@@ -1,10 +1,9 @@
 package org.kframework.krun.api;
 
+import edu.uci.ics.jung.graph.DirectedGraph;
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.kil.Term;
 import org.kframework.krun.K;
-
-import edu.uci.ics.jung.graph.*;
 
 import java.util.List;
 import java.util.Map;
@@ -23,6 +22,13 @@ public class SearchResults {
 		this.varNames = varNames;
 	}
 
+	public SearchResults(List<SearchResult> solutions, DirectedGraph<KRunState, Transition> graph, boolean isDefaultPattern) {
+		this.solutions = solutions;
+		this.graph = graph;
+		this.isDefaultPattern = isDefaultPattern;
+		varNames = null;
+	}
+
 	@Override
 	public String toString() {
 		int i = 1;
@@ -39,14 +45,16 @@ public class SearchResults {
 				boolean empty = true;
 				
 				for (String variable : substitution.keySet()) {
-					String varName = variable.substring(0, variable.indexOf(":"));
-					if (varNames.contains(varName)) {
-						UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens);
-						sb.append("\n" + variable + " -->");
-						substitution.get(variable).accept(unparser);
-						sb.append("\n" + unparser.getResult());
-						empty = false;
+					if (varNames != null) {
+						String varName = variable.substring(0, variable.indexOf(":"));
+						if (!varNames.contains(varName))
+							continue;
 					}
+					UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens);
+					sb.append("\n" + variable + " -->");
+					substitution.get(variable).accept(unparser);
+					sb.append("\n" + unparser.getResult());
+					empty = false;
 				}
 				if (empty) {
 					sb.append("\nEmpty substitution");

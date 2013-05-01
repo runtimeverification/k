@@ -1,18 +1,14 @@
 package org.kframework.parser.concrete.disambiguate;
 
-import java.util.ArrayList;
-
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Ambiguity;
-import org.kframework.kil.Bracket;
-import org.kframework.kil.Rewrite;
-import org.kframework.kil.Term;
+import org.kframework.kil.*;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicHookWorker;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+
+import java.util.ArrayList;
 
 public class TypeSystemFilter2 extends BasicHookWorker {
 
@@ -30,7 +26,7 @@ public class TypeSystemFilter2 extends BasicHookWorker {
 
 	public ASTNode transform(Term trm) throws TransformerException {
 		if (!trm.getSort().equals("K") && !trm.getSort().equals("KResult"))
-			if (!(maxSort.equals(trm.getSort()) || DefinitionHelper.isSubsorted(maxSort, trm.getSort()))) {
+			if (!DefinitionHelper.isSubsortedEq(maxSort, trm.getSort())) {
 				String msg = "Type error detected. Expected sort " + maxSort + ", but found " + trm.getSort();
 				KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, trm.getFilename(), trm.getLocation());
 				throw new TransformerException(kex);

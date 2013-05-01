@@ -44,6 +44,7 @@ import org.kframework.compile.transformers.ResolveSyntaxPredicates;
 import org.kframework.compile.transformers.StrictnessToContexts;
 import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.compile.utils.CompilerSteps;
+import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Bag;
 import org.kframework.kil.Cell;
@@ -229,7 +230,7 @@ public class JavaSymbolicBackend extends BasicBackend {
 		// steps.add(new AddKLabelToString());
 		// steps.add(new AddKLabelConstant());
 		steps.add(new ResolveHybrid());
-		steps.add(new ResolveConfigurationAbstraction());
+		steps.add(new ResolveConfigurationAbstraction(new ConfigurationStructureMap()));
 		steps.add(new ResolveOpenCells());
 		steps.add(new ResolveRewrite());
 		// steps.add(new ResolveSupercool());

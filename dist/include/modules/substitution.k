@@ -112,6 +112,9 @@ module FREE-VARS
   rule freeVariables(.Set) => .Set
   rule freeVariables(SetItem(K) S:Set) => freeVariables(K) freeVariables(S)
 
+  syntax K ::= #freeVarsSet(Set) [function]
+  rule #freeVarsSet(S:Set) => #freeVars(Set2KTerm(S))
+
 // Grigore: again, I think this should just return a set of variables, not a K
 // I added a user-interface variant of it above.  I use it in type-inference.
   syntax K ::= #freeVars(KList)  [function]
@@ -123,7 +126,6 @@ module FREE-VARS
     => #freeVars(Ks, Bound, Free) when X in Bound
   rule #freeVars(X:Variable,,Ks:KList, Bound:Set, Free:Set)
     => #freeVars(Ks, Bound, Free SetItem(X)) when notBool(X in Bound)
-  rule #freeVars((Set2KLabel(S:Set)(.KList) => Set2KTerm(S)),,_, _, _)
   rule #freeVars((L:KLabel(Ks:KList) => Ks),, _, _, _)
     when (isVariable(L(Ks)) =/=K true) andBool
          (isBinder(L(Ks)) =/=K true) andBool
@@ -178,8 +180,9 @@ module SUBSTITUTION
   rule #substituteK(K:K, #map(M:Map)) => #substitute(K,M)
 
 // Grigore: should add Set ::= #freeVars(Set)
+
   rule #substitute(K:K, M:Map)
-    => #substituteFV(K, M, #freeVars(Set2KLabel values(M)(.KList)))
+    => #substituteFV(K, M, #freeVarsSet(values(M)))
 
   rule #substituteFV(Y:Variable, M:Map, _)
     => #if $hasMapping(M, Y) #then M:Map(Y) #else Y #fi

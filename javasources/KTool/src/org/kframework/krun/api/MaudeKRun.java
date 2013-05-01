@@ -3,6 +3,7 @@ package org.kframework.krun.api;
 import org.apache.commons.collections15.Transformer;
 import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.compile.utils.MetaK;
+import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -185,12 +186,28 @@ public class MaudeKRun implements KRun {
 		List<Element> list = XmlUtil.getChildElements(xml);
 		
 		try {
+			Pattern pattern = Pattern.compile("<([^_>]+)>(_+)</([^_>]+)>");
+			Matcher m = pattern.matcher(op);
 			if ((sort.equals("BagItem") || sort.equals("[Bag]")) && op.equals("<_>_</_>")) {
 				Cell cell = new Cell();
 				assertXMLTerm(list.size() == 3 && list.get(0).getAttribute("sort").equals("CellLabel") && list.get(2).getAttribute("sort").equals("CellLabel") && list.get(0).getAttribute("op").equals(list.get(2).getAttribute("op")));
 
 				cell.setLabel(list.get(0).getAttribute("op"));
 				cell.setContents(parseXML(list.get(1)));
+				return cell;
+			} else if (sort.equals("BagItem") && m.matches()) {
+				Cell cell = new Cell();
+				assertXMLTerm(list.size() == m.group(2).length() && m.group(1).equals(m.group(3)));
+				cell.setLabel(m.group(1));
+				if (m.group(2).length() > 1) {
+					Bag bag = new Bag();
+					for (Element el : list) {
+						bag.getContents().add(parseXML(el));
+					}
+					cell.setContents(bag);
+				} else {
+					cell.setContents(parseXML(list.get(0)));
+				}
 				return cell;
 			} else if ((sort.equals("BagItem") || sort.equals("[Bag]")) && op.equals("BagItem")) {
 				assertXMLTerm(list.size() == 1);
@@ -355,7 +372,28 @@ public class MaudeKRun implements KRun {
 		return null;
 	}
 
-	public KRunResult<SearchResults> search(Integer bound, Integer depth, SearchType searchType, Rule pattern, Term cfg, Set<String> varNames) throws KRunExecutionException {
+	public KRunResult<SearchResults> search(Integer bound, Integer depth,
+											SearchType searchType,
+											Rule pattern, Term cfg,
+											Set<String> varNames)
+			throws KRunExecutionException {
+		return search(bound, depth, searchType, pattern, cfg,
+				null, varNames);
+
+	}
+
+	public KRunResult<SearchResults> search(Integer bound, Integer depth, SearchType searchType, Rule pattern, Term cfg, RuleCompilerSteps compilationInfo) throws KRunExecutionException {
+		return search(bound, depth, searchType, pattern, cfg,
+				compilationInfo, null);
+
+	}
+
+	private KRunResult<SearchResults> search(Integer bound, Integer depth,
+										SearchType searchType, Rule pattern,
+										Term cfg,
+										RuleCompilerSteps compilationInfo,
+										Set<String> varNames)
+			throws KRunExecutionException {
 		String cmd = "set show command off ." + K.lineSeparator + setCounter() + "search ";
 		if (bound != null && depth != null) {
 			cmd += "[" + bound + "," + depth + "] ";
@@ -383,7 +421,19 @@ public class MaudeKRun implements KRun {
 		cmd += getCounter();
 		executeKRun(cmd, K.io);
 		try {
-			SearchResults results = new SearchResults(parseSearchResults(pattern), parseSearchGraph(), patternString.trim().matches("=>[!*1+] <_>_</_>\\(generatedTop, B:Bag, generatedTop\\)"), varNames);
+			SearchResults results;
+			final List<SearchResult> solutions = parseSearchResults
+					(pattern, compilationInfo);
+			final boolean matches = patternString.trim().matches("=>[!*1+] " +
+					"<_>_</_>\\(generatedTop, B:Bag, generatedTop\\)");
+			if (compilationInfo != null) {
+				results = new SearchResults(solutions,
+									parseSearchGraph(),
+						matches);
+			} else {
+				results = new SearchResults(solutions, parseSearchGraph(),
+						matches, varNames);
+			}
 			K.stateCounter += results.getGraph().getVertexCount();
 			KRunResult<SearchResults> result = new KRunResult<SearchResults>(results);
 			result.setRawOutput(FileUtil.getFileContent(K.maude_out));
@@ -474,7 +524,7 @@ public class MaudeKRun implements KRun {
 		return graphmlParser.readGraph();
 	}
 
-	private List<SearchResult> parseSearchResults(Rule pattern) {
+	private List<SearchResult> parseSearchResults(Rule pattern, RuleCompilerSteps compilationInfo) {
 		List<SearchResult> results = new ArrayList<SearchResult>();
 		File input = new File(K.maude_output);
 		Document doc = XmlUtil.readXML(input);
@@ -505,7 +555,12 @@ public class MaudeKRun implements KRun {
 				Term rawResult = (Term)pattern.getBody().accept(new SubstitutionFilter(rawSubstitution));
 				KRunState state = new KRunState(rawResult);
 				state.setStateId(stateNum + K.stateCounter);
-				SearchResult result = new SearchResult(state, rawSubstitution);
+				SearchResult result;
+				if (compilationInfo != null) {
+					result = new SearchResult(state, rawSubstitution, compilationInfo);
+				} else {
+					result = new SearchResult(state, rawSubstitution);
+				}
 				results.add(result);
 			} catch (TransformerException e) {
 				e.report(); //this should never happen, so I want it to blow up

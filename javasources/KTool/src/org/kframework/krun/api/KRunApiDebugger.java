@@ -1,20 +1,21 @@
 package org.kframework.krun.api;
 
+import edu.uci.ics.jung.graph.DirectedGraph;
+import edu.uci.ics.jung.graph.DirectedSparseGraph;
+import edu.uci.ics.jung.graph.util.Pair;
 import org.apache.commons.collections15.BidiMap;
 import org.apache.commons.collections15.bidimap.DualHashBidiMap;
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Term;
 import org.kframework.kil.Rule;
+import org.kframework.kil.Term;
 import org.kframework.krun.K;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.api.Transition.TransitionType;
 import org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor;
 import org.kframework.utils.DefinitionLoader;
-
-import edu.uci.ics.jung.graph.*;
-import edu.uci.ics.jung.graph.util.Pair;
+import org.kframework.utils.general.GlobalSettings;
 
 import java.util.Set;
 
@@ -26,6 +27,7 @@ public class KRunApiDebugger implements KRunDebugger {
 
 	private static Rule defaultPattern;
 	private static Set<String> defaultVars;
+	private static RuleCompilerSteps defaultPatternInfo;
 
 	static {
 		try { 
@@ -34,8 +36,8 @@ public class KRunApiDebugger implements KRunDebugger {
 			CollectVariablesVisitor vars = new CollectVariablesVisitor();
 			pattern.accept(vars);
 			defaultVars = vars.getVars().keySet();
-
-			pattern = new RuleCompilerSteps(K.definition).compile((Rule) pattern, null);
+			defaultPatternInfo = new RuleCompilerSteps(K.definition);
+			pattern = defaultPatternInfo.compile((Rule) pattern, null);
 
 			defaultPattern = (Rule) pattern;
 		} catch (Exception e) {
@@ -131,7 +133,12 @@ public class KRunApiDebugger implements KRunDebugger {
 		if (currentState == null) {
 			throw new IllegalStateException("Cannot step without a current state to step from.");
 		}
-		SearchResults results = krun.search(null, steps, SearchType.PLUS, defaultPattern, getState(currentState).getRawResult(), defaultVars).getResult();
+		SearchResults results;
+		if (GlobalSettings.sortedCells) {
+			results = krun.search(null, steps, SearchType.PLUS, defaultPattern, getState(currentState).getRawResult(), defaultPatternInfo).getResult();
+		} else {
+			results = krun.search(null, steps, SearchType.PLUS, defaultPattern, getState(currentState).getRawResult(), defaultVars).getResult();
+		}
 		for (SearchResult result : results.getSolutions()) {
 			KRunState state = result.getState();
 			if (states.containsValue(state)) {

@@ -1,28 +1,20 @@
 package org.kframework.kil.loader;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Cell;
-import org.kframework.kil.Constant;
-import org.kframework.kil.Production;
-import org.kframework.kil.Sort;
-import org.kframework.kil.UserList;
+import org.kframework.kil.*;
 import org.kframework.utils.Poset;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.List;
+import java.util.Set;
+import java.util.Collection;
+import java.util.Map;
 
 public class    DefinitionHelper {
 	public static boolean initialized = false;
@@ -267,7 +259,7 @@ public class    DefinitionHelper {
 	public static boolean isSubsortedEq(String bigSort, String smallSort) {
 		if (bigSort.equals(smallSort))
 			return true;
-		return isSubsorted(bigSort, smallSort);
+		return subsorts.isInRelation(bigSort, smallSort);
 	}
 
 	public static boolean isTagGenerated(String key) {

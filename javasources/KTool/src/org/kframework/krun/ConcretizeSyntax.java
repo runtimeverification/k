@@ -1,7 +1,6 @@
 package org.kframework.krun;
 
 import org.kframework.compile.transformers.AddEmptyLists;
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
@@ -12,7 +11,6 @@ import org.kframework.utils.StringUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.Stack;
 
 public class ConcretizeSyntax extends CopyOnWriteTransformer {
 
@@ -161,4 +159,34 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 		return super.transform(kapp);
 	}
 
+	@Override
+	public ASTNode transform(Cell cell) throws TransformerException {
+		if (cell.getLabel().matches(".*-fragment")) {
+			return cell.getContents().accept(this);
+		}
+		return super.transform(cell);
+	}
+
+	@Override
+	public ASTNode transform(Bag bag) throws TransformerException {
+		List<Term> contents = new ArrayList<Term>();
+		for (Term child : bag.getContents()) {
+			Term accept = (Term) child.accept(this);
+			if (accept instanceof Empty) {
+				Empty empty = (Empty) accept;
+				if (!empty.getSort().equals("Bag")) {
+					contents.add(accept);
+				}
+			} else {
+				contents.add(accept);
+			}
+		}
+		if (contents.size() == 0) {
+			return new Empty("Bag");
+		}
+		if (contents.size() == 1) {
+			return contents.get(0);
+		}
+		return new Bag(contents);
+	}
 }

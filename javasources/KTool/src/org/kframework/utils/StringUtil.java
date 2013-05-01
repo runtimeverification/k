@@ -97,6 +97,37 @@ public class StringUtil {
 		return tag.replaceAll("(?<!`)([\\(\\)\\[\\]\\{\\},])", "`$1");
 	}
 
+	public static String unescapeMaude(String str) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < str.length(); i++) {
+			if (str.charAt(i) == '`') {
+				if (str.charAt(i + 1) == '`')
+					sb.append('`');
+				else if (str.charAt(i + 1) == '(')
+					sb.append('(');
+				else if (str.charAt(i + 1) == ')')
+					sb.append(')');
+				else if (str.charAt(i + 1) == '[')
+					sb.append('[');
+				else if (str.charAt(i + 1) == ']')
+					sb.append(']');
+				else if (str.charAt(i + 1) == '{')
+					sb.append('}');
+				else if (str.charAt(i + 1) == '}')
+					sb.append('}');
+				else if (str.charAt(i + 1) == ',')
+					sb.append(',');
+				else sb.append(' ');
+				i++;
+			} else
+				sb.append(str.charAt(i));
+		}
+
+		return sb.toString();
+	}
+
+
+
 	/**
 	 * This function removes space when declaring equations in lists: -$ cat m.maude mod M is sort S . ops a b c : -> S . op _ _ : S S -> S . eq __(a, b) = c . endm red a b . q -$ maude m.maude
 	 * \||||||||||||||||||/ --- Welcome to Maude --- /||||||||||||||||||\ Maude 2.6 built: Dec 10 2010 11:12:39 Copyright 1997-2010 SRI International Sun Aug 26 11:01:21 2012

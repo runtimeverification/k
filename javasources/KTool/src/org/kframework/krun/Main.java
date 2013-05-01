@@ -1,28 +1,7 @@
 package org.kframework.krun;
 
-import java.io.BufferedReader;
-import java.io.Console;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import jline.ArgumentCompletor;
-import jline.Completor;
-import jline.ConsoleReader;
-import jline.FileNameCompletor;
-import jline.MultiCompletor;
-import jline.SimpleCompletor;
-
+import edu.uci.ics.jung.graph.DirectedGraph;
+import jline.*;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
@@ -34,27 +13,11 @@ import org.kframework.compile.FlattenModules;
 import org.kframework.compile.transformers.AddTopCellConfig;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.utils.CompilerStepDone;
-import org.kframework.compile.utils.MetaK;
 import org.kframework.compile.utils.RuleCompilerSteps;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.BackendTerm;
-import org.kframework.kil.Bag;
-import org.kframework.kil.Configuration;
-import org.kframework.kil.Empty;
-import org.kframework.kil.KSequence;
-import org.kframework.kil.Rule;
-import org.kframework.kil.Term;
+import org.kframework.kil.*;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.krun.api.KRun;
-import org.kframework.krun.api.KRunApiDebugger;
-import org.kframework.krun.api.KRunDebugger;
-import org.kframework.krun.api.KRunResult;
-import org.kframework.krun.api.KRunState;
-import org.kframework.krun.api.MaudeKRun;
-import org.kframework.krun.api.SearchResults;
-import org.kframework.krun.api.SearchType;
-import org.kframework.krun.api.Transition;
+import org.kframework.krun.api.*;
 import org.kframework.krun.gui.Controller.RunKRunCommand;
 import org.kframework.krun.gui.UIDesign.MainWindow;
 import org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor;
@@ -67,7 +30,11 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 
-import edu.uci.ics.jung.graph.DirectedGraph;
+import java.io.*;
+import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class Main {
 
@@ -275,6 +242,8 @@ public class Main {
 			KRunResult<?> result = null;
 			Set<String> varNames = null;
 			Rule patternRule = null;
+			RuleCompilerSteps steps;
+			steps = new RuleCompilerSteps(K.definition);
 			try {
 				if (cmd.hasOption("pattern") || "search".equals(K.maude_cmd)) {
 					org.kframework.parser.concrete.KParser
@@ -284,8 +253,9 @@ public class Main {
 					CollectVariablesVisitor vars = new CollectVariablesVisitor();
 					pattern.accept(vars);
 					varNames = vars.getVars().keySet();
+
 					try {
-						pattern = new RuleCompilerSteps(K.definition).compile(
+						pattern = steps.compile(
 								(Rule) pattern, null);
 					} catch (CompilerStepDone e) {
 						pattern = (ASTNode) e.getResult();
@@ -328,13 +298,23 @@ public class Main {
 						} else if (cmd.hasOption("depth")) {
 							depth = Integer.parseInt(K.depth);
 						}
-						result = krun.search(
-								bound,
-								depth,
-								K.searchType,
-								patternRule,
-								makeConfiguration(KAST, buffer, rp,
-										(K.term != null)), varNames);
+						if (!GlobalSettings.sortedCells) {
+							result = krun.search(
+									bound,
+									depth,
+									K.searchType,
+									patternRule,
+									makeConfiguration(KAST, buffer, rp,
+											(K.term != null)), varNames);
+						} else {
+							result = krun.search(
+									bound,
+									depth,
+									K.searchType,
+									patternRule,
+									makeConfiguration(KAST, buffer, rp,
+											(K.term != null)), steps);
+						}
 
 						if (GlobalSettings.verbose)
 							sw.printTotal("Search total");
@@ -378,8 +358,13 @@ public class Main {
 					Object krs = result.getResult();
 					if (krs instanceof KRunState) {
 						Term res = ((KRunState) krs).getRawResult();
-						result = krun.search(null, null, K.searchType,
-								patternRule, res, varNames);
+						if (!GlobalSettings.sortedCells){
+							result = krun.search(null, null, K.searchType,
+									patternRule, res, varNames);
+						} else {
+							result = krun.search(null, null, K.searchType,
+									patternRule, res, steps);
+						}
 					}else {
 						Error.report("Pattern matching after execution is not supported by search and model checking");
 					}

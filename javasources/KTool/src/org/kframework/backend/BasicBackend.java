@@ -1,6 +1,5 @@
 package org.kframework.backend;
 
-import org.kframework.compile.AddEval;
 import org.kframework.compile.FlattenModules;
 import org.kframework.compile.ResolveConfigurationAbstraction;
 import org.kframework.compile.checks.CheckConfigurationCells;
@@ -10,41 +9,10 @@ import org.kframework.compile.sharing.DeclareCellLabels;
 import org.kframework.compile.tags.AddDefaultComputational;
 import org.kframework.compile.tags.AddOptionalTags;
 import org.kframework.compile.tags.AddStrictStar;
-import org.kframework.compile.transformers.AddEmptyLists;
-import org.kframework.compile.transformers.AddHeatingConditions;
-import org.kframework.compile.transformers.AddK2SMTLib;
-import org.kframework.compile.transformers.AddKCell;
-import org.kframework.compile.transformers.AddKLabelConstant;
-import org.kframework.compile.transformers.AddKLabelToString;
-import org.kframework.compile.transformers.AddPredicates;
-import org.kframework.compile.transformers.AddSemanticEquality;
-import org.kframework.compile.transformers.AddSupercoolDefinition;
-import org.kframework.compile.transformers.AddSuperheatRules;
-import org.kframework.compile.transformers.AddSymbolicK;
-import org.kframework.compile.transformers.AddTopCellConfig;
-import org.kframework.compile.transformers.AddTopCellRules;
-import org.kframework.compile.transformers.ContextsToHeating;
-import org.kframework.compile.transformers.DesugarStreams;
-import org.kframework.compile.transformers.FlattenSyntax;
-import org.kframework.compile.transformers.FreezeUserFreezers;
-import org.kframework.compile.transformers.FreshCondToFreshVar;
-import org.kframework.compile.transformers.RemoveBrackets;
-import org.kframework.compile.transformers.RemoveSyntacticCasts;
-import org.kframework.compile.transformers.ResolveAnonymousVariables;
-import org.kframework.compile.transformers.ResolveBinder;
-import org.kframework.compile.transformers.ResolveBlockingInput;
-import org.kframework.compile.transformers.ResolveBuiltins;
-import org.kframework.compile.transformers.ResolveFreshVarMOS;
-import org.kframework.compile.transformers.ResolveFunctions;
-import org.kframework.compile.transformers.ResolveHybrid;
-import org.kframework.compile.transformers.ResolveListOfK;
-import org.kframework.compile.transformers.ResolveOpenCells;
-import org.kframework.compile.transformers.ResolveRewrite;
-import org.kframework.compile.transformers.ResolveSupercool;
-import org.kframework.compile.transformers.ResolveSyntaxPredicates;
-import org.kframework.compile.transformers.StrictnessToContexts;
+import org.kframework.compile.transformers.*;
 import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.compile.utils.CompilerSteps;
+import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.kil.Definition;
 import org.kframework.main.FirstStep;
 import org.kframework.main.LastStep;
@@ -59,8 +27,19 @@ import org.kframework.utils.general.GlobalSettings;
 public abstract class BasicBackend implements Backend {
 	protected Stopwatch sw;
 
+	public ConfigurationStructureMap getConfigurationStructureMap() {
+		return configurationStructureMap;
+	}
+
+	public void setConfigurationStructureMap(ConfigurationStructureMap configurationStructureMap) {
+		this.configurationStructureMap = configurationStructureMap;
+	}
+
+	private ConfigurationStructureMap configurationStructureMap;
+
 	public BasicBackend(Stopwatch sw) {
 		this.sw = sw;
+		configurationStructureMap = new ConfigurationStructureMap();
 	}
 
 	@Override
@@ -104,9 +83,8 @@ public abstract class BasicBackend implements Backend {
 		steps.add(new ResolveFreshVarMOS());
 		steps.add(new AddTopCellConfig());
 		if (GlobalSettings.addTopCell) {
-			steps.add(new AddTopCellRules());
+		steps.add(new AddTopCellRules());
 		}
-		steps.add(new AddEval());
 		steps.add(new ResolveBinder());
 		steps.add(new ResolveAnonymousVariables());
 		steps.add(new ResolveBlockingInput());
@@ -119,9 +97,12 @@ public abstract class BasicBackend implements Backend {
 		steps.add(new AddKLabelToString());
 		steps.add(new AddKLabelConstant());
 		steps.add(new ResolveHybrid());
-		steps.add(new ResolveConfigurationAbstraction());
+		steps.add(new ResolveConfigurationAbstraction (configurationStructureMap));
 		steps.add(new ResolveOpenCells());
 		steps.add(new ResolveRewrite());
+		if (GlobalSettings.sortedCells) {
+			steps.add(new SortCells(configurationStructureMap));
+		}
 		steps.add(new ResolveSupercool());
 		steps.add(new AddStrictStar());
 		steps.add(new AddDefaultComputational());

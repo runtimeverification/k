@@ -1,10 +1,5 @@
 package org.kframework.main;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Properties;
-
 import org.kframework.backend.BasicBackend;
 import org.kframework.backend.maude.MaudeBackend;
 import org.kframework.backend.maude.MaudeBuiltinsFilter;
@@ -14,6 +9,11 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
 
 public class KompileBackend extends BasicBackend {
 
@@ -43,7 +43,9 @@ public class KompileBackend extends BasicBackend {
 
 	@Override
 	public void run(Definition javaDef) throws IOException {
-		new MaudeBackend(sw).run(javaDef);
+		MaudeBackend maude = new MaudeBackend(sw);
+		maude.setConfigurationStructureMap(getConfigurationStructureMap());
+		maude.run(javaDef);
 
 		String load = "load \"" + KPaths.getKBase(true) + "/bin/maude/lib/k-prelude\"\n";
 

@@ -606,11 +606,11 @@ irrelevant once the function returns).  We add an artificial
 \texttt{nothing} value to the language, which is returned by the
 nulary \texttt{return;} statements. */
 
-  syntax ListItem ::=  (Map,K,Bag)
+  syntax K ::=  (Map,K,ControlCellFragment)
 
   rule <k> lambda(Xs,S)(Vs:Vals) ~> K => mkDecls(Xs,Vs) S return; </k>
        <control>
-         <fstack> . => (Env,K,C) ...</fstack>
+         <fstack> . => ListItem((Env,K,C)) ...</fstack>
          C
        </control>
        <env> Env => GEnv </env>
@@ -618,7 +618,7 @@ nulary \texttt{return;} statements. */
 
   rule <k> return(V:Val); ~> _ => V ~> K </k>
        <control>
-         <fstack> (Env,K,C) => . ...</fstack>
+         <fstack> ListItem((Env,K,C)) => . ...</fstack>
          (_ => C)
        </control>
        <env> _ => Env </env>
@@ -786,13 +786,13 @@ is thrown to correctly recover the execution context.  This can be easily
 achieved by pushing/popping the entire current control context onto the
 exception stack.  The three rules below modularly do precisely the above. */
 
-  syntax ListItem ::= (Id,Stmt,K,Map,Bag)
+  syntax K ::= (Id,Stmt,K,Map,ControlCellFragment)
 
   syntax K ::= "popx" 
 
   rule <k> (try S1 catch(X) {S2} => S1 ~> popx) ~> K </k>
        <control>
-         <xstack> . => (X, S2, K, Env, C) ...</xstack>
+         <xstack> . => ListItem((X, S2, K, Env, C)) ...</xstack>
          C
        </control>
        <env> Env </env>
@@ -802,7 +802,7 @@ exception stack.  The three rules below modularly do precisely the above. */
 
   rule <k> throw V:Val; ~> _ => { var X = V; S2 } ~> K </k>
        <control>
-         <xstack> (X, S2, K, Env, C) => . ...</xstack>
+         <xstack> ListItem((X, S2, K, Env, C)) => . ...</xstack>
          (_ => C)
        </control>
        <env> _ => Env </env>

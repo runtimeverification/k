@@ -2,22 +2,15 @@ package org.kframework.backend.maude;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.kframework.backend.BasicBackend;
-import org.kframework.kil.Attribute;
 import org.kframework.kil.Definition;
-import org.kframework.kil.Module;
-import org.kframework.kil.ModuleItem;
-import org.kframework.kil.PriorityBlock;
 import org.kframework.kil.Production;
-import org.kframework.kil.Syntax;
 import org.kframework.kil.UserList;
 import org.kframework.kil.loader.DefinitionHelper;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Map;
 
 public class MaudeBackend extends BasicBackend {
@@ -28,7 +21,8 @@ public class MaudeBackend extends BasicBackend {
 
 	@Override
 	public void run(Definition definition) throws IOException {
-		MaudeFilter maudeFilter = new MaudeFilter();
+		MaudeFilter maudeFilter = new MaudeFilter
+				(getConfigurationStructureMap());
 		definition.accept(maudeFilter);
 
 		final String mainModule = definition.getMainModule();

@@ -30,6 +30,7 @@ public class GlobalSettings {
 	
 	// this is used by kast to know what parser to use fort the input string
 	public static ParserType whatParser = ParserType.PROGRAM;
+	public static boolean sortedCells = false;
 
 	public enum ParserType {
 		PROGRAM, GROUND, RULES, BINARY

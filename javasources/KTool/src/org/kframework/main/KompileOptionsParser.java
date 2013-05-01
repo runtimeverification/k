@@ -82,6 +82,9 @@ public class KompileOptionsParser {
 
 		Option addTopCell = new Option("addTopCell", false, "add a top cell to configuration and all rules");
 
+		Option sortedCells = new Option("sortedCells", false,
+				"sort cells according to the order in the configuration");
+
 		// transition
 		Option transition = new Option("transition", true, "<arg> tags to become rewrite rules");
 		Option superheat = new Option("superheat", true, "syntax <arg> tags triggering super heating nondetermistic choice for strictness");
@@ -132,6 +135,7 @@ public class KompileOptionsParser {
 		options.addOption(kexp);
 		options.addOption(unparse);
 		options.addOption(addTopCell);
+		options.addOption(sortedCells);
 		options.addOption(transition);
 		options.addOption(supercool);
 		options.addOption(superheat);

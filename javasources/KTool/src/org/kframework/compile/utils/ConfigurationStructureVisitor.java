@@ -9,15 +9,19 @@ public class ConfigurationStructureVisitor extends BasicVisitor {
 
     Stack<ConfigurationStructure> ancestors = new Stack<ConfigurationStructure>();
 
-	private ConfigurationStructureMap config = new ConfigurationStructureMap();
+	private ConfigurationStructureMap config;
 	private int maxLevel = 0;
-	
-	
+
+	public ConfigurationStructureVisitor(ConfigurationStructureMap cfgStr) {
+		this.config = cfgStr;
+	}
+
 	@Override
 	public void visit(Configuration node) {
 		Term t = node.getBody();
 		Cell top = new Cell();
-		top.setLabel("___CONTEXT_ABSTRACTION_TOP_CELL___");
+		top.setLabel(MetaK.Constants.generatedCfgAbsTopCellLabel);
+		top.setId(MetaK.Constants.generatedCfgAbsTopCellLabel);
 		top.setContents(t);
 		top.accept(this);
 	}
@@ -51,10 +55,6 @@ public class ConfigurationStructureVisitor extends BasicVisitor {
 
 	@Override
 	public void visit(Rule node) {
-	}
-
-	public ConfigurationStructureMap getConfig() {
-		return config;
 	}
 
 	public int getMaxLevel() {

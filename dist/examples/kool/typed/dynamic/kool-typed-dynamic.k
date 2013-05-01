@@ -403,7 +403,7 @@ Like in untyped KOOL. */
 The only change to untyped KOOL's values is that method closures are
 now typed (their first argument holds their type): */
 
- syntax Val ::= objectClosure(Bag)
+ syntax Val ::= objectClosure(CrntObjCellFragment)
               | methodClosure(Type,Id,Int,Params,Stmt)
 
 /*@ The type held by a method clossure will be the entire type of the
@@ -425,7 +425,7 @@ current status of the \textsf{return} cell and then pop it when the
 method returns.  We have to do the same with the current object
 environment, so we group them together in the stack frame.  */
 
-  syntax ListItem ::=  (Map,K,Bag)
+  syntax K ::=  (Map,K,ControlCellFragment)
 
   rule <k> methodClosure(_->T,Class,OL,Ps,S)(Vs:Vals) ~> K
            => mkDecls(Ps,Vs) S return; </k>
@@ -434,8 +434,8 @@ environment, so we group them together in the stack frame.  */
        <br/>
        <control>
           C
-          <fstack> . => (Env, K, C <crntObj> Obj' </crntObj>
-                                   <return> T' </return>) ...</fstack>
+          <fstack> . => ListItem((Env, K, C <crntObj> Obj' </crntObj>
+                                   <return> T' </return>)) ...</fstack>
           <crntObj> Obj' => <crntClass> Class </crntClass> Obj </crntObj>
           <return> T' => T </return>
        </control>
@@ -452,7 +452,7 @@ unchanged.  */
            => subtype(typeOf(V), T) ~> true? ~> unsafeCast(V, T) ~> K
        </k>
        <control>
-         <fstack> (Env, K, C) => . ...</fstack>
+         <fstack> ListItem((Env, K, C)) => . ...</fstack>
          (<return> T:Type </return> _ => C)
        </control>
        <env> _ => Env </env>
@@ -484,12 +484,12 @@ values are allowed to be stored in each location.  */
 Exceptions are propagated now until a catch that can handle them is
 encountered. */
 
-  syntax ListItem ::= (Param,Stmt,K,Map,Bag)
+  syntax K ::= (Param,Stmt,K,Map,ControlCellFragment)
   syntax K ::= "popx"
 
   rule <k> (try S1 catch(P) S2 => S1 ~> popx) ~> K </k>
        <control>
-         <xstack> . => (P, S2, K, Env, C) ...</xstack>
+         <xstack> . => ListItem((P, S2, K, Env, C)) ...</xstack>
          C
        </control>
        <env> Env </env>
@@ -501,7 +501,7 @@ encountered. */
         => if (subtype(typeOf(V),T)) { T X = V; S2 } else { throw V; } ~> K
        </k>
        <control>
-         <xstack> (T:Type X:Id, S2, K, Env, C) => . ...</xstack>
+         <xstack> ListItem((T:Type X:Id, S2, K, Env, C)) => . ...</xstack>
          (_ => C)
        </control>
        <env> _ => Env </env>
@@ -579,7 +579,7 @@ those in untyped KOOL. */
                       <location> L </location>
          </crntObj>
          <return> T => Class </return>
-         <fstack> . => (Env, K, C <return>T</return> <crntObj>Obj</crntObj>)
+         <fstack> . => ListItem((Env, K, C <return>T</return> <crntObj>Obj</crntObj>))
          ...</fstack>
        </control>
 

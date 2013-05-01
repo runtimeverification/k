@@ -355,6 +355,7 @@ typed SIMPLE, so we do not discuss them much here. */
   rule release _:Type; => stmt
   rule rendezvous _:Type; => stmt
 
+  syntax Stmt ::= BlockOrStmtType
   rule _:BlockOrStmtType _:BlockOrStmtType => stmt
 
 

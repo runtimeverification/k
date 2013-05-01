@@ -1,11 +1,5 @@
 package org.kframework.main;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.cli.CommandLine;
 import org.kframework.backend.Backend;
 import org.kframework.backend.doc.DocumentationBackend;
@@ -32,6 +26,12 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class KompileFrontEnd {
 
@@ -90,6 +90,9 @@ public class KompileFrontEnd {
 				GlobalSettings.style = style;
 			}
 		}
+
+		if (cmd.hasOption("sortCells"))
+			GlobalSettings.sortedCells = true;
 
 		if (cmd.hasOption("addTopCell"))
 			GlobalSettings.addTopCell = true;
