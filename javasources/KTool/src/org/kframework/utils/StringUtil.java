@@ -142,7 +142,8 @@ public class StringUtil {
 
 	public static String latexify(String name) {
 		return name.replace("\\", "\\textbackslash ").replace("_", "\\_").replace("{", "\\{").replace("}", "\\}").replace("#", "\\#").replace("%", "\\%").replace("$", "\\$").replace("&", "\\&")
-				.replace("~", "\\mbox{\\~{}}").replace("^", "\\mbox{\\^{}}").replace("`", "\\`{}");
+				.replace("~", "\\mbox{\\~{}}").replace("^",
+						"\\mbox{\\^{}}").replace("`", "\\mbox{\\`{}}");
 	}
 
 	public static String emptyIfNull(String string) {
