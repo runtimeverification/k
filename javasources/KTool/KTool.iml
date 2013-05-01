@@ -5,10 +5,15 @@
     <output-test url="file://$MODULE_DIR$/../../out/test/KTool" />
     <exclude-output />
     <content url="file://$MODULE_DIR$/../../dist">
-      <excludeFolder url="file://$MODULE_DIR$/../../dist/bin" />
+      <excludeFolder url="file://$MODULE_DIR$/../../dist/bin/java" />
+      <excludeFolder url="file://$MODULE_DIR$/../../dist/bin/maude/binaries" />
+      <excludeFolder url="file://$MODULE_DIR$/../../dist/bin/native" />
     </content>
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../tests">
+      <sourceFolder url="file://$MODULE_DIR$/../../tests/tools/Testing/src" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

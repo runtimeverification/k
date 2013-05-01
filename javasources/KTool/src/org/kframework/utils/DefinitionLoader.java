@@ -124,8 +124,8 @@ public class DefinitionLoader {
 				Stopwatch.sw.printIntermediate("Checks");
 
 			// ------------------------------------- generate files
-			ResourceExtractor.ExtractAllSDF(new File(DefinitionHelper.dotk + "/def"));
-			ResourceExtractor.ExtractAllSDF(new File(DefinitionHelper.dotk + "/ground"));
+			ResourceExtractor.ExtractDefSDF(new File(DefinitionHelper.dotk + "/def"));
+			ResourceExtractor.ExtractGroundSDF(new File(DefinitionHelper.dotk + "/ground"));
 
 			ResourceExtractor.ExtractProgramSDF(new File(DefinitionHelper.dotk + "/pgm"));
 

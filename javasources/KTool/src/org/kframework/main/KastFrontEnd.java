@@ -54,7 +54,7 @@ public class KastFrontEnd {
 		if (cmd.hasOption("e")) {
 			pgm = cmd.getOptionValue("e");
 			path = "Command line";
-		} else if(cmd.hasOption("binaryParser")) {
+		} else if (cmd.hasOption("binaryParser")) {
 			GlobalSettings.whatParser = GlobalSettings.ParserType.BINARY;
 			path = new File(cmd.getOptionValue("binaryParser")).getAbsolutePath();
 		} else {
@@ -146,7 +146,7 @@ public class KastFrontEnd {
 		} catch (TransformerException e) {
 			e.printStackTrace();
 		}
-		
+
 		boolean prettyPrint = false;
 		boolean nextline = false;
 		IndentationOptions indentationOptions = new IndentationOptions();
@@ -176,7 +176,7 @@ public class KastFrontEnd {
 		if (cmd.hasOption("groundParser")) {
 			GlobalSettings.whatParser = GlobalSettings.ParserType.GROUND;
 		}
-		
+
 		String sort = DefinitionHelper.startSymbolPgm;
 		if (System.getenv("KRUN_SORT") != null) {
 			sort = System.getenv("KRUN_SORT");
@@ -184,7 +184,7 @@ public class KastFrontEnd {
 		if (cmd.hasOption("sort")) {
 			sort = cmd.getOptionValue("sort");
 		}
-		
+
 		try {
 			ASTNode out = org.kframework.utils.ProgramLoader.processPgm(pgm, path, javaDef, sort);
 			String kast;
