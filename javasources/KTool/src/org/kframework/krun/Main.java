@@ -1014,6 +1014,13 @@ public class Main {
 				org.kframework.kil.Configuration configKompiled = (org.kframework.kil.Configuration) BinaryLoader
 						.fromBinary(new FileInputStream(K.compiled_def
 								+ "/configuration.bin"));
+
+				CommandLine compileOptions = (CommandLine) BinaryLoader
+						.fromBinary(new FileInputStream(K.compiled_def +
+								"/compile-options.bin"));
+				if (compileOptions.hasOption("sortCells"))
+					GlobalSettings.sortedCells = true;
+
 				K.kompiled_cfg = configKompiled;
 
 				if (GlobalSettings.verbose)

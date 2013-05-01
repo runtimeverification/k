@@ -28,6 +28,7 @@ import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -91,8 +92,11 @@ public class KompileFrontEnd {
 			}
 		}
 
-		if (cmd.hasOption("sortCells"))
+		if (cmd.hasOption("sortCells")) {
 			GlobalSettings.sortedCells = true;
+			GlobalSettings.addTopCell = true;
+		}
+
 
 		if (cmd.hasOption("addTopCell"))
 			GlobalSettings.addTopCell = true;
@@ -221,7 +225,14 @@ public class KompileFrontEnd {
 
 		if (backend != null) {
 			genericCompile(mainFile, lang, backend, step);
+			try {
+				BinaryLoader.toBinary(cmd, new FileOutputStream(DefinitionHelper.dotk
+						.getAbsolutePath() + "/compile-options.bin"));
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+			}
 		}
+
 
 
 		verbose(cmd);
