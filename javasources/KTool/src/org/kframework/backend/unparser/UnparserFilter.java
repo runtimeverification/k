@@ -393,7 +393,7 @@ public class UnparserFilter extends BasicVisitor {
     public void visit(KLabelConstant kLabelConstant) {
         /* andreis: prepare and postpare seem unnecessary for KLabelConstant */
         //prepare(kLabelConstant);
-        result.write(kLabelConstant.getLabel());
+        result.write(kLabelConstant.getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)"));
         //postpare();
     }
 

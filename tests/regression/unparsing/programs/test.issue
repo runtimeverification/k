@@ -1,1 +1,1 @@
-foo(true)
+foo(true, '`(`), x)

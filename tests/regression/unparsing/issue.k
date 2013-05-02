@@ -1,5 +1,7 @@
 module ISSUE
 
-syntax Exp ::= foo(Bool)
+syntax Exp ::= foo(Bool, KLabel, Id)
+
+syntax KLabel ::= "'`(`)"
 
 endmodule

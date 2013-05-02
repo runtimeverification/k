@@ -11,6 +11,7 @@ import org.kframework.krun.runner.KRunner;
 import org.kframework.krun.*;
 import org.kframework.krun.Error;
 import org.kframework.krun.api.Transition.TransitionType;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -310,7 +311,7 @@ public class MaudeKRun implements KRun {
 				assertXMLTerm(list.size() == 2);
 				return new KApp(parseXML(list.get(0)), parseXML(list.get(1)));
 			} else if (sort.equals("KLabel") && list.size() == 0) {
-				return KLabelConstant.of(op);
+				return KLabelConstant.of(StringUtil.unescapeMaude(op));
 			} else if (sort.equals("KLabel") && op.equals("#freezer_")) {
 				assertXMLTerm(list.size() == 1);
 				return new FreezerLabel(parseXML(list.get(0)));	

@@ -75,7 +75,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 				return new Freezer((Term)l.getTerm().accept(this));
 			}
 			Term injected = ((KInjectedLabel)label).getTerm();
-			if (injected instanceof Builtin) {
+			if (injected instanceof Builtin || injected instanceof Token || injected instanceof Constant) {
 				return (Term)injected.accept(this);
 			}
 		} else if (label instanceof KLabelConstant) {
