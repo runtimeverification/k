@@ -17,6 +17,11 @@ public class StringSentence extends ModuleItem {
 	private String content;
 	private String type;
 
+	public StringSentence(String content, String type) {
+		this.content = content;
+		this.type = type;
+	}
+	
 	public StringSentence(Element element) {
 		super(element);
 		content = StringUtil.unescape(element.getAttribute(Constants.VALUE_value_ATTR));
@@ -28,6 +33,8 @@ public class StringSentence extends ModuleItem {
 		this.content = node.content;
 	}
 
+	
+	
 	public String toString() {
 		String shortStr = content;
 		if (content.indexOf("\n") > 0)

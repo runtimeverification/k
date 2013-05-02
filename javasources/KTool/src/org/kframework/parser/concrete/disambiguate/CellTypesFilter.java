@@ -1,5 +1,6 @@
 package org.kframework.parser.concrete.disambiguate;
 
+import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicTransformer;
@@ -39,6 +40,8 @@ public class CellTypesFilter extends BasicTransformer {
 				sort = "Bag";
 			else if (cell.getLabel().equals("freshCounter"))
 				sort = "K";
+			else if (cell.getLabel().equals(MetaK.Constants.pathCondition))
+				sort = "K";
 		}
 
 		if (sort != null) {
@@ -66,7 +69,7 @@ public class CellTypesFilter extends BasicTransformer {
 				}
 		} else {
 			String msg = "Cell '" + cell.getLabel() + "' was not declared in a configuration.";
-			throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, cell.getFilename(), cell.getLocation()));
+			throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, getName(), cell.getFilename(), cell.getLocation()));
 		}
 		return super.transform(cell);
 	}

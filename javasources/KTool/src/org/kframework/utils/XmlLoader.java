@@ -145,6 +145,9 @@ public class XmlLoader {
 	}
 
 	public static int getLocNumber(String loc, int place) {
+		if (loc.equals("generated"))
+			return -1;
+		
 		String[] str = loc.split("[\\(,\\)]");
 		return Integer.parseInt(str[place + 1]);
 	}

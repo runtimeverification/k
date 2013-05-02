@@ -1,14 +1,22 @@
 package org.kframework.krun;
 
-import org.kframework.compile.transformers.AddEmptyLists;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.*;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.Ambiguity;
+import org.kframework.kil.Empty;
+import org.kframework.kil.KApp;
+import org.kframework.kil.KLabelConstant;
+import org.kframework.kil.KList;
+import org.kframework.kil.ListTerminator;
+import org.kframework.kil.Term;
+import org.kframework.kil.TermCons;
+import org.kframework.kil.UserList;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class FlattenDisambiguationFilter extends CopyOnWriteTransformer {
 	public FlattenDisambiguationFilter() {

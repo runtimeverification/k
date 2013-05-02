@@ -104,6 +104,7 @@ public class ParseRulesFilter extends BasicTransformer {
 			} catch (TransformerException te) {
 				te.printStackTrace();
 			} catch (Exception e) {
+				e.printStackTrace();
 				String msg = "Cannot parse sentence: " + e.getLocalizedMessage();
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ss.getFilename(), ss.getLocation()));
 			}

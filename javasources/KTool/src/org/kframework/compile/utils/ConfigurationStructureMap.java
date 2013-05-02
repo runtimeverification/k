@@ -57,8 +57,8 @@ public class ConfigurationStructureMap implements Map<String, ConfigurationStruc
         if (cfgStr == null) {
             GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
                     KException.KExceptionGroup.INTERNAL,
-                    "Cell " + o + " not found in configuration",
-                    o.getFilename(), o.getLocation()));
+                    "Cell " + o + " not found in configuration"
+                    , this.getClass().getName(), o.getFilename(), o.getLocation()));
         }
         return cfgStr;
     }
@@ -69,7 +69,7 @@ public class ConfigurationStructureMap implements Map<String, ConfigurationStruc
 			Cell c = config.get(s).cell;
 			GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
 					KException.KExceptionGroup.INTERNAL,
-					"Cell " + s + " found twice in configuration (once at " + c.getLocation() + ").",
+					"Cell " + s + " found twice in configuration (once at " + c.getLocation() + ").", this.getClass().getName(),
 					configurationStructure.cell.getFilename(), configurationStructure.cell.getLocation()));
 		}
         return config.put(s,configurationStructure);

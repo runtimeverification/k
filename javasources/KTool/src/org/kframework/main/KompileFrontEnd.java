@@ -207,6 +207,7 @@ public class KompileFrontEnd {
 			if (output == null) {
 				output = FileUtil.stripExtension(mainFile.getName()) + "-kompiled";
 			}
+			GlobalSettings.CHECK = new File(cmd.getOptionValue("check")).getAbsolutePath();
 			backend = new RLBackend(Stopwatch.sw);
 			DefinitionHelper.dotk = new File(output);
 			DefinitionHelper.dotk.mkdirs();
