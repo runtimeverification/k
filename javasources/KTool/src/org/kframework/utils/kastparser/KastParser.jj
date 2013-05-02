@@ -1,0 +1,171 @@
+PARSER_BEGIN(KastParser)
+package org.kframework.utils.kastparser;
+
+import org.kframework.kil.KApp;
+import org.kframework.kil.KLabelConstant;
+import org.kframework.kil.KList;
+import org.kframework.kil.KSequence;
+import org.kframework.kil.Term;
+import org.kframework.utils.StringUtil;
+
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
+
+public class KastParser {
+
+	private KastParser(String kast) {
+		this((Reader)(new StringReader(kast)));
+	}
+
+	public static Term parse(String kast) {
+		KastParser parser = new KastParser(kast);
+		try {
+			return parser.k();
+		} catch (ParseException e) {
+		}
+		return null;
+	}
+
+}
+PARSER_END(KastParser)
+
+SKIP :
+{
+	" "
+|	"\t"
+|	"\r"
+|	"\n"
+}
+
+TOKEN :
+{
+	<KSEQ: "~>">
+|	<DOTK: ".K">
+|	<LPAREN: "(">
+|	<RPAREN: ")">
+|	<COMMA: ",">
+|	<DOTKLIST: ".KList">
+|	<TOKENLABEL: "#token">
+}
+
+MORE :
+{
+	"\"": STRING_STATE
+|	<["~", ".", "#"]>: KLABEL_STATE
+|	<~["~", ".", "#", "(", ")", ",", "`"]>: KLABEL_STATE
+|	<"`" ~[]> : KLABEL_STATE
+}
+
+<STRING_STATE> MORE :
+{
+	<"\\" ~[]>
+|	<~["\"", "\\"]>
+}
+
+<STRING_STATE> TOKEN :
+{
+	<STRING: "\"">: DEFAULT
+}
+
+<KLABEL_STATE> MORE :
+{
+	<"`" ~[]>
+|	<~["(", "`"]>
+}
+
+<KLABEL_STATE> TOKEN :
+{
+	<KLABEL: "(">
+	{
+		matchedToken.image = image.substring(0, image.length() - 1);
+	}: DEFAULT
+}
+
+Term k() :
+{
+	List<Term> items = new ArrayList<Term>();
+	Term current;
+}
+{
+	current = kitem()
+	{
+		items.add(current);
+	}
+	(<KSEQ> current = kitem()
+	{
+		items.add(current);
+	}
+	)*
+	{
+		return new KSequence(items);
+	}
+|	<DOTK>
+	{
+		return KSequence.EMPTY;
+	}
+}
+
+Term kitem() :
+{
+	Term label;
+	Term list;
+}
+{
+	label = klabel() list = klist() <RPAREN>
+	{
+		return new KApp(label, list);
+	}
+}
+
+Term klist() :
+{
+	List<Term> items = new ArrayList<Term>();
+	Term current;
+}
+{
+	current = k()
+	{
+		items.add(current);
+	}
+	(<COMMA> current = k()
+	{
+		items.add(current);
+	}
+	)*
+	{
+		return new KList(items);
+	}
+|	<DOTKLIST>
+	{
+		return KList.EMPTY;
+	}
+}
+
+Term klabel() :
+{
+	String sort;
+	String value;
+}
+{
+	<TOKENLABEL> <LPAREN> <STRING>
+	{
+		value = StringUtil.unescape(token.image);
+		value = value.substring(1, value.length() - 1);
+	}
+	<COMMA> <STRING>
+	{
+		sort = StringUtil.unescape(token.image);
+		sort = sort.substring(1, sort.length() - 1);
+	}
+	<RPAREN> <LPAREN>
+	{
+		org.kframework.kil.Token t = org.kframework.kil.Token.of(sort, value);
+		return t;
+	}
+|	<KLABEL>
+	{
+		return KLabelConstant.of(StringUtil.unescapeMaude(token.image));
+	}
+}

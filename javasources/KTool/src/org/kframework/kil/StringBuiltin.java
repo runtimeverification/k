@@ -5,6 +5,7 @@ import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.StringUtil;
 import org.w3c.dom.Element;
 
 import java.util.HashMap;
@@ -83,7 +84,7 @@ public class StringBuiltin extends Builtin {
 
     @Override
     public String toString() {
-        return "\"" + getValue() + "\"";
+        return "\"" + StringUtil.escape(getValue()) + "\"";
     }
 
     @Override

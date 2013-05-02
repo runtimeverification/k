@@ -162,6 +162,8 @@ public class UnparserFilter extends BasicVisitor {
 				result.write(",, ");
 			}
 		}
+		if (termList.size() == 0)
+			result.write(".KList");
 		postpare();
 	}
 
@@ -391,10 +393,9 @@ public class UnparserFilter extends BasicVisitor {
 
     @Override
     public void visit(KLabelConstant kLabelConstant) {
-        /* andreis: prepare and postpare seem unnecessary for KLabelConstant */
-        //prepare(kLabelConstant);
+        prepare(kLabelConstant);
         result.write(kLabelConstant.getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)"));
-        //postpare();
+        postpare();
     }
 
 	@Override
@@ -406,7 +407,6 @@ public class UnparserFilter extends BasicVisitor {
 
     @Override
     public void visit(Builtin builtin) {
-        /* andreis: prepare and postpare seem unnecessary for KLabelConstant */
         prepare(builtin);
         result.write(builtin.toString());
         postpare();
@@ -425,6 +425,9 @@ public class UnparserFilter extends BasicVisitor {
 					result.write(" ");
 				}
 			}
+		}
+		if (contents.size() == 0) {
+			result.write("." + collection.getSort());
 		}
 		postpare();
 	}
@@ -621,6 +624,7 @@ public class UnparserFilter extends BasicVisitor {
 		postpare();
 	}
 
+	@Override
 	public void visit(Cast c) {
 		prepare(c);
 		c.getContent().accept(this);
@@ -630,6 +634,16 @@ public class UnparserFilter extends BasicVisitor {
 		}
 		result.write(c.getSort());
 		postpare();
+	}
+
+	@Override
+	public void visit(Token t) {
+		prepare(t);
+		result.write("#token(");
+		t.getValueTerm().accept(this);
+		result.write(", ");
+		t.getSortTerm().accept(this);
+		result.write(")");
 	}
 
 	private void prepare(ASTNode astNode) {

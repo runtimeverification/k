@@ -29,6 +29,8 @@ public class Main {
 				} catch (Exception e) {
 					Error.report("IO server threw exception");
 				}
+			} else if (args[0].equals("-kpretty")) {
+				org.kframework.main.KPretty.main(args2);
 			} else {
 				Error.report("The first argument of K3 not recognized. Try -kompile or -kast or -krun or -kpp.");
 			}

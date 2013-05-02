@@ -30,7 +30,7 @@ public class Token extends Term {
 
     public static Token of(Term sortTerm, Term valueTerm) {
         Token token = new Token(sortTerm, valueTerm);
-        if (cache.get(token) != null) {
+        if (cache.get(token) == null) {
             cache.put(token, token);
         }
         return cache.get(token);
