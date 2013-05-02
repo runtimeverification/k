@@ -99,7 +99,7 @@ public class MaudeFilter extends BackendFilter {
 					}
 					if (!MaudeHelper.constantSorts.contains(syn.getSort()) || !syn.getSort().toString().equals("KLabel") || !syn.getSort().toString().equals("CellLabel")) {
 						result.append("op ");
-						result.append(operation);
+						result.append(StringUtil.escapeMaude(operation));
 						result.append(" : -> ");
 						result.append(syn.getSort());
 						if (!isEmptyAttributes(p.getAttributes())) {
@@ -135,7 +135,7 @@ public class MaudeFilter extends BackendFilter {
 
 					if (!p.containsAttribute("bracket")) {
 						result.append("op ");
-						result.append(maudelabel);
+						result.append(StringUtil.escapeMaude(maudelabel));
 						result.append(" : ");
 						p.accept(this);
 						result.append(" -> ");
@@ -446,13 +446,13 @@ public class MaudeFilter extends BackendFilter {
 	@Override
 	public void visit(TermCons termCons) {
 		Production pr = DefinitionHelper.conses.get(termCons.getCons());
-		String cons = pr.getLabel();
+		String cons = StringUtil.escapeMaude(pr.getLabel());
 
 		if (pr.containsAttribute("maudeop")) {
-			cons = pr.getAttribute("maudeop").replaceAll("\"", "");
+			cons = pr.getAttribute("maudeop").replaceAll("\"", "").replaceAll(" ", "`");
 		}
 
-		result.append(cons.replaceAll(" ", "`"));
+        result.append(cons);
 		if (termCons.getContents().size() > 0) {
 			result.append("(");
 		}
@@ -519,7 +519,7 @@ public class MaudeFilter extends BackendFilter {
 
     @Override
     public void visit(KLabelConstant kLabelConstant) {
-        result.append(kLabelConstant.getLabel());
+        result.append(StringUtil.escapeMaude(kLabelConstant.getLabel()));
     }
 
 	@Override
@@ -616,7 +616,8 @@ public class MaudeFilter extends BackendFilter {
 	public void visit(KInjectedLabel kInjectedLabel) {
 		Term term = kInjectedLabel.getTerm();
 		if (MetaK.isKSort(term.getSort())) {
-			result.append(StringUtil.escapeMaude(kInjectedLabel.getInjectedSort(term.getSort())));
+			//result.append(StringUtil.escapeMaude(kInjectedLabel.getInjectedSort(term.getSort())));
+            result.append(kInjectedLabel.getInjectedSort(term.getSort()));
 			result.append("2KLabel_(");
 		} else {
 			result.append("#_(");

@@ -47,7 +47,7 @@ public class KLabelConstant extends KLabel {
      * Static function for creating AST term representation of KLabel constants. The function caches the KLabelConstant
      * objects; subsequent calls with the same label return the same object.
      *
-     * @param label string representation of the KLabel
+     * @param label string representation of the KLabel; must not be '`' escaped;
      * @return AST term representation the KLabel;
      */
     public static final KLabelConstant of(String label) {

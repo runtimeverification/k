@@ -44,7 +44,7 @@ public class ResolveSyntaxPredicates extends CopyOnWriteTransformer {
 		}
 		if (!change) return node;
 		if (ands.getContents().size() > 1) {
-			condition = new KApp(KLabelConstant.of("'#andBool"), ands);
+			condition = new KApp(KLabelConstant.ANDBOOL_KLABEL, ands);
 		} else {
 			condition = ands.getContents().get(0);
 		}

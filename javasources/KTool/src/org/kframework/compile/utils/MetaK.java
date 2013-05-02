@@ -377,10 +377,8 @@ public class MetaK {
 	}
 
 	public static String getListUnitLabel(String sep) {
-		//return "'.List`{\"" + sep + "\"`}";
-		String unitStr = "'.List{\"" + sep + "\"}";
-		return StringUtil.escapeMaude(unitStr).replace(" ", "");
-	}
+	    return  "'.List{\"" + sep + "\"}";
+    }
 
 	public static List<Cell> getTopCells(Term t) {
 		final List<Cell> cells = new ArrayList<Cell>();

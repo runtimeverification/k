@@ -38,7 +38,7 @@ public class KInjectedLabel extends Term {
 		return "# " + term;
 	}
 
-	public String getInjectedSort(String sort) {
+	public static String getInjectedSort(String sort) {
 		if (sort.equals("BagItem"))
 			return "Bag";
 		if (sort.equals("SetItem"))

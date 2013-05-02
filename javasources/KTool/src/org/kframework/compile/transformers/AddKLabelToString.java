@@ -3,6 +3,7 @@ package org.kframework.compile.transformers;
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.StringUtil;
 
 import java.util.ArrayList;
 
@@ -27,7 +28,7 @@ public class AddKLabelToString extends CopyOnWriteTransformer {
         for (String klbl : node.getModuleKLabels()) {
             Term kapp = KApp.of(new KInjectedLabel(KLabelConstant.of(klbl)));
             Term lhs = KApp.of(KLabel2String, kapp);
-            Term rhs = KApp.of(new KInjectedLabel(StringBuiltin.of(klbl.replace("\"","\\\""))));
+            Term rhs = KApp.of(new KInjectedLabel(StringBuiltin.of(StringUtil.escapeMaude(klbl).replace("\"","\\\""))));
             Rule rule = new Rule(lhs, rhs);
             rule.addAttribute(Attribute.FUNCTION);
             retNode.appendModuleItem(rule);
