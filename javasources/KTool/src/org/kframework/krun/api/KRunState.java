@@ -44,7 +44,8 @@ public class KRunState implements Serializable{
 			}
 		} catch (Exception e) {
 			// if concretization fails, return the raw result directly.
-			return rawResult;
+			//return rawResult;s
+			throw new RuntimeException(e);
 		}
 		if (result.getClass() == Cell.class) {
 			Cell generatedTop = (Cell) result;

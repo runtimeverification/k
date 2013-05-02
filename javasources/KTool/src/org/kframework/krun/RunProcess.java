@@ -221,7 +221,7 @@ public class RunProcess {
 			// get the absolute path on disk for the maude_err file disregard the rename of krun temp dir took place or not
 			String fileName = new File(K.maude_err).getName();
 			String fullPath = new File(K.kdir + K.fileSeparator + "krun" + K.fileSeparator + fileName).getCanonicalPath();
-			Error.silentReport("Maude produced warnings or errors. See in " + fullPath + " file");
+			Error.silentReport("Maude produced warnings or errors.\n" + content);
 		} catch (IOException e) {
 			Error.report("Error in checkMaudeForErrors method:" + e.getMessage());
 		}

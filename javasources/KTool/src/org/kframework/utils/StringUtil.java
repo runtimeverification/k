@@ -24,6 +24,16 @@ public class StringUtil {
 	}
 
 	public static String escape(String str) {
+		str = str.replaceAll("\\\\", "\\\\");
+		str = str.replaceAll("\n", "\\n");
+		str = str.replaceAll("\r", "\\r");
+		str = str.replaceAll("\t", "\\t");
+		str = str.replaceAll("\\\"", "\\\"");
+
+		return str;
+	}
+
+	public static String escapeSDF(String str) {
 		str = str.replaceAll("\\\\", "\\\\\\\\");
 		str = str.replaceAll("\n", "\\\\n");
 		str = str.replaceAll("\r", "\\\\r");
@@ -112,7 +122,7 @@ public class StringUtil {
 				else if (str.charAt(i + 1) == ']')
 					sb.append(']');
 				else if (str.charAt(i + 1) == '{')
-					sb.append('}');
+					sb.append('{');
 				else if (str.charAt(i + 1) == '}')
 					sb.append('}');
 				else if (str.charAt(i + 1) == ',')

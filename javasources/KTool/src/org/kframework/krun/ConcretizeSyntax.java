@@ -85,8 +85,8 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 			possibleTerms = new ArrayList<Term>();
 			if (child instanceof KList) {
 				contents = ((KList)child).getContents();
-			} else if (!(child.equals(KList.EMPTY))) {
-				contents.add(child);
+			} else {
+				System.err.println(child);
 			}
 			if (conses != null) {	
 				for (int i = 0; i < contents.size(); i++) {
@@ -119,7 +119,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 				} else {
 					return new Ambiguity("K", possibleTerms);
 				}
-			} else if (child instanceof Empty) {
+			} else if (child.equals(KList.EMPTY)) {
 				//could be a list terminator, which don't have conses
 				Set<String> sorts = DefinitionHelper.listLabels.get(klabel);
 				possibleTerms = new ArrayList<Term>();
@@ -149,11 +149,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 				StringBuiltin sort = (StringBuiltin) sortNode;
 				StringBuiltin value = (StringBuiltin) valueNode;
 
-				String escapedSort = sort.getValue();
-				String escapedValue = value.getValue();
-				escapedSort = escapedSort.substring(1, escapedSort.length() - 1);
-				escapedValue = escapedValue.substring(1, escapedValue.length() - 1);
-				return new Constant(StringUtil.unescape(escapedSort), StringUtil.unescape(escapedValue));
+				return new Constant(sort.getValue(), value.getValue());
 			}
 		}
 		return super.transform(kapp);

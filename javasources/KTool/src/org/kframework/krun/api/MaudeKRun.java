@@ -55,7 +55,7 @@ public class MaudeKRun implements KRun {
 				returnValue = KRunner.main(new String[] { "--maudeFile", K.compiled_def + K.fileSeparator + "main.maude", "--moduleName", K.main_module, "--commandFile", K.maude_in, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath() });
 			}
 		} catch (Exception e) {
-			throw new KRunExecutionException("Runner threw exception", e);
+			throw new RuntimeException("Runner threw exception", e);
 		}
 		if (errFile.exists()) {
 			String content = FileUtil.getFileContent(K.maude_err);
@@ -85,7 +85,7 @@ public class MaudeKRun implements KRun {
 		try {
 			return parseRunResult();
 		} catch (IOException e) {
-			throw new KRunExecutionException("Pretty-printer threw I/O exception", e);
+			throw new RuntimeException("Pretty-printer threw I/O exception", e);
 		}
 	}
 
@@ -309,7 +309,13 @@ public class MaudeKRun implements KRun {
 				return KList.EMPTY;
 			} else if (op.equals("_`(_`)") && (sort.equals("KItem") || sort.equals("[KList]"))) {
 				assertXMLTerm(list.size() == 2);
-				return new KApp(parseXML(list.get(0)), parseXML(list.get(1)));
+				Term child = parseXML(list.get(1));
+				if (!(child instanceof KList)) {
+					List<Term> terms = new ArrayList<Term>();
+					terms.add(child);
+					child = new KList(terms);
+				}
+				return new KApp(parseXML(list.get(0)),child);
 			} else if (sort.equals("KLabel") && list.size() == 0) {
 				return KLabelConstant.of(StringUtil.unescapeMaude(op));
 			} else if (sort.equals("KLabel") && op.equals("#freezer_")) {
@@ -319,7 +325,7 @@ public class MaudeKRun implements KRun {
 				assertXMLTerm(list.size() == 0);
 				return new Hole(sort);
 			} else {
-				Set<String> conses = DefinitionHelper.labels.get(op);
+				Set<String> conses = DefinitionHelper.labels.get(StringUtil.unescapeMaude(op));
 				Set<String> validConses = new HashSet<String>();
 				List<Term> possibleTerms = new ArrayList<Term>();
 				assertXMLTerm(conses != null);
@@ -440,7 +446,7 @@ public class MaudeKRun implements KRun {
 			result.setRawOutput(FileUtil.getFileContent(K.maude_out));
 			return result;
 		} catch (Exception e) {
-			throw new KRunExecutionException("Pretty-printer threw exception", e);
+			throw new RuntimeException("Pretty-printer threw exception", e);
 		}
 	}
 
