@@ -81,8 +81,9 @@ public class    DefinitionHelper {
 		else
 			label = p.getKLabel();
 		Set<String> s = labels.get(label);
-		if (s == null)
+		if (s == null) {
 			labels.put(label, s = new HashSet<String>());
+        }
 		s.add(cons);
 	}
 

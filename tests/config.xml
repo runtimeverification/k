@@ -536,11 +536,11 @@
   </test>
 
   <test
-      language="tests/regression/escapeKLabel/issue.k"
-      folder="tests/regression/escapeKLabel/programs"
-      results="tests/regression/escapeKLabel/tests"
+      language="tests/regression/escapedKLabel/issue.k"
+      folder="tests/regression/escapedKLabel/programs"
+      results="tests/regression/escapedKLabel/tests"
       extensions="issue" >
-      <program name="tests/regression/escapeKLabel/programs/test.issue">
+      <program name="tests/regression/escapedKLabel/programs/test.issue">
         <krun-option name="-output-mode" value="pretty" />
       </program>
   </test>
