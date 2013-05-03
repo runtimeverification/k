@@ -380,26 +380,9 @@ public class MaudeKRun implements KRun {
 	}
 
 	public KRunResult<SearchResults> search(Integer bound, Integer depth,
-											SearchType searchType,
-											Rule pattern, Term cfg,
-											Set<String> varNames)
-			throws KRunExecutionException {
-		return search(bound, depth, searchType, pattern, cfg,
-				null, varNames);
-
-	}
-
-	public KRunResult<SearchResults> search(Integer bound, Integer depth, SearchType searchType, Rule pattern, Term cfg, RuleCompilerSteps compilationInfo) throws KRunExecutionException {
-		return search(bound, depth, searchType, pattern, cfg,
-				compilationInfo, null);
-
-	}
-
-	private KRunResult<SearchResults> search(Integer bound, Integer depth,
 										SearchType searchType, Rule pattern,
 										Term cfg,
-										RuleCompilerSteps compilationInfo,
-										Set<String> varNames)
+										RuleCompilerSteps compilationInfo)
 			throws KRunExecutionException {
 		String cmd = "set show command off ." + K.lineSeparator + setCounter() + "search ";
 		if (bound != null && depth != null) {
@@ -433,14 +416,7 @@ public class MaudeKRun implements KRun {
 					(pattern, compilationInfo);
 			final boolean matches = patternString.trim().matches("=>[!*1+] " +
 					"<_>_</_>\\(generatedTop, B:Bag, generatedTop\\)");
-			if (compilationInfo != null) {
-				results = new SearchResults(solutions,
-									parseSearchGraph(),
-						matches);
-			} else {
-				results = new SearchResults(solutions, parseSearchGraph(),
-						matches, varNames);
-			}
+			results = new SearchResults(solutions, parseSearchGraph(), matches);
 			K.stateCounter += results.getGraph().getVertexCount();
 			KRunResult<SearchResults> result = new KRunResult<SearchResults>(results);
 			result.setRawOutput(FileUtil.getFileContent(K.maude_out));
@@ -562,12 +538,7 @@ public class MaudeKRun implements KRun {
 				Term rawResult = (Term)pattern.getBody().accept(new SubstitutionFilter(rawSubstitution));
 				KRunState state = new KRunState(rawResult);
 				state.setStateId(stateNum + K.stateCounter);
-				SearchResult result;
-				if (compilationInfo != null) {
-					result = new SearchResult(state, rawSubstitution, compilationInfo);
-				} else {
-					result = new SearchResult(state, rawSubstitution);
-				}
+				SearchResult result = new SearchResult(state, rawSubstitution, compilationInfo);
 				results.add(result);
 			} catch (TransformerException e) {
 				e.report(); //this should never happen, so I want it to blow up

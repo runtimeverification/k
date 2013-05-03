@@ -298,23 +298,13 @@ public class Main {
 						} else if (cmd.hasOption("depth")) {
 							depth = Integer.parseInt(K.depth);
 						}
-						if (!GlobalSettings.sortedCells) {
-							result = krun.search(
-									bound,
-									depth,
-									K.searchType,
-									patternRule,
-									makeConfiguration(KAST, buffer, rp,
-											(K.term != null)), varNames);
-						} else {
-							result = krun.search(
-									bound,
-									depth,
-									K.searchType,
-									patternRule,
-									makeConfiguration(KAST, buffer, rp,
-											(K.term != null)), steps);
-						}
+						result = krun.search(
+								bound,
+								depth,
+								K.searchType,
+								patternRule,
+								makeConfiguration(KAST, buffer, rp,
+										(K.term != null)), steps);
 
 						if (GlobalSettings.verbose)
 							sw.printTotal("Search total");
@@ -358,13 +348,7 @@ public class Main {
 					Object krs = result.getResult();
 					if (krs instanceof KRunState) {
 						Term res = ((KRunState) krs).getRawResult();
-						if (!GlobalSettings.sortedCells){
-							result = krun.search(null, null, K.searchType,
-									patternRule, res, varNames);
-						} else {
-							result = krun.search(null, null, K.searchType,
-									patternRule, res, steps);
-						}
+						result = krun.search(null, null, K.searchType, patternRule, res, steps);
 					}else {
 						Error.report("Pattern matching after execution is not supported by search and model checking");
 					}

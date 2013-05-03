@@ -133,12 +133,7 @@ public class KRunApiDebugger implements KRunDebugger {
 		if (currentState == null) {
 			throw new IllegalStateException("Cannot step without a current state to step from.");
 		}
-		SearchResults results;
-		if (GlobalSettings.sortedCells) {
-			results = krun.search(null, steps, SearchType.PLUS, defaultPattern, getState(currentState).getRawResult(), defaultPatternInfo).getResult();
-		} else {
-			results = krun.search(null, steps, SearchType.PLUS, defaultPattern, getState(currentState).getRawResult(), defaultVars).getResult();
-		}
+		SearchResults results = krun.search(null, steps, SearchType.PLUS, defaultPattern, getState(currentState).getRawResult(), defaultPatternInfo).getResult();
 		for (SearchResult result : results.getSolutions()) {
 			KRunState state = result.getState();
 			if (states.containsValue(state)) {
