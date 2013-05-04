@@ -12,6 +12,14 @@ the K tool. It is also used by our Jenkins server for testing.
 1.2 Running custom configuration file
     $ ant test -Dcfg=path/to/mycfgfile.xml
 
+1.3 Some notes on the current test suite
+
+Sadly, for a lot of complicated and unfortunate reasons, the current state of the test suite is not particularly excellent in terms of coverage. While many of the common cases in terms of parsing and execution are covered, there have been and probably continue to be several minor corner cases of features that are not covered by the test suite. Moreover, the majority of the tests in the test suite assert that a particular definition will compile, and that all programs in that definition will rewrite without creating errors, but say very little about what they should rewrite into or what the resulting configuration should look like when represented in text. There are, however, several notable exceptions to this:
+
+(1) If a test in dist/examples/cink/ltlmc fails, there may be a bug involving model checking
+(2) If a test in dist/examples/logik fails, there may be a bug involving search
+(3) If dist/tutorial/4_imp++/lesson_3/imp.k fails for the program div.imp, or if tests/regression/unparsing fails, it is highly likely there is some kind of change (either expected or a bug) in the textual output format that krun uses to pretty-print output terms and search results.
+(4) If dist/examples/imp-reachability or dist/examples/imp-symbolic fail, there may be a bug involving the symbolic backend, or, instead, there may simply be a bug involving the ground parser provided by kast.
 
 2. Adding new tests for `ant test`
 
