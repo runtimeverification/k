@@ -155,10 +155,9 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
         return node;
     }
 
-    // KLabels are applied to associative KList,
-    // so the context we must generate is the fairly
-    // easy context KLabel(KList1 ,, HOLE ,, KList2)
-    // if the label is seqstrict add the condition isKResult(KList1)
+    /* Add context KLabel(KList1 ,, HOLE ,, KList2).
+     * If KLabel is seqstrict then add the condition isKResult(KList1)
+     */
     private void kLabelStrictness(Production prod, boolean isSeq) {
         List<Term> contents = new ArrayList<Term>(3);
         //first argument is a variable of sort KList
