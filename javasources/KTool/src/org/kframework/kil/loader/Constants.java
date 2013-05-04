@@ -47,6 +47,7 @@ public class Constants {
 	public static final String CELL = "cell";
 	public static final String BAG = "Bag";
 	public static final String BAGITEM = "BagItem";
+	public static final String K = "K";
 	public static final String KSEQUENCE = "KSequence";
 	public static final String MAPITEM = "MapItem";
 	public static final String KEY = "key";

@@ -85,8 +85,6 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 			possibleTerms = new ArrayList<Term>();
 			if (child instanceof KList) {
 				contents = ((KList)child).getContents();
-			} else {
-				System.err.println(child);
 			}
 			if (conses != null) {	
 				for (int i = 0; i < contents.size(); i++) {

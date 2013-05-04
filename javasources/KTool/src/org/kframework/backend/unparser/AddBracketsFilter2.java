@@ -120,15 +120,41 @@ public class AddBracketsFilter2 extends BasicTransformer {
 			}
 			return result;
 		}
-		UnparserFilter unparser = new UnparserFilter(false, false, false);
+		UnparserFilter unparser = new UnparserFilter(false, false, false, true);
 		ast.accept(unparser);
 		String unparsed = unparser.getResult();
 		try {
 			ASTNode rule = DefinitionLoader.parsePatternAmbiguous(unparsed);
 			Term reparsed = ((Rule)rule).getBody();
+			reparsed.accept(new AdjustLocations());
+			if (!reparsed.contains(ast)) {
+				return replaceWithVar(ast);
+			}
 			return ast.accept(new AddBracketsFilter2(reparsed));
 		} catch (TransformerException e) {
 			return replaceWithVar(ast);
+		}
+	}
+
+	private class AdjustLocations extends BasicVisitor {
+		public AdjustLocations() {
+			super("Apply first-line location offset");
+		}
+
+		public void visit(ASTNode ast) {
+			if (ast.getLocation().equals("generated")) return;
+			Scanner scanner = new Scanner(ast.getLocation()).useDelimiter("[,)]").skip("\\(");
+			int beginLine = scanner.nextInt();
+			int beginCol = scanner.nextInt();
+			int endLine = scanner.nextInt();
+			int endCol = scanner.nextInt();
+			if (beginLine == 1) {
+				beginCol -= "rule ".length();
+			}
+			if (endLine == 1) {
+				endCol -= "rule ".length();
+			}
+			ast.setLocation("(" + beginLine + "," + beginCol + "," + endLine + "," + endCol + ")");
 		}
 	}
 
@@ -184,6 +210,7 @@ public class AddBracketsFilter2 extends BasicTransformer {
 				hasTerm = false;
 				t.accept(this);
 				if (!hasTerm) {
+					System.err.println(realLocation);
 					needsParens = true;
 					amb.getContents().remove(i);
 				}
@@ -197,7 +224,7 @@ public class AddBracketsFilter2 extends BasicTransformer {
 
 		public ASTNode transform(Term t) throws TransformerException {
 			if (t.equals(ast) && t.getLocation().equals(realLocation)) {
-				hasTerm = true;
+				hasTerm = true; 
 			}
 			return t;
 		}

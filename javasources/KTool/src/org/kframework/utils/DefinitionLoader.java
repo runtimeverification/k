@@ -308,11 +308,13 @@ public class DefinitionLoader {
 		ASTNode config = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
 
 		// TODO: don't allow rewrites
+		new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation()).check(config);
 		config = config.accept(new SentenceVariablesFilter());
 		config = config.accept(new CellEndLabelFilter());
 		config = config.accept(new CellTypesFilter());
 		//config = config.accept(new CorrectRewritePriorityFilter());
 		config = config.accept(new CorrectKSeqFilter());
+		config = config.accept(new CorrectCastPriorityFilter());
 		// config = config.accept(new CheckBinaryPrecedenceFilter());
 		// config = config.accept(new InclusionFilter(localModule));
 		//config = config.accept(new VariableTypeInferenceFilter());

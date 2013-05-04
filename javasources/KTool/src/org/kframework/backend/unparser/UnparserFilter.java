@@ -19,6 +19,7 @@ public class UnparserFilter extends BasicVisitor {
 	private boolean addParentheses;
 	private int inTerm = 0;
 	private boolean color = false;
+	private boolean annotateLocation;
 	private static int TAB = 4;
 	private java.util.List<String> variableList = new java.util.LinkedList<String>();
 	private java.util.Map<Production, Integer> priorities = null;
@@ -37,10 +38,15 @@ public class UnparserFilter extends BasicVisitor {
 	}
 
 	public UnparserFilter(boolean inConfiguration, boolean color, boolean addParentheses) {
+		this(inConfiguration, color, addParentheses, false);
+	}
+
+	public UnparserFilter(boolean inConfiguration, boolean color, boolean addParentheses, boolean annotateLocation) {
 		this.inConfiguration = inConfiguration;
 		this.color = color;
 		this.inTerm = 0;
 		this.addParentheses = addParentheses;
+		this.annotateLocation = annotateLocation;
 	}
 
 	public String getResult() {
@@ -653,6 +659,9 @@ public class UnparserFilter extends BasicVisitor {
 			}
 		}
 		stack.push(astNode);
+		if (annotateLocation) {
+			astNode.setLocation("(" + result.getLineNo() + "," + result.getColNo());
+		}
 	}
 
 	private void postpare() {
@@ -660,6 +669,12 @@ public class UnparserFilter extends BasicVisitor {
 		if (!stack.empty()) {
 			if (needsParanthesis(stack.peek(), astNode)) {
 				result.write(")");
+			}
+		}
+		if (annotateLocation) {
+			String loc = astNode.getLocation();
+			if (!loc.substring(loc.length() - 1).equals(")")) {
+				astNode.setLocation(loc + "," + result.getLineNo() + "," + result.getColNo() + ")");
 			}
 		}
 	}
