@@ -76,6 +76,10 @@ public class CorrectKSeqFilter extends BasicTransformer {
 		}
 
 		public ASTNode transform(KSequence ks) throws TransformerException {
+            /* TODO: andreis changed here; radu please review */
+            if (ks.isEmpty()) {
+                return super.transform(ks);
+            }
 			String msg = "Due to typing errors, ~> is not greedy. Use parentheses to set proper scope.";
 			KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ks.getFilename(), ks.getLocation());
 			throw new PriorityException(kex);

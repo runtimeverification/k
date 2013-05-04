@@ -77,7 +77,7 @@ public class JavaClassesFactory {
 		if (KSorts.KLIST.equals(element.getNodeName()))
 			return new KList(element);
 		if (Constants.EMPTY.equals(element.getNodeName())) {
-            if (element.getAttribute(Constants.SORT_sort_ATTR).equals(Constants.KSEQUENCE)) {
+            if (element.getAttribute(Constants.SORT_sort_ATTR).equals(KSorts.K)) {
                 return KSequence.EMPTY;
             } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(KSorts.KLIST)) {
                 return KList.EMPTY;
