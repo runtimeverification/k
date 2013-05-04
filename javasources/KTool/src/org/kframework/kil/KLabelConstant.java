@@ -8,6 +8,7 @@ import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
+import org.kframework.utils.StringUtil;
 import org.w3c.dom.Element;
 
 import java.util.Collections;
@@ -74,9 +75,13 @@ public class KLabelConstant extends KLabel {
         productions = Collections.unmodifiableList(DefinitionHelper.productionsOf(label));
     }
 
+    /**
+     * Constructs a {@link KLabelConstant} from an XML {@link Element} representing a constant.
+     * The KLabel string representation in the element is escaped according to Maude conventions.
+     */
     public KLabelConstant(Element element) {
         super(element);
-        label = element.getAttribute(Constants.VALUE_value_ATTR);
+        label = StringUtil.unescapeMaude(element.getAttribute(Constants.VALUE_value_ATTR));
         productions = Collections.unmodifiableList(DefinitionHelper.productionsOf(label));
     }
 

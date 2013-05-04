@@ -104,6 +104,7 @@ public class StringUtil {
 	}
 
 	public static String escapeMaude(String tag) {
+        // TODO [andreis]: current implementation appears wrong to me, i.e. '`(`) stays the same rather than becoming '```(```)
 		return tag.replaceAll("(?<!`)([\\(\\)\\[\\]\\{\\},])", "`$1");
 	}
 
