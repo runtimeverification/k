@@ -18,7 +18,7 @@ public class Hole extends Term {
     public static final Hole HOLE = new Hole();
 
     private Hole() {
-        super("K");
+        super(Kind.K);
     }
 
     @Override
@@ -50,4 +50,5 @@ public class Hole extends Term {
     public ASTNode accept(Transformer transformer) {
         return transformer.transform(this);
     }
+
 }

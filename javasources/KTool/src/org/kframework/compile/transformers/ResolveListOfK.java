@@ -1,6 +1,5 @@
 package org.kframework.compile.transformers;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.loader.DefinitionHelper;
@@ -48,8 +47,8 @@ public class ResolveListOfK extends CopyOnWriteTransformer {
 				}
 				Term result = (Term) resultAST;
 				if (pitem instanceof Sort 
-						&& ((Sort)pitem).getName().equals(MetaK.Constants.KList) 
-						&& !t.getSort().equals(MetaK.Constants.KList)) {
+						&& ((Sort)pitem).getName().equals(KSorts.KLIST)
+						&& !t.getSort().equals(KSorts.KLIST)) {
 					KList list = new KList();
 					list.getContents().add(result);
 					result = list;

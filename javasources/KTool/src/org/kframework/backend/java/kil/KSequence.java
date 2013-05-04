@@ -18,12 +18,10 @@ import org.kframework.kil.ASTNode;
 public class KSequence extends KCollection {
 
     private static final String OPERATOR_NAME = " ~> ";
-    private static final String IDENTITY_NAME = ".K";
-
-    public static final String KIND_NAME = "KSequence";
+    private static final String IDENTITY_NAME = "." + Kind.K;
 
     public KSequence(ImmutableList<Term> items, Variable frame) {
-        super(items, frame, KIND_NAME);
+        super(items, frame, Kind.K);
     }
 
     /*
@@ -33,11 +31,11 @@ public class KSequence extends KCollection {
     */
 
     public KSequence(Variable frame) {
-        super(frame, KIND_NAME);
+        super(frame, Kind.K);
     }
 
     public KSequence(ImmutableList<Term> items) {
-        super(items, null, KIND_NAME);
+        super(items, null, Kind.K);
     }
 
     /*
@@ -47,7 +45,7 @@ public class KSequence extends KCollection {
     */
 
     public KSequence() {
-        super(null, KIND_NAME);
+        super(null, Kind.K);
     }
 
     @Override

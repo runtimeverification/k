@@ -30,7 +30,7 @@ public class Constant extends Term {
 
 		this.value = value;
 
-        assert !(sort.equals("KLabel") || sort.equals("#Bool") || sort.equals("#Int")
+        assert !(sort.equals(KSorts.KLABEL) || sort.equals("#Bool") || sort.equals("#Int")
                 || sort.equals("#Float") || sort.equals("#String"));
 	}
 
@@ -39,7 +39,7 @@ public class Constant extends Term {
 		this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
 		this.value = element.getAttribute(Constants.VALUE_value_ATTR);
 
-        assert !(sort.equals("KLabel") || sort.equals("#Bool") || sort.equals("#Int")
+        assert !(sort.equals(KSorts.KLABEL) || sort.equals("#Bool") || sort.equals("#Int")
                 || sort.equals("#Float") || sort.equals("#String"));
 	}
 

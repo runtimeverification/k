@@ -9,12 +9,12 @@ import org.w3c.dom.Element;
 public abstract class KLabel extends Term {
 
 	protected KLabel() {
-        super("KLabel");
+        super(KSorts.KLABEL);
     }
 
     protected KLabel(Element element) {
         super(element);
-        this.sort = "KLabel";
+        this.sort = KSorts.KLABEL;
     }
 
     protected KLabel(KLabel kLabel) {

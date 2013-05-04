@@ -15,7 +15,7 @@ import org.kframework.kil.ASTNode;
 public abstract class KLabel extends Term {
 
     protected KLabel() {
-        super("KLabel");
+        super(Kind.KLABEL);
     }
 
     @Override

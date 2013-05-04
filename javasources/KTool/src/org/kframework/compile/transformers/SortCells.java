@@ -317,13 +317,13 @@ public class SortCells extends CopyOnWriteTransformer {
 		if (iCells != null) {
 			if (multiplicity == Cell.Multiplicity.ANY ||
 					multiplicity == Cell.Multiplicity.SOME) {
-				replacementTerm = MetaK.getFreshVar(MetaK.Constants.Bag);
+				replacementTerm = MetaK.getFreshVar(KSorts.BAG);
 			}
 		} else {
 			if (multiplicity == Cell.Multiplicity.ONE && !fragment) {
-				replacementTerm = MetaK.getFreshVar(MetaK.Constants.BagItem);
+				replacementTerm = MetaK.getFreshVar(KSorts.BAG_ITEM);
 			} else {
-				replacementTerm = MetaK.getFreshVar(MetaK.Constants.Bag);
+				replacementTerm = MetaK.getFreshVar(KSorts.BAG);
 			}
 		}
 		Term oldTerm = renamedVars.get(cell.getId());

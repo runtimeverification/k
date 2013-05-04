@@ -1,6 +1,6 @@
 package org.kframework.compile.checks;
 
-import org.kframework.compile.utils.MetaK;
+import org.kframework.kil.KSorts;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.visitors.BasicVisitor;
@@ -20,7 +20,7 @@ public class CheckListOfKDeprecation extends BasicVisitor {
 		if (node.getName().equals("List{K}")) {
 			String msg = "Deprecated: List{K} has been renamed into KList to be less confuzing.";
 			GlobalSettings.kem.register(new KException(KException.ExceptionType.WARNING, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
-			node.setName(MetaK.Constants.KList);
+			node.setName(KSorts.KLIST);
 		}
 	}
 
@@ -29,7 +29,7 @@ public class CheckListOfKDeprecation extends BasicVisitor {
 		if (node.getSort().equals("List{K}")) {
 			String msg = "Deprecated: List{K} has been renamed into KList to be less confuzing.";
 			GlobalSettings.kem.register(new KException(KException.ExceptionType.WARNING, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
-			node.setSort(MetaK.Constants.KList);
+			node.setSort(KSorts.KLIST);
 		}
 	}
 }

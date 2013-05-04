@@ -22,7 +22,7 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
 
     protected final ImmutableList<Term> items;
 
-    protected KCollection(ImmutableList<Term> items, Variable frame, String kind) {
+    protected KCollection(ImmutableList<Term> items, Variable frame, Kind kind) {
         super(frame, kind);
         this.items = items;
     }
@@ -36,7 +36,7 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
         }
     }*/
 
-    protected KCollection(Variable frame, String kind) {
+    protected KCollection(Variable frame, Kind kind) {
         super(frame, kind);
         this.items = ImmutableList.of();
     }

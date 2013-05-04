@@ -333,7 +333,7 @@ public class BasicTransformer implements Transformer {
 		KApp result = node.shallowCopy();
 		result.setLabel((Term) node.getLabel().accept(this));
         Term resultChild = (Term) node.getChild().accept(this);
-        if (!(resultChild.getSort().equals("KList") || resultChild instanceof Ambiguity)) {
+        if (!(resultChild.getSort().equals(KSorts.KLIST) || resultChild instanceof Ambiguity)) {
             result.setChild(new KList(Collections.<Term>singletonList(resultChild)));
         } else {
 		    result.setChild(resultChild);

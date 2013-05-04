@@ -73,7 +73,7 @@ public class AddSymbolicK extends CopyOnWriteTransformer {
 		for (String sort : node.getAllSorts()) {
             if (allowKSymbolic(sort)) {
                 //retNode.addProduction(sort, getSymbolicProduction(sort));
-                retNode.addConstant("KLabel", symbolicConstructor(sort));
+                retNode.addConstant(KSorts.KLABEL, symbolicConstructor(sort));
             }
 		}
 

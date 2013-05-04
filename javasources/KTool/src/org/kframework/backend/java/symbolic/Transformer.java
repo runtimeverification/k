@@ -7,7 +7,7 @@ import org.kframework.backend.java.kil.Collection;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Hole;
 import org.kframework.backend.java.kil.KLabelInjection;
-import org.kframework.backend.java.kil.K;
+import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KCollection;
 import org.kframework.backend.java.kil.KLabel;
 import org.kframework.backend.java.kil.KList;
@@ -37,7 +37,7 @@ public interface Transformer {
     public ASTNode transform(KLabelConstant kLabelConstant);
     public ASTNode transform(Hole hole);
     public ASTNode transform(KLabelInjection kLabelInjection);
-    public ASTNode transform(K k);
+    public ASTNode transform(KItem kItem);
     public ASTNode transform(KCollection kCollection);
     public ASTNode transform(KLabel kLabel);
     public ASTNode transform(KList kList);

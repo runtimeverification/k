@@ -34,7 +34,7 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
     
     /* assumes term has exactly one rewrite and returns the list 
      * C[v], v, t1, t2 such that
-     * v is a fresh variable and term= C[t1 => t2] */
+     * v is a fresh variable and term = C[t1 => t2] */
     private List<Term> splitRewrite(Term term) throws TransformerException {
     	final Variable v = MetaK.getFreshVar("K");
     	final List<Term> list = new ArrayList<Term>();
@@ -52,7 +52,7 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
     }
     
     private static Term substituteHole(Term term, Term replacement) throws TransformerException {
-		return substituteSubstitutable(term, new Hole("K"), replacement);
+		return substituteSubstitutable(term, Hole.KITEM_HOLE, replacement);
     }
 
 	public static Term freeze(Term term) {
@@ -91,7 +91,7 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
     						node.getLocation(),
     						node.getFilename()));
     	} else if (countRewrites == 0) {
-    		body = substituteHole(body, new Rewrite(new Hole("K"), new Hole("K")));
+    		body = substituteHole(body, new Rewrite(Hole.KITEM_HOLE, Hole.KITEM_HOLE));
     	}
     	List<Term> r = splitRewrite(body);
     	Term rewriteContext = r.get(0);

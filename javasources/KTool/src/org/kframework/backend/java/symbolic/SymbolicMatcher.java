@@ -8,7 +8,7 @@ import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Hole;
 import org.kframework.backend.java.kil.KLabelFreezer;
 import org.kframework.backend.java.kil.KLabelInjection;
-import org.kframework.backend.java.kil.K;
+import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KCollection;
 import org.kframework.backend.java.kil.KCollectionFragment;
 import org.kframework.backend.java.kil.KList;
@@ -319,14 +319,14 @@ public class SymbolicMatcher extends AbstractMatcher {
     }
 
     @Override
-    public void match(K k, Term pattern) {
-        if (!(pattern instanceof K)) {
+    public void match(KItem kItem, Term pattern) {
+        if (!(pattern instanceof KItem)) {
             fail();
         }
 
-        K patternK = (K) pattern;
-        match(k.getKLabel(), patternK.getKLabel());
-        match(k.getKList(), patternK.getKList());
+        KItem patternKItem = (KItem) pattern;
+        match(kItem.getKLabel(), patternKItem.getKLabel());
+        match(kItem.getKList(), patternKItem.getKList());
     }
 
     @Override

@@ -110,10 +110,10 @@ public class SimpleRewriter {
     KList termGuts = new KList();
     KList subtermGuts = new KList();
     KList rhsGuts = new KList();
-    patternGuts.add(new Variable("x", "KLabel"));
-    patternGuts.add(new Variable("y", "KLabel"));
+    patternGuts.add(new Variable("x", KSorts.KLABEL));
+    patternGuts.add(new Variable("y", KSorts.KLABEL));
     patternGuts.add(new Variable("z", "K"));
-    patternGuts.add(new Variable("x", "KLabel"));
+    patternGuts.add(new Variable("x", KSorts.KLABEL));
     subtermGuts.add(Constant.KLABEL("d"));
     subtermGuts.add(Constant.KLABEL("e"));
     KApp subterm = new KApp(Constant.KLABEL("bar"), subtermGuts);
@@ -122,7 +122,7 @@ public class SimpleRewriter {
     termGuts.add(subterm);
     termGuts.add(Constant.KLABEL("a"));
     rhsGuts.add(Constant.KLABEL("42"));
-    rhsGuts.add(new Variable("x", "KLabel"));
+    rhsGuts.add(new Variable("x", KSorts.KLABEL));
     rhsGuts.add(new Variable("z", "K"));
     KApp pattern = new KApp(Constant.KLABEL("foo"), patternGuts);
     KApp term = new KApp(Constant.KLABEL("foo"), termGuts);

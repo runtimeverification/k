@@ -76,7 +76,7 @@ public class AddSuperheatRules extends CopyOnWriteTransformer {
 			Term heat = KApp.of(
                     KLabelConstant.HEAT_KLABEL,
                     redex,
-                    new Variable(MetaK.Constants.anyVarSymbol, MetaK.Constants.KList));
+                    new Variable(MetaK.Constants.anyVarSymbol, KSorts.KLIST));
 			Rule superHeat = node.shallowCopy();
 			superHeat.setBody(heat);
 			superHeats.add(superHeat);
@@ -90,7 +90,7 @@ public class AddSuperheatRules extends CopyOnWriteTransformer {
 		Term left = body.getLeft(); // C[e]
 		Term right = body.getRight(); // e ~> C
 		Variable restHeat = MetaK.getFreshVar("K");
-		Variable lHeat = MetaK.getFreshVar(MetaK.Constants.KList);
+		Variable lHeat = MetaK.getFreshVar(KSorts.KLIST);
 		KSequence red1Seq = new KSequence();
 		red1Seq.add(left); red1Seq.add(restHeat); //C[e] ~> RestHeat:K,
 		KList red1List = new KList();
@@ -107,7 +107,7 @@ public class AddSuperheatRules extends CopyOnWriteTransformer {
 															   //       (.KList => redex(e ~> C ~> RestHeat:K)))
 		KList heatList = new KList();
 		heatList.add(red1);
-        heatList.add(new Variable(MetaK.Constants.anyVarSymbol, MetaK.Constants.KList));
+        heatList.add(new Variable(MetaK.Constants.anyVarSymbol, KSorts.KLIST));
 		Term heat = new KApp(KLabelConstant.HEAT_KLABEL, heatList);
 		superHeat.setBody(heat);
 

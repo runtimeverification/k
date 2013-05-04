@@ -16,12 +16,12 @@ public abstract class Collection extends Term {
 
     protected final Variable frame;
 
-    protected Collection(Variable frame, String kind) {
+    protected Collection(Variable frame, Kind kind) {
         super(kind);
 
-        assert frame == null || frame.getKind().equals(kind)
-                : "unexpected sort " + frame.getKind() + " for frame variable " + frame.getName()
-                + "; expected sort " + kind;
+        assert frame == null || frame.getKind() == kind
+                : "unexpected kind " + frame.getKind() + " for frame variable " + frame.getName()
+                + "; expected kind " + kind;
 
         this.frame = frame;
     }

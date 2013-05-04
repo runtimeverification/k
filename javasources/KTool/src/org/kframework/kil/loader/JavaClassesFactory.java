@@ -58,7 +58,7 @@ public class JavaClassesFactory {
 		if (Constants.TERMINAL.equals(element.getNodeName()))
 			return new Terminal(element);
 		if (Constants.CONST.equals(element.getNodeName())) {
-            if (element.getAttribute(Constants.SORT_sort_ATTR).equals("KLabel")) {
+            if (element.getAttribute(Constants.SORT_sort_ATTR).equals(KSorts.KLABEL)) {
                 return new KLabelConstant(element);
             } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(BoolBuiltin.SORT_NAME)) {
                 return new BoolBuiltin(element);
@@ -74,29 +74,29 @@ public class JavaClassesFactory {
         }
 		if (Constants.KAPP.equals(element.getNodeName()))
 			return new KApp(element);
-		if (Constants.KList.equals(element.getNodeName()))
+		if (KSorts.KLIST.equals(element.getNodeName()))
 			return new KList(element);
 		if (Constants.EMPTY.equals(element.getNodeName())) {
             if (element.getAttribute(Constants.SORT_sort_ATTR).equals(Constants.KSEQUENCE)) {
                 return KSequence.EMPTY;
-            } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(Constants.KList)) {
+            } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(KSorts.KLIST)) {
                 return KList.EMPTY;
-            } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(Constants.BAG)) {
+            } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(KSorts.BAG)) {
                 return Bag.EMPTY;
-            } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(Constants.LIST)) {
+            } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(KSorts.LIST)) {
                 return List.EMPTY;
-            } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(Constants.MAP)) {
+            } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(KSorts.MAP)) {
                 return Map.EMPTY;
-            } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(Constants.SET)) {
+            } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(KSorts.SET)) {
                 return Set.EMPTY;
             } else {
 			    // user defined empty list
                 return new Empty(element);
             }
         }
-		if (Constants.SET.equals(element.getNodeName()))
+		if (KSorts.SET.equals(element.getNodeName()))
 			return new Set(element);
-		if (Constants.SETITEM.equals(element.getNodeName()))
+		if (KSorts.SET_ITEM.equals(element.getNodeName()))
 			return new SetItem(element);
 		if (Constants.USERLIST.equals(element.getNodeName()))
 			return new UserList(element);
@@ -106,26 +106,27 @@ public class JavaClassesFactory {
 			return new Cell(element);
 		if (Constants.BREAK.equals(element.getNodeName()))
 			return new TermComment(element);
-		if (Constants.BAG.equals(element.getNodeName()))
+		if (KSorts.BAG.equals(element.getNodeName()))
 			return new Bag(element);
-		if (Constants.BAGITEM.equals(element.getNodeName()))
+		if (KSorts.BAG_ITEM.equals(element.getNodeName()))
 			return new BagItem(element);
 		if (Constants.KSEQUENCE.equals(element.getNodeName()))
 			return new KSequence(element);
-		if (Constants.MAPITEM.equals(element.getNodeName()))
-			return new MapItem(element);
-		if (Constants.MAP.equals(element.getNodeName()))
-			return new Map(element);
+		if (KSorts.MAP.equals(element.getNodeName()))
+            return new Map(element);
+		if (KSorts.MAP_ITEM.equals(element.getNodeName()))
+            return new MapItem(element);
 		if (Constants.CONTEXT.equals(element.getNodeName()))
 			return new Context(element);
 		if (Constants.HOLE.equals(element.getNodeName()))
-			return new Hole(element);
+			//return new Hole(element);
+            return Hole.KITEM_HOLE;
 		if (Constants.FREEZERHOLE.equals(element.getNodeName()))
 			return new FreezerHole(element);
-		if (Constants.LISTITEM.equals(element.getNodeName()))
+        if (KSorts.LIST.equals(element.getNodeName()))
+            return new List(element);
+		if (KSorts.LIST_ITEM.equals(element.getNodeName()))
 			return new ListItem(element);
-		if (Constants.LIST.equals(element.getNodeName()))
-			return new List(element);
 		if (Constants.DEFINITION.equals(element.getNodeName()))
 			return new Definition(element);
 		if (Constants.AMB.equals(element.getNodeName()))

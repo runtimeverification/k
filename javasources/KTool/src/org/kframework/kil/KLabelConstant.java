@@ -1,7 +1,6 @@
 package org.kframework.kil;
 
 import org.kframework.compile.transformers.AddPredicates;
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.matchers.Matcher;
@@ -36,11 +35,11 @@ public class KLabelConstant extends KLabel {
     public static final KLabelConstant KNEQ_KLABEL = of("'_=/=K_");
     public static final KLabelConstant KEQ_KLABEL = of("'_==K_");
     public static final KLabelConstant KEQ = of("'_=K_");
-    public static final KLabelConstant KLIST_EQUALITY = of("'_=" + MetaK.Constants.KList + "_");
+    public static final KLabelConstant KLIST_EQUALITY = of("'_=" + KSorts.KLIST + "_");
     public static final KLabelConstant ANDBOOL_KLABEL = of("'#andBool");
     public static final KLabelConstant BOOL_ANDBOOL_KLABEL = of("'_andBool_");
     public static final KLabelConstant BOOL_ANDTHENBOOL_KLABEL = of("'_andThenBool_");
-    public static final KLabelConstant KRESULT_PREDICATE = of(AddPredicates.predicate("KResult"));
+    public static final KLabelConstant KRESULT_PREDICATE = of(AddPredicates.predicate(KSorts.KRESULT));
     public static final KLabelConstant STRING_PLUSSTRING_KLABEL = of("'_+String_");
 
     /**
@@ -65,6 +64,7 @@ public class KLabelConstant extends KLabel {
         return label;
     }
 
+    /* un-escaped label */
     private final String label;
     /* unmodifiable view of the production list */
     private final List<Production> productions;
@@ -81,7 +81,7 @@ public class KLabelConstant extends KLabel {
     }
 
     /**
-     * @return unmodifiable list of K productions generating this KLabel
+     * @return unmodifiable list of productions generating this KLabel
      */
     public List<Production> productions() {
         return productions;

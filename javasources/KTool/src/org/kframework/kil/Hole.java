@@ -12,17 +12,22 @@ import org.w3c.dom.Element;
  * See {@link FreezerHole} for holes in freezers.
  */
 public class Hole extends Term {
-	public Hole(Element element) {
+
+    public static final Hole KITEM_HOLE = new Hole(KSorts.KITEM);
+
+	private Hole(Element element) {
 		super(element);
 		this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
 	}
 
-	public Hole(Hole hole) {
+	private Hole(Hole hole) {
 		super(hole);
 	}
 
-	public Hole(String sort) {
+	private Hole(String sort) {
 		super(sort);
+
+        assert sort.equals(KSorts.KITEM);
 	}
 
 	public String toString() {

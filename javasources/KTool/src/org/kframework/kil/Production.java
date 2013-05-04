@@ -61,7 +61,7 @@ public class Production extends ASTNode {
 	}
 
 	public boolean isConstant() {
-		return items.size() == 1 && items.get(0).getType() == ProductionType.TERMINAL && (sort.startsWith("#") || sort.equals("KLabel"));
+		return items.size() == 1 && items.get(0).getType() == ProductionType.TERMINAL && (sort.startsWith("#") || sort.equals(KSorts.KLABEL));
 	}
 
 	public Production(Element element) {
@@ -123,13 +123,13 @@ public class Production extends ASTNode {
 
 	public String getKLabel() {
         /*
-		assert MetaK.isComputationSort(sort) || sort.equals("KLabel") && isConstant():
+		assert MetaK.isComputationSort(sort) || sort.equals(KSorts.KLABEL) && isConstant():
                 sort + " ::= " + this + " -> " + getPrefixLabel();
         */
 
 		String klabel = attributes.get("klabel");
 		if (klabel == null) {
-			if (sort.toString().equals("KLabel"))
+			if (sort.toString().equals(KSorts.KLABEL))
 				klabel = getPrefixLabel();
 			else
 				klabel = "'" + getPrefixLabel();

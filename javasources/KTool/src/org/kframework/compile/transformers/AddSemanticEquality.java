@@ -1,14 +1,13 @@
 package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.MetaK;
-import org.kframework.compile.utils.MetaK.Constants;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
-import org.kframework.kil.Empty;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
+import org.kframework.kil.KSorts;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Production;
@@ -22,7 +21,6 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -110,9 +108,9 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
                     && !prod.containsAttribute(Attribute.BRACKET.getKey())
                     && !prod.containsAttribute(Attribute.FUNCTION.getKey())
                     && !prod.containsAttribute(Attribute.PREDICATE.getKey())
-                    && (!MetaK.isKSort(prod.getSort()) || prod.getSort().equals(Constants.K))) {
-                Variable KListVar1 = MetaK.getFreshVar(MetaK.Constants.KList);
-                Variable KListVar2 = MetaK.getFreshVar(MetaK.Constants.KList);
+                    && (!MetaK.isKSort(prod.getSort()) || prod.getSort().equals(KSorts.K))) {
+                Variable KListVar1 = MetaK.getFreshVar(KSorts.KLIST);
+                Variable KListVar2 = MetaK.getFreshVar(KSorts.KLIST);
 
                 KList lhsList = new KList();
                 lhsList.add(new KApp(KLabelConstant.of(prod.getKLabel()), KListVar1));

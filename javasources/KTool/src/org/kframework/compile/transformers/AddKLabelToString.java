@@ -22,6 +22,7 @@ public class AddKLabelToString extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(Module node) throws TransformerException {
+        /* TODO: escape labels when generating KLabel2String and String2KLabel */
         Module retNode = node.shallowCopy();
         retNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
 
@@ -35,7 +36,7 @@ public class AddKLabelToString extends CopyOnWriteTransformer {
 
             java.util.List<Term> termList = new ArrayList<Term>();
             termList.add(rhs);
-            TermCons termCons = new TermCons("KLabel", String2KLabelCons, termList);
+            TermCons termCons = new TermCons(KSorts.KLABEL, String2KLabelCons, termList);
             rule = new Rule(termCons, KLabelConstant.of(klbl));
             rule.addAttribute(Attribute.FUNCTION);
             retNode.appendModuleItem(rule);

@@ -74,7 +74,7 @@ public class KApp extends Term {
         Element body = XML.getChildrenElements(childrenElements.get(0)).get(0);
         setLabel((Term) JavaClassesFactory.getTerm(body));
         Term term = (Term) JavaClassesFactory.getTerm(childrenElements.get(1));
-        if (!(term.getSort().equals("KList") || term instanceof Ambiguity)) {
+        if (!(term.getSort().equals(KSorts.KLIST) || term instanceof Ambiguity)) {
             setChild(new KList(Collections.<Term>singletonList(term)));
         } else {
             setChild(term);
@@ -103,7 +103,7 @@ public class KApp extends Term {
      */
 	public void setLabel(Term label) {
         assert label != null;
-        assert label.getSort().equals("KLabel") || child instanceof Ambiguity:
+        assert label.getSort().equals(KSorts.KLABEL) || child instanceof Ambiguity:
                 "unexpected sort " + label.getSort() + " of KApp first argument " + label + ";"
                         + " expected KLabel";
 
@@ -121,7 +121,7 @@ public class KApp extends Term {
      */
 	public void setChild(Term child) {
         assert child != null;
-        assert child.getSort().equals("KList") || child instanceof Ambiguity:
+        assert child.getSort().equals(KSorts.KLIST) || child instanceof Ambiguity:
                 "unexpected sort " + child.getSort() + " of KApp second argument " + child + ";"
                         + "; expected KList";
 

@@ -6,13 +6,12 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.BoolBuiltin;
 import org.kframework.kil.Configuration;
-import org.kframework.kil.Constant;
 import org.kframework.kil.Context;
 import org.kframework.kil.Empty;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.KLabelConstant;
-import org.kframework.kil.KList;
+import org.kframework.kil.KSorts;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Production;
@@ -166,12 +165,12 @@ public class AddPredicates extends CopyOnWriteTransformer {
             if (!MetaK.isKSort(sort)) {
                 String pred = syntaxPredicate(sort);
                 // declare isSort predicate as KLabel
-                retNode.addConstant("KLabel", pred);
+                retNode.addConstant(KSorts.KLABEL, pred);
 
                 if (AddSymbolicK.allowKSymbolic(sort)) {
                     String symPred = symbolicPredicate(sort);
                     // declare isSymbolicSort predicate as KLabel
-                    retNode.addConstant("KLabel", symPred);
+                    retNode.addConstant(KSorts.KLABEL, symPred);
 
                     // define isSymbolicSort predicate as the conjunction of isSort and isSymbolicK
                     Variable var = MetaK.getFreshVar("K");
@@ -185,7 +184,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
                     retNode.appendModuleItem(rule);
 
                     String symCtor = AddSymbolicK.symbolicConstructor(sort);
-                    var = MetaK.getFreshVar(MetaK.Constants.KList);
+                    var = MetaK.getFreshVar(KSorts.KLIST);
                     Term symTerm = KApp.of(KLabelConstant.of(symCtor), var);
 
                     // define isSort for symbolic sort constructor symSort

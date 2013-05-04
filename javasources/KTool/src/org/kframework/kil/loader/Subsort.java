@@ -3,7 +3,7 @@ package org.kframework.kil.loader;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.kframework.compile.utils.MetaK;
+import org.kframework.kil.KSorts;
 
 public class Subsort {
 	private String bigSort, smallSort;
@@ -44,8 +44,8 @@ public class Subsort {
 
 	public static Set<Subsort> getDefaultSubsorts() {
 		Set<Subsort> sbs = new HashSet<Subsort>();
-		sbs.add(new Subsort(MetaK.Constants.KList, "K"));
-		sbs.add(new Subsort(MetaK.Constants.KList, "KResult"));
+		sbs.add(new Subsort(KSorts.KLIST, "K"));
+		sbs.add(new Subsort(KSorts.KLIST, "KResult"));
 		sbs.add(new Subsort("K", "KResult"));
 		sbs.add(new Subsort("Map", "MapItem"));
 		sbs.add(new Subsort("Set", "SetItem"));

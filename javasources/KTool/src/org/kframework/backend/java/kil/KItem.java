@@ -19,48 +19,48 @@ import java.util.List;
  * Time: 12:18 PM
  * To change this template use File | Settings | File Templates.
  */
-public class K extends Term implements Sorted {
+public class KItem extends Term implements Sorted {
 
     private final KLabel kLabel;
     private final KList kList;
     private final String sort;
 
-    public K(KLabel kLabel, KList kList) {
-        super("K");
+    public KItem(KLabel kLabel, KList kList) {
+        super(Kind.KITEM);
 
         this.kLabel = kLabel;
         this.kList = kList;
 
         if (kLabel instanceof KLabelConstant) {
-            List<Production> productions = Utils.productionsOf(((KLabelConstant) kLabel).getLabel());
+            List<Production> productions = ((KLabelConstant) kLabel).productionsOf();
             if (productions.size() == 1) {
                 Production production = productions.get(0);
                 if (!kList.hasFrame() && kList.size() == production.getArity()) {
                     for (int i = 0; i < kList.size(); ++i) {
-                        String sort;
+                        String childSort;
                         if (kList.get(i) instanceof Sorted) {
-                            sort = ((Sorted) kList.get(i)).getSort();
+                            childSort = ((Sorted) kList.get(i)).getSort();
                         } else {
-                            sort = "K";
+                            childSort = kind.toString();
                         }
 
-                        if (DefinitionHelper.isSubsortedEq(production.getChildSort(i), sort)) {
-                            sort = "K";
-                            break;
+                        if (!DefinitionHelper.isSubsortedEq(production.getChildSort(i), childSort)) {
+                            sort = kind.toString();
+                            return;
                         }
                     }
                     sort = production.getSort();
                 } else {
-                    sort = "K";
+                    sort = kind.toString();;
                 }
             } else {
-                sort = "K";
+                sort = kind.toString();
             }
         } else {
             if (kLabel instanceof KLabelInjection && ((KLabelInjection) kLabel).getTerm() instanceof BuiltinConstant) {
                 sort = ((BuiltinConstant) ((KLabelInjection) kLabel).getTerm()).getSort();
             } else {
-                sort = "K";
+                sort = kind.toString();
             }
         }
     }
@@ -92,12 +92,12 @@ public class K extends Term implements Sorted {
             return true;
         }
 
-        if (!(object instanceof K)) {
+        if (!(object instanceof KItem)) {
             return false;
         }
 
-        K k = (K) object;
-        return kLabel.equals(k.kLabel) && kList.equals(k.kList) && sort.equals(k.sort);
+        KItem kItem = (KItem) object;
+        return kLabel.equals(kItem.kLabel) && kList.equals(kItem.kList);
     }
 
     @Override
@@ -105,7 +105,6 @@ public class K extends Term implements Sorted {
         int hash = 1;
         hash = hash * Utils.HASH_PRIME + kLabel.hashCode();
         hash = hash * Utils.HASH_PRIME + kList.hashCode();
-        hash = hash * Utils.HASH_PRIME + sort.hashCode();
         return hash;
     }
 
@@ -120,7 +119,7 @@ public class K extends Term implements Sorted {
      */
     @Override
     public ASTNode shallowCopy() {
-        return new K(this.kLabel, this.kList);
+        return new KItem(this.kLabel, this.kList);
     }
 
     @Override

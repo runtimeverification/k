@@ -9,7 +9,7 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  */
 public class ListTerminator extends Empty {
 
-	private String separator;
+	private final String separator;
 
 	public ListTerminator(String sort, String separator) {
 		super(sort);
@@ -17,28 +17,25 @@ public class ListTerminator extends Empty {
 	}
 
 	public ListTerminator(String separator) {
-		super("K");
+		super(KSorts.K);
 		this.separator = separator;
 	}
 
-	public ListTerminator(ListTerminator terminator) {
+	private ListTerminator(ListTerminator terminator) {
 		super(terminator);
 		this.separator = terminator.separator;
 	}
 
 	public String toString() {
-		if (sort.equals("K"))
+		if (sort.equals(KSorts.K)) {
 			return ".List{\"" + separator + "\"} ";
-		else
+        } else {
 			return super.toString();
+        }
 	}
 
 	public String getSeparator() {
 		return separator;
-	}
-
-	public void setSeparator(String separator) {
-		this.separator = separator;
 	}
 
 	@Override

@@ -17,6 +17,7 @@ import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSequence;
+import org.kframework.kil.KSorts;
 import org.kframework.kil.MapItem;
 import org.kframework.kil.Module;
 import org.kframework.kil.Production;
@@ -58,15 +59,15 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 		// List<PriorityBlock> pbs = new ArrayList<PriorityBlock>();
 		// PriorityBlock pb = new PriorityBlock();
 		// pbs.add(pb);
-		// Syntax syn = new Syntax(new Sort("KLabel"), pbs);
+		// Syntax syn = new Syntax(new Sort(KSorts.KLABEL), pbs);
 		// node.getItems().add(syn);
 		// for (String separator : listSeparators) {
 		// List<ProductionItem> pis = new ArrayList<ProductionItem>();
 		// pis.add(new Terminal(MetaK.getListUnitLabel(separator)));
-		// pb.getProductions().add(new Production(new Sort("KLabel"), pis));
+		// pb.getProductions().add(new Production(new Sort(KSorts.KLABEL), pis));
 		// }
 		for (String sep : listSeparators) {
-			node.addConstant("KLabel", MetaK.getListUnitLabel(sep));
+			node.addConstant(KSorts.KLABEL, MetaK.getListUnitLabel(sep));
 		}
 		return node;
 	}
@@ -79,7 +80,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 		}
 		isComputation = true;
 		node = (Syntax) super.transform(node);
-		node.setSort(new Sort("KLabel"));
+		node.setSort(new Sort(KSorts.KLABEL));
 		return node;
 	}
 
@@ -103,7 +104,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 		node.setItems(pis);
 		attrs.set("arity", arity);
 		node.setAttributes(attrs);
-		node.setSort("KLabel");
+		node.setSort(KSorts.KLABEL);
 		return node;
 	}
 
@@ -239,7 +240,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 				Production listProd = DefinitionHelper.listConses.get(emp.getSort());
 				String separator = ((UserList) listProd.getItems().get(0)).getSeparator();
 				return new KApp(l, f, KLabelConstant.of(MetaK.getListUnitLabel(separator)), KList.EMPTY);
-				// Constant cst = new Constant(l, f, "KLabel", "'." + emp.getSort() + "");
+				// Constant cst = new Constant(l, f, KSorts.KLABEL, "'." + emp.getSort() + "");
 				// return new KApp(l, f, cst, new Empty(l, f, MetaK.Constants.KList));
 			}
 			return emp;
@@ -269,12 +270,12 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 
 		@Override
 		public ASTNode transform(Variable node) throws TransformerException {
-			if ("K".equals(node.getSort()))
+			if (node.getSort().equals(KSorts.KITEM) || node.getSort().equals(KSorts.K))
 				return node;
 			if (MetaK.isKSort(node.getSort()) || MetaK.isBuiltinSort(node.getSort()))
 				return KApp.of(new KInjectedLabel(node));
 			node = node.shallowCopy();
-			node.setSort("KItem");
+			node.setSort(KSorts.KITEM);
 			return node;
 		}
 	}

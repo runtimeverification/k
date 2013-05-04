@@ -1,6 +1,7 @@
 package org.kframework.kil.loader;
 
 import org.kframework.kil.Attribute;
+import org.kframework.kil.KSorts;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.visitors.BasicVisitor;
@@ -25,7 +26,10 @@ public class AddConsesVisitor extends BasicVisitor {
 				}
 			} else
 				p.putAttribute("cons", cons2);
-		} else if (p.getItems().size() == 1 && p.getItems().get(0).getType() == ProductionType.TERMINAL && (p.getSort().startsWith("#") || p.getSort().equals("KLabel"))) {
+		} else if (p.getItems().size() == 1
+                    && p.getItems().get(0).getType() == ProductionType.TERMINAL
+                    && (p.getSort().startsWith("#")
+                || p.getSort().equals(KSorts.KLABEL))) {
 			// don't add any cons, if it is a constant
 			// a constant is a single terminal for a builtin sort
 			String cons = p.getAttribute("cons");

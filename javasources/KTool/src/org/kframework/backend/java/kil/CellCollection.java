@@ -22,7 +22,7 @@ public class CellCollection extends Collection {
     private final Map<String, Cell> cells;
 
     public CellCollection(Map<String, Cell> cells, Variable frame) {
-        super(frame, "CellCollection");
+        super(frame, Kind.CELL_COLLECTION);
         this.cells = new HashMap<String, Cell>(cells);
         System.err.println(this);
         System.err.println("===");
@@ -30,17 +30,17 @@ public class CellCollection extends Collection {
     }
 
     public CellCollection(Variable frame) {
-        super(frame, "CellCollection");
+        super(frame, Kind.CELL_COLLECTION);
         cells = new HashMap<String, Cell>();
     }
 
     public CellCollection(Map<String, Cell> cells) {
-        super(null, "CellCollection");
+        super(null, Kind.CELL_COLLECTION);
         this.cells = new HashMap<String, Cell>(cells);
     }
 
     public CellCollection() {
-        super(null, "CellCollection");
+        super(null, Kind.CELL_COLLECTION);
         cells = new HashMap<String, Cell>();
     }
 

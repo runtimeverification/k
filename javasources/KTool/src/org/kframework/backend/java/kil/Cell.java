@@ -16,16 +16,19 @@ import org.kframework.kil.ASTNode;
 public class Cell<T extends Term> extends Term {
 
     private final String label;
-    private final String contentKind;
+    private final Kind contentKind;
     private final T content;
 
     public Cell(String label, T content) {
-        super("Cell");
+        super(Kind.CELL);
 
-        assert content.getKind().equals("K")
-                || content.getKind().equals("KSequence")
-                || content.getKind().equals("Map")
-                || content.getKind().equals("CellCollection");
+        assert content.getKind() == Kind.CELL_COLLECTION
+                || content.getKind() == Kind.K
+                || content.getKind() == Kind.KITEM
+                || content.getKind() == Kind.KLABEL
+                || content.getKind() == Kind.KLIST
+                || content.getKind() == Kind.MAP:
+                "unexpected cell kind " + content.getKind();
         this.label = label;
         this.contentKind = content.getKind();
         this.content = content;
@@ -35,7 +38,7 @@ public class Cell<T extends Term> extends Term {
         return label;
     }
 
-    public String getContentKind() {
+    public Kind getContentKind() {
         return contentKind;
     }
 

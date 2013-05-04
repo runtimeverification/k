@@ -1,6 +1,5 @@
 package org.kframework.kil;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Visitor;
@@ -16,11 +15,11 @@ public class KList extends Collection {
     public static final KList EMPTY = new KList(Collections.<Term>emptyList());
 
     public KList() {
-		super(MetaK.Constants.KList);
+		super(KSorts.KLIST);
 	}
 	
 	public KList(String location, String filename) {
-		super(location, filename, MetaK.Constants.KList);
+		super(location, filename, KSorts.KLIST);
 	}
 
 	public KList(Element element) {
@@ -32,7 +31,7 @@ public class KList extends Collection {
 	}
 
 	public KList(List<Term> col) {
-		super(MetaK.Constants.KList, col);
+		super(KSorts.KLIST, col);
 	}
 
 	@Override

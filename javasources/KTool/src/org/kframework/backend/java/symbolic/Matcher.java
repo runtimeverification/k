@@ -7,7 +7,7 @@ import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Hole;
 import org.kframework.backend.java.kil.KLabelFreezer;
 import org.kframework.backend.java.kil.KLabelInjection;
-import org.kframework.backend.java.kil.K;
+import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Map;
@@ -29,7 +29,7 @@ public interface Matcher {
     public void match(Cell cell, Term pattern);
     public void match(CellCollection cellCollection, Term pattern);
     public void match(Hole hole, Term pattern);
-    public void match(K k, Term pattern);
+    public void match(KItem kItem, Term pattern);
     public void match(KLabelConstant kLabelConstant, Term pattern);
     public void match(KLabelFreezer kLabelFreezer, Term pattern);
     public void match(KLabelInjection kLabelInjection, Term pattern);

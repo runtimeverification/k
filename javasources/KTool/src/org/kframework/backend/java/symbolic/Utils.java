@@ -25,46 +25,4 @@ public class Utils {
 
     public static final int HASH_PRIME = 47;
 
-    public static String sortToKind(String sort) {
-        if (sort.equals("BuiltinConstant")
-                || sort.equals("Cell")
-                || sort.equals("CellCollection")
-                || sort.equals("K")
-                || sort.equals("KLabel")
-                || sort.equals("KList")
-                || sort.equals("KSequence")
-                || sort.equals("Map")) {
-            return sort;
-        } else {
-            return "K";
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    public static List<Production> productionsOf(KLabel kLabel) {
-        if (!(kLabel instanceof KLabelConstant)) {
-            return (List<Production>) Collections.EMPTY_LIST;
-        }
-        KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
-
-        return Utils.productionsOf(kLabelConstant.getLabel());
-    }
-
-    @SuppressWarnings("unchecked")
-    public static List<Production> productionsOf(String label) {
-        Set<String> conses = DefinitionHelper.labels.get(label);
-        if (conses == null) {
-            return (List<Production>) Collections.EMPTY_LIST;
-        }
-
-        ArrayList<Production> productions = new ArrayList<Production>();
-        for (String cons : conses) {
-            assert DefinitionHelper.conses.containsKey(cons);
-
-            productions.add(DefinitionHelper.conses.get(cons));
-        }
-
-        return productions;
-    }
-
 }

@@ -8,7 +8,7 @@ import org.kframework.backend.java.kil.Collection;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Hole;
 import org.kframework.backend.java.kil.KLabelInjection;
-import org.kframework.backend.java.kil.K;
+import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KCollection;
 import org.kframework.backend.java.kil.KCollectionFragment;
 import org.kframework.backend.java.kil.KLabel;
@@ -37,7 +37,7 @@ public interface Visitor {
     public void visit(KLabelConstant kLabelConstant);
     public void visit(Hole hole);
     public void visit(KLabelInjection kLabelInjection);
-    public void visit(K k);
+    public void visit(KItem kItem);
     public void visit(KCollection kCollection);
     public void visit(KCollectionFragment kCollectionFragment);
     public void visit(KLabel kLabel);

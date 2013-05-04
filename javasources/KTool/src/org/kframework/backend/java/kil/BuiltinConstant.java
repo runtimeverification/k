@@ -20,7 +20,7 @@ public class BuiltinConstant extends Term {
     private final String sort;
 
     public BuiltinConstant(String value, String sort) {
-        super("BuiltinConstant");
+        super(Kind.BUILTIN);
 
         this.value = value;
         this.sort = sort;

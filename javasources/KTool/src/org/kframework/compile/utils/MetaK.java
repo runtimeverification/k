@@ -11,7 +11,6 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.Visitable;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -55,19 +54,7 @@ public class MetaK {
 		public static final String hole = "[]";
 		public static final String freshCons = "Bool1FreshSyn";
 		public static final String plusIntCons = "Int1PlusSyn";
-		public static final String K = "K";
-		public static final String KItem = "KItem";
-		public static final String KList = "KList";
-		public static final String Bag = "Bag";
-		public static final String Set = "Set";
-		public static final String List = "List";
-		public static final String Map = "Map";
-		public static final String BagItem = "BagItem";
-		public static final String SetItem = "SetItem";
-		public static final String ListItem = "ListItem";
-		public static final String MapItem = "MapItem";
-
-		public static final String generatedTopCellLabel = "generatedTop";
+        public static final String generatedTopCellLabel = "generatedTop";
 		public static final String pathCondition = "path-condition";
 		public static final String generatedCfgAbsTopCellLabel =
 				"___CONTEXT_ABSTRACTION_TOP_CELL___";
@@ -194,7 +181,7 @@ public class MetaK {
 		try {
 			KSort.valueOf(sort);
 		} catch (IllegalArgumentException e) {
-			return sort.equals(MetaK.Constants.KList);
+			return sort.equals(KSorts.KLIST);
 		}
 		return true;
 	}
@@ -330,7 +317,7 @@ public class MetaK {
 		}
 		if (prod.isConstant()) {
             String terminal = ((Terminal) prod.getItems().get(0)).getTerminal();
-            if (prod.getSort().equals("KLabel")) {
+            if (prod.getSort().equals(KSorts.KLABEL)) {
                 return KLabelConstant.of(terminal);
             } else if (prod.getSort().equals("#Bool")) {
                 return BoolBuiltin.of(terminal);
@@ -476,7 +463,8 @@ public class MetaK {
 		} catch (ArithmeticException e) {
 			return result.get(0);
 		}
-		return new Hole("K");
+		//return new Hole("K");
+        return Hole.KITEM_HOLE;
 	}
 
 	public static boolean isPredefinedPredicate(String name) {

@@ -6,10 +6,10 @@ import org.kframework.backend.java.kil.BuiltinConstant;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.Collection;
+import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Hole;
 import org.kframework.backend.java.kil.KLabelInjection;
-import org.kframework.backend.java.kil.K;
 import org.kframework.backend.java.kil.KCollection;
 import org.kframework.backend.java.kil.KLabel;
 import org.kframework.backend.java.kil.KList;
@@ -105,13 +105,13 @@ public class CopyOnWriteTransformer implements Transformer {
     }
 
     @Override
-    public ASTNode transform(K k) {
-        KLabel kLabel = (KLabel) k.getKLabel().accept(this);
-        KList kList = (KList) k.getKList().accept(this);
-        if (kLabel != k.getKLabel() || kList != k.getKList()) {
-            k = new K(kLabel, kList);
+    public ASTNode transform(KItem kItem) {
+        KLabel kLabel = (KLabel) kItem.getKLabel().accept(this);
+        KList kList = (KList) kItem.getKList().accept(this);
+        if (kLabel != kItem.getKLabel() || kList != kItem.getKList()) {
+            kItem = new KItem(kLabel, kList);
         }
-        return k;
+        return kItem;
     }
 
     @Override

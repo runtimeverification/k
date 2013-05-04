@@ -2,6 +2,7 @@ package org.kframework.compile.checks;
 
 import java.util.HashMap;
 
+import org.kframework.kil.KSorts;
 import org.kframework.kil.Production;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Syntax;
@@ -24,8 +25,8 @@ public class CheckSortTopUniqueness extends BasicVisitor {
 	public void visit(Syntax node) {
 		String msg = "Multiple top sorts found for " + node.getSort() + ": ";
 		int count = 0;
-		if (DefinitionHelper.isSubsorted("KList", node.getSort().getName())) {
-			msg += "KList, ";
+		if (DefinitionHelper.isSubsorted(KSorts.KLIST, node.getSort().getName())) {
+			msg += KSorts.KLIST + ", ";
 			count++;
 		}
 		if (DefinitionHelper.isSubsorted("List", node.getSort().getName())) {

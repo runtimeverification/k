@@ -25,22 +25,22 @@ public class Map extends Collection {
     private final java.util.Map<Term, Term> entries;
 
     public Map(java.util.Map<Term, Term> entries, Variable frame) {
-        super(frame, "Map");
+        super(frame, Kind.MAP);
         this.entries = new HashMap<Term, Term>(entries);
     }
 
     public Map(Variable frame) {
-        super(frame, "Map");
+        super(frame, Kind.MAP);
         entries = new HashMap<Term, Term>();
     }
 
     public Map(java.util.Map<Term, Term> entries) {
-        super(null, "Map");
+        super(null, Kind.MAP);
         this.entries = new HashMap<Term, Term>(entries);
     }
 
     public Map() {
-        super(null, "Map");
+        super(null, Kind.MAP);
         entries = new HashMap<Term, Term>();
     }
 
@@ -59,7 +59,7 @@ public class Map extends Collection {
 
     @Override
     public String toString() {
-        return toString(" ", " |-> ", ".Map");
+        return toString(" ", " |-> ", "." + Kind.MAP);
     }
 
     public String toString(String operator, String mapsTo, String identity) {

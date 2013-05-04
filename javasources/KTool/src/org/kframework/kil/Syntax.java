@@ -95,7 +95,7 @@ public class Syntax extends ModuleItem {
         for (PriorityBlock pb : priorityBlocks) {
             for (Production prod : pb.getProductions()) {
                 if (MetaK.isComputationSort(prod.getSort()) ||
-                        prod.getSort().equals("KLabel") && prod.isConstant())
+                        prod.getSort().equals(KSorts.KLABEL) && prod.isConstant())
                     lbls.add(prod.getKLabel());
             }
         }

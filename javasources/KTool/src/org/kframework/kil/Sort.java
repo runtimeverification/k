@@ -20,7 +20,7 @@ public class Sort extends ProductionItem {
 	static {
 		baseSorts.add("K");
 		baseSorts.add("KResult");
-		baseSorts.add(MetaK.Constants.KList);
+		baseSorts.add(KSorts.KLIST);
 		baseSorts.add("Map");
 		baseSorts.add("MapItem");
 		baseSorts.add("List");
@@ -29,7 +29,7 @@ public class Sort extends ProductionItem {
 		baseSorts.add("SetItem");
 		baseSorts.add("Bag");
 		baseSorts.add("BagItem");
-		baseSorts.add("KLabel");
+		baseSorts.add(KSorts.KLABEL);
 		baseSorts.add("CellLabel");
 	}
 

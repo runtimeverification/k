@@ -1,5 +1,6 @@
 package org.kframework.krun;
 
+import org.kframework.kil.KSorts;
 import org.w3c.dom.Element;
 
 import java.util.List;
@@ -104,12 +105,12 @@ public class Utils {
 				}
 				Element child = list.get(count);
 				//do not insert any parenthesis in this case
-				if (child.getAttribute("op").equals("#_") && child.getAttribute("sort").equals("KLabel"))  {
+				if (child.getAttribute("op").equals("#_")
+                        && child.getAttribute("sort").equals(KSorts.KLABEL)) {
 					sb = sb.insert(index + 1, " ");
 					sb = sb.insert(index, " ");
 					index += 2;
-				}
-				else {
+				} else {
 					sb = sb.insert(index + 1, ") ");
 					sb = sb.insert(index, " (");
 					index += 3;

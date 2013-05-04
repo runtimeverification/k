@@ -18,10 +18,10 @@ import org.kframework.kil.ASTNode;
 public class KList extends KCollection {
 
     private static final String OPERATOR_NAME = ",, ";
-    private static final String IDENTITY_NAME = ".KList";
+    private static final String IDENTITY_NAME = "." + Kind.KLIST;
 
     public KList(ImmutableList<Term> items, Variable frame) {
-        super(items, frame, "KList");
+        super(items, frame, Kind.KLIST);
     }
 
     /*
@@ -31,11 +31,11 @@ public class KList extends KCollection {
     */
 
     public KList(Variable frame) {
-        super(frame, "KList");
+        super(frame, Kind.KLIST);
     }
 
     public KList(ImmutableList<Term> items) {
-        super(items, null, "KList");
+        super(items, null, Kind.KLIST);
     }
 
     /*
@@ -45,7 +45,7 @@ public class KList extends KCollection {
     */
 
     public KList() {
-        super(null, "KList");
+        super(null, Kind.KLIST);
     }
 
     @Override

@@ -1,5 +1,11 @@
 package org.kframework.compile.utils;
 
+import org.kframework.kil.BoolBuiltin;
+import org.kframework.kil.FloatBuiltin;
+import org.kframework.kil.IntBuiltin;
+import org.kframework.kil.KSorts;
+import org.kframework.kil.StringBuiltin;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -9,54 +15,53 @@ public class MaudeHelper {
 
 	public static List<String> separators = new ArrayList<String>();
 	public static Set<String> declaredSorts = new HashSet<String>();
-	public static Set<String> basicSorts = getBasicSorts();
 	public static Set<String> kLabels = new HashSet<String>();
-	public static Set<String> constantSorts = getConstantSorts();
-	
-	
-	private static Set<String> getBasicSorts() {
-		Set<String> basic = new HashSet<String>();
-		
-		basic.add("Bag");
-		basic.add("K");
-		basic.add("List");
-		basic.add("Set");
-		basic.add("Map");
-		basic.add("BagItem");
-		basic.add("CellLabel");
-//		basic.add("KItem");
-		basic.add("ListItem");
-		basic.add("SetItem");
-		basic.add("MapItem");
-		basic.add("KLabel");
-		basic.add(MetaK.Constants.KList);
-		basic.add("KResult");
-		basic.add("#Id");
-		basic.add("#String");
-		basic.add("#Float");
-		basic.add("#Rat");
-		basic.add("#Int");
-		basic.add("#Bool");
-		basic.add("#ModelCheckerState");
-		basic.add("#ModelCheckResult");
-		basic.add("#LTLFormula");
-		basic.add("#Prop");
 
-		return basic;
+    public static Set<String> basicSorts = new HashSet<String>();
+	static {
+        basicSorts.add(KSorts.K);
+        basicSorts.add(KSorts.KITEM);
+        basicSorts.add(KSorts.KLABEL);
+        basicSorts.add(KSorts.KLIST);
+        basicSorts.add(KSorts.KRESULT);
+
+        basicSorts.add(KSorts.CELL_LABEL);
+
+        basicSorts.add(BoolBuiltin.SORT_NAME);
+        basicSorts.add(IntBuiltin.SORT_NAME);
+        basicSorts.add(FloatBuiltin.SORT_NAME);
+        basicSorts.add(StringBuiltin.SORT_NAME);
+
+        basicSorts.add(KSorts.BAG);
+        basicSorts.add(KSorts.BAG_ITEM);
+        basicSorts.add(KSorts.LIST);
+        basicSorts.add(KSorts.LIST_ITEM);
+        basicSorts.add(KSorts.MAP);
+        basicSorts.add(KSorts.MAP_ITEM);
+        basicSorts.add(KSorts.SET);
+        basicSorts.add(KSorts.SET_ITEM);
+
+        basicSorts.add("#Id");
+        basicSorts.add("#Rat");
+        basicSorts.add("#ModelCheckerState");
+        basicSorts.add("#ModelCheckResult");
+        basicSorts.add("#LTLFormula");
+        basicSorts.add("#Prop");
 	}
 
-	private static Set<String> getConstantSorts() {
-		Set<String> basic = new HashSet<String>();
-		
-		basic.add("#Id");
-		basic.add("#String");
-		basic.add("#Float");
-		basic.add("#Rat");
-		basic.add("#Int");
-		basic.add("#Bool");
-		basic.add("KLabel");
-		basic.add("CellLabel");
-		
-		return basic;
+    public static Set<String> constantSorts = new HashSet<String>();
+	static {
+        constantSorts.add(BoolBuiltin.SORT_NAME);
+        constantSorts.add(IntBuiltin.SORT_NAME);
+        constantSorts.add(FloatBuiltin.SORT_NAME);
+        constantSorts.add(StringBuiltin.SORT_NAME);
+
+        constantSorts.add(KSorts.KLABEL);
+
+        constantSorts.add(KSorts.CELL_LABEL);
+
+        /* andreis: not sure if this two are needed */
+        constantSorts.add("#Id");
+        constantSorts.add("#Rat");
 	}
 }

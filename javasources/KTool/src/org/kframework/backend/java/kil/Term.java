@@ -23,9 +23,9 @@ import java.util.Map;
  */
 public abstract class Term extends ASTNode implements Matchable, Transformable, Visitable {
 
-    private final String kind;
+    protected final Kind kind;
 
-    protected Term(String kind) {
+    protected Term(Kind kind) {
         this.kind = kind;
     }
 
@@ -33,7 +33,7 @@ public abstract class Term extends ASTNode implements Matchable, Transformable, 
      * @return the string representation of the kind of this term
      * (BuiltinConstant, Cell, CellCollection, K, KLabel, KList, KSequence, Map, Variable).
      */
-    public String getKind() {
+    public Kind getKind() {
         return kind;
     }
 

@@ -5,10 +5,10 @@ import org.kframework.backend.java.kil.BuiltinConstant;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.Collection;
+import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Hole;
 import org.kframework.backend.java.kil.KLabelInjection;
-import org.kframework.backend.java.kil.K;
 import org.kframework.backend.java.kil.KCollection;
 import org.kframework.backend.java.kil.KCollectionFragment;
 import org.kframework.backend.java.kil.KLabel;
@@ -79,10 +79,10 @@ public class BottomUpVisitor implements Visitor {
     }
 
     @Override
-    public void visit(K k) {
-        k.getKLabel().accept(this);
-        k.getKList().accept(this);
-        visit((Term) k);
+    public void visit(KItem kItem) {
+        kItem.getKLabel().accept(this);
+        kItem.getKList().accept(this);
+        visit((Term) kItem);
     }
 
     @Override

@@ -2,7 +2,6 @@ package org.kframework.krun.api;
 
 import org.apache.commons.collections15.Transformer;
 import org.kframework.backend.maude.MaudeFilter;
-import org.kframework.compile.utils.MetaK;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.DefinitionHelper;
@@ -264,7 +263,7 @@ public class MaudeKRun implements KRun {
 					l.add(parseXML(elem));
 				}
 				return new org.kframework.kil.Map(l);
-			} else if ((op.equals("#_") || op.equals("List2KLabel_") || op.equals("Map2KLabel_") || op.equals("Set2KLabel_") || op.equals("Bag2KLabel_") || op.equals("KList2KLabel_") || op.equals("KLabel2KLabel_")) && (sort.equals("KLabel") || sort.equals("[KLabel]"))) {
+			} else if ((op.equals("#_") || op.equals("List2KLabel_") || op.equals("Map2KLabel_") || op.equals("Set2KLabel_") || op.equals("Bag2KLabel_") || op.equals("KList2KLabel_") || op.equals("KLabel2KLabel_")) && (sort.equals(KSorts.KLABEL) || sort.equals("[KLabel]"))) {
 				assertXMLTerm(list.size() == 1);
 				return new KInjectedLabel(parseXML(list.get(0)));
 			} else if (sort.equals("#NzInt") && op.equals("--Int_")) {
@@ -304,10 +303,10 @@ public class MaudeKRun implements KRun {
                     // sort.equals("K")
                     return KSequence.EMPTY;
                 }
-			} else if (op.equals(".KList") && sort.equals(MetaK.Constants.KList)) {
+			} else if (op.equals(".KList") && sort.equals(KSorts.KLIST)) {
 				assertXMLTerm(list.size() == 0);
 				return KList.EMPTY;
-			} else if (op.equals("_`(_`)") && (sort.equals("KItem") || sort.equals("[KList]"))) {
+			} else if (op.equals("_`(_`)") && (sort.equals(KSorts.KITEM) || sort.equals("[KList]"))) {
 				assertXMLTerm(list.size() == 2);
 				Term child = parseXML(list.get(1));
 				if (!(child instanceof KList)) {
@@ -316,15 +315,16 @@ public class MaudeKRun implements KRun {
 					child = new KList(terms);
 				}
 				return new KApp(parseXML(list.get(0)),child);
-			} else if (sort.equals("KLabel") && list.size() == 0) {
+			} else if (sort.equals(KSorts.KLABEL) && list.size() == 0) {
 				return KLabelConstant.of(StringUtil.unescapeMaude(op));
-			} else if (sort.equals("KLabel") && op.equals("#freezer_")) {
+			} else if (sort.equals(KSorts.KLABEL) && op.equals("#freezer_")) {
 				assertXMLTerm(list.size() == 1);
 				return new FreezerLabel(parseXML(list.get(0)));	
 			} else if (op.equals("HOLE")) {
-				assertXMLTerm(list.size() == 0);
-				return new Hole(sort);
-			} else {
+				assertXMLTerm(list.size() == 0 && sort.equals(KSorts.KITEM));
+				//return new Hole(sort);
+			    return Hole.KITEM_HOLE;
+            } else {
 				Set<String> conses = DefinitionHelper.labels.get(StringUtil.unescapeMaude(op));
 				Set<String> validConses = new HashSet<String>();
 				List<Term> possibleTerms = new ArrayList<Term>();
@@ -577,15 +577,15 @@ public class MaudeKRun implements KRun {
 		assertXML(child.size() == 1);
 		String sort = child.get(0).getAttribute("sort");
 		String op = child.get(0).getAttribute("op");
-		assertXML(op.equals("_`(_`)") && sort.equals("KItem"));
+		assertXML(op.equals("_`(_`)") && sort.equals(KSorts.KITEM));
 		child = XmlUtil.getChildElements(child.get(0));
 		assertXML(child.size() == 2);
 		sort = child.get(0).getAttribute("sort");
 		op = child.get(0).getAttribute("op");
-		assertXML(op.equals("#_") && sort.equals("KLabel"));
+		assertXML(op.equals("#_") && sort.equals(KSorts.KLABEL));
 		sort = child.get(1).getAttribute("sort");
 		op = child.get(1).getAttribute("op");
-		assertXML(op.equals(".KList") && sort.equals("KList"));
+		assertXML(op.equals(".KList") && sort.equals(KSorts.KLIST));
 		child = XmlUtil.getChildElements(child.get(0));
 		assertXML(child.size() == 1);
 		elem = child.get(0);

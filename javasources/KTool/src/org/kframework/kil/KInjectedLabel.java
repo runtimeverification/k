@@ -13,7 +13,7 @@ public class KInjectedLabel extends Term {
 	protected Term term;
 
 	public KInjectedLabel(String location, String filename) {
-		super(location, filename, "KLabel");
+		super(location, filename, KSorts.KLABEL);
 	}
 
 	public KInjectedLabel(KInjectedLabel l) {
@@ -22,7 +22,7 @@ public class KInjectedLabel extends Term {
 	}
 
 	public KInjectedLabel(Term t) {
-		super("KLabel");
+		super(KSorts.KLABEL);
 		term = t;
 	}
 

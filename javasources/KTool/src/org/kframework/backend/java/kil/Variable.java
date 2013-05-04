@@ -21,7 +21,7 @@ public class Variable extends Term implements Sorted {
     protected final String sort;
 
     public Variable(String name, String sort) {
-        super(Utils.sortToKind(sort));
+        super(Kind.of(sort));
 
         this.name = name;
         this.sort = sort;

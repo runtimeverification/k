@@ -97,7 +97,7 @@ public class MaudeFilter extends BackendFilter {
 						msg += "            Use attribute 'onlyLabel' paired with 'klabel(...)' to limit the use to programs.";
 						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, p.getFilename(), p.getLocation()));
 					}
-					if (!MaudeHelper.constantSorts.contains(syn.getSort()) || !syn.getSort().toString().equals("KLabel") || !syn.getSort().toString().equals("CellLabel")) {
+					if (!MaudeHelper.constantSorts.contains(syn.getSort()) || !syn.getSort().toString().equals(KSorts.KLABEL) || !syn.getSort().toString().equals("CellLabel")) {
 						result.append("op ");
 						result.append(StringUtil.escapeMaude(operation));
 						result.append(" : -> ");
@@ -295,12 +295,12 @@ public class MaudeFilter extends BackendFilter {
 
 				switch(((Cell) cCell).getMultiplicity()) {
 					case ONE:
-						sorts += MetaK.Constants.BagItem;
+						sorts += KSorts.BAG_ITEM;
 						break;
 					default:
-						sorts += MetaK.Constants.Bag;
+						sorts += KSorts.BAG;
 				}
-				fragSorts += MetaK.Constants.Bag + " ";
+				fragSorts += KSorts.BAG + " ";
 				sorts += " ";
 			}
 			declareCell(id, placeHolders, sorts, format);
@@ -671,7 +671,7 @@ public class MaudeFilter extends BackendFilter {
 	@Override
 	public void visit(Bag bag) {
 		if (bag.getContents().isEmpty()) {
-			new Empty(MetaK.Constants.Bag).accept(this);
+			new Empty(KSorts.BAG).accept(this);
 			return;
 		}
 		for (Term item: bag.getContents()) {
