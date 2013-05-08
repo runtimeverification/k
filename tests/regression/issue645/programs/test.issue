@@ -1,0 +1,72 @@
+'Program(
+  'Decls(
+    'ListWrap(
+      # "a"(.KList),,
+      # "b"(.KList),,
+      # "c"(.KList),,
+      # "max"(.KList)
+    )
+  ),,
+  'ListWrap(
+    'Assign(
+      # "a"(.KList),,
+      'Lit(
+        # "3"(.KList)
+      )
+    ),,
+    'Assign(
+      # "b"(.KList),,
+      'Lit(
+        # "7"(.KList)
+      )
+    ),,
+    'Assign(
+      # "c"(.KList),,
+      'Lit(
+        # "5"(.KList)
+      )
+    ),,
+    'If(
+      'LtEq(
+        'Lookup(
+          # "a"(.KList)
+        ),,
+        'Lookup(
+          # "b"(.KList)
+        )
+      ),,
+      'Assign(
+        # "max"(.KList),,
+        'Lookup(
+          # "b"(.KList)
+        )
+      ),,
+      'Assign(
+        # "max"(.KList),,
+        'Lookup(
+          # "a"(.KList)
+        )
+      )
+    ),,
+    'If(
+      'LtEq(
+        'Lookup(
+          # "max"(.KList)
+        ),,
+        'Lookup(
+          # "c"(.KList)
+        )
+      ),,
+      'Block(
+        'ListWrap(
+          'Assign(
+            # "max"(.KList),,
+            'Lookup(
+              # "c"(.KList)
+            )
+          )
+        )
+      )
+    )
+  )
+)
