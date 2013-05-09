@@ -86,6 +86,57 @@ public class SortCells extends CopyOnWriteTransformer {
 	}
 
 	@Override
+	public ASTNode transform(TermCons node) throws TransformerException {
+		ASTNode astNode = super.transform(node);
+		if (astNode != node) {
+			node = (TermCons) astNode;
+		}
+		Production production = node.getProduction();
+		Map<Integer, String> cellfragments = new HashMap<Integer, String>();
+		int i = 0;
+		for (ProductionItem pitem : production.getItems()) {
+			if (pitem instanceof Sort) {
+				final Sort sort = (Sort) pitem;
+				final String realName = sort.getRealName();
+				final Integer key = new Integer(i);
+				String oldsort = cellfragments.get(key);
+				if (MetaK.isCellSort(realName)) {
+					if (oldsort != null && !oldsort.equals(realName)) {
+						//exception
+					}
+					cellfragments.put(key, realName);
+				} else if (oldsort != null) {
+					// exception
+				}
+				i++;
+			}
+		}
+		if (cellfragments.isEmpty()) return node;
+		TermCons outNode = node.shallowCopy();
+		final ArrayList<Term> outList = new ArrayList<Term>();
+		outNode.setContents(outList);
+		i = 0;
+		for (Term t : node.getContents()) {
+			Term out = t;
+			String sort = cellfragments.get(new Integer(i));
+			if (sort != null) {
+				if (!KSort.valueOf(t.getSort()).mainSort().equals(KSort.Bag)){
+					//exception --- should be a Bag
+				}
+				Cell fragment = new Cell();
+				fragment.setLabel(MetaK.getCellSort(sort));
+				System.err.println(fragment.getLabel());
+				fragment.setContents(t);
+				fragment = (Cell) transformTop(fragment, true);
+				out = fragment;
+			}
+			outList.add(out);
+			i++;
+		}
+		return outNode;
+	}
+
+	@Override
 	public ASTNode transform(KApp node) throws TransformerException {
 		ASTNode astNode = super.transform(node);
 		if (astNode != node) {

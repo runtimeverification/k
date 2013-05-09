@@ -24,6 +24,7 @@ public class MetaK {
 
 	private static final String cellSort = "CellSort";
 	private static final String cellFragment = "CellFragment";
+	private static final String fragment = "-fragment";
 
 	public static Term incrementCondition(Term condition, Term kresultCnd) {
 		if (condition == null) {
@@ -38,6 +39,18 @@ public class MetaK {
 	}
 
 	public static String getCellSort(String sort) {
+		sort = getCellSort2(sort);
+		String cellName = sort;
+		if (sort.endsWith(fragment)) {
+			cellName = sort.substring(0, sort.length() - fragment.length());
+		}
+		if (DefinitionHelper.cells.containsKey(cellName)) {
+			return sort;
+		}
+		return sort.substring(0,1).toUpperCase() + sort.substring(1);
+	}
+
+	private static String getCellSort2(String sort) {
 		sort = sort.substring(0,1).toLowerCase() + sort.substring(1);
 		if (sort.endsWith(cellSort)) {
 			return sort.substring(0, sort.length() - cellSort.length());
