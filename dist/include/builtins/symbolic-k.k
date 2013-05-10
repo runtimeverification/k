@@ -22,14 +22,14 @@ module SYMBOLIC-K
   rule exists S:Set . true => true
   rule exists S:Set . false => false
 
-
+  /* Translation to SMTLib */
   syntax String ::= "K2SMTLib" "(" K ")" [klabel(K2SMTLib), function]
   rule K2SMTLib(false) => "false"
   rule K2SMTLib(true)  => "true"
   rule K2SMTLib(I:#Int) => Int2String(I)
-  when I >=Int 0
+       when I >=Int 0
   rule K2SMTLib(I:#Int) => "(- " +String Int2String(absInt(I)) +String ")"
-  when I <Int 0
+       when I <Int 0
 
   rule
     K2SMTLib(forall S:Set . B:Bool)
@@ -169,13 +169,26 @@ module SYMBOLIC-K
   rule B1:Bool ==Symbolic B2:Bool => B1 ==Bool B2 [structural]
   rule S1:String ==Symbolic S2:String => S1 ==String S2 [structural]
 */
-
+  /* K equality - "hardcoded" */
   rule I1:K =K I2:Int => I1 ==Int I2 [anywhere]
   rule B1:K =K B2:Bool => B1 ==Bool B2 [anywhere]
   rule S1:K =K S2:String => S1 ==String S2 [anywhere]
   rule I1:Int =K I2:K => I1 ==Int I2 [anywhere]
   rule B1:Bool =K B2:K => B1 ==Bool B2 [anywhere]
   rule S1:String =K S2:K => S1 ==String S2 [anywhere]
+
+  /* These are needed to print symbolic values */
+  rule Int2String(I:Int +Int I':Int) => Int2String(I) +String " +Int " +String Int2String(I')
+       when isSymbolicInt(I) orBool isSymbolicInt(I') [anywhere]
+  rule Int2String(I:Int *Int I':Int) => Int2String(I) +String " *Int " +String Int2String(I')
+       when isSymbolicInt(I) orBool isSymbolicInt(I') [anywhere]
+  rule Int2String(I:Int -Int I':Int) => Int2String(I) +String " -Int " +String Int2String(I')
+       when isSymbolicInt(I) orBool isSymbolicInt(I') [anywhere]
+  rule Int2String(I:Int /Int I':Int) => Int2String(I) +String " /Int " +String Int2String(I')
+       when isSymbolicInt(I) orBool isSymbolicInt(I') [anywhere]
+
+  rule Int2String(#symInt(I:Int)) => "#symInt(" +String Int2String(I) +String ")" [anywhere]
+  rule Int2String(#symInt(I:Id )) => "#symInt(" +String Id2String(I)  +String ")" [anywhere]
 
 endmodule
 
