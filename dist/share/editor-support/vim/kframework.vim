@@ -45,9 +45,12 @@ syn keyword kStatement    configuration rule context when where
 " the following is just for folding (Ctrl-F9), currently not working
 syn region  kCellContent  start="<\h\(\w\|-\)*>" end="</\h\(\w\|-\)*>" fold transparent
 
-syn match   kCell         "<\h\(\w\|-\)*>"
+syn match   kCell         /<\h\(\w\|-\)*\(\s\+\l\+="[^"]*"\)*>/ contains=kCellAttr,kString
 syn match   kCell         "<\/\h\(\w\|-\)*>"
 syn match   kCell         "\.\.\."
+
+syn match   kCellAttr "\l\+=" contained contains=kEqual
+syn match   kEqual        "=" contained
 
 syn match   kSymbol       "::="
 syn match   kSymbol       "=>"
@@ -74,7 +77,7 @@ syn keyword kType         #Bool #Int #Float #String #Char #Id
 syn keyword kBoolean    true false
 syn match   kNumber     "\<\(0\o\+\|0[xX]\x\+\|\d\+\)[lL]\=\>"
 syn match   kFloat      "\(\<\d\+\.\d*\|\.\d\+\)\([eE][-+]\=\d\+\)\=[fFdD]\="
-syn region  kString     start=+"+ end=+"+ contains=@Spell
+syn region  kString     start=+"+ skip=+\\\\\|\\"+ end=+"+ end=+$+ contains=@Spell
 
 syn region  kComment    start="/\*" end="\*/" contains=kTodo,@Spell
 syn match   kComment    "//.*$" contains=kTodo,@Spell
@@ -92,10 +95,12 @@ KHiLink kSyntaxAttr     StorageClass
 KHiLink kStatement      Statement
 " KHiLink kCellContent    PreProc
 KHiLink kCell           Structure
+KHiLink kCellAttr       Structure
 KHiLink kMeta           PreProc
 KHiLink kSymbol         Operator
+KHiLink kEqual          Operator
 " KHiLink kType           Type
-KHiLink kBool           Boolean
+KHiLink kBoolean        Boolean
 KHiLink kNumber         Number
 KHiLink kFloat          Float
 KHiLink kString         String
