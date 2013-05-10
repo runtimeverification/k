@@ -3,11 +3,11 @@ This is the symbolic semantics of IMP enriched with arrays and Hoare logic.
 The semantics, gets as input an IMP program, annotated with pre and post 
 conditions and invariants.
 */
-require "builtins/array.k"
+require "symbolic-array.k"
 
 
 module IMP-SYNTAX
-  imports ARRAY-SYNTAX
+  imports SYMBOLIC-ARRAY-SYNTAX
 
   syntax AExp  ::= Int | Id
   	         | AExp "[" AExp "]"          [strict]
@@ -59,7 +59,7 @@ endmodule
 
 module IMP
   imports IMP-SYNTAX
-  imports ARRAY
+  imports SYMBOLIC-ARRAY
 
   syntax KResult ::= Val
 
