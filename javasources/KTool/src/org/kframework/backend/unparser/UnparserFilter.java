@@ -21,9 +21,14 @@ public class UnparserFilter extends BasicVisitor {
 	private boolean color = false;
 	private boolean annotateLocation;
 	private static int TAB = 4;
+	private boolean forEquivalence = false; /* true when unparsing for kagreg; does not print configuration/imports/etc */
 	private java.util.List<String> variableList = new java.util.LinkedList<String>();
 	private java.util.Map<Production, Integer> priorities = null;
 	private java.util.Stack<ASTNode> stack = new java.util.Stack<ASTNode>();
+	
+	public void setForEquivalence() {
+		forEquivalence = true;
+	}
 
 	public UnparserFilter() {
 		this(false);
@@ -63,8 +68,10 @@ public class UnparserFilter extends BasicVisitor {
 	@Override
 	public void visit(Import imp) {
 		prepare(imp);
-		result.write("imports " + imp.getName());
-		result.endLine();
+		if (!forEquivalence) {
+			result.write("imports " + imp.getName());
+			result.endLine();
+		}
 		postpare();
 	}
 
@@ -72,15 +79,19 @@ public class UnparserFilter extends BasicVisitor {
 	public void visit(Module mod) {
 		prepare(mod);
 		if (!mod.isPredefined()) {
-			result.write("module " + mod.getName());
-			result.endLine();
-			result.endLine();
-			result.indent(TAB);
+			if (!forEquivalence) {
+				result.write("module " + mod.getName());
+				result.endLine();
+				result.endLine();
+				result.indent(TAB);
+			}
 			super.visit(mod);
-			result.unindent();
-			result.write("endmodule");
-			result.endLine();
-			result.endLine();
+			if (!forEquivalence) {
+				result.unindent();
+				result.write("endmodule");
+				result.endLine();
+				result.endLine();
+			}
 		}
 		postpare();
 	}
@@ -218,15 +229,17 @@ public class UnparserFilter extends BasicVisitor {
 	@Override
 	public void visit(Configuration configuration) {
 		prepare(configuration);
-		result.write("configuration");
-		result.endLine();
-		result.indent(TAB);
-		inConfiguration = true;
-		configuration.getBody().accept(this);
-		inConfiguration = false;
-		result.unindent();
-		result.endLine();
-		result.endLine();
+		if (!forEquivalence) {
+			result.write("configuration");
+			result.endLine();
+			result.indent(TAB);
+			inConfiguration = true;
+			configuration.getBody().accept(this);
+			inConfiguration = false;
+			result.unindent();
+			result.endLine();
+			result.endLine();
+		}
 		postpare();
 	}
 
@@ -607,10 +620,12 @@ public class UnparserFilter extends BasicVisitor {
 	}
 
 	@Override
-	public void visit(org.kframework.kil.Require require) {
+	public void visit(Require require) {
 		prepare(require);
-		result.write("require \"" + require.getValue() + "\"");
-		result.endLine();
+		if (!forEquivalence) {
+			result.write("require \"" + require.getValue() + "\"");
+			result.endLine();
+		}
 		postpare();
 	}
 

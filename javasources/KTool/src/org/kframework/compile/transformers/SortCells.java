@@ -124,7 +124,7 @@ public class SortCells extends CopyOnWriteTransformer {
 					//exception --- should be a Bag
 				}
 				Cell fragment = new Cell();
-				fragment.setLabel(MetaK.getCellSort(sort));
+				fragment.setLabel(DefinitionHelper.getCellSort(sort));
 				System.err.println(fragment.getLabel());
 				fragment.setContents(t);
 				fragment = (Cell) transformTop(fragment, true);
@@ -214,7 +214,7 @@ public class SortCells extends CopyOnWriteTransformer {
 					//exception --- should be a Bag
 				}
 				Cell fragment = new Cell();
-				fragment.setLabel(MetaK.getCellSort(sort));
+				fragment.setLabel(DefinitionHelper.getCellSort(sort));
 				fragment.setContents(bag);
 				fragment = (Cell) transformTop(fragment, true);
 				kInjectedLabel.setTerm(fragment);

@@ -23,6 +23,7 @@ import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Variable;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -81,15 +82,15 @@ public class AddEval extends BasicCompilerStep<Definition> {
 
 	public Term defaultMapItem(Variable v) {
 		MapItem item = new MapItem();
-		item.setKey(MetaK.kWrapper(StringBuiltin.of(v.getName())));
-		item.setValue(MetaK.kWrapper(MetaK.defaultTerm(v)));
+		item.setKey(DefinitionHelper.kWrapper(StringBuiltin.of(v.getName())));
+		item.setValue(DefinitionHelper.kWrapper(MetaK.defaultTerm(v)));
 		return item;
 	}
 
 	public Term evalMapItem(Variable v) {
 		MapItem item = new MapItem();
-		item.setKey(MetaK.kWrapper(StringBuiltin.of(v.getName())));
-		item.setValue(MetaK.kWrapper(v));
+		item.setKey(DefinitionHelper.kWrapper(StringBuiltin.of(v.getName())));
+		item.setValue(DefinitionHelper.kWrapper(v));
 		return item;
 	}
 
