@@ -1,3 +1,5 @@
+require "int.k"
+
 module ARRAY-SYNTAX
   syntax Array ::= // store(array, index, value)
   	       	   "store"       "(" K "," K "," K ")"  [smtlib(store)]
