@@ -9,6 +9,12 @@ import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
+/**
+ * Add variable $IN if the current cell is marked as being 
+ * connected to the input stream.
+ * @author andreiarusoaie
+ *
+ */
 public class ResolveInputStreamCell extends CopyOnWriteTransformer {
 
 	private boolean notSet = true;
