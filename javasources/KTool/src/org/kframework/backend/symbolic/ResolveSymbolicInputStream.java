@@ -5,7 +5,13 @@ import org.kframework.kil.Configuration;
 import org.kframework.kil.Term;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-
+/**
+ * Search for input stream cell in the configuration and plug
+ * a variable into it. Its purpose is to send symbolic values
+ * as input using -cIN option.
+ * @author andreiarusoaie
+ *
+ */
 public class ResolveSymbolicInputStream extends CopyOnWriteTransformer {
 
 	public ResolveSymbolicInputStream() {

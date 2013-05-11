@@ -20,8 +20,8 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
 /**
- * * This is part of the symbolic transformation: replace each (data) constant
- * with a symbolic value and add an equality in the side condition of the rule.
+ * Replace each (data) constant with a symbolic value 
+ * and add an equality in the side condition of the rule.
  * 
  * @author andreiarusoaie
  */
