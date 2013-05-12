@@ -6,15 +6,18 @@ import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 /**
  * Class implementing a transformation which normalizes the fresh variable indices in rules
- * such that if the counting begins at 0 in each rule (i.e., GeneratedFreshVar0 always appears if
- * there is at least one fresh variable in the rule).
+ * such that the occurring indices are precisely the numbers in some interval [0, n].
  */
 public class FreshVariableNormalizer extends CopyOnWriteTransformer {
 
-    private int baseCounter;
+    private int counter;
+    private Map<Variable, Variable> substitution = new HashMap<Variable, Variable>();
     private FreshVariableCounter visitor = new FreshVariableCounter();
 
     public FreshVariableNormalizer() {
@@ -23,9 +26,10 @@ public class FreshVariableNormalizer extends CopyOnWriteTransformer {
 
     @Override
     public Rule transform(Rule rule) {
-        baseCounter = Integer.MAX_VALUE;
+        counter = 0;
+        substitution.clear();
         rule.accept(visitor);
-        if (baseCounter == Integer.MAX_VALUE) {
+        if (substitution.isEmpty()) {
             // no fresh variables in this rule
             return rule;
         }
@@ -39,31 +43,32 @@ public class FreshVariableNormalizer extends CopyOnWriteTransformer {
 
     @Override
     public Variable transform(Variable variable) {
-        try {
-            if (variable.getName().startsWith("GeneratedFreshVar")) {
-                int index = Integer.parseInt(
-                        variable.getName().substring("GeneratedFreshVar".length()));
-                return new Variable(
-                        "GeneratedFreshVar" + (index - baseCounter),
-                        variable.getSort());
-            }
-        } catch (Exception e) { }
-
-        return variable;
+        Variable substituteVariable = substitution.get(variable);
+        if (substituteVariable != null) {
+            return substituteVariable;
+        } else {
+            return variable;
+        }
     }
 
     /**
-     * Class implementing a visitor which finds the minimum index of a fresh variable.
+     * Class implementing a visitor which constructs a substitution mapping the fresh variables
+     * into variables with indices the number in the range [0, this.counter].
      */
     class FreshVariableCounter extends BasicVisitor {
 
         @Override
         public void visit(Variable variable) {
+            if (substitution.containsKey(variable)) {
+                return;
+            }
+
             if (variable.getName().startsWith("GeneratedFreshVar")) {
                 try {
-                    int index = Integer.parseInt(
-                            variable.getName().substring("GeneratedFreshVar".length()));
-                    baseCounter = Math.min(baseCounter, index);
+                    Integer.parseInt(variable.getName().substring("GeneratedFreshVar".length()));
+                    substitution.put(
+                            variable,
+                            new Variable("GeneratedFreshVar" + counter++, variable.getSort()));
                 } catch (Exception e) { }
             }
         }
