@@ -115,18 +115,18 @@ public class AddPathCondition extends CopyOnWriteTransformer {
             }
 
             // add transition attribute
-            List<Attribute> attrs = node.getAttributes().getContents();
+//            List<Attribute> attrs = node.getAttributes().getContents();
             // bad practice
-            attrs.add(new Attribute("transition", ""));
+ //           attrs.add(new Attribute("transition", ""));
 
-            Attributes atts = node.getAttributes().shallowCopy();
-            atts.setContents(attrs);
+   //         Attributes atts = node.getAttributes().shallowCopy();
+   //         atts.setContents(attrs);
 
 
             // re-construct the rule
             node = node.shallowCopy();
             node.setBody(new Rewrite(left, right, definitionHelper));
-            node.setAttributes(atts);
+//            node.setAttributes(atts);
             node.setCondition(cond);
         }
 
