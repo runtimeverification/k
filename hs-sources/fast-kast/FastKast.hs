@@ -31,6 +31,13 @@ kastEscape s = escape s
           | otherwise = c:escape cs
         escape [] = []
 
+unescapeSortName ('D':'d':s) = 'D':s
+unescapeSortName ('D':'z':s) = '#':s
+unescapeSortName ('D':'l':s) = '{':s
+unescapeSortName ('D':'r':s) = '}':s
+unescapeSortName (c:s) = c:unescapeSortName s
+unescapeSortName [] = []
+
 {- Simplified representation of the ATerms found in parse results -}
 data ATm = AAp String [Int] | ALst [Int] deriving Show
 
@@ -85,18 +92,15 @@ mkConst val sort = KApp (Token val sort) []
 
 -- Print a KAst term as kast does.
 printMetaMetaMeta :: KAst -> String
-printMetaMetaMeta (KApp (Token val sort) children)
-  | not (sort `elem` ["Int","Float","Bool","String","Id","KLabel"]) =
-    printMetaMetaMeta (KApp (KLabel "#token") [mkConst (escape sort) "String", mkConst val "String"])
 printMetaMetaMeta (KApp label children) =
     "_`(_`)("++printLabel label++", "++args++") "
   where
-    printLabel (Token n "Int") = "#_("++n++")"
-    printLabel (Token n "Float") = "#_("++n++")"
-    printLabel (Token b "Bool") = "#_("++b++")"
-    printLabel (Token s "String") = "#_("++s++")"
-    printLabel (Token s "Id") = "#_(#id "++escape s++")"
+    printLabel (Token n "#Int") = "#_("++n++")"
+    printLabel (Token n "#Float") = "#_("++n++")"
+    printLabel (Token b "#Bool") = "#_("++b++")"
+    printLabel (Token s "#String") = "#_("++s++")"
     printLabel (Token s "KLabel") = "KLabel2KLabel_("++s++")"
+    printLabel (Token val sort) = "#token("++show sort++", "++show val++")"
     printLabel (KLabel s) = maudeEscape s
     args = case map printMetaMetaMeta children of
       [] -> ".KList"
@@ -133,28 +137,24 @@ decode tbl consTable n =
         _ -> error $ "unresolved ambiguity at node "++show n
     AAp "DzBool1Const" [node' -> AAp val []] ->
       case val of
-        "\"true\"" -> mkConst "true" "Bool"
-        "\"false\"" -> mkConst "false" "Bool"
+        "\"true\"" -> mkConst "true" "#Bool"
+        "\"false\"" -> mkConst "false" "#Bool"
         _ -> error $ "Unknown boolean value at node "++show n++" in parse:"++show val
     AAp "DzBool1Cons" _ ->
         error $ "Unknown boolean node with malformed children at node "++show n
     AAp "DzString1Const" cs ->
      case cs of
-       [str' -> val] -> mkConst val "String"
+       [str' -> val] -> mkConst val "#String"
        _ -> error $ "malformed DzString1Const at node "++show n
-    AAp "DzId1Const" cs ->
-      case cs of
-        [str' -> val] -> mkConst val "Id"
-        _ -> error $ "malformed DzId1Const at node "++show n
     AAp "DzInt1Const" [str' -> val] ->
-      mkConst val "Int"
+      mkConst val "#Int"
     AAp "DzFloat1Const" [str' -> val] ->
-      mkConst val "Float"
+      mkConst val "#Float"
     AAp "KLabel1Const" [str' -> label] ->
         mkConst label "KLabel"
-    AAp cons [node' -> AAp tok []]
+    AAp cons [str' -> tok]
       | "1Const" `isSuffixOf` cons ->
-        let sort = take (length cons - length "1Const") cons in
+        let sort = unescapeSortName $ take (length cons - length "1Const") cons in
         mkConst tok sort
     AAp cons _
       | "1Const" `isSuffixOf` cons ->
