@@ -368,13 +368,13 @@ public class SortCells extends CopyOnWriteTransformer {
 		if (iCells != null) {
 			if (multiplicity == Cell.Multiplicity.ANY ||
 					multiplicity == Cell.Multiplicity.SOME) {
-				replacementTerm = MetaK.getFreshVar(KSorts.BAG);
+				replacementTerm = Variable.getFreshVar(KSorts.BAG);
 			}
 		} else {
 			if (multiplicity == Cell.Multiplicity.ONE && !fragment) {
-				replacementTerm = MetaK.getFreshVar(KSorts.BAG_ITEM);
+				replacementTerm = Variable.getFreshVar(KSorts.BAG_ITEM);
 			} else {
-				replacementTerm = MetaK.getFreshVar(KSorts.BAG);
+				replacementTerm = Variable.getFreshVar(KSorts.BAG);
 			}
 		}
 		Term oldTerm = renamedVars.get(cell.getId());

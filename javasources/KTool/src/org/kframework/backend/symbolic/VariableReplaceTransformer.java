@@ -35,7 +35,7 @@ public class VariableReplaceTransformer extends CopyOnWriteTransformer {
 
         Variable newVar = node;
         if (vars.contains(node.getName()) && !node.isFresh()) {
-            newVar = MetaK.getFreshVar(node.getSort());
+            newVar = Variable.getFreshVar(node.getSort());
             generatedVariables.put(node, newVar);
         }
 

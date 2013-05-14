@@ -68,7 +68,7 @@ public class AddPathCondition extends CopyOnWriteTransformer {
             Rewrite rew = (Rewrite) node.getBody();
 
             // variable holding the formula
-            Variable phi = MetaK.getFreshVar("K");
+            Variable phi = Variable.getFreshVar("K");
 
             // create lhs path condition cell
             Cell leftCell = new Cell();
@@ -147,7 +147,7 @@ public class AddPathCondition extends CopyOnWriteTransformer {
 
     private Term checkSat(Term pathCondition) {
         // checkSat(pathCondition) =/=K # "unsat"(.KList)
-        KApp unsat = KApp.of(new KInjectedLabel(StringBuiltin.of("unsat")));
+        KApp unsat = StringBuiltin.kAppOf("unsat");
         KApp checkSat = KApp.of(KLabelConstant.of("'checkSat"), pathCondition);
         return KApp.of(KLabelConstant.KNEQ_KLABEL, checkSat, unsat);
     }

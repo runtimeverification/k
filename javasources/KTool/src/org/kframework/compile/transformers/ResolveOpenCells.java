@@ -48,10 +48,10 @@ public class ResolveOpenCells extends CopyOnWriteTransformer {
 			ellipses = Ellipses.RIGHT;
 		}
 		if (ellipses == Ellipses.BOTH || ellipses == Ellipses.LEFT) {
-			col.getContents().add(0, MetaK.getFreshVar(sort.toString()));
+			col.getContents().add(0, Variable.getFreshVar(sort.toString()));
 		}
 		if (ellipses == Ellipses.BOTH || ellipses == Ellipses.RIGHT) {
-			col.getContents().add(MetaK.getFreshVar(sort.toString()));
+			col.getContents().add(Variable.getFreshVar(sort.toString()));
 		}
 		return node;
 	}

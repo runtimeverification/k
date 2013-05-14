@@ -1,5 +1,6 @@
 package org.kframework.kil;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
@@ -13,78 +14,97 @@ import java.util.Map;
 
 
 /**
- * Created with IntelliJ IDEA.
- * User: andrei
- * Date: 4/17/13
- * Time: 12:22 PM
- * To change this template use File | Settings | File Templates.
+ * Class representing a builtin string token. Factory method {@link #of(String)
+ * StringBuiltin.of} expects a string representing the value (an un-escaped string without the
+ * leading and trailing '"'). Method {@link #stringValue() stringValue} returns the string value
+ * of the {@link StringBuiltin} token, while method {@link #value() value} (declared in the
+ * superclass) returns the string representation of the {@link StringBuiltin} token. For example,
+ * the assertions in the following code are satisfied:
+ *     StringBuiltin stringBuiltin = StringBuiltin.of("\"");
+ *     assert stringBuiltin.stringValue().equals("\"");
+ *     assert stringBuiltin.value().equals("\"\\\"\"") : stringBuiltin.value();
  */
-public class StringBuiltin extends Builtin {
+public class StringBuiltin extends Token {
 
     public static final String SORT_NAME = "#String";
 
-    /*
-     * HashMap caches the constants to ensure uniqueness
+    /* Token cache */
+    private static Map<String, StringBuiltin> tokenCache = new HashMap<String, StringBuiltin>();
+    /* KApp cache */
+    private static Map<String, KApp> kAppCache = new HashMap<String, KApp>();
+
+    /**
+     * #token("#String", " ")(.KList)
      */
-    private static Map<String, StringBuiltin> cache = new HashMap<String, StringBuiltin>();
+    public static final KApp SPACE = StringBuiltin.kAppOf(" ");
 
-    public static final StringBuiltin SPACE = StringBuiltin.of(" ");
-
+    /**
+     * Returns a {@link StringBuiltin} representing the given {@link String} value.
+     * @param value An un-escaped {@link String} value without the leading and trailing '"'.
+     * @return
+     */
     public static StringBuiltin of(String value) {
-        StringBuiltin stringBuiltin = cache.get(value);
+        StringBuiltin stringBuiltin = tokenCache.get(value);
         if (stringBuiltin == null) {
             stringBuiltin = new StringBuiltin(value);
-            cache.put(value, stringBuiltin);
+            tokenCache.put(value, stringBuiltin);
         }
         return stringBuiltin;
     }
 
+    /**
+     * Returns a {@link KApp} representing a {@link StringBuiltin} with the given (un-escaped)
+     * value applied to an empty {@link KList}.
+     * @param value
+     * @return
+     */
+    public static KApp kAppOf(String value) {
+        KApp kApp = kAppCache.get(value);
+        if (kApp == null) {
+            kApp = KApp.of(StringBuiltin.of(value));
+            kAppCache.put(value, kApp);
+        }
+        return kApp;
+    }
+
+    /* un-escaped value of the string token */
     private final String value;
 
     private StringBuiltin(String value) {
-        super(StringBuiltin.SORT_NAME);
         this.value = value;
     }
 
-    public StringBuiltin(Element element) {
+    protected StringBuiltin(Element element) {
         super(element);
         String s = element.getAttribute(Constants.VALUE_value_ATTR);
-        value = s.substring(1, s.length() - 1);
+        value = StringEscapeUtils.unescapeJava(s.substring(1, s.length() - 1));
     }
 
-    @Override
-    public String getValue() {
+    /**
+     * Returns a {@link String} representing the (interpreted) value of the string token.
+     * @return The un-escaped {@link String} value without the leading and trailing '"'.
+     */
+    public String stringValue() {
         return value;
     }
 
+    /**
+     * Returns a {@link String} representing the sort name of a string token.
+     * @return
+     */
     @Override
-    public Term shallowCopy() {
-        /* this object is immutable */
-        return this;
+    public String tokenSort() {
+        return StringBuiltin.SORT_NAME;
     }
 
+    /**
+     * Returns a {@link String} representing the (uninterpreted) value of the string token.
+     * @return The escaped {@link String} representation with the leading and trailing '"'.
+     */
     @Override
-    public int hashCode() {
-        return value.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        if (this == object) {
-            return true;
-        }
-
-        if (!(object instanceof StringBuiltin)) {
-            return false;
-        }
-
-        StringBuiltin stringBuiltin = (StringBuiltin) object;
-        return value.equals(stringBuiltin.value);
-    }
-
-    @Override
-    public String toString() {
-        return "\"" + StringUtil.escape(getValue()) + "\"";
+    public String value() {
+        /* TODO: andreis to see what maude supports and convert accordingly */
+        return ("\"" + StringEscapeUtils.escapeJava(value) + "\"").replaceAll("\\\\u0", "\\\\");
     }
 
     @Override

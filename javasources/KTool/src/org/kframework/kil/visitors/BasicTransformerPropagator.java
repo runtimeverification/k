@@ -460,34 +460,30 @@ public class BasicTransformerPropagator implements Transformer {
 	}
 
     @Override
-    public ASTNode transform(Builtin node) throws TransformerException {
-        return transform((Term) node);
+    public ASTNode transform(Token node) throws TransformerException {
+        /* an instance of class Token is immutable */
+        return transform((KLabel) node);
     }
 
     @Override
     public ASTNode transform(BoolBuiltin node) throws TransformerException {
-        return transform((Builtin) node);
+        return transform((Token) node);
     }
 
     @Override
     public ASTNode transform(IntBuiltin node) throws TransformerException {
-        return transform((Builtin) node);
-    }
-
-    @Override
-    public ASTNode transform(FloatBuiltin node) throws TransformerException {
-        return transform((Builtin) node);
+        return transform((Token) node);
     }
 
     @Override
     public ASTNode transform(StringBuiltin node) throws TransformerException {
-        return transform((Builtin) node);
+        return transform((Token) node);
     }
 
     @Override
-    public ASTNode transform(Token node) throws TransformerException {
+    public ASTNode transform(GenericToken node) throws TransformerException {
         /* an instance of class Token is immutable */
-        return transform((Term) node);
+        return transform((Token) node);
     }
 
     @Override

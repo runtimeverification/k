@@ -347,8 +347,8 @@ public class LatexFilter extends BackendFilter {
 	}
 	
 	@Override
-	public void visit(Builtin c) {
-		result.append("\\constant[" + StringUtil.latexify(c.getSort()) + "]{" + StringUtil.latexify(c.toString()) + "}");
+	public void visit(Token t) {
+		result.append("\\constant[" + StringUtil.latexify(t.tokenSort()) + "]{" + StringUtil.latexify(t.value()) + "}");
 	}
 
 	@Override

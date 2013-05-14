@@ -23,10 +23,11 @@ public class FlattenModules  extends BasicCompilerStep<Definition> {
 
 	private class FlattenModulesVisitor extends BasicVisitor  {
 		HashMap<String,Module> modules = new HashMap<String,Module>();
-		Definition result = new Definition();
+		Definition result;
 
 		@Override
 		public void visit(Definition d) {
+            result = new Definition(d);
 			Set<String> included = new HashSet<String>();
 			Configuration cfg = null;
 //			boolean nextId = false;

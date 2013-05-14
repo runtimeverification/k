@@ -163,8 +163,7 @@ public class MaudeKRun implements KRun {
 		Element elem = (Element) counter;
 		List<Element> child = XmlUtil.getChildElements(elem);
 		assertXML(child.size() == 1);
-		IntBuiltin intBuiltin = (IntBuiltin) parseXML(child.get(0));
-		K.counter = intBuiltin.bigIntegerValue().intValue() - 1;
+		K.counter = ((IntBuiltin) parseXML(child.get(0))).bigIntegerValue().intValue() - 1;
 	}
 
 	private static void assertXML(boolean assertion) {
@@ -265,16 +264,22 @@ public class MaudeKRun implements KRun {
 				return new org.kframework.kil.Map(l);
 			} else if ((op.equals("#_") || op.equals("List2KLabel_") || op.equals("Map2KLabel_") || op.equals("Set2KLabel_") || op.equals("Bag2KLabel_") || op.equals("KList2KLabel_") || op.equals("KLabel2KLabel_")) && (sort.equals(KSorts.KLABEL) || sort.equals("[KLabel]"))) {
 				assertXMLTerm(list.size() == 1);
-				return new KInjectedLabel(parseXML(list.get(0)));
+                Term term = parseXML(list.get(0));
+                if (op.equals("#_") && term instanceof Token) {
+                    return term;
+                } else {
+                    return new KInjectedLabel(term);
+                }
 			} else if (sort.equals("#NzInt") && op.equals("--Int_")) {
 				assertXMLTerm(list.size() == 1);
-				return IntBuiltin.of("-" + ((IntBuiltin) parseXML(list.get(0))).getValue());
+				return IntBuiltin.of("-" + ((IntBuiltin) parseXML(list.get(0))).value());
 			} else if (sort.equals("#NzNat") && op.equals("sNat_")) {
-				assertXMLTerm(list.size() == 1 && parseXML(list.get(0)).equals(IntBuiltin.ZERO));
+				assertXMLTerm(list.size() == 1
+                              && parseXML(list.get(0)).equals(IntBuiltin.ZERO_TOKEN));
                 return IntBuiltin.of(xml.getAttribute("number"));
 			} else if (sort.equals("#Zero") && op.equals("0")) {
 				assertXMLTerm(list.size() == 0);
-				return IntBuiltin.ZERO;
+				return IntBuiltin.ZERO_TOKEN;
 			} else if (sort.equals("#Bool") && (op.equals("true") || op.equals("false"))) {
 				assertXMLTerm(list.size() == 0);
                 return BoolBuiltin.of(op);
@@ -282,13 +287,12 @@ public class MaudeKRun implements KRun {
 				assertXMLTerm(list.size() == 0);
                 assertXMLTerm(op.startsWith("\"") && op.endsWith("\""));
 				return StringBuiltin.of(op.substring(1, op.length() - 1));
-			} else if (sort.equals("#FiniteFloat")) {
-				assertXMLTerm(list.size() == 0);
-				return FloatBuiltin.of(op);
-			} else if (sort.equals("#Id") && op.equals("#id_")) {
-				assertXMLTerm(list.size() == 1);
-				StringBuiltin value = (StringBuiltin) parseXML(list.get(0));
-				return new Constant("#Id", value.getValue());
+            } else if (op.equals("#token") && sort.equals(KSorts.KLABEL)) {
+                // #token(String, String)
+                assertXMLTerm(list.size() == 2);
+                StringBuiltin sortString = (StringBuiltin) parseXML(list.get(0));
+                StringBuiltin valueString = (StringBuiltin) parseXML(list.get(1));
+                return GenericToken.of(sortString.stringValue(), valueString.stringValue());
 			} else if (op.matches("\\.(Map|Bag|List|Set|K)") && (sort.equals("Bag") || sort.equals("List") || sort.equals("Map") || sort.equals("Set") || sort.equals("K"))) {
 				assertXMLTerm(list.size() == 0);
                 if (sort.equals("Bag")) {

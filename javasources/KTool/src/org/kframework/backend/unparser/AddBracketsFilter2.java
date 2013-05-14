@@ -1,6 +1,5 @@
 package org.kframework.backend.unparser;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
@@ -9,9 +8,7 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.DefinitionLoader;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -159,7 +156,7 @@ public class AddBracketsFilter2 extends BasicTransformer {
 	}
 
 	private Variable replaceWithVar(Term ast) {
-		Variable var = MetaK.getFreshVar(((Term)ast).getSort());
+		Variable var = Variable.getFreshVar(((Term) ast).getSort());
 		substitution.put(var.getName(), (Term) ast);
 		return var;
 	}

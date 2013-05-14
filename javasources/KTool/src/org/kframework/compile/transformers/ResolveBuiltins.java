@@ -11,6 +11,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Class adding #_ : Builtin -> KLabel wrappers and is#Builtin predicates for each builtin.
+ *
+ * andreis: this is backend specific, should go to MaudeFilter or something...
+ */
 public class ResolveBuiltins extends CopyOnWriteTransformer {
 	
 	Set<String> builtinSorts = new HashSet<String>();

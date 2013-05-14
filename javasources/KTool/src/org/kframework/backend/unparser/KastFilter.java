@@ -216,8 +216,8 @@ public class KastFilter extends BasicVisitor {
 	}
 
     @Override
-    public void visit(Builtin builtin) {
-        result.write(builtin.toString());
+    public void visit(Token token) {
+        result.write(token.toString());
     }
 
 	@Override

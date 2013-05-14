@@ -67,8 +67,8 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(org.kframework.kil.Builtin node) throws TransformerException {
-        return new BuiltinConstant(node.getValue(), node.getSort());
+    public ASTNode transform(org.kframework.kil.Token node) throws TransformerException {
+        return new BuiltinConstant(node.value(), node.tokenSort());
     }
 
     @Override

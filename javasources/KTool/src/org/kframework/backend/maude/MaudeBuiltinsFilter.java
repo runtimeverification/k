@@ -1,7 +1,6 @@
 package org.kframework.backend.maude;
 
 import org.kframework.backend.BackendFilter;
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.utils.StringUtil;
 
@@ -71,9 +70,9 @@ public class MaudeBuiltinsFilter extends BackendFilter {
 			first = false;
 		}
 		String sort = "#" + node.getName();
-		final Variable var = MetaK.getFreshVar(sort);
+		final Variable var = Variable.getFreshVar(sort);
         MaudeFilter filter = new MaudeFilter();
-		filter.visit(KApp.of(new KInjectedLabel(var)));
+        filter.visit(var);
 		left += filter.getResult();
 		right += var.toString();
 	}

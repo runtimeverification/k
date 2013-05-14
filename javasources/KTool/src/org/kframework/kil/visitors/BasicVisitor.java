@@ -255,35 +255,29 @@ public class BasicVisitor implements Visitor {
 	}
 
     @Override
-    public void visit(Builtin node) {
-        visit((Term) node);
+    public void visit(Token node) {
+        visit((KLabel) node);
     }
+
 
     @Override
     public void visit(BoolBuiltin node) {
-        visit((Builtin) node);
+        visit((Token) node);
     }
 
     @Override
     public void visit(IntBuiltin node) {
-        visit((Builtin) node);
-    }
-
-    @Override
-    public void visit(FloatBuiltin node) {
-        visit((Builtin) node);
+        visit((Token) node);
     }
 
     @Override
     public void visit(StringBuiltin node) {
-        visit((Builtin) node);
+        visit((Token) node);
     }
 
     @Override
-    public void visit(Token node) {
-        node.getSortTerm().accept(this);
-        node.getValueTerm().accept(this);
-        visit((Term) node);
+    public void visit(GenericToken node) {
+        visit((Token) node);
     }
 
     @Override

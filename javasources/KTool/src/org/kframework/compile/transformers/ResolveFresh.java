@@ -60,7 +60,7 @@ public class ResolveFresh extends CopyOnWriteTransformer {
 
 		node = node.shallowCopy();
 		node.setCondition((Term) condNode);
-		Variable freshVar = MetaK.getFreshVar("Int"); 
+		Variable freshVar = Variable.getFreshVar("Int");
 		ASTNode bodyNode = node.getBody().accept(freshSubstitution(vars, freshVar));
 		assert(bodyNode instanceof Term);
 		Bag bag;
@@ -77,7 +77,7 @@ public class ResolveFresh extends CopyOnWriteTransformer {
 		fCell.setEllipses(Ellipses.NONE);
 		TermCons t = new TermCons("Int", "Int1PlusSyn");
 		t.getContents().add(freshVar);
-		t.getContents().add(IntBuiltin.of(vars.size()));
+		t.getContents().add(IntBuiltin.kAppOf(vars.size()));
 		fCell.setContents(new Rewrite(freshVar, t));
 		bag.getContents().add(fCell);
 		
@@ -108,7 +108,7 @@ public class ResolveFresh extends CopyOnWriteTransformer {
 			TermCons idxTerm = new TermCons("Int", MetaK.Constants.plusIntCons);
 			List<Term> subterms = idxTerm.getContents();
 			subterms.add(idxVar);
-			subterms.add(IntBuiltin.of(idx));
+			subterms.add(IntBuiltin.kAppOf(idx));
 			++idx;
 
 			String sort = var.getSort();

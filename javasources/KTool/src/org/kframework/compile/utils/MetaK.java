@@ -60,8 +60,6 @@ public class MetaK {
 				"___CONTEXT_ABSTRACTION_TOP_CELL___";
 	}
 
-	static int nextVarId = 0;
-
 	public static Set<String> kModules = new HashSet<String>();
 	static {
 		kModules.add("K-BUILTINS");
@@ -297,13 +295,9 @@ public class MetaK {
 		return false;
 	}
 
-	public static Variable getFreshVar(String sort) {
-		return new Variable("GeneratedFreshVar" + nextVarId++, sort);
-	}
-
-	public static Term getTerm(Production prod) {
+    public static Term getTerm(Production prod) {
 		if (prod.isSubsort()) {
-			final Variable freshVar = getFreshVar(prod.getItems().get(0).toString());
+			final Variable freshVar = Variable.getFreshVar(prod.getItems().get(0).toString());
 			if (prod.containsAttribute("klabel")) {
 				return KApp.of(KLabelConstant.of(prod.getKLabel()), freshVar);
 			}
@@ -313,32 +307,30 @@ public class MetaK {
             String terminal = ((Terminal) prod.getItems().get(0)).getTerminal();
             if (prod.getSort().equals(KSorts.KLABEL)) {
                 return KLabelConstant.of(terminal);
-            } else if (prod.getSort().equals("#Bool")) {
-                return BoolBuiltin.of(terminal);
-            } else if (prod.getSort().equals("#Int")) {
-                return IntBuiltin.of(terminal);
-            } else if (prod.getSort().equals("#Float")) {
-                return FloatBuiltin.of(terminal);
-            } else if (prod.getSort().equals("#String")) {
-                return StringBuiltin.of(terminal);
+            } else if (prod.getSort().equals(BoolBuiltin.SORT_NAME)) {
+                return BoolBuiltin.kAppOf(terminal);
+            } else if (prod.getSort().equals(IntBuiltin.SORT_NAME)) {
+                return IntBuiltin.kAppOf(terminal);
+            } else if (prod.getSort().equals(StringBuiltin.SORT_NAME)) {
+                return StringBuiltin.kAppOf(terminal);
             } else {
-			    return new Constant(prod.getSort(), terminal);
+			    return GenericToken.kAppOf(prod.getSort(), terminal);
             }
         }
 		if (prod.isLexical()) {
 			return KApp.of(KLabelConstant.of("#token"),
-                           StringBuiltin.of(prod.getSort()),
-                           getFreshVar("String"));
+                           StringBuiltin.kAppOf(prod.getSort()),
+                           Variable.getFreshVar("String"));
 		}
 		TermCons t = new TermCons(prod.getSort(), prod.getCons());
 		if (prod.isListDecl()) {
-			t.getContents().add(getFreshVar(((UserList) prod.getItems().get(0)).getSort()));
-			t.getContents().add(getFreshVar(prod.getSort()));
+			t.getContents().add(Variable.getFreshVar(((UserList) prod.getItems().get(0)).getSort()));
+			t.getContents().add(Variable.getFreshVar(prod.getSort()));
 			return t;
 		}
 		for (ProductionItem item : prod.getItems()) {
 			if (item.getType() == ProductionType.SORT) {
-				t.getContents().add(getFreshVar(((Sort) item).getName()));
+				t.getContents().add(Variable.getFreshVar(((Sort) item).getName()));
 			}
 		}
 		return t;
@@ -349,8 +341,16 @@ public class MetaK {
 	}
 
 	public static boolean isBuiltinSort(String sort) {
-		return sort.startsWith("#");
-		// return builtinSorts.contains(sort);
+        /* TODO: replace with a proper table of builtins */
+		return sort.equals(BoolBuiltin.SORT_NAME)
+               || sort.equals(IntBuiltin.SORT_NAME)
+               || sort.equals(FloatBuiltin.SORT_NAME)
+               || sort.equals(StringBuiltin.SORT_NAME)
+               /* LTL builtin sorts */
+               || sort.equals("#LtlFormula")
+               || sort.equals("#Prop")
+               || sort.equals("#ModelCheckerState")
+               || sort.equals("#ModelCheckResult");
 	}
 
 	public static boolean isComputationSort(String sort) {

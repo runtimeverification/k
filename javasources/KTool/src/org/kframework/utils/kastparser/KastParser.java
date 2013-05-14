@@ -127,8 +127,7 @@ public class KastParser implements KastParserConstants {
                 sort = sort.substring(1, sort.length() - 1);
       jj_consume_token(RPAREN);
       jj_consume_token(LPAREN);
-                org.kframework.kil.Token t = org.kframework.kil.Token.of(sort, value);
-                {if (true) return t;}
+                {if (true) return org.kframework.kil.Token.kAppOf(sort, value);}
       break;
     case KLABEL:
       jj_consume_token(KLABEL);

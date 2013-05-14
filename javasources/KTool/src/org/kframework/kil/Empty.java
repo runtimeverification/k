@@ -9,6 +9,7 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
 /** An empty user-defined cons list, distinguished by {@link #sort} */
+@Deprecated
 public class Empty extends Term {
 
     public Empty(String sort) {

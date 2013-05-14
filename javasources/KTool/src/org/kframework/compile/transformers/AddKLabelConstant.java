@@ -27,7 +27,7 @@ public class AddKLabelConstant extends CopyOnWriteTransformer {
         for (String klbl : node.getModuleKLabels()) {
             Term kapp = KApp.of(new KInjectedLabel(KLabelConstant.of(klbl)));
             Term lhs = KApp.of(KLabelConstantPredicate, kapp);
-            Term rhs = KApp.of(new KInjectedLabel(BoolBuiltin.TRUE));
+            Term rhs = BoolBuiltin.TRUE;
             Rule rule = new Rule(lhs, rhs);
             rule.addAttribute(Attribute.PREDICATE);
             retNode.appendModuleItem(rule);

@@ -4,16 +4,19 @@ import org.kframework.compile.utils.MaudeHelper;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attributes;
-import org.kframework.kil.Builtin;
+import org.kframework.kil.BoolBuiltin;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Collection;
 import org.kframework.kil.CollectionItem;
 import org.kframework.kil.Constant;
 import org.kframework.kil.Empty;
+import org.kframework.kil.FloatBuiltin;
 import org.kframework.kil.Freezer;
 import org.kframework.kil.FreezerLabel;
+import org.kframework.kil.IntBuiltin;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
+import org.kframework.kil.KLabel;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSequence;
@@ -141,14 +144,10 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 
 	@Override
 	public ASTNode transform(Constant node) throws TransformerException {
+        assert false : "dead code";
 		if (MetaK.isComputationSort(node.getSort()))
 			return node.accept(kTrans);
 		return node;
-	}
-
-	@Override
-	public ASTNode transform(Builtin node) throws TransformerException {
-		return node.accept(kTrans);
 	}
 
 	@Override
@@ -200,32 +199,18 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 		}
 
 		@Override
-		public ASTNode transform(KLabelConstant kLabelConstant) throws TransformerException {
-			String l = kLabelConstant.getLocation();
-			String f = kLabelConstant.getFilename();
-			return new KApp(l, f, new KInjectedLabel(kLabelConstant), KList.EMPTY);
+		public ASTNode transform(KLabel kLabel) throws TransformerException {
+			return new KApp(
+                    kLabel.getLocation(),
+                    kLabel.getFilename(),
+                    new KInjectedLabel(kLabel),
+                    KList.EMPTY);
 		}
 
 		@Override
 		public ASTNode transform(Constant cst) throws TransformerException {
-			String l = cst.getLocation();
-			String f = cst.getFilename();
-
-			if (!MetaK.isBuiltinSort(cst.getSort())) {
-				KList list = new KList();
-				list.add(StringBuiltin.of(cst.getSort()));
-				list.add(StringBuiltin.of(StringUtil.escape(cst.getValue())));
-				return new KApp(KLabelConstant.of("#token"), list).accept(this);
-			} else {
-				return new KApp(l, f, new KInjectedLabel(cst), KList.EMPTY);
-			}
-		}
-
-		@Override
-		public ASTNode transform(Builtin builtin) throws TransformerException {
-			String l = builtin.getLocation();
-			String f = builtin.getFilename();
-			return new KApp(l, f, new KInjectedLabel(builtin), KList.EMPTY);
+            assert false : "deprecated class";
+            return null;
 		}
 
 		@Override
@@ -270,10 +255,19 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 
 		@Override
 		public ASTNode transform(Variable node) throws TransformerException {
-			if (node.getSort().equals(KSorts.KITEM) || node.getSort().equals(KSorts.K))
+			if (node.getSort().equals(KSorts.KITEM) || node.getSort().equals(KSorts.K)) {
 				return node;
-			if (MetaK.isKSort(node.getSort()) || MetaK.isBuiltinSort(node.getSort()))
+            }
+            if (MetaK.isKSort(node.getSort())) {
 				return KApp.of(new KInjectedLabel(node));
+            }
+
+            if (node.getSort().equals(BoolBuiltin.SORT_NAME)
+                    || node.getSort().equals(IntBuiltin.SORT_NAME)
+                    || node.getSort().equals(FloatBuiltin.SORT_NAME)
+                    || node.getSort().equals(StringBuiltin.SORT_NAME)) {
+                return node;
+            }
 			node = node.shallowCopy();
 			node.setSort(KSorts.KITEM);
 			return node;

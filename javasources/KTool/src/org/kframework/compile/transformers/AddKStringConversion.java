@@ -8,7 +8,7 @@ import org.kframework.utils.StringUtil;
 import java.util.ArrayList;
 
 
-public class AddKLabelToString extends CopyOnWriteTransformer {
+public class AddKStringConversion extends CopyOnWriteTransformer {
 
     private static final KLabelConstant KLabel2String =
             KLabelConstant.of("KLabel2String");
@@ -16,7 +16,7 @@ public class AddKLabelToString extends CopyOnWriteTransformer {
     private static final String String2KLabelCons =
             "KLabel1String2KLabelSyn";
 
-    public AddKLabelToString() {
+    public AddKStringConversion() {
         super("Define KLabel2String and String2Klabel for KLabel constants");
     }
 
@@ -29,7 +29,7 @@ public class AddKLabelToString extends CopyOnWriteTransformer {
         for (String klbl : node.getModuleKLabels()) {
             Term kapp = KApp.of(new KInjectedLabel(KLabelConstant.of(klbl)));
             Term lhs = KApp.of(KLabel2String, kapp);
-            Term rhs = KApp.of(new KInjectedLabel(StringBuiltin.of(StringUtil.escapeMaude(klbl).replace("\"","\\\""))));
+            Term rhs = StringBuiltin.kAppOf(StringUtil.escapeMaude(klbl));
             Rule rule = new Rule(lhs, rhs);
             rule.addAttribute(Attribute.FUNCTION);
             retNode.appendModuleItem(rule);

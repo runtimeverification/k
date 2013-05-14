@@ -46,7 +46,7 @@ public class ConstantsReplaceTransformer extends CopyOnWriteTransformer {
         }
 
         String sort = "K";
-        Variable newVar = MetaK.getFreshVar(sort);
+        Variable newVar = Variable.getFreshVar(sort);
 
         generatedSV.put(newVar, builtin);
         return newVar;

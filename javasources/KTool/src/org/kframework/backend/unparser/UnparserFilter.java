@@ -424,13 +424,6 @@ public class UnparserFilter extends BasicVisitor {
 		postpare();
 	}
 
-    @Override
-    public void visit(Builtin builtin) {
-        prepare(builtin);
-        result.write(builtin.toString());
-        postpare();
-    }
-
 	@Override
 	public void visit(Collection collection) {
 		prepare(collection);
@@ -660,11 +653,8 @@ public class UnparserFilter extends BasicVisitor {
 	@Override
 	public void visit(Token t) {
 		prepare(t);
-		result.write("#token(");
-		t.getValueTerm().accept(this);
-		result.write(", ");
-		t.getSortTerm().accept(this);
-		result.write(")");
+		result.write("#token(\"" + t.tokenSort() + "\", \"" + t.value() + "\")");
+		postpare();
 	}
 
 	private void prepare(ASTNode astNode) {

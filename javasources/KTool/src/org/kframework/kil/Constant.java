@@ -17,6 +17,7 @@ import org.w3c.dom.Element;
  * All values are represented textually in {@link #value},
  * whose interpretation may depend on {@link #sort}.
  */
+@Deprecated
 public class Constant extends Term {
     /**
 	 * 

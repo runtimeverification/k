@@ -161,8 +161,7 @@ Term klabel() :
 	}
 	<RPAREN> <LPAREN>
 	{
-		org.kframework.kil.Token t = org.kframework.kil.Token.of(sort, value);
-		return t;
+		return org.kframework.kil.Token.kAppOf(sort, value);
 	}
 |	<KLABEL>
 	{

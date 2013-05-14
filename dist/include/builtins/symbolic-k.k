@@ -10,6 +10,7 @@ endmodule
 module SYMBOLIC-K
   imports #SMT
   imports BUILTIN-HOOKS
+  imports ID-HOOKS
   imports FREE-VARS
 
   syntax Bool ::= "forall" Set "." Bool [binder, function]

@@ -4,10 +4,8 @@ import org.kframework.compile.utils.SyntaxByTag;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
-import org.kframework.kil.Constant;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
-import org.kframework.kil.KList;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Production;
@@ -59,28 +57,29 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
             if (AddSymbolicK.allowKSymbolic(sort)) {
                 String symCtor = AddSymbolicK.symbolicConstructor(sort);
 
-                Variable var = MetaK.getFreshVar("Int");
+                Variable var = Variable.getFreshVar("Int");
                 Term symTerm = KApp.of(KLabelConstant.of(symCtor), var);
                 Term lhs = KApp.of(K_TO_SMTLIB, symTerm);
                 KApp strTerm = KApp.of(KLabelConstant.of("Int2String"), var);
-                Term rhs = appendString(StringBuiltin.of(SMTLIB_VAR_PREFIX), strTerm);
+                Term rhs = appendString(StringBuiltin.kAppOf(SMTLIB_VAR_PREFIX), strTerm);
                 Rule rule = new Rule(lhs, rhs);
                 rule.addAttribute(Attribute.FUNCTION);
                 retNode.appendModuleItem(rule);
 
-                var = MetaK.getFreshVar("#String");
+                var = Variable.getFreshVar("#String");
                 symTerm = KApp.of(KLabelConstant.of(symCtor), var);
                 lhs = KApp.of(K_TO_SMTLIB, symTerm);
-                rhs = appendString(StringBuiltin.of(SMTLIB_VAR_PREFIX), var);
+                rhs = appendString(StringBuiltin.kAppOf(SMTLIB_VAR_PREFIX), var);
                 rule = new Rule(lhs, rhs);
                 rule.addAttribute(Attribute.FUNCTION);
                 retNode.appendModuleItem(rule);
 
-                var = MetaK.getFreshVar("Id");
+                /* TODO: replace Id2String with some generic function of #token(..., ...) */
+                var = Variable.getFreshVar("Id");
                 symTerm = KApp.of(KLabelConstant.of(symCtor), var);
                 lhs = KApp.of(K_TO_SMTLIB, symTerm);
-                strTerm = KApp.of(KLabelConstant.of("Id2String"), var);
-                rhs = appendString(StringBuiltin.of(SMTLIB_VAR_PREFIX), strTerm);
+                strTerm = KApp.of(KLabelConstant.of("#tokenToString"), var);
+                rhs = appendString(StringBuiltin.kAppOf(SMTLIB_VAR_PREFIX), strTerm);
                 rule = new Rule(lhs, rhs);
                 rule.addAttribute(Attribute.FUNCTION);
                 retNode.appendModuleItem(rule);
@@ -113,16 +112,16 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
 
             Term rhs;
             if (prod.isConstant()) {
-                rhs = StringBuiltin.of(smtLbl);
+                rhs = StringBuiltin.kAppOf(smtLbl);
             } else {
                 TermCons termCons = ((TermCons) term);
-                rhs = StringBuiltin.of("(" + smtLbl);
+                rhs = StringBuiltin.kAppOf("(" + smtLbl);
                 for (int idx = 0; idx < ((TermCons) term).arity(); ++idx) {
                     Variable var = (Variable) termCons.getSubterm(idx);
                     rhs = appendString(rhs, StringBuiltin.SPACE);
                     rhs = appendString(rhs, KApp.of(K_TO_SMTLIB, var));
                 }
-                rhs = appendString(rhs, StringBuiltin.of(")"));
+                rhs = appendString(rhs, StringBuiltin.kAppOf(")"));
             }
 
             Rule rule = new Rule(lhs, rhs);

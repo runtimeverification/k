@@ -460,38 +460,29 @@ public class CopyOnWriteTransformer implements Transformer {
 	}
 
     @Override
-    public ASTNode transform(Builtin node) throws TransformerException {
-        return transform((Term) node);
+    public ASTNode transform(Token node) throws TransformerException {
+        /* an instance of class Token is immutable */
+        return transform((KLabel) node);
     }
 
     @Override
     public ASTNode transform(BoolBuiltin node) throws TransformerException {
-        return transform((Builtin) node);
+        return transform((Token) node);
     }
 
     @Override
     public ASTNode transform(IntBuiltin node) throws TransformerException {
-        return transform((Builtin) node);
-    }
-
-    @Override
-    public ASTNode transform(FloatBuiltin node) throws TransformerException {
-        return transform((Builtin) node);
+        return transform((Token) node);
     }
 
     @Override
     public ASTNode transform(StringBuiltin node) throws TransformerException {
-        return transform((Builtin) node);
+        return transform((Token) node);
     }
 
     @Override
-    public ASTNode transform(Token node) throws TransformerException {
-        Term sortTerm = (Term) node.getSortTerm().accept(this);
-        Term valueTerm = (Term) node.getValueTerm().accept(this);
-        if (!sortTerm.equals(node.getSortTerm()) || !valueTerm.equals(node.getValueTerm())) {
-            node = Token.of(sortTerm, valueTerm);
-        }
-        return transform((Term) node);
+    public ASTNode transform(GenericToken node) throws TransformerException {
+        return transform((Token) node);
     }
 
     @Override

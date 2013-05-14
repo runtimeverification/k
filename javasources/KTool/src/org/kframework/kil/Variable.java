@@ -1,5 +1,6 @@
 package org.kframework.kil;
 
+import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.matchers.Matcher;
@@ -11,6 +12,9 @@ import org.w3c.dom.Element;
  * Variables, used both in rules/contexts and for variables like {@code $PGM} in configurations.
  */
 public class Variable extends Term {
+
+    private static int nextVariableIndex = 0;
+
 	private String name;
 	/** True if the variable was written with an explicit type annotation */
 	private boolean userTyped = false;
@@ -38,7 +42,11 @@ public class Variable extends Term {
 		fresh = variable.fresh;
 	}
 
-	public void setName(String name) {
+	public static Variable getFreshVar(String sort) {
+		return new Variable("GeneratedFreshVar" + nextVariableIndex++, sort);
+	}
+
+    public void setName(String name) {
 		this.name = name;
 	}
 

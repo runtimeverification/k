@@ -263,7 +263,7 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 		}
 
         @Override
-        public void visit(Builtin node) {
+        public void visit(Token node) {
             levels.get(0).add(node);
         }
 		

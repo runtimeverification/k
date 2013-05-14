@@ -38,13 +38,12 @@ public class KApp extends Term {
     }
 
     /**
-     * Constructs the application of the specified KLabel to the specified KList.
+     * Constructs a {@link KApp} object representing the application of the specified KLabel to the specified KList.
      *
      * @param location the line and column
      * @param filename the complete name of the file
      * @param label the KLabel which is applied to the given KList. A non-null instance of {@link KLabel}, {@link Variable} of sort KLabel or {@link Ambiguity}.
      * @param child the KList which the given KLabel is applied to. A non-null instance of {@link KList}, {@link Variable} of sort KList, or {@link Ambiguity}.
-     * @return a {@link KApp} which represents the application of the KLabel argument to the KList argument.
      */
 	public KApp(String location, String filename, Term label, Term child) {
 		super(location, filename, "K");
@@ -53,11 +52,10 @@ public class KApp extends Term {
 	}
 
     /**
-     * Constructs the application of the specified KLabel to the specified KList.
+     * Constructs a {@link KApp} object representing the application of the specified KLabel to the specified KList.
      *
      * @param label the KLabel which is applied to the given KList. A non-null instance of {@link KLabel}, {@link Variable} of sort KLabel or {@link Ambiguity}.
      * @param child the KList which the given KLabel is applied to. A non-null instance of {@link KList}, {@link Variable} of sort KList, or {@link Ambiguity}.
-     * @return a {@link KApp} which represents the application of the KLabel argument to the KList argument.
      */
 	public KApp(Term label, Term child) {
 		super("K");
@@ -66,7 +64,7 @@ public class KApp extends Term {
 	}
 
     /**
-     * Constructs a {@link KApp} object from an XML element.
+     * Constructs a {@link KApp} object from an XML {@link Element}.
      */
 	public KApp(Element element) {
 		super(element);

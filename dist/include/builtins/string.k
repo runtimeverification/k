@@ -1,4 +1,3 @@
-require "id.k"
 require "int.k"
 require "float.k"
 
@@ -11,7 +10,6 @@ module STRING-HOOKS
   imports STRING-SYNTAX-HOOKS
   imports INT-HOOKS
   imports FLOAT-HOOKS
-  imports ID-HOOKS
 
 
   syntax String ::= String "+String" String	[function, left, latex({#1}+_{\scriptstyle\it String}{#2}), hook(#STRING:_+String_)]
@@ -30,8 +28,6 @@ module STRING-HOOKS
   syntax Float ::= "String2Float" "(" String ")" [function, klabel(String2Float), hook(#CONVERSION:string2Float)]
   syntax Int ::= "String2Int" "(" String ")"	 [function, klabel(String2Int), hook(#CONVERSION:string2Int)]
   syntax String ::= "Int2String" "(" Int ")"	 [function, klabel(Int2String), hook(#CONVERSION:int2String)]
-  syntax String ::= "Id2String" "(" Id ")"		 [function, klabel(Id2String), hook(#CONVERSION:id2String)]
-  syntax Id ::= "String2Id" "(" String ")"		 [function, klabel(String2Id), hook(#CONVERSION:string2Id)]
 
 
   syntax String ::= "KLabel2String" "(" KLabel ")"  [function, klabel(KLabel2String)]
@@ -101,20 +97,13 @@ module STRING-HOOKS
   
   rule trim(S:K) => ltrim(rtrim(S))
 
-  syntax K ::= "#parseToken" "(" String "," String ")"  [function]
+  syntax K ::= "#parseToken" "(" String "," String ")"  [function, klabel(#parseToken)]
   rule #parseToken("#Int",S:String) => String2Int(S)
   rule #parseToken("#Float",S:String) => (String2Float(S)) 
   rule #parseToken("#String",S:String) => (S) 
-  rule #parseToken("#Id",S:String) => (String2Id(S))
   rule #parseToken("Int",S:String) => String2Int(S)
   rule #parseToken("Float",S:String) => (String2Float(S)) 
   rule #parseToken("String",S:String) => (S) 
-  rule #parseToken("Id",S:String) => (String2Id(S))
 
-  // Check if an identifier is capitalized.  Useful for languages like Prolog
-  syntax CapitalizedId ::= "A-Dummy-Capitalized-Id-Just-Because-We-Do-Not-Allow-Empty-Productions-Yet"
-  rule isCapitalizedId(X) => true
-    when asciiString(substrString(Id2String(X),0,1)) <Int 96
-  rule isCapitalizedId(#symId(_)) => true
-
+  syntax String ::= "#tokenToString" "(" K ")"    [function, klabel(#tokenToString)]
 endmodule

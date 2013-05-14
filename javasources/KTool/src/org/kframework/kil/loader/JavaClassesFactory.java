@@ -60,16 +60,9 @@ public class JavaClassesFactory {
 		if (Constants.CONST.equals(element.getNodeName())) {
             if (element.getAttribute(Constants.SORT_sort_ATTR).equals(KSorts.KLABEL)) {
                 return new KLabelConstant(element);
-            } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(BoolBuiltin.SORT_NAME)) {
-                return new BoolBuiltin(element);
-            } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(IntBuiltin.SORT_NAME)) {
-                return new IntBuiltin(element);
-            } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(FloatBuiltin.SORT_NAME)) {
-                return new FloatBuiltin(element);
-            } else if (element.getAttribute(Constants.SORT_sort_ATTR).equals(StringBuiltin.SORT_NAME)) {
-                return new StringBuiltin(element);
             } else {
-                return new Constant(element);
+                // builtin token or lexical token
+                return Token.kAppOf(element);
             }
         }
 		if (Constants.KAPP.equals(element.getNodeName()))
@@ -119,7 +112,6 @@ public class JavaClassesFactory {
 		if (Constants.CONTEXT.equals(element.getNodeName()))
 			return new Context(element);
 		if (Constants.HOLE.equals(element.getNodeName()))
-			//return new Hole(element);
             return Hole.KITEM_HOLE;
 		if (Constants.FREEZERHOLE.equals(element.getNodeName()))
 			return new FreezerHole(element);

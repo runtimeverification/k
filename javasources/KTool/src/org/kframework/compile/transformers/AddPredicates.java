@@ -7,6 +7,7 @@ import org.kframework.kil.Attribute;
 import org.kframework.kil.BoolBuiltin;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Context;
+import org.kframework.kil.Definition;
 import org.kframework.kil.Empty;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
@@ -34,6 +35,8 @@ import java.util.Set;
 public class AddPredicates extends CopyOnWriteTransformer {
 
     public static final KLabelConstant K2Sort = KLabelConstant.of("K2Sort");
+
+    private static Set<String> tokenNames;
 
     public class PredicatesVisitor extends BasicVisitor {
 
@@ -80,6 +83,11 @@ public class AddPredicates extends CopyOnWriteTransformer {
             if (node.containsAttribute("predicate"))
                 return;
 
+            if (node.isLexical()) {
+                /* predicate definition for token sorts is deferred to each backend */
+                return;
+            }
+
             String sort = node.getSort();
             Term term = MetaK.getTerm(node);
 
@@ -96,7 +104,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
             // define K2Sort for syntactic production (excluding subsorts)
             if (!node.isSubsort()) {
                 lhs = KApp.of(K2Sort, term);
-                rhs = StringBuiltin.of(sort);
+                rhs = StringBuiltin.kAppOf(sort);
                 rule = new Rule(lhs, rhs);
                 rule.addAttribute(Attribute.FUNCTION);
                 result.add(rule);
@@ -150,6 +158,11 @@ public class AddPredicates extends CopyOnWriteTransformer {
         return predicate(SymbolicPredicatePrefix + sort);
     }
 
+    @Override
+    public ASTNode transform(Definition node) throws TransformerException {
+        tokenNames = node.tokenNames();
+        return super.transform(node);
+    }
 
     @Override
     public ASTNode transform(Module node) throws TransformerException {
@@ -173,7 +186,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
                     retNode.addConstant(KSorts.KLABEL, symPred);
 
                     // define isSymbolicSort predicate as the conjunction of isSort and isSymbolicK
-                    Variable var = MetaK.getFreshVar("K");
+                    Variable var = Variable.getFreshVar("K");
                     Term lhs = KApp.of(KLabelConstant.of(symPred), var);
                     Term rhs = KApp.of(
                             KLabelConstant.BOOL_ANDTHENBOOL_KLABEL,
@@ -184,7 +197,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
                     retNode.appendModuleItem(rule);
 
                     String symCtor = AddSymbolicK.symbolicConstructor(sort);
-                    var = MetaK.getFreshVar(KSorts.KLIST);
+                    var = Variable.getFreshVar(KSorts.KLIST);
                     Term symTerm = KApp.of(KLabelConstant.of(symCtor), var);
 
                     // define isSort for symbolic sort constructor symSort
@@ -200,12 +213,15 @@ public class AddPredicates extends CopyOnWriteTransformer {
                     // define K2Sort function for symbolic sort constructor
                     // symSort
                     lhs = KApp.of(K2Sort, symTerm);
-                    rhs = StringBuiltin.of(sort);
+                    rhs = StringBuiltin.kAppOf(sort);
                     rule = new Rule(lhs, rhs);
                     rule.addAttribute(Attribute.FUNCTION);
                     retNode.appendModuleItem(rule);
+                } else if (tokenNames.contains(sort)) {
+                    // define isSort predicate for token sorts
+
                 } else if (MetaK.isBuiltinSort(sort)) {
-                    Variable var = MetaK.getFreshVar(sort);
+                    Variable var = Variable.getFreshVar(sort);
                     Term lhs = KApp.of(BuiltinPredicate, var);
                     Rule rule = new Rule(lhs, BoolBuiltin.TRUE);
                     rule.addAttribute(Attribute.PREDICATE);

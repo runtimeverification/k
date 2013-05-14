@@ -91,8 +91,8 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
                 retNode.addSubsort(EQUALITY_SORT, sort);
 
                 KList kList = new KList();
-                kList.add(MetaK.getFreshVar(sort));
-                kList.add(MetaK.getFreshVar(sort));
+                kList.add(Variable.getFreshVar(sort));
+                kList.add(Variable.getFreshVar(sort));
 
                 Term lhs = new KApp(KLabelConstant.KEQ, kList);
                 Term rhs = new KApp(sortEq, kList);
@@ -109,8 +109,8 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
                     && !prod.containsAttribute(Attribute.FUNCTION.getKey())
                     && !prod.containsAttribute(Attribute.PREDICATE.getKey())
                     && (!MetaK.isKSort(prod.getSort()) || prod.getSort().equals(KSorts.K))) {
-                Variable KListVar1 = MetaK.getFreshVar(KSorts.KLIST);
-                Variable KListVar2 = MetaK.getFreshVar(KSorts.KLIST);
+                Variable KListVar1 = Variable.getFreshVar(KSorts.KLIST);
+                Variable KListVar2 = Variable.getFreshVar(KSorts.KLIST);
 
                 KList lhsList = new KList();
                 lhsList.add(new KApp(KLabelConstant.of(prod.getKLabel()), KListVar1));

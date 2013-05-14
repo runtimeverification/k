@@ -1,5 +1,6 @@
 package org.kframework.kil;
 
+import org.kframework.compile.sharing.TokenSorts;
 import org.kframework.kil.loader.AddConsesVisitor;
 import org.kframework.kil.loader.CollectConfigCellsVisitor;
 import org.kframework.kil.loader.CollectConsesVisitor;
@@ -25,9 +26,11 @@ import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Represents a language definition.
@@ -37,15 +40,17 @@ import java.util.Map;
  */
 public class Definition extends ASTNode {
 
-	private java.util.List<DefinitionItem> items;
+	private List<DefinitionItem> items;
 	private String mainFile;
 	private String mainModule;
 	/** An index of all modules in {@link #items} by name */
 	private Map<String, Module> modulesMap;
 	private String mainSyntaxModule;
+    private final Set<String> tokenNames;
 
 	public Definition() {
 		super("File System", "generated");
+        tokenNames = new HashSet<String>();
 	}
 
 	public Definition(Definition d) {
@@ -54,6 +59,7 @@ public class Definition extends ASTNode {
 		this.mainModule = d.mainModule;
 		this.mainSyntaxModule = d.mainSyntaxModule;
 		this.items = d.items;
+        this.tokenNames = new HashSet<String>(d.tokenNames);
 	}
 
 	public Definition(Element element) {
@@ -67,6 +73,8 @@ public class Definition extends ASTNode {
 		List<Element> elements = XML.getChildrenElements(element);
 		for (Element e : elements)
 			items.add((DefinitionItem) JavaClassesFactory.getTerm(e));
+
+        tokenNames = new HashSet<String>();
 	}
 
 	public void appendDefinitionItem(DefinitionItem di) {
@@ -139,6 +147,11 @@ public class Definition extends ASTNode {
 		this.accept(new CollectConfigCellsVisitor());
 		this.accept(new UpdateAssocVisitor());
 		this.accept(new CollectLocationsVisitor());
+        TokenSorts tokenSortsVisitor = new TokenSorts();
+        this.accept(tokenSortsVisitor);
+        tokenNames.addAll(tokenSortsVisitor.getNames());
+        // TODO: fix #Id
+        tokenNames.add("#Id");
 		DefinitionHelper.initialized = true;
 	}
 
@@ -182,6 +195,13 @@ public class Definition extends ASTNode {
 		result.setItems(newDefinitionItems);
 		return result;
 	}
+
+    /**
+     * Returns a list containing the names of the token productions in this definition.
+     */
+    public Set<String> tokenNames() {
+        return tokenNames;
+    }
 
 	@Override
 	public Definition shallowCopy() {

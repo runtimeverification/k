@@ -94,7 +94,7 @@ public abstract class BasicBackend implements Backend {
 		steps.add(new ResolveBuiltins());
 		steps.add(new ResolveListOfK());
 		steps.add(new FlattenSyntax());
-		steps.add(new AddKLabelToString());
+		steps.add(new AddKStringConversion());
 		steps.add(new AddKLabelConstant());
 		steps.add(new ResolveHybrid());
 		steps.add(new ResolveConfigurationAbstraction (configurationStructureMap));

@@ -1,11 +1,13 @@
 package org.kframework.backend.maude;
 
 import org.kframework.backend.BackendFilter;
+import org.kframework.compile.transformers.AddPredicates;
 import org.kframework.compile.utils.ConfigurationStructure;
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.MaudeHelper;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
+import org.kframework.kil.Collection;
 import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.utils.StringUtil;
@@ -18,6 +20,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 public class MaudeFilter extends BackendFilter {
+    private Definition definition;
 	private boolean firstAttribute;
 	ConfigurationStructureMap cfgStr;
 
@@ -30,8 +33,11 @@ public class MaudeFilter extends BackendFilter {
 	}
 
 	@Override
-	public void visit(Definition def) {
-		for (DefinitionItem di : def.getItems()) {
+	public void visit(Definition definition) {
+        // TODO: remove hack for token membership predicates
+        this.definition = definition;
+
+		for (DefinitionItem di : definition.getItems()) {
 			di.accept(this);
 			result.append(" \n");
 		}
@@ -55,10 +61,29 @@ public class MaudeFilter extends BackendFilter {
 			result.append("mod ");
 			result.append(mod.getName());
 			result.append(" is\n");
+
+            // TODO: move declaration of #token in a .maude file
+            result.append("op #token : #String #String -> KLabel .\n");
+
 			for (ModuleItem mi : mod.getItems()) {
 				mi.accept(this);
 				result.append("\n");
 			}
+
+            for (String sort : definition.tokenNames()) {
+                String tokenKItem = "_`(_`)(#token(\"" + sort + "\", V:" + StringBuiltin.SORT_NAME
+                                    + "), .KList)";
+                String sortKItem = "_`(_`)(#_(\"" + sort + "\")" + ", .KList)";
+                String valueKItem = "_`(_`)(#_(V:" + StringBuiltin.SORT_NAME + ")" + ", .KList)";
+                result.append("eq _`(_`)(" + AddPredicates.syntaxPredicate(sort) + ", "
+                              + tokenKItem + ") = _`(_`)(#_(true), .KList) .\n");
+                result.append("eq _`(_`)(#parseToken, _`,`,_(" + sortKItem + ", " + valueKItem
+                              + ")) = " + tokenKItem + " .\n");
+                result.append("eq _`(_`)(#tokenToString, " + tokenKItem + ") = " + valueKItem
+                              + " .\n");
+            }
+            definition.tokenNames().clear();
+
 			result.append("\nendm");
 		}
 	}
@@ -355,6 +380,10 @@ public class MaudeFilter extends BackendFilter {
 
 	@Override
 	public void visit(Variable variable) {
+        if (MetaK.isBuiltinSort(variable.getSort())) {
+            result.append("_`(_`)(");
+            result.append("#_(");
+        }
 		if (variable.getName().equals(MetaK.Constants.anyVarSymbol)) {
 			result.append("?");
 		} else {
@@ -362,6 +391,12 @@ public class MaudeFilter extends BackendFilter {
 		}
 		result.append(":");
 		result.append(variable.getSort());
+        if (MetaK.isBuiltinSort(variable.getSort())) {
+            result.append(")");
+            result.append(", ");
+            result.append(".KList");
+            result.append(") ");
+        }
 	}
 
 	@Override
@@ -524,6 +559,7 @@ public class MaudeFilter extends BackendFilter {
 
 	@Override
 	public void visit(Constant constant) {
+        assert false : "dead code";
 		if (constant.getSort().equals("#Id")) {
 			result.append("#id \"");
 		}
@@ -534,8 +570,12 @@ public class MaudeFilter extends BackendFilter {
 	}
 
     @Override
-    public void visit(Builtin builtin) {
-        result.append(builtin);
+    public void visit(Token token) {
+        if (token instanceof GenericToken) {
+            result.append(token);
+        } else {
+            result.append("#_(" + token.value() + ")");
+        }
     }
 
 	@Override

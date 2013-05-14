@@ -135,21 +135,10 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 						return new Ambiguity("K", possibleTerms);
 					}
 				}
-			} else if (klabel.equals("#token")) {
-				if (contents.size() != 2) {
-					return super.transform(kapp);
-				}
-				ASTNode sortNode = contents.get(0).accept(this);
-				ASTNode valueNode = contents.get(1).accept(this);
-				if (!(sortNode instanceof StringBuiltin && valueNode instanceof StringBuiltin)) {
-					return super.transform(kapp);
-				}
-				StringBuiltin sort = (StringBuiltin) sortNode;
-				StringBuiltin value = (StringBuiltin) valueNode;
-
-				return new Constant(sort.getValue(), value.getValue());
 			}
-		}
+		} else if (label instanceof Token) {
+            return new Constant(((Token) label).tokenSort(), ((Token) label).value());
+        }
 		return super.transform(kapp);
 	}
 

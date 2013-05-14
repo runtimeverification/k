@@ -16,6 +16,10 @@ import org.w3c.dom.Element;
  */
 public abstract class Builtin extends Term {
 
+    public static Builtin of(String sort, String value) {
+        return null;
+    }
+
     protected Builtin(String sort) {
         super(sort);
     }
