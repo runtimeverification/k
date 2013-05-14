@@ -23,6 +23,8 @@ module ARRAY
   imports ARRAY-SYNTAX
   imports K-EQUAL-HOOKS
   imports INT-HOOKS
+  imports BOOL-HOOKS
+  imports STRING-HOOKS
 
   // Int can be used as an index by default; the below rules should be added 
   // for each type used as an index
