@@ -421,6 +421,61 @@
 
 
 <!--
+    Cink ltlmc
+-->
+
+  <test
+      language="dist/examples/cink/ltlmc/cink.k"
+      folder="dist/examples/cink/ltlmc/programs"
+      extensions="cink"
+      results="tests/examples/cink/ltlmc" 
+      exclude="form-peterson.cink form-dekker.cink form-threads.cink peterson-wrong1.cink peterson-wrong2.cink" >
+      <kompile-option name="-transition" value="kripke" />
+      <all-programs>
+        <krun-option name="-ltlmc" value="[]Ltl ((eqTo(critical1, 1) ->Ltl eqTo(critical2, 0)) /\Ltl (eqTo(critical2, 1) ->Ltl eqTo(critical1, 0)))" />
+      </all-programs>
+  </test>
+
+
+<!--
+    Cink basic
+-->
+
+  <test
+      language="dist/examples/cink/basic/cink.k"
+      folder="dist/examples/cink/basic/programs"
+      extensions="cink"
+      results="tests/examples/cink/basic" 
+      exclude="fact.cink prim.cink"
+      >
+  </test>
+
+<!--
+    Program equivalence
+-->
+
+  <test
+      language="dist/examples/prog-equiv/peq.k"
+      folder="dist/examples/prog-equiv/programs"
+      extensions="peq"
+      results="tests/examples/prog-equiv/" > 
+      <kompile-option name="-addTopCell" />
+  </test>
+
+<!--
+    
+-->
+  <test
+      language="dist/tutorial/2_imp/lesson_4/imp.k"
+      folder="dist/tutorial/2_imp"
+      extensions="imp"
+      report-dir="symbolic.imp"
+      >
+    <kompile-option name="--symbolic" />
+  </test>
+
+
+<!--
     Regression tests
 -->
 
@@ -545,61 +600,6 @@
       </program>
   </test>
 
-
-<!--
-    Cink ltlmc
--->
-
-  <test
-      language="dist/examples/cink/ltlmc/cink.k"
-      folder="dist/examples/cink/ltlmc/programs"
-      extensions="cink"
-      results="tests/examples/cink/ltlmc" 
-      exclude="form-peterson.cink form-dekker.cink form-threads.cink peterson-wrong1.cink peterson-wrong2.cink" >
-      <kompile-option name="-transition" value="kripke" />
-      <all-programs>
-        <krun-option name="-ltlmc" value="[]Ltl ((eqTo(critical1, 1) ->Ltl eqTo(critical2, 0)) /\Ltl (eqTo(critical2, 1) ->Ltl eqTo(critical1, 0)))" />
-      </all-programs>
-  </test>
-
-
-<!--
-    Cink basic
--->
-
-  <test
-      language="dist/examples/cink/basic/cink.k"
-      folder="dist/examples/cink/basic/programs"
-      extensions="cink"
-      results="tests/examples/cink/basic" 
-      exclude="fact.cink prim.cink"
-      >
-  </test>
-
-<!--
-    Program equivalence
--->
-
-  <test
-      language="dist/examples/prog-equiv/peq.k"
-      folder="dist/examples/prog-equiv/programs"
-      extensions="peq"
-      results="tests/examples/prog-equiv/" > 
-      <kompile-option name="-addTopCell" />
-  </test>
-
-<!--
-    
--->
-  <test
-      language="dist/tutorial/2_imp/lesson_4/imp.k"
-      folder="dist/tutorial/2_imp"
-      extensions="imp"
-      report-dir="symbolic.imp"
-      >
-    <kompile-option name="--symbolic" />
-  </test>
-
   <test
       language="tests/regression/unparsing/issue.k"
       folder="tests/regression/unparsing/programs"
@@ -609,4 +609,11 @@
         <krun-option name="--output-mode" value="pretty" />
       </all-programs>
   </test>
+
+  <test
+      language="tests/regression/issue647/issue.k"
+      folder="tests/regression/issue647"
+      results="tests/regression/issue647"
+      extensions="issue" />
 </tests>
+
