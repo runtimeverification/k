@@ -180,7 +180,7 @@ public class LatexFilter extends BackendFilter {
 		final boolean parens = wantParens.peek();
 		final boolean hasBR = containsBR(col);
         if (col.isEmpty()) {
-		    result.append("\\dotCt{" + col.getSort(definitionHelper) + "}");
+            printEmpty(col.getSort(definitionHelper));
             return;
         }
 		if (hasBR) {
@@ -253,10 +253,14 @@ public class LatexFilter extends BackendFilter {
 
 	@Override
 	public void visit(Empty e) {
-		result.append("\\dotCt{" + e.getSort() + "}");
-	}
+        printEmpty(e.getSort());
+    }
 
-	@Override
+    private void printEmpty(String sort) {
+        result.append("\\dotCt{" + sort + "}");
+    }
+
+    @Override
 	public void visit(Rule rule) {
 		// termComment = false;
 		result.append("\\krule");
@@ -368,7 +372,8 @@ public class LatexFilter extends BackendFilter {
 
 	@Override
 	public void visit(KSequence k) {
-		printList(k.getContents(), "\\kra");
+        if (k.getContents().isEmpty()) printEmpty(KSort.K.name());
+		else printList(k.getContents(), "\\kra");
 
 	}
 
