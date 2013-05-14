@@ -5,7 +5,7 @@ import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.utils.DefinitionLoader;
+import org.kframework.parser.DefinitionLoader;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -197,17 +197,13 @@ public class AddBracketsFilter2 extends BasicTransformer {
 		private String realLocation;
 
 		public ASTNode transform(Ambiguity amb) throws TransformerException {
-			GetRealLocation visitor = new GetRealLocation(ast, definitionHelper);
-			amb.accept(visitor);
-			if (visitor.realTerm == null) return amb;
-			realLocation = visitor.realTerm.getLocation();
+			realLocation = ast.getLocation();
 			for (int i = amb.getContents().size() - 1; i >= 0; i--) {
 				Term t = amb.getContents().get(i);
 				boolean tmp = hasTerm;
 				hasTerm = false;
 				t.accept(this);
 				if (!hasTerm) {
-					System.err.println(realLocation);
 					needsParens = true;
 					amb.getContents().remove(i);
 				}

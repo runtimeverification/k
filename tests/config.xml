@@ -610,6 +610,20 @@
   </test>
 
   <test
+      language="tests/regression/addbrackets/issue.k"
+      folder="tests/regression/addbrackets/programs"
+      extensions="issue"
+      results="tests/regression/addbrackets/out/">
+      <all-programs>
+        <krun-option name="--output-mode" value="pretty" />
+	<krun-option name="--parser" value="kast -groundParser" />
+        <krun-option name="--no-parens" />
+      </all-programs>
+  </test>
+
+
+
+  <test
       language="tests/regression/issue647/issue.k"
       folder="tests/regression/issue647"
       results="tests/regression/issue647"
