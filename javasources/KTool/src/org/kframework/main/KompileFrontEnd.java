@@ -18,6 +18,7 @@ import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.parser.DefinitionLoader;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
@@ -251,7 +252,7 @@ public class KompileFrontEnd {
 		org.kframework.kil.Definition javaDef;
 		try {
 			Stopwatch.sw.Start();
-			javaDef = org.kframework.utils.DefinitionLoader.loadDefinition(mainFile, lang, backend.autoinclude(), definitionHelper);
+			javaDef = DefinitionLoader.loadDefinition(mainFile, lang, backend.autoinclude(), definitionHelper);
 
 			CompilerSteps<Definition> steps = backend.getCompilationSteps();
 
@@ -280,7 +281,7 @@ public class KompileFrontEnd {
 	// private static void lint(File mainFile, String mainModule) {
 	// try {
 	// File canonicalFile = mainFile.getCanonicalFile();
-	// org.kframework.kil.Definition javaDef = org.kframework.utils.DefinitionLoader.parseDefinition(canonicalFile, mainModule, true);
+	// org.kframework.kil.Definition javaDef = org.kframework.parser.DefinitionLoader.parseDefinition(canonicalFile, mainModule, true);
 	//
 	// KlintRule lintRule = new UnusedName(javaDef);
 	// lintRule.run();

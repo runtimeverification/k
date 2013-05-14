@@ -13,7 +13,7 @@ import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.K;
-import org.kframework.utils.DefinitionLoader;
+import org.kframework.parser.DefinitionLoader;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.general.GlobalSettings;
 

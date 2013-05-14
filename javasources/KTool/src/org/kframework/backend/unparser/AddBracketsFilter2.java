@@ -5,7 +5,7 @@ import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.utils.DefinitionLoader;
+import org.kframework.parser.DefinitionLoader;
 
 import java.io.IOException;
 import java.util.HashMap;

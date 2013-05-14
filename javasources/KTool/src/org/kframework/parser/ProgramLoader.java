@@ -1,4 +1,4 @@
-package org.kframework.utils;
+package org.kframework.parser;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,6 +20,9 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
+import org.kframework.utils.BinaryLoader;
+import org.kframework.utils.Stopwatch;
+import org.kframework.utils.XmlLoader;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;

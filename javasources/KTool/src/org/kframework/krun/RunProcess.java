@@ -1,11 +1,11 @@
 package org.kframework.krun;
 
 import org.kframework.krun.tasks.MaudeTask;
-import org.kframework.utils.ProgramLoader;
 import org.kframework.kil.BackendTerm;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.parser.ProgramLoader;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;

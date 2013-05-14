@@ -1,4 +1,4 @@
-package org.kframework.utils;
+package org.kframework.parser;
 
 import com.thoughtworks.xstream.XStream;
 import org.kframework.compile.checks.*;
@@ -10,6 +10,11 @@ import org.kframework.kil.loader.*;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.concrete.disambiguate.*;
 import org.kframework.parser.generator.*;
+import org.kframework.utils.BinaryLoader;
+import org.kframework.utils.ResourceExtractor;
+import org.kframework.utils.Sdf2Table;
+import org.kframework.utils.Stopwatch;
+import org.kframework.utils.XmlLoader;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;

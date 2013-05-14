@@ -1,4 +1,4 @@
-package org.kframework.main;
+package org.kframework.kast;
 
 import org.apache.commons.cli.*;
 

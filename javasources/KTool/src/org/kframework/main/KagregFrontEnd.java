@@ -14,6 +14,7 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.Module;
+import org.kframework.parser.DefinitionLoader;
 import org.kframework.utils.Error;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -56,11 +57,11 @@ public class KagregFrontEnd {
 		DefinitionHelper definitionHelper = new DefinitionHelper();
 		definitionHelper.dotk = new File(firstDefinitionFile.getCanonicalFile().getParent() + File.separator + ".k");
 		definitionHelper.dotk.mkdirs();
-		Definition firstDef = org.kframework.utils.DefinitionLoader.loadDefinition(firstDefinitionFile, firstLang, true, definitionHelper);
+		Definition firstDef = DefinitionLoader.loadDefinition(firstDefinitionFile, firstLang, true, definitionHelper);
 		
 		definitionHelper.dotk = new File(secondDefinitionFile.getCanonicalFile().getParent() + File.separator + ".k");
 		definitionHelper.dotk.mkdirs();
-		Definition secondDef = org.kframework.utils.DefinitionLoader.loadDefinition(secondDefinitionFile, secondLang, true, definitionHelper);
+		Definition secondDef = DefinitionLoader.loadDefinition(secondDefinitionFile, secondLang, true, definitionHelper);
 		
 		Configuration firstConf = null;
 		try {

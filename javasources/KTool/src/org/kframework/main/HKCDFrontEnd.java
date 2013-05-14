@@ -5,6 +5,8 @@ import org.kframework.backend.hkcd.HaskellDefFilter;
 import org.kframework.backend.hkcd.HaskellPgmFilter;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.parser.DefinitionLoader;
+import org.kframework.parser.ProgramLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -106,9 +108,9 @@ public class HKCDFrontEnd {
 			File dotk = new File(defCanonical.getParent() + fileSep + ".k");
 			dotk.mkdirs();
 
-			org.kframework.kil.Definition langDef = org.kframework.utils.DefinitionLoader.loadDefinition(defFile, mainModule, true, definitionHelper);
+			org.kframework.kil.Definition langDef = DefinitionLoader.loadDefinition(defFile, mainModule, true, definitionHelper);
 
-			ASTNode pgmAst = org.kframework.utils.ProgramLoader.loadPgmAst(pgmFile, false, definitionHelper.startSymbolPgm, definitionHelper);
+			ASTNode pgmAst = ProgramLoader.loadPgmAst(pgmFile, false, definitionHelper.startSymbolPgm, definitionHelper);
 
 			HaskellPgmFilter hpf = new HaskellPgmFilter(definitionHelper);
 			pgmAst.accept(hpf);

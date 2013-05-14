@@ -1,5 +1,5 @@
-require "string.k"
-require "k-equal.k"
+require "builtins/string.k"
+require "builtins/k-equal.k"
 module TCP-HOOKS
   imports STRING-HOOKS
   imports K-EQUAL-HOOKS

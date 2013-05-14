@@ -14,8 +14,8 @@ import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.krun.K;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.api.Transition.TransitionType;
+import org.kframework.parser.DefinitionLoader;
 import org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor;
-import org.kframework.utils.DefinitionLoader;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.util.Set;

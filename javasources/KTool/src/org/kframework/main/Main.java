@@ -22,7 +22,7 @@ public class Main {
 			} else if (args[0].equals("-kagreg")) {
 				KagregFrontEnd.kagreg(args2);
 			} else if (args[0].equals("-kast")) {
-				KastFrontEnd.kast(args2);
+				org.kframework.kast.KastFrontEnd.kast(args2);
 			} else if (args[0].equals("-hkcd")) {
 				HKCDFrontEnd.hkcd(args2);
 			} else if (args[0].equals("-krun")) {

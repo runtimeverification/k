@@ -1,4 +1,4 @@
-package org.kframework.main;
+package org.kframework.kast;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,6 +14,7 @@ import org.kframework.compile.transformers.AddTopCellConfig;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.parser.ProgramLoader;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
@@ -187,7 +188,7 @@ public class KastFrontEnd {
 		}
 
 		try {
-			ASTNode out = org.kframework.utils.ProgramLoader.processPgm(pgm, path, javaDef, sort, definitionHelper);
+			ASTNode out = ProgramLoader.processPgm(pgm, path, javaDef, sort, definitionHelper);
 			String kast;
 			if (prettyPrint) {
 				KastFilter kastFilter = new KastFilter(indentationOptions, nextline, definitionHelper);

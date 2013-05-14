@@ -61,9 +61,10 @@ public class TermCons extends Term {
 		return definitionHelper.conses.get(getCons());
 	}
 
-	public String toString(DefinitionHelper definitionHelper) {
+	@Override
+	public String toString() {
 		String str = "";
-		Production pr = definitionHelper.conses.get(cons);
+		Production pr = DefinitionHelper.conses.get(cons);
 
 		if (pr.items.size() > 0) {
 			if (pr.items.get(0).getType() == ProductionType.USERLIST) {

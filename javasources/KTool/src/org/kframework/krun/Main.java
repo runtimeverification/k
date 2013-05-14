@@ -20,9 +20,9 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.api.*;
 import org.kframework.krun.gui.Controller.RunKRunCommand;
 import org.kframework.krun.gui.UIDesign.MainWindow;
+import org.kframework.parser.DefinitionLoader;
 import org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor;
 import org.kframework.utils.BinaryLoader;
-import org.kframework.utils.DefinitionLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -137,7 +137,7 @@ public class Main {
 	private static Term parseTerm(String value, DefinitionHelper definitionHelper) throws Exception {
 		org.kframework.parser.concrete.KParser.ImportTblGround(K.compiled_def
 				+ "/ground/Concrete.tbl");
-		ASTNode term = org.kframework.utils.DefinitionLoader.parseCmdString(
+		ASTNode term = DefinitionLoader.parseCmdString(
 				value, "", "Command line argument", definitionHelper);
 		return (Term) term.accept(new FlattenSyntax(definitionHelper));
 	}
