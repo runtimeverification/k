@@ -2,10 +2,12 @@ package org.kframework.backend.maude;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.kframework.backend.BasicBackend;
+import org.kframework.compile.sharing.FreshVariableNormalizer;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Production;
 import org.kframework.kil.UserList;
 import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.general.GlobalSettings;
@@ -21,7 +23,10 @@ public class MaudeBackend extends BasicBackend {
 
 	@Override
 	public void run(Definition definition) throws IOException {
-		MaudeFilter maudeFilter = new MaudeFilter
+        try {
+            definition = (Definition) definition.accept(new FreshVariableNormalizer());
+        } catch (TransformerException e) { }
+        MaudeFilter maudeFilter = new MaudeFilter
 				(getConfigurationStructureMap());
 		definition.accept(maudeFilter);
 

@@ -30,7 +30,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
-
+/**
+ * Compile a K definition symbolically, using both basic
+ * and specific compilation steps. 
+ * @author andreiarusoaie
+ *
+ */
 public class SymbolicBackend extends BasicBackend implements Backend {
 
 	public static String SYMBOLIC = "symbolic-kompile";

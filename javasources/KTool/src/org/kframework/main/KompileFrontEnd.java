@@ -234,8 +234,6 @@ public class KompileFrontEnd {
 			}
 		}
 
-
-
 		verbose(cmd);
 	}
 

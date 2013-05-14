@@ -38,6 +38,15 @@ public class AddPathCondition extends CopyOnWriteTransformer {
     }
 
     @Override
+    /**
+     * Construct the path condition by adding to the original 
+     * path condition (phi) the side condition (SC) of the rule. 
+     * If NOSMT is set, then the side condition of the rule
+     * remains unchanged. Otherwise, we filter the condition
+     * separating the predicates(P) from 'smtlib' translatable
+     * expressions and we add as side condition of the rule
+     * checkSat(SC-P) =/= unsat.
+     */
     public ASTNode transform(Rule node) throws TransformerException {
 
         if (!node.containsAttribute(SymbolicBackend.SYMBOLIC)) {
@@ -48,6 +57,7 @@ public class AddPathCondition extends CopyOnWriteTransformer {
             return node;
 
         Term condition = node.getCondition();
+        Term originalCondition = condition.shallowCopy();
         CollapseAndBoolTransformer cnft = new CollapseAndBoolTransformer();
         condition = (Term) node.getCondition().accept(cnft);
 
@@ -99,6 +109,8 @@ public class AddPathCondition extends CopyOnWriteTransformer {
                 myList.add(condition);
                 myList.add(checkSat(pathCondition));
                 cond = new KApp(KLabelConstant.ANDBOOL_KLABEL, new KList(myList));
+            }else {
+            	cond = originalCondition;
             }
 
             // add transition attribute

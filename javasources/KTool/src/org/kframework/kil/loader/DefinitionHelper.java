@@ -307,4 +307,22 @@ public class    DefinitionHelper {
         return productions;
     }
 
+	public static Term kWrapper(Term t) {
+		if (isSubsortedEq("K", t.getSort()))
+			return t;
+		return KApp.of(new KInjectedLabel(t));
+	}
+
+	public static String getCellSort(String sort) {
+		sort = MetaK.getCellSort2(sort);
+		String cellName = sort;
+		if (sort.endsWith(MetaK.fragment)) {
+			cellName = sort.substring(0, sort.length() - MetaK.fragment.length());
+		}
+		if (cells.containsKey(cellName)) {
+			return sort;
+		}
+		return sort.substring(0,1).toUpperCase() + sort.substring(1);
+	}
+
 }

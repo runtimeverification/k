@@ -3,10 +3,10 @@ module MINIMP-SYNTAX
 syntax Exp ::= Id
        	     | Int
 	     | Bool
-	     | Exp "+" Exp [strict]
-	     | Exp "-" Exp [strict]
-	     | Exp "==" Exp [strict]
-	     | Exp "<" Exp [strict]
+	     | Exp "i+" Exp [strict]
+	     | Exp "i-" Exp [strict]
+	     | Exp "i==" Exp [strict]
+	     | Exp "i<" Exp [strict]
 
 syntax Stmt ::= Id ":=" Exp [strict(2)]
               | "skip"
@@ -22,19 +22,19 @@ endmodule
 module MINIMP
   imports MINIMP-SYNTAX
 
-configuration <t> <k> $PGM:Code </k> <env> .Map </env> </t>
+configuration <t> <k> $PGM:K </k> <env> .Map </env> </t>
 
 syntax KResult ::= Int | Bool
 
 rule <k> I:Id => I1:Int ...</k> <env>... I |-> I1 ...</env>
 
-rule I1:Int + I2:Int => I1 +Int I2
+rule I1:Int i+ I2:Int => I1 +Int I2
 
-rule I1:Int - I2:Int => I1 -Int I2
+rule I1:Int i- I2:Int => I1 -Int I2
 
-rule I1:Int == I2:Int => I1 ==Int I2
+rule I1:Int i== I2:Int => I1 ==Int I2
 
-rule I1:Int < I2:Int => I1 <Int I2
+rule I1:Int i< I2:Int => I1 <Int I2
 
 rule <k> I:Id := I1:Int => . ...</k> <env>... I |-> (_ => I1) ...</env>
 

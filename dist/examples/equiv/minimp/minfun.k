@@ -1,17 +1,17 @@
 module MINFUN-SYNTAX
 
-syntax Exp ::= Id
-	     | Exp "+" Exp [strict]
-	     | Exp "-" Exp [strict]
-	     | Exp "==" Exp [strict]
-	     | Exp "<" Exp [strict]
-	     | "if" Exp "then" Exp "else" Exp [strict(1)]
+syntax FExp ::= Id
+	     | FExp "f+" FExp [strict]
+	     | FExp "f-" FExp [strict]
+	     | FExp "f==" FExp [strict]
+	     | FExp "f<" FExp [strict]
+	     | "if" FExp "then" FExp "else" FExp [strict(1)]
 	     | Val
-	     | "fix" Id Exp [binder]
-	     > Exp Exp [seqstrict]
-	     | "(" Exp ")" [bracket]
+	     | "fix" Id FExp [binder]
+	     > FExp FExp [seqstrict]
+	     | "(" FExp ")" [bracket]
 
-syntax Val ::= "lambda" Id "." Exp [binder]
+syntax Val ::= "lambda" Id "." FExp [binder]
              | Int
 	     | Bool
 
@@ -21,24 +21,24 @@ module MINFUN
   imports MINFUN-SYNTAX
   imports SUBSTITUTION
 
-configuration <t> <k> $PGM:Exp </k> </t>
+configuration <t> <k> $PGM:K </k> </t>
 
 syntax KResult ::= Val
 
-rule I1:Int + I2:Int => I1 +Int I2
+rule I1:Int f+ I2:Int => I1 +Int I2
 
-rule I1:Int - I2:Int => I1 -Int I2
+rule I1:Int f- I2:Int => I1 -Int I2
 
-rule I1:Int == I2:Int => I1 ==Int I2
+rule I1:Int f== I2:Int => I1 ==Int I2
 
-rule I1:Int < I2:Int => I1 <Int I2
+rule I1:Int f< I2:Int => I1 <Int I2
 
-rule if true then S1:Exp else _ => S1
+rule if true then S1:FExp else _ => S1
 
-rule if false then _ else S2:Exp => S2
+rule if false then _ else S2:FExp => S2
 
-rule (lambda X:Id . E:Exp) V:Val => E[V / X]
+rule (lambda X:Id . E:FExp) V:Val => E[V / X]
 
-rule fix X:Id E:Exp => E[fix X E / X]
+rule fix X:Id E:FExp => E[fix X E / X]
 
 endmodule

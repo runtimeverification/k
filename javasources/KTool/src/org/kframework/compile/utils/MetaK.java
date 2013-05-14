@@ -5,7 +5,6 @@ import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Collection;
 import org.kframework.kil.Map;
 import org.kframework.kil.ProductionItem.ProductionType;
-import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.Visitable;
@@ -24,6 +23,7 @@ public class MetaK {
 
 	private static final String cellSort = "CellSort";
 	private static final String cellFragment = "CellFragment";
+	public static final String fragment = "-fragment";
 
 	public static Term incrementCondition(Term condition, Term kresultCnd) {
 		if (condition == null) {
@@ -37,7 +37,7 @@ public class MetaK {
 				||bigSort.endsWith(cellFragment));
 	}
 
-	public static String getCellSort(String sort) {
+	public static String getCellSort2(String sort) {
 		sort = sort.substring(0,1).toLowerCase() + sort.substring(1);
 		if (sort.endsWith(cellSort)) {
 			return sort.substring(0, sort.length() - cellSort.length());
@@ -169,12 +169,6 @@ public class MetaK {
 		GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, "Don't know the default value for term " + v.toString() + ". Assuming .K", v.getFilename(), v
 				.getLocation()));
 		return KSequence.EMPTY;
-	}
-
-	public static Term kWrapper(Term t) {
-		if (DefinitionHelper.isSubsortedEq("K", t.getSort()))
-			return t;
-		return KApp.of(new KInjectedLabel(t));
 	}
 
 	public static boolean isKSort(String sort) {

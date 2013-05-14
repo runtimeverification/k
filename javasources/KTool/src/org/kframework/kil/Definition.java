@@ -187,4 +187,28 @@ public class Definition extends ASTNode {
 	public Definition shallowCopy() {
 		return new Definition(this);
 	}
+
+	public Configuration getSingletonConfiguration() throws ConfigurationNotUnique, ConfigurationNotFound {
+		Configuration result = null;
+		for (DefinitionItem i : this.getItems()) {
+			if (i instanceof Module) {
+				if (((Module)i).isPredefined()) {
+					continue;
+				}
+				for (ModuleItem j : ((Module) i).getItems()) {
+					if (j instanceof Configuration) {
+						if (result != null) {
+							throw new ConfigurationNotUnique();
+						} else {
+							result = (Configuration)j;
+						}
+					}
+				}
+			}
+		}
+		if (result == null) {
+			throw new ConfigurationNotFound();
+		}
+		return result;
+	}
 }
