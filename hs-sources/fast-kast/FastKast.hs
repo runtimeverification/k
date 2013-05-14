@@ -21,13 +21,6 @@ maudeEscape (c:cs)
   | otherwise = c:maudeEscape cs
 maudeEscape [] = []
 
-maudeUnescape :: String -> String
-maudeUnescape cs = unescape cs
-  where unescape ('`':c:cs) = c:unescape cs
-        unescape (c:cs) = c:unescape cs
-        unescape [] = []
-maudeUnescape cs = error cs
-
 kastSpecial :: [Char]
 kastSpecial = "`()"
 
@@ -63,10 +56,10 @@ parseConsTbl :: String -> Map String ConsInfo
 parseConsTbl t = Map.fromList
   [(a,ConsInfo (p=='*') (lblInfo b)) | (a,p:b) <- map splitTab (filter ((/="#").take 1) (lines t))]
  where lblInfo "B" = Bracket                 
-       lblInfo ('P':klabel) = Plain (maudeUnescape . unescape $ klabel)
+       lblInfo ('P':klabel) = Plain (unescape $ klabel)
        lblInfo ('L':lstinfo) =
          let (label,sep) = splitTab lstinfo
-         in UserList (maudeUnescape . unescape $ label) (unescape sep)
+         in UserList (unescape $ label) (unescape sep)
        lblInfo k = error $ "Bad production info string "++show k
 
 unescape :: String -> String
@@ -93,7 +86,7 @@ mkConst val sort = KApp (Token val sort) []
 -- Print a KAst term as kast does.
 printMetaMetaMeta :: KAst -> String
 printMetaMetaMeta (KApp (Token val sort) children)
-  | not (sort `elem` ["Int","Float","Bool","String","Id"]) =
+  | not (sort `elem` ["Int","Float","Bool","String","Id","KLabel"]) =
     printMetaMetaMeta (KApp (KLabel "#token") [mkConst (escape sort) "String", mkConst val "String"])
 printMetaMetaMeta (KApp label children) =
     "_`(_`)("++printLabel label++", "++args++") "
@@ -103,6 +96,7 @@ printMetaMetaMeta (KApp label children) =
     printLabel (Token b "Bool") = "#_("++b++")"
     printLabel (Token s "String") = "#_("++s++")"
     printLabel (Token s "Id") = "#_(#id "++escape s++")"
+    printLabel (Token s "KLabel") = "KLabel2KLabel_("++s++")"
     printLabel (KLabel s) = maudeEscape s
     args = case map printMetaMetaMeta children of
       [] -> ".KList"
@@ -156,8 +150,8 @@ decode tbl consTable n =
       mkConst val "Int"
     AAp "DzFloat1Const" [str' -> val] ->
       mkConst val "Float"
-    AAp "KLabel1Const" _ ->
-      error $ "Don't know how to handle DzKLabel1Const"
+    AAp "KLabel1Const" [str' -> label] ->
+        mkConst label "KLabel"
     AAp cons [node' -> AAp tok []]
       | "1Const" `isSuffixOf` cons ->
         let sort = take (length cons - length "1Const") cons in
