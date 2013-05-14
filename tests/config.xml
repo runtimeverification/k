@@ -10,7 +10,6 @@
 -->
 
 <!-- LAMBDA -->
-
   <test 
       language="dist/tutorial/1_lambda/lesson_1/lambda.k"
       folder="dist/tutorial/1_lambda/lesson_1"
