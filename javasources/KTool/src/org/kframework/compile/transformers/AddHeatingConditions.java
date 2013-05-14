@@ -96,9 +96,9 @@ public class AddHeatingConditions extends CopyOnWriteTransformer {
 			);
 		}
 		Variable variable = vars.iterator().next();
-		final KApp isKResult = KApp.of(definitionHelper, KLabelConstant.KRESULT_PREDICATE, variable);
+		final KApp isKResult = KApp.of(KLabelConstant.KRESULT_PREDICATE, variable);
 		if (heating) {
-			kresultCnd = KApp.of(definitionHelper, KLabelConstant.KNEQ_KLABEL, isKResult, BoolBuiltin.TRUE);
+			kresultCnd = KApp.of(KLabelConstant.KNEQ_KLABEL, isKResult, BoolBuiltin.TRUE);
 		} else {
 			kresultCnd = isKResult;
 		}

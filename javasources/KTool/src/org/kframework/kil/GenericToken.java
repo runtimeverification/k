@@ -1,6 +1,7 @@
 package org.kframework.kil;
 
 import org.kframework.kil.loader.Constants;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.w3c.dom.Element;
 
 import java.util.Map;
@@ -40,7 +41,7 @@ public class GenericToken extends Token {
      * @param value
      * @return
      */
-    public static KApp kAppOf(String sort, String value) {
+    public static KApp kAppOf(String sort, String value, DefinitionHelper definitionHelper) {
         GenericToken genericToken = new GenericToken(sort, value);
         KApp kApp = kAppCache.get(genericToken);
         if (kApp == null) {

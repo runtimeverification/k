@@ -118,8 +118,8 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
                 lhsList.add(new KApp(KLabelConstant.of(prod.getKLabel(), definitionHelper), KListVar2));
 
                 KList rhsList = new KList();
-                rhsList.add(KApp.of(definitionHelper, new KInjectedLabel(KListVar1)));
-                rhsList.add(KApp.of(definitionHelper, new KInjectedLabel(KListVar2)));
+                rhsList.add(KApp.of(new KInjectedLabel(KListVar1)));
+                rhsList.add(KApp.of(new KInjectedLabel(KListVar2)));
 
                 Term lhs = new KApp(KLabelConstant.KEQ, lhsList);
                 Term rhs = new KApp(KLabelConstant.KLIST_EQUALITY, rhsList);

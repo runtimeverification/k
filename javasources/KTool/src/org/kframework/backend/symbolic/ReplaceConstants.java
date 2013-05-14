@@ -51,11 +51,11 @@ public class ReplaceConstants extends CopyOnWriteTransformer {
 			for (Entry<Variable, Builtin> entry : newGeneratedSV.entrySet()) {
 				List<Term> vars = new ArrayList<Term>();
 				vars.add(entry.getKey());
-				vars.add(KApp.of(definitionHelper, new KInjectedLabel(entry.getValue())));
+				vars.add(KApp.of(new KInjectedLabel(entry.getValue())));
 
 				terms.add(new KApp(KLabelConstant.of(KLabelConstant.KEQ.getLabel(), definitionHelper), new KList(vars)));
 
-				terms.add(KApp.of(definitionHelper, 
+				terms.add(KApp.of( 
                         KLabelConstant.of(AddPredicates.predicate(
                                 entry.getValue().getSort(definitionHelper).replaceFirst("#", "")), definitionHelper),
                         entry.getKey()));

@@ -382,7 +382,7 @@ public class MaudeFilter extends BackendFilter {
 
 	@Override
 	public void visit(Variable variable) {
-        if (MetaK.isBuiltinSort(variable.getSort())) {
+        if (MetaK.isBuiltinSort(variable.getSort(definitionHelper))) {
             result.append("_`(_`)(");
             result.append("#_(");
         }
@@ -393,7 +393,7 @@ public class MaudeFilter extends BackendFilter {
 		}
 		result.append(":");
 		result.append(variable.getSort(definitionHelper));
-        if (MetaK.isBuiltinSort(variable.getSort())) {
+        if (MetaK.isBuiltinSort(variable.getSort(definitionHelper))) {
             result.append(")");
             result.append(", ");
             result.append(".KList");

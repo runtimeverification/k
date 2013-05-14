@@ -39,7 +39,7 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
 
     // constructs the term '_+String_(term1,,term2)
     public static Term appendString(Term term1, Term term2, DefinitionHelper definitionHelper) {
-        return KApp.of(definitionHelper, KLabelConstant.STRING_PLUSSTRING_KLABEL, term1, term2);
+        return KApp.of(KLabelConstant.STRING_PLUSSTRING_KLABEL, term1, term2);
     }
 
 
@@ -59,28 +59,28 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
                 String symCtor = AddSymbolicK.symbolicConstructor(sort);
 
                 Variable var = Variable.getFreshVar("Int");
-                Term symTerm = KApp.of(definitionHelper, KLabelConstant.of(symCtor, definitionHelper), var);
-                Term lhs = KApp.of(definitionHelper, K_TO_SMTLIB, symTerm);
-                KApp strTerm = KApp.of(definitionHelper, KLabelConstant.of("Int2String", definitionHelper), var);
-                Term rhs = appendString(StringBuiltin.kAppOf(SMTLIB_VAR_PREFIX), strTerm);
+                Term symTerm = KApp.of(KLabelConstant.of(symCtor, definitionHelper), var);
+                Term lhs = KApp.of(K_TO_SMTLIB, symTerm);
+                KApp strTerm = KApp.of(KLabelConstant.of("Int2String", definitionHelper), var);
+                Term rhs = appendString(StringBuiltin.kAppOf(SMTLIB_VAR_PREFIX), strTerm, definitionHelper);
                 Rule rule = new Rule(lhs, rhs, definitionHelper);
                 rule.addAttribute(Attribute.FUNCTION);
                 retNode.appendModuleItem(rule);
 
                 var = Variable.getFreshVar("#String");
-                symTerm = KApp.of(definitionHelper, KLabelConstant.of(symCtor, definitionHelper), var);
-                lhs = KApp.of(definitionHelper, K_TO_SMTLIB, symTerm);
-                rhs = appendString(StringBuiltin.kAppOf(SMTLIB_VAR_PREFIX), var);
+                symTerm = KApp.of(KLabelConstant.of(symCtor, definitionHelper), var);
+                lhs = KApp.of(K_TO_SMTLIB, symTerm);
+                rhs = appendString(StringBuiltin.kAppOf(SMTLIB_VAR_PREFIX), var, definitionHelper);
                 rule = new Rule(lhs, rhs, definitionHelper);
                 rule.addAttribute(Attribute.FUNCTION);
                 retNode.appendModuleItem(rule);
 
                 /* TODO: replace Id2String with some generic function of #token(..., ...) */
                 var = Variable.getFreshVar("Id");
-                symTerm = KApp.of(definitionHelper, KLabelConstant.of(symCtor, definitionHelper), var);
-                lhs = KApp.of(definitionHelper, K_TO_SMTLIB, symTerm);
-                strTerm = KApp.of(definitionHelper, KLabelConstant.of("#tokenToString", definitionHelper), var);
-                rhs = appendString(StringBuiltin.kAppOf(SMTLIB_VAR_PREFIX), strTerm);
+                symTerm = KApp.of(KLabelConstant.of(symCtor, definitionHelper), var);
+                lhs = KApp.of(K_TO_SMTLIB, symTerm);
+                strTerm = KApp.of(KLabelConstant.of("#tokenToString", definitionHelper), var);
+                rhs = appendString(StringBuiltin.kAppOf(SMTLIB_VAR_PREFIX), strTerm, definitionHelper);
                 rule = new Rule(lhs, rhs, definitionHelper);
                 rule.addAttribute(Attribute.FUNCTION);
                 retNode.appendModuleItem(rule);
@@ -109,7 +109,7 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
                 continue;
 
             Term term = MetaK.getTerm(prod, definitionHelper);
-            Term lhs = KApp.of(definitionHelper, K_TO_SMTLIB, term);
+            Term lhs = KApp.of(K_TO_SMTLIB, term);
 
             Term rhs;
             if (prod.isConstant()) {
@@ -120,9 +120,9 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
                 for (int idx = 0; idx < ((TermCons) term).arity(definitionHelper); ++idx) {
                     Variable var = (Variable) termCons.getSubterm(idx);
                     rhs = appendString(rhs, StringBuiltin.SPACE, definitionHelper);
-                    rhs = appendString(rhs, KApp.of(definitionHelper, K_TO_SMTLIB, var), definitionHelper);
+                    rhs = appendString(rhs, KApp.of(K_TO_SMTLIB, var), definitionHelper);
                 }
-                rhs = appendString(rhs, StringBuiltin.kAppOf(")"));
+                rhs = appendString(rhs, StringBuiltin.kAppOf(")"), definitionHelper);
             }
 
             Rule rule = new Rule(lhs, rhs, definitionHelper);

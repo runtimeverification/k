@@ -34,7 +34,7 @@ public class KApp extends Term {
      * @param elements the elements of the KList.
      * @return a {@link KApp} which represents the application of the given KLabel to a KList with the given elements.
      */
-    public static KApp of(DefinitionHelper definitionHelper, Term label, Term ... elements) {
+    public static KApp of(Term label, Term ... elements) {
         return new KApp(label, new KList(Arrays.asList(elements)));
     }
 

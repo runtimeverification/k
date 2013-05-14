@@ -310,7 +310,7 @@ public class    DefinitionHelper {
 	public Term kWrapper(Term t) {
 		if (isSubsortedEq("K", t.getSort(this)))
 			return t;
-		return KApp.of(this, new KInjectedLabel(t));
+		return KApp.of(new KInjectedLabel(t));
 	}
 
 	public static String getCellSort(String sort) {

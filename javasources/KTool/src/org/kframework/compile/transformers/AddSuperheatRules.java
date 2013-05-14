@@ -73,8 +73,8 @@ public class AddSuperheatRules extends CopyOnWriteTransformer {
 			KSequence kSequence = new KSequence();
 			kSequence.getContents().add(body);
 			kSequence.add(new Variable(MetaK.Constants.anyVarSymbol,"K"));
-			Term redex = KApp.of(definitionHelper, KLabelConstant.REDEX_KLABEL, kSequence);
-			Term heat = KApp.of(definitionHelper,
+			Term redex = KApp.of(KLabelConstant.REDEX_KLABEL, kSequence);
+			Term heat = KApp.of(
                     KLabelConstant.HEAT_KLABEL,
                     redex,
                     new Variable(MetaK.Constants.anyVarSymbol, KSorts.KLIST));
@@ -114,7 +114,7 @@ public class AddSuperheatRules extends CopyOnWriteTransformer {
 
 		KList inListList = new KList();
 		inListList.add(red2);
-        inListList.add(KApp.of(definitionHelper, new KInjectedLabel(lHeat)));
+        inListList.add(KApp.of(new KInjectedLabel(lHeat)));
 		Term inList = new KApp(KLabelConstant.of("'_inKList_", definitionHelper), inListList);
 		KList condList = new KList();
 		condList.add(inList);
@@ -126,10 +126,10 @@ public class AddSuperheatRules extends CopyOnWriteTransformer {
 		// replace heating rule by
 		// rule C[e] => heat(redex(C[e]),, heated(.KList))
 		node = node.shallowCopy();
-		Term red3 = KApp.of(definitionHelper, KLabelConstant.REDEX_KLABEL, left);
+		Term red3 = KApp.of(KLabelConstant.REDEX_KLABEL, left);
 		KList red3List = new KList();
 		red3List.add(red3);
-		red3List.add(KApp.of(definitionHelper, KLabelConstant.HEATED_KLABEL));
+		red3List.add(KApp.of(KLabelConstant.HEATED_KLABEL));
 		Term heat2 = new KApp(KLabelConstant.HEAT_KLABEL, red3List);
 		node.setBody(new Rewrite(left, heat2, definitionHelper));
 

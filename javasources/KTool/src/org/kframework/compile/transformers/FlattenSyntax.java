@@ -180,13 +180,13 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 
 		@Override
 		public ASTNode transform(Freezer node) throws TransformerException {
-			return KApp.of(definitionHelper, new FreezerLabel((Term) node.getTerm().accept(this)));
+			return KApp.of(new FreezerLabel((Term) node.getTerm().accept(this)));
 		}
 
 		@Override
 		public ASTNode transform(TermCons tc) throws TransformerException {
 			if (!MetaK.isComputationSort(tc.getSort())) {
-				return KApp.of(definitionHelper, new KInjectedLabel((Term) tc.accept(trans)));
+				return KApp.of(new KInjectedLabel((Term) tc.accept(trans)));
 			}
 
 			String l = tc.getLocation();
@@ -230,7 +230,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 			String l = emp.getLocation();
 			String f = emp.getFilename();
 			if (!MetaK.isComputationSort(emp.getSort())) {
-				return KApp.of(definitionHelper, new KInjectedLabel(emp));
+				return KApp.of(new KInjectedLabel(emp));
 			}
 			// if this is a list sort
 			if (!MaudeHelper.basicSorts.contains(emp.getSort())) {
@@ -247,22 +247,22 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 		public ASTNode transform(Collection node) throws TransformerException {
 			if (node instanceof KSequence)
 				return super.transform(node);
-			return KApp.of(definitionHelper, new KInjectedLabel((Term) node.accept(trans)));
+			return KApp.of(new KInjectedLabel((Term) node.accept(trans)));
 		}
 
 		@Override
 		public ASTNode transform(CollectionItem node) throws TransformerException {
-			return KApp.of(definitionHelper, new KInjectedLabel((Term) node.accept(trans)));
+			return KApp.of(new KInjectedLabel((Term) node.accept(trans)));
 		}
 
 		@Override
 		public ASTNode transform(MapItem node) throws TransformerException {
-			return KApp.of(definitionHelper, new KInjectedLabel((Term) node.accept(trans)));
+			return KApp.of(new KInjectedLabel((Term) node.accept(trans)));
 		}
 
 		@Override
 		public ASTNode transform(Cell node) throws TransformerException {
-			return KApp.of(definitionHelper, new KInjectedLabel((Term) node.accept(trans)));
+			return KApp.of(new KInjectedLabel((Term) node.accept(trans)));
 		}
 
 		@Override
@@ -270,14 +270,14 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 			if (node.getSort(definitionHelper).equals(KSorts.KITEM) || node.getSort(definitionHelper).equals(KSorts.K)) {
 				return node;
             }
-			if (MetaK.isKSort(node.getSort(definitionHelper)))
-				return KApp.of(definitionHelper, new KInjectedLabel(node));
+			if (MetaK.isKSort(node.getSort(definitionHelper))) {
+				return KApp.of(new KInjectedLabel(node));
             }
 
-            if (node.getSort().equals(BoolBuiltin.SORT_NAME)
-                    || node.getSort().equals(IntBuiltin.SORT_NAME)
-                    || node.getSort().equals(FloatBuiltin.SORT_NAME)
-                    || node.getSort().equals(StringBuiltin.SORT_NAME)) {
+            if (node.getSort(definitionHelper).equals(BoolBuiltin.SORT_NAME)
+                    || node.getSort(definitionHelper).equals(IntBuiltin.SORT_NAME)
+                    || node.getSort(definitionHelper).equals(FloatBuiltin.SORT_NAME)
+                    || node.getSort(definitionHelper).equals(StringBuiltin.SORT_NAME)) {
                 return node;
             }
 			node = node.shallowCopy();

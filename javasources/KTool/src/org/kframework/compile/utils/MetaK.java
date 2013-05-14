@@ -30,7 +30,7 @@ public class MetaK {
 		if (condition == null) {
 			return kresultCnd;
 		}
-		return KApp.of(definitionHelper, KLabelConstant.ANDBOOL_KLABEL, condition, kresultCnd);
+		return KApp.of(KLabelConstant.ANDBOOL_KLABEL, condition, kresultCnd);
 	}
 
 	public static boolean isCellSort(String bigSort) {
@@ -300,7 +300,7 @@ public class MetaK {
 		if (prod.isSubsort()) {
 			final Variable freshVar = Variable.getFreshVar(prod.getItems().get(0).toString());
 			if (prod.containsAttribute("klabel")) {
-				return KApp.of(definitionHelper, KLabelConstant.of(prod.getKLabel(), definitionHelper), freshVar);
+				return KApp.of(KLabelConstant.of(prod.getKLabel(), definitionHelper), freshVar);
 			}
 			return freshVar;
 		}
@@ -319,7 +319,7 @@ public class MetaK {
             }
         }
 		if (prod.isLexical()) {
-			return KApp.of(definitionHelper, KLabelConstant.of("#token", definitionHelper),
+			return KApp.of(KLabelConstant.of("#token", definitionHelper),
                            StringBuiltin.kAppOf(prod.getSort()),
                            Variable.getFreshVar("String"));
 		}

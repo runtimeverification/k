@@ -147,7 +147,7 @@ public class Definition extends ASTNode {
 		this.accept(new CollectConfigCellsVisitor(definitionHelper));
 		this.accept(new UpdateAssocVisitor(definitionHelper));
 		this.accept(new CollectLocationsVisitor(definitionHelper));
-        TokenSorts tokenSortsVisitor = new TokenSorts();
+        TokenSorts tokenSortsVisitor = new TokenSorts(definitionHelper);
         this.accept(tokenSortsVisitor);
         tokenNames.addAll(tokenSortsVisitor.getNames());
         // TODO: fix #Id

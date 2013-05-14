@@ -4,6 +4,7 @@ import org.kframework.kil.Configuration;
 import org.kframework.kil.Context;
 import org.kframework.kil.Production;
 import org.kframework.kil.Rule;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 
 import java.util.HashSet;
@@ -16,7 +17,11 @@ import java.util.Set;
  */
 public class TokenSorts extends BasicVisitor {
 
-    private final Set<String> names = new HashSet<String>();
+    public TokenSorts(DefinitionHelper definitionHelper) {
+		super(definitionHelper);
+	}
+
+	private final Set<String> names = new HashSet<String>();
 
     public Set<String> getNames() {
         return names;
