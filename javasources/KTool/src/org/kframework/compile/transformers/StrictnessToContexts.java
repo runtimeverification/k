@@ -27,6 +27,9 @@ import java.util.List;
 import java.util.Set;
 
 
+/**
+ * Transformer class compiling strictness annotations into contexts.
+ */
 public class StrictnessToContexts extends CopyOnWriteTransformer {
 
     private List<ModuleItem> items = new ArrayList<ModuleItem>();
@@ -129,7 +132,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
             for (int i = 0; i < arguments.size(); ++i) {
                 TermCons termCons = (TermCons) MetaK.getTerm(prod);
                 for (int j = 0; j < prod.getArity(); ++j) {
-                    termCons.getContents().get(j).setSort(KSorts.KITEM);
+                    termCons.getContents().get(j).setSort(KSorts.K);
                 }
 
                 // insert HOLE instead of the term
@@ -147,9 +150,6 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                 ctx.setAttributes(prod.getAttributes());
                 items.add(ctx);
             }
-
-            //remove strictness after adding contexts
-            //prod.getAttributes().remove(attr);
         }
 
         return node;
