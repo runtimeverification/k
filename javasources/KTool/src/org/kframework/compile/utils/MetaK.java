@@ -22,9 +22,8 @@ import java.util.Set;
 
 public class MetaK {
 
-	private static final String cellSort = "CellSort";
-	private static final String cellFragment = "CellFragment";
-	public static final String fragment = "-fragment";
+	public static final String cellSort = "CellSort";
+	public static final String cellFragment = "CellFragment";
 
 	public static Term incrementCondition(Term condition, Term kresultCnd, DefinitionHelper definitionHelper) {
 		if (condition == null) {
@@ -36,16 +35,6 @@ public class MetaK {
 	public static boolean isCellSort(String bigSort) {
 		return (bigSort.endsWith(cellSort)
 				||bigSort.endsWith(cellFragment));
-	}
-
-	public static String getCellSort2(String sort) {
-		sort = sort.substring(0,1).toLowerCase() + sort.substring(1);
-		if (sort.endsWith(cellSort)) {
-			return sort.substring(0, sort.length() - cellSort.length());
-		} else {
-			return sort.substring(0, sort.length() - cellFragment.length())
-					+ "-fragment";
-		}
 	}
 
 	public static class Constants {

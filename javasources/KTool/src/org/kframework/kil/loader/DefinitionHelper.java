@@ -313,11 +313,23 @@ public class    DefinitionHelper {
 		return KApp.of(new KInjectedLabel(t));
 	}
 
+	private static final String fragment = "-fragment";
+
+	private static String getCellSort2(String sort) {
+		sort = sort.substring(0,1).toLowerCase() + sort.substring(1);
+		if (sort.endsWith(MetaK.cellSort)) {
+			return sort.substring(0, sort.length() - MetaK.cellSort.length());
+		} else {
+			return sort.substring(0, sort.length() - MetaK.cellFragment.length())
+					+ "-fragment";
+		}
+	}
+
 	public static String getCellSort(String sort) {
-		sort = MetaK.getCellSort2(sort);
+		sort = getCellSort2(sort);
 		String cellName = sort;
-		if (sort.endsWith(MetaK.fragment)) {
-			cellName = sort.substring(0, sort.length() - MetaK.fragment.length());
+		if (sort.endsWith(fragment)) {
+			cellName = sort.substring(0, sort.length() - fragment.length());
 		}
 		if (cells.containsKey(cellName)) {
 			return sort;
