@@ -179,6 +179,10 @@ public class LatexFilter extends BackendFilter {
 	public void visit(Collection col) {
 		final boolean parens = wantParens.peek();
 		final boolean hasBR = containsBR(col);
+        if (col.isEmpty()) {
+		    result.append("\\dotCt{" + col.getSort(definitionHelper) + "}");
+            return;
+        }
 		if (hasBR) {
 			if (parens) result.append("\\left(");
 			result.append("\\begin{array}{@{}c@{}}");
