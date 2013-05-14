@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import javax.swing.text.html.HTMLEditorKit;
 
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.Transition;
 import org.kframework.krun.gui.Controller.RunKRunCommand;
@@ -18,9 +19,10 @@ public class DiffFrame extends javax.swing.JFrame {
 	/**
      * Creates new form DiffFrame
      */
-    public DiffFrame(KRunState srcState, KRunState destState, Transition transition) {
+    public DiffFrame(KRunState srcState, KRunState destState, Transition transition, DefinitionHelper definitionHelper) {
     	try {
-			initComponents(Diff.comparableTest(RunKRunCommand.transformTerm(srcState.getResult()), RunKRunCommand.transformTerm(destState.getResult())));
+			initComponents(Diff.comparableTest(RunKRunCommand.transformTerm(srcState.getResult(), definitionHelper),
+					RunKRunCommand.transformTerm(destState.getResult(), definitionHelper)));
 		} catch (IOException e) {
 			e.printStackTrace();
 			initComponents(e.getMessage());

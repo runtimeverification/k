@@ -1,5 +1,6 @@
 package org.kframework.kil;
 
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
@@ -33,7 +34,7 @@ public class KApp extends Term {
      * @param elements the elements of the KList.
      * @return a {@link KApp} which represents the application of the given KLabel to a KList with the given elements.
      */
-    public static KApp of(Term label, Term ... elements) {
+    public static KApp of(DefinitionHelper definitionHelper, Term label, Term ... elements) {
         return new KApp(label, new KList(Arrays.asList(elements)));
     }
 
@@ -68,13 +69,13 @@ public class KApp extends Term {
     /**
      * Constructs a {@link KApp} object from an XML element.
      */
-	public KApp(Element element) {
+	public KApp(Element element, DefinitionHelper definitionHelper) {
 		super(element);
         List<Element> childrenElements = XML.getChildrenElements(element);
         Element body = XML.getChildrenElements(childrenElements.get(0)).get(0);
         setLabel((Term) JavaClassesFactory.getTerm(body));
         Term term = (Term) JavaClassesFactory.getTerm(childrenElements.get(1));
-        if (!(term.getSort().equals(KSorts.KLIST) || term instanceof Ambiguity)) {
+        if (!(term.getSort(definitionHelper).equals(KSorts.KLIST) || term instanceof Ambiguity)) {
             setChild(new KList(Collections.<Term>singletonList(term)));
         } else {
             setChild(term);
@@ -103,10 +104,11 @@ public class KApp extends Term {
      */
 	public void setLabel(Term label) {
         assert label != null;
-        assert label.getSort().equals(KSorts.KLABEL) || child instanceof Ambiguity:
-                "unexpected sort " + label.getSort() + " of KApp first argument " + label + ";"
-                        + " expected KLabel";
-
+        // assertion disabled due to getSort relying on DefinitionHelper
+//        assert label.getSort(definitionHelper).equals(KSorts.KLABEL) || child instanceof Ambiguity:
+//                "unexpected sort " + label.getSort(definitionHelper) + " of KApp first argument " + label + ";"
+//                        + " expected KLabel";
+//
 		this.label = label;
 	}
 
@@ -121,10 +123,11 @@ public class KApp extends Term {
      */
 	public void setChild(Term child) {
         assert child != null;
-        assert child.getSort().equals(KSorts.KLIST) || child instanceof Ambiguity:
-                "unexpected sort " + child.getSort() + " of KApp second argument " + child + ";"
-                        + "; expected KList";
-
+        // assertion disabled due to getSort relying on DefinitionHelper
+//        assert child.getSort(definitionHelper).equals(KSorts.KLIST) || child instanceof Ambiguity:
+//                "unexpected sort " + child.getSort(definitionHelper) + " of KApp second argument " + child + ";"
+//                        + "; expected KList";
+//
 		this.child = child;
 	}
 

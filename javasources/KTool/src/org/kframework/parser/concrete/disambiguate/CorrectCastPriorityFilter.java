@@ -7,12 +7,13 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Cast;
 import org.kframework.kil.Term;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class CorrectCastPriorityFilter extends BasicTransformer {
-	public CorrectCastPriorityFilter() {
-		super("Correct Cast priority");
+	public CorrectCastPriorityFilter(DefinitionHelper definitionHelper) {
+		super("Correct Cast priority", definitionHelper);
 	}
 
 	public ASTNode transform(Ambiguity amb) throws TransformerException {

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -13,8 +14,11 @@ import org.kframework.utils.general.GlobalSettings;
 
 public class BasicTransformerPropagator implements Transformer {
 	Transformer delegate;
+	
+	protected DefinitionHelper definitionHelper;
 
-	public BasicTransformerPropagator(HookedTransformer hookedTransformer) {
+	public BasicTransformerPropagator(HookedTransformer hookedTransformer, DefinitionHelper definitionHelper) {
+		this.definitionHelper = definitionHelper;
 		delegate = hookedTransformer;
 	}
 
@@ -318,7 +322,7 @@ public class BasicTransformerPropagator implements Transformer {
 		Term term = node.getContents();
 		ASTNode result = term.accept(delegate);
 		if (result == null) {
-			result = MetaK.defaultTerm(term);
+			result = MetaK.defaultTerm(term, definitionHelper);
 		}
 		if (!(result instanceof Term)) {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + result.getClass() + ".", getName(), term.getFilename(), term

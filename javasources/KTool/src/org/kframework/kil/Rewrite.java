@@ -35,8 +35,8 @@ public class Rewrite extends Term {
 		this.right = node.right;
 	}
 
-	public Rewrite(Term eval1Left, Term eval1Right) {
-		super(eval1Left.getSort());
+	public Rewrite(Term eval1Left, Term eval1Right, DefinitionHelper definitionHelper) {
+		super(eval1Left.getSort(definitionHelper));
 		left = eval1Left;
 		right = eval1Right;
 	}
@@ -44,19 +44,19 @@ public class Rewrite extends Term {
 	/**
 	 * Returning the Least Upper Bound for left and right sorts.
 	 */
-	public String getSort() {
+	public String getSort(DefinitionHelper definitionHelper) {
 		if (localSort != null)
 			return localSort;
 
 		if (left instanceof Ambiguity || right instanceof Ambiguity)
-			return super.getSort();
+			return super.getSort(definitionHelper);
 
-		localSort = super.getSort();
+		localSort = super.getSort(definitionHelper);
 		boolean found;
 		do {
 			found = true;
-			for (String s : DefinitionHelper.definedSorts) {
-				if (DefinitionHelper.isSubsorted(localSort, s) && DefinitionHelper.isSubsortedEq(s, this.left.getSort()) && DefinitionHelper.isSubsortedEq(s, this.right.getSort())) {
+			for (String s : definitionHelper.definedSorts) {
+				if (definitionHelper.isSubsorted(localSort, s) && definitionHelper.isSubsortedEq(s, this.left.getSort(definitionHelper)) && definitionHelper.isSubsortedEq(s, this.right.getSort(definitionHelper))) {
 					localSort = s;
 					found = false;
 				}

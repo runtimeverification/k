@@ -4,12 +4,14 @@ import org.kframework.backend.Backend;
 import org.kframework.compile.utils.BasicCompilerStep;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.kil.Definition;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.utils.Stopwatch;
 
 public class FirstStep extends BasicCompilerStep<Definition> {
 	Backend backend;
 
-	public FirstStep(Backend backend) {
+	public FirstStep(Backend backend, DefinitionHelper definitionHelper) {
+		super(definitionHelper);
 		this.backend = backend;
 	}
 

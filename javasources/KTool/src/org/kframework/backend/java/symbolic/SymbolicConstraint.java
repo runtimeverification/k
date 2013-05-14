@@ -71,7 +71,7 @@ public class SymbolicConstraint {
 
         public boolean isFalse() {
             if (leftHandSide instanceof Sorted && rightHandSide instanceof Sorted) {
-                return null == DefinitionHelper.getGLBSort(ImmutableSet.<String>of(
+                return null == definitionHelper.getGLBSort(ImmutableSet.<String>of(
                         ((Sorted) leftHandSide).getSort(),
                         ((Sorted) rightHandSide).getSort()));
             } else {
@@ -88,8 +88,8 @@ public class SymbolicConstraint {
         }
 
         private void substitute(Map<Variable, Term> substitution) {
-            leftHandSide = leftHandSide.substitute(substitution);
-            rightHandSide = rightHandSide.substitute(substitution);
+            leftHandSide = leftHandSide.substitute(substitution, definitionHelper);
+            rightHandSide = rightHandSide.substitute(substitution, definitionHelper);
         }
 
         private void substitute(Variable variable, Term term) {
@@ -116,14 +116,20 @@ public class SymbolicConstraint {
     private final Map<Variable, Term> substitution = new HashMap<Variable, Term>();
     private TruthValue truthValue = TruthValue.TRUE;
 
+    protected DefinitionHelper definitionHelper;
+    
+    public SymbolicConstraint(DefinitionHelper definitionHelper) {
+    	this.definitionHelper = definitionHelper;
+    }
+    
     public TruthValue add(Term leftHandSide, Term rightHandSide) {
         assert leftHandSide.getKind().equals(rightHandSide.getKind()):
                 "kind mismatch between "
                         + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
                         + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
 
-        leftHandSide = leftHandSide.substitute(substitution);
-        rightHandSide = rightHandSide.substitute(substitution);
+        leftHandSide = leftHandSide.substitute(substitution, definitionHelper);
+        rightHandSide = rightHandSide.substitute(substitution, definitionHelper);
 
         Equality equality = this.new Equality(leftHandSide, rightHandSide);
 
@@ -204,7 +210,7 @@ public class SymbolicConstraint {
             Map<Variable, Term> tempSubstitution = new HashMap<Variable, Term>();
             tempSubstitution.put(variable, term);
 
-            SymbolicConstraint.compose(substitution, tempSubstitution);
+            SymbolicConstraint.compose(substitution, tempSubstitution, definitionHelper);
             substitution.put(variable, term);
 
             for (Iterator<Equality> previousIterator = equalities.iterator(); previousIterator.hasNext();) {
@@ -245,10 +251,10 @@ public class SymbolicConstraint {
         return builder.toString();
     }
     @SuppressWarnings("unchecked")
-    public static void compose(Map<Variable, Term> map, Map<Variable, Term> substitution) {
+    public static void compose(Map<Variable, Term> map, Map<Variable, Term> substitution, DefinitionHelper definitionHelper) {
         Map.Entry<Variable, Term>[] entries = map.entrySet().toArray(new Map.Entry[map.size()]);
         for (int index = 0; index < entries.length; ++index) {
-            Term term = entries[index].getValue().substitute(substitution);
+            Term term = entries[index].getValue().substitute(substitution, definitionHelper);
             if (term != entries[index].getValue()) {
                 map.put(entries[index].getKey(), term);
             }

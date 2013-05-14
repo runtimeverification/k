@@ -13,6 +13,10 @@ import org.kframework.utils.general.GlobalSettings;
 
 public class AddConsesVisitor extends BasicVisitor {
 
+	public AddConsesVisitor(DefinitionHelper definitionHelper) {
+		super(definitionHelper);
+	}
+
 	public void visit(Production p) {
 		// add cons to productions that don't have it already
 		if (p.containsAttribute("bracket")) {

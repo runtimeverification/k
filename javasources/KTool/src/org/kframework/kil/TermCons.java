@@ -57,13 +57,13 @@ public class TermCons extends Term {
 		contents = genContents;
 	}
 
-	public Production getProduction() {
-		return DefinitionHelper.conses.get(getCons());
+	public Production getProduction(DefinitionHelper definitionHelper) {
+		return definitionHelper.conses.get(getCons());
 	}
 
-	public String toString() {
+	public String toString(DefinitionHelper definitionHelper) {
 		String str = "";
-		Production pr = DefinitionHelper.conses.get(cons);
+		Production pr = definitionHelper.conses.get(cons);
 
 		if (pr.items.size() > 0) {
 			if (pr.items.get(0).getType() == ProductionType.USERLIST) {
@@ -111,8 +111,8 @@ public class TermCons extends Term {
 		return contents.set(idx, term);
 	}
 
-	public int arity() {
-		return getProduction().getArity();
+	public int arity(DefinitionHelper definitionHelper) {
+		return getProduction(definitionHelper).getArity();
 	}
 
 	@Override

@@ -1,10 +1,6 @@
 package org.kframework.kil.rewriter;
 
 //unit test imports
-import org.kframework.kil.Constant;
-import org.kframework.kil.KApp;
-import org.kframework.kil.KList;
-import org.kframework.kil.Variable;
 import org.kframework.kil.*;
 
 import java.util.ArrayList;
@@ -14,6 +10,7 @@ import java.util.List;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Term;
 
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.matchers.MatcherException;
 import org.kframework.kil.matchers.SimpleMatcher;
@@ -29,18 +26,24 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  */
 
 public class SimpleRewriter {
+  protected DefinitionHelper definitionHelper;
+  protected Matcher matcher;
+
+  public SimpleRewriter(DefinitionHelper definitionHelper) {
+	  this.definitionHelper = definitionHelper;
+	  matcher = new SimpleMatcher(definitionHelper);
+  }
   
-  static Matcher matcher = new SimpleMatcher();
 
   //we know the cast is safe because SimpleMatcher is only defined for Terms
   //This helper function returns null if no rewrite is performed
   @SuppressWarnings("cast")
-  static private Term rewriteAux(RewriteSet trs, Term t){
+   private Term rewriteAux(RewriteSet trs, Term t){
     Term out = null;
     for(Rewrite r : trs){
       try {
         matcher.start(r.getLeft(),t);
-        RewriteSubstitution substitution = new RewriteSubstitution(matcher.getSubstitution());
+        RewriteSubstitution substitution = new RewriteSubstitution(matcher.getSubstitution(), definitionHelper);
         try {
           //ignore warning, we know this must be a Term
           out = (Term) r.getRight().accept(substitution);
@@ -65,7 +68,7 @@ public class SimpleRewriter {
    * @param RewriteSet trs is the term rewriting system, specified in order of rule priority
    * @param Term t is the term to rewrite one step
    */
-   static public Term rewrite(RewriteSet trs, Term t){
+    public Term rewrite(RewriteSet trs, Term t){
      Term temp = rewriteAux(trs, t);
      return (temp == null)? t : temp;
    }
@@ -76,7 +79,7 @@ public class SimpleRewriter {
    * @param RewriteSet trs is the term rewriting system, specified in order of rule priority
    * @param Term t is the term to rewrite one step
    */
-  static public Term rewriteToNormalForm(RewriteSet trs, Term t){
+   public Term rewriteToNormalForm(RewriteSet trs, Term t){
     Term out = t;
     Term temp = t;
     do {
@@ -94,7 +97,7 @@ public class SimpleRewriter {
    * @param Term t is the term to rewrite one step
    * @param int n is the (max) number of rewrites to perform
    */
-  static public Term rewriteN(RewriteSet trs, Term t, int n){
+   public Term rewriteN(RewriteSet trs, Term t, int n){
     Term out = t;
     Term temp = t;
     for(int i = 0; (i <= n) && (temp != null); ++i){

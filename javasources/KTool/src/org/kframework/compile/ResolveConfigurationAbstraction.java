@@ -7,6 +7,7 @@ import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.ConfigurationStructureVisitor;
 import org.kframework.kil.Definition;
+import org.kframework.kil.loader.DefinitionHelper;
 
 /**
  * Initially created by: Traian Florin Serbanuta
@@ -16,7 +17,8 @@ import org.kframework.kil.Definition;
  */
 public class ResolveConfigurationAbstraction extends CompilerSteps<Definition> {
 
-	public ResolveConfigurationAbstraction(ConfigurationStructureMap cfgStr) {
+	public ResolveConfigurationAbstraction(ConfigurationStructureMap cfgStr, DefinitionHelper definitionHelper) {
+		super(definitionHelper);
 		this.cfgStr = cfgStr;
 	}
 
@@ -24,11 +26,11 @@ public class ResolveConfigurationAbstraction extends CompilerSteps<Definition> {
 	@Override
 	public Definition compile(Definition def, String stepName) throws CompilerStepDone {
 		ConfigurationStructureVisitor cfgStrVisitor = new
-				ConfigurationStructureVisitor(cfgStr);
+				ConfigurationStructureVisitor(cfgStr, definitionHelper);
 		def.accept(cfgStrVisitor);
 		int cfgMaxLevel = cfgStrVisitor.getMaxLevel();
-		add(new ResolveContextAbstraction(cfgMaxLevel, cfgStr));
-		add(new ResolveDefaultTerms(cfgStr));
+		add(new ResolveContextAbstraction(cfgMaxLevel, cfgStr, definitionHelper));
+		add(new ResolveDefaultTerms(cfgStr, definitionHelper));
 		return super.compile(def, stepName);
 	}
 }

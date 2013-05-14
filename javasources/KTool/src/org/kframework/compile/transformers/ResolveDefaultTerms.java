@@ -5,6 +5,7 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Cell.Multiplicity;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -21,12 +22,12 @@ public class ResolveDefaultTerms extends CopyOnWriteTransformer {
 	
 	private Map<String, ConfigurationStructure> config;
 
-	public ResolveDefaultTerms() {
-		super("Resolve Default Terms");
+	public ResolveDefaultTerms(DefinitionHelper definitionHelper) {
+		super("Resolve Default Terms", definitionHelper);
 	}
 	
-	public ResolveDefaultTerms(Map<String, ConfigurationStructure> config) {
-		this();
+	public ResolveDefaultTerms(Map<String, ConfigurationStructure> config, DefinitionHelper definitionHelper) {
+		this(definitionHelper);
 		this.config = config;
 	}
 	
@@ -39,7 +40,7 @@ public class ResolveDefaultTerms extends CopyOnWriteTransformer {
 	
 	@Override
 	public ASTNode transform(Rewrite node) throws TransformerException {
-		ASTNode right = node.getRight().accept(new DefaultTermsResolver());
+		ASTNode right = node.getRight().accept(new DefaultTermsResolver(definitionHelper));
 		if (right != node.getRight()) {
 			node = node.shallowCopy();
 			node.setRight((Term)right);
@@ -65,8 +66,8 @@ public class ResolveDefaultTerms extends CopyOnWriteTransformer {
 	
 	public class DefaultTermsResolver extends CopyOnWriteTransformer {
 		
-		public DefaultTermsResolver() {
-			super("Default Terms Resolver");
+		public DefaultTermsResolver(DefinitionHelper definitionHelper) {
+			super("Default Terms Resolver", definitionHelper);
 		}
 		
 		@Override
@@ -85,7 +86,7 @@ public class ResolveDefaultTerms extends CopyOnWriteTransformer {
 				
 				return cell;
 			}
-			List<Cell> sons = MetaK.getTopCells(cell.getContents());
+			List<Cell> sons = MetaK.getTopCells(cell.getContents(), definitionHelper);
 			Map<String, ConfigurationStructure> potentialSons = new HashMap<String, ConfigurationStructure>(cellStr.sons);
 			
 			for (Cell son : sons) {

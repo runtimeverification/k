@@ -6,6 +6,7 @@ import org.kframework.kil.Variable;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
 import org.kframework.kil.loader.Constants;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -19,8 +20,8 @@ public class ResolveInputStreamCell extends CopyOnWriteTransformer {
 
 	private boolean notSet = true;
 	
-	public ResolveInputStreamCell() {
-		super("Resolve InputStream cell");
+	public ResolveInputStreamCell(DefinitionHelper definitionHelper) {
+		super("Resolve InputStream cell", definitionHelper);
 	}
 	
 	@Override

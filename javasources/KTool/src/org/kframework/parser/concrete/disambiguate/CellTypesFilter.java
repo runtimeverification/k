@@ -15,8 +15,8 @@ import java.util.List;
 
 public class CellTypesFilter extends BasicTransformer {
 
-	public CellTypesFilter() {
-		super("Cell types");
+	public CellTypesFilter(DefinitionHelper definitionHelper) {
+		super("Cell types", definitionHelper);
 	}
 
 	// don't do anything for configuration and syntax
@@ -29,7 +29,7 @@ public class CellTypesFilter extends BasicTransformer {
 	}
 
 	public ASTNode transform(Cell cell) throws TransformerException {
-		String sort = DefinitionHelper.cellSorts.get(cell.getLabel());
+		String sort = definitionHelper.cellSorts.get(cell.getLabel());
 
 		if (sort == null) {
 			if (cell.getLabel().equals("k"))
@@ -48,7 +48,7 @@ public class CellTypesFilter extends BasicTransformer {
 			if (cell.getContents() instanceof Ambiguity) {
 				List<Term> children = new ArrayList<Term>();
 				for (Term t : ((Ambiguity) cell.getContents()).getContents()) {
-					if (DefinitionHelper.isSubsortedEq(sort, t.getSort()))
+					if (definitionHelper.isSubsortedEq(sort, t.getSort(definitionHelper)))
 						children.add(t);
 				}
 
@@ -62,9 +62,9 @@ public class CellTypesFilter extends BasicTransformer {
 			}
 
 			if (!(cell.getContents() instanceof Ambiguity))
-				if (!DefinitionHelper.isSubsortedEq(sort, cell.getContents().getSort())) {
+				if (!definitionHelper.isSubsortedEq(sort, cell.getContents().getSort(definitionHelper))) {
 					// if the found sort is not a subsort of what I was expecting
-					String msg = "Wrong type in cell '" + cell.getLabel() + "'. Expected sort: " + sort + " but found " + cell.getContents().getSort();
+					String msg = "Wrong type in cell '" + cell.getLabel() + "'. Expected sort: " + sort + " but found " + cell.getContents().getSort(definitionHelper);
 					throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, getName(), cell.getFilename(), cell.getLocation()));
 				}
 		} else {

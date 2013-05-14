@@ -2,6 +2,7 @@ package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -14,8 +15,8 @@ import org.kframework.utils.general.GlobalSettings;
  * Time: 3:02 PM
  */
 public class AddHeatingConditions extends CopyOnWriteTransformer {
-	public AddHeatingConditions() {
-		super("Generate Heating Conditions");
+	public AddHeatingConditions(DefinitionHelper definitionHelper) {
+		super("Generate Heating Conditions", definitionHelper);
 	}
 
 	@Override
@@ -83,7 +84,7 @@ public class AddHeatingConditions extends CopyOnWriteTransformer {
 								node.getLocation())
 				);
 		}
-		java.util.Set<Variable> vars = MetaK.getVariables(kSequence.getContents().get(0));
+		java.util.Set<Variable> vars = MetaK.getVariables(kSequence.getContents().get(0), definitionHelper);
 		if (vars.size() != 1) {
 			GlobalSettings.kem.register(
 					new KException(KException.ExceptionType.ERROR,
@@ -95,14 +96,14 @@ public class AddHeatingConditions extends CopyOnWriteTransformer {
 			);
 		}
 		Variable variable = vars.iterator().next();
-		final KApp isKResult = KApp.of(KLabelConstant.KRESULT_PREDICATE, variable);
+		final KApp isKResult = KApp.of(definitionHelper, KLabelConstant.KRESULT_PREDICATE, variable);
 		if (heating) {
-			kresultCnd = KApp.of(KLabelConstant.KNEQ_KLABEL, isKResult, BoolBuiltin.TRUE);
+			kresultCnd = KApp.of(definitionHelper, KLabelConstant.KNEQ_KLABEL, isKResult, BoolBuiltin.TRUE);
 		} else {
 			kresultCnd = isKResult;
 		}
 		node = node.shallowCopy();
-		Term condition = MetaK.incrementCondition(node.getCondition(), kresultCnd);
+		Term condition = MetaK.incrementCondition(node.getCondition(), kresultCnd, definitionHelper);
 
 		node.setCondition(condition);
 		return node;

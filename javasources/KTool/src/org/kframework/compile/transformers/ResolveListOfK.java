@@ -16,8 +16,8 @@ import java.util.Iterator;
 /* TODO: andrei adds javadoc */
 public class ResolveListOfK extends CopyOnWriteTransformer {
 
-	public ResolveListOfK() {
-		super("Resolve KList");
+	public ResolveListOfK(DefinitionHelper definitionHelper) {
+		super("Resolve KList", definitionHelper);
 	}
 	
 	
@@ -30,7 +30,7 @@ public class ResolveListOfK extends CopyOnWriteTransformer {
 	public ASTNode transform(TermCons node) throws TransformerException {
 		boolean change = false;
 		ArrayList<Term> terms = new ArrayList<Term>();
-		Production prod = DefinitionHelper.conses.get(node.getCons());
+		Production prod = definitionHelper.conses.get(node.getCons());
 		Iterator<Term> termIt = node.getContents().iterator();
 		Term t;
 		for (ProductionItem pitem : prod.getItems()) {
@@ -48,7 +48,7 @@ public class ResolveListOfK extends CopyOnWriteTransformer {
 				Term result = (Term) resultAST;
 				if (pitem instanceof Sort 
 						&& ((Sort)pitem).getName().equals(KSorts.KLIST)
-						&& !t.getSort().equals(KSorts.KLIST)) {
+						&& !t.getSort(definitionHelper).equals(KSorts.KLIST)) {
 					KList list = new KList();
 					list.getContents().add(result);
 					result = list;

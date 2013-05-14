@@ -22,6 +22,10 @@ import org.kframework.utils.general.GlobalSettings;
  */
 public class CheckSyntaxDecl extends BasicVisitor {
 
+	public CheckSyntaxDecl(DefinitionHelper definitionHelper) {
+		super(definitionHelper);
+	}
+
 	java.util.Map<Production, Production> prods = new HashMap<Production, Production>();
 
 	@Override
@@ -40,7 +44,7 @@ public class CheckSyntaxDecl extends BasicVisitor {
 
 		if (node.isSubsort()) {
 			String sort = ((Sort) node.getItems().get(0)).getName();
-			if (Sort.isBasesort(sort) && !DefinitionHelper.isSubsorted(node.getSort(), sort)) {
+			if (Sort.isBasesort(sort) && !definitionHelper.isSubsorted(node.getSort(), sort)) {
 				String msg = "Extending  built-in sorts is forbidden: K, KResult, KList, Map,\n\t MapItem, List, ListItem, Set, SetItem, Bag, BagItem, KLabel, CellLabel";
 				GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
 			}
@@ -51,7 +55,7 @@ public class CheckSyntaxDecl extends BasicVisitor {
 				sorts++;
 				Sort s = (Sort) pi;
 				if (!(s.getName().endsWith("CellSort") || s.getName().endsWith("CellFragment")))
-					if (!s.getName().startsWith("#") && !DefinitionHelper.definedSorts.contains(s.getName())) {
+					if (!s.getName().startsWith("#") && !definitionHelper.definedSorts.contains(s.getName())) {
 						String msg = "Undefined sort " + s.getName();
 						GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), s.getFilename(), s.getLocation()));
 					}
@@ -63,7 +67,7 @@ public class CheckSyntaxDecl extends BasicVisitor {
 			if (pi.getType() == ProductionType.USERLIST) {
 				sorts++;
 				UserList s = (UserList) pi;
-				if (!s.getSort().startsWith("#") && !DefinitionHelper.definedSorts.contains(s.getSort())) {
+				if (!s.getSort().startsWith("#") && !definitionHelper.definedSorts.contains(s.getSort())) {
 					String msg = "Undefined sort " + s.getSort();
 					GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), s.getFilename(), s.getLocation()));
 				}

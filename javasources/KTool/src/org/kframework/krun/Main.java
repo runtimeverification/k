@@ -134,19 +134,19 @@ public class Main {
 		}
 	}
 
-	private static Term parseTerm(String value) throws Exception {
+	private static Term parseTerm(String value, DefinitionHelper definitionHelper) throws Exception {
 		org.kframework.parser.concrete.KParser.ImportTblGround(K.compiled_def
 				+ "/ground/Concrete.tbl");
 		ASTNode term = org.kframework.utils.DefinitionLoader.parseCmdString(
-				value, "", "Command line argument");
-		return (Term) term.accept(new FlattenSyntax());
+				value, "", "Command line argument", definitionHelper);
+		return (Term) term.accept(new FlattenSyntax(definitionHelper));
 	}
 
-	public static Term plug(Map<String, Term> args) throws TransformerException {
+	public static Term plug(Map<String, Term> args, DefinitionHelper definitionHelper) throws TransformerException {
 		Configuration cfg = K.kompiled_cfg;
 		ASTNode cfgCleanedNode = null;
 		try {
-			cfgCleanedNode = new ConfigurationCleaner().transform(cfg);
+			cfgCleanedNode = new ConfigurationCleaner(definitionHelper).transform(cfg);
 		} catch (TransformerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -167,15 +167,15 @@ public class Main {
 		if (GlobalSettings.verbose)
 			sw.printIntermediate("Plug configuration variables");
 
-		return (Term) cfgCleaned.accept(new SubstitutionFilter(args));
+		return (Term) cfgCleaned.accept(new SubstitutionFilter(args, definitionHelper));
 	}
 
 	public static Term makeConfiguration(Term kast, String stdin,
-			RunProcess rp, boolean hasTerm) throws TransformerException {
+			RunProcess rp, boolean hasTerm, DefinitionHelper definitionHelper) throws TransformerException {
 
 		if (hasTerm) {
 			if (kast == null) {
-				return rp.runParserOrDie(K.parser, K.term, false, null);
+				return rp.runParserOrDie(K.parser, K.term, false, null, definitionHelper);
 			} else {
 				Error.report("You cannot specify both the term and the configuration variables.");
 			}
@@ -193,13 +193,13 @@ public class Main {
 			Term parsed = null;
 			if (parser == null) {
 				try {
-					parsed = parseTerm(value);
+					parsed = parseTerm(value, definitionHelper);
 				} catch (Exception e1) {
 					e1.printStackTrace();
 					Error.report(e1.getMessage());
 				}
 			} else {
-				parsed = rp.runParserOrDie(parser, value, true, null);
+				parsed = rp.runParserOrDie(parser, value, true, null, definitionHelper);
 			}
 			output.put("$" + name, parsed);
 			hasPGM = hasPGM || name.equals("$PGM");
@@ -222,20 +222,20 @@ public class Main {
 		if (GlobalSettings.verbose)
 			sw.printIntermediate("Make configuration");
 
-		return plug(output);
+		return plug(output, definitionHelper);
 	}
 
 	// execute krun in normal mode (i.e. not in debug mode)
 	public static void normalExecution(Term KAST, String lang, RunProcess rp,
-			CommandlineOptions cmd_options) {
+			CommandlineOptions cmd_options, DefinitionHelper definitionHelper) {
 		try {
 			CommandLine cmd = cmd_options.getCommandLine();
 
 			KRun krun = null;
 			if (K.backend.equals("maude")) {
-				krun = new MaudeKRun();
+				krun = new MaudeKRun(definitionHelper);
 			} else if (K.backend.equals("java-symbolic")) {
-				krun = new JavaSymbolicKRun();
+				krun = new JavaSymbolicKRun(definitionHelper);
 			} else {
 				Error.report("Currently supported backends are 'maude' and 'java-symbolic'");
 			}
@@ -243,14 +243,14 @@ public class Main {
 			Set<String> varNames = null;
 			Rule patternRule = null;
 			RuleCompilerSteps steps;
-			steps = new RuleCompilerSteps(K.definition);
+			steps = new RuleCompilerSteps(K.definition, definitionHelper);
 			try {
 				if (cmd.hasOption("pattern") || "search".equals(K.maude_cmd)) {
 					org.kframework.parser.concrete.KParser
 							.ImportTbl(K.compiled_def + "/def/Concrete.tbl");
 					ASTNode pattern = DefinitionLoader.parsePattern(K.pattern,
-							"Command line pattern");
-					CollectVariablesVisitor vars = new CollectVariablesVisitor();
+							"Command line pattern", definitionHelper);
+					CollectVariablesVisitor vars = new CollectVariablesVisitor(definitionHelper);
 					pattern.accept(vars);
 					varNames = vars.getVars().keySet();
 
@@ -304,7 +304,7 @@ public class Main {
 								K.searchType,
 								patternRule,
 								makeConfiguration(KAST, buffer, rp,
-										(K.term != null)), steps);
+										(K.term != null), definitionHelper), steps);
 
 						if (GlobalSettings.verbose)
 							sw.printTotal("Search total");
@@ -321,24 +321,24 @@ public class Main {
 						// assume that the specified argument is not a file and
 						// maybe represents a formula
 						KAST1 = rp.runParserOrDie("kast", K.model_checking, true,
-								"LTLFormula");
+								"LTLFormula", definitionHelper);
 					} else {
 						// the specified argument represents a file
 						KAST1 = rp.runParserOrDie("kast", K.model_checking, false,
-								"LTLFormula");
+								"LTLFormula", definitionHelper);
 					}
 
 					result = krun
 							.modelCheck(
 									KAST1,
 									makeConfiguration(KAST, null, rp,
-											(K.term != null)));
+											(K.term != null), definitionHelper));
 
 					if (GlobalSettings.verbose)
 						sw.printTotal("Model checking total");
 				} else {
 					result = krun.run(makeConfiguration(KAST, null, rp,
-							(K.term != null)));
+							(K.term != null), definitionHelper));
 
 					if (GlobalSettings.verbose)
 						sw.printTotal("Normal execution total");
@@ -355,7 +355,7 @@ public class Main {
 				}
 
 			} catch (KRunExecutionException e) {
-				rp.printError(e.getMessage(), lang);
+				rp.printError(e.getMessage(), lang, definitionHelper);
 				System.exit(1);
 			} catch (TransformerException e) {
 				e.report();
@@ -393,7 +393,7 @@ public class Main {
 						}
 						if (input.equals("y")) {
 							K.debug = true;
-							debugExecution(KAST, lang, searchResult);
+							debugExecution(KAST, lang, searchResult, definitionHelper);
 						} else if (input.equals("n")) {
 							K.debug = false;
 							K.guidebug = false;
@@ -448,7 +448,7 @@ public class Main {
 	// execution (we use the search command with --graph option)
 	@SuppressWarnings("unchecked")
 	public static void debugExecution(Term kast, String lang,
-			KRunResult<SearchResults> state) {
+			KRunResult<SearchResults> state, DefinitionHelper definitionHelper) {
 		try {
 			// adding autocompletion and history feature to the stepper internal
 			// commandline by using the JLine library
@@ -467,10 +467,10 @@ public class Main {
 			new File(K.compiled_def + K.fileSeparator + "main.maude")
 					.getCanonicalPath();
 			RunProcess rp = new RunProcess();
-			KRun krun = new MaudeKRun();
+			KRun krun = new MaudeKRun(definitionHelper);
 			KRunDebugger debugger;
 			if (state == null) {
-				Term t = makeConfiguration(kast, null, rp, (K.term != null));
+				Term t = makeConfiguration(kast, null, rp, (K.term != null), definitionHelper);
 				debugger = krun.debug(t);
 				System.out
 						.println("After running one step of execution the result is:");
@@ -647,7 +647,7 @@ public class Main {
 					if (cmd.hasOption("load")) {
 						try {
 							savedGraph = (DirectedGraph<KRunState, Transition>) BinaryLoader.fromBinary(new FileInputStream(cmd.getOptionValue("load")));
-							krun = new MaudeKRun();
+							krun = new MaudeKRun(definitionHelper);
 							debugger = new KRunApiDebugger(krun, savedGraph);
 							debugger.setCurrentState(1);
 							System.out.println("File successfully loaded.");
@@ -664,10 +664,10 @@ public class Main {
 	}
 
 	public static void guiDebugExecution(Term kast, String lang,
-			KRunResult<SearchResults> state) {
+			KRunResult<SearchResults> state, DefinitionHelper definitionHelper) {
 
 		try {
-			new MainWindow(new RunKRunCommand(kast, lang, false));
+			new MainWindow(new RunKRunCommand(kast, lang, false, definitionHelper), definitionHelper);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -679,7 +679,8 @@ public class Main {
 	 *            represents the arguments/options given to jkrun command..
 	 */
 	public static void execute_Krun(String cmds[]) {
-
+		DefinitionHelper definitionHelper = new DefinitionHelper();
+		K.init(definitionHelper);
 		// delete temporary krun directory
 		FileUtil.deleteDirectory(new File(K.krunDir));
 		Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -937,14 +938,14 @@ public class Main {
 						+ "\nPlease compile the definition by using `kompile'.");
 			}
 
-			DefinitionHelper.dotk = new File(
+			definitionHelper.dotk = new File(
 					new File(K.compiled_def).getParent() + File.separator
 							+ ".k");
-			if (!DefinitionHelper.dotk.exists()) {
-				DefinitionHelper.dotk.mkdirs();
+			if (!definitionHelper.dotk.exists()) {
+				definitionHelper.dotk.mkdirs();
 			}
-			DefinitionHelper.kompiled = new File(K.compiled_def);
-			K.kdir = DefinitionHelper.dotk.getCanonicalPath();
+			definitionHelper.kompiled = new File(K.compiled_def);
+			K.kdir = definitionHelper.dotk.getCanonicalPath();
 			K.setKDir();
 			/*
 			 * System.out.println("K.k_definition=" + K.k_definition);
@@ -961,7 +962,7 @@ public class Main {
 			Term KAST = null;
 			RunProcess rp = new RunProcess();
 
-			if (!DefinitionHelper.initialized) {
+			if (!definitionHelper.initialized) {
 				org.kframework.kil.Definition javaDef = (org.kframework.kil.Definition) BinaryLoader
 						.fromBinary(new FileInputStream(K.compiled_def
 								+ "/defx.bin"));
@@ -970,14 +971,14 @@ public class Main {
 					sw.printIntermediate("Reading definition from binary");
 
 				// This is essential for generating maude
-				javaDef = new FlattenModules().compile(javaDef, null);
+				javaDef = new FlattenModules(definitionHelper).compile(javaDef, null);
 
 				if (GlobalSettings.verbose)
 					sw.printIntermediate("Flattening modules");
 
 				try {
 					javaDef = (org.kframework.kil.Definition) javaDef
-							.accept(new AddTopCellConfig());
+							.accept(new AddTopCellConfig(definitionHelper));
 				} catch (TransformerException e) {
 					e.report();
 				}
@@ -985,7 +986,7 @@ public class Main {
 				if (GlobalSettings.verbose)
 					sw.printIntermediate("Adding top cell to configuration");
 
-				javaDef.preprocess();
+				javaDef.preprocess(definitionHelper);
 
 				if (GlobalSettings.verbose)
 					sw.printIntermediate("Preprocessing definition");
@@ -1022,7 +1023,7 @@ public class Main {
 				sw.printIntermediate("Resolving main and syntax modules");
 
 			if (K.pgm != null) {
-				KAST = rp.runParserOrDie(K.parser, K.pgm, false, null);
+				KAST = rp.runParserOrDie(K.parser, K.pgm, false, null, definitionHelper);
 			} else {
 				KAST = null;
 			}
@@ -1043,15 +1044,15 @@ public class Main {
 			GlobalSettings.kem.print();
 
 			if (!K.debug && !K.guidebug) {
-				normalExecution(KAST, lang, rp, cmd_options);
+				normalExecution(KAST, lang, rp, cmd_options, definitionHelper);
 			} else {
 				if (K.do_search) {
 					Error.report("Cannot specify --search with --debug. In order to search inside the debugger, use the step-all command.");
 				}
 				if (K.guidebug)
-					guiDebugExecution(KAST, lang, null);
+					guiDebugExecution(KAST, lang, null, definitionHelper);
 				else
-					debugExecution(KAST, lang, null);
+					debugExecution(KAST, lang, null, definitionHelper);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -1,6 +1,7 @@
 package org.kframework.kompile.lint;
 
 import org.kframework.kil.*;
+import org.kframework.kil.loader.DefinitionHelper;
 
 import java.util.ArrayList;
 
@@ -15,7 +16,12 @@ import java.util.ArrayList;
 public abstract class KlintRule {
 
 	protected Definition javaDef;
+	protected DefinitionHelper definitionHelper;
 	public abstract void run();
+	
+	public KlintRule(DefinitionHelper definitionHelper) {
+		this.definitionHelper = definitionHelper;
+	}
 
 	//TODO: Move to Definition?
 	protected ArrayList<Rule> getRules(){

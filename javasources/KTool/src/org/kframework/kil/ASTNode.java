@@ -2,6 +2,7 @@ package org.kframework.kil;
 
 import org.kframework.compile.utils.SyntaxByTag;
 import org.kframework.kil.loader.Constants;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.Transformable;
 import org.kframework.kil.visitors.Visitable;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -241,8 +242,8 @@ public abstract class ASTNode implements Visitable, Transformable, Serializable 
 	 * @param key
 	 * @return Set<Production> object containing the production descendants
 	 */
-	public Set<Production> getSyntaxByTag(String key) {
-		return SyntaxByTag.get(this, key);
+	public Set<Production> getSyntaxByTag(String key, DefinitionHelper definitionHelper) {
+		return SyntaxByTag.get(this, key, definitionHelper);
 	}
 
 	/**

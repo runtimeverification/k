@@ -11,6 +11,7 @@ import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.symbolic.SymbolicBackend;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Definition;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -23,11 +24,12 @@ public class SymbolicRewriter {
     private final List<Rule> rules;
 	private final SymbolicMatcher matcher;
     private final Transformer transformer;
+    protected DefinitionHelper definitionHelper;
 
-
-	public SymbolicRewriter(Definition definition) {
-		matcher = new SymbolicMatcher();
-        transformer = new KILtoBackendJavaKILTransformer();
+	public SymbolicRewriter(Definition definition, DefinitionHelper definitionHelper) {
+		this.definitionHelper = definitionHelper;
+		matcher = new SymbolicMatcher(definitionHelper);
+        transformer = new KILtoBackendJavaKILTransformer(definitionHelper);
 
         rules = new ArrayList<Rule>(definition.getSingletonModule().getRules().size());
         for (org.kframework.kil.Rule kilRule : definition.getSingletonModule().getRules()) {
@@ -64,10 +66,10 @@ public class SymbolicRewriter {
 
                 System.err.println(rule.getLeftHandSide());
                 System.err.println(matcher.getConstraint());
-                System.err.println(rule.getRightHandSide().substitute(substitution).substitute(freshSubstitution));
+                System.err.println(rule.getRightHandSide().substitute(substitution, definitionHelper).substitute(freshSubstitution, definitionHelper));
 
                 // return first match
-                return rule.getRightHandSide().substitute(substitution).substitute(freshSubstitution);
+                return rule.getRightHandSide().substitute(substitution, definitionHelper).substitute(freshSubstitution, definitionHelper);
 			}
 		}
 

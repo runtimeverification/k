@@ -16,12 +16,16 @@ import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.utils.StringUtil;
 
 public class LatexFilter extends BackendFilter {
+	public LatexFilter(DefinitionHelper definitionHelper) {
+		super(definitionHelper);
+	}
+
 	String endl = System.getProperty("line.separator");
 	private StringBuilder preamble = new StringBuilder();
 	private boolean firstProduction = false;
 	private boolean terminalBefore = false;
 	private Map<String, String> colors = new HashMap<String, String>();
-	private LatexPatternsVisitor patternsVisitor = new LatexPatternsVisitor();
+	private LatexPatternsVisitor patternsVisitor = new LatexPatternsVisitor(definitionHelper);
 	private boolean firstAttribute;
 	private boolean hasTitle = false;
 
@@ -95,7 +99,7 @@ public class LatexFilter extends BackendFilter {
 				&& patternsVisitor.getPatterns().containsKey(p.getAttribute(Constants.CONS_cons_ATTR))) {
 			String pattern = patternsVisitor.getPatterns().get(p.getAttribute(Constants.CONS_cons_ATTR));
 			int n = 1;
-			LatexFilter termFilter = new LatexFilter();
+			LatexFilter termFilter = new LatexFilter(definitionHelper);
 			for (ProductionItem pi : p.getItems()) {
 				if (pi.getType() != ProductionType.TERMINAL) {
 					termFilter.setResult(new StringBuilder());
@@ -117,7 +121,7 @@ public class LatexFilter extends BackendFilter {
 		String terminal = pi.getTerminal();
 		if (terminal.isEmpty())
 			return;
-		if (DefinitionHelper.isSpecialTerminal(terminal)) {
+		if (definitionHelper.isSpecialTerminal(terminal)) {
 			result.append(StringUtil.latexify(terminal));
 		} else {
                   if (terminalBefore) result.append("{}");
@@ -223,8 +227,8 @@ public class LatexFilter extends BackendFilter {
 		} else {
 			result.append("\\variable");
 		}
-		if (var.getSort() != null) {
-			result.append("[" + StringUtil.latexify(var.getSort()) + "]");
+		if (var.getSort(definitionHelper) != null) {
+			result.append("[" + StringUtil.latexify(var.getSort(definitionHelper)) + "]");
 		}
 		if (!var.getName().equals(MetaK.Constants.anyVarSymbol)) {
 			result.append("{" + makeIndices(makeGreek(StringUtil.latexify(var.getName()))) + "}");
@@ -306,7 +310,7 @@ public class LatexFilter extends BackendFilter {
 			super.visit(trm);
 		else {
 			String pattern = getBracketPattern(trm);
-			LatexFilter termFilter = new LatexFilter();
+			LatexFilter termFilter = new LatexFilter(definitionHelper);
 			termFilter.getWantParens().push(Boolean.FALSE);
 			trm.getContent().accept(termFilter);
 			pattern = pattern.replace("{#1}", "{" + termFilter.getResult() + "}");
@@ -322,12 +326,12 @@ public class LatexFilter extends BackendFilter {
 	public void visit(TermCons trm) {
 		String pattern = patternsVisitor.getPatterns().get(trm.getCons());
 		if (pattern == null) {
-			Production pr = DefinitionHelper.conses.get(trm.getCons());
+			Production pr = definitionHelper.conses.get(trm.getCons());
 			pr.accept(patternsVisitor);
 			pattern = patternsVisitor.getPatterns().get(trm.getCons());
 		}
 		int n = 1;
-		LatexFilter termFilter = new LatexFilter();
+		LatexFilter termFilter = new LatexFilter(definitionHelper);
 		for (Term t : trm.getContents()) {
 			termFilter.setResult(new StringBuilder());
 			t.accept(termFilter);
@@ -343,12 +347,12 @@ public class LatexFilter extends BackendFilter {
 
 	@Override
 	public void visit(Constant c) {
-		result.append("\\constant[" + StringUtil.latexify(c.getSort()) + "]{" + StringUtil.latexify(c.getValue()) + "}");
+		result.append("\\constant[" + StringUtil.latexify(c.getSort(definitionHelper)) + "]{" + StringUtil.latexify(c.getValue()) + "}");
 	}
 	
 	@Override
 	public void visit(Builtin c) {
-		result.append("\\constant[" + StringUtil.latexify(c.getSort()) + "]{" + StringUtil.latexify(c.toString()) + "}");
+		result.append("\\constant[" + StringUtil.latexify(c.getSort(definitionHelper)) + "]{" + StringUtil.latexify(c.toString()) + "}");
 	}
 
 	@Override
@@ -409,9 +413,9 @@ public class LatexFilter extends BackendFilter {
 	public void visit(Attribute entry) {
 		if (Constants.GENERATED_LOCATION.equals(entry.getLocation()))
 			return;
-		if (DefinitionHelper.isTagGenerated(entry.getKey()))
+		if (definitionHelper.isTagGenerated(entry.getKey()))
 			return;
-		if (DefinitionHelper.isParsingTag(entry.getKey()))
+		if (definitionHelper.isParsingTag(entry.getKey()))
 			return;
 		if (entry.getKey().equals("latex"))
 			return;

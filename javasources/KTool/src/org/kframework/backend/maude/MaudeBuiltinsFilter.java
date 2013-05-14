@@ -3,6 +3,7 @@ package org.kframework.backend.maude;
 import org.kframework.backend.BackendFilter;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.utils.StringUtil;
 
 import java.util.Properties;
@@ -18,7 +19,8 @@ public class MaudeBuiltinsFilter extends BackendFilter {
 	private boolean first;
 	private final Properties builtinsProperties;
 
-	public MaudeBuiltinsFilter(Properties builtinsProperties) {
+	public MaudeBuiltinsFilter(Properties builtinsProperties, DefinitionHelper definitionHelper) {
+		super(definitionHelper);
 		this.builtinsProperties = builtinsProperties;
 	}
 
@@ -72,8 +74,8 @@ public class MaudeBuiltinsFilter extends BackendFilter {
 		}
 		String sort = "#" + node.getName();
 		final Variable var = MetaK.getFreshVar(sort);
-        MaudeFilter filter = new MaudeFilter();
-		filter.visit(KApp.of(new KInjectedLabel(var)));
+        MaudeFilter filter = new MaudeFilter(definitionHelper);
+		filter.visit(KApp.of(definitionHelper, new KInjectedLabel(var)));
 		left += filter.getResult();
 		right += var.toString();
 	}

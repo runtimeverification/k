@@ -28,7 +28,7 @@ public class Production extends ASTNode {
 	protected String sort;
 	protected String ownerModuleName;
 
-	public static Production makeFunction(String funSort, String funName, String argSort) {
+	public static Production makeFunction(String funSort, String funName, String argSort, DefinitionHelper definitionHelper) {
 		List<ProductionItem> prodItems = new ArrayList<ProductionItem>();
 		prodItems.add(new Terminal(funName));
 		prodItems.add(new Terminal("("));
@@ -41,8 +41,8 @@ public class Production extends ASTNode {
 			funProd.addAttribute(new Attribute("klabel", funName));
 			String consAttr = funSort + "1" + funName + "Syn";
 			funProd.addAttribute(new Attribute("cons", consAttr));
-			DefinitionHelper.conses.put(consAttr, funProd);
-			DefinitionHelper.putLabel(funProd, consAttr);
+			definitionHelper.conses.put(consAttr, funProd);
+			definitionHelper.putLabel(funProd, consAttr);
 		}
 
 		return funProd;

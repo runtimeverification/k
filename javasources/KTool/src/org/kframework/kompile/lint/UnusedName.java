@@ -1,6 +1,7 @@
 package org.kframework.kompile.lint;
 
 import org.kframework.kil.*;
+import org.kframework.kil.loader.DefinitionHelper;
 
 import java.util.ArrayList;
 
@@ -10,7 +11,8 @@ import java.util.ArrayList;
  */
 public class UnusedName extends KlintRule{
 
-	public UnusedName(Definition javaDef){
+	public UnusedName(Definition javaDef, DefinitionHelper definitionHelper) {
+		super(definitionHelper);
 		this.javaDef = javaDef;
 	}
 

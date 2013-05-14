@@ -166,6 +166,6 @@ Term klabel() :
 	}
 |	<KLABEL>
 	{
-		return KLabelConstant.of(StringUtil.unescapeMaude(token.image));
+		return KLabelConstant.ofStatic(StringUtil.unescapeMaude(token.image));
 	}
 }

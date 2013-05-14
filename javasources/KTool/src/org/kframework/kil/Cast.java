@@ -1,5 +1,6 @@
 package org.kframework.kil;
 
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.matchers.Matcher;
@@ -28,8 +29,8 @@ public class Cast extends Term {
 		this.syntactic = i.syntactic;
 	}
 
-	public Cast(Term t) {
-		super(t.getSort());
+	public Cast(Term t, DefinitionHelper definitionHelper) {
+		super(t.getSort(definitionHelper));
 		this.content = t;
 	}
 
@@ -37,8 +38,8 @@ public class Cast extends Term {
 		super(location, filename, sort);
 	}
 
-	public Cast(String location, String filename, Term t) {
-		super(location, filename, t.getSort());
+	public Cast(String location, String filename, Term t, DefinitionHelper definitionHelper) {
+		super(location, filename, t.getSort(definitionHelper));
 		this.content = t;
 	}
 

@@ -18,11 +18,12 @@ import java.io.IOException;
 /**
  * Haskell K Compiler dump tool frontend
  * 
- * @todo .def and .pgm loading routines is the same as in kast/kompile — refactor it as well
+ * @todo .def and .pgm loading routines is the same as in kast/kompile refactor it as well
  */
 public class HKCDFrontEnd {
 
 	public static void hkcd(String[] args) {
+		DefinitionHelper definitionHelper = new DefinitionHelper();
 		Stopwatch sw = new Stopwatch();
 		HKCDOptionsParser op = new HKCDOptionsParser();
 
@@ -85,7 +86,7 @@ public class HKCDFrontEnd {
 			lang = FileUtil.getMainModule(defFile.getName());
 
 		// / Do the actual processing
-		hkcd(defFile, pgmFile, lang);
+		hkcd(defFile, pgmFile, lang, definitionHelper);
 
 		if (GlobalSettings.verbose)
 			sw.printTotal("Total           = ");
@@ -95,7 +96,7 @@ public class HKCDFrontEnd {
 	/**
 	 * Dump language definition and program tree to hkc-readable form
 	 */
-	public static void hkcd(File defFile, File pgmFile, String mainModule) {
+	public static void hkcd(File defFile, File pgmFile, String mainModule, DefinitionHelper definitionHelper) {
 		try {
 			Stopwatch sw = new Stopwatch();
 			String fileSep = System.getProperty("file.separator");
@@ -105,15 +106,15 @@ public class HKCDFrontEnd {
 			File dotk = new File(defCanonical.getParent() + fileSep + ".k");
 			dotk.mkdirs();
 
-			org.kframework.kil.Definition langDef = org.kframework.utils.DefinitionLoader.loadDefinition(defFile, mainModule, true);
+			org.kframework.kil.Definition langDef = org.kframework.utils.DefinitionLoader.loadDefinition(defFile, mainModule, true, definitionHelper);
 
-			ASTNode pgmAst = org.kframework.utils.ProgramLoader.loadPgmAst(pgmFile, false, DefinitionHelper.startSymbolPgm);
+			ASTNode pgmAst = org.kframework.utils.ProgramLoader.loadPgmAst(pgmFile, false, definitionHelper.startSymbolPgm, definitionHelper);
 
-			HaskellPgmFilter hpf = new HaskellPgmFilter();
+			HaskellPgmFilter hpf = new HaskellPgmFilter(definitionHelper);
 			pgmAst.accept(hpf);
 			String pgmDump = hpf.getResult();
 
-			HaskellDefFilter hdf = new HaskellDefFilter();
+			HaskellDefFilter hdf = new HaskellDefFilter(definitionHelper);
 			langDef.accept(hdf);
 			String defDump = hdf.getResult();
 

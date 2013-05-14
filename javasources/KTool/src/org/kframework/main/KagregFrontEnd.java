@@ -53,13 +53,14 @@ public class KagregFrontEnd {
 		String firstLang = FileUtil.getMainModule(firstDefinitionFile.getName());
 		String secondLang = FileUtil.getMainModule(secondDefinitionFile.getName());
 		
-		DefinitionHelper.dotk = new File(firstDefinitionFile.getCanonicalFile().getParent() + File.separator + ".k");
-		DefinitionHelper.dotk.mkdirs();
-		Definition firstDef = org.kframework.utils.DefinitionLoader.loadDefinition(firstDefinitionFile, firstLang, true);
+		DefinitionHelper definitionHelper = new DefinitionHelper();
+		definitionHelper.dotk = new File(firstDefinitionFile.getCanonicalFile().getParent() + File.separator + ".k");
+		definitionHelper.dotk.mkdirs();
+		Definition firstDef = org.kframework.utils.DefinitionLoader.loadDefinition(firstDefinitionFile, firstLang, true, definitionHelper);
 		
-		DefinitionHelper.dotk = new File(secondDefinitionFile.getCanonicalFile().getParent() + File.separator + ".k");
-		DefinitionHelper.dotk.mkdirs();
-		Definition secondDef = org.kframework.utils.DefinitionLoader.loadDefinition(secondDefinitionFile, secondLang, true);
+		definitionHelper.dotk = new File(secondDefinitionFile.getCanonicalFile().getParent() + File.separator + ".k");
+		definitionHelper.dotk.mkdirs();
+		Definition secondDef = org.kframework.utils.DefinitionLoader.loadDefinition(secondDefinitionFile, secondLang, true, definitionHelper);
 		
 		Configuration firstConf = null;
 		try {
@@ -84,12 +85,12 @@ public class KagregFrontEnd {
 		}
 
 		String result = "";
-		UnparserFilter unparserFirst = new UnparserFilter();
+		UnparserFilter unparserFirst = new UnparserFilter(definitionHelper);
 		unparserFirst.setForEquivalence();
 		unparserFirst.visit(firstDef);
 		result += unparserFirst.getResult();
 		
-		UnparserFilter unparserSecond = new UnparserFilter();
+		UnparserFilter unparserSecond = new UnparserFilter(definitionHelper);
 		unparserSecond.setForEquivalence();
 		unparserSecond.visit(secondDef);
 		result += unparserSecond.getResult();
@@ -97,13 +98,13 @@ public class KagregFrontEnd {
 		result += "\n\n\nconfiguration\n";
 		result += "<agregation>\n";
 		result += "<first>\n";
-		UnparserFilter unparserFirstConfiguration = new UnparserFilter();
+		UnparserFilter unparserFirstConfiguration = new UnparserFilter(definitionHelper);
 		firstConf.getBody().accept(unparserFirstConfiguration);
 		result += unparserFirstConfiguration.getResult();
 		result += "</first>\n\n\n";
 
 		result += "<second>\n";
-		UnparserFilter unparserSecondConfiguration = new UnparserFilter();
+		UnparserFilter unparserSecondConfiguration = new UnparserFilter(definitionHelper);
 		secondConf.getBody().accept(unparserSecondConfiguration);
 		result += unparserSecondConfiguration.getResult();
 		result += "</second>\n\n\n";

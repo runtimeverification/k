@@ -7,6 +7,7 @@ import org.kframework.kil.Module;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.loader.CollectStartSymbolPgmVisitor;
 import org.kframework.kil.loader.Constants;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -38,8 +39,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 public class ParseConfigsFilter extends BasicTransformer {
-	public ParseConfigsFilter() {
-		super("Parse Configurations");
+	public ParseConfigsFilter(DefinitionHelper definitionHelper) {
+		super("Parse Configurations", definitionHelper);
 	}
 
 	String localModule = null;
@@ -48,7 +49,7 @@ public class ParseConfigsFilter extends BasicTransformer {
 	public ASTNode transform(Module m) throws TransformerException {
 		localModule = m.getName();
 		ASTNode rez = super.transform(m);
-		rez.accept(new CollectStartSymbolPgmVisitor());
+		rez.accept(new CollectStartSymbolPgmVisitor(definitionHelper));
 		return rez;
 	}
 
@@ -72,28 +73,28 @@ public class ParseConfigsFilter extends BasicTransformer {
 					config = JavaClassesFactory.getTerm((IStrategoAppl) parsed);
 				}
 
-				new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation()).check(config);
+				new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation(definitionHelper), definitionHelper).check(config);
 				// disambiguate configs
-				config = config.accept(new SentenceVariablesFilter());
-				config = config.accept(new CellEndLabelFilter());
-				config = config.accept(new InclusionFilter(localModule));
+				config = config.accept(new SentenceVariablesFilter(definitionHelper));
+				config = config.accept(new CellEndLabelFilter(definitionHelper));
+				config = config.accept(new InclusionFilter(localModule, definitionHelper));
 				// config = config.accept(new CellTypesFilter()); not the case on configs
 				// config = config.accept(new CorrectRewritePriorityFilter());
-				config = config.accept(new CorrectKSeqFilter());
-				config = config.accept(new CorrectCastPriorityFilter());
+				config = config.accept(new CorrectKSeqFilter(definitionHelper));
+				config = config.accept(new CorrectCastPriorityFilter(definitionHelper));
 				// config = config.accept(new CheckBinaryPrecedenceFilter());
-				config = config.accept(new VariableTypeInferenceFilter());
-				config = config.accept(new AmbDuplicateFilter());
-				config = config.accept(new TypeSystemFilter());
-				config = config.accept(new PriorityFilter());
-				config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
-				config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor()));
-				config = config.accept(new TypeInferenceSupremumFilter());
-				config = config.accept(new PreferAvoidFilter());
-				config = config.accept(new FlattenListsFilter());
-				config = config.accept(new AmbDuplicateFilter());
+				config = config.accept(new VariableTypeInferenceFilter(definitionHelper));
+				config = config.accept(new AmbDuplicateFilter(definitionHelper));
+				config = config.accept(new TypeSystemFilter(definitionHelper));
+				config = config.accept(new PriorityFilter(definitionHelper));
+				config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(definitionHelper), definitionHelper));
+				config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(definitionHelper), definitionHelper));
+				config = config.accept(new TypeInferenceSupremumFilter(definitionHelper));
+				config = config.accept(new PreferAvoidFilter(definitionHelper));
+				config = config.accept(new FlattenListsFilter(definitionHelper));
+				config = config.accept(new AmbDuplicateFilter(definitionHelper));
 				// last resort disambiguation
-				config = config.accept(new AmbFilter());
+				config = config.accept(new AmbFilter(definitionHelper));
 
 				return config;
 			} catch (TransformerException te) {

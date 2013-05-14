@@ -14,21 +14,21 @@ public class TypeSystemFilter2 extends BasicHookWorker {
 
 	private String maxSort;
 
-	public TypeSystemFilter2(String maxSort) {
-		super("Type system");
+	public TypeSystemFilter2(String maxSort, DefinitionHelper definitionHelper) {
+		super("Type system", definitionHelper);
 		this.maxSort = maxSort;
 	}
 
-	public TypeSystemFilter2(TypeSystemFilter2 tsf) {
-		super("Type system");
+	public TypeSystemFilter2(TypeSystemFilter2 tsf, DefinitionHelper definitionHelper) {
+		super("Type system", definitionHelper);
 		this.maxSort = tsf.maxSort;
 	}
 
 	public ASTNode transform(Term trm) throws TransformerException {
-		if (!trm.getSort().equals("K") && !trm.getSort().equals(KSorts.KITEM)
-                && !trm.getSort().equals ("KResult")) {
-			if (!DefinitionHelper.isSubsortedEq(maxSort, trm.getSort())) {
-				String msg = "Type error detected. Expected sort " + maxSort + ", but found " + trm.getSort();
+		if (!trm.getSort(definitionHelper).equals("K") && !trm.getSort(definitionHelper).equals(KSorts.KITEM)
+                && !trm.getSort(definitionHelper).equals ("KResult")) {
+			if (!definitionHelper.isSubsortedEq(maxSort, trm.getSort(definitionHelper))) {
+				String msg = "Type error detected. Expected sort " + maxSort + ", but found " + trm.getSort(definitionHelper);
 				KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, trm.getFilename(), trm.getLocation());
 				throw new TransformerException(kex);
 			}

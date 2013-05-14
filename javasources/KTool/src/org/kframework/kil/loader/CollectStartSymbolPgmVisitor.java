@@ -14,6 +14,10 @@ import org.kframework.kil.visitors.BasicVisitor;
  */
 public class CollectStartSymbolPgmVisitor extends BasicVisitor {
 
+	public CollectStartSymbolPgmVisitor(DefinitionHelper definitionHelper) {
+		super(definitionHelper);
+	}
+
 	@Override
 	public void visit(Rule node) {
 	}
@@ -29,7 +33,7 @@ public class CollectStartSymbolPgmVisitor extends BasicVisitor {
 	@Override
 	public void visit(Variable node) {
 		if (node.getName().equals("$PGM")) {
-			DefinitionHelper.startSymbolPgm = node.getSort();
+			definitionHelper.startSymbolPgm = node.getSort(definitionHelper);
 		}
 	}
 }

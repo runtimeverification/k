@@ -6,6 +6,10 @@ import org.kframework.kil.Sentence;
 import org.kframework.kil.visitors.BasicVisitor;
 
 public class CollectConfigCellsVisitor extends BasicVisitor {
+	public CollectConfigCellsVisitor(DefinitionHelper definitionHelper) {
+		super(definitionHelper);
+	}
+
 	@Override
 	public void visit(Configuration config) {
 		super.visit((Sentence) config);
@@ -17,7 +21,7 @@ public class CollectConfigCellsVisitor extends BasicVisitor {
 
 	@Override
 	public void visit(Cell cell) {
-		DefinitionHelper.addCellDecl(cell);
+		definitionHelper.addCellDecl(cell);
 		super.visit(cell);
 	}
 }

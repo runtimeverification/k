@@ -104,10 +104,10 @@ public class    DefinitionHelper {
 		}
 	}
 
-	public static void addCellDecl(Cell c) {
+	public void addCellDecl(Cell c) {
 		cells.put(c.getLabel(), c);
 
-		String sort = subsorts.getMaxim(c.getContents().getSort());
+		String sort = subsorts.getMaxim(c.getContents().getSort(this));
 		if (sort.equals(KSorts.KLIST))
 			sort = "K";
 		cellSorts.put(c.getLabel(), sort);
@@ -275,10 +275,10 @@ public class    DefinitionHelper {
 		return parsingTags.contains(key);
 	}
 
-	public static boolean isListUnit(Constant cst) {
-		if (!isListSort(cst.getSort()))
+	public boolean isListUnit(Constant cst) {
+		if (!isListSort(cst.getSort(this)))
 			return false;
-		assert (cst.getValue().equals("." + cst.getSort()));
+		assert (cst.getValue().equals("." + cst.getSort(this)));
 		return true;
 	}
 
@@ -307,10 +307,10 @@ public class    DefinitionHelper {
         return productions;
     }
 
-	public static Term kWrapper(Term t) {
-		if (isSubsortedEq("K", t.getSort()))
+	public Term kWrapper(Term t) {
+		if (isSubsortedEq("K", t.getSort(this)))
 			return t;
-		return KApp.of(new KInjectedLabel(t));
+		return KApp.of(this, new KInjectedLabel(t));
 	}
 
 	public static String getCellSort(String sort) {

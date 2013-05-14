@@ -35,8 +35,8 @@ import java.util.Properties;
 
 public class RLBackend  extends BasicBackend implements Backend{
 
-	public RLBackend(Stopwatch sw) {
-		super(sw);
+	public RLBackend(Stopwatch sw, DefinitionHelper definitionHelper) {
+		super(sw, definitionHelper);
 	}
 
 	@Override
@@ -49,11 +49,11 @@ public class RLBackend  extends BasicBackend implements Backend{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		MaudeBuiltinsFilter builtinsFilter = new MaudeBuiltinsFilter(builtinsProperties);
+		MaudeBuiltinsFilter builtinsFilter = new MaudeBuiltinsFilter(builtinsProperties, definitionHelper);
 		javaDef.accept(builtinsFilter);
 		final String mainModule = javaDef.getMainModule();
 		String builtins = "mod " + mainModule + "-BUILTINS is\n" + " including " + mainModule + "-BASE .\n" + builtinsFilter.getResult() + "endm\n";
-		FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/builtins.maude", builtins);
+		FileUtil.saveInFile(definitionHelper.dotk.getAbsolutePath() + "/builtins.maude", builtins);
 		if (GlobalSettings.verbose)
 			sw.printIntermediate("Generating equations for hooks");
 		return super.firstStep(javaDef);
@@ -62,7 +62,7 @@ public class RLBackend  extends BasicBackend implements Backend{
 	@Override
 	public void run(Definition javaDef) throws IOException {
 
-		new MaudeBackend(sw).run(javaDef);
+		new MaudeBackend(sw, definitionHelper).run(javaDef);
 
 		String load = "load \"" + KPaths.getKBase(true) + "/bin/maude/lib/k-prelude\"\n";
 
@@ -76,9 +76,9 @@ public class RLBackend  extends BasicBackend implements Backend{
 
 		String main = load + "load \"base.maude\"\n" + "load \"builtins.maude\"\n" + "mod " + mainModule + " is \n" + "  including " + mainModule + "-BASE .\n" + "  including " + mainModule
 				+ "-BUILTINS .\n" + "  including K-STRICTNESS-DEFAULTS .\n" + "endm\n";
-		FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/" + "main.maude", main);
+		FileUtil.saveInFile(definitionHelper.dotk.getAbsolutePath() + "/" + "main.maude", main);
 
-		 UnparserFilter unparserFilter = new UnparserFilter();
+		 UnparserFilter unparserFilter = new UnparserFilter(definitionHelper);
 		 javaDef.accept(unparserFilter);
 		
 		 String unparsedText = unparserFilter.getResult();
@@ -90,7 +90,7 @@ public class RLBackend  extends BasicBackend implements Backend{
 		//
 		// String xml = xstream.toXML(def);
 		//
-		// FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath()
+		// FileUtil.saveInFile(definitionHelper.dotk.getAbsolutePath()
 		// + "/def-symbolic.xml", xml);
 
 	}
@@ -102,60 +102,60 @@ public class RLBackend  extends BasicBackend implements Backend{
 
 	@Override
 	public CompilerSteps<Definition> getCompilationSteps() {
-		CompilerSteps<Definition> steps = new CompilerSteps<Definition>();
-		steps.add(new FirstStep(this));
-		steps.add(new CheckVisitorStep<Definition>(new CheckConfigurationCells()));
-		steps.add(new RemoveBrackets());
-		steps.add(new AddEmptyLists());
-		steps.add(new RemoveSyntacticCasts());
-		steps.add(new CheckVisitorStep<Definition>(new CheckVariables()));
-		steps.add(new CheckVisitorStep<Definition>(new CheckRewrite()));
-		steps.add(new FlattenModules());
-		steps.add(new StrictnessToContexts());
-		steps.add(new FreezeUserFreezers());
-		steps.add(new ContextsToHeating());
-		steps.add(new AddSupercoolDefinition());
-		steps.add(new AddHeatingConditions());
-		steps.add(new AddSuperheatRules());
-		steps.add(new ResolveSymbolicInputStream()); // symbolic step
-		steps.add(new DesugarStreams());
-		steps.add(new ResolveFunctions());
-		steps.add(new TagUserRules()); // symbolic step
-		steps.add(new AddKCell());
-		steps.add(new AddSymbolicK());
+		CompilerSteps<Definition> steps = new CompilerSteps<Definition>(definitionHelper);
+		steps.add(new FirstStep(this, definitionHelper));
+		steps.add(new CheckVisitorStep<Definition>(new CheckConfigurationCells(definitionHelper), definitionHelper));
+		steps.add(new RemoveBrackets(definitionHelper));
+		steps.add(new AddEmptyLists(definitionHelper));
+		steps.add(new RemoveSyntacticCasts(definitionHelper));
+		steps.add(new CheckVisitorStep<Definition>(new CheckVariables(definitionHelper), definitionHelper));
+		steps.add(new CheckVisitorStep<Definition>(new CheckRewrite(definitionHelper), definitionHelper));
+		steps.add(new FlattenModules(definitionHelper));
+		steps.add(new StrictnessToContexts(definitionHelper));
+		steps.add(new FreezeUserFreezers(definitionHelper));
+		steps.add(new ContextsToHeating(definitionHelper));
+		steps.add(new AddSupercoolDefinition(definitionHelper));
+		steps.add(new AddHeatingConditions(definitionHelper));
+		steps.add(new AddSuperheatRules(definitionHelper));
+		steps.add(new ResolveSymbolicInputStream(definitionHelper)); // symbolic step
+		steps.add(new DesugarStreams(definitionHelper));
+		steps.add(new ResolveFunctions(definitionHelper));
+		steps.add(new TagUserRules(definitionHelper)); // symbolic step
+		steps.add(new AddKCell(definitionHelper));
+		steps.add(new AddSymbolicK(definitionHelper));
 
-		steps.add(new AddSemanticEquality());
-		steps.add(new FreshCondToFreshVar());
-		steps.add(new ResolveFreshVarMOS());
-		steps.add(new AddTopCellConfig());
-		steps.add(new AddConditionToConfig()); // symbolic step
-		steps.add(new AddTopCellRules());
-		steps.add(new AddEval());
-		steps.add(new ResolveBinder());
-		steps.add(new ResolveAnonymousVariables());
-		steps.add(new ResolveBlockingInput());
-		steps.add(new AddK2SMTLib());
-		steps.add(new AddPredicates());
-		steps.add(new ResolveSyntaxPredicates());
-		steps.add(new ResolveBuiltins());
-		steps.add(new ResolveListOfK());
-		steps.add(new FlattenSyntax());
-		steps.add(new AddKLabelToString());
-		steps.add(new AddKLabelConstant());
-		steps.add(new ResolveHybrid());
-		steps.add(new ResolveConfigurationAbstraction(new ConfigurationStructureMap()));
-		steps.add(new ResolveOpenCells());
-		steps.add(new ResolveRewrite());
+		steps.add(new AddSemanticEquality(definitionHelper));
+		steps.add(new FreshCondToFreshVar(definitionHelper));
+		steps.add(new ResolveFreshVarMOS(definitionHelper));
+		steps.add(new AddTopCellConfig(definitionHelper));
+		steps.add(new AddConditionToConfig(definitionHelper)); // symbolic step
+		steps.add(new AddTopCellRules(definitionHelper));
+		steps.add(new AddEval(definitionHelper));
+		steps.add(new ResolveBinder(definitionHelper));
+		steps.add(new ResolveAnonymousVariables(definitionHelper));
+		steps.add(new ResolveBlockingInput(definitionHelper));
+		steps.add(new AddK2SMTLib(definitionHelper));
+		steps.add(new AddPredicates(definitionHelper));
+		steps.add(new ResolveSyntaxPredicates(definitionHelper));
+		steps.add(new ResolveBuiltins(definitionHelper));
+		steps.add(new ResolveListOfK(definitionHelper));
+		steps.add(new FlattenSyntax(definitionHelper));
+		steps.add(new AddKLabelToString(definitionHelper));
+		steps.add(new AddKLabelConstant(definitionHelper));
+		steps.add(new ResolveHybrid(definitionHelper));
+		steps.add(new ResolveConfigurationAbstraction(new ConfigurationStructureMap(), definitionHelper));
+		steps.add(new ResolveOpenCells(definitionHelper));
+		steps.add(new ResolveRewrite(definitionHelper));
 		// steps.add(new LineariseTransformer()); //symbolic step
-		steps.add(new ReplaceConstants()); // symbolic step
-		steps.add(new AddPathCondition()); // symbolic step
-		steps.add(new ResolveRLFile()); // rl-verification step
-		steps.add(new ResolveSupercool());
-		steps.add(new AddStrictStar());
-		steps.add(new AddDefaultComputational());
-		steps.add(new AddOptionalTags());
-		steps.add(new DeclareCellLabels());
-		steps.add(new AddOptionalTags());
+		steps.add(new ReplaceConstants(definitionHelper)); // symbolic step
+		steps.add(new AddPathCondition(definitionHelper)); // symbolic step
+		steps.add(new ResolveRLFile(definitionHelper)); // rl-verification step
+		steps.add(new ResolveSupercool(definitionHelper));
+		steps.add(new AddStrictStar(definitionHelper));
+		steps.add(new AddDefaultComputational(definitionHelper));
+		steps.add(new AddOptionalTags(definitionHelper));
+		steps.add(new DeclareCellLabels(definitionHelper));
+		steps.add(new AddOptionalTags(definitionHelper));
 
 		return steps;
 	}

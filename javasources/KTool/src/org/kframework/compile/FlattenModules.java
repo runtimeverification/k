@@ -3,6 +3,7 @@ package org.kframework.compile;
 import org.kframework.compile.utils.BasicCompilerStep;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -14,14 +15,23 @@ import java.util.Set;
 
 
 public class FlattenModules  extends BasicCompilerStep<Definition> {
+	
+	public FlattenModules(DefinitionHelper definitionHelper) {
+		super(definitionHelper);
+	}
+
 	@Override
 	public Definition compile(Definition def, String stepName) {
-		FlattenModulesVisitor fm = new FlattenModulesVisitor();
+		FlattenModulesVisitor fm = new FlattenModulesVisitor(definitionHelper);
 		def.accept(fm);
 		return fm.getResult();
 	}
 
 	private class FlattenModulesVisitor extends BasicVisitor  {
+		public FlattenModulesVisitor(DefinitionHelper definitionHelper) {
+			super(definitionHelper);
+		}
+
 		HashMap<String,Module> modules = new HashMap<String,Module>();
 		Definition result = new Definition();
 

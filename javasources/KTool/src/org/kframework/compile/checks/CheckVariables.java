@@ -2,6 +2,7 @@ package org.kframework.compile.checks;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
@@ -29,6 +30,10 @@ import java.util.Map;
  * 3. the fresh variable can only appear as a replacement variable
  */
 public class CheckVariables extends BasicVisitor {
+
+	public CheckVariables(DefinitionHelper definitionHelper) {
+		super(definitionHelper);
+	}
 
 	HashMap<Variable, Integer> left = new HashMap<Variable, Integer>();
 	HashMap<Variable, Integer> right = new HashMap<Variable, Integer>();

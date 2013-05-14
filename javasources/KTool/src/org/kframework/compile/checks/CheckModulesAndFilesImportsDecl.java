@@ -13,19 +13,23 @@ import org.kframework.utils.general.GlobalSettings;
 
 public class CheckModulesAndFilesImportsDecl extends BasicVisitor {
 
+	public CheckModulesAndFilesImportsDecl(DefinitionHelper definitionHelper) {
+		super(definitionHelper);
+	}
+
 	@Override
 	public void visit(Definition def) {
 
 		for (DefinitionItem di : def.getItems()) {
 			if (di instanceof Module && !di.isPredefined()) {
 				Module m = (Module) di;
-				CollectIncludesVisitor civ = new CollectIncludesVisitor();
+				CollectIncludesVisitor civ = new CollectIncludesVisitor(definitionHelper);
 				m.accept(civ);
 
 				for (Import i : civ.getImportList()) {
 					if (!i.getName().startsWith("#") && !MetaK.isBuiltinModule(i.getName())) {
 						Module imported = def.getModulesMap().get(i.getName());
-						if (imported == null || !DefinitionHelper.isRequiredEq(imported.getFilename(), m.getFilename())) {
+						if (imported == null || !definitionHelper.isRequiredEq(imported.getFilename(), m.getFilename())) {
 							String msg = "Could not find module: " + i.getName() + " imported from: " + m.getName();
 							GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), m.getFilename(), i.getLocation()));
 						}

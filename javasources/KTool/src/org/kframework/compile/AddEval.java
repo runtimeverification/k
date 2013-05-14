@@ -32,14 +32,18 @@ import org.kframework.utils.general.GlobalSettings;
 
 public class AddEval extends BasicCompilerStep<Definition> {
 
+	public AddEval(DefinitionHelper definitionHelper) {
+		super(definitionHelper);
+	}
+	
 	@Override
 	public Definition compile(Definition def, String stepName) {
-		Configuration cfg = MetaK.getConfiguration(def);
-		Set<Variable> vars = MetaK.getVariables(cfg);
+		Configuration cfg = MetaK.getConfiguration(def, definitionHelper);
+		Set<Variable> vars = MetaK.getVariables(cfg, definitionHelper);
 
 		ASTNode cfgCleanedNode = null;
 		try {
-			cfgCleanedNode = new ConfigurationCleaner().transform(cfg);
+			cfgCleanedNode = new ConfigurationCleaner(definitionHelper).transform(cfg);
 		} catch (TransformerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -63,13 +67,13 @@ public class AddEval extends BasicCompilerStep<Definition> {
 		updateMap.getContents().add(defaultMap(vars));
 		updateMap.getContents().add(new Variable("M", "Map"));
 		eval1Right.getContents().add(updateMap);
-		ruleEval1.setBody(new Rewrite(eval1Left, eval1Right));
+		ruleEval1.setBody(new Rewrite(eval1Left, eval1Right, definitionHelper));
 
 		Rule ruleEval2 = new Rule();
 		TermCons eval2Left = new TermCons("Bag", "Bag1EvalHelperSyn");
 		eval2Left.getContents().add(evalMap(vars));
 		Term eval2Right = cfgCleaned.getBody();
-		ruleEval2.setBody(new Rewrite(eval2Left, eval2Right));
+		ruleEval2.setBody(new Rewrite(eval2Left, eval2Right, definitionHelper));
 
 		List<ModuleItem> rules = new ArrayList<ModuleItem>();
 		// rules.add(syntaxBlock);
@@ -82,15 +86,15 @@ public class AddEval extends BasicCompilerStep<Definition> {
 
 	public Term defaultMapItem(Variable v) {
 		MapItem item = new MapItem();
-		item.setKey(DefinitionHelper.kWrapper(StringBuiltin.of(v.getName())));
-		item.setValue(DefinitionHelper.kWrapper(MetaK.defaultTerm(v)));
+		item.setKey(definitionHelper.kWrapper(StringBuiltin.of(v.getName())));
+		item.setValue(definitionHelper.kWrapper(MetaK.defaultTerm(v, definitionHelper)));
 		return item;
 	}
 
 	public Term evalMapItem(Variable v) {
 		MapItem item = new MapItem();
-		item.setKey(DefinitionHelper.kWrapper(StringBuiltin.of(v.getName())));
-		item.setValue(DefinitionHelper.kWrapper(v));
+		item.setKey(definitionHelper.kWrapper(StringBuiltin.of(v.getName())));
+		item.setValue(definitionHelper.kWrapper(v));
 		return item;
 	}
 

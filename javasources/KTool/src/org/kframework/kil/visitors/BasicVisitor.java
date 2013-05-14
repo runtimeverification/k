@@ -1,17 +1,20 @@
 package org.kframework.kil.visitors;
 
 import org.kframework.kil.*;
+import org.kframework.kil.loader.DefinitionHelper;
 
 public class BasicVisitor implements Visitor {
-
+	protected DefinitionHelper definitionHelper;
 	String name;
 
-	public BasicVisitor() {
+	public BasicVisitor(DefinitionHelper definitionHelper) {
 		this.name = this.getClass().toString();
+		this.definitionHelper = definitionHelper;
 	}
 
-	public BasicVisitor(String name) {
+	public BasicVisitor(String name, DefinitionHelper definitionHelper) {
 		this.name = name;
+		this.definitionHelper = definitionHelper;
 	}
 
 	@Override

@@ -10,6 +10,7 @@ import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.PriorityException;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -18,8 +19,8 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
 public class CheckBinaryPrecedenceFilter extends BasicTransformer {
-	public CheckBinaryPrecedenceFilter() {
-		super("Check precedence for => and ~>");
+	public CheckBinaryPrecedenceFilter(DefinitionHelper definitionHelper) {
+		super("Check precedence for => and ~>", definitionHelper);
 	}
 
 	TermCons parent = null;
@@ -86,7 +87,7 @@ public class CheckBinaryPrecedenceFilter extends BasicTransformer {
 
 	@Override
 	public ASTNode transform(TermCons tc) throws TransformerException {
-		if (tc.getProduction().isListDecl()) {
+		if (tc.getProduction(definitionHelper).isListDecl()) {
 			Term t = tc.getContents().get(0);
 			parent = t instanceof Rewrite || t instanceof Ambiguity || t instanceof KSequence ? tc : null;
 			parentks = null;
@@ -97,12 +98,12 @@ public class CheckBinaryPrecedenceFilter extends BasicTransformer {
 			parent = t instanceof Rewrite || t instanceof Ambiguity || t instanceof KSequence ? tc : null;
 			parentks = null;
 			tc.getContents().set(1, (Term) t.accept(this));
-		} else if (!tc.getProduction().isConstant() && !tc.getProduction().isSubsort()) {
-			for (int i = 0, j = 0; i < tc.getProduction().getItems().size(); i++) {
-				if (tc.getProduction().getItems().get(i).getType() == ProductionType.SORT) {
+		} else if (!tc.getProduction(definitionHelper).isConstant() && !tc.getProduction(definitionHelper).isSubsort()) {
+			for (int i = 0, j = 0; i < tc.getProduction(definitionHelper).getItems().size(); i++) {
+				if (tc.getProduction(definitionHelper).getItems().get(i).getType() == ProductionType.SORT) {
 					// look for the outermost element
 					Term t = tc.getContents().get(j);
-					if ((i == 0 || i == tc.getProduction().getItems().size() - 1) && (t instanceof Rewrite || t instanceof Ambiguity || t instanceof KSequence)) {
+					if ((i == 0 || i == tc.getProduction(definitionHelper).getItems().size() - 1) && (t instanceof Rewrite || t instanceof Ambiguity || t instanceof KSequence)) {
 						parent = tc;
 						parentks = null;
 						tc.getContents().set(j, (Term) t.accept(this));

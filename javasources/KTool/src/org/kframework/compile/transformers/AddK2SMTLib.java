@@ -16,6 +16,7 @@ import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Variable;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -33,14 +34,14 @@ import java.util.ArrayList;
 
 public class AddK2SMTLib  extends CopyOnWriteTransformer {
 
-    public static final KLabelConstant K_TO_SMTLIB = KLabelConstant.of("K2SMTLib");
+    public static final KLabelConstant K_TO_SMTLIB = KLabelConstant.ofStatic("K2SMTLib");
     public static final String SMTLIB_ATTR = "smtlib";
 
     private static final String SMTLIB_VAR_PREFIX = "__var__";
 
     // constructs the term '_+String_(term1,,term2)
-    public static Term appendString(Term term1, Term term2) {
-        return KApp.of(KLabelConstant.STRING_PLUSSTRING_KLABEL, term1, term2);
+    public static Term appendString(Term term1, Term term2, DefinitionHelper definitionHelper) {
+        return KApp.of(definitionHelper, KLabelConstant.STRING_PLUSSTRING_KLABEL, term1, term2);
     }
 
 
@@ -60,28 +61,28 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
                 String symCtor = AddSymbolicK.symbolicConstructor(sort);
 
                 Variable var = MetaK.getFreshVar("Int");
-                Term symTerm = KApp.of(KLabelConstant.of(symCtor), var);
-                Term lhs = KApp.of(K_TO_SMTLIB, symTerm);
-                KApp strTerm = KApp.of(KLabelConstant.of("Int2String"), var);
-                Term rhs = appendString(StringBuiltin.of(SMTLIB_VAR_PREFIX), strTerm);
-                Rule rule = new Rule(lhs, rhs);
+                Term symTerm = KApp.of(definitionHelper, KLabelConstant.of(symCtor, definitionHelper), var);
+                Term lhs = KApp.of(definitionHelper, K_TO_SMTLIB, symTerm);
+                KApp strTerm = KApp.of(definitionHelper, KLabelConstant.of("Int2String", definitionHelper), var);
+                Term rhs = appendString(StringBuiltin.of(SMTLIB_VAR_PREFIX), strTerm, definitionHelper);
+                Rule rule = new Rule(lhs, rhs, definitionHelper);
                 rule.addAttribute(Attribute.FUNCTION);
                 retNode.appendModuleItem(rule);
 
                 var = MetaK.getFreshVar("#String");
-                symTerm = KApp.of(KLabelConstant.of(symCtor), var);
-                lhs = KApp.of(K_TO_SMTLIB, symTerm);
-                rhs = appendString(StringBuiltin.of(SMTLIB_VAR_PREFIX), var);
-                rule = new Rule(lhs, rhs);
+                symTerm = KApp.of(definitionHelper, KLabelConstant.of(symCtor, definitionHelper), var);
+                lhs = KApp.of(definitionHelper, K_TO_SMTLIB, symTerm);
+                rhs = appendString(StringBuiltin.of(SMTLIB_VAR_PREFIX), var, definitionHelper);
+                rule = new Rule(lhs, rhs, definitionHelper);
                 rule.addAttribute(Attribute.FUNCTION);
                 retNode.appendModuleItem(rule);
 
                 var = MetaK.getFreshVar("Id");
-                symTerm = KApp.of(KLabelConstant.of(symCtor), var);
-                lhs = KApp.of(K_TO_SMTLIB, symTerm);
-                strTerm = KApp.of(KLabelConstant.of("Id2String"), var);
-                rhs = appendString(StringBuiltin.of(SMTLIB_VAR_PREFIX), strTerm);
-                rule = new Rule(lhs, rhs);
+                symTerm = KApp.of(definitionHelper, KLabelConstant.of(symCtor, definitionHelper), var);
+                lhs = KApp.of(definitionHelper, K_TO_SMTLIB, symTerm);
+                strTerm = KApp.of(definitionHelper, KLabelConstant.of("Id2String", definitionHelper), var);
+                rhs = appendString(StringBuiltin.of(SMTLIB_VAR_PREFIX), strTerm, definitionHelper);
+                rule = new Rule(lhs, rhs, definitionHelper);
                 rule.addAttribute(Attribute.FUNCTION);
                 retNode.appendModuleItem(rule);
             }
@@ -90,7 +91,7 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
         // for each production, define the SMT representation based on the
         // smtlib tag
         // TODO: support subsort production using the injection label
-        for (Production prod : SyntaxByTag.get(node, SMTLIB_ATTR)) {
+        for (Production prod : SyntaxByTag.get(node, SMTLIB_ATTR, definitionHelper)) {
             String smtLbl = prod.getAttribute(SMTLIB_ATTR);
             // not sure if this is necessary
             if (smtLbl == null)
@@ -108,8 +109,8 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
             if (prod.isListDecl())
                 continue;
 
-            Term term = MetaK.getTerm(prod);
-            Term lhs = KApp.of(K_TO_SMTLIB, term);
+            Term term = MetaK.getTerm(prod, definitionHelper);
+            Term lhs = KApp.of(definitionHelper, K_TO_SMTLIB, term);
 
             Term rhs;
             if (prod.isConstant()) {
@@ -117,15 +118,15 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
             } else {
                 TermCons termCons = ((TermCons) term);
                 rhs = StringBuiltin.of("(" + smtLbl);
-                for (int idx = 0; idx < ((TermCons) term).arity(); ++idx) {
+                for (int idx = 0; idx < ((TermCons) term).arity(definitionHelper); ++idx) {
                     Variable var = (Variable) termCons.getSubterm(idx);
-                    rhs = appendString(rhs, StringBuiltin.SPACE);
-                    rhs = appendString(rhs, KApp.of(K_TO_SMTLIB, var));
+                    rhs = appendString(rhs, StringBuiltin.SPACE, definitionHelper);
+                    rhs = appendString(rhs, KApp.of(definitionHelper, K_TO_SMTLIB, var), definitionHelper);
                 }
-                rhs = appendString(rhs, StringBuiltin.of(")"));
+                rhs = appendString(rhs, StringBuiltin.of(")"), definitionHelper);
             }
 
-            Rule rule = new Rule(lhs, rhs);
+            Rule rule = new Rule(lhs, rhs, definitionHelper);
             rule.addAttribute(Attribute.FUNCTION);
             retNode.appendModuleItem(rule);
         }
@@ -133,8 +134,7 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
         return retNode;
     }
 
-
-    public AddK2SMTLib() {
-        super("Add translation from K to Z3 SMTlib v2 string");
+    public AddK2SMTLib(DefinitionHelper definitionHelper) {
+        super("Add translation from K to Z3 SMTlib v2 string", definitionHelper);
     }
 }

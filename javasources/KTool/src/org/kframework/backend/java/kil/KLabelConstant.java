@@ -27,11 +27,11 @@ public class KLabelConstant extends KLabel {
     private final String label;
     private final boolean isFunction;
 
-    public KLabelConstant(String label) {
+    public KLabelConstant(String label, DefinitionHelper definitionHelper) {
         this.label = label;
 
         boolean isFunction = false;
-        for (Production production : productionsOf()) {
+        for (Production production : productionsOf(definitionHelper)) {
             if (production.containsAttribute(Attribute.FUNCTION.getKey())) {
                 isFunction = true;
                 break;
@@ -48,17 +48,17 @@ public class KLabelConstant extends KLabel {
         return label;
     }
 
-    public List<Production> productionsOf() {
-        Set<String> conses = DefinitionHelper.labels.get(label);
+    public List<Production> productionsOf(DefinitionHelper definitionHelper) {
+        Set<String> conses = definitionHelper.labels.get(label);
         if (conses == null) {
             return Collections.<Production>emptyList();
         }
 
         ArrayList<Production> productions = new ArrayList<Production>();
         for (String cons : conses) {
-            assert DefinitionHelper.conses.containsKey(cons);
+            assert definitionHelper.conses.containsKey(cons);
 
-            productions.add(DefinitionHelper.conses.get(cons));
+            productions.add(definitionHelper.conses.get(cons));
         }
 
         return productions;

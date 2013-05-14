@@ -1,7 +1,9 @@
 package org.kframework.compile.transformers;
 
+import org.kframework.compile.transformers.FlattenSyntax.FlattenKSyntax;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -17,8 +19,8 @@ import java.util.List;
  * Time: 3:02 PM
  */
 public class FreezeUserFreezers extends CopyOnWriteTransformer {
-	public FreezeUserFreezers() {
-		super("Freeze User Freezers");
+	public FreezeUserFreezers(DefinitionHelper definitionHelper) {
+		super("Freeze User Freezers", definitionHelper);
 	}
 
 	@Override
@@ -89,7 +91,7 @@ public class FreezeUserFreezers extends CopyOnWriteTransformer {
 		final Term freezer = kSequenceContents.get(1);
 		if (!(freezer instanceof  Freezer)) {
 			kSequenceContents = new ArrayList<Term>(kSequenceContents);
-			kSequenceContents.set(1, ContextsToHeating.freeze(freezer));
+			kSequenceContents.set(1, new ContextsToHeating(definitionHelper).freeze(freezer));
 			kSequence = kSequence.shallowCopy();
 			kSequence.setContents(kSequenceContents);
 			rewrite = rewrite.shallowCopy();

@@ -20,18 +20,19 @@ public class K {
 	public static final String k_base = KPaths.getKBase(false);
 
 	public static String kdir;
-	static {
-		if (DefinitionHelper.dotk == null) {
-			DefinitionHelper.dotk = new File(userdir + File.separator + ".k");		
+	
+	public static void init(DefinitionHelper definitionHelper) {
+		if (definitionHelper.dotk == null) {
+			definitionHelper.dotk = new File(userdir + File.separator + ".k");		
 		}
 		try {
-			kdir = DefinitionHelper.dotk.getCanonicalPath();
+			kdir = definitionHelper.dotk.getCanonicalPath();
 			setKDir();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
+	
 	public static String krunDir, krunTempDir, maude_in, maude_out, maude_err, kast_in, maude_output, processed_maude_output, krun_output;
 
 	public static void setKDir() {

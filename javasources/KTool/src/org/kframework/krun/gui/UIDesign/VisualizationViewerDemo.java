@@ -13,6 +13,7 @@ import java.util.Set;
 import org.apache.commons.collections15.Predicate;
 import org.apache.commons.collections15.Transformer;
 import org.apache.commons.collections15.functors.ConstantTransformer;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.Transition;
 import org.strategoxt.stratego_lib.retain_all_1_0;
@@ -40,10 +41,14 @@ public class VisualizationViewerDemo {
 	public static final int width = 400;
 	public static final int heigth = 600;
 	public static ArrayList<Integer> oldIds = new ArrayList<Integer>();
+	protected DefinitionHelper definitionHelper;
 
-	public VisualizationViewerDemo(){}
+	public VisualizationViewerDemo(DefinitionHelper definitionHelper) {
+		this.definitionHelper = definitionHelper;
+	}
 
-	public VisualizationViewerDemo(Graph graph){		
+	public VisualizationViewerDemo(Graph graph, DefinitionHelper definitionHelper) {		
+		this.definitionHelper = definitionHelper;
 		init(graph);
 	}
 
@@ -150,7 +155,7 @@ public class VisualizationViewerDemo {
 				if(getSelectedVertices().size()==1){
 					for(Object vertex:getSelectedVertices()){
 						try{
-							GraphRepresentation.displayVertexInfo((KRunState)vertex);
+							GraphRepresentation.displayVertexInfo((KRunState)vertex, definitionHelper);
 						}catch(Exception e){}
 					}
 				}
@@ -159,7 +164,7 @@ public class VisualizationViewerDemo {
 						try{
 							KRunState dest = (KRunState)layout.getGraph().getDest((Transition)edge);
 							KRunState src = (KRunState)layout.getGraph().getSource((Transition)edge);
-							GraphRepresentation.displayEdgeInfo((Transition)edge,src,dest);
+							GraphRepresentation.displayEdgeInfo((Transition)edge,src,dest, definitionHelper);
 							resetEdgeSelection();
 						}catch(Exception e){}
 					}
@@ -216,7 +221,7 @@ public class VisualizationViewerDemo {
 	}
 
 	public void addEdge(KRunState source, KRunState target, int depth, String rule){
-		this.layout.getGraph().addEdge(new Transition(Transition.TransitionType.REDUCE), source, target);
+		this.layout.getGraph().addEdge(new Transition(Transition.TransitionType.REDUCE, definitionHelper), source, target);
 	}
 
 	public Object verifyExistingVertex(Object vertex){

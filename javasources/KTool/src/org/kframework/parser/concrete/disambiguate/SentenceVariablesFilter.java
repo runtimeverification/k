@@ -1,6 +1,7 @@
 package org.kframework.parser.concrete.disambiguate;
 
 import org.kframework.kil.*;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.kil.visitors.exceptions.VariableTypeClashException;
@@ -17,8 +18,8 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 public class SentenceVariablesFilter extends BasicTransformer {
 	private boolean config = false;
 
-	public SentenceVariablesFilter() {
-		super("Sentence Variable Filter");
+	public SentenceVariablesFilter(DefinitionHelper definitionHelper) {
+		super("Sentence Variable Filter", definitionHelper);
 	}
 
 	public ASTNode transform(Configuration cfg) throws TransformerException {

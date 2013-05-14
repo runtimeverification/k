@@ -3,14 +3,15 @@ package org.kframework.parser.concrete.disambiguate;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Term;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.ArrayList;
 
 public class AmbDuplicateFilter extends BasicTransformer {
-	public AmbDuplicateFilter() {
-		super("Remove ambiguity duplicates");
+	public AmbDuplicateFilter(DefinitionHelper definitionHelper) {
+		super("Remove ambiguity duplicates", definitionHelper);
 	}
 
 	public ASTNode transform(Ambiguity amb) throws TransformerException {

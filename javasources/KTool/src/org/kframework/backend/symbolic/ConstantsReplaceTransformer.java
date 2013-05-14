@@ -9,6 +9,7 @@ import org.kframework.kil.Builtin;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.Variable;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -21,8 +22,8 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 public class ConstantsReplaceTransformer extends CopyOnWriteTransformer {
     private Map<Variable, Builtin> generatedSV;
 
-    public ConstantsReplaceTransformer(String name) {
-        super("Replace Constants");
+    public ConstantsReplaceTransformer(String name, DefinitionHelper definitionHelper) {
+        super("Replace Constants", definitionHelper);
         generatedSV = new HashMap<Variable, Builtin>();
     }
 
@@ -41,7 +42,7 @@ public class ConstantsReplaceTransformer extends CopyOnWriteTransformer {
 
         Builtin builtin = (Builtin) label.getTerm();
       
-        if (!MetaK.isAbstractableSort(builtin.getSort())) {
+        if (!MetaK.isAbstractableSort(builtin.getSort(definitionHelper))) {
             return super.transform(node);
         }
 

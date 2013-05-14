@@ -5,6 +5,8 @@ import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
+
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.krun.K;
 import org.kframework.krun.KPaths;
 import org.kframework.krun.ioserver.main.MainServer;
@@ -33,8 +35,10 @@ public class KRunner {
 	private String _maudeModule;
 	private boolean _createLogs;
 	private boolean _noServer;
+	protected DefinitionHelper definitionHelper;
 
-	public KRunner(String[] args) throws Exception, IOException {
+	public KRunner(String[] args, DefinitionHelper definitionHelper) throws Exception, IOException {
+		this.definitionHelper = definitionHelper;
 		// boolean append = true;
 		// parser.accepts("suppressio");
 
@@ -91,7 +95,7 @@ public class KRunner {
 
 	Thread startServer() {
 		_logger.info("Trying to start server on port " + _port);
-		MainServer server = new MainServer(_port, _logger);
+		MainServer server = new MainServer(_port, _logger, definitionHelper);
 		Thread t = new Thread(server);
 		t.start();
 		while (!server._started) {
@@ -125,8 +129,8 @@ public class KRunner {
 		return maude.returnValue;
 	}
 
-	public static int main(String[] args) throws IOException, Exception {
-		KRunner runner = new KRunner(args);
+	public static int main(String[] args, DefinitionHelper definitionHelper) throws IOException, Exception {
+		KRunner runner = new KRunner(args, definitionHelper);
 		// try {
 		return runner.run();
 		// } catch (IOException e) {

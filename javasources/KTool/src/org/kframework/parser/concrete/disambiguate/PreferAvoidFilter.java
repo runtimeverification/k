@@ -6,12 +6,13 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class PreferAvoidFilter extends BasicTransformer {
-	public PreferAvoidFilter() {
-		super("Ambiguity filter");
+	public PreferAvoidFilter(DefinitionHelper definitionHelper) {
+		super("Ambiguity filter", definitionHelper);
 	}
 
 	public ASTNode transform(Ambiguity amb) throws TransformerException {
@@ -21,9 +22,9 @@ public class PreferAvoidFilter extends BasicTransformer {
 		for (ASTNode variant : amb.getContents()) {
 			if (variant instanceof TermCons) {
 				TermCons tc = (TermCons) variant;
-				if (tc.getProduction().getAttributes().containsKey("prefer"))
+				if (tc.getProduction(definitionHelper).getAttributes().containsKey("prefer"))
 					prefer.add(tc);
-				if (tc.getProduction().getAttributes().containsKey("avoid"))
+				if (tc.getProduction(definitionHelper).getAttributes().containsKey("avoid"))
 					avoid.add(tc);
 			}
 		}

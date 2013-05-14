@@ -1,6 +1,7 @@
 package org.kframework.compile.utils;
 
 import org.kframework.kil.*;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 
 import java.util.Stack;
@@ -12,7 +13,8 @@ public class ConfigurationStructureVisitor extends BasicVisitor {
 	private ConfigurationStructureMap config;
 	private int maxLevel = 0;
 
-	public ConfigurationStructureVisitor(ConfigurationStructureMap cfgStr) {
+	public ConfigurationStructureVisitor(ConfigurationStructureMap cfgStr, DefinitionHelper definitionHelper) {
+		super(definitionHelper);
 		this.config = cfgStr;
 	}
 

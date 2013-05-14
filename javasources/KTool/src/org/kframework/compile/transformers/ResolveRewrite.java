@@ -1,6 +1,7 @@
 package org.kframework.compile.transformers;
 
 import org.kframework.kil.*;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -11,8 +12,8 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  */
 public class ResolveRewrite extends CopyOnWriteTransformer {
 
-    public ResolveRewrite() {
-        super("Pushing local rewrites to top");
+    public ResolveRewrite(DefinitionHelper definitionHelper) {
+        super("Pushing local rewrites to top", definitionHelper);
     }
 
     @Override
@@ -20,9 +21,9 @@ public class ResolveRewrite extends CopyOnWriteTransformer {
         Term body = node.getBody();
         if (body instanceof Rewrite) return node;
         node = node.shallowCopy();
-        Term left = (Term) body.accept(new OneSideTransformer(LRHS.LEFT));
-        Term right = (Term) body.accept(new OneSideTransformer(LRHS.RIGHT));
-        Rewrite rewrite = new Rewrite(left, right);
+        Term left = (Term) body.accept(new OneSideTransformer(LRHS.LEFT, definitionHelper));
+        Term right = (Term) body.accept(new OneSideTransformer(LRHS.RIGHT, definitionHelper));
+        Rewrite rewrite = new Rewrite(left, right, definitionHelper);
         node.setBody(rewrite);
         return node;
     }
@@ -50,8 +51,8 @@ public class ResolveRewrite extends CopyOnWriteTransformer {
     public class OneSideTransformer extends CopyOnWriteTransformer {
         private LRHS lrhs;
 
-        public OneSideTransformer(LRHS lrhs) {
-            super("Retrieving the " + lrhs + "side of the term");
+        public OneSideTransformer(LRHS lrhs, DefinitionHelper definitionHelper) {
+            super("Retrieving the " + lrhs + "side of the term", definitionHelper);
             this.lrhs = lrhs;
         }
 

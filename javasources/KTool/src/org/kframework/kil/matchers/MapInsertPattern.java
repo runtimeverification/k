@@ -6,6 +6,7 @@ import org.kframework.kil.Map;
 import org.kframework.kil.MapItem;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.rewriter.SetImpl;
 import org.kframework.kil.visitors.Transformer;
@@ -31,12 +32,12 @@ public class MapInsertPattern extends Term {
   */ 
   private Variable remainder;
 
-  public MapInsertPattern(Map m){
+  public MapInsertPattern(Map m, DefinitionHelper definitionHelper){
     java.util.List<Term> contents = m.getContents();
     insertions = new ArrayList<Binding>(contents.size());
     for(Term t : contents){
       if(t instanceof Variable){
-        if(!(t.getSort().equals("Map")))
+        if(!(t.getSort(definitionHelper).equals("Map")))
           throw new MatchCompilationException(
               "Variable in Map pattern does not have sort Map: " + t);
         if(remainder != null)

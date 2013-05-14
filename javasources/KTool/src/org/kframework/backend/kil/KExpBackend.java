@@ -12,18 +12,18 @@ import java.io.IOException;
 
 public class KExpBackend extends BasicBackend {
 
-	public KExpBackend(Stopwatch sw) {
-		super(sw);
+	public KExpBackend(Stopwatch sw, DefinitionHelper definitionHelper) {
+		super(sw, definitionHelper);
 	}
 
 	@Override
 	public void run(Definition definition) throws IOException {
-		KExpFilter unparserFilter = new KExpFilter();
+		KExpFilter unparserFilter = new KExpFilter(definitionHelper);
 		definition.accept(unparserFilter);
 
 		String kexpText = unparserFilter.getResult();
 
-		FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/def.kexp", kexpText);
+		FileUtil.saveInFile(definitionHelper.dotk.getAbsolutePath() + "/def.kexp", kexpText);
 
 		File canonicalFile = GlobalSettings.mainFile.getCanonicalFile();
 		FileUtil.saveInFile(FileUtil.stripExtension(canonicalFile.getAbsolutePath()) + ".kexp", kexpText);

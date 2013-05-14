@@ -2,13 +2,14 @@ package org.kframework.compile.tags;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Rule;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class AddDefaultComputational extends BasicTransformer {
 
-	public AddDefaultComputational() {
-		super("AddDefaultComputational");
+	public AddDefaultComputational(DefinitionHelper definitionHelper) {
+		super("AddDefaultComputational", definitionHelper);
 	}
 
 	@Override

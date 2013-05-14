@@ -8,8 +8,8 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class ResolveFunctions extends CopyOnWriteTransformer {
 
-	public ResolveFunctions() {
-		super("Resolve Functions");
+	public ResolveFunctions(DefinitionHelper definitionHelper) {
+		super("Resolve Functions", definitionHelper);
 	}
 
 	@Override
@@ -19,7 +19,7 @@ public class ResolveFunctions extends CopyOnWriteTransformer {
 			body = ((Rewrite) body).getLeft();
 		}
 		if (body instanceof TermCons) {
-			Production prod = DefinitionHelper.conses.get(((TermCons) body).getCons());
+			Production prod = definitionHelper.conses.get(((TermCons) body).getCons());
 			if (prod.containsAttribute("function") || prod.containsAttribute("predicate")) {
 				node = addFunction(node);
 			}

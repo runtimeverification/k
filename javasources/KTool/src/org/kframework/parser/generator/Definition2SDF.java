@@ -15,12 +15,13 @@ import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.loader.Subsort;
 import org.kframework.utils.StringUtil;
 
 public class Definition2SDF {
 
-	public static String getSdfForDefinition(Definition def) {
+	public static String getSdfForDefinition(Definition def, DefinitionHelper definitionHelper) {
 
 		StringBuilder sdf = new StringBuilder("module Integration\n\n");
 		sdf.append("imports Common\n");
@@ -29,8 +30,8 @@ public class Definition2SDF {
 		sdf.append("exports\n\n");
 		sdf.append("context-free syntax\n");
 
-		DefinitionSDFVisitor psdfv = new DefinitionSDFVisitor(true);
-		CollectTerminalsVisitor terminals = new CollectTerminalsVisitor();
+		DefinitionSDFVisitor psdfv = new DefinitionSDFVisitor(true, definitionHelper);
+		CollectTerminalsVisitor terminals = new CollectTerminalsVisitor(definitionHelper);
 		def.accept(psdfv);
 		def.accept(terminals);
 

@@ -66,14 +66,15 @@ import org.kframework.kil.Token;
 import org.kframework.kil.UserList;
 import org.kframework.kil.Variable;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-
+import org.kframework.kil.loader.DefinitionHelper;
 
 public class BasicHookWorker implements Transformer {
-
 	private String name;
 	protected boolean skip;
+	protected DefinitionHelper definitionHelper;
 
-	public BasicHookWorker(String name) {
+	public BasicHookWorker(String name, DefinitionHelper definitionHelper) {
+		this.definitionHelper = definitionHelper;
 		this.name = name;
 	}
 

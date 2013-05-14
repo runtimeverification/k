@@ -15,8 +15,8 @@ public class ResolveBuiltins extends CopyOnWriteTransformer {
 	
 	Set<String> builtinSorts = new HashSet<String>();
 
-	public ResolveBuiltins() {
-		super("Resolve Builtins");
+	public ResolveBuiltins(DefinitionHelper definitionHelper) {
+		super("Resolve Builtins", definitionHelper);
 	}
 	
 	@Override
@@ -39,8 +39,8 @@ public class ResolveBuiltins extends CopyOnWriteTransformer {
 			p.putAttribute("KLabelWrapper", sort);
 			p.putAttribute("cons", "KLabel1" + sort + "Wrapper");
 			p.putAttribute("prefixlabel", "#_");
-			DefinitionHelper.conses.put("KLabel1" + sort + "Wrapper", p);
-			DefinitionHelper.putLabel(p, "KLabel1" + sort+ "Wrapper");
+			definitionHelper.conses.put("KLabel1" + sort + "Wrapper", p);
+			definitionHelper.putLabel(p, "KLabel1" + sort+ "Wrapper");
 			block.getProductions().add(p);
 			pItems = new ArrayList<ProductionItem>();
 			p = new Production(new Sort(KSorts.KLABEL), pItems );
@@ -48,9 +48,9 @@ public class ResolveBuiltins extends CopyOnWriteTransformer {
 			block.getProductions().add(p);
 			Rule rule = new Rule();
 			rule.setBody(new Rewrite(
-					KApp.of(KLabelConstant.of(AddPredicates.predicate(sort)),
+					KApp.of(definitionHelper, KLabelConstant.of(AddPredicates.predicate(sort), definitionHelper),
 							new Variable(sort, sort)),
-                    BoolBuiltin.TRUE));
+                    BoolBuiltin.TRUE, definitionHelper));
 			rule.addAttribute(Attribute.PREDICATE);
 			items.add(rule);
 			

@@ -3,6 +3,7 @@ package org.kframework.parser.concrete.disambiguate;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Collection;
 import org.kframework.kil.Term;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -11,8 +12,8 @@ import java.util.ArrayList;
 
 public class FlattenListsFilter extends BasicTransformer {
 
-	public FlattenListsFilter() {
-		super("Flatten lists");
+	public FlattenListsFilter(DefinitionHelper definitionHelper) {
+		super("Flatten lists", definitionHelper);
 	}
 
 	public ASTNode transform(Collection c) throws TransformerException {

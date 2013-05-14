@@ -3,6 +3,7 @@ package org.kframework.krun.api;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.SubstitutionFilter;
 import org.kframework.utils.general.GlobalSettings;
@@ -15,7 +16,7 @@ public class SearchResult {
 	private Map<String, Term> substitution;
 	private Map<String, Term> rawSubstitution;
 
-	public SearchResult(KRunState state, Map<String, Term> rawSubstitution, RuleCompilerSteps compilationInfo) throws TransformerException {
+	public SearchResult(KRunState state, Map<String, Term> rawSubstitution, RuleCompilerSteps compilationInfo, DefinitionHelper definitionHelper) throws TransformerException {
 		this.state = state;
 		this.rawSubstitution = rawSubstitution;
 		substitution = new HashMap<String, Term>();
@@ -23,11 +24,11 @@ public class SearchResult {
 			Term rawValue;
 			if (GlobalSettings.sortedCells) {
 				Term cellFragment = compilationInfo.getCellFragment(var);
-				rawValue = (Term)cellFragment.accept(new SubstitutionFilter(rawSubstitution));
+				rawValue = (Term)cellFragment.accept(new SubstitutionFilter(rawSubstitution, definitionHelper));
 			} else {
-				rawValue = rawSubstitution.get(var.getName() + ":" + var.getSort());
+				rawValue = rawSubstitution.get(var.getName() + ":" + var.getSort(definitionHelper));
 			}
-			substitution.put(var.getName() + ":" + var.getSort(), KRunState.concretize(rawValue));
+			substitution.put(var.getName() + ":" + var.getSort(definitionHelper), KRunState.concretize(rawValue, definitionHelper));
 		}
 	}
 

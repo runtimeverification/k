@@ -10,6 +10,7 @@ import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Term;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.krun.K;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.api.Transition.TransitionType;
@@ -28,27 +29,27 @@ public class KRunApiDebugger implements KRunDebugger {
 	private static Rule defaultPattern;
 	private static Set<String> defaultVars;
 	private static RuleCompilerSteps defaultPatternInfo;
+	
+	protected DefinitionHelper definitionHelper;
 
-	static {
+	public KRunApiDebugger(KRun krun, Term cfg, DefinitionHelper definitionHelper) throws KRunExecutionException {
+		this.definitionHelper = definitionHelper;
 		try { 
 			org.kframework.parser.concrete.KParser.ImportTbl(K.compiled_def + "/def/Concrete.tbl");
-			ASTNode pattern = DefinitionLoader.parsePattern(K.pattern, "Command line pattern");
-			CollectVariablesVisitor vars = new CollectVariablesVisitor();
+			ASTNode pattern = DefinitionLoader.parsePattern(K.pattern, "Command line pattern", definitionHelper);
+			CollectVariablesVisitor vars = new CollectVariablesVisitor(definitionHelper);
 			pattern.accept(vars);
 			defaultVars = vars.getVars().keySet();
-			defaultPatternInfo = new RuleCompilerSteps(K.definition);
+			defaultPatternInfo = new RuleCompilerSteps(K.definition, definitionHelper);
 			pattern = defaultPatternInfo.compile((Rule) pattern, null);
 
 			defaultPattern = (Rule) pattern;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-	
 
-	public KRunApiDebugger(KRun krun, Term cfg) throws KRunExecutionException {
 		this.krun = krun;
-		KRunState initialState = new KRunState(cfg, K.stateCounter++);
+		KRunState initialState = new KRunState(cfg, K.stateCounter++, definitionHelper);
 		graph = new DirectedSparseGraph<KRunState, Transition>();
 		graph.addVertex(initialState);
 		states = new DualHashBidiMap<Integer, KRunState>();
@@ -57,7 +58,7 @@ public class KRunApiDebugger implements KRunDebugger {
 		reduced.setStateId(K.stateCounter++);
 		putState(reduced);
 		graph.addVertex(reduced);
-		graph.addEdge(new Transition(TransitionType.REDUCE), initialState, reduced);
+		graph.addEdge(new Transition(TransitionType.REDUCE, definitionHelper), initialState, reduced);
 		currentState = reduced.getStateId();
 	}
 
@@ -116,7 +117,7 @@ public class KRunApiDebugger implements KRunDebugger {
 			nextStep.setStateId(K.stateCounter++);
 			putState(nextStep);
 			graph.addVertex(nextStep);
-			graph.addEdge(new Transition(TransitionType.UNLABELLED), getState(currentState), nextStep);
+			graph.addEdge(new Transition(TransitionType.UNLABELLED, definitionHelper), getState(currentState), nextStep);
 			currentState = nextStep.getStateId();
 		}
 	}
@@ -174,7 +175,7 @@ public class KRunApiDebugger implements KRunDebugger {
 
 	public String printState(int stateNum) {
 		KRunState state = getState(stateNum);
-		UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens);
+		UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, definitionHelper);
 		state.getResult().accept(unparser);
 		return state.toString() + ":\n" + unparser.getResult();
 	}
@@ -191,7 +192,7 @@ public class KRunApiDebugger implements KRunDebugger {
 		Transition edge = getEdge(state1, state2);
 		String rule;
 		if (edge.getType() == TransitionType.RULE) {
-			UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens);
+			UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, definitionHelper);
 			edge.getRule().accept(unparser);
 			rule = unparser.getResult();
 		} else if (edge.getType() == TransitionType.LABEL) {

@@ -39,8 +39,8 @@ public class SortCells extends CopyOnWriteTransformer {
 	private final ConfigurationStructureMap configurationStructureMap;
 
 
-	public SortCells(ConfigurationStructureMap configurationStructureMap) {
-		super("SortCells");
+	public SortCells(ConfigurationStructureMap configurationStructureMap, DefinitionHelper definitionHelper) {
+		super("SortCells", definitionHelper);
 		this.configurationStructureMap = configurationStructureMap;
 	}
 
@@ -68,7 +68,7 @@ public class SortCells extends CopyOnWriteTransformer {
 		if (bodyNode == body) return node;
 		node = node.shallowCopy();
 		node.setBody((Term) bodyNode);
-		return node.accept(new ResolveRemainingVariables());
+		return node.accept(new ResolveRemainingVariables(definitionHelper));
 	}
 
 	private Map<String,List<Term>> cellMap;
@@ -91,7 +91,7 @@ public class SortCells extends CopyOnWriteTransformer {
 		if (astNode != node) {
 			node = (TermCons) astNode;
 		}
-		Production production = node.getProduction();
+		Production production = node.getProduction(definitionHelper);
 		Map<Integer, String> cellfragments = new HashMap<Integer, String>();
 		int i = 0;
 		for (ProductionItem pitem : production.getItems()) {
@@ -120,11 +120,11 @@ public class SortCells extends CopyOnWriteTransformer {
 			Term out = t;
 			String sort = cellfragments.get(new Integer(i));
 			if (sort != null) {
-				if (!KSort.valueOf(t.getSort()).mainSort().equals(KSort.Bag)){
+				if (!KSort.valueOf(t.getSort(definitionHelper)).mainSort().equals(KSort.Bag)){
 					//exception --- should be a Bag
 				}
 				Cell fragment = new Cell();
-				fragment.setLabel(DefinitionHelper.getCellSort(sort));
+				fragment.setLabel(definitionHelper.getCellSort(sort));
 				System.err.println(fragment.getLabel());
 				fragment.setContents(t);
 				fragment = (Cell) transformTop(fragment, true);
@@ -146,7 +146,7 @@ public class SortCells extends CopyOnWriteTransformer {
 		if (!(klabel instanceof KLabelConstant)) return node;
 		KLabelConstant label = (KLabelConstant) klabel;
 		Set<Production> productions =
-				DefinitionHelper.productions.get(
+				definitionHelper.productions.get(
 						StringUtil.unescapeMaude(label.getLabel()));
 		if (productions == null|| productions.isEmpty())
 			return node;
@@ -210,11 +210,11 @@ public class SortCells extends CopyOnWriteTransformer {
 
 				final KInjectedLabel kInjectedLabel = (KInjectedLabel) kAppLabel;
 				Term bag = kInjectedLabel.getTerm();
-				if (!KSort.valueOf(bag.getSort()).mainSort().equals(KSort.Bag)){
+				if (!KSort.valueOf(bag.getSort(definitionHelper)).mainSort().equals(KSort.Bag)){
 					//exception --- should be a Bag
 				}
 				Cell fragment = new Cell();
-				fragment.setLabel(DefinitionHelper.getCellSort(sort));
+				fragment.setLabel(definitionHelper.getCellSort(sort));
 				fragment.setContents(bag);
 				fragment = (Cell) transformTop(fragment, true);
 				kInjectedLabel.setTerm(fragment);
@@ -390,7 +390,7 @@ public class SortCells extends CopyOnWriteTransformer {
 			return replacementTerm;
 		}
 		if (replacementTerm instanceof Empty) {
-			if (oldTerm.getSort().equals(KSort.BagItem.name())) {
+			if (oldTerm.getSort(definitionHelper).equals(KSort.BagItem.name())) {
 				GlobalSettings.kem.register(new KException(KException
 						.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER,
 						"Multiplicity constraints clash for cell" +
@@ -403,7 +403,7 @@ public class SortCells extends CopyOnWriteTransformer {
 			}
 			return replacementTerm;
 		}
-		if (oldTerm instanceof Empty && replacementTerm.getSort().equals
+		if (oldTerm instanceof Empty && replacementTerm.getSort(definitionHelper).equals
 				(KSort.BagItem.name())) {
 			GlobalSettings.kem.register(new KException(KException
 					.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER,
@@ -428,8 +428,8 @@ public class SortCells extends CopyOnWriteTransformer {
 	}
 
 	private class ResolveRemainingVariables extends CopyOnWriteTransformer {
-		private ResolveRemainingVariables() {
-			super("SortCells: resolving remaining variables");
+		private ResolveRemainingVariables(DefinitionHelper definitionHelper) {
+			super("SortCells: resolving remaining variables", definitionHelper);
 		}
 
 		@Override

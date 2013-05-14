@@ -38,8 +38,8 @@ public class ProgramLoader {
 	 * @param kappize
 	 *            If true, then apply KAppModifier to AST.
 	 */
-	public static ASTNode loadPgmAst(String content, String filename, Boolean kappize, String startSymbol) throws IOException, TransformerException {
-		File tbl = new File(DefinitionHelper.kompiled.getCanonicalPath() + "/pgm/Program.tbl");
+	public static ASTNode loadPgmAst(String content, String filename, Boolean kappize, String startSymbol, DefinitionHelper definitionHelper) throws IOException, TransformerException {
+		File tbl = new File(definitionHelper.kompiled.getCanonicalPath() + "/pgm/Program.tbl");
 
 		// ------------------------------------- import files in Stratego
 		org.kframework.parser.concrete.KParser.ImportTblPgm(tbl.getAbsolutePath());
@@ -48,28 +48,28 @@ public class ProgramLoader {
 
 		XmlLoader.addFilename(doc.getFirstChild(), filename);
 		XmlLoader.reportErrors(doc);
-		FileUtil.saveInFile(DefinitionHelper.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
+		FileUtil.saveInFile(definitionHelper.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
 		ASTNode out = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
 
-		out = out.accept(new PriorityFilter());
-		out = out.accept(new PreferAvoidFilter());
-		out = out.accept(new AmbFilter());
-		out = out.accept(new RemoveBrackets());
+		out = out.accept(new PriorityFilter(definitionHelper));
+		out = out.accept(new PreferAvoidFilter(definitionHelper));
+		out = out.accept(new AmbFilter(definitionHelper));
+		out = out.accept(new RemoveBrackets(definitionHelper));
 
 		if (kappize)
-			out = out.accept(new FlattenSyntax());
+			out = out.accept(new FlattenSyntax(definitionHelper));
 
 		return out;
 	}
 
-	public static ASTNode loadPgmAst(String content, String filename, String startSymbol) throws IOException, TransformerException {
-		return loadPgmAst(content, filename, true, startSymbol);
+	public static ASTNode loadPgmAst(String content, String filename, String startSymbol, DefinitionHelper definitionHelper) throws IOException, TransformerException {
+		return loadPgmAst(content, filename, true, startSymbol, definitionHelper);
 	}
 
-	public static ASTNode loadPgmAst(File pgmFile, boolean kappize, String startSymbol) throws IOException, TransformerException {
+	public static ASTNode loadPgmAst(File pgmFile, boolean kappize, String startSymbol, DefinitionHelper definitionHelper) throws IOException, TransformerException {
 		String filename = pgmFile.getCanonicalFile().getAbsolutePath();
 		String content = FileUtil.getFileContent(filename);
-		return loadPgmAst(content, filename, kappize, startSymbol);
+		return loadPgmAst(content, filename, kappize, startSymbol, definitionHelper);
 	}
 
 	/**
@@ -81,7 +81,7 @@ public class ProgramLoader {
 	 * @param prettyPrint
 	 * @param nextline
 	 */
-	public static Term processPgm(String content, String filename, Definition def, String startSymbol) throws TransformerException {
+	public static Term processPgm(String content, String filename, Definition def, String startSymbol, DefinitionHelper definitionHelper) throws TransformerException {
 		// compile a definition here
 		Stopwatch sw = new Stopwatch();
 
@@ -91,18 +91,18 @@ public class ProgramLoader {
 		try {
 			ASTNode out;
 			if (GlobalSettings.whatParser == GlobalSettings.ParserType.GROUND) {
-				org.kframework.parser.concrete.KParser.ImportTblGround(DefinitionHelper.kompiled.getCanonicalPath() + "/ground/Concrete.tbl");
-				out = DefinitionLoader.parseCmdString(content, "", filename);
-				out = out.accept(new RemoveBrackets());
-				out = out.accept(new AddEmptyLists());
-				out = out.accept(new RemoveSyntacticCasts());
-				out = out.accept(new FlattenSyntax());
-				out = out.accept(new RemoveSyntacticCasts());
+				org.kframework.parser.concrete.KParser.ImportTblGround(definitionHelper.kompiled.getCanonicalPath() + "/ground/Concrete.tbl");
+				out = DefinitionLoader.parseCmdString(content, "", filename, definitionHelper);
+				out = out.accept(new RemoveBrackets(definitionHelper));
+				out = out.accept(new AddEmptyLists(definitionHelper));
+				out = out.accept(new RemoveSyntacticCasts(definitionHelper));
+				out = out.accept(new FlattenSyntax(definitionHelper));
+				out = out.accept(new RemoveSyntacticCasts(definitionHelper));
 			} else if (GlobalSettings.whatParser == GlobalSettings.ParserType.RULES) {
-				org.kframework.parser.concrete.KParser.ImportTbl(DefinitionHelper.kompiled.getCanonicalPath() + "/def/Concrete.tbl");
-				out = DefinitionLoader.parsePattern(content, filename);
+				org.kframework.parser.concrete.KParser.ImportTbl(definitionHelper.kompiled.getCanonicalPath() + "/def/Concrete.tbl");
+				out = DefinitionLoader.parsePattern(content, filename, definitionHelper);
 				try {
-					out = new RuleCompilerSteps(def).compile((Rule) out, null);
+					out = new RuleCompilerSteps(def, definitionHelper).compile((Rule) out, null);
 				} catch (CompilerStepDone e) {
 					out = (ASTNode) e.getResult();
 				}
@@ -110,7 +110,7 @@ public class ProgramLoader {
 			} else if (GlobalSettings.whatParser == GlobalSettings.ParserType.BINARY) {
 				out = (org.kframework.kil.Cell) BinaryLoader.fromBinary(new FileInputStream(filename));
 			} else {
-				out = loadPgmAst(content, filename, startSymbol);
+				out = loadPgmAst(content, filename, startSymbol, definitionHelper);
 			}
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Parsing Program");

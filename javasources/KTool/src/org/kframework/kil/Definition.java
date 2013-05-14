@@ -128,18 +128,18 @@ public class Definition extends ASTNode {
 		return visitor.transform(this);
 	}
 
-	public void preprocess() {
+	public void preprocess(DefinitionHelper definitionHelper) {
 		// Collect information
-		this.accept(new UpdateReferencesVisitor());
-		this.accept(new AddConsesVisitor());
-		this.accept(new CollectConsesVisitor());
-		this.accept(new CollectSubsortsVisitor());
-		this.accept(new CollectPrioritiesVisitor());
-		this.accept(new CollectStartSymbolPgmVisitor());
-		this.accept(new CollectConfigCellsVisitor());
-		this.accept(new UpdateAssocVisitor());
-		this.accept(new CollectLocationsVisitor());
-		DefinitionHelper.initialized = true;
+		this.accept(new UpdateReferencesVisitor(definitionHelper));
+		this.accept(new AddConsesVisitor(definitionHelper));
+		this.accept(new CollectConsesVisitor(definitionHelper));
+		this.accept(new CollectSubsortsVisitor(definitionHelper));
+		this.accept(new CollectPrioritiesVisitor(definitionHelper));
+		this.accept(new CollectStartSymbolPgmVisitor(definitionHelper));
+		this.accept(new CollectConfigCellsVisitor(definitionHelper));
+		this.accept(new UpdateAssocVisitor(definitionHelper));
+		this.accept(new CollectLocationsVisitor(definitionHelper));
+		definitionHelper.initialized = true;
 	}
 
 	public Map<String, Module> getModulesMap() {

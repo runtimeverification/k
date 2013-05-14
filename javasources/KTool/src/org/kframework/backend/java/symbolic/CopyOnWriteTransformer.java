@@ -19,6 +19,7 @@ import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.loader.DefinitionHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,7 +34,12 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class CopyOnWriteTransformer implements Transformer {
-
+	protected DefinitionHelper definitionHelper;
+	
+	public CopyOnWriteTransformer(DefinitionHelper definitionHelper) {
+		this.definitionHelper = definitionHelper;
+	}
+	
     @Override
     public String getName() {
         return this.getClass().toString();
@@ -109,7 +115,7 @@ public class CopyOnWriteTransformer implements Transformer {
         KLabel kLabel = (KLabel) kItem.getKLabel().accept(this);
         KList kList = (KList) kItem.getKList().accept(this);
         if (kLabel != kItem.getKLabel() || kList != kItem.getKList()) {
-            kItem = new KItem(kLabel, kList);
+            kItem = new KItem(kLabel, kList, definitionHelper);
         }
         return kItem;
     }

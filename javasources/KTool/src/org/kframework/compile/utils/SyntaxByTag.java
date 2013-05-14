@@ -5,6 +5,7 @@ import org.kframework.kil.Configuration;
 import org.kframework.kil.Context;
 import org.kframework.kil.Production;
 import org.kframework.kil.Rule;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 
 import java.util.HashSet;
@@ -30,7 +31,8 @@ public class SyntaxByTag extends BasicVisitor {
 			productions.add(node);
 	};
 
-    public SyntaxByTag(String key) {
+    public SyntaxByTag(String key, DefinitionHelper definitionHelper) {
+    	super(definitionHelper);
         this.key = key;
     }
 
@@ -38,8 +40,8 @@ public class SyntaxByTag extends BasicVisitor {
         return productions;
     }
 
-	public static Set<Production> get(ASTNode node, String key) {
-		SyntaxByTag visitor = new SyntaxByTag(key);
+	public static Set<Production> get(ASTNode node, String key, DefinitionHelper definitionHelper) {
+		SyntaxByTag visitor = new SyntaxByTag(key, definitionHelper);
 		node.accept(visitor);
 		return visitor.getProductions();
 	}

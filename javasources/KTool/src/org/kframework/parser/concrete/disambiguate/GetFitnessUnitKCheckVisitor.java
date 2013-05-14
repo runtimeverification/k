@@ -12,20 +12,24 @@ import org.kframework.kil.loader.DefinitionHelper;
  */
 public class GetFitnessUnitKCheckVisitor extends GetFitnessUnitBasicVisitor {
 
+	public GetFitnessUnitKCheckVisitor(DefinitionHelper definitionHelper) {
+		super(definitionHelper);
+	}
+
 	@Override
 	public void visit(TermCons tc) {
 		super.visit(tc);
 
-		if (tc.getProduction().getItems().get(0).getType() == ProductionType.USERLIST) {
-			UserList ulist = (UserList) tc.getProduction().getItems().get(0);
+		if (tc.getProduction(definitionHelper).getItems().get(0).getType() == ProductionType.USERLIST) {
+			UserList ulist = (UserList) tc.getProduction(definitionHelper).getItems().get(0);
 
 			score += getFitnessUnit2(ulist.getSort(), tc.getContents().get(0));
-			score += getFitnessUnit2(tc.getProduction().getSort(), tc.getContents().get(1));
+			score += getFitnessUnit2(tc.getProduction(definitionHelper).getSort(), tc.getContents().get(1));
 		} else {
 			int j = 0;
-			for (int i = 0; i < tc.getProduction().getItems().size(); i++) {
-				if (tc.getProduction().getItems().get(i).getType() == ProductionType.SORT) {
-					Sort sort = (Sort) tc.getProduction().getItems().get(i);
+			for (int i = 0; i < tc.getProduction(definitionHelper).getItems().size(); i++) {
+				if (tc.getProduction(definitionHelper).getItems().get(i).getType() == ProductionType.SORT) {
+					Sort sort = (Sort) tc.getProduction(definitionHelper).getItems().get(i);
 					Term child = (Term) tc.getContents().get(j);
 					score += getFitnessUnit2(sort.getName(), child);
 					j++;
@@ -55,17 +59,17 @@ public class GetFitnessUnitKCheckVisitor extends GetFitnessUnitBasicVisitor {
 			return getFitnessUnit2(declSort, br.getContent());
 		}
 
-		return getFitnessUnit3(declSort, childTerm.getSort());
+		return getFitnessUnit3(declSort, childTerm.getSort(definitionHelper));
 	}
 
 	private int getFitnessUnit3(String declSort, String termSort) {
 		if (termSort.equals(""))
 			return 0; // if it is amb it won't have a sort
 		int score;
-		if (DefinitionHelper.isSubsortedEq(declSort, termSort))
+		if (definitionHelper.isSubsortedEq(declSort, termSort))
 			score = 0;
 		// isSubsortEq(|"K", expect) ; <?"K"> place ; !-1
-		else if (DefinitionHelper.isSubsortedEq("K", declSort) && termSort.equals("K"))
+		else if (definitionHelper.isSubsortedEq("K", declSort) && termSort.equals("K"))
 			score = -1; // if I insert a K where I would expect a more specific kind of sort, put -1
 		else {
 			score = -1;
@@ -76,6 +80,6 @@ public class GetFitnessUnitKCheckVisitor extends GetFitnessUnitBasicVisitor {
 
 	@Override
 	public GetFitnessUnitBasicVisitor getInstance() {
-		return new GetFitnessUnitKCheckVisitor();
+		return new GetFitnessUnitKCheckVisitor(definitionHelper);
 	}
 }
