@@ -74,7 +74,7 @@ module SYMBOLIC-K
   syntax String ::= "SMTCall" "(" String ")" [function, hook(#SMT:#smtCall_)]
   syntax String ::= checkSat(Bool) [function]
   rule checkSat(B:Bool) => SMTCall(SMTLibQuery(B))
-
+  rule checkSat(false) => "unsat"
 
   syntax Bool ::= "isBuiltin" "(" K ")"
   [prefixlabel(isBuiltin), klabel(isBuiltin), predicate]

@@ -5,7 +5,7 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.w3c.dom.Element;
 
 public class JavaClassesFactory {
-
+	
 	public static ASTNode getTerm(Element element) {
 		// used for a new feature - loading java classes at first step (Basic Parsing)
 		if (Constants.LEXICAL.equals(element.getNodeName()))
@@ -66,7 +66,7 @@ public class JavaClassesFactory {
             }
         }
 		if (Constants.KAPP.equals(element.getNodeName()))
-			return new KApp(element);
+			return new KApp(element, null);
 		if (KSorts.KLIST.equals(element.getNodeName()))
 			return new KList(element);
 		if (Constants.EMPTY.equals(element.getNodeName())) {

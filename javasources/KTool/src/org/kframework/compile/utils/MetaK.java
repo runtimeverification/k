@@ -5,6 +5,7 @@ import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Collection;
 import org.kframework.kil.Map;
 import org.kframework.kil.ProductionItem.ProductionType;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.Visitable;
@@ -25,11 +26,11 @@ public class MetaK {
 	private static final String cellFragment = "CellFragment";
 	public static final String fragment = "-fragment";
 
-	public static Term incrementCondition(Term condition, Term kresultCnd) {
+	public static Term incrementCondition(Term condition, Term kresultCnd, DefinitionHelper definitionHelper) {
 		if (condition == null) {
 			return kresultCnd;
 		}
-		return KApp.of(KLabelConstant.ANDBOOL_KLABEL, condition, kresultCnd);
+		return KApp.of(definitionHelper, KLabelConstant.ANDBOOL_KLABEL, condition, kresultCnd);
 	}
 
 	public static boolean isCellSort(String bigSort) {
@@ -89,9 +90,9 @@ public class MetaK {
 		return key.startsWith("#");
 	}
 
-	public static Set<Variable> getVariables(Visitable node) {
+	public static Set<Variable> getVariables(Visitable node, DefinitionHelper definitionHelper) {
 		final Set<Variable> result = new HashSet<Variable>();
-		node.accept(new BasicVisitor() {
+		node.accept(new BasicVisitor(definitionHelper) {
 			@Override
 			public void visit(Variable node) {
 				result.add(node);
@@ -100,9 +101,9 @@ public class MetaK {
 		return result;
 	}
 
-	public static Definition setConfiguration(Definition node, final Configuration conf) {
+	public static Definition setConfiguration(Definition node, DefinitionHelper definitionHelper, final Configuration conf) {
 		try {
-			return (Definition) node.accept(new CopyOnWriteTransformer("Configuration setter") {
+			return (Definition) node.accept(new CopyOnWriteTransformer("Configuration setter", definitionHelper) {
 				@Override
 				public ASTNode transform(Configuration node) {
 					return conf;
@@ -129,9 +130,9 @@ public class MetaK {
 		return node;
 	}
 
-	public static Configuration getConfiguration(Definition node) {
+	public static Configuration getConfiguration(Definition node, DefinitionHelper definitionHelper) {
 		final List<Configuration> result = new LinkedList<Configuration>();
-		node.accept(new BasicVisitor() {
+		node.accept(new BasicVisitor(definitionHelper) {
 			@Override
 			public void visit(Configuration node) {
 				result.add(node);
@@ -159,8 +160,8 @@ public class MetaK {
 		return result.get(0);
 	}
 
-	public static Term defaultTerm(Term v) {
-		String sort = v.getSort();
+	public static Term defaultTerm(Term v, DefinitionHelper definitionHelper) {
+		String sort = v.getSort(definitionHelper);
 		KSort ksort = KSort.getKSort(sort).mainSort();
 		if (ksort.isDefaultable())
 			return new Empty(ksort.toString());
@@ -210,10 +211,10 @@ public class MetaK {
 		return v;
 	}
 
-	public static int countRewrites(Term t) {
+	public static int countRewrites(Term t, DefinitionHelper definitionHelper) {
 		final List<Integer> count = new ArrayList<Integer>();
 		count.add(0);
-		Visitor countVisitor = new BasicVisitor() {
+		Visitor countVisitor = new BasicVisitor(definitionHelper) {
 			@Override public void visit(Rewrite rewrite) {
 				count.set(0, count.get(0) + 1);
 				super.visit(rewrite);
@@ -224,8 +225,8 @@ public class MetaK {
 		return count.get(0);
 	}
 
-	public static boolean hasCell(Term t) {
-		Visitor cellFinder = new BasicVisitor() {
+	public static boolean hasCell(Term t, DefinitionHelper definitionHelper) {
+		Visitor cellFinder = new BasicVisitor(definitionHelper) {
 			@Override
 			public void visit(KSequence node) {
 				return;
@@ -295,18 +296,18 @@ public class MetaK {
 		return false;
 	}
 
-    public static Term getTerm(Production prod) {
+    public static Term getTerm(Production prod, DefinitionHelper definitionHelper) {
 		if (prod.isSubsort()) {
 			final Variable freshVar = Variable.getFreshVar(prod.getItems().get(0).toString());
 			if (prod.containsAttribute("klabel")) {
-				return KApp.of(KLabelConstant.of(prod.getKLabel()), freshVar);
+				return KApp.of(definitionHelper, KLabelConstant.of(prod.getKLabel(), definitionHelper), freshVar);
 			}
 			return freshVar;
 		}
 		if (prod.isConstant()) {
             String terminal = ((Terminal) prod.getItems().get(0)).getTerminal();
             if (prod.getSort().equals(KSorts.KLABEL)) {
-                return KLabelConstant.of(terminal);
+                return KLabelConstant.of(terminal, definitionHelper);
             } else if (prod.getSort().equals(BoolBuiltin.SORT_NAME)) {
                 return BoolBuiltin.kAppOf(terminal);
             } else if (prod.getSort().equals(IntBuiltin.SORT_NAME)) {
@@ -318,7 +319,7 @@ public class MetaK {
             }
         }
 		if (prod.isLexical()) {
-			return KApp.of(KLabelConstant.of("#token"),
+			return KApp.of(definitionHelper, KLabelConstant.of("#token", definitionHelper),
                            StringBuiltin.kAppOf(prod.getSort()),
                            Variable.getFreshVar("String"));
 		}
@@ -361,9 +362,9 @@ public class MetaK {
 	    return  "'.List{\"" + sep + "\"}";
     }
 
-	public static List<Cell> getTopCells(Term t) {
+	public static List<Cell> getTopCells(Term t, DefinitionHelper definitionHelper) {
 		final List<Cell> cells = new ArrayList<Cell>();
-		t.accept(new BasicVisitor() {
+		t.accept(new BasicVisitor(definitionHelper) {
 			@Override
 			public void visit(Cell node) {
 				cells.add(node);
@@ -372,9 +373,9 @@ public class MetaK {
 		return cells;
 	}
 
-	public static List<String> getAllCellLabels(Term t) {
+	public static List<String> getAllCellLabels(Term t, DefinitionHelper definitionHelper) {
 		final List<String> cells = new ArrayList<String>();
-		t.accept(new BasicVisitor() {
+		t.accept(new BasicVisitor(definitionHelper) {
 			@Override
 			public void visit(Cell node) {
 				cells.add(node.getLabel());
@@ -404,8 +405,8 @@ public class MetaK {
 	}
 
 
-	public static Term fillHole(Term t, final Term replacement) {
-		CopyOnWriteTransformer holeFiller = new CopyOnWriteTransformer("Hole Filling") {
+	public static Term fillHole(Term t, final Term replacement, DefinitionHelper definitionHelper) {
+		CopyOnWriteTransformer holeFiller = new CopyOnWriteTransformer("Hole Filling", definitionHelper) {
 			@Override
 			public ASTNode transform(Hole node) {
 				return replacement;
@@ -433,9 +434,9 @@ public class MetaK {
 		return false;
 	}
 
-	public static Term getHoleReplacement(Term t) {
+	public static Term getHoleReplacement(Term t, DefinitionHelper definitionHelper) {
 		final List<Term> result = new ArrayList<Term>();
-		Visitor holeReplacementFinder = new BasicVisitor() {
+		Visitor holeReplacementFinder = new BasicVisitor(definitionHelper) {
 			@Override
 			public void visit(Rewrite node) {
 				final Term left = node.getLeft();

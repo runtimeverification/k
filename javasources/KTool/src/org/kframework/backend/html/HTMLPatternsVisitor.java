@@ -4,6 +4,7 @@ import org.kframework.kil.Production;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 
 import java.util.HashMap;
@@ -11,6 +12,10 @@ import java.util.Map;
 
 
 public class HTMLPatternsVisitor extends BasicVisitor {
+	public HTMLPatternsVisitor(DefinitionHelper definitionHelper) {
+		super(definitionHelper);
+	}
+
 	public enum HTMLPatternType {
 		LATEX, HTML, DEFAULT
 	};
@@ -89,7 +94,7 @@ public class HTMLPatternsVisitor extends BasicVisitor {
 	public void visit(Terminal pi) {
 		/*String terminal = pi.getTerminal();
 		if (terminal.isEmpty()) return;
-		if (DefinitionHelper.isSpecialTerminal(terminal)) {
+		if (definitionHelper.isSpecialTerminal(terminal)) {
 			pattern += StringUtil.latexify(terminal);
 		} else {
 			pattern += "\\terminal{" + StringUtil.latexify(terminal) + "}";

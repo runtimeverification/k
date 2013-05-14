@@ -24,15 +24,15 @@ import org.kframework.utils.StringUtil;
  */
 public class ProgramSDF {
 
-	public static String getSdfForPrograms(Definition def) {
+	public static String getSdfForPrograms(Definition def, DefinitionHelper definitionHelper) {
 
 		// collect all the syntax modules
-		CollectSynModulesVisitor csmv = new CollectSynModulesVisitor();
+		CollectSynModulesVisitor csmv = new CollectSynModulesVisitor(definitionHelper);
 		def.accept(csmv);
 
 		// collect the syntax from those modules
-		ProgramSDFVisitor psdfv = new ProgramSDFVisitor();
-		CollectTerminalsVisitor ctv = new CollectTerminalsVisitor();
+		ProgramSDFVisitor psdfv = new ProgramSDFVisitor(definitionHelper);
+		CollectTerminalsVisitor ctv = new CollectTerminalsVisitor(definitionHelper);
 		for (String modName : csmv.synModNames) {
 			Module m = def.getModulesMap().get(modName);
 			m.accept(psdfv);
@@ -48,7 +48,7 @@ public class ProgramSDF {
 		sdf.append(psdfv.sdf);
 
 		sdf.append("context-free start-symbols\n");
-		// sdf.append(StringUtil.escapeSortName(DefinitionHelper.startSymbolPgm) + "\n");
+		// sdf.append(StringUtil.escapeSortName(definitionHelper.startSymbolPgm) + "\n");
 		for (String s : psdfv.startSorts) {
 			if (!s.equals("Start"))
 				sdf.append(StringUtil.escapeSortName(s) + " ");
@@ -108,7 +108,7 @@ public class ProgramSDF {
 
 		sdf.append("\n%% start symbols subsorts\n");
 		for (String s : psdfv.startSorts) {
-			if (!Sort.isBasesort(s) && !DefinitionHelper.isListSort(s))
+			if (!Sort.isBasesort(s) && !definitionHelper.isListSort(s))
 				sdf.append("	" + StringUtil.escapeSortName(s) + "		-> K\n");
 		}
 

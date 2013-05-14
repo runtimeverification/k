@@ -4,6 +4,7 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.compile.utils.Substitution;
 import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -18,8 +19,8 @@ public class ResolveFresh extends CopyOnWriteTransformer {
 	private boolean isFresh;
 	private Set<Variable> vars = new HashSet<Variable>();
 
-	public ResolveFresh() {
-		super("Resolve fresh variables condition.");
+	public ResolveFresh(DefinitionHelper definitionHelper) {
+		super("Resolve fresh variables condition.", definitionHelper);
 	}
 	
 	@Override
@@ -29,7 +30,7 @@ public class ResolveFresh extends CopyOnWriteTransformer {
 		if (!isFresh)
             return node;
 
-		Configuration cfg = MetaK.getConfiguration(node);
+		Configuration cfg = MetaK.getConfiguration(node, definitionHelper);
 		Bag bag;
 		if (cfg.getBody() instanceof Bag) {
 			bag = (Bag) cfg.getBody().shallowCopy();
@@ -78,7 +79,7 @@ public class ResolveFresh extends CopyOnWriteTransformer {
 		TermCons t = new TermCons("Int", "Int1PlusSyn");
 		t.getContents().add(freshVar);
 		t.getContents().add(IntBuiltin.kAppOf(vars.size()));
-		fCell.setContents(new Rewrite(freshVar, t));
+		fCell.setContents(new Rewrite(freshVar, t, definitionHelper));
 		bag.getContents().add(fCell);
 		
 		return node;
@@ -99,7 +100,7 @@ public class ResolveFresh extends CopyOnWriteTransformer {
 		return super.transform(node);
 	}
 
-	private static Substitution freshSubstitution(
+	private Substitution freshSubstitution(
             Set<Variable> vars,
             Variable idxVar) {
 		Map<Term, Term> symMap = new HashMap<Term, Term>();
@@ -111,12 +112,12 @@ public class ResolveFresh extends CopyOnWriteTransformer {
 			subterms.add(IntBuiltin.kAppOf(idx));
 			++idx;
 
-			String sort = var.getSort();
-            Term symTerm = AddSymbolicK.makeSymbolicTerm(sort, idxTerm);
+			String sort = var.getSort(definitionHelper);
+            Term symTerm = new AddSymbolicK(definitionHelper).makeSymbolicTerm(sort, idxTerm);
             symMap.put(var, symTerm);
 		}
 
-		return new Substitution(symMap);
+		return new Substitution(symMap, definitionHelper);
 	}
 
 }

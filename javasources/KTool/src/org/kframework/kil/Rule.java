@@ -1,6 +1,7 @@
 package org.kframework.kil;
 
 import org.kframework.kil.loader.Constants;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -30,9 +31,9 @@ public class Rule extends Sentence {
 		super();
 	}
 
-	public Rule(Term lhs, Term rhs) {
+	public Rule(Term lhs, Term rhs, DefinitionHelper definitionHelper) {
 		super();
-		this.setBody(new Rewrite(lhs, rhs));
+		this.setBody(new Rewrite(lhs, rhs, definitionHelper));
 	}
 
 	public void setLabel(String label) {

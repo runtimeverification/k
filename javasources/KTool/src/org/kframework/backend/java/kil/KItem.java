@@ -24,15 +24,17 @@ public class KItem extends Term implements Sorted {
     private final KLabel kLabel;
     private final KList kList;
     private final String sort;
+    private DefinitionHelper definitionHelper;
 
-    public KItem(KLabel kLabel, KList kList) {
+    public KItem(KLabel kLabel, KList kList, DefinitionHelper definitionHelper) {
         super(Kind.KITEM);
+    	this.definitionHelper = definitionHelper;
 
         this.kLabel = kLabel;
         this.kList = kList;
 
         if (kLabel instanceof KLabelConstant) {
-            List<Production> productions = ((KLabelConstant) kLabel).productionsOf();
+            List<Production> productions = ((KLabelConstant) kLabel).productionsOf(definitionHelper);
             if (productions.size() == 1) {
                 Production production = productions.get(0);
                 if (!kList.hasFrame() && kList.size() == production.getArity()) {
@@ -44,7 +46,7 @@ public class KItem extends Term implements Sorted {
                             childSort = kind.toString();
                         }
 
-                        if (!DefinitionHelper.isSubsortedEq(production.getChildSort(i), childSort)) {
+                        if (!definitionHelper.isSubsortedEq(production.getChildSort(i), childSort)) {
                             sort = kind.toString();
                             return;
                         }
@@ -119,7 +121,7 @@ public class KItem extends Term implements Sorted {
      */
     @Override
     public ASTNode shallowCopy() {
-        return new KItem(this.kLabel, this.kList);
+        return new KItem(this.kLabel, this.kList, this.definitionHelper);
     }
 
     @Override

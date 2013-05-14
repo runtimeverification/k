@@ -15,6 +15,7 @@ import org.kframework.kil.Production;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Variable;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -34,15 +35,15 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 
     private List<ModuleItem> items = new ArrayList<ModuleItem>();
 
-    public StrictnessToContexts() {
-        super("Strict Ops To Context");
+    public StrictnessToContexts(DefinitionHelper definitionHelper) {
+        super("Strict Ops To Context", definitionHelper);
     }
 
     @Override
     public ASTNode transform(Module node) throws TransformerException {
         //collect the productions which have the attributes strict and seqstrict
-        Set<Production> prods = SyntaxByTag.get(node, "strict");
-        prods.addAll(SyntaxByTag.get(node, "seqstrict"));
+        Set<Production> prods = SyntaxByTag.get(node, "strict", definitionHelper);
+        prods.addAll(SyntaxByTag.get(node, "seqstrict", definitionHelper));
         if (prods.isEmpty()) {
             return node;
         }
@@ -130,7 +131,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
             }
 
             for (int i = 0; i < arguments.size(); ++i) {
-                TermCons termCons = (TermCons) MetaK.getTerm(prod);
+                TermCons termCons = (TermCons) MetaK.getTerm(prod, definitionHelper);
                 for (int j = 0; j < prod.getArity(); ++j) {
                     termCons.getContents().get(j).setSort(KSorts.K);
                 }
@@ -167,14 +168,14 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
         contents.add(Hole.KITEM_HOLE);
         //third argument is a variable of sort KList
         contents.add(Variable.getFreshVar(KSorts.KLIST));
-        KApp kapp = new KApp(MetaK.getTerm(prod), new KList(contents));
+        KApp kapp = new KApp(MetaK.getTerm(prod, definitionHelper), new KList(contents));
         //make a context from the TermCons
         Context ctx = new Context();
         ctx.setBody(kapp);
         ctx.setAttributes(prod.getAttributes());
         if (isSeq) {
             //set the condition
-            KApp condApp = KApp.of(KLabelConstant.KRESULT_PREDICATE, variable);
+            KApp condApp = KApp.of(definitionHelper, KLabelConstant.KRESULT_PREDICATE, variable);
             ctx.setCondition(condApp);
             ctx.getAttributes().remove("seqstrict");
         } else {

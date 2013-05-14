@@ -2,12 +2,14 @@ package org.kframework.backend.kil;
 
 import org.kframework.compile.utils.MaudeHelper;
 import org.kframework.kil.*;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 
 public class KExpFilter extends BasicVisitor {
     protected StringBuilder result;
 
-	public KExpFilter() {
+	public KExpFilter(DefinitionHelper definitionHelper) {
+		super(definitionHelper);
 		result = new StringBuilder();
 	}
 
@@ -149,7 +151,7 @@ public class KExpFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Constant constant) {
-		final boolean isString = constant.getSort().equals("#String");
+		final boolean isString = constant.getSort(definitionHelper).equals("#String");
 		if (isString)
 			result.append("\"");
 		result.append(constant.getValue());
@@ -203,7 +205,7 @@ public class KExpFilter extends BasicVisitor {
 	public void visit(KInjectedLabel kInjectedLabel) {
 		result.append("(");
 		Term term = kInjectedLabel.getTerm();
-		result.append(term.getSort().replaceFirst("#",""));
+		result.append(term.getSort(definitionHelper).replaceFirst("#",""));
 		result.append(" ");
 		term.accept(this);
 		result.append(")");

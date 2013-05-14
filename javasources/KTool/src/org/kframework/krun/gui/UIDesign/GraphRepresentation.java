@@ -28,6 +28,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Term;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.ConcretizeSyntax;
 import org.kframework.krun.api.KRunState;
@@ -64,12 +65,15 @@ public class GraphRepresentation extends JPanel implements ItemListener{
 	JButton compare;
 	private RunKRunCommand commandProcessor;
 	public static KRunState selection;
+	
+	protected DefinitionHelper definitionHelper;
 
 	// keep track of number of selection 
 	private int nonKrunStateSelection;
 	private int totalSelections ;
 	private boolean enabled ;
-	public GraphRepresentation(RunKRunCommand command) throws Exception{
+	public GraphRepresentation(RunKRunCommand command, DefinitionHelper definitionHelper) throws Exception{
+		this.definitionHelper = definitionHelper;
 		initCommandProcessor(command);
 		initGraph();
 		initCollapser();
@@ -92,13 +96,13 @@ public class GraphRepresentation extends JPanel implements ItemListener{
 	public void initGraph() throws Exception{
 		Graph graph = null;
 		try {
-			graph = commandProcessor.firstStep();
+			graph = commandProcessor.firstStep(definitionHelper);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}		
-		vvd = new VisualizationViewerDemo(graph);
+		vvd = new VisualizationViewerDemo(graph, definitionHelper);
 	}
 
 	public void initCollapser(){		
@@ -289,7 +293,7 @@ public class GraphRepresentation extends JPanel implements ItemListener{
 						second = krs;
 					}
 				}
-				new DiffFrame(first, second, null).setVisible(true);
+				new DiffFrame(first, second, null, definitionHelper).setVisible(true);
 			}
 		});
 	}
@@ -354,14 +358,14 @@ public class GraphRepresentation extends JPanel implements ItemListener{
 		index++;
 	}	
 
-	public  static void displayVertexInfo(KRunState pick) {		
+	public  static void displayVertexInfo(KRunState pick, DefinitionHelper definitionHelper) {		
 		Term term = pick.getResult();
 		try {
-			term = (Term) term.accept(new ConcretizeSyntax());
-			term = (Term) term.accept(new TypeInferenceSupremumFilter());
-			term = (Term) term.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor()));
+			term = (Term) term.accept(new ConcretizeSyntax(definitionHelper));
+			term = (Term) term.accept(new TypeInferenceSupremumFilter(definitionHelper));
+			term = (Term) term.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(definitionHelper), definitionHelper));
 			//as a last resort, undo concretization
-			term = (Term) term.accept(new org.kframework.krun.FlattenDisambiguationFilter());
+			term = (Term) term.accept(new org.kframework.krun.FlattenDisambiguationFilter(definitionHelper));
 		} catch (TransformerException e) {
 			e.printStackTrace();
 		}
@@ -372,10 +376,10 @@ public class GraphRepresentation extends JPanel implements ItemListener{
 			}
 		}
 		//set the color map  
-		ColorVisitor cv = new ColorVisitor();
+		ColorVisitor cv = new ColorVisitor(definitionHelper);
 		term.accept(cv);
 
-		UnparserFilter unparser = new UnparserFilter(true, false);
+		UnparserFilter unparser = new UnparserFilter(true, false, definitionHelper);
 		term.accept(unparser);
 
 		//TO-DO : create our own filter that ignores xml characters from a tag
@@ -392,8 +396,8 @@ public class GraphRepresentation extends JPanel implements ItemListener{
 		XMLEditorKit.collapseMemorizedTags();
 	}
 
-	public static void displayEdgeInfo(Transition pick, KRunState src, KRunState dest){
-		new DiffFrame(src, dest, pick).setVisible(true);
+	public static void displayEdgeInfo(Transition pick, KRunState src, KRunState dest, DefinitionHelper definitionHelper){
+		new DiffFrame(src, dest, pick, definitionHelper).setVisible(true);
 	}
 
 	public void redrawGraphAndResetScroll(){

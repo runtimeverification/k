@@ -13,7 +13,8 @@ public class UnusedSyntax extends KlintRule {
 	@SuppressWarnings("unused")
 	private static boolean debug = false;
 
-	public UnusedSyntax(Definition javaDef) {
+	public UnusedSyntax(Definition javaDef, DefinitionHelper definitionHelper) {
+		super(definitionHelper);
 		this.javaDef = javaDef;
 	}
 
@@ -50,7 +51,7 @@ public class UnusedSyntax extends KlintRule {
 			/* If is a termcons, check it agains the productions */
 			if(term instanceof TermCons){
 				TermCons termCons = (TermCons)term;
-				Production termProd = DefinitionHelper.conses.get("\""+termCons.getCons()+"\"");
+				Production termProd = definitionHelper.conses.get("\""+termCons.getCons()+"\"");
 				if(termProd.equals(production))
 					return true;
 			}

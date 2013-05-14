@@ -1,5 +1,6 @@
 package org.kframework.krun;
 
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.*;
 import org.kframework.utils.errorsystem.KException;
@@ -13,8 +14,8 @@ public class SubstitutionFilter extends CopyOnWriteTransformer {
 
 	private Map<String, Term> args;
 
-	public SubstitutionFilter(Map<String, Term> args) {
-		super("Plug terms into variables");
+	public SubstitutionFilter(Map<String, Term> args, DefinitionHelper definitionHelper) {
+		super("Plug terms into variables", definitionHelper);
 		this.args = args;
 	}
 
@@ -22,7 +23,7 @@ public class SubstitutionFilter extends CopyOnWriteTransformer {
 	public ASTNode transform(Variable var) {
 		Term t = args.get(var.getName());
 		if (t == null) {
-			t = args.get(var.getName() + ":" + var.getSort());
+			t = args.get(var.getName() + ":" + var.getSort(definitionHelper));
 		}
 		if (t == null) {
 			GlobalSettings.kem.register(new KException(
@@ -32,7 +33,7 @@ public class SubstitutionFilter extends CopyOnWriteTransformer {
 				var.getFilename(), var.getLocation()));
 		}
 		if (t instanceof BackendTerm) {
-			t.setSort(var.getSort());
+			t.setSort(var.getSort(definitionHelper));
 		}
 		return t;
 	}

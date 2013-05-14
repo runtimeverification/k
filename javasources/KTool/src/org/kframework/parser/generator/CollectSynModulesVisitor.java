@@ -5,6 +5,7 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.Import;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -17,6 +18,10 @@ import java.util.List;
 import java.util.Set;
 
 public class CollectSynModulesVisitor extends BasicVisitor {
+	public CollectSynModulesVisitor(DefinitionHelper definitionHelper) {
+		super(definitionHelper);
+	}
+
 	public Set<String> synModNames = new HashSet<String>();
 
 	public void visit(Definition def) {

@@ -20,8 +20,8 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class TypeInferenceSupremumFilter extends BasicTransformer {
 
-	public TypeInferenceSupremumFilter() {
-		super("Type inference supremum");
+	public TypeInferenceSupremumFilter(DefinitionHelper definitionHelper) {
+		super("Type inference supremum", definitionHelper);
 	}
 
 	public ASTNode transform(Ambiguity amb) throws TransformerException {
@@ -47,9 +47,9 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 					// finally, try to find the minimums
 					for (Term tm2 : group) {
 						boolean min = true;
-						Production tcBig = ((TermCons) tm2).getProduction();
+						Production tcBig = ((TermCons) tm2).getProduction(definitionHelper);
 						for (Term tm22 : group) {
-							Production tcSmall = ((TermCons) tm22).getProduction();
+							Production tcSmall = ((TermCons) tm22).getProduction(definitionHelper);
 							if (tm2 != tm22 && isSubsorted(tcBig, tcSmall)) {
 								min = false;
 								break;
@@ -63,7 +63,7 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 					for (Term t1 : group) {
 						boolean max = true;
 						for (Term t2 : group)
-							if (t1 != t2 && DefinitionHelper.isSubsorted(t2.getSort(), t1.getSort()))
+							if (t1 != t2 && definitionHelper.isSubsorted(t2.getSort(definitionHelper), t1.getSort(definitionHelper)))
 								max = false;
 						if (max)
 							maxterms.add(t1);
@@ -81,12 +81,12 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 		return super.transform(amb);
 	}
 
-	private static boolean isSubsorted(Production big, Production small) {
+	private boolean isSubsorted(Production big, Production small) {
 		if (big == small)
 			return false;
 		if (big.getItems().size() != small.getItems().size())
 			return false;
-		if (!DefinitionHelper.isSubsortedEq(big.getSort(), small.getSort()))
+		if (!definitionHelper.isSubsortedEq(big.getSort(), small.getSort()))
 			return false;
 		for (int i = 0; i < big.getItems().size(); i++) {
 			if (big.getItems().get(i).getType() != small.getItems().get(i).getType()) {
@@ -94,12 +94,12 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 			} else if (big.getItems().get(i).getType() == ProductionType.SORT) {
 				String bigSort = ((Sort) big.getItems().get(i)).getName();
 				String smallSort = ((Sort) small.getItems().get(i)).getName();
-				if (!DefinitionHelper.isSubsortedEq(bigSort, smallSort))
+				if (!definitionHelper.isSubsortedEq(bigSort, smallSort))
 					return false;
 			} else if (big.getItems().get(i).getType() == ProductionType.USERLIST) {
 				String bigSort = ((UserList) big.getItems().get(i)).getSort();
 				String smallSort = ((UserList) small.getItems().get(i)).getSort();
-				if (!DefinitionHelper.isSubsortedEq(bigSort, smallSort))
+				if (!definitionHelper.isSubsortedEq(bigSort, smallSort))
 					return false;
 			} else
 				continue;
@@ -107,7 +107,7 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 		return true;
 	}
 
-	private static boolean termsAlike_simple(Term trm1, Term trm2) {
+	private boolean termsAlike_simple(Term trm1, Term trm2) {
 		if (!trm1.getClass().equals(trm2.getClass()))
 			return false;
 
@@ -116,15 +116,15 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 			TermCons term2 = (TermCons) trm2;
 
 			// check to see if the two terms have the same arity
-			if (term1.getProduction().getItems().size() != term2.getProduction().getItems().size())
+			if (term1.getProduction(definitionHelper).getItems().size() != term2.getProduction(definitionHelper).getItems().size())
 				return false;
 
-			if (!term1.getProduction().getKLabel().equals(term2.getProduction().getKLabel()))
+			if (!term1.getProduction(definitionHelper).getKLabel().equals(term2.getProduction(definitionHelper).getKLabel()))
 				return false;
 
-			for (int i = 0; i < term1.getProduction().getItems().size(); i++) {
-				ProductionItem itm1 = term1.getProduction().getItems().get(i);
-				ProductionItem itm2 = term2.getProduction().getItems().get(i);
+			for (int i = 0; i < term1.getProduction(definitionHelper).getItems().size(); i++) {
+				ProductionItem itm1 = term1.getProduction(definitionHelper).getItems().get(i);
+				ProductionItem itm2 = term2.getProduction(definitionHelper).getItems().get(i);
 
 				if (itm1.getType() == ProductionType.TERMINAL && !itm1.equals(itm2))
 					return false;

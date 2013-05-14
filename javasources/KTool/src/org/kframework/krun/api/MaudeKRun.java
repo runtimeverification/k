@@ -38,6 +38,11 @@ import java.util.Scanner;
 import java.util.Set;
 
 public class MaudeKRun implements KRun {
+	protected DefinitionHelper definitionHelper;
+	public MaudeKRun(DefinitionHelper definitionHelper) {
+		this.definitionHelper = definitionHelper;
+	}
+	
 	private void executeKRun(String maudeCmd, boolean ioServer) throws KRunExecutionException {
 		FileUtil.createFile(K.maude_in, maudeCmd);
 		File outFile = FileUtil.createFile(K.maude_out);
@@ -46,12 +51,12 @@ public class MaudeKRun implements KRun {
 		int returnValue;
 		try {
 			if (K.log_io) {
-				returnValue = KRunner.main(new String[] { "--maudeFile", K.compiled_def + K.fileSeparator + "main.maude", "--moduleName", K.main_module, "--commandFile", K.maude_in, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath(), "--createLogs" });
+				returnValue = KRunner.main(new String[] { "--maudeFile", K.compiled_def + K.fileSeparator + "main.maude", "--moduleName", K.main_module, "--commandFile", K.maude_in, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath(), "--createLogs" }, definitionHelper);
 			}
 			if (!ioServer) {
-				returnValue = KRunner.main(new String[] { "--maudeFile", K.compiled_def + K.fileSeparator + "main.maude", "--moduleName", K.main_module, "--commandFile", K.maude_in, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath(), "--noServer" });
+				returnValue = KRunner.main(new String[] { "--maudeFile", K.compiled_def + K.fileSeparator + "main.maude", "--moduleName", K.main_module, "--commandFile", K.maude_in, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath(), "--noServer" }, definitionHelper);
 			} else {
-				returnValue = KRunner.main(new String[] { "--maudeFile", K.compiled_def + K.fileSeparator + "main.maude", "--moduleName", K.main_module, "--commandFile", K.maude_in, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath() });
+				returnValue = KRunner.main(new String[] { "--maudeFile", K.compiled_def + K.fileSeparator + "main.maude", "--moduleName", K.main_module, "--commandFile", K.maude_in, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath() }, definitionHelper);
 			}
 		} catch (Exception e) {
 			throw new RuntimeException("Runner threw exception", e);
@@ -69,7 +74,7 @@ public class MaudeKRun implements KRun {
 	}
 
 	public KRunResult<KRunState> run(Term cfg) throws KRunExecutionException {
-		MaudeFilter maudeFilter = new MaudeFilter();
+		MaudeFilter maudeFilter = new MaudeFilter(definitionHelper);
 		cfg.accept(maudeFilter);
 		String cmd = "set show command off ." + K.lineSeparator + setCounter() + K.maude_cmd + " " + maudeFilter.getResult() + " .";
 		if(K.trace) {
@@ -143,7 +148,7 @@ public class MaudeKRun implements KRun {
 		List<Element> child = XmlUtil.getChildElements(elem);
 		assertXML(child.size() == 1);
 
-		KRunState state = parseElement((Element) child.get(0));
+		KRunState state = parseElement((Element) child.get(0), definitionHelper);
 		KRunResult<KRunState> ret = new KRunResult<KRunState>(state);
 		String statistics = printStatistics(elem);
 		ret.setStatistics(statistics);
@@ -152,10 +157,10 @@ public class MaudeKRun implements KRun {
 		return ret;
 	}
 
-	private KRunState parseElement(Element el) {
-		Term rawResult = MaudeKRun.parseXML(el);
+	private KRunState parseElement(Element el, DefinitionHelper definitionHelper) {
+		Term rawResult = MaudeKRun.parseXML(el, definitionHelper);
 
-		return new KRunState(rawResult);
+		return new KRunState(rawResult, definitionHelper);
 	}
 
 	private void parseCounter(Node counter) {
@@ -163,7 +168,8 @@ public class MaudeKRun implements KRun {
 		Element elem = (Element) counter;
 		List<Element> child = XmlUtil.getChildElements(elem);
 		assertXML(child.size() == 1);
-		K.counter = ((IntBuiltin) parseXML(child.get(0))).bigIntegerValue().intValue() - 1;
+		IntBuiltin intBuiltin = (IntBuiltin) parseXML(child.get(0), definitionHelper);
+		K.counter = intBuiltin.bigIntegerValue().intValue() - 1;
 	}
 
 	private static void assertXML(boolean assertion) {
@@ -178,7 +184,7 @@ public class MaudeKRun implements KRun {
 		}
 	}
 
-	public static Term parseXML(Element xml) {
+	public static Term parseXML(Element xml, DefinitionHelper definitionHelper) {
 		String op = xml.getAttribute("op");
 		String sort = xml.getAttribute("sort");
 		sort = sort.replaceAll("`([{}\\[\\](),])", "$1");
@@ -192,7 +198,7 @@ public class MaudeKRun implements KRun {
 				assertXMLTerm(list.size() == 3 && list.get(0).getAttribute("sort").equals("CellLabel") && list.get(2).getAttribute("sort").equals("CellLabel") && list.get(0).getAttribute("op").equals(list.get(2).getAttribute("op")));
 
 				cell.setLabel(list.get(0).getAttribute("op"));
-				cell.setContents(parseXML(list.get(1)));
+				cell.setContents(parseXML(list.get(1), definitionHelper));
 				return cell;
 			} else if (sort.equals("BagItem") && m.matches()) {
 				Cell cell = new Cell();
@@ -201,70 +207,70 @@ public class MaudeKRun implements KRun {
 				if (m.group(2).length() > 1) {
 					Bag bag = new Bag();
 					for (Element el : list) {
-						bag.getContents().add(parseXML(el));
+						bag.getContents().add(parseXML(el, definitionHelper));
 					}
 					cell.setContents(bag);
 				} else {
-					cell.setContents(parseXML(list.get(0)));
+					cell.setContents(parseXML(list.get(0), definitionHelper));
 				}
 				return cell;
 			} else if ((sort.equals("BagItem") || sort.equals("[Bag]")) && op.equals("BagItem")) {
 				assertXMLTerm(list.size() == 1);
-				return new BagItem(parseXML(list.get(0)));
+				return new BagItem(parseXML(list.get(0), definitionHelper));
 			} else if ((sort.equals("MapItem") || sort.equals("[Map]")) && op.equals("_|->_")) {
 				assertXMLTerm(list.size() == 2);
-				return new MapItem(parseXML(list.get(0)), parseXML(list.get(1)));
+				return new MapItem(parseXML(list.get(0), definitionHelper), parseXML(list.get(1), definitionHelper));
 			} else if ((sort.equals("SetItem") || sort.equals("[Set]")) && op.equals("SetItem")) {
 				assertXMLTerm(list.size() == 1);
-				return new SetItem(parseXML(list.get(0)));
+				return new SetItem(parseXML(list.get(0), definitionHelper));
 			} else if ((sort.equals("ListItem") || sort.equals("[List]")) && op.equals("ListItem")) {
 				assertXMLTerm(list.size() == 1);
-				return new ListItem(parseXML(list.get(0)));
+				return new ListItem(parseXML(list.get(0), definitionHelper));
 			} else if (op.equals("_`,`,_") && sort.equals("NeKList")) {
 				assertXMLTerm(list.size() >= 2);
 				List<Term> l = new ArrayList<Term>();
 				for (Element elem : list) {
-					l.add(parseXML(elem));
+					l.add(parseXML(elem, definitionHelper));
 				}
 				return new KList(l);
 			} else if (sort.equals("K") && op.equals("_~>_")) {
 				assertXMLTerm(list.size() >= 2);
 				List<Term> l = new ArrayList<Term>();
 				for (Element elem : list) {
-					l.add(parseXML(elem));
+					l.add(parseXML(elem, definitionHelper));
 				}
 				return new KSequence(l);
 			} else if (op.equals("__") && (sort.equals("NeList") || sort.equals("List") || sort.equals("[List]"))) {
 				assertXMLTerm(list.size() >= 2);
 				List<Term> l = new ArrayList<Term>();
 				for (Element elem : list) {
-					l.add(parseXML(elem));
+					l.add(parseXML(elem, definitionHelper));
 				}
 				return new org.kframework.kil.List(l);
 			} else if (op.equals("__") && (sort.equals("NeBag") || sort.equals("Bag") || sort.equals("[Bag]"))) {
 				assertXMLTerm(list.size() >= 2);
 				List<Term> l = new ArrayList<Term>();
 				for (Element elem : list) {
-					l.add(parseXML(elem));
+					l.add(parseXML(elem, definitionHelper));
 				}
 				return new Bag(l);
 			} else if (op.equals("__") && (sort.equals("NeSet") || sort.equals("Set") || sort.equals("[Set]"))) {
 				assertXMLTerm(list.size() >= 2);
 				List<Term> l = new ArrayList<Term>();
 				for (Element elem : list) {
-					l.add(parseXML(elem));
+					l.add(parseXML(elem, definitionHelper));
 				}
 				return new org.kframework.kil.Set(l);
 			} else if (op.equals("__") && (sort.equals("NeMap") || sort.equals("Map") || sort.equals("[Map]"))) {
 				assertXMLTerm(list.size() >= 2);
 				List<Term> l = new ArrayList<Term>();
 				for (Element elem : list) {
-					l.add(parseXML(elem));
+					l.add(parseXML(elem, definitionHelper));
 				}
 				return new org.kframework.kil.Map(l);
 			} else if ((op.equals("#_") || op.equals("List2KLabel_") || op.equals("Map2KLabel_") || op.equals("Set2KLabel_") || op.equals("Bag2KLabel_") || op.equals("KList2KLabel_") || op.equals("KLabel2KLabel_")) && (sort.equals(KSorts.KLABEL) || sort.equals("[KLabel]"))) {
 				assertXMLTerm(list.size() == 1);
-                Term term = parseXML(list.get(0));
+                Term term = parseXML(list.get(0), definitionHelper);
                 if (op.equals("#_") && term instanceof Token) {
                     return term;
                 } else {
@@ -272,10 +278,9 @@ public class MaudeKRun implements KRun {
                 }
 			} else if (sort.equals("#NzInt") && op.equals("--Int_")) {
 				assertXMLTerm(list.size() == 1);
-				return IntBuiltin.of("-" + ((IntBuiltin) parseXML(list.get(0))).value());
+				return IntBuiltin.of("-" + ((IntBuiltin) parseXML(list.get(0), definitionHelper)).value());
 			} else if (sort.equals("#NzNat") && op.equals("sNat_")) {
-				assertXMLTerm(list.size() == 1
-                              && parseXML(list.get(0)).equals(IntBuiltin.ZERO_TOKEN));
+				assertXMLTerm(list.size() == 1 && parseXML(list.get(0), definitionHelper).equals(IntBuiltin.ZERO_TOKEN));
                 return IntBuiltin.of(xml.getAttribute("number"));
 			} else if (sort.equals("#Zero") && op.equals("0")) {
 				assertXMLTerm(list.size() == 0);
@@ -290,9 +295,20 @@ public class MaudeKRun implements KRun {
             } else if (op.equals("#token") && sort.equals(KSorts.KLABEL)) {
                 // #token(String, String)
                 assertXMLTerm(list.size() == 2);
-                StringBuiltin sortString = (StringBuiltin) parseXML(list.get(0));
-                StringBuiltin valueString = (StringBuiltin) parseXML(list.get(1));
+                StringBuiltin sortString = (StringBuiltin)
+parseXML(list.get(0), definitionHelper);
+                StringBuiltin valueString = (StringBuiltin)
+parseXML(list.get(1), definitionHelper);
                 return GenericToken.of(sortString.stringValue(), valueString.stringValue());
+
+/*			} else if (sort.equals("#FiniteFloat")) {
+				assertXMLTerm(list.size() == 0);
+				return FloatBuiltin.of(op);
+			} else if (sort.equals("#Id") && op.equals("#id_")) {
+				assertXMLTerm(list.size() == 1);
+				StringBuiltin value = (StringBuiltin) parseXML(list.get(0), definitionHelper);
+				return new Constant("#Id", value.getValue());
+*/
 			} else if (op.matches("\\.(Map|Bag|List|Set|K)") && (sort.equals("Bag") || sort.equals("List") || sort.equals("Map") || sort.equals("Set") || sort.equals("K"))) {
 				assertXMLTerm(list.size() == 0);
                 if (sort.equals("Bag")) {
@@ -312,29 +328,29 @@ public class MaudeKRun implements KRun {
 				return KList.EMPTY;
 			} else if (op.equals("_`(_`)") && (sort.equals(KSorts.KITEM) || sort.equals("[KList]"))) {
 				assertXMLTerm(list.size() == 2);
-				Term child = parseXML(list.get(1));
+				Term child = parseXML(list.get(1), definitionHelper);
 				if (!(child instanceof KList)) {
 					List<Term> terms = new ArrayList<Term>();
 					terms.add(child);
 					child = new KList(terms);
 				}
-				return new KApp(parseXML(list.get(0)),child);
+				return new KApp(parseXML(list.get(0), definitionHelper),child);
 			} else if (sort.equals(KSorts.KLABEL) && list.size() == 0) {
-				return KLabelConstant.of(StringUtil.unescapeMaude(op));
+				return KLabelConstant.of(StringUtil.unescapeMaude(op), definitionHelper);
 			} else if (sort.equals(KSorts.KLABEL) && op.equals("#freezer_")) {
 				assertXMLTerm(list.size() == 1);
-				return new FreezerLabel(parseXML(list.get(0)));	
+				return new FreezerLabel(parseXML(list.get(0), definitionHelper));	
 			} else if (op.equals("HOLE")) {
 				assertXMLTerm(list.size() == 0 && sort.equals(KSorts.KITEM));
 				//return new Hole(sort);
 			    return Hole.KITEM_HOLE;
             } else {
-				Set<String> conses = DefinitionHelper.labels.get(StringUtil.unescapeMaude(op));
+				Set<String> conses = definitionHelper.labels.get(StringUtil.unescapeMaude(op));
 				Set<String> validConses = new HashSet<String>();
 				List<Term> possibleTerms = new ArrayList<Term>();
 				assertXMLTerm(conses != null);
 				for (String cons : conses) {
-					Production p = DefinitionHelper.conses.get(cons);
+					Production p = definitionHelper.conses.get(cons);
 					if (p.getSort().equals(sort) && p.getArity() == list.size()) {
 						validConses.add(cons);
 					}
@@ -342,7 +358,7 @@ public class MaudeKRun implements KRun {
 				assertXMLTerm(validConses.size() > 0);
 				List<Term> contents = new ArrayList<Term>();
 				for (Element elem : list) {
-					contents.add(parseXML(elem));
+					contents.add(parseXML(elem, definitionHelper));
 				}
 				for (String cons : validConses) {
 					possibleTerms.add(new TermCons(sort, cons, contents));
@@ -396,14 +412,14 @@ public class MaudeKRun implements KRun {
 		} else if (depth != null) {
 			cmd += "[," + depth + "] ";
 		}
-		MaudeFilter maudeFilter = new MaudeFilter();
+		MaudeFilter maudeFilter = new MaudeFilter(definitionHelper);
 		cfg.accept(maudeFilter);
 		cmd += maudeFilter.getResult() + " ";
-		MaudeFilter patternBody = new MaudeFilter();
+		MaudeFilter patternBody = new MaudeFilter(definitionHelper);
 		pattern.getBody().accept(patternBody);
 		String patternString = "=>" + getSearchType(searchType) + " " + patternBody.getResult();
 		if (pattern.getCondition() != null) {
-			MaudeFilter patternCondition = new MaudeFilter();
+			MaudeFilter patternCondition = new MaudeFilter(definitionHelper);
 			pattern.getCondition().accept(patternCondition);
 			patternString += " such that " + patternCondition.getResult() + " = # true(.KList)";
 		}
@@ -420,7 +436,7 @@ public class MaudeKRun implements KRun {
 					(pattern, compilationInfo);
 			final boolean matches = patternString.trim().matches("=>[!*1+] " +
 					"<_>_</_>\\(generatedTop, B:Bag, generatedTop\\)");
-			results = new SearchResults(solutions, parseSearchGraph(), matches);
+			results = new SearchResults(solutions, parseSearchGraph(), matches, definitionHelper);
 			K.stateCounter += results.getGraph().getVertexCount();
 			KRunResult<SearchResults> result = new KRunResult<SearchResults>(results);
 			result.setRawOutput(FileUtil.getFileContent(K.maude_out));
@@ -463,7 +479,7 @@ public class MaudeKRun implements KRun {
 			public KRunState transform(NodeMetadata n) {
 				String nodeXmlString = n.getProperty("term");
 				Element xmlTerm = XmlUtil.readXML(nodeXmlString).getDocumentElement();
-				KRunState ret = parseElement(xmlTerm);
+				KRunState ret = parseElement(xmlTerm, definitionHelper);
 				String id = n.getId();
 				id = id.substring(1);
 				ret.setStateId(Integer.parseInt(id) + K.stateCounter);
@@ -492,12 +508,12 @@ public class MaudeKRun implements KRun {
 					// location information is missing, I am creating non-RULE edges.
 					String labelAttribute = elem.getAttribute("label");
 					if (labelAttribute == null) {
-						return new Transition(TransitionType.UNLABELLED);
+						return new Transition(TransitionType.UNLABELLED, definitionHelper);
 					} else {
-						return new Transition(labelAttribute);
+						return new Transition(labelAttribute, definitionHelper);
 					}
 				}
-				return new Transition(DefinitionHelper.locations.get(filename + ":(" + location + ")"));
+				return new Transition(definitionHelper.locations.get(filename + ":(" + location + ")"), definitionHelper);
 			}
 		};
 
@@ -534,15 +550,15 @@ public class MaudeKRun implements KRun {
 				elem = (Element) nod;
 				List<Element> child = XmlUtil.getChildElements(elem);
 				assertXML(child.size() == 2);
-				Term result = parseXML(child.get(1));
+				Term result = parseXML(child.get(1), definitionHelper);
 				rawSubstitution.put(child.get(0).getAttribute("op"), result);
 			}
 
 			try {
-				Term rawResult = (Term)pattern.getBody().accept(new SubstitutionFilter(rawSubstitution));
-				KRunState state = new KRunState(rawResult);
+				Term rawResult = (Term)pattern.getBody().accept(new SubstitutionFilter(rawSubstitution, definitionHelper));
+				KRunState state = new KRunState(rawResult, definitionHelper);
 				state.setStateId(stateNum + K.stateCounter);
-				SearchResult result = new SearchResult(state, rawSubstitution, compilationInfo);
+				SearchResult result = new SearchResult(state, rawSubstitution, compilationInfo, definitionHelper);
 				results.add(result);
 			} catch (TransformerException e) {
 				e.report(); //this should never happen, so I want it to blow up
@@ -555,9 +571,9 @@ public class MaudeKRun implements KRun {
 	}
 
 	public KRunResult<DirectedGraph<KRunState, Transition>> modelCheck(Term formula, Term cfg) throws KRunExecutionException {
-		MaudeFilter formulaFilter = new MaudeFilter();
+		MaudeFilter formulaFilter = new MaudeFilter(definitionHelper);
 		formula.accept(formulaFilter);
-		MaudeFilter cfgFilter = new MaudeFilter();
+		MaudeFilter cfgFilter = new MaudeFilter(definitionHelper);
 		cfg.accept(cfgFilter);
 
 		String cmd = "mod MCK is" + K.lineSeparator + " including " + K.main_module + " ." + K.lineSeparator + K.lineSeparator + " op #initConfig : -> Bag ." + K.lineSeparator + K.lineSeparator + " eq #initConfig  =" + K.lineSeparator + cfgFilter.getResult() + " ." + K.lineSeparator + "endm" + K.lineSeparator + K.lineSeparator + "red" + K.lineSeparator + "_`(_`)(('modelCheck`(_`,_`)).KLabel,_`,`,_(_`(_`)(Bag2KLabel(#initConfig),.KList)," + K.lineSeparator + formulaFilter.getResult() + ")" + K.lineSeparator + ") .";
@@ -603,8 +619,8 @@ public class MaudeKRun implements KRun {
 			assertXML(child.size() == 2);
 			List<MaudeTransition> initialPath = new ArrayList<MaudeTransition>();
 			List<MaudeTransition> loop = new ArrayList<MaudeTransition>();
-			parseCounterexample(child.get(0), initialPath);
-			parseCounterexample(child.get(1), loop);
+			parseCounterexample(child.get(0), initialPath, definitionHelper);
+			parseCounterexample(child.get(1), loop, definitionHelper);
 			DirectedGraph<KRunState, Transition> graph = new DirectedOrderedSparseMultigraph<KRunState, Transition>();
 			Transition edge = null;
 			KRunState vertex = null;
@@ -638,18 +654,18 @@ public class MaudeKRun implements KRun {
 		}
 	}
 
-	private static void parseCounterexample(Element elem, List<MaudeTransition> list) {
+	private static void parseCounterexample(Element elem, List<MaudeTransition> list, DefinitionHelper definitionHelper) {
 		String sort = elem.getAttribute("sort");
 		String op = elem.getAttribute("op");
 		List<Element> child = XmlUtil.getChildElements(elem);
 		if (sort.equals("#TransitionList") && op.equals("_LTL_")) {
 			assertXML(child.size() >= 2);
 			for (Element e : child) {
-				parseCounterexample(e, list);
+				parseCounterexample(e, list, definitionHelper);
 			}
 		} else if (sort.equals("#Transition") && op.equals("LTL`{_`,_`}")) {
 			assertXML(child.size() == 2);
-			Term t = parseXML(child.get(0));
+			Term t = parseXML(child.get(0), definitionHelper);
 		
 			List<Element> child2 = XmlUtil.getChildElements(child.get(1));
 			sort = child.get(1).getAttribute("sort");
@@ -658,11 +674,11 @@ public class MaudeKRun implements KRun {
 			String label = op;
 			Transition trans;
 			if (sort.equals("#RuleName") && op.equals("UnlabeledLtl")) {
-				trans = new Transition(TransitionType.UNLABELLED);
+				trans = new Transition(TransitionType.UNLABELLED, definitionHelper);
 			} else {
-				trans = new Transition(label);
+				trans = new Transition(label, definitionHelper);
 			}
-			list.add(new MaudeTransition(new KRunState(t), trans));
+			list.add(new MaudeTransition(new KRunState(t, definitionHelper), trans));
 		} else if (sort.equals("#TransitionList") && op.equals("LTLnil")) {
 			assertXML(child.size() == 0);
 		} else {
@@ -671,7 +687,7 @@ public class MaudeKRun implements KRun {
 	}
 
 	public KRunDebugger debug(Term cfg) throws KRunExecutionException {
-		return new KRunApiDebugger(this, cfg);
+		return new KRunApiDebugger(this, cfg, definitionHelper);
 	}
 
 	public KRunDebugger debug(SearchResults searchResults) {

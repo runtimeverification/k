@@ -2,6 +2,7 @@ package org.kframework.parser.concrete.disambiguate;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Variable;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 
 import java.util.ArrayList;
@@ -9,6 +10,10 @@ import java.util.HashMap;
 
 
 public class CollectVariablesVisitor extends BasicVisitor {
+	public CollectVariablesVisitor(DefinitionHelper definitionHelper) {
+		super(definitionHelper);
+	}
+
 	private java.util.Map<String, java.util.List<Variable>> vars = new HashMap<String, java.util.List<Variable>>();
 
 	public java.util.Map<String, java.util.List<Variable>> getVars() {

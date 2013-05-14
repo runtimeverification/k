@@ -1,5 +1,6 @@
 package org.kframework.kil;
 
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
@@ -21,10 +22,10 @@ public class Bracket extends Term {
 		this.content = content;
 	}
 
-	public String getSort() {
+	public String getSort(DefinitionHelper definitionHelper) {
 		if (content instanceof Ambiguity)
-			return super.getSort();
-		return content.getSort();
+			return super.getSort(definitionHelper);
+		return content.getSort(definitionHelper);
 	}
 
 	public Bracket(Bracket i) {
@@ -32,8 +33,8 @@ public class Bracket extends Term {
 		this.content = i.content;
 	}
 
-	public Bracket(Term t) {
-		super(t.getSort());
+	public Bracket(Term t, DefinitionHelper definitionHelper) {
+		super(t.getSort(definitionHelper));
 		this.content = t;
 	}
 
@@ -41,8 +42,8 @@ public class Bracket extends Term {
 		super(location, filename, sort);
 	}
 
-	public Bracket(String location, String filename, Term t) {
-		super(location, filename, t.getSort());
+	public Bracket(String location, String filename, Term t, DefinitionHelper definitionHelper) {
+		super(location, filename, t.getSort(definitionHelper));
 		this.content = t;
 	}
 

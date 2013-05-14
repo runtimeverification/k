@@ -131,7 +131,7 @@ public class KastParser implements KastParserConstants {
       break;
     case KLABEL:
       jj_consume_token(KLABEL);
-                {if (true) return KLabelConstant.of(StringUtil.unescapeMaude(token.image));}
+                {if (true) return KLabelConstant.ofStatic(StringUtil.unescapeMaude(token.image));}
       break;
     default:
       jj_la1[4] = jj_gen;

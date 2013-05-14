@@ -3,6 +3,7 @@ package org.kframework.compile.transformers;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -15,8 +16,8 @@ import java.util.HashMap;
 
 public class ResolveOpenCells extends CopyOnWriteTransformer {
 
-	public ResolveOpenCells() {
-		super("Resolve Open Cells");
+	public ResolveOpenCells(DefinitionHelper definitionHelper) {
+		super("Resolve Open Cells", definitionHelper);
 	}
 	
 	@Override
@@ -28,7 +29,7 @@ public class ResolveOpenCells extends CopyOnWriteTransformer {
 		node = node.shallowCopy();
 		node.setCellAttributes(new HashMap<String, String>(node.getCellAttributes()));
 		node.setEllipses(Ellipses.NONE);
-		KSort sort = KSort.getKSort(node.getContents().getSort()).mainSort();
+		KSort sort = KSort.getKSort(node.getContents().getSort(definitionHelper)).mainSort();
 		Collection col;
 		if (node.getContents() instanceof Collection) {
 			col = (Collection) node.getContents().shallowCopy();

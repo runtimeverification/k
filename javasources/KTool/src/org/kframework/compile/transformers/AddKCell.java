@@ -3,21 +3,25 @@ package org.kframework.compile.transformers;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class AddKCell extends CopyOnWriteTransformer {
 
-	public AddKCell() {
-		super("Add K cell");
+	public AddKCell(DefinitionHelper definitionHelper) {
+		super("Add K cell", definitionHelper);
 	}
 	
 	@Override
 	public ASTNode transform(Rule node) {
-		if (MetaK.isAnywhere(node)) return node;
-		String sort = node.getBody().getSort();
-		if (!sort.equals("K") && MetaK.isKSort(sort))
+		if (MetaK.isAnywhere(node)) {
 			return node;
+		}
+		String sort = node.getBody().getSort(definitionHelper);
+		if (!sort.equals("K") && MetaK.isKSort(sort)) {
+			return node;
+		}
 		node = node.shallowCopy();
 		node.setBody(MetaK.kWrap(node.getBody()));
 		return node;
@@ -25,7 +29,7 @@ public class AddKCell extends CopyOnWriteTransformer {
 	
 	@Override
 	public ASTNode transform(Configuration cfg) throws TransformerException {
-		if (!MetaK.getAllCellLabels(cfg.getBody()).contains("k"))
+		if (!MetaK.getAllCellLabels(cfg.getBody(), definitionHelper).contains("k"))
 		{
 			Cell k = new Cell();
 			k.setLabel("k");

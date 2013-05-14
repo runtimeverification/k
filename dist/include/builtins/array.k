@@ -14,7 +14,7 @@ module ARRAY-SYNTAX
   syntax K ::= K "<=K" K [function]
   syntax K ::= K "<K"  K [function]
   syntax K ::= K "-K"  K [function]
-  
+  syntax K ::= K "!=K" K [function]  
 
 endmodule
 
@@ -23,18 +23,35 @@ module ARRAY
   imports ARRAY-SYNTAX
   imports K-EQUAL-HOOKS
   imports INT-HOOKS
+  imports BOOL-HOOKS
+  imports STRING-HOOKS
 
   // Int can be used as an index by default; the below rules should be added 
   // for each type used as an index
- 
-  rule I:Int <=K J:Int => I <=Int J [anywhere]
-  rule I:Int <K J:Int  => I <Int  J [anywhere]
-  rule I:Int -K J:Int  => I -Int  J [anywhere]
+  
+  /* hacks */
+  rule I:Int <=K J:Int => I <=Int J
+  rule I:Int <K J:Int  => I <Int  J
+  rule I:Int -K J:Int  => I -Int  J
+  
+  rule I:Int !=K J:Int => I =/=Int J
+  rule I:Int =K J:Int => I ==Int J
+  rule isInt(select(A:Array, I:K)) => true when isSymbolicInt(I) [anywhere]
+
+  rule I:Bool !=K J:Bool => I =/=Bool J
+  rule I:Bool =K J:Bool => I ==Bool J
+  rule isBool(select(A:Array, I:K)) => true when isSymbolicInt(I) [anywhere]
+
+  rule I:String !=K J:String => I =/=String J
+  rule I:String =K J:String => I ==String J
+  rule isString(select(A:Array, I:K)) => true when isSymbolicInt(I) [anywhere]
+  /* end hacks */
+
 
   // main array axioms
   rule select(store(A:K, I:K, V:K), I:K) => V
   rule select(store(A:K, I:K, V:K), J:K) => select(A, J)
-       when I =/=K J
+       when I !=K J
 
   // select from constant array
   rule select(const-array(_:Id, MIN:K, MAX:Int, V:K), I:Int) => V

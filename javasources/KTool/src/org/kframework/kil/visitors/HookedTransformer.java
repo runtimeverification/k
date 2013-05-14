@@ -1,6 +1,7 @@
 package org.kframework.kil.visitors;
 
 import org.kframework.kil.*;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
 
@@ -9,19 +10,26 @@ public class HookedTransformer implements Transformer {
 	BasicHookWorker before = null;
 	BasicHookWorker after = null;
 	String name;
-	BasicTransformerPropagator propagator = new BasicTransformerPropagator(this);
+	BasicTransformerPropagator propagator;
+	protected DefinitionHelper definitionHelper;
 
-	public HookedTransformer(BasicHookWorker before, String name) {
+	public HookedTransformer(BasicHookWorker before, String name, DefinitionHelper definitionHelper) {
+		propagator = new BasicTransformerPropagator(this, definitionHelper);
+		this.definitionHelper = definitionHelper;
 		this.before = before;
 		this.name = name;
 	}
 
-	public HookedTransformer(String name, BasicHookWorker after) {
+	public HookedTransformer(String name, BasicHookWorker after, DefinitionHelper definitionHelper) {
+		propagator = new BasicTransformerPropagator(this, definitionHelper);
+		this.definitionHelper = definitionHelper;
 		this.name = name;
 		this.after = after;
 	}
 
-	public HookedTransformer(BasicHookWorker before, String name, BasicHookWorker after) {
+	public HookedTransformer(BasicHookWorker before, String name, BasicHookWorker after, DefinitionHelper definitionHelper) {
+		propagator = new BasicTransformerPropagator(this, definitionHelper);
+		this.definitionHelper = definitionHelper;
 		this.before = before;
 		this.name = name;
 		this.after = after;

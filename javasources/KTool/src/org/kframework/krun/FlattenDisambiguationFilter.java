@@ -19,8 +19,8 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class FlattenDisambiguationFilter extends CopyOnWriteTransformer {
-	public FlattenDisambiguationFilter() {
-		super("Reflatten ambiguous syntax");
+	public FlattenDisambiguationFilter(DefinitionHelper definitionHelper) {
+		super("Reflatten ambiguous syntax", definitionHelper);
 	}
 
 	@Override
@@ -29,10 +29,10 @@ public class FlattenDisambiguationFilter extends CopyOnWriteTransformer {
 		if (amb.getContents().get(0) instanceof TermCons) {
 			TermCons t1 = (TermCons)amb.getContents().get(0);
 			if (MetaK.isComputationSort(t1.getSort())) {
-				if (t1.getProduction().isListDecl()) {
+				if (t1.getProduction(definitionHelper).isListDecl()) {
 					Term t2 = t1.getContents().get(1);
-					UserList ul = (UserList)t1.getProduction().getItems().get(0);
-					if (DefinitionHelper.isSubsortedEq(ul.getSort(), t2.getSort())) {
+					UserList ul = (UserList)t1.getProduction(definitionHelper).getItems().get(0);
+					if (definitionHelper.isSubsortedEq(ul.getSort(), t2.getSort(definitionHelper))) {
 						t1.getContents().set(1, addEmpty(t2, t1.getSort()));
 					}
 					if (t2 instanceof Empty) {
@@ -40,20 +40,20 @@ public class FlattenDisambiguationFilter extends CopyOnWriteTransformer {
 					}
 				}
 				return new KApp(
-                        KLabelConstant.of(t1.getProduction().getKLabel()),
+                        KLabelConstant.of(t1.getProduction(definitionHelper).getKLabel(), definitionHelper),
                         (Term) new KList(t1.getContents()).accept(this));
 			}
 		} else if (amb.getContents().get(0) instanceof Empty) {
 			Empty t1 = (Empty)amb.getContents().get(0);
 			if (MetaK.isComputationSort(t1.getSort())) {
-				return new ListTerminator(((UserList)DefinitionHelper.listConses.get(t1.getSort()).getItems().get(0)).getSeparator());
+				return new ListTerminator(((UserList)definitionHelper.listConses.get(t1.getSort()).getItems().get(0)).getSeparator());
 			}
 		}
 		return amb;
 	}
 
-	private static Term addEmpty(Term node, String sort) {
-		TermCons tc = new TermCons(sort, DefinitionHelper.listConses.get(sort).getCons());
+	private Term addEmpty(Term node, String sort) {
+		TermCons tc = new TermCons(sort, definitionHelper.listConses.get(sort).getCons());
 		List<Term> contents = new ArrayList<Term>();
 		contents.add(node);
 		contents.add(new Empty(sort));

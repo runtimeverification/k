@@ -14,14 +14,14 @@ import java.util.Scanner;
 
 public class AddBracketsFilter2 extends BasicTransformer {
 
-	public AddBracketsFilter2() throws IOException {
-		super("Add more brackets");
-		org.kframework.parser.concrete.KParser.ImportTbl(DefinitionHelper.kompiled.getCanonicalPath() + "/def/Concrete.tbl");
+	public AddBracketsFilter2(DefinitionHelper definitionHelper) throws IOException {
+		super("Add more brackets", definitionHelper);
+		org.kframework.parser.concrete.KParser.ImportTbl(definitionHelper.kompiled.getCanonicalPath() + "/def/Concrete.tbl");
 	}
 
 	private Term reparsed = null;
-	public AddBracketsFilter2(Term reparsed) {
-		super("Add brackets to term based on parse forest");
+	public AddBracketsFilter2(Term reparsed, DefinitionHelper definitionHelper) {
+		super("Add brackets to term based on parse forest", definitionHelper);
 		this.reparsed = reparsed;
 	}
 
@@ -113,29 +113,29 @@ public class AddBracketsFilter2 extends BasicTransformer {
 		if (reparsed != null) {
 			ASTNode result = addBracketsIfNeeded(ast);
 			if (atTop && result instanceof Bracket) {
-				return new Cast(result.getLocation(), result.getFilename(), (Term)result);
+				return new Cast(result.getLocation(), result.getFilename(), (Term)result, definitionHelper);
 			}
 			return result;
 		}
-		UnparserFilter unparser = new UnparserFilter(false, false, false, true);
+		UnparserFilter unparser = new UnparserFilter(false, false, false, true, definitionHelper);
 		ast.accept(unparser);
 		String unparsed = unparser.getResult();
 		try {
-			ASTNode rule = DefinitionLoader.parsePatternAmbiguous(unparsed);
+			ASTNode rule = DefinitionLoader.parsePatternAmbiguous(unparsed, definitionHelper);
 			Term reparsed = ((Rule)rule).getBody();
-			reparsed.accept(new AdjustLocations());
+			reparsed.accept(new AdjustLocations(definitionHelper));
 			if (!reparsed.contains(ast)) {
 				return replaceWithVar(ast);
 			}
-			return ast.accept(new AddBracketsFilter2(reparsed));
+			return ast.accept(new AddBracketsFilter2(reparsed, definitionHelper));
 		} catch (TransformerException e) {
 			return replaceWithVar(ast);
 		}
 	}
 
 	private class AdjustLocations extends BasicVisitor {
-		public AdjustLocations() {
-			super("Apply first-line location offset");
+		public AdjustLocations(DefinitionHelper definitionHelper) {
+			super("Apply first-line location offset", definitionHelper);
 		}
 
 		public void visit(ASTNode ast) {
@@ -156,23 +156,23 @@ public class AddBracketsFilter2 extends BasicTransformer {
 	}
 
 	private Variable replaceWithVar(Term ast) {
-		Variable var = Variable.getFreshVar(((Term) ast).getSort());
+		Variable var = Variable.getFreshVar(((Term)ast).getSort(definitionHelper));
 		substitution.put(var.getName(), (Term) ast);
 		return var;
 	}
 
 	private ASTNode addBracketsIfNeeded(Term ast) throws TransformerException {
-		TraverseForest trans = new TraverseForest(ast);
+		TraverseForest trans = new TraverseForest(ast, definitionHelper);
 		reparsed = (Term)reparsed.accept(trans);
 		if (trans.needsParens) {
-			return new Bracket(ast.getLocation(), ast.getFilename(), ast);
+			return new Bracket(ast.getLocation(), ast.getFilename(), ast, definitionHelper);
 		}
 		return ast;
 	}
 
 	private class GetRealLocation extends BasicVisitor {
-		public GetRealLocation(Term ast) {
-			super("Find term in parse forest");
+		public GetRealLocation(Term ast, DefinitionHelper definitionHelper) {
+			super("Find term in parse forest", definitionHelper);
 			this.ast = ast;
 		}
 		private Term ast;
@@ -186,8 +186,8 @@ public class AddBracketsFilter2 extends BasicTransformer {
 	}
 
 	private class TraverseForest extends BasicTransformer {
-		public TraverseForest(Term ast) {
-			super("Determine if term needs parentheses");
+		public TraverseForest(Term ast, DefinitionHelper definitionHelper) {
+			super("Determine if term needs parentheses", definitionHelper);
 			this.ast = ast;
 		}
 		private Term ast;
@@ -197,7 +197,7 @@ public class AddBracketsFilter2 extends BasicTransformer {
 		private String realLocation;
 
 		public ASTNode transform(Ambiguity amb) throws TransformerException {
-			GetRealLocation visitor = new GetRealLocation(ast);
+			GetRealLocation visitor = new GetRealLocation(ast, definitionHelper);
 			amb.accept(visitor);
 			if (visitor.realTerm == null) return amb;
 			realLocation = visitor.realTerm.getLocation();

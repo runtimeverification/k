@@ -15,12 +15,14 @@ public class KastFilter extends BasicVisitor {
     protected Indenter result;
     private boolean nextline;
     
-	public KastFilter() {
+	public KastFilter(DefinitionHelper definitionHelper) {
+		super(definitionHelper);
 		result = new Indenter();
 		result.setWidth(Integer.MAX_VALUE);
 	}
 	
-	public KastFilter(IndentationOptions indentationOptions, boolean nextline) {
+	public KastFilter(IndentationOptions indentationOptions, boolean nextline, DefinitionHelper definitionHelper) {
+		super(definitionHelper);
 		result = new Indenter(indentationOptions);
 		this.nextline = nextline;
 	}
@@ -82,7 +84,7 @@ public class KastFilter extends BasicVisitor {
 	@Override
 	public void visit(KList listOfK) {
 		if (listOfK.getContents().size() == 0) {
-			new Empty(listOfK.getSort()).accept(this);
+			new Empty(listOfK.getSort(definitionHelper)).accept(this);
 		} else if (listOfK.getContents().size() == 1) {
 			listOfK.getContents().get(0).accept(this);
 		} else {
@@ -137,7 +139,7 @@ public class KastFilter extends BasicVisitor {
 			result.write(".");
 			result.write(sort);
 		} else {
-			Production prd = DefinitionHelper.listConses.get(sort);
+			Production prd = definitionHelper.listConses.get(sort);
 			UserList ul = (UserList) prd.getItems().get(0);
 			result.write(".List`{\"");
 			result.write(ul.getSeparator());
@@ -206,11 +208,11 @@ public class KastFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Constant constant) {
-		if (constant.getSort().equals("#Id")) {
+		if (constant.getSort(definitionHelper).equals("#Id")) {
 			result.write("#id \"");
 		}
 		result.write(constant.getValue());
-		if (constant.getSort().equals("#Id")) {
+		if (constant.getSort(definitionHelper).equals("#Id")) {
 			result.write("\"");
 		}
 	}
@@ -258,8 +260,8 @@ public class KastFilter extends BasicVisitor {
 	@Override
 	public void visit(KInjectedLabel kInjectedLabel) {
 		Term term = kInjectedLabel.getTerm();
-		if (MetaK.isKSort(term.getSort())) {
-            result.write(KInjectedLabel.getInjectedSort(term.getSort()));
+		if (MetaK.isKSort(term.getSort(definitionHelper))) {
+            result.write(KInjectedLabel.getInjectedSort(term.getSort(definitionHelper)));
 			result.write("2KLabel_("); 
 		} else {
 			result.write("#_(");

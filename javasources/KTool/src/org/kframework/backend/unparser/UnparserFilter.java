@@ -30,23 +30,24 @@ public class UnparserFilter extends BasicVisitor {
 		forEquivalence = true;
 	}
 
-	public UnparserFilter() {
-		this(false);
+	public UnparserFilter(DefinitionHelper definitionHelper) {
+		this(false, definitionHelper);
 	}
 
-	public UnparserFilter(boolean inConfiguration) {
-		this(inConfiguration, false);
+	public UnparserFilter(boolean inConfiguration, DefinitionHelper definitionHelper) {
+		this(inConfiguration, false, definitionHelper);
 	}
 
-	public UnparserFilter(boolean inConfiguration, boolean color) {
-		this(inConfiguration, color, true);
+	public UnparserFilter(boolean inConfiguration, boolean color, DefinitionHelper definitionHelper) {
+		this(inConfiguration, color, true, definitionHelper);
 	}
 
-	public UnparserFilter(boolean inConfiguration, boolean color, boolean addParentheses) {
-		this(inConfiguration, color, addParentheses, false);
+	public UnparserFilter(boolean inConfiguration, boolean color, boolean addParentheses, DefinitionHelper definitionHelper) {
+		this(inConfiguration, color, addParentheses, false, definitionHelper);
 	}
 
-	public UnparserFilter(boolean inConfiguration, boolean color, boolean addParentheses, boolean annotateLocation) {
+	public UnparserFilter(boolean inConfiguration, boolean color, boolean addParentheses, boolean annotateLocation, DefinitionHelper definitionHelper) {
+		super(definitionHelper);
 		this.inConfiguration = inConfiguration;
 		this.color = color;
 		this.inTerm = 0;
@@ -254,7 +255,7 @@ public class UnparserFilter extends BasicVisitor {
 		}
 		String colorCode = "";
 		if (color) {
-			Cell declaredCell = DefinitionHelper.cells.get(cell.getLabel());
+			Cell declaredCell = definitionHelper.cells.get(cell.getLabel());
 			if (declaredCell != null) {
 				String declaredColor = declaredCell.getCellAttributes().get("color");
 				if (declaredColor != null) {
@@ -302,7 +303,7 @@ public class UnparserFilter extends BasicVisitor {
 			result.write("?");
 		result.write(variable.getName());
 		if (!variableList.contains(variable.getName())) {
-			result.write(":" + variable.getSort());
+			result.write(":" + variable.getSort(definitionHelper));
 			variableList.add(variable.getName());
 		}
 		postpare();
@@ -375,7 +376,7 @@ public class UnparserFilter extends BasicVisitor {
 	public void visit(TermCons termCons) {
 		prepare(termCons);
 		inTerm++;
-		Production production = termCons.getProduction();
+		Production production = termCons.getProduction(definitionHelper);
 		if (production.isListDecl()) {
 			UserList userList = (UserList) production.getItems().get(0);
 			String separator = userList.getSeparator();
@@ -439,7 +440,7 @@ public class UnparserFilter extends BasicVisitor {
 			}
 		}
 		if (contents.size() == 0) {
-			result.write("." + collection.getSort());
+			result.write("." + collection.getSort(definitionHelper));
 		}
 		postpare();
 	}
@@ -512,8 +513,8 @@ public class UnparserFilter extends BasicVisitor {
 	public void visit(KInjectedLabel kInjectedLabel) {
 		prepare(kInjectedLabel);
 		Term term = kInjectedLabel.getTerm();
-		if (MetaK.isKSort(term.getSort())) {
-			result.write(kInjectedLabel.getInjectedSort(term.getSort()));
+		if (MetaK.isKSort(term.getSort(definitionHelper))) {
+			result.write(kInjectedLabel.getInjectedSort(term.getSort(definitionHelper)));
 			result.write("2KLabel ");
 		} else {
 			result.write("# ");
@@ -646,7 +647,7 @@ public class UnparserFilter extends BasicVisitor {
 		if (c.isSyntactic()) {
 			result.write(":");
 		}
-		result.write(c.getSort());
+		result.write(c.getSort(definitionHelper));
 		postpare();
 	}
 
@@ -695,9 +696,9 @@ public class UnparserFilter extends BasicVisitor {
 		} else if ((astNode instanceof TermCons) && (upper instanceof TermCons)) {
 			TermCons termConsNext = (TermCons) astNode;
 			TermCons termCons = (TermCons) upper;
-			Production productionNext = termConsNext.getProduction();
-			Production production = termCons.getProduction();
-			if (DefinitionHelper.isPriorityWrong(production.getKLabel(), productionNext.getKLabel())) {
+			Production productionNext = termConsNext.getProduction(definitionHelper);
+			Production production = termCons.getProduction(definitionHelper);
+			if (definitionHelper.isPriorityWrong(production.getKLabel(), productionNext.getKLabel())) {
 				return true;
 			}
 			return termConsNext.getContents().size() != 0;

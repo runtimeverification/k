@@ -3,6 +3,7 @@ package org.kframework.compile.transformers;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.compile.utils.Substitution;
 import org.kframework.kil.*;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -23,8 +24,8 @@ import java.util.List;
 public class ContextsToHeating extends CopyOnWriteTransformer {
     private List<ModuleItem> rules = new ArrayList<ModuleItem>();
     
-    public ContextsToHeating() {
-           super("Contexts to Heating Rules");
+    public ContextsToHeating(DefinitionHelper definitionHelper) {
+           super("Contexts to Heating Rules", definitionHelper);
     }
 
     @Override
@@ -38,7 +39,7 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
     private List<Term> splitRewrite(Term term) throws TransformerException {
     	final Variable v = Variable.getFreshVar("K");
     	final List<Term> list = new ArrayList<Term>();
-    	Transformer transformer = new CopyOnWriteTransformer("splitter") {
+    	Transformer transformer = new CopyOnWriteTransformer("splitter", definitionHelper) {
     		@Override public ASTNode transform(Rewrite rewrite) {
     			list.add(rewrite.getLeft());
     			list.add(rewrite.getRight());
@@ -51,11 +52,11 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
     	return list;
     }
     
-    private static Term substituteHole(Term term, Term replacement) throws TransformerException {
+    private Term substituteHole(Term term, Term replacement) throws TransformerException {
 		return substituteSubstitutable(term, Hole.KITEM_HOLE, replacement);
     }
 
-	public static Term freeze(Term term) {
+	public Term freeze(Term term) {
 		try {
 			return new Freezer(substituteHole(term, new FreezerHole(0)));
 		} catch (TransformerException e) {
@@ -68,10 +69,10 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
 		return substituteSubstitutable(term, variable, replacement);
    }
 
-	private static Term substituteSubstitutable(Term term, Term variable, Term replacement) throws TransformerException {
+	private Term substituteSubstitutable(Term term, Term variable, Term replacement) throws TransformerException {
 		HashMap<Term, Term> hashMap = new HashMap<Term, Term>();
 		hashMap.put(variable, replacement);
-		Substitution substitution = new Substitution(hashMap);
+		Substitution substitution = new Substitution(hashMap, definitionHelper);
 		if (term == null) {
 			return null;
 		}
@@ -80,8 +81,8 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
 
 	@Override
     public ASTNode transform(Context node) throws TransformerException {
-    	Term body = (Term) node.getBody().accept(new ResolveAnonymousVariables());
-    	Integer countRewrites = MetaK.countRewrites(body); 
+    	Term body = (Term) node.getBody().accept(new ResolveAnonymousVariables(definitionHelper));
+    	Integer countRewrites = MetaK.countRewrites(body, definitionHelper); 
     	if (countRewrites > 1) {
     		GlobalSettings.kem.register(
     				new KException(ExceptionType.ERROR,
@@ -91,7 +92,7 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
     						node.getLocation(),
     						node.getFilename()));
     	} else if (countRewrites == 0) {
-    		body = substituteHole(body, new Rewrite(Hole.KITEM_HOLE, Hole.KITEM_HOLE));
+    		body = substituteHole(body, new Rewrite(Hole.KITEM_HOLE, Hole.KITEM_HOLE, definitionHelper));
     	}
     	List<Term> r = splitRewrite(body);
     	Term rewriteContext = r.get(0);
@@ -112,13 +113,13 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
     	rewriteList.add(substituteHole(right, freshVariable));
     	rewriteList.add(new Freezer(substituteVariable(rewriteContext, freshVariable, new FreezerHole(0))));
     	Term rhsHeat = new KSequence(rewriteList);
-    	Rule heatingRule = new Rule(lhsHeat, rhsHeat);
+    	Rule heatingRule = new Rule(lhsHeat, rhsHeat, definitionHelper);
     	heatingRule.setCondition(substituteHole(node.getCondition(), freshVariable));
 		heatingRule.getAttributes().getContents().addAll(node.getAttributes().getContents());
     	heatingRule.putAttribute(MetaK.Constants.heatingTag,"");
     	rules.add(heatingRule);
     	
-    	Rule coolingRule = new Rule(rhsHeat, lhsHeat);
+    	Rule coolingRule = new Rule(rhsHeat, lhsHeat, definitionHelper);
 		coolingRule.getAttributes().getContents().addAll(node.getAttributes().getContents());
     	coolingRule.putAttribute(MetaK.Constants.coolingTag,"");
     	rules.add(coolingRule);

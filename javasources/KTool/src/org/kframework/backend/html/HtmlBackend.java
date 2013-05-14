@@ -2,6 +2,7 @@ package org.kframework.backend.html;
 
 import org.kframework.backend.BasicBackend;
 import org.kframework.kil.Definition;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.main.KompileFrontEnd;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
@@ -13,15 +14,15 @@ import java.io.IOException;
 
 public class HtmlBackend extends BasicBackend {
 
-	public HtmlBackend(Stopwatch sw) {
-		super(sw);
+	public HtmlBackend(Stopwatch sw, DefinitionHelper definitionHelper) {
+		super(sw, definitionHelper);
 	}
 
 	@Override
 	public void run(Definition definition) throws IOException {
 		String fileSep = System.getProperty("file.separator");
 		String htmlIncludePath = KPaths.getKBase(false) + fileSep + "include" + fileSep + "html" + fileSep;
-		HTMLFilter htmlFilter = new HTMLFilter(htmlIncludePath);
+		HTMLFilter htmlFilter = new HTMLFilter(htmlIncludePath, definitionHelper);
 		definition.accept(htmlFilter);
 
 		String html = htmlFilter.getHTML();

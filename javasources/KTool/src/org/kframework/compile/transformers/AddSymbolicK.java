@@ -2,6 +2,7 @@ package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -13,8 +14,8 @@ public class AddSymbolicK extends CopyOnWriteTransformer {
 
 	private static final String SymbolicConstructorPrefix = "#sym";
 
-	public AddSymbolicK() {
-		super("Add symbolic constructors");
+	public AddSymbolicK(DefinitionHelper definitionHelper) {
+		super("Add symbolic constructors", definitionHelper);
 	}
 
 	public static final boolean allowSymbolic(String sort) {
@@ -37,13 +38,13 @@ public class AddSymbolicK extends CopyOnWriteTransformer {
         return sort.startsWith(SymbolicConstructorPrefix);
     }
 
-    public static final Production getSymbolicProduction(String sort) {
+    public final Production getSymbolicProduction(String sort) {
         assert allowSymbolic(sort);
 
-        return Production.makeFunction(sort, symbolicConstructor(sort), "K");
+        return Production.makeFunction(sort, symbolicConstructor(sort), "K", definitionHelper);
     }
 
-    public static final Term makeSymbolicTerm(String sort, Term term) {
+    public final Term makeSymbolicTerm(String sort, Term term) {
         assert allowSymbolic(sort);
 
         String ctor = symbolicConstructor(sort);
@@ -52,15 +53,15 @@ public class AddSymbolicK extends CopyOnWriteTransformer {
             symTerm = new TermCons(sort, ctor);
             ((TermCons) symTerm).getContents().add(term);
         } else {
-            symTerm = KApp.of(KLabelConstant.of(ctor), term);
+            symTerm = KApp.of(definitionHelper, KLabelConstant.of(ctor, definitionHelper), term);
         }
 
         return symTerm;
     }
 
-	public static Term freshSymSortN(String sort, int n) {
-		return KApp.of(
-                KLabelConstant.of("'#freshSymSortN"),
+	public Term freshSymSortN(String sort, int n) {
+		return KApp.of(definitionHelper, 
+                KLabelConstant.of("'#freshSymSortN", definitionHelper),
                 StringBuiltin.kAppOf(sort),
                 IntBuiltin.kAppOf(n));
 	}

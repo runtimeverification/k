@@ -10,8 +10,8 @@ import org.kframework.utils.general.GlobalSettings;
 
 public class CheckStreams extends BasicVisitor {
 
-	public CheckStreams() {
-		super("Check Streaming Cell Contents");
+	public CheckStreams(DefinitionHelper definitionHelper) {
+		super("Check Streaming Cell Contents", definitionHelper);
 	}
 
 	@Override
@@ -20,8 +20,8 @@ public class CheckStreams extends BasicVisitor {
 		node.getContents().accept(this);
 		String stream = node.getCellAttributes().get("stream");
 		if (stream != null) {
-			if (!DefinitionHelper.isSubsortedEq("List", node.getContents().getSort())) {
-				String msg = "Wrong sort in streaming cell. Expected List, but found " + node.getContents().getSort() + ".";
+			if (!definitionHelper.isSubsortedEq("List", node.getContents().getSort(definitionHelper))) {
+				String msg = "Wrong sort in streaming cell. Expected List, but found " + node.getContents().getSort(definitionHelper) + ".";
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, getName(), node.getFilename(), node.getLocation()));
 			}
 		}

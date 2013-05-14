@@ -5,19 +5,20 @@ import java.awt.Toolkit;
 
 import javax.swing.JFrame;
 
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.krun.gui.Controller.RunKRunCommand;
 
 public class MainWindow extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 
-	public MainWindow(RunKRunCommand command){			
+	public MainWindow(RunKRunCommand command, DefinitionHelper definitionHelper){			
 			Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 			this.setPreferredSize(screenSize);
 			this.setExtendedState(MAXIMIZED_BOTH);
 			this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);			
 		    try {
-				this.getContentPane().add(new GraphRepresentation(command));
+				this.getContentPane().add(new GraphRepresentation(command, definitionHelper));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}		   

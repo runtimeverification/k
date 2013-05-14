@@ -7,6 +7,7 @@ import org.kframework.backend.java.symbolic.Transformable;
 import org.kframework.backend.java.symbolic.VariableVisitor;
 import org.kframework.backend.java.symbolic.Visitable;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.HashMap;
@@ -43,19 +44,19 @@ public abstract class Term extends ASTNode implements Matchable, Transformable, 
 
     public abstract boolean isSymbolic();
 
-    public Term substitute(Map<Variable, Term> substitution) {
+    public Term substitute(Map<Variable, Term> substitution, DefinitionHelper definitionHelper) {
         if (substitution.isEmpty() || isGround()) {
             return this;
         }
 
-        SubstitutionTransformer transformer = new SubstitutionTransformer(substitution);
+        SubstitutionTransformer transformer = new SubstitutionTransformer(substitution, definitionHelper);
         return (Term) accept(transformer);
     }
 
-    public Term substitute(Variable variable, Term term) {
+    public Term substitute(Variable variable, Term term, DefinitionHelper definitionHelper) {
         Map<Variable, Term> substitution = new HashMap<Variable, Term>();
         substitution.put(variable, term);
-        return substitute(substitution);
+        return substitute(substitution, definitionHelper);
     }
 
     public Set<Variable> variableSet() {
@@ -64,11 +65,10 @@ public abstract class Term extends ASTNode implements Matchable, Transformable, 
         return visitor.getVariableSet();
     }
 
-    private static final org.kframework.kil.visitors.Transformer transformer
-            = new KILtoBackendJavaKILTransformer();
 
-    public static Term of(org.kframework.kil.Term kilTerm) {
+    public static Term of(org.kframework.kil.Term kilTerm, DefinitionHelper definitionHelper) {
         try {
+        	org.kframework.kil.visitors.Transformer transformer = new KILtoBackendJavaKILTransformer(definitionHelper);
             return (Term) kilTerm.accept(transformer);
         } catch (TransformerException e) {
             e.printStackTrace();

@@ -1,5 +1,6 @@
 package org.kframework.krun.ioserver.main;
 
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.krun.ioserver.commands.*;
 
 import java.io.*;
@@ -18,8 +19,10 @@ public class IOServer {
 	ThreadPoolExecutor pool;
 	private int POOL_THREADS_SIZE = 10;
 	private Logger _logger;
+	protected DefinitionHelper definitionHelper;
 
-	public IOServer(int port, Logger logger) {
+	public IOServer(int port, Logger logger, DefinitionHelper definitionHelper) {
+		this.definitionHelper = definitionHelper;
 		this.port = port;
 		_logger = logger;
 		pool = (ThreadPoolExecutor) Executors.newFixedThreadPool(POOL_THREADS_SIZE);
@@ -196,7 +199,7 @@ public class IOServer {
 			return new CommandSmtlib(args, socket, logger);
 		}
 		if (command.equals("parse")) {
-			return new CommandParse(args, socket, logger);
+			return new CommandParse(args, socket, logger, definitionHelper);
 		}
 
 		return new CommandUnknown(args, socket, logger); //, (long) 0);

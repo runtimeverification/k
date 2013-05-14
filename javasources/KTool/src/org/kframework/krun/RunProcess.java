@@ -89,9 +89,9 @@ public class RunProcess {
 
 	}
 
-	public Term runParserOrDie(String parser, String pgm, boolean isPgm, String startSymbol) {
+	public Term runParserOrDie(String parser, String pgm, boolean isPgm, String startSymbol, DefinitionHelper definitionHelper) {
 		try {
-			return runParser(parser, pgm, isPgm, startSymbol);
+			return runParser(parser, pgm, isPgm, startSymbol, definitionHelper);
 		} catch (TransformerException e) {
 			e.report();
 			return null;
@@ -101,12 +101,12 @@ public class RunProcess {
 	/*
 	 * run the process denoted by the parser ("kast" or an external parser specified with --parser option) and return the AST obtained by parser
 	 */
-	public Term runParser(String parser, String pgm, boolean isPgm, String startSymbol) throws TransformerException {
+	public Term runParser(String parser, String pgm, boolean isPgm, String startSymbol, DefinitionHelper definitionHelper) throws TransformerException {
 		String KAST = new String();
 		String parserPath = new String();
 
 		if (startSymbol == null) {
-			startSymbol = DefinitionHelper.startSymbolPgm;
+			startSymbol = definitionHelper.startSymbolPgm;
 		}		
 		
 		// the argument is a formula and we should write it in a file before passing it to the parser
@@ -117,7 +117,7 @@ public class RunProcess {
 			if (!isPgm) {
 				pgmContent = FileUtil.getFileContent(pgm);
 			}
-			return ProgramLoader.processPgm(pgmContent, pgm, K.definition, startSymbol);
+			return ProgramLoader.processPgm(pgmContent, pgm, K.definition, startSymbol, definitionHelper);
 			// this.execute(new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", k3jar, "-kast", "--definition", definition, pgm });
 		} else {
 			try {
@@ -132,7 +132,7 @@ public class RunProcess {
 				if (!isPgm) {
 					pgmContent = FileUtil.getFileContent(pgm);
 				}
-				return ProgramLoader.processPgm(pgmContent, pgm, K.definition, startSymbol);
+				return ProgramLoader.processPgm(pgmContent, pgm, K.definition, startSymbol, definitionHelper);
 				// this.execute(new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", k3jar, "-kast", pgm });
 			} else {
 				List<String> tokens = new ArrayList<String>(Arrays.asList(parser.split(" ")));
@@ -185,17 +185,17 @@ public class RunProcess {
 		return maude.returnValue;
 	}
 
-	public void checkMaudeForErrors(File errFile, String lang) {
+	public void checkMaudeForErrors(File errFile, String lang, DefinitionHelper definitionHelper) {
 		if (errFile.exists()) {
 			String content = FileUtil.getFileContent(K.maude_err);
 			if (!content.equals("")) {
-				printError(content, lang);
+				printError(content, lang, definitionHelper);
 			}
 		}
 	}
 
 	// check if the execution of Maude process produced some errors
-	public void printError(String content, String lang) {
+	public void printError(String content, String lang, DefinitionHelper definitionHelper) {
 		try {
 			if (content.contains("GLIBC")) {
 				System.out.println("\nError: A known bug in the current version of the Maude rewrite engine\n" + "prohibits running K with I/O on certain architectures.\n"
@@ -205,7 +205,7 @@ public class RunProcess {
 			}
 			System.out.println("Krun was executed with the following arguments:" + K.lineSeparator + "k_definition=" + K.k_definition + K.lineSeparator + "syntax_module=" + K.syntax_module
 					+ K.lineSeparator + "main_module=" + K.main_module + K.lineSeparator + "compiled_def=" + K.compiled_def + K.lineSeparator);
-			String compiledDefName = DefinitionHelper.kompiled.getName();
+			String compiledDefName = definitionHelper.kompiled.getName();
 			int index = compiledDefName.indexOf("-kompiled");
 			compiledDefName = compiledDefName.substring(0, index);
 			if (lang != null && !lang.equals(compiledDefName)) {

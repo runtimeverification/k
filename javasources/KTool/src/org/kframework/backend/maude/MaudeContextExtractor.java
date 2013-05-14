@@ -1,6 +1,7 @@
 package org.kframework.backend.maude;
 
 import org.kframework.kil.*;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -11,10 +12,10 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  * Time: 12:59 AM
  */
 public class MaudeContextExtractor extends CopyOnWriteTransformer {
-	MaudeFilter maudeFilter = new MaudeFilter();
+	MaudeFilter maudeFilter = new MaudeFilter(definitionHelper);
 
-	public MaudeContextExtractor() {
-		super("Maude Contexts Extractor");
+	public MaudeContextExtractor(DefinitionHelper definitionHelper) {
+		super("Maude Contexts Extractor", definitionHelper);
 	}
 
 	public String getResult() {

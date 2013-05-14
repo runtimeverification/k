@@ -14,24 +14,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LatexBackend extends BasicBackend {
-	public LatexBackend(Stopwatch sw) {
-		super(sw);
+	public LatexBackend(Stopwatch sw, DefinitionHelper definitionHelper) {
+		super(sw, definitionHelper);
 	}
 
-	public static List<File> latex(Definition javaDef, String mainModule) {
+	public static List<File> latex(Definition javaDef, DefinitionHelper definitionHelper, String mainModule) {
 		List<File> result = new ArrayList<File>();
 		try {
 			Stopwatch sw = new Stopwatch();
 
 			String fileSep = System.getProperty("file.separator");
 
-			LatexFilter lf = new LatexFilter();
+			LatexFilter lf = new LatexFilter(definitionHelper);
 			javaDef.accept(lf);
 
 			String endl = System.getProperty("line.separator");
 
 			String kLatexStyle = KPaths.getKBase(false) + fileSep + "include" + fileSep + "latex" + fileSep + "k.sty";
-			String dotKLatexStyle = DefinitionHelper.dotk.getAbsolutePath() + fileSep + "k.sty";
+			String dotKLatexStyle = definitionHelper.dotk.getAbsolutePath() + fileSep + "k.sty";
 
 			FileUtil.saveInFile(dotKLatexStyle, FileUtil.getFileContent(kLatexStyle));
 
@@ -40,7 +40,7 @@ public class LatexBackend extends BasicBackend {
 			latexified += preamble + "\\begin{document}" + endl + lf.getResult() + "\\end{document}" + endl;
 
 			File canonicalFile = GlobalSettings.mainFile.getCanonicalFile();
-			String latexifiedFile = DefinitionHelper.dotk.getAbsolutePath() + fileSep + FileUtil.stripExtension(canonicalFile.getName()) + ".tex";
+			String latexifiedFile = definitionHelper.dotk.getAbsolutePath() + fileSep + FileUtil.stripExtension(canonicalFile.getName()) + ".tex";
 			result.add(new File(latexifiedFile));
 			result.add(new File(dotKLatexStyle));
 			FileUtil.saveInFile(latexifiedFile, latexified);
@@ -60,7 +60,7 @@ public class LatexBackend extends BasicBackend {
 
 	@Override
 	public void run(Definition definition) throws IOException {
-		List<File> files = latex(definition, definition.getMainModule());
+		List<File> files = latex(definition, definitionHelper, definition.getMainModule());
 		try {
 			FileUtil.copyFiles(files, GlobalSettings.mainFile.getCanonicalFile().getParentFile());
 		} catch (IOException e) {

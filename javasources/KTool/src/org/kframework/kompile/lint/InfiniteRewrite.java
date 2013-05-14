@@ -8,7 +8,8 @@ import org.kframework.kil.loader.DefinitionHelper;
  */
 public class InfiniteRewrite extends KlintRule{
 
-	public InfiniteRewrite(Definition javaDef){
+	public InfiniteRewrite(Definition javaDef, DefinitionHelper definitionHelper) {
+		super(definitionHelper);
 		this.javaDef = javaDef;
 	}
 	@Override
@@ -44,8 +45,8 @@ public class InfiniteRewrite extends KlintRule{
 	}
 
 	private void checkProductions(TermCons leftTermCons, TermCons rightTermCons, Rewrite rewrite) {
-		Production leftTermProd = DefinitionHelper.conses.get(leftTermCons.getCons());
-		Production rightTermProd = DefinitionHelper.conses.get(rightTermCons.getCons());
+		Production leftTermProd = definitionHelper.conses.get(leftTermCons.getCons());
+		Production rightTermProd = definitionHelper.conses.get(rightTermCons.getCons());
 
 		if(leftTermProd.equals(rightTermProd)){
 			warning("Possible infinite rewrite: ", rewrite);

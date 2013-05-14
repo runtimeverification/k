@@ -13,20 +13,20 @@ import java.io.File;
 import java.io.IOException;
 
 public class DocumentationBackend extends BasicBackend {
-	public DocumentationBackend(Stopwatch sw) {
-		super(sw);
+	public DocumentationBackend(Stopwatch sw, DefinitionHelper definitionHelper) {
+		super(sw, definitionHelper);
 	}
 
 	@Override
 	public void run(Definition definition) throws IOException {
 		String fileSep = System.getProperty("file.separator");
 		String htmlIncludePath = KPaths.getKBase(false) + fileSep + "include" + fileSep + "html" + fileSep;
-		HTMLFilter htmlFilter = new HTMLFilter(htmlIncludePath);
+		HTMLFilter htmlFilter = new HTMLFilter(htmlIncludePath, definitionHelper);
 		definition.accept(htmlFilter);
 
 		String html = htmlFilter.getHTML();
 
-		FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/def.html", html);
+		FileUtil.saveInFile(definitionHelper.dotk.getAbsolutePath() + "/def.html", html);
 
 		File canonicalFile = GlobalSettings.mainFile.getCanonicalFile();
 		FileUtil.saveInFile(FileUtil.stripExtension(canonicalFile.getAbsolutePath()) + ".html", html);

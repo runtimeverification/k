@@ -42,9 +42,9 @@ public class SDFHelper {
 	 * @param tag
 	 * @return
 	 */
-	public static Set<Production> getProductionsForTag(String tag) {
-		if (DefinitionHelper.productions.containsKey(tag))
-			return DefinitionHelper.productions.get(tag);
+	public static Set<Production> getProductionsForTag(String tag, DefinitionHelper definitionHelper) {
+		if (definitionHelper.productions.containsKey(tag))
+			return definitionHelper.productions.get(tag);
 		else
 			return new HashSet<Production>();
 	}

@@ -18,6 +18,9 @@ import org.kframework.utils.general.GlobalSettings;
  * 
  */
 public class CheckSortTopUniqueness extends BasicVisitor {
+	public CheckSortTopUniqueness(DefinitionHelper definitionHelper) {
+		super(definitionHelper);
+	}
 
 	java.util.Map<Production, Production> prods = new HashMap<Production, Production>();
 
@@ -25,23 +28,23 @@ public class CheckSortTopUniqueness extends BasicVisitor {
 	public void visit(Syntax node) {
 		String msg = "Multiple top sorts found for " + node.getSort() + ": ";
 		int count = 0;
-		if (DefinitionHelper.isSubsorted(KSorts.KLIST, node.getSort().getName())) {
+		if (definitionHelper.isSubsorted(KSorts.KLIST, node.getSort().getName())) {
 			msg += KSorts.KLIST + ", ";
 			count++;
 		}
-		if (DefinitionHelper.isSubsorted("List", node.getSort().getName())) {
+		if (definitionHelper.isSubsorted("List", node.getSort().getName())) {
 			msg += "List, ";
 			count++;
 		}
-		if (DefinitionHelper.isSubsorted("Bag", node.getSort().getName())) {
+		if (definitionHelper.isSubsorted("Bag", node.getSort().getName())) {
 			msg += "Bag, ";
 			count++;
 		}
-		if (DefinitionHelper.isSubsorted("Map", node.getSort().getName())) {
+		if (definitionHelper.isSubsorted("Map", node.getSort().getName())) {
 			msg += "Map, ";
 			count++;
 		}
-		if (DefinitionHelper.isSubsorted("Set", node.getSort().getName())) {
+		if (definitionHelper.isSubsorted("Set", node.getSort().getName())) {
 			msg += "Set, ";
 			count++;
 		}

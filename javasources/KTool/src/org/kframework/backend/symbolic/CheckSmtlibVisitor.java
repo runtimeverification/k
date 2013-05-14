@@ -20,8 +20,8 @@ public class CheckSmtlibVisitor extends BasicVisitor {
 
     private boolean smtValid = false;
 
-    public CheckSmtlibVisitor() {
-        super("Check SMTLIB translation.");
+    public CheckSmtlibVisitor(DefinitionHelper definitionHelper) {
+        super("Check SMTLIB translation.", definitionHelper);
     }
 
     public boolean smtValid() {
@@ -38,7 +38,7 @@ public class CheckSmtlibVisitor extends BasicVisitor {
                 return;
             }
 
-            Set<Production> prods = DefinitionHelper.productions.get(((KLabelConstant) klabel).getLabel());
+            Set<Production> prods = definitionHelper.productions.get(((KLabelConstant) klabel).getLabel());
             if (prods == null) {
                 smtValid = false;
             } else {

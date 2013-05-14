@@ -17,6 +17,10 @@ public class HaskellFilter extends BasicVisitor {
 	protected String endl = System.getProperty("line.separator");
 	protected String result = "";
 
+	public HaskellFilter(DefinitionHelper definitionHelper) {
+		super(definitionHelper);
+	}
+	
 	/**
 	 * Update transformer state wrt type of current AST node.
 	 *
@@ -24,7 +28,7 @@ public class HaskellFilter extends BasicVisitor {
 	 */
 	public void visit(TermCons tc) {
 		String klabel =
-			DefinitionHelper.conses.get(tc.getCons())
+			definitionHelper.conses.get(tc.getCons())
 			.getKLabel();
 		this.result += "KApp (KLabel [Syntax \"" + klabel + "\"]) [";
 
@@ -43,7 +47,7 @@ public class HaskellFilter extends BasicVisitor {
 	}
 
 	public void visit(Constant cst) {
-		String s = cst.getSort();
+		String s = cst.getSort(definitionHelper);
 		String v = cst.getValue();
 
 		result += "KApp (";

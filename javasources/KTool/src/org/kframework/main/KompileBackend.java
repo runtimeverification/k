@@ -17,8 +17,8 @@ import java.util.Properties;
 
 public class KompileBackend extends BasicBackend {
 
-	public KompileBackend(Stopwatch sw) {
-		super(sw);
+	public KompileBackend(Stopwatch sw, DefinitionHelper definitionHelper) {
+		super(sw, definitionHelper);
 	}
 
 	@Override
@@ -31,11 +31,11 @@ public class KompileBackend extends BasicBackend {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		MaudeBuiltinsFilter builtinsFilter = new MaudeBuiltinsFilter(builtinsProperties);
+		MaudeBuiltinsFilter builtinsFilter = new MaudeBuiltinsFilter(builtinsProperties, definitionHelper);
 		javaDef.accept(builtinsFilter);
 		final String mainModule = javaDef.getMainModule();
 		String builtins = "mod " + mainModule + "-BUILTINS is\n" + " including " + mainModule + "-BASE .\n" + builtinsFilter.getResult() + "endm\n";
-		FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/builtins.maude", builtins);
+		FileUtil.saveInFile(definitionHelper.dotk.getAbsolutePath() + "/builtins.maude", builtins);
 		if (GlobalSettings.verbose)
 			sw.printIntermediate("Generating equations for hooks");
 		return super.firstStep(javaDef);
@@ -43,7 +43,7 @@ public class KompileBackend extends BasicBackend {
 
 	@Override
 	public void run(Definition javaDef) throws IOException {
-		MaudeBackend maude = new MaudeBackend(sw);
+		MaudeBackend maude = new MaudeBackend(sw, definitionHelper);
 		maude.setConfigurationStructureMap(getConfigurationStructureMap());
 		maude.run(javaDef);
 
@@ -58,7 +58,7 @@ public class KompileBackend extends BasicBackend {
 
 		String main = load + "load \"base.maude\"\n" + "load \"builtins.maude\"\n" + "mod " + mainModule + " is \n" + "  including " + mainModule + "-BASE .\n" + "  including " + mainModule
 				+ "-BUILTINS .\n" + "  including K-STRICTNESS-DEFAULTS .\neq mainModule = '" + mainModule  + " .\nendm\n";
-		FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/" + "main.maude", main);
+		FileUtil.saveInFile(definitionHelper.dotk.getAbsolutePath() + "/" + "main.maude", main);
 	}
 
 	@Override

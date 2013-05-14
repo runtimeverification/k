@@ -3,6 +3,7 @@ package org.kframework.compile.transformers;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -16,9 +17,8 @@ import java.util.List;
 
 public class AddTopCellConfig extends CopyOnWriteTransformer {
 
-	public AddTopCellConfig() {
-		super("Add top cell for configurations");
-		// TODO Auto-generated constructor stub
+	public AddTopCellConfig(DefinitionHelper definitionHelper) {
+		super("Add top cell for configurations", definitionHelper);
 	}
 	
 	@Override

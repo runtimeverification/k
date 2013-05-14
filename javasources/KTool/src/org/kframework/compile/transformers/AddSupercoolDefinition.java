@@ -2,6 +2,7 @@ package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -19,8 +20,8 @@ import java.util.List;
 public class AddSupercoolDefinition extends CopyOnWriteTransformer {
 	private List<Rule> superCools = new ArrayList<Rule>();
 
-	public AddSupercoolDefinition() {
-		super("AddSupercoolDefinition");
+	public AddSupercoolDefinition(DefinitionHelper definitionHelper) {
+		super("AddSupercoolDefinition", definitionHelper);
 	}
 
 	@Override
@@ -86,12 +87,12 @@ public class AddSupercoolDefinition extends CopyOnWriteTransformer {
 		}
 		final Term cool = kSequenceContents.get(0);
 		kSequenceContents = new ArrayList<Term>(kSequenceContents);
-		kSequenceContents.set(0, KApp.of(KLabelConstant.COOL_KLABEL, cool));
+		kSequenceContents.set(0, KApp.of(definitionHelper, KLabelConstant.COOL_KLABEL, cool));
 		kSequence = kSequence.shallowCopy();
 		kSequence.setContents(kSequenceContents);
 		rewrite = rewrite.shallowCopy();
 		rewrite.setLeft(kSequence);
-		rewrite.setRight(KApp.of(KLabelConstant.COOL_KLABEL, rewrite.getRight()));
+		rewrite.setRight(KApp.of(definitionHelper, KLabelConstant.COOL_KLABEL, rewrite.getRight()));
 		Rule superCoolNode = node.shallowCopy();
 		final Attributes attrs = new Attributes();
 		attrs.getContents().addAll(node.getAttributes().getContents());

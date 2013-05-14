@@ -19,6 +19,7 @@ import org.kframework.kil.Rule;
 import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.general.GlobalSettings;
@@ -33,8 +34,8 @@ import org.kframework.utils.general.GlobalSettings;
  */
 public class AddPathCondition extends CopyOnWriteTransformer {
 
-    public AddPathCondition() {
-        super("Add Path Condition to each rule");
+    public AddPathCondition(DefinitionHelper definitionHelper) {
+        super("Add Path Condition to each rule", definitionHelper);
     }
 
     @Override
@@ -58,10 +59,10 @@ public class AddPathCondition extends CopyOnWriteTransformer {
 
         Term condition = node.getCondition();
         Term originalCondition = condition.shallowCopy();
-        CollapseAndBoolTransformer cnft = new CollapseAndBoolTransformer();
+        CollapseAndBoolTransformer cnft = new CollapseAndBoolTransformer(definitionHelper);
         condition = (Term) node.getCondition().accept(cnft);
 
-        ConditionTransformer ct = new ConditionTransformer();
+        ConditionTransformer ct = new ConditionTransformer(definitionHelper);
         condition = (Term) node.getCondition().accept(ct);
 
         if (node.getBody() instanceof Rewrite) {
@@ -114,18 +115,18 @@ public class AddPathCondition extends CopyOnWriteTransformer {
             }
 
             // add transition attribute
-            List<Attribute> attrs = node.getAttributes().getContents();
+//            List<Attribute> attrs = node.getAttributes().getContents();
             // bad practice
-            attrs.add(new Attribute("transition", ""));
+ //           attrs.add(new Attribute("transition", ""));
 
-            Attributes atts = node.getAttributes().shallowCopy();
-            atts.setContents(attrs);
+   //         Attributes atts = node.getAttributes().shallowCopy();
+   //         atts.setContents(attrs);
 
 
             // re-construct the rule
             node = node.shallowCopy();
-            node.setBody(new Rewrite(left, right));
-            node.setAttributes(atts);
+            node.setBody(new Rewrite(left, right, definitionHelper));
+//            node.setAttributes(atts);
             node.setCondition(cond);
         }
 
@@ -148,7 +149,7 @@ public class AddPathCondition extends CopyOnWriteTransformer {
     private Term checkSat(Term pathCondition) {
         // checkSat(pathCondition) =/=K # "unsat"(.KList)
         KApp unsat = StringBuiltin.kAppOf("unsat");
-        KApp checkSat = KApp.of(KLabelConstant.of("'checkSat"), pathCondition);
-        return KApp.of(KLabelConstant.KNEQ_KLABEL, checkSat, unsat);
+        KApp checkSat = KApp.of(definitionHelper, KLabelConstant.of("'checkSat", definitionHelper), pathCondition);
+        return KApp.of(definitionHelper, KLabelConstant.KNEQ_KLABEL, checkSat, unsat);
     }
 }

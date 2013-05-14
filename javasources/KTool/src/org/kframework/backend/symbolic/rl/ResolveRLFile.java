@@ -19,8 +19,8 @@ import org.kframework.utils.general.GlobalSettings;
 
 public class ResolveRLFile extends CopyOnWriteTransformer {
 
-	public ResolveRLFile() {
-		super("Parse RL input file");
+	public ResolveRLFile(DefinitionHelper definitionHelper) {
+		super("Parse RL input file", definitionHelper);
 
 		String[] rrls = FileUtil.getFileContent(GlobalSettings.CHECK).split(
 				"reachability-rule");
@@ -40,15 +40,15 @@ public class ResolveRLFile extends CopyOnWriteTransformer {
 					K.k_definition = K.compiled_def.substring(0, index);
 				}
 				
-				DefinitionHelper.kompiled = new File(K.compiled_def);
-				System.out.println("TBL: " + new File(DefinitionHelper.kompiled.getCanonicalPath()
+				definitionHelper.kompiled = new File(K.compiled_def);
+				System.out.println("TBL: " + new File(definitionHelper.kompiled.getCanonicalPath()
 								+ "/ground/Concrete.tbl").exists());
 				org.kframework.parser.concrete.KParser
-						.ImportTblGround(DefinitionHelper.kompiled.getCanonicalPath()
+						.ImportTblGround(definitionHelper.kompiled.getCanonicalPath()
 								+ "/ground/Concrete.tbl");
-				ASTNode out = DefinitionLoader.parseCmdString(s, "", "generated");
+				ASTNode out = DefinitionLoader.parseCmdString(s, "", "generated", definitionHelper);
 				try {
-					out = new RuleCompilerSteps(K.definition).compile((Rule) out, null);
+					out = new RuleCompilerSteps(K.definition, definitionHelper).compile((Rule) out, null);
 				} catch (CompilerStepDone e) {
 					out = (ASTNode) e.getResult();
 				}

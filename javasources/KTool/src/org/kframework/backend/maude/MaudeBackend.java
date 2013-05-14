@@ -17,28 +17,28 @@ import java.util.Map;
 
 public class MaudeBackend extends BasicBackend {
 
-	public MaudeBackend(Stopwatch sw) {
-		super(sw);
+	public MaudeBackend(Stopwatch sw, DefinitionHelper definitionHelper) {
+		super(sw, definitionHelper);
 	}
 
 	@Override
 	public void run(Definition definition) throws IOException {
         try {
-            definition = (Definition) definition.accept(new FreshVariableNormalizer());
+            definition = (Definition) definition.accept(new FreshVariableNormalizer(definitionHelper));
         } catch (TransformerException e) { }
         MaudeFilter maudeFilter = new MaudeFilter
-				(getConfigurationStructureMap());
+				(getConfigurationStructureMap(), definitionHelper);
 		definition.accept(maudeFilter);
 
 		final String mainModule = definition.getMainModule();
 		String maudified = maudeFilter.getResult().replaceFirst(mainModule, mainModule + "-BASE");
 
-		FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/base.maude", maudified);
+		FileUtil.saveInFile(definitionHelper.dotk.getAbsolutePath() + "/base.maude", maudified);
 		if (GlobalSettings.verbose)
 			sw.printIntermediate("Generating Maude file");
 		
 		String consTable = getLabelTable(definition);
-		FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/consTable.txt", consTable);
+		FileUtil.saveInFile(definitionHelper.dotk.getAbsolutePath() + "/consTable.txt", consTable);
 	}
 	
 	private String getLabelTable(Definition def) {
@@ -49,7 +49,7 @@ public class MaudeBackend extends BasicBackend {
 				 "# or L followed by the klabel, a tab, and the separator.\n"+
 		         "# strings escaped with \\t for tabs and \\n for newlines. # is comment to end of line");
 		 */
-		for (Map.Entry<String,Production> e : DefinitionHelper.conses.entrySet()) {
+		for (Map.Entry<String,Production> e : definitionHelper.conses.entrySet()) {
 			String cons = e.getKey();
 			Production p = e.getValue();
 			b.append(StringEscapeUtils.escapeJava(cons));

@@ -14,19 +14,24 @@ public class TypeSystemFilter2 extends BasicHookWorker {
 
 	private String maxSort;
 
-	public TypeSystemFilter2(String maxSort) {
-		super("Type system");
+	public TypeSystemFilter2(String maxSort, DefinitionHelper definitionHelper) {
+		super("Type system", definitionHelper);
 		this.maxSort = maxSort;
 	}
 
+	public TypeSystemFilter2(TypeSystemFilter2 tsf, DefinitionHelper definitionHelper) {
+		super("Type system", definitionHelper);
+		this.maxSort = tsf.maxSort;
+	}
+
 	public ASTNode transform(Term trm) throws TransformerException {
-		if (!trm.getSort().equals(KSorts.K) && !trm.getSort().equals(KSorts.KITEM)
-                && !trm.getSort().equals(KSorts.KRESULT)) {
-			if (!DefinitionHelper.isSubsortedEq(maxSort, trm.getSort())) {
+		if (!trm.getSort(definitionHelper).equals(KSorts.K) && !trm.getSort(definitionHelper).equals(KSorts.KITEM)
+                && !trm.getSort(definitionHelper).equals(KSorts.KRESULT)) {
+			if (!definitionHelper.isSubsortedEq(maxSort, trm.getSort(definitionHelper))) {
 				KException kex = new KException(
                         ExceptionType.ERROR,
                         KExceptionGroup.CRITICAL,
-                        "type error: unexpected term '" + trm + "' of sort '" + trm.getSort()
+                        "type error: unexpected term '" + trm + "' of sort '" + trm.getSort(definitionHelper)
                                 + "', expected sort '" + maxSort + "'.",
                         trm.getFilename(),
                         trm.getLocation());

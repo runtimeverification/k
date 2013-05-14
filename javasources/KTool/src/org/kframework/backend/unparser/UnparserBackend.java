@@ -12,18 +12,18 @@ import java.io.IOException;
 
 public class UnparserBackend extends BasicBackend {
 
-	public UnparserBackend(Stopwatch sw) {
-		super(sw);
+	public UnparserBackend(Stopwatch sw, DefinitionHelper definitionHelper) {
+		super(sw, definitionHelper);
 	}
 
 	@Override
 	public void run(Definition definition) throws IOException {
-		UnparserFilter unparserFilter = new UnparserFilter();
+		UnparserFilter unparserFilter = new UnparserFilter(definitionHelper);
 		definition.accept(unparserFilter);
 
 		String unparsedText = unparserFilter.getResult();
 
-		FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/def.k", unparsedText);
+		FileUtil.saveInFile(definitionHelper.dotk.getAbsolutePath() + "/def.k", unparsedText);
 
 		File canonicalFile = GlobalSettings.mainFile.getCanonicalFile();
 		FileUtil.saveInFile(FileUtil.stripExtension(canonicalFile.getAbsolutePath()) + ".unparsed.k", unparsedText);

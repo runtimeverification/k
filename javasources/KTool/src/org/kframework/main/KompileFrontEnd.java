@@ -156,78 +156,79 @@ public class KompileFrontEnd {
 		GlobalSettings.symbolicEquality = cmd.hasOption("symeq");
 		GlobalSettings.SMT = cmd.hasOption("smt");
 		
-		if (DefinitionHelper.dotk == null) {
+		DefinitionHelper definitionHelper = new DefinitionHelper();
+		if (definitionHelper.dotk == null) {
 			try {
-				DefinitionHelper.dotk = new File(mainFile.getCanonicalFile().getParent() + File.separator + ".k");
+				definitionHelper.dotk = new File(mainFile.getCanonicalFile().getParent() + File.separator + ".k");
 			} catch (IOException e) {
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Canonical file cannot be obtained for main file.", mainFile.getAbsolutePath(),
 						"File system."));
 			}
-			DefinitionHelper.dotk.mkdirs();
+			definitionHelper.dotk.mkdirs();
 		}
 
 		
 		Backend backend = null;
 		if (cmd.hasOption("maudify")) {
-			backend = new MaudeBackend(Stopwatch.sw);
+			backend = new MaudeBackend(Stopwatch.sw, definitionHelper);
 		} else if (cmd.hasOption("latex")) {
 			GlobalSettings.documentation = true;
-			backend = new LatexBackend(Stopwatch.sw);
+			backend = new LatexBackend(Stopwatch.sw, definitionHelper);
 		} else if (cmd.hasOption("pdf")) {
 			GlobalSettings.documentation = true;
-			backend = new PdfBackend(Stopwatch.sw);
+			backend = new PdfBackend(Stopwatch.sw, definitionHelper);
 		} else if (cmd.hasOption("xml")) {
 			GlobalSettings.xml = true;
-			backend = new XmlBackend(Stopwatch.sw);
+			backend = new XmlBackend(Stopwatch.sw, definitionHelper);
 		} else if (cmd.hasOption("html")) {
 			if (!cmd.hasOption("style")) {
 				GlobalSettings.style = "k-definition.css";
 			}
 			GlobalSettings.documentation = true;
-			backend = new HtmlBackend(Stopwatch.sw);
+			backend = new HtmlBackend(Stopwatch.sw, definitionHelper);
 		} else if (cmd.hasOption("unparse")) {
-			backend = new UnparserBackend(Stopwatch.sw);
+			backend = new UnparserBackend(Stopwatch.sw, definitionHelper);
 		} else if (cmd.hasOption("kexp")) {
-			backend = new KExpBackend(Stopwatch.sw);
+			backend = new KExpBackend(Stopwatch.sw, definitionHelper);
 		} else if (cmd.hasOption("doc")) {
 			GlobalSettings.documentation = true;
 			if (!cmd.hasOption("style")) {
 				GlobalSettings.style = "k-documentation.css";
 			}
-			backend = new DocumentationBackend(Stopwatch.sw);
+			backend = new DocumentationBackend(Stopwatch.sw, definitionHelper);
 		} else if (cmd.hasOption("symbolic")) {
 			if (output == null) {
 				output = FileUtil.stripExtension(mainFile.getName()) + "-kompiled";
 			}
-			backend = new SymbolicBackend(Stopwatch.sw);
-			DefinitionHelper.dotk = new File(output);
-			DefinitionHelper.dotk.mkdirs();
+			backend = new SymbolicBackend(Stopwatch.sw, definitionHelper);
+			definitionHelper.dotk = new File(output);
+			definitionHelper.dotk.mkdirs();
 
 		} else if (cmd.hasOption("check")) {
 			if (output == null) {
 				output = FileUtil.stripExtension(mainFile.getName()) + "-kompiled";
 			}
 			GlobalSettings.CHECK = new File(cmd.getOptionValue("check")).getAbsolutePath();
-			backend = new RLBackend(Stopwatch.sw);
-			DefinitionHelper.dotk = new File(output);
-			DefinitionHelper.dotk.mkdirs();
+			backend = new RLBackend(Stopwatch.sw, definitionHelper);
+			definitionHelper.dotk = new File(output);
+			definitionHelper.dotk.mkdirs();
 
 		} else if (cmd.hasOption("ml")) {
             GlobalSettings.matchingLogic = true;
-            backend = new JavaSymbolicBackend(Stopwatch.sw);
+            backend = new JavaSymbolicBackend(Stopwatch.sw, definitionHelper);
         } else {
 			if (output == null) {
 				output = FileUtil.stripExtension(mainFile.getName()) + "-kompiled";
 			}
-			backend = new KompileBackend(Stopwatch.sw);
-			DefinitionHelper.dotk = new File(output);
-			DefinitionHelper.dotk.mkdirs();
+			backend = new KompileBackend(Stopwatch.sw, definitionHelper);
+			definitionHelper.dotk = new File(output);
+			definitionHelper.dotk.mkdirs();
 		}
-
+		
 		if (backend != null) {
-			genericCompile(mainFile, lang, backend, step);
+			genericCompile(mainFile, lang, backend, step, definitionHelper);
 			try {
-				BinaryLoader.toBinary(cmd, new FileOutputStream(DefinitionHelper.dotk
+				BinaryLoader.toBinary(cmd, new FileOutputStream(definitionHelper.dotk
 						.getAbsolutePath() + "/compile-options.bin"));
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
@@ -246,11 +247,11 @@ public class KompileFrontEnd {
 	}
 
 
-	private static void genericCompile(File mainFile, String lang, Backend backend, String step) {
+	private static void genericCompile(File mainFile, String lang, Backend backend, String step, DefinitionHelper definitionHelper) {
 		org.kframework.kil.Definition javaDef;
 		try {
 			Stopwatch.sw.Start();
-			javaDef = org.kframework.utils.DefinitionLoader.loadDefinition(mainFile, lang, backend.autoinclude());
+			javaDef = org.kframework.utils.DefinitionLoader.loadDefinition(mainFile, lang, backend.autoinclude(), definitionHelper);
 
 			CompilerSteps<Definition> steps = backend.getCompilationSteps();
 
@@ -266,7 +267,7 @@ public class KompileFrontEnd {
 				javaDef = (Definition) e.getResult();
 			}
 
-			BinaryLoader.toBinary(MetaK.getConfiguration(javaDef), new FileOutputStream(DefinitionHelper.dotk.getAbsolutePath() + "/configuration.bin"));
+			BinaryLoader.toBinary(MetaK.getConfiguration(javaDef, definitionHelper), new FileOutputStream(definitionHelper.dotk.getAbsolutePath() + "/configuration.bin"));
 
 			backend.run(javaDef);
 		} catch (IOException e) {

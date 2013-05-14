@@ -4,6 +4,7 @@ import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
+import org.kframework.kil.loader.DefinitionHelper;
 
 /**
  * Transform AST of language definition into set of Haskell
@@ -12,6 +13,10 @@ import org.kframework.kil.Variable;
  * @see ProgramLoader.loadPgmAst
  */
 public class HaskellDefFilter extends HaskellFilter {
+	public HaskellDefFilter(DefinitionHelper definitionHelper) {
+		super(definitionHelper);
+	}
+
 	public void visit(Rule rl) {
 		result += "KRule [";
 		Term b = rl.getBody();
@@ -45,6 +50,6 @@ public class HaskellDefFilter extends HaskellFilter {
 	 * as name of pattern.
 	 */
 	public void visit(Variable var) {
-		result += "KVar \"" + var.getName() + "\" \"" + var.getSort() + "\"";
+		result += "KVar \"" + var.getName() + "\" \"" + var.getSort(definitionHelper) + "\"";
 	}
 }

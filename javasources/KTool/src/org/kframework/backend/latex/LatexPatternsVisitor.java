@@ -10,6 +10,10 @@ import java.util.Map;
 
 
 public class LatexPatternsVisitor extends BasicVisitor {
+	public LatexPatternsVisitor(DefinitionHelper definitionHelper) {
+		super(definitionHelper);
+	}
+
 	private Map<String, String> patterns = new HashMap<String, String>();
 	String pattern = "";
 	int nonTerm;
@@ -60,7 +64,7 @@ public class LatexPatternsVisitor extends BasicVisitor {
 		String terminal = pi.getTerminal();
 		if (terminal.isEmpty())
 			return;
-		if (DefinitionHelper.isSpecialTerminal(terminal)) {
+		if (definitionHelper.isSpecialTerminal(terminal)) {
 			pattern += StringUtil.latexify(terminal);
 		} else {
                         if (!prevNonTerm) pattern += "{}";

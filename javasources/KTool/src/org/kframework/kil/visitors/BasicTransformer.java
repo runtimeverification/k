@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import org.kframework.kil.*;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
 
@@ -11,11 +12,12 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  * Default implementations of methods visit non-attribute children, and then call the transform method for the parent class on the current node.
  */
 public class BasicTransformer implements Transformer {
-
+	protected DefinitionHelper definitionHelper;
 	private String name;
 
-	public BasicTransformer(String name) {
+	public BasicTransformer(String name, DefinitionHelper definitionHelper) {
 		this.name = name;
+		this.definitionHelper = definitionHelper;
 	}
 
 	@Override
@@ -328,7 +330,7 @@ public class BasicTransformer implements Transformer {
 		KApp result = node.shallowCopy();
 		result.setLabel((Term) node.getLabel().accept(this));
         Term resultChild = (Term) node.getChild().accept(this);
-        if (!(resultChild.getSort().equals(KSorts.KLIST) || resultChild instanceof Ambiguity)) {
+        if (!(resultChild.getSort(definitionHelper).equals(KSorts.KLIST) || resultChild instanceof Ambiguity)) {
             result.setChild(new KList(Collections.<Term>singletonList(resultChild)));
         } else {
 		    result.setChild(resultChild);

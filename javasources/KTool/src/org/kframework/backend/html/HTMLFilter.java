@@ -39,7 +39,7 @@ public class HTMLFilter extends BackendFilter {
 	// this is created in the constructor of the HTMLFilter class
 	private Map<String,Color> HTMLColors = new HashMap<String,Color>();
 	
-	private HTMLPatternsVisitor patternsVisitor = new HTMLPatternsVisitor();
+	private HTMLPatternsVisitor patternsVisitor = new HTMLPatternsVisitor(definitionHelper);
 	
 	private boolean firstAttribute;
 	private boolean firstProduction = false;
@@ -48,8 +48,8 @@ public class HTMLFilter extends BackendFilter {
 	private Properties Latex2HTMLone = new Properties();
 	private String includePath = new String();
 	
-	public HTMLFilter(String includePath) {
-		super();
+	public HTMLFilter(String includePath, DefinitionHelper definitionHelper) {
+		super(definitionHelper);
 		this.includePath = includePath;
 		createHTMLColors();
 		loadProperties();
@@ -144,7 +144,7 @@ public class HTMLFilter extends BackendFilter {
 			String pattern = patternsVisitor.getPatterns().get(p.getAttribute(Constants.CONS_cons_ATTR));
 			boolean isLatex = patternsVisitor.getPatternType(p.getAttribute(Constants.CONS_cons_ATTR)) == HTMLPatternType.LATEX;
 			int n = 1;
-			HTMLFilter termFilter = new HTMLFilter(includePath);
+			HTMLFilter termFilter = new HTMLFilter(includePath, definitionHelper);
 			for (ProductionItem pi : p.getItems()) {
 				if (pi.getType() != ProductionType.TERMINAL) {
 					termFilter.setResult("");
@@ -254,8 +254,8 @@ public class HTMLFilter extends BackendFilter {
 	@Override
 	public void visit(Variable var) {
 		result.append("<span ");
-		if (var.getSort() != null) {
-			result.append("title =\"" + var.getSort() + "\"");
+		if (var.getSort(definitionHelper) != null) {
+			result.append("title =\"" + var.getSort(definitionHelper) + "\"");
 		}
 		result.append(">" + makeGreek(var.getName()));
 		result.append(" </span> ");
@@ -317,7 +317,7 @@ public class HTMLFilter extends BackendFilter {
 			super.visit(trm);
 		else {
 			String pattern = getBracketPattern(trm);
-			HTMLFilter termFilter = new HTMLFilter(includePath);
+			HTMLFilter termFilter = new HTMLFilter(includePath, definitionHelper);
 			trm.getContent().accept(termFilter);
 			pattern = pattern.replace("{#1}", "<span>" + termFilter.getResult() + "</span>");
 			result.append(pattern);
@@ -334,7 +334,7 @@ public class HTMLFilter extends BackendFilter {
 		HTMLPatternType type = patternsVisitor.getPatternType(trm.getCons());
 		if(type == null)
 		{
-			Production pr = DefinitionHelper.conses.get(trm.getCons());
+			Production pr = definitionHelper.conses.get(trm.getCons());
 			pr.accept(patternsVisitor);
 			type = patternsVisitor.getPatternType(trm.getCons());
 		}
@@ -345,7 +345,7 @@ public class HTMLFilter extends BackendFilter {
 		 * The information about the attribute is in HTMLPatternVisitor. */
 			String pattern = patternsVisitor.getPatterns().get(trm.getCons());
 			int n = 1;
-			HTMLFilter termFilter = new HTMLFilter(includePath);
+			HTMLFilter termFilter = new HTMLFilter(includePath, definitionHelper);
 			for (Term t : trm.getContents()) {
 				termFilter.setResult("");
 				t.accept(termFilter);
@@ -366,7 +366,7 @@ public class HTMLFilter extends BackendFilter {
 			 * the term is printed by using the informations in the termCons's
 			 * production and in its list of terms (contents). */
 			boolean empty = true;
-			Production pr = trm.getProduction();
+			Production pr = trm.getProduction(definitionHelper);
 	
 			if (pr.getItems().size() > 0) {
 				if (pr.getItems().get(0).getType() == ProductionType.USERLIST) {
@@ -396,7 +396,7 @@ public class HTMLFilter extends BackendFilter {
 
 	@Override
 	public void visit(Constant c) {
-		result.append("<span title =\"" + c.getSort() + "\"> " + makeGreek(c.getValue()) + " </span> ");
+		result.append("<span title =\"" + c.getSort(definitionHelper) + "\"> " + makeGreek(c.getValue()) + " </span> ");
 	}
 
 	@Override
@@ -464,9 +464,9 @@ public class HTMLFilter extends BackendFilter {
 	public void visit(Attribute entry) {
 		if (Constants.GENERATED_LOCATION.equals(entry.getLocation()))
 			return;
-		if (DefinitionHelper.isTagGenerated(entry.getKey()))
+		if (definitionHelper.isTagGenerated(entry.getKey()))
 			return;
-		if (DefinitionHelper.isParsingTag(entry.getKey()))
+		if (definitionHelper.isParsingTag(entry.getKey()))
 			return;
 		
 		// The latex and/or html attributes are processed in the HTMLPatternVisitor, not here.

@@ -20,6 +20,7 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.KSorts;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -37,8 +38,8 @@ import java.util.List;
  */
 public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
-    public KILtoBackendJavaKILTransformer() {
-        super("Transform KIL into java backend KIL");
+    public KILtoBackendJavaKILTransformer(DefinitionHelper definitionHelper) {
+        super("Transform KIL into java backend KIL", definitionHelper);
     }
 
     @Override
@@ -46,12 +47,12 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         KLabel kLabel = (KLabel) node.getLabel().accept(this);
         KList kList = (KList) node.getChild().accept(this);
 
-        return new KItem(kLabel, kList);
+        return new KItem(kLabel, kList, this.definitionHelper);
     }
 
     @Override
     public ASTNode transform(org.kframework.kil.KLabelConstant node) throws TransformerException {
-        return new KLabelConstant(node.getLabel());
+        return new KLabelConstant(node.getLabel(), this.definitionHelper);
     }
 
     @Override
@@ -85,7 +86,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         Variable variable = null;
         if (!flatList.isEmpty()
                 && flatList.get(flatList.size() - 1) instanceof org.kframework.kil.Variable
-                && flatList.get(flatList.size() - 1).getSort().equals(KSorts.KITEM)) {
+                && flatList.get(flatList.size() - 1).getSort(definitionHelper).equals(KSorts.KITEM)) {
             variable = (Variable) flatList.remove(flatList.size() - 1).accept(this);
         }
 
@@ -118,7 +119,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         Variable variable = null;
         if (!flatList.isEmpty()
                 && flatList.get(flatList.size() - 1) instanceof org.kframework.kil.Variable
-                && flatList.get(flatList.size() - 1).getSort().equals(KSorts.KLIST)) {
+                && flatList.get(flatList.size() - 1).getSort(definitionHelper).equals(KSorts.KLIST)) {
             variable = (Variable) flatList.remove(flatList.size() - 1).accept(this);
         }
 
@@ -155,7 +156,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                     Cell cell = (Cell) term.accept(this);
                     cells.put(cell.getLabel(), cell);
                 } else if (variable == null && term instanceof org.kframework.kil.Variable
-                        && term.getSort().equals("Bag")) {
+                        && term.getSort(definitionHelper).equals("Bag")) {
                     variable = (Variable) term.accept(this);
                 } else {
                     throw new RuntimeException();
@@ -193,7 +194,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 Term value = (Term) mapItem.getValue().accept(this);
                 entries.put(key, value);
             } else if (variable == null && term instanceof org.kframework.kil.Variable
-                    && term.getSort().equals("Map")) {
+                    && term.getSort(definitionHelper).equals("Map")) {
                 variable = (Variable) term.accept(this);
             } else {
                 throw new RuntimeException();
@@ -205,10 +206,10 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(org.kframework.kil.Variable node) throws TransformerException {
-        if (node.getSort().equals("Bag")) {
+        if (node.getSort(definitionHelper).equals("Bag")) {
             return new Variable(node.getName(), Kind.CELL_COLLECTION.toString());
         } else {
-            return new Variable(node.getName(), node.getSort());
+            return new Variable(node.getName(), node.getSort(definitionHelper));
         }
     }
 

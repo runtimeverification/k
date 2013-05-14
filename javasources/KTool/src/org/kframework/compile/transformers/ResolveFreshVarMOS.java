@@ -5,6 +5,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -18,8 +19,8 @@ public class ResolveFreshVarMOS extends CopyOnWriteTransformer {
 
 	private Set<Variable> vars = new HashSet<Variable>();
 
-	public ResolveFreshVarMOS() {
-		super("Resolve fresh variables (MOS version).");
+	public ResolveFreshVarMOS(DefinitionHelper definitionHelper) {
+		super("Resolve fresh variables (MOS version).", definitionHelper);
 	}
 
 	@Override
@@ -44,16 +45,16 @@ public class ResolveFreshVarMOS extends CopyOnWriteTransformer {
 		return super.transform(node);
 	}
 
-	private static Substitution freshSubstitution(Set<Variable> vars) {
+	private Substitution freshSubstitution(Set<Variable> vars) {
 		Map<Term, Term> symMap = new HashMap<Term, Term>();
 		int idx = 0;
 		for (Variable var : vars) {
-			Term symTerm = AddSymbolicK.freshSymSortN(var.getSort(),idx);
+			Term symTerm = new AddSymbolicK(definitionHelper).freshSymSortN(var.getSort(definitionHelper),idx);
 			idx++;
             symMap.put(var, symTerm);
 		}
 
-		return new Substitution(symMap);
+		return new Substitution(symMap, definitionHelper);
 	}
 
 }

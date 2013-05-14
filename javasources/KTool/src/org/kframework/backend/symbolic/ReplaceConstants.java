@@ -16,6 +16,7 @@ import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -27,8 +28,8 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  */
 public class ReplaceConstants extends CopyOnWriteTransformer {
 
-	public ReplaceConstants() {
-		super("Replace Constants with Variables");
+	public ReplaceConstants(DefinitionHelper definitionHelper) {
+		super("Replace Constants with Variables", definitionHelper);
 	}
 
 	@Override
@@ -39,7 +40,7 @@ public class ReplaceConstants extends CopyOnWriteTransformer {
 
 		if (node.getBody() instanceof Rewrite) {
 			ConstantsReplaceTransformer crt = new ConstantsReplaceTransformer(
-					"");
+					"", definitionHelper);
 			Rewrite rew = (Rewrite) node.getBody();
 			rew.setLeft((Term) rew.getLeft().accept(crt));
 
@@ -50,13 +51,13 @@ public class ReplaceConstants extends CopyOnWriteTransformer {
 			for (Entry<Variable, Builtin> entry : newGeneratedSV.entrySet()) {
 				List<Term> vars = new ArrayList<Term>();
 				vars.add(entry.getKey());
-				vars.add(KApp.of(new KInjectedLabel(entry.getValue())));
+				vars.add(KApp.of(definitionHelper, new KInjectedLabel(entry.getValue())));
 
-				terms.add(new KApp(KLabelConstant.of(KLabelConstant.KEQ.getLabel()), new KList(vars)));
+				terms.add(new KApp(KLabelConstant.of(KLabelConstant.KEQ.getLabel(), definitionHelper), new KList(vars)));
 
-				terms.add(KApp.of(
+				terms.add(KApp.of(definitionHelper, 
                         KLabelConstant.of(AddPredicates.predicate(
-                                entry.getValue().getSort().replaceFirst("#", ""))),
+                                entry.getValue().getSort(definitionHelper).replaceFirst("#", "")), definitionHelper),
                         entry.getKey()));
 			}
 

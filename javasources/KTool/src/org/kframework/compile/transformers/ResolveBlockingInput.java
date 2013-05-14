@@ -4,6 +4,7 @@ import org.kframework.compile.utils.GetLhsPattern;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -22,14 +23,14 @@ public class ResolveBlockingInput extends GetLhsPattern {
 	java.util.List<Rule> generated = new ArrayList<Rule>();
 	boolean hasInputCell;
 	
-	public ResolveBlockingInput() {
-		super("Resolve Blocking Input");
+	public ResolveBlockingInput(DefinitionHelper definitionHelper) {
+		super("Resolve Blocking Input", definitionHelper);
 	}
 	
 	@Override
 	public ASTNode transform(Definition node) throws TransformerException {
-		Configuration config = MetaK.getConfiguration(node);
-		config.accept(new BasicVisitor() {
+		Configuration config = MetaK.getConfiguration(node, definitionHelper);
+		config.accept(new BasicVisitor(definitionHelper) {
 			@Override
 			public void visit(Cell node) {
 				String stream = node.getCellAttributes().get("stream");
@@ -128,7 +129,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
 			GlobalSettings.kem.register(new KException(ExceptionType.WARNING, 
 					KExceptionGroup.COMPILER, 
 					"Expecting an empty list but got " + rewrite.getRight().getClass() + " of sort " + 
-							rewrite.getRight().getSort() + "." +
+							rewrite.getRight().getSort(definitionHelper) + "." +
 							System.getProperty("line.separator") + "Won't transform.", 
 							getName(), rewrite.getRight().getFilename(), rewrite.getRight().getLocation()));
 			return node;						
@@ -139,7 +140,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
 		
 //		  syntax List ::= "#parse" "(" String "," K ")"   [cons(List1ParseSyn)]
 		TermCons parseTerm = new TermCons("List", "List1ParseSyn");
-		parseTerm.getContents().add(StringBuiltin.kAppOf(item.getItem().getSort()));
+		parseTerm.getContents().add(StringBuiltin.kAppOf(item.getItem().getSort(definitionHelper)));
 		parseTerm.getContents().add(KSequence.EMPTY);
 		
 //		  syntax List ::= "#buffer" "(" K ")"           [cons(List1IOBufferSyn)]
@@ -148,7 +149,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
 		
 //		ctor(List)[replaceS[emptyCt(List),parseTerm(string(Ty),nilK)],ioBuffer(mkVariable('BI,K))]
 		List list = new List();
-		list.getContents().add(new Rewrite(List.EMPTY, parseTerm));
+		list.getContents().add(new Rewrite(List.EMPTY, parseTerm, definitionHelper));
 		list.getContents().add(ioBuffer);
 		
 		node = node.shallowCopy();

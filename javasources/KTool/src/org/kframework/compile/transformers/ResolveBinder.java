@@ -18,6 +18,7 @@ import org.kframework.kil.Production;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -33,22 +34,22 @@ import java.util.regex.Pattern;
 public class ResolveBinder extends CopyOnWriteTransformer {
 
     private static final KLabelConstant BINDER_PREDICATE
-            = KLabelConstant.of(AddPredicates.predicate("Binder"));
+            = KLabelConstant.ofStatic(AddPredicates.predicate("Binder"));
     private static final KLabelConstant BOUNDED_PREDICATE
-            = KLabelConstant.of(AddPredicates.predicate("Bound"));
+            = KLabelConstant.ofStatic(AddPredicates.predicate("Bound"));
     private static final KLabelConstant BOUNDING_PREDICATE
-            = KLabelConstant.of(AddPredicates.predicate("Bounding"));
+            = KLabelConstant.ofStatic(AddPredicates.predicate("Bounding"));
 
     private static final String REGEX
             = "\\s*(\\d+)(\\s*-\\>\\s*(\\d+))?\\s*(,?)";
 
-    public ResolveBinder() {
-        super("Resolve binder");
+    public ResolveBinder(DefinitionHelper definitionHelper) {
+        super("Resolve binder", definitionHelper);
     }
 
     @Override
     public ASTNode transform(Module node) throws TransformerException {
-        Set<Production> prods = SyntaxByTag.get(node, "binder");
+        Set<Production> prods = SyntaxByTag.get(node, "binder", definitionHelper);
         if (prods.isEmpty())
             return node;
 
@@ -95,29 +96,29 @@ public class ResolveBinder extends CopyOnWriteTransformer {
             }
 
             Rule rule = new Rule(
-                    KApp.of(BINDER_PREDICATE, MetaK.getTerm(prod)),
-                    BoolBuiltin.TRUE);
+                    KApp.of(definitionHelper, BINDER_PREDICATE, MetaK.getTerm(prod, definitionHelper)),
+                    BoolBuiltin.TRUE, definitionHelper);
             rule.addAttribute(Attribute.ANYWHERE);
             items.add(rule);
 
-            Term klblK = KApp.of(new KInjectedLabel(KLabelConstant.of(prod.getKLabel())));
+            Term klblK = KApp.of(definitionHelper, new KInjectedLabel(KLabelConstant.ofStatic(prod.getKLabel())));
 
             for (int bndIdx : bndMap.keySet()) {
                 KList list = new KList();
                 list.getContents().add(klblK);
                 list.getContents().add(IntBuiltin.kAppOf(bndIdx));
-                rule = new Rule(new KApp(BOUNDED_PREDICATE, list), BoolBuiltin.TRUE);
+                rule = new Rule(new KApp(BOUNDED_PREDICATE, list), BoolBuiltin.TRUE, definitionHelper);
                 rule.addAttribute(Attribute.ANYWHERE);
                 items.add(rule);
 				String bndSort = prod.getChildSort(bndIdx - 1);
-				items.add(AddPredicates.getIsVariableRule(new Variable(MetaK.Constants.anyVarSymbol,bndSort)));
+				items.add(AddPredicates.getIsVariableRule(new Variable(MetaK.Constants.anyVarSymbol,bndSort), definitionHelper));
             }
 
             for (int bodyIdx : bndMap.values()) {
                 KList list = new KList();
                 list.getContents().add(klblK);
                 list.getContents().add(IntBuiltin.kAppOf(bodyIdx));
-                rule = new Rule(new KApp(BOUNDING_PREDICATE, list), BoolBuiltin.TRUE);
+                rule = new Rule(new KApp(BOUNDING_PREDICATE, list), BoolBuiltin.TRUE, definitionHelper);
                 rule.addAttribute(Attribute.ANYWHERE);
                 items.add(rule);
             }

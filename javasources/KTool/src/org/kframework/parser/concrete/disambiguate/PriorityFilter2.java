@@ -18,20 +18,20 @@ public class PriorityFilter2 extends BasicHookWorker {
 
 	private TermCons parent;
 
-	public PriorityFilter2(TermCons parent) {
-		super("Type system");
+	public PriorityFilter2(TermCons parent, DefinitionHelper definitionHelper) {
+		super("Type system", definitionHelper);
 		this.parent = parent;
 	}
 
-	public PriorityFilter2(PriorityFilter2 pf) {
-		super("Type system");
+	public PriorityFilter2(PriorityFilter2 pf, DefinitionHelper definitionHelper) {
+		super("Type system", definitionHelper);
 		this.parent = pf.parent;
 	}
 
 	public ASTNode transform(TermCons tc) throws TransformerException {
-		String parentLabel = parent.getProduction().getKLabel();
-		String localLabel = tc.getProduction().getKLabel();
-		if (DefinitionHelper.isPriorityWrong(parentLabel, localLabel)) {
+		String parentLabel = parent.getProduction(definitionHelper).getKLabel();
+		String localLabel = tc.getProduction(definitionHelper).getKLabel();
+		if (definitionHelper.isPriorityWrong(parentLabel, localLabel)) {
 			String msg = "Priority filter exception. Cannot use " + localLabel + " as a child of " + parentLabel;
 			KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, tc.getFilename(), tc.getLocation());
 			throw new PriorityException(kex);

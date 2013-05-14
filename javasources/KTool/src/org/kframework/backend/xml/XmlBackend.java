@@ -13,8 +13,8 @@ import java.io.IOException;
 
 public class XmlBackend extends BasicBackend {
 
-	public XmlBackend(Stopwatch sw) {
-		super(sw);
+	public XmlBackend(Stopwatch sw, DefinitionHelper definitionHelper) {
+		super(sw, definitionHelper);
 	}
 
 	@Override
@@ -26,7 +26,7 @@ public class XmlBackend extends BasicBackend {
 
 		String xml = xstream.toXML(definition);
 
-		FileUtil.saveInFile(DefinitionHelper.dotk.getAbsolutePath() + "/def.xml", xml);
+		FileUtil.saveInFile(definitionHelper.dotk.getAbsolutePath() + "/def.xml", xml);
 
 		File canonicalFile = GlobalSettings.mainFile.getCanonicalFile();
 		FileUtil.saveInFile(canonicalFile.getAbsolutePath().replaceFirst("\\.k$", "") + ".xml", xml);

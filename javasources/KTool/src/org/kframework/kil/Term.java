@@ -1,6 +1,7 @@
 package org.kframework.kil;
 
 import org.kframework.kil.loader.Constants;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.matchers.Matchable;
 
 import org.w3c.dom.Element;
@@ -34,7 +35,7 @@ public abstract class Term extends ASTNode implements Matchable {
 		this.sort = sort;
 	}
 
-	public String getSort() {
+	public String getSort(DefinitionHelper definitionHelper) {
 		return sort;
 	}
 

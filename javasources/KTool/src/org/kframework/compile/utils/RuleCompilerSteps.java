@@ -5,6 +5,7 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor;
 import org.kframework.utils.general.GlobalSettings;
 
@@ -25,33 +26,33 @@ public class RuleCompilerSteps extends CompilerSteps<Rule> {
 		return vars;
 	}
 
-	public RuleCompilerSteps(Definition def) {
-		super();
-		this.add(new AddKCell());
-		this.add(new AddTopCellRules());
-		this.add(new ResolveAnonymousVariables());
-		this.add(new ResolveSyntaxPredicates());
-		this.add(new ResolveListOfK());
-		this.add(new FlattenSyntax());
+	public RuleCompilerSteps(Definition def, DefinitionHelper definitionHelper) {
+		super(definitionHelper);
+		this.add(new AddKCell(definitionHelper));
+		this.add(new AddTopCellRules(definitionHelper));
+		this.add(new ResolveAnonymousVariables(definitionHelper));
+		this.add(new ResolveSyntaxPredicates(definitionHelper));
+		this.add(new ResolveListOfK(definitionHelper));
+		this.add(new FlattenSyntax(definitionHelper));
 		ConfigurationStructureMap configurationStructureMap = new
 				ConfigurationStructureMap();
 		ConfigurationStructureVisitor cfgStrVisitor =
-				new ConfigurationStructureVisitor(configurationStructureMap);
+				new ConfigurationStructureVisitor(configurationStructureMap, definitionHelper);
 		def.accept(cfgStrVisitor);
 		final ResolveContextAbstraction resolveContextAbstraction =
 				new ResolveContextAbstraction(cfgStrVisitor.getMaxLevel(),
-						configurationStructureMap);
+						configurationStructureMap, definitionHelper);
 		this.add(resolveContextAbstraction);
-		this.add(new ResolveOpenCells());
+		this.add(new ResolveOpenCells(definitionHelper));
 		if (GlobalSettings.sortedCells) {
-			cellSorter = new SortCells(configurationStructureMap);
+			cellSorter = new SortCells(configurationStructureMap, definitionHelper);
 			this.add(cellSorter);
 		}
 	}
 
 	@Override
 	public Rule compile(Rule def, String stepName) throws CompilerStepDone {
-		CollectVariablesVisitor collectVars = new CollectVariablesVisitor();
+		CollectVariablesVisitor collectVars = new CollectVariablesVisitor(definitionHelper);
 		def.accept(collectVars);
 		vars = new HashSet<Variable>();
 		for (List<Variable> collectedVars : collectVars.getVars().values()) {

@@ -16,6 +16,7 @@ import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Map;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.matchers.MatcherException;
 
 import java.util.ArrayList;
@@ -29,6 +30,12 @@ import java.util.Iterator;
  */
 public class SymbolicMatcher extends AbstractMatcher {
 
+	protected DefinitionHelper definitionHelper;
+	
+	public SymbolicMatcher(DefinitionHelper definitionHelper) {
+		this.definitionHelper = definitionHelper;
+	}
+	
     //private final Map<Variable, ListIterator> kCollectionSubstitution = new HashMap<>();
     private SymbolicConstraint constraint = null;
     private final ArrayList<MapMatcher> mapMatchers = new ArrayList<MapMatcher>();
@@ -50,8 +57,8 @@ public class SymbolicMatcher extends AbstractMatcher {
 
             boolean change = false;
 
-            map = (Map) map.substitute(constraint.getSubstitution());
-            pattern = (Map) pattern.substitute(constraint.getSubstitution());
+            map = (Map) map.substitute(constraint.getSubstitution(), definitionHelper);
+            pattern = (Map) pattern.substitute(constraint.getSubstitution(), definitionHelper);
 
             Iterator<java.util.Map.Entry<Term, Term>> iterator;
             iterator = map.getEntries().entrySet().iterator();
@@ -116,7 +123,7 @@ public class SymbolicMatcher extends AbstractMatcher {
     }
 
     public boolean isMatching(Term term, Term pattern) {
-        constraint = new SymbolicConstraint();
+        constraint = new SymbolicConstraint(definitionHelper);
 
         try {
             match(term, pattern);

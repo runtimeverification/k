@@ -15,25 +15,25 @@ import java.util.Set;
 public class ConcretizeSyntax extends CopyOnWriteTransformer {
 
 
-	public ConcretizeSyntax() {
-		super("Abstract K to Syntax K");
+	public ConcretizeSyntax(DefinitionHelper definitionHelper) {
+		super("Abstract K to Syntax K", definitionHelper);
 	}
 
 	@Override
 	public ASTNode transform(KApp kapp) throws TransformerException {
 		ASTNode t = internalTransform(kapp);
 		try {
-			t = t.accept(new TypeSystemFilter());
+			t = t.accept(new TypeSystemFilter(definitionHelper));
 		} catch (TransformerException e) {
 			//type error, so don't disambiguate
 		}
-		t = t.accept(new RemoveEmptyLists());
+		t = t.accept(new RemoveEmptyLists(definitionHelper));
 		return t;
 	}
 
 	public static class RemoveEmptyLists extends CopyOnWriteTransformer {
-		public RemoveEmptyLists() {
-			super("Reverse AddEmptyLists");
+		public RemoveEmptyLists(DefinitionHelper definitionHelper) {
+			super("Reverse AddEmptyLists", definitionHelper);
 		}
 
 		@Override
@@ -48,8 +48,8 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 		private void internalTransform(TermCons tcParent, int i, Term child) {
 			if (child instanceof TermCons) {
 				TermCons termCons = (TermCons) child;
-				if (termCons.getProduction().isListDecl()) {
-					if (AddEmptyLists.isAddEmptyList(tcParent.getProduction().getChildSort(i), termCons.getContents().get(0).getSort()) && termCons.getContents().get(1) instanceof Empty) {
+				if (termCons.getProduction(definitionHelper).isListDecl()) {
+					if (new AddEmptyLists(definitionHelper).isAddEmptyList(tcParent.getProduction(definitionHelper).getChildSort(i), termCons.getContents().get(0).getSort(definitionHelper)) && termCons.getContents().get(1) instanceof Empty) {
 						
 						tcParent.getContents().set(i, termCons.getContents().get(0));
 					}
@@ -80,7 +80,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 			}
 		} else if (label instanceof KLabelConstant) {
 			String klabel = ((KLabelConstant) label).getLabel();
-			Set<String> conses = DefinitionHelper.labels.get(klabel);
+			Set<String> conses = definitionHelper.labels.get(klabel);
 			List<Term> contents = new ArrayList<Term>();
 			possibleTerms = new ArrayList<Term>();
 			if (child instanceof KList) {
@@ -91,7 +91,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 					contents.set(i, (Term)contents.get(i).accept(this));
 				}
 				for (String cons : conses) {
-					Production p = DefinitionHelper.conses.get(cons);
+					Production p = definitionHelper.conses.get(cons);
 					List<Term> newContents = new ArrayList<Term>(contents);
 					if (p.getAttribute("reject") != null)
 						continue;
@@ -100,7 +100,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 					for (int i = 0; i < contents.size(); i++) {
 						if (contents.get(i) instanceof KApp && ((KApp)contents.get(i)).getLabel() instanceof KInjectedLabel) {
 							KInjectedLabel l = (KInjectedLabel)((KApp)contents.get(i)).getLabel();
-							if (DefinitionHelper.isSubsortedEq(p.getChildSort(i), l.getTerm().getSort())) {
+							if (definitionHelper.isSubsortedEq(p.getChildSort(i), l.getTerm().getSort(definitionHelper))) {
 								newContents.set(i, l.getTerm());
 							}
 						} else {
@@ -119,7 +119,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 				}
 			} else if (child.equals(KList.EMPTY)) {
 				//could be a list terminator, which don't have conses
-				Set<String> sorts = DefinitionHelper.listLabels.get(klabel);
+				Set<String> sorts = definitionHelper.listLabels.get(klabel);
 				possibleTerms = new ArrayList<Term>();
 				if (sorts != null) {
 					for (String sort : sorts) {

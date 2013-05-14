@@ -1,5 +1,6 @@
 package org.kframework.krun.ioserver.main;
 
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.krun.ioserver.resources.ResourceSystem;
 
 import java.util.logging.Logger;
@@ -8,8 +9,10 @@ public class MainServer implements Runnable {
 	public int _port;
 	public boolean _started;
 	private Logger _logger;
+	protected DefinitionHelper definitionHelper;
 
-	public MainServer(int port, Logger logger) {
+	public MainServer(int port, Logger logger, DefinitionHelper definitionHelper) {
+		this.definitionHelper = definitionHelper;
 		_port = port;
 		_logger = logger;
 		try {
@@ -20,7 +23,7 @@ public class MainServer implements Runnable {
 		}
 	}
 	public void run() {
-		IOServer server = new IOServer(_port, _logger);
+		IOServer server = new IOServer(_port, _logger, definitionHelper);
 		_port = server.port; // in case server changes port
 		_started = true;
 		try {
@@ -44,9 +47,10 @@ public class MainServer implements Runnable {
 	}
 		
 	public static void main(String[] args) throws Exception {
+		DefinitionHelper definitionHelper = new DefinitionHelper();
 		Logger logger = java.util.logging.Logger.getLogger("KRunner");
 		logger.setUseParentHandlers(false);
-		MainServer ms = new MainServer(Integer.parseInt(args[0]), logger);
+		MainServer ms = new MainServer(Integer.parseInt(args[0]), logger, definitionHelper);
 		
 		ms.run();
 		//start(Integer.parseInt(args[0]));

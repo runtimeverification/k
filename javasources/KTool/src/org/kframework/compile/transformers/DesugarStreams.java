@@ -1,6 +1,7 @@
 package org.kframework.compile.transformers;
 
 import org.kframework.kil.*;
+import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -15,8 +16,8 @@ public class DesugarStreams extends CopyOnWriteTransformer {
 	
 	ArrayList<String> channels = new ArrayList<String>();
 
-	public DesugarStreams() {
-		super("Desugar streams");
+	public DesugarStreams(DefinitionHelper definitionHelper) {
+		super("Desugar streams", definitionHelper);
 		
 		channels.add("stdin");
 		channels.add("stdout");
