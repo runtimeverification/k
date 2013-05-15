@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="aterm-java">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/dist/bin/java/aterm-java.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/dist/bin/java/aterm-java.jar!/" />
+    </SOURCES>
+  </library>
+</component>
