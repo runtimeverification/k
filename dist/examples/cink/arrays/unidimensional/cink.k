@@ -1,4 +1,5 @@
-require "cink-basic.k"
+require "../../basic/cink-basic.k"
+require "cink-arrays-unidimensional.k"
 
 /*!
 \setlength{\parindent}{1em}
@@ -45,12 +46,14 @@ syntax.
 module CINK-SYNTAX 
 
   imports CINK-BASIC-SYNTAX
+  imports CINK-ARRAYS-SYNTAX
 
 endmodule
 
 module CINK
   imports CINK-SYNTAX
   imports CINK-BASIC-SEMANTICS
+  imports CINK-ARRAYS-SEMANTICS
 
   configuration <T color="yellow">
                   <control color="pink">
