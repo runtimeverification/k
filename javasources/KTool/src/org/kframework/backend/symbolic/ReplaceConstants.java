@@ -15,6 +15,7 @@ import org.kframework.kil.KList;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Term;
+import org.kframework.kil.Token;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
@@ -44,11 +45,11 @@ public class ReplaceConstants extends CopyOnWriteTransformer {
 			Rewrite rew = (Rewrite) node.getBody();
 			rew.setLeft((Term) rew.getLeft().accept(crt));
 
-			Map<Variable, Builtin> newGeneratedSV = crt.getGeneratedSV();
+			Map<Variable, Token> newGeneratedSV = crt.getGeneratedSV();
 			Term condition = node.getCondition();
 
 			List<Term> terms = new ArrayList<Term>();
-			for (Entry<Variable, Builtin> entry : newGeneratedSV.entrySet()) {
+			for (Entry<Variable, Token> entry : newGeneratedSV.entrySet()) {
 				List<Term> vars = new ArrayList<Term>();
 				vars.add(entry.getKey());
 				vars.add(KApp.of(new KInjectedLabel(entry.getValue())));
