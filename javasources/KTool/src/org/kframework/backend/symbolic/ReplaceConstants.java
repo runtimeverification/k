@@ -7,7 +7,6 @@ import java.util.Map.Entry;
 
 import org.kframework.compile.transformers.AddPredicates;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Builtin;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.KLabelConstant;
@@ -43,7 +42,8 @@ public class ReplaceConstants extends CopyOnWriteTransformer {
 			ConstantsReplaceTransformer crt = new ConstantsReplaceTransformer(
 					"", definitionHelper);
 			Rewrite rew = (Rewrite) node.getBody();
-			rew.setLeft((Term) rew.getLeft().accept(crt));
+			Term left = rew.getLeft().shallowCopy();
+			rew.setLeft((Term) left.accept(crt));
 
 			Map<Variable, Token> newGeneratedSV = crt.getGeneratedSV();
 			Term condition = node.getCondition();
@@ -52,7 +52,7 @@ public class ReplaceConstants extends CopyOnWriteTransformer {
 			for (Entry<Variable, Token> entry : newGeneratedSV.entrySet()) {
 				List<Term> vars = new ArrayList<Term>();
 				vars.add(entry.getKey());
-				vars.add(entry.getValue());
+				vars.add(KApp.of(new KInjectedLabel(entry.getValue())));
 				terms.add(new KApp(KLabelConstant.of(KLabelConstant.KEQ.getLabel(), definitionHelper), new KList(vars)));
 
 				terms.add(KApp.of( 

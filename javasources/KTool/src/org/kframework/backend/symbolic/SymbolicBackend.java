@@ -1,9 +1,15 @@
 package org.kframework.backend.symbolic;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
+
 import org.kframework.backend.Backend;
 import org.kframework.backend.BasicBackend;
 import org.kframework.backend.maude.MaudeBackend;
 import org.kframework.backend.maude.MaudeBuiltinsFilter;
+import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.compile.AddEval;
 import org.kframework.compile.FlattenModules;
 import org.kframework.compile.ResolveConfigurationAbstraction;
@@ -14,7 +20,39 @@ import org.kframework.compile.sharing.DeclareCellLabels;
 import org.kframework.compile.tags.AddDefaultComputational;
 import org.kframework.compile.tags.AddOptionalTags;
 import org.kframework.compile.tags.AddStrictStar;
-import org.kframework.compile.transformers.*;
+import org.kframework.compile.transformers.AddEmptyLists;
+import org.kframework.compile.transformers.AddHeatingConditions;
+import org.kframework.compile.transformers.AddK2SMTLib;
+import org.kframework.compile.transformers.AddKCell;
+import org.kframework.compile.transformers.AddKLabelConstant;
+import org.kframework.compile.transformers.AddKStringConversion;
+import org.kframework.compile.transformers.AddPredicates;
+import org.kframework.compile.transformers.AddSemanticEquality;
+import org.kframework.compile.transformers.AddSupercoolDefinition;
+import org.kframework.compile.transformers.AddSuperheatRules;
+import org.kframework.compile.transformers.AddSymbolicK;
+import org.kframework.compile.transformers.AddTopCellConfig;
+import org.kframework.compile.transformers.AddTopCellRules;
+import org.kframework.compile.transformers.ContextsToHeating;
+import org.kframework.compile.transformers.DesugarStreams;
+import org.kframework.compile.transformers.FlattenSyntax;
+import org.kframework.compile.transformers.FreezeUserFreezers;
+import org.kframework.compile.transformers.FreshCondToFreshVar;
+import org.kframework.compile.transformers.RemoveBrackets;
+import org.kframework.compile.transformers.RemoveSyntacticCasts;
+import org.kframework.compile.transformers.ResolveAnonymousVariables;
+import org.kframework.compile.transformers.ResolveBinder;
+import org.kframework.compile.transformers.ResolveBlockingInput;
+import org.kframework.compile.transformers.ResolveBuiltins;
+import org.kframework.compile.transformers.ResolveFreshVarMOS;
+import org.kframework.compile.transformers.ResolveFunctions;
+import org.kframework.compile.transformers.ResolveHybrid;
+import org.kframework.compile.transformers.ResolveListOfK;
+import org.kframework.compile.transformers.ResolveOpenCells;
+import org.kframework.compile.transformers.ResolveRewrite;
+import org.kframework.compile.transformers.ResolveSupercool;
+import org.kframework.compile.transformers.ResolveSyntaxPredicates;
+import org.kframework.compile.transformers.StrictnessToContexts;
 import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.ConfigurationStructureMap;
@@ -25,11 +63,6 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Properties;
 /**
  * Compile a K definition symbolically, using both basic
  * and specific compilation steps. 
@@ -84,11 +117,11 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 				+ "-BUILTINS .\n" + "  including K-STRICTNESS-DEFAULTS .\n" + "endm\n";
 		FileUtil.saveInFile(definitionHelper.dotk.getAbsolutePath() + "/" + "main.maude", main);
 
-		// UnparserFilter unparserFilter = new UnparserFilter();
-		// javaDef.accept(unparserFilter);
-		//
-		// String unparsedText = unparserFilter.getResult();
-		//
+		 UnparserFilter unparserFilter = new UnparserFilter(this.definitionHelper);
+		 javaDef.accept(unparserFilter);
+		
+		 String unparsedText = unparserFilter.getResult();
+		
 		// System.out.println(unparsedText);
 		//
 		// XStream xstream = new XStream();

@@ -1,9 +1,8 @@
 package org.kframework.kil;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.loader.Constants;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.matchers.Matcher;
+import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
