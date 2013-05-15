@@ -6,8 +6,11 @@ import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
+
+import aterm.ATermAppl;
 
 /** Represents parentheses uses for grouping. All productions labeled bracket parse to this. */
 public class Bracket extends Term {
@@ -50,6 +53,13 @@ public class Bracket extends Term {
 	public Bracket(Element element) {
 		super(element);
 		this.content = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
+	}
+
+	public Bracket(ATermAppl atm) {
+		super(atm);
+		this.sort = StringUtil.getSortNameFromCons(atm.getName());
+
+		content = (Term) JavaClassesFactory.getTerm(atm.getArgument(0));
 	}
 
 	public Bracket(String sort) {

@@ -1,7 +1,8 @@
 package org.kframework.kil;
 
-import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.w3c.dom.Element;
+
+import aterm.ATermAppl;
 
 public abstract class ModuleItem extends ASTNode {
 	public ModuleItem(String location, String filename) {
@@ -12,7 +13,7 @@ public abstract class ModuleItem extends ASTNode {
 		super(element);
 	}
 
-	public ModuleItem(IStrategoAppl element) {
+	public ModuleItem(ATermAppl element) {
 		super(element);
 	}
 

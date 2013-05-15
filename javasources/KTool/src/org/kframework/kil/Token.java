@@ -6,137 +6,159 @@ import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.StringUtil;
 import org.w3c.dom.Element;
 
+import aterm.ATermAppl;
 
 /**
  * Abstract class representing a {@link KLabel} of the form #token("SORT", "VALUE").
  */
 public abstract class Token extends KLabel {
 
-    /**
-     * Returns a {@link Token} of the given sort with the given value. The {@link Token} object
-     * is an instance of {@link BoolBuiltin}, {@link IntBuiltin}, {@link StringBuiltin},
-     * or {@link GenericToken}.
-     * @param sort
-     * @param value
-     * @return
-     */
-    public static Token of(String sort, String value) {
-        if (sort.equals(BoolBuiltin.SORT_NAME)) {
-            return BoolBuiltin.of(value);
-        } else if (sort.equals(IntBuiltin.SORT_NAME)) {
-            return IntBuiltin.of(value);
-        } else if (sort.equals(StringBuiltin.SORT_NAME)) {
-            /* TODO: andreis to un-escape string */
-            return StringBuiltin.of(value);
-        } else {
-            return GenericToken.of(sort, value);
-        }
-    }
+	/**
+	 * Returns a {@link Token} of the given sort with the given value. The {@link Token} object is an instance of {@link BoolBuiltin}, {@link IntBuiltin},
+	 * {@link StringBuiltin}, or {@link GenericToken}.
+	 * 
+	 * @param sort
+	 * @param value
+	 * @return
+	 */
+	public static Token of(String sort, String value) {
+		if (sort.equals(BoolBuiltin.SORT_NAME)) {
+			return BoolBuiltin.of(value);
+		} else if (sort.equals(IntBuiltin.SORT_NAME)) {
+			return IntBuiltin.of(value);
+		} else if (sort.equals(StringBuiltin.SORT_NAME)) {
+			/* TODO: andreis to un-escape string */
+			return StringBuiltin.of(value);
+		} else {
+			return GenericToken.of(sort, value);
+		}
+	}
 
-    /**
-     * Returns a {@link KApp} representing a {@link Token} of the given sort with the given value
-     * applied to an empty {@link KList}.
-     * @param sort
-     * @param value
-     * @return
-     */
-    public static KApp kAppOf(String sort, String value) {
-        if (sort.equals(BoolBuiltin.SORT_NAME)) {
-            return BoolBuiltin.kAppOf(value);
-        } else if (sort.equals(IntBuiltin.SORT_NAME)) {
-            return IntBuiltin.kAppOf(value);
-        } else if (sort.equals(StringBuiltin.SORT_NAME)) {
-            return StringBuiltin.kAppOf(value);
-        } else {
-            return GenericToken.kAppOf(sort, value);
-        }
-    }
+	/**
+	 * Returns a {@link KApp} representing a {@link Token} of the given sort with the given value applied to an empty {@link KList}.
+	 * 
+	 * @param sort
+	 * @param value
+	 * @return
+	 */
+	public static KApp kAppOf(String sort, String value) {
+		if (sort.equals(BoolBuiltin.SORT_NAME)) {
+			return BoolBuiltin.kAppOf(value);
+		} else if (sort.equals(IntBuiltin.SORT_NAME)) {
+			return IntBuiltin.kAppOf(value);
+		} else if (sort.equals(StringBuiltin.SORT_NAME)) {
+			return StringBuiltin.kAppOf(value);
+		} else {
+			return GenericToken.kAppOf(sort, value);
+		}
+	}
 
-    /**
-     * Returns a {@link KApp} representing a {@link Token} with the sort and value specified by
-     * the given {@link Element} applied to an empty {@link KList}.
-     * @param element
-     * @return
-     */
-    public static KApp kAppOf(Element element) {
-        String sort = element.getAttribute(Constants.SORT_sort_ATTR);
-        if (sort.equals(BoolBuiltin.SORT_NAME)) {
-            return KApp.of(new BoolBuiltin(element));
-        } else if (sort.equals(IntBuiltin.SORT_NAME)) {
-            return KApp.of(new IntBuiltin(element));
-        } else if (sort.equals(StringBuiltin.SORT_NAME)) {
-            return KApp.of(new StringBuiltin(element));
-        } else {
-            return KApp.of(new GenericToken(element));
-        }
-    }
+	/**
+	 * Returns a {@link KApp} representing a {@link Token} with the sort and value specified by the given {@link Element} applied to an empty {@link KList}.
+	 * 
+	 * @param element
+	 * @return
+	 */
+	public static KApp kAppOf(Element element) {
+		String sort = element.getAttribute(Constants.SORT_sort_ATTR);
+		if (sort.equals(BoolBuiltin.SORT_NAME)) {
+			return KApp.of(new BoolBuiltin(element));
+		} else if (sort.equals(IntBuiltin.SORT_NAME)) {
+			return KApp.of(new IntBuiltin(element));
+		} else if (sort.equals(StringBuiltin.SORT_NAME)) {
+			return KApp.of(new StringBuiltin(element));
+		} else {
+			return KApp.of(new GenericToken(element));
+		}
+	}
 
-    protected Token() { }
+	public static KApp kAppOf(ATermAppl atm) {
+		String sort = StringUtil.getSortNameFromCons(atm.getName());
+		if (sort.equals(BoolBuiltin.SORT_NAME)) {
+			return KApp.of(new BoolBuiltin(atm));
+		} else if (sort.equals(IntBuiltin.SORT_NAME)) {
+			return KApp.of(new IntBuiltin(atm));
+		} else if (sort.equals(StringBuiltin.SORT_NAME)) {
+			return KApp.of(new StringBuiltin(atm));
+		} else {
+			return KApp.of(new GenericToken(atm));
+		}
+	}
 
-    protected Token(Element element) {
-        super(element);
-    }
+	protected Token() {
+	}
 
-    /**
-     * Returns a {@link String} representing the sort of the token.
-     * @return
-     */
-    public abstract String tokenSort();
+	protected Token(Element element) {
+		super(element);
+	}
 
-    /**
-     * Returns a {@link String} representing the (uninterpreted) value of the token.
-     * @return
-     */
-    public abstract String value();
+	protected Token(ATermAppl element) {
+		super(element);
+	}
 
-    @Override
-    public Term shallowCopy() {
-        /* this object is immutable */
-        return this;
-    }
+	/**
+	 * Returns a {@link String} representing the sort of the token.
+	 * 
+	 * @return
+	 */
+	public abstract String tokenSort();
 
-    @Override
-    public int hashCode() {
-        int hash = 1;
-        hash = hash * DefinitionHelper.HASH_PRIME + tokenSort().hashCode();
-        hash = hash * DefinitionHelper.HASH_PRIME + value().hashCode();
-        return hash;
-    }
+	/**
+	 * Returns a {@link String} representing the (uninterpreted) value of the token.
+	 * 
+	 * @return
+	 */
+	public abstract String value();
 
-    @Override
-    public boolean equals(Object object) {
-        if (this == object) {
-            return true;
-        }
+	@Override
+	public Term shallowCopy() {
+		/* this object is immutable */
+		return this;
+	}
 
-        if (!(object instanceof Token)) {
-            return false;
-        }
+	@Override
+	public int hashCode() {
+		int hash = 1;
+		hash = hash * DefinitionHelper.HASH_PRIME + tokenSort().hashCode();
+		hash = hash * DefinitionHelper.HASH_PRIME + value().hashCode();
+		return hash;
+	}
 
-        Token token = (Token) object;
-        return tokenSort().equals(token.tokenSort()) && value().equals(token.value());
-    }
+	@Override
+	public boolean equals(Object object) {
+		if (this == object) {
+			return true;
+		}
 
-    @Override
-    public String toString() {
-        return "#token(\"" + tokenSort() + "\", \"" + value() + "\")";
-    }
+		if (!(object instanceof Token)) {
+			return false;
+		}
 
-    @Override
-    public void accept(Matcher matcher, Term toMatch) {
-        throw new UnsupportedOperationException();
-    }
+		Token token = (Token) object;
+		return tokenSort().equals(token.tokenSort()) && value().equals(token.value());
+	}
 
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
-    }
+	@Override
+	public String toString() {
+		return "#token(\"" + tokenSort() + "\", \"" + value() + "\")";
+	}
 
-    @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
+	@Override
+	public void accept(Matcher matcher, Term toMatch) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
+	}
+
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
+	}
 
 }

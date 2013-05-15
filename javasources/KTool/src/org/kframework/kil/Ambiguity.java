@@ -1,10 +1,16 @@
 package org.kframework.kil;
 
+import java.util.ArrayList;
+
+import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
+
+import aterm.ATermAppl;
+import aterm.ATermList;
 
 /**
  * Used for representing parsing ambiguity. Shouldn't exist after disambiguation.
@@ -13,6 +19,17 @@ public class Ambiguity extends Collection {
 
 	public Ambiguity(Element element) {
 		super(element);
+	}
+
+	public Ambiguity(ATermAppl atm) {
+		super(atm);
+
+		contents = new ArrayList<Term>();
+		ATermList atl = (ATermList) atm.getArgument(0);
+		while (!atl.isEmpty()) {
+			contents.add((Term) JavaClassesFactory.getTerm(atl.getFirst()));
+			atl = atl.getNext();
+		}
 	}
 
 	public Ambiguity(Ambiguity node) {
@@ -60,9 +77,9 @@ public class Ambiguity extends Collection {
 	@Override
 	public boolean contains(Object o) {
 		if (o instanceof Bracket)
-			return contains(((Bracket)o).getContent());
+			return contains(((Bracket) o).getContent());
 		if (o instanceof Cast)
-			return contains(((Cast)o).getContent());
+			return contains(((Cast) o).getContent());
 		for (int i = 0; i < contents.size(); i++) {
 			if (contents.get(i).contains(o)) {
 				return true;

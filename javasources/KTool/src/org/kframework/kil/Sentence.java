@@ -3,8 +3,9 @@ package org.kframework.kil;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.utils.xml.XML;
-import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.w3c.dom.Element;
+
+import aterm.ATermAppl;
 
 /**
  * A rule, configuration declaration, or context.
@@ -33,7 +34,7 @@ public abstract class Sentence extends ModuleItem {
 			attributes = new Attributes();
 	}
 
-	public Sentence(IStrategoAppl element) {
+	public Sentence(ATermAppl element) {
 		super(element);
 	}
 

@@ -7,7 +7,6 @@ import org.kframework.parser.concrete.lib.import$Tbl$Ground_0_0;
 import org.kframework.parser.concrete.lib.import$Tbl$Pgm_0_0;
 import org.kframework.parser.concrete.lib.import$Tbl_0_0;
 import org.kframework.parser.concrete.lib.java$Parse$String$Cmd_0_0;
-import org.kframework.parser.concrete.lib.java$Parse$String$Config$Ast_0_0;
 import org.kframework.parser.concrete.lib.java$Parse$String$Config_0_0;
 import org.kframework.parser.concrete.lib.java$Parse$String$Pgm_0_0;
 import org.kframework.parser.concrete.lib.java$Parse$String$Rules_0_0;
@@ -31,7 +30,7 @@ public class KParser {
 
 	public static String ImportTbl(String filePath) {
 
-		if(!tables.contains(filePath)){
+		if (!tables.contains(filePath)) {
 			tables.add(filePath);
 
 			init();
@@ -69,7 +68,7 @@ public class KParser {
 
 	public static String ImportTblPgm(String filePath) {
 
-		if(!tables.contains(filePath)){
+		if (!tables.contains(filePath)) {
 			tables.add(filePath);
 
 			init();
@@ -107,7 +106,7 @@ public class KParser {
 
 	public static String ImportTblGround(String filePath) {
 
-		if(!tables.contains(filePath)){
+		if (!tables.contains(filePath)) {
 			tables.add(filePath);
 
 			init();
@@ -174,33 +173,6 @@ public class KParser {
 			rez = result.toString();
 		}
 		return rez;
-	}
-
-	public static IStrategoTerm ParseKConfigStringAst(String kDefinition) {
-		init();
-		context.setStandAlone(true);
-		IStrategoTerm result = null;
-		try {
-			try {
-				result = context.invokeStrategyCLI(java$Parse$String$Config$Ast_0_0.instance, "a.exe", kDefinition);
-			} finally {
-				context.getIOAgent().closeAllFiles();
-			}
-			if (result == null) {
-				System.err.println("Input: " + kDefinition);
-				System.err.println("rewriting failed, trace:");
-				context.printStackTrace();
-				context.setStandAlone(false);
-				System.exit(1);
-			} else {
-				context.setStandAlone(false);
-			}
-		} catch (StrategoExit exit) {
-			context.setStandAlone(false);
-			System.exit(exit.getValue());
-		}
-
-		return result;
 	}
 
 	public static String ParseKRuleString(String kDefinition) {

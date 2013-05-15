@@ -1,18 +1,16 @@
 package org.kframework.kil;
 
+import java.io.Serializable;
+import java.util.Set;
+
 import org.kframework.compile.utils.SyntaxByTag;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.Transformable;
 import org.kframework.kil.visitors.Visitable;
-import org.spoofax.interpreter.terms.IStrategoAppl;
-import org.spoofax.jsglr.client.imploder.IToken;
-import org.spoofax.jsglr.client.imploder.ITokenizer;
-import org.spoofax.jsglr.client.imploder.ImploderAttachment;
 import org.w3c.dom.Element;
 
-import java.io.Serializable;
-import java.util.Set;
+import aterm.ATermAppl;
 
 /**
  * Base class for K AST. Useful for Visitors and Transformers.
@@ -46,14 +44,8 @@ public abstract class ASTNode implements Visitable, Transformable, Serializable 
 	 * @param elem
 	 *            the Stratego object representing an ASTNode
 	 */
-	public ASTNode(IStrategoAppl elem) {
-		ITokenizer tkz = ImploderAttachment.getTokenizer(elem);
-
-		IToken tk = tkz.currentToken();
-
-		String loc = "(" + tk.getLine() + "," + tk.getColumn() + "," + tk.getEndLine() + "," + tk.getEndColumn() + ")";
-
-		System.out.println(loc);
+	public ASTNode(ATermAppl elem) {
+		String loc = elem.getAnnotations().getFirst().toString().substring(8);
 		this.setLocation(loc);
 	}
 

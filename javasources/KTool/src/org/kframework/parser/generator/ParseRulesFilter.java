@@ -33,8 +33,6 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
-import org.spoofax.interpreter.terms.IStrategoAppl;
-import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -68,8 +66,12 @@ public class ParseRulesFilter extends BasicTransformer {
 
 					config = JavaClassesFactory.getTerm((Element) xmlTerm);
 				} else {
-					IStrategoTerm parsed = org.kframework.parser.concrete.KParser.ParseKConfigStringAst(ss.getContent());
-					config = JavaClassesFactory.getTerm((IStrategoAppl) parsed);
+					// TODO: load directly from ATerms
+					System.out.println("Not implemented yet: org.kframework.parser.generator.ParseRulesFilter");
+					System.exit(0);
+					config = null;
+					// ATerm parsed = org.kframework.parser.concrete.KParser.ParseKConfigStringAst(ss.getContent());
+					// config = JavaClassesFactory.getTerm((IStrategoAppl) parsed);
 				}
 
 				// disambiguate rules

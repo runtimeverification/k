@@ -16,7 +16,7 @@ import java.util.Set;
 import java.util.Collection;
 import java.util.Map;
 
-public class    DefinitionHelper {
+public class DefinitionHelper {
 	public static boolean initialized = false;
 	public static Set<String> generatedTags = new HashSet<String>();
 	static {
@@ -83,7 +83,7 @@ public class    DefinitionHelper {
 		Set<String> s = labels.get(label);
 		if (s == null) {
 			labels.put(label, s = new HashSet<String>());
-        }
+		}
 		s.add(cons);
 	}
 
@@ -282,30 +282,31 @@ public class    DefinitionHelper {
 		return true;
 	}
 
-    public static final int HASH_PRIME = 37;
+	public static final int HASH_PRIME = 37;
 
-    /**
-     * Returns a {@link List} of productions associated with the specified KLabel
-     *
-     * @param label string representation of the KLabel
-     * @return list of productions associated with the label
-     */
-    @SuppressWarnings("unchecked")
-    public static List<Production> productionsOf(String label) {
-        Set<String> conses = DefinitionHelper.labels.get(label);
-        if (conses == null) {
-            return (List<Production>) Collections.EMPTY_LIST;
-        }
+	/**
+	 * Returns a {@link List} of productions associated with the specified KLabel
+	 * 
+	 * @param label
+	 *            string representation of the KLabel
+	 * @return list of productions associated with the label
+	 */
+	@SuppressWarnings("unchecked")
+	public static List<Production> productionsOf(String label) {
+		Set<String> conses = DefinitionHelper.labels.get(label);
+		if (conses == null) {
+			return (List<Production>) Collections.EMPTY_LIST;
+		}
 
-        ArrayList<Production> productions = new ArrayList<Production>();
-        for (String cons : conses) {
-            assert DefinitionHelper.conses.containsKey(cons);
+		ArrayList<Production> productions = new ArrayList<Production>();
+		for (String cons : conses) {
+			assert DefinitionHelper.conses.containsKey(cons);
 
-            productions.add(DefinitionHelper.conses.get(cons));
-        }
+			productions.add(DefinitionHelper.conses.get(cons));
+		}
 
-        return productions;
-    }
+		return productions;
+	}
 
 	public Term kWrapper(Term t) {
 		if (isSubsortedEq("K", t.getSort(this)))
@@ -316,12 +317,11 @@ public class    DefinitionHelper {
 	private static final String fragment = "-fragment";
 
 	private static String getCellSort2(String sort) {
-		sort = sort.substring(0,1).toLowerCase() + sort.substring(1);
+		sort = sort.substring(0, 1).toLowerCase() + sort.substring(1);
 		if (sort.endsWith(MetaK.cellSort)) {
 			return sort.substring(0, sort.length() - MetaK.cellSort.length());
 		} else {
-			return sort.substring(0, sort.length() - MetaK.cellFragment.length())
-					+ "-fragment";
+			return sort.substring(0, sort.length() - MetaK.cellFragment.length()) + "-fragment";
 		}
 	}
 
@@ -334,7 +334,6 @@ public class    DefinitionHelper {
 		if (cells.containsKey(cellName)) {
 			return sort;
 		}
-		return sort.substring(0,1).toUpperCase() + sort.substring(1);
+		return sort.substring(0, 1).toUpperCase() + sort.substring(1);
 	}
-
 }

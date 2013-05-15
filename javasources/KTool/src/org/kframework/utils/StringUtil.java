@@ -24,16 +24,6 @@ public class StringUtil {
 	}
 
 	public static String escape(String str) {
-		str = str.replaceAll("\\\\", "\\\\");
-		str = str.replaceAll("\n", "\\n");
-		str = str.replaceAll("\r", "\\r");
-		str = str.replaceAll("\t", "\\t");
-		str = str.replaceAll("\\\"", "\\\"");
-
-		return str;
-	}
-
-	public static String escapeSDF(String str) {
 		str = str.replaceAll("\\\\", "\\\\\\\\");
 		str = str.replaceAll("\n", "\\\\n");
 		str = str.replaceAll("\r", "\\\\r");
@@ -77,6 +67,16 @@ public class StringUtil {
 		return str;
 	}
 
+	public static String getSortNameFromCons(String str) {
+		String ret = "";
+		int idx = str.lastIndexOf("1");
+
+		if (idx > 0) {
+			ret = str.substring(0, idx);
+		}
+		return StringUtil.unEscapeSortName(ret);
+	}
+
 	private static int number = 0;
 
 	/**
@@ -104,7 +104,7 @@ public class StringUtil {
 	}
 
 	public static String escapeMaude(String tag) {
-        // TODO [andreis]: current implementation appears wrong to me, i.e. '`(`) stays the same rather than becoming '```(```)
+		// TODO [andreis]: current implementation appears wrong to me, i.e. '`(`) stays the same rather than becoming '```(```)
 		return tag.replaceAll("(?<!`)([\\(\\)\\[\\]\\{\\},])", "`$1");
 	}
 
@@ -128,7 +128,8 @@ public class StringUtil {
 					sb.append('}');
 				else if (str.charAt(i + 1) == ',')
 					sb.append(',');
-				else sb.append(' ');
+				else
+					sb.append(' ');
 				i++;
 			} else
 				sb.append(str.charAt(i));
@@ -136,8 +137,6 @@ public class StringUtil {
 
 		return sb.toString();
 	}
-
-
 
 	/**
 	 * This function removes space when declaring equations in lists: -$ cat m.maude mod M is sort S . ops a b c : -> S . op _ _ : S S -> S . eq __(a, b) = c . endm red a b . q -$ maude m.maude
@@ -153,8 +152,7 @@ public class StringUtil {
 
 	public static String latexify(String name) {
 		return name.replace("\\", "\\textbackslash ").replace("_", "\\_").replace("{", "\\{").replace("}", "\\}").replace("#", "\\#").replace("%", "\\%").replace("$", "\\$").replace("&", "\\&")
-				.replace("~", "\\mbox{\\~{}}").replace("^",
-						"\\mbox{\\^{}}").replace("`", "\\mbox{\\`{}}");
+				.replace("~", "\\mbox{\\~{}}").replace("^", "\\mbox{\\^{}}").replace("`", "\\mbox{\\`{}}");
 	}
 
 	public static String emptyIfNull(String string) {

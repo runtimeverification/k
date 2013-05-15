@@ -2,7 +2,6 @@ package org.kframework.kil.loader;
 
 import java.util.Set;
 
-import org.kframework.kil.Constant;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.PriorityBlock;
 import org.kframework.kil.PriorityExtendedAssoc;

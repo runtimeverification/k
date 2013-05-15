@@ -11,8 +11,11 @@ import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
+
+import aterm.ATermAppl;
 
 /**
  * Applications that are not in sort K, or have not yet been flattened.
@@ -31,6 +34,17 @@ public class TermCons extends Term {
 		List<Element> children = XML.getChildrenElements(element);
 		for (Element e : children)
 			contents.add((Term) JavaClassesFactory.getTerm(e));
+	}
+
+	public TermCons(ATermAppl atm) {
+		super(atm);
+		this.cons = atm.getName();
+		this.sort = StringUtil.getSortNameFromCons(cons);
+
+		contents = new ArrayList<Term>();
+		for (int i = 0; i < atm.getArity(); i++) {
+			contents.add((Term) JavaClassesFactory.getTerm(atm.getArgument(i)));
+		}
 	}
 
 	public TermCons(String sort, String cons) {
@@ -164,9 +178,9 @@ public class TermCons extends Term {
 		if (this == obj)
 			return true;
 		if (obj instanceof Bracket)
-			return contains(((Bracket)obj).getContent());
+			return contains(((Bracket) obj).getContent());
 		if (obj instanceof Cast)
-			return contains(((Cast)obj).getContent());
+			return contains(((Cast) obj).getContent());
 		if (!(obj instanceof TermCons))
 			return false;
 		TermCons tc = (TermCons) obj;
@@ -186,7 +200,6 @@ public class TermCons extends Term {
 
 		return true;
 	}
-
 
 	@Override
 	public int hashCode() {

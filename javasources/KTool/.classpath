@@ -43,5 +43,6 @@
 	<classpathentry kind="lib" path="../../dist/bin/java/ui/wstx-asl-3.2.6.jar"/>
 	<classpathentry kind="lib" path="../../dist/bin/java/diffutils-1.2.1.jar"/>
 	<classpathentry kind="lib" path="../../dist/bin/java/guava-14.0.1.jar"/>
+	<classpathentry kind="lib" path="../../dist/bin/java/aterm-java.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
