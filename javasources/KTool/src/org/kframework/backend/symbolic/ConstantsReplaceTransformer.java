@@ -19,27 +19,27 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  * @author andreiarusoaie
  */
 public class ConstantsReplaceTransformer extends CopyOnWriteTransformer {
-    private Map<Variable, Token> generatedSV;
+    private Map<Variable, KApp> generatedSV;
 
     public ConstantsReplaceTransformer(String name, DefinitionHelper definitionHelper) {
         super("Replace Constants", definitionHelper);
-        generatedSV = new HashMap<Variable, Token>();
+        generatedSV = new HashMap<Variable, KApp>();
     }
     
     @Override
     public ASTNode transform(KApp node) throws TransformerException {
     	
     	if (node.getLabel() instanceof Token) {
-    		Token token = ((Token) node.getLabel());
-            Variable newVar = Variable.getFreshVar(KSorts.K.replaceFirst("#", ""));
-            generatedSV.put(newVar, token);
+//    		Token token = ((Token) node.getLabel());
+            Variable newVar = Variable.getFreshVar(KSorts.K);
+            generatedSV.put(newVar, node);
             return newVar;
     	}
 
     	return super.transform(node);
     }
     
-    public Map<Variable, Token> getGeneratedSV() {
+    public Map<Variable, KApp> getGeneratedSV() {
 		return generatedSV;
 	}
 }

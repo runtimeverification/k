@@ -45,19 +45,21 @@ public class ReplaceConstants extends CopyOnWriteTransformer {
 			Term left = rew.getLeft().shallowCopy();
 			rew.setLeft((Term) left.accept(crt));
 
-			Map<Variable, Token> newGeneratedSV = crt.getGeneratedSV();
+			Map<Variable, KApp> newGeneratedSV = crt.getGeneratedSV();
 			Term condition = node.getCondition();
 
 			List<Term> terms = new ArrayList<Term>();
-			for (Entry<Variable, Token> entry : newGeneratedSV.entrySet()) {
+			for (Entry<Variable, KApp> entry : newGeneratedSV.entrySet()) {
 				List<Term> vars = new ArrayList<Term>();
 				vars.add(entry.getKey());
-				vars.add(KApp.of(new KInjectedLabel(entry.getValue())));
+//				vars.add(KApp.of(new KInjectedLabel(entry.getValue())));
+				vars.add(entry.getValue());
 				terms.add(new KApp(KLabelConstant.of(KLabelConstant.KEQ.getLabel(), definitionHelper), new KList(vars)));
 
+				Token token = (Token) (entry.getValue().getLabel());
 				terms.add(KApp.of( 
                         KLabelConstant.of(AddPredicates.predicate(
-                                entry.getValue().tokenSort().replaceFirst("#", "")), definitionHelper),
+                                token.tokenSort().replaceFirst("#", "")), definitionHelper),
                         entry.getKey()));
 			}
 

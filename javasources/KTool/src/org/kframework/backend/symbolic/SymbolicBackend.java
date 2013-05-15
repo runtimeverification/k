@@ -122,7 +122,7 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 		
 		 String unparsedText = unparserFilter.getResult();
 		
-		// System.out.println(unparsedText);
+		System.out.println(unparsedText);
 		//
 		// XStream xstream = new XStream();
 		// xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
