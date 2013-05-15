@@ -364,17 +364,17 @@ public class SortCells extends CopyOnWriteTransformer {
 		if (framingVariable == null) return null;
 		Cell.Multiplicity multiplicity = cell.getMultiplicity();
 		List<Term> iCells = cellMap.get(cell.getId());
-		Term replacementTerm =  new Empty(KSort.Bag.name());
+		Term replacementTerm =  new Empty(MetaK.cellUnit(cell.getId()));
 		if (iCells != null) {
 			if (multiplicity == Cell.Multiplicity.ANY ||
 					multiplicity == Cell.Multiplicity.SOME) {
-				replacementTerm = Variable.getFreshVar(KSorts.BAG);
+				replacementTerm = Variable.getFreshVar(MetaK.cellFragment(cell.getId()));
 			}
 		} else {
 			if (multiplicity == Cell.Multiplicity.ONE && !fragment) {
-				replacementTerm = Variable.getFreshVar(KSorts.BAG_ITEM);
+				replacementTerm = Variable.getFreshVar(MetaK.cellSort(cell.getId()));
 			} else {
-				replacementTerm = Variable.getFreshVar(KSorts.BAG);
+				replacementTerm = Variable.getFreshVar(MetaK.cellFragment(cell.getId()));
 			}
 		}
 		Term oldTerm = renamedVars.get(cell.getId());
@@ -390,7 +390,7 @@ public class SortCells extends CopyOnWriteTransformer {
 			return replacementTerm;
 		}
 		if (replacementTerm instanceof Empty) {
-			if (oldTerm.getSort(definitionHelper).equals(KSort.BagItem.name())) {
+			if (oldTerm.getSort(definitionHelper).equals(MetaK.cellSort(cell.getId()))) {
 				GlobalSettings.kem.register(new KException(KException
 						.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER,
 						"Multiplicity constraints clash for cell" +
@@ -404,7 +404,7 @@ public class SortCells extends CopyOnWriteTransformer {
 			return replacementTerm;
 		}
 		if (oldTerm instanceof Empty && replacementTerm.getSort(definitionHelper).equals
-				(KSort.BagItem.name())) {
+				(MetaK.cellSort(cell.getId()))) {
 			GlobalSettings.kem.register(new KException(KException
 					.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER,
 					"Multiplicity constraints clash for cell" +

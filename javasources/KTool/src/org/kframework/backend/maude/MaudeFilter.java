@@ -297,18 +297,33 @@ public class MaudeFilter extends BackendFilter {
 		if (cfgStr == null) return;
 		for (ConfigurationStructure cellStr : cfgStr.values()) {
 			String id = cellStr.id;
-			if (id == MetaK.Constants.generatedCfgAbsTopCellLabel) continue;
+            if (id == MetaK.Constants.generatedCfgAbsTopCellLabel) continue;
+            String cellSort = MetaK.cellSort(id);
+            String cellFragment = MetaK.cellFragment(id);
+            String cellUnit = MetaK.cellUnit(id);
+            if (!cellStr.id.equals("k")) {
+                result.append("  sort " + cellSort +  " .\n");
+            }
+            result.append("  sort " + cellFragment + " .\n");
+            result.append("  subsort " + cellSort + " < " + cellFragment + " .\n");
+            result.append("  op " + cellUnit + " : -> " + cellFragment + " .\n");
+            if (cellStr.multiplicity == Cell.Multiplicity.ANY || cellStr.multiplicity == Cell.Multiplicity.SOME) {
+                result.append(" op __ : " + cellFragment + " " + cellFragment + " -> " + cellFragment + " " +
+                        "[assoc comm id: " + cellUnit + "] .\n");
+            }
 			String placeHolders = "";
 			String sorts = "";
 			String fragSorts = "";
 			String format = "";
 			Cell cell = cellStr.cell;
 			if (cellStr.sons.isEmpty()) {
-				placeHolders="_";
-				format = "ni ";
-				sorts = KSort.getKSort(cell.getContents().getSort(definitionHelper)).mainSort()
-						.toString();
-				declareCell(id,placeHolders, sorts, format);
+                if (!cellStr.id.equals("k")) {
+                    placeHolders="_";
+                    format = "ni ";
+                    sorts = KSort.getKSort(cell.getContents().getSort(definitionHelper)).mainSort()
+                            .toString();
+                    declareCell(id,placeHolders, sorts, cellSort, format);
+                }
 				continue;
 			}
 
@@ -320,25 +335,26 @@ public class MaudeFilter extends BackendFilter {
 				// Decided to declare all sorts as Bags to allow using
 				// cells instead of tuples for tupling purposes.
 
+                String cellName = ((Cell) cCell).getId();
 				switch(((Cell) cCell).getMultiplicity()) {
 					case ONE:
-						sorts += KSorts.BAG_ITEM;
+                        sorts += MetaK.cellSort(cellName);
 						break;
 					default:
-						sorts += KSorts.BAG;
+						sorts += MetaK.cellFragment(cellName);
 				}
-				fragSorts += KSorts.BAG + " ";
+				fragSorts += MetaK.cellFragment(cellName) + " ";
 				sorts += " ";
 			}
-			declareCell(id, placeHolders, sorts, format);
-			declareCell(id+"-fragment",placeHolders,fragSorts, format);
+			declareCell(id, placeHolders, sorts, cellSort, format);
+			declareCell(id+"-fragment",placeHolders,fragSorts, cellFragment, format);
 		}
 
 		// result.append("mb configuration ");
 		// this.visit((Sentence)configuration);
 	}
 
-	private void declareCell(String id, String placeHolders, String sorts, String format) {
+	private void declareCell(String id, String placeHolders, String sorts, String resultSort, String format) {
 		result.append(
 				"  op " +
 						"<" + id + ">" +
@@ -347,7 +363,7 @@ public class MaudeFilter extends BackendFilter {
 						" : " +
 						sorts +
 						" -> " +
-						"BagItem " +
+						resultSort +
 						"[format(b o++" + format + "--nib o)]" +
 						"." +
 						"\n");

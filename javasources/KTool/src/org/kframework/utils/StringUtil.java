@@ -23,6 +23,10 @@ public class StringUtil {
 		return sb.toString();
 	}
 
+    public static String makeProper(String str) {
+        return Character.toUpperCase(str.charAt(0)) + str.substring(1);
+    }
+
 	public static String escape(String str) {
 		str = str.replaceAll("\\\\", "\\\\\\\\");
 		str = str.replaceAll("\n", "\\\\n");

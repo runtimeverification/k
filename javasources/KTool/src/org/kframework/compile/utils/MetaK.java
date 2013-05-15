@@ -11,6 +11,7 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.Visitable;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -36,6 +37,18 @@ public class MetaK {
 		return (bigSort.endsWith(cellSort)
 				||bigSort.endsWith(cellFragment));
 	}
+
+    public static String cellSort(String cellName) {
+        return StringUtil.makeProper(cellName) + cellSort;
+    }
+
+    public static String cellFragment(String cellName) {
+        return StringUtil.makeProper(cellName) + cellFragment;
+    }
+
+    public static String cellUnit(String cellName) {
+        return "." + StringUtil.makeProper(cellName) + "Cell";
+    }
 
 	public static class Constants {
 		public static final String anyVarSymbol = "_";

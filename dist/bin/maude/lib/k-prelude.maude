@@ -74,7 +74,8 @@ mod K-TECHNIQUE is
   op <_>_</_> : CellLabel Set CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
   op <_>_</_> : CellLabel Map CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
 
-  op <k>_</k> : K -> BagItem [format(b o++ni --nib o)].
+  sort KCellSort .
+  op <k>_</k> : K -> KCellSort [format(b o++ni --nib o)].
   op k : -> CellLabel .
 
 endm
