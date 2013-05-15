@@ -107,7 +107,7 @@ module CINK-ARRAYS-SEMANTICS
   rule <k> lvalue(X:Id => L) ...</k>
        <env>... X |-> L:Loc ...</env>
 
-  rule <k> L:Loc = V:Val  => V ...</k>/
+  rule <k> L:Loc = V:Val  => V ...</k>
        <store>... L |-> (_ => V) ...</store>
 
   rule <k> locElem(L:Loc[I:Int]) = V:Val  => V ...</k>

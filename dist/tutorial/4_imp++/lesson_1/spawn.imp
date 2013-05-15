@@ -1,6 +1,9 @@
 int x;
-print("x = ");
-x=read();
-spawn x=x/2;
-spawn x=x+10;
-print(x,"\n");
+//print("x = ");
+x=#symInt(x);
+while (x <= 20) {
+x = x+1;
+}
+//spawn x=x/2;
+//spawn x=x+10;
+//print(x,"\n");

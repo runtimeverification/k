@@ -4,7 +4,7 @@ module ARRAY-SYNTAX
   syntax Array ::= // store(array, index, value)
   	       	   "store"       "(" K "," K "," K ")"  [smtlib(store)]
   	       	   // const-array(name, min, max, initial value)
-		 | "const-array" "(" Id "," K "," K "," K ")" 
+		 | "const-array" "(" K "," K "," K "," K ")" 
 		 
   syntax K ::= // select(array, index)
   	       "select" "(" K "," K ")"  [function, smtlib(select)]
