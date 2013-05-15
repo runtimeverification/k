@@ -217,6 +217,7 @@ public class SortCells extends CopyOnWriteTransformer {
 				fragment.setLabel(definitionHelper.getCellSort(sort));
 				fragment.setContents(bag);
 				fragment = (Cell) transformTop(fragment, true);
+                fragment.setSort(sort);
 				kInjectedLabel.setTerm(fragment);
 			}
 			outList.add(t);
@@ -284,7 +285,10 @@ public class SortCells extends CopyOnWriteTransformer {
 				iCells.add(replacementTerm);
 			}
 			if (iCells.isEmpty() && fragment) {
-				outCells.add(new Bag());
+                if (replacementTerm != null)
+                    outCells.add(replacementTerm);
+                else
+                    outCells.add(new Bag());
 			} else {
 				if (multiplicity == Cell.Multiplicity.ONE) {
 					if (iCells.size() != 1) {
@@ -364,7 +368,7 @@ public class SortCells extends CopyOnWriteTransformer {
 		if (framingVariable == null) return null;
 		Cell.Multiplicity multiplicity = cell.getMultiplicity();
 		List<Term> iCells = cellMap.get(cell.getId());
-		Term replacementTerm =  new Empty(MetaK.cellUnit(cell.getId()));
+		Term replacementTerm =  new Empty(MetaK.cellFragment(cell.getId()));
 		if (iCells != null) {
 			if (multiplicity == Cell.Multiplicity.ANY ||
 					multiplicity == Cell.Multiplicity.SOME) {

@@ -311,6 +311,8 @@ public class MaudeFilter extends BackendFilter {
                 result.append(" op __ : " + cellFragment + " " + cellFragment + " -> " + cellFragment + " " +
                         "[assoc comm id: " + cellUnit + "] .\n");
             }
+            result.append("  op " + cellFragment + "2KLabel_ : " + cellFragment + " -> KLabel .\n");
+
 			String placeHolders = "";
 			String sorts = "";
 			String fragSorts = "";
@@ -420,7 +422,7 @@ public class MaudeFilter extends BackendFilter {
 	@Override
 	public void visit(Empty empty) {
 		String sort = empty.getSort();
-		if (MaudeHelper.basicSorts.contains(sort)) {
+		if (MaudeHelper.basicSorts.contains(sort) || MetaK.isCellSort(sort)) {
 			result.append(".");
 			result.append(sort);
 		} else {
@@ -673,11 +675,15 @@ public class MaudeFilter extends BackendFilter {
 	@Override
 	public void visit(KInjectedLabel kInjectedLabel) {
 		Term term = kInjectedLabel.getTerm();
-		if (MetaK.isKSort(term.getSort(definitionHelper))) {
+        String sort = term.getSort(definitionHelper);
+        if (MetaK.isKSort(sort)) {
 			//result.append(StringUtil.escapeMaude(kInjectedLabel.getInjectedSort(term.getSort())));
-            result.append(kInjectedLabel.getInjectedSort(term.getSort(definitionHelper)));
+            result.append(kInjectedLabel.getInjectedSort(sort));
 			result.append("2KLabel_(");
-		} else {
+		} else if (MetaK.isCellSort(sort)){
+            result.append(sort + "2KLabel_(");
+
+        } else {
 			result.append("#_(");
 		}
 		term.accept(this);

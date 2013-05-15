@@ -47,7 +47,7 @@ public class MetaK {
     }
 
     public static String cellUnit(String cellName) {
-        return "." + StringUtil.makeProper(cellName) + "Cell";
+        return "." + cellFragment(cellName);
     }
 
 	public static class Constants {
