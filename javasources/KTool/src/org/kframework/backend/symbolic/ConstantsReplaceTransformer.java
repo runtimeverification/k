@@ -3,12 +3,7 @@ package org.kframework.backend.symbolic;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.BoolBuiltin;
-import org.kframework.kil.Builtin;
-import org.kframework.kil.IntBuiltin;
-import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Token;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.DefinitionHelper;
@@ -28,7 +23,7 @@ public class ConstantsReplaceTransformer extends CopyOnWriteTransformer {
         super("Replace Constants", definitionHelper);
         generatedSV = new HashMap<Variable, Token>();
     }
-
+    
     @Override
     public ASTNode transform(Token node) throws TransformerException {
         Variable newVar = Variable.getFreshVar(node.getSort(definitionHelper));
