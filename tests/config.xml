@@ -345,6 +345,7 @@
     <all-programs>
       <krun-option name="--search" />
       <krun-option name="--bound" value="2" />
+      <krun-option name="--no-color" />
     </all-programs>
   </test>
 
