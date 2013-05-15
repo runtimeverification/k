@@ -41,7 +41,7 @@ public class GenericToken extends Token {
      * @param value
      * @return
      */
-    public static KApp kAppOf(String sort, String value, DefinitionHelper definitionHelper) {
+    public static KApp kAppOf(String sort, String value) {
         GenericToken genericToken = new GenericToken(sort, value);
         KApp kApp = kAppCache.get(genericToken);
         if (kApp == null) {
