@@ -40,6 +40,7 @@
 		<pathelement location="../../dist/bin/java/ui/vecmath-1.3.1.jar"/>
 		<pathelement location="../../dist/bin/java/ui/wstx-asl-3.2.6.jar"/>
 		<pathelement location="../../dist/bin/java/apache_lang/commons-lang3-3.1.jar"/>
+		<pathelement location="../../dist/bin/java/aterm-java.jar"/>
     </path>
     <target name="init">
         <mkdir dir="bin"/>
