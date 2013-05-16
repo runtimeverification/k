@@ -8,7 +8,9 @@ import org.kframework.utils.StringUtil;
 
 import java.util.ArrayList;
 
-
+/**
+ * Define KLabel2String and String2KLabel
+ */
 public class AddKStringConversion extends CopyOnWriteTransformer {
 
     private static final KLabelConstant KLabel2String =

@@ -7,7 +7,7 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.ArrayList;
 
-
+/** Define isKLabelConstant predicate */
 public class AddKLabelConstant extends CopyOnWriteTransformer {
 
     private static final KLabelConstant KLabelConstantPredicate =

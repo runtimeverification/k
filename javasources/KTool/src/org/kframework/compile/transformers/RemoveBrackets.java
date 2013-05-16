@@ -6,6 +6,9 @@ import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
+/**
+ * Delete Bracket nodes
+ */
 public class RemoveBrackets extends CopyOnWriteTransformer {
 
 	public RemoveBrackets(DefinitionHelper definitionHelper) {

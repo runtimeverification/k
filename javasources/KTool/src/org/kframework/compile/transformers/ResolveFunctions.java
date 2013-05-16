@@ -6,6 +6,11 @@ import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
+/**
+ * Add the function attribute to rules which rewrite either a TermCons of
+ * a production with a function or predicate attribute,
+ * or a KApp of a KLabelConstant satisfying MetaK.isPredicateLabel.
+ */
 public class ResolveFunctions extends CopyOnWriteTransformer {
 
 	public ResolveFunctions(DefinitionHelper definitionHelper) {
