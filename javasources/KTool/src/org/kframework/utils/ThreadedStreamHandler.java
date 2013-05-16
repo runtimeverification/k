@@ -10,7 +10,7 @@ public class ThreadedStreamHandler extends Thread {
 	InputStream inputStream;
 	StringBuilder content = new StringBuilder();
 
-	ThreadedStreamHandler(InputStream inputStream) {
+	public ThreadedStreamHandler(InputStream inputStream) {
 		this.inputStream = inputStream;
 	}
 

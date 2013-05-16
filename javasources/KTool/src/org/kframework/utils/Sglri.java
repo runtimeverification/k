@@ -5,17 +5,17 @@ import java.io.IOException;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.JavaClassesFactory;
+import org.kframework.parser.ThreadedATermReader;
 import org.kframework.utils.file.KPaths;
 
 import aterm.ATerm;
-import aterm.pure.PureFactory;
-import aterm.pure.binary.BAFReader;
 
 public class Sglri {
 
 	public static ASTNode run_sglri(String tablePath, String startSymbol, String content) {
 		ThreadedStreamHandler errorStreamHandler;
-		//ThreadedStreamHandler inputStreamHandler;
+		ThreadedStreamHandler inputStreamHandler;
+		ThreadedATermReader inputATermReader;
 
 		try {
 			File f = null;
@@ -41,10 +41,13 @@ public class Sglri {
 			Process process = pb.start();
 
 			process.getOutputStream().write(content.getBytes());
+			process.getOutputStream().close();
 			// these need to run as java thread to get the standard error from the command.
 			errorStreamHandler = new ThreadedStreamHandler(process.getErrorStream());
+			inputATermReader = new ThreadedATermReader(process.getInputStream());
 			//inputStreamHandler = new ThreadedStreamHandler(process.getInputStream());
 			errorStreamHandler.start();
+			inputATermReader.start();
 			//inputStreamHandler.start();
 			process.waitFor();
 
@@ -57,9 +60,9 @@ public class Sglri {
 				System.exit(1);
 			}
 
-			process.getInputStream().read(); // the BAF format starts with a '!' that has to go away first.
-			ATerm a = new BAFReader(new PureFactory(), process.getInputStream()).readFromBinaryFile(false);
-			return JavaClassesFactory.getTerm(a);
+			//return JavaClassesFactory.getTerm(inputATermReader.getAterm());
+			ATerm atm = inputATermReader.getAterm();
+			return JavaClassesFactory.getTerm(atm);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
