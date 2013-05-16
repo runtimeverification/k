@@ -312,6 +312,7 @@ public class MaudeFilter extends BackendFilter {
                         "[assoc comm id: " + cellUnit + "] .\n");
             }
             result.append("  op " + cellFragment + "2KLabel_ : " + cellFragment + " -> KLabel .\n");
+            result.append("  op " + cellSort + "2KLabel_ : " + cellFragment + " -> KLabel .\n");
 
 			String placeHolders = "";
 			String sorts = "";
@@ -422,7 +423,7 @@ public class MaudeFilter extends BackendFilter {
 	@Override
 	public void visit(Empty empty) {
 		String sort = empty.getSort();
-		if (MaudeHelper.basicSorts.contains(sort) || MetaK.isCellSort(sort)) {
+		if (MaudeHelper.basicSorts.contains(sort) || MetaK.isCellFragment(sort)) {
 			result.append(".");
 			result.append(sort);
 		} else {

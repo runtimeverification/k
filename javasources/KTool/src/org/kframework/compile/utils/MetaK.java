@@ -38,6 +38,10 @@ public class MetaK {
 				||bigSort.endsWith(cellFragment));
 	}
 
+	public static boolean isCellFragment(String bigSort) {
+		return (bigSort.endsWith(cellFragment));
+	}
+
     public static String cellSort(String cellName) {
         return StringUtil.makeProper(cellName) + cellSort;
     }

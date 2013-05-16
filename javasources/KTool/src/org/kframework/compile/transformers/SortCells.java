@@ -101,7 +101,7 @@ public class SortCells extends CopyOnWriteTransformer {
 				final String realName = sort.getRealName();
 				final Integer key = new Integer(i);
 				String oldsort = cellfragments.get(key);
-				if (MetaK.isCellSort(realName)) {
+				if (MetaK.isCellFragment(realName)) {
 					if (oldsort != null && !oldsort.equals(realName)) {
 						//exception
 					}
@@ -160,7 +160,7 @@ public class SortCells extends CopyOnWriteTransformer {
 					final String realName = sort.getRealName();
 					final Integer key = new Integer(i);
 					String oldsort = cellfragments.get(key);
-					if (MetaK.isCellSort(realName)) {
+					if (MetaK.isCellFragment(realName)) {
 						if (oldsort != null && !oldsort.equals(realName)) {
 							//exception
 						}
@@ -218,7 +218,6 @@ public class SortCells extends CopyOnWriteTransformer {
 				fragment.setLabel(definitionHelper.getCellSort(sort));
 				fragment.setContents(bag);
 				fragment = (Cell) transformTop(fragment, true);
-                fragment.setSort(sort);
 				kInjectedLabel.setTerm(fragment);
 			}
 			outList.add(t);
@@ -233,7 +232,10 @@ public class SortCells extends CopyOnWriteTransformer {
 		if (fragment) {
 //            System.out.println(node);
 			id = id.substring(0, id.length()-"-fragment".length());
-		}
+            node.setSort(MetaK.cellFragment(id));
+		} else {
+            node.setSort(MetaK.cellSort(id));
+        }
 		ConfigurationStructure cfgStr = config.get(id);
 		if (cfgStr.sons.isEmpty()) {
 			return node;

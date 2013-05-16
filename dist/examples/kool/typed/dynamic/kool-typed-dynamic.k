@@ -565,7 +565,7 @@ order to be recovered after the creation of the new object.  Only the
 first rule below needs to be changed; the others are identical to
 those in untyped KOOL. */
 
-  syntax K ::= (Id,ThreadCellFragment)
+  syntax K ::= (Id,EnvCellSort)
 
   rule <k> new Class:Id(Vs:Vals) ~> K
            => create(Class) ~> (storeObj ~> ((Class(Vs)); return this;)) </k>
@@ -717,7 +717,7 @@ Like in untyped KOOL. */
 
 Like in untyped KOOL. */
 
-  syntax K ::= lookupMember(CrntObjCellFragment,Id)  [function]
+  syntax K ::= lookupMember(EnvStackCellSort,Id)  [function]
 
   rule lookupMember(<envStack> ListItem((_, <env>... X |-> L ...</env>))
                     ...</envStack>, X) => lookup(L)
