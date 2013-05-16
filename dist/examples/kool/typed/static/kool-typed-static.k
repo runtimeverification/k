@@ -122,7 +122,7 @@ the wrapper in the generated documentation, we associate it an
   syntax Param ::= Type Id
   syntax Params ::= List{Param,","}
 
-  syntax Decl ::= Type Exps ";"
+  syntax Decl ::= Type Exps ";" [avoid]
                 | Type Id "(" Params ")" Block
                 | "class" Id Block
                 | "class" Id "extends" Id Block

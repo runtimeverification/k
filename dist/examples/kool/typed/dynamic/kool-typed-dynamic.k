@@ -52,7 +52,7 @@ untyped KOOL.  */
   syntax Param ::= Type Id
   syntax Params ::= List{Param,","}
 
-  syntax Decl ::= Type Exps ";"
+  syntax Decl ::= Type Exps ";" [avoid]
                 | Type Id "(" Params ")" Block    // stays like in typed SIMPLE
                 | "class" Id Block                // KOOL
                 | "class" Id "extends" Id Block   // KOOL
