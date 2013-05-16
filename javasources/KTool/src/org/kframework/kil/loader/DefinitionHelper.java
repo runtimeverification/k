@@ -8,6 +8,8 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
+import com.google.common.collect.ImmutableSet;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -18,52 +20,45 @@ import java.util.Map;
 
 public class DefinitionHelper {
 	public static boolean initialized = false;
-	public static Set<String> generatedTags = new HashSet<String>();
-	static {
-		generatedTags.add("cons");
-		generatedTags.add("kgeneratedlabel");
-		generatedTags.add("prefixlabel");
-	};
+	
+	public static final Set<String> generatedTags = ImmutableSet.of(
+			"cons",
+			"kgeneratedlabel",
+			"prefixlabel");
 
-	public static Set<String> parsingTags = new HashSet<String>();
+	public static final Set<String> parsingTags = ImmutableSet.of(
+		"left",
+		"right",
+		"non-assoc");
 
-	static {
-		parsingTags.add("left");
-		parsingTags.add("right");
-		parsingTags.add("non-assoc");
-	}
+	public static final Set<String> specialTerminals = ImmutableSet.of(
+		"(",
+		")",
+		",",
+		"[",
+		"]",
+		"{",
+		"}");
+	
+	public java.util.Map<String, Production> conses = new HashMap<String, Production>();
+	public java.util.Map<String, Set<Production>> productions = new HashMap<String, Set<Production>>();
+	public java.util.Map<String, Set<String>> labels = new HashMap<String, Set<String>>();
+	public java.util.Map<String, Cell> cells = new HashMap<String, Cell>();
+	public java.util.Map<String, String> cellSorts = new HashMap<String, String>();
+	public java.util.Map<String, Production> listConses = new HashMap<String, Production>();
+	public java.util.Map<String, Set<String>> listLabels = new HashMap<String, Set<String>>();
+	public java.util.Map<String, ASTNode> locations = new HashMap<String, ASTNode>();
+	public java.util.Map<String, Set<Production>> associativity = new HashMap<String, Set<Production>>();
+	private Poset subsorts = new Poset();;
+	public java.util.Set<String> definedSorts = Sort.getBaseSorts();
+	private Poset priorities = new Poset();
+	private Poset modules = new Poset();
+	private Poset fileRequirements = new Poset();
+	public String startSymbolPgm = "K";
+	public File dotk = null;
+	public File kompiled = null;
 
-	public static Set<String> specialTerminals = new HashSet<String>();
-
-	static {
-		specialTerminals.add("(");
-		specialTerminals.add(")");
-		specialTerminals.add(",");
-		specialTerminals.add("[");
-		specialTerminals.add("]");
-		specialTerminals.add("{");
-		specialTerminals.add("}");
-	};
-
-	public static java.util.Map<String, Production> conses = new HashMap<String, Production>();
-	public static java.util.Map<String, Set<Production>> productions = new HashMap<String, Set<Production>>();
-	public static java.util.Map<String, Set<String>> labels = new HashMap<String, Set<String>>();
-	public static java.util.Map<String, Cell> cells = new HashMap<String, Cell>();
-	public static java.util.Map<String, String> cellSorts = new HashMap<String, String>();
-	public static java.util.Map<String, Production> listConses = new HashMap<String, Production>();
-	public static java.util.Map<String, Set<String>> listLabels = new HashMap<String, Set<String>>();
-	public static java.util.Map<String, ASTNode> locations = new HashMap<String, ASTNode>();
-	public static java.util.Map<String, Set<Production>> associativity = new HashMap<String, Set<Production>>();
-	private static Poset subsorts = new Poset();;
-	public static java.util.Set<String> definedSorts = Sort.getBaseSorts();
-	private static Poset priorities = new Poset();
-	private static Poset modules = new Poset();
-	private static Poset fileRequirements = new Poset();
-	public static String startSymbolPgm = "K";
-	public static File dotk = null;
-	public static File kompiled = null;
-
-	static {
+	private void initSubsorts() {
 		subsorts.addRelation(KSorts.KLIST, "K");
 		subsorts.addRelation(KSorts.KLIST, "KResult");
 		subsorts.addRelation("K", "KResult");
@@ -71,10 +66,14 @@ public class DefinitionHelper {
 		subsorts.addRelation("Map", "MapItem");
 		subsorts.addRelation("Set", "SetItem");
 		subsorts.addRelation("List", "ListItem");
-		subsorts.addRelation("Bag", "BagItem");
+		subsorts.addRelation("Bag", "BagItem");		
+	}
+	
+	public DefinitionHelper() {
+		initSubsorts();
 	}
 
-	public static void putLabel(Production p, String cons) {
+	public void putLabel(Production p, String cons) {
 		String label;
 		if (!MetaK.isComputationSort(p.getSort()))
 			label = p.getLabel();
@@ -87,7 +86,7 @@ public class DefinitionHelper {
 		s.add(cons);
 	}
 
-	public static void putListLabel(Production p) {
+	public void putListLabel(Production p) {
 		String separator = ((UserList) p.getItems().get(0)).getSeparator();
 		String label = MetaK.getListUnitLabel(separator);
 		Set<String> s = listLabels.get(label);
@@ -96,7 +95,7 @@ public class DefinitionHelper {
 		s.add(p.getSort());
 	}
 
-	public static void putAssoc(String cons, Collection<Production> prods) {
+	public void putAssoc(String cons, Collection<Production> prods) {
 		if (associativity.get(cons) == null) {
 			associativity.put(cons, new HashSet<Production>(prods));
 		} else {
@@ -113,8 +112,8 @@ public class DefinitionHelper {
 		cellSorts.put(c.getLabel(), sort);
 	}
 
-	public static boolean isListSort(String sort) {
-		return DefinitionHelper.listConses.containsKey(sort);
+	public boolean isListSort(String sort) {
+		return listConses.containsKey(sort);
 	}
 
 	/**
@@ -125,7 +124,7 @@ public class DefinitionHelper {
 	 * we suppress cast warnings because we know that the sort must be UserList
 	 */
 	@SuppressWarnings("cast")
-	public static String getListElementSort(String sort) {
+	public String getListElementSort(String sort) {
 		if (!isListSort(sort))
 			return null;
 		return ((UserList) listConses.get(sort).getItems().get(0)).getSort();
@@ -134,23 +133,23 @@ public class DefinitionHelper {
 	/**
 	 * find the LUB of a list of sorts
 	 */
-	public static String getLUBSort(Set<String> sorts) {
+	public String getLUBSort(Set<String> sorts) {
 		return subsorts.getLUB(sorts);
 	}
 
 	/**
 	 * find the GLB of a list of sorts
 	 */
-	public static String getGLBSort(Set<String> sorts) {
+	public String getGLBSort(Set<String> sorts) {
 		return subsorts.getGLB(sorts);
 	}
 
-	public static void addPriority(String bigPriority, String smallPriority) {
+	public void addPriority(String bigPriority, String smallPriority) {
 		// add the new priority
 		priorities.addRelation(bigPriority, smallPriority);
 	}
 
-	public static void finalizePriority() {
+	public void finalizePriority() {
 		priorities.transitiveClosure();
 	}
 
@@ -161,11 +160,11 @@ public class DefinitionHelper {
 	 * @param klabelChild
 	 * @return
 	 */
-	public static boolean isPriorityWrong(String klabelParent, String klabelChild) {
+	public boolean isPriorityWrong(String klabelParent, String klabelChild) {
 		return priorities.isInRelation(klabelParent, klabelChild);
 	}
 
-	public static void addFileRequirement(String required, String local) {
+	public void addFileRequirement(String required, String local) {
 		// add the new subsorting
 		if (required.equals(local))
 			return;
@@ -173,11 +172,11 @@ public class DefinitionHelper {
 		fileRequirements.addRelation(required, local);
 	}
 
-	public static void finalizeRequirements() {
+	public void finalizeRequirements() {
 		fileRequirements.transitiveClosure();
 	}
 
-	public static void addModuleImport(String mainModule, String importedModule) {
+	public void addModuleImport(String mainModule, String importedModule) {
 		// add the new subsorting
 		if (mainModule.equals(importedModule))
 			return;
@@ -185,21 +184,21 @@ public class DefinitionHelper {
 		modules.addRelation(mainModule, importedModule);
 	}
 
-	public static void finalizeModules() {
+	public void finalizeModules() {
 		modules.transitiveClosure();
 	}
 
-	public static boolean isModuleIncluded(String localModule, String importedModule) {
+	public boolean isModuleIncluded(String localModule, String importedModule) {
 		return modules.isInRelation(localModule, importedModule);
 	}
 
-	public static boolean isModuleIncludedEq(String localModule, String importedModule) {
+	public boolean isModuleIncludedEq(String localModule, String importedModule) {
 		if (localModule.equals(importedModule))
 			return true;
 		return modules.isInRelation(localModule, importedModule);
 	}
 
-	public static boolean isRequiredEq(String required, String local) {
+	public boolean isRequiredEq(String required, String local) {
 		try {
 			required = new File(required).getCanonicalPath();
 			local = new File(local).getCanonicalPath();
@@ -211,12 +210,12 @@ public class DefinitionHelper {
 		return fileRequirements.isInRelation(required, local);
 	}
 
-	public static void addSubsort(String bigSort, String smallSort) {
+	public void addSubsort(String bigSort, String smallSort) {
 		// add the new subsorting
 		subsorts.addRelation(bigSort, smallSort);
 	}
 
-	public static void finalizeSubsorts() {
+	public void finalizeSubsorts() {
 		List<String> circuit = subsorts.checkForCycles();
 		if (circuit != null) {
 			String msg = "Circularity detected in subsorts: ";
@@ -231,7 +230,7 @@ public class DefinitionHelper {
 			for (Map.Entry<String, Production> ls2 : listConses.entrySet()) {
 				String sort1 = ((UserList) ls1.getValue().getItems().get(0)).getSort();
 				String sort2 = ((UserList) ls2.getValue().getItems().get(0)).getSort();
-				if (DefinitionHelper.isSubsorted(sort1, sort2)) {
+				if (isSubsorted(sort1, sort2)) {
 					subsorts.addRelation(ls1.getValue().getSort(), ls2.getValue().getSort());
 				}
 			}
@@ -246,7 +245,7 @@ public class DefinitionHelper {
 	 * @param smallSort
 	 * @return
 	 */
-	public static boolean isSubsorted(String bigSort, String smallSort) {
+	public boolean isSubsorted(String bigSort, String smallSort) {
 		return subsorts.isInRelation(bigSort, smallSort);
 	}
 
@@ -257,21 +256,21 @@ public class DefinitionHelper {
 	 * @param smallSort
 	 * @return
 	 */
-	public static boolean isSubsortedEq(String bigSort, String smallSort) {
+	public boolean isSubsortedEq(String bigSort, String smallSort) {
 		if (bigSort.equals(smallSort))
 			return true;
 		return subsorts.isInRelation(bigSort, smallSort);
 	}
 
-	public static boolean isTagGenerated(String key) {
+	public boolean isTagGenerated(String key) {
 		return generatedTags.contains(key);
 	}
 
-	public static boolean isSpecialTerminal(String terminal) {
+	public boolean isSpecialTerminal(String terminal) {
 		return specialTerminals.contains(terminal);
 	}
 
-	public static boolean isParsingTag(String key) {
+	public boolean isParsingTag(String key) {
 		return parsingTags.contains(key);
 	}
 
@@ -292,17 +291,17 @@ public class DefinitionHelper {
 	 * @return list of productions associated with the label
 	 */
 	@SuppressWarnings("unchecked")
-	public static List<Production> productionsOf(String label) {
-		Set<String> conses = DefinitionHelper.labels.get(label);
+	public List<Production> productionsOf(String label) {
+		Set<String> conses = labels.get(label);
 		if (conses == null) {
 			return (List<Production>) Collections.EMPTY_LIST;
 		}
 
 		ArrayList<Production> productions = new ArrayList<Production>();
 		for (String cons : conses) {
-			assert DefinitionHelper.conses.containsKey(cons);
+			assert this.conses.containsKey(cons);
 
-			productions.add(DefinitionHelper.conses.get(cons));
+			productions.add(this.conses.get(cons));
 		}
 
 		return productions;
@@ -316,7 +315,7 @@ public class DefinitionHelper {
 
 	private static final String fragment = "-fragment";
 
-	private static String getCellSort2(String sort) {
+	private String getCellSort2(String sort) {
 		sort = sort.substring(0, 1).toLowerCase() + sort.substring(1);
 		if (sort.endsWith(MetaK.cellSort)) {
 			return sort.substring(0, sort.length() - MetaK.cellSort.length());
@@ -325,7 +324,7 @@ public class DefinitionHelper {
 		}
 	}
 
-	public static String getCellSort(String sort) {
+	public String getCellSort(String sort) {
 		sort = getCellSort2(sort);
 		String cellName = sort;
 		if (sort.endsWith(fragment)) {

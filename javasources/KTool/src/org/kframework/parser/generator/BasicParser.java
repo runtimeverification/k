@@ -143,12 +143,14 @@ public class BasicParser {
 		NodeList nl = doc.getFirstChild().getChildNodes();
 		List<DefinitionItem> defItemList = new ArrayList<DefinitionItem>();
 
+		JavaClassesFactory.startConstruction(definitionHelper);
 		for (int i = 0; i < nl.getLength(); i++) {
 			if (nl.item(i).getNodeType() == Node.ELEMENT_NODE) {
 				Element elm = (Element) nl.item(i);
 				defItemList.add((DefinitionItem) JavaClassesFactory.getTerm(elm));
 			}
 		}
+		JavaClassesFactory.endConstruction();
 		defItemList = (List<DefinitionItem>) BasicParser.relocateComments(defItemList);
 		return defItemList;
 	}

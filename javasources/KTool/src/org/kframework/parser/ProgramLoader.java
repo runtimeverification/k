@@ -57,7 +57,9 @@ public class ProgramLoader {
 			XmlLoader.addFilename(doc.getFirstChild(), filename);
 			XmlLoader.reportErrors(doc);
 			FileUtil.saveInFile(definitionHelper.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
+			JavaClassesFactory.startConstruction(definitionHelper);
 			out = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
+			JavaClassesFactory.endConstruction();
 		} else {
 			out = Sglri.run_sglri(definitionHelper.kompiled.getAbsolutePath() + "/pgm/Program.tbl", startSymbol, content);
 		}

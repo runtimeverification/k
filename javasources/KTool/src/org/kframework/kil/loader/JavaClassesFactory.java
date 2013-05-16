@@ -55,9 +55,26 @@ import org.w3c.dom.Element;
 import aterm.ATerm;
 import aterm.ATermAppl;
 
+/**
+ * Factory for creating KIL classes from XML nodes or ATerms.
+ * Must call startConstruction/endConstruction around calls to getTerm,
+ * to supply a DefinitionHelper.
+ */
 public class JavaClassesFactory {
+	private static DefinitionHelper definitionHelper = null;
 
+	/** Set the definitionHelper to use */
+	public static synchronized void startConstruction(DefinitionHelper definitionHelper) {
+		assert JavaClassesFactory.definitionHelper == null;
+		JavaClassesFactory.definitionHelper = definitionHelper;		
+	}
+	public static synchronized void endConstruction() {
+		assert JavaClassesFactory.definitionHelper != null;
+		JavaClassesFactory.definitionHelper = null;			
+	}
+	
 	public static ASTNode getTerm(Element element) {
+		assert definitionHelper != null;
 		// used for a new feature - loading java classes at first step (Basic Parsing)
 		if (Constants.LEXICAL.equals(element.getNodeName()))
 			return new Lexical(element);
@@ -117,7 +134,7 @@ public class JavaClassesFactory {
 			}
 		}
 		if (Constants.KAPP.equals(element.getNodeName()))
-			return new KApp(element, null);
+			return new KApp(element, definitionHelper);
 		if (KSorts.KLIST.equals(element.getNodeName()))
 			return new KList(element);
 		if (Constants.EMPTY.equals(element.getNodeName())) {

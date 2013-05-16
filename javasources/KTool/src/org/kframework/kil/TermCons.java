@@ -89,27 +89,16 @@ public class TermCons extends Term {
 
 	@Override
 	public String toString() {
-		String str = "";
-		Production pr = DefinitionHelper.conses.get(cons);
-
-		if (pr.items.size() > 0) {
-			if (pr.items.get(0).getType() == ProductionType.USERLIST) {
-				String separator = ((UserList) pr.items.get(0)).separator;
-				str = contents.get(0) + " " + separator + " " + contents.get(1) + " ";
-			} else
-				for (int i = 0, j = 0; i < pr.items.size(); i++) {
-					ProductionItem pi = pr.items.get(i);
-					if (pi.getType() == ProductionType.TERMINAL) {
-						String terminall = pi.toString();
-						terminall = terminall.substring(1, terminall.length() - 1);
-						str += terminall + " ";
-					} else if (pi.getType() == ProductionType.SORT)
-						str += contents.get(j++) + " ";
-				}
+		StringBuilder str = new StringBuilder("TermCons(");
+		str.append(cons);
+		for (Term t : contents) {
+			str.append(',');
+			str.append(t);
 		}
-		return str;
+		str.append(')');
+		return str.toString();
 	}
-
+	
 	public String getSort() {
 		return sort;
 	}

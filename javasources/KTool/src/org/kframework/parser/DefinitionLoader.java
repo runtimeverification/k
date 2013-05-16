@@ -191,7 +191,9 @@ public class DefinitionLoader {
 				Stopwatch.sw.printIntermediate("Importing Files");
 
 			// ------------------------------------- parse configs
+			JavaClassesFactory.startConstruction(definitionHelper);
 			def = (Definition) def.accept(new ParseConfigsFilter(definitionHelper));
+			JavaClassesFactory.endConstruction();
 			def.accept(new CollectConfigCellsVisitor(definitionHelper));
 
 			// sort List in streaming cells
@@ -201,7 +203,9 @@ public class DefinitionLoader {
 				Stopwatch.sw.printIntermediate("Parsing Configs");
 
 			// ----------------------------------- parse rules
+			JavaClassesFactory.startConstruction(definitionHelper);		
 			def = (Definition) def.accept(new ParseRulesFilter(definitionHelper));
+			JavaClassesFactory.endConstruction();
 
 			if (GlobalSettings.verbose)
 				Stopwatch.sw.printIntermediate("Parsing Rules");
@@ -226,7 +230,9 @@ public class DefinitionLoader {
 		XmlLoader.reportErrors(doc);
 		FileUtil.saveInFile(definitionHelper.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
 
+		JavaClassesFactory.startConstruction(definitionHelper);
 		org.kframework.kil.ASTNode config = (Term) JavaClassesFactory.getTerm((Element) doc.getFirstChild().getFirstChild().getNextSibling());
+		JavaClassesFactory.endConstruction();
 
 		// TODO: reject rewrites
 		new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation(definitionHelper), definitionHelper).check(config);
@@ -268,7 +274,9 @@ public class DefinitionLoader {
 		FileUtil.saveInFile(definitionHelper.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
 		XmlLoader.writeXmlFile(doc, definitionHelper.kompiled + "/pattern.xml");
 
+		JavaClassesFactory.startConstruction(definitionHelper);
 		ASTNode config = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
+		JavaClassesFactory.endConstruction();
 
 		// TODO: reject rewrites
 		new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation(definitionHelper), definitionHelper).check(config);
@@ -310,8 +318,10 @@ public class DefinitionLoader {
 		FileUtil.saveInFile(definitionHelper.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
 		XmlLoader.writeXmlFile(doc, definitionHelper.kompiled + "/pattern.xml");
 
+		JavaClassesFactory.startConstruction(definitionHelper);		
 		ASTNode config = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
-
+		JavaClassesFactory.endConstruction();
+		
 		// TODO: don't allow rewrites
 		new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation(definitionHelper), definitionHelper).check(config);
 		config = config.accept(new SentenceVariablesFilter(definitionHelper));
