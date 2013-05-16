@@ -16,6 +16,7 @@ import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
 import aterm.ATermAppl;
+import aterm.ATermList;
 
 /**
  * Applications that are not in sort K, or have not yet been flattened.
@@ -42,8 +43,19 @@ public class TermCons extends Term {
 		this.sort = StringUtil.getSortNameFromCons(cons);
 
 		contents = new ArrayList<Term>();
-		for (int i = 0; i < atm.getArity(); i++) {
-			contents.add((Term) JavaClassesFactory.getTerm(atm.getArgument(i)));
+		if (atm.getArity() == 0) {
+			contents = new ArrayList<Term>();
+		} else if (atm.getArgument(0) instanceof ATermList) {
+			ATermList list = (ATermList) atm.getArgument(0);
+			while (!list.isEmpty()) {
+				contents.add((Term) JavaClassesFactory.getTerm(list.getFirst()));
+				list = list.getNext();
+			}
+			contents.add(new Empty(sort));
+		} else {
+			for (int i = 0; i < atm.getArity(); i++) {
+				contents.add((Term) JavaClassesFactory.getTerm(atm.getArgument(i)));
+			}
 		}
 	}
 

@@ -21,6 +21,7 @@ import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.utils.BinaryLoader;
+import org.kframework.utils.Sglri;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.XmlLoader;
 import org.kframework.utils.errorsystem.KException;
@@ -41,18 +42,25 @@ public class ProgramLoader {
 	 * @param kappize
 	 *            If true, then apply KAppModifier to AST.
 	 */
-	public static ASTNode loadPgmAst(String content, String filename, Boolean kappize, String startSymbol, DefinitionHelper definitionHelper) throws IOException, TransformerException {
+	public static ASTNode loadPgmAst(String content, String filename, Boolean kappize, String startSymbol, DefinitionHelper definitionHelper) throws IOException,
+			TransformerException {
 		File tbl = new File(definitionHelper.kompiled.getCanonicalPath() + "/pgm/Program.tbl");
 
 		// ------------------------------------- import files in Stratego
-		org.kframework.parser.concrete.KParser.ImportTblPgm(tbl.getAbsolutePath());
-		String parsed = org.kframework.parser.concrete.KParser.ParseProgramString(content, startSymbol);
-		Document doc = XmlLoader.getXMLDoc(parsed);
+		ASTNode out;
 
-		XmlLoader.addFilename(doc.getFirstChild(), filename);
-		XmlLoader.reportErrors(doc);
-		FileUtil.saveInFile(definitionHelper.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
-		ASTNode out = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
+		if (true) {
+			org.kframework.parser.concrete.KParser.ImportTblPgm(tbl.getAbsolutePath());
+			String parsed = org.kframework.parser.concrete.KParser.ParseProgramString(content, startSymbol);
+			Document doc = XmlLoader.getXMLDoc(parsed);
+
+			XmlLoader.addFilename(doc.getFirstChild(), filename);
+			XmlLoader.reportErrors(doc);
+			FileUtil.saveInFile(definitionHelper.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
+			out = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
+		} else {
+			out = Sglri.run_sglri(definitionHelper.kompiled.getAbsolutePath() + "/pgm/Program.tbl", startSymbol, content);
+		}
 
 		out = out.accept(new PriorityFilter(definitionHelper));
 		out = out.accept(new PreferAvoidFilter(definitionHelper));
@@ -121,7 +129,8 @@ public class ProgramLoader {
 
 			return (Term) out;
 		} catch (IOException e) {
-			throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse program: " + e.getLocalizedMessage(), filename, "File system."));
+			throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse program: " + e.getLocalizedMessage(), filename,
+					"File system."));
 		}
 	}
 }
