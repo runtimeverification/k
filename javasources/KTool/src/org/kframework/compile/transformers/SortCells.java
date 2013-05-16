@@ -61,6 +61,7 @@ public class SortCells extends CopyOnWriteTransformer {
 
 	@Override
 	public ASTNode transform(Rule node) throws TransformerException {
+//        System.out.println(node.getLocation());
 		variables.clear();
 		substitution.clear();
 		Term body = node.getBody();
@@ -125,7 +126,7 @@ public class SortCells extends CopyOnWriteTransformer {
 				}
 				Cell fragment = new Cell();
 				fragment.setLabel(definitionHelper.getCellSort(sort));
-				System.err.println(fragment.getLabel());
+//				System.err.println(fragment.getLabel());
 				fragment.setContents(t);
 				fragment = (Cell) transformTop(fragment, true);
 				out = fragment;
@@ -230,6 +231,7 @@ public class SortCells extends CopyOnWriteTransformer {
 		ConfigurationStructureMap config = configurationStructureMap;
 		String id = node.getId();
 		if (fragment) {
+//            System.out.println(node);
 			id = id.substring(0, id.length()-"-fragment".length());
 		}
 		ConfigurationStructure cfgStr = config.get(id);
@@ -284,11 +286,8 @@ public class SortCells extends CopyOnWriteTransformer {
 			if (!(replacementTerm instanceof Empty) && replacementTerm != null) {
 				iCells.add(replacementTerm);
 			}
-			if (iCells.isEmpty() && fragment) {
-                if (replacementTerm != null)
-                    outCells.add(replacementTerm);
-                else
-                    outCells.add(new Bag());
+			if (iCells.isEmpty()) {
+                outCells.add(new Empty(MetaK.cellFragment(cell.getId())));
 			} else {
 				if (multiplicity == Cell.Multiplicity.ONE) {
 					if (iCells.size() != 1) {
