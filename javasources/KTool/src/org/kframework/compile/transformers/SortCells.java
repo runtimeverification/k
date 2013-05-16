@@ -62,17 +62,47 @@ public class SortCells extends CopyOnWriteTransformer {
 	@Override
 	public ASTNode transform(Rule node) throws TransformerException {
 //        System.out.println(node.getLocation());
+//        node = checkCollapsingCellRule(node);
+        boolean change = false;
 		variables.clear();
 		substitution.clear();
 		Term body = node.getBody();
 		ASTNode bodyNode = body.accept(this);
-		if (bodyNode == body) return node;
+        if (bodyNode != body) change = true;
+        Term condition = node.getCondition();
+        Term conditionNode = null;
+        if (condition != null) {
+           conditionNode = (Term) condition.accept(this);
+           if (conditionNode != condition) change = true;
+        }
+        if (!change) return node;
 		node = node.shallowCopy();
 		node.setBody((Term) bodyNode);
+        node.setCondition(conditionNode);
 		return node.accept(new ResolveRemainingVariables(definitionHelper));
 	}
 
-	private Map<String,List<Term>> cellMap;
+//    private Rule checkCollapsingCellRule(Rule node) {
+//        assert node.getBody() instanceof Rewrite;
+//        Rewrite rew = (Rewrite) node.getBody();
+//        if (rew.getLeft() instanceof Cell) {
+//            Term right = rew.getRight();
+//            if (right instanceof Cell) return node;
+//            if (right instanceof Bag) {
+//                assert ((Bag) right).getContents().isEmpty();
+//            } else {
+//                assert right instanceof Empty;
+//            }
+//            right = new Empty(MetaK.cellFragment(((Cell) rew.getLeft()).getId()));
+//            rew = rew.shallowCopy();
+//            rew.setRight(right);
+//            node = node.shallowCopy();
+//            node.setBody(rew);
+//        }
+//        return node;
+//    }
+
+    private Map<String,List<Term>> cellMap;
 	Map<String, Term> renamedVars;
 	Variable framingVariable;
 
@@ -229,6 +259,7 @@ public class SortCells extends CopyOnWriteTransformer {
 	ASTNode transformTop(Cell node, boolean fragment) {
 		ConfigurationStructureMap config = configurationStructureMap;
 		String id = node.getId();
+        node = node.shallowCopy();
 		if (fragment) {
 //            System.out.println(node);
 			id = id.substring(0, id.length()-"-fragment".length());
@@ -398,7 +429,7 @@ public class SortCells extends CopyOnWriteTransformer {
 			if (oldTerm.getSort(definitionHelper).equals(MetaK.cellSort(cell.getId()))) {
 				GlobalSettings.kem.register(new KException(KException
 						.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER,
-						"Multiplicity constraints clash for cell" +
+						"Multiplicity constraints clash for cell " +
 								cell.getId(),
 						getName(), cell.getFilename(), cell.getLocation()));
 			}
@@ -442,7 +473,7 @@ public class SortCells extends CopyOnWriteTransformer {
 			if (variables.containsKey(node)) {
 				GlobalSettings.kem.register(new KException(KException
 						.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER,
-						"Unresolved cell contents variable" + node + " .  " +
+						"Unresolved cell contents variable " + node + " .  " +
 								"Maybe you forgot to annotate the operation " +
 								"as containing a CellFragment.",
 						getName(), node.getFilename(), node.getLocation()));

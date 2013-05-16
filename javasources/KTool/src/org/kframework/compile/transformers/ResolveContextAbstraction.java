@@ -80,7 +80,7 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 				visitor.max = min;
 			}
 			LinkedList<Term> cells = visitor.levels.get(min);
-			if (cells.size() > 1) change = true;
+			if (areMultipleCells(cells)) change = true;
 			ConfigurationStructure parent = findParent(cells.peek());
 			parentCell = createParentCell(parent, cells);
 			if (!cells.isEmpty()) {
@@ -97,16 +97,30 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 		} while (min < visitor.max);
 		if (change) {
 			rule = rule.shallowCopy();
-			if (MetaK.getTopCells(parentCell.getContents(), definitionHelper).size() > 1) {
-				rule.setBody(parentCell);
-			} else {
-				rule.setBody(parentCell.getContents());
-			}
+//			if (MetaK.getTopCells(parentCell.getContents(), definitionHelper).size() > 1) {
+            rule.setBody(parentCell);
+//			} else {
+//            rule.setBody(parentCell.getContents());
+//			}
 		}
 		return rule;
 	}
-	
-	@Override
+
+    private boolean areMultipleCells(LinkedList<Term> cells) {
+        if (cells.size() > 1) return true;
+        if (cells.isEmpty()) return false;
+        Term trm = cells.element();
+        if (trm instanceof Cell) return false;
+        assert trm instanceof Rewrite;
+        Rewrite rew = (Rewrite) trm;
+        Term left = rew.getLeft();
+        Term right = rew.getRight();
+        if (!(left instanceof Cell && right instanceof Cell)) return true;
+        if (!((Cell) left).getId().equals(((Cell) right).getId())) return true;
+        return false;
+    }
+
+    @Override
 	public ASTNode transform(Cell node) throws TransformerException {
 		boolean change = false;
 		Cell cell = (Cell)super.transform(node);

@@ -253,7 +253,7 @@ The later is useful for example for checking whether there are cycles
 in the class extends relation. */
 
   configuration <T color="yellow">
-                  <tasks color="orange">
+                  <tasks color="orange" multiplicity="?">
                     <task multiplicity="*" color="yellow">
                       <k color="green"> $PGM:Stmts </k>
                       <tenv multiplicity="?" color="cyan"> .Map </tenv>
