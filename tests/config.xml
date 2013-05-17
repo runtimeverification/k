@@ -470,6 +470,7 @@
       folder="dist/tutorial/2_imp"
       extensions="imp"
       report-dir="symbolic.imp"
+      title="symbolic"
       >
     <kompile-option name="--symbolic" />
   </test>

@@ -388,6 +388,8 @@ public class Test implements Comparable<Test> {
 		else
 			name = new File(language).getParent();
 
+		name = tag + "/" + name;
+		
 		testsuite.setAttribute(NAME,
 				name.replaceFirst("/", "\\."));
 		return testsuite;
