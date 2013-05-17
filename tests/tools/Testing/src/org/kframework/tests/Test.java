@@ -480,10 +480,8 @@ public class Test implements Comparable<Test> {
 		if (reportDir != null)
 			name = reportDir + "-report.xml";
 
-//		System.out.println("Tag: " + tag);
 		if (!tag.equals(""))
 			name = tag + "." + name;
-//		System.out.println("Name: " + name);
 		return name;
 	}
 
@@ -553,6 +551,7 @@ public class Test implements Comparable<Test> {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		System.out.println("saved: " + reportPath);
 	}
 
 	public static String format(Document document) {
