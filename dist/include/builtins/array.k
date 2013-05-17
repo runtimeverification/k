@@ -36,7 +36,7 @@ module ARRAY
   
   rule I:Int !=K J:Int => I =/=Int J
   rule I:Int =K J:Int => I ==Int J
-  rule isInt(select(A:Array, I:K)) => true /*when isSymbolicInt(I)*/ [anywhere]
+//  rule isInt(select(A:Array, I:K)) => true when isSymbolicInt(I) [anywhere]
 
   rule I:Bool !=K J:Bool => I =/=Bool J
   rule I:Bool =K J:Bool => I ==Bool J

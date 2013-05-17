@@ -6,12 +6,9 @@ import java.util.List;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Attribute;
-import org.kframework.kil.Attributes;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.KApp;
-import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.Rewrite;
@@ -58,7 +55,7 @@ public class AddPathCondition extends CopyOnWriteTransformer {
             return node;
 
         Term condition = node.getCondition();
-        Term originalCondition = condition.shallowCopy();
+//        Term originalCondition = condition.shallowCopy();
         CollapseAndBoolTransformer cnft = new CollapseAndBoolTransformer(definitionHelper);
         condition = (Term) node.getCondition().accept(cnft);
 
@@ -110,9 +107,10 @@ public class AddPathCondition extends CopyOnWriteTransformer {
                 myList.add(condition);
                 myList.add(checkSat(pathCondition));
                 cond = new KApp(KLabelConstant.ANDBOOL_KLABEL, new KList(myList));
-            }else {
-            	cond = originalCondition;
             }
+//            else {
+//            	cond = originalCondition;
+//            }
 
             // add transition attribute
 //            List<Attribute> attrs = node.getAttributes().getContents();
