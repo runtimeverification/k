@@ -123,48 +123,54 @@ public class SortCells extends CopyOnWriteTransformer {
 			node = (TermCons) astNode;
 		}
 		Production production = node.getProduction(definitionHelper);
-		Map<Integer, String> cellfragments = new HashMap<Integer, String>();
-		int i = 0;
-		for (ProductionItem pitem : production.getItems()) {
-			if (pitem instanceof Sort) {
-				final Sort sort = (Sort) pitem;
-				final String realName = sort.getRealName();
-				final Integer key = new Integer(i);
-				String oldsort = cellfragments.get(key);
-				if (MetaK.isCellFragment(realName)) {
-					if (oldsort != null && !oldsort.equals(realName)) {
-						//exception
-					}
-					cellfragments.put(key, realName);
-				} else if (oldsort != null) {
-					// exception
-				}
-				i++;
-			}
-		}
-		if (cellfragments.isEmpty()) return node;
+		Map<Integer, String> cellsorts = getCellSorts(production);
+		int i;
+		if (cellsorts.isEmpty()) return node;
 		TermCons outNode = node.shallowCopy();
 		final ArrayList<Term> outList = new ArrayList<Term>();
 		outNode.setContents(outList);
 		i = 0;
 		for (Term t : node.getContents()) {
 			Term out = t;
-			String sort = cellfragments.get(new Integer(i));
+			String sort = cellsorts.get(new Integer(i));
 			if (sort != null) {
-				if (!KSort.valueOf(t.getSort(definitionHelper)).mainSort().equals(KSort.Bag)){
-					//exception --- should be a Bag
+				assert (KSort.valueOf(t.getSort(definitionHelper))
+						.mainSort().equals(KSort.Bag));
+				if (MetaK.isCellFragment(sort)) {
+					Cell fragment = new Cell();
+					fragment.setLabel(definitionHelper.getCellSort(sort));
+//					System.err.println(fragment.getLabel());
+					fragment.setContents(t);
+					fragment = (Cell) transformTop(fragment, true);
+					out = fragment;
+				} else {
+					out = out.shallowCopy();
+					out.setSort(sort);
 				}
-				Cell fragment = new Cell();
-				fragment.setLabel(definitionHelper.getCellSort(sort));
-//				System.err.println(fragment.getLabel());
-				fragment.setContents(t);
-				fragment = (Cell) transformTop(fragment, true);
-				out = fragment;
 			}
 			outList.add(out);
 			i++;
 		}
 		return outNode;
+	}
+
+	private Map<Integer, String> getCellSorts(Production production) {
+		Map<Integer, String> cellsorts = new HashMap<Integer, String>();
+		int i = 0;
+		for (ProductionItem pitem : production.getItems()) {
+			if (pitem instanceof Sort) {
+				final Sort sort = (Sort) pitem;
+				final String realName = sort.getRealName();
+				final Integer key = new Integer(i);
+				String oldsort = cellsorts.get(key);
+				if (MetaK.isCellSort(realName)) {
+					assert (oldsort == null || oldsort.equals(realName)) ;
+					cellsorts.put(key, realName);
+				} else assert  (oldsort == null) ;
+				i++;
+			}
+		}
+		return cellsorts;
 	}
 
 	@Override
@@ -190,14 +196,10 @@ public class SortCells extends CopyOnWriteTransformer {
 					final String realName = sort.getRealName();
 					final Integer key = new Integer(i);
 					String oldsort = cellfragments.get(key);
-					if (MetaK.isCellFragment(realName)) {
-						if (oldsort != null && !oldsort.equals(realName)) {
-							//exception
-						}
+					if (MetaK.isCellSort(realName)) {
+						assert (oldsort == null || oldsort.equals(realName));
 						cellfragments.put(key, realName);
-					} else if (oldsort != null) {
-						// exception
-					}
+					} else assert (oldsort == null);
 					i++;
 				}
 			}
@@ -220,35 +222,33 @@ public class SortCells extends CopyOnWriteTransformer {
 		for (Term t : kList.getContents()) {
 			String sort = cellfragments.get(new Integer(i));
 			if (sort != null) {
-				if (!(t instanceof KApp)) {
-					// exception -- should be a Bag KLabel
-				}
+				assert (t instanceof KApp);
 				t = t.shallowCopy();
 				KApp kApp = (KApp) t;
 				if (kApp.getChild() instanceof KList) {
-					if (!((KList) kApp
-						.getChild()).getContents().isEmpty()) {
-					//exception -- should be empty list here
-					}
-				} else if (!(kApp.getChild() instanceof Empty)) {
-					//exception --- should be empty
-				}
+					assert((KList) kApp
+						.getChild()).getContents().isEmpty();
+				} else assert  ((kApp.getChild() instanceof Empty));
 				final Term kAppLabel = kApp.getLabel().shallowCopy();
-				if (!(kAppLabel instanceof KInjectedLabel)) {
-					//exception --- Should be a KInjected Bag label
-				}
+				assert ((kAppLabel instanceof KInjectedLabel));
 				kApp.setLabel(kAppLabel);
 
 				final KInjectedLabel kInjectedLabel = (KInjectedLabel) kAppLabel;
 				Term bag = kInjectedLabel.getTerm();
-				if (!KSort.valueOf(bag.getSort(definitionHelper)).mainSort().equals(KSort.Bag)){
-					//exception --- should be a Bag
+				assert  bag.getSort(definitionHelper).equals("Bag")
+						||	bag.getSort(definitionHelper).equals("BagItem")
+						|| MetaK.isCellSort(bag.getSort(definitionHelper));
+				if (MetaK.isCellFragment(sort)) {
+					Cell fragment = new Cell();
+					fragment.setLabel(definitionHelper.getCellSort(sort));
+					fragment.setContents(bag);
+					fragment = (Cell) transformTop(fragment, true);
+					kInjectedLabel.setTerm(fragment);
+				} else {
+					bag = bag.shallowCopy();
+					bag.setSort(sort);
+					kInjectedLabel.setTerm(bag);
 				}
-				Cell fragment = new Cell();
-				fragment.setLabel(definitionHelper.getCellSort(sort));
-				fragment.setContents(bag);
-				fragment = (Cell) transformTop(fragment, true);
-				kInjectedLabel.setTerm(fragment);
 			}
 			outList.add(t);
 			i++;
