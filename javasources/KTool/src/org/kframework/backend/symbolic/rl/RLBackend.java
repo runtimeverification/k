@@ -6,7 +6,6 @@ import org.kframework.backend.maude.MaudeBackend;
 import org.kframework.backend.maude.MaudeBuiltinsFilter;
 import org.kframework.backend.symbolic.*;
 import org.kframework.backend.unparser.UnparserFilter;
-import org.kframework.compile.AddEval;
 import org.kframework.compile.FlattenModules;
 import org.kframework.compile.ResolveConfigurationAbstraction;
 import org.kframework.compile.checks.CheckConfigurationCells;
@@ -130,7 +129,6 @@ public class RLBackend  extends BasicBackend implements Backend{
 		steps.add(new AddTopCellConfig(definitionHelper));
 		steps.add(new AddConditionToConfig(definitionHelper)); // symbolic step
 		steps.add(new AddTopCellRules(definitionHelper));
-		steps.add(new AddEval(definitionHelper));
 		steps.add(new ResolveBinder(definitionHelper));
 		steps.add(new ResolveAnonymousVariables(definitionHelper));
 		steps.add(new ResolveBlockingInput(definitionHelper));
