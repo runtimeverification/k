@@ -62,7 +62,7 @@ public class Test implements Comparable<Test> {
 	private static final String ERR = ".err";
 	private static final String OUT = ".out";
 	private static final String VALUE = "value";
-	
+
 	/* data read from config.xml */
 	private String language;
 	private String programsFolder;
@@ -276,7 +276,7 @@ public class Test implements Comparable<Test> {
 
 		// get Jenkins tag
 		tag = test.getAttribute(TITLE);
-		
+
 		// get pdf
 		if (test.getAttribute(PDF2).equals(YES)
 				|| test.getAttribute(PDF2).equals(""))
@@ -292,12 +292,12 @@ public class Test implements Comparable<Test> {
 			recursive = false;
 
 		// extensions
-		extensions = Arrays.asList(test.getAttribute(EXTENSIONS2)
-				.split("\\s+"));
+		extensions = Arrays
+				.asList(test.getAttribute(EXTENSIONS2).split("\\s+"));
 
 		// exclude programs
-		excludePrograms = Arrays.asList(test.getAttribute(EXCLUDE).split(
-				"\\s+"));
+		excludePrograms = Arrays.asList(test.getAttribute(EXCLUDE)
+				.split("\\s+"));
 
 		// kompile options
 		NodeList kompileOpts = test.getElementsByTagName(KOMPILE_OPTION);
@@ -389,10 +389,9 @@ public class Test implements Comparable<Test> {
 			name = new File(language).getParent();
 
 		if (!tag.equals(""))
-		name = tag + "/" + name;
-		
-		testsuite.setAttribute(NAME,
-				name.replaceFirst("/", "\\."));
+			name = tag + "/" + name;
+
+		testsuite.setAttribute(NAME, name.replaceFirst("/", "\\."));
 		return testsuite;
 	}
 
@@ -540,18 +539,16 @@ public class Test implements Comparable<Test> {
 		try {
 
 			File repFile = new File(reportPath);
-			if (!repFile.exists())	
+			if (!repFile.exists())
 				repFile.createNewFile();
-			
-			FileWriter fstream = new FileWriter(Configuration.JR
-					+ Configuration.FS + getReportFilename());
+
+			FileWriter fstream = new FileWriter(reportPath);
 			BufferedWriter out = new BufferedWriter(fstream);
 			out.write(format(doc));
 			out.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		System.out.println("saved: " + reportPath);
 	}
 
 	public static String format(Document document) {
@@ -613,11 +610,24 @@ public class Test implements Comparable<Test> {
 	@Override
 	public int compareTo(Test o) {
 		int d;
-		if (o == this) return 0;
-		d = this.language.compareTo(o.language);
-		if (d != 0) return d;
+		if (o == this)
+			return 0;
+		d = this.getReportFilename().compareTo(o.getReportFilename());
+		if (d != 0)
+			return d;
 		d = this.programsFolder.compareTo(o.programsFolder);
 		return d;
 	}
 
+	@Override
+	public String toString() {
+		return "[" + language + "]" + " ---> " + getReportFilename() + "\n"
+				+ programs + "\n\n";
+	}
+
+	public String getTag() {
+		if (!tag.equals(""))
+			return "(" + tag + ")";
+		return "";
+	}
 }

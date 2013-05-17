@@ -75,15 +75,18 @@ public class Main {
 		}
 
 		// compile definitions first
-		System.out.println("Kompiling the language definitions...");
+		int i = 0;
+		System.out.print("Kompiling the language definitions...");
 		Map<Test, Task> definitions = new TreeMap<Test, Task>();
 		for (Test test : alltests) {
 			Task def = test.getDefinitionTask(homeDir);
 			definitions.put(test, def);
 			Execution.execute(def);
+			i++;
 		}
+		System.out.println("(" + i + ")");
 		Execution.finish();
-
+		
 		// report
 		for (Entry<Test, Task> entry : definitions.entrySet()) {
 			entry.getKey().reportCompilation(entry.getValue());
@@ -104,7 +107,8 @@ public class Main {
 		System.out.println(kompileStatus);
 
 		// compile pdf definitions
-		System.out.println("Generating PDF documentation...");
+		i = 0;
+		System.out.print("Generating PDF documentation...");
 		Map<Test, Task> pdfDefinitions = new TreeMap<Test, Task>();
 		for (Test test : alltests) {
 			// also compile pdf if set
@@ -112,9 +116,10 @@ public class Main {
 				Task pdfDef = test.getPdfDefinitionTask(homeDir);
 				pdfDefinitions.put(test, pdfDef);
 				Execution.execute(pdfDef);
+				i++;
 			}
 		}
-
+		System.out.println("(" + i + ")");
 		Execution.finish();
 		// report
 		for (Entry<Test, Task> entry : pdfDefinitions.entrySet()) {
@@ -142,19 +147,21 @@ public class Main {
 			Test test = dentry.getKey();
 			if (test.compiled(dentry.getValue())) {
 
-				System.out.println("Running "
+				System.out.print("Running "
 						+ test.getLanguage()
-						+ " programs... ");
+						+ " programs... " + test.getTag());
 
 				// execute
 				List<Program> pgms = test.getPrograms();
 				Map<Program, Task> all = new TreeMap<Program, Task>();
+				i = 0;
 				for (Program p : pgms) {
 					Task task = p.getTask(homeDir);
 					all.put(p, task);
 					Execution.tpe.execute(task);
+					i ++;
 				}
-
+				System.out.println("(" + i + ")");
 				Execution.finish();
 
 				// report
