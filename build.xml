@@ -148,4 +148,9 @@
 			<property name="cfg" value="${config}" />
 		</ant>
 	</target>
+	<target name="test-clean">
+		<ant antfile="build.xml" dir="./tests/tools/Testing" target="clean">
+		  <property name="cfg" value="${config}" />
+		</ant>
+	</target>
 </project>

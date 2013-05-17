@@ -7,4 +7,9 @@
       <arg value="${cfg}"/>
     </java>
   </target>
+  <target name="clean">
+    <delete>
+      <fileset dir="src/org/kframework/" includes="**/*.class" />
+    </delete>
+  </target>
 </project>

@@ -51,20 +51,12 @@ public class Program implements Comparable<Program> {
 	}
 
 	public boolean success(Task task) {
-//		System.out.println(this.programPath);
-//		System.out.println("e>>>" + error + "<<<");
-//		System.out.println("e>>>" + task.getStderr() + "<<<");
-//		if(error !=null)
-//		System.out.println("e>>>" + task.getStderr().equals(error) + "<<<");
 		if (!task.getStderr().equals(error) && error != null)
 			return false;
 		
-//		System.out.println("o>>>" + output + "<<<");
-//		System.out.println("o>>>" + task.getStdout() + "<<<");
 		if (!task.getStdout().equals(output) && output != null)
 			return false;
 
-//		System.out.println("x>>>" + task.getExit() + "<<<");
 		if (error == null && task.getExit() != 0)
 			return false;
 		
