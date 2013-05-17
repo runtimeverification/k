@@ -388,6 +388,7 @@ public class Test implements Comparable<Test> {
 		else
 			name = new File(language).getParent();
 
+		if (!tag.equals(""))
 		name = tag + "/" + name;
 		
 		testsuite.setAttribute(NAME,
@@ -480,7 +481,8 @@ public class Test implements Comparable<Test> {
 			name = reportDir + "-report.xml";
 
 //		System.out.println("Tag: " + tag);
-		name = tag + "." + name;
+		if (!tag.equals(""))
+			name = tag + "." + name;
 //		System.out.println("Name: " + name);
 		return name;
 	}

@@ -469,7 +469,7 @@
       language="dist/tutorial/2_imp/lesson_4/imp.k"
       folder="dist/tutorial/2_imp"
       extensions="imp"
-      report-dir="symbolic.imp"
+      report-dir="imp"
       title="symbolic"
       >
     <kompile-option name="--symbolic" />
