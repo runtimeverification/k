@@ -9,6 +9,462 @@
   Testing the Tutorial languages and programs
 -->
 
+<!-- LAMBDA -->
+  <test 
+      language="dist/tutorial/1_lambda/lesson_1/lambda.k"
+      folder="dist/tutorial/1_lambda/lesson_1"
+      extensions="lambda"
+      />
+  <test 
+      language="dist/tutorial/1_lambda/lesson_2/lambda.k"
+      folder="dist/tutorial/1_lambda/lesson_1"
+      extensions="lambda"
+      exclude="omega.lambda"
+      />
+  <test 
+      language="dist/tutorial/1_lambda/lesson_3/lambda.k"
+      folder="dist/tutorial/1_lambda/lesson_1"
+      extensions="lambda"
+      exclude="omega.lambda"
+      />
+  <test 
+      language="dist/tutorial/1_lambda/lesson_4/lambda.k"
+      folder="dist/tutorial/1_lambda/lesson_1"
+      extensions="lambda"
+      exclude="omega.lambda"
+      />
+  <test
+      language="dist/tutorial/1_lambda/lesson_5/lambda.k"
+      folder="dist/tutorial/1_lambda/lesson_1
+              dist/tutorial/1_lambda/lesson_5"
+      extensions="lambda"
+      exclude="omega.lambda"
+      />
+  <test
+      language="dist/tutorial/1_lambda/lesson_6/lambda.k"
+      folder="dist/tutorial/1_lambda/lesson_1
+              dist/tutorial/1_lambda/lesson_5
+              dist/tutorial/1_lambda/lesson_6"
+      extensions="lambda"
+      exclude="omega.lambda"
+      />
+  <test
+      language="dist/tutorial/1_lambda/lesson_7/lambda.k"
+      folder="dist/tutorial/1_lambda"
+      extensions="lambda"
+      exclude="lesson_1/omega.lambda"
+      />
+  <test
+      language="dist/tutorial/1_lambda/lesson_8/lambda.k"
+      folder="dist/tutorial/1_lambda"
+      extensions="lambda"
+      exclude="lesson_1/omega.lambda"
+      />
+  <test
+      language="dist/tutorial/1_lambda/lesson_9/lambda.k"
+      folder="dist/tutorial/1_lambda"
+      extensions="lambda"
+      exclude="lesson_1/omega.lambda"
+      />
+
+<!-- IMP -->
+
+  <test
+      language="dist/tutorial/2_imp/lesson_1/imp.k"
+      folder="dist/tutorial/2_imp"
+      extensions="imp"
+      />
+  <test
+      language="dist/tutorial/2_imp/lesson_2/imp.k"
+      folder="dist/tutorial/2_imp"
+      extensions="imp"
+      />
+  <test
+      language="dist/tutorial/2_imp/lesson_3/imp.k"
+      folder="dist/tutorial/2_imp"
+      extensions="imp"
+      />
+  <test
+      language="dist/tutorial/2_imp/lesson_4/imp.k"
+      folder="dist/tutorial/2_imp"
+      extensions="imp"
+      />
+  <test
+      language="dist/tutorial/2_imp/lesson_5/imp.k"
+      folder="dist/tutorial/2_imp"
+      extensions="imp"
+      />
+
+<!-- LAMBDA++ -->
+
+  <test
+      language="dist/tutorial/3_lambda++/lesson_1/lambda.k"
+      folder="dist/tutorial/1_lambda dist/tutorial/3_lambda++"
+      extensions="lambda"
+      exclude="lesson_1/omega.lambda"
+      />
+  <test
+      language="dist/tutorial/3_lambda++/lesson_2/lambda.k"
+      folder="dist/tutorial/1_lambda/lesson_1"
+      extensions="lambda"
+      exclude="omega.lambda"
+      />
+  <test
+      language="dist/tutorial/3_lambda++/lesson_3/lambda.k"
+      folder="dist/tutorial/1_lambda"
+      extensions="lambda"
+      exclude="lesson_1/omega.lambda"
+      />
+  <test
+      language="dist/tutorial/3_lambda++/lesson_4/lambda.k"
+      folder="dist/tutorial/1_lambda dist/tutorial/3_lambda++"
+      extensions="lambda"
+      exclude="lesson_1/omega.lambda"
+      />
+  <test
+      language="dist/tutorial/3_lambda++/lesson_5/lambda.k"
+      folder="dist/tutorial/1_lambda dist/tutorial/3_lambda++"
+      extensions="lambda"
+      exclude="lesson_1/omega.lambda"
+      />
+  <test
+      language="dist/tutorial/3_lambda++/lesson_6/lambda.k"
+      folder="dist/tutorial/1_lambda dist/tutorial/3_lambda++"
+      extensions="lambda"
+      exclude="lesson_1/omega.lambda"
+      />
+
+<!-- IMP++ -->
+
+  <test
+      language="dist/tutorial/4_imp++/lesson_1/imp.k"
+      folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
+      extensions="imp"
+      exclude="lesson_7/spawn.imp"
+      />
+  <test
+      language="dist/tutorial/4_imp++/lesson_2/imp.k"
+      folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
+      extensions="imp"
+      exclude="lesson_7/spawn.imp"
+      />
+  <test
+      language="dist/tutorial/4_imp++/lesson_3/imp.k"
+      folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
+      extensions="imp"
+      exclude="lesson_7/spawn.imp" 
+      results="tests/tutorial/4_imp++/lesson_3" >
+      <kompile-option name="-superheat" value="division" />
+      <kompile-option name="-supercool" value="lookup increment" />
+      <program name="dist/tutorial/4_imp++/lesson_1/div.imp">
+        <krun-option name="-output-mode" value="pretty" />
+        <krun-option name="-search" />
+	<krun-option name="-no-color" />
+      </program>
+  </test>
+  <test
+      language="dist/tutorial/4_imp++/lesson_4/imp.k"
+      folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
+      extensions="imp"
+      exclude="lesson_7/spawn.imp"
+      results="tests/tutorial/4_imp++/lesson_4"
+      />
+  <test
+      language="dist/tutorial/4_imp++/lesson_5/imp.k"
+      folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
+      extensions="imp"
+      exclude="lesson_7/spawn.imp"
+      results="tests/tutorial/4_imp++/lesson_5"
+      />
+  <test
+      language="dist/tutorial/4_imp++/lesson_6/imp.k"
+      folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
+      extensions="imp"
+      exclude="lesson_7/spawn.imp"
+      results="tests/tutorial/4_imp++/lesson_5"
+      />
+  <test
+      language="dist/tutorial/4_imp++/lesson_7/imp.k"
+      folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
+      extensions="imp"
+      exclude="lesson_1/spawn.imp"
+      results="tests/tutorial/4_imp++/lesson_5"
+      />
+  <test
+      language="dist/tutorial/4_imp++/lesson_8/imp.k"
+      folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
+      extensions="imp"
+      exclude="lesson_1/spawn.imp"
+      results="tests/tutorial/4_imp++/lesson_5"
+      />
+
+<!-- TYPES -->
+
+  <test
+      language="dist/tutorial/5_types/lesson_1/imp.k"
+      folder="dist/tutorial/2_imp
+              dist/tutorial/4_imp++"
+      extensions="imp"
+      exclude="lesson_1/spawn.imp"
+      />
+  <test
+      language="dist/tutorial/5_types/lesson_2/lambda.k"
+      folder="dist/tutorial/5_types/lesson_2"
+      extensions="lambda"
+      />
+  <test
+      language="dist/tutorial/5_types/lesson_3/lambda.k"
+      folder="dist/tutorial/5_types/lesson_2"
+      extensions="lambda"
+      />
+  <test
+      language="dist/tutorial/5_types/lesson_4/lambda.k"
+      folder="dist/tutorial/5_types/lesson_4"
+      extensions="lambda"
+      />
+  <test
+      language="dist/tutorial/5_types/lesson_5/lambda.k"
+      folder="dist/tutorial/5_types/lesson_4
+              dist/tutorial/5_types/lesson_5"
+      extensions="lambda"
+      />
+  <test
+      language="dist/tutorial/5_types/lesson_6/lambda.k"
+      folder="dist/tutorial/5_types/lesson_4
+              dist/tutorial/5_types/lesson_5"
+      extensions="lambda"
+      />
+  <test
+      language="dist/tutorial/5_types/lesson_7/lambda.k"
+      folder="dist/tutorial/5_types/lesson_4
+              dist/tutorial/5_types/lesson_5
+              dist/tutorial/5_types/lesson_6"
+      extensions="lambda"
+      />
+  <test
+      language="dist/tutorial/5_types/lesson_8/lambda.k"
+      folder="dist/tutorial/5_types/lesson_4
+              dist/tutorial/5_types/lesson_5
+              dist/tutorial/5_types/lesson_6"
+      extensions="lambda"
+      />
+  <test
+      language="dist/tutorial/5_types/lesson_9/lambda.k"
+      folder="dist/tutorial/5_types/lesson_4
+              dist/tutorial/5_types/lesson_5
+              dist/tutorial/5_types/lesson_6"
+      extensions="lambda"
+      />
+
+<!--
+  SIMPLE
+-->
+
+  <test
+      language="dist/examples/simple/untyped/simple-untyped.k"
+      folder="dist/examples/simple/untyped/programs"
+      extensions="simple"
+      exclude="diverse/dekker.simple"
+      results="tests/examples/simple-untyped"
+      />
+  <test 
+      language="dist/examples/simple/typed/dynamic/simple-typed-dynamic.k"
+      folder="dist/examples/simple/typed/programs"
+      extensions="simple"
+      exclude="diverse/dekker.simple"
+      results="tests/examples/simple-typed-dynamic"
+      />
+  <test 
+      language="dist/examples/simple/typed/static/simple-typed-static.k"
+      folder="dist/examples/simple/typed/programs"
+      extensions="simple"
+      exclude="diverse/dekker.simple"
+      />
+
+<!--
+  KOOL
+-->
+
+  <test
+      language="dist/examples/kool/untyped/kool-untyped.k"
+      folder="dist/examples/kool/untyped/programs"
+      extensions="kool"
+      results="tests/examples/kool-untyped"
+      />
+  <test
+      language="dist/examples/kool/typed/dynamic/kool-typed-dynamic.k"
+      folder="dist/examples/kool/typed/programs"
+      extensions="kool"
+      results="tests/examples/kool-typed-dynamic"
+      />
+  <test
+      language="dist/examples/kool/typed/static/kool-typed-static.k"
+      folder="dist/examples/kool/typed/programs"
+      extensions="kool"
+      results="tests/examples/kool-typed-static"
+      />
+
+<!--
+  QUINE
+-->
+  <test
+      language="dist/examples/quine/explicit/quine-explicit.k"
+      folder="tests/examples/quine-explicit"
+      results="tests/examples/quine-explicit"
+      extensions="quine" >
+  </test>
+  <test
+      language="dist/examples/quine/short/quine-short.k"
+      folder="tests/examples/quine-short"
+      results="tests/examples/quine-short"
+      extensions="quine" >
+  </test>
+
+<!--
+  FUN
+-->
+
+  <test 
+      language="dist/examples/fun/untyped/fun-untyped.k"
+      folder="dist/examples/fun/programs"
+      extensions="fun"
+      >
+    <kompile-option name="--transition" value="otherwise"/>
+  </test>
+
+<!--
+  LOGIK
+-->
+
+  <test 
+      language="dist/examples/logik/logik.k"
+      folder="dist/examples/logik/programs"
+      extensions="logik"
+      results="tests/examples/logik"
+      >
+    <all-programs>
+      <krun-option name="--search" />
+      <krun-option name="--bound" value="2" />
+      <krun-option name="--no-color" />
+    </all-programs>
+  </test>
+
+
+<!--
+  AGENT
+-->
+
+  <test 
+      language="dist/examples/agent/agent.k"
+      folder="dist/examples/agent/programs"
+      extensions="agent"
+      results="tests/examples/agent"
+      >
+  </test>
+
+<!--
+  BF
+-->
+
+  <test 
+      language="dist/examples/bf/bf.k"
+      folder="dist/examples/bf/programs"
+      extensions="bf"
+      results="tests/examples/bf"
+      >
+  </test>
+
+<!--
+  IMP-SYMBOLIC
+-->
+ 
+  <test 
+      language="dist/examples/imp-symbolic/imp.k"
+      folder="dist/examples/imp-symbolic/programs"
+      extensions="imp"
+      >
+    <all-programs>
+      <krun-option name="--search" />
+      <krun-option name="--parser" value="&quot;kast -groundParser&quot;"/>
+      <krun-option name="--no-color" />
+    </all-programs>
+  </test>
+
+<!--
+  IMP-HOARE
+-->
+ 
+  <test 
+      language="dist/examples/imp-hoare/imp.k"
+      folder="dist/examples/imp-hoare/programs"
+      extensions="imp"
+      >
+  </test>
+
+<!--
+  IMP-REACHABILITY
+-->
+ 
+  <test 
+      language="dist/examples/imp-reachability/imp.k"
+      folder="dist/examples/imp-reachability"
+      extensions="imp"
+      exclude="pgm-1.imp pgm-2.imp pgm-3.imp"
+      >
+    <all-programs>
+      <krun-option name="--search" />
+      <krun-option name="--depth" value="5" />
+      <krun-option name="--parser" value="&quot;kast -groundParser&quot;"/>
+      <krun-option name="--no-color" />
+    </all-programs>
+  </test>
+
+
+<!--
+    Cink ltlmc
+-->
+
+  <test
+      language="dist/examples/cink/ltlmc/cink.k"
+      folder="dist/examples/cink/ltlmc/programs"
+      extensions="cink"
+      results="tests/examples/cink/ltlmc" 
+      exclude="form-peterson.cink form-dekker.cink form-threads.cink peterson-wrong1.cink peterson-wrong2.cink" >
+      <kompile-option name="-transition" value="kripke" />
+      <all-programs>
+        <krun-option name="-ltlmc" value="[]Ltl ((eqTo(critical1, 1) ->Ltl eqTo(critical2, 0)) /\Ltl (eqTo(critical2, 1) ->Ltl eqTo(critical1, 0)))" />
+      </all-programs>
+  </test>
+
+
+<!--
+    Cink basic
+-->
+
+  <test
+      language="dist/examples/cink/basic/cink.k"
+      folder="dist/examples/cink/basic/programs"
+      extensions="cink"
+      results="tests/examples/cink/basic" 
+      exclude="fact.cink prim.cink"
+      >
+  </test>
+
+<!--
+    Program equivalence
+-->
+
+  <test
+      language="dist/examples/prog-equiv/peq.k"
+      folder="dist/examples/prog-equiv/programs"
+      extensions="peq"
+      results="tests/examples/prog-equiv/" > 
+      <kompile-option name="-addTopCell" />
+  </test>
+
+<!--
+    
+-->
   <test
       language="dist/tutorial/2_imp/lesson_4/imp.k"
       folder="dist/tutorial/2_imp"
@@ -18,5 +474,160 @@
     <kompile-option name="--symbolic" />
   </test>
 
+
+<!--
+    Regression tests
+-->
+
+  <test
+      language="tests/regression/issue552/issue.k"
+  />
+  <test
+      language="tests/regression/issue529/issue.k"
+  />
+  <test
+      language="tests/regression/defaultTerms1/issue.k"
+  />
+  <test
+      language="tests/regression/freshMOS/issue.k"
+      folder="tests/regression/freshMOS/programs"
+      results="tests/regression/freshMOS/tests"
+      extensions="issue"
+  />
+  <test
+      language="tests/regression/openCells1/issue.k"
+      folder="tests/regression/openCells1/programs"
+      results="tests/regression/openCells1/tests"
+      extensions="issue"
+  />
+  <test
+      language="tests/regression/sets-issue/issue.k"
+      folder="tests/regression/sets-issue/programs"
+      results="tests/regression/sets-issue/tests"
+      extensions="issue"
+  />
+  <test
+      language="tests/regression/mapitem2klabel/issue.k"
+  />
+  <test
+      language="tests/regression/issue/issue.k"
+      folder="tests/regression/issue/programs"
+      results="tests/regression/issue/tests"
+      extensions="issue"
+  />
+  <test
+      language="tests/regression/issue403/issue.k"
+  />
+  <test
+      language="tests/regression/issue425/issue.k"
+  />
+  <test
+      language="tests/regression/issue466/issue.k"
+  />
+  <test
+      language="tests/regression/issue482/issue.k"
+  />
+  <test
+      language="tests/regression/issue483/issue.k"
+  />
+  <test
+      language="tests/regression/strictness/issue.k"
+      folder="tests/regression/strictness/programs"
+      results="tests/regression/strictness/tests"
+      extensions="issue"
+  />
+
+  <test
+      language="tests/regression/issue580/issue.k"
+      folder="tests/regression/issue580/programs"
+      results="tests/regression/issue580/tests"
+      extensions="issue" >
+      <program name="tests/regression/issue580/programs/test.issue">
+        <krun-option name="-output-mode" value="pretty" />
+        <krun-option name="-search" />
+        <krun-option name="--pattern" value="&lt;k&gt; 6 &lt;/k&gt;" />
+      </program>
+  </test>
+
+  <test
+      language="tests/regression/subsort-klabel/issue.k"
+      folder="tests/regression/subsort-klabel/programs"
+      results="tests/regression/subsort-klabel/tests"
+      extensions="issue" >
+      <program name="tests/regression/subsort-klabel/programs/test.issue">
+        <krun-option name="-output-mode" value="pretty" />
+      </program>
+  </test>
+
+  <test
+      language="tests/regression/issue627/issue.k"
+      folder="tests/regression/issue627/programs"
+      results="tests/regression/issue627/tests"
+      extensions="issue" >
+  </test>
+
+  <test
+      language="tests/regression/issue631/issue.k"
+      folder="tests/regression/issue631"
+      results="tests/regression/issue631"
+      extensions="issue" >
+  </test>
+
+  <test
+      language="tests/regression/mostConcrete/issue.k"
+      folder="tests/regression/mostConcrete"
+      results="tests/regression/mostConcrete"
+      extensions="issue" >
+  </test>
+
+  <test
+      language="tests/regression/negative-test/issue.k"
+      folder="tests/regression/negative-test/programs"
+      results="tests/regression/negative-test/tests"
+      extensions="issue" >
+    <program name="tests/regression/negative-test/programs/test.issue">
+      <krun-option name="-no-color"/>
+    </program>
+  </test>
+
+  <test
+      language="tests/regression/escapedKLabel/issue.k"
+      folder="tests/regression/escapedKLabel/programs"
+      results="tests/regression/escapedKLabel/tests"
+      extensions="issue" >
+      <program name="tests/regression/escapedKLabel/programs/test.issue">
+        <krun-option name="-output-mode" value="pretty" />
+      </program>
+  </test>
+
+  <test
+      language="tests/regression/unparsing/issue.k"
+      folder="tests/regression/unparsing/programs"
+      extensions="issue"
+      results="tests/regression/unparsing/out/">
+      <all-programs>
+        <krun-option name="--output-mode" value="pretty" />
+      </all-programs>
+  </test>
+
+  <test
+      language="tests/regression/addbrackets/issue.k"
+      folder="tests/regression/addbrackets/programs"
+      extensions="issue"
+      results="tests/regression/addbrackets/out/">
+      <all-programs>
+        <krun-option name="--output-mode" value="pretty" />
+	<krun-option name="--parser" value="kast -groundParser" />
+        <krun-option name="--no-parens" />
+      </all-programs>
+  </test>
+
+
+
+  <test
+      language="tests/regression/issue647/issue.k"
+      folder="tests/regression/issue647"
+      results="tests/regression/issue647"
+      extensions="issue" />
 </tests>
 
