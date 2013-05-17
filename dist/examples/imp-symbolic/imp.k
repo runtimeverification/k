@@ -26,7 +26,7 @@ module IMP-SYNTAX
   syntax Ids   ::= List{Id,","}
 
   //@ Programs are \K configurations.
-  syntax Stmt  ::= "#ps" "(" Bag ")" 
+  syntax Stmt  ::= "#ps" "(" TCellFragment ")" 
 
   //@ Assertions syntax
   syntax Stmt  ::= "assert" "(" BExp ")" ";"  [strict]
