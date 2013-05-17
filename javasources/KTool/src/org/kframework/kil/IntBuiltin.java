@@ -134,7 +134,7 @@ public class IntBuiltin extends Token {
 
 	protected IntBuiltin(ATermAppl atm) {
 		super(atm);
-		value = new BigInteger(((ATermAppl)atm.getArgument(0)).getName());
+		value = new BigInteger(((ATermAppl) atm.getArgument(0)).getName());
 	}
 
 	/**

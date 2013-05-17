@@ -39,6 +39,7 @@ public class Sdf2Table {
 			errorStreamHandler = new ThreadedStreamHandler(errorStream);
 			errorStreamHandler.start();
 			process.waitFor();
+			errorStreamHandler.join();
 
 			String s = errorStreamHandler.getContent().toString();
 			// if some errors occurred (if something was written on the stderr stream)

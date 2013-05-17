@@ -42,13 +42,16 @@ public class ProgramLoader {
 	 * @param kappize
 	 *            If true, then apply KAppModifier to AST.
 	 */
-	public static ASTNode loadPgmAst(String content, String filename, Boolean kappize, String startSymbol, DefinitionHelper definitionHelper) throws IOException, TransformerException {
+	public static ASTNode loadPgmAst(String content, String filename, Boolean kappize, String startSymbol, DefinitionHelper definitionHelper) throws IOException,
+			TransformerException {
 		File tbl = new File(definitionHelper.kompiled.getCanonicalPath() + "/pgm/Program.tbl");
 
 		// ------------------------------------- import files in Stratego
 		ASTNode out;
 
-		if (true) {
+		if (GlobalSettings.fastKast) {
+			out = Sglri.run_sglri(definitionHelper.kompiled.getAbsolutePath() + "/pgm/Program.tbl", startSymbol, content);
+		} else {
 			org.kframework.parser.concrete.KParser.ImportTblPgm(tbl.getAbsolutePath());
 			String parsed = org.kframework.parser.concrete.KParser.ParseProgramString(content, startSymbol);
 			Document doc = XmlLoader.getXMLDoc(parsed);
@@ -59,8 +62,6 @@ public class ProgramLoader {
 			JavaClassesFactory.startConstruction(definitionHelper);
 			out = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
 			JavaClassesFactory.endConstruction();
-		} else {
-			out = Sglri.run_sglri(definitionHelper.kompiled.getAbsolutePath() + "/pgm/Program.tbl", startSymbol, content);
 		}
 
 		out = out.accept(new PriorityFilter(definitionHelper));
@@ -130,7 +131,8 @@ public class ProgramLoader {
 
 			return (Term) out;
 		} catch (IOException e) {
-			throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse program: " + e.getLocalizedMessage(), filename, "File system."));
+			throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse program: " + e.getLocalizedMessage(), filename,
+					"File system."));
 		}
 	}
 }

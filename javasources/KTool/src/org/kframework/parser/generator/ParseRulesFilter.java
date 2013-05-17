@@ -54,18 +54,17 @@ public class ParseRulesFilter extends BasicTransformer {
 		if (ss.getType().equals(Constants.RULE) || ss.getType().equals(Constants.CONTEXT)) {
 			try {
 				ASTNode config;
-				if (!GlobalSettings.testFactory) {
-					String parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
-					Document doc = XmlLoader.getXMLDoc(parsed);
+				String parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
+				Document doc = XmlLoader.getXMLDoc(parsed);
 
-					// replace the old xml node with the newly parsed sentence
-					Node xmlTerm = doc.getFirstChild().getFirstChild().getNextSibling();
-					XmlLoader.updateLocation(xmlTerm, XmlLoader.getLocNumber(ss.getLocation(), 0), XmlLoader.getLocNumber(ss.getLocation(), 1));
-					XmlLoader.addFilename(xmlTerm, ss.getFilename());
-					XmlLoader.reportErrors(doc, ss.getType());
+				// replace the old xml node with the newly parsed sentence
+				Node xmlTerm = doc.getFirstChild().getFirstChild().getNextSibling();
+				XmlLoader.updateLocation(xmlTerm, XmlLoader.getLocNumber(ss.getLocation(), 0), XmlLoader.getLocNumber(ss.getLocation(), 1));
+				XmlLoader.addFilename(xmlTerm, ss.getFilename());
+				XmlLoader.reportErrors(doc, ss.getType());
 
-					config = JavaClassesFactory.getTerm((Element) xmlTerm);
-				} else {
+				config = JavaClassesFactory.getTerm((Element) xmlTerm);
+				if (GlobalSettings.fastKast) {
 					// TODO: load directly from ATerms
 					System.out.println("Not implemented yet: org.kframework.parser.generator.ParseRulesFilter");
 					System.exit(0);

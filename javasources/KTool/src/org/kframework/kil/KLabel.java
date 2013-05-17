@@ -22,7 +22,7 @@ public abstract class KLabel extends Term {
 
 	public KLabel(ATermAppl atm) {
 		super(atm);
-		assert this.sort.equals(KSorts.KLABEL);
+		//assert this.sort.equals(KSorts.KLABEL);
 	}
 
 	protected KLabel(KLabel kLabel) {

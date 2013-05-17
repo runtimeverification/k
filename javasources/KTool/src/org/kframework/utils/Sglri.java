@@ -14,7 +14,6 @@ public class Sglri {
 
 	public static ASTNode run_sglri(String tablePath, String startSymbol, String content) {
 		ThreadedStreamHandler errorStreamHandler;
-		ThreadedStreamHandler inputStreamHandler;
 		ThreadedATermReader inputATermReader;
 
 		try {
@@ -45,12 +44,11 @@ public class Sglri {
 			// these need to run as java thread to get the standard error from the command.
 			errorStreamHandler = new ThreadedStreamHandler(process.getErrorStream());
 			inputATermReader = new ThreadedATermReader(process.getInputStream());
-			//inputStreamHandler = new ThreadedStreamHandler(process.getInputStream());
 			errorStreamHandler.start();
 			inputATermReader.start();
-			//inputStreamHandler.start();
 			process.waitFor();
 
+			errorStreamHandler.join();
 			String s = errorStreamHandler.getContent().toString();
 			// if some errors occurred (if something was written on the stderr stream)
 			if (!s.equals("")) {
@@ -60,7 +58,7 @@ public class Sglri {
 				System.exit(1);
 			}
 
-			//return JavaClassesFactory.getTerm(inputATermReader.getAterm());
+			inputATermReader.join();
 			ATerm atm = inputATermReader.getAterm();
 			return JavaClassesFactory.getTerm(atm);
 		} catch (IOException e) {

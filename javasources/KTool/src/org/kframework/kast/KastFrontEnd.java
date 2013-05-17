@@ -43,6 +43,11 @@ public class KastFrontEnd {
 			GlobalSettings.verbose = true;
 		}
 
+		// set fast kast option
+		if (cmd.hasOption("fastKast")) {
+			GlobalSettings.fastKast = true;
+		}
+
 		if (cmd.hasOption("nofilename")) {
 			GlobalSettings.noFilename = true;
 		}
@@ -129,7 +134,8 @@ public class KastFrontEnd {
 			if (definitionHelper.kompiled.exists()) {
 				File defXml = new File(definitionHelper.kompiled.getCanonicalPath() + "/defx.bin");
 				if (!defXml.exists()) {
-					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find the compiled definition.", "command line", defXml.getAbsolutePath()));
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find the compiled definition.", "command line",
+							defXml.getAbsolutePath()));
 				}
 
 				javaDef = (org.kframework.kil.Definition) BinaryLoader.fromBinary(new FileInputStream(defXml));

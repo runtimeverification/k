@@ -86,8 +86,7 @@ public class StringBuiltin extends Token {
 
 	protected StringBuiltin(ATermAppl atm) {
 		super(atm);
-		// TODO: get first child and then get the value
-		String s = atm.getName();
+		String s = ((ATermAppl) atm.getArgument(0)).getName();
 		value = StringEscapeUtils.unescapeJava(s.substring(1, s.length() - 1));
 	}
 

@@ -114,7 +114,7 @@ public class KompileOptionsParser {
 		checkOpt.addOption(check);
 		
 		// add options
-		options.addOption(new Option("testFactory", false, "Option to test new class instantiation"));
+		options.addOption(new Option("fastKast", false, "Option to test new class instantiation"));
 		options.addOptionGroup(verb);
 		options.addOptionGroup(main);
 		options.addOptionGroup(langGroup);

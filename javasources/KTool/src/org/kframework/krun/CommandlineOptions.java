@@ -51,11 +51,13 @@ public class CommandlineOptions {
 		Option help2 = new Option("?", false, "Display the detailed help message and quit");
 		Option version = new Option("v", "version", false, "Display the version number and quit");
 		Option verbose = new Option("verbose", false, "Display the time each step takes");
+		Option fastKast = new Option("fastKast", false, "Display the time each step takes");
 		
 		options.addOption(help1); getOptionList().add(help1);
 		options.addOption(help2); getOptionList().add(help2);
 		options.addOption(version); getOptionList().add(version);
 		options.addOption(verbose); getOptionList().add(verbose);
+		options.addOption(fastKast); getOptionList().add(fastKast);
 		
 		// Common K options
 		Option pgm = OptionBuilder.hasArg(true).withArgName("FILE").withLongOpt("pgm").withDescription("Name of the program to execute").create();

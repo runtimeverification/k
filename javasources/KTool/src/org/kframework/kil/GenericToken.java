@@ -71,9 +71,8 @@ public class GenericToken extends Token {
 
 	protected GenericToken(ATermAppl atm) {
 		super(atm);
-		// TODO: get first child and then get the value
 		this.tokenSort = StringUtil.getSortNameFromCons(atm.getName());
-		this.value = atm.getName();
+		this.value = ((ATermAppl) atm.getArgument(0)).getName();
 	}
 
 	/**

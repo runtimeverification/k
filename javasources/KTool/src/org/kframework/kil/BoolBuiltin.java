@@ -92,7 +92,7 @@ public class BoolBuiltin extends Token {
 	protected BoolBuiltin(ATermAppl atm) {
 		super(atm);
 		// TODO: get first child and then get the value
-		String s = atm.getName();
+		String s = ((ATermAppl) atm.getArgument(0)).getName();
 
 		checkValue(s);
 

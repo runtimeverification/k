@@ -701,6 +701,11 @@ public class Main {
 			GlobalSettings.verbose = true;
 		}
 
+		// set verbose
+		if (cmd.hasOption("fastKast")) {
+			GlobalSettings.fastKast = true;
+		}
+
 		if (GlobalSettings.verbose)
 			sw.printIntermediate("Deleting temporary krun directory");
 

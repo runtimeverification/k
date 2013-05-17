@@ -1,6 +1,5 @@
 package org.kframework.parser;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -15,12 +14,12 @@ public class ThreadedATermReader extends Thread {
 	ATerm aterm;
 
 	public ThreadedATermReader(InputStream inputStream) {
-		this.inputStream = (InputStream) new BufferedInputStream(inputStream);
+		this.inputStream = inputStream;
 	}
 
 	public void run() {
 		try {
-			System.out.println(inputStream.read()); // the BAF format starts with a '!' that has to go away first.
+			inputStream.read(); // the BAF format starts with a 0 that has to go away first.
 			aterm = new BAFReader(new PureFactory(), inputStream).readFromBinaryFile(false);
 		} catch (ParseError e1) {
 			e1.printStackTrace();

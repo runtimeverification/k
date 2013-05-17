@@ -38,8 +38,6 @@ public class KastOptionsParser {
 		Option exp = new Option("e", "expression", true, "an expression to parse passed on the command line");
 		tex2.addOption(tbl);
 		tex2.addOption(exp);
-		
-
 
 		// indentation options
 		Option prettyPrint = new Option("pretty", false, "pretty print the output");
@@ -60,6 +58,7 @@ public class KastOptionsParser {
 		parserGroup.addOption(binaryParser);
 
 		// add options
+		options.addOption(new Option("fastKast", false, "Option to test new class instantiation"));
 		options.addOptionGroup(verb);
 		options.addOptionGroup(main);
 		options.addOptionGroup(tex2);

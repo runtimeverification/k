@@ -1,5 +1,7 @@
 package org.kframework.kil.loader;
 
+import java.util.ArrayList;
+
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Attribute;
@@ -43,6 +45,7 @@ import org.kframework.kil.SetItem;
 import org.kframework.kil.Sort;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.Syntax;
+import org.kframework.kil.Term;
 import org.kframework.kil.TermComment;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Terminal;
@@ -54,6 +57,7 @@ import org.w3c.dom.Element;
 
 import aterm.ATerm;
 import aterm.ATermAppl;
+import aterm.ATermList;
 
 /**
  * Factory for creating KIL classes from XML nodes or ATerms.
@@ -66,13 +70,14 @@ public class JavaClassesFactory {
 	/** Set the definitionHelper to use */
 	public static synchronized void startConstruction(DefinitionHelper definitionHelper) {
 		assert JavaClassesFactory.definitionHelper == null;
-		JavaClassesFactory.definitionHelper = definitionHelper;		
+		JavaClassesFactory.definitionHelper = definitionHelper;
 	}
+
 	public static synchronized void endConstruction() {
 		assert JavaClassesFactory.definitionHelper != null;
-		JavaClassesFactory.definitionHelper = null;			
+		JavaClassesFactory.definitionHelper = null;
 	}
-	
+
 	public static ASTNode getTerm(Element element) {
 		assert definitionHelper != null;
 		// used for a new feature - loading java classes at first step (Basic Parsing)
@@ -247,8 +252,32 @@ public class JavaClassesFactory {
 			// return new Rule(appl);
 			// if (Constants.REWRITE.endsWith(appl.getNodeName()))
 			// return new Rewrite(appl);
-			if (appl.getName().endsWith("Syn"))
-				return new TermCons(appl);
+			if (appl.getName().endsWith("Syn")) {
+				if (appl.getName().endsWith("ListSyn") && appl.getArgument(0) instanceof ATermList) {
+					ATermList list = (ATermList) appl.getArgument(0);
+					TermCons head = null;
+					TermCons tc = null;
+					while (!list.isEmpty()) {
+						TermCons ntc = new TermCons(StringUtil.getSortNameFromCons(appl.getName()), appl.getName());
+						ntc.setLocation(appl.getAnnotations().getFirst().toString().substring(8));
+						ntc.setContents(new ArrayList<Term>());
+						ntc.getContents().add((Term) JavaClassesFactory.getTerm(list.getFirst()));
+						if (tc == null) {
+							head = ntc;
+						} else {
+							tc.getContents().add(ntc);
+						}
+						tc = ntc;
+						list = list.getNext();
+					}
+					if (tc != null)
+						tc.getContents().add(new Empty(StringUtil.getSortNameFromCons(appl.getName())));
+					else
+						return new Empty(StringUtil.getSortNameFromCons(appl.getName()));
+					return head;
+				} else
+					return new TermCons(appl);
+			}
 			if (appl.getName().endsWith("Bracket"))
 				return new Bracket(appl);
 			// if (Constants.CAST.endsWith(appl.getNodeName()))
