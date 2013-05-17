@@ -1,15 +1,5 @@
 package org.kframework.backend.java.symbolic;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-
 import org.kframework.backend.BasicBackend;
 import org.kframework.backend.maude.MaudeBackend;
 import org.kframework.backend.maude.MaudeBuiltinsFilter;
@@ -22,40 +12,13 @@ import org.kframework.compile.checks.CheckVariables;
 import org.kframework.compile.tags.AddDefaultComputational;
 import org.kframework.compile.tags.AddOptionalTags;
 import org.kframework.compile.tags.AddStrictStar;
-import org.kframework.compile.transformers.AddEmptyLists;
-import org.kframework.compile.transformers.AddHeatingConditions;
-import org.kframework.compile.transformers.AddKCell;
-import org.kframework.compile.transformers.AddPredicates;
-import org.kframework.compile.transformers.AddTopCellConfig;
-import org.kframework.compile.transformers.AddTopCellRules;
-import org.kframework.compile.transformers.ContextsToHeating;
-import org.kframework.compile.transformers.FlattenSyntax;
-import org.kframework.compile.transformers.FreezeUserFreezers;
-import org.kframework.compile.transformers.RemoveBrackets;
-import org.kframework.compile.transformers.RemoveSyntacticCasts;
-import org.kframework.compile.transformers.ResolveAnonymousVariables;
-import org.kframework.compile.transformers.ResolveBuiltins;
-import org.kframework.compile.transformers.ResolveFunctions;
-import org.kframework.compile.transformers.ResolveHybrid;
-import org.kframework.compile.transformers.ResolveListOfK;
-import org.kframework.compile.transformers.ResolveOpenCells;
-import org.kframework.compile.transformers.ResolveRewrite;
-import org.kframework.compile.transformers.ResolveSyntaxPredicates;
-import org.kframework.compile.transformers.StrictnessToContexts;
+import org.kframework.compile.transformers.*;
 import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Bag;
-import org.kframework.kil.Cell;
-import org.kframework.kil.Constant;
-import org.kframework.kil.Definition;
-import org.kframework.kil.KApp;
-import org.kframework.kil.KLabelConstant;
-import org.kframework.kil.KList;
-import org.kframework.kil.KSequence;
-import org.kframework.kil.Term;
-import org.kframework.kil.Variable;
+import org.kframework.kil.*;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.api.KRun;
@@ -66,6 +29,11 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * Created with IntelliJ IDEA. User: andrei Date: 3/12/13 Time: 12:21 PM To change this template use File | Settings | File Templates.
@@ -217,7 +185,6 @@ public class JavaSymbolicBackend extends BasicBackend {
 		// steps.add(new ResolveFresh());
 		// steps.add(new ResolveFreshMOS());
 
-		// steps.add(new AddEval());
 		// steps.add(new ResolveBinder());
 		steps.add(new ResolveAnonymousVariables(definitionHelper));
 		// steps.add(new ResolveBlockingInput());
