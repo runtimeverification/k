@@ -44,16 +44,16 @@ public class CorrectKSeqFilter extends BasicTransformer {
 
 	@Override
 	public ASTNode transform(TermCons tc) throws TransformerException {
-		if (tc.getProduction(definitionHelper) == null)
+		if (tc.getProduction() == null)
 			System.err.println(this.getClass() + ":" + " cons not found." + tc.getCons());
-		if (tc.getProduction(definitionHelper).isListDecl()) {
+		if (tc.getProduction().isListDecl()) {
 			tc.getContents().set(0, (Term) tc.getContents().get(0).accept(secondFilter));
 			tc.getContents().set(1, (Term) tc.getContents().get(1).accept(secondFilter));
-		} else if (!tc.getProduction(definitionHelper).isConstant() && !tc.getProduction(definitionHelper).isSubsort()) {
-			for (int i = 0, j = 0; i < tc.getProduction(definitionHelper).getItems().size(); i++) {
-				if (tc.getProduction(definitionHelper).getItems().get(i).getType() == ProductionType.SORT) {
+		} else if (!tc.getProduction().isConstant() && !tc.getProduction().isSubsort()) {
+			for (int i = 0, j = 0; i < tc.getProduction().getItems().size(); i++) {
+				if (tc.getProduction().getItems().get(i).getType() == ProductionType.SORT) {
 					// look for the outermost element
-					if (i == 0 || i == tc.getProduction(definitionHelper).getItems().size() - 1) {
+					if (i == 0 || i == tc.getProduction().getItems().size() - 1) {
 						tc.getContents().set(j, (Term) tc.getContents().get(j).accept(secondFilter));
 					}
 					j++;

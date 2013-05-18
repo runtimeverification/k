@@ -30,7 +30,7 @@ public class Cast extends Term {
 	}
 
 	public Cast(Term t, DefinitionHelper definitionHelper) {
-		super(t.getSort(definitionHelper));
+		super(t.getSort());
 		this.content = t;
 	}
 
@@ -39,7 +39,7 @@ public class Cast extends Term {
 	}
 
 	public Cast(String location, String filename, Term t, DefinitionHelper definitionHelper) {
-		super(location, filename, t.getSort(definitionHelper));
+		super(location, filename, t.getSort());
 		this.content = t;
 	}
 

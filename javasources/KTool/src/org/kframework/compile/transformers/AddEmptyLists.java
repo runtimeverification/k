@@ -36,14 +36,14 @@ public class AddEmptyLists extends BasicTransformer {
 	@Override
 	public ASTNode transform(TermCons tc) throws TransformerException {
 		// traverse
-		Production p = tc.getProduction(definitionHelper);
+		Production p = tc.getProduction();
 
 		if (p.isListDecl()) {
 			Term t = tc.getContents().get(0);
 			UserList ul = (UserList) p.getItems().get(0);
-			if (isAddEmptyList(ul.getSort(), t.getSort(definitionHelper))) {
+			if (isAddEmptyList(ul.getSort(), t.getSort())) {
 				if (!isUserListElement(ul.getSort(), t, definitionHelper)) {
-					String msg = "Found sort '" + t.getSort(definitionHelper) + "' where list sort '" + ul.getSort() + "' was expected. Moving on.";
+					String msg = "Found sort '" + t.getSort() + "' where list sort '" + ul.getSort() + "' was expected. Moving on.";
 					GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.LISTS, msg, t.getFilename(), t.getLocation()));
 				} else
 					tc.getContents().set(0, addEmpty(t, ul.getSort()));
@@ -51,12 +51,12 @@ public class AddEmptyLists extends BasicTransformer {
 
 			// if the term should be a list, append the empty element
 			t = tc.getContents().get(1);
-			if (isAddEmptyList(p.getSort(), t.getSort(definitionHelper))) {
+			if (isAddEmptyList(p.getSort(), t.getSort())) {
 				if (!isUserListElement(p.getSort(), t, definitionHelper)) {
-					String msg = "Found sort '" + t.getSort(definitionHelper) + "' where list sort '" + p.getSort() + "' was expected. Moving on.";
+					String msg = "Found sort '" + t.getSort() + "' where list sort '" + p.getSort() + "' was expected. Moving on.";
 					GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.LISTS, msg, t.getFilename(), t.getLocation()));
 				} else
-					tc.getContents().set(1, addEmpty(t, tc.getProduction(definitionHelper).getSort()));
+					tc.getContents().set(1, addEmpty(t, tc.getProduction().getSort()));
 			}
 		} else {
 			for (int i = 0, j = 0; j < p.getItems().size(); j++) {
@@ -68,9 +68,9 @@ public class AddEmptyLists extends BasicTransformer {
 				if (definitionHelper.isListSort(srt)) {
 					Term t = (Term) tc.getContents().get(i);
 					// if the term should be a list, append the empty element
-					if (isAddEmptyList(srt, t.getSort(definitionHelper))) {
+					if (isAddEmptyList(srt, t.getSort())) {
 						if (!isUserListElement(srt, t, definitionHelper)) {
-							String msg = "Found sort '" + t.getSort(definitionHelper) + "' where list sort '" + srt + "' was expected. Moving on.";
+							String msg = "Found sort '" + t.getSort() + "' where list sort '" + srt + "' was expected. Moving on.";
 							GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.LISTS, msg, t.getFilename(), t.getLocation()));
 						} else
 							tc.getContents().set(i, addEmpty(t, srt));
@@ -84,7 +84,7 @@ public class AddEmptyLists extends BasicTransformer {
 	}
 
     private boolean isUserListElement(String listSort, Term element, DefinitionHelper definitionHelper) {
-        String elementSort = element.getSort(definitionHelper);
+        String elementSort = element.getSort();
 
         /* TODO: properly infer sort of KApp */
         if (elementSort.equals(KSorts.K) && element instanceof KApp) {
@@ -107,7 +107,7 @@ public class AddEmptyLists extends BasicTransformer {
 	}
 
 	private Term addEmpty(Term node, String sort) {
-		TermCons tc = new TermCons(sort, getListCons(sort));
+		TermCons tc = new TermCons(sort, getListCons(sort), definitionHelper);
 		List<Term> genContents = new ArrayList<Term>();
 		genContents.add(node);
 		genContents.add(new Empty(sort));

@@ -303,7 +303,7 @@ public class UnparserFilter extends BasicVisitor {
 			result.write("?");
 		result.write(variable.getName());
 		if (!variableList.contains(variable.getName())) {
-			result.write(":" + variable.getSort(definitionHelper));
+			result.write(":" + variable.getSort());
 			variableList.add(variable.getName());
 		}
 		postpare();
@@ -376,7 +376,7 @@ public class UnparserFilter extends BasicVisitor {
 	public void visit(TermCons termCons) {
 		prepare(termCons);
 		inTerm++;
-		Production production = termCons.getProduction(definitionHelper);
+		Production production = termCons.getProduction();
 		if (production.isListDecl()) {
 			UserList userList = (UserList) production.getItems().get(0);
 			String separator = userList.getSeparator();
@@ -440,7 +440,7 @@ public class UnparserFilter extends BasicVisitor {
 			}
 		}
 		if (contents.size() == 0) {
-			result.write("." + collection.getSort(definitionHelper));
+			result.write("." + collection.getSort());
 		}
 		postpare();
 	}
@@ -513,8 +513,8 @@ public class UnparserFilter extends BasicVisitor {
 	public void visit(KInjectedLabel kInjectedLabel) {
 		prepare(kInjectedLabel);
 		Term term = kInjectedLabel.getTerm();
-		if (MetaK.isKSort(term.getSort(definitionHelper))) {
-			result.write(kInjectedLabel.getInjectedSort(term.getSort(definitionHelper)));
+		if (MetaK.isKSort(term.getSort())) {
+			result.write(kInjectedLabel.getInjectedSort(term.getSort()));
 			result.write("2KLabel ");
 		} else {
 			result.write("# ");
@@ -647,7 +647,7 @@ public class UnparserFilter extends BasicVisitor {
 		if (c.isSyntactic()) {
 			result.write(":");
 		}
-		result.write(c.getSort(definitionHelper));
+		result.write(c.getSort());
 		postpare();
 	}
 
@@ -696,8 +696,8 @@ public class UnparserFilter extends BasicVisitor {
 		} else if ((astNode instanceof TermCons) && (upper instanceof TermCons)) {
 			TermCons termConsNext = (TermCons) astNode;
 			TermCons termCons = (TermCons) upper;
-			Production productionNext = termConsNext.getProduction(definitionHelper);
-			Production production = termCons.getProduction(definitionHelper);
+			Production productionNext = termConsNext.getProduction();
+			Production production = termCons.getProduction();
 			if (definitionHelper.isPriorityWrong(production.getKLabel(), productionNext.getKLabel())) {
 				return true;
 			}

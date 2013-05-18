@@ -37,7 +37,7 @@ public class MapInsertPattern extends Term {
     insertions = new ArrayList<Binding>(contents.size());
     for(Term t : contents){
       if(t instanceof Variable){
-        if(!(t.getSort(definitionHelper).equals("Map")))
+        if(!(t.getSort().equals("Map")))
           throw new MatchCompilationException(
               "Variable in Map pattern does not have sort Map: " + t);
         if(remainder != null)

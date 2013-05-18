@@ -48,8 +48,8 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 		private void internalTransform(TermCons tcParent, int i, Term child) {
 			if (child instanceof TermCons) {
 				TermCons termCons = (TermCons) child;
-				if (termCons.getProduction(definitionHelper).isListDecl()) {
-					if (new AddEmptyLists(definitionHelper).isAddEmptyList(tcParent.getProduction(definitionHelper).getChildSort(i), termCons.getContents().get(0).getSort(definitionHelper)) && termCons.getContents().get(1) instanceof Empty) {
+				if (termCons.getProduction().isListDecl()) {
+					if (new AddEmptyLists(definitionHelper).isAddEmptyList(tcParent.getProduction().getChildSort(i), termCons.getContents().get(0).getSort()) && termCons.getContents().get(1) instanceof Empty) {
 						
 						tcParent.getContents().set(i, termCons.getContents().get(0));
 					}
@@ -100,14 +100,14 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 					for (int i = 0; i < contents.size(); i++) {
 						if (contents.get(i) instanceof KApp && ((KApp)contents.get(i)).getLabel() instanceof KInjectedLabel) {
 							KInjectedLabel l = (KInjectedLabel)((KApp)contents.get(i)).getLabel();
-							if (definitionHelper.isSubsortedEq(p.getChildSort(i), l.getTerm().getSort(definitionHelper))) {
+							if (definitionHelper.isSubsortedEq(p.getChildSort(i), l.getTerm().getSort())) {
 								newContents.set(i, l.getTerm());
 							}
 						} else {
 							newContents.set(i, newContents.get(i).shallowCopy());
 						}
 					}
-					possibleTerms.add(new TermCons(p.getSort(), cons, newContents));
+					possibleTerms.add(new TermCons(p.getSort(), cons, newContents, definitionHelper));
 				}
 				if (possibleTerms.size() == 0) {
 					return super.transform(kapp);

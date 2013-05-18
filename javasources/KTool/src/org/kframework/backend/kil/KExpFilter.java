@@ -151,7 +151,7 @@ public class KExpFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Constant constant) {
-		final boolean isString = constant.getSort(definitionHelper).equals("#String");
+		final boolean isString = constant.getSort().equals("#String");
 		if (isString)
 			result.append("\"");
 		result.append(constant.getValue());
@@ -205,7 +205,7 @@ public class KExpFilter extends BasicVisitor {
 	public void visit(KInjectedLabel kInjectedLabel) {
 		result.append("(");
 		Term term = kInjectedLabel.getTerm();
-		result.append(term.getSort(definitionHelper).replaceFirst("#",""));
+		result.append(term.getSort().replaceFirst("#",""));
 		result.append(" ");
 		term.accept(this);
 		result.append(")");

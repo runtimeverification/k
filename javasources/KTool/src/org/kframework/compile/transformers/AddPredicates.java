@@ -257,7 +257,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
 	public static Rule getIsVariableRule(Term symTerm, DefinitionHelper definitionHelper) {
 		Term lhs;
 		Rule rule;
-		if (!MetaK.isComputationSort(symTerm.getSort(definitionHelper))) {
+		if (!MetaK.isComputationSort(symTerm.getSort())) {
 			symTerm = KApp.of(new KInjectedLabel(symTerm));
 		}
 

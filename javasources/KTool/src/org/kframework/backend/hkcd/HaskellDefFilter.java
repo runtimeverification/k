@@ -50,6 +50,6 @@ public class HaskellDefFilter extends HaskellFilter {
 	 * as name of pattern.
 	 */
 	public void visit(Variable var) {
-		result += "KVar \"" + var.getName() + "\" \"" + var.getSort(definitionHelper) + "\"";
+		result += "KVar \"" + var.getName() + "\" \"" + var.getSort() + "\"";
 	}
 }

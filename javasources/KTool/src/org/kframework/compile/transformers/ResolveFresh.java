@@ -76,7 +76,7 @@ public class ResolveFresh extends CopyOnWriteTransformer {
 		Cell fCell = new Cell();
 		fCell.setLabel("freshCounter");
 		fCell.setEllipses(Ellipses.NONE);
-		TermCons t = new TermCons("Int", "Int1PlusSyn");
+		TermCons t = new TermCons("Int", "Int1PlusSyn", definitionHelper);
 		t.getContents().add(freshVar);
 		t.getContents().add(IntBuiltin.kAppOf(vars.size()));
 		fCell.setContents(new Rewrite(freshVar, t, definitionHelper));
@@ -106,13 +106,13 @@ public class ResolveFresh extends CopyOnWriteTransformer {
 		Map<Term, Term> symMap = new HashMap<Term, Term>();
 		int idx = 0;
 		for (Variable var : vars) {
-			TermCons idxTerm = new TermCons("Int", MetaK.Constants.plusIntCons);
+			TermCons idxTerm = new TermCons("Int", MetaK.Constants.plusIntCons, definitionHelper);
 			List<Term> subterms = idxTerm.getContents();
 			subterms.add(idxVar);
 			subterms.add(IntBuiltin.kAppOf(idx));
 			++idx;
 
-			String sort = var.getSort(definitionHelper);
+			String sort = var.getSort();
             Term symTerm = new AddSymbolicK(definitionHelper).makeSymbolicTerm(sort, idxTerm);
             symMap.put(var, symTerm);
 		}

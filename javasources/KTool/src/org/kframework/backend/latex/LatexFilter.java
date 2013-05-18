@@ -180,7 +180,7 @@ public class LatexFilter extends BackendFilter {
 		final boolean parens = wantParens.peek();
 		final boolean hasBR = containsBR(col);
         if (col.isEmpty()) {
-            printEmpty(col.getSort(definitionHelper));
+            printEmpty(col.getSort());
             return;
         }
 		if (hasBR) {
@@ -231,8 +231,8 @@ public class LatexFilter extends BackendFilter {
 		} else {
 			result.append("\\variable");
 		}
-		if (var.getSort(definitionHelper) != null) {
-			result.append("[" + StringUtil.latexify(var.getSort(definitionHelper)) + "]");
+		if (var.getSort() != null) {
+			result.append("[" + StringUtil.latexify(var.getSort()) + "]");
 		}
 		if (!var.getName().equals(MetaK.Constants.anyVarSymbol)) {
 			result.append("{" + makeIndices(makeGreek(StringUtil.latexify(var.getName()))) + "}");
@@ -355,7 +355,7 @@ public class LatexFilter extends BackendFilter {
 
 	@Override
 	public void visit(Constant c) {
-		result.append("\\constant[" + StringUtil.latexify(c.getSort(definitionHelper)) + "]{" + StringUtil.latexify(c.getValue()) + "}");
+		result.append("\\constant[" + StringUtil.latexify(c.getSort()) + "]{" + StringUtil.latexify(c.getValue()) + "}");
 	}
 	
 	@Override

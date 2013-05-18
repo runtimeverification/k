@@ -25,10 +25,10 @@ public class Bracket extends Term {
 		this.content = content;
 	}
 
-	public String getSort(DefinitionHelper definitionHelper) {
+	public String getSort() {
 		if (content instanceof Ambiguity)
-			return super.getSort(definitionHelper);
-		return content.getSort(definitionHelper);
+			return super.getSort();
+		return content.getSort();
 	}
 
 	public Bracket(Bracket i) {
@@ -37,7 +37,7 @@ public class Bracket extends Term {
 	}
 
 	public Bracket(Term t, DefinitionHelper definitionHelper) {
-		super(t.getSort(definitionHelper));
+		super(t.getSort());
 		this.content = t;
 	}
 
@@ -46,7 +46,7 @@ public class Bracket extends Term {
 	}
 
 	public Bracket(String location, String filename, Term t, DefinitionHelper definitionHelper) {
-		super(location, filename, t.getSort(definitionHelper));
+		super(location, filename, t.getSort());
 		this.content = t;
 	}
 

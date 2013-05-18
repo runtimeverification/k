@@ -86,7 +86,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         Variable variable = null;
         if (!flatList.isEmpty()
                 && flatList.get(flatList.size() - 1) instanceof org.kframework.kil.Variable
-                && flatList.get(flatList.size() - 1).getSort(definitionHelper).equals(KSorts.KITEM)) {
+                && flatList.get(flatList.size() - 1).getSort().equals(KSorts.KITEM)) {
             variable = (Variable) flatList.remove(flatList.size() - 1).accept(this);
         }
 
@@ -119,7 +119,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         Variable variable = null;
         if (!flatList.isEmpty()
                 && flatList.get(flatList.size() - 1) instanceof org.kframework.kil.Variable
-                && flatList.get(flatList.size() - 1).getSort(definitionHelper).equals(KSorts.KLIST)) {
+                && flatList.get(flatList.size() - 1).getSort().equals(KSorts.KLIST)) {
             variable = (Variable) flatList.remove(flatList.size() - 1).accept(this);
         }
 
@@ -156,7 +156,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                     Cell cell = (Cell) term.accept(this);
                     cells.put(cell.getLabel(), cell);
                 } else if (variable == null && term instanceof org.kframework.kil.Variable
-                        && term.getSort(definitionHelper).equals("Bag")) {
+                        && term.getSort().equals("Bag")) {
                     variable = (Variable) term.accept(this);
                 } else {
                     throw new RuntimeException();
@@ -194,7 +194,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 Term value = (Term) mapItem.getValue().accept(this);
                 entries.put(key, value);
             } else if (variable == null && term instanceof org.kframework.kil.Variable
-                    && term.getSort(definitionHelper).equals("Map")) {
+                    && term.getSort().equals("Map")) {
                 variable = (Variable) term.accept(this);
             } else {
                 throw new RuntimeException();
@@ -206,10 +206,10 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(org.kframework.kil.Variable node) throws TransformerException {
-        if (node.getSort(definitionHelper).equals("Bag")) {
+        if (node.getSort().equals("Bag")) {
             return new Variable(node.getName(), Kind.CELL_COLLECTION.toString());
         } else {
-            return new Variable(node.getName(), node.getSort(definitionHelper));
+            return new Variable(node.getName(), node.getSort());
         }
     }
 

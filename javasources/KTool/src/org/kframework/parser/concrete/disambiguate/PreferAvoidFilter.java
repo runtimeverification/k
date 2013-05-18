@@ -22,9 +22,9 @@ public class PreferAvoidFilter extends BasicTransformer {
 		for (ASTNode variant : amb.getContents()) {
 			if (variant instanceof TermCons) {
 				TermCons tc = (TermCons) variant;
-				if (tc.getProduction(definitionHelper).getAttributes().containsKey("prefer"))
+				if (tc.getProduction().getAttributes().containsKey("prefer"))
 					prefer.add(tc);
-				if (tc.getProduction(definitionHelper).getAttributes().containsKey("avoid"))
+				if (tc.getProduction().getAttributes().containsKey("avoid"))
 					avoid.add(tc);
 			}
 		}

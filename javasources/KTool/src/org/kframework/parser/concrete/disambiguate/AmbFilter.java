@@ -24,8 +24,8 @@ public class AmbFilter extends BasicTransformer {
 			msg += "\n" + (i + 1) + ": ";
 			if (amb.getContents().get(i) instanceof TermCons) {
 				TermCons tc = (TermCons) amb.getContents().get(i);
-				msg += tc.getProduction(definitionHelper).getSort() + " ::= ";
-				msg += tc.getProduction(definitionHelper).toString();
+				msg += tc.getProduction().getSort() + " ::= ";
+				msg += tc.getProduction().toString();
 			}
 			UnparserFilter unparserFilter = new UnparserFilter(definitionHelper);
 			amb.getContents().get(i).accept(unparserFilter);

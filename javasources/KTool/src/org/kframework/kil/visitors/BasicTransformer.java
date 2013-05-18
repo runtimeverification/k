@@ -330,7 +330,7 @@ public class BasicTransformer implements Transformer {
 		KApp result = node.shallowCopy();
 		result.setLabel((Term) node.getLabel().accept(this));
         Term resultChild = (Term) node.getChild().accept(this);
-        if (!(resultChild.getSort(definitionHelper).equals(KSorts.KLIST) || resultChild instanceof Ambiguity)) {
+        if (!(resultChild.getSort().equals(KSorts.KLIST) || resultChild instanceof Ambiguity)) {
             result.setChild(new KList(Collections.<Term>singletonList(resultChild)));
         } else {
 		    result.setChild(resultChild);
@@ -351,8 +351,10 @@ public class BasicTransformer implements Transformer {
     @Override
 	public ASTNode transform(Rewrite node) throws TransformerException {
 		Rewrite result = new Rewrite(node);
-		result.setLeft((Term) node.getLeft().accept(this));
-		result.setRight((Term) node.getRight().accept(this));
+		result.replaceChildren(
+				(Term) node.getLeft().accept(this),
+				(Term) node.getRight().accept(this),
+				definitionHelper);
 		return transform((Term) result);
 	}
 

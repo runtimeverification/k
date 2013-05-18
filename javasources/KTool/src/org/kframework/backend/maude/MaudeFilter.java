@@ -323,7 +323,7 @@ public class MaudeFilter extends BackendFilter {
                 if (!cellStr.id.equals("k")) {
                     placeHolders="_";
                     format = "ni ";
-                    sorts = KSort.getKSort(cell.getContents().getSort(definitionHelper)).mainSort()
+                    sorts = KSort.getKSort(cell.getContents().getSort()).mainSort()
                             .toString();
                     declareCell(id,placeHolders, sorts, cellSort, format);
                 }
@@ -401,7 +401,7 @@ public class MaudeFilter extends BackendFilter {
 
 	@Override
 	public void visit(Variable variable) {
-        if (MetaK.isBuiltinSort(variable.getSort(definitionHelper))) {
+        if (MetaK.isBuiltinSort(variable.getSort())) {
             result.append("_`(_`)(");
             result.append("#_(");
         }
@@ -411,8 +411,8 @@ public class MaudeFilter extends BackendFilter {
 			result.append(variable.getName());
 		}
 		result.append(":");
-		result.append(variable.getSort(definitionHelper));
-        if (MetaK.isBuiltinSort(variable.getSort(definitionHelper))) {
+		result.append(variable.getSort());
+        if (MetaK.isBuiltinSort(variable.getSort())) {
             result.append(")");
             result.append(", ");
             result.append(".KList");
@@ -581,11 +581,11 @@ public class MaudeFilter extends BackendFilter {
 	@Override
 	public void visit(Constant constant) {
         assert false : "dead code";
-		if (constant.getSort(definitionHelper).equals("#Id")) {
+		if (constant.getSort().equals("#Id")) {
 			result.append("#id \"");
 		}
 		result.append(constant.getValue());
-		if (constant.getSort(definitionHelper).equals("#Id")) {
+		if (constant.getSort().equals("#Id")) {
 			result.append("\"");
 		}
 	}
@@ -602,11 +602,11 @@ public class MaudeFilter extends BackendFilter {
 	@Override
 	public void visit(Collection collection) {
 		if (collection.getContents().size() == 0) {
-			new Empty(collection.getSort(definitionHelper)).accept(this);
+			new Empty(collection.getSort()).accept(this);
 		} else if (collection.getContents().size() == 1) {
 			collection.getContents().get(0).accept(this);
 		} else {
-			String constructor = getMaudeConstructor(collection.getSort(definitionHelper));
+			String constructor = getMaudeConstructor(collection.getSort());
 			result.append(constructor);
 			result.append("(");
 
@@ -676,7 +676,7 @@ public class MaudeFilter extends BackendFilter {
 	@Override
 	public void visit(KInjectedLabel kInjectedLabel) {
 		Term term = kInjectedLabel.getTerm();
-        String sort = term.getSort(definitionHelper);
+        String sort = term.getSort();
         if (MetaK.isKSort(sort)) {
 			//result.append(StringUtil.escapeMaude(kInjectedLabel.getInjectedSort(term.getSort())));
             result.append(kInjectedLabel.getInjectedSort(sort));

@@ -26,9 +26,9 @@ public class SearchResult {
 				Term cellFragment = compilationInfo.getCellFragment(var);
 				rawValue = (Term)cellFragment.accept(new SubstitutionFilter(rawSubstitution, definitionHelper));
 			} else {
-				rawValue = rawSubstitution.get(var.getName() + ":" + var.getSort(definitionHelper));
+				rawValue = rawSubstitution.get(var.getName() + ":" + var.getSort());
 			}
-			substitution.put(var.getName() + ":" + var.getSort(definitionHelper), KRunState.concretize(rawValue, definitionHelper));
+			substitution.put(var.getName() + ":" + var.getSort(), KRunState.concretize(rawValue, definitionHelper));
 		}
 	}
 

@@ -532,7 +532,7 @@ public class CopyOnWriteTransformer implements Transformer {
 			node = node.shallowCopy();
 			node.setLabel((Term) label);
             Term childTerm = (Term) child;
-            if (!(childTerm.getSort(definitionHelper).equals(KSorts.KLIST) || childTerm instanceof Ambiguity)) {
+            if (!(childTerm.getSort().equals(KSorts.KLIST) || childTerm instanceof Ambiguity)) {
                 node.setChild(new KList(Collections.<Term>singletonList(childTerm)));
             } else {
                 node.setChild(childTerm);
@@ -579,8 +579,7 @@ public class CopyOnWriteTransformer implements Transformer {
 		}
 		if (change) {
 			node = node.shallowCopy();
-			node.setLeft((Term) left);
-			node.setRight((Term) right);
+			node.replaceChildren((Term)left, (Term)right, definitionHelper);
 		}
 		return transform((Term) node);
 	}

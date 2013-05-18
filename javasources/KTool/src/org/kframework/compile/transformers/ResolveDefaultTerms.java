@@ -43,7 +43,7 @@ public class ResolveDefaultTerms extends CopyOnWriteTransformer {
 		ASTNode right = node.getRight().accept(new DefaultTermsResolver(definitionHelper));
 		if (right != node.getRight()) {
 			node = node.shallowCopy();
-			node.setRight((Term)right);
+			node.setRight((Term)right, definitionHelper);
 		}
 		return node;
 	}

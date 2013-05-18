@@ -64,7 +64,7 @@ public class Hole extends Term {
 			return false;
 		Hole hole = (Hole)obj;
 
-		return this.sort.equals(hole.getSort(null));
+		return this.sort.equals(hole.getSort());
 	}
 
 	@Override

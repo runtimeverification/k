@@ -122,7 +122,7 @@ public class SortCells extends CopyOnWriteTransformer {
 		if (astNode != node) {
 			node = (TermCons) astNode;
 		}
-		Production production = node.getProduction(definitionHelper);
+		Production production = node.getProduction();
 		Map<Integer, String> cellsorts = getCellSorts(production);
 		int i;
 		if (cellsorts.isEmpty()) return node;
@@ -134,7 +134,7 @@ public class SortCells extends CopyOnWriteTransformer {
 			Term out = t;
 			String sort = cellsorts.get(new Integer(i));
 			if (sort != null) {
-				assert (KSort.valueOf(t.getSort(definitionHelper))
+				assert (KSort.valueOf(t.getSort())
 						.mainSort().equals(KSort.Bag));
 				if (MetaK.isCellFragment(sort)) {
 					Cell fragment = new Cell();
@@ -235,9 +235,9 @@ public class SortCells extends CopyOnWriteTransformer {
 
 				final KInjectedLabel kInjectedLabel = (KInjectedLabel) kAppLabel;
 				Term bag = kInjectedLabel.getTerm();
-				assert  bag.getSort(definitionHelper).equals("Bag")
-						||	bag.getSort(definitionHelper).equals("BagItem")
-						|| MetaK.isCellSort(bag.getSort(definitionHelper));
+				assert  bag.getSort().equals("Bag")
+						||	bag.getSort().equals("BagItem")
+						|| MetaK.isCellSort(bag.getSort());
 				if (MetaK.isCellFragment(sort)) {
 					Cell fragment = new Cell();
 					fragment.setLabel(definitionHelper.getCellSort(sort));
@@ -426,7 +426,7 @@ public class SortCells extends CopyOnWriteTransformer {
 			return replacementTerm;
 		}
 		if (replacementTerm instanceof Empty) {
-			if (oldTerm.getSort(definitionHelper).equals(MetaK.cellSort(cell.getId()))) {
+			if (oldTerm.getSort().equals(MetaK.cellSort(cell.getId()))) {
 				GlobalSettings.kem.register(new KException(KException
 						.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER,
 						"Multiplicity constraints clash for cell " +
@@ -439,7 +439,7 @@ public class SortCells extends CopyOnWriteTransformer {
 			}
 			return replacementTerm;
 		}
-		if (oldTerm instanceof Empty && replacementTerm.getSort(definitionHelper).equals
+		if (oldTerm instanceof Empty && replacementTerm.getSort().equals
 				(MetaK.cellSort(cell.getId()))) {
 			GlobalSettings.kem.register(new KException(KException
 					.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER,

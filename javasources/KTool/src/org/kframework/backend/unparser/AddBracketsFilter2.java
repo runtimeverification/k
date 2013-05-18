@@ -156,7 +156,7 @@ public class AddBracketsFilter2 extends BasicTransformer {
 	}
 
 	private Variable replaceWithVar(Term ast) {
-		Variable var = Variable.getFreshVar(((Term)ast).getSort(definitionHelper));
+		Variable var = Variable.getFreshVar(((Term)ast).getSort());
 		substitution.put(var.getName(), (Term) ast);
 		return var;
 	}

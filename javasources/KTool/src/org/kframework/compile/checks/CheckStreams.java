@@ -20,8 +20,8 @@ public class CheckStreams extends BasicVisitor {
 		node.getContents().accept(this);
 		String stream = node.getCellAttributes().get("stream");
 		if (stream != null) {
-			if (!definitionHelper.isSubsortedEq("List", node.getContents().getSort(definitionHelper))) {
-				String msg = "Wrong sort in streaming cell. Expected List, but found " + node.getContents().getSort(definitionHelper) + ".";
+			if (!definitionHelper.isSubsortedEq("List", node.getContents().getSort())) {
+				String msg = "Wrong sort in streaming cell. Expected List, but found " + node.getContents().getSort() + ".";
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, getName(), node.getFilename(), node.getLocation()));
 			}
 		}

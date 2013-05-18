@@ -324,10 +324,10 @@ public class SimpleMatcher implements Matcher {
 			}
 			Term t;
 			t = (Term) term2;
-			if (term.getSort(definitionHelper).equals(t.getSort(definitionHelper))) {
+			if (term.getSort().equals(t.getSort())) {
 				substitution.put(term, term2);
 			} else {
-				throw new MatcherException("Sort " + term.getSort(definitionHelper) + " of Variable " + term + " does not match " + " sort " + t.getSort(definitionHelper) + " of Term " + term2);
+				throw new MatcherException("Sort " + term.getSort() + " of Variable " + term + " does not match " + " sort " + t.getSort() + " of Term " + term2);
 			}
 			handleMapLookups(term, term2);
 			handleSetLookups(term);

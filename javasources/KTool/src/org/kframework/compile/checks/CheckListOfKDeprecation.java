@@ -31,7 +31,7 @@ public class CheckListOfKDeprecation extends BasicVisitor {
 
 	@Override
 	public void visit(Term node) {
-		if (node.getSort(definitionHelper).equals("List{K}")) {
+		if (node.getSort().equals("List{K}")) {
 			String msg = "Deprecated: List{K} has been renamed into KList to be less confuzing.";
 			GlobalSettings.kem.register(new KException(KException.ExceptionType.WARNING, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
 			node.setSort(KSorts.KLIST);

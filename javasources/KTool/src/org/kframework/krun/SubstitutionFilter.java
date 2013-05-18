@@ -23,7 +23,7 @@ public class SubstitutionFilter extends CopyOnWriteTransformer {
 	public ASTNode transform(Variable var) {
 		Term t = args.get(var.getName());
 		if (t == null) {
-			t = args.get(var.getName() + ":" + var.getSort(definitionHelper));
+			t = args.get(var.getName() + ":" + var.getSort());
 		}
 		if (t == null) {
 			GlobalSettings.kem.register(new KException(
@@ -33,7 +33,7 @@ public class SubstitutionFilter extends CopyOnWriteTransformer {
 				var.getFilename(), var.getLocation()));
 		}
 		if (t instanceof BackendTerm) {
-			t.setSort(var.getSort(definitionHelper));
+			t.setSort(var.getSort());
 		}
 		return t;
 	}

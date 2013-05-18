@@ -25,13 +25,13 @@ public class TypeSystemFilter2 extends BasicHookWorker {
 	}
 
 	public ASTNode transform(Term trm) throws TransformerException {
-		if (!trm.getSort(definitionHelper).equals(KSorts.K) && !trm.getSort(definitionHelper).equals(KSorts.KITEM)
-                && !trm.getSort(definitionHelper).equals(KSorts.KRESULT)) {
-			if (!definitionHelper.isSubsortedEq(maxSort, trm.getSort(definitionHelper))) {
+		if (!trm.getSort().equals(KSorts.K) && !trm.getSort().equals(KSorts.KITEM)
+                && !trm.getSort().equals(KSorts.KRESULT)) {
+			if (!definitionHelper.isSubsortedEq(maxSort, trm.getSort())) {
 				KException kex = new KException(
                         ExceptionType.ERROR,
                         KExceptionGroup.CRITICAL,
-                        "type error: unexpected term '" + trm + "' of sort '" + trm.getSort(definitionHelper)
+                        "type error: unexpected term '" + trm + "' of sort '" + trm.getSort()
                                 + "', expected sort '" + maxSort + "'.",
                         trm.getFilename(),
                         trm.getLocation());
@@ -72,8 +72,10 @@ public class TypeSystemFilter2 extends BasicHookWorker {
 	@Override
 	public ASTNode transform(Rewrite node) throws TransformerException {
 		Rewrite result = new Rewrite(node);
-		result.setLeft((Term) node.getLeft().accept(this));
-		result.setRight((Term) node.getRight().accept(this));
+		result.replaceChildren(
+				(Term) node.getLeft().accept(this),
+				(Term) node.getRight().accept(this),
+				definitionHelper);
 		return result;
 	}
 }

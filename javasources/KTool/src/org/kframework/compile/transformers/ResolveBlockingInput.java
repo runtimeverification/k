@@ -129,7 +129,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
 			GlobalSettings.kem.register(new KException(ExceptionType.WARNING, 
 					KExceptionGroup.COMPILER, 
 					"Expecting an empty list but got " + rewrite.getRight().getClass() + " of sort " + 
-							rewrite.getRight().getSort(definitionHelper) + "." +
+							rewrite.getRight().getSort() + "." +
 							System.getProperty("line.separator") + "Won't transform.", 
 							getName(), rewrite.getRight().getFilename(), rewrite.getRight().getLocation()));
 			return node;						
@@ -139,12 +139,12 @@ public class ResolveBlockingInput extends GetLhsPattern {
 		
 		
 //		  syntax List ::= "#parse" "(" String "," K ")"   [cons(List1ParseSyn)]
-		TermCons parseTerm = new TermCons("List", "List1ParseSyn");
-		parseTerm.getContents().add(StringBuiltin.kAppOf(item.getItem().getSort(definitionHelper)));
+		TermCons parseTerm = new TermCons("List", "List1ParseSyn", definitionHelper);
+		parseTerm.getContents().add(StringBuiltin.kAppOf(item.getItem().getSort()));
 		parseTerm.getContents().add(KSequence.EMPTY);
 		
 //		  syntax List ::= "#buffer" "(" K ")"           [cons(List1IOBufferSyn)]
-		TermCons ioBuffer = new TermCons("List", "List1IOBufferSyn");
+		TermCons ioBuffer = new TermCons("List", "List1IOBufferSyn", definitionHelper);
 		ioBuffer.getContents().add(new Variable(Variable.getFreshVar("K")));
 		
 //		ctor(List)[replaceS[emptyCt(List),parseTerm(string(Ty),nilK)],ioBuffer(mkVariable('BI,K))]

@@ -25,11 +25,13 @@ public class TermCons extends Term {
 	/** A unique identifier corresponding to a production, matching the SDF cons */
 	protected final String cons;
 	protected java.util.List<Term> contents;
+	protected Production production;
 
-	public TermCons(Element element) {
+	public TermCons(Element element, DefinitionHelper definitionHelper) {
 		super(element);
 		this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
 		this.cons = element.getAttribute(Constants.CONS_cons_ATTR);
+		this.production = definitionHelper.conses.get(cons);
 
 		contents = new ArrayList<Term>();
 		List<Element> children = XML.getChildrenElements(element);
@@ -37,10 +39,11 @@ public class TermCons extends Term {
 			contents.add((Term) JavaClassesFactory.getTerm(e));
 	}
 
-	public TermCons(ATermAppl atm) {
+	public TermCons(ATermAppl atm, DefinitionHelper definitionHelper) {
 		super(atm);
 		this.cons = atm.getName();
 		this.sort = StringUtil.getSortNameFromCons(cons);
+		this.production = definitionHelper.conses.get(cons);
 
 		contents = new ArrayList<Term>();
 		if (atm.getArity() == 0) {
@@ -59,46 +62,49 @@ public class TermCons extends Term {
 		}
 	}
 
-	public TermCons(String sort, String cons) {
-		super(sort);
-		this.cons = cons;
-		contents = new ArrayList<Term>();
-	}
-
-	public TermCons(String location, String filename, String sort, String listCons, List<Term> genContents) {
-		super(location, filename, sort);
-		cons = listCons;
-		contents = genContents;
+	public TermCons(String sort, String cons, DefinitionHelper definitionHelper) {
+		this(sort, cons, new ArrayList<Term>(), definitionHelper);
 	}
 
 	public TermCons(TermCons node) {
 		super(node);
 		this.cons = node.cons;
 		this.contents = new ArrayList<Term>(node.contents);
+		this.production = node.production;
 	}
 
-	public TermCons(String psort, String listCons, List<Term> genContents) {
+	public TermCons(String psort, String listCons, List<Term> genContents, DefinitionHelper definitionHelper) {
 		super(psort);
 		cons = listCons;
 		contents = genContents;
+		production = definitionHelper.conses.get(cons);
 	}
 
-	public Production getProduction(DefinitionHelper definitionHelper) {
-		return definitionHelper.conses.get(getCons());
+	public Production getProduction() {
+		return production;
 	}
 
 	@Override
 	public String toString() {
-		StringBuilder str = new StringBuilder("TermCons(");
-		str.append(cons);
-		for (Term t : contents) {
-			str.append(',');
-			str.append(t);
+		String str = "";
+		if (production.items.size() > 0) {
+			if (production.items.get(0).getType() == ProductionType.USERLIST) {
+				String separator = ((UserList) production.items.get(0)).separator;
+				str = contents.get(0) + " " + separator + " " + contents.get(1) + " ";
+			} else
+				for (int i = 0, j = 0; i < production.items.size(); i++) {
+					ProductionItem pi = production.items.get(i);
+					if (pi.getType() == ProductionType.TERMINAL) {
+						String terminall = pi.toString();
+						terminall = terminall.substring(1, terminall.length() - 1);
+						str += terminall + " ";
+					} else if (pi.getType() == ProductionType.SORT)
+						str += contents.get(j++) + " ";
+				}
 		}
-		str.append(')');
-		return str.toString();
+		return str;
 	}
-	
+
 	public String getSort() {
 		return sort;
 	}
@@ -127,8 +133,8 @@ public class TermCons extends Term {
 		return contents.set(idx, term);
 	}
 
-	public int arity(DefinitionHelper definitionHelper) {
-		return getProduction(definitionHelper).getArity();
+	public int arity() {
+		return production.getArity();
 	}
 
 	@Override

@@ -6,7 +6,6 @@ import org.kframework.kil.Set;
 import org.kframework.kil.SetItem;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
-import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
@@ -31,12 +30,12 @@ public class SetLookupPattern extends Term {
   /**
    * currently assumes no "..." in Sets
    */
-  public SetLookupPattern(Set s, DefinitionHelper definitionHelper){
+  public SetLookupPattern(Set s){
     java.util.List<Term> contents = s.getContents();
     lookups = new ArrayList<Term>(contents.size());
     for(Term t : contents){
       if(t instanceof Variable){
-        if(!(t.getSort(definitionHelper).equals("Set")))
+        if(!(t.getSort().equals("Set")))
           throw new MatchCompilationException(
               "Variable in Set pattern does not have sort Set: " + t);
         if(remainder != null)

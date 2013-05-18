@@ -43,7 +43,7 @@ public class LineariseTransformer extends BasicTransformer {
             Term transformedLeft = rew.getLeft();
             transformedLeft = (Term) transformedLeft.accept(vrt);
             rew.shallowCopy();
-            rew.setLeft(transformedLeft);
+            rew.setLeft(transformedLeft, definitionHelper);
 
             Map<Variable, Variable> newGeneratedSV = vrt.getGeneratedVariables();
             Term condition = node.getCondition();

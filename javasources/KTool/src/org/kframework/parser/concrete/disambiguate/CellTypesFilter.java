@@ -48,7 +48,7 @@ public class CellTypesFilter extends BasicTransformer {
 			if (cell.getContents() instanceof Ambiguity) {
 				List<Term> children = new ArrayList<Term>();
 				for (Term t : ((Ambiguity) cell.getContents()).getContents()) {
-					if (definitionHelper.isSubsortedEq(sort, t.getSort(definitionHelper)))
+					if (definitionHelper.isSubsortedEq(sort, t.getSort()))
 						children.add(t);
 				}
 
@@ -62,9 +62,9 @@ public class CellTypesFilter extends BasicTransformer {
 			}
 
 			if (!(cell.getContents() instanceof Ambiguity))
-				if (!definitionHelper.isSubsortedEq(sort, cell.getContents().getSort(definitionHelper))) {
+				if (!definitionHelper.isSubsortedEq(sort, cell.getContents().getSort())) {
 					// if the found sort is not a subsort of what I was expecting
-					String msg = "Wrong type in cell '" + cell.getLabel() + "'. Expected sort: " + sort + " but found " + cell.getContents().getSort(definitionHelper);
+					String msg = "Wrong type in cell '" + cell.getLabel() + "'. Expected sort: " + sort + " but found " + cell.getContents().getSort();
 					throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, getName(), cell.getFilename(), cell.getLocation()));
 				}
 		} else {

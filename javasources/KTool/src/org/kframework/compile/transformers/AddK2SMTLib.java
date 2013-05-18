@@ -117,7 +117,7 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
             } else {
                 TermCons termCons = ((TermCons) term);
                 rhs = StringBuiltin.kAppOf("(" + smtLbl);
-                for (int idx = 0; idx < ((TermCons) term).arity(definitionHelper); ++idx) {
+                for (int idx = 0; idx < ((TermCons) term).arity(); ++idx) {
                     Variable var = (Variable) termCons.getSubterm(idx);
                     rhs = appendString(rhs, StringBuiltin.SPACE, definitionHelper);
                     rhs = appendString(rhs, KApp.of(K_TO_SMTLIB, var), definitionHelper);

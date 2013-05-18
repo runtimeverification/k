@@ -47,7 +47,7 @@ public class HaskellFilter extends BasicVisitor {
 	}
 
 	public void visit(Constant cst) {
-		String s = cst.getSort(definitionHelper);
+		String s = cst.getSort();
 		String v = cst.getValue();
 
 		result += "KApp (";

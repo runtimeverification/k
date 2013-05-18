@@ -50,7 +50,7 @@ public class AddSymbolicK extends CopyOnWriteTransformer {
         String ctor = symbolicConstructor(sort);
         Term symTerm;
         if (!allowKSymbolic(sort)) {
-            symTerm = new TermCons(sort, ctor);
+            symTerm = new TermCons(sort, ctor, definitionHelper);
             ((TermCons) symTerm).getContents().add(term);
         } else {
             symTerm = KApp.of(KLabelConstant.of(ctor, definitionHelper), term);

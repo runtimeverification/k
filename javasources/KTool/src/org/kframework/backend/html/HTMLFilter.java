@@ -254,8 +254,8 @@ public class HTMLFilter extends BackendFilter {
 	@Override
 	public void visit(Variable var) {
 		result.append("<span ");
-		if (var.getSort(definitionHelper) != null) {
-			result.append("title =\"" + var.getSort(definitionHelper) + "\"");
+		if (var.getSort() != null) {
+			result.append("title =\"" + var.getSort() + "\"");
 		}
 		result.append(">" + makeGreek(var.getName()));
 		result.append(" </span> ");
@@ -366,7 +366,7 @@ public class HTMLFilter extends BackendFilter {
 			 * the term is printed by using the informations in the termCons's
 			 * production and in its list of terms (contents). */
 			boolean empty = true;
-			Production pr = trm.getProduction(definitionHelper);
+			Production pr = trm.getProduction();
 	
 			if (pr.getItems().size() > 0) {
 				if (pr.getItems().get(0).getType() == ProductionType.USERLIST) {
@@ -396,7 +396,7 @@ public class HTMLFilter extends BackendFilter {
 
 	@Override
 	public void visit(Constant c) {
-		result.append("<span title =\"" + c.getSort(definitionHelper) + "\"> " + makeGreek(c.getValue()) + " </span> ");
+		result.append("<span title =\"" + c.getSort() + "\"> " + makeGreek(c.getValue()) + " </span> ");
 	}
 
 	@Override

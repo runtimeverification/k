@@ -96,9 +96,9 @@ public class FreezeUserFreezers extends CopyOnWriteTransformer {
 			kSequence.setContents(kSequenceContents);
 			rewrite = rewrite.shallowCopy();
 			if (heating) {
-				rewrite.setRight(kSequence);
+				rewrite.replaceChildren(rewrite.getLeft(), kSequence, definitionHelper);
 			} else {
-				rewrite.setLeft(kSequence);
+				rewrite.replaceChildren(kSequence, rewrite.getRight(), definitionHelper);
 			}
 			node = node.shallowCopy();
 			node.setBody(rewrite);

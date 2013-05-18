@@ -47,9 +47,9 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 					// finally, try to find the minimums
 					for (Term tm2 : group) {
 						boolean min = true;
-						Production tcBig = ((TermCons) tm2).getProduction(definitionHelper);
+						Production tcBig = ((TermCons) tm2).getProduction();
 						for (Term tm22 : group) {
-							Production tcSmall = ((TermCons) tm22).getProduction(definitionHelper);
+							Production tcSmall = ((TermCons) tm22).getProduction();
 							if (tm2 != tm22 && isSubsorted(tcBig, tcSmall)) {
 								min = false;
 								break;
@@ -63,7 +63,7 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 					for (Term t1 : group) {
 						boolean max = true;
 						for (Term t2 : group)
-							if (t1 != t2 && definitionHelper.isSubsorted(t2.getSort(definitionHelper), t1.getSort(definitionHelper)))
+							if (t1 != t2 && definitionHelper.isSubsorted(t2.getSort(), t1.getSort()))
 								max = false;
 						if (max)
 							maxterms.add(t1);
@@ -116,15 +116,15 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 			TermCons term2 = (TermCons) trm2;
 
 			// check to see if the two terms have the same arity
-			if (term1.getProduction(definitionHelper).getItems().size() != term2.getProduction(definitionHelper).getItems().size())
+			if (term1.getProduction().getItems().size() != term2.getProduction().getItems().size())
 				return false;
 
-			if (!term1.getProduction(definitionHelper).getKLabel().equals(term2.getProduction(definitionHelper).getKLabel()))
+			if (!term1.getProduction().getKLabel().equals(term2.getProduction().getKLabel()))
 				return false;
 
-			for (int i = 0; i < term1.getProduction(definitionHelper).getItems().size(); i++) {
-				ProductionItem itm1 = term1.getProduction(definitionHelper).getItems().get(i);
-				ProductionItem itm2 = term2.getProduction(definitionHelper).getItems().get(i);
+			for (int i = 0; i < term1.getProduction().getItems().size(); i++) {
+				ProductionItem itm1 = term1.getProduction().getItems().get(i);
+				ProductionItem itm2 = term2.getProduction().getItems().get(i);
 
 				if (itm1.getType() == ProductionType.TERMINAL && !itm1.equals(itm2))
 					return false;

@@ -131,7 +131,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 
 	@Override
 	public ASTNode transform(Variable node) throws TransformerException {
-		if (MetaK.isComputationSort(node.getSort(definitionHelper)))
+		if (MetaK.isComputationSort(node.getSort()))
 			return node.accept(kTrans);
 		return node;
 	}
@@ -146,7 +146,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 	@Override
 	public ASTNode transform(Constant node) throws TransformerException {
         assert false : "dead code";
-		if (MetaK.isComputationSort(node.getSort(definitionHelper)))
+		if (MetaK.isComputationSort(node.getSort()))
 			return node.accept(kTrans);
 		return node;
 	}
@@ -267,17 +267,17 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 
 		@Override
 		public ASTNode transform(Variable node) throws TransformerException {
-			if (node.getSort(definitionHelper).equals(KSorts.KITEM) || node.getSort(definitionHelper).equals(KSorts.K)) {
+			if (node.getSort().equals(KSorts.KITEM) || node.getSort().equals(KSorts.K)) {
 				return node;
             }
-			if (MetaK.isKSort(node.getSort(definitionHelper))) {
+			if (MetaK.isKSort(node.getSort())) {
 				return KApp.of(new KInjectedLabel(node));
             }
 
-            if (node.getSort(definitionHelper).equals(BoolBuiltin.SORT_NAME)
-                    || node.getSort(definitionHelper).equals(IntBuiltin.SORT_NAME)
-                    || node.getSort(definitionHelper).equals(FloatBuiltin.SORT_NAME)
-                    || node.getSort(definitionHelper).equals(StringBuiltin.SORT_NAME)) {
+            if (node.getSort().equals(BoolBuiltin.SORT_NAME)
+                    || node.getSort().equals(IntBuiltin.SORT_NAME)
+                    || node.getSort().equals(FloatBuiltin.SORT_NAME)
+                    || node.getSort().equals(StringBuiltin.SORT_NAME)) {
                 return node;
             }
 			node = node.shallowCopy();

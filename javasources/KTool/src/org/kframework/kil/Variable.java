@@ -82,7 +82,7 @@ public class Variable extends Term {
 			return false;
 		Variable var = (Variable) obj;
 
-		return this.sort.equals(var.getSort(null)) && this.name.equals(var.getName());
+		return this.sort.equals(var.getSort()) && this.name.equals(var.getName());
 	}
 
 	@Override

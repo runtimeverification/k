@@ -121,7 +121,7 @@ public class JavaClassesFactory {
 		if (Constants.REWRITE.equals(element.getNodeName()))
 			return new Rewrite(element);
 		if (Constants.TERM.equals(element.getNodeName()))
-			return new TermCons(element);
+			return new TermCons(element, definitionHelper);
 		if (Constants.BRACKET.equals(element.getNodeName()))
 			return new Bracket(element);
 		if (Constants.CAST.equals(element.getNodeName()))
@@ -258,7 +258,7 @@ public class JavaClassesFactory {
 					TermCons head = null;
 					TermCons tc = null;
 					while (!list.isEmpty()) {
-						TermCons ntc = new TermCons(StringUtil.getSortNameFromCons(appl.getName()), appl.getName());
+						TermCons ntc = new TermCons(StringUtil.getSortNameFromCons(appl.getName()), appl.getName(), definitionHelper);
 						ntc.setLocation(appl.getAnnotations().getFirst().toString().substring(8));
 						ntc.setContents(new ArrayList<Term>());
 						ntc.getContents().add((Term) JavaClassesFactory.getTerm(list.getFirst()));
@@ -276,7 +276,7 @@ public class JavaClassesFactory {
 						return new Empty(StringUtil.getSortNameFromCons(appl.getName()));
 					return head;
 				} else
-					return new TermCons(appl);
+					return new TermCons(appl, definitionHelper);
 			}
 			if (appl.getName().endsWith("Bracket"))
 				return new Bracket(appl);

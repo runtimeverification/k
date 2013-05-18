@@ -361,7 +361,7 @@ parseXML(list.get(1), definitionHelper);
 					contents.add(parseXML(elem, definitionHelper));
 				}
 				for (String cons : validConses) {
-					possibleTerms.add(new TermCons(sort, cons, contents));
+					possibleTerms.add(new TermCons(sort, cons, contents, definitionHelper));
 				}
 				if (possibleTerms.size() == 1) {
 					return possibleTerms.get(0);

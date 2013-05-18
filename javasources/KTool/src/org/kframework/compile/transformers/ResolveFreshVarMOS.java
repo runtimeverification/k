@@ -49,7 +49,7 @@ public class ResolveFreshVarMOS extends CopyOnWriteTransformer {
 		Map<Term, Term> symMap = new HashMap<Term, Term>();
 		int idx = 0;
 		for (Variable var : vars) {
-			Term symTerm = new AddSymbolicK(definitionHelper).freshSymSortN(var.getSort(definitionHelper),idx);
+			Term symTerm = new AddSymbolicK(definitionHelper).freshSymSortN(var.getSort(),idx);
 			idx++;
             symMap.put(var, symTerm);
 		}

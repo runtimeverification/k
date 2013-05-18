@@ -22,16 +22,16 @@ public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
 		// TODO: make this as a hard type checker where you throw exceptions every time you get a typing error
 		super.visit(tc);
 
-		if (tc.getProduction(definitionHelper).getItems().get(0).getType() == ProductionType.USERLIST) {
-			UserList ulist = (UserList) tc.getProduction(definitionHelper).getItems().get(0);
+		if (tc.getProduction().getItems().get(0).getType() == ProductionType.USERLIST) {
+			UserList ulist = (UserList) tc.getProduction().getItems().get(0);
 
 			score += getFitnessUnit2(ulist.getSort(), tc.getContents().get(0));
-			score += getFitnessUnit2(tc.getProduction(definitionHelper).getSort(), tc.getContents().get(1));
+			score += getFitnessUnit2(tc.getProduction().getSort(), tc.getContents().get(1));
 		} else {
 			int j = 0;
-			for (int i = 0; i < tc.getProduction(definitionHelper).getItems().size(); i++) {
-				if (tc.getProduction(definitionHelper).getItems().get(i).getType() == ProductionType.SORT) {
-					Sort sort = (Sort) tc.getProduction(definitionHelper).getItems().get(i);
+			for (int i = 0; i < tc.getProduction().getItems().size(); i++) {
+				if (tc.getProduction().getItems().get(i).getType() == ProductionType.SORT) {
+					Sort sort = (Sort) tc.getProduction().getItems().get(i);
 					Term child = (Term) tc.getContents().get(j);
 					score += getFitnessUnit2(sort.getName(), child);
 					j++;
@@ -44,7 +44,7 @@ public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
 	public void visit(Collection node) {
 		super.visit(node);
 		for (Term t : node.getContents()) {
-			if (!definitionHelper.isSubsortedEq(node.getSort(definitionHelper), t.getSort(definitionHelper)))
+			if (!definitionHelper.isSubsortedEq(node.getSort(), t.getSort()))
 				score += -1;
 		}
 	}
@@ -70,7 +70,7 @@ public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
 			return getFitnessUnit2(declSort, br.getContent());
 		}
 
-		return getFitnessUnit3(declSort, childTerm.getSort(definitionHelper));
+		return getFitnessUnit3(declSort, childTerm.getSort());
 	}
 
 	private int getFitnessUnit3(String declSort, String termSort) {

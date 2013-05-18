@@ -29,8 +29,8 @@ public class PriorityFilter2 extends BasicHookWorker {
 	}
 
 	public ASTNode transform(TermCons tc) throws TransformerException {
-		String parentLabel = parent.getProduction(definitionHelper).getKLabel();
-		String localLabel = tc.getProduction(definitionHelper).getKLabel();
+		String parentLabel = parent.getProduction().getKLabel();
+		String localLabel = tc.getProduction().getKLabel();
 		if (definitionHelper.isPriorityWrong(parentLabel, localLabel)) {
 			String msg = "Priority filter exception. Cannot use " + localLabel + " as a child of " + parentLabel;
 			KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, tc.getFilename(), tc.getLocation());

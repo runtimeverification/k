@@ -25,12 +25,12 @@ public class VariableTypeFilter extends BasicTransformer {
 		String correctSort = variableTypes.get(r.getName());
 		if (correctSort == null)
 			return r;
-		if (definitionHelper.isSubsortedEq(r.getSort(definitionHelper), correctSort)) {
+		if (definitionHelper.isSubsortedEq(r.getSort(), correctSort)) {
 			Variable newV = new Variable(r);
 			newV.setSort(correctSort);
 			return newV;
 		}
-		String msg = "Variable " + r.getName() + " is contextually expected to have sort " + r.getSort(definitionHelper) + " but it has been declared (or infered) of sort " + correctSort + ".";
+		String msg = "Variable " + r.getName() + " is contextually expected to have sort " + r.getSort() + " but it has been declared (or infered) of sort " + correctSort + ".";
 		// String msg = "Variable " + r.getName() + " cannot have sort " + r.getSort() + " at this location. Expected sort " + correctSort + ".";
 		KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getFilename(), r.getLocation());
 		throw new VariableTypeClashException(kex);

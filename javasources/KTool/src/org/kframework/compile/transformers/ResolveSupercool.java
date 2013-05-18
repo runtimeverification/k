@@ -35,7 +35,7 @@ public class ResolveSupercool extends CopyOnWriteTransformer {
         Term right = (Term)node.getRight().accept(this);
         if (right != node.getRight()) {
             node = node.shallowCopy();
-            node.setRight(right);
+            node.setRight(right, definitionHelper);
         }
         return node;
     }

@@ -167,7 +167,7 @@ public class MetaK {
 	}
 
 	public static Term defaultTerm(Term v, DefinitionHelper definitionHelper) {
-		String sort = v.getSort(definitionHelper);
+		String sort = v.getSort();
 		KSort ksort = KSort.getKSort(sort).mainSort();
 		if (ksort.isDefaultable())
 			return new Empty(ksort.toString());
@@ -329,7 +329,7 @@ public class MetaK {
                            StringBuiltin.kAppOf(prod.getSort()),
                            Variable.getFreshVar("String"));
 		}
-		TermCons t = new TermCons(prod.getSort(), prod.getCons());
+		TermCons t = new TermCons(prod.getSort(), prod.getCons(), definitionHelper);
 		if (prod.isListDecl()) {
 			t.getContents().add(Variable.getFreshVar(((UserList) prod.getItems().get(0)).getSort()));
 			t.getContents().add(Variable.getFreshVar(prod.getSort()));

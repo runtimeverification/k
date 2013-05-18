@@ -39,7 +39,7 @@ public class ResolveSyntaxPredicates extends CopyOnWriteTransformer {
 		}
 		for (Variable var : vars) {
 //			if (!var.isUserTyped()) continue;
-			if (MetaK.isKSort(var.getSort(definitionHelper))) continue;
+			if (MetaK.isKSort(var.getSort())) continue;
 			change = true;
 			ands.getContents().add(getPredicateTerm(var));
 		}
@@ -55,7 +55,7 @@ public class ResolveSyntaxPredicates extends CopyOnWriteTransformer {
 	}
 
 	private Term getPredicateTerm(Variable var) {
-		return KApp.of(KLabelConstant.of(AddPredicates.predicate(var.getSort(definitionHelper)), definitionHelper), var);
+		return KApp.of(KLabelConstant.of(AddPredicates.predicate(var.getSort()), definitionHelper), var);
 	}
 
 }

@@ -18,7 +18,7 @@ public class AddKCell extends CopyOnWriteTransformer {
 		if (MetaK.isAnywhere(node)) {
 			return node;
 		}
-		String sort = node.getBody().getSort(definitionHelper);
+		String sort = node.getBody().getSort();
 		if (!sort.equals("K") && MetaK.isKSort(sort)) {
 			return node;
 		}

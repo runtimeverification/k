@@ -57,8 +57,8 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 				for (Variable v1 : varDecl)
 					for (Variable v2 : varDecl)
 						if (v1 != v2)
-							if (!v1.getSort(definitionHelper).equals(v2.getSort(definitionHelper))) {
-								String msg = "Variable '" + v1.getName() + "' declared with two different sorts: " + v1.getSort(definitionHelper) + " and " + v2.getSort(definitionHelper);
+							if (!v1.getSort().equals(v2.getSort())) {
+								String msg = "Variable '" + v1.getName() + "' declared with two different sorts: " + v1.getSort() + " and " + v2.getSort();
 								throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, getName(), v1.getFilename(), v1.getLocation()));
 							}
 			}
@@ -67,7 +67,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 			if (varDecl.size() == 1) {
 				Map<String, String> varDeclMap = new HashMap<String, String>();
 				Variable var = varDecl.iterator().next();
-				varDeclMap.put(var.getName(), var.getSort(definitionHelper));
+				varDeclMap.put(var.getName(), var.getSort());
 
 				try {
 					r = (Sentence) r.accept(new VariableTypeFilter(varDeclMap, definitionHelper));
@@ -105,7 +105,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 					for (Variable vv1 : isect) {
 						boolean maxSort = true;
 						for (Variable vv2 : isect) {
-							if (definitionHelper.isSubsorted(vv2.getSort(definitionHelper), vv1.getSort(definitionHelper)))
+							if (definitionHelper.isSubsorted(vv2.getSort(), vv1.getSort()))
 								maxSort = false;
 						}
 						if (maxSort)
@@ -116,7 +116,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 						String msg = "Could not infer a unique sort for variable '" + varr.getName() + "'.";
 						msg += " Possible sorts: ";
 						for (Variable vv1 : maxSorts)
-							msg += vv1.getSort(definitionHelper) + ", ";
+							msg += vv1.getSort() + ", ";
 						msg = msg.substring(0, msg.length() - 2);
 						throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, varr.getFilename(), varr.getLocation()));
 					}
@@ -128,7 +128,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 
 				if (inferredVar != null) {
 					Map<String, String> varDeclMap = new HashMap<String, String>();
-					varDeclMap.put(inferredVar.getName(), inferredVar.getSort(definitionHelper));
+					varDeclMap.put(inferredVar.getName(), inferredVar.getSort());
 
 					try {
 						r = (Sentence) r.accept(new VariableTypeFilter(varDeclMap, definitionHelper));
@@ -136,7 +136,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 						e.report();
 					}
 
-					String msg = "Variable '" + inferredVar.getName() + "' was not declared. Assuming sort " + inferredVar.getSort(definitionHelper);
+					String msg = "Variable '" + inferredVar.getName() + "' was not declared. Assuming sort " + inferredVar.getSort();
 					GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.COMPILER, msg, varr.getFilename(), varr.getLocation()));
 				}
 			}

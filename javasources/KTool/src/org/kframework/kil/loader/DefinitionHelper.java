@@ -106,7 +106,7 @@ public class DefinitionHelper {
 	public void addCellDecl(Cell c) {
 		cells.put(c.getLabel(), c);
 
-		String sort = subsorts.getMaxim(c.getContents().getSort(this));
+		String sort = subsorts.getMaxim(c.getContents().getSort());
 		if (sort.equals(KSorts.KLIST))
 			sort = "K";
 		cellSorts.put(c.getLabel(), sort);
@@ -275,9 +275,9 @@ public class DefinitionHelper {
 	}
 
 	public boolean isListUnit(Constant cst) {
-		if (!isListSort(cst.getSort(this)))
+		if (!isListSort(cst.getSort()))
 			return false;
-		assert (cst.getValue().equals("." + cst.getSort(this)));
+		assert (cst.getValue().equals("." + cst.getSort()));
 		return true;
 	}
 
@@ -308,7 +308,7 @@ public class DefinitionHelper {
 	}
 
 	public Term kWrapper(Term t) {
-		if (isSubsortedEq("K", t.getSort(this)))
+		if (isSubsortedEq("K", t.getSort()))
 			return t;
 		return KApp.of(new KInjectedLabel(t));
 	}

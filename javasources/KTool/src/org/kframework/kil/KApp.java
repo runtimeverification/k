@@ -73,7 +73,7 @@ public class KApp extends Term {
         Element body = XML.getChildrenElements(childrenElements.get(0)).get(0);
         setLabel((Term) JavaClassesFactory.getTerm(body));
         Term term = (Term) JavaClassesFactory.getTerm(childrenElements.get(1));
-        if (!(term.getSort(definitionHelper).equals(KSorts.KLIST) || term instanceof Ambiguity)) {
+        if (!(term.getSort().equals(KSorts.KLIST) || term instanceof Ambiguity)) {
             setChild(new KList(Collections.<Term>singletonList(term)));
         } else {
             setChild(term);
