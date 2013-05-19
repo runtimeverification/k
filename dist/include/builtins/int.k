@@ -68,5 +68,8 @@ module INT-HOOKS
   //sort Nat ::= {I:Int | I >=Int 0}
   syntax Nat ::= "dummyNat"
   rule isNat(I:Int) => I >=Int 0 [function, anywhere]
+
+  rule 0 +Int I:Int => I [anywhere]
+  rule 0 *Int I:Int => 0 [anywhere]
 endmodule
 
