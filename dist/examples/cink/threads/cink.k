@@ -1,4 +1,5 @@
-require "cink-basic.k"
+require "../basic/cink-basic.k"
+require "cink-threads.k"
 
 /*!
 \setlength{\parindent}{1em}
@@ -45,19 +46,24 @@ syntax.
 module CINK-SYNTAX 
 
   imports CINK-BASIC-SYNTAX
+  imports CINK-THREADS-SYNTAX
 
 endmodule
 
 module CINK
   imports CINK-SYNTAX
   imports CINK-BASIC-SEMANTICS
+  imports CINK-THREADS-SEMANTICS
 
   configuration <T color="yellow">
-                  <control color="pink">
+                  <threads color="pink">
+                    <thread multiplicity="*" color="purple"> 
+                      <name color="yellow"> noName </name>
                       <k color="green"> ($PGM:Pgm ~> execute) </k>
                       <env color="LightSkyBlue"> .Map </env>
                       <fstack color="orange"> .List </fstack>
-                  </control>
+                    </thread>
+                  </threads>
                   <br/>
                   <genv color="SkyBlue"> .Map </genv>
                   <store color="white"> .Map </store>

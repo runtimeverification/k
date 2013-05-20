@@ -451,6 +451,43 @@
   </test>
 
 <!--
+    Cink threads
+-->
+
+  <test
+      language="dist/examples/cink/threads/cink.k"
+      folder="dist/examples/cink/threads/programs"
+      extensions="cink"
+      results="tests/examples/cink/threads"
+      >
+  </test>
+
+<!--
+    Cink arrays
+-->
+
+  <test
+      language="dist/examples/cink/arrays/cink.k"
+      folder="dist/examples/cink/arrays/programs"
+      extensions="cink"
+      results="tests/examples/cink/arrays"
+      exclude="sort.cink"
+      >
+  </test>
+<!--
+    Cink arrays unidimensional
+-->
+
+  <test
+      language="dist/examples/cink/arrays/unidimensional/cink.k"
+      folder="dist/examples/cink/arrays/unidimensional/programs"
+      extensions="cink"
+      results="tests/examples/cink/arrays/unidimensional"
+      exclude="sort.cink"
+      >
+  </test>
+
+<!--
     Program equivalence
 -->
 
