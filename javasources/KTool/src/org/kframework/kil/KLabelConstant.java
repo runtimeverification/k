@@ -29,19 +29,19 @@ public class KLabelConstant extends KLabel {
 	/*
 	 * Useful constants.
 	 */
-	public static final KLabelConstant COOL_KLABEL = ofStatic("cool");
-	public static final KLabelConstant HEAT_KLABEL = ofStatic("heat");
-	public static final KLabelConstant HEATED_KLABEL = ofStatic("heated");
-	public static final KLabelConstant REDEX_KLABEL = ofStatic("redex");
-	public static final KLabelConstant KNEQ_KLABEL = ofStatic("'_=/=K_");
-	public static final KLabelConstant KEQ_KLABEL = ofStatic("'_==K_");
-	public static final KLabelConstant KEQ = ofStatic("'_=K_");
-	public static final KLabelConstant KLIST_EQUALITY = ofStatic("'_=" + KSorts.KLIST + "_");
-	public static final KLabelConstant ANDBOOL_KLABEL = ofStatic("'#andBool");
-	public static final KLabelConstant BOOL_ANDBOOL_KLABEL = ofStatic("'_andBool_");
-	public static final KLabelConstant BOOL_ANDTHENBOOL_KLABEL = ofStatic("'_andThenBool_");
-	public static final KLabelConstant KRESULT_PREDICATE = ofStatic(AddPredicates.predicate(KSorts.KRESULT));
-	public static final KLabelConstant STRING_PLUSSTRING_KLABEL = ofStatic("'_+String_");
+	public static final KLabelConstant COOL_KLABEL = of("cool");
+	public static final KLabelConstant HEAT_KLABEL = of("heat");
+	public static final KLabelConstant HEATED_KLABEL = of("heated");
+	public static final KLabelConstant REDEX_KLABEL = of("redex");
+	public static final KLabelConstant KNEQ_KLABEL = of("'_=/=K_");
+	public static final KLabelConstant KEQ_KLABEL = of("'_==K_");
+	public static final KLabelConstant KEQ = of("'_=K_");
+	public static final KLabelConstant KLIST_EQUALITY = of("'_=" + KSorts.KLIST + "_");
+	public static final KLabelConstant ANDBOOL_KLABEL = of("'#andBool");
+	public static final KLabelConstant BOOL_ANDBOOL_KLABEL = of("'_andBool_");
+	public static final KLabelConstant BOOL_ANDTHENBOOL_KLABEL = of("'_andThenBool_");
+	public static final KLabelConstant KRESULT_PREDICATE = of(AddPredicates.predicate(KSorts.KRESULT));
+	public static final KLabelConstant STRING_PLUSSTRING_KLABEL = of("'_+String_");
 
 	/**
 	 * Static function for creating AST term representation of KLabel constants. The function caches the KLabelConstant objects; subsequent calls with the same label return
@@ -70,7 +70,7 @@ public class KLabelConstant extends KLabel {
 	 *            string representation of the KLabel; must not be '`' escaped;
 	 * @return AST term representation the KLabel;
 	 */
-	public static final KLabelConstant ofStatic(String label) {
+	public static final KLabelConstant of(String label) {
 		assert label != null;
 
 		KLabelConstant kLabelConstant = cache.get(label);

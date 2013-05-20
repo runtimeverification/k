@@ -34,11 +34,11 @@ import java.util.regex.Pattern;
 public class ResolveBinder extends CopyOnWriteTransformer {
 
     private static final KLabelConstant BINDER_PREDICATE
-            = KLabelConstant.ofStatic(AddPredicates.predicate("Binder"));
+            = KLabelConstant.of(AddPredicates.predicate("Binder"));
     private static final KLabelConstant BOUNDED_PREDICATE
-            = KLabelConstant.ofStatic(AddPredicates.predicate("Bound"));
+            = KLabelConstant.of(AddPredicates.predicate("Bound"));
     private static final KLabelConstant BOUNDING_PREDICATE
-            = KLabelConstant.ofStatic(AddPredicates.predicate("Bounding"));
+            = KLabelConstant.of(AddPredicates.predicate("Bounding"));
 
     private static final String REGEX
             = "\\s*(\\d+)(\\s*-\\>\\s*(\\d+))?\\s*(,?)";
@@ -101,7 +101,7 @@ public class ResolveBinder extends CopyOnWriteTransformer {
             rule.addAttribute(Attribute.ANYWHERE);
             items.add(rule);
 
-            Term klblK = KApp.of(new KInjectedLabel(KLabelConstant.ofStatic(prod.getKLabel())));
+            Term klblK = KApp.of(new KInjectedLabel(KLabelConstant.of(prod.getKLabel())));
 
             for (int bndIdx : bndMap.keySet()) {
                 KList list = new KList();

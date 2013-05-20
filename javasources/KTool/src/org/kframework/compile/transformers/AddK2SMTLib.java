@@ -32,7 +32,7 @@ import java.util.ArrayList;
 
 public class AddK2SMTLib  extends CopyOnWriteTransformer {
 
-    public static final KLabelConstant K_TO_SMTLIB = KLabelConstant.ofStatic("K2SMTLib");
+    public static final KLabelConstant K_TO_SMTLIB = KLabelConstant.of("K2SMTLib");
     public static final String SMTLIB_ATTR = "smtlib";
 
     private static final String SMTLIB_VAR_PREFIX = "__var__";

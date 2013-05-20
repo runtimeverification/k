@@ -34,7 +34,7 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
 
     public static final String EQUALITY_SORT = "EqualitySort";
     public static final KLabelConstant EQUALITY_PREDICATE
-            = KLabelConstant.ofStatic(AddPredicates.predicate(EQUALITY_SORT));
+            = KLabelConstant.of(AddPredicates.predicate(EQUALITY_SORT));
 
     private Map<String, String> equalities = new HashMap<String, String>();
 

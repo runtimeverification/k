@@ -11,7 +11,7 @@ import java.util.ArrayList;
 public class AddKLabelConstant extends CopyOnWriteTransformer {
 
     private static final KLabelConstant KLabelConstantPredicate =
-            KLabelConstant.ofStatic(AddPredicates.predicate("KLabelConstant"));
+            KLabelConstant.of(AddPredicates.predicate("KLabelConstant"));
 
     public AddKLabelConstant(DefinitionHelper definitionHelper) {
         super("Define isKLabelConstant predicate for KLabel constants", definitionHelper);

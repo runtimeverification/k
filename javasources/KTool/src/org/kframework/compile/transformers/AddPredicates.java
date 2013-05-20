@@ -34,7 +34,7 @@ import java.util.Set;
 
 public class AddPredicates extends CopyOnWriteTransformer {
 
-    public static final KLabelConstant K2Sort = KLabelConstant.ofStatic("K2Sort");
+    public static final KLabelConstant K2Sort = KLabelConstant.of("K2Sort");
 
     private static Set<String> tokenNames;
 
@@ -136,11 +136,11 @@ public class AddPredicates extends CopyOnWriteTransformer {
     private static final String PredicatePrefix = "is";
     private static final String SymbolicPredicatePrefix = "Symbolic";
     public static final KLabelConstant BuiltinPredicate =
-            KLabelConstant.ofStatic(predicate("Builtin"));
+            KLabelConstant.of(predicate("Builtin"));
     public static final KLabelConstant VariablePredicate =
-            KLabelConstant.ofStatic(predicate("Variable"));
+            KLabelConstant.of(predicate("Variable"));
     public static final KLabelConstant KSymbolicPredicate =
-            KLabelConstant.ofStatic(symbolicPredicate("K"));
+            KLabelConstant.of(symbolicPredicate("K"));
 
 
     public static final String predicate(String sort) {

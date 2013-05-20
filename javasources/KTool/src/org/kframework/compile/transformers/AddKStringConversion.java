@@ -14,7 +14,7 @@ import java.util.ArrayList;
 public class AddKStringConversion extends CopyOnWriteTransformer {
 
     private static final KLabelConstant KLabel2String =
-            KLabelConstant.ofStatic("KLabel2String");
+            KLabelConstant.of("KLabel2String");
 
     private static final String String2KLabelCons =
             "KLabel1String2KLabelSyn";
