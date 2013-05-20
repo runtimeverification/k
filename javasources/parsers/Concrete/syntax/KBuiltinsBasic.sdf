@@ -17,7 +17,7 @@ lexical syntax
 
 	%% String declaration
 	"\"" StringCharDz* "\"" -> DzDzSTRING
-	~[\"\n\r]			-> StringCharDz
+	~[\"\n\r\\]			-> StringCharDz
 	"\\\""				-> StringCharDz
     BackSlashCharDz		-> StringCharDz
     "\\"				-> BackSlashCharDz
