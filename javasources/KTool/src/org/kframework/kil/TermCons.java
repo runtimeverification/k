@@ -32,6 +32,7 @@ public class TermCons extends Term {
 		this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
 		this.cons = element.getAttribute(Constants.CONS_cons_ATTR);
 		this.production = definitionHelper.conses.get(cons);
+		assert this.production != null;
 
 		contents = new ArrayList<Term>();
 		List<Element> children = XML.getChildrenElements(element);
@@ -44,6 +45,7 @@ public class TermCons extends Term {
 		this.cons = atm.getName();
 		this.sort = StringUtil.getSortNameFromCons(cons);
 		this.production = definitionHelper.conses.get(cons);
+		assert this.production != null;
 
 		contents = new ArrayList<Term>();
 		if (atm.getArity() == 0) {
@@ -71,6 +73,7 @@ public class TermCons extends Term {
 		this.cons = node.cons;
 		this.contents = new ArrayList<Term>(node.contents);
 		this.production = node.production;
+		assert this.production != null;
 	}
 
 	public TermCons(String psort, String listCons, List<Term> genContents, DefinitionHelper definitionHelper) {

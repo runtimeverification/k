@@ -13,8 +13,10 @@ import org.kframework.kil.ConfigurationNotUnique;
 import org.kframework.kil.Definition;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.Module;
 import org.kframework.parser.DefinitionLoader;
+import org.kframework.parser.concrete.KParser;
 import org.kframework.utils.Error;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -50,19 +52,25 @@ public class KagregFrontEnd {
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, errorFile.getAbsolutePath(), "File system."));
 			}
 		}
+		
+		GlobalSettings.verbose = true;
 
 		String firstLang = FileUtil.getMainModule(firstDefinitionFile.getName());
 		String secondLang = FileUtil.getMainModule(secondDefinitionFile.getName());
 		
-		DefinitionHelper definitionHelper = new DefinitionHelper();
-		definitionHelper.dotk = new File(firstDefinitionFile.getCanonicalFile().getParent() + File.separator + ".k");
-		definitionHelper.dotk.mkdirs();
-		Definition firstDef = DefinitionLoader.loadDefinition(firstDefinitionFile, firstLang, true, definitionHelper);
+		DefinitionHelper definitionHelper1 = new DefinitionHelper();
+		definitionHelper1.dotk = new File(firstDefinitionFile.getCanonicalFile().getParent() + File.separator + ".k");
+		definitionHelper1.dotk.mkdirs();
+		Definition firstDef = DefinitionLoader.loadDefinition(firstDefinitionFile, firstLang, true, definitionHelper1);
 		
-		definitionHelper.dotk = new File(secondDefinitionFile.getCanonicalFile().getParent() + File.separator + ".k");
-		definitionHelper.dotk.mkdirs();
-		Definition secondDef = DefinitionLoader.loadDefinition(secondDefinitionFile, secondLang, true, definitionHelper);
-		
+		GlobalSettings.synModule = null;
+		KParser.reset();
+		DefinitionHelper definitionHelper2 = new DefinitionHelper();
+		assert definitionHelper2 != null;
+		definitionHelper2.dotk = new File(secondDefinitionFile.getCanonicalFile().getParent() + File.separator + ".k");
+		definitionHelper2.dotk.mkdirs();
+		Definition secondDef = DefinitionLoader.loadDefinition(secondDefinitionFile, secondLang, true, definitionHelper2);
+
 		Configuration firstConf = null;
 		try {
 			firstConf = firstDef.getSingletonConfiguration();
@@ -86,12 +94,12 @@ public class KagregFrontEnd {
 		}
 
 		String result = "";
-		UnparserFilter unparserFirst = new UnparserFilter(definitionHelper);
+		UnparserFilter unparserFirst = new UnparserFilter(definitionHelper1);
 		unparserFirst.setForEquivalence();
 		unparserFirst.visit(firstDef);
 		result += unparserFirst.getResult();
 		
-		UnparserFilter unparserSecond = new UnparserFilter(definitionHelper);
+		UnparserFilter unparserSecond = new UnparserFilter(definitionHelper2);
 		unparserSecond.setForEquivalence();
 		unparserSecond.visit(secondDef);
 		result += unparserSecond.getResult();
@@ -99,13 +107,13 @@ public class KagregFrontEnd {
 		result += "\n\n\nconfiguration\n";
 		result += "<agregation>\n";
 		result += "<first>\n";
-		UnparserFilter unparserFirstConfiguration = new UnparserFilter(definitionHelper);
+		UnparserFilter unparserFirstConfiguration = new UnparserFilter(definitionHelper1);
 		firstConf.getBody().accept(unparserFirstConfiguration);
 		result += unparserFirstConfiguration.getResult();
 		result += "</first>\n\n\n";
 
 		result += "<second>\n";
-		UnparserFilter unparserSecondConfiguration = new UnparserFilter(definitionHelper);
+		UnparserFilter unparserSecondConfiguration = new UnparserFilter(definitionHelper2);
 		secondConf.getBody().accept(unparserSecondConfiguration);
 		result += unparserSecondConfiguration.getResult();
 		result += "</second>\n\n\n";

@@ -19,6 +19,12 @@ import org.strategoxt.lang.StrategoExit;
 public class KParser {
 	private static Context context = null;
 	private static HashSet<String> tables = new HashSet<String>();
+	
+	public static void reset()
+	{
+		context = null;
+		tables = new HashSet<String>();
+	}
 
 	private static void init() {
 		synchronized (KParser.class) {

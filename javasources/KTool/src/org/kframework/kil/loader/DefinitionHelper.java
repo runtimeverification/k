@@ -19,8 +19,8 @@ import java.util.Collection;
 import java.util.Map;
 
 public class DefinitionHelper {
-	public static boolean initialized = false;
-	
+	public boolean initialized = false;
+
 	public static final Set<String> generatedTags = ImmutableSet.of(
 			"cons",
 			"kgeneratedlabel",

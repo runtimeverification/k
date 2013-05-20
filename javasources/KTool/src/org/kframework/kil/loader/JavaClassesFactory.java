@@ -120,8 +120,10 @@ public class JavaClassesFactory {
 			return new Rule(element);
 		if (Constants.REWRITE.equals(element.getNodeName()))
 			return new Rewrite(element);
-		if (Constants.TERM.equals(element.getNodeName()))
+		if (Constants.TERM.equals(element.getNodeName())) {
+			assert definitionHelper != null;
 			return new TermCons(element, definitionHelper);
+		}
 		if (Constants.BRACKET.equals(element.getNodeName()))
 			return new Bracket(element);
 		if (Constants.CAST.equals(element.getNodeName()))
@@ -210,6 +212,8 @@ public class JavaClassesFactory {
 	}
 
 	public static ASTNode getTerm(ATerm atm) {
+		assert definitionHelper != null;
+
 		if (atm.getType() == ATerm.APPL) {
 			ATermAppl appl = (ATermAppl) atm;
 			// used for a new feature - loading java classes at first step (Basic Parsing)
