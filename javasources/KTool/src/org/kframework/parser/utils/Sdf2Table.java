@@ -4,13 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.kframework.utils.ThreadedStreamHandler;
+import org.kframework.utils.ThreadedStreamCapturer;
 import org.kframework.utils.file.KPaths;
 
 public class Sdf2Table {
 
 	public static void run_sdf2table(File startDir, String mainFile) {
-		ThreadedStreamHandler errorStreamHandler;
+		ThreadedStreamCapturer errorStreamHandler;
 
 		try {
 			File f = null;
@@ -37,7 +37,7 @@ public class Sdf2Table {
 
 			InputStream errorStream = process.getErrorStream();
 			// these need to run as java thread to get the standard error from the command.
-			errorStreamHandler = new ThreadedStreamHandler(errorStream);
+			errorStreamHandler = new ThreadedStreamCapturer(errorStream);
 			errorStreamHandler.start();
 			process.waitFor();
 			errorStreamHandler.join();

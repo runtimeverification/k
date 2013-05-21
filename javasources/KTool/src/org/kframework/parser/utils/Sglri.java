@@ -5,7 +5,7 @@ import java.io.IOException;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.utils.ThreadedStreamHandler;
+import org.kframework.utils.ThreadedStreamCapturer;
 import org.kframework.utils.file.KPaths;
 
 import aterm.ATerm;
@@ -13,7 +13,7 @@ import aterm.ATerm;
 public class Sglri {
 
 	public static ASTNode run_sglri(String tablePath, String startSymbol, String content) {
-		ThreadedStreamHandler errorStreamHandler;
+		ThreadedStreamCapturer errorStreamHandler;
 		ThreadedATermReader inputATermReader;
 
 		try {
@@ -42,7 +42,7 @@ public class Sglri {
 			process.getOutputStream().write(content.getBytes());
 			process.getOutputStream().close();
 			// these need to run as java thread to get the standard error from the command.
-			errorStreamHandler = new ThreadedStreamHandler(process.getErrorStream());
+			errorStreamHandler = new ThreadedStreamCapturer(process.getErrorStream());
 			inputATermReader = new ThreadedATermReader(process.getInputStream());
 			errorStreamHandler.start();
 			inputATermReader.start();

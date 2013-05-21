@@ -5,12 +5,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-public class ThreadedStreamHandler extends Thread {
+public class ThreadedStreamCapturer extends Thread {
 
 	InputStream inputStream;
 	StringBuilder content = new StringBuilder();
 
-	public ThreadedStreamHandler(InputStream inputStream) {
+	public ThreadedStreamCapturer(InputStream inputStream) {
 		this.inputStream = inputStream;
 	}
 

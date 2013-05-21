@@ -6,6 +6,7 @@ import org.kframework.kil.Term;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.ProgramLoader;
+import org.kframework.utils.ThreadedStreamCapturer;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -28,7 +29,7 @@ public class RunProcess {
 
 	public void execute(Map<String, String> environment,String... commands) {
 
-		ThreadedStreamHandler inputStreamHandler, errorStreamHandler;
+		ThreadedStreamCapturer inputStreamHandler, errorStreamHandler;
 
 		try {
 			if (commands.length <= 0) {
@@ -49,8 +50,8 @@ public class RunProcess {
 			InputStream inputStream = process.getInputStream();
 			InputStream errorStream = process.getErrorStream();
 			// these need to run as java threads to get the standard output and error from the command.
-			inputStreamHandler = new ThreadedStreamHandler(inputStream);
-			errorStreamHandler = new ThreadedStreamHandler(errorStream);
+			inputStreamHandler = new ThreadedStreamCapturer(inputStream);
+			errorStreamHandler = new ThreadedStreamCapturer(errorStream);
 
 			inputStreamHandler.start();
 			errorStreamHandler.start();
