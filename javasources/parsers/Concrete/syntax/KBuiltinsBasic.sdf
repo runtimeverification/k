@@ -18,7 +18,7 @@ lexical syntax
 	%% String declaration
 	"\"" StringCharDz* "\"" -> DzDzSTRING
 	~[\"\n\r\\]			-> StringCharDz
-	[\\]~[\n\t]			-> StringCharDz
+	[\\]~[\n\r]			-> StringCharDz
 
 	%% KLabel definition + restrictions lower
 	"'" KLabelCharDz+			-> KLabelDz
