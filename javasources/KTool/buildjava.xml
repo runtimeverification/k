@@ -56,6 +56,10 @@
                 <exclude name="**/*.java"/>
             </fileset>
         </copy>
+	<javacc
+	    target="src/org/kframework/utils/kastparser/KastParser.jj"
+	    javacchome="../../dist/lib/java"
+	/>
 	<condition property="isJava7">
 		<equals arg1="${ant.java.version}" arg2="1.7" />
 	</condition>
