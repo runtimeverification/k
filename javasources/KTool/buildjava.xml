@@ -5,113 +5,101 @@
               directory with the processing instruction <?eclipse.ant.import?>
               as the first entry and export the buildfile again. -->
 <project basedir="." default="build" name="KTool">
-    <property environment="env"/>
-    <property name="ECLIPSE_HOME" value="../../../eclisespoofax"/>
-    <property name="debuglevel" value="source,lines,vars"/>
-    <property name="target" value="1.6"/>
-    <property name="source" value="1.6"/>
-    <path id="KTool.classpath">
-        <pathelement location="bin"/>
-        <pathelement location="../../dist/lib/java/strategoxt.jar"/>
-        <pathelement location="../../dist/lib/java/commons-cli-1.2-javadoc.jar"/>
-        <pathelement location="../../dist/lib/java/commons-cli-1.2-sources.jar"/>
-        <pathelement location="../../dist/lib/java/commons-cli-1.2.jar"/>
-        <pathelement location="../../dist/lib/java/commons-io-2.1.jar"/>
-        <pathelement location="../../dist/lib/java/jopt-simple-3.3.jar"/>
-        <pathelement location="../../dist/lib/java/jansi-1.8.jar"/>
-        <pathelement location="../../dist/lib/java/jline-1.0.jar"/>
-        <pathelement location="../../dist/lib/java/xstream.jar"/>
-        <pathelement location="../../dist/lib/java/kxml2-min.jar"/>
-        <pathelement location="../../dist/lib/java/diffutils-1.2.1.jar"/>
-        <pathelement location="../../dist/lib/java/guava-14.0.1.jar"/>
-		<pathelement location="../../dist/lib/java/collections-generic-4.01.jar"/>
-		<pathelement location="../../dist/lib/java/colt-1.2.0.jar ui/concurrent-1.3.4.jar"/>
-		<pathelement location="../../dist/lib/java/j3d-core-1.3.1.jar ui/jung-3d-2.0.1.jar"/>
-		<pathelement location="../../dist/lib/java/jung-3d-demos-2.0.1.jar"/>
-		<pathelement location="../../dist/lib/java/jung-algorithms-2.0.1.jar"/>
-		<pathelement location="../../dist/lib/java/jung-api-2.0.1.jar"/>
-		<pathelement location="../../dist/lib/java/jung-graph-impl-2.0.1.jar"/>
-		<pathelement location="../../dist/lib/java/jung-io-2.0.1.jar"/>
-		<pathelement location="../../dist/lib/java/jung-jai-2.0.1.jar"/>
-		<pathelement location="../../dist/lib/java/jung-jai-samples-2.0.1.jar"/>
-		<pathelement location="../../dist/lib/java/jung-samples-2.0.1.jar"/>
-		<pathelement location="../../dist/lib/java/jung-visualization-2.0.1.jar"/>
-		<pathelement location="../../dist/lib/java/stax-api-1.0.1.jar"/>
-		<pathelement location="../../dist/lib/java/vecmath-1.3.1.jar"/>
-		<pathelement location="../../dist/lib/java/wstx-asl-3.2.6.jar"/>
-		<pathelement location="../../dist/lib/java/commons-lang3-3.1.jar"/>
-		<pathelement location="../../dist/lib/java/aterm-java.jar"/>
-    </path>
-    <target name="init">
-        <mkdir dir="bin"/>
-        <copy includeemptydirs="false" todir="bin">
-            <fileset dir="src">
-                <exclude name="**/*.launch"/>
-                <exclude name="**/*.java"/>
-            </fileset>
-        </copy>
-        <copy includeemptydirs="false" todir="bin">
-            <fileset dir="lib/resources">
-                <exclude name="**/*.launch"/>
-                <exclude name="**/*.java"/>
-            </fileset>
-        </copy>
-	<javacc
-	    target="src/org/kframework/utils/kastparser/KastParser.jj"
-	    javacchome="../../dist/lib/java"
-	/>
-	<condition property="isJava7">
-		<equals arg1="${ant.java.version}" arg2="1.7" />
-	</condition>
-	<condition property="isJava6">
-		<equals arg1="${ant.java.version}" arg2="1.6" />
-	</condition>
-    </target>
-    <target name="clean">
-        <delete dir="bin"/>
-    </target>
-    <target depends="clean" name="cleanall"/>
-    <target depends="build-subprojects,build-project-java6,build-project-java7" name="build"/>
-    <target name="build-subprojects"/>
-    <target depends="init" name="build-project-java7" if="isJava7">
-        <echo message="${ant.project.name}: ${ant.file}"/>
-        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" includeantruntime="false">
-            <src path="src"/>
-            <classpath refid="KTool.classpath"/>
-            <compilerarg value="-Xlint:unchecked"/>
-        </javac>
-        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" includeantruntime="false">
-            <src path="lib/resources"/>
-            <classpath refid="KTool.classpath"/>
-        </javac>
-    </target>
-    <target depends="init" name="build-project-java6" if="isJava6">
-        <echo message="${ant.project.name}: ${ant.file}"/>
-        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" includeantruntime="false">
-            <src path="src"/>
-            <classpath refid="KTool.classpath"/>
-            <compilerarg value="-Xlint:unchecked"/>
-	    <exclude name="org/kframework/krun/ioserver/commands/CommandStat.java" />
-            <exclude name="org/kframework/krun/ioserver/commands/CommandOpendir.java" />
-        </javac>
-        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" includeantruntime="false">
-            <src path="lib/resources"/>
-            <classpath refid="KTool.classpath"/>
-        </javac>
-    </target>
- 
-    <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
-    <target description="copy Eclipse compiler jars to ant lib directory" name="init-eclipse-compiler">
-        <copy todir="${ant.library.dir}">
-            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
-        </copy>
-        <unzip dest="${ant.library.dir}">
-            <patternset includes="jdtCompilerAdapter.jar"/>
-            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
-        </unzip>
-    </target>
-    <target description="compile project with Eclipse compiler" name="build-eclipse-compiler">
-        <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
-        <antcall target="build"/>
-    </target>
+	<property environment="env" />
+	<property name="ECLIPSE_HOME" value="../../../eclisespoofax" />
+	<property name="debuglevel" value="source,lines,vars" />
+	<property name="target" value="1.6" />
+	<property name="source" value="1.6" />
+	<path id="KTool.classpath">
+		<pathelement location="bin" />
+		<path id="KTool.classpath">
+			<pathelement location="bin" />
+			<pathelement location="../../dist/lib/java/aterm-java.jar" />
+			<pathelement location="../../dist/lib/java/collections-generic-4.01.jar" />
+			<pathelement location="../../dist/lib/java/commons-cli-1.2.jar" />
+			<pathelement location="../../dist/lib/java/commons-io-2.1.jar" />
+			<pathelement location="../../dist/lib/java/commons-lang3-3.1.jar" />
+			<pathelement location="../../dist/lib/java/diffutils-1.2.1.jar" />
+			<pathelement location="../../dist/lib/java/guava-14.0.1.jar" />
+			<pathelement location="../../dist/lib/java/jansi-1.8.jar" />
+			<pathelement location="../../dist/lib/java/jline-1.0.jar" />
+			<pathelement location="../../dist/lib/java/jopt-simple-3.3.jar" />
+			<pathelement location="../../dist/lib/java/jung-algorithms-2.0.1.jar" />
+			<pathelement location="../../dist/lib/java/jung-api-2.0.1.jar" />
+			<pathelement location="../../dist/lib/java/jung-graph-impl-2.0.1.jar" />
+			<pathelement location="../../dist/lib/java/jung-io-2.0.1.jar" />
+			<pathelement location="../../dist/lib/java/jung-visualization-2.0.1.jar" />
+			<pathelement location="../../dist/lib/java/strategoxt.jar" />
+			<pathelement location="../../dist/lib/java/xstream.jar" />
+		</path>
+	</path>
+	<target name="init">
+		<mkdir dir="bin" />
+		<copy includeemptydirs="false" todir="bin">
+			<fileset dir="src">
+				<exclude name="**/*.launch" />
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+		<copy includeemptydirs="false" todir="bin">
+			<fileset dir="lib/resources">
+				<exclude name="**/*.launch" />
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+		<javacc target="src/org/kframework/utils/kastparser/KastParser.jj" javacchome="../../dist/lib/java" />
+		<condition property="isJava7">
+			<equals arg1="${ant.java.version}" arg2="1.7" />
+		</condition>
+		<condition property="isJava6">
+			<equals arg1="${ant.java.version}" arg2="1.6" />
+		</condition>
+	</target>
+	<target name="clean">
+		<delete dir="bin" />
+	</target>
+	<target depends="clean" name="cleanall" />
+	<target depends="build-subprojects,build-project-java6,build-project-java7" name="build" />
+	<target name="build-subprojects" />
+	<target depends="init" name="build-project-java7" if="isJava7">
+		<echo message="${ant.project.name}: ${ant.file}" />
+		<javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" includeantruntime="false">
+			<src path="src" />
+			<classpath refid="KTool.classpath" />
+			<compilerarg value="-Xlint:unchecked" />
+		</javac>
+		<javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" includeantruntime="false">
+			<src path="lib/resources" />
+			<classpath refid="KTool.classpath" />
+		</javac>
+	</target>
+	<target depends="init" name="build-project-java6" if="isJava6">
+		<echo message="${ant.project.name}: ${ant.file}" />
+		<javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" includeantruntime="false">
+			<src path="src" />
+			<classpath refid="KTool.classpath" />
+			<compilerarg value="-Xlint:unchecked" />
+			<exclude name="org/kframework/krun/ioserver/commands/CommandStat.java" />
+			<exclude name="org/kframework/krun/ioserver/commands/CommandOpendir.java" />
+		</javac>
+		<javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" includeantruntime="false">
+			<src path="lib/resources" />
+			<classpath refid="KTool.classpath" />
+		</javac>
+	</target>
+
+	<target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects" />
+	<target description="copy Eclipse compiler jars to ant lib directory" name="init-eclipse-compiler">
+		<copy todir="${ant.library.dir}">
+			<fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar" />
+		</copy>
+		<unzip dest="${ant.library.dir}">
+			<patternset includes="jdtCompilerAdapter.jar" />
+			<fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar" />
+		</unzip>
+	</target>
+	<target description="compile project with Eclipse compiler" name="build-eclipse-compiler">
+		<property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter" />
+		<antcall target="build" />
+	</target>
 </project>
