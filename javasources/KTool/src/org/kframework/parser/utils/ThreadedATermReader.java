@@ -1,4 +1,4 @@
-package org.kframework.parser;
+package org.kframework.parser.utils;
 
 import java.io.IOException;
 import java.io.InputStream;

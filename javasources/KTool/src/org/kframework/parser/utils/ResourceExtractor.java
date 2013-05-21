@@ -1,4 +1,4 @@
-package org.kframework.utils;
+package org.kframework.parser.utils;
 
 import java.io.*;
 
