@@ -3,7 +3,7 @@ package org.kframework.backend.latex;
 import org.kframework.backend.BasicBackend;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.DefinitionHelper;
-import org.kframework.main.KompileFrontEnd;
+import org.kframework.kompile.KompileFrontEnd;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;

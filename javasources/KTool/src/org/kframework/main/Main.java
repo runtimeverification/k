@@ -18,7 +18,7 @@ public class Main {
 			for (int i = 0; i < args.length - 1; i++)
 				args2[i] = args[i + 1];
 			if (args[0].equals("-kompile")) {
-				KompileFrontEnd.kompile(args2);
+				org.kframework.kompile.KompileFrontEnd.kompile(args2);
 			} else if (args[0].equals("-kagreg")) {
 				KagregFrontEnd.kagreg(args2);
 			} else if (args[0].equals("-kast")) {

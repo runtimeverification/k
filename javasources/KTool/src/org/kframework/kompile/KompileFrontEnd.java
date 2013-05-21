@@ -1,4 +1,4 @@
-package org.kframework.main;
+package org.kframework.kompile;
 
 import org.apache.commons.cli.CommandLine;
 import org.kframework.backend.Backend;
@@ -9,6 +9,7 @@ import org.kframework.backend.kil.KExpBackend;
 import org.kframework.backend.latex.LatexBackend;
 import org.kframework.backend.latex.PdfBackend;
 import org.kframework.backend.maude.MaudeBackend;
+import org.kframework.backend.maude.KompileBackend;
 import org.kframework.backend.symbolic.SymbolicBackend;
 import org.kframework.backend.symbolic.rl.RLBackend;
 import org.kframework.backend.unparser.UnparserBackend;
@@ -57,7 +58,7 @@ public class KompileFrontEnd {
 			org.kframework.utils.Error.helpExit(op.getHelp(), op.getOptions());
 
 		if (cmd.hasOption("version")) {
-			String msg = FileUtil.getFileContent(KPaths.getKBase(false) + "/bin/version.txt");
+			String msg = FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE);
 			System.out.println(msg);
 			System.exit(0);
 		}

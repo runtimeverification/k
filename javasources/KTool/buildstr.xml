@@ -28,7 +28,7 @@
 		<delete file="../parsers/Basic/trans/BasicMain.rtree" />
 		<delete file="../parsers/Basic/trans/BasicMain.dep" />
 		<delete dir="../parsers/Basic/trans/BasicMain" />
-		<java failonerror="true" dir="../parsers/Basic/trans/" jar="${basedir}/../../dist/bin/java/strategoxt.jar" fork="true">
+		<java failonerror="true" dir="../parsers/Basic/trans/" jar="${basedir}/../../dist/lib/java/strategoxt.jar" fork="true">
 			<arg line="-i xmlify.str -o BasicMain -la stratego-sglr --lib -I .. -p org.kframework.parser.basic.lib --clean" />
 		</java>
 		<delete>
@@ -77,7 +77,7 @@
 		<delete file="../parsers/Concrete/trans/ConcreteMain.rtree" />
 		<delete file="../parsers/Concrete/trans/ConcreteMain.dep" />
 		<delete dir="../parsers/Concrete/trans/ConcreteMain" />
-		<java failonerror="true" dir="../parsers/Concrete/trans/" jar="${basedir}/../../dist/bin/java/strategoxt.jar" fork="true">
+		<java failonerror="true" dir="../parsers/Concrete/trans/" jar="${basedir}/../../dist/lib/java/strategoxt.jar" fork="true">
 			<arg line="-i starter.str -o ConcreteMain -la stratego-sglr --lib -I .. -p org.kframework.parser.concrete.lib --clean" />
 		</java>
 		<delete>

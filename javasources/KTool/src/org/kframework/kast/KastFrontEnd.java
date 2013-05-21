@@ -33,7 +33,7 @@ public class KastFrontEnd {
 		CommandLine cmd = op.parse(args);
 
 		if (cmd.hasOption("version")) {
-			String msg = FileUtil.getFileContent(KPaths.getKBase(false) + "/bin/version.txt");
+			String msg = FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE);
 			System.out.println(msg);
 			System.exit(0);
 		}

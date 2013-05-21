@@ -70,7 +70,7 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 
 		new MaudeBackend(sw, definitionHelper).run(javaDef);
 
-		String load = "load \"" + KPaths.getKBase(true) + "/bin/maude/lib/k-prelude\"\n";
+		String load = "load \"" + KPaths.getKBase(true) + KPaths.MAUDE_LIB_DIR + "/k-prelude\"\n";
 
 		// load libraries if any
 		String maudeLib = GlobalSettings.lib.equals("") ? "" : "load " + KPaths.windowfyPath(new File(GlobalSettings.lib).getAbsolutePath()) + "\n";

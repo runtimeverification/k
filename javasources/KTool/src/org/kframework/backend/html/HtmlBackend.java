@@ -3,7 +3,7 @@ package org.kframework.backend.html;
 import org.kframework.backend.BasicBackend;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.DefinitionHelper;
-import org.kframework.main.KompileFrontEnd;
+import org.kframework.kompile.KompileFrontEnd;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;

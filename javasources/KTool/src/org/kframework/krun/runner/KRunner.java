@@ -8,7 +8,7 @@ import joptsimple.OptionSpec;
 
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.krun.K;
-import org.kframework.krun.KPaths;
+import org.kframework.utils.file.KPaths;
 import org.kframework.krun.ioserver.main.MainServer;
 import org.kframework.krun.tasks.MaudeTask;
 

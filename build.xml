@@ -59,13 +59,13 @@
 
 	<target name="clean-java">
 		<delete dir="${javasources}/KTool/bin" />
-		<delete file="${javasources}/../dist/bin/java/k3.jar" />
-		<delete file="${javasources}/../dist/bin/version.txt" />
+		<delete file="${javasources}/../dist/lib/java/k3.jar" />
+		<delete file="${javasources}/../dist/lib/version.txt" />
 		<delete dir="./k/" />
 	</target>
 
 	<target name="makeversion">
-		<property name="version.file" value="./dist/bin/version.txt" />
+		<property name="version.file" value="./dist/lib/version.txt" />
 
 		<exec executable="svn" output="${version.file}">
 			<arg value="info" />

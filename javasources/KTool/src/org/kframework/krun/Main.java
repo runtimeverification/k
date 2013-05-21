@@ -883,7 +883,7 @@ public class Main {
 				System.exit(0);
 			}
 			if (K.version) {
-				String msg = org.kframework.utils.file.FileUtil.getFileContent(KPaths.getKBase(false) + "/bin/version.txt");
+				String msg = org.kframework.utils.file.FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE);
 				System.out.println(msg);
 				System.exit(0);
 			}

@@ -17,7 +17,7 @@ public class MaudeRun {
 	static boolean internalMaude = true;
 
 	/**
-	 * This function computes the path to a K-included version of maude. It assumes that /dist/bin/maude directory contains all maude executables. It searches for the os type and the architecture and it returns the right maude executable.
+	 * This function computes the path to a K-included version of maude. It assumes that /dist/lib/maude directory contains all maude executables. It searches for the os type and the architecture and it returns the right maude executable.
 	 */
 	public static String initializeMaudeExecutable() {
 //		if (checkLocalMaudeInstallation()) {
@@ -41,7 +41,7 @@ public class MaudeRun {
 		// System.out.println("OS: |" + osname + "|" + arch + "|");
 		// System.out.println(KPaths.getKBase(true));
 
-		String maudeDir = KPaths.getKBase(false) + fileSeparator + "bin" + fileSeparator + "maude" + fileSeparator + "binaries";
+		String maudeDir = KPaths.getKBase(false) + fileSeparator + KPaths.MAUDE_DIR;
 		String maudeExe = "maude";
 
 

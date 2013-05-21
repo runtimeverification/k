@@ -4,6 +4,7 @@ import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Definition;
 import org.kframework.krun.api.SearchType;
+import org.kframework.utils.file.KPaths;
 
 import java.io.File;
 import java.io.IOException;

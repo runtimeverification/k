@@ -17,14 +17,14 @@ public class Sdf2Table {
 			String basePath = KPaths.getKBase(false);
 
 			if (isUnixOS()) {
-				f = new File(basePath + "/bin/native/linux/sdf2table");
+				f = new File(basePath + "/lib/native/linux/sdf2table");
 				f.setExecutable(true, false);
 			}
 			if (isWindowsOS()) {
-				f = new File(basePath + "/bin/native/cygwin/sdf2table.exe");
+				f = new File(basePath + "/lib/native/cygwin/sdf2table.exe");
 			}
 			if (isMacOS()) {
-				f = new File(basePath + "/bin/native/macosx/sdf2table");
+				f = new File(basePath + "/lib/native/macosx/sdf2table");
 				f.setExecutable(true, false);
 			}
 

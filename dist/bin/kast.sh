@@ -5,7 +5,7 @@ Linux) OS=linux;;
 Darwin) OS=macos;;
 *) echo "Unknown OS $(uname)"; exit 1;;
 esac
-BIN=$(dirname $0)/native/$OS
+BIN=$(dirname $0)/../lib/native/$OS
 
 #pwd >> log.txt
 #echo $* >> log.txt

@@ -13,7 +13,7 @@ import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.krun.KPaths;
+import org.kframework.utils.file.KPaths;
 
 /**
  * Tag all the rules which are not part of K "dist/include" files with
