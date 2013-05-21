@@ -1,7 +1,7 @@
 package org.kframework.compile.utils;
 
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.Transformer;
 
 import java.util.ArrayList;
@@ -12,13 +12,13 @@ public class CompilerSteps<T extends ASTNode> extends BasicCompilerStep<T> {
 
 	List<CompilerStep<T>> steps;
 
-	public CompilerSteps(DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public CompilerSteps(Context context) {
+		super(context);
 		steps = new ArrayList<CompilerStep<T>>();
 	}
 
-	public CompilerSteps(List<CompilerStep<T>> ts, DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public CompilerSteps(List<CompilerStep<T>> ts, Context context) {
+		super(context);
 		this.steps = new ArrayList<CompilerStep<T>>(ts);
 	}
 
@@ -27,7 +27,7 @@ public class CompilerSteps<T extends ASTNode> extends BasicCompilerStep<T> {
 	}
 
 	public void add(Transformer t) {
-		steps.add(new CompilerTransformerStep<T>(t, definitionHelper));
+		steps.add(new CompilerTransformerStep<T>(t, context));
 	}
 
 	@Override

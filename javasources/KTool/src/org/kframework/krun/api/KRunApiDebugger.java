@@ -10,13 +10,12 @@ import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Term;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.krun.K;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.api.Transition.TransitionType;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor;
-import org.kframework.utils.general.GlobalSettings;
 
 import java.util.Set;
 
@@ -30,17 +29,18 @@ public class KRunApiDebugger implements KRunDebugger {
 	private static Set<String> defaultVars;
 	private static RuleCompilerSteps defaultPatternInfo;
 	
-	protected DefinitionHelper definitionHelper;
+	protected Context context;
 
-	public KRunApiDebugger(KRun krun, Term cfg, DefinitionHelper definitionHelper) throws KRunExecutionException {
-		this.definitionHelper = definitionHelper;
+	public KRunApiDebugger(KRun krun, Term cfg, Context context) throws KRunExecutionException {
+		this.context = context;
 		try { 
 			org.kframework.parser.concrete.KParser.ImportTbl(K.compiled_def + "/def/Concrete.tbl");
-			ASTNode pattern = DefinitionLoader.parsePattern(K.pattern, "Command line pattern", definitionHelper);
-			CollectVariablesVisitor vars = new CollectVariablesVisitor(definitionHelper);
+			ASTNode pattern = DefinitionLoader.parsePattern(K.pattern, "Command line pattern",
+                    context);
+			CollectVariablesVisitor vars = new CollectVariablesVisitor(context);
 			pattern.accept(vars);
 			defaultVars = vars.getVars().keySet();
-			defaultPatternInfo = new RuleCompilerSteps(K.definition, definitionHelper);
+			defaultPatternInfo = new RuleCompilerSteps(K.definition, context);
 			pattern = defaultPatternInfo.compile((Rule) pattern, null);
 
 			defaultPattern = (Rule) pattern;
@@ -49,7 +49,7 @@ public class KRunApiDebugger implements KRunDebugger {
 		}
 
 		this.krun = krun;
-		KRunState initialState = new KRunState(cfg, K.stateCounter++, definitionHelper);
+		KRunState initialState = new KRunState(cfg, K.stateCounter++, context);
 		graph = new DirectedSparseGraph<KRunState, Transition>();
 		graph.addVertex(initialState);
 		states = new DualHashBidiMap<Integer, KRunState>();
@@ -58,7 +58,7 @@ public class KRunApiDebugger implements KRunDebugger {
 		reduced.setStateId(K.stateCounter++);
 		putState(reduced);
 		graph.addVertex(reduced);
-		graph.addEdge(new Transition(TransitionType.REDUCE, definitionHelper), initialState, reduced);
+		graph.addEdge(new Transition(TransitionType.REDUCE, context), initialState, reduced);
 		currentState = reduced.getStateId();
 	}
 
@@ -117,7 +117,7 @@ public class KRunApiDebugger implements KRunDebugger {
 			nextStep.setStateId(K.stateCounter++);
 			putState(nextStep);
 			graph.addVertex(nextStep);
-			graph.addEdge(new Transition(TransitionType.UNLABELLED, definitionHelper), getState(currentState), nextStep);
+			graph.addEdge(new Transition(TransitionType.UNLABELLED, context), getState(currentState), nextStep);
 			currentState = nextStep.getStateId();
 		}
 	}
@@ -175,7 +175,7 @@ public class KRunApiDebugger implements KRunDebugger {
 
 	public String printState(int stateNum) {
 		KRunState state = getState(stateNum);
-		UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, definitionHelper);
+		UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
 		state.getResult().accept(unparser);
 		return state.toString() + ":\n" + unparser.getResult();
 	}
@@ -192,7 +192,7 @@ public class KRunApiDebugger implements KRunDebugger {
 		Transition edge = getEdge(state1, state2);
 		String rule;
 		if (edge.getType() == TransitionType.RULE) {
-			UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, definitionHelper);
+			UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
 			edge.getRule().accept(unparser);
 			rule = unparser.getResult();
 		} else if (edge.getType() == TransitionType.LABEL) {

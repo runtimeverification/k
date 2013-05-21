@@ -19,7 +19,6 @@ import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Bag;
 import org.kframework.kil.*;
-import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.api.KRun;
 import org.kframework.main.FirstStep;
@@ -42,8 +41,8 @@ public class JavaSymbolicBackend extends BasicBackend {
 
 	public static final String DEFINITION_FILENAME = "java_symbolic_definition.bin";
 
-	public JavaSymbolicBackend(Stopwatch sw, DefinitionHelper definitionHelper) {
-		super(sw, definitionHelper);
+	public JavaSymbolicBackend(Stopwatch sw, org.kframework.kil.loader.Context context) {
+		super(sw, context);
 	}
 
 	@Override
@@ -56,11 +55,11 @@ public class JavaSymbolicBackend extends BasicBackend {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		MaudeBuiltinsFilter builtinsFilter = new MaudeBuiltinsFilter(builtinsProperties, definitionHelper);
+		MaudeBuiltinsFilter builtinsFilter = new MaudeBuiltinsFilter(builtinsProperties, context);
 		javaDef.accept(builtinsFilter);
 		final String mainModule = javaDef.getMainModule();
 		String builtins = "mod " + mainModule + "-BUILTINS is\n" + " including " + mainModule + "-BASE .\n" + builtinsFilter.getResult() + "endm\n";
-		FileUtil.saveInFile(definitionHelper.dotk.getAbsolutePath() + "/builtins.maude", builtins);
+		FileUtil.saveInFile(context.dotk.getAbsolutePath() + "/builtins.maude", builtins);
 		if (GlobalSettings.verbose)
 			sw.printIntermediate("Generating equations for hooks");
 		return super.firstStep(javaDef);
@@ -81,7 +80,7 @@ public class JavaSymbolicBackend extends BasicBackend {
 		list1.add(new Variable("B", "Bool"));
 		list1.add(new Variable("S1", "Stmt"));
 		list1.add(new Variable("S2", "Stmt"));
-		Term kTerm = new KApp(KLabelConstant.of("'if(_)_else_", definitionHelper), new KList(list1));
+		Term kTerm = new KApp(KLabelConstant.of("'if(_)_else_", context), new KList(list1));
 		List<Term> list2 = new ArrayList<Term>();
 		list2.add(kTerm);
 		Term kSequence = new KSequence(list2);
@@ -95,12 +94,12 @@ public class JavaSymbolicBackend extends BasicBackend {
 		term = MetaK.wrap(topBag, MetaK.Constants.generatedTopCellLabel, Cell.Ellipses.NONE);
 
 		try {
-			term = (Term) term.accept(new FlattenSyntax(definitionHelper));
+			term = (Term) term.accept(new FlattenSyntax(context));
 		} catch (TransformerException e) {
 			e.printStackTrace();
 		}
 
-		KRun kRun = new JavaSymbolicKRun(definitionHelper);
+		KRun kRun = new JavaSymbolicKRun(context);
 		try {
 			kRun.run(term);
 		} catch (Exception e) {
@@ -113,7 +112,7 @@ public class JavaSymbolicBackend extends BasicBackend {
 	@Override
 	public void run(Definition javaDef) throws IOException {
 
-		new MaudeBackend(sw, definitionHelper).run(javaDef);
+		new MaudeBackend(sw, context).run(javaDef);
 
 		String load = "load \"" + KPaths.getKBase(true) + KPaths.MAUDE_LIB_DIR + "/k-prelude\"\n";
 
@@ -127,7 +126,7 @@ public class JavaSymbolicBackend extends BasicBackend {
 
 		String main = load + "load \"base.maude\"\n" + "load \"builtins.maude\"\n" + "mod " + mainModule + " is \n" + "  including " + mainModule + "-BASE .\n" + "  including " + mainModule
 				+ "-BUILTINS .\n" + "  including K-STRICTNESS-DEFAULTS .\n" + "endm\n";
-		FileUtil.saveInFile(definitionHelper.dotk.getAbsolutePath() + "/" + "main.maude", main);
+		FileUtil.saveInFile(context.dotk.getAbsolutePath() + "/" + "main.maude", main);
 
 		// UnparserFilter unparserFilter = new UnparserFilter();
 		// javaDef.accept(unparserFilter);
@@ -141,7 +140,7 @@ public class JavaSymbolicBackend extends BasicBackend {
 		//
 		// String xml = xstream.toXML(def);
 		//
-		// FileUtil.saveInFile(definitionHelper.dotk.getAbsolutePath()
+		// FileUtil.saveInFile(context.dotk.getAbsolutePath()
 		// + "/def-symbolic.xml", xml);
 	}
 
@@ -152,63 +151,63 @@ public class JavaSymbolicBackend extends BasicBackend {
 
 	@Override
 	public CompilerSteps<Definition> getCompilationSteps() {
-		CompilerSteps<Definition> steps = new CompilerSteps<Definition>(definitionHelper);
-		steps.add(new FirstStep(this, definitionHelper));
+		CompilerSteps<Definition> steps = new CompilerSteps<Definition>(context);
+		steps.add(new FirstStep(this, context));
 
 		/* sanity checks */
-		steps.add(new CheckVisitorStep<Definition>(new CheckConfigurationCells(definitionHelper), definitionHelper));
-		steps.add(new CheckVisitorStep<Definition>(new CheckVariables(definitionHelper), definitionHelper));
-		steps.add(new CheckVisitorStep<Definition>(new CheckRewrite(definitionHelper), definitionHelper));
+		steps.add(new CheckVisitorStep<Definition>(new CheckConfigurationCells(context), context));
+		steps.add(new CheckVisitorStep<Definition>(new CheckVariables(context), context));
+		steps.add(new CheckVisitorStep<Definition>(new CheckRewrite(context), context));
 
 		/* syntactic macros */
-		steps.add(new RemoveBrackets(definitionHelper));
-		steps.add(new AddEmptyLists(definitionHelper));
-		steps.add(new RemoveSyntacticCasts(definitionHelper));
+		steps.add(new RemoveBrackets(context));
+		steps.add(new AddEmptyLists(context));
+		steps.add(new RemoveSyntacticCasts(context));
 
 		/* module system */
-		steps.add(new FlattenModules(definitionHelper));
+		steps.add(new FlattenModules(context));
 
 		/* strictness */
-		steps.add(new StrictnessToContexts(definitionHelper));
-		steps.add(new FreezeUserFreezers(definitionHelper));
-		steps.add(new ContextsToHeating(definitionHelper));
+		steps.add(new StrictnessToContexts(context));
+		steps.add(new FreezeUserFreezers(context));
+		steps.add(new ContextsToHeating(context));
 		// steps.add(new AddSupercoolDefinition());
-		steps.add(new AddHeatingConditions(definitionHelper));
+		steps.add(new AddHeatingConditions(context));
 		// steps.add(new AddSuperheatRules());
 		// steps.add(new DesugarStreams());
 
-		steps.add(new ResolveFunctions(definitionHelper));
-		steps.add(new AddKCell(definitionHelper));
-		steps.add(new AddTopCellRules(definitionHelper));
-		steps.add(new AddTopCellConfig(definitionHelper));
+		steps.add(new ResolveFunctions(context));
+		steps.add(new AddKCell(context));
+		steps.add(new AddTopCellRules(context));
+		steps.add(new AddTopCellConfig(context));
 		// steps.add(new AddSymbolicK());
 		// steps.add(new ResolveFresh());
 		// steps.add(new ResolveFreshMOS());
 
 		// steps.add(new ResolveBinder());
-		steps.add(new ResolveAnonymousVariables(definitionHelper));
+		steps.add(new ResolveAnonymousVariables(context));
 		// steps.add(new ResolveBlockingInput());
 		// steps.add(new AddK2SMTLib());
-		steps.add(new AddPredicates(definitionHelper));
+		steps.add(new AddPredicates(context));
 		//steps.add(new ResolveSyntaxPredicates());
-		steps.add(new ResolveBuiltins(definitionHelper));
-		steps.add(new ResolveListOfK(definitionHelper));
-		steps.add(new FlattenSyntax(definitionHelper));
+		steps.add(new ResolveBuiltins(context));
+		steps.add(new ResolveListOfK(context));
+		steps.add(new FlattenSyntax(context));
 		// steps.add(new AddKStringConversion());
 		// steps.add(new AddKLabelConstant());
-		steps.add(new ResolveHybrid(definitionHelper));
-		steps.add(new ResolveConfigurationAbstraction(new ConfigurationStructureMap(), definitionHelper));
-		steps.add(new ResolveOpenCells(definitionHelper));
-		steps.add(new ResolveRewrite(definitionHelper));
+		steps.add(new ResolveHybrid(context));
+		steps.add(new ResolveConfigurationAbstraction(new ConfigurationStructureMap(), context));
+		steps.add(new ResolveOpenCells(context));
+		steps.add(new ResolveRewrite(context));
 		// steps.add(new ResolveSupercool());
-		steps.add(new AddStrictStar(definitionHelper));
-		steps.add(new AddDefaultComputational(definitionHelper));
-		steps.add(new AddOptionalTags(definitionHelper));
+		steps.add(new AddStrictStar(context));
+		steps.add(new AddDefaultComputational(context));
+		steps.add(new AddOptionalTags(context));
 
 		/* tag with symbolic the rules that are not form k dist */
-		steps.add(new TagUserRules(definitionHelper));
+		steps.add(new TagUserRules(context));
 
-		steps.add(new LastStep(this, definitionHelper));
+		steps.add(new LastStep(this, context));
 
 		return steps;
 	}

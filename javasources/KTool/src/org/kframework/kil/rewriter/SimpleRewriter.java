@@ -1,23 +1,18 @@
 package org.kframework.kil.rewriter;
 
 //unit test imports
-import org.kframework.kil.*;
 
-import java.util.ArrayList;
-import java.util.List;
 //end test imports
 
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Term;
 
-import org.kframework.kil.loader.DefinitionHelper;
-import org.kframework.kil.matchers.Matcher;
+        import org.kframework.kil.loader.Context;
+        import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.matchers.MatcherException;
 import org.kframework.kil.matchers.SimpleMatcher;
-import org.kframework.kil.matchers.MapInsertPattern;
-import org.kframework.kil.matchers.MapLookupPattern;
 
-import org.kframework.kil.visitors.exceptions.TransformerException;
+        import org.kframework.kil.visitors.exceptions.TransformerException;
 
 /** 
  * This class implements Term Rewriting based on the
@@ -26,12 +21,12 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  */
 
 public class SimpleRewriter {
-  protected DefinitionHelper definitionHelper;
+  protected Context context;
   protected Matcher matcher;
 
-  public SimpleRewriter(DefinitionHelper definitionHelper) {
-	  this.definitionHelper = definitionHelper;
-	  matcher = new SimpleMatcher(definitionHelper);
+  public SimpleRewriter(org.kframework.kil.loader.Context context) {
+	  this.context = context;
+	  matcher = new SimpleMatcher(context);
   }
   
 
@@ -43,7 +38,8 @@ public class SimpleRewriter {
     for(Rewrite r : trs){
       try {
         matcher.start(r.getLeft(),t);
-        RewriteSubstitution substitution = new RewriteSubstitution(matcher.getSubstitution(), definitionHelper);
+        RewriteSubstitution substitution = new RewriteSubstitution(matcher.getSubstitution(),
+                context);
         try {
           //ignore warning, we know this must be a Term
           out = (Term) r.getRight().accept(substitution);

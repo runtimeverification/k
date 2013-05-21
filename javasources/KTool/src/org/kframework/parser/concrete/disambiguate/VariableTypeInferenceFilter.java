@@ -3,7 +3,7 @@ package org.kframework.parser.concrete.disambiguate;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Variable;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -19,14 +19,14 @@ import java.util.Map.Entry;
 
 public class VariableTypeInferenceFilter extends BasicTransformer {
 
-	public VariableTypeInferenceFilter(DefinitionHelper definitionHelper) {
-		super("Variable type inference", definitionHelper);
+	public VariableTypeInferenceFilter(Context context) {
+		super("Variable type inference", context);
 	}
 
 	@Override
 	public ASTNode transform(Sentence r) throws TransformerException {
 
-		CollectVariablesVisitor vars = new CollectVariablesVisitor(definitionHelper);
+		CollectVariablesVisitor vars = new CollectVariablesVisitor(context);
 		r.accept(vars);
 
 		// for each variable name do checks or type inference
@@ -70,7 +70,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 				varDeclMap.put(var.getName(), var.getSort());
 
 				try {
-					r = (Sentence) r.accept(new VariableTypeFilter(varDeclMap, definitionHelper));
+					r = (Sentence) r.accept(new VariableTypeFilter(varDeclMap, context));
 				} catch (TransformerException e) {
 					e.report();
 				}
@@ -105,7 +105,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 					for (Variable vv1 : isect) {
 						boolean maxSort = true;
 						for (Variable vv2 : isect) {
-							if (definitionHelper.isSubsorted(vv2.getSort(), vv1.getSort()))
+							if (context.isSubsorted(vv2.getSort(), vv1.getSort()))
 								maxSort = false;
 						}
 						if (maxSort)
@@ -131,7 +131,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 					varDeclMap.put(inferredVar.getName(), inferredVar.getSort());
 
 					try {
-						r = (Sentence) r.accept(new VariableTypeFilter(varDeclMap, definitionHelper));
+						r = (Sentence) r.accept(new VariableTypeFilter(varDeclMap, context));
 					} catch (TransformerException e) {
 						e.report();
 					}

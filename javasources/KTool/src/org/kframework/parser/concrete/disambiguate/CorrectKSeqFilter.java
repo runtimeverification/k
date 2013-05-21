@@ -9,7 +9,7 @@ import org.kframework.kil.KSequence;
 import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicHookWorker;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.PriorityException;
@@ -21,9 +21,9 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 public class CorrectKSeqFilter extends BasicTransformer {
 	private CorrectKSeqFilter2 secondFilter;
 
-	public CorrectKSeqFilter(DefinitionHelper definitionHelper) {
-		super("Correct K sequences", definitionHelper);
-		secondFilter = new CorrectKSeqFilter2(definitionHelper);
+	public CorrectKSeqFilter(Context context) {
+		super("Correct K sequences", context);
+		secondFilter = new CorrectKSeqFilter2(context);
 	}
 
 	public ASTNode transform(Ambiguity amb) throws TransformerException {
@@ -73,8 +73,8 @@ public class CorrectKSeqFilter extends BasicTransformer {
 	 * 
 	 */
 	public class CorrectKSeqFilter2 extends BasicHookWorker {
-		public CorrectKSeqFilter2(DefinitionHelper definitionHelper) {
-			super("org.kframework.parser.concrete.disambiguate.CorrectKSeqFilter2", definitionHelper);
+		public CorrectKSeqFilter2(Context context) {
+			super("org.kframework.parser.concrete.disambiguate.CorrectKSeqFilter2", context);
 		}
 
 		public ASTNode transform(KSequence ks) throws TransformerException {

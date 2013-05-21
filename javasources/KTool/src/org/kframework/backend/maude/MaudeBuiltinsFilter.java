@@ -1,25 +1,29 @@
 package org.kframework.backend.maude;
 
 import org.kframework.backend.BackendFilter;
-import org.kframework.kil.*;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.Attribute;
+import org.kframework.kil.Configuration;
+import org.kframework.kil.KSorts;
+import org.kframework.kil.Production;
+import org.kframework.kil.Rule;
+import org.kframework.kil.Sort;
+import org.kframework.kil.Variable;
+import org.kframework.kil.loader.Context;
 import org.kframework.utils.StringUtil;
 
 import java.util.Properties;
 
+
 /**
- * Initially created by: Traian Florin Serbanuta
- * <p/>
- * Date: 12/17/12
- * Time: 6:22 PM
+ * Visitor generating the maude equations hooking the builtins from the hooked productions.
  */
 public class MaudeBuiltinsFilter extends BackendFilter {
 	private String left, right;
 	private boolean first;
 	private final Properties builtinsProperties;
 
-	public MaudeBuiltinsFilter(Properties builtinsProperties, DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public MaudeBuiltinsFilter(Properties builtinsProperties, Context context) {
+		super(context);
 		this.builtinsProperties = builtinsProperties;
 	}
 
@@ -29,7 +33,7 @@ public class MaudeBuiltinsFilter extends BackendFilter {
 	}
 
 	@Override
-	public void visit(Context node) {
+	public void visit(org.kframework.kil.Context node) {
 		return;
 	}
 
@@ -40,26 +44,40 @@ public class MaudeBuiltinsFilter extends BackendFilter {
 
 	@Override
 	public void visit(Production node) {
-		if (!node.containsAttribute("hook")) {
+        if (!node.containsAttribute(Attribute.HOOK_KEY)) {
 			return;
 		}
-		final String hook = node.getAttribute("hook");
+
+        final String hook = node.getAttribute(Attribute.HOOK_KEY);
 		if (builtinsProperties.containsKey(hook)) {
 			result.append(builtinsProperties.getProperty(hook));
 			result.append("\n");
 			return;
 		}
-		result.append(" eq ");
-		left = StringUtil.escapeMaude(node.getKLabel()) + "(";
-		right = getHookLabel(hook) + "(";
-		first = true;
-		super.visit(node);
-		left += ")";
-		right += ")";
+
+        result.append(" eq ");
+		left = StringUtil.escapeMaude(node.getKLabel());
+        left += "(";
+		right = getHookLabel(hook);
+        if (!node.isConstant()) {
+            right += "(";
+            first = true;
+            super.visit(node);
+            right += ")";
+        } else {
+            left += ".KList";
+        }
+        left += ")";
 		result.append(left);
-		result.append(" = _`(_`)(# ");
+		result.append(" = _`(_`)(");
+        if (context.collectionSorts.containsKey(node.getSort())) {
+            result.append(context.collectionSorts.get(node.getSort()).type() + "2KLabel_(");
+        } else {
+            result.append("#_(");
+        }
 		result.append(right);
-		result.append(", .KList) .\n");
+		result.append("), .KList)");
+        result.append(" .\n");
 	}
 
 
@@ -71,15 +89,28 @@ public class MaudeBuiltinsFilter extends BackendFilter {
 		} else {
 			first = false;
 		}
-		String sort = "#" + node.getName();
-		final Variable var = Variable.getFreshVar(sort);
-        MaudeFilter filter = new MaudeFilter(definitionHelper);
+
+        Variable var;
+        if (context.collectionSorts.containsKey(node.getName())
+                || node.getName().equals(KSorts.K)
+                || node.getName().equals(KSorts.KITEM)) {
+            var = Variable.getFreshVar(node.getName());
+        } else {
+            var = Variable.getFreshVar("#" + node.getName());
+        }
+
+        MaudeFilter filter = new MaudeFilter(context);
 		filter.visit(var);
-		left += filter.getResult();
+        left += filter.getResult();
+
+        if (context.collectionSorts.containsKey(node.getName())) {
+            var.setSort(context.collectionSorts.get(node.getName()).type());
+        }
 		right += var.toString();
 	}
 
 	private String getHookLabel(String hook) {
 		return hook.split(":")[1];
 	}
+
 }

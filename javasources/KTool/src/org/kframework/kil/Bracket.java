@@ -1,6 +1,6 @@
 package org.kframework.kil;
 
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
@@ -36,7 +36,7 @@ public class Bracket extends Term {
 		this.content = i.content;
 	}
 
-	public Bracket(Term t, DefinitionHelper definitionHelper) {
+	public Bracket(Term t, Context context) {
 		super(t.getSort());
 		this.content = t;
 	}
@@ -45,7 +45,7 @@ public class Bracket extends Term {
 		super(location, filename, sort);
 	}
 
-	public Bracket(String location, String filename, Term t, DefinitionHelper definitionHelper) {
+	public Bracket(String location, String filename, Term t, Context context) {
 		super(location, filename, t.getSort());
 		this.content = t;
 	}
@@ -72,8 +72,8 @@ public class Bracket extends Term {
 	}
 
 	@Override
-	public ASTNode accept(Transformer visitor) throws TransformerException {
-		return visitor.transform(this);
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
 	}
 
 	@Override

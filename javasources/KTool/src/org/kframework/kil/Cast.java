@@ -1,7 +1,7 @@
 package org.kframework.kil;
 
-import org.kframework.kil.loader.DefinitionHelper;
-import org.kframework.kil.loader.JavaClassesFactory;
+import org.kframework.kil.loader.*;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Visitor;
@@ -29,7 +29,7 @@ public class Cast extends Term {
 		this.syntactic = i.syntactic;
 	}
 
-	public Cast(Term t, DefinitionHelper definitionHelper) {
+	public Cast(Term t, Context context) {
 		super(t.getSort());
 		this.content = t;
 	}
@@ -38,7 +38,7 @@ public class Cast extends Term {
 		super(location, filename, sort);
 	}
 
-	public Cast(String location, String filename, Term t, DefinitionHelper definitionHelper) {
+	public Cast(String location, String filename, Term t, org.kframework.kil.loader.Context context) {
 		super(location, filename, t.getSort());
 		this.content = t;
 	}
@@ -58,8 +58,8 @@ public class Cast extends Term {
 	}
 
 	@Override
-	public ASTNode accept(Transformer visitor) throws TransformerException {
-		return visitor.transform(this);
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
 	}
 
 	@Override

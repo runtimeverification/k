@@ -21,6 +21,7 @@ import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSequence;
 import org.kframework.kil.KSorts;
+import org.kframework.kil.MapBuiltin;
 import org.kframework.kil.MapItem;
 import org.kframework.kil.Module;
 import org.kframework.kil.Production;
@@ -33,24 +34,25 @@ import org.kframework.kil.TermCons;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
 import org.kframework.kil.Variable;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.utils.StringUtil;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
+
 
 public class FlattenSyntax extends CopyOnWriteTransformer {
 	FlattenKSyntax kTrans;
 	Set<String> listSeparators = new HashSet<String>();
 	boolean isComputation = false;
 
-	public FlattenSyntax(DefinitionHelper definitionHelper) {
-		super("Syntax K to Abstract K", definitionHelper);
-		kTrans = new FlattenKSyntax(this, definitionHelper);
+	public FlattenSyntax(Context context) {
+		super("Syntax K to Abstract K", context);
+		kTrans = new FlattenKSyntax(this, context);
 	}
 
 	@Override
@@ -161,8 +163,8 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 	class FlattenKSyntax extends CopyOnWriteTransformer {
 		FlattenSyntax trans;
 
-		public FlattenKSyntax(FlattenSyntax t, DefinitionHelper definitionHelper) {
-			super("Flatten K Syntax", definitionHelper);
+		public FlattenKSyntax(FlattenSyntax t, Context context) {
+			super("Flatten K Syntax", context);
 			trans = t;
 		}
 
@@ -191,12 +193,12 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 
 			String l = tc.getLocation();
 			String f = tc.getFilename();
-			Production ppp = definitionHelper.conses.get(tc.getCons());
+			Production ppp = context.conses.get(tc.getCons());
 			KList lok = new KList(l, f);
 			for (Term t : tc.getContents()) {
 				lok.getContents().add((Term) t.accept(this));
 			}
-			return new KApp(l, f, KLabelConstant.of(ppp.getKLabel(), definitionHelper), lok);
+			return new KApp(l, f, KLabelConstant.of(ppp.getKLabel(), context), lok);
 		}
 
 		@Override
@@ -215,11 +217,11 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 /*			String l = cst.getLocation();
 			String f = cst.getFilename();
 
-			if (!MetaK.isBuiltinSort(cst.getSort(definitionHelper))) {
+			if (!MetaK.isBuiltinSort(cst.getSort(context))) {
 				KList list = new KList();
-				list.add(StringBuiltin.of(cst.getSort(definitionHelper)));
+				list.add(StringBuiltin.of(cst.getSort(context)));
 				list.add(StringBuiltin.of(StringUtil.escape(cst.getValue())));
-				return new KApp(KLabelConstant.of("#token", definitionHelper), list).accept(this);
+				return new KApp(KLabelConstant.of("#token", context), list).accept(this);
 			} else {
 				return new KApp(l, f, new KInjectedLabel(cst), KList.EMPTY);
 			} */
@@ -234,9 +236,9 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 			}
 			// if this is a list sort
 			if (!MaudeHelper.basicSorts.contains(emp.getSort())) {
-				Production listProd = definitionHelper.listConses.get(emp.getSort());
+				Production listProd = context.listConses.get(emp.getSort());
 				String separator = ((UserList) listProd.getItems().get(0)).getSeparator();
-				return new KApp(l, f, KLabelConstant.of(MetaK.getListUnitLabel(separator), definitionHelper), KList.EMPTY);
+				return new KApp(l, f, KLabelConstant.of(MetaK.getListUnitLabel(separator), context), KList.EMPTY);
 				// Constant cst = new Constant(l, f, KSorts.KLABEL, "'." + emp.getSort() + "");
 				// return new KApp(l, f, cst, new Empty(l, f, MetaK.Constants.KList));
 			}
@@ -260,6 +262,31 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 			return KApp.of(new KInjectedLabel((Term) node.accept(trans)));
 		}
 
+        @Override
+        public ASTNode transform(MapBuiltin node) throws TransformerException {
+            /* just for LHS for now */
+            assert  (node.hasFrame() || node.isElementCollection());
+
+            LinkedHashMap<Term, Term> elements = new LinkedHashMap<Term, Term>(node.elements().size());
+            for (java.util.Map.Entry<Term, Term> entry : node.elements().entrySet()) {
+                Term transformedKey = (Term) entry.getKey().accept(trans);
+                Term transformedValue = (Term) entry.getValue().accept(trans);
+                elements.put(transformedKey, transformedValue);
+            }
+
+            ArrayList<Term> terms = new ArrayList<Term>(node.terms().size());
+            if (node.hasFrame()) {
+                Variable frame = node.frame();
+                frame.setSort(node.collectionSort().type());
+                terms.add(frame);
+            }
+
+            return KApp.of(new KInjectedLabel(new MapBuiltin(
+                    node.collectionSort(),
+                    elements,
+                    terms)));
+        }
+
 		@Override
 		public ASTNode transform(Cell node) throws TransformerException {
 			return KApp.of(new KInjectedLabel((Term) node.accept(trans)));
@@ -280,6 +307,13 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
                     || node.getSort().equals(StringBuiltin.SORT_NAME)) {
                 return node;
             }
+
+            if (context.collectionSorts.containsKey(node.getSort())) {
+                node = node.shallowCopy();
+                node.setSort(context.collectionSorts.get(node.getSort()).type());
+                return KApp.of(new KInjectedLabel(node));
+            }
+
 			node = node.shallowCopy();
 			node.setSort(KSorts.KITEM);
 			return node;

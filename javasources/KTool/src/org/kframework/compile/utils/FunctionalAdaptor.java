@@ -1,15 +1,15 @@
 package org.kframework.compile.utils;
 
 import org.kframework.kil.Definition;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.Visitor;
 
 public class FunctionalAdaptor extends BasicCompilerStep<Definition> {
 
 	private Visitor visitor;
 
-	public FunctionalAdaptor(Visitor visitor, DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public FunctionalAdaptor(Visitor visitor, Context context) {
+		super(context);
 		this.visitor = visitor;
 	}
 

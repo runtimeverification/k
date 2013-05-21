@@ -2,7 +2,6 @@ package org.kframework.kil.loader;
 
 import java.util.Set;
 
-import org.kframework.kil.Constant;
 import org.kframework.kil.Definition;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.PriorityBlock;
@@ -16,13 +15,13 @@ import org.kframework.parser.generator.SDFHelper;
 
 public class CollectPrioritiesVisitor extends BasicVisitor {
 
-	public CollectPrioritiesVisitor(DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public CollectPrioritiesVisitor(Context context) {
+		super(context);
 	}
 
 	public void visit(Definition def) {
 		super.visit(def);
-		definitionHelper.finalizePriority();
+		context.finalizePriority();
 	}
 
 	public void visit(Syntax node) {
@@ -40,7 +39,7 @@ public class CollectPrioritiesVisitor extends BasicVisitor {
 						continue;
 					if (prd2.getItems().get(0).getType() != ProductionType.SORT && prd2.getItems().get(prd2.getItems().size() - 1).getType() != ProductionType.SORT)
 						continue;
-					definitionHelper.addPriority(prd1.getKLabel(), prd2.getKLabel());
+					context.addPriority(prd1.getKLabel(), prd2.getKLabel());
 				}
 			}
 		}
@@ -53,10 +52,11 @@ public class CollectPrioritiesVisitor extends BasicVisitor {
 			// example: syntax priorities tag1 > tag2
 			for (KLabelConstant prd1 : pb1.getProductions()) {
 				// get all the productions annotated with tag1
-				Set<Production> prods1 = SDFHelper.getProductionsForTag(prd1.getLabel(), definitionHelper);
+				Set<Production> prods1 = SDFHelper.getProductionsForTag(prd1.getLabel(), context);
 				for (KLabelConstant prd2 : pb2.getProductions()) {
 					// get all the productions annotated with tag2
-					Set<Production> prods2 = SDFHelper.getProductionsForTag(prd2.getLabel(), definitionHelper);
+					Set<Production> prods2 = SDFHelper.getProductionsForTag(prd2.getLabel(),
+                            context);
 					// add all the relations between all the productions annotated with tag1 and tag 2
 					for (Production p1 : prods1) {
 						if (p1.isSubsort() && !p1.containsAttribute("klabel"))
@@ -64,7 +64,7 @@ public class CollectPrioritiesVisitor extends BasicVisitor {
 						for (Production p2 : prods2) {
 							if (p2.isSubsort() && !p2.containsAttribute("klabel"))
 								continue;
-							definitionHelper.addPriority(p1.getKLabel(), p2.getKLabel());
+							context.addPriority(p1.getKLabel(), p2.getKLabel());
 						}
 					}
 				}

@@ -1,11 +1,11 @@
 package org.kframework.parser.concrete.disambiguate;
 
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 
 public abstract class GetFitnessUnitBasicVisitor extends BasicVisitor {
-	public GetFitnessUnitBasicVisitor(DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public GetFitnessUnitBasicVisitor(Context context) {
+		super(context);
 	}
 
 	protected int score = 0;

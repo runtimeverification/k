@@ -8,7 +8,7 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.Term;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -23,8 +23,8 @@ public class ConditionTransformer extends CopyOnWriteTransformer {
 
     List<Term> filteredTerms = new ArrayList<Term>();
 
-    public ConditionTransformer(DefinitionHelper definitionHelper) {
-        super("Filter side conditions", definitionHelper);
+    public ConditionTransformer(Context context) {
+        super("Filter side conditions", context);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class ConditionTransformer extends CopyOnWriteTransformer {
                     List<Term> terms = ((KList) content).getContents();
                     List<Term> remainingTerms = new ArrayList<Term>();
                     for (Term t : terms) {
-                        CheckSmtlibVisitor csv = new CheckSmtlibVisitor(definitionHelper);
+                        CheckSmtlibVisitor csv = new CheckSmtlibVisitor(context);
                         t.accept(csv);
                         if (csv.smtValid())
                             filteredTerms.add(t.shallowCopy());
@@ -46,7 +46,7 @@ public class ConditionTransformer extends CopyOnWriteTransformer {
                     content = new KList(remainingTerms);
                 }
             } else {
-                CheckSmtlibVisitor csv = new CheckSmtlibVisitor(definitionHelper);
+                CheckSmtlibVisitor csv = new CheckSmtlibVisitor(context);
                 content.accept(csv);
                 if (csv.smtValid()) {
                     filteredTerms.add(content.shallowCopy());

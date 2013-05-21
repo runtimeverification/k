@@ -13,8 +13,9 @@ import org.kframework.compile.transformers.*;
 import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.ConfigurationStructureMap;
+import org.kframework.compile.utils.FlattenCollections;
 import org.kframework.kil.Definition;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.main.FirstStep;
 import org.kframework.main.LastStep;
 import org.kframework.utils.Stopwatch;
@@ -27,7 +28,7 @@ import org.kframework.utils.general.GlobalSettings;
  */
 public abstract class BasicBackend implements Backend {
 	protected Stopwatch sw;
-	protected DefinitionHelper definitionHelper;
+	protected Context context;
 
 	public ConfigurationStructureMap getConfigurationStructureMap() {
 		return configurationStructureMap;
@@ -39,9 +40,9 @@ public abstract class BasicBackend implements Backend {
 
 	private ConfigurationStructureMap configurationStructureMap;
 
-	public BasicBackend(Stopwatch sw, DefinitionHelper definitionHelper) {
+	public BasicBackend(Stopwatch sw, Context context) {
 		this.sw = sw;
-		this.definitionHelper = definitionHelper;
+		this.context = context;
 		configurationStructureMap = new ConfigurationStructureMap();
 	}
 
@@ -60,59 +61,60 @@ public abstract class BasicBackend implements Backend {
 	}
 
 	public CompilerSteps<Definition> getCompilationSteps() {
-		CompilerSteps<Definition> steps = new CompilerSteps<Definition>(definitionHelper);
-		steps.add(new FirstStep(this, definitionHelper));
-		steps.add(new CheckVisitorStep<Definition>(new CheckConfigurationCells(definitionHelper), definitionHelper));
-		steps.add(new RemoveBrackets(definitionHelper));
-		steps.add(new AddEmptyLists(definitionHelper));
-		steps.add(new RemoveSyntacticCasts(definitionHelper));
-		steps.add(new CheckVisitorStep<Definition>(new CheckVariables(definitionHelper), definitionHelper));
-		steps.add(new CheckVisitorStep<Definition>(new CheckRewrite(definitionHelper), definitionHelper));
-		steps.add(new FlattenModules(definitionHelper));
-		steps.add(new StrictnessToContexts(definitionHelper));
-		steps.add(new FreezeUserFreezers(definitionHelper));
-		steps.add(new ContextsToHeating(definitionHelper));
-		steps.add(new AddSupercoolDefinition(definitionHelper));
-		steps.add(new AddHeatingConditions(definitionHelper));
-		steps.add(new AddSuperheatRules(definitionHelper));
-		steps.add(new DesugarStreams(definitionHelper));
-		steps.add(new ResolveFunctions(definitionHelper));
-		steps.add(new AddKCell(definitionHelper));
-		steps.add(new AddSymbolicK(definitionHelper));
+		CompilerSteps<Definition> steps = new CompilerSteps<Definition>(context);
+		steps.add(new FirstStep(this, context));
+		steps.add(new CheckVisitorStep<Definition>(new CheckConfigurationCells(context), context));
+		steps.add(new RemoveBrackets(context));
+		steps.add(new AddEmptyLists(context));
+		steps.add(new RemoveSyntacticCasts(context));
+		steps.add(new CheckVisitorStep<Definition>(new CheckVariables(context), context));
+		steps.add(new CheckVisitorStep<Definition>(new CheckRewrite(context), context));
+		steps.add(new FlattenModules(context));
+		steps.add(new StrictnessToContexts(context));
+		steps.add(new FreezeUserFreezers(context));
+		steps.add(new ContextsToHeating(context));
+		steps.add(new AddSupercoolDefinition(context));
+		steps.add(new AddHeatingConditions(context));
+		steps.add(new AddSuperheatRules(context));
+		steps.add(new DesugarStreams(context));
+		steps.add(new ResolveFunctions(context));
+		steps.add(new AddKCell(context));
+		steps.add(new AddSymbolicK(context));
 		if (GlobalSettings.symbolicEquality)
-			steps.add(new AddSemanticEquality(definitionHelper));
+			steps.add(new AddSemanticEquality(context));
 		// steps.add(new ResolveFresh());
-		steps.add(new FreshCondToFreshVar(definitionHelper));
-		steps.add(new ResolveFreshVarMOS(definitionHelper));
-		steps.add(new AddTopCellConfig(definitionHelper));
+		steps.add(new FreshCondToFreshVar(context));
+		steps.add(new ResolveFreshVarMOS(context));
+		steps.add(new AddTopCellConfig(context));
 		if (GlobalSettings.addTopCell) {
-		steps.add(new AddTopCellRules(definitionHelper));
+		steps.add(new AddTopCellRules(context));
 		}
-		steps.add(new ResolveBinder(definitionHelper));
-		steps.add(new ResolveAnonymousVariables(definitionHelper));
-		steps.add(new ResolveBlockingInput(definitionHelper));
-		steps.add(new AddK2SMTLib(definitionHelper));
-		steps.add(new AddPredicates(definitionHelper));
-		steps.add(new ResolveSyntaxPredicates(definitionHelper));
-		steps.add(new ResolveBuiltins(definitionHelper));
-		steps.add(new ResolveListOfK(definitionHelper));
-		steps.add(new FlattenSyntax(definitionHelper));
-		steps.add(new AddKStringConversion(definitionHelper));
-		steps.add(new AddKLabelConstant(definitionHelper));
-		steps.add(new ResolveHybrid(definitionHelper));
-		steps.add(new ResolveConfigurationAbstraction (configurationStructureMap, definitionHelper));
-		steps.add(new ResolveOpenCells(definitionHelper));
-		steps.add(new ResolveRewrite(definitionHelper));
+		steps.add(new ResolveBinder(context));
+		steps.add(new ResolveAnonymousVariables(context));
+		steps.add(new ResolveBlockingInput(context));
+		steps.add(new AddK2SMTLib(context));
+		steps.add(new AddPredicates(context));
+		steps.add(new ResolveSyntaxPredicates(context));
+		steps.add(new ResolveBuiltins(context));
+		steps.add(new ResolveListOfK(context));
+		steps.add(new FlattenSyntax(context));
+		steps.add(new AddKStringConversion(context));
+		steps.add(new AddKLabelConstant(context));
+		steps.add(new ResolveHybrid(context));
+		steps.add(new ResolveConfigurationAbstraction (configurationStructureMap, context));
+		steps.add(new ResolveOpenCells(context));
+		steps.add(new ResolveRewrite(context));
+        steps.add(new FlattenCollections(context));
 
 		if (GlobalSettings.sortedCells) {
-			steps.add(new SortCells(configurationStructureMap, definitionHelper));
+			steps.add(new SortCells(configurationStructureMap, context));
 		}
-		steps.add(new ResolveSupercool(definitionHelper));
-		steps.add(new AddStrictStar(definitionHelper));
-		steps.add(new AddDefaultComputational(definitionHelper));
-		steps.add(new AddOptionalTags(definitionHelper));
-		steps.add(new DeclareCellLabels(definitionHelper));
-		steps.add(new LastStep(this, definitionHelper));
+		steps.add(new ResolveSupercool(context));
+		steps.add(new AddStrictStar(context));
+		steps.add(new AddDefaultComputational(context));
+		steps.add(new AddOptionalTags(context));
+		steps.add(new DeclareCellLabels(context));
+		steps.add(new LastStep(this, context));
 		return steps;
 	}
 }

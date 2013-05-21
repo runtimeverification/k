@@ -15,13 +15,13 @@ import org.kframework.kil.Restrictions;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.Subsort;
 import org.kframework.utils.StringUtil;
 
 public class DefinitionSDF {
 
-	public static String getSdfForDefinition(Definition def, DefinitionHelper definitionHelper) {
+	public static String getSdfForDefinition(Definition def, Context context) {
 
 		StringBuilder sdf = new StringBuilder("module Integration\n\n");
 		sdf.append("imports Common\n");
@@ -31,8 +31,8 @@ public class DefinitionSDF {
 		sdf.append("exports\n\n");
 		sdf.append("context-free syntax\n");
 
-		DefinitionSDFVisitor psdfv = new DefinitionSDFVisitor(false, definitionHelper);
-		CollectTerminalsVisitor terminals = new CollectTerminalsVisitor(definitionHelper);
+		DefinitionSDFVisitor psdfv = new DefinitionSDFVisitor(false, context);
+		CollectTerminalsVisitor terminals = new CollectTerminalsVisitor(context);
 		def.accept(psdfv);
 		def.accept(terminals);
 

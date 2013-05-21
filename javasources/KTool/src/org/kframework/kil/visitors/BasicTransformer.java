@@ -1,10 +1,13 @@
 package org.kframework.kil.visitors;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 
 import org.kframework.kil.*;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.Collection;
+import org.kframework.kil.List;
+import org.kframework.kil.Map;
+import org.kframework.kil.Set;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
 
@@ -12,12 +15,12 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  * Default implementations of methods visit non-attribute children, and then call the transform method for the parent class on the current node.
  */
 public class BasicTransformer implements Transformer {
-	protected DefinitionHelper definitionHelper;
+	protected Context context;
 	private String name;
 
-	public BasicTransformer(String name, DefinitionHelper definitionHelper) {
+	public BasicTransformer(String name, Context context) {
 		this.name = name;
-		this.definitionHelper = definitionHelper;
+		this.context = context;
 	}
 
 	@Override
@@ -84,8 +87,8 @@ public class BasicTransformer implements Transformer {
 	}
 
 	@Override
-	public ASTNode transform(Context node) throws TransformerException {
-		Context c = new Context(node);
+	public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
+		org.kframework.kil.Context c = new org.kframework.kil.Context(node);
 		return transform((Sentence) c);
 	}
 
@@ -279,7 +282,28 @@ public class BasicTransformer implements Transformer {
 		return transform((CollectionItem) result);
 	}
 
-	@Override
+    @Override
+    public ASTNode transform(MapBuiltin node) throws TransformerException {
+        boolean change = false;
+        ArrayList<Term> terms = new ArrayList<Term>(node.terms().size());
+        LinkedHashMap<Term, Term> elements = new LinkedHashMap<Term, Term>(node.elements().size());
+        for (Term term : node.terms()) {
+            Term transformedTerm = (Term) term.accept(this);
+            terms.add(transformedTerm);
+            change = change || transformedTerm != term;
+        }
+        for (java.util.Map.Entry<Term, Term> entry : node.elements().entrySet()) {
+            Term transformedKey = (Term) entry.getKey().accept(this);
+            Term transformedValue = (Term) entry.getValue().accept(this);
+            elements.put(transformedKey, transformedValue);
+            change = change || transformedKey != entry.getKey()
+                     || transformedValue != entry.getValue();
+        }
+
+        return new MapBuiltin(node.collectionSort(), elements, terms);
+    }
+
+    @Override
 	public ASTNode transform(Constant node) throws TransformerException {
 		return transform((Term) node);
 	}
@@ -352,9 +376,9 @@ public class BasicTransformer implements Transformer {
 	public ASTNode transform(Rewrite node) throws TransformerException {
 		Rewrite result = new Rewrite(node);
 		result.replaceChildren(
-				(Term) node.getLeft().accept(this),
-				(Term) node.getRight().accept(this),
-				definitionHelper);
+                (Term) node.getLeft().accept(this),
+                (Term) node.getRight().accept(this),
+                context);
 		return transform((Term) result);
 	}
 

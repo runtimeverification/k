@@ -8,7 +8,7 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.Term;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -20,8 +20,8 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  */
 public class CollapseAndBoolTransformer extends CopyOnWriteTransformer {
 
-    public CollapseAndBoolTransformer(DefinitionHelper definitionHelper) {
-        super("Collapse nested conjunctions.", definitionHelper);
+    public CollapseAndBoolTransformer(Context context) {
+        super("Collapse nested conjunctions.", context);
     }
 
     @Override

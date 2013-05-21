@@ -13,6 +13,7 @@ import org.w3c.dom.Element;
 
 import aterm.ATermAppl;
 
+
 /**
  * Class representing a builtin string token.
  *
@@ -43,8 +44,7 @@ public class StringBuiltin extends Token {
 	/**
 	 * Returns a {@link StringBuiltin} representing the given {@link String} value.
 	 * 
-	 * @param value
-	 *            An un-escaped {@link String} value without the leading and trailing '"'.
+	 * @param value An un-escaped {@link String} value without the leading and trailing '"'.
 	 * @return
 	 */
 	public static StringBuiltin of(String value) {
@@ -57,7 +57,8 @@ public class StringBuiltin extends Token {
 	}
 
 	/**
-	 * Returns a {@link KApp} representing a {@link StringBuiltin} with the given (un-escaped) value applied to an empty {@link KList}.
+	 * Returns a {@link KApp} representing a {@link StringBuiltin} with the given (un-escaped)
+     * value applied to an empty {@link KList}.
 	 * 
 	 * @param value
 	 * @return

@@ -6,14 +6,13 @@ import com.google.common.collect.ImmutableSet;
 import org.kframework.backend.java.kil.AnonymousVariable;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -71,7 +70,7 @@ public class SymbolicConstraint {
 
         public boolean isFalse() {
             if (leftHandSide instanceof Sorted && rightHandSide instanceof Sorted) {
-                return null == definitionHelper.getGLBSort(ImmutableSet.<String>of(
+                return null == context.getGLBSort(ImmutableSet.<String>of(
                         ((Sorted) leftHandSide).getSort(),
                         ((Sorted) rightHandSide).getSort()));
             } else {
@@ -88,8 +87,8 @@ public class SymbolicConstraint {
         }
 
         private void substitute(Map<Variable, Term> substitution) {
-            leftHandSide = leftHandSide.substitute(substitution, definitionHelper);
-            rightHandSide = rightHandSide.substitute(substitution, definitionHelper);
+            leftHandSide = leftHandSide.substitute(substitution, context);
+            rightHandSide = rightHandSide.substitute(substitution, context);
         }
 
         private void substitute(Variable variable, Term term) {
@@ -116,10 +115,10 @@ public class SymbolicConstraint {
     private final Map<Variable, Term> substitution = new HashMap<Variable, Term>();
     private TruthValue truthValue = TruthValue.TRUE;
 
-    protected DefinitionHelper definitionHelper;
+    protected Context context;
     
-    public SymbolicConstraint(DefinitionHelper definitionHelper) {
-    	this.definitionHelper = definitionHelper;
+    public SymbolicConstraint(Context context) {
+    	this.context = context;
     }
     
     public TruthValue add(Term leftHandSide, Term rightHandSide) {
@@ -128,8 +127,8 @@ public class SymbolicConstraint {
                         + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
                         + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
 
-        leftHandSide = leftHandSide.substitute(substitution, definitionHelper);
-        rightHandSide = rightHandSide.substitute(substitution, definitionHelper);
+        leftHandSide = leftHandSide.substitute(substitution, context);
+        rightHandSide = rightHandSide.substitute(substitution, context);
 
         Equality equality = this.new Equality(leftHandSide, rightHandSide);
 
@@ -210,7 +209,7 @@ public class SymbolicConstraint {
             Map<Variable, Term> tempSubstitution = new HashMap<Variable, Term>();
             tempSubstitution.put(variable, term);
 
-            SymbolicConstraint.compose(substitution, tempSubstitution, definitionHelper);
+            SymbolicConstraint.compose(substitution, tempSubstitution, context);
             substitution.put(variable, term);
 
             for (Iterator<Equality> previousIterator = equalities.iterator(); previousIterator.hasNext();) {
@@ -251,10 +250,10 @@ public class SymbolicConstraint {
         return builder.toString();
     }
     @SuppressWarnings("unchecked")
-    public static void compose(Map<Variable, Term> map, Map<Variable, Term> substitution, DefinitionHelper definitionHelper) {
+    public static void compose(Map<Variable, Term> map, Map<Variable, Term> substitution, Context context) {
         Map.Entry<Variable, Term>[] entries = map.entrySet().toArray(new Map.Entry[map.size()]);
         for (int index = 0; index < entries.length; ++index) {
-            Term term = entries[index].getValue().substitute(substitution, definitionHelper);
+            Term term = entries[index].getValue().substitute(substitution, context);
             if (term != entries[index].getValue()) {
                 map.put(entries[index].getKey(), term);
             }

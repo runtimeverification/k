@@ -8,7 +8,6 @@ import java.util.Map.Entry;
 import org.kframework.compile.transformers.AddPredicates;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.KApp;
-import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.Rewrite;
@@ -16,7 +15,7 @@ import org.kframework.kil.Rule;
 import org.kframework.kil.Term;
 import org.kframework.kil.Token;
 import org.kframework.kil.Variable;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -28,8 +27,8 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  */
 public class ReplaceConstants extends CopyOnWriteTransformer {
 
-	public ReplaceConstants(DefinitionHelper definitionHelper) {
-		super("Replace Constants with Variables", definitionHelper);
+	public ReplaceConstants(Context context) {
+		super("Replace Constants with Variables", context);
 	}
 
 	@Override
@@ -40,10 +39,10 @@ public class ReplaceConstants extends CopyOnWriteTransformer {
 
 		if (node.getBody() instanceof Rewrite) {
 			ConstantsReplaceTransformer crt = new ConstantsReplaceTransformer(
-					"", definitionHelper);
+					"", context);
 			Rewrite rew = (Rewrite) node.getBody();
 			Term left = rew.getLeft().shallowCopy();
-			rew.setLeft((Term) left.accept(crt), definitionHelper);
+			rew.setLeft((Term) left.accept(crt), context);
 
 			Map<Variable, KApp> newGeneratedSV = crt.getGeneratedSV();
 			Term condition = node.getCondition();
@@ -54,12 +53,12 @@ public class ReplaceConstants extends CopyOnWriteTransformer {
 				vars.add(entry.getKey());
 //				vars.add(KApp.of(new KInjectedLabel(entry.getValue())));
 				vars.add(entry.getValue());
-				terms.add(new KApp(KLabelConstant.of(KLabelConstant.KEQ.getLabel(), definitionHelper), new KList(vars)));
+				terms.add(new KApp(KLabelConstant.of(KLabelConstant.KEQ.getLabel(), context), new KList(vars)));
 
 				Token token = (Token) (entry.getValue().getLabel());
 				terms.add(KApp.of( 
                         KLabelConstant.of(AddPredicates.predicate(
-                                token.tokenSort().replaceFirst("#", "")), definitionHelper),
+                                token.tokenSort().replaceFirst("#", "")), context),
                         entry.getKey()));
 			}
 

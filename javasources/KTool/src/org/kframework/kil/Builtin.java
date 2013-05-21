@@ -14,6 +14,7 @@ import org.w3c.dom.Element;
  * Time: 4:49 PM
  * To change this template use File | Settings | File Templates.
  */
+@Deprecated
 public abstract class Builtin extends Term {
 
     public static Builtin of(String sort, String value) {

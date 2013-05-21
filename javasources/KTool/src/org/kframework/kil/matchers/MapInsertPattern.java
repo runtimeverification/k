@@ -6,9 +6,7 @@ import org.kframework.kil.Map;
 import org.kframework.kil.MapItem;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
-import org.kframework.kil.loader.DefinitionHelper;
-import org.kframework.kil.matchers.Matcher;
-import org.kframework.kil.rewriter.SetImpl;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -32,7 +30,7 @@ public class MapInsertPattern extends Term {
   */ 
   private Variable remainder;
 
-  public MapInsertPattern(Map m, DefinitionHelper definitionHelper){
+  public MapInsertPattern(Map m, Context context){
     java.util.List<Term> contents = m.getContents();
     insertions = new ArrayList<Binding>(contents.size());
     for(Term t : contents){
@@ -88,8 +86,8 @@ public class MapInsertPattern extends Term {
 	}
 
   @Override
-	public ASTNode accept(Transformer visitor) throws TransformerException {
-		return visitor.transform(this);
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
 	}
 
   @Override

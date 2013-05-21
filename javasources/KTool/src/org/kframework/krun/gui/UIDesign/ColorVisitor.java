@@ -3,19 +3,19 @@ package org.kframework.krun.gui.UIDesign;
 import java.awt.Color;
 
 import org.kframework.kil.Cell;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.krun.gui.UIDesign.xmlEditor.ColorTagMap;
 import org.kframework.utils.ColorUtil;
 
 public class ColorVisitor extends BasicVisitor{
-	public ColorVisitor(DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public ColorVisitor(Context context) {
+		super(context);
 	}
 
 	@Override
 	public void visit(Cell cell) {
-		Cell declaredCell = definitionHelper.cells.get(cell.getLabel());
+		Cell declaredCell = context.cells.get(cell.getLabel());
 		if (declaredCell != null) {
 			String declaredColor = declaredCell.getCellAttributes().get("color");
 			if (declaredColor != null) {

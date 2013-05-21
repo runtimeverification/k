@@ -3,7 +3,7 @@ package org.kframework.backend.symbolic;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Variable;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -23,8 +23,8 @@ public class VariableReplaceTransformer extends CopyOnWriteTransformer {
     private Map<Variable, Variable> generatedVariables;
     private Set<String> vars;
 
-    public VariableReplaceTransformer(String name, DefinitionHelper definitionHelper) {
-        super("Replace Variables", definitionHelper);
+    public VariableReplaceTransformer(String name, Context context) {
+        super("Replace Variables", context);
         generatedVariables = new HashMap<Variable, Variable>();
         vars = new HashSet<String>();
     }

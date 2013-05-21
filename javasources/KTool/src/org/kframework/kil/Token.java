@@ -1,7 +1,7 @@
 package org.kframework.kil;
 
-import org.kframework.kil.loader.Constants;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.*;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
@@ -30,7 +30,7 @@ public abstract class Token extends KLabel {
 		} else if (sort.equals(IntBuiltin.SORT_NAME)) {
 			return IntBuiltin.of(value);
 		} else if (sort.equals(StringBuiltin.SORT_NAME)) {
-			/* TODO: andreis to un-escape string */
+			/* TODO(andreis): unescape string */
 			return StringBuiltin.of(value);
 		} else {
 			return GenericToken.of(sort, value);
@@ -122,8 +122,8 @@ public abstract class Token extends KLabel {
 	@Override
 	public int hashCode() {
 		int hash = 1;
-		hash = hash * DefinitionHelper.HASH_PRIME + tokenSort().hashCode();
-		hash = hash * DefinitionHelper.HASH_PRIME + value().hashCode();
+		hash = hash * Context.HASH_PRIME + tokenSort().hashCode();
+		hash = hash * org.kframework.kil.loader.Context.HASH_PRIME + value().hashCode();
 		return hash;
 	}
 

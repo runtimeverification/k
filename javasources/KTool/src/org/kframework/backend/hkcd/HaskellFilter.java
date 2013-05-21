@@ -4,7 +4,7 @@ import org.kframework.compile.utils.MaudeHelper;
 import org.kframework.kil.Constant;
 import org.kframework.kil.Empty;
 import org.kframework.kil.TermCons;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 
 /**
@@ -17,8 +17,8 @@ public class HaskellFilter extends BasicVisitor {
 	protected String endl = System.getProperty("line.separator");
 	protected String result = "";
 
-	public HaskellFilter(DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public HaskellFilter(Context context) {
+		super(context);
 	}
 	
 	/**
@@ -28,7 +28,7 @@ public class HaskellFilter extends BasicVisitor {
 	 */
 	public void visit(TermCons tc) {
 		String klabel =
-			definitionHelper.conses.get(tc.getCons())
+			context.conses.get(tc.getCons())
 			.getKLabel();
 		this.result += "KApp (KLabel [Syntax \"" + klabel + "\"]) [";
 

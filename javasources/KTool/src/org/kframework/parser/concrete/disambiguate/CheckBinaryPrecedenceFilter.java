@@ -10,7 +10,7 @@ import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.PriorityException;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -19,8 +19,8 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
 public class CheckBinaryPrecedenceFilter extends BasicTransformer {
-	public CheckBinaryPrecedenceFilter(DefinitionHelper definitionHelper) {
-		super("Check precedence for => and ~>", definitionHelper);
+	public CheckBinaryPrecedenceFilter(Context context) {
+		super("Check precedence for => and ~>", context);
 	}
 
 	TermCons parent = null;

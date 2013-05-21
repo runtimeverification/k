@@ -4,7 +4,7 @@ import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 
 /**
  * Transform AST of language definition into set of Haskell
@@ -13,8 +13,8 @@ import org.kframework.kil.loader.DefinitionHelper;
  * @see ProgramLoader.loadPgmAst
  */
 public class HaskellDefFilter extends HaskellFilter {
-	public HaskellDefFilter(DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public HaskellDefFilter(Context context) {
+		super(context);
 	}
 
 	public void visit(Rule rl) {

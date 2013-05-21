@@ -7,7 +7,7 @@ import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Map;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 
 import java.util.HashSet;
 import java.util.List;
@@ -25,8 +25,8 @@ public class SubstitutionTransformer extends CopyOnWriteTransformer {
     private final java.util.Set<Variable> boundVariables;
     private final java.util.Map<Variable, Term> substitution;
 
-    public SubstitutionTransformer(java.util.Map<Variable, Term> substitution, DefinitionHelper definitionHelper) {
-    	super(definitionHelper);
+    public SubstitutionTransformer(java.util.Map<Variable, Term> substitution, Context context) {
+    	super(context);
         this.substitution = substitution;
         boundVariables = new HashSet<Variable>();
     }

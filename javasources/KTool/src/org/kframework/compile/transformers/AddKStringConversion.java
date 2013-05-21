@@ -1,7 +1,7 @@
 package org.kframework.compile.transformers;
 
 import org.kframework.kil.*;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.StringUtil;
@@ -19,8 +19,8 @@ public class AddKStringConversion extends CopyOnWriteTransformer {
     private static final String String2KLabelCons =
             "KLabel1String2KLabelSyn";
 
-    public AddKStringConversion(DefinitionHelper definitionHelper) {
-    	super("Define KLabel2String and String2Klabel for KLabel constants", definitionHelper);
+    public AddKStringConversion(Context context) {
+    	super("Define KLabel2String and String2Klabel for KLabel constants", context);
     }
 
     @Override
@@ -30,17 +30,17 @@ public class AddKStringConversion extends CopyOnWriteTransformer {
         retNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
 
         for (String klbl : node.getModuleKLabels()) {
-            Term kapp = KApp.of(new KInjectedLabel(KLabelConstant.of(klbl, definitionHelper)));
+            Term kapp = KApp.of(new KInjectedLabel(KLabelConstant.of(klbl, context)));
             Term lhs = KApp.of(KLabel2String, kapp);
             Term rhs = StringBuiltin.kAppOf(StringUtil.escapeMaude(klbl));
-            Rule rule = new Rule(lhs, rhs, definitionHelper);
+            Rule rule = new Rule(lhs, rhs, context);
             rule.addAttribute(Attribute.FUNCTION);
             retNode.appendModuleItem(rule);
 
             java.util.List<Term> termList = new ArrayList<Term>();
             termList.add(rhs);
-            TermCons termCons = new TermCons(KSorts.KLABEL, String2KLabelCons, termList, definitionHelper);
-            rule = new Rule(termCons, KLabelConstant.of(klbl, definitionHelper), definitionHelper);
+            TermCons termCons = new TermCons(KSorts.KLABEL, String2KLabelCons, termList, context);
+            rule = new Rule(termCons, KLabelConstant.of(klbl, context), context);
             rule.addAttribute(Attribute.FUNCTION);
             retNode.appendModuleItem(rule);
         }

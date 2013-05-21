@@ -7,7 +7,7 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Production;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,11 +27,11 @@ public class KLabelConstant extends KLabel {
     private final String label;
     private final boolean isFunction;
 
-    public KLabelConstant(String label, DefinitionHelper definitionHelper) {
+    public KLabelConstant(String label, Context context) {
         this.label = label;
 
         boolean isFunction = false;
-        for (Production production : productionsOf(definitionHelper)) {
+        for (Production production : productionsOf(context)) {
             if (production.containsAttribute(Attribute.FUNCTION.getKey())) {
                 isFunction = true;
                 break;
@@ -48,17 +48,17 @@ public class KLabelConstant extends KLabel {
         return label;
     }
 
-    public List<Production> productionsOf(DefinitionHelper definitionHelper) {
-        Set<String> conses = definitionHelper.labels.get(label);
+    public List<Production> productionsOf(Context context) {
+        Set<String> conses = context.labels.get(label);
         if (conses == null) {
             return Collections.<Production>emptyList();
         }
 
         ArrayList<Production> productions = new ArrayList<Production>();
         for (String cons : conses) {
-            assert definitionHelper.conses.containsKey(cons);
+            assert context.conses.containsKey(cons);
 
-            productions.add(definitionHelper.conses.get(cons));
+            productions.add(context.conses.get(cons));
         }
 
         return productions;

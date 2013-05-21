@@ -2,7 +2,7 @@ package org.kframework.compile.transformers;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Bracket;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -11,8 +11,8 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  */
 public class RemoveBrackets extends CopyOnWriteTransformer {
 
-	public RemoveBrackets(DefinitionHelper definitionHelper) {
-		super("Remove brackets", definitionHelper);
+	public RemoveBrackets(Context context) {
+		super("Remove brackets", context);
 	}
 
 	@Override

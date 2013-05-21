@@ -1,8 +1,7 @@
 package org.kframework.kil;
 
-import org.kframework.kil.loader.Constants;
-import org.kframework.kil.loader.DefinitionHelper;
-import org.kframework.kil.loader.JavaClassesFactory;
+import org.kframework.kil.loader.*;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
@@ -36,22 +35,22 @@ public class Rewrite extends Term {
 		this.right = node.right;
 	}
 
-	public Rewrite(Term eval1Left, Term eval1Right, DefinitionHelper definitionHelper) {
+	public Rewrite(Term eval1Left, Term eval1Right, Context context) {
 		super(eval1Left.getSort());
 		left = eval1Left;
 		right = eval1Right;
-		recomputeSort(definitionHelper);
+		recomputeSort(context);
 	}
 	
 	/**
 	 * Returning the Least Upper Bound for left and right sorts,
 	 * unless either side is an ambiguity, in which case arbitrary return the left sort.
 	 */
-	private void recomputeSort(DefinitionHelper definitionHelper) {
+	private void recomputeSort(Context context) {
 		if (left instanceof Ambiguity || right instanceof Ambiguity)
 			super.getSort();
 		else
-			sort = definitionHelper.getLUBSort(ImmutableSet.of(left.getSort(), right.getSort()));
+			sort = context.getLUBSort(ImmutableSet.of(left.getSort(), right.getSort()));
 	}
 
 	public Term getLeft() {
@@ -62,20 +61,20 @@ public class Rewrite extends Term {
 		return right;
 	}
 	
-	public void replaceChildren(Term left, Term right, DefinitionHelper definitionHelper) {
+	public void replaceChildren(Term left, Term right, Context context) {
 		this.left = left;
 		this.right = right;
-		recomputeSort(definitionHelper);
+		recomputeSort(context);
 	}
 	
-	public void setLeft(Term left, DefinitionHelper definitionHelper) {
+	public void setLeft(Term left, Context context) {
 		this.left = left;
-		recomputeSort(definitionHelper);
+		recomputeSort(context);
 	}
 
-	public void setRight(Term right, DefinitionHelper definitionHelper) {
+	public void setRight(Term right, org.kframework.kil.loader.Context context) {
 		this.right = right;
-		recomputeSort(definitionHelper);
+		recomputeSort(context);
 	}
 
 	@Override
@@ -89,8 +88,8 @@ public class Rewrite extends Term {
 	}
 
 	@Override
-	public ASTNode accept(Transformer visitor) throws TransformerException {
-		return visitor.transform(this);
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
 	}
 
 	@Override

@@ -5,7 +5,7 @@ import org.kframework.backend.unparser.AddBracketsFilter2;
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Term;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.krun.ConcretizeSyntax;
 import org.kframework.krun.FlattenDisambiguationFilter;
 import org.kframework.krun.K;
@@ -20,26 +20,27 @@ public class KRunState implements Serializable{
 	private Term rawResult;
 	private Integer stateId;
 	
-	protected DefinitionHelper definitionHelper;
+	protected Context context;
 
-	public KRunState(Term rawResult, DefinitionHelper definitionHelper) {
-		this.definitionHelper = definitionHelper;
+	public KRunState(Term rawResult, Context context) {
+		this.context = context;
 		this.rawResult = rawResult;
-		this.result = concretize(rawResult, definitionHelper);
+		this.result = concretize(rawResult, context);
 	}
 
-	public static Term concretize(Term result, DefinitionHelper definitionHelper) {
+	public static Term concretize(Term result, Context context) {
 		Term rawResult = result;
 		try {
-			result = (Term) result.accept(new ConcretizeSyntax(definitionHelper));
-			result = (Term) result.accept(new TypeInferenceSupremumFilter(definitionHelper));
-			result = (Term) result.accept(new FlattenDisambiguationFilter(definitionHelper));
+			result = (Term) result.accept(new ConcretizeSyntax(context));
+			result = (Term) result.accept(new TypeInferenceSupremumFilter(context));
+			result = (Term) result.accept(new FlattenDisambiguationFilter(context));
 			if (!K.parens) {
-				result = (Term) result.accept(new AddBracketsFilter(definitionHelper));
-				AddBracketsFilter2 filter = new AddBracketsFilter2(definitionHelper);
+				result = (Term) result.accept(new AddBracketsFilter(context));
+				AddBracketsFilter2 filter = new AddBracketsFilter2(context);
 				result = (Term) result.accept(filter);
 				while (true) {
-					Term newResult = (Term) result.accept(new SubstitutionFilter(filter.substitution, definitionHelper));
+					Term newResult = (Term) result.accept(new SubstitutionFilter(filter.substitution,
+                            context));
 					if (newResult.equals(result)) {
 						break;
 					}
@@ -61,15 +62,15 @@ public class KRunState implements Serializable{
 		return result;
 	}
 	
-	public KRunState(Term rawResult, int stateId, DefinitionHelper definitionHelper) {
-		this(rawResult, definitionHelper);
+	public KRunState(Term rawResult, int stateId, Context context) {
+		this(rawResult, context);
 		this.stateId = stateId;
 	}
 
 	@Override
 	public String toString() {
 		if (stateId == null) {
-			UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, definitionHelper);
+			UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
 			result.accept(unparser);
 			return unparser.getResult();
 		} else {

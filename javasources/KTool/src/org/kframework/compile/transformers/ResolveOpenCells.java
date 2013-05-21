@@ -3,7 +3,6 @@ package org.kframework.compile.transformers;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
-import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -16,8 +15,8 @@ import java.util.HashMap;
 
 public class ResolveOpenCells extends CopyOnWriteTransformer {
 
-	public ResolveOpenCells(DefinitionHelper definitionHelper) {
-		super("Resolve Open Cells", definitionHelper);
+	public ResolveOpenCells(org.kframework.kil.loader.Context context) {
+		super("Resolve Open Cells", context);
 	}
 	
 	@Override
@@ -68,7 +67,7 @@ public class ResolveOpenCells extends CopyOnWriteTransformer {
 	}
 
 	@Override
-	public ASTNode transform(Context node) throws TransformerException {
+	public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
 		return node;
 	}
 

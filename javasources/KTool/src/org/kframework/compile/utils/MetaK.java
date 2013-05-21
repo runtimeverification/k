@@ -5,7 +5,6 @@ import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Collection;
 import org.kframework.kil.Map;
 import org.kframework.kil.ProductionItem.ProductionType;
-import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.Visitable;
@@ -26,7 +25,7 @@ public class MetaK {
 	public static final String cellSort = "CellSort";
 	public static final String cellFragment = "CellFragment";
 
-	public static Term incrementCondition(Term condition, Term kresultCnd, DefinitionHelper definitionHelper) {
+	public static Term incrementCondition(Term condition, Term kresultCnd, org.kframework.kil.loader.Context context) {
 		if (condition == null) {
 			return kresultCnd;
 		}
@@ -96,9 +95,9 @@ public class MetaK {
 		return key.startsWith("#");
 	}
 
-	public static Set<Variable> getVariables(Visitable node, DefinitionHelper definitionHelper) {
+	public static Set<Variable> getVariables(Visitable node, org.kframework.kil.loader.Context context) {
 		final Set<Variable> result = new HashSet<Variable>();
-		node.accept(new BasicVisitor(definitionHelper) {
+		node.accept(new BasicVisitor(context) {
 			@Override
 			public void visit(Variable node) {
 				result.add(node);
@@ -107,16 +106,17 @@ public class MetaK {
 		return result;
 	}
 
-	public static Definition setConfiguration(Definition node, DefinitionHelper definitionHelper, final Configuration conf) {
+	public static Definition setConfiguration(Definition node, org.kframework.kil.loader.Context context, final Configuration conf) {
 		try {
-			return (Definition) node.accept(new CopyOnWriteTransformer("Configuration setter", definitionHelper) {
+			return (Definition) node.accept(new CopyOnWriteTransformer("Configuration setter",
+                    context) {
 				@Override
 				public ASTNode transform(Configuration node) {
 					return conf;
 				}
 
 				@Override
-				public ASTNode transform(Context node) {
+				public ASTNode transform(org.kframework.kil.Context node) {
 					return node;
 				}
 
@@ -136,16 +136,16 @@ public class MetaK {
 		return node;
 	}
 
-	public static Configuration getConfiguration(Definition node, DefinitionHelper definitionHelper) {
+	public static Configuration getConfiguration(Definition node, org.kframework.kil.loader.Context context) {
 		final List<Configuration> result = new LinkedList<Configuration>();
-		node.accept(new BasicVisitor(definitionHelper) {
+		node.accept(new BasicVisitor(context) {
 			@Override
 			public void visit(Configuration node) {
 				result.add(node);
 			}
 
 			@Override
-			public void visit(Context node) {
+			public void visit(org.kframework.kil.Context node) {
 				return;
 			}
 
@@ -166,7 +166,7 @@ public class MetaK {
 		return result.get(0);
 	}
 
-	public static Term defaultTerm(Term v, DefinitionHelper definitionHelper) {
+	public static Term defaultTerm(Term v, org.kframework.kil.loader.Context context) {
 		String sort = v.getSort();
 		KSort ksort = KSort.getKSort(sort).mainSort();
 		if (ksort.isDefaultable())
@@ -217,10 +217,10 @@ public class MetaK {
 		return v;
 	}
 
-	public static int countRewrites(Term t, DefinitionHelper definitionHelper) {
+	public static int countRewrites(Term t, org.kframework.kil.loader.Context context) {
 		final List<Integer> count = new ArrayList<Integer>();
 		count.add(0);
-		Visitor countVisitor = new BasicVisitor(definitionHelper) {
+		Visitor countVisitor = new BasicVisitor(context) {
 			@Override public void visit(Rewrite rewrite) {
 				count.set(0, count.get(0) + 1);
 				super.visit(rewrite);
@@ -231,8 +231,8 @@ public class MetaK {
 		return count.get(0);
 	}
 
-	public static boolean hasCell(Term t, DefinitionHelper definitionHelper) {
-		Visitor cellFinder = new BasicVisitor(definitionHelper) {
+	public static boolean hasCell(Term t, org.kframework.kil.loader.Context context) {
+		Visitor cellFinder = new BasicVisitor(context) {
 			@Override
 			public void visit(KSequence node) {
 				return;
@@ -302,18 +302,18 @@ public class MetaK {
 		return false;
 	}
 
-    public static Term getTerm(Production prod, DefinitionHelper definitionHelper) {
+    public static Term getTerm(Production prod, org.kframework.kil.loader.Context context) {
 		if (prod.isSubsort()) {
 			final Variable freshVar = Variable.getFreshVar(prod.getItems().get(0).toString());
 			if (prod.containsAttribute("klabel")) {
-				return KApp.of(KLabelConstant.of(prod.getKLabel(), definitionHelper), freshVar);
+				return KApp.of(KLabelConstant.of(prod.getKLabel(), context), freshVar);
 			}
 			return freshVar;
 		}
 		if (prod.isConstant()) {
             String terminal = ((Terminal) prod.getItems().get(0)).getTerminal();
             if (prod.getSort().equals(KSorts.KLABEL)) {
-                return KLabelConstant.of(terminal, definitionHelper);
+                return KLabelConstant.of(terminal, context);
             } else if (prod.getSort().equals(BoolBuiltin.SORT_NAME)) {
                 return BoolBuiltin.kAppOf(terminal);
             } else if (prod.getSort().equals(IntBuiltin.SORT_NAME)) {
@@ -325,11 +325,11 @@ public class MetaK {
             }
         }
 		if (prod.isLexical()) {
-			return KApp.of(KLabelConstant.of("#token", definitionHelper),
+			return KApp.of(KLabelConstant.of("#token", context),
                            StringBuiltin.kAppOf(prod.getSort()),
                            Variable.getFreshVar("String"));
 		}
-		TermCons t = new TermCons(prod.getSort(), prod.getCons(), definitionHelper);
+		TermCons t = new TermCons(prod.getSort(), prod.getCons(), context);
 		if (prod.isListDecl()) {
 			t.getContents().add(Variable.getFreshVar(((UserList) prod.getItems().get(0)).getSort()));
 			t.getContents().add(Variable.getFreshVar(prod.getSort()));
@@ -368,9 +368,9 @@ public class MetaK {
 	    return  "'.List{\"" + sep + "\"}";
     }
 
-	public static List<Cell> getTopCells(Term t, DefinitionHelper definitionHelper) {
+	public static List<Cell> getTopCells(Term t, org.kframework.kil.loader.Context context) {
 		final List<Cell> cells = new ArrayList<Cell>();
-		t.accept(new BasicVisitor(definitionHelper) {
+		t.accept(new BasicVisitor(context) {
 			@Override
 			public void visit(Cell node) {
 				cells.add(node);
@@ -379,9 +379,9 @@ public class MetaK {
 		return cells;
 	}
 
-	public static List<String> getAllCellLabels(Term t, DefinitionHelper definitionHelper) {
+	public static List<String> getAllCellLabels(Term t, org.kframework.kil.loader.Context context) {
 		final List<String> cells = new ArrayList<String>();
-		t.accept(new BasicVisitor(definitionHelper) {
+		t.accept(new BasicVisitor(context) {
 			@Override
 			public void visit(Cell node) {
 				cells.add(node.getLabel());
@@ -411,8 +411,8 @@ public class MetaK {
 	}
 
 
-	public static Term fillHole(Term t, final Term replacement, DefinitionHelper definitionHelper) {
-		CopyOnWriteTransformer holeFiller = new CopyOnWriteTransformer("Hole Filling", definitionHelper) {
+	public static Term fillHole(Term t, final Term replacement, org.kframework.kil.loader.Context context) {
+		CopyOnWriteTransformer holeFiller = new CopyOnWriteTransformer("Hole Filling", context) {
 			@Override
 			public ASTNode transform(Hole node) {
 				return replacement;
@@ -440,9 +440,9 @@ public class MetaK {
 		return false;
 	}
 
-	public static Term getHoleReplacement(Term t, DefinitionHelper definitionHelper) {
+	public static Term getHoleReplacement(Term t, org.kframework.kil.loader.Context context) {
 		final List<Term> result = new ArrayList<Term>();
-		Visitor holeReplacementFinder = new BasicVisitor(definitionHelper) {
+		Visitor holeReplacementFinder = new BasicVisitor(context) {
 			@Override
 			public void visit(Rewrite node) {
 				final Term left = node.getLeft();

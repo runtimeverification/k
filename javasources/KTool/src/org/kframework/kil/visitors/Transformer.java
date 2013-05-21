@@ -59,6 +59,11 @@ public interface Transformer {
 	public ASTNode transform(MapItem node) throws TransformerException;
 	public ASTNode transform(SetItem node) throws TransformerException;
 	//	</CollectionItems>
+    // <BuiltinCollections>
+    /* andreis: needs shallow copy with fields arguments in order to implement */
+    // public ASTNode transform(CollectionBuiltin node) throws TransformerException;
+    public ASTNode transform(MapBuiltin node) throws TransformerException;
+    // </BuiltinCollections>
     // <Token>
     public ASTNode transform(Token node) throws TransformerException;
     public ASTNode transform(Constant node) throws TransformerException;

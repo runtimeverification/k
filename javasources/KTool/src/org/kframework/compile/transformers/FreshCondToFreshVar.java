@@ -3,7 +3,7 @@ package org.kframework.compile.transformers;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.compile.utils.Substitution;
 import org.kframework.kil.*;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -19,8 +19,8 @@ public class FreshCondToFreshVar extends CopyOnWriteTransformer {
 
 	private Set<Variable> vars = new HashSet<Variable>();
 
-	public FreshCondToFreshVar(DefinitionHelper definitionHelper) {
-		super("Transform fresh conditions into fresh variables.", definitionHelper);
+	public FreshCondToFreshVar(Context context) {
+		super("Transform fresh conditions into fresh variables.", context);
 	}
 
 	@Override
@@ -75,7 +75,7 @@ public class FreshCondToFreshVar extends CopyOnWriteTransformer {
             symMap.put(var, freshVar);
 		}
 
-		return new Substitution(symMap, definitionHelper);
+		return new Substitution(symMap, context);
 	}
 
 }

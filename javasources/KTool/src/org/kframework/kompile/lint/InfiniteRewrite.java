@@ -1,15 +1,14 @@
 package org.kframework.kompile.lint;
 
 import org.kframework.kil.*;
-import org.kframework.kil.loader.DefinitionHelper;
 
 /**
  * Inifite rewrite rule is a lint rule that looks for rules that can lead to infinite rewrite.
  */
 public class InfiniteRewrite extends KlintRule{
 
-	public InfiniteRewrite(Definition javaDef, DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public InfiniteRewrite(Definition javaDef, org.kframework.kil.loader.Context context) {
+		super(context);
 		this.javaDef = javaDef;
 	}
 	@Override
@@ -45,8 +44,8 @@ public class InfiniteRewrite extends KlintRule{
 	}
 
 	private void checkProductions(TermCons leftTermCons, TermCons rightTermCons, Rewrite rewrite) {
-		Production leftTermProd = definitionHelper.conses.get(leftTermCons.getCons());
-		Production rightTermProd = definitionHelper.conses.get(rightTermCons.getCons());
+		Production leftTermProd = context.conses.get(leftTermCons.getCons());
+		Production rightTermProd = context.conses.get(rightTermCons.getCons());
 
 		if(leftTermProd.equals(rightTermProd)){
 			warning("Possible infinite rewrite: ", rewrite);

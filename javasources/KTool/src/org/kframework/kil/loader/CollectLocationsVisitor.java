@@ -5,18 +5,18 @@ import org.kframework.kil.Sentence;
 import org.kframework.kil.visitors.BasicVisitor;
 
 public class CollectLocationsVisitor extends BasicVisitor {
-	public CollectLocationsVisitor(DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public CollectLocationsVisitor(Context context) {
+		super(context);
 		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public void visit(Production node) {
-		definitionHelper.locations.put(node.getFilename() + ":" + node.getLocation(), node);
+		context.locations.put(node.getFilename() + ":" + node.getLocation(), node);
 	}
 
 	@Override
 	public void visit(Sentence node) {
-		definitionHelper.locations.put(node.getFilename() + ":" + node.getLocation(), node);
+		context.locations.put(node.getFilename() + ":" + node.getLocation(), node);
 	}
 }

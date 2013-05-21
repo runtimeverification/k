@@ -12,7 +12,6 @@ import org.kframework.kil.Bracket;
 import org.kframework.kil.Cast;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Configuration;
-import org.kframework.kil.Context;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Empty;
 import org.kframework.kil.FreezerHole;
@@ -62,24 +61,24 @@ import aterm.ATermList;
 /**
  * Factory for creating KIL classes from XML nodes or ATerms.
  * Must call startConstruction/endConstruction around calls to getTerm,
- * to supply a DefinitionHelper.
+ * to supply a Context.
  */
 public class JavaClassesFactory {
-	private static DefinitionHelper definitionHelper = null;
+	private static Context context = null;
 
-	/** Set the definitionHelper to use */
-	public static synchronized void startConstruction(DefinitionHelper definitionHelper) {
-		assert JavaClassesFactory.definitionHelper == null;
-		JavaClassesFactory.definitionHelper = definitionHelper;
+	/** Set the context to use */
+	public static synchronized void startConstruction(Context context) {
+		assert JavaClassesFactory.context == null;
+		JavaClassesFactory.context = context;
 	}
 
 	public static synchronized void endConstruction() {
-		assert JavaClassesFactory.definitionHelper != null;
-		JavaClassesFactory.definitionHelper = null;
+		assert JavaClassesFactory.context != null;
+		JavaClassesFactory.context = null;
 	}
 
 	public static ASTNode getTerm(Element element) {
-		assert definitionHelper != null;
+		assert context != null;
 		// used for a new feature - loading java classes at first step (Basic Parsing)
 		if (Constants.LEXICAL.equals(element.getNodeName()))
 			return new Lexical(element);
@@ -121,8 +120,8 @@ public class JavaClassesFactory {
 		if (Constants.REWRITE.equals(element.getNodeName()))
 			return new Rewrite(element);
 		if (Constants.TERM.equals(element.getNodeName())) {
-			assert definitionHelper != null;
-			return new TermCons(element, definitionHelper);
+			assert context != null;
+			return new TermCons(element, context);
 		}
 		if (Constants.BRACKET.equals(element.getNodeName()))
 			return new Bracket(element);
@@ -141,7 +140,7 @@ public class JavaClassesFactory {
 			}
 		}
 		if (Constants.KAPP.equals(element.getNodeName()))
-			return new KApp(element, definitionHelper);
+			return new KApp(element, context);
 		if (KSorts.KLIST.equals(element.getNodeName()))
 			return new KList(element);
 		if (Constants.EMPTY.equals(element.getNodeName())) {
@@ -185,7 +184,7 @@ public class JavaClassesFactory {
 		if (KSorts.MAP_ITEM.equals(element.getNodeName()))
 			return new MapItem(element);
 		if (Constants.CONTEXT.equals(element.getNodeName()))
-			return new Context(element);
+			return new org.kframework.kil.Context(element);
 		if (Constants.HOLE.equals(element.getNodeName()))
 			return Hole.KITEM_HOLE;
 		if (Constants.FREEZERHOLE.equals(element.getNodeName()))
@@ -212,7 +211,7 @@ public class JavaClassesFactory {
 	}
 
 	public static ASTNode getTerm(ATerm atm) {
-		assert definitionHelper != null;
+		assert context != null;
 
 		if (atm.getType() == ATerm.APPL) {
 			ATermAppl appl = (ATermAppl) atm;
@@ -262,7 +261,8 @@ public class JavaClassesFactory {
 					TermCons head = null;
 					TermCons tc = null;
 					while (!list.isEmpty()) {
-						TermCons ntc = new TermCons(StringUtil.getSortNameFromCons(appl.getName()), appl.getName(), definitionHelper);
+						TermCons ntc = new TermCons(StringUtil.getSortNameFromCons(appl.getName()), appl.getName(),
+                                context);
 						ntc.setLocation(appl.getAnnotations().getFirst().toString().substring(8));
 						ntc.setContents(new ArrayList<Term>());
 						ntc.getContents().add((Term) JavaClassesFactory.getTerm(list.getFirst()));
@@ -280,7 +280,7 @@ public class JavaClassesFactory {
 						return new Empty(StringUtil.getSortNameFromCons(appl.getName()));
 					return head;
 				} else
-					return new TermCons(appl, definitionHelper);
+					return new TermCons(appl, context);
 			}
 			if (appl.getName().endsWith("Bracket"))
 				return new Bracket(appl);

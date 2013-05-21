@@ -18,7 +18,7 @@ import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.Terminal;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -36,8 +36,8 @@ public class AddConditionToConfig extends CopyOnWriteTransformer {
 
     public static String KCELL = "k";
 
-    public AddConditionToConfig(DefinitionHelper definitionHelper) {
-        super("Add path condition to configuration", definitionHelper);
+    public AddConditionToConfig(Context context) {
+        super("Add path condition to configuration", context);
     }
 
     @Override

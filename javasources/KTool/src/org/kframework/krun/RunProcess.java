@@ -1,9 +1,9 @@
 package org.kframework.krun;
 
+import org.kframework.kil.loader.Context;
 import org.kframework.krun.tasks.MaudeTask;
 import org.kframework.kil.BackendTerm;
 import org.kframework.kil.Term;
-import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.ProgramLoader;
 import org.kframework.utils.ThreadedStreamCapturer;
@@ -90,9 +90,9 @@ public class RunProcess {
 
 	}
 
-	public Term runParserOrDie(String parser, String pgm, boolean isPgm, String startSymbol, DefinitionHelper definitionHelper) {
+	public Term runParserOrDie(String parser, String pgm, boolean isPgm, String startSymbol, Context context) {
 		try {
-			return runParser(parser, pgm, isPgm, startSymbol, definitionHelper);
+			return runParser(parser, pgm, isPgm, startSymbol, context);
 		} catch (TransformerException e) {
 			e.report();
 			return null;
@@ -102,12 +102,12 @@ public class RunProcess {
 	/*
 	 * run the process denoted by the parser ("kast" or an external parser specified with --parser option) and return the AST obtained by parser
 	 */
-	public Term runParser(String parser, String pgm, boolean isPgm, String startSymbol, DefinitionHelper definitionHelper) throws TransformerException {
+	public Term runParser(String parser, String pgm, boolean isPgm, String startSymbol, Context context) throws TransformerException {
 		String KAST = new String();
 		String parserPath = new String();
 
 		if (startSymbol == null) {
-			startSymbol = definitionHelper.startSymbolPgm;
+			startSymbol = context.startSymbolPgm;
 		}		
 		
 		// the argument is a formula and we should write it in a file before passing it to the parser
@@ -118,7 +118,7 @@ public class RunProcess {
 			if (!isPgm) {
 				pgmContent = FileUtil.getFileContent(pgm);
 			}
-			return ProgramLoader.processPgm(pgmContent, pgm, K.definition, startSymbol, definitionHelper);
+			return ProgramLoader.processPgm(pgmContent, pgm, K.definition, startSymbol, context);
 			// this.execute(new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", k3jar, "-kast", "--definition", definition, pgm });
 		} else {
 			try {
@@ -133,7 +133,7 @@ public class RunProcess {
 				if (!isPgm) {
 					pgmContent = FileUtil.getFileContent(pgm);
 				}
-				return ProgramLoader.processPgm(pgmContent, pgm, K.definition, startSymbol, definitionHelper);
+				return ProgramLoader.processPgm(pgmContent, pgm, K.definition, startSymbol, context);
 				// this.execute(new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", k3jar, "-kast", pgm });
 			} else {
 				List<String> tokens = new ArrayList<String>(Arrays.asList(parser.split(" ")));
@@ -186,17 +186,17 @@ public class RunProcess {
 		return maude.returnValue;
 	}
 
-	public void checkMaudeForErrors(File errFile, String lang, DefinitionHelper definitionHelper) {
+	public void checkMaudeForErrors(File errFile, String lang, Context context) {
 		if (errFile.exists()) {
 			String content = FileUtil.getFileContent(K.maude_err);
 			if (!content.equals("")) {
-				printError(content, lang, definitionHelper);
+				printError(content, lang, context);
 			}
 		}
 	}
 
 	// check if the execution of Maude process produced some errors
-	public void printError(String content, String lang, DefinitionHelper definitionHelper) {
+	public void printError(String content, String lang, Context context) {
 		try {
 			if (content.contains("GLIBC")) {
 				System.out.println("\nError: A known bug in the current version of the Maude rewrite engine\n" + "prohibits running K with I/O on certain architectures.\n"
@@ -206,7 +206,7 @@ public class RunProcess {
 			}
 			System.out.println("Krun was executed with the following arguments:" + K.lineSeparator + "k_definition=" + K.k_definition + K.lineSeparator + "syntax_module=" + K.syntax_module
 					+ K.lineSeparator + "main_module=" + K.main_module + K.lineSeparator + "compiled_def=" + K.compiled_def + K.lineSeparator);
-			String compiledDefName = definitionHelper.kompiled.getName();
+			String compiledDefName = context.kompiled.getName();
 			int index = compiledDefName.indexOf("-kompiled");
 			compiledDefName = compiledDefName.substring(0, index);
 			if (lang != null && !lang.equals(compiledDefName)) {

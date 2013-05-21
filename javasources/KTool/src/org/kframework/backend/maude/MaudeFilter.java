@@ -9,28 +9,28 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.Collection;
 import org.kframework.kil.ProductionItem.ProductionType;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.*;
+import java.util.Map;
 
 public class MaudeFilter extends BackendFilter {
     private Definition definition;
 	private boolean firstAttribute;
 	ConfigurationStructureMap cfgStr;
 
-	public MaudeFilter(ConfigurationStructureMap cfgStr, DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public MaudeFilter(ConfigurationStructureMap cfgStr, Context context) {
+		super(context);
 		this.cfgStr = cfgStr;
 	}
 
-	public MaudeFilter(DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public MaudeFilter(Context context) {
+		super(context);
 		this.cfgStr = null;
 	}
 
@@ -86,6 +86,13 @@ public class MaudeFilter extends BackendFilter {
             }
             definition.tokenNames().clear();
 
+            for (Map.Entry<String, CollectionSort> entry : context.collectionSorts.entrySet()) {
+                String lhs = "_`(_`)(" + AddPredicates.syntaxPredicate(entry.getKey()) + ", "
+                           + "_`(_`)(" + entry.getValue().type() + "2KLabel_(V:"
+                           + entry.getValue().type() + "), .KList))";
+                result.append("eq " + lhs + "  = _`(_`)(#_(true), .KList) .\n");
+            }
+
 			result.append("\nendm");
 		}
 	}
@@ -125,7 +132,7 @@ public class MaudeFilter extends BackendFilter {
 						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, p.getFilename(), p.getLocation()));
 					}
 					if (!MaudeHelper.constantSorts.contains(syn.getSort()) || !syn.getSort().toString().equals(KSorts.KLABEL) || !syn.getSort().toString().equals("CellLabel")) {
-						result.append("op ");
+                        result.append("op ");
 						result.append(StringUtil.escapeMaude(operation));
 						result.append(" : -> ");
 						result.append(syn.getSort());
@@ -401,9 +408,14 @@ public class MaudeFilter extends BackendFilter {
 
 	@Override
 	public void visit(Variable variable) {
-        if (MetaK.isBuiltinSort(variable.getSort())) {
+        if (MetaK.isBuiltinSort(variable.getSort())
+                || context.collectionSorts.containsKey(variable.getSort())) {
             result.append("_`(_`)(");
-            result.append("#_(");
+            if (context.collectionSorts.containsKey(variable.getSort())) {
+                result.append(context.collectionSorts.get(variable.getSort()).type() + "2KLabel_(");
+            } else {
+                result.append("#_(");
+            }
         }
 		if (variable.getName().equals(MetaK.Constants.anyVarSymbol)) {
 			result.append("?");
@@ -411,8 +423,13 @@ public class MaudeFilter extends BackendFilter {
 			result.append(variable.getName());
 		}
 		result.append(":");
-		result.append(variable.getSort());
-        if (MetaK.isBuiltinSort(variable.getSort())) {
+        if (context.collectionSorts.containsKey(variable.getSort())) {
+            result.append(context.collectionSorts.get(variable.getSort()).type());
+        } else {
+            result.append(variable.getSort());
+        }
+        if (MetaK.isBuiltinSort(variable.getSort())
+                || context.collectionSorts.containsKey(variable.getSort())) {
             result.append(")");
             result.append(", ");
             result.append(".KList");
@@ -427,7 +444,7 @@ public class MaudeFilter extends BackendFilter {
 			result.append(".");
 			result.append(sort);
 		} else {
-			Production prd = definitionHelper.listConses.get(sort);
+			Production prd = context.listConses.get(sort);
 			UserList ul = (UserList) prd.getItems().get(0);
 			result.append(".List`{\"");
 			result.append(ul.getSeparator());
@@ -501,7 +518,7 @@ public class MaudeFilter extends BackendFilter {
 
 	@Override
 	public void visit(TermCons termCons) {
-		Production pr = definitionHelper.conses.get(termCons.getCons());
+		Production pr = context.conses.get(termCons.getCons());
 		String cons = StringUtil.escapeMaude(pr.getLabel());
 
 		if (pr.containsAttribute("maudeop")) {
@@ -662,6 +679,46 @@ public class MaudeFilter extends BackendFilter {
 		mapItem.getValue().accept(this);
 		result.append(")");
 	}
+
+    @Override
+    public void visit(MapBuiltin mapBuiltin) {
+        if (mapBuiltin.isEmpty()) {
+            result.append("." + KSorts.MAP);
+        } else if (mapBuiltin.hasFrame() && mapBuiltin.elements().isEmpty()) {
+            new Variable(mapBuiltin.frame().getName(), KSorts.MAP).accept(this);
+        } else if (!mapBuiltin.hasFrame() && mapBuiltin.elements().size() == 1) {
+            Map.Entry<Term, Term> entry = mapBuiltin.elements().entrySet().iterator().next();
+            result.append("_|->_(");
+            entry.getKey().accept(this);
+            result.append(", ");
+            entry.getValue().accept(this);
+            result.append(")");
+        } else {
+            result.append("__(");
+
+            boolean first = true;
+            for (Map.Entry<Term, Term> entry : mapBuiltin.elements().entrySet()) {
+                if (!first) {
+                    result.append(", ");
+                }
+
+                result.append("_|->_(");
+                entry.getKey().accept(this);
+                result.append(", ");
+                entry.getValue().accept(this);
+                result.append(")");
+
+                first = false;
+            }
+
+            if (mapBuiltin.hasFrame()) {
+                result.append(", ");
+                new Variable(mapBuiltin.frame().getName(), KSorts.MAP).accept(this);
+            }
+
+            result.append(")");
+        }
+    }
 
 	@Override
 	public void visit(Hole hole) {

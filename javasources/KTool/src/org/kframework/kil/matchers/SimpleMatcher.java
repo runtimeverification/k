@@ -30,7 +30,7 @@ import org.kframework.kil.Term;
 import org.kframework.kil.TermComment;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Variable;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.rewriter.MapImpl;
 import org.kframework.kil.rewriter.SetImpl;
 
@@ -42,10 +42,10 @@ public class SimpleMatcher implements Matcher {
 
 	private java.util.Map<Variable, HashSet<SetImpl>> deferredSetLookups = new HashMap<Variable, HashSet<SetImpl>>();
 
-	protected DefinitionHelper definitionHelper;
+	protected Context context;
 	
-	public SimpleMatcher(DefinitionHelper definitionHelper) {
-		this.definitionHelper = definitionHelper;
+	public SimpleMatcher(Context context) {
+		this.context = context;
 	}
 	
 	@Override

@@ -1,24 +1,42 @@
 package org.kframework.kil.loader;
 
 import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.*;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.Cell;
+import org.kframework.kil.CollectionSort;
+import org.kframework.kil.Constant;
+import org.kframework.kil.KApp;
+import org.kframework.kil.KInjectedLabel;
+import org.kframework.kil.KSorts;
+import org.kframework.kil.Production;
+import org.kframework.kil.Sort;
+import org.kframework.kil.Term;
+import org.kframework.kil.UserList;
 import org.kframework.utils.Poset;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
-import java.util.List;
-import java.util.Set;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-public class DefinitionHelper {
+
+public class Context {
+
+    public enum BuiltinCollectionLabel { CONSTRUCTOR, ELEMENT, UNIT };
+
 	public boolean initialized = false;
 
 	public static final Set<String> generatedTags = ImmutableSet.of(
@@ -39,7 +57,44 @@ public class DefinitionHelper {
 		"]",
 		"{",
 		"}");
-	
+
+    public static final Set<String> builtinCollectionTypes = ImmutableSet.of(
+            KSorts.BAG,
+            KSorts.LIST,
+            KSorts.MAP,
+            KSorts.SET);
+
+    public static final Map<String, ImmutableMap<BuiltinCollectionLabel, String>> collectionLabels
+            = ImmutableMap.of(
+                    KSorts.BAG, ImmutableMap.of(
+                            BuiltinCollectionLabel.CONSTRUCTOR,
+                            "__",
+                            BuiltinCollectionLabel.ELEMENT,
+                            "BagItem`(_`)",
+                            BuiltinCollectionLabel.UNIT,
+                            ".Bag"),
+                    KSorts.LIST, ImmutableMap.of(
+                            BuiltinCollectionLabel.CONSTRUCTOR,
+                            "__",
+                            BuiltinCollectionLabel.ELEMENT,
+                            "ListItem`(_`)",
+                            BuiltinCollectionLabel.UNIT,
+                            ".List"),
+                    KSorts.MAP, ImmutableMap.of(
+                            BuiltinCollectionLabel.CONSTRUCTOR,
+                            "__",
+                            BuiltinCollectionLabel.ELEMENT,
+                            "_|->_",
+                            BuiltinCollectionLabel.UNIT,
+                            ".Map"),
+                    KSorts.SET, ImmutableMap.of(
+                            BuiltinCollectionLabel.CONSTRUCTOR,
+                            "__",
+                            BuiltinCollectionLabel.ELEMENT,
+                            "SetItem`(_`)",
+                            BuiltinCollectionLabel.UNIT,
+                            ".Set"));
+
 	public java.util.Map<String, Production> conses = new HashMap<String, Production>();
 	public java.util.Map<String, Set<Production>> productions = new HashMap<String, Set<Production>>();
 	public java.util.Map<String, Set<String>> labels = new HashMap<String, Set<String>>();
@@ -58,6 +113,8 @@ public class DefinitionHelper {
 	public File dotk = null;
 	public File kompiled = null;
 
+    public Map<String, CollectionSort> collectionSorts;
+
 	private void initSubsorts() {
 		subsorts.addRelation(KSorts.KLIST, "K");
 		subsorts.addRelation(KSorts.KLIST, "KResult");
@@ -69,7 +126,7 @@ public class DefinitionHelper {
 		subsorts.addRelation("Bag", "BagItem");		
 	}
 	
-	public DefinitionHelper() {
+	public Context() {
 		initSubsorts();
 	}
 
@@ -335,4 +392,11 @@ public class DefinitionHelper {
 		}
 		return sort.substring(0, 1).toUpperCase() + sort.substring(1);
 	}
+
+    public CollectionSort collectionSortOf(String sortName) {
+        assert collectionSorts != null;
+
+        return collectionSorts.get(sortName);
+    }
+
 }

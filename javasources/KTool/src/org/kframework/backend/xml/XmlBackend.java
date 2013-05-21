@@ -3,7 +3,7 @@ package org.kframework.backend.xml;
 import com.thoughtworks.xstream.XStream;
 import org.kframework.backend.BasicBackend;
 import org.kframework.kil.Definition;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.general.GlobalSettings;
@@ -13,8 +13,8 @@ import java.io.IOException;
 
 public class XmlBackend extends BasicBackend {
 
-	public XmlBackend(Stopwatch sw, DefinitionHelper definitionHelper) {
-		super(sw, definitionHelper);
+	public XmlBackend(Stopwatch sw, Context context) {
+		super(sw, context);
 	}
 
 	@Override
@@ -26,7 +26,7 @@ public class XmlBackend extends BasicBackend {
 
 		String xml = xstream.toXML(definition);
 
-		FileUtil.saveInFile(definitionHelper.dotk.getAbsolutePath() + "/def.xml", xml);
+		FileUtil.saveInFile(context.dotk.getAbsolutePath() + "/def.xml", xml);
 
 		File canonicalFile = GlobalSettings.mainFile.getCanonicalFile();
 		FileUtil.saveInFile(canonicalFile.getAbsolutePath().replaceFirst("\\.k$", "") + ".xml", xml);

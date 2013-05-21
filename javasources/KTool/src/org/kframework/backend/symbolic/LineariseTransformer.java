@@ -13,7 +13,7 @@ import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -25,8 +25,8 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  */
 public class LineariseTransformer extends BasicTransformer {
 
-    public LineariseTransformer(DefinitionHelper definitionHelper) {
-        super("Linearise Rules", definitionHelper);
+    public LineariseTransformer(Context context) {
+        super("Linearise Rules", context);
     }
 
     @Override
@@ -38,12 +38,12 @@ public class LineariseTransformer extends BasicTransformer {
 
         if (node.getBody() instanceof Rewrite) {
             VariableReplaceTransformer vrt = new VariableReplaceTransformer(
-                    "", definitionHelper);
+                    "", context);
             Rewrite rew = (Rewrite) node.getBody();
             Term transformedLeft = rew.getLeft();
             transformedLeft = (Term) transformedLeft.accept(vrt);
             rew.shallowCopy();
-            rew.setLeft(transformedLeft, definitionHelper);
+            rew.setLeft(transformedLeft, context);
 
             Map<Variable, Variable> newGeneratedSV = vrt.getGeneratedVariables();
             Term condition = node.getCondition();
@@ -53,7 +53,7 @@ public class LineariseTransformer extends BasicTransformer {
                 List<Term> vars = new ArrayList<Term>();
                 vars.add(entry.getKey());
                 vars.add(entry.getValue());
-                terms.add(new KApp(KLabelConstant.of(KLabelConstant.KEQ.getLabel(), definitionHelper), new KList(vars)));
+                terms.add(new KApp(KLabelConstant.of(KLabelConstant.KEQ.getLabel(), context), new KList(vars)));
             }
 
             if (terms.isEmpty())

@@ -1,7 +1,6 @@
 package org.kframework.kil;
 
 import org.kframework.kil.loader.Constants;
-import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.utils.StringUtil;
 import org.w3c.dom.Element;
 

@@ -3,7 +3,6 @@ package org.kframework.backend.unparser;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.ProductionItem.ProductionType;
-import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.ColorUtil;
 
@@ -30,24 +29,24 @@ public class UnparserFilter extends BasicVisitor {
 		forEquivalence = true;
 	}
 
-	public UnparserFilter(DefinitionHelper definitionHelper) {
-		this(false, definitionHelper);
+	public UnparserFilter(org.kframework.kil.loader.Context context) {
+		this(false, context);
 	}
 
-	public UnparserFilter(boolean inConfiguration, DefinitionHelper definitionHelper) {
-		this(inConfiguration, false, definitionHelper);
+	public UnparserFilter(boolean inConfiguration, org.kframework.kil.loader.Context context) {
+		this(inConfiguration, false, context);
 	}
 
-	public UnparserFilter(boolean inConfiguration, boolean color, DefinitionHelper definitionHelper) {
-		this(inConfiguration, color, true, definitionHelper);
+	public UnparserFilter(boolean inConfiguration, boolean color, org.kframework.kil.loader.Context context) {
+		this(inConfiguration, color, true, context);
 	}
 
-	public UnparserFilter(boolean inConfiguration, boolean color, boolean addParentheses, DefinitionHelper definitionHelper) {
-		this(inConfiguration, color, addParentheses, false, definitionHelper);
+	public UnparserFilter(boolean inConfiguration, boolean color, boolean addParentheses, org.kframework.kil.loader.Context context) {
+		this(inConfiguration, color, addParentheses, false, context);
 	}
 
-	public UnparserFilter(boolean inConfiguration, boolean color, boolean addParentheses, boolean annotateLocation, DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public UnparserFilter(boolean inConfiguration, boolean color, boolean addParentheses, boolean annotateLocation, org.kframework.kil.loader.Context context) {
+		super(context);
 		this.inConfiguration = inConfiguration;
 		this.color = color;
 		this.inTerm = 0;
@@ -255,7 +254,7 @@ public class UnparserFilter extends BasicVisitor {
 		}
 		String colorCode = "";
 		if (color) {
-			Cell declaredCell = definitionHelper.cells.get(cell.getLabel());
+			Cell declaredCell = context.cells.get(cell.getLabel());
 			if (declaredCell != null) {
 				String declaredColor = declaredCell.getCellAttributes().get("color");
 				if (declaredColor != null) {
@@ -698,7 +697,7 @@ public class UnparserFilter extends BasicVisitor {
 			TermCons termCons = (TermCons) upper;
 			Production productionNext = termConsNext.getProduction();
 			Production production = termCons.getProduction();
-			if (definitionHelper.isPriorityWrong(production.getKLabel(), productionNext.getKLabel())) {
+			if (context.isPriorityWrong(production.getKLabel(), productionNext.getKLabel())) {
 				return true;
 			}
 			return termConsNext.getContents().size() != 0;

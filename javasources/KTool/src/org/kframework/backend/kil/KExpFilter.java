@@ -2,14 +2,13 @@ package org.kframework.backend.kil;
 
 import org.kframework.compile.utils.MaudeHelper;
 import org.kframework.kil.*;
-import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 
 public class KExpFilter extends BasicVisitor {
     protected StringBuilder result;
 
-	public KExpFilter(DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public KExpFilter(org.kframework.kil.loader.Context context) {
+		super(context);
 		result = new StringBuilder();
 	}
 

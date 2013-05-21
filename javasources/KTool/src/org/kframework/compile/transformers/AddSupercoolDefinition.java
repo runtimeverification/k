@@ -2,7 +2,7 @@ package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -20,8 +20,8 @@ import java.util.List;
 public class AddSupercoolDefinition extends CopyOnWriteTransformer {
 	private List<Rule> superCools = new ArrayList<Rule>();
 
-	public AddSupercoolDefinition(DefinitionHelper definitionHelper) {
-		super("AddSupercoolDefinition", definitionHelper);
+	public AddSupercoolDefinition(Context context) {
+		super("AddSupercoolDefinition", context);
 	}
 
 	@Override
@@ -42,7 +42,7 @@ public class AddSupercoolDefinition extends CopyOnWriteTransformer {
 	}
 
 	@Override
-	public ASTNode transform(Context node) throws TransformerException {
+	public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
 		return node;
 	}
 
@@ -94,7 +94,7 @@ public class AddSupercoolDefinition extends CopyOnWriteTransformer {
 		rewrite.replaceChildren(
 				kSequence,
 				KApp.of(KLabelConstant.COOL_KLABEL, rewrite.getRight()),
-				definitionHelper);
+                context);
 		Rule superCoolNode = node.shallowCopy();
 		final Attributes attrs = new Attributes();
 		attrs.getContents().addAll(node.getAttributes().getContents());

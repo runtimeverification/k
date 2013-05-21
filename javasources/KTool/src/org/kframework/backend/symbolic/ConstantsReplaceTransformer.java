@@ -8,7 +8,7 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.KSorts;
 import org.kframework.kil.Token;
 import org.kframework.kil.Variable;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -21,8 +21,8 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 public class ConstantsReplaceTransformer extends CopyOnWriteTransformer {
     private Map<Variable, KApp> generatedSV;
 
-    public ConstantsReplaceTransformer(String name, DefinitionHelper definitionHelper) {
-        super("Replace Constants", definitionHelper);
+    public ConstantsReplaceTransformer(String name, Context context) {
+        super("Replace Constants", context);
         generatedSV = new HashMap<Variable, KApp>();
     }
     

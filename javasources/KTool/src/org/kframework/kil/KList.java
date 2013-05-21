@@ -51,8 +51,8 @@ public class KList extends Collection {
 		visitor.visit(this);
 	}
 	@Override
-	public ASTNode accept(Transformer visitor) throws TransformerException {
-		return visitor.transform(this);
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
 	}
 
   @Override

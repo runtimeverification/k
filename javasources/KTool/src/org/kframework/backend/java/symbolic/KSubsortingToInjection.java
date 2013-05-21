@@ -2,7 +2,7 @@ package org.kframework.backend.java.symbolic;
 
 import org.kframework.kil.KList;
 import org.kframework.kil.TermCons;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
 
@@ -15,8 +15,8 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
  */
 public class KSubsortingToInjection extends CopyOnWriteTransformer {
 
-    public KSubsortingToInjection(DefinitionHelper definitionHelper) {
-        super("Replace a KItem with a KSequence with one element", definitionHelper);
+    public KSubsortingToInjection(Context context) {
+        super("Replace a KItem with a KSequence with one element", context);
     }
 
     @Override

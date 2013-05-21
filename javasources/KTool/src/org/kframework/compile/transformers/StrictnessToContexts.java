@@ -3,7 +3,6 @@ package org.kframework.compile.transformers;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.compile.utils.SyntaxByTag;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Context;
 import org.kframework.kil.Hole;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
@@ -15,7 +14,7 @@ import org.kframework.kil.Production;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Variable;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -35,15 +34,15 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 
     private List<ModuleItem> items = new ArrayList<ModuleItem>();
 
-    public StrictnessToContexts(DefinitionHelper definitionHelper) {
-        super("Strict Ops To Context", definitionHelper);
+    public StrictnessToContexts(Context context) {
+        super("Strict Ops To Context", context);
     }
 
     @Override
     public ASTNode transform(Module node) throws TransformerException {
         //collect the productions which have the attributes strict and seqstrict
-        Set<Production> prods = SyntaxByTag.get(node, "strict", definitionHelper);
-        prods.addAll(SyntaxByTag.get(node, "seqstrict", definitionHelper));
+        Set<Production> prods = SyntaxByTag.get(node, "strict", context);
+        prods.addAll(SyntaxByTag.get(node, "seqstrict", context));
         if (prods.isEmpty()) {
             return node;
         }
@@ -131,7 +130,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
             }
 
             for (int i = 0; i < arguments.size(); ++i) {
-                TermCons termCons = (TermCons) MetaK.getTerm(prod, definitionHelper);
+                TermCons termCons = (TermCons) MetaK.getTerm(prod, context);
                 for (int j = 0; j < prod.getArity(); ++j) {
                     termCons.getContents().get(j).setSort(KSorts.K);
                 }
@@ -146,7 +145,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                     }
                 }
 
-                Context ctx = new Context();
+                org.kframework.kil.Context ctx = new org.kframework.kil.Context();
                 ctx.setBody(termCons);
                 ctx.setAttributes(prod.getAttributes());
                 items.add(ctx);
@@ -168,9 +167,9 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
         contents.add(Hole.KITEM_HOLE);
         //third argument is a variable of sort KList
         contents.add(Variable.getFreshVar(KSorts.KLIST));
-        KApp kapp = new KApp(MetaK.getTerm(prod, definitionHelper), new KList(contents));
+        KApp kapp = new KApp(MetaK.getTerm(prod, context), new KList(contents));
         //make a context from the TermCons
-        Context ctx = new Context();
+        org.kframework.kil.Context ctx = new org.kframework.kil.Context();
         ctx.setBody(kapp);
         ctx.setAttributes(prod.getAttributes());
         if (isSeq) {

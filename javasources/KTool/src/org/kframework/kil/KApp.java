@@ -1,7 +1,6 @@
 package org.kframework.kil;
 
-import org.kframework.kil.loader.DefinitionHelper;
-import org.kframework.kil.loader.JavaClassesFactory;
+import org.kframework.kil.loader.*;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
@@ -67,7 +66,7 @@ public class KApp extends Term {
     /**
      * Constructs a {@link KApp} object from an XML {@link Element}.
      */
-	public KApp(Element element, DefinitionHelper definitionHelper) {
+	public KApp(Element element, org.kframework.kil.loader.Context context) {
 		super(element);
         List<Element> childrenElements = XML.getChildrenElements(element);
         Element body = XML.getChildrenElements(childrenElements.get(0)).get(0);
@@ -102,9 +101,9 @@ public class KApp extends Term {
      */
 	public void setLabel(Term label) {
         assert label != null;
-        // assertion disabled due to getSort relying on DefinitionHelper
-//        assert label.getSort(definitionHelper).equals(KSorts.KLABEL) || child instanceof Ambiguity:
-//                "unexpected sort " + label.getSort(definitionHelper) + " of KApp first argument " + label + ";"
+        // assertion disabled due to getSort relying on Context
+//        assert label.getSort(context).equals(KSorts.KLABEL) || child instanceof Ambiguity:
+//                "unexpected sort " + label.getSort(context) + " of KApp first argument " + label + ";"
 //                        + " expected KLabel";
 //
 		this.label = label;
@@ -121,9 +120,9 @@ public class KApp extends Term {
      */
 	public void setChild(Term child) {
         assert child != null;
-        // assertion disabled due to getSort relying on DefinitionHelper
-//        assert child.getSort(definitionHelper).equals(KSorts.KLIST) || child instanceof Ambiguity:
-//                "unexpected sort " + child.getSort(definitionHelper) + " of KApp second argument " + child + ";"
+        // assertion disabled due to getSort relying on Context
+//        assert child.getSort(context).equals(KSorts.KLIST) || child instanceof Ambiguity:
+//                "unexpected sort " + child.getSort(context) + " of KApp second argument " + child + ";"
 //                        + "; expected KList";
 //
 		this.child = child;

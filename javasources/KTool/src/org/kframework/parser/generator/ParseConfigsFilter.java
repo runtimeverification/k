@@ -7,7 +7,7 @@ import org.kframework.kil.Module;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.loader.CollectStartSymbolPgmVisitor;
 import org.kframework.kil.loader.Constants;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -37,8 +37,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 public class ParseConfigsFilter extends BasicTransformer {
-	public ParseConfigsFilter(DefinitionHelper definitionHelper) {
-		super("Parse Configurations", definitionHelper);
+	public ParseConfigsFilter(Context context) {
+		super("Parse Configurations", context);
 	}
 
 	String localModule = null;
@@ -47,7 +47,7 @@ public class ParseConfigsFilter extends BasicTransformer {
 	public ASTNode transform(Module m) throws TransformerException {
 		localModule = m.getName();
 		ASTNode rez = super.transform(m);
-		rez.accept(new CollectStartSymbolPgmVisitor(definitionHelper));
+		rez.accept(new CollectStartSymbolPgmVisitor(context));
 		return rez;
 	}
 
@@ -74,28 +74,30 @@ public class ParseConfigsFilter extends BasicTransformer {
 					// config = JavaClassesFactory.getTerm((IStrategoAppl) parsed);
 				}
 
-				new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation(definitionHelper), definitionHelper).check(config);
+				new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation(context), context).check(config);
 				// disambiguate configs
-				config = config.accept(new SentenceVariablesFilter(definitionHelper));
-				config = config.accept(new CellEndLabelFilter(definitionHelper));
-				config = config.accept(new InclusionFilter(localModule, definitionHelper));
+				config = config.accept(new SentenceVariablesFilter(context));
+				config = config.accept(new CellEndLabelFilter(context));
+				config = config.accept(new InclusionFilter(localModule, context));
 				// config = config.accept(new CellTypesFilter()); not the case on configs
 				// config = config.accept(new CorrectRewritePriorityFilter());
-				config = config.accept(new CorrectKSeqFilter(definitionHelper));
-				config = config.accept(new CorrectCastPriorityFilter(definitionHelper));
+				config = config.accept(new CorrectKSeqFilter(context));
+				config = config.accept(new CorrectCastPriorityFilter(context));
 				// config = config.accept(new CheckBinaryPrecedenceFilter());
-				config = config.accept(new VariableTypeInferenceFilter(definitionHelper));
-				config = config.accept(new AmbDuplicateFilter(definitionHelper));
-				config = config.accept(new TypeSystemFilter(definitionHelper));
-				config = config.accept(new PriorityFilter(definitionHelper));
-				config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(definitionHelper), definitionHelper));
-				config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(definitionHelper), definitionHelper));
-				config = config.accept(new TypeInferenceSupremumFilter(definitionHelper));
-				config = config.accept(new PreferAvoidFilter(definitionHelper));
-				config = config.accept(new FlattenListsFilter(definitionHelper));
-				config = config.accept(new AmbDuplicateFilter(definitionHelper));
+				config = config.accept(new VariableTypeInferenceFilter(context));
+				config = config.accept(new AmbDuplicateFilter(context));
+				config = config.accept(new TypeSystemFilter(context));
+				config = config.accept(new PriorityFilter(context));
+				config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context),
+                        context));
+				config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context),
+                        context));
+				config = config.accept(new TypeInferenceSupremumFilter(context));
+				config = config.accept(new PreferAvoidFilter(context));
+				config = config.accept(new FlattenListsFilter(context));
+				config = config.accept(new AmbDuplicateFilter(context));
 				// last resort disambiguation
-				config = config.accept(new AmbFilter(definitionHelper));
+				config = config.accept(new AmbFilter(context));
 
 				return config;
 			} catch (TransformerException te) {

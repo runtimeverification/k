@@ -13,8 +13,8 @@ import org.kframework.utils.general.GlobalSettings;
 
 public class AddConsesVisitor extends BasicVisitor {
 
-	public AddConsesVisitor(DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public AddConsesVisitor(Context context) {
+		super(context);
 	}
 
 	public void visit(Production p) {

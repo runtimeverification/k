@@ -29,7 +29,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class DefinitionLoader {
-	public static org.kframework.kil.Definition loadDefinition(File mainFile, String lang, boolean autoinclude, DefinitionHelper definitionHelper) throws IOException, Exception {
+	public static org.kframework.kil.Definition loadDefinition(File mainFile, String lang, boolean autoinclude, Context context) throws IOException, Exception {
 		org.kframework.kil.Definition javaDef;
 		File canoFile = mainFile.getCanonicalFile();
 
@@ -48,20 +48,20 @@ public class DefinitionLoader {
 			if (GlobalSettings.verbose)
 				Stopwatch.sw.printIntermediate("Load definition from XML");
 
-			javaDef.preprocess(definitionHelper);
+			javaDef.preprocess(context);
 
 			if (GlobalSettings.verbose)
 				Stopwatch.sw.printIntermediate("Preprocess");
 
 		} else {
-			javaDef = parseDefinition(mainFile, lang, autoinclude, definitionHelper);
+			javaDef = parseDefinition(mainFile, lang, autoinclude, context);
 
-			BinaryLoader.toBinary(javaDef, new FileOutputStream(definitionHelper.dotk.getAbsolutePath() + "/defx.bin"));
+			BinaryLoader.toBinary(javaDef, new FileOutputStream(context.dotk.getAbsolutePath() + "/defx.bin"));
 
 			if (GlobalSettings.xml) {
 				XStream xstream = new XStream();
 				xstream.aliasPackage("k", "org.kframework.kil");
-				xstream.toXML(javaDef, new FileOutputStream(definitionHelper.dotk.getAbsolutePath() + "/defx.xml"));
+				xstream.toXML(javaDef, new FileOutputStream(context.dotk.getAbsolutePath() + "/defx.xml"));
 			}
 
 			if (GlobalSettings.verbose) {
@@ -79,13 +79,13 @@ public class DefinitionLoader {
 	 * @param mainModule
 	 * @return
 	 */
-	public static Definition parseDefinition(File mainFile, String mainModule, boolean autoinclude, DefinitionHelper definitionHelper) {
+	public static Definition parseDefinition(File mainFile, String mainModule, boolean autoinclude, Context context) {
 		try {
 			// for now just use this file as main argument
 			// ------------------------------------- basic parsing
 
 			BasicParser bparser = new BasicParser(autoinclude);
-			bparser.slurp(mainFile.getPath(), definitionHelper);
+			bparser.slurp(mainFile.getPath(), context);
 
 			// transfer information from the BasicParser object, to the Definition object
 			org.kframework.kil.Definition def = new org.kframework.kil.Definition();
@@ -114,70 +114,72 @@ public class DefinitionLoader {
 			if (GlobalSettings.verbose)
 				Stopwatch.sw.printIntermediate("Basic Parsing");
 
-			new CheckVisitorStep<Definition>(new CheckListOfKDeprecation(definitionHelper), definitionHelper).check(def);
+			new CheckVisitorStep<Definition>(new CheckListOfKDeprecation(context), context).check(def);
 
-			def.preprocess(definitionHelper);
+			def.preprocess(context);
 
 			if (GlobalSettings.verbose)
 				Stopwatch.sw.printIntermediate("Preprocess");
 
-			new CheckVisitorStep<Definition>(new CheckSyntaxDecl(definitionHelper), definitionHelper).check(def);
-			new CheckVisitorStep<Definition>(new CheckListDecl(definitionHelper), definitionHelper).check(def);
-			new CheckVisitorStep<Definition>(new CheckSortTopUniqueness(definitionHelper), definitionHelper).check(def);
+			new CheckVisitorStep<Definition>(new CheckSyntaxDecl(context), context).check(def);
+			new CheckVisitorStep<Definition>(new CheckListDecl(context), context).check(def);
+			new CheckVisitorStep<Definition>(new CheckSortTopUniqueness(context), context).check(def);
 
 			if (GlobalSettings.verbose)
 				Stopwatch.sw.printIntermediate("Checks");
 
 			// ------------------------------------- generate files
-			ResourceExtractor.ExtractDefSDF(new File(definitionHelper.dotk + "/def"));
-			ResourceExtractor.ExtractGroundSDF(new File(definitionHelper.dotk + "/ground"));
+			ResourceExtractor.ExtractDefSDF(new File(context.dotk + "/def"));
+			ResourceExtractor.ExtractGroundSDF(new File(context.dotk + "/ground"));
 
-			ResourceExtractor.ExtractProgramSDF(new File(definitionHelper.dotk + "/pgm"));
+			ResourceExtractor.ExtractProgramSDF(new File(context.dotk + "/pgm"));
 
 			// ------------------------------------- generate parser TBL
 			// cache the TBL if the sdf file is the same
 			if (!GlobalSettings.documentation) {
 				String oldSdfPgm = "";
-				if (new File(definitionHelper.dotk.getAbsolutePath() + "/pgm/Program.sdf").exists())
-					oldSdfPgm = FileUtil.getFileContent(definitionHelper.dotk.getAbsolutePath() + "/pgm/Program.sdf");
+				if (new File(context.dotk.getAbsolutePath() + "/pgm/Program.sdf").exists())
+					oldSdfPgm = FileUtil.getFileContent(context.dotk.getAbsolutePath() + "/pgm/Program.sdf");
 
-				String newSdfPgm = ProgramSDF.getSdfForPrograms(def, definitionHelper);
+				String newSdfPgm = ProgramSDF.getSdfForPrograms(def, context);
 
-				FileUtil.saveInFile(definitionHelper.dotk.getAbsolutePath() + "/pgm/Program.sdf", newSdfPgm);
-				newSdfPgm = FileUtil.getFileContent(definitionHelper.dotk.getAbsolutePath() + "/pgm/Program.sdf");
+				FileUtil.saveInFile(context.dotk.getAbsolutePath() + "/pgm/Program.sdf", newSdfPgm);
+				newSdfPgm = FileUtil.getFileContent(context.dotk.getAbsolutePath() + "/pgm/Program.sdf");
 
 				if (GlobalSettings.verbose)
 					Stopwatch.sw.printIntermediate("File Gen Pgm");
 
-				if (!oldSdfPgm.equals(newSdfPgm) || !new File(definitionHelper.dotk.getAbsoluteFile() + "/pgm/Program.tbl").exists()) {
-					Sdf2Table.run_sdf2table(new File(definitionHelper.dotk.getAbsoluteFile() + "/pgm"), "Program");
+				if (!oldSdfPgm.equals(newSdfPgm) || !new File(context.dotk.getAbsoluteFile() + "/pgm/Program.tbl").exists()) {
+					Sdf2Table.run_sdf2table(new File(context.dotk.getAbsoluteFile() + "/pgm"), "Program");
 					if (GlobalSettings.verbose)
 						Stopwatch.sw.printIntermediate("Generate TBLPgm");
 				}
 			}
 
-			def.accept(new AddAutoIncludedModulesVisitor(definitionHelper));
-			def.accept(new CheckModulesAndFilesImportsDecl(definitionHelper));
-			def.accept(new CollectModuleImportsVisitor(definitionHelper));
+			def.accept(new AddAutoIncludedModulesVisitor(context));
+			def.accept(new CheckModulesAndFilesImportsDecl(context));
+			def.accept(new CollectModuleImportsVisitor(context));
 
 			// ------------------------------------- generate parser TBL
 			// cache the TBL if the sdf file is the same
 			String oldSdf = "";
-			if (new File(definitionHelper.dotk.getAbsolutePath() + "/def/Integration.sdf").exists())
-				oldSdf = FileUtil.getFileContent(definitionHelper.dotk.getAbsolutePath() + "/def/Integration.sdf");
-			FileUtil.saveInFile(definitionHelper.dotk.getAbsolutePath() + "/def/Integration.sdf", DefinitionSDF.getSdfForDefinition(def, definitionHelper));
-			FileUtil.saveInFile(definitionHelper.dotk.getAbsolutePath() + "/ground/Integration.sdf", Definition2SDF.getSdfForDefinition(def, definitionHelper));
-			String newSdf = FileUtil.getFileContent(definitionHelper.dotk.getAbsolutePath() + "/def/Integration.sdf");
+			if (new File(context.dotk.getAbsolutePath() + "/def/Integration.sdf").exists())
+				oldSdf = FileUtil.getFileContent(context.dotk.getAbsolutePath() + "/def/Integration.sdf");
+			FileUtil.saveInFile(context.dotk.getAbsolutePath() + "/def/Integration.sdf", DefinitionSDF.getSdfForDefinition(def,
+                    context));
+			FileUtil.saveInFile(context.dotk.getAbsolutePath() + "/ground/Integration.sdf", Definition2SDF.getSdfForDefinition(def,
+                    context));
+			String newSdf = FileUtil.getFileContent(context.dotk.getAbsolutePath() + "/def/Integration.sdf");
 
 			if (GlobalSettings.verbose)
 				Stopwatch.sw.printIntermediate("File Gen Def");
 
-			if (!oldSdf.equals(newSdf) || !new File(definitionHelper.dotk.getAbsoluteFile() + "/def/Concrete.tbl").exists()
-					|| !new File(definitionHelper.dotk.getAbsoluteFile() + "/ground/Concrete.tbl").exists()) {
-				// Sdf2Table.run_sdf2table(new File(definitionHelper.dotk.getAbsoluteFile() + "/def"), "Concrete");
-				Thread t1 = Sdf2Table.run_sdf2table_parallel(new File(definitionHelper.dotk.getAbsoluteFile() + "/def"), "Concrete");
+			if (!oldSdf.equals(newSdf) || !new File(context.dotk.getAbsoluteFile() + "/def/Concrete.tbl").exists()
+					|| !new File(context.dotk.getAbsoluteFile() + "/ground/Concrete.tbl").exists()) {
+				// Sdf2Table.run_sdf2table(new File(context.dotk.getAbsoluteFile() + "/def"), "Concrete");
+				Thread t1 = Sdf2Table.run_sdf2table_parallel(new File(context.dotk.getAbsoluteFile() + "/def"), "Concrete");
 				if (!GlobalSettings.documentation) {
-					Thread t2 = Sdf2Table.run_sdf2table_parallel(new File(definitionHelper.dotk.getAbsoluteFile() + "/ground"), "Concrete");
+					Thread t2 = Sdf2Table.run_sdf2table_parallel(new File(context.dotk.getAbsoluteFile() + "/ground"), "Concrete");
 					t2.join();
 				}
 				t1.join();
@@ -185,26 +187,26 @@ public class DefinitionLoader {
 					Stopwatch.sw.printIntermediate("Generate TBLDef");
 			}
 			// ------------------------------------- import files in Stratego
-			org.kframework.parser.concrete.KParser.ImportTbl(definitionHelper.dotk.getAbsolutePath() + "/def/Concrete.tbl");
+			org.kframework.parser.concrete.KParser.ImportTbl(context.dotk.getAbsolutePath() + "/def/Concrete.tbl");
 
 			if (GlobalSettings.verbose)
 				Stopwatch.sw.printIntermediate("Importing Files");
 
 			// ------------------------------------- parse configs
-			JavaClassesFactory.startConstruction(definitionHelper);
-			def = (Definition) def.accept(new ParseConfigsFilter(definitionHelper));
+			JavaClassesFactory.startConstruction(context);
+			def = (Definition) def.accept(new ParseConfigsFilter(context));
 			JavaClassesFactory.endConstruction();
-			def.accept(new CollectConfigCellsVisitor(definitionHelper));
+			def.accept(new CollectConfigCellsVisitor(context));
 
 			// sort List in streaming cells
-			new CheckVisitorStep<Definition>(new CheckStreams(definitionHelper), definitionHelper).check(def);
+			new CheckVisitorStep<Definition>(new CheckStreams(context), context).check(def);
 
 			if (GlobalSettings.verbose)
 				Stopwatch.sw.printIntermediate("Parsing Configs");
 
 			// ----------------------------------- parse rules
-			JavaClassesFactory.startConstruction(definitionHelper);		
-			def = (Definition) def.accept(new ParseRulesFilter(definitionHelper));
+			JavaClassesFactory.startConstruction(context);
+			def = (Definition) def.accept(new ParseRulesFilter(context));
 			JavaClassesFactory.endConstruction();
 
 			if (GlobalSettings.verbose)
@@ -219,8 +221,8 @@ public class DefinitionLoader {
 		return null;
 	}
 
-	public static Term parseCmdString(String content, String sort, String filename, DefinitionHelper definitionHelper) throws TransformerException {
-		if (!definitionHelper.initialized) {
+	public static Term parseCmdString(String content, String sort, String filename, Context context) throws TransformerException {
+		if (!context.initialized) {
 			System.err.println("You need to load the definition before you call parsePattern!");
 			System.exit(1);
 		}
@@ -228,40 +230,41 @@ public class DefinitionLoader {
 		Document doc = XmlLoader.getXMLDoc(parsed);
 		XmlLoader.addFilename(doc.getFirstChild(), filename);
 		XmlLoader.reportErrors(doc);
-		FileUtil.saveInFile(definitionHelper.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
+		FileUtil.saveInFile(context.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
 
-		JavaClassesFactory.startConstruction(definitionHelper);
+		JavaClassesFactory.startConstruction(context);
 		org.kframework.kil.ASTNode config = (Term) JavaClassesFactory.getTerm((Element) doc.getFirstChild().getFirstChild().getNextSibling());
 		JavaClassesFactory.endConstruction();
 
 		// TODO: reject rewrites
-		new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation(definitionHelper), definitionHelper).check(config);
-		config = config.accept(new SentenceVariablesFilter(definitionHelper));
-		config = config.accept(new CellEndLabelFilter(definitionHelper));
+		new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation(context), context).check(config);
+		config = config.accept(new SentenceVariablesFilter(context));
+		config = config.accept(new CellEndLabelFilter(context));
 		// config = config.accept(new InclusionFilter(localModule));
-		config = config.accept(new CellTypesFilter(definitionHelper));
+		config = config.accept(new CellTypesFilter(context));
 		// config = config.accept(new CorrectRewritePriorityFilter());
-		config = config.accept(new CorrectKSeqFilter(definitionHelper));
-		config = config.accept(new CorrectCastPriorityFilter(definitionHelper));
+		config = config.accept(new CorrectKSeqFilter(context));
+		config = config.accept(new CorrectCastPriorityFilter(context));
 		// config = config.accept(new CheckBinaryPrecedenceFilter());
 		// config = config.accept(new VariableTypeInferenceFilter());
-		config = config.accept(new AmbDuplicateFilter(definitionHelper));
-		config = config.accept(new TypeSystemFilter(definitionHelper));
-		config = config.accept(new PriorityFilter(definitionHelper));
-		config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(definitionHelper), definitionHelper));
-		config = config.accept(new TypeInferenceSupremumFilter(definitionHelper));
-		config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(definitionHelper), definitionHelper));
-		config = config.accept(new PreferAvoidFilter(definitionHelper));
-		config = config.accept(new FlattenListsFilter(definitionHelper));
-		config = config.accept(new AmbDuplicateFilter(definitionHelper));
+		config = config.accept(new AmbDuplicateFilter(context));
+		config = config.accept(new TypeSystemFilter(context));
+		config = config.accept(new PriorityFilter(context));
+		config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context),
+                context));
+		config = config.accept(new TypeInferenceSupremumFilter(context));
+		config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context));
+		config = config.accept(new PreferAvoidFilter(context));
+		config = config.accept(new FlattenListsFilter(context));
+		config = config.accept(new AmbDuplicateFilter(context));
 		// last resort disambiguation
-		config = config.accept(new AmbFilter(definitionHelper));
+		config = config.accept(new AmbFilter(context));
 
 		return (Term) config;
 	}
 
-	public static ASTNode parsePattern(String pattern, String filename, DefinitionHelper definitionHelper) throws TransformerException {
-		if (!definitionHelper.initialized) {
+	public static ASTNode parsePattern(String pattern, String filename, Context context) throws TransformerException {
+		if (!context.initialized) {
 			System.err.println("You need to load the definition before you call parsePattern!");
 			System.exit(1);
 		}
@@ -271,41 +274,42 @@ public class DefinitionLoader {
 
 		XmlLoader.addFilename(doc.getFirstChild(), filename);
 		XmlLoader.reportErrors(doc);
-		FileUtil.saveInFile(definitionHelper.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
-		XmlLoader.writeXmlFile(doc, definitionHelper.kompiled + "/pattern.xml");
+		FileUtil.saveInFile(context.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
+		XmlLoader.writeXmlFile(doc, context.kompiled + "/pattern.xml");
 
-		JavaClassesFactory.startConstruction(definitionHelper);
+		JavaClassesFactory.startConstruction(context);
 		ASTNode config = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
 		JavaClassesFactory.endConstruction();
 
 		// TODO: reject rewrites
-		new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation(definitionHelper), definitionHelper).check(config);
-		config = config.accept(new SentenceVariablesFilter(definitionHelper));
-		config = config.accept(new CellEndLabelFilter(definitionHelper));
+		new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation(context), context).check(config);
+		config = config.accept(new SentenceVariablesFilter(context));
+		config = config.accept(new CellEndLabelFilter(context));
 		// config = config.accept(new InclusionFilter(localModule));
-		config = config.accept(new CellTypesFilter(definitionHelper));
+		config = config.accept(new CellTypesFilter(context));
 		// config = config.accept(new CorrectRewritePriorityFilter());
-		config = config.accept(new CorrectKSeqFilter(definitionHelper));
-		config = config.accept(new CorrectCastPriorityFilter(definitionHelper));
+		config = config.accept(new CorrectKSeqFilter(context));
+		config = config.accept(new CorrectCastPriorityFilter(context));
 		// config = config.accept(new CheckBinaryPrecedenceFilter());
 		// config = config.accept(new VariableTypeInferenceFilter());
-		config = config.accept(new AmbDuplicateFilter(definitionHelper));
-		config = config.accept(new TypeSystemFilter(definitionHelper));
-		config = config.accept(new PriorityFilter(definitionHelper));
-		config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(definitionHelper), definitionHelper));
-		config = config.accept(new TypeInferenceSupremumFilter(definitionHelper));
-		config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(definitionHelper), definitionHelper));
-		config = config.accept(new PreferAvoidFilter(definitionHelper));
-		config = config.accept(new FlattenListsFilter(definitionHelper));
-		config = config.accept(new AmbDuplicateFilter(definitionHelper));
+		config = config.accept(new AmbDuplicateFilter(context));
+		config = config.accept(new TypeSystemFilter(context));
+		config = config.accept(new PriorityFilter(context));
+		config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context),
+                context));
+		config = config.accept(new TypeInferenceSupremumFilter(context));
+		config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context));
+		config = config.accept(new PreferAvoidFilter(context));
+		config = config.accept(new FlattenListsFilter(context));
+		config = config.accept(new AmbDuplicateFilter(context));
 		// last resort disambiguation
-		config = config.accept(new AmbFilter(definitionHelper));
+		config = config.accept(new AmbFilter(context));
 
 		return config;
 	}
 
-	public static ASTNode parsePatternAmbiguous(String pattern, DefinitionHelper definitionHelper) throws TransformerException {
-		if (!definitionHelper.initialized) {
+	public static ASTNode parsePatternAmbiguous(String pattern, Context context) throws TransformerException {
+		if (!context.initialized) {
 			System.err.println("You need to load the definition before you call parsePattern!");
 			System.exit(1);
 		}
@@ -315,33 +319,34 @@ public class DefinitionLoader {
 
 		//XmlLoader.addFilename(doc.getFirstChild(), filename);
 		XmlLoader.reportErrors(doc);
-		FileUtil.saveInFile(definitionHelper.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
-		XmlLoader.writeXmlFile(doc, definitionHelper.kompiled + "/pattern.xml");
+		FileUtil.saveInFile(context.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
+		XmlLoader.writeXmlFile(doc, context.kompiled + "/pattern.xml");
 
-		JavaClassesFactory.startConstruction(definitionHelper);		
+		JavaClassesFactory.startConstruction(context);
 		ASTNode config = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
 		JavaClassesFactory.endConstruction();
 		
 		// TODO: don't allow rewrites
-		new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation(definitionHelper), definitionHelper).check(config);
-		config = config.accept(new SentenceVariablesFilter(definitionHelper));
-		config = config.accept(new CellEndLabelFilter(definitionHelper));
-		config = config.accept(new CellTypesFilter(definitionHelper));
+		new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation(context), context).check(config);
+		config = config.accept(new SentenceVariablesFilter(context));
+		config = config.accept(new CellEndLabelFilter(context));
+		config = config.accept(new CellTypesFilter(context));
 		//config = config.accept(new CorrectRewritePriorityFilter());
-		config = config.accept(new CorrectKSeqFilter(definitionHelper));
-		config = config.accept(new CorrectCastPriorityFilter(definitionHelper));
+		config = config.accept(new CorrectKSeqFilter(context));
+		config = config.accept(new CorrectCastPriorityFilter(context));
 		// config = config.accept(new CheckBinaryPrecedenceFilter());
 		// config = config.accept(new InclusionFilter(localModule));
 		//config = config.accept(new VariableTypeInferenceFilter());
-		config = config.accept(new AmbDuplicateFilter(definitionHelper));
-		config = config.accept(new TypeSystemFilter(definitionHelper));
+		config = config.accept(new AmbDuplicateFilter(context));
+		config = config.accept(new TypeSystemFilter(context));
 		//config = config.accept(new PriorityFilter());
-		config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(definitionHelper), definitionHelper));
-		config = config.accept(new TypeInferenceSupremumFilter(definitionHelper));
-		config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(definitionHelper), definitionHelper));
+		config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context),
+                context));
+		config = config.accept(new TypeInferenceSupremumFilter(context));
+		config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context));
 		//config = config.accept(new PreferAvoidFilter());
-		config = config.accept(new FlattenListsFilter(definitionHelper));
-		config = config.accept(new AmbDuplicateFilter(definitionHelper));
+		config = config.accept(new FlattenListsFilter(context));
+		config = config.accept(new AmbDuplicateFilter(context));
 		// last resort disambiguation
 		//config = config.accept(new AmbFilter());
 		return config;

@@ -4,7 +4,7 @@ import org.kframework.compile.utils.GetLhsPattern;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -23,14 +23,14 @@ public class ResolveBlockingInput extends GetLhsPattern {
 	java.util.List<Rule> generated = new ArrayList<Rule>();
 	boolean hasInputCell;
 	
-	public ResolveBlockingInput(DefinitionHelper definitionHelper) {
-		super("Resolve Blocking Input", definitionHelper);
+	public ResolveBlockingInput(Context context) {
+		super("Resolve Blocking Input", context);
 	}
 	
 	@Override
 	public ASTNode transform(Definition node) throws TransformerException {
-		Configuration config = MetaK.getConfiguration(node, definitionHelper);
-		config.accept(new BasicVisitor(definitionHelper) {
+		Configuration config = MetaK.getConfiguration(node, context);
+		config.accept(new BasicVisitor(context) {
 			@Override
 			public void visit(Cell node) {
 				String stream = node.getCellAttributes().get("stream");
@@ -65,7 +65,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
 	}
 	
 	@Override
-	public ASTNode transform(Context node) throws TransformerException {
+	public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
 		return node;
 	}
 	
@@ -139,17 +139,17 @@ public class ResolveBlockingInput extends GetLhsPattern {
 		
 		
 //		  syntax List ::= "#parse" "(" String "," K ")"   [cons(List1ParseSyn)]
-		TermCons parseTerm = new TermCons("List", "List1ParseSyn", definitionHelper);
+		TermCons parseTerm = new TermCons("List", "List1ParseSyn", context);
 		parseTerm.getContents().add(StringBuiltin.kAppOf(item.getItem().getSort()));
 		parseTerm.getContents().add(KSequence.EMPTY);
 		
 //		  syntax List ::= "#buffer" "(" K ")"           [cons(List1IOBufferSyn)]
-		TermCons ioBuffer = new TermCons("List", "List1IOBufferSyn", definitionHelper);
+		TermCons ioBuffer = new TermCons("List", "List1IOBufferSyn", context);
 		ioBuffer.getContents().add(new Variable(Variable.getFreshVar("K")));
 		
 //		ctor(List)[replaceS[emptyCt(List),parseTerm(string(Ty),nilK)],ioBuffer(mkVariable('BI,K))]
 		List list = new List();
-		list.getContents().add(new Rewrite(List.EMPTY, parseTerm, definitionHelper));
+		list.getContents().add(new Rewrite(List.EMPTY, parseTerm, context));
 		list.getContents().add(ioBuffer);
 		
 		node = node.shallowCopy();

@@ -1,10 +1,5 @@
 package org.kframework.kil;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.kframework.compile.transformers.AddPredicates;
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
@@ -64,8 +59,8 @@ public class Constant extends Term {
 	}
 
 	@Override
-	public ASTNode accept(Transformer visitor) throws TransformerException {
-		return visitor.transform(this);
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
 	}
 
   @Override

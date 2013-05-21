@@ -3,14 +3,14 @@ package org.kframework.compile.transformers;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class AddKCell extends CopyOnWriteTransformer {
 
-	public AddKCell(DefinitionHelper definitionHelper) {
-		super("Add K cell", definitionHelper);
+	public AddKCell(Context context) {
+		super("Add K cell", context);
 	}
 	
 	@Override
@@ -29,7 +29,7 @@ public class AddKCell extends CopyOnWriteTransformer {
 	
 	@Override
 	public ASTNode transform(Configuration cfg) throws TransformerException {
-		if (!MetaK.getAllCellLabels(cfg.getBody(), definitionHelper).contains("k"))
+		if (!MetaK.getAllCellLabels(cfg.getBody(), context).contains("k"))
 		{
 			Cell k = new Cell();
 			k.setLabel("k");

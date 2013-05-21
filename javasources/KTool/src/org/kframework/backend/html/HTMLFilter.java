@@ -7,8 +7,7 @@ import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Collection;
 import org.kframework.kil.LiterateComment.LiterateCommentType;
 import org.kframework.kil.ProductionItem.ProductionType;
-import org.kframework.kil.loader.Constants;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.*;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.awt.*;
@@ -39,7 +38,7 @@ public class HTMLFilter extends BackendFilter {
 	// this is created in the constructor of the HTMLFilter class
 	private Map<String,Color> HTMLColors = new HashMap<String,Color>();
 	
-	private HTMLPatternsVisitor patternsVisitor = new HTMLPatternsVisitor(definitionHelper);
+	private HTMLPatternsVisitor patternsVisitor = new HTMLPatternsVisitor(context);
 	
 	private boolean firstAttribute;
 	private boolean firstProduction = false;
@@ -48,8 +47,8 @@ public class HTMLFilter extends BackendFilter {
 	private Properties Latex2HTMLone = new Properties();
 	private String includePath = new String();
 	
-	public HTMLFilter(String includePath, DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public HTMLFilter(String includePath, org.kframework.kil.loader.Context context) {
+		super(context);
 		this.includePath = includePath;
 		createHTMLColors();
 		loadProperties();
@@ -144,7 +143,7 @@ public class HTMLFilter extends BackendFilter {
 			String pattern = patternsVisitor.getPatterns().get(p.getAttribute(Constants.CONS_cons_ATTR));
 			boolean isLatex = patternsVisitor.getPatternType(p.getAttribute(Constants.CONS_cons_ATTR)) == HTMLPatternType.LATEX;
 			int n = 1;
-			HTMLFilter termFilter = new HTMLFilter(includePath, definitionHelper);
+			HTMLFilter termFilter = new HTMLFilter(includePath, context);
 			for (ProductionItem pi : p.getItems()) {
 				if (pi.getType() != ProductionType.TERMINAL) {
 					termFilter.setResult("");
@@ -285,7 +284,7 @@ public class HTMLFilter extends BackendFilter {
 	}
 
 	@Override
-	public void visit(Context cxt) {
+	public void visit(org.kframework.kil.Context cxt) {
 		result.append("<div> CONTEXT ");
 		cxt.getBody().accept(this);
 		if (cxt.getCondition() != null) {
@@ -317,7 +316,7 @@ public class HTMLFilter extends BackendFilter {
 			super.visit(trm);
 		else {
 			String pattern = getBracketPattern(trm);
-			HTMLFilter termFilter = new HTMLFilter(includePath, definitionHelper);
+			HTMLFilter termFilter = new HTMLFilter(includePath, context);
 			trm.getContent().accept(termFilter);
 			pattern = pattern.replace("{#1}", "<span>" + termFilter.getResult() + "</span>");
 			result.append(pattern);
@@ -334,7 +333,7 @@ public class HTMLFilter extends BackendFilter {
 		HTMLPatternType type = patternsVisitor.getPatternType(trm.getCons());
 		if(type == null)
 		{
-			Production pr = definitionHelper.conses.get(trm.getCons());
+			Production pr = context.conses.get(trm.getCons());
 			pr.accept(patternsVisitor);
 			type = patternsVisitor.getPatternType(trm.getCons());
 		}
@@ -345,7 +344,7 @@ public class HTMLFilter extends BackendFilter {
 		 * The information about the attribute is in HTMLPatternVisitor. */
 			String pattern = patternsVisitor.getPatterns().get(trm.getCons());
 			int n = 1;
-			HTMLFilter termFilter = new HTMLFilter(includePath, definitionHelper);
+			HTMLFilter termFilter = new HTMLFilter(includePath, context);
 			for (Term t : trm.getContents()) {
 				termFilter.setResult("");
 				t.accept(termFilter);
@@ -464,9 +463,9 @@ public class HTMLFilter extends BackendFilter {
 	public void visit(Attribute entry) {
 		if (Constants.GENERATED_LOCATION.equals(entry.getLocation()))
 			return;
-		if (definitionHelper.isTagGenerated(entry.getKey()))
+		if (context.isTagGenerated(entry.getKey()))
 			return;
-		if (definitionHelper.isParsingTag(entry.getKey()))
+		if (context.isParsingTag(entry.getKey()))
 			return;
 		
 		// The latex and/or html attributes are processed in the HTMLPatternVisitor, not here.

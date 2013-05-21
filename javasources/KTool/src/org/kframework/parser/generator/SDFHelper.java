@@ -5,7 +5,7 @@ import java.util.Set;
 
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Production;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 
 public class SDFHelper {
 	public static String getSDFAttributes(Attributes attrs) {
@@ -42,9 +42,9 @@ public class SDFHelper {
 	 * @param tag
 	 * @return
 	 */
-	public static Set<Production> getProductionsForTag(String tag, DefinitionHelper definitionHelper) {
-		if (definitionHelper.productions.containsKey(tag))
-			return definitionHelper.productions.get(tag);
+	public static Set<Production> getProductionsForTag(String tag, Context context) {
+		if (context.productions.containsKey(tag))
+			return context.productions.get(tag);
 		else
 			return new HashSet<Production>();
 	}

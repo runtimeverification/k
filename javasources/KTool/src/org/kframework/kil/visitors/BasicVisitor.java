@@ -1,20 +1,23 @@
 package org.kframework.kil.visitors;
 
 import org.kframework.kil.*;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.Collection;
+import org.kframework.kil.List;
+import org.kframework.kil.Map;
+import org.kframework.kil.Set;
 
 public class BasicVisitor implements Visitor {
-	protected DefinitionHelper definitionHelper;
+	protected org.kframework.kil.loader.Context context;
 	String name;
 
-	public BasicVisitor(DefinitionHelper definitionHelper) {
+	public BasicVisitor(org.kframework.kil.loader.Context context) {
 		this.name = this.getClass().toString();
-		this.definitionHelper = definitionHelper;
+		this.context = context;
 	}
 
-	public BasicVisitor(String name, DefinitionHelper definitionHelper) {
+	public BasicVisitor(String name, org.kframework.kil.loader.Context context) {
 		this.name = name;
-		this.definitionHelper = definitionHelper;
+		this.context = context;
 	}
 
 	@Override
@@ -83,7 +86,7 @@ public class BasicVisitor implements Visitor {
 	}
 
 	@Override
-	public void visit(Context node) {
+	public void visit(org.kframework.kil.Context node) {
 		visit((Sentence) node);
 	}
 
@@ -252,7 +255,26 @@ public class BasicVisitor implements Visitor {
 		visit((CollectionItem) node);
 	}
 
-	@Override
+    @Override
+    public void visit(CollectionBuiltin node) {
+        for (Term term : node.terms()) {
+            term.accept(this);
+        }
+
+        visit((Term) node);
+    }
+
+    @Override
+    public void visit(MapBuiltin node) {
+        for (java.util.Map.Entry<Term, Term> entry : node.elements().entrySet()) {
+            entry.getKey().accept(this);
+            entry.getValue().accept(this);
+        }
+
+        visit((CollectionBuiltin) node);
+    }
+
+    @Override
 	public void visit(Constant node) {
 		visit((Term) node);
 	}

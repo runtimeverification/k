@@ -14,6 +14,9 @@ import org.w3c.dom.Element;
  */
 public class Attribute extends ASTNode {
 
+    public static final String BUILTIN_KEY = "bruiltin";
+    public static final String HOOK_KEY = "hook";
+
     public static final Attribute BRACKET = new Attribute("bracket", "");
     public static final Attribute FUNCTION = new Attribute("function", "");
     public static final Attribute PREDICATE = new Attribute("predicate", "");
@@ -54,8 +57,8 @@ public class Attribute extends ASTNode {
 	}
 
 	@Override
-	public ASTNode accept(Transformer visitor) throws TransformerException {
-		return visitor.transform(this);
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
 	}
 
 	public void setValue(String value) {

@@ -3,9 +3,7 @@ package org.kframework.backend.unparser;
 import org.kframework.compile.utils.MaudeHelper;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
-import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -15,14 +13,14 @@ public class KastFilter extends BasicVisitor {
     protected Indenter result;
     private boolean nextline;
     
-	public KastFilter(DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public KastFilter(org.kframework.kil.loader.Context context) {
+		super(context);
 		result = new Indenter();
 		result.setWidth(Integer.MAX_VALUE);
 	}
 	
-	public KastFilter(IndentationOptions indentationOptions, boolean nextline, DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public KastFilter(IndentationOptions indentationOptions, boolean nextline, org.kframework.kil.loader.Context context) {
+		super(context);
 		result = new Indenter(indentationOptions);
 		this.nextline = nextline;
 	}
@@ -139,7 +137,7 @@ public class KastFilter extends BasicVisitor {
 			result.write(".");
 			result.write(sort);
 		} else {
-			Production prd = definitionHelper.listConses.get(sort);
+			Production prd = context.listConses.get(sort);
 			UserList ul = (UserList) prd.getItems().get(0);
 			result.write(".List`{\"");
 			result.write(ul.getSeparator());

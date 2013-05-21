@@ -6,7 +6,7 @@ import org.kframework.kil.KSorts;
 import org.kframework.kil.Production;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Syntax;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
@@ -18,8 +18,8 @@ import org.kframework.utils.general.GlobalSettings;
  * 
  */
 public class CheckSortTopUniqueness extends BasicVisitor {
-	public CheckSortTopUniqueness(DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public CheckSortTopUniqueness(Context context) {
+		super(context);
 	}
 
 	java.util.Map<Production, Production> prods = new HashMap<Production, Production>();
@@ -28,23 +28,23 @@ public class CheckSortTopUniqueness extends BasicVisitor {
 	public void visit(Syntax node) {
 		String msg = "Multiple top sorts found for " + node.getSort() + ": ";
 		int count = 0;
-		if (definitionHelper.isSubsorted(KSorts.KLIST, node.getSort().getName())) {
+		if (context.isSubsorted(KSorts.KLIST, node.getSort().getName())) {
 			msg += KSorts.KLIST + ", ";
 			count++;
 		}
-		if (definitionHelper.isSubsorted("List", node.getSort().getName())) {
+		if (context.isSubsorted("List", node.getSort().getName())) {
 			msg += "List, ";
 			count++;
 		}
-		if (definitionHelper.isSubsorted("Bag", node.getSort().getName())) {
+		if (context.isSubsorted("Bag", node.getSort().getName())) {
 			msg += "Bag, ";
 			count++;
 		}
-		if (definitionHelper.isSubsorted("Map", node.getSort().getName())) {
+		if (context.isSubsorted("Map", node.getSort().getName())) {
 			msg += "Map, ";
 			count++;
 		}
-		if (definitionHelper.isSubsorted("Set", node.getSort().getName())) {
+		if (context.isSubsorted("Set", node.getSort().getName())) {
 			msg += "Set, ";
 			count++;
 		}

@@ -2,7 +2,7 @@ package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -13,8 +13,8 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  */
 public class ResolveFunctions extends CopyOnWriteTransformer {
 
-	public ResolveFunctions(DefinitionHelper definitionHelper) {
-		super("Resolve Functions", definitionHelper);
+	public ResolveFunctions(Context context) {
+		super("Resolve Functions", context);
 	}
 
 	@Override
@@ -24,7 +24,7 @@ public class ResolveFunctions extends CopyOnWriteTransformer {
 			body = ((Rewrite) body).getLeft();
 		}
 		if (body instanceof TermCons) {
-			Production prod = definitionHelper.conses.get(((TermCons) body).getCons());
+			Production prod = context.conses.get(((TermCons) body).getCons());
 			if (prod.containsAttribute("function") || prod.containsAttribute("predicate")) {
 				node = addFunction(node);
 			}
@@ -53,7 +53,7 @@ public class ResolveFunctions extends CopyOnWriteTransformer {
 	}
 
 	@Override
-	public ASTNode transform(Context node) throws TransformerException {
+	public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
 		return node;
 	}
 

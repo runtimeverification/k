@@ -58,6 +58,10 @@ public interface Visitor {
 	public void visit(MapItem node);
 	public void visit(SetItem node);
 	// </CollectionItems>
+    // <BuiltinCollections>
+    public void visit(CollectionBuiltin node);
+    public void visit(MapBuiltin node);
+    // </BuiltinCollections>
 	// <Token>
     public void visit(Constant node);
     public void visit(Token node);

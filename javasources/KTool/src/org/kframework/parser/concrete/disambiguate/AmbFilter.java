@@ -4,7 +4,7 @@ import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.TermCons;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -13,8 +13,8 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
 public class AmbFilter extends BasicTransformer {
-	public AmbFilter(DefinitionHelper definitionHelper) {
-		super("Ambiguity filter", definitionHelper);
+	public AmbFilter(Context context) {
+		super("Ambiguity filter", context);
 	}
 
 	public ASTNode transform(Ambiguity amb) throws TransformerException {
@@ -27,7 +27,7 @@ public class AmbFilter extends BasicTransformer {
 				msg += tc.getProduction().getSort() + " ::= ";
 				msg += tc.getProduction().toString();
 			}
-			UnparserFilter unparserFilter = new UnparserFilter(definitionHelper);
+			UnparserFilter unparserFilter = new UnparserFilter(context);
 			amb.getContents().get(i).accept(unparserFilter);
 			msg += "\n   " + unparserFilter.getResult().replace("\n", "\n   ");
 		}

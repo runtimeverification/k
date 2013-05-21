@@ -2,7 +2,7 @@ package org.kframework.backend.latex;
 
 import org.kframework.backend.BasicBackend;
 import org.kframework.kil.Definition;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
@@ -14,24 +14,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LatexBackend extends BasicBackend {
-	public LatexBackend(Stopwatch sw, DefinitionHelper definitionHelper) {
-		super(sw, definitionHelper);
+	public LatexBackend(Stopwatch sw, Context context) {
+		super(sw, context);
 	}
 
-	public static List<File> latex(Definition javaDef, DefinitionHelper definitionHelper, String mainModule) {
+	public static List<File> latex(Definition javaDef, Context context, String mainModule) {
 		List<File> result = new ArrayList<File>();
 		try {
 			Stopwatch sw = new Stopwatch();
 
 			String fileSep = System.getProperty("file.separator");
 
-			LatexFilter lf = new LatexFilter(definitionHelper);
+			LatexFilter lf = new LatexFilter(context);
 			javaDef.accept(lf);
 
 			String endl = System.getProperty("line.separator");
 
 			String kLatexStyle = KPaths.getKBase(false) + fileSep + "include" + fileSep + "latex" + fileSep + "k.sty";
-			String dotKLatexStyle = definitionHelper.dotk.getAbsolutePath() + fileSep + "k.sty";
+			String dotKLatexStyle = context.dotk.getAbsolutePath() + fileSep + "k.sty";
 
 			FileUtil.saveInFile(dotKLatexStyle, FileUtil.getFileContent(kLatexStyle));
 
@@ -40,7 +40,7 @@ public class LatexBackend extends BasicBackend {
 			latexified += preamble + "\\begin{document}" + endl + lf.getResult() + "\\end{document}" + endl;
 
 			File canonicalFile = GlobalSettings.mainFile.getCanonicalFile();
-			String latexifiedFile = definitionHelper.dotk.getAbsolutePath() + fileSep + FileUtil.stripExtension(canonicalFile.getName()) + ".tex";
+			String latexifiedFile = context.dotk.getAbsolutePath() + fileSep + FileUtil.stripExtension(canonicalFile.getName()) + ".tex";
 			result.add(new File(latexifiedFile));
 			result.add(new File(dotKLatexStyle));
 			FileUtil.saveInFile(latexifiedFile, latexified);
@@ -60,7 +60,7 @@ public class LatexBackend extends BasicBackend {
 
 	@Override
 	public void run(Definition definition) throws IOException {
-		List<File> files = latex(definition, definitionHelper, definition.getMainModule());
+		List<File> files = latex(definition, context, definition.getMainModule());
 		try {
 			FileUtil.copyFiles(files, GlobalSettings.mainFile.getCanonicalFile().getParentFile());
 		} catch (IOException e) {

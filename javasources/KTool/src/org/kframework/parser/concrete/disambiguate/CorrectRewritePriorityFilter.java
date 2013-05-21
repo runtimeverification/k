@@ -12,7 +12,7 @@ import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicHookWorker;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.PriorityException;
@@ -24,9 +24,9 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 public class CorrectRewritePriorityFilter extends BasicTransformer {
 	private CorrectRewriteFilter2 secondFilter;
 
-	public CorrectRewritePriorityFilter(DefinitionHelper definitionHelper) {
-		super("Correct Rewrite priority", definitionHelper);
-		secondFilter = new CorrectRewriteFilter2(definitionHelper);
+	public CorrectRewritePriorityFilter(Context context) {
+		super("Correct Rewrite priority", context);
+		secondFilter = new CorrectRewriteFilter2(context);
 	}
 
 	public ASTNode transform(Ambiguity amb) throws TransformerException {
@@ -106,8 +106,8 @@ public class CorrectRewritePriorityFilter extends BasicTransformer {
 	 * 
 	 */
 	public class CorrectRewriteFilter2 extends BasicHookWorker {
-		public CorrectRewriteFilter2(DefinitionHelper definitionHelper) {
-			super("org.kframework.parser.concrete.disambiguate.CorrectKSeqFilter2", definitionHelper);
+		public CorrectRewriteFilter2(Context context) {
+			super("org.kframework.parser.concrete.disambiguate.CorrectKSeqFilter2", context);
 		}
 
 		public ASTNode transform(Rewrite ks) throws TransformerException {

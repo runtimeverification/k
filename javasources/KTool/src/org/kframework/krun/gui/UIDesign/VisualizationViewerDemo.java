@@ -13,10 +13,9 @@ import java.util.Set;
 import org.apache.commons.collections15.Predicate;
 import org.apache.commons.collections15.Transformer;
 import org.apache.commons.collections15.functors.ConstantTransformer;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.Transition;
-import org.strategoxt.stratego_lib.retain_all_1_0;
 
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.Graph;
@@ -41,14 +40,14 @@ public class VisualizationViewerDemo {
 	public static final int width = 400;
 	public static final int heigth = 600;
 	public static ArrayList<Integer> oldIds = new ArrayList<Integer>();
-	protected DefinitionHelper definitionHelper;
+	protected Context context;
 
-	public VisualizationViewerDemo(DefinitionHelper definitionHelper) {
-		this.definitionHelper = definitionHelper;
+	public VisualizationViewerDemo(Context context) {
+		this.context = context;
 	}
 
-	public VisualizationViewerDemo(Graph graph, DefinitionHelper definitionHelper) {		
-		this.definitionHelper = definitionHelper;
+	public VisualizationViewerDemo(Graph graph, Context context) {
+		this.context = context;
 		init(graph);
 	}
 
@@ -155,7 +154,7 @@ public class VisualizationViewerDemo {
 				if(getSelectedVertices().size()==1){
 					for(Object vertex:getSelectedVertices()){
 						try{
-							GraphRepresentation.displayVertexInfo((KRunState)vertex, definitionHelper);
+							GraphRepresentation.displayVertexInfo((KRunState)vertex, context);
 						}catch(Exception e){}
 					}
 				}
@@ -164,7 +163,7 @@ public class VisualizationViewerDemo {
 						try{
 							KRunState dest = (KRunState)layout.getGraph().getDest((Transition)edge);
 							KRunState src = (KRunState)layout.getGraph().getSource((Transition)edge);
-							GraphRepresentation.displayEdgeInfo((Transition)edge,src,dest, definitionHelper);
+							GraphRepresentation.displayEdgeInfo((Transition)edge,src,dest, context);
 							resetEdgeSelection();
 						}catch(Exception e){}
 					}
@@ -221,7 +220,7 @@ public class VisualizationViewerDemo {
 	}
 
 	public void addEdge(KRunState source, KRunState target, int depth, String rule){
-		this.layout.getGraph().addEdge(new Transition(Transition.TransitionType.REDUCE, definitionHelper), source, target);
+		this.layout.getGraph().addEdge(new Transition(Transition.TransitionType.REDUCE, context), source, target);
 	}
 
 	public Object verifyExistingVertex(Object vertex){

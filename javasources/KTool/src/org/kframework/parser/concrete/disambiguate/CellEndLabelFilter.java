@@ -3,7 +3,7 @@ package org.kframework.parser.concrete.disambiguate;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Syntax;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -12,8 +12,8 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
 public class CellEndLabelFilter extends BasicTransformer {
 
-	public CellEndLabelFilter(DefinitionHelper definitionHelper) {
-		super("Cell End Label", definitionHelper);
+	public CellEndLabelFilter(Context context) {
+		super("Cell End Label", context);
 	}
 
 	public ASTNode transform(Syntax cell) {

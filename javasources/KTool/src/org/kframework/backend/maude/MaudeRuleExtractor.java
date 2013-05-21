@@ -1,7 +1,7 @@
 package org.kframework.backend.maude;
 
 import org.kframework.kil.*;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -14,9 +14,9 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 public class MaudeRuleExtractor extends CopyOnWriteTransformer {
 	MaudeFilter maudeFilter;
 
-	public MaudeRuleExtractor(DefinitionHelper definitionHelper) {
-		super("Maude Rules Extractor", definitionHelper);
-		maudeFilter = new MaudeFilter(definitionHelper);
+	public MaudeRuleExtractor(Context context) {
+		super("Maude Rules Extractor", context);
+		maudeFilter = new MaudeFilter(context);
 	}
 
 	public String getResult() {
@@ -30,7 +30,7 @@ public class MaudeRuleExtractor extends CopyOnWriteTransformer {
 	}
 
 	@Override
-	public ASTNode transform(Context node) throws TransformerException {
+	public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
 		return node;
 	}
 

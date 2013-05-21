@@ -13,7 +13,7 @@ import org.kframework.kil.TermCons;
 import org.kframework.kil.Token;
 import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Constants;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -29,8 +29,8 @@ import java.util.List;
  */
 public class AddEmptyLists extends BasicTransformer {
 
-	public AddEmptyLists(DefinitionHelper definitionHelper) {
-		super("Add empty lists", definitionHelper);
+	public AddEmptyLists(Context context) {
+		super("Add empty lists", context);
 	}
 
 	@Override
@@ -42,7 +42,7 @@ public class AddEmptyLists extends BasicTransformer {
 			Term t = tc.getContents().get(0);
 			UserList ul = (UserList) p.getItems().get(0);
 			if (isAddEmptyList(ul.getSort(), t.getSort())) {
-				if (!isUserListElement(ul.getSort(), t, definitionHelper)) {
+				if (!isUserListElement(ul.getSort(), t, context)) {
 					String msg = "Found sort '" + t.getSort() + "' where list sort '" + ul.getSort() + "' was expected. Moving on.";
 					GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.LISTS, msg, t.getFilename(), t.getLocation()));
 				} else
@@ -52,7 +52,7 @@ public class AddEmptyLists extends BasicTransformer {
 			// if the term should be a list, append the empty element
 			t = tc.getContents().get(1);
 			if (isAddEmptyList(p.getSort(), t.getSort())) {
-				if (!isUserListElement(p.getSort(), t, definitionHelper)) {
+				if (!isUserListElement(p.getSort(), t, context)) {
 					String msg = "Found sort '" + t.getSort() + "' where list sort '" + p.getSort() + "' was expected. Moving on.";
 					GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.LISTS, msg, t.getFilename(), t.getLocation()));
 				} else
@@ -65,11 +65,11 @@ public class AddEmptyLists extends BasicTransformer {
 					continue;
 
 				String srt = ((Sort) pi).getName();
-				if (definitionHelper.isListSort(srt)) {
+				if (context.isListSort(srt)) {
 					Term t = (Term) tc.getContents().get(i);
 					// if the term should be a list, append the empty element
 					if (isAddEmptyList(srt, t.getSort())) {
-						if (!isUserListElement(srt, t, definitionHelper)) {
+						if (!isUserListElement(srt, t, context)) {
 							String msg = "Found sort '" + t.getSort() + "' where list sort '" + srt + "' was expected. Moving on.";
 							GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.LISTS, msg, t.getFilename(), t.getLocation()));
 						} else
@@ -83,7 +83,7 @@ public class AddEmptyLists extends BasicTransformer {
 		return super.transform(tc);
 	}
 
-    private boolean isUserListElement(String listSort, Term element, DefinitionHelper definitionHelper) {
+    private boolean isUserListElement(String listSort, Term element, Context context) {
         String elementSort = element.getSort();
 
         /* TODO: properly infer sort of KApp */
@@ -95,19 +95,19 @@ public class AddEmptyLists extends BasicTransformer {
         }
 
         return !elementSort.equals(KSorts.K)
-               && definitionHelper.isSubsortedEq(listSort, elementSort);
+               && context.isSubsortedEq(listSort, elementSort);
     }
 
 	public boolean isAddEmptyList(String expectedSort, String termSort) {
-		if (!definitionHelper.isListSort(expectedSort))
+		if (!context.isListSort(expectedSort))
 			return false;
-		if (definitionHelper.isSubsortedEq(expectedSort, termSort) && definitionHelper.isListSort(termSort))
+		if (context.isSubsortedEq(expectedSort, termSort) && context.isListSort(termSort))
 			return false;
 		return true;
 	}
 
 	private Term addEmpty(Term node, String sort) {
-		TermCons tc = new TermCons(sort, getListCons(sort), definitionHelper);
+		TermCons tc = new TermCons(sort, getListCons(sort), context);
 		List<Term> genContents = new ArrayList<Term>();
 		genContents.add(node);
 		genContents.add(new Empty(sort));
@@ -117,7 +117,7 @@ public class AddEmptyLists extends BasicTransformer {
 	}
 
 	private String getListCons(String psort) {
-		Production p = definitionHelper.listConses.get(psort);
+		Production p = context.listConses.get(psort);
 		return p.getAttribute(Constants.CONS_cons_ATTR);
 	}
 }

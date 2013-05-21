@@ -18,7 +18,7 @@ import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Definition;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
@@ -158,80 +158,80 @@ public class KompileFrontEnd {
 		GlobalSettings.symbolicEquality = cmd.hasOption("symeq");
 		GlobalSettings.SMT = cmd.hasOption("smt");
 		
-		DefinitionHelper definitionHelper = new DefinitionHelper();
-		if (definitionHelper.dotk == null) {
+		Context context = new Context();
+		if (context.dotk == null) {
 			try {
-				definitionHelper.dotk = new File(mainFile.getCanonicalFile().getParent() + File.separator + ".k");
+				context.dotk = new File(mainFile.getCanonicalFile().getParent() + File.separator + ".k");
 			} catch (IOException e) {
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Canonical file cannot be obtained for main file.", mainFile.getAbsolutePath(),
 						"File system."));
 			}
-			definitionHelper.dotk.mkdirs();
+			context.dotk.mkdirs();
 		}
 
 		
 		Backend backend = null;
 		if (cmd.hasOption("maudify")) {
-			backend = new MaudeBackend(Stopwatch.sw, definitionHelper);
+			backend = new MaudeBackend(Stopwatch.sw, context);
 		} else if (cmd.hasOption("latex")) {
 			GlobalSettings.documentation = true;
-			backend = new LatexBackend(Stopwatch.sw, definitionHelper);
+			backend = new LatexBackend(Stopwatch.sw, context);
 		} else if (cmd.hasOption("pdf")) {
 			GlobalSettings.documentation = true;
-			backend = new PdfBackend(Stopwatch.sw, definitionHelper);
+			backend = new PdfBackend(Stopwatch.sw, context);
 		} else if (cmd.hasOption("xml")) {
 			GlobalSettings.xml = true;
-			backend = new XmlBackend(Stopwatch.sw, definitionHelper);
+			backend = new XmlBackend(Stopwatch.sw, context);
 		} else if (cmd.hasOption("html")) {
 			if (!cmd.hasOption("style")) {
 				GlobalSettings.style = "k-definition.css";
 			}
 			GlobalSettings.documentation = true;
-			backend = new HtmlBackend(Stopwatch.sw, definitionHelper);
+			backend = new HtmlBackend(Stopwatch.sw, context);
 		} else if (cmd.hasOption("unparse")) {
-			backend = new UnparserBackend(Stopwatch.sw, definitionHelper);
+			backend = new UnparserBackend(Stopwatch.sw, context);
 		} else if (cmd.hasOption("kexp")) {
-			backend = new KExpBackend(Stopwatch.sw, definitionHelper);
+			backend = new KExpBackend(Stopwatch.sw, context);
 		} else if (cmd.hasOption("doc")) {
 			GlobalSettings.documentation = true;
 			if (!cmd.hasOption("style")) {
 				GlobalSettings.style = "k-documentation.css";
 			}
-			backend = new DocumentationBackend(Stopwatch.sw, definitionHelper);
+			backend = new DocumentationBackend(Stopwatch.sw, context);
 		} else if (cmd.hasOption("symbolic")) {
 			if (output == null) {
 				output = FileUtil.stripExtension(mainFile.getName()) + "-kompiled";
 			}
-			backend = new SymbolicBackend(Stopwatch.sw, definitionHelper);
-			definitionHelper.dotk = new File(output);
-			definitionHelper.dotk.mkdirs();
+			backend = new SymbolicBackend(Stopwatch.sw, context);
+			context.dotk = new File(output);
+			context.dotk.mkdirs();
 
 		} else if (cmd.hasOption("check")) {
 			if (output == null) {
 				output = FileUtil.stripExtension(mainFile.getName()) + "-kompiled";
 			}
 			GlobalSettings.CHECK = new File(cmd.getOptionValue("check")).getAbsolutePath();
-			backend = new RLBackend(Stopwatch.sw, definitionHelper);
-			definitionHelper.dotk = new File(output);
-			definitionHelper.dotk.mkdirs();
+			backend = new RLBackend(Stopwatch.sw, context);
+			context.dotk = new File(output);
+			context.dotk.mkdirs();
 
 		} else if (cmd.hasOption("ml")) {
             GlobalSettings.matchingLogic = true;
-            backend = new JavaSymbolicBackend(Stopwatch.sw, definitionHelper);
+            backend = new JavaSymbolicBackend(Stopwatch.sw, context);
         } else {
 			if (output == null) {
 				output = FileUtil.stripExtension(mainFile.getName()) + "-kompiled";
 			}
-			backend = new KompileBackend(Stopwatch.sw, definitionHelper);
-			definitionHelper.dotk = new File(output);
-			definitionHelper.dotk.mkdirs();
+			backend = new KompileBackend(Stopwatch.sw, context);
+			context.dotk = new File(output);
+			context.dotk.mkdirs();
 		}
 		
 		if (backend != null) {
-			genericCompile(mainFile, lang, backend, step, definitionHelper);
+			genericCompile(mainFile, lang, backend, step, context);
 			try {
-				BinaryLoader.toBinary(cmd, new FileOutputStream(definitionHelper.dotk
-						.getAbsolutePath() + "/compile-options.bin"));
+				BinaryLoader.toBinary(cmd, new FileOutputStream(
+                        context.dotk.getAbsolutePath() + "/compile-options.bin"));
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
 			}
@@ -249,11 +249,16 @@ public class KompileFrontEnd {
 	}
 
 
-	private static void genericCompile(File mainFile, String lang, Backend backend, String step, DefinitionHelper definitionHelper) {
+	private static void genericCompile(
+            File mainFile,
+            String lang,
+            Backend backend,
+            String step,
+            Context context) {
 		org.kframework.kil.Definition javaDef;
 		try {
 			Stopwatch.sw.Start();
-			javaDef = DefinitionLoader.loadDefinition(mainFile, lang, backend.autoinclude(), definitionHelper);
+			javaDef = DefinitionLoader.loadDefinition(mainFile, lang, backend.autoinclude(), context);
 
 			CompilerSteps<Definition> steps = backend.getCompilationSteps();
 
@@ -269,7 +274,9 @@ public class KompileFrontEnd {
 				javaDef = (Definition) e.getResult();
 			}
 
-			BinaryLoader.toBinary(MetaK.getConfiguration(javaDef, definitionHelper), new FileOutputStream(definitionHelper.dotk.getAbsolutePath() + "/configuration.bin"));
+			BinaryLoader.toBinary(
+                    MetaK.getConfiguration(javaDef, context),
+                    new FileOutputStream(context.dotk.getAbsolutePath() + "/configuration.bin"));
 
 			backend.run(javaDef);
 		} catch (IOException e) {

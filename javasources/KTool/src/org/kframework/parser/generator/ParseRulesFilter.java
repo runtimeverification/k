@@ -6,7 +6,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Module;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.loader.Constants;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -38,8 +38,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 public class ParseRulesFilter extends BasicTransformer {
-	public ParseRulesFilter(DefinitionHelper definitionHelper) {
-		super("Parse Configurations", definitionHelper);
+	public ParseRulesFilter(Context context) {
+		super("Parse Configurations", context);
 	}
 
 	String localModule = null;
@@ -80,27 +80,29 @@ public class ParseRulesFilter extends BasicTransformer {
 					a = a + 1;
 				}
 
-				new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation(definitionHelper), definitionHelper).check(config);
-				config = config.accept(new SentenceVariablesFilter(definitionHelper));
-				config = config.accept(new CellEndLabelFilter(definitionHelper));
-				config = config.accept(new InclusionFilter(localModule, definitionHelper));
-				config = config.accept(new CellTypesFilter(definitionHelper));
-				config = config.accept(new CorrectRewritePriorityFilter(definitionHelper));
-				config = config.accept(new CorrectKSeqFilter(definitionHelper));
-				config = config.accept(new CorrectCastPriorityFilter(definitionHelper));
+				new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation(context), context).check(config);
+				config = config.accept(new SentenceVariablesFilter(context));
+				config = config.accept(new CellEndLabelFilter(context));
+				config = config.accept(new InclusionFilter(localModule, context));
+				config = config.accept(new CellTypesFilter(context));
+				config = config.accept(new CorrectRewritePriorityFilter(context));
+				config = config.accept(new CorrectKSeqFilter(context));
+				config = config.accept(new CorrectCastPriorityFilter(context));
 				// config = config.accept(new CheckBinaryPrecedenceFilter());
-				config = config.accept(new VariableTypeInferenceFilter(definitionHelper));
-				config = config.accept(new AmbDuplicateFilter(definitionHelper));
-				config = config.accept(new TypeSystemFilter(definitionHelper));
-				config = config.accept(new PriorityFilter(definitionHelper));
-				config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(definitionHelper), definitionHelper));
-				config = config.accept(new TypeInferenceSupremumFilter(definitionHelper));
-				config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(definitionHelper), definitionHelper));
-				config = config.accept(new PreferAvoidFilter(definitionHelper));
-				config = config.accept(new FlattenListsFilter(definitionHelper));
-				config = config.accept(new AmbDuplicateFilter(definitionHelper));
+				config = config.accept(new VariableTypeInferenceFilter(context));
+				config = config.accept(new AmbDuplicateFilter(context));
+				config = config.accept(new TypeSystemFilter(context));
+				config = config.accept(new PriorityFilter(context));
+				config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context),
+                        context));
+				config = config.accept(new TypeInferenceSupremumFilter(context));
+				config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context),
+                        context));
+				config = config.accept(new PreferAvoidFilter(context));
+				config = config.accept(new FlattenListsFilter(context));
+				config = config.accept(new AmbDuplicateFilter(context));
 				// last resort disambiguation
-				config = config.accept(new AmbFilter(definitionHelper));
+				config = config.accept(new AmbFilter(context));
 
 				return config;
 			} catch (TransformerException te) {

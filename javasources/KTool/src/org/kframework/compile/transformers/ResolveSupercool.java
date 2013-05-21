@@ -1,7 +1,6 @@
 package org.kframework.compile.transformers;
 
 import org.kframework.kil.*;
-import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.general.GlobalSettings;
@@ -16,8 +15,8 @@ import java.util.List;
  * Time: 10:07 PM
  */
 public class ResolveSupercool extends CopyOnWriteTransformer {
-    public ResolveSupercool(DefinitionHelper definitionHelper) {
-        super("Cool the <k> cell for supercool rules", definitionHelper);
+    public ResolveSupercool(org.kframework.kil.loader.Context context) {
+        super("Cool the <k> cell for supercool rules", context);
     }
 
     @Override
@@ -35,7 +34,7 @@ public class ResolveSupercool extends CopyOnWriteTransformer {
         Term right = (Term)node.getRight().accept(this);
         if (right != node.getRight()) {
             node = node.shallowCopy();
-            node.setRight(right, definitionHelper);
+            node.setRight(right, context);
         }
         return node;
     }
@@ -65,7 +64,7 @@ public class ResolveSupercool extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Context node) throws TransformerException {
+    public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
         return node;
     }
 

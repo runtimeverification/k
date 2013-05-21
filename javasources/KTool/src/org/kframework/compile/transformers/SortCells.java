@@ -5,7 +5,6 @@ import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.Collection;
-import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.StringUtil;
@@ -39,8 +38,8 @@ public class SortCells extends CopyOnWriteTransformer {
 	private final ConfigurationStructureMap configurationStructureMap;
 
 
-	public SortCells(ConfigurationStructureMap configurationStructureMap, DefinitionHelper definitionHelper) {
-		super("SortCells", definitionHelper);
+	public SortCells(ConfigurationStructureMap configurationStructureMap, org.kframework.kil.loader.Context context) {
+		super("SortCells", context);
 		this.configurationStructureMap = configurationStructureMap;
 	}
 
@@ -50,7 +49,7 @@ public class SortCells extends CopyOnWriteTransformer {
 	}
 
 	@Override
-	public ASTNode transform(Context node) throws TransformerException {
+	public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
 		return node;
 	}
 
@@ -79,7 +78,7 @@ public class SortCells extends CopyOnWriteTransformer {
 		node = node.shallowCopy();
 		node.setBody((Term) bodyNode);
         node.setCondition(conditionNode);
-		return node.accept(new ResolveRemainingVariables(definitionHelper));
+		return node.accept(new ResolveRemainingVariables(context));
 	}
 
 //    private Rule checkCollapsingCellRule(Rule node) {
@@ -138,7 +137,7 @@ public class SortCells extends CopyOnWriteTransformer {
 						.mainSort().equals(KSort.Bag));
 				if (MetaK.isCellFragment(sort)) {
 					Cell fragment = new Cell();
-					fragment.setLabel(definitionHelper.getCellSort(sort));
+					fragment.setLabel(context.getCellSort(sort));
 //					System.err.println(fragment.getLabel());
 					fragment.setContents(t);
 					fragment = (Cell) transformTop(fragment, true);
@@ -183,7 +182,7 @@ public class SortCells extends CopyOnWriteTransformer {
 		if (!(klabel instanceof KLabelConstant)) return node;
 		KLabelConstant label = (KLabelConstant) klabel;
 		Set<Production> productions =
-				definitionHelper.productions.get(
+				context.productions.get(
 						StringUtil.unescapeMaude(label.getLabel()));
 		if (productions == null|| productions.isEmpty())
 			return node;
@@ -240,7 +239,7 @@ public class SortCells extends CopyOnWriteTransformer {
 						|| MetaK.isCellSort(bag.getSort());
 				if (MetaK.isCellFragment(sort)) {
 					Cell fragment = new Cell();
-					fragment.setLabel(definitionHelper.getCellSort(sort));
+					fragment.setLabel(context.getCellSort(sort));
 					fragment.setContents(bag);
 					fragment = (Cell) transformTop(fragment, true);
 					kInjectedLabel.setTerm(fragment);
@@ -464,8 +463,8 @@ public class SortCells extends CopyOnWriteTransformer {
 	}
 
 	private class ResolveRemainingVariables extends CopyOnWriteTransformer {
-		private ResolveRemainingVariables(DefinitionHelper definitionHelper) {
-			super("SortCells: resolving remaining variables", definitionHelper);
+		private ResolveRemainingVariables(org.kframework.kil.loader.Context context) {
+			super("SortCells: resolving remaining variables", context);
 		}
 
 		@Override

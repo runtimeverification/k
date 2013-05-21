@@ -2,7 +2,7 @@ package org.kframework.parser.concrete.disambiguate;
 
 import org.kframework.kil.*;
 import org.kframework.kil.ProductionItem.ProductionType;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 
 /**
  * Check to see which branch of an ambiguity has less type errors
@@ -12,8 +12,8 @@ import org.kframework.kil.loader.DefinitionHelper;
  */
 public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
 
-	public GetFitnessUnitTypeCheckVisitor(DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public GetFitnessUnitTypeCheckVisitor(Context context) {
+		super(context);
 	}
 
 	@Override
@@ -44,7 +44,7 @@ public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
 	public void visit(Collection node) {
 		super.visit(node);
 		for (Term t : node.getContents()) {
-			if (!definitionHelper.isSubsortedEq(node.getSort(), t.getSort()))
+			if (!context.isSubsortedEq(node.getSort(), t.getSort()))
 				score += -1;
 		}
 	}
@@ -75,10 +75,10 @@ public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
 
 	private int getFitnessUnit3(String declSort, String termSort) {
 		int score;
-		if (definitionHelper.isSubsortedEq(declSort, termSort))
+		if (context.isSubsortedEq(declSort, termSort))
 			score = 0;
 		// isSubsortEq(|"K", expect) ; (<?"K"> place <+ <?"K"> expect); !0
-		else if (definitionHelper.isSubsortedEq("K", termSort) && (declSort.equals("K") || termSort.equals("K")))
+		else if (context.isSubsortedEq("K", termSort) && (declSort.equals("K") || termSort.equals("K")))
 			score = 0; // do nothing when you have a K
 		else {
 			score = -1;
@@ -89,6 +89,6 @@ public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
 
 	@Override
 	public GetFitnessUnitBasicVisitor getInstance() {
-		return new GetFitnessUnitTypeCheckVisitor(definitionHelper);
+		return new GetFitnessUnitTypeCheckVisitor(context);
 	}
 }

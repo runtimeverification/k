@@ -1,6 +1,6 @@
 package org.kframework.backend.hkcd;
 
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 
 /**
  * Transform AST of program into set of Haskell constructors.
@@ -11,7 +11,7 @@ import org.kframework.kil.loader.DefinitionHelper;
  */
 public class HaskellPgmFilter extends HaskellFilter {
 
-	public HaskellPgmFilter(DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public HaskellPgmFilter(Context context) {
+		super(context);
 	}
 }

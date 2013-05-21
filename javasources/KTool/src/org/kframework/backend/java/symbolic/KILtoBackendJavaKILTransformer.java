@@ -20,7 +20,7 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.KSorts;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -38,8 +38,8 @@ import java.util.List;
  */
 public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
-    public KILtoBackendJavaKILTransformer(DefinitionHelper definitionHelper) {
-        super("Transform KIL into java backend KIL", definitionHelper);
+    public KILtoBackendJavaKILTransformer(Context context) {
+        super("Transform KIL into java backend KIL", context);
     }
 
     @Override
@@ -47,12 +47,12 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         KLabel kLabel = (KLabel) node.getLabel().accept(this);
         KList kList = (KList) node.getChild().accept(this);
 
-        return new KItem(kLabel, kList, this.definitionHelper);
+        return new KItem(kLabel, kList, this.context);
     }
 
     @Override
     public ASTNode transform(org.kframework.kil.KLabelConstant node) throws TransformerException {
-        return new KLabelConstant(node.getLabel(), this.definitionHelper);
+        return new KLabelConstant(node.getLabel(), this.context);
     }
 
     @Override

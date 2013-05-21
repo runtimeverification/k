@@ -6,8 +6,8 @@ import org.kframework.kil.Syntax;
 import org.kframework.kil.visitors.BasicVisitor;
 
 public class UpdateReferencesVisitor extends BasicVisitor {
-	public UpdateReferencesVisitor(DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public UpdateReferencesVisitor(Context context) {
+		super(context);
 	}
 
 	private String prodSort;
@@ -24,7 +24,7 @@ public class UpdateReferencesVisitor extends BasicVisitor {
 	 */
 	@Override
 	public void visit(Syntax syn) {
-		definitionHelper.definedSorts.add(syn.getSort().getName());
+		context.definedSorts.add(syn.getSort().getName());
 		prodSort = syn.getSort().getName();
 		super.visit(syn);
 	}

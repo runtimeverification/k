@@ -1,7 +1,6 @@
 package org.kframework.compile.checks;
 
 import org.kframework.kil.*;
-import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
@@ -22,8 +21,8 @@ public class CheckConfigurationCells extends BasicVisitor {
 		super.visit(node);
 	}
 
-	public CheckConfigurationCells(DefinitionHelper definitionHelper) {
-		super("Check that configuration cells have unique names", definitionHelper);
+	public CheckConfigurationCells(org.kframework.kil.loader.Context context) {
+		super("Check that configuration cells have unique names", context);
 	}
 
 	@Override
@@ -32,7 +31,7 @@ public class CheckConfigurationCells extends BasicVisitor {
 	}
 
 	@Override
-	public void visit(Context node) {
+	public void visit(org.kframework.kil.Context node) {
 		return;
 	}
 

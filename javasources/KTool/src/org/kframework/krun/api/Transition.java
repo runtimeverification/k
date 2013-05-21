@@ -5,7 +5,7 @@ import java.io.Serializable;
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attributes;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.krun.K;
 
 public class Transition implements Serializable{
@@ -14,22 +14,22 @@ public class Transition implements Serializable{
 	private String label;
 	private TransitionType type;
 	
-	protected DefinitionHelper definitionHelper;
+	protected Context context;
 
-	public Transition(ASTNode rule, DefinitionHelper definitionHelper) {
-		this.definitionHelper = definitionHelper;
+	public Transition(ASTNode rule, Context context) {
+		this.context = context;
 		this.rule = rule;
 		this.type = TransitionType.RULE;
 	}
 
-	public Transition(String label, DefinitionHelper definitionHelper) {
-		this.definitionHelper = definitionHelper;
+	public Transition(String label, Context context) {
+		this.context = context;
 		this.label = label;
 		this.type = TransitionType.LABEL;
 	}
 
-	public Transition(TransitionType type, DefinitionHelper definitionHelper) {
-		this.definitionHelper = definitionHelper;
+	public Transition(TransitionType type, Context context) {
+		this.context = context;
 		if (type == TransitionType.RULE || type == TransitionType.LABEL) {
 			throw new RuntimeException("Must specify argument for transition types RULE and LABEL");
 		}
@@ -67,7 +67,7 @@ public class Transition implements Serializable{
 	public String toString() {
 		if (rule != null) {
 			Attributes a = rule.getAttributes();
-			UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, definitionHelper);
+			UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
 			a.accept(unparser);
 			return "\nRule tagged " + unparser.getResult() + " ";
 		} else if (label != null) {

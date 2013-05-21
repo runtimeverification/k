@@ -10,7 +10,7 @@ import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Rule;
 import org.kframework.kil.loader.Constants;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.file.KPaths;
@@ -27,8 +27,8 @@ public class TagUserRules extends CopyOnWriteTransformer {
 	List<String> notSymbolicTags = new ArrayList<String>(Arrays.asList(
 			Constants.MACRO, Constants.STRUCTURAL, Constants.FUNCTION, SymbolicBackend.NOTSYMBOLIC));
 
-	public TagUserRules(DefinitionHelper definitionHelper) {
-		super("Tag rules which are not builtin with 'symbolic' tag", definitionHelper);
+	public TagUserRules(Context context) {
+		super("Tag rules which are not builtin with 'symbolic' tag", context);
 	}
 
 	@Override

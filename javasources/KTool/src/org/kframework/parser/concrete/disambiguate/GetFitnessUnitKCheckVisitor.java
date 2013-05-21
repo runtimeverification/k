@@ -2,7 +2,7 @@ package org.kframework.parser.concrete.disambiguate;
 
 import org.kframework.kil.*;
 import org.kframework.kil.ProductionItem.ProductionType;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 
 /**
  * Check to see which branch of an ambiguity has less K insertions
@@ -12,8 +12,8 @@ import org.kframework.kil.loader.DefinitionHelper;
  */
 public class GetFitnessUnitKCheckVisitor extends GetFitnessUnitBasicVisitor {
 
-	public GetFitnessUnitKCheckVisitor(DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public GetFitnessUnitKCheckVisitor(Context context) {
+		super(context);
 	}
 
 	@Override
@@ -66,10 +66,10 @@ public class GetFitnessUnitKCheckVisitor extends GetFitnessUnitBasicVisitor {
 		if (termSort.equals(""))
 			return 0; // if it is amb it won't have a sort
 		int score;
-		if (definitionHelper.isSubsortedEq(declSort, termSort))
+		if (context.isSubsortedEq(declSort, termSort))
 			score = 0;
 		// isSubsortEq(|"K", expect) ; <?"K"> place ; !-1
-		else if (definitionHelper.isSubsortedEq("K", declSort) && termSort.equals("K"))
+		else if (context.isSubsortedEq("K", declSort) && termSort.equals("K"))
 			score = -1; // if I insert a K where I would expect a more specific kind of sort, put -1
 		else {
 			score = -1;
@@ -80,6 +80,6 @@ public class GetFitnessUnitKCheckVisitor extends GetFitnessUnitBasicVisitor {
 
 	@Override
 	public GetFitnessUnitBasicVisitor getInstance() {
-		return new GetFitnessUnitKCheckVisitor(definitionHelper);
+		return new GetFitnessUnitKCheckVisitor(context);
 	}
 }

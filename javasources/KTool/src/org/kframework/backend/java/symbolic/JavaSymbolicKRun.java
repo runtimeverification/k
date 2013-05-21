@@ -4,7 +4,7 @@ import edu.uci.ics.jung.graph.DirectedGraph;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.Definition;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.matchers.MatcherException;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.api.*;
@@ -26,10 +26,10 @@ import java.util.Set;
  */
 public class JavaSymbolicKRun implements KRun {
 	
-	protected DefinitionHelper definitionHelper;
+	protected Context context;
 	
-	public JavaSymbolicKRun(DefinitionHelper definitionHelper) {
-		this.definitionHelper = definitionHelper;
+	public JavaSymbolicKRun(Context context) {
+		this.context = context;
 	}
 	
     @Override
@@ -44,11 +44,11 @@ public class JavaSymbolicKRun implements KRun {
                 e.printStackTrace();
             }
 
-            SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition, definitionHelper);
-            symbolicRewriter.rewrite(Term.of(cfg, definitionHelper));
+            SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition, context);
+            symbolicRewriter.rewrite(Term.of(cfg, context));
             //symbolicRewriter.rewriteStar(Term.of(cfg));
             //return new KRunResult<KRunState>(new KRunState(symbolicRewriter.rewrite(cfg)));
-            return new KRunResult<KRunState>(new KRunState(cfg, definitionHelper));
+            return new KRunResult<KRunState>(new KRunState(cfg, context));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (MatcherException e) {

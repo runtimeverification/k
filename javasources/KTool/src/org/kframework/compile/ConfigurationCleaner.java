@@ -1,7 +1,7 @@
 package org.kframework.compile;
 
 import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.kil.*;
@@ -14,15 +14,15 @@ import org.kframework.utils.general.GlobalSettings;
 
 public class ConfigurationCleaner extends CopyOnWriteTransformer {
 		
-	public ConfigurationCleaner(DefinitionHelper definitionHelper) {
-		super("Configuration Cleaner", definitionHelper);
+	public ConfigurationCleaner(Context context) {
+		super("Configuration Cleaner", context);
 		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public ASTNode transform(Cell node) throws TransformerException {
 		if (node.getMultiplicity() == Multiplicity.ANY || node.getMultiplicity() == Multiplicity.MAYBE) {
-			if (MetaK.getVariables(node, definitionHelper).isEmpty()) {
+			if (MetaK.getVariables(node, context).isEmpty()) {
                 if (GlobalSettings.sortedCells)
                     return new Empty(MetaK.cellFragment(node.getId()));
                 else return new Bag();

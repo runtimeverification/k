@@ -6,7 +6,7 @@ import org.kframework.backend.maude.MaudeFilter;
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Term;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.ConcretizeSyntax;
 import org.kframework.krun.K;
@@ -35,18 +35,18 @@ public class RunKRunCommand {
 	KRunDebugger debugger;
 	RunProcess rp ;
 	
-	public RunKRunCommand(Term kast, String lang, boolean isSwitch, DefinitionHelper definitionHelper)
+	public RunKRunCommand(Term kast, String lang, boolean isSwitch, Context context)
 			throws IOException {
 		super();
 		this.KAST = kast;
 		this.lang = lang;
 		this.isSwitch = isSwitch;
-		krun = new MaudeKRun(definitionHelper);
+		krun = new MaudeKRun(context);
 		rp = new RunProcess();
 	}
 
-	public DirectedGraph<KRunState, Transition> firstStep(DefinitionHelper definitionHelper) throws Exception{
-		Term cfg = Main.makeConfiguration(KAST, null, rp, K.term!=null, definitionHelper);
+	public DirectedGraph<KRunState, Transition> firstStep(Context context) throws Exception{
+		Term cfg = Main.makeConfiguration(KAST, null, rp, K.term!=null, context);
 		debugger = krun.debug(cfg);
 		return debugger.getGraph();
 	}
@@ -71,19 +71,20 @@ public class RunKRunCommand {
 		return debugger.getGraph();
 	}
 
-	public static void seeTerm(Term c, DefinitionHelper definitionHelper) {
-		MaudeFilter mf = new MaudeFilter(definitionHelper);
+	public static void seeTerm(Term c, Context context) {
+		MaudeFilter mf = new MaudeFilter(context);
 		c.accept(mf);
 		String rez = mf.getResult();
 	}
 	
-	public static String transformTerm (Term term, DefinitionHelper definitionHelper) {
+	public static String transformTerm (Term term, Context context) {
 		try {
-			term = (Term) term.accept(new ConcretizeSyntax(definitionHelper));
-			term = (Term) term.accept(new TypeInferenceSupremumFilter(definitionHelper));
-			term = (Term) term.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(definitionHelper), definitionHelper));
+			term = (Term) term.accept(new ConcretizeSyntax(context));
+			term = (Term) term.accept(new TypeInferenceSupremumFilter(context));
+			term = (Term) term.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context),
+                    context));
 			//as a last resort, undo concretization
-			term = (Term) term.accept(new org.kframework.krun.FlattenDisambiguationFilter(definitionHelper));
+			term = (Term) term.accept(new org.kframework.krun.FlattenDisambiguationFilter(context));
 		} catch (TransformerException e) {
 			e.printStackTrace();
 		}
@@ -94,10 +95,10 @@ public class RunKRunCommand {
 			}
 		}
 		//set the color map  
-		ColorVisitor cv = new ColorVisitor(definitionHelper);
+		ColorVisitor cv = new ColorVisitor(context);
 		term.accept(cv);
 		
-		UnparserFilter unparser = new UnparserFilter(true, false, definitionHelper);
+		UnparserFilter unparser = new UnparserFilter(true, false, context);
 		term.accept(unparser);
 		return unparser.getResult();
 	}

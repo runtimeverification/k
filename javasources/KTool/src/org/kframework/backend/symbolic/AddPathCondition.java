@@ -16,7 +16,7 @@ import org.kframework.kil.Rule;
 import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.general.GlobalSettings;
@@ -31,8 +31,8 @@ import org.kframework.utils.general.GlobalSettings;
  */
 public class AddPathCondition extends CopyOnWriteTransformer {
 
-    public AddPathCondition(DefinitionHelper definitionHelper) {
-        super("Add Path Condition to each rule", definitionHelper);
+    public AddPathCondition(Context context) {
+        super("Add Path Condition to each rule", context);
     }
 
     @Override
@@ -56,10 +56,10 @@ public class AddPathCondition extends CopyOnWriteTransformer {
 
         Term condition = node.getCondition();
 //        Term originalCondition = condition.shallowCopy();
-        CollapseAndBoolTransformer cnft = new CollapseAndBoolTransformer(definitionHelper);
+        CollapseAndBoolTransformer cnft = new CollapseAndBoolTransformer(context);
         condition = (Term) node.getCondition().accept(cnft);
 
-        ConditionTransformer ct = new ConditionTransformer(definitionHelper);
+        ConditionTransformer ct = new ConditionTransformer(context);
         condition = (Term) node.getCondition().accept(ct);
 
         if (node.getBody() instanceof Rewrite) {
@@ -123,7 +123,7 @@ public class AddPathCondition extends CopyOnWriteTransformer {
 
             // re-construct the rule
             node = node.shallowCopy();
-            node.setBody(new Rewrite(left, right, definitionHelper));
+            node.setBody(new Rewrite(left, right, context));
 //            node.setAttributes(atts);
             node.setCondition(cond);
         }
@@ -147,7 +147,7 @@ public class AddPathCondition extends CopyOnWriteTransformer {
     private Term checkSat(Term pathCondition) {
         // checkSat(pathCondition) =/=K # "unsat"(.KList)
         KApp unsat = StringBuiltin.kAppOf("unsat");
-        KApp checkSat = KApp.of(KLabelConstant.of("'checkSat", definitionHelper), pathCondition);
+        KApp checkSat = KApp.of(KLabelConstant.of("'checkSat", context), pathCondition);
         return KApp.of(KLabelConstant.KNEQ_KLABEL, checkSat, unsat);
     }
 }

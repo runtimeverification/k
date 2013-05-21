@@ -1,7 +1,6 @@
 package org.kframework.backend.java.symbolic;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,7 +10,7 @@ import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.symbolic.SymbolicBackend;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Definition;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -24,12 +23,12 @@ public class SymbolicRewriter {
     private final List<Rule> rules;
 	private final SymbolicMatcher matcher;
     private final Transformer transformer;
-    protected DefinitionHelper definitionHelper;
+    protected Context context;
 
-	public SymbolicRewriter(Definition definition, DefinitionHelper definitionHelper) {
-		this.definitionHelper = definitionHelper;
-		matcher = new SymbolicMatcher(definitionHelper);
-        transformer = new KILtoBackendJavaKILTransformer(definitionHelper);
+	public SymbolicRewriter(Definition definition, Context context) {
+		this.context = context;
+		matcher = new SymbolicMatcher(context);
+        transformer = new KILtoBackendJavaKILTransformer(context);
 
         rules = new ArrayList<Rule>(definition.getSingletonModule().getRules().size());
         for (org.kframework.kil.Rule kilRule : definition.getSingletonModule().getRules()) {
@@ -66,10 +65,12 @@ public class SymbolicRewriter {
 
                 System.err.println(rule.getLeftHandSide());
                 System.err.println(matcher.getConstraint());
-                System.err.println(rule.getRightHandSide().substitute(substitution, definitionHelper).substitute(freshSubstitution, definitionHelper));
+                System.err.println(rule.getRightHandSide().substitute(substitution, context).substitute(freshSubstitution,
+                        context));
 
                 // return first match
-                return rule.getRightHandSide().substitute(substitution, definitionHelper).substitute(freshSubstitution, definitionHelper);
+                return rule.getRightHandSide().substitute(substitution, context).substitute(freshSubstitution,
+                        context);
 			}
 		}
 

@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.kframework.compile.transformers.AddPredicates;
-import org.kframework.kil.loader.Constants;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.*;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
@@ -51,12 +51,12 @@ public class KLabelConstant extends KLabel {
 	 *            string representation of the KLabel; must not be '`' escaped;
 	 * @return AST term representation the KLabel;
 	 */
-	public static final KLabelConstant of(String label, DefinitionHelper definitionHelper) {
+	public static final KLabelConstant of(String label, Context context) {
 		assert label != null;
 
 		KLabelConstant kLabelConstant = cache.get(label);
 		if (kLabelConstant == null) {
-			kLabelConstant = new KLabelConstant(label, definitionHelper);
+			kLabelConstant = new KLabelConstant(label, context);
 			cache.put(label, kLabelConstant);
 		}
 		return kLabelConstant;
@@ -96,19 +96,19 @@ public class KLabelConstant extends KLabel {
 		productions = (List<Production>) Collections.EMPTY_LIST;
 	}
 
-	private KLabelConstant(String label, DefinitionHelper definitionHelper) {
+	private KLabelConstant(String label, Context context) {
 		this.label = label;
-		productions = Collections.unmodifiableList(definitionHelper.productionsOf(label));
+		productions = Collections.unmodifiableList(context.productionsOf(label));
 	}
 
 	/**
 	 * Constructs a {@link KLabelConstant} from an XML {@link Element} representing a constant. The KLabel string representation in the element is escaped according to Maude
 	 * conventions.
 	 */
-	public KLabelConstant(Element element, DefinitionHelper definitionHelper) {
+	public KLabelConstant(Element element, org.kframework.kil.loader.Context context) {
 		super(element);
 		label = StringUtil.unescapeMaude(element.getAttribute(Constants.VALUE_value_ATTR));
-		productions = Collections.unmodifiableList(definitionHelper.productionsOf(label));
+		productions = Collections.unmodifiableList(context.productionsOf(label));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -168,8 +168,8 @@ public class KLabelConstant extends KLabel {
 	}
 
 	@Override
-	public ASTNode accept(Transformer visitor) throws TransformerException {
-		return visitor.transform(this);
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
 	}
 
 	@Override

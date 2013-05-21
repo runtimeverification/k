@@ -1,7 +1,6 @@
 package org.kframework.kompile.lint;
 
 import org.kframework.kil.*;
-import org.kframework.kil.loader.DefinitionHelper;
 
 import java.util.ArrayList;
 
@@ -13,8 +12,8 @@ public class UnusedSyntax extends KlintRule {
 	@SuppressWarnings("unused")
 	private static boolean debug = false;
 
-	public UnusedSyntax(Definition javaDef, DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public UnusedSyntax(Definition javaDef, org.kframework.kil.loader.Context context) {
+		super(context);
 		this.javaDef = javaDef;
 	}
 
@@ -51,7 +50,7 @@ public class UnusedSyntax extends KlintRule {
 			/* If is a termcons, check it agains the productions */
 			if(term instanceof TermCons){
 				TermCons termCons = (TermCons)term;
-				Production termProd = definitionHelper.conses.get("\""+termCons.getCons()+"\"");
+				Production termProd = context.conses.get("\""+termCons.getCons()+"\"");
 				if(termProd.equals(production))
 					return true;
 			}

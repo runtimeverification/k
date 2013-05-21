@@ -14,7 +14,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Term;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
@@ -42,15 +42,15 @@ public class ProgramLoader {
 	 * @param kappize
 	 *            If true, then apply KAppModifier to AST.
 	 */
-	public static ASTNode loadPgmAst(String content, String filename, Boolean kappize, String startSymbol, DefinitionHelper definitionHelper) throws IOException,
+	public static ASTNode loadPgmAst(String content, String filename, Boolean kappize, String startSymbol, Context context) throws IOException,
 			TransformerException {
-		File tbl = new File(definitionHelper.kompiled.getCanonicalPath() + "/pgm/Program.tbl");
+		File tbl = new File(context.kompiled.getCanonicalPath() + "/pgm/Program.tbl");
 
 		// ------------------------------------- import files in Stratego
 		ASTNode out;
 
 		if (GlobalSettings.fastKast) {
-			out = Sglri.run_sglri(definitionHelper.kompiled.getAbsolutePath() + "/pgm/Program.tbl", startSymbol, content);
+			out = Sglri.run_sglri(context.kompiled.getAbsolutePath() + "/pgm/Program.tbl", startSymbol, content);
 		} else {
 			org.kframework.parser.concrete.KParser.ImportTblPgm(tbl.getAbsolutePath());
 			String parsed = org.kframework.parser.concrete.KParser.ParseProgramString(content, startSymbol);
@@ -58,31 +58,31 @@ public class ProgramLoader {
 
 			XmlLoader.addFilename(doc.getFirstChild(), filename);
 			XmlLoader.reportErrors(doc);
-			FileUtil.saveInFile(definitionHelper.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
-			JavaClassesFactory.startConstruction(definitionHelper);
+			FileUtil.saveInFile(context.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
+			JavaClassesFactory.startConstruction(context);
 			out = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
 			JavaClassesFactory.endConstruction();
 		}
 
-		out = out.accept(new PriorityFilter(definitionHelper));
-		out = out.accept(new PreferAvoidFilter(definitionHelper));
-		out = out.accept(new AmbFilter(definitionHelper));
-		out = out.accept(new RemoveBrackets(definitionHelper));
+		out = out.accept(new PriorityFilter(context));
+		out = out.accept(new PreferAvoidFilter(context));
+		out = out.accept(new AmbFilter(context));
+		out = out.accept(new RemoveBrackets(context));
 
 		if (kappize)
-			out = out.accept(new FlattenSyntax(definitionHelper));
+			out = out.accept(new FlattenSyntax(context));
 
 		return out;
 	}
 
-	public static ASTNode loadPgmAst(String content, String filename, String startSymbol, DefinitionHelper definitionHelper) throws IOException, TransformerException {
-		return loadPgmAst(content, filename, true, startSymbol, definitionHelper);
+	public static ASTNode loadPgmAst(String content, String filename, String startSymbol, Context context) throws IOException, TransformerException {
+		return loadPgmAst(content, filename, true, startSymbol, context);
 	}
 
-	public static ASTNode loadPgmAst(File pgmFile, boolean kappize, String startSymbol, DefinitionHelper definitionHelper) throws IOException, TransformerException {
+	public static ASTNode loadPgmAst(File pgmFile, boolean kappize, String startSymbol, Context context) throws IOException, TransformerException {
 		String filename = pgmFile.getCanonicalFile().getAbsolutePath();
 		String content = FileUtil.getFileContent(filename);
-		return loadPgmAst(content, filename, kappize, startSymbol, definitionHelper);
+		return loadPgmAst(content, filename, kappize, startSymbol, context);
 	}
 
 	/**
@@ -94,7 +94,7 @@ public class ProgramLoader {
 	 * @param prettyPrint
 	 * @param nextline
 	 */
-	public static Term processPgm(String content, String filename, Definition def, String startSymbol, DefinitionHelper definitionHelper) throws TransformerException {
+	public static Term processPgm(String content, String filename, Definition def, String startSymbol, Context context) throws TransformerException {
 		// compile a definition here
 		Stopwatch sw = new Stopwatch();
 
@@ -104,18 +104,18 @@ public class ProgramLoader {
 		try {
 			ASTNode out;
 			if (GlobalSettings.whatParser == GlobalSettings.ParserType.GROUND) {
-				org.kframework.parser.concrete.KParser.ImportTblGround(definitionHelper.kompiled.getCanonicalPath() + "/ground/Concrete.tbl");
-				out = DefinitionLoader.parseCmdString(content, "", filename, definitionHelper);
-				out = out.accept(new RemoveBrackets(definitionHelper));
-				out = out.accept(new AddEmptyLists(definitionHelper));
-				out = out.accept(new RemoveSyntacticCasts(definitionHelper));
-				out = out.accept(new FlattenSyntax(definitionHelper));
-				out = out.accept(new RemoveSyntacticCasts(definitionHelper));
+				org.kframework.parser.concrete.KParser.ImportTblGround(context.kompiled.getCanonicalPath() + "/ground/Concrete.tbl");
+				out = DefinitionLoader.parseCmdString(content, "", filename, context);
+				out = out.accept(new RemoveBrackets(context));
+				out = out.accept(new AddEmptyLists(context));
+				out = out.accept(new RemoveSyntacticCasts(context));
+				out = out.accept(new FlattenSyntax(context));
+				out = out.accept(new RemoveSyntacticCasts(context));
 			} else if (GlobalSettings.whatParser == GlobalSettings.ParserType.RULES) {
-				org.kframework.parser.concrete.KParser.ImportTbl(definitionHelper.kompiled.getCanonicalPath() + "/def/Concrete.tbl");
-				out = DefinitionLoader.parsePattern(content, filename, definitionHelper);
+				org.kframework.parser.concrete.KParser.ImportTbl(context.kompiled.getCanonicalPath() + "/def/Concrete.tbl");
+				out = DefinitionLoader.parsePattern(content, filename, context);
 				try {
-					out = new RuleCompilerSteps(def, definitionHelper).compile((Rule) out, null);
+					out = new RuleCompilerSteps(def, context).compile((Rule) out, null);
 				} catch (CompilerStepDone e) {
 					out = (ASTNode) e.getResult();
 				}
@@ -123,7 +123,7 @@ public class ProgramLoader {
 			} else if (GlobalSettings.whatParser == GlobalSettings.ParserType.BINARY) {
 				out = (org.kframework.kil.Cell) BinaryLoader.fromBinary(new FileInputStream(filename));
 			} else {
-				out = loadPgmAst(content, filename, startSymbol, definitionHelper);
+				out = loadPgmAst(content, filename, startSymbol, context);
 			}
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Parsing Program");

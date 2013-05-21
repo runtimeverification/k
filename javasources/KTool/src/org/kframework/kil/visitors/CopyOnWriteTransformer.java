@@ -2,10 +2,11 @@ package org.kframework.kil.visitors;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -15,11 +16,11 @@ import org.kframework.utils.general.GlobalSettings;
 
 public class CopyOnWriteTransformer implements Transformer {
 	String name;
-	protected DefinitionHelper definitionHelper;
+	protected Context context;
 
-	public CopyOnWriteTransformer(String name, DefinitionHelper definitionHelper) {
+	public CopyOnWriteTransformer(String name, Context context) {
 		this.name = name;
-		this.definitionHelper = definitionHelper;
+		this.context = context;
 	}
 
 	@Override
@@ -139,7 +140,7 @@ public class CopyOnWriteTransformer implements Transformer {
 	}
 
 	@Override
-	public ASTNode transform(Context node) throws TransformerException {
+	public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
 		return transform((Sentence) node);
 	}
 
@@ -321,7 +322,7 @@ public class CopyOnWriteTransformer implements Transformer {
 		Term term = node.getContents();
 		ASTNode result = term.accept(this);
 		if (result == null) {
-			result = MetaK.defaultTerm(term, definitionHelper);
+			result = MetaK.defaultTerm(term, context);
 		}
 		if (!(result instanceof Term)) {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + result.getClass() + ".", getName(), term.getFilename(), term
@@ -457,6 +458,30 @@ public class CopyOnWriteTransformer implements Transformer {
 		return transform((CollectionItem) node);
 	}
 
+    @Override
+    public ASTNode transform(MapBuiltin node) throws TransformerException {
+        boolean change = false;
+        ArrayList<Term> terms = new ArrayList<Term>(node.terms().size());
+        LinkedHashMap<Term, Term> elements = new LinkedHashMap<Term, Term>(node.elements().size());
+        for (Term term : node.terms()) {
+            Term transformedTerm = (Term) term.accept(this);
+            terms.add(transformedTerm);
+            change = change || transformedTerm != term;
+        }
+        for (java.util.Map.Entry<Term, Term> entry : node.elements().entrySet()) {
+            Term transformedKey = (Term) entry.getKey().accept(this);
+            Term transformedValue = (Term) entry.getValue().accept(this);
+            elements.put(transformedKey, transformedValue);
+            change = change || transformedKey != entry.getKey()
+                     || transformedValue != entry.getValue();
+        }
+        if (change) {
+            return new MapBuiltin(node.collectionSort(), elements, terms);
+        } else {
+            return node;
+        }
+    }
+
 	@Override
 	public ASTNode transform(Constant node) throws TransformerException {
 		return transform((Term) node);
@@ -579,7 +604,7 @@ public class CopyOnWriteTransformer implements Transformer {
 		}
 		if (change) {
 			node = node.shallowCopy();
-			node.replaceChildren((Term)left, (Term)right, definitionHelper);
+			node.replaceChildren((Term) left, (Term) right, context);
 		}
 		return transform((Term) node);
 	}

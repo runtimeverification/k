@@ -7,7 +7,7 @@ import org.kframework.backend.java.symbolic.Utils;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Production;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 
 import java.util.List;
 
@@ -24,17 +24,17 @@ public class KItem extends Term implements Sorted {
     private final KLabel kLabel;
     private final KList kList;
     private final String sort;
-    private DefinitionHelper definitionHelper;
+    private Context context;
 
-    public KItem(KLabel kLabel, KList kList, DefinitionHelper definitionHelper) {
+    public KItem(KLabel kLabel, KList kList, Context context) {
         super(Kind.KITEM);
-    	this.definitionHelper = definitionHelper;
+    	this.context = context;
 
         this.kLabel = kLabel;
         this.kList = kList;
 
         if (kLabel instanceof KLabelConstant) {
-            List<Production> productions = ((KLabelConstant) kLabel).productionsOf(definitionHelper);
+            List<Production> productions = ((KLabelConstant) kLabel).productionsOf(context);
             if (productions.size() == 1) {
                 Production production = productions.get(0);
                 if (!kList.hasFrame() && kList.size() == production.getArity()) {
@@ -46,7 +46,7 @@ public class KItem extends Term implements Sorted {
                             childSort = kind.toString();
                         }
 
-                        if (!definitionHelper.isSubsortedEq(production.getChildSort(i), childSort)) {
+                        if (!context.isSubsortedEq(production.getChildSort(i), childSort)) {
                             sort = kind.toString();
                             return;
                         }
@@ -121,7 +121,7 @@ public class KItem extends Term implements Sorted {
      */
     @Override
     public ASTNode shallowCopy() {
-        return new KItem(this.kLabel, this.kList, this.definitionHelper);
+        return new KItem(this.kLabel, this.kList, this.context);
     }
 
     @Override

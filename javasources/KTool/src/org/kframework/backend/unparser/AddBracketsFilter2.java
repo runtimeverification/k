@@ -1,7 +1,7 @@
 package org.kframework.backend.unparser;
 
 import org.kframework.kil.*;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -14,14 +14,14 @@ import java.util.Scanner;
 
 public class AddBracketsFilter2 extends BasicTransformer {
 
-	public AddBracketsFilter2(DefinitionHelper definitionHelper) throws IOException {
-		super("Add more brackets", definitionHelper);
-		org.kframework.parser.concrete.KParser.ImportTbl(definitionHelper.kompiled.getCanonicalPath() + "/def/Concrete.tbl");
+	public AddBracketsFilter2(Context context) throws IOException {
+		super("Add more brackets", context);
+		org.kframework.parser.concrete.KParser.ImportTbl(context.kompiled.getCanonicalPath() + "/def/Concrete.tbl");
 	}
 
 	private Term reparsed = null;
-	public AddBracketsFilter2(Term reparsed, DefinitionHelper definitionHelper) {
-		super("Add brackets to term based on parse forest", definitionHelper);
+	public AddBracketsFilter2(Term reparsed, Context context) {
+		super("Add brackets to term based on parse forest", context);
 		this.reparsed = reparsed;
 	}
 
@@ -113,29 +113,29 @@ public class AddBracketsFilter2 extends BasicTransformer {
 		if (reparsed != null) {
 			ASTNode result = addBracketsIfNeeded(ast);
 			if (atTop && result instanceof Bracket) {
-				return new Cast(result.getLocation(), result.getFilename(), (Term)result, definitionHelper);
+				return new Cast(result.getLocation(), result.getFilename(), (Term)result, context);
 			}
 			return result;
 		}
-		UnparserFilter unparser = new UnparserFilter(false, false, false, true, definitionHelper);
+		UnparserFilter unparser = new UnparserFilter(false, false, false, true, context);
 		ast.accept(unparser);
 		String unparsed = unparser.getResult();
 		try {
-			ASTNode rule = DefinitionLoader.parsePatternAmbiguous(unparsed, definitionHelper);
+			ASTNode rule = DefinitionLoader.parsePatternAmbiguous(unparsed, context);
 			Term reparsed = ((Rule)rule).getBody();
-			reparsed.accept(new AdjustLocations(definitionHelper));
+			reparsed.accept(new AdjustLocations(context));
 			if (!reparsed.contains(ast)) {
 				return replaceWithVar(ast);
 			}
-			return ast.accept(new AddBracketsFilter2(reparsed, definitionHelper));
+			return ast.accept(new AddBracketsFilter2(reparsed, context));
 		} catch (TransformerException e) {
 			return replaceWithVar(ast);
 		}
 	}
 
 	private class AdjustLocations extends BasicVisitor {
-		public AdjustLocations(DefinitionHelper definitionHelper) {
-			super("Apply first-line location offset", definitionHelper);
+		public AdjustLocations(Context context) {
+			super("Apply first-line location offset", context);
 		}
 
 		public void visit(ASTNode ast) {
@@ -162,17 +162,17 @@ public class AddBracketsFilter2 extends BasicTransformer {
 	}
 
 	private ASTNode addBracketsIfNeeded(Term ast) throws TransformerException {
-		TraverseForest trans = new TraverseForest(ast, definitionHelper);
+		TraverseForest trans = new TraverseForest(ast, context);
 		reparsed = (Term)reparsed.accept(trans);
 		if (trans.needsParens) {
-			return new Bracket(ast.getLocation(), ast.getFilename(), ast, definitionHelper);
+			return new Bracket(ast.getLocation(), ast.getFilename(), ast, context);
 		}
 		return ast;
 	}
 
 	private class GetRealLocation extends BasicVisitor {
-		public GetRealLocation(Term ast, DefinitionHelper definitionHelper) {
-			super("Find term in parse forest", definitionHelper);
+		public GetRealLocation(Term ast, Context context) {
+			super("Find term in parse forest", context);
 			this.ast = ast;
 		}
 		private Term ast;
@@ -186,8 +186,8 @@ public class AddBracketsFilter2 extends BasicTransformer {
 	}
 
 	private class TraverseForest extends BasicTransformer {
-		public TraverseForest(Term ast, DefinitionHelper definitionHelper) {
-			super("Determine if term needs parentheses", definitionHelper);
+		public TraverseForest(Term ast, org.kframework.kil.loader.Context context) {
+			super("Determine if term needs parentheses", context);
 			this.ast = ast;
 		}
 		private Term ast;

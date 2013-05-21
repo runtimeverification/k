@@ -12,7 +12,7 @@ import org.kframework.backend.unparser.KastFilter;
 import org.kframework.compile.FlattenModules;
 import org.kframework.compile.transformers.AddTopCellConfig;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.ProgramLoader;
 import org.kframework.utils.BinaryLoader;
@@ -27,7 +27,7 @@ import org.kframework.utils.general.GlobalSettings;
 public class KastFrontEnd {
 
 	public static void kast(String[] args) {
-		DefinitionHelper definitionHelper = new DefinitionHelper();
+		Context context = new Context();
 		Stopwatch sw = new Stopwatch();
 		KastOptionsParser op = new KastOptionsParser();
 		CommandLine cmd = op.parse(args);
@@ -88,19 +88,19 @@ public class KastFrontEnd {
 			def = new File(cmd.getOptionValue("k-definition"));
 			if (!def.exists())
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find file: " + pgm, "command line", "System file."));
-			if (definitionHelper.kompiled == null) {
+			if (context.kompiled == null) {
 				try {
 					String fileName = FileUtil.stripExtension(def.getName());
-					definitionHelper.kompiled = new File(def.getCanonicalFile().getParent() + File.separator + fileName + "-kompiled");
+					context.kompiled = new File(def.getCanonicalFile().getParent() + File.separator + fileName + "-kompiled");
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
 		} else if (cmd.hasOption("compiled-def")) {
-			definitionHelper.kompiled = new File(cmd.getOptionValue("compiled-def"));
-			if (!definitionHelper.kompiled.exists()) {
-				String msg = "Could not find directory: " + definitionHelper.kompiled;
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", definitionHelper.kompiled.getAbsolutePath()));
+			context.kompiled = new File(cmd.getOptionValue("compiled-def"));
+			if (!context.kompiled.exists()) {
+				String msg = "Could not find directory: " + context.kompiled;
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", context.kompiled.getAbsolutePath()));
 			}
 		} else {
 			// search for the definition
@@ -113,36 +113,37 @@ public class KastFrontEnd {
 
 			for (int i = 0; i < dirs.length; i++) {
 				if (dirs[i].endsWith("-kompiled")) {
-					if (definitionHelper.kompiled != null) {
+					if (context.kompiled != null) {
 						String msg = "Multiple compiled definitions found. Use -kDefinition or -compiledDef to specify one.";
 						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", new File(".").getAbsolutePath()));
 					} else {
-						definitionHelper.kompiled = new File(dirs[i]).getAbsoluteFile();
+						context.kompiled = new File(dirs[i]).getAbsoluteFile();
 					}
 				}
 			}
-			if (definitionHelper.kompiled == null && System.getenv("KRUN_COMPILED_DEF") != null) {
-				definitionHelper.kompiled = new File(System.getenv("KRUN_COMPILED_DEF"));
+			if (context.kompiled == null && System.getenv("KRUN_COMPILED_DEF") != null) {
+				context.kompiled = new File(System.getenv("KRUN_COMPILED_DEF"));
 			}
 
-			if (definitionHelper.kompiled == null) {
+			if (context.kompiled == null) {
 				String msg = "Could not find a compiled definition. Use -kDefinition or -compiledDef to specify one.";
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", new File(".").getAbsolutePath()));
 			}
 		}
 		try {
-			if (definitionHelper.kompiled.exists()) {
-				File defXml = new File(definitionHelper.kompiled.getCanonicalPath() + "/defx.bin");
+			if (context.kompiled.exists()) {
+				File defXml = new File(context.kompiled.getCanonicalPath() + "/defx.bin");
 				if (!defXml.exists()) {
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find the compiled definition.", "command line",
 							defXml.getAbsolutePath()));
 				}
 
 				javaDef = (org.kframework.kil.Definition) BinaryLoader.fromBinary(new FileInputStream(defXml));
-				javaDef = new FlattenModules(definitionHelper).compile(javaDef, null);
-				javaDef = (org.kframework.kil.Definition) javaDef.accept(new AddTopCellConfig(definitionHelper));
+				javaDef = new FlattenModules(context).compile(javaDef, null);
+				javaDef = (org.kframework.kil.Definition) javaDef.accept(new AddTopCellConfig(
+                        context));
 				// This is essential for generating maude
-				javaDef.preprocess(definitionHelper);
+				javaDef.preprocess(context);
 
 				def = new File(javaDef.getMainFile());
 			} else {
@@ -185,7 +186,7 @@ public class KastFrontEnd {
 			GlobalSettings.whatParser = GlobalSettings.ParserType.GROUND;
 		}
 
-		String sort = definitionHelper.startSymbolPgm;
+		String sort = context.startSymbolPgm;
 		if (System.getenv("KRUN_SORT") != null) {
 			sort = System.getenv("KRUN_SORT");
 		}
@@ -194,14 +195,14 @@ public class KastFrontEnd {
 		}
 
 		try {
-			ASTNode out = ProgramLoader.processPgm(pgm, path, javaDef, sort, definitionHelper);
+			ASTNode out = ProgramLoader.processPgm(pgm, path, javaDef, sort, context);
 			String kast;
 			if (prettyPrint) {
-				KastFilter kastFilter = new KastFilter(indentationOptions, nextline, definitionHelper);
+				KastFilter kastFilter = new KastFilter(indentationOptions, nextline, context);
 				out.accept(kastFilter);
 				kast = kastFilter.getResult();
 			} else {
-				MaudeFilter maudeFilter = new MaudeFilter(definitionHelper);
+				MaudeFilter maudeFilter = new MaudeFilter(context);
 				out.accept(maudeFilter);
 				kast = maudeFilter.getResult();
 			}

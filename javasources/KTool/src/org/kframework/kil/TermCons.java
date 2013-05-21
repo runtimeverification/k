@@ -4,9 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.kframework.kil.ProductionItem.ProductionType;
-import org.kframework.kil.loader.Constants;
-import org.kframework.kil.loader.DefinitionHelper;
-import org.kframework.kil.loader.JavaClassesFactory;
+import org.kframework.kil.loader.*;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
@@ -27,11 +26,11 @@ public class TermCons extends Term {
 	protected java.util.List<Term> contents;
 	protected Production production;
 
-	public TermCons(Element element, DefinitionHelper definitionHelper) {
+	public TermCons(Element element, Context context) {
 		super(element);
 		this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
 		this.cons = element.getAttribute(Constants.CONS_cons_ATTR);
-		this.production = definitionHelper.conses.get(cons);
+		this.production = context.conses.get(cons);
 		assert this.production != null;
 
 		contents = new ArrayList<Term>();
@@ -40,11 +39,11 @@ public class TermCons extends Term {
 			contents.add((Term) JavaClassesFactory.getTerm(e));
 	}
 
-	public TermCons(ATermAppl atm, DefinitionHelper definitionHelper) {
+	public TermCons(ATermAppl atm, Context context) {
 		super(atm);
 		this.cons = atm.getName();
 		this.sort = StringUtil.getSortNameFromCons(cons);
-		this.production = definitionHelper.conses.get(cons);
+		this.production = context.conses.get(cons);
 		assert this.production != null;
 
 		contents = new ArrayList<Term>();
@@ -64,8 +63,8 @@ public class TermCons extends Term {
 		}
 	}
 
-	public TermCons(String sort, String cons, DefinitionHelper definitionHelper) {
-		this(sort, cons, new ArrayList<Term>(), definitionHelper);
+	public TermCons(String sort, String cons, org.kframework.kil.loader.Context context) {
+		this(sort, cons, new ArrayList<Term>(), context);
 	}
 
 	public TermCons(TermCons node) {
@@ -76,11 +75,11 @@ public class TermCons extends Term {
 		assert this.production != null;
 	}
 
-	public TermCons(String psort, String listCons, List<Term> genContents, DefinitionHelper definitionHelper) {
+	public TermCons(String psort, String listCons, List<Term> genContents, Context context) {
 		super(psort);
 		cons = listCons;
 		contents = genContents;
-		production = definitionHelper.conses.get(cons);
+		production = context.conses.get(cons);
 	}
 
 	public Production getProduction() {
@@ -146,8 +145,8 @@ public class TermCons extends Term {
 	}
 
 	@Override
-	public ASTNode accept(Transformer visitor) throws TransformerException {
-		return visitor.transform(this);
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
 	}
 
 	@Override

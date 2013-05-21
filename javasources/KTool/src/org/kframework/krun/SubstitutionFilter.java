@@ -1,6 +1,5 @@
 package org.kframework.krun;
 
-import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.*;
 import org.kframework.utils.errorsystem.KException;
@@ -14,8 +13,8 @@ public class SubstitutionFilter extends CopyOnWriteTransformer {
 
 	private Map<String, Term> args;
 
-	public SubstitutionFilter(Map<String, Term> args, DefinitionHelper definitionHelper) {
-		super("Plug terms into variables", definitionHelper);
+	public SubstitutionFilter(Map<String, Term> args, org.kframework.kil.loader.Context context) {
+		super("Plug terms into variables", context);
 		this.args = args;
 	}
 

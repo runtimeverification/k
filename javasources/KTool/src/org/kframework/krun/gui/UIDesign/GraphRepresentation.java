@@ -2,7 +2,6 @@ package org.kframework.krun.gui.UIDesign;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.Event;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -28,7 +27,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Term;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.ConcretizeSyntax;
 import org.kframework.krun.api.KRunState;
@@ -66,14 +65,14 @@ public class GraphRepresentation extends JPanel implements ItemListener{
 	private RunKRunCommand commandProcessor;
 	public static KRunState selection;
 	
-	protected DefinitionHelper definitionHelper;
+	protected Context context;
 
 	// keep track of number of selection 
 	private int nonKrunStateSelection;
 	private int totalSelections ;
 	private boolean enabled ;
-	public GraphRepresentation(RunKRunCommand command, DefinitionHelper definitionHelper) throws Exception{
-		this.definitionHelper = definitionHelper;
+	public GraphRepresentation(RunKRunCommand command, Context context) throws Exception{
+		this.context = context;
 		initCommandProcessor(command);
 		initGraph();
 		initCollapser();
@@ -96,13 +95,13 @@ public class GraphRepresentation extends JPanel implements ItemListener{
 	public void initGraph() throws Exception{
 		Graph graph = null;
 		try {
-			graph = commandProcessor.firstStep(definitionHelper);
+			graph = commandProcessor.firstStep(context);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}		
-		vvd = new VisualizationViewerDemo(graph, definitionHelper);
+		vvd = new VisualizationViewerDemo(graph, context);
 	}
 
 	public void initCollapser(){		
@@ -293,7 +292,7 @@ public class GraphRepresentation extends JPanel implements ItemListener{
 						second = krs;
 					}
 				}
-				new DiffFrame(first, second, null, definitionHelper).setVisible(true);
+				new DiffFrame(first, second, null, context).setVisible(true);
 			}
 		});
 	}
@@ -358,14 +357,15 @@ public class GraphRepresentation extends JPanel implements ItemListener{
 		index++;
 	}	
 
-	public  static void displayVertexInfo(KRunState pick, DefinitionHelper definitionHelper) {		
+	public  static void displayVertexInfo(KRunState pick, Context context) {
 		Term term = pick.getResult();
 		try {
-			term = (Term) term.accept(new ConcretizeSyntax(definitionHelper));
-			term = (Term) term.accept(new TypeInferenceSupremumFilter(definitionHelper));
-			term = (Term) term.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(definitionHelper), definitionHelper));
+			term = (Term) term.accept(new ConcretizeSyntax(context));
+			term = (Term) term.accept(new TypeInferenceSupremumFilter(context));
+			term = (Term) term.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context),
+                    context));
 			//as a last resort, undo concretization
-			term = (Term) term.accept(new org.kframework.krun.FlattenDisambiguationFilter(definitionHelper));
+			term = (Term) term.accept(new org.kframework.krun.FlattenDisambiguationFilter(context));
 		} catch (TransformerException e) {
 			e.printStackTrace();
 		}
@@ -376,10 +376,10 @@ public class GraphRepresentation extends JPanel implements ItemListener{
 			}
 		}
 		//set the color map  
-		ColorVisitor cv = new ColorVisitor(definitionHelper);
+		ColorVisitor cv = new ColorVisitor(context);
 		term.accept(cv);
 
-		UnparserFilter unparser = new UnparserFilter(true, false, definitionHelper);
+		UnparserFilter unparser = new UnparserFilter(true, false, context);
 		term.accept(unparser);
 
 		//TO-DO : create our own filter that ignores xml characters from a tag
@@ -396,8 +396,8 @@ public class GraphRepresentation extends JPanel implements ItemListener{
 		XMLEditorKit.collapseMemorizedTags();
 	}
 
-	public static void displayEdgeInfo(Transition pick, KRunState src, KRunState dest, DefinitionHelper definitionHelper){
-		new DiffFrame(src, dest, pick, definitionHelper).setVisible(true);
+	public static void displayEdgeInfo(Transition pick, KRunState src, KRunState dest, Context context){
+		new DiffFrame(src, dest, pick, context).setVisible(true);
 	}
 
 	public void redrawGraphAndResetScroll(){
