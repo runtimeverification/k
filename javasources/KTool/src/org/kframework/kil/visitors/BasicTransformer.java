@@ -10,6 +10,7 @@ import org.kframework.kil.Set;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
+
 /**
  * Default implementations of methods visit non-attribute children, and then call the transform method for the parent class on the current node.
  */
@@ -100,10 +101,8 @@ public class BasicTransformer implements Transformer {
 	@Override
 	public ASTNode transform(Syntax node) throws TransformerException {
 		node.setSort((Sort) node.getSort().accept(this));
-		if (node.getPriorityBlocks() != null) {
-			for (int i = 0; i < node.getPriorityBlocks().size(); i++) {
-				node.getPriorityBlocks().set(i, (PriorityBlock) node.getPriorityBlocks().get(i).accept(this));
-			}
+		for (int i = 0; i < node.getPriorityBlocks().size(); i++) {
+			node.getPriorityBlocks().set(i, (PriorityBlock) node.getPriorityBlocks().get(i).accept(this));
 		}
 		return transform((ModuleItem) node);
 	}
@@ -283,58 +282,59 @@ public class BasicTransformer implements Transformer {
 		return transform((CollectionItem) result);
 	}
 
-	@Override
-	public ASTNode transform(MapBuiltin node) throws TransformerException {
-		boolean change = false;
-		ArrayList<Term> terms = new ArrayList<Term>(node.terms().size());
-		LinkedHashMap<Term, Term> elements = new LinkedHashMap<Term, Term>(node.elements().size());
-		for (Term term : node.terms()) {
-			Term transformedTerm = (Term) term.accept(this);
-			terms.add(transformedTerm);
-			change = change || transformedTerm != term;
-		}
-		for (java.util.Map.Entry<Term, Term> entry : node.elements().entrySet()) {
-			Term transformedKey = (Term) entry.getKey().accept(this);
-			Term transformedValue = (Term) entry.getValue().accept(this);
-			elements.put(transformedKey, transformedValue);
-			change = change || transformedKey != entry.getKey() || transformedValue != entry.getValue();
-		}
+    @Override
+    public ASTNode transform(MapBuiltin node) throws TransformerException {
+        boolean change = false;
+        ArrayList<Term> terms = new ArrayList<Term>(node.terms().size());
+        LinkedHashMap<Term, Term> elements = new LinkedHashMap<Term, Term>(node.elements().size());
+        for (Term term : node.terms()) {
+            Term transformedTerm = (Term) term.accept(this);
+            terms.add(transformedTerm);
+            change = change || transformedTerm != term;
+        }
+        for (java.util.Map.Entry<Term, Term> entry : node.elements().entrySet()) {
+            Term transformedKey = (Term) entry.getKey().accept(this);
+            Term transformedValue = (Term) entry.getValue().accept(this);
+            elements.put(transformedKey, transformedValue);
+            change = change || transformedKey != entry.getKey()
+                     || transformedValue != entry.getValue();
+        }
 
-		return new MapBuiltin(node.collectionSort(), elements, terms);
-	}
+        return new MapBuiltin(node.collectionSort(), elements, terms);
+    }
 
-	@Override
+    @Override
 	public ASTNode transform(Constant node) throws TransformerException {
 		return transform((Term) node);
 	}
 
-	@Override
-	public ASTNode transform(Token node) throws TransformerException {
-		/* an instance of class Token is immutable */
-		return transform((KLabel) node);
-	}
+    @Override
+    public ASTNode transform(Token node) throws TransformerException {
+        /* an instance of class Token is immutable */
+        return transform((KLabel) node);
+    }
 
-	@Override
-	public ASTNode transform(BoolBuiltin node) throws TransformerException {
-		return transform((Token) node);
-	}
+    @Override
+    public ASTNode transform(BoolBuiltin node) throws TransformerException {
+        return transform((Token) node);
+    }
 
-	@Override
-	public ASTNode transform(IntBuiltin node) throws TransformerException {
-		return transform((Token) node);
-	}
+    @Override
+    public ASTNode transform(IntBuiltin node) throws TransformerException {
+        return transform((Token) node);
+    }
 
-	@Override
-	public ASTNode transform(StringBuiltin node) throws TransformerException {
-		return transform((Token) node);
-	}
+    @Override
+    public ASTNode transform(StringBuiltin node) throws TransformerException {
+        return transform((Token) node);
+    }
 
-	@Override
-	public ASTNode transform(GenericToken node) throws TransformerException {
-		return transform((Token) node);
-	}
+    @Override
+    public ASTNode transform(GenericToken node) throws TransformerException {
+        return transform((Token) node);
+    }
 
-	@Override
+    @Override
 	public ASTNode transform(Empty node) throws TransformerException {
 		return transform((Term) node);
 	}
@@ -353,13 +353,13 @@ public class BasicTransformer implements Transformer {
 	public ASTNode transform(KApp node) throws TransformerException {
 		KApp result = node.shallowCopy();
 		result.setLabel((Term) node.getLabel().accept(this));
-		Term resultChild = (Term) node.getChild().accept(this);
-		if (!(resultChild.getSort().equals(KSorts.KLIST) || resultChild instanceof Ambiguity)) {
-			result.setChild(new KList(Collections.<Term> singletonList(resultChild)));
-		} else {
-			result.setChild(resultChild);
-		}
-		return transform((Term) result);
+        Term resultChild = (Term) node.getChild().accept(this);
+        if (!(resultChild.getSort().equals(KSorts.KLIST) || resultChild instanceof Ambiguity)) {
+            result.setChild(new KList(Collections.<Term>singletonList(resultChild)));
+        } else {
+		    result.setChild(resultChild);
+        }
+        return transform((Term) result);
 	}
 
 	@Override
@@ -367,15 +367,18 @@ public class BasicTransformer implements Transformer {
 		return transform((Term) node);
 	}
 
-	@Override
-	public ASTNode transform(KLabelConstant node) throws TransformerException {
-		return transform((KLabel) node);
-	}
+    @Override
+    public ASTNode transform(KLabelConstant node) throws TransformerException {
+        return transform((KLabel) node);
+    }
 
-	@Override
+    @Override
 	public ASTNode transform(Rewrite node) throws TransformerException {
 		Rewrite result = new Rewrite(node);
-		result.replaceChildren((Term) node.getLeft().accept(this), (Term) node.getRight().accept(this), context);
+		result.replaceChildren(
+                (Term) node.getLeft().accept(this),
+                (Term) node.getRight().accept(this),
+                context);
 		return transform((Term) result);
 	}
 

@@ -54,8 +54,8 @@ public class Syntax extends ModuleItem {
 		sort = (Sort) JavaClassesFactory.getTerm(sorts.get(0));
 
 		List<Element> priorities = XML.getChildrenElementsByTagName(element, Constants.PRIORITY);
+		this.priorityBlocks = new ArrayList<PriorityBlock>();
 		if (priorities.size() > 0) {
-			this.priorityBlocks = new ArrayList<PriorityBlock>();
 			for (Element priority : priorities)
 				priorityBlocks.add((PriorityBlock) JavaClassesFactory.getTerm(priority));
 		}
@@ -63,9 +63,8 @@ public class Syntax extends ModuleItem {
 		List<Element> its = XML.getChildrenElementsByTagName(element, Constants.ATTRIBUTES);
 		if (attributes == null)
 			attributes = new Attributes();
-		if (its.size() > 0) {
+		if (its.size() > 0)
 			attributes.setAll((Attributes) JavaClassesFactory.getTerm(its.get(0)));
-		}
 	}
 
 	public Syntax(Syntax node) {

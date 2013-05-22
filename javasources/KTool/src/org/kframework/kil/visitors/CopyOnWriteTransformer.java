@@ -13,6 +13,7 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
+
 public class CopyOnWriteTransformer implements Transformer {
 	String name;
 	protected Context context;
@@ -37,8 +38,8 @@ public class CopyOnWriteTransformer implements Transformer {
 				change = true;
 			if (result != null) {
 				if (!(result instanceof DefinitionItem)) {
-					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting DefinitionItem, but got " + result.getClass() + ".",
-							getName(), di.getFilename(), di.getLocation()));
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting DefinitionItem, but got " + result.getClass() + ".", getName(), di
+							.getFilename(), di.getLocation()));
 				}
 				items.add((DefinitionItem) result);
 			}
@@ -70,8 +71,8 @@ public class CopyOnWriteTransformer implements Transformer {
 				change = true;
 			if (result != null) {
 				if (!(result instanceof ModuleItem)) {
-					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting ModuleItem, but got " + result.getClass() + ".",
-							getName(), mi.getFilename(), mi.getLocation()));
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting ModuleItem, but got " + result.getClass() + ".", getName(), mi.getFilename(),
+							mi.getLocation()));
 				}
 				items.add((ModuleItem) result);
 			}
@@ -108,8 +109,8 @@ public class CopyOnWriteTransformer implements Transformer {
 		if (null == bodyAST)
 			return null;
 		if (!(bodyAST instanceof Term)) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + bodyAST.getClass() + ".", getName(), body
-					.getFilename(), body.getLocation()));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + bodyAST.getClass() + ".", getName(), body.getFilename(), body
+					.getLocation()));
 		}
 		body = (Term) bodyAST;
 		Term condition = node.getCondition();
@@ -120,8 +121,8 @@ public class CopyOnWriteTransformer implements Transformer {
 			if (null == conditionAST)
 				return null;
 			if (!(conditionAST instanceof Term)) {
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + conditionAST.getClass()
-						+ " while transforming.", condition.getFilename(), condition.getLocation()));
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + conditionAST.getClass() + " while transforming.", condition
+						.getFilename(), condition.getLocation()));
 			}
 			condition = (Term) conditionAST;
 		}
@@ -152,23 +153,21 @@ public class CopyOnWriteTransformer implements Transformer {
 	public ASTNode transform(Syntax node) throws TransformerException {
 		boolean change = false;
 		ArrayList<PriorityBlock> pbs = new ArrayList<PriorityBlock>();
-		if (node.getPriorityBlocks() != null) {
-			for (PriorityBlock pb : node.getPriorityBlocks()) {
-				ASTNode result = pb.accept(this);
-				if (result != pb)
-					change = true;
-				if (result != null) {
-					if (!(result instanceof PriorityBlock)) {
-						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting PriorityBlock, but got " + result.getClass()
-								+ " while transforming.", getName(), pb.getFilename(), pb.getLocation()));
-					}
-					pbs.add((PriorityBlock) result);
+		for (PriorityBlock pb : node.getPriorityBlocks()) {
+			ASTNode result = pb.accept(this);
+			if (result != pb)
+				change = true;
+			if (result != null) {
+				if (!(result instanceof PriorityBlock)) {
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting PriorityBlock, but got " + result.getClass() + " while transforming.",
+							getName(), pb.getFilename(), pb.getLocation()));
 				}
+				pbs.add((PriorityBlock) result);
 			}
-			if (change) {
-				node = node.shallowCopy();
-				node.setPriorityBlocks(pbs);
-			}
+		}
+		if (change) {
+			node = node.shallowCopy();
+			node.setPriorityBlocks(pbs);
 		}
 		return transform((ModuleItem) node);
 	}
@@ -183,8 +182,8 @@ public class CopyOnWriteTransformer implements Transformer {
 				change = true;
 			if (result != null) {
 				if (!(result instanceof PriorityBlockExtended)) {
-					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting PriorityBlock, but got " + result.getClass()
-							+ " while transforming.", getName(), pb.getFilename(), pb.getLocation()));
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting PriorityBlock, but got " + result.getClass() + " while transforming.",
+							getName(), pb.getFilename(), pb.getLocation()));
 				}
 				pbs.add((PriorityBlockExtended) result);
 			}
@@ -206,8 +205,8 @@ public class CopyOnWriteTransformer implements Transformer {
 				change = true;
 			if (result != null) {
 				if (!(result instanceof KLabelConstant)) {
-					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Constant, but got " + result.getClass()
-							+ " while transforming.", getName(), pb.getFilename(), pb.getLocation()));
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Constant, but got " + result.getClass() + " while transforming.", getName(),
+							pb.getFilename(), pb.getLocation()));
 				}
 				pbs.add((KLabelConstant) result);
 			}
@@ -229,8 +228,8 @@ public class CopyOnWriteTransformer implements Transformer {
 				change = true;
 			if (result != null) {
 				if (!(result instanceof Production)) {
-					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Production, but got " + result.getClass() + ".",
-							getName(), p.getFilename(), p.getLocation()));
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Production, but got " + result.getClass() + ".", getName(), p.getFilename(), p
+							.getLocation()));
 				}
 				prods.add((Production) result);
 			}
@@ -252,8 +251,8 @@ public class CopyOnWriteTransformer implements Transformer {
 				change = true;
 			if (result != null) {
 				if (!(result instanceof KLabelConstant)) {
-					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Constant, but got " + result.getClass() + ".",
-							getName(), p.getFilename(), p.getLocation()));
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Constant, but got " + result.getClass() + ".", getName(), p.getFilename(), p
+							.getLocation()));
 				}
 				prods.add((KLabelConstant) result);
 			}
@@ -275,8 +274,8 @@ public class CopyOnWriteTransformer implements Transformer {
 				change = true;
 			if (result != null) {
 				if (!(result instanceof ProductionItem)) {
-					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Production, but got " + result.getClass() + ".",
-							getName(), pi.getFilename(), pi.getLocation()));
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Production, but got " + result.getClass() + ".", getName(), pi.getFilename(),
+							pi.getLocation()));
 				}
 				pis.add((ProductionItem) result);
 			}
@@ -326,8 +325,8 @@ public class CopyOnWriteTransformer implements Transformer {
 			result = MetaK.defaultTerm(term, context);
 		}
 		if (!(result instanceof Term)) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + result.getClass() + ".", getName(), term
-					.getFilename(), term.getLocation()));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + result.getClass() + ".", getName(), term.getFilename(), term
+					.getLocation()));
 		}
 		if (result != term) {
 			node = node.shallowCopy();
@@ -346,8 +345,8 @@ public class CopyOnWriteTransformer implements Transformer {
 				change = true;
 			if (result != null) {
 				if (!(result instanceof Term)) {
-					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + result.getClass() + ".", getName(),
-							t.getFilename(), t.getLocation()));
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + result.getClass() + ".", getName(), t.getFilename(), t
+							.getLocation()));
 				}
 				terms.add((Term) result);
 			}
@@ -401,8 +400,8 @@ public class CopyOnWriteTransformer implements Transformer {
 		if (result == null)
 			return null;
 		if (!(result instanceof Term)) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + result.getClass() + ".", getName(), term
-					.getFilename(), term.getLocation()));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + result.getClass() + ".", getName(), term.getFilename(), term
+					.getLocation()));
 		}
 		if (result != term) {
 			node = node.shallowCopy();
@@ -429,8 +428,8 @@ public class CopyOnWriteTransformer implements Transformer {
 		if (key == null)
 			return null;
 		if (!(key instanceof Term)) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + key.getClass() + ".", getName(), term
-					.getFilename(), term.getLocation()));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + key.getClass() + ".", getName(), term.getFilename(), term
+					.getLocation()));
 		}
 		if (key != term) {
 			change = true;
@@ -440,8 +439,8 @@ public class CopyOnWriteTransformer implements Transformer {
 		if (value == null)
 			return null;
 		if (!(value instanceof Term)) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + value.getClass() + " while transforming.",
-					term.getFilename(), term.getLocation()));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + value.getClass() + " while transforming.", term.getFilename(), term
+					.getLocation()));
 		}
 		if (value != term) {
 			change = true;
@@ -459,61 +458,62 @@ public class CopyOnWriteTransformer implements Transformer {
 		return transform((CollectionItem) node);
 	}
 
-	@Override
-	public ASTNode transform(MapBuiltin node) throws TransformerException {
-		boolean change = false;
-		ArrayList<Term> terms = new ArrayList<Term>(node.terms().size());
-		LinkedHashMap<Term, Term> elements = new LinkedHashMap<Term, Term>(node.elements().size());
-		for (Term term : node.terms()) {
-			Term transformedTerm = (Term) term.accept(this);
-			terms.add(transformedTerm);
-			change = change || transformedTerm != term;
-		}
-		for (java.util.Map.Entry<Term, Term> entry : node.elements().entrySet()) {
-			Term transformedKey = (Term) entry.getKey().accept(this);
-			Term transformedValue = (Term) entry.getValue().accept(this);
-			elements.put(transformedKey, transformedValue);
-			change = change || transformedKey != entry.getKey() || transformedValue != entry.getValue();
-		}
-		if (change) {
-			return new MapBuiltin(node.collectionSort(), elements, terms);
-		} else {
-			return node;
-		}
-	}
+    @Override
+    public ASTNode transform(MapBuiltin node) throws TransformerException {
+        boolean change = false;
+        ArrayList<Term> terms = new ArrayList<Term>(node.terms().size());
+        LinkedHashMap<Term, Term> elements = new LinkedHashMap<Term, Term>(node.elements().size());
+        for (Term term : node.terms()) {
+            Term transformedTerm = (Term) term.accept(this);
+            terms.add(transformedTerm);
+            change = change || transformedTerm != term;
+        }
+        for (java.util.Map.Entry<Term, Term> entry : node.elements().entrySet()) {
+            Term transformedKey = (Term) entry.getKey().accept(this);
+            Term transformedValue = (Term) entry.getValue().accept(this);
+            elements.put(transformedKey, transformedValue);
+            change = change || transformedKey != entry.getKey()
+                     || transformedValue != entry.getValue();
+        }
+        if (change) {
+            return new MapBuiltin(node.collectionSort(), elements, terms);
+        } else {
+            return node;
+        }
+    }
 
 	@Override
 	public ASTNode transform(Constant node) throws TransformerException {
 		return transform((Term) node);
 	}
 
-	@Override
-	public ASTNode transform(Token node) throws TransformerException {
-		/* an instance of class Token is immutable */
-		return transform((KLabel) node);
-	}
+    @Override
+    public ASTNode transform(Token node) throws TransformerException {
+        /* an instance of class Token is immutable */
+        return transform((KLabel) node);
+    }
 
-	@Override
-	public ASTNode transform(BoolBuiltin node) throws TransformerException {
-		return transform((Token) node);
-	}
+    @Override
+    public ASTNode transform(BoolBuiltin node) throws TransformerException {
+        return transform((Token) node);
+    }
 
-	@Override
-	public ASTNode transform(IntBuiltin node) throws TransformerException {
-		return transform((Token) node);
-	}
+    @Override
+    public ASTNode transform(IntBuiltin node) throws TransformerException {
+        return transform((Token) node);
+    }
 
-	@Override
-	public ASTNode transform(StringBuiltin node) throws TransformerException {
-		return transform((Token) node);
-	}
+    @Override
+    public ASTNode transform(StringBuiltin node) throws TransformerException {
+        return transform((Token) node);
+    }
 
-	@Override
-	public ASTNode transform(GenericToken node) throws TransformerException {
-		return transform((Token) node);
-	}
+    @Override
+    public ASTNode transform(GenericToken node) throws TransformerException {
+        return transform((Token) node);
+    }
 
-	@Override
+    @Override
 	public ASTNode transform(Empty node) throws TransformerException {
 		return transform((Term) node);
 	}
@@ -536,8 +536,8 @@ public class CopyOnWriteTransformer implements Transformer {
 		if (label == null)
 			return null;
 		if (!(label instanceof Term)) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + label.getClass() + ".", getName(), term
-					.getFilename(), term.getLocation()));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + label.getClass() + ".", getName(), term.getFilename(), term
+					.getLocation()));
 		}
 		if (label != term) {
 			change = true;
@@ -547,8 +547,8 @@ public class CopyOnWriteTransformer implements Transformer {
 		if (child == null)
 			return null;
 		if (!(child instanceof Term)) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + child.getClass() + " while transforming.",
-					term.getFilename(), term.getLocation()));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + child.getClass() + " while transforming.", term.getFilename(), term
+					.getLocation()));
 		}
 		if (child != term) {
 			change = true;
@@ -556,12 +556,12 @@ public class CopyOnWriteTransformer implements Transformer {
 		if (change) {
 			node = node.shallowCopy();
 			node.setLabel((Term) label);
-			Term childTerm = (Term) child;
-			if (!(childTerm.getSort().equals(KSorts.KLIST) || childTerm instanceof Ambiguity)) {
-				node.setChild(new KList(Collections.<Term> singletonList(childTerm)));
-			} else {
-				node.setChild(childTerm);
-			}
+            Term childTerm = (Term) child;
+            if (!(childTerm.getSort().equals(KSorts.KLIST) || childTerm instanceof Ambiguity)) {
+                node.setChild(new KList(Collections.<Term>singletonList(childTerm)));
+            } else {
+                node.setChild(childTerm);
+            }
 
 		}
 		return transform((Term) node);
@@ -572,12 +572,12 @@ public class CopyOnWriteTransformer implements Transformer {
 		return transform((Term) node);
 	}
 
-	@Override
-	public ASTNode transform(KLabelConstant node) throws TransformerException {
-		return transform((KLabel) node);
-	}
+    @Override
+    public ASTNode transform(KLabelConstant node) throws TransformerException {
+        return transform((KLabel) node);
+    }
 
-	@Override
+    @Override
 	public ASTNode transform(Rewrite node) throws TransformerException {
 		boolean change = false;
 		Term term = node.getLeft();
@@ -585,8 +585,8 @@ public class CopyOnWriteTransformer implements Transformer {
 		if (left == null)
 			return null;
 		if (!(left instanceof Term)) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + left.getClass() + ".", getName(), term
-					.getFilename(), term.getLocation()));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + left.getClass() + ".", getName(), term.getFilename(), term
+					.getLocation()));
 		}
 		if (left != term) {
 			change = true;
@@ -596,8 +596,8 @@ public class CopyOnWriteTransformer implements Transformer {
 		if (right == null)
 			return null;
 		if (!(right instanceof Term)) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + right.getClass() + " while transforming.",
-					term.getFilename(), term.getLocation()));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + right.getClass() + " while transforming.", term.getFilename(), term
+					.getLocation()));
 		}
 		if (right != term) {
 			change = true;
@@ -619,8 +619,8 @@ public class CopyOnWriteTransformer implements Transformer {
 				change = true;
 			if (result != null) {
 				if (!(result instanceof Term)) {
-					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + result.getClass() + ".", getName(),
-							t.getFilename(), t.getLocation()));
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + result.getClass() + ".", getName(), t.getFilename(), t
+							.getLocation()));
 				}
 				terms.add((Term) result);
 			}
@@ -639,8 +639,8 @@ public class CopyOnWriteTransformer implements Transformer {
 		if (result == null)
 			return null;
 		if (!(result instanceof Term)) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + result.getClass() + ".", getName(), term
-					.getFilename(), term.getLocation()));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + result.getClass() + ".", getName(), term.getFilename(), term
+					.getLocation()));
 		}
 		if (result != term) {
 			node = node.shallowCopy();
@@ -656,8 +656,8 @@ public class CopyOnWriteTransformer implements Transformer {
 		if (result == null)
 			return null;
 		if (!(result instanceof Term)) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + result.getClass() + ".", getName(), term
-					.getFilename(), term.getLocation()));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + result.getClass() + ".", getName(), term.getFilename(), term
+					.getLocation()));
 		}
 		if (result != term) {
 			node = node.shallowCopy();
@@ -678,8 +678,8 @@ public class CopyOnWriteTransformer implements Transformer {
 		if (result == null)
 			return null;
 		if (!(result instanceof Term)) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + result.getClass() + ".", getName(), term
-					.getFilename(), term.getLocation()));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + result.getClass() + ".", getName(), term.getFilename(), term
+					.getLocation()));
 		}
 		if (result != term) {
 			node = node.shallowCopy();
@@ -704,8 +704,8 @@ public class CopyOnWriteTransformer implements Transformer {
 				change = true;
 			if (result != null) {
 				if (!(result instanceof Attribute)) {
-					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Attribute, but got " + result.getClass()
-							+ " while transforming.", getName(), at.getFilename(), at.getLocation()));
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Attribute, but got " + result.getClass() + " while transforming.", getName(),
+							at.getFilename(), at.getLocation()));
 				}
 				contents.add((Attribute) result);
 			}
@@ -737,8 +737,8 @@ public class CopyOnWriteTransformer implements Transformer {
 		if (null == bodyAST)
 			return null;
 		if (!(bodyAST instanceof Term)) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + bodyAST.getClass() + ".", getName(), body
-					.getFilename(), body.getLocation()));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + bodyAST.getClass() + ".", getName(), body.getFilename(), body
+					.getLocation()));
 		}
 		body = (Term) bodyAST;
 		if (change) {
@@ -758,8 +758,8 @@ public class CopyOnWriteTransformer implements Transformer {
 		if (null == bodyAST)
 			return null;
 		if (!(bodyAST instanceof Term)) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + bodyAST.getClass() + ".", getName(), body
-					.getFilename(), body.getLocation()));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + bodyAST.getClass() + ".", getName(), body.getFilename(), body
+					.getLocation()));
 		}
 		body = (Term) bodyAST;
 		if (change) {
