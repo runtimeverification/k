@@ -98,9 +98,10 @@ public class BasicVisitor implements Visitor {
 	@Override
 	public void visit(Syntax node) {
 		node.getSort().accept(this);
-		for (PriorityBlock pb : node.getPriorityBlocks()) {
-			pb.accept(this);
-		}
+		if (node.getPriorityBlocks() != null)
+			for (PriorityBlock pb : node.getPriorityBlocks()) {
+				pb.accept(this);
+			}
 		visit((ModuleItem) node);
 	}
 
@@ -255,57 +256,56 @@ public class BasicVisitor implements Visitor {
 		visit((CollectionItem) node);
 	}
 
-    @Override
-    public void visit(CollectionBuiltin node) {
-        for (Term term : node.terms()) {
-            term.accept(this);
-        }
+	@Override
+	public void visit(CollectionBuiltin node) {
+		for (Term term : node.terms()) {
+			term.accept(this);
+		}
 
-        visit((Term) node);
-    }
+		visit((Term) node);
+	}
 
-    @Override
-    public void visit(MapBuiltin node) {
-        for (java.util.Map.Entry<Term, Term> entry : node.elements().entrySet()) {
-            entry.getKey().accept(this);
-            entry.getValue().accept(this);
-        }
+	@Override
+	public void visit(MapBuiltin node) {
+		for (java.util.Map.Entry<Term, Term> entry : node.elements().entrySet()) {
+			entry.getKey().accept(this);
+			entry.getValue().accept(this);
+		}
 
-        visit((CollectionBuiltin) node);
-    }
+		visit((CollectionBuiltin) node);
+	}
 
-    @Override
+	@Override
 	public void visit(Constant node) {
 		visit((Term) node);
 	}
 
-    @Override
-    public void visit(Token node) {
-        visit((KLabel) node);
-    }
+	@Override
+	public void visit(Token node) {
+		visit((KLabel) node);
+	}
 
+	@Override
+	public void visit(BoolBuiltin node) {
+		visit((Token) node);
+	}
 
-    @Override
-    public void visit(BoolBuiltin node) {
-        visit((Token) node);
-    }
+	@Override
+	public void visit(IntBuiltin node) {
+		visit((Token) node);
+	}
 
-    @Override
-    public void visit(IntBuiltin node) {
-        visit((Token) node);
-    }
+	@Override
+	public void visit(StringBuiltin node) {
+		visit((Token) node);
+	}
 
-    @Override
-    public void visit(StringBuiltin node) {
-        visit((Token) node);
-    }
+	@Override
+	public void visit(GenericToken node) {
+		visit((Token) node);
+	}
 
-    @Override
-    public void visit(GenericToken node) {
-        visit((Token) node);
-    }
-
-    @Override
+	@Override
 	public void visit(Empty node) {
 		visit((Term) node);
 	}
@@ -337,12 +337,12 @@ public class BasicVisitor implements Visitor {
 		visit((Term) node);
 	}
 
-    @Override
-    public void visit(KLabelConstant node) {
-        visit((KLabel) node);
-    }
+	@Override
+	public void visit(KLabelConstant node) {
+		visit((KLabel) node);
+	}
 
-    @Override
+	@Override
 	public void visit(Rewrite node) {
 		node.getLeft().accept(this);
 		node.getRight().accept(this);

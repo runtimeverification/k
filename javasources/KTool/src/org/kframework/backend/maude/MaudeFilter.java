@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.Map;
 
 public class MaudeFilter extends BackendFilter {
-    private Definition definition;
+	private Definition definition;
 	private boolean firstAttribute;
 	ConfigurationStructureMap cfgStr;
 
@@ -36,8 +36,8 @@ public class MaudeFilter extends BackendFilter {
 
 	@Override
 	public void visit(Definition definition) {
-        // TODO: remove hack for token membership predicates
-        this.definition = definition;
+		// TODO: remove hack for token membership predicates
+		this.definition = definition;
 
 		for (DefinitionItem di : definition.getItems()) {
 			di.accept(this);
@@ -64,34 +64,29 @@ public class MaudeFilter extends BackendFilter {
 			result.append(mod.getName());
 			result.append(" is\n");
 
-            // TODO: move declaration of #token in a .maude file
-            result.append("op #token : #String #String -> KLabel .\n");
+			// TODO: move declaration of #token in a .maude file
+			result.append("op #token : #String #String -> KLabel .\n");
 
 			for (ModuleItem mi : mod.getItems()) {
 				mi.accept(this);
 				result.append("\n");
 			}
 
-            for (String sort : definition.tokenNames()) {
-                String tokenKItem = "_`(_`)(#token(\"" + sort + "\", V:" + StringBuiltin.SORT_NAME
-                                    + "), .KList)";
-                String sortKItem = "_`(_`)(#_(\"" + sort + "\")" + ", .KList)";
-                String valueKItem = "_`(_`)(#_(V:" + StringBuiltin.SORT_NAME + ")" + ", .KList)";
-                result.append("eq _`(_`)(" + AddPredicates.syntaxPredicate(sort) + ", "
-                              + tokenKItem + ") = _`(_`)(#_(true), .KList) .\n");
-                result.append("eq _`(_`)(#parseToken, _`,`,_(" + sortKItem + ", " + valueKItem
-                              + ")) = " + tokenKItem + " .\n");
-                result.append("eq _`(_`)(#tokenToString, " + tokenKItem + ") = " + valueKItem
-                              + " .\n");
-            }
-            definition.tokenNames().clear();
+			for (String sort : definition.tokenNames()) {
+				String tokenKItem = "_`(_`)(#token(\"" + sort + "\", V:" + StringBuiltin.SORT_NAME + "), .KList)";
+				String sortKItem = "_`(_`)(#_(\"" + sort + "\")" + ", .KList)";
+				String valueKItem = "_`(_`)(#_(V:" + StringBuiltin.SORT_NAME + ")" + ", .KList)";
+				result.append("eq _`(_`)(" + AddPredicates.syntaxPredicate(sort) + ", " + tokenKItem + ") = _`(_`)(#_(true), .KList) .\n");
+				result.append("eq _`(_`)(#parseToken, _`,`,_(" + sortKItem + ", " + valueKItem + ")) = " + tokenKItem + " .\n");
+				result.append("eq _`(_`)(#tokenToString, " + tokenKItem + ") = " + valueKItem + " .\n");
+			}
+			definition.tokenNames().clear();
 
-            for (Map.Entry<String, CollectionSort> entry : context.collectionSorts.entrySet()) {
-                String lhs = "_`(_`)(" + AddPredicates.syntaxPredicate(entry.getKey()) + ", "
-                           + "_`(_`)(" + entry.getValue().type() + "2KLabel_(V:"
-                           + entry.getValue().type() + "), .KList))";
-                result.append("eq " + lhs + "  = _`(_`)(#_(true), .KList) .\n");
-            }
+			for (Map.Entry<String, CollectionSort> entry : context.collectionSorts.entrySet()) {
+				String lhs = "_`(_`)(" + AddPredicates.syntaxPredicate(entry.getKey()) + ", " + "_`(_`)(" + entry.getValue().type() + "2KLabel_(V:" + entry.getValue().type()
+						+ "), .KList))";
+				result.append("eq " + lhs + "  = _`(_`)(#_(true), .KList) .\n");
+			}
 
 			result.append("\nendm");
 		}
@@ -103,83 +98,86 @@ public class MaudeFilter extends BackendFilter {
 
 	@Override
 	public void visit(Syntax syn) {
-		for (PriorityBlock pb : syn.getPriorityBlocks()) {
-			for (Production p : pb.getProductions()) {
-				if (p.getItems().size() == 1 && (p.getItems().get(0) instanceof Sort)) {
-					// sub-sort case
-					ProductionItem item = p.getItems().get(0);
-					if (item instanceof Sort) {
-						if (!MaudeHelper.declaredSorts.contains(p.getItems().get(0).toString()) && !MaudeHelper.basicSorts.contains(p.getItems().get(0).toString())) {
-							result.append("sort ");
+		if (syn.getPriorityBlocks() != null) {
+			for (PriorityBlock pb : syn.getPriorityBlocks()) {
+				for (Production p : pb.getProductions()) {
+					if (p.getItems().size() == 1 && (p.getItems().get(0) instanceof Sort)) {
+						// sub-sort case
+						ProductionItem item = p.getItems().get(0);
+						if (item instanceof Sort) {
+							if (!MaudeHelper.declaredSorts.contains(p.getItems().get(0).toString()) && !MaudeHelper.basicSorts.contains(p.getItems().get(0).toString())) {
+								result.append("sort ");
+								result.append(p.getItems().get(0));
+								result.append(" .\n");
+								MaudeHelper.declaredSorts.add(p.getItems().get(0).toString());
+							}
+							result.append("subsort ");
 							result.append(p.getItems().get(0));
+							result.append(" < ");
+							result.append(syn.getSort());
 							result.append(" .\n");
-							MaudeHelper.declaredSorts.add(p.getItems().get(0).toString());
 						}
-						result.append("subsort ");
-						result.append(p.getItems().get(0));
-						result.append(" < ");
-						result.append(syn.getSort());
-						result.append(" .\n");
-					}
-				} else if (p.getItems().size() == 1 && (p.getItems().get(0) instanceof Terminal)) {
-					String operation = p.toString();
-					if (operation.startsWith("\"")) {
-						operation = operation.substring(1, operation.length() - 2);
-					}
-					if (operation.equals("") && !p.containsAttribute("onlyLabel")) {
-						String msg = "Cannot declare empty terminals in the definition.\n";
-						msg += "            Use attribute 'onlyLabel' paired with 'klabel(...)' to limit the use to programs.";
-						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, p.getFilename(), p.getLocation()));
-					}
-					if (!MaudeHelper.constantSorts.contains(syn.getSort()) || !syn.getSort().toString().equals(KSorts.KLABEL) || !syn.getSort().toString().equals("CellLabel")) {
-                        result.append("op ");
-						result.append(StringUtil.escapeMaude(operation));
-						result.append(" : -> ");
-						result.append(syn.getSort());
-						if (!isEmptyAttributes(p.getAttributes())) {
+					} else if (p.getItems().size() == 1 && (p.getItems().get(0) instanceof Terminal)) {
+						String operation = p.toString();
+						if (operation.startsWith("\"")) {
+							operation = operation.substring(1, operation.length() - 2);
+						}
+						if (operation.equals("") && !p.containsAttribute("onlyLabel")) {
+							String msg = "Cannot declare empty terminals in the definition.\n";
+							msg += "            Use attribute 'onlyLabel' paired with 'klabel(...)' to limit the use to programs.";
+							GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, p.getFilename(), p.getLocation()));
+						}
+						if (!MaudeHelper.constantSorts.contains(syn.getSort()) || !syn.getSort().toString().equals(KSorts.KLABEL)
+								|| !syn.getSort().toString().equals("CellLabel")) {
+							result.append("op ");
+							result.append(StringUtil.escapeMaude(operation));
+							result.append(" : -> ");
+							result.append(syn.getSort());
+							if (!isEmptyAttributes(p.getAttributes())) {
+								result.append(" [metadata \"");
+								p.getAttributes().accept(this);
+								result.append("\"]");
+							}
+							result.append(" .\n");
+						}
+						// ignore K constants declarations
+					} else if (p.getItems().size() == 1 && (p.getItems().get(0) instanceof UserList)) {
+						// user declared lists case
+						UserList list = (UserList) p.getItems().get(0);
+						if (!MaudeHelper.separators.contains(list.getSeparator())) {
+							result.append("op _");
+							result.append(StringUtil.escapeMaude(list.getSeparator()));
+							result.append("_ : K K -> K [prec 120 metadata \"");
+							p.getAttributes().accept(this);
+							result.append(" hybrid=()");
+							result.append("\"] .\n");
+							result.append("op .List`{\"");
+							result.append(list.getSeparator());
+							result.append("\"`} : -> K .\n");
+							MaudeHelper.separators.add(list.getSeparator());
+						}
+					} else {
+						String maudelabel = p.getLabel();
+						if (maudelabel.equals("")) {
+							String msg = "Empty production. Please use `prefixlabel` attribute.";
+							GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, msg, p.getFilename(), p.getLocation()));
+							continue;
+						}
+
+						if (!p.containsAttribute("bracket")) {
+							result.append("op ");
+							result.append(StringUtil.escapeMaude(maudelabel));
+							result.append(" : ");
+							p.accept(this);
+							result.append(" -> ");
+							result.append(syn.getSort());
+							// if (!isEmptyAttributes(p.getCellAttributes())) {
 							result.append(" [metadata \"");
 							p.getAttributes().accept(this);
 							result.append("\"]");
+							// }
+							result.append(" .\n");
 						}
-						result.append(" .\n");
-					}
-					// ignore K constants declarations
-				} else if (p.getItems().size() == 1 && (p.getItems().get(0) instanceof UserList)) {
-					// user declared lists case
-					UserList list = (UserList) p.getItems().get(0);
-					if (!MaudeHelper.separators.contains(list.getSeparator())) {
-						result.append("op _");
-						result.append(StringUtil.escapeMaude(list.getSeparator()));
-						result.append("_ : K K -> K [prec 120 metadata \"");
-						p.getAttributes().accept(this);
-						result.append(" hybrid=()");
-						result.append("\"] .\n");
-						result.append("op .List`{\"");
-						result.append(list.getSeparator());
-						result.append("\"`} : -> K .\n");
-						MaudeHelper.separators.add(list.getSeparator());
-					}
-				} else {
-					String maudelabel = p.getLabel();
-					if (maudelabel.equals("")) {
-						String msg = "Empty production. Please use `prefixlabel` attribute.";
-						GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, msg, p.getFilename(), p.getLocation()));
-						continue;
-					}
-
-					if (!p.containsAttribute("bracket")) {
-						result.append("op ");
-						result.append(StringUtil.escapeMaude(maudelabel));
-						result.append(" : ");
-						p.accept(this);
-						result.append(" -> ");
-						result.append(syn.getSort());
-						// if (!isEmptyAttributes(p.getCellAttributes())) {
-						result.append(" [metadata \"");
-						p.getAttributes().accept(this);
-						result.append("\"]");
-						// }
-						result.append(" .\n");
 					}
 				}
 			}
@@ -301,25 +299,26 @@ public class MaudeFilter extends BackendFilter {
 	 */
 	@Override
 	public void visit(Configuration configuration) {
-		if (cfgStr == null) return;
+		if (cfgStr == null)
+			return;
 		for (ConfigurationStructure cellStr : cfgStr.values()) {
 			String id = cellStr.id;
-            if (id == MetaK.Constants.generatedCfgAbsTopCellLabel) continue;
-            String cellSort = MetaK.cellSort(id);
-            String cellFragment = MetaK.cellFragment(id);
-            String cellUnit = MetaK.cellUnit(id);
-            if (!cellStr.id.equals("k")) {
-                result.append("  sort " + cellSort +  " .\n");
-            }
-            result.append("  sort " + cellFragment + " .\n");
-            result.append("  subsort " + cellSort + " < " + cellFragment + " .\n");
-            result.append("  op " + cellUnit + " : -> " + cellFragment + " .\n");
-            if (cellStr.multiplicity == Cell.Multiplicity.ANY || cellStr.multiplicity == Cell.Multiplicity.SOME) {
-                result.append(" op __ : " + cellFragment + " " + cellFragment + " -> " + cellFragment + " " +
-                        "[assoc comm id: " + cellUnit + "] .\n");
-            }
-            result.append("  op " + cellFragment + "2KLabel_ : " + cellFragment + " -> KLabel .\n");
-            result.append("  op " + cellSort + "2KLabel_ : " + cellFragment + " -> KLabel .\n");
+			if (id == MetaK.Constants.generatedCfgAbsTopCellLabel)
+				continue;
+			String cellSort = MetaK.cellSort(id);
+			String cellFragment = MetaK.cellFragment(id);
+			String cellUnit = MetaK.cellUnit(id);
+			if (!cellStr.id.equals("k")) {
+				result.append("  sort " + cellSort + " .\n");
+			}
+			result.append("  sort " + cellFragment + " .\n");
+			result.append("  subsort " + cellSort + " < " + cellFragment + " .\n");
+			result.append("  op " + cellUnit + " : -> " + cellFragment + " .\n");
+			if (cellStr.multiplicity == Cell.Multiplicity.ANY || cellStr.multiplicity == Cell.Multiplicity.SOME) {
+				result.append(" op __ : " + cellFragment + " " + cellFragment + " -> " + cellFragment + " " + "[assoc comm id: " + cellUnit + "] .\n");
+			}
+			result.append("  op " + cellFragment + "2KLabel_ : " + cellFragment + " -> KLabel .\n");
+			result.append("  op " + cellSort + "2KLabel_ : " + cellFragment + " -> KLabel .\n");
 
 			String placeHolders = "";
 			String sorts = "";
@@ -327,37 +326,37 @@ public class MaudeFilter extends BackendFilter {
 			String format = "";
 			Cell cell = cellStr.cell;
 			if (cellStr.sons.isEmpty()) {
-                if (!cellStr.id.equals("k")) {
-                    placeHolders="_";
-                    format = "ni ";
-                    sorts = KSort.getKSort(cell.getContents().getSort()).mainSort()
-                            .toString();
-                    declareCell(id,placeHolders, sorts, cellSort, format);
-                }
+				if (!cellStr.id.equals("k")) {
+					placeHolders = "_";
+					format = "ni ";
+					sorts = KSort.getKSort(cell.getContents().getSort()).mainSort().toString();
+					declareCell(id, placeHolders, sorts, cellSort, format);
+				}
 				continue;
 			}
 
 			java.util.List<Term> cfgCells = cell.getCellTerms();
 			for (Term cCell : cfgCells) {
-				if (cCell instanceof TermComment) continue;
+				if (cCell instanceof TermComment)
+					continue;
 				placeHolders += "_";
 				format += "ni ";
 				// Decided to declare all sorts as Bags to allow using
 				// cells instead of tuples for tupling purposes.
 
-                String cellName = ((Cell) cCell).getId();
-				switch(((Cell) cCell).getMultiplicity()) {
-					case ONE:
-                        sorts += MetaK.cellSort(cellName);
-						break;
-					default:
-						sorts += MetaK.cellFragment(cellName);
+				String cellName = ((Cell) cCell).getId();
+				switch (((Cell) cCell).getMultiplicity()) {
+				case ONE:
+					sorts += MetaK.cellSort(cellName);
+					break;
+				default:
+					sorts += MetaK.cellFragment(cellName);
 				}
 				fragSorts += MetaK.cellFragment(cellName) + " ";
 				sorts += " ";
 			}
 			declareCell(id, placeHolders, sorts, cellSort, format);
-			declareCell(id+"-fragment",placeHolders,fragSorts, cellFragment, format);
+			declareCell(id + "-fragment", placeHolders, fragSorts, cellFragment, format);
 		}
 
 		// result.append("mb configuration ");
@@ -365,18 +364,7 @@ public class MaudeFilter extends BackendFilter {
 	}
 
 	private void declareCell(String id, String placeHolders, String sorts, String resultSort, String format) {
-		result.append(
-				"  op " +
-						"<" + id + ">" +
-						placeHolders +
-						"</" + id + ">" +
-						" : " +
-						sorts +
-						" -> " +
-						resultSort +
-						"[format(b o++" + format + "--nib o)]" +
-						"." +
-						"\n");
+		result.append("  op " + "<" + id + ">" + placeHolders + "</" + id + ">" + " : " + sorts + " -> " + resultSort + "[format(b o++" + format + "--nib o)]" + "." + "\n");
 	}
 
 	/**
@@ -394,11 +382,11 @@ public class MaudeFilter extends BackendFilter {
 		} else {
 			result.append("( <" + id + "> ");
 		}
-			if (cell.getContents() != null) {
-				cell.getContents().accept(this);
-			} else {
-				result.append("null");
-			}
+		if (cell.getContents() != null) {
+			cell.getContents().accept(this);
+		} else {
+			result.append("null");
+		}
 		if (!GlobalSettings.sortedCells) {
 			result.append(", " + id + ")");
 		} else {
@@ -408,33 +396,31 @@ public class MaudeFilter extends BackendFilter {
 
 	@Override
 	public void visit(Variable variable) {
-        if (MetaK.isBuiltinSort(variable.getSort())
-                || context.collectionSorts.containsKey(variable.getSort())) {
-            result.append("_`(_`)(");
-            if (context.collectionSorts.containsKey(variable.getSort())) {
-                result.append(context.collectionSorts.get(variable.getSort()).type() + "2KLabel_(");
-            } else {
-                result.append("#_(");
-            }
-        }
+		if (MetaK.isBuiltinSort(variable.getSort()) || context.collectionSorts.containsKey(variable.getSort())) {
+			result.append("_`(_`)(");
+			if (context.collectionSorts.containsKey(variable.getSort())) {
+				result.append(context.collectionSorts.get(variable.getSort()).type() + "2KLabel_(");
+			} else {
+				result.append("#_(");
+			}
+		}
 		if (variable.getName().equals(MetaK.Constants.anyVarSymbol)) {
 			result.append("?");
 		} else {
 			result.append(variable.getName());
 		}
 		result.append(":");
-        if (context.collectionSorts.containsKey(variable.getSort())) {
-            result.append(context.collectionSorts.get(variable.getSort()).type());
-        } else {
-            result.append(variable.getSort());
-        }
-        if (MetaK.isBuiltinSort(variable.getSort())
-                || context.collectionSorts.containsKey(variable.getSort())) {
-            result.append(")");
-            result.append(", ");
-            result.append(".KList");
-            result.append(") ");
-        }
+		if (context.collectionSorts.containsKey(variable.getSort())) {
+			result.append(context.collectionSorts.get(variable.getSort()).type());
+		} else {
+			result.append(variable.getSort());
+		}
+		if (MetaK.isBuiltinSort(variable.getSort()) || context.collectionSorts.containsKey(variable.getSort())) {
+			result.append(")");
+			result.append(", ");
+			result.append(".KList");
+			result.append(") ");
+		}
 	}
 
 	@Override
@@ -462,8 +448,8 @@ public class MaudeFilter extends BackendFilter {
 			}
 		}
 		if (!(rule.getBody() instanceof Rewrite)) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "This rule should have a rewrite at top by now.", getName(), rule.getFilename(), rule
-					.getLocation()));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "This rule should have a rewrite at top by now.", getName(), rule
+					.getFilename(), rule.getLocation()));
 		}
 		Rewrite body = (Rewrite) rule.getBody();
 		final Term condition = rule.getCondition();
@@ -525,7 +511,7 @@ public class MaudeFilter extends BackendFilter {
 			cons = pr.getAttribute("maudeop").replaceAll("\"", "").replaceAll(" ", "`");
 		}
 
-        result.append(cons);
+		result.append(cons);
 		if (termCons.getContents().size() > 0) {
 			result.append("(");
 		}
@@ -590,14 +576,14 @@ public class MaudeFilter extends BackendFilter {
 
 	}
 
-    @Override
-    public void visit(KLabelConstant kLabelConstant) {
-        result.append(StringUtil.escapeMaude(kLabelConstant.getLabel()));
-    }
+	@Override
+	public void visit(KLabelConstant kLabelConstant) {
+		result.append(StringUtil.escapeMaude(kLabelConstant.getLabel()));
+	}
 
 	@Override
 	public void visit(Constant constant) {
-        assert false : "dead code";
+		assert false : "dead code";
 		if (constant.getSort().equals("#Id")) {
 			result.append("#id \"");
 		}
@@ -607,14 +593,14 @@ public class MaudeFilter extends BackendFilter {
 		}
 	}
 
-    @Override
-    public void visit(Token token) {
-        if (token instanceof GenericToken) {
-            result.append(token);
-        } else {
-            result.append("#_(" + token.value() + ")");
-        }
-    }
+	@Override
+	public void visit(Token token) {
+		if (token instanceof GenericToken) {
+			result.append(token);
+		} else {
+			result.append("#_(" + token.value() + ")");
+		}
+	}
 
 	@Override
 	public void visit(Collection collection) {
@@ -635,8 +621,8 @@ public class MaudeFilter extends BackendFilter {
 					first = false;
 				}
 				if (term == null) {
-					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "NULL Term encountered when MaudeFilter ran on collection " + collection.getContents()
-							+ ".", collection.getFilename(), collection.getLocation()));
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "NULL Term encountered when MaudeFilter ran on collection "
+							+ collection.getContents() + ".", collection.getFilename(), collection.getLocation()));
 				}
 				term.accept(this);
 			}
@@ -680,45 +666,45 @@ public class MaudeFilter extends BackendFilter {
 		result.append(")");
 	}
 
-    @Override
-    public void visit(MapBuiltin mapBuiltin) {
-        if (mapBuiltin.isEmpty()) {
-            result.append("." + KSorts.MAP);
-        } else if (mapBuiltin.hasFrame() && mapBuiltin.elements().isEmpty()) {
-            new Variable(mapBuiltin.frame().getName(), KSorts.MAP).accept(this);
-        } else if (!mapBuiltin.hasFrame() && mapBuiltin.elements().size() == 1) {
-            Map.Entry<Term, Term> entry = mapBuiltin.elements().entrySet().iterator().next();
-            result.append("_|->_(");
-            entry.getKey().accept(this);
-            result.append(", ");
-            entry.getValue().accept(this);
-            result.append(")");
-        } else {
-            result.append("__(");
+	@Override
+	public void visit(MapBuiltin mapBuiltin) {
+		if (mapBuiltin.isEmpty()) {
+			result.append("." + KSorts.MAP);
+		} else if (mapBuiltin.hasFrame() && mapBuiltin.elements().isEmpty()) {
+			new Variable(mapBuiltin.frame().getName(), KSorts.MAP).accept(this);
+		} else if (!mapBuiltin.hasFrame() && mapBuiltin.elements().size() == 1) {
+			Map.Entry<Term, Term> entry = mapBuiltin.elements().entrySet().iterator().next();
+			result.append("_|->_(");
+			entry.getKey().accept(this);
+			result.append(", ");
+			entry.getValue().accept(this);
+			result.append(")");
+		} else {
+			result.append("__(");
 
-            boolean first = true;
-            for (Map.Entry<Term, Term> entry : mapBuiltin.elements().entrySet()) {
-                if (!first) {
-                    result.append(", ");
-                }
+			boolean first = true;
+			for (Map.Entry<Term, Term> entry : mapBuiltin.elements().entrySet()) {
+				if (!first) {
+					result.append(", ");
+				}
 
-                result.append("_|->_(");
-                entry.getKey().accept(this);
-                result.append(", ");
-                entry.getValue().accept(this);
-                result.append(")");
+				result.append("_|->_(");
+				entry.getKey().accept(this);
+				result.append(", ");
+				entry.getValue().accept(this);
+				result.append(")");
 
-                first = false;
-            }
+				first = false;
+			}
 
-            if (mapBuiltin.hasFrame()) {
-                result.append(", ");
-                new Variable(mapBuiltin.frame().getName(), KSorts.MAP).accept(this);
-            }
+			if (mapBuiltin.hasFrame()) {
+				result.append(", ");
+				new Variable(mapBuiltin.frame().getName(), KSorts.MAP).accept(this);
+			}
 
-            result.append(")");
-        }
-    }
+			result.append(")");
+		}
+	}
 
 	@Override
 	public void visit(Hole hole) {
@@ -733,15 +719,15 @@ public class MaudeFilter extends BackendFilter {
 	@Override
 	public void visit(KInjectedLabel kInjectedLabel) {
 		Term term = kInjectedLabel.getTerm();
-        String sort = term.getSort();
-        if (MetaK.isKSort(sort)) {
+		String sort = term.getSort();
+		if (MetaK.isKSort(sort)) {
 			//result.append(StringUtil.escapeMaude(kInjectedLabel.getInjectedSort(term.getSort())));
-            result.append(kInjectedLabel.getInjectedSort(sort));
+			result.append(kInjectedLabel.getInjectedSort(sort));
 			result.append("2KLabel_(");
-		} else if (MetaK.isCellSort(sort)){
-            result.append(sort + "2KLabel_(");
+		} else if (MetaK.isCellSort(sort)) {
+			result.append(sort + "2KLabel_(");
 
-        } else {
+		} else {
 			result.append("#_(");
 		}
 		term.accept(this);
@@ -796,14 +782,15 @@ public class MaudeFilter extends BackendFilter {
 			new Empty(KSorts.BAG).accept(this);
 			return;
 		}
-		for (Term item: bag.getContents()) {
-			if (item instanceof TermComment) continue;
+		for (Term item : bag.getContents()) {
+			if (item instanceof TermComment)
+				continue;
 			result.append("(");
 			item.accept(this);
 			result.append(")");
 			result.append(" ");
 		}
-//		this.visit((Collection) bag);
+		//		this.visit((Collection) bag);
 		// throw new RuntimeException("don't know how to maudify Bag");
 	}
 

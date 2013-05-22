@@ -53,10 +53,19 @@ public class Syntax extends ModuleItem {
 		// assumption: sorts contains only one element
 		sort = (Sort) JavaClassesFactory.getTerm(sorts.get(0));
 
-		this.priorityBlocks = new ArrayList<PriorityBlock>();
 		List<Element> priorities = XML.getChildrenElementsByTagName(element, Constants.PRIORITY);
-		for (Element priority : priorities)
-			priorityBlocks.add((PriorityBlock) JavaClassesFactory.getTerm(priority));
+		if (priorities.size() > 0) {
+			this.priorityBlocks = new ArrayList<PriorityBlock>();
+			for (Element priority : priorities)
+				priorityBlocks.add((PriorityBlock) JavaClassesFactory.getTerm(priority));
+		}
+
+		List<Element> its = XML.getChildrenElementsByTagName(element, Constants.ATTRIBUTES);
+		if (attributes == null)
+			attributes = new Attributes();
+		if (its.size() > 0) {
+			attributes.setAll((Attributes) JavaClassesFactory.getTerm(its.get(0)));
+		}
 	}
 
 	public Syntax(Syntax node) {
@@ -78,29 +87,30 @@ public class Syntax extends ModuleItem {
 		return "  syntax " + sort + " ::= " + blocks + "\n";
 	}
 
-    @Override
-    public List<String> getLabels() {
-        List<String> lbls = new LinkedList<String>();
-        for (PriorityBlock pb : priorityBlocks) {
-            for (Production prod : pb.getProductions()) {
-                lbls.add(prod.getLabel());
-            }
-        }
-        return lbls;
-    }
+	@Override
+	public List<String> getLabels() {
+		List<String> lbls = new LinkedList<String>();
+		for (PriorityBlock pb : priorityBlocks) {
+			for (Production prod : pb.getProductions()) {
+				lbls.add(prod.getLabel());
+			}
+		}
+		return lbls;
+	}
 
-    @Override
-    public List<String> getKLabels() {
-        List<String> lbls = new LinkedList<String>();
-        for (PriorityBlock pb : priorityBlocks) {
-            for (Production prod : pb.getProductions()) {
-                if (MetaK.isComputationSort(prod.getSort()) ||
-                        prod.getSort().equals(KSorts.KLABEL) && prod.isConstant())
-                    lbls.add(prod.getKLabel());
-            }
-        }
-        return lbls;
-    }
+	@Override
+	public List<String> getKLabels() {
+		List<String> lbls = new LinkedList<String>();
+		if (priorityBlocks == null)
+			return lbls;
+		for (PriorityBlock pb : priorityBlocks) {
+			for (Production prod : pb.getProductions()) {
+				if (MetaK.isComputationSort(prod.getSort()) || prod.getSort().equals(KSorts.KLABEL) && prod.isConstant())
+					lbls.add(prod.getKLabel());
+			}
+		}
+		return lbls;
+	}
 
 	@Override
 	public List<String> getAllSorts() {

@@ -21,6 +21,8 @@ context-free syntax
 	"context"			HIDDEN+	-> KSentence {cons("Context")}
 
 	"syntax" SORTID "::=" {Prod1 ">"}+	-> KSentence {cons("Syntax")}
+	"syntax" SORTID						-> KSentence {cons("SyntaxShort")}
+	"syntax" SORTID	"[" {Tag ","}+ "]"	-> KSentence {cons("SyntaxShortAnno")}
 
 	"syntax" "priorities"	{KLList ">"}+	-> KSentence {cons("Priority")}
 	"syntax" "priority"		{KLList ">"}+	-> KSentence {cons("Priority")}

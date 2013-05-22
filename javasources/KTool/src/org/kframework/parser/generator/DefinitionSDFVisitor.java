@@ -100,92 +100,95 @@ public class DefinitionSDFVisitor extends BasicVisitor {
 
 	private void processPriorities(List<PriorityBlock> priblocks) {
 		List<PriorityBlock> prilist = new ArrayList<PriorityBlock>();
-		for (PriorityBlock prt : priblocks) {
-			PriorityBlock p = new PriorityBlock();
-			p.setAssoc(prt.getAssoc());
+		if (priblocks != null) {
+			for (PriorityBlock prt : priblocks) {
+				PriorityBlock p = new PriorityBlock();
+				p.setAssoc(prt.getAssoc());
 
-			// filter the productions according to their form
-			for (Production prd : prt.getProductions()) {
-				if (prd.containsAttribute("onlyLabel")) {
-					// if a production has this attribute, don't add it to the list
-				} else if (prd.isLexical()) {
-					lexical.add(prd);
-				} else if (prd.isSubsort()) {
-					if (!prd.getSort().equals("KResult")) { // avoid KResult because it breaks subsortings in SDF
+				// filter the productions according to their form
+				for (Production prd : prt.getProductions()) {
+					if (prd.containsAttribute("onlyLabel")) {
+						// if a production has this attribute, don't add it to the list
+					} else if (prd.isLexical()) {
+						lexical.add(prd);
+					} else if (prd.isSubsort()) {
+						if (!prd.getSort().equals("KResult")) { // avoid KResult because it breaks subsortings in SDF
+							p.getProductions().add(prd);
+							subsorts.add(new Subsort(prd.getSort(), ((Sort) prd.getItems().get(0)).getName()));
+							// add the small sort to the user sorts to add it to the variable declarations
+							userSorts.add((Sort) prd.getItems().get(0));
+						}
+					} else if (prd.getItems().get(0).getType() == ProductionType.TERMINAL && prd.getItems().size() == 1 && prd.isConstant()) {
+						constants.add(prd);
+						constantSorts.add(prd.getSort());
+					} else if (prd.getItems().get(0).getType() == ProductionType.TERMINAL
+							&& prd.getItems().get(prd.getItems().size() - 1).getType() == ProductionType.TERMINAL) {
+						outsides.add(prd);
+					} else if (prd.isListDecl()) {
+						outsides.add(prd);
+						listProds.add(prd);
+						subsorts.add(new Subsort(prd.getSort(), ((UserList) prd.getItems().get(0)).getSort()));
+					} else {
 						p.getProductions().add(prd);
-						subsorts.add(new Subsort(prd.getSort(), ((Sort) prd.getItems().get(0)).getName()));
-						// add the small sort to the user sorts to add it to the variable declarations
-						userSorts.add((Sort) prd.getItems().get(0));
 					}
-				} else if (prd.getItems().get(0).getType() == ProductionType.TERMINAL && prd.getItems().size() == 1 && prd.isConstant()) {
-					constants.add(prd);
-					constantSorts.add(prd.getSort());
-				} else if (prd.getItems().get(0).getType() == ProductionType.TERMINAL && prd.getItems().get(prd.getItems().size() - 1).getType() == ProductionType.TERMINAL) {
-					outsides.add(prd);
-				} else if (prd.isListDecl()) {
-					outsides.add(prd);
-					listProds.add(prd);
-					subsorts.add(new Subsort(prd.getSort(), ((UserList) prd.getItems().get(0)).getSort()));
-				} else {
-					p.getProductions().add(prd);
 				}
+				if (p.getProductions().size() > 0)
+					prilist.add(p);
 			}
-			if (p.getProductions().size() > 0)
-				prilist.add(p);
-		}
 
-		if (prilist.size() > 0) {
-			if (prilist.size() == 1 && (prilist.get(0).getAssoc() == null || prilist.get(0).getAssoc().equals(""))) {
-				// weird bug in SDF - if you declare only one production in a priority block, it gives parse errors
-				// you need to have at least 2 productions or a block association
-				PriorityBlock prt = prilist.get(0);
-				for (Production p : prt.getProductions())
-					outsides.add(p);
-			} else {
-				sdf.append("context-free priorities\n");
+			if (prilist.size() > 0) {
+				if (prilist.size() == 1 && (prilist.get(0).getAssoc() == null || prilist.get(0).getAssoc().equals(""))) {
+					// weird bug in SDF - if you declare only one production in a priority block, it gives parse errors
+					// you need to have at least 2 productions or a block association
+					PriorityBlock prt = prilist.get(0);
+					for (Production p : prt.getProductions())
+						outsides.add(p);
+				} else {
+					sdf.append("context-free priorities\n");
 
-				for (PriorityBlock prt : prilist) {
-					if (prt.getAssoc() == null || prt.getAssoc().equals(""))
-						sdf.append("{\n");
-					else
-						sdf.append("{ " + prt.getAssoc() + ":\n");
-					for (Production p : prt.getProductions()) {
-						sdf.append("	");
-						List<ProductionItem> items = p.getItems();
-						for (int i = 0; i < items.size(); i++) {
-							ProductionItem itm = items.get(i);
-							if (itm.getType() == ProductionType.TERMINAL) {
-								Terminal t = (Terminal) itm;
-								if (!ground) {
-									if (t.getTerminal().equals(":"))
-										sdf.append("ColonDz ");
-									else if (t.getTerminal().equals("?"))
-										sdf.append("QuestionMarkDz ");
-									else
+					for (PriorityBlock prt : prilist) {
+						if (prt.getAssoc() == null || prt.getAssoc().equals(""))
+							sdf.append("{\n");
+						else
+							sdf.append("{ " + prt.getAssoc() + ":\n");
+						for (Production p : prt.getProductions()) {
+							sdf.append("	");
+							List<ProductionItem> items = p.getItems();
+							for (int i = 0; i < items.size(); i++) {
+								ProductionItem itm = items.get(i);
+								if (itm.getType() == ProductionType.TERMINAL) {
+									Terminal t = (Terminal) itm;
+									if (!ground) {
+										if (t.getTerminal().equals(":"))
+											sdf.append("ColonDz ");
+										else if (t.getTerminal().equals("?"))
+											sdf.append("QuestionMarkDz ");
+										else
+											sdf.append("\"" + StringUtil.escape(t.getTerminal()) + "\" ");
+									} else
 										sdf.append("\"" + StringUtil.escape(t.getTerminal()) + "\" ");
-								} else
-									sdf.append("\"" + StringUtil.escape(t.getTerminal()) + "\" ");
-							} else if (itm.getType() == ProductionType.SORT) {
-								Sort srt = (Sort) itm;
-								// if we are on the first or last place and this sort is not a list, just print the sort
-								if (i == 0 || i == items.size() - 1) {
-									sdf.append(StringUtil.escapeSortName(srt.getName()) + " ");
-								} else {
-									// if this sort should be inserted to avoid the priority filter, then add it to the list
-									insertSorts.add(srt);
-									String tempstr = srt.getName();
-									if (tempstr.endsWith("CellSort") || tempstr.endsWith("CellFragment"))
-										tempstr = "Bag";
-									sdf.append("InsertDz" + StringUtil.escapeSortName(tempstr) + " ");
+								} else if (itm.getType() == ProductionType.SORT) {
+									Sort srt = (Sort) itm;
+									// if we are on the first or last place and this sort is not a list, just print the sort
+									if (i == 0 || i == items.size() - 1) {
+										sdf.append(StringUtil.escapeSortName(srt.getName()) + " ");
+									} else {
+										// if this sort should be inserted to avoid the priority filter, then add it to the list
+										insertSorts.add(srt);
+										String tempstr = srt.getName();
+										if (tempstr.endsWith("CellSort") || tempstr.endsWith("CellFragment"))
+											tempstr = "Bag";
+										sdf.append("InsertDz" + StringUtil.escapeSortName(tempstr) + " ");
+									}
 								}
 							}
+							sdf.append("-> " + StringUtil.escapeSortName(p.getSort()));
+							sdf.append(SDFHelper.getSDFAttributes(p.getAttributes()) + "\n");
 						}
-						sdf.append("-> " + StringUtil.escapeSortName(p.getSort()));
-						sdf.append(SDFHelper.getSDFAttributes(p.getAttributes()) + "\n");
+						sdf.append("} > ");
 					}
-					sdf.append("} > ");
+					sdf = new StringBuilder(sdf.substring(0, sdf.length() - 3) + "\n\n");
 				}
-				sdf = new StringBuilder(sdf.substring(0, sdf.length() - 3) + "\n\n");
 			}
 		}
 	}

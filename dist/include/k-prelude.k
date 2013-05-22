@@ -7,6 +7,8 @@ interface K-TECHNIQUE
 	// Unfortunately, FlattenModules explicitly ignores
 	// includes of K-TECHNIQUE and some other core modules,
 	// so we have to declare things like isSet in less obvious places
+	
+	syntax KItem
 endinterface
 
 module K-LISTK-EXTRAS

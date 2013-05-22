@@ -165,6 +165,28 @@ rules
 		where locs := <getLocAsString> x1
 
 	to-xml:
+		SyntaxShort(x1) -> $[<syntax loc="[loc]">
+								<sort value="[x1]" loc="[locs]" />
+			</syntax>
+		]
+		where mydebug(!"Syntax: ")
+		where loc := <getLocAsString>
+		where locs := <getLocAsString> x1
+
+	to-xml:
+		SyntaxShortAnno(x1, x2*) -> $[<syntax loc="[loc]">
+										<sort value="[x1]" loc="[locs]" />
+										<attributes>
+											[x2'*]
+										</attributes>
+			</syntax>
+		]
+		where mydebug(!"Syntax: ")
+		where x2'* := <all(to-xml)> x2*	// get all of the production rules
+		where loc := <getLocAsString>
+		where locs := <getLocAsString> x1
+
+	to-xml:
 		OrList(a*) -> $[<priority loc="[loc]">
 							[<all(to-xml)> a*]
 			</priority>

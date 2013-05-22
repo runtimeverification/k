@@ -102,79 +102,82 @@ public class ProgramSDFVisitor extends BasicVisitor {
 
 	private void processPriorities(List<PriorityBlock> priblocks) {
 		List<PriorityBlock> prilist = new ArrayList<PriorityBlock>();
-		for (PriorityBlock prt : priblocks) {
-			PriorityBlock p = new PriorityBlock();
-			p.setAssoc(prt.getAssoc());
+		if (priblocks != null) {
+			for (PriorityBlock prt : priblocks) {
+				PriorityBlock p = new PriorityBlock();
+				p.setAssoc(prt.getAssoc());
 
-			// filter the productions according to their form
-			for (Production prd : prt.getProductions()) {
-				startSorts.add(prd.getSort());
+				// filter the productions according to their form
+				for (Production prd : prt.getProductions()) {
+					startSorts.add(prd.getSort());
 
-				if (prd.isLexical()) {
-					lexical.add(prd);
-				} else if (prd.isSubsort()) {
-					p.getProductions().add(prd);
-					startSorts.add(((Sort) prd.getItems().get(0)).getName());
-				} else if (prd.isConstant()) {
-					constants.add(prd);
-					constantSorts.add(prd.getSort());
-				} else if (prd.getItems().get(0).getType() == ProductionType.TERMINAL && prd.getItems().get(prd.getItems().size() - 1).getType() == ProductionType.TERMINAL) {
-					outsides.add(prd);
-				} else if (prd.getItems().get(0).getType() == ProductionType.USERLIST) {
-					outsides.add(prd);
-					listSorts.add(prd.getSort());
-				} else {
-					p.getProductions().add(prd);
+					if (prd.isLexical()) {
+						lexical.add(prd);
+					} else if (prd.isSubsort()) {
+						p.getProductions().add(prd);
+						startSorts.add(((Sort) prd.getItems().get(0)).getName());
+					} else if (prd.isConstant()) {
+						constants.add(prd);
+						constantSorts.add(prd.getSort());
+					} else if (prd.getItems().get(0).getType() == ProductionType.TERMINAL
+							&& prd.getItems().get(prd.getItems().size() - 1).getType() == ProductionType.TERMINAL) {
+						outsides.add(prd);
+					} else if (prd.getItems().get(0).getType() == ProductionType.USERLIST) {
+						outsides.add(prd);
+						listSorts.add(prd.getSort());
+					} else {
+						p.getProductions().add(prd);
+					}
 				}
+				if (p.getProductions().size() > 0)
+					prilist.add(p);
 			}
-			if (p.getProductions().size() > 0)
-				prilist.add(p);
-		}
 
-		if (prilist.size() > 0) {
-			if (prilist.size() == 1 && (prilist.get(0).getAssoc() == null || prilist.get(0).getAssoc().equals(""))) {
-				// weird bug in SDF - if you declare only one production in a priority block, it gives parse errors
-				// you need to have at least 2 productions or a block association
-				PriorityBlock prt = prilist.get(0);
-				for (Production p : prt.getProductions())
-					outsides.add(p);
-			} else {
-				sdf.append("context-free priorities\n");
+			if (prilist.size() > 0) {
+				if (prilist.size() == 1 && (prilist.get(0).getAssoc() == null || prilist.get(0).getAssoc().equals(""))) {
+					// weird bug in SDF - if you declare only one production in a priority block, it gives parse errors
+					// you need to have at least 2 productions or a block association
+					PriorityBlock prt = prilist.get(0);
+					for (Production p : prt.getProductions())
+						outsides.add(p);
+				} else {
+					sdf.append("context-free priorities\n");
 
-				for (PriorityBlock prt : prilist) {
-					if (prt.getAssoc() == null || prt.getAssoc().equals(""))
-						sdf.append("{\n");
-					else
-						sdf.append("{ " + prt.getAssoc() + ":\n");
-					for (Production p : prt.getProductions()) {
-						sdf.append("	");
-						List<ProductionItem> items = p.getItems();
-						for (int i = 0; i < items.size(); i++) {
-							ProductionItem itm = items.get(i);
-							if (itm.getType() == ProductionType.TERMINAL) {
-								Terminal t = (Terminal) itm;
-								sdf.append("\"" + StringUtil.escape(t.getTerminal()) + "\" ");
-							} else if (itm.getType() == ProductionType.SORT) {
-								Sort srt = (Sort) itm;
-								// if we are on the first or last place and this sort is not a list, just print the sort
-								if (i == 0 || i == items.size() - 1) {
-									sdf.append(StringUtil.escapeSortName(srt.getName()) + " ");
-								} else {
-									// if this sort should be inserted to avoid the priority filter, then add it to the list
-									insertSorts.add(srt.getName());
-									String tempstr = srt.getName();
-									if (tempstr.endsWith("CellSort") || tempstr.endsWith("CellFragment"))
-										tempstr = "Bag";
-									sdf.append("InsertDz" + StringUtil.escapeSortName(tempstr) + " ");
+					for (PriorityBlock prt : prilist) {
+						if (prt.getAssoc() == null || prt.getAssoc().equals(""))
+							sdf.append("{\n");
+						else
+							sdf.append("{ " + prt.getAssoc() + ":\n");
+						for (Production p : prt.getProductions()) {
+							sdf.append("	");
+							List<ProductionItem> items = p.getItems();
+							for (int i = 0; i < items.size(); i++) {
+								ProductionItem itm = items.get(i);
+								if (itm.getType() == ProductionType.TERMINAL) {
+									Terminal t = (Terminal) itm;
+									sdf.append("\"" + StringUtil.escape(t.getTerminal()) + "\" ");
+								} else if (itm.getType() == ProductionType.SORT) {
+									Sort srt = (Sort) itm;
+									// if we are on the first or last place and this sort is not a list, just print the sort
+									if (i == 0 || i == items.size() - 1) {
+										sdf.append(StringUtil.escapeSortName(srt.getName()) + " ");
+									} else {
+										// if this sort should be inserted to avoid the priority filter, then add it to the list
+										insertSorts.add(srt.getName());
+										String tempstr = srt.getName();
+										if (tempstr.endsWith("CellSort") || tempstr.endsWith("CellFragment"))
+											tempstr = "Bag";
+										sdf.append("InsertDz" + StringUtil.escapeSortName(tempstr) + " ");
+									}
 								}
 							}
+							sdf.append("-> " + StringUtil.escapeSortName(p.getSort()));
+							sdf.append(SDFHelper.getSDFAttributes(p.getAttributes()) + "\n");
 						}
-						sdf.append("-> " + StringUtil.escapeSortName(p.getSort()));
-						sdf.append(SDFHelper.getSDFAttributes(p.getAttributes()) + "\n");
+						sdf.append("} > ");
 					}
-					sdf.append("} > ");
+					sdf = new StringBuilder(sdf.substring(0, sdf.length() - 3) + "\n\n");
 				}
-				sdf = new StringBuilder(sdf.substring(0, sdf.length() - 3) + "\n\n");
 			}
 		}
 	}
