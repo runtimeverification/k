@@ -24,7 +24,7 @@ public class UnparserFilter extends BasicVisitor {
 	private java.util.List<String> variableList = new java.util.LinkedList<String>();
 	private java.util.Map<Production, Integer> priorities = null;
 	private java.util.Stack<ASTNode> stack = new java.util.Stack<ASTNode>();
-	
+
 	public void setForEquivalence() {
 		forEquivalence = true;
 	}
@@ -102,9 +102,10 @@ public class UnparserFilter extends BasicVisitor {
 		firstPriorityBlock = true;
 		result.write("syntax " + syn.getSort().getName());
 		result.indentToCurrent();
-		for (PriorityBlock pb : syn.getPriorityBlocks()) {
-			pb.accept(this);
-		}
+		if (syn.getPriorityBlocks() != null)
+			for (PriorityBlock pb : syn.getPriorityBlocks()) {
+				pb.accept(this);
+			}
 		result.unindent();
 		result.endLine();
 		postpare();
@@ -359,15 +360,15 @@ public class UnparserFilter extends BasicVisitor {
 		prepare(ksequence);
 		java.util.List<Term> contents = ksequence.getContents();
 		if (!contents.isEmpty()) {
-            for (int i = 0; i < contents.size(); i++) {
-                contents.get(i).accept(this);
-                if (i != contents.size() - 1) {
-                    result.write(" ~> ");
-                }
-            }
-        } else {
-            result.write(".K");
-        }
+			for (int i = 0; i < contents.size(); i++) {
+				contents.get(i).accept(this);
+				if (i != contents.size() - 1) {
+					result.write(" ~> ");
+				}
+			}
+		} else {
+			result.write(".K");
+		}
 		postpare();
 	}
 
@@ -410,12 +411,12 @@ public class UnparserFilter extends BasicVisitor {
 		postpare();
 	}
 
-    @Override
-    public void visit(KLabelConstant kLabelConstant) {
-        prepare(kLabelConstant);
-        result.write(kLabelConstant.getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)"));
-        postpare();
-    }
+	@Override
+	public void visit(KLabelConstant kLabelConstant) {
+		prepare(kLabelConstant);
+		result.write(kLabelConstant.getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)"));
+		postpare();
+	}
 
 	@Override
 	public void visit(Constant constant) {
