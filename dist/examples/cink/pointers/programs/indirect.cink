@@ -1,0 +1,18 @@
+/*
+  This example tests the semantics of the indirect operator.
+*/
+
+int main() {
+  int x, *y, **z, u, *v;
+  y = &x;
+  *y = 10;
+  cout << x << "\n";
+  cout << *y << "\n"; 
+  z = &y;
+  **z = 20;
+  u = **z;
+  cout << u << "\n";
+  cout << **z << "\n";
+  v = *z;
+  cout << *v << "\n"; 
+}

@@ -1,5 +1,3 @@
-require "../basic/cink-basic.k"
-require "cink-arrays.k"
 
 /*!
 \setlength{\parindent}{1em}
@@ -26,34 +24,29 @@ specific features, as \Cpp is.
 \Cink is developed in several iterations, each iteration adding an incremental 
 contribution.
 
-This file includes the extension of the starting iteration with 
-multidimensional arrays. 
+This file extends the initial iteration with the mechanisms able to handle
+\emph{lvalues} and \emph{rvalues}.
 
-From C++ 2011 Manual:\\
-  "In a declaration T D where D has the form\\
-   \indent   D1 [ constant-expressionopt] attribute-specifier-seqopt\\
-   and the type of the identifier in the declaration T D1 is 
-   "derived-declarator-type-list T", then the type of the identifier of D
-   is an array type...\\
-   Example:
-   \begin{verbatim}
-      typedef int A[5], AA[2][3];
-      typedef const A CA; // type is "array of 5 const int"
-      typedef const AA CAA; // type is "array of 2 array of 3 const int"
-  \end{verbatim}
-  ... 
-  "An array can be constructed from one of the fundamental types (except void),
-   from a pointer, from a pointer to member, from a class, from an enumeration
-   type, or from another array.\\
-   When several "array of" specifications are adjacent, a multidimensional array
-   is created; only the first of the constant expressions that specify the 
-   bounds of the arrays may be omitted. In addition to declarations in
-   which an incomplete object type is allowed, an array bound may be omitted in
-   some cases in the declaration of a function parameter (8.3.5). An array 
-   bound may also be omitted when the declarator is followed by an
-   initializer (8.5). In this case the bound is calculated from the number of 
-   initial elements (say, N) supplied (8.5.1), and the type of the identifier
-   of D is "array of N T."
+Here are the definitions of these notions from the \Cpp 2011 manual:\\
+"— An lvalue (so called, historically, because lvalues could appear on the 
+left-hand side of an assignment expression) designates a function or an object.
+[ Example: If E is an expression of pointer type, then
+*E is an lvalue expression referring to the object or function to which E 
+points. As another example, the result of calling a function whose return type
+is an lvalue reference is an lvalue. —end example ]\\
+— An xvalue (an “eXpiring” value) also refers to an object, usually near
+the end of its lifetime (so that its resources may be moved, for example). 
+An xvalue is the result of certain kinds of expressions involving
+rvalue references (8.3.2). [ Example: The result of calling a function whose 
+return type is an rvalue reference is an xvalue. —end example ]\\
+— A glvalue (“generalized” lvalue) is an lvalue or an xvalue.\\
+— An rvalue (so called, historically, because rvalues could appear on the 
+right-hand side of an assignment expression) is an xvalue, a temporary object 
+(12.2) or subobject thereof, or a value that is not associated with an object.\\
+— A prvalue (“pure” rvalue) is an rvalue that is not an xvalue. 
+[ Example: The result of calling a function whose return type is not a 
+reference is a prvalue. The value of a literal such as 12, 7.3e5, or true is
+also a prvalue. —end example ]
 */
 
 /*@ \section{Syntax}
@@ -62,9 +55,7 @@ of arrays:
 */
 
 module CINK-SYNTAX 
-
-  imports CINK-BASIC-SYNTAX
-  imports CINK-ARRAYS-SYNTAX
+  imports CINK-INCR-DECR-SYNTAX
 
 endmodule
 
@@ -74,9 +65,8 @@ that of arrays and the definition of the whole configuration:
 */
 
 module CINK
-  imports CINK-SYNTAX
-  imports CINK-BASIC-SEMANTICS
-  imports CINK-ARRAYS-SEMANTICS
+
+  imports CINK-INCR-DECR-SEMANTICS
 
   configuration <T color="yellow">
                   <control color="pink">
@@ -91,7 +81,3 @@ module CINK
                   <out color="Orchid" stream="stdout"> .List </out>
                 </T>
 endmodule
-
-
-
-

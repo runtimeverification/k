@@ -1,5 +1,5 @@
 require "../basic/cink-basic.k"
-require "cink-arrays.k"
+require "cink-pointers.k"
 
 /*!
 \setlength{\parindent}{1em}
@@ -26,34 +26,26 @@ specific features, as \Cpp is.
 \Cink is developed in several iterations, each iteration adding an incremental 
 contribution.
 
-This file includes the extension of the starting iteration with 
-multidimensional arrays. 
+This file extends the l-r-values iteration with the mechanisms of pointers.
 
-From C++ 2011 Manual:\\
-  "In a declaration T D where D has the form\\
-   \indent   D1 [ constant-expressionopt] attribute-specifier-seqopt\\
-   and the type of the identifier in the declaration T D1 is 
-   "derived-declarator-type-list T", then the type of the identifier of D
-   is an array type...\\
-   Example:
-   \begin{verbatim}
-      typedef int A[5], AA[2][3];
-      typedef const A CA; // type is "array of 5 const int"
-      typedef const AA CAA; // type is "array of 2 array of 3 const int"
-  \end{verbatim}
-  ... 
-  "An array can be constructed from one of the fundamental types (except void),
-   from a pointer, from a pointer to member, from a class, from an enumeration
-   type, or from another array.\\
-   When several "array of" specifications are adjacent, a multidimensional array
-   is created; only the first of the constant expressions that specify the 
-   bounds of the arrays may be omitted. In addition to declarations in
-   which an incomplete object type is allowed, an array bound may be omitted in
-   some cases in the declaration of a function parameter (8.3.5). An array 
-   bound may also be omitted when the declarator is followed by an
-   initializer (8.5). In this case the bound is calculated from the number of 
-   initial elements (say, N) supplied (8.5.1), and the type of the identifier
-   of D is "array of N T."
+Here is the definition of the indirect operatorfrom the \Cpp 2011 manual:\\
+"The unary * operator performs indirection: the expression to which it is 
+applied shall be a pointer to an
+object type, or a pointer to a function type and the result is an lvalue 
+referring to the object or function
+to which the expression points. If the type of the expression is 
+\emph{pointer to $T$}, the type of the result is $T$.
+"\\
+Related to the pointers is the ampersand (\&) operator:\\
+"The result of the unary & operator is a pointer to its operand. 
+The operand shall be an lvalue or a qualifiedid.
+If the operand is a qualified-id naming a non-static member m of some 
+class C with type T, the result has
+type “pointer to member of class C of type T” and is a prvalue designating 
+C::m. Otherwise, if the type of
+the expression is T, the result has type “pointer to T” and is a prvalue that 
+is the address of the designated
+object (1.7) or a pointer to the designated function."
 */
 
 /*@ \section{Syntax}
@@ -64,7 +56,7 @@ of arrays:
 module CINK-SYNTAX 
 
   imports CINK-BASIC-SYNTAX
-  imports CINK-ARRAYS-SYNTAX
+  imports CINK-POINTERS-SYNTAX
 
 endmodule
 
@@ -75,8 +67,7 @@ that of arrays and the definition of the whole configuration:
 
 module CINK
   imports CINK-SYNTAX
-  imports CINK-BASIC-SEMANTICS
-  imports CINK-ARRAYS-SEMANTICS
+  imports CINK-POINTERS-SEMANTICS
 
   configuration <T color="yellow">
                   <control color="pink">
@@ -91,7 +82,3 @@ module CINK
                   <out color="Orchid" stream="stdout"> .List </out>
                 </T>
 endmodule
-
-
-
-

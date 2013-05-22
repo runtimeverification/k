@@ -1,4 +1,4 @@
-require "../basic/cink-basic.k"
+require "../l-r-values/cink-l-r-values.k"
 
 module CINK-ARRAYS-SYNTAX
 
@@ -12,121 +12,140 @@ endmodule
 
 module CINK-ARRAYS-SEMANTICS
 
-  imports CINK-BASIC-SEMANTICS
+  imports CINK-L-R-VALUES-SYNTAX
   imports CINK-ARRAYS-SYNTAX
+  imports CINK-BASIC-SEMANTICS
+  imports CINK-L-R-VALUES-SEMANTICS
   imports ARRAY
 
-  /* From C++ 2011 Manual:\\
-  "In a declaration T D where D has the form\\
-   \indent   D1 [ constant-expressionopt] attribute-specifier-seqopt\\
-   and the type of the identifier in the declaration T D1 is 
-   "derived-declarator-type-list T", then the type of the identifier of D
-   is an array type...\\
-   Example:
-   \begin{verbatim}
-      typedef int A[5], AA[2][3];
-      typedef const A CA; // type is "array of 5 const int"
-      typedef const AA CAA; // type is "array of 2 array of 3 const int"
-  \end{verbatim}
-  ... 
-  "An array can be constructed from one of the fundamental types (except void),
-   from a pointer, from a pointer to member, from a class, from an enumeration
-   type, or from another array.\\
-   When several "array of" specifications are adjacent, a multidimensional array
-   is created; only the first of the constant expressions that specify the 
-   bounds of the arrays may be omitted. In addition to declarations in
-   which an incomplete object type is allowed, an array bound may be omitted in
-   some cases in the declaration of a function parameter (8.3.5). An array 
-   bound may also be omitted when the declarator is followed by an
-   initializer (8.5). In this case the bound is calculated from the number of 
-   initial elements (say, N) supplied (8.5.1), and the type of the identifier
-   of D is "array of N T."
+  /*@
+  First we define array types following the the notation convention from
+  the manual. 
+  We call these type \emph{explicit array types}. Note that these have a 
+  recursive definition.  
+  We also extends statements with declaration of variable (expression)
+  of the new type.
   */
 
-  syntax ArrRecType ::= "array" "of" Int Type | "array" "of" Int ArrRecType
-  syntax Stmt ::= Exp "of" ArrRecType ";"
+  syntax ArrType ::= "array" "of" Int Type 
+  syntax Type ::= ArrType
+  syntax Stmt ::= Exp "of" ArrType ";"
 
-//  syntax Id ::= "Id" "(" Exp ")"
+  /*@
+  The array declaration are translated into declaration with explicit array
+  types.
+  */
 
   rule T:Type X:Exp[N:Int]; => X of array of N T;
 
-  rule X:Exp[N:Int] of ART:ArrRecType; => X of array of N ART;
+  rule X:Exp[N:Int] of AT:ArrType; => X of array of N AT;
 
-  syntax Val ::= "array" "(" K "," Int "," K ")" | Array 
+  /*@
+  We need declare the arrays as values: .
+  */
 
+  syntax Val ::= Array 
+
+  /*@
+  An array \texttt{a[2][3]} will be represented as follows:
+  \begin{verbatim}
+  <env>
+    a[0] |-> #symLoc(3)
+    a[1] |-> #symLoc(4)
+    a |-> #symLoc(2)
+  </env>
+  <store>
+    #symLoc(2) |-> store(store(const-array(a, 0, 2, undefined),
+                               0, #symLoc(3)),
+                         1, #symLoc(4))
+        #symLoc(3) |-> const-array(a[0], 0, 2, undefined )
+        #symLoc(4) |-> const-array(a[1], 0, 2, undefined )
+    </store>
+  \end{verbatim}
+  Since the definition of the multidimensional array is recursive, the 
+  allocation is described by a recursive function:
+  */
   syntax K ::= "alloc" "(" Stmt "," Int ")" 
 
-  rule <k>
-          X:Id of array of N:Int ART:ArrRecType;
-          =>
-          alloc(X of array of N ART;, 0)
-       ...</k>
- 
-  rule <k> alloc(X:Exp of array of N:Int ART:ArrRecType;, I:Int)
+  /*@
+  The initial call:
+  */
+  rule <k> X:Id of array of N:Int T:Type;
            =>
-           alloc(X[I] of ART;, 0) ~>
-           alloc(X of array of N ART;, I +Int 1)
+           alloc(X of array of N T;, 0)
        ...</k>
-       when (I <Int N)
-
-  rule <k> alloc(X:Exp of array of N:Int ART:ArrRecType;, I:Int) => . ...</k>
        <env>... . => X |-> L </env>
-       <store>... . => L |-> array(X, N, array of N ART) </store>
+       <store>... . => L |-> const-array(X, 0, N, undefined) </store>
+       when fresh(L:Loc)
+
+  /*@
+  The recursive case, when $X$ denotes a $N$-dimensional array with $N\ge 2$:
+  */
+  rule <k> alloc(X:Exp of array of N:Int array of N':Int T:Type;, I:Int)
+           =>
+           alloc(X[I] of array of N' T;, 0) ~>
+           alloc(X of array of N array of N':Int T;, I +Int 1)
+       ...</k>
+       <env>... X |-> L (. => X[I] |-> L') </env>
+       <store>...
+              (L |-> (A:Array => store(A, I, L')))
+              (. =>  L' |-> const-array(X[I], 0, N', undefined))
+       ...</store>
+       when fresh(L':Loc) andBool (I <Int N)
+
+  /*@
+   The base case when all components given by the current index
+  are allocated:
+  */ 
+  rule alloc(X:Exp of array of N:Int AT:ArrType;, I:Int) => .
        when fresh(L:Loc) andBool (I >=Int N)
 
+  /*@
+   The base case when X denotes a unidimensional array:
+  */ 
   rule <k> alloc(X:Exp of array of N:Int T:Type;, I:Int)
            =>
            .
        ...</k>
-       <env>... . => X |-> L </env>
-       <store>... . => L |-> const-array(X, 0, N, undefined) </store>
-       when fresh(L:Loc) andBool (I <Int N)
+       when fresh(L:Loc) andBool isArrType(T) =/=K true
 
-//  context _:Exp[HOLE] = _
-  
-  syntax K ::= "lvalue" "(" K ")"
-
-  syntax Val ::= Loc 
+  /*@
+  We introduce a new constructor for locations, corresponding to a component
+  of unidimensional array of basic types:
+  */
   syntax Loc ::=  "locElem" "(" K ")"
 
-  context (HOLE => lvalue(HOLE)) = _:Exp
+  /*@
+  The evaluation of an array component as a lvalue:
+  */
+  context lvalue(_:Exp[HOLE])
 
-  rule <k> lvalue(X:Id => L) ...</k>
-       <env>... X |-> L:Loc ...</env>
+  context lvalue((HOLE => lvalue(HOLE))[_:Exp])
 
   rule <k> lvalue(L:Loc[I:Int] => L' ) ...</k>
        <env>... X:Exp |-> L  X[I] |-> L':Loc ...</env>
 
   rule <k> lvalue(L:Loc[I:Int] => locElem(L[I])) ...</k>
+       <env> X:Exp |-> L Env:Map </env>
        <store>... L |-> _:Array ...</store>
-
-  context lvalue(_:Exp[HOLE])
-  context lvalue((HOLE => lvalue(HOLE))[_:Exp])
+       when notBool $hasMapping(Env, X[I])
 
 
-  rule <k> lvalue(X:Id => L) ...</k>
-       <env>... X |-> L:Loc ...</env>
-
-  rule <k> L:Loc = V:Val  => V ...</k>
-       <store>... L |-> (_ => V) ...</store>
-
+  /*@
+  The evaluation of an array component as a lvalue:
+  */
   rule <k> locElem(L:Loc[I:Int]) = V:Val  => V ...</k>
        <store>... L |-> (A:Array => store(A, I, V)) ...</store>
 
-
   rule A:Array [I:Int] => select(A, I)
 
-  rule <k> array(X:Exp, _:Int, _:K)[I:Int] => Y ...</k>
-       <env>... X[I] |-> L:Loc ...</env>
-       <store>... L |-> Y:K ...</store>
+  rule <k> L:Loc [I:Int] => select(A, I) ...</k>
+       <store>... L |-> A:Array ...</store>
 
-  context cin >> (HOLE => lvalue(HOLE))
-
-  rule <k> cin >> L:Loc => cin  ...</k>
-       <store>... L |-> (_ => V)  ...</store>
-       <in> (ListItem(V:Int) => .)  ...</in>
-       [read-stream]
-
+  /*@
+  The semantics operator for a component of an array requires a new rule,
+  because the location of the component does not explicitly appear in the store:
+  */
   rule <k> cin >> locElem(L:Loc[I:Int]) => cin  ...</k>
        <store>... L |-> (A:Array => store(A, I, V))  ...</store>
        <in> (ListItem(V:Int) => .)  ...</in>

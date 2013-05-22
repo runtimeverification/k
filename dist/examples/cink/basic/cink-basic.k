@@ -7,7 +7,9 @@ module CINK-BASIC-SYNTAX
     could be an integer, a boolean, or \texttt{void}.
   */
 
-  syntax Type ::= "int" | "bool" | "void" 
+  syntax PrimType ::= "int" | "bool" | "void" 
+
+  syntax Type ::= PrimType
 
   syntax Decl ::= Type Exps
 
@@ -197,7 +199,9 @@ module CINK-BASIC-SEMANTICS
     Desugaring rule for variable declarations with initialization.
   */
 
-   rule T:Type E1:Exp = E2:Exp ; => T E1; E1 = E2; [macro]
+   rule T:Type E1:Exp = E2:Exp ; => T E1; E1 = E2;
+        when isAliasExp(E1) =/=K true
+        [macro]
 
 
   /*@ \subsection{Declarations.} */
@@ -220,7 +224,7 @@ module CINK-BASIC-SEMANTICS
    */
 
   rule [var-decl] :
-       <k> T:Type X:Id; => .  ...</k>      
+       <k> T:PrimType X:Id; => .  ...</k>      
        <env> Env:Map => Env[L/X] </env>
        <store>... . => (L |-> undefined) ...</store>
   when fresh(L:Loc)
@@ -500,6 +504,8 @@ when fresh(L:Loc)
     Here we winclude the semantics for the auxiliary constructs, used to give
     semnatics for \Cink.
   */
+
+  syntax Bool ::= "isAliasExp" "(" Exp ")" [function]
 
   /*@
     The next operator returns the variable name from an expression occurring
