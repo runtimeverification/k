@@ -6,13 +6,19 @@ import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
+import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.ConcretizeSyntax;
 import org.kframework.krun.FlattenDisambiguationFilter;
 import org.kframework.krun.K;
 import org.kframework.krun.SubstitutionFilter;
 import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.general.GlobalSettings;
 
 import java.io.Serializable;
+import java.io.IOException;
 
 public class KRunState implements Serializable{
 
@@ -25,7 +31,6 @@ public class KRunState implements Serializable{
 	public KRunState(Term rawResult, Context context) {
 		this.context = context;
 		this.rawResult = rawResult;
-		this.result = concretize(rawResult, context);
 	}
 
 	public static Term concretize(Term result, Context context) {
@@ -36,21 +41,25 @@ public class KRunState implements Serializable{
 			result = (Term) result.accept(new FlattenDisambiguationFilter(context));
 			if (!K.parens) {
 				result = (Term) result.accept(new AddBracketsFilter(context));
-				AddBracketsFilter2 filter = new AddBracketsFilter2(context);
-				result = (Term) result.accept(filter);
-				while (true) {
-					Term newResult = (Term) result.accept(new SubstitutionFilter(filter.substitution,
-                            context));
-					if (newResult.equals(result)) {
-						break;
+				try {
+					AddBracketsFilter2 filter = new AddBracketsFilter2(context);
+					result = (Term) result.accept(filter);
+					while (true) {
+						Term newResult = (Term) result.accept(new SubstitutionFilter(filter.substitution, context));
+						if (newResult.equals(result)) {
+							break;
+						}
+						result = newResult;
 					}
-					result = newResult;
+				} catch (IOException e) {
+					GlobalSettings.kem.register(new KException(
+						ExceptionType.WARNING,
+						KExceptionGroup.INTERNAL,
+						"Could not load parser: brackets may be unsound"));
 				}
 			}
-		} catch (Exception e) {
-			// if concretization fails, return the raw result directly.
-			//return rawResult;s
-			throw new RuntimeException(e);
+		} catch (TransformerException e) {
+			assert false : "Concretization threw a TransformerException";
 		}
 		if (result.getClass() == Cell.class) {
 			Cell generatedTop = (Cell) result;
@@ -71,7 +80,7 @@ public class KRunState implements Serializable{
 	public String toString() {
 		if (stateId == null) {
 			UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
-			result.accept(unparser);
+			getResult().accept(unparser);
 			return unparser.getResult();
 		} else {
 			return "Node " + stateId;
@@ -79,6 +88,9 @@ public class KRunState implements Serializable{
 	}
 
 	public Term getResult() {
+		if (result == null) {
+			result = concretize(rawResult, context);
+		}
 		return result;
 	}
 
