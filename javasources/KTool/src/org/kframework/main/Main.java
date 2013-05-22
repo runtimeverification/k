@@ -2,6 +2,7 @@ package org.kframework.main;
 
 import java.io.IOException;
 
+import org.kframework.kagreg.KagregFrontEnd;
 import org.kframework.utils.Error;
 
 public class Main {

@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 public class UnparserFilter extends BasicVisitor {
-	private Indenter result = new Indenter();
+	private Indenter indenter = new Indenter();
 	private boolean firstPriorityBlock = false;
 	private boolean firstProduction = false;
 	private boolean inConfiguration = false;
@@ -19,7 +19,7 @@ public class UnparserFilter extends BasicVisitor {
 	private int inTerm = 0;
 	private boolean color = false;
 	private boolean annotateLocation;
-	private static int TAB = 4;
+	public static int TAB = 4;
 	private boolean forEquivalence = false; /* true when unparsing for kagreg; does not print configuration/imports/etc */
 	private java.util.List<String> variableList = new java.util.LinkedList<String>();
 	private java.util.Map<Production, Integer> priorities = null;
@@ -29,6 +29,10 @@ public class UnparserFilter extends BasicVisitor {
 		forEquivalence = true;
 	}
 
+	public void setIndenter(Indenter indenter) {
+		this.indenter = indenter;
+	}
+	
 	public UnparserFilter(org.kframework.kil.loader.Context context) {
 		this(false, context);
 	}
@@ -55,7 +59,7 @@ public class UnparserFilter extends BasicVisitor {
 	}
 
 	public String getResult() {
-		return result.toString();
+		return indenter.toString();
 	}
 
 	@Override
@@ -69,8 +73,8 @@ public class UnparserFilter extends BasicVisitor {
 	public void visit(Import imp) {
 		prepare(imp);
 		if (!forEquivalence) {
-			result.write("imports " + imp.getName());
-			result.endLine();
+			indenter.write("imports " + imp.getName());
+			indenter.endLine();
 		}
 		postpare();
 	}
@@ -80,17 +84,17 @@ public class UnparserFilter extends BasicVisitor {
 		prepare(mod);
 		if (!mod.isPredefined()) {
 			if (!forEquivalence) {
-				result.write("module " + mod.getName());
-				result.endLine();
-				result.endLine();
-				result.indent(TAB);
+				indenter.write("module " + mod.getName());
+				indenter.endLine();
+				indenter.endLine();
+				indenter.indent(TAB);
 			}
 			super.visit(mod);
 			if (!forEquivalence) {
-				result.unindent();
-				result.write("endmodule");
-				result.endLine();
-				result.endLine();
+				indenter.unindent();
+				indenter.write("endmodule");
+				indenter.endLine();
+				indenter.endLine();
 			}
 		}
 		postpare();
@@ -100,14 +104,14 @@ public class UnparserFilter extends BasicVisitor {
 	public void visit(Syntax syn) {
 		prepare(syn);
 		firstPriorityBlock = true;
-		result.write("syntax " + syn.getSort().getName());
-		result.indentToCurrent();
+		indenter.write("syntax " + syn.getSort().getName());
+		indenter.indentToCurrent();
 		if (syn.getPriorityBlocks() != null)
 			for (PriorityBlock pb : syn.getPriorityBlocks()) {
 				pb.accept(this);
 			}
-		result.unindent();
-		result.endLine();
+		indenter.unindent();
+		indenter.endLine();
 		postpare();
 	}
 
@@ -115,9 +119,9 @@ public class UnparserFilter extends BasicVisitor {
 	public void visit(PriorityBlock priorityBlock) {
 		prepare(priorityBlock);
 		if (firstPriorityBlock) {
-			result.write(" ::=");
+			indenter.write(" ::=");
 		} else {
-			result.write("  >");
+			indenter.write("  >");
 		}
 		firstPriorityBlock = false;
 		firstProduction = true;
@@ -129,27 +133,27 @@ public class UnparserFilter extends BasicVisitor {
 	public void visit(Production prod) {
 		prepare(prod);
 		if (firstProduction) {
-			result.write(" ");
+			indenter.write(" ");
 		} else {
-			result.write("  | ");
+			indenter.write("  | ");
 		}
 		firstProduction = false;
 		for (int i = 0; i < prod.getItems().size(); ++i) {
 			ProductionItem pi = prod.getItems().get(i);
 			pi.accept(this);
 			if (i != prod.getItems().size() - 1) {
-				result.write(" ");
+				indenter.write(" ");
 			}
 		}
 		prod.getAttributes().accept(this);
-		result.endLine();
+		indenter.endLine();
 		postpare();
 	}
 
 	@Override
 	public void visit(Sort sort) {
 		prepare(sort);
-		result.write(sort.getName());
+		indenter.write(sort.getName());
 		super.visit(sort);
 		postpare();
 	}
@@ -157,7 +161,7 @@ public class UnparserFilter extends BasicVisitor {
 	@Override
 	public void visit(Terminal terminal) {
 		prepare(terminal);
-		result.write("\"" + terminal.getTerminal() + "\"");
+		indenter.write("\"" + terminal.getTerminal() + "\"");
 		super.visit(terminal);
 		postpare();
 	}
@@ -165,7 +169,7 @@ public class UnparserFilter extends BasicVisitor {
 	@Override
 	public void visit(UserList userList) {
 		prepare(userList);
-		result.write("List{" + userList.getSort() + ",\"" + userList.getSeparator() + "\"}");
+		indenter.write("List{" + userList.getSort() + ",\"" + userList.getSeparator() + "\"}");
 		super.visit(userList);
 		postpare();
 	}
@@ -177,11 +181,11 @@ public class UnparserFilter extends BasicVisitor {
 		for (int i = 0; i < termList.size(); ++i) {
 			termList.get(i).accept(this);
 			if (i != termList.size() - 1) {
-				result.write(",, ");
+				indenter.write(",, ");
 			}
 		}
 		if (termList.size() == 0)
-			result.write(".KList");
+			indenter.write(".KList");
 		postpare();
 	}
 
@@ -204,15 +208,15 @@ public class UnparserFilter extends BasicVisitor {
 		}
 
 		if (!attributeList.isEmpty()) {
-			result.write(" ");
-			result.write("[");
+			indenter.write(" ");
+			indenter.write("[");
 			for (int i = 0; i < attributeList.size(); ++i) {
 				attributeList.get(i).accept(this);
 				if (i != attributeList.size() - 1) {
-					result.write(", ");
+					indenter.write(", ");
 				}
 			}
-			result.write("]");
+			indenter.write("]");
 		}
 		postpare();
 	}
@@ -220,9 +224,9 @@ public class UnparserFilter extends BasicVisitor {
 	@Override
 	public void visit(Attribute attribute) {
 		prepare(attribute);
-		result.write(attribute.getKey());
+		indenter.write(attribute.getKey());
 		if (!attribute.getValue().equals("")) {
-			result.write("(" + attribute.getValue() + ")");
+			indenter.write("(" + attribute.getValue() + ")");
 		}
 		postpare();
 	}
@@ -231,15 +235,15 @@ public class UnparserFilter extends BasicVisitor {
 	public void visit(Configuration configuration) {
 		prepare(configuration);
 		if (!forEquivalence) {
-			result.write("configuration");
-			result.endLine();
-			result.indent(TAB);
+			indenter.write("configuration");
+			indenter.endLine();
+			indenter.indent(TAB);
 			inConfiguration = true;
 			configuration.getBody().accept(this);
 			inConfiguration = false;
-			result.unindent();
-			result.endLine();
-			result.endLine();
+			indenter.unindent();
+			indenter.endLine();
+			indenter.endLine();
 		}
 		postpare();
 	}
@@ -260,38 +264,38 @@ public class UnparserFilter extends BasicVisitor {
 				String declaredColor = declaredCell.getCellAttributes().get("color");
 				if (declaredColor != null) {
 					colorCode = ColorUtil.RgbToAnsi(ColorUtil.colors.get(declaredColor));
-					result.write(colorCode);
+					indenter.write(colorCode);
 				}
 			}
 		}
 
-		result.write("<" + cell.getLabel() + attributes + ">");
+		indenter.write("<" + cell.getLabel() + attributes + ">");
 		if (inConfiguration && inTerm == 0) {
-			result.endLine();
-			result.indent(TAB);
+			indenter.endLine();
+			indenter.indent(TAB);
 		} else {
-			result.write(" ");
+			indenter.write(" ");
 		}
 		if (cell.hasLeftEllipsis()) {
-			result.write("... ");
+			indenter.write("... ");
 		}
 		if (!colorCode.equals("")) {
-			result.write(ColorUtil.ANSI_NORMAL);
+			indenter.write(ColorUtil.ANSI_NORMAL);
 		}
 		cell.getContents().accept(this);
-		result.write(colorCode);
+		indenter.write(colorCode);
 		if (cell.hasRightEllipsis()) {
-			result.write(" ...");
+			indenter.write(" ...");
 		}
 		if (inConfiguration && inTerm == 0) {
-			result.endLine();
-			result.unindent();
+			indenter.endLine();
+			indenter.unindent();
 		} else {
-			result.write(" ");
+			indenter.write(" ");
 		}
-		result.write("</" + cell.getLabel() + ">");
+		indenter.write("</" + cell.getLabel() + ">");
 		if (!colorCode.equals("")) {
-			result.write(ColorUtil.ANSI_NORMAL);
+			indenter.write(ColorUtil.ANSI_NORMAL);
 		}
 		postpare();
 	}
@@ -300,10 +304,10 @@ public class UnparserFilter extends BasicVisitor {
 	public void visit(Variable variable) {
 		prepare(variable);
 		if (variable.isFresh())
-			result.write("?");
-		result.write(variable.getName());
+			indenter.write("?");
+		indenter.write(variable.getName());
 		if (!variableList.contains(variable.getName())) {
-			result.write(":" + variable.getSort());
+			indenter.write(":" + variable.getSort());
 			variableList.add(variable.getName());
 		}
 		postpare();
@@ -312,7 +316,7 @@ public class UnparserFilter extends BasicVisitor {
 	@Override
 	public void visit(Empty empty) {
 		prepare(empty);
-		result.write("." + empty.getSort());
+		indenter.write("." + empty.getSort());
 		postpare();
 	}
 
@@ -320,28 +324,28 @@ public class UnparserFilter extends BasicVisitor {
 	public void visit(ListTerminator terminator) {
 		prepare(terminator);
 		if (terminator.getSort().equals("K"))
-			result.write(".List{\"" + terminator.getSeparator() + "\"}");
+			indenter.write(".List{\"" + terminator.getSeparator() + "\"}");
 		else
-			result.write("." + terminator.getSort());
+			indenter.write("." + terminator.getSort());
 		postpare();
 	}
 
 	@Override
 	public void visit(Rule rule) {
 		prepare(rule);
-		result.write("rule ");
+		indenter.write("rule ");
 		if (!"".equals(rule.getLabel())) {
-			result.write("[" + rule.getLabel() + "]: ");
+			indenter.write("[" + rule.getLabel() + "]: ");
 		}
 		variableList.clear();
 		rule.getBody().accept(this);
 		if (rule.getCondition() != null) {
-			result.write(" when ");
+			indenter.write(" when ");
 			rule.getCondition().accept(this);
 		}
 		rule.getAttributes().accept(this);
-		result.endLine();
-		result.endLine();
+		indenter.endLine();
+		indenter.endLine();
 		postpare();
 	}
 
@@ -349,9 +353,9 @@ public class UnparserFilter extends BasicVisitor {
 	public void visit(KApp kapp) {
 		prepare(kapp);
 		kapp.getLabel().accept(this);
-		result.write("(");
+		indenter.write("(");
 		kapp.getChild().accept(this);
-		result.write(")");
+		indenter.write(")");
 		postpare();
 	}
 
@@ -360,15 +364,15 @@ public class UnparserFilter extends BasicVisitor {
 		prepare(ksequence);
 		java.util.List<Term> contents = ksequence.getContents();
 		if (!contents.isEmpty()) {
-			for (int i = 0; i < contents.size(); i++) {
-				contents.get(i).accept(this);
-				if (i != contents.size() - 1) {
-					result.write(" ~> ");
-				}
-			}
-		} else {
-			result.write(".K");
-		}
+            for (int i = 0; i < contents.size(); i++) {
+                contents.get(i).accept(this);
+                if (i != contents.size() - 1) {
+                    indenter.write(" ~> ");
+                }
+            }
+        } else {
+            indenter.write(".K");
+        }
 		postpare();
 	}
 
@@ -382,7 +386,7 @@ public class UnparserFilter extends BasicVisitor {
 			String separator = userList.getSeparator();
 			java.util.List<Term> contents = termCons.getContents();
 			contents.get(0).accept(this);
-			result.write(separator + " ");
+			indenter.write(separator + " ");
 			contents.get(1).accept(this);
 		} else {
 			int where = 0;
@@ -391,10 +395,10 @@ public class UnparserFilter extends BasicVisitor {
 				if (productionItem.getType() != ProductionType.TERMINAL) {
 					termCons.getContents().get(where++).accept(this);
 				} else {
-					result.write(((Terminal) productionItem).getTerminal());
+					indenter.write(((Terminal) productionItem).getTerminal());
 				}
 				if (i != production.getItems().size() - 1) {
-					result.write(" ");
+					indenter.write(" ");
 				}
 			}
 		}
@@ -406,7 +410,7 @@ public class UnparserFilter extends BasicVisitor {
 	public void visit(Rewrite rewrite) {
 		prepare(rewrite);
 		rewrite.getLeft().accept(this);
-		result.write(" => ");
+		indenter.write(" => ");
 		rewrite.getRight().accept(this);
 		postpare();
 	}
@@ -414,14 +418,14 @@ public class UnparserFilter extends BasicVisitor {
 	@Override
 	public void visit(KLabelConstant kLabelConstant) {
 		prepare(kLabelConstant);
-		result.write(kLabelConstant.getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)"));
+		indenter.write(kLabelConstant.getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)"));
 		postpare();
 	}
 
 	@Override
 	public void visit(Constant constant) {
 		prepare(constant);
-		result.write(constant.getValue());
+		indenter.write(constant.getValue());
 		postpare();
 	}
 
@@ -433,14 +437,14 @@ public class UnparserFilter extends BasicVisitor {
 			contents.get(i).accept(this);
 			if (i != contents.size() - 1) {
 				if (inConfiguration && inTerm == 0) {
-					result.endLine();
+					indenter.endLine();
 				} else {
-					result.write(" ");
+					indenter.write(" ");
 				}
 			}
 		}
 		if (contents.size() == 0) {
-			result.write("." + collection.getSort());
+			indenter.write("." + collection.getSort());
 		}
 		postpare();
 	}
@@ -455,27 +459,27 @@ public class UnparserFilter extends BasicVisitor {
 	@Override
 	public void visit(BagItem bagItem) {
 		prepare(bagItem);
-		result.write("BagItem(");
+		indenter.write("BagItem(");
 		super.visit(bagItem);
-		result.write(")");
+		indenter.write(")");
 		postpare();
 	}
 
 	@Override
 	public void visit(ListItem listItem) {
 		prepare(listItem);
-		result.write("ListItem(");
+		indenter.write("ListItem(");
 		super.visit(listItem);
-		result.write(")");
+		indenter.write(")");
 		postpare();
 	}
 
 	@Override
 	public void visit(SetItem setItem) {
 		prepare(setItem);
-		result.write("SetItem(");
+		indenter.write("SetItem(");
 		super.visit(setItem);
-		result.write(")");
+		indenter.write(")");
 		postpare();
 	}
 
@@ -483,7 +487,7 @@ public class UnparserFilter extends BasicVisitor {
 	public void visit(MapItem mapItem) {
 		prepare(mapItem);
 		mapItem.getKey().accept(this);
-		result.write(" |-> ");
+		indenter.write(" |-> ");
 		mapItem.getValue().accept(this);
 		postpare();
 	}
@@ -491,14 +495,14 @@ public class UnparserFilter extends BasicVisitor {
 	@Override
 	public void visit(Hole hole) {
 		prepare(hole);
-		result.write("HOLE");
+		indenter.write("HOLE");
 		postpare();
 	}
 
 	@Override
 	public void visit(FreezerHole hole) {
 		prepare(hole);
-		result.write("HOLE(" + hole.getIndex() + ")");
+		indenter.write("HOLE(" + hole.getIndex() + ")");
 		postpare();
 	}
 
@@ -514,10 +518,10 @@ public class UnparserFilter extends BasicVisitor {
 		prepare(kInjectedLabel);
 		Term term = kInjectedLabel.getTerm();
 		if (MetaK.isKSort(term.getSort())) {
-			result.write(kInjectedLabel.getInjectedSort(term.getSort()));
-			result.write("2KLabel ");
+			indenter.write(kInjectedLabel.getInjectedSort(term.getSort()));
+			indenter.write("2KLabel ");
 		} else {
-			result.write("# ");
+			indenter.write("# ");
 		}
 		term.accept(this);
 		postpare();
@@ -526,9 +530,9 @@ public class UnparserFilter extends BasicVisitor {
 	@Override
 	public void visit(KLabel kLabel) {
 		prepare(kLabel);
-		result.endLine();
-		result.write("Don't know how to pretty print KLabel");
-		result.endLine();
+		indenter.endLine();
+		indenter.write("Don't know how to pretty print KLabel");
+		indenter.endLine();
 		super.visit(kLabel);
 		postpare();
 	}
@@ -536,7 +540,7 @@ public class UnparserFilter extends BasicVisitor {
 	@Override
 	public void visit(TermComment termComment) {
 		prepare(termComment);
-		result.write("<br/>");
+		indenter.write("<br/>");
 		super.visit(termComment);
 		postpare();
 	}
@@ -572,44 +576,44 @@ public class UnparserFilter extends BasicVisitor {
 	@Override
 	public void visit(org.kframework.kil.Ambiguity ambiguity) {
 		prepare(ambiguity);
-		result.write("amb(");
-		result.endLine();
-		result.indent(TAB);
+		indenter.write("amb(");
+		indenter.endLine();
+		indenter.indent(TAB);
 		java.util.List<Term> contents = ambiguity.getContents();
 		for (int i = 0; i < contents.size(); ++i) {
 			contents.get(i).accept(this);
 			if (i != contents.size() - 1) {
-				result.write(",");
-				result.endLine();
+				indenter.write(",");
+				indenter.endLine();
 			}
 		}
-		result.endLine();
-		result.unindent();
-		result.write(")");
+		indenter.endLine();
+		indenter.unindent();
+		indenter.write(")");
 		postpare();
 	}
 
 	@Override
 	public void visit(org.kframework.kil.Context context) {
 		prepare(context);
-		result.write("context ");
+		indenter.write("context ");
 		variableList.clear();
 		context.getBody().accept(this);
 		if (context.getCondition() != null) {
-			result.write(" when ");
+			indenter.write(" when ");
 			context.getCondition().accept(this);
 		}
 		context.getAttributes().accept(this);
-		result.endLine();
-		result.endLine();
+		indenter.endLine();
+		indenter.endLine();
 		postpare();
 	}
 
 	@Override
 	public void visit(LiterateDefinitionComment literateDefinitionComment) {
 		prepare(literateDefinitionComment);
-		// result.write(literateDefinitionComment.getValue());
-		// result.endLine();
+		// indenter.write(literateDefinitionComment.getValue());
+		// indenter.endLine();
 		postpare();
 	}
 
@@ -617,8 +621,8 @@ public class UnparserFilter extends BasicVisitor {
 	public void visit(Require require) {
 		prepare(require);
 		if (!forEquivalence) {
-			result.write("require \"" + require.getValue() + "\"");
-			result.endLine();
+			indenter.write("require \"" + require.getValue() + "\"");
+			indenter.endLine();
 		}
 		postpare();
 	}
@@ -626,16 +630,16 @@ public class UnparserFilter extends BasicVisitor {
 	@Override
 	public void visit(BackendTerm term) {
 		prepare(term);
-		result.write(term.getValue());
+		indenter.write(term.getValue());
 		postpare();
 	}
 
 	@Override
 	public void visit(Bracket br) {
 		prepare(br);
-		result.write("(");
+		indenter.write("(");
 		br.getContent().accept(this);
-		result.write(")");
+		indenter.write(")");
 		postpare();
 	}
 
@@ -643,30 +647,30 @@ public class UnparserFilter extends BasicVisitor {
 	public void visit(Cast c) {
 		prepare(c);
 		c.getContent().accept(this);
-		result.write(" :");
+		indenter.write(" :");
 		if (c.isSyntactic()) {
-			result.write(":");
+			indenter.write(":");
 		}
-		result.write(c.getSort());
+		indenter.write(c.getSort());
 		postpare();
 	}
 
 	@Override
 	public void visit(Token t) {
 		prepare(t);
-		result.write("#token(\"" + t.tokenSort() + "\", \"" + t.value() + "\")");
+		indenter.write("#token(\"" + t.tokenSort() + "\", \"" + t.value() + "\")");
 		postpare();
 	}
 
 	private void prepare(ASTNode astNode) {
 		if (!stack.empty()) {
 			if (needsParanthesis(stack.peek(), astNode)) {
-				result.write("(");
+				indenter.write("(");
 			}
 		}
 		stack.push(astNode);
 		if (annotateLocation) {
-			astNode.setLocation("(" + result.getLineNo() + "," + result.getColNo());
+			astNode.setLocation("(" + indenter.getLineNo() + "," + indenter.getColNo());
 		}
 	}
 
@@ -674,13 +678,13 @@ public class UnparserFilter extends BasicVisitor {
 		ASTNode astNode = stack.pop();
 		if (!stack.empty()) {
 			if (needsParanthesis(stack.peek(), astNode)) {
-				result.write(")");
+				indenter.write(")");
 			}
 		}
 		if (annotateLocation) {
 			String loc = astNode.getLocation();
 			if (!loc.substring(loc.length() - 1).equals(")")) {
-				astNode.setLocation(loc + "," + result.getLineNo() + "," + result.getColNo() + ")");
+				astNode.setLocation(loc + "," + indenter.getLineNo() + "," + indenter.getColNo() + ")");
 			}
 		}
 	}
@@ -713,5 +717,9 @@ public class UnparserFilter extends BasicVisitor {
 
 	public void setPriorities(java.util.Map<Production, Integer> priorities) {
 		this.priorities = priorities;
+	}
+
+	public void setInConfiguration(boolean inConfiguration) {
+		this.inConfiguration = inConfiguration;
 	}
 }
