@@ -56,14 +56,15 @@ public class AddKCell extends CopyOnWriteTransformer {
 			return node;
 		}
 		node = node.shallowCopy();
-		assert !this.komputationCells.isEmpty();
-		node.setBody(MetaK.kWrap(node.getBody(), this.komputationCells.get(0))); // first rule replaces older rule
 		for (int i = 1; i < komputationCells.size(); ++i) {
-			// all other rules are scheduled to be added
+			// first all other rules are scheduled to be added
 			Rule newRule = node.shallowCopy();
 			newRule.setBody(MetaK.kWrap(node.getBody(), this.komputationCells.get(i)));
 			newRules.add(newRule);
 		}
+		assert !this.komputationCells.isEmpty();
+		node.setBody(MetaK.kWrap(node.getBody(), this.komputationCells.get(0))); // then first rule replaces older rule
+		
 		return node;
 	}
 	
