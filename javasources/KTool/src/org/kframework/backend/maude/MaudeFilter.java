@@ -610,7 +610,11 @@ public class MaudeFilter extends BackendFilter {
     @Override
     public void visit(Token token) {
         if (token instanceof GenericToken) {
-            result.append(token);
+            if (token.tokenSort().equals("#Float")) {
+                result.append("#_(" + token.value() + ")");
+            } else {
+                result.append(token);
+            }
         } else {
             result.append("#_(" + token.value() + ")");
         }

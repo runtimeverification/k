@@ -299,20 +299,12 @@ public class MaudeKRun implements KRun {
             } else if (op.equals("#token") && sort.equals(KSorts.KLABEL)) {
                 // #token(String, String)
                 assertXMLTerm(list.size() == 2);
-                StringBuiltin sortString = (StringBuiltin)
-parseXML(list.get(0), context);
-                StringBuiltin valueString = (StringBuiltin)
-parseXML(list.get(1), context);
+                StringBuiltin sortString = (StringBuiltin) parseXML(list.get(0), context);
+                StringBuiltin valueString = (StringBuiltin) parseXML(list.get(1), context);
                 return GenericToken.of(sortString.stringValue(), valueString.stringValue());
-
-/*			} else if (sort.equals("#FiniteFloat")) {
+			} else if (sort.equals("#FiniteFloat")) {
 				assertXMLTerm(list.size() == 0);
-				return FloatBuiltin.of(op);
-			} else if (sort.equals("#Id") && op.equals("#id_")) {
-				assertXMLTerm(list.size() == 1);
-				StringBuiltin value = (StringBuiltin) parseXML(list.get(0), context);
-				return new Constant("#Id", value.getValue());
-*/
+        return GenericToken.of("#Float", op);
 			} else if (op.matches("\\.(Map|Bag|List|Set|K)") && (sort.equals("Bag") || sort.equals("List") || sort.equals("Map") || sort.equals("Set") || sort.equals("K"))) {
 				assertXMLTerm(list.size() == 0);
                 if (sort.equals("Bag")) {

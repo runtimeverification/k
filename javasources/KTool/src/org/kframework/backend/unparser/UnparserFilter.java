@@ -357,10 +357,12 @@ public class UnparserFilter extends BasicVisitor {
 		prepare(kapp);
 		Term child = kapp.getChild();
 		Term label = kapp.getLabel();
-		if (forEquivalence && label instanceof Token &&
-				child instanceof KList && ((KList)child).getContents().isEmpty()) {
-			// hack around incorrect unparsing of #tokens
-			indenter.write(((Token)label).value());
+    if (label instanceof Token) {
+      // TODO(AndreiS): this code should be dead; after parsing constants should
+      // be loaded into Constant and then transformed into KApp of Token, empty
+      // KList right away.
+      assert child instanceof KList && ((KList) child).isEmpty();
+      indenter.write(((Token) label).value());
 		} else {
 			label.accept(this);
 			indenter.write("(");
