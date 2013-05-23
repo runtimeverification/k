@@ -220,7 +220,7 @@ public class VisualizationViewerDemo {
 	}
 
 	public void addEdge(KRunState source, KRunState target, int depth, String rule){
-		this.layout.getGraph().addEdge(new Transition(Transition.TransitionType.REDUCE, context), source, target);
+		this.layout.getGraph().addEdge(Transition.reduce(context), source, target);
 	}
 
 	public Object verifyExistingVertex(Object vertex){
