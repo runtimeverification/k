@@ -64,17 +64,6 @@ public class JavaSymbolicKRun implements KRun {
 											org.kframework.kil.Rule pattern,
 											org.kframework.kil.Term cfg,
 											RuleCompilerSteps compilationInfo) throws KRunExecutionException {
-		return null;  //To change body of implemented methods use File | Settings | File Templates.
-	}
-
-	//	@Override
-    public KRunResult<SearchResults> search(
-            Integer bound,
-            Integer depth,
-            SearchType searchType,
-            org.kframework.kil.Rule pattern,
-            org.kframework.kil.Term cfg,
-            Set<String> varNames) throws KRunExecutionException {
         throw new UnsupportedOperationException();
     }
 

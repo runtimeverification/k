@@ -8,12 +8,25 @@ import org.kframework.kil.Attributes;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.K;
 
+/**
+A transitition in the transition system of a semantics. Used to represent edges in the search graph
+associated with breadth-first search, LTL model-checking, and debugging.
+*/
 public class Transition implements Serializable{
 
+	/**
+	The rule transforming the origin state to the destination state
+	*/
 	private ASTNode rule;
+
+	/**
+	The label of the rule transforming the origin state to the destination state, if the entire rule
+	is unavailable
+	*/
 	private String label;
+
 	private TransitionType type;
-	
+
 	protected Context context;
 
 	public Transition(ASTNode rule, Context context) {
@@ -53,9 +66,22 @@ public class Transition implements Serializable{
 	}
 
 	public enum TransitionType {
+		/**
+		A transition for which the rule transforming the origin to the destination is known
+		*/
 		RULE,
+		/**
+		A transition for which only the rule label of the underlying rule is known.
+		*/
 		LABEL,
+		/**
+		A transition for which no further information is available, except that the rule had no
+		label.
+		*/
 		UNLABELLED,
+		/**
+		A rewrite or set of rewrites containing no transitions.
+		*/
 		REDUCE
 	}
 

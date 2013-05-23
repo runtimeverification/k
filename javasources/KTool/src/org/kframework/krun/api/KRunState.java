@@ -22,7 +22,14 @@ import java.io.IOException;
 
 public class KRunState implements Serializable{
 
+	/**
+	The pretty-printed term associated with this state, as suitable for display
+	*/
 	private Term result;
+
+	/**
+	The raw term associated with this state, as suitable for further rewriting
+	*/
 	private Term rawResult;
 	private Integer stateId;
 	
