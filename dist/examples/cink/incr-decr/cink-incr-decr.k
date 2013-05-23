@@ -8,12 +8,30 @@ module CINK-INCR-DECR-SEMANTICS
   imports CINK-BASIC-SEMANTICS
   imports CINK-L-R-VALUES-SEMANTICS
 
-  // for transforming the lvalue into a rvalue
+  /*@
+   There are cases when an lvalue must be converted into its rvalue.
+   For instance x++ + y will be evaluated to lvalue-of-x + rvalue-of-y.
+   Obviously, lvalue-of-x must be converted into rvalue-of-x in this
+   context.\\
+   Therefore we extend expressions with a "rvalue" wrapper, similar to
+   "lvalue".
+  */ 
 
   syntax Exp ::= "rvalue" "(" Exp ")"
 
+  /*@
+   The rule realizing the conversion is very simple: it replaces the
+   expresion with the value stored at the location given as paraemeter.
+  */
+
   rule <k>  rvalue(L:Loc) => V ...</k>
        <store>... L |-> V ...</store>
+
+  /*@ since the cooling rules for the arithmetic and logic operators depend
+    on the type of the result, i.e. whether it is an lvalue or a rvalue, 
+    we have to disable the strict attribute and manually write the heating
+    and cooling rules.
+  */
 
   // heating & cooling rules for assignment
   rule E1:Exp = E2:Exp => E2 ~> E1 = HOLE [heat]
@@ -161,15 +179,15 @@ module CINK-INCR-DECR-SEMANTICS
     in order to specify how to valuate subexpressions.
   */
 
-  // heating the argument of the prefix increment as an lvalue
+  //@ Heating the argument of the prefix increment as an lvalue;
   context ++ (HOLE => lvalue(HOLE))
 
- // for nested increment expressions:
+ //@ EXtend the above heating for nested increment expressions:
 
   rule lvalue(++ E:Exp) => ++ E:Exp ~> lvalue(HOLE) [heat]
   rule L:Loc ~> lvalue(HOLE) => lvalue(L) [cool]
 
-  // the semantics of the the prefix increment
+  //@ The semantics of the the prefix increment
   rule <k> ++ L:Loc => L ...</k>
        <store>... L |-> (V:Int => V +Int 1) ...</store>
 
@@ -194,24 +212,68 @@ module CINK-INCR-DECR-SEMANTICS
   postfix ++ operator. —end note ] The result is a prvalue."
   From the Appendix D: \\
   "D.1 The use of an operand of type bool with the ++ operator is deprecated 
-  (see 5.3.2 and 5.2.6)."
+  (see 5.3.2 and 5.2.6)."\\
+  Here is the definition for sequenced before:\\
+  "\emph{Sequenced before} is an asymmetric, transitive, pair-wise relation 
+  between evaluations executed by a single
+   thread (1.10), which induces a partial order among those evaluations.
+   Given any two evaluations A and B, if
+   A is sequenced before B, then the execution of A shall precede the execution
+   of B. If A is not sequenced before
+   B and B is not sequenced before A, then A and B are unsequenced.
+  [ Note: The execution of unsequenced
+   evaluations can overlap. — end note ] Evaluations A and B are 
+  indeterminately sequenced when either A
+   is sequenced before B or B is sequenced before A, but it is unspecified 
+  which.
+  [ Note: Indeterminately
+   sequenced evaluations cannot overlap, but either could be executed first.
+   — end note ]\\
+  Every value computation and side effect associated with a full-expression
+  is sequenced before every value
+  computation and side effect associated with the next full-expression
+  to be evaluated."\\
+  */
+
+  /*@
+   We add a new cell that collects the side-effects during the evaluation
+   of a full-expression:
   */
 
   configuration 
      <sideEffects> .K </sideEffects>
 
+  /*@
+  we define a syntax for the side-effects;
+  */
+
   syntax K ::= "$inc" "(" K ")" | "$dec" "(" K ")" | "seqpoint"
 
+  
+  //@ The argument of the postfix increment operator is heated as an lvalue:
   context (HOLE => lvalue(HOLE)) ++
+
+  /*@
+    The semantics of the postfix increment operator: the result value is the 
+    value  stored at the computed location and its side-effect is added to 
+    the cell with the side-effects:
+  */
 
   rule <k> L:Loc ++ => V ...</k>
        <store>... L |-> V:Int ...</store>
        <sideEffects> . => $inc(L) ...</sideEffects>
 
+  /*@
+    The semantics of a sequence point (when a full-expression is sequenced):
+    the sequence of the side effects is moved from the its cell to the top of
+    the k cell. The side-effects are executed in the reverse order they were
+    evaluated.
+  */
 
   rule <k> seqpoint => SE ...</k>
        <sideEffects> SE => . </sideEffects>
 
+  //@ The semantics of the side-effects (self-explained);
 
   rule <k> $inc(L:Loc) => . ...</k>
        <store>... L |-> (V:Int => V +Int 1) ...</store>
