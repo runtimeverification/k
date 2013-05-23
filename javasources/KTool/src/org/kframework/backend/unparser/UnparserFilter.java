@@ -184,8 +184,9 @@ public class UnparserFilter extends BasicVisitor {
 				indenter.write(",, ");
 			}
 		}
-		if (termList.size() == 0)
+		if (termList.size() == 0) {
 			indenter.write(".KList");
+		}
 		postpare();
 	}
 
@@ -274,24 +275,26 @@ public class UnparserFilter extends BasicVisitor {
 			indenter.endLine();
 			indenter.indent(TAB);
 		} else {
-			indenter.write(" ");
-		}
-		if (cell.hasLeftEllipsis()) {
-			indenter.write("... ");
+			if (cell.hasLeftEllipsis()) {
+				indenter.write("... ");
+			} else {
+				indenter.write(" ");
+			}
 		}
 		if (!colorCode.equals("")) {
 			indenter.write(ColorUtil.ANSI_NORMAL);
 		}
 		cell.getContents().accept(this);
 		indenter.write(colorCode);
-		if (cell.hasRightEllipsis()) {
-			indenter.write(" ...");
-		}
 		if (inConfiguration && inTerm == 0) {
 			indenter.endLine();
 			indenter.unindent();
 		} else {
-			indenter.write(" ");
+			if (cell.hasRightEllipsis()) {
+				indenter.write(" ...");
+			} else {
+				indenter.write(" ");
+			}
 		}
 		indenter.write("</" + cell.getLabel() + ">");
 		if (!colorCode.equals("")) {
@@ -352,10 +355,18 @@ public class UnparserFilter extends BasicVisitor {
 	@Override
 	public void visit(KApp kapp) {
 		prepare(kapp);
-		kapp.getLabel().accept(this);
-		indenter.write("(");
-		kapp.getChild().accept(this);
-		indenter.write(")");
+		Term child = kapp.getChild();
+		Term label = kapp.getLabel();
+		if (forEquivalence && label instanceof Token &&
+				child instanceof KList && ((KList)child).getContents().isEmpty()) {
+			// hack around incorrect unparsing of #tokens
+			indenter.write(((Token)label).value());
+		} else {
+			label.accept(this);
+			indenter.write("(");
+			child.accept(this);
+			indenter.write(")");
+		}
 		postpare();
 	}
 

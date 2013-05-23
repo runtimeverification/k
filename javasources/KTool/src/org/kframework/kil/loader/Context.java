@@ -115,6 +115,16 @@ public class Context {
 
     public Map<String, CollectionSort> collectionSorts;
 
+	protected java.util.List<String> komputationCells = null;
+	
+	public java.util.List<String> getKomputationCells() {
+		return komputationCells;
+	}
+
+	public void setKomputationCells(java.util.List<String> komputationCells) {
+		this.komputationCells = komputationCells;
+	}
+
 	private void initSubsorts() {
 		subsorts.addRelation(KSorts.KLIST, "K");
 		subsorts.addRelation(KSorts.KLIST, "KResult");

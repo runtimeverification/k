@@ -4,6 +4,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.kframework.backend.unparser.Indenter;
 import org.kframework.backend.unparser.UnparserFilter;
@@ -12,6 +14,7 @@ import org.kframework.kil.Configuration;
 import org.kframework.kil.ConfigurationNotFound;
 import org.kframework.kil.ConfigurationNotUnique;
 import org.kframework.kil.Definition;
+import org.kframework.kil.Import;
 import org.kframework.kil.loader.Context;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.parser.concrete.KParser;
@@ -23,6 +26,11 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.general.GlobalSettings;
 
+/*
+ * @author StefanC
+ * 
+ * Front-end for the equivalance checker.
+ */
 public class KagregFrontEnd {
 
 	public static void kagreg(String[] args) throws IOException, Exception {
@@ -68,6 +76,9 @@ public class KagregFrontEnd {
                 context1);
 		firstDef = (Definition)firstDef.accept(new AddKCell(context1));
 		firstDef = (Definition)firstDef.accept(new RenameCellsTransformer(new AppendRenameStrategy("1"), context1));
+		CollectImportsVisitor collectImportsVisitor1 = new CollectImportsVisitor(context1, false);
+		collectImportsVisitor1.visit(firstDef);
+		List<Import> imports1 = collectImportsVisitor1.getImports();
 		
 		GlobalSettings.verbose = true;
 //        GlobalSettings.symbolicEquality = false;
@@ -84,6 +95,9 @@ public class KagregFrontEnd {
                 context2);
 		secondDef = (Definition)secondDef.accept(new AddKCell(context2));
 		secondDef = (Definition)secondDef.accept(new RenameCellsTransformer(new AppendRenameStrategy("2"), context2));
+		CollectImportsVisitor collectImportsVisitor2 = new CollectImportsVisitor(context2, false);
+		collectImportsVisitor2.visit(secondDef);
+		List<Import> imports2 = collectImportsVisitor2.getImports();
 
 		Configuration firstConf = null;
 		try {
@@ -108,6 +122,22 @@ public class KagregFrontEnd {
 		}
 
 		Indenter indenter = new Indenter();
+		
+		indenter.write("module RESULT");
+		indenter.endLine();
+		indenter.indent(UnparserFilter.TAB);
+		List<Import> allImports = new ArrayList<Import>();
+		allImports.addAll(imports1);
+		allImports.addAll(imports2);
+		for (Import i : allImports) {
+			if (i.getName().endsWith("-SYNTAX") || i.getName().startsWith("AUTO-INCLUDED")) {
+				continue;
+			}
+			indenter.write("imports " + i.getName());
+			indenter.endLine();
+		}
+		indenter.endLine();
+
 		UnparserFilter unparserFirst = new UnparserFilter(context1);
 		unparserFirst.setIndenter(indenter);
 		unparserFirst.setForEquivalence();
@@ -154,6 +184,12 @@ public class KagregFrontEnd {
 		indenter.unindent();
 		
 		indenter.write("</aggregation>");
+		indenter.endLine();
+		indenter.unindent();
+
+		indenter.unindent(); // "configuration"
+		indenter.endLine();
+		indenter.write("endmodule");
 		indenter.endLine();
 		
 		BufferedWriter writer = new BufferedWriter(new FileWriter("result.k"));

@@ -82,6 +82,8 @@ public class KompileOptionsParser {
 
 		Option addTopCell = new Option("addTopCell", false, "add a top cell to configuration and all rules");
 
+		Option kCells = new Option("k", "kcells", true, "cells which contain komputations");
+
 		Option sortCells = new Option("sortCells", false,
 				"sort cells according to the order in the configuration");
 
@@ -135,6 +137,7 @@ public class KompileOptionsParser {
 		options.addOption(kexp);
 		options.addOption(unparse);
 		options.addOption(addTopCell);
+		options.addOption(kCells);
 		options.addOption(sortCells);
 		options.addOption(transition);
 		options.addOption(supercool);

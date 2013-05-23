@@ -159,6 +159,16 @@ public class KompileFrontEnd {
 		GlobalSettings.SMT = cmd.hasOption("smt");
 		
 		Context context = new Context();
+		if (cmd.hasOption("kcells")) {
+			String kCells = cmd.getOptionValue("kcells");
+			List<String> komputationCells = new ArrayList<String>();
+			for (String s : kCells.split(" ")) {
+				komputationCells.add(s);
+			}
+			context.setKomputationCells(komputationCells);
+			assert !context.getKomputationCells().isEmpty();
+		}
+		
 		if (context.dotk == null) {
 			try {
 				context.dotk = new File(mainFile.getCanonicalFile().getParent() + File.separator + ".k");

@@ -195,8 +195,8 @@ public class MetaK {
 		return false;
 	}
 
-	public static Term kWrap(Term t) {
-		return wrap(t, "k", Ellipses.RIGHT);
+	public static Term kWrap(Term t, String komputationCellName) {
+		return wrap(t, komputationCellName, Ellipses.RIGHT);
 	}
 
 	public static Term wrap(Term t, String label, Ellipses ellipses) {
