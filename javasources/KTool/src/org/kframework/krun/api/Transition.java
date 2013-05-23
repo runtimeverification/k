@@ -5,6 +5,7 @@ import java.io.Serializable;
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attributes;
+import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.K;
 
@@ -20,33 +21,47 @@ public class Transition implements Serializable{
 	private ASTNode rule;
 
 	/**
-	The label of the rule transforming the origin state to the destination state, if the entire rule
-	is unavailable
+	The label of the rule transforming the origin state to the destination state, if the entire
+	rule is unavailable
 	*/
 	private String label;
+
+	/**
+	The string read from stdin.
+	*/
+	private String readString;
 
 	private TransitionType type;
 
 	protected Context context;
 
-	public Transition(ASTNode rule, Context context) {
+	protected Transition(Context context, TransitionType type, String label, ASTNode rule,
+		String readString) {
 		this.context = context;
-		this.rule = rule;
-		this.type = TransitionType.RULE;
-	}
-
-	public Transition(String label, Context context) {
-		this.context = context;
-		this.label = label;
-		this.type = TransitionType.LABEL;
-	}
-
-	public Transition(TransitionType type, Context context) {
-		this.context = context;
-		if (type == TransitionType.RULE || type == TransitionType.LABEL) {
-			throw new RuntimeException("Must specify argument for transition types RULE and LABEL");
-		}
 		this.type = type;
+		this.label = label;
+		this.rule = rule;
+		this.readString = readString;
+	}
+
+	public static Transition rule(ASTNode rule, Context context) {
+		return new Transition(context, TransitionType.RULE, null, rule, null);
+	}
+
+	public static Transition label(String label, Context context) {
+		return new Transition(context, TransitionType.LABEL, label, null, null);
+	}
+
+	public static Transition unlabelled(Context context) {
+		return new Transition(context, TransitionType.UNLABELLED, null, null, null);
+	}
+
+	public static Transition reduce(Context context) {
+		return new Transition(context, TransitionType.REDUCE, null, null, null);
+	}
+
+	public static Transition stdin(String readString, Context context) {
+		return new Transition(context, TransitionType.STDIN, null, null, readString);
 	}
 
 	public ASTNode getRule() {
@@ -82,7 +97,11 @@ public class Transition implements Serializable{
 		/**
 		A rewrite or set of rewrites containing no transitions.
 		*/
-		REDUCE
+		REDUCE,
+		/**
+		An action signifying that the user has entered data on the standard input stream.
+		*/
+		STDIN
 	}
 
 	public TransitionType getType() {
@@ -91,17 +110,19 @@ public class Transition implements Serializable{
 
 	@Override
 	public String toString() {
-		if (rule != null) {
+		if (type == TransitionType.RULE) {
 			Attributes a = rule.getAttributes();
 			UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
 			a.accept(unparser);
 			return "\nRule tagged " + unparser.getResult() + " ";
-		} else if (label != null) {
+		} else if (type == TransitionType.LABEL) {
 			return "\nRule labelled " + label + " ";
 		} else if (type == TransitionType.REDUCE) {
 			return "\nMaude 'reduce' command ";
-		} else {
+		} else if (type == TransitionType.UNLABELLED) {
 			return "\nUnlabelled rule ";
+		} else {
+			return "\nRead " + StringBuiltin.of(readString).value();
 		}
 	}
 }

@@ -187,6 +187,8 @@ public class CommandlineOptions {
 		Option save = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("save").withDescription("Save the debug session to file").create();
 		Option load = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("load").withDescription("Load the debug session from file").create();
 		Option help = OptionBuilder.hasArg(false).withLongOpt("help").withDescription("Display the available commands").create();
+		Option read = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("read")
+			.withDescription("Read a string from stdin").create();
 		options.addOption(step); getOptionList().add(step);
 		options.addOption(stepAll); getOptionList().add(stepAll);
 		options.addOption(select); getOptionList().add(select);
@@ -197,6 +199,7 @@ public class CommandlineOptions {
 		options.addOption(abort); getOptionList().add(abort);
 		options.addOption(save); getOptionList().add(save);
 		options.addOption(load); getOptionList().add(load);
+		options.addOption(read); getOptionList().add(read);
 		options.addOption(help); getOptionList().add(help);
 	}
 

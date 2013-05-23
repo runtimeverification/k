@@ -277,6 +277,7 @@ public class MaudeKRun implements KRun {
                 if (op.equals("#_") && term instanceof Token) {
                     return term;
                 } else {
+					System.err.println(term);
                     return new KInjectedLabel(term);
                 }
 			} else if (sort.equals("#NzInt") && op.equals("--Int_")) {
@@ -511,12 +512,12 @@ parseXML(list.get(1), context);
 					// location information is missing, I am creating non-RULE edges.
 					String labelAttribute = elem.getAttribute("label");
 					if (labelAttribute == null) {
-						return new Transition(TransitionType.UNLABELLED, context);
+						return Transition.unlabelled(context);
 					} else {
-						return new Transition(labelAttribute, context);
+						return Transition.label(labelAttribute, context);
 					}
 				}
-				return new Transition(context.locations.get(filename + ":(" + location + ")"),
+				return Transition.rule(context.locations.get(filename + ":(" + location + ")"),
                         context);
 			}
 		};
@@ -680,9 +681,9 @@ parseXML(list.get(1), context);
 			String label = op;
 			Transition trans;
 			if (sort.equals("#RuleName") && op.equals("UnlabeledLtl")) {
-				trans = new Transition(TransitionType.UNLABELLED, context);
+				trans = Transition.unlabelled(context);
 			} else {
-				trans = new Transition(label, context);
+				trans = Transition.label(label, context);
 			}
 			list.add(new MaudeTransition(new KRunState(t, context), trans));
 		} else if (sort.equals("#TransitionList") && op.equals("LTLnil")) {

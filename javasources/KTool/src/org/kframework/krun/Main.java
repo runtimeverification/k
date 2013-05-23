@@ -458,7 +458,7 @@ public class Main {
 			List<Completor> argCompletor = new LinkedList<Completor>();
 			argCompletor.add(new SimpleCompletor(new String[] { "help", 
 					"abort", "resume", "step", "step-all", "select", 
-					"show-search-graph", "show-node", "show-edge", "save", "load" }));
+					"show-search-graph", "show-node", "show-edge", "save", "load", "read" }));
 			argCompletor.add(new FileNameCompletor());
 			List<Completor> completors = new LinkedList<Completor>();
 			completors.add(new ArgumentCompletor(argCompletor));
@@ -469,8 +469,9 @@ public class Main {
 			RunProcess rp = new RunProcess();
 			KRun krun = new MaudeKRun(context);
 			KRunDebugger debugger;
+			K.io = false;
 			if (state == null) {
-				Term t = makeConfiguration(kast, null, rp, (K.term != null), context);
+				Term t = makeConfiguration(kast, "", rp, (K.term != null), context);
 				debugger = krun.debug(t);
 				System.out
 						.println("After running one step of execution the result is:");
@@ -653,6 +654,16 @@ public class Main {
 							System.out.println("File successfully loaded.");
 						} catch (FileNotFoundException e) {
 							System.out.println("There is no such file, please try again.");
+						}
+					}
+					if (cmd.hasOption("read")) {
+						try {
+							debugger.readFromStdin(StringBuiltin.valueOf("\"" + 
+								cmd.getOptionValue("read") + "\"").stringValue());
+							AnsiConsole.out.println(
+								debugger.printState(debugger.getCurrentState()));
+						} catch (IllegalStateException e) {
+							Error.silentReport(e.getMessage());
 						}
 					}
 				}

@@ -26,8 +26,7 @@ public class Constant extends Term {
 
 		this.value = value;
 
-        assert !(sort.equals(KSorts.KLABEL) || sort.equals("#Bool") || sort.equals("#Int")
-                || sort.equals("#Float") || sort.equals("#String"));
+        assert !(sort.equals(KSorts.KLABEL));
 	}
 
 	public Constant(Element element) {

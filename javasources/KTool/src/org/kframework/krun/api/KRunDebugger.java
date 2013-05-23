@@ -84,4 +84,10 @@ public interface KRunDebugger {
 	information the debugger knows about the transition.
 	*/
 	public String printEdge(int state1, int state2);
+
+	/**
+	Read a string and append it to the buffer for stdin.
+	@param s The string to append to stdin.
+	*/
+	public void readFromStdin(String s);
 }

@@ -8,9 +8,14 @@ import org.apache.commons.collections15.bidimap.DualHashBidiMap;
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Cell;
 import org.kframework.kil.Rule;
+import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
+import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
+import org.kframework.kil.visitors.CopyOnWriteTransformer;
+import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.K;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.api.Transition.TransitionType;
@@ -58,7 +63,7 @@ public class KRunApiDebugger implements KRunDebugger {
 		reduced.setStateId(K.stateCounter++);
 		putState(reduced);
 		graph.addVertex(reduced);
-		graph.addEdge(new Transition(TransitionType.REDUCE, context), initialState, reduced);
+		graph.addEdge(Transition.reduce(context), initialState, reduced);
 		currentState = reduced.getStateId();
 	}
 
@@ -117,7 +122,7 @@ public class KRunApiDebugger implements KRunDebugger {
 			nextStep.setStateId(K.stateCounter++);
 			putState(nextStep);
 			graph.addVertex(nextStep);
-			graph.addEdge(new Transition(TransitionType.UNLABELLED, context), getState(currentState), nextStep);
+			graph.addEdge(Transition.unlabelled(context), getState(currentState), nextStep);
 			currentState = nextStep.getStateId();
 		}
 	}
@@ -202,5 +207,93 @@ public class KRunApiDebugger implements KRunDebugger {
 		}
 		
 		return rule + "\n" + printState(state1) + "\n=>\n" + printState(state2);
+	}
+
+	public void readFromStdin(String s) {
+		if (currentState == null) {
+			throw new IllegalStateException("Wrong command: If you previously used the step-all " +
+				"command you must select\nfirst a solution with the select command before " +
+				"executing a read from stdin.");
+		}
+		Term configuration = getState(currentState).getRawResult();
+		AppendToStdin transformer = new AppendToStdin(s, context);
+		Term result;
+		try {
+			result = (Term)configuration.accept(transformer);
+		} catch (TransformerException e) {
+			assert false;
+			result = null; //for static purposes
+		}
+		if (!transformer.getSucceeded()) {
+			throw new IllegalStateException("Cannot perform command: Configuration does not " + 
+				"have an stdin buffer");
+		}
+		KRunState newState = new KRunState(result, context);
+		if (states.containsValue(newState)) {
+			KRunState canonicalNewState = canonicalizeState(newState);
+			Transition edge = graph.findEdge(getState(currentState), canonicalNewState);
+			if (edge == null) {
+				graph.addEdge(Transition.stdin(s, context), 
+					getState(currentState), canonicalNewState);
+			}
+			currentState = canonicalNewState.getStateId();
+			return;
+		}
+		newState.setStateId(K.stateCounter++);
+		putState(newState);
+		graph.addVertex(newState);
+		graph.addEdge(Transition.stdin(s, context), 
+			getState(currentState), newState);
+		currentState = newState.getStateId();
+	}
+
+	private static class AppendToStdin extends CopyOnWriteTransformer {
+		private String str;
+		private boolean succeeded;
+		private boolean inStdin, inBuffer;
+		public AppendToStdin(String str, Context context) {
+			super("Append a string to the stdin buffer", context);
+			this.str = str;
+			succeeded = false;
+			inStdin = false;
+			inBuffer = false;
+		}
+
+		public boolean getSucceeded() {
+			return succeeded;
+		}
+
+		@Override
+		public ASTNode transform(Cell cell) throws TransformerException {
+			if ("stdin".equals(context.cells.get(cell.getLabel())
+				.getCellAttributes().get("stream"))) {
+				inStdin = true;
+				ASTNode result = super.transform(cell);
+				inStdin = false;
+				return result;
+			}
+			return super.transform(cell);
+		}
+
+		@Override
+		public ASTNode transform(TermCons tc) throws TransformerException {
+			if (tc.getCons().equals("List1IOBufferSyn") &&
+				tc.getContents().size() == 1) {
+				inBuffer = true;
+				ASTNode result = super.transform(tc);
+				inBuffer = false;
+				return result;
+			}
+			return super.transform(tc);
+		}
+
+		@Override
+		public ASTNode transform(StringBuiltin s) throws TransformerException {
+			if (inStdin && inBuffer) {
+				succeeded = true;
+				return StringBuiltin.of(s.stringValue() + str);
+			}
+			return super.transform(s);
+		}
 	}
 }

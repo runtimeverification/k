@@ -72,6 +72,19 @@ public class StringBuiltin extends Token {
 		return kApp;
 	}
 
+	/**
+	 * Returns a {@link StringBuiltin} representing the value of a string textually represented by
+	 * the given {@link String} value.
+	 * @param value An escaped {@link String} value with the leading and trailing '"'.
+	 */
+	public static StringBuiltin valueOf(String value) {
+		assert value.charAt(0) == '"';
+		assert value.charAt(value.length() - 1) == '"';
+		String stringValue = StringEscapeUtils.unescapeJava(
+			value.substring(1, value.length() - 1));
+		return StringBuiltin.of(stringValue);
+	}
+
 	/* un-escaped value of the string token */
 	private final String value;
 
