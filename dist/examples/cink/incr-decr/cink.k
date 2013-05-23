@@ -1,3 +1,5 @@
+require "cink-basic-semantics.k"
+require "cink-incr-decr.k"
 
 /*!
 \setlength{\parindent}{1em}
@@ -55,7 +57,7 @@ of arrays:
 */
 
 module CINK-SYNTAX 
-  imports CINK-INCR-DECR-SYNTAX
+  imports CINK-BASIC-SYNTAX
 
 endmodule
 
@@ -66,6 +68,7 @@ that of arrays and the definition of the whole configuration:
 
 module CINK
 
+  imports CINK-BASIC-SEMANTICS
   imports CINK-INCR-DECR-SEMANTICS
 
   configuration <T color="yellow">
@@ -79,5 +82,6 @@ module CINK
                   <store color="white"> .Map </store>
                   <in color="magenta" stream="stdin"> .List </in>
                   <out color="Orchid" stream="stdout"> .List </out>
+     <sideEffects> .K </sideEffects>
                 </T>
 endmodule

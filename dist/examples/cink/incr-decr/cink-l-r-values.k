@@ -1,4 +1,4 @@
-require "../basic/cink-basic.k"
+require "cink-basic-semantics.k"
 
 module CINK-L-R-VALUES-SYNTAX
  // no syntax

@@ -8,7 +8,7 @@ int main() {
   int x = 1,y, z;
   y = x++;
   cout << "y = " << y << endl;
-  z = (x++) + x + (y++);
+  z = x++ + (x + y++);
   cout << "x = " << x << endl;
   cout << "y = " << y << endl;
   cout << "z = " << z << endl;
