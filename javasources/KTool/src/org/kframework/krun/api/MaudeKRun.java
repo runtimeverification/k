@@ -619,7 +619,9 @@ public class MaudeKRun implements KRun {
 			}
 			for (MaudeTransition trans : loop) {
 				graph.addVertex(trans.state);
-				graph.addEdge(edge, vertex, trans.state);
+				if (edge != null) {
+					graph.addEdge(edge, vertex, trans.state);
+				}
 				edge = trans.label;
 				vertex = trans.state;
 			}
