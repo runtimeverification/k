@@ -1,7 +1,7 @@
 package org.kframework.compile.sharing;
 
 import org.kframework.kil.Attribute;
-import org.kframework.kil.CollectionSort;
+import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
@@ -15,11 +15,12 @@ import java.util.Set;
 
 
 /**
- * Visitor collecting the names of the collection sorts.
+ * Visitor collecting the names of the sorts with productions hooked to data structures (bag,
+ * list, map or set). A sort may be hooked to only one data structure.
  *
  * @author AndreiS
  */
-public class CollectionSorts extends BasicVisitor {
+public class DataStructureSortCollector extends BasicVisitor {
     /* TODO: merge with the rest of the builtins */
 
     private Map<String, String> types = new HashMap<String, String>();
@@ -28,12 +29,12 @@ public class CollectionSorts extends BasicVisitor {
     private Map<String, String> unitLabels = new HashMap<String, String>();
     private Map<String, Set<String>> operatorLabels = new HashMap<String, Set<String>>();
 
-    public CollectionSorts(Context context) {
+    public DataStructureSortCollector(Context context) {
         super(context);
     }
 
-    public Map<String, CollectionSort> getCollectionSorts() {
-        ImmutableMap.Builder<String, CollectionSort> builder = ImmutableMap.builder();
+    public Map<String, DataStructureSort> getSorts() {
+        ImmutableMap.Builder<String, DataStructureSort> builder = ImmutableMap.builder();
         for (Map.Entry<String, String> entry : types.entrySet()) {
             String sort = entry.getKey();
 
@@ -50,14 +51,14 @@ public class CollectionSorts extends BasicVisitor {
                 continue;
             }
 
-            CollectionSort collectionSort = new CollectionSort(
+            DataStructureSort dataStructureSort = new DataStructureSort(
                     sort,
                     types.get(sort),
                     constructorLabels.get(sort),
                     elementLabels.get(sort),
                     unitLabels.get(sort),
                     operatorLabels.get(sort));
-            builder.put(sort, collectionSort);
+            builder.put(sort, dataStructureSort);
         }
 
         return builder.build();
@@ -81,7 +82,7 @@ public class CollectionSorts extends BasicVisitor {
 
         String type = strings[0];
         String operator = strings[1];
-        if (!Context.builtinCollectionTypes.contains(type)) {
+        if (!Context.DataStructureTypes.contains(type)) {
             /* not a builtin collection */
             return;
         }
@@ -96,23 +97,23 @@ public class CollectionSorts extends BasicVisitor {
             operatorLabels.put(sort, new HashSet<String>());
         }
 
-        Map<Context.BuiltinCollectionLabel, String> labels
-                = Context.collectionLabels.get(type);
-        if (operator.equals(labels.get(Context.BuiltinCollectionLabel.CONSTRUCTOR))) {
+        Map<Context.DataStructureLabel, String> labels
+                = Context.dataStructureLabels.get(type);
+        if (operator.equals(labels.get(Context.DataStructureLabel.CONSTRUCTOR))) {
             if (constructorLabels.containsKey(sort)) {
                 /* TODO: print error message */
                 return;
             }
 
             constructorLabels.put(sort, node.getKLabel());
-        } else if (operator.equals(labels.get(Context.BuiltinCollectionLabel.ELEMENT))) {
+        } else if (operator.equals(labels.get(Context.DataStructureLabel.ELEMENT))) {
             if (elementLabels.containsKey(sort)) {
                 /* TODO: print error message */
                 return;
             }
 
             elementLabels.put(sort, node.getKLabel());
-        } else if (operator.equals(labels.get(Context.BuiltinCollectionLabel.UNIT))) {
+        } else if (operator.equals(labels.get(Context.DataStructureLabel.UNIT))) {
             if (unitLabels.containsKey(sort)) {
                 /* TODO: print error message */
                 return;

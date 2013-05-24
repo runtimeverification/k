@@ -7,7 +7,6 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 
@@ -16,11 +15,11 @@ import java.util.Map;
  *
  * @author AndreiS
  */
-public class MapBuiltin extends CollectionBuiltin {
+public class MapBuiltin extends DataStructureBuiltin {
 
-    private final LinkedHashMap<Term, Term> elements;
+    private final Map<Term, Term> elements;
 
-    public MapBuiltin(CollectionSort sort, LinkedHashMap<Term, Term> elements, Collection<Term> terms) {
+    public MapBuiltin(DataStructureSort sort, Map<Term, Term> elements, Collection<Term> terms) {
         super(sort, terms);
         this.elements = elements;
     }
@@ -31,7 +30,7 @@ public class MapBuiltin extends CollectionBuiltin {
 
     @Override
     public boolean isEmpty() {
-        return elements.isEmpty() && terms.isEmpty();
+        return elements.isEmpty() && super.terms.isEmpty();
     }
 
     @Override

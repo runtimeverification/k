@@ -204,6 +204,11 @@ public class BasicHookWorker implements Transformer {
 	}
 
     @Override
+    public ASTNode transform(CollectionBuiltin node) throws TransformerException {
+        return transform((Term) node);
+    }
+
+    @Override
     public ASTNode transform(MapBuiltin node) throws TransformerException {
         return transform((Term) node);
     }

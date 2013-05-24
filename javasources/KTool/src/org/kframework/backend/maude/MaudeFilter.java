@@ -64,7 +64,7 @@ public class MaudeFilter extends BackendFilter {
 			result.append(mod.getName());
 			result.append(" is\n");
 
-            // TODO: move declaration of #token in a .maude file
+            // TODO(AndreiS): move declaration of #token in a .maude file
             result.append("op #token : #String #String -> KLabel .\n");
 
 			for (ModuleItem mi : mod.getItems()) {
@@ -72,7 +72,8 @@ public class MaudeFilter extends BackendFilter {
 				result.append("\n");
 			}
 
-            for (String sort : definition.tokenNames()) {
+            // TODO(AndreiS): move this in a more approprite place
+            for (String sort : context.getTokenSorts()) {
                 String tokenKItem = "_`(_`)(#token(\"" + sort + "\", V:" + StringBuiltin.SORT_NAME
                                     + "), .KList)";
                 String sortKItem = "_`(_`)(#_(\"" + sort + "\")" + ", .KList)";
@@ -84,14 +85,13 @@ public class MaudeFilter extends BackendFilter {
                 result.append("eq _`(_`)(#tokenToString, " + tokenKItem + ") = " + valueKItem
                               + " .\n");
             }
-            definition.tokenNames().clear();
 
-            for (Map.Entry<String, CollectionSort> entry : context.collectionSorts.entrySet()) {
-                String lhs = "_`(_`)(" + AddPredicates.syntaxPredicate(entry.getKey()) + ", "
+			for (Map.Entry<String, DataStructureSort> entry : context.getDataStructureSorts().entrySet()) {
+				String lhs = "_`(_`)(" + AddPredicates.syntaxPredicate(entry.getKey()) + ", "
                            + "_`(_`)(" + entry.getValue().type() + "2KLabel_(V:"
                            + entry.getValue().type() + "), .KList))";
-                result.append("eq " + lhs + "  = _`(_`)(#_(true), .KList) .\n");
-            }
+				result.append("eq " + lhs + "  = _`(_`)(#_(true), .KList) .\n");
+			}
 
 			result.append("\nendm");
 		}
@@ -409,27 +409,29 @@ public class MaudeFilter extends BackendFilter {
 	@Override
 	public void visit(Variable variable) {
         if (MetaK.isBuiltinSort(variable.getSort())
-                || context.collectionSorts.containsKey(variable.getSort())) {
+                || context.getDataStructureSorts().containsKey(variable.getSort())) {
             result.append("_`(_`)(");
-            if (context.collectionSorts.containsKey(variable.getSort())) {
-                result.append(context.collectionSorts.get(variable.getSort()).type() + "2KLabel_(");
+            if (context.getDataStructureSorts().containsKey(variable.getSort())) {
+                result.append(context.dataStructureSortOf(variable.getSort()).type() + "2KLabel_(");
             } else {
                 result.append("#_(");
             }
         }
+
 		if (variable.getName().equals(MetaK.Constants.anyVarSymbol)) {
 			result.append("?");
 		} else {
 			result.append(variable.getName());
 		}
 		result.append(":");
-        if (context.collectionSorts.containsKey(variable.getSort())) {
-            result.append(context.collectionSorts.get(variable.getSort()).type());
+        if (context.getDataStructureSorts().containsKey(variable.getSort())) {
+            result.append(context.dataStructureSortOf(variable.getSort()).type());
         } else {
             result.append(variable.getSort());
         }
+
         if (MetaK.isBuiltinSort(variable.getSort())
-                || context.collectionSorts.containsKey(variable.getSort())) {
+                || context.getDataStructureSorts().containsKey(variable.getSort())) {
             result.append(")");
             result.append(", ");
             result.append(".KList");
@@ -684,45 +686,77 @@ public class MaudeFilter extends BackendFilter {
 		result.append(")");
 	}
 
-    @Override
-    public void visit(MapBuiltin mapBuiltin) {
-        if (mapBuiltin.isEmpty()) {
-            result.append("." + KSorts.MAP);
-        } else if (mapBuiltin.hasFrame() && mapBuiltin.elements().isEmpty()) {
-            new Variable(mapBuiltin.frame().getName(), KSorts.MAP).accept(this);
-        } else if (!mapBuiltin.hasFrame() && mapBuiltin.elements().size() == 1) {
-            Map.Entry<Term, Term> entry = mapBuiltin.elements().entrySet().iterator().next();
-            result.append("_|->_(");
+	@Override
+	public void visit(DataStructureBuiltin dataStructure) {
+        result.append("_`(_`)(" + dataStructure.sort().type() + "2KLabel_(");
+
+        if (!dataStructure.isEmpty()) {
+            result.append(Context.dataStructureLabels.get(dataStructure.sort().type()).get(
+                    Context.DataStructureLabel.CONSTRUCTOR));
+			result.append("(");
+
+            result.append(Context.dataStructureLabels.get(dataStructure.sort().type()).get(
+                    Context.DataStructureLabel.UNIT));
+
+            if (dataStructure instanceof CollectionBuiltin) {
+                visitCollectionElements((CollectionBuiltin) dataStructure);
+            } else {
+                assert dataStructure instanceof MapBuiltin;
+
+                visitMapElements((MapBuiltin) dataStructure);
+            }
+
+            if (dataStructure.hasFrame()) {
+                result.append(", ");
+                Variable variable = new Variable(
+                        dataStructure.frame().getName(),
+                        dataStructure.sort().type());
+                variable.accept(this);
+            }
+
+			result.append(")");
+        } else {
+            result.append(Context.dataStructureLabels.get(dataStructure.sort().type()).get(
+                    Context.DataStructureLabel.UNIT));
+        }
+
+        result.append("), .KList)");
+	}
+
+    private void visitCollectionElements(CollectionBuiltin collection) {
+        for (Term term : collection.elements()) {
+            result.append(", ");
+            result.append(Context.dataStructureLabels.get(collection.sort().type()).get(
+                    Context.DataStructureLabel.ELEMENT));
+            result.append("(");
+            term.accept(this);
+            result.append(")");
+        }
+    }
+
+    private void visitMapElements(MapBuiltin map) {
+        for (Map.Entry<Term, Term> entry : map.elements().entrySet()) {
+            result.append(", ");
+            result.append(Context.dataStructureLabels.get(map.sort().type()).get(
+                    Context.DataStructureLabel.ELEMENT));
+            result.append("(");
             entry.getKey().accept(this);
             result.append(", ");
             entry.getValue().accept(this);
             result.append(")");
-        } else {
-            result.append("__(");
-
-            boolean first = true;
-            for (Map.Entry<Term, Term> entry : mapBuiltin.elements().entrySet()) {
-                if (!first) {
-                    result.append(", ");
-                }
-
-                result.append("_|->_(");
-                entry.getKey().accept(this);
-                result.append(", ");
-                entry.getValue().accept(this);
-                result.append(")");
-
-                first = false;
-            }
-
-            if (mapBuiltin.hasFrame()) {
-                result.append(", ");
-                new Variable(mapBuiltin.frame().getName(), KSorts.MAP).accept(this);
-            }
-
-            result.append(")");
         }
     }
+
+    @Override
+    public void visit(CollectionBuiltin collection) {
+        visit((DataStructureBuiltin) collection);
+    }
+
+    @Override
+    public void visit(MapBuiltin map) {
+        visit((DataStructureBuiltin) map);
+    }
+
 
 	@Override
 	public void visit(Hole hole) {

@@ -256,12 +256,21 @@ public class BasicVisitor implements Visitor {
 	}
 
     @Override
-    public void visit(CollectionBuiltin node) {
+    public void visit(DataStructureBuiltin node) {
         for (Term term : node.terms()) {
             term.accept(this);
         }
 
         visit((Term) node);
+    }
+
+    @Override
+    public void visit(CollectionBuiltin node) {
+        for (Term term : node.elements()) {
+            term.accept(this);
+        }
+
+        visit((DataStructureBuiltin) node);
     }
 
     @Override
@@ -271,7 +280,7 @@ public class BasicVisitor implements Visitor {
             entry.getValue().accept(this);
         }
 
-        visit((CollectionBuiltin) node);
+        visit((DataStructureBuiltin) node);
     }
 
     @Override

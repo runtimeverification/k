@@ -8,7 +8,7 @@ module SET
 
   syntax MySet ::= MySet MySet    [function, hook(Set:__), klabel('_Set_)]
                  | ".MySet"       [function, hook(Set:.Set)]
-                 | MySetItem(K)   [function, hook(Set:SetItem`(_`))]
+                 | MySetItem(K)   [function, hook(Set:SetItem)]
 
   /* set difference */
   syntax MySet ::= MySet "-MySet" MySet   [function, latex({#1}-_{\it Set}{#2})]

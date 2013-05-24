@@ -16,22 +16,22 @@ import java.util.Set;
  *
  * @author AndreiS
  */
-public class TokenSorts extends BasicVisitor {
+public class TokenSortCollector extends BasicVisitor {
 
-    private final Set<String> names = new HashSet<String>();
+    private final Set<String> sorts = new HashSet<String>();
 
-    public TokenSorts(Context context) {
+    public TokenSortCollector(Context context) {
 		super(context);
 	}
 
-    public Set<String> getNames() {
-        return names;
+    public Set<String> getSorts() {
+        return sorts;
     }
 
     @Override
     public void visit(Production production) {
         if (production.isLexical()) {
-            names.add(production.getSort());
+            sorts.add(production.getSort());
         }
     }
 

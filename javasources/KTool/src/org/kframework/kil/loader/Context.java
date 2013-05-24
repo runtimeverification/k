@@ -3,7 +3,7 @@ package org.kframework.kil.loader;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
-import org.kframework.kil.CollectionSort;
+import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.Constant;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
@@ -35,9 +35,7 @@ import java.util.Set;
 
 public class Context {
 
-    public enum BuiltinCollectionLabel { CONSTRUCTOR, ELEMENT, UNIT };
-
-	public boolean initialized = false;
+    public enum DataStructureLabel { CONSTRUCTOR, ELEMENT, UNIT };
 
 	public static final Set<String> generatedTags = ImmutableSet.of(
 			"cons",
@@ -58,41 +56,41 @@ public class Context {
 		"{",
 		"}");
 
-    public static final Set<String> builtinCollectionTypes = ImmutableSet.of(
+    public static final Set<String> DataStructureTypes = ImmutableSet.of(
             KSorts.BAG,
             KSorts.LIST,
             KSorts.MAP,
             KSorts.SET);
 
-    public static final Map<String, ImmutableMap<BuiltinCollectionLabel, String>> collectionLabels
+    public static final Map<String, ImmutableMap<DataStructureLabel, String>> dataStructureLabels
             = ImmutableMap.of(
                     KSorts.BAG, ImmutableMap.of(
-                            BuiltinCollectionLabel.CONSTRUCTOR,
+                            DataStructureLabel.CONSTRUCTOR,
                             "__",
-                            BuiltinCollectionLabel.ELEMENT,
-                            "BagItem`(_`)",
-                            BuiltinCollectionLabel.UNIT,
+                            DataStructureLabel.ELEMENT,
+                            "BagItem",
+                            DataStructureLabel.UNIT,
                             ".Bag"),
                     KSorts.LIST, ImmutableMap.of(
-                            BuiltinCollectionLabel.CONSTRUCTOR,
+                            DataStructureLabel.CONSTRUCTOR,
                             "__",
-                            BuiltinCollectionLabel.ELEMENT,
-                            "ListItem`(_`)",
-                            BuiltinCollectionLabel.UNIT,
+                            DataStructureLabel.ELEMENT,
+                            "ListItem",
+                            DataStructureLabel.UNIT,
                             ".List"),
                     KSorts.MAP, ImmutableMap.of(
-                            BuiltinCollectionLabel.CONSTRUCTOR,
+                            DataStructureLabel.CONSTRUCTOR,
                             "__",
-                            BuiltinCollectionLabel.ELEMENT,
+                            DataStructureLabel.ELEMENT,
                             "_|->_",
-                            BuiltinCollectionLabel.UNIT,
+                            DataStructureLabel.UNIT,
                             ".Map"),
                     KSorts.SET, ImmutableMap.of(
-                            BuiltinCollectionLabel.CONSTRUCTOR,
+                            DataStructureLabel.CONSTRUCTOR,
                             "__",
-                            BuiltinCollectionLabel.ELEMENT,
-                            "SetItem`(_`)",
-                            BuiltinCollectionLabel.UNIT,
+                            DataStructureLabel.ELEMENT,
+                            "SetItem",
+                            DataStructureLabel.UNIT,
                             ".Set"));
 
 	public java.util.Map<String, Production> conses = new HashMap<String, Production>();
@@ -112,10 +110,19 @@ public class Context {
 	public String startSymbolPgm = "K";
 	public File dotk = null;
 	public File kompiled = null;
+    public boolean initialized = false;
+    protected java.util.List<String> komputationCells = null;
 
-    public Map<String, CollectionSort> collectionSorts;
+    /**
+     * {@link Map} of sort names into {@link DataStructureSort} instances.
+     */
+    private Map<String, DataStructureSort> dataStructureSorts;
 
-	protected java.util.List<String> komputationCells = null;
+    /**
+     * {@link Set} of the names of the sorts with lexical productions.
+     */
+    private Set<String> tokenSorts;
+
 	
 	public java.util.List<String> getKomputationCells() {
 		return komputationCells;
@@ -403,10 +410,30 @@ public class Context {
 		return sort.substring(0, 1).toUpperCase() + sort.substring(1);
 	}
 
-    public CollectionSort collectionSortOf(String sortName) {
-        assert collectionSorts != null;
+    public Map<String, DataStructureSort> getDataStructureSorts() {
+        return Collections.unmodifiableMap(dataStructureSorts);
+    }
 
-        return collectionSorts.get(sortName);
+    public void setDataStructureSorts(Map<String, DataStructureSort> dataStructureSorts) {
+        assert !initialized;
+
+        this.dataStructureSorts = new HashMap<String, DataStructureSort>(dataStructureSorts);
+    }
+
+    public DataStructureSort dataStructureSortOf(String sortName) {
+        assert initialized : "Context is not initialized yet";
+
+        return dataStructureSorts.get(sortName);
+    }
+
+    public Set<String> getTokenSorts() {
+        return Collections.unmodifiableSet(tokenSorts);
+    }
+
+    public void setTokenSorts(Set<String> tokenSorts) {
+        assert !initialized;
+
+        this.tokenSorts = new HashSet<String>(tokenSorts);
     }
 
 }

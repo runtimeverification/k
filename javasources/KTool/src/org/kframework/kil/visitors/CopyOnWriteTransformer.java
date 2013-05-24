@@ -2,6 +2,7 @@ package org.kframework.kil.visitors;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import org.kframework.compile.utils.MetaK;
@@ -459,28 +460,52 @@ public class CopyOnWriteTransformer implements Transformer {
 	}
 
     @Override
-    public ASTNode transform(MapBuiltin node) throws TransformerException {
+    public ASTNode transform(CollectionBuiltin node) throws TransformerException {
         boolean change = false;
         ArrayList<Term> terms = new ArrayList<Term>(node.terms().size());
-        LinkedHashMap<Term, Term> elements = new LinkedHashMap<Term, Term>(node.elements().size());
+        ArrayList<Term> elements = new ArrayList<Term>(node.elements().size());
         for (Term term : node.terms()) {
             Term transformedTerm = (Term) term.accept(this);
             terms.add(transformedTerm);
             change = change || transformedTerm != term;
         }
-        for (java.util.Map.Entry<Term, Term> entry : node.elements().entrySet()) {
-            Term transformedKey = (Term) entry.getKey().accept(this);
-            Term transformedValue = (Term) entry.getValue().accept(this);
-            elements.put(transformedKey, transformedValue);
-            change = change || transformedKey != entry.getKey()
-                     || transformedValue != entry.getValue();
+        for (Term term : node.elements()) {
+            Term transformedTerm = (Term) term.accept(this);
+            elements.add(transformedTerm);
+            change = change || transformedTerm != term;
         }
+
         if (change) {
-            return new MapBuiltin(node.collectionSort(), elements, terms);
+            return new CollectionBuiltin(node.sort(), elements, terms);
         } else {
             return node;
         }
     }
+
+	@Override
+	public ASTNode transform(MapBuiltin node) throws TransformerException {
+		boolean change = false;
+		ArrayList<Term> terms = new ArrayList<Term>(node.terms().size());
+		HashMap<Term, Term> elements = new HashMap<Term, Term>(node.elements().size());
+		for (Term term : node.terms()) {
+			Term transformedTerm = (Term) term.accept(this);
+			terms.add(transformedTerm);
+			change = change || transformedTerm != term;
+		}
+		for (java.util.Map.Entry<Term, Term> entry : node.elements().entrySet()) {
+			Term transformedKey = (Term) entry.getKey().accept(this);
+			Term transformedValue = (Term) entry.getValue().accept(this);
+			elements.put(transformedKey, transformedValue);
+			change = change || transformedKey != entry.getKey()
+                     || transformedValue != entry.getValue();
+		}
+
+		if (change) {
+			return new MapBuiltin(node.sort(), elements, terms);
+		} else {
+			return node;
+		}
+	}
 
 	@Override
 	public ASTNode transform(Constant node) throws TransformerException {

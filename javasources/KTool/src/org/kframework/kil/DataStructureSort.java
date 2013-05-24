@@ -1,17 +1,19 @@
 package org.kframework.kil;
 
-import com.google.common.collect.ImmutableSet;
 import org.kframework.kil.loader.Context;
 
+import com.google.common.collect.ImmutableSet;
+
+import java.io.Serializable;
 import java.util.Collection;
 
 
 /**
- * A builtin collection sort.
+ * A builtin data structure sort.
  *
  * @author AndreiS
  */
-public class CollectionSort {
+public class DataStructureSort implements Serializable {
 
     private final String name;
     private final String type;
@@ -20,13 +22,14 @@ public class CollectionSort {
     private final String unitLabel;
     private final ImmutableSet<String> operatorLabels;
 
-    public CollectionSort(String name,
-                   String type,
-                   String constructorLabel,
-                   String elementLabel,
-                   String unitLabel,
-                   Collection<String> operatorLabels) {
-        assert Context.builtinCollectionTypes.contains(type):
+    public DataStructureSort(
+            String name,
+            String type,
+            String constructorLabel,
+            String elementLabel,
+            String unitLabel,
+            Collection<String> operatorLabels) {
+        assert Context.DataStructureTypes.contains(type):
                "unknown builtin collection type " + type;
 
         this.name = name;
@@ -35,7 +38,6 @@ public class CollectionSort {
         this.elementLabel = elementLabel;
         this.unitLabel = unitLabel;
         this.operatorLabels = ImmutableSet.copyOf(operatorLabels);
-
     }
 
     public String constructorLabel() {

@@ -6,7 +6,6 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.BoolBuiltin;
 import org.kframework.kil.Configuration;
-import org.kframework.kil.Definition;
 import org.kframework.kil.Empty;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
@@ -34,8 +33,6 @@ import java.util.Set;
 public class AddPredicates extends CopyOnWriteTransformer {
 
     public static final KLabelConstant K2Sort = KLabelConstant.of("K2Sort");
-
-    private static Set<String> tokenNames;
 
     public class PredicatesVisitor extends BasicVisitor {
 
@@ -88,6 +85,11 @@ public class AddPredicates extends CopyOnWriteTransformer {
 
             if (node.isLexical()) {
                 /* predicate definition for token sorts is deferred to each backend */
+                return;
+            }
+
+            if (context.getDataStructureSorts().containsKey(node.getSort())) {
+                /* predicate definition for builtin collection sorts is deferred to each backend */
                 return;
             }
 
@@ -162,12 +164,6 @@ public class AddPredicates extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Definition node) throws TransformerException {
-        tokenNames = node.tokenNames();
-        return super.transform(node);
-    }
-
-    @Override
     public ASTNode transform(Module node) throws TransformerException {
         Module retNode = node.shallowCopy();
         retNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
@@ -220,9 +216,6 @@ public class AddPredicates extends CopyOnWriteTransformer {
                     rule = new Rule(lhs, rhs, context);
                     rule.addAttribute(Attribute.FUNCTION);
                     retNode.appendModuleItem(rule);
-                } else if (tokenNames.contains(sort)) {
-                    // define isSort predicate for token sorts
-
                 } else if (MetaK.isBuiltinSort(sort)) {
                     Variable var = Variable.getFreshVar(sort);
                     Term lhs = KApp.of(BuiltinPredicate, var);
@@ -239,12 +232,14 @@ public class AddPredicates extends CopyOnWriteTransformer {
                     rule.getCellAttributes().getContents().add(Attribute.FUNCTION);
                     retNode.appendModuleItem(rule);
                      */
+                } else if (context.getTokenSorts().contains(sort)) {
+                    /* defer membership predicate for lexical token to each backend */
                 }
             }
         }
 
         /* add collection membership predicates */
-        for (String sort : context.collectionSorts.keySet()) {
+        for (String sort : context.getDataStructureSorts().keySet()) {
             retNode.addConstant(KSorts.KLABEL, AddPredicates.predicate(sort));
         }
 

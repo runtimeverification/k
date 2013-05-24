@@ -59,7 +59,7 @@ public class MaudeBuiltinsFilter extends BackendFilter {
 		left = StringUtil.escapeMaude(node.getKLabel());
         left += "(";
 		right = getHookLabel(hook);
-        if (!node.isConstant()) {
+        if (node.getArity() > 0) {
             right += "(";
             first = true;
             super.visit(node);
@@ -70,8 +70,8 @@ public class MaudeBuiltinsFilter extends BackendFilter {
         left += ")";
 		result.append(left);
 		result.append(" = _`(_`)(");
-        if (context.collectionSorts.containsKey(node.getSort())) {
-            result.append(context.collectionSorts.get(node.getSort()).type() + "2KLabel_(");
+        if (context.getDataStructureSorts().containsKey(node.getSort())) {
+            result.append(context.dataStructureSortOf(node.getSort()).type() + "2KLabel_(");
         } else {
             result.append("#_(");
         }
@@ -91,7 +91,7 @@ public class MaudeBuiltinsFilter extends BackendFilter {
 		}
 
         Variable var;
-        if (context.collectionSorts.containsKey(node.getName())
+        if (context.getDataStructureSorts().containsKey(node.getName())
                 || node.getName().equals(KSorts.K)
                 || node.getName().equals(KSorts.KITEM)) {
             var = Variable.getFreshVar(node.getName());
@@ -103,8 +103,8 @@ public class MaudeBuiltinsFilter extends BackendFilter {
 		filter.visit(var);
         left += filter.getResult();
 
-        if (context.collectionSorts.containsKey(node.getName())) {
-            var.setSort(context.collectionSorts.get(node.getName()).type());
+        if (context.getDataStructureSorts().containsKey(node.getName())) {
+            var.setSort(context.dataStructureSortOf(node.getName()).type());
         }
 		right += var.toString();
 	}

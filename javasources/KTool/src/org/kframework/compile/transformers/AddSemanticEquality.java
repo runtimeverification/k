@@ -28,7 +28,10 @@ import java.util.Set;
 
 /**
  * Transformer class for semantic equality.
+ *
  * @see CopyOnWriteTransformer
+ *
+ * @author AndreiS
  */
 public class AddSemanticEquality extends CopyOnWriteTransformer {
 
@@ -79,12 +82,14 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
                 GlobalSettings.kem.register(new KException(
                         KException.ExceptionType.ERROR,
                         KException.KExceptionGroup.CRITICAL,
-                        "unexpected sort " + prod.getSort() + " for equality, expected sort " + Sort.BOOL,
+                        "unexpected sort " + prod.getSort() + " for equality, expected sort "
+                        + Sort.BOOL,
                         prod.getFilename(),
                         prod.getLocation()));
 
         retNode.addConstant(EQUALITY_PREDICATE);
 
+        /* defer =K to =Sort for sorts with equality */
         for(Map.Entry<String, String> item : equalities.entrySet()) {
             String sort = item.getKey();
             KLabelConstant sortEq = KLabelConstant.of(item.getValue(), context);
@@ -127,6 +132,19 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
                 rule.addAttribute(Attribute.FUNCTION);
                 retNode.appendModuleItem(rule);
             }
+        }
+
+        /* defer =K to ==K for lexical tokens */
+        for (String sort : context.getTokenSorts()) {
+            KList kList = new KList();
+            kList.add(Variable.getFreshVar(sort));
+            kList.add(Variable.getFreshVar(sort));
+
+            Term lhs = new KApp(KLabelConstant.KEQ, kList);
+            Term rhs = new KApp(KLabelConstant.KEQ_KLABEL, kList);
+            Rule rule = new Rule(lhs, rhs, context);
+            rule.addAttribute(Attribute.FUNCTION);
+            retNode.appendModuleItem(rule);
         }
 
         /*

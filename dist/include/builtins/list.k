@@ -8,7 +8,7 @@ module LIST
 
   syntax MyList ::= MyList MyList   [function, hook(List:__), klabel('_List_)]
                   | ".MyList"       [function, hook(List:.List)]
-                  | MyListItem(K)   [function, hook(List:ListItem`(_`))]
+                  | MyListItem(K)   [function, hook(List:ListItem)]
 
   /* element membership */
   syntax Bool ::= K "in" MyList   [function]

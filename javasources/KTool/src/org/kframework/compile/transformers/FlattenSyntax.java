@@ -277,12 +277,12 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
             ArrayList<Term> terms = new ArrayList<Term>(node.terms().size());
             if (node.hasFrame()) {
                 Variable frame = node.frame();
-                frame.setSort(node.collectionSort().type());
+                frame.setSort(node.sort().type());
                 terms.add(frame);
             }
 
             return KApp.of(new KInjectedLabel(new MapBuiltin(
-                    node.collectionSort(),
+                    node.sort(),
                     elements,
                     terms)));
         }
@@ -308,10 +308,11 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
                 return node;
             }
 
-            if (context.collectionSorts.containsKey(node.getSort())) {
-                node = node.shallowCopy();
-                node.setSort(context.collectionSorts.get(node.getSort()).type());
-                return KApp.of(new KInjectedLabel(node));
+            if (context.getDataStructureSorts().containsKey(node.getSort())) {
+                //node = node.shallowCopy();
+                //node.setSort(context.dataStructureSorts.get(node.getSort()).type());
+                //return KApp.of(new KInjectedLabel(node));
+                return node;
             }
 
 			node = node.shallowCopy();

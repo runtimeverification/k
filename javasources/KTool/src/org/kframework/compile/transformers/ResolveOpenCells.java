@@ -43,15 +43,17 @@ public class ResolveOpenCells extends CopyOnWriteTransformer {
 								
 			}
 		}
+
+        String sortName = sort.toString();
 		node.setContents(col);
 		if (ellipses == Ellipses.BOTH && sort != KSort.K && sort != KSort.List) {
 			ellipses = Ellipses.RIGHT;
 		}
-		if (ellipses == Ellipses.BOTH || ellipses == Ellipses.LEFT) {
-			col.getContents().add(0, Variable.getFreshVar(sort.toString()));
+        if (ellipses == Ellipses.BOTH || ellipses == Ellipses.LEFT) {
+			col.getContents().add(0, Variable.getFreshVar(sortName));
 		}
 		if (ellipses == Ellipses.BOTH || ellipses == Ellipses.RIGHT) {
-			col.getContents().add(Variable.getFreshVar(sort.toString()));
+			col.getContents().add(Variable.getFreshVar(sortName));
 		}
 		return node;
 	}

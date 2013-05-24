@@ -13,7 +13,7 @@ import org.kframework.compile.transformers.*;
 import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.ConfigurationStructureMap;
-import org.kframework.compile.utils.FlattenCollections;
+import org.kframework.compile.utils.FlattenDataStructures;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.main.FirstStep;
@@ -80,8 +80,7 @@ public abstract class BasicBackend implements Backend {
 		steps.add(new ResolveFunctions(context));
 		steps.add(new AddKCell(context));
 		steps.add(new AddSymbolicK(context));
-		if (GlobalSettings.symbolicEquality)
-			steps.add(new AddSemanticEquality(context));
+		steps.add(new AddSemanticEquality(context));
 		// steps.add(new ResolveFresh());
 		steps.add(new FreshCondToFreshVar(context));
 		steps.add(new ResolveFreshVarMOS(context));
@@ -104,7 +103,7 @@ public abstract class BasicBackend implements Backend {
 		steps.add(new ResolveConfigurationAbstraction (configurationStructureMap, context));
 		steps.add(new ResolveOpenCells(context));
 		steps.add(new ResolveRewrite(context));
-        steps.add(new FlattenCollections(context));
+        steps.add(new FlattenDataStructures(context));
 
 		if (GlobalSettings.sortedCells) {
 			steps.add(new SortCells(configurationStructureMap, context));

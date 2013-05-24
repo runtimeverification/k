@@ -8,7 +8,7 @@ module BAG
 
   syntax MyBag ::= MyBag MyBag    [function, hook(Bag:__), klabel('_Bag_)]
                  | ".MyBag"       [function, hook(Bag:.Bag)]
-                 | MyBagItem(K)   [function, hook(Bag:BagItem`(_`))]
+                 | MyBagItem(K)   [function, hook(Bag:BagItem)]
 
   /* element membership */
   syntax Bool ::= K "in" MyBag    [function]
