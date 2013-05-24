@@ -5,6 +5,8 @@ import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.Collection;
+import org.kframework.kil.Context;
+import org.kframework.kil.loader.*;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.StringUtil;
@@ -38,9 +40,9 @@ public class SortCells extends CopyOnWriteTransformer {
 	private final ConfigurationStructureMap configurationStructureMap;
 
 
-	public SortCells(ConfigurationStructureMap configurationStructureMap, org.kframework.kil.loader.Context context) {
+	public SortCells(org.kframework.kil.loader.Context context) {
 		super("SortCells", context);
-		this.configurationStructureMap = configurationStructureMap;
+		this.configurationStructureMap = context.getConfigurationStructureMap();
 	}
 
 	@Override

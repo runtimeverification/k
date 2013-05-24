@@ -10,10 +10,11 @@ import java.util.Map;
 import java.util.Set;
 
 /**
-* Initially created by: Traian Florin Serbanuta
-* <p/>
-* Date: 11/9/12
-* Time: 10:34 PM
+ * Initially created by: Traian Florin Serbanuta
+ * <p/>
+ * Date: 11/9/12
+ * Time: 10:34 PM
+ * A Map from cell names to @see ConfigurationStructure representing the cell contents and attributes.
 */
 public class ConfigurationStructureMap implements Map<String, ConfigurationStructure> {
     Map<String, ConfigurationStructure> config;

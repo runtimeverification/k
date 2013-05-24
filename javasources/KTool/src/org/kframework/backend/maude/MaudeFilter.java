@@ -24,14 +24,9 @@ public class MaudeFilter extends BackendFilter {
 	private boolean firstAttribute;
 	ConfigurationStructureMap cfgStr;
 
-	public MaudeFilter(ConfigurationStructureMap cfgStr, Context context) {
-		super(context);
-		this.cfgStr = cfgStr;
-	}
-
 	public MaudeFilter(Context context) {
 		super(context);
-		this.cfgStr = null;
+		this.cfgStr = context.getConfigurationStructureMap();
 	}
 
 	@Override

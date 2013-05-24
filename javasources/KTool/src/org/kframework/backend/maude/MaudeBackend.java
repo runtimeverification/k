@@ -26,8 +26,7 @@ public class MaudeBackend extends BasicBackend {
         try {
             definition = (Definition) definition.accept(new FreshVariableNormalizer(context));
         } catch (TransformerException e) { }
-        MaudeFilter maudeFilter = new MaudeFilter
-				(getConfigurationStructureMap(), context);
+        MaudeFilter maudeFilter = new MaudeFilter(context);
 		definition.accept(maudeFilter);
 
 		final String mainModule = definition.getMainModule();

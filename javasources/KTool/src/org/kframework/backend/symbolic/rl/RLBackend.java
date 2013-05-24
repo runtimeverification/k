@@ -18,7 +18,6 @@ import org.kframework.compile.tags.AddStrictStar;
 import org.kframework.compile.transformers.*;
 import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.compile.utils.CompilerSteps;
-import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.main.FirstStep;
@@ -141,7 +140,7 @@ public class RLBackend  extends BasicBackend implements Backend{
 		steps.add(new AddKStringConversion(context));
 		steps.add(new AddKLabelConstant(context));
 		steps.add(new ResolveHybrid(context));
-		steps.add(new ResolveConfigurationAbstraction(new ConfigurationStructureMap(), context));
+		steps.add(new ResolveConfigurationAbstraction(context));
 		steps.add(new ResolveOpenCells(context));
 		steps.add(new ResolveRewrite(context));
 

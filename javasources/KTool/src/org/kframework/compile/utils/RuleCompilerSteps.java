@@ -37,15 +37,15 @@ public class RuleCompilerSteps extends CompilerSteps<Rule> {
 		ConfigurationStructureMap configurationStructureMap = new
 				ConfigurationStructureMap();
 		ConfigurationStructureVisitor cfgStrVisitor =
-				new ConfigurationStructureVisitor(configurationStructureMap, context);
+				new ConfigurationStructureVisitor(context);
 		def.accept(cfgStrVisitor);
+        context.setMaxConfigurationLevel(cfgStrVisitor.getMaxLevel());
 		final ResolveContextAbstraction resolveContextAbstraction =
-				new ResolveContextAbstraction(cfgStrVisitor.getMaxLevel(),
-						configurationStructureMap, context);
+				new ResolveContextAbstraction(context);
 		this.add(resolveContextAbstraction);
 		this.add(new ResolveOpenCells(context));
 		if (GlobalSettings.sortedCells) {
-			cellSorter = new SortCells(configurationStructureMap, context);
+			cellSorter = new SortCells(context);
 			this.add(cellSorter);
 		}
 	}

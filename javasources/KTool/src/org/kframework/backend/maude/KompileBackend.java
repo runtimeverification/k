@@ -42,7 +42,6 @@ public class KompileBackend extends BasicBackend {
 	@Override
 	public void run(Definition javaDef) throws IOException {
 		MaudeBackend maude = new MaudeBackend(sw, context);
-		maude.setConfigurationStructureMap(getConfigurationStructureMap());
 		maude.run(javaDef);
 
 		String load = "load \"" + KPaths.getKBase(true) + KPaths.MAUDE_LIB_DIR + "/k-prelude\"\n";

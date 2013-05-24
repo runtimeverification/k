@@ -1,5 +1,6 @@
 package org.kframework.kil.loader;
 
+import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
@@ -114,6 +115,14 @@ public class Context {
     protected java.util.List<String> komputationCells = null;
 
     /**
+     * The two structures below are populated by the InitializeConfigurationStructure step of the compilation.
+     * configurationStructureMap represents a map from cell names to structures containing cell data.
+     * maxConfigurationLevel represent the maximum level of cell nesting in the configuration.
+     */
+    private ConfigurationStructureMap configurationStructureMap = new ConfigurationStructureMap();
+    private int maxConfigurationLevel = -1;
+
+    /**
      * {@link Map} of sort names into {@link DataStructureSort} instances.
      */
     private Map<String, DataStructureSort> dataStructureSorts;
@@ -131,6 +140,18 @@ public class Context {
 	public void setKomputationCells(java.util.List<String> komputationCells) {
 		this.komputationCells = komputationCells;
 	}
+
+    public ConfigurationStructureMap getConfigurationStructureMap() {
+        return configurationStructureMap;
+    }
+
+    public int getMaxConfigurationLevel() {
+        return maxConfigurationLevel;
+    }
+
+    public void setMaxConfigurationLevel(int maxConfigurationLevel) {
+        this.maxConfigurationLevel = maxConfigurationLevel;
+    }
 
 	private void initSubsorts() {
 		subsorts.addRelation(KSorts.KLIST, "K");

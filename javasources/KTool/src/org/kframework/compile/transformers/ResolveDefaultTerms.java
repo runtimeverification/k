@@ -24,13 +24,8 @@ public class ResolveDefaultTerms extends CopyOnWriteTransformer {
 
 	public ResolveDefaultTerms(Context context) {
 		super("Resolve Default Terms", context);
+        config = context.getConfigurationStructureMap();
 	}
-	
-	public ResolveDefaultTerms(Map<String, ConfigurationStructure> config, Context context) {
-		this(context);
-		this.config = config;
-	}
-	
 	
 	@Override
 	public ASTNode transform(Rule node) throws TransformerException {

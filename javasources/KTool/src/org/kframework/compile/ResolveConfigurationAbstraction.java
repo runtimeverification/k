@@ -17,20 +17,14 @@ import org.kframework.kil.loader.Context;
  */
 public class ResolveConfigurationAbstraction extends CompilerSteps<Definition> {
 
-	public ResolveConfigurationAbstraction(ConfigurationStructureMap cfgStr, Context context) {
+	public ResolveConfigurationAbstraction(Context context) {
 		super(context);
-		this.cfgStr = cfgStr;
 	}
 
-	private ConfigurationStructureMap cfgStr;
 	@Override
 	public Definition compile(Definition def, String stepName) throws CompilerStepDone {
-		ConfigurationStructureVisitor cfgStrVisitor = new
-				ConfigurationStructureVisitor(cfgStr, context);
-		def.accept(cfgStrVisitor);
-		int cfgMaxLevel = cfgStrVisitor.getMaxLevel();
-		add(new ResolveContextAbstraction(cfgMaxLevel, cfgStr, context));
-		add(new ResolveDefaultTerms(cfgStr, context));
+		add(new ResolveContextAbstraction(context));
+		add(new ResolveDefaultTerms(context));
 		return super.compile(def, stepName);
 	}
 }

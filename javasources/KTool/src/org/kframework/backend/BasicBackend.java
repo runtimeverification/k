@@ -10,10 +10,7 @@ import org.kframework.compile.tags.AddDefaultComputational;
 import org.kframework.compile.tags.AddOptionalTags;
 import org.kframework.compile.tags.AddStrictStar;
 import org.kframework.compile.transformers.*;
-import org.kframework.compile.utils.CheckVisitorStep;
-import org.kframework.compile.utils.CompilerSteps;
-import org.kframework.compile.utils.ConfigurationStructureMap;
-import org.kframework.compile.utils.FlattenDataStructures;
+import org.kframework.compile.utils.*;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.main.FirstStep;
@@ -30,20 +27,9 @@ public abstract class BasicBackend implements Backend {
 	protected Stopwatch sw;
 	protected Context context;
 
-	public ConfigurationStructureMap getConfigurationStructureMap() {
-		return configurationStructureMap;
-	}
-
-	public void setConfigurationStructureMap(ConfigurationStructureMap configurationStructureMap) {
-		this.configurationStructureMap = configurationStructureMap;
-	}
-
-	private ConfigurationStructureMap configurationStructureMap;
-
 	public BasicBackend(Stopwatch sw, Context context) {
 		this.sw = sw;
 		this.context = context;
-		configurationStructureMap = new ConfigurationStructureMap();
 	}
 
 	@Override
@@ -97,16 +83,17 @@ public abstract class BasicBackend implements Backend {
 		steps.add(new ResolveBuiltins(context));
 		steps.add(new ResolveListOfK(context));
 		steps.add(new FlattenSyntax(context));
+        steps.add(new InitializeConfigurationStructure(context));
 		steps.add(new AddKStringConversion(context));
 		steps.add(new AddKLabelConstant(context));
 		steps.add(new ResolveHybrid(context));
-		steps.add(new ResolveConfigurationAbstraction (configurationStructureMap, context));
+		steps.add(new ResolveConfigurationAbstraction (context));
 		steps.add(new ResolveOpenCells(context));
 		steps.add(new ResolveRewrite(context));
         steps.add(new FlattenDataStructures(context));
 
 		if (GlobalSettings.sortedCells) {
-			steps.add(new SortCells(configurationStructureMap, context));
+			steps.add(new SortCells(context));
 		}
 		steps.add(new ResolveSupercool(context));
 		steps.add(new AddStrictStar(context));

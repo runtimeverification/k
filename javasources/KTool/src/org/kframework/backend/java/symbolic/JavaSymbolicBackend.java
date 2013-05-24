@@ -15,7 +15,6 @@ import org.kframework.compile.tags.AddStrictStar;
 import org.kframework.compile.transformers.*;
 import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.compile.utils.CompilerSteps;
-import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Bag;
 import org.kframework.kil.*;
@@ -196,7 +195,7 @@ public class JavaSymbolicBackend extends BasicBackend {
 		// steps.add(new AddKStringConversion());
 		// steps.add(new AddKLabelConstant());
 		steps.add(new ResolveHybrid(context));
-		steps.add(new ResolveConfigurationAbstraction(new ConfigurationStructureMap(), context));
+		steps.add(new ResolveConfigurationAbstraction(context));
 		steps.add(new ResolveOpenCells(context));
 		steps.add(new ResolveRewrite(context));
 		// steps.add(new ResolveSupercool());
