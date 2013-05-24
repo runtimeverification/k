@@ -277,7 +277,6 @@ public class MaudeKRun implements KRun {
                 if (op.equals("#_") && term instanceof Token) {
                     return term;
                 } else {
-					System.err.println(term);
                     return new KInjectedLabel(term);
                 }
 			} else if (sort.equals("#NzInt") && op.equals("--Int_")) {
