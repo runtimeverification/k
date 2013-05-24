@@ -321,11 +321,11 @@ public class Main {
 						// assume that the specified argument is not a file and
 						// maybe represents a formula
 						KAST1 = rp.runParserOrDie("kast", K.model_checking, true,
-								"LTLFormula", context);
+								"LtlFormula", context);
 					} else {
 						// the specified argument represents a file
 						KAST1 = rp.runParserOrDie("kast", K.model_checking, false,
-								"LTLFormula", context);
+								"LtlFormula", context);
 					}
 
 					result = krun
