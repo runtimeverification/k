@@ -52,6 +52,8 @@ public class Cell extends Term {
 		LEFT, RIGHT, BOTH, NONE,
 	}
 
+    public static String SORT_ATTRIBUTE = "sort";
+
 	/** Must equal with {@link #endLabel} */
 	String label;
 	/** Must equal with {@link #label} */

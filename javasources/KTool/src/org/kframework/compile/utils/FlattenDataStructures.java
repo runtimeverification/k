@@ -1,6 +1,7 @@
 package org.kframework.compile.utils;
 
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Configuration;
 import org.kframework.kil.DataStructureBuiltin;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.KApp;
