@@ -33,7 +33,7 @@ module IMP
                 </T>
 
 // AExp
-  rule <k> X:Id => I ...</k> <state> X |-> I _:MyMap </state>
+  rule <k> X:Id => I ...</k> <state>... X |-> I ...</state>
   rule I1:Int / I2:Int => I1 /Int I2  when I2 =/=Int 0
   rule I1:Int + I2:Int => I1 +Int I2
 // BExp
@@ -45,7 +45,7 @@ module IMP
   rule {} => .   [structural]
   rule {S} => S  [structural]
 // Stmt
-  rule <k> X = I:Int; => . ...</k> <state> X |-> (_ => I) _:MyMap </state>
+  rule <k> X = I:Int; => . ...</k> <state>... X |-> (_ => I) ...</state>
   rule S1::Stmt S2::Stmt => S1 ~> S2  [structural]
   rule if (true)  S else _ => S
   rule if (false) _ else S => S
