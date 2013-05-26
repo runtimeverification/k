@@ -18,6 +18,7 @@ import org.kframework.compile.tags.AddStrictStar;
 import org.kframework.compile.transformers.*;
 import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.compile.utils.CompilerSteps;
+import org.kframework.compile.utils.FlattenDataStructures;
 import org.kframework.compile.utils.InitializeConfigurationStructure;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
@@ -88,7 +89,7 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 		 UnparserFilter unparserFilter = new UnparserFilter(this.context);
 		 javaDef.accept(unparserFilter);
 		
-		 String unparsedText = unparserFilter.getResult();
+		 //String unparsedText = unparserFilter.getResult();
 		
 		 //		System.out.println(unparsedText);
 		//
@@ -154,7 +155,11 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 		steps.add(new ResolveConfigurationAbstraction(context));
 		steps.add(new ResolveOpenCells(context));
 		steps.add(new ResolveRewrite(context));
+		steps.add(new FlattenDataStructures(context));
 
+		if (GlobalSettings.sortedCells) {
+			steps.add(new SortCells(context));
+		}
 		// steps.add(new LineariseTransformer()); //symbolic step
 		steps.add(new ReplaceConstants(context)); // symbolic step
 		steps.add(new AddPathCondition(context)); // symbolic step
@@ -163,7 +168,6 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 		steps.add(new AddDefaultComputational(context));
 		steps.add(new AddOptionalTags(context));
 		steps.add(new DeclareCellLabels(context));
-		steps.add(new AddOptionalTags(context));
 
 		return steps;
 	}
