@@ -86,7 +86,7 @@ public class JavaSymbolicKRun implements KRun {
     }
 
     @Override
-    public KRunDebugger debug(SearchResults searchResults) {
+    public KRunDebugger debug(DirectedGraph<KRunState, Transition> graph) {
         throw new UnsupportedOperationException();
     }
 
