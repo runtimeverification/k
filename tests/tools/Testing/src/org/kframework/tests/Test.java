@@ -470,7 +470,7 @@ public class Test implements Comparable<Test> {
 	}
 
 	public String getCompiled() {
-		return tag + getLanguage().replaceAll("\\.k$", "") + "-kompiled";
+		return getLanguage().replaceAll("\\.k$", "") + "-kompiled" + (tag.equals("") ? "" : "-" + tag);
 	}
 
 	private String getReportFilename() {
