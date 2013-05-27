@@ -1,4 +1,4 @@
-package org.kframework.krun.api;
+package org.kframework.backend.maude.krun;
 
 import org.apache.commons.collections15.Transformer;
 import org.kframework.backend.maude.MaudeFilter;
@@ -7,8 +7,13 @@ import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.runner.KRunner;
-import org.kframework.krun.*;
 import org.kframework.krun.Error;
+import org.kframework.krun.FileUtil;
+import org.kframework.krun.K;
+import org.kframework.krun.KRunExecutionException;
+import org.kframework.krun.SubstitutionFilter;
+import org.kframework.krun.XmlUtil;
+import org.kframework.krun.api.*;
 import org.kframework.krun.api.Transition.TransitionType;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
@@ -20,8 +25,14 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import edu.uci.ics.jung.graph.*;
-import edu.uci.ics.jung.io.graphml.*;
+import edu.uci.ics.jung.graph.DirectedGraph;
+import edu.uci.ics.jung.graph.DirectedOrderedSparseMultigraph;
+import edu.uci.ics.jung.graph.DirectedSparseGraph;
+import edu.uci.ics.jung.io.graphml.EdgeMetadata;
+import edu.uci.ics.jung.io.graphml.GraphMetadata;
+import edu.uci.ics.jung.io.graphml.GraphMLReader2;
+import edu.uci.ics.jung.io.graphml.HyperEdgeMetadata;
+import edu.uci.ics.jung.io.graphml.NodeMetadata;
 
 import java.io.File;
 import java.io.FileReader;
@@ -693,7 +704,7 @@ public class MaudeKRun implements KRun {
 		return new KRunApiDebugger(this, cfg, context);
 	}
 
-	public KRunDebugger debug(SearchResults searchResults) {
-		return new KRunApiDebugger(this, searchResults.getGraph());
+	public KRunDebugger debug(DirectedGraph<KRunState, Transition> graph) {
+		return new KRunApiDebugger(this, graph);
 	}
 }

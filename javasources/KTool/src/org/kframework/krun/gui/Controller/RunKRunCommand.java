@@ -15,7 +15,6 @@ import org.kframework.krun.RunProcess;
 import org.kframework.krun.api.KRun;
 import org.kframework.krun.api.KRunDebugger;
 import org.kframework.krun.api.KRunState;
-import org.kframework.krun.api.MaudeKRun;
 import org.kframework.krun.api.SearchResults;
 import org.kframework.krun.api.Transition;
 import org.kframework.krun.gui.UIDesign.ColorVisitor;
@@ -35,13 +34,12 @@ public class RunKRunCommand {
 	KRunDebugger debugger;
 	RunProcess rp ;
 	
-	public RunKRunCommand(Term kast, String lang, boolean isSwitch, Context context)
+	public RunKRunCommand(Term kast, String lang, boolean isSwitch, KRun context)
 			throws IOException {
 		super();
 		this.KAST = kast;
 		this.lang = lang;
 		this.isSwitch = isSwitch;
-		krun = new MaudeKRun(context);
 		rp = new RunProcess();
 	}
 

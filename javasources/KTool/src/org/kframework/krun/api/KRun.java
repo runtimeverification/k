@@ -90,12 +90,12 @@ public interface KRun {
 
 	/**
 	Create a debugger session from an existing state space graph.
-	@param searchResults the result of a search command, used to initialize the debugger with
-	an already-executed graph traversal.
+	@param graph A pre-existing graph containing a prior traversal of the state space, such as can
+	be obtained from a search command.
 	@exception UnsupportedOperationException The backend implementing this interface does not
 	support debugging
 	@return An object upon which debugger commands can be executed. This object will contain
 	the entire state space explored by the search command it follows.
 	*/
-	public KRunDebugger debug(SearchResults searchResults);
+	public KRunDebugger debug(DirectedGraph<KRunState, Transition> graph);
 }

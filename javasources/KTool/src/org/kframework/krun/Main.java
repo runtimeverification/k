@@ -8,16 +8,30 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.fusesource.jansi.AnsiConsole;
 import org.kframework.backend.java.symbolic.JavaSymbolicKRun;
+import org.kframework.backend.maude.krun.MaudeKRun;
 import org.kframework.compile.ConfigurationCleaner;
 import org.kframework.compile.FlattenModules;
 import org.kframework.compile.transformers.AddTopCellConfig;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
-import org.kframework.kil.*;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.BackendTerm;
+import org.kframework.kil.Bag;
+import org.kframework.kil.Configuration;
+import org.kframework.kil.KSequence;
+import org.kframework.kil.Rule;
+import org.kframework.kil.StringBuiltin;
+import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.krun.api.*;
+import org.kframework.krun.api.KRun;
+import org.kframework.krun.api.KRunDebugger;
+import org.kframework.krun.api.KRunResult;
+import org.kframework.krun.api.KRunState;
+import org.kframework.krun.api.SearchResults;
+import org.kframework.krun.api.SearchType;
+import org.kframework.krun.api.Transition;
 import org.kframework.krun.gui.Controller.RunKRunCommand;
 import org.kframework.krun.gui.UIDesign.MainWindow;
 import org.kframework.parser.DefinitionLoader;
@@ -225,20 +239,24 @@ public class Main {
 		return plug(output, context);
 	}
 
+	private static KRun obtainKRun(Context context) {
+			if (K.backend.equals("maude")) {
+				return new MaudeKRun(context);
+			} else if (K.backend.equals("java-symbolic")) {
+				return new JavaSymbolicKRun(context);
+			} else {
+				Error.report("Currently supported backends are 'maude' and 'java-symbolic'");
+				return null;
+			}
+	}
+
 	// execute krun in normal mode (i.e. not in debug mode)
 	public static void normalExecution(Term KAST, String lang, RunProcess rp,
 			CommandlineOptions cmd_options, Context context) {
 		try {
 			CommandLine cmd = cmd_options.getCommandLine();
 
-			KRun krun = null;
-			if (K.backend.equals("maude")) {
-				krun = new MaudeKRun(context);
-			} else if (K.backend.equals("java-symbolic")) {
-				krun = new JavaSymbolicKRun(context);
-			} else {
-				Error.report("Currently supported backends are 'maude' and 'java-symbolic'");
-			}
+			KRun krun = obtainKRun(context);
 			KRunResult<?> result = null;
 			Set<String> varNames = null;
 			Rule patternRule = null;
@@ -467,7 +485,7 @@ public class Main {
 			new File(K.compiled_def + K.fileSeparator + "main.maude")
 					.getCanonicalPath();
 			RunProcess rp = new RunProcess();
-			KRun krun = new MaudeKRun(context);
+			KRun krun = obtainKRun(context);
 			KRunDebugger debugger;
 			K.io = false;
 			if (state == null) {
@@ -478,7 +496,7 @@ public class Main {
 				AnsiConsole.out.println(debugger.printState(debugger
 						.getCurrentState()));
 			} else {
-				debugger = krun.debug(state.getResult());
+				debugger = krun.debug(state.getResult().getGraph());
 			}
 
 			while (true) {
@@ -649,7 +667,7 @@ public class Main {
 						try {
 							savedGraph = (DirectedGraph<KRunState, Transition>) BinaryLoader.fromBinary(new FileInputStream(cmd.getOptionValue("load")));
 							krun = new MaudeKRun(context);
-							debugger = new KRunApiDebugger(krun, savedGraph);
+							debugger = krun.debug(savedGraph);
 							debugger.setCurrentState(1);
 							System.out.println("File successfully loaded.");
 						} catch (FileNotFoundException e) {
@@ -678,7 +696,7 @@ public class Main {
 			KRunResult<SearchResults> state, Context context) {
 
 		try {
-			new MainWindow(new RunKRunCommand(kast, lang, false, context), context);
+			new MainWindow(new RunKRunCommand(kast, lang, false, obtainKRun(context)), context);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
