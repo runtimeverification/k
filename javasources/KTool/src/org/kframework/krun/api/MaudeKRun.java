@@ -375,6 +375,9 @@ public class MaudeKRun implements KRun {
 			return xml.getAttribute("op");
 		} else {
 			String result = xml.getAttribute("op");
+			if (!xml.getAttribute("number").equals("")) {
+				result += "^" + xml.getAttribute("number");
+			}
 			String conn = "(";
 			for (Element child : children) {
 				result += conn;
