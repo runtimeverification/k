@@ -104,6 +104,37 @@ rules
 		where loc := <getLocAsString>
 
 	to-xml1:
+		AttributedCondSentence(Context(y), c, d) -> $[<context loc="[loc]">
+														<body>
+															[children]
+														</body>
+														<cond>
+															[<to-xml> c]
+														</cond>
+														<attributes loc="[loc]">
+															[<to-xml> d]
+														</attributes>
+		</context>
+		]
+		where mydebug(!"Rule: ")
+		where children := <to-xml> y
+		where loc := <getLocAsString>
+
+	to-xml1:
+		AttributedSentence(Context(y), d) -> $[<context loc="[loc]">
+					<body>
+						[children]
+					</body>
+					<attributes loc="[loc]">
+						[<to-xml> d]
+					</attributes>
+		</context>
+		]
+		where mydebug(!"Rule: ")
+		where children := <to-xml> y
+		where loc := <getLocAsString>
+
+	to-xml1:
 		Tag(x) -> $[<tag key="[x]" loc="[loc]" />
 		]
 		where loc := <getLocAsString>
