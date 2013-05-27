@@ -510,6 +510,11 @@
       title="symbolic"
       >
     <kompile-option name="--symbolic" />
+    <all-programs>
+      <krun-option name="--no-color" />
+      <krun-option name="--output-mode" value="none" />
+      <krun-option name="-cPC" value="true" /> 
+    </all-programs>
   </test>
 
 
