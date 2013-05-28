@@ -7,9 +7,9 @@ module ARRAY-SYNTAX
 		 | "const-array" "(" K "," K "," K "," K ")" 
 		 
   syntax K ::= // select(array, index)
-  	       "select" "(" K "," K ")"  [function, smtlib(select)]
+  	       "select" "(" K "," K ")"  [smtlib(select)]
 
-  syntax Int ::= "size-of-array" "(" Array ")"
+  syntax Int ::= "size-of-array" "(" Array ")" [function, smtlib()]
 
   syntax K ::= K "<=K" K [function]
   syntax K ::= K "<K"  K [function]
@@ -40,22 +40,23 @@ module ARRAY
 
   rule I:Bool !=K J:Bool => I =/=Bool J
   rule I:Bool =K J:Bool => I ==Bool J
-  rule isBool(select(A:Array, I:K)) => true /*when isSymbolicInt(I)*/ [anywhere]
+//  rule isBool(select(A:Array, I:K)) => true /*when isSymbolicInt(I)*/ [anywhere]
 
   rule I:String !=K J:String => I =/=String J
   rule I:String =K J:String => I ==String J
-  rule isString(select(A:Array, I:K)) => true /*when isSymbolicInt(I)*/ [anywhere]
+//  rule isString(select(A:Array, I:K)) => true /*when isSymbolicInt(I)*/ [anywhere]
   /* end hacks */
 
 
   // main array axioms
-  rule select(store(A:K, I:K, V:K), I:K) => V
-  rule select(store(A:K, I:K, V:K), J:K) => select(A, J)
-       when I !=K J
+  rule select(store(A:K, I:Int, V:K), J:Int) => V 
+       when I ==Int J [symbolic-kompile, transition]
+  rule select(store(A:K, I:Int, V:K), J:Int) => select(A, J)
+       when I =/=Int J [symbolic-kompile, transition]
 
   // select from constant array
-  rule select(const-array(_:Id, MIN:K, MAX:Int, V:K), I:Int) => V
-       when (MIN <=K I) andBool (I <K MAX)
+  rule select(const-array(_:Id, MIN:Int, MAX:Int, V:K), I:Int) => V
+       when (MIN <=Int I) andBool (I <Int MAX) [symbolic-kompile, transition]
 
   // simplification of multiple store
   rule store(store(A:K, I:K, V:K), J:Int, V':K)
@@ -70,7 +71,7 @@ module ARRAY
        [anywhere]   
 
   // array size
-  rule size-of-array(store(A:K, I:K, V:K)) => size-of-array(A) [anywhere]
-  rule size-of-array(const-array(_:Id, MIN:K, MAX:K, _:K)) => MAX -K MIN [anywhere]
+  rule size-of-array(store(A:K, I:K, V:K)) => size-of-array(A) 
+  rule size-of-array(const-array(_:Id, MIN:Int, MAX:Int, _:K)) => MAX -Int MIN
 
 endmodule

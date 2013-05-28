@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Attribute;
+import org.kframework.kil.Attributes;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.KApp;
@@ -101,30 +103,34 @@ public class AddPathCondition extends CopyOnWriteTransformer {
                 right = AddConditionToConfig.addSubcellToCell((Cell) right, rightCell);
             }
 
+            Attributes atts = node.getAttributes();
             Term cond = condition;
+//            System.out.println(pathCondition);
             if (!GlobalSettings.NOSMT) {
                 List<Term> myList = new ArrayList<Term>();
                 myList.add(condition);
                 myList.add(checkSat(pathCondition));
-                cond = new KApp(KLabelConstant.ANDBOOL_KLABEL, new KList(myList));
+                if (!(pathCondition instanceof Variable)){
+                    cond = new KApp(KLabelConstant.ANDBOOL_KLABEL, new KList(myList));
+                    // add transition attribute
+                  List<Attribute> attrs = node.getAttributes().getContents();
+                  // bad practice
+                  attrs.add(new Attribute("transition", ""));
+
+                  atts = node.getAttributes().shallowCopy();
+                  atts.setContents(attrs);
+                }
             }
 //            else {
 //            	cond = originalCondition;
 //            }
 
-            // add transition attribute
-//            List<Attribute> attrs = node.getAttributes().getContents();
-            // bad practice
- //           attrs.add(new Attribute("transition", ""));
-
-   //         Attributes atts = node.getAttributes().shallowCopy();
-   //         atts.setContents(attrs);
 
 
             // re-construct the rule
             node = node.shallowCopy();
             node.setBody(new Rewrite(left, right, context));
-//            node.setAttributes(atts);
+            node.setAttributes(atts);
             node.setCondition(cond);
         }
 
@@ -149,5 +155,6 @@ public class AddPathCondition extends CopyOnWriteTransformer {
         KApp unsat = StringBuiltin.kAppOf("unsat");
         KApp checkSat = KApp.of(KLabelConstant.of("'checkSat", context), pathCondition);
         return KApp.of(KLabelConstant.KNEQ_KLABEL, checkSat, unsat);
+//        return KApp.of(KLabelConstant.KEQ_KLABEL, checkSat, unsat);
     }
 }
