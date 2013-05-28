@@ -79,7 +79,7 @@ module CINK-ARRAYS-SEMANTICS
            .
        ...</k>
        <env>... . => X |-> L </env>
-       <store>... . => L |-> const-array(X, 0, N, undefined) </store>
+       <store>... . => L |-> const-array(N, undefined) </store>
        when fresh(L:Loc) andBool (I <Int N)
 
 //  context _:Exp[HOLE] = _
