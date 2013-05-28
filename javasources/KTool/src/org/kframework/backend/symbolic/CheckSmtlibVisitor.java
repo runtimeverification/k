@@ -45,11 +45,12 @@ public class CheckSmtlibVisitor extends BasicVisitor {
                 Iterator<Production> it = prods.iterator();
                 while (it.hasNext()) {
                     Production p = it.next();
-                    if (p.containsAttribute("smtlib"))
+                    if (p.containsAttribute("smtlib") || p.containsAttribute("symbolic-function")) {
                         smtValid = true;
-                    else
+                    }
+                    else {
                         smtValid = false;
-
+                    }
                     // only first production assumed
                     break;
                 }
