@@ -28,4 +28,15 @@ public class Stopwatch {
 		long endd = System.currentTimeMillis();
 		f.format("%-60s = %5d%n", message, endd - start);
 	}
+
+	public long getTotalMilliseconds() {
+		return System.currentTimeMillis() - start;
+	}
+
+	public long getIntermediateMilliseconds() {
+		long endd = System.currentTimeMillis();
+		long rez = start2 - endd;
+		start2 = endd;
+		return rez;
+	}
 }

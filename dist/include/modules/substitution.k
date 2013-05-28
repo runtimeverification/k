@@ -87,8 +87,8 @@ module BINDER
     => #if isBound(L,I) ==K true
        #then #binderSplit2(L, I +Int 1, Ks, NBEs, BEs, Bound, #getVars(K))
        #else #if isBounding(L, I) ==K true
-             #then #binderSplit1(L, I +Int 1, Ks, NBEs, BEs,,K, Bound)
-             #else #binderSplit1(L, I +Int 1, Ks, NBEs,,K, BEs, Bound)
+             #then #binderSplit1(L, I +Int 1, Ks, NBEs, (BEs,,K), Bound)
+             #else #binderSplit1(L, I +Int 1, Ks, (NBEs,,K), BEs, Bound)
              #fi
        #fi
   rule #binderSplit1(_, _, .KList, NBEs:KList, BEs:KList, Bound:Set)

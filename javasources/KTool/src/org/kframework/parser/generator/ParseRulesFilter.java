@@ -1,5 +1,9 @@
 package org.kframework.parser.generator;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Formatter;
+
 import org.kframework.compile.checks.CheckListOfKDeprecation;
 import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.kil.ASTNode;
@@ -28,6 +32,7 @@ import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
 import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
 import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
 import org.kframework.parser.concrete.disambiguate.VariableTypeInferenceFilter;
+import org.kframework.utils.Stopwatch;
 import org.kframework.utils.XmlLoader;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -38,8 +43,16 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 public class ParseRulesFilter extends BasicTransformer {
+	Formatter f;
+
 	public ParseRulesFilter(Context context) {
 		super("Parse Configurations", context);
+		if (GlobalSettings.verbose)
+			try {
+				f = new Formatter(new File(context.dotk.getAbsolutePath() + "/timing.log"));
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
 	}
 
 	String localModule = null;
@@ -52,6 +65,9 @@ public class ParseRulesFilter extends BasicTransformer {
 
 	public ASTNode transform(StringSentence ss) throws TransformerException {
 		if (ss.getType().equals(Constants.RULE) || ss.getType().equals(Constants.CONTEXT)) {
+			Stopwatch sw = null;
+			if (GlobalSettings.verbose)
+				sw = new Stopwatch();
 			try {
 				ASTNode config;
 				String parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
@@ -65,7 +81,7 @@ public class ParseRulesFilter extends BasicTransformer {
 
 				config = JavaClassesFactory.getTerm((Element) xmlTerm);
 				if (GlobalSettings.fastKast) {
-					// TODO: load directly from ATerms
+					// TODO(RaduM): load directly from ATerms
 					System.out.println("Not implemented yet: org.kframework.parser.generator.ParseRulesFilter");
 					System.exit(0);
 					config = null;
@@ -93,17 +109,19 @@ public class ParseRulesFilter extends BasicTransformer {
 				config = config.accept(new AmbDuplicateFilter(context));
 				config = config.accept(new TypeSystemFilter(context));
 				config = config.accept(new PriorityFilter(context));
-				config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context),
-                        context));
+				config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context));
 				config = config.accept(new TypeInferenceSupremumFilter(context));
-				config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context),
-                        context));
+				config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context));
 				config = config.accept(new PreferAvoidFilter(context));
 				config = config.accept(new FlattenListsFilter(context));
 				config = config.accept(new AmbDuplicateFilter(context));
 				// last resort disambiguation
 				config = config.accept(new AmbFilter(context));
 
+				if (GlobalSettings.verbose) {
+					f.format("Parsing rule: Time: %6d Location: %s:%s\n", sw.getTotalMilliseconds(), ss.getFilename(), ss.getLocation());
+					f.flush();
+				}
 				return config;
 			} catch (TransformerException te) {
 				te.printStackTrace();
