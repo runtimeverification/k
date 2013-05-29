@@ -22,7 +22,7 @@ public class ConfigurationCleaner extends CopyOnWriteTransformer {
 	@Override
 	public ASTNode transform(Cell node) throws TransformerException {
 		if (node.getMultiplicity() == Multiplicity.ANY || node.getMultiplicity() == Multiplicity.MAYBE) {
-			if (MetaK.getVariables(node, context).isEmpty()) {
+			if (node.variables().isEmpty()) {
                 if (GlobalSettings.sortedCells)
                     return new Empty(MetaK.cellFragment(node.getId()));
                 else return new Bag();

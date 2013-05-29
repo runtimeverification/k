@@ -30,7 +30,7 @@ public class ResolveSyntaxPredicates extends CopyOnWriteTransformer {
 	@Override
 	public ASTNode transform(Sentence node) throws TransformerException {
 		boolean change = false;
-		Set<Variable> vars = MetaK.getVariables(node.getBody(), context);
+		Set<Variable> vars = node.getBody().variables();
 		KList ands = new KList();
 		Term condition = node.getCondition();
 		if (null != condition) {

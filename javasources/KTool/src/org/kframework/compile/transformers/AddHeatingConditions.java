@@ -83,7 +83,7 @@ public class AddHeatingConditions extends CopyOnWriteTransformer {
 								node.getLocation())
 				);
 		}
-		java.util.Set<Variable> vars = MetaK.getVariables(kSequence.getContents().get(0), context);
+		java.util.Set<Variable> vars = kSequence.getContents().get(0).variables();
 		if (vars.size() != 1) {
 			GlobalSettings.kem.register(
 					new KException(KException.ExceptionType.ERROR,

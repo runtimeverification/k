@@ -95,17 +95,6 @@ public class MetaK {
 		return key.startsWith("#");
 	}
 
-	public static Set<Variable> getVariables(Visitable node, org.kframework.kil.loader.Context context) {
-		final Set<Variable> result = new HashSet<Variable>();
-		node.accept(new BasicVisitor(context) {
-			@Override
-			public void visit(Variable node) {
-				result.add(node);
-			}
-		});
-		return result;
-	}
-
 	public static Definition setConfiguration(Definition node, org.kframework.kil.loader.Context context, final Configuration conf) {
 		try {
 			return (Definition) node.accept(new CopyOnWriteTransformer("Configuration setter",
