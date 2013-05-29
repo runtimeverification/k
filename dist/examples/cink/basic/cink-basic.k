@@ -105,7 +105,7 @@ module CINK-BASIC-SYNTAX
     declarations, which are declared as follows:
   */
   syntax Exps  ::= List{Exp,  ","} [strict]
-  syntax Decls ::= List{Decl, ","}
+  syntax Decls ::= List{Decl, ","} [strict]
 //  syntax Stmts ::= List{Stmt,""}
 
 endmodule
@@ -443,7 +443,7 @@ module CINK-BASIC-SEMANTICS
     by recursing into the lists:
   */
 
-  rule evaluate(V:Val, El:Exps => El) to (Vl:Vals => V,Vl)
+  rule evaluate(V:Val, El:Exps => El) to (Vl:Vals => append(Vl, V))
          following (Dec:Decl, Xl:Decls => Xl);
        [structural]
    
@@ -517,4 +517,10 @@ when fresh(L:Loc)
   rule getName(T:Type E:Exp) => getName(E)
   rule getName(E1:Exp = E2:Exp) => getName(E1)
 
+  //@ Append function:
+
+  syntax Vals ::= "append" "(" Vals "," Val ")" [function]
+  rule append(.Vals, V:Val) => V, .Vals
+  rule append((V':Val, Vl:Vals), V:Val) => V', append(Vl, V)
+  
 endmodule
