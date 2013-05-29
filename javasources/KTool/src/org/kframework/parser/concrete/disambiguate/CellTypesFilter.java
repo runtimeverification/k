@@ -27,7 +27,7 @@ public class CellTypesFilter extends BasicTransformer {
 	}
 
 	public ASTNode transform(Cell cell) throws TransformerException {
-		String sort = context.cellSorts.get(cell.getLabel());
+		String sort = context.cellKinds.get(cell.getLabel());
 
 		if (sort == null) {
 			if (cell.getLabel().equals("k"))

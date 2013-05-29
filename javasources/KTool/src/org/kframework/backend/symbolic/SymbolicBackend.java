@@ -11,7 +11,6 @@ import org.kframework.compile.checks.CheckConfigurationCells;
 import org.kframework.compile.checks.CheckRewrite;
 import org.kframework.compile.checks.CheckVariables;
 import org.kframework.compile.sharing.DeclareCellLabels;
-import org.kframework.compile.tags.AddConfigurationCellSorts;
 import org.kframework.compile.tags.AddDefaultComputational;
 import org.kframework.compile.tags.AddOptionalTags;
 import org.kframework.compile.tags.AddStrictStar;
@@ -146,7 +145,6 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 		steps.add(new ResolveSyntaxPredicates(context));
 		steps.add(new ResolveBuiltins(context));
 		steps.add(new ResolveListOfK(context));
-        steps.add(new CheckVisitorStep<Definition>(new AddConfigurationCellSorts(), context));
 		steps.add(new FlattenSyntax(context));
         steps.add(new InitializeConfigurationStructure(context));
 		steps.add(new AddKStringConversion(context));

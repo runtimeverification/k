@@ -30,9 +30,8 @@ public class ResolveOpenCells extends CopyOnWriteTransformer {
 		node.setCellAttributes(new HashMap<String, String>(node.getCellAttributes()));
 		node.setEllipses(Ellipses.NONE);
 
-        DataStructureSort dataStructureSort = context.dataStructureSortOf(context
-                .getConfigurationStructureMap().get(node).cell
-                .getCellAttributes().get(Cell.SORT_ATTRIBUTE));
+        DataStructureSort dataStructureSort
+                = context.dataStructureSortOf(context.cellSorts.get(node.getLabel()));
         if (dataStructureSort != null) {
             /* data structure sort */
             if (ellipses == Ellipses.BOTH && !dataStructureSort.type().equals(KSorts.LIST)) {

@@ -98,7 +98,8 @@ public class Context {
 	public java.util.Map<String, Set<Production>> productions = new HashMap<String, Set<Production>>();
 	public java.util.Map<String, Set<String>> labels = new HashMap<String, Set<String>>();
 	public java.util.Map<String, Cell> cells = new HashMap<String, Cell>();
-	public java.util.Map<String, String> cellSorts = new HashMap<String, String>();
+	public java.util.Map<String, String> cellKinds = new HashMap<String, String>();
+    public java.util.Map<String, String> cellSorts = new HashMap<String, String>();
 	public java.util.Map<String, Production> listConses = new HashMap<String, Production>();
 	public java.util.Map<String, Set<String>> listLabels = new HashMap<String, Set<String>>();
 	public java.util.Map<String, ASTNode> locations = new HashMap<String, ASTNode>();
@@ -199,12 +200,19 @@ public class Context {
 	}
 
 	public void addCellDecl(Cell c) {
-		cells.put(c.getLabel(), c);
+        cells.put(c.getLabel(), c);
 
-		String sort = subsorts.getMaxim(c.getContents().getSort());
-		if (sort.equals(KSorts.KLIST))
-			sort = "K";
-		cellSorts.put(c.getLabel(), sort);
+        String kind = subsorts.getMaxim(c.getContents().getSort());
+        if (kind.equals(KSorts.KLIST)) {
+            kind = "K";
+        }
+        cellKinds.put(c.getLabel(), kind);
+
+        String sort = c.getCellAttributes().get(Cell.SORT_ATTRIBUTE);
+        if (sort == null) {
+            sort = c.getContents().getSort();
+        }
+        cellSorts.put(c.getLabel(), sort);
 	}
 
 	public boolean isListSort(String sort) {
