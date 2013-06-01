@@ -54,7 +54,7 @@ context-free syntax
 lexical syntax
 	%% Variables and the Anonymous Variable
 	("$"|"?")?[A-Z] [a-zA-Z0-9\']*  -> VARID
-	"_" -> VARID
+	"?"?"_" -> VARID
 	"HOLE" -> VARID {reject}
 
 	%% because of the constructors SetItem, BagItem... that can be confused with KApp
