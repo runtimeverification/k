@@ -82,6 +82,16 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
 	@Override
     public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
     	Term body = (Term) node.getBody().accept(new ResolveAnonymousVariables(context));
+    	int countHoles = MetaK.countHoles(body, context);
+    	if (countHoles == 0) {
+    		GlobalSettings.kem.register(
+    				new KException(ExceptionType.ERROR,
+    						KExceptionGroup.CRITICAL,
+    						"Contexts must have at least one HOLE.",
+    						getName(),
+    						node.getLocation(),
+    						node.getFilename()));
+    	}
     	Integer countRewrites = MetaK.countRewrites(body, context);
     	if (countRewrites > 1) {
     		GlobalSettings.kem.register(

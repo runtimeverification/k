@@ -220,6 +220,20 @@ public class MetaK {
 		return count.get(0);
 	}
 
+	public static int countHoles(Term t, org.kframework.kil.loader.Context context) {
+		final List<Integer> count = new ArrayList<Integer>();
+		count.add(0);
+		Visitor countVisitor = new BasicVisitor(context) {
+			@Override public void visit(Hole hole) {
+				count.set(0, count.get(0) + 1);
+				super.visit(hole);
+			}
+		};
+
+		t.accept(countVisitor);
+		return count.get(0);
+	}
+
 	public static boolean hasCell(Term t, org.kframework.kil.loader.Context context) {
 		Visitor cellFinder = new BasicVisitor(context) {
 			@Override
