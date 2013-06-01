@@ -21,6 +21,7 @@ import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.parser.utils.Sglri;
+import org.kframework.parser.utils.Sglr;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.XmlLoader;
@@ -50,7 +51,9 @@ public class ProgramLoader {
 		ASTNode out;
 
 		if (GlobalSettings.fastKast) {
-			out = Sglri.run_sglri(context.kompiled.getAbsolutePath() + "/pgm/Program.tbl", startSymbol, content);
+			//out = Sglri.run_sglri(context.kompiled.getAbsolutePath() + "/pgm/Program.tbl", startSymbol, content);
+			out = Sglr.run_sglri(context.kompiled.getAbsolutePath() + "/pgm/Program.tbl", startSymbol, content);
+			
 		} else {
 			org.kframework.parser.concrete.KParser.ImportTblPgm(tbl.getAbsolutePath());
 			String parsed = org.kframework.parser.concrete.KParser.ParseProgramString(content, startSymbol);
