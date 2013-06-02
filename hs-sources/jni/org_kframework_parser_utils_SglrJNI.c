@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "sdf-wrapper.h"
-#include "SglrJNI.h"
+#include "org_kframework_parser_utils_SglrJNI.h"
  
 JNIEXPORT void JNICALL Java_org_kframework_parser_utils_SglrJNI_init(JNIEnv * a, jclass b) {
   init();
