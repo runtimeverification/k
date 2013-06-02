@@ -11,6 +11,7 @@ import org.kframework.kil.visitors.Visitable;
 import org.w3c.dom.Element;
 
 import aterm.ATermAppl;
+import aterm.ATermList;
 
 /**
  * Base class for K AST. Useful for Visitors and Transformers.
@@ -45,8 +46,16 @@ public abstract class ASTNode implements Visitable, Transformable, Serializable 
 	 *            the Stratego object representing an ASTNode
 	 */
 	public ASTNode(ATermAppl elem) {
-		String loc = elem.getAnnotations().getFirst().toString().substring(8);
+		ATermList list = (ATermList) elem.getAnnotations().getFirst();
+		list = list.getNext();
+		String fileame = ((ATermAppl) list.getFirst()).getChildAt(0).toString();
+		int loc0 = Integer.parseInt(((ATermAppl) list.getFirst()).getChildAt(1).getChildAt(0).toString());
+		int loc1 = Integer.parseInt(((ATermAppl) list.getFirst()).getChildAt(1).getChildAt(1).toString()) + 1;
+		int loc2 = Integer.parseInt(((ATermAppl) list.getFirst()).getChildAt(1).getChildAt(2).toString());
+		int loc3 = Integer.parseInt(((ATermAppl) list.getFirst()).getChildAt(1).getChildAt(3).toString()) + 1;
+		String loc = "(" + loc0 + "," + loc1 + "," + loc2 + "," + loc3 + ")";
 		this.setLocation(loc);
+		this.setFilename(fileame);
 	}
 
 	/**

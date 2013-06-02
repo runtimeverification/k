@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
 
-LD_LIBRARY_PATH="$(dirname $0)/../lib/native/linux/x64" java -ea -ss8m -Xms64m -Xmx1G -jar "$(dirname $0)/../lib/java/k3.jar" -kast "$@"
+LD_LIBRARY_PATH="$(dirname $0)/../lib/native/linux/x64" java -Xcheck:jni -ea -ss8m -Xms64m -Xmx1G -jar "$(dirname $0)/../lib/java/k3.jar" -kast "$@"
 #java -ea -ss8m -Xms64m -Xmx1G -jar "$(dirname $0)/../lib/java/k3.jar" -kast "$@"

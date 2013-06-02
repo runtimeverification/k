@@ -5,11 +5,11 @@
 #include "sdf-wrapper.h"
 #include "SglrJNI.h"
  
-JNIEXPORT void JNICALL Java_SglrJNI_init(JNIEnv * a, jclass b) {
+JNIEXPORT void JNICALL Java_org_kframework_parser_utils_SglrJNI_init(JNIEnv * a, jclass b) {
   init();
 }
 
-JNIEXPORT jbyteArray JNICALL Java_SglrJNI_parse
+JNIEXPORT jbyteArray JNICALL Java_org_kframework_parser_utils_SglrJNI_parse
   (JNIEnv * env, jclass obj, 
    jstring pt, jstring prompt, jstring start, jstring input_file_name) {
      const jbyte *str_pt;

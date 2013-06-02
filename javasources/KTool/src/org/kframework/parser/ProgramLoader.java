@@ -20,7 +20,6 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
-import org.kframework.parser.utils.Sglri;
 import org.kframework.parser.utils.Sglr;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
@@ -52,8 +51,9 @@ public class ProgramLoader {
 
 		if (GlobalSettings.fastKast) {
 			//out = Sglri.run_sglri(context.kompiled.getAbsolutePath() + "/pgm/Program.tbl", startSymbol, content);
-			out = Sglr.run_sglri(context.kompiled.getAbsolutePath() + "/pgm/Program.tbl", startSymbol, content);
-			
+			JavaClassesFactory.startConstruction(context);
+			out = Sglr.run_sglri(context.kompiled.getAbsolutePath() + "/pgm/Program.tbl", startSymbol, content, filename);
+			JavaClassesFactory.endConstruction();
 		} else {
 			org.kframework.parser.concrete.KParser.ImportTblPgm(tbl.getAbsolutePath());
 			String parsed = org.kframework.parser.concrete.KParser.ParseProgramString(content, startSymbol);
@@ -134,8 +134,8 @@ public class ProgramLoader {
 
 			return (Term) out;
 		} catch (IOException e) {
-			throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse program: " + e.getLocalizedMessage(), filename,
-					"File system."));
+			throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse program: "
+					+ e.getLocalizedMessage(), filename, "File system."));
 		}
 	}
 }
