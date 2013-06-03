@@ -70,16 +70,7 @@ public class ParseRulesFilter extends BasicTransformer {
 				sw = new Stopwatch();
 			try {
 				ASTNode config;
-				String parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
-				Document doc = XmlLoader.getXMLDoc(parsed);
 
-				// replace the old xml node with the newly parsed sentence
-				Node xmlTerm = doc.getFirstChild().getFirstChild().getNextSibling();
-				XmlLoader.updateLocation(xmlTerm, XmlLoader.getLocNumber(ss.getLocation(), 0), XmlLoader.getLocNumber(ss.getLocation(), 1));
-				XmlLoader.addFilename(xmlTerm, ss.getFilename());
-				XmlLoader.reportErrors(doc, ss.getType());
-
-				config = JavaClassesFactory.getTerm((Element) xmlTerm);
 				if (GlobalSettings.fastKast) {
 					// TODO(RaduM): load directly from ATerms
 					System.out.println("Not implemented yet: org.kframework.parser.generator.ParseRulesFilter");
@@ -87,8 +78,26 @@ public class ParseRulesFilter extends BasicTransformer {
 					config = null;
 					// ATerm parsed = org.kframework.parser.concrete.KParser.ParseKConfigStringAst(ss.getContent());
 					// config = JavaClassesFactory.getTerm((IStrategoAppl) parsed);
-				}
+				} else {
+					String parsed = null;
+					// TODO(anyone that knows regular expressions): make contains to look only in the attributes area
+					if (ss.getContent().contains("kore")) {
+						Stopwatch sww = new Stopwatch();
+						parsed = org.kframework.parser.concrete.KParser.ParseKoreString(ss.getContent());
+						if (GlobalSettings.verbose)
+							System.out.println("Parsing with Kore: " + ss.getFilename() + ":" + ss.getLocation() + " - " + sww.getTotalMilliseconds());
+					} else
+						parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
+					Document doc = XmlLoader.getXMLDoc(parsed);
 
+					// replace the old xml node with the newly parsed sentence
+					Node xmlTerm = doc.getFirstChild().getFirstChild().getNextSibling();
+					XmlLoader.updateLocation(xmlTerm, XmlLoader.getLocNumber(ss.getLocation(), 0), XmlLoader.getLocNumber(ss.getLocation(), 1));
+					XmlLoader.addFilename(xmlTerm, ss.getFilename());
+					XmlLoader.reportErrors(doc, ss.getType());
+
+					config = JavaClassesFactory.getTerm((Element) xmlTerm);
+				}
 				// disambiguate rules
 				if (config.getFilename().endsWith("test.k")) {
 					// this is just for testing. I put a breakpoint on the next line so I can get faster to the rule that I'm interested in

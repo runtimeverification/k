@@ -6,16 +6,16 @@ imports KBuiltinsBasic
 exports
 context-free priorities
 {
-	".K"		-> K {cons("K12Empty"), prefer}
-	"."			-> K {cons("K1Empty")}
-	K "~>" K	-> K {left, cons("K1Seq")}
-	".List{K}"	-> KList {cons("ListDlKDr12Empty")}
-	".KList"	-> KList {cons("KList12Empty")}
+	".K"				-> K {cons("K12Empty"), prefer}
+	"."					-> K {cons("K1Empty")}
+	K "~>" K			-> K {left, cons("K1Seq")}
+	".List{K}"			-> KList {cons("ListDlKDr12Empty")}
+	".KList"			-> KList {cons("KList12Empty")}
 	KList   ",," KList	-> KList {left, cons("KList1List")}
 } > { non-assoc:
-	K "=>" K	-> K {non-assoc, cons("K1Rewrite")}
-	KList  "=>" KList		-> KList {non-assoc, cons("KList1Rewrite")}
-	KLabel "=>" KLabel		-> KLabel {cons("KLabel1Rewrite")}
+	K "=>" K			-> K {non-assoc, cons("K1Rewrite")}
+	KList  "=>" KList	-> KList {non-assoc, cons("KList1Rewrite")}
+	KLabel "=>" KLabel	-> KLabel {cons("KLabel1Rewrite")}
 }
 context-free syntax
 	KLabel "(" KList ")"-> K {cons("K1App")}
@@ -64,8 +64,8 @@ context-free priorities
 	Set "=>" Set		-> Set {non-assoc, cons("Set1Rewrite")}
 }
 context-free syntax
-	%%"(" SetItem ")"		-> SetItem {bracket}
-	"(" Set ")"				-> Set {cons("Set1Bracket")}
+	%%"(" SetItem ")"	-> SetItem {bracket}
+	"(" Set ")"			-> Set {cons("Set1Bracket")}
 
 context-free priorities
 {
@@ -74,14 +74,14 @@ context-free priorities
 	MapItem			-> Map %%{cons("Map3MapItem")}  %% Does SDF supports subsorting closure? I believe it generates ambiguities
 	"MapItem" "(" K "," K ")"	-> MapItem {cons("MapItem1KKItem")}
 	K "|->" K					-> MapItem {cons("MapItem1LKLKItem")}
-	Map   Map				-> Map {left, cons("Map1List")}
+	Map   Map					-> Map {left, cons("Map1List")}
 	%%Map "[" K "/" K "]"		-> Map {cons("Map1MapReplaceK")}
 } > {
-	Map "=>" Map			-> Map {non-assoc, cons("Map1Rewrite")}
+	Map "=>" Map				-> Map {non-assoc, cons("Map1Rewrite")}
 }
 context-free syntax
-	%%"(" MapItem ")"		-> MapItem {bracket}
-	"(" Map ")"				-> Map {cons("Map1Bracket")}
+	%%"(" MapItem ")"			-> MapItem {bracket}
+	"(" Map ")"					-> Map {cons("Map1Bracket")}
 
 lexical restrictions
 	".List"		-/- [a-zA-Z0-9\{\}]

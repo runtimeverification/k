@@ -88,10 +88,8 @@ public class ParseConfigsFilter extends BasicTransformer {
 				config = config.accept(new AmbDuplicateFilter(context));
 				config = config.accept(new TypeSystemFilter(context));
 				config = config.accept(new PriorityFilter(context));
-				config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context),
-                        context));
-				config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context),
-                        context));
+				config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context));
+				config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context));
 				config = config.accept(new TypeInferenceSupremumFilter(context));
 				config = config.accept(new PreferAvoidFilter(context));
 				config = config.accept(new FlattenListsFilter(context));

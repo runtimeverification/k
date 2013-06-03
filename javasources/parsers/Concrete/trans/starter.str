@@ -50,11 +50,11 @@ rules
 	importTblGround = ?[a, b] ; <ReadFromFile> b ; ?trm ; rules(MemoMyTblGround : _ -> trm)
 	importTblPgm    = ?[a, b] ; <ReadFromFile> b ; ?trm ; rules(MemoMyTblPgm    : _ -> trm)
 
-	javaParseStringConfigAst = ?[a, b] ; <parse-string(my-parse-error|<MemoMyTbl>, "StartDz")> b
-	javaParseStringConfig = ?[a, b] ; <parse-string(my-parse-error|<MemoMyTbl>, "StartDz")> b       ; (handleErrors <+ justFine)
-	javaParseStringRules  = ?[a, b] ; <parse-string(my-parse-error|<MemoMyTbl>, "StartDz")> b       ; (handleErrors <+ justFine)
-	javaParseStringCmd    = ?[a, b] ; <parse-string(my-parse-error|<MemoMyTblGround>, "RuleContentDz")> b ; (handleErrors <+ justFine)
-	javaParseStringPgm    = ?[a, b] ; <parse-string(my-parse-error|<MemoMyTblPgm>, a)> b    ; (handleErrors <+ justFinePgms)
+	javaParseStringConfig = ?[a, b] ; <parse-string(my-parse-error|<MemoMyTbl>, "StartDz")> b              ; (handleErrors <+ justFine)
+	javaParseStringRules  = ?[a, b] ; <parse-string(my-parse-error|<MemoMyTbl>, "StartDz")> b              ; (handleErrors <+ justFine)
+	javaParseStringCmd    = ?[a, b] ; <parse-string(my-parse-error|<MemoMyTblGround>, "RuleContentDz")> b  ; (handleErrors <+ justFine)
+	javaParseStringPgm    = ?[a, b] ; <parse-string(my-parse-error|<MemoMyTblPgm>, a)> b                   ; (handleErrors <+ justFinePgms)
+	javaParseStringKore   = ?[a, b] ; <parse-string(my-parse-error|<import-term(include/Concrete.tbl)>)> b ; (handleErrors <+ justFine)
 
 	justFine =
 		mydisambiguate ; justFine2

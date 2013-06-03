@@ -157,7 +157,7 @@ public class DefinitionLoader {
 			}
 
 			def.accept(new AddAutoIncludedModulesVisitor(context));
-			def.accept(new CheckModulesAndFilesImportsDecl(context));
+			//def.accept(new CheckModulesAndFilesImportsDecl(context));
 			def.accept(new CollectModuleImportsVisitor(context));
 
 			// ------------------------------------- generate parser TBL
@@ -165,10 +165,8 @@ public class DefinitionLoader {
 			String oldSdf = "";
 			if (new File(context.dotk.getAbsolutePath() + "/def/Integration.sdf").exists())
 				oldSdf = FileUtil.getFileContent(context.dotk.getAbsolutePath() + "/def/Integration.sdf");
-			FileUtil.saveInFile(context.dotk.getAbsolutePath() + "/def/Integration.sdf", DefinitionSDF.getSdfForDefinition(def,
-                    context));
-			FileUtil.saveInFile(context.dotk.getAbsolutePath() + "/ground/Integration.sdf", Definition2SDF.getSdfForDefinition(def,
-                    context));
+			FileUtil.saveInFile(context.dotk.getAbsolutePath() + "/def/Integration.sdf", DefinitionSDF.getSdfForDefinition(def, context));
+			FileUtil.saveInFile(context.dotk.getAbsolutePath() + "/ground/Integration.sdf", Definition2SDF.getSdfForDefinition(def, context));
 			String newSdf = FileUtil.getFileContent(context.dotk.getAbsolutePath() + "/def/Integration.sdf");
 
 			if (GlobalSettings.verbose)
@@ -250,8 +248,7 @@ public class DefinitionLoader {
 		config = config.accept(new AmbDuplicateFilter(context));
 		config = config.accept(new TypeSystemFilter(context));
 		config = config.accept(new PriorityFilter(context));
-		config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context),
-                context));
+		config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context));
 		config = config.accept(new TypeInferenceSupremumFilter(context));
 		config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context));
 		config = config.accept(new PreferAvoidFilter(context));
@@ -295,8 +292,7 @@ public class DefinitionLoader {
 		config = config.accept(new AmbDuplicateFilter(context));
 		config = config.accept(new TypeSystemFilter(context));
 		config = config.accept(new PriorityFilter(context));
-		config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context),
-                context));
+		config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context));
 		config = config.accept(new TypeInferenceSupremumFilter(context));
 		config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context));
 		config = config.accept(new PreferAvoidFilter(context));
@@ -325,7 +321,7 @@ public class DefinitionLoader {
 		JavaClassesFactory.startConstruction(context);
 		ASTNode config = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
 		JavaClassesFactory.endConstruction();
-		
+
 		// TODO: don't allow rewrites
 		new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation(context), context).check(config);
 		config = config.accept(new SentenceVariablesFilter(context));
@@ -340,8 +336,7 @@ public class DefinitionLoader {
 		config = config.accept(new AmbDuplicateFilter(context));
 		config = config.accept(new TypeSystemFilter(context));
 		//config = config.accept(new PriorityFilter());
-		config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context),
-                context));
+		config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context));
 		config = config.accept(new TypeInferenceSupremumFilter(context));
 		config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context));
 		//config = config.accept(new PreferAvoidFilter());

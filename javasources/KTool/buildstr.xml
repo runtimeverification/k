@@ -83,6 +83,7 @@
 		<delete>
 			<fileset dir="src/org/kframework/parser/concrete/lib">
 				<include name="*.java" />
+				<include name="Concrete.tbl" />
 				<exclude name="string_trim_last_one_0_0.java" />
 				<exclude name="string_unescape_sort_0_0.java" />
 				<exclude name="annolocation_0_0.java" />

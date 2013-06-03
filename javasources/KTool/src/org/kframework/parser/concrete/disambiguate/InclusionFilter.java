@@ -20,15 +20,16 @@ public class InclusionFilter extends BasicTransformer {
 
 	@Override
 	public ASTNode transform(TermCons tc) throws TransformerException {
-		String localFile = tc.getFilename();
 		String consFile = tc.getProduction().getFilename();
 		String consModule = tc.getProduction().getOwnerModuleName();
-		if (!context.isRequiredEq(consFile, localFile)) {
-			String msg = "Production " + tc.getProduction().toString() + " has not been imported in this file.\n";
-			msg += "	Defined in module: " + consModule + " file: " + consFile;
-			KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, tc.getFilename(), tc.getLocation());
-			throw new PriorityException(kex);
-		}
+//		Trying to fix issue 651, by removing file inclusion check
+//		String localFile = tc.getFilename();
+//		if (!context.isRequiredEq(consFile, localFile)) {
+//			String msg = "Production " + tc.getProduction().toString() + " has not been imported in this file.\n";
+//			msg += "	Defined in module: " + consModule + " file: " + consFile;
+//			KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, tc.getFilename(), tc.getLocation());
+//			throw new PriorityException(kex);
+//		}
 
 		if (!context.isModuleIncludedEq(localModule, consModule)) {
 			String msg = "Production " + tc.getProduction().toString() + " has not been imported in this module.\n";
