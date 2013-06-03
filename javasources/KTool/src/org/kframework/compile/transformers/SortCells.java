@@ -206,6 +206,7 @@ public class SortCells extends CopyOnWriteTransformer {
 			}
 		}
 		if (cellfragments.isEmpty()) return node;
+        KApp oldNode = node;
 		node = node.shallowCopy();
 		Term child = node.getChild();
 		if (!(child instanceof KList)) {
@@ -221,6 +222,7 @@ public class SortCells extends CopyOnWriteTransformer {
 		outkList.setContents(outList);
 		int i = 0;
 		for (Term t : kList.getContents()) {
+            if (t.getSort().equals(KSort.KList.name())) return oldNode;
 			String sort = cellfragments.get(new Integer(i));
 			if (sort != null) {
 				assert (t instanceof KApp);

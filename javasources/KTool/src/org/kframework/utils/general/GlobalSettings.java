@@ -32,7 +32,20 @@ public class GlobalSettings {
 	public static ParserType whatParser = ParserType.PROGRAM;
 	public static boolean sortedCells = false;
 
-	public enum ParserType {
+    public static boolean isUnixOS() {
+		String os = System.getProperty("os.name").toLowerCase();
+		return os.contains("nix") || os.contains("nux");
+	}
+
+    public static boolean isWindowsOS() {
+		return System.getProperty("os.name").toLowerCase().contains("win");
+	}
+
+    public static boolean isMacOS() {
+		return System.getProperty("os.name").toLowerCase().contains("mac");
+	}
+
+    public enum ParserType {
 		PROGRAM, GROUND, RULES, BINARY
 	}
 

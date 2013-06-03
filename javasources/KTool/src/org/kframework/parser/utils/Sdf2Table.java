@@ -6,6 +6,7 @@ import java.io.InputStream;
 
 import org.kframework.utils.ThreadedStreamCapturer;
 import org.kframework.utils.file.KPaths;
+import org.kframework.utils.general.GlobalSettings;
 
 public class Sdf2Table {
 
@@ -16,14 +17,14 @@ public class Sdf2Table {
 			File f = null;
 			String basePath = KPaths.getKBase(false);
 
-			if (isUnixOS()) {
+			if (GlobalSettings.isUnixOS()) {
 				f = new File(basePath + "/lib/native/linux/sdf2table");
 				f.setExecutable(true, false);
 			}
-			if (isWindowsOS()) {
+			if (GlobalSettings.isWindowsOS()) {
 				f = new File(basePath + "/lib/native/cygwin/sdf2table.exe");
 			}
-			if (isMacOS()) {
+			if (GlobalSettings.isMacOS()) {
 				f = new File(basePath + "/lib/native/macosx/sdf2table");
 				f.setExecutable(true, false);
 			}
@@ -80,16 +81,4 @@ public class Sdf2Table {
 		}
 	}
 
-	private static boolean isUnixOS() {
-		String os = System.getProperty("os.name").toLowerCase();
-		return os.contains("nix") || os.contains("nux");
-	}
-
-	private static boolean isWindowsOS() {
-		return System.getProperty("os.name").toLowerCase().contains("win");
-	}
-
-	private static boolean isMacOS() {
-		return System.getProperty("os.name").toLowerCase().contains("mac");
-	}
 }

@@ -1,12 +1,41 @@
 package org.kframework.parser.utils;
 
-public class SglrJNI {
-	static {
-		System.loadLibrary("SglrJNI"); // hello.dll (Windows) or libhello.so (Unixes)
-		init();
-	}
+import org.kframework.utils.file.KPaths;
+import org.kframework.utils.general.GlobalSettings;
 
-	// A native method that receives nothing and returns void
+public class SglrJNI {
+    static {
+//		System.loadLibrary("SglrJNI"); // hello.dll (Windows) or libhello.so (Unixes)
+
+        System.load(getSglriLibraryPath());
+
+        init();
+    }
+
+    private static String getSglriLibraryPath() {
+        String path = KPaths.getKBase(false) + "/lib/native";
+
+        if (GlobalSettings.isUnixOS()) {
+            String arch = System.getProperty("os.arch");
+            if (arch.toLowerCase().contains("64")) {
+                path += "/linux/x64/libSglrJNI.so";
+            } else {
+                System.err.println("SglriJNI not available on this platform, yet :-)");
+                System.exit(1);
+            }
+        }
+        if (GlobalSettings.isWindowsOS()) {
+            System.err.println("SglriJNI not available on this platform, yet :-)");
+            System.exit(1);
+        }
+        if (GlobalSettings.isMacOS()) {
+            System.err.println("SglriJNI not available on this platform, yet :-)");
+            System.exit(1);
+        }
+        return path;
+    }
+
+    // A native method that receives nothing and returns void
 	private static native void init();
 
 	/**
