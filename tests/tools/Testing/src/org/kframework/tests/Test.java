@@ -35,6 +35,7 @@ import org.w3c.dom.NodeList;
 
 public class Test implements Comparable<Test> {
 
+	private static final String PARSER_HOME = "parser-home";
 	private static final String MESSAGE = "message";
 	private static final String ERROR2 = "error";
 	private static final String SYSTEM_ERR = "system-err";
@@ -62,7 +63,8 @@ public class Test implements Comparable<Test> {
 	private static final String ERR = ".err";
 	private static final String OUT = ".out";
 	private static final String VALUE = "value";
-
+	
+	
 	/* data read from config.xml */
 	private String language;
 	private String programsFolder;
@@ -75,7 +77,7 @@ public class Test implements Comparable<Test> {
 	private Map<String, String> generalKrunOptions = new HashMap<String, String>();
 	private List<Program> specialPrograms = new LinkedList<Program>();
 	private boolean pdf;
-
+	
 	/* data needed for temporary stuff */
 	private Document doc;
 	public Element report;
@@ -375,6 +377,12 @@ public class Test implements Comparable<Test> {
 			optValue = optValue.replaceAll("&lt;", "<");
 			optValue = optValue.replaceAll("&gt;", ">");
 
+			String parserHome = krunOpt.getAttribute(PARSER_HOME);
+			String parser = System.getenv(parserHome);
+			if (parser != null) {
+				optValue = "\"" + parser + System.getProperty("file.separator") + optValue.substring(1);
+			}
+			
 			map.put(krunOpt.getAttribute(NAME), optValue);
 		}
 		return map;

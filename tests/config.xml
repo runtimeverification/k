@@ -385,7 +385,7 @@
       >
     <all-programs>
       <krun-option name="--search" />
-      <krun-option name="--parser" value="&quot;kast -groundParser&quot;"/>
+      <krun-option name="--parser" value="&quot;kast -groundParser&quot;" parser-home="PARSER_HOME"/>
       <krun-option name="--no-color" />
     </all-programs>
   </test>
@@ -414,7 +414,7 @@
     <all-programs>
       <krun-option name="--search" />
       <krun-option name="--depth" value="5" />
-      <krun-option name="--parser" value="&quot;kast -groundParser&quot;"/>
+      <krun-option name="--parser" value="&quot;kast -groundParser&quot;"  parser-home="PARSER_HOME"/>
       <krun-option name="--no-color" />
     </all-programs>
   </test>
