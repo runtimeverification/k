@@ -198,6 +198,9 @@ public class MaudeKRun implements KRun {
 		}
 	}
 
+	public static Pattern cellPattern = Pattern.compile("<([^_>]+)>(_+)</([^_>]+)>");
+	public static Pattern emptyPattern = Pattern.compile("\\.(Map|Bag|List|Set|K)");
+
 	public static Term parseXML(Element xml, Context context) {
 		String op = xml.getAttribute("op");
 		String sort = xml.getAttribute("sort");
@@ -205,8 +208,7 @@ public class MaudeKRun implements KRun {
 		List<Element> list = XmlUtil.getChildElements(xml);
 		
 		try {
-			Pattern pattern = Pattern.compile("<([^_>]+)>(_+)</([^_>]+)>");
-			Matcher m = pattern.matcher(op);
+			Matcher m;
 			if ((sort.equals("BagItem") || sort.equals("[Bag]")) && op.equals("<_>_</_>")) {
 				Cell cell = new Cell();
 				assertXMLTerm(list.size() == 3 && list.get(0).getAttribute("sort").equals("CellLabel") && list.get(2).getAttribute("sort").equals("CellLabel") && list.get(0).getAttribute("op").equals(list.get(2).getAttribute("op")));
@@ -214,7 +216,8 @@ public class MaudeKRun implements KRun {
 				cell.setLabel(list.get(0).getAttribute("op"));
 				cell.setContents(parseXML(list.get(1), context));
 				return cell;
-			} else if (sort.equals("BagItem") && m.matches()) {
+			} else if (GlobalSettings.sortedCells && sort.equals("BagItem") && 
+					   (m = cellPattern.matcher(op)).matches()) {
 				Cell cell = new Cell();
 				assertXMLTerm(list.size() == m.group(2).length() && m.group(1).equals(m.group(3)));
 				cell.setLabel(m.group(1));
@@ -314,8 +317,8 @@ public class MaudeKRun implements KRun {
                 return GenericToken.of(sortString.stringValue(), valueString.stringValue());
 			} else if (sort.equals("#FiniteFloat")) {
 				assertXMLTerm(list.size() == 0);
-        return GenericToken.of("#Float", op);
-			} else if (op.matches("\\.(Map|Bag|List|Set|K)") && (sort.equals("Bag") || sort.equals("List") || sort.equals("Map") || sort.equals("Set") || sort.equals("K"))) {
+				return GenericToken.of("#Float", op);
+			} else if (emptyPattern.matcher(op).matches() && (sort.equals("Bag") || sort.equals("List") || sort.equals("Map") || sort.equals("Set") || sort.equals("K"))) {
 				assertXMLTerm(list.size() == 0);
                 if (sort.equals("Bag")) {
                     return Bag.EMPTY;

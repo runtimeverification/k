@@ -33,10 +33,11 @@ module URIS
   rule #close(N:Int) 
       => String2DotK((#tcpRequest("close\001" +String Int2String(N) +String "\001"))::K) [function, anywhere]
 
-  syntax K ::= "String2DotK" "(" String ")"  [function, klabel(String2DotK)]
+  syntax K ::= "String2DotK" "(" TCPAnswer ")"  [function, klabel(String2DotK)]
   rule String2DotK(S:String) => #ioError(#retrieveTCPError(S)) when #isTCPError(S) [function, anywhere]
   rule String2DotK(S:String) => .K when notBool(#isTCPError(S)) [function, anywhere]
-  
+  rule String2DotK(E:TCPError) => E 
+
 
   rule String2Bool("0") => false [anywhere]
   rule String2Bool("false") => false [anywhere]

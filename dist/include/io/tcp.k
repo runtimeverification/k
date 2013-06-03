@@ -5,7 +5,7 @@ module TCP-HOOKS
   imports K-EQUAL-HOOKS
   imports #TCP-INTERFACE
   syntax TCPAnswer ::= String | TCPError
-  syntax TCPError ::= "#EOF" | "#tcpError" "(" String ")" | "#noparse" | "#ENOENT" | "#ENOTDIR" | "#EACCES" | "#ELOOP" | "#ENAMETOOLONG"
+  syntax TCPError ::= "#EOF" | "#tcpError" "(" String ")" | "#noparse" | "#ENOENT" | "#ENOTDIR" | "#EACCES" | "#ELOOP" | "#ENAMETOOLONG" | "#EBADF"
   rule isKResult(#EOF) => true [function, anywhere]
 
   syntax TCPAnswer ::= "#tcpRequest" "(" String ")"   [function, klabel(#tcpRequest)]
@@ -22,6 +22,7 @@ module TCP-HOOKS
   rule #tcpError("EACCES") => #EACCES [function, anywhere]
   rule #tcpError("ELOOP") => #ELOOP [function, anywhere]
   rule #tcpError("ENAMETOOLONG") => #ENAMETOOLONG [function, anywhere]
+  rule #tcpError("EBADF") => #EBADF [function, anywhere]
 
   syntax String ::= "##tcpRequest" "(" String ")"        [function, klabel(##tcpRequest), hook(#TCP:#tcpRequest)]
                   | "#retrieveTCPError" "(" String ")"   [function, klabel(#retrieveTCPError), hook(#TCP:#retrieveTCPError)]
