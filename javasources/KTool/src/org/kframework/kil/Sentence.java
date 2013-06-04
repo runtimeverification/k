@@ -17,6 +17,7 @@ import aterm.ATermAppl;
  * interpretations in the subclasses.
  */
 public class Sentence extends ModuleItem {
+	/** Label from {@code rule[}label{@code ]:} syntax or "". Currently unrelated to attributes */
 	String label = "";
 	Term body;
 	Term condition = null;

@@ -103,7 +103,7 @@ public class ParseRulesFilter extends BasicTransformer {
 						config = new Rule((Sentence) JavaClassesFactory.getTerm((Element) xmlTerm));
 					else { // should not reach here
 						config = null;
-						throw new NullPointerException("Only context and rules have been implemented.");
+						assert false : "Only context and rules have been implemented.";
 					}
 					Sentence st = (Sentence) config;
 					assert st.getLabel().equals(""); // labels should have been parsed in Basic Parsing

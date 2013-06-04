@@ -69,7 +69,7 @@ public class ParseConfigsFilter extends BasicTransformer {
 
 				config = new Configuration((Sentence) JavaClassesFactory.getTerm((Element) xmlTerm));
 				Sentence st = (Sentence) config;
-				assert st.getLabel().equals(""); // labels should have been parsed in Basic Parsing
+				assert st.getLabel().equals("") : "labels should have been parsed in Basic Parsing";
 				st.setLabel(ss.getLabel());
 				//assert st.getAttributes() == null || st.getAttributes().isEmpty(); // attributes should have been parsed in Basic Parsing
 				st.setAttributes(ss.getAttributes());

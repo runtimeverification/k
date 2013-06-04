@@ -13,7 +13,6 @@ import org.w3c.dom.Element;
  * Any explicit attributes on the rule are stored in {@link #attributes}.
  */
 public class Rule extends Sentence {
-	/** Label from {@code rule[}label{@code ]:} syntax or "". Currently unrelated to attributes */
 	public Rule(Element element) {
 		super(element);
 	}
