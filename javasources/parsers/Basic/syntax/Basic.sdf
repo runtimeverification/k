@@ -20,10 +20,10 @@ context-free syntax
 	"rule" 			-> Keyword {cons("Rule")}
 	"configuration"	-> Keyword {cons("Configuration")}
 
-	Keyword				HIDDEN+						-> KSentence {cons("SimpleSentence"), avoid}
-	Keyword "[" RL "]:"	HIDDEN+						-> KSentence {cons("LabelSentence")}
-	Keyword				HIDDEN+	"[" {Tag ","}+ "]"	-> KSentence {cons("AnnoSentence")}
-	Keyword	"[" RL "]:"	HIDDEN+	"[" {Tag ","}+ "]"	-> KSentence {cons("LabelAnnoSentence"), prefer}
+	Keyword					HIDDEN+						-> KSentence {cons("SimpleSentence"), avoid}
+	Keyword "[" RL "]" ":"	HIDDEN+						-> KSentence {cons("LabelSentence")}
+	Keyword					HIDDEN+	"[" {Tag ","}+ "]"	-> KSentence {cons("AnnoSentence")}
+	Keyword	"[" RL "]" ":"	HIDDEN+	"[" {Tag ","}+ "]"	-> KSentence {cons("LabelAnnoSentence"), prefer}
 
 	"syntax" SORTID "::=" {Prod1 ">"}+	-> KSentence {cons("Syntax")}
 	"syntax" SORTID						-> KSentence {cons("SyntaxShort")}

@@ -22,6 +22,7 @@ public class Constants {
 	public static final String LEXICAL = "lexical";
 	public static final String RESTRICTIONS = "restrictions";
 	public static final String RULE = "rule";
+	public static final String SENTENCE = "sentence";
 	public static final String BODY = "body";
 	public static final String REWRITE = "rewrite";
 	public static final String LEFT = "left";

@@ -14,8 +14,8 @@ context-free syntax
 	KSentence	-> StartDz {cons("KSentenceList")}
 
 	%% K Sentences
-	"[" LABELDz "]:" AttributedSentence -> KSentence {cons("LabelSentence"), prefer}
-					 AttributedSentence -> KSentence {cons("NoLabelSentence")}
+	"[" LABELDz "]" ":" AttributedSentence -> KSentence {cons("LabelSentence"), prefer}
+						AttributedSentence -> KSentence {cons("NoLabelSentence")}
 
 	CondSentence "[" TagListDz "]"	-> AttributedSentence {cons("AttributedSentence"), prefer}
 	CondSentence					-> AttributedSentence {cons("NoAttributedSentence")}

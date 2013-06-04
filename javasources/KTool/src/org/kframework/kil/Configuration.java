@@ -35,6 +35,10 @@ public class Configuration extends Sentence {
 		super(node);
 	}
 
+	public Configuration(Sentence term) {
+		super(term);
+	}
+
 	public String toString() {
 		String content = "  configuration ";
 		content += this.body + " ";

@@ -13,6 +13,7 @@ import org.kframework.kil.Sentence;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
+import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
@@ -97,10 +98,10 @@ public class ParseRulesFilter extends BasicTransformer {
 					XmlLoader.reportErrors(doc, ss.getType());
 
 					if (ss.getType().equals(Constants.CONTEXT))
-						config = new org.kframework.kil.Context((Element) xmlTerm);
+						config = new org.kframework.kil.Context((Sentence) JavaClassesFactory.getTerm((Element) xmlTerm));
 					else if (ss.getType().equals(Constants.RULE))
-						config = new Rule((Element) xmlTerm);
-					else { // this should not reach
+						config = new Rule((Sentence) JavaClassesFactory.getTerm((Element) xmlTerm));
+					else { // should not reach here
 						config = null;
 						throw new NullPointerException("Only context and rules have been implemented.");
 					}

@@ -5,11 +5,13 @@ import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Module;
+import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.loader.CollectStartSymbolPgmVisitor;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
+import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
@@ -65,7 +67,7 @@ public class ParseConfigsFilter extends BasicTransformer {
 				XmlLoader.addFilename(xmlTerm, ss.getFilename());
 				XmlLoader.reportErrors(doc, "configuration");
 
-				config = new Configuration((Element) xmlTerm);
+				config = new Configuration((Sentence) JavaClassesFactory.getTerm((Element) xmlTerm));
 				Sentence st = (Sentence) config;
 				assert st.getLabel().equals(""); // labels should have been parsed in Basic Parsing
 				st.setLabel(ss.getLabel());

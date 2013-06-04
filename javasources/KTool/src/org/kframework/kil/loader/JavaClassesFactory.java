@@ -86,8 +86,6 @@ public class JavaClassesFactory {
 			return new Restrictions(element);
 		if (Constants.RULE.equals(element.getNodeName()) && element.hasAttribute(Constants.VALUE_value_ATTR))
 			return new StringSentence(element);
-		if (Constants.RULE.equals(element.getNodeName()) && element.hasAttribute(Constants.VALUE_value_ATTR))
-			return new StringSentence(element);
 		if (Constants.CONFIG.equals(element.getNodeName()) && element.hasAttribute(Constants.VALUE_value_ATTR))
 			return new StringSentence(element);
 		if (Constants.CONTEXT.equals(element.getNodeName()) && element.hasAttribute(Constants.VALUE_value_ATTR))
@@ -116,6 +114,8 @@ public class JavaClassesFactory {
 		if (Constants.PRODUCTION.equals(element.getNodeName()))
 			return new Production(element);
 		if (Constants.RULE.equals(element.getNodeName()))
+			return new Rule(element);
+		if (Constants.SENTENCE.equals(element.getNodeName()))
 			return new Rule(element);
 		if (Constants.REWRITE.equals(element.getNodeName()))
 			return new Rewrite(element);

@@ -20,9 +20,13 @@ public class Context extends Sentence {
 	public Context(Context node) {
 		super(node);
 	}
-	
-	public Context(){
+
+	public Context() {
 		super();
+	}
+
+	public Context(Sentence term) {
+		super(term);
 	}
 
 	public String toString() {

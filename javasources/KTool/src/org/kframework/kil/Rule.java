@@ -31,6 +31,10 @@ public class Rule extends Sentence {
 		this.setBody(new Rewrite(lhs, rhs, context));
 	}
 
+	public Rule(Sentence term) {
+		super(term);
+	}
+
 	public String toString() {
 		String content = "  rule ";
 
