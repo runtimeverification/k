@@ -1,6 +1,5 @@
 package org.kframework.kil;
 
-import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
@@ -15,16 +14,12 @@ import org.w3c.dom.Element;
  */
 public class Rule extends Sentence {
 	/** Label from {@code rule[}label{@code ]:} syntax or "". Currently unrelated to attributes */
-	private String label;
-
 	public Rule(Element element) {
 		super(element);
-		setLabel(element.getAttribute(Constants.LABEL));
 	}
 
 	public Rule(Rule node) {
 		super(node);
-		this.label = node.getLabel();
 	}
 
 	public Rule() {
@@ -34,14 +29,6 @@ public class Rule extends Sentence {
 	public Rule(Term lhs, Term rhs, Context context) {
 		super();
 		this.setBody(new Rewrite(lhs, rhs, context));
-	}
-
-	public void setLabel(String label) {
-		this.label = label;
-	}
-
-	public String getLabel() {
-		return label;
 	}
 
 	public String toString() {

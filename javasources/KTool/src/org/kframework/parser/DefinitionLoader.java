@@ -266,7 +266,7 @@ public class DefinitionLoader {
 			System.exit(1);
 		}
 
-		String parsed = org.kframework.parser.concrete.KParser.ParseKRuleString("rule " + pattern);
+		String parsed = org.kframework.parser.concrete.KParser.ParseKRuleString(pattern);
 		Document doc = XmlLoader.getXMLDoc(parsed);
 
 		XmlLoader.addFilename(doc.getFirstChild(), filename);
@@ -310,7 +310,7 @@ public class DefinitionLoader {
 			System.exit(1);
 		}
 
-		String parsed = org.kframework.parser.concrete.KParser.ParseKRuleString("rule " + pattern);
+		String parsed = org.kframework.parser.concrete.KParser.ParseKRuleString(pattern);
 		Document doc = XmlLoader.getXMLDoc(parsed);
 
 		//XmlLoader.addFilename(doc.getFirstChild(), filename);

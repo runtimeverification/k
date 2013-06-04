@@ -1,10 +1,12 @@
 package org.kframework.kil;
 
 import org.kframework.kil.loader.Constants;
+import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.StringUtil;
+import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
 /**
@@ -15,17 +17,28 @@ import org.w3c.dom.Element;
  */
 public class StringSentence extends ModuleItem {
 	private String content;
+	private String label;
 	private String type;
 
 	public StringSentence(String content, String type) {
 		this.content = content;
 		this.type = type;
 	}
-	
+
 	public StringSentence(Element element) {
 		super(element);
 		content = StringUtil.unescape(element.getAttribute(Constants.VALUE_value_ATTR));
+		label = element.getAttribute(Constants.LABEL_label_ATTR);
 		type = element.getNodeName();
+		java.util.List<Element> its = XML.getChildrenElementsByTagName(element, Constants.ATTRIBUTES);
+		// assumption: <attributes> appears only once
+		if (its.size() > 0) {
+			attributes.setAll((Attributes) JavaClassesFactory.getTerm(its.get(0)));
+		} else {
+			if (attributes == null)
+				attributes = new Attributes();
+			attributes.addAttribute("generated", "generated");
+		}
 	}
 
 	public StringSentence(StringSentence node) {
@@ -33,8 +46,6 @@ public class StringSentence extends ModuleItem {
 		this.content = node.content;
 	}
 
-	
-	
 	public String toString() {
 		String shortStr = content;
 		if (content.indexOf("\n") > 0)
@@ -71,5 +82,13 @@ public class StringSentence extends ModuleItem {
 
 	public String getType() {
 		return type;
+	}
+
+	public String getLabel() {
+		return label;
+	}
+
+	public void setLabel(String label) {
+		this.label = label;
 	}
 }

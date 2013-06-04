@@ -8,10 +8,11 @@ import org.kframework.compile.checks.CheckListOfKDeprecation;
 import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Module;
+import org.kframework.kil.Rule;
+import org.kframework.kil.Sentence;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
@@ -80,8 +81,7 @@ public class ParseRulesFilter extends BasicTransformer {
 					// config = JavaClassesFactory.getTerm((IStrategoAppl) parsed);
 				} else {
 					String parsed = null;
-					// TODO(anyone that knows regular expressions): make contains to look only in the attributes area
-					if (ss.getContent().contains("kore")) {
+					if (ss.getAttributes().containsAttribute("kore")) {
 						Stopwatch sww = new Stopwatch();
 						parsed = org.kframework.parser.concrete.KParser.ParseKoreString(ss.getContent());
 						if (GlobalSettings.verbose)
@@ -96,7 +96,19 @@ public class ParseRulesFilter extends BasicTransformer {
 					XmlLoader.addFilename(xmlTerm, ss.getFilename());
 					XmlLoader.reportErrors(doc, ss.getType());
 
-					config = JavaClassesFactory.getTerm((Element) xmlTerm);
+					if (ss.getType().equals(Constants.CONTEXT))
+						config = new org.kframework.kil.Context((Element) xmlTerm);
+					else if (ss.getType().equals(Constants.RULE))
+						config = new Rule((Element) xmlTerm);
+					else { // this should not reach
+						config = null;
+						throw new NullPointerException("Only context and rules have been implemented.");
+					}
+					Sentence st = (Sentence) config;
+					assert st.getLabel().equals(""); // labels should have been parsed in Basic Parsing
+					st.setLabel(ss.getLabel());
+					//assert st.getAttributes() == null || st.getAttributes().isEmpty(); // attributes should have been parsed in Basic Parsing
+					st.setAttributes(ss.getAttributes());
 				}
 				// disambiguate rules
 				if (config.getFilename().endsWith("test.k")) {

@@ -20,23 +20,13 @@ rules
 		to-xml1 <+ to-xml2 <+ to-xml3 <+ to-xml4 <+ (debug(!"Error XMLifying at: ") ; !"<error/>")
 
 	to-xml1:
-		KSentenceList(a') -> $[[<all(to-xml)>a']]
+		KSentenceList(a') -> $[[<to-xml>a']]
 
 	// print the K definition as an XML - parsing only the syntax
 	to-xml1:
 		"Colon"#(_) -> $[]
 	to-xml1:
 		"QuestionMark"#(_) -> $[]
-
-	to-xml1:
-		Config(x1) -> $[<config loc="[loc]">
-			<body>
-				[<to-xml> x1]
-			</body>
-		</config>
-		]
-		where mydebug(!"Config: ")
-		where loc := <getLocAsString>
 
 	// generate xml for cells
 	to-xml1:
@@ -79,60 +69,124 @@ rules
 		CellProperty(a, b) -> $[[<id>""] [a]=[<xmlStringEscapeFromString>b]]
 
 	to-xml1:
-		Context(x1) -> $[<context loc="[loc]">
-							<body>
-								[x1']
-							</body>
-		</context>
+		NoLabelSentence(NoAttributedSentence(NoCondSentence(body))) ->
+		$[<sentence loc="[loc]">
+			<body>
+				[body']
+			</body>
+		</sentence>
 		]
-		where mydebug(!"Context: ")
-		where x1' := <to-xml> x1
-		where loc := <getLocAsString>
+		where body' := <to-xml> body
+		where loc   := <getLocAsString>
+
 	to-xml1:
-		CondSentence(Context(x1), cond) -> $[<context loc="[loc]">
-												<body>
-													[x1']
-												</body>
-												<cond>
-													[cond']
-												</cond>
-		</context>
+		NoLabelSentence(NoAttributedSentence(CondSentence(body, cond))) ->
+		$[<sentence loc="[loc]">
+			<body>
+				[body']
+			</body>
+			<cond>
+				[cond']
+			</cond>
+		</sentence>
 		]
-		where mydebug(!"Context: ")
-		where x1' := <to-xml> x1
+		where body' := <to-xml> body
 		where cond' := <to-xml> cond
-		where loc := <getLocAsString>
+		where loc   := <getLocAsString>
 
 	to-xml1:
-		AttributedCondSentence(Context(y), c, d) -> $[<context loc="[loc]">
-														<body>
-															[children]
-														</body>
-														<cond>
-															[<to-xml> c]
-														</cond>
-														<attributes loc="[loc]">
-															[<to-xml> d]
-														</attributes>
-		</context>
+		NoLabelSentence(AttributedSentence(CondSentence(body, cond), attr)) ->
+		$[<sentence loc="[loc]">
+			<body>
+				[body']
+			</body>
+			<cond>
+				[cond']
+			</cond>
+			<attributes loc="[<getLocAsString> attr]">
+				[attr']
+			</attributes>
+		</sentence>
 		]
-		where mydebug(!"Rule: ")
-		where children := <to-xml> y
-		where loc := <getLocAsString>
+		where body' := <to-xml> body
+		where cond' := <to-xml> cond
+		where attr' := <to-xml> attr
+		where loc   := <getLocAsString>
 
 	to-xml1:
-		AttributedSentence(Context(y), d) -> $[<context loc="[loc]">
-					<body>
-						[children]
-					</body>
-					<attributes loc="[loc]">
-						[<to-xml> d]
-					</attributes>
-		</context>
+		NoLabelSentence(AttributedSentence(NoCondSentence(body), attr)) ->
+		$[<sentence loc="[loc]">
+			<body>
+				[body']
+			</body>
+			<attributes loc="[<getLocAsString> attr]">
+				[attr']
+			</attributes>
+		</sentence>
 		]
-		where mydebug(!"Rule: ")
-		where children := <to-xml> y
-		where loc := <getLocAsString>
+		where body' := <to-xml> body
+		where loc   := <getLocAsString>
+		where attr' := <to-xml> attr
+
+	to-xml1:
+		LabelSentence(label, NoAttributedSentence(NoCondSentence(body))) ->
+		$[<sentence loc="[loc]" label="[<xmlStringEscape> label]">
+			<body>
+				[body']
+			</body>
+		</sentence>
+		]
+		where body' := <to-xml> body
+		where loc   := <getLocAsString>
+
+	to-xml1:
+		LabelSentence(label, NoAttributedSentence(CondSentence(body, cond))) ->
+		$[<sentence loc="[loc]" label="[<xmlStringEscape> label]">
+			<body>
+				[body']
+			</body>
+			<cond>
+				[cond']
+			</cond>
+		</sentence>
+		]
+		where body' := <to-xml> body
+		where cond' := <to-xml> cond
+		where loc   := <getLocAsString>
+
+	to-xml1:
+		LabelSentence(label, AttributedSentence(CondSentence(body, cond), attr)) ->
+		$[<sentence loc="[loc]" label="[<xmlStringEscape> label]">
+			<body>
+				[body']
+			</body>
+			<cond>
+				[cond']
+			</cond>
+			<attributes loc="[<getLocAsString> attr]">
+				[attr']
+			</attributes>
+		</sentence>
+		]
+		where body' := <to-xml> body
+		where cond' := <to-xml> cond
+		where attr' := <to-xml> attr
+		where loc   := <getLocAsString>
+
+	to-xml1:
+		LabelSentence(label, AttributedSentence(NoCondSentence(body), attr)) ->
+		$[<sentence loc="[loc]" label="[<xmlStringEscape> label]">
+			<body>
+				[body']
+			</body>
+			<attributes loc="[<getLocAsString> attr]">
+				[attr']
+			</attributes>
+		</sentence>
+		]
+		where body' := <to-xml> body
+		where loc   := <getLocAsString>
+		where attr' := <to-xml> attr
 
 	to-xml1:
 		Tag(x) -> $[<tag key="[x]" loc="[loc]" />
@@ -153,61 +207,8 @@ rules
 		where loc := <getLocAsString>
 
 	to-xml1:
-		NoLabel() -> $[]
-	to-xml1:
-		Label(x) -> $[label="[x]" ]
-
-	to-xml1:
 		BagItem1Break() -> $[<br sort="BagItem"/>
 		]
-
-	to-xml1:
-		CondSentence(Rule(x, y), c) -> $[<rule [label] loc="[loc]">
-											<body>
-												[children]
-											</body>
-											<cond>
-												[<to-xml> c]
-											</cond>
-		</rule>
-		]
-		where mydebug(!"Rule: ")
-		where label := <to-xml> x
-		where children := <to-xml> y
-		where loc := <getLocAsString>
-
-	to-xml1:
-		AttributedCondSentence(Rule(x, y), c, d) -> $[<rule [label] loc="[loc]">
-														<body>
-															[children]
-														</body>
-														<cond>
-															[<to-xml> c]
-														</cond>
-														<attributes loc="[loc]">
-															[<to-xml> d]
-														</attributes>
-		</rule>
-		]
-		where mydebug(!"Rule: ")
-		where label := <to-xml> x
-		where children := <to-xml> y
-		where loc := <getLocAsString>
-
-	to-xml1:
-		AttributedSentence(Rule(x, y), d) -> $[<rule [label] loc="[loc]">
-					<body>
-						[children]
-					</body>
-					<attributes loc="[loc]">
-						[<to-xml> d]
-					</attributes>
-		</rule>
-		]
-		where mydebug(!"Rule: ")
-		where label := <to-xml> x
-		where children := <to-xml> y
-		where loc := <getLocAsString>
 
 	to-xml1:
 		"K1Seq"#(b) -> $[<KSequence sort="K" loc="[loc]">
@@ -327,18 +328,6 @@ rules
 		where <string-ends-with(|"Rewrite")> a
 		where mydebug(!"Rewrite: ")
 		where sort := <getSort> a
-		where loc := <getLocAsString>
-
-	to-xml2:
-		Rule(x, y) -> $[<rule [label] loc="[loc]">
-							<body>
-								[children]
-							</body>
-		</rule>
-		]
-		where mydebug(!"Rule: ")
-		where label := <to-xml> x
-		where children := <to-xml> y
 		where loc := <getLocAsString>
 
 	to-xml2:	// sort wrappers

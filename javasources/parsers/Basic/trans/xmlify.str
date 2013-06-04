@@ -326,26 +326,51 @@ rules
 		where s' := <xml-string-escape-from-string> s
 		where loc := <getLocAsString>
 
-	to-xml:
-		Config(x1) -> $[<config loc="[loc]" value="[x1']" />
-		]
-		where mydebug(!"Config: ")
-		where x1' := <get-original-sentence>
-		where loc := <getLocAsString>
+	to-xml: Rule() -> $[rule]
+	to-xml: Context() -> $[context]
+	to-xml: Configuration() -> $[config]
 
 	to-xml:
-		Context(x1) -> $[<context loc="[loc]" value="[x1']" />
+		SimpleSentence(key, x1) -> $[<[type] loc="[loc]" value="[x1']" />
 		]
-		where mydebug(!"Context: ")
-		where x1' := <get-original-sentence>
-		where loc := <getLocAsString>
+		where mydebug(!"SimpleSentence: ")
+		where type := <to-xml> key
+		where x1'  := <get-original-sentence> x1
+		where loc  := <getLocAsString> x1
 
 	to-xml:
-		Rule(x1) -> $[<rule loc="[loc]" value="[x1']" />
+		LabelSentence(key, label, x1) -> $[<[type] loc="[loc]" value="[x1']" label="[<xmlStringEscape> label]" />
 		]
-		where mydebug(!"Context: ")
-		where x1' := <get-original-sentence>
-		where loc := <getLocAsString>
+		where mydebug(!"LabelSentence: ")
+		where x1'  := <get-original-sentence> x1
+		where type := <to-xml> key
+		where loc  := <getLocAsString> x1
+
+	to-xml:
+		AnnoSentence(key, x1, anno) -> $[<[type] loc="[loc]" value="[x1']">
+											<attributes>
+												[at']
+											</attributes>
+										</[type]>
+		]
+		where mydebug(!"AnnoSentence: ")
+		where x1'  := <get-original-sentence> x1
+		where type := <to-xml> key
+		where at'  := <all(to-xml)> anno
+		where loc  := <getLocAsString> x1
+
+	to-xml:
+		LabelAnnoSentence(key, label, x1, anno) -> $[<[type] loc="[loc]" value="[x1']" label="[<xmlStringEscape> label]">
+														<attributes>
+															[at']
+														</attributes>
+													</[type]>
+		]
+		where mydebug(!"LabelAnnoSentence: ")
+		where x1'  := <get-original-sentence> x1
+		where type := <to-xml> key
+		where at'  := <all(to-xml)> anno
+		where loc  := <getLocAsString> x1
 
 	to-xml:
 		Tag(x) -> $[<tag key="[x]" loc="[loc]" />

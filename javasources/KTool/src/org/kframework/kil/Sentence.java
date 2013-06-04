@@ -2,6 +2,9 @@ package org.kframework.kil;
 
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
+import org.kframework.kil.visitors.Transformer;
+import org.kframework.kil.visitors.Visitor;
+import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
@@ -13,13 +16,15 @@ import aterm.ATermAppl;
  * {@link #body} and {@link #condition}, which have different
  * interpretations in the subclasses.
  */
-public abstract class Sentence extends ModuleItem {
+public class Sentence extends ModuleItem {
+	String label = "";
 	Term body;
 	Term condition = null;
 
 	public Sentence(Sentence s) {
 		super(s);
 		this.body = s.body;
+		this.label = s.label;
 		this.condition = s.condition;
 	}
 
@@ -41,6 +46,7 @@ public abstract class Sentence extends ModuleItem {
 	public Sentence(Element element) {
 		super(element);
 
+		label = element.getAttribute(Constants.LABEL);
 		Element elm = XML.getChildrenElementsByTagName(element, Constants.BODY).get(0);
 		Element elmBody = XML.getChildrenElements(elm).get(0);
 		this.body = (Term) JavaClassesFactory.getTerm(elmBody);
@@ -77,5 +83,25 @@ public abstract class Sentence extends ModuleItem {
 	}
 
 	@Override
-	public abstract Sentence shallowCopy();
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
+	}
+
+	@Override
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
+	}
+
+	@Override
+	public Sentence shallowCopy() {
+		return new Sentence(this);
+	}
+
+	public String getLabel() {
+		return label;
+	}
+
+	public void setLabel(String label) {
+		this.label = label;
+	}
 }
