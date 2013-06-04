@@ -20,8 +20,7 @@ public class SglrJNI {
             if (arch.toLowerCase().contains("64")) {
                 path += "/linux/x64/libSglrJNI.so";
             } else {
-                System.err.println("SglriJNI not available on this platform, yet :-)");
-                System.exit(1);
+                path += "/linux/libSglrJNI.so";
             }
         }
         if (GlobalSettings.isWindowsOS()) {
