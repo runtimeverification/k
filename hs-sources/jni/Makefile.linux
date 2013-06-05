@@ -1,12 +1,14 @@
-SDF_PATH=/home/maude/dist
+ifndef SDF_PATH
+    $(error please set the SDF_PATH variable to point to the SDF distribution path)
+endif
 SDF_LIB=$(SDF_PATH)/lib
 SDF_INC=$(SDF_PATH)/include
 
-JAVA_INC=/usr/lib/jvm/java-6-openjdk/include
+ifndef JAVA_INC
+    $(error please set the JAVA_INC variable to point to the JDK headers path)
+endif
 
 all: libSglrJNI.so
-test: test.c libSglrJNI.so
-	gcc -Wall -o test test.c -L. -L/data/dist/lib -lSglrJNI -lsglr -lmept -lErrorAPI -lATerm -lLocationAPI
 org_kframework_parser_utils_SglrJNI.h:
 	javac org/kframework/parser/utils/SglrJNI.java
 	javah -classpath . -jni org.kframework.parser.utils.SglrJNI

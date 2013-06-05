@@ -1,12 +1,12 @@
-SDF_PATH=/Users/tserban2/dist
+ifndef SDF_PATH
+    $(error please set the SDF_PATH variable to point to the SDF distribution path)
+endif
 SDF_LIB=$(SDF_PATH)/lib
 SDF_INC=$(SDF_PATH)/include
 
 JAVA_INC=/System/Library/Frameworks/JavaVM.framework/Versions/Current/Headers
 
 all: libSglrJNI.so
-test: test.c libSglrJNI.so
-	gcc -Wall -o test test.c -L. -L/data/dist/lib -lSglrJNI -lsglr -lmept -lErrorAPI -lATerm -lLocationAPI
 org_kframework_parser_utils_SglrJNI.h:
 	javac org/kframework/parser/utils/SglrJNI.java
 	javah -classpath . -jni org.kframework.parser.utils.SglrJNI
