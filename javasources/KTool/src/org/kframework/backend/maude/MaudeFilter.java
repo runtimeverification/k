@@ -16,6 +16,8 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
+import com.google.common.collect.ImmutableSet;
+
 import java.util.*;
 import java.util.Map;
 
@@ -604,10 +606,13 @@ public class MaudeFilter extends BackendFilter {
 		}
 	}
 
+	private java.util.Set<String> maudeBuiltinTokenSorts =
+		ImmutableSet.of("#Float", "#LtlFormula");
+
     @Override
     public void visit(Token token) {
         if (token instanceof GenericToken) {
-            if (token.tokenSort().equals("#Float")) {
+            if (maudeBuiltinTokenSorts.contains(token.tokenSort())) {
                 result.append("#_(" + token.value() + ")");
             } else {
                 result.append(token);
