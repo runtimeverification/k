@@ -134,8 +134,8 @@ public class ProgramLoader {
 
 			return (Term) out;
 		} catch (IOException e) {
-			throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse program: "
-					+ e.getLocalizedMessage(), filename, "File system."));
+			String msg = "Cannot parse program: " + e.getLocalizedMessage();
+			throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, filename, "File system."));
 		}
 	}
 }

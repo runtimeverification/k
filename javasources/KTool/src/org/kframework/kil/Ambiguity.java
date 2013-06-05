@@ -10,7 +10,6 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
 import aterm.ATermAppl;
-import aterm.ATermList;
 
 /**
  * Used for representing parsing ambiguity. Shouldn't exist after disambiguation.
@@ -25,10 +24,8 @@ public class Ambiguity extends Collection {
 		super(atm);
 
 		contents = new ArrayList<Term>();
-		ATermList atl = (ATermList) atm.getArgument(0);
-		while (!atl.isEmpty()) {
-			contents.add((Term) JavaClassesFactory.getTerm(atl.getFirst()));
-			atl = atl.getNext();
+		for (int i = 0; i < atm.getArity(); i++) {
+			contents.add((Term) JavaClassesFactory.getTerm(atm.getArgument(i)));
 		}
 	}
 
