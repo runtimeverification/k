@@ -98,4 +98,11 @@ public interface KRun {
 	the entire state space explored by the search command it follows.
 	*/
 	public KRunDebugger debug(DirectedGraph<KRunState, Transition> graph);
+
+	/**
+	Set a backend-specific option on the krun object. This function should silently succeed doing nothing if the backend implementing this does not use the option in question.
+	@param key A string key specifying the name of the option to set.
+	@param value The value of the option.
+	*/
+	public void setBackendOption(String key, Object value);
 }

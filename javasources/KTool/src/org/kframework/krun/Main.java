@@ -366,6 +366,7 @@ public class Main {
 					Object krs = result.getResult();
 					if (krs instanceof KRunState) {
 						Term res = ((KRunState) krs).getRawResult();
+						krun.setBackendOption("io", false);
 						result = krun.search(null, null, K.searchType, patternRule, res, steps);
 					}else {
 						Error.report("Pattern matching after execution is not supported by search and model checking");

@@ -97,4 +97,8 @@ public class JavaSymbolicKRun implements KRun {
         throw new UnsupportedOperationException();
     }
 
+	@Override
+	public void setBackendOption(String key, Object value) {
+	}
+
 }

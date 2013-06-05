@@ -53,8 +53,16 @@ public class MaudeKRun implements KRun {
 	public MaudeKRun(Context context) {
 		this.context = context;
 	}
+
+	private boolean ioServer = K.io;
+
+	public void setBackendOption(String key, Object value) {
+		if (key.equals("io")) {
+			ioServer = (Boolean) value;
+		}
+	}
 	
-	private void executeKRun(String maudeCmd, boolean ioServer) throws KRunExecutionException {
+	private void executeKRun(String maudeCmd) throws KRunExecutionException {
 		FileUtil.createFile(K.maude_in, maudeCmd);
 		File outFile = FileUtil.createFile(K.maude_out);
 		File errFile = FileUtil.createFile(K.maude_err);
@@ -99,7 +107,7 @@ public class MaudeKRun implements KRun {
 		}
 		cmd += getCounter();
 
-		executeKRun(cmd, K.io);
+		executeKRun(cmd);
 		try {
 			return parseRunResult();
 		} catch (IOException e) {
@@ -441,7 +449,7 @@ public class MaudeKRun implements KRun {
 			cmd = "set trace on ." + K.lineSeparator + cmd;
 		}
 		cmd += getCounter();
-		executeKRun(cmd, K.io);
+		executeKRun(cmd);
 		try {
 			SearchResults results;
 			final List<SearchResult> solutions = parseSearchResults
@@ -592,7 +600,10 @@ public class MaudeKRun implements KRun {
 		cfg.accept(cfgFilter);
 
 		String cmd = "mod MCK is" + K.lineSeparator + " including " + K.main_module + " ." + K.lineSeparator + K.lineSeparator + " op #initConfig : -> Bag ." + K.lineSeparator + K.lineSeparator + " eq #initConfig  =" + K.lineSeparator + cfgFilter.getResult() + " ." + K.lineSeparator + "endm" + K.lineSeparator + K.lineSeparator + "red" + K.lineSeparator + "_`(_`)(('modelCheck`(_`,_`)).KLabel,_`,`,_(_`(_`)(Bag2KLabel(#initConfig),.KList)," + K.lineSeparator + formulaFilter.getResult() + ")" + K.lineSeparator + ") .";
-		executeKRun(cmd, false);
+		boolean io = ioServer;
+		ioServer = false;
+		executeKRun(cmd);
+		ioServer = io;
 		KRunResult<DirectedGraph<KRunState, Transition>> result = parseModelCheckResult();
 		result.setRawOutput(FileUtil.getFileContent(K.maude_out));
 		return result;
