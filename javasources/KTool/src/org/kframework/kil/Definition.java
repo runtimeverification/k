@@ -2,7 +2,6 @@ package org.kframework.kil;
 
 import org.kframework.compile.sharing.DataStructureSortCollector;
 import org.kframework.compile.sharing.TokenSortCollector;
-import org.kframework.compile.utils.ConfigurationStructureVisitor;
 import org.kframework.kil.loader.*;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
@@ -147,11 +146,6 @@ public class Definition extends ASTNode {
                 = new DataStructureSortCollector(context);
         this.accept(dataStructureSortCollector);
         context.setDataStructureSorts(dataStructureSortCollector.getSorts());
-
-		ConfigurationStructureVisitor cfgStrVisitor =
-				new ConfigurationStructureVisitor(context);
-		this.accept(cfgStrVisitor);
-        context.setMaxConfigurationLevel(cfgStrVisitor.getMaxLevel());
 
         /* set the initialized flag */
         context.initialized = true;

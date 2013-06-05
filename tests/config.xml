@@ -513,6 +513,7 @@
       extensions="imp"
       report-dir="imp"
       title="symbolic"
+	  exclude="lesson_4/test.imp"
       >
     <kompile-option name="--symbolic" />
     <all-programs>
