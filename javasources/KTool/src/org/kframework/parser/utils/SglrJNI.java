@@ -28,8 +28,7 @@ public class SglrJNI {
             System.exit(1);
         }
         if (GlobalSettings.isMacOS()) {
-            System.err.println("SglriJNI not available on this platform, yet :-)");
-            System.exit(1);
+			path += "/macosx/libSglrJNI.jnilib";
         }
         return path;
     }
