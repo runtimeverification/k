@@ -34,12 +34,6 @@ public class RuleCompilerSteps extends CompilerSteps<Rule> {
 		this.add(new ResolveSyntaxPredicates(context));
 		this.add(new ResolveListOfK(context));
 		this.add(new FlattenSyntax(context));
-		ConfigurationStructureMap configurationStructureMap = new
-				ConfigurationStructureMap();
-		ConfigurationStructureVisitor cfgStrVisitor =
-				new ConfigurationStructureVisitor(context);
-		def.accept(cfgStrVisitor);
-        context.setMaxConfigurationLevel(cfgStrVisitor.getMaxLevel());
 		final ResolveContextAbstraction resolveContextAbstraction =
 				new ResolveContextAbstraction(context);
 		this.add(resolveContextAbstraction);
