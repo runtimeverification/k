@@ -145,12 +145,6 @@ public class AddBracketsFilter2 extends BasicTransformer {
 			int beginCol = scanner.nextInt();
 			int endLine = scanner.nextInt();
 			int endCol = scanner.nextInt();
-			if (beginLine == 1) {
-				beginCol -= "rule ".length();
-			}
-			if (endLine == 1) {
-				endCol -= "rule ".length();
-			}
 			ast.setLocation("(" + beginLine + "," + beginCol + "," + endLine + "," + endCol + ")");
 		}
 	}
