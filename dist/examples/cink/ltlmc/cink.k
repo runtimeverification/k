@@ -648,7 +648,7 @@ module CINK-SYNTAX
     A input program is a sequence of statements or a LTL Formula 
     (this is needed for parsing purposes)
   */
-  syntax Pgm ::= Stmts | LTLFormula
+  syntax Pgm ::= Stmts | LtlFormula
 
 
   /*@

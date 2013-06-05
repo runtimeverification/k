@@ -675,11 +675,11 @@
       language="tests/regression/issue663/issue.k"
       folder="tests/regression/issue663/programs"
       results="tests/regression/issue663/out"
-      extensions="issue"
+      extensions="issue">
       <all-programs>
         <krun-option name="--ltlmc" value="TrueLtl" />
       </all-programs> />
-
+  </test>
   <test
       language="tests/regression/basicFloat/issue.k"
       folder="tests/regression/basicFloat"
