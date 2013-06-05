@@ -31,10 +31,7 @@ public class Hole extends Term {
         return "HOLE";
     }
 
-    @Override
-    public ASTNode shallowCopy() {
-        throw new UnsupportedOperationException();  //To change body of implemented methods use File | Settings | File Templates.
-    }
+
 
     @Override
     public void accept(Matcher matcher, Term patten) {

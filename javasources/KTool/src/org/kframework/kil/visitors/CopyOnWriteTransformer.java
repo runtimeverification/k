@@ -3,7 +3,7 @@ package org.kframework.kil.visitors;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.HashSet;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
@@ -462,13 +462,15 @@ public class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(CollectionBuiltin node) throws TransformerException {
         boolean change = false;
-        ArrayList<Term> terms = new ArrayList<Term>(node.terms().size());
-        ArrayList<Term> elements = new ArrayList<Term>(node.elements().size());
-        for (Term term : node.terms()) {
+
+        ArrayList<Term> terms = new ArrayList<Term>(node.baseTerms().size());
+        for (Term term : node.baseTerms()) {
             Term transformedTerm = (Term) term.accept(this);
             terms.add(transformedTerm);
             change = change || transformedTerm != term;
         }
+
+        ArrayList<Term> elements = new ArrayList<Term>(node.elements().size());
         for (Term term : node.elements()) {
             Term transformedTerm = (Term) term.accept(this);
             elements.add(transformedTerm);
@@ -485,13 +487,15 @@ public class CopyOnWriteTransformer implements Transformer {
 	@Override
 	public ASTNode transform(MapBuiltin node) throws TransformerException {
 		boolean change = false;
-		ArrayList<Term> terms = new ArrayList<Term>(node.terms().size());
-		HashMap<Term, Term> elements = new HashMap<Term, Term>(node.elements().size());
-		for (Term term : node.terms()) {
+
+        ArrayList<Term> terms = new ArrayList<Term>(node.baseTerms().size());
+		for (Term term : node.baseTerms()) {
 			Term transformedTerm = (Term) term.accept(this);
 			terms.add(transformedTerm);
 			change = change || transformedTerm != term;
 		}
+
+        HashMap<Term, Term> elements = new HashMap<Term, Term>(node.elements().size());
 		for (java.util.Map.Entry<Term, Term> entry : node.elements().entrySet()) {
 			Term transformedKey = (Term) entry.getKey().accept(this);
 			Term transformedValue = (Term) entry.getValue().accept(this);
@@ -506,6 +510,50 @@ public class CopyOnWriteTransformer implements Transformer {
 			return node;
 		}
 	}
+
+    @Override
+    public ASTNode transform(MapLookup node) throws TransformerException {
+        Variable map = (Variable) node.map().accept(this);
+        Term key = (Term) node.key().accept(this);
+        Term value = (Term) node.value().accept(this);
+
+        if (map != node.map() || key != node.key() || value != node.value()) {
+            return new MapLookup(map, key, value);
+        } else {
+            return node;
+        }
+    }
+
+    @Override
+    public ASTNode transform(MapUpdate node) throws TransformerException {
+        boolean change = false;
+
+        Variable map = (Variable) node.map().accept(this);
+
+        HashSet<Term> removeSet = new HashSet<Term>(node.removeSet().size());
+        for (Term key : node.removeSet()) {
+            Term transformedKey = (Term) key.accept(this);
+            removeSet.add(transformedKey);
+            change = change || transformedKey != key;
+        }
+
+        HashMap<Term, Term> updateMap = new HashMap<Term, Term>(node.updateMap().size());
+        for (java.util.Map.Entry<Term, Term> entry : node.updateMap().entrySet()) {
+            Term transformedKey = (Term) entry.getKey().accept(this);
+            Term transformedValue = (Term) entry.getValue().accept(this);
+            updateMap.put(transformedKey, transformedValue);
+            change = change || transformedKey != entry.getKey()
+                     || transformedValue != entry.getValue();
+        }
+
+        if (change) {
+            return new MapUpdate(map, removeSet, updateMap);
+        } else {
+            return node;
+        }
+    }
+
+
 
 	@Override
 	public ASTNode transform(Constant node) throws TransformerException {

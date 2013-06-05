@@ -7,11 +7,9 @@ import org.kframework.kil.ASTNode;
 
 
 /**
- * Created with IntelliJ IDEA.
- * User: andrei
- * Date: 3/28/13
- * Time: 3:12 PM
- * To change this template use File | Settings | File Templates.
+ *
+ *
+ * @author AndreiS
  */
 public class KLabelFreezer extends KLabelInjection {
 

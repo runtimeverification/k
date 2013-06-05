@@ -4,6 +4,7 @@ package org.kframework.backend.java.symbolic;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import org.kframework.backend.java.kil.AnonymousVariable;
+import org.kframework.backend.java.kil.Sorted;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.loader.Context;
@@ -18,11 +19,8 @@ import java.util.Set;
 
 
 /**
- * Created with IntelliJ IDEA.
- * User: andrei
- * Date: 4/2/13
- * Time: 1:05 PM
- * To change this template use File | Settings | File Templates.
+ *
+ * @author AndreiS
  */
 public class SymbolicConstraint {
 
@@ -38,26 +36,11 @@ public class SymbolicConstraint {
         private Equality(Term leftHandSide, Term rightHandSide) {
             assert leftHandSide.getKind().equals(rightHandSide.getKind()):
                     "kind mismatch between "
-                            + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
-                            + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
+                    + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
+                    + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
 
             this.leftHandSide = leftHandSide;
             this.rightHandSide = rightHandSide;
-        }
-
-        @Override
-        public boolean equals(Object object) {
-            if (this == object) {
-                return true;
-            }
-
-            if (!(object instanceof Equality)) {
-                return false;
-            }
-
-            Equality equality = (Equality) object;
-            return leftHandSide.equals(equality.leftHandSide)
-                    && rightHandSide.equals(equality.rightHandSide);
         }
 
         public Term getLeftHandSide() {
@@ -71,8 +54,8 @@ public class SymbolicConstraint {
         public boolean isFalse() {
             if (leftHandSide instanceof Sorted && rightHandSide instanceof Sorted) {
                 return null == context.getGLBSort(ImmutableSet.<String>of(
-                        ((Sorted) leftHandSide).getSort(),
-                        ((Sorted) rightHandSide).getSort()));
+                        ((Sorted) leftHandSide).sort(),
+                        ((Sorted) rightHandSide).sort()));
             } else {
                 return false;
             }
@@ -98,6 +81,21 @@ public class SymbolicConstraint {
         }
 
         @Override
+        public boolean equals(Object object) {
+            if (this == object) {
+                return true;
+            }
+
+            if (!(object instanceof Equality)) {
+                return false;
+            }
+
+            Equality equality = (Equality) object;
+            return leftHandSide.equals(equality.leftHandSide)
+                   && rightHandSide.equals(equality.rightHandSide);
+        }
+
+        @Override
         public String toString() {
             return leftHandSide + SEPARATOR + rightHandSide;
         }
@@ -111,14 +109,16 @@ public class SymbolicConstraint {
             = joiner.withKeyValueSeparator(Equality.SEPARATOR);
 
     private final LinkedList<Equality> equalities = new LinkedList<Equality>();
-    private boolean isNormal = true;
+    private boolean isNormal;
     private final Map<Variable, Term> substitution = new HashMap<Variable, Term>();
-    private TruthValue truthValue = TruthValue.TRUE;
+    private TruthValue truthValue;
 
     protected Context context;
     
     public SymbolicConstraint(Context context) {
     	this.context = context;
+        truthValue = TruthValue.TRUE;
+        isNormal = true;
     }
     
     public TruthValue add(Term leftHandSide, Term rightHandSide) {
@@ -137,18 +137,19 @@ public class SymbolicConstraint {
             truthValue = TruthValue.UNKNOWN;
             isNormal = false;
         } else if (equality.isFalse()) {
+            //equalities.add(equality);
             truthValue = TruthValue.FALSE;
         }
 
         return truthValue;
     }
 
-    public List<Equality> getEqualities() {
+    public List<Equality> equalities() {
         normalize();
         return Collections.unmodifiableList(equalities);
     }
 
-    public Map<Variable, Term> getSubstitution() {
+    public Map<Variable, Term> substitution() {
         normalize();
         return Collections.unmodifiableMap(substitution);
     }
@@ -265,11 +266,11 @@ public class SymbolicConstraint {
 
         for (Variable variable : variableSet) {
             if (substitution.get(variable) != null) {
-                substitution.put(AnonymousVariable.getFreshVariable(variable.getSort()),
+                substitution.put(AnonymousVariable.getFreshVariable(variable.sort()),
                                  substitution.remove(variable));
             } else {
                 freshSubstitution.put(variable,
-                                      AnonymousVariable.getFreshVariable(variable.getSort()));
+                                      AnonymousVariable.getFreshVariable(variable.sort()));
             }
         }
 

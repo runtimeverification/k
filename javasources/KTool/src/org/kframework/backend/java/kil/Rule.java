@@ -8,31 +8,39 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attributes;
 
-
+import java.util.List;
 import java.util.Set;
 
 
 /**
- * Created with IntelliJ IDEA.
- * User: andrei
- * Date: 3/25/13
- * Time: 12:10 PM
- * To change this template use File | Settings | File Templates.
+ * A K rule in the format of the Java Rewrite Engine.
+ *
+ * @author AndreiS
  */
 public class Rule extends ASTNode implements Transformable, Visitable {
 
-    private final Term condition;
     private final Term leftHandSide;
     private final Term rightHandSide;
+    private final Term condition;
+    private final List<MapLookup> lookups;
+    private final List<Term> values;
 
-
-    public Rule(Term leftHandSide, Term rightHandSide, Term condition, Attributes attributes) {
+    public Rule(
+            Term leftHandSide,
+            Term rightHandSide,
+            Term condition,
+            List<MapLookup> lookups,
+            List<Term> values,
+            Attributes attributes) {
         this.leftHandSide = leftHandSide;
         this.rightHandSide = rightHandSide;
         this.condition = condition;
+        this.lookups = lookups;
+        this.values = values;
         super.setAttributes(attributes);
     }
 
+    /*
     public Rule(Term leftHandSide, Term rightHandSide, Term condition) {
         this(leftHandSide, rightHandSide, condition, null);
     }
@@ -44,6 +52,7 @@ public class Rule extends ASTNode implements Transformable, Visitable {
     public Rule(Term leftHandSide, Term rightHandSide) {
         this(leftHandSide, rightHandSide, null, null);
     }
+    */
 
     public Term getCondition() {
         assert hasCondition();
@@ -55,8 +64,16 @@ public class Rule extends ASTNode implements Transformable, Visitable {
         return leftHandSide;
     }
 
+    public List<MapLookup> getLookups() {
+        return lookups;
+    }
+
     public Term getRightHandSide() {
         return rightHandSide;
+    }
+
+    public List<Term> getValues() {
+        return values;
     }
 
     public boolean hasCondition() {

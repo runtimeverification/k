@@ -2,10 +2,12 @@ package org.kframework.backend.java.symbolic;
 
 import com.google.common.collect.ImmutableList;
 
+import org.kframework.backend.java.kil.BoolToken;
 import org.kframework.backend.java.kil.BuiltinConstant;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.Collection;
+import org.kframework.backend.java.kil.IntToken;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Hole;
@@ -15,14 +17,19 @@ import org.kframework.backend.java.kil.KLabel;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Map;
+import org.kframework.backend.java.kil.MapLookup;
+import org.kframework.backend.java.kil.MapUpdate;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.Token;
+import org.kframework.backend.java.kil.UninterpretedToken;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 
@@ -34,11 +41,16 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class CopyOnWriteTransformer implements Transformer {
-	protected Context context;
+
+    private final Context context;
 	
 	public CopyOnWriteTransformer(Context context) {
 		this.context = context;
 	}
+
+    public CopyOnWriteTransformer() {
+        this.context = null;
+    }
 	
     @Override
     public String getName() {
@@ -103,8 +115,8 @@ public class CopyOnWriteTransformer implements Transformer {
 
     @Override
     public ASTNode transform(KLabelInjection kLabelInjection) {
-        Term term = (Term) kLabelInjection.getTerm().accept(this);
-        if (term != kLabelInjection.getTerm()) {
+        Term term = (Term) kLabelInjection.term().accept(this);
+        if (term != kLabelInjection.term()) {
             kLabelInjection = new KLabelInjection(term);
         }
         return kLabelInjection;
@@ -112,12 +124,32 @@ public class CopyOnWriteTransformer implements Transformer {
 
     @Override
     public ASTNode transform(KItem kItem) {
-        KLabel kLabel = (KLabel) kItem.getKLabel().accept(this);
-        KList kList = (KList) kItem.getKList().accept(this);
-        if (kLabel != kItem.getKLabel() || kList != kItem.getKList()) {
+        KLabel kLabel = (KLabel) kItem.kLabel().accept(this);
+        KList kList = (KList) kItem.kList().accept(this);
+        if (kLabel != kItem.kLabel() || kList != kItem.kList()) {
             kItem = new KItem(kLabel, kList, context);
         }
         return kItem;
+    }
+
+    @Override
+    public ASTNode transform(Token token) {
+        return token;
+    }
+
+    @Override
+    public ASTNode transform(UninterpretedToken uninterpretedToken) {
+        return transform((Token) uninterpretedToken);
+    }
+
+    @Override
+    public ASTNode transform(BoolToken boolToken) {
+        return transform((Token) boolToken);
+    }
+
+    @Override
+    public ASTNode transform(IntToken intToken) {
+        return transform((Token) intToken);
     }
 
     @Override
@@ -180,13 +212,16 @@ public class CopyOnWriteTransformer implements Transformer {
             Term key = (Term) entry.getKey().accept(this);
             Term value = (Term) entry.getValue().accept(this);
 
-            if (transformedMap != null && (key != entry.getKey() || value != entry.getValue())) {
+            if (transformedMap == null && (key != entry.getKey() || value != entry.getValue())) {
                 if (map.hasFrame()) {
                     transformedMap = new Map(map.getFrame());
                 } else {
                     transformedMap = new Map();
                 }
                 for(java.util.Map.Entry<Term, Term> copyEntry : map.getEntries().entrySet()) {
+                    if (copyEntry == entry) {
+                        break;
+                    }
                     transformedMap.put(copyEntry.getKey(), copyEntry.getValue());
                 }
             }
@@ -201,6 +236,74 @@ public class CopyOnWriteTransformer implements Transformer {
         } else {
             return map;
         }
+    }
+
+    @Override
+    public ASTNode transform(MapLookup mapLookup) {
+        Term map = (Term) mapLookup.map().accept(this);
+        Term key = (Term) mapLookup.key().accept(this);
+        if (map != mapLookup.map() || key != mapLookup.key()) {
+            mapLookup = new MapLookup(map, key);
+        }
+        return mapLookup;
+
+    }
+
+    @Override
+    public ASTNode transform(MapUpdate mapUpdate) {
+        Term map = (Term) mapUpdate.map().accept(this);
+
+        java.util.Set<Term> removeSet = null;
+        for(Term key : mapUpdate.removeSet()) {
+            Term transformedKey = (Term) key.accept(this);
+
+            if (removeSet == null && transformedKey != key) {
+                removeSet = new HashSet<Term>(mapUpdate.removeSet().size());
+                for(Term copyKey : mapUpdate.removeSet()) {
+                    if (copyKey == key) {
+                        break;
+                    }
+                    removeSet.add(copyKey);
+                }
+            }
+
+            if (removeSet != null) {
+                removeSet.add(transformedKey);
+            }
+        }
+        if (removeSet == null) {
+            removeSet = mapUpdate.removeSet();
+        }
+
+        java.util.Map<Term, Term> updateMap = null;
+        for(java.util.Map.Entry<Term, Term> entry : mapUpdate.updateMap().entrySet()) {
+            Term key = (Term) entry.getKey().accept(this);
+            Term value = (Term) entry.getValue().accept(this);
+
+            if (updateMap == null && (key != entry.getKey() || value != entry.getValue())) {
+                updateMap = new HashMap<Term, Term>(mapUpdate.updateMap().size());
+                for(java.util.Map.Entry<Term, Term> copyEntry : mapUpdate.updateMap().entrySet()) {
+                    if (copyEntry == entry) {
+                        break;
+                    }
+                    updateMap.put(copyEntry.getKey(), copyEntry.getValue());
+                }
+            }
+
+            if (updateMap != null) {
+                updateMap.put(key, value);
+            }
+        }
+        if (updateMap == null) {
+            updateMap = mapUpdate.updateMap();
+        }
+
+        if (map != mapUpdate.map() || removeSet != mapUpdate.removeSet()
+                || mapUpdate.updateMap() != updateMap) {
+            mapUpdate = new MapUpdate(map, removeSet, updateMap);
+        }
+
+        return mapUpdate;
     }
 
     @Override

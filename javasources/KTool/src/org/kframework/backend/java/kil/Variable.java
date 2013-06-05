@@ -1,7 +1,6 @@
 package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.symbolic.Matcher;
-import org.kframework.backend.java.symbolic.Sorted;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Utils;
 import org.kframework.backend.java.symbolic.Visitor;
@@ -9,20 +8,18 @@ import org.kframework.kil.ASTNode;
 
 
 /**
- * Created with IntelliJ IDEA.
- * User: andrei
- * Date: 3/18/13
- * Time: 12:49 PM
- * To change this template use File | Settings | File Templates.
+ *
+ *
+ * @author AndreiS
  */
 public class Variable extends Term implements Sorted {
 
+    /* TODO(AndreiS): cache the varibles */
     protected final String name;
     protected final String sort;
 
     public Variable(String name, String sort) {
         super(Kind.of(sort));
-
         this.name = name;
         this.sort = sort;
     }
@@ -32,15 +29,15 @@ public class Variable extends Term implements Sorted {
         return true;
     }
 
-    public String getName() {
+    public String name() {
         return name;
     }
 
     /**
-     * @return the string representation of the sort of this variable.
+     * Returns a {@code String} representation of the sort of this variable.
      */
     @Override
-    public String getSort() {
+    public String sort() {
         return sort;
     }
 
@@ -69,14 +66,6 @@ public class Variable extends Term implements Sorted {
     @Override
     public String toString() {
         return name + ":" + sort;
-    }
-
-    /**
-     * @return a copy of the ASTNode containing the same fields.
-     */
-    @Override
-    public ASTNode shallowCopy() {
-        throw new UnsupportedOperationException();  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override

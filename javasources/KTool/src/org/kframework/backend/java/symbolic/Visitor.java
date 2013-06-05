@@ -1,10 +1,12 @@
 package org.kframework.backend.java.symbolic;
 
 
+import org.kframework.backend.java.kil.BoolToken;
 import org.kframework.backend.java.kil.BuiltinConstant;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.Collection;
+import org.kframework.backend.java.kil.IntToken;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Hole;
 import org.kframework.backend.java.kil.KLabelInjection;
@@ -15,8 +17,12 @@ import org.kframework.backend.java.kil.KLabel;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Map;
+import org.kframework.backend.java.kil.MapLookup;
+import org.kframework.backend.java.kil.MapUpdate;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.Token;
+import org.kframework.backend.java.kil.UninterpretedToken;
 import org.kframework.backend.java.kil.Variable;
 
 /**
@@ -38,12 +44,18 @@ public interface Visitor {
     public void visit(Hole hole);
     public void visit(KLabelInjection kLabelInjection);
     public void visit(KItem kItem);
+    public void visit(Token token);
+    public void visit(UninterpretedToken uninterpretedToken);
+    public void visit(BoolToken boolToken);
+    public void visit(IntToken intToken);
     public void visit(KCollection kCollection);
     public void visit(KCollectionFragment kCollectionFragment);
     public void visit(KLabel kLabel);
     public void visit(KList kList);
     public void visit(KSequence kSequence);
     public void visit(Map map);
+    public void visit(MapLookup mapLookup);
+    public void visit(MapUpdate mapUpdate);
     public void visit(Rule rule);
     public void visit(Term node);
     public void visit(Variable variable);

@@ -6,11 +6,8 @@ import org.kframework.kil.ASTNode;
 
 
 /**
- * Created with IntelliJ IDEA.
- * User: andrei
- * Date: 3/17/13
- * Time: 12:54 PM
- * To change this template use File | Settings | File Templates.
+ *
+ * @author AndreiS
  */
 public abstract class Collection extends Term {
 
@@ -20,7 +17,7 @@ public abstract class Collection extends Term {
         super(kind);
 
         assert frame == null || frame.getKind() == kind
-                : "unexpected kind " + frame.getKind() + " for frame variable " + frame.getName()
+                : "unexpected kind " + frame.getKind() + " for frame variable " + frame.name()
                 + "; expected kind " + kind;
 
         this.frame = frame;

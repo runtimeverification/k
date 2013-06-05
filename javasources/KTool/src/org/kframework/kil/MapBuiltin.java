@@ -8,6 +8,7 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -18,10 +19,14 @@ import java.util.Map;
 public class MapBuiltin extends DataStructureBuiltin {
 
     private final Map<Term, Term> elements;
+    private final Set<Term> removeKeys;
+    private final Map<Term, Term> updateEntries;
 
     public MapBuiltin(DataStructureSort sort, Map<Term, Term> elements, Collection<Term> terms) {
         super(sort, terms);
         this.elements = elements;
+        this.removeKeys = Collections.<Term>emptySet();
+        this.updateEntries = Collections.<Term, Term>emptyMap();
     }
 
     public Map<Term, Term> elements() {
@@ -30,7 +35,7 @@ public class MapBuiltin extends DataStructureBuiltin {
 
     @Override
     public boolean isEmpty() {
-        return elements.isEmpty() && super.terms.isEmpty();
+        return elements.isEmpty() && super.baseTerms.isEmpty();
     }
 
     @Override
@@ -41,7 +46,7 @@ public class MapBuiltin extends DataStructureBuiltin {
     @Override
     public int hashCode() {
         int hash = 1;
-        hash = hash * org.kframework.kil.loader.Context.HASH_PRIME + super.hashCode();
+        hash = hash * Context.HASH_PRIME + super.hashCode();
         hash = hash * Context.HASH_PRIME + elements.hashCode();
         return hash;
     }

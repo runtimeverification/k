@@ -1,10 +1,11 @@
 package org.kframework.backend.java.symbolic;
 
-
+import org.kframework.backend.java.kil.BoolToken;
 import org.kframework.backend.java.kil.BuiltinConstant;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.Collection;
+import org.kframework.backend.java.kil.IntToken;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Hole;
@@ -15,9 +16,14 @@ import org.kframework.backend.java.kil.KLabel;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Map;
+import org.kframework.backend.java.kil.MapLookup;
+import org.kframework.backend.java.kil.MapUpdate;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.Token;
+import org.kframework.backend.java.kil.UninterpretedToken;
 import org.kframework.backend.java.kil.Variable;
+
 
 /**
  * Created with IntelliJ IDEA.
@@ -74,15 +80,35 @@ public class BottomUpVisitor implements Visitor {
 
     @Override
     public void visit(KLabelInjection kLabelInjection) {
-        kLabelInjection.getTerm().accept(this);
+        kLabelInjection.term().accept(this);
         visit((KLabel) kLabelInjection);
     }
 
     @Override
     public void visit(KItem kItem) {
-        kItem.getKLabel().accept(this);
-        kItem.getKList().accept(this);
+        kItem.kLabel().accept(this);
+        kItem.kList().accept(this);
         visit((Term) kItem);
+    }
+
+    @Override
+    public void visit(Token token) {
+        visit((Term) token);
+    }
+
+    @Override
+    public void visit(UninterpretedToken uninterpretedToken) {
+        visit((Term) uninterpretedToken);
+    }
+
+    @Override
+    public void visit(BoolToken boolToken) {
+        visit((Token) boolToken);
+    }
+
+    @Override
+    public void visit(IntToken intToken) {
+        visit((Token) intToken);
     }
 
     @Override
@@ -123,6 +149,25 @@ public class BottomUpVisitor implements Visitor {
             entry.getValue().accept(this);
         }
         visit((Collection) map);
+    }
+
+    @Override
+    public void visit(MapLookup mapLookup) {
+        mapLookup.map().accept(this);
+        mapLookup.key().accept(this);
+        visit((Term) mapLookup);
+    }
+
+    @Override
+    public void visit(MapUpdate mapUpdate) {
+        mapUpdate.map().accept(this);
+        for (Term key : mapUpdate.removeSet()) {
+            key.accept(this);
+        }
+        for (java.util.Map.Entry<Term, Term> entry : mapUpdate.updateMap().entrySet()) {
+            entry.getKey().accept(this);
+            entry.getValue().accept(this);
+        }
     }
 
     @Override

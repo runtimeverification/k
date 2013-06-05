@@ -32,7 +32,7 @@ public class CollectionBuiltin extends DataStructureBuiltin {
 
     @Override
     public boolean isEmpty() {
-        return elements.isEmpty() && super.terms.isEmpty();
+        return elements.isEmpty() && super.baseTerms.isEmpty();
     }
 
     @Override

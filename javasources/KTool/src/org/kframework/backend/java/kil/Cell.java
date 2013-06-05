@@ -7,11 +7,9 @@ import org.kframework.kil.ASTNode;
 
 
 /**
- * Created with IntelliJ IDEA.
- * User: andrei
- * Date: 3/20/13
- * Time: 6:52 PM
- * To change this template use File | Settings | File Templates.
+ *
+ *
+ * @author AndreiS
  */
 public class Cell<T extends Term> extends Term {
 
@@ -54,14 +52,6 @@ public class Cell<T extends Term> extends Term {
     @Override
     public String toString() {
         return "<" + label + ">" + content + "</" + label + ">";
-    }
-
-    /**
-     * @return a copy of the ASTNode containing the same fields.
-     */
-    @Override
-    public ASTNode shallowCopy() {
-        throw new UnsupportedOperationException();  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override

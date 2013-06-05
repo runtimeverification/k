@@ -225,9 +225,13 @@ public class KompileFrontEnd {
 			context.dotk = new File(output);
 			context.dotk.mkdirs();
 
-		} else if (cmd.hasOption("ml")) {
-            GlobalSettings.matchingLogic = true;
+		} else if (GlobalSettings.matchingLogic) {
             backend = new JavaSymbolicBackend(Stopwatch.sw, context);
+            if (output == null) {
+                output = FileUtil.stripExtension(mainFile.getName()) + "-kompiled";
+            }
+            context.dotk = new File(output);
+            context.dotk.mkdirs();
         } else {
 			if (output == null) {
 				output = FileUtil.stripExtension(mainFile.getName()) + "-kompiled";

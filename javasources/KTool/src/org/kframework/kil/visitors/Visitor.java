@@ -62,6 +62,8 @@ public interface Visitor {
     public void visit(DataStructureBuiltin node);
     public void visit(CollectionBuiltin node);
     public void visit(MapBuiltin node);
+    public void visit(MapLookup node);
+    public void visit(MapUpdate node);
     // </BuiltinDataStructure>
 	// <Token>
     public void visit(Constant node);

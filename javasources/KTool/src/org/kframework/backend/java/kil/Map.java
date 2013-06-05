@@ -49,7 +49,6 @@ public class Map extends Collection {
     }
 
     public java.util.Map<Term, Term> getEntries() {
-        //return Collections.unmodifiableMap(entries);
         return Collections.unmodifiableMap(entries);
     }
 

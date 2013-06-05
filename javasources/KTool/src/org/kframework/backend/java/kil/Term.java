@@ -68,9 +68,7 @@ public abstract class Term extends ASTNode implements Matchable, Transformable, 
 
     public static Term of(org.kframework.kil.Term kilTerm, Context context) {
         try {
-        	org.kframework.kil.visitors.Transformer transformer = new KILtoBackendJavaKILTransformer(
-                    context);
-            return (Term) kilTerm.accept(transformer);
+            return (Term) kilTerm.accept(new KILtoBackendJavaKILTransformer(context));
         } catch (TransformerException e) {
             e.printStackTrace();
             return null;
@@ -78,7 +76,13 @@ public abstract class Term extends ASTNode implements Matchable, Transformable, 
     }
 
     @Override
-    public ASTNode accept(org.kframework.kil.visitors.Transformer transformer) throws TransformerException {
+    public ASTNode shallowCopy() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ASTNode accept(org.kframework.kil.visitors.Transformer transformer)
+            throws TransformerException {
         throw new UnsupportedOperationException();
     }
 

@@ -82,7 +82,7 @@ public abstract class DataStructureBuiltin extends Term {
                 if (term instanceof CollectionBuiltin) {
                     CollectionBuiltin collectionBuiltin = (CollectionBuiltin) term;
                     elements.addAll(collectionBuiltin.elements());
-                    terms.addAll(collectionBuiltin.terms());
+                    terms.addAll(collectionBuiltin.baseTerms());
                 } else {
                     terms.add(term);
                 }
@@ -96,7 +96,7 @@ public abstract class DataStructureBuiltin extends Term {
                 if (term instanceof MapBuiltin) {
                     MapBuiltin mapBuiltin = (MapBuiltin) term;
                     elements.putAll(mapBuiltin.elements());
-                    terms.addAll(mapBuiltin.terms());
+                    terms.addAll(mapBuiltin.baseTerms());
                 } else {
                     terms.add(term);
                 }
@@ -110,47 +110,51 @@ public abstract class DataStructureBuiltin extends Term {
     }
 
     protected final DataStructureSort dataStructureSort;
-    protected final Variable frame;
-    protected final Collection<Term> terms;
+    protected final Variable viewBase;
+    protected final Collection<Term> baseTerms;
 
-    protected DataStructureBuiltin(DataStructureSort sort, Collection<Term> terms) {
+    protected DataStructureBuiltin(DataStructureSort sort, Collection<Term> baseTerms) {
         super(sort.name());
         this.dataStructureSort = sort;
-        this.terms = terms;
-        if (terms.size() == 1) {
-            Term term = terms.iterator().next();
+        this.baseTerms = baseTerms;
+        if (baseTerms.size() == 1) {
+            Term term = baseTerms.iterator().next();
             if (term instanceof Variable && term.getSort().equals(sort.name())) {
-                frame = (Variable) term;
+                viewBase = (Variable) term;
             } else {
-                frame = null;
+                viewBase = null;
             }
         } else {
-            frame = null;
+            viewBase = null;
         }
+    }
+
+    public Collection<Term> baseTerms() {
+        return Collections.unmodifiableCollection(baseTerms);
+    }
+
+    public boolean hasViewBase() {
+        return viewBase != null;
+    }
+
+    public boolean isElementCollection() {
+        return baseTerms.isEmpty();
+    }
+
+    public abstract boolean isEmpty();
+
+    public boolean isLHSView() {
+        return viewBase != null || baseTerms.isEmpty();
     }
 
     public DataStructureSort sort() {
         return dataStructureSort;
     }
 
-    public Variable frame() {
-        assert hasFrame();
+    public Variable viewBase() {
+        assert hasViewBase();
 
-        return frame;
-    }
-
-    public boolean hasFrame() {
-        return frame != null;
-    }
-
-    public boolean isElementCollection() {
-        return terms.isEmpty();
-    }
-
-    public abstract boolean isEmpty();
-
-    public Collection<Term> terms() {
-        return Collections.unmodifiableCollection(terms);
+        return viewBase;
     }
 
     @Override
@@ -161,8 +165,8 @@ public abstract class DataStructureBuiltin extends Term {
     @Override
     public int hashCode() {
         int hash = 1;
-        hash = hash * org.kframework.kil.loader.Context.HASH_PRIME + sort.hashCode();
-        hash = hash * Context.HASH_PRIME + terms.hashCode();
+        hash = hash * Context.HASH_PRIME + sort.hashCode();
+        hash = hash * Context.HASH_PRIME + baseTerms.hashCode();
         return hash;
     }
 
@@ -177,12 +181,13 @@ public abstract class DataStructureBuiltin extends Term {
         }
 
         DataStructureBuiltin dataStructureBuiltin = (DataStructureBuiltin) object;
-        return sort.equals(dataStructureBuiltin.sort) && terms.equals(dataStructureBuiltin.terms);
+        return sort.equals(dataStructureBuiltin.sort)
+               && baseTerms.equals(dataStructureBuiltin.baseTerms);
     }
 
     @Override
     public void accept(Matcher matcher, Term toMatch) {
-        throw new UnsupportedOperationException();  //To change body of implemented methods use File | Settings | File Templates.
+        throw new UnsupportedOperationException();
     }
 
     @Override

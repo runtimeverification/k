@@ -1,7 +1,6 @@
 package org.kframework.compile.utils;
 
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Configuration;
 import org.kframework.kil.DataStructureBuiltin;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.KApp;
@@ -97,7 +96,7 @@ public class FlattenDataStructures extends CopyOnWriteTransformer {
             Term term2 = (Term) node.getContents().get(0).accept(this);
 
             DataStructureBuiltin dataStructure = DataStructureBuiltin.of(sort, term1, term2);
-            if (dataStructure.hasFrame() || dataStructure.isElementCollection()) {
+            if (dataStructure.isLHSView() || dataStructure.isElementCollection()) {
                 return dataStructure;
             } else {
                 GlobalSettings.kem.register(new KException(
@@ -162,7 +161,7 @@ public class FlattenDataStructures extends CopyOnWriteTransformer {
 
         if (sort.constructorLabel().equals(kLabelConstant.getLabel())) {
             DataStructureBuiltin dataStructure = DataStructureBuiltin.of(sort, arguments);
-            if (dataStructure.hasFrame() || dataStructure.isElementCollection()) {
+            if (dataStructure.isLHSView() || dataStructure.isElementCollection()) {
                 return dataStructure;
             } else {
                 GlobalSettings.kem.register(new KException(

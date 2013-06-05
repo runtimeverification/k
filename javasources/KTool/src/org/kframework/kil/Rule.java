@@ -6,6 +6,9 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * A rule declaration.
  * The left and right hand sides of the rewrite are described by the single term
@@ -13,7 +16,10 @@ import org.w3c.dom.Element;
  * Any explicit attributes on the rule are stored in {@link #attributes}.
  */
 public class Rule extends Sentence {
-	public Rule(Element element) {
+
+    private List<MapLookup> lookups = Collections.emptyList();
+
+    public Rule(Element element) {
 		super(element);
 	}
 
@@ -59,4 +65,12 @@ public class Rule extends Sentence {
 	public Rule shallowCopy() {
 		return new Rule(this);
 	}
+
+    public List<MapLookup> getLookups() {
+        return lookups;
+    }
+
+    public void setLookups(List<MapLookup> lookups) {
+        this.lookups = lookups;
+    }
 }

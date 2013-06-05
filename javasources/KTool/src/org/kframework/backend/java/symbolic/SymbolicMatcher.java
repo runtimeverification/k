@@ -1,9 +1,11 @@
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.kil.AnonymousVariable;
+import org.kframework.backend.java.kil.BoolToken;
 import org.kframework.backend.java.kil.BuiltinConstant;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
+import org.kframework.backend.java.kil.IntToken;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Hole;
 import org.kframework.backend.java.kil.KLabelFreezer;
@@ -15,6 +17,7 @@ import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Map;
 import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.matchers.MatcherException;
@@ -25,20 +28,11 @@ import java.util.Iterator;
 
 
 /**
- * assumtions:
- *     Collections with one element rather than the element directly
+ *
+ *
+ * @author AndreiS
  */
 public class SymbolicMatcher extends AbstractMatcher {
-
-	protected Context context;
-	
-	public SymbolicMatcher(Context context) {
-		this.context = context;
-	}
-	
-    //private final Map<Variable, ListIterator> kCollectionSubstitution = new HashMap<>();
-    private SymbolicConstraint constraint = null;
-    private final ArrayList<MapMatcher> mapMatchers = new ArrayList<MapMatcher>();
 
     private class MapMatcher {
 
@@ -57,8 +51,8 @@ public class SymbolicMatcher extends AbstractMatcher {
 
             boolean change = false;
 
-            map = (Map) map.substitute(constraint.getSubstitution(), context);
-            pattern = (Map) pattern.substitute(constraint.getSubstitution(), context);
+            map = (Map) map.substitute(constraint.substitution(), context);
+            pattern = (Map) pattern.substitute(constraint.substitution(), context);
 
             Iterator<java.util.Map.Entry<Term, Term>> iterator;
             iterator = map.getEntries().entrySet().iterator();
@@ -113,12 +107,21 @@ public class SymbolicMatcher extends AbstractMatcher {
 
     }
 
+    private final Context context;
+    //private final Map<Variable, ListIterator> kCollectionSubstitution = new HashMap<>();
+    private SymbolicConstraint constraint = null;
+    private final ArrayList<MapMatcher> mapMatchers = new ArrayList<MapMatcher>();
+
+	public SymbolicMatcher(Context context) {
+		this.context = context;
+	}
+
     @Override
     public String getName() {
         return this.getClass().toString();
     }
 
-    public SymbolicConstraint getConstraint() {
+    public SymbolicConstraint constraint() {
         return constraint;
     }
 
@@ -169,17 +172,14 @@ public class SymbolicMatcher extends AbstractMatcher {
 
     /**
      * matches two builtin constants
-     *
-     * @param builtinConstant
-     * @param pattern
      */
     @Override
     public void match(BuiltinConstant builtinConstant, Term pattern) {
         if (!(pattern instanceof BuiltinConstant)) {
             this.fail();
         }
-        BuiltinConstant patternBuiltinConstant = (BuiltinConstant) pattern;
 
+        BuiltinConstant patternBuiltinConstant = (BuiltinConstant) pattern;
         if (!builtinConstant.equals(patternBuiltinConstant)) {
             fail();
         }
@@ -187,17 +187,14 @@ public class SymbolicMatcher extends AbstractMatcher {
 
     /**
      * matches two cells
-     *
-     * @param cell
-     * @param pattern
      */
     @Override
     public void match(Cell cell, Term pattern) {
         if (!(pattern instanceof Cell)) {
             this.fail();
         }
-        Cell patternCell = (Cell) pattern;
 
+        Cell patternCell = (Cell) pattern;
         if (!cell.getLabel().equals(patternCell.getLabel())
                 || !cell.getContentKind().equals(patternCell.getContentKind())) {
             fail();
@@ -208,9 +205,6 @@ public class SymbolicMatcher extends AbstractMatcher {
 
     /**
      * matches two bags of cells
-     *
-     * @param cellCollection
-     * @param pattern
      */
     @Override
     public void match(CellCollection cellCollection, Term pattern) {
@@ -269,17 +263,14 @@ public class SymbolicMatcher extends AbstractMatcher {
 
     /**
      * matches two KLabel constants
-     *
-     * @param kLabelConstant
-     * @param pattern
      */
     @Override
     public void match(KLabelConstant kLabelConstant, Term pattern) {
         if (!(pattern instanceof KLabelConstant)) {
             this.fail();
         }
-        KLabelConstant patternKLabelConstant = (KLabelConstant) pattern;
 
+        KLabelConstant patternKLabelConstant = (KLabelConstant) pattern;
         if (!kLabelConstant.equals(patternKLabelConstant)) {
             fail();
         }
@@ -290,8 +281,8 @@ public class SymbolicMatcher extends AbstractMatcher {
         if (!(pattern instanceof KLabelFreezer)) {
             this.fail();
         }
-        KLabelFreezer patternKLabelFreezer = (KLabelFreezer) pattern;
 
+        KLabelFreezer patternKLabelFreezer = (KLabelFreezer) pattern;
         if (!kLabelFreezer.equals(patternKLabelFreezer)) {
             fail();
         }
@@ -299,9 +290,6 @@ public class SymbolicMatcher extends AbstractMatcher {
 
     /**
      * matches two injection KLabel constants
-     *
-     * @param kLabelInjection
-     * @param pattern
      */
     @Override
     public void match(KLabelInjection kLabelInjection, Term pattern) {
@@ -310,7 +298,7 @@ public class SymbolicMatcher extends AbstractMatcher {
         }
 
         KLabelInjection patternKLabelInjection = (KLabelInjection) pattern;
-        match(kLabelInjection.getTerm(), patternKLabelInjection.getTerm());
+        match(kLabelInjection.term(), patternKLabelInjection.term());
     }
 
     @Override
@@ -318,8 +306,8 @@ public class SymbolicMatcher extends AbstractMatcher {
         if (!(pattern instanceof Hole)) {
             this.fail();
         }
-        Hole patternHole = (Hole) pattern;
 
+        Hole patternHole = (Hole) pattern;
         if (!hole.equals(patternHole)) {
             fail();
         }
@@ -332,8 +320,29 @@ public class SymbolicMatcher extends AbstractMatcher {
         }
 
         KItem patternKItem = (KItem) pattern;
-        match(kItem.getKLabel(), patternKItem.getKLabel());
-        match(kItem.getKList(), patternKItem.getKList());
+        match(kItem.kLabel(), patternKItem.kLabel());
+        match(kItem.kList(), patternKItem.kList());
+    }
+
+    @Override
+    public void match(Token token, Term pattern) {
+        if (!token.equals(pattern)) {
+            fail();
+        }
+    }
+
+    @Override
+    public void match(BoolToken boolToken, Term pattern) {
+        if (!boolToken.equals(pattern)) {
+            fail();
+        }
+    }
+
+    @Override
+    public void match(IntToken intToken, Term pattern) {
+        if (!intToken.equals(pattern)) {
+            fail();
+        }
     }
 
     @Override
@@ -392,6 +401,8 @@ public class SymbolicMatcher extends AbstractMatcher {
 
     @Override
     public void match(Map map, Term pattern) {
+        assert false: "dead code";
+
         if (!(pattern instanceof Map)) {
             this.fail();
         }
@@ -400,7 +411,7 @@ public class SymbolicMatcher extends AbstractMatcher {
     }
 
     public void match(Variable variable, Term pattern) {
-        throw new UnsupportedOperationException();
+        assert false: "dead code";
     }
 
 }

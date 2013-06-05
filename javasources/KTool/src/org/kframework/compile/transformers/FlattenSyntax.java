@@ -265,7 +265,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
         @Override
         public ASTNode transform(MapBuiltin node) throws TransformerException {
             /* just for LHS for now */
-            assert  (node.hasFrame() || node.isElementCollection());
+            assert  (node.isLHSView() || node.isElementCollection());
 
             LinkedHashMap<Term, Term> elements = new LinkedHashMap<Term, Term>(node.elements().size());
             for (java.util.Map.Entry<Term, Term> entry : node.elements().entrySet()) {
@@ -274,9 +274,9 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
                 elements.put(transformedKey, transformedValue);
             }
 
-            ArrayList<Term> terms = new ArrayList<Term>(node.terms().size());
-            if (node.hasFrame()) {
-                Variable frame = node.frame();
+            ArrayList<Term> terms = new ArrayList<Term>(node.baseTerms().size());
+            if (node.isLHSView()) {
+                Variable frame = node.viewBase();
                 frame.setSort(node.sort().type());
                 terms.add(frame);
             }

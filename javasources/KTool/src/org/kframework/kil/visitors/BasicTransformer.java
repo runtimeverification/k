@@ -284,13 +284,13 @@ public class BasicTransformer implements Transformer {
 
     @Override
     public ASTNode transform(CollectionBuiltin node) throws TransformerException {
-        boolean change = false;
-        ArrayList<Term> terms = new ArrayList<Term>(node.terms().size());
-        ArrayList<Term> elements = new ArrayList<Term>(node.elements().size());
-        for (Term term : node.terms()) {
+        ArrayList<Term> terms = new ArrayList<Term>(node.baseTerms().size());
+        for (Term term : node.baseTerms()) {
             Term transformedTerm = (Term) term.accept(this);
             terms.add(transformedTerm);
         }
+
+        ArrayList<Term> elements = new ArrayList<Term>(node.elements().size());
         for (Term term : node.elements()) {
             Term transformedTerm = (Term) term.accept(this);
             elements.add(transformedTerm);
@@ -301,13 +301,13 @@ public class BasicTransformer implements Transformer {
 
     @Override
     public ASTNode transform(MapBuiltin node) throws TransformerException {
-        boolean change = false;
-        ArrayList<Term> terms = new ArrayList<Term>(node.terms().size());
-        HashMap<Term, Term> elements = new HashMap<Term, Term>(node.elements().size());
-        for (Term term : node.terms()) {
+        ArrayList<Term> terms = new ArrayList<Term>(node.baseTerms().size());
+        for (Term term : node.baseTerms()) {
             Term transformedTerm = (Term) term.accept(this);
             terms.add(transformedTerm);
         }
+
+        HashMap<Term, Term> elements = new HashMap<Term, Term>(node.elements().size());
         for (java.util.Map.Entry<Term, Term> entry : node.elements().entrySet()) {
             Term transformedKey = (Term) entry.getKey().accept(this);
             Term transformedValue = (Term) entry.getValue().accept(this);
@@ -316,6 +316,33 @@ public class BasicTransformer implements Transformer {
 
 		return new MapBuiltin(node.sort(), elements, terms);
 	}
+
+    @Override
+    public ASTNode transform(MapLookup node) throws TransformerException {
+        Variable map = (Variable) node.map().accept(this);
+        Term key = (Term) node.key().accept(this);
+        Term value = (Term) node.value().accept(this);
+        return new MapLookup(map, key, value);
+    }
+
+    @Override
+    public ASTNode transform(MapUpdate node) throws TransformerException {
+        Variable map = (Variable) node.map().accept(this);
+
+        HashSet<Term> removeSet = new HashSet<Term>(node.removeSet().size());
+        for (Term key : node.removeSet()) {
+            removeSet.add((Term) key.accept(this));
+        }
+
+        HashMap<Term, Term> updateMap = new HashMap<Term, Term>(node.updateMap().size());
+        for (java.util.Map.Entry<Term, Term> entry : node.updateMap().entrySet()) {
+            Term transformedKey = (Term) entry.getKey().accept(this);
+            Term transformedValue = (Term) entry.getValue().accept(this);
+            updateMap.put(transformedKey, transformedValue);
+        }
+
+        return new MapUpdate(map, removeSet, updateMap);
+    }
 
     @Override
 	public ASTNode transform(Constant node) throws TransformerException {

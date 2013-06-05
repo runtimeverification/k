@@ -1,32 +1,37 @@
 package org.kframework.backend.java.symbolic;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
+import org.kframework.backend.java.builtins.BuiltinFunction;
+import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.compile.utils.RuleCompilerSteps;
-import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.matchers.MatcherException;
 import org.kframework.krun.KRunExecutionException;
-import org.kframework.krun.api.*;
+import org.kframework.krun.api.KRun;
+import org.kframework.krun.api.KRunDebugger;
+import org.kframework.krun.api.KRunResult;
+import org.kframework.krun.api.KRunState;
+import org.kframework.krun.api.SearchResults;
+import org.kframework.krun.api.SearchType;
+import org.kframework.krun.api.Transition;
 import org.kframework.utils.BinaryLoader;
 
-import java.io.*;
-import java.util.Set;
-
-//import org.kframework.kil.Rule;
-//import org.kframework.kil.Term;
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 
 
 /**
- * Created with IntelliJ IDEA.
- * User: andrei
- * Date: 3/15/13
- * Time: 12:51 PM
- * To change this template use File | Settings | File Templates.
+ *
+ *
+ * @author AndreiS
  */
 public class JavaSymbolicKRun implements KRun {
 	
-	protected Context context;
+	private Context context;
 	
 	public JavaSymbolicKRun(Context context) {
 		this.context = context;
@@ -35,35 +40,37 @@ public class JavaSymbolicKRun implements KRun {
     @Override
     public KRunResult<KRunState> run(org.kframework.kil.Term cfg) throws KRunExecutionException {
         try {
-            InputStream inputStream = new BufferedInputStream(
-                    new FileInputStream(JavaSymbolicBackend.DEFINITION_FILENAME));
+            /* load the definition from a binary file */
+            InputStream inputStream = new BufferedInputStream(new FileInputStream(
+                    JavaSymbolicBackend.DEFINITION_FILENAME));
             Definition definition = (Definition) BinaryLoader.fromBinary(inputStream);
-            try {
-                inputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            inputStream.close();
+
+            /* initialize the builtin function table */
+            BuiltinFunction.init(context);
 
             SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition, context);
             symbolicRewriter.rewrite(Term.of(cfg, context));
-            //symbolicRewriter.rewriteStar(Term.of(cfg));
-            //return new KRunResult<KRunState>(new KRunState(symbolicRewriter.rewrite(cfg)));
+            //symbolicRewriter.rewriteStar(Term.of(cfg, context));
             return new KRunResult<KRunState>(new KRunState(cfg, context));
         } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         } catch (MatcherException e) {
             e.printStackTrace();
         }
-
         return null;
     }
 
 	@Override
-	public KRunResult<SearchResults> search(Integer bound, Integer depth,
-											SearchType searchType,
-											org.kframework.kil.Rule pattern,
-											org.kframework.kil.Term cfg,
-											RuleCompilerSteps compilationInfo) throws KRunExecutionException {
+	public KRunResult<SearchResults> search(
+            Integer bound,
+            Integer depth,
+            SearchType searchType,
+            org.kframework.kil.Rule pattern,
+            org.kframework.kil.Term cfg,
+            RuleCompilerSteps compilationInfo) throws KRunExecutionException {
         throw new UnsupportedOperationException();
     }
 

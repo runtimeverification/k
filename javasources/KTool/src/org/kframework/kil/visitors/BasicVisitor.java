@@ -257,7 +257,7 @@ public class BasicVisitor implements Visitor {
 
     @Override
     public void visit(DataStructureBuiltin node) {
-        for (Term term : node.terms()) {
+        for (Term term : node.baseTerms()) {
             term.accept(this);
         }
 
@@ -281,6 +281,27 @@ public class BasicVisitor implements Visitor {
         }
 
         visit((DataStructureBuiltin) node);
+    }
+
+    @Override
+    public void visit(MapLookup node) {
+        node.map().accept(this);
+        node.key().accept(this);
+        node.value().accept(this);
+        visit((Term) node);
+    }
+
+    @Override
+    public void visit(MapUpdate node) {
+        node.map().accept(this);
+        for (Term key : node.removeSet()) {
+            key.accept(this);
+        }
+        for (java.util.Map.Entry<Term, Term> entry : node.updateMap().entrySet()) {
+            entry.getKey().accept(this);
+            entry.getValue().accept(this);
+        }
+        visit((Term) node);
     }
 
     @Override

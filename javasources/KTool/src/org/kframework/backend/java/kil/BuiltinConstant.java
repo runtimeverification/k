@@ -8,20 +8,16 @@ import org.kframework.kil.ASTNode;
 
 
 /**
- * Created with IntelliJ IDEA.
- * User: andrei
- * Date: 3/18/13
- * Time: 4:57 PM
- * To change this template use File | Settings | File Templates.
+ *
+ *
+ * @author AndreiS
  */
-public class BuiltinConstant extends Term {
+public class BuiltinConstant extends KLabel {
 
     private final String value;
     private final String sort;
 
     public BuiltinConstant(String value, String sort) {
-        super(Kind.BUILTIN);
-
         this.value = value;
         this.sort = sort;
     }
@@ -40,12 +36,22 @@ public class BuiltinConstant extends Term {
         return value.equals(builtinConstant.value) && sort.equals(builtinConstant.sort);
     }
 
+    public String getSort() {
+        return sort;
+    }
+
     public String getValue() {
         return value;
     }
 
-    public String getSort() {
-        return sort;
+    @Override
+    public boolean isConstructor() {
+        return true;
+    }
+
+    @Override
+    public boolean isFunction() {
+        return false;
     }
 
     @Override
@@ -64,14 +70,6 @@ public class BuiltinConstant extends Term {
     @Override
     public String toString() {
         return value + "." + sort;
-    }
-
-    /**
-     * @return a copy of the ASTNode containing the same fields.
-     */
-    @Override
-    public ASTNode shallowCopy() {
-        throw new UnsupportedOperationException();  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override

@@ -213,7 +213,17 @@ public class BasicHookWorker implements Transformer {
         return transform((Term) node);
     }
 
-	@Override
+    @Override
+    public ASTNode transform(MapLookup node) throws TransformerException {
+        return transform((Term) node);
+    }
+
+    @Override
+    public ASTNode transform(MapUpdate node) throws TransformerException {
+        return transform((Term) node);
+    }
+
+    @Override
 	public ASTNode transform(Constant node) throws TransformerException {
 		return transform((Term) node);
 	}

@@ -701,10 +701,10 @@ public class MaudeFilter extends BackendFilter {
                 visitMapElements((MapBuiltin) dataStructure);
             }
 
-            if (dataStructure.hasFrame()) {
+            if (dataStructure.isLHSView()) {
                 result.append(", ");
                 Variable variable = new Variable(
-                        dataStructure.frame().getName(),
+                        dataStructure.viewBase().getName(),
                         dataStructure.sort().type());
                 variable.accept(this);
             }

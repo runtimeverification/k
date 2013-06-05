@@ -1,76 +1,46 @@
 package org.kframework.backend.java.symbolic;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
+import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.symbolic.SymbolicBackend;
-import org.kframework.kil.Attribute;
-import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.Transformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+
+import java.util.Map;
 
 
 /**
- * Created with IntelliJ IDEA. User: andrei Date: 3/12/13 Time: 4:03 PM To change this template use File | Settings | File Templates.
+ *
+ *
+ * @author AndreiS
  */
 public class SymbolicRewriter {
 
-    private final List<Rule> rules;
+    private final Context context;
+    private final Definition definition;
 	private final SymbolicMatcher matcher;
-    private final Transformer transformer;
-    protected Context context;
 
 	public SymbolicRewriter(Definition definition, Context context) {
-		this.context = context;
+        this.definition = definition;
+        this.context = context;
 		matcher = new SymbolicMatcher(context);
-        transformer = new KILtoBackendJavaKILTransformer(context);
-
-        rules = new ArrayList<Rule>(definition.getSingletonModule().getRules().size());
-        for (org.kframework.kil.Rule kilRule : definition.getSingletonModule().getRules()) {
-			if (!kilRule.containsAttribute(SymbolicBackend.SYMBOLIC)
-                    || kilRule.containsAttribute(Attribute.FUNCTION.getKey())
-                    || kilRule.containsAttribute(Attribute.PREDICATE.getKey())
-					|| kilRule.containsAttribute(Attribute.ANYWHERE.getKey())) {
-				continue;
-			}
-
-            Rule rule = null;
-            try {
-                //System.err.println(kilRule);
-                //System.err.flush();
-                rule = (Rule) kilRule.accept(transformer);
-            } catch (TransformerException e) {
-                System.err.println(kilRule);
-                System.err.flush();
-                e.printStackTrace();
-            }
-            if (rule != null) {
-                //System.err.println(rule);
-                rules.add(rule);
-            }
-        }
 	}
 
 	public Term rewrite(Term term) {
-        for (Rule rule : rules) {
+        for (Rule rule : definition.rules()) {
 			if (matcher.isMatching(term, rule.getLeftHandSide())) {
-                Map<Variable, Term> freshSubstitution = matcher.getConstraint().freshSubstitution(rule.variableSet());
-                Map<Variable, Term> substitution = matcher.getConstraint().getSubstitution();
-
+                Map<Variable, Term> freshSubstitution
+                        = matcher.constraint().freshSubstitution(rule.variableSet());
+                Term result = rule.getRightHandSide()
+                        .substitute(matcher.constraint().substitution(), context)
+                        .substitute(freshSubstitution, context);
 
                 System.err.println(rule.getLeftHandSide());
-                System.err.println(matcher.getConstraint());
-                System.err.println(rule.getRightHandSide().substitute(substitution, context).substitute(freshSubstitution,
-                        context));
+                System.err.println(matcher.constraint());
+                System.err.println(result);
 
-                // return first match
-                return rule.getRightHandSide().substitute(substitution, context).substitute(freshSubstitution,
-                        context);
+                /* return first match */
+                return result;
 			}
 		}
 
