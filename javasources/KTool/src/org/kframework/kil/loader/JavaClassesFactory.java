@@ -39,6 +39,7 @@ import org.kframework.kil.Require;
 import org.kframework.kil.Restrictions;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
+import org.kframework.kil.Sentence;
 import org.kframework.kil.Set;
 import org.kframework.kil.SetItem;
 import org.kframework.kil.Sort;
@@ -116,7 +117,7 @@ public class JavaClassesFactory {
 		if (Constants.RULE.equals(element.getNodeName()))
 			return new Rule(element);
 		if (Constants.SENTENCE.equals(element.getNodeName()))
-			return new Rule(element);
+			return new Sentence(element);
 		if (Constants.REWRITE.equals(element.getNodeName()))
 			return new Rewrite(element);
 		if (Constants.TERM.equals(element.getNodeName())) {
@@ -261,8 +262,7 @@ public class JavaClassesFactory {
 					TermCons head = null;
 					TermCons tc = null;
 					while (!list.isEmpty()) {
-						TermCons ntc = new TermCons(StringUtil.getSortNameFromCons(appl.getName()), appl.getName(),
-                                context);
+						TermCons ntc = new TermCons(StringUtil.getSortNameFromCons(appl.getName()), appl.getName(), context);
 						ntc.setLocation(appl.getAnnotations().getFirst().toString().substring(8));
 						ntc.setContents(new ArrayList<Term>());
 						ntc.getContents().add((Term) JavaClassesFactory.getTerm(list.getFirst()));
