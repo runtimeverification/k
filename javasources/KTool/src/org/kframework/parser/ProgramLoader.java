@@ -13,6 +13,7 @@ import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Rule;
+import org.kframework.kil.Sentence;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
@@ -118,7 +119,9 @@ public class ProgramLoader {
 				org.kframework.parser.concrete.KParser.ImportTbl(context.kompiled.getCanonicalPath() + "/def/Concrete.tbl");
 				out = DefinitionLoader.parsePattern(content, filename, context);
 				try {
-					out = new RuleCompilerSteps(def, context).compile((Rule) out, null);
+					out = new RuleCompilerSteps(def, context).compile(
+                            new Rule((Sentence) out),
+                            null);
 				} catch (CompilerStepDone e) {
 					out = (ASTNode) e.getResult();
 				}
