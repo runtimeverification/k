@@ -2,6 +2,8 @@ package org.kframework.compile.utils;
 
 import org.kframework.kil.Cell;
 
+import java.io.Serializable;
+
 /**
  * For each Cell, this class contains a reference to the cell itself, its id, a link to its parent (if there exists),
  * a @see ConfigurationStructureMap mapping the name of its direct children to ConfigurationStructures, the multiplicity
@@ -11,7 +13,7 @@ import org.kframework.kil.Cell;
  * Date: 11/9/12
  * Time: 10:35 PM
  */
-public class ConfigurationStructure {
+public class ConfigurationStructure implements Serializable {
     public Cell cell;
     public String id;
     public ConfigurationStructure parent = null;

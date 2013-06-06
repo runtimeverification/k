@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableSet;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,7 +35,7 @@ import java.util.Map;
 import java.util.Set;
 
 
-public class Context {
+public class Context implements Serializable {
 
     public enum DataStructureLabel { CONSTRUCTOR, ELEMENT, UNIT };
 

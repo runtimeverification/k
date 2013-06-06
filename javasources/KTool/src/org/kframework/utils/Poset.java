@@ -1,5 +1,6 @@
 package org.kframework.utils;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -7,7 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
-public class Poset {
+public class Poset implements Serializable {
 
 	private java.util.Set<Tuple> relations = new HashSet<Tuple>();
 	private java.util.Set<String> elements = new HashSet<String>();
@@ -134,7 +135,7 @@ public class Poset {
 		return glb;
 	}
 
-	private class Tuple {
+	private class Tuple implements Serializable {
 		private String big, small;
 
 		public Tuple(String big, String small) {
