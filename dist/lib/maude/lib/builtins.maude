@@ -44,7 +44,36 @@ mod #BOOL is  including #BOOL-INTERFACE .
   eq false and-then B = false .
   eq true or-else B = true .
   eq false or-else B = B .
-endm
+
+  op notBool_ : #Bool -> #Bool .
+  eq notBool true = false .
+  eq notBool false = true .
+
+  op _andBool_ : #Bool #Bool -> #Bool .
+  eq true andBool B:#Bool = B:#Bool .
+  eq B:#Bool andBool true = B:#Bool .
+  eq false andBool ?:#Bool = false .
+  eq ?:#Bool andBool false = false .
+
+  op _xorBool_ : #Bool #Bool -> #Bool .
+  eq false xorBool B:#Bool = B:#Bool .
+  eq B:#Bool xorBool false = B:#Bool .
+  eq B:#Bool xorBool B:#Bool = false .
+  eq B1:#Bool xorBool B2:#Bool = notBool (B1:#Bool ==Bool B2:#Bool) .
+
+  op _orBool_ : #Bool #Bool -> #Bool .
+  eq true orBool ?:#Bool = true .
+  eq ?:#Bool orBool true = true .
+  eq false orBool B:#Bool = B:#Bool .
+  eq B:#Bool orBool false = B:#Bool .
+
+  op _impliesBool_ : #Bool #Bool -> #Bool .
+  eq true impliesBool B:#Bool = B:#Bool .
+  eq false impliesBool ?:#Bool = true .
+  eq ?:#Bool impliesBool true = true .
+  eq B:#Bool impliesBool false = notBool B:#Bool .
+ endm
+
 
 mod #NAT is
   protecting #BOOL .
