@@ -453,9 +453,31 @@ public class Test implements Comparable<Test> {
 			i++;
 		}
 
+		
+		/* Before running the definition, delete the temporary files if they exists */
+		deleteFolder(new File(getCompiled()));
+		
 		return new Task(arguments, null, homeDir);
 	}
 
+	public void deleteFolder(File folder) {
+		if (!folder.exists()) {
+			return;
+		}
+		
+	    File[] files = folder.listFiles();
+	    if(files!=null) { //some JVMs return null for empty dirs
+	        for(File f: files) {
+	            if(f.isDirectory()) {
+	                deleteFolder(f);
+	            } else {
+	                f.delete();
+	            }
+	        }
+	    }
+	    folder.delete();
+	}
+	
 	public String compileStatus(Task task) {
 		return "Compiling " + language + "...\t\t"
 				+ (compiled(task) ? "success" : "failed");
