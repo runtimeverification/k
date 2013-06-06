@@ -1,7 +1,27 @@
 package org.kframework.krun;
 
-import edu.uci.ics.jung.graph.DirectedGraph;
-import jline.*;
+import java.io.BufferedReader;
+import java.io.Console;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import jline.ArgumentCompletor;
+import jline.Completor;
+import jline.ConsoleReader;
+import jline.FileNameCompletor;
+import jline.MultiCompletor;
+import jline.SimpleCompletor;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
@@ -21,6 +41,7 @@ import org.kframework.kil.Bag;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.KSequence;
 import org.kframework.kil.Rule;
+import org.kframework.kil.Sentence;
 import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
@@ -44,11 +65,7 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 
-import java.io.*;
-import java.util.*;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import edu.uci.ics.jung.graph.DirectedGraph;
 
 public class Main {
 
@@ -258,7 +275,7 @@ public class Main {
 
 			KRun krun = obtainKRun(context);
 			KRunResult<?> result = null;
-			Set<String> varNames = null;
+			//Set<String> varNames = null;
 			Rule patternRule = null;
 			RuleCompilerSteps steps;
 			steps = new RuleCompilerSteps(K.definition, context);
@@ -270,15 +287,14 @@ public class Main {
 							"Command line pattern", context);
 					CollectVariablesVisitor vars = new CollectVariablesVisitor(context);
 					pattern.accept(vars);
-					varNames = vars.getVars().keySet();
+					//varNames = vars.getVars().keySet();
 
 					try {
-						pattern = steps.compile(
-								(Rule) pattern, null);
+						pattern = steps.compile(new Rule((Sentence) pattern), null);
 					} catch (CompilerStepDone e) {
 						pattern = (ASTNode) e.getResult();
 					}
-					patternRule = (Rule) pattern;
+					patternRule = new Rule((Sentence) pattern);
 					if (GlobalSettings.verbose)
 						sw.printIntermediate("Parsing search pattern");
 				}
