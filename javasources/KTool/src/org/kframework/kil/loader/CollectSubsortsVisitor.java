@@ -1,6 +1,7 @@
 package org.kframework.kil.loader;
 
 import org.kframework.kil.Definition;
+import org.kframework.kil.KSorts;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.ProductionItem.ProductionType;
@@ -22,7 +23,7 @@ public class CollectSubsortsVisitor extends BasicVisitor {
 
 	public void visit(Production prd) {
 		if (!Sort.isBasesort(prd.getSort()))
-			context.addSubsort("K", prd.getSort());
+			context.addSubsort(KSorts.KITEM, prd.getSort());
 		if (prd.isSubsort()) {
 			Sort srt = (Sort) prd.getItems().get(0);
 			context.addSubsort(prd.getSort(), srt.toString());
@@ -36,7 +37,7 @@ public class CollectSubsortsVisitor extends BasicVisitor {
 				if (pi.getType() == ProductionType.SORT) {
 					Sort s = (Sort) pi;
 					if (!s.isBaseSort())
-						context.addSubsort("K", s.getName());
+						context.addSubsort(KSorts.KITEM, s.getName());
 				}
 			}
 		}
