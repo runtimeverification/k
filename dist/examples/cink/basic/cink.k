@@ -1,4 +1,5 @@
-require "cink-basic.k"
+require "cink-basic-syntax.k"
+require "cink-basic-semantics.k"
 
 /*!
 \setlength{\parindent}{1em}
@@ -65,7 +66,3 @@ module CINK
                   <out color="Orchid" stream="stdout"> .List </out>
                 </T>
 endmodule
-
-
-
-

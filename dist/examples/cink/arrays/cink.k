@@ -1,4 +1,3 @@
-require "../basic/cink-basic.k"
 require "cink-arrays.k"
 
 /*!
@@ -26,21 +25,39 @@ specific features, as \Cpp is.
 \Cink is developed in several iterations, each iteration adding an incremental 
 contribution.
 
-This file includes the starting iteration, where the basic constructions of 
-\Cink as arithmetic and boolean expressions (partial), imperative 
-statements, simple threads, are defined. The variables can be declared only in
-the main block of the function. 
+This file includes the extension of the starting iteration with 
+multidimensional arrays. 
 
-
+From C++ 2011 Manual:\\
+  "In a declaration T D where D has the form\\
+   \indent   D1 [ constant-expressionopt] attribute-specifier-seqopt\\
+   and the type of the identifier in the declaration T D1 is 
+   "derived-declarator-type-list T", then the type of the identifier of D
+   is an array type...\\
+   Example:
+   \begin{verbatim}
+      typedef int A[5], AA[2][3];
+      typedef const A CA; // type is "array of 5 const int"
+      typedef const AA CAA; // type is "array of 2 array of 3 const int"
+  \end{verbatim}
+  ... 
+  "An array can be constructed from one of the fundamental types (except void),
+   from a pointer, from a pointer to member, from a class, from an enumeration
+   type, or from another array.\\
+   When several "array of" specifications are adjacent, a multidimensional array
+   is created; only the first of the constant expressions that specify the 
+   bounds of the arrays may be omitted. In addition to declarations in
+   which an incomplete object type is allowed, an array bound may be omitted in
+   some cases in the declaration of a function parameter (8.3.5). An array 
+   bound may also be omitted when the declarator is followed by an
+   initializer (8.5). In this case the bound is calculated from the number of 
+   initial elements (say, N) supplied (8.5.1), and the type of the identifier
+   of D is "array of N T."
 */
 
 /*@ \section{Syntax}
-The syntax of \Cink is written using the last version at the moment of the 
-\KTool. Since the language is relatively small, we use the facilities the 
-\KTool offers for deffining the syntax.This is given using a BNF-like 
-notation enriched with annotations and priority specifications.
-In this way, the rules giving semantics are written using the \Cink 
-syntax. 
+The syntax consists of the syntax of basic constructs together with the syntax
+of arrays: 
 */
 
 module CINK-SYNTAX 
@@ -49,6 +66,11 @@ module CINK-SYNTAX
   imports CINK-ARRAYS-SYNTAX
 
 endmodule
+
+/*@ \section{Semantics}
+The semantics consists of the semantics of basic constructs together with the
+that of arrays and the definition of the whole configuration: 
+*/
 
 module CINK
   imports CINK-SYNTAX

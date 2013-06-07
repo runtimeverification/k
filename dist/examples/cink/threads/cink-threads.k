@@ -1,4 +1,5 @@
-require "../basic/cink-basic.k"
+require "../basic/cink-basic-syntax.k"
+require "../basic/cink-basic-semantics.k"
 
 module CINK-THREADS-SYNTAX
 

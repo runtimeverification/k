@@ -1,0 +1,11 @@
+/*
+  The program tests the semantics of the alias declarations in Cink.
+  The output should be "10 10".
+*/
+int main() {
+  int a = 5;
+  int &b = a;
+  b = 10;
+  cout << a << b << endl;
+  return 0;
+}

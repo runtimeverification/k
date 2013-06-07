@@ -1,5 +1,4 @@
-require "../basic/cink-basic.k"
-require "cink-l-r-values.k"
+require "cink-pointers.k"
 
 /*!
 \setlength{\parindent}{1em}
@@ -26,29 +25,26 @@ specific features, as \Cpp is.
 \Cink is developed in several iterations, each iteration adding an incremental 
 contribution.
 
-This file extends the initial iteration with the mechanisms able to handle
-\emph{lvalues} and \emph{rvalues}.
+This file extends the l-r-values iteration with the mechanisms of pointers.
 
-Here are the definitions of these notions from the \Cpp 2011 manual:\\
-"— An lvalue (so called, historically, because lvalues could appear on the 
-left-hand side of an assignment expression) designates a function or an object.
-[ Example: If E is an expression of pointer type, then
-*E is an lvalue expression referring to the object or function to which E 
-points. As another example, the result of calling a function whose return type
-is an lvalue reference is an lvalue. —end example ]\\
-— An xvalue (an “eXpiring” value) also refers to an object, usually near
-the end of its lifetime (so that its resources may be moved, for example). 
-An xvalue is the result of certain kinds of expressions involving
-rvalue references (8.3.2). [ Example: The result of calling a function whose 
-return type is an rvalue reference is an xvalue. —end example ]\\
-— A glvalue (“generalized” lvalue) is an lvalue or an xvalue.\\
-— An rvalue (so called, historically, because rvalues could appear on the 
-right-hand side of an assignment expression) is an xvalue, a temporary object 
-(12.2) or subobject thereof, or a value that is not associated with an object.\\
-— A prvalue (“pure” rvalue) is an rvalue that is not an xvalue. 
-[ Example: The result of calling a function whose return type is not a 
-reference is a prvalue. The value of a literal such as 12, 7.3e5, or true is
-also a prvalue. —end example ]
+Here is the definition of the indirect operatorfrom the \Cpp 2011 manual:\\
+"The unary * operator performs indirection: the expression to which it is 
+applied shall be a pointer to an
+object type, or a pointer to a function type and the result is an lvalue 
+referring to the object or function
+to which the expression points. If the type of the expression is 
+\emph{pointer to $T$}, the type of the result is $T$.
+"\\
+Related to the pointers is the ampersand (\&) operator:\\
+"The result of the unary & operator is a pointer to its operand. 
+The operand shall be an lvalue or a qualifiedid.
+If the operand is a qualified-id naming a non-static member m of some 
+class C with type T, the result has
+type “pointer to member of class C of type T” and is a prvalue designating 
+C::m. Otherwise, if the type of
+the expression is T, the result has type “pointer to T” and is a prvalue that 
+is the address of the designated
+object (1.7) or a pointer to the designated function."
 */
 
 /*@ \section{Syntax}
@@ -59,7 +55,7 @@ of arrays:
 module CINK-SYNTAX 
 
   imports CINK-BASIC-SYNTAX
-  imports CINK-L-R-VALUES-SYNTAX
+  imports CINK-POINTERS-SYNTAX
 
 endmodule
 
@@ -70,8 +66,7 @@ that of arrays and the definition of the whole configuration:
 
 module CINK
   imports CINK-SYNTAX
-  imports CINK-BASIC-SEMANTICS
-  imports CINK-L-R-VALUES-SEMANTICS
+  imports CINK-POINTERS-SEMANTICS
 
   configuration <T color="yellow">
                   <control color="pink">

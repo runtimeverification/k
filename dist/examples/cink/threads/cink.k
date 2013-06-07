@@ -1,4 +1,3 @@
-require "../basic/cink-basic.k"
 require "cink-threads.k"
 
 /*!

@@ -1,14 +1,6 @@
-int main() {
-  int a[10], n , i, j, aux;
-  cout << endl << "n ( <= 10 ) = ";
-  cin >> n;
-  i = 0;
-  while (i <= n - 1) {
-    cout << "a[" << i << "] = ";
-    cin >> a[i];
-    i = i + 1;
-  }
-  i = 0; 
+void sort (int a[], int n)
+{
+  int i = 0, j, aux; 
   while (i <= n - 2) {
     j = i+1;
     while (j <= n - 1) {
@@ -21,6 +13,19 @@ int main() {
     }
     i = i + 1;
   }
+}
+
+int main() {
+  int a[10], n , i;
+  cout << endl << "n ( <= 10 ) = ";
+  cin >> n;
+  i = 0;
+  while (i <= n - 1) {
+    cout << "a[" << i << "] = ";
+    cin >> a[i];
+    i = i + 1;
+  }
+  sort(a, n);
   i = 0;
   cout << "Sorted array:" << endl;
   while (i <= n - 1) {

@@ -1,5 +1,4 @@
-require "../basic/cink-basic.k"
-require "cink-l-r-values.k"
+require "cink-call-by-ref.k"
 
 /*!
 \setlength{\parindent}{1em}
@@ -59,7 +58,8 @@ of arrays:
 module CINK-SYNTAX 
 
   imports CINK-BASIC-SYNTAX
-  imports CINK-L-R-VALUES-SYNTAX
+  imports CINK-ARRAYS-SYNTAX
+  imports CINK-CALL-BY-REF-SYNTAX
 
 endmodule
 
@@ -72,6 +72,7 @@ module CINK
   imports CINK-SYNTAX
   imports CINK-BASIC-SEMANTICS
   imports CINK-L-R-VALUES-SEMANTICS
+  imports CINK-CALL-BY-REF-SEMANTICS
 
   configuration <T color="yellow">
                   <control color="pink">
