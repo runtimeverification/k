@@ -22,7 +22,8 @@ void g(int &x, int &y) {
 int main () {
   int x, y, z;
   cout << "x, y: ";
-  cin >> x >> y;
+  cin >> x ;
+  cin >> y;
   z = f(x, y);
   cout << z << x << y << "\n";
   g(y, x);

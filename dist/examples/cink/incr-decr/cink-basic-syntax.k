@@ -9,7 +9,9 @@ module CINK-BASIC-SYNTAX
   /*@ \subsection{Expressions} */
 
 
-  syntax Val ::= "cout" | "cin" | Bool | String | Int
+  syntax RVal ::= "cout" | "cin" | Bool | String | Int
+
+  syntax Val ::= RVal
 
   syntax Exp ::= Id | Val
                | "(" Exp ")"  [bracket]

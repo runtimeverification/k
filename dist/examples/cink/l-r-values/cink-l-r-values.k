@@ -1,4 +1,5 @@
-require "../basic/cink-basic.k"
+require "../basic/cink-basic-syntax.k"
+require "../basic/cink-basic-semantics.k"
 
 module CINK-L-R-VALUES-SYNTAX
  // no syntax
@@ -36,8 +37,10 @@ module CINK-L-R-VALUES-SEMANTICS
   This assume that the locations must be defined as values:
   */
 
-  syntax KResult ::= Loc 
-  syntax Exp ::= Loc
+  syntax KResult ::= LVal
+  syntax LVal ::= Loc   // for lvalues
+  syntax Exp ::= LVal 
+  syntax Val ::= LVal
 
   /*@
   An identifier seen as a lvalue is evaluated to its location: 
@@ -66,5 +69,7 @@ module CINK-L-R-VALUES-SEMANTICS
        <store>... L |-> (_ => V)  ...</store>
        <in> (ListItem(V:Int) => .)  ...</in>
        [read-stream]
+
+  
 
 endmodule

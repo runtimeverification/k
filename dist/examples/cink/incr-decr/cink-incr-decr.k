@@ -36,7 +36,7 @@ module CINK-INCR-DECR-SEMANTICS
   // heating & cooling rules for assignment
   rule E1:Exp = E2:Exp => E2 ~> E1 = HOLE [heat]
 
-  rule V:Val ~> E:Exp = HOLE => seqpoint ~> E = V  [cool]
+  rule V:RVal ~> E:Exp = HOLE => seqpoint ~> E = V  [cool]
 
   rule L:Loc ~> E:Exp = HOLE => seqpoint ~> E = rvalue(L) [cool]
 
@@ -45,9 +45,9 @@ module CINK-INCR-DECR-SEMANTICS
 
   rule E1:Exp + E2:Exp => E2 ~> E1 + HOLE [heat]
 
-  rule V:Val ~> HOLE + E:Exp => V + E  [cool]
+  rule V:RVal ~> HOLE + E:Exp => V + E  [cool]
 
-  rule V:Val ~> E:Exp + HOLE => E + V  [cool]
+  rule V:RVal ~> E:Exp + HOLE => E + V  [cool]
 
   rule L:Loc ~> HOLE + E:Exp => rvalue(L) + E [cool]
 
@@ -58,9 +58,9 @@ module CINK-INCR-DECR-SEMANTICS
 
   rule E1:Exp - E2:Exp => E2 ~> E1 - HOLE [heat]
 
-  rule V:Val ~> HOLE - E:Exp => V - E  [cool]
+  rule V:RVal ~> HOLE - E:Exp => V - E  [cool]
 
-  rule V:Val ~> E:Exp - HOLE => E - V  [cool]
+  rule V:RVal ~> E:Exp - HOLE => E - V  [cool]
 
   rule L:Loc ~> HOLE - E:Exp => rvalue(L) - E [cool]
 
@@ -71,9 +71,9 @@ module CINK-INCR-DECR-SEMANTICS
 
   rule E1:Exp * E2:Exp => E2 ~> E1 * HOLE [heat]
 
-  rule V:Val ~> HOLE * E:Exp => V * E  [cool]
+  rule V:RVal ~> HOLE * E:Exp => V * E  [cool]
 
-  rule V:Val ~> E:Exp * HOLE => E * V  [cool]
+  rule V:RVal ~> E:Exp * HOLE => E * V  [cool]
 
   rule L:Loc ~> HOLE * E:Exp => rvalue(L) * E [cool]
 
@@ -84,9 +84,9 @@ module CINK-INCR-DECR-SEMANTICS
 
   rule E1:Exp / E2:Exp => E2 ~> E1 / HOLE [heat]
 
-  rule V:Val ~> HOLE / E:Exp => V / E  [cool]
+  rule V:RVal ~> HOLE / E:Exp => V / E  [cool]
 
-  rule V:Val ~> E:Exp / HOLE => E / V  [cool]
+  rule V:RVal ~> E:Exp / HOLE => E / V  [cool]
 
   rule L:Loc ~> HOLE / E:Exp => rvalue(L) / E [cool]
 
@@ -97,9 +97,9 @@ module CINK-INCR-DECR-SEMANTICS
 
   rule E1:Exp % E2:Exp => E2 ~> E1 % HOLE [heat]
 
-  rule V:Val ~> HOLE % E:Exp => V % E  [cool]
+  rule V:RVal ~> HOLE % E:Exp => V % E  [cool]
 
-  rule V:Val ~> E:Exp % HOLE => E % V  [cool]
+  rule V:RVal ~> E:Exp % HOLE => E % V  [cool]
 
   rule L:Loc ~> HOLE % E:Exp => rvalue(L) % E [cool]
 
@@ -110,9 +110,9 @@ module CINK-INCR-DECR-SEMANTICS
 
   rule E1:Exp < E2:Exp => E2 ~> E1 < HOLE [heat]
 
-  rule V:Val ~> HOLE < E:Exp => V < E  [cool]
+  rule V:RVal ~> HOLE < E:Exp => V < E  [cool]
 
-  rule V:Val ~> E:Exp < HOLE => E < V  [cool]
+  rule V:RVal ~> E:Exp < HOLE => E < V  [cool]
 
   rule L:Loc ~> HOLE < E:Exp => rvalue(L) < E [cool]
 
@@ -123,9 +123,9 @@ module CINK-INCR-DECR-SEMANTICS
 
   rule E1:Exp <= E2:Exp => E2 ~> E1 <= HOLE [heat]
 
-  rule V:Val ~> HOLE <= E:Exp => V <= E  [cool]
+  rule V:RVal ~> HOLE <= E:Exp => V <= E  [cool]
 
-  rule V:Val ~> E:Exp <= HOLE => E <= V  [cool]
+  rule V:RVal ~> E:Exp <= HOLE => E <= V  [cool]
 
   rule L:Loc ~> HOLE <= E:Exp => rvalue(L) <= E [cool]
 
@@ -136,9 +136,9 @@ module CINK-INCR-DECR-SEMANTICS
 
   rule E1:Exp > E2:Exp => E2 ~> E1 > HOLE [heat]
 
-  rule V:Val ~> HOLE > E:Exp => V > E  [cool]
+  rule V:RVal ~> HOLE > E:Exp => V > E  [cool]
 
-  rule V:Val ~> E:Exp > HOLE => E > V  [cool]
+  rule V:RVal ~> E:Exp > HOLE => E > V  [cool]
 
   rule L:Loc ~> HOLE > E:Exp => rvalue(L) > E [cool]
 
@@ -149,9 +149,9 @@ module CINK-INCR-DECR-SEMANTICS
 
   rule E1:Exp == E2:Exp => E2 ~> E1 == HOLE [heat]
 
-  rule V:Val ~> HOLE == E:Exp => V == E  [cool]
+  rule V:RVal ~> HOLE == E:Exp => V == E  [cool]
 
-  rule V:Val ~> E:Exp == HOLE => E == V  [cool]
+  rule V:RVal ~> E:Exp == HOLE => E == V  [cool]
 
   rule L:Loc ~> HOLE == E:Exp => rvalue(L) == E [cool]
 
@@ -283,5 +283,4 @@ module CINK-INCR-DECR-SEMANTICS
        <store>... L |-> (V:Int => V -Int 1) ...</store>
 
  
-
 endmodule

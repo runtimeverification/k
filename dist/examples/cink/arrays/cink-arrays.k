@@ -3,10 +3,10 @@ require "../l-r-values/cink-l-r-values.k"
 module CINK-ARRAYS-SYNTAX
 
   syntax Exp ::= Exp "[" Exp "]" [strict, array]
+               | Exp "[]" [array] 
 
   syntax priorities  array > read write greatthan lessequal
   syntax priority  array > assign
-
 
 endmodule
 
@@ -130,7 +130,6 @@ module CINK-ARRAYS-SEMANTICS
        <store>... L |-> _:Array ...</store>
        when notBool $hasMapping(Env, X[I])
 
-
   /*@
   The evaluation of an array component as a lvalue:
   */
@@ -141,6 +140,14 @@ module CINK-ARRAYS-SEMANTICS
 
   rule <k> L:Loc [I:Int] => select(A, I) ...</k>
        <store>... L |-> A:Array ...</store>
+//lvalue ( ((locElem ( (#symLoc(3) [ 1 ]) )) [ 2 ]) )
+  rule <k> lvalue((locElem(L:Loc [I:Int]) => select(A, I))[_]) ...</k>
+       <store>... L |-> A:Array ...</store>
+//lvalue ( (#symLoc(8) [ 2 ]) )
+  rule <k> lvalue(L:Loc [I:Int] => locElem(L[I])) ...</k>
+       <env> X:Exp |-> L Env:Map </env>
+       <store>... L |-> _:Array ...</store>
+       when notBool $hasMapping(Env, X[I])
 
   /*@
   The semantics operator for a component of an array requires a new rule,
@@ -150,6 +157,32 @@ module CINK-ARRAYS-SEMANTICS
        <store>... L |-> (A:Array => store(A, I, V))  ...</store>
        <in> (ListItem(V:Int) => .)  ...</in>
        [read-stream]
+
+  /*@ 
+  Arrays a parameters:
+  */
+
+  context evaluate ((HOLE => lvalue(HOLE)), _:Exps) to _:Vals
+          following (T _:Exp[], _:Decls);
+
+  context evaluate ((HOLE => lvalue(HOLE)), _:Exps) to _:Vals
+          following (T _:Exp[_:Exp], _:Decls);
+
+  rule <k> bind((L:LVal, Vs:Vals) => Vs)
+           to((T X:Id[], Xl:Decls) => Xl); 
+       ...</k>
+       <env> Env:Map => Env[L/X] </env>
+       [structural]
+
+  rule bind(L:LVal, Vs:Vals) to (T X:Exp[_:Exp], Xl:Decls); 
+       =>
+       bind(L:LVal, Vs:Vals) to (T X, Xl:Decls); 
+       [structural]
+
+  rule bind(L:LVal, Vs:Vals) to (T X:Exp[][], Xl:Decls); 
+       =>
+       bind(L:LVal, Vs:Vals) to (T X[], Xl:Decls); 
+       [structural]
 
 endmodule
 
