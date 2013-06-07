@@ -55,11 +55,11 @@ module CINK-ARRAYS-SEMANTICS
     a |-> #symLoc(2)
   </env>
   <store>
-    #symLoc(2) |-> store(store(const-array(a, 0, 2, undefined),
+    #symLoc(2) |-> store(store(const-array(2, undefined),
                                0, #symLoc(3)),
                          1, #symLoc(4))
-        #symLoc(3) |-> const-array(a[0], 0, 2, undefined )
-        #symLoc(4) |-> const-array(a[1], 0, 2, undefined )
+        #symLoc(3) |-> const-array(2, undefined )
+        #symLoc(4) |-> const-array(2, undefined )
     </store>
   \end{verbatim}
   Since the definition of the multidimensional array is recursive, the 
@@ -75,7 +75,7 @@ module CINK-ARRAYS-SEMANTICS
            alloc(X of array of N T;, 0)
        ...</k>
        <env>... . => X |-> L </env>
-       <store>... . => L |-> const-array(X, 0, N, undefined) </store>
+       <store>... . => L |-> const-array(N, undefined) </store>
        when fresh(L:Loc)
 
   /*@
@@ -89,7 +89,7 @@ module CINK-ARRAYS-SEMANTICS
        <env>... X |-> L (. => X[I] |-> L') </env>
        <store>...
               (L |-> (A:Array => store(A, I, L')))
-              (. =>  L' |-> const-array(X[I], 0, N', undefined))
+              (. =>  L' |-> const-array(N', undefined))
        ...</store>
        when fresh(L':Loc) andBool (I <Int N)
 
