@@ -122,7 +122,7 @@ public class AddBracketsFilter2 extends BasicTransformer {
 		String unparsed = unparser.getResult();
 		try {
 			ASTNode rule = DefinitionLoader.parsePatternAmbiguous(unparsed, context);
-			Term reparsed = ((Rule)rule).getBody();
+			Term reparsed = ((Sentence)rule).getBody();
 			reparsed.accept(new AdjustLocations(context));
 			if (!reparsed.contains(ast)) {
 				return replaceWithVar(ast);
