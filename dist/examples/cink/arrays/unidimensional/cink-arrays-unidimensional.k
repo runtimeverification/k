@@ -1,4 +1,4 @@
-require "../../basic/cink-basic.k"
+require "../../basic/cink-basic-semantics.k"
 
 module CINK-ARRAYS-SYNTAX
 
