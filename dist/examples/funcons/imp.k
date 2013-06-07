@@ -24,7 +24,7 @@ endmodule
 
 module IMP
   imports IMP-SYNTAX
-  imports FUNCONS-SEMANTICS
+  imports FUNCONS
   rule X:Id => deref(boundValue(X))                                 [structural]
   rule E1 / E2  => intDivide(E1,E2)                                 [structural]
   rule E1 + E2  => intPlus(E1,E2)                                   [structural]

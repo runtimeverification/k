@@ -7,7 +7,7 @@ module FUNCONS-SYNTAX
              | not(K)                         [strict]
              | ifTrue(K,K,K)                  [strict(1)]
              | "skip"
-             | "asgn" "(" K "," K ")"         [strict]
+             | asgn(K,K)                      [strict]
              | whileTrue(K,K)
              | seq(K,K)                       [strict(1)]
              | scope(K,K)
@@ -15,7 +15,7 @@ module FUNCONS-SYNTAX
              | alloc(K)                       [strict]
 endmodule
 
-module FUNCONS-SEMANTICS
+module FUNCONS
   imports FUNCONS-SYNTAX
   configuration <T color="yellow">
                   <k color="green"> $PGM:K </k>
