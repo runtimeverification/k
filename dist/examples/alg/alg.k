@@ -52,6 +52,9 @@ endmodule
 module ALG 
   imports ALG-SYNTAX 
 
+
+  rule if(B:Exp) St:Stmt => if(B) St else {} 
+
   syntax Val ::= "noVal" 
                | "lambda" "(" Ids "@" Stmts ")" 
                  [latex(\lambda\,{#1}\mathrel{\bullet}{#2})]
@@ -62,11 +65,23 @@ module ALG
   syntax KResult ::= Val
 
   configuration 
-    <k> $PGM:Stmts </k>
+    <k> copyGlobalState; ~> $PGM:Stmts </k>
     <state> $ST:Map </state>
+    <gstate multiplicity="?"> $GST:Map </gstate>
+
+  syntax Stmt ::= "copyGlobalState;"
+
+  rule <k> copyGlobalState; => . ...</k>
+       <state>... . => GSt ...</state>
+       <gstate>  GSt:Map </gstate>
+
+
+  rule <k> .K </k>
+       (<gstate> _:Map </gstate> => .)
 
   rule <k>  '_`(_`)`{_`}(F:Name,, Xl:Ids,, Sts:Stmts)  => .  ...</k> 
        <state>... . => (F |-> lambda(Xl @ Sts)) ...</state>
+       <gstate>... . => (F |-> lambda(Xl @ Sts)) ...</gstate>
        [fun-decl, structural]
 
 
@@ -152,9 +167,11 @@ module ALG
 
   //@ Arrays
 
+  context '_._(_:Name[HOLE],, _:Exp)
   context '_._(_:Exp,, _:Name[HOLE])
   context '_._(_:Exp,, '_._(_:Name[HOLE],, _:Exp))
 
+  context _:Name[HOLE] = _:Exp;
   context '_._(_:Exp,, _:Name[HOLE]) = _:Exp;
   context '_._(_:Exp,, '_._(_:Name[HOLE],, _:Exp)) = _:Exp;
 
@@ -163,8 +180,8 @@ module ALG
   rule '_`[_`]({_ I |-> V:Val _},, I:Int) => V
 
   // update
-  rule <k> X:Name[I:Val] = V:Val ; => . ...</k>
-       <state>... X |-> {_ I |-> (_ => V) _} ...</state>
+  rule <k> X:Name[I:Int] = V:Val ; => . ...</k>
+       <state>... X |-> (Vx:Val => update(Vx, I, V)) ...</state>
 
 
   // structure fields
@@ -207,23 +224,26 @@ module ALG
 
   rule <k> (Vl:Vals ~>  updateSelf(L:Id, self) ~> '_`(_`)(lambda(Xl:Ids @ Sts:Stmts),, HOLE) ~> K:K)
            => 
-           (bind Vl to (self, Xl); ~> Sts ~> updateSelf(L, self) ~> restore(ST, K))
+           (bind Vl to (self, Xl); ~> Sts ~> updateSelf(L, self) ~> restore(St, K))
        </k>
-       <state> ST:Map => . </state>
+       <state> St:Map => mergeMap(GSt, St, GSt) </state>
+       <gstate> GSt:Map </gstate>
        [meth-call]
 
   rule <k> (return V:Val;  ~> updateSelf(L, Self:Val) ~> restore(St:Map, K:K))
            =>
           (V ~> K)
        </k>
-       <state> _ => St[Self/L] </state>   
+       <state> St':Map => mergeMap(St[Self/L], St'[Self/L], GSt) </state>
+       <gstate> GSt:Map => mergeMap(GSt, St'[Self/L], GSt) </gstate>
        [meth-return]
 
   rule <k> (updateSelf(L, Self:Val) ~> restore(St:Map, K:K))
            =>
           (noVal ~> K)
        </k>
-       <state> _ => St[Self/L] </state>   
+       <state> St':Map => mergeMap(St[Self/L], St'[Self/L], GSt) </state>
+       <gstate> GSt:Map => mergeMap(GSt, St'[Self/L], GSt) </gstate>
        [meth-return]
 
   // function call
@@ -238,9 +258,10 @@ module ALG
 
   rule <k> (Vl:Vals ~> '_`(_`)(lambda(Xl:Ids @ Sts:Stmts),, HOLE) ~> K:K)
            => 
-           (bind Vl to Xl; ~> Sts ~> restore(ST, K))
+           (bind Vl to Xl; ~> Sts ~> restore(St, K))
        </k>
-       <state> ST:Map => . </state>
+       <state> St:Map => mergeMap(GSt, St, GSt) </state>
+       <gstate> GSt:Map </gstate>
        [fun-call]
 
 
@@ -269,11 +290,15 @@ module ALG
 
   // return
   rule <k> (return V:Val; ~> restore(St:Map, K:K)) => (V ~> K) </k>
-       <state> _ => St </state>   
+       <state> St':Map => mergeMap(St, St', GSt) </state> 
+       <gstate> GSt:Map </gstate> 
+//       <gstate> GSt:Map => mergeMap(GSt, St', GSt) </gstate>   
        [return]
 
   rule <k> restore(St:Map, K:K) => (noVal ~> K) </k>
-       <state> _ => St </state>   
+       <state> St':Map => mergeMap(St, St', GSt) </state>
+       <gstate> GSt:Map </gstate>
+//       <gstate> GSt:Map => mergeMap(GSt, St', GSt) </gstate>
        [return]
 
   rule noVal ; => .
@@ -281,8 +306,12 @@ module ALG
 
   // abstract lists
 
-  syntax #Id ::= "topFront" | "topBack" | "select" | "insert" | "size" 
+  syntax #Id ::= "empty" | "topFront" | "topBack" | "select" | "insert" | "size" 
                | "popFront" | "popBack" | "pushFront" | "pushBack" | "update"
+
+  rule isVal(empty) => true [anywhere]
+  
+  rule '_`(_`)(empty,, .Exps) => [.Vals]
 
   context '_._(HOLE,, topFront(.Vals))
   rule '_._([V:Val, Vl:Vals],, topFront(.Vals)) => V
@@ -319,20 +348,25 @@ module ALG
        '_._([Vl:Vals],, size(.Vals)) + 1
 
 
-  rule <k> '_._(L:Id,, popFront(.Vals)) => noVal ...</k>
+  rule <k> '_._(L:Name,, popFront(.Vals)) => noVal ...</k>
        <state>... L |-> [(V:Val, Vl:Vals) => Vl] ...</state>
 
-  rule <k> '_._(L:Id,, popBack(.Vals)) => noVal ...</k>
+// trick - I must find a general solution
+
+  rule <k> '_._(L:Name[I:Int],, popFront(.Vals)) => noVal ...</k>
+       <state>... L |-> {_ I |-> [(V:Val, Vl:Vals) => Vl] _} ...</state>
+
+  rule <k> '_._(L:Name,, popBack(.Vals)) => noVal ...</k>
        <state>... L |-> [Vl:Vals => '_._(Vl,, popBack(.Vals))] ...</state>
 
   context '_._(_,, pushFront(HOLE))
 
-  rule <k> '_._(L:Id,, pushFront(V:Val)) => noVal ...</k>
+  rule <k> '_._(L:Name,, pushFront(V:Val)) => noVal ...</k>
        <state>... L |-> [Vl:Vals => (V, Vl)] ...</state>
 
   context '_._(_,, pushBack(HOLE))
 
-  rule <k> '_._(L:Id,, pushBack(V:Val)) => noVal ...</k>
+  rule <k> '_._(L:Name,, pushBack(V:Val)) => noVal ...</k>
        <state>... L |-> [Vl:Vals => '_._(Vl,, pushBack(V))] ...</state>
 
   context '_._(_,, update(HOLE:Exp, _:Exp))
@@ -397,9 +431,9 @@ module ALG
 
   //update
 
-  rule update({M:Map X |-> _}, X:Name, V:Val) => {M X |-> V} 
+  rule update({ M:Map }, X:Name, V:Val) => { M[V/X] } 
 
-  rule update({M:Map I |-> _}, I:Int, V:Val) => {M I |-> V} 
+  rule update({ M:Map }, I:Int, V:Val) => { M[V/I] } 
 
   rule update({M:Map X |-> V':Val}, '_._(X:Name,, E:Exp), V:Val)
        =>
@@ -418,5 +452,12 @@ module ALG
   rule isFieldName('_`[_`](_:Name,, _:Exp)) => true
   rule isFieldName('_._(_:Name,, E:Exp)) => isFieldName(E)
   rule isFieldName('_._('_`[_`](_:Name,, _:Exp),, E:Exp)) => isFieldName(E)
+
+  // the following function is used to update the global and local states
+  syntax Map ::= "mergeMap" "(" Map "," Map "," Map ")" [function]
+  rule mergeMap(L:Map, _:Map, .Map) => L
+  rule mergeMap((L:Map X:Name |-> V:Val), (R:Map X |-> V':Val), (J:Map X |-> _:Val))
+       =>
+       mergeMap((L X |-> V'), R, J)
 
 endmodule

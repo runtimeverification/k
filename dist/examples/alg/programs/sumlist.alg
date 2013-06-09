@@ -5,5 +5,5 @@ while (i < L.size()) {
   i = i + 1;
 }
 
-// krun programs/sumlist.alg -cST="s |-> 7 i |-> 8 L |-> [1, 2, 3, .Vals]"
-// krun programs/sumlist.alg -cST="L |-> [1, 2, 3, .Vals]"
+
+// krun programs/sumlist.alg -cST="L |-> [1, 2, 3, .Vals]"  -cGST=".Map"

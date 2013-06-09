@@ -15,5 +15,5 @@ l.ArrList::pushFront(1);
 l.pushFront(2);
 l.update(0,5);
 
-// krun programs/list-with-arrays.alg -cST "l |-> { length |-> 2 arr |-> { 0 |-> 7 1 |-> 8 2 |-> 9 3 |-> 0} }"
+// krun programs/list-with-arrays.alg -cST "l |-> { length |-> 2 arr |-> { 0 |-> 7 1 |-> 8 2 |-> 9 3 |-> 0} }" -cGST=".Map"
 

@@ -9,4 +9,4 @@ duplicate(L) {
 
 l = duplicate(l);
 
-// krun programs/fun-with-list.alg -cST="l |-> [1, 2, 3, .Vals]" 
+// krun programs/fun-with-list.alg -cST="l |-> [1, 2, 3, .Vals]" -cGST=".Map" -cGST=".Map"
