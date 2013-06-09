@@ -1,3 +1,25 @@
+/*!
+\setlength{\parindent}{1em}
+\title{Alg -- an experimental algorithmic language in \K}
+\author{Dorel Lucanu (\texttt{dlucanu@info.uaic.ro})}
+\organization{Alexandru Ioan Cuza University of Ia\c{s}i, Romania}
+\usepackage{alltt}
+\newcommand{\myparagraph}[1]{\textbf{#1}}
+\newcommand{\KTool}{\K tool\xspace}
+\newcommand{\Cpp}{\mbox{C\raisebox{.2ex}{\small\!+\!+}}\xspace}
+*/
+
+/*@ \section{Introduction}
+This file include the definition of an algorithmic language, intended to be used for teaching data structures and algorithms using an abstraction notation (independent of programming language).
+
+We intend to add tools supporting algorithm analysis (e.g., the computation of the worst-case time complexity).
+*/
+
+/*@ 
+\section{Syntax}
+
+*/
+
 module ALG-SYNTAX
  
   syntax Val ::=  Bool | Int | Float | String
@@ -49,11 +71,82 @@ module ALG-SYNTAX
 
 endmodule
 
+/*@
+
+\section{Semantics}
+
+*/
+
 module ALG 
   imports ALG-SYNTAX 
 
 
   rule if(B:Exp) St:Stmt => if(B) St else {} 
+
+/*@
+\subsection{Values}
+The values are the most important in the representation of the states.  
+The values together with their operations they define the computation model for the algorithm represented in the language.
+
+We distinguish two categories of values:
+\begin{list}{}{3ex}
+\item[\it Scalars (primitive values)] These are booleans, integers, rationals (floats), and strings. For the operations of these types we may have two measurement 
+\item[\it Structured values] These are cons lists, arrays, structures. 
+\end{list} 
+
+\subsubsection{Cons Lists}
+Con lists are also called "lists \'a la Lisp". They have a recursive definition:
+\begin{itemize}
+\item the empty lists is a cons list;
+\item if $V$ is a value and $L$ is a list the $V, L$ is a cons list (this is the cons 
+(from constructor) operation). 
+\end{itemize}
+a list with three elements is represented as $a, (b, (c, ()))$.
+
+
+
+In \K the cons lists are declared as:
+\begin{alltt}
+  syntax Vals ::= List\{Val,","\}
+\end{alltt}
+The empty list (as value) is \texttt{.Vals}. The operations include:
+
+\indent\begin{tabular}{ll}
+Operation & Time Complexity\\
+\tt lookup(i) & $O(i)$\\
+\tt insert(i, x) & $O(i)$\\
+\tt update(i, x) & $O(i)$\\
+\tt topFront() & $O(1)$\\
+\tt pushFront(x) & $O(1)$\\
+\tt topBack() & $O(size(L))$\\
+\tt pushBack() & $O(size(L))$\\
+\end{tabular}
+
+\noindent
+where $L$ is the list which the operation is executed over. 
+
+\subsubsection{Arrays}
+An array is represented as a finite set of maps from indexes to values.
+For instance, the array with three elements $a,b,c$ is represented as 
+$\{0\mapsto a~ 1\mapsto b~ 2\mapsto c\}$.
+The basic operations are \texttt{lookup(i)} and \texttt{update(i,x)}, 
+both having the time complexity $O(1)$.
+
+\subsubsection{Structures}
+
+The structures are represented in a similar way as the arrays, but the maps are from 
+fields names to values.
+For instance, a structure representing points in plane has two fields: \texttt{x} and \texttt{y}. 
+Hence the point $(2,7)$ is represented by the structure 
+$\{\texttt{x}\mapsto 2~\texttt{y}\mapsto 7\}$.
+
+These definitions for values can be used to represent complex data structures. 
+For example, the graph 
+$G=(\{0,1,2\}, \{(0,1), (0,2), (1,2)\})$ is represented by adjacency lists as follows:\\
+$\{\texttt{n}\mapsto 3~ \texttt{a}\mapsto \{0\mapsto [1,2,\texttt{.Vals}]~
+1\mapsto [0,2,\texttt{.Vals}]~2\mapsto [0,1,\texttt{.Vals}]\}\}$,\\
+ where $[a_0,a_1,\ldots]$ is a list (see below).
+*/
 
   syntax Val ::= "noVal" 
                | "lambda" "(" Ids "@" Stmts ")" 
@@ -303,36 +396,64 @@ module ALG
 
   rule noVal ; => .
 
+/*@
 
-  // abstract lists
+\subsection{Lists}
+This is the first example of abstract data type implemented in our language (computation model).
+The objects are sequences of values: $[v_0,\ldots,v_{n-1}]$. The oprations are the usual ones: 
+\texttt{empty()}, \texttt{topFront()}, \texttt{topBack()}, \texttt{select(i)}, \texttt{insert(i,x)},
+ \texttt{size()}, \texttt{popFront()}, \texttt{popBack()}, \texttt{pushFront(x)}, 
+\texttt{pushBack(x)}, \texttt{update(i,x)}. 
+
+In the representation of the algorithms in our language only scalars, lists, arrays, and structures 
+are used.  The cons lists have no representation at the high level.
+
+The lists can be implemented with conslists, 
+$[v_0, (v_1,(\ldots (v_{n-1}, \texttt{.Vals})\ldots))]$, 
+or with structures and arrays: 
+$\{\texttt{length}\mapsto n~ \texttt{arr}\mapsto \{0\mapsto v_0~ \ldots n{-}1\mapsto v_{n-1}\}\}$.
+The efficiency of the operations is depending on the algorithms implementing them.
+
+The (extended) language includes only an implementation with cons lists, described below.
+
+*/
 
   syntax #Id ::= "empty" | "topFront" | "topBack" | "select" | "insert" | "size" 
                | "popFront" | "popBack" | "pushFront" | "pushBack" | "update"
 
-  rule isVal(empty) => true [anywhere]
+/*@
+Empty list:\\
+$\texttt{empty()}\Rightarrow [.Vals]$\\
+Time complexity: $O(1)$
+*/
   
+  rule isVal(empty) => true [anywhere]
+
   rule '_`(_`)(empty,, .Exps) => [.Vals]
+
+/*@
+Top front:\\
+$\texttt{topFront}([v_0,\ldots])\Rightarrow v_0$\\
+Time complexity: $O(1)$
+*/
 
   context '_._(HOLE,, topFront(.Vals))
   rule '_._([V:Val, Vl:Vals],, topFront(.Vals)) => V
 
+/*@
+Top back:\\
+$\texttt{topBack}([v_0,\ldots,v_{n{-}1}])\Rightarrow \texttt{topBack}(v_0,\ldots,v_{n{-}1})$\\
+Time complexity: $O(size(L))$ (inherited from cons lists)
+*/
 
   context '_._(HOLE,, topBack(.Vals))
-  rule '_._([V:Val, .Vals],, topBack(.Vals)) => V
-  rule '_._([V:Val, Vl:Vals],, topBack(.Vals))
-       => 
-       '_._([Vl:Vals],, topBack(.Vals))
+  rule '_._([Vl:Vals],, topBack(.Vals)) => ['_._(Vl:Vals,, topBack(.Vals))]
 
-
-  context '_._(HOLE,, select(_))
-  context '_._(_,, select(HOLE))
-
-  rule '_._([V:Val, Vl:Vals],, select(0)) => V
-  rule '_._([V:Val, Vl:Vals],, select(I:Int))
-       => 
-       '_._([Vl:Vals],, select(I -Int 1))
-       when I >Int 0
-
+/*@
+Insert:\\
+$\texttt{insert}([v_0,\ldots,v_{n{-}1}],i,v)\Rightarrow [\texttt{insert}((v_0,\ldots,v_{n{-}1}),i,v)]$\\
+Time complexity: $O(i)$ (inherited from cons lists)
+*/
 
   context '_._(_,, insert(HOLE:Exp, _:Exp))
   context '_._(_,, insert(_:Exp, HOLE:Exp))
@@ -340,6 +461,12 @@ module ALG
   rule <k> '_._(L:Name,, insert(I:Int, V:Val)); => noVal ...</k>
        <state>... L |-> [Vl => '_._(Vl,, insert(I, V))] ...</state>
 
+/*@
+Size:\\
+$\texttt{size}(v_i,\ldots)\Rightarrow \texttt{size}(v_{i{+}1},\ldots)+1$\\
+$\texttt{size}(\texttt{.Vals})\Rightarrow 0$\\
+Time complexity: $O(size(L))$
+*/
 
   context '_._(HOLE,, size(.Vals))
   rule '_._([.Vals],, size(.Vals)) => 0
@@ -347,27 +474,76 @@ module ALG
        => 
        '_._([Vl:Vals],, size(.Vals)) + 1
 
+/*@
+Pop front:\\
+$\texttt{popFront}([v_0,v_1,\ldots])\Rightarrow [v_1,\ldots]$\\
+Time complexity: $O(1)$
+*/
 
   rule <k> '_._(L:Name,, popFront(.Vals)) => noVal ...</k>
        <state>... L |-> [(V:Val, Vl:Vals) => Vl] ...</state>
 
-// trick - I must find a general solution
+//@ trick - I must find a general solution!!!
 
   rule <k> '_._(L:Name[I:Int],, popFront(.Vals)) => noVal ...</k>
        <state>... L |-> {_ I |-> [(V:Val, Vl:Vals) => Vl] _} ...</state>
 
+/*@
+Pop back:\\
+$\texttt{popBack}([v_0,\ldots,v_{n{-}1}])\Rightarrow [\texttt{popBack}(v_0,\ldots,v_{n{-}1})]$\\
+Time complexity: $O(size(L))$ (inherited from cons lists)
+*/
+
   rule <k> '_._(L:Name,, popBack(.Vals)) => noVal ...</k>
        <state>... L |-> [Vl:Vals => '_._(Vl,, popBack(.Vals))] ...</state>
+
+/*@
+Push front:\\
+$\texttt{pushFront}([v_0,v_1,\ldots],v)\Rightarrow [v,v_0,\ldots]$\\
+Time complexity: $O(1)$
+*/
 
   context '_._(_,, pushFront(HOLE))
 
   rule <k> '_._(L:Name,, pushFront(V:Val)) => noVal ...</k>
        <state>... L |-> [Vl:Vals => (V, Vl)] ...</state>
 
+/*@
+Push back:\\
+$\texttt{pushBack}([v_0,\ldots,v_{n{-}1}],v)\Rightarrow [\texttt{pushBack}((v_0,\ldots,v_{n{-}1}),v)]$\\
+Time complexity: $O(size(L))$ (inherited from cons lists)
+*/
+
   context '_._(_,, pushBack(HOLE))
 
   rule <k> '_._(L:Name,, pushBack(V:Val)) => noVal ...</k>
        <state>... L |-> [Vl:Vals => '_._(Vl,, pushBack(V))] ...</state>
+
+/*@
+Select and Lookup (two names for the same operation):\\
+select is used at high level, in algorithms.\\
+Lookup is used for compatibility with the other values: arrays and structures.\\
+$\texttt{select}([v_0,\ldots,v_{n{-}1}], i)\Rightarrow \texttt{lookup}((v_0,\ldots,v_{n{-}1}),i)$\\
+$\texttt{lookup}([v_0,\ldots,v_{n{-}1}])\Rightarrow \texttt{lookup}((v_0,\ldots,v_{n{-}1}),i)$\\
+Time complexity: $O(i)$ (inherited from cons lists)
+*/
+
+  context '_._(HOLE,, select(_))
+  context '_._(_,, select(HOLE))
+
+
+  rule '_._([Vl:Vals],, select(I:Int)) => lookup([Vl], I)
+  rule lookup([V:Val, Vl:Vals], 0) => V
+  rule lookup([V:Val, Vl:Vals], I:Int)
+       => 
+       lookup([Vl:Vals], I -Int 1)
+       when I >Int 0
+
+/*@
+Update:\\
+$\texttt{update}([v_0,\ldots,v_{n{-}1}],i,v)\Rightarrow [\texttt{update}((v_0,\ldots,v_{n{-}1}),i,v)]$\\
+Time complexity: $O(i)$ (inherited from cons lists)
+*/
 
   context '_._(_,, update(HOLE:Exp, _:Exp))
   context '_._(_,, update(_:Exp, HOLE:Exp))
@@ -376,12 +552,15 @@ module ALG
        <state>... L |-> [Vl => '_._(Vl,, update(I, V))] ...</state>
 
 
+//@ \subsection{Operations on Cons Lists}
 
+/*@
+Insert:\\
+$v_0,\ldots,\texttt{insert}((v_j,\ldots), i,v)\Rightarrow v_0,\ldots,v_j\texttt{insert}((v_{j{+}1},\ldots),i{-}1,v)$ if $i>0$\\
+$v_0,\ldots,v_{i{-}1},\texttt{insert}((v_i,\ldots),0,v)\Rightarrow (v_0,\ldots,v_{i{-}1},v,v_i,\ldots)$\\
+Time complexity: $O(i)$
+*/
 
-
-  // operations on Vals
-
-  // insert
   rule '_._(Vl:Vals,, insert(0, V:Val)) => (V, Vl) [anywhere]
   rule '_._((V:Val, Vl:Vals),, insert(I:Int, V':Val))
        => 
@@ -389,21 +568,67 @@ module ALG
        when I >Int 0
       [anywhere]
 
-  //popBack
+/*@
+Top back:\\
+$\texttt{topBack}(v_i,\ldots)\Rightarrow \texttt{topBack}(v_{i{+}1},\ldots)$\\
+$\texttt{topBack}(v_{n{-}1},\texttt{.Vals})\Rightarrow v_{n{-}1}$\\
+Time complexity: $O(size(L))$
+*/
+
+  rule '_._((V:Val, .Vals),, topBack(.Vals)) => V [anywhere]
+  rule '_`,_((V:Val, (V':Val, Vl:Vals)),, topBack(.Vals))
+       => 
+       '_._((V', Vl:Vals),, topBack(.Vals))
+       [anywhere]
+
+/*@
+Pop back:\\
+$v_0,\ldots,\texttt{popBack}(v_i,\ldots)\Rightarrow v_0,\ldots,v_i,\texttt{popBack}(v_{i{+}1},\ldots)$\\
+$v_0,\ldots,v_{n{-}2}\texttt{popBack}(v_{n{-}1},\texttt{.Vals})\Rightarrow v_0,\ldots,v_{n{-}2}$\\
+Time complexity: $O(size(L))$
+*/
+
   rule '_._((V:Val, .Vals),, popBack(.Vals)) => .Vals [anywhere]
   rule '_`,_((V:Val, Vl:Vals),, popBack(.Vals))
        => 
        '_._(V,, '_._(Vl:Vals,, popBack(.Vals)))
        [anywhere]
 
-  // pushBack
+/*@
+Push back:\\
+$v_0,\ldots,\texttt{pushBack}((v_i,\ldots),v)\Rightarrow v_0,\ldots,v_i,\texttt{pushBack}((v_{i{+}1},\ldots),v)$\\
+$v_0,\ldots,v_{n{-}1}\texttt{pushBack}(\texttt{.Vals},v)\Rightarrow v_0,\ldots,v_{n{-}1}, v$\\
+Time complexity: $O(size(L))$
+*/
+
   rule '_._(.Vals,, pushBack(X:Val)) => (X, .Vals) [anywhere]
   rule '_._((V:Val, Vl:Vals),, pushBack(X:Val))
        => 
         '_`,_(V,, '_._(Vl:Vals,, pushBack(X)))
       [anywhere]
 
- // update
+/*@
+Lookup:\\
+$\texttt{lookup}((v_j,\ldots),i)\Rightarrow \texttt{lookup}((v_{j{+}1},\ldots),i{-}1)$\\
+$\texttt{lookup}((v_{i},\ldots),0)\Rightarrow v_{i}$\\
+Time complexity: $O(i)$
+*/
+
+/*
+  rule lookup((V:Val, Vl:Vals), 0) => V
+  rule lookup((V:Val, Vl:Vals), I:Int)
+       => 
+       lookup(Vl:Vals, I -Int 1)
+       when I >Int 0
+*/
+
+/*@
+Update:\\
+$v_0,\ldots,\texttt{update}((v_j,\ldots),i,v)\Rightarrow v_0,\ldots,v_i,\texttt{update}((v_{i{+}1},\ldots),i{-}1,v)$ if $i>0$\\
+$v_0,\ldots,v_i\texttt{update}((v_{i{+}1},\texttt{.Vals}), 0, v)\Rightarrow v_0,\ldots,v_i, v, v_{i{+}1},\ldots,v_{n{-}1}$\\
+Time complexity: $O(size(L))$
+*/
+
   rule '_._((V:Val, Vl:Vals),, update(0, V':Val)) => (V', Vl) [anywhere]
   rule '_._((V:Val, Vl:Vals),, update(I:Int, V':Val))
        => 
@@ -412,11 +637,12 @@ module ALG
        [anywhere]
 
 
-  // operations on structured values
+//@ \subsection{Operations on structures and arrays}
 
-  //lookup
-  syntax Val ::= "lookup" "(" Val "," Exp ")" [function]
-               | "update" "(" Val "," Exp "," Val ")" [function]
+  //@ Lookup:
+
+  syntax Val ::= "lookup" "(" Vals "," Exp ")" [function]
+               | "update" "(" Vals "," Exp "," Val ")" [function]
 
   rule lookup({_ X |-> V:Val _}, X:Name) => V
 
@@ -429,7 +655,7 @@ module ALG
   rule lookup({_ I |-> V:Val _}, I:Int) => V
 
 
-  //update
+  //@ Update:
 
   rule update({ M:Map }, X:Name, V:Val) => { M[V/X] } 
 
@@ -441,12 +667,12 @@ module ALG
 
   rule update({M:Map X |-> V:Val}, X:Name[I:Int], V':Val) => { M (X |-> (update(V, I, V'))) }
  
- rule update({M:Map X |-> V':Val}, '_._(X:Name[I:Int],, E:Exp), V:Val)
+  rule update({M:Map X |-> V':Val}, '_._(X:Name[I:Int],, E:Exp), V:Val)
        =>
        {M (X |-> (update(V', I, (update(lookup(V', I), E, V)))))}
 
 
-  // auxiliary functions
+  //@ Auxiliary functions
   syntax Bool ::= "isFieldName" "(" Exp ")" [function]
   rule isFieldName(X:Name) => true
   rule isFieldName('_`[_`](_:Name,, _:Exp)) => true
