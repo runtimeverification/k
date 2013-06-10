@@ -155,7 +155,8 @@ public class CheckVariables extends BasicVisitor {
 			if (!right.containsKey(key)) {
 				GlobalSettings.kem.register(new KException(KException.ExceptionType.HIDDENWARNING,
 						KException.KExceptionGroup.COMPILER,
-						"Unused named variable " + key.toString() + ".",
+						"Singleton variable " + key.toString() + ".\n" +
+								"	If this is not a speling mistake, please consider using anonymous variables.",
 						getName(), key.getFilename(), key.getLocation()));
 			}
 		}
