@@ -364,7 +364,7 @@ public class MetaK {
 	}
 
 	public static boolean isComputationSort(String sort) {
-		return ("K".equals(sort) || !isKSort(sort));
+		return sort.equals(KSorts.K) || sort.equals(KSorts.KITEM) || !MetaK.isKSort(sort);
 	}
 
 	public static String getListUnitLabel(String sep) {

@@ -51,8 +51,8 @@ public class AddKCell extends CopyOnWriteTransformer {
 		if (MetaK.isAnywhere(node)) {
 			return node;
 		}
-		String sort = node.getBody().getSort();
-		if (!sort.equals("K") && MetaK.isKSort(sort)) {
+
+		if (!MetaK.isComputationSort(node.getBody().getSort())) {
 			return node;
 		}
 		node = node.shallowCopy();
@@ -67,8 +67,8 @@ public class AddKCell extends CopyOnWriteTransformer {
 		
 		return node;
 	}
-	
-	@Override
+
+    @Override
 	public ASTNode transform(Configuration cfg) throws TransformerException {
 		if (!intersects(MetaK.getAllCellLabels(cfg.getBody(), context), komputationCells))
 		{
