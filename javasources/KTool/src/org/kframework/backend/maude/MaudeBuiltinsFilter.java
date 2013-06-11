@@ -20,11 +20,13 @@ import java.util.Properties;
 public class MaudeBuiltinsFilter extends BackendFilter {
 	private String left, right;
 	private boolean first;
-	private final Properties builtinsProperties;
+	private final Properties maudeHooksMap;
+	private final Properties specialMaudeHooks;
 
-	public MaudeBuiltinsFilter(Properties builtinsProperties, Context context) {
+	public MaudeBuiltinsFilter(Properties maudeHooksMap, Properties specialMaudeHooks, Context context) {
 		super(context);
-		this.builtinsProperties = builtinsProperties;
+		this.maudeHooksMap = maudeHooksMap;
+		this.specialMaudeHooks = specialMaudeHooks;
 	}
 
 	@Override
@@ -47,10 +49,13 @@ public class MaudeBuiltinsFilter extends BackendFilter {
         if (!node.containsAttribute(Attribute.HOOK_KEY)) {
 			return;
 		}
+		final String hook = node.getAttribute(Attribute.HOOK_KEY);
+		if (!maudeHooksMap.containsKey(hook)) {
+			return;
+		}
 
-        final String hook = node.getAttribute(Attribute.HOOK_KEY);
-		if (builtinsProperties.containsKey(hook)) {
-			result.append(builtinsProperties.getProperty(hook));
+		if (specialMaudeHooks.containsKey(hook)) {
+			result.append(specialMaudeHooks.getProperty(hook));
 			result.append("\n");
 			return;
 		}

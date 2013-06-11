@@ -22,14 +22,18 @@ public class KompileBackend extends BasicBackend {
 	@Override
 	public Definition firstStep(Definition javaDef) {
 		String fileSep = System.getProperty("file.separator");
-		String includePath = KPaths.getKBase(false) + fileSep + "include" + fileSep + "maude" + fileSep;
-		Properties builtinsProperties = new Properties();
+		String propPath = KPaths.getKBase(false) + fileSep + "lib" + fileSep + "maude" +
+				fileSep;
+		Properties specialMaudeHooks = new Properties();
+		Properties maudeHooks = new Properties();
 		try {
-			builtinsProperties.load(new FileInputStream(includePath + "hooks.properties"));
+			maudeHooks.load(new FileInputStream(propPath + "MaudeHooksMap.properties"));
+
+			specialMaudeHooks.load(new FileInputStream(propPath + "SpecialMaudeHooks.properties"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		MaudeBuiltinsFilter builtinsFilter = new MaudeBuiltinsFilter(builtinsProperties, context);
+		MaudeBuiltinsFilter builtinsFilter = new MaudeBuiltinsFilter(maudeHooks, specialMaudeHooks, context);
 		javaDef.accept(builtinsFilter);
 		final String mainModule = javaDef.getMainModule();
 		String builtins = "mod " + mainModule + "-BUILTINS is\n" + " including " + mainModule + "-BASE .\n" + builtinsFilter.getResult() + "endm\n";
