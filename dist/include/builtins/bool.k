@@ -18,7 +18,7 @@ module BOOL-HOOKS
 				> Bool "impliesBool" Bool [function, left, smtlib(=>), boolOperation, hook(#BOOL:_impliesBool_)]
 				> left:
 				  Bool "==Bool" Bool	  [function, left, smtlib(=), hook(#BOOL:_==Bool_)]
-				| Bool "=/=Bool" Bool	  [function, left, smtlib(distinct)]
+				| Bool "=/=Bool" Bool	  [function, left, smtlib(distinct), hook(#BOOL:_=/=Bool_)]
 
   rule notBool true => false
   rule notBool false => true
