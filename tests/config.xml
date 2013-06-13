@@ -73,31 +73,26 @@
       language="dist/tutorial/2_imp/lesson_1/imp.k"
       folder="dist/tutorial/2_imp"
       extensions="imp"
-	  exclude="lesson_4/test.imp"
       />
   <test
       language="dist/tutorial/2_imp/lesson_2/imp.k"
       folder="dist/tutorial/2_imp"
       extensions="imp"
-	  exclude="lesson_4/test.imp"
       />
   <test
       language="dist/tutorial/2_imp/lesson_3/imp.k"
       folder="dist/tutorial/2_imp"
       extensions="imp"
-	  exclude="lesson_4/test.imp"
       />
   <test
       language="dist/tutorial/2_imp/lesson_4/imp.k"
       folder="dist/tutorial/2_imp"
       extensions="imp"
-	  exclude="lesson_4/test.imp"
       />
   <test
       language="dist/tutorial/2_imp/lesson_5/imp.k"
       folder="dist/tutorial/2_imp"
       extensions="imp"
-	  exclude="lesson_4/test.imp"
       />
 
 <!-- LAMBDA++ -->
@@ -145,19 +140,19 @@
       language="dist/tutorial/4_imp++/lesson_1/imp.k"
       folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
       extensions="imp"
-      exclude="lesson_7/spawn.imp lesson_4/test.imp"
+      exclude="lesson_7/spawn.imp"
       />
   <test
       language="dist/tutorial/4_imp++/lesson_2/imp.k"
       folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
       extensions="imp"
-      exclude="lesson_7/spawn.imp lesson_4/test.imp"
+      exclude="lesson_7/spawn.imp"
       />
   <test
       language="dist/tutorial/4_imp++/lesson_3/imp.k"
       folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
       extensions="imp"
-      exclude="lesson_7/spawn.imp lesson_4/test.imp"
+      exclude="lesson_7/spawn.imp"
       results="tests/tutorial/4_imp++/lesson_3" >
       <kompile-option name="-superheat" value="division" />
       <kompile-option name="-supercool" value="lookup increment" />
@@ -171,35 +166,35 @@
       language="dist/tutorial/4_imp++/lesson_4/imp.k"
       folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
       extensions="imp"
-      exclude="lesson_7/spawn.imp lesson_4/test.imp"
+      exclude="lesson_7/spawn.imp"
       results="tests/tutorial/4_imp++/lesson_4"
       />
   <test
       language="dist/tutorial/4_imp++/lesson_5/imp.k"
       folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
       extensions="imp"
-      exclude="lesson_7/spawn.imp lesson_4/test.imp"
+      exclude="lesson_7/spawn.imp"
       results="tests/tutorial/4_imp++/lesson_5"
       />
   <test
       language="dist/tutorial/4_imp++/lesson_6/imp.k"
       folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
       extensions="imp"
-      exclude="lesson_7/spawn.imp lesson_4/test.imp"
+      exclude="lesson_7/spawn.imp"
       results="tests/tutorial/4_imp++/lesson_5"
       />
   <test
       language="dist/tutorial/4_imp++/lesson_7/imp.k"
       folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
       extensions="imp"
-      exclude="lesson_1/spawn.imp lesson_4/test.imp"
+      exclude="lesson_1/spawn.imp"
       results="tests/tutorial/4_imp++/lesson_5"
       />
   <test
       language="dist/tutorial/4_imp++/lesson_8/imp.k"
       folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
       extensions="imp"
-      exclude="lesson_1/spawn.imp lesson_4/test.imp"
+      exclude="lesson_1/spawn.imp"
       results="tests/tutorial/4_imp++/lesson_5"
       />
 
