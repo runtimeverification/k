@@ -18,8 +18,8 @@ module IMP-SYNTAX
                    Block "else" Block         [strict(1)]
                  | "while" "(" BExp ")" Block
                  > Stmt Stmt                  [left]
-  //syntax Pgm ::= "int" Ids ";" Stmt
-  //syntax Ids ::= List{Id,","}
+  syntax Pgm ::= "int" Ids ";" Stmt
+  syntax Ids ::= List{Id,","}
 endmodule
 
 module IMP
@@ -34,27 +34,27 @@ module IMP
                 </T>
 
 // AExp
-  rule <k> X:Id => I ...</k> <state>... X |-> I ...</state>
+  rule <k> X:Id => I ...</k> <state>... X |-> I:KItem ...</state>
   rule I1:Int / I2:Int => I1 /Int I2  when I2 =/=Int 0
   rule I1:Int + I2:Int => I1 +Int I2
 // BExp
   rule I1:Int <= I2:Int => I1 <=Int I2
   rule ! T:Bool => notBool T
-  rule true && B => B
-  rule false && _ => false
+  rule true && B:KItem => B
+  rule false && _:KItem => false
 // Block
   rule {} => .   [structural]
-  rule {S} => S  [structural]
+  rule {S:KItem} => S  [structural]
 // Stmt
-  rule <k> X = I:Int; => . ...</k> <state>... X |-> (_ => I) ...</state>
-  rule S1::Stmt S2::Stmt => S1 ~> S2  [structural]
-  rule if (true)  S else _ => S
-  rule if (false) _ else S => S
-  rule while (B) S => if (B) {S while (B) S} else {}  [structural]
+  rule <k> X:Id = I:Int; => . ...</k> <state>... X |-> (_:KItem => I) ...</state>
+  rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
+  rule if (true)  S:KItem else _:KItem => S
+  rule if (false) _:KItem else S:KItem => S
+  rule while (B:KItem) S:KItem => if (B) {S while (B) S} else {}  [structural]
 // Pgm
-  //rule
-  //  <k> int (X:Id,Xs:Ids => Xs);_ </k>
-  //  <state> Rho:MyMap (.MyMap => X |-> 0) </state>
-  //  when notBool (X in keys(Rho))
-  //rule int .Ids; S => S  [structural]
+  rule
+    <k> int (X:Id,Xs:Ids => Xs); _:KItem </k>
+    <state> Rho:MyMap (.MyMap => X |-> 0) </state>
+    //when notBool (X in keys(Rho))
+  rule int .Ids; S:KItem => S  [structural]
 endmodule
