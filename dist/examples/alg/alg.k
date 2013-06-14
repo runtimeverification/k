@@ -151,11 +151,25 @@ $\{\texttt{n}\mapsto 3~ \texttt{a}\mapsto \{0\mapsto [1,2,\texttt{.Vals}]~
   syntax Val ::= "noVal" 
                | "lambda" "(" Ids "@" Stmts ")" 
                  [latex(\lambda\,{#1}\mathrel{\bullet}{#2})]
-               | "[" Vals "]"
-               | "{" Map "}"
+               | "[" Vals "]" [kalbel("absList")]
+               | "{" Map "}"  [klabel("structOrArray")]
 
   syntax Vals ::= List{Val,","}
   syntax KResult ::= Val
+
+/*
+\subsection{Configuration}
+
+The configuration is very simple. It includes only two cells: one for local variables and the other one 
+for global variables, useful for function calls (inclusive recursive functions).
+The content of each of the two cells is a set of maps $\textit{variable-name}\mapsto \textit{value}$, 
+abstracting the memory.
+
+EXamples: a map $\texttt{x}\mapsto 5$ represents a memory cell storing $5$ and refered by \texttt{x}:
+\[
+
+\]
+*/
 
   configuration 
     <k> copyGlobalState; ~> $PGM:Stmts </k>
@@ -178,58 +192,58 @@ $\{\texttt{n}\mapsto 3~ \texttt{a}\mapsto \{0\mapsto [1,2,\texttt{.Vals}]~
        [fun-decl, structural]
 
 
-  rule I1:Int + I2:Int => I1 +Int I2 [plus,structural]
+  rule I1:Int + I2:Int => I1 +Int I2 [plus]
 
-  rule I1:Int - I2:Int => I1 -Int I2 [structural]
+  rule I1:Int - I2:Int => I1 -Int I2 
 
-  rule I1:Int * I2:Int => I1 *Int I2 [structural]
+  rule I1:Int * I2:Int => I1 *Int I2 
 
-  rule I1:Int / I2:Int => I1 /Int I2 when I2 =/=Int 0 [structural]
+  rule I1:Int / I2:Int => I1 /Int I2 when I2 =/=Int 0 
  
-  rule I1:Int % I2:Int => I1 %Int I2 when I2 =/=Int 0 [structural]
+  rule I1:Int % I2:Int => I1 %Int I2 when I2 =/=Int 0 
 
-  rule I1:Int < I2:Int => (I1 <Int I2) [structural]
+  rule I1:Int < I2:Int => (I1 <Int I2) 
 
-  rule I1:Int > I2:Int => (I1 >Int I2) [structural]
+  rule I1:Int > I2:Int => (I1 >Int I2) 
 
-  rule I1:Int <= I2:Int => (I1 <=Int I2) [structural]
+  rule I1:Int <= I2:Int => (I1 <=Int I2) 
 
-  rule I1:Int == I2:Int => (I1 ==Int I2) [structural]
+  rule I1:Int == I2:Int => (I1 ==Int I2) 
 
-  rule F1:Float + F2:Float => F1 +Float F2 [plus,structural]
+  rule F1:Float + F2:Float => F1 +Float F2 [plus]
 
 
-  rule F1:Float - F2:Float => F1 -Float F2 [structural]
+  rule F1:Float - F2:Float => F1 -Float F2 
 
-  rule F1:Float * F2:Float => F1 *Float F2 [structural]
+  rule F1:Float * F2:Float => F1 *Float F2 
 
-  rule F1:Float / F2:Float => F1 /Float F2 when F2 =/=Float 0.0 [structural]
+  rule F1:Float / F2:Float => F1 /Float F2 when F2 =/=Float 0.0 
  
-  rule F1:Float % F2:Float => F1 %Float F2 when F2 =/=Float 0.0 [structural]
+  rule F1:Float % F2:Float => F1 %Float F2 when F2 =/=Float 0.0 
 
-  rule F1:Float < F2:Float => (F1 <Float F2) [structural]
+  rule F1:Float < F2:Float => (F1 <Float F2) 
 
-  rule F1:Float > F2:Float => (F1 >Float F2) [structural]
+  rule F1:Float > F2:Float => (F1 >Float F2) 
 
-  rule F1:Float <= F2:Float => (F1 <=Float F2) [structural]
+  rule F1:Float <= F2:Float => (F1 <=Float F2) 
 
-  rule F1:Float == F2:Float => (F1 ==Float F2) [structural]
-
-
-  rule true && B:Exp => B [structural]
-
-  rule false && B:Exp => false [structural]
-
-  rule true || B:Exp => true [structural]
-
-  rule false || B:Exp => B [structural]
-
-  rule ! false  => true [structural]
-
-  rule ! true => false [structural]
+  rule F1:Float == F2:Float => (F1 ==Float F2) 
 
 
-  rule S1:String + S2:String => S1 +String S2 [structural]
+  rule true && B:Exp => B 
+
+  rule false && B:Exp => false 
+
+  rule true || B:Exp => true 
+
+  rule false || B:Exp => B 
+
+  rule ! false  => true 
+
+  rule ! true => false 
+
+
+  rule S1:String + S2:String => S1 +String S2 
 
 
   rule <k> X:Name => V ...</k>
