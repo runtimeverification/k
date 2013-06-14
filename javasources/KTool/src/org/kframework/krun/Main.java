@@ -667,7 +667,7 @@ public class Main {
 			KRunResult<SearchResults> state, DefinitionHelper definitionHelper) {
 
 		try {
-			new MainWindow(new RunKRunCommand(kast, lang, false, definitionHelper), definitionHelper);
+			new MainWindow(new RunKRunCommand(kast, lang,definitionHelper,true), definitionHelper);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

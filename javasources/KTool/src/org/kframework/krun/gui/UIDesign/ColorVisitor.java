@@ -15,7 +15,7 @@ public class ColorVisitor extends BasicVisitor{
 
 	@Override
 	public void visit(Cell cell) {
-		Cell declaredCell = definitionHelper.cells.get(cell.getLabel());
+		Cell declaredCell = DefinitionHelper.cells.get(cell.getLabel());
 		if (declaredCell != null) {
 			String declaredColor = declaredCell.getCellAttributes().get("color");
 			if (declaredColor != null) {
