@@ -6,12 +6,10 @@ import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 
-import com.google.common.collect.ImmutableMap;
-
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
+
+import com.google.common.collect.ImmutableMap;
 
 
 /**
@@ -21,13 +19,13 @@ import java.util.Set;
  * @author AndreiS
  */
 public class DataStructureSortCollector extends BasicVisitor {
-    /* TODO: merge with the rest of the builtins */
+    /* TODO(AndreiS): merge with the rest of the builtins */
 
     private Map<String, String> types = new HashMap<String, String>();
     private Map<String, String> constructorLabels = new HashMap<String, String>();
     private Map<String, String> elementLabels = new HashMap<String, String>();
     private Map<String, String> unitLabels = new HashMap<String, String>();
-    private Map<String, Set<String>> operatorLabels = new HashMap<String, Set<String>>();
+    private Map<String, Map<String, String>> operatorLabels = new HashMap<String, Map<String, String>>();
 
     public DataStructureSortCollector(Context context) {
         super(context);
@@ -82,7 +80,7 @@ public class DataStructureSortCollector extends BasicVisitor {
 
         String type = strings[0];
         String operator = strings[1];
-        if (!Context.DataStructureTypes.contains(type)) {
+        if (!DataStructureSort.TYPES.contains(type)) {
             /* not a builtin collection */
             return;
         }
@@ -94,26 +92,26 @@ public class DataStructureSortCollector extends BasicVisitor {
             }
         } else {
             types.put(sort, type);
-            operatorLabels.put(sort, new HashSet<String>());
+            operatorLabels.put(sort, new HashMap<String, String>());
         }
 
-        Map<Context.DataStructureLabel, String> labels
-                = Context.dataStructureLabels.get(type);
-        if (operator.equals(labels.get(Context.DataStructureLabel.CONSTRUCTOR))) {
+        Map<DataStructureSort.Label, String> labels
+                = DataStructureSort.LABELS.get(type);
+        if (operator.equals(labels.get(DataStructureSort.Label.CONSTRUCTOR))) {
             if (constructorLabels.containsKey(sort)) {
                 /* TODO: print error message */
                 return;
             }
 
             constructorLabels.put(sort, node.getKLabel());
-        } else if (operator.equals(labels.get(Context.DataStructureLabel.ELEMENT))) {
+        } else if (operator.equals(labels.get(DataStructureSort.Label.ELEMENT))) {
             if (elementLabels.containsKey(sort)) {
                 /* TODO: print error message */
                 return;
             }
 
             elementLabels.put(sort, node.getKLabel());
-        } else if (operator.equals(labels.get(Context.DataStructureLabel.UNIT))) {
+        } else if (operator.equals(labels.get(DataStructureSort.Label.UNIT))) {
             if (unitLabels.containsKey(sort)) {
                 /* TODO: print error message */
                 return;
@@ -122,7 +120,7 @@ public class DataStructureSortCollector extends BasicVisitor {
             unitLabels.put(sort, node.getKLabel());
         } else {
             /* domain specific function */
-            operatorLabels.get(sort).add(operator);
+            operatorLabels.get(sort).put(operator, node.getKLabel());
         }
 
     }

@@ -16,8 +16,8 @@ public abstract class Collection extends Term {
     protected Collection(Variable frame, Kind kind) {
         super(kind);
 
-        assert frame == null || frame.getKind() == kind
-                : "unexpected kind " + frame.getKind() + " for frame variable " + frame.name()
+        assert frame == null || frame.kind() == kind
+                : "unexpected kind " + frame.kind() + " for frame variable " + frame.name()
                 + "; expected kind " + kind;
 
         this.frame = frame;

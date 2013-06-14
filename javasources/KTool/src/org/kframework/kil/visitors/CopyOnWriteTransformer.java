@@ -530,24 +530,26 @@ public class CopyOnWriteTransformer implements Transformer {
 
         Variable map = (Variable) node.map().accept(this);
 
-        HashSet<Term> removeSet = new HashSet<Term>(node.removeSet().size());
-        for (Term key : node.removeSet()) {
-            Term transformedKey = (Term) key.accept(this);
-            removeSet.add(transformedKey);
-            change = change || transformedKey != key;
-        }
-
-        HashMap<Term, Term> updateMap = new HashMap<Term, Term>(node.updateMap().size());
-        for (java.util.Map.Entry<Term, Term> entry : node.updateMap().entrySet()) {
+        HashMap<Term, Term> removeEntries = new HashMap<Term, Term>(node.removeEntries().size());
+        for (java.util.Map.Entry<Term, Term> entry : node.updateEntries().entrySet()) {
             Term transformedKey = (Term) entry.getKey().accept(this);
             Term transformedValue = (Term) entry.getValue().accept(this);
-            updateMap.put(transformedKey, transformedValue);
+            removeEntries.put(transformedKey, transformedValue);
+            change = change || transformedKey != entry.getKey()
+                     || transformedValue != entry.getValue();
+        }
+
+        HashMap<Term, Term> updateEntries = new HashMap<Term, Term>(node.updateEntries().size());
+        for (java.util.Map.Entry<Term, Term> entry : node.updateEntries().entrySet()) {
+            Term transformedKey = (Term) entry.getKey().accept(this);
+            Term transformedValue = (Term) entry.getValue().accept(this);
+            updateEntries.put(transformedKey, transformedValue);
             change = change || transformedKey != entry.getKey()
                      || transformedValue != entry.getValue();
         }
 
         if (change) {
-            return new MapUpdate(map, removeSet, updateMap);
+            return new MapUpdate(map, removeEntries, updateEntries);
         } else {
             return node;
         }

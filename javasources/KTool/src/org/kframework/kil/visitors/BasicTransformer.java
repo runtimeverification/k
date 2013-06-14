@@ -329,19 +329,21 @@ public class BasicTransformer implements Transformer {
     public ASTNode transform(MapUpdate node) throws TransformerException {
         Variable map = (Variable) node.map().accept(this);
 
-        HashSet<Term> removeSet = new HashSet<Term>(node.removeSet().size());
-        for (Term key : node.removeSet()) {
-            removeSet.add((Term) key.accept(this));
-        }
-
-        HashMap<Term, Term> updateMap = new HashMap<Term, Term>(node.updateMap().size());
-        for (java.util.Map.Entry<Term, Term> entry : node.updateMap().entrySet()) {
+        HashMap<Term, Term> removeEntries = new HashMap<Term, Term>(node.removeEntries().size());
+        for (java.util.Map.Entry<Term, Term> entry : node.removeEntries().entrySet()) {
             Term transformedKey = (Term) entry.getKey().accept(this);
             Term transformedValue = (Term) entry.getValue().accept(this);
-            updateMap.put(transformedKey, transformedValue);
+            removeEntries.put(transformedKey, transformedValue);
         }
 
-        return new MapUpdate(map, removeSet, updateMap);
+        HashMap<Term, Term> updateEntries = new HashMap<Term, Term>(node.updateEntries().size());
+        for (java.util.Map.Entry<Term, Term> entry : node.updateEntries().entrySet()) {
+            Term transformedKey = (Term) entry.getKey().accept(this);
+            Term transformedValue = (Term) entry.getValue().accept(this);
+            updateEntries.put(transformedKey, transformedValue);
+        }
+
+        return new MapUpdate(map, removeEntries, updateEntries);
     }
 
     @Override

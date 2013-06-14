@@ -1,5 +1,7 @@
-package org.kframework.backend.java.kil;
+package org.kframework.backend.java.builtins;
 
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
@@ -10,13 +12,15 @@ import java.util.Map;
 
 
 /**
+ * A uninterpreted token.
+ *
  * @author: AndreiS
  */
 public class UninterpretedToken extends Token {
 
     /* Token cache */
-    private static final Map<UninterpretedToken, UninterpretedToken> cache = new
-            HashMap<UninterpretedToken, UninterpretedToken>();
+    private static final Map<String, Map <String, UninterpretedToken>> cache
+            = new HashMap<String, Map <String, UninterpretedToken>>();
 
     private final String sort;
     private final String value;
@@ -27,15 +31,23 @@ public class UninterpretedToken extends Token {
     }
 
     /**
-     * Returns a {@code UninterpretedToken} representation of a token of given sort and value.
+     * Returns a {@code UninterpretedToken} representation of a token of given sort and value. The
+     * UninterpretedToken instances are cached to ensure uniqueness (subsequent invocations of
+     * this method with the same sort and value return the same {@code UninterpretedToken} object).
      */
     public static UninterpretedToken of(String sort, String value) {
-        UninterpretedToken genericToken = new UninterpretedToken(sort, value);
-        UninterpretedToken cachedGenericToken = cache.get(genericToken);
-        if (cachedGenericToken == null) {
-            cachedGenericToken = genericToken;
-            cache.put(genericToken, cachedGenericToken);
+        Map<String, UninterpretedToken> sortCache = cache.get(sort);
+        if (sortCache == null) {
+            sortCache = new HashMap<String, UninterpretedToken>();
+            cache.put(sort, sortCache);
         }
+
+        UninterpretedToken cachedGenericToken = sortCache.get(value);
+        if (cachedGenericToken == null) {
+            cachedGenericToken = new UninterpretedToken(sort, value);
+            sortCache.put(value, cachedGenericToken);
+        }
+
         return cachedGenericToken;
     }
 

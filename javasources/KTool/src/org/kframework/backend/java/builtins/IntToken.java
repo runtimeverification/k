@@ -1,5 +1,7 @@
-package org.kframework.backend.java.kil;
+package org.kframework.backend.java.builtins;
 
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
@@ -11,11 +13,13 @@ import java.util.Map;
 
 
 /**
+ * An integer token. Integer tokens have arbitrary precision.
+ *
  * @author: AndreiS
  */
 public class IntToken extends Token {
 
-    public static final String SORT_NAME = "#Int";
+    public static final String SORT_NAME = "Int";
 
     /* IntToken cache */
     private static final Map<BigInteger, IntToken> cache = new HashMap<BigInteger, IntToken>();
@@ -29,8 +33,8 @@ public class IntToken extends Token {
 
     /**
      * Returns a {@code IntToken} representation of the given {@link BigInteger} value. The
-     * IntToken instances are cached to ensure uniqueness (subsequent invocations of this method
-     * with the same {@code BigInteger} value return the same IntToken object).
+     * {@code IntToken} instances are cached to ensure uniqueness (subsequent invocations of this
+     * method with the same {@code BigInteger} value return the same {@code IntToken} object).
      */
     public static IntToken of(BigInteger value) {
         assert value != null;

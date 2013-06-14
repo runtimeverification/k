@@ -7,6 +7,8 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,10 +26,41 @@ public class MapUpdate extends Term {
     private final Map<Term, Term> updateMap;
 
     public MapUpdate(Term map, Set<Term> removeSet, Map<Term, Term> updateMap) {
-        super(Kind.MAP);
+        super(Kind.KITEM);
         this.map = map;
         this.removeSet = removeSet;
         this.updateMap = updateMap;
+    }
+
+    public Term evaluateUpdate() {
+        if (removeSet.isEmpty() && updateMap().isEmpty()) {
+            return map;
+        }
+
+        if (!(map instanceof BuiltinMap)) {
+            return this;
+        }
+
+        BuiltinMap builtinMap = ((BuiltinMap) map);
+
+        Map<Term, Term> entries = new HashMap<Term, Term>(builtinMap.getEntries());
+        for (Iterator<Term> iterator = removeSet.iterator(); iterator.hasNext();) {
+            if (entries.remove(iterator.next()) != null) {
+                iterator.remove();
+            }
+        }
+
+        if (!removeSet.isEmpty()) {
+            return this;
+        }
+
+        entries.putAll(updateMap);
+
+        if (builtinMap.hasFrame()) {
+            return new BuiltinMap(entries, builtinMap.getFrame());
+        } else {
+            return new BuiltinMap(entries);
+        }
     }
 
     public Term map() {
@@ -69,6 +102,18 @@ public class MapUpdate extends Term {
         MapUpdate mapUpdate = (MapUpdate) object;
         return map.equals(mapUpdate.map) && removeSet.equals(mapUpdate.removeSet)
                && updateMap.equals(mapUpdate.updateMap);
+    }
+
+    @Override
+    public String toString() {
+        String s = map.toString();
+        for (Term key : removeSet) {
+            s += "[" + key + " <- undef]";
+        }
+        for (Map.Entry<Term, Term> entry : updateMap.entrySet()) {
+            s += "[" + entry.getKey() + " <- " + entry.getValue() + "]";
+        }
+        return s;
     }
 
     @Override

@@ -26,12 +26,17 @@ public class KCollectionFragment extends KCollection {
     public KCollectionFragment(KCollection kCollection, int index) {
         super(kCollection.getItems(),
               kCollection.hasFrame() ? kCollection.getFrame() : null,
-              kCollection.getKind());
+              kCollection.kind());
 
         assert 0 <= index && index <= kCollection.size();
 
         this.kCollection = kCollection;
         this.index = index;
+    }
+
+    @Override
+    public KCollection fragment(int length) {
+        throw new UnsupportedOperationException();  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override

@@ -691,12 +691,12 @@ public class MaudeFilter extends BackendFilter {
         result.append("_`(_`)(" + dataStructure.sort().type() + "2KLabel_(");
 
         if (!dataStructure.isEmpty()) {
-            result.append(Context.dataStructureLabels.get(dataStructure.sort().type()).get(
-                    Context.DataStructureLabel.CONSTRUCTOR));
+            result.append(DataStructureSort.LABELS.get(dataStructure.sort().type()).get(
+                    DataStructureSort.Label.CONSTRUCTOR));
 			result.append("(");
 
-            result.append(Context.dataStructureLabels.get(dataStructure.sort().type()).get(
-                    Context.DataStructureLabel.UNIT));
+            result.append(DataStructureSort.LABELS.get(dataStructure.sort().type()).get(
+                    DataStructureSort.Label.UNIT));
 
             if (dataStructure instanceof CollectionBuiltin) {
                 visitCollectionElements((CollectionBuiltin) dataStructure);
@@ -716,8 +716,8 @@ public class MaudeFilter extends BackendFilter {
 
 			result.append(")");
         } else {
-            result.append(Context.dataStructureLabels.get(dataStructure.sort().type()).get(
-                    Context.DataStructureLabel.UNIT));
+            result.append(DataStructureSort.LABELS.get(dataStructure.sort().type()).get(
+                    DataStructureSort.Label.UNIT));
         }
 
         result.append("), .KList)");
@@ -726,8 +726,8 @@ public class MaudeFilter extends BackendFilter {
     private void visitCollectionElements(CollectionBuiltin collection) {
         for (Term term : collection.elements()) {
             result.append(", ");
-            result.append(Context.dataStructureLabels.get(collection.sort().type()).get(
-                    Context.DataStructureLabel.ELEMENT));
+            result.append(DataStructureSort.LABELS.get(collection.sort().type()).get(
+                    DataStructureSort.Label.ELEMENT));
             result.append("(");
             term.accept(this);
             result.append(")");
@@ -737,8 +737,8 @@ public class MaudeFilter extends BackendFilter {
     private void visitMapElements(MapBuiltin map) {
         for (Map.Entry<Term, Term> entry : map.elements().entrySet()) {
             result.append(", ");
-            result.append(Context.dataStructureLabels.get(map.sort().type()).get(
-                    Context.DataStructureLabel.ELEMENT));
+            result.append(DataStructureSort.LABELS.get(map.sort().type()).get(
+                    DataStructureSort.Label.ELEMENT));
             result.append("(");
             entry.getKey().accept(this);
             result.append(", ");

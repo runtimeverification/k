@@ -1,13 +1,13 @@
 package org.kframework.backend.java.symbolic;
 
-import com.google.common.collect.ImmutableList;
-
-import org.kframework.backend.java.kil.BoolToken;
-import org.kframework.backend.java.kil.BuiltinConstant;
+import com.google.common.collect.ImmutableSet;
+import org.kframework.backend.java.indexing.IndexingPair;
+import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.Definition;
-import org.kframework.backend.java.kil.IntToken;
+import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KLabelFreezer;
@@ -17,12 +17,11 @@ import org.kframework.backend.java.kil.KLabel;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Kind;
-import org.kframework.backend.java.kil.Map;
 import org.kframework.backend.java.kil.MapLookup;
 import org.kframework.backend.java.kil.MapUpdate;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.UninterpretedToken;
+import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.symbolic.SymbolicBackend;
 import org.kframework.kil.ASTNode;
@@ -31,15 +30,21 @@ import org.kframework.kil.BoolBuiltin;
 import org.kframework.kil.GenericToken;
 import org.kframework.kil.IntBuiltin;
 import org.kframework.kil.KSorts;
+import org.kframework.kil.Module;
+import org.kframework.kil.Production;
 import org.kframework.kil.Token;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import com.google.common.collect.ImmutableList;
 
 
 /**
@@ -48,6 +53,8 @@ import java.util.List;
  * @author AndreiS
  */
 public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
+
+    private IndexingPair indexingPair = null;
 
     public KILtoBackendJavaKILTransformer(Context context) {
         super("Transform KIL into java backend KIL", context);
@@ -99,12 +106,14 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(org.kframework.kil.Token node) throws TransformerException {
-        return new BuiltinConstant(node.value(), node.tokenSort());
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public ASTNode transform(org.kframework.kil.KSequence node) throws TransformerException {
-        List<org.kframework.kil.Term> list = node.getContents();
+        List<org.kframework.kil.Term> list = new ArrayList<org.kframework.kil.Term>();
+        KILtoBackendJavaKILTransformer.flattenKSequence(list, node.getContents());
+
         Variable variable = null;
         if (!list.isEmpty()
                 && list.get(list.size() - 1) instanceof org.kframework.kil.Variable
@@ -122,7 +131,9 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(org.kframework.kil.KList node) throws TransformerException {
-        List<org.kframework.kil.Term> list = node.getContents();
+        List<org.kframework.kil.Term> list = new ArrayList<org.kframework.kil.Term>();
+        KILtoBackendJavaKILTransformer.flattenKList(list, node.getContents());
+
         Variable variable = null;
         if (!list.isEmpty()
                 && list.get(list.size() - 1) instanceof org.kframework.kil.Variable
@@ -140,12 +151,18 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(org.kframework.kil.Cell node) throws TransformerException {
-        if (node.getContents() instanceof org.kframework.kil.Bag) {
-            org.kframework.kil.Bag bag = (org.kframework.kil.Bag) node.getContents();
+        if (node.getContents() instanceof org.kframework.kil.Bag
+                || node.getContents() instanceof org.kframework.kil.Cell) {
+            List<org.kframework.kil.Term> contents;
+            if (node.getContents() instanceof org.kframework.kil.Bag) {
+                contents = ((org.kframework.kil.Bag) node.getContents()).getContents();
+            } else {
+                contents = Collections.singletonList(node.getContents());
+            }
 
             java.util.Map<String, Cell> cells = new HashMap<String, Cell>();
             Variable variable = null;
-            for (org.kframework.kil.Term term : bag.getContents()) {
+            for (org.kframework.kil.Term term : contents) {
                 if (term instanceof org.kframework.kil.Cell) {
                     Cell cell = (Cell) term.accept(this);
                     cells.put(cell.getLabel(), cell);
@@ -160,14 +177,22 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             return new Cell<CellCollection>(node.getLabel(), new CellCollection(cells, variable));
         } else {
             Term content = (Term) node.getContents().accept(this);
+
+            /* set {@link indexingPair} field */
+            if (node.getLabel().equals("k")) {
+                indexingPair = IndexingPair.getIndexingPair(content);
+            }
+
             if (content instanceof KItem) {
                 return new Cell<KItem>(node.getLabel(), (KItem) content);
             } else if (content instanceof KSequence) {
                 return new Cell<KSequence>(node.getLabel(), (KSequence) content);
             } else if (content instanceof KList) {
                 return new Cell<KList>(node.getLabel(), (KList) content);
-            } else if (content instanceof Map) {
-                return new Cell<Map>(node.getLabel(), (Map) content);
+            } else if (content instanceof BuiltinMap) {
+                return new Cell<BuiltinMap>(node.getLabel(), (BuiltinMap) content);
+            } else if (content instanceof MapUpdate) {
+                return new Cell<MapUpdate>(node.getLabel(), (MapUpdate) content);
             } else if (content instanceof Variable) {
                 return new Cell<Term>(node.getLabel(), content);
             } else {
@@ -197,10 +222,10 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 return new MapUpdate(mapUpdate.map(), mapUpdate.removeSet(), entries);
             } else {
                 /* base instanceof Variable */
-                return new Map(entries, (Variable) base);
+                return new BuiltinMap(entries, (Variable) base);
             }
         } else {
-            return new Map(entries);
+            return new BuiltinMap(entries);
         }
     }
 
@@ -208,14 +233,14 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     public ASTNode transform(org.kframework.kil.MapUpdate node) throws TransformerException {
         Variable map = (Variable) node.map().accept(this);
 
-        HashSet<Term> removeSet = new HashSet<Term>(node.removeSet().size());
-        for (org.kframework.kil.Term term : node.removeSet()) {
+        HashSet<Term> removeSet = new HashSet<Term>(node.removeEntries().size());
+        for (org.kframework.kil.Term term : node.removeEntries().keySet()) {
             removeSet.add((Term) term.accept(this));
         }
 
-        HashMap<Term, Term> updateMap = new HashMap<Term, Term>(node.updateMap().size());
+        HashMap<Term, Term> updateMap = new HashMap<Term, Term>(node.updateEntries().size());
         for (java.util.Map.Entry<org.kframework.kil.Term, org.kframework.kil.Term> entry :
-                node.updateMap().entrySet()) {
+                node.updateEntries().entrySet()) {
             Term key = (Term) entry.getKey().accept(this);
             Term value = (Term) entry.getValue().accept(this);
             updateMap.put(key, value);
@@ -230,7 +255,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             return new Variable(node.getName(), Kind.CELL_COLLECTION.toString());
         } else if (context.dataStructureSortOf(node.getSort()) != null
                 && context.dataStructureSortOf(node.getSort()).type().equals(KSorts.MAP)) {
-            return new Variable(node.getName(), Kind.MAP.toString());
+            return new Variable(node.getName(), KSorts.MAP);
         } else {
             return new Variable(node.getName(), node.getSort());
         }
@@ -241,45 +266,46 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         assert node.getBody() instanceof org.kframework.kil.Rewrite;
 
         org.kframework.kil.Rewrite rewrite = (org.kframework.kil.Rewrite) node.getBody();
+
+        indexingPair = null;
         Term leftHandSide = (Term) rewrite.getLeft().accept(this);
-        //System.err.println(leftHandSide);
-        //System.err.flush();
+        IndexingPair indexingPair = this.indexingPair;
+
         Term rightHandSide = (Term) rewrite.getRight().accept(this);
-        //System.err.println(rightHandSide);
-        //System.err.flush();
-        Term condition = null;
+
+        SymbolicConstraint condition = new SymbolicConstraint(context);
+        Term term = BoolToken.TRUE;
         if (node.getCondition() != null) {
-            System.err.println("[error]: " + node.getCondition());
-            System.err.flush();
-            // TODO(AndreiS): handle conditions
-            condition = (Term) node.getCondition().accept(this);
+            term = (Term) node.getCondition().accept(this);
+            /* TODO(AndreiS): flatten boolean terms and use an actual constraint */
+            condition.add(term, BoolToken.TRUE);
         }
 
-        List<Term> values = new ArrayList<Term>();
-        List<MapLookup> lookups = new ArrayList<MapLookup>();
+        SymbolicConstraint lookups = new SymbolicConstraint(context);
         for (org.kframework.kil.MapLookup lookup : node.getLookups()) {
             Variable map = (Variable) lookup.map().accept(this);
             Term key = (Term) lookup.key().accept(this);
-            lookups.add(new MapLookup(map, key));
             Term value = (Term) lookup.value().accept(this);
-            values.add(value);
+            lookups.add(new MapLookup(map, key), value);
         }
 
-        assert leftHandSide.getKind().equals(rightHandSide.getKind());
+        assert leftHandSide.kind().equals(rightHandSide.kind());
 
         return new Rule(
                 leftHandSide,
                 rightHandSide,
-                condition,
+                term,
                 lookups,
-                values,
+                indexingPair,
                 node.getAttributes());
     }
 
     @Override
     public ASTNode transform(org.kframework.kil.Definition definition) {
-        List<Rule> rules = new ArrayList<Rule>(definition.getSingletonModule().getRules().size());
-        for (org.kframework.kil.Rule rule : definition.getSingletonModule().getRules()) {
+        Module singletonModule = definition.getSingletonModule();
+
+        ImmutableSet.Builder<Rule> rulesBuilder = ImmutableSet.builder();
+        for (org.kframework.kil.Rule rule : singletonModule.getRules()) {
             if (!rule.containsAttribute(SymbolicBackend.SYMBOLIC)
                 || rule.containsAttribute(Attribute.FUNCTION.getKey())
                 || rule.containsAttribute(Attribute.PREDICATE.getKey())
@@ -290,14 +316,57 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             try {
                 //System.err.println(rule);
                 //System.err.flush();
-                rules.add((Rule) rule.accept(this));
+                rulesBuilder.add((Rule) rule.accept(this));
             } catch (TransformerException e) {
                 System.err.println(rule);
                 System.err.flush();
                 e.printStackTrace();
             }
         }
-        return new Definition(rules);
+        Set<Rule> rules = rulesBuilder.build();
+
+        ImmutableSet.Builder<KLabelConstant> kLabelsBuilder = ImmutableSet.builder();
+        for (String kLabelName : singletonModule.getModuleKLabels()) {
+            kLabelsBuilder.add(KLabelConstant.of(kLabelName, context));
+        }
+        Set<KLabelConstant> kLabels = kLabelsBuilder.build();
+
+        ImmutableSet.Builder<KLabelConstant> frozenKLabelsBuilder = ImmutableSet.builder();
+        //collect the productions which have the attributes strict and seqstrict
+        Set<Production> productions = singletonModule.getSyntaxByTag("strict", context);
+        productions.addAll(singletonModule.getSyntaxByTag("seqstrict", context));
+        for (Production production : productions) {
+            frozenKLabelsBuilder.add(KLabelConstant.of(production.getKLabel(), context));
+        }
+        Set<KLabelConstant> frozenKLabels = frozenKLabelsBuilder.build();
+
+        return new Definition(rules, kLabels, frozenKLabels);
+    }
+
+    private static void flattenKSequence(
+            List<org.kframework.kil.Term> flatList,
+            List<org.kframework.kil.Term> nestedList) {
+        for (org.kframework.kil.Term term : nestedList) {
+            if (term instanceof org.kframework.kil.KSequence) {
+                org.kframework.kil.KSequence kSequence = (org.kframework.kil.KSequence) term;
+                KILtoBackendJavaKILTransformer.flattenKSequence(flatList, kSequence.getContents());
+            } else {
+                flatList.add(term);
+            }
+        }
+    }
+
+    private static void flattenKList(
+            List<org.kframework.kil.Term> flatList,
+            List<org.kframework.kil.Term> nestedList) {
+        for (org.kframework.kil.Term term : nestedList) {
+            if (term instanceof org.kframework.kil.KList) {
+                org.kframework.kil.KList kList = (org.kframework.kil.KList) term;
+                KILtoBackendJavaKILTransformer.flattenKList(flatList, kList.getContents());
+            } else {
+                flatList.add(term);
+            }
+        }
     }
 
 }

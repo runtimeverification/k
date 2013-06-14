@@ -1,14 +1,13 @@
 package org.kframework.backend.java.kil;
 
-import org.kframework.backend.java.symbolic.Transformable;
-import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.indexing.IndexingPair;
+import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.VariableVisitor;
 import org.kframework.backend.java.symbolic.Visitable;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attributes;
 
-import java.util.List;
 import java.util.Set;
 
 
@@ -17,26 +16,27 @@ import java.util.Set;
  *
  * @author AndreiS
  */
-public class Rule extends ASTNode implements Transformable, Visitable {
+public class Rule extends ASTNode implements Visitable {
 
     private final Term leftHandSide;
     private final Term rightHandSide;
+    //private final SymbolicConstraint condition;
     private final Term condition;
-    private final List<MapLookup> lookups;
-    private final List<Term> values;
+    private final SymbolicConstraint lookups;
+    private final IndexingPair indexingPair;
 
     public Rule(
             Term leftHandSide,
             Term rightHandSide,
             Term condition,
-            List<MapLookup> lookups,
-            List<Term> values,
+            SymbolicConstraint lookups,
+            IndexingPair indexingPair,
             Attributes attributes) {
         this.leftHandSide = leftHandSide;
         this.rightHandSide = rightHandSide;
         this.condition = condition;
         this.lookups = lookups;
-        this.values = values;
+        this.indexingPair = indexingPair;
         super.setAttributes(attributes);
     }
 
@@ -54,30 +54,24 @@ public class Rule extends ASTNode implements Transformable, Visitable {
     }
     */
 
-    public Term getCondition() {
-        assert hasCondition();
-
+    public Term condition() {
         return condition;
     }
 
-    public Term getLeftHandSide() {
+    public IndexingPair indexingPair() {
+        return indexingPair;
+    }
+
+    public Term leftHandSide() {
         return leftHandSide;
     }
 
-    public List<MapLookup> getLookups() {
+    public SymbolicConstraint lookups() {
         return lookups;
     }
 
-    public Term getRightHandSide() {
+    public Term rightHandSide() {
         return rightHandSide;
-    }
-
-    public List<Term> getValues() {
-        return values;
-    }
-
-    public boolean hasCondition() {
-        return condition != null;
     }
 
     @Override
@@ -85,6 +79,14 @@ public class Rule extends ASTNode implements Transformable, Visitable {
         String string = "rule " + leftHandSide + " => " + rightHandSide;
         if (condition != null) {
             string += " when " + condition;
+        }
+        if (!lookups.isTrue()) {
+            if (condition != null) {
+                string += " when ";
+            } else {
+                string += " " + SymbolicConstraint.SEPARATOR + " ";
+            }
+            string += lookups;
         }
         return string;
     }
@@ -109,11 +111,6 @@ public class Rule extends ASTNode implements Transformable, Visitable {
     @Override
     public void accept(org.kframework.kil.visitors.Visitor visitor) {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) {
-        return transformer.transform(this);
     }
 
     @Override

@@ -1,28 +1,27 @@
 package org.kframework.backend.java.symbolic;
 
-import com.google.common.collect.ImmutableList;
-
-import org.kframework.backend.java.kil.BoolToken;
-import org.kframework.backend.java.kil.BuiltinConstant;
+import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.Collection;
-import org.kframework.backend.java.kil.IntToken;
+import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Hole;
+import org.kframework.backend.java.kil.KLabelFreezer;
 import org.kframework.backend.java.kil.KLabelInjection;
 import org.kframework.backend.java.kil.KCollection;
 import org.kframework.backend.java.kil.KLabel;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
-import org.kframework.backend.java.kil.Map;
 import org.kframework.backend.java.kil.MapLookup;
 import org.kframework.backend.java.kil.MapUpdate;
-import org.kframework.backend.java.kil.Rule;
+import org.kframework.backend.java.kil.MetaVariable;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Token;
-import org.kframework.backend.java.kil.UninterpretedToken;
+import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
@@ -31,14 +30,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+
+import com.google.common.collect.ImmutableList;
 
 
 /**
- * Created with IntelliJ IDEA.
- * User: andrei
- * Date: 3/26/13
- * Time: 6:54 PM
- * To change this template use File | Settings | File Templates.
+ * @author AndreiS
  */
 public class CopyOnWriteTransformer implements Transformer {
 
@@ -58,8 +56,9 @@ public class CopyOnWriteTransformer implements Transformer {
     }
 
     @Override
-    public ASTNode transform(BuiltinConstant builtinConstant) {
-        return builtinConstant;
+    public ASTNode transform(BuiltinSet builtinSet) {
+        // TODO(AndreiS): implement
+        return builtinSet;
     }
 
     @Override
@@ -85,7 +84,16 @@ public class CopyOnWriteTransformer implements Transformer {
         }
 
         if (cellCollection.hasFrame()) {
-            Variable frame = (Variable) cellCollection.getFrame().accept(this);
+            Variable frame;
+            Term transformedFrame = (Term) cellCollection.getFrame().accept(this);
+            if (transformedFrame instanceof CellCollection) {
+                cells.putAll(((CellCollection) transformedFrame).getCells());
+                frame = ((CellCollection) transformedFrame).hasFrame() ?
+                        ((CellCollection) transformedFrame).getFrame() : null;
+            } else {
+                frame = (Variable) transformedFrame;
+            }
+
             if (cells != cellCollection.getCells() || frame != cellCollection.getFrame()) {
                 cellCollection = new CellCollection(cells, frame);
             }
@@ -106,6 +114,15 @@ public class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(KLabelConstant kLabelConstant) {
         return kLabelConstant;
+    }
+
+    @Override
+    public ASTNode transform(KLabelFreezer kLabelFreezer) {
+        Term term = (Term) kLabelFreezer.term().accept(this);
+        if (term != kLabelFreezer.term()) {
+            kLabelFreezer = new KLabelFreezer(term);
+        }
+        return kLabelFreezer;
     }
 
     @Override
@@ -159,7 +176,7 @@ public class CopyOnWriteTransformer implements Transformer {
 
     @Override
     public ASTNode transform(KLabel kLabel) {
-        throw new UnsupportedOperationException();
+        return kLabel;
     }
 
     @Override
@@ -185,7 +202,16 @@ public class CopyOnWriteTransformer implements Transformer {
         List<Term> items = transformList(kSequence.getItems());
 
         if (kSequence.hasFrame()) {
-            Variable frame = (Variable) kSequence.getFrame().accept(this);
+            Variable frame;
+            Term transformedFrame = (Term) kSequence.getFrame().accept(this);
+            if (transformedFrame instanceof KSequence) {
+                items = new ArrayList<Term>(items);
+                items.addAll(((KSequence) transformedFrame).getItems());
+                frame = ((KSequence) transformedFrame).hasFrame() ?
+                        ((KSequence) transformedFrame).getFrame() : null;
+            } else {
+                frame = (Variable) transformedFrame;
+            }
             if (items != kSequence.getItems() || frame != kSequence.getFrame()) {
                 kSequence = new KSequence(ImmutableList.<Term>copyOf(items), frame);
             }
@@ -199,27 +225,27 @@ public class CopyOnWriteTransformer implements Transformer {
     }
 
     @Override
-    public ASTNode transform(Map map) {
-        Map transformedMap = null;
-        if (map.hasFrame()) {
-            Variable frame = (Variable) map.getFrame().accept(this);
-            if (frame != map.getFrame()) {
-                transformedMap = new Map(frame);
+    public ASTNode transform(BuiltinMap builtinMap) {
+        BuiltinMap transformedMap = null;
+        if (builtinMap.hasFrame()) {
+            Variable frame = (Variable) builtinMap.getFrame().accept(this);
+            if (frame != builtinMap.getFrame()) {
+                transformedMap = new BuiltinMap(frame);
             }
         }
 
-        for(java.util.Map.Entry<Term, Term> entry : map.getEntries().entrySet()) {
+        for(Map.Entry<Term, Term> entry : builtinMap.getEntries().entrySet()) {
             Term key = (Term) entry.getKey().accept(this);
             Term value = (Term) entry.getValue().accept(this);
 
             if (transformedMap == null && (key != entry.getKey() || value != entry.getValue())) {
-                if (map.hasFrame()) {
-                    transformedMap = new Map(map.getFrame());
+                if (builtinMap.hasFrame()) {
+                    transformedMap = new BuiltinMap(builtinMap.getFrame());
                 } else {
-                    transformedMap = new Map();
+                    transformedMap = new BuiltinMap();
                 }
-                for(java.util.Map.Entry<Term, Term> copyEntry : map.getEntries().entrySet()) {
-                    if (copyEntry == entry) {
+                for(Map.Entry<Term, Term> copyEntry : builtinMap.getEntries().entrySet()) {
+                    if (copyEntry.equals(entry)) {
                         break;
                     }
                     transformedMap.put(copyEntry.getKey(), copyEntry.getValue());
@@ -234,7 +260,7 @@ public class CopyOnWriteTransformer implements Transformer {
         if (transformedMap != null) {
             return transformedMap;
         } else {
-            return map;
+            return builtinMap;
         }
     }
 
@@ -275,15 +301,15 @@ public class CopyOnWriteTransformer implements Transformer {
             removeSet = mapUpdate.removeSet();
         }
 
-        java.util.Map<Term, Term> updateMap = null;
+        Map<Term, Term> updateMap = null;
         for(java.util.Map.Entry<Term, Term> entry : mapUpdate.updateMap().entrySet()) {
             Term key = (Term) entry.getKey().accept(this);
             Term value = (Term) entry.getValue().accept(this);
 
             if (updateMap == null && (key != entry.getKey() || value != entry.getValue())) {
                 updateMap = new HashMap<Term, Term>(mapUpdate.updateMap().size());
-                for(java.util.Map.Entry<Term, Term> copyEntry : mapUpdate.updateMap().entrySet()) {
-                    if (copyEntry == entry) {
+                for(Map.Entry<Term, Term> copyEntry : mapUpdate.updateMap().entrySet()) {
+                    if (copyEntry.equals(entry)) {
                         break;
                     }
                     updateMap.put(copyEntry.getKey(), copyEntry.getValue());
@@ -307,8 +333,8 @@ public class CopyOnWriteTransformer implements Transformer {
     }
 
     @Override
-    public ASTNode transform(Rule rule) {
-        throw new UnsupportedOperationException();
+    public ASTNode transform(MetaVariable metaVariable) {
+        return transform((Token) metaVariable);
     }
 
     @Override

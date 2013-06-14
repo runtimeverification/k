@@ -37,8 +37,6 @@ import java.util.Set;
 
 public class Context implements Serializable {
 
-    public enum DataStructureLabel { CONSTRUCTOR, ELEMENT, UNIT };
-
 	public static final Set<String> generatedTags = ImmutableSet.of(
 			"cons",
 			"kgeneratedlabel",
@@ -58,44 +56,7 @@ public class Context implements Serializable {
 		"{",
 		"}");
 
-    public static final Set<String> DataStructureTypes = ImmutableSet.of(
-            KSorts.BAG,
-            KSorts.LIST,
-            KSorts.MAP,
-            KSorts.SET);
-
-    public static final Map<String, ImmutableMap<DataStructureLabel, String>> dataStructureLabels
-            = ImmutableMap.of(
-                    KSorts.BAG, ImmutableMap.of(
-                            DataStructureLabel.CONSTRUCTOR,
-                            "__",
-                            DataStructureLabel.ELEMENT,
-                            "BagItem",
-                            DataStructureLabel.UNIT,
-                            ".Bag"),
-                    KSorts.LIST, ImmutableMap.of(
-                            DataStructureLabel.CONSTRUCTOR,
-                            "__",
-                            DataStructureLabel.ELEMENT,
-                            "ListItem",
-                            DataStructureLabel.UNIT,
-                            ".List"),
-                    KSorts.MAP, ImmutableMap.of(
-                            DataStructureLabel.CONSTRUCTOR,
-                            "__",
-                            DataStructureLabel.ELEMENT,
-                            "_|->_",
-                            DataStructureLabel.UNIT,
-                            ".Map"),
-                    KSorts.SET, ImmutableMap.of(
-                            DataStructureLabel.CONSTRUCTOR,
-                            "__",
-                            DataStructureLabel.ELEMENT,
-                            "SetItem",
-                            DataStructureLabel.UNIT,
-                            ".Set"));
-
-	public java.util.Map<String, Production> conses = new HashMap<String, Production>();
+    public java.util.Map<String, Production> conses = new HashMap<String, Production>();
 	public java.util.Map<String, Set<Production>> productions = new HashMap<String, Set<Production>>();
 	public java.util.Map<String, Set<String>> labels = new HashMap<String, Set<String>>();
 	public java.util.Map<String, Cell> cells = new HashMap<String, Cell>();

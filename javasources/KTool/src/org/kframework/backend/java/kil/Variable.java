@@ -6,15 +6,19 @@ import org.kframework.backend.java.symbolic.Utils;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 
 /**
- *
+ * A variable.
  *
  * @author AndreiS
  */
 public class Variable extends Term implements Sorted {
 
-    /* TODO(AndreiS): cache the varibles */
+    /* TODO(AndreiS): cache the variables */
     protected final String name;
     protected final String sort;
 
@@ -24,11 +28,26 @@ public class Variable extends Term implements Sorted {
         this.sort = sort;
     }
 
+    public Variable(MetaVariable metaVariable) {
+        this(metaVariable.variableName(), metaVariable.variableSort());
+    }
+
+    public static Map<Variable, Variable> getFreshSubstitution(Set<Variable> variableSet) {
+        Map<Variable, Variable> substitution = new HashMap<Variable, Variable>();
+        for (Variable variable : variableSet) {
+            substitution.put(variable, AnonymousVariable.getFreshVariable(variable.sort()));
+        }
+        return substitution;
+    }
+
     @Override
     public boolean isSymbolic() {
         return true;
     }
 
+    /**
+     * Returns a {@code String} representation of the name of this variable.
+     */
     public String name() {
         return name;
     }

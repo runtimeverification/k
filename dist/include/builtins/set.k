@@ -11,7 +11,7 @@ module SET
                  | MySetItem(K)   [function, hook(Set:SetItem)]
 
   /* set difference */
-  syntax MySet ::= MySet "-MySet" MySet   [function, latex({#1}-_{\it Set}{#2})]
+  syntax MySet ::= MySet "-MySet" MySet   [function, hook(Set:difference), latex({#1}-_{\it Set}{#2})]
   rule (MySetItem(K:K) S1:MySet) -MySet S2:MySet => S1 -MySet S2
   when K in S2
   rule (MySetItem(K:K) S1:MySet) -MySet S2:MySet => MySetItem(K) (S1 -MySet S2)

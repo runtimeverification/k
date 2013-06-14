@@ -33,12 +33,11 @@ import org.kframework.compile.transformers.ResolveRewrite;
 import org.kframework.compile.transformers.SortCells;
 import org.kframework.compile.transformers.StrictnessToContexts;
 import org.kframework.compile.utils.CheckVisitorStep;
+import org.kframework.compile.utils.CompileDataStructures;
 import org.kframework.compile.utils.CompilerSteps;
-import org.kframework.compile.utils.FlattenDataStructures;
 import org.kframework.compile.utils.InitializeConfigurationStructure;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.main.FirstStep;
 import org.kframework.main.LastStep;
 import org.kframework.utils.BinaryLoader;
@@ -70,11 +69,12 @@ public class JavaSymbolicBackend extends KompileBackend {
 			OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(
                     JavaSymbolicBackend.DEFINITION_FILENAME));
 			BinaryLoader.toBinary(
-                    javaDef.accept(new KILtoBackendJavaKILTransformer(context)),
+                    //javaDef.accept(new KILtoBackendJavaKILTransformer(context)),
+                    javaDef,
                     outputStream);
 			outputStream.close();
-		} catch (TransformerException e) {
-            e.printStackTrace();
+		//} catch (TransformerException e) {
+        //    e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -149,9 +149,7 @@ public class JavaSymbolicBackend extends KompileBackend {
         //steps.add(new FreshCondToFreshVar(context));
         //steps.add(new ResolveFreshVarMOS(context));
         steps.add(new AddTopCellConfig(context));
-        if (GlobalSettings.addTopCell) {
-            steps.add(new AddTopCellRules(context));
-        }
+        steps.add(new AddTopCellRules(context));
         //steps.add(new ResolveBinder(context));
         steps.add(new ResolveAnonymousVariables(context));
         //steps.add(new ResolveBlockingInput(context));
@@ -165,10 +163,10 @@ public class JavaSymbolicBackend extends KompileBackend {
         //steps.add(new AddKStringConversion(context));
         //steps.add(new AddKLabelConstant(context));
         steps.add(new ResolveHybrid(context));
-        steps.add(new ResolveConfigurationAbstraction (context));
+        steps.add(new ResolveConfigurationAbstraction(context));
         steps.add(new ResolveOpenCells(context));
         steps.add(new ResolveRewrite(context));
-        steps.add(new FlattenDataStructures(context));
+        steps.add(new CompileDataStructures(context));
         steps.add(new MapToLookupUpdate(context));
 
         if (GlobalSettings.sortedCells) {

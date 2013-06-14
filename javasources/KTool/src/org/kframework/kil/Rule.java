@@ -25,6 +25,7 @@ public class Rule extends Sentence {
 
 	public Rule(Rule node) {
 		super(node);
+        lookups = node.lookups;
 	}
 
 	public Rule() {

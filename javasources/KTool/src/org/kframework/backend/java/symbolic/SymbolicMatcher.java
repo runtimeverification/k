@@ -1,193 +1,121 @@
 package org.kframework.backend.java.symbolic;
 
+import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.AnonymousVariable;
-import org.kframework.backend.java.kil.BoolToken;
-import org.kframework.backend.java.kil.BuiltinConstant;
+import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
-import org.kframework.backend.java.kil.IntToken;
+import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Hole;
 import org.kframework.backend.java.kil.KLabelFreezer;
 import org.kframework.backend.java.kil.KLabelInjection;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KCollection;
-import org.kframework.backend.java.kil.KCollectionFragment;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
-import org.kframework.backend.java.kil.Map;
+import org.kframework.backend.java.kil.Kind;
+import org.kframework.backend.java.kil.MetaVariable;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.matchers.MatcherException;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.Map;
+
+import com.google.common.collect.ImmutableList;
 
 
 /**
- *
+ * A unifier modulo theories.
  *
  * @author AndreiS
  */
 public class SymbolicMatcher extends AbstractMatcher {
 
-    private class MapMatcher {
-
-        private Map map;
-        private Map pattern;
-
-        private MapMatcher(Map map, Map pattern) {
-            this.map = new Map(new HashMap<Term, Term>(map.getEntries()));
-            this.pattern =  new Map(new HashMap<Term, Term>(pattern.getEntries()));
-        }
-
-        private boolean incrementalMatch() {
-            if (map == null && pattern == null) {
-                return false;
-            }
-
-            boolean change = false;
-
-            map = (Map) map.substitute(constraint.substitution(), context);
-            pattern = (Map) pattern.substitute(constraint.substitution(), context);
-
-            Iterator<java.util.Map.Entry<Term, Term>> iterator;
-            iterator = map.getEntries().entrySet().iterator();
-            while (iterator.hasNext()) {
-                java.util.Map.Entry<Term, Term> entry = iterator.next();
-                Term term = pattern.getEntries().get(entry.getKey());
-                if (term != null) {
-                    iterator.remove();
-                    constraint.add(entry.getValue(), term);
-                    change = true;
-                }
-            }
-
-            iterator = pattern.getEntries().entrySet().iterator();
-            while (iterator.hasNext()) {
-                java.util.Map.Entry<Term, Term> entry = iterator.next();
-                Term term = map.getEntries().get(entry.getKey());
-                if (term != null) {
-                    iterator.remove();
-                    constraint.add(term, entry.getValue());
-                    change = true;
-                }
-            }
-
-            if (map.getEntries().isEmpty() && pattern.getEntries().isEmpty()) {
-                if (map.hasFrame() && pattern.hasFrame()) {
-                    constraint.add(map.getFrame(), pattern.getFrame());
-                } else if (map.hasFrame()) {
-                    constraint.add(map.getFrame(), Map.EMPTY);
-                } else if (pattern.hasFrame()) {
-                    constraint.add(Map.EMPTY, pattern.getFrame());
-                }
-                map = pattern = null;
-            } else if (map.getEntries().isEmpty()) {
-                if (map.hasFrame()) {
-                    constraint.add(map.getFrame(), pattern);
-                } else {
-                    fail();
-                }
-                map = pattern = null;
-            } else if (pattern.getEntries().isEmpty()) {
-                if (pattern.hasFrame()) {
-                    constraint.add(map, pattern.getFrame());
-                } else {
-                    fail();
-                }
-                map = pattern = null;
-            }
-
-            return change;
-        }
-
-    }
-
     private final Context context;
-    //private final Map<Variable, ListIterator> kCollectionSubstitution = new HashMap<>();
     private SymbolicConstraint constraint = null;
-    private final ArrayList<MapMatcher> mapMatchers = new ArrayList<MapMatcher>();
 
 	public SymbolicMatcher(Context context) {
 		this.context = context;
 	}
-
-    @Override
-    public String getName() {
-        return this.getClass().toString();
-    }
 
     public SymbolicConstraint constraint() {
         return constraint;
     }
 
     public boolean isMatching(Term term, Term pattern) {
-        constraint = new SymbolicConstraint(context);
-
         try {
+            constraint = new SymbolicConstraint(context);
             match(term, pattern);
-
-            boolean change;
-            do {
-                change = false;
-
-                for (MapMatcher mapMatcher : mapMatchers) {
-                    change = change || mapMatcher.incrementalMatch();
-                }
-
-            } while (change);
-
             return true;
         } catch (MatcherException e) {
             constraint = null;
             return false;
-        } finally {
-            mapMatchers.clear();
-            //freshSubstitution.clear();
         }
     }
 
     public void match(Term term, Term pattern) {
-        System.err.println(">>>");
-        System.err.println(term);
-        System.err.println("<<<");
-        System.err.println(pattern);
-        System.err.println("===");
+        /* promote KItem to K, and then promote K to KList */
+        if (term.kind() == Kind.KITEM
+                && (pattern.kind() == Kind.K || pattern.kind() == Kind.KLIST)) {
+            term = new KSequence(ImmutableList.of(term));
+        } else if (pattern.kind() == Kind.KITEM
+                && (term.kind() == Kind.K || term.kind() == Kind.KLIST)) {
+            pattern = new KSequence(ImmutableList.of(pattern));
+        }
+
+        if (term instanceof KSequence && pattern instanceof KList) {
+            term = new KList(ImmutableList.of(term));
+        } else if (pattern instanceof KSequence && term instanceof KList) {
+            pattern = new KList(ImmutableList.of(pattern));
+        }
+
+        assert term.kind() == pattern.kind():
+               "kind mismatch between " + term + " (" + term.kind() + ")"
+               + " and " + pattern + " (" + pattern.kind() + ")";
 
         if (term.isSymbolic() || pattern.isSymbolic()) {
+            /* add symbolic constraint */
             constraint.add(term, pattern);
             if (constraint.isFalse()) {
                 fail();
             }
         } else {
-            // match properly
+            /* match */
             term.accept(this, pattern);
         }
     }
 
-
-    /**
-     * matches two builtin constants
-     */
     @Override
-    public void match(BuiltinConstant builtinConstant, Term pattern) {
-        if (!(pattern instanceof BuiltinConstant)) {
+    public String getName() {
+        return this.getClass().toString();
+    }
+
+    @Override
+    public void match(BuiltinMap builtinMap, Term pattern) {
+        if (!(pattern instanceof BuiltinMap)) {
             this.fail();
         }
 
-        BuiltinConstant patternBuiltinConstant = (BuiltinConstant) pattern;
-        if (!builtinConstant.equals(patternBuiltinConstant)) {
-            fail();
-        }
+        throw new UnsupportedOperationException(
+                "map matching is only supported when one of the maps is a variable.");
     }
 
-    /**
-     * matches two cells
-     */
+    @Override
+    public void match(BuiltinSet builtinSet, Term pattern) {
+        if (!(pattern instanceof BuiltinSet)) {
+            this.fail();
+        }
+
+        throw new UnsupportedOperationException(
+                "set matching is only supported when one of the sets is a variable.");
+    }
+
     @Override
     public void match(Cell cell, Term pattern) {
         if (!(pattern instanceof Cell)) {
@@ -195,17 +123,16 @@ public class SymbolicMatcher extends AbstractMatcher {
         }
 
         Cell patternCell = (Cell) pattern;
-        if (!cell.getLabel().equals(patternCell.getLabel())
-                || !cell.getContentKind().equals(patternCell.getContentKind())) {
+        if (!cell.getLabel().equals(patternCell.getLabel())) {
+                // AndreiS: commented out the check below as matching might fail due to KItem < K
+                // < KList subsorting
+                //|| !cell.getContentKind().equals(patternCell.getContentKind())) {
             fail();
         }
 
         match(cell.getContent(), patternCell.getContent());
     }
 
-    /**
-     * matches two bags of cells
-     */
     @Override
     public void match(CellCollection cellCollection, Term pattern) {
         if (!(pattern instanceof CellCollection)) {
@@ -213,8 +140,8 @@ public class SymbolicMatcher extends AbstractMatcher {
         }
         CellCollection patternCellCollection = (CellCollection) pattern;
 
-        java.util.Map<String, Cell> cellMap = new HashMap<String, Cell>();
-        java.util.Map<String, Cell> patternCellMap = new HashMap<String, Cell>();
+        Map<String, Cell> cellMap = new HashMap<String, Cell>();
+        Map<String, Cell> patternCellMap = new HashMap<String, Cell>();
 
         for (String label : cellCollection.labelSet()) {
             if (patternCellCollection.containsKey(label)) {
@@ -232,13 +159,26 @@ public class SymbolicMatcher extends AbstractMatcher {
 
         if (cellCollection.hasFrame()) {
             if (patternCellCollection.hasFrame()) {
-                Variable variable = AnonymousVariable.getFreshVariable("cellCollection");
-                constraint.add(
-                        cellCollection.getFrame(),
-                        new CellCollection(patternCellMap, variable));
-                constraint.add(
-                        new CellCollection(cellMap, variable),
-                        patternCellCollection.getFrame());
+                if (cellMap.isEmpty() && patternCellMap.isEmpty()) {
+                    constraint.add(cellCollection.getFrame(), patternCellCollection.getFrame());
+                } else if (cellMap.isEmpty()) {
+                    constraint.add(
+                            cellCollection.getFrame(),
+                            new CellCollection(patternCellMap, patternCellCollection.getFrame()));
+                } else if (patternCellMap.isEmpty()) {
+                    constraint.add(
+                            new CellCollection(cellMap, cellCollection.getFrame()),
+                            patternCellCollection.getFrame());
+                } else {
+                    Variable variable = AnonymousVariable.getFreshVariable(
+                            Kind.CELL_COLLECTION.toString());
+                    constraint.add(
+                            cellCollection.getFrame(),
+                            new CellCollection(patternCellMap, variable));
+                    constraint.add(
+                            new CellCollection(cellMap, variable),
+                            patternCellCollection.getFrame());
+                }
             } else {
                 if (!cellMap.isEmpty()) {
                     fail();
@@ -246,51 +186,34 @@ public class SymbolicMatcher extends AbstractMatcher {
 
                 constraint.add(cellCollection.getFrame(), new CellCollection(patternCellMap));
             }
-        } else {
+        } else if (patternCellCollection.hasFrame()) {
             if (!patternCellMap.isEmpty()) {
                 fail();
             }
 
-            if (patternCellCollection.hasFrame()) {
-                constraint.add(new CellCollection(cellMap), patternCellCollection.getFrame());
-            } else {
-                if (!cellMap.isEmpty()) {
-                    fail();
-                }
-            }
+            constraint.add(new CellCollection(cellMap), patternCellCollection.getFrame());
+        } else if (!cellMap.isEmpty() || !patternCellMap.isEmpty()) {
+            fail();
         }
     }
 
-    /**
-     * matches two KLabel constants
-     */
     @Override
     public void match(KLabelConstant kLabelConstant, Term pattern) {
-        if (!(pattern instanceof KLabelConstant)) {
-            this.fail();
-        }
-
-        KLabelConstant patternKLabelConstant = (KLabelConstant) pattern;
-        if (!kLabelConstant.equals(patternKLabelConstant)) {
+        if (!kLabelConstant.equals(pattern)) {
             fail();
         }
     }
 
     @Override
     public void match(KLabelFreezer kLabelFreezer, Term pattern) {
-        if (!(pattern instanceof KLabelFreezer)) {
-            this.fail();
+        if(!(pattern instanceof KLabelFreezer)) {
+            fail();
         }
 
         KLabelFreezer patternKLabelFreezer = (KLabelFreezer) pattern;
-        if (!kLabelFreezer.equals(patternKLabelFreezer)) {
-            fail();
-        }
+        match(kLabelFreezer.term(), patternKLabelFreezer.term());
     }
 
-    /**
-     * matches two injection KLabel constants
-     */
     @Override
     public void match(KLabelInjection kLabelInjection, Term pattern) {
         if(!(pattern instanceof KLabelInjection)) {
@@ -303,12 +226,7 @@ public class SymbolicMatcher extends AbstractMatcher {
 
     @Override
     public void match(Hole hole, Term pattern) {
-        if (!(pattern instanceof Hole)) {
-            this.fail();
-        }
-
-        Hole patternHole = (Hole) pattern;
-        if (!hole.equals(patternHole)) {
+        if (!hole.equals(pattern)) {
             fail();
         }
     }
@@ -327,6 +245,13 @@ public class SymbolicMatcher extends AbstractMatcher {
     @Override
     public void match(Token token, Term pattern) {
         if (!token.equals(pattern)) {
+            fail();
+        }
+    }
+
+    @Override
+    public void match(UninterpretedToken uninterpretedToken, Term pattern) {
+        if (!uninterpretedToken.equals(pattern)) {
             fail();
         }
     }
@@ -365,9 +290,8 @@ public class SymbolicMatcher extends AbstractMatcher {
         matchKCollection(kSequence, patternKSequence);
     }
 
-    @SuppressWarnings("unchecked")
-    public void matchKCollection(KCollection kCollection, KCollection patternKCollection) {
-        int length = Math.min(kCollection.size(), kCollection.size());
+    private void matchKCollection(KCollection kCollection, KCollection patternKCollection) {
+        int length = Math.min(kCollection.size(), patternKCollection.size());
         for(int index = 0; index < length; ++index) {
             this.match(kCollection.get(index), patternKCollection.get(index));
         }
@@ -377,41 +301,34 @@ public class SymbolicMatcher extends AbstractMatcher {
                 fail();
             }
 
-            KCollectionFragment fragment = new KCollectionFragment(patternKCollection, length);
-            constraint.add(kCollection.getFrame(), fragment);
+            constraint.add(kCollection.getFrame(), patternKCollection.fragment(length));
         } else if (patternKCollection.size() < kCollection.size()) {
             if (!patternKCollection.hasFrame()) {
                 fail();
             }
 
-            KCollectionFragment fragment = new KCollectionFragment(kCollection, length);
-            constraint.add(fragment, patternKCollection.getFrame());
+            constraint.add(kCollection.fragment(length), patternKCollection.getFrame());
         } else {
             if (kCollection.hasFrame() && patternKCollection.hasFrame()) {
                 constraint.add(kCollection.getFrame(), patternKCollection.getFrame());
             } else if (kCollection.hasFrame()) {
-                KCollectionFragment fragment = new KCollectionFragment(patternKCollection, length);
-                constraint.add(kCollection.getFrame(), fragment);
+                constraint.add(kCollection.getFrame(), patternKCollection.fragment(length));
             } else if (patternKCollection.hasFrame()) {
-                KCollectionFragment fragment = new KCollectionFragment(kCollection, length);
-                constraint.add(fragment, patternKCollection.getFrame());
+                constraint.add(kCollection.fragment(length), patternKCollection.getFrame());
             }
         }
     }
 
     @Override
-    public void match(Map map, Term pattern) {
-        assert false: "dead code";
-
-        if (!(pattern instanceof Map)) {
-            this.fail();
+    public void match(MetaVariable metaVariable, Term pattern) {
+        if (!metaVariable.equals(pattern)) {
+            fail();
         }
-
-        mapMatchers.add(new MapMatcher(map, (Map) pattern));
     }
 
+    @Override
     public void match(Variable variable, Term pattern) {
-        assert false: "dead code";
+        match((Term) variable, pattern);
     }
 
 }

@@ -294,10 +294,11 @@ public class BasicVisitor implements Visitor {
     @Override
     public void visit(MapUpdate node) {
         node.map().accept(this);
-        for (Term key : node.removeSet()) {
-            key.accept(this);
+        for (java.util.Map.Entry<Term, Term> entry : node.removeEntries().entrySet()) {
+            entry.getKey().accept(this);
+            entry.getValue().accept(this);
         }
-        for (java.util.Map.Entry<Term, Term> entry : node.updateMap().entrySet()) {
+        for (java.util.Map.Entry<Term, Term> entry : node.updateEntries().entrySet()) {
             entry.getKey().accept(this);
             entry.getValue().accept(this);
         }

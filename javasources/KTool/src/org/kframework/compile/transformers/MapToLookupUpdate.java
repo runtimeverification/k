@@ -42,9 +42,8 @@ public class MapToLookupUpdate extends CopyOnWriteTransformer {
         }
     }
 
-    private enum Status {LHS, RHS, CONDITION };
+    private enum Status {LHS, RHS, CONDITION }
 
-    private Map<Variable, MapBuiltin> maps = new HashMap<Variable, MapBuiltin>();
     private Map<Variable, MapUpdate> reverseMap = new HashMap<Variable, MapUpdate>();
     private ArrayList<ExtendedMapLookup> queue = new ArrayList<ExtendedMapLookup>();
     private Status status;
@@ -59,7 +58,6 @@ public class MapToLookupUpdate extends CopyOnWriteTransformer {
                "expected rewrite at the top of rule " + node + ". "
                + "MapToLookupUpdate pass should be applied after ResolveRewrite pass.";
 
-        maps.clear();
         reverseMap.clear();
         queue.clear();
 
@@ -129,16 +127,21 @@ public class MapToLookupUpdate extends CopyOnWriteTransformer {
         if (status == Status.LHS) {
             assert node.isLHSView();
 
+            if (node.elements().isEmpty()) {
+                if (node.hasViewBase()) {
+                    return node.viewBase();
+                } else {
+                    /* TODO(AndreiS): deal with empty data structures */
+                }
+
+            }
+
             Variable variable = Variable.getFreshVar(node.sort().name());
-            maps.put(variable, node);
             if (node.hasViewBase()) {
                 /* TODO(AndreiS): check the uniqueness of map variables in the LHS */
                 reverseMap.put(
                         node.viewBase(),
-                        new MapUpdate(
-                                variable,
-                                node.elements().keySet(),
-                                Collections.<Term, Term>emptyMap()));
+                        new MapUpdate(variable, node.elements(), Collections.<Term, Term>emptyMap()));
             }
             for (Map.Entry<Term, Term> entry : node.elements().entrySet()) {
                 queue.add(new ExtendedMapLookup(entry.getKey(), entry.getValue(), variable));
@@ -155,21 +158,30 @@ public class MapToLookupUpdate extends CopyOnWriteTransformer {
                 }
                 MapUpdate mapUpdate = (MapUpdate) term;
 
-                Set<Term> removeSet = new HashSet<Term>();
-                Map<Term, Term> updateMap = new HashMap<Term, Term>();
-                for (Term key : mapUpdate.removeSet()) {
-                    if (elements.containsKey(key)) {
-                        updateMap.put(key, elements.remove(key));
+                Map<Term, Term> removeEntries = new HashMap<Term, Term>();
+                Map<Term, Term> updateEntries = new HashMap<Term, Term>();
+                for (Map.Entry<Term, Term> entry : mapUpdate.removeEntries().entrySet()) {
+                    if (elements.containsKey(entry.getKey())) {
+                        if (elements.get(entry.getKey()).equals(entry.getValue())) {
+                            elements.remove(entry.getKey());
+                        } else {
+                            updateEntries.put(entry.getKey(), elements.remove(entry.getKey()));
+                        }
                     } else {
-                        removeSet.add(key);
+                        removeEntries.put(entry.getKey(), entry.getValue());
                     }
                 }
-                baseTerms.add(new MapUpdate(mapUpdate.map(), removeSet, updateMap));
+
+                if (removeEntries.isEmpty() && updateEntries.isEmpty()) {
+                    baseTerms.add(mapUpdate.map());
+                } else {
+                    baseTerms.add(new MapUpdate(mapUpdate.map(), removeEntries, updateEntries));
+                }
             }
 
             if (baseTerms.size() == 1 && elements.isEmpty()) {
-                /* if the MapBuiltin instance consists of only one instance of MapUpdate,
-                 * return the MapUpdate instance instead */
+                /* if the MapBuiltin instance consists of only one base term,
+                 * return the base term instead */
                 return baseTerms.get(0);
             } else {
                 return new MapBuiltin(node.sort(), elements, baseTerms);

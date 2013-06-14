@@ -132,7 +132,12 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
             for (int i = 0; i < arguments.size(); ++i) {
                 TermCons termCons = (TermCons) MetaK.getTerm(prod, context);
                 for (int j = 0; j < prod.getArity(); ++j) {
-                    termCons.getContents().get(j).setSort(KSorts.K);
+                    if (GlobalSettings.matchingLogic) {
+                        /* the Java Rewrite Engine only supports strictness with KItem variables */
+                        termCons.getContents().get(j).setSort(KSorts.KITEM);
+                    } else {
+                        termCons.getContents().get(j).setSort(KSorts.K);
+                    }
                 }
 
                 // insert HOLE instead of the term

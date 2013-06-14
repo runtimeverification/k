@@ -1,6 +1,7 @@
 package org.kframework.backend.java.kil;
 
-import org.kframework.backend.java.builtins.BuiltinFunction;
+import org.kframework.backend.java.builtins.SortMembership;
+import org.kframework.backend.java.symbolic.BuiltinFunction;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Utils;
@@ -10,11 +11,13 @@ import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 
 /**
- *
+ * A K application.
  *
  * @author AndreiS
  */
@@ -53,37 +56,57 @@ public class KItem extends Term implements Sorted {
                     sort = kind.toString();
                 }
             } else {
-                sort = kind.toString();
+                /* a list terminator does not have conses */
+                Set<String> listSorts = context.listLabels.get(((KLabelConstant) kLabel).label());
+                if (listSorts != null) {
+                    if (listSorts.size() == 1) {
+                        sort = listSorts.iterator().next();
+                    } else {
+                        sort = context.getLUBSort(listSorts);
+                    }
+                } else {
+                    sort = kind.toString();
+                }
             }
         } else {
-            if (kLabel instanceof KLabelInjection
-                    && ((KLabelInjection) kLabel).term() instanceof BuiltinConstant) {
-                sort = ((BuiltinConstant) ((KLabelInjection) kLabel).term()).getSort();
-            } else {
-                sort = kind.toString();
-            }
+            sort = kind.toString();
         }
     }
 
-    public KItem evaluateFunction() {
+    public Term evaluateFunction() {
         if (!(kLabel instanceof KLabelConstant)) {
             return this;
         }
+        KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
 
-        for (Term term : kList.getItems()) {
-            if (!term.isGround()) {
-                return this;
-            }
+        /* evaluate a sort membership predicate (to either true or false, no unknown value) */
+        if (kLabelConstant.label().startsWith("is") && kList.getItems().size() == 1
+                && kList.getItems().get(0) instanceof Sorted) {
+            return SortMembership.check(
+                    kLabelConstant.label().substring("is".length()),
+                    (Sorted) kList.getItems().get(0));
         }
 
+        if (!BuiltinFunction.isBuiltinKLabel(kLabelConstant)) {
+            return this;
+        }
+
+        /* this can be removed, and IllegalArgumentException would be thrown below */
+        //for (Term term : kList.getItems()) {
+        //    if (!term.isGround()) {
+        //        return this;
+        //    }
+        //}
+
         try {
-            return BuiltinFunction.invoke(
-                    (KLabelConstant) kLabel,
-                    (Term[]) kList.getItems().toArray());
+            Term[] arguments = kList.getItems().toArray(new Term[kList.getItems().size()]);
+            return BuiltinFunction.invoke(kLabelConstant, arguments);
+        } catch (IllegalAccessException e) {
+            //e.printStackTrace();
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         } catch (InvocationTargetException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
 
         return this;

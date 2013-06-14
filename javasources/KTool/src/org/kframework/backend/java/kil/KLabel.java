@@ -6,7 +6,7 @@ import org.kframework.kil.ASTNode;
 
 
 /**
- *
+ * A KLabel.
  *
  * @author AndreiS
  */
@@ -18,7 +18,7 @@ public abstract class KLabel extends Term {
 
     @Override
     public boolean isSymbolic() {
-        /* do not support symbolic KLabels */
+        /* AndreiS: no support for symbolic KLabels */
         return false;
     }
 

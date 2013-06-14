@@ -1,12 +1,12 @@
 package org.kframework.backend.java.kil;
 
+import com.google.common.collect.ImmutableSet;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
-import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -16,14 +16,31 @@ import java.util.List;
  */
 public class Definition extends ASTNode {
 
-    private final List<Rule> rules;
+    public static final Set<String> TOKEN_SORTS = ImmutableSet.of("Bool", "Int", "Id");
 
-    public Definition(List<Rule> rules) {
+    private final Set<Rule> rules;
+    private final Set<KLabelConstant> kLabels;
+    private final Set<KLabelConstant> frozenKLabels;
+
+    public Definition(
+            Set<Rule> rules,
+            Set<KLabelConstant> kLabels,
+            Set<KLabelConstant> frozenKLabels) {
         this.rules = rules;
+        this.kLabels = kLabels;
+        this.frozenKLabels = frozenKLabels;
     }
 
-    public List<Rule> rules() {
+    public Set<Rule> rules() {
         return rules;
+    }
+
+    public Set<KLabelConstant> kLabels() {
+        return kLabels;
+    }
+
+    public Set<KLabelConstant> frozenKLabels() {
+        return frozenKLabels;
     }
 
     @Override

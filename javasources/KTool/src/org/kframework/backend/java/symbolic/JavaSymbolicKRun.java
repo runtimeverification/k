@@ -1,12 +1,12 @@
 package org.kframework.backend.java.symbolic;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
-import org.kframework.backend.java.builtins.BuiltinFunction;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.matchers.MatcherException;
+import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.api.KRun;
 import org.kframework.krun.api.KRunDebugger;
@@ -40,24 +40,29 @@ public class JavaSymbolicKRun implements KRun {
     @Override
     public KRunResult<KRunState> run(org.kframework.kil.Term cfg) throws KRunExecutionException {
         try {
-            /* load the definition from a binary file */
-            InputStream inputStream = new BufferedInputStream(new FileInputStream(
-                    JavaSymbolicBackend.DEFINITION_FILENAME));
-            Definition definition = (Definition) BinaryLoader.fromBinary(inputStream);
-            inputStream.close();
-
             /* initialize the builtin function table */
             BuiltinFunction.init(context);
 
+            /* load the definition from a binary file */
+            InputStream inputStream = new BufferedInputStream(new FileInputStream(
+                    JavaSymbolicBackend.DEFINITION_FILENAME));
+            Definition definition
+                    = (Definition) ((org.kframework.kil.Definition) BinaryLoader.fromBinary(
+                            inputStream)).accept(new KILtoBackendJavaKILTransformer(context));
+            inputStream.close();
+
             SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition, context);
-            symbolicRewriter.rewrite(Term.of(cfg, context));
-            //symbolicRewriter.rewriteStar(Term.of(cfg, context));
+            Term result = symbolicRewriter.rewriteStar(Term.of(cfg, context));
+            //Term result = symbolicRewriter.rewriteN(Term.of(cfg, context), 60);
+            System.err.println("[" + symbolicRewriter.elapsed() + "ms]:" + result);
+            System.err.println("[" + symbolicRewriter.ruleStopwatch + "]");
+
             return new KRunResult<KRunState>(new KRunState(cfg, context));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (MatcherException e) {
+        } catch (TransformerException e) {
             e.printStackTrace();
         }
         return null;

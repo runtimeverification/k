@@ -9,11 +9,7 @@ import org.kframework.kil.ASTNode;
 
 
 /**
- * Created with IntelliJ IDEA.
- * User: andrei
- * Date: 3/18/13
- * Time: 12:42 PM
- * To change this template use File | Settings | File Templates.
+ * @author AndreiS
  */
 public class KSequence extends KCollection {
 
@@ -49,6 +45,11 @@ public class KSequence extends KCollection {
     }
 
     @Override
+    public KCollection fragment(int length) {
+        return new KSequence(items.subList(length, items.size()), frame);
+    }
+
+    @Override
     public String getOperatorName() {
         return KSequence.OPERATOR_NAME;
     }
@@ -71,14 +72,6 @@ public class KSequence extends KCollection {
         KSequence kSequence = (KSequence) object;
         return super.frame == null ? kSequence.frame == null : frame.equals(kSequence.frame)
                 && super.items.equals(kSequence.items);
-    }
-
-    /**
-     * @return a copy of the ASTNode containing the same fields.
-     */
-    @Override
-    public ASTNode shallowCopy() {
-        throw new UnsupportedOperationException();  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override

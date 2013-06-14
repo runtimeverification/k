@@ -37,7 +37,7 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
      * C[v], v, t1, t2 such that
      * v is a fresh variable and term = C[t1 => t2] */
     private List<Term> splitRewrite(Term term) throws TransformerException {
-    	final Variable v = Variable.getFreshVar("K");
+    	final Variable v = Variable.getFreshVar(KSorts.KITEM);
     	final List<Term> list = new ArrayList<Term>();
     	Transformer transformer = new CopyOnWriteTransformer("splitter", context) {
     		@Override public ASTNode transform(Rewrite rewrite) {

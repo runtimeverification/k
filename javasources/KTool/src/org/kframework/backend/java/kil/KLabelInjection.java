@@ -7,7 +7,7 @@ import org.kframework.kil.ASTNode;
 
 
 /**
- *
+ * An injection KLabel.
  *
  * @author AndreiS
  */
@@ -39,7 +39,7 @@ public class KLabelInjection extends KLabel {
 
     @Override
     public boolean isConstructor() {
-        return false;
+        return true;
     }
 
     @Override

@@ -1,15 +1,12 @@
 package org.kframework.backend.java.builtins;
 
-import org.kframework.backend.java.kil.BoolToken;
-import org.kframework.backend.java.kil.IntToken;
-
 
 /**
  * Table of {@code public static} methods on builtin integers.
  *
  * @author: AndreiS
  */
-public class BuiltinInt {
+public class BuiltinIntOperations {
 
     public static IntToken add(IntToken term1, IntToken term2) {
         return IntToken.of(term1.bigIntegerValue().add(term2.bigIntegerValue()));

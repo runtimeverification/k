@@ -14,7 +14,26 @@ import java.util.Map;
 
 
 /**
- * Abstract class representing a builtin data structure (bag, list, map or set).
+ * Abstract class representing a data structure (bag, list, map or set) AST node.
+ *
+ * A data structure node must be a union (bag, map, set) or concatenation (list) of:
+ * <p>
+ * (1) variables of the data structure sort, represented by {@link Variable} instances;
+ * (2) data structure operations, represented bt {@link KApp} instances (e.g. {@code keys(M)}
+ *     with {@code M} a variable of some sort hooked to the builtin map);
+ * (3) elements (bag, list, set) or entries (map).
+ * </p>
+ * Nodes of the first and second kinds are stored in the {@code baseTerms} collection field of
+ * this class. Nodes of the last kind are stored in fields in the particular classes representing
+ * each of the builtin data structures (class which extend this class).
+ *
+ * A data structure may be used unrestricted in the right-hand side or condition of a rule.
+ * However, a data structure used in the left-hand side of a rule must be restricted to at most one
+ * variable (node of the first kind) and no operations (nodes of the second kind),
+ * while it may contain arbitrary many elements or entries. This restriction enables matching a
+ * data structure pattern.
+ *
+ * @see DataStructureSort
  *
  * @author AndreiS
  */
@@ -65,6 +84,7 @@ public abstract class DataStructureBuiltin extends Term {
     }
 
     public static DataStructureBuiltin of(DataStructureSort sort, Term ... argument) {
+        /* TODO(AndreiS): enforce some type checking for collections
         assert argument != null;
         for (Term term : argument) {
             assert term.getSort().equals(sort.name()):
@@ -72,6 +92,7 @@ public abstract class DataStructureBuiltin extends Term {
                    + term.getLocation() + "; "
                    + "expected " + sort.name();
         }
+        */
 
         if (sort.type().equals(KSorts.BAG)
                 || sort.type().equals(KSorts.LIST)
@@ -110,7 +131,16 @@ public abstract class DataStructureBuiltin extends Term {
     }
 
     protected final DataStructureSort dataStructureSort;
+    /**
+     * The single variable allowed in this data structure if occurring in the left-hand side of a
+     * rule; set to {@code null} if this data structure does not occur in the left-hand side or
+     * is a collection of elements or entries.
+     */
     protected final Variable viewBase;
+    /**
+     * {@code Collection} of {@link KApp} AST nodes (representing data structure operations) and
+     * {@link Variable} AST nodes.
+     */
     protected final Collection<Term> baseTerms;
 
     protected DataStructureBuiltin(DataStructureSort sort, Collection<Term> baseTerms) {
@@ -143,6 +173,9 @@ public abstract class DataStructureBuiltin extends Term {
 
     public abstract boolean isEmpty();
 
+    /**
+     * Returns {@code true} if this data structure may occur in the left-hand side of a rule.
+     */
     public boolean isLHSView() {
         return viewBase != null || baseTerms.isEmpty();
     }

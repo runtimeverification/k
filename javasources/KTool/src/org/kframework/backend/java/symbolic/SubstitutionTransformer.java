@@ -1,16 +1,19 @@
 package org.kframework.backend.java.symbolic;
 
 import com.google.common.collect.ImmutableList;
+import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.KCollectionFragment;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
-import org.kframework.backend.java.kil.Map;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.loader.Context;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -22,10 +25,10 @@ import java.util.List;
  */
 public class SubstitutionTransformer extends CopyOnWriteTransformer {
 
-    private final java.util.Set<Variable> boundVariables;
-    private final java.util.Map<Variable, Term> substitution;
+    private final Set<Variable> boundVariables;
+    private final Map<Variable, Term> substitution;
 
-    public SubstitutionTransformer(java.util.Map<Variable, Term> substitution, Context context) {
+    public SubstitutionTransformer(Map<Variable, Term> substitution, Context context) {
     	super(context);
         this.substitution = substitution;
         boundVariables = new HashSet<Variable>();
@@ -68,17 +71,26 @@ public class SubstitutionTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public Map transform(Map map) {
-        if (!map.hasFrame() || boundVariables.contains(map.getFrame())) {
-            return (Map) super.transform(map);
+    public BuiltinMap transform(BuiltinMap builtinMap) {
+        if (!builtinMap.hasFrame() || boundVariables.contains(builtinMap.getFrame())) {
+            return (BuiltinMap) super.transform(builtinMap);
         }
 
-        Term term = substitution.get(map.getFrame());
+        Term term = substitution.get(builtinMap.getFrame());
         if (term == null || term instanceof Variable) {
-            return (Map) super.transform(map);
+            return (BuiltinMap) super.transform(builtinMap);
         }
 
-
+        if (term instanceof BuiltinMap) {
+            boundVariables.add(builtinMap.getFrame());
+            HashMap<Term, Term> entries = new HashMap<Term, Term>(
+                    ((BuiltinMap) super.transform(builtinMap)).getEntries());
+            entries.putAll(((BuiltinMap) term).getEntries());
+            BuiltinMap returnMap = ((BuiltinMap) term).hasFrame() ?
+                    new BuiltinMap(entries, ((BuiltinMap) term).getFrame()) : new BuiltinMap(entries);
+            boundVariables.remove(builtinMap.getFrame());
+            return returnMap;
+        }
 
         throw new RuntimeException();
     }

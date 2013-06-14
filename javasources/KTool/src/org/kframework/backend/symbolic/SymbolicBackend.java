@@ -16,8 +16,8 @@ import org.kframework.compile.tags.AddOptionalTags;
 import org.kframework.compile.tags.AddStrictStar;
 import org.kframework.compile.transformers.*;
 import org.kframework.compile.utils.CheckVisitorStep;
+import org.kframework.compile.utils.CompileDataStructures;
 import org.kframework.compile.utils.CompilerSteps;
-import org.kframework.compile.utils.FlattenDataStructures;
 import org.kframework.compile.utils.InitializeConfigurationStructure;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
@@ -157,7 +157,7 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 		steps.add(new ResolveConfigurationAbstraction(context));
 		steps.add(new ResolveOpenCells(context));
 		steps.add(new ResolveRewrite(context));
-		steps.add(new FlattenDataStructures(context));
+		steps.add(new CompileDataStructures(context));
 
 		if (GlobalSettings.sortedCells) {
 			steps.add(new SortCells(context));

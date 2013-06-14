@@ -37,6 +37,7 @@ import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.general.GlobalSettings;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -316,7 +317,11 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
             }
 
 			node = node.shallowCopy();
-			node.setSort(KSorts.KITEM);
+            if (GlobalSettings.matchingLogic) {
+                /* the Java Rewrite Engine preserves sort information for variables */
+            } else {
+			    node.setSort(KSorts.KITEM);
+            }
 			return node;
 		}
 	}

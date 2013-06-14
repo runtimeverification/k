@@ -20,15 +20,15 @@ public class Cell<T extends Term> extends Term {
     public Cell(String label, T content) {
         super(Kind.CELL);
 
-        assert content.getKind() == Kind.CELL_COLLECTION
-                || content.getKind() == Kind.K
-                || content.getKind() == Kind.KITEM
-                || content.getKind() == Kind.KLABEL
-                || content.getKind() == Kind.KLIST
-                || content.getKind() == Kind.MAP:
-                "unexpected cell kind " + content.getKind();
+        assert content.kind() == Kind.CELL_COLLECTION
+                || content.kind() == Kind.K
+                || content.kind() == Kind.KITEM
+                || content.kind() == Kind.KLABEL
+                || content.kind() == Kind.KLIST:
+                //|| content.kind() == Kind.MAP:
+                "unexpected cell kind " + content.kind();
         this.label = label;
-        this.contentKind = content.getKind();
+        this.contentKind = content.kind();
         this.content = content;
     }
 

@@ -1,14 +1,12 @@
 package org.kframework.backend.java.builtins;
 
-import org.kframework.backend.java.kil.BoolToken;
-
 
 /**
  * Table of {@code public static} methods on builtin boolean values.
  *
  * @author: AndreiS
  */
-public class BuiltinBool {
+public class BuiltinBoolOperations {
 
     public static BoolToken not(BoolToken term) {
         return BoolToken.of(!term.booleanValue());

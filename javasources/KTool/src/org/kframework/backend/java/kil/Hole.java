@@ -7,18 +7,16 @@ import org.kframework.kil.ASTNode;
 
 
 /**
- * Created with IntelliJ IDEA.
- * User: andrei
- * Date: 3/28/13
- * Time: 1:52 PM
- * To change this template use File | Settings | File Templates.
+ * A hole (a term of the form "HOLE").
+ *
+ * @author AndreiS
  */
 public class Hole extends Term {
 
     public static final Hole HOLE = new Hole();
 
     private Hole() {
-        super(Kind.K);
+        super(Kind.KITEM);
     }
 
     @Override
@@ -30,8 +28,6 @@ public class Hole extends Term {
     public String toString() {
         return "HOLE";
     }
-
-
 
     @Override
     public void accept(Matcher matcher, Term patten) {

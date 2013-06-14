@@ -21,30 +21,30 @@ public class MapUpdate extends Term {
     /** {@link Variable} name of the map */
     private final Variable map;
 
-    /** {@code Set} of keys to be removed from the map */
-    private final Set<Term> removeSet;
+    /** {@code Map} of entries to be removed from the map */
+    private final  Map<Term, Term> removeEntries;
 
     /** {@code Map} of entries to be updated in the map */
-    private final Map<Term, Term> updateMap;
+    private final Map<Term, Term> updateEntries;
 
 
-    public MapUpdate(Variable map, Set<Term> removeSet, Map<Term, Term> updateMap) {
+    public MapUpdate(Variable map, Map<Term, Term> removeEntries, Map<Term, Term> updateEntries) {
         super(map.getSort());
         this.map = map;
-        this.removeSet = removeSet;
-        this.updateMap = updateMap;
+        this.removeEntries = removeEntries;
+        this.updateEntries = updateEntries;
     }
 
     public Variable map() {
         return map;
     }
 
-    public Set<Term> removeSet() {
-        return Collections.unmodifiableSet(removeSet);
+    public Map<Term, Term> removeEntries() {
+        return Collections.unmodifiableMap(removeEntries);
     }
 
-    public Map<Term, Term> updateMap(){
-        return Collections.unmodifiableMap(updateMap);
+    public Map<Term, Term> updateEntries(){
+        return Collections.unmodifiableMap(updateEntries);
     }
 
     @Override
@@ -56,8 +56,8 @@ public class MapUpdate extends Term {
     public int hashCode() {
         int hash = 1;
         hash = hash * Context.HASH_PRIME + map.hashCode();
-        hash = hash * Context.HASH_PRIME + removeSet.hashCode();
-        hash = hash * Context.HASH_PRIME + updateMap.hashCode();
+        hash = hash * Context.HASH_PRIME + removeEntries.hashCode();
+        hash = hash * Context.HASH_PRIME + updateEntries.hashCode();
         return hash;
     }
 
@@ -72,8 +72,8 @@ public class MapUpdate extends Term {
         }
 
         MapUpdate mapUpdate = (MapUpdate) object;
-        return map.equals(mapUpdate.map) && removeSet.equals(mapUpdate.removeSet)
-               && updateMap.equals(mapUpdate.updateMap);
+        return map.equals(mapUpdate.map) && removeEntries.equals(mapUpdate.removeEntries)
+               && updateEntries.equals(mapUpdate.updateEntries);
     }
 
     @Override

@@ -7,7 +7,7 @@ import java.util.Set;
 
 
 /**
- * Abstract class representing a KItem of the form {@code SORT(#"VALUE")}.
+ * A K term of the form {@code SORT(#"VALUE")}.
  *
  * @author AndreiS
  */
@@ -30,7 +30,7 @@ public abstract class Token extends Term implements Sorted {
 
     @Override
     public boolean isGround() {
-        return false;
+        return true;
     }
 
     @Override

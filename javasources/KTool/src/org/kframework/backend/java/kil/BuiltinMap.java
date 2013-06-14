@@ -12,35 +12,31 @@ import java.util.HashMap;
 
 
 /**
- * Created with IntelliJ IDEA.
- * User: andrei
- * Date: 3/17/13
- * Time: 12:59 PM
- * To change this template use File | Settings | File Templates.
+ * @author AndreiS
  */
-public class Map extends Collection {
+public class BuiltinMap extends Collection {
 
-    public static final Map EMPTY = new Map();
+    public static final BuiltinMap EMPTY = new BuiltinMap();
 
     private final java.util.Map<Term, Term> entries;
 
-    public Map(java.util.Map<Term, Term> entries, Variable frame) {
-        super(frame, Kind.MAP);
+    public BuiltinMap(java.util.Map<Term, Term> entries, Variable frame) {
+        super(frame, Kind.KITEM);
         this.entries = new HashMap<Term, Term>(entries);
     }
 
-    public Map(Variable frame) {
-        super(frame, Kind.MAP);
+    public BuiltinMap(Variable frame) {
+        super(frame, Kind.KITEM);
         entries = new HashMap<Term, Term>();
     }
 
-    public Map(java.util.Map<Term, Term> entries) {
-        super(null, Kind.MAP);
+    public BuiltinMap(java.util.Map<Term, Term> entries) {
+        super(null, Kind.KITEM);
         this.entries = new HashMap<Term, Term>(entries);
     }
 
-    public Map() {
-        super(null, Kind.MAP);
+    public BuiltinMap() {
+        super(null, Kind.KITEM);
         entries = new HashMap<Term, Term>();
     }
 
@@ -56,12 +52,20 @@ public class Map extends Collection {
         return entries.put(key, value);
     }
 
-    @Override
-    public String toString() {
-        return toString(" ", " |-> ", "." + Kind.MAP);
+    public void putAll(java.util.Map<Term, Term> entries) {
+        this.entries.putAll(entries);
     }
 
-    public String toString(String operator, String mapsTo, String identity) {
+    public Term remove(Term key) {
+        return entries.remove(key);
+    }
+
+    @Override
+    public String toString() {
+        return toString(" ", " |-> ", ".Map");
+    }
+
+    private String toString(String operator, String mapsTo, String identity) {
         Joiner.MapJoiner joiner = Joiner.on(operator).withKeyValueSeparator(mapsTo);
         StringBuilder stringBuilder = new StringBuilder();
         joiner.appendTo(stringBuilder, entries);
@@ -75,14 +79,6 @@ public class Map extends Collection {
             stringBuilder.append(identity);
         }
         return stringBuilder.toString();
-    }
-
-    /**
-     * @return a copy of the ASTNode containing the same fields.
-     */
-    @Override
-    public ASTNode shallowCopy() {
-        throw new UnsupportedOperationException();  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override

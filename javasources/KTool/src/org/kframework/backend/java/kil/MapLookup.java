@@ -21,6 +21,15 @@ public class MapLookup extends Term {
         this.key = key;
     }
 
+    public Term evaluateLookup() {
+        if (!(map instanceof BuiltinMap)) {
+            return this;
+        }
+
+        Term value = ((BuiltinMap) map).get(key);
+        return value != null ? value : this;
+    }
+
     public Term key() {
         return key;
     }
@@ -54,6 +63,11 @@ public class MapLookup extends Term {
 
         MapLookup mapLookup = (MapLookup) object;
         return key.equals(mapLookup.key) && map.equals(mapLookup.map);
+    }
+
+    @Override
+    public String toString() {
+        return map.toString() + "[" + key + "]";
     }
 
     @Override

@@ -15,47 +15,56 @@ import com.google.common.collect.ImmutableList;
 
 
 /**
+ * A KLabel constant.
  *
  * @author AndreiS
  */
 public class KLabelConstant extends KLabel {
 
-    /**
-     * HashMap caches the constants to ensure uniqueness.
-     */
+    /* KLabelConstant cache */
     private static final HashMap<String, KLabelConstant> cache = new HashMap<String, KLabelConstant>();
 
     /* un-escaped label */
     private final String label;
-    /* unmodifiable view of the production list */
+    /* unmodifiable view of a list of productions generating this {@code KLabelConstant} */
     private final List<Production> productions;
+    /*
+     * boolean flag set iff a production tagged with "function" or "predicate" generates this
+     * {@code
+     * KLabelConstant}
+     */
     private final boolean isFunction;
 
-    public KLabelConstant(String label, Context context) {
+    private KLabelConstant(String label, Context context) {
         this.label = label;
         productions = ImmutableList.copyOf(context.productionsOf(label));
 
         boolean isFunction = false;
-        for (Production production : productions) {
-            if (production.containsAttribute(Attribute.FUNCTION.getKey())) {
-                isFunction = true;
-                break;
+        if (!label.startsWith("is")) {
+            for (Production production : productions) {
+                if (production.containsAttribute(Attribute.FUNCTION.getKey())) {
+                    isFunction = true;
+                    break;
+                }
+                if (production.containsAttribute(Attribute.PREDICATE.getKey())) {
+                    isFunction = true;
+                    break;
+                }
             }
-            if (production.containsAttribute(Attribute.PREDICATE.getKey())) {
-                isFunction = true;
-                break;
-            }
+        } else {
+            /* a KLabel beginning with "is" represents a sort membership predicate */
+            isFunction = true;
         }
         this.isFunction = isFunction;
     }
 
     /**
-     * Returns a {@code KLabelConstant} representing the label. The function
-     * caches the {@code KLabelConstant} objects; subsequent calls with the same label return
-     * the same object.
+     * Returns a {@code KLabelConstant} representation of label. The {@code KLabelConstant}
+     * instances are cached to ensure uniqueness (subsequent invocations
+     * of this method with the same label return the same {@code KLabelConstant} object).
      *
      * @param label string representation of the KLabel; must not be '`' escaped;
-     * @return AST term representation the KLabel;
+     * @return AST term representation the the KLabel;
      */
     public static final KLabelConstant of(String label, Context context) {
         assert label != null;
@@ -68,11 +77,19 @@ public class KLabelConstant extends KLabel {
         return kLabelConstant;
     }
 
+    /**
+     * Returns true iff no production tagged with "function" or "predicate" generates this {@code
+     * KLabelConstant}.
+     */
     @Override
     public boolean isConstructor() {
         return !isFunction;
     }
 
+    /**
+     * Returns true iff a production tagged with "function" or "predicate" generates this {@code
+     * KLabelConstant}.
+     */
     @Override
     public boolean isFunction() {
         return isFunction;
@@ -83,7 +100,7 @@ public class KLabelConstant extends KLabel {
     }
 
     /**
-     * @return unmodifiable list of productions generating this {@code KLabelConstant}
+     * Returns a unmodifiable view of a list of productions generating this {@code KLabelConstant}.
      */
     public List<Production> productions() {
         return productions;

@@ -1,5 +1,7 @@
-package org.kframework.backend.java.kil;
+package org.kframework.backend.java.builtins;
 
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
@@ -7,11 +9,13 @@ import org.kframework.kil.ASTNode;
 
 
 /**
+ * A boolean token. There are precisely two boolean values: "true" and "false".
+ *
  * @author AndreiS
  */
 public class BoolToken extends Token {
 
-    public static final String SORT_NAME = "#Bool";
+    public static final String SORT_NAME = "Bool";
 
     /**
      * Bool(#"true")
@@ -58,6 +62,16 @@ public class BoolToken extends Token {
     @Override
     public String value() {
         return Boolean.toString(value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Boolean.valueOf(value).hashCode();
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        return this == object;
     }
 
     @Override

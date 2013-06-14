@@ -7,7 +7,7 @@ import org.kframework.kil.ASTNode;
 
 
 /**
- *
+ * A freezer term (a term of the form "#freezer()").
  *
  * @author AndreiS
  */

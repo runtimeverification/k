@@ -12,11 +12,7 @@ import java.util.Iterator;
 
 
 /**
- * Created with IntelliJ IDEA.
- * User: andrei
- * Date: 3/17/13
- * Time: 1:03 PM
- * To change this template use File | Settings | File Templates.
+ * @author AndreiS
  */
 public abstract class KCollection extends Collection implements Iterable<Term> {
 
@@ -40,6 +36,8 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
         super(frame, kind);
         this.items = ImmutableList.of();
     }
+
+    public abstract KCollection fragment(int length);
 
     public Term get(int index) {
         return items.get(index);

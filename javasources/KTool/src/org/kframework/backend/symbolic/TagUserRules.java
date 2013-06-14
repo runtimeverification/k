@@ -25,7 +25,7 @@ import org.kframework.utils.file.KPaths;
 public class TagUserRules extends CopyOnWriteTransformer {
 
 	List<String> notSymbolicTags = new ArrayList<String>(Arrays.asList(
-			Constants.MACRO, Constants.STRUCTURAL, Constants.FUNCTION, SymbolicBackend.NOTSYMBOLIC));
+			Constants.MACRO, Constants.FUNCTION, SymbolicBackend.NOTSYMBOLIC));
 
 	public TagUserRules(Context context) {
 		super("Tag rules which are not builtin with 'symbolic' tag", context);

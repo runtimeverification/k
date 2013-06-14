@@ -19,35 +19,40 @@ module MAP
   rule MyMapOf(.KList, .KList) => .MyMap
 
   /* map key lookup */
-  // AndreiS: using () instead of [] causes too ambiguities with __ and ()
-  // cannot be used for disambiguation
-  syntax K ::= MyMap "[" K "]"    [function]
+  // AndreiS: using () instead of [] causes ambiguities with __
+  // () cannot be used for disambiguation
+  syntax K ::= MyMap "[" K "]"    [function, hook(Map:lookup)]
   rule (K1:K |-> K2:K _:MyMap)[K1] => K2
 
   /* map values update (update in form of KLists of keys and values) */
-  syntax MyMap ::= MyMap "[" KList "/" KList "]"    [function]
-  rule
-    M:MyMap[K2:K,,K4:K,,KL2:KList / K1:K,,K3:K,,KL1:KList]
-  =>
-    M[K2 / K1][K4 / K3][KL2 / KL1]
-  rule M:MyMap[.KList / .KList] => M
-  rule (K1:K |-> _ M:MyMap)[K2:K / K1] => K1 |-> K2 M
-  rule M:MyMap[K2:K / K1:K] => K1 |-> K2 M
+  syntax MyMap ::= MyMap "[" K "<-" K "]"    [function, hook(Map:update)]
+  rule (K1:K |-> _ M:MyMap)[K1 <- K2:K] => K1 |-> K2 M
+  rule M:MyMap[K1:K <- K2:K] => K1 |-> K2 M
   when notBool(K1 in keys(M))
+  //syntax MyMap ::= MyMap "[" KList "<-" KList "]"    [function, hook(Map:update)]
+  //rule
+  //  M:MyMap[K2:K,,K4:K,,KL2:KList <- K1:K,,K3:K,,KL1:KList]
+  //=>
+  //  M[K2 <- K1][K4 <- K3][KL2 <- KL1]
+  //rule M:MyMap[.KList <- .KList] => M
+  //rule (K1:K |-> _ M:MyMap)[K1 <- K2:K] => K1 |-> K2 M
+  //rule M:MyMap[K1:K <- K2:K] => K1 |-> K2 M
+  //when notBool(K1 in keys(M))
 
   /* map values update (update in form of a second map) */
+  // TODO: rename operator
   syntax MyMap ::= MyMap "[" MyMap "]"    [function]
-  rule M1:MyMap[K1:K |-> K2:K M2:MyMap] => M1[K2 / K1][M2]
+  rule M1:MyMap[K1:K |-> K2:K M2:MyMap] => M1[K1 <- K2][M2]
   rule M:MyMap[.MyMap] => M
 
   /* map domain restriction */
-  syntax MyMap ::= MyMap "[" "undef" "/" KList "]"    [function] 
+  syntax MyMap ::= MyMap "[" KList "<-" "undef" "]"    [function] 
   rule
-    M:MyMap[undef / K1:K,,K2:K,,KL:KList]
+    M:MyMap[K1:K,,K2:K,,KL:KList <- undef]
   =>
-    M[undef / K1][undef / K2][undef / KL]
-  rule (K:K |-> _ M:MyMap)[undef / K] => M
-  rule M:MyMap[undef / .KList] => M
+    M[K1 <- undef][K2 <- undef][KL <- undef]
+  rule (K:K |-> _ M:MyMap)[K <- undef] => M
+  rule M:MyMap[.KList <- undef] => M
 
   /* set of map keys */
 	syntax MySet ::= keys(MyMap)    [function]
