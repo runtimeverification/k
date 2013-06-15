@@ -1,6 +1,6 @@
 package org.kframework.backend.java.kil;
 
-import org.kframework.backend.java.symbolic.Matcher;
+import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Utils;
 import org.kframework.backend.java.symbolic.Visitor;
@@ -88,8 +88,8 @@ public class Variable extends Term implements Sorted {
     }
 
     @Override
-    public void accept(Matcher matcher, Term patten) {
-        matcher.match(this, patten);
+    public void accept(Unifier unifier, Term patten) {
+        unifier.unify(this, patten);
     }
 
     @Override

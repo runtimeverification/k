@@ -36,7 +36,6 @@ public class SymbolicRewriter {
 
     private final Context context;
     private final Definition definition;
-	private final SymbolicMatcher matcher;
     private final Stopwatch stopwatch = new Stopwatch();
     public final Stopwatch ruleStopwatch = new Stopwatch();
     private final Map<IndexingPair, Set<Rule>> ruleTable;
@@ -45,7 +44,6 @@ public class SymbolicRewriter {
 	public SymbolicRewriter(Definition definition, Context context) {
         this.definition = definition;
         this.context = context;
-		matcher = new SymbolicMatcher(context);
 
         ruleTable = new HashMap<IndexingPair, Set<Rule>>();
 
@@ -136,41 +134,46 @@ public class SymbolicRewriter {
         for (Rule rule : rules) {
             ruleStopwatch.reset();
             ruleStopwatch.start();
-            if (matcher.isMatching(term, rule.leftHandSide())) {
-                SymbolicConstraint constraint = matcher.constraint();
-                constraint.addAll(rule.lookups());
-                //constraint.addAll(rule.condition());
-                constraint.add(rule.condition(), BoolToken.TRUE);
 
-                if (constraint.isFalse()) {
-                    continue;
-                }
-
-                /* rename rule variables in the constraints */
-                Map<Variable, Variable> freshSubstitution = constraint.rename(rule.variableSet());
-
-                Term result = rule.rightHandSide();
-                /* rename rule variables in the rule RHS */
-                result = result.substitute(freshSubstitution, context);
-                /* apply the constraints substitution on the rule RHS */
-                result = result.substitute(constraint.substitution(), context);
-                /* evaluate pending functions in the rule RHS */
-                result = result.evaluate(context);
-
-
-                System.err.println("rule \n\t" + rule);
-                System.err.println("result constraint\n\t" + constraint);
-                System.err.println("result term\n\t" + result);
-                System.err.println("============================================================");
-
-
-                /* return first match */
-                ruleStopwatch.stop();
-                System.err.println("### " + ruleStopwatch);
-                return result;
+            SymbolicConstraint constraint = new SymbolicConstraint(context);
+            constraint.add(term, rule.leftHandSide());
+            constraint.simplify();
+            if (constraint.isFalse()) {
+                continue;
             }
+
+            constraint.addAll(rule.lookups());
+            //constraint.addAll(rule.condition());
+            constraint.add(rule.condition(), BoolToken.TRUE);
+            constraint.simplify();
+            if (constraint.isFalse()) {
+                continue;
+            }
+
+            assert constraint.isSubstitution();
+
+            /* rename rule variables in the constraints */
+            Map<Variable, Variable> freshSubstitution = constraint.rename(rule.variableSet());
+
+            Term result = rule.rightHandSide();
+            /* rename rule variables in the rule RHS */
+            result = result.substitute(freshSubstitution, context);
+            /* apply the constraints substitution on the rule RHS */
+            result = result.substitute(constraint.substitution(), context);
+            /* evaluate pending functions in the rule RHS */
+            result = result.evaluate(context);
+
+            /*
+            System.err.println("rule \n\t" + rule);
+            System.err.println("result constraint\n\t" + constraint);
+            System.err.println("result term\n\t" + result);
+            System.err.println("============================================================");
             ruleStopwatch.stop();
-            System.err.println(ruleStopwatch);
+            System.err.println("### " + ruleStopwatch);
+            */
+
+            /* return first result */
+            return result;
         }
 
         return null;

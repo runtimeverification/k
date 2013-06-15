@@ -28,6 +28,8 @@ import java.util.Map;
  * 1. fresh can only appear as a side condition
  * 2. fresh can only be applied to a variable
  * 3. the fresh variable can only appear as a replacement variable
+ *
+ * Matching logic (option -ml): named variables may appear in the rhs
  */
 public class CheckVariables extends BasicVisitor {
 
@@ -134,10 +136,18 @@ public class CheckVariables extends BasicVisitor {
 		}
 		for (Variable v : right.keySet()) {
 			if (!left.containsKey(v)) {
-				GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
-						KException.KExceptionGroup.COMPILER,
-						"Unbounded Variable " + v.toString() + ".",
-						getName(), v.getFilename(), v.getLocation()));
+                /* matching logic relaxes this restriction */
+                if (!GlobalSettings.matchingLogic) {
+                    GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
+                            KException.KExceptionGroup.COMPILER,
+                            "Unbounded Variable " + v.toString() + ".",
+                            getName(), v.getFilename(), v.getLocation()));
+                } else {
+                    GlobalSettings.kem.register(new KException(KException.ExceptionType.WARNING,
+                            KException.KExceptionGroup.COMPILER,
+                            "Unbounded Variable " + v.toString() + ".",
+                            getName(), v.getFilename(), v.getLocation()));
+                }
 			}
 		}
 		for (Map.Entry<Variable,Integer> e : left.entrySet()) {

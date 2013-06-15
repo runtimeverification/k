@@ -53,11 +53,11 @@ public class JavaSymbolicKRun implements KRun {
 
             SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition, context);
             Term result = symbolicRewriter.rewriteStar(Term.of(cfg, context));
-            //Term result = symbolicRewriter.rewriteN(Term.of(cfg, context), 60);
+            //Term result = symbolicRewriter.rewriteN(Term.of(cfg, context), 10);
             System.err.println("[" + symbolicRewriter.elapsed() + "ms]:" + result);
-            System.err.println("[" + symbolicRewriter.ruleStopwatch + "]");
+            //System.err.println("[" + symbolicRewriter.ruleStopwatch + "]");
 
-            return new KRunResult<KRunState>(new KRunState(cfg, context));
+            return new KRunResult<KRunState>(new KRunState(null, context));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

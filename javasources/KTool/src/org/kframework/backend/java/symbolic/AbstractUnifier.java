@@ -6,10 +6,10 @@ import org.kframework.kil.matchers.MatcherException;
 /**
  * @author AndreiS
  */
-public abstract class AbstractMatcher implements Matcher {
+public abstract class AbstractUnifier implements Unifier {
 	
 	public void fail() {
-		throw new MatcherException("matching failed");
+		throw new MatcherException("unification failed");
 	}
 
 }

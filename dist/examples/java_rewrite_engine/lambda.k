@@ -30,7 +30,9 @@ module LAMBDA
   syntax Exp ::= Type
   syntax KResult ::= Type
 
-  rule letrec F X = E in E' => let F = mu F . lambda X . E in E'    [macro]
+  // macro is not supported yet
+  // rule letrec F X = E in E' => let F = mu F . lambda X . E in E'    [macro]
+  rule letrec F:Id X:Id = E:Exp in E':Exp => let F = mu F . lambda X . E in E'
 
 
   configuration <T color="yellow">
@@ -53,10 +55,8 @@ module LAMBDA
   rule if bool then T:Type else T => T
   rule <k> lambda X:Id . E:Exp => T:Type -> E::K ~> TEnv ...</k>
        <tenv> TEnv:MyMap => TEnv[X <- T] </tenv>
-    when fresh(T:Type)
   rule <k> mu X:Id . E:Exp => (T:Type -> T) E ~> TEnv ...</k>
        <tenv> TEnv:MyMap => TEnv[X <- T] </tenv>
-    when fresh(T:Type)
   rule <k> let X:Id = T:Type in E:Exp => E ~> TEnv ...</k>
        <tenv>
          TEnv:MyMap

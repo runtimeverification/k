@@ -140,8 +140,10 @@ public class SymbolicConstraint implements Serializable, Visitable {
     private TruthValue truthValue;
 
     private Context context;
-    
+    private final SymbolicUnifier unifier;
+
     public SymbolicConstraint(Context context) {
+        unifier = new SymbolicUnifier(this);
     	this.context = context;
         truthValue = TruthValue.TRUE;
         isNormal = true;
@@ -153,15 +155,8 @@ public class SymbolicConstraint implements Serializable, Visitable {
                         + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
                         + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
 
-        leftHandSide = leftHandSide.substitute(substitution, context);
-        //if (leftHandSide.isGround()) {
-            leftHandSide = leftHandSide.evaluate(context);
-        //}
-        rightHandSide = rightHandSide.substitute(substitution, context);
-        //if (rightHandSide.isGround()) {
-            rightHandSide = rightHandSide.evaluate(context);
-        //}
-
+        leftHandSide = leftHandSide.substitute(substitution, context).evaluate(context);
+        rightHandSide = rightHandSide.substitute(substitution, context).evaluate(context);
         Equality equality = this.new Equality(leftHandSide, rightHandSide);
 
         if (equality.isUnknown()){
@@ -213,9 +208,37 @@ public class SymbolicConstraint implements Serializable, Visitable {
         return truthValue == TruthValue.TRUE;
     }
 
+    public boolean isSubstitution() {
+        normalize();
+        return equalities.isEmpty();
+    }
+
     public boolean isUnknown() {
         normalize();
         return truthValue == TruthValue.UNKNOWN;
+    }
+
+    public TruthValue simplify() {
+        boolean change;
+        label: do {
+            change = false;
+            normalize();
+
+            for (int i = 0; i < equalities.size(); ++i) {
+                Equality equality = equalities.get(i);
+                if (!equality.leftHandSide.isSymbolic() && !equality.rightHandSide.isSymbolic()) {
+                    equalities.remove(i);
+                    if (!unifier.unify(equality)) {
+                        truthValue = TruthValue.FALSE;
+                        break label;
+                    }
+
+                    change = true;
+                }
+            }
+        } while (change);
+
+        return truthValue;
     }
 
     private void normalize() {

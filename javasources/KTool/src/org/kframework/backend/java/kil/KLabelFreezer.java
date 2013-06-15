@@ -1,6 +1,6 @@
 package org.kframework.backend.java.kil;
 
-import org.kframework.backend.java.symbolic.Matcher;
+import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
@@ -18,8 +18,8 @@ public class KLabelFreezer extends KLabelInjection {
     }
 
     @Override
-    public void accept(Matcher matcher, Term patten) {
-        matcher.match(this, patten);
+    public void accept(Unifier unifier, Term patten) {
+        unifier.unify(this, patten);
     }
 
     @Override

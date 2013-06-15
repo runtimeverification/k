@@ -2,7 +2,7 @@ package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.symbolic.Evaluator;
 import org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer;
-import org.kframework.backend.java.symbolic.Matchable;
+import org.kframework.backend.java.symbolic.Unifiable;
 import org.kframework.backend.java.symbolic.SubstitutionTransformer;
 import org.kframework.backend.java.symbolic.Transformable;
 import org.kframework.backend.java.symbolic.VariableVisitor;
@@ -12,7 +12,6 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Set;
 import java.util.Map;
 
@@ -22,7 +21,7 @@ import java.util.Map;
  *
  * @author AndreiS
  */
-public abstract class Term extends ASTNode implements Matchable, Transformable, Visitable {
+public abstract class Term extends ASTNode implements Unifiable, Transformable, Visitable {
 
     protected final Kind kind;
 

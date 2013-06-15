@@ -2,7 +2,7 @@ package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.builtins.SortMembership;
 import org.kframework.backend.java.symbolic.BuiltinFunction;
-import org.kframework.backend.java.symbolic.Matcher;
+import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Utils;
 import org.kframework.backend.java.symbolic.Visitor;
@@ -11,7 +11,6 @@ import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -161,8 +160,8 @@ public class KItem extends Term implements Sorted {
     }
 
     @Override
-    public void accept(Matcher matcher, Term patten) {
-        matcher.match(this, patten);
+    public void accept(Unifier unifier, Term patten) {
+        unifier.unify(this, patten);
     }
 
     @Override
