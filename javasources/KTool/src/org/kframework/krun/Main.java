@@ -230,7 +230,7 @@ public class Main {
 					Error.report(e1.getMessage());
 				}
 			} else {
-				parsed = rp.runParserOrDie(parser, value, true, null, context);
+				parsed = rp.runParserOrDie(parser, value, false, null, context);
 			}
 			output.put("$" + name, parsed);
 			hasPGM = hasPGM || name.equals("$PGM");
@@ -354,7 +354,7 @@ public class Main {
 						// + K.model_checking);
 						// assume that the specified argument is not a file and
 						// maybe represents a formula
-						KAST1 = rp.runParserOrDie("kast", K.model_checking, true,
+						KAST1 = rp.runParserOrDie("kast -e", K.model_checking, false,
 								"LtlFormula", context);
 					} else {
 						// the specified argument represents a file

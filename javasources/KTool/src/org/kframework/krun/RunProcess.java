@@ -140,7 +140,7 @@ public class RunProcess {
 				tokens.add(pgm);
 				Map<String, String> environment = new HashMap<String, String>();
 				environment.put("KRUN_SORT", startSymbol);
-				environment.put("KRUN_COMPILED_DEF", K.compiled_def);
+				environment.put("KRUN_COMPILED_DEF", context.kompiled.getAbsolutePath());
 				if (isPgm) {
 					environment.put("KRUN_IS_NOT_FILE", "true");
 				}
