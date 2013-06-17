@@ -66,7 +66,7 @@ module INT-HOOKS
   rule (I1:Int dividesInt I2:Int) => (I2 %Int I1) ==Int 0
 
   //sort Nat ::= {I:Int | I >=Int 0}
-  syntax Nat ::= "dummyNat"
+  syntax Nat
   rule isNat(I:Int) => I >=Int 0 [function, anywhere]
 
   rule 0 +Int I:Int => I [anywhere]

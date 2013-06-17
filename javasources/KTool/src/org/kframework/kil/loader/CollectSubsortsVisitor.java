@@ -5,6 +5,10 @@ import org.kframework.kil.KSorts;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.ProductionItem.ProductionType;
+import org.kframework.kil.Syntax;
+import org.kframework.kil.Syntax;
+import org.kframework.kil.Syntax;
+import org.kframework.kil.Syntax;
 import org.kframework.kil.Sort;
 import org.kframework.kil.UserList;
 import org.kframework.kil.visitors.BasicVisitor;
@@ -20,6 +24,16 @@ public class CollectSubsortsVisitor extends BasicVisitor {
 		super.visit(def);
 		context.finalizeSubsorts();
 	}
+
+    public void visit(Syntax syn) {
+        if (syn.getPriorityBlocks().size() == 0) {
+            String sortName = syn.getSort().getName();
+            if (!sortName.equals(KSorts.KITEM)) {
+                context.addSubsort(KSorts.KITEM, syn.getSort().getName());
+            }
+        }
+        super.visit(syn);
+    }
 
 	public void visit(Production prd) {
 		if (!Sort.isBasesort(prd.getSort()))

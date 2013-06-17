@@ -103,7 +103,7 @@ module K-EQUAL-HOOKS
 
   rule K:K =K K => true
 
-  rule ((K1,,KL1:KList) =KList (K2,,KL2:KList)) => ((K1 =K K2) andBool (KL1 =KList KL2))
+  rule ((K1:K,,KL1:KList) =KList (K2:K,,KL2:KList)) => ((K1 =K K2) andBool (KL1 =KList KL2))
   rule .KList =KList .KList => true
   rule _:K,,_:KList =KList .KList => false
   rule .KList =KList _:K,,_:KList => false

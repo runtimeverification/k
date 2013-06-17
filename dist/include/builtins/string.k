@@ -54,17 +54,17 @@ module STRING-HOOKS
   rule S1:String >String S2:String => S2 <String S1
   rule S1:String >=String S2:String => notBool(S1 <String S2)
 
-  syntax Char ::= "dummyChar"
+  syntax Char
 
   rule isChar(S:String) => lengthString(S) ==Int 1 [function, anywhere]
 
-  syntax Bool ::= "#isWhiteSpace" "(" Char ")"   [function, klabel(#isWhiteSpace)]
-  rule #isWhiteSpace(C)
+  syntax Bool ::= "#isWhiteSpace" "(" String ")"   [function, klabel(#isWhiteSpace)]
+  rule #isWhiteSpace(C:String)
       => (asciiString(C) >=Int 9 andBool asciiString(C) <=Int 13)  
            orBool (C ==String " ") when isChar(C)
 
-  syntax Bool ::= "#isDigit" "(" Char ")"        [function, klabel(#isDigit)]
-  rule #isDigit(C) 
+  syntax Bool ::= "#isDigit" "(" String ")"        [function, klabel(#isDigit)]
+  rule #isDigit(C:String) 
       => (asciiString(C) >=Int asciiString("0")) 
            andBool (asciiString(C) <=Int asciiString("9")) when isChar(C)
 

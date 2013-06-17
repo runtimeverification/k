@@ -18,9 +18,9 @@ module ARRAY
   imports STRING-HOOKS
 
   // main array axioms
-  rule select(store(A:Array, I:Int, V:K), J:Int) => V 
+  rule select(store(_:Array, I:Int, V:K), J:Int) => V 
        when I ==Int J [symbolic-kompile]
-  rule select(store(A:Array, I:Int, V:K), J:Int) => select(A, J)
+  rule select(store(A:Array, I:Int, _:K), J:Int) => select(A, J)
        when I =/=Int J [symbolic-kompile]
 
   // select from constant array

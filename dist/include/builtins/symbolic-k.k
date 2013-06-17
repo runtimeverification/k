@@ -18,10 +18,10 @@ module SYMBOLIC-K
   syntax KLabel ::= "#symEqualitySort"
 
   /* The following simplification rules assume non-empty sorts. */
-  rule forall S:Set . true => true
-  rule forall S:Set . false => false
-  rule exists S:Set . true => true
-  rule exists S:Set . false => false
+  rule forall _:Set . true => true
+  rule forall _:Set . false => false
+  rule exists _:Set . true => true
+  rule exists _:Set . false => false
 
   /* Translation to SMTLib */
   syntax String ::= "K2SMTLib" "(" K ")" [klabel(K2SMTLib), function]
@@ -79,7 +79,7 @@ module SYMBOLIC-K
   syntax Bool ::= "isBuiltin" "(" K ")"
   [prefixlabel(isBuiltin), klabel(isBuiltin), predicate]
 
-  syntax Variable ::= "dummy-this-Variable-needed-only-to-declare-sort"
+  syntax Variable
 //  syntax Bool ::= "isVariable" "(" K ")"
 //  [prefixlabel(isVariable), klabel(isVariable), predicate]
 

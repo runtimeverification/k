@@ -111,7 +111,7 @@ module URIS
   syntax KList ::= #string2klist(String) [function]
   rule #string2klist(S:String) => substrString(S, 0, findString(S, "\001", 0)) ,, #string2klist(substrString(S, findString(S, "\001", 0) +Int 1, lengthString(S))) when findString(S, "\001", 0) =/=Int -1
   rule #string2klist(S:String) => S when findString(S, "\001", 0) ==Int -1
-  rule #string2klist(K) => K when isString(K) =/=K true
+  rule #string2klist(K:K) => K when isString(K) =/=K true
 
   syntax KList ::= #statTypes(KList) [function]
   rule #statTypes(S1:String,,S2:String,,S3:String,,S4:String,,S5:String,,S6:String,,S7:String,,S8:String,,S9:String,,S10:String,,S11:String,,S12:String) => String2Int(S1),,String2Int(S2),,String2Int(S3),,String2Bool(S4),,String2Bool(S5),,String2Bool(S6),,String2Int(S7),,String2Int(S8),,String2Int(S9),,String2Int(S10),,String2Int(S11),,String2Int(S12)
@@ -172,20 +172,20 @@ module URIS
          when isChar(C)
 
   // Skipping initial whitespace if reading more than a character
-  rule #parseInput(S:String,.K) (ListItem(C) => .List) 
-        when S =/=String "#Char" andBool #isWhiteSpace(C) andBool isString(C)
+  rule #parseInput(S:String,.K) (ListItem(C:String) => .List) 
+        when S =/=String "#Char" andBool #isWhiteSpace(C)
 
 
   // Read a token
-  rule #parseInput(S:String,.K => "") ListItem(C)
-        when S =/=String "#Char" andBool notBool(#isWhiteSpace(C)) andBool isString(C)
+  rule #parseInput(S:String,.K => "") ListItem(C:String)
+        when S =/=String "#Char" andBool notBool(#isWhiteSpace(C))
         
-  rule #parseInput(_:String, S:String => S:String +String C) (ListItem(C) => .List) 
-    when notBool(#isWhiteSpace(C)) andBool isString(C)
+  rule #parseInput(_:String, S:String => S:String +String C) (ListItem(C:String) => .List) 
+    when notBool(#isWhiteSpace(C))
 
   // Upon encountering again whitespace, convert token
-  rule #parseInput(SType:String,S:String) ListItem(C) => #convertToken(SType, S)
-    when #isWhiteSpace(C) andBool isString(C)
+  rule #parseInput(SType:String,S:String) ListItem(C:String) => #convertToken(SType, S)
+    when #isWhiteSpace(C)
 
   rule (#parseInput(SType:String,S:String) => #convertToken(SType, S)) ListItem(#EOF)
   
@@ -219,7 +219,7 @@ module URIS
 // ------------------------------
 // Dynamic parsing
 
-  rule #parse(StringToParse, Sort) => String2K((#tcpRequest("parse\001" +String Sort +String "\001" +String StringToParse +String "\001"))::K)
+  rule #parse(StringToParse:String, Sort:String) => String2K((#tcpRequest("parse\001" +String Sort +String "\001" +String StringToParse +String "\001"))::K)
 
   syntax K ::= String2K(String) [function, hook(#K-PARSER:string2k)]
   syntax Bag ::= String2Bag(String) [function, hook(#K-PARSER:string2bag)]
