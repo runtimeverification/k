@@ -121,7 +121,7 @@ public class ProgramSDF {
 
 		for (String t : ctv.terminals) {
 			if (t.matches("[a-zA-Z][a-zA-Z0-9]*")) {
-				sdf.append("	\"" + t + "\" -> DzDzID {reject}\n");
+				sdf.append("	\"" + StringUtil.escape(t) + "\" -> DzDzID {reject}\n");
 			}
 		}
 
@@ -153,7 +153,7 @@ public class ProgramSDF {
 		sdf.append("context-free restrictions\n");
 		for (Restrictions r : psdfv.restrictions) {
 			if (r.getTerminal() != null && !r.getTerminal().getTerminal().equals(""))
-				sdf.append("	" + r.getTerminal() + " -/- " + r.getPattern() + "\n");
+				sdf.append("	" + StringUtil.escape(r.getTerminal().toString()) + " -/- " + r.getPattern() + "\n");
 			else
 				sdf.append("	" + StringUtil.escapeSortName(r.getSort().getName()) + " -/- " + r.getPattern() + "\n");
 		}

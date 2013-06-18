@@ -42,8 +42,7 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
     private Status status;
 
     public CompileDataStructures(Context context) {
-        super("Compile collections (bag, list, map and set) to internal K representation",
-              context);
+        super("Compile collections to internal K representation", context);
     }
 
     @Override

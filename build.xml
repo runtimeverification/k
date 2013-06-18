@@ -86,7 +86,7 @@
 				<equals arg1="${version}" arg2="latest" />
 			</not>
 		</condition>
-		<echo message="K-framework ${k-version}.${line.separator}" file="${version.file}" />
+		<echo message="K-framework ${k-version}, branch v3.2.${line.separator}" file="${version.file}" />
 		<echo message="SVN Revision: ${info.entry(revision)}${line.separator}" file="${version.file}" append="true" />
 		<echo message="Build date: ${date}${line.separator}" file="${version.file}" append="true" />
 	</target>

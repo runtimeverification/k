@@ -17,7 +17,6 @@ public class CollectSubsortsVisitor extends BasicVisitor {
 
 	public CollectSubsortsVisitor(Context context) {
 		super(context);
-		// TODO Auto-generated constructor stub
 	}
 
 	public void visit(Definition def) {
