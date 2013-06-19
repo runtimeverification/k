@@ -1,8 +1,7 @@
 package org.kframework.krun.api;
 
-import edu.uci.ics.jung.graph.DirectedGraph;
-import edu.uci.ics.jung.graph.DirectedSparseGraph;
-import edu.uci.ics.jung.graph.util.Pair;
+import java.util.Set;
+
 import org.apache.commons.collections15.BidiMap;
 import org.apache.commons.collections15.bidimap.DualHashBidiMap;
 import org.kframework.backend.unparser.UnparserFilter;
@@ -10,6 +9,7 @@ import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Rule;
+import org.kframework.kil.Sentence;
 import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
@@ -22,7 +22,9 @@ import org.kframework.krun.api.Transition.TransitionType;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor;
 
-import java.util.Set;
+import edu.uci.ics.jung.graph.DirectedGraph;
+import edu.uci.ics.jung.graph.DirectedSparseGraph;
+import edu.uci.ics.jung.graph.util.Pair;
 
 public class KRunApiDebugger implements KRunDebugger {
 	private KRun krun;
@@ -46,7 +48,7 @@ public class KRunApiDebugger implements KRunDebugger {
 			pattern.accept(vars);
 			defaultVars = vars.getVars().keySet();
 			defaultPatternInfo = new RuleCompilerSteps(K.definition, context);
-			pattern = defaultPatternInfo.compile((Rule) pattern, null);
+			pattern = defaultPatternInfo.compile(new Rule((Sentence) pattern), null);
 
 			defaultPattern = (Rule) pattern;
 		} catch (Exception e) {
