@@ -1,3 +1,3 @@
 #!/usr/bin/env sh
 
-java -ea -jar -Xmx1024m -Xss1024m "$(dirname $0)/../lib/java/k3.jar" -krun "$@"
+java -ea -jar -Xmx4096m -Xss64m "$(dirname $0)/../lib/java/k3.jar" -krun "$@"
