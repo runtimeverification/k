@@ -1,0 +1,8 @@
+i := #symInt(i) ;
+n := #symInt(n) ;
+s := #symInt(s) ;
+while i i< n do (
+     (   s := s i+ i ;
+   i := i i+ 1  ) ;
+  Labe1Stmt nnn
+)
