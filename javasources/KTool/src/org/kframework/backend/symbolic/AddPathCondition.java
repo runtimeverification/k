@@ -62,8 +62,8 @@ public class AddPathCondition extends CopyOnWriteTransformer {
         condition = (Term) node.getCondition().accept(cnft);
 
         ConditionTransformer ct = new ConditionTransformer(context);
-        condition = (Term) node.getCondition().accept(ct);
-
+        condition = (Term) condition.accept(ct);
+        
         if (node.getBody() instanceof Rewrite) {
             Rewrite rew = (Rewrite) node.getBody();
 
@@ -105,7 +105,6 @@ public class AddPathCondition extends CopyOnWriteTransformer {
 
             Attributes atts = node.getAttributes();
             Term cond = condition;
-//            System.out.println(pathCondition);
             if (!GlobalSettings.NOSMT) {
                 List<Term> myList = new ArrayList<Term>();
                 myList.add(condition);
@@ -121,13 +120,7 @@ public class AddPathCondition extends CopyOnWriteTransformer {
                   atts.setContents(attrs);
                 }
             }
-//            else {
-//            	cond = originalCondition;
-//            }
 
-
-
-            // re-construct the rule
             node = node.shallowCopy();
             node.setBody(new Rewrite(left, right, context));
             node.setAttributes(atts);
@@ -155,6 +148,6 @@ public class AddPathCondition extends CopyOnWriteTransformer {
         KApp unsat = StringBuiltin.kAppOf("unsat");
         KApp checkSat = KApp.of(KLabelConstant.of("'checkSat", context), pathCondition);
         return KApp.of(KLabelConstant.KNEQ_KLABEL, checkSat, unsat);
-//        return KApp.of(KLabelConstant.KEQ_KLABEL, checkSat, unsat);
+//        return KApp.of(KLabelConstant.KEQ_KLABEL, checkSat, StringBuiltin.kAppOf("sat");
     }
 }
