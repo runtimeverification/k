@@ -1,6 +1,7 @@
 package org.kframework.kil.loader;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
@@ -60,9 +61,7 @@ import aterm.ATermAppl;
 import aterm.ATermList;
 
 /**
- * Factory for creating KIL classes from XML nodes or ATerms.
- * Must call startConstruction/endConstruction around calls to getTerm,
- * to supply a Context.
+ * Factory for creating KIL classes from XML nodes or ATerms. Must call startConstruction/endConstruction around calls to getTerm, to supply a Context.
  */
 public class JavaClassesFactory {
 	private static Context context = null;
@@ -211,8 +210,25 @@ public class JavaClassesFactory {
 		return null;
 	}
 
+	private static java.util.Map<Integer, ASTNode> cache = new HashMap<Integer, ASTNode>();
+
+	public static void clearCache() {
+		cache.clear();
+	}
+
+	private static ASTNode storeNode(Integer key, ASTNode node) {
+		cache.put(key, node);
+		return node;
+	}
+
 	public static ASTNode getTerm(ATerm atm) {
 		assert context != null;
+
+		if (cache.containsKey(atm.getUniqueIdentifier())) {
+			ASTNode node = cache.get(atm.getUniqueIdentifier());
+			// System.out.println(atm.getUniqueIdentifier() + " = " + node);
+			return node;
+		}
 
 		if (atm.getType() == ATerm.APPL) {
 			ATermAppl appl = (ATermAppl) atm;
@@ -277,10 +293,10 @@ public class JavaClassesFactory {
 					if (tc != null)
 						tc.getContents().add(new Empty(StringUtil.getSortNameFromCons(appl.getName())));
 					else
-						return new Empty(StringUtil.getSortNameFromCons(appl.getName()));
-					return head;
+						return storeNode(atm.getUniqueIdentifier(), new Empty(StringUtil.getSortNameFromCons(appl.getName())));
+					return storeNode(atm.getUniqueIdentifier(), head);
 				} else
-					return new TermCons(appl, context);
+					return storeNode(atm.getUniqueIdentifier(), new TermCons(appl, context));
 			}
 			if (appl.getName().endsWith("Bracket"))
 				return new Bracket(appl);
@@ -293,10 +309,10 @@ public class JavaClassesFactory {
 			if (appl.getName().endsWith("Const")) {
 				String sort = StringUtil.getSortNameFromCons(appl.getName());
 				if (sort.equals(KSorts.KLABEL)) {
-					return new KLabelConstant(appl);
+					return storeNode(atm.getUniqueIdentifier(), new KLabelConstant(appl));
 				} else {
 					// builtin token or lexical token
-					return Token.kAppOf(appl);
+					return storeNode(atm.getUniqueIdentifier(), Token.kAppOf(appl));
 				}
 			}
 			// if (Constants.KAPP.endsWith(appl.getNodeName()))
@@ -357,7 +373,7 @@ public class JavaClassesFactory {
 			// if (Constants.DEFINITION.endsWith(appl.getNodeName()))
 			// return new Definition(appl);
 			if (Constants.AMB.equals(appl.getName()))
-				return new Ambiguity(appl);
+				return storeNode(atm.getUniqueIdentifier(), new Ambiguity(appl));
 			// if (Constants.MODULECOMMENT.endsWith(appl.getNodeName()))
 			// return new LiterateModuleComment(appl);
 			// if (Constants.DEFCOMMENT.endsWith(appl.getNodeName()))
