@@ -58,9 +58,9 @@ module RUNECHIV
 
     rule <k1> S1:Stmt ; S2:Stmt => S1 ~> S2 ...</k1>
 
-    rule <k1> if B:Bool then S1:Stmt else _:K => S1 ...</k1> when B ==Bool true
+    rule <k1> if true then S1:Stmt else _:K => S1 ...</k1>
 
-    rule <k1> if B:Bool then _:K else S2:Stmt => S2 ...</k1> when B ==Bool false
+    rule <k1> if false then _:K else S2:Stmt => S2 ...</k1>
 
     rule <k1> while E:Exp do S:Stmt => if E then (S ; (while E do S)) else 
       skip ...</k1>
@@ -103,9 +103,9 @@ module RUNECHIV
 
     rule <k2> I1:Int f< I2:Int => I1 <Int I2 ...</k2>
 
-    rule <k2> fif B:Bool fthen S1:FExp felse _:K => S1 ...</k2> when B ==Bool true
+    rule <k2> fif true fthen S1:FExp felse _:K => S1 ...</k2>
 
-    rule <k2> fif B:Bool fthen _:K felse S2:FExp => S2 ...</k2> when B ==Bool false
+    rule <k2> fif false fthen _:K felse S2:FExp => S2 ...</k2>
 
     rule <k2> (lambda X:Id . E:FExp) V:Val => E [ V / X ] ...</k2>
 
