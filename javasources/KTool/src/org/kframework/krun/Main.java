@@ -503,8 +503,8 @@ public class Main {
 					.getCanonicalPath();
 			RunProcess rp = new RunProcess();
 			KRun krun = obtainKRun(context);
+            krun.setBackendOption("io", false);
 			KRunDebugger debugger;
-			K.io = false;
 			if (state == null) {
 				Term t = makeConfiguration(kast, "", rp, (K.term != null), context);
 				debugger = krun.debug(t);
