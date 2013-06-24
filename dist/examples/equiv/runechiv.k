@@ -166,10 +166,10 @@ module RUNECHIV
       	             S |-> SPB:Int
            ...</env1>
       	   </t1>
-      	   when //(N1 ==Int N -Int 1) ==Bool true // andBool
+//      	   when //(N1 ==Int N -Int 1) ==Bool true // andBool
       // 	   // SPE = (N + ... + NP - 1)
       // 	   // SPB = (1 + ... + I - 1)
 //                SPE ==Int ((N +Int NP -Int 1) *Int (IP -Int 1)) /Int 2 andBool 
-                (SPB ==Int (IP *Int (IP -Int 1)) /Int 2) [symbolic-kompile]
+//                (SPB *Int 2 ==Int (IP *Int (IP -Int 1))) [symbolic-kompile]
 
 endmodule
