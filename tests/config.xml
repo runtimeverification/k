@@ -686,5 +686,10 @@
       folder="tests/regression/basicFloat"
       results="tests/regression/basicFloat"
       extensions="issue" />
+  <test
+      language="tests/regression/follow/issue.k"
+      folder="tests/regression/follow"
+      results="tests/regression/follow"
+      extensions="issue" />
 </tests>
 

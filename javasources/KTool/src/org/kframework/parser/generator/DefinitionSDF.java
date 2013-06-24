@@ -272,7 +272,7 @@ public class DefinitionSDF {
 		sdf.append("context-free restrictions\n");
 		for (Restrictions r : psdfv.restrictions) {
 			if (r.getTerminal() != null && !r.getTerminal().getTerminal().equals(""))
-				sdf.append("	" + r.getTerminal() + " -/- " + r.getPattern() + "\n");
+				sdf.append("	\"" + StringUtil.escape(r.getTerminal().getTerminal()) + "\" -/- " + r.getPattern() + "\n");
 			else
 				sdf.append("	" + StringUtil.escapeSortName(r.getSort().getName()) + " -/- " + r.getPattern() + "\n");
 		}
