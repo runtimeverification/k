@@ -1,8 +1,8 @@
-i := #symInt(i) ;
 n := #symInt(n) ;
-s := #symInt(s) ;
+s := 0 ;
+i := 0 ;
 while i i< n do (
-     (   s := s i+ i ;
-   i := i i+ 1  ) ;
-  Labe1Stmt nnn
+   ( s := s i+ i ;
+   i := i i+ 1 ) ;
+   L1Stmt mylabel : skip
 )

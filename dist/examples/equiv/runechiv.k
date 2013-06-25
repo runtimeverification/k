@@ -29,9 +29,9 @@ module RUNECHIV
 
     syntax KLabel ::= "Label1" Id
 
-    rule <k1> 'L1Stmt_:_(I:Id,, X:Stmt) => Labe1Stmt I ~> X ...</k1> [transition]
+//    rule <k1> 'L1Stmt_:_(I:Id,, X:Stmt) => Labe1Stmt I ~> X ...</k1> [transition]
 
-    rule <k1> Labe1Stmt I:Id => (Label1 I)(.KList) ...</k1> [transition]
+//    rule <k1> Labe1Stmt I:Id => (Label1 I)(.KList) ...</k1> [transition]
 
 //    rule <k1> (Label1 I)(.KList) => .K ...</k1> [transition]
 
@@ -76,7 +76,7 @@ module RUNECHIV
                   | "fix" Id FExp [binder, klabel('fix__)]
                   | FExp FExp [seqstrict, klabel('__)]
                   | "(" FExp ")" [bracket, klabel('(_))]
-                  | "L2FExp" Id ":" FExp [strict(2)]
+                  | "L2FExp" Id ":" FExp
 		  | "Labe2FExp" Id
 
     syntax Val ::= "lambda" Id "." FExp [binder, klabel('lambda_._)]
@@ -116,10 +116,10 @@ module RUNECHIV
                 <first>
                     <t1>
                         <k1>
-                            $PGM:K
+			    $PGM:K
                         </k1>
                         <env1>
-                            .Map
+                            $CFG:Map
                         </env1>
                     </t1>
                 </first>
@@ -134,8 +134,8 @@ module RUNECHIV
 
       syntax KResult ::= "Success1" | "Success2"
 
-      rule <k1> .K </k1> <env1>... _:Id |-> (R1:KResult => Success1) ...</env1>
-      	   <k2> R2:KResult => Success2 </k2> when R1 ==K R2 [transition]
+      // rule <k1> .K </k1> <env1>... _:Id |-> (R1:KResult => Success1) ...</env1>
+      // 	   <k2> R2:KResult => Success2 </k2> when R1 ==K R2 [transition]
 
 //      rule #freezer (X:Id => 1)
 
@@ -149,23 +149,23 @@ module RUNECHIV
 
       rule 
            <k2>
-                L2FExp L1:Id : N:Int ~> (#freezer (lambda X:Id . (fif (N1:Int
-                  f== 0) fthen X felse (((fix F:Id (lambda
-                  Y:Id . (lambda X . (fif (Y f== 0) fthen X felse
-                  ((F (Y f- 1)) (L2FExp L1 : (X f+ Y))))))) (N1 f- 1)) (
-                  L2FExp L1 : (X f+ N1))))) HOLE)(.KList) => .K
+                L2FExp Label:Id : (((fix F:Id (lambda X:Id . (
+                  lambda Y:Id . (fif (X f== 0) fthen Y felse (L2FExp Label :
+                        ((F (X f- 1)) (Y f+ X))))))) (NI:Int f- 1))
+                         (SE:Int f+ NI)) => .K
            </k2>
       	   <t1>
       	   <k1>
-      		((Label1 YP:Id)(.KList) ~>
-      		   (while (I:Id i< NName:Id) do (((S:Id := (S i+ I)) ; (
-                    I := (I i+ 1))) ; (Labe1Stmt YP)))) => .K
+                L1Stmt Label:Id : skip ~> while (IName:Id i< NName:Id) do (((SName:Id := (SName i+ IName))
+                  ; (IName := (IName i+ 1))) ; (L1Stmt Label : skip)) => .K
            </k1>
-      	   <env1>... NName |-> NP:Int
-      	   	     I |-> IP:Int
-      	             S |-> SPB:Int
+      	   <env1>... 
+      	   	     IName |-> I:Int
+		     NName |-> N:Int
+      	             SName |-> S:Int
            ...</env1>
       	   </t1>
+	   when NI ==Int N -Int I
 //      	   when //(N1 ==Int N -Int 1) ==Bool true // andBool
       // 	   // SPE = (N + ... + NP - 1)
       // 	   // SPB = (1 + ... + I - 1)
