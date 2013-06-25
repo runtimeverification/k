@@ -50,6 +50,9 @@ public class DeleteFunctionRules extends CopyOnWriteTransformer {
 		if (!hooks.contains(hook)) {
 			return node;
 		}
+        if (node.containsAttribute(Attribute.SIMPLIFICATION_KEY)) {
+            return node;
+        }
 		return null;
 	}
 }
