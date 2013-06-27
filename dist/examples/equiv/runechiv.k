@@ -8,6 +8,7 @@ module RUNECHIV
                  | Exp "i-" Exp [strict, klabel('_i-_)]
                  | Exp "i==" Exp [strict, klabel('_i==_)]
                  | Exp "i<" Exp [strict, klabel('_i<_)]
+                 | Exp "i<=" Exp [strict, klabel('_i<=_)]
                  | "(" Exp ")" [bracket, klabel('(_))]
                  | "L1Exp" Id ":" Exp
 		 | "Labe1Exp" Id
@@ -50,6 +51,8 @@ module RUNECHIV
 
     rule <k1> I1:Int i< I2:Int => I1 <Int I2 ...</k1>
 
+    rule <k1> I1:Int i<= I2:Int => I1 <=Int I2 ...</k1>
+
     rule <k1> I:Id := I1:Int => .K ...</k1> <env1>... I |-> ((_:K => I1)) ...
       </env1>
 
@@ -70,12 +73,14 @@ module RUNECHIV
                   | FExp "f-" FExp [strict, klabel('_f-_)]
                   | FExp "f==" FExp [strict, klabel('_f==_)]
                   | FExp "f<" FExp [strict, klabel('_f<_)]
+                  | FExp "f<=" FExp [strict, klabel('_f<=_)]
                   | "fif" FExp "fthen" FExp "felse" FExp [strict(1), klabel
                   ('if_then_else_)]
                   | Val
                   | "fix" Id FExp [binder, klabel('fix__)]
                   | FExp FExp [seqstrict, klabel('__)]
                   | "(" FExp ")" [bracket, klabel('(_))]
+		  | "let" Id "=" FExp "in" FExp [binder, strict(2), klabel('let_=_in)]
                   | "L2FExp" Id ":" FExp
 		  | "Labe2FExp" Id
 
@@ -95,6 +100,8 @@ module RUNECHIV
 
     syntax KResult ::= Val
 
+    rule <k2> let X:Id = V:Val in E:FExp => ((lambda X . E) V)  ...</k2>
+
     rule <k2> I1:Int f+ I2:Int => I1 +Int I2 ...</k2>
 
     rule <k2> I1:Int f- I2:Int => I1 -Int I2 ...</k2>
@@ -102,6 +109,8 @@ module RUNECHIV
     rule <k2> I1:Int f== I2:Int => I1 ==Int I2 ...</k2>
 
     rule <k2> I1:Int f< I2:Int => I1 <Int I2 ...</k2>
+
+    rule <k2> I1:Int f<= I2:Int => I1 <=Int I2 ...</k2>
 
     rule <k2> fif true fthen S1:FExp felse _:K => S1 ...</k2>
 
@@ -150,14 +159,17 @@ module RUNECHIV
       rule 
            <k2>
                 L2FExp Label:Id : (((fix F:Id (lambda X:Id . (
-                  lambda Y:Id . (fif (X f== 0) fthen Y felse (L2FExp Label :
-                        ((F (X f- 1)) (Y f+ X))))))) (NI:Int f- 1))
-                         (SE:Int f+ NI)) => .K
+                  lambda Y:Id . (fif (X f== 0) fthen Y felse 
+		   (let NIName:Id = X f- 1 in
+		    (let SEName:Id = Y f+ X in
+		  (L2FExp Label :
+                        ((F NIName) SEName)))))))) NI:Int)
+                         SE:Int) => .K
            </k2>
       	   <t1>
       	   <k1>
-                L1Stmt Label:Id : skip ~> while (IName:Id i< NName:Id) do (((SName:Id := (SName i+ IName))
-                  ; (IName := (IName i+ 1))) ; (L1Stmt Label : skip)) => .K
+                L1Stmt Label:Id : skip ~> (while (IName:Id i< NName:Id) do (((SName:Id := (SName i+ IName))
+                  ; (IName := (IName i+ 1))) ; (L1Stmt Label : skip))) => .K
            </k1>
       	   <env1>... 
       	   	     IName |-> I:Int
@@ -165,7 +177,13 @@ module RUNECHIV
       	             SName |-> S:Int
            ...</env1>
       	   </t1>
-	   when NI ==Int N -Int I
+	   when
+                         (NI ==Int (N -Int I))
+			 andBool ((2 *Int SE) ==Int ((N +Int NI +Int 1) *Int I))
+			 andBool ((2 *Int S) ==Int (I *Int (I -Int 1)))
+
+
+
 //      	   when //(N1 ==Int N -Int 1) ==Bool true // andBool
       // 	   // SPE = (N + ... + NP - 1)
       // 	   // SPB = (1 + ... + I - 1)
