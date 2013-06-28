@@ -9,7 +9,7 @@ module RESULT
                  | Exp "i==" Exp [strict, klabel('_i==_)]
                  | Exp "i<" Exp [strict, klabel('_i<_)]
                  | "(" Exp ")" [bracket, klabel('(_))]
-                 > "L1Exp" Id ":" Exp
+                 | "LExp" Id ":" Exp
 
     syntax Stmt ::= Id ":=" Exp [strict(2), klabel('_:=_)]
                   | "skip" [klabel('skip)]
@@ -18,23 +18,17 @@ module RESULT
                   ('if_then_else_)]
                   | "while" Exp "do" Stmt [klabel('while_do_)]
                   | "{" Stmt "}" [bracket, klabel('{_})]
-                  > "L1Stmt" Id ":" Stmt
+                  | "LStmt" Id ":" Stmt
 
     syntax Code ::= Exp
                   | Stmt
-                  > "L1Code" Id ":" Code
-
-    rule <k1> 'L1Exp_:_(_:Id,, GeneratedFreshVar0:Exp) => GeneratedFreshVar0
-       ...</k1>
-
-    rule <k1> 'L1Stmt_:_(_:Id,, GeneratedFreshVar1:Stmt) => 
-      GeneratedFreshVar1 ...</k1>
-
-    rule <k1> 'L1Code_:_(_:Id,, GeneratedFreshVar2:Code) => 
-      GeneratedFreshVar2 ...</k1>
+                  | "LCode" Id ":" Code
 
     syntax KResult ::= Int
                      | Bool
+                     | "LKResult" Id ":" KResult
+
+    rule <k1> skip => .K ...</k1>
 
     rule <k1> I:Id => I1:Int ...</k1> <env1>... I |-> I1 ...</env1>
 
@@ -61,15 +55,6 @@ module RESULT
     rule <k1> while E:Exp do S:Stmt => if E then (S ; (while E do S)) else 
       skip ...</k1>
 
-    rule <k1> 'L1Exp_:_(_:Id,, GeneratedFreshVar3:Exp) => GeneratedFreshVar3
-       ...</k1>
-
-    rule <k1> 'L1Stmt_:_(_:Id,, GeneratedFreshVar4:Stmt) => 
-      GeneratedFreshVar4 ...</k1>
-
-    rule <k1> 'L1Code_:_(_:Id,, GeneratedFreshVar5:Code) => 
-      GeneratedFreshVar5 ...</k1>
-
     syntax FExp ::= Id
                   | FExp "f+" FExp [strict, klabel('_f+_)]
                   | FExp "f-" FExp [strict, klabel('_f-_)]
@@ -81,20 +66,15 @@ module RESULT
                   | "fix" Id FExp [binder, klabel('fix__)]
                   > FExp FExp [seqstrict, klabel('__)]
                   | "(" FExp ")" [bracket, klabel('(_))]
-                  > "L2FExp" Id ":" FExp
+                  | "LFExp" Id ":" FExp
 
     syntax Val ::= "lambda" Id "." FExp [binder, klabel('lambda_._)]
                  | Int
                  | Bool
-                 > "L2Val" Id ":" Val
-
-    rule <k2> 'L2FExp_:_(_:Id,, GeneratedFreshVar6:FExp) => 
-      GeneratedFreshVar6 ...</k2>
-
-    rule <k2> 'L2Val_:_(_:Id,, GeneratedFreshVar7:Val) => GeneratedFreshVar7
-       ...</k2>
+                 | "LVal" Id ":" Val
 
     syntax KResult ::= Val
+                     | "LKResult" Id ":" KResult
 
     rule <k2> I1:Int f+ I2:Int => I1 +Int I2 ...</k2>
 
@@ -112,12 +92,6 @@ module RESULT
 
     rule <k2> fix X:Id E:FExp => E [ (fix X E) / X ] ...</k2>
 
-    rule <k2> 'L2FExp_:_(_:Id,, GeneratedFreshVar8:FExp) => 
-      GeneratedFreshVar8 ...</k2>
-
-    rule <k2> 'L2Val_:_(_:Id,, GeneratedFreshVar9:Val) => GeneratedFreshVar9
-       ...</k2>
-
     configuration
         <aggregation>
                 <first>
@@ -133,7 +107,7 @@ module RESULT
             <second>
                 <t2>
                     <k2>
-                        $PGM2:K
+                        $PGM:K
                     </k2>
                 </t2>
             </second>

@@ -137,6 +137,12 @@ public class KagregFrontEnd {
 			indenter.endLine();
 		}
 		indenter.endLine();
+		
+		AddSortLabels addSortLabels1 = new AddSortLabels(context1);
+		firstDef = (Definition)addSortLabels1.transform(firstDef);
+
+		AddSortLabels addSortLabels2 = new AddSortLabels(context2);
+		secondDef = (Definition)addSortLabels2.transform(secondDef);
 
 		UnparserFilter unparserFirst = new UnparserFilter(context1);
 		unparserFirst.setIndenter(indenter);
