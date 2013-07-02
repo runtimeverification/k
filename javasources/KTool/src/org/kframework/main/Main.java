@@ -1,11 +1,52 @@
 package org.kframework.main;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 
 import org.kframework.kagreg.KagregFrontEnd;
 import org.kframework.utils.Error;
+import org.kframework.utils.file.KPaths;
+import org.kframework.utils.general.GlobalSettings;
 
 public class Main {
+
+    /**
+     * Sets the {@code java.library.path} system property to include the native libraries
+     * directory for this platform.
+     */
+    private static void setJavaLibraryPath() {
+        String path = KPaths.getKBase(false) + "/lib/native";
+
+        if (GlobalSettings.isWindowsOS()) {
+            path += "/cygwin";
+        } else if (GlobalSettings.isMacOS()) {
+            path += "/macosx";
+        } else if (GlobalSettings.isUnixOS()) {
+            String arch = System.getProperty("os.arch");
+            if (arch.toLowerCase().contains("64")) {
+                path += "/linux/x64";
+            } else {
+                path += "/linux";
+            }
+        } else {
+            /* unexpected os */
+            return;
+        }
+
+
+        System.setProperty("java.library.path", path);
+
+        /* force java to reset the path (dirty hack) */
+        try {
+            Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
+            fieldSysPath.setAccessible(true);
+            fieldSysPath.set(null, null);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+    }
 
 	/**
 	 * @param args
@@ -14,6 +55,8 @@ public class Main {
 	 * @throws IOException when loadDefinition fails 
 	 */
 	public static void main(String[] args) throws IOException, Exception {
+        setJavaLibraryPath();
+
 		if (args.length >= 1) {
 			String[] args2 = new String[args.length - 1];
 			for (int i = 0; i < args.length - 1; i++)
