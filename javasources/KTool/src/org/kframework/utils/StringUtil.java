@@ -109,6 +109,7 @@ public class StringUtil {
 
 	public static String escapeMaude(String tag) {
 		// TODO [andreis]: current implementation appears wrong to me, i.e. '`(`) stays the same rather than becoming '```(```)
+        tag = tag.replaceAll("(?<!`)`", "BKQT");
 		return tag.replaceAll("(?<!`)([\\(\\)\\[\\]\\{\\},])", "`$1");
 	}
 
@@ -135,8 +136,15 @@ public class StringUtil {
 				else
 					sb.append(' ');
 				i++;
-			} else
-				sb.append(str.charAt(i));
+			} else {
+                if (str.charAt(i) == 'B' && str.charAt(i+1) == 'K' &&
+                        str.charAt(i+2) == 'Q' && str.charAt(i+3) == 'T') {
+                    sb.append('`');
+                    i+=3;
+                } else  {
+                    sb.append(str.charAt(i));
+                }
+            }
 		}
 
 		return sb.toString();

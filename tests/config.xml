@@ -682,6 +682,16 @@
       </all-programs> />
   </test>
   <test
+      language="tests/regression/issue674/issue.k"
+      folder="tests/regression/issue674"
+      results="tests/regression/issue674"
+      extensions="issue" >
+      <all-programs>
+        <krun-option name="--output-mode" value="pretty" />
+      </all-programs>
+  </test>
+
+  <test
       language="tests/regression/basicFloat/issue.k"
       folder="tests/regression/basicFloat"
       results="tests/regression/basicFloat"
