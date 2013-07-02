@@ -24,8 +24,7 @@ public class SglrJNI {
             }
         }
         if (GlobalSettings.isWindowsOS()) {
-            System.err.println("SglriJNI not available on this platform, yet :-)");
-            System.exit(1);
+        	path += "/cygwin/SglrJNI.dll";
         }
         if (GlobalSettings.isMacOS()) {
 			path += "/macosx/libSglrJNI.jnilib";
