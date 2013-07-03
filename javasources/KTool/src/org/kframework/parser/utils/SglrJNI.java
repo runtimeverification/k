@@ -1,8 +1,5 @@
 package org.kframework.parser.utils;
 
-import org.kframework.utils.file.KPaths;
-import org.kframework.utils.general.GlobalSettings;
-
 public class SglrJNI {
 	/**
 	 * The main parsing function that accesses the C parser in native way.
@@ -15,19 +12,7 @@ public class SglrJNI {
 	 */
 	public static byte[] parseString(String parseTablePath, String input, String startSymbol, String inputFileName) {
 		if (firstTime) {
-			String arch = System.getProperty("os.arch");
-			if (GlobalSettings.isWindowsOS()) {
-				if (arch.toLowerCase().contains("64")) {
-					System.load(KPaths.getKBase(false) + "/lib/native/cygwin/x64/SglrJNI.dll");
-				} else
-					System.load(KPaths.getKBase(false) + "/lib/native/cygwin/SglrJNI.dll");
-			} else if (GlobalSettings.isUnixOS()) {
-				if (arch.toLowerCase().contains("64")) {
-					System.load(KPaths.getKBase(false) + "/lib/native/linux/x64/libSglrJNI.so");
-				} else
-					System.load(KPaths.getKBase(false) + "/lib/native/linux/libSglrJNI.so");
-			} else if (GlobalSettings.isMacOS())
-				System.load(KPaths.getKBase(false) + "/lib/native/macosx/libSglrJNI.jnilib");
+			System.loadLibrary("SglrJNI");
 			init();
 			firstTime = false;
 		}

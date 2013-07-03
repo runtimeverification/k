@@ -10,43 +10,45 @@ import org.kframework.utils.general.GlobalSettings;
 
 public class Main {
 
-    /**
-     * Sets the {@code java.library.path} system property to include the native libraries
-     * directory for this platform.
-     */
-    private static void setJavaLibraryPath() {
-        String path = KPaths.getKBase(false) + "/lib/native";
+	/**
+	 * Sets the {@code java.library.path} system property to include the native libraries
+	 * directory for this platform.
+	 */
+	private static void setJavaLibraryPath() {
+		String path = KPaths.getKBase(false) + "/lib/native";
 
-        if (GlobalSettings.isWindowsOS()) {
-            path += "/cygwin";
-        } else if (GlobalSettings.isMacOS()) {
-            path += "/macosx";
-        } else if (GlobalSettings.isUnixOS()) {
-            String arch = System.getProperty("os.arch");
-            if (arch.toLowerCase().contains("64")) {
-                path += "/linux/x64";
-            } else {
-                path += "/linux";
-            }
-        } else {
-            /* unexpected os */
-            return;
-        }
+		String arch = System.getProperty("os.arch");
+		if (GlobalSettings.isWindowsOS()) {
+			if (arch.toLowerCase().contains("64"))
+				path += "/cygwin/x64";
+			else
+				path += "/cygwin";
+		} else if (GlobalSettings.isMacOS()) {
+			path += "/macosx";
+		} else if (GlobalSettings.isUnixOS()) {
+			if (arch.toLowerCase().contains("64")) {
+				path += "/linux/x64";
+			} else {
+				path += "/linux";
+			}
+		} else {
+			/* unexpected os */
+			return;
+		}
 
+		System.setProperty("java.library.path", path);
 
-        System.setProperty("java.library.path", path);
-
-        /* force java to reset the path (dirty hack) */
-        try {
-            Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
-            fieldSysPath.setAccessible(true);
-            fieldSysPath.set(null, null);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        }
-    }
+		/* force java to reset the path (dirty hack) */
+		try {
+			Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
+			fieldSysPath.setAccessible(true);
+			fieldSysPath.set(null, null);
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (NoSuchFieldException e) {
+			e.printStackTrace();
+		}
+	}
 
 	/**
 	 * @param args
@@ -55,7 +57,7 @@ public class Main {
 	 * @throws IOException when loadDefinition fails 
 	 */
 	public static void main(String[] args) throws IOException, Exception {
-        setJavaLibraryPath();
+		setJavaLibraryPath();
 
 		if (args.length >= 1) {
 			String[] args2 = new String[args.length - 1];
@@ -82,9 +84,9 @@ public class Main {
 			} else if (args[0].equals("-kpretty")) {
 				org.kframework.main.KPretty.main(args2);
 			} else {
-				Error.report("The first argument of K3 not recognized. Try -kompile or -kast or -krun or -kpp.");
+				Error.report("The first argument of K3 not recognized. Try -kompile, -kast, -krun or -kpp.");
 			}
 		} else
-			Error.report("There must be a first argument to K3: try -kompile or -kast or -krun or -kpp.");
+			Error.report("There must be a first argument to K3: try -kompile, -kast, -krun or -kpp.");
 	}
 }
