@@ -1,40 +1,6 @@
 package org.kframework.parser.utils;
 
-import org.kframework.utils.file.KPaths;
-import org.kframework.utils.general.GlobalSettings;
-
 public class SglrJNI {
-    static {
-//		System.loadLibrary("SglrJNI"); // hello.dll (Windows) or libhello.so (Unixes)
-
-        System.load(getSglriLibraryPath());
-
-        init();
-    }
-
-    private static String getSglriLibraryPath() {
-        String path = KPaths.getKBase(false) + "/lib/native";
-
-        if (GlobalSettings.isUnixOS()) {
-            String arch = System.getProperty("os.arch");
-            if (arch.toLowerCase().contains("64")) {
-                path += "/linux/x64/libSglrJNI.so";
-            } else {
-                path += "/linux/libSglrJNI.so";
-            }
-        }
-        if (GlobalSettings.isWindowsOS()) {
-        	path += "/cygwin/SglrJNI.dll";
-        }
-        if (GlobalSettings.isMacOS()) {
-			path += "/macosx/libSglrJNI.jnilib";
-        }
-        return path;
-    }
-
-    // A native method that receives nothing and returns void
-	private static native void init();
-
 	/**
 	 * The main parsing function that accesses the C parser in native way.
 	 * The library is loaded only once and it is persistent.
@@ -44,5 +10,21 @@ public class SglrJNI {
 	 * @param inputFileName - this is required to annotate the nodes with location information. It can be any string.
 	 * @return a byte array in containing the ATerm in the BAF format.
 	 */
-	public static native byte[] parse(String parseTablePath, String input, String startSymbol, String inputFileName);
+    public static byte[] parseString(String parseTablePath, String input, String startSymbol, String inputFileName) {
+        if (firstTime) {
+            System.loadLibrary("SglrJNI"); // hello.dll (Windows) or libhello.so (Unixes)
+            init();
+            firstTime = false;
+        }
+        return parse(parseTablePath, input, startSymbol, inputFileName);
+    }
+
+    // A flag signaling whether this is the first time the parser is instantiated.
+    private static boolean firstTime = true;
+
+    // A native parser initialization method that receives nothing and returns void.  It must be called only once.
+	private static native void init();
+
+    // A delegate native method that parses the string into a BAF array.
+    private static native byte[] parse(String parseTablePath, String input, String startSymbol, String inputFileName);
 }

@@ -22,7 +22,7 @@ public class Sglr {
 	 * @return the ASTNode corresponding to the DAG parse forest returned by the parser.
 	 */
 	public static ASTNode run_sglri(String tablePath, String startSymbol, String input, String location) {
-		byte[] parsed = SglrJNI.parse(tablePath, input, startSymbol, location);
+		byte[] parsed = SglrJNI.parseString(tablePath, input, startSymbol, location);
 		try {
 			ByteArrayInputStream inputStream = new ByteArrayInputStream(parsed);
 			inputStream.read(); // the BAF format starts with a 0 that has to go away first.
