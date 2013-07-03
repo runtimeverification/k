@@ -1,15 +1,48 @@
 package org.kframework.parser;
 
-import com.thoughtworks.xstream.XStream;
-import org.kframework.compile.checks.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.List;
+
+import org.kframework.compile.checks.CheckListDecl;
+import org.kframework.compile.checks.CheckListOfKDeprecation;
+import org.kframework.compile.checks.CheckSortTopUniqueness;
+import org.kframework.compile.checks.CheckStreams;
+import org.kframework.compile.checks.CheckSyntaxDecl;
 import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
+import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Term;
-import org.kframework.kil.loader.*;
+import org.kframework.kil.loader.AddAutoIncludedModulesVisitor;
+import org.kframework.kil.loader.CollectConfigCellsVisitor;
+import org.kframework.kil.loader.CollectModuleImportsVisitor;
+import org.kframework.kil.loader.Context;
+import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.parser.concrete.disambiguate.*;
-import org.kframework.parser.generator.*;
+import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
+import org.kframework.parser.concrete.disambiguate.AmbFilter;
+import org.kframework.parser.concrete.disambiguate.BestFitFilter;
+import org.kframework.parser.concrete.disambiguate.CellEndLabelFilter;
+import org.kframework.parser.concrete.disambiguate.CellTypesFilter;
+import org.kframework.parser.concrete.disambiguate.CorrectCastPriorityFilter;
+import org.kframework.parser.concrete.disambiguate.CorrectKSeqFilter;
+import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
+import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
+import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
+import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
+import org.kframework.parser.concrete.disambiguate.PriorityFilter;
+import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
+import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
+import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
+import org.kframework.parser.generator.BasicParser;
+import org.kframework.parser.generator.Definition2SDF;
+import org.kframework.parser.generator.DefinitionSDF;
+import org.kframework.parser.generator.ParseConfigsFilter;
+import org.kframework.parser.generator.ParseRulesFilter;
+import org.kframework.parser.generator.ProgramSDF;
 import org.kframework.parser.utils.ResourceExtractor;
 import org.kframework.parser.utils.Sdf2Table;
 import org.kframework.utils.BinaryLoader;
@@ -23,10 +56,7 @@ import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import com.thoughtworks.xstream.XStream;
 
 public class DefinitionLoader {
 	public static org.kframework.kil.Definition loadDefinition(File mainFile, String lang, boolean autoinclude, Context context) throws IOException, Exception {
@@ -213,6 +243,43 @@ public class DefinitionLoader {
 			return def;
 		} catch (IOException e1) {
 			e1.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	/**
+	 * Parses a string representing a file with modules in it.
+	 * Returns the complete parse tree. Any bubble rule has been parsed and disambiguated.
+	 * @param content - the input string.
+	 * @param filename - only for error reporting purposes. Can be empty string.
+	 * @param context - the context for disambiguation purposes.
+	 * @return A lightweight Definition element which contain all the definition items found in the string.
+	 */
+	public static Definition parseString(String content, String filename, Context context) {
+		try {
+			List<DefinitionItem> di = BasicParser.parseString(content, filename, context);
+
+			org.kframework.kil.Definition def = new org.kframework.kil.Definition();
+			def.setItems(di);
+
+			new CheckVisitorStep<Definition>(new CheckListOfKDeprecation(context), context).check(def);
+
+			// ------------------------------------- import files in Stratego
+			org.kframework.parser.concrete.KParser.ImportTbl(context.dotk.getAbsolutePath() + "/def/Concrete.tbl");
+
+			// ------------------------------------- parse configs
+			JavaClassesFactory.startConstruction(context);
+			def = (Definition) def.accept(new ParseConfigsFilter(context));
+			JavaClassesFactory.endConstruction();
+
+			// ----------------------------------- parse rules
+			JavaClassesFactory.startConstruction(context);
+			def = (Definition) def.accept(new ParseRulesFilter(context));
+			JavaClassesFactory.endConstruction();
+
+			return def;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -34,17 +34,4 @@ public class Sglr {
 		}
 		return null;
 	}
-
-	private static boolean isUnixOS() {
-		String os = System.getProperty("os.name").toLowerCase();
-		return os.contains("nix") || os.contains("nux");
-	}
-
-	private static boolean isWindowsOS() {
-		return System.getProperty("os.name").toLowerCase().contains("win");
-	}
-
-	private static boolean isMacOS() {
-		return System.getProperty("os.name").toLowerCase().contains("mac");
-	}
 }
