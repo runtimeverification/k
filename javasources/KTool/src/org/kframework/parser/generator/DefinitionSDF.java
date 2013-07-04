@@ -183,12 +183,12 @@ public class DefinitionSDF {
 		sdf.append("\n");
 		for (Sort s : psdfv.userSorts) {
 			if (!s.isBaseSort()) {
-				sdf.append("	 K \":" + s.getName() + "\"	-> K            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "1Cast\")}\n");
-				sdf.append("	 K \"::" + s.getName() + "\"	-> K            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Cast\")}\n");
+				sdf.append("	 K \":" + s.getName() + "\"	-> VariableDz	{cons(\"" + StringUtil.escapeSortName(s.getName()) + "1Cast\")}\n");
+				sdf.append("	 K \"::" + s.getName() + "\"	-> VariableDz	{cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Cast\")}\n");
 			}
 		}
-		sdf.append("	 K \":K\"	-> K            {cons(\"K1Cast\")}\n");
-		sdf.append("	 K \"::K\"	-> K            {cons(\"K12Cast\")}\n");
+		sdf.append("	 K \":K\"	-> VariableDz	{cons(\"K1Cast\")}\n");
+		sdf.append("	 K \"::K\"	-> VariableDz	{cons(\"K12Cast\")}\n");
 
 		sdf.append("\n");
 		sdf.append("	VariableDz -> K\n");
