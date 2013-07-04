@@ -169,6 +169,9 @@ public class Definition2SDF {
 		sdf.append("	 K \":K\"	-> VariableDz	{cons(\"K1Cast\")}\n");
 		sdf.append("	 K \"::K\"	-> VariableDz	{cons(\"K12Cast\")}\n");
 
+		sdf.append("\n");
+		sdf.append("	VariableDz -> K\n");
+
 		sdf.append("\n\n");
 		for (String sort : psdfv.constantSorts) {
 			String s = StringUtil.escapeSortName(sort);
@@ -213,6 +216,9 @@ public class Definition2SDF {
 		}
 		sdf.append("\n");
 		sdf.append(SDFHelper.getFollowRestrictionsForTerminals(terminals.terminals));
+
+		sdf.append("context-free restrictions\n");
+		sdf.append("	VariableDz -/- [a-zA-Z0-9\\{]\n");
 
 		sdf.append("lexical restrictions\n");
 		sdf.append("%% some restrictions to ensure greedy matching for user defined constants\n");
