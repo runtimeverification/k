@@ -103,4 +103,5 @@ public class K {
 	public static int stateCounter = 0;
 
 	public static String backend = "maude";
+    public static String prove = "";
 }

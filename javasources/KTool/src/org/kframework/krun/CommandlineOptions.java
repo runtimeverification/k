@@ -170,6 +170,9 @@ public class CommandlineOptions {
 		Option backend = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("backend").withDescription("Specify the krun backend to execute with").create();
 		options.addOption(backend); getOptionList().add(backend);
 
+        Option prove = OptionBuilder.hasArg(true).withArgName("FILE").withLongOpt("prove").withDescription("Prove a set of reachability rules").create();
+        options.addOption(prove); getOptionList().add(prove);
+
 	}
 	
 	//create options displayed in the krun debugger help

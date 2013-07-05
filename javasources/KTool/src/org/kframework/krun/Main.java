@@ -39,7 +39,9 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.BackendTerm;
 import org.kframework.kil.Bag;
 import org.kframework.kil.Configuration;
+import org.kframework.kil.Definition;
 import org.kframework.kil.KSequence;
+import org.kframework.kil.Module;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.StringBuiltin;
@@ -370,7 +372,17 @@ public class Main {
 
 					if (GlobalSettings.verbose)
 						sw.printTotal("Model checking total");
-				} else {
+				} else if (K.prove.length() > 0) {
+                    File proofFile = new File(K.prove);
+                    if (!proofFile.exists()) {
+                        Error.report("Cannot find the file containing rules to prove");
+                    }
+                    String content = FileUtil.getFileContent(proofFile.getAbsolutePath());
+                    Definition parsed = DefinitionLoader.parseString(content,
+                        proofFile.getAbsolutePath(), context);
+                    Module mod = parsed.getSingletonModule();
+                    result = krun.prove(mod);
+                } else {
 					result = krun.run(makeConfiguration(KAST, null, rp,
 							(K.term != null), context));
 
@@ -888,6 +900,9 @@ public class Main {
 			if (cmd.hasOption("ltlmc")) {
 				K.model_checking = cmd.getOptionValue("ltlmc");
 			}
+            if (cmd.hasOption("prove")) {
+                K.prove = cmd.getOptionValue("prove");
+            }
 			if (cmd.hasOption("deleteTempDir")) {
 				K.deleteTempDir = true;
 			}
@@ -1014,7 +1029,7 @@ public class Main {
 			RunProcess rp = new RunProcess();
 
 			if (!context.initialized) {
-				org.kframework.kil.Definition javaDef = (org.kframework.kil.Definition) BinaryLoader
+				Definition javaDef = (Definition) BinaryLoader
 						.fromBinary(new FileInputStream(K.compiled_def
 								+ "/defx.bin"));
 
@@ -1028,7 +1043,7 @@ public class Main {
 					sw.printIntermediate("Flattening modules");
 
 				try {
-					javaDef = (org.kframework.kil.Definition) javaDef
+					javaDef = (Definition) javaDef
 							.accept(new AddTopCellConfig(context));
 				} catch (TransformerException e) {
 					e.report();

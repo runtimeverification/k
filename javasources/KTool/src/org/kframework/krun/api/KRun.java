@@ -2,8 +2,9 @@ package org.kframework.krun.api;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
 import org.kframework.compile.utils.RuleCompilerSteps;
-import org.kframework.kil.Term;
+import org.kframework.kil.Module;
 import org.kframework.kil.Rule;
+import org.kframework.kil.Term;
 import org.kframework.krun.KRunExecutionException;
 
 import java.util.Set;
@@ -56,7 +57,7 @@ public interface KRun {
 	@return An object containing both metadata about krun's execution, and a graph containing
 	the LTL counterexample if model-checking failed (null if it succeeded)
 	*/
-	public KRunResult<DirectedGraph<KRunState, Transition>> modelCheck(Term formula, Term cfg) throws KRunExecutionException;
+	public KRunProofResult<DirectedGraph<KRunState, Transition>> modelCheck(Term formula, Term cfg) throws KRunExecutionException;
 
 	/**
 	Execute a term in normal-execution mode for a specified number of steps
@@ -98,6 +99,16 @@ public interface KRun {
 	the entire state space explored by the search command it follows.
 	*/
 	public KRunDebugger debug(DirectedGraph<KRunState, Transition> graph);
+
+    /**
+    Prove a set of reachability rules using Matching Logic.
+    @param module A {@link Module} containing a set of reachability rules to be proven.
+    @exception UnsupportedOperationException The backend implementing this interface does not
+    support proofs
+    @return An object containing metadata about whether the proof succeeded, and a counterexample
+    if it failed.
+    */
+    public KRunProofResult<Set<Term>> prove(Module module);
 
 	/**
 	Set a backend-specific option on the krun object. This function should silently succeed doing nothing if the backend implementing this does not use the option in question.

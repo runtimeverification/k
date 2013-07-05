@@ -267,7 +267,7 @@ public class DefinitionLoader {
 			new CheckVisitorStep<Definition>(new CheckListOfKDeprecation(context), context).check(def);
 
 			// ------------------------------------- import files in Stratego
-			org.kframework.parser.concrete.KParser.ImportTbl(context.dotk.getAbsolutePath() + "/def/Concrete.tbl");
+			org.kframework.parser.concrete.KParser.ImportTbl(context.kompiled.getAbsolutePath() + "/def/Concrete.tbl");
 
 			// ------------------------------------- parse configs
 			JavaClassesFactory.startConstruction(context);

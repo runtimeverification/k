@@ -4,12 +4,14 @@ import edu.uci.ics.jung.graph.DirectedGraph;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.compile.utils.RuleCompilerSteps;
+import org.kframework.kil.Module;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.matchers.MatcherException;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.api.KRun;
 import org.kframework.krun.api.KRunDebugger;
+import org.kframework.krun.api.KRunProofResult;
 import org.kframework.krun.api.KRunResult;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.SearchResults;
@@ -22,7 +24,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-
+import java.util.Set;
 
 /**
  *
@@ -68,6 +70,11 @@ public class JavaSymbolicKRun implements KRun {
         return null;
     }
 
+    @Override
+    public KRunProofResult<Set<org.kframework.kil.Term>> prove(Module module) {
+        throw new UnsupportedOperationException();
+    }
+
 	@Override
 	public KRunResult<SearchResults> search(
             Integer bound,
@@ -80,7 +87,7 @@ public class JavaSymbolicKRun implements KRun {
     }
 
     @Override
-    public KRunResult<DirectedGraph<KRunState, Transition>> modelCheck(
+    public KRunProofResult<DirectedGraph<KRunState, Transition>> modelCheck(
             org.kframework.kil.Term formula,
             org.kframework.kil.Term cfg) throws KRunExecutionException {
         throw new UnsupportedOperationException();

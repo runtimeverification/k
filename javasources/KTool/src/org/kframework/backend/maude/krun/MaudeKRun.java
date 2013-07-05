@@ -593,7 +593,7 @@ public class MaudeKRun implements KRun {
 		return results;		
 	}
 
-	public KRunResult<DirectedGraph<KRunState, Transition>> modelCheck(Term formula, Term cfg) throws KRunExecutionException {
+	public KRunProofResult<DirectedGraph<KRunState, Transition>> modelCheck(Term formula, Term cfg) throws KRunExecutionException {
 		MaudeFilter formulaFilter = new MaudeFilter(context);
 		formula.accept(formulaFilter);
 		MaudeFilter cfgFilter = new MaudeFilter(context);
@@ -604,12 +604,12 @@ public class MaudeKRun implements KRun {
 		ioServer = false;
 		executeKRun(cmd);
 		ioServer = io;
-		KRunResult<DirectedGraph<KRunState, Transition>> result = parseModelCheckResult();
+		KRunProofResult<DirectedGraph<KRunState, Transition>> result = parseModelCheckResult();
 		result.setRawOutput(FileUtil.getFileContent(K.maude_out));
 		return result;
 	}
 
-	private KRunResult<DirectedGraph<KRunState, Transition>> parseModelCheckResult() {
+	private KRunProofResult<DirectedGraph<KRunState, Transition>> parseModelCheckResult() {
 		File input = new File(K.maude_output);
 		Document doc = XmlUtil.readXML(input);
 		NodeList list = null;
@@ -636,7 +636,7 @@ public class MaudeKRun implements KRun {
 		assertXML(child.size() == 1);
 		elem = child.get(0);
 		if (elem.getAttribute("op").equals("true") && elem.getAttribute("sort").equals("#Bool")) {
-			return new KRunResult<DirectedGraph<KRunState, Transition>>(null);
+			return new KRunProofResult<DirectedGraph<KRunState, Transition>>(true, null);
 		} else {
 			sort = elem.getAttribute("sort");
 			op = elem.getAttribute("op");
@@ -668,7 +668,7 @@ public class MaudeKRun implements KRun {
 			}
 			graph.addEdge(edge, vertex, loop.get(0).state);
 			
-			return new KRunResult<DirectedGraph<KRunState, Transition>>(graph);
+			return new KRunProofResult<DirectedGraph<KRunState, Transition>>(false, graph);
 		}
 	}
 
@@ -721,4 +721,8 @@ public class MaudeKRun implements KRun {
 	public KRunDebugger debug(DirectedGraph<KRunState, Transition> graph) {
 		return new KRunApiDebugger(this, graph);
 	}
+
+    public KRunProofResult<Set<Term>> prove(Module m) {
+        throw new UnsupportedOperationException("maude backend does not support matching logic");
+    }
 }
