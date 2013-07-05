@@ -271,12 +271,12 @@ public class DefinitionLoader {
 
 			// ------------------------------------- parse configs
 			JavaClassesFactory.startConstruction(context);
-			def = (Definition) def.accept(new ParseConfigsFilter(context));
+			def = (Definition) def.accept(new ParseConfigsFilter(context, false));
 			JavaClassesFactory.endConstruction();
 
 			// ----------------------------------- parse rules
 			JavaClassesFactory.startConstruction(context);
-			def = (Definition) def.accept(new ParseRulesFilter(context));
+			def = (Definition) def.accept(new ParseRulesFilter(context, false));
 			JavaClassesFactory.endConstruction();
 
 			return def;

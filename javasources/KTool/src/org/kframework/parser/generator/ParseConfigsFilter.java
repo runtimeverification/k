@@ -5,7 +5,6 @@ import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Module;
-import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.loader.CollectStartSymbolPgmVisitor;
@@ -44,6 +43,12 @@ public class ParseConfigsFilter extends BasicTransformer {
 		super("Parse Configurations", context);
 	}
 
+	public ParseConfigsFilter(Context context, boolean checkInclusion) {
+		super("Parse Configurations", context);
+		this.checkInclusion = checkInclusion;
+	}
+
+	boolean checkInclusion = true;
 	String localModule = null;
 
 	@Override
@@ -87,7 +92,8 @@ public class ParseConfigsFilter extends BasicTransformer {
 				// disambiguate configs
 				config = config.accept(new SentenceVariablesFilter(context));
 				config = config.accept(new CellEndLabelFilter(context));
-				config = config.accept(new InclusionFilter(localModule, context));
+				if (checkInclusion)
+					config = config.accept(new InclusionFilter(localModule, context));
 				// config = config.accept(new CellTypesFilter()); not the case on configs
 				// config = config.accept(new CorrectRewritePriorityFilter());
 				config = config.accept(new CorrectKSeqFilter(context));

@@ -46,6 +46,18 @@ import org.w3c.dom.Node;
 
 public class ParseRulesFilter extends BasicTransformer {
 	Formatter f;
+	boolean checkInclusion = true;
+
+	public ParseRulesFilter(Context context, boolean checkInclusion) {
+		super("Parse Configurations", context);
+		this.checkInclusion = checkInclusion;
+		if (GlobalSettings.verbose)
+			try {
+				f = new Formatter(new File(context.dotk.getAbsolutePath() + "/timing.log"));
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+	}
 
 	public ParseRulesFilter(Context context) {
 		super("Parse Configurations", context);
@@ -121,7 +133,8 @@ public class ParseRulesFilter extends BasicTransformer {
 				new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation(context), context).check(config);
 				config = config.accept(new SentenceVariablesFilter(context));
 				config = config.accept(new CellEndLabelFilter(context));
-				config = config.accept(new InclusionFilter(localModule, context));
+				if (checkInclusion)
+					config = config.accept(new InclusionFilter(localModule, context));
 				config = config.accept(new CellTypesFilter(context));
 				config = config.accept(new CorrectRewritePriorityFilter(context));
 				config = config.accept(new CorrectKSeqFilter(context));
@@ -154,5 +167,13 @@ public class ParseRulesFilter extends BasicTransformer {
 			}
 		}
 		return ss;
+	}
+
+	public boolean isCheckInclusion() {
+		return checkInclusion;
+	}
+
+	public void setCheckInclusion(boolean checkInclusion) {
+		this.checkInclusion = checkInclusion;
 	}
 }
