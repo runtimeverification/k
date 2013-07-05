@@ -406,7 +406,9 @@ public class Main {
 				System.exit(1);
 			} catch (TransformerException e) {
 				e.report();
-			}
+			} catch (UnsupportedOperationException e) {
+                Error.report("Backend \"" + K.backend + "\" does not support option " + e.getMessage());
+            }
 
 			if ("pretty".equals(K.output_mode)) {
 				String output = result.toString();

@@ -72,7 +72,7 @@ public class JavaSymbolicKRun implements KRun {
 
     @Override
     public KRunProofResult<Set<org.kframework.kil.Term>> prove(Module module) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("--prove");
     }
 
 	@Override
@@ -83,30 +83,30 @@ public class JavaSymbolicKRun implements KRun {
             org.kframework.kil.Rule pattern,
             org.kframework.kil.Term cfg,
             RuleCompilerSteps compilationInfo) throws KRunExecutionException {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("--search");
     }
 
     @Override
     public KRunProofResult<DirectedGraph<KRunState, Transition>> modelCheck(
             org.kframework.kil.Term formula,
             org.kframework.kil.Term cfg) throws KRunExecutionException {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("--ltlmc");
     }
 
     @Override
     public KRunResult<KRunState> step(org.kframework.kil.Term cfg, int steps)
             throws KRunExecutionException {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("--debug");
     }
 
     @Override
     public KRunDebugger debug(org.kframework.kil.Term cfg) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("--debug");
     }
 
     @Override
     public KRunDebugger debug(DirectedGraph<KRunState, Transition> graph) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("--debug");
     }
 
 	@Override

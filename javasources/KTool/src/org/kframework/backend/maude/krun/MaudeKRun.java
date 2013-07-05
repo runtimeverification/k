@@ -723,6 +723,6 @@ public class MaudeKRun implements KRun {
 	}
 
     public KRunProofResult<Set<Term>> prove(Module m) {
-        throw new UnsupportedOperationException("maude backend does not support matching logic");
+        throw new UnsupportedOperationException("--prove");
     }
 }
