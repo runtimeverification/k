@@ -160,7 +160,7 @@ public class RunProcess {
 		// } else
 		{
 			if (this.getExitCode() != 0) {
-				throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Parser returned a non-zero exit code: " + this.getExitCode()));
+				throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Parser returned a non-zero exit code: " + this.getExitCode() + "\nStdout:\n" + this.getStdout() + "\nStderr:\n" + this.getErr()));
 			}
 		}
 
