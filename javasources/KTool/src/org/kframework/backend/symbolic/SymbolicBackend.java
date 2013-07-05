@@ -92,9 +92,9 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 		 UnparserFilter unparserFilter = new UnparserFilter(this.context);
 		 javaDef.accept(unparserFilter);
 		
-		// String unparsedText = unparserFilter.getResult();
-		
-		// System.out.println(unparsedText);
+//		String unparsedText = unparserFilter.getResult();
+//		
+//		System.out.println(unparsedText);
 		//
 		// XStream xstream = new XStream();
 		// xstream.aliasPackage("k", "ro.uaic.info.fmse.k");

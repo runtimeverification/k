@@ -85,6 +85,7 @@ public class Constants {
     public static final String MACRO = "macro";
     public static final String STRUCTURAL = "structural";
     public static final String FUNCTION = "function";
+	public static final String ANYWHERE = "anywhere";
 
     // Streams
     public static final String STDIN = "stdin";

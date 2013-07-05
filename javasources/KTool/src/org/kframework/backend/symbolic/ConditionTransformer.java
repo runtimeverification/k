@@ -52,7 +52,6 @@ public class ConditionTransformer extends CopyOnWriteTransformer {
                     filteredTerms.add(content.shallowCopy());
                     content = new KList();
                 }
-
             }
 
             node = node.shallowCopy();

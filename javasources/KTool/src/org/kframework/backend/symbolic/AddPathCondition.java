@@ -69,7 +69,7 @@ public class AddPathCondition extends CopyOnWriteTransformer {
 
             // variable holding the formula
             Variable phi = Variable.getFreshVar("K");
-
+            
             // create lhs path condition cell
             Cell leftCell = new Cell();
             leftCell.setLabel(MetaK.Constants.pathCondition);
@@ -82,7 +82,6 @@ public class AddPathCondition extends CopyOnWriteTransformer {
             if (left instanceof Cell) {
                 left = AddConditionToConfig.addSubcellToCell((Cell) left, leftCell);
             }
-
 
             // create rhs path condition cell
             Term right = rew.getRight();
@@ -102,7 +101,7 @@ public class AddPathCondition extends CopyOnWriteTransformer {
             if (right instanceof Cell) {
                 right = AddConditionToConfig.addSubcellToCell((Cell) right, rightCell);
             }
-
+            
             Attributes atts = node.getAttributes();
             Term cond = condition;
             if (!GlobalSettings.NOSMT) {

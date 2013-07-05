@@ -39,6 +39,7 @@ public class TagUserRules extends CopyOnWriteTransformer {
                     Constants.MACRO,
                     Constants.FUNCTION,
                     Constants.STRUCTURAL,
+                    Constants.ANYWHERE,
                     SymbolicBackend.NOTSYMBOLIC);
         }
     }
