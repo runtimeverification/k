@@ -28,6 +28,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Formatter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -76,6 +77,16 @@ public class Context implements Serializable {
 	public File kompiled = null;
     public boolean initialized = false;
     protected java.util.List<String> komputationCells = null;
+
+    public int numModules, numSentences, numProductions, numCells;
+
+    public void printStatistics() {
+        Formatter f = new Formatter(System.out);
+        f.format("%-60s = %5d%n", "Number of Modules", numModules);
+        f.format("%-60s = %5d%n", "Number of Sentences", numSentences);
+        f.format("%-60s = %5d%n", "Number of Productions", numProductions);
+        f.format("%-60s = %5d%n", "Number of Cells", numCells);
+    }
 
     /**
      * The two structures below are populated by the InitializeConfigurationStructure step of the compilation.

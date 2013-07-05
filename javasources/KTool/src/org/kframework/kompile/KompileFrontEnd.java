@@ -19,6 +19,7 @@ import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
+import org.kframework.kil.loader.CountNodesVisitor;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
@@ -251,12 +252,14 @@ public class KompileFrontEnd {
 			}
 		}
 
-		verbose(cmd);
+		verbose(cmd, context);
 	}
 
-	private static void verbose(CommandLine cmd) {
-		if (GlobalSettings.verbose)
+	private static void verbose(CommandLine cmd, Context context) {
+		if (GlobalSettings.verbose) {
 			Stopwatch.sw.printTotal("Total");
+            context.printStatistics();
+        }
 		GlobalSettings.kem.print();
 		if (cmd.hasOption("loud"))
 			System.out.println("Done.");
@@ -273,6 +276,7 @@ public class KompileFrontEnd {
 		try {
 			Stopwatch.sw.Start();
 			javaDef = DefinitionLoader.loadDefinition(mainFile, lang, backend.autoinclude(), context);
+            javaDef.accept(new CountNodesVisitor(context));
 
 			CompilerSteps<Definition> steps = backend.getCompilationSteps();
 
