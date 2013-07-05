@@ -106,12 +106,12 @@ public class ResourceSystem {
 	private static FileResource createNormalFile(URI uri, String[] args) throws ResourceException {
 		if (uri.getPath() == null) { // relative path
 			String requestPath = uri.getSchemeSpecificPart();
-			try {
-				String localPath = new java.io.File(".").getCanonicalPath();
-				uri = new java.io.File(localPath, requestPath).toURI();
-			} catch (java.io.IOException e) {
-				throw new ResourceException(e);
-			}
+            try {
+                String localPath = new java.io.File(requestPath).getCanonicalPath();
+			    uri = new java.io.File(localPath).toURI();
+            } catch (java.io.IOException e) {
+                throw new ResourceException(e);
+            }
 		}
 		// URI u = uri;
 		// System.out.println(uri);
