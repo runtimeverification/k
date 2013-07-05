@@ -76,6 +76,7 @@ public class KagregFrontEnd {
                 context1);
 		firstDef = (Definition)firstDef.accept(new AddKCell(context1));
 		firstDef = (Definition)firstDef.accept(new RenameCellsTransformer(new AppendRenameStrategy("1"), context1));
+		firstDef = (Definition)firstDef.accept(new RenameVariablesTransformer(new AppendRenameStrategy("1"), context1));
 		CollectImportsVisitor collectImportsVisitor1 = new CollectImportsVisitor(context1, false);
 		collectImportsVisitor1.visit(firstDef);
 		List<Import> imports1 = collectImportsVisitor1.getImports();
@@ -95,6 +96,7 @@ public class KagregFrontEnd {
                 context2);
 		secondDef = (Definition)secondDef.accept(new AddKCell(context2));
 		secondDef = (Definition)secondDef.accept(new RenameCellsTransformer(new AppendRenameStrategy("2"), context2));
+		secondDef = (Definition)secondDef.accept(new RenameVariablesTransformer(new AppendRenameStrategy("2"), context2));
 		CollectImportsVisitor collectImportsVisitor2 = new CollectImportsVisitor(context2, false);
 		collectImportsVisitor2.visit(secondDef);
 		List<Import> imports2 = collectImportsVisitor2.getImports();
