@@ -9,8 +9,8 @@ import org.kframework.krun.gui.UIDesign.xmlEditor.ColorTagMap;
 import org.kframework.utils.ColorUtil;
 
 public class ColorVisitor extends BasicVisitor{
-	public ColorVisitor(Context context) {
-		super(context);
+	public ColorVisitor(Context definitionHelper) {
+		super(definitionHelper);
 	}
 
 	@Override
