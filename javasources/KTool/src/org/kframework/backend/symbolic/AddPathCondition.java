@@ -107,7 +107,7 @@ public class AddPathCondition extends CopyOnWriteTransformer {
             if (!GlobalSettings.NOSMT) {
                 List<Term> myList = new ArrayList<Term>();
                 myList.add(condition);
-                myList.add(checkSat(pathCondition));
+                myList.add(checkSat(pathCondition, context));
                 if (!(pathCondition instanceof Variable)){
                     cond = new KApp(KLabelConstant.ANDBOOL_KLABEL, new KList(myList));
                     // add transition attribute
@@ -142,7 +142,7 @@ public class AddPathCondition extends CopyOnWriteTransformer {
         return and;
     }
 
-    private Term checkSat(Term pathCondition) {
+    public static Term checkSat(Term pathCondition, Context context) {
         // checkSat(pathCondition) =/=K # "unsat"(.KList)
         KApp unsat = StringBuiltin.kAppOf("unsat");
         KApp checkSat = KApp.of(KLabelConstant.of("'checkSat", context), pathCondition);

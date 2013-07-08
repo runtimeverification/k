@@ -132,6 +132,7 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 		steps.add(new DesugarStreams(context));
 		steps.add(new ResolveFunctions(context));
 		steps.add(new TagUserRules(context)); // symbolic step
+		steps.add(new ReachabilityRuleToKRule(context)); // symbolic step 
 		steps.add(new AddKCell(context));
 		steps.add(new AddSymbolicK(context));
 
@@ -162,9 +163,11 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 		if (GlobalSettings.sortedCells) {
 			steps.add(new SortCells(context));
 		}
-		// steps.add(new LineariseTransformer()); //symbolic step
+		// steps.add(new LineariseTransformer()); // symbolic step
 		steps.add(new ReplaceConstants(context)); // symbolic step
 		steps.add(new AddPathCondition(context)); // symbolic step
+		steps.add(new AddPathConditionToReachabilityKRule(context)); // symbolic step
+
 		steps.add(new ResolveSupercool(context));
 		steps.add(new AddStrictStar(context));
 		steps.add(new AddDefaultComputational(context));
