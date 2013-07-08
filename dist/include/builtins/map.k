@@ -41,9 +41,9 @@ module MAP
 
   /* map values update (update in form of a second map) */
   // TODO: rename operator
-  syntax MyMap ::= MyMap "[" MyMap "]"    [function]
-  rule M1:MyMap[K1:K |-> K2:K M2:MyMap] => M1[K1 <- K2][M2]
-  rule M:MyMap[.MyMap] => M
+  syntax MyMap ::= update(MyMap, MyMap)   [function]
+  rule update(M1:MyMap, K1:K |-> K2:K M2:MyMap) => update(M1[K1 <- K2], M2)
+  rule update(M:MyMap, .MyMap) => M
 
   /* map domain restriction */
   syntax MyMap ::= MyMap "[" KList "<-" "undef" "]"    [function] 

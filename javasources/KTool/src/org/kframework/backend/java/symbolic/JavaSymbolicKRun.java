@@ -44,9 +44,11 @@ public class JavaSymbolicKRun implements KRun {
 
     private final Definition definition;
 	private final Context context;
-	
-	public JavaSymbolicKRun(Context context) throws KRunExecutionException {
+    private final KILtoBackendJavaKILTransformer transformer;
+
+    public JavaSymbolicKRun(Context context) throws KRunExecutionException {
 		this.context = context;
+        transformer = new KILtoBackendJavaKILTransformer(context);
 
         try {
             /* initialize the builtin function table */
@@ -57,8 +59,7 @@ public class JavaSymbolicKRun implements KRun {
                     JavaSymbolicBackend.DEFINITION_FILENAME));
             org.kframework.kil.Definition kilDefinition = (org.kframework.kil.Definition)
                     BinaryLoader.fromBinary(inputStream);
-            definition = (Definition) (kilDefinition).accept(
-                    new KILtoBackendJavaKILTransformer(context));
+            definition = (Definition) (kilDefinition).accept(transformer);
             inputStream.close();
         } catch (FileNotFoundException e) {
             throw new KRunExecutionException(e);
@@ -82,6 +83,20 @@ public class JavaSymbolicKRun implements KRun {
 
     @Override
     public KRunProofResult<Set<org.kframework.kil.Term>> prove(org.kframework.kil.Module module) {
+        List<Rule> rules = new ArrayList<Rule>();
+        for (org.kframework.kil.ModuleItem moduleItem : module.getItems()) {
+            assert moduleItem instanceof org.kframework.kil.Rule;
+
+            try {
+                rules.add((Rule) moduleItem.accept(transformer));
+            } catch (TransformerException e) {
+                e.printStackTrace();
+            }
+        }
+
+        SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition, context);
+        symbolicRewriter.prove(rules);
+
         throw new UnsupportedOperationException("--prove");
     }
 

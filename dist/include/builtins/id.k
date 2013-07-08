@@ -2,7 +2,8 @@ require "string.k"
 
 module ID-SYNTAX-HOOKS
   imports #ID-INTERFACE
-  syntax Id ::= #Id 
+  syntax Id ::= #Id
+  //syntax Id ::= Token{[A-Za-z][A-Za-z0-9]*}   [onlyLabel]
 endmodule
 
 module ID-HOOKS
