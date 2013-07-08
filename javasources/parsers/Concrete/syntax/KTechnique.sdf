@@ -85,6 +85,9 @@ context-free syntax
 
 	"." -> DotDz
 
+context-free restrictions
+	DotDz		-/- [a-zA-Z\.]
+
 lexical restrictions
 	".List"		-/- [a-zA-Z0-9\{\}]
 	".ListItem"	-/- [a-zA-Z0-9]
@@ -109,5 +112,4 @@ lexical restrictions
 	"K"			-/- [a-zA-Z0-9]
 	"List{K}"	-/- [a-zA-Z0-9]
 	"KList"		-/- [a-zA-Z0-9]
-	DotDz		-/- [a-zA-Z\.]
 
