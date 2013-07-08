@@ -37,7 +37,7 @@ public class SubstitutionTransformer extends CopyOnWriteTransformer {
     @Override
     public KList transform(KList kList) {
         if (kList.hasFrame()) {
-            Variable frame = kList.getFrame();
+            Variable frame = kList.frame();
             kList = (KList) super.transform(new KList(kList.getItems()));
             return new KList(kList.getItems(), frame);
         } else {
@@ -47,11 +47,11 @@ public class SubstitutionTransformer extends CopyOnWriteTransformer {
 
     @Override
     public KSequence transform(KSequence kSequence) {
-        if (!kSequence.hasFrame() || boundVariables.contains(kSequence.getFrame())) {
+        if (!kSequence.hasFrame() || boundVariables.contains(kSequence.frame())) {
             return (KSequence) super.transform(kSequence);
         }
 
-        Term term = substitution.get(kSequence.getFrame());
+        Term term = substitution.get(kSequence.frame());
         if (term == null || !(term instanceof KCollectionFragment)) {
             return (KSequence) super.transform(kSequence);
         }
@@ -62,7 +62,7 @@ public class SubstitutionTransformer extends CopyOnWriteTransformer {
         builder.addAll(items).addAll(fragment);
 
         if (fragment.hasFrame()) {
-            kSequence = new KSequence(builder.build(), fragment.getFrame());
+            kSequence = new KSequence(builder.build(), fragment.frame());
         } else {
             kSequence = new KSequence(builder.build());
         }
@@ -72,23 +72,23 @@ public class SubstitutionTransformer extends CopyOnWriteTransformer {
 
     @Override
     public BuiltinMap transform(BuiltinMap builtinMap) {
-        if (!builtinMap.hasFrame() || boundVariables.contains(builtinMap.getFrame())) {
+        if (!builtinMap.hasFrame() || boundVariables.contains(builtinMap.frame())) {
             return (BuiltinMap) super.transform(builtinMap);
         }
 
-        Term term = substitution.get(builtinMap.getFrame());
+        Term term = substitution.get(builtinMap.frame());
         if (term == null || term instanceof Variable) {
             return (BuiltinMap) super.transform(builtinMap);
         }
 
         if (term instanceof BuiltinMap) {
-            boundVariables.add(builtinMap.getFrame());
+            boundVariables.add(builtinMap.frame());
             HashMap<Term, Term> entries = new HashMap<Term, Term>(
                     ((BuiltinMap) super.transform(builtinMap)).getEntries());
             entries.putAll(((BuiltinMap) term).getEntries());
             BuiltinMap returnMap = ((BuiltinMap) term).hasFrame() ?
-                    new BuiltinMap(entries, ((BuiltinMap) term).getFrame()) : new BuiltinMap(entries);
-            boundVariables.remove(builtinMap.getFrame());
+                    new BuiltinMap(entries, ((BuiltinMap) term).frame()) : new BuiltinMap(entries);
+            boundVariables.remove(builtinMap.frame());
             return returnMap;
         }
 
@@ -110,7 +110,7 @@ public class SubstitutionTransformer extends CopyOnWriteTransformer {
 
                 KSequence kSequence;
                 if (fragment.hasFrame()) {
-                    kSequence = new KSequence(builder.build(), fragment.getFrame());
+                    kSequence = new KSequence(builder.build(), fragment.frame());
                 } else {
                     kSequence = new KSequence(builder.build());
                 }

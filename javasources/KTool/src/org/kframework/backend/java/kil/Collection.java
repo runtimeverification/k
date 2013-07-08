@@ -27,7 +27,7 @@ public abstract class Collection extends Term {
         return frame != null;
     }
 
-    public Variable getFrame() {
+    public Variable frame() {
         assert hasFrame();
 
         return frame;
@@ -36,6 +36,19 @@ public abstract class Collection extends Term {
     @Override
     public boolean isSymbolic() {
         return false;
+    }
+
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+
+        if (!(object instanceof Collection)) {
+            return false;
+        }
+
+        Collection collection = (Collection) object;
+        return frame == null ? collection.frame == null : frame.equals(collection.frame);
     }
 
     @Override

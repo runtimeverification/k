@@ -7,6 +7,7 @@ import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.Collection;
 import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Hole;
@@ -32,7 +33,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Multimap;
 
 
 /**
@@ -73,33 +76,33 @@ public class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(CellCollection cellCollection) {
         boolean change = false;
-        java.util.Map<String, Cell> cells = new HashMap<String, Cell>(cellCollection.size());
-        for (java.util.Map.Entry<String, Cell> entry: cellCollection.getCells().entrySet()) {
+        Multimap<String, Cell> cells = HashMultimap.create();
+        for (Map.Entry<String, Cell> entry : cellCollection.cellMap().entries()) {
             Cell cell = (Cell) entry.getValue().accept(this);
             cells.put(entry.getKey(), cell);
             change = change || cell != entry.getValue();
         }
         if (!change) {
-            cells = cellCollection.getCells();
+            cells = cellCollection.cellMap();
         }
 
         if (cellCollection.hasFrame()) {
             Variable frame;
-            Term transformedFrame = (Term) cellCollection.getFrame().accept(this);
+            Term transformedFrame = (Term) cellCollection.frame().accept(this);
             if (transformedFrame instanceof CellCollection) {
-                cells.putAll(((CellCollection) transformedFrame).getCells());
+                cells.putAll(((CellCollection) transformedFrame).cellMap());
                 frame = ((CellCollection) transformedFrame).hasFrame() ?
-                        ((CellCollection) transformedFrame).getFrame() : null;
+                        ((CellCollection) transformedFrame).frame() : null;
             } else {
                 frame = (Variable) transformedFrame;
             }
 
-            if (cells != cellCollection.getCells() || frame != cellCollection.getFrame()) {
-                cellCollection = new CellCollection(cells, frame);
+            if (cells != cellCollection.cellMap() || frame != cellCollection.frame()) {
+                cellCollection = new CellCollection(cells, frame, cellCollection.isStar());
             }
         } else {
-            if (cells != cellCollection.getCells()) {
-                cellCollection = new CellCollection(cells);
+            if (cells != cellCollection.cellMap()) {
+                cellCollection = new CellCollection(cells, cellCollection.isStar());
             }
         }
 
@@ -108,6 +111,11 @@ public class CopyOnWriteTransformer implements Transformer {
 
     @Override
     public ASTNode transform(Collection collection) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ASTNode transform(ConstrainedTerm constrainedTerm) {
         throw new UnsupportedOperationException();
     }
 
@@ -184,8 +192,8 @@ public class CopyOnWriteTransformer implements Transformer {
         List<Term> items = transformList(kList.getItems());
 
         if (kList.hasFrame()) {
-            Variable frame = (Variable) kList.getFrame().accept(this);
-            if (items != kList.getItems() || frame != kList.getFrame()) {
+            Variable frame = (Variable) kList.frame().accept(this);
+            if (items != kList.getItems() || frame != kList.frame()) {
                 kList = new KList(ImmutableList.<Term>copyOf(items), frame);
             }
         } else {
@@ -203,16 +211,16 @@ public class CopyOnWriteTransformer implements Transformer {
 
         if (kSequence.hasFrame()) {
             Variable frame;
-            Term transformedFrame = (Term) kSequence.getFrame().accept(this);
+            Term transformedFrame = (Term) kSequence.frame().accept(this);
             if (transformedFrame instanceof KSequence) {
                 items = new ArrayList<Term>(items);
                 items.addAll(((KSequence) transformedFrame).getItems());
                 frame = ((KSequence) transformedFrame).hasFrame() ?
-                        ((KSequence) transformedFrame).getFrame() : null;
+                        ((KSequence) transformedFrame).frame() : null;
             } else {
                 frame = (Variable) transformedFrame;
             }
-            if (items != kSequence.getItems() || frame != kSequence.getFrame()) {
+            if (items != kSequence.getItems() || frame != kSequence.frame()) {
                 kSequence = new KSequence(ImmutableList.<Term>copyOf(items), frame);
             }
         } else {
@@ -228,8 +236,8 @@ public class CopyOnWriteTransformer implements Transformer {
     public ASTNode transform(BuiltinMap builtinMap) {
         BuiltinMap transformedMap = null;
         if (builtinMap.hasFrame()) {
-            Variable frame = (Variable) builtinMap.getFrame().accept(this);
-            if (frame != builtinMap.getFrame()) {
+            Variable frame = (Variable) builtinMap.frame().accept(this);
+            if (frame != builtinMap.frame()) {
                 transformedMap = new BuiltinMap(frame);
             }
         }
@@ -240,7 +248,7 @@ public class CopyOnWriteTransformer implements Transformer {
 
             if (transformedMap == null && (key != entry.getKey() || value != entry.getValue())) {
                 if (builtinMap.hasFrame()) {
-                    transformedMap = new BuiltinMap(builtinMap.getFrame());
+                    transformedMap = new BuiltinMap(builtinMap.frame());
                 } else {
                     transformedMap = new BuiltinMap();
                 }
@@ -335,6 +343,25 @@ public class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(MetaVariable metaVariable) {
         return transform((Token) metaVariable);
+    }
+
+    @Override
+    public ASTNode transform(SymbolicConstraint symbolicConstraint) {
+        SymbolicConstraint transformedSymbolicConstraint = new SymbolicConstraint(context);
+
+        for (Map.Entry<Variable, Term> entry : symbolicConstraint.substitution().entrySet()) {
+            transformedSymbolicConstraint.add(
+                    (Term) entry.getKey().accept(this),
+                    (Term) entry.getValue().accept(this));
+        }
+
+        for (SymbolicConstraint.Equality equality : symbolicConstraint.equalities()) {
+            transformedSymbolicConstraint.add(
+                    (Term) equality.leftHandSide().accept(this),
+                    (Term) equality.rightHandSide().accept(this));
+        }
+
+        return transformedSymbolicConstraint;
     }
 
     @Override

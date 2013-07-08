@@ -21,7 +21,9 @@ import java.util.Map;
  *
  * @author AndreiS
  */
-public abstract class Term extends ASTNode implements Unifiable, Transformable, Visitable {
+public abstract class Term
+        extends JavaSymbolicObject
+        implements Unifiable, Transformable, Visitable {
 
     protected final Kind kind;
 
@@ -97,22 +99,6 @@ public abstract class Term extends ASTNode implements Unifiable, Transformable, 
         VariableVisitor visitor = new VariableVisitor();
         accept(visitor);
         return visitor.getVariableSet();
-    }
-
-    @Override
-    public ASTNode shallowCopy() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public ASTNode accept(org.kframework.kil.visitors.Transformer transformer)
-            throws TransformerException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void accept(org.kframework.kil.visitors.Visitor visitor) {
-        throw new UnsupportedOperationException();
     }
 
 }

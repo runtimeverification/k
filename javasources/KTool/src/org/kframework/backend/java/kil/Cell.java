@@ -2,6 +2,7 @@ package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Utils;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 
@@ -36,7 +37,7 @@ public class Cell<T extends Term> extends Term {
         return label;
     }
 
-    public Kind getContentKind() {
+    public Kind contentKind() {
         return contentKind;
     }
 
@@ -47,6 +48,28 @@ public class Cell<T extends Term> extends Term {
     @Override
     public boolean isSymbolic() {
         return false;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+
+        if (!(object instanceof Cell)) {
+            return false;
+        }
+
+        Cell cell = (Cell) object;
+        return label.equals(cell.label) && content.equals(cell.content);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 1;
+        hash = hash * Utils.HASH_PRIME + label.hashCode();
+        hash = hash * Utils.HASH_PRIME + content.hashCode();
+        return hash;
     }
 
     @Override

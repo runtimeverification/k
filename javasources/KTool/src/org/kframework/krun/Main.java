@@ -28,6 +28,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.fusesource.jansi.AnsiConsole;
 import org.kframework.backend.java.symbolic.JavaSymbolicKRun;
+import org.kframework.backend.java.symbolic.SpecificationCompilerSteps;
 import org.kframework.backend.maude.krun.MaudeKRun;
 import org.kframework.compile.ConfigurationCleaner;
 import org.kframework.compile.FlattenModules;
@@ -262,8 +263,13 @@ public class Main {
 			if (K.backend.equals("maude")) {
 				return new MaudeKRun(context);
 			} else if (K.backend.equals("java-symbolic")) {
-				return new JavaSymbolicKRun(context);
-			} else {
+                try {
+                    return new JavaSymbolicKRun(context);
+                } catch (KRunExecutionException e) {
+                    Error.report(e.getMessage());
+                    return null;
+                }
+            } else {
 				Error.report("Currently supported backends are 'maude' and 'java-symbolic'");
 				return null;
 			}
@@ -381,6 +387,11 @@ public class Main {
                     Definition parsed = DefinitionLoader.parseString(content,
                         proofFile.getAbsolutePath(), context);
                     Module mod = parsed.getSingletonModule();
+                    try {
+                        mod = new SpecificationCompilerSteps(context).compile(mod, null);
+                    } catch (CompilerStepDone e) {
+                        assert false: "dead code";
+                    }
                     result = krun.prove(mod);
                 } else {
 					result = krun.run(makeConfiguration(KAST, null, rp,
@@ -904,6 +915,9 @@ public class Main {
 			}
             if (cmd.hasOption("prove")) {
                 K.prove = cmd.getOptionValue("prove");
+            }
+            if (cmd.hasOption("no-smt")) {
+                K.smt = false;
             }
 			if (cmd.hasOption("deleteTempDir")) {
 				K.deleteTempDir = true;

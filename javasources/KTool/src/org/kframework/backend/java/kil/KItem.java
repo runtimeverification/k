@@ -78,12 +78,10 @@ public class KItem extends Term implements Sorted {
         }
         KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
 
-        /* evaluate a sort membership predicate (to either true or false, no unknown value) */
+        /* evaluate a sort membership predicate */
         if (kLabelConstant.label().startsWith("is") && kList.getItems().size() == 1
                 && kList.getItems().get(0) instanceof Sorted) {
-            return SortMembership.check(
-                    kLabelConstant.label().substring("is".length()),
-                    (Sorted) kList.getItems().get(0));
+            return SortMembership.check(this);
         }
 
         if (!BuiltinFunction.isBuiltinKLabel(kLabelConstant)) {

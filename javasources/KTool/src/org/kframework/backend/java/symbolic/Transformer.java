@@ -6,6 +6,7 @@ import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.Collection;
 import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Hole;
 import org.kframework.backend.java.kil.KLabelFreezer;
@@ -41,6 +42,7 @@ public interface Transformer {
     public ASTNode transform(Cell cell);
     public ASTNode transform(CellCollection cellCollection);
     public ASTNode transform(Collection collection);
+    public ASTNode transform(ConstrainedTerm constrainedTerm);
     public ASTNode transform(Hole hole);
     public ASTNode transform(IntToken intToken);
     public ASTNode transform(KLabelConstant kLabelConstant);
@@ -54,6 +56,7 @@ public interface Transformer {
     public ASTNode transform(MapLookup mapLookup);
     public ASTNode transform(MapUpdate mapUpdate);
     public ASTNode transform(MetaVariable metaVariable);
+    public ASTNode transform(SymbolicConstraint symbolicConstraint);
     public ASTNode transform(Term node);
     public ASTNode transform(Token token);
     public ASTNode transform(UninterpretedToken uninterpretedToken);

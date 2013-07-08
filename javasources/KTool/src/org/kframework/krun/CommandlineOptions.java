@@ -173,6 +173,9 @@ public class CommandlineOptions {
         Option prove = OptionBuilder.hasArg(true).withArgName("FILE").withLongOpt("prove").withDescription("Prove a set of reachability rules").create();
         options.addOption(prove); getOptionList().add(prove);
 
+        // java rewrite engine specific options
+        Option no_smt = OptionBuilder.hasArg(false).withLongOpt("no-smt").withDescription("do not use SMT solvers for checking constraints").create();
+        options.addOption(no_smt); getOptionList().add(no_smt);
 	}
 	
 	//create options displayed in the krun debugger help

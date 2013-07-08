@@ -25,7 +25,7 @@ public class KCollectionFragment extends KCollection {
 
     public KCollectionFragment(KCollection kCollection, int index) {
         super(kCollection.getItems(),
-              kCollection.hasFrame() ? kCollection.getFrame() : null,
+              kCollection.hasFrame() ? kCollection.frame() : null,
               kCollection.kind());
 
         assert 0 <= index && index <= kCollection.size();
@@ -88,7 +88,7 @@ public class KCollectionFragment extends KCollection {
             if (stringBuilder.length() != 0) {
                 stringBuilder.append(getOperatorName());
             }
-            stringBuilder.append(super.getFrame());
+            stringBuilder.append(super.frame());
         }
         if (stringBuilder.length() == 0) {
             stringBuilder.append(getIdentityName());

@@ -26,6 +26,8 @@ import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.Variable;
 
+import java.util.Map;
+
 
 /**
  * A bottom-up implementation of the visitor pattern.
@@ -78,7 +80,7 @@ public class BottomUpVisitor implements Visitor {
     @Override
     public void visit(Collection collection) {
         if (collection.hasFrame()) {
-            collection.getFrame().accept(this);
+            collection.frame().accept(this);
         }
         visit((Term) collection);
     }
@@ -197,6 +199,10 @@ public class BottomUpVisitor implements Visitor {
 
     @Override
     public void visit(SymbolicConstraint node) {
+        for (Map.Entry<Variable, Term> entry : node.substitution().entrySet()) {
+            entry.getKey().accept(this);
+            entry.getValue().accept(this);
+        }
         for (SymbolicConstraint.Equality equality : node.equalities()) {
             equality.leftHandSide().accept(this);
             equality.rightHandSide().accept(this);

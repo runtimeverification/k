@@ -1,5 +1,7 @@
 package org.kframework.backend.java.symbolic;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.AnonymousVariable;
 import org.kframework.backend.java.builtins.BoolToken;
@@ -21,10 +23,14 @@ import org.kframework.backend.java.kil.MetaVariable;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.matchers.MatcherException;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import com.google.common.collect.ImmutableList;
 
@@ -36,14 +42,21 @@ import com.google.common.collect.ImmutableList;
  */
 public class SymbolicUnifier extends AbstractUnifier {
 
-    private final SymbolicConstraint constraint;
+    private SymbolicConstraint constraint;
+    private boolean isStarNested;
+    public Collection<Collection<SymbolicConstraint>> multiConstraints;
+    private final Context context;
 
-    public SymbolicUnifier(SymbolicConstraint constraint) {
+    public SymbolicUnifier(SymbolicConstraint constraint, Context context) {
         this.constraint = constraint;
+        this.context = context;
+        multiConstraints = new ArrayList<Collection<SymbolicConstraint>>();
     }
 
     public boolean unify(SymbolicConstraint.Equality equality) {
         try {
+            isStarNested = false;
+            multiConstraints.clear();
             unify(equality.leftHandSide(), equality.rightHandSide());
             return true;
         } catch (MatcherException e) {
@@ -114,7 +127,7 @@ public class SymbolicUnifier extends AbstractUnifier {
         if (!cell.getLabel().equals(otherCell.getLabel())) {
                 // AndreiS: commented out the check below as matching might fail due to KItem < K
                 // < KList subsorting
-                //|| !cell.getContentKind().equals(otherCell.getContentKind())) {
+                //|| !cell.contentKind().equals(otherCell.contentKind())) {
             fail();
         }
 
@@ -124,64 +137,196 @@ public class SymbolicUnifier extends AbstractUnifier {
     @Override
     public void unify(CellCollection cellCollection, Term term) {
         if (!(term instanceof CellCollection)) {
-            this.fail();
+            fail();
         }
         CellCollection otherCellCollection = (CellCollection) term;
 
-        Map<String, Cell> cellMap = new HashMap<String, Cell>();
-        Map<String, Cell> otherCellMap = new HashMap<String, Cell>();
+        if (cellCollection.isStar() != otherCellCollection.isStar()) {
+            fail();
+        }
 
-        for (String label : cellCollection.labelSet()) {
-            if (otherCellCollection.containsKey(label)) {
-                unify(cellCollection.get(label), otherCellCollection.get(label));
+        Set<String> unifiableCellLabels = new HashSet<String>(cellCollection.labelSet());
+        unifiableCellLabels.retainAll(otherCellCollection.labelSet());
+
+        if (!cellCollection.isStar()) {
+            for (String label : unifiableCellLabels) {
+                unify(cellCollection.get(label).iterator().next(),
+                      otherCellCollection.get(label).iterator().next());
+            }
+
+            Multimap<String, Cell> cellMap = ArrayListMultimap.create();
+            for (String label : cellCollection.labelSet()) {
+                if (!unifiableCellLabels.contains(label)) {
+                    cellMap.putAll(label, cellCollection.get(label));
+                }
+            }
+
+            Multimap<String, Cell> otherCellMap = ArrayListMultimap.create();
+            for (String label : otherCellCollection.labelSet()) {
+                if (!unifiableCellLabels.contains(label)) {
+                    otherCellMap.putAll(label, otherCellCollection.get(label));
+                }
+            }
+
+            addCellCollectionConstraint(
+                    cellMap,
+                    cellCollection.hasFrame() ? cellCollection.frame() : null,
+                    otherCellMap,
+                    otherCellCollection.hasFrame() ? otherCellCollection.frame() : null,
+                    cellCollection.isStar());
+        } else {
+            assert !isStarNested : "nested cells with multiplicity='*' not supported";
+            assert !cellCollection.hasFrame();
+            assert cellCollection.size() >= otherCellCollection.size();
+
+            String label = unifiableCellLabels.iterator().next();
+            Cell[] cells = cellCollection.get(label).toArray(new Cell[0]);
+            Cell[] otherCells = otherCellCollection.get(label).toArray(new Cell[0]);
+            Variable otherFrame = otherCellCollection.hasFrame() ? otherCellCollection.frame() : null;
+
+            if (otherFrame == null && cells.length > otherCells.length) {
+                fail();
+            }
+
+            SymbolicConstraint mainConstraint = constraint;
+            isStarNested = true;
+
+            Collection<SymbolicConstraint> constraints = new ArrayList<SymbolicConstraint>();
+            SelectionGenerator generator = new SelectionGenerator(otherCells.length, cells.length);
+            do {
+                constraint = new SymbolicConstraint(context);
+
+                try {
+                    for (int i = 0; i < otherCells.length; ++i) {
+                        unify(cells[generator.selection.get(i)], otherCells[i]);
+                    }
+                } catch (MatcherException e) {
+                    continue;
+                }
+
+                Multimap<String, Cell> cellMap = ArrayListMultimap.create();
+                for (int i = 0; i < cells.length; ++i) {
+                    if (!generator.selected.contains(i)) {
+                        cellMap.put(cells[i].getLabel(), cells[i]);
+                    }
+                }
+
+                constraint.add(new CellCollection(cellMap, true), otherFrame);
+                constraints.add(constraint);
+            } while (generator.generate());
+
+            constraint = mainConstraint;
+            isStarNested = false;
+
+            if (constraints.isEmpty()) {
+                fail();
+            }
+
+            if (constraints.size() == 1) {
+                constraint.addAll(constraints.iterator().next());
             } else {
-                cellMap.put(label, cellCollection.get(label));
+                multiConstraints.add(constraints);
+            }
+        }
+    }
+
+    private class SelectionGenerator {
+
+        private final int size;
+        private final int coSize;
+        public List<Integer> selection;
+        public Set<Integer> selected;
+        private int index;
+
+        public SelectionGenerator(int size, int coSize) {
+            assert size <= coSize;
+
+            this.size = size;
+            this.coSize = coSize;
+            selection = new ArrayList<Integer>();
+            selected = new HashSet<Integer>();
+            for (int i = 0; i < size; ++i) {
+                selection.add(i);
+                selected.add(i);
             }
         }
 
-        for (String label : otherCellCollection.labelSet()) {
-            if (!cellCollection.containsKey(label)) {
-                otherCellMap.put(label, otherCellCollection.get(label));
-            }
+        private void pop() {
+            index = selection.remove(selection.size() - 1);
+            selected.remove(index);
+            ++index;
         }
 
-        if (cellCollection.hasFrame()) {
-            if (otherCellCollection.hasFrame()) {
+        private void push() {
+            selection.add(index);
+            selected.add(index);
+            index = 0;
+        }
+
+        public boolean generate() {
+            pop();
+            while (selection.size() != size) {
+                if (index == coSize) {
+                    if (selection.isEmpty()) {
+                        break;
+                    } else {
+                        pop();
+                        continue;
+                    }
+                }
+
+                if (!selected.contains(index)) {
+                    push();
+                    continue;
+                }
+
+                ++index;
+            }
+
+            return !selection.isEmpty();
+        }
+
+    }
+
+    private void addCellCollectionConstraint(
+            Multimap<String, Cell> cellMap,
+            Variable frame,
+            Multimap<String, Cell> otherCellMap,
+            Variable otherFrame,
+            boolean isStar) {
+        if (frame != null) {
+            if (otherFrame != null) {
                 if (cellMap.isEmpty() && otherCellMap.isEmpty()) {
-                    constraint.add(cellCollection.getFrame(), otherCellCollection.getFrame());
+                    constraint.add(frame, otherFrame);
                 } else if (cellMap.isEmpty()) {
-                    constraint.add(
-                            cellCollection.getFrame(),
-                            new CellCollection(otherCellMap, otherCellCollection.getFrame()));
+                    constraint.add(frame, new CellCollection(otherCellMap, otherFrame, isStar));
                 } else if (otherCellMap.isEmpty()) {
-                    constraint.add(
-                            new CellCollection(cellMap, cellCollection.getFrame()),
-                            otherCellCollection.getFrame());
+                    constraint.add(new CellCollection(cellMap, frame, isStar), otherFrame);
                 } else {
                     Variable variable = AnonymousVariable.getFreshVariable(
                             Kind.CELL_COLLECTION.toString());
-                    constraint.add(
-                            cellCollection.getFrame(),
-                            new CellCollection(otherCellMap, variable));
-                    constraint.add(
-                            new CellCollection(cellMap, variable),
-                            otherCellCollection.getFrame());
+                    constraint.add(frame, new CellCollection(otherCellMap, variable, isStar));
+                    constraint.add(new CellCollection(cellMap, variable, isStar), otherFrame);
                 }
             } else {
                 if (!cellMap.isEmpty()) {
                     fail();
                 }
 
-                constraint.add(cellCollection.getFrame(), new CellCollection(otherCellMap));
+                constraint.add(frame, new CellCollection(otherCellMap, isStar));
             }
-        } else if (otherCellCollection.hasFrame()) {
-            if (!otherCellMap.isEmpty()) {
-                fail();
-            }
+        } else {
+            if (otherFrame != null) {
+                if (!otherCellMap.isEmpty()) {
+                    fail();
+                }
 
-            constraint.add(new CellCollection(cellMap), otherCellCollection.getFrame());
-        } else if (!cellMap.isEmpty() || !otherCellMap.isEmpty()) {
-            fail();
+                constraint.add(new CellCollection(cellMap, isStar), otherFrame);
+            } else {
+                if (!cellMap.isEmpty() || !otherCellMap.isEmpty()) {
+                    fail();
+                }
+            }
         }
     }
 
@@ -288,19 +433,19 @@ public class SymbolicUnifier extends AbstractUnifier {
             if (!kCollection.hasFrame()) {
                 fail();
             }
-            constraint.add(kCollection.getFrame(), otherKCollection.fragment(length));
+            constraint.add(kCollection.frame(), otherKCollection.fragment(length));
         } else if (otherKCollection.size() < kCollection.size()) {
             if (!otherKCollection.hasFrame()) {
                 fail();
             }
-            constraint.add(kCollection.fragment(length), otherKCollection.getFrame());
+            constraint.add(kCollection.fragment(length), otherKCollection.frame());
         } else {
             if (kCollection.hasFrame() && otherKCollection.hasFrame()) {
-                constraint.add(kCollection.getFrame(), otherKCollection.getFrame());
+                constraint.add(kCollection.frame(), otherKCollection.frame());
             } else if (kCollection.hasFrame()) {
-                constraint.add(kCollection.getFrame(), otherKCollection.fragment(length));
+                constraint.add(kCollection.frame(), otherKCollection.fragment(length));
             } else if (otherKCollection.hasFrame()) {
-                constraint.add(kCollection.fragment(length), otherKCollection.getFrame());
+                constraint.add(kCollection.fragment(length), otherKCollection.frame());
             }
         }
     }

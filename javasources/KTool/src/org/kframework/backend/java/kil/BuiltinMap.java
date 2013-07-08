@@ -1,26 +1,29 @@
 package org.kframework.backend.java.kil;
 
-import com.google.common.base.Joiner;
-
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Utils;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.KSorts;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
+
+import com.google.common.base.Joiner;
 
 
 /**
  * @author AndreiS
  */
-public class BuiltinMap extends Collection {
+public class BuiltinMap extends Collection implements Sorted {
 
     public static final BuiltinMap EMPTY = new BuiltinMap();
 
-    private final java.util.Map<Term, Term> entries;
+    private final Map<Term, Term> entries;
 
-    public BuiltinMap(java.util.Map<Term, Term> entries, Variable frame) {
+    public BuiltinMap(Map<Term, Term> entries, Variable frame) {
         super(frame, Kind.KITEM);
         this.entries = new HashMap<Term, Term>(entries);
     }
@@ -30,7 +33,7 @@ public class BuiltinMap extends Collection {
         entries = new HashMap<Term, Term>();
     }
 
-    public BuiltinMap(java.util.Map<Term, Term> entries) {
+    public BuiltinMap(Map<Term, Term> entries) {
         super(null, Kind.KITEM);
         this.entries = new HashMap<Term, Term>(entries);
     }
@@ -44,7 +47,7 @@ public class BuiltinMap extends Collection {
         return entries.get(key);
     }
 
-    public java.util.Map<Term, Term> getEntries() {
+    public Map<Term, Term> getEntries() {
         return Collections.unmodifiableMap(entries);
     }
 
@@ -52,12 +55,43 @@ public class BuiltinMap extends Collection {
         return entries.put(key, value);
     }
 
-    public void putAll(java.util.Map<Term, Term> entries) {
+    public void putAll(Map<Term, Term> entries) {
         this.entries.putAll(entries);
     }
 
     public Term remove(Term key) {
         return entries.remove(key);
+    }
+
+    /**
+     * Returns a {@code String} representation of the sort of this builtin map.
+     */
+    @Override
+    public String sort() {
+        // TODO(AndreiS): use a builtin map sort (add it to the sort dag in Context)
+        return KSorts.MAP;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+
+        if (!(object instanceof BuiltinMap)) {
+            return false;
+        }
+
+        BuiltinMap map = (BuiltinMap) object;
+        return super.equals(map) && entries.equals(map.entries);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 1;
+        hash = hash * Utils.HASH_PRIME + (super.frame == null ? 0 : super.frame.hashCode());
+        hash = hash * Utils.HASH_PRIME + entries.hashCode();
+        return hash;
     }
 
     @Override
@@ -73,7 +107,7 @@ public class BuiltinMap extends Collection {
             if (stringBuilder.length() != 0) {
                 stringBuilder.append(operator);
             }
-            stringBuilder.append(super.getFrame());
+            stringBuilder.append(super.frame());
         }
         if (stringBuilder.length() == 0) {
             stringBuilder.append(identity);

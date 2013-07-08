@@ -57,7 +57,7 @@ public class MapUpdate extends Term {
         entries.putAll(updateMap);
 
         if (builtinMap.hasFrame()) {
-            return new BuiltinMap(entries, builtinMap.getFrame());
+            return new BuiltinMap(entries, builtinMap.frame());
         } else {
             return new BuiltinMap(entries);
         }
