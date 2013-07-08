@@ -107,5 +107,5 @@ lexical restrictions
 	"K"			-/- [a-zA-Z0-9]
 	"List{K}"	-/- [a-zA-Z0-9]
 	"KList"		-/- [a-zA-Z0-9]
-	"."			-/- [a-z\.]
+	"."			-/- [A-Z\.]
 
