@@ -24,7 +24,7 @@ module IMP-SYNTAX
   syntax Ids ::= List{Id,","}
 
   // special identifiers (for matching-logic specifications)
-  syntax Id ::= "n" | "sum"
+  // syntax Id ::= "n" | "sum"
 endmodule
 
 module IMP
