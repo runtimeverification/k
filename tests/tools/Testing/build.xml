@@ -8,6 +8,7 @@
       <classpath>
         <pathelement path="src" />
         <pathelement location="lib/xercesImpl.jar"/>
+        <pathelement location="lib/xml-apis.jar"/>
       </classpath>
     </java>
   </target>

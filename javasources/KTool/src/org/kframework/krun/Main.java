@@ -32,8 +32,11 @@ import org.kframework.backend.java.symbolic.SpecificationCompilerSteps;
 import org.kframework.backend.maude.krun.MaudeKRun;
 import org.kframework.compile.ConfigurationCleaner;
 import org.kframework.compile.FlattenModules;
+import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.transformers.AddTopCellConfig;
 import org.kframework.compile.transformers.FlattenSyntax;
+import org.kframework.compile.transformers.RemoveBrackets;
+import org.kframework.compile.transformers.RemoveSyntacticCasts;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
@@ -168,14 +171,6 @@ public class Main {
 		}
 	}
 
-	private static Term parseTerm(String value, Context context) throws Exception {
-		org.kframework.parser.concrete.KParser.ImportTblGround(K.compiled_def
-				+ "/ground/Concrete.tbl");
-		ASTNode term = DefinitionLoader.parseCmdString(
-				value, "", "Command line argument", context);
-		return (Term) term.accept(new FlattenSyntax(context));
-	}
-
 	public static Term plug(Map<String, Term> args, Context context) throws TransformerException {
 		Configuration cfg = K.kompiled_cfg;
 		ASTNode cfgCleanedNode = null;
@@ -226,15 +221,9 @@ public class Main {
 			// here
 			Term parsed = null;
 			if (parser == null) {
-				try {
-					parsed = parseTerm(value, context);
-				} catch (Exception e1) {
-					e1.printStackTrace();
-					Error.report(e1.getMessage());
-				}
-			} else {
-				parsed = rp.runParserOrDie(parser, value, false, null, context);
+                parser = "kast -groundParser -e";
 			}
+			parsed = rp.runParserOrDie(parser, value, false, null, context);
 			output.put("$" + name, parsed);
 			hasPGM = hasPGM || name.equals("$PGM");
 		}
