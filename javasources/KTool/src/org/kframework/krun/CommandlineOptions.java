@@ -1,6 +1,7 @@
 package org.kframework.krun;
 
 import org.apache.commons.cli.*;
+import org.kframework.utils.ActualPosixParser;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -210,7 +211,7 @@ public class CommandlineOptions {
 	}
 
 	public CommandLine parse(String[] cmd) {
-		CommandLineParser parser = new PosixParser();
+		CommandLineParser parser = new ActualPosixParser();
 		try {
 			setCommandLine(parser.parse(options, cmd));
 			return getCommandLine();

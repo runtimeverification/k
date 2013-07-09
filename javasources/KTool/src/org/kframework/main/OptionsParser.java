@@ -1,6 +1,7 @@
 package org.kframework.main;
 
 import org.apache.commons.cli.*;
+import org.kframework.utils.ActualPosixParser;
 
 public class OptionsParser {
 
@@ -78,7 +79,7 @@ public class OptionsParser {
 	}
 
 	public CommandLine parse(String[] cmd) {
-		CommandLineParser parser = new PosixParser();
+		CommandLineParser parser = new ActualPosixParser();
 		try {
 			CommandLine cl = parser.parse(options, cmd);
 			if (cl.getOptions().length > 0)

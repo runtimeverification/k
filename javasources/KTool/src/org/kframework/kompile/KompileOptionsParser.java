@@ -1,6 +1,7 @@
 package org.kframework.kompile;
 
 import org.apache.commons.cli.*;
+import org.kframework.utils.ActualPosixParser;
 
 public class KompileOptionsParser {
 	Options options;
@@ -149,7 +150,7 @@ public class KompileOptionsParser {
 	}
 
 	public CommandLine parse(String[] cmd) {
-		CommandLineParser parser = new PosixParser();
+		CommandLineParser parser = new ActualPosixParser();
 		try {
 			CommandLine cl = parser.parse(options, cmd);
 			return cl;

@@ -1,6 +1,7 @@
 package org.kframework.kast;
 
 import org.apache.commons.cli.*;
+import org.kframework.utils.ActualPosixParser;
 
 public class KastOptionsParser {
 
@@ -72,7 +73,7 @@ public class KastOptionsParser {
 	}
 
 	public CommandLine parse(String[] cmd) {
-		CommandLineParser parser = new PosixParser();
+		CommandLineParser parser = new ActualPosixParser();
 		try {
 			CommandLine cl = parser.parse(options, cmd);
 			return cl;
