@@ -40,18 +40,11 @@ public class SpecificationCompilerSteps extends CompilerSteps<Module> {
         add(new ResolveAnonymousVariables(context));
         add(new ResolveListOfK(context));
         add(new FlattenSyntax(context));
-        //ConfigurationStructureVisitor cfgStrVisitor = new ConfigurationStructureVisitor(context);
-        //def.accept(cfgStrVisitor);
-        //context.setMaxConfigurationLevel(cfgStrVisitor.getMaxLevel());
         add(new ResolveContextAbstraction(context));
         add(new ResolveOpenCells(context));
         add(new ResolveRewrite(context));
         add(new CompileDataStructures(context));
-        add(new MapToLookupUpdate(context));
-
-        if (GlobalSettings.sortedCells) {
-            add(new SortCells(context));
-        }
+        //add(new MapToLookupUpdate(context));
     }
 
 }

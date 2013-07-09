@@ -195,9 +195,16 @@ public class SymbolicRewriter {
             ruleStopwatch.reset();
             ruleStopwatch.start();
 
-            SymbolicConstraint constraint = constrainedTerm.match(
-                    (ConstrainedTerm) rule.leftHandSide(),
-                    context);
+            SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(context);
+            //initialConstraint.addAll(rule.condition());
+            leftHandSideConstraint.add(rule.condition(), BoolToken.TRUE);
+
+            ConstrainedTerm leftHandSideTerm = new ConstrainedTerm(
+                    rule.leftHandSide(),
+                    rule.lookups(),
+                    leftHandSideConstraint);
+
+            SymbolicConstraint constraint = constrainedTerm.match(leftHandSideTerm, context);
             if (constraint == null) {
                 continue;
             }
@@ -303,7 +310,7 @@ public class SymbolicRewriter {
         return proofResults;
     }
 
-    private List<ConstrainedTerm> proveRule(
+    public List<ConstrainedTerm> proveRule(
             ConstrainedTerm initialTerm,
             ConstrainedTerm targetTerm,
             List<Rule> rules) {
@@ -317,9 +324,9 @@ public class SymbolicRewriter {
         boolean guarded = false;
         while (!queue.isEmpty()) {
             for (ConstrainedTerm term : queue) {
-                if (term.implies(targetTerm, context)) {
-                    continue;
-                }
+//                if (term.implies(targetTerm, context)) {
+//                    continue;
+//                }
 
                 if (guarded) {
                     ConstrainedTerm result = applyRule(term, rules);

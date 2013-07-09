@@ -8,6 +8,8 @@ import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.Variable;
+import org.kframework.compile.transformers.MapToLookupUpdate;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.loader.Context;
@@ -32,6 +34,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -83,21 +86,51 @@ public class JavaSymbolicKRun implements KRun {
 
     @Override
     public KRunProofResult<Set<org.kframework.kil.Term>> prove(org.kframework.kil.Module module) {
-        List<Rule> rules = new ArrayList<Rule>();
-        for (org.kframework.kil.ModuleItem moduleItem : module.getItems()) {
-            assert moduleItem instanceof org.kframework.kil.Rule;
+        List<ConstrainedTerm> proofResults = new ArrayList<ConstrainedTerm>();
 
-            try {
-                rules.add((Rule) moduleItem.accept(transformer));
-            } catch (TransformerException e) {
-                e.printStackTrace();
+        MapToLookupUpdate mapTransformer = new MapToLookupUpdate(context);
+
+        try {
+            List<Rule> rules = new ArrayList<Rule>();
+            for (org.kframework.kil.ModuleItem moduleItem : module.getItems()) {
+                assert moduleItem instanceof org.kframework.kil.Rule;
+
+                rules.add((Rule) moduleItem.accept(mapTransformer).accept(transformer));
             }
+
+            SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition, context);
+            for (org.kframework.kil.ModuleItem moduleItem : module.getItems()) {
+                org.kframework.kil.Rule kilRule = (org.kframework.kil.Rule) moduleItem;
+                org.kframework.kil.Term kilLeftHandSide
+                        = ((org.kframework.kil.Rewrite) kilRule.getBody()).getLeft();
+                org.kframework.kil.Term kilRightHandSide =
+                        ((org.kframework.kil.Rewrite) kilRule.getBody()).getRight();
+                org.kframework.kil.Term kilCondition = kilRule.getCondition();
+
+                /* rename rule variables */
+                Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(
+                        ((Rule) moduleItem.accept(mapTransformer).accept(transformer)).variableSet());
+
+                SymbolicConstraint initialConstraint = new SymbolicConstraint(context);
+                //initialConstraint.addAll(rule.condition());
+                initialConstraint.add((Term) kilCondition.accept(transformer), BoolToken.TRUE);
+                ConstrainedTerm initialTerm = new ConstrainedTerm(
+                        ((Term) kilLeftHandSide.accept(transformer)).substitute(freshSubstitution, context),
+                        initialConstraint.substitute(freshSubstitution, context),
+                        context);
+
+                ConstrainedTerm targetTerm = new ConstrainedTerm(
+                        ((Term) kilRightHandSide.accept(transformer)).substitute(freshSubstitution, context),
+                        context);
+
+                proofResults.addAll(symbolicRewriter.proveRule(initialTerm, targetTerm, rules));
+            }
+
+            return null;
+        } catch (TransformerException e) {
+            e.printStackTrace();
+            return null;
         }
-
-        SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition, context);
-        symbolicRewriter.prove(rules);
-
-        throw new UnsupportedOperationException("--prove");
     }
 
 	@Override

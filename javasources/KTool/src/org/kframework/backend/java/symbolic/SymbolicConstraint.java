@@ -184,7 +184,7 @@ public class SymbolicConstraint extends ASTNode implements Serializable, Transfo
 
     public TruthValue addAll(SymbolicConstraint constraint) {
         for (Map.Entry<Variable, Term> entry : constraint.substitution.entrySet()) {
-            add(entry.getKey(), entry.getValue());
+            add(entry.getValue(), entry.getKey());
         }
 
         for (Equality equality : constraint.equalities) {

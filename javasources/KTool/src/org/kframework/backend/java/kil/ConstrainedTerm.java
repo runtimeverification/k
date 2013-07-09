@@ -49,7 +49,7 @@ public class ConstrainedTerm extends Term {
         SymbolicConstraint unificationConstraint = new SymbolicConstraint(context);
         unificationConstraint.add(term, constrainedTerm.term());
         unificationConstraint.simplify();
-        if (!constraint.isSubstitution()) {
+        if (unificationConstraint.isFalse() || !unificationConstraint.isSubstitution()) {
             return null;
         }
 
@@ -63,6 +63,13 @@ public class ConstrainedTerm extends Term {
 
         return unificationConstraint;
     }
+
+    /**
+     * Simplify map lookups.
+     */
+    //public ConstrainedTerm simplifyLookups() {
+    //    for (SymbolicConstraint.Equality equality : constraint.equalities())
+    //}
 
     public Term term() {
         return term;
