@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project basedir="." default="build" name="Testing">
-  <property name="cfg" value="tests/config.xml"/>
+  <property name="cfg" location="tests/config.xml"/>
   <target name="build">
     <javac srcdir="src" includeantruntime="false" failonerror="true"/>
-    <java classname="org.kframework.main.Main" failonerror="true">
+    <java classname="org.kframework.main.Main" fork="true" clonevm="true" failonerror="true">
       <arg value="${cfg}"/>
       <classpath>
         <pathelement path="src" />
-        <!-- <pathelement location="lib/xercesImpl.jar" /> -->
       </classpath>
     </java>
   </target>

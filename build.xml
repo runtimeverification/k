@@ -145,7 +145,7 @@
 	<property name="config" value="./tests/config.xml" />
 	<target name="test" depends="build">
 		<ant antfile="build.xml" dir="./tests/tools/Testing">
-			<property name="cfg" value="${config}" />
+			<property name="cfg" location="${config}" />
 		</ant>
 	</target>
 	<target name="test-clean">
