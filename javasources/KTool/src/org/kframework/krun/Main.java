@@ -221,7 +221,6 @@ public class Main {
 			// here
 			Term parsed = null;
 			if (parser == null) {
-                System.err.println(value);
                 parser = "kast -groundParser -e";
 			}
 			parsed = rp.runParserOrDie(parser, value, false, null, context);
