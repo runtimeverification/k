@@ -3,8 +3,12 @@
   <property name="cfg" value="tests/config.xml"/>
   <target name="build">
     <javac srcdir="src" includeantruntime="false" failonerror="true"/>
-    <java classname="org.kframework.main.Main" classpath="src" failonerror="true">
+    <java classname="org.kframework.main.Main" failonerror="true">
       <arg value="${cfg}"/>
+      <classpath>
+        <pathelement path="src" />
+        <pathelement location="lib/xercesImpl.jar"/>
+      </classpath>
     </java>
   </target>
   <target name="clean">
