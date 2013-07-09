@@ -661,7 +661,7 @@
       results="tests/regression/addbrackets/out/">
       <all-programs>
         <krun-option name="--output-mode" value="pretty" />
-	<krun-option name="--parser" value="kast -groundParser" />
+	<krun-option name="--parser" value="kast -groundParser" parser-home="PARSER_HOME" />
         <krun-option name="--no-parens" />
       </all-programs>
   </test>

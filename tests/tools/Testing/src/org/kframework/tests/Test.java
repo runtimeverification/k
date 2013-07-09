@@ -380,7 +380,7 @@ public class Test implements Comparable<Test> {
 			String parserHome = krunOpt.getAttribute(PARSER_HOME);
 			String parser = System.getenv(parserHome);
 			if (parser != null) {
-				optValue = "\"" + parser + System.getProperty("file.separator") + optValue.substring(1);
+				optValue = parser + System.getProperty("file.separator") + optValue;
 			}
 			
 			map.put(krunOpt.getAttribute(NAME), optValue);
