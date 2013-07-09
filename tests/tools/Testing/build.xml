@@ -3,7 +3,7 @@
   <property name="cfg" location="tests/config.xml"/>
   <target name="build">
     <javac srcdir="src" includeantruntime="false" failonerror="true"/>
-    <java classname="org.kframework.main.Main" fork="true" clonevm="true" failonerror="true">
+    <java classname="org.kframework.main.Main" fork="true" dir="../../.." failonerror="true">
       <arg value="${cfg}"/>
       <classpath>
         <pathelement path="src" />
