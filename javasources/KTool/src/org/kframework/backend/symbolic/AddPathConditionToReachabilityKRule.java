@@ -58,9 +58,11 @@ public class AddPathConditionToReachabilityKRule extends CopyOnWriteTransformer 
 				Term pcNew = new KApp(KLabelConstant.BOOL_ANDBOOL_KLABEL, new KList(pcAndPhi));
 				Term rightBag = addPathCondition(rcfg, pcNew);
 					
-				KApp unsat = StringBuiltin.kAppOf("unsat");
-		        KApp checkSat = KApp.of(KLabelConstant.of("'checkSat", context), KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, pc, KApp.of(KLabelConstant.NOTBOOL_KLABEL, lphi)));
-		        Term newCondition = KApp.of(KLabelConstant.KEQ_KLABEL, checkSat, unsat);
+//				KApp unsat = StringBuiltin.kAppOf("unsat");
+//		        KApp checkSat = KApp.of(KLabelConstant.of("'checkSat", context), KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, pc, KApp.of(KLabelConstant.NOTBOOL_KLABEL, lphi)));
+				KApp sat = StringBuiltin.kAppOf("sat");
+		        KApp checkSat = KApp.of(KLabelConstant.of("'checkSat", context), KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, pc, lphi));
+		        Term newCondition = KApp.of(KLabelConstant.KEQ_KLABEL, checkSat, sat);
 		        newCondition = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, newCondition, newCond);
 			        
 				Sentence rule = new Sentence();
