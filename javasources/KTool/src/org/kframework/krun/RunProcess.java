@@ -10,6 +10,7 @@ import org.kframework.utils.ThreadedStreamCapturer;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.general.GlobalSettings.ParserType;
 
 import java.io.File;
 import java.io.IOException;
@@ -102,50 +103,44 @@ public class RunProcess {
 	/*
 	 * run the process denoted by the parser ("kast" or an external parser specified with --parser option) and return the AST obtained by parser
 	 */
-	public Term runParser(String parser, String pgm, boolean isPgm, String startSymbol, Context context) throws TransformerException {
+	public Term runParser(String parser, String value, boolean isNotFile, String startSymbol, Context context) throws TransformerException {
 		String KAST = new String();
 		String parserPath = new String();
 
 		if (startSymbol == null) {
 			startSymbol = context.startSymbolPgm;
 		}		
+		String content = value;
 		
-		// the argument is a formula and we should write it in a file before passing it to the parser
 		if ("kast".equals(parser)) {
-			// rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--main-module=" + K.main_module, "--syntax-module=" + K.syntax_module, "-pgm=" + K.pgm });
-			// rp.execute(new String[] { K.kast, "--definition=" + K.k_definition, "--lang=" + K.main_module, "--syntax-module=" + K.syntax_module, K.pgm });
-			String pgmContent = pgm;
-			if (!isPgm) {
-				pgmContent = FileUtil.getFileContent(pgm);
-			}
-			return ProgramLoader.processPgm(pgmContent, pgm, K.definition, startSymbol, context);
-			// this.execute(new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", k3jar, "-kast", "--definition", definition, pgm });
+            if (!isNotFile) {
+		    	content = FileUtil.getFileContent(value);
+		    }
+			return ProgramLoader.processPgm(content, value, K.definition, startSymbol, context, ParserType.PROGRAM);
+        } else if ("kast -e".equals(parser)) {
+            return ProgramLoader.processPgm(value, value, K.definition, startSymbol, context, ParserType.PROGRAM);
+        } else if ("kast -groundParser".equals(parser)) {
+            if (!isNotFile) {
+		    	content = FileUtil.getFileContent(value);
+		    }
+            return ProgramLoader.processPgm(content, value, K.definition, startSymbol, context, ParserType.GROUND);
+        } else if ("kast -groundParser -e".equals(parser)) {
+            return ProgramLoader.processPgm(value, value, K.definition, startSymbol, context, ParserType.GROUND);
+        } else if ("kast -ruleParser".equals(parser)) {
+            if (!isNotFile) {
+		    	content = FileUtil.getFileContent(value);
+		    }
+            return ProgramLoader.processPgm(content, value, K.definition, startSymbol, context, ParserType.RULES);
 		} else {
-			try {
-				parserPath = new File(parser).getCanonicalPath();
-			} catch (IOException e) {
-				e.printStackTrace();
+			List<String> tokens = new ArrayList<String>(Arrays.asList(parser.split(" ")));
+			tokens.add(value);
+			Map<String, String> environment = new HashMap<String, String>();
+			environment.put("KRUN_SORT", startSymbol);
+			environment.put("KRUN_COMPILED_DEF", context.kompiled.getAbsolutePath());
+			if (isNotFile) {
+				environment.put("KRUN_IS_NOT_FILE", "true");
 			}
-			String parserName = new File(parserPath).getName();
-			// System.out.println("The external parser to be used is:" + parserName);
-			if ("kast".equals(parserName)) {
-				String pgmContent = pgm;
-				if (!isPgm) {
-					pgmContent = FileUtil.getFileContent(pgm);
-				}
-				return ProgramLoader.processPgm(pgmContent, pgm, K.definition, startSymbol, context);
-				// this.execute(new String[] { "java", "-ss8m", "-Xms64m", "-Xmx1G", "-jar", k3jar, "-kast", pgm });
-			} else {
-				List<String> tokens = new ArrayList<String>(Arrays.asList(parser.split(" ")));
-				tokens.add(pgm);
-				Map<String, String> environment = new HashMap<String, String>();
-				environment.put("KRUN_SORT", startSymbol);
-				environment.put("KRUN_COMPILED_DEF", context.kompiled.getAbsolutePath());
-				if (isPgm) {
-					environment.put("KRUN_IS_NOT_FILE", "true");
-				}
-				this.execute(environment, tokens.toArray(new String[0]));
-			}
+			this.execute(environment, tokens.toArray(new String[0]));
 		}
 
 		// if (parser.equals("kast")) {

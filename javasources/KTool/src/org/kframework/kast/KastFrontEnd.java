@@ -195,7 +195,7 @@ public class KastFrontEnd {
 		}
 
 		try {
-			ASTNode out = ProgramLoader.processPgm(pgm, path, javaDef, sort, context);
+			ASTNode out = ProgramLoader.processPgm(pgm, path, javaDef, sort, context, GlobalSettings.whatParser);
 			String kast;
 			if (prettyPrint) {
 				KastFilter kastFilter = new KastFilter(indentationOptions, nextline, context);

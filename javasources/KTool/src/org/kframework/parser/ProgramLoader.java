@@ -98,7 +98,8 @@ public class ProgramLoader {
 	 * @param prettyPrint
 	 * @param nextline
 	 */
-	public static Term processPgm(String content, String filename, Definition def, String startSymbol, Context context) throws TransformerException {
+	public static Term processPgm(String content, String filename, Definition def, String startSymbol,
+            Context context, GlobalSettings.ParserType whatParser) throws TransformerException {
 		// compile a definition here
 		Stopwatch sw = new Stopwatch();
 
@@ -107,7 +108,7 @@ public class ProgramLoader {
 
 		try {
 			ASTNode out;
-			if (GlobalSettings.whatParser == GlobalSettings.ParserType.GROUND) {
+			if (whatParser == GlobalSettings.ParserType.GROUND) {
 				org.kframework.parser.concrete.KParser.ImportTblGround(context.kompiled.getCanonicalPath() + "/ground/Concrete.tbl");
 				out = DefinitionLoader.parseCmdString(content, "", filename, context);
 				out = out.accept(new RemoveBrackets(context));
@@ -115,7 +116,7 @@ public class ProgramLoader {
 				out = out.accept(new RemoveSyntacticCasts(context));
 				out = out.accept(new FlattenSyntax(context));
 				out = out.accept(new RemoveSyntacticCasts(context));
-			} else if (GlobalSettings.whatParser == GlobalSettings.ParserType.RULES) {
+			} else if (whatParser == GlobalSettings.ParserType.RULES) {
 				org.kframework.parser.concrete.KParser.ImportTbl(context.kompiled.getCanonicalPath() + "/def/Concrete.tbl");
 				out = DefinitionLoader.parsePattern(content, filename, context);
 				try {
@@ -126,7 +127,7 @@ public class ProgramLoader {
 					out = (ASTNode) e.getResult();
 				}
 				out = ((Rule) out).getBody();
-			} else if (GlobalSettings.whatParser == GlobalSettings.ParserType.BINARY) {
+			} else if (whatParser == GlobalSettings.ParserType.BINARY) {
 				out = (org.kframework.kil.Cell) BinaryLoader.fromBinary(new FileInputStream(filename));
 			} else {
 				out = loadPgmAst(content, filename, startSymbol, context);

@@ -1103,11 +1103,11 @@ public class Main {
 				sw.printIntermediate("Kast process");
 
 			if (K.term != null) {
-				if (K.parser.equals("kast")) {
+				if (K.parser.equals("kast") && !cmd.hasOption("parser")) {
 					if (K.backend.equals("java-symbolic")) {
-						GlobalSettings.whatParser = GlobalSettings.ParserType.RULES;
+                        K.parser = "kast -ruleParser";
 					} else {
-						GlobalSettings.whatParser = GlobalSettings.ParserType.GROUND;
+                        K.parser = "kast -groundParser";
 					}
 				}
 			}
