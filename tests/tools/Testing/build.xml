@@ -7,8 +7,7 @@
       <arg value="${cfg}"/>
       <classpath>
         <pathelement path="src" />
-        <pathelement location="lib/xercesImpl.jar"/>
-        <pathelement location="lib/xml-apis.jar"/>
+        <!-- <pathelement location="lib/xercesImpl.jar" /> -->
       </classpath>
     </java>
   </target>
