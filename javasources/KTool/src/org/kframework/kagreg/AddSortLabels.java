@@ -15,13 +15,20 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class AddSortLabels extends CopyOnWriteTransformer {
+	
+	final protected List<String> labeledSorts;
 
-	public AddSortLabels(Context context) {
+	public AddSortLabels(Context context, List<String> labeledSorts) {
 		super("AddSortLabels", context);
+		this.labeledSorts = labeledSorts;
 	}
 	
 	@Override
 	public ASTNode transform(Syntax syntax) throws TransformerException {
+		if (labeledSorts.contains(syntax.getSort().getName())) {
+			return syntax;
+		}
+		labeledSorts.add(syntax.getSort().getName());
 		List<ProductionItem> productionItems = new ArrayList<ProductionItem>();
 		productionItems.add(new Terminal("L" + syntax.getSort()));
 		productionItems.add(new Sort("Id"));
