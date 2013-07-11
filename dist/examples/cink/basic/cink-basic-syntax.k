@@ -49,17 +49,17 @@ module CINK-BASIC-SYNTAX
                | "(" Exp ")"  [bracket]
                | Exp "(" Exps ")" [strict(1)]
                > left:
-                 Exp "*" Exp [strict, multiply]
-               | Exp "/" Exp [strict, divide]
-               | Exp "%" Exp [strict, latex({#1}\%{#2}), modulo] 
+                 Exp "*" Exp [left, strict, multiply]
+               | Exp "/" Exp [left, strict, divide]
+               | Exp "%" Exp [left, strict, latex({#1}\%{#2}), modulo] 
                >  left:
-                 Exp "+" Exp [strict, plus]
-               | Exp "-" Exp [strict, minus]
+                 Exp "+" Exp [left, strict, plus]
+               | Exp "-" Exp [left, strict, minus]
                > left:
-                 Exp "<" Exp  [strict, lessthan]
-               | Exp ">" Exp  [strict, greatthan]
-               | Exp "<=" Exp [strict, latex({#1}\leq{#2}), lessequal]
-               | Exp "==" Exp [strict, equality]
+                 Exp "<" Exp  [left, strict, lessthan]
+               | Exp ">" Exp  [left, strict, greatthan]
+               | Exp "<=" Exp [left, strict, latex({#1}\leq{#2}), lessequal]
+               | Exp "==" Exp [left, strict, equality]
                >
                  "!" Exp [strict, negation] 
                > 

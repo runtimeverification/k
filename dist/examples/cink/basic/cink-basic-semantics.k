@@ -61,9 +61,10 @@ module CINK-BASIC-SEMANTICS
    or a return statement is executed.
   */
 
-  configuration       <k color="green"> ($PGM:Pgm ~> execute) </k>
-                      <env color="LightSkyBlue"> .Map </env>
-                      <fstack color="orange"> .List </fstack>
+  configuration   <k color="green"> ($PGM:Pgm ~> execute) </k>
+                  <env color="LightSkyBlue"> .Map </env>
+                  <fstack color="orange"> .List </fstack>
+                  <br/>
                   <genv color="SkyBlue"> .Map </genv>
                   <store color="white"> .Map </store>
                   <in color="magenta" stream="stdin"> .List </in>
