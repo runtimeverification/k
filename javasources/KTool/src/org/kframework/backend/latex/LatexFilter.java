@@ -63,7 +63,17 @@ public class LatexFilter extends BackendFilter {
 		}
 	}
 
-	@Override
+    @Override
+    public void visit(PriorityExtended node) {
+        return;
+    }
+
+    @Override
+    public void visit(PriorityExtendedAssoc node) {
+        return;
+    }
+
+    @Override
 	public void visit(Module mod) {
 		if (mod.isPredefined())
 			return;
