@@ -15,6 +15,7 @@ import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
 import org.kframework.kil.DefinitionItem;
+import org.kframework.kil.Sentence;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.AddAutoIncludedModulesVisitor;
 import org.kframework.kil.loader.CollectConfigCellsVisitor;
@@ -27,16 +28,20 @@ import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.BestFitFilter;
 import org.kframework.parser.concrete.disambiguate.CellEndLabelFilter;
 import org.kframework.parser.concrete.disambiguate.CellTypesFilter;
+import org.kframework.parser.concrete.disambiguate.CheckBinaryPrecedenceFilter;
 import org.kframework.parser.concrete.disambiguate.CorrectCastPriorityFilter;
 import org.kframework.parser.concrete.disambiguate.CorrectKSeqFilter;
+import org.kframework.parser.concrete.disambiguate.CorrectRewritePriorityFilter;
 import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
+import org.kframework.parser.concrete.disambiguate.InclusionFilter;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
 import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
 import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
+import org.kframework.parser.concrete.disambiguate.VariableTypeInferenceFilter;
 import org.kframework.parser.generator.BasicParser;
 import org.kframework.parser.generator.Definition2SDF;
 import org.kframework.parser.generator.DefinitionSDF;
@@ -187,7 +192,7 @@ public class DefinitionLoader {
 			}
 
 			def.accept(new AddAutoIncludedModulesVisitor(context));
-			//def.accept(new CheckModulesAndFilesImportsDecl(context));
+			// def.accept(new CheckModulesAndFilesImportsDecl(context));
 			def.accept(new CollectModuleImportsVisitor(context));
 
 			// ------------------------------------- generate parser TBL
@@ -202,8 +207,7 @@ public class DefinitionLoader {
 			if (GlobalSettings.verbose)
 				Stopwatch.sw.printIntermediate("File Gen Def");
 
-			if (!oldSdf.equals(newSdf) || !new File(context.dotk.getAbsoluteFile() + "/def/Concrete.tbl").exists()
-					|| !new File(context.dotk.getAbsoluteFile() + "/ground/Concrete.tbl").exists()) {
+			if (!oldSdf.equals(newSdf) || !new File(context.dotk.getAbsoluteFile() + "/def/Concrete.tbl").exists() || !new File(context.dotk.getAbsoluteFile() + "/ground/Concrete.tbl").exists()) {
 				// Sdf2Table.run_sdf2table(new File(context.dotk.getAbsoluteFile() + "/def"), "Concrete");
 				Thread t1 = Sdf2Table.run_sdf2table_parallel(new File(context.dotk.getAbsoluteFile() + "/def"), "Concrete");
 				if (!GlobalSettings.documentation) {
@@ -250,11 +254,14 @@ public class DefinitionLoader {
 	}
 
 	/**
-	 * Parses a string representing a file with modules in it.
-	 * Returns the complete parse tree. Any bubble rule has been parsed and disambiguated.
-	 * @param content - the input string.
-	 * @param filename - only for error reporting purposes. Can be empty string.
-	 * @param context - the context for disambiguation purposes.
+	 * Parses a string representing a file with modules in it. Returns the complete parse tree. Any bubble rule has been parsed and disambiguated.
+	 * 
+	 * @param content
+	 *            - the input string.
+	 * @param filename
+	 *            - only for error reporting purposes. Can be empty string.
+	 * @param context
+	 *            - the context for disambiguation purposes.
 	 * @return A lightweight Definition element which contain all the definition items found in the string.
 	 */
 	public static Definition parseString(String content, String filename, Context context) {
@@ -371,6 +378,57 @@ public class DefinitionLoader {
 		return config;
 	}
 
+	/**
+	 * Parses a string of the form: A => B when X [attributes], where the 'when' clause and the attributes can be absent.
+	 * @param sentence The input string.
+	 * @param filename Required for error reporting. Can be anything.
+	 * @param context The context is required for disambiguation purposes.
+	 * @return A {@link Sentence} element.
+	 * @throws TransformerException
+	 */	
+	public static ASTNode parseSentence(String sentence, String filename, Context context) throws TransformerException {
+		if (!context.initialized) {
+			System.err.println("You need to load the definition before you call parsePattern!");
+			System.exit(1);
+		}
+
+		String parsed = org.kframework.parser.concrete.KParser.ParseKRuleString(sentence);
+		Document doc = XmlLoader.getXMLDoc(parsed);
+
+		XmlLoader.addFilename(doc.getFirstChild(), filename);
+		XmlLoader.reportErrors(doc);
+		FileUtil.saveInFile(context.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
+		XmlLoader.writeXmlFile(doc, context.kompiled + "/pattern.xml");
+
+		JavaClassesFactory.startConstruction(context);
+		ASTNode config = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
+		JavaClassesFactory.endConstruction();
+
+		new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation(context), context).check(config);
+		config = config.accept(new SentenceVariablesFilter(context));
+		config = config.accept(new CellEndLabelFilter(context));
+		// config = config.accept(new InclusionFilter(localModule, context));
+		config = config.accept(new CellTypesFilter(context));
+		config = config.accept(new CorrectRewritePriorityFilter(context));
+		config = config.accept(new CorrectKSeqFilter(context));
+		config = config.accept(new CorrectCastPriorityFilter(context));
+		// config = config.accept(new CheckBinaryPrecedenceFilter());
+		config = config.accept(new VariableTypeInferenceFilter(context));
+		config = config.accept(new AmbDuplicateFilter(context));
+		config = config.accept(new TypeSystemFilter(context));
+		config = config.accept(new PriorityFilter(context));
+		config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context));
+		config = config.accept(new TypeInferenceSupremumFilter(context));
+		config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context));
+		config = config.accept(new PreferAvoidFilter(context));
+		config = config.accept(new FlattenListsFilter(context));
+		config = config.accept(new AmbDuplicateFilter(context));
+		// last resort disambiguation
+		config = config.accept(new AmbFilter(context));
+
+		return config;
+	}
+
 	public static ASTNode parsePatternAmbiguous(String pattern, Context context) throws TransformerException {
 		if (!context.initialized) {
 			System.err.println("You need to load the definition before you call parsePattern!");
@@ -380,7 +438,7 @@ public class DefinitionLoader {
 		String parsed = org.kframework.parser.concrete.KParser.ParseKRuleString(pattern);
 		Document doc = XmlLoader.getXMLDoc(parsed);
 
-		//XmlLoader.addFilename(doc.getFirstChild(), filename);
+		// XmlLoader.addFilename(doc.getFirstChild(), filename);
 		XmlLoader.reportErrors(doc);
 		FileUtil.saveInFile(context.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
 		XmlLoader.writeXmlFile(doc, context.kompiled + "/pattern.xml");
@@ -394,23 +452,23 @@ public class DefinitionLoader {
 		config = config.accept(new SentenceVariablesFilter(context));
 		config = config.accept(new CellEndLabelFilter(context));
 		config = config.accept(new CellTypesFilter(context));
-		//config = config.accept(new CorrectRewritePriorityFilter());
+		// config = config.accept(new CorrectRewritePriorityFilter());
 		config = config.accept(new CorrectKSeqFilter(context));
 		config = config.accept(new CorrectCastPriorityFilter(context));
 		// config = config.accept(new CheckBinaryPrecedenceFilter());
 		// config = config.accept(new InclusionFilter(localModule));
-		//config = config.accept(new VariableTypeInferenceFilter());
+		// config = config.accept(new VariableTypeInferenceFilter());
 		config = config.accept(new AmbDuplicateFilter(context));
 		config = config.accept(new TypeSystemFilter(context));
-		//config = config.accept(new PriorityFilter());
+		// config = config.accept(new PriorityFilter());
 		config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context));
 		config = config.accept(new TypeInferenceSupremumFilter(context));
 		config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context));
-		//config = config.accept(new PreferAvoidFilter());
+		// config = config.accept(new PreferAvoidFilter());
 		config = config.accept(new FlattenListsFilter(context));
 		config = config.accept(new AmbDuplicateFilter(context));
 		// last resort disambiguation
-		//config = config.accept(new AmbFilter());
+		// config = config.accept(new AmbFilter());
 		return config;
 	}
 }
