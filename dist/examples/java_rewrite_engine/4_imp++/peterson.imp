@@ -1,0 +1,20 @@
+int x, f0, f1, turn;
+x = 0;
+f0 = 0;
+f1 = 0;
+
+spawn {
+  f0 = 1;
+  turn = 1;
+  while(f1 == 1 && turn != 0) {}
+  x = x + 1;
+  f0 = 0;
+}
+//spawn {
+  f1 = 1;
+  turn = 0;
+  while(f0 == 1 && turn == 0) {}
+  x = x + 1;
+  f1 = 0;
+//}
+
