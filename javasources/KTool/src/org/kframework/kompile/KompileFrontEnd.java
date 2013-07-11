@@ -213,6 +213,7 @@ public class KompileFrontEnd {
 			if (output == null) {
 				output = FileUtil.stripExtension(mainFile.getName()) + "-kompiled";
 			}
+			GlobalSettings.symbolic = true;
 			backend = new SymbolicBackend(Stopwatch.sw, context);
 			context.dotk = new File(output);
 			context.dotk.mkdirs();

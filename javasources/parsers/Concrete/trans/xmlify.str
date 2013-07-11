@@ -400,6 +400,19 @@ rules
 		where loc := <getLocAsString>
 
 	to-xml-p:
+		a#(b) -> $[<KApp sort="K" loc="[loc]">
+							<label loc="[loc]">
+								<const sort="KLabel" value="#sym[srt]" loc="[loc]"/>
+							</label>
+							[<all(to-xml-p)> b]
+		</KApp>
+		]
+		where <string-ends-with(|"Symb")> a
+		where mydebug(!"SymbTerm: ")
+		where srt := <getSort> a
+		where loc := <getLocAsString>
+
+	to-xml-p:
 		a#(b) -> $[<empty sort="[srt]" loc="[loc]"/>
 		]
 		where <string-ends-with(|"Empty")> a

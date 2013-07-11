@@ -3,6 +3,7 @@ package org.kframework.parser.generator;
 import java.util.HashSet;
 import java.util.List;
 
+import org.kframework.compile.transformers.AddSymbolicK;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Lexical;
 import org.kframework.kil.Module;
@@ -15,6 +16,7 @@ import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.StringUtil;
+import org.kframework.utils.general.GlobalSettings;
 
 /**
  * Collect the syntax module, call the syntax collector and print SDF for programs.
@@ -110,6 +112,22 @@ public class ProgramSDF {
 		for (String s : psdfv.startSorts) {
 			if (!Sort.isBasesort(s) && !context.isListSort(s))
 				sdf.append("	" + StringUtil.escapeSortName(s) + "		-> K\n");
+		}
+
+		if (GlobalSettings.symbolic) {
+			sdf.append("\ncontext-free syntax\n");
+			sdf.append("	DzId	-> UnitDz\n");
+			sdf.append("	DzBool	-> UnitDz\n");
+			sdf.append("	DzInt	-> UnitDz\n");
+			sdf.append("	DzFloat	-> UnitDz\n");
+			sdf.append("	DzString-> UnitDz\n");
+			for (String s : psdfv.startSorts) {
+				if (!Sort.isBasesort(s) && !context.isListSort(s))
+					if (AddSymbolicK.allowKSymbolic(s)) {
+						sdf.append("	\"" + AddSymbolicK.symbolicConstructor(s) + "\"	\"(\" UnitDz \")\"	-> ");
+						sdf.append(StringUtil.escapeSortName(s) + "	{cons(\"" + StringUtil.escapeSortName(s) + "1Symb\")}\n");
+					}
+			}
 		}
 
 		sdf.append("lexical syntax\n");

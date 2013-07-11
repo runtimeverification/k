@@ -57,4 +57,5 @@ public class GlobalSettings {
 	public static boolean NOSMT = false;
 	
 	public static String CHECK = null;
+	public static boolean symbolic = false; // true if the --symbolic argument has been provided to kompile
 }
