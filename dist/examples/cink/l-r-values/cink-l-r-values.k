@@ -1,15 +1,9 @@
 require "../basic/cink-basic-syntax.k"
 require "../basic/cink-basic-semantics.k"
 
-module CINK-L-R-VALUES-SYNTAX
- // no syntax
-endmodule
-
 module CINK-L-R-VALUES-SEMANTICS
 
   imports CINK-BASIC-SYNTAX
-
-  imports CINK-L-R-VALUES-SYNTAX
 
   /*@
   We first deal only with lvalues and prvalues. In order to keep the definition
