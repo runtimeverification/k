@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Module;
 import org.kframework.kil.PriorityBlock;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Terminal;
+import org.kframework.kil.loader.AddConsesVisitor;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -24,6 +26,14 @@ public class AddSortLabels extends CopyOnWriteTransformer {
 	}
 	
 	@Override
+	public ASTNode transform(Module module) throws TransformerException {
+		if (module.isPredefined()) {
+			return module;
+		}
+		return super.transform(module);
+	}
+	
+	@Override
 	public ASTNode transform(Syntax syntax) throws TransformerException {
 		if (labeledSorts.contains(syntax.getSort().getName())) {
 			return syntax;
@@ -35,6 +45,12 @@ public class AddSortLabels extends CopyOnWriteTransformer {
 		productionItems.add(new Terminal(":"));
 		productionItems.add(syntax.getSort());
 		Production production = new Production(syntax.getSort(), productionItems);
+
+//		System.out.println("Before: " + context.conses);
+		AddConsesVisitor acv = new AddConsesVisitor(context);
+		production.accept(acv);
+//		System.out.println("After: " + context.conses);
+//		acv.visit(production);
 		List<PriorityBlock> priorityBlocks = syntax.getPriorityBlocks();
 		if (priorityBlocks.size() == 0) {
 			System.out.println(syntax.getSort() + " empty priorityBlocks");

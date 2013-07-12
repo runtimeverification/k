@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 
 import org.kframework.kagreg.KagregFrontEnd;
+import org.kframework.kcheck.KCheckFrontEnd;
 import org.kframework.utils.Error;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
@@ -67,6 +68,8 @@ public class Main {
 				org.kframework.kompile.KompileFrontEnd.kompile(args2);
 			} else if (args[0].equals("-kagreg")) {
 				KagregFrontEnd.kagreg(args2);
+			} else if (args[0].equals("-kcheck")) {
+				KCheckFrontEnd.kcheck(args2);
 			} else if (args[0].equals("-kast")) {
 				org.kframework.kast.KastFrontEnd.kast(args2);
 			} else if (args[0].equals("-hkcd")) {

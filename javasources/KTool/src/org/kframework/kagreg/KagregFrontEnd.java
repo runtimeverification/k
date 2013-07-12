@@ -18,7 +18,6 @@ import org.kframework.kil.Import;
 import org.kframework.kil.loader.Context;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.parser.concrete.KParser;
-import org.kframework.utils.ColorUtil;
 import org.kframework.utils.Error;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;

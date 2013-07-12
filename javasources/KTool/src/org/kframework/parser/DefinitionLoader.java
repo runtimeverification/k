@@ -148,7 +148,8 @@ public class DefinitionLoader {
 				Stopwatch.sw.printIntermediate("Basic Parsing");
 
 			new CheckVisitorStep<Definition>(new CheckListOfKDeprecation(context), context).check(def);
-
+// HERE: add labels to sorts
+			
 			def.preprocess(context);
 
 			if (GlobalSettings.verbose)
@@ -396,8 +397,8 @@ public class DefinitionLoader {
 
 		XmlLoader.addFilename(doc.getFirstChild(), filename);
 		XmlLoader.reportErrors(doc);
-		FileUtil.saveInFile(context.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
-		XmlLoader.writeXmlFile(doc, context.kompiled + "/pattern.xml");
+//		FileUtil.saveInFile(context.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
+//		XmlLoader.writeXmlFile(doc, context.kompiled + "/pattern.xml");
 
 		JavaClassesFactory.startConstruction(context);
 		ASTNode config = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());

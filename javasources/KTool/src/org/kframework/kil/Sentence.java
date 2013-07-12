@@ -111,4 +111,18 @@ public class Sentence extends ModuleItem {
 	public void setLabel(String label) {
 		this.label = label;
 	}
+	
+	public String toString() {
+		String content = "";
+
+		if (this.label != null && !this.label.equals(""))
+			content += "[" + this.label + "]: ";
+
+		content += this.body + " ";
+		if (this.condition != null) {
+			content += "when " + this.condition + " ";
+		}
+
+		return content + attributes;
+	}
 }

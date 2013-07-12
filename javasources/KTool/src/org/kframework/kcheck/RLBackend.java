@@ -1,4 +1,4 @@
-package org.kframework.backend.symbolic.rl;
+package org.kframework.kcheck;
 
 import org.kframework.backend.Backend;
 import org.kframework.backend.BasicBackend;
@@ -17,7 +17,9 @@ import org.kframework.compile.tags.AddOptionalTags;
 import org.kframework.compile.tags.AddStrictStar;
 import org.kframework.compile.transformers.*;
 import org.kframework.compile.utils.CheckVisitorStep;
+import org.kframework.compile.utils.CompileDataStructures;
 import org.kframework.compile.utils.CompilerSteps;
+import org.kframework.compile.utils.InitializeConfigurationStructure;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.main.FirstStep;
@@ -85,7 +87,7 @@ public class RLBackend  extends BasicBackend implements Backend{
 		
 		 String unparsedText = unparserFilter.getResult();
 		
-		 System.out.println(unparsedText);
+		// System.out.println(unparsedText);
 		//
 		// XStream xstream = new XStream();
 		// xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
@@ -123,6 +125,7 @@ public class RLBackend  extends BasicBackend implements Backend{
 		steps.add(new DesugarStreams(context));
 		steps.add(new ResolveFunctions(context));
 		steps.add(new TagUserRules(context)); // symbolic step
+		steps.add(new ReachabilityRuleToKRule(context)); // symbolic step 
 		steps.add(new AddKCell(context));
 		steps.add(new AddSymbolicK(context));
 
@@ -141,23 +144,29 @@ public class RLBackend  extends BasicBackend implements Backend{
 		steps.add(new ResolveBuiltins(context));
 		steps.add(new ResolveListOfK(context));
 		steps.add(new FlattenSyntax(context));
+        steps.add(new InitializeConfigurationStructure(context));
 		steps.add(new AddKStringConversion(context));
 		steps.add(new AddKLabelConstant(context));
 		steps.add(new ResolveHybrid(context));
 		steps.add(new ResolveConfigurationAbstraction(context));
 		steps.add(new ResolveOpenCells(context));
 		steps.add(new ResolveRewrite(context));
+		steps.add(new CompileDataStructures(context));
 
-		// steps.add(new LineariseTransformer()); //symbolic step
+		if (GlobalSettings.sortedCells) {
+			steps.add(new SortCells(context));
+		}
+		// steps.add(new LineariseTransformer()); // symbolic step
 		steps.add(new ReplaceConstants(context)); // symbolic step
 		steps.add(new AddPathCondition(context)); // symbolic step
-		steps.add(new ResolveRLFile(context)); // rl-verification step
+		steps.add(new AddPathConditionToReachabilityKRule(context)); // symbolic step
+		steps.add(new ResolveRLFile(context)); // rl
 		steps.add(new ResolveSupercool(context));
 		steps.add(new AddStrictStar(context));
 		steps.add(new AddDefaultComputational(context));
 		steps.add(new AddOptionalTags(context));
 		steps.add(new DeclareCellLabels(context));
-		steps.add(new AddOptionalTags(context));
+
 
 		return steps;
 	}
