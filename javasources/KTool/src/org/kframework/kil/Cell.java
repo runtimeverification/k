@@ -109,7 +109,7 @@ public class Cell extends Term {
 	public Cell(ATermAppl atm) {
 		super(atm);
 
-		label = atm.getArgument(0).toString();
+		label = ((ATermAppl) atm.getArgument(0)).getName();
 		boolean left = false, right = false;
 		ATermAppl next = (ATermAppl) atm.getArgument(2);
 
@@ -132,7 +132,7 @@ public class Cell extends Term {
 			setEllipses(Ellipses.NONE);
 
 		contents = (Term) JavaClassesFactory.getTerm(next);
-		endLabel = atm.getArgument(3).toString();
+		endLabel = ((ATermAppl) atm.getArgument(3)).getName();
 	}
 
 	public Cell(Cell node) {

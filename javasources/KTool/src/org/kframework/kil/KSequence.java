@@ -9,17 +9,23 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
+import aterm.ATermAppl;
+
 /** Represents the contents (all of sort KItem) joined by ~>. */
 public class KSequence extends Collection {
 
-    public static final KSequence EMPTY = new KSequence(Collections.<Term>emptyList());
+	public static final KSequence EMPTY = new KSequence(Collections.<Term> emptyList());
 
-    public KSequence(Element element) {
+	public KSequence(Element element) {
 		super(element);
 	}
 
 	public KSequence(KSequence node) {
 		super(node);
+	}
+
+	public KSequence(ATermAppl atm) {
+		super(atm);
 	}
 
 	public KSequence() {
@@ -52,10 +58,10 @@ public class KSequence extends Collection {
 		return transformer.transform(this);
 	}
 
-  @Override
-  public void accept(Matcher matcher, Term toMatch){
-    matcher.match(this, toMatch);
-  }
+	@Override
+	public void accept(Matcher matcher, Term toMatch) {
+		matcher.match(this, toMatch);
+	}
 
 	@Override
 	public KSequence shallowCopy() {

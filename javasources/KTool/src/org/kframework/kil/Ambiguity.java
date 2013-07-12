@@ -1,8 +1,5 @@
 package org.kframework.kil;
 
-import java.util.ArrayList;
-
-import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
@@ -22,11 +19,6 @@ public class Ambiguity extends Collection {
 
 	public Ambiguity(ATermAppl atm) {
 		super(atm);
-
-		contents = new ArrayList<Term>();
-		for (int i = 0; i < atm.getArity(); i++) {
-			contents.add((Term) JavaClassesFactory.getTerm(atm.getArgument(i)));
-		}
 	}
 
 	public Ambiguity(Ambiguity node) {

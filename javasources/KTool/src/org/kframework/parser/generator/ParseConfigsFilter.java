@@ -5,7 +5,6 @@ import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Module;
-import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.loader.CollectStartSymbolPgmVisitor;
@@ -68,8 +67,8 @@ public class ParseConfigsFilter extends BasicTransformer {
 				ASTNode config = null;
 				if (GlobalSettings.fastKast) {
 					// TODO(RaduM): load directly from ATerms
-					System.out.println("Using fastKast in rules: org.kframework.parser.generator.ParseConfigFilter");
-					config = Sglr.run_sglri(context.dotk.getAbsolutePath() + "/def/Concrete.tbl", "CondSentence", ss.getContent(), ss.getFilename());
+					Sentence st = (Sentence) Sglr.run_sglri(context.dotk.getAbsolutePath() + "/def/Concrete.tbl", "CondSentence", ss.getContent(), ss.getFilename());
+					config = new Configuration(st);
 				} else {
 					String parsed = null;
 					if (ss.getAttributes().containsAttribute("kore")) {
@@ -87,8 +86,8 @@ public class ParseConfigsFilter extends BasicTransformer {
 					XmlLoader.addFilename(xmlTerm, ss.getFilename());
 					XmlLoader.reportErrors(doc, ss.getType());
 
-					config = new Configuration((Sentence) JavaClassesFactory.getTerm((Element) xmlTerm));
-					Sentence st = (Sentence) config;
+					Sentence st = (Sentence) JavaClassesFactory.getTerm((Element) xmlTerm);
+					config = new Configuration(st);
 					assert st.getLabel().equals(""); // labels should have been parsed in Basic Parsing
 					st.setLabel(ss.getLabel());
 					//assert st.getAttributes() == null || st.getAttributes().isEmpty(); // attributes should have been parsed in Basic Parsing

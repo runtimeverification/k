@@ -334,7 +334,7 @@ public class JavaClassesFactory {
 					return storeNode(atm.getUniqueIdentifier(), Token.kAppOf(appl));
 				}
 			}
-			if (appl.getName().equals("KApp"))
+			if (appl.getName().equals("K1App"))
 				return storeNode(atm.getUniqueIdentifier(), new KApp(appl));
 			if (appl.getName().endsWith("Empty")) {
 				String sort = StringUtil.getSortNameFromCons(appl.getName());
@@ -357,13 +357,13 @@ public class JavaClassesFactory {
 			}
 			if (appl.getName().endsWith("Item")) {
 				String sort = StringUtil.getSortNameFromCons(appl.getName());
-				if (sort.equals("Set"))
+				if (sort.equals("SetItem"))
 					return storeNode(atm.getUniqueIdentifier(), new SetItem(appl));
-				else if (sort.equals("Bag"))
+				else if (sort.equals("BagItem"))
 					return storeNode(atm.getUniqueIdentifier(), new BagItem(appl));
-				else if (sort.equals("List"))
+				else if (sort.equals("ListItem"))
 					return storeNode(atm.getUniqueIdentifier(), new ListItem(appl));
-				else if (sort.equals("Map"))
+				else if (sort.equals("MapItem"))
 					return storeNode(atm.getUniqueIdentifier(), new MapItem(appl));
 			}
 
@@ -380,15 +380,16 @@ public class JavaClassesFactory {
 				else if (sort.equals("Map"))
 					return storeNode(atm.getUniqueIdentifier(), new Map(appl));
 			}
-
+			if (appl.getName().endsWith("K1Seq"))
+				return storeNode(atm.getUniqueIdentifier(), new KSequence(appl));
 			if (appl.getName().equals("Bag1ClosedCell"))
-				return storeNode(atm.getUniqueIdentifier(), new Cell(appl));			
-			// if (Constants.BREAK.endsWith(appl.getNodeName()))
-			// return new TermComment(appl);
-			// if (Constants.KSEQUENCE.endsWith(appl.getNodeName()))
-			// return new KSequence(appl);
-			// if (Constants.HOLE.endsWith(appl.getNodeName()))
-			// return Hole.KITEM_HOLE;
+				return storeNode(atm.getUniqueIdentifier(), new Cell(appl));
+			if (appl.getName().endsWith("1Hole"))
+				return Hole.KITEM_HOLE;
+			if (appl.getName().equals("BagItem1Break"))
+				return storeNode(atm.getUniqueIdentifier(), new TermComment(appl));
+			
+
 			// if (Constants.FREEZERHOLE.endsWith(appl.getNodeName()))
 			// return new FreezerHole(appl);
 			if (Constants.AMB.equals(appl.getName()))

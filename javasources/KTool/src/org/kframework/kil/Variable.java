@@ -37,7 +37,7 @@ public class Variable extends Term {
 		super(atm);
 		this.sort = StringUtil.getSortNameFromCons(atm.getName());
 
-		name = atm.getArgument(0).toString();
+		name = ((ATermAppl) atm.getArgument(0)).getName();
 
 		if (atm.getName().endsWith("2Var"))
 			this.userTyped = true;

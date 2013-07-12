@@ -28,14 +28,12 @@ import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.BestFitFilter;
 import org.kframework.parser.concrete.disambiguate.CellEndLabelFilter;
 import org.kframework.parser.concrete.disambiguate.CellTypesFilter;
-import org.kframework.parser.concrete.disambiguate.CheckBinaryPrecedenceFilter;
 import org.kframework.parser.concrete.disambiguate.CorrectCastPriorityFilter;
 import org.kframework.parser.concrete.disambiguate.CorrectKSeqFilter;
 import org.kframework.parser.concrete.disambiguate.CorrectRewritePriorityFilter;
 import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
-import org.kframework.parser.concrete.disambiguate.InclusionFilter;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
@@ -207,7 +205,8 @@ public class DefinitionLoader {
 			if (GlobalSettings.verbose)
 				Stopwatch.sw.printIntermediate("File Gen Def");
 
-			if (!oldSdf.equals(newSdf) || !new File(context.dotk.getAbsoluteFile() + "/def/Concrete.tbl").exists() || !new File(context.dotk.getAbsoluteFile() + "/ground/Concrete.tbl").exists()) {
+			if (!oldSdf.equals(newSdf) || !new File(context.dotk.getAbsoluteFile() + "/def/Concrete.tbl").exists()
+					|| !new File(context.dotk.getAbsoluteFile() + "/ground/Concrete.tbl").exists()) {
 				// Sdf2Table.run_sdf2table(new File(context.dotk.getAbsoluteFile() + "/def"), "Concrete");
 				Thread t1 = Sdf2Table.run_sdf2table_parallel(new File(context.dotk.getAbsoluteFile() + "/def"), "Concrete");
 				if (!GlobalSettings.documentation) {
@@ -218,12 +217,12 @@ public class DefinitionLoader {
 				if (GlobalSettings.verbose)
 					Stopwatch.sw.printIntermediate("Generate TBLDef");
 			}
-			// ------------------------------------- import files in Stratego
-			org.kframework.parser.concrete.KParser.ImportTbl(context.dotk.getAbsolutePath() + "/def/Concrete.tbl");
+			if (!GlobalSettings.fastKast) { // ------------------------------------- import files in Stratego
+				org.kframework.parser.concrete.KParser.ImportTbl(context.dotk.getAbsolutePath() + "/def/Concrete.tbl");
 
-			if (GlobalSettings.verbose)
-				Stopwatch.sw.printIntermediate("Importing Files");
-
+				if (GlobalSettings.verbose)
+					Stopwatch.sw.printIntermediate("Importing Files");
+			}
 			// ------------------------------------- parse configs
 			JavaClassesFactory.startConstruction(context);
 			def = (Definition) def.accept(new ParseConfigsFilter(context));
@@ -385,7 +384,7 @@ public class DefinitionLoader {
 	 * @param context The context is required for disambiguation purposes.
 	 * @return A {@link Sentence} element.
 	 * @throws TransformerException
-	 */	
+	 */
 	public static ASTNode parseSentence(String sentence, String filename, Context context) throws TransformerException {
 		if (!context.initialized) {
 			System.err.println("You need to load the definition before you call parsePattern!");

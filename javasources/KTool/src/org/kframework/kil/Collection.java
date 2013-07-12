@@ -40,10 +40,10 @@ public abstract class Collection extends Term {
 
 	public Collection(ATermAppl atm) {
 		super(atm);
-		// contents = new ArrayList<Term>();
-		// for (int i = 0; i < atm.getArity(); i++) {
-		// contents.add((Term) JavaClassesFactory.getTerm(atm.getArgument(i)));
-		// }
+		contents = new ArrayList<Term>();
+		for (int i = 0; i < atm.getArity(); i++) {
+			contents.add((Term) JavaClassesFactory.getTerm(atm.getArgument(i)));
+		}
 	}
 
 	public Collection(String sort, List<Term> col) {

@@ -88,8 +88,15 @@ public class ParseRulesFilter extends BasicTransformer {
 
 				if (GlobalSettings.fastKast) {
 					// TODO(RaduM): load directly from ATerms
-					System.out.println("Using fastKast in rules: org.kframework.parser.generator.ParseRulesFilter");
-					config = Sglr.run_sglri(context.dotk.getAbsolutePath() + "/def/Concrete.tbl", "CondSentence", ss.getContent(), ss.getFilename());
+					Sentence st = (Sentence) Sglr.run_sglri(context.dotk.getAbsolutePath() + "/def/Concrete.tbl", "CondSentence", ss.getContent(), ss.getFilename());
+					if (ss.getType().equals(Constants.CONTEXT))
+						config = new org.kframework.kil.Context(st);
+					else if (ss.getType().equals(Constants.RULE))
+						config = new Rule(st);
+					else { // should not reach here
+						config = null;
+						assert false : "Only context and rules have been implemented.";
+					}
 				} else {
 					String parsed = null;
 					if (ss.getAttributes().containsAttribute("kore")) {
