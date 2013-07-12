@@ -382,6 +382,13 @@ public class Main {
                         assert false: "dead code";
                     }
                     result = krun.prove(mod);
+				} else if (cmd.hasOption("bound")) {
+					int bound = Integer.parseInt(K.bound);
+                    result = krun.step(makeConfiguration(KAST, null, rp,
+                            (K.term != null), context), bound);
+
+					if (GlobalSettings.verbose)
+						sw.printTotal("Bounded execution total");
                 } else {
 					result = krun.run(makeConfiguration(KAST, null, rp,
 							(K.term != null), context));
