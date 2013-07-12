@@ -12,7 +12,6 @@ endmodule
 
 module CINK-ARRAYS-SEMANTICS
 
-  imports CINK-L-R-VALUES-SYNTAX
   imports CINK-ARRAYS-SYNTAX
   imports CINK-BASIC-SEMANTICS
   imports CINK-L-R-VALUES-SEMANTICS
@@ -159,7 +158,7 @@ module CINK-ARRAYS-SEMANTICS
        [read-stream]
 
   /*@ 
-  Arrays a parameters:
+  Arrays as parameters:
   */
 
   context evaluate ((HOLE => lvalue(HOLE)), _:Exps) to _:Vals
