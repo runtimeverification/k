@@ -87,14 +87,7 @@ public class ParseConfigsFilter extends BasicTransformer {
 					XmlLoader.addFilename(xmlTerm, ss.getFilename());
 					XmlLoader.reportErrors(doc, ss.getType());
 
-					if (ss.getType().equals(Constants.CONTEXT))
-						config = new org.kframework.kil.Context((Sentence) JavaClassesFactory.getTerm((Element) xmlTerm));
-					else if (ss.getType().equals(Constants.RULE))
-						config = new Rule((Sentence) JavaClassesFactory.getTerm((Element) xmlTerm));
-					else { // should not reach here
-						config = null;
-						assert false : "Only context and rules have been implemented.";
-					}
+					config = new Configuration((Sentence) JavaClassesFactory.getTerm((Element) xmlTerm));
 					Sentence st = (Sentence) config;
 					assert st.getLabel().equals(""); // labels should have been parsed in Basic Parsing
 					st.setLabel(ss.getLabel());
