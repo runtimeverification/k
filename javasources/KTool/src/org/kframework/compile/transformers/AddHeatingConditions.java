@@ -95,7 +95,9 @@ public class AddHeatingConditions extends CopyOnWriteTransformer {
 			);
 		}
 		Variable variable = vars.iterator().next();
-		final KApp isKResult = KApp.of(KLabelConstant.KRESULT_PREDICATE, variable);
+        String resultType = node.getAttribute("result");
+        KLabel resultLabel = getResultLabel(resultType);
+		final KApp isKResult = KApp.of(resultLabel, variable);
 		if (heating) {
 			kresultCnd = KApp.of(KLabelConstant.KNEQ_KLABEL, isKResult, BoolBuiltin.TRUE);
 		} else {
@@ -108,7 +110,19 @@ public class AddHeatingConditions extends CopyOnWriteTransformer {
 		return node;
 	}
 
-	@Override
+    private KLabel getResultLabel(String resultType) {
+        if (resultType == null) {
+            return KLabelConstant.KRESULT_PREDICATE;
+        }
+        if (Character.isUpperCase(resultType.charAt(0))) {
+            return KLabelConstant.of(AddPredicates.predicate(resultType));
+        }
+        return KLabelConstant.of(resultType);
+
+
+    }
+
+    @Override
 	public ASTNode transform(Syntax node) throws TransformerException {
 		return node;
 	}

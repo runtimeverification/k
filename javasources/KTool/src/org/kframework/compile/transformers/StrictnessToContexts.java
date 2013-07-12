@@ -2,18 +2,7 @@ package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.compile.utils.SyntaxByTag;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Hole;
-import org.kframework.kil.KApp;
-import org.kframework.kil.KLabelConstant;
-import org.kframework.kil.KList;
-import org.kframework.kil.KSorts;
-import org.kframework.kil.Module;
-import org.kframework.kil.ModuleItem;
-import org.kframework.kil.Production;
-import org.kframework.kil.Term;
-import org.kframework.kil.TermCons;
-import org.kframework.kil.Variable;
+import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -141,7 +130,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                 }
 
                 // insert HOLE instead of the term
-                termCons.getContents().set(arguments.get(i), Hole.KITEM_HOLE);
+                termCons.getContents().set(arguments.get(i), getHoleTerm(prod));
 
                 // is seqstrict the elements before the argument should be KResult
                 if (isSeq) {
@@ -160,6 +149,17 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
         return node;
     }
 
+    private Term getHoleTerm(Production prod) {
+        Term hole;
+        String strictType = prod.getAttribute("strictType");
+        if (null == strictType) {
+            hole = Hole.KITEM_HOLE;
+        } else {
+           hole = new Rewrite(Hole.KITEM_HOLE, KApp.of(KLabelConstant.of(strictType), Hole.KITEM_HOLE),context);
+        }
+        return hole;
+    }
+
     /* Add context KLabel(KList1 ,, HOLE ,, KList2).
      * If KLabel is seqstrict then add the condition isKResult(KList1)
      */
@@ -169,7 +169,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
         Variable variable = Variable.getFreshVar(KSorts.KLIST);
         contents.add(variable);
         //second is a HOLE
-        contents.add(Hole.KITEM_HOLE);
+        contents.add(getHoleTerm(prod));
         //third argument is a variable of sort KList
         contents.add(Variable.getFreshVar(KSorts.KLIST));
         KApp kapp = new KApp(MetaK.getTerm(prod, context), new KList(contents));
