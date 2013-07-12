@@ -36,6 +36,7 @@ import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
 import org.kframework.parser.concrete.disambiguate.VariableTypeInferenceFilter;
 import org.kframework.parser.utils.Sglr;
 import org.kframework.utils.Stopwatch;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.XmlLoader;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -97,6 +98,10 @@ public class ParseRulesFilter extends BasicTransformer {
 						config = null;
 						assert false : "Only context and rules have been implemented.";
 					}
+
+					int startLine = StringUtil.getStartLineFromLocation(ss.getLocation());
+					int startCol = StringUtil.getStartColFromLocation(ss.getLocation());
+					config.accept(new UpdateLocationVisitor(context, startLine, startCol));
 				} else {
 					String parsed = null;
 					if (ss.getAttributes().containsAttribute("kore")) {

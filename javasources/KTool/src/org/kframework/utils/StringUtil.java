@@ -23,9 +23,9 @@ public class StringUtil {
 		return sb.toString();
 	}
 
-    public static String makeProper(String str) {
-        return Character.toUpperCase(str.charAt(0)) + str.substring(1);
-    }
+	public static String makeProper(String str) {
+		return Character.toUpperCase(str.charAt(0)) + str.substring(1);
+	}
 
 	public static String escape(String str) {
 		str = str.replaceAll("\\\\", "\\\\\\\\");
@@ -109,7 +109,7 @@ public class StringUtil {
 
 	public static String escapeMaude(String tag) {
 		// TODO [andreis]: current implementation appears wrong to me, i.e. '`(`) stays the same rather than becoming '```(```)
-        tag = tag.replaceAll("(?<!`)`", "BKQT");
+		tag = tag.replaceAll("(?<!`)`", "BKQT");
 		return tag.replaceAll("(?<!`)([\\(\\)\\[\\]\\{\\},])", "`$1");
 	}
 
@@ -137,14 +137,13 @@ public class StringUtil {
 					sb.append(' ');
 				i++;
 			} else {
-                if (str.charAt(i) == 'B' && str.charAt(i+1) == 'K' &&
-                        str.charAt(i+2) == 'Q' && str.charAt(i+3) == 'T') {
-                    sb.append('`');
-                    i+=3;
-                } else  {
-                    sb.append(str.charAt(i));
-                }
-            }
+				if (str.charAt(i) == 'B' && str.charAt(i + 1) == 'K' && str.charAt(i + 2) == 'Q' && str.charAt(i + 3) == 'T') {
+					sb.append('`');
+					i += 3;
+				} else {
+					sb.append(str.charAt(i));
+				}
+			}
 		}
 
 		return sb.toString();
@@ -163,13 +162,23 @@ public class StringUtil {
 	}
 
 	public static String latexify(String name) {
-		return name.replace("\\", "\\textbackslash ").replace("_", "\\_").replace("{", "\\{").replace("}", "\\}").replace("#", "\\#").replace("%", "\\%").replace("$", "\\$").replace("&", "\\&")
-				.replace("~", "\\mbox{\\~{}}").replace("^", "\\mbox{\\^{}}").replace("`", "\\mbox{\\`{}}");
+		return name.replace("\\", "\\textbackslash ").replace("_", "\\_").replace("{", "\\{").replace("}", "\\}").replace("#", "\\#").replace("%", "\\%").replace("$", "\\$")
+				.replace("&", "\\&").replace("~", "\\mbox{\\~{}}").replace("^", "\\mbox{\\^{}}").replace("`", "\\mbox{\\`{}}");
 	}
 
 	public static String emptyIfNull(String string) {
 		if (string == null)
 			return "";
 		return string;
+	}
+
+	public static int getStartLineFromLocation(String location) {
+		String[] str = location.split("[\\(,\\)]");
+		return Integer.parseInt(str[0 + 1]);
+	}
+
+	public static int getStartColFromLocation(String location) {
+		String[] str = location.split("[\\(,\\)]");
+		return Integer.parseInt(str[1 + 1]);
 	}
 }
