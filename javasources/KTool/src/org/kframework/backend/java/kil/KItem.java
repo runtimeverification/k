@@ -100,8 +100,9 @@ public class KItem extends Term implements Sorted {
             return BuiltinFunction.invoke(kLabelConstant, arguments);
         } catch (IllegalAccessException e) {
             //e.printStackTrace();
-        } catch (RuntimeException e) {
+        } catch (IllegalArgumentException e) {
             //e.printStackTrace();
+        } catch (InvocationTargetException e) {
         }
 
         return this;

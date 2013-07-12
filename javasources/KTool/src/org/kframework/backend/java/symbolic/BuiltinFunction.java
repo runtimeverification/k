@@ -70,12 +70,8 @@ public class BuiltinFunction {
     }
 
     public static Term invoke(KLabelConstant label, Term ... arguments)
-            throws IllegalAccessException, IllegalArgumentException, Throwable {
-        try {
-            return (Term) table.get(label).invoke(null, (Object[]) arguments);
-        } catch (InvocationTargetException e) {
-            throw e.getTargetException();
-        }
+            throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        return (Term) table.get(label).invoke(null, (Object[]) arguments);
     }
 
     public static boolean isBuiltinKLabel(KLabelConstant label) {
