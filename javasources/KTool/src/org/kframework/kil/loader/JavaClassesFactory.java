@@ -264,14 +264,35 @@ public class JavaClassesFactory {
 
 			// if (Constants.SORT.endsWith(appl.getNodeName()))
 			// return new Sort(appl);
+			// if (Constants.TERMINAL.endsWith(appl.getNodeName()))
+			// return new Terminal(appl);
 			// if (Constants.PRIORITY.endsWith(appl.getNodeName()))
 			// return new PriorityBlock(appl);
 			// if (Constants.PRODUCTION.endsWith(appl.getNodeName()))
 			// return new Production(appl);
 			// if (Constants.RULE.endsWith(appl.getNodeName()))
 			// return new Rule(appl);
-			// if (Constants.REWRITE.endsWith(appl.getNodeName()))
-			// return new Rewrite(appl);
+			// if (Constants.USERLIST.endsWith(appl.getName()))
+			// return new UserList(appl);
+			// if (Constants.CONFIG.endsWith(appl.getNodeName()))
+			// return new Configuration(appl);
+			// if (Constants.DEFINITION.endsWith(appl.getNodeName()))
+			// return new Definition(appl);
+			// if (Constants.MODULECOMMENT.endsWith(appl.getNodeName()))
+			// return new LiterateModuleComment(appl);
+			// if (Constants.DEFCOMMENT.endsWith(appl.getNodeName()))
+			// return new LiterateDefinitionComment(appl);
+			// if (Constants.TAG.endsWith(appl.getNodeName()))
+			// return new Attribute(appl);
+			// if (Constants.ATTRIBUTES.endsWith(appl.getNodeName()))
+			// return new Attributes(appl);
+			// if (Constants.CONTEXT.endsWith(appl.getNodeName()))
+			// return new Context(appl);
+
+			if (appl.getName().endsWith("CondSentence"))
+				return storeNode(atm.getUniqueIdentifier(), new Sentence(appl));
+			if (appl.getName().endsWith("Rewrite"))
+				return storeNode(atm.getUniqueIdentifier(), new Rewrite(appl));
 			if (appl.getName().endsWith("Syn")) {
 				if (appl.getName().endsWith("ListSyn") && appl.getArgument(0) instanceof ATermList) {
 					ATermList list = (ATermList) appl.getArgument(0);
@@ -299,13 +320,11 @@ public class JavaClassesFactory {
 					return storeNode(atm.getUniqueIdentifier(), new TermCons(appl, context));
 			}
 			if (appl.getName().endsWith("Bracket"))
-				return new Bracket(appl);
-			// if (Constants.CAST.endsWith(appl.getNodeName()))
-			// return new Cast(appl);
-			// if (Constants.VAR.endsWith(appl.getNodeName()))
-			// return new Variable(appl);
-			// if (Constants.TERMINAL.endsWith(appl.getNodeName()))
-			// return new Terminal(appl);
+				return storeNode(atm.getUniqueIdentifier(), new Bracket(appl));
+			if (appl.getName().endsWith("Cast"))
+				return storeNode(atm.getUniqueIdentifier(), new Cast(appl));
+			if (appl.getName().endsWith("Var"))
+				return storeNode(atm.getUniqueIdentifier(), new Variable(appl));
 			if (appl.getName().endsWith("Const")) {
 				String sort = StringUtil.getSortNameFromCons(appl.getName());
 				if (sort.equals(KSorts.KLABEL)) {
@@ -315,10 +334,8 @@ public class JavaClassesFactory {
 					return storeNode(atm.getUniqueIdentifier(), Token.kAppOf(appl));
 				}
 			}
-			// if (Constants.KAPP.endsWith(appl.getNodeName()))
-			// return new KApp(appl, null);
-			// if (KSorts.KLIST.endsWith(appl.getNodeName()))
-			// return new KList(appl);
+			if (appl.getName().equals("KApp"))
+				return storeNode(atm.getUniqueIdentifier(), new KApp(appl));
 			if (appl.getName().endsWith("Empty")) {
 				String sort = StringUtil.getSortNameFromCons(appl.getName());
 				if (sort.equals(KSorts.K)) {
@@ -338,50 +355,44 @@ public class JavaClassesFactory {
 					return new Empty(appl);
 				}
 			}
-			// if (KSorts.SET.endsWith(appl.getNodeName()))
-			// return new Set(appl);
-			// if (KSorts.SET_ITEM.endsWith(appl.getNodeName()))
-			// return new SetItem(appl);
-			// if (Constants.USERLIST.endsWith(appl.getName()))
-			// return new UserList(appl);
-			// if (Constants.CONFIG.endsWith(appl.getNodeName()))
-			// return new Configuration(appl);
-			// if (Constants.CELL.endsWith(appl.getNodeName()))
-			// return new Cell(appl);
+			if (appl.getName().endsWith("Item")) {
+				String sort = StringUtil.getSortNameFromCons(appl.getName());
+				if (sort.equals("Set"))
+					return storeNode(atm.getUniqueIdentifier(), new SetItem(appl));
+				else if (sort.equals("Bag"))
+					return storeNode(atm.getUniqueIdentifier(), new BagItem(appl));
+				else if (sort.equals("List"))
+					return storeNode(atm.getUniqueIdentifier(), new ListItem(appl));
+				else if (sort.equals("Map"))
+					return storeNode(atm.getUniqueIdentifier(), new MapItem(appl));
+			}
+
+			if (appl.getName().endsWith("List")) {
+				String sort = StringUtil.getSortNameFromCons(appl.getName());
+				if (sort.equals("Set"))
+					return storeNode(atm.getUniqueIdentifier(), new Set(appl));
+				else if (sort.equals("Bag"))
+					return storeNode(atm.getUniqueIdentifier(), new Bag(appl));
+				else if (sort.equals("List"))
+					return storeNode(atm.getUniqueIdentifier(), new List(appl));
+				else if (sort.equals("KList"))
+					return storeNode(atm.getUniqueIdentifier(), new KList(appl));
+				else if (sort.equals("Map"))
+					return storeNode(atm.getUniqueIdentifier(), new Map(appl));
+			}
+
+			if (appl.getName().equals("Bag1ClosedCell"))
+				return storeNode(atm.getUniqueIdentifier(), new Cell(appl));			
 			// if (Constants.BREAK.endsWith(appl.getNodeName()))
 			// return new TermComment(appl);
-			// if (KSorts.BAG.endsWith(appl.getNodeName()))
-			// return new Bag(appl);
-			// if (KSorts.BAG_ITEM.endsWith(appl.getNodeName()))
-			// return new BagItem(appl);
 			// if (Constants.KSEQUENCE.endsWith(appl.getNodeName()))
 			// return new KSequence(appl);
-			// if (KSorts.MAP.endsWith(appl.getNodeName()))
-			// return new Map(appl);
-			// if (KSorts.MAP_ITEM.endsWith(appl.getNodeName()))
-			// return new MapItem(appl);
-			// if (Constants.CONTEXT.endsWith(appl.getNodeName()))
-			// return new Context(appl);
 			// if (Constants.HOLE.endsWith(appl.getNodeName()))
 			// return Hole.KITEM_HOLE;
 			// if (Constants.FREEZERHOLE.endsWith(appl.getNodeName()))
 			// return new FreezerHole(appl);
-			// if (KSorts.LIST.endsWith(appl.getNodeName()))
-			// return new List(appl);
-			// if (KSorts.LIST_ITEM.endsWith(appl.getNodeName()))
-			// return new ListItem(appl);
-			// if (Constants.DEFINITION.endsWith(appl.getNodeName()))
-			// return new Definition(appl);
 			if (Constants.AMB.equals(appl.getName()))
 				return storeNode(atm.getUniqueIdentifier(), new Ambiguity(appl));
-			// if (Constants.MODULECOMMENT.endsWith(appl.getNodeName()))
-			// return new LiterateModuleComment(appl);
-			// if (Constants.DEFCOMMENT.endsWith(appl.getNodeName()))
-			// return new LiterateDefinitionComment(appl);
-			// if (Constants.TAG.endsWith(appl.getNodeName()))
-			// return new Attribute(appl);
-			// if (Constants.ATTRIBUTES.endsWith(appl.getNodeName()))
-			// return new Attributes(appl);
 		}
 		System.out.println(">>> " + atm + " <<< - unimplemented yet: org.kframework.kil.loader.JavaClassesFactory");
 		return null;

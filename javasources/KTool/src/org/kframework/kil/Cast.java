@@ -6,8 +6,11 @@ import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
+
+import aterm.ATermAppl;
 
 /** Represents parentheses uses for grouping. All productions labeled bracket parse to this. */
 public class Cast extends Term {
@@ -32,6 +35,13 @@ public class Cast extends Term {
 	public Cast(Term t, Context context) {
 		super(t.getSort());
 		this.content = t;
+	}
+
+	public Cast(ATermAppl atm) {
+		super(atm);
+		this.sort = StringUtil.getSortNameFromCons(atm.getName());
+
+		content = (Term) JavaClassesFactory.getTerm(atm.getArgument(0));
 	}
 
 	public Cast(String location, String filename, String sort) {

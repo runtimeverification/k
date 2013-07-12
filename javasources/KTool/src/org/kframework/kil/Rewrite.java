@@ -1,13 +1,17 @@
 package org.kframework.kil;
 
-import org.kframework.kil.loader.*;
+import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
+import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
+
+import aterm.ATermAppl;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -29,6 +33,14 @@ public class Rewrite extends Term {
 		right = (Term) JavaClassesFactory.getTerm(temp);
 	}
 
+	public Rewrite(ATermAppl atm) {
+		super(atm);
+		this.sort = StringUtil.getSortNameFromCons(atm.getName());
+
+		left = (Term) JavaClassesFactory.getTerm(atm.getArgument(0));
+		right = (Term) JavaClassesFactory.getTerm(atm.getArgument(1));
+	}
+
 	public Rewrite(Rewrite node) {
 		super(node);
 		this.left = node.left;
@@ -41,10 +53,9 @@ public class Rewrite extends Term {
 		right = eval1Right;
 		recomputeSort(context);
 	}
-	
+
 	/**
-	 * Returning the Least Upper Bound for left and right sorts,
-	 * unless either side is an ambiguity, in which case arbitrary return the left sort.
+	 * Returning the Least Upper Bound for left and right sorts, unless either side is an ambiguity, in which case arbitrary return the left sort.
 	 */
 	private void recomputeSort(Context context) {
 		if (left instanceof Ambiguity || right instanceof Ambiguity)
@@ -60,13 +71,13 @@ public class Rewrite extends Term {
 	public Term getRight() {
 		return right;
 	}
-	
+
 	public void replaceChildren(Term left, Term right, Context context) {
 		this.left = left;
 		this.right = right;
 		recomputeSort(context);
 	}
-	
+
 	public void setLeft(Term left, Context context) {
 		this.left = left;
 		recomputeSort(context);
@@ -122,9 +133,9 @@ public class Rewrite extends Term {
 	@Override
 	public boolean contains(Object o) {
 		if (o instanceof Bracket)
-			return contains(((Bracket)o).getContent());
+			return contains(((Bracket) o).getContent());
 		if (o instanceof Cast)
-			return contains(((Cast)o).getContent());
+			return contains(((Cast) o).getContent());
 		if (o == null)
 			return false;
 		if (this == o)
@@ -134,5 +145,4 @@ public class Rewrite extends Term {
 		Rewrite r = (Rewrite) o;
 		return left.contains(r.left) && right.contains(r.right);
 	}
-
 }

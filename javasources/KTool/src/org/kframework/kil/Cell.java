@@ -6,6 +6,7 @@ import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -13,6 +14,8 @@ import org.kframework.utils.general.GlobalSettings;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
+
+import aterm.ATermAppl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,7 +55,7 @@ public class Cell extends Term {
 		LEFT, RIGHT, BOTH, NONE,
 	}
 
-    public static String SORT_ATTRIBUTE = "sort";
+	public static String SORT_ATTRIBUTE = "sort";
 
 	/** Must equal with {@link #endLabel} */
 	String label;
@@ -101,6 +104,35 @@ public class Cell extends Term {
 				cellAttributes.put(its.item(i).getNodeName(), its.item(i).getNodeValue());
 			}
 		}
+	}
+
+	public Cell(ATermAppl atm) {
+		super(atm);
+
+		label = atm.getArgument(0).toString();
+		boolean left = false, right = false;
+		ATermAppl next = (ATermAppl) atm.getArgument(2);
+
+		if (next.getName().equals("LeftCell")) {
+			left = true;
+			next = (ATermAppl) atm.getArgument(0);
+		}
+		if (next.getName().equals("RightCell")) {
+			right = true;
+			next = (ATermAppl) atm.getArgument(0);
+		}
+		cellAttributes = new HashMap<String, String>();
+		if (left && right)
+			setEllipses(Ellipses.BOTH);
+		else if (left)
+			setEllipses(Ellipses.LEFT);
+		else if (right)
+			setEllipses(Ellipses.RIGHT);
+		else
+			setEllipses(Ellipses.NONE);
+
+		contents = (Term) JavaClassesFactory.getTerm(next);
+		endLabel = atm.getArgument(3).toString();
 	}
 
 	public Cell(Cell node) {
@@ -223,10 +255,10 @@ public class Cell extends Term {
 		return transformer.transform(this);
 	}
 
-  @Override
-  public void accept(Matcher matcher, Term toMatch){
-    matcher.match(this, toMatch);
-  }
+	@Override
+	public void accept(Matcher matcher, Term toMatch) {
+		matcher.match(this, toMatch);
+	}
 
 	public void setDefaultAttributes() {
 		cellAttributes = new HashMap<String, String>();
@@ -256,19 +288,21 @@ public class Cell extends Term {
 
 	@Override
 	public boolean equals(Object o) {
-		if (!(o instanceof Cell)) return false;
-		Cell c = (Cell)o;
+		if (!(o instanceof Cell))
+			return false;
+		Cell c = (Cell) o;
 		return label.equals(c.label) && contents.equals(c.contents);
 	}
 
 	@Override
 	public boolean contains(Object o) {
 		if (o instanceof Bracket)
-			return contains(((Bracket)o).getContent());
+			return contains(((Bracket) o).getContent());
 		if (o instanceof Cast)
-			return contains(((Cast)o).getContent());
-		if (!(o instanceof Cell)) return false;
-		Cell c = (Cell)o;
+			return contains(((Cast) o).getContent());
+		if (!(o instanceof Cell))
+			return false;
+		Cell c = (Cell) o;
 		return label.equals(c.label) && contents.contains(c.contents);
 	}
 
@@ -277,16 +311,15 @@ public class Cell extends Term {
 		return label.hashCode() * 17 + contents.hashCode();
 	}
 
-
 	public List<Term> getCellTerms() {
-			Term contents = getContents();
-			List<Term> cells = new ArrayList<Term>();
-			if (contents instanceof Variable || contents instanceof Cell) {
-				cells.add(contents);
-			} else if (contents instanceof Bag) {
-				cells.addAll(((Bag)contents).getContents());
-			}
-			return cells;
+		Term contents = getContents();
+		List<Term> cells = new ArrayList<Term>();
+		if (contents instanceof Variable || contents instanceof Cell) {
+			cells.add(contents);
+		} else if (contents instanceof Bag) {
+			cells.addAll(((Bag) contents).getContents());
 		}
+		return cells;
+	}
 
 }

@@ -73,6 +73,11 @@ public class KompileFrontEnd {
 		if (cmd.hasOption("verbose"))
 			GlobalSettings.verbose = true;
 
+		// set fast kast option
+		if (cmd.hasOption("fastKast")) {
+			GlobalSettings.fastKast = true;
+		}
+
 		if (cmd.hasOption("nofilename"))
 			GlobalSettings.noFilename = true;
 

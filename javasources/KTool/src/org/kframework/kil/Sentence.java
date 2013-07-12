@@ -40,8 +40,14 @@ public class Sentence extends ModuleItem {
 			attributes = new Attributes();
 	}
 
-	public Sentence(ATermAppl element) {
-		super(element);
+	public Sentence(ATermAppl atm) {
+		super(atm);
+
+		body = (Term) JavaClassesFactory.getTerm(atm.getArgument(0));
+
+		if (atm.getName().equals("CondSentence")) {
+			condition = (Term) JavaClassesFactory.getTerm(atm.getArgument(1));
+		}
 	}
 
 	public Sentence(Element element) {

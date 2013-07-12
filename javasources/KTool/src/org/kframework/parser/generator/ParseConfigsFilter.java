@@ -5,6 +5,7 @@ import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Module;
+import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.loader.CollectStartSymbolPgmVisitor;
@@ -29,6 +30,8 @@ import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
 import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
 import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
 import org.kframework.parser.concrete.disambiguate.VariableTypeInferenceFilter;
+import org.kframework.parser.utils.Sglr;
+import org.kframework.utils.Stopwatch;
 import org.kframework.utils.XmlLoader;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -63,29 +66,40 @@ public class ParseConfigsFilter extends BasicTransformer {
 		if (ss.getType().equals(Constants.CONFIG)) {
 			try {
 				ASTNode config = null;
-				String parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
-				Document doc = XmlLoader.getXMLDoc(parsed);
-
-				// replace the old xml node with the newly parsed sentence
-				Node xmlTerm = doc.getFirstChild().getFirstChild().getNextSibling();
-				XmlLoader.updateLocation(xmlTerm, XmlLoader.getLocNumber(ss.getLocation(), 0), XmlLoader.getLocNumber(ss.getLocation(), 1));
-				XmlLoader.addFilename(xmlTerm, ss.getFilename());
-				XmlLoader.reportErrors(doc, "configuration");
-
-				config = new Configuration((Sentence) JavaClassesFactory.getTerm((Element) xmlTerm));
-				Sentence st = (Sentence) config;
-				assert st.getLabel().equals("") : "labels should have been parsed in Basic Parsing";
-				st.setLabel(ss.getLabel());
-				//assert st.getAttributes() == null || st.getAttributes().isEmpty(); // attributes should have been parsed in Basic Parsing
-				st.setAttributes(ss.getAttributes());
-
 				if (GlobalSettings.fastKast) {
-					// TODO: load directly from ATerms
-					System.out.println("Not implemented yet: org.kframework.parser.generator.ParseConfigsFilter");
-					System.exit(0);
-					config = null;
-					// ATerm parsed = org.kframework.parser.concrete.KParser.ParseKConfigStringAst(ss.getContent());
-					// config = JavaClassesFactory.getTerm((IStrategoAppl) parsed);
+					// TODO(RaduM): load directly from ATerms
+					System.out.println("Using fastKast in rules: org.kframework.parser.generator.ParseConfigFilter");
+					config = Sglr.run_sglri(context.dotk.getAbsolutePath() + "/def/Concrete.tbl", "CondSentence", ss.getContent(), ss.getFilename());
+				} else {
+					String parsed = null;
+					if (ss.getAttributes().containsAttribute("kore")) {
+						Stopwatch sww = new Stopwatch();
+						parsed = org.kframework.parser.concrete.KParser.ParseKoreString(ss.getContent());
+						if (GlobalSettings.verbose)
+							System.out.println("Parsing with Kore: " + ss.getFilename() + ":" + ss.getLocation() + " - " + sww.getTotalMilliseconds());
+					} else
+						parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
+					Document doc = XmlLoader.getXMLDoc(parsed);
+
+					// replace the old xml node with the newly parsed sentence
+					Node xmlTerm = doc.getFirstChild().getFirstChild().getNextSibling();
+					XmlLoader.updateLocation(xmlTerm, XmlLoader.getLocNumber(ss.getLocation(), 0), XmlLoader.getLocNumber(ss.getLocation(), 1));
+					XmlLoader.addFilename(xmlTerm, ss.getFilename());
+					XmlLoader.reportErrors(doc, ss.getType());
+
+					if (ss.getType().equals(Constants.CONTEXT))
+						config = new org.kframework.kil.Context((Sentence) JavaClassesFactory.getTerm((Element) xmlTerm));
+					else if (ss.getType().equals(Constants.RULE))
+						config = new Rule((Sentence) JavaClassesFactory.getTerm((Element) xmlTerm));
+					else { // should not reach here
+						config = null;
+						assert false : "Only context and rules have been implemented.";
+					}
+					Sentence st = (Sentence) config;
+					assert st.getLabel().equals(""); // labels should have been parsed in Basic Parsing
+					st.setLabel(ss.getLabel());
+					//assert st.getAttributes() == null || st.getAttributes().isEmpty(); // attributes should have been parsed in Basic Parsing
+					st.setAttributes(ss.getAttributes());
 				}
 
 				new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation(context), context).check(config);

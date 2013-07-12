@@ -5,14 +5,17 @@ import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.StringUtil;
 import org.w3c.dom.Element;
+
+import aterm.ATermAppl;
 
 /**
  * Variables, used both in rules/contexts and for variables like {@code $PGM} in configurations.
  */
 public class Variable extends Term {
 
-    private static int nextVariableIndex = 0;
+	private static int nextVariableIndex = 0;
 
 	private String name;
 	/** True if the variable was written with an explicit type annotation */
@@ -30,6 +33,16 @@ public class Variable extends Term {
 		}
 	}
 
+	public Variable(ATermAppl atm) {
+		super(atm);
+		this.sort = StringUtil.getSortNameFromCons(atm.getName());
+
+		name = atm.getArgument(0).toString();
+
+		if (atm.getName().endsWith("2Var"))
+			this.userTyped = true;
+	}
+
 	public Variable(String name, String sort) {
 		super(sort);
 		this.name = name;
@@ -45,7 +58,7 @@ public class Variable extends Term {
 		return new Variable("GeneratedFreshVar" + nextVariableIndex++, sort);
 	}
 
-    public void setName(String name) {
+	public void setName(String name) {
 		this.name = name;
 	}
 

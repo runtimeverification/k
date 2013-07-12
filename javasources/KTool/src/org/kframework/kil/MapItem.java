@@ -9,6 +9,8 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
+import aterm.ATermAppl;
+
 /** MapItem is a map item with key {@link #key} and value the inherited {@link #value} */
 public class MapItem extends CollectionItem {
 	private Term key;
@@ -22,6 +24,12 @@ public class MapItem extends CollectionItem {
 		elm = XML.getChildrenElementsByTagName(element, Constants.VALUE).get(0);
 		elmBody = XML.getChildrenElements(elm).get(0);
 		this.value = (Term) JavaClassesFactory.getTerm(elmBody);
+	}
+
+	public MapItem(ATermAppl atm) {
+		super(atm);
+		key = (Term) JavaClassesFactory.getTerm(atm.getArgument(0));
+		value = (Term) JavaClassesFactory.getTerm(atm.getArgument(1));
 	}
 
 	public MapItem(String location, String filename) {
@@ -73,11 +81,10 @@ public class MapItem extends CollectionItem {
 		return transformer.transform(this);
 	}
 
-  @Override
-  public void accept(Matcher matcher, Term toMatch){
-    matcher.match(this, toMatch);
-  }
-
+	@Override
+	public void accept(Matcher matcher, Term toMatch) {
+		matcher.match(this, toMatch);
+	}
 
 	@Override
 	public MapItem shallowCopy() {
@@ -86,22 +93,23 @@ public class MapItem extends CollectionItem {
 
 	@Override
 	public boolean equals(Object o) {
-		if (!(o instanceof MapItem)) return false;
-		MapItem m = (MapItem)o;
+		if (!(o instanceof MapItem))
+			return false;
+		MapItem m = (MapItem) o;
 		return key.equals(m.key) && value.equals(m.value);
 	}
 
 	@Override
 	public boolean contains(Object o) {
 		if (o instanceof Bracket)
-			return contains(((Bracket)o).getContent());
+			return contains(((Bracket) o).getContent());
 		if (o instanceof Cast)
-			return contains(((Cast)o).getContent());
-		if (!(o instanceof MapItem)) return false;
-		MapItem m = (MapItem)o;
+			return contains(((Cast) o).getContent());
+		if (!(o instanceof MapItem))
+			return false;
+		MapItem m = (MapItem) o;
 		return key.contains(m.key) && value.contains(m.value);
 	}
-
 
 	@Override
 	public int hashCode() {

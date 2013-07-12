@@ -34,6 +34,7 @@ import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
 import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
 import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
 import org.kframework.parser.concrete.disambiguate.VariableTypeInferenceFilter;
+import org.kframework.parser.utils.Sglr;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.XmlLoader;
 import org.kframework.utils.errorsystem.KException;
@@ -87,11 +88,8 @@ public class ParseRulesFilter extends BasicTransformer {
 
 				if (GlobalSettings.fastKast) {
 					// TODO(RaduM): load directly from ATerms
-					System.out.println("Not implemented yet: org.kframework.parser.generator.ParseRulesFilter");
-					System.exit(0);
-					config = null;
-					// ATerm parsed = org.kframework.parser.concrete.KParser.ParseKConfigStringAst(ss.getContent());
-					// config = JavaClassesFactory.getTerm((IStrategoAppl) parsed);
+					System.out.println("Using fastKast in rules: org.kframework.parser.generator.ParseRulesFilter");
+					config = Sglr.run_sglri(context.dotk.getAbsolutePath() + "/def/Concrete.tbl", "CondSentence", ss.getContent(), ss.getFilename());
 				} else {
 					String parsed = null;
 					if (ss.getAttributes().containsAttribute("kore")) {
