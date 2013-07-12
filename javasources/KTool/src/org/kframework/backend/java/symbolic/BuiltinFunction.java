@@ -70,8 +70,20 @@ public class BuiltinFunction {
     }
 
     public static Term invoke(KLabelConstant label, Term ... arguments)
-            throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        return (Term) table.get(label).invoke(null, (Object[]) arguments);
+            throws IllegalAccessException, IllegalArgumentException {
+        try {
+            return (Term) table.get(label).invoke(null, (Object[]) arguments);
+        } catch (InvocationTargetException e) {
+            Throwable t = e.getTargetException();
+            if (t instanceof Error) {
+                throw (Error)t;
+            }
+            if (t instanceof RuntimeException) {
+                throw (RuntimeException)t;
+            }
+            assert false : "Builtin functions should not throw checked exceptions";
+            return null; //unreachable
+        }
     }
 
     public static boolean isBuiltinKLabel(KLabelConstant label) {

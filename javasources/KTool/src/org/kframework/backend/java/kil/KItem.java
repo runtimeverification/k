@@ -102,7 +102,7 @@ public class KItem extends Term implements Sorted {
             //e.printStackTrace();
         } catch (IllegalArgumentException e) {
             //e.printStackTrace();
-        } catch (InvocationTargetException e) {
+        } catch (RuntimeException e) {
         }
 
         return this;
