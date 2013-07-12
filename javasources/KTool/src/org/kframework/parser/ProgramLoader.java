@@ -119,6 +119,9 @@ public class ProgramLoader {
 			} else if (whatParser == GlobalSettings.ParserType.RULES) {
 				org.kframework.parser.concrete.KParser.ImportTbl(context.kompiled.getCanonicalPath() + "/def/Concrete.tbl");
 				out = DefinitionLoader.parsePattern(content, filename, context);
+				out = out.accept(new RemoveBrackets(context));
+				out = out.accept(new AddEmptyLists(context));
+				out = out.accept(new RemoveSyntacticCasts(context));
 				try {
 					out = new RuleCompilerSteps(def, context).compile(
                             new Rule((Sentence) out),

@@ -45,6 +45,7 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -67,7 +68,7 @@ public class JavaSymbolicBackend extends KompileBackend {
 	public Definition lastStep(Definition javaDef) {
 		try {
 			OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(
-                    JavaSymbolicBackend.DEFINITION_FILENAME));
+                    new File(context.dotk, JavaSymbolicBackend.DEFINITION_FILENAME)));
 			BinaryLoader.toBinary(
                     //javaDef.accept(new KILtoBackendJavaKILTransformer(context)),
                     javaDef,

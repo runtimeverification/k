@@ -63,7 +63,7 @@ public class MaudeBuiltinsFilter extends BackendFilter {
         result.append(" eq ");
 		left = StringUtil.escapeMaude(node.getKLabel());
         left += "(";
-		right = getHookLabel(hook);
+		right = getHookLabel((String)maudeHooksMap.get(hook));
         if (node.getArity() > 0) {
             right += "(";
             first = true;

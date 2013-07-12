@@ -17,8 +17,8 @@ module STRING-HOOKS
   syntax Bool ::= String "==String" String [function, left, hook(#STRING:_==String_)]
 
   syntax Int ::= "lengthString" "(" String ")" [function, klabel(lengthString), hook(#STRING:lengthString)]
-  syntax String ::= "charString" "(" Int ")"   [function, klabel(charString), hook(#STRING:charString)]
-  syntax Int ::= "asciiString" "(" String ")"  [function, klabel(asciiString), hook(#STRING:asciiString)]
+  syntax String ::= "chrChar" "(" Int ")"   [function, klabel(chrString), hook(#STRING:chrChar)]
+  syntax Int ::= "ordChar" "(" String ")"  [function, klabel(ordString), hook(#STRING:ordChar)]
 
   syntax String ::= "substrString" "(" String "," Int "," Int ")" [function, klabel(substrString), hook(#STRING:substrString)]
   syntax Int ::= "findString" "(" String "," String "," Int ")" [function, klabel(findString), hook(#STRING:findString)]
@@ -26,8 +26,8 @@ module STRING-HOOKS
 
   syntax String ::= "Float2String" "(" Float ")" [function, klabel(Float2String), hook(#CONVERSION:float2String)]
   syntax Float ::= "String2Float" "(" String ")" [function, klabel(String2Float), hook(#CONVERSION:string2Float)]
-  syntax Int ::= "String2Int" "(" String ")"	 [function, klabel(String2Int), hook(#CONVERSION:string2Int)]
-  syntax String ::= "Int2String" "(" Int ")"	 [function, klabel(Int2String), hook(#CONVERSION:int2String)]
+  syntax Int ::= "String2Int" "(" String ")"	 [function, klabel(String2Int), hook(#CONVERSION:string2int)]
+  syntax String ::= "Int2String" "(" Int ")"	 [function, klabel(Int2String), hook(#CONVERSION:int2string)]
 
 
   syntax String ::= "KLabel2String" "(" KLabel ")"  [function, klabel(KLabel2String)]
@@ -42,13 +42,16 @@ module STRING-HOOKS
   syntax String ::= "ltrim" "(" String ")" [function]
   syntax String ::= "rtrim" "(" String ")" [function]
   
-  syntax Bool ::= String "=/=String" String      [function, left]
+  syntax Bool ::= String "=/=String" String      [function, left, hook(#STRING:_=/=String_)]
   rule S1:String =/=String S2:String => notBool(S1 ==String S2)
 
   syntax Bool ::= String "<String" String [function, hook(#STRING:_<String_)]
-                | String "<=String" String [function]
-                | String ">String" String [function]
-                | String ">=String" String [function]
+                | String "<=String" String [function, hook(#STRING:_<=String_)]
+                | String ">String" String [function, hook(#STRING:_>String_)]
+                | String ">=String" String [function, hook(#STRING:_>=String_)]
+
+  syntax String ::= categoryChar(String) [function, hook(#STRING:categoryChar)]
+                  | directionalityChar(String) [function, hook(#STRING:directionalityChar)]
 
   rule S1:String <=String S2:String => notBool(S2 <String S1)
   rule S1:String >String S2:String => S2 <String S1
@@ -60,13 +63,13 @@ module STRING-HOOKS
 
   syntax Bool ::= "#isWhiteSpace" "(" String ")"   [function, klabel(#isWhiteSpace)]
   rule #isWhiteSpace(C:String)
-      => (asciiString(C) >=Int 9 andBool asciiString(C) <=Int 13)  
+      => (ordChar(C) >=Int 9 andBool ordChar(C) <=Int 13)  
            orBool (C ==String " ") when isChar(C)
 
   syntax Bool ::= "#isDigit" "(" String ")"        [function, klabel(#isDigit)]
   rule #isDigit(C:String) 
-      => (asciiString(C) >=Int asciiString("0")) 
-           andBool (asciiString(C) <=Int asciiString("9")) when isChar(C)
+      => (ordChar(C) >=Int ordChar("0")) 
+           andBool (ordChar(C) <=Int ordChar("9")) when isChar(C)
 
   rule countAllOccurences(Source:String, ToCount:String) => 0 
 			when findString(Source, ToCount, 0) <Int 0

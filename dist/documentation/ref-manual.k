@@ -707,8 +707,96 @@ slower.
 
 \subsubsection{Booleans}
 
-\subsubsection{Rational Numbers}
+\subsubsection{Floats}
+*/
 
+/*@
+\subsubsection{Strings}
+
+A String in \K corresponds to an indexable, searchable array of Unicode code
+points, as represented by literals enclosed in double quotes. For example,
+\verb^""^ is the empty string, and \verb^"string"^ is a string of length 6.
+While most ASCII characters can be encoded simply by typing them, non-ASCII
+characters in \K definitions, as well as some ASCII characters, require escape
+sequences to encode themselves in strings. \K provides, in addition to the
+standard escape sequences \verb^\t^, \verb^\n^, \verb^\r^, \verb^\\^, and
+\verb^\"^, three mechanisms for escaping characters. The first, \verb^\x^,
+takes exactly two hexadecimal digits as argument, and encodes the Latin-1
+Unicode code point corresponding to that number. The second, \verb^\u^, takes
+exactly four hexadecimal digits as argument, and encodes a Unicode character
+in the Basic Multilingual Plane.
+
+For portability reasons, a String in \K is a sequence of code points, not a
+sequence of code units. Therefore, the escape sequences in the range
+\verb^\ud800^ to \verb^\udfff^, corresponding to UTF-16 surrogate pairs, are
+not allowed in String literals. If you believe that this impairs your ability
+to write the semantics you desire in the \K framework, please let us know. We
+are willing to re-evaluate this decision. However, you might simply consider
+disallowing such strings in your semantics, as they do not correspond to any
+well-encoded Unicode String, and the Unicode standard forbids their use outside
+of UTF-16 surrogate pairs. Alternatively, you may choose to represent strings
+as an array of bytes or an array of integers in your semantics, and implement
+encoding and decoding yourself.
+
+The third and final escape sequence \K provides is \verb^\U^, which takes
+eight hexadecimal digits encoding any Unicode code point, from
+\verb^\U00000000^ all the way up to \verb^\U0010ffff^.
+
+The \K framework defines the following operations on Strings:
+
+\begin{verbatim}
+syntax String ::= String "+String" String
+
+syntax Bool ::= String "==String" String
+              | String "=/=String" String
+              | String "<String" String
+              | String ">String" String
+              | String "<=String" String
+              | String ">=String" String
+
+syntax Int ::= lengthString(String)
+
+syntax String ::= chrChar(Int)
+syntax Int    ::= ordChar(String)
+
+syntax String ::= substrString(String, Int, Int)
+syntax Int ::= findString(String, String, Int)
+             | rfindString(String, String, Int)
+
+syntax Int    ::= String2Int(String)
+syntax String ::= Int2String(Int)
+
+syntax String ::= categoryChar(String)
+                | directionalityChar(String)
+\end{verbatim}
+
+The \verb^+String^ operation performs String concatenation. The \verb^==String^
+operation performs String equality, the \verb^=/=String^ inequality, and the
+remaining four comparisons perform lexicographic ordering on Strings. The
+\verb^lengthString^ operation returns the number of code points in the String.
+\verb^ordChar^ and \verb^chrChar^ convert between single unicode characters
+and their numeric code points. Again, as before, unicode code points in the 
+surrogate range cannot be encoded in Strings in \K.
+
+\verb^substrString^ takes a string, an inclusive begin offset, and an exclusive
+end offset, and returns the characters between that range. \verb^findString^
+takes two strings and an inclusive offset, and returns the index of the first
+occurrence of the second string in the first string which follows the provided
+offset. \verb^rfindString^ performs the same task but searches from right to 
+left.
+
+\verb^String2Int^ converts a String into an integer by means of parsing it. A
+String that can be converted to an integer is either a sequence of characters
+with the "Nd" general category, optionally preceded by a sign, or else a
+single character with a Numeric Value unicode property which corresponds to
+an integer.  \verb^Int2String^ converts back from an integer to a string by
+means of the ASCII digit characters.
+
+Finally, several methods exist to support reflection into the Unicode character
+database. \verb^categoryChar^ returns the two-letter string code corresponding
+to the general category of the character provided as argument, and 
+\verb^directionalityChar^ provides the string code of the bidirectionality 
+category of the character.
 */
 
 /*@

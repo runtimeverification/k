@@ -1,0 +1,5 @@
+<k>
+    "L" ~> "LRE" ~> "LRO" ~> "R" ~> "AL" ~> "RLE" ~> "RLO" ~> "PDF" ~> "EN"
+       ~> "ES" ~> "ET" ~> "AN" ~> "CS" ~> "NSM" ~> "BN" ~> "B" ~> "S" ~> "WS"
+       ~> "ON"
+</k>

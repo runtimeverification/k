@@ -27,6 +27,7 @@ import org.kframework.krun.api.Transition;
 import org.kframework.utils.BinaryLoader;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -59,7 +60,7 @@ public class JavaSymbolicKRun implements KRun {
 
             /* load the definition from a binary file */
             InputStream inputStream = new BufferedInputStream(new FileInputStream(
-                    JavaSymbolicBackend.DEFINITION_FILENAME));
+                    new File(context.kompiled, JavaSymbolicBackend.DEFINITION_FILENAME)));
             org.kframework.kil.Definition kilDefinition = (org.kframework.kil.Definition)
                     BinaryLoader.fromBinary(inputStream);
             definition = (Definition) (kilDefinition).accept(transformer);

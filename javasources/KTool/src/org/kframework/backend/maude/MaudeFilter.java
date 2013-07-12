@@ -1,5 +1,6 @@
 package org.kframework.backend.maude;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.kframework.backend.BackendFilter;
 import org.kframework.compile.transformers.AddPredicates;
 import org.kframework.compile.utils.ConfigurationStructure;
@@ -610,16 +611,22 @@ public class MaudeFilter extends BackendFilter {
 		ImmutableSet.of("#Float", "#LtlFormula");
 
     @Override
-    public void visit(Token token) {
-        if (token instanceof GenericToken) {
-            if (maudeBuiltinTokenSorts.contains(token.tokenSort())) {
-                result.append("#_(" + token.value() + ")");
-            } else {
-                result.append(token);
-            }
-        } else {
+    public void visit(GenericToken token) {
+        if (maudeBuiltinTokenSorts.contains(token.tokenSort())) {
             result.append("#_(" + token.value() + ")");
+        } else {
+            result.append(token);
         }
+    }
+
+    @Override
+    public void visit(StringBuiltin token) {
+        result.append("#_(\"" + StringUtil.escape(token.stringValue()) + "\")");
+    }
+
+    @Override
+    public void visit(Token token) {
+        result.append("#_(" + token.value() + ")");
     }
 
 	@Override
@@ -801,7 +808,7 @@ public class MaudeFilter extends BackendFilter {
 
 	@Override
 	public void visit(KLabel kLabel) {
-		throw new RuntimeException("don't know how to maudify KLabel");
+		throw new RuntimeException("don't know how to maudify KLabel of type" + kLabel.getClass());
 	}
 
 	@Override

@@ -701,5 +701,20 @@
       folder="tests/regression/follow"
       results="tests/regression/follow"
       extensions="issue" />
+
+  <test
+      language="tests/regression/strings/test.k"
+      folder="tests/regression/strings/programs"
+      results="tests/regression/strings/tests"
+      extensions="test">
+    <kompile-option name="-ml" />
+    <all-programs>
+      <krun-option name="--backend" value="java-symbolic" />
+      <krun-option name="--no-smt" />
+      <krun-option name="--parser" value="kast -groundParser" />
+    </all-programs>
+  </test>
+
+
 </tests>
 

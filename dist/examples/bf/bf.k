@@ -49,7 +49,7 @@ module BF
   rule <k> '.(.KList) => .K ...</k>
        <array>... P |-> V:Int ...</array>
        <ptr> P:Int </ptr>
-       <out>... .List => ListItem(charString(V)) </out>
+       <out>... .List => ListItem(chrChar(V)) </out>
 
   /*@
   Input the byte at the data pointer.

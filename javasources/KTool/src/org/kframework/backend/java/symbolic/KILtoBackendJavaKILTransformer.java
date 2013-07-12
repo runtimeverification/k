@@ -7,6 +7,7 @@ import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KLabelFreezer;
@@ -29,6 +30,7 @@ import org.kframework.kil.Attribute;
 import org.kframework.kil.BoolBuiltin;
 import org.kframework.kil.GenericToken;
 import org.kframework.kil.IntBuiltin;
+import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.KSorts;
 import org.kframework.kil.Module;
 import org.kframework.kil.Production;
@@ -71,6 +73,8 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 return BoolToken.of(((BoolBuiltin) node.getLabel()).booleanValue());
             } else if (node.getLabel() instanceof IntBuiltin) {
                 return IntToken.of(((IntBuiltin) node.getLabel()).bigIntegerValue());
+            } else if (node.getLabel() instanceof StringBuiltin) {
+                return StringToken.of(((StringBuiltin) node.getLabel()).stringValue());
             } else if (node.getLabel() instanceof GenericToken) {
                 return UninterpretedToken.of(
                         ((GenericToken) node.getLabel()).tokenSort(),

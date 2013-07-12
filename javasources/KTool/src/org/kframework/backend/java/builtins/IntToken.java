@@ -55,11 +55,30 @@ public class IntToken extends Token {
         return intToken;
     }
 
+    public static IntToken of(long value) {
+        return of(BigInteger.valueOf(value));
+    }
+
     /**
      * Returns a {@link BigInteger} representation of the (interpreted) value of this IntToken.
      */
     public BigInteger bigIntegerValue() {
         return value;
+    }
+
+    /**
+     * Returns an {@code int} representation of the (interpreted) value of this
+     * IntToken.
+     * @throws ArithmeticException Integer does not fit in an int.
+     */
+    public int intValue() {
+        if (value.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) > 0) {
+            throw new ArithmeticException();
+        }
+        if (value.compareTo(BigInteger.valueOf(Integer.MIN_VALUE)) < 0) {
+            throw new ArithmeticException();
+        }
+        return (int)value.longValue();
     }
 
     /**

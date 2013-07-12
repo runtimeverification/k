@@ -9,6 +9,11 @@ import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.StringUtil;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Element;
 
 import aterm.ATermAppl;
@@ -80,8 +85,8 @@ public class StringBuiltin extends Token {
 	public static StringBuiltin valueOf(String value) {
 		assert value.charAt(0) == '"';
 		assert value.charAt(value.length() - 1) == '"';
-		String stringValue = StringEscapeUtils.unescapeJava(
-			value.substring(1, value.length() - 1));
+		String stringValue = StringUtil.unescapeK(
+			value);
 		return StringBuiltin.of(stringValue);
 	}
 
@@ -92,16 +97,28 @@ public class StringBuiltin extends Token {
 		this.value = value;
 	}
 
+    private final String encodingErrorMsg = "The Unicode standard forbids the encoding of surrogate pair code points. If you need to perform operations on incorrectly-encoded strings, you must represent them as an array of code units.";
+
 	protected StringBuiltin(Element element) {
 		super(element);
 		String s = element.getAttribute(Constants.VALUE_value_ATTR);
-		value = StringEscapeUtils.unescapeJava(s.substring(1, s.length() - 1));
+        try {
+	    	value = StringUtil.unescapeK(s);
+        } catch (IllegalArgumentException e) {
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, encodingErrorMsg, this.getLocation(), this.getFilename()));
+            throw e; //unreachable
+        }
 	}
 
 	protected StringBuiltin(ATermAppl atm) {
 		super(atm);
 		String s = ((ATermAppl) atm.getArgument(0)).getName();
-		value = StringEscapeUtils.unescapeJava(s.substring(1, s.length() - 1));
+        try {
+	    	value = StringUtil.unescapeK(s);
+        } catch (IllegalArgumentException e) {
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, encodingErrorMsg, this.getLocation(), this.getFilename()));
+            throw e; //unreachable
+        }
 	}
 
 	/**
@@ -130,8 +147,7 @@ public class StringBuiltin extends Token {
 	 */
 	@Override
 	public String value() {
-		/* TODO: andreis to see what maude supports and convert accordingly */
-		return ("\"" + StringEscapeUtils.escapeJava(value) + "\"").replaceAll("\\\\u0", "\\\\");
+		return StringUtil.escapeK(value);
 	}
 
 	@Override

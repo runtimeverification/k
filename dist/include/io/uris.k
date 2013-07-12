@@ -28,10 +28,10 @@ module URIS
                  | "#opendir" "(" String ")" [function]
 
   syntax K ::= "#parse" "(" String "," String ")" [function, klabel(#parse)]
-  rule #open(S:String) => String2Int((#tcpRequest("open\001" +String S +String "\001"))::K) [function, anywhere]
+  rule #open(S:String) => String2Int((#tcpRequest("open\x01" +String S +String "\x01"))::K) [function, anywhere]
 
   rule #close(N:Int) 
-      => String2DotK((#tcpRequest("close\001" +String Int2String(N) +String "\001"))::K) [function, anywhere]
+      => String2DotK((#tcpRequest("close\x01" +String Int2String(N) +String "\x01"))::K) [function, anywhere]
 
   syntax K ::= "String2DotK" "(" TCPAnswer ")"  [function, klabel(String2DotK)]
   rule String2DotK(S:String) => #ioError(#retrieveTCPError(S)) when #isTCPError(S) [function, anywhere]
@@ -44,19 +44,19 @@ module URIS
   rule String2Bool("1") => true [anywhere]
   rule String2Bool("true") => true [anywhere]
 
-  rule #flush(N:Int) => String2DotK((#tcpRequest("flush\001" +String Int2String(N) +String "\001"))::K) [function, anywhere]
+  rule #flush(N:Int) => String2DotK((#tcpRequest("flush\x01" +String Int2String(N) +String "\x01"))::K) [function, anywhere]
 
-  rule #tell(N:Int) => String2DotK((#tcpRequest("position\001" +String Int2String(N) +String "\001"))::K) [function, anywhere]
+  rule #tell(N:Int) => String2DotK((#tcpRequest("position\x01" +String Int2String(N) +String "\x01"))::K) [function, anywhere]
 
-  rule #tell(N:Int) => String2Int((#tcpRequest("tell\001" +String Int2String(N) +String "\001"))::K) [function, anywhere]
+  rule #tell(N:Int) => String2Int((#tcpRequest("tell\x01" +String Int2String(N) +String "\x01"))::K) [function, anywhere]
 
   rule #seek(N:Int,P:Int) 
-      => String2DotK((#tcpRequest("seek\001" +String Int2String(N) +String "\001"
-                              +String Int2String(P) +String "\001"))::K) [function, anywhere]
+      => String2DotK((#tcpRequest("seek\x01" +String Int2String(N) +String "\x01"
+                              +String Int2String(P) +String "\x01"))::K) [function, anywhere]
 
   rule #reopen(N:Int,S:String) 
-      => String2DotK((#tcpRequest("reopen\001" +String Int2String(N) +String "\001"
-                              +String S +String "\001"))::K) [function, anywhere]
+      => String2DotK((#tcpRequest("reopen\x01" +String Int2String(N) +String "\x01"
+                              +String S +String "\x01"))::K) [function, anywhere]
 
   syntax Int ::= "#stdin"   [function] 
                 | "#stdout" [function]
@@ -72,10 +72,10 @@ module URIS
   rule #readByte() => #fReadByte(#stdin) [function, anywhere]
 
   rule #fReadByte(N:Int) 
-      => #string2Int(#tcpRequest("readbyte\001" +String Int2String(N) +String "\001")) [function, anywhere]
+      => #string2Int(#tcpRequest("readbyte\x01" +String Int2String(N) +String "\x01")) [function, anywhere]
 
   rule #fReadBytes(N:Int, NumBytes:Int)
-      => #tcpRequest("readbytes\001" +String Int2String(N) +String "\001" +String Int2String(NumBytes) +String "\001") [function, anywhere]
+      => #tcpRequest("readbytes\x01" +String Int2String(N) +String "\x01" +String Int2String(NumBytes) +String "\x01") [function, anywhere]
 
   syntax K ::= "#string2Int" "(" K ")"   [function, klabel(#string2Int)]
 
@@ -85,32 +85,32 @@ module URIS
   rule #putByte(B:Int) => #fPutByte(#stdout,B) [function, anywhere]
 
   rule #fPutByte(N:Int,B:Int)
-    => String2DotK((#tcpRequest("writebyte\001" +String Int2String(N) +String "\001"
-                              +String Int2String(B) +String "\001"))::K) [function, anywhere]
+    => String2DotK((#tcpRequest("writebyte\x01" +String Int2String(N) +String "\x01"
+                              +String Int2String(B) +String "\x01"))::K) [function, anywhere]
 
   rule #fPutBytes(N:Int,S:String)
-    => String2DotK((#tcpRequest("writebytes\001" +String Int2String(N) +String "\001"
-                              +String S +String "\001"))::K) [function, anywhere]
+    => String2DotK((#tcpRequest("writebytes\x01" +String Int2String(N) +String "\x01"
+                              +String S +String "\x01"))::K) [function, anywhere]
 
   rule #peekByte() => #fPeekByte(#stdin) [function, anywhere]
   rule #fPeekByte(N:Int)
-    => String2Int((#tcpRequest("peek\001" +String Int2String(N) +String "\001"))::K) [function, anywhere]
+    => String2Int((#tcpRequest("peek\x01" +String Int2String(N) +String "\x01"))::K) [function, anywhere]
 
   rule #eof() => #fEof(#stdin) [function, anywhere]
   rule #fEof(N:Int)
-    => String2Bool((#tcpRequest("eof\001" +String Int2String(N) +String "\001"))::K) [function, anywhere]
+    => String2Bool((#tcpRequest("eof\x01" +String Int2String(N) +String "\x01"))::K) [function, anywhere]
 
   rule #stat(S:String)
-    => #statTypes(#string2klist((#tcpRequest("stat\001" +String S +String "\001true\001"))::K))
+    => #statTypes(#string2klist((#tcpRequest("stat\x01" +String S +String "\x01true\x01"))::K))
 
   rule #lstat(S:String)
-    => #statTypes(#string2klist((#tcpRequest("stat\001" +String S +String "\001false\001"))::K))
+    => #statTypes(#string2klist((#tcpRequest("stat\x01" +String S +String "\x01false\x01"))::K))
 
-  rule #opendir(S:String) => #string2klist((#tcpRequest("opendir\001" +String S +String "\001"))::K)
+  rule #opendir(S:String) => #string2klist((#tcpRequest("opendir\x01" +String S +String "\x01"))::K)
 
   syntax KList ::= #string2klist(String) [function]
-  rule #string2klist(S:String) => substrString(S, 0, findString(S, "\001", 0)) ,, #string2klist(substrString(S, findString(S, "\001", 0) +Int 1, lengthString(S))) when findString(S, "\001", 0) =/=Int -1
-  rule #string2klist(S:String) => S when findString(S, "\001", 0) ==Int -1
+  rule #string2klist(S:String) => substrString(S, 0, findString(S, "\x01", 0)) ,, #string2klist(substrString(S, findString(S, "\x01", 0) +Int 1, lengthString(S))) when findString(S, "\x01", 0) =/=Int -1
+  rule #string2klist(S:String) => S when findString(S, "\x01", 0) ==Int -1
   rule #string2klist(K:K) => K when isString(K) =/=K true
 
   syntax KList ::= #statTypes(KList) [function]
@@ -125,7 +125,7 @@ module URIS
   rule #fReadChar(N:Int) => #charString(#fReadByte(N)) [function, anywhere]
 
   syntax K ::= "#charString" "(" K ")"   [function, klabel(#charString)]
-  rule #charString(N:Int) => charString(N) [function, anywhere]
+  rule #charString(N:Int) => chrChar(N) [function, anywhere]
   rule #charString(#EOF) => #EOF [function, anywhere]
 
   syntax K ::= "#printChar" "(" K ")"   [function, klabel(#printChar)]
@@ -133,7 +133,7 @@ module URIS
         when isChar(C) [anywhere]
 
   syntax K ::= "#fPrintChar" "(" Int "," K ")"   [function, klabel(#fPrintChar)]
-  rule #fPrintChar(N:Int,C:String) => #fPutByte(N,asciiString(C)) 
+  rule #fPrintChar(N:Int,C:String) => #fPutByte(N,ordChar(C)) 
         when isChar(C) [anywhere]
 
   rule #buffer(.K => Int2String(I)) (ListItem(I:Int) => .List)
@@ -219,7 +219,7 @@ module URIS
 // ------------------------------
 // Dynamic parsing
 
-  rule #parse(StringToParse:String, Sort:String) => String2K((#tcpRequest("parse\001" +String Sort +String "\001" +String StringToParse +String "\001"))::K)
+  rule #parse(StringToParse:String, Sort:String) => String2K((#tcpRequest("parse\x01" +String Sort +String "\x01" +String StringToParse +String "\x01"))::K)
 
   syntax K ::= String2K(String) [function, hook(#K-PARSER:string2k)]
   syntax Bag ::= String2Bag(String) [function, hook(#K-PARSER:string2bag)]
