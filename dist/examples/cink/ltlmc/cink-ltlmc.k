@@ -1,6 +1,8 @@
 require "builtins/model-checker.k"
 require "../threads/cink-threads.k"
 
+/*@  \section{The New Modules} */
+
 module CINK-LTLMC-SYNTAX
 
   imports CINK-BASIC-SYNTAX

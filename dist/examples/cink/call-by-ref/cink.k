@@ -1,27 +1,15 @@
 require "intro.k"
 require "imports-intro.k"
-require "syntax-intro.k"
-require "cink-basic-syntax.k"
-require "semantics-intro.k"
-require "cink-basic-semantics.k"
+require "../pointers/cink-pointers.k"
+require "cink-call-by-ref.k"
 
 
 /*@ \section{The Main Module}
-Includes the modules defining the syntax and semantics, and defines 
-the main configuration of the language.
 */
 
-
-
 module CINK
-  imports CINK-BASIC-SYNTAX
-  imports CINK-BASIC-SEMANTICS
-
- /*@ \subsection{Configuration.} 
-   The configuration is standard for such languages (compare it to that of IMPPP
-   and SIMPLE).
-  */
-
+  imports CINK-POINTERS-SYNTAX
+  imports CINK-CALL-BY-REF-SEMANTICS
 
   configuration <T color="yellow">
                   <control color="pink">
