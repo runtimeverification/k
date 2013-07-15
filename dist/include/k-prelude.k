@@ -41,6 +41,8 @@ module K-MAP-EXTRAS
   rule (M:Map => M[K2/K1][K2'/K1'])[(K2:K,,K2':K => .KList),,_ 
                         /  (K1:K,,K1':K => .KList),,_]
    [structural, anywhere]
+  rule M:Map[.KList / .KList] => M    
+   [structural, anywhere]
 
   rule (M:Map K1:K |-> _:K)[K2:K / K1] => M K1 |-> K2 
     [structural, anywhere]
