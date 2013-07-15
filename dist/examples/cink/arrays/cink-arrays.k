@@ -75,7 +75,7 @@ module CINK-ARRAYS-SEMANTICS
            alloc(X of array of N T;, 0)
        ...</k>
        <env>... . => X |-> L </env>
-       <store>... . => L |-> const-array(0, N, undefined) </store>
+       <store>... . => L |-> const-array(X,0, N, undefined) </store>
        when fresh(L:Loc)
 
   /*@
@@ -89,7 +89,7 @@ module CINK-ARRAYS-SEMANTICS
        <env>... X |-> L (. => X[I] |-> L') </env>
        <store>...
               (L |-> (A:Array => store(A, I, L')))
-              (. =>  L' |-> const-array(0, N', undefined))
+              (. =>  L' |-> const-array(X[I], 0, N', undefined))
        ...</store>
        when fresh(L':Loc) andBool (I <Int N)
 
