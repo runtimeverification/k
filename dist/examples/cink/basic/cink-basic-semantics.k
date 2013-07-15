@@ -239,7 +239,7 @@ module CINK-BASIC-SEMANTICS
   */
   rule <k> L:Loc = V:Val  => V ...</k>
        <store>... L |-> (_ => V) ...</store>
-       [update]
+       [update, kripke]
 
   /*@
 

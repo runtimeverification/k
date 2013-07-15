@@ -5,9 +5,10 @@ require "../threads/cink-threads.k"
 
 module CINK-LTLMC-SYNTAX
 
-  imports CINK-BASIC-SYNTAX
   imports LTL-HOOKS
   imports MODEL-CHECKER-HOOKS
+  imports CINK-BASIC-SYNTAX
+  imports CINK-BASIC-SEMANTICS
 
   /*@
     A input program is a sequence of statements or a LTL Formula 
