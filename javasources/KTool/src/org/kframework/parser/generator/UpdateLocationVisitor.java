@@ -14,6 +14,7 @@ public class UpdateLocationVisitor extends BasicVisitor {
 	}
 
 	public void visit(ASTNode a) {
+		super.visit(a);
 		if (a.getLocation().startsWith("(")) {
 			String[] str = a.getLocation().split("[\\(,\\)]");
 			int loc0 = Integer.parseInt(str[0 + 1]);

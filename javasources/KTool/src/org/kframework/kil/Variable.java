@@ -41,6 +41,10 @@ public class Variable extends Term {
 
 		if (atm.getName().endsWith("2Var"))
 			this.userTyped = true;
+		if (this.name.startsWith("?")) {
+			this.setFresh(true);
+			this.name = this.name.substring(1);
+		}
 	}
 
 	public Variable(String name, String sort) {

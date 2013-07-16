@@ -115,11 +115,11 @@ public class Cell extends Term {
 
 		if (next.getName().equals("LeftCell")) {
 			left = true;
-			next = (ATermAppl) atm.getArgument(0);
+			next = (ATermAppl) next.getArgument(0);
 		}
 		if (next.getName().equals("RightCell")) {
 			right = true;
-			next = (ATermAppl) atm.getArgument(0);
+			next = (ATermAppl) next.getArgument(0);
 		}
 		cellAttributes = new HashMap<String, String>();
 		if (left && right)

@@ -202,14 +202,14 @@ endmodule
 
 interface K-WRAPPERS
 	imports K-TECHNIQUE
-
-	syntax K ::= "KLabel2K" KLabel
-			   | "Celllabel2K" CellLabel
-			   | "KList2K" KList
-			   | "Set2K" Set
-			   | "Bag2K" Bag
-			   | "List2K" List
-			   | "Map2K" Map
+// not used anymore
+//	syntax K ::= KLabel2K (KLabel)		[klabel('KLabel2K_)]
+//			   | Celllabel2K (CellLabel)[klabel('Celllabel2K_)] 
+//			   | KList2K (KList)		[klabel('KList2K_)]
+//			   | Set2K (Set)			[klabel('Set2K_)]
+//			   | Bag2K (Bag)			[klabel('Bag2K_)]
+//			   | List2K (List)			[klabel('List2K_)]
+//			   | Map2K (Map)			[klabel('Map2K_)]
 endinterface
 
 interface K-EVAL
