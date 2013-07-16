@@ -1,10 +1,23 @@
 package org.kframework.kcheck;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+
 import org.kframework.backend.Backend;
 import org.kframework.backend.BasicBackend;
 import org.kframework.backend.maude.MaudeBackend;
 import org.kframework.backend.maude.MaudeBuiltinsFilter;
-import org.kframework.backend.symbolic.*;
+import org.kframework.backend.maude.krun.MaudeKRun;
+import org.kframework.backend.symbolic.AddConditionToConfig;
+import org.kframework.backend.symbolic.AddPathCondition;
+import org.kframework.backend.symbolic.ReplaceConstants;
+import org.kframework.backend.symbolic.ResolveSymbolicInputStream;
+import org.kframework.backend.symbolic.TagUserRules;
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.compile.FlattenModules;
 import org.kframework.compile.ResolveConfigurationAbstraction;
@@ -15,28 +28,78 @@ import org.kframework.compile.sharing.DeclareCellLabels;
 import org.kframework.compile.tags.AddDefaultComputational;
 import org.kframework.compile.tags.AddOptionalTags;
 import org.kframework.compile.tags.AddStrictStar;
-import org.kframework.compile.transformers.*;
+import org.kframework.compile.transformers.AddEmptyLists;
+import org.kframework.compile.transformers.AddHeatingConditions;
+import org.kframework.compile.transformers.AddK2SMTLib;
+import org.kframework.compile.transformers.AddKCell;
+import org.kframework.compile.transformers.AddKLabelConstant;
+import org.kframework.compile.transformers.AddKStringConversion;
+import org.kframework.compile.transformers.AddPredicates;
+import org.kframework.compile.transformers.AddSemanticEquality;
+import org.kframework.compile.transformers.AddSupercoolDefinition;
+import org.kframework.compile.transformers.AddSuperheatRules;
+import org.kframework.compile.transformers.AddSymbolicK;
+import org.kframework.compile.transformers.AddTopCellConfig;
+import org.kframework.compile.transformers.AddTopCellRules;
+import org.kframework.compile.transformers.ContextsToHeating;
+import org.kframework.compile.transformers.DesugarStreams;
+import org.kframework.compile.transformers.FlattenSyntax;
+import org.kframework.compile.transformers.FreezeUserFreezers;
+import org.kframework.compile.transformers.FreshCondToFreshVar;
+import org.kframework.compile.transformers.RemoveBrackets;
+import org.kframework.compile.transformers.RemoveSyntacticCasts;
+import org.kframework.compile.transformers.ResolveAnonymousVariables;
+import org.kframework.compile.transformers.ResolveBinder;
+import org.kframework.compile.transformers.ResolveBlockingInput;
+import org.kframework.compile.transformers.ResolveBuiltins;
+import org.kframework.compile.transformers.ResolveFreshVarMOS;
+import org.kframework.compile.transformers.ResolveFunctions;
+import org.kframework.compile.transformers.ResolveHybrid;
+import org.kframework.compile.transformers.ResolveListOfK;
+import org.kframework.compile.transformers.ResolveOpenCells;
+import org.kframework.compile.transformers.ResolveRewrite;
+import org.kframework.compile.transformers.ResolveSupercool;
+import org.kframework.compile.transformers.ResolveSyntaxPredicates;
+import org.kframework.compile.transformers.SortCells;
+import org.kframework.compile.transformers.StrictnessToContexts;
 import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.compile.utils.CompileDataStructures;
+import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.InitializeConfigurationStructure;
+import org.kframework.compile.utils.RuleCompilerSteps;
+import org.kframework.kcheck.utils.AddCircularityRules;
+import org.kframework.kcheck.utils.AddImplicationRules;
+import org.kframework.kcheck.utils.AddPathConditionToCircularities;
+import org.kframework.kcheck.utils.AddPathConditionToImplications;
+import org.kframework.kcheck.utils.GeneratePrograms;
+import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
+import org.kframework.kil.Rule;
+import org.kframework.kil.Sentence;
+import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
+import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.krun.K;
+import org.kframework.krun.KRunExecutionException;
+import org.kframework.krun.api.KRunResult;
+import org.kframework.krun.api.SearchResults;
+import org.kframework.krun.api.SearchType;
 import org.kframework.main.FirstStep;
+import org.kframework.parser.DefinitionLoader;
+import org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Properties;
-
 public class RLBackend  extends BasicBackend implements Backend{
 
+	List<ASTNode> reachabilityRules = null;
+	
 	public RLBackend(Stopwatch sw, Context context) {
 		super(sw, context);
+		reachabilityRules = new ArrayList<ASTNode>();
 	}
 
 	@Override
@@ -82,6 +145,47 @@ public class RLBackend  extends BasicBackend implements Backend{
 				+ "-BUILTINS .\n" + "  including K-STRICTNESS-DEFAULTS .\n" + "endm\n";
 		FileUtil.saveInFile(context.dotk.getAbsolutePath() + "/" + "main.maude", main);
 
+
+		GeneratePrograms gp = new GeneratePrograms(context, reachabilityRules);
+		try {
+			javaDef.accept(gp);
+		} catch (TransformerException e) {
+			e.printStackTrace();
+		}
+
+		
+		MaudeKRun mkr = new MaudeKRun(context);
+		Rule defaultPattern;
+		Set<String> defaultVars;
+		RuleCompilerSteps defaultPatternInfo;
+		
+		for (Term pgm:gp.getPrograms()) {
+			try {
+				System.out.println("Execute: " + pgm);
+				
+
+				ASTNode pattern = DefinitionLoader.parsePattern(K.pattern, "Command line pattern",
+	                    context);
+				CollectVariablesVisitor vars = new CollectVariablesVisitor(context);
+				pattern.accept(vars);
+				defaultVars = vars.getVars().keySet();
+				defaultPatternInfo = new RuleCompilerSteps(K.definition, context);
+				pattern = defaultPatternInfo.compile(new Rule((Sentence) pattern), null);
+
+				defaultPattern = (Rule) pattern;
+				
+				RuleCompilerSteps steps = new RuleCompilerSteps(javaDef, context);
+				KRunResult<SearchResults> result = mkr.search(null, null, SearchType.FINAL, defaultPattern, pgm, steps);
+				System.out.println("Result: " + result + "\n\n");
+			} catch (KRunExecutionException e) {
+				e.printStackTrace();
+			} catch (TransformerException e) {
+				e.printStackTrace();
+			} catch (CompilerStepDone e) {
+				e.printStackTrace();
+			}
+		}
+		
 		 UnparserFilter unparserFilter = new UnparserFilter(context);
 		 javaDef.accept(unparserFilter);
 		
@@ -108,6 +212,7 @@ public class RLBackend  extends BasicBackend implements Backend{
 	public CompilerSteps<Definition> getCompilationSteps() {
 		CompilerSteps<Definition> steps = new CompilerSteps<Definition>(context);
 		steps.add(new FirstStep(this, context));
+		
 		steps.add(new CheckVisitorStep<Definition>(new CheckConfigurationCells(context), context));
 		steps.add(new RemoveBrackets(context));
 		steps.add(new AddEmptyLists(context));
@@ -125,10 +230,14 @@ public class RLBackend  extends BasicBackend implements Backend{
 		steps.add(new DesugarStreams(context));
 		steps.add(new ResolveFunctions(context));
 		steps.add(new TagUserRules(context)); // symbolic step
-		steps.add(new ReachabilityRuleToKRule(context)); // symbolic step 
 		steps.add(new AddKCell(context));
 		steps.add(new AddSymbolicK(context));
 
+		ResolveRLFile rl = new ResolveRLFile(context);
+		reachabilityRules = rl.getReachabilityRules();
+		steps.add(new AddCircularityRules(context, reachabilityRules));
+		steps.add(new AddImplicationRules(context, reachabilityRules));
+		
 		steps.add(new AddSemanticEquality(context));
 		steps.add(new FreshCondToFreshVar(context));
 		steps.add(new ResolveFreshVarMOS(context));
@@ -148,6 +257,8 @@ public class RLBackend  extends BasicBackend implements Backend{
 		steps.add(new AddKStringConversion(context));
 		steps.add(new AddKLabelConstant(context));
 		steps.add(new ResolveHybrid(context));
+		
+		
 		steps.add(new ResolveConfigurationAbstraction(context));
 		steps.add(new ResolveOpenCells(context));
 		steps.add(new ResolveRewrite(context));
@@ -159,14 +270,15 @@ public class RLBackend  extends BasicBackend implements Backend{
 		// steps.add(new LineariseTransformer()); // symbolic step
 		steps.add(new ReplaceConstants(context)); // symbolic step
 		steps.add(new AddPathCondition(context)); // symbolic step
-		steps.add(new AddPathConditionToReachabilityKRule(context)); // symbolic step
-		steps.add(new ResolveRLFile(context)); // rl
+		
+		steps.add(new AddPathConditionToCircularities(context, reachabilityRules));
+		steps.add(new AddPathConditionToImplications(context, reachabilityRules));
+		
 		steps.add(new ResolveSupercool(context));
 		steps.add(new AddStrictStar(context));
 		steps.add(new AddDefaultComputational(context));
 		steps.add(new AddOptionalTags(context));
 		steps.add(new DeclareCellLabels(context));
-
 
 		return steps;
 	}

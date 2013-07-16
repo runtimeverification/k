@@ -65,6 +65,13 @@ public class AddSymbolicK extends CopyOnWriteTransformer {
                 IntBuiltin.kAppOf(n));
 	}
 
+	public Term freshSymSortId(String sort, String id) {
+		return KApp.of(
+                KLabelConstant.of("'#freshSymSortN", context),
+                StringBuiltin.kAppOf(sort),
+                StringBuiltin.kAppOf(id));
+	}
+	
 	@Override
 	public ASTNode transform(Module node) throws TransformerException {
 		Module retNode = node.shallowCopy();
