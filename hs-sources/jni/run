@@ -1,2 +1,0 @@
-#!/usr/bin/env bash
-LD_LIBRARY_PATH="$(dirname $0)/../../dist/lib/native/linux/x64" java -Xcheck:jni SglrJNI
