@@ -8,31 +8,31 @@ import org.kframework.kil.Production;
 import org.kframework.kil.visitors.BasicVisitor;
 
 public class CollectConsesVisitor extends BasicVisitor {
-	public CollectConsesVisitor(DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public CollectConsesVisitor(Context context) {
+		super(context);
 	}
 
 	@Override
 	public void visit(Production node) {
 		if (node.containsAttribute(Constants.CONS_cons_ATTR)) {
 			String cons = node.getAttribute(Constants.CONS_cons_ATTR);
-			definitionHelper.conses.put(cons, node);
-			definitionHelper.putLabel(node, cons);
+			context.conses.put(cons, node);
+			context.putLabel(node, cons);
 		}
 		if (node.isListDecl()) {
-			definitionHelper.listConses.put(node.getSort(), node);
-			definitionHelper.putListLabel(node);
+			context.listConses.put(node.getSort(), node);
+			context.putListLabel(node);
 		}
 		for (Attribute a : node.getAttributes().getContents()) {
 			String key = a.getKey();
 			if (key.equals("klabel"))
 				key = node.getAttribute("klabel");
-			if (definitionHelper.productions.containsKey(key)) {
-				definitionHelper.productions.get(key).add(node);
+			if (context.productions.containsKey(key)) {
+				context.productions.get(key).add(node);
 			} else {
 				Set<Production> sset = new HashSet<Production>();
 				sset.add(node);
-				definitionHelper.productions.put(key, sset);
+				context.productions.put(key, sset);
 			}
 		}
 	}

@@ -1,4 +1,4 @@
-require "../../basic/cink-basic.k"
+require "../../basic/cink-basic-syntax.k"
 require "cink-arrays-unidimensional.k"
 
 /*!

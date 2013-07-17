@@ -1,98 +1,120 @@
 package org.kframework.backend.java.kil;
 
-import org.kframework.backend.java.symbolic.Matcher;
+import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
-import org.kframework.backend.java.symbolic.Utils;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Production;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+
+import com.google.common.collect.ImmutableList;
 
 
 /**
- * Created with IntelliJ IDEA.
- * User: andrei
- * Date: 3/18/13
- * Time: 1:50 PM
- * To change this template use File | Settings | File Templates.
+ * A KLabel constant.
+ *
+ * @author AndreiS
  */
 public class KLabelConstant extends KLabel {
 
+    /* KLabelConstant cache */
+    private static final HashMap<String, KLabelConstant> cache = new HashMap<String, KLabelConstant>();
+
+    /* un-escaped label */
     private final String label;
+    /* unmodifiable view of a list of productions generating this {@code KLabelConstant} */
+    private final List<Production> productions;
+    /*
+     * boolean flag set iff a production tagged with "function" or "predicate" generates this
+     * {@code
+     * KLabelConstant}
+     */
     private final boolean isFunction;
 
-    public KLabelConstant(String label, DefinitionHelper definitionHelper) {
+    private KLabelConstant(String label, Context context) {
         this.label = label;
+        productions = ImmutableList.copyOf(context.productionsOf(label));
 
         boolean isFunction = false;
-        for (Production production : productionsOf(definitionHelper)) {
-            if (production.containsAttribute(Attribute.FUNCTION.getKey())) {
-                isFunction = true;
-                break;
+        if (!label.startsWith("is")) {
+            for (Production production : productions) {
+                if (production.containsAttribute(Attribute.FUNCTION.getKey())) {
+                    isFunction = true;
+                    break;
+                }
+                if (production.containsAttribute(Attribute.PREDICATE.getKey())) {
+                    isFunction = true;
+                    break;
+                }
             }
-            if (production.containsAttribute(Attribute.PREDICATE.getKey())) {
-                isFunction = false;
-                break;
-            }
+        } else {
+            /* a KLabel beginning with "is" represents a sort membership predicate */
+            isFunction = true;
         }
         this.isFunction = isFunction;
     }
 
-    public String getLabel() {
-        return label;
+    /**
+     * Returns a {@code KLabelConstant} representation of label. The {@code KLabelConstant}
+     * instances are cached to ensure uniqueness (subsequent invocations
+     * of this method with the same label return the same {@code KLabelConstant} object).
+     *
+     * @param label string representation of the KLabel; must not be '`' escaped;
+     * @return AST term representation the the KLabel;
+     */
+    public static KLabelConstant of(String label, Context context) {
+        assert label != null;
+
+        KLabelConstant kLabelConstant = cache.get(label);
+        if (kLabelConstant == null) {
+            kLabelConstant = new KLabelConstant(label, context);
+            cache.put(label, kLabelConstant);
+        }
+        return kLabelConstant;
     }
 
-    public List<Production> productionsOf(DefinitionHelper definitionHelper) {
-        Set<String> conses = definitionHelper.labels.get(label);
-        if (conses == null) {
-            return Collections.<Production>emptyList();
-        }
-
-        ArrayList<Production> productions = new ArrayList<Production>();
-        for (String cons : conses) {
-            assert definitionHelper.conses.containsKey(cons);
-
-            productions.add(definitionHelper.conses.get(cons));
-        }
-
-        return productions;
-    }
-
+    /**
+     * Returns true iff no production tagged with "function" or "predicate" generates this {@code
+     * KLabelConstant}.
+     */
     @Override
     public boolean isConstructor() {
         return !isFunction;
     }
 
+    /**
+     * Returns true iff a production tagged with "function" or "predicate" generates this {@code
+     * KLabelConstant}.
+     */
     @Override
     public boolean isFunction() {
         return isFunction;
     }
 
+    public String label() {
+        return label;
+    }
+
+    /**
+     * Returns a unmodifiable view of a list of productions generating this {@code KLabelConstant}.
+     */
+    public List<Production> productions() {
+        return productions;
+    }
+
     @Override
     public boolean equals(Object object) {
-        if (this == object) {
-            return true;
-        }
-
-        if (!(object instanceof KLabelConstant)) {
-            return false;
-        }
-
-        KLabelConstant kLabelConstant = (KLabelConstant) object;
-        return label.equals(kLabelConstant.getLabel());
+        /* {@code KLabelConstant} objects are cached to ensure uniqueness */
+        return this == object;
     }
 
     @Override
     public int hashCode() {
-        int hash = 1;
-        hash = hash * Utils.HASH_PRIME + label.hashCode();
-        return hash;
+        return label.hashCode();
     }
 
     @Override
@@ -100,17 +122,9 @@ public class KLabelConstant extends KLabel {
         return label;
     }
 
-    /**
-     * @return a copy of the ASTNode containing the same fields.
-     */
     @Override
-    public ASTNode shallowCopy() {
-        throw new UnsupportedOperationException();  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void accept(Matcher matcher, Term patten) {
-        matcher.match(this, patten);
+    public void accept(Unifier unifier, Term patten) {
+        unifier.unify(this, patten);
     }
 
     @Override

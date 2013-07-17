@@ -1,17 +1,16 @@
 package org.kframework.backend.java.kil;
 
-import org.kframework.backend.java.symbolic.Matcher;
+import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Utils;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 
 
 /**
- * Created with IntelliJ IDEA.
- * User: andrei
- * Date: 3/20/13
- * Time: 6:52 PM
- * To change this template use File | Settings | File Templates.
+ *
+ *
+ * @author AndreiS
  */
 public class Cell<T extends Term> extends Term {
 
@@ -22,15 +21,15 @@ public class Cell<T extends Term> extends Term {
     public Cell(String label, T content) {
         super(Kind.CELL);
 
-        assert content.getKind() == Kind.CELL_COLLECTION
-                || content.getKind() == Kind.K
-                || content.getKind() == Kind.KITEM
-                || content.getKind() == Kind.KLABEL
-                || content.getKind() == Kind.KLIST
-                || content.getKind() == Kind.MAP:
-                "unexpected cell kind " + content.getKind();
+        assert content.kind() == Kind.CELL_COLLECTION
+                || content.kind() == Kind.K
+                || content.kind() == Kind.KITEM
+                || content.kind() == Kind.KLABEL
+                || content.kind() == Kind.KLIST:
+                //|| content.kind() == Kind.MAP:
+                "unexpected cell kind " + content.kind();
         this.label = label;
-        this.contentKind = content.getKind();
+        this.contentKind = content.kind();
         this.content = content;
     }
 
@@ -38,7 +37,7 @@ public class Cell<T extends Term> extends Term {
         return label;
     }
 
-    public Kind getContentKind() {
+    public Kind contentKind() {
         return contentKind;
     }
 
@@ -52,21 +51,35 @@ public class Cell<T extends Term> extends Term {
     }
 
     @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+
+        if (!(object instanceof Cell)) {
+            return false;
+        }
+
+        Cell cell = (Cell) object;
+        return label.equals(cell.label) && content.equals(cell.content);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 1;
+        hash = hash * Utils.HASH_PRIME + label.hashCode();
+        hash = hash * Utils.HASH_PRIME + content.hashCode();
+        return hash;
+    }
+
+    @Override
     public String toString() {
         return "<" + label + ">" + content + "</" + label + ">";
     }
 
-    /**
-     * @return a copy of the ASTNode containing the same fields.
-     */
     @Override
-    public ASTNode shallowCopy() {
-        throw new UnsupportedOperationException();  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void accept(Matcher matcher, Term patten) {
-        matcher.match(this, patten);
+    public void accept(Unifier unifier, Term patten) {
+        unifier.unify(this, patten);
     }
 
     @Override

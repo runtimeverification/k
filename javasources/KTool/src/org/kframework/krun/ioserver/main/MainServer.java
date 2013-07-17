@@ -1,18 +1,25 @@
 package org.kframework.krun.ioserver.main;
 
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.compile.FlattenModules;
+import org.kframework.compile.transformers.AddTopCellConfig;
+import org.kframework.kil.Definition;
+import org.kframework.kil.loader.Context;
+import org.kframework.krun.K;
 import org.kframework.krun.ioserver.resources.ResourceSystem;
+import org.kframework.utils.BinaryLoader;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.logging.Logger;
 
 public class MainServer implements Runnable {
 	public int _port;
 	public boolean _started;
 	private Logger _logger;
-	protected DefinitionHelper definitionHelper;
+	protected Context context;
 
-	public MainServer(int port, Logger logger, DefinitionHelper definitionHelper) {
-		this.definitionHelper = definitionHelper;
+	public MainServer(int port, Logger logger, Context context) {
+		this.context = context;
 		_port = port;
 		_logger = logger;
 		try {
@@ -23,7 +30,7 @@ public class MainServer implements Runnable {
 		}
 	}
 	public void run() {
-		IOServer server = new IOServer(_port, _logger, definitionHelper);
+		IOServer server = new IOServer(_port, _logger, context);
 		_port = server.port; // in case server changes port
 		_started = true;
 		try {
@@ -47,10 +54,18 @@ public class MainServer implements Runnable {
 	}
 		
 	public static void main(String[] args) throws Exception {
-		DefinitionHelper definitionHelper = new DefinitionHelper();
+		Context context = new Context();
+		context.kompiled = new File(args[1]);
+		Definition javaDef = (Definition) BinaryLoader.fromBinary(
+			new FileInputStream(context.kompiled.getCanonicalPath() + "/defx.bin"));
+		javaDef = new FlattenModules(context).compile(javaDef, null);
+		javaDef = (Definition) javaDef.accept(new AddTopCellConfig(context));
+		// This is essential for generating maude
+		javaDef.preprocess(context);
+        K.parser = args[2];
 		Logger logger = java.util.logging.Logger.getLogger("KRunner");
 		logger.setUseParentHandlers(false);
-		MainServer ms = new MainServer(Integer.parseInt(args[0]), logger, definitionHelper);
+		MainServer ms = new MainServer(Integer.parseInt(args[0]), logger, context);
 		
 		ms.run();
 		//start(Integer.parseInt(args[0]));

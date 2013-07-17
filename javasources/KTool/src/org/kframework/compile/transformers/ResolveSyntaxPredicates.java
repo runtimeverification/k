@@ -3,7 +3,6 @@ package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
-import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -13,8 +12,8 @@ public class ResolveSyntaxPredicates extends CopyOnWriteTransformer {
 	
 	
 	
-	public ResolveSyntaxPredicates(DefinitionHelper definitionHelper) {
-		super("Resolve syntax predicates", definitionHelper);
+	public ResolveSyntaxPredicates(org.kframework.kil.loader.Context context) {
+		super("Resolve syntax predicates", context);
 	}
 	
 	
@@ -31,7 +30,7 @@ public class ResolveSyntaxPredicates extends CopyOnWriteTransformer {
 	@Override
 	public ASTNode transform(Sentence node) throws TransformerException {
 		boolean change = false;
-		Set<Variable> vars = MetaK.getVariables(node.getBody(), definitionHelper);
+		Set<Variable> vars = node.getBody().variables();
 		KList ands = new KList();
 		Term condition = node.getCondition();
 		if (null != condition) {
@@ -39,7 +38,7 @@ public class ResolveSyntaxPredicates extends CopyOnWriteTransformer {
 		}
 		for (Variable var : vars) {
 //			if (!var.isUserTyped()) continue;
-			if (MetaK.isKSort(var.getSort(definitionHelper))) continue;
+			if (MetaK.isKSort(var.getSort())) continue;
 			change = true;
 			ands.getContents().add(getPredicateTerm(var));
 		}
@@ -55,7 +54,7 @@ public class ResolveSyntaxPredicates extends CopyOnWriteTransformer {
 	}
 
 	private Term getPredicateTerm(Variable var) {
-		return KApp.of(definitionHelper, KLabelConstant.of(AddPredicates.predicate(var.getSort(definitionHelper)), definitionHelper), var);
+		return KApp.of(KLabelConstant.of(AddPredicates.predicate(var.getSort()), context), var);
 	}
 
 }

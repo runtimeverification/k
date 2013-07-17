@@ -10,7 +10,6 @@
 -->
 
 <!-- LAMBDA -->
-
   <test 
       language="dist/tutorial/1_lambda/lesson_1/lambda.k"
       folder="dist/tutorial/1_lambda/lesson_1"
@@ -153,7 +152,7 @@
       language="dist/tutorial/4_imp++/lesson_3/imp.k"
       folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
       extensions="imp"
-      exclude="lesson_7/spawn.imp" 
+      exclude="lesson_7/spawn.imp"
       results="tests/tutorial/4_imp++/lesson_3" >
       <kompile-option name="-superheat" value="division" />
       <kompile-option name="-supercool" value="lookup increment" />
@@ -206,7 +205,7 @@
       folder="dist/tutorial/2_imp
               dist/tutorial/4_imp++"
       extensions="imp"
-      exclude="lesson_1/spawn.imp"
+      exclude="lesson_1/spawn.imp lesson_4/test.imp"
       />
   <test
       language="dist/tutorial/5_types/lesson_2/lambda.k"
@@ -346,6 +345,7 @@
     <all-programs>
       <krun-option name="--search" />
       <krun-option name="--bound" value="2" />
+      <krun-option name="--no-color" />
     </all-programs>
   </test>
 
@@ -385,7 +385,7 @@
       >
     <all-programs>
       <krun-option name="--search" />
-      <krun-option name="--parser" value="&quot;kast -groundParser&quot;"/>
+      <krun-option name="--parser" value="kast -groundParser" parser-home="PARSER_HOME"/>
       <krun-option name="--no-color" />
     </all-programs>
   </test>
@@ -414,7 +414,7 @@
     <all-programs>
       <krun-option name="--search" />
       <krun-option name="--depth" value="5" />
-      <krun-option name="--parser" value="&quot;kast -groundParser&quot;"/>
+      <krun-option name="--parser" value="kast -groundParser"  parser-home="PARSER_HOME"/>
       <krun-option name="--no-color" />
     </all-programs>
   </test>
@@ -506,9 +506,16 @@
       language="dist/tutorial/2_imp/lesson_4/imp.k"
       folder="dist/tutorial/2_imp"
       extensions="imp"
-      report-dir="symbolic.imp"
+      report-dir="imp"
+      title="symbolic"
+	  exclude="lesson_4/test.imp"
       >
     <kompile-option name="--symbolic" />
+    <all-programs>
+      <krun-option name="--no-color" />
+      <krun-option name="--output-mode" value="none" />
+      <krun-option name="-cPC" value="true" /> 
+    </all-programs>
   </test>
 
 
@@ -648,9 +655,66 @@
   </test>
 
   <test
+      language="tests/regression/addbrackets/issue.k"
+      folder="tests/regression/addbrackets/programs"
+      extensions="issue"
+      results="tests/regression/addbrackets/out/">
+      <all-programs>
+        <krun-option name="--output-mode" value="pretty" />
+	<krun-option name="--parser" value="kast -groundParser" parser-home="PARSER_HOME" />
+        <krun-option name="--no-parens" />
+      </all-programs>
+  </test>
+
+  <test
       language="tests/regression/issue647/issue.k"
       folder="tests/regression/issue647"
       results="tests/regression/issue647"
       extensions="issue" />
+
+  <test
+      language="tests/regression/issue663/issue.k"
+      folder="tests/regression/issue663/programs"
+      results="tests/regression/issue663/out"
+      extensions="issue">
+      <all-programs>
+        <krun-option name="--ltlmc" value="TrueLtl" />
+      </all-programs> />
+  </test>
+  <test
+      language="tests/regression/issue674/issue.k"
+      folder="tests/regression/issue674"
+      results="tests/regression/issue674"
+      extensions="issue" >
+      <all-programs>
+        <krun-option name="--output-mode" value="pretty" />
+      </all-programs>
+  </test>
+
+  <test
+      language="tests/regression/basicFloat/issue.k"
+      folder="tests/regression/basicFloat"
+      results="tests/regression/basicFloat"
+      extensions="issue" />
+  <test
+      language="tests/regression/follow/issue.k"
+      folder="tests/regression/follow"
+      results="tests/regression/follow"
+      extensions="issue" />
+
+  <test
+      language="tests/regression/strings/test.k"
+      folder="tests/regression/strings/programs"
+      results="tests/regression/strings/tests"
+      extensions="test">
+    <kompile-option name="-ml" />
+    <all-programs>
+      <krun-option name="--backend" value="java-symbolic" />
+      <krun-option name="--no-smt" />
+      <krun-option name="--parser" value="kast -groundParser" />
+    </all-programs>
+  </test>
+
+
 </tests>
 

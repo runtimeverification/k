@@ -1,7 +1,7 @@
 package org.kframework.parser.concrete.disambiguate;
 
 import org.kframework.kil.*;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicHookWorker;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -14,22 +14,27 @@ public class TypeSystemFilter2 extends BasicHookWorker {
 
 	private String maxSort;
 
-	public TypeSystemFilter2(String maxSort, DefinitionHelper definitionHelper) {
-		super("Type system", definitionHelper);
+	public TypeSystemFilter2(String maxSort, org.kframework.kil.loader.Context context) {
+		super("Type system", context);
 		this.maxSort = maxSort;
 	}
 
-	public TypeSystemFilter2(TypeSystemFilter2 tsf, DefinitionHelper definitionHelper) {
-		super("Type system", definitionHelper);
+	public TypeSystemFilter2(TypeSystemFilter2 tsf, Context context) {
+		super("Type system", context);
 		this.maxSort = tsf.maxSort;
 	}
 
 	public ASTNode transform(Term trm) throws TransformerException {
-		if (!trm.getSort(definitionHelper).equals("K") && !trm.getSort(definitionHelper).equals(KSorts.KITEM)
-                && !trm.getSort(definitionHelper).equals ("KResult")) {
-			if (!definitionHelper.isSubsortedEq(maxSort, trm.getSort(definitionHelper))) {
-				String msg = "Type error detected. Expected sort " + maxSort + ", but found " + trm.getSort(definitionHelper);
-				KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, trm.getFilename(), trm.getLocation());
+		if (!trm.getSort().equals(KSorts.K) && !trm.getSort().equals(KSorts.KITEM)
+                && !trm.getSort().equals(KSorts.KRESULT)) {
+			if (!context.isSubsortedEq(maxSort, trm.getSort())) {
+				KException kex = new KException(
+                        ExceptionType.ERROR,
+                        KExceptionGroup.CRITICAL,
+                        "type error: unexpected term '" + trm + "' of sort '" + trm.getSort()
+                                + "', expected sort '" + maxSort + "'.",
+                        trm.getFilename(),
+                        trm.getLocation());
 				throw new TransformerException(kex);
 			}
         }
@@ -67,8 +72,10 @@ public class TypeSystemFilter2 extends BasicHookWorker {
 	@Override
 	public ASTNode transform(Rewrite node) throws TransformerException {
 		Rewrite result = new Rewrite(node);
-		result.setLeft((Term) node.getLeft().accept(this));
-		result.setRight((Term) node.getRight().accept(this));
+		result.replaceChildren(
+				(Term) node.getLeft().accept(this),
+				(Term) node.getRight().accept(this),
+                context);
 		return result;
 	}
 }

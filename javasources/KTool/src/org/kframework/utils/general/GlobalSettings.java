@@ -26,13 +26,26 @@ public class GlobalSettings {
 	}
 	public static boolean addTopCell = false;
 	public static String style = "poster,style=bubble";
-	public static boolean testFactory = false;
+	public static boolean fastKast = false;
 	
 	// this is used by kast to know what parser to use fort the input string
 	public static ParserType whatParser = ParserType.PROGRAM;
 	public static boolean sortedCells = false;
 
-	public enum ParserType {
+    public static boolean isUnixOS() {
+		String os = System.getProperty("os.name").toLowerCase();
+		return os.contains("nix") || os.contains("nux");
+	}
+
+    public static boolean isWindowsOS() {
+		return System.getProperty("os.name").toLowerCase().contains("win");
+	}
+
+    public static boolean isMacOS() {
+		return System.getProperty("os.name").toLowerCase().contains("mac");
+	}
+
+    public enum ParserType {
 		PROGRAM, GROUND, RULES, BINARY
 	}
 
@@ -44,4 +57,5 @@ public class GlobalSettings {
 	public static boolean NOSMT = false;
 	
 	public static String CHECK = null;
+	public static boolean symbolic = false; // true if the --symbolic argument has been provided to kompile
 }

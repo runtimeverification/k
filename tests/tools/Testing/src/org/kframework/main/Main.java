@@ -31,99 +31,6 @@ public class Main {
 
 		int exitCode = 0;
 		File homeDir = new File(System.getProperty("user.dir"));
-		System.out.println(homeDir.getAbsolutePath());
-
-		// a little bit hack-ish but it works until somebody complains
-//		System.out.println(System.getProperty("user.dir"));
-//		if (System.getProperty("user.dir").contains("jenkins")) {
-//
-//			// remove anything from previous build
-//			try {
-//				ProcessBuilder pb = new ProcessBuilder("rm", "-rf",
-//						Configuration.k);
-//				Process process = pb.start();
-//				int exit = process.waitFor();
-//				String out = Task.readString(process.getInputStream());
-//				String err = Task.readString(process.getErrorStream());
-//				System.out.println(out);
-//				System.out.println(err);
-//				System.out.println(exit);
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//				exitCode = 1;
-//			}
-//
-//			// remove maude binaries
-//			/*
-//			 * System.out.println("Remove maude binaries"); try { ProcessBuilder
-//			 * pb = new ProcessBuilder("rm", "-rf",
-//			 * "/var/lib/jenkins/workspace/k-framework/dist/bin/maude/binaries",
-//			 * Configuration.k); Process process = pb.start(); int exit =
-//			 * process.waitFor(); String out =
-//			 * Task.readString(process.getInputStream()); String err =
-//			 * Task.readString(process.getErrorStream());
-//			 * System.out.println(out); System.out.println(err);
-//			 * System.out.println(exit); } catch (Exception e) { exitCode = 1;
-//			 * e.printStackTrace(); }
-//			 */
-//			// first copy the k-framework artifacts
-//			try {
-//				ProcessBuilder pb = new ProcessBuilder("cp", "-r",
-//						"/var/lib/jenkins/workspace/k-framework",
-//						Configuration.k);
-//				Process process = pb.start();
-//				int exit = process.waitFor();
-//				String out = Task.readString(process.getInputStream());
-//				String err = Task.readString(process.getErrorStream());
-//				System.out.println(out);
-//				System.out.println(err);
-//				System.out.println(exit);
-//			} catch (Exception e) {
-//				exitCode = 1;
-//				e.printStackTrace();
-//			}
-//
-//
-//			try {
-//				ProcessBuilder pb = new ProcessBuilder("rm", "-rf",
-//						"junit-reports");
-//				Process process = pb.start();
-//				int exit = process.waitFor();
-//				String out = Task.readString(process.getInputStream());
-//				String err = Task.readString(process.getErrorStream());
-//				System.out.println(out);
-//				System.out.println(err);
-//				System.out.println(exit);
-//			} catch (Exception e) {
-//				exitCode = 1;
-//				e.printStackTrace();
-//			}
-//			
-//			// build K
-//			try {
-//				ProcessBuilder pb = new ProcessBuilder("ant");
-//				pb.directory(new File(Configuration.getHome()));
-//				Process process = pb.start();
-//				int exit = process.waitFor();
-//				String out = Task.readString(process.getInputStream());
-//				String err = Task.readString(process.getErrorStream());
-//				System.out.println(out);
-//				System.out.println(err);
-//				if (exit != 0)
-//					System.exit(exit);
-//			} catch (Exception e) {
-//				exitCode = 1;
-//				e.printStackTrace();
-//			}
-//
-//			if (!new File(Configuration.getHome() + Configuration.FS + "dist"
-//					+ Configuration.FS + "bin" + Configuration.FS + "java"
-//					+ Configuration.FS + "k3.jar").exists()) {
-//			}
-//			
-//			homeDir = new File(System.getProperty("user.dir") + Configuration.FS + Configuration.k);
-//			Configuration.JR = "/var/lib/jenkins/workspace/k-framework-tests" + Configuration.FS + Configuration.JR;
-//		}
 
 		if (args.length == 1) {
 			if (!new File(args[0]).isAbsolute())
@@ -168,15 +75,18 @@ public class Main {
 		}
 
 		// compile definitions first
-		System.out.println("Kompiling the language definitions...");
+		int i = 0;
+		System.out.print("Kompiling the language definitions...");
 		Map<Test, Task> definitions = new TreeMap<Test, Task>();
 		for (Test test : alltests) {
 			Task def = test.getDefinitionTask(homeDir);
 			definitions.put(test, def);
 			Execution.execute(def);
+			i++;
 		}
+		System.out.println("(" + i + ")");
 		Execution.finish();
-
+		
 		// report
 		for (Entry<Test, Task> entry : definitions.entrySet()) {
 			entry.getKey().reportCompilation(entry.getValue());
@@ -197,7 +107,8 @@ public class Main {
 		System.out.println(kompileStatus);
 
 		// compile pdf definitions
-		System.out.println("Generating PDF documentation...");
+		i = 0;
+		System.out.print("Generating PDF documentation...");
 		Map<Test, Task> pdfDefinitions = new TreeMap<Test, Task>();
 		for (Test test : alltests) {
 			// also compile pdf if set
@@ -205,9 +116,10 @@ public class Main {
 				Task pdfDef = test.getPdfDefinitionTask(homeDir);
 				pdfDefinitions.put(test, pdfDef);
 				Execution.execute(pdfDef);
+				i++;
 			}
 		}
-
+		System.out.println("(" + i + ")");
 		Execution.finish();
 		// report
 		for (Entry<Test, Task> entry : pdfDefinitions.entrySet()) {
@@ -235,19 +147,21 @@ public class Main {
 			Test test = dentry.getKey();
 			if (test.compiled(dentry.getValue())) {
 
-				System.out.println("Running "
+				System.out.print("Running "
 						+ test.getLanguage()
-						+ " programs... ");
+						+ " programs... " + test.getTag());
 
 				// execute
 				List<Program> pgms = test.getPrograms();
 				Map<Program, Task> all = new TreeMap<Program, Task>();
+				i = 0;
 				for (Program p : pgms) {
 					Task task = p.getTask(homeDir);
 					all.put(p, task);
 					Execution.tpe.execute(task);
+					i ++;
 				}
-
+				System.out.println("(" + i + ")");
 				Execution.finish();
 
 				// report

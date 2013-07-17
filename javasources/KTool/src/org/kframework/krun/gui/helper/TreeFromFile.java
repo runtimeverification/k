@@ -6,7 +6,8 @@ import java.util.Scanner;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
-import org.kframework.krun.KPaths;
+
+import org.kframework.utils.file.KPaths;
 
 public class TreeFromFile {
 

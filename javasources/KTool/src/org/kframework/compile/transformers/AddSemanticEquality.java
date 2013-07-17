@@ -15,7 +15,7 @@ import org.kframework.kil.Rule;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -28,13 +28,16 @@ import java.util.Set;
 
 /**
  * Transformer class for semantic equality.
+ *
  * @see CopyOnWriteTransformer
+ *
+ * @author AndreiS
  */
 public class AddSemanticEquality extends CopyOnWriteTransformer {
 
     public static final String EQUALITY_SORT = "EqualitySort";
     public static final KLabelConstant EQUALITY_PREDICATE
-            = KLabelConstant.ofStatic(AddPredicates.predicate(EQUALITY_SORT));
+            = KLabelConstant.of(AddPredicates.predicate(EQUALITY_SORT));
 
     private Map<String, String> equalities = new HashMap<String, String>();
 
@@ -43,7 +46,7 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
         Module retNode = node.shallowCopy();
         retNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
 
-        Set<Production> eqProds = node.getSyntaxByTag(Attribute.EQUALITY.getKey(), definitionHelper);
+        Set<Production> eqProds = node.getSyntaxByTag(Attribute.EQUALITY.getKey(), context);
         for (Production prod : eqProds)
             /*
              * operators tagged with "equality" must have the signature
@@ -75,58 +78,75 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
                             "unexpected number of arguments for equality, expected 2",
                             prod.getFilename(),
                             prod.getLocation()));
+            /* TOOD(AndreiS): cink fails this check; either fix cink or remove the check
             else
                 GlobalSettings.kem.register(new KException(
                         KException.ExceptionType.ERROR,
                         KException.KExceptionGroup.CRITICAL,
-                        "unexpected sort " + prod.getSort() + " for equality, expected sort " + Sort.BOOL,
+                        "unexpected sort " + prod.getSort() + " for equality, expected sort "
+                        + Sort.BOOL,
                         prod.getFilename(),
                         prod.getLocation()));
+            */
 
         retNode.addConstant(EQUALITY_PREDICATE);
 
+        /* defer =K to =Sort for sorts with equality */
         for(Map.Entry<String, String> item : equalities.entrySet()) {
             String sort = item.getKey();
-            KLabelConstant sortEq = KLabelConstant.of(item.getValue(), definitionHelper);
+            KLabelConstant sortEq = KLabelConstant.of(item.getValue(), context);
             if (MetaK.isComputationSort(sort)) {
                 retNode.addSubsort(EQUALITY_SORT, sort);
 
                 KList kList = new KList();
-                kList.add(MetaK.getFreshVar(sort));
-                kList.add(MetaK.getFreshVar(sort));
+                kList.add(Variable.getFreshVar(sort));
+                kList.add(Variable.getFreshVar(sort));
 
                 Term lhs = new KApp(KLabelConstant.KEQ, kList);
                 Term rhs = new KApp(sortEq, kList);
-                Rule rule = new Rule(lhs, rhs, definitionHelper);
+                Rule rule = new Rule(lhs, rhs, context);
                 rule.addAttribute(Attribute.FUNCTION);
                 retNode.appendModuleItem(rule);
             }
         }
 
-        Set<Production> prods = node.getSyntaxByTag("", definitionHelper);
+        Set<Production> prods = node.getSyntaxByTag("", context);
         for (Production prod : prods) {
             if (!prod.isSubsort()
                     && !prod.containsAttribute(Attribute.BRACKET.getKey())
                     && !prod.containsAttribute(Attribute.FUNCTION.getKey())
                     && !prod.containsAttribute(Attribute.PREDICATE.getKey())
                     && (!MetaK.isKSort(prod.getSort()) || prod.getSort().equals(KSorts.K))) {
-                Variable KListVar1 = MetaK.getFreshVar(KSorts.KLIST);
-                Variable KListVar2 = MetaK.getFreshVar(KSorts.KLIST);
+                Variable KListVar1 = Variable.getFreshVar(KSorts.KLIST);
+                Variable KListVar2 = Variable.getFreshVar(KSorts.KLIST);
 
                 KList lhsList = new KList();
-                lhsList.add(new KApp(KLabelConstant.of(prod.getKLabel(), definitionHelper), KListVar1));
-                lhsList.add(new KApp(KLabelConstant.of(prod.getKLabel(), definitionHelper), KListVar2));
+                lhsList.add(new KApp(KLabelConstant.of(prod.getKLabel(), context), KListVar1));
+                lhsList.add(new KApp(KLabelConstant.of(prod.getKLabel(), context), KListVar2));
 
                 KList rhsList = new KList();
-                rhsList.add(KApp.of(definitionHelper, new KInjectedLabel(KListVar1)));
-                rhsList.add(KApp.of(definitionHelper, new KInjectedLabel(KListVar2)));
+                rhsList.add(KApp.of(new KInjectedLabel(KListVar1)));
+                rhsList.add(KApp.of(new KInjectedLabel(KListVar2)));
 
                 Term lhs = new KApp(KLabelConstant.KEQ, lhsList);
                 Term rhs = new KApp(KLabelConstant.KLIST_EQUALITY, rhsList);
-                Rule rule = new Rule(lhs, rhs, definitionHelper);
+                Rule rule = new Rule(lhs, rhs, context);
                 rule.addAttribute(Attribute.FUNCTION);
                 retNode.appendModuleItem(rule);
             }
+        }
+
+        /* defer =K to ==K for lexical tokens */
+        for (String sort : context.getTokenSorts()) {
+            KList kList = new KList();
+            kList.add(Variable.getFreshVar(sort));
+            kList.add(Variable.getFreshVar(sort));
+
+            Term lhs = new KApp(KLabelConstant.KEQ, kList);
+            Term rhs = new KApp(KLabelConstant.KEQ_KLABEL, kList);
+            Rule rule = new Rule(lhs, rhs, context);
+            rule.addAttribute(Attribute.FUNCTION);
+            retNode.appendModuleItem(rule);
         }
 
         /*
@@ -183,7 +203,7 @@ public class AddSemanticEquality extends CopyOnWriteTransformer {
         return retNode;
     }
 
-    public AddSemanticEquality(DefinitionHelper definitionHelper) {
-        super("Define semantic equality", definitionHelper);
+    public AddSemanticEquality(Context context) {
+        super("Define semantic equality", context);
     }
 }

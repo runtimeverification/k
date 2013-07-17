@@ -11,13 +11,12 @@ import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.LiterateComment.LiterateCommentType;
 import org.kframework.kil.ProductionItem.ProductionType;
-import org.kframework.kil.loader.Constants;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.*;
 import org.kframework.utils.StringUtil;
 
 public class LatexFilter extends BackendFilter {
-	public LatexFilter(DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public LatexFilter(org.kframework.kil.loader.Context context) {
+		super(context);
 	}
 
 	String endl = System.getProperty("line.separator");
@@ -25,7 +24,7 @@ public class LatexFilter extends BackendFilter {
 	private boolean firstProduction = false;
 	private boolean terminalBefore = false;
 	private Map<String, String> colors = new HashMap<String, String>();
-	private LatexPatternsVisitor patternsVisitor = new LatexPatternsVisitor(definitionHelper);
+	private LatexPatternsVisitor patternsVisitor = new LatexPatternsVisitor(context);
 	private boolean firstAttribute;
 	private boolean hasTitle = false;
 
@@ -64,7 +63,17 @@ public class LatexFilter extends BackendFilter {
 		}
 	}
 
-	@Override
+    @Override
+    public void visit(PriorityExtended node) {
+        return;
+    }
+
+    @Override
+    public void visit(PriorityExtendedAssoc node) {
+        return;
+    }
+
+    @Override
 	public void visit(Module mod) {
 		if (mod.isPredefined())
 			return;
@@ -99,7 +108,7 @@ public class LatexFilter extends BackendFilter {
 				&& patternsVisitor.getPatterns().containsKey(p.getAttribute(Constants.CONS_cons_ATTR))) {
 			String pattern = patternsVisitor.getPatterns().get(p.getAttribute(Constants.CONS_cons_ATTR));
 			int n = 1;
-			LatexFilter termFilter = new LatexFilter(definitionHelper);
+			LatexFilter termFilter = new LatexFilter(context);
 			for (ProductionItem pi : p.getItems()) {
 				if (pi.getType() != ProductionType.TERMINAL) {
 					termFilter.setResult(new StringBuilder());
@@ -121,7 +130,7 @@ public class LatexFilter extends BackendFilter {
 		String terminal = pi.getTerminal();
 		if (terminal.isEmpty())
 			return;
-		if (definitionHelper.isSpecialTerminal(terminal)) {
+		if (context.isSpecialTerminal(terminal)) {
 			result.append(StringUtil.latexify(terminal));
 		} else {
                   if (terminalBefore) result.append("{}");
@@ -180,7 +189,7 @@ public class LatexFilter extends BackendFilter {
 		final boolean parens = wantParens.peek();
 		final boolean hasBR = containsBR(col);
         if (col.isEmpty()) {
-            printEmpty(col.getSort(definitionHelper));
+            printEmpty(col.getSort());
             return;
         }
 		if (hasBR) {
@@ -231,8 +240,8 @@ public class LatexFilter extends BackendFilter {
 		} else {
 			result.append("\\variable");
 		}
-		if (var.getSort(definitionHelper) != null) {
-			result.append("[" + StringUtil.latexify(var.getSort(definitionHelper)) + "]");
+		if (var.getSort() != null) {
+			result.append("[" + StringUtil.latexify(var.getSort()) + "]");
 		}
 		if (!var.getName().equals(MetaK.Constants.anyVarSymbol)) {
 			result.append("{" + makeIndices(makeGreek(StringUtil.latexify(var.getName()))) + "}");
@@ -283,7 +292,7 @@ public class LatexFilter extends BackendFilter {
 	}
 
 	@Override
-	public void visit(Context cxt) {
+	public void visit(org.kframework.kil.Context cxt) {
 		result.append("\\kcontext");
 		result.append("{" + endl);
 		cxt.getBody().accept(this);
@@ -318,7 +327,7 @@ public class LatexFilter extends BackendFilter {
 			super.visit(trm);
 		else {
 			String pattern = getBracketPattern(trm);
-			LatexFilter termFilter = new LatexFilter(definitionHelper);
+			LatexFilter termFilter = new LatexFilter(context);
 			termFilter.getWantParens().push(Boolean.FALSE);
 			trm.getContent().accept(termFilter);
 			pattern = pattern.replace("{#1}", "{" + termFilter.getResult() + "}");
@@ -334,12 +343,12 @@ public class LatexFilter extends BackendFilter {
 	public void visit(TermCons trm) {
 		String pattern = patternsVisitor.getPatterns().get(trm.getCons());
 		if (pattern == null) {
-			Production pr = definitionHelper.conses.get(trm.getCons());
+			Production pr = context.conses.get(trm.getCons());
 			pr.accept(patternsVisitor);
 			pattern = patternsVisitor.getPatterns().get(trm.getCons());
 		}
 		int n = 1;
-		LatexFilter termFilter = new LatexFilter(definitionHelper);
+		LatexFilter termFilter = new LatexFilter(context);
 		for (Term t : trm.getContents()) {
 			termFilter.setResult(new StringBuilder());
 			t.accept(termFilter);
@@ -355,12 +364,12 @@ public class LatexFilter extends BackendFilter {
 
 	@Override
 	public void visit(Constant c) {
-		result.append("\\constant[" + StringUtil.latexify(c.getSort(definitionHelper)) + "]{" + StringUtil.latexify(c.getValue()) + "}");
+		result.append("\\constant[" + StringUtil.latexify(c.getSort()) + "]{" + StringUtil.latexify(c.getValue()) + "}");
 	}
 	
 	@Override
-	public void visit(Builtin c) {
-		result.append("\\constant[" + StringUtil.latexify(c.getSort(definitionHelper)) + "]{" + StringUtil.latexify(c.toString()) + "}");
+	public void visit(Token t) {
+		result.append("\\constant[" + StringUtil.latexify(t.tokenSort()) + "]{" + StringUtil.latexify(t.value()) + "}");
 	}
 
 	@Override
@@ -422,9 +431,9 @@ public class LatexFilter extends BackendFilter {
 	public void visit(Attribute entry) {
 		if (Constants.GENERATED_LOCATION.equals(entry.getLocation()))
 			return;
-		if (definitionHelper.isTagGenerated(entry.getKey()))
+		if (context.isTagGenerated(entry.getKey()))
 			return;
-		if (definitionHelper.isParsingTag(entry.getKey()))
+		if (context.isParsingTag(entry.getKey()))
 			return;
 		if (entry.getKey().equals("latex"))
 			return;

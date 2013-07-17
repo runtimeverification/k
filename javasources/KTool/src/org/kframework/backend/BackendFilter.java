@@ -1,6 +1,6 @@
 package org.kframework.backend;
 
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 
 /**
@@ -12,8 +12,8 @@ import org.kframework.kil.visitors.BasicVisitor;
 public class BackendFilter extends BasicVisitor {
 	protected java.lang.StringBuilder result;
 
-	public BackendFilter(DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public BackendFilter(Context context) {
+		super(context);
 		result = new java.lang.StringBuilder();
 	}
 

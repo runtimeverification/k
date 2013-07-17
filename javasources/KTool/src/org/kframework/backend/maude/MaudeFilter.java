@@ -1,39 +1,43 @@
 package org.kframework.backend.maude;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.kframework.backend.BackendFilter;
+import org.kframework.compile.transformers.AddPredicates;
 import org.kframework.compile.utils.ConfigurationStructure;
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.MaudeHelper;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
+import org.kframework.kil.Collection;
 import org.kframework.kil.ProductionItem.ProductionType;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
-import java.util.HashMap;
-import java.util.LinkedList;
+import com.google.common.collect.ImmutableSet;
+
+import java.util.*;
+import java.util.Map;
 
 public class MaudeFilter extends BackendFilter {
+    private Definition definition;
 	private boolean firstAttribute;
 	ConfigurationStructureMap cfgStr;
 
-	public MaudeFilter(ConfigurationStructureMap cfgStr, DefinitionHelper definitionHelper) {
-		super(definitionHelper);
-		this.cfgStr = cfgStr;
-	}
-
-	public MaudeFilter(DefinitionHelper definitionHelper) {
-		super(definitionHelper);
-		this.cfgStr = null;
+	public MaudeFilter(Context context) {
+		super(context);
+		this.cfgStr = context.getConfigurationStructureMap();
 	}
 
 	@Override
-	public void visit(Definition def) {
-		for (DefinitionItem di : def.getItems()) {
+	public void visit(Definition definition) {
+        // TODO: remove hack for token membership predicates
+        this.definition = definition;
+
+		for (DefinitionItem di : definition.getItems()) {
 			di.accept(this);
 			result.append(" \n");
 		}
@@ -57,10 +61,36 @@ public class MaudeFilter extends BackendFilter {
 			result.append("mod ");
 			result.append(mod.getName());
 			result.append(" is\n");
+
+            // TODO(AndreiS): move declaration of #token in a .maude file
+            result.append("op #token : #String #String -> KLabel .\n");
+
 			for (ModuleItem mi : mod.getItems()) {
 				mi.accept(this);
 				result.append("\n");
 			}
+
+            // TODO(AndreiS): move this in a more approprite place
+            for (String sort : context.getTokenSorts()) {
+                String tokenKItem = "_`(_`)(#token(\"" + sort + "\", V:" + StringBuiltin.SORT_NAME
+                                    + "), .KList)";
+                String sortKItem = "_`(_`)(#_(\"" + sort + "\")" + ", .KList)";
+                String valueKItem = "_`(_`)(#_(V:" + StringBuiltin.SORT_NAME + ")" + ", .KList)";
+                result.append("eq _`(_`)(" + AddPredicates.syntaxPredicate(sort) + ", "
+                              + tokenKItem + ") = _`(_`)(#_(true), .KList) .\n");
+                result.append("eq _`(_`)(#parseToken, _`,`,_(" + sortKItem + ", " + valueKItem
+                              + ")) = " + tokenKItem + " .\n");
+                result.append("eq _`(_`)(#tokenToString, " + tokenKItem + ") = " + valueKItem
+                              + " .\n");
+            }
+
+			for (Map.Entry<String, DataStructureSort> entry : context.getDataStructureSorts().entrySet()) {
+				String lhs = "_`(_`)(" + AddPredicates.syntaxPredicate(entry.getKey()) + ", "
+                           + "_`(_`)(" + entry.getValue().type() + "2KLabel_(V:"
+                           + entry.getValue().type() + "), .KList))";
+				result.append("eq " + lhs + "  = _`(_`)(#_(true), .KList) .\n");
+			}
+
 			result.append("\nendm");
 		}
 	}
@@ -100,7 +130,7 @@ public class MaudeFilter extends BackendFilter {
 						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, p.getFilename(), p.getLocation()));
 					}
 					if (!MaudeHelper.constantSorts.contains(syn.getSort()) || !syn.getSort().toString().equals(KSorts.KLABEL) || !syn.getSort().toString().equals("CellLabel")) {
-						result.append("op ");
+                        result.append("op ");
 						result.append(StringUtil.escapeMaude(operation));
 						result.append(" : -> ");
 						result.append(syn.getSort());
@@ -272,18 +302,36 @@ public class MaudeFilter extends BackendFilter {
 		if (cfgStr == null) return;
 		for (ConfigurationStructure cellStr : cfgStr.values()) {
 			String id = cellStr.id;
-			if (id == MetaK.Constants.generatedCfgAbsTopCellLabel) continue;
+            if (id == MetaK.Constants.generatedCfgAbsTopCellLabel) continue;
+            String cellSort = MetaK.cellSort(id);
+            String cellFragment = MetaK.cellFragment(id);
+            String cellUnit = MetaK.cellUnit(id);
+            if (!cellStr.id.equals("k")) {
+                result.append("  sort " + cellSort +  " .\n");
+            }
+            result.append("  sort " + cellFragment + " .\n");
+            result.append("  subsort " + cellSort + " < " + cellFragment + " .\n");
+            result.append("  op " + cellUnit + " : -> " + cellFragment + " .\n");
+            if (cellStr.multiplicity == Cell.Multiplicity.ANY || cellStr.multiplicity == Cell.Multiplicity.SOME) {
+                result.append(" op __ : " + cellFragment + " " + cellFragment + " -> " + cellFragment + " " +
+                        "[assoc comm id: " + cellUnit + "] .\n");
+            }
+            result.append("  op " + cellFragment + "2KLabel_ : " + cellFragment + " -> KLabel .\n");
+            result.append("  op " + cellSort + "2KLabel_ : " + cellFragment + " -> KLabel .\n");
+
 			String placeHolders = "";
 			String sorts = "";
 			String fragSorts = "";
 			String format = "";
 			Cell cell = cellStr.cell;
 			if (cellStr.sons.isEmpty()) {
-				placeHolders="_";
-				format = "ni ";
-				sorts = KSort.getKSort(cell.getContents().getSort(definitionHelper)).mainSort()
-						.toString();
-				declareCell(id,placeHolders, sorts, format);
+                if (!cellStr.id.equals("k")) {
+                    placeHolders="_";
+                    format = "ni ";
+                    sorts = KSort.getKSort(cell.getContents().getSort()).mainSort()
+                            .toString();
+                    declareCell(id,placeHolders, sorts, cellSort, format);
+                }
 				continue;
 			}
 
@@ -295,25 +343,26 @@ public class MaudeFilter extends BackendFilter {
 				// Decided to declare all sorts as Bags to allow using
 				// cells instead of tuples for tupling purposes.
 
+                String cellName = ((Cell) cCell).getId();
 				switch(((Cell) cCell).getMultiplicity()) {
 					case ONE:
-						sorts += KSorts.BAG_ITEM;
+                        sorts += MetaK.cellSort(cellName);
 						break;
 					default:
-						sorts += KSorts.BAG;
+						sorts += MetaK.cellFragment(cellName);
 				}
-				fragSorts += KSorts.BAG + " ";
+				fragSorts += MetaK.cellFragment(cellName) + " ";
 				sorts += " ";
 			}
-			declareCell(id, placeHolders, sorts, format);
-			declareCell(id+"-fragment",placeHolders,fragSorts, format);
+			declareCell(id, placeHolders, sorts, cellSort, format);
+			declareCell(id+"-fragment",placeHolders,fragSorts, cellFragment, format);
 		}
 
 		// result.append("mb configuration ");
 		// this.visit((Sentence)configuration);
 	}
 
-	private void declareCell(String id, String placeHolders, String sorts, String format) {
+	private void declareCell(String id, String placeHolders, String sorts, String resultSort, String format) {
 		result.append(
 				"  op " +
 						"<" + id + ">" +
@@ -322,7 +371,7 @@ public class MaudeFilter extends BackendFilter {
 						" : " +
 						sorts +
 						" -> " +
-						"BagItem " +
+						resultSort +
 						"[format(b o++" + format + "--nib o)]" +
 						"." +
 						"\n");
@@ -357,23 +406,45 @@ public class MaudeFilter extends BackendFilter {
 
 	@Override
 	public void visit(Variable variable) {
+        if (MetaK.isBuiltinSort(variable.getSort())
+                || context.getDataStructureSorts().containsKey(variable.getSort())) {
+            result.append("_`(_`)(");
+            if (context.getDataStructureSorts().containsKey(variable.getSort())) {
+                result.append(context.dataStructureSortOf(variable.getSort()).type() + "2KLabel_(");
+            } else {
+                result.append("#_(");
+            }
+        }
+
 		if (variable.getName().equals(MetaK.Constants.anyVarSymbol)) {
 			result.append("?");
 		} else {
 			result.append(variable.getName());
 		}
 		result.append(":");
-		result.append(variable.getSort(definitionHelper));
+        if (context.getDataStructureSorts().containsKey(variable.getSort())) {
+            result.append(context.dataStructureSortOf(variable.getSort()).type());
+        } else {
+            result.append(variable.getSort());
+        }
+
+        if (MetaK.isBuiltinSort(variable.getSort())
+                || context.getDataStructureSorts().containsKey(variable.getSort())) {
+            result.append(")");
+            result.append(", ");
+            result.append(".KList");
+            result.append(") ");
+        }
 	}
 
 	@Override
 	public void visit(Empty empty) {
 		String sort = empty.getSort();
-		if (MaudeHelper.basicSorts.contains(sort)) {
+		if (MaudeHelper.basicSorts.contains(sort) || MetaK.isCellFragment(sort)) {
 			result.append(".");
 			result.append(sort);
 		} else {
-			Production prd = definitionHelper.listConses.get(sort);
+			Production prd = context.listConses.get(sort);
 			UserList ul = (UserList) prd.getItems().get(0);
 			result.append(".List`{\"");
 			result.append(ul.getSeparator());
@@ -436,7 +507,7 @@ public class MaudeFilter extends BackendFilter {
 		kapp.getLabel().accept(this);
 		result.append(", ");
 		kapp.getChild().accept(this);
-		result.append(") ");
+		result.append(")");
 	}
 
 	@Override
@@ -447,7 +518,7 @@ public class MaudeFilter extends BackendFilter {
 
 	@Override
 	public void visit(TermCons termCons) {
-		Production pr = definitionHelper.conses.get(termCons.getCons());
+		Production pr = context.conses.get(termCons.getCons());
 		String cons = StringUtil.escapeMaude(pr.getLabel());
 
 		if (pr.containsAttribute("maudeop")) {
@@ -526,35 +597,53 @@ public class MaudeFilter extends BackendFilter {
 
 	@Override
 	public void visit(Constant constant) {
-		if (constant.getSort(definitionHelper).equals("#Id")) {
+        assert false : "dead code";
+		if (constant.getSort().equals("#Id")) {
 			result.append("#id \"");
 		}
 		result.append(constant.getValue());
-		if (constant.getSort(definitionHelper).equals("#Id")) {
+		if (constant.getSort().equals("#Id")) {
 			result.append("\"");
 		}
 	}
 
+	private java.util.Set<String> maudeBuiltinTokenSorts =
+		ImmutableSet.of("#Float", "#LtlFormula");
+
     @Override
-    public void visit(Builtin builtin) {
-        result.append(builtin);
+    public void visit(GenericToken token) {
+        if (maudeBuiltinTokenSorts.contains(token.tokenSort())) {
+            result.append("#_(" + token.value() + ")");
+        } else {
+            result.append(token);
+        }
+    }
+
+    @Override
+    public void visit(StringBuiltin token) {
+        result.append("#_(\"" + StringUtil.escape(token.stringValue()) + "\")");
+    }
+
+    @Override
+    public void visit(Token token) {
+        result.append("#_(" + token.value() + ")");
     }
 
 	@Override
 	public void visit(Collection collection) {
 		if (collection.getContents().size() == 0) {
-			new Empty(collection.getSort(definitionHelper)).accept(this);
+			new Empty(collection.getSort()).accept(this);
 		} else if (collection.getContents().size() == 1) {
 			collection.getContents().get(0).accept(this);
 		} else {
-			String constructor = getMaudeConstructor(collection.getSort(definitionHelper));
+			String constructor = getMaudeConstructor(collection.getSort());
 			result.append(constructor);
 			result.append("(");
 
 			boolean first = true;
 			for (Term term : collection.getContents()) {
 				if (!first) {
-					result.append(",");
+					result.append(", ");
 				} else {
 					first = false;
 				}
@@ -605,6 +694,78 @@ public class MaudeFilter extends BackendFilter {
 	}
 
 	@Override
+	public void visit(DataStructureBuiltin dataStructure) {
+        result.append("_`(_`)(" + dataStructure.sort().type() + "2KLabel_(");
+
+        if (!dataStructure.isEmpty()) {
+            result.append(DataStructureSort.LABELS.get(dataStructure.sort().type()).get(
+                    DataStructureSort.Label.CONSTRUCTOR));
+			result.append("(");
+
+            result.append(DataStructureSort.LABELS.get(dataStructure.sort().type()).get(
+                    DataStructureSort.Label.UNIT));
+
+            if (dataStructure instanceof CollectionBuiltin) {
+                visitCollectionElements((CollectionBuiltin) dataStructure);
+            } else {
+                assert dataStructure instanceof MapBuiltin;
+
+                visitMapElements((MapBuiltin) dataStructure);
+            }
+
+            if (dataStructure.isLHSView()) {
+                result.append(", ");
+                Variable variable = new Variable(
+                        dataStructure.viewBase().getName(),
+                        dataStructure.sort().type());
+                variable.accept(this);
+            }
+
+			result.append(")");
+        } else {
+            result.append(DataStructureSort.LABELS.get(dataStructure.sort().type()).get(
+                    DataStructureSort.Label.UNIT));
+        }
+
+        result.append("), .KList)");
+	}
+
+    private void visitCollectionElements(CollectionBuiltin collection) {
+        for (Term term : collection.elements()) {
+            result.append(", ");
+            result.append(DataStructureSort.LABELS.get(collection.sort().type()).get(
+                    DataStructureSort.Label.ELEMENT));
+            result.append("(");
+            term.accept(this);
+            result.append(")");
+        }
+    }
+
+    private void visitMapElements(MapBuiltin map) {
+        for (Map.Entry<Term, Term> entry : map.elements().entrySet()) {
+            result.append(", ");
+            result.append(DataStructureSort.LABELS.get(map.sort().type()).get(
+                    DataStructureSort.Label.ELEMENT));
+            result.append("(");
+            entry.getKey().accept(this);
+            result.append(", ");
+            entry.getValue().accept(this);
+            result.append(")");
+        }
+    }
+
+    @Override
+    public void visit(CollectionBuiltin collection) {
+        visit((DataStructureBuiltin) collection);
+    }
+
+    @Override
+    public void visit(MapBuiltin map) {
+        visit((DataStructureBuiltin) map);
+    }
+
+
+	@Override
 	public void visit(Hole hole) {
 		result.append("HOLE");
 	}
@@ -617,11 +778,15 @@ public class MaudeFilter extends BackendFilter {
 	@Override
 	public void visit(KInjectedLabel kInjectedLabel) {
 		Term term = kInjectedLabel.getTerm();
-		if (MetaK.isKSort(term.getSort(definitionHelper))) {
+        String sort = term.getSort();
+        if (MetaK.isKSort(sort)) {
 			//result.append(StringUtil.escapeMaude(kInjectedLabel.getInjectedSort(term.getSort())));
-            result.append(kInjectedLabel.getInjectedSort(term.getSort(definitionHelper)));
+            result.append(kInjectedLabel.getInjectedSort(sort));
 			result.append("2KLabel_(");
-		} else {
+		} else if (MetaK.isCellSort(sort)){
+            result.append(sort + "2KLabel_(");
+
+        } else {
 			result.append("#_(");
 		}
 		term.accept(this);
@@ -643,7 +808,7 @@ public class MaudeFilter extends BackendFilter {
 
 	@Override
 	public void visit(KLabel kLabel) {
-		throw new RuntimeException("don't know how to maudify KLabel");
+		throw new RuntimeException("don't know how to maudify KLabel of type" + kLabel.getClass());
 	}
 
 	@Override
@@ -737,6 +902,20 @@ public class MaudeFilter extends BackendFilter {
 	@Override
 	public void visit(BackendTerm term) {
 		result.append(term.getValue());
+	}
+
+	@Override
+	public void visit(Bracket term) {
+		term.getContent().accept(this);
+	}
+
+	public void visit(Builtin term) {
+		throw new RuntimeException("don't know how to maudify Builtin");
+	}
+
+	@Override
+	public void visit(Cast term) {
+		throw new RuntimeException("don't know how to maudify Cast");
 	}
 
 	private static java.util.Map<KSort, String> maudeCollectionConstructors = new HashMap<KSort, String>();

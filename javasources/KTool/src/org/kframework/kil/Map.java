@@ -6,6 +6,8 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
+import aterm.ATermAppl;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -17,6 +19,10 @@ public class Map extends Collection {
 
 	public Map(Element element) {
 		super(element);
+	}
+
+	public Map(ATermAppl atm) {
+		super(atm);
 	}
 
 	public Map(String location, String filename) {
@@ -41,8 +47,8 @@ public class Map extends Collection {
 	}
 
 	@Override
-	public ASTNode accept(Transformer visitor) throws TransformerException {
-		return visitor.transform(this);
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
 	}
 
   @Override

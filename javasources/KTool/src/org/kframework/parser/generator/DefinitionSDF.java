@@ -15,13 +15,13 @@ import org.kframework.kil.Restrictions;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.Subsort;
 import org.kframework.utils.StringUtil;
 
 public class DefinitionSDF {
 
-	public static String getSdfForDefinition(Definition def, DefinitionHelper definitionHelper) {
+	public static String getSdfForDefinition(Definition def, Context context) {
 
 		StringBuilder sdf = new StringBuilder("module Integration\n\n");
 		sdf.append("imports Common\n");
@@ -31,8 +31,8 @@ public class DefinitionSDF {
 		sdf.append("exports\n\n");
 		sdf.append("context-free syntax\n");
 
-		DefinitionSDFVisitor psdfv = new DefinitionSDFVisitor(false, definitionHelper);
-		CollectTerminalsVisitor terminals = new CollectTerminalsVisitor(definitionHelper);
+		DefinitionSDFVisitor psdfv = new DefinitionSDFVisitor(false, context);
+		CollectTerminalsVisitor terminals = new CollectTerminalsVisitor(context);
 		def.accept(psdfv);
 		def.accept(terminals);
 
@@ -142,7 +142,7 @@ public class DefinitionSDF {
 						else if (t.getTerminal().equals("?"))
 							sdf.append("QuestionMarkDz ");
 						else
-							sdf.append("\"" + StringUtil.escapeSDF(t.getTerminal()) + "\" ");
+							sdf.append("\"" + StringUtil.escape(t.getTerminal()) + "\" ");
 					} else if (itm.getType() == ProductionType.SORT) {
 						Sort srt = (Sort) itm;
 						// if we are on the first or last place and this sort is not a list, just print the sort
@@ -173,22 +173,16 @@ public class DefinitionSDF {
 				sdf.append("	VARID  \":" + s.getName() + "\"        -> VariableDz            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Var\")}\n");
 			}
 		}
-		// print variables, HOLEs, cast
+		// print variables, cast
 		sdf.append("\n");
 		for (Sort s : psdfv.userSorts) {
 			if (!s.isBaseSort()) {
-				sdf.append("	\"HOLE\" \":" + s.getName() + "\"		-> VariableDz            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Hole\")}\n");
+				sdf.append("	 K \":" + s.getName() + "\"	-> VariableDz	{cons(\"" + StringUtil.escapeSortName(s.getName()) + "1Cast\")}\n");
+				sdf.append("	 K \"::" + s.getName() + "\"	-> VariableDz	{cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Cast\")}\n");
 			}
 		}
-		sdf.append("\n");
-		for (Sort s : psdfv.userSorts) {
-			if (!s.isBaseSort()) {
-				sdf.append("	 K \":" + s.getName() + "\"	-> K            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "1Cast\")}\n");
-				sdf.append("	 K \"::" + s.getName() + "\"	-> K            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Cast\")}\n");
-			}
-		}
-		sdf.append("	 K \":K\"	-> K            {cons(\"K1Cast\")}\n");
-		sdf.append("	 K \"::K\"	-> K            {cons(\"K12Cast\")}\n");
+		sdf.append("	 K \":K\"	-> VariableDz	{cons(\"K1Cast\")}\n");
+		sdf.append("	 K \"::K\"	-> VariableDz	{cons(\"K12Cast\")}\n");
 
 		sdf.append("\n");
 		sdf.append("	VariableDz -> K\n");
@@ -272,7 +266,7 @@ public class DefinitionSDF {
 		sdf.append("context-free restrictions\n");
 		for (Restrictions r : psdfv.restrictions) {
 			if (r.getTerminal() != null && !r.getTerminal().getTerminal().equals(""))
-				sdf.append("	" + r.getTerminal() + " -/- " + r.getPattern() + "\n");
+				sdf.append("	\"" + StringUtil.escape(r.getTerminal().getTerminal()) + "\" -/- " + r.getPattern() + "\n");
 			else
 				sdf.append("	" + StringUtil.escapeSortName(r.getSort().getName()) + " -/- " + r.getPattern() + "\n");
 		}

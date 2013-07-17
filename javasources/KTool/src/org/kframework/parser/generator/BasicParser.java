@@ -1,7 +1,7 @@
 package org.kframework.parser.generator;
 
 import org.kframework.kil.*;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.basic.KParser;
@@ -41,7 +41,7 @@ public class BasicParser {
 	 * 
 	 * @param filepath
 	 */
-	public void slurp(String fileName, DefinitionHelper definitionHelper) {
+	public void slurp(String fileName, Context context) {
 		moduleItems = new ArrayList<DefinitionItem>();
 		modulesMap = new HashMap<String, Module>();
 		filePaths = new ArrayList<String>();
@@ -52,7 +52,7 @@ public class BasicParser {
 			if (!file.exists())
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1004 + fileName + " given at console.", "", ""));
 
-			slurp2(file, definitionHelper);
+			slurp2(file, context);
 
 			if (autoinclude) {
 				// parse the autoinclude.k file but remember what I parsed to give the correct order at the end
@@ -61,14 +61,15 @@ public class BasicParser {
 
 				file = buildCanonicalPath("autoinclude.k", new File(fileName));
 				if (file == null)
-					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1004 + fileName + " autoimporeted for every definition ", fileName, ""));
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1004 + fileName
+							+ " autoimporeted for every definition ", fileName, ""));
 
-				slurp2(file, definitionHelper);
+				slurp2(file, context);
 				moduleItems.addAll(tempmi);
 			}
 
 			setMainFile(file);
-			definitionHelper.finalizeRequirements();
+			context.finalizeRequirements();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -85,12 +86,12 @@ public class BasicParser {
 		return null;
 	}
 
-	private void slurp2(File file, DefinitionHelper definitionHelper) throws IOException {
+	private void slurp2(File file, Context context) throws IOException {
 		String cannonicalPath = file.getCanonicalPath();
 		if (!filePaths.contains(cannonicalPath)) {
 			filePaths.add(cannonicalPath);
 
-			List<DefinitionItem> defItemList = parseFile(file, definitionHelper);
+			List<DefinitionItem> defItemList = parseFile(file, context);
 
 			// go through every required file
 			for (ASTNode di : defItemList) {
@@ -100,16 +101,17 @@ public class BasicParser {
 					File newFile = buildCanonicalPath(req.getValue(), file);
 
 					if (newFile == null)
-						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1004 + req.getValue(), req.getFilename(), req.getLocation()));
+						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1004 + req.getValue(), req.getFilename(), req
+								.getLocation()));
 
-					slurp2(newFile, definitionHelper);
-					definitionHelper.addFileRequirement(newFile.getCanonicalPath(), file.getCanonicalPath());
+					slurp2(newFile, context);
+					context.addFileRequirement(newFile.getCanonicalPath(), file.getCanonicalPath());
 				}
 			}
 
 			boolean predefined = file.getCanonicalPath().startsWith(KPaths.getKBase(false) + File.separator + "include");
 			if (!predefined)
-				definitionHelper.addFileRequirement(buildCanonicalPath("autoinclude.k", file).getCanonicalPath(), file.getCanonicalPath());
+				context.addFileRequirement(buildCanonicalPath("autoinclude.k", file).getCanonicalPath(), file.getCanonicalPath());
 
 			// add the modules to the modules list and to the map for easy access
 			for (DefinitionItem di : defItemList) {
@@ -125,15 +127,26 @@ public class BasicParser {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	public static List<DefinitionItem> parseFile(File file, DefinitionHelper definitionHelper) {
+	public static List<DefinitionItem> parseFile(File file, Context context) {
 		if (GlobalSettings.verbose)
 			System.out.println("Including file: " + file.getAbsolutePath());
 		String content = FileUtil.getFileContent(file.getAbsolutePath());
+		return parseString(content, file.getAbsolutePath(), context);
+	}
 
+	/**
+	 * Parses a string representing a file with modules in it.
+	 * Returns only the basic parsing AST which contain bubbles instead of rules.
+	 * @param content - the input string.
+	 * @param filename - only for error reporting purposes. Can be empty string.
+	 * @param context - the context for disambiguation purposes.
+	 * @return - a list of DefinitionItems
+	 */
+	@SuppressWarnings("unchecked")
+	public static List<DefinitionItem> parseString(String content, String filename, Context context) {
 		String parsed = KParser.ParseKString(content);
 		Document doc = XmlLoader.getXMLDoc(parsed);
-		XmlLoader.addFilename(doc.getFirstChild(), file.getAbsolutePath());
+		XmlLoader.addFilename(doc.getFirstChild(), filename);
 		try {
 			XmlLoader.reportErrors(doc);
 		} catch (TransformerException e) {
@@ -143,12 +156,14 @@ public class BasicParser {
 		NodeList nl = doc.getFirstChild().getChildNodes();
 		List<DefinitionItem> defItemList = new ArrayList<DefinitionItem>();
 
+		JavaClassesFactory.startConstruction(context);
 		for (int i = 0; i < nl.getLength(); i++) {
 			if (nl.item(i).getNodeType() == Node.ELEMENT_NODE) {
 				Element elm = (Element) nl.item(i);
 				defItemList.add((DefinitionItem) JavaClassesFactory.getTerm(elm));
 			}
 		}
+		JavaClassesFactory.endConstruction();
 		defItemList = (List<DefinitionItem>) BasicParser.relocateComments(defItemList);
 		return defItemList;
 	}

@@ -1,6 +1,7 @@
 package org.kframework.krun;
 
 import org.apache.commons.cli.*;
+import org.kframework.utils.ActualPosixParser;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -51,11 +52,13 @@ public class CommandlineOptions {
 		Option help2 = new Option("?", false, "Display the detailed help message and quit");
 		Option version = new Option("v", "version", false, "Display the version number and quit");
 		Option verbose = new Option("verbose", false, "Display the time each step takes");
+		Option fastKast = new Option("fastKast", false, "Display the time each step takes");
 		
 		options.addOption(help1); getOptionList().add(help1);
 		options.addOption(help2); getOptionList().add(help2);
 		options.addOption(version); getOptionList().add(version);
 		options.addOption(verbose); getOptionList().add(verbose);
+		options.addOption(fastKast); getOptionList().add(fastKast);
 		
 		// Common K options
 		Option pgm = OptionBuilder.hasArg(true).withArgName("FILE").withLongOpt("pgm").withDescription("Name of the program to execute").create();
@@ -168,6 +171,12 @@ public class CommandlineOptions {
 		Option backend = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("backend").withDescription("Specify the krun backend to execute with").create();
 		options.addOption(backend); getOptionList().add(backend);
 
+        Option prove = OptionBuilder.hasArg(true).withArgName("FILE").withLongOpt("prove").withDescription("Prove a set of reachability rules").create();
+        options.addOption(prove); getOptionList().add(prove);
+
+        // java rewrite engine specific options
+        Option no_smt = OptionBuilder.hasArg(false).withLongOpt("no-smt").withDescription("do not use SMT solvers for checking constraints").create();
+        options.addOption(no_smt); getOptionList().add(no_smt);
 	}
 	
 	//create options displayed in the krun debugger help
@@ -185,6 +194,8 @@ public class CommandlineOptions {
 		Option save = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("save").withDescription("Save the debug session to file").create();
 		Option load = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("load").withDescription("Load the debug session from file").create();
 		Option help = OptionBuilder.hasArg(false).withLongOpt("help").withDescription("Display the available commands").create();
+		Option read = OptionBuilder.hasArg(true).withArgName("STRING").withLongOpt("read")
+			.withDescription("Read a string from stdin").create();
 		options.addOption(step); getOptionList().add(step);
 		options.addOption(stepAll); getOptionList().add(stepAll);
 		options.addOption(select); getOptionList().add(select);
@@ -195,11 +206,12 @@ public class CommandlineOptions {
 		options.addOption(abort); getOptionList().add(abort);
 		options.addOption(save); getOptionList().add(save);
 		options.addOption(load); getOptionList().add(load);
+		options.addOption(read); getOptionList().add(read);
 		options.addOption(help); getOptionList().add(help);
 	}
 
 	public CommandLine parse(String[] cmd) {
-		CommandLineParser parser = new PosixParser();
+		CommandLineParser parser = new ActualPosixParser();
 		try {
 			setCommandLine(parser.parse(options, cmd));
 			return getCommandLine();

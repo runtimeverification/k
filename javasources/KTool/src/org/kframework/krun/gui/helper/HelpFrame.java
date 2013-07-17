@@ -8,7 +8,8 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import org.kframework.kil.loader.DefinitionHelper;
+
+import org.kframework.kil.loader.Context;
 
 public class HelpFrame extends JFrame {
 
@@ -19,7 +20,7 @@ public class HelpFrame extends JFrame {
   JScrollPane detailedScroll;
   JSplitPane splitPane;
 
-  public HelpFrame(DefinitionHelper helper) {
+  public HelpFrame(Context helper) {
     this.setForeground(Color.black);
     this.setBackground(Color.lightGray);
     Container cp = this.getContentPane();

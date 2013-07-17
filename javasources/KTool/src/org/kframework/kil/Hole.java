@@ -40,8 +40,8 @@ public class Hole extends Term {
 	}
 
 	@Override
-	public ASTNode accept(Transformer visitor) throws TransformerException {
-		return visitor.transform(this);
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
 	}
 
   @Override
@@ -64,7 +64,7 @@ public class Hole extends Term {
 			return false;
 		Hole hole = (Hole)obj;
 
-		return this.sort.equals(hole.getSort(null));
+		return this.sort.equals(hole.getSort());
 	}
 
 	@Override

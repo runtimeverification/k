@@ -1,7 +1,7 @@
 package org.kframework.compile.utils;
 
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -12,8 +12,8 @@ public class CompilerTransformerStep<T extends ASTNode> extends BasicCompilerSte
 	
 	Transformer t;
 
-	public CompilerTransformerStep(Transformer t, DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public CompilerTransformerStep(Transformer t, Context context) {
+		super(context);
 		this.t = t;
 	}
 

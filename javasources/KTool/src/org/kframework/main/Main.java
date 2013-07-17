@@ -1,10 +1,55 @@
 package org.kframework.main;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 
+import org.kframework.kagreg.KagregFrontEnd;
+import org.kframework.kcheck.KCheckFrontEnd;
 import org.kframework.utils.Error;
+import org.kframework.utils.file.KPaths;
+import org.kframework.utils.general.GlobalSettings;
 
 public class Main {
+
+	/**
+	 * Sets the {@code java.library.path} system property to include the native libraries
+	 * directory for this platform.
+	 */
+	private static void setJavaLibraryPath() {
+		String path = KPaths.getKBase(false) + "/lib/native";
+
+		String arch = System.getProperty("os.arch");
+		if (GlobalSettings.isWindowsOS()) {
+			if (arch.toLowerCase().contains("64"))
+				path += "/cygwin/x64";
+			else
+				path += "/cygwin";
+		} else if (GlobalSettings.isMacOS()) {
+			path += "/macosx";
+		} else if (GlobalSettings.isUnixOS()) {
+			if (arch.toLowerCase().contains("64")) {
+				path += "/linux/x64";
+			} else {
+				path += "/linux";
+			}
+		} else {
+			/* unexpected os */
+			return;
+		}
+
+		System.setProperty("java.library.path", path);
+
+		/* force java to reset the path (dirty hack) */
+		try {
+			Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
+			fieldSysPath.setAccessible(true);
+			fieldSysPath.set(null, null);
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (NoSuchFieldException e) {
+			e.printStackTrace();
+		}
+	}
 
 	/**
 	 * @param args
@@ -13,16 +58,20 @@ public class Main {
 	 * @throws IOException when loadDefinition fails 
 	 */
 	public static void main(String[] args) throws IOException, Exception {
+		setJavaLibraryPath();
+
 		if (args.length >= 1) {
 			String[] args2 = new String[args.length - 1];
 			for (int i = 0; i < args.length - 1; i++)
 				args2[i] = args[i + 1];
 			if (args[0].equals("-kompile")) {
-				KompileFrontEnd.kompile(args2);
+				org.kframework.kompile.KompileFrontEnd.kompile(args2);
 			} else if (args[0].equals("-kagreg")) {
 				KagregFrontEnd.kagreg(args2);
+			} else if (args[0].equals("-kcheck")) {
+				KCheckFrontEnd.kcheck(args2);
 			} else if (args[0].equals("-kast")) {
-				KastFrontEnd.kast(args2);
+				org.kframework.kast.KastFrontEnd.kast(args2);
 			} else if (args[0].equals("-hkcd")) {
 				HKCDFrontEnd.hkcd(args2);
 			} else if (args[0].equals("-krun")) {
@@ -38,9 +87,9 @@ public class Main {
 			} else if (args[0].equals("-kpretty")) {
 				org.kframework.main.KPretty.main(args2);
 			} else {
-				Error.report("The first argument of K3 not recognized. Try -kompile or -kast or -krun or -kpp.");
+				Error.report("The first argument of K3 not recognized. Try -kompile, -kast, -krun or -kpp.");
 			}
 		} else
-			Error.report("There must be a first argument to K3: try -kompile or -kast or -krun or -kpp.");
+			Error.report("There must be a first argument to K3: try -kompile, -kast, -krun or -kpp.");
 	}
 }

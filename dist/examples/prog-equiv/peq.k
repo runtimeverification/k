@@ -190,6 +190,7 @@ module PEQ
                       <condition> true </condition>
                     </goal>
                   </goals>
+		  <success> false </success>
                   <hypos>
                     <hypo multiplicity="*">
                       <patt1>
@@ -227,7 +228,7 @@ module PEQ
             |  "lbldStmt" "(" Id "," K ")"    // event signalling a labelled
                                               // statement
 
-            |  "checkHypo" "(" K "," Map "," K "," Map "," Bag ")"
+            |  "checkHypo" "(" K "," Map "," K "," Map "," HyposCellFragment ")"
                // for checking hypotheses one by one 
 
             |  "checkCond" "(" K "," K ")"  // check the conditions of the
@@ -547,15 +548,7 @@ module PEQ
 
   rule <k> storeSyns(notBool(F:K), B:K, V:Bool) => . ...</k>
 
-/*@
-  The special bag \texttt{success} is used for removing goals.
-*/
-
-  syntax Bag ::= "success"
-
-  rule success success => success 
-
-//  rule <T> <goals> success </goals> B:Bag </T> => success
+//  rule <T>... <goals> .Bag </goals> <success> true </success> ...</T> => success
 
 /*@
   The next rule implements the basic entailment relation. The current version
@@ -577,10 +570,11 @@ module PEQ
          <condition> F:K </condition>
        </goal>
        =>
-       success)
+       .)
+       <success> _ => true </success>
        <observers> Obs:List </observers>
-       when eqObs(<env> Env </env> 
-                  <env> Env' </env>
+       when eqObs(<env> Env </env>, 
+                  <env> Env' </env>,
                   <observers> Obs </observers>, F)
             ==K true
        [transition]
@@ -592,24 +586,24 @@ module PEQ
   called.
 */
 
-  syntax Bool ::= "eqObs" "(" Bag "," K ")" [function]
+  syntax Bool ::= "eqObs" "(" EnvCellSort "," EnvCellSort "," ObserversCellSort "," K ")" [function]
 
-  rule eqObs(<env> _ </env>
-             <env> _ </env>
+  rule eqObs(<env> _ </env>,
+             <env> _ </env>,
              <observers> .List </observers>, F:K)
        =>
        true
 
 
-  rule eqObs(<env> Env1:Map </env>
-             <env> Env2:Map </env>
+  rule eqObs(<env> Env1:Map </env>,
+             <env> Env2:Map </env>,
              <observers> ListItem(allObs) </observers>, F:K)
        =>
        eqEnv(Env1, Env2)
 
 
-  rule eqObs( <env>... X:Id |-> V1:Int ...</env>
-              <env>... X    |-> V2:Int ...</env>
+  rule eqObs( <env>... X:Id |-> V1:Int ...</env>,
+              <env>... X    |-> V2:Int ...</env>,
               <observers> ListItem(X) => . ...</observers>, F:K )
        when checkSat(filter(F andBool notBool(V1 ==Int V2))) ==K "unsat" 
 // when V1 ==K V2
@@ -835,8 +829,8 @@ module PEQ
          <condition> F:K </condition>
        ...</goal> 
        <observers> Obs:List </observers> 
-       when (eqObs(<env> Env1 </env> 
-                   <env> Env2 </env> 
+       when (eqObs(<env> Env1 </env>, 
+                   <env> Env2 </env>,
                    <observers> Obs </observers>, F) ==K true)
        [transition]
 
@@ -951,7 +945,8 @@ module PEQ
          <condition> F:K </condition>
        </goal>
        =>
-       success)
+       .)
+       <success> _ => true </success>
        when checkSat(filter(F andBool notBool(SF'))) ==K "unsat"
 
 /*@
@@ -1090,8 +1085,8 @@ module PEQ
        <observers> Obs:List </observers>
        when
        (L1 =/=K L2) orBool
-       (eqObs(<env> Env1 </env> 
-             <env> Env2 </env> 
+       (eqObs(<env> Env1 </env>, 
+             <env> Env2 </env>, 
              <observers> Obs </observers>, F) =/=K true)
        [transition]
 

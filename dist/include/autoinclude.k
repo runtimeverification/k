@@ -1,6 +1,6 @@
 require "k-prelude.k"
 require "builtins/symbolic-k.k"
-require "modules/uris.k"
+require "io/uris.k"
 // require "builtins/smt.k"
 // require "modules/substitution.k"
 

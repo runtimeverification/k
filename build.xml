@@ -59,13 +59,13 @@
 
 	<target name="clean-java">
 		<delete dir="${javasources}/KTool/bin" />
-		<delete file="${javasources}/../dist/bin/java/k3.jar" />
-		<delete file="${javasources}/../dist/bin/version.txt" />
+		<delete file="${javasources}/../dist/lib/java/k3.jar" />
+		<delete file="${javasources}/../dist/lib/version.txt" />
 		<delete dir="./k/" />
 	</target>
 
 	<target name="makeversion">
-		<property name="version.file" value="./dist/bin/version.txt" />
+		<property name="version.file" value="./dist/lib/version.txt" />
 
 		<exec executable="svn" output="${version.file}">
 			<arg value="info" />
@@ -86,7 +86,7 @@
 				<equals arg1="${version}" arg2="latest" />
 			</not>
 		</condition>
-		<echo message="K-framework ${k-version}.${line.separator}" file="${version.file}" />
+		<echo message="K-framework ${k-version}, branch v3.2.${line.separator}" file="${version.file}" />
 		<echo message="SVN Revision: ${info.entry(revision)}${line.separator}" file="${version.file}" append="true" />
 		<echo message="Build date: ${date}${line.separator}" file="${version.file}" append="true" />
 	</target>
@@ -145,7 +145,12 @@
 	<property name="config" value="./tests/config.xml" />
 	<target name="test" depends="build">
 		<ant antfile="build.xml" dir="./tests/tools/Testing">
-			<property name="cfg" value="${config}" />
+			<property name="cfg" location="${config}" />
+		</ant>
+	</target>
+	<target name="test-clean">
+		<ant antfile="build.xml" dir="./tests/tools/Testing" target="clean">
+		  <property name="cfg" value="${config}" />
 		</ant>
 	</target>
 </project>

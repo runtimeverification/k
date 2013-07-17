@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="strategoxt">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/dist/bin/java/strategoxt.jar!/" />
+      <root url="jar://$PROJECT_DIR$/dist/lib/java/strategoxt.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

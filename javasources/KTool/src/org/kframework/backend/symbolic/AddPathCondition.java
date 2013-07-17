@@ -11,7 +11,6 @@ import org.kframework.kil.Attributes;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.KApp;
-import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.Rewrite;
@@ -19,7 +18,7 @@ import org.kframework.kil.Rule;
 import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.general.GlobalSettings;
@@ -34,8 +33,8 @@ import org.kframework.utils.general.GlobalSettings;
  */
 public class AddPathCondition extends CopyOnWriteTransformer {
 
-    public AddPathCondition(DefinitionHelper definitionHelper) {
-        super("Add Path Condition to each rule", definitionHelper);
+    public AddPathCondition(Context context) {
+        super("Add Path Condition to each rule", context);
     }
 
     @Override
@@ -58,19 +57,19 @@ public class AddPathCondition extends CopyOnWriteTransformer {
             return node;
 
         Term condition = node.getCondition();
-        Term originalCondition = condition.shallowCopy();
-        CollapseAndBoolTransformer cnft = new CollapseAndBoolTransformer(definitionHelper);
+//        Term originalCondition = condition.shallowCopy();
+        CollapseAndBoolTransformer cnft = new CollapseAndBoolTransformer(context);
         condition = (Term) node.getCondition().accept(cnft);
 
-        ConditionTransformer ct = new ConditionTransformer(definitionHelper);
-        condition = (Term) node.getCondition().accept(ct);
-
+        ConditionTransformer ct = new ConditionTransformer(context);
+        condition = (Term) condition.accept(ct);
+        
         if (node.getBody() instanceof Rewrite) {
             Rewrite rew = (Rewrite) node.getBody();
 
             // variable holding the formula
-            Variable phi = MetaK.getFreshVar("K");
-
+            Variable phi = Variable.getFreshVar("K");
+            
             // create lhs path condition cell
             Cell leftCell = new Cell();
             leftCell.setLabel(MetaK.Constants.pathCondition);
@@ -83,7 +82,6 @@ public class AddPathCondition extends CopyOnWriteTransformer {
             if (left instanceof Cell) {
                 left = AddConditionToConfig.addSubcellToCell((Cell) left, leftCell);
             }
-
 
             // create rhs path condition cell
             Term right = rew.getRight();
@@ -103,30 +101,28 @@ public class AddPathCondition extends CopyOnWriteTransformer {
             if (right instanceof Cell) {
                 right = AddConditionToConfig.addSubcellToCell((Cell) right, rightCell);
             }
-
+            
+            Attributes atts = node.getAttributes();
             Term cond = condition;
             if (!GlobalSettings.NOSMT) {
                 List<Term> myList = new ArrayList<Term>();
                 myList.add(condition);
-                myList.add(checkSat(pathCondition));
-                cond = new KApp(KLabelConstant.ANDBOOL_KLABEL, new KList(myList));
-            }else {
-            	cond = originalCondition;
+                myList.add(checkSat(pathCondition, context));
+                if (!(pathCondition instanceof Variable)){
+                    cond = new KApp(KLabelConstant.ANDBOOL_KLABEL, new KList(myList));
+                    // add transition attribute
+                  List<Attribute> attrs = node.getAttributes().getContents();
+                  // bad practice
+                  attrs.add(new Attribute("transition", ""));
+
+                  atts = node.getAttributes().shallowCopy();
+                  atts.setContents(attrs);
+                }
             }
 
-            // add transition attribute
-//            List<Attribute> attrs = node.getAttributes().getContents();
-            // bad practice
- //           attrs.add(new Attribute("transition", ""));
-
-   //         Attributes atts = node.getAttributes().shallowCopy();
-   //         atts.setContents(attrs);
-
-
-            // re-construct the rule
             node = node.shallowCopy();
-            node.setBody(new Rewrite(left, right, definitionHelper));
-//            node.setAttributes(atts);
+            node.setBody(new Rewrite(left, right, context));
+            node.setAttributes(atts);
             node.setCondition(cond);
         }
 
@@ -146,10 +142,11 @@ public class AddPathCondition extends CopyOnWriteTransformer {
         return and;
     }
 
-    private Term checkSat(Term pathCondition) {
+    public static Term checkSat(Term pathCondition, Context context) {
         // checkSat(pathCondition) =/=K # "unsat"(.KList)
-        KApp unsat = KApp.of(definitionHelper, new KInjectedLabel(StringBuiltin.of("unsat")));
-        KApp checkSat = KApp.of(definitionHelper, KLabelConstant.of("'checkSat", definitionHelper), pathCondition);
-        return KApp.of(definitionHelper, KLabelConstant.KNEQ_KLABEL, checkSat, unsat);
+        KApp unsat = StringBuiltin.kAppOf("unsat");
+        KApp checkSat = KApp.of(KLabelConstant.of("'checkSat", context), pathCondition);
+        return KApp.of(KLabelConstant.KNEQ_KLABEL, checkSat, unsat);
+//        return KApp.of(KLabelConstant.KEQ_KLABEL, checkSat, StringBuiltin.kAppOf("sat");
     }
 }

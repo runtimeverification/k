@@ -1,10 +1,12 @@
 package org.kframework.kil;
 
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.matchers.Matcher;
+import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
+
+import aterm.ATermAppl;
 
 /**
  * Represents a <br />
@@ -20,6 +22,10 @@ public class TermComment extends Term {
 		super(termComment);
 	}
 
+	public TermComment(ATermAppl element) {
+		super(element);
+	}
+
 	@Override
 	public String toString() {
 		return "<br />";
@@ -31,8 +37,8 @@ public class TermComment extends Term {
 	}
 
 	@Override
-	public ASTNode accept(Transformer visitor) throws TransformerException {
-		return visitor.transform(this);
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
 	}
 
 	@Override
@@ -45,7 +51,7 @@ public class TermComment extends Term {
 		return new TermComment(this);
 	}
 
-        @Override
+	@Override
 	public int hashCode() {
 		return 53;
 	}

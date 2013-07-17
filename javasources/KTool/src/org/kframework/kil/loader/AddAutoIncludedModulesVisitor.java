@@ -10,8 +10,8 @@ import org.kframework.parser.generator.CollectIncludesVisitor;
 
 public class AddAutoIncludedModulesVisitor extends BasicVisitor {
 
-	public AddAutoIncludedModulesVisitor(DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public AddAutoIncludedModulesVisitor(Context context) {
+		super(context);
 	}
 
 	@Override
@@ -21,7 +21,7 @@ public class AddAutoIncludedModulesVisitor extends BasicVisitor {
 		for (Entry<String, Module> e : def.getModulesMap().entrySet()) {
 			Module m = e.getValue();
 			if (!m.isPredefined()) {
-				CollectIncludesVisitor getIncludes = new CollectIncludesVisitor(definitionHelper);
+				CollectIncludesVisitor getIncludes = new CollectIncludesVisitor(context);
 				m.accept(getIncludes);
 				if (!getIncludes.getImportList().contains(importMod))
 					m.getItems().add(0, importMod);

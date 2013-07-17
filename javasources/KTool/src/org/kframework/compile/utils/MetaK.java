@@ -5,12 +5,12 @@ import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Collection;
 import org.kframework.kil.Map;
 import org.kframework.kil.ProductionItem.ProductionType;
-import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.Visitable;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -22,15 +22,14 @@ import java.util.Set;
 
 public class MetaK {
 
-	private static final String cellSort = "CellSort";
-	private static final String cellFragment = "CellFragment";
-	public static final String fragment = "-fragment";
+	public static final String cellSort = "CellSort";
+	public static final String cellFragment = "CellFragment";
 
-	public static Term incrementCondition(Term condition, Term kresultCnd, DefinitionHelper definitionHelper) {
+	public static Term incrementCondition(Term condition, Term kresultCnd, org.kframework.kil.loader.Context context) {
 		if (condition == null) {
 			return kresultCnd;
 		}
-		return KApp.of(definitionHelper, KLabelConstant.ANDBOOL_KLABEL, condition, kresultCnd);
+		return KApp.of(KLabelConstant.ANDBOOL_KLABEL, condition, kresultCnd);
 	}
 
 	public static boolean isCellSort(String bigSort) {
@@ -38,15 +37,21 @@ public class MetaK {
 				||bigSort.endsWith(cellFragment));
 	}
 
-	public static String getCellSort2(String sort) {
-		sort = sort.substring(0,1).toLowerCase() + sort.substring(1);
-		if (sort.endsWith(cellSort)) {
-			return sort.substring(0, sort.length() - cellSort.length());
-		} else {
-			return sort.substring(0, sort.length() - cellFragment.length())
-					+ "-fragment";
-		}
+	public static boolean isCellFragment(String bigSort) {
+		return (bigSort.endsWith(cellFragment));
 	}
+
+    public static String cellSort(String cellName) {
+        return StringUtil.makeProper(cellName) + cellSort;
+    }
+
+    public static String cellFragment(String cellName) {
+        return StringUtil.makeProper(cellName) + cellFragment;
+    }
+
+    public static String cellUnit(String cellName) {
+        return "." + cellFragment(cellName);
+    }
 
 	public static class Constants {
 		public static final String anyVarSymbol = "_";
@@ -60,8 +65,6 @@ public class MetaK {
 		public static final String generatedCfgAbsTopCellLabel =
 				"___CONTEXT_ABSTRACTION_TOP_CELL___";
 	}
-
-	static int nextVarId = 0;
 
 	public static Set<String> kModules = new HashSet<String>();
 	static {
@@ -92,27 +95,17 @@ public class MetaK {
 		return key.startsWith("#");
 	}
 
-	public static Set<Variable> getVariables(Visitable node, DefinitionHelper definitionHelper) {
-		final Set<Variable> result = new HashSet<Variable>();
-		node.accept(new BasicVisitor(definitionHelper) {
-			@Override
-			public void visit(Variable node) {
-				result.add(node);
-			}
-		});
-		return result;
-	}
-
-	public static Definition setConfiguration(Definition node, DefinitionHelper definitionHelper, final Configuration conf) {
+	public static Definition setConfiguration(Definition node, org.kframework.kil.loader.Context context, final Configuration conf) {
 		try {
-			return (Definition) node.accept(new CopyOnWriteTransformer("Configuration setter", definitionHelper) {
+			return (Definition) node.accept(new CopyOnWriteTransformer("Configuration setter",
+                    context) {
 				@Override
 				public ASTNode transform(Configuration node) {
 					return conf;
 				}
 
 				@Override
-				public ASTNode transform(Context node) {
+				public ASTNode transform(org.kframework.kil.Context node) {
 					return node;
 				}
 
@@ -132,16 +125,16 @@ public class MetaK {
 		return node;
 	}
 
-	public static Configuration getConfiguration(Definition node, DefinitionHelper definitionHelper) {
+	public static Configuration getConfiguration(Definition node, org.kframework.kil.loader.Context context) {
 		final List<Configuration> result = new LinkedList<Configuration>();
-		node.accept(new BasicVisitor(definitionHelper) {
+		node.accept(new BasicVisitor(context) {
 			@Override
 			public void visit(Configuration node) {
 				result.add(node);
 			}
 
 			@Override
-			public void visit(Context node) {
+			public void visit(org.kframework.kil.Context node) {
 				return;
 			}
 
@@ -162,8 +155,8 @@ public class MetaK {
 		return result.get(0);
 	}
 
-	public static Term defaultTerm(Term v, DefinitionHelper definitionHelper) {
-		String sort = v.getSort(definitionHelper);
+	public static Term defaultTerm(Term v, org.kframework.kil.loader.Context context) {
+		String sort = v.getSort();
 		KSort ksort = KSort.getKSort(sort).mainSort();
 		if (ksort.isDefaultable())
 			return new Empty(ksort.toString());
@@ -191,8 +184,8 @@ public class MetaK {
 		return false;
 	}
 
-	public static Term kWrap(Term t) {
-		return wrap(t, "k", Ellipses.RIGHT);
+	public static Term kWrap(Term t, String komputationCellName) {
+		return wrap(t, komputationCellName, Ellipses.RIGHT);
 	}
 
 	public static Term wrap(Term t, String label, Ellipses ellipses) {
@@ -213,10 +206,10 @@ public class MetaK {
 		return v;
 	}
 
-	public static int countRewrites(Term t, DefinitionHelper definitionHelper) {
+	public static int countRewrites(Term t, org.kframework.kil.loader.Context context) {
 		final List<Integer> count = new ArrayList<Integer>();
 		count.add(0);
-		Visitor countVisitor = new BasicVisitor(definitionHelper) {
+		Visitor countVisitor = new BasicVisitor(context) {
 			@Override public void visit(Rewrite rewrite) {
 				count.set(0, count.get(0) + 1);
 				super.visit(rewrite);
@@ -227,8 +220,22 @@ public class MetaK {
 		return count.get(0);
 	}
 
-	public static boolean hasCell(Term t, DefinitionHelper definitionHelper) {
-		Visitor cellFinder = new BasicVisitor(definitionHelper) {
+	public static int countHoles(Term t, org.kframework.kil.loader.Context context) {
+		final List<Integer> count = new ArrayList<Integer>();
+		count.add(0);
+		Visitor countVisitor = new BasicVisitor(context) {
+			@Override public void visit(Hole hole) {
+				count.set(0, count.get(0) + 1);
+				super.visit(hole);
+			}
+		};
+
+		t.accept(countVisitor);
+		return count.get(0);
+	}
+
+	public static boolean hasCell(Term t, org.kframework.kil.loader.Context context) {
+		Visitor cellFinder = new BasicVisitor(context) {
 			@Override
 			public void visit(KSequence node) {
 				return;
@@ -298,48 +305,42 @@ public class MetaK {
 		return false;
 	}
 
-	public static Variable getFreshVar(String sort) {
-		return new Variable("GeneratedFreshVar" + nextVarId++, sort);
-	}
-
-	public static Term getTerm(Production prod, DefinitionHelper definitionHelper) {
+    public static Term getTerm(Production prod, org.kframework.kil.loader.Context context) {
 		if (prod.isSubsort()) {
-			final Variable freshVar = getFreshVar(prod.getItems().get(0).toString());
+			final Variable freshVar = Variable.getFreshVar(prod.getItems().get(0).toString());
 			if (prod.containsAttribute("klabel")) {
-				return KApp.of(definitionHelper, KLabelConstant.of(prod.getKLabel(), definitionHelper), freshVar);
+				return KApp.of(KLabelConstant.of(prod.getKLabel(), context), freshVar);
 			}
 			return freshVar;
 		}
 		if (prod.isConstant()) {
             String terminal = ((Terminal) prod.getItems().get(0)).getTerminal();
             if (prod.getSort().equals(KSorts.KLABEL)) {
-                return KLabelConstant.of(terminal, definitionHelper);
-            } else if (prod.getSort().equals("#Bool")) {
-                return BoolBuiltin.of(terminal);
-            } else if (prod.getSort().equals("#Int")) {
-                return IntBuiltin.of(terminal);
-            } else if (prod.getSort().equals("#Float")) {
-                return FloatBuiltin.of(terminal);
-            } else if (prod.getSort().equals("#String")) {
-                return StringBuiltin.of(terminal);
+                return KLabelConstant.of(terminal, context);
+            } else if (prod.getSort().equals(BoolBuiltin.SORT_NAME)) {
+                return BoolBuiltin.kAppOf(terminal);
+            } else if (prod.getSort().equals(IntBuiltin.SORT_NAME)) {
+                return IntBuiltin.kAppOf(terminal);
+            } else if (prod.getSort().equals(StringBuiltin.SORT_NAME)) {
+                return StringBuiltin.kAppOf(terminal);
             } else {
-			    return new Constant(prod.getSort(), terminal);
+			    return GenericToken.kAppOf(prod.getSort(), terminal);
             }
         }
 		if (prod.isLexical()) {
-			return KApp.of(definitionHelper, KLabelConstant.of("#token", definitionHelper),
-                           StringBuiltin.of(prod.getSort()),
-                           getFreshVar("String"));
+			return KApp.of(KLabelConstant.of("#token", context),
+                           StringBuiltin.kAppOf(prod.getSort()),
+                           Variable.getFreshVar("String"));
 		}
-		TermCons t = new TermCons(prod.getSort(), prod.getCons());
+		TermCons t = new TermCons(prod.getSort(), prod.getCons(), context);
 		if (prod.isListDecl()) {
-			t.getContents().add(getFreshVar(((UserList) prod.getItems().get(0)).getSort()));
-			t.getContents().add(getFreshVar(prod.getSort()));
+			t.getContents().add(Variable.getFreshVar(((UserList) prod.getItems().get(0)).getSort()));
+			t.getContents().add(Variable.getFreshVar(prod.getSort()));
 			return t;
 		}
 		for (ProductionItem item : prod.getItems()) {
 			if (item.getType() == ProductionType.SORT) {
-				t.getContents().add(getFreshVar(((Sort) item).getName()));
+				t.getContents().add(Variable.getFreshVar(((Sort) item).getName()));
 			}
 		}
 		return t;
@@ -350,21 +351,29 @@ public class MetaK {
 	}
 
 	public static boolean isBuiltinSort(String sort) {
-		return sort.startsWith("#");
-		// return builtinSorts.contains(sort);
+        /* TODO: replace with a proper table of builtins */
+		return sort.equals(BoolBuiltin.SORT_NAME)
+               || sort.equals(IntBuiltin.SORT_NAME)
+               || sort.equals(FloatBuiltin.SORT_NAME)
+               || sort.equals(StringBuiltin.SORT_NAME)
+               /* LTL builtin sorts */
+               || sort.equals("#LtlFormula")
+               || sort.equals("#Prop")
+               || sort.equals("#ModelCheckerState")
+               || sort.equals("#ModelCheckResult");
 	}
 
 	public static boolean isComputationSort(String sort) {
-		return ("K".equals(sort) || !isKSort(sort));
+		return sort.equals(KSorts.K) || sort.equals(KSorts.KITEM) || !MetaK.isKSort(sort);
 	}
 
 	public static String getListUnitLabel(String sep) {
 	    return  "'.List{\"" + sep + "\"}";
     }
 
-	public static List<Cell> getTopCells(Term t, DefinitionHelper definitionHelper) {
+	public static List<Cell> getTopCells(Term t, org.kframework.kil.loader.Context context) {
 		final List<Cell> cells = new ArrayList<Cell>();
-		t.accept(new BasicVisitor(definitionHelper) {
+		t.accept(new BasicVisitor(context) {
 			@Override
 			public void visit(Cell node) {
 				cells.add(node);
@@ -373,9 +382,9 @@ public class MetaK {
 		return cells;
 	}
 
-	public static List<String> getAllCellLabels(Term t, DefinitionHelper definitionHelper) {
+	public static List<String> getAllCellLabels(Term t, org.kframework.kil.loader.Context context) {
 		final List<String> cells = new ArrayList<String>();
-		t.accept(new BasicVisitor(definitionHelper) {
+		t.accept(new BasicVisitor(context) {
 			@Override
 			public void visit(Cell node) {
 				cells.add(node.getLabel());
@@ -405,8 +414,8 @@ public class MetaK {
 	}
 
 
-	public static Term fillHole(Term t, final Term replacement, DefinitionHelper definitionHelper) {
-		CopyOnWriteTransformer holeFiller = new CopyOnWriteTransformer("Hole Filling", definitionHelper) {
+	public static Term fillHole(Term t, final Term replacement, org.kframework.kil.loader.Context context) {
+		CopyOnWriteTransformer holeFiller = new CopyOnWriteTransformer("Hole Filling", context) {
 			@Override
 			public ASTNode transform(Hole node) {
 				return replacement;
@@ -434,9 +443,9 @@ public class MetaK {
 		return false;
 	}
 
-	public static Term getHoleReplacement(Term t, DefinitionHelper definitionHelper) {
+	public static Term getHoleReplacement(Term t, org.kframework.kil.loader.Context context) {
 		final List<Term> result = new ArrayList<Term>();
-		Visitor holeReplacementFinder = new BasicVisitor(definitionHelper) {
+		Visitor holeReplacementFinder = new BasicVisitor(context) {
 			@Override
 			public void visit(Rewrite node) {
 				final Term left = node.getLeft();

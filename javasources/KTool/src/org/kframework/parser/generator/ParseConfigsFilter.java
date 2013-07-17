@@ -3,11 +3,13 @@ package org.kframework.parser.generator;
 import org.kframework.compile.checks.CheckListOfKDeprecation;
 import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Configuration;
 import org.kframework.kil.Module;
+import org.kframework.kil.Sentence;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.loader.CollectStartSymbolPgmVisitor;
 import org.kframework.kil.loader.Constants;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -27,29 +29,36 @@ import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
 import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
 import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
 import org.kframework.parser.concrete.disambiguate.VariableTypeInferenceFilter;
+import org.kframework.parser.utils.Sglr;
+import org.kframework.utils.Stopwatch;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.XmlLoader;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
-import org.spoofax.interpreter.terms.IStrategoAppl;
-import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 public class ParseConfigsFilter extends BasicTransformer {
-	public ParseConfigsFilter(DefinitionHelper definitionHelper) {
-		super("Parse Configurations", definitionHelper);
+	public ParseConfigsFilter(Context context) {
+		super("Parse Configurations", context);
 	}
 
+	public ParseConfigsFilter(Context context, boolean checkInclusion) {
+		super("Parse Configurations", context);
+		this.checkInclusion = checkInclusion;
+	}
+
+	boolean checkInclusion = true;
 	String localModule = null;
 
 	@Override
 	public ASTNode transform(Module m) throws TransformerException {
 		localModule = m.getName();
 		ASTNode rez = super.transform(m);
-		rez.accept(new CollectStartSymbolPgmVisitor(definitionHelper));
+		rez.accept(new CollectStartSymbolPgmVisitor(context));
 		return rez;
 	}
 
@@ -57,44 +66,62 @@ public class ParseConfigsFilter extends BasicTransformer {
 		if (ss.getType().equals(Constants.CONFIG)) {
 			try {
 				ASTNode config = null;
-				if (!GlobalSettings.testFactory) {
-					String parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
+				if (GlobalSettings.fastKast) {
+					// TODO(RaduM): load directly from ATerms
+					Sentence st = (Sentence) Sglr.run_sglri(context.dotk.getAbsolutePath() + "/def/Concrete.tbl", "CondSentence", ss.getContent(), ss.getFilename());
+					config = new Configuration(st);
+					int startLine = StringUtil.getStartLineFromLocation(ss.getLocation());
+					int startCol = StringUtil.getStartColFromLocation(ss.getLocation());
+					((Sentence) config).accept(new UpdateLocationVisitor(context, startLine, startCol));
+					((Sentence) config).setAttributes(ss.getAttributes());
+				} else {
+					String parsed = null;
+					if (ss.getAttributes().containsAttribute("kore")) {
+						Stopwatch sww = new Stopwatch();
+						parsed = org.kframework.parser.concrete.KParser.ParseKoreString(ss.getContent());
+						if (GlobalSettings.verbose)
+							System.out.println("Parsing with Kore: " + ss.getFilename() + ":" + ss.getLocation() + " - " + sww.getTotalMilliseconds());
+					} else
+						parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
 					Document doc = XmlLoader.getXMLDoc(parsed);
 
 					// replace the old xml node with the newly parsed sentence
 					Node xmlTerm = doc.getFirstChild().getFirstChild().getNextSibling();
 					XmlLoader.updateLocation(xmlTerm, XmlLoader.getLocNumber(ss.getLocation(), 0), XmlLoader.getLocNumber(ss.getLocation(), 1));
 					XmlLoader.addFilename(xmlTerm, ss.getFilename());
-					XmlLoader.reportErrors(doc, "configuration");
+					XmlLoader.reportErrors(doc, ss.getType());
 
-					config = JavaClassesFactory.getTerm((Element) xmlTerm);
-				} else {
-					IStrategoTerm parsed = org.kframework.parser.concrete.KParser.ParseKConfigStringAst(ss.getContent());
-					config = JavaClassesFactory.getTerm((IStrategoAppl) parsed);
+					Sentence st = (Sentence) JavaClassesFactory.getTerm((Element) xmlTerm);
+					config = new Configuration(st);
+					assert st.getLabel().equals(""); // labels should have been parsed in Basic Parsing
+					st.setLabel(ss.getLabel());
+					//assert st.getAttributes() == null || st.getAttributes().isEmpty(); // attributes should have been parsed in Basic Parsing
+					st.setAttributes(ss.getAttributes());
 				}
 
-				new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation(definitionHelper), definitionHelper).check(config);
+				new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation(context), context).check(config);
 				// disambiguate configs
-				config = config.accept(new SentenceVariablesFilter(definitionHelper));
-				config = config.accept(new CellEndLabelFilter(definitionHelper));
-				config = config.accept(new InclusionFilter(localModule, definitionHelper));
+				config = config.accept(new SentenceVariablesFilter(context));
+				config = config.accept(new CellEndLabelFilter(context));
+				if (checkInclusion)
+					config = config.accept(new InclusionFilter(localModule, context));
 				// config = config.accept(new CellTypesFilter()); not the case on configs
 				// config = config.accept(new CorrectRewritePriorityFilter());
-				config = config.accept(new CorrectKSeqFilter(definitionHelper));
-				config = config.accept(new CorrectCastPriorityFilter(definitionHelper));
+				config = config.accept(new CorrectKSeqFilter(context));
+				config = config.accept(new CorrectCastPriorityFilter(context));
 				// config = config.accept(new CheckBinaryPrecedenceFilter());
-				config = config.accept(new VariableTypeInferenceFilter(definitionHelper));
-				config = config.accept(new AmbDuplicateFilter(definitionHelper));
-				config = config.accept(new TypeSystemFilter(definitionHelper));
-				config = config.accept(new PriorityFilter(definitionHelper));
-				config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(definitionHelper), definitionHelper));
-				config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(definitionHelper), definitionHelper));
-				config = config.accept(new TypeInferenceSupremumFilter(definitionHelper));
-				config = config.accept(new PreferAvoidFilter(definitionHelper));
-				config = config.accept(new FlattenListsFilter(definitionHelper));
-				config = config.accept(new AmbDuplicateFilter(definitionHelper));
+				config = config.accept(new VariableTypeInferenceFilter(context));
+				config = config.accept(new AmbDuplicateFilter(context));
+				config = config.accept(new TypeSystemFilter(context));
+				config = config.accept(new PriorityFilter(context));
+				config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context));
+				config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context));
+				config = config.accept(new TypeInferenceSupremumFilter(context));
+				config = config.accept(new PreferAvoidFilter(context));
+				config = config.accept(new FlattenListsFilter(context));
+				config = config.accept(new AmbDuplicateFilter(context));
 				// last resort disambiguation
-				config = config.accept(new AmbFilter(definitionHelper));
+				config = config.accept(new AmbFilter(context));
 
 				return config;
 			} catch (TransformerException te) {

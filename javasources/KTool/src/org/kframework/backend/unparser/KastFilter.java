@@ -3,9 +3,7 @@ package org.kframework.backend.unparser;
 import org.kframework.compile.utils.MaudeHelper;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
-import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -15,14 +13,14 @@ public class KastFilter extends BasicVisitor {
     protected Indenter result;
     private boolean nextline;
     
-	public KastFilter(DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public KastFilter(org.kframework.kil.loader.Context context) {
+		super(context);
 		result = new Indenter();
 		result.setWidth(Integer.MAX_VALUE);
 	}
 	
-	public KastFilter(IndentationOptions indentationOptions, boolean nextline, DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public KastFilter(IndentationOptions indentationOptions, boolean nextline, org.kframework.kil.loader.Context context) {
+		super(context);
 		result = new Indenter(indentationOptions);
 		this.nextline = nextline;
 	}
@@ -84,7 +82,7 @@ public class KastFilter extends BasicVisitor {
 	@Override
 	public void visit(KList listOfK) {
 		if (listOfK.getContents().size() == 0) {
-			new Empty(listOfK.getSort(definitionHelper)).accept(this);
+			new Empty(listOfK.getSort()).accept(this);
 		} else if (listOfK.getContents().size() == 1) {
 			listOfK.getContents().get(0).accept(this);
 		} else {
@@ -139,7 +137,7 @@ public class KastFilter extends BasicVisitor {
 			result.write(".");
 			result.write(sort);
 		} else {
-			Production prd = definitionHelper.listConses.get(sort);
+			Production prd = context.listConses.get(sort);
 			UserList ul = (UserList) prd.getItems().get(0);
 			result.write(".List`{\"");
 			result.write(ul.getSeparator());
@@ -208,18 +206,18 @@ public class KastFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Constant constant) {
-		if (constant.getSort(definitionHelper).equals("#Id")) {
+		if (constant.getSort().equals("#Id")) {
 			result.write("#id \"");
 		}
 		result.write(constant.getValue());
-		if (constant.getSort(definitionHelper).equals("#Id")) {
+		if (constant.getSort().equals("#Id")) {
 			result.write("\"");
 		}
 	}
 
     @Override
-    public void visit(Builtin builtin) {
-        result.write(builtin.toString());
+    public void visit(Token token) {
+        result.write(token.toString());
     }
 
 	@Override
@@ -260,8 +258,8 @@ public class KastFilter extends BasicVisitor {
 	@Override
 	public void visit(KInjectedLabel kInjectedLabel) {
 		Term term = kInjectedLabel.getTerm();
-		if (MetaK.isKSort(term.getSort(definitionHelper))) {
-            result.write(KInjectedLabel.getInjectedSort(term.getSort(definitionHelper)));
+		if (MetaK.isKSort(term.getSort())) {
+            result.write(KInjectedLabel.getInjectedSort(term.getSort()));
 			result.write("2KLabel_("); 
 		} else {
 			result.write("#_(");

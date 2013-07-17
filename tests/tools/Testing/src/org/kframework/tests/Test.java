@@ -35,10 +35,41 @@ import org.w3c.dom.NodeList;
 
 public class Test implements Comparable<Test> {
 
+	private static final String PARSER_HOME = "parser-home";
+	private static final String MESSAGE = "message";
+	private static final String ERROR2 = "error";
+	private static final String SYSTEM_ERR = "system-err";
+	private static final String SYSTEM_OUT = "system-out";
+	private static final String TIME2 = "time";
+	private static final String STATUS2 = "status";
+	private static final String TESTCASE2 = "testcase";
+	private static final String TESTSUITE2 = "testsuite";
+	private static final String KRUN_OPTION = "krun-option";
+	private static final String ALL_PROGRAMS = "all-programs";
+	private static final String KOMPILE_OPTION = "kompile-option";
+	private static final String PROGRAM2 = "program";
+	private static final String NAME = "name";
+	private static final String EXCLUDE = "exclude";
+	private static final String EXTENSIONS2 = "extensions";
+	private static final String RECURSIVE2 = "recursive";
+	private static final String YES = "yes";
+	private static final String PDF2 = "pdf";
+	private static final String TITLE = "title";
+	private static final String REPORT_DIR = "report-dir";
+	private static final String RESULTS = "results";
+	private static final String FOLDER = "folder";
+	private static final String LANGUAGE2 = "language";
+	private static final String IN = ".in";
+	private static final String ERR = ".err";
+	private static final String OUT = ".out";
+	private static final String VALUE = "value";
+	
+	
 	/* data read from config.xml */
 	private String language;
 	private String programsFolder;
 	private String resultsFolder;
+	private String tag = "";
 	private boolean recursive;
 	private List<String> extensions;
 	private List<String> excludePrograms;
@@ -46,7 +77,7 @@ public class Test implements Comparable<Test> {
 	private Map<String, String> generalKrunOptions = new HashMap<String, String>();
 	private List<Program> specialPrograms = new LinkedList<Program>();
 	private boolean pdf;
-
+	
 	/* data needed for temporary stuff */
 	private Document doc;
 	public Element report;
@@ -154,17 +185,17 @@ public class Test implements Comparable<Test> {
 
 	private String searchOutputFile(String resultsFolder2, String name,
 			boolean recursive2) {
-		return searchFile(resultsFolder2, name + ".out", recursive);
+		return searchFile(resultsFolder2, name + OUT, recursive);
 	}
 
 	private String searchErrorFile(String resultsFolder2, String name,
 			boolean recursive2) {
-		return searchFile(resultsFolder2, name + ".err", recursive);
+		return searchFile(resultsFolder2, name + ERR, recursive);
 	}
 
 	private String searchInputFile(String resultsFolder2, String name,
 			boolean recursive) {
-		return searchFile(resultsFolder2, name + ".in", recursive);
+		return searchFile(resultsFolder2, name + IN, recursive);
 	}
 
 	private String searchFile(String folder, String filename, boolean recursive) {
@@ -230,56 +261,59 @@ public class Test implements Comparable<Test> {
 		String homeDir = Configuration.getHome();
 
 		// get full name
-		language = test.getAttribute("language");
+		language = test.getAttribute(LANGUAGE2);
 
 		// get programs dir
-		programsFolder = test.getAttribute("folder");
+		programsFolder = test.getAttribute(FOLDER);
 
 		// get tests results
-		resultsFolder = test.getAttribute("results");
+		resultsFolder = test.getAttribute(RESULTS);
 		if (resultsFolder.equals(""))
 			resultsFolder = null;
 
 		// get tests results
-		reportDir = test.getAttribute("report-dir");
+		reportDir = test.getAttribute(REPORT_DIR);
 		if (reportDir.equals(""))
 			reportDir = null;
 
+		// get Jenkins tag
+		tag = test.getAttribute(TITLE);
+
 		// get pdf
-		if (test.getAttribute("pdf").equals("yes")
-				|| test.getAttribute("pdf").equals(""))
+		if (test.getAttribute(PDF2).equals(YES)
+				|| test.getAttribute(PDF2).equals(""))
 			pdf = true;
 		else
 			pdf = false;
 
 		// set recursive
-		String rec = test.getAttribute("recursive");
-		if (rec.equals("") || rec.equals("yes"))
+		String rec = test.getAttribute(RECURSIVE2);
+		if (rec.equals("") || rec.equals(YES))
 			recursive = true;
 		else
 			recursive = false;
 
 		// extensions
-		extensions = Arrays.asList(test.getAttribute("extensions")
-				.split("\\s+"));
+		extensions = Arrays
+				.asList(test.getAttribute(EXTENSIONS2).split("\\s+"));
 
 		// exclude programs
-		excludePrograms = Arrays.asList(test.getAttribute("exclude").split(
-				"\\s+"));
+		excludePrograms = Arrays.asList(test.getAttribute(EXCLUDE)
+				.split("\\s+"));
 
 		// kompile options
-		NodeList kompileOpts = test.getElementsByTagName("kompile-option");
+		NodeList kompileOpts = test.getElementsByTagName(KOMPILE_OPTION);
 		for (int i = 0; i < kompileOpts.getLength(); i++) {
 			Element option = (Element) kompileOpts.item(i);
-			kompileOptions.put(option.getAttribute("name"),
-					option.getAttribute("value"));
+			kompileOptions.put(option.getAttribute(NAME),
+					option.getAttribute(VALUE));
 		}
 
 		// load programs with special option
-		NodeList specialPgms = test.getElementsByTagName("program");
+		NodeList specialPgms = test.getElementsByTagName(PROGRAM2);
 		for (int i = 0; i < specialPgms.getLength(); i++) {
 			Element pgm = (Element) specialPgms.item(i);
-			String programPath = pgm.getAttribute("name");
+			String programPath = pgm.getAttribute(NAME);
 
 			Map<String, String> map = getKrunOptions(pgm);
 
@@ -308,7 +342,7 @@ public class Test implements Comparable<Test> {
 		}
 
 		// general krun options
-		NodeList genOpts = test.getElementsByTagName("all-programs");
+		NodeList genOpts = test.getElementsByTagName(ALL_PROGRAMS);
 		if (genOpts != null && genOpts.getLength() > 0) {
 			Element all = (Element) genOpts.item(0);
 			generalKrunOptions = getKrunOptions(all);
@@ -334,54 +368,62 @@ public class Test implements Comparable<Test> {
 
 	private Map<String, String> getKrunOptions(Element parent) {
 		Map<String, String> map = new HashMap<String, String>();
-		NodeList opts = parent.getElementsByTagName("krun-option");
+		NodeList opts = parent.getElementsByTagName(KRUN_OPTION);
 		for (int j = 0; j < opts.getLength(); j++) {
 			Element krunOpt = (Element) opts.item(j);
 
 			// unescape < and >
-			String optValue = krunOpt.getAttribute("value");
+			String optValue = krunOpt.getAttribute(VALUE);
 			optValue = optValue.replaceAll("&lt;", "<");
 			optValue = optValue.replaceAll("&gt;", ">");
 
-			map.put(krunOpt.getAttribute("name"), optValue);
+			String parserHome = krunOpt.getAttribute(PARSER_HOME);
+			String parser = System.getenv(parserHome);
+			if (parser != null) {
+				optValue = parser + System.getProperty("file.separator") + optValue;
+			}
+			
+			map.put(krunOpt.getAttribute(NAME), optValue);
 		}
 		return map;
 	}
 
 	private Element getInitialElement(String definition) {
-		Element testsuite = doc.createElement("testsuite");
+		Element testsuite = doc.createElement(TESTSUITE2);
 		String name = "";
 		if (reportDir != null)
 			name = reportDir;
 		else
 			name = new File(language).getParent();
 
-		testsuite.setAttribute("name",
-				name.replaceFirst("/", "\\."));
+		if (!tag.equals(""))
+			name = tag + "/" + name;
+
+		testsuite.setAttribute(NAME, name.replaceFirst("/", "\\."));
 		return testsuite;
 	}
 
 	public Element createReportElement(String testcase, String status,
 			String time, String output, String error, Task task,
 			String expected, boolean failureCondition) {
-		Element testcaseE = doc.createElement("testcase");
-		testcaseE.setAttribute("name", testcase);
-		testcaseE.setAttribute("status", status);
-		testcaseE.setAttribute("time", time);
+		Element testcaseE = doc.createElement(TESTCASE2);
+		testcaseE.setAttribute(NAME, testcase);
+		testcaseE.setAttribute(STATUS2, status);
+		testcaseE.setAttribute(TIME2, time);
 
-		Element sysout = doc.createElement("system-out");
+		Element sysout = doc.createElement(SYSTEM_OUT);
 		sysout.setTextContent(output);
 
-		Element syserr = doc.createElement("system-err");
+		Element syserr = doc.createElement(SYSTEM_ERR);
 		syserr.setTextContent(error);
 
 		testcaseE.appendChild(syserr);
 		testcaseE.appendChild(sysout);
 
 		if (failureCondition) {
-			Element error_ = doc.createElement("error");
+			Element error_ = doc.createElement(ERROR2);
 			error_.setTextContent(task.getStderr());
-			error_.setAttribute("message", task.getStderr());
+			error_.setAttribute(MESSAGE, task.getStderr());
 			testcaseE.appendChild(error_);
 
 			Element failure = doc.createElement("failure");
@@ -411,9 +453,31 @@ public class Test implements Comparable<Test> {
 			i++;
 		}
 
+		
+		/* Before running the definition, delete the temporary files if they exists */
+		deleteFolder(new File(getCompiled()));
+		
 		return new Task(arguments, null, homeDir);
 	}
 
+	public void deleteFolder(File folder) {
+		if (!folder.exists()) {
+			return;
+		}
+		
+	    File[] files = folder.listFiles();
+	    if(files!=null) { //some JVMs return null for empty dirs
+	        for(File f: files) {
+	            if(f.isDirectory()) {
+	                deleteFolder(f);
+	            } else {
+	                f.delete();
+	            }
+	        }
+	    }
+	    folder.delete();
+	}
+	
 	public String compileStatus(Task task) {
 		return "Compiling " + language + "...\t\t"
 				+ (compiled(task) ? "success" : "failed");
@@ -436,15 +500,18 @@ public class Test implements Comparable<Test> {
 	}
 
 	public String getCompiled() {
-		return getLanguage().replaceAll("\\.k$", "") + "-kompiled";
+		return getLanguage().replaceAll("\\.k$", "") + "-kompiled" + (tag.equals("") ? "" : "-" + tag);
 	}
 
 	private String getReportFilename() {
-		if (reportDir != null)
-			return reportDir + "-report.xml";
-
-		return language.replaceFirst("\\.k$", "-report.xml").replaceAll(
+		String name = language.replaceFirst("\\.k$", "-report.xml").replaceAll(
 				"\\/", ".");
+		if (reportDir != null)
+			name = reportDir + "-report.xml";
+
+		if (!tag.equals(""))
+			name = tag + "." + name;
+		return name;
 	}
 
 	public void reportCompilation(Task task) {
@@ -502,11 +569,10 @@ public class Test implements Comparable<Test> {
 		try {
 
 			File repFile = new File(reportPath);
-			if (!repFile.exists())	
+			if (!repFile.exists())
 				repFile.createNewFile();
-			
-			FileWriter fstream = new FileWriter(Configuration.JR
-					+ Configuration.FS + getReportFilename());
+
+			FileWriter fstream = new FileWriter(reportPath);
 			BufferedWriter out = new BufferedWriter(fstream);
 			out.write(format(doc));
 			out.close();
@@ -519,7 +585,7 @@ public class Test implements Comparable<Test> {
 		Transformer transformer;
 		try {
 			transformer = TransformerFactory.newInstance().newTransformer();
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			transformer.setOutputProperty(OutputKeys.INDENT, YES);
 
 			// initialize StreamResult with File object to save to file
 			StreamResult result = new StreamResult(new StringWriter());
@@ -574,11 +640,24 @@ public class Test implements Comparable<Test> {
 	@Override
 	public int compareTo(Test o) {
 		int d;
-		if (o == this) return 0;
-		d = this.language.compareTo(o.language);
-		if (d != 0) return d;
+		if (o == this)
+			return 0;
+		d = this.getReportFilename().compareTo(o.getReportFilename());
+		if (d != 0)
+			return d;
 		d = this.programsFolder.compareTo(o.programsFolder);
 		return d;
 	}
 
+	@Override
+	public String toString() {
+		return "[" + language + "]" + " ---> " + getReportFilename() + "\n"
+				+ programs + "\n\n";
+	}
+
+	public String getTag() {
+		if (!tag.equals(""))
+			return "(" + tag + ")";
+		return "";
+	}
 }

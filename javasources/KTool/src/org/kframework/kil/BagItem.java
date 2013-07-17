@@ -8,6 +8,8 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
+import aterm.ATermAppl;
+
 public class BagItem extends CollectionItem {
 	public BagItem(String location, String filename) {
 		super(location, filename, "BagItem");
@@ -16,6 +18,11 @@ public class BagItem extends CollectionItem {
 	public BagItem(Element element) {
 		super(element);
 		this.value = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
+	}
+
+	public BagItem(ATermAppl atm) {
+		super(atm);
+		value = (Term) JavaClassesFactory.getTerm(atm.getArgument(0));
 	}
 
 	public BagItem(BagItem node) {
@@ -45,14 +52,14 @@ public class BagItem extends CollectionItem {
 	}
 
 	@Override
-	public ASTNode accept(Transformer visitor) throws TransformerException {
-		return visitor.transform(this);
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
 	}
 
-  @Override
-  public void accept(Matcher matcher, Term toMatch){
-    matcher.match(this, toMatch);
-  }
+	@Override
+	public void accept(Matcher matcher, Term toMatch) {
+		matcher.match(this, toMatch);
+	}
 
 	@Override
 	public BagItem shallowCopy() {

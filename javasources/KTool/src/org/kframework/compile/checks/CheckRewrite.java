@@ -1,19 +1,18 @@
 package org.kframework.compile.checks;
 
 import org.kframework.kil.Configuration;
-import org.kframework.kil.Context;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Syntax;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
 public class CheckRewrite extends BasicVisitor {
 
-	public CheckRewrite(DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public CheckRewrite(Context context) {
+		super(context);
 	}
 
 	private boolean inConfig = false;
@@ -49,7 +48,7 @@ public class CheckRewrite extends BasicVisitor {
 	}
 
 	@Override
-	public void visit(Context node) {
+	public void visit(org.kframework.kil.Context node) {
 		node.getBody().accept(this);
 		if (node.getCondition() != null) {
 			inSideCondition = true;

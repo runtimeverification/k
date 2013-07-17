@@ -3,7 +3,7 @@ package org.kframework.backend.java.kil;
 import com.google.common.base.Joiner;
 
 import com.google.common.collect.ImmutableList;
-import org.kframework.backend.java.symbolic.Matcher;
+import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
@@ -25,13 +25,18 @@ public class KCollectionFragment extends KCollection {
 
     public KCollectionFragment(KCollection kCollection, int index) {
         super(kCollection.getItems(),
-              kCollection.hasFrame() ? kCollection.getFrame() : null,
-              kCollection.getKind());
+              kCollection.hasFrame() ? kCollection.frame() : null,
+              kCollection.kind());
 
         assert 0 <= index && index <= kCollection.size();
 
         this.kCollection = kCollection;
         this.index = index;
+    }
+
+    @Override
+    public KCollection fragment(int length) {
+        throw new UnsupportedOperationException();  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
@@ -83,7 +88,7 @@ public class KCollectionFragment extends KCollection {
             if (stringBuilder.length() != 0) {
                 stringBuilder.append(getOperatorName());
             }
-            stringBuilder.append(super.getFrame());
+            stringBuilder.append(super.frame());
         }
         if (stringBuilder.length() == 0) {
             stringBuilder.append(getIdentityName());
@@ -97,7 +102,7 @@ public class KCollectionFragment extends KCollection {
     }
 
     @Override
-    public void accept(Matcher matcher, Term patten) {
+    public void accept(Unifier unifier, Term patten) {
         throw new UnsupportedOperationException();
     }
 

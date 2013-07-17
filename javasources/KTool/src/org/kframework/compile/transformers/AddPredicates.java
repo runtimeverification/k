@@ -6,7 +6,6 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.BoolBuiltin;
 import org.kframework.kil.Configuration;
-import org.kframework.kil.Context;
 import org.kframework.kil.Empty;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
@@ -20,7 +19,7 @@ import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -33,12 +32,12 @@ import java.util.Set;
 
 public class AddPredicates extends CopyOnWriteTransformer {
 
-    public static final KLabelConstant K2Sort = KLabelConstant.ofStatic("K2Sort");
+    public static final KLabelConstant K2Sort = KLabelConstant.of("K2Sort");
 
     public class PredicatesVisitor extends BasicVisitor {
 
-        public PredicatesVisitor(String name, DefinitionHelper definitionHelper) {
-			super(name, definitionHelper);
+        public PredicatesVisitor(String name, Context context) {
+			super(name, context);
 		}
 
 		private List<ModuleItem> result = new ArrayList<ModuleItem>();
@@ -51,13 +50,13 @@ public class AddPredicates extends CopyOnWriteTransformer {
             if (!lists.isEmpty()) {
                 for (String listSort : lists) {
                     Rule rule = new Rule(
-                            KApp.of(definitionHelper, KLabelConstant.of(predicate(listSort), definitionHelper), new Empty(listSort)),
-                            BoolBuiltin.TRUE, definitionHelper);
+                            KApp.of(KLabelConstant.of(predicate(listSort), context), new Empty(listSort)),
+                            BoolBuiltin.TRUE, context);
                     rule.addAttribute(Attribute.PREDICATE);
                     result.add(rule);
                     rule = new Rule(
-                            KApp.of(definitionHelper, KLabelConstant.KRESULT_PREDICATE, new Empty(listSort)),
-                            BoolBuiltin.TRUE, definitionHelper);
+                            KApp.of(KLabelConstant.KRESULT_PREDICATE, new Empty(listSort)),
+                            BoolBuiltin.TRUE, context);
                     rule.addAttribute(Attribute.PREDICATE);
                     result.add(rule);
                 }
@@ -68,7 +67,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
         public void visit(Syntax node) {
             String sort = node.getSort().getName();
 
-            if (definitionHelper.isListSort(sort))
+            if (context.isListSort(sort))
                 lists.add(sort);
 
             if (MetaK.isKSort(sort))
@@ -84,24 +83,34 @@ public class AddPredicates extends CopyOnWriteTransformer {
             if (node.containsAttribute("predicate"))
                 return;
 
+            if (node.isLexical()) {
+                /* predicate definition for token sorts is deferred to each backend */
+                return;
+            }
+
+            if (context.getDataStructureSorts().containsKey(node.getSort())) {
+                /* predicate definition for builtin collection sorts is deferred to each backend */
+                return;
+            }
+
             String sort = node.getSort();
-            Term term = MetaK.getTerm(node, definitionHelper);
+            Term term = MetaK.getTerm(node, context);
 
             Term rhs;
             if (node.containsAttribute("function") && node.getArity() > 0)
-               rhs = KApp.of(definitionHelper, KSymbolicPredicate, term);
+               rhs = KApp.of(KSymbolicPredicate, term);
             else
                rhs = BoolBuiltin.TRUE;
-            Term lhs = KApp.of(definitionHelper, KLabelConstant.of(syntaxPredicate(sort), definitionHelper), term);
-            Rule rule = new Rule(lhs, rhs, definitionHelper);
+            Term lhs = KApp.of(KLabelConstant.of(syntaxPredicate(sort), context), term);
+            Rule rule = new Rule(lhs, rhs, context);
             rule.addAttribute(Attribute.PREDICATE);
             result.add(rule);
 
             // define K2Sort for syntactic production (excluding subsorts)
             if (!node.isSubsort()) {
-                lhs = KApp.of(definitionHelper, K2Sort, term);
-                rhs = StringBuiltin.of(sort);
-                rule = new Rule(lhs, rhs, definitionHelper);
+                lhs = KApp.of(K2Sort, term);
+                rhs = StringBuiltin.kAppOf(sort);
+                rule = new Rule(lhs, rhs, context);
                 rule.addAttribute(Attribute.FUNCTION);
                 result.add(rule);
             }
@@ -112,7 +121,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
         }
 
         @Override
-        public void visit(Context node) {
+        public void visit(org.kframework.kil.Context node) {
         }
 
         @Override
@@ -128,11 +137,11 @@ public class AddPredicates extends CopyOnWriteTransformer {
     private static final String PredicatePrefix = "is";
     private static final String SymbolicPredicatePrefix = "Symbolic";
     public static final KLabelConstant BuiltinPredicate =
-            KLabelConstant.ofStatic(predicate("Builtin"));
+            KLabelConstant.of(predicate("Builtin"));
     public static final KLabelConstant VariablePredicate =
-            KLabelConstant.ofStatic(predicate("Variable"));
+            KLabelConstant.of(predicate("Variable"));
     public static final KLabelConstant KSymbolicPredicate =
-            KLabelConstant.ofStatic(symbolicPredicate("K"));
+            KLabelConstant.of(symbolicPredicate("K"));
 
 
     public static final String predicate(String sort) {
@@ -154,7 +163,6 @@ public class AddPredicates extends CopyOnWriteTransformer {
         return predicate(SymbolicPredicatePrefix + sort);
     }
 
-
     @Override
     public ASTNode transform(Module node) throws TransformerException {
         Module retNode = node.shallowCopy();
@@ -167,51 +175,51 @@ public class AddPredicates extends CopyOnWriteTransformer {
 
         for (String sort : node.getAllSorts()) {
             if (!MetaK.isKSort(sort)) {
-                String pred = syntaxPredicate(sort);
+                String pred = AddPredicates.syntaxPredicate(sort);
                 // declare isSort predicate as KLabel
                 retNode.addConstant(KSorts.KLABEL, pred);
 
                 if (AddSymbolicK.allowKSymbolic(sort)) {
-                    String symPred = symbolicPredicate(sort);
+                    String symPred = AddPredicates.symbolicPredicate(sort);
                     // declare isSymbolicSort predicate as KLabel
                     retNode.addConstant(KSorts.KLABEL, symPred);
 
                     // define isSymbolicSort predicate as the conjunction of isSort and isSymbolicK
-                    Variable var = MetaK.getFreshVar("K");
-                    Term lhs = KApp.of(definitionHelper, KLabelConstant.of(symPred, definitionHelper), var);
-                    Term rhs = KApp.of(definitionHelper,
+                    Variable var = Variable.getFreshVar("K");
+                    Term lhs = KApp.of(KLabelConstant.of(symPred, context), var);
+                    Term rhs = KApp.of(
                             KLabelConstant.BOOL_ANDTHENBOOL_KLABEL,
-                            KApp.of(definitionHelper, KLabelConstant.of(pred, definitionHelper), var),
-                            KApp.of(definitionHelper, KSymbolicPredicate, var));
-                    Rule rule = new Rule(lhs, rhs, definitionHelper);
+                            KApp.of(KLabelConstant.of(pred, context), var),
+                            KApp.of(KSymbolicPredicate, var));
+                    Rule rule = new Rule(lhs, rhs, context);
                     rule.addAttribute(Attribute.PREDICATE);
                     retNode.appendModuleItem(rule);
 
                     String symCtor = AddSymbolicK.symbolicConstructor(sort);
-                    var = MetaK.getFreshVar(KSorts.KLIST);
-                    Term symTerm = KApp.of(definitionHelper, KLabelConstant.of(symCtor, definitionHelper), var);
+                    var = Variable.getFreshVar(KSorts.KLIST);
+                    Term symTerm = KApp.of(KLabelConstant.of(symCtor, context), var);
 
                     // define isSort for symbolic sort constructor symSort
-                    lhs = KApp.of(definitionHelper, KLabelConstant.of(pred, definitionHelper), symTerm);
-                    rule = new Rule(lhs, BoolBuiltin.TRUE, definitionHelper);
+                    lhs = KApp.of(KLabelConstant.of(pred, context), symTerm);
+                    rule = new Rule(lhs, BoolBuiltin.TRUE, context);
                     rule.addAttribute(Attribute.PREDICATE);
                     retNode.appendModuleItem(rule);
 
                     // define isVariable predicate for symbolic sort constructor symSort
-					rule = getIsVariableRule(symTerm, definitionHelper);
+					rule = getIsVariableRule(symTerm, context);
                     retNode.appendModuleItem(rule);
 
                     // define K2Sort function for symbolic sort constructor
                     // symSort
-                    lhs = KApp.of(definitionHelper, K2Sort, symTerm);
-                    rhs = StringBuiltin.of(sort);
-                    rule = new Rule(lhs, rhs, definitionHelper);
+                    lhs = KApp.of(K2Sort, symTerm);
+                    rhs = StringBuiltin.kAppOf(sort);
+                    rule = new Rule(lhs, rhs, context);
                     rule.addAttribute(Attribute.FUNCTION);
                     retNode.appendModuleItem(rule);
                 } else if (MetaK.isBuiltinSort(sort)) {
-                    Variable var = MetaK.getFreshVar(sort);
-                    Term lhs = KApp.of(definitionHelper, BuiltinPredicate, var);
-                    Rule rule = new Rule(lhs, BoolBuiltin.TRUE, definitionHelper);
+                    Variable var = Variable.getFreshVar(sort);
+                    Term lhs = KApp.of(BuiltinPredicate, var);
+                    Rule rule = new Rule(lhs, BoolBuiltin.TRUE, context);
                     rule.addAttribute(Attribute.PREDICATE);
                     retNode.appendModuleItem(rule);
 
@@ -224,11 +232,18 @@ public class AddPredicates extends CopyOnWriteTransformer {
                     rule.getCellAttributes().getContents().add(Attribute.FUNCTION);
                     retNode.appendModuleItem(rule);
                      */
+                } else if (context.getTokenSorts().contains(sort)) {
+                    /* defer membership predicate for lexical token to each backend */
                 }
             }
         }
 
-        PredicatesVisitor mv = new PredicatesVisitor("PredicatesVisitor", definitionHelper);
+        /* add collection membership predicates */
+        for (String sort : context.getDataStructureSorts().keySet()) {
+            retNode.addConstant(KSorts.KLABEL, AddPredicates.predicate(sort));
+        }
+
+        PredicatesVisitor mv = new PredicatesVisitor("PredicatesVisitor", context);
         node.accept(mv);
         retNode.getItems().addAll(mv.getResult());
 
@@ -238,21 +253,21 @@ public class AddPredicates extends CopyOnWriteTransformer {
             return node;
     }
 
-	public static Rule getIsVariableRule(Term symTerm, DefinitionHelper definitionHelper) {
+	public static Rule getIsVariableRule(Term symTerm, Context context) {
 		Term lhs;
 		Rule rule;
-		if (!MetaK.isComputationSort(symTerm.getSort(definitionHelper))) {
-			symTerm = KApp.of(definitionHelper, new KInjectedLabel(symTerm));
+		if (!MetaK.isComputationSort(symTerm.getSort())) {
+			symTerm = KApp.of(new KInjectedLabel(symTerm));
 		}
 
-		lhs = KApp.of(definitionHelper, VariablePredicate, symTerm);
-		rule = new Rule(lhs, BoolBuiltin.TRUE, definitionHelper);
+		lhs = KApp.of(VariablePredicate, symTerm);
+		rule = new Rule(lhs, BoolBuiltin.TRUE, context);
 		rule.addAttribute(Attribute.PREDICATE);
 		return rule;
 	}
 
-	public AddPredicates(DefinitionHelper definitionHelper) {
-        super("Add syntax and symbolic predicates", definitionHelper);
+	public AddPredicates(Context context) {
+        super("Add syntax and symbolic predicates", context);
     }
 
 }

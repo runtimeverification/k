@@ -2,18 +2,14 @@ package org.kframework.backend.java.kil;
 
 import com.google.common.collect.ImmutableList;
 
-import org.kframework.backend.java.symbolic.Matcher;
+import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 
 
 /**
- * Created with IntelliJ IDEA.
- * User: andrei
- * Date: 3/18/13
- * Time: 12:36 PM
- * To change this template use File | Settings | File Templates.
+ * @author AndreiS
  */
 public class KList extends KCollection {
 
@@ -49,6 +45,11 @@ public class KList extends KCollection {
     }
 
     @Override
+    public KCollection fragment(int length) {
+        return new KList(items.subList(length, items.size()), frame);
+    }
+
+    @Override
     public String getOperatorName() {
         return KList.OPERATOR_NAME;
     }
@@ -69,21 +70,13 @@ public class KList extends KCollection {
         }
 
         KList kList = (KList) object;
-        return super.frame == null ? kList.frame == null : frame.equals(kList.frame)
+        return (super.frame == null ? kList.frame == null : frame.equals(kList.frame))
                 && super.items.equals(kList.items);
     }
 
-    /**
-     * @return a copy of the ASTNode containing the same fields.
-     */
     @Override
-    public ASTNode shallowCopy() {
-        throw new UnsupportedOperationException();  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void accept(Matcher matcher, Term patten) {
-        matcher.match(this, patten);
+    public void accept(Unifier unifier, Term patten) {
+        unifier.unify(this, patten);
     }
 
     @Override

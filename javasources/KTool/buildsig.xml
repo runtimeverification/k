@@ -24,7 +24,7 @@
 	- create the path for the AntPropertyHelper
 	- compile the AntPropertyHelper
 	-->
-	<property name="build.strategoxt.sdf" value="${basedir}/../../dist/bin/native/${osNativesDir}/" />
+	<property name="build.strategoxt.sdf" value="${basedir}/../../dist/lib/native/${osNativesDir}/" />
 
 	<!-- call both targets -->
 	<target name="all.signature" depends="basic.signature, concrete.signature" />
@@ -32,6 +32,7 @@
 	<target name="basic.signature">
 		<dependset>
 			<srcfileset file="../parsers/Basic/syntax/*.sdf" />
+			<srcfileset file="../parsers/Basic/trans/*.str" />
 			<targetfileset file="../parsers/Basic/include/*.tbl" />
 			<targetfileset file="../parsers/Basic/include/*.str" />
 		</dependset>
@@ -89,9 +90,11 @@
 	<target name="concrete.signature">
 		<dependset>
 			<srcfileset file="../parsers/Concrete/syntax/*.sdf" />
+			<srcfileset file="../parsers/Concrete/trans/*.str" />
+			<targetfileset file="../parsers/Concrete/include/*.tbl" />
 			<targetfileset file="../parsers/Concrete/include/*.str" />
 		</dependset>
-		<available file="../parsers/Concrete/include/Concrete.str" property="concrete.signature.available" />
+		<available file="../parsers/Concrete/include/Concrete.tbl" property="concrete.signature.available" />
 		<antcall target="concrete.signature.helper" />
 	</target>
 	<target name="concrete.signature.helper" unless="concrete.signature.available">
@@ -129,6 +132,16 @@
 			<arg value="--module" />
 			<arg value="Concrete" />
 		</java>
+		<!-- create the .tbl file of the definition -->
+		<echo message="Build TBL" />
+		<exec executable="${build.strategoxt.sdf}sdf2table">
+			<arg value="-i" />
+			<arg value="../parsers/Concrete/include/Concrete.def" />
+			<arg value="-o" />
+			<arg value="../parsers/Concrete/include/Concrete.tbl" />
+			<arg value="-m" />
+			<arg value="Concrete" />
+		</exec>
 	</target>
 
 </project>

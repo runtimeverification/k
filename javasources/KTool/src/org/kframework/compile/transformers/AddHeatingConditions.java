@@ -2,7 +2,6 @@ package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
-import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -15,8 +14,8 @@ import org.kframework.utils.general.GlobalSettings;
  * Time: 3:02 PM
  */
 public class AddHeatingConditions extends CopyOnWriteTransformer {
-	public AddHeatingConditions(DefinitionHelper definitionHelper) {
-		super("Generate Heating Conditions", definitionHelper);
+	public AddHeatingConditions(org.kframework.kil.loader.Context context) {
+		super("Generate Heating Conditions", context);
 	}
 
 	@Override
@@ -25,7 +24,7 @@ public class AddHeatingConditions extends CopyOnWriteTransformer {
 	}
 
 	@Override
-	public ASTNode transform(Context node) throws TransformerException {
+	public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
 		return node;
 	}
 
@@ -84,7 +83,7 @@ public class AddHeatingConditions extends CopyOnWriteTransformer {
 								node.getLocation())
 				);
 		}
-		java.util.Set<Variable> vars = MetaK.getVariables(kSequence.getContents().get(0), definitionHelper);
+		java.util.Set<Variable> vars = kSequence.getContents().get(0).variables();
 		if (vars.size() != 1) {
 			GlobalSettings.kem.register(
 					new KException(KException.ExceptionType.ERROR,
@@ -96,20 +95,34 @@ public class AddHeatingConditions extends CopyOnWriteTransformer {
 			);
 		}
 		Variable variable = vars.iterator().next();
-		final KApp isKResult = KApp.of(definitionHelper, KLabelConstant.KRESULT_PREDICATE, variable);
+        String resultType = node.getAttribute("result");
+        KLabel resultLabel = getResultLabel(resultType);
+		final KApp isKResult = KApp.of(resultLabel, variable);
 		if (heating) {
-			kresultCnd = KApp.of(definitionHelper, KLabelConstant.KNEQ_KLABEL, isKResult, BoolBuiltin.TRUE);
+			kresultCnd = KApp.of(KLabelConstant.KNEQ_KLABEL, isKResult, BoolBuiltin.TRUE);
 		} else {
 			kresultCnd = isKResult;
 		}
 		node = node.shallowCopy();
-		Term condition = MetaK.incrementCondition(node.getCondition(), kresultCnd, definitionHelper);
+		Term condition = MetaK.incrementCondition(node.getCondition(), kresultCnd, context);
 
 		node.setCondition(condition);
 		return node;
 	}
 
-	@Override
+    private KLabel getResultLabel(String resultType) {
+        if (resultType == null) {
+            return KLabelConstant.KRESULT_PREDICATE;
+        }
+        if (Character.isUpperCase(resultType.charAt(0))) {
+            return KLabelConstant.of(AddPredicates.predicate(resultType));
+        }
+        return KLabelConstant.of(resultType);
+
+
+    }
+
+    @Override
 	public ASTNode transform(Syntax node) throws TransformerException {
 		return node;
 	}

@@ -4,15 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.kframework.kil.ProductionItem.ProductionType;
-import org.kframework.kil.loader.Constants;
-import org.kframework.kil.loader.DefinitionHelper;
-import org.kframework.kil.loader.JavaClassesFactory;
+import org.kframework.kil.loader.*;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
+
+import aterm.ATermAppl;
+import aterm.ATermList;
 
 /**
  * Applications that are not in sort K, or have not yet been flattened.
@@ -21,11 +24,14 @@ public class TermCons extends Term {
 	/** A unique identifier corresponding to a production, matching the SDF cons */
 	protected final String cons;
 	protected java.util.List<Term> contents;
+	protected Production production;
 
-	public TermCons(Element element) {
+	public TermCons(Element element, Context context) {
 		super(element);
 		this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
 		this.cons = element.getAttribute(Constants.CONS_cons_ATTR);
+		this.production = context.conses.get(cons);
+		assert this.production != null;
 
 		contents = new ArrayList<Term>();
 		List<Element> children = XML.getChildrenElements(element);
@@ -33,45 +39,63 @@ public class TermCons extends Term {
 			contents.add((Term) JavaClassesFactory.getTerm(e));
 	}
 
-	public TermCons(String sort, String cons) {
-		super(sort);
-		this.cons = cons;
+	public TermCons(ATermAppl atm, Context context) {
+		super(atm);
+		this.cons = atm.getName();
+		this.sort = StringUtil.getSortNameFromCons(cons);
+		this.production = context.conses.get(cons);
+		assert this.production != null;
+
 		contents = new ArrayList<Term>();
+		if (atm.getArity() == 0) {
+			contents = new ArrayList<Term>();
+		} else if (atm.getArgument(0) instanceof ATermList) {
+			ATermList list = (ATermList) atm.getArgument(0);
+			while (!list.isEmpty()) {
+				contents.add((Term) JavaClassesFactory.getTerm(list.getFirst()));
+				list = list.getNext();
+			}
+			contents.add(new Empty(sort));
+		} else {
+			for (int i = 0; i < atm.getArity(); i++) {
+				contents.add((Term) JavaClassesFactory.getTerm(atm.getArgument(i)));
+			}
+		}
 	}
 
-	public TermCons(String location, String filename, String sort, String listCons, List<Term> genContents) {
-		super(location, filename, sort);
-		cons = listCons;
-		contents = genContents;
+	public TermCons(String sort, String cons, org.kframework.kil.loader.Context context) {
+		this(sort, cons, new ArrayList<Term>(), context);
 	}
 
 	public TermCons(TermCons node) {
 		super(node);
 		this.cons = node.cons;
 		this.contents = new ArrayList<Term>(node.contents);
+		this.production = node.production;
+		assert this.production != null;
 	}
 
-	public TermCons(String psort, String listCons, List<Term> genContents) {
+	public TermCons(String psort, String listCons, List<Term> genContents, Context context) {
 		super(psort);
 		cons = listCons;
 		contents = genContents;
+		production = context.conses.get(cons);
 	}
 
-	public Production getProduction(DefinitionHelper definitionHelper) {
-		return definitionHelper.conses.get(getCons());
+	public Production getProduction() {
+		return production;
 	}
 
-	public String toString(DefinitionHelper definitionHelper) {
+	@Override
+	public String toString() {
 		String str = "";
-		Production pr = definitionHelper.conses.get(cons);
-
-		if (pr.items.size() > 0) {
-			if (pr.items.get(0).getType() == ProductionType.USERLIST) {
-				String separator = ((UserList) pr.items.get(0)).separator;
+		if (production.items.size() > 0) {
+			if (production.items.get(0).getType() == ProductionType.USERLIST) {
+				String separator = ((UserList) production.items.get(0)).separator;
 				str = contents.get(0) + " " + separator + " " + contents.get(1) + " ";
 			} else
-				for (int i = 0, j = 0; i < pr.items.size(); i++) {
-					ProductionItem pi = pr.items.get(i);
+				for (int i = 0, j = 0; i < production.items.size(); i++) {
+					ProductionItem pi = production.items.get(i);
 					if (pi.getType() == ProductionType.TERMINAL) {
 						String terminall = pi.toString();
 						terminall = terminall.substring(1, terminall.length() - 1);
@@ -111,8 +135,8 @@ public class TermCons extends Term {
 		return contents.set(idx, term);
 	}
 
-	public int arity(DefinitionHelper definitionHelper) {
-		return getProduction(definitionHelper).getArity();
+	public int arity() {
+		return production.getArity();
 	}
 
 	@Override
@@ -121,8 +145,8 @@ public class TermCons extends Term {
 	}
 
 	@Override
-	public ASTNode accept(Transformer visitor) throws TransformerException {
-		return visitor.transform(this);
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
 	}
 
 	@Override
@@ -163,9 +187,9 @@ public class TermCons extends Term {
 		if (this == obj)
 			return true;
 		if (obj instanceof Bracket)
-			return contains(((Bracket)obj).getContent());
+			return contains(((Bracket) obj).getContent());
 		if (obj instanceof Cast)
-			return contains(((Cast)obj).getContent());
+			return contains(((Cast) obj).getContent());
 		if (!(obj instanceof TermCons))
 			return false;
 		TermCons tc = (TermCons) obj;
@@ -185,7 +209,6 @@ public class TermCons extends Term {
 
 		return true;
 	}
-
 
 	@Override
 	public int hashCode() {

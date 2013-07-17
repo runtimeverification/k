@@ -161,11 +161,10 @@ Term klabel() :
 	}
 	<RPAREN> <LPAREN>
 	{
-		org.kframework.kil.Token t = org.kframework.kil.Token.of(sort, value);
-		return t;
+		return org.kframework.kil.Token.kAppOf(sort, value);
 	}
 |	<KLABEL>
 	{
-		return KLabelConstant.ofStatic(StringUtil.unescapeMaude(token.image));
+		return KLabelConstant.of(StringUtil.unescapeMaude(token.image));
 	}
 }

@@ -3,13 +3,12 @@ package org.kframework.backend.symbolic;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Builtin;
 import org.kframework.kil.KApp;
-import org.kframework.kil.KInjectedLabel;
+import org.kframework.kil.KSorts;
+import org.kframework.kil.Token;
 import org.kframework.kil.Variable;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -20,40 +19,27 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  * @author andreiarusoaie
  */
 public class ConstantsReplaceTransformer extends CopyOnWriteTransformer {
-    private Map<Variable, Builtin> generatedSV;
+    private Map<Variable, KApp> generatedSV;
 
-    public ConstantsReplaceTransformer(String name, DefinitionHelper definitionHelper) {
-        super("Replace Constants", definitionHelper);
-        generatedSV = new HashMap<Variable, Builtin>();
+    public ConstantsReplaceTransformer(String name, Context context) {
+        super("Replace Constants", context);
+        generatedSV = new HashMap<Variable, KApp>();
     }
-
+    
     @Override
     public ASTNode transform(KApp node) throws TransformerException {
+    	
+    	if (node.getLabel() instanceof Token) {
+//    		Token token = ((Token) node.getLabel());
+            Variable newVar = Variable.getFreshVar(KSorts.K);
+            generatedSV.put(newVar, node);
+            return newVar;
+    	}
 
-        if (!(node.getLabel() instanceof KInjectedLabel)) {
-            return super.transform(node);
-        }
-
-        KInjectedLabel label = (KInjectedLabel) node.getLabel();
-
-        if (!(label.getTerm() instanceof Builtin)) {
-            return super.transform(node);
-        }
-
-        Builtin builtin = (Builtin) label.getTerm();
-      
-        if (!MetaK.isAbstractableSort(builtin.getSort(definitionHelper))) {
-            return super.transform(node);
-        }
-
-        String sort = "K";
-        Variable newVar = MetaK.getFreshVar(sort);
-
-        generatedSV.put(newVar, builtin);
-        return newVar;
+    	return super.transform(node);
     }
-
-    public Map<Variable, Builtin> getGeneratedSV() {
-        return generatedSV;
-    }
+    
+    public Map<Variable, KApp> getGeneratedSV() {
+		return generatedSV;
+	}
 }

@@ -1,18 +1,15 @@
 package org.kframework.backend.java.kil;
 
-import org.kframework.backend.java.symbolic.Matcher;
+import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
-import org.kframework.backend.java.symbolic.Utils;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 
 
 /**
- * Created with IntelliJ IDEA.
- * User: andrei
- * Date: 3/18/13
- * Time: 1:50 PM
- * To change this template use File | Settings | File Templates.
+ * An injection KLabel.
+ *
+ * @author AndreiS
  */
 public class KLabelInjection extends KLabel {
 
@@ -22,7 +19,7 @@ public class KLabelInjection extends KLabel {
         this.term = term;
     }
 
-    public Term getTerm() {
+    public Term term() {
         return term;
     }
 
@@ -42,7 +39,7 @@ public class KLabelInjection extends KLabel {
 
     @Override
     public boolean isConstructor() {
-        return false;
+        return true;
     }
 
     @Override
@@ -52,9 +49,7 @@ public class KLabelInjection extends KLabel {
 
     @Override
     public int hashCode() {
-        int hash = 1;
-        hash = hash * Utils.HASH_PRIME + term.hashCode();
-        return hash;
+        return term.hashCode();
     }
 
     @Override
@@ -62,17 +57,9 @@ public class KLabelInjection extends KLabel {
         return "(# " + term + ")";
     }
 
-    /**
-     * @return a copy of the ASTNode containing the same fields.
-     */
     @Override
-    public ASTNode shallowCopy() {
-        throw new UnsupportedOperationException();  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void accept(Matcher matcher, Term patten) {
-        matcher.match(this, patten);
+    public void accept(Unifier unifier, Term patten) {
+        unifier.unify(this, patten);
     }
 
     @Override

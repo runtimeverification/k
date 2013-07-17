@@ -14,8 +14,7 @@
             <SvnBranchConfiguration>
               <option name="branchUrls">
                 <list>
-                  <option value="https://k-framework.googlecode.com/svn/branches/sortcells" />
-                  <option value="https://k-framework.googlecode.com/svn/trunk" />
+                  <option value="https://k-framework.googlecode.com/svn/branches/v3.2" />
                 </list>
               </option>
               <option name="trunkUrl" value="https://k-framework.googlecode.com/svn/trunk" />

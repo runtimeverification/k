@@ -1,16 +1,22 @@
 package org.kframework.kil;
 
 import org.kframework.kil.loader.Constants;
-import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.matchers.Matcher;
+import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.StringUtil;
 import org.w3c.dom.Element;
+
+import aterm.ATermAppl;
 
 /**
  * Variables, used both in rules/contexts and for variables like {@code $PGM} in configurations.
  */
 public class Variable extends Term {
+
+	private static int nextVariableIndex = 0;
+
 	private String name;
 	/** True if the variable was written with an explicit type annotation */
 	private boolean userTyped = false;
@@ -27,6 +33,20 @@ public class Variable extends Term {
 		}
 	}
 
+	public Variable(ATermAppl atm) {
+		super(atm);
+		this.sort = StringUtil.getSortNameFromCons(atm.getName());
+
+		name = ((ATermAppl) atm.getArgument(0)).getName();
+
+		if (atm.getName().endsWith("2Var"))
+			this.userTyped = true;
+		if (this.name.startsWith("?")) {
+			this.setFresh(true);
+			this.name = this.name.substring(1);
+		}
+	}
+
 	public Variable(String name, String sort) {
 		super(sort);
 		this.name = name;
@@ -36,6 +56,11 @@ public class Variable extends Term {
 		super(variable);
 		name = variable.name;
 		fresh = variable.fresh;
+		userTyped = variable.userTyped;
+	}
+
+	public static Variable getFreshVar(String sort) {
+		return new Variable("GeneratedFreshVar" + nextVariableIndex++, sort);
 	}
 
 	public void setName(String name) {
@@ -56,8 +81,8 @@ public class Variable extends Term {
 	}
 
 	@Override
-	public ASTNode accept(Transformer visitor) throws TransformerException {
-		return visitor.transform(this);
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
 	}
 
 	@Override
@@ -75,7 +100,7 @@ public class Variable extends Term {
 			return false;
 		Variable var = (Variable) obj;
 
-		return this.sort.equals(var.getSort(null)) && this.name.equals(var.getName());
+		return this.sort.equals(var.getSort()) && this.name.equals(var.getName());
 	}
 
 	@Override

@@ -1,28 +1,69 @@
 package org.kframework.krun;
 
-import edu.uci.ics.jung.graph.DirectedGraph;
-import jline.*;
+import java.io.BufferedReader;
+import java.io.Console;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import jline.ArgumentCompletor;
+import jline.Completor;
+import jline.ConsoleReader;
+import jline.FileNameCompletor;
+import jline.MultiCompletor;
+import jline.SimpleCompletor;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.fusesource.jansi.AnsiConsole;
 import org.kframework.backend.java.symbolic.JavaSymbolicKRun;
+import org.kframework.backend.java.symbolic.SpecificationCompilerSteps;
+import org.kframework.backend.maude.krun.MaudeKRun;
 import org.kframework.compile.ConfigurationCleaner;
 import org.kframework.compile.FlattenModules;
+import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.transformers.AddTopCellConfig;
 import org.kframework.compile.transformers.FlattenSyntax;
+import org.kframework.compile.transformers.RemoveBrackets;
+import org.kframework.compile.transformers.RemoveSyntacticCasts;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
-import org.kframework.kil.*;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.BackendTerm;
+import org.kframework.kil.Bag;
+import org.kframework.kil.Configuration;
+import org.kframework.kil.Definition;
+import org.kframework.kil.KSequence;
+import org.kframework.kil.Module;
+import org.kframework.kil.Rule;
+import org.kframework.kil.Sentence;
+import org.kframework.kil.StringBuiltin;
+import org.kframework.kil.Term;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.krun.api.*;
+import org.kframework.krun.api.KRun;
+import org.kframework.krun.api.KRunDebugger;
+import org.kframework.krun.api.KRunResult;
+import org.kframework.krun.api.KRunState;
+import org.kframework.krun.api.SearchResults;
+import org.kframework.krun.api.SearchType;
+import org.kframework.krun.api.Transition;
 import org.kframework.krun.gui.Controller.RunKRunCommand;
 import org.kframework.krun.gui.UIDesign.MainWindow;
+import org.kframework.parser.DefinitionLoader;
 import org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor;
 import org.kframework.utils.BinaryLoader;
-import org.kframework.utils.DefinitionLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -30,11 +71,7 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 
-import java.io.*;
-import java.util.*;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import edu.uci.ics.jung.graph.DirectedGraph;
 
 public class Main {
 
@@ -134,19 +171,19 @@ public class Main {
 		}
 	}
 
-	private static Term parseTerm(String value, DefinitionHelper definitionHelper) throws Exception {
+	private static Term parseTerm(String value, Context context) throws Exception {
 		org.kframework.parser.concrete.KParser.ImportTblGround(K.compiled_def
 				+ "/ground/Concrete.tbl");
-		ASTNode term = org.kframework.utils.DefinitionLoader.parseCmdString(
-				value, "", "Command line argument", definitionHelper);
-		return (Term) term.accept(new FlattenSyntax(definitionHelper));
+		ASTNode term = DefinitionLoader.parseCmdString(
+				value, "", "Command line argument", context);
+		return (Term) term.accept(new FlattenSyntax(context));
 	}
 
-	public static Term plug(Map<String, Term> args, DefinitionHelper definitionHelper) throws TransformerException {
+	public static Term plug(Map<String, Term> args, Context context) throws TransformerException {
 		Configuration cfg = K.kompiled_cfg;
 		ASTNode cfgCleanedNode = null;
 		try {
-			cfgCleanedNode = new ConfigurationCleaner(definitionHelper).transform(cfg);
+			cfgCleanedNode = new ConfigurationCleaner(context).transform(cfg);
 		} catch (TransformerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -167,15 +204,15 @@ public class Main {
 		if (GlobalSettings.verbose)
 			sw.printIntermediate("Plug configuration variables");
 
-		return (Term) cfgCleaned.accept(new SubstitutionFilter(args, definitionHelper));
+		return (Term) cfgCleaned.accept(new SubstitutionFilter(args, context));
 	}
 
 	public static Term makeConfiguration(Term kast, String stdin,
-			RunProcess rp, boolean hasTerm, DefinitionHelper definitionHelper) throws TransformerException {
+			RunProcess rp, boolean hasTerm, Context context) throws TransformerException {
 
 		if (hasTerm) {
 			if (kast == null) {
-				return rp.runParserOrDie(K.parser, K.term, false, null, definitionHelper);
+				return rp.runParserOrDie(K.parser, K.term, false, null, context);
 			} else {
 				Error.report("You cannot specify both the term and the configuration variables.");
 			}
@@ -192,15 +229,9 @@ public class Main {
 			// here
 			Term parsed = null;
 			if (parser == null) {
-				try {
-					parsed = parseTerm(value, definitionHelper);
-				} catch (Exception e1) {
-					e1.printStackTrace();
-					Error.report(e1.getMessage());
-				}
-			} else {
-				parsed = rp.runParserOrDie(parser, value, true, null, definitionHelper);
+                parser = "kast -groundParser -e";
 			}
+			parsed = rp.runParserOrDie(parser, value, false, null, context);
 			output.put("$" + name, parsed);
 			hasPGM = hasPGM || name.equals("$PGM");
 		}
@@ -222,45 +253,53 @@ public class Main {
 		if (GlobalSettings.verbose)
 			sw.printIntermediate("Make configuration");
 
-		return plug(output, definitionHelper);
+		return plug(output, context);
+	}
+
+	private static KRun obtainKRun(Context context) {
+			if (K.backend.equals("maude")) {
+				return new MaudeKRun(context);
+			} else if (K.backend.equals("java-symbolic")) {
+                try {
+                    return new JavaSymbolicKRun(context);
+                } catch (KRunExecutionException e) {
+                    Error.report(e.getMessage());
+                    return null;
+                }
+            } else {
+				Error.report("Currently supported backends are 'maude' and 'java-symbolic'");
+				return null;
+			}
 	}
 
 	// execute krun in normal mode (i.e. not in debug mode)
 	public static void normalExecution(Term KAST, String lang, RunProcess rp,
-			CommandlineOptions cmd_options, DefinitionHelper definitionHelper) {
+			CommandlineOptions cmd_options, Context context) {
 		try {
 			CommandLine cmd = cmd_options.getCommandLine();
 
-			KRun krun = null;
-			if (K.backend.equals("maude")) {
-				krun = new MaudeKRun(definitionHelper);
-			} else if (K.backend.equals("java-symbolic")) {
-				krun = new JavaSymbolicKRun(definitionHelper);
-			} else {
-				Error.report("Currently supported backends are 'maude' and 'java-symbolic'");
-			}
+			KRun krun = obtainKRun(context);
 			KRunResult<?> result = null;
-			Set<String> varNames = null;
+			//Set<String> varNames = null;
 			Rule patternRule = null;
 			RuleCompilerSteps steps;
-			steps = new RuleCompilerSteps(K.definition, definitionHelper);
+			steps = new RuleCompilerSteps(K.definition, context);
 			try {
 				if (cmd.hasOption("pattern") || "search".equals(K.maude_cmd)) {
 					org.kframework.parser.concrete.KParser
 							.ImportTbl(K.compiled_def + "/def/Concrete.tbl");
 					ASTNode pattern = DefinitionLoader.parsePattern(K.pattern,
-							"Command line pattern", definitionHelper);
-					CollectVariablesVisitor vars = new CollectVariablesVisitor(definitionHelper);
+							"Command line pattern", context);
+					CollectVariablesVisitor vars = new CollectVariablesVisitor(context);
 					pattern.accept(vars);
-					varNames = vars.getVars().keySet();
+					//varNames = vars.getVars().keySet();
 
 					try {
-						pattern = steps.compile(
-								(Rule) pattern, null);
+						pattern = steps.compile(new Rule((Sentence) pattern), null);
 					} catch (CompilerStepDone e) {
 						pattern = (ASTNode) e.getResult();
 					}
-					patternRule = (Rule) pattern;
+					patternRule = new Rule((Sentence) pattern);
 					if (GlobalSettings.verbose)
 						sw.printIntermediate("Parsing search pattern");
 				}
@@ -304,7 +343,7 @@ public class Main {
 								K.searchType,
 								patternRule,
 								makeConfiguration(KAST, buffer, rp,
-										(K.term != null), definitionHelper), steps);
+										(K.term != null), context), steps);
 
 						if (GlobalSettings.verbose)
 							sw.printTotal("Search total");
@@ -320,25 +359,47 @@ public class Main {
 						// + K.model_checking);
 						// assume that the specified argument is not a file and
 						// maybe represents a formula
-						KAST1 = rp.runParserOrDie("kast", K.model_checking, true,
-								"LtlFormula", definitionHelper);
+						KAST1 = rp.runParserOrDie("kast -e", K.model_checking, false,
+								"LtlFormula", context);
 					} else {
 						// the specified argument represents a file
 						KAST1 = rp.runParserOrDie("kast", K.model_checking, false,
-								"LtlFormula", definitionHelper);
+								"LtlFormula", context);
 					}
 
 					result = krun
 							.modelCheck(
 									KAST1,
 									makeConfiguration(KAST, null, rp,
-											(K.term != null), definitionHelper));
+											(K.term != null), context));
 
 					if (GlobalSettings.verbose)
 						sw.printTotal("Model checking total");
-				} else {
+				} else if (K.prove.length() > 0) {
+                    File proofFile = new File(K.prove);
+                    if (!proofFile.exists()) {
+                        Error.report("Cannot find the file containing rules to prove");
+                    }
+                    String content = FileUtil.getFileContent(proofFile.getAbsolutePath());
+                    Definition parsed = DefinitionLoader.parseString(content,
+                        proofFile.getAbsolutePath(), context);
+                    Module mod = parsed.getSingletonModule();
+                    try {
+                        mod = new SpecificationCompilerSteps(context).compile(mod, null);
+                    } catch (CompilerStepDone e) {
+                        assert false: "dead code";
+                    }
+                    result = krun.prove(mod);
+				} else if (cmd.hasOption("bound")) {
+					int bound = Integer.parseInt(K.bound);
+                    result = krun.step(makeConfiguration(KAST, null, rp,
+                            (K.term != null), context), bound);
+
+					if (GlobalSettings.verbose)
+						sw.printTotal("Bounded execution total");
+                } else {
 					result = krun.run(makeConfiguration(KAST, null, rp,
-							(K.term != null), definitionHelper));
+							(K.term != null), context));
 
 					if (GlobalSettings.verbose)
 						sw.printTotal("Normal execution total");
@@ -348,6 +409,7 @@ public class Main {
 					Object krs = result.getResult();
 					if (krs instanceof KRunState) {
 						Term res = ((KRunState) krs).getRawResult();
+						krun.setBackendOption("io", false);
 						result = krun.search(null, null, K.searchType, patternRule, res, steps);
 					}else {
 						Error.report("Pattern matching after execution is not supported by search and model checking");
@@ -355,11 +417,13 @@ public class Main {
 				}
 
 			} catch (KRunExecutionException e) {
-				rp.printError(e.getMessage(), lang, definitionHelper);
+				rp.printError(e.getMessage(), lang, context);
 				System.exit(1);
 			} catch (TransformerException e) {
 				e.report();
-			}
+			} catch (UnsupportedOperationException e) {
+                Error.report("Backend \"" + K.backend + "\" does not support option " + e.getMessage());
+            }
 
 			if ("pretty".equals(K.output_mode)) {
 				String output = result.toString();
@@ -393,7 +457,7 @@ public class Main {
 						}
 						if (input.equals("y")) {
 							K.debug = true;
-							debugExecution(KAST, lang, searchResult, definitionHelper);
+							debugExecution(KAST, lang, searchResult, context);
 						} else if (input.equals("n")) {
 							K.debug = false;
 							K.guidebug = false;
@@ -448,7 +512,7 @@ public class Main {
 	// execution (we use the search command with --graph option)
 	@SuppressWarnings("unchecked")
 	public static void debugExecution(Term kast, String lang,
-			KRunResult<SearchResults> state, DefinitionHelper definitionHelper) {
+			KRunResult<SearchResults> state, org.kframework.kil.loader.Context context) {
 		try {
 			// adding autocompletion and history feature to the stepper internal
 			// commandline by using the JLine library
@@ -458,7 +522,7 @@ public class Main {
 			List<Completor> argCompletor = new LinkedList<Completor>();
 			argCompletor.add(new SimpleCompletor(new String[] { "help", 
 					"abort", "resume", "step", "step-all", "select", 
-					"show-search-graph", "show-node", "show-edge", "save", "load" }));
+					"show-search-graph", "show-node", "show-edge", "save", "load", "read" }));
 			argCompletor.add(new FileNameCompletor());
 			List<Completor> completors = new LinkedList<Completor>();
 			completors.add(new ArgumentCompletor(argCompletor));
@@ -467,17 +531,18 @@ public class Main {
 			new File(K.compiled_def + K.fileSeparator + "main.maude")
 					.getCanonicalPath();
 			RunProcess rp = new RunProcess();
-			KRun krun = new MaudeKRun(definitionHelper);
+			KRun krun = obtainKRun(context);
+            krun.setBackendOption("io", false);
 			KRunDebugger debugger;
 			if (state == null) {
-				Term t = makeConfiguration(kast, null, rp, (K.term != null), definitionHelper);
+				Term t = makeConfiguration(kast, "", rp, (K.term != null), context);
 				debugger = krun.debug(t);
 				System.out
 						.println("After running one step of execution the result is:");
 				AnsiConsole.out.println(debugger.printState(debugger
 						.getCurrentState()));
 			} else {
-				debugger = krun.debug(state.getResult());
+				debugger = krun.debug(state.getResult().getGraph());
 			}
 
 			while (true) {
@@ -647,12 +712,22 @@ public class Main {
 					if (cmd.hasOption("load")) {
 						try {
 							savedGraph = (DirectedGraph<KRunState, Transition>) BinaryLoader.fromBinary(new FileInputStream(cmd.getOptionValue("load")));
-							krun = new MaudeKRun(definitionHelper);
-							debugger = new KRunApiDebugger(krun, savedGraph);
+							krun = new MaudeKRun(context);
+							debugger = krun.debug(savedGraph);
 							debugger.setCurrentState(1);
 							System.out.println("File successfully loaded.");
 						} catch (FileNotFoundException e) {
 							System.out.println("There is no such file, please try again.");
+						}
+					}
+					if (cmd.hasOption("read")) {
+						try {
+							debugger.readFromStdin(StringBuiltin.valueOf("\"" + 
+								cmd.getOptionValue("read") + "\"").stringValue());
+							AnsiConsole.out.println(
+								debugger.printState(debugger.getCurrentState()));
+						} catch (IllegalStateException e) {
+							Error.silentReport(e.getMessage());
 						}
 					}
 				}
@@ -664,10 +739,10 @@ public class Main {
 	}
 
 	public static void guiDebugExecution(Term kast, String lang,
-			KRunResult<SearchResults> state, DefinitionHelper definitionHelper) {
+			KRunResult<SearchResults> state, Context context) {
 
 		try {
-			new MainWindow(new RunKRunCommand(kast, lang,definitionHelper,true), definitionHelper);
+			new MainWindow(new RunKRunCommand(kast, lang, false, obtainKRun(context)), context);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -679,8 +754,8 @@ public class Main {
 	 *            represents the arguments/options given to jkrun command..
 	 */
 	public static void execute_Krun(String cmds[]) {
-		DefinitionHelper definitionHelper = new DefinitionHelper();
-		K.init(definitionHelper);
+		Context context = new Context();
+		K.init(context);
 		// delete temporary krun directory
 		FileUtil.deleteDirectory(new File(K.krunDir));
 		Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -699,6 +774,11 @@ public class Main {
 		// set verbose
 		if (cmd.hasOption("verbose")) {
 			GlobalSettings.verbose = true;
+		}
+
+		// set verbose
+		if (cmd.hasOption("fastKast")) {
+			GlobalSettings.fastKast = true;
 		}
 
 		if (GlobalSettings.verbose)
@@ -837,6 +917,12 @@ public class Main {
 			if (cmd.hasOption("ltlmc")) {
 				K.model_checking = cmd.getOptionValue("ltlmc");
 			}
+            if (cmd.hasOption("prove")) {
+                K.prove = cmd.getOptionValue("prove");
+            }
+            if (cmd.hasOption("no-smt")) {
+                K.smt = false;
+            }
 			if (cmd.hasOption("deleteTempDir")) {
 				K.deleteTempDir = true;
 			}
@@ -878,7 +964,7 @@ public class Main {
 				System.exit(0);
 			}
 			if (K.version) {
-				String msg = org.kframework.utils.file.FileUtil.getFileContent(KPaths.getKBase(false) + "/bin/version.txt");
+				String msg = org.kframework.utils.file.FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE);
 				System.out.println(msg);
 				System.exit(0);
 			}
@@ -938,14 +1024,14 @@ public class Main {
 						+ "\nPlease compile the definition by using `kompile'.");
 			}
 
-			definitionHelper.dotk = new File(
+			context.dotk = new File(
 					new File(K.compiled_def).getParent() + File.separator
 							+ ".k");
-			if (!definitionHelper.dotk.exists()) {
-				definitionHelper.dotk.mkdirs();
+			if (!context.dotk.exists()) {
+				context.dotk.mkdirs();
 			}
-			definitionHelper.kompiled = new File(K.compiled_def);
-			K.kdir = definitionHelper.dotk.getCanonicalPath();
+			context.kompiled = new File(K.compiled_def);
+			K.kdir = context.dotk.getCanonicalPath();
 			K.setKDir();
 			/*
 			 * System.out.println("K.k_definition=" + K.k_definition);
@@ -962,8 +1048,8 @@ public class Main {
 			Term KAST = null;
 			RunProcess rp = new RunProcess();
 
-			if (!definitionHelper.initialized) {
-				org.kframework.kil.Definition javaDef = (org.kframework.kil.Definition) BinaryLoader
+			if (!context.initialized) {
+				Definition javaDef = (Definition) BinaryLoader
 						.fromBinary(new FileInputStream(K.compiled_def
 								+ "/defx.bin"));
 
@@ -971,14 +1057,14 @@ public class Main {
 					sw.printIntermediate("Reading definition from binary");
 
 				// This is essential for generating maude
-				javaDef = new FlattenModules(definitionHelper).compile(javaDef, null);
+				javaDef = new FlattenModules(context).compile(javaDef, null);
 
 				if (GlobalSettings.verbose)
 					sw.printIntermediate("Flattening modules");
 
 				try {
-					javaDef = (org.kframework.kil.Definition) javaDef
-							.accept(new AddTopCellConfig(definitionHelper));
+					javaDef = (Definition) javaDef
+							.accept(new AddTopCellConfig(context));
 				} catch (TransformerException e) {
 					e.report();
 				}
@@ -986,7 +1072,7 @@ public class Main {
 				if (GlobalSettings.verbose)
 					sw.printIntermediate("Adding top cell to configuration");
 
-				javaDef.preprocess(definitionHelper);
+				javaDef.preprocess(context);
 
 				if (GlobalSettings.verbose)
 					sw.printIntermediate("Preprocessing definition");
@@ -1023,7 +1109,7 @@ public class Main {
 				sw.printIntermediate("Resolving main and syntax modules");
 
 			if (K.pgm != null) {
-				KAST = rp.runParserOrDie(K.parser, K.pgm, false, null, definitionHelper);
+				KAST = rp.runParserOrDie(K.parser, K.pgm, false, null, context);
 			} else {
 				KAST = null;
 			}
@@ -1032,11 +1118,11 @@ public class Main {
 				sw.printIntermediate("Kast process");
 
 			if (K.term != null) {
-				if (K.parser.equals("kast")) {
+				if (K.parser.equals("kast") && !cmd.hasOption("parser")) {
 					if (K.backend.equals("java-symbolic")) {
-						GlobalSettings.whatParser = GlobalSettings.ParserType.RULES;
+                        K.parser = "kast -ruleParser";
 					} else {
-						GlobalSettings.whatParser = GlobalSettings.ParserType.GROUND;
+                        K.parser = "kast -groundParser";
 					}
 				}
 			}
@@ -1044,15 +1130,15 @@ public class Main {
 			GlobalSettings.kem.print();
 
 			if (!K.debug && !K.guidebug) {
-				normalExecution(KAST, lang, rp, cmd_options, definitionHelper);
+				normalExecution(KAST, lang, rp, cmd_options, context);
 			} else {
 				if (K.do_search) {
 					Error.report("Cannot specify --search with --debug. In order to search inside the debugger, use the step-all command.");
 				}
 				if (K.guidebug)
-					guiDebugExecution(KAST, lang, null, definitionHelper);
+					guiDebugExecution(KAST, lang, null, context);
 				else
-					debugExecution(KAST, lang, null, definitionHelper);
+					debugExecution(KAST, lang, null, context);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

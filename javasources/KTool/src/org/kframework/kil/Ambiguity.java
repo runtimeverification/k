@@ -6,6 +6,8 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
+import aterm.ATermAppl;
+
 /**
  * Used for representing parsing ambiguity. Shouldn't exist after disambiguation.
  */
@@ -13,6 +15,10 @@ public class Ambiguity extends Collection {
 
 	public Ambiguity(Element element) {
 		super(element);
+	}
+
+	public Ambiguity(ATermAppl atm) {
+		super(atm);
 	}
 
 	public Ambiguity(Ambiguity node) {
@@ -43,8 +49,8 @@ public class Ambiguity extends Collection {
 	}
 
 	@Override
-	public ASTNode accept(Transformer visitor) throws TransformerException {
-		return visitor.transform(this);
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
 	}
 
 	@Override
@@ -60,9 +66,9 @@ public class Ambiguity extends Collection {
 	@Override
 	public boolean contains(Object o) {
 		if (o instanceof Bracket)
-			return contains(((Bracket)o).getContent());
+			return contains(((Bracket) o).getContent());
 		if (o instanceof Cast)
-			return contains(((Cast)o).getContent());
+			return contains(((Cast) o).getContent());
 		for (int i = 0; i < contents.size(); i++) {
 			if (contents.get(i).contains(o)) {
 				return true;

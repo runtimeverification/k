@@ -6,6 +6,8 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
+import aterm.ATermAppl;
+
 import java.util.Collections;
 
 
@@ -16,6 +18,10 @@ public class List extends Collection {
 
 	public List(Element element) {
 		super(element);
+	}
+
+	public List(ATermAppl atm) {
+		super(atm);
 	}
 
 	public List(List node) {
@@ -45,8 +51,8 @@ public class List extends Collection {
 	}
 
 	@Override
-	public ASTNode accept(Transformer visitor) throws TransformerException {
-		return visitor.transform(this);
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
 	}
 
   @Override

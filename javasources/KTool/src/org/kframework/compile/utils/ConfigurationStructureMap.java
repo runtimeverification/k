@@ -4,18 +4,21 @@ import org.kframework.kil.Cell;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 /**
-* Initially created by: Traian Florin Serbanuta
-* <p/>
-* Date: 11/9/12
-* Time: 10:34 PM
+ * Initially created by: Traian Florin Serbanuta
+ * <p/>
+ * Date: 11/9/12
+ * Time: 10:34 PM
+ * A Map from cell names to @see ConfigurationStructure representing the cell contents and attributes.
 */
-public class ConfigurationStructureMap implements Map<String, ConfigurationStructure> {
+public class ConfigurationStructureMap
+        implements Map<String, ConfigurationStructure>, Serializable {
     Map<String, ConfigurationStructure> config;
 
     public ConfigurationStructureMap() {

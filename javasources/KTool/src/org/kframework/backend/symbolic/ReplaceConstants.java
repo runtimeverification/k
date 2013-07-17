@@ -7,16 +7,15 @@ import java.util.Map.Entry;
 
 import org.kframework.compile.transformers.AddPredicates;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Builtin;
 import org.kframework.kil.KApp;
-import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Term;
+import org.kframework.kil.Token;
 import org.kframework.kil.Variable;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -28,8 +27,8 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  */
 public class ReplaceConstants extends CopyOnWriteTransformer {
 
-	public ReplaceConstants(DefinitionHelper definitionHelper) {
-		super("Replace Constants with Variables", definitionHelper);
+	public ReplaceConstants(Context context) {
+		super("Replace Constants with Variables", context);
 	}
 
 	@Override
@@ -40,24 +39,26 @@ public class ReplaceConstants extends CopyOnWriteTransformer {
 
 		if (node.getBody() instanceof Rewrite) {
 			ConstantsReplaceTransformer crt = new ConstantsReplaceTransformer(
-					"", definitionHelper);
+					"", context);
 			Rewrite rew = (Rewrite) node.getBody();
-			rew.setLeft((Term) rew.getLeft().accept(crt));
-
-			Map<Variable, Builtin> newGeneratedSV = crt.getGeneratedSV();
+			Term left = rew.getLeft().shallowCopy();
+//			System.out.println("LEFT : " + node);
+			rew.setLeft((Term) left.accept(crt), context);
+			Map<Variable, KApp> newGeneratedSV = crt.getGeneratedSV();
 			Term condition = node.getCondition();
 
 			List<Term> terms = new ArrayList<Term>();
-			for (Entry<Variable, Builtin> entry : newGeneratedSV.entrySet()) {
+			for (Entry<Variable, KApp> entry : newGeneratedSV.entrySet()) {
 				List<Term> vars = new ArrayList<Term>();
 				vars.add(entry.getKey());
-				vars.add(KApp.of(definitionHelper, new KInjectedLabel(entry.getValue())));
+//				vars.add(KApp.of(new KInjectedLabel(entry.getValue())));
+				vars.add(entry.getValue());
+				terms.add(new KApp(KLabelConstant.of(KLabelConstant.KEQ.getLabel(), context), new KList(vars)));
 
-				terms.add(new KApp(KLabelConstant.of(KLabelConstant.KEQ.getLabel(), definitionHelper), new KList(vars)));
-
-				terms.add(KApp.of(definitionHelper, 
+				Token token = (Token) (entry.getValue().getLabel());
+				terms.add(KApp.of( 
                         KLabelConstant.of(AddPredicates.predicate(
-                                entry.getValue().getSort(definitionHelper).replaceFirst("#", "")), definitionHelper),
+                                token.tokenSort().replaceFirst("#", "")), context),
                         entry.getKey()));
 			}
 
@@ -79,6 +80,9 @@ public class ReplaceConstants extends CopyOnWriteTransformer {
 			node.setBody(rew);
 			node.setCondition(newCondition);
 		}
+//		System.out.println("LEFT': " + node);
+//		System.out.println("\n\n");
+
 		return node;
 	}
 }

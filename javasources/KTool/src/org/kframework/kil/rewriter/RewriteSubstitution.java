@@ -3,7 +3,7 @@ package org.kframework.kil.rewriter;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.matchers.Binding;
 import org.kframework.kil.matchers.MapInsertPattern;
 import org.kframework.kil.matchers.SetInsertPattern;
@@ -14,8 +14,8 @@ import java.util.Map;
 
 public class RewriteSubstitution extends CopyOnWriteTransformer {
 	Map<Term, Term> substitution;
-	public RewriteSubstitution(Map<Term, Term> substitution, DefinitionHelper definitionHelper) {
-		super("Substitution", definitionHelper);
+	public RewriteSubstitution(Map<Term, Term> substitution, Context context) {
+		super("Substitution", context);
 		this.substitution = substitution;
 	}
 	

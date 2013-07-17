@@ -4,7 +4,9 @@ import org.apache.commons.cli.CommandLine;
 import org.kframework.backend.hkcd.HaskellDefFilter;
 import org.kframework.backend.hkcd.HaskellPgmFilter;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
+import org.kframework.parser.DefinitionLoader;
+import org.kframework.parser.ProgramLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -23,7 +25,7 @@ import java.io.IOException;
 public class HKCDFrontEnd {
 
 	public static void hkcd(String[] args) {
-		DefinitionHelper definitionHelper = new DefinitionHelper();
+		Context context = new Context();
 		Stopwatch sw = new Stopwatch();
 		HKCDOptionsParser op = new HKCDOptionsParser();
 
@@ -86,7 +88,7 @@ public class HKCDFrontEnd {
 			lang = FileUtil.getMainModule(defFile.getName());
 
 		// / Do the actual processing
-		hkcd(defFile, pgmFile, lang, definitionHelper);
+		hkcd(defFile, pgmFile, lang, context);
 
 		if (GlobalSettings.verbose)
 			sw.printTotal("Total           = ");
@@ -96,7 +98,7 @@ public class HKCDFrontEnd {
 	/**
 	 * Dump language definition and program tree to hkc-readable form
 	 */
-	public static void hkcd(File defFile, File pgmFile, String mainModule, DefinitionHelper definitionHelper) {
+	public static void hkcd(File defFile, File pgmFile, String mainModule, Context context) {
 		try {
 			Stopwatch sw = new Stopwatch();
 			String fileSep = System.getProperty("file.separator");
@@ -106,15 +108,17 @@ public class HKCDFrontEnd {
 			File dotk = new File(defCanonical.getParent() + fileSep + ".k");
 			dotk.mkdirs();
 
-			org.kframework.kil.Definition langDef = org.kframework.utils.DefinitionLoader.loadDefinition(defFile, mainModule, true, definitionHelper);
+			org.kframework.kil.Definition langDef = DefinitionLoader.loadDefinition(defFile, mainModule, true,
+                    context);
 
-			ASTNode pgmAst = org.kframework.utils.ProgramLoader.loadPgmAst(pgmFile, false, definitionHelper.startSymbolPgm, definitionHelper);
+			ASTNode pgmAst = ProgramLoader.loadPgmAst(pgmFile, false, context.startSymbolPgm,
+                    context);
 
-			HaskellPgmFilter hpf = new HaskellPgmFilter(definitionHelper);
+			HaskellPgmFilter hpf = new HaskellPgmFilter(context);
 			pgmAst.accept(hpf);
 			String pgmDump = hpf.getResult();
 
-			HaskellDefFilter hdf = new HaskellDefFilter(definitionHelper);
+			HaskellDefFilter hdf = new HaskellDefFilter(context);
 			langDef.accept(hdf);
 			String defDump = hdf.getResult();
 

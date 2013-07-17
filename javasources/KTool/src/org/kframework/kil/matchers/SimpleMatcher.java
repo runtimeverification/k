@@ -30,7 +30,7 @@ import org.kframework.kil.Term;
 import org.kframework.kil.TermComment;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Variable;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.rewriter.MapImpl;
 import org.kframework.kil.rewriter.SetImpl;
 
@@ -42,10 +42,10 @@ public class SimpleMatcher implements Matcher {
 
 	private java.util.Map<Variable, HashSet<SetImpl>> deferredSetLookups = new HashMap<Variable, HashSet<SetImpl>>();
 
-	protected DefinitionHelper definitionHelper;
+	protected Context context;
 	
-	public SimpleMatcher(DefinitionHelper definitionHelper) {
-		this.definitionHelper = definitionHelper;
+	public SimpleMatcher(Context context) {
+		this.context = context;
 	}
 	
 	@Override
@@ -324,10 +324,10 @@ public class SimpleMatcher implements Matcher {
 			}
 			Term t;
 			t = (Term) term2;
-			if (term.getSort(definitionHelper).equals(t.getSort(definitionHelper))) {
+			if (term.getSort().equals(t.getSort())) {
 				substitution.put(term, term2);
 			} else {
-				throw new MatcherException("Sort " + term.getSort(definitionHelper) + " of Variable " + term + " does not match " + " sort " + t.getSort(definitionHelper) + " of Term " + term2);
+				throw new MatcherException("Sort " + term.getSort() + " of Variable " + term + " does not match " + " sort " + t.getSort() + " of Term " + term2);
 			}
 			handleMapLookups(term, term2);
 			handleSetLookups(term);

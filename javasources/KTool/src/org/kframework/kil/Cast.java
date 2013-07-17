@@ -1,13 +1,16 @@
 package org.kframework.kil;
 
-import org.kframework.kil.loader.DefinitionHelper;
-import org.kframework.kil.loader.JavaClassesFactory;
+import org.kframework.kil.loader.*;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
+
+import aterm.ATermAppl;
 
 /** Represents parentheses uses for grouping. All productions labeled bracket parse to this. */
 public class Cast extends Term {
@@ -29,17 +32,24 @@ public class Cast extends Term {
 		this.syntactic = i.syntactic;
 	}
 
-	public Cast(Term t, DefinitionHelper definitionHelper) {
-		super(t.getSort(definitionHelper));
+	public Cast(Term t, Context context) {
+		super(t.getSort());
 		this.content = t;
+	}
+
+	public Cast(ATermAppl atm) {
+		super(atm);
+		this.sort = StringUtil.getSortNameFromCons(atm.getName());
+
+		content = (Term) JavaClassesFactory.getTerm(atm.getArgument(0));
 	}
 
 	public Cast(String location, String filename, String sort) {
 		super(location, filename, sort);
 	}
 
-	public Cast(String location, String filename, Term t, DefinitionHelper definitionHelper) {
-		super(location, filename, t.getSort(definitionHelper));
+	public Cast(String location, String filename, Term t, org.kframework.kil.loader.Context context) {
+		super(location, filename, t.getSort());
 		this.content = t;
 	}
 
@@ -58,8 +68,8 @@ public class Cast extends Term {
 	}
 
 	@Override
-	public ASTNode accept(Transformer visitor) throws TransformerException {
-		return visitor.transform(this);
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
 	}
 
 	@Override

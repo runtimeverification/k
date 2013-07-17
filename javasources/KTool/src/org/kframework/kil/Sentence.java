@@ -2,9 +2,13 @@ package org.kframework.kil;
 
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
+import org.kframework.kil.visitors.Transformer;
+import org.kframework.kil.visitors.Visitor;
+import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.xml.XML;
-import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.w3c.dom.Element;
+
+import aterm.ATermAppl;
 
 /**
  * A rule, configuration declaration, or context.
@@ -12,13 +16,16 @@ import org.w3c.dom.Element;
  * {@link #body} and {@link #condition}, which have different
  * interpretations in the subclasses.
  */
-public abstract class Sentence extends ModuleItem {
+public class Sentence extends ModuleItem {
+	/** Label from {@code rule[}label{@code ]:} syntax or "". Currently unrelated to attributes */
+	String label = "";
 	Term body;
 	Term condition = null;
 
 	public Sentence(Sentence s) {
 		super(s);
 		this.body = s.body;
+		this.label = s.label;
 		this.condition = s.condition;
 	}
 
@@ -33,13 +40,20 @@ public abstract class Sentence extends ModuleItem {
 			attributes = new Attributes();
 	}
 
-	public Sentence(IStrategoAppl element) {
-		super(element);
+	public Sentence(ATermAppl atm) {
+		super(atm);
+
+		body = (Term) JavaClassesFactory.getTerm(atm.getArgument(0));
+
+		if (atm.getName().equals("CondSentence")) {
+			condition = (Term) JavaClassesFactory.getTerm(atm.getArgument(1));
+		}
 	}
 
 	public Sentence(Element element) {
 		super(element);
 
+		label = element.getAttribute(Constants.LABEL);
 		Element elm = XML.getChildrenElementsByTagName(element, Constants.BODY).get(0);
 		Element elmBody = XML.getChildrenElements(elm).get(0);
 		this.body = (Term) JavaClassesFactory.getTerm(elmBody);
@@ -76,5 +90,39 @@ public abstract class Sentence extends ModuleItem {
 	}
 
 	@Override
-	public abstract Sentence shallowCopy();
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
+	}
+
+	@Override
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
+	}
+
+	@Override
+	public Sentence shallowCopy() {
+		return new Sentence(this);
+	}
+
+	public String getLabel() {
+		return label;
+	}
+
+	public void setLabel(String label) {
+		this.label = label;
+	}
+	
+	public String toString() {
+		String content = "";
+
+		if (this.label != null && !this.label.equals(""))
+			content += "[" + this.label + "]: ";
+
+		content += this.body + " ";
+		if (this.condition != null) {
+			content += "when " + this.condition + " ";
+		}
+
+		return content + attributes;
+	}
 }

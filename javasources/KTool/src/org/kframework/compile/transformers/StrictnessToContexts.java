@@ -2,20 +2,8 @@ package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.compile.utils.SyntaxByTag;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Context;
-import org.kframework.kil.Hole;
-import org.kframework.kil.KApp;
-import org.kframework.kil.KLabelConstant;
-import org.kframework.kil.KList;
-import org.kframework.kil.KSorts;
-import org.kframework.kil.Module;
-import org.kframework.kil.ModuleItem;
-import org.kframework.kil.Production;
-import org.kframework.kil.Term;
-import org.kframework.kil.TermCons;
-import org.kframework.kil.Variable;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.*;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -35,15 +23,15 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
 
     private List<ModuleItem> items = new ArrayList<ModuleItem>();
 
-    public StrictnessToContexts(DefinitionHelper definitionHelper) {
-        super("Strict Ops To Context", definitionHelper);
+    public StrictnessToContexts(Context context) {
+        super("Strict Ops To Context", context);
     }
 
     @Override
     public ASTNode transform(Module node) throws TransformerException {
         //collect the productions which have the attributes strict and seqstrict
-        Set<Production> prods = SyntaxByTag.get(node, "strict", definitionHelper);
-        prods.addAll(SyntaxByTag.get(node, "seqstrict", definitionHelper));
+        Set<Production> prods = SyntaxByTag.get(node, "strict", context);
+        prods.addAll(SyntaxByTag.get(node, "seqstrict", context));
         if (prods.isEmpty()) {
             return node;
         }
@@ -131,13 +119,18 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
             }
 
             for (int i = 0; i < arguments.size(); ++i) {
-                TermCons termCons = (TermCons) MetaK.getTerm(prod, definitionHelper);
+                TermCons termCons = (TermCons) MetaK.getTerm(prod, context);
                 for (int j = 0; j < prod.getArity(); ++j) {
-                    termCons.getContents().get(j).setSort(KSorts.K);
+                    if (GlobalSettings.matchingLogic) {
+                        /* the Java Rewrite Engine only supports strictness with KItem variables */
+                        termCons.getContents().get(j).setSort(KSorts.KITEM);
+                    } else {
+                        termCons.getContents().get(j).setSort(KSorts.K);
+                    }
                 }
 
                 // insert HOLE instead of the term
-                termCons.getContents().set(arguments.get(i), Hole.KITEM_HOLE);
+                termCons.getContents().set(arguments.get(i), getHoleTerm(prod));
 
                 // is seqstrict the elements before the argument should be KResult
                 if (isSeq) {
@@ -146,7 +139,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                     }
                 }
 
-                Context ctx = new Context();
+                org.kframework.kil.Context ctx = new org.kframework.kil.Context();
                 ctx.setBody(termCons);
                 ctx.setAttributes(prod.getAttributes());
                 items.add(ctx);
@@ -156,26 +149,37 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
         return node;
     }
 
+    private Term getHoleTerm(Production prod) {
+        Term hole;
+        String strictType = prod.getAttribute("strictType");
+        if (null == strictType) {
+            hole = Hole.KITEM_HOLE;
+        } else {
+           hole = new Rewrite(Hole.KITEM_HOLE, KApp.of(KLabelConstant.of(strictType), Hole.KITEM_HOLE),context);
+        }
+        return hole;
+    }
+
     /* Add context KLabel(KList1 ,, HOLE ,, KList2).
      * If KLabel is seqstrict then add the condition isKResult(KList1)
      */
     private void kLabelStrictness(Production prod, boolean isSeq) {
         List<Term> contents = new ArrayList<Term>(3);
         //first argument is a variable of sort KList
-        Variable variable = MetaK.getFreshVar(KSorts.KLIST);
+        Variable variable = Variable.getFreshVar(KSorts.KLIST);
         contents.add(variable);
         //second is a HOLE
-        contents.add(Hole.KITEM_HOLE);
+        contents.add(getHoleTerm(prod));
         //third argument is a variable of sort KList
-        contents.add(MetaK.getFreshVar(KSorts.KLIST));
-        KApp kapp = new KApp(MetaK.getTerm(prod, definitionHelper), new KList(contents));
+        contents.add(Variable.getFreshVar(KSorts.KLIST));
+        KApp kapp = new KApp(MetaK.getTerm(prod, context), new KList(contents));
         //make a context from the TermCons
-        Context ctx = new Context();
+        org.kframework.kil.Context ctx = new org.kframework.kil.Context();
         ctx.setBody(kapp);
         ctx.setAttributes(prod.getAttributes());
         if (isSeq) {
             //set the condition
-            KApp condApp = KApp.of(definitionHelper, KLabelConstant.KRESULT_PREDICATE, variable);
+            KApp condApp = KApp.of(KLabelConstant.KRESULT_PREDICATE, variable);
             ctx.setCondition(condApp);
             ctx.getAttributes().remove("seqstrict");
         } else {

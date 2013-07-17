@@ -50,7 +50,7 @@ module VARIABLE
 // non-local variable.  I added the predicate below.
 
   syntax Bool ::= isLocalFreshVar(K)  [function]
-  rule isLocalFreshVar(L:KLabel("local",,_:Int)) => true
+  rule isLocalFreshVar(_:KLabel("local",,_:Int)) => true
 
 endmodule
 
@@ -87,8 +87,8 @@ module BINDER
     => #if isBound(L,I) ==K true
        #then #binderSplit2(L, I +Int 1, Ks, NBEs, BEs, Bound, #getVars(K))
        #else #if isBounding(L, I) ==K true
-             #then #binderSplit1(L, I +Int 1, Ks, NBEs, BEs,,K, Bound)
-             #else #binderSplit1(L, I +Int 1, Ks, NBEs,,K, BEs, Bound)
+             #then #binderSplit1(L, I +Int 1, Ks, NBEs, (BEs,,K), Bound)
+             #else #binderSplit1(L, I +Int 1, Ks, (NBEs,,K), BEs, Bound)
              #fi
        #fi
   rule #binderSplit1(_, _, .KList, NBEs:KList, BEs:KList, Bound:Set)
@@ -110,7 +110,7 @@ module FREE-VARS
                | freeVariables(Set)      [function, latex({\it FV}({#1}))]
   rule freeVariables(Ks:KList) => #getVarsFromK(#freeVars(Ks))
   rule freeVariables(.Set) => .Set
-  rule freeVariables(SetItem(K) S:Set) => freeVariables(K) freeVariables(S)
+  rule freeVariables(SetItem(K:K) S:Set) => freeVariables(K) freeVariables(S)
 
   syntax K ::= #freeVarsSet(Set) [function]
   rule #freeVarsSet(S:Set) => #freeVars(Set2KTerm(S))
@@ -272,12 +272,11 @@ module SUBSTITUTION
 */
 
   syntax K ::= freshVariables(Set,K)
-  rule freshVariables(.Set, T) => T
-  rule freshVariables(SetItem(Tv) S:Set, T)
-    => freshVariables(S, T[#changeLabel(Tv',Tv)/Tv])
-    when fresh(Tv':K)
+  rule freshVariables(.Set, T:K) => T
+  rule freshVariables(SetItem(Tv:K) S:Set, T:K)
+    => freshVariables(S, T[#changeLabel(?Tv':K,Tv)/Tv])
 
   syntax K ::= #changeLabel(K,K)  [function]
-  rule #changeLabel(L:KLabel(Ks:KList),L':KLabel(_)) => L'(Ks)
+  rule #changeLabel(_:KLabel(Ks:KList),L':KLabel(_)) => L'(Ks)
 
 endmodule

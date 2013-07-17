@@ -1,19 +1,22 @@
 package org.kframework.backend.symbolic;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Rule;
 import org.kframework.kil.loader.Constants;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.krun.KPaths;
+import org.kframework.utils.file.KPaths;
+import org.kframework.utils.general.GlobalSettings;
+
+import java.io.File;
+import java.util.List;
+import java.util.Set;
+
+import com.google.common.collect.ImmutableSet;
+
 
 /**
  * Tag all the rules which are not part of K "dist/include" files with
@@ -24,11 +27,25 @@ import org.kframework.krun.KPaths;
  */
 public class TagUserRules extends CopyOnWriteTransformer {
 
-	List<String> notSymbolicTags = new ArrayList<String>(Arrays.asList(
-			Constants.MACRO, Constants.STRUCTURAL, Constants.FUNCTION, SymbolicBackend.NOTSYMBOLIC));
+	public static final Set<String> notSymbolicTags;
+    static {
+        if (GlobalSettings.matchingLogic) {
+            notSymbolicTags = ImmutableSet.of(
+                    Constants.MACRO,
+                    Constants.FUNCTION,
+                    SymbolicBackend.NOTSYMBOLIC);
+        } else {
+            notSymbolicTags = ImmutableSet.of(
+                    Constants.MACRO,
+                    Constants.FUNCTION,
+                    Constants.STRUCTURAL,
+                    Constants.ANYWHERE,
+                    SymbolicBackend.NOTSYMBOLIC);
+        }
+    }
 
-	public TagUserRules(DefinitionHelper definitionHelper) {
-		super("Tag rules which are not builtin with 'symbolic' tag", definitionHelper);
+	public TagUserRules(Context context) {
+		super("Tag rules which are not builtin with 'symbolic' tag", context);
 	}
 
 	@Override

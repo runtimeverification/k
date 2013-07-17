@@ -1,3 +1,18 @@
+/*
+
+This example exhibits a non-deterministic behavior of a defined program.
+
+ -- The compiling command
+
+     	kompile cink -transition kripke -superheat plus
+
+ -- The execution command 
+
+	krun programs/nondet.cink --search
+
+Two solutions should be reported.
+*/
+
 int r; 
 int f(int x) {
   return (r = x);

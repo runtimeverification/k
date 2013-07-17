@@ -6,11 +6,8 @@ import org.kframework.kil.ASTNode;
 
 
 /**
- * Created with IntelliJ IDEA.
- * User: andrei
- * Date: 3/17/13
- * Time: 12:54 PM
- * To change this template use File | Settings | File Templates.
+ *
+ * @author AndreiS
  */
 public abstract class Collection extends Term {
 
@@ -19,8 +16,8 @@ public abstract class Collection extends Term {
     protected Collection(Variable frame, Kind kind) {
         super(kind);
 
-        assert frame == null || frame.getKind() == kind
-                : "unexpected kind " + frame.getKind() + " for frame variable " + frame.getName()
+        assert frame == null || frame.kind() == kind
+                : "unexpected kind " + frame.kind() + " for frame variable " + frame.name()
                 + "; expected kind " + kind;
 
         this.frame = frame;
@@ -30,7 +27,7 @@ public abstract class Collection extends Term {
         return frame != null;
     }
 
-    public Variable getFrame() {
+    public Variable frame() {
         assert hasFrame();
 
         return frame;
@@ -39,6 +36,19 @@ public abstract class Collection extends Term {
     @Override
     public boolean isSymbolic() {
         return false;
+    }
+
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+
+        if (!(object instanceof Collection)) {
+            return false;
+        }
+
+        Collection collection = (Collection) object;
+        return frame == null ? collection.frame == null : frame.equals(collection.frame);
     }
 
     @Override

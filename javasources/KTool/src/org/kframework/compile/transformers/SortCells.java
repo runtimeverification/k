@@ -5,7 +5,8 @@ import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.Collection;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.Context;
+import org.kframework.kil.loader.*;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.StringUtil;
@@ -39,9 +40,9 @@ public class SortCells extends CopyOnWriteTransformer {
 	private final ConfigurationStructureMap configurationStructureMap;
 
 
-	public SortCells(ConfigurationStructureMap configurationStructureMap, DefinitionHelper definitionHelper) {
-		super("SortCells", definitionHelper);
-		this.configurationStructureMap = configurationStructureMap;
+	public SortCells(org.kframework.kil.loader.Context context) {
+		super("SortCells", context);
+		this.configurationStructureMap = context.getConfigurationStructureMap();
 	}
 
 	@Override
@@ -50,7 +51,7 @@ public class SortCells extends CopyOnWriteTransformer {
 	}
 
 	@Override
-	public ASTNode transform(Context node) throws TransformerException {
+	public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
 		return node;
 	}
 
@@ -61,17 +62,48 @@ public class SortCells extends CopyOnWriteTransformer {
 
 	@Override
 	public ASTNode transform(Rule node) throws TransformerException {
+//        System.out.println(node.getLocation());
+//        node = checkCollapsingCellRule(node);
+        boolean change = false;
 		variables.clear();
 		substitution.clear();
 		Term body = node.getBody();
 		ASTNode bodyNode = body.accept(this);
-		if (bodyNode == body) return node;
+        if (bodyNode != body) change = true;
+        Term condition = node.getCondition();
+        Term conditionNode = null;
+        if (condition != null) {
+           conditionNode = (Term) condition.accept(this);
+           if (conditionNode != condition) change = true;
+        }
+        if (!change) return node;
 		node = node.shallowCopy();
 		node.setBody((Term) bodyNode);
-		return node.accept(new ResolveRemainingVariables(definitionHelper));
+        node.setCondition(conditionNode);
+		return node.accept(new ResolveRemainingVariables(context));
 	}
 
-	private Map<String,List<Term>> cellMap;
+//    private Rule checkCollapsingCellRule(Rule node) {
+//        assert node.getBody() instanceof Rewrite;
+//        Rewrite rew = (Rewrite) node.getBody();
+//        if (rew.getLeft() instanceof Cell) {
+//            Term right = rew.getRight();
+//            if (right instanceof Cell) return node;
+//            if (right instanceof Bag) {
+//                assert ((Bag) right).getContents().isEmpty();
+//            } else {
+//                assert right instanceof Empty;
+//            }
+//            right = new Empty(MetaK.cellFragment(((Cell) rew.getLeft()).getId()));
+//            rew = rew.shallowCopy();
+//            rew.setRight(right);
+//            node = node.shallowCopy();
+//            node.setBody(rew);
+//        }
+//        return node;
+//    }
+
+    private Map<String,List<Term>> cellMap;
 	Map<String, Term> renamedVars;
 	Variable framingVariable;
 
@@ -91,49 +123,55 @@ public class SortCells extends CopyOnWriteTransformer {
 		if (astNode != node) {
 			node = (TermCons) astNode;
 		}
-		Production production = node.getProduction(definitionHelper);
-		Map<Integer, String> cellfragments = new HashMap<Integer, String>();
-		int i = 0;
-		for (ProductionItem pitem : production.getItems()) {
-			if (pitem instanceof Sort) {
-				final Sort sort = (Sort) pitem;
-				final String realName = sort.getRealName();
-				final Integer key = new Integer(i);
-				String oldsort = cellfragments.get(key);
-				if (MetaK.isCellSort(realName)) {
-					if (oldsort != null && !oldsort.equals(realName)) {
-						//exception
-					}
-					cellfragments.put(key, realName);
-				} else if (oldsort != null) {
-					// exception
-				}
-				i++;
-			}
-		}
-		if (cellfragments.isEmpty()) return node;
+		Production production = node.getProduction();
+		Map<Integer, String> cellsorts = getCellSorts(production);
+		int i;
+		if (cellsorts.isEmpty()) return node;
 		TermCons outNode = node.shallowCopy();
 		final ArrayList<Term> outList = new ArrayList<Term>();
 		outNode.setContents(outList);
 		i = 0;
 		for (Term t : node.getContents()) {
 			Term out = t;
-			String sort = cellfragments.get(new Integer(i));
+			String sort = cellsorts.get(new Integer(i));
 			if (sort != null) {
-				if (!KSort.valueOf(t.getSort(definitionHelper)).mainSort().equals(KSort.Bag)){
-					//exception --- should be a Bag
+				assert (KSort.valueOf(t.getSort())
+						.mainSort().equals(KSort.Bag));
+				if (MetaK.isCellFragment(sort)) {
+					Cell fragment = new Cell();
+					fragment.setLabel(context.getCellSort(sort));
+//					System.err.println(fragment.getLabel());
+					fragment.setContents(t);
+					fragment = (Cell) transformTop(fragment, true);
+					out = fragment;
+				} else {
+					out = out.shallowCopy();
+					out.setSort(sort);
 				}
-				Cell fragment = new Cell();
-				fragment.setLabel(definitionHelper.getCellSort(sort));
-				System.err.println(fragment.getLabel());
-				fragment.setContents(t);
-				fragment = (Cell) transformTop(fragment, true);
-				out = fragment;
 			}
 			outList.add(out);
 			i++;
 		}
 		return outNode;
+	}
+
+	private Map<Integer, String> getCellSorts(Production production) {
+		Map<Integer, String> cellsorts = new HashMap<Integer, String>();
+		int i = 0;
+		for (ProductionItem pitem : production.getItems()) {
+			if (pitem instanceof Sort) {
+				final Sort sort = (Sort) pitem;
+				final String realName = sort.getRealName();
+				final Integer key = new Integer(i);
+				String oldsort = cellsorts.get(key);
+				if (MetaK.isCellSort(realName)) {
+					assert (oldsort == null || oldsort.equals(realName)) ;
+					cellsorts.put(key, realName);
+				} else assert  (oldsort == null) ;
+				i++;
+			}
+		}
+		return cellsorts;
 	}
 
 	@Override
@@ -146,7 +184,7 @@ public class SortCells extends CopyOnWriteTransformer {
 		if (!(klabel instanceof KLabelConstant)) return node;
 		KLabelConstant label = (KLabelConstant) klabel;
 		Set<Production> productions =
-				definitionHelper.productions.get(
+				context.productions.get(
 						StringUtil.unescapeMaude(label.getLabel()));
 		if (productions == null|| productions.isEmpty())
 			return node;
@@ -160,18 +198,15 @@ public class SortCells extends CopyOnWriteTransformer {
 					final Integer key = new Integer(i);
 					String oldsort = cellfragments.get(key);
 					if (MetaK.isCellSort(realName)) {
-						if (oldsort != null && !oldsort.equals(realName)) {
-							//exception
-						}
+						assert (oldsort == null || oldsort.equals(realName));
 						cellfragments.put(key, realName);
-					} else if (oldsort != null) {
-						// exception
-					}
+					} else assert (oldsort == null);
 					i++;
 				}
 			}
 		}
 		if (cellfragments.isEmpty()) return node;
+        KApp oldNode = node;
 		node = node.shallowCopy();
 		Term child = node.getChild();
 		if (!(child instanceof KList)) {
@@ -187,37 +222,36 @@ public class SortCells extends CopyOnWriteTransformer {
 		outkList.setContents(outList);
 		int i = 0;
 		for (Term t : kList.getContents()) {
+            if (t.getSort().equals(KSort.KList.name())) return oldNode;
 			String sort = cellfragments.get(new Integer(i));
 			if (sort != null) {
-				if (!(t instanceof KApp)) {
-					// exception -- should be a Bag KLabel
-				}
+				assert (t instanceof KApp);
 				t = t.shallowCopy();
 				KApp kApp = (KApp) t;
 				if (kApp.getChild() instanceof KList) {
-					if (!((KList) kApp
-						.getChild()).getContents().isEmpty()) {
-					//exception -- should be empty list here
-					}
-				} else if (!(kApp.getChild() instanceof Empty)) {
-					//exception --- should be empty
-				}
+					assert((KList) kApp
+						.getChild()).getContents().isEmpty();
+				} else assert  ((kApp.getChild() instanceof Empty));
 				final Term kAppLabel = kApp.getLabel().shallowCopy();
-				if (!(kAppLabel instanceof KInjectedLabel)) {
-					//exception --- Should be a KInjected Bag label
-				}
+				assert ((kAppLabel instanceof KInjectedLabel));
 				kApp.setLabel(kAppLabel);
 
 				final KInjectedLabel kInjectedLabel = (KInjectedLabel) kAppLabel;
 				Term bag = kInjectedLabel.getTerm();
-				if (!KSort.valueOf(bag.getSort(definitionHelper)).mainSort().equals(KSort.Bag)){
-					//exception --- should be a Bag
+				assert  bag.getSort().equals("Bag")
+						||	bag.getSort().equals("BagItem")
+						|| MetaK.isCellSort(bag.getSort());
+				if (MetaK.isCellFragment(sort)) {
+					Cell fragment = new Cell();
+					fragment.setLabel(context.getCellSort(sort));
+					fragment.setContents(bag);
+					fragment = (Cell) transformTop(fragment, true);
+					kInjectedLabel.setTerm(fragment);
+				} else {
+					bag = bag.shallowCopy();
+					bag.setSort(sort);
+					kInjectedLabel.setTerm(bag);
 				}
-				Cell fragment = new Cell();
-				fragment.setLabel(definitionHelper.getCellSort(sort));
-				fragment.setContents(bag);
-				fragment = (Cell) transformTop(fragment, true);
-				kInjectedLabel.setTerm(fragment);
 			}
 			outList.add(t);
 			i++;
@@ -228,9 +262,14 @@ public class SortCells extends CopyOnWriteTransformer {
 	ASTNode transformTop(Cell node, boolean fragment) {
 		ConfigurationStructureMap config = configurationStructureMap;
 		String id = node.getId();
+        node = node.shallowCopy();
 		if (fragment) {
+//            System.out.println(node);
 			id = id.substring(0, id.length()-"-fragment".length());
-		}
+            node.setSort(MetaK.cellFragment(id));
+		} else {
+            node.setSort(MetaK.cellSort(id));
+        }
 		ConfigurationStructure cfgStr = config.get(id);
 		if (cfgStr.sons.isEmpty()) {
 			return node;
@@ -283,8 +322,8 @@ public class SortCells extends CopyOnWriteTransformer {
 			if (!(replacementTerm instanceof Empty) && replacementTerm != null) {
 				iCells.add(replacementTerm);
 			}
-			if (iCells.isEmpty() && fragment) {
-				outCells.add(new Bag());
+			if (iCells.isEmpty()) {
+                outCells.add(new Empty(MetaK.cellFragment(cell.getId())));
 			} else {
 				if (multiplicity == Cell.Multiplicity.ONE) {
 					if (iCells.size() != 1) {
@@ -364,17 +403,17 @@ public class SortCells extends CopyOnWriteTransformer {
 		if (framingVariable == null) return null;
 		Cell.Multiplicity multiplicity = cell.getMultiplicity();
 		List<Term> iCells = cellMap.get(cell.getId());
-		Term replacementTerm =  new Empty(KSort.Bag.name());
+		Term replacementTerm =  new Empty(MetaK.cellFragment(cell.getId()));
 		if (iCells != null) {
 			if (multiplicity == Cell.Multiplicity.ANY ||
 					multiplicity == Cell.Multiplicity.SOME) {
-				replacementTerm = MetaK.getFreshVar(KSorts.BAG);
+				replacementTerm = Variable.getFreshVar(MetaK.cellFragment(cell.getId()));
 			}
 		} else {
 			if (multiplicity == Cell.Multiplicity.ONE && !fragment) {
-				replacementTerm = MetaK.getFreshVar(KSorts.BAG_ITEM);
+				replacementTerm = Variable.getFreshVar(MetaK.cellSort(cell.getId()));
 			} else {
-				replacementTerm = MetaK.getFreshVar(KSorts.BAG);
+				replacementTerm = Variable.getFreshVar(MetaK.cellFragment(cell.getId()));
 			}
 		}
 		Term oldTerm = renamedVars.get(cell.getId());
@@ -390,10 +429,10 @@ public class SortCells extends CopyOnWriteTransformer {
 			return replacementTerm;
 		}
 		if (replacementTerm instanceof Empty) {
-			if (oldTerm.getSort(definitionHelper).equals(KSort.BagItem.name())) {
+			if (oldTerm.getSort().equals(MetaK.cellSort(cell.getId()))) {
 				GlobalSettings.kem.register(new KException(KException
 						.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER,
-						"Multiplicity constraints clash for cell" +
+						"Multiplicity constraints clash for cell " +
 								cell.getId(),
 						getName(), cell.getFilename(), cell.getLocation()));
 			}
@@ -403,8 +442,8 @@ public class SortCells extends CopyOnWriteTransformer {
 			}
 			return replacementTerm;
 		}
-		if (oldTerm instanceof Empty && replacementTerm.getSort(definitionHelper).equals
-				(KSort.BagItem.name())) {
+		if (oldTerm instanceof Empty && replacementTerm.getSort().equals
+				(MetaK.cellSort(cell.getId()))) {
 			GlobalSettings.kem.register(new KException(KException
 					.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER,
 					"Multiplicity constraints clash for cell" +
@@ -428,8 +467,8 @@ public class SortCells extends CopyOnWriteTransformer {
 	}
 
 	private class ResolveRemainingVariables extends CopyOnWriteTransformer {
-		private ResolveRemainingVariables(DefinitionHelper definitionHelper) {
-			super("SortCells: resolving remaining variables", definitionHelper);
+		private ResolveRemainingVariables(org.kframework.kil.loader.Context context) {
+			super("SortCells: resolving remaining variables", context);
 		}
 
 		@Override
@@ -437,7 +476,7 @@ public class SortCells extends CopyOnWriteTransformer {
 			if (variables.containsKey(node)) {
 				GlobalSettings.kem.register(new KException(KException
 						.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER,
-						"Unresolved cell contents variable" + node + " .  " +
+						"Unresolved cell contents variable " + node + " .  " +
 								"Maybe you forgot to annotate the operation " +
 								"as containing a CellFragment.",
 						getName(), node.getFilename(), node.getLocation()));

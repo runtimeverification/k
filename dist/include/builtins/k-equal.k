@@ -9,7 +9,7 @@ module K-EQUAL-HOOKS
 
   syntax Bool ::= left:
   				  K "==K" K           [function, hook(#K-EQUAL:_==K_), latex({#1}\mathrel{=_K}{#2}), equalEqualK]
-				| K "=/=K" K          [function, latex({#1}\mathrel{\neq_K}{#2}), notEqualEqualK]
+				| K "=/=K" K          [function, hook(#K-EQUAL:_=/=K_), latex({#1}\mathrel{\neq_K}{#2}), notEqualEqualK]
 				
   syntax priorities equalEqualK notEqualEqualK > boolOperation
   rule K1:K =/=K K2:K => notBool(K1 ==K K2)
@@ -103,9 +103,9 @@ module K-EQUAL-HOOKS
 
   rule K:K =K K => true
 
-  rule K1,,KL1:KList =KList K2,,KL2:KList => K1 =K K2 andBool KL1 =KList KL2
+  rule ((K1:K,,KL1:KList) =KList (K2:K,,KL2:KList)) => ((K1 =K K2) andBool (KL1 =KList KL2))
   rule .KList =KList .KList => true
-  rule _:K,,_:KList =KList .KList => false
-  rule .KList =KList _:K,,_:KList => false
+  rule (_:K,,_:KList) =KList .KList => false
+  rule .KList =KList (_:K,,_:KList) => false
 endmodule
 

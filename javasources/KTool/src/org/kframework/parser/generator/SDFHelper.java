@@ -5,7 +5,8 @@ import java.util.Set;
 
 import org.kframework.kil.Attributes;
 import org.kframework.kil.Production;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
+import org.kframework.utils.StringUtil;
 
 public class SDFHelper {
 	public static String getSDFAttributes(Attributes attrs) {
@@ -42,9 +43,9 @@ public class SDFHelper {
 	 * @param tag
 	 * @return
 	 */
-	public static Set<Production> getProductionsForTag(String tag, DefinitionHelper definitionHelper) {
-		if (definitionHelper.productions.containsKey(tag))
-			return definitionHelper.productions.get(tag);
+	public static Set<Production> getProductionsForTag(String tag, Context context) {
+		if (context.productions.containsKey(tag))
+			return context.productions.get(tag);
 		else
 			return new HashSet<Production>();
 	}
@@ -71,7 +72,7 @@ public class SDFHelper {
 		String sdf = "lexical restrictions\n";
 		sdf += "	%% follow restrictions\n";
 		for (Ttuple tt : mytuples) {
-			sdf += "	\"" + tt.value + "\" -/- ";
+			sdf += "	\"" + StringUtil.escape(tt.value) + "\" -/- ";
 			String ending = tt.key.substring(tt.value.length());
 			for (int i = 0; i < ending.length(); i++) {
 				String ch = "" + ending.charAt(i);

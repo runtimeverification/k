@@ -1,24 +1,30 @@
 package org.kframework.krun.api;
 
-import edu.uci.ics.jung.graph.DirectedGraph;
-import edu.uci.ics.jung.graph.DirectedSparseGraph;
-import edu.uci.ics.jung.graph.util.Pair;
+import java.util.Set;
+
 import org.apache.commons.collections15.BidiMap;
 import org.apache.commons.collections15.bidimap.DualHashBidiMap;
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Cell;
 import org.kframework.kil.Rule;
+import org.kframework.kil.Sentence;
+import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.TermCons;
+import org.kframework.kil.loader.Context;
+import org.kframework.kil.visitors.CopyOnWriteTransformer;
+import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.K;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.api.Transition.TransitionType;
+import org.kframework.parser.DefinitionLoader;
 import org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor;
-import org.kframework.utils.DefinitionLoader;
-import org.kframework.utils.general.GlobalSettings;
 
-import java.util.Set;
+import edu.uci.ics.jung.graph.DirectedGraph;
+import edu.uci.ics.jung.graph.DirectedSparseGraph;
+import edu.uci.ics.jung.graph.util.Pair;
 
 public class KRunApiDebugger implements KRunDebugger {
 	private KRun krun;
@@ -30,18 +36,19 @@ public class KRunApiDebugger implements KRunDebugger {
 	private static Set<String> defaultVars;
 	private static RuleCompilerSteps defaultPatternInfo;
 	
-	protected DefinitionHelper definitionHelper;
+	protected Context context;
 
-	public KRunApiDebugger(KRun krun, Term cfg, DefinitionHelper definitionHelper) throws KRunExecutionException {
-		this.definitionHelper = definitionHelper;
+	public KRunApiDebugger(KRun krun, Term cfg, Context context) throws KRunExecutionException {
+		this.context = context;
 		try { 
 			org.kframework.parser.concrete.KParser.ImportTbl(K.compiled_def + "/def/Concrete.tbl");
-			ASTNode pattern = DefinitionLoader.parsePattern(K.pattern, "Command line pattern", definitionHelper);
-			CollectVariablesVisitor vars = new CollectVariablesVisitor(definitionHelper);
+			ASTNode pattern = DefinitionLoader.parsePattern(K.pattern, "Command line pattern",
+                    context);
+			CollectVariablesVisitor vars = new CollectVariablesVisitor(context);
 			pattern.accept(vars);
 			defaultVars = vars.getVars().keySet();
-			defaultPatternInfo = new RuleCompilerSteps(K.definition, definitionHelper);
-			pattern = defaultPatternInfo.compile((Rule) pattern, null);
+			defaultPatternInfo = new RuleCompilerSteps(K.definition, context);
+			pattern = defaultPatternInfo.compile(new Rule((Sentence) pattern), null);
 
 			defaultPattern = (Rule) pattern;
 		} catch (Exception e) {
@@ -49,7 +56,7 @@ public class KRunApiDebugger implements KRunDebugger {
 		}
 
 		this.krun = krun;
-		KRunState initialState = new KRunState(cfg, K.stateCounter++, definitionHelper);
+		KRunState initialState = new KRunState(cfg, K.stateCounter++, context);
 		graph = new DirectedSparseGraph<KRunState, Transition>();
 		graph.addVertex(initialState);
 		states = new DualHashBidiMap<Integer, KRunState>();
@@ -58,7 +65,7 @@ public class KRunApiDebugger implements KRunDebugger {
 		reduced.setStateId(K.stateCounter++);
 		putState(reduced);
 		graph.addVertex(reduced);
-		graph.addEdge(new Transition(TransitionType.REDUCE, definitionHelper), initialState, reduced);
+		graph.addEdge(Transition.reduce(context), initialState, reduced);
 		currentState = reduced.getStateId();
 	}
 
@@ -117,7 +124,7 @@ public class KRunApiDebugger implements KRunDebugger {
 			nextStep.setStateId(K.stateCounter++);
 			putState(nextStep);
 			graph.addVertex(nextStep);
-			graph.addEdge(new Transition(TransitionType.UNLABELLED, definitionHelper), getState(currentState), nextStep);
+			graph.addEdge(Transition.unlabelled(context), getState(currentState), nextStep);
 			currentState = nextStep.getStateId();
 		}
 	}
@@ -175,7 +182,7 @@ public class KRunApiDebugger implements KRunDebugger {
 
 	public String printState(int stateNum) {
 		KRunState state = getState(stateNum);
-		UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, definitionHelper);
+		UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
 		state.getResult().accept(unparser);
 		return state.toString() + ":\n" + unparser.getResult();
 	}
@@ -192,7 +199,7 @@ public class KRunApiDebugger implements KRunDebugger {
 		Transition edge = getEdge(state1, state2);
 		String rule;
 		if (edge.getType() == TransitionType.RULE) {
-			UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, definitionHelper);
+			UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
 			edge.getRule().accept(unparser);
 			rule = unparser.getResult();
 		} else if (edge.getType() == TransitionType.LABEL) {
@@ -202,5 +209,93 @@ public class KRunApiDebugger implements KRunDebugger {
 		}
 		
 		return rule + "\n" + printState(state1) + "\n=>\n" + printState(state2);
+	}
+
+	public void readFromStdin(String s) {
+		if (currentState == null) {
+			throw new IllegalStateException("Wrong command: If you previously used the step-all " +
+				"command you must select\nfirst a solution with the select command before " +
+				"executing a read from stdin.");
+		}
+		Term configuration = getState(currentState).getRawResult();
+		AppendToStdin transformer = new AppendToStdin(s, context);
+		Term result;
+		try {
+			result = (Term)configuration.accept(transformer);
+		} catch (TransformerException e) {
+			assert false;
+			result = null; //for static purposes
+		}
+		if (!transformer.getSucceeded()) {
+			throw new IllegalStateException("Cannot perform command: Configuration does not " + 
+				"have an stdin buffer");
+		}
+		KRunState newState = new KRunState(result, context);
+		if (states.containsValue(newState)) {
+			KRunState canonicalNewState = canonicalizeState(newState);
+			Transition edge = graph.findEdge(getState(currentState), canonicalNewState);
+			if (edge == null) {
+				graph.addEdge(Transition.stdin(s, context), 
+					getState(currentState), canonicalNewState);
+			}
+			currentState = canonicalNewState.getStateId();
+			return;
+		}
+		newState.setStateId(K.stateCounter++);
+		putState(newState);
+		graph.addVertex(newState);
+		graph.addEdge(Transition.stdin(s, context), 
+			getState(currentState), newState);
+		currentState = newState.getStateId();
+	}
+
+	private static class AppendToStdin extends CopyOnWriteTransformer {
+		private String str;
+		private boolean succeeded;
+		private boolean inStdin, inBuffer;
+		public AppendToStdin(String str, Context context) {
+			super("Append a string to the stdin buffer", context);
+			this.str = str;
+			succeeded = false;
+			inStdin = false;
+			inBuffer = false;
+		}
+
+		public boolean getSucceeded() {
+			return succeeded;
+		}
+
+		@Override
+		public ASTNode transform(Cell cell) throws TransformerException {
+			if ("stdin".equals(context.cells.get(cell.getLabel())
+				.getCellAttributes().get("stream"))) {
+				inStdin = true;
+				ASTNode result = super.transform(cell);
+				inStdin = false;
+				return result;
+			}
+			return super.transform(cell);
+		}
+
+		@Override
+		public ASTNode transform(TermCons tc) throws TransformerException {
+			if (tc.getCons().equals("List1IOBufferSyn") &&
+				tc.getContents().size() == 1) {
+				inBuffer = true;
+				ASTNode result = super.transform(tc);
+				inBuffer = false;
+				return result;
+			}
+			return super.transform(tc);
+		}
+
+		@Override
+		public ASTNode transform(StringBuiltin s) throws TransformerException {
+			if (inStdin && inBuffer) {
+				succeeded = true;
+				return StringBuiltin.of(s.stringValue() + str);
+			}
+			return super.transform(s);
+		}
 	}
 }

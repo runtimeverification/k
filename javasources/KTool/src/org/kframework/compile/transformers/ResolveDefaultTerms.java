@@ -5,7 +5,7 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Cell.Multiplicity;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -22,15 +22,10 @@ public class ResolveDefaultTerms extends CopyOnWriteTransformer {
 	
 	private Map<String, ConfigurationStructure> config;
 
-	public ResolveDefaultTerms(DefinitionHelper definitionHelper) {
-		super("Resolve Default Terms", definitionHelper);
+	public ResolveDefaultTerms(Context context) {
+		super("Resolve Default Terms", context);
+        config = context.getConfigurationStructureMap();
 	}
-	
-	public ResolveDefaultTerms(Map<String, ConfigurationStructure> config, DefinitionHelper definitionHelper) {
-		this(definitionHelper);
-		this.config = config;
-	}
-	
 	
 	@Override
 	public ASTNode transform(Rule node) throws TransformerException {
@@ -40,10 +35,10 @@ public class ResolveDefaultTerms extends CopyOnWriteTransformer {
 	
 	@Override
 	public ASTNode transform(Rewrite node) throws TransformerException {
-		ASTNode right = node.getRight().accept(new DefaultTermsResolver(definitionHelper));
+		ASTNode right = node.getRight().accept(new DefaultTermsResolver(context));
 		if (right != node.getRight()) {
 			node = node.shallowCopy();
-			node.setRight((Term)right);
+			node.setRight((Term)right, context);
 		}
 		return node;
 	}
@@ -59,15 +54,15 @@ public class ResolveDefaultTerms extends CopyOnWriteTransformer {
 	}
 
 	@Override
-	public ASTNode transform(Context node) throws TransformerException {
+	public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
 		return node;
 	}
 	
 	
 	public class DefaultTermsResolver extends CopyOnWriteTransformer {
 		
-		public DefaultTermsResolver(DefinitionHelper definitionHelper) {
-			super("Default Terms Resolver", definitionHelper);
+		public DefaultTermsResolver(Context context) {
+			super("Default Terms Resolver", context);
 		}
 		
 		@Override
@@ -86,7 +81,7 @@ public class ResolveDefaultTerms extends CopyOnWriteTransformer {
 				
 				return cell;
 			}
-			List<Cell> sons = MetaK.getTopCells(cell.getContents(), definitionHelper);
+			List<Cell> sons = MetaK.getTopCells(cell.getContents(), context);
 			Map<String, ConfigurationStructure> potentialSons = new HashMap<String, ConfigurationStructure>(cellStr.sons);
 			
 			for (Cell son : sons) {

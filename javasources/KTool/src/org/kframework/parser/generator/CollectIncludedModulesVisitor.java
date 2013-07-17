@@ -5,7 +5,7 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.Import;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -21,8 +21,8 @@ public class CollectIncludedModulesVisitor extends BasicVisitor {
 	public Set<String> modNames = new HashSet<String>();
 	private String startModuleName;
 
-	public CollectIncludedModulesVisitor(String startModuleName, DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public CollectIncludedModulesVisitor(String startModuleName, Context context) {
+		super(context);
 		this.startModuleName = startModuleName;
 	}
 

@@ -2,52 +2,27 @@ package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.MaudeHelper;
 import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Attributes;
-import org.kframework.kil.Builtin;
-import org.kframework.kil.Cell;
+import org.kframework.kil.*;
 import org.kframework.kil.Collection;
-import org.kframework.kil.CollectionItem;
-import org.kframework.kil.Constant;
-import org.kframework.kil.Empty;
-import org.kframework.kil.Freezer;
-import org.kframework.kil.FreezerLabel;
-import org.kframework.kil.KApp;
-import org.kframework.kil.KInjectedLabel;
-import org.kframework.kil.KLabelConstant;
-import org.kframework.kil.KList;
-import org.kframework.kil.KSequence;
-import org.kframework.kil.KSorts;
-import org.kframework.kil.MapItem;
-import org.kframework.kil.Module;
-import org.kframework.kil.Production;
-import org.kframework.kil.ProductionItem;
-import org.kframework.kil.Sort;
-import org.kframework.kil.StringBuiltin;
-import org.kframework.kil.Syntax;
-import org.kframework.kil.Term;
-import org.kframework.kil.TermCons;
-import org.kframework.kil.Terminal;
-import org.kframework.kil.UserList;
-import org.kframework.kil.Variable;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.utils.StringUtil;
+import org.kframework.krun.K;
+import org.kframework.utils.general.GlobalSettings;
 
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.*;
 import java.util.List;
 import java.util.Set;
+
 
 public class FlattenSyntax extends CopyOnWriteTransformer {
 	FlattenKSyntax kTrans;
 	Set<String> listSeparators = new HashSet<String>();
 	boolean isComputation = false;
 
-	public FlattenSyntax(DefinitionHelper definitionHelper) {
-		super("Syntax K to Abstract K", definitionHelper);
-		kTrans = new FlattenKSyntax(this, definitionHelper);
+	public FlattenSyntax(Context context) {
+		super("Syntax K to Abstract K", context);
+		kTrans = new FlattenKSyntax(this, context);
 	}
 
 	@Override
@@ -128,7 +103,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 
 	@Override
 	public ASTNode transform(Variable node) throws TransformerException {
-		if (MetaK.isComputationSort(node.getSort(definitionHelper)))
+		if (MetaK.isComputationSort(node.getSort()))
 			return node.accept(kTrans);
 		return node;
 	}
@@ -142,14 +117,10 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 
 	@Override
 	public ASTNode transform(Constant node) throws TransformerException {
-		if (MetaK.isComputationSort(node.getSort(definitionHelper)))
+        assert false : "dead code";
+		if (MetaK.isComputationSort(node.getSort()))
 			return node.accept(kTrans);
 		return node;
-	}
-
-	@Override
-	public ASTNode transform(Builtin node) throws TransformerException {
-		return node.accept(kTrans);
 	}
 
 	@Override
@@ -162,8 +133,8 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 	class FlattenKSyntax extends CopyOnWriteTransformer {
 		FlattenSyntax trans;
 
-		public FlattenKSyntax(FlattenSyntax t, DefinitionHelper definitionHelper) {
-			super("Flatten K Syntax", definitionHelper);
+		public FlattenKSyntax(FlattenSyntax t, Context context) {
+			super("Flatten K Syntax", context);
 			trans = t;
 		}
 
@@ -181,52 +152,49 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 
 		@Override
 		public ASTNode transform(Freezer node) throws TransformerException {
-			return KApp.of(definitionHelper, new FreezerLabel((Term) node.getTerm().accept(this)));
+			return KApp.of(new FreezerLabel((Term) node.getTerm().accept(this)));
 		}
 
 		@Override
 		public ASTNode transform(TermCons tc) throws TransformerException {
 			if (!MetaK.isComputationSort(tc.getSort())) {
-				return KApp.of(definitionHelper, new KInjectedLabel((Term) tc.accept(trans)));
+				return KApp.of(new KInjectedLabel((Term) tc.accept(trans)));
 			}
 
 			String l = tc.getLocation();
 			String f = tc.getFilename();
-			Production ppp = definitionHelper.conses.get(tc.getCons());
+			Production ppp = context.conses.get(tc.getCons());
 			KList lok = new KList(l, f);
 			for (Term t : tc.getContents()) {
 				lok.getContents().add((Term) t.accept(this));
 			}
-			return new KApp(l, f, KLabelConstant.of(ppp.getKLabel(), definitionHelper), lok);
+			return new KApp(l, f, KLabelConstant.of(ppp.getKLabel(), context), lok);
 		}
 
 		@Override
-		public ASTNode transform(KLabelConstant kLabelConstant) throws TransformerException {
-			String l = kLabelConstant.getLocation();
-			String f = kLabelConstant.getFilename();
-			return new KApp(l, f, new KInjectedLabel(kLabelConstant), KList.EMPTY);
+		public ASTNode transform(KLabel kLabel) throws TransformerException {
+			return new KApp(
+                    kLabel.getLocation(),
+                    kLabel.getFilename(),
+                    new KInjectedLabel(kLabel),
+                    KList.EMPTY);
 		}
 
 		@Override
 		public ASTNode transform(Constant cst) throws TransformerException {
-			String l = cst.getLocation();
+            assert false : "deprecated class";
+            return null;
+/*			String l = cst.getLocation();
 			String f = cst.getFilename();
 
-			if (!MetaK.isBuiltinSort(cst.getSort(definitionHelper))) {
+			if (!MetaK.isBuiltinSort(cst.getSort(context))) {
 				KList list = new KList();
-				list.add(StringBuiltin.of(cst.getSort(definitionHelper)));
+				list.add(StringBuiltin.of(cst.getSort(context)));
 				list.add(StringBuiltin.of(StringUtil.escape(cst.getValue())));
-				return new KApp(KLabelConstant.of("#token", definitionHelper), list).accept(this);
+				return new KApp(KLabelConstant.of("#token", context), list).accept(this);
 			} else {
 				return new KApp(l, f, new KInjectedLabel(cst), KList.EMPTY);
-			}
-		}
-
-		@Override
-		public ASTNode transform(Builtin builtin) throws TransformerException {
-			String l = builtin.getLocation();
-			String f = builtin.getFilename();
-			return new KApp(l, f, new KInjectedLabel(builtin), KList.EMPTY);
+			} */
 		}
 
 		@Override
@@ -234,13 +202,13 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 			String l = emp.getLocation();
 			String f = emp.getFilename();
 			if (!MetaK.isComputationSort(emp.getSort())) {
-				return KApp.of(definitionHelper, new KInjectedLabel(emp));
+				return KApp.of(new KInjectedLabel(emp));
 			}
 			// if this is a list sort
 			if (!MaudeHelper.basicSorts.contains(emp.getSort())) {
-				Production listProd = definitionHelper.listConses.get(emp.getSort());
+				Production listProd = context.listConses.get(emp.getSort());
 				String separator = ((UserList) listProd.getItems().get(0)).getSeparator();
-				return new KApp(l, f, KLabelConstant.of(MetaK.getListUnitLabel(separator), definitionHelper), KList.EMPTY);
+				return new KApp(l, f, KLabelConstant.of(MetaK.getListUnitLabel(separator), context), KList.EMPTY);
 				// Constant cst = new Constant(l, f, KSorts.KLABEL, "'." + emp.getSort() + "");
 				// return new KApp(l, f, cst, new Empty(l, f, MetaK.Constants.KList));
 			}
@@ -251,32 +219,102 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 		public ASTNode transform(Collection node) throws TransformerException {
 			if (node instanceof KSequence)
 				return super.transform(node);
-			return KApp.of(definitionHelper, new KInjectedLabel((Term) node.accept(trans)));
+			return KApp.of(new KInjectedLabel((Term) node.accept(trans)));
 		}
 
 		@Override
 		public ASTNode transform(CollectionItem node) throws TransformerException {
-			return KApp.of(definitionHelper, new KInjectedLabel((Term) node.accept(trans)));
+			return KApp.of(new KInjectedLabel((Term) node.accept(trans)));
 		}
 
 		@Override
 		public ASTNode transform(MapItem node) throws TransformerException {
-			return KApp.of(definitionHelper, new KInjectedLabel((Term) node.accept(trans)));
+			return KApp.of(new KInjectedLabel((Term) node.accept(trans)));
 		}
+
+        @Override
+        public ASTNode transform(CollectionBuiltin node) throws TransformerException {
+            /* just for LHS for now */
+            assert  (node.isLHSView() || node.isElementCollection());
+
+            LinkedHashSet<Term> elements = new LinkedHashSet<Term>(node.elements().size());
+            for (Term term : node.elements()) {
+                Term transformedTerm = (Term) term.accept(trans);
+                elements.add(transformedTerm);
+            }
+
+            ArrayList<Term> terms = new ArrayList<Term>(node.baseTerms().size());
+            if (node.isLHSView()) {
+                Variable frame = node.viewBase();
+                frame.setSort(node.sort().type());
+                terms.add(frame);
+            }
+
+            return KApp.of(new KInjectedLabel(CollectionBuiltin.of(
+                    node.sort(),
+                    elements,
+                    terms)));
+        }
+
+        @Override
+        public ASTNode transform(MapBuiltin node) throws TransformerException {
+            /* just for LHS for now */
+            assert  (node.isLHSView() || node.isElementCollection());
+
+            LinkedHashMap<Term, Term> elements = new LinkedHashMap<Term, Term>(node.elements().size());
+            for (java.util.Map.Entry<Term, Term> entry : node.elements().entrySet()) {
+                Term transformedKey = (Term) entry.getKey().accept(trans);
+                Term transformedValue = (Term) entry.getValue().accept(trans);
+                elements.put(transformedKey, transformedValue);
+            }
+
+            ArrayList<Term> terms = new ArrayList<Term>(node.baseTerms().size());
+            if (node.isLHSView()) {
+                Variable frame = node.viewBase();
+                frame.setSort(node.sort().type());
+                terms.add(frame);
+            }
+
+            return KApp.of(new KInjectedLabel(new MapBuiltin(
+                    node.sort(),
+                    elements,
+                    terms)));
+        }
 
 		@Override
 		public ASTNode transform(Cell node) throws TransformerException {
-			return KApp.of(definitionHelper, new KInjectedLabel((Term) node.accept(trans)));
+			return KApp.of(new KInjectedLabel((Term) node.accept(trans)));
 		}
 
 		@Override
 		public ASTNode transform(Variable node) throws TransformerException {
-			if (node.getSort(definitionHelper).equals(KSorts.KITEM) || node.getSort(definitionHelper).equals(KSorts.K))
+			if (node.getSort().equals(KSorts.KITEM) || node.getSort().equals(KSorts.K)) {
 				return node;
-			if (MetaK.isKSort(node.getSort(definitionHelper)) || MetaK.isBuiltinSort(node.getSort(definitionHelper)))
-				return KApp.of(definitionHelper, new KInjectedLabel(node));
+            }
+			if (MetaK.isKSort(node.getSort())) {
+				return KApp.of(new KInjectedLabel(node));
+            }
+
+            if (node.getSort().equals(BoolBuiltin.SORT_NAME)
+                    || node.getSort().equals(IntBuiltin.SORT_NAME)
+                    || node.getSort().equals(FloatBuiltin.SORT_NAME)
+                    || node.getSort().equals(StringBuiltin.SORT_NAME)) {
+                return node;
+            }
+
+            if (context.getDataStructureSorts().containsKey(node.getSort())) {
+                //node = node.shallowCopy();
+                //node.setSort(context.dataStructureSorts.get(node.getSort()).type());
+                //return KApp.of(new KInjectedLabel(node));
+                return node;
+            }
+
 			node = node.shallowCopy();
-			node.setSort(KSorts.KITEM);
+            if (GlobalSettings.matchingLogic || K.backend.equals("java-symbolic")) {
+                /* the Java Rewrite Engine preserves sort information for variables */
+            } else {
+			    node.setSort(KSorts.KITEM);
+            }
 			return node;
 		}
 	}

@@ -28,42 +28,9 @@ module CINK-BASIC-SEMANTICS
   syntax KResult ::= Val
   syntax Exp ::= "undefined"
 
-  /*@
-  \subsection{Lvalues and Rvalues}
-  We first deal only with lvalues and prvalues. In order to keep the definition
-  as simple as possible, we let the the prvalue as the default category for 
-  expressions and we make explicitly only the category of lvalue expressions:
-  */
-  
-  syntax K ::= "lvalue" "(" K ")" 
-
-  /*@
-  As its definition says, the main operator emphasiszing the two categories is
-  the assignment. We use a context declaration to say that the left-hand side 
-  of the assignemnt is a lvalue:
-  */
-
-  context (HOLE => lvalue(HOLE)) = _:Exp
-
-  /*@
-  The above declaration is equivalent with the following to heating/cooling
-  rules:
-  \begin{align}
-  & E_1 \texttt{~=~} E_2 \Rightarrow lvalue(E_1) \kra HOLE \texttt{~=~} E_2\\
-  &  lvalue(L_1) \kra HOLE \texttt{~=~} E_2 \Rightarrow L_1 \texttt{~=~} E_2
-  \end{align}
-  This assume that the locations must be defined as values:
-  */
-
-
-  /*@ \subsection{Memory Locations}
-   We use (automatically generated) symbolic values for locations.
-   These are of sort \texttt{Loc}. The locations are by definition lvalues.
-   */
-
+  /*@ \subsection{Memory Locations} */
 
   syntax Loc ::= "noLoc"
-  syntax LVal ::= Loc 
 
 
   /*@ \subsection{Auxiliary constructs.} */
@@ -84,11 +51,14 @@ module CINK-BASIC-SEMANTICS
                     | "[" Map "]"
 
  /*@ \subsection{Configuration.} 
-   Since \Cink is developed in iterations, each such iteration will have its
-   own configuration. In order to have a modular definition, each module 
-   adding semantics for several feature will include a minimal configuration
-   needed to define these features.
-   The following cells are used to give semantics for the basic constructs:
+   The configuration is standard for such languages (compare it to that of IMPP
+   and SIMPLE).
+   The threads are included in a cell named \texttt{threads}, where each cell
+   \texttt{thread}, representing the current of a thread, includes a cell 
+   \texttt{k} for the local computations, a cell \texttt{env} for the local
+   environment, and a cell \texttt{fstack} for
+   the managing the local configurations when a function call expression 
+   or a return statement is executed.
   */
 
   configuration   <k color="green"> ($PGM:Pgm ~> execute) </k>
@@ -118,7 +88,6 @@ module CINK-BASIC-SEMANTICS
 
  /*@
     Desugaring rule for variable declarations with initialization.
-    The alias declarations are defined later, together with the pointers.
   */
 
    rule T:Type E1:Exp = E2:Exp ; => T E1; E1 = E2;
@@ -224,25 +193,16 @@ module CINK-BASIC-SEMANTICS
        <env>... X |-> L:Loc ...</env>
        <store>... L |-> V:Val ...</store>
        [kripke(mem-lookup)]
+
   /*@
-    An identifier seen as a lvalue is evaluated to its location: 
-  */
-  rule <k> lvalue(X:Id => L) ...</k>
+    The memory update is given by the assignment operator. We consider
+    here only the case when he left-hand side is an variable name. 
+    The general case will be considered in a future iteration.
+   */
+  rule <k> X:Id = V:Val => V  ...</k>
        <env>... X |-> L:Loc ...</env>
-       [lookup]
-
-
-  /*@
-    The memory update is given by the assignment operator.
-    An assignemnt, after the reduction of the arguments, has in the lef-hand
-    side a location ($=$ the lvalue designated by the lhs.)
-  */
-  rule <k> L:Loc = V:Val  => V ...</k>
        <store>... L |-> (_ => V) ...</store>
-       [update, kripke]
-
-  /*@
-
+       [kripke(mem-update)]
 
   /* \subsection{Control Statements.} */
 
@@ -297,13 +257,11 @@ module CINK-BASIC-SEMANTICS
    In order to read from the standard stream \texttt{cin}, the expression
    from the right-hand side must be evaluated to an l-value:
   */
-  context cin >> (HOLE => lvalue(HOLE))
-
-  rule <k> cin >> L:Loc => cin  ...</k>
-       <store>... L |-> (_ => V)  ...</store>
-       <in> (ListItem(V:Int) => .)  ...</in>
+  rule <k> cin >> X:Id => cin  ...</k>
+       <env>...  X |-> L:Loc  ...</env>
+       <store>... L |-> (_ => I)  ...</store>
+       <in> (ListItem(I:Int) => .)  ...</in>
        [read-stream]
-
 
   /*@
     \subsection{The function call expression}
@@ -317,35 +275,10 @@ module CINK-BASIC-SEMANTICS
     Since the evaluation strategy for the second argument is depending on
     the binding specification in the function signature, the function call
     expression is declared strict only in its first argument.
-    Note that in this iteration we consider only the call-by-value 
+    Note that in this iterartion we consider only the call-by-value 
     binding mechanism. The call-by-reference mechanism will be considered
     in a future iteration.
-  /*
-
-/*@
-From the \Cpp manual:
-\begin{quote}
-When a function is called, each parameter (8.3.5) shall be initialized 
-(8.5, 12.8, 12.1) with its corresponding
-argument. [ Note: Such initializations are indeterminately sequenced with 
-respect to each other (1.9) - end note ] \ldots\\  
-When a function is called, the parameters that have object 
-type shall have completely-defined
-object type. \ldots \\
-During the initialization of a parameter, an implementation may avoid the 
-construction of extra temporaries by
-combining the conversions on the associated argument and/or the construction
-of temporaries with thevinitialization of the parameter (see 12.2). 
-The lifetime of a parameter ends when the function in which it
-is defined returns. The initialization and destruction of each parameter 
-occurs within the context of the calling function.
-\ldots\\{}
-[ Note: a function can change the values of its non-const parameters, 
-but these changes cannot affect the
-values of the arguments except where a parameter is of a reference 
-type (8.3.2)\ldots
-\end{quote}
-*/
+   */
 
   /*@
     The rule defining the evaluation of a function call expression evaluates
@@ -462,9 +395,7 @@ type (8.3.2)\ldots
   /*@
     \subsection{Auxiliary Functions and Rules.}
     Here we winclude the semantics for the auxiliary constructs, used to give
-    semnatics for \Cink.\\
-    The "alias" are used for declaring aliases for the variables; their semantics 
-    is given in the iteration that adds the pointers. 
+    semnatics for \Cink.
   */
 
   syntax Bool ::= "isAliasExp" "(" Exp ")" [function]

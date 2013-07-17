@@ -20,9 +20,13 @@ public class Context extends Sentence {
 	public Context(Context node) {
 		super(node);
 	}
-	
-	public Context(){
+
+	public Context() {
 		super();
+	}
+
+	public Context(Sentence term) {
+		super(term);
 	}
 
 	public String toString() {
@@ -38,8 +42,8 @@ public class Context extends Sentence {
 	}
 
 	@Override
-	public ASTNode accept(Transformer visitor) throws TransformerException {
-		return visitor.transform(this);
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
 	}
 
 	@Override

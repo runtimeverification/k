@@ -22,10 +22,12 @@ public class Constants {
 	public static final String LEXICAL = "lexical";
 	public static final String RESTRICTIONS = "restrictions";
 	public static final String RULE = "rule";
+	public static final String SENTENCE = "sentence";
 	public static final String BODY = "body";
 	public static final String REWRITE = "rewrite";
 	public static final String LEFT = "left";
 	public static final String TERM = "term";
+	public static final String SYN = "Syn";
 	public static final String BRACKET = "bracket";
 	public static final String CAST = "cast";
 	public static final String VAR = "var";
@@ -83,6 +85,7 @@ public class Constants {
     public static final String MACRO = "macro";
     public static final String STRUCTURAL = "structural";
     public static final String FUNCTION = "function";
+	public static final String ANYWHERE = "anywhere";
 
     // Streams
     public static final String STDIN = "stdin";

@@ -1,6 +1,5 @@
 package org.kframework.kil.loader;
 
-import org.kframework.kil.Context;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Variable;
@@ -14,8 +13,8 @@ import org.kframework.kil.visitors.BasicVisitor;
  */
 public class CollectStartSymbolPgmVisitor extends BasicVisitor {
 
-	public CollectStartSymbolPgmVisitor(DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public CollectStartSymbolPgmVisitor(Context context) {
+		super(context);
 	}
 
 	@Override
@@ -23,7 +22,7 @@ public class CollectStartSymbolPgmVisitor extends BasicVisitor {
 	}
 
 	@Override
-	public void visit(Context node) {
+	public void visit(org.kframework.kil.Context node) {
 	}
 
 	@Override
@@ -33,7 +32,7 @@ public class CollectStartSymbolPgmVisitor extends BasicVisitor {
 	@Override
 	public void visit(Variable node) {
 		if (node.getName().equals("$PGM")) {
-			definitionHelper.startSymbolPgm = node.getSort(definitionHelper);
+			context.startSymbolPgm = node.getSort();
 		}
 	}
 }

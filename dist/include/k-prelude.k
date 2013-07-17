@@ -7,6 +7,8 @@ interface K-TECHNIQUE
 	// Unfortunately, FlattenModules explicitly ignores
 	// includes of K-TECHNIQUE and some other core modules,
 	// so we have to declare things like isSet in less obvious places
+	
+	syntax KItem
 endinterface
 
 module K-LISTK-EXTRAS
@@ -38,6 +40,8 @@ module K-MAP-EXTRAS
   syntax Map ::= Map "[" KList "/" KList "]"  [function]
   rule (M:Map => M[K2/K1][K2'/K1'])[(K2:K,,K2':K => .KList),,_ 
                         /  (K1:K,,K1':K => .KList),,_]
+   [structural, anywhere]
+  rule M:Map[.KList / .KList] => M    
    [structural, anywhere]
 
   rule (M:Map K1:K |-> _:K)[K2:K / K1] => M K1 |-> K2 
@@ -155,7 +159,7 @@ interface K-LIST-EXTRAS
 
    rule lengthList ( _:ListItem L:List ) => 1 +Int lengthList L [structural, anywhere]
    rule lengthList .List => 0 [structural, anywhere]
-   rule isKResult((K1:KResult => .KList),, _:K,, _:KList)
+   rule isKResult((_:KResult => .KList),, _:K,, _:KList)
    rule isKResult(.KList) => true
 endinterface
 
@@ -198,14 +202,14 @@ endmodule
 
 interface K-WRAPPERS
 	imports K-TECHNIQUE
-
-	syntax K ::= "KLabel2K" KLabel
-			   | "Celllabel2K" CellLabel
-			   | "KList2K" KList
-			   | "Set2K" Set
-			   | "Bag2K" Bag
-			   | "List2K" List
-			   | "Map2K" Map
+// not used anymore
+//	syntax K ::= KLabel2K (KLabel)		[klabel('KLabel2K_)]
+//			   | Celllabel2K (CellLabel)[klabel('Celllabel2K_)] 
+//			   | KList2K (KList)		[klabel('KList2K_)]
+//			   | Set2K (Set)			[klabel('Set2K_)]
+//			   | Bag2K (Bag)			[klabel('Bag2K_)]
+//			   | List2K (List)			[klabel('List2K_)]
+//			   | Map2K (Map)			[klabel('Map2K_)]
 endinterface
 
 interface K-EVAL

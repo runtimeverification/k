@@ -1,7 +1,6 @@
 package org.kframework.backend.latex;
 
 import org.kframework.kil.*;
-import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.StringUtil;
 
@@ -10,8 +9,8 @@ import java.util.Map;
 
 
 public class LatexPatternsVisitor extends BasicVisitor {
-	public LatexPatternsVisitor(DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public LatexPatternsVisitor(org.kframework.kil.loader.Context context) {
+		super(context);
 	}
 
 	private Map<String, String> patterns = new HashMap<String, String>();
@@ -64,7 +63,7 @@ public class LatexPatternsVisitor extends BasicVisitor {
 		String terminal = pi.getTerminal();
 		if (terminal.isEmpty())
 			return;
-		if (definitionHelper.isSpecialTerminal(terminal)) {
+		if (context.isSpecialTerminal(terminal)) {
 			pattern += StringUtil.latexify(terminal);
 		} else {
                         if (!prevNonTerm) pattern += "{}";
@@ -86,7 +85,7 @@ public class LatexPatternsVisitor extends BasicVisitor {
 	}
 
 	@Override
-	public void visit(Context node) {
+	public void visit(org.kframework.kil.Context node) {
 		return;
 	}
 }

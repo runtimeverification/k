@@ -2,7 +2,7 @@ package org.kframework.compile.sharing;
 
 import org.kframework.kil.Rule;
 import org.kframework.kil.Variable;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -21,9 +21,9 @@ public class FreshVariableNormalizer extends CopyOnWriteTransformer {
     private Map<Variable, Variable> substitution = new HashMap<Variable, Variable>();
     private FreshVariableCounter visitor;
 
-    public FreshVariableNormalizer(DefinitionHelper definitionHelper) {
-        super("Normalize fresh variable indices", definitionHelper);
-        visitor = new FreshVariableCounter(definitionHelper);
+    public FreshVariableNormalizer(Context context) {
+        super("Normalize fresh variable indices", context);
+        visitor = new FreshVariableCounter(context);
     }
 
     @Override
@@ -59,8 +59,8 @@ public class FreshVariableNormalizer extends CopyOnWriteTransformer {
      */
     class FreshVariableCounter extends BasicVisitor {
 
-        public FreshVariableCounter(DefinitionHelper definitionHelper) {
-			super(definitionHelper);
+        public FreshVariableCounter(Context context) {
+			super(context);
 		}
 
 		@Override
@@ -74,7 +74,7 @@ public class FreshVariableNormalizer extends CopyOnWriteTransformer {
                     Integer.parseInt(variable.getName().substring("GeneratedFreshVar".length()));
                     substitution.put(
                             variable,
-                            new Variable("GeneratedFreshVar" + counter++, variable.getSort(definitionHelper)));
+                            new Variable("GeneratedFreshVar" + counter++, variable.getSort()));
                 } catch (Exception e) { }
             }
         }

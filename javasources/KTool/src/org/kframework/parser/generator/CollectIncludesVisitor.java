@@ -4,12 +4,12 @@ import java.util.ArrayList;
 
 import org.kframework.kil.Import;
 import org.kframework.kil.ModuleItem;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 
 public class CollectIncludesVisitor extends BasicVisitor {
-	public CollectIncludesVisitor(DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public CollectIncludesVisitor(Context context) {
+		super(context);
 	}
 
 	private java.util.List<Import> importList = new ArrayList<Import>();

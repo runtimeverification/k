@@ -1,11 +1,13 @@
 package org.kframework.kil;
 
-import org.kframework.kil.loader.Constants;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A rule declaration.
@@ -14,34 +16,29 @@ import org.w3c.dom.Element;
  * Any explicit attributes on the rule are stored in {@link #attributes}.
  */
 public class Rule extends Sentence {
-	/** Label from {@code rule[}label{@code ]:} syntax or "". Currently unrelated to attributes */
-	private String label;
 
-	public Rule(Element element) {
+    private List<BuiltinLookup> lookups = Collections.emptyList();
+
+    public Rule(Element element) {
 		super(element);
-		setLabel(element.getAttribute(Constants.LABEL));
 	}
 
 	public Rule(Rule node) {
 		super(node);
-		this.label = node.getLabel();
+        lookups = node.lookups;
 	}
 
 	public Rule() {
 		super();
 	}
 
-	public Rule(Term lhs, Term rhs, DefinitionHelper definitionHelper) {
+	public Rule(Term lhs, Term rhs, Context context) {
 		super();
-		this.setBody(new Rewrite(lhs, rhs, definitionHelper));
+		this.setBody(new Rewrite(lhs, rhs, context));
 	}
 
-	public void setLabel(String label) {
-		this.label = label;
-	}
-
-	public String getLabel() {
-		return label;
+	public Rule(Sentence term) {
+		super(term);
 	}
 
 	public String toString() {
@@ -51,6 +48,9 @@ public class Rule extends Sentence {
 			content += "[" + this.label + "]: ";
 
 		content += this.body + " ";
+		if (this.condition != null) {
+			content += "when " + this.condition + " ";
+		}
 
 		return content + attributes;
 	}
@@ -61,12 +61,20 @@ public class Rule extends Sentence {
 	}
 
 	@Override
-	public ASTNode accept(Transformer visitor) throws TransformerException {
-		return visitor.transform(this);
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
 	}
 
 	@Override
 	public Rule shallowCopy() {
 		return new Rule(this);
 	}
+
+    public List<BuiltinLookup> getLookups() {
+        return lookups;
+    }
+
+    public void setLookups(List<BuiltinLookup> lookups) {
+        this.lookups = lookups;
+    }
 }

@@ -1,10 +1,17 @@
 package org.kframework.kil;
 
 import org.kframework.kil.loader.Constants;
-import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.matchers.Matchable;
+import org.kframework.kil.visitors.BasicVisitor;
+import org.kframework.utils.StringUtil;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import aterm.ATermAppl;
 
 import org.w3c.dom.Element;
+
 
 /**
  * Base of all nodes that represent terms in the semantics. Each term is labeled with a sort.
@@ -30,12 +37,17 @@ public abstract class Term extends ASTNode implements Matchable {
 		this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
 	}
 
+	public Term(ATermAppl atm) {
+		super(atm);
+		this.sort = StringUtil.getSortNameFromCons(atm.getName());
+	}
+
 	public Term(String sort) {
 		super();
 		this.sort = sort;
 	}
 
-	public String getSort(DefinitionHelper definitionHelper) {
+	public String getSort() {
 		return sort;
 	}
 
@@ -47,9 +59,28 @@ public abstract class Term extends ASTNode implements Matchable {
 	public abstract Term shallowCopy();
 
 	public abstract int hashCode();
+
 	public abstract boolean equals(Object obj);
-	//This method compares equality based on membership in a parse forest
+
+	// This method compares equality based on membership in a parse forest
 	public boolean contains(Object obj) {
 		return this.equals(obj);
 	}
+
+    /**
+     * Returns a {@code Set} of {@link Variable} instances occurring in this {@code Term}.
+     *
+     * @return
+     */
+    public Set<Variable> variables() {
+        final Set<Variable> result = new HashSet<Variable>();
+        this.accept(new BasicVisitor(null) {
+            @Override
+            public void visit(Variable node) {
+                result.add(node);
+            }
+        });
+        return result;
+    }
+
 }

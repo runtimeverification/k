@@ -16,11 +16,18 @@ context-free syntax
 	"imports"   MODNAME	-> KModHeaderItem {cons("Imports")}
 
 	%% K Sentences
-	"configuration"		HIDDEN+	-> KSentence {cons("Config")}
-	"rule"				HIDDEN+	-> KSentence {cons("Rule")}
-	"context"			HIDDEN+	-> KSentence {cons("Context")}
+	"context"		-> Keyword {cons("Context")}
+	"rule" 			-> Keyword {cons("Rule")}
+	"configuration"	-> Keyword {cons("Configuration")}
+
+	Keyword					HIDDEN+						-> KSentence {cons("SimpleSentence"), avoid}
+	Keyword "[" RL "]" ":"	HIDDEN+						-> KSentence {cons("LabelSentence")}
+	Keyword					HIDDEN+	"[" {Tag ","}+ "]"	-> KSentence {cons("AnnoSentence")}
+	Keyword	"[" RL "]" ":"	HIDDEN+	"[" {Tag ","}+ "]"	-> KSentence {cons("LabelAnnoSentence"), prefer}
 
 	"syntax" SORTID "::=" {Prod1 ">"}+	-> KSentence {cons("Syntax")}
+	"syntax" SORTID						-> KSentence {cons("SyntaxShort")}
+	"syntax" SORTID	"[" {Tag ","}+ "]"	-> KSentence {cons("SyntaxShortAnno")}
 
 	"syntax" "priorities"	{KLList ">"}+	-> KSentence {cons("Priority")}
 	"syntax" "priority"		{KLList ">"}+	-> KSentence {cons("Priority")}
@@ -63,21 +70,21 @@ context-free syntax
 
 	%%COMPOSEDID	-> NonTerminal {cons("SyntaxCID")}
 
-	KEY							-> Tag {cons("Tag")}
-	KEY "(" TAGCONTENT ")"		-> Tag {cons("TagParam")}
-	KEY "(" STRING ")"			-> Tag {cons("TagString")}
+	KEYDz							-> Tag {cons("Tag")}
+	KEYDz "(" TAGCONTENTDz ")"		-> Tag {cons("TagParam")}
+	KEYDz "(" STRING ")"			-> Tag {cons("TagString")}
 
 
 lexical syntax
-	[A-Za-z\-0-9]			-> TAG
-	[a-z] TAG+				-> KEY
-	TC*						-> TAGCONTENT
-	~[\n\r\(\)\"]			-> TC
-	"(" TAGCONTENT ")"		-> TC
+	~[\[\]\_\ \n\r\t]+		-> RL
+	[a-z] [A-Za-z\-0-9]*	-> KEYDz
+	TCDz*					-> TAGCONTENTDz
+	~[\n\r\(\)\"]			-> TCDz
+	"(" TAGCONTENTDz ")"	-> TCDz
 
 lexical restrictions
-	TAGCONTENT	-/- ~[\(\)]
-	KEY			-/- [A-Za-z\-0-9]
+	TAGCONTENTDz-/- ~[\(\)]
+	KEYDz		-/- [A-Za-z\-0-9]
 	"syntax"	-/- ~[\n\r\ \t]
 	"rule"		-/- ~[\n\r\ \t]
 	"context"	-/- ~[\n\r\ \t]
@@ -117,6 +124,7 @@ lexical syntax
 
 
 lexical restrictions
+	RL				-/- ~[\[\]\_\ \n\r\t]
 	HIDDEN			-/- ~[\t\n\r\ ]
 	KLABEL			-/- ~[\t\n\r\ ]
 	MODNAME			-/- [a-z0-9A-Z\-\_]

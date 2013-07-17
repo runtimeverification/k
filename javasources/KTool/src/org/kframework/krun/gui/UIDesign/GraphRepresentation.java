@@ -1,6 +1,7 @@
 package org.kframework.krun.gui.UIDesign;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -8,13 +9,15 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
-
+import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -23,12 +26,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
-
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Term;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.ConcretizeSyntax;
 import org.kframework.krun.api.KRunState;
@@ -40,10 +43,10 @@ import org.kframework.krun.gui.helper.HelpFrame;
 import org.kframework.parser.concrete.disambiguate.BestFitFilter;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
-
 import edu.uci.ics.jung.algorithms.shortestpath.DijkstraShortestPath;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
+import edu.uci.ics.jung.visualization.VisualizationImageServer;
 import edu.uci.ics.jung.visualization.control.CrossoverScalingControl;
 import edu.uci.ics.jung.visualization.control.ScalingControl;
 import edu.uci.ics.jung.visualization.subLayout.GraphCollapser;
@@ -72,13 +75,13 @@ public class GraphRepresentation extends JPanel implements ItemListener {
   //private JButton edit;
   private RunKRunCommand commandProcessor;
   private final ScalingControl scaler = new CrossoverScalingControl();
-  private DefinitionHelper definitionHelper;
+  private Context definitionHelper;
   private int totalSelections;
   private boolean enabled;
   // keep track of number of selection
   private int nonKrunStateSelection;
 
-  public GraphRepresentation(RunKRunCommand command, DefinitionHelper definitionHelper)
+  public GraphRepresentation(RunKRunCommand command, Context definitionHelper)
           throws Exception {
     this.definitionHelper = definitionHelper;
     tabbedPane = new JTabbedPane();
@@ -106,8 +109,10 @@ public class GraphRepresentation extends JPanel implements ItemListener {
       graph = commandProcessor.firstStep(definitionHelper);
     } catch (IOException e) {
       e.printStackTrace();
+      MainWindow.showAndExit(e);
     } catch (Exception e) {
       e.printStackTrace();
+      MainWindow.showAndExit(e);
     }
     vvd = new VisualizationViewerDemo(graph, definitionHelper);
   }
@@ -320,24 +325,24 @@ public class GraphRepresentation extends JPanel implements ItemListener {
   }
 
   public void addActionForEdit() {
-//    edit.addActionListener(new ActionListener() {
-//      public void actionPerformed(ActionEvent e) {
-//        if (vvd == null) {
-//          return;
-//        }
-//        Set<KRunState> picked = vvd.getSelectedVertices();
-//        if (picked == null || picked.size() != 1) {
-//          showMessageOfSelectRequirement("Select one configurations to edit.");
-//          return;
-//        }
-//        for (KRunState krs : picked) {
-//          ConfEditor confE = new ConfEditor(krs);
-//          confE.setVisible(true);
-//          KRunState t = confE.getKrunState();
-//          System.out.println(t.toString());
-//        }
-//      }
-//    });
+    //    edit.addActionListener(new ActionListener() {
+    //      public void actionPerformed(ActionEvent e) {
+    //        if (vvd == null) {
+    //          return;
+    //        }
+    //        Set<KRunState> picked = vvd.getSelectedVertices();
+    //        if (picked == null || picked.size() != 1) {
+    //          showMessageOfSelectRequirement("Select one configurations to edit.");
+    //          return;
+    //        }
+    //        for (KRunState krs : picked) {
+    //          ConfEditor confE = new ConfEditor(krs);
+    //          confE.setVisible(true);
+    //          KRunState t = confE.getKrunState();
+    //          System.out.println(t.toString());
+    //        }
+    //      }
+    //    });
   }
 
   public int determineNoOfSteps() {
@@ -374,7 +379,7 @@ public class GraphRepresentation extends JPanel implements ItemListener {
     commandControl.add(this.numberField);
     commandControl.add(this.compare);
     commandControl.add(this.exit);
-//    commandControl.add(this.edit);
+    //    commandControl.add(this.edit);
 
   }
 
@@ -406,7 +411,21 @@ public class GraphRepresentation extends JPanel implements ItemListener {
     index++;
   }
 
-  private static String getXmlFromKrunState(KRunState pick, DefinitionHelper definitionHelper) {
+  private static String getXmlFromKrunState(KRunState pick, Context definitionHelper) {
+    // TO-DO : create our own filter that ignores xml characters from a tag
+    StringBuffer rez = new StringBuffer();
+    String str = getStrFromKrunState(pick, definitionHelper);
+    for (String line : str.split("\n")) {
+      line = line.trim();
+      if (line.startsWith("<") && line.endsWith(">"))
+        rez.append(line + "\n");
+      else
+        rez.append(StringEscapeUtils.escapeXml(line) + "\n");
+    }
+    return rez.toString();
+  }
+
+  private static String getStrFromKrunState(KRunState pick, Context definitionHelper) {
     Term term = pick.getResult();
     try {
       term = (Term) term.accept(new ConcretizeSyntax(definitionHelper));
@@ -431,20 +450,12 @@ public class GraphRepresentation extends JPanel implements ItemListener {
 
     UnparserFilter unparser = new UnparserFilter(true, false, definitionHelper);
     term.accept(unparser);
-    // TO-DO : create our own filter that ignores xml characters from a tag
-    StringBuffer rez = new StringBuffer();
-    for (String line : unparser.getResult().split("\n")) {
-      line = line.trim();
-      if (line.startsWith("<") && line.endsWith(">"))
-        rez.append(line + "\n");
-      else
-        rez.append(StringEscapeUtils.escapeXml(line) + "\n");
-    }
-    return rez.toString();
+    return unparser.getResult();
   }
 
+  
   public static void displayEdgeInfo(Transition pick, KRunState src, KRunState dest,
-          DefinitionHelper definitionHelper) {
+          Context definitionHelper) {
     new DiffFrame(src, dest, pick, definitionHelper).setVisible(true);
   }
 
@@ -595,7 +606,50 @@ public class GraphRepresentation extends JPanel implements ItemListener {
   }
 
   public void changeEditStatus(boolean status) {
-//    edit.setEnabled(status);
+    //    edit.setEnabled(status);
   }
 
+  public void savePng(String file){
+    VisualizationImageServer<KRunState, Transition> vis =
+            new VisualizationImageServer<KRunState, Transition>(vvd.getVv().getGraphLayout(),
+                    vvd.getVv().getGraphLayout().getSize());
+    vis.setBackground(Color.WHITE);
+    BufferedImage image = (BufferedImage) vis.getImage(
+            new Point2D.Double(vvd.getVv().getGraphLayout().getSize().getWidth() / 2,
+                    vvd.getVv().getGraphLayout().getSize().getHeight() / 2),
+                    new Dimension(vvd.getVv().getGraphLayout().getSize()));
+    // Write image to a png file
+    File outputfile = new File(file);
+
+    try {
+      ImageIO.write(image, "png", outputfile);
+    } catch (IOException e) {
+      // Exception handling
+    }
+  }
+  
+  private boolean saveConf(String folder,KRunState conf){
+    String confStr = getStrFromKrunState(conf, definitionHelper);
+    File out= new File(folder+File.separator + "conf"+conf.getStateId()); 
+    try {
+      FileUtils.writeStringToFile(out, confStr);
+    } catch (IOException e) {
+      e.printStackTrace();
+      return false; 
+    }
+    return true ; 
+  }
+  
+  public void saveSelectedConf(String folder){
+    Object[] picked = vvd.getSelectedVertices().toArray();
+    if (picked.length > 0) {
+      for (int i = 0; i < picked.length; i++) {
+        if (!(picked[i] instanceof KRunState))
+          continue;
+        KRunState pick = (KRunState) picked[i];
+        saveConf(folder, pick);
+      }
+      showMessage("Selected configs saved in : \n" +(new File(folder).getPath()) );
+    }
+  }
 }

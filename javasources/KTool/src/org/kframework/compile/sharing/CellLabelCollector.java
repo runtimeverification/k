@@ -3,7 +3,7 @@ package org.kframework.compile.sharing;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.ModuleItem;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 
 import java.util.HashSet;
@@ -15,8 +15,8 @@ import java.util.Set;
  * @author andreiarusoaie
  */
 public class CellLabelCollector extends BasicVisitor {
-	public CellLabelCollector(DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public CellLabelCollector(Context context) {
+		super(context);
 	}
 
 	public Set<String> cellLabels = new HashSet<String>()	;

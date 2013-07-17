@@ -33,7 +33,7 @@ module IMP-SYNTAX
   syntax Pgm   ::= "int" Ids ";" Stmt
   syntax Ids   ::= List{Id,","}
 
-  syntax Stmt ::= "#ps" "(" Bag ")"
+  syntax Stmt ::= "#ps" "(" TCellFragment ")"
 
   //@ K tool issues
   syntax Int ::= "#symInt" "(" Id ")" [onlyLabel, klabel(#symInt)]
@@ -57,7 +57,7 @@ The cell <goal> contains the current goal. Whenever multiple rules can be
 applied to the same configuration, the current goal will be splitted into
 multiple goals. 
 */
-  configuration <T color="yellow">
+  configuration <T color="yellow" multiplicity="?">
 //		 <goal multiplicity="*">
 		  <k color="green"> #ps($PGM:Bag) </k>
                   <state color="blue"> .Map </state>
@@ -65,6 +65,7 @@ multiple goals.
 //		  <ruleConstraints> none </ruleConstraints>
 //		 </goal>
                 </T>
+		<success> false </success>
 
 
 /*@
@@ -143,13 +144,14 @@ For each reachability formula given as input we have two corresponding generated
             andBool checkSat(Psi andBool notBool(0 <=Int X andBool 0 <Int Y)) ==K "unsat"
       [transition]
 
-  rule <T>
+  rule (<T>
          <k> check0 </k>
          <state> a |-> A':Int b |-> B':Int x |-> X:Int y |-> Y:Int </state>
          <condition> Psi:Bool </condition>
        </T>
        => 
-       success
+       .)
+       <success> _ => true </success>
        when checkSat(Psi andBool 
                      notBool ((X ==Int A' *Int Y +Int B' andBool B' >=Int 0 andBool B' <Int Y)))
             ==K "unsat"
@@ -170,13 +172,14 @@ For each reachability formula given as input we have two corresponding generated
                     ==K "unsat"
       [transition]
 
-  rule <T>
+  rule (<T>
          <k> check1 </k>
          <state> a |-> A':Int b |-> B':Int x |-> X:Int y |-> Y:Int </state>
          <condition> Psi:Bool </condition>
        </T>
-       => 
-       success
+       =>
+	.) 
+       <success> _ => true </success>
        when checkSat(Psi andBool
                      notBool (X ==Int A' *Int Y +Int B' andBool B' >=Int 0 andBool B' <Int Y))
             ==K "unsat"
@@ -198,13 +201,14 @@ For each reachability formula given as input we have two corresponding generated
                     ==K "unsat"
        [transition]
 
-  rule <T>
+  rule (<T>
          <k> check2 </k>
          <state> a |-> A':Int b |-> B':Int x |-> X:Int y |-> Y:Int </state>
          <condition> Psi:Bool </condition>
        </T>
-       => 
-       success
+       =>
+	.) 
+       <success> _ => true </success>
        when checkSat(Psi andBool 
                      notBool (X ==Int A' *Int Y +Int B' andBool B' >=Int 0))
             ==K "unsat"

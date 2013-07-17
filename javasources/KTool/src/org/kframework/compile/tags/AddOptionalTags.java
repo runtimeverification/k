@@ -2,15 +2,15 @@ package org.kframework.compile.tags;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attributes;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.general.GlobalSettings;
 
 public class AddOptionalTags extends BasicTransformer {
 
-	public AddOptionalTags(DefinitionHelper definitionHelper) {
-		super("AddOptionalTags", definitionHelper);
+	public AddOptionalTags(Context context) {
+		super("AddOptionalTags", context);
 	}
 
 	@Override

@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.kframework.kil.Constant;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.PriorityBlock;
 import org.kframework.kil.PriorityBlockExtended;
@@ -18,7 +17,7 @@ import org.kframework.kil.Restrictions;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Terminal;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
@@ -45,8 +44,8 @@ public class ProgramSDFVisitor extends BasicVisitor {
 	public List<Production> lexical = new ArrayList<Production>();
 	public List<Restrictions> restrictions = new ArrayList<Restrictions>();
 
-	public ProgramSDFVisitor(DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public ProgramSDFVisitor(Context context) {
+		super(context);
 		constantSorts.add("#Id");
 		constantSorts.add("#Bool");
 		constantSorts.add("#Int");
@@ -69,7 +68,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
 			pb1.setAssoc(pbe1.getAssoc());
 
 			for (KLabelConstant tag : pbe1.getProductions()) {
-				Set<Production> prods2 = SDFHelper.getProductionsForTag(tag.getLabel(), definitionHelper);
+				Set<Production> prods2 = SDFHelper.getProductionsForTag(tag.getLabel(), context);
 				if (prods2.isEmpty()) {
 					String msg = "Could not find any production represented by tag: " + tag.getLabel();
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, tag.getFilename(), tag.getLocation()));
@@ -89,7 +88,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
 		pb1.setAssoc(node.getAssoc());
 
 		for (KLabelConstant tag : node.getTags()) {
-			Set<Production> prods2 = SDFHelper.getProductionsForTag(tag.getLabel(), definitionHelper);
+			Set<Production> prods2 = SDFHelper.getProductionsForTag(tag.getLabel(), context);
 			if (prods2.isEmpty()) {
 				String msg = "Could not find any production represented by tag: " + tag.getLabel();
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, tag.getFilename(), tag.getLocation()));
@@ -154,7 +153,7 @@ public class ProgramSDFVisitor extends BasicVisitor {
 							ProductionItem itm = items.get(i);
 							if (itm.getType() == ProductionType.TERMINAL) {
 								Terminal t = (Terminal) itm;
-								sdf.append("\"" + StringUtil.escapeSDF(t.getTerminal()) + "\" ");
+								sdf.append("\"" + StringUtil.escape(t.getTerminal()) + "\" ");
 							} else if (itm.getType() == ProductionType.SORT) {
 								Sort srt = (Sort) itm;
 								// if we are on the first or last place and this sort is not a list, just print the sort

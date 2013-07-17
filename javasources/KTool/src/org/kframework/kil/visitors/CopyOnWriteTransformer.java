@@ -2,10 +2,12 @@ package org.kframework.kil.visitors;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -15,11 +17,11 @@ import org.kframework.utils.general.GlobalSettings;
 
 public class CopyOnWriteTransformer implements Transformer {
 	String name;
-	protected DefinitionHelper definitionHelper;
+	protected Context context;
 
-	public CopyOnWriteTransformer(String name, DefinitionHelper definitionHelper) {
+	public CopyOnWriteTransformer(String name, Context context) {
 		this.name = name;
-		this.definitionHelper = definitionHelper;
+		this.context = context;
 	}
 
 	@Override
@@ -139,7 +141,7 @@ public class CopyOnWriteTransformer implements Transformer {
 	}
 
 	@Override
-	public ASTNode transform(Context node) throws TransformerException {
+	public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
 		return transform((Sentence) node);
 	}
 
@@ -321,7 +323,7 @@ public class CopyOnWriteTransformer implements Transformer {
 		Term term = node.getContents();
 		ASTNode result = term.accept(this);
 		if (result == null) {
-			result = MetaK.defaultTerm(term, definitionHelper);
+			result = MetaK.defaultTerm(term, context);
 		}
 		if (!(result instanceof Term)) {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + result.getClass() + ".", getName(), term.getFilename(), term
@@ -457,44 +459,178 @@ public class CopyOnWriteTransformer implements Transformer {
 		return transform((CollectionItem) node);
 	}
 
+    @Override
+    public ASTNode transform(CollectionBuiltin node) throws TransformerException {
+        boolean change = false;
+
+        ArrayList<Term> terms = new ArrayList<Term>(node.baseTerms().size());
+        for (Term term : node.baseTerms()) {
+            Term transformedTerm = (Term) term.accept(this);
+            terms.add(transformedTerm);
+            change = change || transformedTerm != term;
+        }
+
+        ArrayList<Term> elements = new ArrayList<Term>(node.elements().size());
+        for (Term term : node.elements()) {
+            Term transformedTerm = (Term) term.accept(this);
+            elements.add(transformedTerm);
+            change = change || transformedTerm != term;
+        }
+
+        if (change) {
+            return CollectionBuiltin.of(node.sort(), elements, terms);
+        } else {
+            return node;
+        }
+    }
+
+    @Override
+    public ASTNode transform(SetBuiltin node) throws TransformerException {
+       return transform((CollectionBuiltin)node);
+    }
+
+    @Override
+    public ASTNode transform(SetLookup node) throws TransformerException {
+        Variable set = (Variable) node.base().accept(this);
+        Term value = (Term) node.key().accept(this);
+
+        if (set != node.base() || value != node.key()) {
+            return new SetLookup(set, value);
+        } else {
+            return node;
+        }
+    }
+
+    @Override
+    public ASTNode transform(SetUpdate node) throws TransformerException {
+        boolean change = false;
+
+        Variable set = (Variable) node.set().accept(this);
+
+        HashSet<Term> removeEntries = new HashSet<Term>(node.removeEntries().size());
+        for (Term term : node.updateEntries()) {
+            Term transformedTerm = (Term) term.accept(this);
+            removeEntries.add(transformedTerm);
+            change = change || transformedTerm != term;
+        }
+
+        HashSet<Term> updateEntries = new HashSet<Term>(node.updateEntries().size());
+        for (Term term : node.updateEntries()) {
+            Term transformedTerm = (Term) term.accept(this);
+            updateEntries.add(transformedTerm);
+            change = change || transformedTerm != term;
+        }
+
+        if (change) {
+            return new SetUpdate(set, removeEntries, updateEntries);
+        } else {
+            return node;
+        }
+    }
+
+
+	@Override
+	public ASTNode transform(MapBuiltin node) throws TransformerException {
+		boolean change = false;
+
+        ArrayList<Term> terms = new ArrayList<Term>(node.baseTerms().size());
+		for (Term term : node.baseTerms()) {
+			Term transformedTerm = (Term) term.accept(this);
+			terms.add(transformedTerm);
+			change = change || transformedTerm != term;
+		}
+
+        HashMap<Term, Term> elements = new HashMap<Term, Term>(node.elements().size());
+		for (java.util.Map.Entry<Term, Term> entry : node.elements().entrySet()) {
+			Term transformedKey = (Term) entry.getKey().accept(this);
+			Term transformedValue = (Term) entry.getValue().accept(this);
+			elements.put(transformedKey, transformedValue);
+			change = change || transformedKey != entry.getKey()
+                     || transformedValue != entry.getValue();
+		}
+
+		if (change) {
+			return new MapBuiltin(node.sort(), elements, terms);
+		} else {
+			return node;
+		}
+	}
+
+    @Override
+    public ASTNode transform(MapLookup node) throws TransformerException {
+        Variable map = (Variable) node.base().accept(this);
+        Term key = (Term) node.key().accept(this);
+        Term value = (Term) node.value().accept(this);
+
+        if (map != node.base() || key != node.key() || value != node.value()) {
+            return new MapLookup(map, key, value);
+        } else {
+            return node;
+        }
+    }
+
+    @Override
+    public ASTNode transform(MapUpdate node) throws TransformerException {
+        boolean change = false;
+
+        Variable map = (Variable) node.map().accept(this);
+
+        HashMap<Term, Term> removeEntries = new HashMap<Term, Term>(node.removeEntries().size());
+        for (java.util.Map.Entry<Term, Term> entry : node.updateEntries().entrySet()) {
+            Term transformedKey = (Term) entry.getKey().accept(this);
+            Term transformedValue = (Term) entry.getValue().accept(this);
+            removeEntries.put(transformedKey, transformedValue);
+            change = change || transformedKey != entry.getKey()
+                     || transformedValue != entry.getValue();
+        }
+
+        HashMap<Term, Term> updateEntries = new HashMap<Term, Term>(node.updateEntries().size());
+        for (java.util.Map.Entry<Term, Term> entry : node.updateEntries().entrySet()) {
+            Term transformedKey = (Term) entry.getKey().accept(this);
+            Term transformedValue = (Term) entry.getValue().accept(this);
+            updateEntries.put(transformedKey, transformedValue);
+            change = change || transformedKey != entry.getKey()
+                     || transformedValue != entry.getValue();
+        }
+
+        if (change) {
+            return new MapUpdate(map, removeEntries, updateEntries);
+        } else {
+            return node;
+        }
+    }
+
+
+
 	@Override
 	public ASTNode transform(Constant node) throws TransformerException {
 		return transform((Term) node);
 	}
 
     @Override
-    public ASTNode transform(Builtin node) throws TransformerException {
-        return transform((Term) node);
+    public ASTNode transform(Token node) throws TransformerException {
+        /* an instance of class Token is immutable */
+        return transform((KLabel) node);
     }
 
     @Override
     public ASTNode transform(BoolBuiltin node) throws TransformerException {
-        return transform((Builtin) node);
+        return transform((Token) node);
     }
 
     @Override
     public ASTNode transform(IntBuiltin node) throws TransformerException {
-        return transform((Builtin) node);
-    }
-
-    @Override
-    public ASTNode transform(FloatBuiltin node) throws TransformerException {
-        return transform((Builtin) node);
+        return transform((Token) node);
     }
 
     @Override
     public ASTNode transform(StringBuiltin node) throws TransformerException {
-        return transform((Builtin) node);
+        return transform((Token) node);
     }
 
     @Override
-    public ASTNode transform(Token node) throws TransformerException {
-        Term sortTerm = (Term) node.getSortTerm().accept(this);
-        Term valueTerm = (Term) node.getValueTerm().accept(this);
-        if (!sortTerm.equals(node.getSortTerm()) || !valueTerm.equals(node.getValueTerm())) {
-            node = Token.of(sortTerm, valueTerm);
-        }
-        return transform((Term) node);
+    public ASTNode transform(GenericToken node) throws TransformerException {
+        return transform((Token) node);
     }
 
     @Override
@@ -541,7 +677,7 @@ public class CopyOnWriteTransformer implements Transformer {
 			node = node.shallowCopy();
 			node.setLabel((Term) label);
             Term childTerm = (Term) child;
-            if (!(childTerm.getSort(definitionHelper).equals(KSorts.KLIST) || childTerm instanceof Ambiguity)) {
+            if (!(childTerm.getSort().equals(KSorts.KLIST) || childTerm instanceof Ambiguity)) {
                 node.setChild(new KList(Collections.<Term>singletonList(childTerm)));
             } else {
                 node.setChild(childTerm);
@@ -588,8 +724,7 @@ public class CopyOnWriteTransformer implements Transformer {
 		}
 		if (change) {
 			node = node.shallowCopy();
-			node.setLeft((Term) left);
-			node.setRight((Term) right);
+			node.replaceChildren((Term) left, (Term) right, context);
 		}
 		return transform((Term) node);
 	}

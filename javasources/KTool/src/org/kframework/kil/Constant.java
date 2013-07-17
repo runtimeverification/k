@@ -1,10 +1,5 @@
 package org.kframework.kil;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.kframework.compile.transformers.AddPredicates;
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
@@ -17,6 +12,7 @@ import org.w3c.dom.Element;
  * All values are represented textually in {@link #value},
  * whose interpretation may depend on {@link #sort}.
  */
+@Deprecated
 public class Constant extends Term {
     /**
 	 * 
@@ -30,8 +26,7 @@ public class Constant extends Term {
 
 		this.value = value;
 
-        assert !(sort.equals(KSorts.KLABEL) || sort.equals("#Bool") || sort.equals("#Int")
-                || sort.equals("#Float") || sort.equals("#String"));
+        assert !(sort.equals(KSorts.KLABEL));
 	}
 
 	public Constant(Element element) {
@@ -63,8 +58,8 @@ public class Constant extends Term {
 	}
 
 	@Override
-	public ASTNode accept(Transformer visitor) throws TransformerException {
-		return visitor.transform(this);
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
 	}
 
   @Override

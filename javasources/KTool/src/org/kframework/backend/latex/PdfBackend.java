@@ -2,8 +2,8 @@ package org.kframework.backend.latex;
 
 import org.kframework.backend.BasicBackend;
 import org.kframework.kil.Definition;
-import org.kframework.kil.loader.DefinitionHelper;
-import org.kframework.main.KompileFrontEnd;
+import org.kframework.kil.loader.Context;
+import org.kframework.kompile.KompileFrontEnd;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -16,8 +16,8 @@ import java.io.*;
 import java.util.List;
 
 public class PdfBackend extends BasicBackend {
-	public PdfBackend(Stopwatch sw, DefinitionHelper definitionHelper) {
-		super(sw, definitionHelper);
+	public PdfBackend(Stopwatch sw, Context context) {
+		super(sw, context);
 	}
 
 	private static List<File> pdf(List<File> files, String lang) {
@@ -74,7 +74,7 @@ public class PdfBackend extends BasicBackend {
 
 	@Override
 	public void run(Definition definition) throws IOException {
-		List<File> files = LatexBackend.latex(definition, definitionHelper, definition.getMainModule());
+		List<File> files = LatexBackend.latex(definition, context, definition.getMainModule());
 		files = pdf(files, definition.getMainModule());
 		String output = KompileFrontEnd.output;
 		if (output == null) {

@@ -1,13 +1,16 @@
 package org.kframework.kil;
 
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
+
+import aterm.ATermAppl;
 
 /** Represents parentheses uses for grouping. All productions labeled bracket parse to this. */
 public class Bracket extends Term {
@@ -22,10 +25,10 @@ public class Bracket extends Term {
 		this.content = content;
 	}
 
-	public String getSort(DefinitionHelper definitionHelper) {
+	public String getSort() {
 		if (content instanceof Ambiguity)
-			return super.getSort(definitionHelper);
-		return content.getSort(definitionHelper);
+			return super.getSort();
+		return content.getSort();
 	}
 
 	public Bracket(Bracket i) {
@@ -33,8 +36,8 @@ public class Bracket extends Term {
 		this.content = i.content;
 	}
 
-	public Bracket(Term t, DefinitionHelper definitionHelper) {
-		super(t.getSort(definitionHelper));
+	public Bracket(Term t, Context context) {
+		super(t.getSort());
 		this.content = t;
 	}
 
@@ -42,14 +45,21 @@ public class Bracket extends Term {
 		super(location, filename, sort);
 	}
 
-	public Bracket(String location, String filename, Term t, DefinitionHelper definitionHelper) {
-		super(location, filename, t.getSort(definitionHelper));
+	public Bracket(String location, String filename, Term t, Context context) {
+		super(location, filename, t.getSort());
 		this.content = t;
 	}
 
 	public Bracket(Element element) {
 		super(element);
 		this.content = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
+	}
+
+	public Bracket(ATermAppl atm) {
+		super(atm);
+		this.sort = StringUtil.getSortNameFromCons(atm.getName());
+
+		content = (Term) JavaClassesFactory.getTerm(atm.getArgument(0));
 	}
 
 	public Bracket(String sort) {
@@ -62,8 +72,8 @@ public class Bracket extends Term {
 	}
 
 	@Override
-	public ASTNode accept(Transformer visitor) throws TransformerException {
-		return visitor.transform(this);
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
 	}
 
 	@Override

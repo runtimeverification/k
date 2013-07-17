@@ -1,5 +1,9 @@
 package org.kframework.kil;
 
+import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
@@ -7,113 +11,169 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
-import java.math.BigInteger;
-
-import java.util.HashMap;
-import java.util.Map;
+import aterm.ATermAppl;
 
 
 /**
- * Created with IntelliJ IDEA.
- * User: andrei
- * Date: 4/17/13
- * Time: 12:21 PM
- * To change this template use File | Settings | File Templates.
+ * Class representing a builtin integer token.
  */
-public class IntBuiltin extends Builtin {
+public class IntBuiltin extends Token {
 
-    public static final String SORT_NAME = "#Int";
+	public static final String SORT_NAME = "#Int";
 
-    /*
-     * HashMap caches the constants to ensure uniqueness
-     */
-    private static Map<BigInteger, IntBuiltin> cache = new HashMap<BigInteger, IntBuiltin>();
+	/* Token cache */
+	private static Map<BigInteger, IntBuiltin> tokenCache = new HashMap<BigInteger, IntBuiltin>();
+	/* KApp cache */
+	private static Map<BigInteger, KApp> kAppCache = new HashMap<BigInteger, KApp>();
 
-    public static final IntBuiltin ZERO = IntBuiltin.of(0);
-    public static final IntBuiltin ONE = IntBuiltin.of(1);
+	/**
+	 * #token("#Int", "0")(.KList)
+	 */
+	public static final IntBuiltin ZERO_TOKEN = IntBuiltin.of(0);
+	/**
+	 * #token("#Int", "1")(.KList)
+	 */
+	public static final IntBuiltin ONE_TOKEN = IntBuiltin.of(1);
 
-    public static IntBuiltin of(BigInteger value) {
-        assert value != null : BigInteger.valueOf(0);
-        IntBuiltin intBuiltin = cache.get(value);
-        if (intBuiltin == null) {
-            intBuiltin = new IntBuiltin(value);
-            cache.put(value, intBuiltin);
-        }
-        return intBuiltin;
-    }
+	/**
+	 * #token("#Int", "0")(.KList)
+	 */
+	public static final KApp ZERO = IntBuiltin.kAppOf(0);
+	/**
+	 * #token("#Int", "1")(.KList)
+	 */
+	public static final KApp ONE = IntBuiltin.kAppOf(1);
 
-    public static IntBuiltin of(long value) {
-        return IntBuiltin.of(BigInteger.valueOf(value));
-    }
+	/**
+	 * Returns a {@link IntBuiltin} representing the given {@link BigInteger} value.
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public static IntBuiltin of(BigInteger value) {
+		assert value != null;
 
-    public static IntBuiltin of(String value) {
-        return IntBuiltin.of(new BigInteger(value));
-    }
+		IntBuiltin intBuiltin = tokenCache.get(value);
+		if (intBuiltin == null) {
+			intBuiltin = new IntBuiltin(value);
+			tokenCache.put(value, intBuiltin);
+		}
+		return intBuiltin;
+	}
 
-    private final BigInteger value;
+	/**
+	 * Returns a {@link IntBuiltin} representing the given {@link long} value.
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public static IntBuiltin of(long value) {
+		return IntBuiltin.of(BigInteger.valueOf(value));
+	}
 
-    private IntBuiltin(BigInteger value) {
-        super(IntBuiltin.SORT_NAME);
-        this.value = value;
-    }
+	/**
+	 * Returns a {@link IntBuiltin} representing a {@link BigInteger} with the given {@link String} representation.
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public static IntBuiltin of(String value) {
+		assert value != null;
 
-    public IntBuiltin(Element element) {
-        super(element);
-        value =  new BigInteger(element.getAttribute(Constants.VALUE_value_ATTR));
-    }
+		return IntBuiltin.of(new BigInteger(value));
+	}
 
-    public BigInteger bigIntegerValue() {
-        return value;
-    }
+	/**
+	 * Returns a {@link KApp} representing a {@link IntBuiltin} with the given value applied to an empty {@link KList}.
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public static KApp kAppOf(BigInteger value) {
+		assert value != null;
 
-    @Override
-    public String getValue() {
-        return value.toString();
-    }
+		KApp kApp = kAppCache.get(value);
+		if (kApp == null) {
+			kApp = KApp.of(IntBuiltin.of(value));
+			kAppCache.put(value, kApp);
+		}
+		return kApp;
+	}
 
-    @Override
-    public Term shallowCopy() {
-        /* this object is immutable */
-        return this;
-    }
+	/**
+	 * Returns a {@link KApp} representing a {@link IntBuiltin} with the given value applied to an empty {@link KList}.
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public static KApp kAppOf(long value) {
+		return IntBuiltin.kAppOf(BigInteger.valueOf(value));
+	}
 
-    @Override
-    public int hashCode() {
-        return value.hashCode();
-    }
+	/**
+	 * Returns a {@link KApp} representing a {@link IntBuiltin} with the given {@link String} representation applied to an empty {@link KList}.
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public static KApp kAppOf(String value) {
+		assert value != null;
 
-    @Override
-    public boolean equals(Object object) {
-        if (this == object) {
-            return true;
-        }
+		return IntBuiltin.kAppOf(new BigInteger(value));
+	}
 
-        if (!(object instanceof IntBuiltin)) {
-            return false;
-        }
+	private final BigInteger value;
 
-        IntBuiltin intBuiltin = (IntBuiltin) object;
-        return value.equals(intBuiltin.value);
-    }
+	private IntBuiltin(BigInteger value) {
+		this.value = value;
+	}
 
-    @Override
-    public String toString() {
-        return getValue();
-    }
+	protected IntBuiltin(Element element) {
+		super(element);
+		value = new BigInteger(element.getAttribute(Constants.VALUE_value_ATTR));
+	}
 
-    @Override
-    public void accept(Matcher matcher, Term toMatch) {
-        throw new UnsupportedOperationException();
-    }
+	protected IntBuiltin(ATermAppl atm) {
+		super(atm);
+		value = new BigInteger(((ATermAppl) atm.getArgument(0)).getName());
+	}
 
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
-    }
+	/**
+	 * Returns a {@link BigInteger} representing the (interpreted) value of the int token.
+	 */
+	public BigInteger bigIntegerValue() {
+		return value;
+	}
 
-    @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
+	/**
+	 * Returns a {@link String} representing the sort name of a int token.
+	 */
+	@Override
+	public String tokenSort() {
+		return IntBuiltin.SORT_NAME;
+	}
+
+	/**
+	 * Returns a {@link String} representing the (uninterpreted) value of the int token.
+	 */
+	@Override
+	public String value() {
+		return value.toString();
+	}
+
+	@Override
+	public void accept(Matcher matcher, Term toMatch) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
+	}
+
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
+	}
 
 }

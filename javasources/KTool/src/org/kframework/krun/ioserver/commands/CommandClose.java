@@ -28,6 +28,10 @@ public class CommandClose extends Command {
 
 		// retrieve file struct
 		Resource resource = ResourceSystem.getResource(ID);
+		if (resource == null) {
+			fail("EBADF");
+			return;
+		}
 
 		// call corresponding method on resource
 		try {

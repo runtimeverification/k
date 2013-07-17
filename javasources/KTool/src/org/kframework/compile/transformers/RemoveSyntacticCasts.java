@@ -2,14 +2,14 @@ package org.kframework.compile.transformers;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cast;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class RemoveSyntacticCasts extends CopyOnWriteTransformer {
 
-	public RemoveSyntacticCasts(DefinitionHelper definitionHelper) {
-		super("Remove syntactic casts", definitionHelper);
+	public RemoveSyntacticCasts(Context context) {
+		super("Remove syntactic casts", context);
 	}
 
 	@Override

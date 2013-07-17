@@ -6,7 +6,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicHookWorker;
 import org.kframework.kil.visitors.exceptions.PriorityException;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -18,20 +18,20 @@ public class PriorityFilter2 extends BasicHookWorker {
 
 	private TermCons parent;
 
-	public PriorityFilter2(TermCons parent, DefinitionHelper definitionHelper) {
-		super("Type system", definitionHelper);
+	public PriorityFilter2(TermCons parent, Context context) {
+		super("Type system", context);
 		this.parent = parent;
 	}
 
-	public PriorityFilter2(PriorityFilter2 pf, DefinitionHelper definitionHelper) {
-		super("Type system", definitionHelper);
+	public PriorityFilter2(PriorityFilter2 pf, Context context) {
+		super("Type system", context);
 		this.parent = pf.parent;
 	}
 
 	public ASTNode transform(TermCons tc) throws TransformerException {
-		String parentLabel = parent.getProduction(definitionHelper).getKLabel();
-		String localLabel = tc.getProduction(definitionHelper).getKLabel();
-		if (definitionHelper.isPriorityWrong(parentLabel, localLabel)) {
+		String parentLabel = parent.getProduction().getKLabel();
+		String localLabel = tc.getProduction().getKLabel();
+		if (context.isPriorityWrong(parentLabel, localLabel)) {
 			String msg = "Priority filter exception. Cannot use " + localLabel + " as a child of " + parentLabel;
 			KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, tc.getFilename(), tc.getLocation());
 			throw new PriorityException(kex);

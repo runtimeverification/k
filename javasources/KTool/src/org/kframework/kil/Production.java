@@ -2,13 +2,10 @@ package org.kframework.kil;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ProductionItem.ProductionType;
-import org.kframework.kil.loader.Constants;
-import org.kframework.kil.loader.DefinitionHelper;
-import org.kframework.kil.loader.JavaClassesFactory;
+import org.kframework.kil.loader.*;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.utils.StringUtil;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
@@ -28,7 +25,7 @@ public class Production extends ASTNode {
 	protected String sort;
 	protected String ownerModuleName;
 
-	public static Production makeFunction(String funSort, String funName, String argSort, DefinitionHelper definitionHelper) {
+	public static Production makeFunction(String funSort, String funName, String argSort, org.kframework.kil.loader.Context context) {
 		List<ProductionItem> prodItems = new ArrayList<ProductionItem>();
 		prodItems.add(new Terminal(funName));
 		prodItems.add(new Terminal("("));
@@ -41,8 +38,8 @@ public class Production extends ASTNode {
 			funProd.addAttribute(new Attribute("klabel", funName));
 			String consAttr = funSort + "1" + funName + "Syn";
 			funProd.addAttribute(new Attribute("cons", consAttr));
-			definitionHelper.conses.put(consAttr, funProd);
-			definitionHelper.putLabel(funProd, consAttr);
+			context.conses.put(consAttr, funProd);
+			context.putLabel(funProd, consAttr);
 		}
 
 		return funProd;
@@ -181,8 +178,8 @@ public class Production extends ASTNode {
 	}
 
 	@Override
-	public ASTNode accept(Transformer visitor) throws TransformerException {
-		return visitor.transform(this);
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
 	}
 
 	public String getSort() {

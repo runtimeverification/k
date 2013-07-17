@@ -3,7 +3,7 @@ package org.kframework.compile.transformers;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.compile.utils.Substitution;
 import org.kframework.kil.*;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -24,8 +24,8 @@ import java.util.List;
 public class ContextsToHeating extends CopyOnWriteTransformer {
     private List<ModuleItem> rules = new ArrayList<ModuleItem>();
     
-    public ContextsToHeating(DefinitionHelper definitionHelper) {
-           super("Contexts to Heating Rules", definitionHelper);
+    public ContextsToHeating(Context context) {
+           super("Contexts to Heating Rules", context);
     }
 
     @Override
@@ -37,9 +37,15 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
      * C[v], v, t1, t2 such that
      * v is a fresh variable and term = C[t1 => t2] */
     private List<Term> splitRewrite(Term term) throws TransformerException {
-    	final Variable v = MetaK.getFreshVar("K");
+    	final Variable v;
+        if (GlobalSettings.matchingLogic) {
+            /* the java rewrite engine only supports heating/cooling on KItem */
+            v = Variable.getFreshVar(KSorts.KITEM);
+        } else {
+            v = Variable.getFreshVar(KSorts.K);
+        }
     	final List<Term> list = new ArrayList<Term>();
-    	Transformer transformer = new CopyOnWriteTransformer("splitter", definitionHelper) {
+    	Transformer transformer = new CopyOnWriteTransformer("splitter", context) {
     		@Override public ASTNode transform(Rewrite rewrite) {
     			list.add(rewrite.getLeft());
     			list.add(rewrite.getRight());
@@ -72,7 +78,7 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
 	private Term substituteSubstitutable(Term term, Term variable, Term replacement) throws TransformerException {
 		HashMap<Term, Term> hashMap = new HashMap<Term, Term>();
 		hashMap.put(variable, replacement);
-		Substitution substitution = new Substitution(hashMap, definitionHelper);
+		Substitution substitution = new Substitution(hashMap, context);
 		if (term == null) {
 			return null;
 		}
@@ -80,9 +86,19 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
 	}
 
 	@Override
-    public ASTNode transform(Context node) throws TransformerException {
-    	Term body = (Term) node.getBody().accept(new ResolveAnonymousVariables(definitionHelper));
-    	Integer countRewrites = MetaK.countRewrites(body, definitionHelper); 
+    public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
+    	Term body = (Term) node.getBody().accept(new ResolveAnonymousVariables(context));
+    	int countHoles = MetaK.countHoles(body, context);
+    	if (countHoles == 0) {
+    		GlobalSettings.kem.register(
+    				new KException(ExceptionType.ERROR,
+    						KExceptionGroup.CRITICAL,
+    						"Contexts must have at least one HOLE.",
+    						getName(),
+    						node.getLocation(),
+    						node.getFilename()));
+    	}
+    	Integer countRewrites = MetaK.countRewrites(body, context);
     	if (countRewrites > 1) {
     		GlobalSettings.kem.register(
     				new KException(ExceptionType.ERROR,
@@ -92,7 +108,7 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
     						node.getLocation(),
     						node.getFilename()));
     	} else if (countRewrites == 0) {
-    		body = substituteHole(body, new Rewrite(Hole.KITEM_HOLE, Hole.KITEM_HOLE, definitionHelper));
+    		body = substituteHole(body, new Rewrite(Hole.KITEM_HOLE, Hole.KITEM_HOLE, context));
     	}
     	List<Term> r = splitRewrite(body);
     	Term rewriteContext = r.get(0);
@@ -113,13 +129,13 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
     	rewriteList.add(substituteHole(right, freshVariable));
     	rewriteList.add(new Freezer(substituteVariable(rewriteContext, freshVariable, new FreezerHole(0))));
     	Term rhsHeat = new KSequence(rewriteList);
-    	Rule heatingRule = new Rule(lhsHeat, rhsHeat, definitionHelper);
+    	Rule heatingRule = new Rule(lhsHeat, rhsHeat, context);
     	heatingRule.setCondition(substituteHole(node.getCondition(), freshVariable));
 		heatingRule.getAttributes().getContents().addAll(node.getAttributes().getContents());
     	heatingRule.putAttribute(MetaK.Constants.heatingTag,"");
     	rules.add(heatingRule);
     	
-    	Rule coolingRule = new Rule(rhsHeat, lhsHeat, definitionHelper);
+    	Rule coolingRule = new Rule(rhsHeat, lhsHeat, context);
 		coolingRule.getAttributes().getContents().addAll(node.getAttributes().getContents());
     	coolingRule.putAttribute(MetaK.Constants.coolingTag,"");
     	rules.add(coolingRule);

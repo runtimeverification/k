@@ -130,8 +130,8 @@ public class Module extends DefinitionItem {
 	}
 
 	@Override
-	public ASTNode accept(Transformer visitor) throws TransformerException {
-		return visitor.transform(this);
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
 	}
 
 	public Module addModuleItems(List<ModuleItem> rules) {
@@ -156,11 +156,11 @@ public class Module extends DefinitionItem {
 	}
 
     public void addConstant(Constant ct) {
-        this.addProduction(ct.getSort(null), new Terminal(ct.getValue()));
+        this.addProduction(ct.getSort(), new Terminal(ct.getValue()));
     }
 
     public void addConstant(KLabelConstant kLabelConstant) {
-        this.addProduction(kLabelConstant.getSort(null), new Terminal(kLabelConstant.getLabel()));
+        this.addProduction(kLabelConstant.getSort(), new Terminal(kLabelConstant.getLabel()));
     }
 
 	public void addProduction(String sort, ProductionItem prodItem) {

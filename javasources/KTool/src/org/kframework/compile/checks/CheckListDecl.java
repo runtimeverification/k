@@ -6,15 +6,15 @@ import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Sort;
 import org.kframework.kil.UserList;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
 public class CheckListDecl extends BasicVisitor {
 
-	public CheckListDecl(DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public CheckListDecl(Context context) {
+		super(context);
 	}
 
 	@Override

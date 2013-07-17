@@ -1,9 +1,10 @@
 package org.kframework.krun;
 
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Definition;
 import org.kframework.krun.api.SearchType;
+import org.kframework.utils.file.KPaths;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,12 +22,12 @@ public class K {
 
 	public static String kdir;
 	
-	public static void init(DefinitionHelper definitionHelper) {
-		if (definitionHelper.dotk == null) {
-			definitionHelper.dotk = new File(userdir + File.separator + ".k");		
+	public static void init(Context context) {
+		if (context.dotk == null) {
+			context.dotk = new File(userdir + File.separator + ".k");
 		}
 		try {
-			kdir = definitionHelper.dotk.getCanonicalPath();
+			kdir = context.dotk.getCanonicalPath();
 			setKDir();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -90,6 +91,7 @@ public class K {
 	public static boolean profile = false;
 	//don't delete temp folders created by krun by default
 	public static boolean deleteTempDir = false;
+    public static boolean smt = true;
 
 
 	public static Properties configuration_variables = new Properties();
@@ -102,4 +104,5 @@ public class K {
 	public static int stateCounter = 0;
 
 	public static String backend = "maude";
+    public static String prove = "";
 }

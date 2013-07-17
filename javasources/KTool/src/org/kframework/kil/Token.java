@@ -1,95 +1,164 @@
 package org.kframework.kil;
 
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.*;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.StringUtil;
+import org.w3c.dom.Element;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import aterm.ATermAppl;
 
 /**
- * Created with IntelliJ IDEA.
- * User: andrei
- * Date: 4/16/13
- * Time: 11:43 PM
- * To change this template use File | Settings | File Templates.
+ * Abstract class representing a {@link KLabel} of the form #token("SORT", "VALUE").
  */
-public class Token extends Term {
+public abstract class Token extends KLabel {
 
-    /*
-     * HashMap caches the constants to ensure uniqueness
-     */
-    private static Map<Token, Token> cache = new HashMap<Token, Token>();
+	/**
+	 * Returns a {@link Token} of the given sort with the given value. The {@link Token} object is an instance of {@link BoolBuiltin}, {@link IntBuiltin},
+	 * {@link StringBuiltin}, or {@link GenericToken}.
+	 * 
+	 * @param sort
+	 * @param value
+	 * @return
+	 */
+	public static Token of(String sort, String value) {
+		if (sort.equals(BoolBuiltin.SORT_NAME)) {
+			return BoolBuiltin.of(value);
+		} else if (sort.equals(IntBuiltin.SORT_NAME)) {
+			return IntBuiltin.of(value);
+		} else if (sort.equals(StringBuiltin.SORT_NAME)) {
+			/* TODO(andreis): unescape string */
+			return StringBuiltin.of(value);
+		} else {
+			return GenericToken.of(sort, value);
+		}
+	}
 
-    public static Token of(String sort, String value) {
-        return Token.of(StringBuiltin.of(sort), StringBuiltin.of(value));
-    }
+	/**
+	 * Returns a {@link KApp} representing a {@link Token} of the given sort with the given value applied to an empty {@link KList}.
+	 * 
+	 * @param sort
+	 * @param value
+	 * @return
+	 */
+	public static KApp kAppOf(String sort, String value) {
+		if (sort.equals(BoolBuiltin.SORT_NAME)) {
+			return BoolBuiltin.kAppOf(value);
+		} else if (sort.equals(IntBuiltin.SORT_NAME)) {
+			return IntBuiltin.kAppOf(value);
+		} else if (sort.equals(StringBuiltin.SORT_NAME)) {
+			return StringBuiltin.kAppOf(value);
+		} else {
+			return GenericToken.kAppOf(sort, value);
+		}
+	}
 
-    public static Token of(Term sortTerm, Term valueTerm) {
-        Token token = new Token(sortTerm, valueTerm);
-        if (cache.get(token) == null) {
-            cache.put(token, token);
-        }
-        return cache.get(token);
-    }
+	/**
+	 * Returns a {@link KApp} representing a {@link Token} with the sort and value specified by the given {@link Element} applied to an empty {@link KList}.
+	 * 
+	 * @param element
+	 * @return
+	 */
+	public static KApp kAppOf(Element element) {
+		String sort = element.getAttribute(Constants.SORT_sort_ATTR);
+		if (sort.equals(BoolBuiltin.SORT_NAME)) {
+			return KApp.of(new BoolBuiltin(element));
+		} else if (sort.equals(IntBuiltin.SORT_NAME)) {
+			return KApp.of(new IntBuiltin(element));
+		} else if (sort.equals(StringBuiltin.SORT_NAME)) {
+			return KApp.of(new StringBuiltin(element));
+		} else {
+			return KApp.of(new GenericToken(element));
+		}
+	}
 
-    private final Term sortTerm;
-    private final Term valueTerm;
+	public static KApp kAppOf(ATermAppl atm) {
+		String sort = StringUtil.getSortNameFromCons(atm.getName());
+		if (sort.equals(BoolBuiltin.SORT_NAME)) {
+			return KApp.of(new BoolBuiltin(atm));
+		} else if (sort.equals(IntBuiltin.SORT_NAME)) {
+			return KApp.of(new IntBuiltin(atm));
+		} else if (sort.equals(StringBuiltin.SORT_NAME)) {
+			return KApp.of(new StringBuiltin(atm));
+		} else {
+			return KApp.of(new GenericToken(atm));
+		}
+	}
 
-    private Token(Term sortTerm, Term valueTerm) {
-        this.sortTerm = sortTerm;
-        this.valueTerm = valueTerm;
-    }
+	protected Token() {
+	}
 
-    public Term getSortTerm() {
-        return sortTerm;
-    }
+	protected Token(Element element) {
+		super(element);
+	}
 
-    public Term getValueTerm() {
-        return valueTerm;
-    }
+	protected Token(ATermAppl element) {
+		super(element);
+	}
 
-    @Override
-    public Term shallowCopy() {
-        /* this object is immutable */
-        return this;
-    }
+	/**
+	 * Returns a {@link String} representing the sort of the token.
+	 * 
+	 * @return
+	 */
+	public abstract String tokenSort();
 
-    @Override
-    public int hashCode() {
-        int hash = 1;
-        hash = hash * DefinitionHelper.HASH_PRIME + sortTerm.hashCode();
-        hash = hash * DefinitionHelper.HASH_PRIME + valueTerm.hashCode();
-        return hash;
-    }
+	/**
+	 * Returns a {@link String} representing the (uninterpreted) value of the token.
+	 * 
+	 * @return
+	 */
+	public abstract String value();
 
-    @Override
-    public boolean equals(Object object) {
-        /* the cache ensures uniqueness of logically equal object instances */
-        return this == object;
-    }
+	@Override
+	public Term shallowCopy() {
+		/* this object is immutable */
+		return this;
+	}
 
-    @Override
-    public String toString() {
-        return "#token(" + sortTerm + ", " + valueTerm + ")";
-    }
+	@Override
+	public int hashCode() {
+		int hash = 1;
+		hash = hash * Context.HASH_PRIME + tokenSort().hashCode();
+		hash = hash * org.kframework.kil.loader.Context.HASH_PRIME + value().hashCode();
+		return hash;
+	}
 
-    @Override
-    public void accept(Matcher matcher, Term toMatch) {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public boolean equals(Object object) {
+		if (this == object) {
+			return true;
+		}
 
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
-    }
+		if (!(object instanceof Token)) {
+			return false;
+		}
 
-    @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
+		Token token = (Token) object;
+		return tokenSort().equals(token.tokenSort()) && value().equals(token.value());
+	}
+
+	@Override
+	public String toString() {
+		return "#token(\"" + tokenSort() + "\", \"" + value() + "\")";
+	}
+
+	@Override
+	public void accept(Matcher matcher, Term toMatch) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
+	}
+
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
+	}
 
 }

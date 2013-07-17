@@ -1,35 +1,49 @@
 package org.kframework.backend.java.symbolic;
 
-
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableSet;
+import com.microsoft.z3.BoolExpr;
 import org.kframework.backend.java.kil.AnonymousVariable;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.Sorted;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.backend.java.kil.Z3Term;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.loader.Context;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableSet;
+
+import com.microsoft.z3.Solver;
+import com.microsoft.z3.Status;
+import com.microsoft.z3.Z3Exception;
+import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.krun.K;
+
 
 /**
- * Created with IntelliJ IDEA.
- * User: andrei
- * Date: 4/2/13
- * Time: 1:05 PM
- * To change this template use File | Settings | File Templates.
+ * A conjunction of equalities between terms (with variables).
+ *
+ * @author AndreiS
  */
-public class SymbolicConstraint {
+public class SymbolicConstraint extends ASTNode implements Serializable, Transformable, Visitable {
 
     public enum TruthValue { TRUE, UNKNOWN, FALSE }
 
-    public class Equality {
+    /**
+     * An equality between two terms (with variables).
+     */
+    public class Equality implements Serializable {
 
         public static final String SEPARATOR = " =? ";
 
@@ -37,13 +51,71 @@ public class SymbolicConstraint {
         private Term rightHandSide;
 
         private Equality(Term leftHandSide, Term rightHandSide) {
-            assert leftHandSide.getKind().equals(rightHandSide.getKind()):
+            assert leftHandSide.kind().equals(rightHandSide.kind()):
                     "kind mismatch between "
-                            + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
-                            + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
+                    + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
+                    + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
 
             this.leftHandSide = leftHandSide;
             this.rightHandSide = rightHandSide;
+        }
+
+        public Equality evaluate() {
+            leftHandSide = leftHandSide.evaluate(context);
+            rightHandSide = rightHandSide.evaluate(context);
+            return this;
+        }
+
+        public Term leftHandSide() {
+            return leftHandSide;
+        }
+
+        public Term rightHandSide() {
+            return rightHandSide;
+        }
+
+        public boolean isFalse() {
+            if (leftHandSide.isGround() && rightHandSide.isGround()) {
+                return !leftHandSide.equals(rightHandSide);
+            }
+
+            if (!(leftHandSide instanceof Sorted) || !(rightHandSide instanceof Sorted)) {
+                return false;
+            }
+
+            if (leftHandSide instanceof KItem
+                    && ((KItem) leftHandSide).kLabel().isConstructor()) {
+                return !context.isSubsortedEq(
+                        ((Sorted) rightHandSide).sort(),
+                        ((KItem) leftHandSide).sort());
+            } else if (rightHandSide instanceof KItem
+                    && ((KItem) rightHandSide).kLabel().isConstructor()) {
+                return !context.isSubsortedEq(
+                        ((Sorted) leftHandSide).sort(),
+                        ((KItem) rightHandSide).sort());
+            } else {
+                return null == context.getGLBSort(ImmutableSet.<String>of(
+                    ((Sorted) leftHandSide).sort(),
+                    ((Sorted) rightHandSide).sort()));
+            }
+        }
+
+        public boolean isTrue() {
+            return leftHandSide.equals(rightHandSide);
+        }
+
+        public boolean isUnknown() {
+            return !isTrue() && !isFalse();
+        }
+
+        private Equality substitute(Map<Variable, ? extends Term> substitution) {
+            leftHandSide = leftHandSide.substitute(substitution, context);
+            rightHandSide = rightHandSide.substitute(substitution, context);
+            return this;
+        }
+
+        private Equality substitute(Variable variable, Term term) {
+            return substitute(Collections.singletonMap(variable, term));
         }
 
         @Override
@@ -58,44 +130,7 @@ public class SymbolicConstraint {
 
             Equality equality = (Equality) object;
             return leftHandSide.equals(equality.leftHandSide)
-                    && rightHandSide.equals(equality.rightHandSide);
-        }
-
-        public Term getLeftHandSide() {
-            return leftHandSide;
-        }
-
-        public Term getRightHandSide() {
-            return rightHandSide;
-        }
-
-        public boolean isFalse() {
-            if (leftHandSide instanceof Sorted && rightHandSide instanceof Sorted) {
-                return null == definitionHelper.getGLBSort(ImmutableSet.<String>of(
-                        ((Sorted) leftHandSide).getSort(),
-                        ((Sorted) rightHandSide).getSort()));
-            } else {
-                return false;
-            }
-        }
-
-        public boolean isTrue() {
-            return leftHandSide.equals(rightHandSide);
-        }
-
-        public boolean isUnknown() {
-            return !isTrue() && !isFalse();
-        }
-
-        private void substitute(Map<Variable, Term> substitution) {
-            leftHandSide = leftHandSide.substitute(substitution, definitionHelper);
-            rightHandSide = rightHandSide.substitute(substitution, definitionHelper);
-        }
-
-        private void substitute(Variable variable, Term term) {
-            Map<Variable, Term> substitution = new HashMap<Variable, Term>();
-            substitution.put(variable, term);
-            substitute(substitution);
+                   && rightHandSide.equals(equality.rightHandSide);
         }
 
         @Override
@@ -112,25 +147,27 @@ public class SymbolicConstraint {
             = joiner.withKeyValueSeparator(Equality.SEPARATOR);
 
     private final LinkedList<Equality> equalities = new LinkedList<Equality>();
-    private boolean isNormal = true;
+    private boolean isNormal;
     private final Map<Variable, Term> substitution = new HashMap<Variable, Term>();
-    private TruthValue truthValue = TruthValue.TRUE;
+    private TruthValue truthValue;
+    private Context context;
+    private final SymbolicUnifier unifier;
 
-    protected DefinitionHelper definitionHelper;
-    
-    public SymbolicConstraint(DefinitionHelper definitionHelper) {
-    	this.definitionHelper = definitionHelper;
+    public SymbolicConstraint(Context context) {
+        unifier = new SymbolicUnifier(this, context);
+    	this.context = context;
+        truthValue = TruthValue.TRUE;
+        isNormal = true;
     }
     
     public TruthValue add(Term leftHandSide, Term rightHandSide) {
-        assert leftHandSide.getKind().equals(rightHandSide.getKind()):
+        assert leftHandSide.kind().equals(rightHandSide.kind()):
                 "kind mismatch between "
                         + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
                         + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
 
-        leftHandSide = leftHandSide.substitute(substitution, definitionHelper);
-        rightHandSide = rightHandSide.substitute(substitution, definitionHelper);
-
+        leftHandSide = leftHandSide.substitute(substitution, context).evaluate(context);
+        rightHandSide = rightHandSide.substitute(substitution, context).evaluate(context);
         Equality equality = this.new Equality(leftHandSide, rightHandSide);
 
         if (equality.isUnknown()){
@@ -138,25 +175,108 @@ public class SymbolicConstraint {
             truthValue = TruthValue.UNKNOWN;
             isNormal = false;
         } else if (equality.isFalse()) {
+            equalities.add(equality);
             truthValue = TruthValue.FALSE;
         }
 
         return truthValue;
     }
 
-    public List<Equality> getEqualities() {
+    public TruthValue addAll(SymbolicConstraint constraint) {
+        for (Map.Entry<Variable, Term> entry : constraint.substitution.entrySet()) {
+            add(entry.getValue(), entry.getKey());
+        }
+
+        for (Equality equality : constraint.equalities) {
+            add(equality.leftHandSide, equality.rightHandSide);
+        }
+
+        return truthValue;
+    }
+
+    public boolean checkUnsat() {
+        if (!K.smt) {
+            return false;
+        }
+
+        normalize();
+        Boolean result = false;
+        try {
+            com.microsoft.z3.Context context = new com.microsoft.z3.Context();
+            KILtoZ3 transformer = new KILtoZ3(context);
+            Solver solver = context.MkSolver();
+            for (Equality equality : equalities) {
+                solver.Assert(context.MkEq(
+                        ((Z3Term) equality.leftHandSide.accept(transformer)).expression(),
+                        ((Z3Term) equality.rightHandSide.accept(transformer)).expression()));
+            }
+            result = solver.Check() == Status.UNSATISFIABLE;
+            context.Dispose();
+        } catch (Z3Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public List<Equality> equalities() {
         normalize();
         return Collections.unmodifiableList(equalities);
     }
 
-    public Map<Variable, Term> getSubstitution() {
+    public Map<Variable, Term> substitution() {
         normalize();
         return Collections.unmodifiableMap(substitution);
+    }
+
+    public void eliminateAnonymousVariables() {
+        for (Iterator<Variable> iterator = substitution.keySet().iterator(); iterator.hasNext();) {
+            Variable variable = iterator.next();
+            if (variable instanceof AnonymousVariable) {
+                iterator.remove();
+            }
+        }
     }
 
     public TruthValue getTruthValue() {
         normalize();
         return truthValue;
+    }
+
+    public boolean implies(SymbolicConstraint constraint) {
+        normalize();
+
+        Boolean result = false;
+        try {
+            com.microsoft.z3.Context context = new com.microsoft.z3.Context();
+            KILtoZ3 transformer = new KILtoZ3(context);
+            Solver solver = context.MkSolver();
+            for (Equality equality : equalities) {
+                solver.Assert(context.MkEq(
+                        ((Z3Term) equality.leftHandSide.accept(transformer)).expression(),
+                        ((Z3Term) equality.rightHandSide.accept(transformer)).expression()));
+            }
+
+            BoolExpr[] inequalities = new BoolExpr[constraint.equalities.size() + constraint.substitution.size()];
+            int i = 0;
+            for (Equality equality : constraint.equalities) {
+                inequalities[i++] = context.MkNot(context.MkEq(
+                        ((Z3Term) equality.leftHandSide.accept(transformer)).expression(),
+                        ((Z3Term) equality.rightHandSide.accept(transformer)).expression()));
+            }
+            for (Map.Entry<Variable, Term> entry : constraint.substitution.entrySet()) {
+                inequalities[i++] = context.MkNot(context.MkEq(
+                        ((Z3Term) entry.getKey().accept(transformer)).expression(),
+                        ((Z3Term) entry.getValue().accept(transformer)).expression()));
+            }
+
+            solver.Assert(context.MkOr(inequalities));
+
+            result = solver.Check() == Status.UNSATISFIABLE;
+            context.Dispose();
+        } catch (Z3Exception e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
     public boolean isFalse() {
@@ -169,9 +289,52 @@ public class SymbolicConstraint {
         return truthValue == TruthValue.TRUE;
     }
 
+    public boolean isSubstitution() {
+        normalize();
+        return equalities.isEmpty() && unifier.multiConstraints.isEmpty();
+    }
+
     public boolean isUnknown() {
         normalize();
         return truthValue == TruthValue.UNKNOWN;
+    }
+
+    public Collection<SymbolicConstraint> getMultiConstraints() {
+        if (!unifier.multiConstraints.isEmpty()) {
+            assert unifier.multiConstraints.size() == 1;
+
+            List<SymbolicConstraint> multiConstraints = new ArrayList<SymbolicConstraint>();
+            for (SymbolicConstraint constraint : unifier.multiConstraints.iterator().next()) {
+                constraint.addAll(this);
+                multiConstraints.add(constraint);
+            }
+            return multiConstraints;
+        } else {
+            return Collections.singletonList(this);
+        }
+    }
+
+    public TruthValue simplify() {
+        boolean change;
+        label: do {
+            change = false;
+            normalize();
+
+            for (int i = 0; i < equalities.size(); ++i) {
+                Equality equality = equalities.get(i);
+                if (!equality.leftHandSide.isSymbolic() && !equality.rightHandSide.isSymbolic()) {
+                    equalities.remove(i);
+                    if (!unifier.unify(equality)) {
+                        truthValue = TruthValue.FALSE;
+                        break label;
+                    }
+
+                    change = true;
+                }
+            }
+        } while (change);
+
+        return truthValue;
     }
 
     private void normalize() {
@@ -182,7 +345,7 @@ public class SymbolicConstraint {
 
         for (Iterator<Equality> iterator = equalities.iterator(); iterator.hasNext();) {
             Equality equality = iterator.next();
-            equality.substitute(substitution);
+            equality.substitute(substitution).evaluate();
 
             if (equality.isTrue()) {
                 iterator.remove();
@@ -194,12 +357,14 @@ public class SymbolicConstraint {
 
             Variable variable;
             Term term;
-            if (equality.leftHandSide instanceof Variable) {
-                variable = (Variable) equality.leftHandSide;
-                term = equality.rightHandSide;
-            } else if (equality.rightHandSide instanceof Variable) {
+            /* when possible, substitute the variables in the RHS in terms of the variables in the
+             * LHS */
+            if (equality.rightHandSide instanceof Variable) {
                 variable = (Variable) equality.rightHandSide;
                 term = equality.leftHandSide;
+            } else if (equality.leftHandSide instanceof Variable) {
+                variable = (Variable) equality.leftHandSide;
+                term = equality.rightHandSide;
             } else {
                 continue;
             }
@@ -210,7 +375,7 @@ public class SymbolicConstraint {
             Map<Variable, Term> tempSubstitution = new HashMap<Variable, Term>();
             tempSubstitution.put(variable, term);
 
-            SymbolicConstraint.compose(substitution, tempSubstitution, definitionHelper);
+            SymbolicConstraint.compose(substitution, tempSubstitution, context);
             substitution.put(variable, term);
 
             for (Iterator<Equality> previousIterator = equalities.iterator(); previousIterator.hasNext();) {
@@ -222,7 +387,6 @@ public class SymbolicConstraint {
 
                 if (previousEquality.isTrue()) {
                     previousIterator.remove();
-                    continue;
                 } else if (previousEquality.isFalse()) {
                     truthValue = TruthValue.FALSE;
                     return;
@@ -230,6 +394,83 @@ public class SymbolicConstraint {
             }
             iterator.remove();
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void compose(Map<Variable, Term> map, Map<Variable, Term> substitution, Context context) {
+        Map.Entry<Variable, Term>[] entries = map.entrySet().toArray(new Map.Entry[map.size()]);
+        for (int index = 0; index < entries.length; ++index) {
+            Term term = entries[index].getValue().substitute(substitution, context);
+            if (term != entries[index].getValue()) {
+                map.put(entries[index].getKey(), term);
+            }
+        }
+    }
+
+    public Map<Variable, Variable> rename(Set<Variable> variableSet) {
+        Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(variableSet);
+
+        /* rename substitution keys */
+        for (Variable variable : variableSet) {
+            if (substitution.get(variable) != null) {
+                substitution.put(freshSubstitution.get(variable), substitution.remove(variable));
+            }
+        }
+
+        /* rename in substitution values */
+        for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
+            entry.setValue(entry.getValue().substitute(freshSubstitution, context));
+        }
+
+        for (Equality equality : equalities) {
+            equality.substitute(freshSubstitution);
+        }
+
+        return freshSubstitution;
+    }
+
+    /**
+     * Returns a new {@code SymbolicConstraint} instance obtained from this symbolic constraint
+     * by applying substitution.
+     */
+    public SymbolicConstraint substitute(Map<Variable, ? extends Term> substitution, Context context) {
+        if (substitution.isEmpty()) {
+            return this;
+        }
+
+        return (SymbolicConstraint) accept(new SubstitutionTransformer((Map<Variable, Term>) substitution, context));
+    }
+
+    /**
+     * Returns a new {@code SymbolicConstraint} instance obtained from this symbolic constraint by
+     * substituting variable with term.
+     */
+    public SymbolicConstraint substitute(Variable variable, Term term, Context context) {
+        return substitute(Collections.singletonMap(variable, term), context);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        // TODO(AndreiS): normalize
+        if (this == object) {
+            return true;
+        }
+
+        if (!(object instanceof SymbolicConstraint)) {
+            return false;
+        }
+
+        SymbolicConstraint constraint = (SymbolicConstraint) object;
+        return equalities.equals(constraint.equalities)
+               && substitution.equals(constraint.substitution);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 1;
+        hash = hash * Utils.HASH_PRIME + equalities.hashCode();
+        hash = hash * Utils.HASH_PRIME + substitution.hashCode();
+        return hash;
     }
 
     @Override
@@ -250,35 +491,32 @@ public class SymbolicConstraint {
         builder = substitutionJoiner.appendTo(builder, substitution);
         return builder.toString();
     }
-    @SuppressWarnings("unchecked")
-    public static void compose(Map<Variable, Term> map, Map<Variable, Term> substitution, DefinitionHelper definitionHelper) {
-        Map.Entry<Variable, Term>[] entries = map.entrySet().toArray(new Map.Entry[map.size()]);
-        for (int index = 0; index < entries.length; ++index) {
-            Term term = entries[index].getValue().substitute(substitution, definitionHelper);
-            if (term != entries[index].getValue()) {
-                map.put(entries[index].getKey(), term);
-            }
-        }
+
+
+    @Override
+    public ASTNode accept(Transformer transformer) {
+        return transformer.transform(this);
     }
 
-    public Map<Variable, Term> freshSubstitution(Set<Variable> variableSet) {
-        Map<Variable, Term> freshSubstitution = new HashMap<Variable, Term>();
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
+    }
 
-        for (Variable variable : variableSet) {
-            if (substitution.get(variable) != null) {
-                substitution.put(AnonymousVariable.getFreshVariable(variable.getSort()),
-                                 substitution.remove(variable));
-            } else {
-                freshSubstitution.put(variable,
-                                      AnonymousVariable.getFreshVariable(variable.getSort()));
-            }
-        }
+    @Override
+    public ASTNode shallowCopy() {
+        throw new UnsupportedOperationException();
+    }
 
-        for (Equality equality : equalities) {
-            equality.substitute(freshSubstitution);
-        }
+    @Override
+    public ASTNode accept(org.kframework.kil.visitors.Transformer transformer)
+            throws TransformerException {
+        throw new UnsupportedOperationException();
+    }
 
-        return freshSubstitution;
+    @Override
+    public void accept(org.kframework.kil.visitors.Visitor visitor) {
+        throw new UnsupportedOperationException();
     }
 
 }

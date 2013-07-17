@@ -6,21 +6,26 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
+import aterm.ATermAppl;
+
 import java.util.Collections;
 import java.util.List;
-
 
 /** A bag. Contents should be a Cell or BagItem node, or term of sort Bag or BagItem */
 public class Bag extends Collection {
 
-    public static final Bag EMPTY = new Bag(Collections.<Term>emptyList());
+	public static final Bag EMPTY = new Bag(Collections.<Term> emptyList());
 
-    public Bag(String location, String filename) {
+	public Bag(String location, String filename) {
 		super(location, filename, "Bag");
 	}
 
 	public Bag(Element element) {
 		super(element);
+	}
+
+	public Bag(ATermAppl atm) {
+		super(atm);
 	}
 
 	public Bag(Bag node) {
@@ -40,21 +45,21 @@ public class Bag extends Collection {
 		return super.toString();
 	}
 
-  @Override
+	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}
 
-  @Override
-	public ASTNode accept(Transformer visitor) throws TransformerException  {
-		return visitor.transform(this);
+	@Override
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
 	}
 
-  @Override
-  public void accept(Matcher matcher, Term toMatch){
-    matcher.match(this, toMatch);
-  }
-	
+	@Override
+	public void accept(Matcher matcher, Term toMatch) {
+		matcher.match(this, toMatch);
+	}
+
 	@Override
 	public Bag shallowCopy() {
 		return new Bag(this);

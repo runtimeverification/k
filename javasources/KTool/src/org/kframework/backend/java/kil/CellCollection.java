@@ -1,13 +1,15 @@
 package org.kframework.backend.java.kil;
 
-import org.kframework.backend.java.symbolic.Matcher;
+import com.google.common.collect.HashMultimap;
+import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Utils;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
+
+import com.google.common.collect.Multimap;
 
 
 /**
@@ -19,45 +21,50 @@ import java.util.Set;
  */
 public class CellCollection extends Collection {
 
-    private final Map<String, Cell> cells;
+    private final Multimap<String, Cell> cells;
+    private final boolean isStar;
 
-    public CellCollection(Map<String, Cell> cells, Variable frame) {
+    public CellCollection(Multimap<String, Cell> cells, Variable frame, boolean isStar) {
         super(frame, Kind.CELL_COLLECTION);
-        this.cells = new HashMap<String, Cell>(cells);
-        System.err.println(this);
-        System.err.println("===");
-        System.err.flush();
+        this.cells = HashMultimap.create(cells);
+        this.isStar = isStar;
+
+        assert !isStar || cells.keySet().size() <= 1;
+        for (String label : cells.keySet()) {
+            assert isStar || cells.get(label).size() == 1;
+        }
     }
 
     public CellCollection(Variable frame) {
-        super(frame, Kind.CELL_COLLECTION);
-        cells = new HashMap<String, Cell>();
+        this(HashMultimap.<String, Cell>create(), frame, false);
     }
 
-    public CellCollection(Map<String, Cell> cells) {
-        super(null, Kind.CELL_COLLECTION);
-        this.cells = new HashMap<String, Cell>(cells);
+    public CellCollection(Multimap<String, Cell> cells, boolean star) {
+        this(cells, null, star);
     }
 
     public CellCollection() {
-        super(null, Kind.CELL_COLLECTION);
-        cells = new HashMap<String, Cell>();
+        this(HashMultimap.<String, Cell>create(), null, false);
     }
 
     public java.util.Collection<Cell> cells() {
         return cells.values();
     }
 
+    public Multimap<String, Cell> cellMap() {
+        return cells;
+    }
+
     public boolean containsKey(String label) {
         return cells.containsKey(label);
     }
 
-    public Cell get(String label) {
+    public java.util.Collection<Cell> get(String label) {
         return cells.get(label);
     }
 
-    public Map<String, Cell> getCells() {
-        return cells;
+    public boolean isStar() {
+        return isStar;
     }
 
     public Set<String> labelSet() {
@@ -69,28 +76,42 @@ public class CellCollection extends Collection {
     }
 
     @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+
+        if (!(object instanceof CellCollection)) {
+            return false;
+        }
+
+        CellCollection collection = (CellCollection) object;
+        return super.equals(collection) && cells.equals(collection.cells);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 1;
+        hash = hash * Utils.HASH_PRIME + (super.frame == null ? 0 : super.frame.hashCode());
+        hash = hash * Utils.HASH_PRIME + cells.hashCode();
+        return hash;
+    }
+
+    @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
         for (Cell cell : cells.values()) {
             stringBuilder.append(cell);
         }
         if (super.hasFrame()) {
-            stringBuilder.append(super.getFrame());
+            stringBuilder.append(super.frame());
         }
         return stringBuilder.toString();
     }
 
-    /**
-     * @return a copy of the ASTNode containing the same fields.
-     */
     @Override
-    public ASTNode shallowCopy() {
-        throw new UnsupportedOperationException();  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void accept(Matcher matcher, Term patten) {
-        matcher.match(this, patten);
+    public void accept(Unifier unifier, Term patten) {
+        unifier.unify(this, patten);
     }
 
     @Override

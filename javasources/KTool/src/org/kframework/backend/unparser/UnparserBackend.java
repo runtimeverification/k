@@ -2,7 +2,7 @@ package org.kframework.backend.unparser;
 
 import org.kframework.backend.BasicBackend;
 import org.kframework.kil.Definition;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.general.GlobalSettings;
@@ -12,18 +12,18 @@ import java.io.IOException;
 
 public class UnparserBackend extends BasicBackend {
 
-	public UnparserBackend(Stopwatch sw, DefinitionHelper definitionHelper) {
-		super(sw, definitionHelper);
+	public UnparserBackend(Stopwatch sw, Context context) {
+		super(sw, context);
 	}
 
 	@Override
 	public void run(Definition definition) throws IOException {
-		UnparserFilter unparserFilter = new UnparserFilter(definitionHelper);
+		UnparserFilter unparserFilter = new UnparserFilter(context);
 		definition.accept(unparserFilter);
 
 		String unparsedText = unparserFilter.getResult();
 
-		FileUtil.saveInFile(definitionHelper.dotk.getAbsolutePath() + "/def.k", unparsedText);
+		FileUtil.saveInFile(context.dotk.getAbsolutePath() + "/def.k", unparsedText);
 
 		File canonicalFile = GlobalSettings.mainFile.getCanonicalFile();
 		FileUtil.saveInFile(FileUtil.stripExtension(canonicalFile.getAbsolutePath()) + ".unparsed.k", unparsedText);

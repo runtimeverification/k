@@ -37,10 +37,6 @@ public class KRunResult<T> {
 
 	@Override
 	public String toString() {
-		if (result == null) {
-			//kind of an ugly hack, but this solves the issue of successful model-checking executions
-			return "true";
-		}
 		if (!K.statistics) {
 			return result.toString();
 		} else {

@@ -122,7 +122,7 @@ the wrapper in the generated documentation, we associate it an
   syntax Param ::= Type Id
   syntax Params ::= List{Param,","}
 
-  syntax Decl ::= Type Exps ";"
+  syntax Decl ::= Type Exps ";" [avoid]
                 | Type Id "(" Params ")" Block
                 | "class" Id Block
                 | "class" Id "extends" Id Block
@@ -253,7 +253,7 @@ The later is useful for example for checking whether there are cycles
 in the class extends relation. */
 
   configuration <T color="yellow">
-                  <tasks color="orange">
+                  <tasks color="orange" multiplicity="?">
                     <task multiplicity="*" color="yellow">
                       <k color="green"> $PGM:Stmts </k>
                       <tenv multiplicity="?" color="cyan"> .Map </tenv>

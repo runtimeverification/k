@@ -2,21 +2,19 @@ package org.kframework.parser.concrete.disambiguate;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
-import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.general.GlobalSettings;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class CellTypesFilter extends BasicTransformer {
 
-	public CellTypesFilter(DefinitionHelper definitionHelper) {
-		super("Cell types", definitionHelper);
+	public CellTypesFilter(org.kframework.kil.loader.Context context) {
+		super("Cell types", context);
 	}
 
 	// don't do anything for configuration and syntax
@@ -29,7 +27,7 @@ public class CellTypesFilter extends BasicTransformer {
 	}
 
 	public ASTNode transform(Cell cell) throws TransformerException {
-		String sort = definitionHelper.cellSorts.get(cell.getLabel());
+		String sort = context.cellKinds.get(cell.getLabel());
 
 		if (sort == null) {
 			if (cell.getLabel().equals("k"))
@@ -48,7 +46,7 @@ public class CellTypesFilter extends BasicTransformer {
 			if (cell.getContents() instanceof Ambiguity) {
 				List<Term> children = new ArrayList<Term>();
 				for (Term t : ((Ambiguity) cell.getContents()).getContents()) {
-					if (definitionHelper.isSubsortedEq(sort, t.getSort(definitionHelper)))
+					if (context.isSubsortedEq(sort, t.getSort()))
 						children.add(t);
 				}
 
@@ -62,9 +60,9 @@ public class CellTypesFilter extends BasicTransformer {
 			}
 
 			if (!(cell.getContents() instanceof Ambiguity))
-				if (!definitionHelper.isSubsortedEq(sort, cell.getContents().getSort(definitionHelper))) {
+				if (!context.isSubsortedEq(sort, cell.getContents().getSort())) {
 					// if the found sort is not a subsort of what I was expecting
-					String msg = "Wrong type in cell '" + cell.getLabel() + "'. Expected sort: " + sort + " but found " + cell.getContents().getSort(definitionHelper);
+					String msg = "Wrong type in cell '" + cell.getLabel() + "'. Expected sort: " + sort + " but found " + cell.getContents().getSort();
 					throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, getName(), cell.getFilename(), cell.getLocation()));
 				}
 		} else {

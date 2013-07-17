@@ -1,6 +1,7 @@
 package org.kframework.main;
 
 import org.apache.commons.cli.*;
+import org.kframework.utils.ActualPosixParser;
 
 /// Options for Haskell K compiler dump tool
 public class HKCDOptionsParser {
@@ -31,7 +32,7 @@ public class HKCDOptionsParser {
 	}
 
 	public CommandLine parse(String[] cmd) {
-		CommandLineParser parser = new PosixParser();
+		CommandLineParser parser = new ActualPosixParser();
 		try {
 			CommandLine cl = parser.parse(options, cmd);
 			return cl;

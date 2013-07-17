@@ -1,0 +1,4 @@
+<k>
+    "f" ~> "o" ~> "" ~> substrString ( "foo" , 2 , 1 ) ~> 
+      "\xff\u0100\uffff\U00010000"
+</k>

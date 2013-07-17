@@ -6,7 +6,6 @@ import java.util.List;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Bag;
-import org.kframework.kil.BoolBuiltin;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Configuration;
@@ -18,7 +17,8 @@ import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.Terminal;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.Variable;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -36,8 +36,8 @@ public class AddConditionToConfig extends CopyOnWriteTransformer {
 
     public static String KCELL = "k";
 
-    public AddConditionToConfig(DefinitionHelper definitionHelper) {
-        super("Add path condition to configuration", definitionHelper);
+    public AddConditionToConfig(Context context) {
+        super("Add path condition to configuration", context);
     }
 
     @Override
@@ -47,8 +47,8 @@ public class AddConditionToConfig extends CopyOnWriteTransformer {
         Cell cell = new Cell();
         cell.setLabel(MetaK.Constants.pathCondition);
         cell.setEllipses(Ellipses.NONE);
-        cell.setContents(BoolBuiltin.TRUE);
-
+        cell.setContents(new Variable("$PC", "Bool"));
+        
         // append the path condition cell as subcell of generated top cell
         Term body = node.getBody();
         if (body instanceof Cell) {

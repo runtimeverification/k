@@ -1,18 +1,17 @@
 package org.kframework.kil;
 
-import org.kframework.compile.utils.SyntaxByTag;
-import org.kframework.kil.loader.Constants;
-import org.kframework.kil.loader.DefinitionHelper;
-import org.kframework.kil.visitors.Transformable;
-import org.kframework.kil.visitors.Visitable;
-import org.spoofax.interpreter.terms.IStrategoAppl;
-import org.spoofax.jsglr.client.imploder.IToken;
-import org.spoofax.jsglr.client.imploder.ITokenizer;
-import org.spoofax.jsglr.client.imploder.ImploderAttachment;
-import org.w3c.dom.Element;
-
 import java.io.Serializable;
 import java.util.Set;
+
+import org.kframework.compile.utils.SyntaxByTag;
+import org.kframework.kil.loader.Constants;
+import org.kframework.kil.loader.Context;
+import org.kframework.kil.visitors.Transformable;
+import org.kframework.kil.visitors.Visitable;
+import org.w3c.dom.Element;
+
+import aterm.ATermAppl;
+import aterm.ATermList;
 
 /**
  * Base class for K AST. Useful for Visitors and Transformers.
@@ -46,15 +45,17 @@ public abstract class ASTNode implements Visitable, Transformable, Serializable 
 	 * @param elem
 	 *            the Stratego object representing an ASTNode
 	 */
-	public ASTNode(IStrategoAppl elem) {
-		ITokenizer tkz = ImploderAttachment.getTokenizer(elem);
-
-		IToken tk = tkz.currentToken();
-
-		String loc = "(" + tk.getLine() + "," + tk.getColumn() + "," + tk.getEndLine() + "," + tk.getEndColumn() + ")";
-
-		System.out.println(loc);
+	public ASTNode(ATermAppl elem) {
+		ATermList list = (ATermList) elem.getAnnotations().getFirst();
+		list = list.getNext();
+		String fileame = ((ATermAppl) ((ATermAppl) list.getFirst()).getChildAt(0)).getName();
+		int loc0 = Integer.parseInt(((ATermAppl) list.getFirst()).getChildAt(1).getChildAt(0).toString());
+		int loc1 = Integer.parseInt(((ATermAppl) list.getFirst()).getChildAt(1).getChildAt(1).toString()) + 1;
+		int loc2 = Integer.parseInt(((ATermAppl) list.getFirst()).getChildAt(1).getChildAt(2).toString());
+		int loc3 = Integer.parseInt(((ATermAppl) list.getFirst()).getChildAt(1).getChildAt(3).toString()) + 1;
+		String loc = "(" + loc0 + "," + loc1 + "," + loc2 + "," + loc3 + ")";
 		this.setLocation(loc);
+		this.setFilename(fileame);
 	}
 
 	/**
@@ -242,8 +243,8 @@ public abstract class ASTNode implements Visitable, Transformable, Serializable 
 	 * @param key
 	 * @return Set<Production> object containing the production descendants
 	 */
-	public Set<Production> getSyntaxByTag(String key, DefinitionHelper definitionHelper) {
-		return SyntaxByTag.get(this, key, definitionHelper);
+	public Set<Production> getSyntaxByTag(String key, Context context) {
+		return SyntaxByTag.get(this, key, context);
 	}
 
 	/**

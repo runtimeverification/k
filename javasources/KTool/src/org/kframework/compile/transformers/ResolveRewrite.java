@@ -1,7 +1,6 @@
 package org.kframework.compile.transformers;
 
 import org.kframework.kil.*;
-import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -12,8 +11,8 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  */
 public class ResolveRewrite extends CopyOnWriteTransformer {
 
-    public ResolveRewrite(DefinitionHelper definitionHelper) {
-        super("Pushing local rewrites to top", definitionHelper);
+    public ResolveRewrite(org.kframework.kil.loader.Context context) {
+        super("Pushing local rewrites to top", context);
     }
 
     @Override
@@ -21,9 +20,9 @@ public class ResolveRewrite extends CopyOnWriteTransformer {
         Term body = node.getBody();
         if (body instanceof Rewrite) return node;
         node = node.shallowCopy();
-        Term left = (Term) body.accept(new OneSideTransformer(LRHS.LEFT, definitionHelper));
-        Term right = (Term) body.accept(new OneSideTransformer(LRHS.RIGHT, definitionHelper));
-        Rewrite rewrite = new Rewrite(left, right, definitionHelper);
+        Term left = (Term) body.accept(new OneSideTransformer(LRHS.LEFT, context));
+        Term right = (Term) body.accept(new OneSideTransformer(LRHS.RIGHT, context));
+        Rewrite rewrite = new Rewrite(left, right, context);
         node.setBody(rewrite);
         return node;
     }
@@ -39,7 +38,7 @@ public class ResolveRewrite extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Context node) throws TransformerException {
+    public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
         return node;    //To change body of overridden methods use File | Settings | File Templates.
     }
 
@@ -51,8 +50,8 @@ public class ResolveRewrite extends CopyOnWriteTransformer {
     public class OneSideTransformer extends CopyOnWriteTransformer {
         private LRHS lrhs;
 
-        public OneSideTransformer(LRHS lrhs, DefinitionHelper definitionHelper) {
-            super("Retrieving the " + lrhs + "side of the term", definitionHelper);
+        public OneSideTransformer(LRHS lrhs, org.kframework.kil.loader.Context context) {
+            super("Retrieving the " + lrhs + "side of the term", context);
             this.lrhs = lrhs;
         }
 

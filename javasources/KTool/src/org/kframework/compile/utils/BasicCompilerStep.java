@@ -1,7 +1,7 @@
 package org.kframework.compile.utils;
 
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.utils.Stopwatch;
 
 /**
@@ -12,10 +12,10 @@ import org.kframework.utils.Stopwatch;
  */
 public abstract class BasicCompilerStep<T extends ASTNode> implements CompilerStep<T> {
 	protected Stopwatch sw = null;
-	protected DefinitionHelper definitionHelper;
+	protected Context context;
 
-	public BasicCompilerStep(DefinitionHelper definitionHelper) {
-		this.definitionHelper = definitionHelper;
+	public BasicCompilerStep(Context context) {
+		this.context = context;
 	}
 	
 	public void setSw(Stopwatch sw) {

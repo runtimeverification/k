@@ -6,8 +6,6 @@ import org.kframework.kil.Set;
 import org.kframework.kil.SetItem;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
-import org.kframework.kil.loader.DefinitionHelper;
-import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -31,12 +29,12 @@ public class SetInsertPattern extends Term {
   */ 
   private Variable remainder;
 
-  public SetInsertPattern(Set s, DefinitionHelper definitionHelper){
+  public SetInsertPattern(Set s){
     java.util.List<Term> contents = s.getContents();
     insertions = new ArrayList<Term>(contents.size());
     for(Term t : contents){
       if(t instanceof Variable){
-        if(!(t.getSort(definitionHelper).equals("Set")))
+        if(!(t.getSort().equals("Set")))
           throw new MatchCompilationException(
               "Variable in Set pattern does not have sort Set: " + t);
         if(remainder != null)
@@ -87,8 +85,8 @@ public class SetInsertPattern extends Term {
 	}
 
   @Override
-	public ASTNode accept(Transformer visitor) throws TransformerException {
-		return visitor.transform(this);
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
 	}
 
   @Override

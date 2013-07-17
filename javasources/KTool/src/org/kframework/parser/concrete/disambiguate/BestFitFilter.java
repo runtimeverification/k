@@ -3,7 +3,7 @@ package org.kframework.parser.concrete.disambiguate;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Term;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -11,8 +11,8 @@ import java.util.ArrayList;
 
 public class BestFitFilter extends BasicTransformer {
 
-	public BestFitFilter(GetFitnessUnitBasicVisitor gfubv, DefinitionHelper definitionHelper) {
-		super("Best fit filter", definitionHelper);
+	public BestFitFilter(GetFitnessUnitBasicVisitor gfubv, Context context) {
+		super("Best fit filter", context);
 		getFitnessUnit = gfubv;
 	}
 

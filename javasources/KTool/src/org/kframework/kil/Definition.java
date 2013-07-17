@@ -1,21 +1,12 @@
 package org.kframework.kil;
 
-import org.kframework.kil.loader.AddConsesVisitor;
-import org.kframework.kil.loader.CollectConfigCellsVisitor;
-import org.kframework.kil.loader.CollectConsesVisitor;
-import org.kframework.kil.loader.CollectLocationsVisitor;
-import org.kframework.kil.loader.CollectPrioritiesVisitor;
-import org.kframework.kil.loader.CollectStartSymbolPgmVisitor;
-import org.kframework.kil.loader.CollectSubsortsVisitor;
-import org.kframework.kil.loader.Constants;
-import org.kframework.kil.loader.DefinitionHelper;
-import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.loader.UpdateAssocVisitor;
-import org.kframework.kil.loader.UpdateReferencesVisitor;
+import org.kframework.compile.sharing.DataStructureSortCollector;
+import org.kframework.compile.sharing.TokenSortCollector;
+import org.kframework.kil.loader.*;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.utils.DefinitionLoader;
+import org.kframework.parser.DefinitionLoader;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -28,6 +19,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
 
 /**
  * Represents a language definition.
@@ -37,7 +30,7 @@ import java.util.Map;
  */
 public class Definition extends ASTNode {
 
-	private java.util.List<DefinitionItem> items;
+	private List<DefinitionItem> items;
 	private String mainFile;
 	private String mainModule;
 	/** An index of all modules in {@link #items} by name */
@@ -124,22 +117,39 @@ public class Definition extends ASTNode {
 	}
 
 	@Override
-	public ASTNode accept(Transformer visitor) throws TransformerException {
-		return visitor.transform(this);
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
 	}
 
-	public void preprocess(DefinitionHelper definitionHelper) {
+	public void preprocess(org.kframework.kil.loader.Context context) {
 		// Collect information
-		this.accept(new UpdateReferencesVisitor(definitionHelper));
-		this.accept(new AddConsesVisitor(definitionHelper));
-		this.accept(new CollectConsesVisitor(definitionHelper));
-		this.accept(new CollectSubsortsVisitor(definitionHelper));
-		this.accept(new CollectPrioritiesVisitor(definitionHelper));
-		this.accept(new CollectStartSymbolPgmVisitor(definitionHelper));
-		this.accept(new CollectConfigCellsVisitor(definitionHelper));
-		this.accept(new UpdateAssocVisitor(definitionHelper));
-		this.accept(new CollectLocationsVisitor(definitionHelper));
-		definitionHelper.initialized = true;
+		this.accept(new UpdateReferencesVisitor(context));
+		this.accept(new AddConsesVisitor(context));
+		this.accept(new CollectConsesVisitor(context));
+		this.accept(new CollectSubsortsVisitor(context));
+		this.accept(new CollectPrioritiesVisitor(context));
+		this.accept(new CollectStartSymbolPgmVisitor(context));
+		this.accept(new CollectConfigCellsVisitor(context));
+		this.accept(new UpdateAssocVisitor(context));
+		this.accept(new CollectLocationsVisitor(context));
+        this.accept(new CountNodesVisitor(context));
+
+        /* collect lexical token sorts */
+        TokenSortCollector tokenSortCollector = new TokenSortCollector(context);
+        this.accept(tokenSortCollector);
+        // TODO(AndreiS): remove from K #Id
+        Set<String> tokenSorts = tokenSortCollector.getSorts();
+        tokenSorts.add("#Id");
+        context.setTokenSorts(tokenSorts);
+
+        /* collect the data structure sorts */
+        DataStructureSortCollector dataStructureSortCollector
+                = new DataStructureSortCollector(context);
+        this.accept(dataStructureSortCollector);
+        context.setDataStructureSorts(dataStructureSortCollector.getSorts());
+
+        /* set the initialized flag */
+        context.initialized = true;
 	}
 
 	public Map<String, Module> getModulesMap() {

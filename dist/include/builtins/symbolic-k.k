@@ -10,6 +10,7 @@ endmodule
 module SYMBOLIC-K
   imports #SMT
   imports BUILTIN-HOOKS
+  imports ID-HOOKS
   imports FREE-VARS
 
   syntax Bool ::= "forall" Set "." Bool [binder, function]
@@ -17,10 +18,10 @@ module SYMBOLIC-K
   syntax KLabel ::= "#symEqualitySort"
 
   /* The following simplification rules assume non-empty sorts. */
-  rule forall S:Set . true => true
-  rule forall S:Set . false => false
-  rule exists S:Set . true => true
-  rule exists S:Set . false => false
+  rule forall _:Set . true => true
+  rule forall _:Set . false => false
+  rule exists _:Set . true => true
+  rule exists _:Set . false => false
 
   /* Translation to SMTLib */
   syntax String ::= "K2SMTLib" "(" K ")" [klabel(K2SMTLib), function]
@@ -78,7 +79,7 @@ module SYMBOLIC-K
   syntax Bool ::= "isBuiltin" "(" K ")"
   [prefixlabel(isBuiltin), klabel(isBuiltin), predicate]
 
-  syntax Variable ::= "dummy-this-Variable-needed-only-to-declare-sort"
+  syntax Variable
 //  syntax Bool ::= "isVariable" "(" K ")"
 //  [prefixlabel(isVariable), klabel(isVariable), predicate]
 
@@ -98,7 +99,7 @@ module SYMBOLIC-K
   rule K2Sort(_:#Int) => "Int"
   rule K2Sort(_:#Float) => "Float"
   rule K2Sort(_:#String) => "String"
-  rule K2Sort(_:#Id) => "Id"
+//  rule K2Sort(_:#Id) => "Id"
 //  rule K2Sort(_:Array) => "(Array Int Int)" // support only integer arrays
 
   // declare isSymbolicSort for List, Set, Bag and Map

@@ -18,6 +18,11 @@ public class KPaths {
 		return !path.endsWith(".jar");
 	}
 
+	public static String JAR_PATH = "lib/java/k3.jar";
+	public static String MAUDE_DIR = "lib/maude/binaries";
+	public static String MAUDE_LIB_DIR = "/lib/maude/lib";
+	public static String VERSION_FILE = "/lib/version.txt";
+
 	/**
 	 * Returns the K installation directory
 	 * 
@@ -29,7 +34,7 @@ public class KPaths {
 		// String env = System.getenv("K_BASE");
 		String path = new File(KPaths.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getAbsolutePath();
 		if (!path.endsWith(".jar"))
-			path = new File(path).getParentFile().getParentFile().getParentFile().getAbsolutePath() + "/dist/bin/java/k3.jar";
+			path = new File(path).getParentFile().getParentFile().getParentFile().getAbsolutePath() + "/dist/" + JAR_PATH;
 		try {
 			String decodedPath = URLDecoder.decode(path, "UTF-8");
 			File parent = new File(decodedPath).getParentFile().getParentFile().getParentFile();

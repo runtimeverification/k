@@ -1,15 +1,15 @@
 package org.kframework.compile.utils;
 
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.Visitor;
 
 public class CheckVisitorStep<T extends ASTNode> extends BasicCompilerStep<T> implements CheckStep<T> {
 
 	Visitor t;
 
-	public CheckVisitorStep(Visitor t, DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public CheckVisitorStep(Visitor t, Context context) {
+		super(context);
 		this.t = t;
 	}
 

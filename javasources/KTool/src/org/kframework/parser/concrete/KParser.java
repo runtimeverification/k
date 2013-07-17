@@ -7,10 +7,10 @@ import org.kframework.parser.concrete.lib.import$Tbl$Ground_0_0;
 import org.kframework.parser.concrete.lib.import$Tbl$Pgm_0_0;
 import org.kframework.parser.concrete.lib.import$Tbl_0_0;
 import org.kframework.parser.concrete.lib.java$Parse$String$Cmd_0_0;
-import org.kframework.parser.concrete.lib.java$Parse$String$Config$Ast_0_0;
 import org.kframework.parser.concrete.lib.java$Parse$String$Config_0_0;
 import org.kframework.parser.concrete.lib.java$Parse$String$Pgm_0_0;
 import org.kframework.parser.concrete.lib.java$Parse$String$Rules_0_0;
+import org.kframework.parser.concrete.lib.java$Parse$String$Kore_0_0;
 import org.kframework.utils.StringUtil;
 import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -20,6 +20,11 @@ import org.strategoxt.lang.StrategoExit;
 public class KParser {
 	private static Context context = null;
 	private static HashSet<String> tables = new HashSet<String>();
+
+	public static void reset() {
+		context = null;
+		tables = new HashSet<String>();
+	}
 
 	private static void init() {
 		synchronized (KParser.class) {
@@ -31,7 +36,7 @@ public class KParser {
 
 	public static String ImportTbl(String filePath) {
 
-		if(!tables.contains(filePath)){
+		if (!tables.contains(filePath)) {
 			tables.add(filePath);
 
 			init();
@@ -69,7 +74,7 @@ public class KParser {
 
 	public static String ImportTblPgm(String filePath) {
 
-		if(!tables.contains(filePath)){
+		if (!tables.contains(filePath)) {
 			tables.add(filePath);
 
 			init();
@@ -107,7 +112,7 @@ public class KParser {
 
 	public static String ImportTblGround(String filePath) {
 
-		if(!tables.contains(filePath)){
+		if (!tables.contains(filePath)) {
 			tables.add(filePath);
 
 			init();
@@ -143,6 +148,39 @@ public class KParser {
 		return null;
 	}
 
+	public static String ParseKoreString(String kDefinition) {
+		init();
+		String rez = "";
+		context.setStandAlone(true);
+		IStrategoTerm result = null;
+		try {
+			try {
+				result = context.invokeStrategyCLI(java$Parse$String$Kore_0_0.instance, "a.exe", kDefinition);
+			} finally {
+				context.getIOAgent().closeAllFiles();
+			}
+			if (result == null) {
+				System.err.println("Input: " + kDefinition);
+				System.err.println("rewriting failed, trace:");
+				context.printStackTrace();
+				context.setStandAlone(false);
+				System.exit(1);
+			} else {
+				context.setStandAlone(false);
+			}
+		} catch (StrategoExit exit) {
+			context.setStandAlone(false);
+			System.exit(exit.getValue());
+		}
+
+		if (result.getTermType() == IStrategoTerm.STRING) {
+			rez = (((IStrategoString) result).stringValue());
+		} else {
+			rez = result.toString();
+		}
+		return rez;
+	}
+
 	public static String ParseKConfigString(String kDefinition) {
 		init();
 		String rez = "";
@@ -174,33 +212,6 @@ public class KParser {
 			rez = result.toString();
 		}
 		return rez;
-	}
-
-	public static IStrategoTerm ParseKConfigStringAst(String kDefinition) {
-		init();
-		context.setStandAlone(true);
-		IStrategoTerm result = null;
-		try {
-			try {
-				result = context.invokeStrategyCLI(java$Parse$String$Config$Ast_0_0.instance, "a.exe", kDefinition);
-			} finally {
-				context.getIOAgent().closeAllFiles();
-			}
-			if (result == null) {
-				System.err.println("Input: " + kDefinition);
-				System.err.println("rewriting failed, trace:");
-				context.printStackTrace();
-				context.setStandAlone(false);
-				System.exit(1);
-			} else {
-				context.setStandAlone(false);
-			}
-		} catch (StrategoExit exit) {
-			context.setStandAlone(false);
-			System.exit(exit.getValue());
-		}
-
-		return result;
 	}
 
 	public static String ParseKRuleString(String kDefinition) {

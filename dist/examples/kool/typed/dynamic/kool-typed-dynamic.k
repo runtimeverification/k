@@ -52,7 +52,7 @@ untyped KOOL.  */
   syntax Param ::= Type Id
   syntax Params ::= List{Param,","}
 
-  syntax Decl ::= Type Exps ";"
+  syntax Decl ::= Type Exps ";" [avoid]
                 | Type Id "(" Params ")" Block    // stays like in typed SIMPLE
                 | "class" Id Block                // KOOL
                 | "class" Id "extends" Id Block   // KOOL
@@ -565,7 +565,7 @@ order to be recovered after the creation of the new object.  Only the
 first rule below needs to be changed; the others are identical to
 those in untyped KOOL. */
 
-  syntax ListItem ::= (Id,BagItem)
+  syntax K ::= (Id,EnvCellSort)
 
   rule <k> new Class:Id(Vs:Vals) ~> K
            => create(Class) ~> (storeObj ~> ((Class(Vs)); return this;)) </k>
@@ -575,7 +575,7 @@ those in untyped KOOL. */
        <control> C
          <crntObj> Obj
                    => <crntClass> Object </crntClass>
-                      <envStack> (Object, <env>.Map</env>) </envStack>
+                      <envStack> ListItem((Object, <env>.Map</env>)) </envStack>
                       <location> L </location>
          </crntObj>
          <return> T => Class </return>
@@ -603,7 +603,7 @@ those in untyped KOOL. */
   rule <k> addEnvLayer => . ...</k>
        <env> Env => . </env>
        <crntClass> Class:Id </crntClass>
-       <envStack> . => (Class, <env>Env</env>) ...</envStack>
+       <envStack> . => ListItem((Class, <env>Env</env>)) ...</envStack>
     [structural]
 
   syntax K ::= "storeObj"
@@ -631,14 +631,14 @@ Like in untyped KOOL. */
   context HOLE . _ when (HOLE =/=K super)
 
   rule objectClosure(<crntClass> Class:Id </crntClass>
-                     <envStack>... (Class,EnvC) EStack </envStack>)
+                     <envStack>... ListItem((Class,EnvC:Bag)) EStack </envStack>)
        . X:Id
-    => lookupMember(<envStack> (Class,EnvC) EStack </envStack>, X)
+    => lookupMember(<envStack> ListItem((Class,EnvC)) EStack </envStack>, X)
     [structural]
 
   rule <k> super . X => lookupMember(<envStack>EStack</envStack>, X) ...</k>
        <crntClass> Class </crntClass>
-       <envStack>... (Class,EnvC) EStack </envStack>
+       <envStack>... ListItem((Class,EnvC:Bag)) EStack </envStack>
     [structural]
 
 
@@ -662,7 +662,7 @@ The method lookup is the same as in untyped KOOL.  */
   rule <k> (super . X
             => lookupMember(<envStack>EStack</envStack>,X))(_:Exps)...</k>
        <crntClass> Class </crntClass>
-       <envStack>... (Class,_) EStack </envStack>
+       <envStack>... ListItem((Class,_)) EStack </envStack>
     [structural]
 
   context HOLE(_:Exps)
@@ -676,10 +676,10 @@ The method lookup is the same as in untyped KOOL.  */
 
 Like in untyped KOOL.  */
 
-  rule objectClosure(<envStack> (C,_) ...</envStack> _)
+  rule objectClosure(<envStack> ListItem((C,_)) ...</envStack> _)
        instanceOf C => true
 
-  rule objectClosure(<envStack> (C,_) => . ...</envStack> _)
+  rule objectClosure(<envStack> ListItem((C,_)) => . ...</envStack> _)
        instanceOf C'  when C =/=K C'  [structural]
 
   rule objectClosure(<envStack> . </envStack> _) instanceOf _ => false
@@ -707,9 +707,9 @@ Like in untyped KOOL. */
   context lvalue(HOLE . _)
 
   rule lvalue(objectClosure(<crntClass> C </crntClass>
-                            <envStack>... (C,EnvC) EStack </envStack>)
+                            <envStack>... ListItem((C,EnvC:Bag)) EStack </envStack>)
               . X
-              => lookupMember(<envStack> (C,EnvC) EStack </envStack>,
+              => lookupMember(<envStack> ListItem((C,EnvC)) EStack </envStack>,
                               X))  [structural]
 
 
@@ -717,12 +717,12 @@ Like in untyped KOOL. */
 
 Like in untyped KOOL. */
 
-  syntax K ::= lookupMember(BagItem,Id)  [function]
+  syntax K ::= lookupMember(EnvStackCellSort,Id)  [function]
 
-  rule lookupMember(<envStack> (_, <env>... X |-> L ...</env>)
+  rule lookupMember(<envStack> ListItem((_, <env>... X |-> L ...</env>))
                     ...</envStack>, X) => lookup(L)
 
-  rule lookupMember(<envStack> (_, <env> Env </env>) => .
+  rule lookupMember(<envStack> ListItem((_, <env> Env </env>)) => .
                     ...</envStack>, X)  when notBool(X in keys(Env))
 
 

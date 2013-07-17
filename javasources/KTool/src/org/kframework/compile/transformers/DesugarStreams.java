@@ -1,7 +1,6 @@
 package org.kframework.compile.transformers;
 
 import org.kframework.kil.*;
-import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -16,8 +15,8 @@ public class DesugarStreams extends CopyOnWriteTransformer {
 	
 	ArrayList<String> channels = new ArrayList<String>();
 
-	public DesugarStreams(DefinitionHelper definitionHelper) {
-		super("Desugar streams", definitionHelper);
+	public DesugarStreams(org.kframework.kil.loader.Context context) {
+		super("Desugar streams", context);
 		
 		channels.add("stdin");
 		channels.add("stdout");
@@ -58,7 +57,7 @@ public class DesugarStreams extends CopyOnWriteTransformer {
 			items.addAll(result.getContents());
 			
 //			syntax List ::= "#buffer" "(" K ")"           [cons(List1IOBufferSyn)]
-			TermCons buffer = new TermCons("List", "List1IOBufferSyn");
+			TermCons buffer = new TermCons("List", "List1IOBufferSyn", context);
 			java.util.List<Term> bufferTerms = new ArrayList<Term>();
 			bufferTerms.add(new Variable("$stdin", "K")); // eq stdinVariable = mkVariable('$stdin,K) .
 			buffer.setContents(bufferTerms);
@@ -67,7 +66,7 @@ public class DesugarStreams extends CopyOnWriteTransformer {
 			items.add(new Variable("$noIO", "List"));//		  eq noIOVariable = mkVariable('$noIO,List) .
 			
 //			syntax List ::= "#istream" "(" Int ")"        [cons(List1InputStreamSyn)]
-			TermCons stdinStream = new TermCons("List", "List1InputStreamSyn");
+			TermCons stdinStream = new TermCons("List", "List1InputStreamSyn", context);
 			java.util.List<Term> stdinStreamTerms = new ArrayList<Term>();
 			stdinStreamTerms.add(IntBuiltin.ZERO);
 			stdinStream.setContents(stdinStreamTerms);
@@ -76,7 +75,7 @@ public class DesugarStreams extends CopyOnWriteTransformer {
 		if ("stdout".equals(stream)) {
 //			eq evalCleanConf(T, "stdout") = mkCollection(List, (stdoutStream, noIOVariable, ioBuffer(nilK),T)) .
 //            | "#ostream" "(" Int ")"        [cons(List1OutputStreamSyn)]
-			TermCons stdoutStream = new TermCons("List", "List1OutputStreamSyn");
+			TermCons stdoutStream = new TermCons("List", "List1OutputStreamSyn", context);
 			java.util.List<Term> stdinStreamTerms = new ArrayList<Term>();
 			stdinStreamTerms.add(IntBuiltin.ONE);
 			stdoutStream.setContents(stdinStreamTerms);
@@ -85,7 +84,7 @@ public class DesugarStreams extends CopyOnWriteTransformer {
 			items.add(new Variable("$noIO", "List"));//		  eq noIOVariable = mkVariable('$noIO,List) .
 
 //			syntax List ::= "#buffer" "(" K ")"           [cons(List1IOBufferSyn)]
-			TermCons buffer = new TermCons("List", "List1IOBufferSyn");
+			TermCons buffer = new TermCons("List", "List1IOBufferSyn", context);
 			java.util.List<Term> bufferTerms = new ArrayList<Term>();
 			bufferTerms.add(KSequence.EMPTY);
 			buffer.setContents(bufferTerms);
@@ -104,7 +103,7 @@ public class DesugarStreams extends CopyOnWriteTransformer {
 	}
 
 	@Override
-	public ASTNode transform(Context node) {
+	public ASTNode transform(org.kframework.kil.Context node) {
 		return node;
 	}
 	

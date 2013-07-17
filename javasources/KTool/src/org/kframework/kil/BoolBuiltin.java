@@ -7,106 +7,138 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
 
+import aterm.ATermAppl;
 
 /**
- * Created with IntelliJ IDEA.
- * User: andrei
- * Date: 4/17/13
- * Time: 12:21 PM
- * To change this template use File | Settings | File Templates.
+ * Class representing a builtin boolean token.
  */
-public class BoolBuiltin extends Builtin {
+public class BoolBuiltin extends Token {
 
-    public static final String SORT_NAME = "#Bool";
+	public static final String SORT_NAME = "#Bool";
 
-    public static final String TRUE_STRING = "true";
-    public static final String FALSE_STRING = "false";
+	public static final String TRUE_STRING = "true";
+	public static final String FALSE_STRING = "false";
 
-    public static final BoolBuiltin TRUE = new BoolBuiltin(Boolean.TRUE);
-    public static final BoolBuiltin FALSE = new BoolBuiltin(Boolean.FALSE);
+	/**
+	 * #token("#Bool", "true")
+	 */
+	public static final BoolBuiltin TRUE_TOKEN = new BoolBuiltin(Boolean.TRUE);
+	/**
+	 * #token("#Bool", "false")
+	 */
+	public static final BoolBuiltin FALSE_TOKEN = new BoolBuiltin(Boolean.FALSE);
 
-    public static BoolBuiltin of(String value) {
-        assert value.equals(BoolBuiltin.TRUE_STRING) || value.equals(BoolBuiltin.FALSE_STRING):
-                "unexpected value " + value + " for a builtin bool constant; expected one of "
-                        + BoolBuiltin.TRUE_STRING + " or " + BoolBuiltin.FALSE_STRING;
+	/**
+	 * #token("#Bool", "true")(.KList)
+	 */
+	public static final KApp TRUE = KApp.of(BoolBuiltin.TRUE_TOKEN);
+	/**
+	 * #token("#Bool", "false")(.KList)
+	 */
+	public static final KApp FALSE = KApp.of(BoolBuiltin.FALSE_TOKEN);
 
-        if (value.equals(BoolBuiltin.TRUE_STRING)) {
-            return BoolBuiltin.TRUE;
-        } else {
-            return BoolBuiltin.FALSE;
-        }
-    }
+	/**
+	 * Returns a {@link BoolBuiltin} representing a {@link boolean} value with the given {@link String} representation.
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public static BoolBuiltin of(String value) {
+		checkValue(value);
 
-    private final Boolean value;
+		if (value.equals(BoolBuiltin.TRUE_STRING)) {
+			return BoolBuiltin.TRUE_TOKEN;
+		} else {
+			return BoolBuiltin.FALSE_TOKEN;
+		}
+	}
 
-    private BoolBuiltin(Boolean value) {
-        super(BoolBuiltin.SORT_NAME);
-        this.value = value;
-    }
+	/**
+	 * Returns a {@link KApp} representing a {@link BoolBuiltin} with the given value applied to an empty {@link KList}.
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public static KApp kAppOf(String value) {
+		checkValue(value);
 
-    public BoolBuiltin(Element element) {
-        super(element);
-        String s = element.getAttribute(Constants.VALUE_value_ATTR);
+		if (value.equals(BoolBuiltin.TRUE_STRING)) {
+			return BoolBuiltin.TRUE;
+		} else {
+			return BoolBuiltin.FALSE;
+		}
+	}
 
-        assert s.equals(BoolBuiltin.TRUE_STRING) || s.equals(BoolBuiltin.FALSE_STRING):
-                "unexpected value " + s + " for a builtin bool constant; expected one of "
-                        + BoolBuiltin.TRUE_STRING + " or " + BoolBuiltin.FALSE_STRING;
+	private static void checkValue(String value) {
+		assert value.equals(BoolBuiltin.TRUE_STRING) || value.equals(BoolBuiltin.FALSE_STRING) : "unexpected value " + value + " for a builtin bool token; expected one of "
+				+ BoolBuiltin.TRUE_STRING + " or " + BoolBuiltin.FALSE_STRING;
+	}
 
-        value = Boolean.valueOf(s);
-    }
+	private final Boolean value;
 
-    public Boolean booleanValue() {
-        return value;
-    }
+	private BoolBuiltin(Boolean value) {
+		this.value = value;
+	}
 
-    @Override
-    public String getValue() {
-        return value.toString();
-    }
+	protected BoolBuiltin(Element element) {
+		super(element);
+		String s = element.getAttribute(Constants.VALUE_value_ATTR);
 
-    @Override
-    public Term shallowCopy() {
-        /* this object is immutable */
-        return this;
-    }
+		checkValue(s);
 
-    @Override
-    public int hashCode() {
-        return value.hashCode();
-    }
+		value = Boolean.valueOf(s);
+	}
 
-    @Override
-    public boolean equals(Object object) {
-        if (this == object) {
-            return true;
-        }
+	protected BoolBuiltin(ATermAppl atm) {
+		super(atm);
+		// TODO: get first child and then get the value
+		String s = ((ATermAppl) atm.getArgument(0)).getName();
 
-        if (!(object instanceof BoolBuiltin)) {
-            return false;
-        }
+		checkValue(s);
 
-        BoolBuiltin boolBuiltin = (BoolBuiltin) object;
-        return value.equals(boolBuiltin.value);
-    }
+		value = Boolean.valueOf(s);
+	}
 
-    @Override
-    public String toString() {
-        return getValue();
-    }
+	/**
+	 * Returns a {@link Boolean} representing the (interpreted) value of the boolean token.
+	 */
+	public Boolean booleanValue() {
+		return value;
+	}
 
-    @Override
-    public void accept(Matcher matcher, Term toMatch) {
-        throw new UnsupportedOperationException();
-    }
+	/**
+	 * Returns a {@link String} representing the sort name of a boolean token.
+	 * 
+	 * @return
+	 */
+	@Override
+	public String tokenSort() {
+		return BoolBuiltin.SORT_NAME;
+	}
 
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        return transformer.transform(this);
-    }
+	/**
+	 * Returns a {@link String} representing the (uninterpreted) value of the boolean token.
+	 * 
+	 * @return
+	 */
+	@Override
+	public String value() {
+		return value.toString();
+	}
 
-    @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
+	@Override
+	public void accept(Matcher matcher, Term toMatch) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public ASTNode accept(Transformer transformer) throws TransformerException {
+		return transformer.transform(this);
+	}
+
+	@Override
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
+	}
 
 }

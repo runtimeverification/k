@@ -1,91 +1,132 @@
 package org.kframework.backend.java.kil;
 
-import org.kframework.backend.java.symbolic.Matcher;
-import org.kframework.backend.java.symbolic.Sorted;
+import org.kframework.backend.java.builtins.SortMembership;
+import org.kframework.backend.java.symbolic.BuiltinFunction;
+import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Utils;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Production;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Set;
 
 
 /**
- * Created with IntelliJ IDEA.
- * User: andrei
- * Date: 3/18/13
- * Time: 12:18 PM
- * To change this template use File | Settings | File Templates.
+ * A K application.
+ *
+ * @author AndreiS
  */
 public class KItem extends Term implements Sorted {
 
     private final KLabel kLabel;
     private final KList kList;
     private final String sort;
-    private DefinitionHelper definitionHelper;
 
-    public KItem(KLabel kLabel, KList kList, DefinitionHelper definitionHelper) {
+    public KItem(KLabel kLabel, KList kList, Context context) {
         super(Kind.KITEM);
-    	this.definitionHelper = definitionHelper;
 
         this.kLabel = kLabel;
         this.kList = kList;
 
         if (kLabel instanceof KLabelConstant) {
-            List<Production> productions = ((KLabelConstant) kLabel).productionsOf(definitionHelper);
+            List<Production> productions = ((KLabelConstant) kLabel).productions();
             if (productions.size() == 1) {
                 Production production = productions.get(0);
                 if (!kList.hasFrame() && kList.size() == production.getArity()) {
                     for (int i = 0; i < kList.size(); ++i) {
                         String childSort;
                         if (kList.get(i) instanceof Sorted) {
-                            childSort = ((Sorted) kList.get(i)).getSort();
+                            childSort = ((Sorted) kList.get(i)).sort();
                         } else {
                             childSort = kind.toString();
                         }
 
-                        if (!definitionHelper.isSubsortedEq(production.getChildSort(i), childSort)) {
+                        if (!context.isSubsortedEq(production.getChildSort(i), childSort)) {
                             sort = kind.toString();
                             return;
                         }
                     }
                     sort = production.getSort();
                 } else {
-                    sort = kind.toString();;
+                    sort = kind.toString();
                 }
             } else {
-                sort = kind.toString();
+                /* a list terminator does not have conses */
+                Set<String> listSorts = context.listLabels.get(((KLabelConstant) kLabel).label());
+                if (listSorts != null) {
+                    if (listSorts.size() == 1) {
+                        sort = listSorts.iterator().next();
+                    } else {
+                        sort = context.getLUBSort(listSorts);
+                    }
+                } else {
+                    sort = kind.toString();
+                }
             }
         } else {
-            if (kLabel instanceof KLabelInjection && ((KLabelInjection) kLabel).getTerm() instanceof BuiltinConstant) {
-                sort = ((BuiltinConstant) ((KLabelInjection) kLabel).getTerm()).getSort();
-            } else {
-                sort = kind.toString();
-            }
+            sort = kind.toString();
         }
     }
 
-    public KLabel getKLabel() {
+    public Term evaluateFunction() {
+        if (!(kLabel instanceof KLabelConstant)) {
+            return this;
+        }
+        KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
+
+        /* evaluate a sort membership predicate */
+        if (kLabelConstant.label().startsWith("is") && kList.getItems().size() == 1
+                && kList.getItems().get(0) instanceof Sorted) {
+            return SortMembership.check(this);
+        }
+
+        if (!BuiltinFunction.isBuiltinKLabel(kLabelConstant)) {
+            return this;
+        }
+
+        /* this can be removed, and IllegalArgumentException would be thrown below */
+        //for (Term term : kList.getItems()) {
+        //    if (!term.isGround()) {
+        //        return this;
+        //    }
+        //}
+
+        try {
+            Term[] arguments = kList.getItems().toArray(new Term[kList.getItems().size()]);
+            return BuiltinFunction.invoke(kLabelConstant, arguments);
+        } catch (IllegalAccessException e) {
+            //e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            //e.printStackTrace();
+        } catch (RuntimeException e) {
+        }
+
+        return this;
+    }
+
+    public KLabel kLabel() {
         return kLabel;
     }
 
-    public KList getKList() {
+    public KList kList() {
         return kList;
-    }
-
-    /**
-     * @return the string representation of the sort of this K application.
-     */
-    @Override
-    public String getSort() {
-        return sort;
     }
 
     @Override
     public boolean isSymbolic() {
         return kLabel.isFunction();
+    }
+
+    /**
+     * @return a {@code String} representation of the sort of this K application.
+     */
+    @Override
+    public String sort() {
+        return sort;
     }
 
     @Override
@@ -112,21 +153,12 @@ public class KItem extends Term implements Sorted {
 
     @Override
     public String toString() {
-        String kListString = kList.toString();
-        return !kListString.isEmpty() ? kLabel + "(" + kListString + ")" : kLabel.toString();
-    }
-
-    /**
-     * @return a copy of the ASTNode containing the same fields.
-     */
-    @Override
-    public ASTNode shallowCopy() {
-        return new KItem(this.kLabel, this.kList, this.definitionHelper);
+        return kLabel + "(" + kList.toString() + ")";
     }
 
     @Override
-    public void accept(Matcher matcher, Term patten) {
-        matcher.match(this, patten);
+    public void accept(Unifier unifier, Term patten) {
+        unifier.unify(this, patten);
     }
 
     @Override

@@ -2,14 +2,14 @@ package org.kframework.compile.tags;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Production;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class AddStrictStar extends BasicTransformer {
 
-	public AddStrictStar(DefinitionHelper definitionHelper) {
-		super("AddStrictStar", definitionHelper);
+	public AddStrictStar(Context context) {
+		super("AddStrictStar", context);
 	}
 
 	@Override

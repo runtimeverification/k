@@ -3,6 +3,7 @@ package org.kframework.parser.generator;
 import java.util.HashSet;
 import java.util.List;
 
+import org.kframework.compile.transformers.AddSymbolicK;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Lexical;
 import org.kframework.kil.Module;
@@ -13,8 +14,9 @@ import org.kframework.kil.Restrictions;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.utils.StringUtil;
+import org.kframework.utils.general.GlobalSettings;
 
 /**
  * Collect the syntax module, call the syntax collector and print SDF for programs.
@@ -24,15 +26,15 @@ import org.kframework.utils.StringUtil;
  */
 public class ProgramSDF {
 
-	public static String getSdfForPrograms(Definition def, DefinitionHelper definitionHelper) {
+	public static String getSdfForPrograms(Definition def, Context context) {
 
 		// collect all the syntax modules
-		CollectSynModulesVisitor csmv = new CollectSynModulesVisitor(definitionHelper);
+		CollectSynModulesVisitor csmv = new CollectSynModulesVisitor(context);
 		def.accept(csmv);
 
 		// collect the syntax from those modules
-		ProgramSDFVisitor psdfv = new ProgramSDFVisitor(definitionHelper);
-		CollectTerminalsVisitor ctv = new CollectTerminalsVisitor(definitionHelper);
+		ProgramSDFVisitor psdfv = new ProgramSDFVisitor(context);
+		CollectTerminalsVisitor ctv = new CollectTerminalsVisitor(context);
 		for (String modName : csmv.synModNames) {
 			Module m = def.getModulesMap().get(modName);
 			m.accept(psdfv);
@@ -48,7 +50,7 @@ public class ProgramSDF {
 		sdf.append(psdfv.sdf);
 
 		sdf.append("context-free start-symbols\n");
-		// sdf.append(StringUtil.escapeSortName(definitionHelper.startSymbolPgm) + "\n");
+		// sdf.append(StringUtil.escapeSortName(context.startSymbolPgm) + "\n");
 		for (String s : psdfv.startSorts) {
 			if (!s.equals("Start"))
 				sdf.append(StringUtil.escapeSortName(s) + " ");
@@ -69,7 +71,7 @@ public class ProgramSDF {
 					ProductionItem itm = items.get(i);
 					if (itm.getType() == ProductionType.TERMINAL) {
 						Terminal t = (Terminal) itm;
-						sdf.append("\"" + StringUtil.escapeSDF(t.getTerminal()) + "\" ");
+						sdf.append("\"" + StringUtil.escape(t.getTerminal()) + "\" ");
 					} else if (itm.getType() == ProductionType.SORT) {
 						Sort srt = (Sort) itm;
 						// if we are on the first or last place and this sort is not a list, just print the sort
@@ -108,8 +110,24 @@ public class ProgramSDF {
 
 		sdf.append("\n%% start symbols subsorts\n");
 		for (String s : psdfv.startSorts) {
-			if (!Sort.isBasesort(s) && !definitionHelper.isListSort(s))
+			if (!Sort.isBasesort(s) && !context.isListSort(s))
 				sdf.append("	" + StringUtil.escapeSortName(s) + "		-> K\n");
+		}
+
+		if (GlobalSettings.symbolic) {
+			sdf.append("\ncontext-free syntax\n");
+			sdf.append("	DzId	-> UnitDz\n");
+			sdf.append("	DzBool	-> UnitDz\n");
+			sdf.append("	DzInt	-> UnitDz\n");
+			sdf.append("	DzFloat	-> UnitDz\n");
+			sdf.append("	DzString-> UnitDz\n");
+			for (String s : psdfv.startSorts) {
+				if (!Sort.isBasesort(s) && !context.isListSort(s))
+					if (AddSymbolicK.allowKSymbolic(s)) {
+						sdf.append("	\"" + AddSymbolicK.symbolicConstructor(s) + "\"	\"(\" UnitDz \")\"	-> ");
+						sdf.append(StringUtil.escapeSortName(s) + "	{cons(\"" + StringUtil.escapeSortName(s) + "1Symb\")}\n");
+					}
+			}
 		}
 
 		sdf.append("lexical syntax\n");
@@ -121,7 +139,7 @@ public class ProgramSDF {
 
 		for (String t : ctv.terminals) {
 			if (t.matches("[a-zA-Z][a-zA-Z0-9]*")) {
-				sdf.append("	\"" + t + "\" -> DzDzID {reject}\n");
+				sdf.append("	\"" + StringUtil.escape(t) + "\" -> DzDzID {reject}\n");
 			}
 		}
 
@@ -153,7 +171,7 @@ public class ProgramSDF {
 		sdf.append("context-free restrictions\n");
 		for (Restrictions r : psdfv.restrictions) {
 			if (r.getTerminal() != null && !r.getTerminal().getTerminal().equals(""))
-				sdf.append("	" + r.getTerminal() + " -/- " + r.getPattern() + "\n");
+				sdf.append("	\"" + StringUtil.escape(r.getTerminal().getTerminal()) + "\" -/- " + r.getPattern() + "\n");
 			else
 				sdf.append("	" + StringUtil.escapeSortName(r.getSort().getName()) + " -/- " + r.getPattern() + "\n");
 		}

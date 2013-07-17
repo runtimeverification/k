@@ -3,7 +3,7 @@ package org.kframework.compile.checks;
 import org.kframework.kil.KSorts;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
@@ -16,8 +16,8 @@ import org.kframework.utils.general.GlobalSettings;
  */
 public class CheckListOfKDeprecation extends BasicVisitor {
 
-	public CheckListOfKDeprecation(DefinitionHelper definitionHelper) {
-		super(definitionHelper);
+	public CheckListOfKDeprecation(Context context) {
+		super(context);
 	}
 
 	@Override
@@ -31,7 +31,7 @@ public class CheckListOfKDeprecation extends BasicVisitor {
 
 	@Override
 	public void visit(Term node) {
-		if (node.getSort(definitionHelper).equals("List{K}")) {
+		if (node.getSort().equals("List{K}")) {
 			String msg = "Deprecated: List{K} has been renamed into KList to be less confuzing.";
 			GlobalSettings.kem.register(new KException(KException.ExceptionType.WARNING, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
 			node.setSort(KSorts.KLIST);

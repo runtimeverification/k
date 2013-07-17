@@ -1,4 +1,4 @@
-require "../../basic/cink-basic.k"
+require "../../basic/cink-basic-semantics.k"
 
 module CINK-ARRAYS-SYNTAX
 
@@ -44,7 +44,7 @@ module CINK-ARRAYS-SEMANTICS
 
   rule <k> T:Type X:Id[N:Int] ; => . ...</k>
        <env>... . => X |-> L </env>
-       <store>... . => L |-> const-array(X, 0, N, undefined) </store>
+       <store>... . => L |-> const-array(N, undefined) </store>
        when fresh(L:Loc)
 
   syntax Val ::= Array

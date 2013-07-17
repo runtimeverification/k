@@ -1,30 +1,27 @@
 package org.kframework.backend.unparser;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.utils.DefinitionLoader;
+import org.kframework.parser.DefinitionLoader;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
 public class AddBracketsFilter2 extends BasicTransformer {
 
-	public AddBracketsFilter2(DefinitionHelper definitionHelper) throws IOException {
-		super("Add more brackets", definitionHelper);
-		org.kframework.parser.concrete.KParser.ImportTbl(definitionHelper.kompiled.getCanonicalPath() + "/def/Concrete.tbl");
+	public AddBracketsFilter2(Context context) throws IOException {
+		super("Add more brackets", context);
+		org.kframework.parser.concrete.KParser.ImportTbl(context.kompiled.getCanonicalPath() + "/def/Concrete.tbl");
 	}
 
 	private Term reparsed = null;
-	public AddBracketsFilter2(Term reparsed, DefinitionHelper definitionHelper) {
-		super("Add brackets to term based on parse forest", definitionHelper);
+	public AddBracketsFilter2(Term reparsed, Context context) {
+		super("Add brackets to term based on parse forest", context);
 		this.reparsed = reparsed;
 	}
 
@@ -116,29 +113,29 @@ public class AddBracketsFilter2 extends BasicTransformer {
 		if (reparsed != null) {
 			ASTNode result = addBracketsIfNeeded(ast);
 			if (atTop && result instanceof Bracket) {
-				return new Cast(result.getLocation(), result.getFilename(), (Term)result, definitionHelper);
+				return new Cast(result.getLocation(), result.getFilename(), (Term)result, context);
 			}
 			return result;
 		}
-		UnparserFilter unparser = new UnparserFilter(false, false, false, true, definitionHelper);
+		UnparserFilter unparser = new UnparserFilter(false, false, false, true, context);
 		ast.accept(unparser);
 		String unparsed = unparser.getResult();
 		try {
-			ASTNode rule = DefinitionLoader.parsePatternAmbiguous(unparsed, definitionHelper);
-			Term reparsed = ((Rule)rule).getBody();
-			reparsed.accept(new AdjustLocations(definitionHelper));
+			ASTNode rule = DefinitionLoader.parsePatternAmbiguous(unparsed, context);
+			Term reparsed = ((Sentence)rule).getBody();
+			reparsed.accept(new AdjustLocations(context));
 			if (!reparsed.contains(ast)) {
 				return replaceWithVar(ast);
 			}
-			return ast.accept(new AddBracketsFilter2(reparsed, definitionHelper));
+			return ast.accept(new AddBracketsFilter2(reparsed, context));
 		} catch (TransformerException e) {
 			return replaceWithVar(ast);
 		}
 	}
 
 	private class AdjustLocations extends BasicVisitor {
-		public AdjustLocations(DefinitionHelper definitionHelper) {
-			super("Apply first-line location offset", definitionHelper);
+		public AdjustLocations(Context context) {
+			super("Apply first-line location offset", context);
 		}
 
 		public void visit(ASTNode ast) {
@@ -148,34 +145,28 @@ public class AddBracketsFilter2 extends BasicTransformer {
 			int beginCol = scanner.nextInt();
 			int endLine = scanner.nextInt();
 			int endCol = scanner.nextInt();
-			if (beginLine == 1) {
-				beginCol -= "rule ".length();
-			}
-			if (endLine == 1) {
-				endCol -= "rule ".length();
-			}
 			ast.setLocation("(" + beginLine + "," + beginCol + "," + endLine + "," + endCol + ")");
 		}
 	}
 
 	private Variable replaceWithVar(Term ast) {
-		Variable var = MetaK.getFreshVar(((Term)ast).getSort(definitionHelper));
+		Variable var = Variable.getFreshVar(((Term)ast).getSort());
 		substitution.put(var.getName(), (Term) ast);
 		return var;
 	}
 
 	private ASTNode addBracketsIfNeeded(Term ast) throws TransformerException {
-		TraverseForest trans = new TraverseForest(ast, definitionHelper);
+		TraverseForest trans = new TraverseForest(ast, context);
 		reparsed = (Term)reparsed.accept(trans);
 		if (trans.needsParens) {
-			return new Bracket(ast.getLocation(), ast.getFilename(), ast, definitionHelper);
+			return new Bracket(ast.getLocation(), ast.getFilename(), ast, context);
 		}
 		return ast;
 	}
 
 	private class GetRealLocation extends BasicVisitor {
-		public GetRealLocation(Term ast, DefinitionHelper definitionHelper) {
-			super("Find term in parse forest", definitionHelper);
+		public GetRealLocation(Term ast, Context context) {
+			super("Find term in parse forest", context);
 			this.ast = ast;
 		}
 		private Term ast;
@@ -189,8 +180,8 @@ public class AddBracketsFilter2 extends BasicTransformer {
 	}
 
 	private class TraverseForest extends BasicTransformer {
-		public TraverseForest(Term ast, DefinitionHelper definitionHelper) {
-			super("Determine if term needs parentheses", definitionHelper);
+		public TraverseForest(Term ast, org.kframework.kil.loader.Context context) {
+			super("Determine if term needs parentheses", context);
 			this.ast = ast;
 		}
 		private Term ast;
@@ -200,17 +191,13 @@ public class AddBracketsFilter2 extends BasicTransformer {
 		private String realLocation;
 
 		public ASTNode transform(Ambiguity amb) throws TransformerException {
-			GetRealLocation visitor = new GetRealLocation(ast, definitionHelper);
-			amb.accept(visitor);
-			if (visitor.realTerm == null) return amb;
-			realLocation = visitor.realTerm.getLocation();
+			realLocation = ast.getLocation();
 			for (int i = amb.getContents().size() - 1; i >= 0; i--) {
 				Term t = amb.getContents().get(i);
 				boolean tmp = hasTerm;
 				hasTerm = false;
 				t.accept(this);
 				if (!hasTerm) {
-					System.err.println(realLocation);
 					needsParens = true;
 					amb.getContents().remove(i);
 				}

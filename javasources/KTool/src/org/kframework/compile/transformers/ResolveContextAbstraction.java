@@ -6,7 +6,6 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Cell.Multiplicity;
-import org.kframework.kil.loader.DefinitionHelper;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -24,16 +23,11 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 	private int maxLevel;
 	private ConfigurationStructureMap config;
 
-	public ResolveContextAbstraction(DefinitionHelper definitionHelper) {
-		super("Resolve Context Abstraction", definitionHelper);
+	public ResolveContextAbstraction(org.kframework.kil.loader.Context context) {
+		super("Resolve Context Abstraction", context);
+        config = context.getConfigurationStructureMap();
+        maxLevel = context.getMaxConfigurationLevel();
 	}
-	
-	public ResolveContextAbstraction(int maxLevel, 	ConfigurationStructureMap config, DefinitionHelper definitionHelper) {
-		this(definitionHelper);
-		this.maxLevel = maxLevel;
-		this.config = config;
-	}
-	
 	
 	@Override
 	public ASTNode transform(Module node) throws TransformerException {
@@ -52,7 +46,7 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 	}
 	
 	@Override
-	public ASTNode transform(Context node) throws TransformerException {
+	public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
 		return node;
 	}
 	
@@ -61,10 +55,10 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 	public ASTNode transform(Rule node) throws TransformerException {
 		if (MetaK.isAnywhere(node)) return node;
 		boolean change = false;		
-		if (MetaK.getTopCells(node.getBody(), definitionHelper).isEmpty()) return node;
+		if (MetaK.getTopCells(node.getBody(), context).isEmpty()) return node;
 		Rule rule = (Rule) super.transform(node);
 		
-		SplitByLevelVisitor visitor = new SplitByLevelVisitor(-1, definitionHelper);
+		SplitByLevelVisitor visitor = new SplitByLevelVisitor(-1, context);
 		rule.getBody().accept(visitor);
 		
 		int min = visitor.max;
@@ -80,7 +74,7 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 				visitor.max = min;
 			}
 			LinkedList<Term> cells = visitor.levels.get(min);
-			if (cells.size() > 1) change = true;
+			if (areMultipleCells(cells)) change = true;
 			ConfigurationStructure parent = findParent(cells.peek());
 			parentCell = createParentCell(parent, cells);
 			if (!cells.isEmpty()) {
@@ -97,16 +91,30 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 		} while (min < visitor.max);
 		if (change) {
 			rule = rule.shallowCopy();
-			if (MetaK.getTopCells(parentCell.getContents(), definitionHelper).size() > 1) {
-				rule.setBody(parentCell);
-			} else {
-				rule.setBody(parentCell.getContents());
-			}
+//			if (MetaK.getTopCells(parentCell.getContents(), context).size() > 1) {
+            rule.setBody(parentCell);
+//			} else {
+//            rule.setBody(parentCell.getContents());
+//			}
 		}
 		return rule;
 	}
-	
-	@Override
+
+    private boolean areMultipleCells(LinkedList<Term> cells) {
+        if (cells.size() > 1) return true;
+        if (cells.isEmpty()) return false;
+        Term trm = cells.element();
+        if (trm instanceof Cell) return false;
+        assert trm instanceof Rewrite;
+        Rewrite rew = (Rewrite) trm;
+        Term left = rew.getLeft();
+        Term right = rew.getRight();
+        if (!(left instanceof Cell && right instanceof Cell)) return true;
+        if (!((Cell) left).getId().equals(((Cell) right).getId())) return true;
+        return false;
+    }
+
+    @Override
 	public ASTNode transform(Cell node) throws TransformerException {
 		boolean change = false;
 		Cell cell = (Cell)super.transform(node);
@@ -121,7 +129,7 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 		}
 		
 		if (confCell.sons.isEmpty()) return cell;
-		SplitByLevelVisitor visitor = new SplitByLevelVisitor(confCell.level, definitionHelper);
+		SplitByLevelVisitor visitor = new SplitByLevelVisitor(confCell.level, context);
 		cell.getContents().accept(visitor);
 		int min = 0;
 		if (visitor.max>min) change = true;
@@ -164,7 +172,7 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 		ListIterator<Term> i = cells.listIterator();
 		while (i.hasNext()) {
 			Term t = i.next();
-			List<Cell> inCells = MetaK.getTopCells(t, definitionHelper);
+			List<Cell> inCells = MetaK.getTopCells(t, context);
 			boolean allAvailable = true;
 			for (Cell cell : inCells) {
 				if (!potentialSons.containsKey(cell.getId())) {
@@ -206,7 +214,7 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 					getName(), t.getFilename(), t.getLocation()));					
 			
 		}
-		List<Cell> cells = MetaK.getTopCells(t, definitionHelper);
+		List<Cell> cells = MetaK.getTopCells(t, context);
 		if (cells.isEmpty()) {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, 
 					KExceptionGroup.INTERNAL, 
@@ -232,8 +240,8 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 		private int level;
 		private int max;
 		
-		public SplitByLevelVisitor(int level, DefinitionHelper definitionHelper) {
-			super(definitionHelper);
+		public SplitByLevelVisitor(int level, org.kframework.kil.loader.Context context) {
+			super(context);
 			levels = new ArrayList<LinkedList<Term>>(maxLevel-level + 1);
 			for (int i=0; i<=maxLevel-level; i++) levels.add(new LinkedList<Term>());
 			this.level = level + 1;
@@ -265,7 +273,7 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 		}
 
         @Override
-        public void visit(Builtin node) {
+        public void visit(Token node) {
             levels.get(0).add(node);
         }
 		
@@ -281,7 +289,7 @@ public class ResolveContextAbstraction extends CopyOnWriteTransformer {
 		
 		@Override
 		public void visit(Rewrite node) {
-			List<Cell> cells = MetaK.getTopCells(node, definitionHelper);
+			List<Cell> cells = MetaK.getTopCells(node, context);
 			int level = 0;
 			if (!cells.isEmpty()) {
 				Iterator<Cell> i = cells.iterator();

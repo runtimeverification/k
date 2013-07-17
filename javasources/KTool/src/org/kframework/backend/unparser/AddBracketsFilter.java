@@ -3,11 +3,11 @@ package org.kframework.backend.unparser;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.ProductionItem.ProductionType;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -15,8 +15,8 @@ import java.util.Stack;
 
 public class AddBracketsFilter extends CopyOnWriteTransformer {
 
-	public AddBracketsFilter(DefinitionHelper definitionHelper) {
-		super("Add brackets", definitionHelper);
+	public AddBracketsFilter(Context context) {
+		super("Add brackets", context);
 	}
 
 	@Override	
@@ -25,7 +25,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 		ASTNode result = super.transform(ast);
 		boolean needsParens = postpare();
 		if (needsParens)
-			return new Bracket((Term)result, definitionHelper);
+			return new Bracket((Term)result, context);
 		return result;
 	}
 
@@ -35,7 +35,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 		ASTNode result = super.transform(ast);
 		boolean needsParens = postpare();
 		if (needsParens)
-			return new Bracket((Term)result, definitionHelper);
+			return new Bracket((Term)result, context);
 		return result;
 	}
 
@@ -45,7 +45,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 		ASTNode result = super.transform(ast);
 		boolean needsParens = postpare();
 		if (needsParens)
-			return new Bracket((Term)result, definitionHelper);
+			return new Bracket((Term)result, context);
 		return result;
 	}
 
@@ -55,7 +55,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 		ASTNode result = super.transform(ast);
 		boolean needsParens = postpare();
 		if (needsParens)
-			return new Bracket((Term)result, definitionHelper);
+			return new Bracket((Term)result, context);
 		return result;
 	}
 
@@ -65,7 +65,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 		ASTNode result = super.transform(ast);
 		boolean needsParens = postpare();
 		if (needsParens)
-			return new Bracket((Term)result, definitionHelper);
+			return new Bracket((Term)result, context);
 		return result;
 	}
 
@@ -75,7 +75,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 		ASTNode result = super.transform(ast);
 		boolean needsParens = postpare();
 		if (needsParens)
-			return new Bracket((Term)result, definitionHelper);
+			return new Bracket((Term)result, context);
 		return result;
 	}
 
@@ -85,7 +85,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 		ASTNode result = super.transform(ast);
 		boolean needsParens = postpare();
 		if (needsParens)
-			return new Bracket((Term)result, definitionHelper);
+			return new Bracket((Term)result, context);
 		return result;
 	}
 
@@ -95,7 +95,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 		ASTNode result = super.transform(ast);
 		boolean needsParens = postpare();
 		if (needsParens)
-			return new Bracket((Term)result, definitionHelper);
+			return new Bracket((Term)result, context);
 		return result;
 	}
 
@@ -105,7 +105,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 		ASTNode result = super.transform(ast);
 		boolean needsParens = postpare();
 		if (needsParens)
-			return new Bracket((Term)result, definitionHelper);
+			return new Bracket((Term)result, context);
 		return result;
 	}
 
@@ -129,14 +129,14 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 	private boolean isUnary(Term t) {
 		if (t instanceof TermCons) {
 			TermCons tc = (TermCons) t;
-			Production p = tc.getProduction(definitionHelper);
+			Production p = tc.getProduction();
 			if (p.isListDecl()) {
 				UserList userList = (UserList) p.getItems().get(0);
-				if (tc.getContents().get(1) instanceof Empty && tc.getContents().get(1).getSort(definitionHelper).equals(p.getSort()) && definitionHelper.isSubsortedEq(userList.getSort(), tc.getContents().get(0).getSort(definitionHelper))) {
+				if (tc.getContents().get(1) instanceof Empty && tc.getContents().get(1).getSort().equals(p.getSort()) && context.isSubsortedEq(userList.getSort(), tc.getContents().get(0).getSort())) {
 					return true;
 				}
 			}
-			return tc.getProduction(definitionHelper).getArity() == 1;
+			return tc.getProduction().getArity() == 1;
 		} else if (t instanceof MapItem) {
 			return false;
 		} else if (t instanceof CollectionItem) {
@@ -150,10 +150,10 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 	private Associativity getAssociativity(Term t) {
 		if (t instanceof TermCons) {
 			TermCons tc = (TermCons)t;
-			Production p = tc.getProduction(definitionHelper);
+			Production p = tc.getProduction();
 			if (p.isListDecl()) {
 				UserList userList = (UserList) p.getItems().get(0);
-				if (tc.getContents().get(1) instanceof Empty && tc.getContents().get(1).getSort(definitionHelper).equals(p.getSort()) && definitionHelper.isSubsortedEq(userList.getSort(), tc.getContents().get(0).getSort(definitionHelper))) {
+				if (tc.getContents().get(1) instanceof Empty && tc.getContents().get(1).getSort().equals(p.getSort()) && context.isSubsortedEq(userList.getSort(), tc.getContents().get(0).getSort())) {
 					return Associativity.NONE;
 				} else {
 					return Associativity.RIGHT;
@@ -166,8 +166,8 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 			if (p.getAttributes().containsKey("non-assoc"))
 				return Associativity.NONASSOC;
 		/*	if (p.getArity() == 2) {
-				boolean leftAssociate = definitionHelper.isSubsortedEq(p.getChildSort(0), p.getSort());
-				boolean rightAssociate = definitionHelper.isSubsortedEq(p.getChildSort(1), p.getSort());
+				boolean leftAssociate = context.isSubsortedEq(p.getChildSort(0), p.getSort());
+				boolean rightAssociate = context.isSubsortedEq(p.getChildSort(1), p.getSort());
 				if (!leftAssociate && !rightAssociate) {
 					return Associativity.NONASSOC;
 				} else if (!leftAssociate) {
@@ -192,10 +192,10 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 		if (tcInner.getCons().equals(tcOuter.getCons())) {
 			return true;
 		}
-		if (definitionHelper.associativity.get(tcInner.getCons()) == null) {
+		if (context.associativity.get(tcInner.getCons()) == null) {
 			return false;
 		}
-		return definitionHelper.associativity.get(tcInner.getCons()).contains(tcOuter.getProduction(definitionHelper));
+		return context.associativity.get(tcInner.getCons()).contains(tcOuter.getProduction());
 	}
 
 	private boolean isAtom(Term inner) {
@@ -208,7 +208,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 		if (inner instanceof Variable) return true;
 		if (inner instanceof TermCons) {
 			TermCons tc = (TermCons) inner;
-			if (tc.getProduction(definitionHelper).getArity() == 0) return true;
+			if (tc.getProduction().getArity() == 0) return true;
 		}
 		return false;
 	}
@@ -218,7 +218,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 		if (isAtom(t)) return EnumSet.noneOf(Fixity.class);
 		if (t instanceof TermCons) {
 			TermCons tc = (TermCons) t;
-			Production p = tc.getProduction(definitionHelper);
+			Production p = tc.getProduction();
 			EnumSet<Fixity> set = EnumSet.noneOf(Fixity.class);
 			if (p.getItems().get(0).getType() != ProductionType.TERMINAL)
 				set.add(Fixity.BARE_LEFT);
@@ -243,10 +243,10 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 		if (outer instanceof TermCons) {
 			TermCons tc = (TermCons)outer;
 			childTerms = tc.getContents();
-			Production p = tc.getProduction(definitionHelper);
+			Production p = tc.getProduction();
 			if (p.isListDecl()) {
 				UserList userList = (UserList) p.getItems().get(0);
-				if (tc.getContents().get(1) instanceof Empty && tc.getContents().get(1).getSort(definitionHelper).equals(p.getSort()) && definitionHelper.isSubsortedEq(userList.getSort(), tc.getContents().get(0).getSort(definitionHelper))) {
+				if (tc.getContents().get(1) instanceof Empty && tc.getContents().get(1).getSort().equals(p.getSort()) && context.isSubsortedEq(userList.getSort(), tc.getContents().get(0).getSort())) {
 					return EnumSet.allOf(Fixity.class);
 				}
 			}
@@ -278,8 +278,8 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 	private static class ContainsVisitor extends BasicVisitor {
 		private boolean found = false;
 		private Term inner;
-		public ContainsVisitor(Term inner, DefinitionHelper definitionHelper) {
-			super("Term contains target term", definitionHelper);
+		public ContainsVisitor(Term inner, Context context) {
+			super("Term contains target term", context);
 			this.inner = inner;
 		}
 		@Override
@@ -292,8 +292,8 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 		}
 	}
 
-	private static boolean contains(Term outer, Term inner, DefinitionHelper definitionHelper) {
-		ContainsVisitor visit = new ContainsVisitor(inner, definitionHelper);
+	private static boolean contains(Term outer, Term inner, org.kframework.kil.loader.Context context) {
+		ContainsVisitor visit = new ContainsVisitor(inner, context);
 		outer.accept(visit);
 		return visit.getFound();
 	}
@@ -304,10 +304,10 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 			TermCons tc = (TermCons)outer;
 			int i;
 			for (i = 0; i < tc.getContents().size(); i++) {
-				if (contains(tc.getContents().get(i), inner, definitionHelper))
+				if (contains(tc.getContents().get(i), inner, context))
 					break;
 			}
-			Production p = tc.getProduction(definitionHelper);
+			Production p = tc.getProduction();
 			EnumSet<Fixity> set = EnumSet.noneOf(Fixity.class);
 			if (!p.hasTerminalToRight(i)) {
 				set.add(Fixity.BARE_RIGHT);
@@ -317,7 +317,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 			}
 			if (p.isListDecl()) {
 				UserList userList = (UserList) p.getItems().get(0);
-				if (tc.getContents().get(1) instanceof Empty && tc.getContents().get(1).getSort(definitionHelper).equals(p.getSort()) && definitionHelper.isSubsortedEq(userList.getSort(), tc.getContents().get(0).getSort(definitionHelper))) {
+				if (tc.getContents().get(1) instanceof Empty && tc.getContents().get(1).getSort().equals(p.getSort()) && context.isSubsortedEq(userList.getSort(), tc.getContents().get(0).getSort())) {
 					return EnumSet.allOf(Fixity.class);
 				}
 			}
@@ -329,7 +329,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 			Collection c = (Collection) outer;
 			int i;
 			for (i = 0; i < c.getContents().size(); i++) {
-				if (contains(c.getContents().get(i), inner, definitionHelper))
+				if (contains(c.getContents().get(i), inner, context))
 					break;
 			}
 			EnumSet<Fixity> set = EnumSet.allOf(Fixity.class);
@@ -340,7 +340,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 			return set;
 		} else if (outer instanceof MapItem) {
 			MapItem m = (MapItem) outer;
-			if (contains(m.getKey(), inner, definitionHelper))
+			if (contains(m.getKey(), inner, context))
 				return EnumSet.of(Fixity.BARE_LEFT);
 			return EnumSet.of(Fixity.BARE_RIGHT);
 		} else if (outer instanceof CollectionItem) {
@@ -349,7 +349,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 			return EnumSet.noneOf(Fixity.class);
 		} else if (outer instanceof KApp) {
 			KApp kapp = (KApp) outer;
-			if (contains(kapp.getLabel(), inner, definitionHelper))
+			if (contains(kapp.getLabel(), inner, context))
 				return EnumSet.of(Fixity.BARE_LEFT);
 			return EnumSet.noneOf(Fixity.class);
 		} else if (outer instanceof Freezer) {
@@ -364,21 +364,21 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 		if (outer instanceof TermCons) {
 			TermCons tcOuter = (TermCons) outer;
 			for (int i = 0; i < tcOuter.getContents().size(); i++) {
-				if (definitionHelper.isSubsortedEq(tcOuter.getProduction(definitionHelper).getChildSort(i), inner.getSort(definitionHelper))) {
-					return inner instanceof TermCons && definitionHelper.isPriorityWrong(tcOuter.getProduction(definitionHelper).getKLabel(), ((TermCons)inner).getProduction(definitionHelper).getKLabel());
+				if (context.isSubsortedEq(tcOuter.getProduction().getChildSort(i), inner.getSort())) {
+					return inner instanceof TermCons && context.isPriorityWrong(tcOuter.getProduction().getKLabel(), ((TermCons)inner).getProduction().getKLabel());
 				}
 			}
-			return !inner.getSort(definitionHelper).equals("K");
+			return !inner.getSort().equals("K");
 		} else if (inner instanceof Rewrite && !(outer instanceof Cell)) {
 			return true;
 		} else if (inner instanceof KSequence && outer instanceof TermCons) {
 			return true;
 		} else if (outer instanceof KInjectedLabel) {
 			KInjectedLabel lbl = (KInjectedLabel)outer;
-			String sort = lbl.getTerm().getSort(definitionHelper);
+			String sort = lbl.getTerm().getSort();
 			if (MetaK.isKSort(sort)) {
 				sort = lbl.getInjectedSort(sort);
-				if (!definitionHelper.isSubsortedEq(sort, inner.getSort(definitionHelper))) {
+				if (!context.isSubsortedEq(sort, inner.getSort())) {
 					return true;
 				}
 			}

@@ -12,7 +12,7 @@ import java.util.Set;
 import org.apache.commons.collections15.Predicate;
 import org.apache.commons.collections15.Transformer;
 import org.apache.commons.collections15.functors.ConstantTransformer;
-import org.kframework.kil.loader.DefinitionHelper;
+import org.kframework.kil.loader.Context;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.Transition;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
@@ -39,13 +39,13 @@ public class VisualizationViewerDemo {
   public static final int width = 400;
   public static final int heigth = 600;
   public static ArrayList<Integer> oldIds = new ArrayList<Integer>();
-  protected DefinitionHelper definitionHelper;
+  protected Context definitionHelper;
 
-  public VisualizationViewerDemo(DefinitionHelper definitionHelper) {
+  public VisualizationViewerDemo(Context definitionHelper) {
     this.definitionHelper = definitionHelper;
   }
 
-  public VisualizationViewerDemo(Graph graph, DefinitionHelper definitionHelper) {
+  public VisualizationViewerDemo(Graph graph, Context definitionHelper) {
     this.definitionHelper = definitionHelper;
     init(graph);
   }
@@ -217,8 +217,8 @@ public class VisualizationViewerDemo {
   }
 
   public void addEdge(KRunState source, KRunState target, int depth, String rule) {
-    this.layout.getGraph().addEdge(
-            new Transition(Transition.TransitionType.REDUCE, definitionHelper), source, target);
+	  this.layout.getGraph().addEdge(
+            Transition.reduce(definitionHelper), source, target);
   }
 
   public Object verifyExistingVertex(Object vertex) {

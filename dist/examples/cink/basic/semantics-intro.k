@@ -1,4 +1,4 @@
-/*@ \section{Semantics}
+/*@ \subsection{Semantics}
 
 */
 

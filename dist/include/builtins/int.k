@@ -58,7 +58,7 @@ module INT-HOOKS
                 | Int ">=Int" Int         [function, left, smtlib(>=), latex({#1}\mathrel{\geq_{\scriptstyle\it Int}}{#2}), hook(#INT:_>=Int_)]
                 | Int ">Int" Int          [function, left, smtlib(>), latex({#1}\mathrel{>_{\scriptstyle\it Int}}{#2}), hook(#INT:_>Int_)]
                 | Int "==Int" Int         [function, left, smtlib(=), latex({#1}\mathrel{{=}{=}_{\scriptstyle\it Int}}{#2}), hook(#INT:_==Int_)]
-                | Int "=/=Int" Int        [function, left, smtlib(distinct), latex({#1}\mathrel{{=}{/}{=}_{\scriptstyle\it Int}}{#2})]
+                | Int "=/=Int" Int        [function, left, smtlib(distinct), latex({#1}\mathrel{{=}{/}{=}_{\scriptstyle\it Int}}{#2}), hook(#INT:_=/=Int_)]
                 | Int "=Int" Int          [equality, function, hook(#INT:_==Int_)]
                 | Int "dividesInt" Int    [function]
 
@@ -66,7 +66,10 @@ module INT-HOOKS
   rule (I1:Int dividesInt I2:Int) => (I2 %Int I1) ==Int 0
 
   //sort Nat ::= {I:Int | I >=Int 0}
-  syntax Nat ::= "dummyNat"
+  syntax Nat
   rule isNat(I:Int) => I >=Int 0 [function, anywhere]
+
+  rule 0 +Int I:Int => I [anywhere]
+  rule 0 *Int I:Int => 0 [anywhere]
 endmodule
 
