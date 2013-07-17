@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 
 import org.kframework.backend.Backend;
 import org.kframework.backend.BasicBackend;
@@ -87,7 +86,6 @@ import org.kframework.krun.api.SearchResults;
 import org.kframework.krun.api.SearchType;
 import org.kframework.main.FirstStep;
 import org.kframework.parser.DefinitionLoader;
-import org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
@@ -153,35 +151,51 @@ public class RLBackend  extends BasicBackend implements Backend{
 			e.printStackTrace();
 		}
 
+		context.kompiled = context.dotk;
+		K.compiled_def = context.dotk.getAbsolutePath();
+		K.main_module = mainModule;
+		K.init(context);
+		// delete temporary krun directory
+		org.kframework.krun.FileUtil.deleteDirectory(new File(K.krunDir));
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			public void run() {
+				try {
+					org.kframework.krun.FileUtil.renameFolder(K.krunTempDir, K.krunDir);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		});
 		
-		MaudeKRun mkr = new MaudeKRun(context);
-		Rule defaultPattern;
-		Set<String> defaultVars;
+		Rule defaultPattern = null;
 		RuleCompilerSteps defaultPatternInfo;
+		ASTNode pattern;
+		try {
+			pattern = DefinitionLoader.parsePattern(K.pattern, "Command line pattern",
+			        context);
+			defaultPatternInfo = new RuleCompilerSteps(javaDef, context);
+			pattern = defaultPatternInfo.compile(new Rule((Sentence) pattern), null);
+			defaultPattern = (Rule) pattern;
+		} catch (TransformerException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (CompilerStepDone e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		MaudeKRun mkr = new MaudeKRun(context);
 		
 		for (Term pgm:gp.getPrograms()) {
 			try {
 				System.out.println("Execute: " + pgm);
 				
-
-				ASTNode pattern = DefinitionLoader.parsePattern(K.pattern, "Command line pattern",
-	                    context);
-				CollectVariablesVisitor vars = new CollectVariablesVisitor(context);
-				pattern.accept(vars);
-				defaultVars = vars.getVars().keySet();
-				defaultPatternInfo = new RuleCompilerSteps(K.definition, context);
-				pattern = defaultPatternInfo.compile(new Rule((Sentence) pattern), null);
-
-				defaultPattern = (Rule) pattern;
 				
+//				System.out.println("SENT: " + javaDef);
 				RuleCompilerSteps steps = new RuleCompilerSteps(javaDef, context);
 				KRunResult<SearchResults> result = mkr.search(null, null, SearchType.FINAL, defaultPattern, pgm, steps);
 				System.out.println("Result: " + result + "\n\n");
 			} catch (KRunExecutionException e) {
-				e.printStackTrace();
-			} catch (TransformerException e) {
-				e.printStackTrace();
-			} catch (CompilerStepDone e) {
 				e.printStackTrace();
 			}
 		}

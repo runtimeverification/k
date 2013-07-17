@@ -43,7 +43,6 @@ public class KCheckFrontEnd {
 
 	        GlobalSettings.symbolicEquality = true;
 	        GlobalSettings.SMT = true;
-	        GlobalSettings.matchingLogic = true;
 	        GlobalSettings.NOSMT = false;
 	        
 			// set verbose
