@@ -449,7 +449,6 @@ public class MaudeKRun implements KRun {
 			cmd = "set trace on ." + K.lineSeparator + cmd;
 		}
 		cmd += getCounter();
-		System.out.println("\n\n\n" + cmd + "\n\n\n");
 		executeKRun(cmd);
 		try {
 			SearchResults results;
