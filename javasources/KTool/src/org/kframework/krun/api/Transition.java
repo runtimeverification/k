@@ -56,6 +56,10 @@ public class Transition implements Serializable{
 		return new Transition(context, TransitionType.UNLABELLED, null, null, null);
 	}
 
+    public static Transition deadlock(Context context) {
+        return new Transition(context, TransitionType.DEADLOCK, null, null, null);
+    }
+
 	public static Transition reduce(Context context) {
 		return new Transition(context, TransitionType.REDUCE, null, null, null);
 	}
@@ -94,6 +98,10 @@ public class Transition implements Serializable{
 		label.
 		*/
 		UNLABELLED,
+        /**
+        A transition corresponding to a model-checking deadlock.
+        */
+        DEADLOCK,
 		/**
 		A rewrite or set of rewrites containing no transitions.
 		*/
@@ -121,6 +129,8 @@ public class Transition implements Serializable{
 			return "\nMaude 'reduce' command ";
 		} else if (type == TransitionType.UNLABELLED) {
 			return "\nUnlabelled rule ";
+        } else if (type == TransitionType.DEADLOCK) {
+            return "\nDeadlock ";
 		} else {
 			return "\nRead " + StringBuiltin.of(readString).value();
 		}

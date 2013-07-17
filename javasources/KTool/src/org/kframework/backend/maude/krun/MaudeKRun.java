@@ -698,11 +698,15 @@ public class MaudeKRun implements KRun {
 			List<Element> child2 = XmlUtil.getChildElements(child.get(1));
 			sort = child.get(1).getAttribute("sort");
 			op = child.get(1).getAttribute("op");
-			assertXML(child2.size() == 0 && (sort.equals("#Qid") || sort.equals("#RuleName")));
+            //#Sort means we included the meta level and so it thinks Qids
+            //aren' Qids even though they really are.
+			assertXML(child2.size() == 0 && (sort.equals("#Qid") || sort.equals("#RuleName") || sort.equals("#Sort")));
 			String label = op;
 			Transition trans;
 			if (sort.equals("#RuleName") && op.equals("UnlabeledLtl")) {
 				trans = Transition.unlabelled(context);
+            } else if (sort.equals("#RuleName") && op.equals("deadlockLtl")) {
+                trans = Transition.deadlock(context);
 			} else {
 				trans = Transition.label(label, context);
 			}
@@ -710,6 +714,7 @@ public class MaudeKRun implements KRun {
 		} else if (sort.equals("#TransitionList") && op.equals("LTLnil")) {
 			assertXML(child.size() == 0);
 		} else {
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot parse result xml from maude due to production " + op + " of sort " + sort + ". Please file an error on the issue tracker which includes this error message."));
 			assertXML(false);
 		}
 	}
