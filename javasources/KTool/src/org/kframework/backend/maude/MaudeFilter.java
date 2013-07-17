@@ -507,7 +507,7 @@ public class MaudeFilter extends BackendFilter {
 		kapp.getLabel().accept(this);
 		result.append(", ");
 		kapp.getChild().accept(this);
-		result.append(") ");
+		result.append(")");
 	}
 
 	@Override
@@ -643,7 +643,7 @@ public class MaudeFilter extends BackendFilter {
 			boolean first = true;
 			for (Term term : collection.getContents()) {
 				if (!first) {
-					result.append(",");
+					result.append(", ");
 				} else {
 					first = false;
 				}
@@ -902,6 +902,20 @@ public class MaudeFilter extends BackendFilter {
 	@Override
 	public void visit(BackendTerm term) {
 		result.append(term.getValue());
+	}
+
+	@Override
+	public void visit(Bracket term) {
+		term.getContent().accept(this);
+	}
+
+	public void visit(Builtin term) {
+		throw new RuntimeException("don't know how to maudify Builtin");
+	}
+
+	@Override
+	public void visit(Cast term) {
+		throw new RuntimeException("don't know how to maudify Cast");
 	}
 
 	private static java.util.Map<KSort, String> maudeCollectionConstructors = new HashMap<KSort, String>();

@@ -1,5 +1,6 @@
 package org.kframework.kcheck.utils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.kframework.backend.symbolic.AddConditionToConfig;
@@ -20,6 +21,7 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class AddPathConditionToImplications extends CopyOnWriteTransformer {
 
+
 	private List<ASTNode> reachabilityRules;
 
 	public AddPathConditionToImplications(Context context, List<ASTNode> reachabilityRules) {
@@ -29,20 +31,34 @@ public class AddPathConditionToImplications extends CopyOnWriteTransformer {
 
 	@Override
 	public ASTNode transform(Rule node) throws TransformerException {
-		
 		if(node.getAttribute(AddImplicationRules.IMPLRULE_ATTR) != null && (node.getBody() instanceof Rewrite)) {
-
+			
 			// get the corresponding reachability rule
-			int rIndex = Integer.parseInt(node.getAttribute(AddImplicationRules.IMPLRULE_ATTR)); 
+			int rIndex = Integer.parseInt(node.getAttribute(AddImplicationRules.IMPLRULE_ATTR));
 			ASTNode rrule = reachabilityRules.get(rIndex);
 			ReachabilityRuleKILParser parser = new ReachabilityRuleKILParser(context);
 			rrule.accept(parser);
+
+			VariablesVisitor vvpi = new VariablesVisitor(context);
+			parser.getPi().accept(vvpi);
+			VariablesVisitor vvpiprime = new VariablesVisitor(context);
+			parser.getPi_prime().accept(vvpiprime);
+			List<Variable> fresh = new ArrayList<Variable>();
+			for(Variable v : vvpi.getVariables()) {
+				if (!AddCircularityRules.varInList(v, vvpiprime.getVariables())) {
+					fresh.add(v);
+				}
+			}
+			
+			// extract phi and phi'
+			Term cnd = node.getCondition();
+			ExtractPatternless ep = new ExtractPatternless(context, true);
+			cnd = (Term) cnd.accept(ep);
 			
 			// separate left and right
 			Rewrite ruleBody = (Rewrite) node.getBody();
 			Term left = ruleBody.getLeft().shallowCopy();
 			Term right = ruleBody.getRight().shallowCopy();
-			
 			
 			// create lhs path condition cell
 			Variable psi = Variable.getFreshVar("K");
@@ -56,20 +72,22 @@ public class AddPathConditionToImplications extends CopyOnWriteTransformer {
             Cell rightCell = new Cell();
             rightCell.setLabel(MetaK.Constants.pathCondition);
             rightCell.setEllipses(Ellipses.NONE);
-            rightCell.setContents(KApp.of(KLabelConstant.ANDBOOL_KLABEL, psi, parser.getPhi_prime()));
+            rightCell.setContents(KApp.of(KLabelConstant.ANDBOOL_KLABEL, psi, ep.getPhiPrime()));
 			right = AddConditionToConfig.addSubcellToCell((Cell)right, rightCell);
 
 			// condition
-			Term condition = node.getCondition().shallowCopy();
-
-			Term implication = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, psi, KApp.of(KLabelConstant.NOTBOOL_KLABEL, parser.getPhi()));
+			Term implication = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, psi, KApp.of(KLabelConstant.NOTBOOL_KLABEL, ep.getPhi()));
 			KApp unsat = StringBuiltin.kAppOf("unsat");
 	        KApp checkSat = KApp.of(KLabelConstant.of("'checkSat", context), implication);
 	        implication = KApp.of(KLabelConstant.KEQ_KLABEL, checkSat, unsat);
 			
+	        // return new rule
 			Rule newRule = new Rule(left, right, context);
-			newRule.setCondition(KApp.of(KLabelConstant.ANDBOOL_KLABEL, condition, implication));
+			newRule.setCondition(KApp.of(KLabelConstant.ANDBOOL_KLABEL, cnd.shallowCopy(), implication));
 			newRule.setAttributes(node.getAttributes().shallowCopy());
+			
+			newRule = (Rule) newRule.accept(new MakeFreshVariables(context, fresh));
+			
 			return newRule;
 		}
 		

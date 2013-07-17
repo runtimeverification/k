@@ -21,11 +21,8 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class AddPathConditionToCircularities extends CopyOnWriteTransformer {
 
-	private List<ASTNode> reachabilityRules;
-
 	public AddPathConditionToCircularities(Context context, List<ASTNode> reachabilityRules) {
 		super("Add path condition to circularities", context);
-		this.reachabilityRules = reachabilityRules;
 	}
 
 	@Override
@@ -33,11 +30,10 @@ public class AddPathConditionToCircularities extends CopyOnWriteTransformer {
 		
 		if(node.getAttribute(AddCircularityRules.RRULE_ATTR) != null && (node.getBody() instanceof Rewrite)) {
 
-			// get the corresponding reachability rule
-			int rIndex = Integer.parseInt(node.getAttribute(AddCircularityRules.RRULE_ATTR)); 
-			ASTNode rrule = reachabilityRules.get(rIndex);
-			ReachabilityRuleKILParser parser = new ReachabilityRuleKILParser(context);
-			rrule.accept(parser);
+			// extract phi and phi'
+			Term cnd = node.getCondition();
+			ExtractPatternless ep = new ExtractPatternless(context, false);
+			cnd = (Term) cnd.accept(ep);
 			
 			// separate left and right
 			Rewrite ruleBody = (Rewrite) node.getBody();
@@ -57,22 +53,20 @@ public class AddPathConditionToCircularities extends CopyOnWriteTransformer {
             Cell rightCell = new Cell();
             rightCell.setLabel(MetaK.Constants.pathCondition);
             rightCell.setEllipses(Ellipses.NONE);
-            rightCell.setContents(KApp.of(KLabelConstant.ANDBOOL_KLABEL, psi, parser.getPhi(), parser.getPhi_prime()));
+            rightCell.setContents(KApp.of(KLabelConstant.ANDBOOL_KLABEL, psi, ep.getPhi(), ep.getPhiPrime()));
 			right = AddConditionToConfig.addSubcellToCell((Cell)right, rightCell);
 
 			// condition
-			Term condition = node.getCondition().shallowCopy();
-
-			Term implication = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, psi, KApp.of(KLabelConstant.NOTBOOL_KLABEL, parser.getPhi()));
+			Term implication = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, psi, KApp.of(KLabelConstant.NOTBOOL_KLABEL, ep.getPhi()));
 			KApp unsat = StringBuiltin.kAppOf("unsat");
 	        KApp checkSat = KApp.of(KLabelConstant.of("'checkSat", context), implication);
 	        implication = KApp.of(KLabelConstant.KEQ_KLABEL, checkSat, unsat);
-	        
-			Term pc = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, psi, parser.getPhi_prime());
+	        Term pc = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, psi, ep.getPhiPrime());
 			pc = AddPathCondition.checkSat(pc, context);
 			
 			Rule newRule = new Rule(left, right, context);
-			newRule.setCondition(KApp.of(KLabelConstant.ANDBOOL_KLABEL, condition, implication, pc));
+			cnd = KApp.of(KLabelConstant.ANDBOOL_KLABEL, cnd, implication, pc);
+			newRule.setCondition(cnd);
 			newRule.setAttributes(node.getAttributes().shallowCopy());
 			return newRule;
 		}

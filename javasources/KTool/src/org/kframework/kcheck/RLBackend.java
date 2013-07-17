@@ -94,10 +94,13 @@ import org.kframework.utils.general.GlobalSettings;
 public class RLBackend  extends BasicBackend implements Backend{
 
 	List<ASTNode> reachabilityRules = null;
+	public static final String INTERNAL_KLABEL = "rrcondition"; 
+	List<Term> programs;
 	
 	public RLBackend(Stopwatch sw, Context context) {
 		super(sw, context);
 		reachabilityRules = new ArrayList<ASTNode>();
+		programs = new ArrayList<Term>();
 	}
 
 	@Override
@@ -142,16 +145,17 @@ public class RLBackend  extends BasicBackend implements Backend{
 		String main = load + "load \"base.maude\"\n" + "load \"builtins.maude\"\n" + "mod " + mainModule + " is \n" + "  including " + mainModule + "-BASE .\n" + "  including " + mainModule
 				+ "-BUILTINS .\n" + "  including K-STRICTNESS-DEFAULTS .\n" + "endm\n";
 		FileUtil.saveInFile(context.dotk.getAbsolutePath() + "/" + "main.maude", main);
-
-
-		GeneratePrograms gp = new GeneratePrograms(context, reachabilityRules);
-		try {
-			javaDef.accept(gp);
-		} catch (TransformerException e) {
-			e.printStackTrace();
-		}
-
 		context.kompiled = context.dotk;
+
+		 UnparserFilter unparserFilter = new UnparserFilter(context);
+		 javaDef.accept(unparserFilter);
+		
+		 String unparsedText = unparserFilter.getResult();
+		
+		System.out.println(unparsedText);
+//		 System.exit(1);
+		
+
 		K.compiled_def = context.dotk.getAbsolutePath();
 		K.main_module = mainModule;
 		K.init(context);
@@ -186,7 +190,7 @@ public class RLBackend  extends BasicBackend implements Backend{
 
 		MaudeKRun mkr = new MaudeKRun(context);
 		
-		for (Term pgm:gp.getPrograms()) {
+		for (Term pgm: programs) {
 			try {
 				System.out.println("Execute: " + pgm);
 				
@@ -200,12 +204,6 @@ public class RLBackend  extends BasicBackend implements Backend{
 			}
 		}
 		
-		 UnparserFilter unparserFilter = new UnparserFilter(context);
-		 javaDef.accept(unparserFilter);
-		
-		 String unparsedText = unparserFilter.getResult();
-		
-		// System.out.println(unparsedText);
 		//
 		// XStream xstream = new XStream();
 		// xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
@@ -287,6 +285,9 @@ public class RLBackend  extends BasicBackend implements Backend{
 		
 		steps.add(new AddPathConditionToCircularities(context, reachabilityRules));
 		steps.add(new AddPathConditionToImplications(context, reachabilityRules));
+		GeneratePrograms gp = new GeneratePrograms(context, reachabilityRules);
+		steps.add(gp);
+		programs = gp.getPrograms();
 		
 		steps.add(new ResolveSupercool(context));
 		steps.add(new AddStrictStar(context));

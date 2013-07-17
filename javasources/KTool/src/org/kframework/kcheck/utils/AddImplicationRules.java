@@ -3,7 +3,10 @@ package org.kframework.kcheck.utils;
 import java.util.List;
 
 import org.kframework.compile.transformers.AddSymbolicK;
+import org.kframework.kcheck.RLBackend;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.KApp;
+import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
@@ -40,17 +43,26 @@ public class AddImplicationRules extends CopyOnWriteTransformer {
 						context);
 				r.accept(parser);
 
-				Term newPi = parser.getPi().shallowCopy();
+				
+				Term newPi = parser.getPi_prime().shallowCopy();
 				Term implies = getFreshImplication(reachabilityRules.indexOf(rr), context);
 				SetCellContent app = new SetCellContent(context, implies, "k");
 				newPi = (Term) newPi.accept(app);
 
 				
-				Term newPiPrime = parser.getPi_prime();
+				Term newPiPrime = parser.getPi_prime().shallowCopy();
 				SetCellContent appPrime = new SetCellContent(context, KList.EMPTY, "k");
 				newPiPrime = (Term) newPiPrime.accept(appPrime);
-
+				
+				// insert patternless formulas into condition
+				Term phi = parser.getPhi().shallowCopy();
+				Term phiPrime = parser.getPhi_prime().shallowCopy();
+				Term rrcond = KApp.of(KLabelConstant.of(RLBackend.INTERNAL_KLABEL, context), phi, phiPrime); 
+				
+				Term condition = KApp.of(KLabelConstant.ANDBOOL_KLABEL, rrcond);
+				
 				Rule implicationRule = new Rule(newPi, newPiPrime, context);
+				implicationRule.setCondition(condition);
 				int correspondingIndex = reachabilityRules.indexOf(rr);
 				implicationRule.addAttribute(IMPLRULE_ATTR, correspondingIndex + "");
 				

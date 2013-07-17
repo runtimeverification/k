@@ -27,49 +27,81 @@ public class GeneratePrograms extends BasicTransformer {
 	@Override
 	public ASTNode transform(Rule node) throws TransformerException {
 		
-		if(node.getAttribute(AddImplicationRules.IMPLRULE_ATTR) != null && (node.getBody() instanceof Rewrite)) {
+		if(node.getAttribute(AddCircularityRules.RRULE_ATTR)!= null && (node.getBody() instanceof Rewrite)) {
+
+			System.out.println("IN");
 			
 			Rewrite rewrite = (Rewrite) node.getBody();
-			int rIndex = Integer.parseInt(node.getAttribute(AddImplicationRules.IMPLRULE_ATTR));
+			int rIndex = Integer.parseInt(node.getAttribute(AddCircularityRules.RRULE_ATTR));
 			
 			// get the corresponding reachability rule
 			ASTNode rrule = reachabilityRules.get(rIndex);
 			ReachabilityRuleKILParser parser = new ReachabilityRuleKILParser(context);
 			rrule.accept(parser);
 
-			// process program
-			Term pi = parser.getPi();
-			ExtractCellContent kcell = new ExtractCellContent(context, "k");
-			pi.accept(kcell);
-			Term pgm = kcell.getContent();
-			RemoveLabel pl = new RemoveLabel(context);
-			pgm = (Term) pgm.accept(pl);
+			// remove the condition wrapper
+			Term cnd = node.getCondition().shallowCopy();
+			ExtractPatternless ep = new ExtractPatternless(context, true);
+			cnd = (Term) cnd.accept(ep);
+
+			
+			// create the new rule
+			Term left = rewrite.getLeft();
+			Term right = rewrite.getRight();
+			
+			ExtractCellContent ecc = new ExtractCellContent(context, "k");
+			left.accept(ecc);
+			KSequence kseq = (KSequence) ecc.getContent();
+			List<Term> contents = kseq.getContents();
+			
+			List<Term> newContents = new ArrayList<Term>();
+			newContents.add(contents.get(0).shallowCopy());
+			Term pgmprime = contents.get(1).shallowCopy(); // collect the program without label
+			newContents.add(contents.get(2).shallowCopy());
+			KSequence newSeq = new KSequence(newContents);
+			
+			Term newLeft = left.shallowCopy();
+			newLeft = (Term) newLeft.accept(new SetCellContent(context, newSeq, "k"));
+			Term newRight = right.shallowCopy();
+			Rule newRule = new Rule(newLeft, newRight, context);
+			newRule.setCondition(cnd);
+			newRule.setAttributes(node.getAttributes().shallowCopy());
+			
+
+			
+			// get program without the first label
+			Term newPgm = left.shallowCopy();
 			
 			// create implication term
 			Term implies = AddImplicationRules.getFreshImplication(rIndex, context);
-
+			
 			// set PGM ~> implies in the <k> cell
-			Term newPi = rewrite.getLeft().shallowCopy();
 			List<Term> cnt = new ArrayList<Term>();
-			cnt.add(pgm);
+			cnt.add(pgmprime);
 			cnt.add(implies);
 			KSequence newContent = new KSequence(cnt);
-			SetCellContent seq = new SetCellContent(context, newContent, "k");
-			newPi = (Term) newPi.accept(seq);
+			
+			SetCellContent scc = new SetCellContent(context, newContent, "k");
+			newPgm = (Term) newPgm.accept(scc);
 
-			SetCellContent setpc = new SetCellContent(context, parser.getPhi(), MetaK.Constants.pathCondition);
-			newPi = (Term) newPi.accept(setpc);
+			SetCellContent setpc = new SetCellContent(context, ep.getPhi(), MetaK.Constants.pathCondition);
+			newPgm = (Term) newPgm.accept(setpc);
 			
 			// generate fresh symbolic variables
 			VariablesVisitor vvleft = new VariablesVisitor(context);
-			newPi.accept(vvleft);
+			newPgm.accept(vvleft);
 
 //			System.out.println("PI: " + newPi);
 			MakeFreshVariables mfv = new MakeFreshVariables(context, vvleft.getVariables());
-			newPi = (Term) newPi.accept(mfv);
+			newPgm = (Term) newPgm.accept(mfv);
 			
-			programs.add(newPi);
-//			System.out.println("NEWPI: " + newPi);
+//			newPi = (Term) newPi.accept(new FlattenSyntax(context));
+//			System.out.println("PGM: " + newPi);
+			
+			programs.add(newPgm);
+			System.out.println("GENERATED: " + programs);
+			
+			return newRule;
 		}
 		
 		return super.transform(node);

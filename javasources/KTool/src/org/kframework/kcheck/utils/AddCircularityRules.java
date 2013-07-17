@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.kframework.compile.utils.MetaK;
+import org.kframework.kcheck.RLBackend;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
@@ -55,9 +56,16 @@ public class AddCircularityRules extends CopyOnWriteTransformer {
 				// the reachability rule and replace it by PGM ~> K
 				ExtractCellContent extract = new ExtractCellContent(context, "k");
 				newPi.accept(extract);
-
+				Term pgm = extract.getContent().shallowCopy();
+				
+				// push the new program without the first label
+				Term pgmprime = pgm.shallowCopy();
+				RemoveLabel pl = new RemoveLabel(context);
+				pgmprime = (Term) pgmprime.accept(pl);
+				
 				List<Term> cnt = new ArrayList<Term>();
-				cnt.add(extract.getContent());
+				cnt.add(pgm);
+				cnt.add(pgmprime); // append the pgmprime too
 				cnt.add(K);
 				KSequence newContent = new KSequence(cnt);
 
@@ -76,8 +84,6 @@ public class AddCircularityRules extends CopyOnWriteTransformer {
 				VariablesVisitor vvright = new VariablesVisitor(context);
 				newPiPrime.accept(vvright);
 				
-//				System.out.println("VL : " + vvleft.getVariables());
-//				System.out.println("RL : " + vvright.getVariables());
 				
 				List<Term> fresh = new ArrayList<Term>();
 				
@@ -89,6 +95,12 @@ public class AddCircularityRules extends CopyOnWriteTransformer {
 					}
 				}
 
+				// insert patternless formulas into condition
+				Term phi = parser.getPhi().shallowCopy();
+				Term phiPrime = parser.getPhi_prime().shallowCopy();
+				Term rrcond = KApp.of(KLabelConstant.of(RLBackend.INTERNAL_KLABEL, context), phi, phiPrime); 
+				fresh.add(rrcond);
+				
 				Term condition = KApp.of(KLabelConstant.ANDBOOL_KLABEL, new KList(fresh));
 
 				Rule circRule = new Rule(newPi, newPiPrime, context);
