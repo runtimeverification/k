@@ -168,18 +168,12 @@ public class DefinitionSDF {
 		sdf.append("\n\n");
 
 		// print variables, HOLEs, cast
-//		for (Sort s : psdfv.userSorts) {
-//			if (!s.isBaseSort()) {
-//				sdf.append("	VARID  \":" + s.getName() + "\"        -> VariableDz            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Var\")}\n");
-//			}
-//		}
-//		// print variables, HOLEs, cast
-//		sdf.append("\n");
-//		for (Sort s : psdfv.userSorts) {
-//			if (!s.isBaseSort()) {
-//				sdf.append("	\"HOLE\" \":" + s.getName() + "\"		-> VariableDz            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Hole\")}\n");
-//			}
-//		}
+		for (Sort s : psdfv.userSorts) {
+			if (!s.isBaseSort()) {
+				sdf.append("	VARID  \":" + s.getName() + "\"        -> VariableDz            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Var\")}\n");
+			}
+		}
+		// print variables, cast
 		sdf.append("\n");
 		for (Sort s : psdfv.userSorts) {
 			if (!s.isBaseSort()) {

@@ -31,11 +31,19 @@ public class CorrectCastPriorityFilter extends BasicTransformer {
 	public ASTNode transform(Cast cst) throws TransformerException {
 		// removed variables and allowing only Cast
 		// if I find a Cast near a variable, then I remove the cast and translate the sort restrictions to the variable
+		// this should be done only if the casting is syntactic, because on semantic cast there should be another branch
+		// that has a typed variable.
 		if (cst.getContent() instanceof Variable) {
-			Variable var = new Variable((Variable) cst.getContent());
-			var.setUserTyped(true);
-			var.setSort(cst.getSort());
-			return var;
+			if (cst.isSyntactic()) {
+				Variable var = new Variable((Variable) cst.getContent());
+				var.setUserTyped(true);
+				var.setSort(cst.getSort());
+				return var;
+			} else {
+				String msg = "Due to typing errors, Casting is too greedy. Use parentheses to set proper scope.";
+				KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, cst.getFilename(), cst.getLocation());
+				throw new PriorityException(kex);
+			}
 		}
 		cst.getContent().accept(secondFilter);
 		return super.transform(cst);

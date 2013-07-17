@@ -262,10 +262,18 @@ rules
 		where loc := <getLocAsString>
 
 	to-xml2:
-		a#(b) -> $[<hole sort="[sort]" loc="[loc]" />
+		a#(["HOLE"]) -> $[<hole sort="[sort]" loc="[loc]" userTyped="true" />
 		]
-		where <string-ends-with(|"Hole")> a
-		where mydebug(!"Hole: ")
+		where <string-ends-with(|"12Var")> a
+		where mydebug(!"Var: ")
+		where sort := <getSort> a
+		where loc := <getLocAsString>
+
+	to-xml2:
+		a#(["HOLE"]) -> $[<hole sort="[sort]" loc="[loc]" userTyped="false" />
+		]
+		where <string-ends-with(|"1Var")> a
+		where mydebug(!"Var: ")
 		where sort := <getSort> a
 		where loc := <getLocAsString>
 

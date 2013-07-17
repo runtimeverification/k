@@ -323,8 +323,11 @@ public class JavaClassesFactory {
 				return storeNode(atm.getUniqueIdentifier(), new Bracket(appl));
 			if (appl.getName().endsWith("Cast"))
 				return storeNode(atm.getUniqueIdentifier(), new Cast(appl));
-			if (appl.getName().endsWith("Var"))
+			if (appl.getName().endsWith("Var")) {
+				if (((ATermAppl) appl.getArgument(0)).getName().equals("HOLE"))
+					return Hole.KITEM_HOLE;
 				return storeNode(atm.getUniqueIdentifier(), new Variable(appl));
+			}
 			if (appl.getName().endsWith("Const")) {
 				String sort = StringUtil.getSortNameFromCons(appl.getName());
 				if (sort.equals(KSorts.KLABEL)) {
@@ -384,11 +387,8 @@ public class JavaClassesFactory {
 				return storeNode(atm.getUniqueIdentifier(), new KSequence(appl));
 			if (appl.getName().equals("Bag1ClosedCell"))
 				return storeNode(atm.getUniqueIdentifier(), new Cell(appl));
-			if (appl.getName().endsWith("1Hole"))
-				return Hole.KITEM_HOLE;
 			if (appl.getName().equals("BagItem1Break"))
 				return storeNode(atm.getUniqueIdentifier(), new TermComment(appl));
-			
 
 			// if (Constants.FREEZERHOLE.endsWith(appl.getNodeName()))
 			// return new FreezerHole(appl);
