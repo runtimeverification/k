@@ -16,7 +16,6 @@ module CINK-L-R-VALUES-SEMANTICS
   expressions and we make explicitly only the category of lvalue expressions:
   */
   
-  syntax K ::= "lvalue" "(" K ")"
 
   /*@
   As its definition says, the main operator emphasiszing the two categories is
@@ -24,7 +23,7 @@ module CINK-L-R-VALUES-SEMANTICS
   of the assignemnt is a lvalue:
   */
 
-  context (HOLE => lvalue(HOLE)) = _:Exp
+  context HOLE = _:Exp
 
   /*@
   The above declaration is equivalent with the following to heating/cooling
@@ -42,9 +41,6 @@ module CINK-L-R-VALUES-SEMANTICS
   /*@
   An identifier seen as a lvalue is evaluated to its location: 
   */
-  rule <k> lvalue(X:Id => L) ...</k>
-       <env>... X |-> L:Loc ...</env>
-       [lookup]
 
   /*@
   An assignemnt, after the reduction of the arguments, has in the lef-hand
@@ -57,7 +53,7 @@ module CINK-L-R-VALUES-SEMANTICS
   /*@
   The right-hand side of reading operator is evaluated as a lvalue:
   */
-  context cin >> (HOLE => lvalue(HOLE))
+  context cin >> HOLE
 
   /*@
   The semantics of the reading operator is overriden:

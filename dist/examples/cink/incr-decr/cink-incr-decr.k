@@ -17,15 +17,15 @@ module CINK-INCR-DECR-SEMANTICS
    "lvalue".
   */ 
 
-  syntax Exp ::= "rvalue" "(" Exp ")"
+  syntax Exp ::= "rvalue" "(" Exp ")" [strict, klabel(rvalue)]
 
   /*@
    The rule realizing the conversion is very simple: it replaces the
    expresion with the value stored at the location given as paraemeter.
   */
 
-  rule <k>  rvalue(L:Loc) => V ...</k>
-       <store>... L |-> V ...</store>
+  rule <k>  rvalue(L:Loc => V) ...</k>
+       <store>... L |-> V:RVal ...</store>
 
   /*@ since the cooling rules for the arithmetic and logic operators depend
     on the type of the result, i.e. whether it is an lvalue or a rvalue, 
@@ -34,129 +34,9 @@ module CINK-INCR-DECR-SEMANTICS
   */
 
   // heating & cooling rules for assignment
-  rule E1:Exp = E2:Exp => E2 ~> E1 = HOLE [heat]
+  rule E1:Exp = E2:Exp => rvalue(E2) ~> E1 = HOLE [heat]
 
-  rule V:RVal ~> E:Exp = HOLE => seqpoint ~> E = V  [cool]
-
-  rule L:Loc ~> E:Exp = HOLE => seqpoint ~> E = rvalue(L) [cool]
-
-  // heating & cooling rules for plus
-  rule E1:Exp + E2:Exp => E1 ~> HOLE + E2 [heat]
-
-  rule E1:Exp + E2:Exp => E2 ~> E1 + HOLE [heat]
-
-  rule V:RVal ~> HOLE + E:Exp => V + E  [cool]
-
-  rule V:RVal ~> E:Exp + HOLE => E + V  [cool]
-
-  rule L:Loc ~> HOLE + E:Exp => rvalue(L) + E [cool]
-
-  rule L:Loc ~> E:Exp + HOLE => E + rvalue(L) [cool]
-
-  // heating & cooling rules for minus
-  rule E1:Exp - E2:Exp => E1 ~> HOLE - E2 [heat]
-
-  rule E1:Exp - E2:Exp => E2 ~> E1 - HOLE [heat]
-
-  rule V:RVal ~> HOLE - E:Exp => V - E  [cool]
-
-  rule V:RVal ~> E:Exp - HOLE => E - V  [cool]
-
-  rule L:Loc ~> HOLE - E:Exp => rvalue(L) - E [cool]
-
-  rule L:Loc ~> E:Exp - HOLE => E - rvalue(L) [cool]
-
-  // heating & cooling rules for multiply
-  rule E1:Exp * E2:Exp => E1 ~> HOLE * E2 [heat]
-
-  rule E1:Exp * E2:Exp => E2 ~> E1 * HOLE [heat]
-
-  rule V:RVal ~> HOLE * E:Exp => V * E  [cool]
-
-  rule V:RVal ~> E:Exp * HOLE => E * V  [cool]
-
-  rule L:Loc ~> HOLE * E:Exp => rvalue(L) * E [cool]
-
-  rule L:Loc ~> E:Exp * HOLE => E * rvalue(L) [cool]
-
-  // heating & cooling rules for divide
-  rule E1:Exp / E2:Exp => E1 ~> HOLE / E2 [heat]
-
-  rule E1:Exp / E2:Exp => E2 ~> E1 / HOLE [heat]
-
-  rule V:RVal ~> HOLE / E:Exp => V / E  [cool]
-
-  rule V:RVal ~> E:Exp / HOLE => E / V  [cool]
-
-  rule L:Loc ~> HOLE / E:Exp => rvalue(L) / E [cool]
-
-  rule L:Loc ~> E:Exp / HOLE => E / rvalue(L) [cool]
-
-  // heating & cooling rules for rest-modulo
-  rule E1:Exp % E2:Exp => E1 ~> HOLE % E2 [heat]
-
-  rule E1:Exp % E2:Exp => E2 ~> E1 % HOLE [heat]
-
-  rule V:RVal ~> HOLE % E:Exp => V % E  [cool]
-
-  rule V:RVal ~> E:Exp % HOLE => E % V  [cool]
-
-  rule L:Loc ~> HOLE % E:Exp => rvalue(L) % E [cool]
-
-  rule L:Loc ~> E:Exp % HOLE => E % rvalue(L) [cool]
-
-  // heating & cooling rules for less than
-  rule E1:Exp < E2:Exp => E1 ~> HOLE < E2 [heat]
-
-  rule E1:Exp < E2:Exp => E2 ~> E1 < HOLE [heat]
-
-  rule V:RVal ~> HOLE < E:Exp => V < E  [cool]
-
-  rule V:RVal ~> E:Exp < HOLE => E < V  [cool]
-
-  rule L:Loc ~> HOLE < E:Exp => rvalue(L) < E [cool]
-
-  rule L:Loc ~> E:Exp < HOLE => E < rvalue(L) [cool]
-
-  // heating & cooling rules for less than or equal to
-  rule E1:Exp <= E2:Exp => E1 ~> HOLE <= E2 [heat]
-
-  rule E1:Exp <= E2:Exp => E2 ~> E1 <= HOLE [heat]
-
-  rule V:RVal ~> HOLE <= E:Exp => V <= E  [cool]
-
-  rule V:RVal ~> E:Exp <= HOLE => E <= V  [cool]
-
-  rule L:Loc ~> HOLE <= E:Exp => rvalue(L) <= E [cool]
-
-  rule L:Loc ~> E:Exp <= HOLE => E <= rvalue(L) [cool]
-
-  // heating & cooling rules for greater than
-  rule E1:Exp > E2:Exp => E1 ~> HOLE > E2 [heat]
-
-  rule E1:Exp > E2:Exp => E2 ~> E1 > HOLE [heat]
-
-  rule V:RVal ~> HOLE > E:Exp => V > E  [cool]
-
-  rule V:RVal ~> E:Exp > HOLE => E > V  [cool]
-
-  rule L:Loc ~> HOLE > E:Exp => rvalue(L) > E [cool]
-
-  rule L:Loc ~> E:Exp > HOLE => E > rvalue(L) [cool]
-
-  // heating & cooling rules for equality
-  rule E1:Exp == E2:Exp => E1 ~> HOLE == E2 [heat]
-
-  rule E1:Exp == E2:Exp => E2 ~> E1 == HOLE [heat]
-
-  rule V:RVal ~> HOLE == E:Exp => V == E  [cool]
-
-  rule V:RVal ~> E:Exp == HOLE => E == V  [cool]
-
-  rule L:Loc ~> HOLE == E:Exp => rvalue(L) == E [cool]
-
-  rule L:Loc ~> E:Exp == HOLE => E == rvalue(L) [cool]
-
+  rule rvalue(V:RVal) ~> E:Exp = HOLE => seqpoint ~> E = V  [cool]
 
   /*@ \subsubsection{The prefix increment operator}
     Here is the description of this operator from the manual of 
@@ -178,14 +58,6 @@ module CINK-INCR-DECR-SEMANTICS
     between r-value and l-value expressions and use the contexts declarations
     in order to specify how to valuate subexpressions.
   */
-
-  //@ Heating the argument of the prefix increment as an lvalue;
-  context ++ (HOLE => lvalue(HOLE))
-
- //@ EXtend the above heating for nested increment expressions:
-
-  rule lvalue(++ E:Exp) => ++ E:Exp ~> lvalue(HOLE) [heat]
-  rule L:Loc ~> lvalue(HOLE) => lvalue(L) [cool]
 
   //@ The semantics of the the prefix increment
   rule <k> ++ L:Loc => L ...</k>
@@ -250,9 +122,6 @@ module CINK-INCR-DECR-SEMANTICS
   syntax K ::= "$inc" "(" K ")" | "$dec" "(" K ")" | "seqpoint"
 
   
-  //@ The argument of the postfix increment operator is heated as an lvalue:
-  context (HOLE => lvalue(HOLE)) ++
-
   /*@
     The semantics of the postfix increment operator: the result value is the 
     value  stored at the computed location and its side-effect is added to 

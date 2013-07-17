@@ -20,7 +20,7 @@ module CINK-BASIC-SEMANTICS
    */
 
 
-  syntax Val ::= "noVal" 
+  syntax RVal ::= "noVal" 
                | "lambda" "(" Decls "@" Stmts ")" 
                  [latex(\lambda\,{#1}\mathrel{\bullet}{#2})]
 
@@ -186,11 +186,10 @@ module CINK-BASIC-SEMANTICS
 
 
   /*@
-    The evaluation of a variable name as an r-value:
+    Variables evaluate to l-values
   */
-  rule <k> X:Id => V ...</k>
+  rule <k> X:Id => L ...</k>
        <env>... X |-> L:Loc ...</env>
-       <store>... L |-> V:Val ...</store>
        [kripke(mem-lookup)]
 
   /*@
@@ -198,8 +197,7 @@ module CINK-BASIC-SEMANTICS
     here only the case when he left-hand side is an variable name. 
     The general case will be considered in a future iteration.
    */
-  rule <k> X:Id = V:Val => V  ...</k>
-       <env>... X |-> L:Loc ...</env>
+  rule <k> L:Loc = V:Val => V  ...</k>
        <store>... L |-> (_ => V) ...</store>
        [kripke(mem-update)]
 
