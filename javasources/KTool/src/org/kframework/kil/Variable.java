@@ -56,6 +56,7 @@ public class Variable extends Term {
 		super(variable);
 		name = variable.name;
 		fresh = variable.fresh;
+		userTyped = variable.userTyped;
 	}
 
 	public static Variable getFreshVar(String sort) {
