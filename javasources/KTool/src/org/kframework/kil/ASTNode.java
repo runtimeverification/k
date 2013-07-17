@@ -48,7 +48,7 @@ public abstract class ASTNode implements Visitable, Transformable, Serializable 
 	public ASTNode(ATermAppl elem) {
 		ATermList list = (ATermList) elem.getAnnotations().getFirst();
 		list = list.getNext();
-		String fileame = ((ATermAppl) list.getFirst()).getChildAt(0).toString();
+		String fileame = ((ATermAppl) ((ATermAppl) list.getFirst()).getChildAt(0)).getName();
 		int loc0 = Integer.parseInt(((ATermAppl) list.getFirst()).getChildAt(1).getChildAt(0).toString());
 		int loc1 = Integer.parseInt(((ATermAppl) list.getFirst()).getChildAt(1).getChildAt(1).toString()) + 1;
 		int loc2 = Integer.parseInt(((ATermAppl) list.getFirst()).getChildAt(1).getChildAt(2).toString());

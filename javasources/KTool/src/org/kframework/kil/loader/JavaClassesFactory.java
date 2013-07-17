@@ -323,11 +323,10 @@ public class JavaClassesFactory {
 				return storeNode(atm.getUniqueIdentifier(), new Bracket(appl));
 			if (appl.getName().endsWith("Cast"))
 				return storeNode(atm.getUniqueIdentifier(), new Cast(appl));
-			if (appl.getName().endsWith("Var")) {
-				if (((ATermAppl) appl.getArgument(0)).getName().equals("HOLE"))
-					return Hole.KITEM_HOLE;
+			if (appl.getName().endsWith("Hole"))
+				return Hole.KITEM_HOLE;
+			if (appl.getName().endsWith("Var"))
 				return storeNode(atm.getUniqueIdentifier(), new Variable(appl));
-			}
 			if (appl.getName().endsWith("Const")) {
 				String sort = StringUtil.getSortNameFromCons(appl.getName());
 				if (sort.equals(KSorts.KLABEL)) {

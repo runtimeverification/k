@@ -29,7 +29,8 @@ context-free syntax
 	VARID ":KLabel"		-> KLabelVarDz {cons("KLabel12Var")}
 	VARIDz				-> KLabel {cons("KLabel1Var")}
 	VARID ":KResult"	-> KVarDz {cons("KResult12Var")}
-
+	
+	"HOLE"			-> K {cons("K1Hole")}
 
 	":" -> ColonDz {cons("Colon")}
 	"?" -> QuestionMarkDz {cons("QuestionMark")} 
@@ -51,6 +52,7 @@ lexical syntax
 	%% Variables and the Anonymous Variable
 	("$"|"?")?[A-Z] [a-zA-Z0-9\']*  -> VARID
 	"?"?"_" -> VARID
+	"HOLE" -> VARID {reject}
 
 	%% because of the constructors SetItem, BagItem... that can be confused with KApp
 	"ListItem"		-> VARID {reject}
