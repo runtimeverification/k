@@ -13,7 +13,7 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  * resolving a lookup operation during the application a rule, the variables in {@code key} must
  * be already bound, while the variables in {@code key} may be bound by this lookup  operation.
  *
- * @author AndreiS
+ * @author TraianSF  (refactoring from {@link org.kframework.kil.MapLookup})
  */
 public class SetLookup extends BuiltinLookup {
 

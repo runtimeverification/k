@@ -7,11 +7,9 @@ import java.util.Set;
 import static java.util.Collections.emptySet;
 
 /**
- * Created with IntelliJ IDEA.
- * User: Traian
- * Date: 02.07.2013
- * Time: 12:40
- * To change this template use File | Settings | File Templates.
+ * A builtin set
+ *
+ * @author TraianSF
  */
 public class SetBuiltin extends CollectionBuiltin {
     private final Set<Term> removeElements;

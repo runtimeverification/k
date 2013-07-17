@@ -10,7 +10,7 @@ import java.util.*;
 
 /**
  *
- * @author AndreiS
+ * @author TraianSF
  */
 public class SetUpdate extends Term {
 

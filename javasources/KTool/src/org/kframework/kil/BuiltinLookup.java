@@ -1,11 +1,9 @@
 package org.kframework.kil;
 
 /**
- * Created with IntelliJ IDEA.
- * User: Traian
- * Date: 03.07.2013
- * Time: 21:29
- * To change this template use File | Settings | File Templates.
+ * Abstract class for Builtin Lookups
+ *
+ * @author TraianSF
  */
 public abstract class BuiltinLookup extends Term {
     /** {@link org.kframework.kil.Term} representation of a key */
