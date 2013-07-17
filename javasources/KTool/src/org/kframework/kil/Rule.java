@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class Rule extends Sentence {
 
-    private List<MapLookup> lookups = Collections.emptyList();
+    private List<BuiltinLookup> lookups = Collections.emptyList();
 
     public Rule(Element element) {
 		super(element);
@@ -70,11 +70,11 @@ public class Rule extends Sentence {
 		return new Rule(this);
 	}
 
-    public List<MapLookup> getLookups() {
+    public List<BuiltinLookup> getLookups() {
         return lookups;
     }
 
-    public void setLookups(List<MapLookup> lookups) {
+    public void setLookups(List<BuiltinLookup> lookups) {
         this.lookups = lookups;
     }
 }

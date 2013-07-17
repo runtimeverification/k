@@ -51,9 +51,18 @@ public class BuiltinSet extends Collection {
     private final Queue<Operation> operations;
 
     public BuiltinSet(Set<Term> elements) {
-        super(null, Kind.KITEM);
+        this(elements, null);
+    }
+
+    public BuiltinSet(Set<Term> elements, Variable frame) {
+        super(frame, Kind.KITEM);
         this.elements = new HashSet<Term>(elements);
         operations = new ArrayDeque<Operation>();
+    }
+
+
+    public boolean contains(Term key) {
+        return elements.contains(key);
     }
 
     public void add(Term element) {

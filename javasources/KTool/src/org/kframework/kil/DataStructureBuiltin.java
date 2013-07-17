@@ -41,8 +41,11 @@ public abstract class DataStructureBuiltin extends Term {
 
     public static DataStructureBuiltin empty(DataStructureSort sort) {
         if (sort.type().equals(KSorts.BAG)
-                || sort.type().equals(KSorts.LIST)
                 || sort.type().equals(KSorts.SET)) {
+            return new SetBuiltin(sort,
+                    Collections.<Term>emptyList(),
+                    Collections.<Term>emptyList());
+        } else if (sort.type().equals(KSorts.LIST)) {
             return new CollectionBuiltin(sort,
                     Collections.<Term>emptyList(),
                     Collections.<Term>emptyList());
@@ -65,10 +68,16 @@ public abstract class DataStructureBuiltin extends Term {
                     "unexpected number of collection item arguments; expected 1, found "
                     + argument.length;
 
-            return new CollectionBuiltin(
-                    sort,
-                    Collections.singletonList(argument[0]),
-                    Collections.<Term>emptyList());
+            if (sort.type().equals(KSorts.LIST)) {
+                return new CollectionBuiltin(
+                        sort,
+                        Collections.singletonList(argument[0]),
+                        Collections.<Term>emptyList());
+            } else {
+                return new SetBuiltin(sort,
+                        Collections.singletonList(argument[0]),
+                        Collections.<Term>emptyList());
+            }
         } else if (sort.type().equals(KSorts.MAP)) {
             assert argument.length == 2:
                    "unexpected number of map item arguments; expected 2, found " + argument.length;
@@ -109,7 +118,11 @@ public abstract class DataStructureBuiltin extends Term {
                 }
             }
 
-            return new CollectionBuiltin(sort, elements, terms);
+            if (sort.type().equals(KSorts.LIST)) {
+                return new CollectionBuiltin(sort, elements, terms);
+            } else {
+                return new SetBuiltin(sort, elements, terms);
+            }
         } else if (sort.type().equals(KSorts.MAP)) {
             Map<Term, Term> elements = new HashMap<Term, Term>();
             Collection<Term> terms = new ArrayList<Term>();

@@ -63,6 +63,9 @@ public interface Transformer {
     /* AndreiS: needs shallow copy with fields arguments in order to implement */
     // public ASTNode transform(DataStructureBuiltin node) throws TransformerException;
     public ASTNode transform(CollectionBuiltin node) throws TransformerException;
+    public ASTNode transform(SetBuiltin node) throws TransformerException;
+    public ASTNode transform(SetLookup node) throws TransformerException;
+    public ASTNode transform(SetUpdate node) throws TransformerException;
     public ASTNode transform(MapBuiltin node) throws TransformerException;
     public ASTNode transform(MapLookup node) throws TransformerException;
     public ASTNode transform(MapUpdate node) throws TransformerException;

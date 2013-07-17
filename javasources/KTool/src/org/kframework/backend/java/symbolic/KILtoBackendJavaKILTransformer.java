@@ -18,6 +18,7 @@ import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.MapLookup;
+import org.kframework.backend.java.kil.SetLookup;
 import org.kframework.backend.java.kil.MapUpdate;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
@@ -300,11 +301,17 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         }
 
         SymbolicConstraint lookups = new SymbolicConstraint(context);
-        for (org.kframework.kil.MapLookup lookup : node.getLookups()) {
-            Variable map = (Variable) lookup.map().accept(this);
+        for (org.kframework.kil.BuiltinLookup lookup : node.getLookups()) {
+            Variable base = (Variable) lookup.base().accept(this);
             Term key = (Term) lookup.key().accept(this);
-            Term value = (Term) lookup.value().accept(this);
-            lookups.add(new MapLookup(map, key), value);
+            if (lookup instanceof org.kframework.kil.MapLookup) {
+                org.kframework.kil.MapLookup mapLookup = (org.kframework.kil.MapLookup) lookup;
+                Term value = (Term) mapLookup.value().accept(this);
+                lookups.add(new MapLookup(base, key), value);
+            } else {
+                lookups.add(new SetLookup(base, key), BoolToken.TRUE);
+            }
+
         }
 
         assert leftHandSide.kind().equals(rightHandSide.kind());

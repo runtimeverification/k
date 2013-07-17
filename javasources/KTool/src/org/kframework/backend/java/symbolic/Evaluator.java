@@ -1,9 +1,6 @@
 package org.kframework.backend.java.symbolic;
 
-import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.MapLookup;
-import org.kframework.backend.java.kil.MapUpdate;
-import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
 
@@ -25,6 +22,16 @@ public class Evaluator extends CopyOnWriteTransformer {
         }
 
         @Override
+        public ASTNode transform(SetLookup setLookup) {
+            return setLookup.evaluateLookup();
+        }
+
+        @Override
+        public ASTNode transform(SetUpdate mapUpdate) {
+            return mapUpdate.evaluateUpdate();
+        }
+
+         @Override
         public ASTNode transform(MapLookup mapLookup) {
             return mapLookup.evaluateLookup();
         }
@@ -56,6 +63,16 @@ public class Evaluator extends CopyOnWriteTransformer {
     @Override
     public ASTNode transform(MapUpdate mapUpdate) {
         return ((Term) super.transform(mapUpdate)).accept(localEvaluator);
+    }
+
+    @Override
+    public ASTNode transform(SetLookup setLookup) {
+        return ((Term) super.transform(setLookup)).accept(localEvaluator);
+    }
+
+    @Override
+    public ASTNode transform(SetUpdate setUpdate) {
+        return ((Term) super.transform(setUpdate)).accept(localEvaluator);
     }
 
 }

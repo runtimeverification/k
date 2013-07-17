@@ -2,76 +2,7 @@ package org.kframework.kil.visitors;
 
 import java.util.HashSet;
 
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Ambiguity;
-import org.kframework.kil.Attribute;
-import org.kframework.kil.Attributes;
-import org.kframework.kil.BackendTerm;
-import org.kframework.kil.Bag;
-import org.kframework.kil.BagItem;
-import org.kframework.kil.BoolBuiltin;
-import org.kframework.kil.Bracket;
-import org.kframework.kil.Cast;
-import org.kframework.kil.Cell;
-import org.kframework.kil.Collection;
-import org.kframework.kil.CollectionBuiltin;
-import org.kframework.kil.CollectionItem;
-import org.kframework.kil.Configuration;
-import org.kframework.kil.Constant;
-import org.kframework.kil.DataStructureBuiltin;
-import org.kframework.kil.Definition;
-import org.kframework.kil.DefinitionItem;
-import org.kframework.kil.Empty;
-import org.kframework.kil.Freezer;
-import org.kframework.kil.FreezerHole;
-import org.kframework.kil.FreezerLabel;
-import org.kframework.kil.GenericToken;
-import org.kframework.kil.Hole;
-import org.kframework.kil.Import;
-import org.kframework.kil.IntBuiltin;
-import org.kframework.kil.KApp;
-import org.kframework.kil.KInjectedLabel;
-import org.kframework.kil.KLabel;
-import org.kframework.kil.KLabelConstant;
-import org.kframework.kil.KList;
-import org.kframework.kil.KSequence;
-import org.kframework.kil.Lexical;
-import org.kframework.kil.List;
-import org.kframework.kil.ListItem;
-import org.kframework.kil.ListTerminator;
-import org.kframework.kil.LiterateDefinitionComment;
-import org.kframework.kil.LiterateModuleComment;
-import org.kframework.kil.Map;
-import org.kframework.kil.MapBuiltin;
-import org.kframework.kil.MapItem;
-import org.kframework.kil.MapLookup;
-import org.kframework.kil.MapUpdate;
-import org.kframework.kil.Module;
-import org.kframework.kil.ModuleItem;
-import org.kframework.kil.PriorityBlock;
-import org.kframework.kil.PriorityBlockExtended;
-import org.kframework.kil.PriorityExtended;
-import org.kframework.kil.PriorityExtendedAssoc;
-import org.kframework.kil.Production;
-import org.kframework.kil.ProductionItem;
-import org.kframework.kil.Require;
-import org.kframework.kil.Restrictions;
-import org.kframework.kil.Rewrite;
-import org.kframework.kil.Rule;
-import org.kframework.kil.Sentence;
-import org.kframework.kil.Set;
-import org.kframework.kil.SetItem;
-import org.kframework.kil.Sort;
-import org.kframework.kil.StringBuiltin;
-import org.kframework.kil.StringSentence;
-import org.kframework.kil.Syntax;
-import org.kframework.kil.Term;
-import org.kframework.kil.TermComment;
-import org.kframework.kil.TermCons;
-import org.kframework.kil.Terminal;
-import org.kframework.kil.Token;
-import org.kframework.kil.UserList;
-import org.kframework.kil.Variable;
+import org.kframework.kil.*;
 
 public class BasicVisitor implements Visitor {
 	protected org.kframework.kil.loader.Context context;
@@ -437,7 +368,41 @@ public class BasicVisitor implements Visitor {
 		visit((DataStructureBuiltin) node);
 	}
 
-	@Override
+    @Override
+    public void visit(SetBuiltin node) {
+		if (isVisited(node))
+			return;
+		for (Term entry : node.elements()) {
+			entry.accept(this);
+		}
+
+		visit((DataStructureBuiltin) node);
+    }
+
+    @Override
+    public void visit(SetLookup node) {
+		if (isVisited(node))
+			return;
+		node.base().accept(this);
+		node.key().accept(this);
+		visit((Term) node);
+    }
+
+    @Override
+    public void visit(SetUpdate node) {
+		if (isVisited(node))
+			return;
+		node.set().accept(this);
+		for (Term entry : node.removeEntries()) {
+			entry.accept(this);
+		}
+		for (Term entry : node.updateEntries()) {
+			entry.accept(this);
+		}
+		visit((Term) node);
+    }
+
+    @Override
 	public void visit(MapBuiltin node) {
 		if (isVisited(node))
 			return;
@@ -453,7 +418,7 @@ public class BasicVisitor implements Visitor {
 	public void visit(MapLookup node) {
 		if (isVisited(node))
 			return;
-		node.map().accept(this);
+		node.base().accept(this);
 		node.key().accept(this);
 		node.value().accept(this);
 		visit((Term) node);

@@ -8,25 +8,17 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 
 
 /**
- * Builtin map lookup operation. The operation has the form {@code value := map[key]} with
- * the semantics that {@code map} contains an entry matching the form {@code key |-> value}. When
+ * Builtin set lookup operation. The operation has the form {@code key := set[key]} with
+ * the semantics that {@code set} contains an entry matching the form {@code key |-> key}. When
  * resolving a lookup operation during the application a rule, the variables in {@code key} must
- * be already bound, while the variables in {@code value} may be bound by this lookup  operation.
+ * be already bound, while the variables in {@code key} may be bound by this lookup  operation.
  *
  * @author AndreiS
  */
-public class MapLookup extends BuiltinLookup {
+public class SetLookup extends BuiltinLookup {
 
-    /** {@link Term} representation of the value */
-    private final Term value;
-
-    public MapLookup(Variable base, Term key, Term value) {
-        super(base,key);
-        this.value = value;
-    }
-
-    public Term value() {
-        return value;
+    public SetLookup(Variable base, Term key) {
+        super(base, key);
     }
 
     @Override
@@ -39,7 +31,6 @@ public class MapLookup extends BuiltinLookup {
         int hash = 1;
         hash = hash * Context.HASH_PRIME + base().hashCode();
         hash = hash * Context.HASH_PRIME + key().hashCode();
-        hash = hash * Context.HASH_PRIME + value.hashCode();
         return hash;
     }
 
@@ -49,13 +40,12 @@ public class MapLookup extends BuiltinLookup {
             return true;
         }
 
-        if (!(object instanceof MapLookup)) {
+        if (!(object instanceof SetLookup)) {
             return false;
         }
 
-        MapLookup mapLookup = (MapLookup) object;
-        return base().equals(mapLookup.base()) && key().equals(mapLookup.key())
-               && value.equals(mapLookup.value);
+        SetLookup mapLookup = (SetLookup) object;
+        return base().equals(mapLookup.base()) && key().equals(mapLookup.key());
     }
 
     @Override

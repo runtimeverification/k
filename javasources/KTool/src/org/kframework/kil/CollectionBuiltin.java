@@ -26,6 +26,15 @@ public class CollectionBuiltin extends DataStructureBuiltin {
         this.elements = elements;
     }
 
+    public static CollectionBuiltin of(DataStructureSort sort,
+                                       Collection<Term> elements,
+                                       Collection<Term> terms) {
+        if (sort.type().equals(KSorts.LIST)) {
+            return new CollectionBuiltin(sort, elements, terms);
+        }
+        return new SetBuiltin(sort, elements, terms);
+    }
+
     public Collection<Term> elements() {
         return Collections.unmodifiableCollection(elements);
     }

@@ -2,47 +2,15 @@ package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.MaudeHelper;
 import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Attributes;
-import org.kframework.kil.BoolBuiltin;
-import org.kframework.kil.Cell;
+import org.kframework.kil.*;
 import org.kframework.kil.Collection;
-import org.kframework.kil.CollectionItem;
-import org.kframework.kil.Constant;
-import org.kframework.kil.Empty;
-import org.kframework.kil.FloatBuiltin;
-import org.kframework.kil.Freezer;
-import org.kframework.kil.FreezerLabel;
-import org.kframework.kil.IntBuiltin;
-import org.kframework.kil.KApp;
-import org.kframework.kil.KInjectedLabel;
-import org.kframework.kil.KLabel;
-import org.kframework.kil.KLabelConstant;
-import org.kframework.kil.KList;
-import org.kframework.kil.KSequence;
-import org.kframework.kil.KSorts;
-import org.kframework.kil.MapBuiltin;
-import org.kframework.kil.MapItem;
-import org.kframework.kil.Module;
-import org.kframework.kil.Production;
-import org.kframework.kil.ProductionItem;
-import org.kframework.kil.Sort;
-import org.kframework.kil.StringBuiltin;
-import org.kframework.kil.Syntax;
-import org.kframework.kil.Term;
-import org.kframework.kil.TermCons;
-import org.kframework.kil.Terminal;
-import org.kframework.kil.UserList;
-import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.K;
 import org.kframework.utils.general.GlobalSettings;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
+import java.util.*;
 import java.util.List;
 import java.util.Set;
 
@@ -263,6 +231,30 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 		public ASTNode transform(MapItem node) throws TransformerException {
 			return KApp.of(new KInjectedLabel((Term) node.accept(trans)));
 		}
+
+        @Override
+        public ASTNode transform(CollectionBuiltin node) throws TransformerException {
+            /* just for LHS for now */
+            assert  (node.isLHSView() || node.isElementCollection());
+
+            LinkedHashSet<Term> elements = new LinkedHashSet<Term>(node.elements().size());
+            for (Term term : node.elements()) {
+                Term transformedTerm = (Term) term.accept(trans);
+                elements.add(transformedTerm);
+            }
+
+            ArrayList<Term> terms = new ArrayList<Term>(node.baseTerms().size());
+            if (node.isLHSView()) {
+                Variable frame = node.viewBase();
+                frame.setSort(node.sort().type());
+                terms.add(frame);
+            }
+
+            return KApp.of(new KInjectedLabel(CollectionBuiltin.of(
+                    node.sort(),
+                    elements,
+                    terms)));
+        }
 
         @Override
         public ASTNode transform(MapBuiltin node) throws TransformerException {

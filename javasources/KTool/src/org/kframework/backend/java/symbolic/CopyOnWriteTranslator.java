@@ -1,4 +1,4 @@
-package org.kframework.kil.visitors;
+package org.kframework.backend.java.symbolic;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,11 +15,11 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
 
-public class CopyOnWriteTransformer implements Transformer {
+public class CopyOnWriteTranslator implements org.kframework.kil.visitors.Transformer {
 	String name;
 	protected Context context;
 
-	public CopyOnWriteTransformer(String name, Context context) {
+	public CopyOnWriteTranslator(String name, Context context) {
 		this.name = name;
 		this.context = context;
 	}
@@ -365,7 +365,7 @@ public class CopyOnWriteTransformer implements Transformer {
 	}
 
 	@Override
-	public ASTNode transform(Bag node) throws TransformerException {
+	public ASTNode transform(org.kframework.kil.Bag node) throws TransformerException {
 		return transform((Collection) node);
 	}
 

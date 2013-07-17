@@ -1,29 +1,9 @@
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.kil.BuiltinMap;
-import org.kframework.backend.java.kil.BuiltinSet;
-import org.kframework.backend.java.kil.Cell;
-import org.kframework.backend.java.kil.CellCollection;
-import org.kframework.backend.java.kil.Collection;
+import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.kil.ConstrainedTerm;
-import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.kil.Hole;
-import org.kframework.backend.java.kil.KLabelFreezer;
-import org.kframework.backend.java.kil.KLabelInjection;
-import org.kframework.backend.java.kil.KCollection;
-import org.kframework.backend.java.kil.KLabel;
-import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.KSequence;
-import org.kframework.backend.java.kil.MapLookup;
-import org.kframework.backend.java.kil.MapUpdate;
-import org.kframework.backend.java.kil.MetaVariable;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.builtins.UninterpretedToken;
-import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
 
@@ -338,6 +318,72 @@ public class CopyOnWriteTransformer implements Transformer {
         }
 
         return mapUpdate;
+    }
+
+    @Override
+    public ASTNode transform(SetUpdate setUpdate) {
+        Term set = (Term) setUpdate.base().accept(this);
+
+        java.util.Set<Term> removeSet = null;
+        for(Term key : setUpdate.removeSet()) {
+            Term transformedKey = (Term) key.accept(this);
+
+            if (removeSet == null && transformedKey != key) {
+                removeSet = new HashSet<Term>(setUpdate.removeSet().size());
+                for(Term copyKey : setUpdate.removeSet()) {
+                    if (copyKey == key) {
+                        break;
+                    }
+                    removeSet.add(copyKey);
+                }
+            }
+
+            if (removeSet != null) {
+                removeSet.add(transformedKey);
+            }
+        }
+        if (removeSet == null) {
+            removeSet = setUpdate.removeSet();
+        }
+
+        java.util.Set<Term> updateSet = null;
+        for(Term key : setUpdate.updateSet()) {
+            Term transformedKey = (Term) key.accept(this);
+
+            if (updateSet == null && transformedKey != key) {
+                updateSet = new HashSet<Term>(setUpdate.updateSet().size());
+                for(Term copyKey : setUpdate.updateSet()) {
+                    if (copyKey.equals(key)) {
+                        break;
+                    }
+                    updateSet.add(copyKey);
+                }
+            }
+
+            if (updateSet != null) {
+                updateSet.add(transformedKey);
+            }
+        }
+        if (updateSet == null) {
+            updateSet = setUpdate.updateSet();
+        }
+
+        if (set != setUpdate.base() || removeSet != setUpdate.removeSet()
+                || setUpdate.updateSet() != updateSet) {
+            setUpdate = new SetUpdate(set, removeSet, updateSet);
+        }
+
+        return setUpdate;
+    }
+
+    @Override
+    public ASTNode transform(SetLookup setLookup) {
+        Term base = (Term) setLookup.base().accept(this);
+        Term key = (Term) setLookup.key().accept(this);
+        if (base != setLookup.base() || key != setLookup.key()) {
+            setLookup = new SetLookup(base, key);
+        }
+        return setLookup;
     }
 
     @Override

@@ -1,12 +1,7 @@
 package org.kframework.backend.java.symbolic;
 
 import com.google.common.collect.ImmutableList;
-import org.kframework.backend.java.kil.BuiltinMap;
-import org.kframework.backend.java.kil.KCollectionFragment;
-import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.KSequence;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.kil.*;
 import org.kframework.kil.loader.Context;
 
 import java.util.HashMap;
@@ -90,6 +85,31 @@ public class SubstitutionTransformer extends CopyOnWriteTransformer {
                     new BuiltinMap(entries, ((BuiltinMap) term).frame()) : new BuiltinMap(entries);
             boundVariables.remove(builtinMap.frame());
             return returnMap;
+        }
+
+        throw new RuntimeException();
+    }
+
+     @Override
+    public BuiltinSet transform(BuiltinSet builtinSet) {
+        if (!builtinSet.hasFrame() || boundVariables.contains(builtinSet.frame())) {
+            return (BuiltinSet) super.transform(builtinSet);
+        }
+
+        Term term = substitution.get(builtinSet.frame());
+        if (term == null || term instanceof Variable) {
+            return (BuiltinSet) super.transform(builtinSet);
+        }
+
+        if (term instanceof BuiltinSet) {
+            boundVariables.add(builtinSet.frame());
+            HashSet<Term> elements = new HashSet<Term>(
+                    ((BuiltinSet) super.transform(builtinSet)).elements());
+            elements.addAll(((BuiltinSet) term).elements());
+            BuiltinSet returnSet = ((BuiltinSet) term).hasFrame() ?
+                    new BuiltinSet(elements, ((BuiltinSet) term).frame()) : new BuiltinSet(elements);
+            boundVariables.remove(builtinSet.frame());
+            return returnSet;
         }
 
         throw new RuntimeException();

@@ -296,7 +296,38 @@ public class BasicTransformer implements Transformer {
             elements.add(transformedTerm);
         }
 
-        return new CollectionBuiltin(node.sort(), elements, terms);
+        return CollectionBuiltin.of(node.sort(), elements, terms);
+    }
+
+    @Override
+    public ASTNode transform(SetBuiltin node) throws TransformerException {
+        return transform((CollectionBuiltin) node);
+    }
+
+    @Override
+    public ASTNode transform(SetLookup node) throws TransformerException {
+        Variable set = (Variable) node.base().accept(this);
+        Term value = (Term) node.key().accept(this);
+        return new SetLookup(set, value);
+    }
+
+    @Override
+    public ASTNode transform(SetUpdate node) throws TransformerException {
+        Variable set = (Variable) node.set().accept(this);
+
+        HashSet<Term> removeEntries = new HashSet<Term>(node.removeEntries().size());
+        for (Term term : node.removeEntries()) {
+            Term transformedTerm = (Term) term.accept(this);
+            removeEntries.add(transformedTerm);
+        }
+
+        HashSet<Term> updateEntries = new HashSet<Term>(node.updateEntries().size());
+        for (Term term : node.updateEntries()) {
+            Term transformedTerm = (Term) term.accept(this);
+            updateEntries.add(transformedTerm);
+        }
+
+        return new SetUpdate(set, removeEntries, updateEntries);
     }
 
     @Override
@@ -319,7 +350,7 @@ public class BasicTransformer implements Transformer {
 
     @Override
     public ASTNode transform(MapLookup node) throws TransformerException {
-        Variable map = (Variable) node.map().accept(this);
+        Variable map = (Variable) node.base().accept(this);
         Term key = (Term) node.key().accept(this);
         Term value = (Term) node.value().accept(this);
         return new MapLookup(map, key, value);

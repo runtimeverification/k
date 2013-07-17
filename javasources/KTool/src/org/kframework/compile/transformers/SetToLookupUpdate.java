@@ -1,55 +1,53 @@
 package org.kframework.compile.transformers;
 
 import org.kframework.kil.*;
+import org.kframework.kil.Collection;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 
 /**
- * Transformer class compiling map accesses into lookup and update operations.
+ * Transformer class compiling Set accesses into lookup and update operations.
  *
- * @see MapLookup
- * @see MapUpdate
+ * @see org.kframework.kil.SetLookup
+ * @see org.kframework.kil.SetUpdate
  *
  * @author AndreiS
  */
-public class MapToLookupUpdate extends CopyOnWriteTransformer {
+public class SetToLookupUpdate extends CopyOnWriteTransformer {
 
-    private class ExtendedMapLookup extends MapLookup {
+    private class ExtendedSetLookup extends SetLookup {
         public Set<Variable> variables;
 
-        ExtendedMapLookup(Term key, Term value, Variable map) {
-            super(map, key, value);
-            variables = key.variables();
+        ExtendedSetLookup(Term value, Variable set) {
+            super(set, value);
+            variables = value.variables();
         }
     }
 
     private enum Status {LHS, RHS, CONDITION }
 
-    private Map<Variable, MapUpdate> reverseMap = new HashMap<Variable, MapUpdate>();
-    private ArrayList<ExtendedMapLookup> queue = new ArrayList<ExtendedMapLookup>();
+    private Map<Variable, SetUpdate> reverseMap = new HashMap<Variable, SetUpdate>();
+    private ArrayList<ExtendedSetLookup> queue = new ArrayList<ExtendedSetLookup>();
     private Status status;
 
-    public MapToLookupUpdate(Context context) {
-        super("Compile maps into load and store operations", context);
+    public SetToLookupUpdate(Context context) {
+        super("Compile sets into lookup and store operations", context);
     }
 
     @Override
     public ASTNode transform(Rule node) throws TransformerException {
         assert node.getBody() instanceof Rewrite:
                "expected rewrite at the top of rule " + node + ". "
-               + "MapToLookupUpdate pass should be applied after ResolveRewrite pass.";
+               + "SetToLookupUpdate pass should be applied after ResolveRewrite pass.";
 
         reverseMap.clear();
         queue.clear();
@@ -58,10 +56,10 @@ public class MapToLookupUpdate extends CopyOnWriteTransformer {
         status = Status.LHS;
         Term lhs = (Term) rewrite.getLeft().accept(this);
 
-        List<BuiltinLookup> lookups = new ArrayList<BuiltinLookup>(node.getLookups());
+        List<BuiltinLookup> lookups = node.getLookups();
+        if (lookups == null) lookups = new ArrayList<BuiltinLookup>();
 
-
-        for (ExtendedMapLookup item : queue) {
+        for (ExtendedSetLookup item : queue) {
             item.variables.removeAll(lhs.variables());
         }
 
@@ -71,22 +69,22 @@ public class MapToLookupUpdate extends CopyOnWriteTransformer {
             for (int i = 0; i < queue.size(); ++i) {
                 if (queue.get(i).variables.isEmpty()) {
                     change = true;
-                    MapLookup lookup = queue.remove(i);
-                    lookups.add(new MapLookup(lookup.base(), lookup.key(), lookup.value()));
+                    SetLookup lookup = queue.remove(i);
+                    lookups.add(new SetLookup(lookup.base(), lookup.key()));
 
-                    for (ExtendedMapLookup extendedLookup : queue) {
-                        extendedLookup.variables.removeAll(lookup.value().variables());
+                    for (ExtendedSetLookup extendedLookup : queue) {
+                        extendedLookup.variables.removeAll(lookup.key().variables());
                     }
                 }
             }
         } while (change);
 
         if (!queue.isEmpty()) {
-            /* TODO(AndreiS): handle iteration over maps */
+            /* TODO(AndreiS): handle iteration over sets */
             GlobalSettings.kem.register(new KException(
                     KException.ExceptionType.WARNING,
                     KException.KExceptionGroup.CRITICAL,
-                    "Unsupported map pattern in the rule left-hand side",
+                    "Unsupported set pattern in the rule left-hand side",
                     node.getFilename(),
                     node.getLocation()));
             return node;
@@ -116,8 +114,8 @@ public class MapToLookupUpdate extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(MapBuiltin node) throws TransformerException {
-        node = (MapBuiltin) super.transform(node);
+    public ASTNode transform(SetBuiltin node) throws TransformerException {
+        node = (SetBuiltin) super.transform(node);
         if (status == Status.LHS) {
             assert node.isLHSView();
 
@@ -132,53 +130,49 @@ public class MapToLookupUpdate extends CopyOnWriteTransformer {
 
             Variable variable = Variable.getFreshVar(node.sort().name());
             if (node.hasViewBase()) {
-                /* TODO(AndreiS): check the uniqueness of map variables in the LHS */
+                /* TODO(AndreiS): check the uniqueness of set variables in the LHS */
                 reverseMap.put(
                         node.viewBase(),
-                        new MapUpdate(variable, node.elements(), Collections.<Term, Term>emptyMap()));
+                        new SetUpdate(variable, node.elements(), Collections.<Term>emptySet()));
             }
-            for (Map.Entry<Term, Term> entry : node.elements().entrySet()) {
-                queue.add(new ExtendedMapLookup(entry.getKey(), entry.getValue(), variable));
+            for (Term term : node.elements()) {
+                queue.add(new ExtendedSetLookup(term, variable));
             }
             return variable;
         } else {
             /* status == Status.RHS || status == Status.CONDITION */
             List<Term> baseTerms = new ArrayList<Term>();
-            Map<Term, Term> elements = new HashMap<Term, Term>(node.elements());
+            java.util.Collection<Term> elements = new ArrayList<Term>(node.elements());
             for (Term term : node.baseTerms()) {
-                if (!(term instanceof MapUpdate)) {
+                if (!(term instanceof SetUpdate)) {
                     baseTerms.add(term);
                     continue;
                 }
-                MapUpdate mapUpdate = (MapUpdate) term;
+                SetUpdate setUpdate = (SetUpdate) term;
 
-                Map<Term, Term> removeEntries = new HashMap<Term, Term>();
-                Map<Term, Term> updateEntries = new HashMap<Term, Term>();
-                for (Map.Entry<Term, Term> entry : mapUpdate.removeEntries().entrySet()) {
-                    if (elements.containsKey(entry.getKey())) {
-                        if (elements.get(entry.getKey()).equals(entry.getValue())) {
-                            elements.remove(entry.getKey());
-                        } else {
-                            updateEntries.put(entry.getKey(), elements.remove(entry.getKey()));
-                        }
+                java.util.Collection<Term> removeEntries = new ArrayList<Term>();
+                java.util.Collection<Term> updateEntries = new ArrayList<Term>();
+                for (Term key : setUpdate.removeEntries()) {
+                    if (elements.contains(key)) {
+                        elements.remove(key);
                     } else {
-                        removeEntries.put(entry.getKey(), entry.getValue());
+                        removeEntries.add(key);
                     }
                 }
 
                 if (removeEntries.isEmpty() && updateEntries.isEmpty()) {
-                    baseTerms.add(mapUpdate.map());
+                    baseTerms.add(setUpdate.set());
                 } else {
-                    baseTerms.add(new MapUpdate(mapUpdate.map(), removeEntries, updateEntries));
+                    baseTerms.add(new SetUpdate(setUpdate.set(), removeEntries, updateEntries));
                 }
             }
 
             if (baseTerms.size() == 1 && elements.isEmpty()) {
-                /* if the MapBuiltin instance consists of only one base term,
+                /* if the SetBuiltin instance consists of only one base term,
                  * return the base term instead */
                 return baseTerms.get(0);
             } else {
-                return new MapBuiltin(node.sort(), elements, baseTerms);
+                return new SetBuiltin(node.sort(), elements, baseTerms);
             }
         }
     }
