@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.kframework.compile.transformers.AddPredicates;
-import org.kframework.kil.loader.*;
+import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
@@ -122,7 +122,7 @@ public class KLabelConstant extends KLabel {
 	@SuppressWarnings("unchecked")
 	public KLabelConstant(ATermAppl atm) {
 		super(atm);
-		label = StringUtil.unescapeMaude(atm.getName());
+		label = StringUtil.unescapeMaude(((ATermAppl) atm.getArgument(0)).getName());
 		productions = (List<Production>) Collections.EMPTY_LIST;
 	}
 

@@ -102,6 +102,10 @@ public class ParseRulesFilter extends BasicTransformer {
 					int startLine = StringUtil.getStartLineFromLocation(ss.getLocation());
 					int startCol = StringUtil.getStartColFromLocation(ss.getLocation());
 					config.accept(new UpdateLocationVisitor(context, startLine, startCol));
+
+					((Sentence) config).setLabel(ss.getLabel());
+					//assert st.getAttributes() == null || st.getAttributes().isEmpty(); // attributes should have been parsed in Basic Parsing
+					((Sentence) config).setAttributes(ss.getAttributes());
 				} else {
 					String parsed = null;
 					if (ss.getAttributes().containsAttribute("kore")) {
@@ -134,7 +138,7 @@ public class ParseRulesFilter extends BasicTransformer {
 					st.setAttributes(ss.getAttributes());
 				}
 				// disambiguate rules
-				if (config.getFilename().endsWith("test.k\"")) {
+				if (config.getFilename().endsWith("test.k")) {
 					// this is just for testing. I put a breakpoint on the next line so I can get faster to the rule that I'm interested in
 					int a = 1;
 					a = a + 1;

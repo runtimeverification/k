@@ -72,7 +72,8 @@ public class ParseConfigsFilter extends BasicTransformer {
 					config = new Configuration(st);
 					int startLine = StringUtil.getStartLineFromLocation(ss.getLocation());
 					int startCol = StringUtil.getStartColFromLocation(ss.getLocation());
-					config.accept(new UpdateLocationVisitor(context, startLine, startCol));
+					((Sentence) config).accept(new UpdateLocationVisitor(context, startLine, startCol));
+					((Sentence) config).setAttributes(ss.getAttributes());
 				} else {
 					String parsed = null;
 					if (ss.getAttributes().containsAttribute("kore")) {
