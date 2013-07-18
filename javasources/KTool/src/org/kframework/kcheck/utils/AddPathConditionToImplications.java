@@ -46,6 +46,7 @@ public class AddPathConditionToImplications extends CopyOnWriteTransformer {
 			List<Variable> fresh = new ArrayList<Variable>();
 			for(Variable v : vvpi.getVariables()) {
 				if (!AddCircularityRules.varInList(v, vvpiprime.getVariables())) {
+					System.out.println("Adding " + v);
 					fresh.add(v);
 				}
 			}
@@ -72,18 +73,18 @@ public class AddPathConditionToImplications extends CopyOnWriteTransformer {
             Cell rightCell = new Cell();
             rightCell.setLabel(MetaK.Constants.pathCondition);
             rightCell.setEllipses(Ellipses.NONE);
-            rightCell.setContents(KApp.of(KLabelConstant.ANDBOOL_KLABEL, psi, ep.getPhiPrime()));
+            rightCell.setContents(KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, psi, ep.getPhiPrime()));
 			right = AddConditionToConfig.addSubcellToCell((Cell)right, rightCell);
 
 			// condition
-			Term implication = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, psi, KApp.of(KLabelConstant.NOTBOOL_KLABEL, ep.getPhi()));
+			Term implication = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, psi, KApp.of(KLabelConstant.NOTBOOL_KLABEL, ep.getPhiPrime()));
 			KApp unsat = StringBuiltin.kAppOf("unsat");
 	        KApp checkSat = KApp.of(KLabelConstant.of("'checkSat", context), implication);
 	        implication = KApp.of(KLabelConstant.KEQ_KLABEL, checkSat, unsat);
 			
 	        // return new rule
 			Rule newRule = new Rule(left, right, context);
-			newRule.setCondition(KApp.of(KLabelConstant.ANDBOOL_KLABEL, cnd.shallowCopy(), implication));
+			newRule.setCondition(KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, cnd.shallowCopy(), implication));
 			newRule.setAttributes(node.getAttributes().shallowCopy());
 			
 			newRule = (Rule) newRule.accept(new MakeFreshVariables(context, fresh));

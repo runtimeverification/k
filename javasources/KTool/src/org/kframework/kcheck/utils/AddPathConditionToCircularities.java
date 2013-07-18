@@ -12,7 +12,6 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
-import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
@@ -53,19 +52,19 @@ public class AddPathConditionToCircularities extends CopyOnWriteTransformer {
             Cell rightCell = new Cell();
             rightCell.setLabel(MetaK.Constants.pathCondition);
             rightCell.setEllipses(Ellipses.NONE);
-            rightCell.setContents(KApp.of(KLabelConstant.ANDBOOL_KLABEL, psi, ep.getPhi(), ep.getPhiPrime()));
+            rightCell.setContents(KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, psi, ep.getPhi()), ep.getPhiPrime()));
 			right = AddConditionToConfig.addSubcellToCell((Cell)right, rightCell);
 
 			// condition
-			Term implication = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, psi, KApp.of(KLabelConstant.NOTBOOL_KLABEL, ep.getPhi()));
-			KApp unsat = StringBuiltin.kAppOf("unsat");
-	        KApp checkSat = KApp.of(KLabelConstant.of("'checkSat", context), implication);
-	        implication = KApp.of(KLabelConstant.KEQ_KLABEL, checkSat, unsat);
-	        Term pc = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, psi, ep.getPhiPrime());
+//			Term implication = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, psi, KApp.of(KLabelConstant.NOTBOOL_KLABEL, ep.getPhi()));
+//			KApp unsat = StringBuiltin.kAppOf("unsat");
+//	        KApp checkSat = KApp.of(KLabelConstant.of("'checkSat", context), implication);
+//	        implication = KApp.of(KLabelConstant.KEQ_KLABEL, checkSat, unsat);
+	        Term pc = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, psi, ep.getPhi()), ep.getPhiPrime());
 			pc = AddPathCondition.checkSat(pc, context);
 			
 			Rule newRule = new Rule(left, right, context);
-			cnd = KApp.of(KLabelConstant.ANDBOOL_KLABEL, cnd, implication, pc);
+			cnd = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, cnd, pc);
 			newRule.setCondition(cnd);
 			newRule.setAttributes(node.getAttributes().shallowCopy());
 			return newRule;

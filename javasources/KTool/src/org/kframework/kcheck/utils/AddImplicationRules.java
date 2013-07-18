@@ -2,12 +2,12 @@ package org.kframework.kcheck.utils;
 
 import java.util.List;
 
-import org.kframework.compile.transformers.AddSymbolicK;
 import org.kframework.kcheck.RLBackend;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.BoolBuiltin;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
-import org.kframework.kil.KList;
+import org.kframework.kil.KSequence;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Rule;
@@ -45,13 +45,13 @@ public class AddImplicationRules extends CopyOnWriteTransformer {
 
 				
 				Term newPi = parser.getPi_prime().shallowCopy();
-				Term implies = getFreshImplication(reachabilityRules.indexOf(rr), context);
+				Term implies = AddCheckConstants.getFreshImplicationForRule(reachabilityRules.indexOf(rr), context);
 				SetCellContent app = new SetCellContent(context, implies, "k");
 				newPi = (Term) newPi.accept(app);
 
 				
 				Term newPiPrime = parser.getPi_prime().shallowCopy();
-				SetCellContent appPrime = new SetCellContent(context, KList.EMPTY, "k");
+				SetCellContent appPrime = new SetCellContent(context, KSequence.EMPTY, "k");
 				newPiPrime = (Term) newPiPrime.accept(appPrime);
 				
 				// insert patternless formulas into condition
@@ -59,7 +59,7 @@ public class AddImplicationRules extends CopyOnWriteTransformer {
 				Term phiPrime = parser.getPhi_prime().shallowCopy();
 				Term rrcond = KApp.of(KLabelConstant.of(RLBackend.INTERNAL_KLABEL, context), phi, phiPrime); 
 				
-				Term condition = KApp.of(KLabelConstant.ANDBOOL_KLABEL, rrcond);
+				Term condition = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, rrcond, BoolBuiltin.TRUE);
 				
 				Rule implicationRule = new Rule(newPi, newPiPrime, context);
 				implicationRule.setCondition(condition);
@@ -71,9 +71,5 @@ public class AddImplicationRules extends CopyOnWriteTransformer {
 		}
 		
 		return node;
-	}
-
-	public static Term getFreshImplication(int indexOf, Context context) {
-		return new AddSymbolicK(context).freshSymSortId("#Id", "implies" + indexOf); 
 	}
 }

@@ -67,6 +67,7 @@ import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.InitializeConfigurationStructure;
 import org.kframework.compile.utils.RuleCompilerSteps;
+import org.kframework.kcheck.utils.AddCheckConstants;
 import org.kframework.kcheck.utils.AddCircularityRules;
 import org.kframework.kcheck.utils.AddImplicationRules;
 import org.kframework.kcheck.utils.AddPathConditionToCircularities;
@@ -93,6 +94,7 @@ import org.kframework.utils.general.GlobalSettings;
 
 public class RLBackend  extends BasicBackend implements Backend{
 
+	public static int idx = 5000;
 	List<ASTNode> reachabilityRules = null;
 	public static final String INTERNAL_KLABEL = "rrcondition"; 
 	List<Term> programs;
@@ -152,7 +154,7 @@ public class RLBackend  extends BasicBackend implements Backend{
 		
 		 String unparsedText = unparserFilter.getResult();
 		
-		System.out.println(unparsedText);
+//		System.out.println(unparsedText);
 //		 System.exit(1);
 		
 
@@ -192,13 +194,13 @@ public class RLBackend  extends BasicBackend implements Backend{
 		
 		for (Term pgm: programs) {
 			try {
-				System.out.println("Execute: " + pgm);
+//				System.out.println("Execute: " + pgm);
 				
 				
 //				System.out.println("SENT: " + javaDef);
 				RuleCompilerSteps steps = new RuleCompilerSteps(javaDef, context);
 				KRunResult<SearchResults> result = mkr.search(null, null, SearchType.FINAL, defaultPattern, pgm, steps);
-				System.out.println("Result: " + result + "\n\n");
+//				System.out.println("Result: " + result + "\n\n");
 			} catch (KRunExecutionException e) {
 				e.printStackTrace();
 			}
@@ -247,6 +249,7 @@ public class RLBackend  extends BasicBackend implements Backend{
 
 		ResolveRLFile rl = new ResolveRLFile(context);
 		reachabilityRules = rl.getReachabilityRules();
+		steps.add(new AddCheckConstants(context, reachabilityRules.size()));
 		steps.add(new AddCircularityRules(context, reachabilityRules));
 		steps.add(new AddImplicationRules(context, reachabilityRules));
 		

@@ -28,8 +28,6 @@ public class GeneratePrograms extends BasicTransformer {
 	public ASTNode transform(Rule node) throws TransformerException {
 		
 		if(node.getAttribute(AddCircularityRules.RRULE_ATTR)!= null && (node.getBody() instanceof Rewrite)) {
-
-			System.out.println("IN");
 			
 			Rewrite rewrite = (Rewrite) node.getBody();
 			int rIndex = Integer.parseInt(node.getAttribute(AddCircularityRules.RRULE_ATTR));
@@ -43,7 +41,6 @@ public class GeneratePrograms extends BasicTransformer {
 			Term cnd = node.getCondition().shallowCopy();
 			ExtractPatternless ep = new ExtractPatternless(context, true);
 			cnd = (Term) cnd.accept(ep);
-
 			
 			// create the new rule
 			Term left = rewrite.getLeft();
@@ -67,13 +64,11 @@ public class GeneratePrograms extends BasicTransformer {
 			newRule.setCondition(cnd);
 			newRule.setAttributes(node.getAttributes().shallowCopy());
 			
-
-			
 			// get program without the first label
 			Term newPgm = left.shallowCopy();
 			
 			// create implication term
-			Term implies = AddImplicationRules.getFreshImplication(rIndex, context);
+			Term implies = AddCheckConstants.getFreshImplicationForPgm(rIndex, context);
 			
 			// set PGM ~> implies in the <k> cell
 			List<Term> cnt = new ArrayList<Term>();
@@ -89,8 +84,10 @@ public class GeneratePrograms extends BasicTransformer {
 			
 			// generate fresh symbolic variables
 			VariablesVisitor vvleft = new VariablesVisitor(context);
-			newPgm.accept(vvleft);
+			parser.getPi().accept(vvleft);
 
+//			System.out.println("VARIABLES: " + vvleft.getVariables());
+			
 //			System.out.println("PI: " + newPi);
 			MakeFreshVariables mfv = new MakeFreshVariables(context, vvleft.getVariables());
 			newPgm = (Term) newPgm.accept(mfv);

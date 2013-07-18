@@ -6,9 +6,9 @@ import java.util.List;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kcheck.RLBackend;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.BoolBuiltin;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
-import org.kframework.kil.KList;
 import org.kframework.kil.KSequence;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
@@ -79,19 +79,26 @@ public class AddCircularityRules extends CopyOnWriteTransformer {
 				
 				// fresh variables
 				VariablesVisitor vvleft = new VariablesVisitor(context);
-				newPi.accept(vvleft);
+				parser.getPi().accept(vvleft);
 				
+//				System.out.println("CFG VARS: " + vvleft.getVariables());
+//				System.out.println("FROM: " + parser.getPi());
+//				
 				VariablesVisitor vvright = new VariablesVisitor(context);
-				newPiPrime.accept(vvright);
+				parser.getPi_prime().accept(vvright);
 				
-				
+//				System.out.println("CFG' VARS: " + vvright.getVariables());
+//				System.out.println("FROM: " + parser.getPi_prime());
+//				
 				List<Term> fresh = new ArrayList<Term>();
 				
 				for(Variable v : vvright.getVariables()){
 					if (!varInList(v, vvleft.getVariables())){
 						List<Term> vlist = new ArrayList<Term>();
 						vlist.add(v);
+//						System.out.println("Generate fresh "  + v);
 						fresh.add(new TermCons(v.getSort(), MetaK.Constants.freshCons, vlist, context));
+//						fresh.add(KApp.of(KLabelConstant.of(AddSymbolicK.symbolicConstructor(v.getSort())), Token.kAppOf("#Id", v.getName())));
 					}
 				}
 
@@ -101,7 +108,8 @@ public class AddCircularityRules extends CopyOnWriteTransformer {
 				Term rrcond = KApp.of(KLabelConstant.of(RLBackend.INTERNAL_KLABEL, context), phi, phiPrime); 
 				fresh.add(rrcond);
 				
-				Term condition = KApp.of(KLabelConstant.ANDBOOL_KLABEL, new KList(fresh));
+//				Term condition = KApp.of(KLabelConstant.ANDBOOL_KLABEL, new KList(fresh));
+				Term condition = andBool(fresh);
 
 				Rule circRule = new Rule(newPi, newPiPrime, context);
 				circRule.setCondition(condition);
@@ -113,6 +121,14 @@ public class AddCircularityRules extends CopyOnWriteTransformer {
 		}
 
 		return module;
+	}
+	
+	private Term andBool(List<Term> terms) {
+		if (terms.size() == 0) 
+			return BoolBuiltin.TRUE;
+		Term term = terms.get(0);
+		terms.remove(0);
+		return KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, term, andBool(terms));
 	}
 	
 	public static boolean varInList(Variable v, List<Variable> vars) {
