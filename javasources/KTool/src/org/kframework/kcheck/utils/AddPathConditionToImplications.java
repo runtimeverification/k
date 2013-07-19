@@ -46,7 +46,6 @@ public class AddPathConditionToImplications extends CopyOnWriteTransformer {
 			List<Variable> fresh = new ArrayList<Variable>();
 			for(Variable v : vvpi.getVariables()) {
 				if (!AddCircularityRules.varInList(v, vvpiprime.getVariables())) {
-					System.out.println("Adding " + v);
 					fresh.add(v);
 				}
 			}
@@ -73,7 +72,8 @@ public class AddPathConditionToImplications extends CopyOnWriteTransformer {
             Cell rightCell = new Cell();
             rightCell.setLabel(MetaK.Constants.pathCondition);
             rightCell.setEllipses(Ellipses.NONE);
-            rightCell.setContents(KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, psi, ep.getPhiPrime()));
+//            rightCell.setContents(KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, psi, ep.getPhiPrime()));
+            rightCell.setContents(psi);
 			right = AddConditionToConfig.addSubcellToCell((Cell)right, rightCell);
 
 			// condition

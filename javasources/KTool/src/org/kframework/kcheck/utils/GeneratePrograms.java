@@ -96,7 +96,6 @@ public class GeneratePrograms extends BasicTransformer {
 //			System.out.println("PGM: " + newPi);
 			
 			programs.add(newPgm);
-			System.out.println("GENERATED: " + programs);
 			
 			return newRule;
 		}

@@ -17,7 +17,6 @@ import org.kframework.backend.symbolic.AddPathCondition;
 import org.kframework.backend.symbolic.ReplaceConstants;
 import org.kframework.backend.symbolic.ResolveSymbolicInputStream;
 import org.kframework.backend.symbolic.TagUserRules;
-import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.compile.FlattenModules;
 import org.kframework.compile.ResolveConfigurationAbstraction;
 import org.kframework.compile.checks.CheckConfigurationCells;
@@ -149,15 +148,20 @@ public class RLBackend  extends BasicBackend implements Backend{
 		FileUtil.saveInFile(context.dotk.getAbsolutePath() + "/" + "main.maude", main);
 		context.kompiled = context.dotk;
 
-		 UnparserFilter unparserFilter = new UnparserFilter(context);
-		 javaDef.accept(unparserFilter);
+//		 UnparserFilter unparserFilter = new UnparserFilter(context);
+//		 javaDef.accept(unparserFilter);
 		
-		 String unparsedText = unparserFilter.getResult();
+//		 String unparsedText = unparserFilter.getResult();
 		
 //		System.out.println(unparsedText);
 //		 System.exit(1);
 		
 
+		 if (GlobalSettings.verbose) {
+			 for (int i = 0; i < programs.size(); i++)
+				System.out.println("PGM(" + i + "): " + programs.get(i));
+		 }
+		 
 		K.compiled_def = context.dotk.getAbsolutePath();
 		K.main_module = mainModule;
 		K.init(context);
@@ -173,8 +177,12 @@ public class RLBackend  extends BasicBackend implements Backend{
 			}
 		});
 		
+		if (GlobalSettings.verbose) {
+			System.out.println("Prepare krun for verification...");
+		}
+		
 		Rule defaultPattern = null;
-		RuleCompilerSteps defaultPatternInfo;
+		RuleCompilerSteps defaultPatternInfo = null;
 		ASTNode pattern;
 		try {
 			pattern = DefinitionLoader.parsePattern(K.pattern, "Command line pattern",
@@ -191,30 +199,17 @@ public class RLBackend  extends BasicBackend implements Backend{
 		}
 
 		MaudeKRun mkr = new MaudeKRun(context);
+		mkr.setBackendOption("io", false);
 		
 		for (Term pgm: programs) {
 			try {
-//				System.out.println("Execute: " + pgm);
-				
-				
-//				System.out.println("SENT: " + javaDef);
-				RuleCompilerSteps steps = new RuleCompilerSteps(javaDef, context);
-				KRunResult<SearchResults> result = mkr.search(null, null, SearchType.FINAL, defaultPattern, pgm, steps);
-//				System.out.println("Result: " + result + "\n\n");
+				System.out.println("Verifying PGM(" + programs.indexOf(pgm) + ") ...");
+				KRunResult<SearchResults> result = mkr.search(null, null, SearchType.FINAL, defaultPattern, pgm, defaultPatternInfo);
+				System.out.println("Result: " + result + "\n\n");
 			} catch (KRunExecutionException e) {
 				e.printStackTrace();
 			}
 		}
-		
-		//
-		// XStream xstream = new XStream();
-		// xstream.aliasPackage("k", "ro.uaic.info.fmse.k");
-		//
-		// String xml = xstream.toXML(def);
-		//
-		// FileUtil.saveInFile(context.dotk.getAbsolutePath()
-		// + "/def-symbolic.xml", xml);
-
 	}
 
 	@Override
