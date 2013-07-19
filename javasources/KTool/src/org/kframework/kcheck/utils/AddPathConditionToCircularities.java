@@ -5,6 +5,7 @@ import java.util.List;
 import org.kframework.backend.symbolic.AddConditionToConfig;
 import org.kframework.backend.symbolic.AddPathCondition;
 import org.kframework.compile.utils.MetaK;
+import org.kframework.kcheck.RLBackend;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Cell.Ellipses;
@@ -61,11 +62,14 @@ public class AddPathConditionToCircularities extends CopyOnWriteTransformer {
 //	        KApp checkSat = KApp.of(KLabelConstant.of("'checkSat", context), implication);
 //	        implication = KApp.of(KLabelConstant.KEQ_KLABEL, checkSat, unsat);
 	        Term pc = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, psi, ep.getPhi()), ep.getPhiPrime());
-			pc = AddPathCondition.checkSat(pc, context);
+	        pc = AddPathCondition.checkSat(pc, context);
 			
 			Rule newRule = new Rule(left, right, context);
-			cnd = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, cnd, pc);
-			newRule.setCondition(cnd);
+			Term cc = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, cnd, pc);
+			if (RLBackend.SIMPLIFY) {
+	        	cc = KApp.of(KLabelConstant.of(RLBackend.SIMPLIFY_KLABEL, context) , cc);
+	        }
+			newRule.setCondition(cc);
 			newRule.setAttributes(node.getAttributes().shallowCopy());
 			return newRule;
 		}

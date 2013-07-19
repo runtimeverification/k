@@ -31,8 +31,13 @@ public class KCheckOptionsParser {
 			verb.addOption(help);
 			verb.addOption(verbose);
 			
+			OptionGroup simplify = new OptionGroup();
+			Option sim = new Option("simplify", false, "simplify the path condition before sending it to SMT solver");
+			simplify.addOption(sim);
+			
 			options.addOptionGroup(main);
 			options.addOptionGroup(verb);
+			options.addOptionGroup(simplify);
 		}
 
 		public CommandLine parse(String[] cmd) {

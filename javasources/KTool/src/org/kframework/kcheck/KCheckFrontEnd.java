@@ -44,6 +44,7 @@ public class KCheckFrontEnd {
 	        GlobalSettings.symbolicEquality = true;
 	        GlobalSettings.SMT = true;
 	        GlobalSettings.NOSMT = false;
+	        RLBackend.SIMPLIFY = cmd.hasOption("simplify");
 	        
 			// set verbose
 			if (cmd.hasOption("verbose"))

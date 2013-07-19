@@ -95,7 +95,9 @@ public class RLBackend  extends BasicBackend implements Backend{
 
 	public static int idx = 5000;
 	List<ASTNode> reachabilityRules = null;
-	public static final String INTERNAL_KLABEL = "rrcondition"; 
+	public static final String INTERNAL_KLABEL = "rrcondition";
+	public static final String SIMPLIFY_KLABEL = "'simplifyBool"; 
+	public static boolean SIMPLIFY = false;
 	List<Term> programs;
 	
 	public RLBackend(Stopwatch sw, Context context) {

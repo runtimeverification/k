@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.kframework.backend.symbolic.AddConditionToConfig;
 import org.kframework.compile.utils.MetaK;
+import org.kframework.kcheck.RLBackend;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Cell.Ellipses;
@@ -84,9 +85,12 @@ public class AddPathConditionToImplications extends CopyOnWriteTransformer {
 			
 	        // return new rule
 			Rule newRule = new Rule(left, right, context);
-			newRule.setCondition(KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, cnd.shallowCopy(), implication));
+			Term cc = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, cnd.shallowCopy(), implication);
+			if (RLBackend.SIMPLIFY) {
+	        	cc = KApp.of(KLabelConstant.of(RLBackend.SIMPLIFY_KLABEL, context) , cc);
+	        }
+			newRule.setCondition(cc);
 			newRule.setAttributes(node.getAttributes().shallowCopy());
-			
 			newRule = (Rule) newRule.accept(new MakeFreshVariables(context, fresh));
 			
 			return newRule;
