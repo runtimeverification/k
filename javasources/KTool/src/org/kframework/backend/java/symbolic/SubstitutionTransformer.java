@@ -1,14 +1,14 @@
 package org.kframework.backend.java.symbolic;
 
-import com.google.common.collect.ImmutableList;
 import org.kframework.backend.java.kil.*;
-import org.kframework.kil.loader.Context;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import com.google.common.collect.ImmutableList;
 
 
 /**
@@ -21,10 +21,10 @@ import java.util.Set;
 public class SubstitutionTransformer extends CopyOnWriteTransformer {
 
     private final Set<Variable> boundVariables;
-    private final Map<Variable, Term> substitution;
+    private final Map<Variable, ? extends Term> substitution;
 
-    public SubstitutionTransformer(Map<Variable, Term> substitution, Context context) {
-    	super(context);
+    public SubstitutionTransformer(Map<Variable, ? extends Term> substitution, Definition definition) {
+    	super(definition);
         this.substitution = substitution;
         boundVariables = new HashSet<Variable>();
     }

@@ -35,12 +35,12 @@ import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.KSorts;
 import org.kframework.kil.Module;
 import org.kframework.kil.Production;
-//import org.kframework.kil.Token;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -50,7 +50,6 @@ import java.util.Set;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 
 
@@ -61,10 +60,50 @@ import com.google.common.collect.Multimap;
  */
 public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
+    private Definition definition = null;
     private IndexingPair indexingPair = null;
 
     public KILtoBackendJavaKILTransformer(Context context) {
         super("Transform KIL into java backend KIL", context);
+    }
+
+    public Definition transformDefinition(org.kframework.kil.Definition node) {
+        try {
+            return (Definition) node.accept(this);
+        } catch (TransformerException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public Rule transformRule(org.kframework.kil.Rule node, Definition definition) {
+        this.definition = definition;
+
+        Rule rule = null;
+        try {
+            rule = (Rule) node.accept(this);
+        } catch (TransformerException e) {
+            e.printStackTrace();
+        } finally {
+            this.definition = null;
+        }
+
+        return rule;
+    }
+
+    public Term transformTerm(org.kframework.kil.Term node, Definition definition) {
+        this.definition = definition;
+
+        Term term = null;
+        try {
+            term = (Term) node.accept(this);
+        } catch (TransformerException e) {
+            e.printStackTrace();
+        } finally {
+            this.definition = null;
+        }
+
+        return term;
     }
 
     @Override
@@ -292,15 +331,28 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
         Term rightHandSide = (Term) rewrite.getRight().accept(this);
 
-        SymbolicConstraint condition = new SymbolicConstraint(context);
-        Term term = BoolToken.TRUE;
+        Collection<Term> condition = new ArrayList<Term>();
+        Collection<Variable> freshVariables = new ArrayList<Variable>();
         if (node.getCondition() != null) {
-            term = (Term) node.getCondition().accept(this);
-            /* TODO(AndreiS): flatten boolean terms and use an actual constraint */
-            condition.add(term, BoolToken.TRUE);
+            Term term = (Term) node.getCondition().accept(this);
+            if (term instanceof KItem && ((KItem) term).kLabel().toString().equals("'_andBool_")) {
+                for (Term item : ((KItem) term).kList().getItems()) {
+                    if (item instanceof KItem && ((KItem) item).kLabel().toString().equals("'fresh(_)")) {
+                        freshVariables.add((Variable) ((KItem) item).kList().get(0));
+                    } else {
+                        condition.add(item);
+                    }
+                }
+            } else {
+                if (term instanceof KItem && ((KItem) term).kLabel().toString().equals("'fresh(_)")) {
+                    freshVariables.add((Variable) ((KItem) term).kList().get(0));
+                } else {
+                    condition.add(term);
+                }
+            }
         }
 
-        SymbolicConstraint lookups = new SymbolicConstraint(context);
+        SymbolicConstraint lookups = new SymbolicConstraint(definition);
         for (org.kframework.kil.BuiltinLookup lookup : node.getLookups()) {
             Variable base = (Variable) lookup.base().accept(this);
             Term key = (Term) lookup.key().accept(this);
@@ -319,53 +371,49 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         return new Rule(
                 leftHandSide,
                 rightHandSide,
-                term,
+                condition,
+                freshVariables,
                 lookups,
                 indexingPair,
                 node.getAttributes());
     }
 
     @Override
-    public ASTNode transform(org.kframework.kil.Definition definition) {
-        Module singletonModule = definition.getSingletonModule();
+    public ASTNode transform(org.kframework.kil.Definition node) {
+        Definition definition = new Definition(context);
+        this.definition = definition;
 
-        ImmutableSet.Builder<Rule> rulesBuilder = ImmutableSet.builder();
+        Module singletonModule = node.getSingletonModule();
+
         for (org.kframework.kil.Rule rule : singletonModule.getRules()) {
             if (!rule.containsAttribute(SymbolicBackend.SYMBOLIC)
-                || rule.containsAttribute(Attribute.FUNCTION.getKey())
                 || rule.containsAttribute(Attribute.PREDICATE.getKey())
                 || rule.containsAttribute(Attribute.ANYWHERE.getKey())) {
                 continue;
             }
 
             try {
-                //System.err.println(rule);
-                //System.err.flush();
-                rulesBuilder.add((Rule) rule.accept(this));
+                definition.addRule((Rule) rule.accept(this));
             } catch (TransformerException e) {
                 System.err.println(rule);
                 System.err.flush();
                 e.printStackTrace();
             }
         }
-        Set<Rule> rules = rulesBuilder.build();
 
-        ImmutableSet.Builder<KLabelConstant> kLabelsBuilder = ImmutableSet.builder();
         for (String kLabelName : singletonModule.getModuleKLabels()) {
-            kLabelsBuilder.add(KLabelConstant.of(kLabelName, context));
+            definition.addKLabel(KLabelConstant.of(kLabelName, context));
         }
-        Set<KLabelConstant> kLabels = kLabelsBuilder.build();
 
-        ImmutableSet.Builder<KLabelConstant> frozenKLabelsBuilder = ImmutableSet.builder();
-        //collect the productions which have the attributes strict and seqstrict
+        /* collect the productions which have the attributes strict and seqstrict */
         Set<Production> productions = singletonModule.getSyntaxByTag("strict", context);
         productions.addAll(singletonModule.getSyntaxByTag("seqstrict", context));
         for (Production production : productions) {
-            frozenKLabelsBuilder.add(KLabelConstant.of(production.getKLabel(), context));
+            definition.addFrozenKLabel(KLabelConstant.of(production.getKLabel(), context));
         }
-        Set<KLabelConstant> frozenKLabels = frozenKLabelsBuilder.build();
 
-        return new Definition(rules, kLabels, frozenKLabels);
+        this.definition = null;
+        return definition;
     }
 
     private static void flattenBag(

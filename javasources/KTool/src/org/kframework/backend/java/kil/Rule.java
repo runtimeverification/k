@@ -6,8 +6,10 @@ import org.kframework.backend.java.symbolic.VariableVisitor;
 import org.kframework.backend.java.symbolic.Visitable;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 
+import java.util.Collection;
 import java.util.Set;
 
 
@@ -20,21 +22,23 @@ public class Rule extends ASTNode implements Visitable {
 
     private final Term leftHandSide;
     private final Term rightHandSide;
-    //private final SymbolicConstraint condition;
-    private final Term condition;
+    private final Collection<Term> condition;
+    private final Collection<Variable> freshVariables;
     private final SymbolicConstraint lookups;
     private final IndexingPair indexingPair;
 
     public Rule(
             Term leftHandSide,
             Term rightHandSide,
-            Term condition,
+            Collection<Term> condition,
+            Collection<Variable> freshVariables,
             SymbolicConstraint lookups,
             IndexingPair indexingPair,
             Attributes attributes) {
         this.leftHandSide = leftHandSide;
         this.rightHandSide = rightHandSide;
         this.condition = condition;
+        this.freshVariables = freshVariables;
         this.lookups = lookups;
         this.indexingPair = indexingPair;
         super.setAttributes(attributes);
@@ -54,8 +58,18 @@ public class Rule extends ASTNode implements Visitable {
     }
     */
 
-    public Term condition() {
+    public Collection<Term> condition() {
         return condition;
+    }
+
+    public Collection<Variable> freshVariables() {
+        return freshVariables;
+    }
+
+    public KLabelConstant functionKLabel() {
+        assert attributes.containsAttribute(Attribute.FUNCTION_KEY);
+
+        return (KLabelConstant) ((KItem) leftHandSide).kLabel();
     }
 
     public IndexingPair indexingPair() {

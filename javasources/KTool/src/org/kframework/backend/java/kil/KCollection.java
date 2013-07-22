@@ -62,7 +62,7 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
     @Override
     public int hashCode() {
         int hash = 1;
-        hash = super.frame == null ? hash : hash * Utils.HASH_PRIME + super.frame.hashCode();
+        hash = hash * Utils.HASH_PRIME + (super.frame == null ? 0 : super.frame.hashCode());
         hash = hash * Utils.HASH_PRIME + items.hashCode();
         return hash;
     }

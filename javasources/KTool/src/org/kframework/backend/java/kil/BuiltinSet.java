@@ -2,6 +2,7 @@ package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Utils;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 
@@ -85,6 +86,30 @@ public class BuiltinSet extends Collection {
         } else {
             elements.remove(element);
         }
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+
+        if (!(object instanceof BuiltinSet)) {
+            return false;
+        }
+
+        BuiltinSet set = (BuiltinSet) object;
+        return super.equals(set) && elements.equals(set.elements)
+               && operations.equals(set.operations);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 1;
+        hash = hash * Utils.HASH_PRIME + (super.frame == null ? 0 : super.frame.hashCode());
+        hash = hash * Utils.HASH_PRIME + elements.hashCode();
+        hash = hash * Utils.HASH_PRIME + operations.hashCode();
+        return hash;
     }
 
     @Override

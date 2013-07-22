@@ -1,7 +1,14 @@
 package org.kframework.backend.java.symbolic;
 
 import com.microsoft.z3.BoolExpr;
+import com.microsoft.z3.Expr;
+import com.microsoft.z3.Sort;
+import com.microsoft.z3.Symbol;
+import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.AnonymousVariable;
+import org.kframework.backend.java.kil.Definition;
+import org.kframework.backend.java.kil.JavaSymbolicObject;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.Sorted;
 import org.kframework.backend.java.kil.Term;
@@ -15,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,7 +44,7 @@ import org.kframework.krun.K;
  *
  * @author AndreiS
  */
-public class SymbolicConstraint extends ASTNode implements Serializable, Transformable, Visitable {
+public class SymbolicConstraint extends JavaSymbolicObject implements Serializable, Transformable {
 
     public enum TruthValue { TRUE, UNKNOWN, FALSE }
 
@@ -61,8 +69,8 @@ public class SymbolicConstraint extends ASTNode implements Serializable, Transfo
         }
 
         public Equality evaluate() {
-            leftHandSide = leftHandSide.evaluate(context);
-            rightHandSide = rightHandSide.evaluate(context);
+            leftHandSide = leftHandSide.evaluate(definition);
+            rightHandSide = rightHandSide.evaluate(definition);
             return this;
         }
 
@@ -85,16 +93,16 @@ public class SymbolicConstraint extends ASTNode implements Serializable, Transfo
 
             if (leftHandSide instanceof KItem
                     && ((KItem) leftHandSide).kLabel().isConstructor()) {
-                return !context.isSubsortedEq(
+                return !definition.context().isSubsortedEq(
                         ((Sorted) rightHandSide).sort(),
                         ((KItem) leftHandSide).sort());
             } else if (rightHandSide instanceof KItem
                     && ((KItem) rightHandSide).kLabel().isConstructor()) {
-                return !context.isSubsortedEq(
+                return !definition.context().isSubsortedEq(
                         ((Sorted) leftHandSide).sort(),
                         ((KItem) rightHandSide).sort());
             } else {
-                return null == context.getGLBSort(ImmutableSet.<String>of(
+                return null == definition.context().getGLBSort(ImmutableSet.<String>of(
                     ((Sorted) leftHandSide).sort(),
                     ((Sorted) rightHandSide).sort()));
             }
@@ -109,8 +117,8 @@ public class SymbolicConstraint extends ASTNode implements Serializable, Transfo
         }
 
         private Equality substitute(Map<Variable, ? extends Term> substitution) {
-            leftHandSide = leftHandSide.substitute(substitution, context);
-            rightHandSide = rightHandSide.substitute(substitution, context);
+            leftHandSide = leftHandSide.substitute(substitution, definition);
+            rightHandSide = rightHandSide.substitute(substitution, definition);
             return this;
         }
 
@@ -150,12 +158,12 @@ public class SymbolicConstraint extends ASTNode implements Serializable, Transfo
     private boolean isNormal;
     private final Map<Variable, Term> substitution = new HashMap<Variable, Term>();
     private TruthValue truthValue;
-    private Context context;
+    private final Definition definition;
     private final SymbolicUnifier unifier;
 
-    public SymbolicConstraint(Context context) {
-        unifier = new SymbolicUnifier(this, context);
-    	this.context = context;
+    public SymbolicConstraint(Definition definition) {
+        this.definition = definition;
+        unifier = new SymbolicUnifier(this, definition);
         truthValue = TruthValue.TRUE;
         isNormal = true;
     }
@@ -166,8 +174,8 @@ public class SymbolicConstraint extends ASTNode implements Serializable, Transfo
                         + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
                         + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
 
-        leftHandSide = leftHandSide.substitute(substitution, context).evaluate(context);
-        rightHandSide = rightHandSide.substitute(substitution, context).evaluate(context);
+        leftHandSide = leftHandSide.substitute(substitution, definition).evaluate(definition);
+        rightHandSide = rightHandSide.substitute(substitution, definition).evaluate(definition);
         Equality equality = this.new Equality(leftHandSide, rightHandSide);
 
         if (equality.isUnknown()){
@@ -177,6 +185,14 @@ public class SymbolicConstraint extends ASTNode implements Serializable, Transfo
         } else if (equality.isFalse()) {
             equalities.add(equality);
             truthValue = TruthValue.FALSE;
+        }
+
+        return truthValue;
+    }
+
+    public TruthValue addAll(Collection<Term> condition) {
+        for (Term term : condition) {
+            add(term, BoolToken.TRUE);
         }
 
         return truthValue;
@@ -203,7 +219,7 @@ public class SymbolicConstraint extends ASTNode implements Serializable, Transfo
         Boolean result = false;
         try {
             com.microsoft.z3.Context context = new com.microsoft.z3.Context();
-            KILtoZ3 transformer = new KILtoZ3(context);
+            KILtoZ3 transformer = new KILtoZ3(Collections.<Variable>emptySet(), context);
             Solver solver = context.MkSolver();
             for (Equality equality : equalities) {
                 solver.Assert(context.MkEq(
@@ -245,31 +261,71 @@ public class SymbolicConstraint extends ASTNode implements Serializable, Transfo
     public boolean implies(SymbolicConstraint constraint) {
         normalize();
 
+        Set<Variable> rightHandSideVariables = new HashSet<Variable>(constraint.variableSet());
+        rightHandSideVariables.removeAll(variableSet());
+
         Boolean result = false;
         try {
             com.microsoft.z3.Context context = new com.microsoft.z3.Context();
-            KILtoZ3 transformer = new KILtoZ3(context);
+            KILtoZ3 transformer = new KILtoZ3(rightHandSideVariables, context);
+
             Solver solver = context.MkSolver();
+
             for (Equality equality : equalities) {
                 solver.Assert(context.MkEq(
                         ((Z3Term) equality.leftHandSide.accept(transformer)).expression(),
                         ((Z3Term) equality.rightHandSide.accept(transformer)).expression()));
             }
 
-            BoolExpr[] inequalities = new BoolExpr[constraint.equalities.size() + constraint.substitution.size()];
+            //BoolExpr[] inequalities = new BoolExpr[constraint.equalities.size() + constraint.substitution.size()];
+            BoolExpr[] inequalities = new BoolExpr[constraint.equalities.size()];
             int i = 0;
             for (Equality equality : constraint.equalities) {
                 inequalities[i++] = context.MkNot(context.MkEq(
                         ((Z3Term) equality.leftHandSide.accept(transformer)).expression(),
                         ((Z3Term) equality.rightHandSide.accept(transformer)).expression()));
             }
+            /* TODO(AndreiS): fix translation to smt
             for (Map.Entry<Variable, Term> entry : constraint.substitution.entrySet()) {
                 inequalities[i++] = context.MkNot(context.MkEq(
                         ((Z3Term) entry.getKey().accept(transformer)).expression(),
                         ((Z3Term) entry.getValue().accept(transformer)).expression()));
             }
+            */
 
-            solver.Assert(context.MkOr(inequalities));
+            Sort[] variableSorts = new Sort[rightHandSideVariables.size()];
+            Symbol[] variableNames = new Symbol[rightHandSideVariables.size()];
+            i = 0;
+            for (Variable variable : rightHandSideVariables) {
+                if (variable.sort().equals(BoolToken.SORT_NAME)) {
+                    variableSorts[i] = context.MkBoolSort();
+                } else if (variable.sort().equals(IntToken.SORT_NAME)) {
+                    variableSorts[i] = context.MkIntSort();
+                } else {
+                    throw new RuntimeException();
+                }
+                variableNames[i] = context.MkSymbol(variable.name());
+                ++i;
+            }
+
+            Expr[] boundVariables = new Expr[rightHandSideVariables.size()];
+            i = 0;
+            for (Variable variable : rightHandSideVariables) {
+                boundVariables[i++] = KILtoZ3.valueOf(variable, context).expression();
+            }
+
+            if (boundVariables.length > 0) {
+                solver.Assert(context.MkForall(
+                        boundVariables,
+                        context.MkOr(inequalities),
+                        1,
+                        null,
+                        null,
+                        null,
+                        null));
+            } else {
+                solver.Assert(context.MkOr(inequalities));
+            }
 
             result = solver.Check() == Status.UNSATISFIABLE;
             context.Dispose();
@@ -375,7 +431,7 @@ public class SymbolicConstraint extends ASTNode implements Serializable, Transfo
             Map<Variable, Term> tempSubstitution = new HashMap<Variable, Term>();
             tempSubstitution.put(variable, term);
 
-            SymbolicConstraint.compose(substitution, tempSubstitution, context);
+            SymbolicConstraint.compose(substitution, tempSubstitution, definition);
             substitution.put(variable, term);
 
             for (Iterator<Equality> previousIterator = equalities.iterator(); previousIterator.hasNext();) {
@@ -397,10 +453,13 @@ public class SymbolicConstraint extends ASTNode implements Serializable, Transfo
     }
 
     @SuppressWarnings("unchecked")
-    public static void compose(Map<Variable, Term> map, Map<Variable, Term> substitution, Context context) {
+    public static void compose(
+            Map<Variable, Term> map,
+            Map<Variable, Term> substitution,
+            Definition definition) {
         Map.Entry<Variable, Term>[] entries = map.entrySet().toArray(new Map.Entry[map.size()]);
         for (int index = 0; index < entries.length; ++index) {
-            Term term = entries[index].getValue().substitute(substitution, context);
+            Term term = entries[index].getValue().substitute(substitution, definition);
             if (term != entries[index].getValue()) {
                 map.put(entries[index].getKey(), term);
             }
@@ -419,7 +478,7 @@ public class SymbolicConstraint extends ASTNode implements Serializable, Transfo
 
         /* rename in substitution values */
         for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
-            entry.setValue(entry.getValue().substitute(freshSubstitution, context));
+            entry.setValue(entry.getValue().substitute(freshSubstitution, definition));
         }
 
         for (Equality equality : equalities) {
@@ -433,20 +492,20 @@ public class SymbolicConstraint extends ASTNode implements Serializable, Transfo
      * Returns a new {@code SymbolicConstraint} instance obtained from this symbolic constraint
      * by applying substitution.
      */
-    public SymbolicConstraint substitute(Map<Variable, ? extends Term> substitution, Context context) {
+    public SymbolicConstraint substitute(Map<Variable, ? extends Term> substitution, Definition definition) {
         if (substitution.isEmpty()) {
             return this;
         }
 
-        return (SymbolicConstraint) accept(new SubstitutionTransformer((Map<Variable, Term>) substitution, context));
+        return (SymbolicConstraint) accept(new SubstitutionTransformer(substitution, definition));
     }
 
     /**
      * Returns a new {@code SymbolicConstraint} instance obtained from this symbolic constraint by
      * substituting variable with term.
      */
-    public SymbolicConstraint substitute(Variable variable, Term term, Context context) {
-        return substitute(Collections.singletonMap(variable, term), context);
+    public SymbolicConstraint substitute(Variable variable, Term term, Definition definition) {
+        return substitute(Collections.singletonMap(variable, term), definition);
     }
 
     @Override

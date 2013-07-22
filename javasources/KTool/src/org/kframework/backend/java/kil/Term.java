@@ -5,14 +5,8 @@ import org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer;
 import org.kframework.backend.java.symbolic.Unifiable;
 import org.kframework.backend.java.symbolic.SubstitutionTransformer;
 import org.kframework.backend.java.symbolic.Transformable;
-import org.kframework.backend.java.symbolic.VariableVisitor;
-import org.kframework.backend.java.symbolic.Visitable;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.Collections;
-import java.util.Set;
 import java.util.Map;
 
 
@@ -21,9 +15,7 @@ import java.util.Map;
  *
  * @author AndreiS
  */
-public abstract class Term
-        extends JavaSymbolicObject
-        implements Unifiable, Transformable, Visitable {
+public abstract class Term extends JavaSymbolicObject implements Unifiable, Transformable {
 
     protected final Kind kind;
 
@@ -36,20 +28,17 @@ public abstract class Term
      * the Java Rewrite Engine internal representation
      * ({@link org.kframework.backend.java.kil.Term}).
      */
-    public static Term of(org.kframework.kil.Term kilTerm, Context context) {
-        try {
-            return (Term) kilTerm.accept(new KILtoBackendJavaKILTransformer(context));
-        } catch (TransformerException e) {
-            e.printStackTrace();
-            return null;
-        }
+    public static Term of(org.kframework.kil.Term kilTerm, Definition definition) {
+        KILtoBackendJavaKILTransformer transformer
+                = new KILtoBackendJavaKILTransformer(definition.context());
+        return transformer.transformTerm(kilTerm, definition);
     }
 
     /**
      * Returns {@code true} if this term does not contain any variables.
      */
     public boolean isGround() {
-        return variableSet().isEmpty();
+        return super.variableSet().isEmpty();
     }
 
     /**
@@ -69,36 +58,27 @@ public abstract class Term
      * Returns a new {@code Term} instance obtained from this term by evaluating pending
      * function and predicate operations.
      */
-    public Term evaluate(Context context) {
-        return (Term) this.accept(new Evaluator(context));
+    public Term evaluate(Definition definition) {
+        return (Term) this.accept(new Evaluator(definition));
     }
 
     /**
      * Returns a new {@code Term} instance obtained from this term by applying substitution.
      */
-    public Term substitute(Map<Variable, ? extends Term> substitution, Context context) {
+    public Term substitute(Map<Variable, ? extends Term> substitution, Definition definition) {
         if (substitution.isEmpty() || isGround()) {
             return this;
         }
 
-        return (Term) accept(new SubstitutionTransformer((Map<Variable, Term>) substitution, context));
+        return (Term) accept(new SubstitutionTransformer(substitution, definition));
     }
 
     /**
      * Returns a new {@code Term} instance obtained from this term by substituting variable with
      * term.
      */
-    public Term substitute(Variable variable, Term term, Context context) {
-        return substitute(Collections.singletonMap(variable, term), context);
-    }
-
-    /**
-     * Returns a {@code Set} view of the variables in this term.
-     */
-    public Set<Variable> variableSet() {
-        VariableVisitor visitor = new VariableVisitor();
-        accept(visitor);
-        return visitor.getVariableSet();
+    public Term substitute(Variable variable, Term term, Definition definition) {
+        return substitute(Collections.singletonMap(variable, term), definition);
     }
 
 }

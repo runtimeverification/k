@@ -8,18 +8,17 @@ import org.kframework.backend.java.indexing.IndexingPair;
 import org.kframework.backend.java.indexing.KLabelIndex;
 import org.kframework.backend.java.indexing.TokenIndex;
 import org.kframework.backend.java.indexing.TopIndex;
-import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.ConstrainedTerm;import org.kframework.backend.java.kil.Definition;
-import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.kil.loader.Context;
+import org.kframework.kil.Attributes;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -37,17 +36,16 @@ import com.google.common.collect.ImmutableSet;
  */
 public class SymbolicRewriter {
 
-    private final Context context;
     private final Definition definition;
     private final Stopwatch stopwatch = new Stopwatch();
     private final Stopwatch ruleStopwatch = new Stopwatch();
     private final Map<IndexingPair, Set<Rule>> ruleTable;
     private final List<ConstrainedTerm> results = new ArrayList<ConstrainedTerm>();
 
-	public SymbolicRewriter(Definition definition, Context context) {
+	public SymbolicRewriter(Definition definition) {
         this.definition = definition;
-        this.context = context;
 
+        /* populate the table of rules rewriting the top configuration */
         ruleTable = new HashMap<IndexingPair, Set<Rule>>();
 
         Set<Index> indices = new HashSet<Index>();
@@ -144,12 +142,10 @@ public class SymbolicRewriter {
             ruleStopwatch.reset();
             ruleStopwatch.start();
 
-            SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(context);
-            //leftHandSideConstraint.addAll(rule.condition());
-            if (rule.condition() instanceof KItem && ((KItem) rule.condition()).kLabel().toString().equals("'fresh(_)")) {
-                leftHandSideConstraint.add(((KItem) rule.condition()).kList().get(0), IntToken.fresh());
-            } else {
-                leftHandSideConstraint.add(rule.condition(), BoolToken.TRUE);
+            SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(definition);
+            leftHandSideConstraint.addAll(rule.condition());
+            for (Variable variable : rule.freshVariables()) {
+                leftHandSideConstraint.add(variable, IntToken.fresh());
             }
 
             ConstrainedTerm leftHandSide = new ConstrainedTerm(
@@ -157,17 +153,17 @@ public class SymbolicRewriter {
                     rule.lookups(),
                     leftHandSideConstraint);
 
-            for (SymbolicConstraint constraint1 : constrainedTerm.unify(leftHandSide, context)) {
+            for (SymbolicConstraint constraint1 : constrainedTerm.unify(leftHandSide, definition)) {
                 /* rename rule variables in the constraints */
                 Map<Variable, Variable> freshSubstitution = constraint1.rename(rule.variableSet());
 
                 Term result = rule.rightHandSide();
                 /* rename rule variables in the rule RHS */
-                result = result.substitute(freshSubstitution, context);
+                result = result.substitute(freshSubstitution, definition);
                 /* apply the constraints substitution on the rule RHS */
-                result = result.substitute(constraint1.substitution(), context);
+                result = result.substitute(constraint1.substitution(), definition);
                 /* evaluate pending functions in the rule RHS */
-                result = result.evaluate(context);
+                result = result.evaluate(definition);
                 /* eliminate anonymous variables */
                 constraint1.eliminateAnonymousVariables();
 
@@ -182,7 +178,7 @@ public class SymbolicRewriter {
                 */
 
                 /* compute all results */
-                results.add(new ConstrainedTerm(result, constraint1, context));
+                results.add(new ConstrainedTerm(result, constraint1, definition));
             }
         }
     }
@@ -195,16 +191,15 @@ public class SymbolicRewriter {
             ruleStopwatch.reset();
             ruleStopwatch.start();
 
-            SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(context);
-            //initialConstraint.addAll(rule.condition());
-            leftHandSideConstraint.add(rule.condition(), BoolToken.TRUE);
+            SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(definition);
+            leftHandSideConstraint.addAll(rule.condition());
 
             ConstrainedTerm leftHandSideTerm = new ConstrainedTerm(
                     rule.leftHandSide(),
                     rule.lookups(),
                     leftHandSideConstraint);
 
-            SymbolicConstraint constraint = constrainedTerm.match(leftHandSideTerm, context);
+            SymbolicConstraint constraint = constrainedTerm.match(leftHandSideTerm, definition);
             if (constraint == null) {
                 continue;
             }
@@ -214,16 +209,16 @@ public class SymbolicRewriter {
 
             Term result = rule.rightHandSide();
             /* rename rule variables in the rule RHS */
-            result = result.substitute(freshSubstitution, context);
+            result = result.substitute(freshSubstitution, definition);
             /* apply the constraints substitution on the rule RHS */
-            result = result.substitute(constraint.substitution(), context);
+            result = result.substitute(constraint.substitution(), definition);
             /* evaluate pending functions in the rule RHS */
-            result = result.evaluate(context);
+            result = result.evaluate(definition);
             /* eliminate anonymous variables */
             constraint.eliminateAnonymousVariables();
 
             /* return first solution */
-            return new ConstrainedTerm(result, constraint, context);
+            return new ConstrainedTerm(result, constraint, definition);
         }
 
         return null;
@@ -254,7 +249,6 @@ public class SymbolicRewriter {
 
                 for (int i = 0; getTransition(i) != null; ++i) {
                     if (visited.add(getTransition(i))) {
-                        // if getTransition(i) not implies targetTerm
                         nextQueue.add(getTransition(i));
                     }
                 }
@@ -290,16 +284,16 @@ public class SymbolicRewriter {
             /* rename rule variables */
             Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.variableSet());
 
-            SymbolicConstraint sideConstraint = new SymbolicConstraint(context);
-            sideConstraint.add(rule.condition(), BoolToken.TRUE);
+            SymbolicConstraint sideConstraint = new SymbolicConstraint(definition);
+            sideConstraint.addAll(rule.condition());
             ConstrainedTerm initialTerm = new ConstrainedTerm(
-                    rule.leftHandSide().substitute(freshSubstitution, context),
-                    rule.lookups().substitute(freshSubstitution, context),
-                    sideConstraint.substitute(freshSubstitution, context));
+                    rule.leftHandSide().substitute(freshSubstitution, definition),
+                    rule.lookups().substitute(freshSubstitution, definition),
+                    sideConstraint.substitute(freshSubstitution, definition));
 
             ConstrainedTerm targetTerm = new ConstrainedTerm(
-                    rule.rightHandSide().substitute(freshSubstitution, context),
-                    context);
+                    rule.rightHandSide().substitute(freshSubstitution, definition),
+                    definition);
 
             proofResults.addAll(proveRule(initialTerm, targetTerm, rules));
         }
@@ -324,9 +318,9 @@ public class SymbolicRewriter {
         boolean guarded = false;
         while (!queue.isEmpty()) {
             for (ConstrainedTerm term : queue) {
-//                if (term.implies(targetTerm, context)) {
-//                    continue;
-//                }
+                if (term.implies(targetTerm, definition)) {
+                    continue;
+                }
 
                 if (guarded) {
                     ConstrainedTerm result = applyRule(term, rules);
@@ -341,6 +335,23 @@ public class SymbolicRewriter {
                 if (results.isEmpty()) {
                     /* final term */
                     proofResults.add(term);
+                } else {
+                    /* add helper rule */
+                    HashSet<Variable> ruleVariables = new HashSet<Variable>(initialTerm.variableSet());
+                    ruleVariables.addAll(targetTerm.variableSet());
+                    Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(
+                            ruleVariables);
+
+                    /*
+                    rules.add(new Rule(
+                            term.term().substitute(freshSubstitution, definition),
+                            targetTerm.term().substitute(freshSubstitution, definition),
+                            term.constraint().substitute(freshSubstitution, definition),
+                            Collections.<Variable>emptyList(),
+                            new SymbolicConstraint(definition).substitute(freshSubstitution, definition),
+                            IndexingPair.getIndexingPair(term.term()),
+                            new Attributes()));
+                    */
                 }
 
                 for (int i = 0; getTransition(i) != null; ++i) {

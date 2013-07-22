@@ -32,7 +32,6 @@ public class TagUserRules extends CopyOnWriteTransformer {
         if (GlobalSettings.matchingLogic) {
             notSymbolicTags = ImmutableSet.of(
                     Constants.MACRO,
-                    Constants.FUNCTION,
                     SymbolicBackend.NOTSYMBOLIC);
         } else {
             notSymbolicTags = ImmutableSet.of(

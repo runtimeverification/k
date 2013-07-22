@@ -1,7 +1,9 @@
 package org.kframework.backend.java.kil;
 
+import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.SortMembership;
 import org.kframework.backend.java.symbolic.BuiltinFunction;
+import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Utils;
@@ -10,8 +12,9 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
 
-import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -72,7 +75,7 @@ public class KItem extends Term implements Sorted {
         }
     }
 
-    public Term evaluateFunction() {
+    public Term evaluateFunction(Definition definition) {
         if (!(kLabel instanceof KLabelConstant)) {
             return this;
         }
@@ -82,6 +85,51 @@ public class KItem extends Term implements Sorted {
         if (kLabelConstant.label().startsWith("is") && kList.getItems().size() == 1
                 && kList.getItems().get(0) instanceof Sorted) {
             return SortMembership.check(this);
+        }
+
+        /* apply rules for user defined functions */
+        if (!definition.functionRules().get((KLabelConstant) kLabel).isEmpty()) {
+            ConstrainedTerm constrainedTerm = new ConstrainedTerm(this, definition);
+
+            for (Rule rule : definition.functionRules().get((KLabelConstant) kLabel)) {
+                SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(definition);
+                leftHandSideConstraint.addAll(rule.condition());
+                for (Variable variable : rule.freshVariables()) {
+                    leftHandSideConstraint.add(variable, IntToken.fresh());
+                }
+
+                ConstrainedTerm leftHandSide = new ConstrainedTerm(
+                        rule.leftHandSide(),
+                        rule.lookups(),
+                        leftHandSideConstraint);
+
+                Collection<SymbolicConstraint> solutions = constrainedTerm.unify(
+                        leftHandSide,
+                        definition);
+
+                assert solutions.size() <= 1 : "function definition is not deterministic";
+
+                SymbolicConstraint constraint = solutions.iterator().next();
+
+                if (!constraint.isSubstitution()) {
+                    continue;
+                }
+
+                /* rename rule variables in the constraints */
+                Map<Variable, Variable> freshSubstitution = constraint.rename(rule.variableSet());
+
+                Term result = rule.rightHandSide();
+                /* rename rule variables in the rule RHS */
+                result = result.substitute(freshSubstitution, definition);
+                /* apply the constraints substitution on the rule RHS */
+                result = result.substitute(constraint.substitution(), definition);
+                /* evaluate pending functions in the rule RHS */
+                result = result.evaluate(definition);
+                /* eliminate anonymous variables */
+                constraint.eliminateAnonymousVariables();
+
+                return result;
+            }
         }
 
         if (!BuiltinFunction.isBuiltinKLabel(kLabelConstant)) {

@@ -2,9 +2,9 @@ require "builtins/map.k"
 
 module IMP-SYNTAX
   syntax AExp  ::= Int | Id
-                 | AExp "/" AExp              [left, strict]
-                 > AExp "+" AExp              [left, strict]
-                 | AExp "-" AExp              [left, strict]
+                 | AExp "/" AExp              [left, seqstrict]
+                 > AExp "+" AExp              [left, seqstrict]
+                 | AExp "-" AExp              [left, seqstrict]
                  | "(" AExp ")"               [bracket]
   syntax BExp  ::= Bool
                  | AExp ">" AExp              [seqstrict]
@@ -24,7 +24,7 @@ module IMP-SYNTAX
   syntax Ids ::= List{Id,","}
 
   // special identifiers (for matching-logic specifications)
-  // syntax Id ::= "n" | "sum"
+  syntax Id ::= Token{"n"} | Token{"sum"}   [prefer]
 endmodule
 
 module IMP

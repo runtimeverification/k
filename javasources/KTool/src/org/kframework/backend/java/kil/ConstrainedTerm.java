@@ -1,6 +1,5 @@
 package org.kframework.backend.java.kil;
 
-import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
@@ -30,36 +29,42 @@ public class ConstrainedTerm extends Term {
         this.constraint = constraint;
     }
 
-    public ConstrainedTerm(Term term, SymbolicConstraint constraint, Context context) {
-        this(term, new SymbolicConstraint(context), constraint);
+    public ConstrainedTerm(Term term, SymbolicConstraint constraint, Definition definition) {
+        this(term, new SymbolicConstraint(definition), constraint);
     }
 
-    public ConstrainedTerm(Term term, Context context) {
-        this(term, new SymbolicConstraint(context), new SymbolicConstraint(context));
+    public ConstrainedTerm(Term term,  Definition definition) {
+        this(term, new SymbolicConstraint(definition), new SymbolicConstraint(definition));
     }
 
     public SymbolicConstraint constraint() {
         return constraint;
     }
-    public boolean implies(ConstrainedTerm constrainedTerm, Context context) {
-        return match(constrainedTerm, context) != null;
+    public boolean implies(ConstrainedTerm constrainedTerm,  Definition definition) {
+        return match(constrainedTerm, definition) != null;
     }
 
-    public SymbolicConstraint match(ConstrainedTerm constrainedTerm, Context context) {
-        SymbolicConstraint unificationConstraint = new SymbolicConstraint(context);
-        unificationConstraint.add(term, constrainedTerm.term());
+    public SymbolicConstraint match(ConstrainedTerm constrainedTerm,  Definition definition) {
+        SymbolicConstraint unificationConstraint = new SymbolicConstraint(definition);
+        unificationConstraint.add(term, constrainedTerm.term);
         unificationConstraint.simplify();
         if (unificationConstraint.isFalse() || !unificationConstraint.isSubstitution()) {
             return null;
         }
 
+        SymbolicConstraint implicationConstraint = new SymbolicConstraint(definition);
+        implicationConstraint.addAll(unificationConstraint);
+        implicationConstraint.addAll(constrainedTerm.lookups);
+        implicationConstraint.addAll(constrainedTerm.constraint);
+        implicationConstraint.simplify();
+
         unificationConstraint.addAll(constraint);
         unificationConstraint.simplify();
-
-        if (!constraint.implies(constrainedTerm.constraint())) {
+        if (!unificationConstraint.implies(implicationConstraint)) {
             return null;
         }
-        unificationConstraint.addAll(constrainedTerm.constraint());
+
+        unificationConstraint.addAll(implicationConstraint);
 
         return unificationConstraint;
     }
@@ -75,8 +80,8 @@ public class ConstrainedTerm extends Term {
         return term;
     }
 
-    public Collection<SymbolicConstraint> unify(ConstrainedTerm constrainedTerm, Context context) {
-        SymbolicConstraint unificationConstraint = new SymbolicConstraint(context);
+    public Collection<SymbolicConstraint> unify(ConstrainedTerm constrainedTerm,  Definition definition) {
+        SymbolicConstraint unificationConstraint = new SymbolicConstraint(definition);
         unificationConstraint.add(term, constrainedTerm.term());
         unificationConstraint.simplify();
         if (unificationConstraint.isFalse()) {
@@ -120,13 +125,15 @@ public class ConstrainedTerm extends Term {
         }
 
         ConstrainedTerm constrainedTerm = (ConstrainedTerm) object;
-        return term.equals(constrainedTerm.term) && constraint.equals(constrainedTerm.constraint);
+        return term.equals(constrainedTerm.term) && lookups.equals(constrainedTerm.lookups)
+               && constraint.equals(constrainedTerm.constraint);
     }
 
     @Override
     public int hashCode() {
         int hash = 1;
         hash = hash * Utils.HASH_PRIME + term.hashCode();
+        hash = hash * Utils.HASH_PRIME + lookups.hashCode();
         hash = hash * Utils.HASH_PRIME + constraint.hashCode();
         return hash;
     }

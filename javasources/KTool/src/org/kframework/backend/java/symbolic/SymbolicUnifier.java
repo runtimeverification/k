@@ -1,7 +1,5 @@
 package org.kframework.backend.java.symbolic;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.AnonymousVariable;
 import org.kframework.backend.java.builtins.BoolToken;
@@ -10,6 +8,7 @@ import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Hole;
 import org.kframework.backend.java.kil.KLabelFreezer;
@@ -23,7 +22,6 @@ import org.kframework.backend.java.kil.MetaVariable;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.kil.loader.Context;
 import org.kframework.kil.matchers.MatcherException;
 
 import java.util.ArrayList;
@@ -32,7 +30,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Multimap;
 
 
 /**
@@ -45,11 +45,11 @@ public class SymbolicUnifier extends AbstractUnifier {
     private SymbolicConstraint constraint;
     private boolean isStarNested;
     public Collection<Collection<SymbolicConstraint>> multiConstraints;
-    private final Context context;
+    private final Definition definition;
 
-    public SymbolicUnifier(SymbolicConstraint constraint, Context context) {
+    public SymbolicUnifier(SymbolicConstraint constraint, Definition definition) {
         this.constraint = constraint;
-        this.context = context;
+        this.definition = definition;
         multiConstraints = new ArrayList<Collection<SymbolicConstraint>>();
     }
 
@@ -176,8 +176,12 @@ public class SymbolicUnifier extends AbstractUnifier {
                     cellCollection.isStar());
         } else {
             assert !isStarNested : "nested cells with multiplicity='*' not supported";
-            assert !cellCollection.hasFrame();
-            assert cellCollection.size() >= otherCellCollection.size();
+            // TODO(AndreiS): fix this assertions
+            //assert !cellCollection.hasFrame();
+            //assert cellCollection.size() >= otherCellCollection.size();
+            if (!(!cellCollection.hasFrame() && cellCollection.size() >= otherCellCollection.size())) {
+                fail();
+            }
 
             String label = unifiableCellLabels.iterator().next();
             Cell[] cells = cellCollection.get(label).toArray(new Cell[0]);
@@ -194,7 +198,7 @@ public class SymbolicUnifier extends AbstractUnifier {
             Collection<SymbolicConstraint> constraints = new ArrayList<SymbolicConstraint>();
             SelectionGenerator generator = new SelectionGenerator(otherCells.length, cells.length);
             do {
-                constraint = new SymbolicConstraint(context);
+                constraint = new SymbolicConstraint(definition);
 
                 try {
                     for (int i = 0; i < otherCells.length; ++i) {

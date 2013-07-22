@@ -1,12 +1,19 @@
 package org.kframework.backend.java.kil;
 
-import com.google.common.collect.ImmutableSet;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.visitors.Transformer;
-import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.kil.Attribute;
+import org.kframework.kil.loader.Context;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
 
 
 /**
@@ -14,43 +21,77 @@ import java.util.Set;
  *
  * @author AndreiS
  */
-public class Definition extends ASTNode {
+public class Definition extends JavaSymbolicObject {
 
     public static final Set<String> TOKEN_SORTS = ImmutableSet.of("Bool", "Int", "Id");
 
-    private final Set<Rule> rules;
+    private final List<Rule> rules;
+    private final Multimap<KLabelConstant, Rule> functionRules = HashMultimap.create();
     private final Set<KLabelConstant> kLabels;
     private final Set<KLabelConstant> frozenKLabels;
+    private final Context context;
 
-    public Definition(
-            Set<Rule> rules,
-            Set<KLabelConstant> kLabels,
-            Set<KLabelConstant> frozenKLabels) {
-        this.rules = rules;
-        this.kLabels = kLabels;
-        this.frozenKLabels = frozenKLabels;
+    public Definition(Context context) {
+        this.context = context;
+        rules = new ArrayList<Rule>();
+        kLabels = new HashSet<KLabelConstant>();
+        frozenKLabels = new HashSet<KLabelConstant>();
     }
 
-    public Set<Rule> rules() {
-        return rules;
+    public void addFrozenKLabel(KLabelConstant frozenKLabel) {
+        frozenKLabels.add(frozenKLabel);
     }
 
-    public Set<KLabelConstant> kLabels() {
-        return kLabels;
+
+    public void addKLabel(KLabelConstant kLabel) {
+        kLabels.add(kLabel);
+    }
+
+    public void addRule(Rule rule) {
+        if (!rule.containsAttribute(Attribute.FUNCTION_KEY)) {
+            rules.add(rule);
+        } else {
+            functionRules.put(rule.functionKLabel(), rule);
+        }
+    }
+
+    public void addRuleCollection(Collection<Rule> rules) {
+        for (Rule rule : rules) {
+            addRule(rule);
+        }
+    }
+
+    public void addFrozenKLabelCollection(Collection<KLabelConstant> frozenKLabels) {
+        for (KLabelConstant frozenKLabel : frozenKLabels) {
+            frozenKLabels.add(frozenKLabel);
+        }
+
+    }
+
+    public void addKLabelCollection(Collection<KLabelConstant> kLabels) {
+        for (KLabelConstant kLabel : kLabels) {
+            kLabels.add(kLabel);
+        }
+    }
+
+    public Context context() {
+        return context;
+    }
+
+    public Multimap<KLabelConstant, Rule> functionRules() {
+        return functionRules;
     }
 
     public Set<KLabelConstant> frozenKLabels() {
         return frozenKLabels;
     }
 
-    @Override
-    public ASTNode shallowCopy() {
-        throw new UnsupportedOperationException();
+    public Set<KLabelConstant> kLabels() {
+        return Collections.unmodifiableSet(kLabels);
     }
 
-    @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
-        throw new UnsupportedOperationException();
+    public Collection<Rule> rules() {
+        return Collections.unmodifiableList(rules);
     }
 
     @Override

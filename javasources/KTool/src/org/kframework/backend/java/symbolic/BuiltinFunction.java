@@ -2,12 +2,11 @@ package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.builtins.MetaK;
 import org.kframework.backend.java.builtins.SortMembership;
-import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Production;
-import org.kframework.kil.loader.Context;
 import org.kframework.utils.file.KPaths;
 
 import java.io.FileInputStream;
@@ -18,8 +17,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+
 /**
- * @author: AndreiS
+ * @author AndreiS
  */
 public class BuiltinFunction {
 
@@ -29,7 +29,7 @@ public class BuiltinFunction {
      */
     private static final Map<KLabelConstant, Method> table = new HashMap<KLabelConstant, Method>();
 
-    public static void init(Context context) {
+    public static void init(Definition definition) {
         /* initialize {@code table} */
         try {
             String separator = System.getProperty("file.separator");
@@ -37,8 +37,8 @@ public class BuiltinFunction {
             Properties properties = new Properties();
             properties.load(new FileInputStream(path + separator + "hooks.properties"));
 
-            for (String label : context.labels.keySet()) {
-                for (Production production : context.productionsOf(label)) {
+            for (String label : definition.context().labels.keySet()) {
+                for (Production production : definition.context().productionsOf(label)) {
                     if (production.containsAttribute(Attribute.HOOK_KEY)) {
                         try {
                             String hook = properties.getProperty(
@@ -48,7 +48,9 @@ public class BuiltinFunction {
                             Class c = Class.forName(className);
                             for (Method method : c.getDeclaredMethods()) {
                                 if (method.getName().equals(methodName)) {
-                                    table.put(KLabelConstant.of(label, context), method);
+                                    table.put(
+                                            KLabelConstant.of(label, definition.context()),
+                                            method);
                                     break;
                                 }
                             }
@@ -63,10 +65,10 @@ public class BuiltinFunction {
         }
 
         /* initialize sort information in {@code SortMembership} */
-        SortMembership.init(context);
+        SortMembership.init(definition.context());
 
         /* initialize sort information in {@code MetaK} */
-        MetaK.init(context);
+        MetaK.init(definition);
     }
 
     public static Term invoke(KLabelConstant label, Term ... arguments)

@@ -5,7 +5,6 @@ import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.loader.Context;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,14 +22,14 @@ import com.google.common.collect.Multimap;
  */
 public class CopyOnWriteTransformer implements Transformer {
 
-    private final Context context;
+    protected final Definition definition;
 	
-	public CopyOnWriteTransformer(Context context) {
-		this.context = context;
+	public CopyOnWriteTransformer( Definition definition) {
+		this.definition = definition;
 	}
 
     public CopyOnWriteTransformer() {
-        this.context = null;
+        this.definition = null;
     }
 	
     @Override
@@ -132,7 +131,7 @@ public class CopyOnWriteTransformer implements Transformer {
         KLabel kLabel = (KLabel) kItem.kLabel().accept(this);
         KList kList = (KList) kItem.kList().accept(this);
         if (kLabel != kItem.kLabel() || kList != kItem.kList()) {
-            kItem = new KItem(kLabel, kList, context);
+            kItem = new KItem(kLabel, kList, definition.context());
         }
         return kItem;
     }
@@ -393,7 +392,7 @@ public class CopyOnWriteTransformer implements Transformer {
 
     @Override
     public ASTNode transform(SymbolicConstraint symbolicConstraint) {
-        SymbolicConstraint transformedSymbolicConstraint = new SymbolicConstraint(context);
+        SymbolicConstraint transformedSymbolicConstraint = new SymbolicConstraint(definition);
 
         for (Map.Entry<Variable, Term> entry : symbolicConstraint.substitution().entrySet()) {
             transformedSymbolicConstraint.add(

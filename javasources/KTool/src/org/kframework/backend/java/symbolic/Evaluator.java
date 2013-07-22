@@ -2,23 +2,22 @@ package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.loader.Context;
 
 
 /**
- * @author: AndreiS
+ * @author AndreiS
  */
 public class Evaluator extends CopyOnWriteTransformer {
 
     private class LocalEvaluator extends CopyOnWriteTransformer {
 
-        public LocalEvaluator(Context context) {
-            super(context);
+        public LocalEvaluator(Definition definition) {
+            super(definition);
         }
 
         @Override
         public ASTNode transform(KItem kItem) {
-            return kItem.evaluateFunction();
+            return kItem.evaluateFunction(definition);
         }
 
         @Override
@@ -45,9 +44,9 @@ public class Evaluator extends CopyOnWriteTransformer {
 
     private final Transformer localEvaluator;
 
-    public Evaluator(Context context) {
-        super(context);
-        localEvaluator = new LocalEvaluator(context);
+    public Evaluator(Definition definition) {
+        super(definition);
+        localEvaluator = new LocalEvaluator(definition);
     }
 
     @Override

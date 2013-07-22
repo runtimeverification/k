@@ -194,7 +194,12 @@ public class BottomUpVisitor implements Visitor {
         rule.leftHandSide().accept(this);
         rule.rightHandSide().accept(this);
         rule.lookups().accept(this);
-        rule.condition().accept(this);
+        for (Term term : rule.condition()) {
+            term.accept(this);
+        }
+        for (Variable variable : rule.freshVariables()) {
+            variable.accept(this);
+        }
     }
 
     @Override

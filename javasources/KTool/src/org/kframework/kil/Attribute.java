@@ -15,11 +15,12 @@ import org.w3c.dom.Element;
 public class Attribute extends ASTNode {
 
     public static final String BUILTIN_KEY = "bruiltin";
+    public static final String FUNCTION_KEY = "function";
     public static final String HOOK_KEY = "hook";
     public static final String SIMPLIFICATION_KEY = "simplification";
 
     public static final Attribute BRACKET = new Attribute("bracket", "");
-    public static final Attribute FUNCTION = new Attribute("function", "");
+    public static final Attribute FUNCTION = new Attribute(FUNCTION_KEY, "");
     public static final Attribute PREDICATE = new Attribute("predicate", "");
     public static final Attribute ANYWHERE = new Attribute("anywhere", "");
     public static final Attribute EQUALITY = new Attribute("equality", "");

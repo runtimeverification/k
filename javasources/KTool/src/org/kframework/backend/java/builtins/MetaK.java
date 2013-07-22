@@ -1,6 +1,7 @@
 package org.kframework.backend.java.builtins;
 
 import org.kframework.backend.java.kil.BuiltinSet;
+import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.MetaVariable;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
@@ -15,12 +16,12 @@ import java.util.Set;
  */
 public class MetaK {
 
-    private static Context context = null;
+    private static Definition definition = null;
 
-    public static void init(Context context) {
-        assert MetaK.context == null;
+    public static void init(Definition definition) {
+        assert MetaK.definition == null;
 
-        MetaK.context = context;
+        MetaK.definition = definition;
     }
 
     public static Term rename(Term term, BuiltinSet builtinSet) {
@@ -37,7 +38,7 @@ public class MetaK {
             variables.add(new Variable((MetaVariable) element));
         }
 
-        return term.substitute(Variable.getFreshSubstitution(variables), context);
+        return term.substitute(Variable.getFreshSubstitution(variables), definition);
     }
 
     public static BuiltinSet variables(Term term) {

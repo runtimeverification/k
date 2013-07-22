@@ -1,9 +1,10 @@
 package org.kframework.backend.java.kil;
 
+import org.kframework.backend.java.symbolic.VariableVisitor;
+import org.kframework.backend.java.symbolic.Visitable;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.visitors.Transformer;
-import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
+
+import java.util.Set;
 
 
 /**
@@ -11,9 +12,16 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  *
  * @author: AndreiS
  */
-public abstract class JavaSymbolicObject extends ASTNode {
+public abstract class JavaSymbolicObject extends ASTNode implements Visitable {
 
-
+    /**
+     * Returns a {@code Set} view of the variables in this java symbolic object.
+     */
+    public Set<Variable> variableSet() {
+        VariableVisitor visitor = new VariableVisitor();
+        accept(visitor);
+        return visitor.getVariableSet();
+    }
 
     @Override
     public ASTNode shallowCopy() {
@@ -21,12 +29,13 @@ public abstract class JavaSymbolicObject extends ASTNode {
     }
 
     @Override
-    public ASTNode accept(Transformer transformer) throws TransformerException {
+    public ASTNode accept(org.kframework.kil.visitors.Transformer transformer)
+            throws org.kframework.kil.visitors.exceptions.TransformerException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void accept(Visitor visitor) {
+    public void accept(org.kframework.kil.visitors.Visitor visitor) {
         throw new UnsupportedOperationException();
     }
 }

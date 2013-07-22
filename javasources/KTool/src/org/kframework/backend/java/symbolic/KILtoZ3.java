@@ -14,6 +14,8 @@ import org.kframework.kil.ASTNode;
 
 import com.microsoft.z3.Context;
 
+import java.util.Set;
+
 
 /**
  * @author: AndreiS
@@ -21,8 +23,10 @@ import com.microsoft.z3.Context;
 public class KILtoZ3 extends CopyOnWriteTransformer {
 
     private final Context context;
+    private final Set<Variable> boundVariables;
 
-    public KILtoZ3(Context context) {
+    public KILtoZ3(Set<Variable> boundVariables, Context context) {
+        this.boundVariables = boundVariables;
         this.context = context;
     }
 
@@ -61,12 +65,12 @@ public class KILtoZ3 extends CopyOnWriteTransformer {
                 BoolExpr booleanExpression
                         = (BoolExpr) ((Z3Term) kItem.kList().get(0).accept(this)).expression();
                 return new Z3Term(context.MkNot(booleanExpression));
-            } else if (kLabel.label().equals("'_andBool_") && kItem.kList().size() == 1) {
+            } else if (kLabel.label().equals("'_andBool_") && kItem.kList().size() == 2) {
                 BoolExpr[] booleanExpressions = {
                         (BoolExpr) ((Z3Term) kItem.kList().get(0).accept(this)).expression(),
                         (BoolExpr) ((Z3Term) kItem.kList().get(1).accept(this)).expression()};
                 return new Z3Term(context.MkAnd(booleanExpressions));
-            } else if (kLabel.label().equals("'_orBool_") && kItem.kList().size() == 1) {
+            } else if (kLabel.label().equals("'_orBool_") && kItem.kList().size() == 2) {
                 BoolExpr[] booleanExpressions = {
                         (BoolExpr) ((Z3Term) kItem.kList().get(0).accept(this)).expression(),
                         (BoolExpr) ((Z3Term) kItem.kList().get(1).accept(this)).expression()};
@@ -164,8 +168,13 @@ public class KILtoZ3 extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(Variable variable) {
+        return KILtoZ3.valueOf(variable, context);
+    }
+
+    public static Z3Term valueOf(Variable variable, Context context) {
         try {
             if (variable.sort().equals(BoolToken.SORT_NAME)) {
+                //if (boundVariables.contains(variable)) {}
                 return new Z3Term(context.MkBoolConst(variable.name()));
             } else if (variable.sort().equals(IntToken.SORT_NAME)) {
                 return new Z3Term(context.MkIntConst(variable.name()));
