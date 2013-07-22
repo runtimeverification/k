@@ -17,8 +17,8 @@ module STRING-HOOKS
   syntax Bool ::= String "==String" String [function, left, hook(#STRING:_==String_)]
 
   syntax Int ::= "lengthString" "(" String ")" [function, klabel(lengthString), hook(#STRING:lengthString)]
-  syntax String ::= "chrChar" "(" Int ")"   [function, klabel(chrString), hook(#STRING:chrChar)]
-  syntax Int ::= "ordChar" "(" String ")"  [function, klabel(ordString), hook(#STRING:ordChar)]
+  syntax String ::= "chrChar" "(" Int ")"   [function, klabel(chrChar), hook(#STRING:chrChar)]
+  syntax Int ::= "ordChar" "(" String ")"  [function, klabel(ordChar), hook(#STRING:ordChar)]
 
   syntax String ::= "substrString" "(" String "," Int "," Int ")" [function, klabel(substrString), hook(#STRING:substrString)]
   syntax Int ::= "findString" "(" String "," String "," Int ")" [function, klabel(findString), hook(#STRING:findString)]
