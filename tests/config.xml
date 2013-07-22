@@ -716,5 +716,12 @@
   </test>
 
 
+  <test
+      language="tests/regression/lint/test.k"
+      folder="tests/regression/lint"
+      extensions="test">
+    <kompile-option name="-w" />
+  </test>
+
 </tests>
 
