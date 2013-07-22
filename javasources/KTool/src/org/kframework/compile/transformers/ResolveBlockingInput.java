@@ -37,7 +37,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
 				if ("stdin".equals(stream)) {
                     String delimiter = node.getCellAttributes().get("delimiters");
                     if (delimiter == null) {
-                        delimiter = " \n";
+                        delimiter = " \n\t\r";
                     }
 					inputCells.put(node.getLabel(), delimiter);
 				}

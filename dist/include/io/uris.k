@@ -127,7 +127,8 @@ module URIS
 
   // when we reach whitespace, if it parses create a ListItem
   rule (#parseInput("String", Delimiters:String) => ListItem(S)) #buffer(S:String => "") when findChar(S, Delimiters, 0) =/=Int -1
-  rule (#parseInput(Sort:String, Delimiters:String) => ListItem(#parse(S, Sort))) #buffer(S:String => "") when findChar(S, Delimiters, 0) =/=Int -1 andBool Sort =/=String "String"
+  rule (#parseInput(Sort:String, Delimiters:String) => ListItem(#parse(substrString(S, 0, lengthString(S) -Int 1), Sort))) #buffer(S:String => "") when findChar(S, Delimiters, 0) =/=Int -1 andBool Sort =/=String "String" andBool lengthString(S) >Int 1
+  rule #parseInput(Sort:String, Delimiters:String) #buffer(S => substrString(S, 1, lengthString(S))) when findChar(S, Delimiters, 0) =/=Int -1 andBool Sort =/=String "String" andBool lengthString(S) <=Int 1
   
   syntax ListItem ::= "#istream" "(" Int ")"        [cons(ListItem1InputStreamSyn)]
                     | "#ostream" "(" Int ")"        [cons(ListItem1OutputStreamSyn)]
