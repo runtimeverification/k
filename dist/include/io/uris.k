@@ -105,9 +105,9 @@ module URIS
   rule #statTypes(S1:String,,S2:String,,S3:String,,S4:String,,S5:String,,S6:String,,S7:String,,S8:String,,S9:String,,S10:String,,S11:String,,S12:String) => String2Int(S1),,String2Int(S2),,String2Int(S3),,String2Bool(S4),,String2Bool(S5),,String2Bool(S6),,String2Int(S7),,String2Int(S8),,String2Int(S9),,String2Int(S10),,String2Int(S11),,String2Int(S12)
   rule #statTypes(K:K) => K
 
-  rule #buffer(Buffer => Buffer +String Float2String(F)) (ListItem(F:Float) => .List)
-  rule #buffer(Buffer => Buffer +String Int2String(I)) (ListItem(I:Int) => .List)
-  rule #buffer(Buffer => Buffer +String S) (ListItem(S:String) => .List)
+  rule #buffer(Buffer:String => Buffer +String Float2String(F)) (ListItem(F:Float) => .List)
+  rule #buffer(Buffer:String => Buffer +String Int2String(I)) (ListItem(I:Int) => .List)
+  rule #buffer(Buffer:String => Buffer +String S) (ListItem(S:String) => .List)
 
   // Send first char from the buffer to the server
   rule #ostream((. => #write(N, S) ~> #flush(N)) ~> N:Int) #buffer(S:String => "")
@@ -123,12 +123,12 @@ module URIS
   syntax ListItem ::= "#buffer" "(" K ")"           [cons(ListItem1IOBufferSyn)]
 
   // read one character at a time until we read whitespace
-  rule #parseInput(Sort:String, Delimiters:String) #buffer(S => S +String chrChar(#getc(N))) #istream(N) when findChar(S, Delimiters, 0) ==Int -1
+  rule #parseInput(_, Delimiters:String) #buffer(S:String => S +String chrChar(#getc(N))) #istream(N:Int) when findChar(S, Delimiters, 0) ==Int -1
 
   // when we reach whitespace, if it parses create a ListItem
   rule (#parseInput("String", Delimiters:String) => ListItem(S)) #buffer(S:String => "") when findChar(S, Delimiters, 0) =/=Int -1
   rule (#parseInput(Sort:String, Delimiters:String) => ListItem(#parse(substrString(S, 0, lengthString(S) -Int 1), Sort))) #buffer(S:String => "") when findChar(S, Delimiters, 0) =/=Int -1 andBool Sort =/=String "String" andBool lengthString(S) >Int 1
-  rule #parseInput(Sort:String, Delimiters:String) #buffer(S => substrString(S, 1, lengthString(S))) when findChar(S, Delimiters, 0) =/=Int -1 andBool Sort =/=String "String" andBool lengthString(S) <=Int 1
+  rule #parseInput(Sort:String, Delimiters:String) #buffer(S:String => substrString(S, 1, lengthString(S))) when findChar(S, Delimiters, 0) =/=Int -1 andBool Sort =/=String "String" andBool lengthString(S) <=Int 1
   
   syntax ListItem ::= "#istream" "(" Int ")"        [cons(ListItem1InputStreamSyn)]
                     | "#ostream" "(" Int ")"        [cons(ListItem1OutputStreamSyn)]
