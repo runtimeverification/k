@@ -4,6 +4,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="src" path="lib/resources"/>
 	<classpathentry kind="lib" path="../../dist/lib/java/aterm-java.jar"/>
+	<classpathentry kind="lib" path="../../dist/lib/java/com.microsoft.z3.jar"/>
 	<classpathentry kind="lib" path="../../dist/lib/java/collections-generic-4.01.jar"/>
 	<classpathentry kind="lib" path="../../dist/lib/java/commons-cli-1.2.jar"/>
 	<classpathentry kind="lib" path="../../dist/lib/java/commons-io-2.1.jar"/>
@@ -20,5 +21,6 @@
 	<classpathentry kind="lib" path="../../dist/lib/java/jung-visualization-2.0.1.jar"/>
 	<classpathentry kind="lib" path="../../dist/lib/java/strategoxt.jar"/>
 	<classpathentry kind="lib" path="../../dist/lib/java/xstream.jar"/>
+	<classpathentry kind="lib" path="../../dist/bin/java/aterm-java.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -22,10 +22,8 @@ public class TypeSystemFilter extends BasicTransformer {
 		// choose only the allowed subsorts for a TermCons
 		if (tc.getProduction().getItems().get(0).getType() == ProductionType.USERLIST) {
 			UserList ulist = (UserList) tc.getProduction().getItems().get(0);
-			tc.getContents().set(0, (Term) tc.getContents().get(0).accept(new TypeSystemFilter2(ulist.getSort(),
-                    context)));
-			tc.getContents().set(1, (Term) tc.getContents().get(1).accept(new TypeSystemFilter2(tc.getProduction().getSort(),
-                    context)));
+			tc.getContents().set(0, (Term) tc.getContents().get(0).accept(new TypeSystemFilter2(ulist.getSort(), context)));
+			tc.getContents().set(1, (Term) tc.getContents().get(1).accept(new TypeSystemFilter2(tc.getProduction().getSort(), context)));
 		} else {
 			int j = 0;
 			Production prd = tc.getProduction();
@@ -33,8 +31,7 @@ public class TypeSystemFilter extends BasicTransformer {
 				if (prd.getItems().get(i).getType() == ProductionType.SORT) {
 					Sort sort = (Sort) prd.getItems().get(i);
 					Term child = (Term) tc.getContents().get(j);
-					tc.getContents().set(j, (Term) child.accept(new TypeSystemFilter2(sort.getName(),
-                            context)));
+					tc.getContents().set(j, (Term) child.accept(new TypeSystemFilter2(sort.getName(), context)));
 					j++;
 				}
 			}
@@ -44,8 +41,7 @@ public class TypeSystemFilter extends BasicTransformer {
 	}
 
 	public ASTNode transform(Cast cast) throws TransformerException {
-		cast.setContent((Term) cast.getContent().accept(new TypeSystemFilter2(cast.getSort(),
-                context)));
+		cast.setContent((Term) cast.getContent().accept(new TypeSystemFilter2(cast.getSort(), context)));
 		return super.transform(cast);
 	}
 }
