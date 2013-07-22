@@ -6,7 +6,8 @@ module URIS
   imports #K-PRINTER-INTERFACE
  
 // B, N, and P are really supposed to be Nat
-  syntax K ::= "#open" "(" String ")" [function, hook(#IO:#open)]
+  syntax K ::= "#open" "(" String ")" [function]
+             | "#open" "(" String "," String ")" [function, hook(#IO:#open)]
              | "#reopen" "(" Int "," String ")" [function, hook(#IO:#reopen)]
              | "#close" "(" Int ")" [function, hook(#IO:#close)]
              | "#eof" "(" Int ")"  [function, hook(#IO:#eof)]
@@ -26,7 +27,8 @@ module URIS
                  | "#opendir" "(" String ")" [function, hook(#IO:#opendir)]
 
   syntax K ::= "#parse" "(" String "," String ")" [function, klabel(#parse), hook(#K-PARSER:#parse)]
-  rule #open(S:String) => String2Int((#tcpRequest("open\x01" +String S +String "\x01"))::K)
+  rule #open(S:String) => #open(S:String, "w")
+  rule #open(S:String, Mode:String) => String2Int((#tcpRequest("open\x01file:" +String S +String "\x01" +String Mode +String "\x01"))::K)
 
   rule #close(N:Int) 
       => String2DotK((#tcpRequest("close\x01" +String Int2String(N) +String "\x01"))::K)

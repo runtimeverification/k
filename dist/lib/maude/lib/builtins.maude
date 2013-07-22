@@ -727,6 +727,7 @@ mod #STRING is
 
   op substrString : #String #Nat #Nat -> #String .
   ceq substrString(S1:#String, I1:#Nat, I2:#Nat) = substr(S1:#String, I1:#Nat, I2:#Nat -Int I1:#Nat) if I2:#Nat >=Nat I1:#Nat .
+  ceq substrString(S1:#String, I1:#Nat, I2:#Nat) = "" if I2:#Nat <Nat I1:#Nat .
 
   op findString : #String #String #Int -> #Int
         [special (id-hook StringOpSymbol (find)
