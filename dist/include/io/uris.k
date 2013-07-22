@@ -6,57 +6,53 @@ module URIS
   imports #K-PRINTER-INTERFACE
  
 // B, N, and P are really supposed to be Nat
-  syntax K ::= String | Int | Float
-             | "#open" "(" String ")"
-             | "#reopen" "(" Int "," String ")"
-             | "#close" "(" Int ")"
-             | "#fEof" "(" Int ")"
-             | "#tell" "(" Int ")"
-             | "#seek" "(" Int "," Int ")"
-             | "#fPeekByte" "(" Int ")"
-             | "String2Bool" "(" String ")"
-             | "#ioError" "(" String ")"
+  syntax K ::= "#open" "(" String ")" [function, hook(#IO:#open)]
+             | "#reopen" "(" Int "," String ")" [function, hook(#IO:#reopen)]
+             | "#close" "(" Int ")" [function, hook(#IO:#close)]
+             | "#eof" "(" Int ")"  [function, hook(#IO:#eof)]
+             | "#tell" "(" Int ")" [function, hook(#IO:#tell)] 
+             | "#seek" "(" Int "," Int ")" [function, hook(#IO:#seek)]
+             | "#peek" "(" Int ")" [function, hook(#IO:#peek)]
+             | "#putc" "(" Int "," Int ")"      [function, hook(#IO:#putc)]
+             | "#flush" "(" Int ")"                 [function, hook(#IO:#flush)]
+             | "#getc" "(" Int ")"             [function, hook(#IO:getc)]
+             | "#read" "(" Int "," Int ")"    [function, hook(#IO:#read)]
+             | "#write" "(" Int "," String ")" [function, hook(#IO:#write)]
+             
+  syntax K ::= "#ioError" "(" String ")"
  
-  syntax K ::= "#fPutByte" "(" Int "," Int ")"      [function, klabel(#fPutByte)]
-             | "#flush" "(" Int ")"                 [function, klabel(#flush)]
-             | "#fReadByte" "(" Int ")"             [function, klabel(#fReadByte)]
-             | "#fReadBytes" "(" Int "," Int ")"    [function, klabel(#fReadBytes)]
-             | "#fPutBytes" "(" Int "," String ")" [function, klabel(#fPutBytes)]
- 
-  syntax KList ::= "#stat" "(" String ")" [function]
-                 | "#lstat" "(" String ")" [function]
-                 | "#opendir" "(" String ")" [function]
+  syntax KList ::= "#stat" "(" String ")" [function, hook(#IO:#stat)]
+                 | "#lstat" "(" String ")" [function, hook(#IO:#lstat)]
+                 | "#opendir" "(" String ")" [function, hook(#IO:#opendir)]
 
-  syntax K ::= "#parse" "(" String "," String ")" [function, klabel(#parse)]
-  rule #open(S:String) => String2Int((#tcpRequest("open\x01" +String S +String "\x01"))::K) [function, anywhere]
+  syntax K ::= "#parse" "(" String "," String ")" [function, klabel(#parse), hook(#K-PARSER:#parse)]
+  rule #open(S:String) => String2Int((#tcpRequest("open\x01" +String S +String "\x01"))::K)
 
   rule #close(N:Int) 
-      => String2DotK((#tcpRequest("close\x01" +String Int2String(N) +String "\x01"))::K) [function, anywhere]
+      => String2DotK((#tcpRequest("close\x01" +String Int2String(N) +String "\x01"))::K)
 
-  syntax K ::= "String2DotK" "(" TCPAnswer ")"  [function, klabel(String2DotK)]
-  rule String2DotK(S:String) => #ioError(#retrieveTCPError(S)) when #isTCPError(S) [function, anywhere]
-  rule String2DotK(S:String) => .K when notBool(#isTCPError(S)) [function, anywhere]
+  syntax K ::= String2DotK(TCPAnswer)  [function]
+  rule String2DotK(S:String) => #ioError(#retrieveTCPError(S)) when #isTCPError(S)
+  rule String2DotK(S:String) => .K when notBool(#isTCPError(S))
   rule String2DotK(E:TCPError) => E 
 
+  syntax Bool ::= String2Bool(TCPAnswer) [function]
+  rule String2Bool("0") => false
+  rule String2Bool("false") => false
+  rule String2Bool("1") => true
+  rule String2Bool("true") => true
 
-  rule String2Bool("0") => false [anywhere]
-  rule String2Bool("false") => false [anywhere]
-  rule String2Bool("1") => true [anywhere]
-  rule String2Bool("true") => true [anywhere]
+  rule #flush(N:Int) => String2DotK((#tcpRequest("flush\x01" +String Int2String(N) +String "\x01"))::K)
 
-  rule #flush(N:Int) => String2DotK((#tcpRequest("flush\x01" +String Int2String(N) +String "\x01"))::K) [function, anywhere]
-
-  rule #tell(N:Int) => String2DotK((#tcpRequest("position\x01" +String Int2String(N) +String "\x01"))::K) [function, anywhere]
-
-  rule #tell(N:Int) => String2Int((#tcpRequest("tell\x01" +String Int2String(N) +String "\x01"))::K) [function, anywhere]
+  rule #tell(N:Int) => String2DotK((#tcpRequest("position\x01" +String Int2String(N) +String "\x01"))::K)
 
   rule #seek(N:Int,P:Int) 
       => String2DotK((#tcpRequest("seek\x01" +String Int2String(N) +String "\x01"
-                              +String Int2String(P) +String "\x01"))::K) [function, anywhere]
+                              +String Int2String(P) +String "\x01"))::K)
 
   rule #reopen(N:Int,S:String) 
       => String2DotK((#tcpRequest("reopen\x01" +String Int2String(N) +String "\x01"
-                              +String S +String "\x01"))::K) [function, anywhere]
+                              +String S +String "\x01"))::K)
 
   syntax Int ::= "#stdin"   [function] 
                 | "#stdout" [function]
@@ -65,40 +61,30 @@ module URIS
   rule #stdout => 1
   rule #stderr => 2
 
-  syntax K ::= "#readByte" "(" ")" 
-             | "#peekByte" "(" ")"
-             | "#putByte" "(" Int ")"
-             | "#eof" "(" ")"
-  rule #readByte() => #fReadByte(#stdin) [function, anywhere]
+  rule #getc(N:Int) 
+      => #string2Int(#tcpRequest("readbyte\x01" +String Int2String(N) +String "\x01"))
 
-  rule #fReadByte(N:Int) 
-      => #string2Int(#tcpRequest("readbyte\x01" +String Int2String(N) +String "\x01")) [function, anywhere]
-
-  rule #fReadBytes(N:Int, NumBytes:Int)
-      => #tcpRequest("readbytes\x01" +String Int2String(N) +String "\x01" +String Int2String(NumBytes) +String "\x01") [function, anywhere]
+  rule #read(N:Int, NumBytes:Int)
+      => #tcpRequest("readbytes\x01" +String Int2String(N) +String "\x01" +String Int2String(NumBytes) +String "\x01")
 
   syntax K ::= "#string2Int" "(" K ")"   [function, klabel(#string2Int)]
 
-  rule #string2Int(S:String) => String2Int(S) when lengthString(S) >=Int 0 [function, anywhere]
-  rule #string2Int(#EOF) => #EOF [function, anywhere]
+  rule #string2Int(S:String) => String2Int(S) when lengthString(S) >=Int 0
+  rule #string2Int(#EOF) => #EOF
 
-  rule #putByte(B:Int) => #fPutByte(#stdout,B) [function, anywhere]
-
-  rule #fPutByte(N:Int,B:Int)
+  rule #putc(N:Int,B:Int)
     => String2DotK((#tcpRequest("writebyte\x01" +String Int2String(N) +String "\x01"
-                              +String Int2String(B) +String "\x01"))::K) [function, anywhere]
+                              +String Int2String(B) +String "\x01"))::K)
 
-  rule #fPutBytes(N:Int,S:String)
+  rule #write(N:Int,S:String)
     => String2DotK((#tcpRequest("writebytes\x01" +String Int2String(N) +String "\x01"
-                              +String S +String "\x01"))::K) [function, anywhere]
+                              +String S +String "\x01"))::K)
 
-  rule #peekByte() => #fPeekByte(#stdin) [function, anywhere]
-  rule #fPeekByte(N:Int)
-    => String2Int((#tcpRequest("peek\x01" +String Int2String(N) +String "\x01"))::K) [function, anywhere]
+  rule #peek(N:Int)
+    => String2Int((#tcpRequest("peek\x01" +String Int2String(N) +String "\x01"))::K)
 
-  rule #eof() => #fEof(#stdin) [function, anywhere]
-  rule #fEof(N:Int)
-    => String2Bool((#tcpRequest("eof\x01" +String Int2String(N) +String "\x01"))::K) [function, anywhere]
+  rule #eof(N:Int)
+    => String2Bool((#tcpRequest("eof\x01" +String Int2String(N) +String "\x01"))::K)
 
   rule #stat(S:String)
     => #statTypes(#string2klist((#tcpRequest("stat\x01" +String S +String "\x01true\x01"))::K))
@@ -117,102 +103,33 @@ module URIS
   rule #statTypes(S1:String,,S2:String,,S3:String,,S4:String,,S5:String,,S6:String,,S7:String,,S8:String,,S9:String,,S10:String,,S11:String,,S12:String) => String2Int(S1),,String2Int(S2),,String2Int(S3),,String2Bool(S4),,String2Bool(S5),,String2Bool(S6),,String2Int(S7),,String2Int(S8),,String2Int(S9),,String2Int(S10),,String2Int(S11),,String2Int(S12)
   rule #statTypes(K:K) => K
 
-  syntax K ::= "#readChar" "(" ")"   [function, klabel(#readChar)]
-  //declare  #readChar() : -> K 
-  rule #readChar() => #fReadChar(#stdin) [function, anywhere]
-
-  syntax K ::= "#fReadChar" "(" Int ")"   [function, klabel(#fReadChar)]
-  rule #fReadChar(N:Int) => #charString(#fReadByte(N)) [function, anywhere]
-
-  syntax K ::= "#charString" "(" K ")"   [function, klabel(#charString)]
-  rule #charString(N:Int) => chrChar(N) [function, anywhere]
-  rule #charString(#EOF) => #EOF [function, anywhere]
-
-  syntax K ::= "#printChar" "(" K ")"   [function, klabel(#printChar)]
-  rule #printChar(C:K) => #fPrintChar(#stdout,C)
-        when isChar(C) [anywhere]
-
-  syntax K ::= "#fPrintChar" "(" Int "," K ")"   [function, klabel(#fPrintChar)]
-  rule #fPrintChar(N:Int,C:String) => #fPutByte(N,ordChar(C)) 
-        when isChar(C) [anywhere]
-
-  rule #buffer(.K => Int2String(I)) (ListItem(I:Int) => .List)
-  rule #buffer(.K => Float2String(F)) (ListItem(F:Float) => .List)
-  rule #buffer(.K => S) (ListItem(S:String) => .List)
-
-  rule #buffer(Buffer:String => Buffer +String Int2String(I)) (ListItem(I:Int) => .List)
-  rule #buffer(Buffer:String => Buffer +String Float2String(F)) (ListItem(F:Float) => .List)
-  rule #buffer(Buffer:String => Buffer +String S) (ListItem(S:String) => .List)
+  rule #buffer(Buffer => Buffer +String Float2String(F)) (ListItem(F:Float) => .List)
+  rule #buffer(Buffer => Buffer +String Int2String(I)) (ListItem(I:Int) => .List)
+  rule #buffer(Buffer => Buffer +String S) (ListItem(S:String) => .List)
 
   // Send first char from the buffer to the server
-  rule #ostream(N:Int) (.List =>  ListItem(#fPutBytes(N,S))
-       #removeCharsUponAck(lengthString(S))) #buffer(S:String)
+  rule #ostream((. => #write(N, S) ~> #flush(N)) ~> N:Int) #buffer(S:String => "")
     when S =/=String ""
-  // Flush when the buffer becomes empty
-  rule #ostream(N:Int) (.List => ListItem(#flush(N))) #buffer("" => .K)
 
-  rule #ostream(_:Int) (ListItem(.K) => .List) 
-  // consume a char from the buffer only on succesfull communication 
-  rule #ostream(_:Int) (#removeCharsUponAck(I:Int) => .List) #buffer(S:String => substrString(S,I, lengthString(S)))
- 
-  syntax List ::= "#removeCharsUponAck" "(" Int ")"
-  
-  syntax List ::= "#parseInput" "(" String "," K ")"   [cons(List1ParseSyn)]
+  syntax ListItem ::= "#parseInput" "(" String "," String ")"   [cons(ListItem1ParseSyn)]
 
-/*
-  // base values for each type
-  syntax K ::= `#defaultValue ( String ) 
-  rule #defaultValue("Int") = 0
-  rule #defaultValue("String") = "" 
-  rule #defaultValue("Float") = 0.0
-*/
-  
-  // Parsing a character
-  rule (#parseInput("#Char",_) => .List) ListItem(C:String)
-         when isChar(C)
-
-  // Skipping initial whitespace if reading more than a character
-  rule #parseInput(S:String,.K) (ListItem(C:String) => .List) 
-        when S =/=String "#Char" andBool #isWhiteSpace(C)
-
-
-  // Read a token
-  rule #parseInput(S:String,.K => "") ListItem(C:String)
-        when S =/=String "#Char" andBool notBool(#isWhiteSpace(C))
-        
-  rule #parseInput(_:String, S:String => S:String +String C) (ListItem(C:String) => .List) 
-    when notBool(#isWhiteSpace(C))
-
-  // Upon encountering again whitespace, convert token
-  rule #parseInput(SType:String,S:String) ListItem(C:String) => #convertToken(SType, S)
-    when #isWhiteSpace(C)
-
-  rule (#parseInput(SType:String,S:String) => #convertToken(SType, S)) ListItem(#EOF)
-  
-  syntax List ::= "#convertToken" "(" String "," String ")"
-  rule #convertToken(Type:String,S:String) => ListItem(#parseToken(Type, S))
-
-  
  /*   C++ -like parsing for ints. 
   rule #parse("Int",I:Int => 10 *Int I +Int String2Int(C)) ListItem(C:String)
     when #isDigit(C:String)
   */
 
-  syntax List ::= "#buffer" "(" K ")"           [cons(List1IOBufferSyn)]
+  syntax ListItem ::= "#buffer" "(" K ")"           [cons(ListItem1IOBufferSyn)]
 
-  // Initial input string is assumed wrapped in an #buffer wrapper an one character is retreved from it at a time
-  rule #parseInput(_:String,_) (.List => ListItem(substrString(S:String,0,1))) 
-       #buffer(S:String => substrString(S,1,lengthString(S)))
-    when S =/=String ""
-    
-  rule #buffer("" => .K) #istream(_:Int)
+  // read one character at a time until we read whitespace
+  rule #parseInput(Sort:String, Delimiters:String) #buffer(S => S +String chrChar(#getc(N))) #istream(N) when findChar(S, Delimiters, 0) ==Int -1
 
-  // I fthe buffer becomes empty, read from the input stream
-  rule #parseInput(_:String,_) (.List => ListItem(#fReadChar(N:Int))) #buffer(.K) #istream(N)
-
-  syntax List ::= "#istream" "(" Int ")"        [cons(List1InputStreamSyn)]
-                | "#ostream" "(" Int ")"        [cons(List1OutputStreamSyn)]
-  syntax List ::= "#noIO"
+  // when we reach whitespace, if it parses create a ListItem
+  rule (#parseInput("String", Delimiters:String) => ListItem(S)) #buffer(S:String => "") when findChar(S, Delimiters, 0) =/=Int -1
+  rule (#parseInput(Sort:String, Delimiters:String) => ListItem(#parse(S, Sort))) #buffer(S:String => "") when findChar(S, Delimiters, 0) =/=Int -1 andBool Sort =/=String "String"
+  
+  syntax ListItem ::= "#istream" "(" Int ")"        [cons(ListItem1InputStreamSyn)]
+                    | "#ostream" "(" Int ")"        [cons(ListItem1OutputStreamSyn)]
+  syntax ListItem ::= "#noIO"
   rule #noIO #istream(_:Int) => .List
   rule #ostream(_:Int) #noIO => .List
 
@@ -226,6 +143,6 @@ module URIS
   syntax String ::= K2String(K) [function, hook(#K-PRINTER:k2string)]
                   | Bag2String(Bag) [function, hook(#K-PRINTER:bag2string)]
 
-  rule String2K((#noparse)::K) => #noparse
+  rule String2K((#noparse)::K) => #noparse [simplification]
 
 endmodule

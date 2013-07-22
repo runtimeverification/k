@@ -2,6 +2,6 @@
     foo ( true , '`(`) , x , .Exps )
 </k>
 <in>
-    #buffer ( .K )
+    #buffer ( "" )
     #istream ( 0 )
 </in>

@@ -247,7 +247,7 @@ public class Main {
 					+ "\\n\"(.KList)"));
 		} else {
 			output.put("$noIO", org.kframework.kil.List.EMPTY);
-			output.put("$stdin", KSequence.EMPTY);
+			output.put("$stdin", StringBuiltin.EMPTY);
 		}
 
 		if (GlobalSettings.verbose)

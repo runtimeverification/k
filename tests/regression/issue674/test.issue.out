@@ -3,5 +3,5 @@ ok<k>
 </k>
 <out>
     #ostream ( 1 )
-    #buffer ( .K )
+    #buffer ( "" )
 </out>

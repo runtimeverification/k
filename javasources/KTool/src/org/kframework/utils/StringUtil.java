@@ -60,6 +60,38 @@ public class StringUtil {
         }
     }
 
+    public static int lastIndexOfAny(String str, String search, int offset) {
+        if (str.equals("") || search.equals("")) {
+            return -1;
+        }
+        for (int i = str.length(), strCodepoint; i > 0; i -= Character.charCount(strCodepoint)) {
+            strCodepoint = str.codePointBefore(i);
+            for (int j = search.length(), searchCodepoint; j > 0; j -= Character.charCount(searchCodepoint)) {
+                searchCodepoint = search.codePointBefore(j);
+                if (strCodepoint == searchCodepoint) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+
+    public static int indexOfAny(String str, String search, int offset) {
+        if (str.equals("") || search.equals("")) {
+            return -1;
+        }
+        for (int i = 0, strCodepoint; i < str.length(); i += Character.charCount(strCodepoint)) {
+            strCodepoint = str.codePointAt(i);
+            for (int j = 0, searchCodepoint; j < str.length(); j += Character.charCount(searchCodepoint)) {
+                searchCodepoint = search.codePointAt(j);
+                if (strCodepoint == searchCodepoint) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+
     public static String unescapeK(String str) {
         StringBuilder sb = new StringBuilder();
         for (int i = 1; i < str.length() - 1; i++) {

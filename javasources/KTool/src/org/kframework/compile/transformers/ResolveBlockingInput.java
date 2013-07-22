@@ -13,13 +13,13 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class ResolveBlockingInput extends GetLhsPattern {
 	
-	Set<String> inputCells = new HashSet<String>();
+	Map<String, String> inputCells = new HashMap<String, String>();
 	java.util.List<Rule> generated = new ArrayList<Rule>();
 	boolean hasInputCell;
 	
@@ -35,7 +35,11 @@ public class ResolveBlockingInput extends GetLhsPattern {
 			public void visit(Cell node) {
 				String stream = node.getCellAttributes().get("stream");
 				if ("stdin".equals(stream)) {
-					inputCells.add(node.getLabel());
+                    String delimiter = node.getCellAttributes().get("delimiters");
+                    if (delimiter == null) {
+                        delimiter = " \n";
+                    }
+					inputCells.put(node.getLabel(), delimiter);
 				}
 				super.visit(node);
 			}
@@ -86,7 +90,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
 	
 	@Override
 	public ASTNode transform(Cell node) throws TransformerException {
-		if ((!inputCells.contains(node.getLabel()))) {
+		if ((!inputCells.containsKey(node.getLabel()))) {
 			return super.transform(node);
 		}
 		if (!(node.getEllipses() == Ellipses.RIGHT)) {
@@ -138,13 +142,13 @@ public class ResolveBlockingInput extends GetLhsPattern {
 		hasInputCell = true;
 		
 		
-//		  syntax List ::= "#parse" "(" String "," K ")"   [cons(List1ParseSyn)]
-		TermCons parseTerm = new TermCons("List", "List1ParseSyn", context);
+//		  syntax List ::= "#parseInput" "(" String ")"   [cons(List1ParseSyn)]
+		TermCons parseTerm = new TermCons("ListItem", "ListItem1ParseSyn", context);
 		parseTerm.getContents().add(StringBuiltin.kAppOf(item.getItem().getSort()));
-		parseTerm.getContents().add(KSequence.EMPTY);
+        parseTerm.getContents().add(StringBuiltin.kAppOf(inputCells.get(node.getLabel())));
 		
 //		  syntax List ::= "#buffer" "(" K ")"           [cons(List1IOBufferSyn)]
-		TermCons ioBuffer = new TermCons("List", "List1IOBufferSyn", context);
+		TermCons ioBuffer = new TermCons("ListItem", "ListItem1IOBufferSyn", context);
 		ioBuffer.getContents().add(new Variable(Variable.getFreshVar("K")));
 		
 //		ctor(List)[replaceS[emptyCt(List),parseTerm(string(Ty),nilK)],ioBuffer(mkVariable('BI,K))]

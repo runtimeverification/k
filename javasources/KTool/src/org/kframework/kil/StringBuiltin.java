@@ -45,6 +45,7 @@ public class StringBuiltin extends Token {
 	 * #token("#String", " ")(.KList)
 	 */
 	public static final KApp SPACE = StringBuiltin.kAppOf(" ");
+    public static final KApp EMPTY = StringBuiltin.kAppOf("");
 
 	/**
 	 * Returns a {@link StringBuiltin} representing the given {@link String} value.
