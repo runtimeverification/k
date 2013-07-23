@@ -110,6 +110,7 @@ public class Cell extends Term {
 	public Cell(ATermAppl atm) {
 		super(atm);
 
+		this.sort = "BagItem";
 		label = ((ATermAppl) atm.getArgument(0)).getName();
 		boolean left = false, right = false;
 		ATermAppl next = (ATermAppl) atm.getArgument(2);
