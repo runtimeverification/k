@@ -1,5 +1,11 @@
 package org.kframework.kil;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.matchers.Matcher;
@@ -16,12 +22,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 
 import aterm.ATermAppl;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+import aterm.ATermList;
 
 /**
  * Class for representing a K cell term.  The textual representation of a K cell is the following:
@@ -130,6 +131,15 @@ public class Cell extends Term {
 			setEllipses(Ellipses.RIGHT);
 		else
 			setEllipses(Ellipses.NONE);
+
+		// extract cell attributes
+		ATermList list = (ATermList) atm.getArgument(1);
+		while (!list.isEmpty()) {
+			String key = ((ATermAppl) ((ATermAppl) list.getFirst()).getArgument(0)).getName();
+			String value = ((ATermAppl) ((ATermAppl) list.getFirst()).getArgument(1)).getName();
+			cellAttributes.put(key, StringUtil.unescapeK(value));
+			list = list.getNext();
+		}
 
 		contents = (Term) JavaClassesFactory.getTerm(next);
 		endLabel = ((ATermAppl) atm.getArgument(3)).getName();
@@ -321,5 +331,4 @@ public class Cell extends Term {
 		}
 		return cells;
 	}
-
 }
