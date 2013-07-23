@@ -25,7 +25,7 @@ public class MetaK {
 	public static final String cellSort = "CellSort";
 	public static final String cellFragment = "CellFragment";
 
-	public static Term incrementCondition(Term condition, Term kresultCnd, org.kframework.kil.loader.Context context) {
+	public static Term incrementCondition(Term condition, Term kresultCnd) {
 		if (condition == null) {
 			return kresultCnd;
 		}

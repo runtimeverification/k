@@ -42,6 +42,7 @@ public class KLabelConstant extends KLabel {
 	public static final KLabelConstant NOTBOOL_KLABEL = of("'notBool_");
 	public static final KLabelConstant BOOL_ANDTHENBOOL_KLABEL = of("'_andThenBool_");
 	public static final KLabelConstant KRESULT_PREDICATE = of(AddPredicates.predicate(KSorts.KRESULT));
+    public static final KLabelConstant STREAM_PREDICATE = of(AddPredicates.predicate("Stream"));
 	public static final KLabelConstant STRING_PLUSSTRING_KLABEL = of("'_+String_");
 
 	/**

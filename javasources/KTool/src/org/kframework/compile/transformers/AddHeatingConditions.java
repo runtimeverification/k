@@ -104,7 +104,7 @@ public class AddHeatingConditions extends CopyOnWriteTransformer {
 			kresultCnd = isKResult;
 		}
 		node = node.shallowCopy();
-		Term condition = MetaK.incrementCondition(node.getCondition(), kresultCnd, context);
+		Term condition = MetaK.incrementCondition(node.getCondition(), kresultCnd);
 
 		node.setCondition(condition);
 		return node;

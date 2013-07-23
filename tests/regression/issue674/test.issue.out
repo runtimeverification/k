@@ -2,6 +2,6 @@ ok<k>
     ` a
 </k>
 <out>
-    #ostream ( 1 )
-    #buffer ( "" )
+    ListItem(#ostream ( 1 ))
+    ListItem(#buffer ( "" ))
 </out>
