@@ -3,6 +3,7 @@ package org.kframework.backend.java.symbolic;
 import org.kframework.backend.java.indexing.IndexingPair;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.Definition;
@@ -20,21 +21,14 @@ import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.MapLookup;
 import org.kframework.backend.java.kil.SetLookup;
 import org.kframework.backend.java.kil.MapUpdate;
+import org.kframework.backend.java.kil.SetUpdate;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.symbolic.SymbolicBackend;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Attribute;
-import org.kframework.kil.BoolBuiltin;
-import org.kframework.kil.GenericToken;
-import org.kframework.kil.IntBuiltin;
-import org.kframework.kil.StringBuiltin;
-import org.kframework.kil.KSorts;
-import org.kframework.kil.Module;
-import org.kframework.kil.Production;
+import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -247,6 +241,10 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 return new Cell<KSequence>(node.getLabel(), (KSequence) content);
             } else if (content instanceof KList) {
                 return new Cell<KList>(node.getLabel(), (KList) content);
+            } else if (content instanceof BuiltinSet) {
+                return new Cell<BuiltinSet>(node.getLabel(), (BuiltinSet) content);
+            } else if (content instanceof SetUpdate) {
+                return new Cell<SetUpdate>(node.getLabel(), (SetUpdate) content);
             } else if (content instanceof BuiltinMap) {
                 return new Cell<BuiltinMap>(node.getLabel(), (BuiltinMap) content);
             } else if (content instanceof MapUpdate) {
@@ -256,6 +254,32 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             } else {
                 throw new RuntimeException();
             }
+        }
+    }
+
+    @Override
+    public ASTNode transform(org.kframework.kil.SetBuiltin node) throws TransformerException {
+        assert node.isLHSView() : "unsupported set " + node;
+
+        HashSet<Term> entries = new HashSet<Term>(node.elements().size());
+        for (org.kframework.kil.Term entry : node.elements()) {
+            Term key = (Term) entry.accept(this);
+            entries.add(key);
+        }
+
+        if (node.hasViewBase()) {
+            Term base = (Term) node.viewBase().accept(this);
+            if (base instanceof SetUpdate) {
+                SetUpdate setUpdate = (SetUpdate) base;
+                /* TODO(AndreiS): check key uniqueness */
+                entries.addAll(setUpdate.updateSet());
+                return new SetUpdate(setUpdate.base(), setUpdate.removeSet(), entries);
+            } else {
+                /* base instanceof Variable */
+                return new BuiltinSet(entries, (Variable) base);
+            }
+        } else {
+            return new BuiltinSet(entries);
         }
     }
 
@@ -309,14 +333,16 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(org.kframework.kil.Variable node) throws TransformerException {
-        if (node.getSort().equals("Bag")) {
+        if (node.getSort().equals("Bag"))
             return new Variable(node.getName(), Kind.CELL_COLLECTION.toString());
-        } else if (context.dataStructureSortOf(node.getSort()) != null
-                && context.dataStructureSortOf(node.getSort()).type().equals(KSorts.MAP)) {
-            return new Variable(node.getName(), KSorts.MAP);
-        } else {
-            return new Variable(node.getName(), node.getSort());
+        DataStructureSort dataStructureSort = context.dataStructureSortOf(node.getSort());
+        if (dataStructureSort != null) {
+            if (dataStructureSort.type().equals(KSorts.MAP))
+                return new Variable(node.getName(), KSorts.MAP);
+            if (dataStructureSort.type().equals(KSorts.SET))
+                return new Variable(node.getName(), KSorts.SET);
         }
+        return new Variable(node.getName(), node.getSort());
     }
 
     @Override

@@ -1,0 +1,13 @@
+<T>
+    <store>
+        .Map
+    </store>
+    <k>
+        .K
+    </k>
+    <set>
+        SetItem(1)
+        SetItem(2)
+        SetItem(3)
+    </set>
+</T>

@@ -38,12 +38,6 @@ public class CopyOnWriteTransformer implements Transformer {
     }
 
     @Override
-    public ASTNode transform(BuiltinSet builtinSet) {
-        // TODO(AndreiS): implement
-        return builtinSet;
-    }
-
-    @Override
     public ASTNode transform(Cell cell) {
         Term content = (Term) cell.getContent().accept(this);
         if (content != cell.getContent()) {
@@ -212,6 +206,45 @@ public class CopyOnWriteTransformer implements Transformer {
     }
 
     @Override
+    public ASTNode transform(BuiltinSet builtinSet) {
+        BuiltinSet transformedSet = null;
+        if (builtinSet.hasFrame()) {
+            Variable frame = (Variable) builtinSet.frame().accept(this);
+            if (frame != builtinSet.frame()) {
+                transformedSet = new BuiltinSet(frame);
+            }
+        }
+
+        for(Term entry : builtinSet.elements()) {
+            Term key = (Term) entry.accept(this);
+
+            if (transformedSet == null && (key != entry)) {
+                if (builtinSet.hasFrame()) {
+                    transformedSet = new BuiltinSet(builtinSet.frame());
+                } else {
+                    transformedSet = new BuiltinSet();
+                }
+                for(Term copyEntry : builtinSet.elements()) {
+                    if (copyEntry.equals(entry)) {
+                        break;
+                    }
+                    transformedSet.add(copyEntry);
+                }
+            }
+
+            if (transformedSet != null) {
+                transformedSet.add(key);
+            }
+        }
+
+        if (transformedSet != null) {
+            return transformedSet;
+        } else {
+            return builtinSet;
+        }
+    }
+
+     @Override
     public ASTNode transform(BuiltinMap builtinMap) {
         BuiltinMap transformedMap = null;
         if (builtinMap.hasFrame()) {
