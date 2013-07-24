@@ -65,6 +65,7 @@
       folder="dist/tutorial/1_lambda"
       extensions="lambda"
       exclude="lesson_1/omega.lambda"
+      results="tests/tutorial/1_lambda/lesson_9" 
       />
 
 <!-- IMP -->
