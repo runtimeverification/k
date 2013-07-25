@@ -1,0 +1,13 @@
+main:	li r 0 , #10000
+	li r 1 , #0
+	li r 2 , #0
+	int t1, #7, #300
+	int t2, #10, #400
+	jmp loop
+loop:	sub r 0 , r 0 , #1
+	bne loop , r 0 , #0
+	halt
+t1:	add r 1 , r 1 , #1
+	rfi
+t2:	add r 2 , r 2 , #1
+	rfi

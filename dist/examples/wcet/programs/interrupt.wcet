@@ -1,0 +1,12 @@
+main:	store #0, #0
+	li r 0 , #10000
+	li r 2 , #0
+	int t1, #0, #300
+	jmp loop
+loop:	sub r 0 , r 0 , #1
+	bne loop , r 0 , #0
+	halt
+t1:	rw r 1, data, #0
+	add r 2 , r 2 , r 1
+	rfi
+	

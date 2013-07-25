@@ -1,0 +1,8 @@
+main:	li r 0 , #10
+	li r 1 , #0
+	li r 2 , #0
+	jmp sum
+sum:	add r 2 , r 2 , #1
+	add r 1 , r 1 , r 2
+	bne sum , r 2 , r 0
+	halt

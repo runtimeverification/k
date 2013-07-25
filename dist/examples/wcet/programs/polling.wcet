@@ -1,0 +1,10 @@
+main:	store #0, #0
+	li r 0 , #100
+	jmp loop
+loop:	rw r 1, data , #0
+	load r 2 , #0
+	add r 2 , r 2 , r 1
+	store #0, r 2
+	sub r 0 , r 0 , #1
+	bne loop , r 0 , #0
+	halt
