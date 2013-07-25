@@ -45,7 +45,9 @@ public class SetLookup extends Term {
 
     @Override
     public boolean isSymbolic() {
-        throw new UnsupportedOperationException();
+        return true;
+//        assert false : "isSymbolic is not supported by SetLookup (yet)";
+//        throw new UnsupportedOperationException();
     }
 
     @Override

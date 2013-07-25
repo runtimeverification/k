@@ -1,30 +1,9 @@
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.kil.BuiltinMap;
-import org.kframework.backend.java.kil.BuiltinSet;
-import org.kframework.backend.java.kil.Cell;
-import org.kframework.backend.java.kil.CellCollection;
-import org.kframework.backend.java.kil.Collection;
+import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.kil.Hole;
-import org.kframework.backend.java.kil.KLabelFreezer;
-import org.kframework.backend.java.kil.KLabelInjection;
-import org.kframework.backend.java.kil.KCollection;
-import org.kframework.backend.java.kil.KCollectionFragment;
-import org.kframework.backend.java.kil.KLabel;
-import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.KSequence;
-import org.kframework.backend.java.kil.MapLookup;
-import org.kframework.backend.java.kil.MapUpdate;
-import org.kframework.backend.java.kil.MetaVariable;
-import org.kframework.backend.java.kil.Rule;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.builtins.UninterpretedToken;
-import org.kframework.backend.java.kil.Variable;
 
 import java.util.Map;
 
@@ -181,6 +160,24 @@ public class BottomUpVisitor implements Visitor {
         for (java.util.Map.Entry<Term, Term> entry : mapUpdate.updateMap().entrySet()) {
             entry.getKey().accept(this);
             entry.getValue().accept(this);
+        }
+    }
+
+    @Override
+    public void visit(SetLookup setLookup) {
+        setLookup.base().accept(this);
+        setLookup.key().accept(this);
+        visit((Term) setLookup);
+    }
+
+    @Override
+    public void visit(SetUpdate setUpdate) {
+        setUpdate.base().accept(this);
+        for (Term key : setUpdate.removeSet()) {
+            key.accept(this);
+        }
+        for (Term element : setUpdate.updateSet()) {
+            element.accept(this);
         }
     }
 

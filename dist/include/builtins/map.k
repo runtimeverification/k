@@ -6,7 +6,7 @@ module MAP
   imports BAG
   imports SET
 
-  syntax MyMap ::= MyMap MyMap    [function, hook(Map:__), klabel('_Map_)]
+  syntax MyMap ::= MyMap MyMap    [left,function, hook(Map:__), klabel('_Map_)]
                  | ".MyMap"       [function, hook(Map:.Map)]
                  | K "|->" K      [function, hook(Map:_|->_)]
                  // breaks klabel uniqueness

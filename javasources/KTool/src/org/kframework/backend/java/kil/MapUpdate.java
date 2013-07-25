@@ -6,11 +6,7 @@ import org.kframework.backend.java.symbolic.Utils;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  *
@@ -28,7 +24,7 @@ public class MapUpdate extends Term {
     public MapUpdate(Term map, Set<Term> removeSet, Map<Term, Term> updateMap) {
         super(Kind.KITEM);
         this.map = map;
-        this.removeSet = removeSet;
+        this.removeSet = new HashSet<Term>(removeSet);
         this.updateMap = updateMap;
     }
 

@@ -24,7 +24,7 @@ public class SetUpdate extends Term {
     public SetUpdate(Term set, Set<Term> removeSet, Set<Term> updateSet) {
         super(Kind.KITEM);
         this.set = set;
-        this.removeSet = removeSet;
+        this.removeSet = new HashSet<Term>(removeSet);
         this.updateSet = updateSet;
     }
 

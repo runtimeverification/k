@@ -56,8 +56,7 @@ public class SetToLookupUpdate extends CopyOnWriteTransformer {
         status = Status.LHS;
         Term lhs = (Term) rewrite.getLeft().accept(this);
 
-        List<BuiltinLookup> lookups = node.getLookups();
-        if (lookups == null) lookups = new ArrayList<BuiltinLookup>();
+        List<BuiltinLookup> lookups = new ArrayList<BuiltinLookup>(node.getLookups());
 
         for (ExtendedSetLookup item : queue) {
             item.variables.removeAll(lhs.variables());

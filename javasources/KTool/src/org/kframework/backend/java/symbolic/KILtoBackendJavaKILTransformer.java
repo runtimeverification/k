@@ -312,6 +312,24 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
+    public ASTNode transform(org.kframework.kil.SetUpdate node) throws TransformerException {
+        Variable set = (Variable) node.set().accept(this);
+
+        HashSet<Term> removeSet = new HashSet<Term>(node.removeEntries().size());
+        for (org.kframework.kil.Term term : node.removeEntries()) {
+            removeSet.add((Term) term.accept(this));
+        }
+
+        HashSet<Term> updateSet = new HashSet<Term>(node.updateEntries().size());
+        for (org.kframework.kil.Term entry : node.updateEntries()) {
+            Term key = (Term) entry.accept(this);
+            updateSet.add(key);
+        }
+
+        return new SetUpdate(set, removeSet, updateSet);
+    }
+
+     @Override
     public ASTNode transform(org.kframework.kil.MapUpdate node) throws TransformerException {
         Variable map = (Variable) node.map().accept(this);
 

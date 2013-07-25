@@ -26,8 +26,8 @@ public class Evaluator extends CopyOnWriteTransformer {
         }
 
         @Override
-        public ASTNode transform(SetUpdate mapUpdate) {
-            return mapUpdate.evaluateUpdate();
+        public ASTNode transform(SetUpdate setUpdate) {
+            return setUpdate.evaluateUpdate();
         }
 
          @Override

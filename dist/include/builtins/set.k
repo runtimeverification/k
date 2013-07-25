@@ -6,7 +6,7 @@ module SET
   imports K-EQUAL-HOOKS
   imports INT-HOOKS
 
-  syntax MySet ::= MySet MySet    [function, hook(Set:__), klabel('_Set_)]
+  syntax MySet ::= MySet MySet    [left, function, hook(Set:__), klabel('_Set_)]
                  | ".MySet"       [function, hook(Set:.Set)]
                  | MySetItem(K)   [function, hook(Set:SetItem)]
 

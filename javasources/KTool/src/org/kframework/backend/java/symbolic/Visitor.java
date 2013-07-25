@@ -19,6 +19,8 @@ import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.MapLookup;
 import org.kframework.backend.java.kil.MapUpdate;
+import org.kframework.backend.java.kil.SetLookup;
+import org.kframework.backend.java.kil.SetUpdate;
 import org.kframework.backend.java.kil.MetaVariable;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
@@ -57,6 +59,8 @@ public interface Visitor {
     public void visit(MapUpdate mapUpdate);
     public void visit(MetaVariable metaVariable);
     public void visit(Rule rule);
+    public void visit(SetLookup mapLookup);
+    public void visit(SetUpdate mapUpdate);
     public void visit(SymbolicConstraint node);
     public void visit(Term node);
     public void visit(Token token);

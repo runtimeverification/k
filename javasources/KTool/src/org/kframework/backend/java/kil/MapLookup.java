@@ -40,7 +40,9 @@ public class MapLookup extends Term {
 
     @Override
     public boolean isSymbolic() {
-        throw new UnsupportedOperationException();
+        return true;
+//        assert final : "isSymbolic is not supported by MapLookup (yet)";
+//        throw new UnsupportedOperationException();
     }
 
     @Override

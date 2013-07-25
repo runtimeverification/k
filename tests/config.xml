@@ -65,8 +65,12 @@
       folder="dist/tutorial/1_lambda"
       extensions="lambda"
       exclude="lesson_1/omega.lambda"
-      results="tests/tutorial/1_lambda/lesson_9" 
-      />
+      results="tests/tutorial/1_lambda/lesson_9" >
+      <all-programs>
+        <krun-option name="--output-mode" value="pretty" />
+      </all-programs>
+   </test>
+ 
 
 <!-- IMP -->
 
@@ -742,8 +746,23 @@
     <all-programs>
       <krun-option name="--no-smt" />
       <krun-option name="--backend" value="java-symbolic" />
+      <krun-option name="--output-mode" value="pretty" />
     </all-programs>
   </test>
+
+ <test
+      language="tests/regression/java-rewrite-engine/set/test2/test2.k"
+      extensions="issue"
+      >
+    <kompile-option name="-ml" />
+    <all-programs>
+      <krun-option name="--no-smt" />
+      <krun-option name="--backend" value="java-symbolic" />
+      <krun-option name="--output-mode" value="pretty" />
+    </all-programs>
+  </test>
+
+
 
 
 </tests>
