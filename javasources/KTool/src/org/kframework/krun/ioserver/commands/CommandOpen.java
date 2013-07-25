@@ -1,37 +1,31 @@
 package org.kframework.krun.ioserver.commands;
 
-import org.kframework.krun.ioserver.resources.ResourceSystem;
+import org.kframework.krun.api.io.FileSystem;
 
+import java.io.IOException;
 import java.net.Socket;
 import java.util.logging.Logger;
 
 
 public class CommandOpen extends Command {
 
-	private String uri;
-	private String[] args;
+	private String path;
+    private String mode;
 	
-	public CommandOpen(String[] args, Socket socket, Logger logger) { //, Long maudeId) {
-		super(args, socket, logger); //, maudeId);
+	public CommandOpen(String[] args, Socket socket, Logger logger, FileSystem fs) { //, Long maudeId) {
+		super(args, socket, logger, fs); //, maudeId);
 
 		// uri#attribute1=v1#a2=v2...
-		uri = args[1];
-		this.args = args;
+		path = args[1];
+        mode = args[2];
 	}
 
 	public void run() {
-
-		try {
-			Long ID = ResourceSystem.getNewResource(uri, args);
-
-			if (ID != null)
-				succeed(new String[] { ID.toString() });
-			else
-				fail("open: cannot open/create resource " + uri);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
+        try {
+            succeed(Long.toString(fs.open(path, mode)));
+		} catch (IOException e) {
+            fail(e.getMessage());
+        }
 	}
 
 }

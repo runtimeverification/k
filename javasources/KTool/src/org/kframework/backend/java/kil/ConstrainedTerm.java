@@ -7,6 +7,7 @@ import org.kframework.backend.java.symbolic.Utils;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
+import org.kframework.krun.api.io.FileSystem;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,12 +22,14 @@ public class ConstrainedTerm extends Term {
     private final Term term;
     private final SymbolicConstraint lookups;
     private final SymbolicConstraint constraint;
+    private final FileSystem fileSystem;
 
     public ConstrainedTerm(Term term, SymbolicConstraint lookups, SymbolicConstraint constraint) {
         super(term.kind);
         this.term = term;
         this.lookups = lookups;
         this.constraint = constraint;
+        fileSystem = null; //TODO(AndreiS): copy from one ConstrainedTerm to the next
     }
 
     public ConstrainedTerm(Term term, SymbolicConstraint constraint, Definition definition) {

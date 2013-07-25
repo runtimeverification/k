@@ -1,13 +1,19 @@
 package org.kframework.krun.ioserver.main;
 
 import org.kframework.kil.loader.Context;
+import org.kframework.krun.api.io.FileSystem;
 import org.kframework.krun.ioserver.commands.*;
 
-import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.logging.Logger;
@@ -20,9 +26,11 @@ public class IOServer {
 	private int POOL_THREADS_SIZE = 10;
 	private Logger _logger;
 	protected Context context;
+    protected FileSystem fs;
 
-	public IOServer(int port, Logger logger, Context context) {
+	public IOServer(int port, Logger logger, Context context, FileSystem fs) {
 		this.context = context;
+        this.fs = fs;
 		this.port = port;
 		_logger = logger;
 		pool = (ThreadPoolExecutor) Executors.newFixedThreadPool(POOL_THREADS_SIZE);
@@ -125,40 +133,28 @@ public class IOServer {
 		
 		// switch on command and create appropriate objects
 		if (command.equals("open")) {
-			return new CommandOpen(args, socket, logger); //, maudeId);
-		}
-		if (command.equals("reopen")) {
-			return new CommandReopen(args, socket, logger); //, maudeId);
+			return new CommandOpen(args, socket, logger, fs); //, maudeId);
 		}
 		if (command.equals("close")) {
-			return new CommandClose(args, socket, logger); //, maudeId);
+			return new CommandClose(args, socket, logger, fs); //, maudeId);
 		}
 		if (command.equals("seek")) {
-			return new CommandSeek(args, socket, logger); //, maudeId);
+			return new CommandSeek(args, socket, logger, fs); //, maudeId);
 		}
 		if (command.equals("position")) {
-			return new CommandPosition(args, socket, logger); //, maudeId);
+			return new CommandPosition(args, socket, logger, fs); //, maudeId);
 		}
 		if (command.equals("readbyte")) {
-			return new CommandReadbyte(args, socket, logger); //, maudeId);
+			return new CommandReadbyte(args, socket, logger, fs); //, maudeId);
 		}
 		if (command.equals("readbytes")) {
-			return new CommandReadbytes(args, socket, logger); //, maudeId);
+			return new CommandReadbytes(args, socket, logger, fs); //, maudeId);
 		}
 		if (command.equals("writebyte")) {
-			return new CommandWritebyte(args, socket, logger); //, maudeId);
+			return new CommandWritebyte(args, socket, logger, fs); //, maudeId);
 		}
 		if (command.equals("writebytes")) {
-			return new CommandWritebytes(args, socket, logger); //, maudeId);
-		}
-		if (command.equals("flush")) {
-			return new CommandFlush(args, socket, logger); //, maudeId);
-		}
-		if (command.equals("peek")) {
-			return new CommandPeek(args, socket, logger); //, maudeId);
-		}
-		if (command.equals("eof")) {
-			return new CommandEof(args, socket, logger); //, maudeId);
+			return new CommandWritebytes(args, socket, logger, fs); //, maudeId);
 		}
 		if (command.equals("stat") || command.equals("opendir")) {
 			String cls;
@@ -169,40 +165,34 @@ public class IOServer {
 			}
 			try {
 				Class commandStat = Class.forName(cls);
-				Class[] argTypes = {String[].class, Socket.class, Logger.class};
+				Class[] argTypes = {String[].class, Socket.class, Logger.class, FileSystem.class};
 				@SuppressWarnings("unchecked")
 				Constructor cons = commandStat.getDeclaredConstructor(argTypes);
-				Object[] arguments = {args, socket, logger};
+				Object[] arguments = {args, socket, logger, fs};
 				return (Command) cons.newInstance(arguments);
 			//wow, this is ridiculous. I think I see what Pat means
 			} catch (ClassNotFoundException e) {
-				return new CommandUnknown(args, socket, logger);
+				return new CommandUnknown(args, socket, logger, fs);
 			} catch (NoSuchMethodException e) {
-				return new CommandUnknown(args, socket, logger);
+				return new CommandUnknown(args, socket, logger, fs);
 			} catch (InstantiationException e) {
-				return new CommandUnknown(args, socket, logger);
+				return new CommandUnknown(args, socket, logger, fs);
 			} catch (IllegalAccessException e) {
-				return new CommandUnknown(args, socket, logger);
+				return new CommandUnknown(args, socket, logger, fs);
 			} catch (InvocationTargetException e) {
-				return new CommandUnknown(args, socket, logger);
+				return new CommandUnknown(args, socket, logger, fs);
 			}
 		}
 		if (command.equals("end")) {
-		    CommandEnd c = new CommandEnd(args, socket, logger);
+		    CommandEnd c = new CommandEnd(args, socket, logger, fs);
 		    c.setPool(pool);
 		    return c;
 		}
-		if (command.equals("smt")){
-			return new CommandSmt(args, socket, logger);
-		}
-		if (command.equals("smtlib")){
-			return new CommandSmtlib(args, socket, logger);
-		}
 		if (command.equals("parse")) {
-			return new CommandParse(args, socket, logger, context);
+			return new CommandParse(args, socket, logger, context, fs);
 		}
 
-		return new CommandUnknown(args, socket, logger); //, (long) 0);
+		return new CommandUnknown(args, socket, logger, fs); //, (long) 0);
 	}
 
 	/***

@@ -1,5 +1,7 @@
 package org.kframework.krun.ioserver.commands;
 
+import org.kframework.krun.api.io.FileSystem;
+
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.file.AccessDeniedException;
@@ -18,8 +20,8 @@ public class CommandStat extends Command {
 	private String path;
 	private boolean follow;
 
-	public CommandStat(String[] args, Socket socket, Logger logger) {
-		super(args, socket, logger);
+	public CommandStat(String[] args, Socket socket, Logger logger, FileSystem fs) {
+		super(args, socket, logger, fs);
 
 		path = args[1];
 		follow = Boolean.parseBoolean(args[2]);
@@ -34,7 +36,7 @@ public class CommandStat extends Command {
 				attrs = Files.readAttributes(Paths.get(path), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
 			}
 			//some notes on where we get these values: we call hashCode on the principals because I don't know a better way to get the integer associated with the principal. We also rely on the implementation of the toString method on file keys in order to get back the device id and inode number.
-			succeed(new String[] {
+			succeed(
 				Long.toString(attrs.lastModifiedTime().toMillis()),
 				Long.toString(attrs.lastAccessTime().toMillis()),
 				Long.toString(attrs.creationTime().toMillis()),
@@ -47,7 +49,7 @@ public class CommandStat extends Command {
 				Integer.toString(attrs.group().hashCode()),
 				Integer.toString(attrs.owner().hashCode()),
 				getPermissions(attrs.permissions())
-			});
+			);
 		} catch (NoSuchFileException e) {
 			fail("ENOENT");
 		} catch (AccessDeniedException e) {
@@ -61,10 +63,10 @@ public class CommandStat extends Command {
 				fail("ENAMETOOLONG");
 			} else {
 				e.printStackTrace();
-				fail(e.getLocalizedMessage());
+				fail(e.getMessage());
 			}
 		} catch (IOException e) {
-			fail(e.getLocalizedMessage());
+			fail(e.getMessage());
 		}
 	}
 

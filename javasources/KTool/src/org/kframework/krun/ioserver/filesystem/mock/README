@@ -1,0 +1,3 @@
+This directory is a stub where eventually we will put the Java code for the mock file system. The
+mock file system will be used to provide support for the online K tool and for program verification
+purposes.

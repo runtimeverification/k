@@ -8,14 +8,10 @@ module URIS
 // B, N, and P are really supposed to be Nat
   syntax K ::= "#open" "(" String ")" [function]
              | "#open" "(" String "," String ")" [function, hook(#IO:#open)]
-             | "#reopen" "(" Int "," String ")" [function, hook(#IO:#reopen)]
              | "#close" "(" Int ")" [function, hook(#IO:#close)]
-             | "#eof" "(" Int ")"  [function, hook(#IO:#eof)]
              | "#tell" "(" Int ")" [function, hook(#IO:#tell)] 
              | "#seek" "(" Int "," Int ")" [function, hook(#IO:#seek)]
-             | "#peek" "(" Int ")" [function, hook(#IO:#peek)]
              | "#putc" "(" Int "," Int ")"      [function, hook(#IO:#putc)]
-             | "#flush" "(" Int ")"                 [function, hook(#IO:#flush)]
              | "#getc" "(" Int ")"             [function, hook(#IO:getc)]
              | "#read" "(" Int "," Int ")"    [function, hook(#IO:#read)]
              | "#write" "(" Int "," String ")" [function, hook(#IO:#write)]
@@ -27,8 +23,8 @@ module URIS
                  | "#opendir" "(" String ")" [function, hook(#IO:#opendir)]
 
   syntax K ::= "#parse" "(" String "," String ")" [function, klabel(#parse), hook(#K-PARSER:#parse)]
-  rule #open(S:String) => #open(S:String, "w")
-  rule #open(S:String, Mode:String) => String2Int((#tcpRequest("open\x01file:" +String S +String "\x01" +String Mode +String "\x01"))::K)
+  rule #open(S:String) => #open(S:String, "rw")
+  rule #open(S:String, Mode:String) => String2Int((#tcpRequest("open\x01" +String S +String "\x01" +String Mode +String "\x01"))::K) when Mode ==String "r" orBool Mode ==String "w" orBool Mode ==String "rw"
 
   rule #close(N:Int) 
       => String2DotK((#tcpRequest("close\x01" +String Int2String(N) +String "\x01"))::K)
@@ -44,17 +40,12 @@ module URIS
   rule String2Bool("1") => true
   rule String2Bool("true") => true
 
-  rule #flush(N:Int) => String2DotK((#tcpRequest("flush\x01" +String Int2String(N) +String "\x01"))::K)
-
-  rule #tell(N:Int) => String2DotK((#tcpRequest("position\x01" +String Int2String(N) +String "\x01"))::K)
+  rule #tell(N:Int) => #string2Int((#tcpRequest("position\x01" +String Int2String(N) +String "\x01"))::K)
 
   rule #seek(N:Int,P:Int) 
       => String2DotK((#tcpRequest("seek\x01" +String Int2String(N) +String "\x01"
                               +String Int2String(P) +String "\x01"))::K)
 
-  rule #reopen(N:Int,S:String) 
-      => String2DotK((#tcpRequest("reopen\x01" +String Int2String(N) +String "\x01"
-                              +String S +String "\x01"))::K)
 
   syntax Int ::= "#stdin"   [function] 
                 | "#stdout" [function]
@@ -64,29 +55,23 @@ module URIS
   rule #stderr => 2
 
   rule #getc(N:Int) 
-      => #string2Int(#tcpRequest("readbyte\x01" +String Int2String(N) +String "\x01"))
+      => #string2Int(#tcpRequest("readbyte\x01" +String Int2String(N) +String "\x01")) when N =/=Int 1 andBool N =/=Int 2
 
   rule #read(N:Int, NumBytes:Int)
-      => #tcpRequest("readbytes\x01" +String Int2String(N) +String "\x01" +String Int2String(NumBytes) +String "\x01")
+      => #tcpRequest("readbytes\x01" +String Int2String(N) +String "\x01" +String Int2String(NumBytes) +String "\x01") when N =/=Int 1 andBool N =/=Int 2
 
   syntax K ::= "#string2Int" "(" K ")"   [function, klabel(#string2Int)]
 
   rule #string2Int(S:String) => String2Int(S) when lengthString(S) >=Int 0
-  rule #string2Int(#EOF) => #EOF
+  rule #string2Int(E:TCPError) => E
 
   rule #putc(N:Int,B:Int)
     => String2DotK((#tcpRequest("writebyte\x01" +String Int2String(N) +String "\x01"
-                              +String Int2String(B) +String "\x01"))::K)
+                              +String Int2String(B) +String "\x01"))::K) when B >=Int 0 andBool B <Int 256 andBool N =/=Int 0
 
   rule #write(N:Int,S:String)
     => String2DotK((#tcpRequest("writebytes\x01" +String Int2String(N) +String "\x01"
-                              +String S +String "\x01"))::K)
-
-  rule #peek(N:Int)
-    => String2Int((#tcpRequest("peek\x01" +String Int2String(N) +String "\x01"))::K)
-
-  rule #eof(N:Int)
-    => String2Bool((#tcpRequest("eof\x01" +String Int2String(N) +String "\x01"))::K)
+                              +String S +String "\x01"))::K) when N =/=Int 0
 
   rule #stat(S:String)
     => #statTypes(#string2klist((#tcpRequest("stat\x01" +String S +String "\x01true\x01"))::K))
@@ -110,7 +95,7 @@ module URIS
   rule ListItem(#ostream(_)) ListItem(#buffer(Buffer:String => Buffer +String S)) (ListItem(S:String) => .List) [stdout, stderr]
 
   // Send first char from the buffer to the server
-  rule ListItem(#ostream((. => #write(N, S) ~> #flush(N)) ~> N:Int)) ListItem(#buffer(S:String => "")) _:List
+  rule ListItem(#ostream((. => #write(N, S)) ~> N:Int)) ListItem(#buffer(S:String => "")) _:List
     when S =/=String "" [stdout, stderr]
 
   syntax Stream ::= "#parseInput" "(" String "," String ")"   [cons(Stream1ParseSyn)]

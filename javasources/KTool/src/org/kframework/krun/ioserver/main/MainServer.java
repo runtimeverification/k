@@ -5,7 +5,8 @@ import org.kframework.compile.transformers.AddTopCellConfig;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.K;
-import org.kframework.krun.ioserver.resources.ResourceSystem;
+import org.kframework.krun.api.io.FileSystem;
+import org.kframework.krun.ioserver.filesystem.portable.PortableFileSystem;
 import org.kframework.utils.BinaryLoader;
 
 import java.io.File;
@@ -17,20 +18,16 @@ public class MainServer implements Runnable {
 	public boolean _started;
 	private Logger _logger;
 	protected Context context;
+    protected FileSystem fs;
 
 	public MainServer(int port, Logger logger, Context context) {
 		this.context = context;
 		_port = port;
 		_logger = logger;
-		try {
-			createDefaultResources();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        fs = new PortableFileSystem();
 	}
 	public void run() {
-		IOServer server = new IOServer(_port, _logger, context);
+		IOServer server = new IOServer(_port, _logger, context, fs);
 		_port = server.port; // in case server changes port
 		_started = true;
 		try {
@@ -40,19 +37,6 @@ public class MainServer implements Runnable {
 		}
 	}
 
-	private void createDefaultResources() throws Exception {
-		// Initialize resource system
-		Long r;
-		r = ResourceSystem.getNewResource("stdin:/", null);
-		assert(r == 0);
-		
-		r = ResourceSystem.getNewResource("stdout:/", null);
-		assert(r == 1);
-		
-		r = ResourceSystem.getNewResource("stderr:/", null);
-		assert(r == 2);
-	}
-		
 	public static void main(String[] args) throws Exception {
 		Context context = new Context();
 		context.kompiled = new File(args[1]);

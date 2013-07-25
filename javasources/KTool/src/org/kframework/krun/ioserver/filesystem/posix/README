@@ -1,0 +1,6 @@
+This directory is a stub where eventually we will put Java wrapper code which will invoke a C
+implementation of the FileSystem interface so that we can express the semantics of languages that
+are not specifiable using only the subset of I/O functionality provided by the JVM. For example,
+Java does not support write-only files or the chdir() system call. Python and C do however, so 
+these semantics will eventually have to rely on the C I/O server to support 100% of their POSIX
+functionality.

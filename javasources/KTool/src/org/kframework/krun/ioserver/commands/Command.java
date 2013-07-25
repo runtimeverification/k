@@ -1,5 +1,6 @@
 package org.kframework.krun.ioserver.commands;
 
+import org.kframework.krun.api.io.FileSystem;
 import org.kframework.krun.ioserver.main.IOServer;
 
 import java.io.BufferedWriter;
@@ -11,10 +12,12 @@ import java.util.logging.Logger;
 public abstract class Command implements Runnable {
 	Socket socket;
 	public int maudeId;
+    protected FileSystem fs;
 	private Logger _logger;
 
-	public Command(String[] args, Socket socket, Logger logger) { //, Long maudeId) {
+	public Command(String[] args, Socket socket, Logger logger, FileSystem fs) { //, Long maudeId) {
 		this.socket = socket;
+        this.fs = fs;
 		_logger = logger;
 	}
 
@@ -24,7 +27,9 @@ public abstract class Command implements Runnable {
 	}
 
 	public void succeed(String... messages) {
-
+        if (messages.length == 0) {
+            messages = new String[] {"success"};
+        }
 		String success = maudeId + "\001" + "success\001";
 		for (String s : messages) {
 			success += s + "\001";

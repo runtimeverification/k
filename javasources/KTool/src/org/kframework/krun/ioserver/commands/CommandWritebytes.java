@@ -1,8 +1,8 @@
 package org.kframework.krun.ioserver.commands;
 
-import org.kframework.krun.ioserver.resources.FileResource;
-import org.kframework.krun.ioserver.resources.ResourceSystem;
+import org.kframework.krun.api.io.FileSystem;
 
+import java.io.IOException;
 import java.net.Socket;
 import java.util.logging.Logger;
 
@@ -13,8 +13,8 @@ public class CommandWritebytes extends Command {
 	private String string;
 	private byte[] bytes;
 
-	public CommandWritebytes(String[] args, Socket socket, Logger logger) { //, Long maudeId) {
-		super(args, socket, logger); //, maudeId);
+	public CommandWritebytes(String[] args, Socket socket, Logger logger, FileSystem fs) { //, Long maudeId) {
+		super(args, socket, logger, fs); //, maudeId);
 
 		try {
 			ID = Long.parseLong(args[1]);
@@ -32,16 +32,12 @@ public class CommandWritebytes extends Command {
 	}
 
 	public void run() {
-		
-		// get resource
-		FileResource resource = (FileResource)ResourceSystem.getResource(ID);
-		
 		try {
-			resource.writebytes(bytes);
-			succeed(new String[] { "success" });
-		} catch (Exception e) {
-			fail("seek: cannot write " + string + " in resource " + ID);
-		}
+            fs.get(ID).write(bytes);
+            succeed();
+        } catch (IOException e) {
+            fail(e.getMessage());
+        }
 	}
 
 }

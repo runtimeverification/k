@@ -1,5 +1,7 @@
 package org.kframework.krun.ioserver.commands;
 
+import org.kframework.krun.api.io.FileSystem;
+
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.file.AccessDeniedException;
@@ -17,8 +19,8 @@ public class CommandOpendir extends Command {
 
 	private String path;
 
-	public CommandOpendir(String[] args, Socket socket, Logger logger) {
-		super(args, socket, logger);
+	public CommandOpendir(String[] args, Socket socket, Logger logger, FileSystem fs) {
+		super(args, socket, logger, fs);
 
 		path = args[1];
 	}
@@ -41,7 +43,7 @@ public class CommandOpendir extends Command {
 		} catch (NotDirectoryException e) {
 			fail("ENOTDIR");
 		} catch (IOException e) {
-			fail(e.getLocalizedMessage());
+			fail(e.getMessage());
 		}
 	}
 }

@@ -1,13 +1,15 @@
 package org.kframework.krun.ioserver.commands;
 
+import org.kframework.krun.api.io.FileSystem;
+
 import java.net.Socket;
 import java.util.logging.Logger;
 
 public class CommandUnknown extends Command {
 
 
-	public CommandUnknown(String[] args, Socket socket, Logger logger) { //, Long maudeId) {
-		super(args, socket, logger); //, maudeId);
+	public CommandUnknown(String[] args, Socket socket, Logger logger, FileSystem fs) { //, Long maudeId) {
+		super(args, socket, logger, fs); //, maudeId);
 		// TODO Auto-generated constructor stub
 	}
 

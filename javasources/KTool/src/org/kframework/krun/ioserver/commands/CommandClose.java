@@ -1,8 +1,8 @@
 package org.kframework.krun.ioserver.commands;
 
-import org.kframework.krun.ioserver.resources.Resource;
-import org.kframework.krun.ioserver.resources.ResourceSystem;
+import org.kframework.krun.api.io.FileSystem;
 
+import java.io.IOException;
 import java.net.Socket;
 import java.util.logging.Logger;
 
@@ -12,10 +12,10 @@ public class CommandClose extends Command {
 
 	private Long ID;
 
-	public CommandClose(String[] args, Socket socket, Logger logger) { //, Long maudeId) {
+	public CommandClose(String[] args, Socket socket, Logger logger, FileSystem fs) { //, Long maudeId) {
 
 		// the form of the request should be: close#ID
-		super(args, socket, logger); //, maudeId);
+		super(args, socket, logger, fs); //, maudeId);
 
 		try {
 			ID = Long.parseLong(args[1]);
@@ -25,28 +25,12 @@ public class CommandClose extends Command {
 	}
 
 	public void run() {
-
-		// retrieve file struct
-		Resource resource = ResourceSystem.getResource(ID);
-		if (resource == null) {
-			fail("EBADF");
-			return;
-		}
-
-		// call corresponding method on resource
-		try {
-			resource.close();
-
-			ResourceSystem.remove(ID);
-			
-			// success
-			succeed(new String[] { "success" });
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			fail("Cannot close resource " + ID);
-			e.printStackTrace();
-		}
-
+        try {
+            fs.close(ID);
+            succeed();
+        } catch (IOException e) {
+            fail(e.getMessage());
+        }
 	}
 
 }

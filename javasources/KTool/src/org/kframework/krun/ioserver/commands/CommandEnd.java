@@ -1,5 +1,7 @@
 package org.kframework.krun.ioserver.commands;
 
+import org.kframework.krun.api.io.FileSystem;
+
 import java.net.Socket;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.logging.Logger;
@@ -7,8 +9,8 @@ import java.util.logging.Logger;
 public class CommandEnd extends Command {
     private ThreadPoolExecutor pool;
      
-    public CommandEnd(String[] args, Socket socket, Logger logger) { 
-		super(args, socket, logger); 
+    public CommandEnd(String[] args, Socket socket, Logger logger, FileSystem fs) { 
+		super(args, socket, logger, fs); 
 	}
      
  	public void setPool(ThreadPoolExecutor pool) { 

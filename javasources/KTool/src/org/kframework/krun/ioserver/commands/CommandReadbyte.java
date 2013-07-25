@@ -1,9 +1,8 @@
 package org.kframework.krun.ioserver.commands;
 
-import org.kframework.krun.ioserver.resources.FileResource;
-import org.kframework.krun.ioserver.resources.ResourceSystem;
+import org.kframework.krun.api.io.FileSystem;
 
-import java.io.EOFException;
+import java.io.IOException;
 import java.net.Socket;
 import java.util.logging.Logger;
 
@@ -12,8 +11,8 @@ public class CommandReadbyte extends Command {
 
 	private long ID;
 
-	public CommandReadbyte(String[] args, Socket socket, Logger logger) { //, Long maudeId) {
-		super(args, socket, logger); //, maudeId);
+	public CommandReadbyte(String[] args, Socket socket, Logger logger, FileSystem fs) { //, Long maudeId) {
+		super(args, socket, logger, fs); //, maudeId);
 
 		try {
 			ID = Long.parseLong(args[1]);
@@ -23,20 +22,10 @@ public class CommandReadbyte extends Command {
 	}
 
 	public void run() {
-		// retrieve file struct
-		FileResource resource = (FileResource)ResourceSystem.getResource(ID);
-
-		// call corresponding method on file
-		Byte ascii = null;
-		try {
-			ascii = resource.readbyte();
-
-			// success
-			succeed(new String[] { ascii.toString() });
-		} catch (EOFException eof) {
-			fail("EOF");
-		} catch (Exception e) {
-			fail("Cannot read byte from resource " + ID);
-		}
+        try {
+            succeed(Integer.toString((fs.get(ID).getc() & 0xff)));
+        } catch (IOException e) {
+            fail(e.getMessage());
+        }
 	}
 }
