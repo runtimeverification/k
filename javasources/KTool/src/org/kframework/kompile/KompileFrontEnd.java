@@ -82,7 +82,7 @@ public class KompileFrontEnd {
 			GlobalSettings.noFilename = true;
 
 		if (cmd.hasOption("warnings"))
-			GlobalSettings.hiddenWarnings = true;
+			GlobalSettings.warnings = cmd.getOptionValue("warnings");
 
 		if (cmd.hasOption("transition"))
 			GlobalSettings.transition = metadataParse(cmd.getOptionValue("transition"));

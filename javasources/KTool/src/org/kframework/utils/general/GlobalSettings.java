@@ -15,7 +15,7 @@ public class GlobalSettings {
 	public static KExceptionManager kem = new KExceptionManager();
 	public static File mainFile;
 	public static String mainFileWithNoExtension;
-	public static boolean hiddenWarnings = false;
+	public static String warnings = "normal";
 	public static List<String> transition = new ArrayList<String>();
 	public static List<String> superheat = new ArrayList<String>();
 	public static List<String> supercool = new ArrayList<String>();

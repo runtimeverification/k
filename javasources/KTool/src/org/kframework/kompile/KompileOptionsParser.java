@@ -52,7 +52,7 @@ public class KompileOptionsParser {
 		tex.addOption(toDoc);
 
 		OptionGroup warn = new OptionGroup();
-		Option warnings = new Option("w", "warnings", false, "display all warnings");
+		Option warnings = new Option("w", "warnings", true, "Use with all/none to control warnings display");
 		warn.addOption(warnings);
 
 		// language module name

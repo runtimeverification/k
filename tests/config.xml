@@ -771,6 +771,7 @@
       extensions="issue"
       >
     <kompile-option name="-ml" />
+    <kompile-option name="-w" value="none" />
     <all-programs>
       <krun-option name="--no-smt" />
       <krun-option name="--backend" value="java-symbolic" />
@@ -783,6 +784,7 @@
       extensions="issue"
       >
     <kompile-option name="-ml" />
+    <kompile-option name="-w" value="none" />
     <all-programs>
       <krun-option name="--no-smt" />
       <krun-option name="--backend" value="java-symbolic" />
