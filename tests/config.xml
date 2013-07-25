@@ -724,6 +724,12 @@
     <kompile-option name="-w" />
   </test>
 
+  <test
+      language="tests/regression/string2int/test.k"
+      folder="tests/regression/string2int"
+      results="tests/regression/string2int"
+      extensions="test" />
+
  <test
       language="tests/regression/java-rewrite-engine/set/test1/test1.k"
       extensions="issue"
