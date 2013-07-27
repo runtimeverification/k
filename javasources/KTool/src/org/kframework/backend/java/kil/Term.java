@@ -18,6 +18,7 @@ import java.util.Map;
 public abstract class Term extends JavaSymbolicObject implements Unifiable, Transformable {
 
     protected final Kind kind;
+    //protected final boolean normalized;
 
     protected Term(Kind kind) {
         this.kind = kind;

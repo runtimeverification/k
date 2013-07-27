@@ -21,11 +21,11 @@ module MAP
   /* map key lookup */
   // AndreiS: using () instead of [] causes ambiguities with __
   // () cannot be used for disambiguation
-  syntax K ::= MyMap "[" K "]"    [function, hook(Map:lookup)]
+  syntax K ::= MyMap "[" K "]"    [function, hook(Map:lookup), klabel(Map:lookup)]
   rule (K1:K |-> K2:K _:MyMap)[K1] => K2
 
   /* map values update (update in form of KLists of keys and values) */
-  syntax MyMap ::= MyMap "[" K "<-" K "]"    [function, hook(Map:update)]
+  syntax MyMap ::= MyMap "[" K "<-" K "]"    [function, hook(Map:update), prefer]
   rule (K1:K |-> _ M:MyMap)[K1 <- K2:K] => K1 |-> K2 M
   rule M:MyMap[K1:K <- K2:K] => K1 |-> K2 M
   when notBool(K1 in keys(M))

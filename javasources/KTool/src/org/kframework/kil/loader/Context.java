@@ -67,7 +67,7 @@ public class Context implements Serializable {
 	public java.util.Map<String, Set<String>> listLabels = new HashMap<String, Set<String>>();
 	public java.util.Map<String, ASTNode> locations = new HashMap<String, ASTNode>();
 	public java.util.Map<String, Set<Production>> associativity = new HashMap<String, Set<Production>>();
-	private Poset subsorts = new Poset();;
+	private Poset subsorts = new Poset();
 	public java.util.Set<String> definedSorts = Sort.getBaseSorts();
 	private Poset priorities = new Poset();
 	private Poset modules = new Poset();

@@ -14,6 +14,12 @@ public class UserList extends ProductionItem {
 	protected String separator;
 	protected String listType;
 
+    public UserList(String sort, String separator) {
+        this.sort = sort;
+        this.separator = separator;
+        this.listType = "*";
+    }
+
 	public UserList(Element element) {
 		super(element);
 

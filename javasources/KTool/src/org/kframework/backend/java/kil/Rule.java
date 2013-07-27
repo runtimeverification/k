@@ -67,7 +67,7 @@ public class Rule extends ASTNode implements Visitable {
     }
 
     public KLabelConstant functionKLabel() {
-        assert attributes.containsAttribute(Attribute.FUNCTION_KEY);
+        assert super.containsAttribute(Attribute.FUNCTION_KEY);
 
         return (KLabelConstant) ((KItem) leftHandSide).kLabel();
     }

@@ -13,6 +13,7 @@ import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,35 +37,48 @@ public class KItem extends Term implements Sorted {
         this.kList = kList;
 
         if (kLabel instanceof KLabelConstant) {
-            List<Production> productions = ((KLabelConstant) kLabel).productions();
-            if (productions.size() == 1) {
-                Production production = productions.get(0);
-                if (!kList.hasFrame() && kList.size() == production.getArity()) {
-                    for (int i = 0; i < kList.size(); ++i) {
-                        String childSort;
-                        if (kList.get(i) instanceof Sorted) {
-                            childSort = ((Sorted) kList.get(i)).sort();
-                        } else {
-                            childSort = kind.toString();
+            KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
+            List<Production> productions = kLabelConstant.productions();
+            if (productions.size() != 0) {
+                Set<String> sorts = new HashSet<String>();
+
+            label:
+                for (Production production : productions) {
+                    if (!kList.hasFrame() && kList.size() == production.getArity()) {
+                        for (int i = 0; i < kList.size(); ++i) {
+                            String childSort;
+                            if (kList.get(i) instanceof Sorted) {
+                                childSort = ((Sorted) kList.get(i)).sort();
+                            } else {
+                                childSort = kind.toString();
+                            }
+
+                            if (!context.isSubsortedEq(production.getChildSort(i), childSort)) {
+                                continue label;
+                            }
                         }
 
-                        if (!context.isSubsortedEq(production.getChildSort(i), childSort)) {
-                            sort = kind.toString();
-                            return;
-                        }
+                        sorts.add(production.getSort());
                     }
-                    sort = production.getSort();
+                }
+
+                if (!sorts.isEmpty()) {
+                    if (sorts.size() == 1) {
+                        sort = sorts.iterator().next();
+                    } else {
+                        sort = context.getGLBSort(sorts);
+                    }
                 } else {
                     sort = kind.toString();
                 }
             } else {
                 /* a list terminator does not have conses */
-                Set<String> listSorts = context.listLabels.get(((KLabelConstant) kLabel).label());
-                if (listSorts != null) {
+                Set<String> listSorts = context.listLabels.get(kLabelConstant.label());
+                if (listSorts != null && !kList.hasFrame() && kList.size() == 0) {
                     if (listSorts.size() == 1) {
                         sort = listSorts.iterator().next();
                     } else {
-                        sort = context.getLUBSort(listSorts);
+                        sort = context.getGLBSort(listSorts);
                     }
                 } else {
                     sort = kind.toString();
@@ -89,7 +103,7 @@ public class KItem extends Term implements Sorted {
 
         /* apply rules for user defined functions */
         if (!definition.functionRules().get((KLabelConstant) kLabel).isEmpty()) {
-            ConstrainedTerm constrainedTerm = new ConstrainedTerm(this, definition);
+            ConstrainedTerm constrainedTerm = new ConstrainedTerm(kList, definition);
 
             for (Rule rule : definition.functionRules().get((KLabelConstant) kLabel)) {
                 SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(definition);
@@ -99,7 +113,7 @@ public class KItem extends Term implements Sorted {
                 }
 
                 ConstrainedTerm leftHandSide = new ConstrainedTerm(
-                        rule.leftHandSide(),
+                        ((KItem) rule.leftHandSide()).kList,
                         rule.lookups(),
                         leftHandSideConstraint);
 
@@ -108,6 +122,10 @@ public class KItem extends Term implements Sorted {
                         definition);
 
                 assert solutions.size() <= 1 : "function definition is not deterministic";
+
+                if (solutions.isEmpty()) {
+                    continue;
+                }
 
                 SymbolicConstraint constraint = solutions.iterator().next();
 

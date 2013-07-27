@@ -173,10 +173,15 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
                 "kind mismatch between "
                         + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
                         + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
-
-        leftHandSide = leftHandSide.substitute(substitution, definition).evaluate(definition);
-        rightHandSide = rightHandSide.substitute(substitution, definition).evaluate(definition);
-        Equality equality = this.new Equality(leftHandSide, rightHandSide);
+        Term normalizedLeftHandSide = leftHandSide.substitute(substitution, definition);
+        if (normalizedLeftHandSide != leftHandSide) {
+            normalizedLeftHandSide = normalizedLeftHandSide.evaluate(definition);
+        }
+        Term normalizedRightHandSide = rightHandSide.substitute(substitution, definition);
+        if (normalizedRightHandSide != rightHandSide) {
+            normalizedRightHandSide = normalizedRightHandSide.evaluate(definition);
+        }
+        Equality equality = this.new Equality(normalizedLeftHandSide, normalizedRightHandSide);
 
         if (equality.isUnknown()){
             equalities.add(equality);
@@ -401,7 +406,10 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
 
         for (Iterator<Equality> iterator = equalities.iterator(); iterator.hasNext();) {
             Equality equality = iterator.next();
-            equality.substitute(substitution).evaluate();
+            Equality normalizedEquality =  equality.substitute(substitution);
+            if (equality != normalizedEquality) {
+                equality = normalizedEquality.evaluate();
+            }
 
             if (equality.isTrue()) {
                 iterator.remove();

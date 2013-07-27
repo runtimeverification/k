@@ -27,7 +27,7 @@ module K-MAP-EXTRAS
 	imports BOOL-HOOKS
 	imports K-EQUAL-HOOKS
 
-  syntax K ::= Map "(" K ")"  [function]
+  syntax K ::= Map "(" K ")"  [function, klabel(deprecatedMapLookup)]
   rule (_ K1:K |-> K2:K)(K1) => K2
 
   syntax Map ::= Map "[" "undef" "/" KList "]"  [function]

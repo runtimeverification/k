@@ -92,21 +92,21 @@ public class ConstrainedTerm extends Term {
         }
 
         Collection<SymbolicConstraint> constraints = new ArrayList<SymbolicConstraint>();
-        for (SymbolicConstraint constraint1 : unificationConstraint.getMultiConstraints()) {
-            constraint1.addAll(constrainedTerm.lookups);
-            constraint1.addAll(constrainedTerm.constraint);
-            constraint1.addAll(constraint);
+        for (SymbolicConstraint solution : unificationConstraint.getMultiConstraints()) {
+            solution.addAll(constrainedTerm.lookups);
+            solution.addAll(constrainedTerm.constraint);
+            solution.addAll(constraint);
 
-            constraint1.simplify();
-            if (constraint1.isFalse()) {
+            solution.simplify();
+            if (solution.isFalse()) {
                 continue;
             }
 
-            if (constraint1.checkUnsat()) {
+            if (solution.checkUnsat()) {
                 continue;
             }
 
-            constraints.add(constraint1);
+            constraints.add(solution);
         }
 
         return constraints;

@@ -11,13 +11,40 @@ import org.kframework.compile.sharing.DeclareCellLabels;
 import org.kframework.compile.tags.AddDefaultComputational;
 import org.kframework.compile.tags.AddOptionalTags;
 import org.kframework.compile.tags.AddStrictStar;
-import org.kframework.compile.transformers.*;
+import org.kframework.compile.transformers.AddEmptyLists;
+import org.kframework.compile.transformers.AddHeatingConditions;
+import org.kframework.compile.transformers.AddKCell;
+import org.kframework.compile.transformers.AddPredicates;
+import org.kframework.compile.transformers.AddTopCellConfig;
+import org.kframework.compile.transformers.AddTopCellRules;
+import org.kframework.compile.transformers.ContextsToHeating;
+import org.kframework.compile.transformers.FlattenSyntax;
+import org.kframework.compile.transformers.FreezeUserFreezers;
+import org.kframework.compile.transformers.MapToLookupUpdate;
+import org.kframework.compile.transformers.RemoveBrackets;
+import org.kframework.compile.transformers.RemoveSyntacticCasts;
+import org.kframework.compile.transformers.ResolveAnonymousVariables;
+import org.kframework.compile.transformers.ResolveBuiltins;
+import org.kframework.compile.transformers.ResolveFunctions;
+import org.kframework.compile.transformers.ResolveHybrid;
+import org.kframework.compile.transformers.ResolveListOfK;
+import org.kframework.compile.transformers.ResolveOpenCells;
+import org.kframework.compile.transformers.ResolveRewrite;
+import org.kframework.compile.transformers.SetToLookupUpdate;
+import org.kframework.compile.transformers.SortCells;
+import org.kframework.compile.transformers.StrictnessToContexts;
+import org.kframework.compile.transformers.SubsortSyntacticLists;
 import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.compile.utils.CompileDataStructures;
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.InitializeConfigurationStructure;
+import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
+import org.kframework.kil.loader.AddConsesVisitor;
+import org.kframework.kil.loader.CollectConsesVisitor;
 import org.kframework.kil.loader.Context;
+import org.kframework.kil.visitors.*;
+import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.main.FirstStep;
 import org.kframework.main.LastStep;
 import org.kframework.utils.BinaryLoader;
@@ -30,6 +57,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import com.thoughtworks.xstream.XStream;
+
 
 /**
  * Backend for the Java Rewrite Engine.
@@ -37,6 +66,34 @@ import java.io.OutputStream;
  * @author AndreiS
  */
 public class JavaSymbolicBackend extends KompileBackend {
+
+    private class DefinitionWriter extends org.kframework.kil.visitors.CopyOnWriteTransformer {
+
+        public DefinitionWriter(Context context) {
+            super("Serialize Compiled Definition to XML", context);
+        }
+
+        @Override
+        public ASTNode transform(Definition node) throws TransformerException {
+            try {
+                BinaryLoader.toBinary(
+                        node,
+                        new BufferedOutputStream(new FileOutputStream(new File(context.dotk, "defx.bin"))));
+
+                if (GlobalSettings.xml) {
+                    XStream xstream = new XStream();
+                    xstream.aliasPackage("k", "org.kframework.kil");
+                    xstream.toXML(
+                            node,
+                            new BufferedOutputStream(new FileOutputStream(new File(context.dotk, "defx.xml"))));
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return node;
+        }
+    }
 
 	public static final String DEFINITION_FILENAME = "java_symbolic_definition.bin";
 
@@ -46,16 +103,14 @@ public class JavaSymbolicBackend extends KompileBackend {
 
 	@Override
 	public Definition lastStep(Definition javaDef) {
-		try {
+        try {
 			OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(
                     new File(context.dotk, JavaSymbolicBackend.DEFINITION_FILENAME)));
 			BinaryLoader.toBinary(
-                    //javaDef.accept(new KILtoBackendJavaKILTransformer(context)),
+                    //new KILtoBackendJavaKILTransformer(context).transformDefinition(javaDef),
                     javaDef,
                     outputStream);
 			outputStream.close();
-		//} catch (TransformerException e) {
-        //    e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -115,6 +170,11 @@ public class JavaSymbolicBackend extends KompileBackend {
         steps.add(new CheckVisitorStep<Definition>(new CheckRewrite(context), context));
         steps.add(new FlattenModules(context));
 
+        steps.add(new SubsortSyntacticLists(context));
+        steps.add(new CheckVisitorStep<Definition>(new AddConsesVisitor(context), context));
+        steps.add(new CheckVisitorStep<Definition>(new CollectConsesVisitor(context), context));
+
+        steps.add(new DefinitionWriter(context));
         steps.add(new StrictnessToContexts(context));
         steps.add(new FreezeUserFreezers(context));
         steps.add(new ContextsToHeating(context));
