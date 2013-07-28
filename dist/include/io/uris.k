@@ -90,9 +90,9 @@ module URIS
   rule #statTypes(S1:String,,S2:String,,S3:String,,S4:String,,S5:String,,S6:String,,S7:String,,S8:String,,S9:String,,S10:String,,S11:String,,S12:String) => String2Int(S1),,String2Int(S2),,String2Int(S3),,String2Bool(S4),,String2Bool(S5),,String2Bool(S6),,String2Int(S7),,String2Int(S8),,String2Int(S9),,String2Int(S10),,String2Int(S11),,String2Int(S12)
   rule #statTypes(K:K) => K
 
-  rule ListItem(#ostream(_)) ListItem(#buffer(Buffer:String => Buffer +String Float2String(F))) (ListItem(F:Float) => .List) [stdout, stderr]
-  rule ListItem(#ostream(_)) ListItem(#buffer(Buffer:String => Buffer +String Int2String(I))) (ListItem(I:Int) => .List) [stdout, stderr]
-  rule ListItem(#ostream(_)) ListItem(#buffer(Buffer:String => Buffer +String S)) (ListItem(S:String) => .List) [stdout, stderr]
+  rule ListItem(#ostream(_)) ListItem(#buffer(Buffer:String => Buffer +String Float2String(F))) (ListItem(F:Float) => .List) _:List [stdout, stderr]
+  rule ListItem(#ostream(_)) ListItem(#buffer(Buffer:String => Buffer +String Int2String(I))) (ListItem(I:Int) => .List) _:List [stdout, stderr]
+  rule ListItem(#ostream(_)) ListItem(#buffer(Buffer:String => Buffer +String S)) (ListItem(S:String) => .List) _:List [stdout, stderr]
 
   // Send first char from the buffer to the server
   rule ListItem(#ostream((. => #write(N, S)) ~> N:Int)) ListItem(#buffer(S:String => "")) _:List
