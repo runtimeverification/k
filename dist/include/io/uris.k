@@ -118,8 +118,8 @@ module URIS
   syntax Stream ::= "#istream" "(" Int ")"        [cons(Stream1InputStreamSyn)]
                     | "#ostream" "(" Int ")"        [cons(Stream1OutputStreamSyn)]
   syntax Stream ::= "#noIO"
-  rule ListItem(#noIO) ListItem(#istream(_:Int)) => .List [stdin]
-  rule ListItem(#ostream(_:Int)) ListItem(#noIO) => .List [stdout, stderr]
+  rule ListItem(#buffer(_)) ListItem(#noIO) ListItem(#istream(_:Int)) => .List [stdin]
+  rule ListItem(#ostream(_:Int)) ListItem(#noIO) ListItem(#buffer(_)) => .List [stdout, stderr]
 
 // ------------------------------
 // Dynamic parsing

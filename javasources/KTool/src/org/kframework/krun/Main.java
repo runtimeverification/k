@@ -242,7 +242,7 @@ public class Main {
 			stdin = "";
 		}
 		if (stdin != null) {
-			output.put("$noIO", new BackendTerm("ListItem", "ListItem(#noIO)"));
+			output.put("$noIO", new BackendTerm("ListItem", "ListItem('#noIO(.KList))"));
 			output.put("$stdin", new BackendTerm("K", "# \"" + stdin
 					+ "\\n\"(.KList)"));
 		} else {
