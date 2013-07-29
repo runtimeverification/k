@@ -1,14 +1,14 @@
 package org.kframework.kil;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.w3c.dom.Element;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /** A nonterminal in a {@link Production}. Also abused in some places as a sort identifier */
 public class Sort extends ProductionItem {
@@ -20,6 +20,7 @@ public class Sort extends ProductionItem {
 	static {
 		baseSorts.add("K");
 		baseSorts.add("KResult");
+		baseSorts.add(KSorts.KITEM);
 		baseSorts.add(KSorts.KLIST);
 		baseSorts.add("Map");
 		baseSorts.add("MapItem");
