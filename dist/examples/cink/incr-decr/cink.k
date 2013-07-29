@@ -1,5 +1,5 @@
-require "cink-basic-semantics.k"
 require "cink-incr-decr.k"
+
 
 /*!
 \setlength{\parindent}{1em}
@@ -51,15 +51,6 @@ reference is a prvalue. The value of a literal such as 12, 7.3e5, or true is
 also a prvalue. —end example ]
 */
 
-/*@ \section{Syntax}
-The syntax consists of the syntax of basic constructs together with the syntax
-of arrays: 
-*/
-
-module CINK-SYNTAX 
-  imports CINK-BASIC-SYNTAX
-
-endmodule
 
 /*@ \section{Semantics}
 The semantics consists of the semantics of basic constructs together with the
@@ -68,6 +59,7 @@ that of arrays and the definition of the whole configuration:
 
 module CINK
 
+  imports CINK-BASIC-SYNTAX
   imports CINK-BASIC-SEMANTICS
   imports CINK-INCR-DECR-SEMANTICS
 

@@ -6,8 +6,9 @@ require "semantics-intro.k"
 require "cink-basic-semantics.k"
 
 
-/*@ \section{Main Module}
-
+/*@ \section{The Main Module}
+Includes the modules defining the syntax and semantics, and defines 
+the main configuration of the language.
 */
 
 
@@ -15,6 +16,12 @@ require "cink-basic-semantics.k"
 module CINK
   imports CINK-BASIC-SYNTAX
   imports CINK-BASIC-SEMANTICS
+
+ /*@ \subsection{Configuration.} 
+   The configuration is standard for such languages (compare it to that of IMPPP
+   and SIMPLE).
+  */
+
 
   configuration <T color="yellow">
                   <control color="pink">

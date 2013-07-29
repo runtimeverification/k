@@ -1,12 +1,10 @@
 require "cink-basic-syntax.k"
 require "cink-basic-semantics.k"
-require "cink-l-r-values.k"
 
 
 module CINK-INCR-DECR-SEMANTICS
 
   imports CINK-BASIC-SEMANTICS
-  imports CINK-L-R-VALUES-SEMANTICS
 
   /*@
    There are cases when an lvalue must be converted into its rvalue.
@@ -60,9 +58,13 @@ module CINK-INCR-DECR-SEMANTICS
   */
 
   //@ The semantics of the the prefix increment
+  context ++ (HOLE => lvalue(HOLE))
+  context lvalue(++ (HOLE => lvalue(HOLE)))
   rule <k> ++ L:Loc => L ...</k>
        <store>... L |-> (V:Int => V +Int 1) ...</store>
 
+  rule lvalue(++ L:Loc) => ++ L ~> lvalue(HOLE) // [heat]
+  rule L:Loc ~> lvalue(HOLE) => lvalue(L)
 
   /*@
   \subsubsection{The postfix increment operator}
@@ -127,6 +129,8 @@ module CINK-INCR-DECR-SEMANTICS
     value  stored at the computed location and its side-effect is added to 
     the cell with the side-effects:
   */
+
+  context (HOLE => lvalue(HOLE)) ++
 
   rule <k> L:Loc ++ => V ...</k>
        <store>... L |-> V:Int ...</store>

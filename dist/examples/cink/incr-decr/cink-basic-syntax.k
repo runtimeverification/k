@@ -11,13 +11,13 @@ module CINK-BASIC-SYNTAX
 
   syntax RVal ::= "cout" | "cin" | Bool | String | Int
 
-  syntax Val ::= RVal
+  syntax Val ::= RVal | LVal
 
   syntax Exp ::= Id | Val
                | "(" Exp ")"  [bracket]
                | Exp "(" Exps ")" [strict(1), strictType(rvalue), result(RVal)]
-| "++" Exp [strict]
-| Exp "++" [strict]
+| "++" Exp
+| Exp "++" 
                > left:
                  Exp "*" Exp [multiply, strict, strictType(rvalue), result(RVal)]
                | Exp "/" Exp [divide, strict, strictType(rvalue), result(RVal)]

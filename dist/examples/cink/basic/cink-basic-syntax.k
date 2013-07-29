@@ -14,19 +14,48 @@ module CINK-BASIC-SYNTAX
   syntax Decl ::= Type Exps
 
 
-  /*@ \subsection{Expressions} */
+  /*@ \subsection{Values} */
 
   /*@ The constants of the builtin types are primitive constructs and therefore
       they should be values.  
-      The sort for values will be extended in the module describing the 
-      semantics. 
+      \par
+      In \Cpp the values are splitted in several categories:\\
+\begin{quote}
+-- An lvalue (so called, historically, because lvalues could appear on the 
+left-hand side of an assignment expression) designates a function or an object.
+[ Example: If E is an expression of pointer type, then
+*E is an lvalue expression referring to the object or function to which E 
+points. As another example, the result of calling a function whose return type
+is an lvalue reference is an lvalue. --end example ]\\
+-- An xvalue (an "eXpiring" value) also refers to an object, usually near
+the end of its lifetime (so that its resources may be moved, for example). 
+An xvalue is the result of certain kinds of expressions involving
+rvalue references (8.3.2). [ Example: The result of calling a function whose 
+return type is an rvalue reference is an xvalue. --end example ]\\
+-- A glvalue ("generalized" lvalue) is an lvalue or an xvalue.\\
+-- An rvalue (so called, historically, because rvalues could appear on the 
+right-hand side of an assignment expression) is an xvalue, a temporary object 
+(12.2) or subobject thereof, or a value that is not associated with an object.\\
+-- A prvalue ("pure" rvalue) is an rvalue that is not an xvalue. 
+[ Example: The result of calling a function whose return type is not a 
+reference is a prvalue. The value of a literal such as 12, 7.3e5, or true is
+also a prvalue. --end example ]
+\end{quote}
+      In order to keep the definition as sinple as possible, we consider only
+      of these categories: \emph{lvalues} (\texttt{LVal}) and \emph{rvalues} 
+      (\texttt{RVal}).
+      The sort \texttt{Val} for values will be extended in the module describing
+      the semantics.
+      \par
       We prefer to declare \texttt{cin} and \texttt{cout} as values rather 
       than identifiers; the reason for this decision will be explained later.
    */
 
   syntax RVal ::= "cout" | "cin" | Bool | String | Int
 
-  syntax Val ::= RVal
+  syntax Val ::= RVal | LVal
+
+  /*@ \subsection{Expressions} */
 
   /*@
     We included in CinK a small subset of \Cpp language, the missing operators

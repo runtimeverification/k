@@ -23,7 +23,7 @@ specific features, as \Cpp is.
 \Cink is developed in several iterations, each iteration adding an incremental 
 contribution.
 
-This file extends the  iteration defining \emph{lvalues} and \emph{rvalues}
+This file extends the basic iteration 
 with the mechanisms able to handle pointers.
 
 Here is the definition of the indirect operator from the \Cpp 2011 manual:

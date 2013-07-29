@@ -1,25 +1,32 @@
-//require "../basic/cink-basic-syntax.k"
-require "../arrays/cink-arrays.k"
+require "../pointers/cink-pointers.k"
 
-module CINK-CALL-BY-REF-SYNTAX
-  syntax Exp ::= "&" Exp [ampersand]
-  syntax priorities  ampersand > assign read write greatthan lessequal
-endmodule
+/*@ \section{The New Module}
+
+*/
 
 module CINK-CALL-BY-REF-SEMANTICS
 
-  imports CINK-BASIC-SYNTAX
-  imports CINK-CALL-BY-REF-SYNTAX
-  imports CINK-BASIC-SEMANTICS
-  imports CINK-L-R-VALUES-SEMANTICS
+  imports CINK-POINTERS-SYNTAX
+  imports CINK-POINTERS-SEMANTICS
+
+/*@
+From the \Cpp manual:
+\begin{quote}
+a function can change the values of its non-const parameters, 
+but these changes cannot affect the
+values of the arguments except where a parameter is of a reference 
+type (8.3.2)\ldots
+\end{quote}
+*/
 
   context evaluate((HOLE => lvalue(HOLE)), _:Exps) to _:Vals
           following  (T:Type (& X:Id)::Exp, _:Decls);
 
 
   /*@ For call-by-reference, the location pointed to by the lvalue is directly
-      bound to the formal parameter:
+      bound to the formal parameter. This is achieved by exactly one rule:
   */
+
   rule <k> bind((L:LVal, Vs:Vals) => Vs)
            to((T:Type & X:Id, Xl:Decls) => Xl); 
        ...</k>

@@ -1,11 +1,12 @@
-require "../l-r-values/cink-l-r-values.k"
+// require "../l-r-values/cink-l-r-values.k"
+ require "../pointers/cink-pointers.k"
 
 module CINK-ARRAYS-SYNTAX
 
   syntax Exp ::= Exp "[" Exp "]" [strict, array]
                | Exp "[]" [array] 
 
-  syntax priorities  array > read write greatthan lessequal
+  syntax priorities  array > multiply read write greatthan lessequal
   syntax priority  array > assign
 
 endmodule
@@ -14,7 +15,7 @@ module CINK-ARRAYS-SEMANTICS
 
   imports CINK-ARRAYS-SYNTAX
   imports CINK-BASIC-SEMANTICS
-  imports CINK-L-R-VALUES-SEMANTICS
+  imports CINK-POINTERS-SEMANTICS
   imports ARRAY
 
   /*@
@@ -40,25 +41,36 @@ module CINK-ARRAYS-SEMANTICS
   rule X:Exp[N:Int] of AT:ArrType; => X of array of N AT;
 
   /*@
-  We need declare the arrays as values: .
+  The arrays are locations storing locations:
   */
-
-  syntax Val ::= Array 
+  syntax Loc ::= Array
 
   /*@
   An array \texttt{a[2][3]} will be represented as follows:
   \begin{verbatim}
   <env>
     a[0] |-> #symLoc(3)
-    a[1] |-> #symLoc(4)
+    a[1] |-> #symLoc(7)
     a |-> #symLoc(2)
   </env>
   <store>
-    #symLoc(2) |-> store(store(const-array(2, undefined),
+    #symLoc(2) |-> store(store(const-array(3, undefined),
                                0, #symLoc(3)),
-                         1, #symLoc(4))
-        #symLoc(3) |-> const-array(2, undefined )
-        #symLoc(4) |-> const-array(2, undefined )
+                               1, #symLoc(4))
+        #symLoc(3) |-> store(store(store(const-array(3, undefined),
+                               0, #symLoc(4)),
+                               0, #symLoc(5)),
+                               1, #symLoc(6))
+        #symLoc(4) |-> undefined
+        #symLoc(5) |-> undefined
+        #symLoc(6) |-> undefined
+        #symLoc(7) |-> store(store(store(const-array(3, undefined),
+                               0, #symLoc(8)),
+                               0, #symLoc(9)),
+                               1, #symLoc(10))
+        #symLoc(8) |-> undefined
+        #symLoc(9) |-> undefined
+        #symLoc(10) |-> undefined
     </store>
   \end{verbatim}
   Since the definition of the multidimensional array is recursive, the 
@@ -102,21 +114,34 @@ module CINK-ARRAYS-SEMANTICS
   /*@
    The base case when X denotes a unidimensional array:
   */ 
+
+  rule <k> alloc(X:Exp of array of N:Int T:Type;, I:Int)
+           =>
+           alloc(X of array of N T;, I +Int 1)
+       ...</k>
+       <env>... X |-> L (. => X[I] |-> L') </env>
+       <store>...
+              (L |-> (A:Array => store(A, I, L')))
+              (. =>  L' |-> undefined)
+       ...</store>
+       when fresh(L':Loc) andBool (isArrType(T) =/=K true) andBool (I <Int N)
+
+  /*@
+   The base case when all components of the current unidimensional array 
+  are allocated:
+  */ 
+
   rule <k> alloc(X:Exp of array of N:Int T:Type;, I:Int)
            =>
            .
        ...</k>
-       when fresh(L:Loc) andBool isArrType(T) =/=K true
+       when fresh(L:Loc)  andBool (I >=Int N) andBool isArrType(T) =/=K true
 
-  /*@
-  We introduce a new constructor for locations, corresponding to a component
-  of unidimensional array of basic types:
-  */
-  syntax Loc ::=  "locElem" "(" K ")"
 
   /*@
   The evaluation of an array component as a lvalue:
   */
+
   context lvalue(_:Exp[HOLE])
 
   context lvalue((HOLE => lvalue(HOLE))[_:Exp])
@@ -124,38 +149,19 @@ module CINK-ARRAYS-SEMANTICS
   rule <k> lvalue(L:Loc[I:Int] => L' ) ...</k>
        <env>... X:Exp |-> L  X[I] |-> L':Loc ...</env>
 
-  rule <k> lvalue(L:Loc[I:Int] => locElem(L[I])) ...</k>
-       <env> X:Exp |-> L Env:Map </env>
-       <store>... L |-> _:Array ...</store>
-       when notBool $hasMapping(Env, X[I])
+  rule lvalue(A:Array + I:Int) =>  select(A,I) ~> lvalue(HOLE)
+  rule L:Loc ~> lvalue(HOLE) => lvalue(& L)
 
   /*@
-  The evaluation of an array component as a lvalue:
+  The evaluation of an array component as an rvalue:
   */
-  rule <k> locElem(L:Loc[I:Int]) = V:Val  => V ...</k>
-       <store>... L |-> (A:Array => store(A, I, V)) ...</store>
 
-  rule A:Array [I:Int] => select(A, I)
+  rule A:Array [I:Int] => * (A + I)
 
-  rule <k> L:Loc [I:Int] => select(A, I) ...</k>
-       <store>... L |-> A:Array ...</store>
-//lvalue ( ((locElem ( (#symLoc(3) [ 1 ]) )) [ 2 ]) )
-  rule <k> lvalue((locElem(L:Loc [I:Int]) => select(A, I))[_]) ...</k>
-       <store>... L |-> A:Array ...</store>
-//lvalue ( (#symLoc(8) [ 2 ]) )
-  rule <k> lvalue(L:Loc [I:Int] => locElem(L[I])) ...</k>
-       <env> X:Exp |-> L Env:Map </env>
-       <store>... L |-> _:Array ...</store>
-       when notBool $hasMapping(Env, X[I])
+  rule A:Array + I:Int => select(A, I) 
 
-  /*@
-  The semantics operator for a component of an array requires a new rule,
-  because the location of the component does not explicitly appear in the store:
-  */
-  rule <k> cin >> locElem(L:Loc[I:Int]) => cin  ...</k>
-       <store>... L |-> (A:Array => store(A, I, V))  ...</store>
-       <in> (ListItem(V:Int) => .)  ...</in>
-       [read-stream]
+  context _:Exp[HOLE] = _
+
 
   /*@ 
   Arrays as parameters:
@@ -167,8 +173,8 @@ module CINK-ARRAYS-SEMANTICS
   context evaluate ((HOLE => lvalue(HOLE)), _:Exps) to _:Vals
           following (T _:Exp[_:Exp], _:Decls);
 
-  rule <k> bind((L:LVal, Vs:Vals) => Vs)
-           to((T X:Id[], Xl:Decls) => Xl); 
+  rule <k>
+          bind((L:LVal, Vs:Vals) => Vs) to((T X:Id[], Xl:Decls) => Xl); 
        ...</k>
        <env> Env:Map => Env[L/X] </env>
        [structural]

@@ -27,7 +27,6 @@ int main() {
     cout << a[i] << "; ";
     i = i + 1;
   }
-y = 5;
   cout << endl;
   return 0;
 }

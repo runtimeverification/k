@@ -19,13 +19,13 @@ module ARRAY
 
   // main array axioms
   rule select(store(_:Array, I:Int, V:K), J:Int) => V 
-       when I ==Int J [symbolic-kompile]
+       when I ==Int J [symbolic-kompile, anywhere]
   rule select(store(A:Array, I:Int, _:K), J:Int) => select(A, J)
-       when I =/=Int J [symbolic-kompile]
+       when I =/=Int J [symbolic-kompile, anywhere]
 
   // select from constant array
   rule select(const-array(Size:Int, V:K), I:Int) => V
-       when (0 <=Int I) andBool (I <Int Size) [symbolic-kompile]
+       when (0 <=Int I) andBool (I <Int Size) [symbolic-kompile, anywhere]
 
   // simplification of multiple store
   rule store(store(A:Array, I:Int, V:K), J:Int, V':K)

@@ -3,7 +3,7 @@ require "imports-intro.k"
 require "cink-pointers.k"
 
 
-/*@ \section{Main Module}
+/*@ \section{The Main Module}
  
 */
 
