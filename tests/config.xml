@@ -792,6 +792,14 @@
     </all-programs>
   </test>
 
+  <test
+      language="tests/regression/issue686/issue.k"
+      extensions="issue" >
+      <all-programs>
+        <krun-option name="--output-mode" value="pretty" />
+      </all-programs>
+  </test>
+
 
 
 
