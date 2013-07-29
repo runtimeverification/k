@@ -38,6 +38,7 @@ public class CorrectCastPriorityFilter extends BasicTransformer {
 				Variable var = new Variable((Variable) cst.getContent());
 				var.setUserTyped(true);
 				var.setSort(cst.getSort());
+				var.setSyntactic(true);
 				return var;
 			} else {
 				String msg = "Due to typing errors, Casting is too greedy. Use parentheses to set proper scope.";
