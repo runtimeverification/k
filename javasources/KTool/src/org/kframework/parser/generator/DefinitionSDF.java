@@ -183,6 +183,8 @@ public class DefinitionSDF {
 		}
 		sdf.append("	 K \":K\"	-> VariableDz	{cons(\"K1Cast\")}\n");
 		sdf.append("	 K \"::K\"	-> VariableDz	{cons(\"K12Cast\")}\n");
+		sdf.append("	 K \":KItem\"	-> VariableDz	{cons(\"KItem1Cast\")}\n");
+		sdf.append("	 K \"::KItem\"	-> VariableDz	{cons(\"KItem12Cast\")}\n");
 
 		sdf.append("\n");
 		sdf.append("	VariableDz -> K\n");
