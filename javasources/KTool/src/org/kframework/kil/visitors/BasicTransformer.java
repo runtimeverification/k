@@ -75,7 +75,7 @@ public class BasicTransformer implements Transformer {
 		Term requires = node.getRequires();
 		if (requires != null)
 			requires = (Term) requires.accept(this);
-		Term ensures = node.getRequires();
+		Term ensures = node.getEnsures();
 		if (ensures != null)
 			ensures = (Term) ensures.accept(this);
 		node.setBody(body);
