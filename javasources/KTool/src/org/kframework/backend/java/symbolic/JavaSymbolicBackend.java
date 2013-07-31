@@ -1,6 +1,6 @@
 package org.kframework.backend.java.symbolic;
 
-import org.kframework.backend.maude.KompileBackend;
+import org.kframework.backend.BasicBackend;
 import org.kframework.backend.symbolic.TagUserRules;
 import org.kframework.compile.FlattenModules;
 import org.kframework.compile.ResolveConfigurationAbstraction;
@@ -65,35 +65,7 @@ import com.thoughtworks.xstream.XStream;
  *
  * @author AndreiS
  */
-public class JavaSymbolicBackend extends KompileBackend {
-
-    private class DefinitionWriter extends org.kframework.kil.visitors.CopyOnWriteTransformer {
-
-        public DefinitionWriter(Context context) {
-            super("Serialize Compiled Definition to XML", context);
-        }
-
-        @Override
-        public ASTNode transform(Definition node) throws TransformerException {
-            try {
-                BinaryLoader.toBinary(
-                        node,
-                        new BufferedOutputStream(new FileOutputStream(new File(context.dotk, "defx.bin"))));
-
-                if (GlobalSettings.xml) {
-                    XStream xstream = new XStream();
-                    xstream.aliasPackage("k", "org.kframework.kil");
-                    xstream.toXML(
-                            node,
-                            new BufferedOutputStream(new FileOutputStream(new File(context.dotk, "defx.xml"))));
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            return node;
-        }
-    }
+public class JavaSymbolicBackend extends BasicBackend {
 
 	public static final String DEFINITION_FILENAME = "java_symbolic_definition.bin";
 
@@ -152,6 +124,10 @@ public class JavaSymbolicBackend extends KompileBackend {
 		return javaDef;
 	}
 
+    @Override
+    public void run(Definition def) throws IOException {
+    }
+
 	@Override
 	public String getDefaultStep() {
 		return "LastStep";
@@ -174,7 +150,6 @@ public class JavaSymbolicBackend extends KompileBackend {
         steps.add(new CheckVisitorStep<Definition>(new AddConsesVisitor(context), context));
         steps.add(new CheckVisitorStep<Definition>(new CollectConsesVisitor(context), context));
 
-        steps.add(new DefinitionWriter(context));
         steps.add(new StrictnessToContexts(context));
         steps.add(new FreezeUserFreezers(context));
         steps.add(new ContextsToHeating(context));

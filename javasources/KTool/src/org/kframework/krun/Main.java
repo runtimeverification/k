@@ -1049,9 +1049,19 @@ public class Main {
 			RunProcess rp = new RunProcess();
 
 			if (!context.initialized) {
-				Definition javaDef = (Definition) BinaryLoader
+                String path = K.compiled_def + "/defx-" + K.backend + ".bin";
+                Definition javaDef;
+                if (new File(path).exists()) {
+                    javaDef = (Definition) BinaryLoader
 						.fromBinary(new FileInputStream(K.compiled_def
-								+ "/defx.bin"));
+								+ "/defx-" + K.backend + ".bin"));
+                } else {
+			        GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+						KExceptionGroup.CRITICAL,
+						"Could not find compiled definition for backend '" + K.backend + "'.  " +
+                        "Please ensure this backend has been kompiled."));
+                    throw new AssertionError("unreachable");
+                }
 
 				if (GlobalSettings.verbose)
 					sw.printIntermediate("Reading definition from binary");

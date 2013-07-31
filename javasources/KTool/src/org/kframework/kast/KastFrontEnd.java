@@ -132,7 +132,7 @@ public class KastFrontEnd {
 		}
 		try {
 			if (context.kompiled.exists()) {
-				File defXml = new File(context.kompiled.getCanonicalPath() + "/defx.bin");
+				File defXml = new File(context.kompiled.getCanonicalPath() + "/defx-maude.bin");
 				if (!defXml.exists()) {
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find the compiled definition.", "command line",
 							defXml.getAbsolutePath()));

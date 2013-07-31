@@ -41,7 +41,7 @@ public class MainServer implements Runnable {
 		Context context = new Context();
 		context.kompiled = new File(args[1]);
 		Definition javaDef = (Definition) BinaryLoader.fromBinary(
-			new FileInputStream(context.kompiled.getCanonicalPath() + "/defx.bin"));
+			new FileInputStream(context.kompiled.getCanonicalPath() + "/defx-maude.bin"));
 		javaDef = new FlattenModules(context).compile(javaDef, null);
 		javaDef = (Definition) javaDef.accept(new AddTopCellConfig(context));
 		// This is essential for generating maude
