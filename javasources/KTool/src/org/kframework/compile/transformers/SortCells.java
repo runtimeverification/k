@@ -70,16 +70,17 @@ public class SortCells extends CopyOnWriteTransformer {
 		Term body = node.getBody();
 		ASTNode bodyNode = body.accept(this);
         if (bodyNode != body) change = true;
-        Term condition = node.getCondition();
-        Term conditionNode = null;
-        if (condition != null) {
-           conditionNode = (Term) condition.accept(this);
-           if (conditionNode != condition) change = true;
+        Term requires = node.getRequires();
+        Term requiresNode = null;
+        if (requires != null) {
+           requiresNode = (Term) requires.accept(this);
+           if (requiresNode != requires) change = true;
         }
+        //TODO:  Handle ensures?
         if (!change) return node;
 		node = node.shallowCopy();
 		node.setBody((Term) bodyNode);
-        node.setCondition(conditionNode);
+        node.setRequires(requiresNode);
 		return node.accept(new ResolveRemainingVariables(context));
 	}
 

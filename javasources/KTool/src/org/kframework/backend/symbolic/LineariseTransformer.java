@@ -46,7 +46,7 @@ public class LineariseTransformer extends BasicTransformer {
             rew.setLeft(transformedLeft, context);
 
             Map<Variable, Variable> newGeneratedSV = vrt.getGeneratedVariables();
-            Term condition = node.getCondition();
+            Term condition = node.getRequires();
 
             List<Term> terms = new ArrayList<Term>();
             for (Entry<Variable, Variable> entry : newGeneratedSV.entrySet()) {
@@ -72,7 +72,7 @@ public class LineariseTransformer extends BasicTransformer {
 
             node = node.shallowCopy();
             node.setBody(rew);
-            node.setCondition(newCondition);
+            node.setRequires(newCondition);
         }
         return node;
     }

@@ -14,7 +14,6 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
-
 public class CopyOnWriteTranslator implements org.kframework.kil.visitors.Transformer {
 	String name;
 	protected Context context;
@@ -114,23 +113,37 @@ public class CopyOnWriteTranslator implements org.kframework.kil.visitors.Transf
 					.getLocation()));
 		}
 		body = (Term) bodyAST;
-		Term condition = node.getCondition();
-		if (condition != null) {
-			ASTNode conditionAST = condition.accept(this);
-			if (conditionAST != condition)
+		Term requires = node.getRequires();
+		if (requires != null) {
+			ASTNode requiresAST = requires.accept(this);
+			if (requiresAST != requires)
 				change = true;
-			if (null == conditionAST)
+			if (null == requiresAST)
 				return null;
-			if (!(conditionAST instanceof Term)) {
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + conditionAST.getClass() + " while transforming.", condition
-						.getFilename(), condition.getLocation()));
+			if (!(requiresAST instanceof Term)) {
+				String msg = "Expecting Term, but got " + requiresAST.getClass() + " while transforming.";
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, msg, requires.getFilename(), requires.getLocation()));
 			}
-			condition = (Term) conditionAST;
+			requires = (Term) requiresAST;
+		}
+		Term ensures = node.getEnsures();
+		if (ensures != null) {
+			ASTNode ensuresAST = ensures.accept(this);
+			if (ensuresAST != ensures)
+				change = true;
+			if (null == ensuresAST)
+				return null;
+			if (!(ensuresAST instanceof Term)) {
+				String msg = "Expecting Term, but got " + ensuresAST.getClass() + " while transforming.";
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, msg, ensures.getFilename(), ensures.getLocation()));
+			}
+			ensures = (Term) ensuresAST;
 		}
 		if (change) {
 			node = node.shallowCopy();
 			node.setBody(body);
-			node.setCondition(condition);
+			node.setRequires(requires);
+			node.setEnsures(ensures);
 		}
 		return transform((ModuleItem) node);
 	}
@@ -459,94 +472,92 @@ public class CopyOnWriteTranslator implements org.kframework.kil.visitors.Transf
 		return transform((CollectionItem) node);
 	}
 
-    @Override
-    public ASTNode transform(CollectionBuiltin node) throws TransformerException {
-        boolean change = false;
-
-        ArrayList<Term> terms = new ArrayList<Term>(node.baseTerms().size());
-        for (Term term : node.baseTerms()) {
-            Term transformedTerm = (Term) term.accept(this);
-            terms.add(transformedTerm);
-            change = change || transformedTerm != term;
-        }
-
-        ArrayList<Term> elements = new ArrayList<Term>(node.elements().size());
-        for (Term term : node.elements()) {
-            Term transformedTerm = (Term) term.accept(this);
-            elements.add(transformedTerm);
-            change = change || transformedTerm != term;
-        }
-
-        if (change) {
-            return CollectionBuiltin.of(node.sort(), elements, terms);
-        } else {
-            return node;
-        }
-    }
-
-    @Override
-    public ASTNode transform(SetBuiltin node) throws TransformerException {
-       return transform((CollectionBuiltin)node);
-    }
-
-    @Override
-    public ASTNode transform(SetLookup node) throws TransformerException {
-        Variable set = (Variable) node.base().accept(this);
-        Term value = (Term) node.key().accept(this);
-
-        if (set != node.base() || value != node.key()) {
-            return new SetLookup(set, value);
-        } else {
-            return node;
-        }
-    }
-
-    @Override
-    public ASTNode transform(SetUpdate node) throws TransformerException {
-        boolean change = false;
-
-        Variable set = (Variable) node.set().accept(this);
-
-        HashSet<Term> removeEntries = new HashSet<Term>(node.removeEntries().size());
-        for (Term term : node.updateEntries()) {
-            Term transformedTerm = (Term) term.accept(this);
-            removeEntries.add(transformedTerm);
-            change = change || transformedTerm != term;
-        }
-
-        HashSet<Term> updateEntries = new HashSet<Term>(node.updateEntries().size());
-        for (Term term : node.updateEntries()) {
-            Term transformedTerm = (Term) term.accept(this);
-            updateEntries.add(transformedTerm);
-            change = change || transformedTerm != term;
-        }
-
-        if (change) {
-            return new SetUpdate(set, removeEntries, updateEntries);
-        } else {
-            return node;
-        }
-    }
-
-
 	@Override
-	public ASTNode transform(MapBuiltin node) throws TransformerException {
+	public ASTNode transform(CollectionBuiltin node) throws TransformerException {
 		boolean change = false;
 
-        ArrayList<Term> terms = new ArrayList<Term>(node.baseTerms().size());
+		ArrayList<Term> terms = new ArrayList<Term>(node.baseTerms().size());
 		for (Term term : node.baseTerms()) {
 			Term transformedTerm = (Term) term.accept(this);
 			terms.add(transformedTerm);
 			change = change || transformedTerm != term;
 		}
 
-        HashMap<Term, Term> elements = new HashMap<Term, Term>(node.elements().size());
+		ArrayList<Term> elements = new ArrayList<Term>(node.elements().size());
+		for (Term term : node.elements()) {
+			Term transformedTerm = (Term) term.accept(this);
+			elements.add(transformedTerm);
+			change = change || transformedTerm != term;
+		}
+
+		if (change) {
+			return CollectionBuiltin.of(node.sort(), elements, terms);
+		} else {
+			return node;
+		}
+	}
+
+	@Override
+	public ASTNode transform(SetBuiltin node) throws TransformerException {
+		return transform((CollectionBuiltin) node);
+	}
+
+	@Override
+	public ASTNode transform(SetLookup node) throws TransformerException {
+		Variable set = (Variable) node.base().accept(this);
+		Term value = (Term) node.key().accept(this);
+
+		if (set != node.base() || value != node.key()) {
+			return new SetLookup(set, value);
+		} else {
+			return node;
+		}
+	}
+
+	@Override
+	public ASTNode transform(SetUpdate node) throws TransformerException {
+		boolean change = false;
+
+		Variable set = (Variable) node.set().accept(this);
+
+		HashSet<Term> removeEntries = new HashSet<Term>(node.removeEntries().size());
+		for (Term term : node.updateEntries()) {
+			Term transformedTerm = (Term) term.accept(this);
+			removeEntries.add(transformedTerm);
+			change = change || transformedTerm != term;
+		}
+
+		HashSet<Term> updateEntries = new HashSet<Term>(node.updateEntries().size());
+		for (Term term : node.updateEntries()) {
+			Term transformedTerm = (Term) term.accept(this);
+			updateEntries.add(transformedTerm);
+			change = change || transformedTerm != term;
+		}
+
+		if (change) {
+			return new SetUpdate(set, removeEntries, updateEntries);
+		} else {
+			return node;
+		}
+	}
+
+	@Override
+	public ASTNode transform(MapBuiltin node) throws TransformerException {
+		boolean change = false;
+
+		ArrayList<Term> terms = new ArrayList<Term>(node.baseTerms().size());
+		for (Term term : node.baseTerms()) {
+			Term transformedTerm = (Term) term.accept(this);
+			terms.add(transformedTerm);
+			change = change || transformedTerm != term;
+		}
+
+		HashMap<Term, Term> elements = new HashMap<Term, Term>(node.elements().size());
 		for (java.util.Map.Entry<Term, Term> entry : node.elements().entrySet()) {
 			Term transformedKey = (Term) entry.getKey().accept(this);
 			Term transformedValue = (Term) entry.getValue().accept(this);
 			elements.put(transformedKey, transformedValue);
-			change = change || transformedKey != entry.getKey()
-                     || transformedValue != entry.getValue();
+			change = change || transformedKey != entry.getKey() || transformedValue != entry.getValue();
 		}
 
 		if (change) {
@@ -556,84 +567,80 @@ public class CopyOnWriteTranslator implements org.kframework.kil.visitors.Transf
 		}
 	}
 
-    @Override
-    public ASTNode transform(MapLookup node) throws TransformerException {
-        Variable map = (Variable) node.base().accept(this);
-        Term key = (Term) node.key().accept(this);
-        Term value = (Term) node.value().accept(this);
+	@Override
+	public ASTNode transform(MapLookup node) throws TransformerException {
+		Variable map = (Variable) node.base().accept(this);
+		Term key = (Term) node.key().accept(this);
+		Term value = (Term) node.value().accept(this);
 
-        if (map != node.base() || key != node.key() || value != node.value()) {
-            return new MapLookup(map, key, value);
-        } else {
-            return node;
-        }
-    }
+		if (map != node.base() || key != node.key() || value != node.value()) {
+			return new MapLookup(map, key, value);
+		} else {
+			return node;
+		}
+	}
 
-    @Override
-    public ASTNode transform(MapUpdate node) throws TransformerException {
-        boolean change = false;
+	@Override
+	public ASTNode transform(MapUpdate node) throws TransformerException {
+		boolean change = false;
 
-        Variable map = (Variable) node.map().accept(this);
+		Variable map = (Variable) node.map().accept(this);
 
-        HashMap<Term, Term> removeEntries = new HashMap<Term, Term>(node.removeEntries().size());
-        for (java.util.Map.Entry<Term, Term> entry : node.updateEntries().entrySet()) {
-            Term transformedKey = (Term) entry.getKey().accept(this);
-            Term transformedValue = (Term) entry.getValue().accept(this);
-            removeEntries.put(transformedKey, transformedValue);
-            change = change || transformedKey != entry.getKey()
-                     || transformedValue != entry.getValue();
-        }
+		HashMap<Term, Term> removeEntries = new HashMap<Term, Term>(node.removeEntries().size());
+		for (java.util.Map.Entry<Term, Term> entry : node.updateEntries().entrySet()) {
+			Term transformedKey = (Term) entry.getKey().accept(this);
+			Term transformedValue = (Term) entry.getValue().accept(this);
+			removeEntries.put(transformedKey, transformedValue);
+			change = change || transformedKey != entry.getKey() || transformedValue != entry.getValue();
+		}
 
-        HashMap<Term, Term> updateEntries = new HashMap<Term, Term>(node.updateEntries().size());
-        for (java.util.Map.Entry<Term, Term> entry : node.updateEntries().entrySet()) {
-            Term transformedKey = (Term) entry.getKey().accept(this);
-            Term transformedValue = (Term) entry.getValue().accept(this);
-            updateEntries.put(transformedKey, transformedValue);
-            change = change || transformedKey != entry.getKey()
-                     || transformedValue != entry.getValue();
-        }
+		HashMap<Term, Term> updateEntries = new HashMap<Term, Term>(node.updateEntries().size());
+		for (java.util.Map.Entry<Term, Term> entry : node.updateEntries().entrySet()) {
+			Term transformedKey = (Term) entry.getKey().accept(this);
+			Term transformedValue = (Term) entry.getValue().accept(this);
+			updateEntries.put(transformedKey, transformedValue);
+			change = change || transformedKey != entry.getKey() || transformedValue != entry.getValue();
+		}
 
-        if (change) {
-            return new MapUpdate(map, removeEntries, updateEntries);
-        } else {
-            return node;
-        }
-    }
-
-
+		if (change) {
+			return new MapUpdate(map, removeEntries, updateEntries);
+		} else {
+			return node;
+		}
+	}
 
 	@Override
 	public ASTNode transform(Constant node) throws TransformerException {
 		return transform((Term) node);
 	}
 
-    @Override
-    public ASTNode transform(Token node) throws TransformerException {
-        /* an instance of class Token is immutable */
-        return transform((KLabel) node);
-    }
+	@Override
+	public ASTNode transform(Token node) throws TransformerException {
+		/* an instance of class Token is immutable */
+		return transform((KLabel) node);
+	}
 
-    @Override
-    public ASTNode transform(BoolBuiltin node) throws TransformerException {
-        return transform((Token) node);
-    }
+	@Override
+	public ASTNode transform(BoolBuiltin node) throws TransformerException {
+		return transform((Token) node);
+	}
 
-    @Override
-    public ASTNode transform(IntBuiltin node) throws TransformerException {
-        return transform((Token) node);
-    }
+	@Override
+	public ASTNode transform(IntBuiltin node) throws TransformerException {
+		return transform((Token) node);
+	}
 
-    @Override
-    public ASTNode transform(StringBuiltin node) throws TransformerException {
-        return transform((Token) node);
-    }
+	@Override
+	public ASTNode transform(StringBuiltin node) throws TransformerException {
+		return transform((Token) node);
+	}
 
-    @Override
-    public ASTNode transform(GenericToken node) throws TransformerException {
-        return transform((Token) node);
-    }
+	@Override
+	public ASTNode transform(GenericToken node) throws TransformerException {
+		return transform((Token) node);
+	}
 
-    @Override
+	@Override
 	public ASTNode transform(Empty node) throws TransformerException {
 		return transform((Term) node);
 	}
@@ -676,12 +683,12 @@ public class CopyOnWriteTranslator implements org.kframework.kil.visitors.Transf
 		if (change) {
 			node = node.shallowCopy();
 			node.setLabel((Term) label);
-            Term childTerm = (Term) child;
-            if (!(childTerm.getSort().equals(KSorts.KLIST) || childTerm instanceof Ambiguity)) {
-                node.setChild(new KList(Collections.<Term>singletonList(childTerm)));
-            } else {
-                node.setChild(childTerm);
-            }
+			Term childTerm = (Term) child;
+			if (!(childTerm.getSort().equals(KSorts.KLIST) || childTerm instanceof Ambiguity)) {
+				node.setChild(new KList(Collections.<Term> singletonList(childTerm)));
+			} else {
+				node.setChild(childTerm);
+			}
 
 		}
 		return transform((Term) node);
@@ -692,12 +699,12 @@ public class CopyOnWriteTranslator implements org.kframework.kil.visitors.Transf
 		return transform((Term) node);
 	}
 
-    @Override
-    public ASTNode transform(KLabelConstant node) throws TransformerException {
-        return transform((KLabel) node);
-    }
+	@Override
+	public ASTNode transform(KLabelConstant node) throws TransformerException {
+		return transform((KLabel) node);
+	}
 
-    @Override
+	@Override
 	public ASTNode transform(Rewrite node) throws TransformerException {
 		boolean change = false;
 		Term term = node.getLeft();

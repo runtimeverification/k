@@ -279,8 +279,12 @@ public class LatexFilter extends BackendFilter {
 		result.append("{" + endl);
 		rule.getBody().accept(this);
 		result.append("}{");
-		if (rule.getCondition() != null) {
-			rule.getCondition().accept(this);
+		if (rule.getRequires() != null) {
+			rule.getRequires().accept(this);
+		}
+		result.append("}{");
+		if (rule.getEnsures() != null) {
+			rule.getEnsures().accept(this);
 		}
 		result.append("}{");
 		rule.getAttributes().accept(this);
@@ -297,8 +301,12 @@ public class LatexFilter extends BackendFilter {
 		result.append("{" + endl);
 		cxt.getBody().accept(this);
 		result.append("}{");
-		if (cxt.getCondition() != null) {
-			cxt.getCondition().accept(this);
+		if (cxt.getRequires() != null) {
+			cxt.getRequires().accept(this);
+		}
+		result.append("}{");
+		if (cxt.getEnsures() != null) {
+			cxt.getEnsures().accept(this);
 		}
 		result.append("}{");
 		cxt.getAttributes().accept(this);

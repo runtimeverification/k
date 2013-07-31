@@ -342,9 +342,13 @@ public class UnparserFilter extends BasicVisitor {
 		}
 		variableList.clear();
 		rule.getBody().accept(this);
-		if (rule.getCondition() != null) {
+		if (rule.getRequires() != null) {
 			indenter.write(" when ");
-			rule.getCondition().accept(this);
+			rule.getRequires().accept(this);
+		}
+		if (rule.getEnsures() != null) {
+			indenter.write(" ensures ");
+			rule.getEnsures().accept(this);
 		}
 		rule.getAttributes().accept(this);
 		indenter.endLine();
@@ -612,9 +616,13 @@ public class UnparserFilter extends BasicVisitor {
 		indenter.write("context ");
 		variableList.clear();
 		context.getBody().accept(this);
-		if (context.getCondition() != null) {
+		if (context.getRequires() != null) {
 			indenter.write(" when ");
-			context.getCondition().accept(this);
+			context.getRequires().accept(this);
+		}
+		if (context.getEnsures() != null) {
+			indenter.write(" ensures ");
+			context.getEnsures().accept(this);
 		}
 		context.getAttributes().accept(this);
 		indenter.endLine();

@@ -32,7 +32,7 @@ public class ResolveSyntaxPredicates extends CopyOnWriteTransformer {
 		boolean change = false;
 		Set<Variable> vars = node.getBody().variables();
 		KList ands = new KList();
-		Term condition = node.getCondition();
+		Term condition = node.getRequires();
 		if (null != condition) {
 			ands.getContents().add(condition);
 		}
@@ -50,7 +50,7 @@ public class ResolveSyntaxPredicates extends CopyOnWriteTransformer {
 			condition = ands.getContents().get(0);
 		}
 		node = node.shallowCopy();
-		node.setCondition(condition);
+		node.setRequires(condition);
 		return node;
 	}
 

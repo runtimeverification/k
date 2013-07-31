@@ -45,7 +45,7 @@ public class ReplaceConstants extends CopyOnWriteTransformer {
 //			System.out.println("LEFT : " + node);
 			rew.setLeft((Term) left.accept(crt), context);
 			Map<Variable, KApp> newGeneratedSV = crt.getGeneratedSV();
-			Term condition = node.getCondition();
+			Term condition = node.getRequires();
 
 			List<Term> terms = new ArrayList<Term>();
 			for (Entry<Variable, KApp> entry : newGeneratedSV.entrySet()) {
@@ -78,7 +78,7 @@ public class ReplaceConstants extends CopyOnWriteTransformer {
 
 			node = node.shallowCopy();
 			node.setBody(rew);
-			node.setCondition(newCondition);
+			node.setRequires(newCondition);
 		}
 //		System.out.println("LEFT': " + node);
 //		System.out.println("\n\n");

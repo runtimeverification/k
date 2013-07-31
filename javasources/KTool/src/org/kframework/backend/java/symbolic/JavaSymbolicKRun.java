@@ -113,8 +113,10 @@ public class JavaSymbolicKRun implements KRun {
                         = ((org.kframework.kil.Rewrite) kilRule.getBody()).getLeft();
                 org.kframework.kil.Term kilRightHandSide =
                         ((org.kframework.kil.Rewrite) kilRule.getBody()).getRight();
-                org.kframework.kil.Term kilCondition = kilRule.getCondition();
+                org.kframework.kil.Term kilRequires = kilRule.getRequires();
 
+                //TODO: Deal with Ensures
+                
                 /* rename rule variables */
                 Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(
                         transformer.transformRule(
@@ -124,7 +126,7 @@ public class JavaSymbolicKRun implements KRun {
                 SymbolicConstraint initialConstraint = new SymbolicConstraint(definition);
                 //initialConstraint.addAll(rule.condition());
                 initialConstraint.add(
-                        transformer.transformTerm(kilCondition, definition),
+                        transformer.transformTerm(kilRequires, definition),
                         BoolToken.TRUE);
                 ConstrainedTerm initialTerm = new ConstrainedTerm(
                         transformer.transformTerm(kilLeftHandSide, definition).substitute(

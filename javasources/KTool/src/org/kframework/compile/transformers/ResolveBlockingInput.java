@@ -89,7 +89,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
 		ASTNode result = super.transform(node);
 		if (hasInputCell) {
 			generated.add((Rule)result);
-            node.setCondition(MetaK.incrementCondition(node.getCondition(), resultCondition));
+            node.setRequires(MetaK.incrementCondition(node.getRequires(), resultCondition));
 		}
 		return node;
 	}

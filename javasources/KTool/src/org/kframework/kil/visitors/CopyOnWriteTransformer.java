@@ -114,23 +114,39 @@ public class CopyOnWriteTransformer implements Transformer {
 					.getLocation()));
 		}
 		body = (Term) bodyAST;
-		Term condition = node.getCondition();
-		if (condition != null) {
-			ASTNode conditionAST = condition.accept(this);
-			if (conditionAST != condition)
+		Term requires = node.getRequires();
+		if (requires != null) {
+			ASTNode requiresAST = requires.accept(this);
+			if (requiresAST != requires)
 				change = true;
-			if (null == conditionAST)
+			if (null == requiresAST)
 				return null;
-			if (!(conditionAST instanceof Term)) {
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "Expecting Term, but got " + conditionAST.getClass() + " while transforming.", condition
-						.getFilename(), condition.getLocation()));
+			if (!(requiresAST instanceof Term)) {
+				String msg = "Expecting Term, but got " + requiresAST.getClass() + " while transforming.";
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, msg, requires
+						.getFilename(), requires.getLocation()));
 			}
-			condition = (Term) conditionAST;
+			requires = (Term) requiresAST;
+		}
+		Term ensures = node.getEnsures();
+		if (ensures != null) {
+			ASTNode ensuresAST = ensures.accept(this);
+			if (ensuresAST != ensures)
+				change = true;
+			if (null == ensuresAST)
+				return null;
+			if (!(ensuresAST instanceof Term)) {
+				String msg = "Expecting Term, but got " + ensuresAST.getClass() + " while transforming.";
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, msg, ensures
+						.getFilename(), ensures.getLocation()));
+			}
+			ensures = (Term) ensuresAST;
 		}
 		if (change) {
 			node = node.shallowCopy();
 			node.setBody(body);
-			node.setCondition(condition);
+			node.setRequires(requires);
+			node.setEnsures(ensures);
 		}
 		return transform((ModuleItem) node);
 	}

@@ -72,11 +72,15 @@ public class BasicTransformer implements Transformer {
 	@Override
 	public ASTNode transform(Sentence node) throws TransformerException {
 		Term body = (Term) node.getBody().accept(this);
-		Term condition = node.getCondition();
-		if (condition != null)
-			condition = (Term) condition.accept(this);
+		Term requires = node.getRequires();
+		if (requires != null)
+			requires = (Term) requires.accept(this);
+		Term ensures = node.getRequires();
+		if (ensures != null)
+			ensures = (Term) ensures.accept(this);
 		node.setBody(body);
-		node.setCondition(condition);
+		node.setRequires(requires);
+		node.setEnsures(ensures);
 		return transform((ModuleItem) node);
 	}
 

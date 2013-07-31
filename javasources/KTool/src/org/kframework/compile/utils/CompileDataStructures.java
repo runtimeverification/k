@@ -56,17 +56,19 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
         Term lhs = (Term) rewrite.getLeft().accept(this);
         status = Status.RHS;
         Term rhs = (Term) rewrite.getRight().accept(this);
-        Term condition;
-        if (node.getCondition() != null) {
+        Term requires;
+        if (node.getRequires() != null) {
             status = Status.CONDITION;
-            condition = (Term) node.getCondition().accept(this);
+            requires = (Term) node.getRequires().accept(this);
         } else {
-            condition = null;
+            requires = null;
         }
+        
+        //TODO: handle ensures, too.
 
         if (lhs == rewrite.getLeft()
             && rhs == rewrite.getRight()
-            && condition == node.getCondition()) {
+            && requires == node.getRequires()) {
             return node;
         }
 
@@ -75,7 +77,7 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
         node.setBody(rewrite);
         rewrite.setLeft(lhs, context);
         rewrite.setRight(rhs, context);
-        node.setCondition(condition);
+        node.setRequires(requires);
         return node;
     }
 

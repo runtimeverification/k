@@ -62,7 +62,7 @@ public class AddImplicationRules extends CopyOnWriteTransformer {
 				Term condition = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, rrcond, BoolBuiltin.TRUE);
 				
 				Rule implicationRule = new Rule(newPi, newPiPrime, context);
-				implicationRule.setCondition(condition);
+				implicationRule.setRequires(condition);
 				int correspondingIndex = reachabilityRules.indexOf(rr);
 				implicationRule.addAttribute(IMPLRULE_ATTR, correspondingIndex + "");
 				

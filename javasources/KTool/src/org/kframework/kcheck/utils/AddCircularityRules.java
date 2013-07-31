@@ -112,7 +112,7 @@ public class AddCircularityRules extends CopyOnWriteTransformer {
 				Term condition = andBool(fresh);
 
 				Rule circRule = new Rule(newPi, newPiPrime, context);
-				circRule.setCondition(condition);
+				circRule.setRequires(condition);
 				int correspondingIndex = reachabilityRules.indexOf(rr);
 				circRule.addAttribute(RRULE_ATTR, correspondingIndex + "");
 				

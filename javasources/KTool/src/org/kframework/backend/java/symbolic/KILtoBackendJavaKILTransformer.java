@@ -377,8 +377,10 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
         Collection<Term> condition = new ArrayList<Term>();
         Collection<Variable> freshVariables = new ArrayList<Variable>();
-        if (node.getCondition() != null) {
-            Term term = (Term) node.getCondition().accept(this);
+        
+        //TODO: Deal with Ensures
+        if (node.getRequires() != null) {
+            Term term = (Term) node.getRequires().accept(this);
             if (term instanceof KItem && ((KItem) term).kLabel().toString().equals("'_andBool_")) {
                 for (Term item : ((KItem) term).kList().getItems()) {
                     if (item instanceof KItem && ((KItem) item).kLabel().toString().equals("'fresh(_)")) {

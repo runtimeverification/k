@@ -859,12 +859,20 @@ rectangle,rectangle
   \hspace{2em} when \ensuremath{#1}%
   \k@markPosition%
 }
+\newcommand{\whenEns}[1]{%
+  \hspace{2em} ensures \ensuremath{#1}%
+  \k@markPosition%
+}
+\newcommand{\whenReq}[1]{%
+  \hspace{2em} requires \ensuremath{#1}%
+  \k@markPosition%
+}
 
 %%% Context
 
 % Context.
-\newcommand{\kcontext}[4][]{
-\ksentence{context}{#1}{#2}{#3}{#4}
+\newcommand{\kcontext}[5][]{
+\ksentence{context}{#1}{#2}{#3}{#4}{#5}
 }
 
 \newcommand{\kcontextb}[4]{\begin{kblock}\kcontext{#1}{#2}{#3}{#4}\end{kblock}}
@@ -902,7 +910,7 @@ rectangle,rectangle
 %%% Rules.
 \newcommand{\ruleAttributes}[1]{\hfill[#1]}
 
-\newcommand{\ksentence}[6][]{%
+\newcommand{\ksentence}[7][]{%
 \wrapRules{%
   \rulebox{%
   \k@ruleLabel{#3}{#2}\hspace{1em}$%
@@ -916,17 +924,20 @@ rectangle,rectangle
     $%
   }%
   \ifthenelse{\equal{#5}{}}{}{%
-    \when{#5}%
+    \whenReq{#5}%
+  }%
+  \ifthenelse{\equal{#6}{}}{}{%
+    \whenEns{#6}%
   }%
   \k@markPosition%
-  \ifthenelse{\equal{#6}{}}{}{%  
-   \ruleAttributes{#6}% 
+  \ifthenelse{\equal{#7}{}}{}{%  
+   \ruleAttributes{#7}% 
   }%
 }%
 }
 
-\newcommand{\krule}[5][]{%
-\ksentence[#5]{rule}{#1}{#2}{#3}{#4}
+\newcommand{\krule}[6][]{%
+\ksentence[#6]{rule}{#1}{#2}{#3}{#4}{#5}
 }
 
 \newcommand{\kruleb}[4]{\begin{kblock}\krule[#1]{#2}{#3}{#4}\end{kblock}}

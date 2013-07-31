@@ -105,9 +105,12 @@ public class BasicVisitor implements Visitor {
 		if (isVisited(node))
 			return;
 		node.getBody().accept(this);
-		Term condition = node.getCondition();
-		if (condition != null)
-			condition.accept(this);
+		Term requires = node.getRequires();
+		if (requires != null)
+			requires.accept(this);
+		Term ensures = node.getEnsures();
+		if (ensures != null)
+			ensures.accept(this);
 		visit((ModuleItem) node);
 	}
 

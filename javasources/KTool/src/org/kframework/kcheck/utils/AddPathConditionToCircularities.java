@@ -30,8 +30,11 @@ public class AddPathConditionToCircularities extends CopyOnWriteTransformer {
 		
 		if(node.getAttribute(AddCircularityRules.RRULE_ATTR) != null && (node.getBody() instanceof Rewrite)) {
 
+			
+			//TODO:  use ensures to get phi'
+			
 			// extract phi and phi'
-			Term cnd = node.getCondition();
+			Term cnd = node.getRequires();
 			ExtractPatternless ep = new ExtractPatternless(context, false);
 			cnd = (Term) cnd.accept(ep);
 			
@@ -69,7 +72,7 @@ public class AddPathConditionToCircularities extends CopyOnWriteTransformer {
 			if (RLBackend.SIMPLIFY) {
 	        	cc = KApp.of(KLabelConstant.of(RLBackend.SIMPLIFY_KLABEL, context) , cc);
 	        }
-			newRule.setCondition(cc);
+			newRule.setRequires(cc);
 			newRule.setAttributes(node.getAttributes().shallowCopy());
 			return newRule;
 		}

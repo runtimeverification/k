@@ -20,9 +20,12 @@ context-free syntax
 	CondSentence "[" TagListDz "]"	-> AttributedSentence {cons("AttributedSentence"), prefer}
 	CondSentence					-> AttributedSentence {cons("NoAttributedSentence")}
 
-	RuleContentDz "when" K	-> CondSentence  {cons("CondSentence"), prefer}
-	RuleContentDz 		 	-> CondSentence  {cons("NoCondSentence")}
+	RuleContentDz "when" K		-> CondSentence1 {cons("RequiresSentence"), prefer}
+	RuleContentDz "requires" K	-> CondSentence1 {cons("RequiresSentence"), prefer}
+	RuleContentDz 		 		-> CondSentence1 {cons("NoRequiresSentence")}
 
+	CondSentence1 "ensures" K	-> CondSentence {cons("Ensures"), prefer}
+	CondSentence1 		 		-> CondSentence {cons("NoEnsures")}
 
 	KList		-> RuleContentDz
 	Map			-> RuleContentDz

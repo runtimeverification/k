@@ -129,11 +129,12 @@ public class CheckVariables extends BasicVisitor {
 		right.clear();
 		current = left;
 		node.getBody().accept(this);
-		if (node.getCondition() != null) {
+		if (node.getRequires() != null) {
 			current = right;
 			inCondition = true;
-			node.getCondition().accept(this);
+			node.getRequires().accept(this);
 		}
+		//TODO: add checks for Ensures, too.
 		for (Variable v : right.keySet()) {
 			if (!left.containsKey(v)) {
                 /* matching logic relaxes this restriction */

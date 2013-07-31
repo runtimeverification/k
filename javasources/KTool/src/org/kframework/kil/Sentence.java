@@ -13,20 +13,22 @@ import aterm.ATermAppl;
 /**
  * A rule, configuration declaration, or context.
  * Each parses as a term, this class declares common members
- * {@link #body} and {@link #condition}, which have different
+ * {@link #body} and {@link #requires}, which have different
  * interpretations in the subclasses.
  */
 public class Sentence extends ModuleItem {
 	/** Label from {@code rule[}label{@code ]:} syntax or "". Currently unrelated to attributes */
 	String label = "";
 	Term body;
-	Term condition = null;
+	Term requires = null;
+	Term ensures = null;
 
 	public Sentence(Sentence s) {
 		super(s);
 		this.body = s.body;
 		this.label = s.label;
-		this.condition = s.condition;
+		this.requires = s.requires;
+		this.ensures = s.ensures;
 	}
 
 	public Sentence() {
@@ -45,8 +47,8 @@ public class Sentence extends ModuleItem {
 
 		body = (Term) JavaClassesFactory.getTerm(atm.getArgument(0));
 
-		if (atm.getName().equals("CondSentence")) {
-			condition = (Term) JavaClassesFactory.getTerm(atm.getArgument(1));
+		if (atm.getName().equals("RequiresSentence")) {
+			requires = (Term) JavaClassesFactory.getTerm(atm.getArgument(1));
 		}
 	}
 
@@ -60,7 +62,11 @@ public class Sentence extends ModuleItem {
 
 		java.util.List<Element> its = XML.getChildrenElementsByTagName(element, Constants.COND);
 		if (its.size() > 0)
-			this.condition = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(its.get(0)).get(0));
+			this.requires = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(its.get(0)).get(0));
+
+		its = XML.getChildrenElementsByTagName(element, "ensures");
+		if (its.size() > 0)
+			this.ensures = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(its.get(0)).get(0));
 
 		its = XML.getChildrenElementsByTagName(element, Constants.ATTRIBUTES);
 		// assumption: <cellAttributes> appears only once
@@ -81,12 +87,12 @@ public class Sentence extends ModuleItem {
 		this.body = body;
 	}
 
-	public Term getCondition() {
-		return condition;
+	public Term getRequires() {
+		return requires;
 	}
 
-	public void setCondition(Term condition) {
-		this.condition = condition;
+	public void setRequires(Term requires) {
+		this.requires = requires;
 	}
 
 	@Override
@@ -111,7 +117,7 @@ public class Sentence extends ModuleItem {
 	public void setLabel(String label) {
 		this.label = label;
 	}
-	
+
 	public String toString() {
 		String content = "";
 
@@ -119,10 +125,21 @@ public class Sentence extends ModuleItem {
 			content += "[" + this.label + "]: ";
 
 		content += this.body + " ";
-		if (this.condition != null) {
-			content += "when " + this.condition + " ";
+		if (this.requires != null) {
+			content += "requires " + this.requires + " ";
+		}
+		if (this.ensures != null) {
+			content += "ensures " + this.ensures + " ";
 		}
 
 		return content + attributes;
+	}
+
+	public Term getEnsures() {
+		return ensures;
+	}
+
+	public void setEnsures(Term ensures) {
+		this.ensures = ensures;
 	}
 }

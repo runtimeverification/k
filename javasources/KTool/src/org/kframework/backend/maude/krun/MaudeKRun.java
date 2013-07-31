@@ -438,9 +438,10 @@ public class MaudeKRun implements KRun {
 		MaudeFilter patternBody = new MaudeFilter(context);
 		pattern.getBody().accept(patternBody);
 		String patternString = "=>" + getSearchType(searchType) + " " + patternBody.getResult();
-		if (pattern.getCondition() != null) {
+		//TODO: consider replacing Requires with Ensures here.
+		if (pattern.getRequires() != null) {
 			MaudeFilter patternCondition = new MaudeFilter(context);
-			pattern.getCondition().accept(patternCondition);
+			pattern.getRequires().accept(patternCondition);
 			patternString += " such that " + patternCondition.getResult() + " = # true(.KList)";
 		}
 		cmd += patternString + " .";

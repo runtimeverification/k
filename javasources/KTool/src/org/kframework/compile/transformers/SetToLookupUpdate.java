@@ -91,14 +91,16 @@ public class SetToLookupUpdate extends CopyOnWriteTransformer {
 
         status = Status.RHS;
         Term rhs = (Term) rewrite.getRight().accept(this);
-        Term condition = node.getCondition();
-        if (condition != null) {
+        Term requires = node.getRequires();
+        if (requires != null) {
             status = Status.CONDITION;
-            condition = (Term) condition.accept(this);
+            requires = (Term) requires.accept(this);
         }
 
+        Term ensures = node.getEnsures();
+        //TODO: update to include ensures.
         if (lhs == rewrite.getLeft() && rhs == rewrite.getRight()
-                && condition == node.getCondition()) {
+                && requires == node.getRequires() && ensures == node.getEnsures()) {
             return node;
         }
 
@@ -107,7 +109,8 @@ public class SetToLookupUpdate extends CopyOnWriteTransformer {
         rewrite.setLeft(lhs, context);
         rewrite.setRight(rhs, context);
         returnNode.setBody(rewrite);
-        returnNode.setCondition(condition);
+        returnNode.setRequires(requires);
+        returnNode.setEnsures(ensures);
         returnNode.setLookups(lookups);
         return returnNode;
     }

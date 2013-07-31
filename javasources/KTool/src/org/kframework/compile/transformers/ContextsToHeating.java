@@ -130,7 +130,8 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
     	rewriteList.add(new Freezer(substituteVariable(rewriteContext, freshVariable, new FreezerHole(0))));
     	Term rhsHeat = new KSequence(rewriteList);
     	Rule heatingRule = new Rule(lhsHeat, rhsHeat, context);
-    	heatingRule.setCondition(substituteHole(node.getCondition(), freshVariable));
+    	heatingRule.setRequires(substituteHole(node.getRequires(), freshVariable));
+    	heatingRule.setEnsures(substituteHole(node.getEnsures(), freshVariable));
 		heatingRule.getAttributes().getContents().addAll(node.getAttributes().getContents());
     	heatingRule.putAttribute(MetaK.Constants.heatingTag,"");
     	rules.add(heatingRule);

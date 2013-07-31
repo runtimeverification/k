@@ -25,16 +25,17 @@ public class FreshCondToFreshVar extends CopyOnWriteTransformer {
 
 	@Override
 	public ASTNode transform(Sentence node) throws TransformerException {
-		if (null == node.getCondition())
+		//TODO:  maybe now fresh belongs in the ensures?  update this accordingly if so.
+		if (null == node.getRequires())
 			return node;
 
 		vars.clear();
-		ASTNode condNode = node.getCondition().accept(this);
+		ASTNode condNode = node.getRequires().accept(this);
 		if (vars.isEmpty())
 			return node;
 
 		node = node.shallowCopy();
-		node.setCondition((Term) condNode);
+		node.setRequires((Term) condNode);
 
 		ASTNode bodyNode = node.getBody().accept(freshSubstitution(vars));
 		assert(bodyNode instanceof Term);

@@ -40,7 +40,7 @@ public class ReachabilityRuleToKRule extends CopyOnWriteTransformer {
 					&& right.getSort().equals(ML_SORT)) {
 				TermCons ltc = (TermCons) left;
 				TermCons rtc = (TermCons) right;
-				Term ruleCond = node.getCondition().shallowCopy();
+				Term ruleCond = node.getRequires().shallowCopy();
 				if (ltc.getProduction().getKLabel().equals(ML_AND_KLABEL)
 						&& ltc.getProduction().getKLabel()
 								.equals(ML_AND_KLABEL)) {
@@ -57,10 +57,10 @@ public class ReachabilityRuleToKRule extends CopyOnWriteTransformer {
 					rule.setBody(new Rewrite(lcfg, rcfg, context));
 					
 					if(ruleCond != null) {
-						rule.setCondition(KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, KApp.of(KLabelConstant.of(RR_COND), lphi, rphi), ruleCond));
+						rule.setRequires(KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, KApp.of(KLabelConstant.of(RR_COND), lphi, rphi), ruleCond));
 					}
 					else {
-						rule.setCondition(KApp.of(KLabelConstant.of(RR_COND), lphi, rphi));
+						rule.setRequires(KApp.of(KLabelConstant.of(RR_COND), lphi, rphi));
 					}
 					Rule newRule = new Rule(rule);
 					newRule.setAttributes(node.getAttributes().shallowCopy());

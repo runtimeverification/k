@@ -51,8 +51,10 @@ public class AddPathConditionToImplications extends CopyOnWriteTransformer {
 				}
 			}
 			
+			//TODO:  use ensures to get phi'
+			
 			// extract phi and phi'
-			Term cnd = node.getCondition();
+			Term cnd = node.getRequires();
 			ExtractPatternless ep = new ExtractPatternless(context, true);
 			cnd = (Term) cnd.accept(ep);
 			
@@ -89,7 +91,7 @@ public class AddPathConditionToImplications extends CopyOnWriteTransformer {
 			if (RLBackend.SIMPLIFY) {
 	        	cc = KApp.of(KLabelConstant.of(RLBackend.SIMPLIFY_KLABEL, context) , cc);
 	        }
-			newRule.setCondition(cc);
+			newRule.setRequires(cc);
 			newRule.setAttributes(node.getAttributes().shallowCopy());
 			newRule = (Rule) newRule.accept(new MakeFreshVariables(context, fresh));
 			

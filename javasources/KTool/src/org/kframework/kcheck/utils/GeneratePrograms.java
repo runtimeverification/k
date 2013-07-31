@@ -37,8 +37,11 @@ public class GeneratePrograms extends BasicTransformer {
 			ReachabilityRuleKILParser parser = new ReachabilityRuleKILParser(context);
 			rrule.accept(parser);
 
+			
+			//TODO: how about ensures?
+			
 			// remove the condition wrapper
-			Term cnd = node.getCondition().shallowCopy();
+			Term cnd = node.getRequires().shallowCopy();
 			ExtractPatternless ep = new ExtractPatternless(context, true);
 			cnd = (Term) cnd.accept(ep);
 			
@@ -61,7 +64,7 @@ public class GeneratePrograms extends BasicTransformer {
 			newLeft = (Term) newLeft.accept(new SetCellContent(context, newSeq, "k"));
 			Term newRight = right.shallowCopy();
 			Rule newRule = new Rule(newLeft, newRight, context);
-			newRule.setCondition(cnd);
+			newRule.setRequires(cnd);
 			newRule.setAttributes(node.getAttributes().shallowCopy());
 			
 			// get program without the first label

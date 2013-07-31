@@ -180,7 +180,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
         if (isSeq) {
             //set the condition
             KApp condApp = KApp.of(KLabelConstant.KRESULT_PREDICATE, variable);
-            ctx.setCondition(condApp);
+            ctx.setRequires(condApp);
             ctx.getAttributes().remove("seqstrict");
         } else {
             ctx.getAttributes().remove("strict");

@@ -68,125 +68,72 @@ rules
 	to-xml1:
 		CellProperty(a, b) -> $[[<id>""] [a]=[<xmlStringEscapeFromString>b]]
 
+//----------------------------------------------------------------------
 	to-xml1:
-		NoLabelSentence(NoAttributedSentence(NoCondSentence(body))) ->
+		NoLabelSentence(body) ->
 		$[<sentence loc="[loc]">
-			<body>
-				[body']
-			</body>
+			[body']
 		</sentence>
 		]
 		where body' := <to-xml> body
 		where loc   := <getLocAsString>
 
 	to-xml1:
-		NoLabelSentence(NoAttributedSentence(CondSentence(body, cond))) ->
-		$[<sentence loc="[loc]">
-			<body>
-				[body']
-			</body>
-			<cond>
-				[cond']
-			</cond>
+		LabelSentence(label, body) ->
+		$[<sentence loc="[loc]" label="[<xmlStringEscape> label]">
+			[body']
 		</sentence>
 		]
 		where body' := <to-xml> body
-		where cond' := <to-xml> cond
 		where loc   := <getLocAsString>
 
 	to-xml1:
-		NoLabelSentence(AttributedSentence(CondSentence(body, cond), attr)) ->
-		$[<sentence loc="[loc]">
-			<body>
-				[body']
-			</body>
-			<cond>
-				[cond']
-			</cond>
-			<attributes loc="[<getLocAsString> attr]">
-				[attr']
-			</attributes>
-		</sentence>
+		NoAttributedSentence(body) -> $[[<to-xml> body]]
+
+	to-xml1:
+		AttributedSentence(body, attr) ->
+		$[[body']
+		<attributes loc="[<getLocAsString> attr]">
+			[attr']
+		</attributes>
 		]
 		where body' := <to-xml> body
-		where cond' := <to-xml> cond
 		where attr' := <to-xml> attr
 		where loc   := <getLocAsString>
 
 	to-xml1:
-		NoLabelSentence(AttributedSentence(NoCondSentence(body), attr)) ->
-		$[<sentence loc="[loc]">
+		NoRequiresSentence(body) -> $[
 			<body>
-				[body']
+				[<to-xml> body]
 			</body>
-			<attributes loc="[<getLocAsString> attr]">
-				[attr']
-			</attributes>
-		</sentence>
 		]
-		where body' := <to-xml> body
-		where loc   := <getLocAsString>
-		where attr' := <to-xml> attr
 
 	to-xml1:
-		LabelSentence(label, NoAttributedSentence(NoCondSentence(body))) ->
-		$[<sentence loc="[loc]" label="[<xmlStringEscape> label]">
-			<body>
-				[body']
-			</body>
-		</sentence>
-		]
-		where body' := <to-xml> body
-		where loc   := <getLocAsString>
-
-	to-xml1:
-		LabelSentence(label, NoAttributedSentence(CondSentence(body, cond))) ->
-		$[<sentence loc="[loc]" label="[<xmlStringEscape> label]">
-			<body>
-				[body']
-			</body>
-			<cond>
-				[cond']
-			</cond>
-		</sentence>
+		RequiresSentence(body, cond) ->
+		$[<body>
+			[<to-xml> body]
+		</body>
+		<cond>
+			[cond']
+		</cond>
 		]
 		where body' := <to-xml> body
 		where cond' := <to-xml> cond
-		where loc   := <getLocAsString>
 
 	to-xml1:
-		LabelSentence(label, AttributedSentence(CondSentence(body, cond), attr)) ->
-		$[<sentence loc="[loc]" label="[<xmlStringEscape> label]">
-			<body>
-				[body']
-			</body>
-			<cond>
-				[cond']
-			</cond>
-			<attributes loc="[<getLocAsString> attr]">
-				[attr']
-			</attributes>
-		</sentence>
-		]
-		where body' := <to-xml> body
-		where cond' := <to-xml> cond
-		where attr' := <to-xml> attr
-		where loc   := <getLocAsString>
+		NoEnsures(body) -> $[[<to-xml> body]]
 
 	to-xml1:
-		LabelSentence(label, AttributedSentence(NoCondSentence(body), attr)) ->
-		$[<sentence loc="[loc]" label="[<xmlStringEscape> label]">
-			<body>
-				[body']
-			</body>
-			<attributes loc="[<getLocAsString> attr]">
-				[attr']
-			</attributes>
-		</sentence>
+		Ensures(body, cond) ->
+		$[[<to-xml> body]
+		<ensures>
+			[<to-xml> cond]
+		</ensures>
 		]
-		where body' := <to-xml> body
-		where loc   := <getLocAsString>
-		where attr' := <to-xml> attr
+
+
+
+//----------------------------------------------------------------------
 
 	to-xml1:
 		Tag(x) -> $[<tag key="[x]" loc="[loc]" />

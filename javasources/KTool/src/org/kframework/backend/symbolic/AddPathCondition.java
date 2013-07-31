@@ -53,13 +53,15 @@ public class AddPathCondition extends CopyOnWriteTransformer {
             return node;
         }
 
-        if (node.getCondition() == null)
+        if (node.getRequires() == null)
             return node;
+        
+        //TODO: handle ensures
 
-        Term condition = node.getCondition();
+        Term condition = node.getRequires();
 //        Term originalCondition = condition.shallowCopy();
         CollapseAndBoolTransformer cnft = new CollapseAndBoolTransformer(context);
-        condition = (Term) node.getCondition().accept(cnft);
+        condition = (Term) node.getRequires().accept(cnft);
 
         ConditionTransformer ct = new ConditionTransformer(context);
         condition = (Term) condition.accept(ct);
@@ -123,7 +125,7 @@ public class AddPathCondition extends CopyOnWriteTransformer {
             node = node.shallowCopy();
             node.setBody(new Rewrite(left, right, context));
             node.setAttributes(atts);
-            node.setCondition(cond);
+            node.setRequires(cond);
         }
 
         return node;

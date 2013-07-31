@@ -466,7 +466,8 @@ public class MaudeFilter extends BackendFilter {
 					.getLocation()));
 		}
 		Rewrite body = (Rewrite) rule.getBody();
-		final Term condition = rule.getCondition();
+		assert rule.getEnsures() == null : "Maude does not support conditions on the right hand side";
+		final Term condition = rule.getRequires();
 		if (null != condition) {
 			result.append("c");
 		}
@@ -551,10 +552,11 @@ public class MaudeFilter extends BackendFilter {
 	public void visit(Sentence sentence) {
 		sentence.getBody().accept(this);
 		result.append(" ");
-		if (sentence.getCondition() != null) {
+		if (sentence.getRequires() != null) {
 			result.append("when ");
-			sentence.getCondition().accept(this);
+			sentence.getRequires().accept(this);
 		}
+		assert sentence.getEnsures() == null : "Maude does not support conditions on the right hand side";
 
 		result.append(" : KSentence [");
 		if (sentence instanceof Rule) {

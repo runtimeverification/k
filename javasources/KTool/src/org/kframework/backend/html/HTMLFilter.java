@@ -275,9 +275,13 @@ public class HTMLFilter extends BackendFilter {
 		result.append("<div class=\"cell\"> ");
 		rule.getBody().accept(this);
 		result.append("</div> ");
-		if (rule.getCondition() != null) {
+		if (rule.getRequires() != null) {
 			result.append(" when ");
-			rule.getCondition().accept(this);
+			rule.getRequires().accept(this);
+		}
+		if (rule.getEnsures() != null) {
+			result.append(" ensures ");
+			rule.getEnsures().accept(this);
 		}
 		rule.getAttributes().accept(this);
 		result.append("</div> <br />" + endl);
@@ -287,9 +291,13 @@ public class HTMLFilter extends BackendFilter {
 	public void visit(org.kframework.kil.Context cxt) {
 		result.append("<div> CONTEXT ");
 		cxt.getBody().accept(this);
-		if (cxt.getCondition() != null) {
+		if (cxt.getRequires() != null) {
 			result.append(" when ");
-			cxt.getCondition().accept(this);
+			cxt.getRequires().accept(this);
+		}
+		if (cxt.getEnsures() != null) {
+			result.append(" ensures ");
+			cxt.getEnsures().accept(this);
 		}
 		cxt.getAttributes().accept(this);
 		result.append("</div> <br />" + endl);

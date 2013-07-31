@@ -48,8 +48,11 @@ public class Rule extends Sentence {
 			content += "[" + this.label + "]: ";
 
 		content += this.body + " ";
-		if (this.condition != null) {
-			content += "when " + this.condition + " ";
+		if (this.requires != null) {
+			content += "requires " + this.requires + " ";
+		}
+		if (this.ensures != null) {
+			content += "ensures " + this.ensures + " ";
 		}
 
 		return content + attributes;

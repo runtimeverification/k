@@ -40,9 +40,14 @@ public class CheckRewrite extends BasicVisitor {
 			GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
 		}
 
-		if (node.getCondition() != null) {
+		if (node.getRequires() != null) {
 			inSideCondition = true;
-			node.getCondition().accept(this);
+			node.getRequires().accept(this);
+			inSideCondition = false;
+		}
+		if (node.getEnsures() != null) {
+			inSideCondition = true;
+			node.getEnsures().accept(this);
 			inSideCondition = false;
 		}
 	}
@@ -50,9 +55,14 @@ public class CheckRewrite extends BasicVisitor {
 	@Override
 	public void visit(org.kframework.kil.Context node) {
 		node.getBody().accept(this);
-		if (node.getCondition() != null) {
+		if (node.getRequires() != null) {
 			inSideCondition = true;
-			node.getCondition().accept(this);
+			node.getRequires().accept(this);
+			inSideCondition = false;
+		}
+		if (node.getEnsures() != null) {
+			inSideCondition = true;
+			node.getEnsures().accept(this);
 			inSideCondition = false;
 		}
 	}

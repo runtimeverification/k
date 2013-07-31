@@ -39,7 +39,8 @@ public class AddPathConditionToReachabilityKRule extends CopyOnWriteTransformer 
 			Term lcfg = body.getLeft().shallowCopy();
 			Term rcfg = body.getRight().shallowCopy();
 			
-			Term condition = node.getCondition();
+			//TODO: handle ensures
+			Term condition = node.getRequires();
 			if (condition instanceof KApp) {
 				KApp appCondition = (KApp) condition;
 				
@@ -68,7 +69,7 @@ public class AddPathConditionToReachabilityKRule extends CopyOnWriteTransformer 
 				Sentence rule = new Sentence();
 				rule.setBody(new Rewrite(leftBag, rightBag, context));
 				Rule newRule = new Rule(rule);
-				newRule.setCondition(newCondition);
+				newRule.setRequires(newCondition);
 				newRule.setAttributes(node.getAttributes().shallowCopy());
 				return newRule;
 			}

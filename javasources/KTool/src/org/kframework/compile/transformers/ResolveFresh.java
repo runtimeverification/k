@@ -51,16 +51,17 @@ public class ResolveFresh extends CopyOnWriteTransformer {
 
 	@Override
 	public ASTNode transform(Sentence node) throws TransformerException {
-		if (null == node.getCondition())
+		//TODO: maybe now fresh should be in the ensures part.
+		if (null == node.getRequires())
 			return node;
 
 		vars.clear();
-		ASTNode condNode = node.getCondition().accept(this);
+		ASTNode condNode = node.getRequires().accept(this);
 		if (vars.isEmpty())
 			return node;
 
 		node = node.shallowCopy();
-		node.setCondition((Term) condNode);
+		node.setRequires((Term) condNode);
 		Variable freshVar = Variable.getFreshVar("Int");
 		ASTNode bodyNode = node.getBody().accept(freshSubstitution(vars, freshVar));
 		assert(bodyNode instanceof Term);
