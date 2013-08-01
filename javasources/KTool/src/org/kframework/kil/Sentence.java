@@ -45,6 +45,11 @@ public class Sentence extends ModuleItem {
 	public Sentence(ATermAppl atm) {
 		super(atm);
 
+		if (atm.getName().equals("Ensures")) {
+			ensures = (Term) JavaClassesFactory.getTerm(atm.getArgument(1));
+		}
+		atm = (ATermAppl) atm.getArgument(0);
+
 		body = (Term) JavaClassesFactory.getTerm(atm.getArgument(0));
 
 		if (atm.getName().equals("RequiresSentence")) {

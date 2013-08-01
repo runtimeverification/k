@@ -289,7 +289,7 @@ public class JavaClassesFactory {
 			// if (Constants.CONTEXT.endsWith(appl.getNodeName()))
 			// return new Context(appl);
 
-			if (appl.getName().endsWith("CondSentence"))
+			if (appl.getName().endsWith("Ensures"))
 				return storeNode(atm.getUniqueIdentifier(), new Sentence(appl));
 			if (appl.getName().endsWith("Rewrite"))
 				return storeNode(atm.getUniqueIdentifier(), new Rewrite(appl));
