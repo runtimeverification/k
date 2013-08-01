@@ -235,6 +235,9 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
             context.Dispose();
         } catch (Z3Exception e) {
             e.printStackTrace();
+        } catch (RuntimeException e) {
+            // TODO(AndreiS): fix this translation and the exceptions
+            e.printStackTrace();
         }
         return result;
     }

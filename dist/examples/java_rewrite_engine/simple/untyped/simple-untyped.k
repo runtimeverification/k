@@ -550,10 +550,10 @@ of the two argument values (which is what the equality on $K$ terms does). */
 are short-circuited: */
 
   rule ! T:Bool => notBool(T)
-  rule true  && E => E
-  rule false && _ => false
-  rule true  || _ => true
-  rule false || E => E
+  rule true  && E:Exp => E
+  rule false && _:Exp => false
+  rule true  || _:Exp => true
+  rule false || E:Exp => E
 
 /*@ \subsection{Array lookup}
 Untyped SIMPLE does not check array bounds (the dynamically typed version of
@@ -570,11 +570,14 @@ and is defined at the end of the file. */
 //
 // Besides the top level of the computation, they are only needed
 // inside the lvalue wrapper.  Maybe add to K some additional notation?
-//  rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]
-//    [structural, anywhere]
-//
-//  rule array(L,_)[N:Int] => lookup(L +Int N)
-//    [structural, anywhere]
+//  rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]    [structural, anywhere]
+//  rule array(L:Int,_:Int)[N:Int] => lookup(L +Int N)      [structural, anywhere]
+
+  rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]            [structural]
+  rule lvalue(V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs])    [structural]
+
+  rule array(L:Int,_:Int)[N:Int] => lookup(L +Int N)            [structural]
+  rule lvalue(array(L:Int,_:Int)[N:Int] => lookup(L +Int N))    [structural]
 
 /*@ \subsection{Size of an array}
 The size of the array is stored in the array reference value, and the
@@ -671,10 +674,10 @@ value.  Thus, we first compute the lvalue of the left-hand-side expression
 that appears in an assignment, and then we do the actual assignment to the
 resulting location: */
 
-  context (HOLE => lvalue(HOLE)) = _
+  context (HOLE => lvalue(HOLE)) = _:Exp
 
   rule <k> loc(L:Int) = V:Val => V ...</k>
-       <store>... L |-> (_:Val => V) ...</store>
+       <store>... L |-> (_:KItem => V) ...</store>
     [assignment]
 
 /*@ \section{Statements}
@@ -745,8 +748,8 @@ can assume that its first argument will eventually be evaluated.  The rules
 below cover the only two possibilities in which the conditional is allowed to
 proceed (otherwise the rewriting process gets stuck). */
 
-  rule if(true) B:Block else _:Block => B
-  rule if(false) _:Block else B:Block => B
+  rule if ( true) B:Block else _:Block => B
+  rule if (false) _:Block else B:Block => B
 
 /*@ \subsection{While loop}
 The simplest way to give the semantics of the while loop is by unrolling.
@@ -760,7 +763,8 @@ below works because our while loops in SIMPLE are indeed very basic.  If we
 allowed break/continue of loops then we would need a completely different
 semantics, which would also involve the \textsf{control} cell. */
 
-  rule while(E:Exp) B:Block => if(E) { B while(E) B }   [structural]
+  //rule while (E:Exp) B:Block => if (E) { B while(E) B }   [structural]
+  rule while (E:Exp) B:Block => if (E) { B while(E) B } else {}   [structural]
 
 ///*@ \subsection{Print}
 //The \texttt{print} statement was strict, so all its arguments are now
@@ -1012,14 +1016,14 @@ corresponding store lookup operation. */
 
 // Local variable
 
-  rule <k> lvalue(X:Id => loc(L)) ...</k> <env>... X |-> L:Int ...</env>
-    [structural]
+  rule <k> lvalue(X:Id => loc(L)) ...</k>
+       <env>... X |-> L:Int ...</env>   [structural]
 
 // Array element: evaluate the array and its index;
 // then the array lookup rule above applies.
 
-  context lvalue(_[HOLE])
-  context lvalue(HOLE[_])
+  context lvalue(_:Exp[HOLE::Exp])
+  context lvalue(HOLE::Exp[_:Exp])
 
 // Finally, return the address of the desired object member
 

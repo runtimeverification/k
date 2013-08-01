@@ -38,4 +38,9 @@ public class KLabelIndex implements Index {
         return kLabel.hashCode();
     }
 
+    @Override
+    public String toString() {
+        return "@" + kLabel;
+    }
+
 }

@@ -15,4 +15,9 @@ public class BottomIndex implements Index {
         return index instanceof BottomIndex || index instanceof TopIndex;
     }
 
+    @Override
+    public String toString() {
+        return "@Bottom";
+    }
+
 }

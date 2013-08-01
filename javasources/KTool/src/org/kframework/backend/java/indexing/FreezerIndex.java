@@ -5,7 +5,7 @@ import org.kframework.backend.java.symbolic.Utils;
 
 
 /**
- * @author: AndreiS
+ * @author AndreiS
  */
 public class FreezerIndex implements Index {
 
@@ -49,6 +49,11 @@ public class FreezerIndex implements Index {
         hash = hash * Utils.HASH_PRIME + kLabel.hashCode();
         hash = hash * Utils.HASH_PRIME + holeIndex;
         return hash;
+    }
+
+    @Override
+    public String toString() {
+        return "@" + kLabel + "[" + holeIndex + "]";
     }
 
 }

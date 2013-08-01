@@ -1,5 +1,6 @@
 package org.kframework.backend.java.kil;
 
+import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Utils;
@@ -27,7 +28,13 @@ public class MapLookup extends Term {
         }
 
         Term value = ((BuiltinMap) map).get(key);
-        return value != null ? value : this;
+        if (value != null) {
+            return value;
+        } else if (map.isGround() && key.isGround() ) {
+            return BoolToken.FALSE;
+        } else {
+            return this;
+        }
     }
 
     public Term key() {

@@ -15,4 +15,9 @@ public class TopIndex implements Index {
         return true;
     }
 
+    @Override
+    public String toString() {
+        return "@Top";
+    }
+
 }

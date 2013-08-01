@@ -35,4 +35,9 @@ public class TokenIndex implements Index {
         return sort.hashCode();
     }
 
+    @Override
+    public String toString() {
+        return "@" + sort;
+    }
+
 }

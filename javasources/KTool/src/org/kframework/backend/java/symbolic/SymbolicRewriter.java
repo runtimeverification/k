@@ -1,5 +1,6 @@
 package org.kframework.backend.java.symbolic;
 
+import com.google.common.collect.ImmutableMap;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.indexing.BottomIndex;
 import org.kframework.backend.java.indexing.FreezerIndex;
@@ -46,41 +47,47 @@ public class SymbolicRewriter {
         this.definition = definition;
 
         /* populate the table of rules rewriting the top configuration */
-        ruleTable = new HashMap<IndexingPair, Set<Rule>>();
-
         Set<Index> indices = new HashSet<Index>();
         indices.add(TopIndex.TOP);
         indices.add(BottomIndex.BOTTOM);
         for (KLabelConstant kLabel : definition.kLabels()) {
             indices.add(new KLabelIndex(kLabel));
-        }
-        for (KLabelConstant frozenKLabel : definition.frozenKLabels()) {
-            indices.add(new FreezerIndex(frozenKLabel, -1));
-            for (int i = 0; i < frozenKLabel.productions().get(0).getArity(); ++i) {
-                indices.add(new FreezerIndex(frozenKLabel, i));
+            indices.add(new FreezerIndex(kLabel, -1));
+            if (!kLabel.productions().isEmpty()) {
+                for (int i = 0; i < kLabel.productions().get(0).getArity(); ++i) {
+                    indices.add(new FreezerIndex(kLabel, i));
+                }
             }
         }
+        //for (KLabelConstant frozenKLabel : definition.frozenKLabels()) {
+        //    for (int i = 0; i < frozenKLabel.productions().get(0).getArity(); ++i) {
+        //        indices.add(new FreezerIndex(frozenKLabel, i));
+        //    }
+        //}
         for (String sort : Definition.TOKEN_SORTS) {
             indices.add(new TokenIndex(sort));
         }
 
+        ImmutableMap.Builder<IndexingPair, Set<Rule>> mapBuilder = ImmutableMap.builder();
         for (Index first : indices) {
             for (Index second : indices) {
                 IndexingPair pair = new IndexingPair(first, second);
 
-                ImmutableSet.Builder<Rule> builder = ImmutableSet.builder();
+                ImmutableSet.Builder<Rule> setBuilder = ImmutableSet.builder();
                 for (Rule rule : definition.rules()) {
                     if (pair.isUnifiable(rule.indexingPair())) {
-                        builder.add(rule);
+                        setBuilder.add(rule);
                     }
                 }
 
-                ImmutableSet<Rule> rules = builder.build();
+                ImmutableSet<Rule> rules = setBuilder.build();
                 if (!rules.isEmpty()) {
-                    ruleTable.put(pair, rules);
+                    mapBuilder.put(pair, rules);
                 }
             }
         }
+
+        ruleTable = mapBuilder.build();
 	}
 
     public ConstrainedTerm rewrite(ConstrainedTerm constrainedTerm, int bound) {

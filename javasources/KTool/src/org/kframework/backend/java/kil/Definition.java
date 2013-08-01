@@ -26,6 +26,7 @@ public class Definition extends JavaSymbolicObject {
     public static final Set<String> TOKEN_SORTS = ImmutableSet.of("Bool", "Int", "Id");
 
     private final List<Rule> rules;
+    private final List<Rule> macros;
     private final Multimap<KLabelConstant, Rule> functionRules = HashMultimap.create();
     private final Set<KLabelConstant> kLabels;
     private final Set<KLabelConstant> frozenKLabels;
@@ -34,6 +35,7 @@ public class Definition extends JavaSymbolicObject {
     public Definition(Context context) {
         this.context = context;
         rules = new ArrayList<Rule>();
+        macros = new ArrayList<Rule>();
         kLabels = new HashSet<KLabelConstant>();
         frozenKLabels = new HashSet<KLabelConstant>();
     }
@@ -42,16 +44,29 @@ public class Definition extends JavaSymbolicObject {
         frozenKLabels.add(frozenKLabel);
     }
 
+    public void addFrozenKLabelCollection(Collection<KLabelConstant> frozenKLabels) {
+        for (KLabelConstant frozenKLabel : frozenKLabels) {
+            frozenKLabels.add(frozenKLabel);
+        }
+    }
 
     public void addKLabel(KLabelConstant kLabel) {
         kLabels.add(kLabel);
     }
 
+    public void addKLabelCollection(Collection<KLabelConstant> kLabels) {
+        for (KLabelConstant kLabel : kLabels) {
+            kLabels.add(kLabel);
+        }
+    }
+
     public void addRule(Rule rule) {
-        if (!rule.containsAttribute(Attribute.FUNCTION_KEY)) {
-            rules.add(rule);
-        } else {
+        if (rule.containsAttribute(Attribute.FUNCTION_KEY)) {
             functionRules.put(rule.functionKLabel(), rule);
+        } else if (rule.containsAttribute(Attribute.MACRO_KEY)) {
+            macros.add(rule);
+        } else {
+            rules.add(rule);
         }
     }
 
@@ -61,21 +76,22 @@ public class Definition extends JavaSymbolicObject {
         }
     }
 
-    public void addFrozenKLabelCollection(Collection<KLabelConstant> frozenKLabels) {
-        for (KLabelConstant frozenKLabel : frozenKLabels) {
-            frozenKLabels.add(frozenKLabel);
-        }
-
-    }
-
-    public void addKLabelCollection(Collection<KLabelConstant> kLabels) {
-        for (KLabelConstant kLabel : kLabels) {
-            kLabels.add(kLabel);
-        }
-    }
-
     public Context context() {
         return context;
+    }
+
+    public void expandMacros() {
+        for (int i = 0; i < rules.size(); ++i) {
+            Rule rule = rules.get(i);
+            rules.set(i, new Rule(
+                    rule.leftHandSide(),
+                    rule.rightHandSide(),
+                    rule.condition(),
+                    rule.freshVariables(),
+                    rule.lookups(),
+                    rule.indexingPair(),
+                    rule.getAttributes()));
+        }
     }
 
     public Multimap<KLabelConstant, Rule> functionRules() {
@@ -88,6 +104,10 @@ public class Definition extends JavaSymbolicObject {
 
     public Set<KLabelConstant> kLabels() {
         return Collections.unmodifiableSet(kLabels);
+    }
+
+    public List<Rule> macros() {
+        return macros;
     }
 
     public Collection<Rule> rules() {

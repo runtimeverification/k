@@ -28,7 +28,16 @@ import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.symbolic.SymbolicBackend;
-import org.kframework.kil.*;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.Attribute;
+import org.kframework.kil.BoolBuiltin;
+import org.kframework.kil.DataStructureSort;
+import org.kframework.kil.GenericToken;
+import org.kframework.kil.IntBuiltin;
+import org.kframework.kil.KSorts;
+import org.kframework.kil.Module;
+import org.kframework.kil.Production;
+import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -375,7 +384,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
         Term rightHandSide = (Term) rewrite.getRight().accept(this);
 
-        Collection<Term> condition = new ArrayList<Term>();
+        Collection<Term> requires = new ArrayList<Term>();
         Collection<Variable> freshVariables = new ArrayList<Variable>();
         
         //TODO: Deal with Ensures
@@ -386,14 +395,14 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                     if (item instanceof KItem && ((KItem) item).kLabel().toString().equals("'fresh(_)")) {
                         freshVariables.add((Variable) ((KItem) item).kList().get(0));
                     } else {
-                        condition.add(item);
+                        requires.add(item);
                     }
                 }
             } else {
                 if (term instanceof KItem && ((KItem) term).kLabel().toString().equals("'fresh(_)")) {
                     freshVariables.add((Variable) ((KItem) term).kList().get(0));
                 } else {
-                    condition.add(term);
+                    requires.add(term);
                 }
             }
         }
@@ -417,7 +426,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         return new Rule(
                 leftHandSide,
                 rightHandSide,
-                condition,
+                requires,
                 freshVariables,
                 lookups,
                 indexingPair,

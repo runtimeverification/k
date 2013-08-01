@@ -157,7 +157,7 @@ public class KILtoZ3 extends CopyOnWriteTransformer {
                 Expr expression2 = ((Z3Term) kItem.kList().get(1).accept(this)).expression();
                 return new Z3Term(context.MkNot(context.MkEq(expression1, expression2)));
             } else {
-                throw new RuntimeException();
+                throw new RuntimeException("cannot translate term to Z3 format " + kItem);
             }
         } catch (ClassCastException e) {
             throw new RuntimeException(e.getMessage(), e.getCause());
