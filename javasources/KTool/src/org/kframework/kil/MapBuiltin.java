@@ -19,14 +19,10 @@ import java.util.Set;
 public class MapBuiltin extends DataStructureBuiltin {
 
     private final Map<Term, Term> elements;
-    private final Set<Term> removeKeys;
-    private final Map<Term, Term> updateEntries;
 
     public MapBuiltin(DataStructureSort sort, Map<Term, Term> elements, Collection<Term> terms) {
         super(sort, terms);
         this.elements = elements;
-        this.removeKeys = Collections.<Term>emptySet();
-        this.updateEntries = Collections.<Term, Term>emptyMap();
     }
 
     public Map<Term, Term> elements() {

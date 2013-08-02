@@ -8,10 +8,10 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 
 
 /**
- * Builtin set lookup operation. The operation has the form {@code key := set[key]} with
- * the semantics that {@code set} contains an entry matching the form {@code key |-> key}. When
+ * Builtin set lookup operation. The operation has the form {@code truth := set[key]} with
+ * the semantics that {@code set} contains an entry matching {@code key}. When
  * resolving a lookup operation during the application a rule, the variables in {@code key} must
- * be already bound, while the variables in {@code key} may be bound by this lookup  operation.
+ * be already bound, while the variables in {@code truth} may be bound by this lookup  operation.
  *
  * @author TraianSF  (refactoring from {@link org.kframework.kil.MapLookup})
  */

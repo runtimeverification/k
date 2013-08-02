@@ -25,7 +25,7 @@ public class MetaK {
     }
 
     public static Term rename(Term term, BuiltinSet builtinSet) {
-        if (builtinSet.hasFrame() || !builtinSet.operations().isEmpty()) {
+        if (builtinSet.hasFrame() /* || !builtinSet.operations().isEmpty() */) {
             return term;
         }
 

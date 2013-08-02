@@ -2,6 +2,7 @@ package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
+import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.Hole;
@@ -115,6 +116,24 @@ public class BackendJavaKILtoKILTranslation extends CopyOnWriteTransformer {
             items.add((org.kframework.kil.Term) set.frame().accept(this));
         }
         return new org.kframework.kil.Set(items);
+    }
+
+     @Override
+    public ASTNode transform(BuiltinList builtinList) {
+        // TODO(AndreiS): use BuiltinList
+        List<org.kframework.kil.Term> items = new ArrayList<org.kframework.kil.Term>();
+        for (Term entry : builtinList.elementsLeft()) {
+            items.add(new org.kframework.kil.ListItem(
+                    (org.kframework.kil.Term) entry.accept(this)));
+        }
+         if (builtinList.hasFrame()) {
+             items.add((org.kframework.kil.Term) builtinList.frame().accept(this));
+         }
+        for (Term entry : builtinList.elementsRight()) {
+            items.add(new org.kframework.kil.ListItem(
+                    (org.kframework.kil.Term) entry.accept(this)));
+        }
+        return new org.kframework.kil.List(items);
     }
 
     @Override

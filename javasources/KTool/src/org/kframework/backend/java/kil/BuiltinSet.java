@@ -18,38 +18,38 @@ import java.util.Set;
  */
 public class BuiltinSet extends Collection {
 
-    public abstract class Operation {
-
-        private final Term element;
-
-        protected Operation(Term element) {
-            this.element = element;
-        }
-
-        public Term element() {
-            return element;
-        }
-
-    }
-
-    public class Insertion extends Operation {
-
-        private Insertion(Term element) {
-            super(element);
-        }
-
-    }
-
-    public class Deletion extends Operation {
-
-        private Deletion(Term element) {
-            super(element);
-        }
-
-    }
+//    public abstract class Operation {
+//
+//        private final Term element;
+//
+//        protected Operation(Term element) {
+//            this.element = element;
+//        }
+//
+//        public Term element() {
+//            return element;
+//        }
+//
+//    }
+//
+//    public class Insertion extends Operation {
+//
+//        private Insertion(Term element) {
+//            super(element);
+//        }
+//
+//    }
+//
+//    public class Deletion extends Operation {
+//
+//        private Deletion(Term element) {
+//            super(element);
+//        }
+//
+//    }
 
     private final Set<Term> elements;
-    private final Queue<Operation> operations;
+//    private final Queue<Operation> operations;
 
     public BuiltinSet(Set<Term> elements) {
         this(elements, null);
@@ -58,19 +58,19 @@ public class BuiltinSet extends Collection {
     public BuiltinSet(Set<Term> elements, Variable frame) {
         super(frame, Kind.KITEM);
         this.elements = new HashSet<Term>(elements);
-        operations = new ArrayDeque<Operation>();
+//        operations = new ArrayDeque<Operation>();
     }
 
     public BuiltinSet(Variable frame) {
         super(frame, Kind.KITEM);
         this.elements = new HashSet<Term>();
-        operations = new ArrayDeque<Operation>();
+//        operations = new ArrayDeque<Operation>();
     }
 
     public BuiltinSet() {
         super(null, Kind.KITEM);
         elements = new HashSet<Term>();
-        operations = new ArrayDeque<Operation>();
+//        operations = new ArrayDeque<Operation>();
     }
 
     public boolean contains(Term key) {
@@ -88,17 +88,17 @@ public class BuiltinSet extends Collection {
         return Collections.unmodifiableSet(elements);
     }
 
-    public Queue<Operation> operations() {
-        return operations;
-    }
+//    public Queue<Operation> operations() {
+//        return operations;
+//    }
 
-    public void remove(Term element) {
-        if (!(operations.isEmpty() && elements.contains(element))) {
-            operations.add(new Deletion(element));
-        } else {
-            elements.remove(element);
-        }
-    }
+//    public void remove(Term element) {
+//        if (!(operations.isEmpty() && elements.contains(element))) {
+//            operations.add(new Deletion(element));
+//        } else {
+//            elements.remove(element);
+//        }
+//    }
 
     @Override
     public boolean equals(Object object) {
@@ -111,8 +111,8 @@ public class BuiltinSet extends Collection {
         }
 
         BuiltinSet set = (BuiltinSet) object;
-        return super.equals(set) && elements.equals(set.elements)
-               && operations.equals(set.operations);
+        return super.equals(set) && elements.equals(set.elements);
+//               && operations.equals(set.operations);
     }
 
     @Override
@@ -120,7 +120,7 @@ public class BuiltinSet extends Collection {
         int hash = 1;
         hash = hash * Utils.HASH_PRIME + (super.frame == null ? 0 : super.frame.hashCode());
         hash = hash * Utils.HASH_PRIME + elements.hashCode();
-        hash = hash * Utils.HASH_PRIME + operations.hashCode();
+//        hash = hash * Utils.HASH_PRIME + operations.hashCode();
         return hash;
     }
 

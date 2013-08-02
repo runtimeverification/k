@@ -2,11 +2,7 @@ package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.kil.*;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import com.google.common.collect.ImmutableList;
 
@@ -63,6 +59,39 @@ public class SubstitutionTransformer extends CopyOnWriteTransformer {
         }
 
         return kSequence;
+    }
+
+    @Override
+    public BuiltinList transform(BuiltinList builtinList) {
+        if (!builtinList.hasFrame() || boundVariables.contains(builtinList.frame())) {
+            return (BuiltinList) super.transform(builtinList);
+        }
+
+        Term term = substitution.get(builtinList.frame());
+        if (term == null || term instanceof Variable) {
+            return (BuiltinList) super.transform(builtinList);
+        }
+
+        if (term instanceof BuiltinList) {
+            BuiltinList innerList = (BuiltinList) term;
+            boundVariables.add(builtinList.frame());
+            BuiltinList transformedList = (BuiltinList) super.transform(builtinList);
+            ArrayList<Term> elementsLeft = new ArrayList<Term>(transformedList.elementsLeft());
+            elementsLeft.addAll(innerList.elementsLeft());
+            ArrayList<Term> elementsRight = new ArrayList<Term>(innerList.elementsRight());
+            elementsRight.addAll(transformedList.elementsRight());
+            BuiltinList returnList = null;
+            if (innerList.hasFrame()) {
+                returnList = new BuiltinList(elementsLeft, elementsRight, innerList.frame());
+            } else {
+                elementsLeft.addAll(elementsRight);
+                returnList = new BuiltinList(elementsLeft);
+            }
+            boundVariables.remove(builtinList.frame());
+            return returnList;
+        }
+
+        throw new RuntimeException();
     }
 
     @Override

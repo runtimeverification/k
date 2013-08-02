@@ -23,15 +23,10 @@ public class SetUpdate extends Term {
     /** {@code Map} of entries to be removed from the set */
     private final  Collection<Term> removeEntries;
 
-    /** {@code Map} of entries to be updated in the set */
-    private final Collection<Term> updateEntries;
-
-
-    public SetUpdate(Variable set, Collection<Term> removeEntries, Collection<Term> updateEntries) {
+    public SetUpdate(Variable set, Collection<Term> removeEntries) {
         super(set.getSort());
         this.set = set;
         this.removeEntries = removeEntries;
-        this.updateEntries = updateEntries;
     }
 
     public Variable set() {
@@ -40,10 +35,6 @@ public class SetUpdate extends Term {
 
     public Collection<Term> removeEntries() {
         return Collections.unmodifiableCollection(removeEntries);
-    }
-
-    public Collection<Term> updateEntries(){
-        return Collections.unmodifiableCollection(updateEntries);
     }
 
     @Override
@@ -56,7 +47,6 @@ public class SetUpdate extends Term {
         int hash = 1;
         hash = hash * Context.HASH_PRIME + set.hashCode();
         hash = hash * Context.HASH_PRIME + removeEntries.hashCode();
-        hash = hash * Context.HASH_PRIME + updateEntries.hashCode();
         return hash;
     }
 
@@ -71,8 +61,7 @@ public class SetUpdate extends Term {
         }
 
         SetUpdate mapUpdate = (SetUpdate) object;
-        return set.equals(mapUpdate.set) && removeEntries.equals(mapUpdate.removeEntries)
-               && updateEntries.equals(mapUpdate.updateEntries);
+        return set.equals(mapUpdate.set) && removeEntries.equals(mapUpdate.removeEntries);
     }
 
     @Override

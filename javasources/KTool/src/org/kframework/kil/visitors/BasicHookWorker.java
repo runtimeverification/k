@@ -224,6 +224,21 @@ public class BasicHookWorker implements Transformer {
     }
 
     @Override
+    public ASTNode transform(ListBuiltin node) throws TransformerException {
+        return transform((Term) node);
+    }
+
+    @Override
+    public ASTNode transform(ListLookup node) throws TransformerException {
+        return transform((Term) node);
+    }
+
+    @Override
+    public ASTNode transform(ListUpdate node) throws TransformerException {
+        return transform((Term) node);
+    }
+
+     @Override
     public ASTNode transform(MapBuiltin node) throws TransformerException {
         return transform((Term) node);
     }

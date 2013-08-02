@@ -17,6 +17,7 @@ public interface Transformer {
     public String getName();
 
     public ASTNode transform(BoolToken boolToken);
+    public ASTNode transform(BuiltinList builtinList);
     public ASTNode transform(BuiltinMap builtinMap);
     public ASTNode transform(BuiltinSet builtinSet);
     public ASTNode transform(Cell cell);
@@ -33,11 +34,13 @@ public interface Transformer {
     public ASTNode transform(KLabel kLabel);
     public ASTNode transform(KList kList);
     public ASTNode transform(KSequence kSequence);
+    public ASTNode transform(ListLookup listLookup);
+    public ASTNode transform(ListUpdate listUpdate);
     public ASTNode transform(MapLookup mapLookup);
     public ASTNode transform(MapUpdate mapUpdate);
+    public ASTNode transform(MetaVariable metaVariable);
     public ASTNode transform(SetLookup setLookup);
     public ASTNode transform(SetUpdate setUpdate);
-    public ASTNode transform(MetaVariable metaVariable);
     public ASTNode transform(SymbolicConstraint symbolicConstraint);
     public ASTNode transform(Term node);
     public ASTNode transform(Token token);

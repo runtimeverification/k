@@ -66,6 +66,9 @@ public interface Transformer {
     public ASTNode transform(SetBuiltin node) throws TransformerException;
     public ASTNode transform(SetLookup node) throws TransformerException;
     public ASTNode transform(SetUpdate node) throws TransformerException;
+    public ASTNode transform(ListBuiltin node) throws TransformerException;
+    public ASTNode transform(ListLookup node) throws TransformerException;
+    public ASTNode transform(ListUpdate node) throws TransformerException;
     public ASTNode transform(MapBuiltin node) throws TransformerException;
     public ASTNode transform(MapLookup node) throws TransformerException;
     public ASTNode transform(MapUpdate node) throws TransformerException;

@@ -15,10 +15,8 @@ import static java.util.Collections.emptySet;
  * @author TraianSF
  */
 public class SetBuiltin extends CollectionBuiltin {
-    private final Set<Term> removeElements;
     public SetBuiltin(DataStructureSort sort, java.util.Collection<Term> elements, Collection<Term> terms) {
         super(sort, elements, terms);
-        this.removeElements = Collections.<Term>emptySet();
     }
 
     @Override

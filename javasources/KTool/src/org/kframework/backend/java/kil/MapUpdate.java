@@ -47,7 +47,7 @@ public class MapUpdate extends Term {
         }
 
         if (!removeSet.isEmpty()) {
-            return this;
+            return new MapUpdate(builtinMap, removeSet, updateMap);
         }
 
         entries.putAll(updateMap);

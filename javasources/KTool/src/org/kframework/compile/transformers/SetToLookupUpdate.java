@@ -20,7 +20,7 @@ import java.util.Set;
  * @see org.kframework.kil.SetLookup
  * @see org.kframework.kil.SetUpdate
  *
- * @author AndreiS
+ * @author TraianSF (refactoring from {@link MapToLookupUpdate})
  */
 public class SetToLookupUpdate extends CopyOnWriteTransformer {
 
@@ -135,7 +135,7 @@ public class SetToLookupUpdate extends CopyOnWriteTransformer {
                 /* TODO(AndreiS): check the uniqueness of set variables in the LHS */
                 reverseMap.put(
                         node.viewBase(),
-                        new SetUpdate(variable, node.elements(), Collections.<Term>emptySet()));
+                        new SetUpdate(variable, node.elements()));
             }
             for (Term term : node.elements()) {
                 queue.add(new ExtendedSetLookup(term, variable));
@@ -153,7 +153,6 @@ public class SetToLookupUpdate extends CopyOnWriteTransformer {
                 SetUpdate setUpdate = (SetUpdate) term;
 
                 java.util.Collection<Term> removeEntries = new ArrayList<Term>();
-                java.util.Collection<Term> updateEntries = new ArrayList<Term>();
                 for (Term key : setUpdate.removeEntries()) {
                     if (elements.contains(key)) {
                         elements.remove(key);
@@ -162,10 +161,10 @@ public class SetToLookupUpdate extends CopyOnWriteTransformer {
                     }
                 }
 
-                if (removeEntries.isEmpty() && updateEntries.isEmpty()) {
+                if (removeEntries.isEmpty()) {
                     baseTerms.add(setUpdate.set());
                 } else {
-                    baseTerms.add(new SetUpdate(setUpdate.set(), removeEntries, updateEntries));
+                    baseTerms.add(new SetUpdate(setUpdate.set(), removeEntries));
                 }
             }
 

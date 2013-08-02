@@ -34,9 +34,9 @@ public class BottomUpVisitor implements Visitor {
         for (Term term : builtinSet.elements()) {
             term.accept(this);
         }
-        for (BuiltinSet.Operation operation : builtinSet.operations()) {
-            operation.element().accept(this);
-        }
+//        for (BuiltinSet.Operation operation : builtinSet.operations()) {
+//            operation.element().accept(this);
+//        }
         visit((Collection) builtinSet);
     }
 
@@ -175,9 +175,6 @@ public class BottomUpVisitor implements Visitor {
         setUpdate.base().accept(this);
         for (Term key : setUpdate.removeSet()) {
             key.accept(this);
-        }
-        for (Term element : setUpdate.updateSet()) {
-            element.accept(this);
         }
     }
 

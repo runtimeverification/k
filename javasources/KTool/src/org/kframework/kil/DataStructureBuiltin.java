@@ -46,9 +46,9 @@ public abstract class DataStructureBuiltin extends Term {
                     Collections.<Term>emptyList(),
                     Collections.<Term>emptyList());
         } else if (sort.type().equals(KSorts.LIST)) {
-            return new CollectionBuiltin(sort,
+            return new ListBuiltin(sort,
                     Collections.<Term>emptyList(),
-                    Collections.<Term>emptyList());
+                    Collections.<Term>emptyList(), Collections.<Term>emptyList());
         } else if (sort.type().equals(KSorts.MAP)) {
             return new MapBuiltin(
                     sort,
@@ -69,9 +69,10 @@ public abstract class DataStructureBuiltin extends Term {
                     + argument.length;
 
             if (sort.type().equals(KSorts.LIST)) {
-                return new CollectionBuiltin(
+                return new ListBuiltin(
                         sort,
                         Collections.singletonList(argument[0]),
+                        Collections.<Term>emptyList(),
                         Collections.<Term>emptyList());
             } else {
                 return new SetBuiltin(sort,
@@ -104,7 +105,6 @@ public abstract class DataStructureBuiltin extends Term {
         */
 
         if (sort.type().equals(KSorts.BAG)
-                || sort.type().equals(KSorts.LIST)
                 || sort.type().equals(KSorts.SET)) {
             Collection<Term> elements = new ArrayList<Term>();
             Collection<Term> terms = new ArrayList<Term>();
@@ -118,11 +118,22 @@ public abstract class DataStructureBuiltin extends Term {
                 }
             }
 
-            if (sort.type().equals(KSorts.LIST)) {
-                return new CollectionBuiltin(sort, elements, terms);
-            } else {
-                return new SetBuiltin(sort, elements, terms);
+            return new SetBuiltin(sort, elements, terms);
+        } else if (sort.type().equals(KSorts.LIST)) {
+            ArrayList<Term> elementsLeft = new ArrayList<Term>();
+            ArrayList<Term> elementsRight = new ArrayList<Term>();
+            ArrayList<Term> terms = new ArrayList<Term>();
+            for (Term term : argument) {
+                if (term instanceof ListBuiltin) {
+                    ListBuiltin listBuiltin = (ListBuiltin) term;
+                    elementsLeft.addAll(listBuiltin.elementsLeft());
+                    elementsRight.addAll(listBuiltin.elementsRight());
+                    terms.addAll(listBuiltin.baseTerms());
+                } else {
+                    terms.add(term);
+                }
             }
+            return new ListBuiltin(sort, elementsLeft, elementsRight, terms);
         } else if (sort.type().equals(KSorts.MAP)) {
             Map<Term, Term> elements = new HashMap<Term, Term>();
             Collection<Term> terms = new ArrayList<Term>();

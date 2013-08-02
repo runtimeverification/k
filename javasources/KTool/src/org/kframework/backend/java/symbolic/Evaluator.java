@@ -21,6 +21,16 @@ public class Evaluator extends CopyOnWriteTransformer {
         }
 
         @Override
+        public ASTNode transform(ListLookup listLookup) {
+            return listLookup.evaluateLookup();
+        }
+
+        @Override
+        public ASTNode transform(ListUpdate listUpdate) {
+            return listUpdate.evaluateUpdate();
+        }
+
+        @Override
         public ASTNode transform(SetLookup setLookup) {
             return setLookup.evaluateLookup();
         }
@@ -30,7 +40,7 @@ public class Evaluator extends CopyOnWriteTransformer {
             return setUpdate.evaluateUpdate();
         }
 
-         @Override
+        @Override
         public ASTNode transform(MapLookup mapLookup) {
             return mapLookup.evaluateLookup();
         }
@@ -52,6 +62,16 @@ public class Evaluator extends CopyOnWriteTransformer {
     @Override
     public ASTNode transform(KItem kItem) {
         return ((Term) super.transform(kItem)).accept(localEvaluator);
+    }
+
+    @Override
+    public ASTNode transform(ListLookup listLookup) {
+        return ((Term) super.transform(listLookup)).accept(localEvaluator);
+    }
+
+    @Override
+    public ASTNode transform(ListUpdate listUpdate) {
+        return ((Term) super.transform(listUpdate)).accept(localEvaluator);
     }
 
     @Override
