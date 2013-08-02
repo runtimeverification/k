@@ -92,6 +92,8 @@ public class K {
 	//don't delete temp folders created by krun by default
 	public static boolean deleteTempDir = false;
     public static boolean smt = true;
+    //generate tests from semantics?
+    public static boolean do_testgen = false;
 
 
 	public static Properties configuration_variables = new Properties();

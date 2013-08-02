@@ -5,7 +5,7 @@ if (V2:Int <= V3:Int) {
 } else {
   V1:Id = V1:Id - 1;
 }
-if (V2:Int <= V3:Int) {
+if (V4:Int <= V3:Int) {
   V1:Id = V1:Id + 1;
 } else {
   V1:Id = V1:Id - 1;

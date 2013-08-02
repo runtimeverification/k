@@ -1,0 +1,4 @@
+<k>
+int V1:Id, .Ids;
+SVar:Stmt
+</k>

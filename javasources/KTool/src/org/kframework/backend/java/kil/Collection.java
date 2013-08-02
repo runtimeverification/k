@@ -4,6 +4,9 @@ import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  *
@@ -13,6 +16,16 @@ public abstract class Collection extends Term {
 
     protected final Variable frame;
 
+    public List<Term> getContents() {
+        return contents;
+    }
+
+    public void setContents(List<Term> contents) {
+        this.contents = contents;
+    }
+
+    protected java.util.List<Term> contents;
+
     protected Collection(Variable frame, Kind kind) {
         super(kind);
 
@@ -21,6 +34,7 @@ public abstract class Collection extends Term {
                 + "; expected kind " + kind;
 
         this.frame = frame;
+        this.contents = new ArrayList<Term>();
     }
 
     public boolean hasFrame() {

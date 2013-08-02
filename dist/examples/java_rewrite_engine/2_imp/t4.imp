@@ -1,0 +1,8 @@
+<k>
+int V1:Id, .Ids;
+if (BCond:BExp) {
+  SVar:Stmt
+} else {
+  SVar2:Stmt
+}
+</k>

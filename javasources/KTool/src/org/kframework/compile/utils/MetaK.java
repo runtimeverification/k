@@ -196,6 +196,8 @@ public class MetaK {
 		return cell;
 	}
 
+
+
 	public static Variable freshVar(Set<Variable> vars, String sort) {
 		String prefix = "?";
 		int i = 0;

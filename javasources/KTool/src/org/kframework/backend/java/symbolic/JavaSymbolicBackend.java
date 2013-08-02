@@ -45,22 +45,22 @@ import com.thoughtworks.xstream.XStream;
  */
 public class JavaSymbolicBackend extends BasicBackend {
 
-	public static final String DEFINITION_FILENAME = "java_symbolic_definition.bin";
+    public static final String DEFINITION_FILENAME = "java_symbolic_definition.bin";
 
-	public JavaSymbolicBackend(Stopwatch sw, Context context) {
-		super(sw, context);
-	}
+    public JavaSymbolicBackend(Stopwatch sw, Context context) {
+        super(sw, context);
+    }
 
-	@Override
-	public Definition lastStep(Definition javaDef) {
+    @Override
+    public Definition lastStep(Definition javaDef) {
         try {
-			OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(
+            OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(
                     new File(context.dotk, JavaSymbolicBackend.DEFINITION_FILENAME)));
-			BinaryLoader.toBinary(
+            BinaryLoader.toBinary(
                     //new KILtoBackendJavaKILTransformer(context).transformDefinition(javaDef),
                     javaDef,
                     outputStream);
-			outputStream.close();
+            outputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -99,20 +99,20 @@ public class JavaSymbolicBackend extends BasicBackend {
 		}
 		*/
 
-		return javaDef;
-	}
+        return javaDef;
+    }
 
     @Override
     public void run(Definition def) throws IOException {
     }
 
-	@Override
-	public String getDefaultStep() {
-		return "LastStep";
-	}
+    @Override
+    public String getDefaultStep() {
+        return "LastStep";
+    }
 
-	@Override
-	public CompilerSteps<Definition> getCompilationSteps() {
+    @Override
+    public CompilerSteps<Definition> getCompilationSteps() {
         CompilerSteps<Definition> steps = new CompilerSteps<Definition>(context);
         steps.add(new FirstStep(this, context));
 
@@ -175,10 +175,10 @@ public class JavaSymbolicBackend extends BasicBackend {
         steps.add(new DeclareCellLabels(context));
 
 		/* tag with symbolic the rules that are form k dist */
-		steps.add(new TagUserRules(context));
+        steps.add(new TagUserRules(context));
 
-		steps.add(new LastStep(this, context));
+        steps.add(new LastStep(this, context));
 
-		return steps;
-	}
+        return steps;
+    }
 }

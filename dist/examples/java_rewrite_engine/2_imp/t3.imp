@@ -1,0 +1,8 @@
+<k>
+int V1:Id, .Ids;
+if (V2:Int <= V3:Int) {
+  SVar:Stmt
+} else {
+  SVar2:Stmt
+}
+</k>

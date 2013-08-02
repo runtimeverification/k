@@ -329,8 +329,8 @@ public class CopyOnWriteTransformer implements Transformer {
 
     @Override
     public ASTNode transform(MapUpdate mapUpdate) {
+//        System.out.println("Map: "+(Term)mapUpdate.map().accept(this));
         Term map = (Term) mapUpdate.map().accept(this);
-
         java.util.Set<Term> removeSet = null;
         for(Term key : mapUpdate.removeSet()) {
             Term transformedKey = (Term) key.accept(this);

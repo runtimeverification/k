@@ -46,6 +46,26 @@ public interface KRun {
 	*/
 	public KRunResult<SearchResults> search(Integer bound, Integer depth, SearchType searchType, Rule pattern, Term cfg, RuleCompilerSteps compilationInfo) throws KRunExecutionException;
 
+    /**
+     Piggyback on the "search" method for test generation
+     @param bound The maximum number of search results to return; null if unbounded
+     @param depth The maximum number of transitions to make before terminating; null if
+     unbounded
+     @param searchType Represents the types of result states to return
+     @param pattern A kompiled rule without rewrites (i.e. a pattern and a side condition) to
+     use to determine whether a particular state is a search result
+     @param cfg The term to begin the search at
+     @param compilationInfo the object used to kompile the search pattern, which contains
+     metadata used to pretty-print results
+     @exception KRunExecutionException Thrown if the backend fails to successfully perform the
+     search
+     @exception UnsupportedOperationException The backend implementing this interface does not
+     support breadth-first search
+     @return An object containing both metadata about krun's execution, and information about
+     the results of the search
+     */
+    public KRunResult<GeneratorResults> generate(Integer bound, Integer depth, SearchType searchType, Rule pattern, Term cfg, RuleCompilerSteps compilationInfo) throws KRunExecutionException;
+
 	/**
 	Perform LTL model-checking of a term according to a particular LTL formula
 	@param formula The K term expressing the LTL formula to check

@@ -15,10 +15,10 @@ module IMP-SYNTAX
   syntax Block ::= "{" "}"
                  | "{" Stmt "}"
   syntax Stmt  ::= Block
-                 | Id "=" AExp ";"            [strict(2)]
                  | "if" "(" BExp ")"
                    Block "else" Block         [strict(1)]
                  | "while" "(" BExp ")" Block
+                 | Id "=" AExp ";"            [strict(2)]
                  > Stmt Stmt                  [left]
   syntax Pgm ::= "int" Ids ";" Stmt
   syntax Ids ::= List{Id,","}

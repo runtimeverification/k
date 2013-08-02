@@ -610,6 +610,10 @@ public class MaudeKRun implements KRun {
 		return result;
 	}
 
+    public KRunResult<GeneratorResults> generate(Integer bound, Integer depth, SearchType searchType, Rule pattern, Term cfg, RuleCompilerSteps compilationInfo) throws KRunExecutionException{
+        throw new UnsupportedOperationException("Test generation");
+    }
+
 	private KRunProofResult<DirectedGraph<KRunState, Transition>> parseModelCheckResult() {
 		File input = new File(K.maude_output);
 		Document doc = XmlUtil.readXML(input);

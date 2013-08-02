@@ -158,7 +158,11 @@ public class BackendJavaKILtoKILTranslation extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(Variable variable) {
-        return new org.kframework.kil.Variable(variable.name(), variable.sort());
+//        System.out.println("VARIABLE*************"+ variable.name()+"->"+variable.sort());
+        ASTNode node = new org.kframework.kil.Variable(variable.name(), variable.sort());
+//        System.out.println("NODE: "+node.toString());
+//        System.out.println("**********VARIABLE"+ variable.name()+"->"+variable.sort());
+        return node;
     }
 
 }
