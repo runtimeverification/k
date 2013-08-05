@@ -89,7 +89,7 @@ public class ParseRulesFilter extends BasicTransformer {
 
 				if (GlobalSettings.fastKast) {
 					// TODO(RaduM): load directly from ATerms
-					Sentence st = (Sentence) Sglr.run_sglri(context.dotk.getAbsolutePath() + "/def/Concrete.tbl", "CondSentence", ss.getContent(), ss.getFilename());
+					Sentence st = (Sentence) Sglr.run_sglri(context.dotk.getAbsolutePath() + "/def/Concrete.tbl", "CondSentence1", ss.getContent(), ss.getFilename());
 					if (ss.getType().equals(Constants.CONTEXT))
 						config = new org.kframework.kil.Context(st);
 					else if (ss.getType().equals(Constants.RULE))
