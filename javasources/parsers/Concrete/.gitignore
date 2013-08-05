@@ -1,0 +1,5 @@
+include
+editor/*.generated.esv
+syntax/*.generated.pp
+test/*.xml
+test/*.aterm
