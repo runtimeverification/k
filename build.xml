@@ -67,12 +67,9 @@
 	<target name="makeversion">
 		<property name="version.file" value="./dist/lib/version.txt" />
 
-		<exec executable="svn" output="${version.file}">
-			<arg value="info" />
-			<arg value="--xml" />
+		<exec executable="git" outputproperty="version.out">
+			<arg value="describe" />
 		</exec>
-
-		<xmlproperty file="${version.file}" />
 
 		<tstamp>
 			<format property="date" pattern="EEE MMM d HH:mm:ss z yyyy" />
@@ -86,8 +83,12 @@
 				<equals arg1="${version}" arg2="latest" />
 			</not>
 		</condition>
+		<echo message="${version.file}" />
+		<echo message="K-framework ${k-version}.${line.separator}" />
+		<echo message="Git Revision: ${version.out}${line.separator}" />
+		<echo message="Build date: ${date}${line.separator}" />
 		<echo message="K-framework ${k-version}.${line.separator}" file="${version.file}" />
-		<echo message="SVN Revision: ${info.entry(revision)}${line.separator}" file="${version.file}" append="true" />
+		<echo message="Git Revision: ${version.out}${line.separator}" file="${version.file}" append="true" />
 		<echo message="Build date: ${date}${line.separator}" file="${version.file}" append="true" />
 	</target>
 
