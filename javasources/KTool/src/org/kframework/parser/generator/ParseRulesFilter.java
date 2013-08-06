@@ -90,7 +90,14 @@ public class ParseRulesFilter extends BasicTransformer {
 
 				if (GlobalSettings.fastKast) {
 					// TODO(RaduM): load directly from ATerms
-					Sentence st = (Sentence) Sglr.run_sglri(context.dotk.getAbsolutePath() + "/def/Concrete.tbl", "CondSentence1", ss.getContent(), ss.getFilename());
+					ASTNode anode = Sglr.run_sglri(context.dotk.getAbsolutePath() + "/def/Concrete.tbl", "CondSentence1", ss.getContent(), ss.getFilename());
+
+					int startLine = StringUtil.getStartLineFromLocation(ss.getLocation());
+					int startCol = StringUtil.getStartColFromLocation(ss.getLocation());
+					anode.accept(new UpdateLocationVisitor(context, startLine, startCol));
+					anode.accept(new ReportErrorsVisitor(context, "rule"));
+
+					Sentence st = (Sentence) anode;
 					if (ss.getType().equals(Constants.CONTEXT))
 						config = new org.kframework.kil.Context(st);
 					else if (ss.getType().equals(Constants.RULE))
@@ -99,11 +106,6 @@ public class ParseRulesFilter extends BasicTransformer {
 						config = null;
 						assert false : "Only context and rules have been implemented.";
 					}
-
-					int startLine = StringUtil.getStartLineFromLocation(ss.getLocation());
-					int startCol = StringUtil.getStartColFromLocation(ss.getLocation());
-					config.accept(new UpdateLocationVisitor(context, startLine, startCol));
-					config.accept(new ReportErrorsVisitor(context, "rule"));
 
 					((Sentence) config).setLabel(ss.getLabel());
 					//assert st.getAttributes() == null || st.getAttributes().isEmpty(); // attributes should have been parsed in Basic Parsing

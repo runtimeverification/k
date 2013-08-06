@@ -69,12 +69,14 @@ public class ParseConfigsFilter extends BasicTransformer {
 				ASTNode config = null;
 				if (GlobalSettings.fastKast) {
 					// TODO(RaduM): load directly from ATerms
-					Sentence st = (Sentence) Sglr.run_sglri(context.dotk.getAbsolutePath() + "/def/Concrete.tbl", "CondSentence", ss.getContent(), ss.getFilename());
-					config = new Configuration(st);
+					config = Sglr.run_sglri(context.dotk.getAbsolutePath() + "/def/Concrete.tbl", "CondSentence", ss.getContent(), ss.getFilename());
 					int startLine = StringUtil.getStartLineFromLocation(ss.getLocation());
 					int startCol = StringUtil.getStartColFromLocation(ss.getLocation());
-					((Sentence) config).accept(new UpdateLocationVisitor(context, startLine, startCol));
+					config.accept(new UpdateLocationVisitor(context, startLine, startCol));
 					config.accept(new ReportErrorsVisitor(context, "configuration"));
+
+					Sentence st = (Sentence) config;
+					config = new Configuration(st);
 					((Sentence) config).setAttributes(ss.getAttributes());
 				} else {
 					String parsed = null;
