@@ -47,8 +47,6 @@ public class AddTopCellConfig extends CopyOnWriteTransformer {
 		Production topProduction = new Production(new Sort("CellLabel"), topTerminals );
 		topPriorityBlock.getProductions().add(topProduction);
 		topCellBlocks.add(topPriorityBlock);
-		Syntax topCellDecl = new Syntax(new Sort("CellLabel"), topCellBlocks );
-		node.getItems().add(topCellDecl);
 		return node;
 	}
 	
