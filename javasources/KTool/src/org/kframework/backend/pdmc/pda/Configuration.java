@@ -2,14 +2,32 @@ package org.kframework.backend.pdmc.pda;
 
 import org.kframework.backend.java.symbolic.Utils;
 
+import java.util.Iterator;
 import java.util.Stack;
 
 /**
  * @author TraianSF
  */
 public class Configuration<Control, Alphabet> {
+    private static Stack emptyStack = new Stack();
     ConfigurationHead<Control,Alphabet> head;
     Stack<Alphabet> stack;
+
+    private Configuration(Control control, Stack<Alphabet> stack) {
+        if (stack.isEmpty()) {
+            head = ConfigurationHead.of(control, null);
+            this.stack = emptyStack;
+        } else {
+            head = ConfigurationHead.of(control, stack.peek());
+            if (stack.size() == 1) {
+                this.stack = emptyStack;
+            } else {
+                this.stack = new Stack<Alphabet>();
+                this.stack.addAll(stack);
+                this.stack.pop();
+            }
+        }
+    }
 
     public Configuration(Configuration<Control, Alphabet> configuration, Stack<Alphabet> stack) {
         head = configuration.getHead();
@@ -20,8 +38,9 @@ public class Configuration<Control, Alphabet> {
             newStack.addAll(stack);
             newStack.addAll(configuration.getStack());
             if (!head.isProper()) {
-                head = new ConfigurationHead<Control, Alphabet>(head.getState(), newStack.pop());
+                head = ConfigurationHead.<Control,Alphabet>of(head.getState(), newStack.pop());
             }
+            this.stack = newStack;
         }
     }
 
@@ -43,7 +62,7 @@ public class Configuration<Control, Alphabet> {
         return head.equals(configuration.head) && stack.equals(configuration.stack);
      }
 
-    public boolean emptyStack() {
+    public boolean isFinal() {
         return !head.isProper();
     }
 
@@ -53,5 +72,25 @@ public class Configuration<Control, Alphabet> {
 
     public Stack<Alphabet> getStack() {
         return stack;
+    }
+
+
+    public static <Alphabet> Stack<Alphabet> emptyStack() {
+        if (emptyStack == null) emptyStack = new Stack<Alphabet>();
+        return (Stack<Alphabet>) emptyStack;
+    }
+
+    public static Configuration<String, String> of(String confString) {
+        assert confString.charAt(0) == '<' : "Configuration must start with '<'.";
+        assert confString.charAt(confString.length() - 1) == '>' : "Configuration must start with '>'.";
+        String[] strings = confString.substring(1, confString.length() - 2).split(",");
+        assert strings.length == 2 : "Configuration is <p, stack>.";
+        String control = strings[0].trim();
+        String[] letters = strings[1].trim().split("\\s+");
+        Stack<String> stack = new Stack<String>();
+        for (String letter : letters) {
+            stack.push(letter);
+        }
+        return new Configuration<String, String>(control, stack);
     }
 }
