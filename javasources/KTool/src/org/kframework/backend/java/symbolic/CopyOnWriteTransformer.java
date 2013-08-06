@@ -204,12 +204,23 @@ public class CopyOnWriteTransformer implements Transformer {
 
     @Override
     public ASTNode transform(ListLookup listLookup) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        Term list = (Term) listLookup.list().accept(this);
+        Term key = (Term) listLookup.key().accept(this);
+        if (list != listLookup.list() || key != listLookup.key()) {
+            listLookup = new ListLookup(list, key);
+        }
+        return listLookup;
     }
 
     @Override
     public ASTNode transform(ListUpdate listUpdate) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        Term list = (Term) listUpdate.base().accept(this);
+
+        if (list != listUpdate.base()) {
+            listUpdate = new ListUpdate(list, listUpdate.removeLeft(), listUpdate.removeRight());
+        }
+
+        return listUpdate;
     }
 
     @Override

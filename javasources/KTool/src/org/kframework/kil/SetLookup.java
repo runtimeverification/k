@@ -22,6 +22,11 @@ public class SetLookup extends BuiltinLookup {
     }
 
     @Override
+    public Term value() {
+        return BoolBuiltin.TRUE;
+    }
+
+    @Override
     public Term shallowCopy() {
         throw new UnsupportedOperationException();
     }

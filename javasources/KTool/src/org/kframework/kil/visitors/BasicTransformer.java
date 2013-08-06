@@ -368,13 +368,13 @@ public class BasicTransformer implements Transformer {
     public ASTNode transform(ListUpdate node) throws TransformerException {
         Variable base = (Variable) node.base().accept(this);
 
-        ArrayList<Term> removeLeft = new ArrayList<Term>(node.removeLeft());
+        ArrayList<Term> removeLeft = new ArrayList<Term>(node.removeLeft().size());
         for (Term entry : node.removeLeft()) {
             Term transformedEntry = (Term) entry.accept(this);
             removeLeft.add(transformedEntry);
         }
 
-        ArrayList<Term> removeRight = new ArrayList<Term>(node.removeRight());
+        ArrayList<Term> removeRight = new ArrayList<Term>(node.removeRight().size());
         for (Term entry : node.removeRight()) {
             Term transformedEntry = (Term) entry.accept(this);
             removeRight.add(transformedEntry);

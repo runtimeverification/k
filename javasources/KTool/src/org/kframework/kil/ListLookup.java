@@ -27,9 +27,10 @@ public class ListLookup extends BuiltinLookup {
     }
 
     public ListLookup(Variable base, int key, Term value) {
-        this(base, IntBuiltin.of(key),value);
+        this(base, IntBuiltin.kAppOf(key),value);
     }
 
+    @Override
     public Term value() {
         return value;
     }

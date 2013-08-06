@@ -445,12 +445,16 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         for (org.kframework.kil.BuiltinLookup lookup : node.getLookups()) {
             Variable base = (Variable) lookup.base().accept(this);
             Term key = (Term) lookup.key().accept(this);
-            if (lookup instanceof org.kframework.kil.MapLookup) {
-                org.kframework.kil.MapLookup mapLookup = (org.kframework.kil.MapLookup) lookup;
-                Term value = (Term) mapLookup.value().accept(this);
-                lookups.add(new MapLookup(base, key), value);
-            } else {
+
+            if (lookup instanceof org.kframework.kil.SetLookup) {
                 lookups.add(new SetLookup(base, key), BoolToken.TRUE);
+            } else {
+                Term value = (Term) lookup.value().accept(this);
+                if (lookup instanceof org.kframework.kil.MapLookup) {
+                    lookups.add(new MapLookup(base, key), value);
+                } else { // ListLookup
+                    lookups.add(new ListLookup(base, key), value);
+                }
             }
 
         }

@@ -44,7 +44,7 @@ public class ListUpdate extends Term {
             iterator.next(); iterator.remove();
         }
 
-        ArrayDeque<Term> elementsRight = new ArrayDeque<Term>(builtinList.elementsLeft());
+        ArrayDeque<Term> elementsRight = new ArrayDeque<Term>(builtinList.elementsRight());
         for (Iterator<Term> iterator = elementsRight.descendingIterator(); removeRight > 0 && iterator.hasNext();) {
             removeRight--;
             iterator.next(); iterator.remove();
@@ -64,6 +64,14 @@ public class ListUpdate extends Term {
 
     public Term base() {
         return list;
+    }
+
+    public int removeLeft() {
+        return removeLeft;
+    }
+
+    public int removeRight() {
+        return removeRight;
     }
 
     @Override

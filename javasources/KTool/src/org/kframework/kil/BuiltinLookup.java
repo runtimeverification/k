@@ -24,4 +24,6 @@ public abstract class BuiltinLookup extends Term {
     public Term key() {
         return key;
     }
+
+    public abstract Term value();
 }

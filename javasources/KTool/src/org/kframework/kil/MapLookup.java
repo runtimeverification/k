@@ -25,6 +25,7 @@ public class MapLookup extends BuiltinLookup {
         this.value = value;
     }
 
+    @Override
     public Term value() {
         return value;
     }

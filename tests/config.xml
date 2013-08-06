@@ -781,6 +781,20 @@
 
 
  <test
+      language="tests/regression/java-rewrite-engine/list/test2/list-test2.k"
+      extensions="issue"
+      >
+    <kompile-option name="-ml" />
+    <kompile-option name="-w" value="none" />
+    <all-programs>
+      <krun-option name="--no-smt" />
+      <krun-option name="--backend" value="java-symbolic" />
+      <krun-option name="--output-mode" value="pretty" />
+    </all-programs>
+  </test>
+
+
+ <test
       language="tests/regression/java-rewrite-engine/set/test1/test1.k"
       extensions="issue"
       >

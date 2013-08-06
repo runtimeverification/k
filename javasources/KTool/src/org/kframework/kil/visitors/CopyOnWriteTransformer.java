@@ -601,7 +601,7 @@ public class CopyOnWriteTransformer implements Transformer {
             change = change || transformedEntry != entry;
         }
 
-        ArrayList<Term> removeRight = new ArrayList<Term>(node.removeLeft().size());
+        ArrayList<Term> removeRight = new ArrayList<Term>(node.removeRight().size());
         for (Term entry : node.removeRight()) {
             Term transformedEntry = (Term) entry.accept(this);
             removeRight.add(transformedEntry);
