@@ -34,16 +34,12 @@ public class CorrectCastPriorityFilter extends BasicTransformer {
 		// this should be done only if the casting is syntactic, because on semantic cast there should be another branch
 		// that has a typed variable.
 		if (cst.getContent() instanceof Variable) {
-			if (cst.isSyntactic()) {
+			if (!((Variable) cst.getContent()).isUserTyped()) {
 				Variable var = new Variable((Variable) cst.getContent());
 				var.setUserTyped(true);
 				var.setSort(cst.getSort());
-				var.setSyntactic(true);
+				var.setSyntactic(cst.isSyntactic());
 				return var;
-			} else {
-				String msg = "Due to typing errors, Casting is too greedy. Use parentheses to set proper scope.";
-				KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, cst.getFilename(), cst.getLocation());
-				throw new PriorityException(kex);
 			}
 		}
 		cst.getContent().accept(secondFilter);
