@@ -95,6 +95,7 @@ public class Constants {
 	public static final String GENERATED_FILENAME = "File System";
 	public static final String GENERATED_LOCATION = "generated";
 	public static final Map<String,String> defaultAttributeValues = new HashMap<String, String>();
+	public static final String ERROR = "error";
 
 	static {
 		defaultAttributeValues.put("filename", Constants.GENERATED_FILENAME);

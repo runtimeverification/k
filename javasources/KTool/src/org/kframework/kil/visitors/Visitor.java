@@ -5,6 +5,7 @@ import org.kframework.kil.*;
 
 public interface Visitor {
 	public void visit(ASTNode node);
+	public void visit(ParseError node);
 	public void visit(Definition node);
 	public void visit(DefinitionItem node);
 	// <DefinitionItems>

@@ -21,6 +21,7 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
+import org.kframework.parser.utils.ReportErrorsVisitor;
 import org.kframework.parser.utils.Sglr;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
@@ -54,6 +55,7 @@ public class ProgramLoader {
 			//out = Sglri.run_sglri(context.kompiled.getAbsolutePath() + "/pgm/Program.tbl", startSymbol, content);
 			JavaClassesFactory.startConstruction(context);
 			out = Sglr.run_sglri(context.kompiled.getAbsolutePath() + "/pgm/Program.tbl", startSymbol, content, filename);
+			out.accept(new ReportErrorsVisitor(context, "file"));
 			JavaClassesFactory.endConstruction();
 		} else {
 			org.kframework.parser.concrete.KParser.ImportTblPgm(tbl.getAbsolutePath());

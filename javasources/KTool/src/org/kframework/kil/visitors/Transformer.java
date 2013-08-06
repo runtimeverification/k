@@ -5,6 +5,7 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public interface Transformer {
 	public ASTNode transform(ASTNode node) throws TransformerException;
+	public ASTNode transform(ParseError node) throws TransformerException;
 	public ASTNode transform(Definition node) throws TransformerException;
 	public ASTNode transform(DefinitionItem node) throws TransformerException;
 	//<DefinitionItems>

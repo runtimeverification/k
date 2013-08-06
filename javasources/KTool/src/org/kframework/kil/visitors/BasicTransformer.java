@@ -29,6 +29,11 @@ public class BasicTransformer implements Transformer {
 	}
 
 	@Override
+	public ASTNode transform(ParseError node) throws TransformerException {
+		return transform((ASTNode) node);
+	}
+
+	@Override
 	public ASTNode transform(Definition node) throws TransformerException {
 		for (int i = 0; i < node.getItems().size(); i++) {
 			node.getItems().set(i, (DefinitionItem) node.getItems().get(i).accept(this));

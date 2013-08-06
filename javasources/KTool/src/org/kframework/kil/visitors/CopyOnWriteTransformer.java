@@ -30,6 +30,11 @@ public class CopyOnWriteTransformer implements Transformer {
 	}
 
 	@Override
+	public ASTNode transform(ParseError node) throws TransformerException {
+		return transform((ASTNode) node);
+	}
+
+	@Override
 	public ASTNode transform(Definition node) throws TransformerException {
 		boolean change = false;
 		ArrayList<DefinitionItem> items = new ArrayList<DefinitionItem>();

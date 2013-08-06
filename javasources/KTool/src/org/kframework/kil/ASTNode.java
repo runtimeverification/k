@@ -11,6 +11,7 @@ import org.kframework.kil.visitors.Visitable;
 import org.w3c.dom.Element;
 
 import aterm.ATermAppl;
+import aterm.ATermInt;
 import aterm.ATermList;
 
 /**
@@ -49,10 +50,11 @@ public abstract class ASTNode implements Visitable, Transformable, Serializable 
 		ATermList list = (ATermList) elem.getAnnotations().getFirst();
 		list = list.getNext();
 		String fileame = ((ATermAppl) ((ATermAppl) list.getFirst()).getChildAt(0)).getName();
-		int loc0 = Integer.parseInt(((ATermAppl) list.getFirst()).getChildAt(1).getChildAt(0).toString());
-		int loc1 = Integer.parseInt(((ATermAppl) list.getFirst()).getChildAt(1).getChildAt(1).toString()) + 1;
-		int loc2 = Integer.parseInt(((ATermAppl) list.getFirst()).getChildAt(1).getChildAt(2).toString());
-		int loc3 = Integer.parseInt(((ATermAppl) list.getFirst()).getChildAt(1).getChildAt(3).toString()) + 1;
+		ATermAppl atm = (ATermAppl) ((ATermAppl) list.getFirst()).getChildAt(1);
+		int loc0 = ((ATermInt) atm.getChildAt(0)).getInt();
+		int loc1 = ((ATermInt) atm.getChildAt(1)).getInt() + 1;
+		int loc2 = ((ATermInt) atm.getChildAt(2)).getInt();
+		int loc3 = ((ATermInt) atm.getChildAt(3)).getInt() + 1;
 		String loc = "(" + loc0 + "," + loc1 + "," + loc2 + "," + loc3 + ")";
 		this.setLocation(loc);
 		this.setFilename(fileame);

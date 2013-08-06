@@ -29,6 +29,7 @@ import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
 import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
 import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
 import org.kframework.parser.concrete.disambiguate.VariableTypeInferenceFilter;
+import org.kframework.parser.utils.ReportErrorsVisitor;
 import org.kframework.parser.utils.Sglr;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.StringUtil;
@@ -73,6 +74,7 @@ public class ParseConfigsFilter extends BasicTransformer {
 					int startLine = StringUtil.getStartLineFromLocation(ss.getLocation());
 					int startCol = StringUtil.getStartColFromLocation(ss.getLocation());
 					((Sentence) config).accept(new UpdateLocationVisitor(context, startLine, startCol));
+					config.accept(new ReportErrorsVisitor(context, "configuration"));
 					((Sentence) config).setAttributes(ss.getAttributes());
 				} else {
 					String parsed = null;

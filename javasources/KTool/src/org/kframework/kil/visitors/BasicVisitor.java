@@ -39,6 +39,13 @@ public class BasicVisitor implements Visitor {
 	}
 
 	@Override
+	public void visit(ParseError node) {
+		if (isVisited(node))
+			return;
+		visit((ASTNode) node);
+	}
+
+	@Override
 	public void visit(Definition node) {
 		if (isVisited(node))
 			return;
