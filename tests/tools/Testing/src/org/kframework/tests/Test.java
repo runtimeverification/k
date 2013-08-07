@@ -610,7 +610,7 @@ public class Test implements Comparable<Test> {
 	public Task getPdfDefinitionTask(File homeDir) {
 		ArrayList<String> command = new ArrayList<String>();
 		command.add(Configuration.getKompile());
-		command.add(getXmlLanguage());
+		command.add(language);
 		command.add("--pdf");
 		command.add("-o");
 		command.add(getPdfCompiledFilename());
