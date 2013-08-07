@@ -22,11 +22,15 @@ import java.util.Set;
 
 
 /**
- * Completes the sort lattice for syntactic lists as follows:
+ * Completes the sort lattice as follows:
  * 1. adds a bottom sort #Bot;
  * 2. adds a syntactic production List{#Bot, separator}, for each syntactic list separator;
- * 3. subsorts List{Sort1, separator} to List{Sort2, separator} if Sort1 is subsorted to Sort2; and
- * 4. subsorts List{Sort, separator} to KResult if Sort is subsorted to KResult
+ * 3. subsorts Sort1 to Sort2 if all subsorts of Sort1 are subsorts of Sort2 and Sort1 only
+ *    contains subsorting productions;
+ * 4. adds List{Sort2, separator} if List{Sort1, separator} and Sort2 < Sort1
+ * 5. subsorts List{Sort1, separator} to List{Sort2, separator} if Sort1 is subsorted to Sort2
+ * 6. subsorts List{#Bot, separator} to List{Sort, separator}; and
+ * 7. subsorts List{Sort, separator} to KResult if Sort is subsorted to KResult
  *
  * Does NOT support syntactic lists of syntactic lists.
  * Supports at most ONE syntactic list for each sort and separator.
@@ -119,9 +123,9 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
         } while (change);
 
         /*
-         * Add list of Sort1 for a separator it there is some syntactic list of Sort2 with the
-         * same separator such that Sort1 is a subsort of Sort2
-         * (i.e. List{Sort1, separator} if List{Sort2, separator} and Sort1 < Sort2)
+         * Add list of Sort2 for a separator it there is some syntactic list of Sort1 with the
+         * same separator such that Sort2 is a subsort of Sort1
+         * (i.e. List{Sort2, separator} if List{Sort1, separator} and Sort2 < Sort1)
          */
         for (Production production1 : context.listConses.values()) {
             UserList userList1 = (UserList) production1.getItems().get(0);
