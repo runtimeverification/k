@@ -1,10 +1,11 @@
+require "builtins/list.k"
 require "builtins/map.k"
 
+
 module IMP-SYNTAX
-  //syntax AExp  ::= Int | String | Id
-  syntax AExp  ::= Int | Id
+  syntax AExp  ::= Int | String | Id
                  | "++" Id
-                 //| "read" "(" ")"
+                 | "read" "(" ")"
                  > AExp "/" AExp              [left, strict, division]
                  > AExp "+" AExp              [left, strict]
                  > "spawn" Block
@@ -22,21 +23,22 @@ module IMP-SYNTAX
                    Block "else" Block         [strict(1)]
                  | "while" "(" BExp ")" Block
                  | "int" Ids ";"
-                 //| "print" "(" AExps ")" ";"  [strict]
+                 | "print" "(" AExps ")" ";"  [strict]
                  | "halt" ";"
                  > "join" AExp ";"            [strict]
 
   syntax Ids   ::= List{Id,","}               [strict]
-  //syntax AExps ::= List{AExp,","}             [strict]
+  syntax AExps ::= List{AExp,","}             [strict]
   syntax Stmts ::= List{Stmt,""}
 endmodule
 
 
 module IMP
   imports IMP-SYNTAX
+  imports LIST
   imports MAP
-  //syntax KResult ::= Int | Bool | String
-  syntax KResult ::= Int | Bool
+
+  syntax KResult ::= Int | Bool | String
 
   configuration <T color="yellow">
                   <threads color="orange">
@@ -48,67 +50,68 @@ module IMP
                     </thread>
                   </threads>
                   <store color="red"> .MyMap </store>
-                  //<in color="magenta" stream="stdin"> .List </in>
-                  //<out color="Orchid" stream="stdout"> .List </out>
+                  //<in color="magenta" stream="stdin"> .MyList </in>
+                  //<out color="Orchid" stream="stdout"> .MyList </out>
+                  <in color="magenta"> .MyList </in>
+                  <out color="Orchid"> .MyList </out>
                 </T>
 
 // AExp
   rule <k> X:Id => I ...</k>
-       <env>... X |-> N:KItem ...</env>
-       <store>... N |-> I:KItem ...</store>  [lookup]
+       <env>... X |-> L:Int ...</env>
+       <store>... L |-> I:KItem ...</store>  [lookup]
   rule <k> ++X:Id => I +Int 1 ...</k>
-       <env>... X |-> N:KItem ...</env>
-       <store>... N |-> (I:KItem => I +Int 1) ...</store>  [increment]
-  //rule <k> read() => I ...</k>
-  //     <in> ListItem(I:Int) => . ...</in>  [read]
+       <env>... X |-> L:Int ...</env>
+       <store>... L |-> (I:Int => I +Int 1) ...</store>  [increment]
+  rule <k> read() => I ...</k>
+       <in> MyListItem(I:Int) => .MyList ...</in>  [read]
   rule I1:Int / I2:Int => I1 /Int I2  when I2 =/=Int 0
   rule I1:Int + I2:Int => I1 +Int I2
-  //rule Str1:String + Str2:String => Str1 +String Str2
+  rule Str1:String + Str2:String => Str1 +String Str2
 // BExp
   rule I1:Int <= I2:Int => I1 <=Int I2
   rule ! T:Bool => notBool T
-  rule true && B:KItem => B
-  rule false && _:KItem => false
+  rule true  && B:BExp => B
+  rule false && _:BExp => false
 // Block
-  rule <k> {Ss:KItem} => Ss ~> Rho ...</k>
-       <env> Rho:MyMap </env>  [structural]
-  rule <k> Rho:MyMap => . ...</k> <env> _:MyMap => Rho </env>  [structural]
+  rule <k> { Ss:Stmts } => Ss ~> Rho ...</k>
+       <env> Rho:MyMap </env>   [structural]
+  rule <k> Rho:MyMap => . ...</k> <env> _:MyMap => Rho </env>   [structural]
 // Stmt
   rule _:Int; => .
   rule <k> X:Id = I:Int => I ...</k>
-       <env>... X |-> N:KItem ...</env>
-       <store>... N |-> (_:KItem => I) ...</store>  [assignment]
-  rule if (true)  S:KItem else _:KItem => S
-  rule if (false) _:KItem else S:KItem => S
-  rule while (B:KItem) S:KItem => if (B) {S while (B) S} else {.Stmts}
+       <env>... X |-> L:Int ...</env>
+       <store>... L |-> (_:KItem => I) ...</store>  [assignment]
+  rule if (true)  S:Block else _:Block => S
+  rule if (false) _:Block else S:Block => S
+  rule while (B:BExp) S:Block => if (B) { S while(B) S } else { .Stmts }
     [structural]
 
-  rule <k> int (X:Id,Xs:Ids => Xs); ...</k>
-       <env> Rho:MyMap => Rho[X <- N] </env>
-       <store>... .MyMap => N |-> 0 ...</store>
-    when fresh(N:Int)
-    [structural]
-  rule int .Ids; => .  [structural]
+  rule <k> int (X:Id, Xs:Ids => Xs); ...</k>
+       <env> Rho:MyMap => Rho[X <- L] </env>
+       <store>... .MyMap => L |-> 0 ...</store>
+    when fresh(L:Int)   [structural]
+  rule int .Ids; => .   [structural]
 
-  //syntax AExp ::= Printable
-  //syntax Printable ::= Int | String
-  //rule <k> print(P:Printable,AEs => AEs); ...</k>
-  //     <out>... . => ListItem(P) </out>  [print]
-  //rule print(.AExps); => .  [structural]
+  syntax AExp ::= Printable
+  syntax Printable ::= Int | String
+  rule <k> print(P:Printable, AEs:AExps => AEs); ...</k>
+       <out>... .MyList => MyListItem(P) </out>   [print]
+  rule print(.AExps); => .  [structural]
   
   rule <k> halt; ~> _ => . </k>
 
-  rule <k> spawn S:KItem => T ...</k>
+  rule <k> spawn S:Block => T ...</k>
        <env> Rho:MyMap </env>
        (. => <thread>... <k> S </k> <env> Rho </env> <id> T </id> ...</thread>)
     when fresh(T:Int)
-  rule <k> join(T:KItem); => . ...</k>
+  rule <k> join(T:Int); => . ...</k>
        <thread>...
          <k> . </k>
          <id> T </id>
        ...</thread>
 
 // Stmts
-  rule .Stmts => .
-  rule S:Stmt Ss:Stmts => S ~> Ss  [structural]
+  rule .Stmts => .                  [structural]
+  rule S:Stmt Ss:Stmts => S ~> Ss   [structural]
 endmodule

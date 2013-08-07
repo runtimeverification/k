@@ -46,7 +46,7 @@ public class Definition extends JavaSymbolicObject {
 
     public void addFrozenKLabelCollection(Collection<KLabelConstant> frozenKLabels) {
         for (KLabelConstant frozenKLabel : frozenKLabels) {
-            frozenKLabels.add(frozenKLabel);
+            this.frozenKLabels.add(frozenKLabel);
         }
     }
 
@@ -56,7 +56,7 @@ public class Definition extends JavaSymbolicObject {
 
     public void addKLabelCollection(Collection<KLabelConstant> kLabels) {
         for (KLabelConstant kLabel : kLabels) {
-            kLabels.add(kLabel);
+            this.kLabels.add(kLabel);
         }
     }
 

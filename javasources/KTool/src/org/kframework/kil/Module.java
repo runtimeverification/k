@@ -1,6 +1,7 @@
 package org.kframework.kil;
 
 import org.kframework.kil.loader.Constants;
+import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
@@ -9,6 +10,7 @@ import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -147,8 +149,9 @@ public class Module extends DefinitionItem {
 		return new Module(this);
 	}
 
-	public void addSubsort(String sort, String subsort) {
+	public void addSubsort(String sort, String subsort, Context context) {
 		this.addProduction(sort, new Sort(subsort));
+        context.addSubsort(sort, subsort);
 	}
 
 	public void addConstant(String ctSort, String ctName) {
@@ -192,4 +195,25 @@ public class Module extends DefinitionItem {
 
         return list;
     }
+
+    /**
+     * Returns a {@code Collection} of {@link Production} instances associated with the given sort.
+     */
+    public Collection<Production> getProductionsOf(String sort) {
+        Collection<Production> productions = new ArrayList<Production>();
+        for (ModuleItem item : items) {
+            if (!(item instanceof Syntax)) {
+                continue;
+            }
+            Syntax syntax = (Syntax) item;
+            if (!syntax.getSort().getName().equals(sort)) {
+                continue;
+            }
+            for (PriorityBlock priorityBlock : syntax.getPriorityBlocks()) {
+                productions.addAll(priorityBlock.getProductions());
+            }
+        }
+        return productions;
+    }
+
 }

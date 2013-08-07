@@ -6,7 +6,6 @@ import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Utils;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.loader.Context;
 import org.kframework.krun.api.io.FileSystem;
 
 import java.util.ArrayList;
@@ -44,10 +43,29 @@ public class ConstrainedTerm extends Term {
         return constraint;
     }
     public boolean implies(ConstrainedTerm constrainedTerm,  Definition definition) {
-        return match(constrainedTerm, definition) != null;
+        return matchImplies(constrainedTerm, definition) != null;
     }
 
-    public SymbolicConstraint match(ConstrainedTerm constrainedTerm,  Definition definition) {
+    /*
+    public SymbolicConstraint match(ConstrainedTerm constrainedTerm, Definition definition) {
+        SymbolicConstraint unificationConstraint = new SymbolicConstraint(definition);
+        unificationConstraint.add(term, constrainedTerm.term);
+        unificationConstraint.simplify();
+        if (unificationConstraint.isFalse() || !unificationConstraint.isSubstitution()) {
+            return null;
+        }
+
+        unificationConstraint.addAll(constrainedTerm.lookups);
+        unificationConstraint.simplify();
+        if (unificationConstraint.isFalse() || !unificationConstraint.isSubstitution()) {
+            return null;
+        }
+
+
+    }
+    */
+
+    public SymbolicConstraint matchImplies(ConstrainedTerm constrainedTerm, Definition definition) {
         SymbolicConstraint unificationConstraint = new SymbolicConstraint(definition);
         unificationConstraint.add(term, constrainedTerm.term);
         unificationConstraint.simplify();
@@ -72,9 +90,9 @@ public class ConstrainedTerm extends Term {
         return unificationConstraint;
     }
 
-    /**
-     * Simplify map lookups.
-     */
+    ///**
+    // * Simplify map lookups.
+    // */
     //public ConstrainedTerm simplifyLookups() {
     //    for (SymbolicConstraint.Equality equality : constraint.equalities())
     //}
@@ -84,6 +102,10 @@ public class ConstrainedTerm extends Term {
     }
 
     public Collection<SymbolicConstraint> unify(ConstrainedTerm constrainedTerm,  Definition definition) {
+        if (!term.kind.equals(constrainedTerm.term.kind)) {
+            return Collections.emptyList();
+        }
+
         SymbolicConstraint unificationConstraint = new SymbolicConstraint(definition);
         unificationConstraint.add(term, constrainedTerm.term());
         unificationConstraint.simplify();

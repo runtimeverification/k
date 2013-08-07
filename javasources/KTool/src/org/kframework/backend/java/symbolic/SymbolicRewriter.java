@@ -16,11 +16,8 @@ import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.kil.Attributes;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -207,7 +204,8 @@ public class SymbolicRewriter {
                     rule.lookups(),
                     leftHandSideConstraint);
 
-            SymbolicConstraint constraint = constrainedTerm.match(leftHandSideTerm, definition);
+            SymbolicConstraint constraint = constrainedTerm.matchImplies(leftHandSideTerm,
+                    definition);
             if (constraint == null) {
                 continue;
             }

@@ -75,7 +75,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     public Definition transformDefinition(org.kframework.kil.Definition node) {
         try {
-            return (Definition) node.accept(this);
+            return new MacroExpander((Definition) node.accept(this)).processDefinition();
         } catch (TransformerException e) {
             e.printStackTrace();
             return null;
@@ -87,7 +87,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
         Rule rule = null;
         try {
-            rule = (Rule) node.accept(this);
+            rule = new MacroExpander(definition).processRule((Rule) node.accept(this));
         } catch (TransformerException e) {
             e.printStackTrace();
         } finally {
@@ -102,7 +102,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
         Term term = null;
         try {
-            term = (Term) node.accept(this);
+            term = new MacroExpander(definition).processTerm((Term) node.accept(this));
         } catch (TransformerException e) {
             e.printStackTrace();
         } finally {

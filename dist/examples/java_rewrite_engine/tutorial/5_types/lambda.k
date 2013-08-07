@@ -1,6 +1,3 @@
-// This currently does not work.  It would work if we had unification builtin
-// for symbolic variables.  That would be awesome!
-
 require "builtins/map.k"
 require "builtins/meta-k.k"
 
@@ -53,7 +50,8 @@ module LAMBDA
   rule int - int => int
   rule int <= int => bool
   rule if bool then T:Type else T => T
-  rule <k> lambda X:Id . E:Exp => T:Type -> E::K ~> TEnv ...</k>
+  //rule <k> lambda X:Id . E:Exp => T:Type -> E::K ~> TEnv ...</k>
+  rule <k> lambda X:Id . E:Exp => T:Type -> (E)::K ~> TEnv ...</k>
        <tenv> TEnv:MyMap => TEnv[X <- T] </tenv>
   rule <k> mu X:Id . E:Exp => (T:Type -> T) E ~> TEnv ...</k>
        <tenv> TEnv:MyMap => TEnv[X <- T] </tenv>

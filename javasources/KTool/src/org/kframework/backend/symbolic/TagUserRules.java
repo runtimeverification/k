@@ -12,6 +12,7 @@ import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -30,9 +31,7 @@ public class TagUserRules extends CopyOnWriteTransformer {
 	public static final Set<String> notSymbolicTags;
     static {
         if (GlobalSettings.matchingLogic) {
-            notSymbolicTags = ImmutableSet.of(
-                    Constants.MACRO,
-                    SymbolicBackend.NOTSYMBOLIC);
+            notSymbolicTags = Collections.emptySet();
         } else {
             notSymbolicTags = ImmutableSet.of(
                     Constants.MACRO,
