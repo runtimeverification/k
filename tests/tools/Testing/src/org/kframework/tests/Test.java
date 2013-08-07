@@ -63,13 +63,15 @@ public class Test implements Comparable<Test> {
 	private static final String ERR = ".err";
 	private static final String OUT = ".out";
 	private static final String VALUE = "value";
-	
+	private static final String UNIX_ONLY = "unixOnly";
+
 	
 	/* data read from config.xml */
 	private String language;
 	private String programsFolder;
 	private String resultsFolder;
 	private String tag = "";
+    private String unixOnlyScript;
 	private boolean recursive;
 	private List<String> extensions;
 	private List<String> excludePrograms;
@@ -276,6 +278,10 @@ public class Test implements Comparable<Test> {
 		if (reportDir.equals(""))
 			reportDir = null;
 
+        unixOnlyScript = test.getAttribute(UNIX_ONLY);
+        if (unixOnlyScript.equals(""))
+            unixOnlyScript = null;
+
 		// get Jenkins tag
 		tag = test.getAttribute(TITLE);
 
@@ -434,6 +440,19 @@ public class Test implements Comparable<Test> {
 
 		return testcaseE;
 	}
+
+    public Task getUnixOnlyScriptTask(File homeDir) {
+        if (unixOnlyScript == null)
+            return null;
+        return new Task(new String[] {unixOnlyScript}, null, homeDir);
+    }
+
+    public boolean runOnOS() {
+        if (unixOnlyScript != null && System.getProperty("os.name").toLowerCase().contains("win")) {
+            return false;
+        }
+        return true;
+    }
 
 	public Task getDefinitionTask(File homeDir) {
 		ArrayList<String> command = new ArrayList<String>();

@@ -82,6 +82,13 @@ public class Main {
 			Task def = test.getDefinitionTask(homeDir);
 			definitions.put(test, def);
 			Execution.execute(def);
+
+            if (test.runOnOS()) {
+                Task unixOnlyScript = test.getUnixOnlyScriptTask(homeDir);
+                if (unixOnlyScript != null) {
+                    Execution.execute(unixOnlyScript);
+                }
+            }
 			i++;
 		}
 		System.out.println("(" + i + ")");
@@ -145,7 +152,7 @@ public class Main {
 		// compiled)
 		for (Entry<Test, Task> dentry : definitions.entrySet()) {
 			Test test = dentry.getKey();
-			if (test.compiled(dentry.getValue())) {
+			if (test.compiled(dentry.getValue()) && test.runOnOS()) {
 
 				System.out.print("Running "
 						+ test.getLanguage()
