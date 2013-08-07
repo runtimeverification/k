@@ -59,27 +59,27 @@ public abstract class Term extends JavaSymbolicObject implements Unifiable, Tran
      * Returns a new {@code Term} instance obtained from this term by evaluating pending
      * function and predicate operations.
      */
-    public Term evaluate(Definition definition) {
-        return (Term) this.accept(new Evaluator(definition));
+    public Term evaluate(TermContext context) {
+        return (Term) this.accept(new Evaluator(context));
     }
 
     /**
      * Returns a new {@code Term} instance obtained from this term by applying substitution.
      */
-    public Term substitute(Map<Variable, ? extends Term> substitution, Definition definition) {
+    public Term substitute(Map<Variable, ? extends Term> substitution, TermContext context) {
         if (substitution.isEmpty() || isGround()) {
             return this;
         }
 
-        return (Term) accept(new SubstitutionTransformer(substitution, definition));
+        return (Term) accept(new SubstitutionTransformer(substitution, context));
     }
 
     /**
      * Returns a new {@code Term} instance obtained from this term by substituting variable with
      * term.
      */
-    public Term substitute(Variable variable, Term term, Definition definition) {
-        return substitute(Collections.singletonMap(variable, term), definition);
+    public Term substitute(Variable variable, Term term, TermContext context) {
+        return substitute(Collections.singletonMap(variable, term), context);
     }
 
 }

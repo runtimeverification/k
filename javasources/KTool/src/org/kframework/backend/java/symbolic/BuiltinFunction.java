@@ -5,6 +5,7 @@ import org.kframework.backend.java.builtins.SortMembership;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Production;
 import org.kframework.utils.file.KPaths;
@@ -28,6 +29,7 @@ public class BuiltinFunction {
      * {@link Method} representation of Java implementation of said operations.
      */
     private static final Map<KLabelConstant, Method> table = new HashMap<KLabelConstant, Method>();
+    private static TermContext context;
 
     public static void init(Definition definition) {
         /* initialize {@code table} */
@@ -67,14 +69,24 @@ public class BuiltinFunction {
         /* initialize sort information in {@code SortMembership} */
         SortMembership.init(definition.context());
 
-        /* initialize sort information in {@code MetaK} */
-        MetaK.init(definition);
     }
 
-    public static Term invoke(KLabelConstant label, Term ... arguments)
+    private static void initContext(TermContext context) {
+        assert BuiltinFunction.context == null;
+        BuiltinFunction.context = context;
+    }
+
+    public static TermContext context() {
+        assert context != null;
+        return context;
+    }
+
+    public static Term invoke(TermContext context, KLabelConstant label, Term ... arguments)
             throws IllegalAccessException, IllegalArgumentException {
+        initContext(context);
         try {
-            return (Term) table.get(label).invoke(null, (Object[]) arguments);
+            Term t = (Term) table.get(label).invoke(null, (Object[]) arguments);
+            return t;
         } catch (InvocationTargetException e) {
             Throwable t = e.getTargetException();
             if (t instanceof Error) {
@@ -85,6 +97,8 @@ public class BuiltinFunction {
             }
             assert false : "Builtin functions should not throw checked exceptions";
             return null; //unreachable
+        } finally {
+            BuiltinFunction.context = null;
         }
     }
 

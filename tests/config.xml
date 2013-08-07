@@ -736,9 +736,9 @@
       extensions="issue" />
 
   <test
-      language="tests/regression/strings/test.k"
-      folder="tests/regression/strings/programs"
-      results="tests/regression/strings/tests"
+      language="tests/regression/java-rewrite-engine/strings/test.k"
+      folder="tests/regression/java-rewrite-engine/strings/programs"
+      results="tests/regression/java-rewrite-engine/strings/tests"
       extensions="test">
     <kompile-option name="-ml" />
     <all-programs>

@@ -4,6 +4,7 @@ import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.MetaVariable;
 import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.loader.Context;
 
@@ -16,15 +17,7 @@ import java.util.Set;
  */
 public class MetaK {
 
-    private static Definition definition = null;
-
-    public static void init(Definition definition) {
-        assert MetaK.definition == null;
-
-        MetaK.definition = definition;
-    }
-
-    public static Term rename(Term term, BuiltinSet builtinSet) {
+    public static Term rename(Term term, BuiltinSet builtinSet, TermContext context) {
         if (builtinSet.hasFrame() /* || !builtinSet.operations().isEmpty() */) {
             return term;
         }
@@ -38,7 +31,7 @@ public class MetaK {
             variables.add(new Variable((MetaVariable) element));
         }
 
-        return term.substitute(Variable.getFreshSubstitution(variables), definition);
+        return term.substitute(Variable.getFreshSubstitution(variables), context);
     }
 
     public static BuiltinSet variables(Term term) {

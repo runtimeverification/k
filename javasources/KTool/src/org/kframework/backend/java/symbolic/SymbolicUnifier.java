@@ -20,6 +20,7 @@ import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.MetaVariable;
 import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.matchers.MatcherException;
@@ -46,10 +47,12 @@ public class SymbolicUnifier extends AbstractUnifier {
     private boolean isStarNested;
     public Collection<Collection<SymbolicConstraint>> multiConstraints;
     private final Definition definition;
+    private final TermContext context;
 
-    public SymbolicUnifier(SymbolicConstraint constraint, Definition definition) {
+    public SymbolicUnifier(SymbolicConstraint constraint, TermContext context) {
         this.constraint = constraint;
-        this.definition = definition;
+        this.context = context;
+        this.definition = context.definition();
         multiConstraints = new ArrayList<Collection<SymbolicConstraint>>();
     }
 
@@ -198,7 +201,7 @@ public class SymbolicUnifier extends AbstractUnifier {
             Collection<SymbolicConstraint> constraints = new ArrayList<SymbolicConstraint>();
             SelectionGenerator generator = new SelectionGenerator(otherCells.length, cells.length);
             do {
-                constraint = new SymbolicConstraint(definition);
+                constraint = new SymbolicConstraint(context);
 
                 try {
                     for (int i = 0; i < otherCells.length; ++i) {

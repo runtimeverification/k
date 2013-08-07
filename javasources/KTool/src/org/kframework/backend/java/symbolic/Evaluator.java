@@ -11,13 +11,13 @@ public class Evaluator extends CopyOnWriteTransformer {
 
     private class LocalEvaluator extends CopyOnWriteTransformer {
 
-        public LocalEvaluator(Definition definition) {
-            super(definition);
+        public LocalEvaluator(TermContext context) {
+            super(context);
         }
 
         @Override
         public ASTNode transform(KItem kItem) {
-            return kItem.evaluateFunction(definition);
+            return kItem.evaluateFunction(context);
         }
 
         @Override
@@ -54,9 +54,9 @@ public class Evaluator extends CopyOnWriteTransformer {
 
     private final Transformer localEvaluator;
 
-    public Evaluator(Definition definition) {
-        super(definition);
-        localEvaluator = new LocalEvaluator(definition);
+    public Evaluator(TermContext context) {
+        super(context);
+        localEvaluator = new LocalEvaluator(context);
     }
 
     @Override

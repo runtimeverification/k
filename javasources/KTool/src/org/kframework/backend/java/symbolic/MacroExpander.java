@@ -4,6 +4,7 @@ import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
 
 import java.util.ArrayList;
 import java.util.Collection;

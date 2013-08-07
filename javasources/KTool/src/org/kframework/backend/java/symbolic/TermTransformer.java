@@ -21,6 +21,7 @@ import org.kframework.backend.java.kil.MetaVariable;
 import org.kframework.backend.java.kil.SetLookup;
 import org.kframework.backend.java.kil.SetUpdate;
 import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.ASTNode;
 
@@ -31,6 +32,10 @@ import org.kframework.kil.ASTNode;
  * @author AndreiS
  */
 public class TermTransformer extends CopyOnWriteTransformer {
+
+    public TermTransformer(TermContext context) {
+        super(context);
+    }
 
     public TermTransformer(Definition definition) {
         super(definition);

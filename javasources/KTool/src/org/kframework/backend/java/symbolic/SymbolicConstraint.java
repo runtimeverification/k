@@ -12,6 +12,7 @@ import org.kframework.backend.java.kil.JavaSymbolicObject;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.Sorted;
 import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.kil.Z3Term;
 import org.kframework.kil.ASTNode;
@@ -69,8 +70,8 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
         }
 
         public Equality evaluate() {
-            leftHandSide = leftHandSide.evaluate(definition);
-            rightHandSide = rightHandSide.evaluate(definition);
+            leftHandSide = leftHandSide.evaluate(context);
+            rightHandSide = rightHandSide.evaluate(context);
             return this;
         }
 
@@ -117,8 +118,8 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
         }
 
         private Equality substitute(Map<Variable, ? extends Term> substitution) {
-            leftHandSide = leftHandSide.substitute(substitution, definition);
-            rightHandSide = rightHandSide.substitute(substitution, definition);
+            leftHandSide = leftHandSide.substitute(substitution, context);
+            rightHandSide = rightHandSide.substitute(substitution, context);
             return this;
         }
 
@@ -158,12 +159,14 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
     private boolean isNormal;
     private final Map<Variable, Term> substitution = new HashMap<Variable, Term>();
     private TruthValue truthValue;
+    private final TermContext context;
     private final Definition definition;
     private final SymbolicUnifier unifier;
 
-    public SymbolicConstraint(Definition definition) {
-        this.definition = definition;
-        unifier = new SymbolicUnifier(this, definition);
+    public SymbolicConstraint(TermContext context) {
+        this.context = context;
+        this.definition = context.definition();
+        unifier = new SymbolicUnifier(this, context);
         truthValue = TruthValue.TRUE;
         isNormal = true;
     }
@@ -173,13 +176,13 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
                 "kind mismatch between "
                         + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
                         + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
-        Term normalizedLeftHandSide = leftHandSide.substitute(substitution, definition);
+        Term normalizedLeftHandSide = leftHandSide.substitute(substitution, context);
         if (normalizedLeftHandSide != leftHandSide) {
-            normalizedLeftHandSide = normalizedLeftHandSide.evaluate(definition);
+            normalizedLeftHandSide = normalizedLeftHandSide.evaluate(context);
         }
-        Term normalizedRightHandSide = rightHandSide.substitute(substitution, definition);
+        Term normalizedRightHandSide = rightHandSide.substitute(substitution, context);
         if (normalizedRightHandSide != rightHandSide) {
-            normalizedRightHandSide = normalizedRightHandSide.evaluate(definition);
+            normalizedRightHandSide = normalizedRightHandSide.evaluate(context);
         }
         Equality equality = this.new Equality(normalizedLeftHandSide, normalizedRightHandSide);
 
@@ -442,7 +445,7 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
             Map<Variable, Term> tempSubstitution = new HashMap<Variable, Term>();
             tempSubstitution.put(variable, term);
 
-            SymbolicConstraint.compose(substitution, tempSubstitution, definition);
+            SymbolicConstraint.compose(substitution, tempSubstitution, context);
             substitution.put(variable, term);
 
             for (Iterator<Equality> previousIterator = equalities.iterator(); previousIterator.hasNext();) {
@@ -467,10 +470,10 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
     public static void compose(
             Map<Variable, Term> map,
             Map<Variable, Term> substitution,
-            Definition definition) {
+            TermContext context) {
         Map.Entry<Variable, Term>[] entries = map.entrySet().toArray(new Map.Entry[map.size()]);
         for (int index = 0; index < entries.length; ++index) {
-            Term term = entries[index].getValue().substitute(substitution, definition);
+            Term term = entries[index].getValue().substitute(substitution, context);
             if (term != entries[index].getValue()) {
                 map.put(entries[index].getKey(), term);
             }
@@ -489,7 +492,7 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
 
         /* rename in substitution values */
         for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
-            entry.setValue(entry.getValue().substitute(freshSubstitution, definition));
+            entry.setValue(entry.getValue().substitute(freshSubstitution, context));
         }
 
         for (Equality equality : equalities) {
@@ -503,20 +506,20 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
      * Returns a new {@code SymbolicConstraint} instance obtained from this symbolic constraint
      * by applying substitution.
      */
-    public SymbolicConstraint substitute(Map<Variable, ? extends Term> substitution, Definition definition) {
+    public SymbolicConstraint substitute(Map<Variable, ? extends Term> substitution, TermContext context) {
         if (substitution.isEmpty()) {
             return this;
         }
 
-        return (SymbolicConstraint) accept(new SubstitutionTransformer(substitution, definition));
+        return (SymbolicConstraint) accept(new SubstitutionTransformer(substitution, context));
     }
 
     /**
      * Returns a new {@code SymbolicConstraint} instance obtained from this symbolic constraint by
      * substituting variable with term.
      */
-    public SymbolicConstraint substitute(Variable variable, Term term, Definition definition) {
-        return substitute(Collections.singletonMap(variable, term), definition);
+    public SymbolicConstraint substitute(Variable variable, Term term, TermContext context) {
+        return substitute(Collections.singletonMap(variable, term), context);
     }
 
     @Override

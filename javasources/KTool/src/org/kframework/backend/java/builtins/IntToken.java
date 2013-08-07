@@ -82,6 +82,23 @@ public class IntToken extends Token {
     }
 
     /**
+     * Returns a {@code long} representation of the (interpreted) value of this
+     * IntToken.
+     * @throws ArithmeticException Integer does not fit in a long.
+     */
+    public long longValue() {
+        if (value.compareTo(BigInteger.valueOf(Long.MAX_VALUE)) > 0) {
+            throw new ArithmeticException();
+        }
+        if (value.compareTo(BigInteger.valueOf(Long.MIN_VALUE)) < 0) {
+            throw new ArithmeticException();
+        }
+        return value.longValue();
+    }
+
+
+
+    /**
      * Returns a {@code String} representation of the sort of this IntToken.
      */
     @Override

@@ -19,13 +19,20 @@ import com.google.common.collect.Multimap;
  */
 public class CopyOnWriteTransformer implements Transformer {
 
+    protected final TermContext context;
     protected final Definition definition;
 	
-	public CopyOnWriteTransformer( Definition definition) {
-		this.definition = definition;
+	public CopyOnWriteTransformer(TermContext context) {
+		this.context = context;
+        this.definition = context.definition();
 	}
 
+    public CopyOnWriteTransformer(Definition definition) {
+        this(new TermContext(definition));
+    }
+
     public CopyOnWriteTransformer() {
+        this.context = null;
         this.definition = null;
     }
 	
@@ -122,7 +129,7 @@ public class CopyOnWriteTransformer implements Transformer {
         KLabel kLabel = (KLabel) kItem.kLabel().accept(this);
         KList kList = (KList) kItem.kList().accept(this);
         if (kLabel != kItem.kLabel() || kList != kItem.kList()) {
-            kItem = new KItem(kLabel, kList, definition.context());
+            kItem = new KItem(kLabel, kList, context.definition().context());
         }
         return kItem;
     }
@@ -445,7 +452,7 @@ public class CopyOnWriteTransformer implements Transformer {
 
     @Override
     public ASTNode transform(SymbolicConstraint symbolicConstraint) {
-        SymbolicConstraint transformedSymbolicConstraint = new SymbolicConstraint(definition);
+        SymbolicConstraint transformedSymbolicConstraint = new SymbolicConstraint(context);
 
         for (Map.Entry<Variable, Term> entry : symbolicConstraint.substitution().entrySet()) {
             transformedSymbolicConstraint.add(

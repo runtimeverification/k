@@ -5,6 +5,7 @@ import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 
 import java.util.ArrayList;
@@ -71,7 +72,8 @@ public class StepRewriter {
 
         constrainedTermResults = new ArrayList<ConstrainedTerm>();
 
-        SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(definition);
+        SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(
+            constrainedTerm.termContext());
         leftHandSideConstraint.addAll(rule.condition());
         for (Variable variable : rule.freshVariables()) {
             leftHandSideConstraint.add(variable, IntToken.fresh());
@@ -80,24 +82,26 @@ public class StepRewriter {
         ConstrainedTerm leftHandSide = new ConstrainedTerm(
                 rule.leftHandSide(),
                 rule.lookups(),
-                leftHandSideConstraint);
+                leftHandSideConstraint,
+                constrainedTerm.termContext());
 
-        for (SymbolicConstraint constraint : constrainedTerm.unify(leftHandSide, definition)) {
+        for (SymbolicConstraint constraint : constrainedTerm.unify(leftHandSide)) {
             /* rename rule variables in the constraints */
             Map<Variable, Variable> freshSubstitution = constraint.rename(rule.variableSet());
 
             Term result = rule.rightHandSide();
             /* rename rule variables in the rule RHS */
-            result = result.substitute(freshSubstitution, definition);
+            result = result.substitute(freshSubstitution, constrainedTerm.termContext());
             /* apply the constraints substitution on the rule RHS */
-            result = result.substitute(constraint.substitution(), definition);
+            result = result.substitute(constraint.substitution(), constrainedTerm.termContext());
             /* evaluate pending functions in the rule RHS */
-            result = result.evaluate(definition);
+            result = result.evaluate(constrainedTerm.termContext());
             /* eliminate anonymous variables */
             constraint.eliminateAnonymousVariables();
 
             /* compute all results */
-            constrainedTermResults.add(new ConstrainedTerm(result, constraint, definition));
+            constrainedTermResults.add(new ConstrainedTerm(result, constraint,
+                constrainedTerm.termContext()));
         }
 
         stopwatch.stop();
@@ -110,9 +114,10 @@ public class StepRewriter {
 
         constrainedTermResults = new ArrayList<ConstrainedTerm>();
 
-        ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, definition);
+        TermContext context = new TermContext(definition);
+        ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, context);
 
-        SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(definition);
+        SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(context);
         leftHandSideConstraint.addAll(rule.condition());
         for (Variable variable : rule.freshVariables()) {
             leftHandSideConstraint.add(variable, IntToken.fresh());
@@ -121,9 +126,10 @@ public class StepRewriter {
         ConstrainedTerm leftHandSide = new ConstrainedTerm(
                 rule.leftHandSide(),
                 rule.lookups(),
-                leftHandSideConstraint);
+                leftHandSideConstraint,
+                context);
 
-        for (SymbolicConstraint constraint : constrainedTerm.unify(leftHandSide, definition)) {
+        for (SymbolicConstraint constraint : constrainedTerm.unify(leftHandSide)) {
             /* check the constraint represents a match */
             if (!constraint.isSubstitution()
                     || !constraint.substitution().keySet().equals(rule.variableSet())) {
@@ -132,9 +138,9 @@ public class StepRewriter {
 
             Term result = rule.rightHandSide();
             /* apply the constraints substitution on the rule RHS */
-            result = result.substitute(constraint.substitution(), definition);
+            result = result.substitute(constraint.substitution(), context);
             /* evaluate pending functions in the rule RHS */
-            result = result.evaluate(definition);
+            result = result.evaluate(context);
 
             /* compute all results */
             termResults.add(term);

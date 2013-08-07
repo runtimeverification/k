@@ -1,0 +1,1 @@
+assertEqual(read(3, 0), #EBADF) ~> assertEqual(open("files/file", "r"), 3) ~> assertEqual(read(3, 0), "") ~> assertEqual(read(3, 2), "12") ~> assertEqual(read(3, 4), "3456") ~> #read(1, 0)

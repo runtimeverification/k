@@ -21,29 +21,34 @@ public class ConstrainedTerm extends Term {
     private final Term term;
     private final SymbolicConstraint lookups;
     private final SymbolicConstraint constraint;
-    private final FileSystem fileSystem;
+    private final TermContext context;
 
-    public ConstrainedTerm(Term term, SymbolicConstraint lookups, SymbolicConstraint constraint) {
+    public ConstrainedTerm(Term term, SymbolicConstraint lookups, SymbolicConstraint constraint, 
+            TermContext context) {
         super(term.kind);
         this.term = term;
         this.lookups = lookups;
         this.constraint = constraint;
-        fileSystem = null; //TODO(AndreiS): copy from one ConstrainedTerm to the next
+        this.context = context;
     }
 
-    public ConstrainedTerm(Term term, SymbolicConstraint constraint, Definition definition) {
-        this(term, new SymbolicConstraint(definition), constraint);
+    public ConstrainedTerm(Term term, SymbolicConstraint constraint, TermContext context) {
+        this(term, new SymbolicConstraint(context), constraint, context);
     }
 
-    public ConstrainedTerm(Term term,  Definition definition) {
-        this(term, new SymbolicConstraint(definition), new SymbolicConstraint(definition));
+    public ConstrainedTerm(Term term, TermContext context) {
+        this(term, new SymbolicConstraint(context), new SymbolicConstraint(context), context);
+    }
+
+    public TermContext termContext() {
+        return context;
     }
 
     public SymbolicConstraint constraint() {
         return constraint;
     }
-    public boolean implies(ConstrainedTerm constrainedTerm,  Definition definition) {
-        return matchImplies(constrainedTerm, definition) != null;
+    public boolean implies(ConstrainedTerm constrainedTerm) {
+        return matchImplies(constrainedTerm) != null;
     }
 
     /*
@@ -65,15 +70,15 @@ public class ConstrainedTerm extends Term {
     }
     */
 
-    public SymbolicConstraint matchImplies(ConstrainedTerm constrainedTerm, Definition definition) {
-        SymbolicConstraint unificationConstraint = new SymbolicConstraint(definition);
+    public SymbolicConstraint matchImplies(ConstrainedTerm constrainedTerm) {
+        SymbolicConstraint unificationConstraint = new SymbolicConstraint(constrainedTerm.termContext());
         unificationConstraint.add(term, constrainedTerm.term);
         unificationConstraint.simplify();
         if (unificationConstraint.isFalse() || !unificationConstraint.isSubstitution()) {
             return null;
         }
 
-        SymbolicConstraint implicationConstraint = new SymbolicConstraint(definition);
+        SymbolicConstraint implicationConstraint = new SymbolicConstraint(constrainedTerm.termContext());
         implicationConstraint.addAll(unificationConstraint);
         implicationConstraint.addAll(constrainedTerm.lookups);
         implicationConstraint.addAll(constrainedTerm.constraint);
@@ -101,12 +106,12 @@ public class ConstrainedTerm extends Term {
         return term;
     }
 
-    public Collection<SymbolicConstraint> unify(ConstrainedTerm constrainedTerm,  Definition definition) {
+    public Collection<SymbolicConstraint> unify(ConstrainedTerm constrainedTerm) {
         if (!term.kind.equals(constrainedTerm.term.kind)) {
             return Collections.emptyList();
         }
 
-        SymbolicConstraint unificationConstraint = new SymbolicConstraint(definition);
+        SymbolicConstraint unificationConstraint = new SymbolicConstraint(constrainedTerm.termContext());
         unificationConstraint.add(term, constrainedTerm.term());
         unificationConstraint.simplify();
         if (unificationConstraint.isFalse()) {

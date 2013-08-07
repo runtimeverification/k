@@ -27,6 +27,7 @@ import org.kframework.backend.java.kil.MapUpdate;
 import org.kframework.backend.java.kil.SetUpdate;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
@@ -441,7 +442,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             }
         }
 
-        SymbolicConstraint lookups = new SymbolicConstraint(definition);
+        SymbolicConstraint lookups = new SymbolicConstraint(new TermContext(definition));
         for (org.kframework.kil.BuiltinLookup lookup : node.getLookups()) {
             Variable base = (Variable) lookup.base().accept(this);
             Term key = (Term) lookup.key().accept(this);

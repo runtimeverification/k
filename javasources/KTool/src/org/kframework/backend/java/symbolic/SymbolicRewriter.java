@@ -15,7 +15,9 @@ import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.krun.api.io.FileSystem;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -146,7 +148,8 @@ public class SymbolicRewriter {
             ruleStopwatch.reset();
             ruleStopwatch.start();
 
-            SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(definition);
+            SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(
+                constrainedTerm.termContext());
             leftHandSideConstraint.addAll(rule.condition());
             for (Variable variable : rule.freshVariables()) {
                 leftHandSideConstraint.add(variable, IntToken.fresh());
@@ -155,19 +158,21 @@ public class SymbolicRewriter {
             ConstrainedTerm leftHandSide = new ConstrainedTerm(
                     rule.leftHandSide(),
                     rule.lookups(),
-                    leftHandSideConstraint);
+                    leftHandSideConstraint,
+                    constrainedTerm.termContext());
 
-            for (SymbolicConstraint constraint1 : constrainedTerm.unify(leftHandSide, definition)) {
+            for (SymbolicConstraint constraint1 : constrainedTerm.unify(leftHandSide)) {
                 /* rename rule variables in the constraints */
                 Map<Variable, Variable> freshSubstitution = constraint1.rename(rule.variableSet());
 
                 Term result = rule.rightHandSide();
                 /* rename rule variables in the rule RHS */
-                result = result.substitute(freshSubstitution, definition);
+                result = result.substitute(freshSubstitution, constrainedTerm.termContext());
                 /* apply the constraints substitution on the rule RHS */
-                result = result.substitute(constraint1.substitution(), definition);
+                result = result.substitute(constraint1.substitution(),
+                    constrainedTerm.termContext());
                 /* evaluate pending functions in the rule RHS */
-                result = result.evaluate(definition);
+                result = result.evaluate(constrainedTerm.termContext());
                 /* eliminate anonymous variables */
                 constraint1.eliminateAnonymousVariables();
 
@@ -182,7 +187,8 @@ public class SymbolicRewriter {
 
 
                 /* compute all results */
-                results.add(new ConstrainedTerm(result, constraint1, definition));
+                results.add(new ConstrainedTerm(result, constraint1,
+                    constrainedTerm.termContext()));
             }
         }
         //System.out.println("Result: " + results.toString());
@@ -196,16 +202,17 @@ public class SymbolicRewriter {
             ruleStopwatch.reset();
             ruleStopwatch.start();
 
-            SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(definition);
+            SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(
+                constrainedTerm.termContext());
             leftHandSideConstraint.addAll(rule.condition());
 
             ConstrainedTerm leftHandSideTerm = new ConstrainedTerm(
                     rule.leftHandSide(),
                     rule.lookups(),
-                    leftHandSideConstraint);
+                    leftHandSideConstraint,
+                    constrainedTerm.termContext());
 
-            SymbolicConstraint constraint = constrainedTerm.matchImplies(leftHandSideTerm,
-                    definition);
+            SymbolicConstraint constraint = constrainedTerm.matchImplies(leftHandSideTerm);
             if (constraint == null) {
                 continue;
             }
@@ -215,16 +222,16 @@ public class SymbolicRewriter {
 
             Term result = rule.rightHandSide();
             /* rename rule variables in the rule RHS */
-            result = result.substitute(freshSubstitution, definition);
+            result = result.substitute(freshSubstitution, constrainedTerm.termContext());
             /* apply the constraints substitution on the rule RHS */
-            result = result.substitute(constraint.substitution(), definition);
+            result = result.substitute(constraint.substitution(), constrainedTerm.termContext());
             /* evaluate pending functions in the rule RHS */
-            result = result.evaluate(definition);
+            result = result.evaluate(constrainedTerm.termContext());
             /* eliminate anonymous variables */
             constraint.eliminateAnonymousVariables();
 
             /* return first solution */
-            return new ConstrainedTerm(result, constraint, definition);
+            return new ConstrainedTerm(result, constraint, constrainedTerm.termContext());
         }
 
         return null;
@@ -536,7 +543,7 @@ public class SymbolicRewriter {
         }
     }
 
-    public List<ConstrainedTerm> prove(List<Rule> rules) {
+    public List<ConstrainedTerm> prove(List<Rule> rules, FileSystem fs) {
         stopwatch.start();
 
         List<ConstrainedTerm> proofResults = new ArrayList<ConstrainedTerm>();
@@ -544,16 +551,18 @@ public class SymbolicRewriter {
             /* rename rule variables */
             Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.variableSet());
 
-            SymbolicConstraint sideConstraint = new SymbolicConstraint(definition);
+            TermContext context = new TermContext(definition, fs);
+            SymbolicConstraint sideConstraint = new SymbolicConstraint(context);
             sideConstraint.addAll(rule.condition());
             ConstrainedTerm initialTerm = new ConstrainedTerm(
-                    rule.leftHandSide().substitute(freshSubstitution, definition),
-                    rule.lookups().substitute(freshSubstitution, definition),
-                    sideConstraint.substitute(freshSubstitution, definition));
+                    rule.leftHandSide().substitute(freshSubstitution, context),
+                    rule.lookups().substitute(freshSubstitution, context),
+                    sideConstraint.substitute(freshSubstitution, context),
+                    context);
 
             ConstrainedTerm targetTerm = new ConstrainedTerm(
-                    rule.rightHandSide().substitute(freshSubstitution, definition),
-                    definition);
+                    rule.rightHandSide().substitute(freshSubstitution, context),
+                    context);
 
             proofResults.addAll(proveRule(initialTerm, targetTerm, rules));
         }
@@ -578,7 +587,7 @@ public class SymbolicRewriter {
         boolean guarded = false;
         while (!queue.isEmpty()) {
             for (ConstrainedTerm term : queue) {
-                if (term.implies(targetTerm, definition)) {
+                if (term.implies(targetTerm)) {
                     continue;
                 }
 

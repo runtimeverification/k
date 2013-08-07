@@ -89,7 +89,8 @@ public class KItem extends Term implements Sorted {
         }
     }
 
-    public Term evaluateFunction(Definition definition) {
+    public Term evaluateFunction(TermContext context) {
+        Definition definition = context.definition();
         if (!(kLabel instanceof KLabelConstant)) {
             return this;
         }
@@ -103,10 +104,10 @@ public class KItem extends Term implements Sorted {
 
         /* apply rules for user defined functions */
         if (!definition.functionRules().get((KLabelConstant) kLabel).isEmpty()) {
-            ConstrainedTerm constrainedTerm = new ConstrainedTerm(kList, definition);
+            ConstrainedTerm constrainedTerm = new ConstrainedTerm(kList, context);
 
             for (Rule rule : definition.functionRules().get((KLabelConstant) kLabel)) {
-                SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(definition);
+                SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(context);
                 leftHandSideConstraint.addAll(rule.condition());
                 for (Variable variable : rule.freshVariables()) {
                     leftHandSideConstraint.add(variable, IntToken.fresh());
@@ -115,11 +116,10 @@ public class KItem extends Term implements Sorted {
                 ConstrainedTerm leftHandSide = new ConstrainedTerm(
                         ((KItem) rule.leftHandSide()).kList,
                         rule.lookups(),
-                        leftHandSideConstraint);
+                        leftHandSideConstraint,
+                        context);
 
-                Collection<SymbolicConstraint> solutions = constrainedTerm.unify(
-                        leftHandSide,
-                        definition);
+                Collection<SymbolicConstraint> solutions = constrainedTerm.unify(leftHandSide);
 
                 assert solutions.size() <= 1 : "function definition is not deterministic";
 
@@ -138,11 +138,11 @@ public class KItem extends Term implements Sorted {
 
                 Term result = rule.rightHandSide();
                 /* rename rule variables in the rule RHS */
-                result = result.substitute(freshSubstitution, definition);
+                result = result.substitute(freshSubstitution, context);
                 /* apply the constraints substitution on the rule RHS */
-                result = result.substitute(constraint.substitution(), definition);
+                result = result.substitute(constraint.substitution(), context);
                 /* evaluate pending functions in the rule RHS */
-                result = result.evaluate(definition);
+                result = result.evaluate(context);
                 /* eliminate anonymous variables */
                 constraint.eliminateAnonymousVariables();
 
@@ -163,7 +163,7 @@ public class KItem extends Term implements Sorted {
 
         try {
             Term[] arguments = kList.getItems().toArray(new Term[kList.getItems().size()]);
-            return BuiltinFunction.invoke(kLabelConstant, arguments);
+            return BuiltinFunction.invoke(context, kLabelConstant, arguments);
         } catch (IllegalAccessException e) {
             //e.printStackTrace();
         } catch (IllegalArgumentException e) {

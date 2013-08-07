@@ -1,0 +1,3 @@
+<k>
+    #open ( "files/dir2" , "r" )
+</k>

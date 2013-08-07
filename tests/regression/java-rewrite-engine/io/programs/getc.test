@@ -1,0 +1,1 @@
+assertEqual(getc(3), #EBADF) ~> assertEqual(open("files/file", "r"), 3) ~> assertEqual(getc(3), 49) ~> assertEqual(getc(3), 50) ~> #getc(1)

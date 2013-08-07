@@ -13,6 +13,7 @@ import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.transformers.MapToLookupUpdate;
@@ -25,6 +26,8 @@ import org.kframework.kil.matchers.MatcherException;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.api.*;
+import org.kframework.krun.api.io.FileSystem;
+import org.kframework.krun.ioserver.filesystem.portable.PortableFileSystem;
 import org.kframework.utils.BinaryLoader;
 
 import java.io.BufferedInputStream;
@@ -91,7 +94,7 @@ public class JavaSymbolicKRun implements KRun {
     public KRunResult<KRunState> run(org.kframework.kil.Term cfg) throws KRunExecutionException {
 
         SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
-        ConstrainedTerm constrainedTerm = new ConstrainedTerm(Term.of(cfg, definition), definition);
+        ConstrainedTerm constrainedTerm = new ConstrainedTerm(Term.of(cfg, definition), new TermContext(definition, new PortableFileSystem()));
 //        try {
 //            generate(definition, symbolicRewriter);
 //        } catch (TransformerException e) {
@@ -326,7 +329,8 @@ public class JavaSymbolicKRun implements KRun {
                                 (org.kframework.kil.Rule) moduleItem.accept(mapTransformer),
                                 definition).variableSet());
 
-                SymbolicConstraint initialConstraint = new SymbolicConstraint(definition);
+                TermContext termContext = new TermContext(definition, new PortableFileSystem());
+                SymbolicConstraint initialConstraint = new SymbolicConstraint(termContext);
                 //initialConstraint.addAll(rule.condition());
                 initialConstraint.add(
                         transformer.transformTerm(kilRequires, definition),
@@ -334,9 +338,9 @@ public class JavaSymbolicKRun implements KRun {
                 ConstrainedTerm initialTerm = new ConstrainedTerm(
                         transformer.transformTerm(kilLeftHandSide, definition).substitute(
                                 freshSubstitution,
-                                definition),
-                        initialConstraint.substitute(freshSubstitution, definition),
-                        definition);
+                                termContext),
+                        initialConstraint.substitute(freshSubstitution, termContext),
+                        termContext);
 
                 org.kframework.kil.Rule kilDummyRule = new org.kframework.kil.Rule(
                         kilRightHandSide,
@@ -346,9 +350,10 @@ public class JavaSymbolicKRun implements KRun {
                         (org.kframework.kil.Rule) kilDummyRule.accept(mapTransformer),
                         definition);
                 ConstrainedTerm targetTerm = new ConstrainedTerm(
-                        dummyRule.leftHandSide().substitute(freshSubstitution, definition),
-                        dummyRule.lookups().substitute(freshSubstitution, definition),
-                        new SymbolicConstraint(definition));
+                        dummyRule.leftHandSide().substitute(freshSubstitution, termContext),
+                        dummyRule.lookups().substitute(freshSubstitution, termContext),
+                        new SymbolicConstraint(termContext),
+                        termContext);
 
                 proofResults.addAll(symbolicRewriter.proveRule(initialTerm, targetTerm, rules));
             }
@@ -370,8 +375,10 @@ public class JavaSymbolicKRun implements KRun {
             RuleCompilerSteps compilationInfo) throws KRunExecutionException {
 
         SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
-        ConstrainedTerm initialTerm = new ConstrainedTerm(Term.of(cfg, definition), definition);
-        ConstrainedTerm targetTerm = new ConstrainedTerm(Term.of(cfg, definition), definition);
+        FileSystem fs = new PortableFileSystem();
+        TermContext termContext = new TermContext(definition, fs);
+        ConstrainedTerm initialTerm = new ConstrainedTerm(Term.of(cfg, definition), termContext);
+        ConstrainedTerm targetTerm = new ConstrainedTerm(Term.of(cfg, definition), termContext);
 
 
         List<Rule> claims = Collections.emptyList();
@@ -408,8 +415,9 @@ public class JavaSymbolicKRun implements KRun {
             RuleCompilerSteps compilationInfo) throws KRunExecutionException {
 
         SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
-        ConstrainedTerm initialTerm = new ConstrainedTerm(Term.of(cfg, definition), definition);
-        ConstrainedTerm targetTerm = new ConstrainedTerm(Term.of(cfg, definition), definition);
+        TermContext termContext = new TermContext(definition, new PortableFileSystem());
+        ConstrainedTerm initialTerm = new ConstrainedTerm(Term.of(cfg, definition), termContext);
+        ConstrainedTerm targetTerm = new ConstrainedTerm(Term.of(cfg, definition), termContext);
 
 
         List<Rule> claims = Collections.emptyList();
@@ -446,7 +454,7 @@ public class JavaSymbolicKRun implements KRun {
     private Term constructProgram(ConstrainedTerm term, Term config){
 //        Term pgm = new ConstrainedTerm(term,definition);
         SymbolicConstraint constraint = term.constraint();
-        Term pgm = config.substitute(constraint.substitution(),definition);
+        Term pgm = config.substitute(constraint.substitution(),term.termContext());
         return pgm;
     }
 

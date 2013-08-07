@@ -6,25 +6,26 @@ module URIS
   imports #K-PRINTER-INTERFACE
  
 // B, N, and P are really supposed to be Nat
-  syntax K ::= "#open" "(" String ")" [function]
-             | "#open" "(" String "," String ")" [function, hook(#IO:#open)]
-             | "#close" "(" Int ")" [function, hook(#IO:#close)]
-             | "#tell" "(" Int ")" [function, hook(#IO:#tell)] 
+  syntax KItem ::= "#open" "(" String ")" [function]
+                 | "#open" "(" String "," String ")" [function, hook(#IO:#open)]
+                 | "#tell" "(" Int ")" [function, hook(#IO:#tell)] 
+                 | "#getc" "(" Int ")"             [function, hook(#IO:getc)]
+                 | "#read" "(" Int "," Int ")"    [function, hook(#IO:#read)]
+ 
+  syntax K ::= "#close" "(" Int ")" [function, hook(#IO:#close)]
              | "#seek" "(" Int "," Int ")" [function, hook(#IO:#seek)]
              | "#putc" "(" Int "," Int ")"      [function, hook(#IO:#putc)]
-             | "#getc" "(" Int ")"             [function, hook(#IO:getc)]
-             | "#read" "(" Int "," Int ")"    [function, hook(#IO:#read)]
              | "#write" "(" Int "," String ")" [function, hook(#IO:#write)]
-             
+
   syntax K ::= "#ioError" "(" String ")"
  
   syntax KList ::= "#stat" "(" String ")" [function, hook(#IO:#stat)]
                  | "#lstat" "(" String ")" [function, hook(#IO:#lstat)]
                  | "#opendir" "(" String ")" [function, hook(#IO:#opendir)]
 
-  syntax K ::= "#parse" "(" String "," String ")" [function, klabel(#parse), hook(#K-PARSER:#parse)]
+  syntax KItem ::= "#parse" "(" String "," String ")" [function, klabel(#parse), hook(#K-PARSER:#parse)]
   rule #open(S:String) => #open(S:String, "rw")
-  rule #open(S:String, Mode:String) => String2Int((#tcpRequest("open\x01" +String S +String "\x01" +String Mode +String "\x01"))::K) when Mode ==String "r" orBool Mode ==String "w" orBool Mode ==String "rw"
+  rule #open(S:String, Mode:String) => #string2Int((#tcpRequest("open\x01" +String S +String "\x01" +String Mode +String "\x01"))::K) when Mode ==String "r" orBool Mode ==String "w" orBool Mode ==String "rw"
 
   rule #close(N:Int) 
       => String2DotK((#tcpRequest("close\x01" +String Int2String(N) +String "\x01"))::K)

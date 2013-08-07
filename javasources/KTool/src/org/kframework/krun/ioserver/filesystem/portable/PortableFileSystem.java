@@ -56,7 +56,17 @@ public class PortableFileSystem implements FileSystem {
                 files.put(f.getFD(), new RandomAccessFileFile(f));
                 return fd;
             } catch (FileNotFoundException e) {
-                processFileNotFoundException(e);
+                try {
+                    processFileNotFoundException(e);
+                } catch (IOException ioe) {
+                    if (ioe.getMessage().equals("EISDIR") && mode.equals("r")) {
+                        //man 2 open says you can open a directory in readonly mode with open, but
+                        //java has no support for it. So we throw an UnsupportedOperationException
+                        //instead of failing with EISDIR
+                        throw new UnsupportedOperationException();
+                    }
+                    throw ioe;
+                }
                 throw e; //unreachable
             }
         }

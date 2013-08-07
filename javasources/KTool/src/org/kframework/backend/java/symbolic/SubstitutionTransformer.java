@@ -19,8 +19,8 @@ public class SubstitutionTransformer extends CopyOnWriteTransformer {
     private final Set<Variable> boundVariables;
     private final Map<Variable, ? extends Term> substitution;
 
-    public SubstitutionTransformer(Map<Variable, ? extends Term> substitution, Definition definition) {
-    	super(definition);
+    public SubstitutionTransformer(Map<Variable, ? extends Term> substitution, TermContext context) {
+    	super(context);
         this.substitution = substitution;
         boundVariables = new HashSet<Variable>();
     }
