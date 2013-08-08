@@ -120,17 +120,32 @@ public abstract class DataStructureBuiltin extends Term {
 
             return new SetBuiltin(sort, elements, terms);
         } else if (sort.type().equals(KSorts.LIST)) {
+            boolean left = true;
             ArrayList<Term> elementsLeft = new ArrayList<Term>();
             ArrayList<Term> elementsRight = new ArrayList<Term>();
             ArrayList<Term> terms = new ArrayList<Term>();
             for (Term term : argument) {
                 if (term instanceof ListBuiltin) {
                     ListBuiltin listBuiltin = (ListBuiltin) term;
-                    elementsLeft.addAll(listBuiltin.elementsLeft());
-                    elementsRight.addAll(listBuiltin.elementsRight());
-                    terms.addAll(listBuiltin.baseTerms());
+                    if (left) {
+                        elementsLeft.addAll(listBuiltin.elementsLeft());
+                        if (listBuiltin.baseTerms().isEmpty()) {
+                            elementsLeft.addAll(listBuiltin.elementsRight());
+                        } else assert listBuiltin.elementsRight().isEmpty();
+                    } else { // if right
+                        assert listBuiltin.baseTerms().isEmpty();
+                        elementsRight.addAll(listBuiltin.elementsLeft());
+                        elementsRight.addAll(listBuiltin.elementsRight());
+                    }
+                    if (!listBuiltin.baseTerms().isEmpty()) {
+                        assert left;
+                        terms.addAll(listBuiltin.baseTerms());
+                        left = false;
+                    }
                 } else {
+                    assert left;
                     terms.add(term);
+                    left = false;
                 }
             }
             return new ListBuiltin(sort, elementsLeft, elementsRight, terms);
