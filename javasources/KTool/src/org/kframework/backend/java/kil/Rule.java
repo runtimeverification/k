@@ -1,16 +1,16 @@
 package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.indexing.IndexingPair;
+import org.kframework.backend.java.indexing.TopIndex;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
-import org.kframework.backend.java.symbolic.VariableVisitor;
-import org.kframework.backend.java.symbolic.Visitable;
+import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 
 import java.util.Collection;
-import java.util.Set;
+import java.util.Map;
 
 
 /**
@@ -18,7 +18,7 @@ import java.util.Set;
  *
  * @author AndreiS
  */
-public class Rule extends ASTNode implements Visitable {
+public class Rule extends JavaSymbolicObject {
 
     private final Term leftHandSide;
     private final Term rightHandSide;
@@ -33,14 +33,24 @@ public class Rule extends ASTNode implements Visitable {
             Collection<Term> condition,
             Collection<Variable> freshVariables,
             SymbolicConstraint lookups,
-            IndexingPair indexingPair,
             Attributes attributes) {
         this.leftHandSide = leftHandSide;
         this.rightHandSide = rightHandSide;
         this.condition = condition;
         this.freshVariables = freshVariables;
         this.lookups = lookups;
-        this.indexingPair = indexingPair;
+
+        Collection<IndexingPair> indexingPairs = leftHandSide.getIndexingPairs();
+        /*
+         * Compute indexing information only if the left-hand side of this rule has precisely one
+         * k cell; set indexing to top otherwise (this rule could rewrite any term).
+         */
+        if (indexingPairs.size() == 1) {
+            this.indexingPair = indexingPairs.iterator().next();
+        } else {
+            this.indexingPair = IndexingPair.TOP;
+        }
+
         super.setAttributes(attributes);
     }
 
@@ -72,6 +82,13 @@ public class Rule extends ASTNode implements Visitable {
         return (KLabelConstant) ((KItem) leftHandSide).kLabel();
     }
 
+    /**
+     * Returns a copy of this {@code Rule} with each {@link Variable} renamed to a fresh name.
+     */
+    public Rule getFreshRule(TermContext context) {
+        return this.substitute(Variable.getFreshSubstitution(variableSet()), context);
+    }
+
     public IndexingPair indexingPair() {
         return indexingPair;
     }
@@ -86,6 +103,23 @@ public class Rule extends ASTNode implements Visitable {
 
     public Term rightHandSide() {
         return rightHandSide;
+    }
+
+    /**
+     * Returns a new {@code Rule} instance obtained from this rule by applying substitution.
+     */
+    @Override
+    public Rule substitute(Map<Variable, ? extends Term> substitution, TermContext context) {
+        return (Rule) super.substitute(substitution, context);
+    }
+
+    /**
+     * Returns a new {@code Rule} instance obtained from this rule by substituting variable with
+     * term.
+     */
+    @Override
+    public Rule substitute(Variable variable, Term term, TermContext context) {
+        return (Rule) super.substitute(variable, term, context);
     }
 
     @Override
@@ -105,26 +139,9 @@ public class Rule extends ASTNode implements Visitable {
         return string;
     }
 
-    public Set<Variable> variableSet() {
-        VariableVisitor visitor = new VariableVisitor();
-        accept(visitor);
-        return visitor.getVariableSet();
-    }
-
     @Override
-    public ASTNode shallowCopy() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public ASTNode accept(org.kframework.kil.visitors.Transformer transformer)
-            throws org.kframework.kil.visitors.exceptions.TransformerException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void accept(org.kframework.kil.visitors.Visitor visitor) {
-        throw new UnsupportedOperationException();
+    public ASTNode accept(Transformer transformer) {
+        return transformer.transform(this);
     }
 
     @Override

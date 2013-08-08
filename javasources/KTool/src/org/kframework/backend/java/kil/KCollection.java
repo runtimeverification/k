@@ -8,7 +8,9 @@ import org.kframework.backend.java.symbolic.Utils;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 
 /**
@@ -20,7 +22,20 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
 
     protected KCollection(ImmutableList<Term> items, Variable frame, Kind kind) {
         super(frame, kind);
-        this.items = items;
+
+        List<Term> normalizedItems = new ArrayList<Term>();
+        for (Term term : items) {
+            if (term.kind() == kind) {
+                KCollection kCollection = (KCollection) term;
+
+                assert !kCollection.hasFrame() : "associative use of KCollection";
+
+                normalizedItems.addAll(kCollection.getItems());
+            } else {
+                normalizedItems.add(term);
+            }
+        }
+        this.items = ImmutableList.copyOf(normalizedItems);
     }
 
     /*

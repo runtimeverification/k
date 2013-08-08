@@ -52,7 +52,6 @@ public class MacroExpander extends TermTransformer {
                 processedCondition,
                 rule.freshVariables(),
                 processedLookups,
-                rule.indexingPair(),
                 rule.getAttributes());
     }
 

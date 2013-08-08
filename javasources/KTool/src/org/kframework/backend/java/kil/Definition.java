@@ -1,6 +1,8 @@
 package org.kframework.backend.java.kil;
 
+import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.loader.Context;
 
@@ -80,20 +82,6 @@ public class Definition extends JavaSymbolicObject {
         return context;
     }
 
-    public void expandMacros() {
-        for (int i = 0; i < rules.size(); ++i) {
-            Rule rule = rules.get(i);
-            rules.set(i, new Rule(
-                    rule.leftHandSide(),
-                    rule.rightHandSide(),
-                    rule.condition(),
-                    rule.freshVariables(),
-                    rule.lookups(),
-                    rule.indexingPair(),
-                    rule.getAttributes()));
-        }
-    }
-
     public Multimap<KLabelConstant, Rule> functionRules() {
         return functionRules;
     }
@@ -112,6 +100,11 @@ public class Definition extends JavaSymbolicObject {
 
     public Collection<Rule> rules() {
         return Collections.unmodifiableList(rules);
+    }
+
+    @Override
+    public ASTNode accept(Transformer transformer) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

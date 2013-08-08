@@ -1,13 +1,44 @@
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
+import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.BuiltinSet;
+import org.kframework.backend.java.kil.Cell;
+import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.Collection;
+import org.kframework.backend.java.kil.ConstrainedTerm;
+import org.kframework.backend.java.kil.Definition;
+import org.kframework.backend.java.kil.Hole;
+import org.kframework.backend.java.kil.KCollection;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KLabel;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.KLabelFreezer;
+import org.kframework.backend.java.kil.KLabelInjection;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.KSequence;
+import org.kframework.backend.java.kil.ListLookup;
+import org.kframework.backend.java.kil.ListUpdate;
+import org.kframework.backend.java.kil.MapLookup;
+import org.kframework.backend.java.kil.MapUpdate;
+import org.kframework.backend.java.kil.MetaVariable;
+import org.kframework.backend.java.kil.Rule;
+import org.kframework.backend.java.kil.SetLookup;
+import org.kframework.backend.java.kil.SetUpdate;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Token;
+import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.ASTNode;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
@@ -448,6 +479,38 @@ public class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(MetaVariable metaVariable) {
         return transform((Token) metaVariable);
+    }
+
+    @Override
+    public ASTNode transform(Rule rule) {
+        Term processedLeftHandSide = (Term) rule.leftHandSide().accept(this);
+        Term processedRightHandSide = (Term) rule.rightHandSide().accept(this);
+        List<Term> processedCondition = new ArrayList<Term>(rule.condition().size());
+        for (Term conditionItem : rule.condition()) {
+            processedCondition.add((Term) conditionItem.accept(this));
+        }
+        List<Variable> processedFreshVariables = new ArrayList<Variable>(
+                rule.freshVariables().size());
+        for (Variable variable : rule.freshVariables()) {
+            processedFreshVariables.add((Variable) variable.accept(this));
+        }
+        SymbolicConstraint processedLookups = (SymbolicConstraint) rule.lookups().accept(this);
+
+        if (processedLeftHandSide != rule.leftHandSide()
+                || processedRightHandSide != rule.rightHandSide()
+                || !processedCondition.equals(rule.condition())
+                || !processedFreshVariables.equals(rule.freshVariables())
+                || processedLookups != rule.lookups()) {
+            return new Rule(
+                    processedLeftHandSide,
+                    processedRightHandSide,
+                    processedCondition,
+                    processedFreshVariables,
+                    processedLookups,
+                    rule.getAttributes());
+        } else {
+            return rule;
+        }
     }
 
     @Override

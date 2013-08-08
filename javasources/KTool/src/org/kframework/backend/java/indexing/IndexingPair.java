@@ -17,6 +17,8 @@ import org.kframework.backend.java.symbolic.Utils;
  */
 public class IndexingPair {
 
+    public static final IndexingPair TOP = new IndexingPair(TopIndex.TOP, TopIndex.TOP);
+
     public static Index getIndex(Term term) {
         if (term instanceof KItem) {
             KItem kItem = (KItem) term;

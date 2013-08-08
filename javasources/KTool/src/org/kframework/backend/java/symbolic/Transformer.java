@@ -39,6 +39,7 @@ public interface Transformer {
     public ASTNode transform(MapLookup mapLookup);
     public ASTNode transform(MapUpdate mapUpdate);
     public ASTNode transform(MetaVariable metaVariable);
+    public ASTNode transform(Rule rule);
     public ASTNode transform(SetLookup setLookup);
     public ASTNode transform(SetUpdate setUpdate);
     public ASTNode transform(SymbolicConstraint symbolicConstraint);

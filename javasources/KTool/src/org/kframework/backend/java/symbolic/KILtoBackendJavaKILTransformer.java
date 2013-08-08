@@ -68,7 +68,6 @@ import com.google.common.collect.Multimap;
 public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     private Definition definition = null;
-    private IndexingPair indexingPair = null;
 
     public KILtoBackendJavaKILTransformer(Context context) {
         super("Transform KIL into java backend KIL", context);
@@ -241,11 +240,6 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         } else {
             Term content = (Term) node.getContents().accept(this);
 
-            /* set {@link indexingPair} field */
-            if (node.getLabel().equals("k")) {
-                indexingPair = IndexingPair.getIndexingPair(content);
-            }
-
             if (content instanceof KItem) {
                 return new Cell<KItem>(node.getLabel(), (KItem) content);
             } else if (content instanceof Token) {
@@ -413,15 +407,11 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
         org.kframework.kil.Rewrite rewrite = (org.kframework.kil.Rewrite) node.getBody();
 
-        indexingPair = null;
         Term leftHandSide = (Term) rewrite.getLeft().accept(this);
-        IndexingPair indexingPair = this.indexingPair;
-
         Term rightHandSide = (Term) rewrite.getRight().accept(this);
 
         Collection<Term> requires = new ArrayList<Term>();
         Collection<Variable> freshVariables = new ArrayList<Variable>();
-
         //TODO: Deal with Ensures
         if (node.getRequires() != null) {
             Term term = (Term) node.getRequires().accept(this);
@@ -460,16 +450,19 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
         }
 
-        assert leftHandSide.kind().equals(rightHandSide.kind());
+        assert leftHandSide.kind() == rightHandSide.kind()
+               || ((leftHandSide.kind() == Kind.KITEM || leftHandSide.kind() == Kind.K || leftHandSide.kind() == Kind.KLIST)
+                   && (rightHandSide.kind() == Kind.KITEM || rightHandSide.kind() == Kind.K || rightHandSide.kind() == Kind.KLIST));
 
-        return new Rule(
+        Rule rule = new Rule(
                 leftHandSide,
                 rightHandSide,
                 requires,
                 freshVariables,
                 lookups,
-                indexingPair,
                 node.getAttributes());
+
+        return rule.getFreshRule(new TermContext(definition));
     }
 
     @Override

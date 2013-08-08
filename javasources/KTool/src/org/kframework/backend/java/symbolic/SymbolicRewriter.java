@@ -114,21 +114,8 @@ public class SymbolicRewriter {
     }
 
     private Set<Rule> getRules(Term term) {
-        final List<Term> contents = new ArrayList<Term>();
-        term.accept(new BottomUpVisitor() {
-            @Override
-            public void visit(Cell cell) {
-                if (cell.contentKind() == Kind.CELL_COLLECTION) {
-                    super.visit(cell);
-                } else if (cell.getLabel().equals("k")) {
-                    contents.add(cell.getContent());
-                }
-            }
-        });
-
         Set<Rule> rules = new HashSet<Rule>();
-        for (Term content : contents) {
-            IndexingPair pair = IndexingPair.getIndexingPair(content);
+        for (IndexingPair pair : term.getIndexingPairs()) {
             if (ruleTable.get(pair) != null) {
                 rules.addAll(ruleTable.get(pair));
             }

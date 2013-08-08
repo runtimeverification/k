@@ -1,18 +1,51 @@
 package org.kframework.backend.java.kil;
 
+import org.kframework.backend.java.symbolic.SubstitutionTransformer;
+import org.kframework.backend.java.symbolic.Transformable;
 import org.kframework.backend.java.symbolic.VariableVisitor;
 import org.kframework.backend.java.symbolic.Visitable;
 import org.kframework.kil.ASTNode;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 
 
 /**
  * Root of the Java Rewrite Engine internal representation class hierarchy.
  *
- * @author: AndreiS
+ * @author AndreiS
  */
-public abstract class JavaSymbolicObject extends ASTNode implements Visitable {
+public abstract class JavaSymbolicObject extends ASTNode implements Transformable, Visitable {
+
+    /**
+     * Returns {@code true} if this JavaSymbolicObject does not contain any variables.
+     */
+    public boolean isGround() {
+        return variableSet().isEmpty();
+    }
+
+    /**
+     * Returns a new {@code JavaSymbolicObject} instance obtained from this JavaSymbolicObject by
+     * applying substitution.
+     */
+    public JavaSymbolicObject substitute(
+            Map<Variable, ? extends Term> substitution,
+            TermContext context) {
+        if (substitution.isEmpty() || isGround()) {
+            return this;
+        }
+
+        return (JavaSymbolicObject) accept(new SubstitutionTransformer(substitution, context));
+    }
+
+    /**
+     * Returns a new {@code JavaSymbolicObject} instance obtained from this JavaSymbolicObject by
+     * substituting variable with term.
+     */
+    public JavaSymbolicObject substitute(Variable variable, Term term, TermContext context) {
+        return substitute(Collections.singletonMap(variable, term), context);
+    }
 
     /**
      * Returns a {@code Set} view of the variables in this java symbolic object.
@@ -38,4 +71,5 @@ public abstract class JavaSymbolicObject extends ASTNode implements Visitable {
     public void accept(org.kframework.kil.visitors.Visitor visitor) {
         throw new UnsupportedOperationException();
     }
+
 }

@@ -1,12 +1,14 @@
 package org.kframework.backend.java.kil;
 
+import org.kframework.backend.java.indexing.IndexingPair;
+import org.kframework.backend.java.symbolic.BottomUpVisitor;
 import org.kframework.backend.java.symbolic.Evaluator;
 import org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer;
 import org.kframework.backend.java.symbolic.Unifiable;
-import org.kframework.backend.java.symbolic.SubstitutionTransformer;
 import org.kframework.backend.java.symbolic.Transformable;
 
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 
 
@@ -15,7 +17,7 @@ import java.util.Map;
  *
  * @author AndreiS
  */
-public abstract class Term extends JavaSymbolicObject implements Unifiable, Transformable {
+public abstract class Term extends JavaSymbolicObject implements Transformable, Unifiable {
 
     protected final Kind kind;
     //protected final boolean normalized;
@@ -26,8 +28,7 @@ public abstract class Term extends JavaSymbolicObject implements Unifiable, Tran
 
     /**
      * Translates a term from the generic KIL representation ({@link org.kframework.kil.Term}) to
-     * the Java Rewrite Engine internal representation
-     * ({@link org.kframework.backend.java.kil.Term}).
+     * Java Rewrite Engine internal representation ({@link org.kframework.backend.java.kil.Term}).
      */
     public static Term of(org.kframework.kil.Term kilTerm, Definition definition) {
         KILtoBackendJavaKILTransformer transformer
@@ -36,10 +37,22 @@ public abstract class Term extends JavaSymbolicObject implements Unifiable, Tran
     }
 
     /**
-     * Returns {@code true} if this term does not contain any variables.
+     * Returns a {@link Collection} view of .
      */
-    public boolean isGround() {
-        return super.variableSet().isEmpty();
+    public Collection<IndexingPair> getIndexingPairs() {
+        final Collection<IndexingPair> indexingPairs = new ArrayList<IndexingPair>();
+        accept(new BottomUpVisitor() {
+            @Override
+            public void visit(Cell cell) {
+                if (cell.getLabel().equals("k")) {
+                    indexingPairs.add(IndexingPair.getIndexingPair(cell.getContent()));
+                } else if (cell.contentKind() == Kind.CELL_COLLECTION) {
+                    super.visit(cell);
+                }
+            }
+        });
+
+        return indexingPairs;
     }
 
     /**
@@ -66,20 +79,18 @@ public abstract class Term extends JavaSymbolicObject implements Unifiable, Tran
     /**
      * Returns a new {@code Term} instance obtained from this term by applying substitution.
      */
+    @Override
     public Term substitute(Map<Variable, ? extends Term> substitution, TermContext context) {
-        if (substitution.isEmpty() || isGround()) {
-            return this;
-        }
-
-        return (Term) accept(new SubstitutionTransformer(substitution, context));
+        return (Term) super.substitute(substitution, context);
     }
 
     /**
      * Returns a new {@code Term} instance obtained from this term by substituting variable with
      * term.
      */
+    @Override
     public Term substitute(Variable variable, Term term, TermContext context) {
-        return substitute(Collections.singletonMap(variable, term), context);
+        return (Term) super.substitute(variable, term, context);
     }
 
 }

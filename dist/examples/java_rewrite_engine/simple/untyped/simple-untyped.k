@@ -1,5 +1,7 @@
-require "builtins/set.k"
+require "builtins/list.k"
 require "builtins/map.k"
+require "builtins/set.k"
+
 
 /*!
 \title{SIMPLE --- Untyped}
@@ -206,6 +208,9 @@ arguments. */
 //
 // With that, I could have also eliminated the empty block
 
+  syntax Id ::= "print"       [reject]
+              | "read"        [reject]
+              | "function"    [reject]
 /*@ \section{Desugared Syntax}
 This part desugars some of SIMPLE's language constructs into core ones.
 We only want to give semantics to core constructs, so we get rid of the
@@ -216,6 +221,10 @@ straightforward. */
 //  rule for(Start Cond; Step) {S} => {Start while (Cond) {S Step;}}  [macro]
 //  rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;          [macro]
 //  rule var X:Id = E; => var X; X = E;                               [macro]
+  rule if (E) S => if (E) S else {}
+  rule for(Start Cond; Step) {S} => {Start while (Cond) {S Step;}}
+  rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;
+  rule var X:Id = E; => var X; X = E;
 
 /*@ For the semantics, we can therefore assume from now on that each
 conditional has both branches, that there are only \texttt{while} loops, and
@@ -226,8 +235,9 @@ endmodule
 
 module SIMPLE-UNTYPED
   imports SIMPLE-UNTYPED-SYNTAX
-  imports SET
+  imports LIST
   imports MAP
+  imports SET
 
 /*@ \section{Basic Semantic Infrastructure}
 Before one starts adding semantic rules to a \K definition, one needs to
@@ -311,10 +321,10 @@ to the \K tool, as indicated by the \textit{\$PGM} variable, followed by the
                       //<k color="green"> ($PGM:Stmts ~> execute) </k>
                       <k color="green"> ($PGM:K ~> execute) </k>
                       //<br/>
-                      //<control color="cyan">
-                      //  <fstack color="blue"> .List </fstack>
-                      //  <xstack color="purple"> .List </xstack>
-                      //</control>
+                      <control color="cyan">
+                        <fstack color="blue"> .MyList </fstack>
+                        <xstack color="purple"> .MyList </xstack>
+                      </control>
                       //<br/>
                       <env color="violet"> .MyMap </env>
                       <holds color="black"> .MyMap </holds>
@@ -329,6 +339,8 @@ to the \K tool, as indicated by the \textit{\$PGM} variable, followed by the
                   //<br/>
                   //<in color="magenta" stream="stdin"> .List </in>
                   //<out color="brown" stream="stdout"> .List </out>
+                  <in color="magenta"> .MyList </in>
+                  <out color="brown"> .MyList </out>
                   <nextLoc color="gray"> 0 </nextLoc>
                 </T>
 
@@ -376,8 +388,8 @@ structure. */
 
   rule <k> var X:Id; => . ...</k>
        <env> Env:MyMap => Env[X <- L] </env>
-       //<store>... . => L |-> undefined ...</store>
-       <store> Store:MyMap => Store[L <- undefined] </store>
+       <store>... .MyMap => L |-> undefined ...</store>
+       //<store> Store:MyMap => Store[L <- undefined] </store>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
 
 /*@ \subsection{Array Declaration}
@@ -410,41 +422,50 @@ declarations. */
        <nextLoc> L:Int => L +Int N +Int 1 </nextLoc>
     when N >Int 0
 
-///*@ SIMPLE allows multi-dimensional arrays.  For semantic simplicity, we
-//desugar them all into uni-dimensional arrays by code transformation.
-//This way, we only need to give semantics to uni-dimensional arrays.
-//First, note that the context rule above actually evaluates all the array
-//dimensions (that's why we defined the expression lists strict!):
-//Upon evaluating the array dimensions, the code generation rule below
-//desugars multi-dimensional array declaration to uni-dimensional declarations.
-//To this aim, we introduce two special unique variable identifiers,
-//\texttt{\$1} and \texttt{\$2}.  The first, \texttt{\$1}, is assigned the array
-//reference value of the current array, so that we can redeclare the array
-//inside the loop body with fewer dimensions.  The second variable,
-//\texttt{\$2}, iterates through and initializes each element of the current
-//dimension: */
-//
-//  syntax Id ::= "$1" | "$2"
-//  rule var X:Id[N1:Int, N2:Int, Vs:Vals];
-//    => var X[N1];
-//       {
-//         var $1=X;
-//         for(var $2=0; $2 <= N1 - 1; ++$2) {
-//           var X[N2,Vs];
-//           $1[$2] = X;
-//         }
-//       }
-//    [structural]
-//
-///*@ Ideally, one would like to perform syntactic desugarings like the one
-//above before the actual semantics.  Unfortunately, that was not possible in
-//this case because the dimension expressions of the multi-dimensional array need
-//to be evaluated first.  Indeed, the desugaring rule above does not work if the
-//dimensions of the declared array are arbitrary expressions, because they can
-//have side effects (e.g., \texttt{a[++x,++x]}) and those side effects would be
-//propagated each time the expression is evaluated in the desugaring code (note
-//that both the loop condition and the nested multi-dimensional declaration
-//would need to evaluate the expressions given as array dimensions). */
+/*@ SIMPLE allows multi-dimensional arrays.  For semantic simplicity, we
+desugar them all into uni-dimensional arrays by code transformation.
+This way, we only need to give semantics to uni-dimensional arrays.
+First, note that the context rule above actually evaluates all the array
+dimensions (that's why we defined the expression lists strict!):
+Upon evaluating the array dimensions, the code generation rule below
+desugars multi-dimensional array declaration to uni-dimensional declarations.
+To this aim, we introduce two special unique variable identifiers,
+\texttt{\$1} and \texttt{\$2}.  The first, \texttt{\$1}, is assigned the array
+reference value of the current array, so that we can redeclare the array
+inside the loop body with fewer dimensions.  The second variable,
+\texttt{\$2}, iterates through and initializes each element of the current
+dimension: */
+
+  syntax Id ::= Token{"$1"} | Token{"$2"}
+  //rule var X:Id[N1:Int, N2:Int, Vs:Vals];
+  //  => var X[N1];
+  //     {
+  //       var $1 = X;
+  //       for(var $2 = 0; $2 <= N1 - 1; ++$2) {
+  //         var X[N2, Vs];
+  //         $1[$2] = X;
+  //       }
+  //     }
+  //  [structural]
+  rule var X:Id[N1:Int, N2:Int, Vs:Vals];
+    => var X[N1];
+       {
+         for(var $1 = 0; $1 <= N1 - 1; ++$1) {
+           var $2[N2, Vs];
+           X[$1] = $2;
+         }
+       }
+    [structural]
+
+/*@ Ideally, one would like to perform syntactic desugarings like the one
+above before the actual semantics.  Unfortunately, that was not possible in
+this case because the dimension expressions of the multi-dimensional array need
+to be evaluated first.  Indeed, the desugaring rule above does not work if the
+dimensions of the declared array are arbitrary expressions, because they can
+have side effects (e.g., \texttt{a[++x,++x]}) and those side effects would be
+propagated each time the expression is evaluated in the desugaring code (note
+that both the loop condition and the nested multi-dimensional declaration
+would need to evaluate the expressions given as array dimensions). */
 
 /*@ \subsection{Function declaration}
 Functions are evaluated to $\lambda$-abstractions and stored like any other
@@ -585,83 +606,87 @@ The size of the array is stored in the array reference value, and the
 
   rule sizeOf(array(_:Int,N:Int)) => N
 
-///*@ \subsection{Function call}
-//Function application was strict in both its arguments, so we can
-//assume that both the function and its arguments are evaluated to
-//values (the former expected to be a $\lambda$-abstraction).  The first
-//rule below matches a well-formed function application on top of the
-//computation and performs the following steps atomically: it switches
-//to the function body followed by ``\texttt{return;}'' (for the case in
-//which the function does not use an explicit return statement); it
-//pushes the remaining computation, the current environment, and the
-//current control data onto the function stack (the remaining
-//computation can thus also be discarded from the computation cell,
-//because an unavoidable subsequent \texttt{return} statement---see
-//above---will always recover it from the stack); it switches the
-//current environment (which is being pushed on the function stack) to
-//the global environment, which is where the free variables in the
-//function body should be looked up; it binds the formal parameters to
-//fresh locations in the new environment, and stores the actual
-//arguments to those locations in the store (this latter step is easily
-//done by reducing the problem to variable declarations, whose semantics
-//we have already defined; the auxiliary operation \texttt{mkDecls} is
-//defined at the end of the file).  The second rule pops the
-//computation, the environment and the control data from the function
-//stack when a \texttt{return} statement is encountered as the next
-//computational task, passing the returned value to the popped
-//computation (the popped computation was the context in which the
-//returning function was called).  Note that the pushing/popping of the
-//control data is crucial.  Without it, one may have a function that
-//contains an exception block with a return statement inside, which
-//would put the \textsf{xstack} cell in an inconsistent state (since the
-//exception block modifies it, but that modification should be
-//irrelevant once the function returns).  We add an artificial
-//\texttt{nothing} value to the language, which is returned by the
-//nulary \texttt{return;} statements. */
-//
-//  syntax K ::=  (Map,K,ControlCellFragment)
-//
-//  rule <k> lambda(Xs,S)(Vs:Vals) ~> K => mkDecls(Xs,Vs) S return; </k>
-//       <control>
-//         <fstack> . => ListItem((Env,K,C)) ...</fstack>
-//         C
-//       </control>
-//       <env> Env => GEnv </env>
-//       <genv> GEnv </genv>
-//
-//  rule <k> return(V:Val); ~> _ => V ~> K </k>
-//       <control>
-//         <fstack> ListItem((Env,K,C)) => . ...</fstack>
-//         (_ => C)
-//       </control>
-//       <env> _ => Env </env>
-//
-//  syntax Val ::= "nothing"
-//  rule return; => return nothing;   [macro]
-//
-///*@ Like for division-by-zero, it is left unspecified what happens
-//when the \texttt{nothing} value is used in domain calculations.  For
-//example, from the the perspective of the language semantics,
-//$7+_{\scriptsize\it Int}\texttt{nothing}$ can evaluate to anything, or
-//may not evaluate at all (be undefined).  If one wants to make sure that
-//such artificial values are never misused, then one needs to define a static
-//checker (also using \K, like our the type checker in
-//\texttt{examples/simple/typed/static}) and reject programs that do. 
-//Note that, unlike the undefined symbol $\bot$ which had the sort $K$
-//instead of $\it Val$, we defined \texttt{nothing} to be a value.  That
-//is because, as explained above, we do not want the program to get
-//stuck when nothing is returned by a function.  Instead, we want the
-//behavior to be unspecified; in particular, if one is careful to never
-//use the returned value in domain computation, like it happens when we
-//call a function for its side effects (e.g., with a statement of the
-//form ``\texttt{f(x);}''), then the program does not get stuck. */
-//
-///*@ \subsection{Read}
-//The \texttt{read()} expression construct simply evaluates to the next
-//input value, at the same time discarding the input value from the
-//\textsf{in} cell. */
-//
-//  rule <k> read() => I ...</k> <in> ListItem(I:Int) => . ...</in>  [read]
+/*@ \subsection{Function call}
+Function application was strict in both its arguments, so we can
+assume that both the function and its arguments are evaluated to
+values (the former expected to be a $\lambda$-abstraction).  The first
+rule below matches a well-formed function application on top of the
+computation and performs the following steps atomically: it switches
+to the function body followed by ``\texttt{return;}'' (for the case in
+which the function does not use an explicit return statement); it
+pushes the remaining computation, the current environment, and the
+current control data onto the function stack (the remaining
+computation can thus also be discarded from the computation cell,
+because an unavoidable subsequent \texttt{return} statement---see
+above---will always recover it from the stack); it switches the
+current environment (which is being pushed on the function stack) to
+the global environment, which is where the free variables in the
+function body should be looked up; it binds the formal parameters to
+fresh locations in the new environment, and stores the actual
+arguments to those locations in the store (this latter step is easily
+done by reducing the problem to variable declarations, whose semantics
+we have already defined; the auxiliary operation \texttt{mkDecls} is
+defined at the end of the file).  The second rule pops the
+computation, the environment and the control data from the function
+stack when a \texttt{return} statement is encountered as the next
+computational task, passing the returned value to the popped
+computation (the popped computation was the context in which the
+returning function was called).  Note that the pushing/popping of the
+control data is crucial.  Without it, one may have a function that
+contains an exception block with a return statement inside, which
+would put the \textsf{xstack} cell in an inconsistent state (since the
+exception block modifies it, but that modification should be
+irrelevant once the function returns).  We add an artificial
+\texttt{nothing} value to the language, which is returned by the
+nulary \texttt{return;} statements. */
+
+  syntax K ::=  (MyMap, K, ControlCellFragment)
+
+  rule <k>
+         lambda(Xs:Ids, S:Block)(Vs:Vals) ~> K => mkDecls(Xs, Vs) S return;
+       </k>
+       <control>
+         <fstack> .MyList => MyListItem((Env, K, C)) ...</fstack>
+         C
+       </control>
+       <env> Env:MyMap => GEnv </env>
+       <genv> GEnv:MyMap </genv>
+
+  rule <k> return(V:Val); ~> _ => V ~> K </k>
+       <control>
+         <fstack> MyListItem((Env:MyMap, K, C)) => .MyList ...</fstack>
+         (_ => C)
+       </control>
+       <env> _:MyMap => Env </env>
+
+  syntax Val ::= "nothing"
+  //rule return; => return nothing;   [macro]
+  rule return; => return nothing;
+
+/*@ Like for division-by-zero, it is left unspecified what happens
+when the \texttt{nothing} value is used in domain calculations.  For
+example, from the the perspective of the language semantics,
+$7+_{\scriptsize\it Int}\texttt{nothing}$ can evaluate to anything, or
+may not evaluate at all (be undefined).  If one wants to make sure that
+such artificial values are never misused, then one needs to define a static
+checker (also using \K, like our the type checker in
+\texttt{examples/simple/typed/static}) and reject programs that do. 
+Note that, unlike the undefined symbol $\bot$ which had the sort $K$
+instead of $\it Val$, we defined \texttt{nothing} to be a value.  That
+is because, as explained above, we do not want the program to get
+stuck when nothing is returned by a function.  Instead, we want the
+behavior to be unspecified; in particular, if one is careful to never
+use the returned value in domain computation, like it happens when we
+call a function for its side effects (e.g., with a statement of the
+form ``\texttt{f(x);}''), then the program does not get stuck. */
+
+/*@ \subsection{Read}
+The \texttt{read()} expression construct simply evaluates to the next
+input value, at the same time discarding the input value from the
+\textsf{in} cell. */
+
+  rule <k> read() => I ...</k>
+       <in> MyListItem(I:Int) => .MyList ...</in>  [read]
 
 /*@ \subsection{Assignment}
 In SIMPLE, like in C, assignments are expression constructs and not statement
@@ -764,18 +789,20 @@ allowed break/continue of loops then we would need a completely different
 semantics, which would also involve the \textsf{control} cell. */
 
   //rule while (E:Exp) B:Block => if (E) { B while(E) B }   [structural]
-  rule while (E:Exp) B:Block => if (E) { B while(E) B } else {}   [structural]
+  rule while (E:Exp) B:Block => if (E) { B while(E) B } else {}
+    [structural]
 
-///*@ \subsection{Print}
-//The \texttt{print} statement was strict, so all its arguments are now
-//evaluated (recall that \texttt{print} is variadic).  We append each of
-//its evaluated arguments to the output buffer, and discard the residual
-//\texttt{print} statement with an empty list of arguments. */
-//
-//  rule <k> print(V:Val, Es => Es); ...</k> <out>... . => ListItem(V) </out>
-//    [print]
-//  rule print(.Vals); => .  [structural]
-//
+/*@ \subsection{Print}
+The \texttt{print} statement was strict, so all its arguments are now
+evaluated (recall that \texttt{print} is variadic).  We append each of
+its evaluated arguments to the output buffer, and discard the residual
+\texttt{print} statement with an empty list of arguments. */
+
+  rule <k> print(V:Val, Es:Exps => Es); ...</k>
+       <out>... .MyList => MyListItem(V) </out>
+    [print]
+  rule print(.Vals); => .  [structural]
+
 ///*@ \subsection{Exceptions}
 //SIMPLE allows parametric exceptions, in that one can throw and catch a
 //particular value.  The statement ``\texttt{try $S_1$ catch($X$) $S_2$}''
@@ -830,113 +857,119 @@ semantics, which would also involve the \textsf{control} cell. */
 //initialization, for binding $X$ to $V$; and (2) the block construct for
 //preventing $X$ from shadowing variables in the original environment upon the
 //completion of $S_2$. */
-//
-///*@ \subsection{Threads}
-//SIMPLE's threads can be created and terminated dynamically, and can
-//synchronize by acquiring and releasing re-entrant locks and by rendezvous.
-//We discuss the seven rules giving the semantics of these operations below. */
-//
-///*@ \subsubsection{Thread creation}
-//Threads can be created by any other threads using the ``\texttt{spawn $S$}''
-//construct.  The spawn expression construct evaluates to the unique identifier
-//of the newly created thread and, at the same time, a new thread cell is added
-//into the configuration, initialized with the $S$ statement and sharing the
-//same environment with the parent thread.  Note that the newly created
-//\textsf{thread} cell is torn.  That means that the remaining cells are added
-//and initialized automatically as described in the definition of SIMPLE's
-//configuration.  This is part of \K's configuration abstraction mechanism. */
-//
-//  rule <thread>...
-//         <k> spawn S => T ...</k>
-//         <env> Env </env>
-//       ...</thread>
-//       (. => <thread>...
-//               <k> S </k>
-//               <env> Env </env>
-//               <id> T </id>
-//             ...</thread>)
-//    when fresh(T:Int)
-//
-///*@ \subsubsection{Thread termination}
-//Dually to the above, when a thread terminates its assigned computation (the
-//contents of its \textsf{k} cell) is empty, so the thread can be dissolved.
-//However, since no discipline is imposed on how locks are acquired and released,
-//it can be the case that a terminating thread still holds locks.  Those locks
-//must be released, so other threads attempting to acquire them do not deadlock.
-//We achieve that by removing all the locks held by the terminating thread in its
-//\textsf{holds} cell from the set of busy locks in the \textsf{busy} cell
-//(\texttt{keys($H$)} returns the domain of the map $H$ as a set, that is, only
-//the locks themselves ignoring their multiplicity).  As seen below, a lock is
-//added to the \textsf{busy} cell as soon as it is acquired for the first time
-//by a thread.  The unique identifier of the terminated thread is also collected
-//into the \textsf{terminated} cell, so the \texttt{join} construct knows which
-//threads have terminated. */
-//
-//  rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .)
-//       <busy> Busy => Busy -Set keys(H) </busy>
-//       <terminated>... . => SetItem(T) ...</terminated>
-//
-///*@ \subsubsection{Thread joining}
-//Thread joining is now straightforward: all we need to do is to check whether
-//the identifier of the thread to be joined is in the \textsf{terminated} cell.
-//If yes, then the \texttt{join} statement dissolves and the joining thread
-//continues normally; if not, then the joining thread gets stuck. */
-//
-//  rule <k> join T:Int; => . ...</k>
-//       <terminated>... SetItem(T) ...</terminated>
-//
-///*@ \subsubsection{Acquire lock}
-//There are two cases to distinguish when a thread attempts to acquire a lock
-//(in SIMPLE any value can be used as a lock):\\
-//(1) The thread does not currently have the lock, in which case it has to
-//take it provided that the lock is not already taken by another thread (see
-//the side condition of the first rule).\\
-//(2) The thread already has the lock, in which case it just increments its
-//counter for the lock (the locks are re-entrant).  These two cases are captured
-//by the two rules below: */
-//
-//  rule <k> acquire V:Val; => . ...</k>
-//       <holds>... . => V |-> 0 ...</holds>
-//       <busy> Busy (. => SetItem(V)) </busy>
-//    when (notBool(V in Busy:Set))  [acquire]
-//
-//  rule <k> acquire V; => . ...</k>
-//       <holds>... V:Val |-> (N:Int => N +Int 1) ...</holds>
-//
-///*@ \subsubsection{Release lock}
-//Similarly, there are two corresponding cases to distinguish when a thread
-//releases a lock:\\
-//(1) The thread holds the lock more than once, in which case all it needs to do
-//is to decrement the lock counter.\\
-//(2) The thread holds the lock only once, in which case it needs to remove it
-//from its \textsf{holds} cell and also from the the shared \textsf{busy} cell,
-//so other threads can acquire it if they need to. */
-//
-//  rule <k> release V:Val; => . ...</k>
-//       <holds>... V |-> (N => N:Int -Int 1) ...</holds>
-//    when N >Int 0
-//
-//  rule <k> release V; => . ...</k> <holds>... V:Val |-> 0 => . ...</holds>
-//       <busy>... SetItem(V) => . ...</busy>
-//
-///*@ \subsubsection{Rendezvous synchronization}
-//In addition to synchronization through acquire and release of locks, SIMPLE
-//also provides a construct for rendezvous synchronization.  A thread whose next
-//statement to execute is \texttt{rendezvous($V$)} gets stuck until another
-//thread reaches an identical statement; when that happens, the two threads
-//drop their rendezvous statements and continue their executions.  If three
-//threads happen to have an identical rendezvous statement as their next
-//statement, then precisely two of them will synchronize and the other will
-//remain blocked until another thread reaches a similar rendezvous statement.
-//The rule below is as simple as it can be.  Note, however, that, again, it is
-//\K's mechanism for configuration abstraction that makes it work as desired:
-//since the only cell which can multiply containing a \textsf{k} cell inside is
-//the \textsf{thread} cell, the only way to concretize the rule below to the
-//actual configuration of SIMPLE is to include each \textsf{k} cell in a
-//\textsf{thread} cell. */
-//
-//  rule <k> rendezvous V:Val; => . ...</k>
-//       <k> rendezvous V; => . ...</k>  [rendezvous]
+
+/*@ \subsection{Threads}
+SIMPLE's threads can be created and terminated dynamically, and can
+synchronize by acquiring and releasing re-entrant locks and by rendezvous.
+We discuss the seven rules giving the semantics of these operations below. */
+
+/*@ \subsubsection{Thread creation}
+Threads can be created by any other threads using the ``\texttt{spawn $S$}''
+construct.  The spawn expression construct evaluates to the unique identifier
+of the newly created thread and, at the same time, a new thread cell is added
+into the configuration, initialized with the $S$ statement and sharing the
+same environment with the parent thread.  Note that the newly created
+\textsf{thread} cell is torn.  That means that the remaining cells are added
+and initialized automatically as described in the definition of SIMPLE's
+configuration.  This is part of \K's configuration abstraction mechanism. */
+
+  rule <thread>...
+         <k> spawn B:Block => T ...</k>
+         <env> Env:MyMap </env>
+       ...</thread>
+       (. => <thread>...
+               <k> B </k>
+               <env> Env </env>
+               <id> T </id>
+             ...</thread>)
+    when fresh(T:Int)
+
+/*@ \subsubsection{Thread termination}
+Dually to the above, when a thread terminates its assigned computation (the
+contents of its \textsf{k} cell) is empty, so the thread can be dissolved.
+However, since no discipline is imposed on how locks are acquired and released,
+it can be the case that a terminating thread still holds locks.  Those locks
+must be released, so other threads attempting to acquire them do not deadlock.
+We achieve that by removing all the locks held by the terminating thread in its
+\textsf{holds} cell from the set of busy locks in the \textsf{busy} cell
+(\texttt{keys($H$)} returns the domain of the map $H$ as a set, that is, only
+the locks themselves ignoring their multiplicity).  As seen below, a lock is
+added to the \textsf{busy} cell as soon as it is acquired for the first time
+by a thread.  The unique identifier of the terminated thread is also collected
+into the \textsf{terminated} cell, so the \texttt{join} construct knows which
+threads have terminated. */
+
+  rule (<thread>...
+          <k> . </k>
+          <holds> H:MyMap </holds>
+          <id> T:Int </id>
+        ...</thread>
+        => .)
+       <busy> Busy:MySet => Busy -MySet keys(H) </busy>
+       <terminated>... .MySet => MySetItem(T) ...</terminated>
+
+/*@ \subsubsection{Thread joining}
+Thread joining is now straightforward: all we need to do is to check whether
+the identifier of the thread to be joined is in the \textsf{terminated} cell.
+If yes, then the \texttt{join} statement dissolves and the joining thread
+continues normally; if not, then the joining thread gets stuck. */
+
+  rule <k> join T:Int; => . ...</k>
+       <terminated>... MySetItem(T) ...</terminated>
+
+/*@ \subsubsection{Acquire lock}
+There are two cases to distinguish when a thread attempts to acquire a lock
+(in SIMPLE any value can be used as a lock):\\
+(1) The thread does not currently have the lock, in which case it has to
+take it provided that the lock is not already taken by another thread (see
+the side condition of the first rule).\\
+(2) The thread already has the lock, in which case it just increments its
+counter for the lock (the locks are re-entrant).  These two cases are captured
+by the two rules below: */
+
+  rule <k> acquire V:Val; => . ...</k>
+       <holds>... .MyMap => V |-> 0 ...</holds>
+       <busy> Busy:MySet (.MySet => MySetItem(V)) </busy>
+    when (notBool(V in Busy))  [acquire]
+
+  rule <k> acquire V:Val; => . ...</k>
+       <holds>... V |-> (N:Int => N +Int 1) ...</holds>
+
+/*@ \subsubsection{Release lock}
+Similarly, there are two corresponding cases to distinguish when a thread
+releases a lock:\\
+(1) The thread holds the lock more than once, in which case all it needs to do
+is to decrement the lock counter.\\
+(2) The thread holds the lock only once, in which case it needs to remove it
+from its \textsf{holds} cell and also from the the shared \textsf{busy} cell,
+so other threads can acquire it if they need to. */
+
+  rule <k> release V:Val; => . ...</k>
+       <holds>... V |-> (N => N:Int -Int 1) ...</holds>
+    when N >Int 0
+
+  rule <k> release V:Val; => . ...</k>
+       <holds>... V |-> 0 => .MyMap ...</holds>
+       <busy>... MySetItem(V) => .MySet ...</busy>
+
+/*@ \subsubsection{Rendezvous synchronization}
+In addition to synchronization through acquire and release of locks, SIMPLE
+also provides a construct for rendezvous synchronization.  A thread whose next
+statement to execute is \texttt{rendezvous($V$)} gets stuck until another
+thread reaches an identical statement; when that happens, the two threads
+drop their rendezvous statements and continue their executions.  If three
+threads happen to have an identical rendezvous statement as their next
+statement, then precisely two of them will synchronize and the other will
+remain blocked until another thread reaches a similar rendezvous statement.
+The rule below is as simple as it can be.  Note, however, that, again, it is
+\K's mechanism for configuration abstraction that makes it work as desired:
+since the only cell which can multiply containing a \textsf{k} cell inside is
+the \textsf{thread} cell, the only way to concretize the rule below to the
+actual configuration of SIMPLE is to include each \textsf{k} cell in a
+\textsf{thread} cell. */
+
+  rule <k> rendezvous V:Val; => . ...</k>
+       <k> rendezvous V; => . ...</k>  [rendezvous]
 
 /*@ \section{Auxiliary declarations and operations}
 In this section we define all the auxiliary constructs used in the

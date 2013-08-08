@@ -45,7 +45,7 @@ import org.kframework.krun.K;
  *
  * @author AndreiS
  */
-public class SymbolicConstraint extends JavaSymbolicObject implements Serializable, Transformable {
+public class SymbolicConstraint extends JavaSymbolicObject implements Serializable {
 
     public enum TruthValue { TRUE, UNKNOWN, FALSE }
 
