@@ -54,4 +54,22 @@ public class Transition<Control, Alphabet> {
     public TransitionIndex<Control, Alphabet> getIndex() {
         return TransitionIndex.<Control, Alphabet>of(startState, letter);
     }
+
+    public static Transition<String, String> of(String transitionString) {
+        String[] strings = transitionString.split("\\s+");
+        assert strings.length == 3 || strings.length == 2;
+        State<String,String> startState = State.ofString(strings[0]);
+        int i = 1;
+        String letter = null;
+        if (strings.length == 3) {
+            letter = strings[i++];
+        }
+        State<String,String> endState = State.ofString(strings[i]);
+        return new Transition<String, String>(startState, letter, endState);
+    }
+
+    @Override
+    public String toString() {
+        return startState + " " + (letter != null ? letter + " " : "") + endState;
+    }
 }

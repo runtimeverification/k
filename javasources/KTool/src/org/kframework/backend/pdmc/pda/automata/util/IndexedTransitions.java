@@ -13,6 +13,11 @@ public class IndexedTransitions<Control, Alphabet> {
     Set<Transition<Control, Alphabet>> rel;
     Map<State<Control,Alphabet>, Set<Transition<Control, Alphabet>>> backIndex;
     Map<State<Control, Alphabet>, Set<Transition<Control, Alphabet>>> directIndex;
+    public IndexedTransitions() {
+        rel = new HashSet<Transition<Control, Alphabet>>();
+        backIndex = new HashMap<State<Control, Alphabet>, Set<Transition<Control, Alphabet>>>();
+        directIndex = new HashMap<State<Control, Alphabet>, Set<Transition<Control, Alphabet>>>();
+    }
 
     public boolean contains(Transition<Control, Alphabet> transition) {
         return  rel.contains(transition);

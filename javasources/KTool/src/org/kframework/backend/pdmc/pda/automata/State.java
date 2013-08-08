@@ -67,4 +67,20 @@ public class State<Control, Alphabet> {
     public boolean equals(Object obj) {
         return this == obj;
     }
+
+    public static State<String, String> ofString(String string) {
+        if (string.charAt(0) != '<') {
+            return State.<String,String>of(string);
+        }
+        assert string.charAt(string.length() - 1) == '>' : "Composed state must end with '>'.";
+        String[] strings = string.substring(1, string.length() - 1).split(",");
+        assert strings.length == 2 : "Composed state is of form <p,l>.";
+        return State.<String,String>of(strings[0], strings[1]);
+    }
+
+    @Override
+    public String toString() {
+        if (letter == null) return state.toString();
+        return "<" + state + "," + letter + ">";
+    }
 }

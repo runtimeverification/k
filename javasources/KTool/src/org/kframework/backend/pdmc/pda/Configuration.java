@@ -83,13 +83,15 @@ public class Configuration<Control, Alphabet> {
     public static Configuration<String, String> of(String confString) {
         assert confString.charAt(0) == '<' : "Configuration must start with '<'.";
         assert confString.charAt(confString.length() - 1) == '>' : "Configuration must start with '>'.";
-        String[] strings = confString.substring(1, confString.length() - 2).split(",");
-        assert strings.length == 2 : "Configuration is <p, stack>.";
+        String[] strings = confString.substring(1, confString.length() - 1).split(",");
+        assert strings.length >= 1 : "Configuration must have a state.";
+        assert strings.length <= 2 : "Configuration cannot have more than a stack.";
         String control = strings[0].trim();
-        String[] letters = strings[1].trim().split("\\s+");
         Stack<String> stack = new Stack<String>();
-        for (String letter : letters) {
-            stack.push(letter);
+        if (strings.length==2) {
+            String[] letters = strings[1].trim().split("\\s+");
+            for (int i = letters.length; i-- > 0; )
+                stack.push(letters[i]);
         }
         return new Configuration<String, String>(control, stack);
     }

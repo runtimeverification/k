@@ -37,4 +37,14 @@ public class Rule<Control, Alphabet> {
     public ConfigurationHead<Control, Alphabet> getHead() {
         return lhs;
     }
+
+    public static Rule<String, String> of(String stringRule) {
+        String[] sides = stringRule.split("\\s*=>\\s*");
+        assert sides.length == 2 : "Rules must be of the form: lhs => rhs";
+        Configuration<String, String> lhsConf = Configuration.of(sides[0].trim());
+        assert lhsConf.getStack().isEmpty() : "lhs should have a configuration head";
+        ConfigurationHead<String, String> lhs = lhsConf.getHead();
+        Configuration<String, String> rhs = Configuration.of(sides[1].trim());
+        return new Rule(lhs, rhs);
+    }
 }

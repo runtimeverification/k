@@ -14,15 +14,16 @@ public class PushdownSystem<Control, Alphabet> {
     Map<ConfigurationHead<Control, Alphabet>, Set<Rule<Control, Alphabet>>> deltaIndex;
 
     public PushdownSystem(Collection<Rule<Control, Alphabet>> rules) {
-       for (Rule<Control, Alphabet> rule : rules) {
-           ConfigurationHead<Control, Alphabet> head = rule.getHead();
-           Set<Rule<Control, Alphabet>> headRules = deltaIndex.get(head);
-           if (headRules == null) {
-               headRules = new HashSet<Rule<Control, Alphabet>>();
-               deltaIndex.put(head, headRules);
-           }
-           headRules.add(rule);
-       }
+        deltaIndex = new HashMap<ConfigurationHead<Control, Alphabet>, Set<Rule<Control, Alphabet>>>();
+        for (Rule<Control, Alphabet> rule : rules) {
+            ConfigurationHead<Control, Alphabet> head = rule.getHead();
+            Set<Rule<Control, Alphabet>> headRules = deltaIndex.get(head);
+            if (headRules == null) {
+                headRules = new HashSet<Rule<Control, Alphabet>>();
+                deltaIndex.put(head, headRules);
+            }
+            headRules.add(rule);
+        }
     }
 
     Set<Configuration<Control, Alphabet>> getTransitions(Configuration configuration) {
@@ -108,14 +109,9 @@ public class PushdownSystem<Control, Alphabet> {
     public static PushdownSystem<String, String> of(String s) {
         ArrayList<Rule<String, String>> rules = new ArrayList<Rule<String, String>>();
         String[] stringRules = s.split("\\s*;\\s*");
-        for (String rule : stringRules) {
-            String[] sides = s.split("\\s*=>\\s*");
-            assert sides.length == 2 : "Rules must be of the form: lhs => rhs";
-            Configuration<String, String> lhsConf = Configuration.of(sides[0].trim());
-            assert lhsConf.getStack().isEmpty() : "lhs should have a configuration head";
-            ConfigurationHead<String, String> lhs = lhsConf.getHead();
-            Configuration<String, String> rhs = Configuration.of(sides[1].trim());
-            rules.add(new Rule(lhs, rhs));
+        for (String stringRule : stringRules) {
+            Rule<String, String> rule = Rule.of(stringRule);
+            rules.add(rule);
         }
         return  new PushdownSystem<String, String>(rules);
     }
