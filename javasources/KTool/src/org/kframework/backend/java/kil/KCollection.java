@@ -26,6 +26,8 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
         List<Term> normalizedItems = new ArrayList<Term>();
         for (Term term : items) {
             if (term.kind() == kind) {
+                assert term instanceof KCollection : "associative use of KCollection";
+
                 KCollection kCollection = (KCollection) term;
 
                 assert !kCollection.hasFrame() : "associative use of KCollection";
@@ -107,6 +109,36 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
     @Override
     public ASTNode accept(Transformer transformer) {
         return transformer.transform(this);
+    }
+
+    public static Term upKind(Term term, Kind kind) {
+        assert term.kind() == Kind.KITEM || term.kind() == Kind.K || term.kind() == Kind.KLIST;
+        assert kind == Kind.KITEM || kind == Kind.K || kind == Kind.KLIST;
+
+        /* promote KItem to K, and then promote K to KList */
+        if (term.kind() == Kind.KITEM && (kind == Kind.K || kind == Kind.KLIST)) {
+            term = new KSequence(ImmutableList.of(term));
+        }
+
+        if (term.kind() == Kind.K && kind == Kind.KLIST) {
+            term = new KList(ImmutableList.of(term));
+        }
+
+        return term;
+    }
+
+    public static Term downKind(Term term) {
+        assert term.kind() == Kind.KITEM || term.kind() == Kind.K || term.kind() == Kind.KLIST;
+
+        if (term instanceof KList && !((KList) term).hasFrame() && ((KList) term).size() == 1) {
+            term = ((KList) term).get(0);
+        }
+
+        if (term instanceof KSequence && !((KSequence) term).hasFrame() && ((KSequence) term).size() == 1) {
+            term = ((KSequence) term).get(0);
+        }
+
+        return term;
     }
 
 }

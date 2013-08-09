@@ -69,19 +69,9 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     @Override
     public void unify(Term term, Term otherTerm) {
-        /* promote KItem to K, and then promote K to KList */
-        if (term.kind() == Kind.KITEM
-                && (otherTerm.kind() == Kind.K || otherTerm.kind() == Kind.KLIST)) {
-            term = new KSequence(ImmutableList.of(term));
-        } else if (otherTerm.kind() == Kind.KITEM
-                && (term.kind() == Kind.K || term.kind() == Kind.KLIST)) {
-            otherTerm = new KSequence(ImmutableList.of(otherTerm));
-        }
-
-        if (term instanceof KSequence && otherTerm instanceof KList) {
-            term = new KList(ImmutableList.of(term));
-        } else if (otherTerm instanceof KSequence && term instanceof KList) {
-            otherTerm = new KList(ImmutableList.of(otherTerm));
+        if (term.kind() == Kind.KITEM || term.kind() == Kind.K || term.kind() == Kind.KLIST) {
+            term = KCollection.upKind(term, otherTerm.kind());
+            otherTerm = KCollection.upKind(otherTerm, term.kind());
         }
 
         assert term.kind() == otherTerm.kind():

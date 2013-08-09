@@ -828,8 +828,33 @@
       </all-programs>
   </test>
 
+  <test
+      language="tests/regression/issue#1/issue.k"
+      folder="tests/regression/issue#1"
+      results="tests/regression/issue#1"
+      extensions="issue" >
+    <kompile-option name="-ml" />
+    <kompile-option name="-w" value="none" />
+    <all-programs>
+      <krun-option name="--no-smt" />
+      <krun-option name="--backend" value="java-symbolic" />
+      <krun-option name="--output-mode" value="pretty" />
+    </all-programs>
+  </test>
 
-
+  <test
+      language="tests/regression/issue#2/issue.k"
+      folder="tests/regression/issue#2"
+      results="tests/regression/issue#2"
+      extensions="issue" >
+    <kompile-option name="-ml" />
+    <kompile-option name="-w" value="none" />
+    <all-programs>
+      <krun-option name="--no-smt" />
+      <krun-option name="--backend" value="java-symbolic" />
+      <krun-option name="--output-mode" value="pretty" />
+    </all-programs>
+  </test>
 
 </tests>
 
