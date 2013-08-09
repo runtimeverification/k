@@ -39,6 +39,8 @@ public class BuiltinIOOperations {
             return IntToken.of(fs().get(term.longValue()).getc() & 0xff);
         } catch (IOException e) {
             return processIOException(e.getMessage());
+        } catch (RuntimeException e) {
+            throw e;
         }
     }
 

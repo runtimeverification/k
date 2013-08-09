@@ -6,13 +6,14 @@ syntax KItem ::= assertEqual(K, K) [strict]
 
 syntax KResult ::= Int | String | TCPError
 
-rule open(S1, S2) => #open(S1, S2)
-rule tell(I) => #tell(I)
-rule getc(I) => #getc(I)
-rule read(I1, I2) => #read(I1, I2)
+rule open(S1:String, S2:String) => #open(S1, S2)
+rule tell(I:Int) => #tell(I)
+rule getc(I:Int) => #getc(I)
+rule read(I1:Int, I2:Int) => #read(I1, I2)
 
 rule assertEqual(K1:Int, K2:Int) => . when K1 ==Int K2
 rule assertEqual(.K, .K) => .
 rule assertEqual(K1:String, K2:String) => . when K1 ==String K2
+rule assertEqual(K1:TCPError, K2:TCPError) => . when K1 ==K K2
 
 endmodule

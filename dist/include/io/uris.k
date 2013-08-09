@@ -9,7 +9,7 @@ module URIS
   syntax KItem ::= "#open" "(" String ")" [function]
                  | "#open" "(" String "," String ")" [function, hook(#IO:#open)]
                  | "#tell" "(" Int ")" [function, hook(#IO:#tell)] 
-                 | "#getc" "(" Int ")"             [function, hook(#IO:getc)]
+                 | "#getc" "(" Int ")"             [function, hook(#IO:#getc)]
                  | "#read" "(" Int "," Int ")"    [function, hook(#IO:#read)]
  
   syntax K ::= "#close" "(" Int ")" [function, hook(#IO:#close)]
