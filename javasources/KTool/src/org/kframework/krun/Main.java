@@ -59,6 +59,7 @@ import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.SearchResults;
 import org.kframework.krun.api.SearchType;
 import org.kframework.krun.api.Transition;
+import org.kframework.krun.api.UnsupportedBackendOptionException;
 import org.kframework.krun.gui.Controller.RunKRunCommand;
 import org.kframework.krun.gui.UIDesign.MainWindow;
 import org.kframework.parser.DefinitionLoader;
@@ -430,7 +431,7 @@ public class Main {
                 System.exit(1);
             } catch (TransformerException e) {
                 e.report();
-            } catch (UnsupportedOperationException e) {
+            } catch (UnsupportedBackendOptionException e) {
                 Error.report("Backend \"" + K.backend + "\" does not support option " + e.getMessage());
             }
 
@@ -543,17 +544,21 @@ public class Main {
             KRun krun = obtainKRun(context);
             krun.setBackendOption("io", false);
             KRunDebugger debugger;
-            if (state == null) {
-                Term t = makeConfiguration(kast, "", rp, (K.term != null), context);
-                debugger = krun.debug(t);
-                System.out
-                        .println("After running one step of execution the result is:");
-                AnsiConsole.out.println(debugger.printState(debugger
-                        .getCurrentState()));
-            } else {
-                debugger = krun.debug(state.getResult().getGraph());
+            try {
+                if (state == null) {
+                    Term t = makeConfiguration(kast, "", rp, (K.term != null), context);
+                    debugger = krun.debug(t);
+                    System.out
+                            .println("After running one step of execution the result is:");
+                    AnsiConsole.out.println(debugger.printState(debugger
+                            .getCurrentState()));
+                } else {
+                    debugger = krun.debug(state.getResult().getGraph());
+                }
+            } catch (UnsupportedBackendOptionException e) {
+                Error.report("Backend \"" + K.backend + "\" does not support option " + e.getMessage());
+                throw e; //unreachable
             }
-
             while (true) {
                 System.out.println();
                 String input = reader.readLine("Command > ");
