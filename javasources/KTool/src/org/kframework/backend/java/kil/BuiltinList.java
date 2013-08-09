@@ -1,5 +1,6 @@
 package org.kframework.backend.java.kil;
 
+import com.google.common.base.Joiner;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Utils;
@@ -131,5 +132,27 @@ public class BuiltinList extends Collection {
 
     public java.util.Collection<Term> elementsRight() {
         return Collections.unmodifiableCollection(elementsRight);
+    }
+
+    @Override
+    public String toString() {
+        return toString(" ", ".List");
+    }
+
+    public String toString(String operator, String identity) {
+        Joiner joiner = Joiner.on(operator);
+        StringBuilder stringBuilder = new StringBuilder();
+        joiner.appendTo(stringBuilder, elementsLeft);
+        if (super.frame != null) {
+            if (stringBuilder.length() != 0) {
+                stringBuilder.append(operator);
+            }
+            stringBuilder.append(super.frame);
+        }
+        joiner.appendTo(stringBuilder, elementsRight);
+        if (stringBuilder.length() == 0) {
+            stringBuilder.append(identity);
+        }
+        return stringBuilder.toString();
     }
 }
