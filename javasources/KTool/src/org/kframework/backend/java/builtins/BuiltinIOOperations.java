@@ -4,11 +4,13 @@ import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.symbolic.BuiltinFunction;
 import org.kframework.krun.api.io.FileSystem;
 
 import java.io.IOException;
+import java.nio.charset.CharacterCodingException;
 
 public class BuiltinIOOperations {
 
@@ -42,16 +44,55 @@ public class BuiltinIOOperations {
 
     public static Term read(IntToken term1, IntToken term2) {
         try {
-            return StringToken.of(new String(fs().get(term1.longValue()).read(term2.intValue())));
+            return StringToken.of(fs().get(term1.longValue()).read(term2.intValue()));
+        } catch (IOException e) {
+            return processIOException(e.getMessage());
+        }
+    }
+
+    public static Term close(IntToken term) {
+        try {
+            fs().close(term.longValue());
+            return new KSequence();
+        } catch (IOException e) {
+            return processIOException(e.getMessage());
+        }
+    }
+
+    public static Term seek(IntToken term1, IntToken term2) {
+        try {
+            fs().get(term1.longValue()).seek(term2.longValue());
+            return new KSequence();
+        } catch (IOException e) {
+            return processIOException(e.getMessage());
+        }
+    }
+
+    public static Term putc(IntToken term1, IntToken term2) {
+        try {
+            fs().get(term1.longValue()).putc(term2.unsignedByteValue());
+            return new KSequence();
+        } catch (IOException e) {
+            return processIOException(e.getMessage());
+        }
+    }
+
+    public static Term write(IntToken term1, StringToken term2) {
+        try {
+            fs().get(term1.longValue()).write(term2.byteArrayValue());
+            return new KSequence();
+        } catch (CharacterCodingException e) {
+            throw new IllegalArgumentException(e);
         } catch (IOException e) {
             return processIOException(e.getMessage());
         }
     }
 
     private static KItem processIOException(String errno) {
-        String klabel = "'#" + errno;
+        String klabelString = "'#" + errno;
         Definition def = BuiltinFunction.context().definition();
+        KLabelConstant klabel = KLabelConstant.of(klabelString, def.context());
         assert def.kLabels().contains(klabel) : "No KLabel in definition for errno '" + errno + "'";
-        return new KItem(KLabelConstant.of(klabel, def.context()), new KList(), def.context());
+        return new KItem(klabel, new KList(), def.context());
     }
 }

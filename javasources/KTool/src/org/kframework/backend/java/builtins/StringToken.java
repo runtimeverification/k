@@ -8,6 +8,12 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 import org.kframework.utils.StringUtil;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CodingErrorAction;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,11 +58,41 @@ public class StringToken extends Token {
     }
 
     /**
+     * Returns a {@code StringToklen} representation of a given {@code byte[]} value. This value is
+     * interpreted as a sequence of code points in the Latin-1 Unicode block according to the
+     * ISO-8859-1 encoding.
+     * @param value A Latin-1 representation o fthe sequence of code points.
+     */
+    public static StringToken of(byte[] value) {
+        try {
+            String stringValue = new String(value, "ISO-8859-1");
+            return of(stringValue);
+        } catch (UnsupportedEncodingException e) {
+            throw new AssertionError("no latin-1 charset???");
+        }
+    }
+
+    /**
      * Returns a {@link String} representation of the interpreted value of
      * this StringToken.
      */
     public String stringValue() {
         return value;
+    }
+
+    /**
+     * Returns a {@code byte[]} representation of the interpreted value of this StringToken.
+     * @throws CharacterCodingException Thrown if the String is not a valid sequence of code points
+     * in the 0-255 range.
+     */
+    public byte[] byteArrayValue() throws CharacterCodingException {
+        ByteBuffer buffer = Charset.forName("ISO-8859-1")
+            .newEncoder()
+            .onUnmappableCharacter(CodingErrorAction.REPORT)
+            .encode(CharBuffer.wrap(value));
+        byte[] bytes = new byte[buffer.remaining()];
+        buffer.get(bytes);
+        return bytes;
     }
 
     /**

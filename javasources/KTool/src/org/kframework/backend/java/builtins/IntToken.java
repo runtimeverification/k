@@ -96,7 +96,20 @@ public class IntToken extends Token {
         return value.longValue();
     }
 
-
+    /**
+     * Returns a {@code byte} representation of the (interpreted) value of this
+     * IntToken. Assumes an unsigned value in the range 0-255.
+     * @throws ArithmeticException Integer is not in the range of an unsigned byte.
+     */
+    public byte unsignedByteValue() {
+        if (value.compareTo(BigInteger.valueOf(255)) > 0) {
+            throw new ArithmeticException();
+        }
+        if (value.compareTo(BigInteger.valueOf(0)) < 0) {
+            throw new ArithmeticException();
+        }
+        return (byte)value.longValue();
+    }
 
     /**
      * Returns a {@code String} representation of the sort of this IntToken.

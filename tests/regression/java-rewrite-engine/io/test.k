@@ -1,8 +1,8 @@
 module TEST
 
-syntax K ::= open(String, String) | tell(Int) | getc(Int) | read(Int, Int)
+syntax KItem ::= open(String, String) | tell(Int) | getc(Int) | read(Int, Int)
 
-syntax K ::= assertEqual(K, K) [strict]
+syntax KItem ::= assertEqual(K, K) [strict]
 
 syntax KResult ::= Int | String | TCPError
 
@@ -11,6 +11,8 @@ rule tell(I) => #tell(I)
 rule getc(I) => #getc(I)
 rule read(I1, I2) => #read(I1, I2)
 
-rule assertEqual(K, K) => .
+rule assertEqual(K1:Int, K2:Int) => . when K1 ==Int K2
+rule assertEqual(.K, .K) => .
+rule assertEqual(K1:String, K2:String) => . when K1 ==String K2
 
 endmodule
