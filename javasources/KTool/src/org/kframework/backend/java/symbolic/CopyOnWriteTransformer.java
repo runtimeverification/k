@@ -1,5 +1,6 @@
 package org.kframework.backend.java.symbolic;
 
+import com.google.common.collect.Iterables;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
@@ -13,6 +14,7 @@ import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Hole;
 import org.kframework.backend.java.kil.KCollection;
+import org.kframework.backend.java.kil.KCollectionFragment;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabel;
 import org.kframework.backend.java.kil.KLabelConstant;
@@ -20,6 +22,7 @@ import org.kframework.backend.java.kil.KLabelFreezer;
 import org.kframework.backend.java.kil.KLabelInjection;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
+import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.ListLookup;
 import org.kframework.backend.java.kil.ListUpdate;
 import org.kframework.backend.java.kil.MapLookup;
@@ -220,14 +223,35 @@ public class CopyOnWriteTransformer implements Transformer {
         if (kSequence.hasFrame()) {
             Variable frame;
             Term transformedFrame = (Term) kSequence.frame().accept(this);
-            if (transformedFrame instanceof KSequence) {
-                items = new ArrayList<Term>(items);
-                items.addAll(((KSequence) transformedFrame).getItems());
-                frame = ((KSequence) transformedFrame).hasFrame() ?
-                        ((KSequence) transformedFrame).frame() : null;
+
+            if (transformedFrame.kind() == Kind.K) {
+                if (transformedFrame instanceof KSequence) {
+                    if (items == kSequence.getItems()) {
+                        items = new ArrayList<Term>(items);
+                    }
+                    items.addAll(((KSequence) transformedFrame).getItems());
+                    frame = ((KSequence) transformedFrame).hasFrame() ?
+                            ((KSequence) transformedFrame).frame() : null;
+                } else if (transformedFrame instanceof KCollectionFragment) {
+                    if (items == kSequence.getItems()) {
+                        items = new ArrayList<Term>(items);
+                    }
+                    Iterables.addAll(items, (KCollectionFragment) transformedFrame);
+                    frame = ((KCollectionFragment) transformedFrame).hasFrame() ?
+                            ((KCollectionFragment) transformedFrame).frame() : null;
+                } else {
+                    frame = (Variable) transformedFrame;
+                }
             } else {
-                frame = (Variable) transformedFrame;
+                assert transformedFrame.kind() == Kind.KITEM;
+
+                if (items == kSequence.getItems()) {
+                    items = new ArrayList<Term>(items);
+                }
+                items.add(transformedFrame);
+                frame = null;
             }
+
             if (items != kSequence.getItems() || frame != kSequence.frame()) {
                 kSequence = new KSequence(ImmutableList.<Term>copyOf(items), frame);
             }
@@ -237,7 +261,11 @@ public class CopyOnWriteTransformer implements Transformer {
             }
         }
 
-        return kSequence;
+        if (kSequence.hasFrame() || kSequence.size() != 1) {
+            return kSequence;
+        } else {
+            return kSequence.get(0);
+        }
     }
 
     @Override

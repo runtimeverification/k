@@ -27,38 +27,9 @@ public class SubstitutionTransformer extends CopyOnWriteTransformer {
 
     @Override
     public KList transform(KList kList) {
-        if (kList.hasFrame()) {
-            Variable frame = kList.frame();
-            kList = (KList) super.transform(new KList(kList.getItems()));
-            return new KList(kList.getItems(), frame);
-        } else {
-            return (KList) super.transform(kList);
-        }
-    }
+        assert !kList.hasFrame() : "only KList with a fixed number of elements is supported";
 
-    @Override
-    public KSequence transform(KSequence kSequence) {
-        if (!kSequence.hasFrame() || boundVariables.contains(kSequence.frame())) {
-            return (KSequence) super.transform(kSequence);
-        }
-
-        Term term = substitution.get(kSequence.frame());
-        if (term == null || !(term instanceof KCollectionFragment)) {
-            return (KSequence) super.transform(kSequence);
-        }
-
-        KCollectionFragment fragment = (KCollectionFragment) term;
-        List<Term> items = transformList(kSequence.getItems());
-        ImmutableList.Builder<Term> builder = new ImmutableList.Builder<Term>();
-        builder.addAll(items).addAll(fragment);
-
-        if (fragment.hasFrame()) {
-            kSequence = new KSequence(builder.build(), fragment.frame());
-        } else {
-            kSequence = new KSequence(builder.build());
-        }
-
-        return kSequence;
+        return (KList) super.transform(kList);
     }
 
     @Override

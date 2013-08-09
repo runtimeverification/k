@@ -185,10 +185,14 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
     }
     
     public TruthValue add(Term leftHandSide, Term rightHandSide) {
-        assert leftHandSide.kind().equals(rightHandSide.kind()):
+        assert leftHandSide.kind() == rightHandSide.kind()
+                || ((leftHandSide.kind() == Kind.KITEM || leftHandSide.kind() == Kind.K
+                     || leftHandSide.kind() == Kind.KLIST)
+                    && (rightHandSide.kind() == Kind.KITEM || rightHandSide.kind() == Kind.K
+                        || rightHandSide.kind() == Kind.KLIST)):
                 "kind mismatch between "
-                        + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
-                        + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
+                + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
+                + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
 
         Term normalizedLeftHandSide = leftHandSide.substitute(substitution, context);
         if (normalizedLeftHandSide != leftHandSide) {
