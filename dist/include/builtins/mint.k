@@ -20,7 +20,7 @@ module MINT
                | "usupMInt" "(" Int ")"   [function]
   rule infMInt(N:Int) => 0 -Int (1 <<Int (N -Int 1))
   rule supMInt(N:Int) => (1 <<Int (N -Int 1)) -Int 1
-  rule uinfMInt(N:Int) => 0 
+  rule uinfMInt(_:Int) => 0 
   rule usupMInt(N:Int) => (1 <<Int N) -Int 1
  
   /* Functions for signed and unsigned interpretations of machine integers. */

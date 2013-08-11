@@ -71,25 +71,25 @@ module K-FUNCTIONAL-VISITOR
    * form.
    */
   rule
-    #visitAll(K:K, VisitLabel:KLabel, VisitList:KList, IfLabel:KLabel)
+    #visitAll(KList:KList, VisitLabel:KLabel, VisitList:KList, IfLabel:KLabel)
   =>
-    #visitAll(K, VisitLabel, VisitList, IfLabel, .KList)
+    #visitAll(KList, VisitLabel, VisitList, IfLabel, .KList)
   rule
-    #visitAll(K:K, VisitLabel:KLabel, IfLabel:KLabel, IfList:KList)
+    #visitAll(KList:KList, VisitLabel:KLabel, IfLabel:KLabel, IfList:KList)
   =>
-    #visitAll(K, VisitLabel, .KList, IfLabel, IfList)
+    #visitAll(KList, VisitLabel, .KList, IfLabel, IfList)
   rule
-    #visitAll(K:K, VisitLabel:KLabel, IfLabel:KLabel)
+    #visitAll(KList:KList, VisitLabel:KLabel, IfLabel:KLabel)
   =>
-    #visitAll(K, VisitLabel, .KList, IfLabel, .KList)
+    #visitAll(KList, VisitLabel, .KList, IfLabel, .KList)
   rule
-    #visitAll(K:K, VisitLabel:KLabel, VisitList:KList)
+    #visitAll(KList:KList, VisitLabel:KLabel, VisitList:KList)
   =>
-    #visitAll(K, VisitLabel, VisitList, $visitTrue, .KList)
+    #visitAll(KList, VisitLabel, VisitList, $visitTrue, .KList)
   rule
-    #visitAll(K:K, VisitLabel:KLabel)
+    #visitAll(KList:KList, VisitLabel:KLabel)
   =>
-    #visitAll(K, VisitLabel, .KList, $visitTrue, .KList)
+    #visitAll(KList, VisitLabel, .KList, $visitTrue, .KList)
 
   /*
    * Default predicate guard (always true)
@@ -101,7 +101,7 @@ module K-FUNCTIONAL-VISITOR
    * #visitAll applies #visit to each element of the KList (first argument).
    */
   rule
-    #visitAll(K,,KList:KList,
+    #visitAll(K:K,,KList:KList,
            VisitLabel:KLabel,
            VisitList:KList,
            IfLabel:KLabel,
@@ -116,7 +116,7 @@ module K-FUNCTIONAL-VISITOR
    * #visit applied to each K item.
    */
   rule
-    #visit(K1 ~> K2,
+    #visit(K1:K ~> K2:K,
            VisitLabel:KLabel,
            VisitList:KList,
            IfLabel:KLabel,
