@@ -1034,7 +1034,7 @@ public class Main {
             }
 
             if (K.compiled_def == null) {
-                Error.report("Could not find a compiled K definition. Please ensure that either a compiled K definition exists in the current directory with its default name, or that --k-definition or --compiled-def have been specified.");
+                Error.report("Could not find a compiled K definition. Please ensure that either a compiled\nK definition exists in the current directory with its default name, or that --k-definition or\n--compiled-def have been specified.");
             }
             File compiledFile = new File(K.compiled_def);
             if (!compiledFile.exists()) {
