@@ -155,4 +155,28 @@ public class BuiltinList extends Collection {
         }
         return stringBuilder.toString();
     }
+
+    public static BuiltinList of(ArrayList<Term> elementsLeft, ArrayList<Term> elementsRight, Term frame) {
+        if (frame == null) {
+            elementsLeft.addAll(elementsRight);
+            return new BuiltinList(elementsLeft);
+        }
+        if (frame instanceof Variable)
+            return new BuiltinList(elementsLeft, elementsRight, (Variable) frame);
+        if (frame instanceof BuiltinList) {
+            BuiltinList builtinList = (BuiltinList) frame;
+            if (elementsLeft.isEmpty() && elementsRight.isEmpty()) return builtinList;
+            elementsLeft.addAll(builtinList.elementsLeft());
+            ArrayDeque<Term> right = builtinList.elementsRight;
+            right.addAll(elementsRight);
+            if (builtinList.hasFrame()) {
+                return new BuiltinList(elementsLeft, right, builtinList.frame());
+            } else {
+                elementsLeft.addAll(right);
+                return new BuiltinList(elementsLeft);
+            }
+        }
+        assert false : "Frame can only be substituted by a Variable or a BuiltinList, or deleted.";
+        return null;
+    }
 }

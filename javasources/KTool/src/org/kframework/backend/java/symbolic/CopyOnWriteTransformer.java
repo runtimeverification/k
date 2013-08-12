@@ -37,11 +37,7 @@ import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.ASTNode;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
@@ -291,10 +287,10 @@ public class CopyOnWriteTransformer implements Transformer {
 
     @Override
     public ASTNode transform(BuiltinList builtinList) {
-        Variable frame = null;
+        Term frame = null;
         boolean change = false;
         if (builtinList.hasFrame()) {
-            frame = (Variable) builtinList.frame().accept(this);
+            frame = (Term) builtinList.frame().accept(this);
             if (frame != builtinList.frame()) change = true;
         }
 
@@ -311,16 +307,16 @@ public class CopyOnWriteTransformer implements Transformer {
             if (newEntry != null) elementsRight.add((Term) newEntry);
         }
         if (! change) return  builtinList;
-        return new BuiltinList(elementsLeft, elementsRight, frame);
+        return BuiltinList.of(elementsLeft, elementsRight, frame);
     }
 
     @Override
     public ASTNode transform(BuiltinMap builtinMap) {
         BuiltinMap transformedMap = null;
         if (builtinMap.hasFrame()) {
-            Variable frame = (Variable) builtinMap.frame().accept(this);
+            Term frame = (Term) builtinMap.frame().accept(this);
             if (frame != builtinMap.frame()) {
-                transformedMap = new BuiltinMap(frame);
+                transformedMap = BuiltinMap.of(Collections.<Term, Term>emptyMap(), frame);
             }
         }
 
@@ -358,9 +354,9 @@ public class CopyOnWriteTransformer implements Transformer {
     public ASTNode transform(BuiltinSet builtinSet) {
         BuiltinSet transformedSet = null;
         if (builtinSet.hasFrame()) {
-            Variable frame = (Variable) builtinSet.frame().accept(this);
+            Term frame = (Term) builtinSet.frame().accept(this);
             if (frame != builtinSet.frame()) {
-                transformedSet = new BuiltinSet(frame);
+                transformedSet = BuiltinSet.of(Collections.<Term>emptySet(), frame);
             }
         }
 
