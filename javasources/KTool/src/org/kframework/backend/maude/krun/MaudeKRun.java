@@ -611,7 +611,7 @@ public class MaudeKRun implements KRun {
 	}
 
     public KRunResult<GeneratorResults> generate(Integer bound, Integer depth, SearchType searchType, Rule pattern, Term cfg, RuleCompilerSteps compilationInfo) throws KRunExecutionException{
-        throw new UnsupportedOperationException("Test generation");
+        throw new UnsupportedBackendOptionException("--testgen");
     }
 
 	private KRunProofResult<DirectedGraph<KRunState, Transition>> parseModelCheckResult() {
@@ -733,6 +733,6 @@ public class MaudeKRun implements KRun {
 	}
 
     public KRunProofResult<Set<Term>> prove(Module m) {
-        throw new UnsupportedOperationException("--prove");
+        throw new UnsupportedBackendOptionException("--prove");
     }
 }

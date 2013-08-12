@@ -1,5 +1,6 @@
 package org.kframework.backend.pdmc.pda;
 
+import com.google.common.base.Joiner;
 import org.kframework.backend.pdmc.pda.automata.Automata;
 import org.kframework.backend.pdmc.pda.automata.State;
 import org.kframework.backend.pdmc.pda.automata.Transition;
@@ -26,7 +27,7 @@ public class PushdownSystem<Control, Alphabet> {
         }
     }
 
-    Set<Configuration<Control, Alphabet>> getTransitions(Configuration configuration) {
+    Set<Configuration<Control, Alphabet>> getTransitions(Configuration<Control, Alphabet> configuration) {
         if (configuration.isFinal()) return Collections.emptySet();
         Set<Rule<Control,Alphabet>> rules = deltaIndex.get(configuration.getHead());
         if (rules == null) return Collections.emptySet();
@@ -114,5 +115,21 @@ public class PushdownSystem<Control, Alphabet> {
             rules.add(rule);
         }
         return  new PushdownSystem<String, String>(rules);
+    }
+
+    @Override
+    public String toString() {
+        Joiner joiner = Joiner.on(";\n");
+        StringBuilder builder = new StringBuilder();
+        joiner.appendTo(builder, getRules());
+        return builder.toString();
+    }
+
+    private Collection<Rule<Control, Alphabet>> getRules() {
+        ArrayList<Rule<Control, Alphabet>> rules = new ArrayList<Rule<Control, Alphabet>>();
+        for (Set<Rule<Control, Alphabet>> values : deltaIndex.values()) {
+            rules.addAll(values);
+        }
+        return rules;
     }
 }

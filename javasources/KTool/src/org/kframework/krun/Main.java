@@ -59,6 +59,7 @@ import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.SearchResults;
 import org.kframework.krun.api.SearchType;
 import org.kframework.krun.api.Transition;
+import org.kframework.krun.api.UnsupportedBackendOptionException;
 import org.kframework.krun.gui.Controller.RunKRunCommand;
 import org.kframework.krun.gui.UIDesign.MainWindow;
 import org.kframework.parser.DefinitionLoader;
@@ -430,7 +431,7 @@ public class Main {
                 System.exit(1);
             } catch (TransformerException e) {
                 e.report();
-            } catch (UnsupportedOperationException e) {
+            } catch (UnsupportedBackendOptionException e) {
                 Error.report("Backend \"" + K.backend + "\" does not support option " + e.getMessage());
             }
 
@@ -543,17 +544,21 @@ public class Main {
             KRun krun = obtainKRun(context);
             krun.setBackendOption("io", false);
             KRunDebugger debugger;
-            if (state == null) {
-                Term t = makeConfiguration(kast, "", rp, (K.term != null), context);
-                debugger = krun.debug(t);
-                System.out
-                        .println("After running one step of execution the result is:");
-                AnsiConsole.out.println(debugger.printState(debugger
-                        .getCurrentState()));
-            } else {
-                debugger = krun.debug(state.getResult().getGraph());
+            try {
+                if (state == null) {
+                    Term t = makeConfiguration(kast, "", rp, (K.term != null), context);
+                    debugger = krun.debug(t);
+                    System.out
+                            .println("After running one step of execution the result is:");
+                    AnsiConsole.out.println(debugger.printState(debugger
+                            .getCurrentState()));
+                } else {
+                    debugger = krun.debug(state.getResult().getGraph());
+                }
+            } catch (UnsupportedBackendOptionException e) {
+                Error.report("Backend \"" + K.backend + "\" does not support option " + e.getMessage());
+                throw e; //unreachable
             }
-
             while (true) {
                 System.out.println();
                 String input = reader.readLine("Command > ");
@@ -1029,7 +1034,7 @@ public class Main {
             }
 
             if (K.compiled_def == null) {
-                Error.report("Could not find a compiled K definition. Please ensure that either a compiled K definition exists in the current directory with its default name, or that --k-definition or --compiled-def have been specified.");
+                Error.report("Could not find a compiled K definition. Please ensure that either a compiled\nK definition exists in the current directory with its default name, or that --k-definition or\n--compiled-def have been specified.");
             }
             File compiledFile = new File(K.compiled_def);
             if (!compiledFile.exists()) {

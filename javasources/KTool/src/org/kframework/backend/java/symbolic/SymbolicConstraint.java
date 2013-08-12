@@ -9,7 +9,9 @@ import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.AnonymousVariable;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.JavaSymbolicObject;
+import org.kframework.backend.java.kil.KCollection;
 import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Sorted;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
@@ -60,10 +62,21 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
         private Term rightHandSide;
 
         private Equality(Term leftHandSide, Term rightHandSide) {
-            assert leftHandSide.kind().equals(rightHandSide.kind()):
+            assert leftHandSide.kind() == rightHandSide.kind()
+                    || ((leftHandSide.kind() == Kind.KITEM || leftHandSide.kind() == Kind.K
+                         || leftHandSide.kind() == Kind.KLIST)
+                        && (rightHandSide.kind() == Kind.KITEM || rightHandSide.kind() == Kind.K
+                            || rightHandSide.kind() == Kind.KLIST)):
                     "kind mismatch between "
                     + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
                     + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
+
+            if (leftHandSide.kind() == Kind.K || leftHandSide.kind() == Kind.KLIST) {
+                leftHandSide = KCollection.downKind(leftHandSide);
+            }
+            if (rightHandSide.kind() == Kind.K || rightHandSide.kind() == Kind.KLIST) {
+                rightHandSide = KCollection.downKind(rightHandSide);
+            }
 
             this.leftHandSide = leftHandSide;
             this.rightHandSide = rightHandSide;
@@ -172,20 +185,26 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
     }
     
     public TruthValue add(Term leftHandSide, Term rightHandSide) {
-        assert leftHandSide.kind().equals(rightHandSide.kind()):
+        assert leftHandSide.kind() == rightHandSide.kind()
+                || ((leftHandSide.kind() == Kind.KITEM || leftHandSide.kind() == Kind.K
+                     || leftHandSide.kind() == Kind.KLIST)
+                    && (rightHandSide.kind() == Kind.KITEM || rightHandSide.kind() == Kind.K
+                        || rightHandSide.kind() == Kind.KLIST)):
                 "kind mismatch between "
-                        + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
-                        + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
+                + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
+                + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
+
         Term normalizedLeftHandSide = leftHandSide.substitute(substitution, context);
         if (normalizedLeftHandSide != leftHandSide) {
             normalizedLeftHandSide = normalizedLeftHandSide.evaluate(context);
         }
+
         Term normalizedRightHandSide = rightHandSide.substitute(substitution, context);
         if (normalizedRightHandSide != rightHandSide) {
             normalizedRightHandSide = normalizedRightHandSide.evaluate(context);
         }
-        Equality equality = this.new Equality(normalizedLeftHandSide, normalizedRightHandSide);
 
+        Equality equality = this.new Equality(normalizedLeftHandSide, normalizedRightHandSide);
         if (equality.isUnknown()){
             equalities.add(equality);
             truthValue = TruthValue.UNKNOWN;

@@ -462,23 +462,23 @@ public class JavaSymbolicKRun implements KRun {
     public KRunProofResult<DirectedGraph<KRunState, Transition>> modelCheck(
             org.kframework.kil.Term formula,
             org.kframework.kil.Term cfg) throws KRunExecutionException {
-        throw new UnsupportedOperationException("--ltlmc");
+        throw new UnsupportedBackendOptionException("--ltlmc");
     }
 
     @Override
     public KRunResult<KRunState> step(org.kframework.kil.Term cfg, int steps)
             throws KRunExecutionException {
-        throw new UnsupportedOperationException("--debug");
+        throw new UnsupportedBackendOptionException("--debug");
     }
 
     @Override
     public KRunDebugger debug(org.kframework.kil.Term cfg) {
-        throw new UnsupportedOperationException("--debug");
+        throw new UnsupportedBackendOptionException("--debug");
     }
 
     @Override
     public KRunDebugger debug(DirectedGraph<KRunState, Transition> graph) {
-        throw new UnsupportedOperationException("--debug");
+        throw new UnsupportedBackendOptionException("--debug");
     }
 
 	@Override
