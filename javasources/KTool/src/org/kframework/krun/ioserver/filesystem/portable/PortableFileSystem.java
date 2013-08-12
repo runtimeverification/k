@@ -4,6 +4,10 @@ import org.apache.commons.collections15.BidiMap;
 import org.apache.commons.collections15.bidimap.DualHashBidiMap;
 import org.kframework.krun.api.io.File;
 import org.kframework.krun.api.io.FileSystem;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.general.GlobalSettings;
 
 import java.io.EOFException;
 import java.io.FileDescriptor;
@@ -85,10 +89,10 @@ public class PortableFileSystem implements FileSystem {
         int startIdx = message.lastIndexOf("(") + 1;
         int endIdx = message.length() - 1;
         String realMessage = message.substring(startIdx, endIdx);
-        processErrno(realMessage, message);
+        processErrno(realMessage, e);
     }
 
-    static void processErrno(String realMessage, String originalMessage) throws IOException {
+    static void processErrno(String realMessage, IOException e) throws IOException {
         if (realMessage.equals("Permission denied")) {
             throw new IOException("EACCES");
         } else if (realMessage.equals("Is a directory")) {
@@ -107,16 +111,20 @@ public class PortableFileSystem implements FileSystem {
             throw new IOException("EINVAL");
         } else if (realMessage.equals("Bad file descriptor")) {
             throw new IOException("EBADF");
+        } else if (realMessage.equals("Illegal seek")) {
+            throw new IOException("ESPIPE");
         }
-        assert false : "Unrecognized OS errno. Please file an issue on the K framework issue " + 
-            "tracker explaining precisely what you were trying to do and include this error " + 
-            "message. Original error message follows:\n" + originalMessage;
+        e.printStackTrace();
+        GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+            KExceptionGroup.CRITICAL,
+            "Unrecognized OS errno. Please file an issue on the K framework issue tracker\n" +
+            "explaining precisely what you were trying to do and include the above stack trace"));
     }
 
     static void processIOException(IOException e) throws IOException {
         if (e instanceof EOFException) {
             throw new IOException("EOF");
         }
-        processErrno(e.getMessage(), e.getMessage());
+        processErrno(e.getMessage(), e);
     }
 }

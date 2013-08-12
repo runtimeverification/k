@@ -856,5 +856,18 @@
     </all-programs>
   </test>
 
+<test language="tests/regression/java-rewrite-engine/io/test.k"
+      extensions="test"
+      folder="tests/regression/java-rewrite-engine/io/programs"
+      results="tests/regression/java-rewrite-engine/io/tests"
+      unixOnly="tests/regression/java-rewrite-engine/io/prepare.sh">
+  <kompile-option name="-ml" />
+  <all-programs>
+    <krun-option name="--backend" value="java-symbolic" />
+    <krun-option name="--no-smt" />
+    <krun-option name="--parser" value="kast -groundParser" />
+  </all-programs>
+</test>
+
 </tests>
 

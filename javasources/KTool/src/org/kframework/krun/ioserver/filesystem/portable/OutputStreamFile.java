@@ -1,22 +1,35 @@
 package org.kframework.krun.ioserver.filesystem.portable;
 
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.FileOutputStream;
 
 public class OutputStreamFile extends File {
 
-    protected OutputStream os;
+    protected FileOutputStream os;
 
-    public OutputStreamFile(OutputStream os) {
+    public OutputStreamFile(FileOutputStream os) {
         this.os = os;
     }
 
     public long tell() throws IOException {
-        throw new IOException("ESPIPE");
+        // we can't just assume it's not possible: what if the stream points to a regular file and not a
+        // pipe?
+        try {
+            return os.getChannel().position();
+        } catch (IOException e) {
+            PortableFileSystem.processIOException(e);
+            throw e; //unreachable
+        }
     }
 
     public void seek(long pos) throws IOException {
-        throw new IOException("ESPIPE");
+        //see comment on tell
+        try {
+            os.getChannel().position(pos);
+        } catch (IOException e) {
+            PortableFileSystem.processIOException(e);
+            throw e; //unreachable
+        }
     }
 
     public void putc(byte b) throws IOException {
