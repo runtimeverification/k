@@ -109,6 +109,7 @@ public class ProgramSDF {
 		sdf.append("\n");
 
 		sdf.append("\n%% start symbols subsorts\n");
+		sdf.append("	KItem		-> K\n");
 		for (String s : psdfv.startSorts) {
 			if (!Sort.isBasesort(s) && !context.isListSort(s))
 				sdf.append("	" + StringUtil.escapeSortName(s) + "		-> K\n");
