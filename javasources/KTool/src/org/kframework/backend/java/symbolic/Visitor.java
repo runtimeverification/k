@@ -17,6 +17,8 @@ import org.kframework.backend.java.kil.KLabel;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.ListLookup;
+import org.kframework.backend.java.kil.ListUpdate;
 import org.kframework.backend.java.kil.MapLookup;
 import org.kframework.backend.java.kil.MapUpdate;
 import org.kframework.backend.java.kil.SetLookup;
@@ -55,6 +57,8 @@ public interface Visitor {
     public void visit(KLabel kLabel);
     public void visit(KList kList);
     public void visit(KSequence kSequence);
+    public void visit(ListLookup listLookup);
+    public void visit(ListUpdate listUpdate);
     public void visit(MapLookup mapLookup);
     public void visit(MapUpdate mapUpdate);
     public void visit(MetaVariable metaVariable);

@@ -38,6 +38,7 @@ public class SymbolicRewriter {
 
     private final Definition definition;
     private final Stopwatch stopwatch = new Stopwatch();
+    private int step;
     private final Stopwatch ruleStopwatch = new Stopwatch();
     private final Map<IndexingPair, Set<Rule>> ruleTable;
     private final List<ConstrainedTerm> results = new ArrayList<ConstrainedTerm>();
@@ -92,7 +93,7 @@ public class SymbolicRewriter {
     public ConstrainedTerm rewrite(ConstrainedTerm constrainedTerm, int bound) {
         stopwatch.start();
 
-        for (int i = 0; i != bound; ++i) {
+        for (step = 0; step != bound; ++step) {
             /* get the first solution */
             computeRewriteStep(constrainedTerm);
             ConstrainedTerm result = getTransition(0);
@@ -104,7 +105,7 @@ public class SymbolicRewriter {
         }
 
         stopwatch.stop();
-        System.err.println("[" + stopwatch +"]");
+        System.err.println("[" + step + ", " + stopwatch +"]");
 
         return constrainedTerm;
     }

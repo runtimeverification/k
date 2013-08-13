@@ -487,7 +487,7 @@ SIMPLE, also defined in \K (see \texttt{examples/simple/typed/static}),
 discards programs which do not respect this requirement. */
 
   rule <k> function F:Id(Xs:Ids) B:Block => . ...</k>
-       <env> Env:MyMap => Env[L <- F] </env>
+       <env> Env:MyMap => Env[F <- L] </env>
        <store>... .MyMap => L |-> lambda(Xs, B) ...</store>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
 

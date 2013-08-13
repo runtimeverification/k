@@ -145,6 +145,18 @@ public class BottomUpVisitor implements Visitor {
     }
 
     @Override
+    public void visit(ListLookup listLookup) {
+        listLookup.list().accept(this);
+        listLookup.key().accept(this);
+        visit((Term) listLookup);
+    }
+
+    @Override
+    public void visit(ListUpdate listUpdate) {
+        listUpdate.base().accept(this);
+    }
+
+    @Override
     public void visit(MapLookup mapLookup) {
         mapLookup.map().accept(this);
         mapLookup.key().accept(this);

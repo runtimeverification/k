@@ -10,7 +10,7 @@ import java.util.Set;
 /**
  * Table of {@code public static} methods on builtin sets.
  *
- * @author: AndreiS
+ * @author AndreiS
  */
 public class BuiltinSetOperations {
 
