@@ -1,18 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" readonly="true" id="80539f2c-4526-49f5-8257-b40223b4e679" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/java/kil/BuiltinList.java" afterPath="$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/java/kil/BuiltinList.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/java/kil/BuiltinSet.java" afterPath="$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/java/kil/BuiltinSet.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/pdmc/pda/PushdownSystem.java" afterPath="$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/pdmc/pda/PushdownSystem.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/vcs.xml" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
+    <list default="true" id="80539f2c-4526-49f5-8257-b40223b4e679" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/dist/examples/java_rewrite_engine/tutorial/2_imp/t1.imp" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/dist/examples/java_rewrite_engine/tutorial/2_imp/t5.imp" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/dist/examples/java_rewrite_engine/tutorial/2_imp/t6.imp" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/javasources/KTool/src/org/kframework/krun/CommandlineOptions.java" afterPath="$PROJECT_DIR$/javasources/KTool/src/org/kframework/krun/CommandlineOptions.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/java/symbolic/JavaSymbolicKRun.java" afterPath="$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/java/symbolic/JavaSymbolicKRun.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/javasources/KTool/src/org/kframework/krun/Main.java" afterPath="$PROJECT_DIR$/javasources/KTool/src/org/kframework/krun/Main.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/maude/krun/MaudeKRun.java" afterPath="$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/maude/krun/MaudeKRun.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/java/symbolic/SymbolicRewriter.java" afterPath="$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/java/symbolic/SymbolicRewriter.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/dist/examples/java_rewrite_engine/tutorial/2_imp/t4.imp" afterPath="$PROJECT_DIR$/dist/examples/java_rewrite_engine/tutorial/2_imp/t4.imp" />
     </list>
     <ignored path="k.iws" />
     <ignored path=".idea/workspace.xml" />
-    <file path="/Dummy.txt" changelist="80539f2c-4526-49f5-8257-b40223b4e679" time="1376051088157" ignored="false" />
+    <file path="/Dummy.txt" changelist="80539f2c-4526-49f5-8257-b40223b4e679" time="1376418937760" ignored="false" />
     <file path="/BuiltinList.java" changelist="80539f2c-4526-49f5-8257-b40223b4e679" time="1376076586115" ignored="false" />
     <file path="/BuiltinSet.java" changelist="80539f2c-4526-49f5-8257-b40223b4e679" time="1376074706527" ignored="false" />
     <file path="/PushdownSystem.java" changelist="80539f2c-4526-49f5-8257-b40223b4e679" time="1376077090891" ignored="false" />
+    <file path="$USER_HOME$/k-framework/javasources/KTool/src/org/kframework/backend/java/symbolic/KILtoZ3.java" changelist="80539f2c-4526-49f5-8257-b40223b4e679" time="1376413015768" ignored="false" />
+    <file path="$USER_HOME$/k-framework/javasources/KTool/src/org/kframework/backend/java/symbolic/JavaSymbolicKRun.java" changelist="80539f2c-4526-49f5-8257-b40223b4e679" time="1376413089049" ignored="false" />
+    <file path="/JavaSymbolicKRun.java" changelist="80539f2c-4526-49f5-8257-b40223b4e679" time="1376415991853" ignored="false" />
+    <file path="/fragment.java" changelist="80539f2c-4526-49f5-8257-b40223b4e679" time="1376417079204" ignored="false" />
+    <file path="/*.regexp" changelist="80539f2c-4526-49f5-8257-b40223b4e679" time="1376415809937" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -27,7 +38,7 @@
     <disable_hints />
   </component>
   <component name="DebuggerManager">
-    <breakpoint_any>
+    <breakpoint_any default_suspend_policy="SuspendAll" default_condition_enabled="true">
       <breakpoint>
         <option name="NOTIFY_CAUGHT" value="true" />
         <option name="NOTIFY_UNCAUGHT" value="true" />
@@ -63,6 +74,7 @@
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
     </breakpoint_any>
+    <ui_properties default_suspend_policy="SuspendAll" default_condition_enabled="true" />
     <breakpoint_rules />
     <ui_properties />
   </component>
@@ -72,84 +84,91 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="ConfigurationTest.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/javasources/KTool/test/org/kframework/backend/pdmc/pda/ConfigurationTest.java">
+      <file leaf-file-name="Main.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/javasources/KTool/src/org/kframework/krun/Main.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="9" column="13" selection-start="131" selection-end="131" vertical-scroll-proportion="0.0">
+            <state line="820" column="42" selection-start="38043" selection-end="38043" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="BasicHookWorker.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/javasources/KTool/src/org/kframework/kil/visitors/BasicHookWorker.java">
+      <file leaf-file-name="JavaSymbolicKRun.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/java/symbolic/JavaSymbolicKRun.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="5" column="24" selection-start="160" selection-end="160" vertical-scroll-proportion="0.0">
+            <state line="236" column="0" selection-start="10236" selection-end="10236" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="CellTypesFilter.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/javasources/KTool/src/org/kframework/parser/concrete/disambiguate/CellTypesFilter.java">
+      <file leaf-file-name="SymbolicRewriter.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/java/symbolic/SymbolicRewriter.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="79" column="34" selection-start="2706" selection-end="2706" vertical-scroll-proportion="0.0">
+            <state line="161" column="72" selection-start="6102" selection-end="6102" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="BuiltinList.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/java/kil/BuiltinList.java">
+      <file leaf-file-name="t1.imp" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/dist/examples/java_rewrite_engine/tutorial/2_imp/t1.imp">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="138" column="14" selection-start="4266" selection-end="4266" vertical-scroll-proportion="0.0">
+            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="BuiltinSet.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/java/kil/BuiltinSet.java">
+      <file leaf-file-name="t1_out.txt" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/dist/examples/java_rewrite_engine/tutorial/2_imp/t1_out.txt">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="148" column="61" selection-start="3711" selection-end="3711" vertical-scroll-proportion="0.0">
+            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="PushdownSystem.java" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/pdmc/pda/PushdownSystem.java">
+      <file leaf-file-name="t2.imp" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/dist/examples/java_rewrite_engine/tutorial/2_imp/t2.imp">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="117" column="4" selection-start="5953" selection-end="5953" vertical-scroll-proportion="0.13404825">
-              <folding>
-                <element signature="e#6309#6334#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Collection.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/java/kil/Collection.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="77" column="0" selection-start="1700" selection-end="1700" vertical-scroll-proportion="0.0">
+            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="BuiltinMap.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/java/kil/BuiltinMap.java">
+      <file leaf-file-name="t3.imp" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/dist/examples/java_rewrite_engine/tutorial/2_imp/t3.imp">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="101" column="23" selection-start="2575" selection-end="2575" vertical-scroll-proportion="0.0">
+            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="KCollection.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/java/kil/KCollection.java">
+      <file leaf-file-name="t4.imp" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/dist/examples/java_rewrite_engine/tutorial/2_imp/t4.imp">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="84" column="0" selection-start="2271" selection-end="2271" vertical-scroll-proportion="0.0">
+            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="t5.imp" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/dist/examples/java_rewrite_engine/tutorial/2_imp/t5.imp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="4" column="15" selection-start="58" selection-end="58" vertical-scroll-proportion="0.16042781">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="t2_out.txt" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/dist/examples/java_rewrite_engine/tutorial/2_imp/t2_out.txt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -176,14 +195,19 @@
         <option value="$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/java/kil/BuiltinSet.java" />
         <option value="$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/java/kil/BuiltinList.java" />
         <option value="$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/pdmc/pda/PushdownSystem.java" />
+        <option value="$PROJECT_DIR$/javasources/KTool/src/org/kframework/krun/CommandlineOptions.java" />
+        <option value="$PROJECT_DIR$/javasources/KTool/src/org/kframework/krun/Main.java" />
+        <option value="$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/maude/krun/MaudeKRun.java" />
+        <option value="$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/java/symbolic/JavaSymbolicKRun.java" />
+        <option value="$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/java/symbolic/SymbolicRewriter.java" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="-8" />
-    <option name="y" value="-8" />
-    <option name="width" value="1306" />
-    <option name="height" value="784" />
+    <option name="x" value="65" />
+    <option name="y" value="24" />
+    <option name="width" value="1301" />
+    <option name="height" value="744" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <OptionsSetting value="true" id="Add" />
@@ -305,37 +329,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="kil" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="k" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="KTool" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewModuleNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="KTool" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="kframework" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="kil" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="visitors" />
+              <option name="myItemId" value="krun" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -429,10 +423,184 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="k" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="KTool" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewModuleNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="KTool" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="kframework" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="backend" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="maude" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="k" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="KTool" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewModuleNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="KTool" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="kframework" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="backend" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="maude" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="krun" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="k" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="KTool" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewModuleNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="dist" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="k" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="KTool" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewModuleNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="dist" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="examples" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="k" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="KTool" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewModuleNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="dist" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="examples" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="java_rewrite_engine" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="k" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="KTool" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewModuleNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="dist" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="examples" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="java_rewrite_engine" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="tutorial" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="k" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="KTool" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewModuleNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="dist" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="examples" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="java_rewrite_engine" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="tutorial" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="2_imp" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
       <pane id="Scope" />
+      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -444,15 +612,23 @@
     <property name="recentsLimit" value="5" />
     <property name="MemberChooser.sorted" value="false" />
     <property name="options.lastSelected" value="project.propVCSSupport.Mappings" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/dist/examples/java_rewrite_engine/tutorial/2_imp" />
     <property name="project.structure.side.proportion" value="0.0" />
     <property name="MemberChooser.copyJavadoc" value="false" />
     <property name="GoToClass.toSaveIncludeLibraries" value="false" />
+    <property name="restartRequiresConfirmation" value="true" />
     <property name="MemberChooser.showClasses" value="true" />
     <property name="GoToClass.includeLibraries" value="false" />
     <property name="options.splitter.details.proportions" value="0.2" />
     <property name="options.searchVisible" value="true" />
+    <property name="dynamic.classpath" value="false" />
   </component>
-  <component name="RunManager">
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/dist/examples/java_rewrite_engine/tutorial/2_imp" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Application.Main">
     <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType" factoryName="Plugin">
       <module name="" />
       <option name="VM_PARAMETERS" value="-Xmx512m -Xms256m -XX:MaxPermSize=250m" />
@@ -541,7 +717,25 @@
       <patterns />
       <method />
     </configuration>
-    <list size="0" />
+    <configuration default="false" name="Main" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="org.kframework.krun.Main" />
+      <option name="VM_PARAMETERS" value="" />
+      <option name="PROGRAM_PARAMETERS" value="-backend java-symbolic -search -bound 5 -depth 20 -generate-tests -term t5.imp -output t5_out.txt" />
+      <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$/dist/examples/java_rewrite_engine/tutorial/2_imp" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" value="" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="KTool" />
+      <envs />
+      <RunnerSettings RunnerId="Run" />
+      <ConfigurationWrapper RunnerId="Run" />
+      <method />
+    </configuration>
+    <list size="1">
+      <item index="0" class="java.lang.String" itemvalue="Application.Main" />
+    </list>
     <configuration name="&lt;template&gt;" type="WebApp" default="true" selected="false">
       <Host>localhost</Host>
       <Port>5050</Port>
@@ -576,28 +770,29 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1306" height="784" extended-state="6" />
-    <editor active="true" />
+    <frame x="65" y="24" width="1301" height="744" extended-state="6" />
+    <editor active="false" />
     <layout>
-      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="JetGradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3290735" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="JetGradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3290735" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32854864" sideWeight="0.5003984" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.25" sideWeight="0.22044729" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24940239" sideWeight="0.14513557" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.25" sideWeight="0.44888178" order="1" side_tool="false" content_ui="combo" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24940239" sideWeight="0.5247209" order="1" side_tool="false" content_ui="combo" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32923076" sideWeight="0.4996016" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.328" sideWeight="0.4996016" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.328" sideWeight="0.4996016" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
   <component name="VcsContentAnnotationSettings">
@@ -660,69 +855,116 @@
   <component name="XDebuggerManager">
     <breakpoint-manager />
   </component>
+  <component name="antWorkspaceConfiguration">
+    <option name="IS_AUTOSCROLL_TO_SOURCE" value="false" />
+    <option name="FILTER_TARGETS" value="false" />
+  </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/javasources/KTool/test/org/kframework/backend/pdmc/pda/ConfigurationTest.java">
+    <entry file="file://$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/java/kil/BuiltinMap.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="9" column="13" selection-start="131" selection-end="131" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/javasources/KTool/src/org/kframework/kil/visitors/BasicHookWorker.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="5" column="24" selection-start="160" selection-end="160" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/javasources/KTool/src/org/kframework/parser/concrete/disambiguate/CellTypesFilter.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="79" column="34" selection-start="2706" selection-end="2706" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="101" column="23" selection-start="2575" selection-end="2575" vertical-scroll-proportion="0.03797468" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/java/kil/KCollection.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="84" column="0" selection-start="2271" selection-end="2271" vertical-scroll-proportion="0.0">
+        <state line="84" column="0" selection-start="2352" selection-end="2352" vertical-scroll-proportion="0.03797468" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/javasources/KTool/src/org/kframework/krun/CommandlineOptions.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="183" column="168" selection-start="13250" selection-end="13250" vertical-scroll-proportion="66.2">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/java/kil/Collection.java">
+    <entry file="file://$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/maude/krun/MaudeKRun.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="77" column="0" selection-start="1700" selection-end="1700" vertical-scroll-proportion="0.0">
+        <state line="613" column="68" selection-start="25924" selection-end="25924" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/java/kil/BuiltinMap.java">
+    <entry file="file://$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/java/symbolic/BuiltinFunction.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="101" column="23" selection-start="2575" selection-end="2575" vertical-scroll-proportion="0.0">
+        <state line="91" column="39" selection-start="3701" selection-end="3701" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/java/kil/BuiltinList.java">
+    <entry file="file://$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/java/kil/Term.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="138" column="14" selection-start="4266" selection-end="4266" vertical-scroll-proportion="0.0">
+        <state line="75" column="0" selection-start="2527" selection-end="2527" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/java/kil/BuiltinSet.java">
+    <entry file="file://$PROJECT_DIR$/javasources/KTool/src/org/kframework/krun/Main.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="148" column="61" selection-start="3711" selection-end="3711" vertical-scroll-proportion="0.0">
+        <state line="820" column="42" selection-start="38043" selection-end="38043" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/pdmc/pda/PushdownSystem.java">
+    <entry file="file://$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/java/symbolic/JavaSymbolicKRun.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="117" column="4" selection-start="5953" selection-end="5953" vertical-scroll-proportion="0.13404825">
-          <folding>
-            <element signature="e#6309#6334#0" expanded="true" />
-          </folding>
+        <state line="236" column="0" selection-start="10236" selection-end="10236" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/javasources/KTool/src/org/kframework/backend/java/symbolic/SymbolicRewriter.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="161" column="72" selection-start="6102" selection-end="6102" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dist/examples/java_rewrite_engine/tutorial/2_imp/t1.imp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dist/examples/java_rewrite_engine/tutorial/2_imp/t1_out.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dist/examples/java_rewrite_engine/tutorial/2_imp/t2.imp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dist/examples/java_rewrite_engine/tutorial/2_imp/t2_out.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dist/examples/java_rewrite_engine/tutorial/2_imp/t3.imp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dist/examples/java_rewrite_engine/tutorial/2_imp/t4.imp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dist/examples/java_rewrite_engine/tutorial/2_imp/t5.imp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="4" column="15" selection-start="58" selection-end="58" vertical-scroll-proportion="0.16042781">
+          <folding />
         </state>
       </provider>
     </entry>
