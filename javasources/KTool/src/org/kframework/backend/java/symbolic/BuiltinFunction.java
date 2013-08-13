@@ -87,9 +87,10 @@ public class BuiltinFunction {
         try {
             Term t = (Term) table.get(label).invoke(null, (Object[]) arguments);
             return t;
-        } catch (RuntimeException e) {
-            //something failed other than the hook
-            throw new AssertionError("Something went wrong trying to invoke the hook '" + label + "'", e);
+        // TODO(AndreiS): come up with a solution
+        //} catch (RuntimeException e) {
+        //    //something failed other than the hook
+        //    throw new AssertionError("Something went wrong trying to invoke the hook '" + label + "'", e);
         } catch (InvocationTargetException e) {
             Throwable t = e.getTargetException();
             if (t instanceof Error) {
