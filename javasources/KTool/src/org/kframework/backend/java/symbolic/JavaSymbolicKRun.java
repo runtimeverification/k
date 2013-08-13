@@ -8,7 +8,8 @@ import org.kframework.backend.java.kil.KLabel;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.indexing.IndexingPair;
 import org.kframework.backend.java.indexing.TopIndex;
-import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Rule;
@@ -19,8 +20,7 @@ import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.transformers.MapToLookupUpdate;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.compile.utils.RuleCompilerSteps;
-import org.kframework.kil.*;
-//import org.kframework.kil.KList;
+//import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.matchers.MatcherException;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -95,205 +95,10 @@ public class JavaSymbolicKRun implements KRun {
 
         SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
         ConstrainedTerm constrainedTerm = new ConstrainedTerm(Term.of(cfg, definition), new TermContext(definition, new PortableFileSystem()));
-//        try {
-//            generate(definition, symbolicRewriter);
-//        } catch (TransformerException e) {
-//            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-//        }       java_symbolic_definition.bin
         ConstrainedTerm result = symbolicRewriter.rewrite(constrainedTerm);
         org.kframework.kil.Term kilTerm = (org.kframework.kil.Term) result.term().accept(
                 new BackendJavaKILtoKILTranslation(context));
         return new KRunResult<KRunState>(new KRunState(kilTerm, context));
-    }
-
-    public void generate(Definition def, SymbolicRewriter sr) throws TransformerException{
-        //make a copy of the definition
-        Definition d = def;
-
-        // fetch the rules from the definition
-        Collection<Rule> rules = d.rules();
-        Term rule1, rule2;
-        for (int i = 0; i < rules.size(); i++) {
-
-        }
-        /*filter out rules whose RHS has KResults - they can't
-          be used as the basis of test generation
-          */
-        Collection<Rule> nonResultRules = filterResults(rules);
-
-        /*filter out heating and cooling rules - they also cannot be
-        used as basis of test generation
-         */
-
-        Collection<Rule> nonResultOrHCRules = filterHeatersAndCoolers(nonResultRules);
-
-//        org.kframework.kil.Term term;
-//        List<org.kframework.kil.Term> list1 = new ArrayList<org.kframework.kil.Term>();
-//        list1.add(new org.kframework.kil.Variable("B", "Bool"));
-//        list1.add(new org.kframework.kil.Variable("S1", "Stmt"));
-//        list1.add(new org.kframework.kil.Variable("S2", "Stmt"));
-//        org.kframework.kil.Term kTerm = new KApp(org.kframework.kil.KLabelConstant.of("'if(_)_else_", context), new org.kframework.kil.KList(list1));
-//        List<org.kframework.kil.Term> list2 = new ArrayList<org.kframework.kil.Term>();
-//        list2.add(kTerm);
-//        org.kframework.kil.Term kSequence = new org.kframework.kil.KSequence(list2);
-//        // Term stateTerm = new Empty("Map");
-//
-//        org.kframework.kil.Bag bag = new org.kframework.kil.Bag();
-//        bag.getContents().add(MetaK.wrap(kSequence, "k", org.kframework.kil.Cell.Ellipses.NONE));
-//        // bag.getContents().add(MetaK.wrap(stateTerm, "state", Cell.Ellipses.NONE));
-//        org.kframework.kil.Bag topBag = new org.kframework.kil.Bag();
-//        topBag.getContents().add(MetaK.wrap(bag, "T", org.kframework.kil.Cell.Ellipses.NONE));
-//        term = MetaK.wrap(topBag, MetaK.Constants.generatedTopCellLabel, org.kframework.kil.Cell.Ellipses.NONE);
-//        System.out.println("Term: "+ term);
-//
-//        try {
-//            term = (org.kframework.kil.Term) term.accept(new FlattenSyntax(context));
-//            System.out.println("Term again: "+term);
-//        } catch (org.kframework.kil.visitors.exceptions.TransformerException e) {
-//            e.printStackTrace();
-//        }
-//
-//        org.kframework.backend.java.kil.Term javaTerm = (org.kframework.backend.java.kil.Term) term.accept(
-//                new KILtoBackendJavaKILTransformer(context));
-//
-//        System.out.println("Java term: "+javaTerm);
-//        System.out.println("Java term variable set: "+javaTerm.variableSet());
-//        System.out.println("Evaluated: "+javaTerm.evaluate(d));
-//
-//        KLabel label = KLabelConstant.of("'if(_)_else_", context);
-////        KLabel iLabel = KLabelConstant.of(term, context);
-//        ImmutableList
-//        KList list = new KList(list1);
-//
-//        KItem item = new KItem("label", )
-
-        /*Term term;
-        List<Term> list1 = new ArrayList<Term>();
-        list1.add(new Variable("B", "Bool"));
-        list1.add(new Variable("S1", "Stmt"));
-        list1.add(new Variable("S2", "Stmt"));
-        ImmutableList<Term> imList = ImmutableList.copyOf(list1);
-        KList kList = new KList(imList);
-
-        Term kTerm = new KItem(KLabelConstant.of("'if(_)_else_", context), kList, context);
-        System.out.println("KTerm: "+ kTerm.toString());
-        List<Term> list2 = new ArrayList<Term>();
-        list2.add(kTerm);
-        Term kSequence = new KSequence(ImmutableList.copyOf(list2));
-        System.out.println("KSequence: "+kSequence.toString());
-//        // Term stateTerm = new Empty("Map");
-
-        Cell kCell = wrap(kSequence, "k");
-
-        CellCollection cellCollection1 = new CellCollection();
-        cellCollection1.cellMap().put("k", kCell);
-
-        // bag.getContents().add(MetaK.wrap(stateTerm, "state", Cell.Ellipses.NONE));
-        Cell topCell = wrap(cellCollection1, "T");
-
-        CellCollection cellCollection2 = new CellCollection();
-        cellCollection2.cellMap().put("T", topCell);
-
-        term = wrap(cellCollection2, "generatedTop");
-        System.out.println("Term: "+term.toString()); */
-
-//        Set<Variable> varSet = new HashSet<Variable>();
-//        varSet.add(new Variable("B", "Bool"));
-//        varSet.add(new Variable("S1", "Stmt"));
-//        varSet.add(new Variable("S2", "Stmt"));
-//
-//
-//
-//        Map<Variable,Variable> varMap = Variable.getFreshSubstitution(varSet);
-//
-//        Variable boolVar = new Variable("B", "Bool");
-//        ASTNode newBool = boolVar.accept(new SubstitutionTransformer(varMap,definition));
-//        System.out.println("NewBool: "+ newBool.toString());
-//
-//        System.out.println("Var Map: "+ varMap);
-
-//        try {
-//            term = (Term) term.accept(new FlattenSyntax(context));
-//            System.out.println("Term again: "+ term.toString());
-//        } catch (TransformerException e) {
-//            e.printStackTrace();
-//        }
-
-        /*SymbolicConstraint constraint = new SymbolicConstraint(definition);
-        SymbolicUnifier unifier = new SymbolicUnifier(constraint,definition);*/
-
-//        Object[] ruleArray = d.rules().toArray();
-//        Rule firstRule = (Rule) ruleArray[0];
-//        System.out.println("First Rule: "+ firstRule);
-
-        /*for (Rule rule: d.rules()){
-            System.out.println("LHS Rule 2: ");
-            System.out.println(rule.leftHandSide());
-            try{
-                unifier.unify(term, rule.leftHandSide());
-                System.out.println("Match: "+ rule);
-                System.out.println("LHS Rule 2: ");
-                System.out.println(rule.leftHandSide());
-                System.out.println("");
-            } catch(MatcherException e){
-                System.out.println("Not a Match");
-            }
-        } */
-
-
-
-//        try {
-//            KRun kRun = new JavaSymbolicKRun(context);
-//            kRun.run(term);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-
-    }
-
-    private Collection<Rule> filterResults(Collection<Rule> rules){
-        Collection<Rule> filtered = new ArrayList<Rule>();
-        for (Rule rule: rules){
-           Set<Variable> vars = rule.variableSet();
-
-           if (!ruleHasKResult(vars)){
-               filtered.add(rule);
-           }
-        }
-        return filtered;
-    }
-
-    private Collection<Rule> filterHeatersAndCoolers(Collection<Rule> rules){
-        Collection<Rule> filtered = new ArrayList<Rule>();
-        for (Rule rule: rules){
-            Collection<Term> conditions = rule.condition();
-            if (!conditionHasKResult(conditions)){
-                filtered.add(rule);
-            }
-        }
-        return filtered;
-    }
-
-    private boolean ruleHasKResult(Set<Variable> vars){
-        boolean hasKResult = false;
-        for (Variable var: vars){
-            if(var.sort().equals("KResult")){
-                hasKResult = true;
-                break;
-            }
-        }
-        return hasKResult;
-    }
-
-    private boolean conditionHasKResult(Collection<Term> conditions){
-        boolean hasKResult = false;
-        for (Term term: conditions){
-            if(term.toString().contains("isKResult")){
-                hasKResult = true;
-                break;
-            }
-        }
-        return hasKResult;
     }
 
     @Override
@@ -413,6 +218,11 @@ public class JavaSymbolicKRun implements KRun {
             org.kframework.kil.Rule pattern,
             org.kframework.kil.Term cfg,
             RuleCompilerSteps compilationInfo) throws KRunExecutionException {
+        //for now, test generation uses the "search-all" option
+        //we hope to add strategies on top of this in the future
+        if (searchType != SearchType.STAR) {
+            throw new UnsupportedOperationException("Search type should be SearchType.STAR");
+        }
 
         SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
         TermContext termContext = new TermContext(definition, new PortableFileSystem());
@@ -426,7 +236,7 @@ public class JavaSymbolicKRun implements KRun {
 
         List<ConstrainedTerm> hits = symbolicRewriter.search(initialTerm, targetTerm, claims, bound, depth, true);
 
-        for (ConstrainedTerm result :hits ) {
+        for (ConstrainedTerm result : hits ) {
             //reconstruct the generated program
             Term pgm = constructProgram(result,Term.of(cfg,definition));
 
@@ -452,7 +262,6 @@ public class JavaSymbolicKRun implements KRun {
     }
 
     private Term constructProgram(ConstrainedTerm term, Term config){
-//        Term pgm = new ConstrainedTerm(term,definition);
         SymbolicConstraint constraint = term.constraint();
         Term pgm = config.substitute(constraint.substitution(),term.termContext());
         return pgm;

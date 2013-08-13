@@ -880,8 +880,10 @@ public class Main {
             }
 
             //testcase generation
-            if (cmd.hasOption("testgen")) {
+            if (cmd.hasOption("generate-tests")) {
                 K.do_testgen = true;
+                K.io = false;
+                K.do_search = true;
             }
             // k-definition beats compiled-def in a fight
             if (cmd.hasOption("compiled-def") && !cmd.hasOption("k-definition")) {

@@ -426,14 +426,14 @@ public class SymbolicRewriter {
             List<Rule> rules, Integer bound, Integer depth, boolean boundConstrained) {
         int count = 0;
 
-        /*Check if which of "bound" or "depth" is specified
+        /*Check which of "bound" or "depth" is specified
         * by the user*/
         if (bound == null & depth == null) {
             return search(initialTerm,targetTerm,rules);
         }else if (bound!=null & depth==null){
             return search(initialTerm,targetTerm,rules,bound);
         } else if (bound == null & depth !=null){
-            //TO DO: handle this "properly"
+            //TODO: handle this "properly"
             throw new UnsupportedOperationException("-depth flag is set but the -bound flag is not");
         }
 
