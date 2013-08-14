@@ -5,6 +5,7 @@ import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Utils;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.ImprovedArrayDeque;
 import org.kframework.kil.ASTNode;
 
 import java.util.*;
@@ -15,8 +16,8 @@ import java.util.*;
  */
 public class BuiltinList extends Collection {
 
-    private final ArrayDeque<Term> elementsLeft;
-    private final ArrayDeque<Term> elementsRight;
+    private final ImprovedArrayDeque<Term> elementsLeft;
+    private final ImprovedArrayDeque<Term> elementsRight;
 //    private final Queue<Operation> operations;
 
     public BuiltinList(java.util.Collection<Term> elements) {
@@ -25,12 +26,12 @@ public class BuiltinList extends Collection {
 
     public BuiltinList(java.util.Collection<Term> elementsLeft, java.util.Collection<Term> elementsRight, Variable frame) {
         super(frame, Kind.KITEM);
-        this.elementsLeft = new ArrayDeque<Term>(elementsLeft);
+        this.elementsLeft = new ImprovedArrayDeque<Term>(elementsLeft);
         if (frame == null) {
             this.elementsLeft.addAll(elementsRight);
-            this.elementsRight = new ArrayDeque<Term>();
+            this.elementsRight = new ImprovedArrayDeque<Term>();
         } else {
-            this.elementsRight = new ArrayDeque<Term>(elementsRight);
+            this.elementsRight = new ImprovedArrayDeque<Term>(elementsRight);
         }
     }
 
