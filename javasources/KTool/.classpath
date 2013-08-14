@@ -21,6 +21,5 @@
 	<classpathentry kind="lib" path="../../dist/lib/java/jung-visualization-2.0.1.jar"/>
 	<classpathentry kind="lib" path="../../dist/lib/java/strategoxt.jar"/>
 	<classpathentry kind="lib" path="../../dist/lib/java/xstream.jar"/>
-	<classpathentry kind="lib" path="../../dist/bin/java/aterm-java.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

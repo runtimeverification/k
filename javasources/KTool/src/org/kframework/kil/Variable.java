@@ -22,6 +22,16 @@ public class Variable extends Term {
 	private boolean userTyped = false;
 	private boolean fresh = false;
 	private boolean syntactic = false;
+	/** Used by the type inferencer  */
+	private String expectedSort = null;
+
+	public String getExpectedSort() {
+		return expectedSort;
+	}
+
+	public void setExpectedSort(String expectedSort) {
+		this.expectedSort = expectedSort;
+	}
 
 	public Variable(Element element) {
 		super(element);
