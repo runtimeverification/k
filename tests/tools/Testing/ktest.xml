@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="." default="build" name="Testing">
+  <property name="cfg" location="tests/config.xml"/>
+  <property name="ktst" location="ktest.jar"/>
+  <target name="build">
+    <javac srcdir="src" includeantruntime="false" failonerror="true"/>
+    <jar destfile="${ktst}" basedir="src">
+      <manifest>
+	<attribute name="Main-Class" value="org.kframework.main.Main"/>
+      </manifest>
+    </jar>
+   </target>
+</project>
