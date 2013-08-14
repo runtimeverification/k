@@ -94,7 +94,10 @@ public class JavaSymbolicKRun implements KRun {
     public KRunResult<KRunState> run(org.kframework.kil.Term cfg) throws KRunExecutionException {
 
         SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
-        ConstrainedTerm constrainedTerm = new ConstrainedTerm(Term.of(cfg, definition), new TermContext(definition, new PortableFileSystem()));
+        Term term = Term.of(cfg, definition);
+        TermContext termContext = new TermContext(definition, new PortableFileSystem());
+        term = term.evaluate(termContext);
+        ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, termContext);
         ConstrainedTerm result = symbolicRewriter.rewrite(constrainedTerm);
         org.kframework.kil.Term kilTerm = (org.kframework.kil.Term) result.term().accept(
                 new BackendJavaKILtoKILTranslation(context));
