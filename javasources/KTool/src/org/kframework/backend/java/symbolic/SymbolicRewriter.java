@@ -157,10 +157,10 @@ public class SymbolicRewriter {
                 /* rename rule variables in the rule RHS */
                 result = result.substitute(freshSubstitution, constrainedTerm.termContext());
                 /* apply the constraints substitution on the rule RHS */
-                result = result.substitute(constraint1.substitution(),
+                result = result.substituteAndEvaluate(constraint1.substitution(),
                     constrainedTerm.termContext());
                 /* evaluate pending functions in the rule RHS */
-                result = result.evaluate(constrainedTerm.termContext());
+//                result = result.evaluate(constrainedTerm.termContext());
                 /* eliminate anonymous variables */
                 constraint1.eliminateAnonymousVariables();
 

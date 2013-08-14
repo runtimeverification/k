@@ -18,6 +18,8 @@ import java.util.Set;
  */
 public abstract class JavaSymbolicObject extends ASTNode implements Transformable, Visitable {
 
+    Set<Variable> variableSet = null;
+
     /**
      * Returns {@code true} if this JavaSymbolicObject does not contain any variables.
      */
@@ -51,9 +53,12 @@ public abstract class JavaSymbolicObject extends ASTNode implements Transformabl
      * Returns a {@code Set} view of the variables in this java symbolic object.
      */
     public Set<Variable> variableSet() {
-        VariableVisitor visitor = new VariableVisitor();
-        accept(visitor);
-        return visitor.getVariableSet();
+        if (variableSet == null) {
+            VariableVisitor visitor = new VariableVisitor();
+            accept(visitor);
+            variableSet = visitor.getVariableSet();
+        }
+        return variableSet;
     }
 
     @Override
@@ -72,4 +77,16 @@ public abstract class JavaSymbolicObject extends ASTNode implements Transformabl
         throw new UnsupportedOperationException();
     }
 
+    public void updateVariableSet() {
+        variableSet = null;
+        variableSet();
+    }
+
+    public Set<Variable> getVariableSet() {
+        return variableSet;
+    }
+
+    public void setVariableSet(Set<Variable> variableSet) {
+        this.variableSet = variableSet;
+    }
 }

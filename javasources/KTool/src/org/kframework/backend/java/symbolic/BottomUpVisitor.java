@@ -225,4 +225,27 @@ public class BottomUpVisitor implements Visitor {
         visit((Term) variable);
     }
 
+    @Override
+    public void visit(ListUpdate node) {
+        node.base().accept(this);
+    }
+
+    @Override
+    public void visit(ListLookup node) {
+        node.list().accept(this);
+        node.key().accept(this);
+    }
+
+    @Override
+    public void visit(ConstrainedTerm node) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void visit(BuiltinList node) {
+        if (node.hasFrame()) node.frame().accept(this);
+        for (Term t : node.elementsLeft()) t.accept(this);
+        for (Term t : node.elementsRight()) t.accept(this);
+    }
+
 }
