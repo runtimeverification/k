@@ -45,6 +45,6 @@ public class Rule<Control, Alphabet> {
         assert lhsConf.getStack().isEmpty() : "lhs should have a configuration head";
         ConfigurationHead<String, String> lhs = lhsConf.getHead();
         Configuration<String, String> rhs = Configuration.of(sides[1].trim());
-        return new Rule(lhs, rhs);
+        return new Rule<String, String>(lhs, rhs);
     }
 }

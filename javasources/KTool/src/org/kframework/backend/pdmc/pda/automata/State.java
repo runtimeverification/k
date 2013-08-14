@@ -35,6 +35,7 @@ public class State<Control, Alphabet> {
             map = new HashMap<Object, State>();
             extendedCache.put(state, map);
         }
+        @SuppressWarnings("unchecked")
         State<Control, Alphabet> state1 = (State<Control, Alphabet>) map.get(letter);
         if (state1 == null) {
             state1 = new State<Control, Alphabet>(state, letter);
@@ -45,6 +46,7 @@ public class State<Control, Alphabet> {
 
     public static <Control, Alphabet> State<Control, Alphabet> of(Control state) {
         if (basicCache == null) basicCache = new HashMap<Object, State>();
+        @SuppressWarnings("unchecked")
         State<Control, Alphabet> state1 = (State<Control, Alphabet>) basicCache.get(state);
         if (state1 == null) {
             state1 = new State<Control, Alphabet>(state, null);

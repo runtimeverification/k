@@ -9,18 +9,18 @@ import java.util.Stack;
  * @author TraianSF
  */
 public class Configuration<Control, Alphabet> {
-    private static Stack emptyStack = new Stack();
+    private static Stack emptyStack = null;
     ConfigurationHead<Control,Alphabet> head;
     Stack<Alphabet> stack;
 
     private Configuration(Control control, Stack<Alphabet> stack) {
         if (stack.isEmpty()) {
             head = ConfigurationHead.of(control, null);
-            this.stack = emptyStack;
+            this.stack = emptyStack();
         } else {
             head = ConfigurationHead.of(control, stack.peek());
             if (stack.size() == 1) {
-                this.stack = emptyStack;
+                this.stack = emptyStack();
             } else {
                 this.stack = new Stack<Alphabet>();
                 this.stack.addAll(stack);
@@ -77,7 +77,9 @@ public class Configuration<Control, Alphabet> {
 
     public static <Alphabet> Stack<Alphabet> emptyStack() {
         if (emptyStack == null) emptyStack = new Stack<Alphabet>();
-        return (Stack<Alphabet>) emptyStack;
+        @SuppressWarnings("unchecked")
+        Stack<Alphabet> returnStack = (Stack<Alphabet>) emptyStack;
+        return returnStack;
     }
 
     public static Configuration<String, String> of(String confString) {

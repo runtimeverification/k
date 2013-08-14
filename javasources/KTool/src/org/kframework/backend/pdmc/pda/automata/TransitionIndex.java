@@ -42,6 +42,7 @@ public class TransitionIndex<Control, Alphabet> {
             map = new HashMap<Object, TransitionIndex>();
             extendedCache.put(start, map);
         }
+        @SuppressWarnings("unchecked")
         TransitionIndex<Control, Alphabet> index = (TransitionIndex<Control, Alphabet>) map.get(letter);
         if (index == null) {
             index = new TransitionIndex<Control, Alphabet>(start, letter);
@@ -54,6 +55,7 @@ public class TransitionIndex<Control, Alphabet> {
         if (basicCache == null) {
             basicCache = new HashMap<State, TransitionIndex>();
         }
+        @SuppressWarnings("unchecked")
         TransitionIndex<Control, Alphabet> index = (TransitionIndex<Control, Alphabet>) basicCache.get(start);
         if (index == null) {
             index = new TransitionIndex<Control, Alphabet>(start, null);

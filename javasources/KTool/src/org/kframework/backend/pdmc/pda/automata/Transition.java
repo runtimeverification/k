@@ -39,6 +39,7 @@ public class Transition<Control, Alphabet> {
             map = new HashMap<State, Transition>();
             cache.put(index, map);
         }
+        @SuppressWarnings("unchecked")
         Transition<Control, Alphabet> transition = (Transition<Control, Alphabet>) map.get(endState);
         if (transition == null) {
             transition = new Transition<Control, Alphabet>(startState, letter, endState);
