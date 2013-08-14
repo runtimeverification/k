@@ -820,6 +820,18 @@
     </all-programs>
   </test>
 
+ <test
+      language="tests/regression/issue#8"
+      >
+    <kompile-option name="-ml" />
+    <kompile-option name="-w" value="none" />
+    <all-programs>
+      <krun-option name="--no-smt" />
+      <krun-option name="--backend" value="java-symbolic" />
+      <krun-option name="--output-mode" value="pretty" />
+    </all-programs>
+  </test>
+
   <test
       language="tests/regression/issue686/issue.k"
       extensions="issue" >

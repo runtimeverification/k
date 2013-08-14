@@ -131,16 +131,15 @@ public abstract class DataStructureBuiltin extends Term {
                         elementsLeft.addAll(listBuiltin.elementsLeft());
                         if (listBuiltin.baseTerms().isEmpty()) {
                             elementsLeft.addAll(listBuiltin.elementsRight());
-                        } else assert listBuiltin.elementsRight().isEmpty();
+                        } else {
+                            terms.addAll(listBuiltin.baseTerms());
+                            elementsRight.addAll(listBuiltin.elementsRight());
+                            left = false;
+                        }
                     } else { // if right
                         assert listBuiltin.baseTerms().isEmpty();
                         elementsRight.addAll(listBuiltin.elementsLeft());
                         elementsRight.addAll(listBuiltin.elementsRight());
-                    }
-                    if (!listBuiltin.baseTerms().isEmpty()) {
-                        assert left;
-                        terms.addAll(listBuiltin.baseTerms());
-                        left = false;
                     }
                 } else {
                     assert left;
