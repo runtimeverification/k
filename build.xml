@@ -3,6 +3,7 @@
 
 	<property location="javasources" name="javasources" />
 	<property name="version" value="latest" />
+	<property name="config" value="./tests/config.xml" />
 
 	<target name="java">
 		<ant antfile="${javasources}/KTool/buildjava.xml" dir="${javasources}/KTool" />
@@ -19,7 +20,11 @@
 
 	<target name="build">
 		<ant antfile="${javasources}/KTool/build.xml" dir="${javasources}/KTool" />
-		<antcall target="makeversion" />
+		<ant antfile="ktest.xml" dir="./tests/tools/Testing">
+			<property name="cfg" location="${config}" />
+		</ant>
+		<copy file="./tests/tools/Testing/ktest.jar" todir="./dist/lib/java/"/>
+		<antcall target="makeversion" />	
 	</target>
 
 	<target name="clean">
@@ -143,7 +148,6 @@
 	</target>
 
 
-	<property name="config" value="./tests/config.xml" />
 	<target name="test" depends="build">
 		<ant antfile="build.xml" dir="./tests/tools/Testing">
 			<property name="cfg" location="${config}" />
