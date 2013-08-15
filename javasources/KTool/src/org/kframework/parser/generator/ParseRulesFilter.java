@@ -90,7 +90,7 @@ public class ParseRulesFilter extends BasicTransformer {
 
 				if (GlobalSettings.fastKast) {
 					// TODO(RaduM): load directly from ATerms
-					ASTNode anode = Sglr.run_sglri(context.dotk.getAbsolutePath() + "/def/Concrete.tbl", "CondSentence1", ss.getContent(), ss.getFilename());
+					ASTNode anode = Sglr.run_sglri(context.dotk.getAbsolutePath() + "/def/Concrete.tbl", "CondSentence", ss.getContent(), ss.getFilename());
 
 					int startLine = StringUtil.getStartLineFromLocation(ss.getLocation());
 					int startCol = StringUtil.getStartColFromLocation(ss.getLocation());
