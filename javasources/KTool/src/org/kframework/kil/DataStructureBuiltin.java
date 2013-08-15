@@ -147,7 +147,7 @@ public abstract class DataStructureBuiltin extends Term {
                     left = false;
                 }
             }
-            return new ListBuiltin(sort, elementsLeft, elementsRight, terms);
+            return ListBuiltin.of(sort, elementsLeft, elementsRight, terms);
         } else if (sort.type().equals(KSorts.MAP)) {
             Map<Term, Term> elements = new HashMap<Term, Term>();
             Collection<Term> terms = new ArrayList<Term>();
