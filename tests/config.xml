@@ -829,7 +829,7 @@
   </test>
 
  <test
-      language="tests/regression/issue#8"
+      language="tests/regression/issue#8/test.k"
       folder="tests/regression/issue#8/programs"
       results="tests/regression/issue#8/tests"
       >
@@ -893,7 +893,7 @@
 
 
  <test
-      language="tests/regression/issue#12"
+      language="tests/regression/issue#12/test.k"
       folder="tests/regression/issue#12/programs"
       results="tests/regression/issue#12/tests"
       >
