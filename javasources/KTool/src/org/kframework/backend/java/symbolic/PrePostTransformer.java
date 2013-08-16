@@ -337,23 +337,6 @@ public abstract class PrePostTransformer implements Transformer {
         return listLookup.accept(postTransformer);
     }
 
-//    @Override
-//    public ASTNode transform(ListUpdate listUpdate) {
-//        ASTNode astNode = listUpdate.accept(preTransformer);
-//        if (astNode instanceof DoneTransforming) {
-//            return ((DoneTransforming) astNode).getContents();
-//        }
-//        assert astNode instanceof ListUpdate : "preTransformer should not modify type";
-//        listUpdate = (ListUpdate) astNode;
-//        Term list = (Term) listUpdate.base().accept(this);
-//
-//        if (list != listUpdate.base()) {
-//            listUpdate = new ListUpdate(list, listUpdate.removeLeft(), listUpdate.removeRight());
-//        }
-//
-//        return listUpdate.accept(postTransformer);
-//    }
-
     @Override
     public ASTNode transform(BuiltinList builtinList) {
         ASTNode astNode = builtinList.accept(preTransformer);

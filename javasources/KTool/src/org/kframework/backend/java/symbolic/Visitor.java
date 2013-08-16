@@ -44,8 +44,6 @@ public interface Visitor {
     public void visit(UninterpretedToken uninterpretedToken);
     public void visit(Variable variable);
 
-//    void visit(ListUpdate node);
-
     void visit(ListLookup node);
 
     void visit(ConstrainedTerm node);

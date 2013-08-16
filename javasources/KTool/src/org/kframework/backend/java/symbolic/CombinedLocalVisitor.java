@@ -142,11 +142,6 @@ public class CombinedLocalVisitor extends LocalVisitor {
         visitAll(node);
     }
 
-//    @Override
-//    public void visit(ListUpdate node) {
-//        visitAll(node);
-//    }
-
     @Override
     public void visit(MapLookup node) {
         visitAll(node);

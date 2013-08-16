@@ -26,11 +26,6 @@ public class Evaluator extends CopyOnWriteTransformer {
         return ((Term) super.transform(listLookup)).accept(localEvaluator);
     }
 
-//    @Override
-//    public ASTNode transform(ListUpdate listUpdate) {
-//        return ((Term) super.transform(listUpdate)).accept(localEvaluator);
-//    }
-
     @Override
     public ASTNode transform(MapLookup mapLookup) {
         return ((Term) super.transform(mapLookup)).accept(localEvaluator);

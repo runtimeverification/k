@@ -121,11 +121,6 @@ public class LocalTransformer implements Transformer {
         return transform((Term) listLookup);
     }
 
-//    @Override
-//    public ASTNode transform(ListUpdate listUpdate) {
-//        return transform((Term) listUpdate);
-//    }
-
     @Override
     public ASTNode transform(MapLookup mapLookup) {
         return transform((Term) mapLookup);

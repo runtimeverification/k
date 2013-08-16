@@ -320,15 +320,6 @@ public class PrePostVisitor implements Visitor {
         visit((Term) variable);
     }
 
-//    @Override
-//    public void visit(ListUpdate node) {
-//        preVisitor.resetProceed();
-//        node.accept(preVisitor);
-//        if (!preVisitor.isProceed()) return;
-//        node.base().accept(this);
-//        node.accept(postVisitor);
-//    }
-
     @Override
     public void visit(ListLookup node) {
         preVisitor.resetProceed();
