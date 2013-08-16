@@ -35,7 +35,7 @@ public interface Transformer {
     public ASTNode transform(KList kList);
     public ASTNode transform(KSequence kSequence);
     public ASTNode transform(ListLookup listLookup);
-    public ASTNode transform(ListUpdate listUpdate);
+//    public ASTNode transform(ListUpdate listUpdate);
     public ASTNode transform(MapLookup mapLookup);
     public ASTNode transform(MapUpdate mapUpdate);
     public ASTNode transform(MetaVariable metaVariable);

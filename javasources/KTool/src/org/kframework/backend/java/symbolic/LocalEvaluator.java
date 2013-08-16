@@ -22,10 +22,10 @@ public class LocalEvaluator extends LocalTransformer {
         return listLookup.evaluateLookup();
     }
 
-    @Override
-    public ASTNode transform(ListUpdate listUpdate) {
-        return listUpdate.evaluateUpdate();
-    }
+//    @Override
+//    public ASTNode transform(ListUpdate listUpdate) {
+//        return listUpdate.evaluateUpdate();
+//    }
 
     @Override
     public ASTNode transform(SetLookup setLookup) {

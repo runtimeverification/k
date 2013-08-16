@@ -17,30 +17,35 @@ import java.util.*;
 public class BuiltinList extends Collection {
 
     private final ImprovedArrayDeque<Term> elementsLeft;
-    private final ImprovedArrayDeque<Term> elementsRight;
+    protected final ImprovedArrayDeque<Term> elementsRight;
+    protected final int removeLeft;
+    protected final int removeRight;
 //    private final Queue<Operation> operations;
 
     public BuiltinList(java.util.Collection<Term> elements) {
-        this(elements, Collections.<Term>emptyList(), null);
+        this(null, 0, 0, elements, Collections.<Term>emptyList());
     }
 
-    public BuiltinList(java.util.Collection<Term> elementsLeft, java.util.Collection<Term> elementsRight, Variable frame) {
+    public BuiltinList(Variable frame, int removeLeft, int removeRight, java.util.Collection<Term> elementsLeft, java.util.Collection<Term> elementsRight) {
         super(frame, Kind.KITEM);
         this.elementsLeft = new ImprovedArrayDeque<Term>(elementsLeft);
         if (frame == null) {
+            assert removeLeft == 0 && removeRight == 0 : "cannot remove from an empty base";
             this.elementsLeft.addAll(elementsRight);
             this.elementsRight = new ImprovedArrayDeque<Term>();
         } else {
             this.elementsRight = new ImprovedArrayDeque<Term>(elementsRight);
         }
+        this.removeLeft = removeLeft;
+        this.removeRight = removeRight;
     }
 
     public BuiltinList(Variable frame) {
-        this(Collections.<Term>emptyList(), Collections.<Term>emptyList(), frame);
+        this(frame, 0, 0, Collections.<Term>emptyList(), Collections.<Term>emptyList());
     }
 
     public BuiltinList() {
-        this(Collections.<Term>emptyList(), Collections.<Term>emptyList(), null);
+        this(null, 0, 0, Collections.<Term>emptyList(), Collections.<Term>emptyList());
     }
 
     public boolean contains(Term key) {
@@ -76,13 +81,16 @@ public class BuiltinList extends Collection {
         }
 
         BuiltinList list = (BuiltinList) object;
-        return super.equals(list) && elementsLeft.equals(list.elementsLeft) && elementsRight.equals(list.elementsRight);
+        return removeLeft == list.removeLeft && removeRight == list.removeRight && super.equals(list)
+                && elementsLeft.equals(list.elementsLeft) && elementsRight.equals(list.elementsRight);
     }
 
     @Override
     public int hashCode() {
         int hash = 1;
         hash = hash * Utils.HASH_PRIME + (super.frame == null ? 0 : super.frame.hashCode());
+        hash = hash * Utils.HASH_PRIME + removeLeft;
+        hash = hash * Utils.HASH_PRIME + removeRight;
         hash = hash * Utils.HASH_PRIME + elementsLeft.hashCode();
         hash = hash * Utils.HASH_PRIME + elementsRight.hashCode();
         return hash;
@@ -148,7 +156,13 @@ public class BuiltinList extends Collection {
             if (stringBuilder.length() != 0) {
                 stringBuilder.append(operator);
             }
+            if (removeLeft != 0 || removeRight != 0) {
+                stringBuilder.append("remove(" + removeLeft + ", ");
+            }
             stringBuilder.append(super.frame);
+            if (removeLeft != 0 || removeRight != 0) {
+                stringBuilder.append(", " + removeRight + ")");
+            }
         }
         joiner.appendTo(stringBuilder, elementsRight);
         if (stringBuilder.length() == 0) {
@@ -157,27 +171,65 @@ public class BuiltinList extends Collection {
         return stringBuilder.toString();
     }
 
-    public static BuiltinList of(ArrayList<Term> elementsLeft, ArrayList<Term> elementsRight, Term frame) {
-        if (frame == null) {
-            elementsLeft.addAll(elementsRight);
-            return new BuiltinList(elementsLeft);
-        }
-        if (frame instanceof Variable)
-            return new BuiltinList(elementsLeft, elementsRight, (Variable) frame);
+    public static BuiltinList of(Term frame, int removeLeft, int removeRight, java.util.Collection<Term> elementsLeft, java.util.Collection<Term> elementsRight) {
         if (frame instanceof BuiltinList) {
             BuiltinList builtinList = (BuiltinList) frame;
-            if (elementsLeft.isEmpty() && elementsRight.isEmpty()) return builtinList;
-            elementsLeft.addAll(builtinList.elementsLeft());
-            ArrayDeque<Term> right = builtinList.elementsRight;
-            right.addAll(elementsRight);
-            if (builtinList.hasFrame()) {
-                return new BuiltinList(elementsLeft, right, builtinList.frame());
+            if (!builtinList.hasFrame()) {
+                assert builtinList.elementsRight.isEmpty();
+                assert builtinList.elementsLeft().size() >= removeLeft + removeRight;
+                if (builtinList.elementsLeft().size() > removeLeft + removeRight) {
+                    Iterator<Term> iterator = builtinList.elementsLeft.iterator();
+                    int deleted = removeLeft + removeRight;
+                    while (removeLeft > 0) {
+                        removeLeft--; iterator.next();
+                    }
+                    for (int i = deleted; i < builtinList.elementsLeft.size(); i++) {
+                        elementsLeft.add(iterator.next());
+                    }
+                }
+                frame = null; removeLeft = 0; removeRight = 0;
             } else {
-                elementsLeft.addAll(right);
-                return new BuiltinList(elementsLeft);
+                Iterator<Term> iterator = builtinList.elementsLeft().iterator();
+                while (removeLeft > 0 && iterator.hasNext()) {
+                    removeLeft--; iterator.next();
+                }
+                while (iterator.hasNext()) {
+                    elementsLeft.add(iterator.next());
+                }
+                removeLeft += builtinList.removeLeft;
+
+                ArrayList<Term> right = new ArrayList<Term>();
+                iterator = builtinList.elementsRight.iterator();
+                int size = builtinList.elementsRight.size();
+                for (int i = removeRight; i < size; i++) {
+                   right.add(iterator.next());
+                }
+                right.addAll(elementsRight);
+                if (removeRight > size) {
+                    removeRight -= size;
+                } else removeRight = 0;
+                removeRight += builtinList.removeRight;
+                right.addAll(elementsRight);
+                return new BuiltinList(builtinList.frame, removeLeft, removeRight, elementsLeft, right);
             }
         }
+        if (frame == null) {
+            assert removeLeft == 0 && removeRight == 0 : "cannot remove from an empty list";
+            elementsLeft.addAll(elementsRight);
+            return new BuiltinList(null, 0, 0, elementsLeft, Collections.<Term>emptyList());
+        }
+        if (frame instanceof Variable)
+            return new BuiltinList((Variable) frame, removeLeft, removeRight, elementsLeft, elementsRight);
+
         assert false : "Frame can only be substituted by a Variable or a BuiltinList, or deleted.";
         return null;
+    }
+
+    public int removeLeft() {
+        return removeLeft;
+    }
+
+    public int removeRight() {
+        return removeRight;
     }
 }

@@ -1,6 +1,5 @@
 package org.kframework.backend.java.symbolic;
 
-import org.kframework.backend.java.indexing.IndexingPair;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
@@ -22,7 +21,6 @@ import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.ListLookup;
 import org.kframework.backend.java.kil.MapLookup;
 import org.kframework.backend.java.kil.SetLookup;
-import org.kframework.backend.java.kil.ListUpdate;
 import org.kframework.backend.java.kil.MapUpdate;
 import org.kframework.backend.java.kil.SetUpdate;
 import org.kframework.backend.java.kil.Rule;
@@ -32,25 +30,13 @@ import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.symbolic.SymbolicBackend;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Attribute;
-import org.kframework.kil.BoolBuiltin;
-import org.kframework.kil.DataStructureSort;
-import org.kframework.kil.GenericToken;
-import org.kframework.kil.IntBuiltin;
-import org.kframework.kil.KSorts;
-import org.kframework.kil.Module;
-import org.kframework.kil.Production;
-import org.kframework.kil.StringBuiltin;
+import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
-import java.util.ArrayList;
+import java.util.*;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -250,8 +236,8 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 return new Cell<KList>(node.getLabel(), (KList) content);
             } else if (content instanceof BuiltinList) {
                 return new Cell<BuiltinList>(node.getLabel(), (BuiltinList) content);
-            } else if (content instanceof ListUpdate) {
-                return new Cell<ListUpdate>(node.getLabel(), (ListUpdate) content);
+//            } else if (content instanceof ListUpdate) {
+//                return new Cell<ListUpdate>(node.getLabel(), (ListUpdate) content);
             } else if (content instanceof BuiltinSet) {
                 return new Cell<BuiltinSet>(node.getLabel(), (BuiltinSet) content);
             } else if (content instanceof SetUpdate) {
@@ -270,8 +256,6 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(org.kframework.kil.ListBuiltin node) throws TransformerException {
-        assert node.isLHSView() : "unsupported list " + node;
-
         ArrayList<Term> elementsLeft = new ArrayList<Term>(node.elementsLeft().size());
         for (org.kframework.kil.Term entry : node.elementsLeft()) {
             Term newEntry = (Term) entry.accept(this);
@@ -284,13 +268,20 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             elementsRight.add(newEntry);
         }
 
-        Variable base = null;
+        Term base = null;
         if (node.hasViewBase()) {
             assert node.viewBase() instanceof org.kframework.kil.Variable : "The viewbase " + node.viewBase() +
                     " must be a variable";
             base = (Variable) node.viewBase().accept(this);
+        } else {
+            Collection<org.kframework.kil.Term> baseTerms = node.baseTerms();
+            if (!baseTerms.isEmpty()) {
+                assert baseTerms.size() == 1 : "Don't know how to handle multiple base terms for now.";
+                Iterator<org.kframework.kil.Term> iterator = baseTerms.iterator();
+                base = (Term) iterator.next().accept(this);
+            }
         }
-        return new BuiltinList(elementsLeft, elementsRight, base);
+        return BuiltinList.of(base, 0, 0, elementsLeft, elementsRight);
     }
 
     @Override
@@ -348,9 +339,10 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(org.kframework.kil.ListUpdate node) throws TransformerException {
-        Variable set = (Variable) node.base().accept(this);
+        Variable base = (Variable) node.base().accept(this);
 
-        return new ListUpdate(set, node.removeLeft().size(), node.removeRight().size());
+        return BuiltinList.of(base, node.removeLeft().size(), node.removeRight().size(),
+                Collections.<Term>emptyList(), Collections.<Term>emptyList());
     }
 
     @Override

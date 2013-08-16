@@ -768,6 +768,8 @@
 
  <test
       language="tests/regression/java-rewrite-engine/list/test1/list-test1.k"
+      folder="tests/regression/java-rewrite-engine/list/test1/programs"
+      results="tests/regression/java-rewrite-engine/list/test1/tests"
       extensions="issue"
       >
     <kompile-option name="-ml" />
@@ -782,6 +784,8 @@
 
  <test
       language="tests/regression/java-rewrite-engine/list/test2/list-test2.k"
+      folder="tests/regression/java-rewrite-engine/list/test2/programs"
+      results="tests/regression/java-rewrite-engine/list/test2/tests"
       extensions="issue"
       >
     <kompile-option name="-ml" />
@@ -796,6 +800,8 @@
 
  <test
       language="tests/regression/java-rewrite-engine/set/test1/test1.k"
+      folder="tests/regression/java-rewrite-engine/set/test1/programs"
+      results="tests/regression/java-rewrite-engine/set/test1/tests"
       extensions="issue"
       >
     <kompile-option name="-ml" />
@@ -809,6 +815,8 @@
 
  <test
       language="tests/regression/java-rewrite-engine/set/test2/test2.k"
+      folder="tests/regression/java-rewrite-engine/set/test2/programs"
+      results="tests/regression/java-rewrite-engine/set/test2/tests"
       extensions="issue"
       >
     <kompile-option name="-ml" />
@@ -822,6 +830,8 @@
 
  <test
       language="tests/regression/issue#8"
+      folder="tests/regression/issue#8/programs"
+      results="tests/regression/issue#8/tests"
       >
     <kompile-option name="-ml" />
     <kompile-option name="-w" value="none" />
@@ -880,6 +890,21 @@
     <krun-option name="--parser" value="kast -groundParser" />
   </all-programs>
 </test>
+
+
+ <test
+      language="tests/regression/issue#12"
+      folder="tests/regression/issue#12/programs"
+      results="tests/regression/issue#12/tests"
+      >
+    <kompile-option name="-ml" />
+    <kompile-option name="-w" value="none" />
+    <all-programs>
+      <krun-option name="--no-smt" />
+      <krun-option name="--backend" value="java-symbolic" />
+      <krun-option name="--output-mode" value="pretty" />
+    </all-programs>
+  </test>
 
 </tests>
 

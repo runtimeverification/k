@@ -144,10 +144,10 @@ public class CombinedLocalTransformer extends LocalTransformer {
         return transformAll(node);
     }
 
-    @Override
-    public ASTNode transform(ListUpdate node) {
-        return transformAll(node);
-    }
+//    @Override
+//    public ASTNode transform(ListUpdate node) {
+//        return transformAll(node);
+//    }
 
     @Override
     public ASTNode transform(MapLookup node) {

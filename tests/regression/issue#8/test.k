@@ -3,10 +3,10 @@ require "builtins/list.k"
 module TEST
 imports LIST
 
-configuration $PGM:K .MyList
+configuration <out> MyListItem(5) MyListItem(6) </out>
 
-rule .MyList (MyListItem(5) (L:MyList MyListItem(6))) => .
-rule .MyList ((MyListItem(5) L:MyList) MyListItem(6)) => .
+rule <out> .MyList (MyListItem(5) (L:MyList MyListItem(6))) => . </out>
+rule <out> .MyList ((MyListItem(5) L:MyList) MyListItem(6)) => . </out>
 
 endmodule
 

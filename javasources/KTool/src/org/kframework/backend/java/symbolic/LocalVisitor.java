@@ -128,10 +128,10 @@ public class LocalVisitor implements Visitor {
         visit((Term) node);
     }
 
-    @Override
-    public void visit(ListUpdate node) {
-        visit((Term) node);
-    }
+//    @Override
+//    public void visit(ListUpdate node) {
+//        visit((Term) node);
+//    }
 
     @Override
     public void visit(MapLookup mapLookup) {

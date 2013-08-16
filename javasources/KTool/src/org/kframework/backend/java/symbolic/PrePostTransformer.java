@@ -10,7 +10,6 @@ import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.kil.Collection;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.visitors.*;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
@@ -338,22 +337,22 @@ public abstract class PrePostTransformer implements Transformer {
         return listLookup.accept(postTransformer);
     }
 
-    @Override
-    public ASTNode transform(ListUpdate listUpdate) {
-        ASTNode astNode = listUpdate.accept(preTransformer);
-        if (astNode instanceof DoneTransforming) {
-            return ((DoneTransforming) astNode).getContents();
-        }
-        assert astNode instanceof ListUpdate : "preTransformer should not modify type";
-        listUpdate = (ListUpdate) astNode;
-        Term list = (Term) listUpdate.base().accept(this);
-
-        if (list != listUpdate.base()) {
-            listUpdate = new ListUpdate(list, listUpdate.removeLeft(), listUpdate.removeRight());
-        }
-
-        return listUpdate.accept(postTransformer);
-    }
+//    @Override
+//    public ASTNode transform(ListUpdate listUpdate) {
+//        ASTNode astNode = listUpdate.accept(preTransformer);
+//        if (astNode instanceof DoneTransforming) {
+//            return ((DoneTransforming) astNode).getContents();
+//        }
+//        assert astNode instanceof ListUpdate : "preTransformer should not modify type";
+//        listUpdate = (ListUpdate) astNode;
+//        Term list = (Term) listUpdate.base().accept(this);
+//
+//        if (list != listUpdate.base()) {
+//            listUpdate = new ListUpdate(list, listUpdate.removeLeft(), listUpdate.removeRight());
+//        }
+//
+//        return listUpdate.accept(postTransformer);
+//    }
 
     @Override
     public ASTNode transform(BuiltinList builtinList) {
@@ -383,7 +382,8 @@ public abstract class PrePostTransformer implements Transformer {
             if (newEntry != null) elementsRight.add((Term) newEntry);
         }
         if (! change) return  builtinList;
-        return BuiltinList.of(elementsLeft, elementsRight, frame).accept(postTransformer);
+        return BuiltinList.of(frame, builtinList.removeLeft(), builtinList.removeRight(),
+                elementsLeft, elementsRight).accept(postTransformer);
     }
 
     @Override

@@ -24,7 +24,6 @@ import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.ListLookup;
-import org.kframework.backend.java.kil.ListUpdate;
 import org.kframework.backend.java.kil.MapLookup;
 import org.kframework.backend.java.kil.MapUpdate;
 import org.kframework.backend.java.kil.MetaVariable;
@@ -273,17 +272,17 @@ public class CopyOnWriteTransformer implements Transformer {
         }
         return listLookup;
     }
-
-    @Override
-    public ASTNode transform(ListUpdate listUpdate) {
-        Term list = (Term) listUpdate.base().accept(this);
-
-        if (list != listUpdate.base()) {
-            listUpdate = new ListUpdate(list, listUpdate.removeLeft(), listUpdate.removeRight());
-        }
-
-        return listUpdate;
-    }
+//
+//    @Override
+//    public ASTNode transform(ListUpdate listUpdate) {
+//        Term list = (Term) listUpdate.base().accept(this);
+//
+//        if (list != listUpdate.base()) {
+//            listUpdate = new ListUpdate(list, listUpdate.removeLeft(), listUpdate.removeRight());
+//        }
+//
+//        return listUpdate;
+//    }
 
     @Override
     public ASTNode transform(BuiltinList builtinList) {
@@ -307,7 +306,7 @@ public class CopyOnWriteTransformer implements Transformer {
             if (newEntry != null) elementsRight.add((Term) newEntry);
         }
         if (! change) return  builtinList;
-        return BuiltinList.of(elementsLeft, elementsRight, frame);
+        return BuiltinList.of(frame, builtinList.removeLeft(), builtinList.removeRight(), elementsLeft, elementsRight);
     }
 
     @Override
