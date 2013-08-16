@@ -238,7 +238,7 @@ public class RLBackend  extends BasicBackend implements Backend{
 		steps.add(new AddHeatingConditions(context));
 		steps.add(new AddSuperheatRules(context));
 		steps.add(new ResolveSymbolicInputStream(context)); // symbolic step
-		steps.add(new DesugarStreams(context));
+		steps.add(new DesugarStreams(context, false));
 		steps.add(new ResolveFunctions(context));
 		steps.add(new TagUserRules(context)); // symbolic step
 		steps.add(new AddKCell(context));
@@ -258,7 +258,7 @@ public class RLBackend  extends BasicBackend implements Backend{
 		steps.add(new AddTopCellRules(context));
 		steps.add(new ResolveBinder(context));
 		steps.add(new ResolveAnonymousVariables(context));
-		steps.add(new ResolveBlockingInput(context));
+		steps.add(new ResolveBlockingInput(context, false));
 		steps.add(new AddK2SMTLib(context));
 		steps.add(new AddPredicates(context));
 		steps.add(new ResolveSyntaxPredicates(context));

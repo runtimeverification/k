@@ -1,0 +1,13 @@
+abc123<T>
+    <k>
+        .K
+    </k>
+    <in>
+        ListItem(#buffer ( "" ))
+        ListItem(#istream ( 0 ))
+    </in>
+    <out>
+        ListItem(#ostream ( 1 ))
+        ListItem(#buffer ( "" ))
+    </out>
+</T>

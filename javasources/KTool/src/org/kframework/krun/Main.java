@@ -43,8 +43,13 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.BackendTerm;
 import org.kframework.kil.Bag;
 import org.kframework.kil.Configuration;
+import org.kframework.kil.DataStructureBuiltin;
+import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.Definition;
+import org.kframework.kil.KApp;
+import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KSequence;
+import org.kframework.kil.ListItem;
 import org.kframework.kil.Module;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
@@ -243,11 +248,19 @@ public class Main {
             stdin = "";
         }
         if (stdin != null) {
-            output.put("$noIO", new BackendTerm("ListItem", "ListItem('#noIO(.KList))"));
-            output.put("$stdin", new BackendTerm("K", "# \"" + stdin
-                    + "\\n\"(.KList)"));
+            KApp noIO = KApp.of(KLabelConstant.of("'#noIO", context));
+            if (K.backend.equals("java-symbolic")) {
+                output.put("$noIO", DataStructureBuiltin.element(context.dataStructureListSortOf(DataStructureSort.DEFAULT_LIST_SORT), noIO));
+            } else {
+                output.put("$noIO", new ListItem(noIO));
+            }
+            output.put("$stdin", StringBuiltin.kAppOf(stdin + "\n"));
         } else {
-            output.put("$noIO", org.kframework.kil.List.EMPTY);
+            if (K.backend.equals("java-symbolic")) {
+                output.put("$noIO", DataStructureBuiltin.empty(context.dataStructureListSortOf(DataStructureSort.DEFAULT_LIST_SORT)));
+            } else {
+                output.put("$noIO", org.kframework.kil.List.EMPTY);
+            }
             output.put("$stdin", StringBuiltin.EMPTY);
         }
 

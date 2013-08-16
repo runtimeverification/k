@@ -5,6 +5,8 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Configuration;
+import org.kframework.kil.DataStructureSort;
+import org.kframework.kil.KSorts;
 import org.kframework.kil.Module;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Syntax;
@@ -75,10 +77,11 @@ public class AddStreamCells extends CopyOnWriteTransformer {
     }
 
     private void addRules(Rule rule, String stream) {
-        if (!(rule.getBody().getSort().equals("List") || rule.getBody().getSort().equals("ListItem"))) {
+        DataStructureSort sort = context.dataStructureSortOf(rule.getBody().getSort());
+        if (!(rule.getBody().getSort().equals("List") || rule.getBody().getSort().equals("ListItem") || context.dataStructureListSortOf(rule.getBody().getSort()) != null)) {
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
                     KExceptionGroup.INTERNAL,
-                    "Found a rule tagged '" + stream + "' whose body wasn't of sort List.",
+                    "Found a rule tagged '" + stream + "' whose body wasn't a list.",
                         getName(), rule.getFilename(), rule.getLocation()));
         }
         Set<Cell> cells = new HashSet<Cell>();

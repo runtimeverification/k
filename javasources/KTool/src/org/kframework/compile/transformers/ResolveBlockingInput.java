@@ -23,9 +23,11 @@ public class ResolveBlockingInput extends GetLhsPattern {
 	java.util.List<Rule> generated = new ArrayList<Rule>();
 	boolean hasInputCell;
     Term resultCondition;
-	
-	public ResolveBlockingInput(Context context) {
+	boolean newList;
+
+	public ResolveBlockingInput(Context context, boolean newList) {
 		super("Resolve Blocking Input", context);
+        this.newList = newList;
 	}
 	
 	@Override
@@ -117,7 +119,10 @@ public class ResolveBlockingInput extends GetLhsPattern {
 			return node;
 		}
 		Rewrite rewrite = (Rewrite) contents;
-		if (!(rewrite.getLeft() instanceof ListItem)) {
+		if ((!newList && !(rewrite.getLeft() instanceof ListItem)) ||
+            (newList && !(rewrite.getLeft() instanceof KApp &&
+            ((KApp)rewrite.getLeft()).getLabel().equals(
+                KLabelConstant.of(DataStructureSort.DEFAULT_LISTITEM_LABEL, context))))) {
 			GlobalSettings.kem.register(new KException(ExceptionType.WARNING, 
 					KExceptionGroup.COMPILER, 
 					"Expecting a list item but got " + rewrite.getLeft().getClass() + "." +
@@ -125,17 +130,36 @@ public class ResolveBlockingInput extends GetLhsPattern {
 							getName(), rewrite.getLeft().getFilename(), rewrite.getLeft().getLocation()));
 			return node;			
 		}
-		ListItem item = (ListItem) rewrite.getLeft();
-		if (!(item.getItem() instanceof Variable //&&	MetaK.isBuiltinSort(item.getItem().getSort())
-				)) {
+        Term item = rewrite.getLeft();
+        Term variable;
+        if (newList) {
+            KApp kappItem = (KApp)item;
+            Term child = kappItem.getChild();
+            if (!(child instanceof KList) || ((KList)child).getContents().size() != 1) {
+			    GlobalSettings.kem.register(new KException(ExceptionType.WARNING, 
+					KExceptionGroup.COMPILER, 
+					"Expecting an input type variable but got a KList instead. Won't transform.", 
+							getName(), ((KApp)item).getChild().getFilename(), ((KApp)item).getChild().getLocation()));
+			    return node;
+            }
+            variable = ((KList)child).getContents().get(0);
+        } else {
+            variable = ((ListItem)item).getItem();
+        }
+		if (!(variable instanceof Variable))//&&	MetaK.isBuiltinSort(item.getItem().getSort())
+				 {
 			GlobalSettings.kem.register(new KException(ExceptionType.WARNING, 
 					KExceptionGroup.COMPILER, 
-					"Expecting an input type variable but got " + item.getItem().getClass() + "." +
+					"Expecting an input type variable but got " + variable.getClass() + "." +
 							System.getProperty("line.separator") + "Won't transform.", 
-							getName(), item.getItem().getFilename(), item.getItem().getLocation()));
+							getName(), variable.getFilename(), variable.getLocation()));
 			return node;
 		}			
-		if (!(rewrite.getRight() instanceof List && ((List) rewrite.getRight()).isEmpty())) {
+		if ((!newList && !(rewrite.getRight() instanceof List && 
+            ((List) rewrite.getRight()).isEmpty())) ||
+            (newList && !(rewrite.getRight() instanceof KApp &&
+            ((KApp)rewrite.getRight()).getLabel().equals(
+                KLabelConstant.of(DataStructureSort.DEFAULT_LIST_UNIT_LABEL, context))))) {
 			GlobalSettings.kem.register(new KException(ExceptionType.WARNING, 
 					KExceptionGroup.COMPILER, 
 					"Expecting an empty list but got " + rewrite.getRight().getClass() + " of sort " + 
@@ -146,26 +170,39 @@ public class ResolveBlockingInput extends GetLhsPattern {
 		}
 		
 		hasInputCell = true;
-        resultCondition = getPredicateTerm((Variable)item.getItem());;
+        resultCondition = getPredicateTerm((Variable)variable);;
 		
-//		  syntax List ::= "#parseInput" "(" String ")"   [cons(List1ParseSyn)]
-		TermCons parseTerm = new TermCons("Stream", "Stream1ParseSyn", context);
-		parseTerm.getContents().add(StringBuiltin.kAppOf(item.getItem().getSort()));
-        parseTerm.getContents().add(StringBuiltin.kAppOf(inputCells.get(node.getLabel())));
+        Term parseTerm = KApp.of(parseInputLabel, 
+            StringBuiltin.kAppOf(variable.getSort()),
+            StringBuiltin.kAppOf(inputCells.get(node.getLabel())));
 		
-//		  syntax List ::= "#buffer" "(" K ")"           [cons(List1IOBufferSyn)]
-		TermCons ioBuffer = new TermCons("Stream", "Stream1IOBufferSyn", context);
-		ioBuffer.getContents().add(new Variable(Variable.getFreshVar("K")));
+        Term ioBuffer = KApp.of(bufferLabel,
+           new Variable(Variable.getFreshVar("K")));
 		
 //		ctor(List)[replaceS[emptyCt(List),parseTerm(string(Ty),nilK)],ioBuffer(mkVariable('BI,K))]
-		List list = new List();
-		list.getContents().add(new Rewrite(List.EMPTY, new ListItem(parseTerm), context));
-		list.getContents().add(new ListItem(ioBuffer));
+        Term list;
+        if (newList) {
+            DataStructureSort myList = context.dataStructureListSortOf(
+                DataStructureSort.DEFAULT_LIST_SORT);
+            Term term1 = new Rewrite(
+                KApp.of(KLabelConstant.of(myList.unitLabel(), context)),
+                KApp.of(KLabelConstant.of(myList.elementLabel(), context), parseTerm),
+                context);
+            Term term2 = KApp.of(KLabelConstant.of(myList.elementLabel(), context), ioBuffer);
+            list = KApp.of(KLabelConstant.of(myList.constructorLabel(), context), term1, term2);
+        } else {
+            list = new List();
+		    ((List)list).getContents().add(new Rewrite(List.EMPTY, new ListItem(parseTerm), context));
+		    ((List)list).getContents().add(new ListItem(ioBuffer));
+        }
 		
 		node = node.shallowCopy();
 		node.setContents(list);
 		return node;
 	}
+
+    private static final KLabelConstant parseInputLabel = KLabelConstant.of("#parseInput");
+    private static final KLabelConstant bufferLabel = KLabelConstant.of("#buffer");
 
     private Term getPredicateTerm(Variable var) {
         return KApp.of(KLabelConstant.KNEQ_KLABEL, KApp.of(KLabelConstant.STREAM_PREDICATE, var), BoolBuiltin.TRUE);

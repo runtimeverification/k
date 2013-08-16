@@ -75,7 +75,7 @@ public class SymbolicRewriter {
 
                 ImmutableSet.Builder<Rule> setBuilder = ImmutableSet.builder();
                 for (Rule rule : definition.rules()) {
-                    if (pair.isUnifiable(rule.indexingPair())) {
+                    if (pair.isUnifiable(rule.indexingPair()) || !rule.containsKCell()) {
                         setBuilder.add(rule);
                     }
                 }

@@ -45,7 +45,7 @@ public class ListBuiltin extends CollectionBuiltin {
         for (Term term : terms) {
             if (term instanceof ListBuiltin) {
                 ListBuiltin listBuiltin = (ListBuiltin) term;
-                assert listBuiltin.sort().equals(sort) : "inner lists are expected to have the same sort for now";
+                assert listBuiltin.sort().equals(sort) : "inner lists are expected to have the same sort for now, found " + sort + " and " + listBuiltin.sort();
 //              Recurse to make sure there are no additional nested inner ListBuiltins
                 listBuiltin = ListBuiltin.of(listBuiltin.sort(), listBuiltin.elementsLeft(), listBuiltin.elementsRight(),
                         listBuiltin.baseTerms());
@@ -79,5 +79,10 @@ public class ListBuiltin extends CollectionBuiltin {
         }
         right.addAll(elementsRight);
         return new ListBuiltin(sort, left, right, base);
+    }
+
+    @Override
+    public String toString() {
+        return elements().toString() + baseTerms().toString() + elementsRight.toString();
     }
 }

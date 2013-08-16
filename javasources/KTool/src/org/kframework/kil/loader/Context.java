@@ -427,6 +427,14 @@ public class Context implements Serializable {
         return dataStructureSorts.get(sortName);
     }
 
+    public DataStructureSort dataStructureListSortOf(String sortName) {
+        assert initialized : "Context is not initialized yet";
+        DataStructureSort sort = dataStructureSorts.get(sortName);
+        if (sort == null) return null;
+        if (!sort.type().equals(KSorts.LIST)) return null;
+        return sort;
+    }
+
     public Set<String> getTokenSorts() {
         return Collections.unmodifiableSet(tokenSorts);
     }

@@ -45,6 +45,7 @@ public class KSequence extends Collection {
 			else
 				content += contents.get(i) + "~> ";
 		}
+        if (content.equals("")) return ".K";
 		return content;
 	}
 

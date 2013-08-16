@@ -56,6 +56,7 @@ public abstract class Collection extends Term {
 		String content = "";
 		for (Term t : contents)
 			content += t;
+        if (content.equals("")) return "." + sort;
 		return content;
 	}
 

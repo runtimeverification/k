@@ -1,5 +1,7 @@
 package org.kframework.kil;
 
+import org.kframework.kil.loader.Context;
+
 import java.io.Serializable;
 import java.util.Map;
 
@@ -112,4 +114,39 @@ public class DataStructureSort implements Serializable {
         return unitLabel;
     }
 
+    public static final String DEFAULT_LIST_SORT = "MyList";
+    public static final String DEFAULT_LISTITEM_LABEL = "'MyListItem";
+    public static final String DEFAULT_LIST_UNIT_LABEL = "'.MyList";
+
+    /**
+     * Returns a term of sort MyList containing one MyListItem element per argument.
+     */
+    public static Term listOf(Context context, Term... listItems) {
+        DataStructureSort myList = context.dataStructureListSortOf(DEFAULT_LIST_SORT);
+        if (listItems.length == 0) {
+            return KApp.of(KLabelConstant.of(myList.unitLabel(), context));
+        }
+        Term result = listItems[0];
+        for (int i = 1; i < listItems.length; i++) {
+            result = KApp.of(KLabelConstant.of(myList.constructorLabel(), context), result, listItems[i]);
+        }
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof DataStructureSort)) return false;
+        DataStructureSort ds = (DataStructureSort)o;
+        return ds.name.equals(name) && ds.type.equals(type) && ds.unitLabel.equals(unitLabel) && ds.constructorLabel.equals(constructorLabel) && ds.elementLabel.equals(elementLabel) && ds.operatorLabels.equals(operatorLabels);
+    }
+
+    @Override
+    public int hashCode() {
+        return (name + type + unitLabel + elementLabel + constructorLabel).hashCode() * Context.HASH_PRIME + operatorLabels.hashCode();
+    }
 }

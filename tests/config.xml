@@ -878,11 +878,11 @@
     </all-programs>
   </test>
 
-<test language="tests/regression/java-rewrite-engine/io/test.k"
+<test language="tests/regression/java-rewrite-engine/io/test1/test.k"
       extensions="test"
-      folder="tests/regression/java-rewrite-engine/io/programs"
-      results="tests/regression/java-rewrite-engine/io/tests"
-      unixOnly="tests/regression/java-rewrite-engine/io/prepare.sh">
+      folder="tests/regression/java-rewrite-engine/io/test1/programs"
+      results="tests/regression/java-rewrite-engine/io/test1/tests"
+      unixOnly="tests/regression/java-rewrite-engine/io/test1/prepare.sh">
   <kompile-option name="-ml" />
   <all-programs>
     <krun-option name="--backend" value="java-symbolic" />
@@ -912,6 +912,11 @@
       folder="tests/regression/issue677/programs"
       results="tests/regression/issue677/tests"
       />
-
+<!--
+<test language="tests/regression/java-rewrite-engine/io/test2/test.k"
+      extensions="test"
+      folder="tests/regression/java-rewrite-engine/io/test2/programs"
+      results="tests/regression/java-rewrite-engine/io/test2/tests" />
+-->
 </tests>
 
