@@ -892,6 +892,7 @@
 </test>
 
 
+
  <test
       language="tests/regression/issue#12/test.k"
       folder="tests/regression/issue#12/programs"
@@ -905,6 +906,12 @@
       <krun-option name="--output-mode" value="pretty" />
     </all-programs>
   </test>
+
+  <test
+      language="tests/regression/issue677/issue.k"
+      folder="tests/regression/issue677/programs"
+      results="tests/regression/issue677/tests"
+      />
 
 </tests>
 
