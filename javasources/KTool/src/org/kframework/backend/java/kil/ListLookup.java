@@ -32,7 +32,7 @@ public class ListLookup extends Term {
         int index = ((IntToken) key).intValue();
 
         Term value = ((BuiltinList) list).get(index);
-        return value != null ? value : this;
+        return value;
     }
 
     public Term key() {

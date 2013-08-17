@@ -1,12 +1,11 @@
 package org.kframework.backend.java.kil;
 
 import com.google.common.base.Joiner;
-import org.kframework.backend.java.symbolic.Transformer;
-import org.kframework.backend.java.symbolic.Unifier;
-import org.kframework.backend.java.symbolic.Utils;
-import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.symbolic.*;
 import org.kframework.backend.java.util.ImprovedArrayDeque;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.IntBuiltin;
 
 import java.util.*;
 
@@ -112,6 +111,7 @@ public class BuiltinList extends Collection {
     }
 
     public Term get(int index) {
+        boolean onLeft = true;
         Deque<Term> elements = elementsLeft;
         Iterator<Term> iterator = elements.iterator();
         if (frame == null) { // no framing variable
@@ -121,6 +121,7 @@ public class BuiltinList extends Collection {
             }
         } else { // if there is a frame
             if (index < 0) { // search among the elements on the right of frame if index < 0
+                onLeft = false;
                 elements = elementsRight;
             }
         }
@@ -132,7 +133,18 @@ public class BuiltinList extends Collection {
             while (index-- > 0) iterator.next();
             return iterator.next();
         }
-        return null;
+        if (frame == null) return new SymbolicConstraint.Bottom();
+        java.util.Collection<Term> left = elementsLeft;
+        java.util.Collection<Term> right = elementsRight;
+        if (onLeft) {
+            index -= elementsLeft.size();
+            left = Collections.<Term>emptyList();
+        } else {
+            index -= elementsRight.size();
+            index = -index-1;
+            right = Collections.<Term>emptyList();
+        }
+        return new ListLookup(BuiltinList.of(frame, removeLeft, removeRight, left, right), IntToken.of(index));
     }
 
     public java.util.Collection<Term> elementsLeft() {

@@ -1,15 +1,8 @@
 package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Cell;
+import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
-import org.kframework.kil.Configuration;
-import org.kframework.kil.DataStructureSort;
-import org.kframework.kil.KSorts;
-import org.kframework.kil.Module;
-import org.kframework.kil.Rule;
-import org.kframework.kil.Syntax;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -34,7 +27,15 @@ public class AddStreamCells extends CopyOnWriteTransformer {
     @Override
     public ASTNode transform(Module node) throws TransformerException {
         ASTNode result = super.transform(node);
-		if (generated.isEmpty()) return node;
+		if (generated.isEmpty()) {
+            if (result == node)
+                return node;
+            GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER,
+                    "Stream cells missing in module " + node.getName() + ". " +
+                            "Some rules tagged with streams have been erased",
+                    node.getFilename(), node.getLocation()));
+            return result;
+        }
 		result = result.shallowCopy();
 		((Module)result).getItems().addAll(generated);
 		return result;
@@ -93,6 +94,9 @@ public class AddStreamCells extends CopyOnWriteTransformer {
         }
         for (Cell cell : cells) {
             Rule newRule = rule.shallowCopy();
+            Attributes newAttrs = newRule.getAttributes().shallowCopy();
+            newAttrs.remove("function");
+            newRule.setAttributes(newAttrs);
             newRule.setBody(MetaK.wrap(rule.getBody(), cell.getLabel(), Ellipses.NONE));
             generated.add(newRule);
         }

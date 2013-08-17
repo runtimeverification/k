@@ -120,9 +120,9 @@ public class ConstrainedTerm extends Term {
 
         Collection<SymbolicConstraint> constraints = new ArrayList<SymbolicConstraint>();
         for (SymbolicConstraint solution : unificationConstraint.getMultiConstraints()) {
-            solution.addAll(constrainedTerm.lookups);
-            solution.addAll(constrainedTerm.constraint);
-            solution.addAll(constraint);
+            if (SymbolicConstraint.TruthValue.FALSE == solution.addAll(constrainedTerm.lookups)) continue;
+            if (SymbolicConstraint.TruthValue.FALSE == solution.addAll(constrainedTerm.constraint)) continue;
+            if (SymbolicConstraint.TruthValue.FALSE == solution.addAll(constraint)) continue;
 
             solution.simplify();
             if (solution.isFalse()) {

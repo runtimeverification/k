@@ -2,6 +2,6 @@
     .K
 </k>
 <out>
-    ListItem(1)
-    ListItem(2)
+    ListItem(#ostream ( 1 ))
+    ListItem(#buffer ( "7" ))
 </out>

@@ -69,6 +69,8 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     @Override
     public void unify(Term term, Term otherTerm) {
+        if (term instanceof SymbolicConstraint.Bottom || otherTerm instanceof SymbolicConstraint.Bottom)
+            fail();
         if (term.kind() == Kind.KITEM || term.kind() == Kind.K || term.kind() == Kind.KLIST) {
             term = KCollection.upKind(term, otherTerm.kind());
             otherTerm = KCollection.upKind(otherTerm, term.kind());
