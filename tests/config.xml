@@ -912,11 +912,17 @@
       folder="tests/regression/issue677/programs"
       results="tests/regression/issue677/tests"
       />
-<!--
+
 <test language="tests/regression/java-rewrite-engine/io/test2/test.k"
       extensions="test"
       folder="tests/regression/java-rewrite-engine/io/test2/programs"
-      results="tests/regression/java-rewrite-engine/io/test2/tests" />
--->
+      results="tests/regression/java-rewrite-engine/io/test2/tests">
+  <kompile-option name="-ml" />
+  <all-programs>
+    <krun-option name="--backend" value="java-symbolic" />
+    <krun-option name="--no-smt" />
+  </all-programs>
+</test>
+
 </tests>
 
