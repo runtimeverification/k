@@ -24,7 +24,7 @@ public class SubstitutionTransformer extends PrePostTransformer {
         this.substitution = substitution;
         postTransformer.addTransformer(new LocalSubstitutionTransformer());
         postTransformer.addTransformer(new VariableUpdaterTransformer());
-        preTransformer.addTransformer(new LocalVariableChecker());
+//        preTransformer.addTransformer(new LocalVariableChecker());
         preTransformer.addTransformer(new LocalSubstitutionChecker());
     }
 

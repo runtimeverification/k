@@ -27,13 +27,13 @@ public class AddStreamCells extends CopyOnWriteTransformer {
     @Override
     public ASTNode transform(Module node) throws TransformerException {
         ASTNode result = super.transform(node);
+        if (result == node)
+            return node;
 		if (generated.isEmpty()) {
-            if (result == node)
-                return node;
-            GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER,
-                    "Stream cells missing in module " + node.getName() + ". " +
-                            "Some rules tagged with streams have been erased",
-                    node.getFilename(), node.getLocation()));
+//            GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER,
+//                    "Stream cells missing in module " + node.getName() + ". " +
+//                            "Some rules tagged with streams have been erased",
+//                    node.getFilename(), node.getLocation()));
             return result;
         }
 		result = result.shallowCopy();
