@@ -11,6 +11,7 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
+import org.kframework.utils.general.GlobalSettings;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -169,6 +170,10 @@ public class KItem extends Term implements Sorted {
         } catch (IllegalArgumentException e) {
             //e.printStackTrace();
         } catch (RuntimeException e) {
+            if (GlobalSettings.verbose) {
+                System.err.println("Ignored exception thrown by hook " + kLabelConstant + " : ");
+                e.printStackTrace();
+            }
         }
 
         return this;

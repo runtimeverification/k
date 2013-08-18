@@ -2,6 +2,7 @@ package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
@@ -158,6 +159,11 @@ public class LocalTransformer implements Transformer {
     @Override
     public ASTNode transform(SymbolicConstraint symbolicConstraint) {
         return transform((JavaSymbolicObject) symbolicConstraint);
+    }
+
+    @Override
+    public ASTNode transform(StringToken stringToken) {
+        return transform((Token) stringToken);
     }
 
     @Override

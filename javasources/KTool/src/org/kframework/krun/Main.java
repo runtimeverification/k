@@ -419,10 +419,10 @@ public class Main {
                         assert false: "dead code";
                     }
                     result = krun.prove(mod);
-                } else if (cmd.hasOption("bound")) {
-                    int bound = Integer.parseInt(K.bound);
+                } else if (cmd.hasOption("depth")) {
+                    int depth = Integer.parseInt(K.depth);
                     result = krun.step(makeConfiguration(KAST, null, rp,
-                            (K.term != null), context), bound);
+                            (K.term != null), context), depth);
 
                     if (GlobalSettings.verbose)
                         sw.printTotal("Bounded execution total");

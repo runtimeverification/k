@@ -7,6 +7,10 @@ import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.symbolic.BuiltinFunction;
+import org.kframework.kil.loader.Context;
+import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.krun.K;
+import org.kframework.krun.RunProcess;
 import org.kframework.krun.api.io.FileSystem;
 
 import java.io.IOException;
@@ -16,6 +20,14 @@ public class BuiltinIOOperations {
 
     public static FileSystem fs() {
         return BuiltinFunction.context().fileSystem();
+    }
+
+    public static Definition definition() {
+        return BuiltinFunction.context().definition();
+    }
+
+    public static Context context() {
+        return BuiltinFunction.context().definition().context();
     }
 
     public static Term open(StringToken term1, StringToken term2) {
@@ -87,6 +99,18 @@ public class BuiltinIOOperations {
             throw new IllegalArgumentException(e);
         } catch (IOException e) {
             return processIOException(e.getMessage());
+        }
+    }
+
+    public static Term parse(StringToken term1, StringToken term2) {
+        try {
+            RunProcess rp = new RunProcess();
+            org.kframework.kil.Term kast = rp.runParser(K.parser, term1.stringValue(), true, term2.stringValue(), context());
+            Term term = Term.of(kast, definition());
+            term = term.evaluate(BuiltinFunction.context());
+            return term;
+        } catch (TransformerException e) {
+            return processIOException("noparse");
         }
     }
 

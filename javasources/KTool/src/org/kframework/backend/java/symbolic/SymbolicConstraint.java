@@ -433,16 +433,15 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
             return;
         }
         isNormal = true;
-
+        Set<Equality> equalitiesToRemove = new HashSet<Equality>();
         for (Iterator<Equality> iterator = equalities.iterator(); iterator.hasNext();) {
             Equality equality = iterator.next();
-            Equality normalizedEquality =  equality.substitute(substitution);
-            if (equality != normalizedEquality) {
-                equality = normalizedEquality.evaluate();
-            }
+            equality.substitute(substitution);
+            //TODO(AndreiS): Only evaluate if the term has changed
+            equality.evaluate();
 
             if (equality.isTrue()) {
-                iterator.remove();
+                equalitiesToRemove.add(equality);
                 continue;
             } else if (equality.isFalse()) {
                 truthValue = TruthValue.FALSE;
@@ -478,16 +477,23 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
                     break;
                 }
                 previousEquality.substitute(tempSubstitution);
-
+                //TODO(AndreiS): Only evaluate if the term has changed
+                previousEquality.evaluate();
                 if (previousEquality.isTrue()) {
-                    previousIterator.remove();
+                    equalitiesToRemove.add(previousEquality);
                 } else if (previousEquality.isFalse()) {
                     truthValue = TruthValue.FALSE;
                     return;
                 }
             }
+            equalitiesToRemove.add(equality);
+        }
+        for (Iterator<Equality> iterator = equalitiesToRemove.iterator(); iterator.hasNext();) {
+            Equality equality = iterator.next();
+            equalities.remove(equality);
             iterator.remove();
         }
+        assert equalitiesToRemove.size() == 0;
     }
 
     @SuppressWarnings("unchecked")

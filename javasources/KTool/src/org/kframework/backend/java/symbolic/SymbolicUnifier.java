@@ -1,13 +1,14 @@
 package org.kframework.backend.java.symbolic;
 
+import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.AnonymousVariable;
-import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
-import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Hole;
@@ -398,6 +399,13 @@ public class SymbolicUnifier extends AbstractUnifier {
     @Override
     public void unify(IntToken intToken, Term term) {
         if (!intToken.equals(term)) {
+            fail();
+        }
+    }
+
+    @Override
+    public void unify(StringToken stringToken, Term term) {
+        if (!stringToken.equals(term)) {
             fail();
         }
     }

@@ -18,7 +18,7 @@ module IO
     when S =/=String "" [stdout, stderr]
 
   // read one character at a time until we read whitespace
-  rule MyListItem(#parseInput(_, Delimiters:String)) MyListItem(#buffer(S:String => S +String chrChar(#getc(N)))) MyListItem(#istream(N:Int)) when findChar(S, Delimiters, 0) ==Int -1 [stdin]
+  rule MyListItem(#parseInput(_:KItem, Delimiters:String)) MyListItem(#buffer(S:String => S +String chrChar(#getc(N)))) MyListItem(#istream(N:Int)) when findChar(S, Delimiters, 0) ==Int -1 [stdin]
 
   // when we reach whitespace, if it parses create a ListItem
   rule (MyListItem(#parseInput("String", Delimiters:String)) => MyListItem(S)) MyListItem(#buffer(S:String => "")) _:MyList when findChar(S, Delimiters, 0) =/=Int -1 [stdin]

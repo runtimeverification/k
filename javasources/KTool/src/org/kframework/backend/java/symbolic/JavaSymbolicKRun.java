@@ -92,13 +92,16 @@ public class JavaSymbolicKRun implements KRun {
 
     @Override
     public KRunResult<KRunState> run(org.kframework.kil.Term cfg) throws KRunExecutionException {
+        return internalRun(cfg, -1);
+    }
 
+    private KRunResult<KRunState> internalRun(org.kframework.kil.Term cfg, int bound) throws KRunExecutionException {
         SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
         Term term = Term.of(cfg, definition);
         TermContext termContext = new TermContext(definition, new PortableFileSystem());
         term = term.evaluate(termContext);
         ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, termContext);
-        ConstrainedTerm result = symbolicRewriter.rewrite(constrainedTerm);
+        ConstrainedTerm result = symbolicRewriter.rewrite(constrainedTerm, bound);
         org.kframework.kil.Term kilTerm = (org.kframework.kil.Term) result.term().accept(
                 new BackendJavaKILtoKILTranslation(context));
         return new KRunResult<KRunState>(new KRunState(kilTerm, context));
@@ -280,7 +283,7 @@ public class JavaSymbolicKRun implements KRun {
     @Override
     public KRunResult<KRunState> step(org.kframework.kil.Term cfg, int steps)
             throws KRunExecutionException {
-        throw new UnsupportedBackendOptionException("--debug");
+        return internalRun(cfg, steps);
     }
 
     @Override

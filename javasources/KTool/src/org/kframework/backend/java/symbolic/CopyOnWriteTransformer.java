@@ -3,6 +3,7 @@ package org.kframework.backend.java.symbolic;
 import com.google.common.collect.Iterables;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
@@ -181,6 +182,11 @@ public class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(IntToken intToken) {
         return transform((Token) intToken);
+    }
+
+    @Override
+    public ASTNode transform(StringToken stringToken) {
+        return transform((Token) stringToken);
     }
 
     @Override
