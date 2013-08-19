@@ -1,5 +1,11 @@
 package org.kframework.parser.concrete.disambiguate;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Variable;
@@ -10,12 +16,6 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
 
 public class VariableTypeInferenceFilter extends BasicTransformer {
 
@@ -76,36 +76,47 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 				}
 			} else {
 				// when there aren't any variable declarations
-				java.util.Set<Variable> isect = new HashSet<Variable>();
-				// find the intersection of varLoc
-				for (Variable var1 : varLoc.entrySet().iterator().next().getValue()) {
-					// iterate over the first variable location
+				java.util.Set<String> isect = new HashSet<String>();
+
+				for (String sort : context.definedSorts) { // for every declared sort
+					if (isect.contains(sort))
+						continue;
 					boolean inAll = true;
-					for (Entry<String, java.util.List<Variable>> varLocEntry : varLoc.entrySet()) { // iterate over each location
-						if (!varLocEntry.getValue().contains(var1)) {
+					for (Entry<String, java.util.List<Variable>> varLocEntry : varLoc.entrySet()) {
+						// iterate over each location
+						// to find a bottom sort that fits
+						boolean inThisOne = false;
+						for (Variable varLocEntry2 : varLocEntry.getValue()) {
+							if (context.isSubsortedEq(varLocEntry2.getExpectedSort(), sort)) {
+								inThisOne = true;
+								break;
+							}
+						}
+						if (!inThisOne) {
 							inAll = false;
 							break;
 						}
 					}
 					if (inAll)
-						isect.add(var1);
+						isect.add(sort);
 				}
+
 				Variable varr = varLoc.entrySet().iterator().next().getValue().get(0);
 				if (isect.size() == 0) {
 					String msg = "Could not infer a sort for variable '" + varr.getName() + "' to match every location.";
 					throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, varr.getFilename(), varr.getLocation()));
 				}
 
-				Variable inferredVar = null;
+				String inferredVar = null;
 
 				// if I have more than one possibility choose a maximum
 				if (isect.size() > 1) {
-					java.util.List<Variable> maxSorts = new ArrayList<Variable>();
+					java.util.List<String> maxSorts = new ArrayList<String>();
 
-					for (Variable vv1 : isect) {
+					for (String vv1 : isect) {
 						boolean maxSort = true;
-						for (Variable vv2 : isect) {
-							if (context.isSubsorted(vv2.getSort(), vv1.getSort()))
+						for (String vv2 : isect) {
+							if (context.isSubsorted(vv2, vv1))
 								maxSort = false;
 						}
 						if (maxSort)
@@ -115,8 +126,8 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 					if (maxSorts.size() > 1) {
 						String msg = "Could not infer a unique sort for variable '" + varr.getName() + "'.";
 						msg += " Possible sorts: ";
-						for (Variable vv1 : maxSorts)
-							msg += vv1.getSort() + ", ";
+						for (String vv1 : maxSorts)
+							msg += vv1 + ", ";
 						msg = msg.substring(0, msg.length() - 2);
 						throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, varr.getFilename(), varr.getLocation()));
 					}
@@ -128,15 +139,17 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 
 				if (inferredVar != null) {
 					Map<String, Variable> varDeclMap = new HashMap<String, Variable>();
-					varDeclMap.put(inferredVar.getName(), inferredVar);
+					Variable varr2 = new Variable(varr.getName(), varr.getSort());
+					varr2.setExpectedSort(inferredVar);
+					varDeclMap.put(varr.getName(), varr2);
 
 					try {
-						r = (Sentence) r.accept(new VariableTypeFilter(varDeclMap, context));
+						r = (Sentence) r.accept(new VariableTypeFilterExpectedSort(varDeclMap, context));
 					} catch (TransformerException e) {
 						e.report();
 					}
 
-					String msg = "Variable '" + inferredVar.getName() + "' was not declared. Assuming sort " + inferredVar.getSort();
+					String msg = "Variable '" + varr.getName() + "' was not declared. Assuming sort " + inferredVar;
 					GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.COMPILER, msg, varr.getFilename(), varr.getLocation()));
 				}
 			}
