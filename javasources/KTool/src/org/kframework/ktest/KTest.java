@@ -54,11 +54,9 @@ public class KTest {
 
 		// configuration file
 		if (cmd.hasOption("config")) {
-			System.out.println("Yes!");
 			Configuration.CONFIG = Configuration.getHome()
 					+ Configuration.FS + cmd.getOptionValue("config");
 		} else {
-			System.out.println("Not!");
 			// if not given, config is considered to be the default
 			String[] restArgs = cmd.getArgs();
 			if (restArgs.length < 1)
@@ -68,8 +66,6 @@ public class KTest {
 						+ Configuration.FS + restArgs[0];
 
 		}
-		
-		System.out.println(Configuration.CONFIG);
 		
 		// check existence of the configuration file
 		if (!new File(Configuration.CONFIG).exists()) {
