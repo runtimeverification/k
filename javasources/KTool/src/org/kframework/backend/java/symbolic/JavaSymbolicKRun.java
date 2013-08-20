@@ -84,8 +84,8 @@ public class JavaSymbolicKRun implements KRun {
         }
 	}
 	
-    public static Cell wrap(Term t, String label) {
-        Cell cell = new Cell(label,t);
+    public static Cell<Term> wrap(Term t, String label) {
+        Cell<Term> cell = new Cell<Term>(label,t);
         System.out.println("Content Kind: "+t.kind());
         return cell;
     }

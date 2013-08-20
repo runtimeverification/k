@@ -45,7 +45,7 @@ public class Automata<Control, Alphabet> {
         int n = stringTransitions.length - 1;
         String[] finalStatesStrings = stringTransitions[n].trim().split("\\s+");
         for (String state : finalStatesStrings) {
-            states.add(State.<String,String>ofString(state));
+            states.add(State.ofString(state));
         }
         for (int i = 0; i < n; i++) {
 
