@@ -3,9 +3,11 @@ package org.kframework.parser.utils;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.JavaClassesFactory;
+import org.kframework.utils.general.GlobalSettings;
 
 import aterm.ATerm;
 import aterm.pure.PureFactory;
@@ -24,7 +26,23 @@ public class Sglr {
 	 */
 	public static ASTNode run_sglri(String tablePath, String startSymbol, String input, String location) {
 		tablePath = new File(tablePath).getAbsolutePath();
-		byte[] parsed = SglrJNI.parseString(tablePath, input, startSymbol, location);
+		// should parse both ways and compare, but JNI way is broken on 64 bits.
+		//byte[] parsed = SglrJNI.parseString(tablePath, input, startSymbol, location);
+		byte[] parsed = null;
+        if (GlobalSettings.isUnixOS()) {
+            try {
+                byte[] served = SglrServer.parseString(tablePath, input, startSymbol, location);
+                parsed = served;
+                /*
+                if (!Arrays.equals(parsed, served)) {
+                    System.err.println("Error, different results from sglr through jni and server");
+                    System.exit(1);
+                }
+                */
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 		try {
 			ByteArrayInputStream inputStream = new ByteArrayInputStream(parsed);
 			inputStream.read(); // the BAF format starts with a 0 that has to go away first.
