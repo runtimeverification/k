@@ -8,7 +8,7 @@ context-free syntax
 	KLabelDz	-> KLabel {cons("KLabel1Const")}
 
 lexical syntax
-	[a-zA-Z][a-zA-Z0-9]*	-> DzDzID
+	[a-zA-Z\_][a-zA-Z0-9\_]*	-> DzDzID
 	[\-\+]? [0-9]+			-> DzDzINT {prefer}
 
 	[\-\+]?	FloatDigitsDz ExponentPartDz? [fFdD]? -> DzDzFLOAT {prefer}
@@ -34,7 +34,7 @@ lexical syntax
 	"`}"					-> KLabelCharDz
 
 lexical restrictions
-	DzDzID  -/- [a-zA-Z0-9]
+	DzDzID  -/- [a-zA-Z0-9\_]
 	DzDzINT -/- [0-9]
     DzDzFLOAT -/- [a-zA-Z0-9\.]
 
