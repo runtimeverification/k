@@ -65,9 +65,9 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 
 			// check to see if the declared type fits everywhere
 			if (varDecl.size() == 1) {
-				Map<String, String> varDeclMap = new HashMap<String, String>();
+				Map<String, Variable> varDeclMap = new HashMap<String, Variable>();
 				Variable var = varDecl.iterator().next();
-				varDeclMap.put(var.getName(), var.getSort());
+				varDeclMap.put(var.getName(), var);
 
 				try {
 					r = (Sentence) r.accept(new VariableTypeFilter(varDeclMap, context));
@@ -127,8 +127,8 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 					inferredVar = isect.iterator().next();
 
 				if (inferredVar != null) {
-					Map<String, String> varDeclMap = new HashMap<String, String>();
-					varDeclMap.put(inferredVar.getName(), inferredVar.getSort());
+					Map<String, Variable> varDeclMap = new HashMap<String, Variable>();
+					varDeclMap.put(inferredVar.getName(), inferredVar);
 
 					try {
 						r = (Sentence) r.accept(new VariableTypeFilter(varDeclMap, context));

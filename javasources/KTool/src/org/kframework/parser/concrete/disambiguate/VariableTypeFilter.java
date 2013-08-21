@@ -14,24 +14,25 @@ import java.util.Map;
 
 public class VariableTypeFilter extends BasicTransformer {
 
-	private Map<String, String> variableTypes = null;
+	private Map<String, Variable> variableTypes = null;
 
-	public VariableTypeFilter(Map<String, String> types, Context context) {
+	public VariableTypeFilter(Map<String, Variable> types, Context context) {
 		super("Variable type filter", context);
 		this.variableTypes = types;
 	}
 
 	public ASTNode transform(Variable r) throws TransformerException {
-		String correctSort = variableTypes.get(r.getName());
-		if (correctSort == null)
+		Variable correctVar = variableTypes.get(r.getName());
+		if (correctVar == null)
 			return r;
-		if (context.isSubsortedEq(r.getSort(), correctSort)) {
+		if (context.isSubsortedEq(r.getSort(), correctVar.getSort())) {
 			Variable newV = new Variable(r);
-			newV.setSort(correctSort);
+			newV.setSort(correctVar.getSort());
+			newV.setSyntactic(correctVar.isSyntactic());
 			return newV;
 		}
-		String msg = "Variable " + r.getName() + " is contextually expected to have sort " + r.getSort() + " but it has been declared (or infered) of sort " + correctSort + ".";
-		// String msg = "Variable " + r.getName() + " cannot have sort " + r.getSort() + " at this location. Expected sort " + correctSort + ".";
+		String msg = "Variable " + r.getName() + " is contextually expected to have sort " + r.getSort();
+		msg += " but it has been declared (or infered) of sort " + correctVar.getSort() + ".";
 		KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getFilename(), r.getLocation());
 		throw new VariableTypeClashException(kex);
 	}
