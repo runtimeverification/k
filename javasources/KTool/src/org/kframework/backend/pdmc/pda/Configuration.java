@@ -1,7 +1,9 @@
 package org.kframework.backend.pdmc.pda;
 
+import com.google.common.base.Joiner;
 import org.kframework.backend.java.symbolic.Utils;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Stack;
 
@@ -13,7 +15,12 @@ public class Configuration<Control, Alphabet> {
     ConfigurationHead<Control,Alphabet> head;
     Stack<Alphabet> stack;
 
-    private Configuration(Control control, Stack<Alphabet> stack) {
+    public Configuration(ConfigurationHead<Control, Alphabet> head, Stack<Alphabet> stack) {
+        this.head = head;
+        this.stack = stack;
+    }
+
+    public Configuration(Control control, Stack<Alphabet> stack) {
         if (stack.isEmpty()) {
             head = ConfigurationHead.of(control, null);
             this.stack = emptyStack();
@@ -96,5 +103,23 @@ public class Configuration<Control, Alphabet> {
                 stack.push(letters[i]);
         }
         return new Configuration<String, String>(control, stack);
+    }
+
+    @Override
+    public String toString() {
+        @SuppressWarnings("unchecked")
+        Stack<Alphabet> stack = (Stack<Alphabet>) this.stack.clone();
+        if (head.isProper()) stack.add(head.getLetter());
+        Collections.<Control>reverse(stack);
+        StringBuilder builder = new StringBuilder();
+        builder.append("<");
+        builder.append(head.getState().toString());
+        if (!stack.isEmpty()) {
+            builder.append(", ");
+            Joiner joiner = Joiner.on(" ");
+            joiner.appendTo(builder, stack);
+        }
+        builder.append(">");
+        return builder.toString();
     }
 }

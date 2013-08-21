@@ -1,5 +1,7 @@
 package org.kframework.backend.pdmc.pda;
 
+import com.google.common.base.Joiner;
+
 import java.util.List;
 import java.util.Stack;
 
@@ -26,7 +28,8 @@ public class Rule<Control, Alphabet> {
     public Stack<Alphabet> endStack() {
         Alphabet letter = rhs.getHead().getLetter();
         if (letter == null) return Configuration.<Alphabet>emptyStack();
-        Stack<Alphabet> stack = rhs.getStack();
+        @SuppressWarnings("unchecked")
+        Stack<Alphabet> stack = (Stack<Alphabet>) rhs.getStack().clone();
         if (stack == null) {
             stack = new Stack<Alphabet>();
         }
@@ -46,5 +49,14 @@ public class Rule<Control, Alphabet> {
         ConfigurationHead<String, String> lhs = lhsConf.getHead();
         Configuration<String, String> rhs = Configuration.of(sides[1].trim());
         return new Rule<String, String>(lhs, rhs);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append(lhs.toString());
+        builder.append(" => ");
+        builder.append(rhs.toString());
+        return builder.toString();
     }
 }

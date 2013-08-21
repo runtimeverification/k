@@ -76,4 +76,10 @@ public class ConfigurationHead<Control, Alphabet> {
     public Alphabet getLetter() {
         return stackHead;
     }
+
+    @Override
+    public String toString() {
+        return "<" + state + "," + stackHead + ">";
+
+    }
 }
