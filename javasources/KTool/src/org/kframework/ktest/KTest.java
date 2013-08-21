@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -34,67 +35,180 @@ import org.xml.sax.SAXException;
 
 public class KTest {
 
-	private static final String HELP_MESSAGE = getHelpMessage();
-
 	public static void test(String[] args) {
-		
+
 		KTestOptionsParser op = new KTestOptionsParser();
 		CommandLine cmd = op.parse(args);
 
-		// options: help
-		if (cmd.hasOption("help"))
-			KTestOptionsParser.helpExit(op.getHelp(), "help", op.getOptions());
+		// Help
+		if (cmd.hasOption(Configuration.HELP_OPTION))
+			KTestOptionsParser.helpExit(op.getHelp(),
+					Configuration.HELP_OPTION, op.getOptions());
 
-		// version
-		if (cmd.hasOption("version")) {
-			String msg = FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE);
+		// Version
+		if (cmd.hasOption(Configuration.VERSION_OPTION)) {
+			String msg = FileUtil.getFileContent(KPaths.getKBase(false)
+					+ KPaths.VERSION_FILE);
 			System.out.println(msg);
 			System.exit(0);
 		}
 
-		// configuration file
-		if (cmd.hasOption("config")) {
-			Configuration.CONFIG = Configuration.getHome()
-					+ Configuration.FS + cmd.getOptionValue("config");
-		} else {
-			// if not given, config is considered to be the default
-			String[] restArgs = cmd.getArgs();
-			if (restArgs.length < 1)
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Please provide a configuration file", "command line", "System file."));
-			else
-				Configuration.CONFIG = Configuration.getHome()
-						+ Configuration.FS + restArgs[0];
+		// The language to be tested
+		if (cmd.hasOption(Configuration.LANGUAGE)) {
+			Configuration.KDEF = resolveFullPath(cmd
+					.getOptionValue(Configuration.LANGUAGE));
+		}
 
+		// Programs folder
+		if (cmd.hasOption(Configuration.PROGRAMS_OPTION)) {
+			Configuration.PGM_DIR = resolveFullPath(cmd
+					.getOptionValue(Configuration.PROGRAMS_OPTION));
+		}
+
+		// List of excluded programs
+		if (cmd.hasOption(Configuration.EXCLUDE_OPTION)) {
+			Configuration.EXCLUDE_PROGRAMS = Arrays.asList(cmd.getOptionValue(
+					Configuration.EXCLUDE_OPTION).split("\\s+"));
+		}
+
+		// List of program (non-empty) extensions
+		if (cmd.hasOption(Configuration.EXTENSIONS_OPTION)) {
+			Configuration.EXTENSIONS = Arrays.asList(cmd.getOptionValue(
+					Configuration.EXTENSIONS_OPTION).split("\\s+"));
+		}
+
+		// List of program (non-empty) extensions
+		if (cmd.hasOption(Configuration.RESULTS_OPTION)) {
+			Configuration.RESULTS_FOLDER = resolveFullPath(cmd
+					.getOptionValue(Configuration.RESULTS_OPTION));
+		}
+
+		// Resolve the configuration file
+		if (cmd.hasOption(Configuration.CONFIG_OPTION)) {
+			Configuration.CONFIG = resolveFullPath(cmd
+					.getOptionValue(Configuration.CONFIG_OPTION));
+		} else {
+			// if not given, config is (by default) considered to be the first
+			// "dangling" command line argument
+			String[] restArgs = cmd.getArgs();
+			for (int i = 0; i < restArgs.length; i++)
+				if (restArgs.length < 1) {
+					if (new File(Configuration.KDEF).isDirectory())
+						GlobalSettings.kem
+								.register(new KException(
+										ExceptionType.ERROR,
+										KExceptionGroup.CRITICAL,
+										"Please provide a configuration file or a K defintion",
+										"command line", "System file."));
+				} else
+					Configuration.CONFIG = resolveFullPath(restArgs[0]);
+		}
+
+		// sanity checks
+		if (Configuration.KDEF == null) {
+			GlobalSettings.kem
+					.register(new KException(
+							ExceptionType.ERROR,
+							KExceptionGroup.CRITICAL,
+							"Please provide a K definition or a root directory for the configuration file.",
+							"command line", "System file."));
+		}
+		else if (new File(Configuration.KDEF).isDirectory() && Configuration.CONFIG == null) {
+			GlobalSettings.kem
+			.register(new KException(
+					ExceptionType.ERROR,
+					KExceptionGroup.CRITICAL,
+					"You provided a root directory for the configuration file but not configuration file.",
+					"command line", "System file."));			
 		}
 		
-		// check existence of the configuration file
-		if (!new File(Configuration.CONFIG).exists()) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "The configuration file you provided does not exists", "command line", "System file."));
+		if (Configuration.CONFIG != null
+				&& new File(Configuration.KDEF).isFile()) {
+			GlobalSettings.kem
+					.register(new KException(
+							ExceptionType.ERROR,
+							KExceptionGroup.CRITICAL,
+							"You provided a file instead of a root directory for the configuration file.",
+							"command line", "System file."));
 		}
-		
-		ktest();
+
+		if (Configuration.CONFIG == null) {
+			// if a configuration file is not given then ktest will run only
+			// with command line arguments
+			Configuration.SINGLE_DEF_MODE = true;
+
+			// additional sanity checks in this case
+			if (Configuration.PGM_DIR != null
+					&& Configuration.EXTENSIONS == null) {
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+						KExceptionGroup.CRITICAL,
+						"Please provide the programs extensions.",
+						"command line", "System file."));
+			}
+		}
+
+		// execution
+		if (Configuration.SINGLE_DEF_MODE) {
+			List<Test> alltests = new LinkedList<Test>();
+			
+			List<String> pgmsFolder = Configuration.PGM_DIR == null ? new LinkedList<String>() : Arrays.asList(Configuration.PGM_DIR.split("\\s+"));
+			List<String> resultsFolder = Configuration.RESULTS_FOLDER == null ? new LinkedList<String>() : Arrays.asList(Configuration.RESULTS_FOLDER.split("\\s+"));
+			Test test = new Test(Configuration.KDEF, pgmsFolder, resultsFolder, Configuration.EXTENSIONS, Configuration.EXCLUDE_PROGRAMS, System.getProperty("user.dir"));
+			alltests.add(test);
+			
+			testing(0, new File(System.getProperty("user.dir")), alltests);
+		} else {
+			testConfig(Configuration.CONFIG, Configuration.KDEF,
+					Configuration.PGM_DIR, Configuration.RESULTS_FOLDER);
+		}
 	}
-	
-	public static void ktest() {
+
+	/**
+	 * Search the absolute path of a given file or throws an error.
+	 * 
+	 * @param path
+	 * @return the absolute path of a file
+	 */
+	private static String resolveFullPath(String path) {
+		if (new File(path).exists())
+			return new File(path).getAbsolutePath();
+		else
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+					KExceptionGroup.CRITICAL, "Unable to find " + path,
+					"command line", "System file."));
+
+		// this will never happen
+		return null;
+	}
+
+	private static List<Test> parseXMLConfig(String configFile,
+			String rootDefDir, String rootProgramsDir, String rootResultsDir)
+			throws ParserConfigurationException, SAXException, IOException {
+		List<Test> alltests = new LinkedList<Test>();
+		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+		System.out.println("Buildfile: " + configFile);
+		Document doc = dBuilder.parse(new File(configFile));
+		Element root = doc.getDocumentElement();
+
+		NodeList test = root.getElementsByTagName(Configuration.TEST);
+		for (int i = 0; i < test.getLength(); i++)
+			alltests.add(new Test((Element) test.item(i), rootDefDir,
+					rootProgramsDir, rootResultsDir, System.getProperty("user.dir")));
+
+		return alltests;
+	}
+
+	public static void testConfig(String configFile, String rootDir,
+			String rootProgramsDir, String rootResultsDir) {
 
 		int exitCode = 0;
-		File homeDir = new File(System.getProperty("user.dir"));
-
 		List<Test> alltests = new LinkedList<Test>();
 
 		// load config
 		try {
-			DocumentBuilderFactory dbFactory = DocumentBuilderFactory
-					.newInstance();
-			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-			System.out.println("Buildfile: " + Configuration.getConfig());
-			Document doc = dBuilder.parse(new File(Configuration.getConfig()));
-			Element root = doc.getDocumentElement();
-
-			NodeList test = root.getElementsByTagName("test");
-			for (int i = 0; i < test.getLength(); i++)
-				alltests.add(new Test((Element) test.item(i)));
-
+			alltests = parseXMLConfig(configFile, rootDir, rootProgramsDir,
+					rootResultsDir);
 		} catch (ParserConfigurationException e) {
 			// TODO Auto-generated catch block
 			exitCode = 1;
@@ -109,6 +223,10 @@ public class KTest {
 			e.printStackTrace();
 		}
 
+		testing(exitCode, new File(System.getProperty("user.dir")), alltests);
+	}
+
+	private static void testing(int exitCode, File homeDir, List<Test> alltests) {
 		// compile definitions first
 		int i = 0;
 		System.out.print("Kompiling the language definitions...");
@@ -223,10 +341,6 @@ public class KTest {
 		}
 
 		System.exit(exitCode);
-	}
-
-	private static String getHelpMessage() {
-		return "usage: [-help] <config.xml>";
 	}
 
 	public static void copyFolder(File src, File dest) throws IOException {

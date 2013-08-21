@@ -29,49 +29,22 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.kframework.ktest.Configuration;
 import org.kframework.ktest.execution.Task;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 public class Test implements Comparable<Test> {
 
-	private static final String PARSER_HOME = "parser-home";
-	private static final String MESSAGE = "message";
-	private static final String ERROR2 = "error";
-	private static final String SYSTEM_ERR = "system-err";
-	private static final String SYSTEM_OUT = "system-out";
-	private static final String TIME2 = "time";
-	private static final String STATUS2 = "status";
-	private static final String TESTCASE2 = "testcase";
-	private static final String TESTSUITE2 = "testsuite";
-	private static final String KRUN_OPTION = "krun-option";
-	private static final String ALL_PROGRAMS = "all-programs";
-	private static final String KOMPILE_OPTION = "kompile-option";
-	private static final String PROGRAM2 = "program";
-	private static final String NAME = "name";
-	private static final String EXCLUDE = "exclude";
-	private static final String EXTENSIONS2 = "extensions";
-	private static final String RECURSIVE2 = "recursive";
-	private static final String YES = "yes";
-	private static final String PDF2 = "pdf";
-	private static final String TITLE = "title";
-	private static final String REPORT_DIR = "report-dir";
-	private static final String RESULTS = "results";
-	private static final String FOLDER = "folder";
-	private static final String LANGUAGE2 = "language";
-	private static final String IN = ".in";
-	private static final String ERR = ".err";
-	private static final String OUT = ".out";
-	private static final String VALUE = "value";
-	private static final String UNIX_ONLY = "unixOnly";
-
-	
 	/* data read from config.xml */
 	private String language;
-	private String programsFolder;
-	private String resultsFolder;
+	private List<String> programsFolders;
+	private List<String> resultsFolders;
 	private String tag = "";
-    private String unixOnlyScript;
+	private String unixOnlyScript;
 	private boolean recursive;
 	private List<String> extensions;
 	private List<String> excludePrograms;
@@ -79,49 +52,98 @@ public class Test implements Comparable<Test> {
 	private Map<String, String> generalKrunOptions = new HashMap<String, String>();
 	private List<Program> specialPrograms = new LinkedList<Program>();
 	private boolean pdf;
-	
+
 	/* data needed for temporary stuff */
 	private Document doc;
 	public Element report;
 	private List<Program> programs;
 	private String reportDir = null;
 
-	public Test(Element test) {
-		init(test);
-		initializePrograms();
+	public Test(String language, List<String> programsFolder,
+			List<String> resultsFolder, List<String> extensions,
+			List<String> excludePrograms, String homeDir) {
+		this.language = language;
+		this.programsFolders = programsFolder;
+		this.resultsFolders = resultsFolder;
+		this.extensions = extensions;
+		this.excludePrograms = excludePrograms == null ? new LinkedList<String>() : excludePrograms;
+		this.recursive = true;
+		this.pdf = true;
+		this.unixOnlyScript = null;
+
+		// reports
+		try {
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			doc = db.newDocument();
+		} catch (ParserConfigurationException e) {
+			e.printStackTrace();
+		}
+
+		report = getInitialElement(language);
+		doc.appendChild(report);
+		
+		initializePrograms(homeDir);
 	}
 
-	private void initializePrograms() {
+	public Test(Element test, String rootDefDir, String rootProgramsDir,
+			String rootResultsDir, String homeDir) {
+
+		init(test, rootDefDir, rootProgramsDir, rootResultsDir);
+		
+		// reports
+		try {
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			doc = db.newDocument();
+		} catch (ParserConfigurationException e) {
+			e.printStackTrace();
+		}
+
+		report = getInitialElement(language);
+		doc.appendChild(report);
+
+		initializePrograms(homeDir);
+	}
+
+	private void initializePrograms(String homeDir) {
 		programs = new LinkedList<Program>();
 
-		String[] pgmsFolders = this.programsFolder.split("\\s+");
+		// check the existence of the results folder
+		if (resultsFolders != null) {
+			for (String rf : resultsFolders)
+				if (rf != null && !rf.equals("") && !new File(rf).exists()) {
+					GlobalSettings.kem.register(new KException(
+							ExceptionType.WARNING, KExceptionGroup.CRITICAL,
+							"Result folder " + rf + " does not exists.",
+							"command line", "System file."));
+				}
 
-		if (resultsFolder != null && !new File(getResultsFolder()).exists())
-			System.out.println("Folder: " + Configuration.getHome()
-					+ Configuration.FS + resultsFolder + " does not exists.");
+		}
 
-		for (int i = 0; i < pgmsFolders.length; i++) {
-			String programsFolder = pgmsFolders[i];
+		for (String programsFolder : programsFolders) {
 
-			if (!new File(Configuration.getHome() + Configuration.FS
-					+ programsFolder).exists())
-				System.out.println("Folder: " + Configuration.getHome()
-						+ Configuration.FS + programsFolder
-						+ " does not exists.");
+			if (!programsFolder.equals("")
+					&& !new File(programsFolder).exists()) {
+				GlobalSettings.kem.register(new KException(
+						ExceptionType.WARNING, KExceptionGroup.CRITICAL,
+						"Programs folder " + programsFolder
+								+ " does not exists.", "command line",
+						"System file."));
+			}
 
 			if (programsFolder == null || programsFolder.equals(""))
 				return;
 
-			List<String> allProgramPaths = searchAll(Configuration.getHome()
-					+ Configuration.FS + programsFolder, extensions, recursive);
+			List<String> allProgramPaths = searchAll(programsFolder,
+					extensions, recursive);
 
 			for (String programPath : allProgramPaths) {
 				// ignore the programs from exclude list
 				boolean excluded = false;
 				for (String exclude : excludePrograms)
-					if (programPath.equals(Configuration.getHome()
-							+ Configuration.FS + programsFolder
-							+ Configuration.FS + exclude))
+					if (programPath.equals(programsFolder + Configuration.FS
+							+ exclude))
 						excluded = true;
 				if (excluded)
 					continue;
@@ -142,25 +164,30 @@ public class Test implements Comparable<Test> {
 				String input = null;
 				String output = null;
 				String error = null;
-				if (resultsFolder != null) {
+				if (resultsFolders != null) {
+					for (String rf : resultsFolders) {
+						String inputFile = searchInputFile(rf, new File(
+								programPath).getName(), recursive);
+						input = getFileAsStringOrNull(inputFile);
 
-					String inputFile = searchInputFile(getResultsFolder(),
-							new File(programPath).getName(), recursive);
-					input = getFileAsStringOrNull(inputFile);
+						String outputFile = searchOutputFile(rf, new File(
+								programPath).getName(), recursive);
+						output = getFileAsStringOrNull(outputFile);
 
-					String outputFile = searchOutputFile(getResultsFolder(),
-							new File(programPath).getName(), recursive);
-					output = getFileAsStringOrNull(outputFile);
+						String errorFile = searchErrorFile(rf, new File(
+								programPath).getName(), recursive);
+						error = getFileAsStringOrNull(errorFile);
 
-					String errorFile = searchErrorFile(getResultsFolder(),
-							new File(programPath).getName(), recursive);
-					error = getFileAsStringOrNull(errorFile);
-
+						if (input != null || output != null || error != null) {
+							break;
+						}
+					}
 				}
 
 				// custom programPath
-				programPath = programPath.replaceFirst(Configuration.getHome()
-						+ Configuration.FS, "");
+				programPath =
+				 programPath.replaceFirst(homeDir
+				 + Configuration.FS, "");
 
 				Program p = new Program(programPath, krunOptions, this, input,
 						output, error);
@@ -168,10 +195,6 @@ public class Test implements Comparable<Test> {
 
 			}
 		}
-	}
-
-	private String getResultsFolder() {
-		return Configuration.getHome() + Configuration.FS + resultsFolder;
 	}
 
 	private String getFileAsStringOrNull(String file) {
@@ -187,20 +210,21 @@ public class Test implements Comparable<Test> {
 
 	private String searchOutputFile(String resultsFolder2, String name,
 			boolean recursive2) {
-		return searchFile(resultsFolder2, name + OUT, recursive);
+		return searchFile(resultsFolder2, name + Configuration.OUT, recursive);
 	}
 
 	private String searchErrorFile(String resultsFolder2, String name,
 			boolean recursive2) {
-		return searchFile(resultsFolder2, name + ERR, recursive);
+		return searchFile(resultsFolder2, name + Configuration.ERR, recursive);
 	}
 
 	private String searchInputFile(String resultsFolder2, String name,
 			boolean recursive) {
-		return searchFile(resultsFolder2, name + IN, recursive);
+		return searchFile(resultsFolder2, name + Configuration.IN, recursive);
 	}
 
 	private String searchFile(String folder, String filename, boolean recursive) {
+
 		String[] files = new File(folder).list();
 		String file = null;
 		if (files != null)
@@ -259,96 +283,126 @@ public class Test implements Comparable<Test> {
 		return fls;
 	}
 
-	private void init(Element test) {
-		String homeDir = Configuration.getHome();
-
+	private void init(Element test, String rootDefDir, String rootProgramsDir,
+			String rootResultsDir) {
 		// get full name
-		language = test.getAttribute(LANGUAGE2);
+		language = resolveAbsolutePathRelativeTo(
+				test.getAttribute(Configuration.LANGUAGE), rootDefDir);
 
 		// get programs dir
-		programsFolder = test.getAttribute(FOLDER);
+		List<String> allpd = Arrays.asList(test.getAttribute(
+				Configuration.PROGRAMS_DIR).split("\\s+"));
+		if (allpd.size() > 0) {
+			programsFolders = new LinkedList<String>();
+			for (String pd : allpd) {
+				if (pd != null && !pd.equals("")) {
+					String p = resolveAbsolutePathRelativeTo(pd.trim(),
+							rootProgramsDir);
+					if (p != null)
+						programsFolders.add(p);
+				}
+			}
+		}
 
 		// get tests results
-		resultsFolder = test.getAttribute(RESULTS);
-		if (resultsFolder.equals(""))
-			resultsFolder = null;
+		List<String> allrd = Arrays.asList(test.getAttribute(
+				Configuration.RESULTS).split("\\s+"));
+		if (allrd.size() > 0) {
+			resultsFolders = new LinkedList<String>();
+			for (String rd : allrd)
+				if (rd != null && !rd.equals("")) {
+					String p = resolveAbsolutePathRelativeTo(rd.trim(),
+							rootResultsDir);
+					if (p != null)
+						resultsFolders.add(p);
+				}
+		} else
+			resultsFolders = null;
 
-		// get tests results
-		reportDir = test.getAttribute(REPORT_DIR);
-		if (reportDir.equals(""))
+		// get report dir
+		reportDir = resolveAbsolutePathRelativeTo(
+				test.getAttribute(Configuration.REPORT_DIR), rootDefDir);
+		if (report != null && reportDir.equals(""))
 			reportDir = null;
 
-        unixOnlyScript = test.getAttribute(UNIX_ONLY);
-        if (unixOnlyScript.equals(""))
-            unixOnlyScript = null;
+		unixOnlyScript = test.getAttribute(Configuration.UNIX_ONLY);
+		if (unixOnlyScript.equals(""))
+			unixOnlyScript = null;
 
 		// get Jenkins tag
-		tag = test.getAttribute(TITLE);
+		tag = test.getAttribute(Configuration.TITLE);
 
 		// get pdf
-		if (test.getAttribute(PDF2).equals(YES)
-				|| test.getAttribute(PDF2).equals(""))
+		if (test.getAttribute(Configuration.PDF2).equals(Configuration.YES)
+				|| test.getAttribute(Configuration.PDF2).equals(""))
 			pdf = true;
 		else
 			pdf = false;
 
 		// set recursive
-		String rec = test.getAttribute(RECURSIVE2);
-		if (rec.equals("") || rec.equals(YES))
+		String rec = test.getAttribute(Configuration.RECURSIVE);
+		if (rec.equals("") || rec.equals(Configuration.YES))
 			recursive = true;
 		else
 			recursive = false;
 
 		// extensions
-		extensions = Arrays
-				.asList(test.getAttribute(EXTENSIONS2).split("\\s+"));
-
-		// exclude programs
-		excludePrograms = Arrays.asList(test.getAttribute(EXCLUDE)
+		extensions = Arrays.asList(test.getAttribute(Configuration.EXTENSIONS2)
 				.split("\\s+"));
 
+		// exclude programs
+		excludePrograms = Arrays.asList(test
+				.getAttribute(Configuration.EXCLUDE).split("\\s+"));
+
 		// kompile options
-		NodeList kompileOpts = test.getElementsByTagName(KOMPILE_OPTION);
+		NodeList kompileOpts = test
+				.getElementsByTagName(Configuration.KOMPILE_OPTION);
 		for (int i = 0; i < kompileOpts.getLength(); i++) {
 			Element option = (Element) kompileOpts.item(i);
-			kompileOptions.put(option.getAttribute(NAME),
-					option.getAttribute(VALUE));
+			kompileOptions.put(option.getAttribute(Configuration.NAME),
+					option.getAttribute(Configuration.VALUE));
 		}
 
 		// load programs with special option
-		NodeList specialPgms = test.getElementsByTagName(PROGRAM2);
+		NodeList specialPgms = test.getElementsByTagName(Configuration.PROGRAM);
 		for (int i = 0; i < specialPgms.getLength(); i++) {
 			Element pgm = (Element) specialPgms.item(i);
-			String programPath = pgm.getAttribute(NAME);
+			String programPath = pgm.getAttribute(Configuration.NAME);
 
 			Map<String, String> map = getKrunOptions(pgm);
 
 			String input = null;
 			String output = null;
 			String error = null;
-			if (resultsFolder != null) {
+			if (resultsFolders != null) {
+				for (String rf : resultsFolders) {
+					String inputFile = searchInputFile(rf,
+							new File(programPath).getName(), recursive);
+					input = getFileAsStringOrNull(inputFile);
 
-				String inputFile = searchInputFile(getResultsFolder(),
-						new File(programPath).getName(), recursive);
-				input = getFileAsStringOrNull(inputFile);
+					String outputFile = searchOutputFile(rf, new File(
+							programPath).getName(), recursive);
+					output = getFileAsStringOrNull(outputFile);
 
-				String outputFile = searchOutputFile(getResultsFolder(),
-						new File(programPath).getName(), recursive);
-				output = getFileAsStringOrNull(outputFile);
+					String errorFile = searchErrorFile(rf,
+							new File(programPath).getName(), recursive);
+					error = getFileAsStringOrNull(errorFile);
 
-				String errorFile = searchErrorFile(getResultsFolder(),
-						new File(programPath).getName(), recursive);
-				error = getFileAsStringOrNull(errorFile);
-
+					if (input != null || output != null || error != null) {
+						break;
+					}
+				}
 			}
 
-			Program program = new Program(homeDir + Configuration.FS
-					+ programPath, map, this, input, output, error);
+			Program program = new Program(resolveAbsolutePathRelativeTo(
+					programPath, rootProgramsDir), map, this, input, output,
+					error);
 			specialPrograms.add(program);
 		}
 
 		// general krun options
-		NodeList genOpts = test.getElementsByTagName(ALL_PROGRAMS);
+		NodeList genOpts = test
+				.getElementsByTagName(Configuration.ALL_PROGRAMS);
 		if (genOpts != null && genOpts.getLength() > 0) {
 			Element all = (Element) genOpts.item(0);
 			generalKrunOptions = getKrunOptions(all);
@@ -358,44 +412,59 @@ public class Test implements Comparable<Test> {
 			generalKrunOptions.put("--no-color", "");
 			generalKrunOptions.put("--output-mode", "none");
 		}
+	}
 
-		// reports
-		try {
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			DocumentBuilder db = dbf.newDocumentBuilder();
-			doc = db.newDocument();
-		} catch (ParserConfigurationException e) {
-			e.printStackTrace();
+	private String resolveAbsolutePathRelativeTo(String path, String rootDir) {
+
+		if (path == null || path.equals("")) {
+			return path;
 		}
 
-		report = getInitialElement(language);
-		doc.appendChild(report);
+		if (new File(path).exists())
+			return new File(path).getAbsolutePath();
+
+		if (rootDir == null) {
+			GlobalSettings.kem.register(new KException(ExceptionType.WARNING,
+					KExceptionGroup.CRITICAL, "File/Directory " + path
+							+ " does not exists.", "command line",
+					"System file."));
+		} else if (new File(rootDir + Configuration.FS + path).exists())
+			return new File(rootDir + Configuration.FS + path)
+					.getAbsolutePath();
+
+		GlobalSettings.kem.register(new KException(ExceptionType.WARNING,
+				KExceptionGroup.CRITICAL, "File/Directory " + path + "\nor "
+						+ rootDir + Configuration.FS + path, "command line",
+				"System file."));
+
+		return null;
 	}
 
 	private Map<String, String> getKrunOptions(Element parent) {
 		Map<String, String> map = new HashMap<String, String>();
-		NodeList opts = parent.getElementsByTagName(KRUN_OPTION);
+		NodeList opts = parent.getElementsByTagName(Configuration.KRUN_OPTION);
 		for (int j = 0; j < opts.getLength(); j++) {
 			Element krunOpt = (Element) opts.item(j);
 
 			// unescape < and >
-			String optValue = krunOpt.getAttribute(VALUE);
+			String optValue = krunOpt.getAttribute(Configuration.VALUE);
 			optValue = optValue.replaceAll("&lt;", "<");
 			optValue = optValue.replaceAll("&gt;", ">");
 
-			String parserHome = krunOpt.getAttribute(PARSER_HOME);
+			String parserHome = krunOpt.getAttribute(Configuration.PARSER_HOME);
 			String parser = System.getenv(parserHome);
 			if (parser != null) {
-				optValue = parser + System.getProperty("file.separator") + optValue;
+				optValue = parser + System.getProperty("file.separator")
+						+ optValue;
 			}
-			
-			map.put(krunOpt.getAttribute(NAME), optValue);
+
+			map.put(krunOpt.getAttribute(Configuration.NAME), optValue);
 		}
 		return map;
 	}
 
 	private Element getInitialElement(String definition) {
-		Element testsuite = doc.createElement(TESTSUITE2);
+		Element testsuite = doc.createElement(Configuration.TESTSUITE);
 		String name = "";
 		if (reportDir != null)
 			name = reportDir;
@@ -405,31 +474,32 @@ public class Test implements Comparable<Test> {
 		if (!tag.equals(""))
 			name = tag + "/" + name;
 
-		testsuite.setAttribute(NAME, name.replaceFirst("/", "\\."));
+		testsuite.setAttribute(Configuration.NAME,
+				name.replaceFirst("/", "\\."));
 		return testsuite;
 	}
 
 	public Element createReportElement(String testcase, String status,
 			String time, String output, String error, Task task,
 			String expected, boolean failureCondition) {
-		Element testcaseE = doc.createElement(TESTCASE2);
-		testcaseE.setAttribute(NAME, testcase);
-		testcaseE.setAttribute(STATUS2, status);
-		testcaseE.setAttribute(TIME2, time);
+		Element testcaseE = doc.createElement(Configuration.TESTCASE);
+		testcaseE.setAttribute(Configuration.NAME, testcase);
+		testcaseE.setAttribute(Configuration.STATUS, status);
+		testcaseE.setAttribute(Configuration.TIME, time);
 
-		Element sysout = doc.createElement(SYSTEM_OUT);
+		Element sysout = doc.createElement(Configuration.SYSTEM_OUT);
 		sysout.setTextContent(output);
 
-		Element syserr = doc.createElement(SYSTEM_ERR);
+		Element syserr = doc.createElement(Configuration.SYSTEM_ERR);
 		syserr.setTextContent(error);
 
 		testcaseE.appendChild(syserr);
 		testcaseE.appendChild(sysout);
 
 		if (failureCondition) {
-			Element error_ = doc.createElement(ERROR2);
+			Element error_ = doc.createElement(Configuration.ERROR);
 			error_.setTextContent(task.getStderr());
-			error_.setAttribute(MESSAGE, task.getStderr());
+			error_.setAttribute(Configuration.MESSAGE, task.getStderr());
 			testcaseE.appendChild(error_);
 
 			Element failure = doc.createElement("failure");
@@ -441,18 +511,19 @@ public class Test implements Comparable<Test> {
 		return testcaseE;
 	}
 
-    public Task getUnixOnlyScriptTask(File homeDir) {
-        if (unixOnlyScript == null)
-            return null;
-        return new Task(new String[] {unixOnlyScript}, null, homeDir);
-    }
+	public Task getUnixOnlyScriptTask(File homeDir) {
+		if (unixOnlyScript == null)
+			return null;
+		return new Task(new String[] { unixOnlyScript }, null, homeDir);
+	}
 
-    public boolean runOnOS() {
-        if (unixOnlyScript != null && System.getProperty("os.name").toLowerCase().contains("win")) {
-            return false;
-        }
-        return true;
-    }
+	public boolean runOnOS() {
+		if (unixOnlyScript != null
+				&& System.getProperty("os.name").toLowerCase().contains("win")) {
+			return false;
+		}
+		return true;
+	}
 
 	public Task getDefinitionTask(File homeDir) {
 		ArrayList<String> command = new ArrayList<String>();
@@ -472,10 +543,12 @@ public class Test implements Comparable<Test> {
 			i++;
 		}
 
-		
-		/* Before running the definition, delete the temporary files if they exists */
+		/*
+		 * Before running the definition, delete the temporary files if they
+		 * exists
+		 */
 		deleteFolder(new File(getCompiled()));
-		
+
 		return new Task(arguments, null, homeDir);
 	}
 
@@ -483,20 +556,20 @@ public class Test implements Comparable<Test> {
 		if (!folder.exists()) {
 			return;
 		}
-		
-	    File[] files = folder.listFiles();
-	    if(files!=null) { //some JVMs return null for empty dirs
-	        for(File f: files) {
-	            if(f.isDirectory()) {
-	                deleteFolder(f);
-	            } else {
-	                f.delete();
-	            }
-	        }
-	    }
-	    folder.delete();
+
+		File[] files = folder.listFiles();
+		if (files != null) { // some JVMs return null for empty dirs
+			for (File f : files) {
+				if (f.isDirectory()) {
+					deleteFolder(f);
+				} else {
+					f.delete();
+				}
+			}
+		}
+		folder.delete();
 	}
-	
+
 	public String compileStatus(Task task) {
 		return "Compiling " + language + "...\t\t"
 				+ (compiled(task) ? "success" : "failed");
@@ -519,7 +592,8 @@ public class Test implements Comparable<Test> {
 	}
 
 	public String getCompiled() {
-		return getLanguage().replaceAll("\\.k$", "") + "-kompiled" + (tag.equals("") ? "" : "-" + tag);
+		return getLanguage().replaceAll("\\.k$", "") + "-kompiled"
+				+ (tag.equals("") ? "" : "-" + tag);
 	}
 
 	private String getReportFilename() {
@@ -604,7 +678,7 @@ public class Test implements Comparable<Test> {
 		Transformer transformer;
 		try {
 			transformer = TransformerFactory.newInstance().newTransformer();
-			transformer.setOutputProperty(OutputKeys.INDENT, YES);
+			transformer.setOutputProperty(OutputKeys.INDENT, Configuration.YES);
 
 			// initialize StreamResult with File object to save to file
 			StreamResult result = new StreamResult(new StringWriter());
@@ -664,7 +738,7 @@ public class Test implements Comparable<Test> {
 		d = this.getReportFilename().compareTo(o.getReportFilename());
 		if (d != 0)
 			return d;
-		d = this.programsFolder.compareTo(o.programsFolder);
+		d = (this.hashCode() == (o.hashCode())) ? 1 : 0;
 		return d;
 	}
 
