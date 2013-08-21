@@ -29,7 +29,6 @@ public class VariableTypeFilter extends BasicTransformer {
 			Variable newV = new Variable(r);
 			newV.setSort(correctVar.getSort());
 			newV.setSyntactic(correctVar.isSyntactic());
-			newV.setExpectedSort(correctVar.getExpectedSort());
 			return newV;
 		}
 		String msg = "Variable " + r.getName() + " is contextually expected to have sort " + r.getSort();
