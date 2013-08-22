@@ -32,7 +32,7 @@ public class KTestOptionsParser {
 
 		// language group
 		OptionGroup languageGroup = new OptionGroup();
-		Option language = new Option(Configuration.LANGUAGE_OPTION, true, "K definition or directory (in case a configuration file is provided)");
+		Option language = new Option("def", Configuration.LANGUAGE_OPTION, true, "K definition or directory (in case a configuration file is provided)");
 		languageGroup.addOption(language);
 		
 		// programs directory

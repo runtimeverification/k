@@ -54,15 +54,15 @@ public class KTest {
 		}
 
 		// The language to be tested
-		if (cmd.hasOption(Configuration.LANGUAGE)) {
-			Configuration.KDEF = resolveFullPath(cmd
-					.getOptionValue(Configuration.LANGUAGE));
+		if (cmd.hasOption(Configuration.LANGUAGE_OPTION)) {
+			Configuration.KDEF = cmd
+					.getOptionValue(Configuration.LANGUAGE_OPTION);
 		}
 
 		// Programs folder
 		if (cmd.hasOption(Configuration.PROGRAMS_OPTION)) {
-			Configuration.PGM_DIR = resolveFullPath(cmd
-					.getOptionValue(Configuration.PROGRAMS_OPTION));
+			Configuration.PGM_DIR = cmd
+					.getOptionValue(Configuration.PROGRAMS_OPTION);
 		}
 
 		// List of excluded programs
@@ -79,72 +79,40 @@ public class KTest {
 
 		// List of program (non-empty) extensions
 		if (cmd.hasOption(Configuration.RESULTS_OPTION)) {
-			Configuration.RESULTS_FOLDER = resolveFullPath(cmd
-					.getOptionValue(Configuration.RESULTS_OPTION));
+			Configuration.RESULTS_FOLDER = cmd
+					.getOptionValue(Configuration.RESULTS_OPTION);
 		}
 
 		// Resolve the configuration file
 		if (cmd.hasOption(Configuration.CONFIG_OPTION)) {
-			Configuration.CONFIG = resolveFullPath(cmd
-					.getOptionValue(Configuration.CONFIG_OPTION));
-		} else {
-			// if not given, config is (by default) considered to be the first
-			// "dangling" command line argument
-			String[] restArgs = cmd.getArgs();
-			for (int i = 0; i < restArgs.length; i++)
-				if (restArgs.length < 1) {
-					if (new File(Configuration.KDEF).isDirectory())
-						GlobalSettings.kem
-								.register(new KException(
-										ExceptionType.ERROR,
-										KExceptionGroup.CRITICAL,
-										"Please provide a configuration file or a K defintion",
-										"command line", "System file."));
-				} else
-					Configuration.CONFIG = resolveFullPath(restArgs[0]);
-		}
+			Configuration.CONFIG = cmd
+					.getOptionValue(Configuration.CONFIG_OPTION);
+		} 
 
-		// sanity checks
-		if (Configuration.KDEF == null) {
-			GlobalSettings.kem
-					.register(new KException(
-							ExceptionType.ERROR,
-							KExceptionGroup.CRITICAL,
-							"Please provide a K definition or a root directory for the configuration file.",
-							"command line", "System file."));
-		}
-		else if (new File(Configuration.KDEF).isDirectory() && Configuration.CONFIG == null) {
-			GlobalSettings.kem
-			.register(new KException(
-					ExceptionType.ERROR,
-					KExceptionGroup.CRITICAL,
-					"You provided a root directory for the configuration file but not configuration file.",
-					"command line", "System file."));			
-		}
-		
+
+		// sanity check
 		if (Configuration.CONFIG != null
 				&& new File(Configuration.KDEF).isFile()) {
 			GlobalSettings.kem
 					.register(new KException(
 							ExceptionType.ERROR,
 							KExceptionGroup.CRITICAL,
-							"You provided a file instead of a root directory for the configuration file.",
+							"Please provide a root directory for the configuration file.",
 							"command line", "System file."));
 		}
+		if (new File(Configuration.KDEF).isDirectory() && Configuration.CONFIG == null) {
+			GlobalSettings.kem
+			.register(new KException(
+					ExceptionType.ERROR,
+					KExceptionGroup.CRITICAL,
+					"Please provide a test configuration file.",
+					"command line", "System file."));
+		}
 
+		// if a configuration file is not given then ktest will run only
+		// with command line arguments
 		if (Configuration.CONFIG == null) {
-			// if a configuration file is not given then ktest will run only
-			// with command line arguments
 			Configuration.SINGLE_DEF_MODE = true;
-
-			// additional sanity checks in this case
-			if (Configuration.PGM_DIR != null
-					&& Configuration.EXTENSIONS == null) {
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-						KExceptionGroup.CRITICAL,
-						"Please provide the programs extensions.",
-						"command line", "System file."));
-			}
 		}
 
 		// execution
@@ -169,17 +137,22 @@ public class KTest {
 	 * @param path
 	 * @return the absolute path of a file
 	 */
-	private static String resolveFullPath(String path) {
-		if (new File(path).exists())
-			return new File(path).getAbsolutePath();
-		else
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-					KExceptionGroup.CRITICAL, "Unable to find " + path,
-					"command line", "System file."));
-
-		// this will never happen
-		return null;
-	}
+//	private static String resolveFullPath(String path) {
+//		
+//		if (new File(path).isAbsolute()){
+//			return new File(path).getAbsolutePath();
+//		}
+//		
+//		if (new File(path).exists())
+//			return new File(path).getAbsolutePath();
+//		else
+//			GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+//					KExceptionGroup.CRITICAL, "Unable to find " + path,
+//					"command line", "System file."));
+//
+//		// this will never happen
+//		return null;
+//	}
 
 	private static List<Test> parseXMLConfig(String configFile,
 			String rootDefDir, String rootProgramsDir, String rootResultsDir)
@@ -187,6 +160,13 @@ public class KTest {
 		List<Test> alltests = new LinkedList<Test>();
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+		
+		if (!new File(configFile).exists()) {
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+			KExceptionGroup.CRITICAL, "Unable to find " + configFile,
+			"command line", "System file."));			
+		}
+		
 		System.out.println("Buildfile: " + configFile);
 		Document doc = dBuilder.parse(new File(configFile));
 		Element root = doc.getDocumentElement();

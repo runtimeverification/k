@@ -83,6 +83,10 @@ public class Test implements Comparable<Test> {
 		report = getInitialElement(language);
 		doc.appendChild(report);
 		
+		//  general krun options
+		generalKrunOptions.put("--output-mode", "none");
+		generalKrunOptions.put("--no-color", "");
+		
 		initializePrograms(homeDir);
 	}
 
@@ -249,6 +253,9 @@ public class Test implements Comparable<Test> {
 	private List<String> searchAll(String programsFolder,
 			List<String> extensions, boolean recursive) {
 
+		if (extensions.isEmpty())
+			return new LinkedList<String>();
+		
 		List<String> paths = new LinkedList<String>();
 		for (String extension : extensions)
 			paths.addAll(searchAll(programsFolder, extension));
@@ -415,28 +422,32 @@ public class Test implements Comparable<Test> {
 	}
 
 	private String resolveAbsolutePathRelativeTo(String path, String rootDir) {
-
-		if (path == null || path.equals("")) {
-			return path;
+		
+		if (path == null) {
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+					KExceptionGroup.CRITICAL, "Empty attribute in configuration file.", "command line",
+					"System file."));
 		}
 
-		if (new File(path).exists())
+		if (new File(path).isAbsolute())
 			return new File(path).getAbsolutePath();
-
+		else {
+		
+		
 		if (rootDir == null) {
-			GlobalSettings.kem.register(new KException(ExceptionType.WARNING,
-					KExceptionGroup.CRITICAL, "File/Directory " + path
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+					KExceptionGroup.CRITICAL, "Directory " + rootDir
 							+ " does not exists.", "command line",
 					"System file."));
 		} else if (new File(rootDir + Configuration.FS + path).exists())
 			return new File(rootDir + Configuration.FS + path)
 					.getAbsolutePath();
 
-		GlobalSettings.kem.register(new KException(ExceptionType.WARNING,
-				KExceptionGroup.CRITICAL, "File/Directory " + path + "\nor "
-						+ rootDir + Configuration.FS + path, "command line",
+		GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+				KExceptionGroup.CRITICAL, "File " 
+						+ rootDir + Configuration.FS + path + " does not exists.", "command line",
 				"System file."));
-
+		}
 		return null;
 	}
 
@@ -468,9 +479,9 @@ public class Test implements Comparable<Test> {
 		String name = "";
 		if (reportDir != null)
 			name = reportDir;
-		else
+		else {
 			name = new File(language).getParent();
-
+		}
 		if (!tag.equals(""))
 			name = tag + "/" + name;
 

@@ -1,6 +1,7 @@
 package org.kframework.ktest;
 
 import java.io.File;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Configuration {
@@ -21,13 +22,13 @@ public class Configuration {
 	// a single K definition and its programs directly from command line
 	public static boolean SINGLE_DEF_MODE = false;
 	// mandatory
-	public static String KDEF = null;
+	public static String KDEF = System.getProperty("user.dir");
 	// programs
-	public static String PGM_DIR = null;
-	public static List<String> EXTENSIONS = null;
+	public static String PGM_DIR = System.getProperty("user.dir");
+	public static List<String> EXTENSIONS = new LinkedList<String>();
 	// optional
 	public static boolean PDF = true;
-	public static String RESULTS_FOLDER = null;
+	public static String RESULTS_FOLDER = System.getProperty("user.dir");
 	public static List<String> EXCLUDE_PROGRAMS = null;
 
 	// XML tag and attribute names used for parsing config.xml
@@ -54,8 +55,8 @@ public class Configuration {
 	public static final String TITLE = "title";
 	public static final String REPORT_DIR = "report-dir";
 	public static final String RESULTS = "results";
-	public static final String PROGRAMS_DIR = "folder";
-	public static final String LANGUAGE = "language";
+	public static final String PROGRAMS_DIR = "programs";
+	public static final String LANGUAGE = "definition";
 	public static final String IN = ".in";
 	public static final String ERR = ".err";
 	public static final String OUT = ".out";

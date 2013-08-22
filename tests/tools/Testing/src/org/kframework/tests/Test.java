@@ -57,8 +57,8 @@ public class Test implements Comparable<Test> {
 	private static final String TITLE = "title";
 	private static final String REPORT_DIR = "report-dir";
 	private static final String RESULTS = "results";
-	private static final String FOLDER = "folder";
-	private static final String LANGUAGE2 = "language";
+	private static final String FOLDER = "programs";
+	private static final String LANGUAGE2 = "definition";
 	private static final String IN = ".in";
 	private static final String ERR = ".err";
 	private static final String OUT = ".out";
