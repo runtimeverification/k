@@ -84,7 +84,7 @@ public class Variable extends Term {
 	}
 
 	public String toString() {
-		return name + ":" + sort + " ";
+		return name + ":" + sort + "::" + expectedSort + " ";
 	}
 
 	@Override

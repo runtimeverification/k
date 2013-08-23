@@ -72,9 +72,13 @@ public class CollectVariablesVisitor extends BasicVisitor {
 
 	@Override
 	public void visit(Variable var) {
+		if (var.isUserTyped()) {
+			var.setExpectedSort(var.getSort());
+			return;
+		}
 		if (var.getExpectedSort() == null)
 			var.setExpectedSort(var.getSort());
-		if (!var.getName().equals(MetaK.Constants.anyVarSymbol))
+		if (!var.getName().equals(MetaK.Constants.anyVarSymbol) && var.isUserTyped())
 			if (vars.containsKey(var.getName()))
 				vars.get(var.getName()).add(var);
 			else {
@@ -102,7 +106,20 @@ public class CollectVariablesVisitor extends BasicVisitor {
 
 		@Override
 		public ASTNode transform(Variable node) throws TransformerException {
-			node.setExpectedSort(this.expectedSort);
+			if (node.isUserTyped()) {
+				node.setExpectedSort(node.getSort());
+				return node;
+			}
+			if (node.getExpectedSort() == null) {
+				node.setExpectedSort(this.expectedSort);
+			}
+			// since the terms may be shared, if a node already has an expected sort set up
+			// create a new variable with the correct information
+			if (!node.getExpectedSort().equals(this.expectedSort)) {
+				Variable newV = new Variable(node);
+				newV.setExpectedSort(this.expectedSort);
+				return newV;
+			}
 			return node;
 		}
 
