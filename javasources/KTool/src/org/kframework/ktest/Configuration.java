@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.kframework.krun.FileUtil;
+
 public class Configuration {
 
 	// file separator
@@ -74,6 +76,16 @@ public class Configuration {
 	public static final String EXTENSIONS_OPTION = EXTENSIONS2;
 	public static final String RESULTS_OPTION = RESULTS;
 
+	// program name
+	public static final String KTEST = "ktest";
+
+	// help details
+	public static String DETAILED_HELP_MESSAGE = getReadme();
+
+	// some error messages
+	public static String PGM_ERROR = "Please check the programs folder from configuration file.";
+	public static String DEF_ERROR = "Please check the definition folder from configuration file.";
+	public static String RES_ERROR = "Please check the results folder from configuration file.";
 
 	// get the K instalation home directory
 	public static String getKHome() {
@@ -97,5 +109,9 @@ public class Configuration {
 			return getKHome() + FS + "dist" + FS + "bin" + FS + exe + ".bat";
 		}
 		return getKHome() + FS + "dist" + FS + "bin" + FS + exe;
+	}
+	
+	public static String getReadme() {
+		return FileUtil.getFileContent(getKHome() + FS + "tests" + FS + "README");
 	}
 }

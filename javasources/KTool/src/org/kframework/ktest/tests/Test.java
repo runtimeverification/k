@@ -66,7 +66,8 @@ public class Test implements Comparable<Test> {
 		this.programsFolders = programsFolder;
 		this.resultsFolders = resultsFolder;
 		this.extensions = extensions;
-		this.excludePrograms = excludePrograms == null ? new LinkedList<String>() : excludePrograms;
+		this.excludePrograms = excludePrograms == null ? new LinkedList<String>()
+				: excludePrograms;
 		this.recursive = true;
 		this.pdf = true;
 		this.unixOnlyScript = null;
@@ -82,11 +83,11 @@ public class Test implements Comparable<Test> {
 
 		report = getInitialElement(language);
 		doc.appendChild(report);
-		
-		//  general krun options
+
+		// general krun options
 		generalKrunOptions.put("--output-mode", "none");
 		generalKrunOptions.put("--no-color", "");
-		
+
 		initializePrograms(homeDir);
 	}
 
@@ -94,7 +95,7 @@ public class Test implements Comparable<Test> {
 			String rootResultsDir, String homeDir) {
 
 		init(test, rootDefDir, rootProgramsDir, rootResultsDir);
-		
+
 		// reports
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -189,9 +190,8 @@ public class Test implements Comparable<Test> {
 				}
 
 				// custom programPath
-				programPath =
-				 programPath.replaceFirst(homeDir
-				 + Configuration.FS, "");
+				programPath = programPath.replaceFirst(homeDir
+						+ Configuration.FS, "");
 
 				Program p = new Program(programPath, krunOptions, this, input,
 						output, error);
@@ -255,7 +255,7 @@ public class Test implements Comparable<Test> {
 
 		if (extensions.isEmpty())
 			return new LinkedList<String>();
-		
+
 		List<String> paths = new LinkedList<String>();
 		for (String extension : extensions)
 			paths.addAll(searchAll(programsFolder, extension));
@@ -294,7 +294,7 @@ public class Test implements Comparable<Test> {
 			String rootResultsDir) {
 		// get full name
 		language = resolveAbsolutePathRelativeTo(
-				test.getAttribute(Configuration.LANGUAGE), rootDefDir);
+				test.getAttribute(Configuration.LANGUAGE), rootDefDir, Configuration.DEF_ERROR);
 
 		// get programs dir
 		List<String> allpd = Arrays.asList(test.getAttribute(
@@ -304,7 +304,7 @@ public class Test implements Comparable<Test> {
 			for (String pd : allpd) {
 				if (pd != null && !pd.equals("")) {
 					String p = resolveAbsolutePathRelativeTo(pd.trim(),
-							rootProgramsDir);
+							rootProgramsDir, Configuration.PGM_ERROR);
 					if (p != null)
 						programsFolders.add(p);
 				}
@@ -319,7 +319,7 @@ public class Test implements Comparable<Test> {
 			for (String rd : allrd)
 				if (rd != null && !rd.equals("")) {
 					String p = resolveAbsolutePathRelativeTo(rd.trim(),
-							rootResultsDir);
+							rootResultsDir, Configuration.RES_ERROR);
 					if (p != null)
 						resultsFolders.add(p);
 				}
@@ -328,7 +328,7 @@ public class Test implements Comparable<Test> {
 
 		// get report dir
 		reportDir = resolveAbsolutePathRelativeTo(
-				test.getAttribute(Configuration.REPORT_DIR), rootDefDir);
+				test.getAttribute(Configuration.REPORT_DIR), rootDefDir, "");
 		if (report != null && reportDir.equals(""))
 			reportDir = null;
 
@@ -402,7 +402,7 @@ public class Test implements Comparable<Test> {
 			}
 
 			Program program = new Program(resolveAbsolutePathRelativeTo(
-					programPath, rootProgramsDir), map, this, input, output,
+					programPath, rootProgramsDir, Configuration.PGM_ERROR), map, this, input, output,
 					error);
 			specialPrograms.add(program);
 		}
@@ -421,32 +421,35 @@ public class Test implements Comparable<Test> {
 		}
 	}
 
-	private String resolveAbsolutePathRelativeTo(String path, String rootDir) {
+	private String resolveAbsolutePathRelativeTo(String path, String rootDir, String errorMessage) {
 		
 		if (path == null) {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-					KExceptionGroup.CRITICAL, "Empty attribute in configuration file.", "command line",
+					KExceptionGroup.CRITICAL,
+					"Empty attribute in configuration file.", "command line",
 					"System file."));
 		}
 
 		if (new File(path).isAbsolute())
 			return new File(path).getAbsolutePath();
 		else {
-		
-		
-		if (rootDir == null) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-					KExceptionGroup.CRITICAL, "Directory " + rootDir
-							+ " does not exists.", "command line",
-					"System file."));
-		} else if (new File(rootDir + Configuration.FS + path).exists())
-			return new File(rootDir + Configuration.FS + path)
-					.getAbsolutePath();
 
-		GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-				KExceptionGroup.CRITICAL, "File " 
-						+ rootDir + Configuration.FS + path + " does not exists.", "command line",
-				"System file."));
+			if (rootDir == null) {
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+						KExceptionGroup.CRITICAL, "File " + rootDir
+								+ " does not exists.", "command line",
+						"System file."));
+			}
+
+			if (new File(rootDir + Configuration.FS + path).exists()) {
+				return new File(rootDir + Configuration.FS + path)
+						.getAbsolutePath();
+			} else
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+						KExceptionGroup.CRITICAL,
+						"File " + rootDir + Configuration.FS + path
+								+ " does not exists.\n" + errorMessage, "command line",
+						"System file."));
 		}
 		return null;
 	}

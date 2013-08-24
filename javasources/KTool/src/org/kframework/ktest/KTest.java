@@ -43,7 +43,7 @@ public class KTest {
 		// Help
 		if (cmd.hasOption(Configuration.HELP_OPTION))
 			KTestOptionsParser.helpExit(op.getHelp(),
-					Configuration.HELP_OPTION, op.getOptions());
+					Configuration.KTEST, op.getOptions());
 
 		// Version
 		if (cmd.hasOption(Configuration.VERSION_OPTION)) {
@@ -89,8 +89,7 @@ public class KTest {
 					.getOptionValue(Configuration.CONFIG_OPTION);
 		} 
 
-
-		// sanity check
+		// sanity checks
 		if (Configuration.CONFIG != null
 				&& new File(Configuration.KDEF).isFile()) {
 			GlobalSettings.kem
@@ -105,7 +104,7 @@ public class KTest {
 			.register(new KException(
 					ExceptionType.ERROR,
 					KExceptionGroup.CRITICAL,
-					"Please provide a test configuration file.",
+					"Testing data missing.",
 					"command line", "System file."));
 		}
 
@@ -163,7 +162,7 @@ public class KTest {
 		
 		if (!new File(configFile).exists()) {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-			KExceptionGroup.CRITICAL, "Unable to find " + configFile,
+			KExceptionGroup.CRITICAL, "File " + configFile + " does not exists",
 			"command line", "System file."));			
 		}
 		

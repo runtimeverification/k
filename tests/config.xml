@@ -417,9 +417,9 @@
       extensions="imp"
       >
     <all-programs>
-      <krun-option name="--search" />
-      <krun-option name="--parser" value="kast -groundParser" parser-home="PARSER_HOME"/>
-      <krun-option name="--no-color" />
+      <krun-option name="-search" />
+      <krun-option name="-parser" value="kast -groundParser" parser-home="PARSER_HOME"/>
+      <krun-option name="-no-color" />
     </all-programs>
   </test>
 
@@ -456,7 +456,7 @@
 <!--
     Cink ltlmc
 -->
-
+<!--
   <test
       definition="dist/examples/cink/ltlmc/cink.k"
       programs="dist/examples/cink/ltlmc/programs"
@@ -468,12 +468,12 @@
         <krun-option name="-ltlmc" value="[]Ltl ((eqTo(critical1, 1) ->Ltl eqTo(critical2, 0)) /\Ltl (eqTo(critical2, 1) ->Ltl eqTo(critical1, 0)))" />
       </all-programs>
   </test>
-
+-->
 
 <!--
     Cink basic
 -->
-
+<!--
   <test
       definition="dist/examples/cink/basic/cink.k"
       programs="dist/examples/cink/basic/programs"
@@ -482,11 +482,11 @@
       exclude="fact.cink prim.cink"
       >
   </test>
-
+-->
 <!--
     Cink threads
 -->
-
+<!--
   <test
       definition="dist/examples/cink/threads/cink.k"
       programs="dist/examples/cink/threads/programs"
@@ -494,7 +494,7 @@
       results="tests/examples/cink/threads"
       >
   </test>
-
+-->
 <!--
     Cink arrays
 -->
@@ -510,7 +510,7 @@
 <!--
     Cink arrays unidimensional
 -->
-
+<!--
   <test
       definition="dist/examples/cink/arrays/unidimensional/cink.k"
       programs="dist/examples/cink/arrays/unidimensional/programs"
@@ -519,7 +519,7 @@
       exclude="sort.cink"
       >
   </test>
-
+-->
 <!--
     Program equivalence
 -->
@@ -539,7 +539,6 @@
       definition="dist/tutorial/2_imp/lesson_4/imp.k"
       programs="dist/tutorial/2_imp"
       extensions="imp"
-      report-dir="imp"
       title="symbolic"
 	  exclude="lesson_4/test.imp"
       >

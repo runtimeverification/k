@@ -20,8 +20,8 @@ public class KTestOptionsParser {
 		
 		// Metadata options
 		OptionGroup helpGroup = new OptionGroup();
-		Option help = new Option("h", Configuration.HELP_OPTION, false, "prints this message and exits");
-		Option version = new Option(Configuration.VERSION_OPTION, false, "prints version number");
+		Option help = new Option("h", Configuration.HELP_OPTION, false, "Prints this message and exits");
+		Option version = new Option(Configuration.VERSION_OPTION, false, "Prints version number");
 		helpGroup.addOption(help);
 		helpGroup.addOption(version);
 		
@@ -32,17 +32,17 @@ public class KTestOptionsParser {
 
 		// language group
 		OptionGroup languageGroup = new OptionGroup();
-		Option language = new Option("def", Configuration.LANGUAGE_OPTION, true, "K definition or directory (in case a configuration file is provided)");
+		Option language = new Option("def", Configuration.LANGUAGE_OPTION, true, "K definition or, in case the -config option is used, a root directory for K definitions");
 		languageGroup.addOption(language);
 		
 		// programs directory
 		OptionGroup programsGroup = new OptionGroup();
-		Option programs = new Option(Configuration.PROGRAMS_OPTION, true, "Programs directory");
+		Option programs = new Option(Configuration.PROGRAMS_OPTION, true, "Programs directory or, in case the -config option is used, a root directory for programs");
 		programsGroup.addOption(programs);
 
 		// the list of excluded programs
 		OptionGroup extensionsGroup = new OptionGroup();
-		Option extensions = new Option(Configuration.EXTENSIONS_OPTION, true, "The list of programs which will not be tested");
+		Option extensions = new Option(Configuration.EXTENSIONS_OPTION, true, "The list of program extensions separated by whitespaces");
 		extensionsGroup.addOption(extensions);
 		
 		// the list of excluded programs
@@ -52,9 +52,10 @@ public class KTestOptionsParser {
 
 		// the list of excluded programs
 		OptionGroup resultsGroup = new OptionGroup();
-		Option results = new Option(Configuration.RESULTS_OPTION, true, "Directory containing I/O for programs");
+		Option results = new Option(Configuration.RESULTS_OPTION, true, "Directory containing I/O for programs or, in case the -config option is used, a root directory for the I/O for programs");
 		resultsGroup.addOption(results);
 		
+		// add all option groups to ktest options
 		options.addOptionGroup(helpGroup);
 		options.addOptionGroup(configGroup);
 		options.addOptionGroup(languageGroup);
@@ -75,7 +76,7 @@ public class KTestOptionsParser {
 			e.printStackTrace();
 		}
 
-		helpExit(help, "help", options);
+		helpExit(help, Configuration.KTEST, options);
 		return null;
 	}
 
@@ -90,7 +91,7 @@ public class KTestOptionsParser {
 	// prints the header of help message and exits with an error code
 	public static void helpExit(HelpFormatter help, String cmdLineSyntax, Options options) {
 		System.out.println("\n");
-		help.printHelp(cmdLineSyntax, "\nTest K definitions and programs.\n\n", options, "\n", true);
+		help.printHelp(79, cmdLineSyntax, "\nTest K definitions and programs.\n\n", options, Configuration.DETAILED_HELP_MESSAGE, true);
 		System.out.println("\n");
 		System.exit(1);
 	}
