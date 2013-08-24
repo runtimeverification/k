@@ -611,13 +611,16 @@ public class Test implements Comparable<Test> {
 	}
 
 	private String getReportFilename() {
-		String name = language.replaceFirst("\\.k$", "-report.xml").replaceAll(
-				"\\/", ".");
-		if (reportDir != null)
-			name = reportDir + "-report.xml";
+		String name = new File(language).getName();
+		name = name.replaceFirst("\\.k$", "-report.xml");
+
+		// TODO: fix report names
+//		if (reportDir != null)
+//			name = reportDir + "-report.xml";
 
 		if (!tag.equals(""))
 			name = tag + "." + name;
+		
 		return name;
 	}
 
@@ -672,6 +675,7 @@ public class Test implements Comparable<Test> {
 	public void save() {
 		String reportPath = Configuration.JR + Configuration.FS
 				+ getReportFilename();
+		
 		new File(Configuration.JR).mkdirs();
 		try {
 
