@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
@@ -22,7 +23,7 @@ public class CollectExpectedVariablesVisitor extends BasicVisitor {
 	 * Each element in the list is a Mapping from variable name and a list of constraints for that variable.
 	 * On each Ambiguity node, a cartesian product is created between the current List and each ambiguity variant.
 	 */
-	private List<Map<String, List<Variable>>> vars;
+	public List<Map<String, List<Variable>>> vars;
 
 	@Override
 	public void visit(Ambiguity node) {
@@ -45,7 +46,7 @@ public class CollectExpectedVariablesVisitor extends BasicVisitor {
 
 	@Override
 	public void visit(Variable var) {
-		if (!var.isUserTyped()) {
+		if (!var.isUserTyped() && !var.getName().equals(MetaK.Constants.anyVarSymbol)) {
 			for (Map<String, List<Variable>> vars2 : vars)
 				if (vars2.containsKey(var.getName()))
 					vars2.get(var.getName()).add(var);

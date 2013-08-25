@@ -2,7 +2,7 @@ package org.kframework.parser.concrete.disambiguate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -66,70 +66,82 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 			CollectExpectedVariablesVisitor vars2 = new CollectExpectedVariablesVisitor(context);
 			r.accept(vars2);
 
-			//			// when there aren't any variable declarations
-			//			java.util.Set<Variable> isect = new HashSet<Variable>();
-			//			// find the intersection of varLoc
-			//			for (Variable var1 : varLoc.entrySet().iterator().next().getValue()) {
-			//				// iterate over the first variable location
-			//				boolean inAll = true;
-			//				for (Entry<String, java.util.List<Variable>> varLocEntry : varLoc.entrySet()) { // iterate over each location
-			//					if (!varLocEntry.getValue().contains(var1)) {
-			//						inAll = false;
-			//						break;
-			//					}
-			//				}
-			//				if (inAll)
-			//					isect.add(var1);
-			//			}
-			//			Variable varr = varLoc.entrySet().iterator().next().getValue().get(0);
-			//			if (isect.size() == 0) {
-			//				String msg = "Could not infer a sort for variable '" + varr.getName() + "' to match every location.";
-			//				throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, varr.getFilename(), varr.getLocation()));
-			//			}
-			//
-			//			Variable inferredVar = null;
-			//
-			//			// if I have more than one possibility choose a maximum
-			//			if (isect.size() > 1) {
-			//				java.util.List<Variable> maxSorts = new ArrayList<Variable>();
-			//
-			//				for (Variable vv1 : isect) {
-			//					boolean maxSort = true;
-			//					for (Variable vv2 : isect) {
-			//						if (context.isSubsorted(vv2.getSort(), vv1.getSort()))
-			//							maxSort = false;
-			//					}
-			//					if (maxSort)
-			//						maxSorts.add(vv1);
-			//				}
-			//
-			//				if (maxSorts.size() > 1) {
-			//					String msg = "Could not infer a unique sort for variable '" + varr.getName() + "'.";
-			//					msg += " Possible sorts: ";
-			//					for (Variable vv1 : maxSorts)
-			//						msg += vv1.getSort() + ", ";
-			//					msg = msg.substring(0, msg.length() - 2);
-			//					throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, varr.getFilename(), varr.getLocation()));
-			//				}
-			//
-			//				if (maxSorts.size() == 1)
-			//					inferredVar = maxSorts.get(0);
-			//			} else if (isect.size() == 1)
-			//				inferredVar = isect.iterator().next();
-			//
-			//			if (inferredVar != null) {
-			//				Map<String, Variable> varDeclMap = new HashMap<String, Variable>();
-			//				varDeclMap.put(inferredVar.getName(), inferredVar);
-			//
-			//				try {
-			//					r = (Sentence) r.accept(new VariableTypeFilter(varDeclMap, context));
-			//				} catch (TransformerException e) {
-			//					e.report();
-			//				}
-			//
-			//				String msg = "Variable '" + inferredVar.getName() + "' was not declared. Assuming sort " + inferredVar.getSort();
-			//				GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.COMPILER, msg, varr.getFilename(), varr.getLocation()));
-			//			}
+			// TODO: GLUB for each variant
+			List<Map<String, List<String>>> solutions = new ArrayList<Map<String, List<String>>>();
+			String fails = null;
+			List<String> failsAmb = null;
+			String failsAmbName = null;
+			for (Map<String, List<Variable>> variant : vars2.vars) {
+				// take each solution and do GLUB on every variable
+				Map<String, List<String>> solution = new HashMap<String, List<String>>();
+				for (Map.Entry<String, List<Variable>> entry : variant.entrySet()) {
+					List<String> mins = new ArrayList<String>();
+					for (String sort : context.definedSorts) { // for every declared sort
+						boolean min = true;
+						for (Variable var : entry.getValue()) {
+							if (!context.isSubsortedEq(var.getExpectedSort(), sort)) {
+								min = false;
+								break;
+							}
+						}
+						if (min)
+							mins.add(sort);
+					}
+					if (mins.size() == 0) {
+						fails = entry.getKey();
+						continue;
+					} else if (mins.size() > 1) {
+						java.util.List<String> maxSorts = new ArrayList<String>();
+
+						for (String vv1 : mins) {
+							boolean maxSort = true;
+							for (String vv2 : mins)
+								if (context.isSubsorted(vv2, vv1))
+									maxSort = false;
+							if (maxSort)
+								maxSorts.add(vv1);
+						}
+
+						if (maxSorts.size() == 1)
+							solution.put(entry.getKey(), maxSorts);
+						else {
+							failsAmb = maxSorts;
+							failsAmbName = entry.getKey();
+						}
+					} else {
+						solution.put(entry.getKey(), mins);
+					}
+				}
+				// I found a solution that fits everywhere, then store it for disambiguation
+				solutions.add(solution);
+			}
+
+			if (solutions.size() == 0) {
+				if (fails != null) {
+					String msg = "Could not infer a sort for variable '" + fails + "' to match every location.";
+					throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getFilename(), r.getLocation()));
+				} else {
+					String msg = "Could not infer a unique sort for variable '" + failsAmbName + "'.";
+					msg += " Possible sorts: ";
+					for (String vv1 : failsAmb)
+						msg += vv1 + ", ";
+					msg = msg.substring(0, msg.length() - 2);
+					throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getFilename(), r.getLocation()));
+
+				}
+			} else if (solutions.size() == 1) {
+				try {
+					r = (Sentence) r.accept(new VariableTypeFilter(varDeclMap, context));
+				} catch (TransformerException e) {
+					e.report();
+				}
+				for (Map.Entry<String, List<String>> solEntry : solutions.iterator().next().entrySet()) {
+					String msg = "Variable '" + solEntry.getKey() + "' was not declared. Assuming sort " + solEntry.getValue().get(0);
+					GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.COMPILER, msg, r.getFilename(), r.getLocation()));
+				}
+			} else {
+				System.err.println("Multiple solutions in rule: " + r.getFilename() + ":" + r.getLocation());
+			}
 		}
 
 		// type inference and error reporting
