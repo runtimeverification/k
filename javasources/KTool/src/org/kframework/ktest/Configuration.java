@@ -112,6 +112,7 @@ public class Configuration {
 	}
 	
 	public static String getReadme() {
-		return FileUtil.getFileContent(getKHome() + FS + "tests" + FS + "README");
+		// return FileUtil.getFileContent(getKHome() + FS + "tests" + FS + "README");
+		return "";
 	}
 }
