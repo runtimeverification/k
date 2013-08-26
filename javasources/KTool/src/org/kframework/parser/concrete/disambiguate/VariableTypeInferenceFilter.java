@@ -51,12 +51,12 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 			}
 			// if no semantic casts were found, then just choose the first syntactic restriction
 			Variable var = varList.iterator().next();
-			if (varDeclMap.containsKey(var.getName()))
+			if (!varDeclMap.containsKey(var.getName()))
 				varDeclMap.put(var.getName(), var);
 		}
 		// after finding all of the variable declarations traverse the tree to disambiguate
 		try {
-			r = (Sentence) r.accept(new VariableTypeFilter(varDeclMap, context));
+			r = (Sentence) r.accept(new VariableTypeFilter(varDeclMap, false, context));
 		} catch (TransformerException e) {
 			e.report();
 		}
@@ -131,7 +131,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 				}
 			} else if (solutions.size() == 1) {
 				try {
-					r = (Sentence) r.accept(new VariableTypeFilter(varDeclMap, context));
+					r = (Sentence) r.accept(new VariableTypeFilter(varDeclMap, true, context));
 				} catch (TransformerException e) {
 					e.report();
 				}

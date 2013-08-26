@@ -72,10 +72,6 @@ public class CollectVariablesVisitor extends BasicVisitor {
 
 	@Override
 	public void visit(Variable var) {
-		if (var.isUserTyped()) {
-			var.setExpectedSort(var.getSort());
-			return;
-		}
 		if (var.getExpectedSort() == null)
 			var.setExpectedSort(var.getSort());
 		if (!var.getName().equals(MetaK.Constants.anyVarSymbol) && var.isUserTyped())

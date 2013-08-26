@@ -15,17 +15,22 @@ import java.util.Map;
 public class VariableTypeFilter extends BasicTransformer {
 
 	private Map<String, Variable> variableTypes = null;
+	// if expected is true, then do disambiguation on the expected sort.
+	// the expected sort is inferred by the type inferencer
+	private boolean expected = false;
 
-	public VariableTypeFilter(Map<String, Variable> types, Context context) {
+	public VariableTypeFilter(Map<String, Variable> types, boolean expected, Context context) {
 		super("Variable type filter", context);
 		this.variableTypes = types;
+		this.expected = expected;
 	}
 
 	public ASTNode transform(Variable r) throws TransformerException {
 		Variable correctVar = variableTypes.get(r.getName());
 		if (correctVar == null)
 			return r;
-		if (context.isSubsortedEq(r.getExpectedSort(), correctVar.getExpectedSort())) {
+		assert r.getExpectedSort() != null : "Expected sort Should not be null";
+		if (!expected && context.isSubsortedEq(r.getSort(), correctVar.getSort()) || expected && context.isSubsortedEq(r.getExpectedSort(), correctVar.getExpectedSort())) {
 			Variable newV = new Variable(r);
 			newV.setSort(correctVar.getSort());
 			newV.setExpectedSort(correctVar.getExpectedSort());
