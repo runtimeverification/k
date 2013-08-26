@@ -113,34 +113,36 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 					}
 				}
 				// I found a solution that fits everywhere, then store it for disambiguation
-				solutions.add(solution);
+				if (!solution.isEmpty())
+					solutions.add(solution);
 			}
+			if (!vars2.vars.isEmpty()) {
+				if (solutions.size() == 0) {
+					if (fails != null) {
+						String msg = "Could not infer a sort for variable '" + fails + "' to match every location.";
+						throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getFilename(), r.getLocation()));
+					} else {
+						String msg = "Could not infer a unique sort for variable '" + failsAmbName + "'.";
+						msg += " Possible sorts: ";
+						for (String vv1 : failsAmb)
+							msg += vv1 + ", ";
+						msg = msg.substring(0, msg.length() - 2);
+						throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getFilename(), r.getLocation()));
 
-			if (solutions.size() == 0) {
-				if (fails != null) {
-					String msg = "Could not infer a sort for variable '" + fails + "' to match every location.";
-					throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getFilename(), r.getLocation()));
+					}
+				} else if (solutions.size() == 1) {
+					try {
+						r = (Sentence) r.accept(new VariableTypeFilter(varDeclMap, true, context));
+					} catch (TransformerException e) {
+						e.report();
+					}
+					for (Map.Entry<String, List<String>> solEntry : solutions.iterator().next().entrySet()) {
+						String msg = "Variable '" + solEntry.getKey() + "' was not declared. Assuming sort " + solEntry.getValue().get(0);
+						GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.COMPILER, msg, r.getFilename(), r.getLocation()));
+					}
 				} else {
-					String msg = "Could not infer a unique sort for variable '" + failsAmbName + "'.";
-					msg += " Possible sorts: ";
-					for (String vv1 : failsAmb)
-						msg += vv1 + ", ";
-					msg = msg.substring(0, msg.length() - 2);
-					throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getFilename(), r.getLocation()));
-
+					System.err.println("Multiple solutions in rule: " + r.getFilename() + ":" + r.getLocation());
 				}
-			} else if (solutions.size() == 1) {
-				try {
-					r = (Sentence) r.accept(new VariableTypeFilter(varDeclMap, true, context));
-				} catch (TransformerException e) {
-					e.report();
-				}
-				for (Map.Entry<String, List<String>> solEntry : solutions.iterator().next().entrySet()) {
-					String msg = "Variable '" + solEntry.getKey() + "' was not declared. Assuming sort " + solEntry.getValue().get(0);
-					GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.COMPILER, msg, r.getFilename(), r.getLocation()));
-				}
-			} else {
-				System.err.println("Multiple solutions in rule: " + r.getFilename() + ":" + r.getLocation());
 			}
 		}
 

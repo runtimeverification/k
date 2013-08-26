@@ -15,15 +15,13 @@ import org.kframework.kil.visitors.BasicVisitor;
 public class CollectExpectedVariablesVisitor extends BasicVisitor {
 	public CollectExpectedVariablesVisitor(Context context) {
 		super(context);
-		vars = new ArrayList<Map<String, List<Variable>>>();
-		vars.add(new HashMap<String, List<Variable>>());
 	}
 
 	/**
 	 * Each element in the list is a Mapping from variable name and a list of constraints for that variable.
 	 * On each Ambiguity node, a cartesian product is created between the current List and each ambiguity variant.
 	 */
-	public List<Map<String, List<Variable>>> vars;
+	public List<Map<String, List<Variable>>> vars = new ArrayList<Map<String, List<Variable>>>();
 
 	@Override
 	public void visit(Ambiguity node) {
@@ -48,9 +46,15 @@ public class CollectExpectedVariablesVisitor extends BasicVisitor {
 	public void visit(Variable var) {
 		if (!var.isUserTyped() && !var.getName().equals(MetaK.Constants.anyVarSymbol)) {
 			for (Map<String, List<Variable>> vars2 : vars)
-				if (vars2.containsKey(var.getName()))
-					vars2.get(var.getName()).add(var);
-				else {
+				if (vars2.containsKey(var.getName())) {
+					List<Variable> lst = vars2.get(var.getName());
+					boolean contains = false;
+					for (Variable v : lst)
+						if (v.getExpectedSort().equals(var.getExpectedSort()))
+							contains = true;
+					if (!contains)
+						lst.add(var);
+				} else {
 					java.util.List<Variable> varss = new ArrayList<Variable>();
 					varss.add(var);
 					vars2.put(var.getName(), varss);
@@ -69,9 +73,18 @@ public class CollectExpectedVariablesVisitor extends BasicVisitor {
 	private Map<String, List<Variable>> combine(Map<String, List<Variable>> in1, Map<String, List<Variable>> in2) {
 		Map<String, List<Variable>> newM = duplicate(in1);
 		for (Map.Entry<String, List<Variable>> elem : in2.entrySet()) {
-			if (newM.containsKey(elem.getKey()))
-				newM.get(elem.getKey()).addAll(elem.getValue());
-			else
+			if (newM.containsKey(elem.getKey())) {
+				List<Variable> where = newM.get(elem.getKey());
+				List<Variable> what = elem.getValue();
+				boolean contains = false;
+				for (Variable v : what) {
+					for (Variable v2 : where)
+						if (v.getExpectedSort().equals(v2.getExpectedSort()))
+							contains = true;
+					if (!contains)
+						where.add(v);
+				}
+			} else
 				newM.put(elem.getKey(), new ArrayList<Variable>(elem.getValue()));
 		}
 		return newM;
