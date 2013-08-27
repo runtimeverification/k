@@ -1,9 +1,6 @@
 package org.kframework.parser.concrete.disambiguate;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Ambiguity;
@@ -21,17 +18,17 @@ public class CollectExpectedVariablesVisitor extends BasicVisitor {
 	 * Each element in the list is a Mapping from variable name and a list of constraints for that variable.
 	 * On each Ambiguity node, a cartesian product is created between the current List and each ambiguity variant.
 	 */
-	public List<Map<String, List<Variable>>> vars = new ArrayList<Map<String, List<Variable>>>();
+	public List<Map<String, Set<String>>> vars = new ArrayList<Map<String, Set<String>>>();
 
 	@Override
 	public void visit(Ambiguity node) {
-		List<Map<String, List<Variable>>> newVars = new ArrayList<Map<String, List<Variable>>>();
+		List<Map<String, Set<String>>> newVars = new ArrayList<Map<String, Set<String>>>();
 		for (Term t : node.getContents()) {
 			CollectExpectedVariablesVisitor viz = new CollectExpectedVariablesVisitor(context);
 			t.accept(viz);
 			// create the split
-			for (Map<String, List<Variable>> elem : vars) { // for every local type restrictions
-				for (Map<String, List<Variable>> elem2 : viz.vars) { // create a combination with every ambiguity detected
+			for (Map<String, Set<String>> elem : vars) { // for every local type restrictions
+				for (Map<String, Set<String>> elem2 : viz.vars) { // create a combination with every ambiguity detected
 					newVars.add(combine(elem, elem2));
 				}
 			}
@@ -45,47 +42,40 @@ public class CollectExpectedVariablesVisitor extends BasicVisitor {
 	@Override
 	public void visit(Variable var) {
 		if (!var.isUserTyped() && !var.getName().equals(MetaK.Constants.anyVarSymbol)) {
-			for (Map<String, List<Variable>> vars2 : vars)
+			if (vars.isEmpty())
+				vars.add(new HashMap<String, Set<String>>());
+			for (Map<String, Set<String>> vars2 : vars)
 				if (vars2.containsKey(var.getName())) {
-					List<Variable> lst = vars2.get(var.getName());
+					Set<String> lst = vars2.get(var.getName());
 					boolean contains = false;
-					for (Variable v : lst)
-						if (v.getExpectedSort().equals(var.getExpectedSort()))
+					for (String v : lst)
+						if (v.equals(var))
 							contains = true;
 					if (!contains)
-						lst.add(var);
+						lst.add(var.getExpectedSort());
 				} else {
-					java.util.List<Variable> varss = new ArrayList<Variable>();
-					varss.add(var);
+					java.util.Set<String> varss = new HashSet<String>();
+					varss.add(var.getExpectedSort());
 					vars2.put(var.getName(), varss);
 				}
 		}
 	}
 
-	private Map<String, List<Variable>> duplicate(Map<String, List<Variable>> in) {
-		Map<String, List<Variable>> newM = new HashMap<String, List<Variable>>();
-		for (Map.Entry<String, List<Variable>> elem : in.entrySet()) {
-			newM.put(elem.getKey(), new ArrayList<Variable>(elem.getValue()));
+	private Map<String, Set<String>> duplicate(Map<String, Set<String>> in) {
+		Map<String, Set<String>> newM = new HashMap<String, Set<String>>();
+		for (Map.Entry<String, Set<String>> elem : in.entrySet()) {
+			newM.put(elem.getKey(), new HashSet<String>(elem.getValue()));
 		}
 		return newM;
 	}
 
-	private Map<String, List<Variable>> combine(Map<String, List<Variable>> in1, Map<String, List<Variable>> in2) {
-		Map<String, List<Variable>> newM = duplicate(in1);
-		for (Map.Entry<String, List<Variable>> elem : in2.entrySet()) {
-			if (newM.containsKey(elem.getKey())) {
-				List<Variable> where = newM.get(elem.getKey());
-				List<Variable> what = elem.getValue();
-				boolean contains = false;
-				for (Variable v : what) {
-					for (Variable v2 : where)
-						if (v.getExpectedSort().equals(v2.getExpectedSort()))
-							contains = true;
-					if (!contains)
-						where.add(v);
-				}
-			} else
-				newM.put(elem.getKey(), new ArrayList<Variable>(elem.getValue()));
+	private Map<String, Set<String>> combine(Map<String, Set<String>> in1, Map<String, Set<String>> in2) {
+		Map<String, Set<String>> newM = duplicate(in1);
+		for (Map.Entry<String, Set<String>> elem : in2.entrySet()) {
+			if (newM.containsKey(elem.getKey()))
+				newM.get(elem.getKey()).addAll(elem.getValue());
+			else
+				newM.put(elem.getKey(), new HashSet<String>(elem.getValue()));
 		}
 		return newM;
 	}

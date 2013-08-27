@@ -2,9 +2,11 @@ package org.kframework.parser.concrete.disambiguate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Sentence;
@@ -67,19 +69,19 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 			r.accept(vars2);
 
 			// TODO: GLUB for each variant
-			List<Map<String, List<String>>> solutions = new ArrayList<Map<String, List<String>>>();
+			List<Map<String, Set<String>>> solutions = new ArrayList<Map<String, Set<String>>>();
 			String fails = null;
-			List<String> failsAmb = null;
+			Set<String> failsAmb = null;
 			String failsAmbName = null;
-			for (Map<String, List<Variable>> variant : vars2.vars) {
+			for (Map<String, Set<String>> variant : vars2.vars) {
 				// take each solution and do GLUB on every variable
-				Map<String, List<String>> solution = new HashMap<String, List<String>>();
-				for (Map.Entry<String, List<Variable>> entry : variant.entrySet()) {
-					List<String> mins = new ArrayList<String>();
+				Map<String, Set<String>> solution = new HashMap<String, Set<String>>();
+				for (Map.Entry<String, Set<String>> entry : variant.entrySet()) {
+					Set<String> mins = new HashSet<String>();
 					for (String sort : context.definedSorts) { // for every declared sort
 						boolean min = true;
-						for (Variable var : entry.getValue()) {
-							if (!context.isSubsortedEq(var.getExpectedSort(), sort)) {
+						for (String var : entry.getValue()) {
+							if (!context.isSubsortedEq(var, sort)) {
 								min = false;
 								break;
 							}
@@ -89,9 +91,9 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 					}
 					if (mins.size() == 0) {
 						fails = entry.getKey();
-						continue;
+						break;
 					} else if (mins.size() > 1) {
-						java.util.List<String> maxSorts = new ArrayList<String>();
+						java.util.Set<String> maxSorts = new HashSet<String>();
 
 						for (String vv1 : mins) {
 							boolean maxSort = true;
@@ -136,8 +138,8 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 					} catch (TransformerException e) {
 						e.report();
 					}
-					for (Map.Entry<String, List<String>> solEntry : solutions.iterator().next().entrySet()) {
-						String msg = "Variable '" + solEntry.getKey() + "' was not declared. Assuming sort " + solEntry.getValue().get(0);
+					for (Map.Entry<String, Set<String>> solEntry : solutions.iterator().next().entrySet()) {
+						String msg = "Variable '" + solEntry.getKey() + "' was not declared. Assuming sort " + solEntry.getValue().iterator().next();
 						GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.COMPILER, msg, r.getFilename(), r.getLocation()));
 					}
 				} else {
