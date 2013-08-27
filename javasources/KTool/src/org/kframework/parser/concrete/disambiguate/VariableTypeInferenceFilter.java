@@ -1,9 +1,7 @@
 package org.kframework.parser.concrete.disambiguate;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -69,13 +67,13 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 			r.accept(vars2);
 
 			// TODO: GLUB for each variant
-			List<Map<String, Set<String>>> solutions = new ArrayList<Map<String, Set<String>>>();
+			Set<VarHashMap> solutions = new HashSet<VarHashMap>();
 			String fails = null;
 			Set<String> failsAmb = null;
 			String failsAmbName = null;
-			for (Map<String, Set<String>> variant : vars2.vars) {
+			for (VarHashMap variant : vars2.vars) {
 				// take each solution and do GLUB on every variable
-				Map<String, Set<String>> solution = new HashMap<String, Set<String>>();
+				VarHashMap solution = new VarHashMap();
 				for (Map.Entry<String, Set<String>> entry : variant.entrySet()) {
 					Set<String> mins = new HashSet<String>();
 					for (String sort : context.definedSorts) { // for every declared sort
@@ -133,6 +131,13 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 
 					}
 				} else if (solutions.size() == 1) {
+					for (Map.Entry<String, Set<String>> entry : solutions.iterator().next().entrySet()) {
+						Variable var = new Variable(entry.getKey(), null);
+						var.setUserTyped(false);
+						var.setExpectedSort(entry.getValue().iterator().next());
+						var.setSyntactic(false);
+						varDeclMap.put(entry.getKey(), var);
+					}
 					try {
 						r = (Sentence) r.accept(new VariableTypeFilter(varDeclMap, true, context));
 					} catch (TransformerException e) {

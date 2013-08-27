@@ -32,7 +32,8 @@ public class VariableTypeFilter extends BasicTransformer {
 		assert r.getExpectedSort() != null : "Expected sort Should not be null";
 		if (!expected && context.isSubsortedEq(r.getSort(), correctVar.getSort()) || expected && context.isSubsortedEq(r.getExpectedSort(), correctVar.getExpectedSort())) {
 			Variable newV = new Variable(r);
-			newV.setSort(correctVar.getSort());
+			if (!expected)
+				newV.setSort(correctVar.getSort());
 			newV.setExpectedSort(correctVar.getExpectedSort());
 			newV.setSyntactic(correctVar.isSyntactic());
 			newV.setUserTyped(correctVar.isUserTyped());

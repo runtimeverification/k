@@ -18,17 +18,17 @@ public class CollectExpectedVariablesVisitor extends BasicVisitor {
 	 * Each element in the list is a Mapping from variable name and a list of constraints for that variable.
 	 * On each Ambiguity node, a cartesian product is created between the current List and each ambiguity variant.
 	 */
-	public List<Map<String, Set<String>>> vars = new ArrayList<Map<String, Set<String>>>();
+	public Set<VarHashMap> vars = new HashSet<VarHashMap>();
 
 	@Override
 	public void visit(Ambiguity node) {
-		List<Map<String, Set<String>>> newVars = new ArrayList<Map<String, Set<String>>>();
+		Set<VarHashMap> newVars = new HashSet<VarHashMap>();
 		for (Term t : node.getContents()) {
 			CollectExpectedVariablesVisitor viz = new CollectExpectedVariablesVisitor(context);
 			t.accept(viz);
 			// create the split
-			for (Map<String, Set<String>> elem : vars) { // for every local type restrictions
-				for (Map<String, Set<String>> elem2 : viz.vars) { // create a combination with every ambiguity detected
+			for (VarHashMap elem : vars) { // for every local type restrictions
+				for (VarHashMap elem2 : viz.vars) { // create a combination with every ambiguity detected
 					newVars.add(combine(elem, elem2));
 				}
 			}
@@ -43,8 +43,8 @@ public class CollectExpectedVariablesVisitor extends BasicVisitor {
 	public void visit(Variable var) {
 		if (!var.isUserTyped() && !var.getName().equals(MetaK.Constants.anyVarSymbol)) {
 			if (vars.isEmpty())
-				vars.add(new HashMap<String, Set<String>>());
-			for (Map<String, Set<String>> vars2 : vars)
+				vars.add(new VarHashMap());
+			for (VarHashMap vars2 : vars)
 				if (vars2.containsKey(var.getName())) {
 					Set<String> lst = vars2.get(var.getName());
 					boolean contains = false;
@@ -61,16 +61,16 @@ public class CollectExpectedVariablesVisitor extends BasicVisitor {
 		}
 	}
 
-	private Map<String, Set<String>> duplicate(Map<String, Set<String>> in) {
-		Map<String, Set<String>> newM = new HashMap<String, Set<String>>();
+	private VarHashMap duplicate(VarHashMap in) {
+		VarHashMap newM = new VarHashMap();
 		for (Map.Entry<String, Set<String>> elem : in.entrySet()) {
 			newM.put(elem.getKey(), new HashSet<String>(elem.getValue()));
 		}
 		return newM;
 	}
 
-	private Map<String, Set<String>> combine(Map<String, Set<String>> in1, Map<String, Set<String>> in2) {
-		Map<String, Set<String>> newM = duplicate(in1);
+	private VarHashMap combine(VarHashMap in1, VarHashMap in2) {
+		VarHashMap newM = duplicate(in1);
 		for (Map.Entry<String, Set<String>> elem : in2.entrySet()) {
 			if (newM.containsKey(elem.getKey()))
 				newM.get(elem.getKey()).addAll(elem.getValue());
