@@ -1,6 +1,7 @@
 package org.kframework.parser.utils;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -15,7 +16,7 @@ import aterm.pure.PureFactory;
 import aterm.pure.binary.BAFReader;
 
 public class Sglr {
-    private static final boolean useJNI = false;
+    private static final boolean useJNI = true;
     private static final boolean useSRV = true;
     
 	/**
@@ -41,19 +42,27 @@ public class Sglr {
 		}
 		if (useJNI && useSRV) {
             if (!Arrays.equals(parsed, served)) {
-                System.err.println("Error, different results from sglr through jni and server");
-                System.err.println(parsed.length+" bytes from JNI, "+served.length+" bytes from server");
                 try {
                     ATerm jniTerm = parseATerm(parsed);
                     ATerm srvTerm = parseATerm(served);
-                    jniTerm.writeToSharedTextFile(new FileOutputStream("jni.taf"));
-                    srvTerm.writeToSharedTextFile(new FileOutputStream("srv.taf"));                    
-                    System.err.println("Parsed terms equal?: "+
-                    jniTerm.toString().equals(srvTerm.toString()));
+                    ByteArrayOutputStream jniStream = new ByteArrayOutputStream();
+                    jniTerm.writeToSharedTextFile(jniStream);
+                    ByteArrayOutputStream srvStream = new ByteArrayOutputStream();
+                    srvTerm.writeToSharedTextFile(srvStream);
+                    if (!Arrays.equals(jniStream.toByteArray(), srvStream.toByteArray())) {
+                        System.err.println("Error, different results from sglr through jni and server");
+                        System.err.println(parsed.length+" bytes from JNI, "+served.length+" bytes from server");
+                        System.exit(1);
+                    } else {
+                        System.err.println("Different but equivalent results from jni and server parsing input from "+location);
+                        System.err.println(input);
+                        System.err.println("Against nonterminal "+startSymbol+" in grammar "+tablePath);
+                        System.err.println("Result lengths "+parsed.length+", "+served.length);
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
+                    System.exit(1);
                 }
-                System.exit(1);
             }		    
 		}
 		if (useSRV && !useJNI) {
