@@ -138,12 +138,9 @@ public class BuiltinMap extends Collection implements Sorted {
             return new BuiltinMap(entries, (Variable) frame);
         if (frame instanceof BuiltinMap) {
             BuiltinMap builtinMap = (BuiltinMap) frame;
-            if (entries.isEmpty()) return builtinMap;
-            Map<Term, Term> all = builtinMap.entries;
-            all.putAll(entries);
-            if (builtinMap.hasFrame())
-                return new BuiltinMap(entries, builtinMap.frame());
-            else return new BuiltinMap(entries);
+            builtinMap = new BuiltinMap(builtinMap.entries, builtinMap.frame);
+            builtinMap.entries.putAll(entries);
+            return builtinMap;
         }
         assert false : "Frame can only be substituted by a Variable or a BuiltinMap, or deleted.";
         return null;
