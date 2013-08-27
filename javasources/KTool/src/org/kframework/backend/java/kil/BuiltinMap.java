@@ -4,8 +4,8 @@ import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Utils;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.KSorts;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.KSorts;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -68,7 +68,7 @@ public class BuiltinMap extends Collection implements Sorted {
      */
     @Override
     public String sort() {
-        // TODO(AndreiS): use a builtin map sort (add it to the sort dag in Context)
+        // TODO(AndreiS): track the original sort from the grammar
         return KSorts.MAP;
     }
 

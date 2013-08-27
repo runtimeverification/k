@@ -225,13 +225,21 @@ public class SymbolicRewriter {
         return null;
     }
 
-    /*
-    Search with neither bound nor depth specified
+    /**
+     *
+     * @param initialTerm
+     * @param targetTerm not implemented yet
+     * @param rules not implemented yet
+     * @param bound a negative value specifies no bound
+     * @param depth a negative value specifies no bound
+     * @return
      */
     public List<ConstrainedTerm> search(
             ConstrainedTerm initialTerm,
             ConstrainedTerm targetTerm,
-            List<Rule> rules) {
+            List<Rule> rules,
+            int bound,
+            int depth) {
         stopwatch.start();
 
         List<ConstrainedTerm> searchResults = new ArrayList<ConstrainedTerm>();
@@ -241,149 +249,16 @@ public class SymbolicRewriter {
 
         visited.add(initialTerm);
         queue.add(initialTerm);
-        while (!queue.isEmpty()) {
+
+    label:
+        for (step = 0; !queue.isEmpty() && step != depth; ++step) {
             for (ConstrainedTerm term : queue) {
                 computeRewriteStep(term);
 
                 if (results.isEmpty()) {
                     /* final term */
                     searchResults.add(term);
-                }
-
-
-                for (int i = 0; getTransition(i) != null; ++i) {
-                    if (visited.add(getTransition(i))) {
-                        nextQueue.add(getTransition(i));
-                    }
-                }
-            }
-
-            /* swap the queues */
-            ListPair swappedPair = swapQueues(new ListPair(queue,nextQueue));
-            queue = swappedPair.getQ1();
-            nextQueue = swappedPair.getQ2();
-
-            /*
-            for (ConstrainedTerm result : queue) {
-                System.err.println(result);
-            }
-            System.err.println("============================================================");
-            */
-        }
-
-
-
-
-        stopwatch.stop();
-        System.err.println("[" + visited.size() + "states, " + stopwatch +"]");
-
-        return searchResults;
-    }
-
-    /*
-    Search with only bound specified
-     */
-    public List<ConstrainedTerm> search(
-            ConstrainedTerm initialTerm,
-            ConstrainedTerm targetTerm,
-            List<Rule> rules, Integer bound) {
-
-        if (bound == null) {
-            return search(initialTerm,targetTerm,rules);
-        }
-
-        stopwatch.start();
-
-        List<ConstrainedTerm> searchResults = new ArrayList<ConstrainedTerm>();
-        Set<ConstrainedTerm> visited = new HashSet<ConstrainedTerm>();
-        List<ConstrainedTerm> queue = new ArrayList<ConstrainedTerm>();
-        List<ConstrainedTerm> nextQueue = new ArrayList<ConstrainedTerm>();
-
-        visited.add(initialTerm);
-        queue.add(initialTerm);
-
-        while (!queue.isEmpty()) {
-
-            for (ConstrainedTerm term : queue) {
-                computeRewriteStep(term);
-
-                if (results.isEmpty()) {
-                    if (searchResults.size() < bound){
-                        /* final term */
-                        searchResults.add(term);
-                    } else{
-                        return searchResults;
-                    }
-
-                }
-
-                for (int i = 0; getTransition(i) != null; ++i) {
-                    if (visited.add(getTransition(i))) {
-                        nextQueue.add(getTransition(i));
-                    }
-                }
-            }
-
-            /* swap the queues */
-            ListPair swappedPair = swapQueues(new ListPair(queue,nextQueue));
-            queue = swappedPair.getQ1();
-            nextQueue = swappedPair.getQ2();
-
-            /*
-            for (ConstrainedTerm result : queue) {
-                System.err.println(result);
-            }
-            System.err.println("============================================================");
-            */
-        }
-
-        stopwatch.stop();
-        System.err.println("[" + visited.size() + "states, " + stopwatch +"]");
-
-        return searchResults;
-    }
-
-    /*
-    Search with all bound and depth.
-     */
-    public List<ConstrainedTerm> search(
-            ConstrainedTerm initialTerm,
-            ConstrainedTerm targetTerm,
-            List<Rule> rules, Integer bound, Integer depth) {
-        int count = 0;
-
-        /*Check if which of "bound" or "depth" is specified
-        * by the user*/
-        if (bound == null & depth == null) {
-            return search(initialTerm,targetTerm,rules);
-        }else if (bound!=null & depth==null){
-            return search(initialTerm,targetTerm,rules,bound);
-        } else if (bound == null & depth !=null){
-            //TO DO: handle this "properly"
-           throw new UnsupportedOperationException("-depth flag is set but the -bound flag is not");
-        }
-
-        stopwatch.start();
-
-
-        List<ConstrainedTerm> searchResults = new ArrayList<ConstrainedTerm>();
-        Set<ConstrainedTerm> visited = new HashSet<ConstrainedTerm>();
-        List<ConstrainedTerm> queue = new ArrayList<ConstrainedTerm>();
-        List<ConstrainedTerm> nextQueue = new ArrayList<ConstrainedTerm>();
-
-        visited.add(initialTerm);
-        queue.add(initialTerm);
-
-        label: while (!queue.isEmpty() && count < depth) {
-            for (ConstrainedTerm term : queue) {
-                computeRewriteStep(term);
-
-                if (results.isEmpty()) {
-
-                    if (searchResults.size() < bound){
-                        /* final term */
-                        searchResults.add(term);
-                    } else{
+                    if (searchResults.size() == bound) {
                         break label;
                     }
 
@@ -397,138 +272,22 @@ public class SymbolicRewriter {
             }
 
             /* swap the queues */
-            ListPair swappedPair = swapQueues(new ListPair(queue,nextQueue));
-            queue = swappedPair.getQ1();
-            nextQueue = swappedPair.getQ2();
-            count+=1;
-
-            /*
-            for (ConstrainedTerm result : queue) {
-                System.err.println(result);
-            }
-            System.err.println("============================================================");
-            */
+            List<ConstrainedTerm> temp;
+            temp = queue;
+            queue = nextQueue;
+            nextQueue = temp;
+            nextQueue.clear();
         }
 
+        /* add the configurations on the depth frontier */
+        while (!queue.isEmpty() && searchResults.size() != bound) {
+            searchResults.add(queue.remove(0));
+        }
 
         stopwatch.stop();
-        System.err.println("[" + visited.size() + "states, " + stopwatch +"]");
+        System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
 
         return searchResults;
-    }
-
-    /*
-    Search with all bound and depth.
-     */
-    public List<ConstrainedTerm> search(
-            ConstrainedTerm initialTerm,
-            ConstrainedTerm targetTerm,
-            List<Rule> rules, Integer bound, Integer depth, boolean boundConstrained) {
-        int count = 0;
-
-        /*Check which of "bound" or "depth" is specified
-        * by the user*/
-        if (bound == null & depth == null) {
-            return search(initialTerm,targetTerm,rules);
-        }else if (bound!=null & depth==null){
-            return search(initialTerm,targetTerm,rules,bound);
-        } else if (bound == null & depth !=null){
-            //TODO: handle this "properly"
-            throw new UnsupportedOperationException("-depth flag is set but the -bound flag is not");
-        }
-
-        stopwatch.start();
-
-
-        List<ConstrainedTerm> searchResults = new ArrayList<ConstrainedTerm>();
-        Set<ConstrainedTerm> visited = new HashSet<ConstrainedTerm>();
-        List<ConstrainedTerm> queue = new ArrayList<ConstrainedTerm>();
-        List<ConstrainedTerm> nextQueue = new ArrayList<ConstrainedTerm>();
-
-        visited.add(initialTerm);
-        queue.add(initialTerm);
-
-        label: while (!queue.isEmpty() && count < depth) {
-            for (ConstrainedTerm term : queue) {
-                computeRewriteStep(term);
-
-                if (results.isEmpty()) {
-
-                    if (searchResults.size() < bound){
-                        /* final term */
-                        searchResults.add(term);
-                    } else{
-                        break label;
-                    }
-
-                }
-
-                for (int i = 0; getTransition(i) != null; ++i) {
-                    if (visited.add(getTransition(i))) {
-                        nextQueue.add(getTransition(i));
-                    }
-                }
-            }
-
-            /* swap the queues */
-            ListPair swappedPair = swapQueues(new ListPair(queue,nextQueue));
-            queue = swappedPair.getQ1();
-            nextQueue = swappedPair.getQ2();
-            count+=1;
-            /*
-            for (ConstrainedTerm result : queue) {
-                System.err.println(result);
-            }
-            System.err.println("============================================================");
-            */
-        }
-
-        if(boundConstrained){
-           searchResults.addAll(queue);
-        }
-
-
-        stopwatch.stop();
-        System.err.println("[" + visited.size() + "states, " + stopwatch +"]");
-
-        return searchResults;
-    }
-
-    private ListPair swapQueues(ListPair pair){
-        List<ConstrainedTerm> temp;
-        temp = pair.getQ1();
-        pair.setQ1(pair.getQ2());
-        pair.setQ2(temp); //why assign temp to nextQueue if it will eventually be cleared. Possible optimization?
-        pair.getQ2().clear();
-        return pair;
-    }
-
-    /*
-    Used for holding pairs to be swapped. Looks like lots of code to do such a simple thing.
-    Owolabi: revert to andrei's swap
-     */
-    private class ListPair{
-        private List<ConstrainedTerm> q1,q2;
-        ListPair(List<ConstrainedTerm> queue1, List<ConstrainedTerm> queue2){
-            this.q1 = queue1;
-            this.q2 = queue2;
-        }
-
-        List<ConstrainedTerm> getQ1(){
-            return this.q1;
-        }
-
-        void setQ1(List<ConstrainedTerm> q){
-            this.q1 = q;
-        }
-
-        List<ConstrainedTerm> getQ2(){
-            return this.q2;
-        }
-
-        void setQ2(List<ConstrainedTerm> q){
-            this.q2 = q;
-        }
     }
 
     public List<ConstrainedTerm> prove(List<Rule> rules, FileSystem fs) {
