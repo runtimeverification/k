@@ -43,6 +43,21 @@ public final class SglrServer {
         output = new DataOutputStream(server.getOutputStream());
         input = new DataInputStream(server.getInputStream());
         
+        Thread childWatcher = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int exitCode;               
+                try {
+                    exitCode = server.waitFor();
+                    System.err.println("SGLR server exited with code "+exitCode);
+                } catch (InterruptedException e) {
+                    System.err.println("Interrupted while waiting for SLGR server");
+                }                
+            }
+        });
+        childWatcher.setDaemon(true);
+        childWatcher.start();
+        
         firstTime = false;
     }
     
@@ -89,15 +104,20 @@ public final class SglrServer {
      * @param inputFileName - this is required to annotate the nodes with location information. It can be any string.
      * @return a byte array in containing the ATerm in the BAF format.
      */
-    public static synchronized byte[] parseString(String parseTablePath, String input, String startSymbol, String inputFileName) throws IOException {
-        if (firstTime) {
-            init();
+    public static synchronized byte[] parseString(String parseTablePath, String input, String startSymbol, String inputFileName) {
+        try {
+            if (firstTime) {
+                init();
+            }
+            sendString(parseTablePath);
+            sendString(input);
+            sendString(startSymbol);
+            sendString(inputFileName);
+            output.flush();
+            return readBytes();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
         }
-        sendString(parseTablePath);
-        sendString(input);
-        sendString(startSymbol);
-        sendString(inputFileName);
-        output.flush();
-        return readBytes();
     }
 }
