@@ -11,58 +11,58 @@
 
 <!-- LAMBDA -->
   <test 
-      language="dist/tutorial/1_lambda/lesson_1/lambda.k"
-      folder="dist/tutorial/1_lambda/lesson_1"
+      definition="dist/tutorial/1_lambda/lesson_1/lambda.k"
+      programs="dist/tutorial/1_lambda/lesson_1"
       extensions="lambda"
       />
   <test 
-      language="dist/tutorial/1_lambda/lesson_2/lambda.k"
-      folder="dist/tutorial/1_lambda/lesson_1"
-      extensions="lambda"
-      exclude="omega.lambda"
-      />
-  <test 
-      language="dist/tutorial/1_lambda/lesson_3/lambda.k"
-      folder="dist/tutorial/1_lambda/lesson_1"
+      definition="dist/tutorial/1_lambda/lesson_2/lambda.k"
+      programs="dist/tutorial/1_lambda/lesson_1"
       extensions="lambda"
       exclude="omega.lambda"
       />
   <test 
-      language="dist/tutorial/1_lambda/lesson_4/lambda.k"
-      folder="dist/tutorial/1_lambda/lesson_1"
+      definition="dist/tutorial/1_lambda/lesson_3/lambda.k"
+      programs="dist/tutorial/1_lambda/lesson_1"
+      extensions="lambda"
+      exclude="omega.lambda"
+      />
+  <test 
+      definition="dist/tutorial/1_lambda/lesson_4/lambda.k"
+      programs="dist/tutorial/1_lambda/lesson_1"
       extensions="lambda"
       exclude="omega.lambda"
       />
   <test
-      language="dist/tutorial/1_lambda/lesson_5/lambda.k"
-      folder="dist/tutorial/1_lambda/lesson_1
+      definition="dist/tutorial/1_lambda/lesson_5/lambda.k"
+      programs="dist/tutorial/1_lambda/lesson_1
               dist/tutorial/1_lambda/lesson_5"
       extensions="lambda"
       exclude="omega.lambda"
       />
   <test
-      language="dist/tutorial/1_lambda/lesson_6/lambda.k"
-      folder="dist/tutorial/1_lambda/lesson_1
+      definition="dist/tutorial/1_lambda/lesson_6/lambda.k"
+      programs="dist/tutorial/1_lambda/lesson_1
               dist/tutorial/1_lambda/lesson_5
               dist/tutorial/1_lambda/lesson_6"
       extensions="lambda"
       exclude="omega.lambda"
       />
   <test
-      language="dist/tutorial/1_lambda/lesson_7/lambda.k"
-      folder="dist/tutorial/1_lambda"
+      definition="dist/tutorial/1_lambda/lesson_7/lambda.k"
+      programs="dist/tutorial/1_lambda"
       extensions="lambda"
       exclude="lesson_1/omega.lambda"
       />
   <test
-      language="dist/tutorial/1_lambda/lesson_8/lambda.k"
-      folder="dist/tutorial/1_lambda"
+      definition="dist/tutorial/1_lambda/lesson_8/lambda.k"
+      programs="dist/tutorial/1_lambda"
       extensions="lambda"
       exclude="lesson_1/omega.lambda"
       />
   <test
-      language="dist/tutorial/1_lambda/lesson_9/lambda.k"
-      folder="dist/tutorial/1_lambda"
+      definition="dist/tutorial/1_lambda/lesson_9/lambda.k"
+      programs="dist/tutorial/1_lambda"
       extensions="lambda"
       exclude="lesson_1/omega.lambda"
       results="tests/tutorial/1_lambda/lesson_9" >
@@ -75,66 +75,66 @@
 <!-- IMP -->
 
   <test
-      language="dist/tutorial/2_imp/lesson_1/imp.k"
-      folder="dist/tutorial/2_imp"
+      definition="dist/tutorial/2_imp/lesson_1/imp.k"
+      programs="dist/tutorial/2_imp"
       extensions="imp"
       />
   <test
-      language="dist/tutorial/2_imp/lesson_2/imp.k"
-      folder="dist/tutorial/2_imp"
+      definition="dist/tutorial/2_imp/lesson_2/imp.k"
+      programs="dist/tutorial/2_imp"
       extensions="imp"
       />
   <test
-      language="dist/tutorial/2_imp/lesson_3/imp.k"
-      folder="dist/tutorial/2_imp"
+      definition="dist/tutorial/2_imp/lesson_3/imp.k"
+      programs="dist/tutorial/2_imp"
       extensions="imp"
       />
   <test
-      language="dist/tutorial/2_imp/lesson_4/imp.k"
-      folder="dist/tutorial/2_imp"
+      definition="dist/tutorial/2_imp/lesson_4/imp.k"
+      programs="dist/tutorial/2_imp"
       extensions="imp"
       />
   <test
-      language="dist/tutorial/2_imp/lesson_5/imp.k"
-      folder="dist/tutorial/2_imp"
+      definition="dist/tutorial/2_imp/lesson_5/imp.k"
+      programs="dist/tutorial/2_imp"
       extensions="imp"
       />
 
 <!-- LAMBDA++ -->
 
   <test
-      language="dist/tutorial/3_lambda++/lesson_1/lambda.k"
-      folder="dist/tutorial/1_lambda dist/tutorial/3_lambda++"
+      definition="dist/tutorial/3_lambda++/lesson_1/lambda.k"
+      programs="dist/tutorial/1_lambda dist/tutorial/3_lambda++"
       extensions="lambda"
       exclude="lesson_1/omega.lambda"
       />
   <test
-      language="dist/tutorial/3_lambda++/lesson_2/lambda.k"
-      folder="dist/tutorial/1_lambda/lesson_1"
+      definition="dist/tutorial/3_lambda++/lesson_2/lambda.k"
+      programs="dist/tutorial/1_lambda/lesson_1"
       extensions="lambda"
       exclude="omega.lambda"
       />
   <test
-      language="dist/tutorial/3_lambda++/lesson_3/lambda.k"
-      folder="dist/tutorial/1_lambda"
+      definition="dist/tutorial/3_lambda++/lesson_3/lambda.k"
+      programs="dist/tutorial/1_lambda"
       extensions="lambda"
       exclude="lesson_1/omega.lambda"
       />
   <test
-      language="dist/tutorial/3_lambda++/lesson_4/lambda.k"
-      folder="dist/tutorial/1_lambda dist/tutorial/3_lambda++"
+      definition="dist/tutorial/3_lambda++/lesson_4/lambda.k"
+      programs="dist/tutorial/1_lambda dist/tutorial/3_lambda++"
       extensions="lambda"
       exclude="lesson_1/omega.lambda"
       />
   <test
-      language="dist/tutorial/3_lambda++/lesson_5/lambda.k"
-      folder="dist/tutorial/1_lambda dist/tutorial/3_lambda++"
+      definition="dist/tutorial/3_lambda++/lesson_5/lambda.k"
+      programs="dist/tutorial/1_lambda dist/tutorial/3_lambda++"
       extensions="lambda"
       exclude="lesson_1/omega.lambda"
       />
   <test
-      language="dist/tutorial/3_lambda++/lesson_6/lambda.k"
-      folder="dist/tutorial/1_lambda dist/tutorial/3_lambda++"
+      definition="dist/tutorial/3_lambda++/lesson_6/lambda.k"
+      programs="dist/tutorial/1_lambda dist/tutorial/3_lambda++"
       extensions="lambda"
       exclude="lesson_1/omega.lambda"
       />
@@ -142,20 +142,20 @@
 <!-- IMP++ -->
 
   <test
-      language="dist/tutorial/4_imp++/lesson_1/imp.k"
-      folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
+      definition="dist/tutorial/4_imp++/lesson_1/imp.k"
+      programs="dist/tutorial/2_imp dist/tutorial/4_imp++"
       extensions="imp"
       exclude="lesson_7/spawn.imp"
       />
   <test
-      language="dist/tutorial/4_imp++/lesson_2/imp.k"
-      folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
+      definition="dist/tutorial/4_imp++/lesson_2/imp.k"
+      programs="dist/tutorial/2_imp dist/tutorial/4_imp++"
       extensions="imp"
       exclude="lesson_7/spawn.imp"
       />
   <test
-      language="dist/tutorial/4_imp++/lesson_3/imp.k"
-      folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
+      definition="dist/tutorial/4_imp++/lesson_3/imp.k"
+      programs="dist/tutorial/2_imp dist/tutorial/4_imp++"
       extensions="imp"
       exclude="lesson_7/spawn.imp"
       results="tests/tutorial/4_imp++/lesson_3" >
@@ -168,36 +168,36 @@
       </program>
   </test>
   <test
-      language="dist/tutorial/4_imp++/lesson_4/imp.k"
-      folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
+      definition="dist/tutorial/4_imp++/lesson_4/imp.k"
+      programs="dist/tutorial/2_imp dist/tutorial/4_imp++"
       extensions="imp"
       exclude="lesson_7/spawn.imp"
       results="tests/tutorial/4_imp++/lesson_4"
       />
   <test
-      language="dist/tutorial/4_imp++/lesson_5/imp.k"
-      folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
+      definition="dist/tutorial/4_imp++/lesson_5/imp.k"
+      programs="dist/tutorial/2_imp dist/tutorial/4_imp++"
       extensions="imp"
       exclude="lesson_7/spawn.imp"
       results="tests/tutorial/4_imp++/lesson_5"
       />
   <test
-      language="dist/tutorial/4_imp++/lesson_6/imp.k"
-      folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
+      definition="dist/tutorial/4_imp++/lesson_6/imp.k"
+      programs="dist/tutorial/2_imp dist/tutorial/4_imp++"
       extensions="imp"
       exclude="lesson_7/spawn.imp"
       results="tests/tutorial/4_imp++/lesson_5"
       />
   <test
-      language="dist/tutorial/4_imp++/lesson_7/imp.k"
-      folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
+      definition="dist/tutorial/4_imp++/lesson_7/imp.k"
+      programs="dist/tutorial/2_imp dist/tutorial/4_imp++"
       extensions="imp"
       exclude="lesson_1/spawn.imp"
       results="tests/tutorial/4_imp++/lesson_5"
       />
   <test
-      language="dist/tutorial/4_imp++/lesson_8/imp.k"
-      folder="dist/tutorial/2_imp dist/tutorial/4_imp++"
+      definition="dist/tutorial/4_imp++/lesson_8/imp.k"
+      programs="dist/tutorial/2_imp dist/tutorial/4_imp++"
       extensions="imp"
       exclude="lesson_1/spawn.imp"
       results="tests/tutorial/4_imp++/lesson_5"
@@ -206,56 +206,56 @@
 <!-- TYPES -->
 
   <test
-      language="dist/tutorial/5_types/lesson_1/imp.k"
-      folder="dist/tutorial/2_imp
+      definition="dist/tutorial/5_types/lesson_1/imp.k"
+      programs="dist/tutorial/2_imp
               dist/tutorial/4_imp++"
       extensions="imp"
       exclude="lesson_1/spawn.imp lesson_4/test.imp"
       />
   <test
-      language="dist/tutorial/5_types/lesson_2/lambda.k"
-      folder="dist/tutorial/5_types/lesson_2"
+      definition="dist/tutorial/5_types/lesson_2/lambda.k"
+      programs="dist/tutorial/5_types/lesson_2"
       extensions="lambda"
       />
   <test
-      language="dist/tutorial/5_types/lesson_3/lambda.k"
-      folder="dist/tutorial/5_types/lesson_2"
+      definition="dist/tutorial/5_types/lesson_3/lambda.k"
+      programs="dist/tutorial/5_types/lesson_2"
       extensions="lambda"
       />
   <test
-      language="dist/tutorial/5_types/lesson_4/lambda.k"
-      folder="dist/tutorial/5_types/lesson_4"
+      definition="dist/tutorial/5_types/lesson_4/lambda.k"
+      programs="dist/tutorial/5_types/lesson_4"
       extensions="lambda"
       />
   <test
-      language="dist/tutorial/5_types/lesson_5/lambda.k"
-      folder="dist/tutorial/5_types/lesson_4
+      definition="dist/tutorial/5_types/lesson_5/lambda.k"
+      programs="dist/tutorial/5_types/lesson_4
               dist/tutorial/5_types/lesson_5"
       extensions="lambda"
       />
   <test
-      language="dist/tutorial/5_types/lesson_6/lambda.k"
-      folder="dist/tutorial/5_types/lesson_4
+      definition="dist/tutorial/5_types/lesson_6/lambda.k"
+      programs="dist/tutorial/5_types/lesson_4
               dist/tutorial/5_types/lesson_5"
       extensions="lambda"
       />
   <test
-      language="dist/tutorial/5_types/lesson_7/lambda.k"
-      folder="dist/tutorial/5_types/lesson_4
+      definition="dist/tutorial/5_types/lesson_7/lambda.k"
+      programs="dist/tutorial/5_types/lesson_4
               dist/tutorial/5_types/lesson_5
               dist/tutorial/5_types/lesson_6"
       extensions="lambda"
       />
   <test
-      language="dist/tutorial/5_types/lesson_8/lambda.k"
-      folder="dist/tutorial/5_types/lesson_4
+      definition="dist/tutorial/5_types/lesson_8/lambda.k"
+      programs="dist/tutorial/5_types/lesson_4
               dist/tutorial/5_types/lesson_5
               dist/tutorial/5_types/lesson_6"
       extensions="lambda"
       />
   <test
-      language="dist/tutorial/5_types/lesson_9/lambda.k"
-      folder="dist/tutorial/5_types/lesson_4
+      definition="dist/tutorial/5_types/lesson_9/lambda.k"
+      programs="dist/tutorial/5_types/lesson_4
               dist/tutorial/5_types/lesson_5
               dist/tutorial/5_types/lesson_6"
       extensions="lambda"
@@ -266,22 +266,22 @@
 -->
 
   <test
-      language="dist/examples/simple/untyped/simple-untyped.k"
-      folder="dist/examples/simple/untyped/programs"
+      definition="dist/examples/simple/untyped/simple-untyped.k"
+      programs="dist/examples/simple/untyped/programs"
       extensions="simple"
       exclude="diverse/dekker.simple"
       results="tests/examples/simple-untyped"
       />
   <test 
-      language="dist/examples/simple/typed/dynamic/simple-typed-dynamic.k"
-      folder="dist/examples/simple/typed/programs"
+      definition="dist/examples/simple/typed/dynamic/simple-typed-dynamic.k"
+      programs="dist/examples/simple/typed/programs"
       extensions="simple"
       exclude="diverse/dekker.simple"
       results="tests/examples/simple-typed-dynamic"
       />
   <test 
-      language="dist/examples/simple/typed/static/simple-typed-static.k"
-      folder="dist/examples/simple/typed/programs"
+      definition="dist/examples/simple/typed/static/simple-typed-static.k"
+      programs="dist/examples/simple/typed/programs"
       extensions="simple"
       exclude="diverse/dekker.simple"
       />
@@ -291,20 +291,20 @@
 -->
 
   <test
-      language="dist/examples/kool/untyped/kool-untyped.k"
-      folder="dist/examples/kool/untyped/programs"
+      definition="dist/examples/kool/untyped/kool-untyped.k"
+      programs="dist/examples/kool/untyped/programs"
       extensions="kool"
       results="tests/examples/kool-untyped"
       />
   <test
-      language="dist/examples/kool/typed/dynamic/kool-typed-dynamic.k"
-      folder="dist/examples/kool/typed/programs"
+      definition="dist/examples/kool/typed/dynamic/kool-typed-dynamic.k"
+      programs="dist/examples/kool/typed/programs"
       extensions="kool"
       results="tests/examples/kool-typed-dynamic"
       />
   <test
-      language="dist/examples/kool/typed/static/kool-typed-static.k"
-      folder="dist/examples/kool/typed/programs"
+      definition="dist/examples/kool/typed/static/kool-typed-static.k"
+      programs="dist/examples/kool/typed/programs"
       extensions="kool"
       results="tests/examples/kool-typed-static"
       />
@@ -313,14 +313,14 @@
   QUINE
 -->
   <test
-      language="dist/examples/quine/explicit/quine-explicit.k"
-      folder="tests/examples/quine-explicit"
+      definition="dist/examples/quine/explicit/quine-explicit.k"
+      programs="tests/examples/quine-explicit"
       results="tests/examples/quine-explicit"
       extensions="quine" >
   </test>
   <test
-      language="dist/examples/quine/short/quine-short.k"
-      folder="tests/examples/quine-short"
+      definition="dist/examples/quine/short/quine-short.k"
+      programs="tests/examples/quine-short"
       results="tests/examples/quine-short"
       extensions="quine" >
   </test>
@@ -330,8 +330,8 @@
 -->
 
   <test 
-      language="dist/examples/fun/untyped/fun-untyped.k"
-      folder="dist/examples/fun/programs"
+      definition="dist/examples/fun/untyped/fun-untyped.k"
+      programs="dist/examples/fun/programs"
       extensions="fun"
       >
     <kompile-option name="--transition" value="otherwise"/>
@@ -342,8 +342,8 @@
 -->
 
   <test 
-      language="dist/examples/logik/logik.k"
-      folder="dist/examples/logik/programs"
+      definition="dist/examples/logik/logik.k"
+      programs="dist/examples/logik/programs"
       extensions="logik"
       results="tests/examples/logik"
       >
@@ -360,8 +360,8 @@
 -->
 
   <test 
-      language="dist/examples/agent/agent.k"
-      folder="dist/examples/agent/programs"
+      definition="dist/examples/agent/agent.k"
+      programs="dist/examples/agent/programs"
       extensions="agent"
       results="tests/examples/agent"
       >
@@ -372,8 +372,8 @@
 -->
 
   <test 
-      language="dist/examples/bf/bf.k"
-      folder="dist/examples/bf/programs"
+      definition="dist/examples/bf/bf.k"
+      programs="dist/examples/bf/programs"
       extensions="bf"
       results="tests/examples/bf"
       >
@@ -383,8 +383,8 @@
   WCET
 -->
   <test
-      language="dist/examples/wcet/wcet.k"
-      folder="dist/examples/wcet/programs"
+      definition="dist/examples/wcet/wcet.k"
+      programs="dist/examples/wcet/programs"
       extensions="wcet">
       <all-programs>
         <krun-option name="-cTIMING" value="add |-> 1 sub |-> 1 mul |-> 1 div |-> 1 or |-> 1 and |-> 1 not |-> 1 load |-> 10 store |-> 10 jmp |-> 1 beq |-> 2 bne |-> 2 blt |-> 2 ble |-> 2 halt |-> 1 read |-> 100 write |-> 100 'rw(.KList) |-> 200 int |-> 5 rfi |-> 5" />
@@ -412,14 +412,14 @@
 -->
  
   <test 
-      language="dist/examples/imp-symbolic/imp.k"
-      folder="dist/examples/imp-symbolic/programs"
+      definition="dist/examples/imp-symbolic/imp.k"
+      programs="dist/examples/imp-symbolic/programs"
       extensions="imp"
       >
     <all-programs>
-      <krun-option name="--search" />
-      <krun-option name="--parser" value="kast -groundParser" parser-home="PARSER_HOME"/>
-      <krun-option name="--no-color" />
+      <krun-option name="-search" />
+      <krun-option name="-parser" value="kast -groundParser" parser-home="PARSER_HOME"/>
+      <krun-option name="-no-color" />
     </all-programs>
   </test>
 
@@ -428,8 +428,8 @@
 -->
  
   <test 
-      language="dist/examples/imp-hoare/imp.k"
-      folder="dist/examples/imp-hoare/programs"
+      definition="dist/examples/imp-hoare/imp.k"
+      programs="dist/examples/imp-hoare/programs"
       extensions="imp"
       >
   </test>
@@ -439,8 +439,8 @@
 -->
  
   <test 
-      language="dist/examples/imp-reachability/imp.k"
-      folder="dist/examples/imp-reachability"
+      definition="dist/examples/imp-reachability/imp.k"
+      programs="dist/examples/imp-reachability"
       extensions="imp"
       exclude="pgm-1.imp pgm-2.imp pgm-3.imp"
       >
@@ -456,10 +456,10 @@
 <!--
     Cink ltlmc
 -->
-
+<!--
   <test
-      language="dist/examples/cink/ltlmc/cink.k"
-      folder="dist/examples/cink/ltlmc/programs"
+      definition="dist/examples/cink/ltlmc/cink.k"
+      programs="dist/examples/cink/ltlmc/programs"
       extensions="cink"
       results="tests/examples/cink/ltlmc" 
       exclude="form-peterson.cink form-dekker.cink form-threads.cink peterson-wrong1.cink peterson-wrong2.cink" >
@@ -468,40 +468,40 @@
         <krun-option name="-ltlmc" value="[]Ltl ((eqTo(critical1, 1) ->Ltl eqTo(critical2, 0)) /\Ltl (eqTo(critical2, 1) ->Ltl eqTo(critical1, 0)))" />
       </all-programs>
   </test>
-
+-->
 
 <!--
     Cink basic
 -->
-
+<!--
   <test
-      language="dist/examples/cink/basic/cink.k"
-      folder="dist/examples/cink/basic/programs"
+      definition="dist/examples/cink/basic/cink.k"
+      programs="dist/examples/cink/basic/programs"
       extensions="cink"
       results="tests/examples/cink/basic" 
       exclude="fact.cink prim.cink"
       >
   </test>
-
+-->
 <!--
     Cink threads
 -->
-
+<!--
   <test
-      language="dist/examples/cink/threads/cink.k"
-      folder="dist/examples/cink/threads/programs"
+      definition="dist/examples/cink/threads/cink.k"
+      programs="dist/examples/cink/threads/programs"
       extensions="cink"
       results="tests/examples/cink/threads"
       >
   </test>
-
+-->
 <!--
     Cink arrays
 -->
 
   <test
-      language="dist/examples/cink/arrays/cink.k"
-      folder="dist/examples/cink/arrays/programs"
+      definition="dist/examples/cink/arrays/cink.k"
+      programs="dist/examples/cink/arrays/programs"
       extensions="cink"
       results="tests/examples/cink/arrays"
       exclude="sort.cink"
@@ -510,23 +510,23 @@
 <!--
     Cink arrays unidimensional
 -->
-
+<!--
   <test
-      language="dist/examples/cink/arrays/unidimensional/cink.k"
-      folder="dist/examples/cink/arrays/unidimensional/programs"
+      definition="dist/examples/cink/arrays/unidimensional/cink.k"
+      programs="dist/examples/cink/arrays/unidimensional/programs"
       extensions="cink"
       results="tests/examples/cink/arrays/unidimensional"
       exclude="sort.cink"
       >
   </test>
-
+-->
 <!--
     Program equivalence
 -->
 
   <test
-      language="dist/examples/prog-equiv/peq.k"
-      folder="dist/examples/prog-equiv/programs"
+      definition="dist/examples/prog-equiv/peq.k"
+      programs="dist/examples/prog-equiv/programs"
       extensions="peq"
       results="tests/examples/prog-equiv/" > 
       <kompile-option name="-addTopCell" />
@@ -536,10 +536,9 @@
     
 -->
   <test
-      language="dist/tutorial/2_imp/lesson_4/imp.k"
-      folder="dist/tutorial/2_imp"
+      definition="dist/tutorial/2_imp/lesson_4/imp.k"
+      programs="dist/tutorial/2_imp"
       extensions="imp"
-      report-dir="imp"
       title="symbolic"
 	  exclude="lesson_4/test.imp"
       >
@@ -557,66 +556,66 @@
 -->
 
   <test
-      language="tests/regression/issue552/issue.k"
+      definition="tests/regression/issue552/issue.k"
   />
   <test
-      language="tests/regression/issue529/issue.k"
+      definition="tests/regression/issue529/issue.k"
   />
   <test
-      language="tests/regression/defaultTerms1/issue.k"
+      definition="tests/regression/defaultTerms1/issue.k"
   />
   <test
-      language="tests/regression/freshMOS/issue.k"
-      folder="tests/regression/freshMOS/programs"
+      definition="tests/regression/freshMOS/issue.k"
+      programs="tests/regression/freshMOS/programs"
       results="tests/regression/freshMOS/tests"
       extensions="issue"
   />
   <test
-      language="tests/regression/openCells1/issue.k"
-      folder="tests/regression/openCells1/programs"
+      definition="tests/regression/openCells1/issue.k"
+      programs="tests/regression/openCells1/programs"
       results="tests/regression/openCells1/tests"
       extensions="issue"
   />
   <test
-      language="tests/regression/sets-issue/issue.k"
-      folder="tests/regression/sets-issue/programs"
+      definition="tests/regression/sets-issue/issue.k"
+      programs="tests/regression/sets-issue/programs"
       results="tests/regression/sets-issue/tests"
       extensions="issue"
   />
   <test
-      language="tests/regression/mapitem2klabel/issue.k"
+      definition="tests/regression/mapitem2klabel/issue.k"
   />
   <test
-      language="tests/regression/issue/issue.k"
-      folder="tests/regression/issue/programs"
+      definition="tests/regression/issue/issue.k"
+      programs="tests/regression/issue/programs"
       results="tests/regression/issue/tests"
       extensions="issue"
   />
   <test
-      language="tests/regression/issue403/issue.k"
+      definition="tests/regression/issue403/issue.k"
   />
   <test
-      language="tests/regression/issue425/issue.k"
+      definition="tests/regression/issue425/issue.k"
   />
   <test
-      language="tests/regression/issue466/issue.k"
+      definition="tests/regression/issue466/issue.k"
   />
   <test
-      language="tests/regression/issue482/issue.k"
+      definition="tests/regression/issue482/issue.k"
   />
   <test
-      language="tests/regression/issue483/issue.k"
+      definition="tests/regression/issue483/issue.k"
   />
   <test
-      language="tests/regression/strictness/issue.k"
-      folder="tests/regression/strictness/programs"
+      definition="tests/regression/strictness/issue.k"
+      programs="tests/regression/strictness/programs"
       results="tests/regression/strictness/tests"
       extensions="issue"
   />
 
   <test
-      language="tests/regression/issue580/issue.k"
-      folder="tests/regression/issue580/programs"
+      definition="tests/regression/issue580/issue.k"
+      programs="tests/regression/issue580/programs"
       results="tests/regression/issue580/tests"
       extensions="issue" >
       <program name="tests/regression/issue580/programs/test.issue">
@@ -627,8 +626,8 @@
   </test>
 
   <test
-      language="tests/regression/subsort-klabel/issue.k"
-      folder="tests/regression/subsort-klabel/programs"
+      definition="tests/regression/subsort-klabel/issue.k"
+      programs="tests/regression/subsort-klabel/programs"
       results="tests/regression/subsort-klabel/tests"
       extensions="issue" >
       <program name="tests/regression/subsort-klabel/programs/test.issue">
@@ -637,29 +636,29 @@
   </test>
 
   <test
-      language="tests/regression/issue627/issue.k"
-      folder="tests/regression/issue627/programs"
+      definition="tests/regression/issue627/issue.k"
+      programs="tests/regression/issue627/programs"
       results="tests/regression/issue627/tests"
       extensions="issue" >
   </test>
 
   <test
-      language="tests/regression/issue631/issue.k"
-      folder="tests/regression/issue631"
+      definition="tests/regression/issue631/issue.k"
+      programs="tests/regression/issue631"
       results="tests/regression/issue631"
       extensions="issue" >
   </test>
 
   <test
-      language="tests/regression/mostConcrete/issue.k"
-      folder="tests/regression/mostConcrete"
+      definition="tests/regression/mostConcrete/issue.k"
+      programs="tests/regression/mostConcrete"
       results="tests/regression/mostConcrete"
       extensions="issue" >
   </test>
 
   <test
-      language="tests/regression/negative-test/issue.k"
-      folder="tests/regression/negative-test/programs"
+      definition="tests/regression/negative-test/issue.k"
+      programs="tests/regression/negative-test/programs"
       results="tests/regression/negative-test/tests"
       extensions="issue" >
     <program name="tests/regression/negative-test/programs/test.issue">
@@ -668,8 +667,8 @@
   </test>
 
   <test
-      language="tests/regression/escapedKLabel/issue.k"
-      folder="tests/regression/escapedKLabel/programs"
+      definition="tests/regression/escapedKLabel/issue.k"
+      programs="tests/regression/escapedKLabel/programs"
       results="tests/regression/escapedKLabel/tests"
       extensions="issue" >
       <program name="tests/regression/escapedKLabel/programs/test.issue">
@@ -678,8 +677,8 @@
   </test>
 
   <test
-      language="tests/regression/unparsing/issue.k"
-      folder="tests/regression/unparsing/programs"
+      definition="tests/regression/unparsing/issue.k"
+      programs="tests/regression/unparsing/programs"
       extensions="issue"
       results="tests/regression/unparsing/out/">
       <all-programs>
@@ -688,8 +687,8 @@
   </test>
 
   <test
-      language="tests/regression/addbrackets/issue.k"
-      folder="tests/regression/addbrackets/programs"
+      definition="tests/regression/addbrackets/issue.k"
+      programs="tests/regression/addbrackets/programs"
       extensions="issue"
       results="tests/regression/addbrackets/out/">
       <all-programs>
@@ -700,14 +699,14 @@
   </test>
 
   <test
-      language="tests/regression/issue647/issue.k"
-      folder="tests/regression/issue647"
+      definition="tests/regression/issue647/issue.k"
+      programs="tests/regression/issue647"
       results="tests/regression/issue647"
       extensions="issue" />
 
   <test
-      language="tests/regression/issue663/issue.k"
-      folder="tests/regression/issue663/programs"
+      definition="tests/regression/issue663/issue.k"
+      programs="tests/regression/issue663/programs"
       results="tests/regression/issue663/out"
       extensions="issue">
       <all-programs>
@@ -715,8 +714,8 @@
       </all-programs> />
   </test>
   <test
-      language="tests/regression/issue674/issue.k"
-      folder="tests/regression/issue674"
+      definition="tests/regression/issue674/issue.k"
+      programs="tests/regression/issue674"
       results="tests/regression/issue674"
       extensions="issue" >
       <all-programs>
@@ -725,19 +724,19 @@
   </test>
 
   <test
-      language="tests/regression/basicFloat/issue.k"
-      folder="tests/regression/basicFloat"
+      definition="tests/regression/basicFloat/issue.k"
+      programs="tests/regression/basicFloat"
       results="tests/regression/basicFloat"
       extensions="issue" />
   <test
-      language="tests/regression/follow/issue.k"
-      folder="tests/regression/follow"
+      definition="tests/regression/follow/issue.k"
+      programs="tests/regression/follow"
       results="tests/regression/follow"
       extensions="issue" />
 
   <test
-      language="tests/regression/java-rewrite-engine/strings/test.k"
-      folder="tests/regression/java-rewrite-engine/strings/programs"
+      definition="tests/regression/java-rewrite-engine/strings/test.k"
+      programs="tests/regression/java-rewrite-engine/strings/programs"
       results="tests/regression/java-rewrite-engine/strings/tests"
       extensions="test">
     <kompile-option name="-ml" />
@@ -750,15 +749,15 @@
 
 
   <test
-      language="tests/regression/lint/test.k"
-      folder="tests/regression/lint"
+      definition="tests/regression/lint/test.k"
+      programs="tests/regression/lint"
       extensions="test">
     <kompile-option name="-w" />
   </test>
 
   <test
-      language="tests/regression/string2int/test.k"
-      folder="tests/regression/string2int"
+      definition="tests/regression/string2int/test.k"
+      programs="tests/regression/string2int"
       results="tests/regression/string2int"
       extensions="test" >
       <all-programs>
@@ -767,7 +766,9 @@
   </test>
 
  <test
-      language="tests/regression/java-rewrite-engine/list/test1/list-test1.k"
+      definition="tests/regression/java-rewrite-engine/list/test1/list-test1.k"
+      programs="tests/regression/java-rewrite-engine/list/test1/programs"
+      results="tests/regression/java-rewrite-engine/list/test1/tests"
       extensions="issue"
       >
     <kompile-option name="-ml" />
@@ -781,7 +782,9 @@
 
 
  <test
-      language="tests/regression/java-rewrite-engine/list/test2/list-test2.k"
+      definition="tests/regression/java-rewrite-engine/list/test2/list-test2.k"
+      programs="tests/regression/java-rewrite-engine/list/test2/programs"
+      results="tests/regression/java-rewrite-engine/list/test2/tests"
       extensions="issue"
       >
     <kompile-option name="-ml" />
@@ -795,7 +798,9 @@
 
 
  <test
-      language="tests/regression/java-rewrite-engine/set/test1/test1.k"
+      definition="tests/regression/java-rewrite-engine/set/test1/test1.k"
+      programs="tests/regression/java-rewrite-engine/set/test1/programs"
+      results="tests/regression/java-rewrite-engine/set/test1/tests"
       extensions="issue"
       >
     <kompile-option name="-ml" />
@@ -808,8 +813,24 @@
   </test>
 
  <test
-      language="tests/regression/java-rewrite-engine/set/test2/test2.k"
+      definition="tests/regression/java-rewrite-engine/set/test2/test2.k"
+      programs="tests/regression/java-rewrite-engine/set/test2/programs"
+      results="tests/regression/java-rewrite-engine/set/test2/tests"
       extensions="issue"
+      >
+    <kompile-option name="-ml" />
+    <kompile-option name="-w" value="none" />
+    <all-programs>
+      <krun-option name="--no-smt" />
+      <krun-option name="--backend" value="java-symbolic" />
+      <krun-option name="--output-mode" value="pretty" />
+    </all-programs>
+  </test>
+
+ <test
+      definition="tests/regression/issue#8/test.k"
+      programs="tests/regression/issue#8/programs"
+      results="tests/regression/issue#8/tests"
       >
     <kompile-option name="-ml" />
     <kompile-option name="-w" value="none" />
@@ -821,7 +842,7 @@
   </test>
 
   <test
-      language="tests/regression/issue686/issue.k"
+      definition="tests/regression/issue686/issue.k"
       extensions="issue" >
       <all-programs>
         <krun-option name="--output-mode" value="pretty" />
@@ -829,8 +850,8 @@
   </test>
 
   <test
-      language="tests/regression/issue#1/issue.k"
-      folder="tests/regression/issue#1"
+      definition="tests/regression/issue#1/issue.k"
+      programs="tests/regression/issue#1"
       results="tests/regression/issue#1"
       extensions="issue" >
     <kompile-option name="-ml" />
@@ -843,8 +864,8 @@
   </test>
 
   <test
-      language="tests/regression/issue#2/issue.k"
-      folder="tests/regression/issue#2"
+      definition="tests/regression/issue#2/issue.k"
+      programs="tests/regression/issue#2"
       results="tests/regression/issue#2"
       extensions="issue" >
     <kompile-option name="-ml" />
@@ -856,16 +877,49 @@
     </all-programs>
   </test>
 
-<test language="tests/regression/java-rewrite-engine/io/test.k"
+<test definition="tests/regression/java-rewrite-engine/io/test1/test.k"
       extensions="test"
-      folder="tests/regression/java-rewrite-engine/io/programs"
-      results="tests/regression/java-rewrite-engine/io/tests"
-      unixOnly="tests/regression/java-rewrite-engine/io/prepare.sh">
+      programs="tests/regression/java-rewrite-engine/io/test1/programs"
+      results="tests/regression/java-rewrite-engine/io/test1/tests"
+      unixOnly="tests/regression/java-rewrite-engine/io/test1/prepare.sh">
   <kompile-option name="-ml" />
   <all-programs>
     <krun-option name="--backend" value="java-symbolic" />
     <krun-option name="--no-smt" />
     <krun-option name="--parser" value="kast -groundParser" />
+  </all-programs>
+</test>
+
+
+
+ <test
+      definition="tests/regression/issue#12/test.k"
+      programs="tests/regression/issue#12/programs"
+      results="tests/regression/issue#12/tests"
+      >
+    <kompile-option name="-ml" />
+    <kompile-option name="-w" value="none" />
+    <all-programs>
+      <krun-option name="--no-smt" />
+      <krun-option name="--backend" value="java-symbolic" />
+      <krun-option name="--output-mode" value="pretty" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="tests/regression/issue677/test.k"
+      programs="tests/regression/issue677/programs"
+      results="tests/regression/issue677/tests"
+      />
+
+<test definition="tests/regression/java-rewrite-engine/io/test2/test.k"
+      extensions="test"
+      programs="tests/regression/java-rewrite-engine/io/test2/programs"
+      results="tests/regression/java-rewrite-engine/io/test2/tests">
+  <kompile-option name="-ml" />
+  <all-programs>
+    <krun-option name="--backend" value="java-symbolic" />
+    <krun-option name="--no-smt" />
   </all-programs>
 </test>
 

@@ -12,6 +12,7 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -57,13 +58,22 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
             }
 
             if (prod.isSubsort()) {
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-                        KExceptionGroup.COMPILER,
-                        "Production is a subsort and cannot be strict.",
-                        getName(),
-                        prod.getFilename(),
-                        prod.getLocation()));
-                continue;
+                if (prod.getAttribute("klabel") == null) {
+                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+                            KExceptionGroup.COMPILER,
+                            "Production is a subsort and cannot be strict.",
+                            getName(),
+                            prod.getFilename(),
+                            prod.getLocation()));
+                    continue;
+                } else {
+                    Attributes attributes = prod.getAttributes();
+                    prod = new Production(new Sort(KSorts.KLABEL),
+                            Collections.<ProductionItem>singletonList(new Terminal(prod.getKLabel())));
+                    prod.setAttributes(attributes);
+                    kLabelStrictness(prod, isSeq);
+                    continue;
+                }
             }
 
             if (prod.isConstant()) {

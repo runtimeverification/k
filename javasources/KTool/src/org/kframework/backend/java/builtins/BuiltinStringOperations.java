@@ -77,6 +77,18 @@ public class BuiltinStringOperations {
         return IntToken.of((foundOffset == -1 ? -1 : term1.stringValue().codePointCount(0, foundOffset)));
     }
 
+    public static IntToken findChar(StringToken term1, StringToken term2, IntToken idx) {
+        int offset = term1.stringValue().offsetByCodePoints(0, idx.intValue());
+        int foundOffset = StringUtil.indexOfAny(term1.stringValue(), term2.stringValue(), offset);
+        return IntToken.of((foundOffset == -1 ? -1 : term1.stringValue().codePointCount(0, foundOffset)));
+    }
+
+    public static IntToken rfindChar(StringToken term1, StringToken term2, IntToken idx) {
+        int offset = term1.stringValue().offsetByCodePoints(0, idx.intValue());
+        int foundOffset = StringUtil.lastIndexOfAny(term1.stringValue(), term2.stringValue(), offset);
+        return IntToken.of((foundOffset == -1 ? -1 : term1.stringValue().codePointCount(0, foundOffset)));
+    }
+
     public static IntToken string2int(StringToken term) {
         try {
             return IntToken.of(new BigInteger(term.stringValue()));

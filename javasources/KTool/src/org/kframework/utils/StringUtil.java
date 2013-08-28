@@ -82,7 +82,7 @@ public class StringUtil {
         }
         for (int i = 0, strCodepoint; i < str.length(); i += Character.charCount(strCodepoint)) {
             strCodepoint = str.codePointAt(i);
-            for (int j = 0, searchCodepoint; j < str.length(); j += Character.charCount(searchCodepoint)) {
+            for (int j = 0, searchCodepoint; j < search.length(); j += Character.charCount(searchCodepoint)) {
                 searchCodepoint = search.codePointAt(j);
                 if (strCodepoint == searchCodepoint) {
                     return i;

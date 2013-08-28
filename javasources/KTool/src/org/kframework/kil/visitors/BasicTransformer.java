@@ -353,7 +353,7 @@ public class BasicTransformer implements Transformer {
             elementsRight.add(transformedEntry);
         }
 
-		return new ListBuiltin(node.sort(), elementsLeft, elementsRight, terms);
+		return ListBuiltin.of(node.sort(), elementsLeft, elementsRight, terms);
 	}
 
     @Override

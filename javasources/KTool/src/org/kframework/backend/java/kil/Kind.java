@@ -9,6 +9,7 @@ import com.google.common.collect.EnumHashBiMap;
  * @author AndreiS
  */
 public enum Kind {
+    BOTTOM,
     CELL,
     CELL_COLLECTION,
     K,
@@ -19,6 +20,7 @@ public enum Kind {
 
     private static final EnumHashBiMap<Kind, String> names = EnumHashBiMap.create(Kind.class);
     static {
+        names.put(BOTTOM, "Bottom");
         names.put(CELL, "Cell");
         names.put(CELL_COLLECTION, "Bag");
         names.put(K, "K");

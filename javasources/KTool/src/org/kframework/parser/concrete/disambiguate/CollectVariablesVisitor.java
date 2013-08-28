@@ -1,13 +1,23 @@
 package org.kframework.parser.concrete.disambiguate;
 
-import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.Variable;
-import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicVisitor;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.kframework.compile.utils.MetaK;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.Ambiguity;
+import org.kframework.kil.Bracket;
+import org.kframework.kil.ProductionItem.ProductionType;
+import org.kframework.kil.Rewrite;
+import org.kframework.kil.Sort;
+import org.kframework.kil.Term;
+import org.kframework.kil.TermCons;
+import org.kframework.kil.UserList;
+import org.kframework.kil.Variable;
+import org.kframework.kil.loader.Context;
+import org.kframework.kil.visitors.BasicHookWorker;
+import org.kframework.kil.visitors.BasicVisitor;
+import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class CollectVariablesVisitor extends BasicVisitor {
 	public CollectVariablesVisitor(Context context) {
@@ -25,7 +35,45 @@ public class CollectVariablesVisitor extends BasicVisitor {
 	}
 
 	@Override
+	public void visit(TermCons node) {
+		if (isVisited(node))
+			return;
+
+		for (int i = 0, j = 0; i < node.getProduction().getItems().size(); i++) {
+			if (node.getProduction().getItems().get(i).getType() == ProductionType.SORT) {
+				Term t = node.getContents().get(j);
+				try {
+					t.accept(new CollectVariablesVisitor2(context, ((Sort) node.getProduction().getItems().get(i)).getName()));
+				} catch (TransformerException e) {
+					e.printStackTrace();
+				}
+				t.accept(this);
+				j++;
+			} else if (node.getProduction().getItems().get(i).getType() == ProductionType.USERLIST) {
+				UserList ul = (UserList) node.getProduction().getItems().get(i);
+				Term t1 = node.getContents().get(0);
+				Term t2 = node.getContents().get(1);
+				try {
+					t1.accept(new CollectVariablesVisitor2(context, ul.getSort()));
+					t2.accept(new CollectVariablesVisitor2(context, node.getProduction().getSort()));
+				} catch (TransformerException e) {
+					e.printStackTrace();
+				}
+				t1.accept(this);
+				t2.accept(this);
+			}
+		}
+
+		for (Term t : node.getContents()) {
+			t.accept(this);
+		}
+		visit((Term) node);
+	}
+
+	@Override
 	public void visit(Variable var) {
+		if (var.getExpectedSort() == null)
+			var.setExpectedSort(var.getSort());
 		if (!var.getName().equals(MetaK.Constants.anyVarSymbol))
 			if (vars.containsKey(var.getName()))
 				vars.get(var.getName()).add(var);
@@ -34,5 +82,63 @@ public class CollectVariablesVisitor extends BasicVisitor {
 				varss.add(var);
 				vars.put(var.getName(), varss);
 			}
+	}
+
+	/**
+	 * A new class (nested) that goes down one level (jumps over Ambiguity, Rewrite and Bracket) and checks to see if there is a Variable
+	 * 
+	 * if found, sets a parameter to that variable with the expected sort gathered from the parent production
+	 * 
+	 * @author Radu
+	 * 
+	 */
+	public class CollectVariablesVisitor2 extends BasicHookWorker {
+		String expectedSort = null;
+
+		public CollectVariablesVisitor2(Context context, String expectedSort) {
+			super("org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor2", context);
+			this.expectedSort = expectedSort;
+		}
+
+		@Override
+		public ASTNode transform(Variable node) throws TransformerException {
+			node.setExpectedSort(this.expectedSort);
+			return node;
+		}
+
+		@Override
+		public ASTNode transform(Rewrite node) throws TransformerException {
+			Rewrite result = new Rewrite(node);
+			result.replaceChildren((Term) node.getLeft().accept(this), (Term) node.getRight().accept(this), context);
+			return transform((Term) result);
+		}
+
+		@Override
+		public ASTNode transform(Ambiguity node) throws TransformerException {
+			TransformerException exception = null;
+			ArrayList<Term> terms = new ArrayList<Term>();
+			for (Term t : node.getContents()) {
+				ASTNode result = null;
+				try {
+					result = t.accept(this);
+					terms.add((Term) result);
+				} catch (TransformerException e) {
+					exception = e;
+				}
+			}
+			if (terms.isEmpty())
+				throw exception;
+			if (terms.size() == 1) {
+				return terms.get(0);
+			}
+			node.setContents(terms);
+			return transform((Term) node);
+		}
+
+		@Override
+		public ASTNode transform(Bracket node) throws TransformerException {
+			node.setContent((Term) node.getContent().accept(this));
+			return transform((Term) node);
+		}
 	}
 }

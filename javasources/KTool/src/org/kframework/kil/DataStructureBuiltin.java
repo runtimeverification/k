@@ -131,16 +131,15 @@ public abstract class DataStructureBuiltin extends Term {
                         elementsLeft.addAll(listBuiltin.elementsLeft());
                         if (listBuiltin.baseTerms().isEmpty()) {
                             elementsLeft.addAll(listBuiltin.elementsRight());
-                        } else assert listBuiltin.elementsRight().isEmpty();
+                        } else {
+                            terms.addAll(listBuiltin.baseTerms());
+                            elementsRight.addAll(listBuiltin.elementsRight());
+                            left = false;
+                        }
                     } else { // if right
                         assert listBuiltin.baseTerms().isEmpty();
                         elementsRight.addAll(listBuiltin.elementsLeft());
                         elementsRight.addAll(listBuiltin.elementsRight());
-                    }
-                    if (!listBuiltin.baseTerms().isEmpty()) {
-                        assert left;
-                        terms.addAll(listBuiltin.baseTerms());
-                        left = false;
                     }
                 } else {
                     assert left;
@@ -148,7 +147,7 @@ public abstract class DataStructureBuiltin extends Term {
                     left = false;
                 }
             }
-            return new ListBuiltin(sort, elementsLeft, elementsRight, terms);
+            return ListBuiltin.of(sort, elementsLeft, elementsRight, terms);
         } else if (sort.type().equals(KSorts.MAP)) {
             Map<Term, Term> elements = new HashMap<Term, Term>();
             Collection<Term> terms = new ArrayList<Term>();

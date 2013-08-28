@@ -152,7 +152,7 @@ public class ListToLookupUpdate extends CopyOnWriteTransformer {
                  * return the base term instead */
                 return baseTerms.get(0);
             } else {
-                return new ListBuiltin(node.sort(), elementsLeft, elementsRight, baseTerms);
+                return ListBuiltin.of(node.sort(), elementsLeft, elementsRight, baseTerms);
             }
         }
     }

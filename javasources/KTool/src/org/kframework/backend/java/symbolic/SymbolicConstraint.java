@@ -62,6 +62,8 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
         private Term rightHandSide;
 
         private Equality(Term leftHandSide, Term rightHandSide) {
+            if (leftHandSide instanceof Bottom) rightHandSide = leftHandSide;
+            if (rightHandSide instanceof Bottom) leftHandSide = rightHandSide;
             assert leftHandSide.kind() == rightHandSide.kind()
                     || ((leftHandSide.kind() == Kind.KITEM || leftHandSide.kind() == Kind.K
                          || leftHandSide.kind() == Kind.KLIST)
@@ -97,6 +99,8 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
         }
 
         public boolean isFalse() {
+            if (leftHandSide instanceof Bottom || rightHandSide instanceof Bottom)
+                return true;
             if (leftHandSide.isGround() && rightHandSide.isGround()) {
                 return !leftHandSide.equals(rightHandSide);
             }
@@ -123,6 +127,7 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
         }
 
         public boolean isTrue() {
+            if (leftHandSide  instanceof Bottom || rightHandSide instanceof Bottom) return false;
             return leftHandSide.equals(rightHandSide);
         }
 
@@ -428,16 +433,15 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
             return;
         }
         isNormal = true;
-
+        Set<Equality> equalitiesToRemove = new HashSet<Equality>();
         for (Iterator<Equality> iterator = equalities.iterator(); iterator.hasNext();) {
             Equality equality = iterator.next();
-            Equality normalizedEquality =  equality.substitute(substitution);
-            if (equality != normalizedEquality) {
-                equality = normalizedEquality.evaluate();
-            }
+            equality.substitute(substitution);
+            //TODO(AndreiS): Only evaluate if the term has changed
+            equality.evaluate();
 
             if (equality.isTrue()) {
-                iterator.remove();
+                equalitiesToRemove.add(equality);
                 continue;
             } else if (equality.isFalse()) {
                 truthValue = TruthValue.FALSE;
@@ -473,16 +477,23 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
                     break;
                 }
                 previousEquality.substitute(tempSubstitution);
-
+                //TODO(AndreiS): Only evaluate if the term has changed
+                previousEquality.evaluate();
                 if (previousEquality.isTrue()) {
-                    previousIterator.remove();
+                    equalitiesToRemove.add(previousEquality);
                 } else if (previousEquality.isFalse()) {
                     truthValue = TruthValue.FALSE;
                     return;
                 }
             }
+            equalitiesToRemove.add(equality);
+        }
+        for (Iterator<Equality> iterator = equalitiesToRemove.iterator(); iterator.hasNext();) {
+            Equality equality = iterator.next();
+            equalities.remove(equality);
             iterator.remove();
         }
+        assert equalitiesToRemove.size() == 0;
     }
 
     @SuppressWarnings("unchecked")
@@ -611,4 +622,27 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
         throw new UnsupportedOperationException();
     }
 
+    public static class Bottom extends Term {
+        public Bottom() {
+            super(Kind.BOTTOM);
+        }
+
+        @Override
+        public boolean isSymbolic() {
+            return false;
+        }
+
+        @Override
+        public ASTNode accept(Transformer transformer) {
+            return this;
+        }
+
+        @Override
+        public void accept(Unifier unifier, Term patten) {
+        }
+
+        @Override
+        public void accept(Visitor visitor) {
+        }
+    }
 }

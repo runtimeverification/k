@@ -3,4 +3,6 @@
 *-kompiled-symbolic
 *.pdf
 *.class
+.metadata
+.cache
 junit-reports

@@ -569,7 +569,7 @@ public class CopyOnWriteTransformer implements Transformer {
 		}
 
 		if (change) {
-			return new ListBuiltin(node.sort(), elementsLeft, elementsRight, terms);
+			return ListBuiltin.of(node.sort(), elementsLeft, elementsRight, terms);
 		} else {
 			return node;
 		}

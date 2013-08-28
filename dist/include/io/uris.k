@@ -91,36 +91,35 @@ module URIS
   rule #statTypes(S1:String,,S2:String,,S3:String,,S4:String,,S5:String,,S6:String,,S7:String,,S8:String,,S9:String,,S10:String,,S11:String,,S12:String) => String2Int(S1),,String2Int(S2),,String2Int(S3),,String2Bool(S4),,String2Bool(S5),,String2Bool(S6),,String2Int(S7),,String2Int(S8),,String2Int(S9),,String2Int(S10),,String2Int(S11),,String2Int(S12)
   rule #statTypes(K:K) => K
 
+  syntax Stream ::= "#parseInput" "(" String "," String ")"   [cons(Stream1ParseSyn), klabel(#parseInput)]
+  syntax Stream ::= "#buffer" "(" K ")"           [cons(Stream1IOBufferSyn), klabel(#buffer)]
+  syntax Stream ::= "#istream" "(" Int ")"        [cons(Stream1InputStreamSyn)]
+                    | "#ostream" "(" Int ")"        [cons(Stream1OutputStreamSyn)]
+  syntax Stream ::= "#noIO"
+
   rule ListItem(#ostream(_)) ListItem(#buffer(Buffer:String => Buffer +String Float2String(F))) (ListItem(F:Float) => .List) _:List [stdout, stderr]
   rule ListItem(#ostream(_)) ListItem(#buffer(Buffer:String => Buffer +String Int2String(I))) (ListItem(I:Int) => .List) _:List [stdout, stderr]
   rule ListItem(#ostream(_)) ListItem(#buffer(Buffer:String => Buffer +String S)) (ListItem(S:String) => .List) _:List [stdout, stderr]
+  rule ListItem(#buffer(Buffer:String => Buffer +String Float2String(F))) (ListItem(F:Float) => .List) _:List [stdout, stderr]
+  rule ListItem(#buffer(Buffer:String => Buffer +String Int2String(I))) (ListItem(I:Int) => .List) _:List [stdout, stderr]
+  rule ListItem(#buffer(Buffer:String => Buffer +String S)) (ListItem(S:String) => .List) _:List [stdout, stderr]
 
   // Send first char from the buffer to the server
   rule ListItem(#ostream((. => #write(N, S)) ~> N:Int)) ListItem(#buffer(S:String => "")) _:List
     when S =/=String "" [stdout, stderr]
 
-  syntax Stream ::= "#parseInput" "(" String "," String ")"   [cons(Stream1ParseSyn)]
-
- /*   C++ -like parsing for ints. 
-  rule #parse("Int",I:Int => 10 *Int I +Int String2Int(C)) ListItem(C:String)
-    when #isDigit(C:String)
-  */
-
-  syntax Stream ::= "#buffer" "(" K ")"           [cons(Stream1IOBufferSyn)]
-
   // read one character at a time until we read whitespace
   rule ListItem(#parseInput(_, Delimiters:String)) ListItem(#buffer(S:String => S +String chrChar(#getc(N)))) ListItem(#istream(N:Int)) when findChar(S, Delimiters, 0) ==Int -1 [stdin]
 
   // when we reach whitespace, if it parses create a ListItem
-  rule (ListItem(#parseInput("String", Delimiters:String)) => ListItem(S)) ListItem(#buffer(S:String => "")) ListItem(#istream(_)) when findChar(S, Delimiters, 0) =/=Int -1 [stdin]
+  rule (ListItem(#parseInput("String", Delimiters:String)) => ListItem(S)) ListItem(#buffer(S:String => "")) _:List when findChar(S, Delimiters, 0) =/=Int -1 [stdin]
+  // a hack: handle the case when we read integers without the help of the IO server
+  rule (ListItem(#parseInput("Int", Delimiters:String)) => ListItem(String2Int(substrString(S, 0, lengthString(S) -Int 1)))) ListItem(#buffer(S:String => "")) when findChar(S, Delimiters, 0) =/=Int -1 andBool lengthString(S) >Int 1 [stdin]
   rule (ListItem(#parseInput(Sort:String, Delimiters:String)) => ListItem(#parse(substrString(S, 0, lengthString(S) -Int 1), Sort))) ListItem(#buffer(S:String => "")) ListItem(#istream(_)) when findChar(S, Delimiters, 0) =/=Int -1 andBool Sort =/=String "String" andBool lengthString(S) >Int 1 [stdin]
-  rule ListItem(#parseInput(Sort:String, Delimiters:String)) ListItem(#buffer(S:String => substrString(S, 1, lengthString(S)))) ListItem(#istream(_)) when findChar(S, Delimiters, 0) =/=Int -1 andBool Sort =/=String "String" andBool lengthString(S) <=Int 1 [stdin]
+  rule ListItem(#parseInput(Sort:String, Delimiters:String)) ListItem(#buffer(S:String => substrString(S, 1, lengthString(S)))) _:List when findChar(S, Delimiters, 0) =/=Int -1 andBool Sort =/=String "String" andBool lengthString(S) <=Int 1 [stdin]
   
-  syntax Stream ::= "#istream" "(" Int ")"        [cons(Stream1InputStreamSyn)]
-                    | "#ostream" "(" Int ")"        [cons(Stream1OutputStreamSyn)]
-  syntax Stream ::= "#noIO"
-  rule ListItem(#buffer(_)) ListItem(#noIO) ListItem(#istream(_:Int)) => .List [stdin]
-  rule ListItem(#ostream(_:Int)) ListItem(#noIO) ListItem(#buffer(_)) => .List [stdout, stderr]
+  rule ListItem(#buffer(_)) (ListItem(#noIO) ListItem(#istream(_:Int)) => .List) [stdin]
+  rule (ListItem(#ostream(_:Int)) ListItem(#noIO) => .List) ListItem(#buffer(_)) [stdout, stderr]
 
 // ------------------------------
 // Dynamic parsing

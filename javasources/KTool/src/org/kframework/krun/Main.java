@@ -43,8 +43,13 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.BackendTerm;
 import org.kframework.kil.Bag;
 import org.kframework.kil.Configuration;
+import org.kframework.kil.DataStructureBuiltin;
+import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.Definition;
+import org.kframework.kil.KApp;
+import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KSequence;
+import org.kframework.kil.ListItem;
 import org.kframework.kil.Module;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
@@ -243,11 +248,25 @@ public class Main {
             stdin = "";
         }
         if (stdin != null) {
-            output.put("$noIO", new BackendTerm("ListItem", "ListItem('#noIO(.KList))"));
-            output.put("$stdin", new BackendTerm("K", "# \"" + stdin
-                    + "\\n\"(.KList)"));
+            KApp noIO = KApp.of(KLabelConstant.of("'#noIO", context));
+            if (K.backend.equals("java-symbolic")) {
+                DataStructureSort myList = context.dataStructureListSortOf(DataStructureSort.DEFAULT_LIST_SORT);
+                if (myList != null) {
+                    output.put("$noIO", DataStructureBuiltin.element(myList, noIO));
+                }
+            } else {
+                output.put("$noIO", new ListItem(noIO));
+            }
+            output.put("$stdin", StringBuiltin.kAppOf(stdin + "\n"));
         } else {
-            output.put("$noIO", org.kframework.kil.List.EMPTY);
+            if (K.backend.equals("java-symbolic")) {
+                DataStructureSort myList = context.dataStructureListSortOf(DataStructureSort.DEFAULT_LIST_SORT);
+                if (myList != null) {
+                    output.put("$noIO", DataStructureBuiltin.empty(myList));
+                }
+            } else {
+                output.put("$noIO", org.kframework.kil.List.EMPTY);
+            }
             output.put("$stdin", StringBuiltin.EMPTY);
         }
 
@@ -400,10 +419,10 @@ public class Main {
                         assert false: "dead code";
                     }
                     result = krun.prove(mod);
-                } else if (cmd.hasOption("bound")) {
-                    int bound = Integer.parseInt(K.bound);
+                } else if (cmd.hasOption("depth")) {
+                    int depth = Integer.parseInt(K.depth);
                     result = krun.step(makeConfiguration(KAST, null, rp,
-                            (K.term != null), context), bound);
+                            (K.term != null), context), depth);
 
                     if (GlobalSettings.verbose)
                         sw.printTotal("Bounded execution total");
@@ -880,8 +899,10 @@ public class Main {
             }
 
             //testcase generation
-            if (cmd.hasOption("testgen")) {
+            if (cmd.hasOption("generate-tests")) {
                 K.do_testgen = true;
+                K.io = false;
+                K.do_search = true;
             }
             // k-definition beats compiled-def in a fight
             if (cmd.hasOption("compiled-def") && !cmd.hasOption("k-definition")) {

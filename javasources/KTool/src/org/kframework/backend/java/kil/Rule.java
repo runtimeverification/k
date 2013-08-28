@@ -2,6 +2,7 @@ package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.indexing.IndexingPair;
 import org.kframework.backend.java.indexing.TopIndex;
+import org.kframework.backend.java.symbolic.BottomUpVisitor;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
@@ -26,6 +27,7 @@ public class Rule extends JavaSymbolicObject {
     private final Collection<Variable> freshVariables;
     private final SymbolicConstraint lookups;
     private final IndexingPair indexingPair;
+    private final boolean containsKCell;
 
     public Rule(
             Term leftHandSide,
@@ -51,8 +53,22 @@ public class Rule extends JavaSymbolicObject {
             this.indexingPair = IndexingPair.TOP;
         }
 
+        leftHandSide.accept(new BottomUpVisitor() {
+            @Override
+            public void visit(Cell cell) {
+                if (cell.getLabel().equals("k")) {
+                    tempContainsKCell = true;
+                } else if (cell.contentKind() == Kind.CELL_COLLECTION) {
+                    super.visit(cell);
+                }
+            }
+        });
+        containsKCell = tempContainsKCell;
+
         super.setAttributes(attributes);
     }
+
+    private boolean tempContainsKCell = false;
 
     /*
     public Rule(Term leftHandSide, Term rightHandSide, Term condition) {
@@ -99,6 +115,10 @@ public class Rule extends JavaSymbolicObject {
 
     public SymbolicConstraint lookups() {
         return lookups;
+    }
+
+    public boolean containsKCell() {
+        return containsKCell;
     }
 
     public Term rightHandSide() {

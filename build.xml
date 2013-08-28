@@ -2,7 +2,8 @@
 <project basedir="." default="build" name="KTool Build file">
 
 	<property location="javasources" name="javasources" />
-	<property name="version" value="latest" />
+	<property name="version" value="nightly" />
+	<property name="config" value="./tests/config.xml" />
 
 	<target name="java">
 		<ant antfile="${javasources}/KTool/buildjava.xml" dir="${javasources}/KTool" />
@@ -19,7 +20,11 @@
 
 	<target name="build">
 		<ant antfile="${javasources}/KTool/build.xml" dir="${javasources}/KTool" />
-		<antcall target="makeversion" />
+		<ant antfile="ktest.xml" dir="./tests/tools/Testing">
+			<property name="cfg" location="${config}" />
+		</ant>
+		<copy file="./tests/tools/Testing/ktest.jar" todir="./dist/lib/java/"/>
+		<antcall target="makeversion" />	
 	</target>
 
 	<target name="clean">
@@ -76,11 +81,11 @@
 		</tstamp>
 
 		<condition property="k-version" value="nightly build">
-			<equals arg1="${version}" arg2="latest" />
+			<equals arg1="${version}" arg2="nightly" />
 		</condition>
 		<condition property="k-version" value="version ${version}">
 			<not>
-				<equals arg1="${version}" arg2="latest" />
+				<equals arg1="${version}" arg2="nightly" />
 			</not>
 		</condition>
 		<echo message="${version.file}" />
@@ -143,7 +148,6 @@
 	</target>
 
 
-	<property name="config" value="./tests/config.xml" />
 	<target name="test" depends="build">
 		<ant antfile="build.xml" dir="./tests/tools/Testing">
 			<property name="cfg" location="${config}" />

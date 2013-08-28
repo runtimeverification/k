@@ -27,22 +27,63 @@ import org.xml.sax.SAXException;
 
 public class Main {
 
-	public static void main(String[] args) {
+	private static final String HELP_MESSAGE = getHelpMessage();
+	private static boolean TEST_MODE = false;
+
+	public static void main(String[] args1) {
 
 		int exitCode = 0;
 		File homeDir = new File(System.getProperty("user.dir"));
+		boolean error = false;
+		String[] args;
+		if (args1.length >= 1) {
 
-		if (args.length == 1) {
-			if (!new File(args[0]).isAbsolute())
-				Configuration.CONFIG = Configuration.getHome()
-						+ Configuration.FS + args[0];
-			else
-				Configuration.CONFIG = args[0];
+			// if -test is set then set TEST_MODE and recover the rest of the
+			// arguments in args
+			if (args1[0].equals("-test")) {
+				TEST_MODE = true;
+				args = new String[args1.length - 1];
+				for (int i = 0; i < args1.length - 1; i++) {
+					args[i] = args1[i + 1];
+				}
+			} else {
+				args = new String[args1.length];
+				for (int i = 0; i < args1.length; i++) {
+					args[i] = args1[i];
+				}
+			}
+
+			// command line options
+			if (args.length > 0) {
+
+				// help
+				if (args[0].equals("-h") || args[0].equals("--h")
+						|| args[0].equals("-help") || args[0].equals("--help")) {
+					System.out.println(HELP_MESSAGE);
+					System.exit(0);
+				}
+
+				// by default consider args[0] the configuration file
+				if (!new File(args[0]).isAbsolute())
+					Configuration.CONFIG = Configuration.getHome()
+							+ Configuration.FS + args[0];
+				else
+					Configuration.CONFIG = args[0];
+
+				// report error if configuration file does not exists
+				if (!new File(Configuration.getConfig()).exists()) {
+					System.out.println("Configuration file "
+							+ Configuration.getConfig() + " does not exists.");
+					System.exit(1);
+				}
+			} else {
+				error = true;
+			}
 		}
-		if (!new File(Configuration.getConfig()).exists()) {
-			System.out.println("Configuration file "
-					+ Configuration.getConfig() + " does not exists.");
-			System.exit(1);
+
+		if (TEST_MODE && error) {
+			System.out.println("Please provide a test configuration file!");
+			System.exit(2);
 		}
 
 		List<Test> alltests = new LinkedList<Test>();
@@ -83,17 +124,17 @@ public class Main {
 			definitions.put(test, def);
 			Execution.execute(def);
 
-            if (test.runOnOS()) {
-                Task unixOnlyScript = test.getUnixOnlyScriptTask(homeDir);
-                if (unixOnlyScript != null) {
-                    Execution.execute(unixOnlyScript);
-                }
-            }
+			if (test.runOnOS()) {
+				Task unixOnlyScript = test.getUnixOnlyScriptTask(homeDir);
+				if (unixOnlyScript != null) {
+					Execution.execute(unixOnlyScript);
+				}
+			}
 			i++;
 		}
 		System.out.println("(" + i + ")");
 		Execution.finish();
-		
+
 		// report
 		for (Entry<Test, Task> entry : definitions.entrySet()) {
 			entry.getKey().reportCompilation(entry.getValue());
@@ -103,9 +144,7 @@ public class Main {
 		String kompileStatus = "\n";
 		for (Entry<Test, Task> entry : definitions.entrySet()) {
 			if (!entry.getKey().compiled(entry.getValue())) {
-				kompileStatus += "FAIL: "
-						+ entry.getKey().getLanguage()
-						+ "\n";
+				kompileStatus += "FAIL: " + entry.getKey().getLanguage() + "\n";
 				exitCode = 1;
 			}
 		}
@@ -128,19 +167,18 @@ public class Main {
 		}
 		System.out.println("(" + i + ")");
 		Execution.finish();
-		// report
+		// create XML report
 		for (Entry<Test, Task> entry : pdfDefinitions.entrySet()) {
 			entry.getKey().reportPdfCompilation(entry.getValue());
 		}
 
-		// console display
+		// console messages
 		String pdfKompileStatus = "\n";
 		for (Entry<Test, Task> entry : pdfDefinitions.entrySet()) {
 			if (!entry.getKey().compiledPdf(entry.getValue())) {
-				pdfKompileStatus += "FAIL: "
-						+ entry.getKey().getLanguage()
-								
-						+ "\n";
+				pdfKompileStatus += "FAIL: " + entry.getKey().getLanguage()
+
+				+ "\n";
 				exitCode = 1;
 			}
 		}
@@ -154,8 +192,7 @@ public class Main {
 			Test test = dentry.getKey();
 			if (test.compiled(dentry.getValue()) && test.runOnOS()) {
 
-				System.out.print("Running "
-						+ test.getLanguage()
+				System.out.print("Running " + test.getLanguage()
 						+ " programs... " + test.getTag());
 
 				// execute
@@ -166,7 +203,7 @@ public class Main {
 					Task task = p.getTask(homeDir);
 					all.put(p, task);
 					Execution.tpe.execute(task);
-					i ++;
+					i++;
 				}
 				System.out.println("(" + i + ")");
 				Execution.finish();
@@ -192,6 +229,10 @@ public class Main {
 		}
 
 		System.exit(exitCode);
+	}
+
+	private static String getHelpMessage() {
+		return "usage: [-help] <config.xml>";
 	}
 
 	public static void copyFolder(File src, File dest) throws IOException {

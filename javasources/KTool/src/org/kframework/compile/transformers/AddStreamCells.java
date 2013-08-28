@@ -1,13 +1,8 @@
 package org.kframework.compile.transformers;
 
 import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Cell;
+import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
-import org.kframework.kil.Configuration;
-import org.kframework.kil.Module;
-import org.kframework.kil.Rule;
-import org.kframework.kil.Syntax;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -32,7 +27,15 @@ public class AddStreamCells extends CopyOnWriteTransformer {
     @Override
     public ASTNode transform(Module node) throws TransformerException {
         ASTNode result = super.transform(node);
-		if (generated.isEmpty()) return node;
+        if (result == node)
+            return node;
+		if (generated.isEmpty()) {
+//            GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER,
+//                    "Stream cells missing in module " + node.getName() + ". " +
+//                            "Some rules tagged with streams have been erased",
+//                    node.getFilename(), node.getLocation()));
+            return result;
+        }
 		result = result.shallowCopy();
 		((Module)result).getItems().addAll(generated);
 		return result;
@@ -75,10 +78,11 @@ public class AddStreamCells extends CopyOnWriteTransformer {
     }
 
     private void addRules(Rule rule, String stream) {
-        if (!(rule.getBody().getSort().equals("List") || rule.getBody().getSort().equals("ListItem"))) {
+        DataStructureSort sort = context.dataStructureSortOf(rule.getBody().getSort());
+        if (!(rule.getBody().getSort().equals("List") || rule.getBody().getSort().equals("ListItem") || context.dataStructureListSortOf(rule.getBody().getSort()) != null)) {
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
                     KExceptionGroup.INTERNAL,
-                    "Found a rule tagged '" + stream + "' whose body wasn't of sort List.",
+                    "Found a rule tagged '" + stream + "' whose body wasn't a list.",
                         getName(), rule.getFilename(), rule.getLocation()));
         }
         Set<Cell> cells = new HashSet<Cell>();
@@ -90,6 +94,9 @@ public class AddStreamCells extends CopyOnWriteTransformer {
         }
         for (Cell cell : cells) {
             Rule newRule = rule.shallowCopy();
+            Attributes newAttrs = newRule.getAttributes().shallowCopy();
+            newAttrs.remove("function");
+            newRule.setAttributes(newAttrs);
             newRule.setBody(MetaK.wrap(rule.getBody(), cell.getLabel(), Ellipses.NONE));
             generated.add(newRule);
         }

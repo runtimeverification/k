@@ -55,7 +55,7 @@ module MAP
   rule M:MyMap[.KList <- undef] => M
 
   /* set of map keys */
-	syntax MySet ::= keys(MyMap)    [function]
+	syntax MySet ::= keys(MyMap)    [function, hook(Map:keys)]
   rule keys(K:K |-> _ M:MyMap) => MySetItem(K) keys(M)
   rule keys(.MyMap) => .MySet
 

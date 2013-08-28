@@ -4,8 +4,8 @@ import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Utils;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.KSorts;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.KSorts;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -68,7 +68,7 @@ public class BuiltinMap extends Collection implements Sorted {
      */
     @Override
     public String sort() {
-        // TODO(AndreiS): use a builtin map sort (add it to the sort dag in Context)
+        // TODO(AndreiS): track the original sort from the grammar
         return KSorts.MAP;
     }
 
@@ -130,4 +130,19 @@ public class BuiltinMap extends Collection implements Sorted {
         return transformer.transform(this);
     }
 
+    public static BuiltinMap of(Map<Term, Term> entries, Term frame) {
+        if (frame == null) {
+            return new BuiltinMap(entries);
+        }
+        if (frame instanceof Variable)
+            return new BuiltinMap(entries, (Variable) frame);
+        if (frame instanceof BuiltinMap) {
+            BuiltinMap builtinMap = (BuiltinMap) frame;
+            builtinMap = new BuiltinMap(builtinMap.entries, builtinMap.frame);
+            builtinMap.entries.putAll(entries);
+            return builtinMap;
+        }
+        assert false : "Frame can only be substituted by a Variable or a BuiltinMap, or deleted.";
+        return null;
+    }
 }

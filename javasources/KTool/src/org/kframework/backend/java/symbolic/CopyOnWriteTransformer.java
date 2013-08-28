@@ -3,6 +3,7 @@ package org.kframework.backend.java.symbolic;
 import com.google.common.collect.Iterables;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
@@ -24,7 +25,6 @@ import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.ListLookup;
-import org.kframework.backend.java.kil.ListUpdate;
 import org.kframework.backend.java.kil.MapLookup;
 import org.kframework.backend.java.kil.MapUpdate;
 import org.kframework.backend.java.kil.MetaVariable;
@@ -37,11 +37,7 @@ import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.ASTNode;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
@@ -98,9 +94,14 @@ public class CopyOnWriteTransformer implements Transformer {
         }
 
         if (cellCollection.hasFrame()) {
+            boolean isStar = cellCollection.isStar();
             Variable frame;
             Term transformedFrame = (Term) cellCollection.frame().accept(this);
             if (transformedFrame instanceof CellCollection) {
+                isStar = isStar || ((CellCollection) transformedFrame).isStar();
+                if (cells == cellCollection.cellMap()) {
+                    cells = HashMultimap.create(cellCollection.cellMap());
+                }
                 cells.putAll(((CellCollection) transformedFrame).cellMap());
                 frame = ((CellCollection) transformedFrame).hasFrame() ?
                         ((CellCollection) transformedFrame).frame() : null;
@@ -109,7 +110,7 @@ public class CopyOnWriteTransformer implements Transformer {
             }
 
             if (cells != cellCollection.cellMap() || frame != cellCollection.frame()) {
-                cellCollection = new CellCollection(cells, frame, cellCollection.isStar());
+                cellCollection = new CellCollection(cells, frame, isStar);
             }
         } else {
             if (cells != cellCollection.cellMap()) {
@@ -186,6 +187,11 @@ public class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(IntToken intToken) {
         return transform((Token) intToken);
+    }
+
+    @Override
+    public ASTNode transform(StringToken stringToken) {
+        return transform((Token) stringToken);
     }
 
     @Override
@@ -279,22 +285,11 @@ public class CopyOnWriteTransformer implements Transformer {
     }
 
     @Override
-    public ASTNode transform(ListUpdate listUpdate) {
-        Term list = (Term) listUpdate.base().accept(this);
-
-        if (list != listUpdate.base()) {
-            listUpdate = new ListUpdate(list, listUpdate.removeLeft(), listUpdate.removeRight());
-        }
-
-        return listUpdate;
-    }
-
-    @Override
     public ASTNode transform(BuiltinList builtinList) {
-        Variable frame = null;
+        Term frame = null;
         boolean change = false;
         if (builtinList.hasFrame()) {
-            frame = (Variable) builtinList.frame().accept(this);
+            frame = (Term) builtinList.frame().accept(this);
             if (frame != builtinList.frame()) change = true;
         }
 
@@ -311,16 +306,16 @@ public class CopyOnWriteTransformer implements Transformer {
             if (newEntry != null) elementsRight.add((Term) newEntry);
         }
         if (! change) return  builtinList;
-        return new BuiltinList(elementsLeft, elementsRight, frame);
+        return BuiltinList.of(frame, builtinList.removeLeft(), builtinList.removeRight(), elementsLeft, elementsRight);
     }
 
     @Override
     public ASTNode transform(BuiltinMap builtinMap) {
         BuiltinMap transformedMap = null;
         if (builtinMap.hasFrame()) {
-            Variable frame = (Variable) builtinMap.frame().accept(this);
+            Term frame = (Term) builtinMap.frame().accept(this);
             if (frame != builtinMap.frame()) {
-                transformedMap = new BuiltinMap(frame);
+                transformedMap = BuiltinMap.of(Collections.<Term, Term>emptyMap(), frame);
             }
         }
 
@@ -358,9 +353,9 @@ public class CopyOnWriteTransformer implements Transformer {
     public ASTNode transform(BuiltinSet builtinSet) {
         BuiltinSet transformedSet = null;
         if (builtinSet.hasFrame()) {
-            Variable frame = (Variable) builtinSet.frame().accept(this);
+            Term frame = (Term) builtinSet.frame().accept(this);
             if (frame != builtinSet.frame()) {
-                transformedSet = new BuiltinSet(frame);
+                transformedSet = BuiltinSet.of(Collections.<Term>emptySet(), frame);
             }
         }
 

@@ -9,49 +9,6 @@ import org.kframework.kil.ASTNode;
  */
 public class Evaluator extends CopyOnWriteTransformer {
 
-    private class LocalEvaluator extends CopyOnWriteTransformer {
-
-        public LocalEvaluator(TermContext context) {
-            super(context);
-        }
-
-        @Override
-        public ASTNode transform(KItem kItem) {
-            return kItem.evaluateFunction(context);
-        }
-
-        @Override
-        public ASTNode transform(ListLookup listLookup) {
-            return listLookup.evaluateLookup();
-        }
-
-        @Override
-        public ASTNode transform(ListUpdate listUpdate) {
-            return listUpdate.evaluateUpdate();
-        }
-
-        @Override
-        public ASTNode transform(SetLookup setLookup) {
-            return setLookup.evaluateLookup();
-        }
-
-        @Override
-        public ASTNode transform(SetUpdate setUpdate) {
-            return setUpdate.evaluateUpdate();
-        }
-
-        @Override
-        public ASTNode transform(MapLookup mapLookup) {
-            return mapLookup.evaluateLookup();
-        }
-
-        @Override
-        public ASTNode transform(MapUpdate mapUpdate) {
-            return mapUpdate.evaluateUpdate();
-        }
-
-    }
-
     private final Transformer localEvaluator;
 
     public Evaluator(TermContext context) {
@@ -67,11 +24,6 @@ public class Evaluator extends CopyOnWriteTransformer {
     @Override
     public ASTNode transform(ListLookup listLookup) {
         return ((Term) super.transform(listLookup)).accept(localEvaluator);
-    }
-
-    @Override
-    public ASTNode transform(ListUpdate listUpdate) {
-        return ((Term) super.transform(listUpdate)).accept(localEvaluator);
     }
 
     @Override

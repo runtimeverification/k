@@ -1,11 +1,7 @@
 package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.indexing.IndexingPair;
-import org.kframework.backend.java.symbolic.BottomUpVisitor;
-import org.kframework.backend.java.symbolic.Evaluator;
-import org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer;
-import org.kframework.backend.java.symbolic.Unifiable;
-import org.kframework.backend.java.symbolic.Transformable;
+import org.kframework.backend.java.symbolic.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -85,6 +81,21 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     }
 
     /**
+     * Returns a new {@code Term} instance obtained from this term by applying substitution.
+     */
+    public Term substituteAndEvaluate(Map<Variable, ? extends Term> substitution, TermContext context) {
+
+        if (substitution.isEmpty() || isGround()) {
+            return this;
+        }
+
+        SubstitutionTransformer transformer = new SubstitutionTransformer(substitution, context);
+        transformer.getPostTransformer().addTransformer(new LocalEvaluator(context));
+
+        return (Term) accept(transformer);
+    }
+
+     /**
      * Returns a new {@code Term} instance obtained from this term by substituting variable with
      * term.
      */

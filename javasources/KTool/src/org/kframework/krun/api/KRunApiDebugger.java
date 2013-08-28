@@ -8,6 +8,8 @@ import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
+import org.kframework.kil.KApp;
+import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.StringBuiltin;
@@ -278,15 +280,14 @@ public class KRunApiDebugger implements KRunDebugger {
 		}
 
 		@Override
-		public ASTNode transform(TermCons tc) throws TransformerException {
-			if (tc.getCons().equals("List1IOBufferSyn") &&
-				tc.getContents().size() == 1) {
+		public ASTNode transform(KApp kapp) throws TransformerException {
+            if (kapp.getLabel().equals(KLabelConstant.of("#buffer", context))) {
 				inBuffer = true;
-				ASTNode result = super.transform(tc);
+				ASTNode result = super.transform(kapp);
 				inBuffer = false;
 				return result;
 			}
-			return super.transform(tc);
+			return super.transform(kapp);
 		}
 
 		@Override

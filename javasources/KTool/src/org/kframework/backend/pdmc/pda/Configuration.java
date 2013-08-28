@@ -1,7 +1,9 @@
 package org.kframework.backend.pdmc.pda;
 
+import com.google.common.base.Joiner;
 import org.kframework.backend.java.symbolic.Utils;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Stack;
 
@@ -9,18 +11,23 @@ import java.util.Stack;
  * @author TraianSF
  */
 public class Configuration<Control, Alphabet> {
-    private static Stack emptyStack = new Stack();
+    private static Stack emptyStack = null;
     ConfigurationHead<Control,Alphabet> head;
     Stack<Alphabet> stack;
 
-    private Configuration(Control control, Stack<Alphabet> stack) {
+    public Configuration(ConfigurationHead<Control, Alphabet> head, Stack<Alphabet> stack) {
+        this.head = head;
+        this.stack = stack;
+    }
+
+    public Configuration(Control control, Stack<Alphabet> stack) {
         if (stack.isEmpty()) {
             head = ConfigurationHead.of(control, null);
-            this.stack = emptyStack;
+            this.stack = emptyStack();
         } else {
             head = ConfigurationHead.of(control, stack.peek());
             if (stack.size() == 1) {
-                this.stack = emptyStack;
+                this.stack = emptyStack();
             } else {
                 this.stack = new Stack<Alphabet>();
                 this.stack.addAll(stack);
@@ -77,7 +84,9 @@ public class Configuration<Control, Alphabet> {
 
     public static <Alphabet> Stack<Alphabet> emptyStack() {
         if (emptyStack == null) emptyStack = new Stack<Alphabet>();
-        return (Stack<Alphabet>) emptyStack;
+        @SuppressWarnings("unchecked")
+        Stack<Alphabet> returnStack = (Stack<Alphabet>) emptyStack;
+        return returnStack;
     }
 
     public static Configuration<String, String> of(String confString) {
@@ -94,5 +103,23 @@ public class Configuration<Control, Alphabet> {
                 stack.push(letters[i]);
         }
         return new Configuration<String, String>(control, stack);
+    }
+
+    @Override
+    public String toString() {
+        @SuppressWarnings("unchecked")
+        Stack<Alphabet> stack = (Stack<Alphabet>) this.stack.clone();
+        if (head.isProper()) stack.add(head.getLetter());
+        Collections.reverse(stack);
+        StringBuilder builder = new StringBuilder();
+        builder.append("<");
+        builder.append(head.getState().toString());
+        if (!stack.isEmpty()) {
+            builder.append(", ");
+            Joiner joiner = Joiner.on(" ");
+            joiner.appendTo(builder, stack);
+        }
+        builder.append(">");
+        return builder.toString();
     }
 }

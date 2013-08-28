@@ -139,7 +139,7 @@ public class ProgramSDF {
 		sdf.append("\n\n");
 
 		for (String t : ctv.terminals) {
-			if (t.matches("[a-zA-Z][a-zA-Z0-9]*")) {
+			if (t.matches("[a-zA-Z\\_][a-zA-Z0-9\\_]*")) {
 				sdf.append("	\"" + StringUtil.escape(t) + "\" -> DzDzID {reject}\n");
 			}
 		}

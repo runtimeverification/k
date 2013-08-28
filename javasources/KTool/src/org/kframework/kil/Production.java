@@ -232,6 +232,14 @@ public class Production extends ASTNode {
 			if (!prd.getItems().get(i).equals(items.get(i)))
 				return false;
 		}
+        String klabel1 = prd.getAttributes().get("klabel");
+        String klabel2 = getAttributes().get("klabel");
+        if ((klabel1 == null && klabel2 != null) || (klabel1 != null && klabel2 == null)) {
+            return false;
+        }
+        if (klabel1 != null && klabel2 != null && klabel1.equals(klabel2)) {
+            return false;
+        }
 		return true;
 	}
 

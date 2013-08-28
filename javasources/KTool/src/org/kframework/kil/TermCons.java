@@ -14,6 +14,7 @@ import org.kframework.utils.StringUtil;
 import org.kframework.utils.xml.XML;
 import org.w3c.dom.Element;
 
+import aterm.ATerm;
 import aterm.ATermAppl;
 import aterm.ATermList;
 
@@ -51,17 +52,22 @@ public class TermCons extends Term {
 			contents = new ArrayList<Term>();
 		} else if (atm.getArgument(0) instanceof ATermList) {
 			ATermList list = (ATermList) atm.getArgument(0);
-			while (!list.isEmpty()) {
+            for (; !list.isEmpty(); list = list.getNext()) {
+                if (isColon(list.getFirst())) continue;
 				contents.add((Term) JavaClassesFactory.getTerm(list.getFirst()));
-				list = list.getNext();
 			}
 			contents.add(new Empty(sort));
 		} else {
 			for (int i = 0; i < atm.getArity(); i++) {
+                if (isColon(atm.getArgument(i))) continue;
 				contents.add((Term) JavaClassesFactory.getTerm(atm.getArgument(i)));
 			}
 		}
 	}
+
+    private boolean isColon(ATerm atm) {
+        return atm.getType() == ATerm.APPL && ((ATermAppl)atm).getName().equals("Colon");
+    }
 
 	public TermCons(String sort, String cons, org.kframework.kil.loader.Context context) {
 		this(sort, cons, new ArrayList<Term>(), context);

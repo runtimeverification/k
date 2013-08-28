@@ -21,6 +21,18 @@ public class BottomUpVisitor implements Visitor {
     }
 
     @Override
+    public void visit(BoolToken boolToken) {
+        visit((Token) boolToken);
+    }
+
+    @Override
+    public void visit(BuiltinList node) {
+        if (node.hasFrame()) node.frame().accept(this);
+        for (Term t : node.elementsLeft()) t.accept(this);
+        for (Term t : node.elementsRight()) t.accept(this);
+    }
+
+    @Override
     public void visit(BuiltinMap builtinMap) {
         for (java.util.Map.Entry<Term, Term> entry : builtinMap.getEntries().entrySet()) {
             entry.getKey().accept(this);
@@ -39,8 +51,6 @@ public class BottomUpVisitor implements Visitor {
 //        }
         visit((Collection) builtinSet);
     }
-
-    @Override public void visit(Term term) { }
 
     @Override
     public void visit(Cell cell) {
@@ -65,8 +75,18 @@ public class BottomUpVisitor implements Visitor {
     }
 
     @Override
+    public void visit(ConstrainedTerm node) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void visit(Hole hole) {
         visit((Term) hole);
+    }
+
+    @Override
+    public void visit(IntToken intToken) {
+        visit((Token) intToken);
     }
 
     @Override
@@ -91,26 +111,6 @@ public class BottomUpVisitor implements Visitor {
         kItem.kLabel().accept(this);
         kItem.kList().accept(this);
         visit((Term) kItem);
-    }
-
-    @Override
-    public void visit(Token token) {
-        visit((Term) token);
-    }
-
-    @Override
-    public void visit(UninterpretedToken uninterpretedToken) {
-        visit((Term) uninterpretedToken);
-    }
-
-    @Override
-    public void visit(BoolToken boolToken) {
-        visit((Token) boolToken);
-    }
-
-    @Override
-    public void visit(IntToken intToken) {
-        visit((Token) intToken);
     }
 
     @Override
@@ -145,6 +145,12 @@ public class BottomUpVisitor implements Visitor {
     }
 
     @Override
+    public void visit(ListLookup listLookup) {
+        listLookup.list().accept(this);
+        listLookup.key().accept(this);
+    }
+
+    @Override
     public void visit(MapLookup mapLookup) {
         mapLookup.map().accept(this);
         mapLookup.key().accept(this);
@@ -160,21 +166,6 @@ public class BottomUpVisitor implements Visitor {
         for (java.util.Map.Entry<Term, Term> entry : mapUpdate.updateMap().entrySet()) {
             entry.getKey().accept(this);
             entry.getValue().accept(this);
-        }
-    }
-
-    @Override
-    public void visit(SetLookup setLookup) {
-        setLookup.base().accept(this);
-        setLookup.key().accept(this);
-        visit((Term) setLookup);
-    }
-
-    @Override
-    public void visit(SetUpdate setUpdate) {
-        setUpdate.base().accept(this);
-        for (Term key : setUpdate.removeSet()) {
-            key.accept(this);
         }
     }
 
@@ -197,6 +188,21 @@ public class BottomUpVisitor implements Visitor {
     }
 
     @Override
+    public void visit(SetLookup setLookup) {
+        setLookup.base().accept(this);
+        setLookup.key().accept(this);
+        visit((Term) setLookup);
+    }
+
+    @Override
+    public void visit(SetUpdate setUpdate) {
+        setUpdate.base().accept(this);
+        for (Term key : setUpdate.removeSet()) {
+            key.accept(this);
+        }
+    }
+
+    @Override
     public void visit(SymbolicConstraint node) {
         for (Map.Entry<Variable, Term> entry : node.substitution().entrySet()) {
             entry.getKey().accept(this);
@@ -208,9 +214,20 @@ public class BottomUpVisitor implements Visitor {
         }
     }
 
+    @Override public void visit(Term term) { }
+
+    @Override
+    public void visit(Token token) {
+        visit((Term) token);
+    }
+
+    @Override
+    public void visit(UninterpretedToken uninterpretedToken) {
+        visit((Term) uninterpretedToken);
+    }
+
     @Override
     public void visit(Variable variable) {
         visit((Term) variable);
     }
-
 }
