@@ -59,6 +59,7 @@
 		<delete dir="${javasources}/parsers/Concrete/include" />
 
 		<delete file="${javasources}/KTool/lib/resources/sdf/*" />
+
 		<antcall target="clean-java" />
 	</target>
 
@@ -67,6 +68,12 @@
 		<delete file="${javasources}/../dist/lib/java/k3.jar" />
 		<delete file="${javasources}/../dist/lib/version.txt" />
 		<delete dir="./k/" />
+		<delete>
+			<fileset dir="${javasources}/KTool/src/org/kframework/backend/pdmc/pda/buchi/parser">
+				<include name="*" />
+				<exclude name="PromelaBuchiParser.jj" />
+			</fileset>
+		</delete>
 	</target>
 
 	<target name="makeversion">

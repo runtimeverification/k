@@ -48,6 +48,7 @@
 				<exclude name="**/*.java" />
 			</fileset>
 		</copy>
+		<javacc target="src/org/kframework/backend/pdmc/pda/buchi/parser/PromelaBuchiParser.jj" javacchome="../../dist/lib/java" />
 		<javacc target="src/org/kframework/utils/kastparser/KastParser.jj" javacchome="../../dist/lib/java" />
 		<condition property="isJava7">
 			<equals arg1="${ant.java.version}" arg2="1.7" />
