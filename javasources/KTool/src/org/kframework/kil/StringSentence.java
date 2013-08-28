@@ -20,9 +20,10 @@ public class StringSentence extends ModuleItem {
 	private String label;
 	private String type;
 
-	public StringSentence(String content, String type) {
+	public StringSentence(String content, String type, String label) {
 		this.content = content;
 		this.type = type;
+		this.label = label;
 	}
 
 	public StringSentence(Element element) {
@@ -47,10 +48,7 @@ public class StringSentence extends ModuleItem {
 	}
 
 	public String toString() {
-		String shortStr = content;
-		if (content.indexOf("\n") > 0)
-			shortStr = content.substring(0, content.indexOf("\n") - 1) + "...";
-		return shortStr;
+		return type+"["+label+"]:"+content;
 	}
 
 	@Override

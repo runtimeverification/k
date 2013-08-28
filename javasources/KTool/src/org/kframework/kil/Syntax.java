@@ -29,6 +29,10 @@ public class Syntax extends ModuleItem {
 		this.priorityBlocks = priorities;
 	}
 
+	public Syntax(Sort sort) {
+		this(sort, new ArrayList<PriorityBlock>());
+	}
+
 	public Sort getSort() {
 		return sort;
 	}
