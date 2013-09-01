@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-LOCATION=~/dist
 wget ftp://ftp.strategoxt.org/pub/stratego/StrategoXT/strategoxt-0.17/aterm-2.5.tar.gz
 wget --no-check-certificate https://svn.nixos.org/repos/nix/nixpkgs/trunk/pkgs/development/libraries/aterm/max-long.patch
 tar xzf aterm-2.5.tar.gz
@@ -7,6 +6,7 @@ cd aterm-2.5/
 patch -p1 < ../max-long.patch
 ./configure  --disable-shared --with-pic --prefix=`pwd`
 make clean && make
+make install
 cd ..
 wget ftp://ftp.strategoxt.org/pub/stratego/StrategoXT/strategoxt-0.17/sdf2-bundle-2.4.tar.gz
 tar xzf sdf2-bundle-2.4.tar.gz
@@ -17,3 +17,4 @@ make install
 cd ..
 make
 #copy src/sglr-server executable to the corresponding dist/lib/native directory
+#cp src/sglr-server ../../dist/lib/native/...
