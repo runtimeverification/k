@@ -30,6 +30,11 @@ public class LiterateModuleComment extends ModuleItem implements LiterateComment
 		lcType = literateModuleComment.lcType;
 	}
 
+	public LiterateModuleComment(String value) {
+		this.value = value;
+		this.lcType = LiterateCommentType.COMMON;
+	}
+
 	public LiterateModuleComment(LiterateDefinitionComment ldc) {
 		setFilename(ldc.getFilename());
 		setLocation(ldc.getLocation());
@@ -67,9 +72,6 @@ public class LiterateModuleComment extends ModuleItem implements LiterateComment
 
 	@Override
 	public String toString() {
-		String shortStr = value;
-		if (value.indexOf("\n") > 0)
-			shortStr = value.substring(0, value.indexOf("\n") - 1) + "...";
-		return shortStr;
+		return "/*"+value+"*/";
 	}
 }

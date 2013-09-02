@@ -1,0 +1,229 @@
+// Copyright 2010, University of Twente, Formal Methods and Tools group
+// With modifications Copyright 2013, The K Framework development group.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+
+
+options {
+  JDK_VERSION = "1.5";
+  STATIC = false;
+}
+
+
+PARSER_BEGIN(PromelaBuchiParser)
+package org.kframework.backend.pdmc.pda.buchi.parser;
+
+import java.io.InputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+
+import java.util.*;
+
+import org.kframework.backend.pdmc.pda.buchi.*;
+
+public class PromelaBuchiParser 
+{
+	public static PromelaBuchi parse(InputStream aInSt) throws ParseException {
+		// create a parser (this object)
+		PromelaBuchiParser parser = new PromelaBuchiParser(aInSt);
+		// parse!
+		return parser.never();
+	}
+
+	public static void main(String[] args) throws ParseException, FileNotFoundException {
+		parse(new FileInputStream(args[0]));
+	}
+}
+
+PARSER_END(PromelaBuchiParser)
+
+TOKEN : {	/* Keywords */
+	<NEVER: "never">
+|	<IF: "if">
+|	<FI: "fi">
+|	<GOTO: "goto">
+|	<TRUE: "true">
+|	<FALSE: "false">
+|	<SKIP_: "skip">
+}
+
+TOKEN : {	/* Operators */
+	<LCURLY: "{">
+|	<RCURLY: "}">
+|	<LPAREN: "(">
+|	<RPAREN: ")">
+|	<OPTION: "::">
+|	<COLON: ":">
+|	<SEMICOLON: ";">
+|	<LNOT: "!">
+|	<LAND: "&&">
+|	<LOR: "||">
+|	<RARROW: "->">
+}
+
+
+TOKEN : { /* Identifiers and numbers */
+	<IDENTIFIER: ["a"-"z","A"-"Z"] (["a"-"z","A"-"Z"] | ["0"-"9"] | "_")* >
+|	<NUMBER: (["0"-"9"])+ >
+}
+
+SKIP : { // Skip whitespace and comments
+ 	" "
+|	"\r"
+|	"\t"
+|	"\n"
+|	"/*" : IN_COMMENT
+}
+
+<IN_COMMENT> SKIP: {
+	< ~[] >
+}
+
+<IN_COMMENT> SKIP: {
+	"*/": DEFAULT
+}
+
+PromelaBuchi never(): {
+	PromelaBuchi automaton = new PromelaBuchi();
+}{
+	<NEVER> <LCURLY> 
+		sequence(automaton) 
+	<RCURLY>
+	{
+		return automaton;
+	}
+}
+
+void sequence(PromelaBuchi automaton): {
+	Token id;
+	Collection<PromelaTransition> trans;
+}{
+	id=<IDENTIFIER> <COLON>
+		(trans = transitions())
+	{
+		BuchiState start = BuchiState.of(id);
+        automaton.addTransitions(start, trans);
+	}
+(	<SEMICOLON> (sequence(automaton)) ) ?
+}
+
+Collection<PromelaTransition> transitions(): {
+	ArrayList<PromelaTransition> trans = new ArrayList<PromelaTransition>();
+}{
+(	<IF> 
+	(option(trans))+
+	<FI>
+|	<SKIP_>
+)
+{
+	return trans;
+}
+}
+
+void option(Collection<PromelaTransition> trans): {
+	Expression condition;
+	BuchiState end;
+}{
+	<OPTION>
+		condition=expr()
+	<RARROW>
+		end=gotoStmt()
+{
+	trans.add(new PromelaTransition(condition, end));
+}
+}
+
+BuchiState gotoStmt(): {
+	Token id;
+}{
+	<GOTO> id=<IDENTIFIER>
+	{
+		return BuchiState.of(id);
+	}
+}
+
+Expression varref(): {
+	Token id;
+}{
+	id=<IDENTIFIER>
+	{
+		return Identifier.of(id);
+	}
+}
+
+Expression base_expr(): {
+	Expression ex1, ex2, ex3;
+	Token t, id;
+}{
+	<LPAREN> ex1=expr() <RPAREN>
+	{ return ex1; }
+|	ex1=varref()
+	{ return ex1; }
+|	ex1=constant()
+	{ return ex1; }
+}
+
+Expression unary_expr(): {
+	Expression ex1;
+	Token t;
+}{
+	t=<LNOT> ex1=unary_expr()
+	{ return new BooleanExpression(LNOT, ex1); }
+|	ex1=base_expr()
+	{ return ex1; }
+}
+
+
+Expression land_expr(): {
+	Expression ex1, ex2;
+	Token t;
+}{
+	ex1=unary_expr() 
+	  (t=<LAND> ex2=land_expr()
+	  { return new BooleanExpression(LAND, ex1, ex2); }
+	  )?
+	{ return ex1; }
+}
+
+Expression lor_expr(): {
+	Expression ex1, ex2;
+	Token t;
+}{
+	ex1=land_expr() 
+	  (t=<LOR> ex2=lor_expr()
+	  { return new BooleanExpression(LOR, ex1, ex2); }
+	  )?
+	{ return ex1; }
+}
+
+Expression expr(): {
+	Expression ex1;
+}{
+	ex1=lor_expr()
+	{ return ex1; }
+}
+
+
+ConstantExpression constant(): {
+    Token n;
+}{
+	<TRUE>
+	{ return new ConstantExpression(true); }
+|	<FALSE>
+	{ return new ConstantExpression(false); }
+|	<SKIP_>
+	{ return new ConstantExpression(true); }
+|	n=<NUMBER>
+	{ return new ConstantExpression(Integer.parseInt(n.image) != 0); }
+}

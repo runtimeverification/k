@@ -1,5 +1,6 @@
 package org.kframework.backend.pdmc.pda.pautomaton;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.pdmc.automaton.BasicAutomaton;
 import org.kframework.backend.pdmc.automaton.Transition;
 import org.kframework.backend.pdmc.automaton.TransitionIndex;
@@ -9,17 +10,17 @@ import java.util.*;
 /**
  * @author Traian
  */
-public class PAutomaton<Control, Alphabet> extends BasicAutomaton<PAutomatonState<Control, Alphabet>, Alphabet> {
+public class PAutomaton<State, Alphabet> extends BasicAutomaton<State, Alphabet> {
 
-    public PAutomaton(Collection<Transition<PAutomatonState<Control, Alphabet>, Alphabet>> delta, PAutomatonState<Control, Alphabet> initialState, Collection<PAutomatonState<Control, Alphabet>> finalStates) {
+    public PAutomaton(Collection<Transition<State, Alphabet>> delta, State initialState, Collection<State> finalStates) {
         super(delta, initialState, finalStates);
     }
 
-    public PAutomaton(Map<TransitionIndex<PAutomatonState<Control, Alphabet>, Alphabet>, Set<Transition<PAutomatonState<Control, Alphabet>, Alphabet>>> deltaIndex, PAutomatonState<Control, Alphabet> initialState, Set<PAutomatonState<Control, Alphabet>> finalStates) {
+    public PAutomaton(Map<TransitionIndex<State, Alphabet>, Set<Transition<State, Alphabet>>> deltaIndex, State initialState, Set<State> finalStates) {
         super(deltaIndex, initialState, finalStates);
     }
 
-    public static PAutomaton<String, String> of(String s) {
+    public static PAutomaton<PAutomatonState<String, String>, String> of(String s) {
         ArrayList<Transition<PAutomatonState<String, String>, String>> rules =
                 new ArrayList<Transition<PAutomatonState<String, String>, String>>();
         ArrayList<PAutomatonState<String, String>> states = new ArrayList<PAutomatonState<String, String>>();
@@ -34,7 +35,7 @@ public class PAutomaton<Control, Alphabet> extends BasicAutomaton<PAutomatonStat
             Transition<PAutomatonState<String, String>, String> rule = Transition.of(stringTransitions[i]);
             rules.add(rule);
         }
-        return new PAutomaton<String, String>(rules, initialState, states);
+        return new PAutomaton<PAutomatonState<String, String>, String>(rules, initialState, states);
     }
 
 

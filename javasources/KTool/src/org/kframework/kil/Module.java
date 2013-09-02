@@ -18,7 +18,7 @@ import java.util.List;
 /** A module or interface. */
 public class Module extends DefinitionItem {
 	private String name;
-	private List<ModuleItem> items;
+	private List<ModuleItem> items = new ArrayList<ModuleItem>();
 	/** "module" or "interface" */
 	private String type;
 
@@ -28,7 +28,6 @@ public class Module extends DefinitionItem {
 		name = element.getAttribute(Constants.VALUE_value_ATTR);
 		type = element.getAttribute(Constants.TYPE_type_ATTR);
 		predefined = element.getAttribute(Constants.PREDEFINED).equals("true") ? true : false;
-		items = new ArrayList<ModuleItem>();
 
 		List<Element> elements = XML.getChildrenElements(element);
 		for (Element e : elements) {
@@ -56,8 +55,6 @@ public class Module extends DefinitionItem {
 	}
 
 	public void appendModuleItem(ModuleItem item) {
-		if (items == null)
-			items = new LinkedList<ModuleItem>();
 		this.items.add(item);
 	}
 

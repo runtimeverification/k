@@ -40,7 +40,7 @@ syn match   kSyntaxName   contained "#\=\u\w*\({\s*#\=\u\w*\(\s*,\s*#\=\u\w*\)*\
 syn keyword kSyntaxAttr   left right prefer avoid
 syn match   kSyntaxAttr   "\<non-assoc\>"
 
-syn keyword kStatement    configuration rule context when where
+syn keyword kStatement    configuration rule context when where requires ensures
 
 " the following is just for folding (Ctrl-F9), currently not working
 syn region  kCellContent  start="<\h\(\w\|-\)*>" end="</\h\(\w\|-\)*>" fold transparent

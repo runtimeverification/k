@@ -52,6 +52,12 @@ public class PriorityBlock extends ASTNode {
 		assoc = element.getAttribute(Constants.ASSOC_assoc_ATTR);
 	}
 
+	public PriorityBlock(String assoc, java.util.List<Production> productions) {
+		super();
+		this.assoc = assoc;
+		this.productions = productions;
+	}
+
 	public PriorityBlock(PriorityBlock node) {
 		super(node);
 		this.assoc = node.assoc;

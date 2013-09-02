@@ -190,9 +190,13 @@ public class JavaSymbolicKRun implements KRun {
         TermContext termContext = new TermContext(definition, fs);
         ConstrainedTerm initialTerm = new ConstrainedTerm(Term.of(cfg, definition), termContext);
         ConstrainedTerm targetTerm = new ConstrainedTerm(Term.of(cfg, definition), termContext);
-
-
         List<Rule> claims = Collections.emptyList();
+        if (bound == null) {
+            bound = -1;
+        }
+        if (depth == null) {
+            depth = -1;
+        }
 
         List<SearchResult> searchResults = new ArrayList<SearchResult>();
         List<ConstrainedTerm> hits = symbolicRewriter.search(initialTerm, targetTerm, claims, bound, depth);
@@ -240,7 +244,7 @@ public class JavaSymbolicKRun implements KRun {
         List<SearchResult> searchResults = new ArrayList<SearchResult>();
         List<GeneratorResult> generatedPrograms = new ArrayList<GeneratorResult>();
 
-        List<ConstrainedTerm> hits = symbolicRewriter.search(initialTerm, targetTerm, claims, bound, depth, true);
+        List<ConstrainedTerm> hits = symbolicRewriter.search(initialTerm, targetTerm, claims, bound, depth);
 
         for (ConstrainedTerm result : hits ) {
             //reconstruct the generated program
