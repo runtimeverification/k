@@ -1,6 +1,6 @@
 require "builtins.k"
 require "modules/substitution.k"
-require "simplification.k"
+// require "simplification.k"
 
 module SYMBOLIC-SYNTAX
   // This is a module where productions will be generated at runtime
@@ -13,7 +13,7 @@ module SYMBOLIC-K
   imports BUILTIN-HOOKS
   imports ID-HOOKS
   imports FREE-VARS
-  imports SIMPLIFICATION
+//  imports SIMPLIFICATION
 
   syntax Bool ::= "forall" Set "." Bool [binder]
   syntax Bool ::= "exists" Set "." Bool [binder]
@@ -64,9 +64,9 @@ module SYMBOLIC-K
     +String Consts2SMTLib(S)
   rule Consts2SMTLib(.Set) => ""
 
-  syntax String ::= "#lib" [function]
-  rule #lib => "(declare-fun gcd (Int Int) Int)\n (define-fun minInt ((x Int) (y Int)) Int (ite (< x y) x y) )\n"
-  syntax Int ::= "min-Int" "(" Int "," Int ")" [function, smtlib(minInt)]
+//  syntax String ::= "#lib" [function]
+//  rule #lib => "(declare-fun gcd (Int Int) Int)\n (define-fun minInt ((x Int) (y Int)) Int (ite (< x y) x y) )\n"
+//  syntax Int ::= "min-Int" "(" Int "," Int ")" [function, smtlib(minInt)]
 
   syntax String ::= "SMTLibQuery" "(" Bool ")" [klabel(SMTLibQuery), function]
   rule
@@ -74,7 +74,7 @@ module SYMBOLIC-K
   =>
     "(set-logic AUFNIRA)\n"
     +String Consts2SMTLib(freeVariables(B))
-    +String #lib +String "\n"
+//    +String #lib +String "\n"
     +String "(assert " +String K2SMTLib(B) +String ")\n"
     +String "(check-sat)\n"
 
