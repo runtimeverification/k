@@ -89,11 +89,4 @@ public abstract class JavaSymbolicObject extends ASTNode implements Transformabl
     public void setVariableSet(Set<Variable> variableSet) {
         this.variableSet = variableSet;
     }
-
-    //@Override
-    //public abstract boolean equals(Object object);
-
-    //@Override
-    //public abstract int hashCode();
-
 }

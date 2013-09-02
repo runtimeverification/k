@@ -21,11 +21,6 @@ public class Require extends DefinitionItem {
 		value = require.value;
 	}
 
-	public Require(String value) {
-		super();
-		this.value = value;
-	}
-
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
@@ -48,9 +43,4 @@ public class Require extends DefinitionItem {
 	public Require shallowCopy() {
 		return new Require(this);
 	}
-
-	@Override
-        public String toString() {
-          return "require \""+value+"\"";
-        }
 }

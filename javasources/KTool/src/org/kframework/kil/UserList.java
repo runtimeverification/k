@@ -20,12 +20,6 @@ public class UserList extends ProductionItem {
         this.listType = "*";
     }
 
-    public UserList(String sort, String separator, String listType) {
-        this.sort = sort;
-        this.separator = separator;
-        this.listType = listType;
-    }
-
 	public UserList(Element element) {
 		super(element);
 

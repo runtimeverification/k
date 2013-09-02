@@ -2,7 +2,7 @@
 <project basedir="." default="build" name="KTool Build file">
 
 	<property location="javasources" name="javasources" />
-	<property name="version" value="nightly" />
+	<property name="version" value="latest" />
 	<property name="config" value="./tests/config.xml" />
 
 	<target name="java">
@@ -59,7 +59,6 @@
 		<delete dir="${javasources}/parsers/Concrete/include" />
 
 		<delete file="${javasources}/KTool/lib/resources/sdf/*" />
-
 		<antcall target="clean-java" />
 	</target>
 
@@ -68,12 +67,6 @@
 		<delete file="${javasources}/../dist/lib/java/k3.jar" />
 		<delete file="${javasources}/../dist/lib/version.txt" />
 		<delete dir="./k/" />
-		<delete>
-			<fileset dir="${javasources}/KTool/src/org/kframework/backend/pdmc/pda/buchi/parser">
-				<include name="*" />
-				<exclude name="PromelaBuchiParser.jj" />
-			</fileset>
-		</delete>
 	</target>
 
 	<target name="makeversion">
@@ -88,11 +81,11 @@
 		</tstamp>
 
 		<condition property="k-version" value="nightly build">
-			<equals arg1="${version}" arg2="nightly" />
+			<equals arg1="${version}" arg2="latest" />
 		</condition>
 		<condition property="k-version" value="version ${version}">
 			<not>
-				<equals arg1="${version}" arg2="nightly" />
+				<equals arg1="${version}" arg2="latest" />
 			</not>
 		</condition>
 		<echo message="${version.file}" />

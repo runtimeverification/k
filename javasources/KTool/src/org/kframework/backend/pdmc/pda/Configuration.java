@@ -110,7 +110,7 @@ public class Configuration<Control, Alphabet> {
         @SuppressWarnings("unchecked")
         Stack<Alphabet> stack = (Stack<Alphabet>) this.stack.clone();
         if (head.isProper()) stack.add(head.getLetter());
-        Collections.reverse(stack);
+        Collections.<Control>reverse(stack);
         StringBuilder builder = new StringBuilder();
         builder.append("<");
         builder.append(head.getState().toString());

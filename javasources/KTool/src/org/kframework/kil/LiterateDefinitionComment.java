@@ -13,11 +13,21 @@ public class LiterateDefinitionComment extends DefinitionItem implements Literat
 
 	public LiterateDefinitionComment(Element element) {
 		super(element);
-		initValue(StringUtil.unescape(element.getAttribute(Constants.VALUE_value_ATTR)));
-	}
+		setValue(StringUtil.unescape(element.getAttribute(Constants.VALUE_value_ATTR)));
 
-	public LiterateDefinitionComment(String v) {
-		initValue(v);
+		if (value.startsWith("//"))
+			value = value.substring(2, value.length() - 1); // remove // and \n from beginning and end
+		else
+			value = value.substring(2, value.length() - 2); // remove /* and */ from beginning and end
+
+		if (value.startsWith("@")) {
+			lcType = LiterateCommentType.LATEX;
+			value = value.substring(1);
+		}
+		if (value.startsWith("!")) {
+			lcType = LiterateCommentType.PREAMBLE;
+			value = value.substring(1);
+		}
 	}
 
 	public LiterateDefinitionComment(LiterateDefinitionComment literateDefinitionComment) {
@@ -34,23 +44,6 @@ public class LiterateDefinitionComment extends DefinitionItem implements Literat
 	@Override
 	public ASTNode accept(Transformer transformer) throws TransformerException {
 		return transformer.transform(this);
-	}
-
-	private void initValue(String v) {
-		value = v;
-		if (value.startsWith("//"))
-			value = value.substring(2, value.length() - 1); // remove // and \n from beginning and end
-		else
-			value = value.substring(2, value.length() - 2); // remove /* and */ from beginning and end
-
-		if (value.startsWith("@")) {
-			lcType = LiterateCommentType.LATEX;
-			value = value.substring(1);
-		}
-		if (value.startsWith("!")) {
-			lcType = LiterateCommentType.PREAMBLE;
-			value = value.substring(1);
-		}
 	}
 
 	public void setValue(String value) {
@@ -73,6 +66,9 @@ public class LiterateDefinitionComment extends DefinitionItem implements Literat
 
 	@Override
 	public String toString() {
-		return "/*"+value+"*/";
+		String shortStr = value;
+		if (value.indexOf("\n") > 0)
+			value.substring(0, value.indexOf("\n") - 1);
+		return shortStr;
 	}
 }

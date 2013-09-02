@@ -25,16 +25,6 @@ public class Hole extends Term {
     }
 
     @Override
-    public boolean equals(Object object) {
-        return this == object;
-    }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
-    @Override
     public String toString() {
         return "HOLE";
     }

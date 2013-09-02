@@ -9,7 +9,7 @@ import org.junit.Test;
 public class PAutomatonTest {
     @Test
     public void testOf() throws Exception {
-        PAutomaton automaton = PAutomaton.of("" +
+        PAutomaton<String,String> automaton = PAutomaton.of("" +
                 "p a <p,dummy1>;" +
                 "p b <p,dummy2>;" +
                 "<p,dummy1> b p;" +
@@ -29,9 +29,9 @@ public class PAutomatonTest {
                 "<p,dummy2> a p;" +
                 "p;" +
                 "p";
-        PAutomaton auto = PAutomaton.of(aut);
+        PAutomaton<String, String> auto = PAutomaton.of(aut);
         String automaton = auto.toString();
-        PAutomaton auto1 = PAutomaton.of(automaton);
+        PAutomaton<String, String> auto1 = PAutomaton.of(automaton);
         Assert.assertEquals(automaton,auto1.toString());
     }
 }

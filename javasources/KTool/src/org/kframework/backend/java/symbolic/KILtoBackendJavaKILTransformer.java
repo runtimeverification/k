@@ -29,27 +29,14 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.java.util.KSorts;
 import org.kframework.backend.symbolic.SymbolicBackend;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Attribute;
-import org.kframework.kil.BoolBuiltin;
-import org.kframework.kil.DataStructureSort;
-import org.kframework.kil.GenericToken;
-import org.kframework.kil.IntBuiltin;
-import org.kframework.kil.Module;
-import org.kframework.kil.Production;
-import org.kframework.kil.StringBuiltin;
+import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
-import java.util.ArrayList;
+import java.util.*;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -170,7 +157,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         Variable variable = null;
         if (!list.isEmpty()
                 && list.get(list.size() - 1) instanceof org.kframework.kil.Variable
-                && list.get(list.size() - 1).getSort().equals(org.kframework.kil.KSorts.K)) {
+                && list.get(list.size() - 1).getSort().equals(KSorts.K)) {
             variable = (Variable) list.remove(list.size() - 1).accept(this);
         }
 
@@ -190,7 +177,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         Variable variable = null;
         if (!list.isEmpty()
                 && list.get(list.size() - 1) instanceof org.kframework.kil.Variable
-                && list.get(list.size() - 1).getSort().equals(org.kframework.kil.KSorts.KLIST)) {
+                && list.get(list.size() - 1).getSort().equals(KSorts.KLIST)) {
             variable = (Variable) list.remove(list.size() - 1).accept(this);
         }
 
@@ -396,11 +383,11 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             return new Variable(node.getName(), Kind.CELL_COLLECTION.toString());
         DataStructureSort dataStructureSort = context.dataStructureSortOf(node.getSort());
         if (dataStructureSort != null) {
-            if (dataStructureSort.type().equals(org.kframework.kil.KSorts.LIST))
+            if (dataStructureSort.type().equals(KSorts.LIST))
                 return new Variable(node.getName(), KSorts.LIST);
-            if (dataStructureSort.type().equals(org.kframework.kil.KSorts.MAP))
+            if (dataStructureSort.type().equals(KSorts.MAP))
                 return new Variable(node.getName(), KSorts.MAP);
-            if (dataStructureSort.type().equals(org.kframework.kil.KSorts.SET))
+            if (dataStructureSort.type().equals(KSorts.SET))
                 return new Variable(node.getName(), KSorts.SET);
         }
         return new Variable(node.getName(), node.getSort());

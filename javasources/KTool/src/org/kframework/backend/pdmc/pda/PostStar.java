@@ -14,12 +14,11 @@ import java.util.Stack;
  * @author Traian
  */
 public class PostStar {
-    public static <Control, Alphabet> PAutomaton<PAutomatonState<Control, Alphabet>, Alphabet> postStar(
+    public static <Control, Alphabet> PAutomaton<Control, Alphabet> postStar(
             PushdownSystemInterface<Control, Alphabet> pds,
-            PAutomaton<PAutomatonState<Control, Alphabet>, Alphabet> initial) {
+            PAutomaton<Control, Alphabet> initial) {
         Set<Transition<PAutomatonState<Control, Alphabet>, Alphabet>> trans = new HashSet<Transition<PAutomatonState<Control, Alphabet>, Alphabet>>();
-        IndexedTransitions<PAutomatonState<Control, Alphabet>, Alphabet> rel =
-                new IndexedTransitions<PAutomatonState<Control, Alphabet>, Alphabet>();
+        IndexedTransitions<Control, Alphabet> rel = new IndexedTransitions<Control, Alphabet>();
         for (Set<Transition<PAutomatonState<Control, Alphabet>, Alphabet>> transitions : initial.getTransitions()) {
             for (Transition<PAutomatonState<Control, Alphabet>, Alphabet> transition : transitions) {
                 if (transition.getStart().getLetter() == null) {
@@ -78,6 +77,6 @@ public class PostStar {
                 }
             }
         }
-        return new PAutomaton<PAutomatonState<Control, Alphabet>, Alphabet>(rel.getTransitions(), initial.initialState(), initial.getFinalStates());
+        return new PAutomaton<Control, Alphabet>(rel.getTransitions(), initial.initialState(), initial.getFinalStates());
     }
 }

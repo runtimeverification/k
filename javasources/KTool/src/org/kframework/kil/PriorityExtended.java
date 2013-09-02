@@ -18,7 +18,7 @@ public class PriorityExtended extends ModuleItem {
 	/** Highest priority block comes first */
 	java.util.List<PriorityBlockExtended> priorityBlocks;
 
-	public PriorityExtended(java.util.List<PriorityBlockExtended> priorities) {
+	public PriorityExtended(Sort sort, java.util.List<PriorityBlockExtended> priorities) {
 		super();
 		this.priorityBlocks = priorities;
 	}

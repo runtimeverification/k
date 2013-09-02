@@ -98,14 +98,9 @@ public abstract class PrePostTransformer implements Transformer {
         }
 
         if (cellCollection.hasFrame()) {
-            boolean isStar = cellCollection.isStar();
             Variable frame;
             Term transformedFrame = (Term) cellCollection.frame().accept(this);
             if (transformedFrame instanceof CellCollection) {
-                isStar = isStar || ((CellCollection) transformedFrame).isStar();
-                if (cells == cellCollection.cellMap()) {
-                    cells = HashMultimap.create(cellCollection.cellMap());
-                }
                 cells.putAll(((CellCollection) transformedFrame).cellMap());
                 frame = ((CellCollection) transformedFrame).hasFrame() ?
                         ((CellCollection) transformedFrame).frame() : null;
@@ -114,7 +109,7 @@ public abstract class PrePostTransformer implements Transformer {
             }
 
             if (cells != cellCollection.cellMap() || frame != cellCollection.frame()) {
-                cellCollection = new CellCollection(cells, frame, isStar);
+                cellCollection = new CellCollection(cells, frame, cellCollection.isStar());
             }
         } else {
             if (cells != cellCollection.cellMap()) {

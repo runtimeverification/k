@@ -12,17 +12,17 @@ public class PostStarTest {
     @Test
     public void testPostStar() throws Exception {
 
-        PAutomaton automaton = PAutomaton.of("" +
+        PAutomaton<String, String> automaton = PAutomaton.of("" +
                 "p a <p,out1>;" +
                 "<p,out1> a <p,out2>;" +
                 "p;" +
                 "<p,out2>");
-        PushdownSystem pds = PushdownSystem.of("" +
+        PushdownSystem<String, String> pds = PushdownSystem.of("" +
                 "<p, a> => <q, b a>;\n" +
                 "<q, b> => <r, c a>;\n" +
                 "<r, c> => <p, b>;\n" +
                 "<p, b> => <p>;");
-        PAutomaton aPostStar = PostStar.postStar(pds, automaton);
+        PAutomaton<String,String> aPostStar = PostStar.<String, String>postStar(pds, automaton);
         String expectedPostStar = PAutomaton.of("p a <p,out1>;" +
                 "<p,out1> a <p,out2>;" +
                 "p a <q,b>;" +

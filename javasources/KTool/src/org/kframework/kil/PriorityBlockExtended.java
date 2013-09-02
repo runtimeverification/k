@@ -54,12 +54,6 @@ public class PriorityBlockExtended extends ASTNode {
 		this.productions.addAll(node.productions);
 	}
 
-	public PriorityBlockExtended(java.util.List<KLabelConstant> productions) {
-		super();
-		this.assoc = "";
-		this.productions.addAll(productions);
-	}
-
 	@Override
 	public String toString() {
 		String content = "";

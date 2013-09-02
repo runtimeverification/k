@@ -69,15 +69,13 @@ public class KompileFrontEnd {
         GlobalSettings.matchingLogic = cmd.hasOption("ml");
         GlobalSettings.NOSMT = cmd.hasOption("nosmt");
         
+		// set verbose
 		if (cmd.hasOption("verbose"))
 			GlobalSettings.verbose = true;
 
+		// set fast kast option
 		if (cmd.hasOption("fastKast")) {
 			GlobalSettings.fastKast = true;
-		}
-
-		if (cmd.hasOption("fastBasic")) {
-			GlobalSettings.fastBasic = true;
 		}
 
 		if (cmd.hasOption("nofilename"))

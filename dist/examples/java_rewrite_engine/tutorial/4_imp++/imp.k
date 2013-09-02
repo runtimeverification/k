@@ -1,6 +1,5 @@
 require "builtins/list.k"
 require "builtins/map.k"
-require "io/io.k"
 
 
 module IMP-SYNTAX
@@ -38,7 +37,6 @@ module IMP
   imports IMP-SYNTAX
   imports LIST
   imports MAP
-  imports IO
 
   syntax KResult ::= Int | Bool | String
 
@@ -52,8 +50,10 @@ module IMP
                     </thread>
                   </threads>
                   <store color="red"> .MyMap </store>
-                  <in color="magenta" stream="stdin"> .MyList </in>
-                  <out color="Orchid" stream="stdout"> .MyList </out>
+                  //<in color="magenta" stream="stdin"> .MyList </in>
+                  //<out color="Orchid" stream="stdout"> .MyList </out>
+                  <in color="magenta"> .MyList </in>
+                  <out color="Orchid"> .MyList </out>
                 </T>
 
 // AExp
@@ -115,4 +115,3 @@ module IMP
   rule .Stmts => .                  [structural]
   rule S:Stmt Ss:Stmts => S ~> Ss   [structural]
 endmodule
-
