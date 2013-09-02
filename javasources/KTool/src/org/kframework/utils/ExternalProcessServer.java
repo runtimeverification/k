@@ -1,4 +1,4 @@
-package org.kframework.parser.utils;
+package org.kframework.utils;
 
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;

@@ -1,5 +1,7 @@
 package org.kframework.parser.utils;
 
+import org.kframework.utils.ExternalProcessServer;
+
 import java.io.IOException;
 
 public final class SglrServer {
