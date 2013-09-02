@@ -24,6 +24,11 @@ public class KCheckOptionsParser {
 			main.addOption(def);
 			main.addOption(rl);
 
+			// program for loading configuration
+			OptionGroup pgmG = new OptionGroup();
+			Option pgm = new Option("p", "pgm", true, "program file used to build the initial configuration ");
+			pgmG.addOption(pgm);
+			
 			// help option
 			OptionGroup verb = new OptionGroup();
 			Option help = new Option("h", "help", false, "prints this message and exits");
@@ -38,6 +43,7 @@ public class KCheckOptionsParser {
 			options.addOptionGroup(main);
 			options.addOptionGroup(verb);
 			options.addOptionGroup(simplify);
+			options.addOptionGroup(pgmG);
 		}
 
 		public CommandLine parse(String[] cmd) {

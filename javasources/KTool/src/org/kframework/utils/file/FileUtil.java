@@ -13,7 +13,7 @@ public class FileUtil {
 
 	public static void saveInFile(String file, String content) {
 		try {
-			File file1 = new File(file);
+			File file1 = new File(new File(file).getAbsolutePath()); // to avoid null from getParent()
 			File f2 = new File(file1.getParent());
 			f2.mkdirs();
 			// file1.createNewFile();

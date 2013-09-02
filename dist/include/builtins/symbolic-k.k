@@ -15,8 +15,8 @@ module SYMBOLIC-K
   imports FREE-VARS
 //  imports SIMPLIFICATION
 
-  syntax Bool ::= "forall" Set "." Bool [binder, function]
-  syntax Bool ::= "exists" Set "." Bool [binder, function]
+  syntax Bool ::= "forall" Set "." Bool [binder]
+  syntax Bool ::= "exists" Set "." Bool [binder]
   syntax KLabel ::= "#symEqualitySort"
 
   /* The following simplification rules assume non-empty sorts. */
@@ -65,7 +65,8 @@ module SYMBOLIC-K
   rule Consts2SMTLib(.Set) => ""
 
 //  syntax String ::= "#lib" [function]
-//  rule #lib => "(declare-fun gcd (Int Int) Int)\n"
+//  rule #lib => "(declare-fun gcd (Int Int) Int)\n (define-fun minInt ((x Int) (y Int)) Int (ite (< x y) x y) )\n"
+//  syntax Int ::= "min-Int" "(" Int "," Int ")" [function, smtlib(minInt)]
 
   syntax String ::= "SMTLibQuery" "(" Bool ")" [klabel(SMTLibQuery), function]
   rule
@@ -107,7 +108,7 @@ module SYMBOLIC-K
   rule K2Sort(_:#Float) => "Float"
   rule K2Sort(_:#String) => "String"
   rule K2Sort(_:#Id) => "Id"
-//  rule K2Sort(_:Array) => "(Array Int Int)" // support only integer arrays
+  rule K2Sort(_:Array) => "(Array Int Int)" // support only integer arrays
 
   // declare isSymbolicSort for List, Set, Bag and Map
   syntax K ::= "isSymbolicList" "(" List ")" [prefixlabel(isSymbolicList), predicate]
