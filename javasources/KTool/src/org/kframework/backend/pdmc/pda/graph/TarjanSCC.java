@@ -4,6 +4,9 @@ import java.util.*;
 
 /**
  * @author Traian
+ *
+ * @see <a href="http://en.wikipedia.org/wiki/Tarjan's_strongly_connected_components_algorithm">The rendition on
+ * Wikipedia of Tarjan's Strongly Connected Components algorithm.</a>
  */
 public class TarjanSCC<Data, Label> {
     Map<Data,TarjanSCCVertex> vertexSet;
