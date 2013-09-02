@@ -21,4 +21,9 @@ public class Identifier extends Expression {
     public boolean evaluate(Evaluator evaluator) {
         return evaluator.evaluate(this);
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

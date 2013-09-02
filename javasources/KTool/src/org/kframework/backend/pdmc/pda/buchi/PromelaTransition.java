@@ -20,4 +20,9 @@ public class PromelaTransition {
     public BuchiState getState() {
         return state;
     }
+
+    @Override
+    public String toString() {
+        return ":: (" + condition + ") -> goto " + state;
+    }
 }

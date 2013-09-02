@@ -11,6 +11,11 @@ public class ConstantExpression extends Expression {
     }
 
     @Override
+    public String toString() {
+        return String.valueOf(value);
+    }
+
+    @Override
     public boolean evaluate(Evaluator evaluator) {
         return value;
     }

@@ -30,6 +30,11 @@ public class BuchiState {
         return right == INIT;
     }
 
+    @Override
+    public String toString() {
+        return left + "_" + right;
+    }
+
     public static BuchiState of(Token id) {
         String[] two = id.image.split("_");
         assert two.length == 2 : "Each state should have two parts";

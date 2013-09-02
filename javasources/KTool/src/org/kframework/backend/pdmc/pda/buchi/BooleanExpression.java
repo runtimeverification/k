@@ -7,6 +7,20 @@ import org.kframework.backend.pdmc.pda.buchi.parser.PromelaBuchiParserConstants;
  */
 public class BooleanExpression extends Expression implements PromelaBuchiParserConstants {
     private final Expression rand1;
+
+    @Override
+    public String toString() {
+        switch (opCode) {
+            case LNOT:
+                return "!" + rand1.toString();
+            case LAND:
+                return rand1.toString() + " && " + rand2.toString();
+            case LOR:
+                return rand1.toString() + " || " + rand2.toString();
+        }
+        return super.toString();
+    }
+
     private final Expression rand2;
     private final int opCode;
 
