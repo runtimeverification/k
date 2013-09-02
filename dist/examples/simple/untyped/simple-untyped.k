@@ -756,7 +756,7 @@ evaluated (recall that \texttt{print} is variadic).  We append each of
 its evaluated arguments to the output buffer, and discard the residual
 \texttt{print} statement with an empty list of arguments. */
 
-  rule <k> print(V:Val, Es => Es); ...</k> <out>... . => ListItem(V) </out>
+  rule <k> print(V:Val, Es:Exps => Es); ...</k> <out>... . => ListItem(V) </out>
     [print]
   rule print(.Vals); => .  [structural]
 

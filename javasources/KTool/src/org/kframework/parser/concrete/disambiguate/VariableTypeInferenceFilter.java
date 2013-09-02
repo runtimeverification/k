@@ -1,5 +1,6 @@
 package org.kframework.parser.concrete.disambiguate;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -7,7 +8,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Sentence;
+import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicTransformer;
@@ -25,6 +28,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 
 	@Override
 	public ASTNode transform(Sentence r) throws TransformerException {
+		r = (Sentence) r.accept(new RemoveDuplicateVariables(context));
 
 		CollectVariablesVisitor vars = new CollectVariablesVisitor(context);
 		r.accept(vars);
@@ -66,13 +70,12 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 			CollectExpectedVariablesVisitor vars2 = new CollectExpectedVariablesVisitor(context);
 			r.accept(vars2);
 
-			// TODO: GLUB for each variant
 			Set<VarHashMap> solutions = new HashSet<VarHashMap>();
 			String fails = null;
 			Set<String> failsAmb = null;
 			String failsAmbName = null;
 			for (VarHashMap variant : vars2.vars) {
-				// take each solution and do GLUB on every variable
+				// take each solution and do GLB on every variable
 				VarHashMap solution = new VarHashMap();
 				for (Map.Entry<String, Set<String>> entry : variant.entrySet()) {
 					Set<String> mins = new HashSet<String>();
@@ -122,6 +125,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 						String msg = "Could not infer a sort for variable '" + fails + "' to match every location.";
 						throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getFilename(), r.getLocation()));
 					} else {
+						// Failure when in the same solutionn I can't find a unique sort for a specific variable.
 						String msg = "Could not infer a unique sort for variable '" + failsAmbName + "'.";
 						msg += " Possible sorts: ";
 						for (String vv1 : failsAmb)
@@ -148,17 +152,77 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 						GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.COMPILER, msg, r.getFilename(), r.getLocation()));
 					}
 				} else {
-					System.err.println("Multiple solutions in rule: " + r.getFilename() + ":" + r.getLocation());
+					Map<String, Set<String>> collect = new HashMap<String, Set<String>>();
+					for (VarHashMap sol : solutions) {
+						for (Map.Entry<String, Set<String>> s : sol.entrySet())
+							if (collect.containsKey(s.getKey())) {
+								collect.get(s.getKey()).addAll(s.getValue());
+							} else {
+								collect.put(s.getKey(), new HashSet<String>(s.getValue()));
+							}
+					}
+					for (Map.Entry<String, Set<String>> s : collect.entrySet()) {
+						if (s.getValue().size() > 1) {
+							String msg = "Could not infer a unique sort for variable '" + s.getKey() + "'.";
+							msg += " Possible sorts: ";
+							for (String vv1 : s.getValue())
+								msg += vv1 + ", ";
+							msg = msg.substring(0, msg.length() - 2);
+							throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getFilename(), r.getLocation()));
+						}
+					}
+					// The above loop looks for variables that can have multiple sorts, collected from multiple solutions.
+					// In rare cases (couldn't think of one right now) it may be that the
+					// solution may be different because of different variable names
+					assert false : "An error message should have been thrown here in the above loop.";
 				}
 			}
 		}
 
 		// type inference and error reporting
 		// -- Error: type mismatch for variable... (when the declared variable doesn't fit everywhere)
-		// -- Error: could not infer a sort for variable... (when the intersection is void)
-		// -- Error: could not infer a unique sort for variable... (when there isn't a maximum sort in the intersection)
+		// -- Error: could not infer a sort for variable... (when there is no solution left)
+		// -- Error: could not infer a unique sort for variable... (when there is more than one solution)
 		// -- Warning: untyped variable, assuming sort...
 
 		return r;
+	}
+
+	/**
+	 * Removes ambiguities of the type amb(M:Map, M:MapItem)
+	 * Chose the maximum
+	 * @author Radu
+	 *
+	 */
+	public class RemoveDuplicateVariables extends BasicTransformer {
+		public RemoveDuplicateVariables(Context context) {
+			super(RemoveDuplicateVariables.class.toString(), context);
+		}
+
+		public ASTNode transform(Ambiguity amb) throws TransformerException {
+			Set<Term> maxterms = new HashSet<Term>();
+			for (Term t : amb.getContents()) {
+				if (t instanceof Variable) {
+					// for variables only, find maximum
+					boolean max = true;
+					for (Term t1 : amb.getContents()) {
+						if (t1 != t && t1 instanceof Variable && context.isSubsorted(t1.getSort(), t.getSort())) {
+							max = false;
+							break;
+						}
+					}
+					if (max)
+						maxterms.add(t);
+				} else
+					maxterms.add(t);
+			}
+
+			if (maxterms.size() == 1) {
+				return maxterms.iterator().next().accept(this);
+			} else if (maxterms.size() > 1)
+				amb.setContents(new ArrayList<Term>(maxterms));
+
+			return super.transform(amb);
+		}
 	}
 }

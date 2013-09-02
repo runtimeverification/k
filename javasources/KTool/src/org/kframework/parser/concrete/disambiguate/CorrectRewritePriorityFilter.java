@@ -7,6 +7,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSequence;
+import org.kframework.kil.KSorts;
 import org.kframework.kil.MapItem;
 import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.Rewrite;
@@ -31,11 +32,19 @@ public class CorrectRewritePriorityFilter extends BasicTransformer {
 
 	public ASTNode transform(Ambiguity amb) throws TransformerException {
 		List<Term> children = new ArrayList<Term>();
+		boolean klist = false;
+		Term krw = null;
 		for (Term t : amb.getContents()) {
 			if (t instanceof Rewrite) {
+				if (t.getSort().equals(KSorts.KLIST))
+					klist = true;
+				if (t.getSort().equals(KSorts.K))
+					krw = t;
 				children.add(t);
 			}
 		}
+		if (klist)
+			children.remove(krw);
 
 		if (children.size() == 0 || children.size() == amb.getContents().size())
 			return super.transform(amb);
@@ -47,11 +56,11 @@ public class CorrectRewritePriorityFilter extends BasicTransformer {
 
 	@Override
 	public ASTNode transform(KSequence ks) throws TransformerException {
-        if (ks.getContents().size() == 2) {
-		    ks.getContents().set(0, (Term) ks.getContents().get(0).accept(secondFilter));
-		    ks.getContents().set(1, (Term) ks.getContents().get(1).accept(secondFilter));
-        }
-        assert ks.getContents().size() <= 2;
+		if (ks.getContents().size() == 2) {
+			ks.getContents().set(0, (Term) ks.getContents().get(0).accept(secondFilter));
+			ks.getContents().set(1, (Term) ks.getContents().get(1).accept(secondFilter));
+		}
+		assert ks.getContents().size() <= 2;
 
 		return super.transform(ks);
 	}
