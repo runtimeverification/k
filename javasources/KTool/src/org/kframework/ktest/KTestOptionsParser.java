@@ -55,6 +55,11 @@ public class KTestOptionsParser {
 		Option results = new Option(Configuration.RESULTS_OPTION, true, "Directory containing I/O for programs or, in case the -config option is used, a root directory for the I/O for programs");
 		resultsGroup.addOption(results);
 		
+		// --skip
+		OptionGroup skipGroup = new OptionGroup();
+		Option skip = new Option(Configuration.SKIP_OPTION, true, "The list of steps separated by whitespace to be skipped (" + Configuration.KOMPILE_STEP + "/" + Configuration.PDF_STEP + "/" + Configuration.PROGRAMS_STEP + ")");
+		skipGroup.addOption(skip);
+		
 		// add all option groups to ktest options
 		options.addOptionGroup(helpGroup);
 		options.addOptionGroup(configGroup);
@@ -63,6 +68,7 @@ public class KTestOptionsParser {
 		options.addOptionGroup(extensionsGroup);
 		options.addOptionGroup(excludeGroup);
 		options.addOptionGroup(resultsGroup);
+		options.addOptionGroup(skipGroup);
 	}
 	
 	// parse the command line arguments

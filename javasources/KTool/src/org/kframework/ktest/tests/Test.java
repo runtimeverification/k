@@ -551,12 +551,6 @@ public class Test implements Comparable<Test> {
 			i++;
 		}
 
-		/*
-		 * Before running the definition, delete the temporary files if they
-		 * exists
-		 */
-		deleteFolder(new File(getCompiled()));
-
 		return new Task(arguments, null, homeDir);
 	}
 

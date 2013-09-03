@@ -42,8 +42,8 @@ public class KTest {
 
 		// Help
 		if (cmd.hasOption(Configuration.HELP_OPTION))
-			KTestOptionsParser.helpExit(op.getHelp(),
-					Configuration.KTEST, op.getOptions());
+			KTestOptionsParser.helpExit(op.getHelp(), Configuration.KTEST,
+					op.getOptions());
 
 		// Version
 		if (cmd.hasOption(Configuration.VERSION_OPTION)) {
@@ -89,7 +89,24 @@ public class KTest {
 		if (cmd.hasOption(Configuration.CONFIG_OPTION)) {
 			Configuration.CONFIG = cmd
 					.getOptionValue(Configuration.CONFIG_OPTION);
-		} 
+		}
+
+		// Resolve skip options
+		if (cmd.hasOption(Configuration.SKIP_OPTION)) {
+			String[] stepsToSkip = cmd
+					.getOptionValue(Configuration.SKIP_OPTION).split("\\s+");
+			for (int i = 0; i < stepsToSkip.length; i++) {
+				if (stepsToSkip[i].equals(Configuration.KOMPILE_STEP)) {
+					Configuration.KOMPILE = false;
+				}
+				if (stepsToSkip[i].equals(Configuration.PDF_STEP)) {
+					Configuration.PDF = false;
+				}
+				if (stepsToSkip[i].equals(Configuration.PROGRAMS_STEP)) {
+					Configuration.PROGRAMS = false;
+				}
+			}
+		}
 
 		// sanity checks
 		if (Configuration.CONFIG != null
@@ -101,12 +118,10 @@ public class KTest {
 							"Please provide a root directory for the configuration file.",
 							"command line", "System file."));
 		}
-		if (new File(Configuration.KDEF).isDirectory() && Configuration.CONFIG == null) {
-			GlobalSettings.kem
-			.register(new KException(
-					ExceptionType.ERROR,
-					KExceptionGroup.CRITICAL,
-					"Testing data missing.",
+		if (new File(Configuration.KDEF).isDirectory()
+				&& Configuration.CONFIG == null) {
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+					KExceptionGroup.CRITICAL, "Testing data missing.",
 					"command line", "System file."));
 		}
 
@@ -119,12 +134,16 @@ public class KTest {
 		// execution
 		if (Configuration.SINGLE_DEF_MODE) {
 			List<Test> alltests = new LinkedList<Test>();
-			
-			List<String> pgmsFolder = Configuration.PGM_DIR == null ? new LinkedList<String>() : Arrays.asList(Configuration.PGM_DIR.split("\\s+"));
-			List<String> resultsFolder = Configuration.RESULTS_FOLDER == null ? new LinkedList<String>() : Arrays.asList(Configuration.RESULTS_FOLDER.split("\\s+"));
-			Test test = new Test(Configuration.KDEF, pgmsFolder, resultsFolder, Configuration.EXTENSIONS, Configuration.EXCLUDE_PROGRAMS, System.getProperty("user.dir"));
+
+			List<String> pgmsFolder = Configuration.PGM_DIR == null ? new LinkedList<String>()
+					: Arrays.asList(Configuration.PGM_DIR.split("\\s+"));
+			List<String> resultsFolder = Configuration.RESULTS_FOLDER == null ? new LinkedList<String>()
+					: Arrays.asList(Configuration.RESULTS_FOLDER.split("\\s+"));
+			Test test = new Test(Configuration.KDEF, pgmsFolder, resultsFolder,
+					Configuration.EXTENSIONS, Configuration.EXCLUDE_PROGRAMS,
+					System.getProperty("user.dir"));
 			alltests.add(test);
-			
+
 			testing(0, new File(System.getProperty("user.dir")), alltests);
 		} else {
 			testConfig(Configuration.CONFIG, Configuration.KDEF,
@@ -138,22 +157,22 @@ public class KTest {
 	 * @param path
 	 * @return the absolute path of a file
 	 */
-//	private static String resolveFullPath(String path) {
-//		
-//		if (new File(path).isAbsolute()){
-//			return new File(path).getAbsolutePath();
-//		}
-//		
-//		if (new File(path).exists())
-//			return new File(path).getAbsolutePath();
-//		else
-//			GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-//					KExceptionGroup.CRITICAL, "Unable to find " + path,
-//					"command line", "System file."));
-//
-//		// this will never happen
-//		return null;
-//	}
+	// private static String resolveFullPath(String path) {
+	//
+	// if (new File(path).isAbsolute()){
+	// return new File(path).getAbsolutePath();
+	// }
+	//
+	// if (new File(path).exists())
+	// return new File(path).getAbsolutePath();
+	// else
+	// GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+	// KExceptionGroup.CRITICAL, "Unable to find " + path,
+	// "command line", "System file."));
+	//
+	// // this will never happen
+	// return null;
+	// }
 
 	private static List<Test> parseXMLConfig(String configFile,
 			String rootDefDir, String rootProgramsDir, String rootResultsDir)
@@ -161,13 +180,14 @@ public class KTest {
 		List<Test> alltests = new LinkedList<Test>();
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-		
+
 		if (!new File(configFile).exists()) {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-			KExceptionGroup.CRITICAL, "File " + configFile + " does not exists",
-			"command line", "System file."));			
+					KExceptionGroup.CRITICAL, "File " + configFile
+							+ " does not exists", "command line",
+					"System file."));
 		}
-		
+
 		System.out.println("Buildfile: " + configFile);
 		Document doc = dBuilder.parse(new File(configFile));
 		Element root = doc.getDocumentElement();
@@ -175,7 +195,8 @@ public class KTest {
 		NodeList test = root.getElementsByTagName(Configuration.TEST);
 		for (int i = 0; i < test.getLength(); i++)
 			alltests.add(new Test((Element) test.item(i), rootDefDir,
-					rootProgramsDir, rootResultsDir, System.getProperty("user.dir")));
+					rootProgramsDir, rootResultsDir, System
+							.getProperty("user.dir")));
 
 		return alltests;
 	}
@@ -215,8 +236,9 @@ public class KTest {
 		for (Test test : alltests) {
 			Task def = test.getDefinitionTask(homeDir);
 			definitions.put(test, def);
-			Execution.execute(def);
-
+			if (Configuration.KOMPILE) {
+				Execution.execute(def);
+			}
 			if (test.runOnOS()) {
 				Task unixOnlyScript = test.getUnixOnlyScriptTask(homeDir);
 				if (unixOnlyScript != null) {
@@ -225,25 +247,32 @@ public class KTest {
 			}
 			i++;
 		}
-		System.out.println("(" + i + ")");
+		if (Configuration.KOMPILE) {
+			System.out.println("(" + i + ")");
+		} else {
+			System.out.println("\nSkipped " + i + " definitions");
+		}
 		Execution.finish();
 
-		// report
-		for (Entry<Test, Task> entry : definitions.entrySet()) {
-			entry.getKey().reportCompilation(entry.getValue());
-		}
-
-		// console display
-		String kompileStatus = "\n";
-		for (Entry<Test, Task> entry : definitions.entrySet()) {
-			if (!entry.getKey().compiled(entry.getValue())) {
-				kompileStatus += "FAIL: " + entry.getKey().getLanguage() + "\n";
-				exitCode = 1;
+		if (Configuration.KOMPILE) {
+			// report
+			for (Entry<Test, Task> entry : definitions.entrySet()) {
+				entry.getKey().reportCompilation(entry.getValue());
 			}
+
+			// console display
+			String kompileStatus = "\n";
+			for (Entry<Test, Task> entry : definitions.entrySet()) {
+				if (!entry.getKey().compiled(entry.getValue())) {
+					kompileStatus += "FAIL: " + entry.getKey().getLanguage()
+							+ "\n";
+					exitCode = 1;
+				}
+			}
+			if (kompileStatus.equals("\n"))
+				kompileStatus = "SUCCESS";
+			System.out.println(kompileStatus);
 		}
-		if (kompileStatus.equals("\n"))
-			kompileStatus = "SUCCESS";
-		System.out.println(kompileStatus);
 
 		// compile pdf definitions
 		i = 0;
@@ -253,31 +282,40 @@ public class KTest {
 			// also compile pdf if set
 			if (test.getPdf()) {
 				Task pdfDef = test.getPdfDefinitionTask(homeDir);
-				pdfDefinitions.put(test, pdfDef);
-				Execution.execute(pdfDef);
+				if (Configuration.PDF) {
+					pdfDefinitions.put(test, pdfDef);
+					Execution.execute(pdfDef);
+				}
 				i++;
 			}
 		}
-		System.out.println("(" + i + ")");
+		if (Configuration.PDF) {
+			System.out.println("(" + i + ")");
+		} else {
+			System.out.println("\nSkipped " + i + " definitions");
+		}
 		Execution.finish();
-		// create XML report
-		for (Entry<Test, Task> entry : pdfDefinitions.entrySet()) {
-			entry.getKey().reportPdfCompilation(entry.getValue());
-		}
 
-		// console messages
-		String pdfKompileStatus = "\n";
-		for (Entry<Test, Task> entry : pdfDefinitions.entrySet()) {
-			if (!entry.getKey().compiledPdf(entry.getValue())) {
-				pdfKompileStatus += "FAIL: " + entry.getKey().getLanguage()
-
-				+ "\n";
-				exitCode = 1;
+		if (Configuration.PDF) {
+			// create XML report
+			for (Entry<Test, Task> entry : pdfDefinitions.entrySet()) {
+				entry.getKey().reportPdfCompilation(entry.getValue());
 			}
+
+			// console messages
+			String pdfKompileStatus = "\n";
+			for (Entry<Test, Task> entry : pdfDefinitions.entrySet()) {
+				if (!entry.getKey().compiledPdf(entry.getValue())) {
+					pdfKompileStatus += "FAIL: " + entry.getKey().getLanguage()
+
+					+ "\n";
+					exitCode = 1;
+				}
+			}
+			if (pdfKompileStatus.equals("\n"))
+				pdfKompileStatus = "SUCCESS";
+			System.out.println(pdfKompileStatus);
 		}
-		if (pdfKompileStatus.equals("\n"))
-			pdfKompileStatus = "SUCCESS";
-		System.out.println(pdfKompileStatus);
 
 		// execute all programs (for which corresponding definitions are
 		// compiled)
@@ -295,29 +333,37 @@ public class KTest {
 				for (Program p : pgms) {
 					Task task = p.getTask(homeDir);
 					all.put(p, task);
-					Execution.tpe.execute(task);
+					if (Configuration.PROGRAMS) {
+						Execution.tpe.execute(task);
+					}
 					i++;
 				}
-				System.out.println("(" + i + ")");
+				if (Configuration.PROGRAMS) {
+					System.out.println("(" + i + ")");
+				} else {
+					System.out.println("\nSkipped " + i + " programs");
+				}
 				Execution.finish();
 
-				// report
-				for (Entry<Program, Task> entry : all.entrySet()) {
-					entry.getKey().reportTest(entry.getValue());
-				}
-
-				// console
-				String pgmOut = "";
-				for (Entry<Program, Task> entry : all.entrySet()) {
-					if (!entry.getKey().success(entry.getValue())) {
-						pgmOut += "FAIL: " + entry.getKey().getProgramPath()
-								+ "\n";
-						exitCode = 1;
+				if (Configuration.PROGRAMS) {
+					// report
+					for (Entry<Program, Task> entry : all.entrySet()) {
+						entry.getKey().reportTest(entry.getValue());
 					}
+
+					// console
+					String pgmOut = "";
+					for (Entry<Program, Task> entry : all.entrySet()) {
+						if (!entry.getKey().success(entry.getValue())) {
+							pgmOut += "FAIL: "
+									+ entry.getKey().getProgramPath() + "\n";
+							exitCode = 1;
+						}
+					}
+					if (pgmOut.equals(""))
+						pgmOut = "SUCCESS";
+					System.out.println(pgmOut);
 				}
-				if (pgmOut.equals(""))
-					pgmOut = "SUCCESS";
-				System.out.println(pgmOut);
 			}
 		}
 
