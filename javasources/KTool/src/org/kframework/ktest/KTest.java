@@ -63,6 +63,8 @@ public class KTest {
 		if (cmd.hasOption(Configuration.PROGRAMS_OPTION)) {
 			Configuration.PGM_DIR = cmd
 					.getOptionValue(Configuration.PROGRAMS_OPTION);
+			// also set the results to be programs folder by default
+			Configuration.RESULTS_FOLDER = Configuration.PGM_DIR;
 		}
 
 		// List of excluded programs

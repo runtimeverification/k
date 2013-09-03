@@ -482,14 +482,6 @@ public class Test implements Comparable<Test> {
 		String name = getReportFilename().replaceFirst("-report.xml", "");
 		name = name.replaceAll("\\.", "/");
 		name = name.replaceFirst("/", ".");
-//		if (reportDir != null)
-//			name = reportDir;
-//		else {
-//			name = new File(language).getParent();
-//		}
-//		if (!tag.equals(""))
-//			name = tag + "/" + name;
-
 		testsuite.setAttribute(Configuration.NAME,
 				name.replaceFirst("/", "\\."));
 		return testsuite;
