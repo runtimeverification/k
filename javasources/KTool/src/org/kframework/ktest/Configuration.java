@@ -67,6 +67,7 @@ public class Configuration {
     public static boolean KOMPILE = true;
     public static boolean KOMPILE_PDF = true;
     public static boolean PROGRAMS = true;
+	public static boolean VERBOSE = false;
 
 	// ktest command line option names
 	public static final String HELP_OPTION = "help";
@@ -78,7 +79,7 @@ public class Configuration {
 	public static final String EXTENSIONS_OPTION = EXTENSIONS2;
 	public static final String RESULTS_OPTION = RESULTS;
     public static final String SKIP_OPTION = "skip";
-	
+	public static final String VERBOSE_OPTION = "verbose";
 	
 	// program name
 	public static final String KTEST = "ktest";

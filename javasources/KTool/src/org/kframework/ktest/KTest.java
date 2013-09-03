@@ -108,6 +108,11 @@ public class KTest {
 			}
 		}
 
+		// Verbose
+		if (cmd.hasOption(Configuration.VERBOSE_OPTION)) {
+			Configuration.VERBOSE = true;
+		}
+		
 		// sanity checks
 		if (Configuration.CONFIG != null
 				&& new File(Configuration.KDEF).isFile()) {
