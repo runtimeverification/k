@@ -147,7 +147,7 @@ public class Test implements Comparable<Test> {
 				// ignore the programs from exclude list
 				boolean excluded = false;
 				for (String exclude : excludePrograms)
-					if (programPath.equals(programsFolder + Configuration.FS
+					if (programPath.equals(programsFolder + Configuration.FILE_SEPARATOR
 							+ exclude))
 						excluded = true;
 				if (excluded)
@@ -191,7 +191,7 @@ public class Test implements Comparable<Test> {
 
 				// custom programPath
 				programPath = programPath.replaceFirst(homeDir
-						+ Configuration.FS, "");
+						+ Configuration.FILE_SEPARATOR, "");
 
 				Program p = new Program(programPath, krunOptions, this, input,
 						output, error);
@@ -233,14 +233,14 @@ public class Test implements Comparable<Test> {
 		String file = null;
 		if (files != null)
 			for (int i = 0; i < files.length; i++) {
-				if (new File(folder + Configuration.FS + files[i]).isFile())
+				if (new File(folder + Configuration.FILE_SEPARATOR + files[i]).isFile())
 					if (files[i].equals(filename))
-						file = new File(folder + Configuration.FS + files[i])
+						file = new File(folder + Configuration.FILE_SEPARATOR + files[i])
 								.getAbsolutePath();
 				if (recursive)
-					if (new File(folder + Configuration.FS + files[i])
+					if (new File(folder + Configuration.FILE_SEPARATOR + files[i])
 							.isDirectory())
-						file = searchFile(folder + Configuration.FS + files[i],
+						file = searchFile(folder + Configuration.FILE_SEPARATOR + files[i],
 								filename, recursive);
 
 				if (file != null)
@@ -264,10 +264,10 @@ public class Test implements Comparable<Test> {
 			String[] files = new File(programsFolder).list();
 			if (files != null)
 				for (int i = 0; i < files.length; i++) {
-					if (new File(programsFolder + Configuration.FS + files[i])
+					if (new File(programsFolder + Configuration.FILE_SEPARATOR + files[i])
 							.isDirectory()) {
 						paths.addAll(searchAll(programsFolder
-								+ Configuration.FS + files[i], extensions,
+								+ Configuration.FILE_SEPARATOR + files[i], extensions,
 								recursive));
 					}
 				}
@@ -281,10 +281,10 @@ public class Test implements Comparable<Test> {
 		List<String> fls = new LinkedList<String>();
 		if (files != null) {
 			for (int i = 0; i < files.length; i++)
-				if (new File(programsFolder2 + Configuration.FS + files[i])
+				if (new File(programsFolder2 + Configuration.FILE_SEPARATOR + files[i])
 						.isFile()) {
 					if (files[i].endsWith(extension))
-						fls.add(programsFolder2 + Configuration.FS + files[i]);
+						fls.add(programsFolder2 + Configuration.FILE_SEPARATOR + files[i]);
 				}
 		}
 		return fls;
@@ -441,13 +441,13 @@ public class Test implements Comparable<Test> {
 						"System file."));
 			}
 
-			if (new File(rootDir + Configuration.FS + path).exists()) {
-				return new File(rootDir + Configuration.FS + path)
+			if (new File(rootDir + Configuration.FILE_SEPARATOR + path).exists()) {
+				return new File(rootDir + Configuration.FILE_SEPARATOR + path)
 						.getAbsolutePath();
 			} else
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
 						KExceptionGroup.CRITICAL,
-						"File " + rootDir + Configuration.FS + path
+						"File " + rootDir + Configuration.FILE_SEPARATOR + path
 								+ " does not exists.\n" + errorMessage, "command line",
 						"System file."));
 		}
@@ -612,15 +612,17 @@ public class Test implements Comparable<Test> {
 
 	private String getReportFilename() {
 		String name = new File(language).getName();
+
+		String absName = new File(language).getAbsolutePath();
+		if (absName.startsWith(Configuration.USER_DIR)) {
+			name = absName.substring(Configuration.USER_DIR.length() + 1);
+		}
+		name = name.replaceAll(Configuration.FILE_SEPARATOR, ".");
 		name = name.replaceFirst("\\.k$", "-report.xml");
-
-		// TODO: fix report names
-//		if (reportDir != null)
-//			name = reportDir + "-report.xml";
-
+		
 		if (!tag.equals(""))
 			name = tag + "." + name;
-		
+
 		return name;
 	}
 
@@ -673,9 +675,7 @@ public class Test implements Comparable<Test> {
 	}
 
 	public void save() {
-		String reportPath = Configuration.JR + Configuration.FS
-				+ getReportFilename();
-		
+		String reportPath = Configuration.JR + Configuration.FILE_SEPARATOR + getReportFilename();
 		new File(Configuration.JR).mkdirs();
 		try {
 
@@ -736,7 +736,7 @@ public class Test implements Comparable<Test> {
 	}
 
 	private String getXmlLanguage() {
-		return getCompiled() + Configuration.FS + "defx.bin";
+		return getCompiled() + Configuration.FILE_SEPARATOR + "defx.bin";
 		// return language;
 	}
 
