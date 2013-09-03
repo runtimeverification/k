@@ -60,11 +60,16 @@ public class KTestOptionsParser {
 		Option skip = new Option(Configuration.SKIP_OPTION, true, "The list of steps separated by whitespace to be skipped (" + Configuration.KOMPILE_STEP + "/" + Configuration.PDF_STEP + "/" + Configuration.PROGRAMS_STEP + ")");
 		skipGroup.addOption(skip);
 		
-		// --verbose
+		// verbose
 		OptionGroup vGroup = new OptionGroup();
 		Option verbose = new Option("v",  Configuration.VERBOSE_OPTION, false, "Verbose mode");
 		vGroup.addOption(verbose);
-		
+
+		// number of processes
+		OptionGroup procGroup = new OptionGroup();
+		Option processes = new Option(Configuration.PROCESSES_OPTION, true, "The maximum number of threads");
+		procGroup.addOption(processes);
+
 		// add all option groups to ktest options
 		options.addOptionGroup(helpGroup);
 		options.addOptionGroup(configGroup);
@@ -75,6 +80,7 @@ public class KTestOptionsParser {
 		options.addOptionGroup(resultsGroup);
 		options.addOptionGroup(skipGroup);
 		options.addOptionGroup(vGroup);
+		options.addOptionGroup(procGroup);
 	}
 	
 	// parse the command line arguments

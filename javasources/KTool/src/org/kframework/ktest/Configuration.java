@@ -86,6 +86,7 @@ public class Configuration {
 	public static final String KOMPILE_STEP = "kompile";
 	public static final String PDF_STEP = "pdf";
 	public static final String PROGRAMS_STEP = "programs";
+	public static final String PROCESSES_OPTION = "threads";
 
 	// help details
 	public static String DETAILED_HELP_MESSAGE = getReadme();

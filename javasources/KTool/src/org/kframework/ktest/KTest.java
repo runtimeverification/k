@@ -113,6 +113,11 @@ public class KTest {
 			Configuration.VERBOSE = true;
 		}
 		
+		// Maximum number of threads
+		if (cmd.hasOption(Configuration.PROCESSES_OPTION)) {
+			Execution.POOL_SIZE = Integer.parseInt(cmd.getOptionValue(Configuration.PROCESSES_OPTION));
+		}
+		
 		// sanity checks
 		if (Configuration.CONFIG != null
 				&& new File(Configuration.KDEF).isFile()) {
