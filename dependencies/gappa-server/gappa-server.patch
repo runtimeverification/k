@@ -1,16 +1,17 @@
-diff -rupN gappa-1.0.0/src/main.cpp gappa-server/src/main.cpp
---- gappa-1.0.0/src/main.cpp	2013-07-19 18:25:55.000000000 +0300
-+++ gappa-server/src/main.cpp	2013-09-03 14:38:03.135214200 +0300
-@@ -10,6 +10,8 @@
+diff -rupN gappa-1.0.0/src/main.cpp gappa-server/src//main.cpp
+--- gappa-1.0.0/src/main.cpp	2013-07-19 18:25:55 +0300
++++ gappa-server/src//main.cpp	2013-09-03 23:46:04 +0300
+@@ -10,6 +10,9 @@
  */
  
  #include <iostream>
++#include <limits.h>
 +#include <stdio.h>
 +#include <string.h>
  
  #include "parameters.hpp"
  #include "backends/backend.hpp"
-@@ -20,6 +22,8 @@
+@@ -20,6 +23,8 @@
  
  extern bool parameter_constrained, parameter_statistics;
  extern int yyparse(void);
@@ -19,7 +20,7 @@ diff -rupN gappa-1.0.0/src/main.cpp gappa-server/src/main.cpp
  extern bool detailed_io;
  extern backend *proof_generator;
  dichotomy_sequence dichotomies;
-@@ -31,19 +35,107 @@ extern int
+@@ -31,19 +36,107 @@ extern int
    stat_tested_app, stat_successful_app,
    stat_intersected_pred, stat_discarded_pred;
  
@@ -137,7 +138,7 @@ diff -rupN gappa-1.0.0/src/main.cpp gappa-server/src/main.cpp
    preal_vect missing_paths = generate_proof_paths();
    for (preal_vect::const_iterator i = missing_paths.begin(),
         i_end = missing_paths.end(); i != i_end; ++i)
-@@ -88,5 +180,56 @@ int main(int argc, char **argv)
+@@ -88,5 +181,56 @@ int main(int argc, char **argv)
        "    yet " << stat_discarded_pred << " proved useless\n"
        "    and " << stat_intersected_pred << " improved existing results.\n";
    }
@@ -194,9 +195,9 @@ diff -rupN gappa-1.0.0/src/main.cpp gappa-server/src/main.cpp
 +    process();
 +  }
 +}
-diff -rupN gappa-1.0.0/src/main.cpp.old gappa-server/src/main.cpp.old
---- gappa-1.0.0/src/main.cpp.old	1970-01-01 02:00:00.000000000 +0200
-+++ gappa-server/src/main.cpp.old	2013-09-02 23:13:43.969921700 +0300
+diff -rupN gappa-1.0.0/src/main.cpp.old gappa-server/src//main.cpp.old
+--- gappa-1.0.0/src/main.cpp.old	1970-01-01 02:00:00 +0200
++++ gappa-server/src//main.cpp.old	2013-09-02 23:13:44 +0300
 @@ -0,0 +1,92 @@
 +/*
 +   Copyright (C) 2004 - 2010 by Guillaume Melquiond <guillaume.melquiond@inria.fr>
@@ -290,9 +291,9 @@ diff -rupN gappa-1.0.0/src/main.cpp.old gappa-server/src/main.cpp.old
 +  }
 +  return globally_proven ? EXIT_SUCCESS : EXIT_FAILURE;
 +}
-diff -rupN gappa-1.0.0/src/parser/lexer.lpp gappa-server/src/parser/lexer.lpp
---- gappa-1.0.0/src/parser/lexer.lpp	2013-07-19 18:25:55.000000000 +0300
-+++ gappa-server/src/parser/lexer.lpp	2013-09-03 17:49:50.741764100 +0300
+diff -rupN gappa-1.0.0/src/parser/lexer.lpp gappa-server/src//parser/lexer.lpp
+--- gappa-1.0.0/src/parser/lexer.lpp	2013-07-19 18:25:55 +0300
++++ gappa-server/src//parser/lexer.lpp	2013-09-03 17:49:51 +0300
 @@ -85,6 +85,11 @@ static void read_options(YYLTYPE &yylloc
    }
  }
@@ -305,9 +306,9 @@ diff -rupN gappa-1.0.0/src/parser/lexer.lpp gappa-server/src/parser/lexer.lpp
  #define YY_USER_INIT	{ yylloc->first_line = 1; yylloc->first_column = 0; }
  #define YY_USER_ACTION	yylloc->first_column += yyleng;
  
-diff -rupN gappa-1.0.0/src/parser/parser_aux.cpp gappa-server/src/parser/parser_aux.cpp
---- gappa-1.0.0/src/parser/parser_aux.cpp	2013-07-19 18:25:55.000000000 +0300
-+++ gappa-server/src/parser/parser_aux.cpp	2013-09-03 16:52:17.280648700 +0300
+diff -rupN gappa-1.0.0/src/parser/parser_aux.cpp gappa-server/src//parser/parser_aux.cpp
+--- gappa-1.0.0/src/parser/parser_aux.cpp	2013-07-19 18:25:55 +0300
++++ gappa-server/src//parser/parser_aux.cpp	2013-09-03 16:52:17 +0300
 @@ -203,6 +203,7 @@ extern property_tree context;
  
  void generate_graph(ast_prop const *p)
