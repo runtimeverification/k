@@ -144,6 +144,10 @@ public class BasicParser {
 	 */
 	@SuppressWarnings("unchecked")
 	public static List<DefinitionItem> parseString(String content, String filename, Context context) {
+		if (GlobalSettings.fastBasic) {
+			return org.kframework.parser.basic.Basic.parse(filename, content);
+		}
+
 		String parsed = KParser.ParseKString(content);
 		Document doc = XmlLoader.getXMLDoc(parsed);
 		XmlLoader.addFilename(doc.getFirstChild(), filename);

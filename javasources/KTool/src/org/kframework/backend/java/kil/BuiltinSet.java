@@ -170,12 +170,9 @@ public class BuiltinSet extends Collection {
             return new BuiltinSet(elements, (Variable) frame);
         if (frame instanceof BuiltinSet) {
             BuiltinSet builtinSet = (BuiltinSet) frame;
-            if (elements.isEmpty()) return builtinSet;
-            Set<Term> all = builtinSet.elements;
-            all.addAll(elements);
-            if (builtinSet.hasFrame()) {
-                return new BuiltinSet(elements, builtinSet.frame());
-            } else return new BuiltinSet(elements);
+            builtinSet = new BuiltinSet(builtinSet.elements, builtinSet.frame);
+            builtinSet.elements.addAll(elements);
+            return builtinSet;
         }
         assert false : "Frame can only be substituted by a Variable or a BuiltinSet, or deleted.";
         return null;

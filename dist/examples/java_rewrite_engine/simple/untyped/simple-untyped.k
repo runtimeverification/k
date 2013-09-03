@@ -210,6 +210,7 @@ arguments. */
 
   syntax Id ::= "print"       [reject]
               | "read"        [reject]
+              | "join"        [reject]
               | "function"    [reject]
 /*@ \section{Desugared Syntax}
 This part desugars some of SIMPLE's language constructs into core ones.
@@ -640,7 +641,7 @@ irrelevant once the function returns).  We add an artificial
 \texttt{nothing} value to the language, which is returned by the
 nulary \texttt{return;} statements. */
 
-  syntax K ::=  (MyMap, K, ControlCellFragment)
+  syntax KItem ::=  (MyMap, K, ControlCellFragment)
 
   rule <k>
          lambda(Xs:Ids, S:Block)(Vs:Vals) ~> K => mkDecls(Xs, Vs) S return;
@@ -803,60 +804,65 @@ its evaluated arguments to the output buffer, and discard the residual
     [print]
   rule print(.Vals); => .  [structural]
 
-///*@ \subsection{Exceptions}
-//SIMPLE allows parametric exceptions, in that one can throw and catch a
-//particular value.  The statement ``\texttt{try $S_1$ catch($X$) $S_2$}''
-//proceeds with the evaluation of $S_1$.  If $S_1$ evaluates normally, i.e.,
-//without any exception thrown, then $S_2$ is discarded and the execution
-//continues normally.  If $S_1$ throws an exception with a statement of the
-//form ``\texttt{throw $E$}'', then $E$ is first evaluated to some value $V$
-//(\texttt{throw} was declared to be strict), then $V$ is bound to $X$, then
-//$S_2$ is evaluated in the new environment while the reminder of $S_1$ is
-//discarded, then the environment is recovered and the execution continues
-//normally with the statement following the ``\texttt{try $S_1$ catch($X$)
-//$S_2$}'' statement.  Exceptions can be nested and the statements in the
-//``\texttt{catch}'' part ($S_2$ in our case) can throw exceptions to the
-//upper level.  One should be careful with how one handles the control data
-//structures here, so that the abrupt changes of control due to exception
-//throwing and to function returns interact correctly with each other.
-//For example, we want to allow function calls inside the statement $S_1$ in
-//a ``\texttt{try $S_1$ catch($X$) $S_2$}'' block which can throw an exception
-//that is not caught by the function but instead is propagated to the
-//``\texttt{try $S_1$ catch($X$) $S_2$}'' block that called the function.
-//Therefore, we have to make sure that the function stack as well as other
-//potential control structures are also properly modified when the exception
-//is thrown to correctly recover the execution context.  This can be easily
-//achieved by pushing/popping the entire current control context onto the
-//exception stack.  The three rules below modularly do precisely the above. */
-//
-//  syntax K ::= (Id,Stmt,K,Map,ControlCellFragment)
-//
-//  syntax K ::= "popx" 
-//
-//  rule <k> (try S1 catch(X) {S2} => S1 ~> popx) ~> K </k>
-//       <control>
-//         <xstack> . => ListItem((X, S2, K, Env, C)) ...</xstack>
-//         C
-//       </control>
-//       <env> Env </env>
-//
-//  rule <k> popx => . ...</k>
-//       <xstack> _:ListItem => . ...</xstack>
-//
-//  rule <k> throw V:Val; ~> _ => { var X = V; S2 } ~> K </k>
-//       <control>
-//         <xstack> ListItem((X, S2, K, Env, C)) => . ...</xstack>
-//         (_ => C)
-//       </control>
-//       <env> _ => Env </env>
-//
-///*@ The catch statement $S_2$ needs to be executed in the original environment,
-//but where the thrown value $V$ is bound to the catch variable $X$.  We here
-//chose to rely on two previously defined constructs when giving semantics to
-//the catch part of the statement: (1) the variable declaration with
-//initialization, for binding $X$ to $V$; and (2) the block construct for
-//preventing $X$ from shadowing variables in the original environment upon the
-//completion of $S_2$. */
+/*@ \subsection{Exceptions}
+SIMPLE allows parametric exceptions, in that one can throw and catch a
+particular value.  The statement ``\texttt{try $S_1$ catch($X$) $S_2$}''
+proceeds with the evaluation of $S_1$.  If $S_1$ evaluates normally, i.e.,
+without any exception thrown, then $S_2$ is discarded and the execution
+continues normally.  If $S_1$ throws an exception with a statement of the
+form ``\texttt{throw $E$}'', then $E$ is first evaluated to some value $V$
+(\texttt{throw} was declared to be strict), then $V$ is bound to $X$, then
+$S_2$ is evaluated in the new environment while the reminder of $S_1$ is
+discarded, then the environment is recovered and the execution continues
+normally with the statement following the ``\texttt{try $S_1$ catch($X$)
+$S_2$}'' statement.  Exceptions can be nested and the statements in the
+``\texttt{catch}'' part ($S_2$ in our case) can throw exceptions to the
+upper level.  One should be careful with how one handles the control data
+structures here, so that the abrupt changes of control due to exception
+throwing and to function returns interact correctly with each other.
+For example, we want to allow function calls inside the statement $S_1$ in
+a ``\texttt{try $S_1$ catch($X$) $S_2$}'' block which can throw an exception
+that is not caught by the function but instead is propagated to the
+``\texttt{try $S_1$ catch($X$) $S_2$}'' block that called the function.
+Therefore, we have to make sure that the function stack as well as other
+potential control structures are also properly modified when the exception
+is thrown to correctly recover the execution context.  This can be easily
+achieved by pushing/popping the entire current control context onto the
+exception stack.  The three rules below modularly do precisely the above. */
+
+  // syntax KItem ::= (Id, Stmt, K, Map, ControlCellFragment)
+  // AndreiS: the above conflicts with the tuple for the function call stack
+  // (line 643)
+  syntax KItem ::= "(|" Id "," Stmt "," K "," MyMap "," ControlCellFragment "|)"
+
+  syntax KItem ::= "popx" 
+
+  rule <k> (try S1:Block catch(X:Id) {S2:Stmt} => S1 ~> popx) ~> K </k>
+       <control>
+         <xstack> .MyList => MyListItem((| X, S2, K, Env, C |)) ...</xstack>
+         C
+       </control>
+       <env> Env:MyMap </env>
+
+  rule <k> popx => . ...</k>
+       <xstack> MyListItem(_:KItem) => .MyList ...</xstack>
+
+  rule <k> throw V:Val; ~> _ => { var X = V; S2 } ~> K </k>
+       <control>
+         <xstack>
+           MyListItem((| X:Id, S2:Stmt, K, Env:MyMap, C |)) => .MyList
+         ...</xstack>
+         (_ => C)
+       </control>
+       <env> _:MyMap => Env </env>
+
+/*@ The catch statement $S_2$ needs to be executed in the original environment,
+but where the thrown value $V$ is bound to the catch variable $X$.  We here
+chose to rely on two previously defined constructs when giving semantics to
+the catch part of the statement: (1) the variable declaration with
+initialization, for binding $X$ to $V$; and (2) the block construct for
+preventing $X$ from shadowing variables in the original environment upon the
+completion of $S_2$. */
 
 /*@ \subsection{Threads}
 SIMPLE's threads can be created and terminated dynamically, and can
