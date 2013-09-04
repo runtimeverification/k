@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import org.kframework.ktest.Configuration;
+
 public class Task extends Thread {
 
 	// standard
@@ -15,7 +17,7 @@ public class Task extends Thread {
 	private String stdin;
 	private long elapsed;
 	private File homeDir;
-	
+
 	public Task(String[] arguments, String stdin, File homeDir) {
 		super();
 		this.arguments = arguments;
@@ -31,15 +33,17 @@ public class Task extends Thread {
 		try {
 			ProcessBuilder pb = new ProcessBuilder(arguments);
 			pb.directory(homeDir);
-//			String message = "Executing ";
-//			for(String cmd : pb.command())
-//				message += cmd + " ";
+			String message = "";
+			if (Configuration.VERBOSE) {
+				message = "Done with [" + pb.command().get(1);
+//				for (String cmd : pb.command())
+//					message += cmd + " ";
+			}
 			elapsed = System.currentTimeMillis();
 			Process p = pb.start();
 
 			// send input
-			if (stdin != null)
-			{
+			if (stdin != null) {
 				p.getOutputStream().write(stdin.getBytes());
 				p.getOutputStream().flush();
 				p.getOutputStream().close();
@@ -60,7 +64,9 @@ public class Task extends Thread {
 			p.getInputStream().close();
 			p.getErrorStream().close();
 			p.destroy();
-//			System.out.println(message + " ... Done.");
+			if (Configuration.VERBOSE) {
+				System.out.println(message + "] (time: " + elapsed + " ms)");
+			}
 
 		} catch (IOException io) {
 			exit = Integer.MAX_VALUE;
@@ -86,7 +92,7 @@ public class Task extends Thread {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		return "";
 	}
 

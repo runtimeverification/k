@@ -1,5 +1,5 @@
 require "int.k"
-
+require "symbolic-k.k"
 /*
   Transforms a boolean formula into its disjunctive normal form.
   Each binary operation _andBool_ , _orBool_, notBool_, and _impliesBool_
@@ -120,6 +120,7 @@ module SIMPLIFICATION
   imports DNF
   imports PROOF-BASIC
   imports GCD
+  imports SYMBOLIC-K
 
   // Do not attach sorts to these variables other than K
   rule '#andBool(_,, B:Bool,, _ ,, (B => .KList) ,, _ ) [anywhere]
@@ -144,6 +145,14 @@ module SIMPLIFICATION
   rule unflat('#andBool(.KList)) => true [anywhere]
   rule unflat('#notBool(B)) => notBool unflat(B) [anywhere]
   rule unflat(B:Bool) => B when isLiteral(B) [anywhere]
+
+  rule unflat(forall S . B) => forall S . unflat(B) [anywhere]
+  rule unflat(exists S . B) => exists S . unflat(B) [anywhere]
+
+  rule unflat(B orBool B') => unflat(B) orBool unflat(B') [anywhere]
+  rule unflat(B andBool B') => unflat(B) orBool unflat(B') [anywhere]
+  rule unflat(notBool B) => notBool unflat(B) [anywhere]
+  rule unflat(B impliesBool B') => unflat(B) impliesBool unflat(B') [anywhere]
 
 endmodule
 

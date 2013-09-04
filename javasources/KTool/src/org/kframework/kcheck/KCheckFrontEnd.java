@@ -46,6 +46,10 @@ public class KCheckFrontEnd {
 	        GlobalSettings.NOSMT = false;
 	        RLBackend.SIMPLIFY = cmd.hasOption("simplify");
 	        
+	        if (cmd.hasOption("pgm")) {
+	        	RLBackend.PGM = cmd.getOptionValue("pgm");
+	        }
+	        
 			// set verbose
 			if (cmd.hasOption("verbose"))
 				GlobalSettings.verbose = true;

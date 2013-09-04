@@ -1,44 +1,56 @@
 package org.kframework.kcheck;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.DefinitionLoader;
+import org.kframework.parser.ProgramLoader;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.general.GlobalSettings;
 
 public class ResolveRLFile extends CopyOnWriteTransformer {
 
-	List<ASTNode> reachabilityRules = new ArrayList<ASTNode>();
-	
-	public ResolveRLFile(Context context) {
+	private List<ASTNode> reachabilityRules = new ArrayList<ASTNode>();
+	private Term program = null;
+
+	public ResolveRLFile(Context context, String pgmFilePath) {
 		super("Parse RL input file", context);
 
-		String[] rrls = FileUtil.getFileContent(GlobalSettings.CHECK).split(
-				"reachability-rule");
-		List<String> rrs = new ArrayList<String>();
-		for (int i = 0; i < rrls.length; i++)
-		{
-			if (!rrls[i].trim().equals(""))
-				rrs.add(rrls[i]);
-		}
-		for (String s : rrs) {
-//			System.out.println("Sentence to parse: " + s + "\n");
-			
+		// resolve reachability rules
+		String rlFileContent = FileUtil.getFileContent(GlobalSettings.CHECK);
+		context.kompiled = context.dotk.getAbsoluteFile();
+		ASTNode rlModule = DefinitionLoader.parseString(rlFileContent,
+				GlobalSettings.CHECK, context);
+		RetrieveRRVisitor rrrv = new RetrieveRRVisitor(context);
+		rlModule.accept(rrrv);
+		reachabilityRules = rrrv.getRules();
+
+		// resolve pgm if any
+		if (RLBackend.PGM != null) {
+			String pgmContent = FileUtil.getFileContent(pgmFilePath);
 			try {
-				ASTNode r = DefinitionLoader.parseSentence(s, GlobalSettings.CHECK, context);
-				reachabilityRules.add(r);
-			} catch (TransformerException e) {
-				e.printStackTrace();
+				context.kompiled = context.dotk.getAbsoluteFile();
+				program = (Term) ProgramLoader.loadPgmAst(pgmContent,
+						GlobalSettings.CHECK, "K", context);
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			} catch (TransformerException e1) {
+				e1.printStackTrace();
 			}
 		}
 	}
 
 	public List<ASTNode> getReachabilityRules() {
 		return reachabilityRules;
+	}
+
+	public Term getPgm() {
+		return program;
 	}
 }

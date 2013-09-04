@@ -1,6 +1,5 @@
 package org.kframework.backend.pdmc.pda.pautomaton.util;
 
-import org.kframework.backend.pdmc.pda.pautomaton.PAutomatonState;
 import org.kframework.backend.pdmc.automaton.Transition;
 
 import java.util.*;
@@ -8,59 +7,63 @@ import java.util.*;
 /**
  * @author Traian
  */
-public class IndexedTransitions<Control, Alphabet> {
-    Set<Transition<PAutomatonState<Control, Alphabet>, Alphabet>> rel;
-    Map<PAutomatonState<Control,Alphabet>, Set<Transition<PAutomatonState<Control, Alphabet>, Alphabet>>> backIndex;
-    Map<PAutomatonState<Control, Alphabet>, Set<Transition<PAutomatonState<Control, Alphabet>, Alphabet>>> directIndex;
+public class IndexedTransitions<State, Alphabet> {
+    Set<Transition<State, Alphabet>> rel;
+    Map<State, Set<Transition<State, Alphabet>>> backIndex;
+    Map<State, Set<Transition<State, Alphabet>>> directIndex;
     public IndexedTransitions() {
-        rel = new HashSet<Transition<PAutomatonState<Control, Alphabet>, Alphabet>>();
-        backIndex = new HashMap<PAutomatonState<Control, Alphabet>,
-                Set<Transition<PAutomatonState<Control, Alphabet>, Alphabet>>>();
-        directIndex = new HashMap<PAutomatonState<Control, Alphabet>,
-                Set<Transition<PAutomatonState<Control, Alphabet>, Alphabet>>>();
+        rel = new HashSet<Transition<State, Alphabet>>();
+        backIndex = new HashMap<State,
+                Set<Transition<State, Alphabet>>>();
+        directIndex = new HashMap<State,
+                Set<Transition<State, Alphabet>>>();
     }
 
-    public boolean contains(Transition<PAutomatonState<Control, Alphabet>, Alphabet> transition) {
+    public boolean contains(Transition<State, Alphabet> transition) {
         return  rel.contains(transition);
     }
 
-    public Set<Transition<PAutomatonState<Control, Alphabet>, Alphabet>>
-    getFrontTransitions(PAutomatonState<Control, Alphabet> index) {
-        Set<Transition<PAutomatonState<Control, Alphabet>, Alphabet>> transitions = directIndex.get(index);
+    public Set<Transition<State, Alphabet>>
+    getFrontTransitions(State index) {
+        Set<Transition<State, Alphabet>> transitions = directIndex.get(index);
         if (transitions == null) transitions
-                = Collections.<Transition<PAutomatonState<Control, Alphabet>, Alphabet>>emptySet();
+                = Collections.<Transition<State, Alphabet>>emptySet();
         return transitions;
     }
 
-    public Set<Transition<PAutomatonState<Control, Alphabet>, Alphabet>>
-    getBackEpsilonTransitions(PAutomatonState<Control, Alphabet> endState) {
-        Set<Transition<PAutomatonState<Control, Alphabet>, Alphabet>> transitions = backIndex.get(endState);
+    public Set<Transition<State, Alphabet>>
+    getBackEpsilonTransitions(State endState) {
+        Set<Transition<State, Alphabet>> transitions = backIndex.get(endState);
         if (transitions == null) transitions
-                = Collections.<Transition<PAutomatonState<Control, Alphabet>, Alphabet>>emptySet();
+                = Collections.<Transition<State, Alphabet>>emptySet();
         return transitions;
     }
 
-    public void add(Transition<PAutomatonState<Control, Alphabet>, Alphabet> transition) {
+    public void add(Transition<State, Alphabet> transition) {
         if (rel.contains(transition)) return;
         rel.add(transition);
-        PAutomatonState<Control, Alphabet> index = transition.getStart();
-        Set<Transition<PAutomatonState<Control, Alphabet>, Alphabet>> transitions = directIndex.get(index);
+        State index = transition.getStart();
+        Set<Transition<State, Alphabet>> transitions = directIndex.get(index);
         if (transitions == null) {
-            transitions = new HashSet<Transition<PAutomatonState<Control, Alphabet>, Alphabet>>();
+            transitions = new HashSet<Transition<State, Alphabet>>();
             directIndex.put(index, transitions);
         }
         transitions.add(transition);
-        if (transition.getLetter() != null) return;
-        PAutomatonState<Control, Alphabet> end = transition.getEnd();
+        if (!isEpsilon(transition.getLetter())) return;
+        State end = transition.getEnd();
         transitions = backIndex.get(end);
         if (transitions == null) {
-            transitions = new HashSet<Transition<PAutomatonState<Control, Alphabet>, Alphabet>>();
+            transitions = new HashSet<Transition<State, Alphabet>>();
             backIndex.put(end, transitions);
         }
         transitions.add(transition);
     }
 
-    public Collection<Transition<PAutomatonState<Control, Alphabet>, Alphabet>> getTransitions() {
+    public boolean isEpsilon(Alphabet gamma) {
+       return gamma == null;
+    }
+
+    public Collection<Transition<State, Alphabet>> getTransitions() {
         return rel;
     }
 }

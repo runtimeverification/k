@@ -105,7 +105,7 @@ public class AddCircularityRules extends CopyOnWriteTransformer {
 				// insert patternless formulas into condition
 				Term phi = parser.getPhi().shallowCopy();
 				Term phiPrime = parser.getPhi_prime().shallowCopy();
-				Term rrcond = KApp.of(KLabelConstant.of(RLBackend.INTERNAL_KLABEL, context), phi, phiPrime); 
+				Term rrcond = KApp.of(KLabelConstant.of(RLBackend.INTERNAL_KLABEL, context), phi, phiPrime);
 				fresh.add(rrcond);
 				
 //				Term condition = KApp.of(KLabelConstant.ANDBOOL_KLABEL, new KList(fresh));

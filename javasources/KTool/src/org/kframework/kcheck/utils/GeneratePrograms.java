@@ -36,7 +36,6 @@ public class GeneratePrograms extends BasicTransformer {
 			ASTNode rrule = reachabilityRules.get(rIndex);
 			ReachabilityRuleKILParser parser = new ReachabilityRuleKILParser(context);
 			rrule.accept(parser);
-
 			
 			//TODO: how about ensures?
 			

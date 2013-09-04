@@ -7,10 +7,14 @@ import java.util.concurrent.TimeUnit;
 import org.kframework.ktest.Configuration;
 
 public class Execution {
-	public static int SIZE = initPoolSize(Runtime.getRuntime()
+	public static int POOL_SIZE = initPoolSize(Runtime.getRuntime()
 			.availableProcessors());
-	public static ThreadPoolExecutor tpe = (ThreadPoolExecutor) Executors
-			.newFixedThreadPool(SIZE);
+	public static ThreadPoolExecutor tpe = getThreadPoolExecutor();
+
+	private static ThreadPoolExecutor getThreadPoolExecutor() {
+		return (ThreadPoolExecutor) Executors
+				.newFixedThreadPool(POOL_SIZE);
+	}
 
 	public static void execute(Task definitionTask) {
 		tpe.execute(definitionTask);
@@ -26,7 +30,7 @@ public class Execution {
 			e.printStackTrace();
 		}
 		Execution.tpe.shutdownNow();
-		Execution.tpe = (ThreadPoolExecutor) Executors.newFixedThreadPool(SIZE);
+		Execution.tpe = getThreadPoolExecutor();
 	}
 
 	public static int initPoolSize(int cores) {

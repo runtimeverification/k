@@ -4,13 +4,12 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.kframework.krun.FileUtil;
-
 public class Configuration {
 
 	// file separator
-	public static final String FS = System.getProperty("file.separator");
-
+	public static final String FILE_SEPARATOR = System.getProperty("file.separator");
+	public static final String USER_DIR = System.getProperty("user.dir");
+	
 	// timeout in miliseconds - this is mostly used by Jenkins
 	public static long KOMPILE_ALL_TIMEOUT = 120;
 
@@ -24,13 +23,13 @@ public class Configuration {
 	// a single K definition and its programs directly from command line
 	public static boolean SINGLE_DEF_MODE = false;
 	// mandatory
-	public static String KDEF = System.getProperty("user.dir");
+	public static String KDEF = USER_DIR;
 	// programs
-	public static String PGM_DIR = System.getProperty("user.dir");
+	public static String PGM_DIR = USER_DIR;
 	public static List<String> EXTENSIONS = new LinkedList<String>();
 	// optional
 	public static boolean PDF = true;
-	public static String RESULTS_FOLDER = System.getProperty("user.dir");
+	public static String RESULTS_FOLDER = USER_DIR;
 	public static List<String> EXCLUDE_PROGRAMS = null;
 
 	// XML tag and attribute names used for parsing config.xml
@@ -65,6 +64,10 @@ public class Configuration {
 	public static final String VALUE = "value";
 	public static final String UNIX_ONLY = "unixOnly";
 	public static final String TEST = "test";
+    public static boolean KOMPILE = true;
+    public static boolean KOMPILE_PDF = true;
+    public static boolean PROGRAMS = true;
+	public static boolean VERBOSE = false;
 
 	// ktest command line option names
 	public static final String HELP_OPTION = "help";
@@ -75,9 +78,15 @@ public class Configuration {
 	public static final String EXCLUDE_OPTION = EXCLUDE;
 	public static final String EXTENSIONS_OPTION = EXTENSIONS2;
 	public static final String RESULTS_OPTION = RESULTS;
-
+    public static final String SKIP_OPTION = "skip";
+	public static final String VERBOSE_OPTION = "verbose";
+	
 	// program name
 	public static final String KTEST = "ktest";
+	public static final String KOMPILE_STEP = "kompile";
+	public static final String PDF_STEP = "pdf";
+	public static final String PROGRAMS_STEP = "programs";
+	public static final String PROCESSES_OPTION = "threads";
 
 	// help details
 	public static String DETAILED_HELP_MESSAGE = getReadme();
@@ -106,9 +115,9 @@ public class Configuration {
 	private static String getExecutable(String exe) {
 		String os = System.getProperty("os.name").toLowerCase();
 		if (os.contains("win")) {
-			return getKHome() + FS + "dist" + FS + "bin" + FS + exe + ".bat";
+			return getKHome() + FILE_SEPARATOR + "dist" + FILE_SEPARATOR + "bin" + FILE_SEPARATOR + exe + ".bat";
 		}
-		return getKHome() + FS + "dist" + FS + "bin" + FS + exe;
+		return getKHome() + FILE_SEPARATOR + "dist" + FILE_SEPARATOR + "bin" + FILE_SEPARATOR + exe;
 	}
 	
 	public static String getReadme() {

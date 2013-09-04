@@ -6,6 +6,7 @@ import java.util.List;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Bag;
+import org.kframework.kil.BoolBuiltin;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Configuration;
@@ -35,7 +36,8 @@ import org.kframework.utils.general.GlobalSettings;
 public class AddConditionToConfig extends CopyOnWriteTransformer {
 
     public static String KCELL = "k";
-
+    public static boolean PC = true;
+    
     public AddConditionToConfig(Context context) {
         super("Add path condition to configuration", context);
     }
@@ -47,8 +49,10 @@ public class AddConditionToConfig extends CopyOnWriteTransformer {
         Cell cell = new Cell();
         cell.setLabel(MetaK.Constants.pathCondition);
         cell.setEllipses(Ellipses.NONE);
-        cell.setContents(new Variable("$PC", "Bool"));
-        
+        if (PC)
+        	cell.setContents(new Variable("$PC", "Bool"));
+        else 
+        	cell.setContents(BoolBuiltin.TRUE);
         // append the path condition cell as subcell of generated top cell
         Term body = node.getBody();
         if (body instanceof Cell) {
