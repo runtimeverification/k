@@ -118,7 +118,6 @@ public class KompileOptionsParser {
 		
 		// add options
 		options.addOption(new Option("fastKast", false, "Option to test new class instantiation"));
-		options.addOption(new Option("fastBasic", false, "Option to test new basic parser"));
 		options.addOptionGroup(verb);
 		options.addOptionGroup(main);
 		options.addOptionGroup(langGroup);

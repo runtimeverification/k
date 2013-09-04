@@ -1,17 +1,18 @@
 package org.kframework.parser.generator;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.DefinitionItem;
-import org.kframework.kil.LiterateDefinitionComment;
-import org.kframework.kil.LiterateModuleComment;
 import org.kframework.kil.Module;
-import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Require;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.basic.Basic;
-import org.kframework.utils.XmlLoader;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -19,20 +20,6 @@ import org.kframework.utils.errorsystem.KMessages;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 
 public class BasicParser {
 	private List<DefinitionItem> moduleItems;
@@ -71,8 +58,8 @@ public class BasicParser {
 
 				file = buildCanonicalPath("autoinclude.k", new File(fileName));
 				if (file == null)
-					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1004 + fileName
-							+ " autoimporeted for every definition ", fileName, ""));
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
+							KMessages.ERR1004 + fileName + " autoimporeted for every definition ", fileName, ""));
 
 				slurp2(file, context);
 				moduleItems.addAll(tempmi);
@@ -169,84 +156,5 @@ public class BasicParser {
 
 	public void setModulesMap(Map<String, Module> modulesMap) {
 		this.modulesMap = modulesMap;
-	}
-
-	private static List<? extends ASTNode> sort(List<? extends ASTNode> nodes) {
-		Collections.sort(nodes, new Comparator<ASTNode>() {
-			@Override
-			public int compare(ASTNode n1, ASTNode n2) {
-				String[] loc1 = n1.getLocation().split("\\(|,|\\)");
-				int loc11 = Integer.parseInt(loc1[1]);
-				int loc12 = Integer.parseInt(loc1[2]);
-				String[] loc2 = n2.getLocation().split("\\(|,|\\)");
-				int loc21 = Integer.parseInt(loc2[1]);
-				int loc22 = Integer.parseInt(loc2[2]);
-				if (loc11 > loc21)
-					return 1;
-				if (loc11 == loc21 && loc12 > loc22)
-					return 1;
-
-				return 0;
-			}
-		});
-
-		return nodes;
-	}
-
-	/**
-	 * All comments are returned at the end of the DefinitionItem list so they need to be sorted and relocated into modules and between modules.
-	 * 
-	 * @param nodes
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-	private static List<? extends ASTNode> relocateComments(List<? extends ASTNode> nodes) {
-
-		Properties p = System.getProperties();
-		p.setProperty("java.util.Arrays.useLegacyMergeSort", "true");
-		System.setProperties(p);
-
-		nodes = BasicParser.sort(nodes);
-		List<ASTNode> defItemListTemp = new ArrayList<ASTNode>();
-
-		List<ASTNode> commentsToRemove = new ArrayList<ASTNode>();
-
-		for (int i = 0; i < nodes.size(); i++) {
-			ASTNode current = nodes.get(i);
-			if (current instanceof Module) {
-				Module m = (Module) current;
-				for (; i + 1 < nodes.size(); i++) {
-					ASTNode next = nodes.get(i + 1);
-					if (next instanceof LiterateDefinitionComment && isInside(m, next)) {
-						m.getItems().add(new LiterateModuleComment((LiterateDefinitionComment) next));
-						commentsToRemove.add(next);
-					} else
-						break;
-				}
-				m.setItems((List<ModuleItem>) sort(m.getItems()));
-			}
-
-			defItemListTemp.add(current);
-		}
-
-		for (ASTNode anode : commentsToRemove)
-			nodes.remove(anode);
-
-		return nodes;
-	}
-
-	private static boolean isInside(ASTNode n1, ASTNode n2) {
-		String[] loc1 = n1.getLocation().split("\\(|,|\\)");
-		int loc11 = Integer.parseInt(loc1[3]);
-		int loc12 = Integer.parseInt(loc1[4]);
-		String[] loc2 = n2.getLocation().split("\\(|,|\\)");
-		int loc21 = Integer.parseInt(loc2[1]);
-		int loc22 = Integer.parseInt(loc2[2]);
-		if (loc11 > loc21)
-			return true;
-		if (loc11 == loc21 && loc12 > loc22)
-			return true;
-
-		return false;
 	}
 }

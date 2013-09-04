@@ -1,8 +1,0 @@
-include
-bin/
-lib/*.generated.str
-lib-refactoring/
-editor/*.generated.esv
-syntax/*.generated.pp
-test/*.xml
-test/*.aterm

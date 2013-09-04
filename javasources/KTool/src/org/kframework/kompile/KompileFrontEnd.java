@@ -76,10 +76,6 @@ public class KompileFrontEnd {
 			GlobalSettings.fastKast = true;
 		}
 
-		if (cmd.hasOption("fastBasic")) {
-			GlobalSettings.fastBasic = true;
-		}
-
 		if (cmd.hasOption("nofilename"))
 			GlobalSettings.noFilename = true;
 
