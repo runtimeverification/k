@@ -1,10 +1,16 @@
 package org.kframework.parser.generator;
 
-import org.kframework.kil.*;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.DefinitionItem;
+import org.kframework.kil.LiterateDefinitionComment;
+import org.kframework.kil.LiterateModuleComment;
+import org.kframework.kil.Module;
+import org.kframework.kil.ModuleItem;
+import org.kframework.kil.Require;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.parser.basic.KParser;
+import org.kframework.parser.basic.Basic;
 import org.kframework.utils.XmlLoader;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -20,9 +26,13 @@ import org.w3c.dom.NodeList;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 public class BasicParser {
 	private List<DefinitionItem> moduleItems;
@@ -91,7 +101,9 @@ public class BasicParser {
 		if (!filePaths.contains(cannonicalPath)) {
 			filePaths.add(cannonicalPath);
 
-			List<DefinitionItem> defItemList = parseFile(file, context);
+			if (GlobalSettings.verbose)
+				System.out.println("Including file: " + file.getAbsolutePath());
+			List<DefinitionItem> defItemList = Basic.parse(file.getAbsolutePath(), FileUtil.getFileContent(file.getAbsolutePath()));
 
 			// go through every required file
 			for (ASTNode di : defItemList) {
@@ -125,51 +137,6 @@ public class BasicParser {
 				}
 			}
 		}
-	}
-
-	public static List<DefinitionItem> parseFile(File file, Context context) {
-		if (GlobalSettings.verbose)
-			System.out.println("Including file: " + file.getAbsolutePath());
-		String content = FileUtil.getFileContent(file.getAbsolutePath());
-		return parseString(content, file.getAbsolutePath(), context);
-	}
-
-	/**
-	 * Parses a string representing a file with modules in it.
-	 * Returns only the basic parsing AST which contain bubbles instead of rules.
-	 * @param content - the input string.
-	 * @param filename - only for error reporting purposes. Can be empty string.
-	 * @param context - the context for disambiguation purposes.
-	 * @return - a list of DefinitionItems
-	 */
-	@SuppressWarnings("unchecked")
-	public static List<DefinitionItem> parseString(String content, String filename, Context context) {
-		if (GlobalSettings.fastBasic) {
-			return org.kframework.parser.basic.Basic.parse(filename, content);
-		}
-
-		String parsed = KParser.ParseKString(content);
-		Document doc = XmlLoader.getXMLDoc(parsed);
-		XmlLoader.addFilename(doc.getFirstChild(), filename);
-		try {
-			XmlLoader.reportErrors(doc);
-		} catch (TransformerException e) {
-			e.report();
-		}
-
-		NodeList nl = doc.getFirstChild().getChildNodes();
-		List<DefinitionItem> defItemList = new ArrayList<DefinitionItem>();
-
-		JavaClassesFactory.startConstruction(context);
-		for (int i = 0; i < nl.getLength(); i++) {
-			if (nl.item(i).getNodeType() == Node.ELEMENT_NODE) {
-				Element elm = (Element) nl.item(i);
-				defItemList.add((DefinitionItem) JavaClassesFactory.getTerm(elm));
-			}
-		}
-		JavaClassesFactory.endConstruction();
-		defItemList = (List<DefinitionItem>) BasicParser.relocateComments(defItemList);
-		return defItemList;
 	}
 
 	public void setMainFile(File mainFile) {

@@ -20,9 +20,10 @@ public class Lexical extends ProductionItem {
 			follow = StringUtil.unescape(element.getAttribute("follow"));
 	}
 
-	public Lexical(String terminal) {
+	public Lexical(String terminal, String follow) {
 		super();
 		this.lexicalRule = terminal;
+		this.follow = follow;
 	}
 
 	public Lexical(Lexical terminal) {

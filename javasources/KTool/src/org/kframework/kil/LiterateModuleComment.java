@@ -30,9 +30,9 @@ public class LiterateModuleComment extends ModuleItem implements LiterateComment
 		lcType = literateModuleComment.lcType;
 	}
 
-	public LiterateModuleComment(String value) {
+	public LiterateModuleComment(String value, LiterateCommentType lcType) {
 		this.value = value;
-		this.lcType = LiterateCommentType.COMMON;
+		this.lcType = lcType;
 	}
 
 	public LiterateModuleComment(LiterateDefinitionComment ldc) {

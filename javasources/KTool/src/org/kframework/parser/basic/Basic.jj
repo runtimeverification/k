@@ -1,36 +1,9 @@
-/* LANGUAGE CHANGES:
-
-I've extended the syntax to allow space between List and "{"
-
-*/
-
-/* UNIMPLEMENTED ASPECTS:
-
-Token needs to have a follow set computed.
+/* BUGS:
 
 Due to now JavaCC handles EOF, EOF cannot terminate a single-line comment
 
-*/
-
-/* CURRENT TESTING FAILURES:
-
-     [java] Kompiling the language definitions...(99)
-     [java] 
-     [java] FAIL: dist/examples/cink/ltlmc/cink.k
-     [java] FAIL: dist/examples/cink/threads/cink.k
-     [java] FAIL: dist/examples/quine/explicit/quine-explicit.k
-     [java] 
-     [java] Generating PDF documentation...(99)
-     [java] 
-     [java] FAIL: dist/examples/cink/ltlmc/cink.k
-     [java] FAIL: dist/examples/cink/threads/cink.k
-     [java] FAIL: dist/examples/quine/explicit/quine-explicit.k
-     [java] 
-     [java] Running dist/examples/agent/agent.k programs... (0)
-     [java] SUCCESS
-     [java] Running dist/examples/bf/bf.k programs... (4)
-     [java] FAIL: dist/examples/bf/programs/hello-world-2.bf
-     [java] 
+The current method of computing follow sets is wrong, but it emulates
+the behavior of the previous system.
 
 */
 
@@ -49,6 +22,8 @@ Why "Keyword [ RL ] : BUBBLE" instead of "Keyword [ RL ] BUBBLE"?
 Some way to generalize FUNCTIONID and TupleProd?
 
 Strings in KIL should be enum
+
+Tabs in comments should not be translated to spaces
 
 */
 
@@ -161,7 +136,6 @@ RL ::= ~[\[\]\_\ \n\r\t]+
 
 */
 
-
 options {
   STATIC = false;
   UNICODE_INPUT = true;
@@ -179,6 +153,7 @@ import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Import;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.Lexical;
+import org.kframework.kil.LiterateComment.LiterateCommentType;
 import org.kframework.kil.LiterateDefinitionComment;
 import org.kframework.kil.LiterateModuleComment;
 import org.kframework.kil.Module;
@@ -246,9 +221,16 @@ public class Basic {
   uses of this function).
   */
   private <T extends ASTNode> T markLoc(String locPrefix, T node) {
+    return markLocExplicit(
+      locPrefix + "," + token.endLine + "," + token.endColumn + ")", node);
+  }
+
+  /** Marks 'node' with the location in 'loc'.Returns 'node' (which
+  simplifies many uses of this function).
+  */
+  private <T extends ASTNode> T markLocExplicit(String loc, T node) {
     node.setFilename(filename);
-    node.setLocation(
-      locPrefix + "," + token.endLine + "," + token.endColumn + ")");
+    node.setLocation(loc);
     return node;
   }
 
@@ -291,19 +273,31 @@ public class Basic {
   }
 
   /** Adds a comment to the current module or definition list */
-  void comment(StringBuilder image) {
-    String str = image.toString();
-    str = str.replace('\t', ' ');
+  void comment(Token token) {
+    String str = token.image;
+    if (str.startsWith("//"))
+      str = str.substring(2, str.length() - 1); // remove // and \n from beginning and end
+    else
+      str = str.substring(2, str.length() - 2); // remove /* and */ from beginning and end
+
+    LiterateCommentType lcType = LiterateCommentType.COMMON;
+
+    if (str.startsWith("@")) {
+      lcType = LiterateCommentType.LATEX;
+      str = str.substring(1);
+    } else if (str.startsWith("!")) {
+      lcType = LiterateCommentType.PREAMBLE;
+      str = str.substring(1);
+    }
+
+    String loc = "("+
+      token.beginLine+","+token.beginColumn+","+
+      token.endLine+","+token.endColumn+")";
 
     if (module == null) {
-      items.add(new LiterateDefinitionComment(str));
+      items.add(markLocExplicit(loc, new LiterateDefinitionComment(str, lcType)));
     } else {
-      if (str.substring(0,2).equals("//")) {
-        str = str.substring(2, str.length() - 1);
-      } else {
-        str = str.substring(2, str.length() - 2);
-      }
-      module.appendModuleItem(new LiterateModuleComment(str));
+      module.appendModuleItem(markLocExplicit(loc, new LiterateModuleComment(str, lcType)));
     }
   }
 
@@ -359,7 +353,7 @@ PARSER_END(Basic)
 <DEFAULT> SPECIAL_TOKEN :
 {
   <COMMENT: ( "//" (~["\n", "\r"])* ("\n" | "\r")
-            | "/*" (~["*"] | "*" ~["/"])* "*/")> { parser.comment(image); }
+            | "/*" (~["*"] | "*" ~["/"])* "*/")> { parser.comment(matchedToken); }
 }
 
 <DEFAULT> SKIP : { " " | "\t" | "\r" | "\n" }
@@ -452,7 +446,7 @@ Sort SortID() : { Sort sort; }
 ///////
 
 <MODNAME_STATE> SPECIAL_TOKEN: {
-  <MODNAME_COMMENT: <COMMENT>> { parser.comment(image); } }
+  <MODNAME_COMMENT: <COMMENT>> { parser.comment(matchedToken); } }
 <MODNAME_STATE> SKIP: { " " | "\t" | "\r" | "\n" }
 <MODNAME_STATE> TOKEN:
 {
@@ -465,7 +459,7 @@ Sort SortID() : { Sort sort; }
 <BUBBLE_STATE> SPECIAL_TOKEN:
 {
   <([" ", "\t", "\r", "\n"])+>
-| <BUBBLE_COMMENT: <COMMENT>> { parser.comment(image); }
+| <BUBBLE_COMMENT: <COMMENT>> { parser.comment(matchedToken); }
 }
 
 <BUBBLE_STATE> TOKEN:
@@ -500,7 +494,7 @@ StringSentence Bubble(String type) :
 /**** KLabels ****/
 
 <KLABEL_STATE> SPECIAL_TOKEN: {
-  <KLABEL_COMMENT: <COMMENT>> { parser.comment(image); } }
+  <KLABEL_COMMENT: <COMMENT>> { parser.comment(matchedToken); } }
 <KLABEL_STATE> SKIP: { " " | "\t" | "\r" | "\n" }
 
 <KLABEL_STATE> TOKEN:
@@ -531,7 +525,7 @@ List<KLabelConstant> KLabels() :
 
 <REGEX_STATE> SPECIAL_TOKEN: {
   <([" ", "\t", "\r", "\n"])+>
-| <REGEX_COMMENT: <COMMENT>> { parser.comment(image); }
+| <REGEX_COMMENT: <COMMENT>> { parser.comment(matchedToken); }
 }
 
 <REGEX_STATE> TOKEN:
@@ -551,24 +545,28 @@ List<KLabelConstant> KLabels() :
 }
 
 /** Parses a complete RegEx and returns it as a String */
-String RegEx(): { StringBuilder sb = new StringBuilder(); }
-{ (Element(sb))+ { return sb.toString(); } }
+String RegEx(StringBuilder follow): { StringBuilder reg = new StringBuilder(); }
+{ (Element(reg, follow))+ { return reg.toString(); } }
 
 /** Parses a single RegEx Element and appends it to 'sb' */
-void Element(StringBuilder sb): {}
-{
+void Element(StringBuilder reg, StringBuilder follow) :
+{ StringBuilder sb = new StringBuilder(); }
+{ { follow.setLength(0); }
 ( <STRING> { sb.append(specialAndImage()); }
 | <ID> { sb.append(specialAndImage()); }
 | Group(sb)
 | "(" { sb.append(specialAndImage()); }
-  (Element(sb))*
+  (Element(sb, follow))*
   ")" { sb.append(specialAndImage()); }
 | "{" { sb.append(specialAndImage()); }
-  Element(sb)
+  Element(sb, follow)
   <STRING> { sb.append(specialAndImage()); }
   "}" { sb.append(specialAndImage()); }
   (("+" | "*") { sb.append(specialAndImage()); })
-) (("+" | "*" | "?") { sb.append(specialAndImage()); })*
+) ({ follow.setLength(0); }
+   (("+" | "*") { follow.append(sb); } | "?")
+   { sb.append(specialAndImage()); })*
+  { reg.append(sb); }
 }
 
 /*** RegEx Character Groups */
@@ -603,7 +601,7 @@ void Group(StringBuilder sb) : {}
 <ATTR_STATE> SPECIAL_TOKEN:
 {
   "\n" | "\r" | " " | "\t"
-| <ATTR_COMMENT: <COMMENT>> { parser.comment(image); }
+| <ATTR_COMMENT: <COMMENT>> { parser.comment(matchedToken); }
 }
 
 <ATTR_STATE> TOKEN:
@@ -785,7 +783,8 @@ void Production(List<Production> prods) :
 
 /** Parses a ProductionItem and adds it to 'items' */
 void ProductionItem(List<ProductionItem> items) :
-{ String loc = startLoc(); String str; String sep; Sort sort; }
+{ String loc = startLoc(); String str; String sep; Sort sort;
+  StringBuilder follow = new StringBuilder(); boolean isToken = false; }
 {
   str = String() { items.add(tokenLoc(new Terminal(str))); }
 | sort = SimpleSortID() { items.add(sort); }
@@ -797,10 +796,14 @@ void ProductionItem(List<ProductionItem> items) :
   ( "{" UpperId() { str = image(); } "," sep = String() "}"
     { items.add(markLoc(loc, new UserList(str, sep, "+"))); return; })?
   { items.add(tokenLoc(new Sort(image()))); }
-| ("Lexer" | "Token")
+| ("Lexer" | "Token" { isToken = true; })
   ( "{" { SwitchTo(REGEX_STATE); }
-    str = RegEx()
+    str = RegEx(follow)
     "}" { SwitchTo(DEFAULT);
-          items.add(markLoc(loc, new Lexical(str+special()))); return; })?
+          items.add(markLoc(loc, new Lexical(
+            str+special(),
+            isToken && follow.length() != 0 ?
+               follow.toString() : null)));
+          return; })?
   { items.add(tokenLoc(new Sort(image()))); }
 }
