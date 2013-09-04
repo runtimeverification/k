@@ -23,6 +23,7 @@ import org.kframework.kil.loader.CollectModuleImportsVisitor;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.parser.basic.Basic;
 import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.BestFitFilter;
@@ -266,7 +267,7 @@ public class DefinitionLoader {
 	 */
 	public static Definition parseString(String content, String filename, Context context) {
 		try {
-			List<DefinitionItem> di = BasicParser.parseString(content, filename, context);
+			List<DefinitionItem> di = Basic.parse(filename, content);
 
 			org.kframework.kil.Definition def = new org.kframework.kil.Definition();
 			def.setItems(di);
