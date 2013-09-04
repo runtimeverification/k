@@ -6,49 +6,7 @@
 	Don't forget to set up the propper execution rights for those programs.
 	-->
 
-	<target name="all.stratego2java" depends="basic.stratego2java, concrete.stratego2java" />
-
-	<target name="basic.stratego2java">
-		<dependset>
-			<srcfileset file="../parsers/Basic/trans/*.str" />
-			<srcfileset file="../parsers/Basic/include/Basic.str" />
-			<srcfileset file="../parsers/Basic/include/Basic.tbl" />
-			<targetfileset dir="src/org/kframework/parser/basic/lib/">
-				<include name="*.java" />
-				<include name="Basic.tbl" />
-				<exclude name="xml_string_escape_from_string_0_0.java" />
-				<exclude name="clear_console_0_0.java" />
-				<exclude name="get_layout_0_0.java" />
-			</targetfileset>
-		</dependset>
-		<available file="src/org/kframework/parser/basic/lib/BasicMain.java" property="basic.stratego2java.available" />
-		<antcall target="basic.stratego2java.helper" />
-	</target>
-	<target name="basic.stratego2java.helper" unless="basic.stratego2java.available">
-		<delete file="../parsers/Basic/trans/BasicMain.rtree" />
-		<delete file="../parsers/Basic/trans/BasicMain.dep" />
-		<delete dir="../parsers/Basic/trans/BasicMain" />
-		<java failonerror="true" dir="../parsers/Basic/trans/" jar="${basedir}/../../dist/lib/java/strategoxt.jar" fork="true">
-			<arg line="-i xmlify.str -o BasicMain -la stratego-sglr --lib -I .. -p org.kframework.parser.basic.lib --clean" />
-		</java>
-		<delete>
-			<fileset dir="src/org/kframework/parser/basic/lib">
-				<include name="*.java" />
-				<include name="Basic.tbl" />
-				<exclude name="xml_string_escape_from_string_0_0.java" />
-				<exclude name="clear_console_0_0.java" />
-				<exclude name="get_layout_0_0.java" />
-			</fileset>
-		</delete>
-		<copy todir="src/org/kframework/parser/basic/lib/">
-			<fileset dir="../parsers/Basic/trans/BasicMain">
-				<include name="*" />
-			</fileset>
-		</copy>
-		<delete file="../parsers/Basic/trans/BasicMain.rtree" />
-		<delete file="../parsers/Basic/trans/BasicMain.dep" />
-		<delete dir="../parsers/Basic/trans/BasicMain" />
-	</target>
+	<target name="all.stratego2java" depends="concrete.stratego2java" />
 
 	<target name="concrete.stratego2java">
 		<dependset>

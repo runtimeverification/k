@@ -7,20 +7,4 @@
 	<import file="buildjar.xml" />
 
 	<target name="alllocal" depends="all.signature,all.stratego2java,build,jar" />
-
-	<target name="parallellocal">
-		<echo message="Parallel" />
-		<parallel>
-			<sequential>
-				<antcall target="basic.signature" />
-				<antcall target="basic.stratego2java" />
-			</sequential>
-			<sequential>
-				<antcall target="concrete.signature" />
-				<antcall target="concrete.stratego2java" />
-			</sequential>
-		</parallel>
-		<antcall target="build" />
-		<antcall target="jar" />
-	</target>
 </project>
