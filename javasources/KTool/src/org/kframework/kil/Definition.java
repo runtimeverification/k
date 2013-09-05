@@ -38,7 +38,7 @@ public class Definition extends ASTNode {
 	private String mainSyntaxModule;
 
 	public Definition() {
-		super("File System", "generated");
+		super();
 	}
 
 	public Definition(Definition d) {

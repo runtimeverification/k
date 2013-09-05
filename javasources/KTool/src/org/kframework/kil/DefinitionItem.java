@@ -8,7 +8,7 @@ public abstract class DefinitionItem extends ASTNode {
 	protected boolean predefined;
 
 	public DefinitionItem() {
-		super("File System", "generated");
+		super();
 	}
 
 	public DefinitionItem(DefinitionItem di) {

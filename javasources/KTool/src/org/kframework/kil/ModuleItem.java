@@ -5,10 +5,6 @@ import org.w3c.dom.Element;
 import aterm.ATermAppl;
 
 public abstract class ModuleItem extends ASTNode {
-	public ModuleItem(String location, String filename) {
-		super(location, filename);
-	}
-
 	public ModuleItem(Element element) {
 		super(element);
 	}
@@ -22,7 +18,7 @@ public abstract class ModuleItem extends ASTNode {
 	}
 
 	public ModuleItem() {
-		super("generated", "generated");
+		super();
 	}
 
 	public java.util.List<String> getLabels() {

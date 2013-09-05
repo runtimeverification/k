@@ -36,12 +36,6 @@ public class Sentence extends ModuleItem {
 		attributes = new Attributes();
 	}
 
-	public Sentence(String location, String filename) {
-		super(location, filename);
-		if (attributes == null)
-			attributes = new Attributes();
-	}
-
 	public Sentence(ATermAppl atm) {
 		super(atm);
 

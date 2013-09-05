@@ -16,11 +16,7 @@ import aterm.ATermAppl;
 public class Configuration extends Sentence {
 
 	public Configuration() {
-		super("File System", "generated");
-	}
-
-	public Configuration(String location, String filename) {
-		super(location, filename);
+		super();
 	}
 
 	public Configuration(Element element) {
