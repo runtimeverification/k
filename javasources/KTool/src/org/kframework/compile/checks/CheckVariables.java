@@ -167,7 +167,7 @@ public class CheckVariables extends BasicVisitor {
 				GlobalSettings.kem.register(new KException(KException.ExceptionType.HIDDENWARNING,
 						KException.KExceptionGroup.COMPILER,
 						"Singleton variable " + key.toString() + ".\n" +
-								"	If this is not a speling mistake, please consider using anonymous variables.",
+								"	If this is not a spelling mistake, please consider using anonymous variables.",
 						getName(), key.getFilename(), key.getLocation()));
 			}
 		}
