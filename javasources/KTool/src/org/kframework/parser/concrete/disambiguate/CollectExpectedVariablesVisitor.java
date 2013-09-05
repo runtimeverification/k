@@ -35,7 +35,8 @@ public class CollectExpectedVariablesVisitor extends BasicVisitor {
 			if (vars.size() == 0)
 				newVars.addAll(viz.vars);
 		}
-		vars = newVars;
+		if (!newVars.isEmpty())
+			vars = newVars;
 		visit((Term) node);
 	}
 
@@ -46,13 +47,7 @@ public class CollectExpectedVariablesVisitor extends BasicVisitor {
 				vars.add(new VarHashMap());
 			for (VarHashMap vars2 : vars)
 				if (vars2.containsKey(var.getName())) {
-					Set<String> lst = vars2.get(var.getName());
-					boolean contains = false;
-					for (String v : lst)
-						if (v.equals(var))
-							contains = true;
-					if (!contains)
-						lst.add(var.getExpectedSort());
+					vars2.get(var.getName()).add(var.getExpectedSort());
 				} else {
 					java.util.Set<String> varss = new HashSet<String>();
 					varss.add(var.getExpectedSort());

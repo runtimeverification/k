@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Sentence;
@@ -14,6 +15,7 @@ import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicTransformer;
+import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -92,6 +94,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 					}
 					if (mins.size() == 0) {
 						fails = entry.getKey();
+						solution.clear();
 						break;
 					} else if (mins.size() > 1) {
 						java.util.Set<String> maxSorts = new HashSet<String>();
@@ -110,6 +113,8 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 						else {
 							failsAmb = maxSorts;
 							failsAmbName = entry.getKey();
+							solution.clear();
+							break;
 						}
 					} else {
 						solution.put(entry.getKey(), mins);
@@ -147,9 +152,62 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 					} catch (TransformerException e) {
 						e.report();
 					}
-					for (Map.Entry<String, Set<String>> solEntry : solutions.iterator().next().entrySet()) {
-						String msg = "Variable '" + solEntry.getKey() + "' was not declared. Assuming sort " + solEntry.getValue().iterator().next();
-						GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.COMPILER, msg, r.getFilename(), r.getLocation()));
+					//					for (Map.Entry<String, Set<String>> solEntry : solutions.iterator().next().entrySet()) {
+					//						String msg = "Variable '" + solEntry.getKey() + "' was not declared. Assuming sort " + solEntry.getValue().iterator().next();
+					//						GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.COMPILER, msg, r.getFilename(), r.getLocation()));
+					//					}
+					// correct the sorts for each variable after type inference
+					CollectRemainingVarsVisitor vars3 = new CollectRemainingVarsVisitor(context);
+					r.accept(vars3);
+
+					varDeclMap.clear();
+					// for each variable name do checks or type inference
+					for (Entry<String, java.util.List<Variable>> varEntry : vars3.vars.entrySet()) {
+						java.util.List<Variable> varList = varEntry.getValue();
+
+						// divide into locations
+						Map<String, java.util.Set<Variable>> varLoc = new HashMap<String, java.util.Set<Variable>>();
+						for (Variable var : varList) {
+							if (varLoc.containsKey(var.getLocation()))
+								varLoc.get(var.getLocation()).add(var);
+							else {
+								java.util.Set<Variable> varss = new HashSet<Variable>();
+								varss.add(var);
+								varLoc.put(var.getLocation(), varss);
+							}
+						}
+
+						// choose maximum on each location
+						for (Map.Entry<String, Set<Variable>> ent : varLoc.entrySet()) {
+							Variable vmax = ent.getValue().iterator().next();
+							for (Variable vv1 : ent.getValue()) {
+								if (context.isSubsorted(vv1.getSort(), vmax.getSort()))
+									vmax = vv1;
+							}
+							ent.getValue().clear();
+							ent.getValue().add(vmax);
+						}
+
+						// choose minimum on all locations
+						Variable vmin = varLoc.entrySet().iterator().next().getValue().iterator().next();
+						for (Map.Entry<String, Set<Variable>> ent : varLoc.entrySet()) {
+							Variable vloc = ent.getValue().iterator().next();
+							if (context.isSubsorted(vmin.getSort(), vloc.getSort()))
+								vmin = vloc;
+						}
+
+						// store the solution for later disambiguation
+						varDeclMap.put(vmin.getName(), vmin);
+						String msg = "Variable '" + vmin.getName() + "' was not declared. Assuming sort " + vmin.getSort() + " and expected sort " + vmin.getExpectedSort() + ".";
+						GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.COMPILER, msg, vmin.getFilename(), vmin.getLocation()));
+					}
+					// after type inference for concrete sorts, reject erroneous branches
+					if (!varDeclMap.isEmpty()) {
+						try {
+							r = (Sentence) r.accept(new VariableTypeFilter(varDeclMap, false, context));
+						} catch (TransformerException e) {
+							e.report();
+						}
 					}
 				} else {
 					Map<String, Set<String>> collect = new HashMap<String, Set<String>>();
@@ -223,6 +281,26 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 				amb.setContents(new ArrayList<Term>(maxterms));
 
 			return super.transform(amb);
+		}
+	}
+
+	public class CollectRemainingVarsVisitor extends BasicVisitor {
+		public CollectRemainingVarsVisitor(Context context) {
+			super(context);
+		}
+
+		public java.util.Map<String, java.util.List<Variable>> vars = new HashMap<String, java.util.List<Variable>>();
+
+		@Override
+		public void visit(Variable var) {
+			if (!var.getName().equals(MetaK.Constants.anyVarSymbol) && !var.isUserTyped())
+				if (vars.containsKey(var.getName()))
+					vars.get(var.getName()).add(var);
+				else {
+					java.util.List<Variable> varss = new ArrayList<Variable>();
+					varss.add(var);
+					vars.put(var.getName(), varss);
+				}
 		}
 	}
 }
