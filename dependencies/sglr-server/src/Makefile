@@ -1,5 +1,5 @@
-CFLAGS=-D NDEBUG -I . -I ../aterm-2.5/include -I ../sdf2-bundle-2.4/include
-LDFLAGS=-static -L ../aterm-2.5/lib -L ../sdf2-bundle-2.4/lib
+CFLAGS=-D NDEBUG -I. -I../aterm-2.5/include -I../sdf2-bundle-2.4/include
+LDFLAGS=-L../aterm-2.5/lib -L../sdf2-bundle-2.4/lib
 
 SRC=$(sdf-wrapper.c)
 OBJS=$(SRC:.c=.o)
