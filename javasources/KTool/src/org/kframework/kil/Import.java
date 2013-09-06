@@ -1,23 +1,16 @@
 package org.kframework.kil;
 
-import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.w3c.dom.Element;
 
 /** An import directive */
 public class Import extends ModuleItem {
 
 	String name;
 
-	public Import(Element element) {
-		super(element);
-		name = element.getAttribute(Constants.NAME_name_ATTR);
-	}
-
 	public Import(String importName) {
-		super((Element) null);
+		super();
 		name = importName;
 	}
 

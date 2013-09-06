@@ -1,13 +1,8 @@
 package org.kframework.kil;
 
-import org.kframework.kil.loader.Constants;
-import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.utils.StringUtil;
-import org.kframework.utils.xml.XML;
-import org.w3c.dom.Element;
 
 /**
  * Used as a container for unparsed sentences like rule, context and configuration.
@@ -24,22 +19,6 @@ public class StringSentence extends ModuleItem {
 		this.content = content;
 		this.type = type;
 		this.label = label;
-	}
-
-	public StringSentence(Element element) {
-		super(element);
-		content = StringUtil.unescape(element.getAttribute(Constants.VALUE_value_ATTR));
-		label = element.getAttribute(Constants.LABEL_label_ATTR);
-		type = element.getNodeName();
-		java.util.List<Element> its = XML.getChildrenElementsByTagName(element, Constants.ATTRIBUTES);
-		// assumption: <attributes> appears only once
-		if (its.size() > 0) {
-			attributes.setAll((Attributes) JavaClassesFactory.getTerm(its.get(0)));
-		} else {
-			if (attributes == null)
-				attributes = new Attributes();
-			attributes.addAttribute("generated", "generated");
-		}
 	}
 
 	public StringSentence(StringSentence node) {

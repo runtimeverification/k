@@ -1,7 +1,5 @@
 package org.kframework.kil;
 
-import org.w3c.dom.Element;
-
 public abstract class DefinitionItem extends ASTNode {
 
 	/** set iff the item was read from a file in the standard libraries */
@@ -13,10 +11,6 @@ public abstract class DefinitionItem extends ASTNode {
 
 	public DefinitionItem(DefinitionItem di) {
 		super(di);
-	}
-
-	public DefinitionItem(Element element) {
-		super(element);
 	}
 
 	public void setPredefined(boolean predefined) {

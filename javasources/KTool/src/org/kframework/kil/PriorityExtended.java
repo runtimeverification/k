@@ -1,15 +1,8 @@
 package org.kframework.kil;
 
-import org.kframework.kil.loader.Constants;
-import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.utils.xml.XML;
-import org.w3c.dom.Element;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /** A priority declaration, {@code syntax priorities} <em>labels</em> {@code >} ... {@code >} <em>labels</em>.
  * @see PriorityBlockExtended
@@ -29,16 +22,6 @@ public class PriorityExtended extends ModuleItem {
 
 	public void setPriorityBlocks(java.util.List<PriorityBlockExtended> priorityBlocks) {
 		this.priorityBlocks = priorityBlocks;
-	}
-
-	public PriorityExtended(Element element) {
-		super(element);
-
-		// assumption: sorts contains only one element
-		this.priorityBlocks = new ArrayList<PriorityBlockExtended>();
-		List<Element> priorities = XML.getChildrenElementsByTagName(element, Constants.PRIBLOCK);
-		for (Element priority : priorities)
-			priorityBlocks.add((PriorityBlockExtended) JavaClassesFactory.getTerm(priority));
 	}
 
 	public PriorityExtended(PriorityExtended node) {

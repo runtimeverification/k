@@ -37,7 +37,7 @@ public abstract class ASTNode implements Visitable, Transformable, Serializable 
 	 *            The XML element describing the ASTNode
 	 */
 	public ASTNode(Element elem) {
-		this(getElementLocation(elem), getElementFile(elem));
+		setLocation(elem);
 	}
 
 	/**
@@ -47,17 +47,7 @@ public abstract class ASTNode implements Visitable, Transformable, Serializable 
 	 *            the Stratego object representing an ASTNode
 	 */
 	public ASTNode(ATermAppl elem) {
-		ATermList list = (ATermList) elem.getAnnotations().getFirst();
-		list = list.getNext();
-		String fileame = ((ATermAppl) ((ATermAppl) list.getFirst()).getChildAt(0)).getName();
-		ATermAppl atm = (ATermAppl) ((ATermAppl) list.getFirst()).getChildAt(1);
-		int loc0 = ((ATermInt) atm.getChildAt(0)).getInt();
-		int loc1 = ((ATermInt) atm.getChildAt(1)).getInt() + 1;
-		int loc2 = ((ATermInt) atm.getChildAt(2)).getInt();
-		int loc3 = ((ATermInt) atm.getChildAt(3)).getInt() + 1;
-		String loc = "(" + loc0 + "," + loc1 + "," + loc2 + "," + loc3 + ")";
-		this.setLocation(loc);
-		this.setFilename(fileame);
+		setLocation(elem);
 	}
 
 	/**
@@ -109,9 +99,27 @@ public abstract class ASTNode implements Visitable, Transformable, Serializable 
 	 * @param file
 	 */
 	public ASTNode(String loc, String file) {
-		// attributes = new Attributes();
 		setLocation(loc);
 		setFilename(file);
+	}
+
+        protected void setLocation(Element elem) {
+		setLocation(getElementLocation(elem));
+		setFilename(getElementFile(elem));
+	}
+
+	protected void setLocation(ATermAppl elem) {
+		ATermList list = (ATermList) elem.getAnnotations().getFirst();
+		list = list.getNext();
+		String fileame = ((ATermAppl) ((ATermAppl) list.getFirst()).getChildAt(0)).getName();
+		ATermAppl atm = (ATermAppl) ((ATermAppl) list.getFirst()).getChildAt(1);
+		int loc0 = ((ATermInt) atm.getChildAt(0)).getInt();
+		int loc1 = ((ATermInt) atm.getChildAt(1)).getInt() + 1;
+		int loc2 = ((ATermInt) atm.getChildAt(2)).getInt();
+		int loc3 = ((ATermInt) atm.getChildAt(3)).getInt() + 1;
+		String loc = "(" + loc0 + "," + loc1 + "," + loc2 + "," + loc3 + ")";
+		this.setLocation(loc);
+		this.setFilename(fileame);
 	}
 
 	/**

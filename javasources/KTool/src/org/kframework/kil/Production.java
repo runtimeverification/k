@@ -2,12 +2,9 @@ package org.kframework.kil;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ProductionItem.ProductionType;
-import org.kframework.kil.loader.*;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.utils.xml.XML;
-import org.w3c.dom.Element;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,28 +56,6 @@ public class Production extends ASTNode {
 
 	public boolean isConstant() {
 		return items.size() == 1 && items.get(0).getType() == ProductionType.TERMINAL && (sort.startsWith("#") || sort.equals(KSorts.KLABEL));
-	}
-
-	public Production(Element element) {
-		super(element);
-
-		java.util.List<String> strings = new ArrayList<String>();
-		strings.add(Constants.SORT);
-		strings.add(Constants.TERMINAL);
-		strings.add(Constants.USERLIST);
-		strings.add(Constants.LEXICAL);
-		java.util.List<Element> its = XML.getChildrenElementsByTagName(element, strings);
-
-		items = new ArrayList<ProductionItem>();
-		for (Element e : its)
-			items.add((ProductionItem) JavaClassesFactory.getTerm(e));
-
-		its = XML.getChildrenElementsByTagName(element, Constants.ATTRIBUTES);
-		// assumption: <attributes> appears only once
-		if (its.size() > 0)
-			attributes.setAll((Attributes) JavaClassesFactory.getTerm(its.get(0)));
-		else if (attributes == null)
-			attributes = new Attributes();
 	}
 
 	public Production(Production node) {

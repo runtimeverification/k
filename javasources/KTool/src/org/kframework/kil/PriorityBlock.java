@@ -1,12 +1,8 @@
 package org.kframework.kil;
 
-import org.kframework.kil.loader.Constants;
-import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.utils.xml.XML;
-import org.w3c.dom.Element;
 
 import java.util.ArrayList;
 
@@ -40,16 +36,6 @@ public class PriorityBlock extends ASTNode {
 	public PriorityBlock() {
 		super();
 		this.assoc = "";
-	}
-
-	public PriorityBlock(Element element) {
-		super(element);
-
-		java.util.List<Element> productions = XML.getChildrenElementsByTagName(element, Constants.PRODUCTION);
-		for (Element production : productions)
-			this.productions.add((Production) JavaClassesFactory.getTerm(production));
-
-		assoc = element.getAttribute(Constants.ASSOC_assoc_ATTR);
 	}
 
 	public PriorityBlock(String assoc, java.util.List<Production> productions) {

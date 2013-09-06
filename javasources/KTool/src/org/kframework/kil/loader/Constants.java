@@ -10,17 +10,6 @@ import java.util.Map;
 public class Constants {
 
 	// Tags constants
-	public static final String MODULE = "module";
-	public static final String IMPORT = "import";
-	public static final String SYNTAX = "syntax";
-	public static final String PRISENT = "prisent";
-	public static final String PRIBLOCK = "priblock";
-	public static final String PRIASSOC = "priassoc";
-	public static final String SORT = "sort";
-	public static final String PRIORITY = "priority";
-	public static final String PRODUCTION = "production";
-	public static final String LEXICAL = "lexical";
-	public static final String RESTRICTIONS = "restrictions";
 	public static final String RULE = "rule";
 	public static final String SENTENCE = "sentence";
 	public static final String BODY = "body";
@@ -32,7 +21,6 @@ public class Constants {
 	public static final String CAST = "cast";
 	public static final String VAR = "var";
 	public static final String RIGHT = "right";
-	public static final String TERMINAL = "terminal";
 	public static final String ATTRIBUTES = "attributes";
 	public static final String TAG = "tag";
 	public static final String CONST = "const";
@@ -41,7 +29,6 @@ public class Constants {
 	public static final String EMPTY = "empty";
 	public static final String COND = "cond";
 	public static final String BUILTINOP = "builtinOp";
-	public static final String USERLIST = "userlist";
 	public static final String CONFIG = "config";
 	public static final String CELL = "cell";
 	public static final String K = "K";
@@ -53,15 +40,11 @@ public class Constants {
 	public static final String FREEZERHOLE = "freezerHole";
 	public static final String DEFINITION = "def";
 	public static final String AMB = "amb";
-	public static final String MODULECOMMENT = "moduleComment";
-	public static final String DEFCOMMENT = "comment";
 	public static final String MAINFILE = "mainFile";
 	public static final String MAINMODULE = "mainModule";
 	public static final String MAINSYNTAXMODULE = "mainSyntaxModule";
 	public static final String NAME = "name";
 	public static final String PREDICATE = "predicate";
-	public static final String REQUIRE = "require";
-
 	// Attributes constants
 	public static final String VALUE_value_ATTR = "value";
 	public static final String LOC_loc_ATTR = "loc";

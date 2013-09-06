@@ -4,11 +4,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.w3c.dom.Element;
 
 /** A nonterminal in a {@link Production}. Also abused in some places as a sort identifier */
 public class Sort extends ProductionItem {
@@ -32,11 +30,6 @@ public class Sort extends ProductionItem {
 		baseSorts.add("BagItem");
 		baseSorts.add(KSorts.KLABEL);
 		baseSorts.add("CellLabel");
-	}
-
-	public Sort(Element element) {
-		super(element);
-		name = element.getAttribute(Constants.VALUE_value_ATTR);
 	}
 
 	public Sort(String name) {

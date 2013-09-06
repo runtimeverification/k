@@ -1,13 +1,9 @@
 package org.kframework.kil;
 
-import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.utils.xml.XML;
-import org.w3c.dom.Element;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,20 +18,6 @@ public class Module extends DefinitionItem {
 	/** "module" or "interface" */
 	private String type;
 
-	public Module(Element element) {
-		super(element);
-
-		name = element.getAttribute(Constants.VALUE_value_ATTR);
-		type = element.getAttribute(Constants.TYPE_type_ATTR);
-		predefined = element.getAttribute(Constants.PREDEFINED).equals("true") ? true : false;
-
-		List<Element> elements = XML.getChildrenElements(element);
-		for (Element e : elements) {
-			ASTNode astn = JavaClassesFactory.getTerm(e);
-			items.add((ModuleItem) astn);
-		}
-	}
-
 	public Module(Module m) {
 		super(m);
 		this.name = m.name;
@@ -45,6 +27,7 @@ public class Module extends DefinitionItem {
 	}
 
 	public Module() {
+		super();
 	}
 
 	public Module(String name, String type, boolean predefined) {

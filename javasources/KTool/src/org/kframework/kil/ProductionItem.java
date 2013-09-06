@@ -1,12 +1,6 @@
 package org.kframework.kil;
 
-import org.w3c.dom.Element;
-
 public abstract class ProductionItem extends ASTNode {
-	public ProductionItem(Element element) {
-		super(element);
-	}
-
 	public ProductionItem() {
 		super();
 	}

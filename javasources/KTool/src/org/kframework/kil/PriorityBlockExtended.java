@@ -38,16 +38,6 @@ public class PriorityBlockExtended extends ASTNode {
 		this.assoc = "";
 	}
 
-	public PriorityBlockExtended(Element element) {
-		super(element);
-
-		java.util.List<Element> productions = XML.getChildrenElementsByTagName(element, Constants.CONST);
-		for (Element production : productions)
-			this.productions.add((KLabelConstant) JavaClassesFactory.getTerm(production));
-
-		assoc = element.getAttribute(Constants.ASSOC_assoc_ATTR);
-	}
-
 	public PriorityBlockExtended(PriorityBlockExtended node) {
 		super(node);
 		this.assoc = node.assoc;

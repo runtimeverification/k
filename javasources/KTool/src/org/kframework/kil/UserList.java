@@ -1,10 +1,8 @@
 package org.kframework.kil;
 
-import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.w3c.dom.Element;
 
 /**
  * A production item for a cons-list with separator, like List{UserSort,";"}. Must be the only item in a {@link Production}.
@@ -25,14 +23,6 @@ public class UserList extends ProductionItem {
         this.separator = separator;
         this.listType = listType;
     }
-
-	public UserList(Element element) {
-		super(element);
-
-		sort = element.getAttribute(Constants.VALUE_value_ATTR);
-		separator = element.getAttribute(Constants.SEPARATOR_separator_ATTR).trim();
-		listType = element.getAttribute(Constants.TYPE_type_ATTR);
-	}
 
 	public UserList(UserList userList) {
 		super(userList);

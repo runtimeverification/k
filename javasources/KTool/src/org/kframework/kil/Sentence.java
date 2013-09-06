@@ -37,7 +37,7 @@ public class Sentence extends ModuleItem {
 	}
 
 	public Sentence(ATermAppl atm) {
-		super(atm);
+		setLocation(atm);
 
 		if (atm.getName().equals("Ensures")) {
 			ensures = (Term) JavaClassesFactory.getTerm(atm.getArgument(1));
@@ -52,7 +52,7 @@ public class Sentence extends ModuleItem {
 	}
 
 	public Sentence(Element element) {
-		super(element);
+		setLocation(element);
 
 		label = element.getAttribute(Constants.LABEL);
 		Element elm = XML.getChildrenElementsByTagName(element, Constants.BODY).get(0);

@@ -1,15 +1,8 @@
 package org.kframework.kil;
 
-import org.kframework.kil.loader.Constants;
-import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.utils.xml.XML;
-import org.w3c.dom.Element;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * An associativity declaration, one of {@code syntax left}, {@code syntax right}, or {@ code syntax non-assoc}.
@@ -40,16 +33,6 @@ public class PriorityExtendedAssoc extends ModuleItem {
 		super();
 		this.tags = tags;
 		this.assoc = assoc;
-	}
-
-	public PriorityExtendedAssoc(Element element) {
-		super(element);
-
-		this.assoc = element.getAttribute(Constants.ASSOC_assoc_ATTR);
-		this.tags = new ArrayList<KLabelConstant>();
-		List<Element> priorities = XML.getChildrenElementsByTagName(element, Constants.CONST);
-		for (Element priority : priorities)
-			tags.add((KLabelConstant) JavaClassesFactory.getTerm(priority));
 	}
 
 	public PriorityExtendedAssoc(PriorityExtendedAssoc node) {
