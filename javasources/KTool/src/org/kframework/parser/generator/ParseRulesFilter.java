@@ -30,8 +30,6 @@ import org.kframework.parser.concrete.disambiguate.InclusionFilter;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
-import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
-import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
 import org.kframework.parser.concrete.disambiguate.VariableTypeInferenceFilter;
 import org.kframework.parser.utils.ReportErrorsVisitor;
 import org.kframework.parser.utils.Sglr;
@@ -141,7 +139,7 @@ public class ParseRulesFilter extends BasicTransformer {
 					st.setAttributes(ss.getAttributes());
 				}
 				// disambiguate rules
-				if (config.getFilename().endsWith("test.k")) {
+				if (config.getFilename().endsWith("untyped.k")) {
 					// this is just for testing. I put a breakpoint on the next line so I can get faster to the rule that I'm interested in
 					int a = 1;
 					a = a + 1;
@@ -159,10 +157,10 @@ public class ParseRulesFilter extends BasicTransformer {
 				// config = config.accept(new CheckBinaryPrecedenceFilter());
 				config = config.accept(new PriorityFilter(context));
 				config = config.accept(new VariableTypeInferenceFilter(context));
-				config = config.accept(new AmbDuplicateFilter(context));
-				config = config.accept(new TypeSystemFilter(context));
+				// config = config.accept(new AmbDuplicateFilter(context));
+				// config = config.accept(new TypeSystemFilter(context));
 				// config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context));
-				config = config.accept(new TypeInferenceSupremumFilter(context));
+				// config = config.accept(new TypeInferenceSupremumFilter(context));
 				config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context));
 				config = config.accept(new PreferAvoidFilter(context));
 				config = config.accept(new FlattenListsFilter(context));

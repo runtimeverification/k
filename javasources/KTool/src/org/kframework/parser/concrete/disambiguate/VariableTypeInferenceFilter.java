@@ -63,6 +63,8 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 		// after finding all of the variable declarations traverse the tree to disambiguate
 		try {
 			r = (Sentence) r.accept(new VariableTypeFilter(varDeclMap, false, context));
+			r = (Sentence) r.accept(new TypeSystemFilter(context));
+			r = (Sentence) r.accept(new TypeInferenceSupremumFilter(context));
 		} catch (TransformerException e) {
 			e.report();
 		}
