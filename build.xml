@@ -55,6 +55,12 @@
 				<exclude name="PromelaBuchiParser.jj" />
 			</fileset>
 		</delete>
+		<delete includeemptydirs="true">
+			<fileset dir="${javasources}/KTool/src/org/kframework/parser/basic">
+				<include name="**/*" />
+				<exclude name="Basic.jj" />
+			</fileset>
+		</delete>
 	</target>
 
 	<target name="makeversion">
