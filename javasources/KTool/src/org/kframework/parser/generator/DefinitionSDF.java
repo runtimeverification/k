@@ -124,7 +124,8 @@ public class DefinitionSDF {
 		for (Production p : psdfv.outsides) {
 			if (p.isListDecl()) {
 				UserList si = (UserList) p.getItems().get(0);
-				sdf.append("	" + StringUtil.escapeSortName(si.getSort()) + " \"" + si.getSeparator() + "\" " + StringUtil.escapeSortName(p.getSort()) + " -> " + StringUtil.escapeSortName(p.getSort()));
+				sdf.append("	" + StringUtil.escapeSortName(si.getSort()) + " \"" + si.getSeparator() + "\" " + StringUtil.escapeSortName(p.getSort()) + " -> "
+						+ StringUtil.escapeSortName(p.getSort()));
 				sdf.append(" {cons(\"" + p.getAttribute("cons") + "\")}\n");
 				sdf.append("	\"." + p.getSort() + "\" -> " + StringUtil.escapeSortName(p.getSort()));
 				sdf.append(" {cons(\"" + StringUtil.escapeSortName(p.getSort()) + "1Empty\")}\n");
@@ -214,16 +215,13 @@ public class DefinitionSDF {
 		sdf.append("\n\n%% sort predicates\n");
 		// print is<Sort> predicates (actually KLabel)
 		for (Sort sort : psdfv.userSorts) {
-            if (!MetaK.isKSort(sort.getName())) {
-			    sdf.append("	\"" + AddPredicates.syntaxPredicate(sort.getName())
-                           + "\"      -> DzKLabel\n");
-            }
-            if (AddSymbolicK.allowKSymbolic(sort.getName())) {
-			    sdf.append("	\"" + AddPredicates.symbolicPredicate(sort.getName())
-                           + "\"      -> DzKLabel\n");
-			    sdf.append("	\"" + AddSymbolicK.symbolicConstructor(sort.getName())
-                           + "\"      -> DzKLabel\n");
-            }
+			if (!MetaK.isKSort(sort.getName())) {
+				sdf.append("	\"" + AddPredicates.syntaxPredicate(sort.getName()) + "\"      -> DzKLabel\n");
+			}
+			if (AddSymbolicK.allowKSymbolic(sort.getName())) {
+				sdf.append("	\"" + AddPredicates.symbolicPredicate(sort.getName()) + "\"      -> DzKLabel\n");
+				sdf.append("	\"" + AddSymbolicK.symbolicConstructor(sort.getName()) + "\"      -> DzKLabel\n");
+			}
 		}
 
 		sdf.append("\n\n");
@@ -256,6 +254,9 @@ public class DefinitionSDF {
 				psdfv.restrictions.add(new Restrictions(p.getSort(), null, l.getFollow()));
 			}
 		}
+		for (String s : lexerSorts)
+			for (String t : terminals.terminals)
+				sdf.append("	\"" + StringUtil.escape(t) + "\" -> " + StringUtil.escapeSortName(s) + "Dz {reject}\n");
 
 		// adding cons over lexical rules
 		sdf.append("context-free syntax\n");
