@@ -915,6 +915,7 @@
 <test definition="tests/regression/java-rewrite-engine/io/test2/test.k"
       extensions="test"
       programs="tests/regression/java-rewrite-engine/io/test2/programs"
+      exclude="tests/regression/java-rewrite-engine/io/test2/programs/readInt.test"
       results="tests/regression/java-rewrite-engine/io/test2/tests">
   <kompile-option name="-ml" />
   <all-programs>
