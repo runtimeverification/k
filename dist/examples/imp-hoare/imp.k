@@ -146,11 +146,11 @@ module IMP
        <condition> Phi:Bool => Phi andBool notBool B1 </condition> ...</T>
        when checkSat(Phi andBool notBool B1) ==K "sat" [transition]
 
-  rule <T> <k> if (B:Bool) S else _ => S ...</k>
+  rule <T> <k> if (B:Bool) S::Block else _ => S ...</k>
        <condition> Phi:Bool => Phi andBool B </condition> ...</T>
        when checkSat(Phi andBool B) ==K "sat" [transition]
 
-  rule <T> <k> if (B:Bool) _ else S => S ...</k>
+  rule <T> <k> if (B:Bool) _ else S::Block => S ...</k>
        <condition> Phi:Bool => Phi andBool notBool B </condition> ...</T>
        when checkSat(Phi andBool notBool B) ==K "sat" [transition]
 
