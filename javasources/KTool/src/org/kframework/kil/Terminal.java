@@ -4,6 +4,7 @@ import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.StringUtil;
 import org.w3c.dom.Element;
 
 /** A terminal in a {@link Production}. */
@@ -40,7 +41,7 @@ public class Terminal extends ProductionItem {
 
 	@Override
 	public String toString() {
-		return "\"" + terminal + "\"";
+		return "\"" + StringUtil.escape(terminal) + "\"";
 	}
 
 	@Override

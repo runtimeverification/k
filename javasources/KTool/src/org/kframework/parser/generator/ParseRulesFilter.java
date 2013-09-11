@@ -139,7 +139,7 @@ public class ParseRulesFilter extends BasicTransformer {
 					st.setAttributes(ss.getAttributes());
 				}
 				// disambiguate rules
-				if (config.getFilename().endsWith("untyped.k")) {
+				if (config.getFilename().endsWith("test.k")) {
 					// this is just for testing. I put a breakpoint on the next line so I can get faster to the rule that I'm interested in
 					int a = 1;
 					a = a + 1;

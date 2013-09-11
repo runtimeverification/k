@@ -7,6 +7,7 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Bracket;
+import org.kframework.kil.Cell;
 import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Sort;
@@ -32,6 +33,17 @@ public class CollectVariablesVisitor extends BasicVisitor {
 
 	public void setVars(java.util.Map<String, java.util.List<Variable>> vars) {
 		this.vars = vars;
+	}
+
+	public void visit(Cell c) {
+		if (context.cellSorts.containsKey(c.getLabel())) {
+			try {
+				c.setContents((Term) c.getContents().accept(new CollectVariablesVisitor2(context, context.cellSorts.get(c.getLabel()))));
+			} catch (TransformerException e) {
+				e.printStackTrace();
+			}
+		}
+		super.visit(c);
 	}
 
 	@Override
@@ -64,10 +76,7 @@ public class CollectVariablesVisitor extends BasicVisitor {
 			}
 		}
 
-		for (Term t : node.getContents()) {
-			t.accept(this);
-		}
-		visit((Term) node);
+		super.visit(node);
 	}
 
 	@Override
