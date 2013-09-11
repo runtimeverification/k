@@ -1,6 +1,7 @@
 require "builtins/list.k"
 require "builtins/map.k"
 require "builtins/set.k"
+require "io/io.k"
 
 
 /*!
@@ -212,6 +213,7 @@ arguments. */
               | "read"        [reject]
               | "join"        [reject]
               | "function"    [reject]
+              | "return"      [reject]
 /*@ \section{Desugared Syntax}
 This part desugars some of SIMPLE's language constructs into core ones.
 We only want to give semantics to core constructs, so we get rid of the
@@ -239,6 +241,7 @@ module SIMPLE-UNTYPED
   imports LIST
   imports MAP
   imports SET
+  imports IO
 
 /*@ \section{Basic Semantic Infrastructure}
 Before one starts adding semantic rules to a \K definition, one needs to
@@ -338,10 +341,8 @@ to the \K tool, as indicated by the \textit{\$PGM} variable, followed by the
                   <busy color="cyan"> .MySet </busy>
                   <terminated color="red"> .MySet </terminated>
                   //<br/>
-                  //<in color="magenta" stream="stdin"> .List </in>
-                  //<out color="brown" stream="stdout"> .List </out>
-                  <in color="magenta"> .MyList </in>
-                  <out color="brown"> .MyList </out>
+                  <in color="magenta" stream="stdin"> .MyList </in>
+                  <out color="brown" stream="stdout"> .MyList </out>
                   <nextLoc color="gray"> 0 </nextLoc>
                 </T>
 
