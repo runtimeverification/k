@@ -101,11 +101,18 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
         }
         KList kList = (KList) node.getChild();
 
-        if (kLabelConstant.productions().size() != 1) {
+        // TODO(AndreiS): the lines below should work one KLabelConstant are properly created
+        //if (kLabelConstant.productions().size() != 1) {
+        //    /* ignore KLabels associated with multiple productions */
+        //    return super.transform(node);
+        //}
+        //Production production = kLabelConstant.productions().iterator().next();
+
+        if (context.productionsOf(kLabelConstant.getLabel()).size() != 1) {
             /* ignore KLabels associated with multiple productions */
             return super.transform(node);
         }
-        Production production = kLabelConstant.productions().iterator().next();
+        Production production = context.productionsOf(kLabelConstant.getLabel()).iterator().next();
 
         DataStructureSort sort = context.dataStructureSortOf(production.getSort());
         if (sort == null) {
