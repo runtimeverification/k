@@ -654,7 +654,7 @@ The method lookup is the same as in untyped KOOL.  */
        <env> Env </env>
     when notBool(X in keys(Env))  [structural]
 
-  context HOLE._(_) when HOLE =/=K super
+  context HOLE._::Id(_) when HOLE =/=K super
 
   rule (objectClosure(Obj:Bag <envStack> EStack </envStack>) . X
     => lookupMember(<envStack> EStack </envStack>, X:Id))(_:Exps)  [structural]
@@ -679,7 +679,7 @@ Like in untyped KOOL.  */
   rule objectClosure(<envStack> ListItem((C,_)) ...</envStack> _)
        instanceOf C => true
 
-  rule objectClosure(<envStack> ListItem((C,_)) => . ...</envStack> _)
+  rule objectClosure(<envStack> ListItem((C::Id,_)) => . ...</envStack> _)
        instanceOf C'  when C =/=K C'  [structural]
 
   rule objectClosure(<envStack> . </envStack> _) instanceOf _ => false

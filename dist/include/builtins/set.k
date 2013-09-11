@@ -29,7 +29,7 @@ module SET
 
   /* element membership */
   syntax Bool ::= K "in" MySet    [function]
-  rule K1 in MySetItem(K2) S:MySet => K1 =K K2 orBool K1 in S
+  rule K1:K in MySetItem(K2:K) S:MySet => K1 =K K2 orBool K1 in S
   rule _ in .MySet => false
 
   /* set cardinality */

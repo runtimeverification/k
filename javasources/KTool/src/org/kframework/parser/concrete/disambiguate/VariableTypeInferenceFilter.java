@@ -132,7 +132,7 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 						String msg = "Could not infer a sort for variable '" + fails + "' to match every location.";
 						throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, r.getFilename(), r.getLocation()));
 					} else {
-						// Failure when in the same solutionn I can't find a unique sort for a specific variable.
+						// Failure when in the same solution I can't find a unique sort for a specific variable.
 						String msg = "Could not infer a unique sort for variable '" + failsAmbName + "'.";
 						msg += " Possible sorts: ";
 						for (String vv1 : failsAmb)
@@ -154,10 +154,6 @@ public class VariableTypeInferenceFilter extends BasicTransformer {
 					} catch (TransformerException e) {
 						e.report();
 					}
-					//					for (Map.Entry<String, Set<String>> solEntry : solutions.iterator().next().entrySet()) {
-					//						String msg = "Variable '" + solEntry.getKey() + "' was not declared. Assuming sort " + solEntry.getValue().iterator().next();
-					//						GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.COMPILER, msg, r.getFilename(), r.getLocation()));
-					//					}
 					// correct the sorts for each variable after type inference
 					CollectRemainingVarsVisitor vars3 = new CollectRemainingVarsVisitor(context);
 					r.accept(vars3);
