@@ -10,6 +10,7 @@ import org.kframework.backend.java.kil.KCollection;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KLabelFreezer;
+import org.kframework.backend.java.kil.KLabelInjection;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Term;
@@ -79,6 +80,12 @@ public class BackendJavaKILtoKILTranslation extends CopyOnWriteTransformer {
     public ASTNode transform(KLabelFreezer kLabelFreezer) {
         return new org.kframework.kil.FreezerLabel(
                 (org.kframework.kil.Term) kLabelFreezer.term().accept(this));
+    }
+
+    @Override
+    public ASTNode transform(KLabelInjection kLabelInjection) {
+        return new org.kframework.kil.KInjectedLabel(
+                (org.kframework.kil.Term) kLabelInjection.term().accept(this));
     }
 
     @Override
