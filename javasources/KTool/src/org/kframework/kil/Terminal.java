@@ -34,7 +34,7 @@ public class Terminal extends ProductionItem {
 
 	@Override
 	public String toString() {
-		return "\"" + StringUtil.escape(terminal) + "\"";
+		return "\"" + terminal + "\"";
 	}
 
 	@Override
