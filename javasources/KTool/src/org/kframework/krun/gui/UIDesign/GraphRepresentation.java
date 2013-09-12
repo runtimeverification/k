@@ -449,6 +449,7 @@ public class GraphRepresentation extends JPanel implements ItemListener {
     term.accept(cv);
 
     UnparserFilter unparser = new UnparserFilter(true, false, definitionHelper);
+    unparser.setExplicitTokens(false);
     term.accept(unparser);
     return unparser.getResult();
   }

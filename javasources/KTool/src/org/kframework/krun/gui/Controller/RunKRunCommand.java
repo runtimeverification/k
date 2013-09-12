@@ -87,6 +87,7 @@ public class RunKRunCommand {
                 }
              
                 UnparserFilter unparser = new UnparserFilter(true, false, context);
+		unparser.setExplicitTokens(false);
                 term.accept(unparser);
                 return unparser.getResult();
         }

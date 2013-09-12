@@ -87,6 +87,7 @@ public class KRunState implements Serializable{
 	public String toString() {
 		if (stateId == null) {
 			UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
+			unparser.setExplicitTokens(false);
 			getResult().accept(unparser);
 			return unparser.getResult();
 		} else {

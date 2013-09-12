@@ -16,6 +16,7 @@ public class UnparserFilter extends BasicVisitor {
 	private boolean firstProduction = false;
 	private boolean inConfiguration = false;
 	private boolean addParentheses;
+	private boolean explicitTokens = true;
 	private int inTerm = 0;
 	private boolean color = false;
 	private boolean annotateLocation;
@@ -672,7 +673,11 @@ public class UnparserFilter extends BasicVisitor {
 	@Override
 	public void visit(Token t) {
 		prepare(t);
-		indenter.write("#token(\"" + t.tokenSort() + "\", \"" + t.value() + "\")");
+		if (explicitTokens) {
+			indenter.write("#token(\"" + t.tokenSort() + "\", \"" + t.value() + "\")");
+		} else {
+			indenter.write(t.value());
+		}
 		postpare();
 	}
 
@@ -735,5 +740,9 @@ public class UnparserFilter extends BasicVisitor {
 
 	public void setInConfiguration(boolean inConfiguration) {
 		this.inConfiguration = inConfiguration;
+	}
+
+	public void setExplicitTokens(boolean explicitTokens) {
+		this.explicitTokens = explicitTokens;
 	}
 }
