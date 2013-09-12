@@ -1,3 +1,11 @@
+options {
+  STATIC = false;
+  UNICODE_INPUT = true;
+  SUPPORT_CLASS_VISIBILITY_PUBLIC = false;
+  TOKEN_MANAGER_USES_PARSER = true;
+  // FORCE_LA_CHECK = true; // Useful for development, but causes a warning in Production()
+}
+
 PARSER_BEGIN(KastParser)
 package org.kframework.utils.kastparser;
 
@@ -6,6 +14,7 @@ import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSequence;
 import org.kframework.kil.Term;
+import org.kframework.kil.loader.Context;
 import org.kframework.utils.StringUtil;
 
 import java.io.Reader;
@@ -14,13 +23,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class KastParser {
-
-	private KastParser(String kast) {
-		this((Reader)(new StringReader(kast)));
-	}
-
-	public static Term parse(String kast) {
-		KastParser parser = new KastParser(kast);
+	private Context context;
+	public static Term parse(String kast, Context context) {
+		KastParser parser = new KastParser(new StringReader(kast));
+		parser.context = context;
 		try {
 			return parser.k();
 		} catch (ParseException e) {
@@ -165,6 +171,6 @@ Term klabel() :
 	}
 |	<KLABEL>
 	{
-		return KLabelConstant.of(StringUtil.unescapeMaude(token.image));
+		return KLabelConstant.of(StringUtil.unescapeMaude(token.image), context);
 	}
 }

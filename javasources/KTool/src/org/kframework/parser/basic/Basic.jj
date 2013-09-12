@@ -170,6 +170,7 @@ import org.kframework.kil.StringSentence;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
+import org.kframework.kil.loader.Context;
 
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -188,12 +189,14 @@ public class Basic {
   private List<DefinitionItem> items = new ArrayList<DefinitionItem>();;
   private Module module = null;
   private int beginLine, beginColumn;
+  private Context context;
 
   /** Parses a given string that was read from 'filename'. */
   public static List<DefinitionItem> parse(
-    String filename, String string) {
+    String filename, String string, Context context) {
     Basic parser = new Basic(new StringReader(string));
     parser.filename = filename;
+    parser.context = context;
     try {
       return parser.Start();
     } catch (ParseException e) {
@@ -516,7 +519,7 @@ List<KLabelConstant> KLabels() :
 { List<KLabelConstant> list = new ArrayList<KLabelConstant>(); }
 {
   // Note that we don't assign location information b/c KLabels are interned
-  (<KLABEL> { list.add(KLabelConstant.of(image())); })+
+  (<KLABEL> { list.add(KLabelConstant.of(image(), context)); })+
   // TODO: check if need context
   { return list; }
 }

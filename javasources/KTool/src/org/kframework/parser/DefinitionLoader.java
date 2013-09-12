@@ -267,7 +267,7 @@ public class DefinitionLoader {
 	 */
 	public static Definition parseString(String content, String filename, Context context) {
 		try {
-			List<DefinitionItem> di = Basic.parse(filename, content);
+			List<DefinitionItem> di = Basic.parse(filename, content, context);
 
 			org.kframework.kil.Definition def = new org.kframework.kil.Definition();
 			def.setItems(di);

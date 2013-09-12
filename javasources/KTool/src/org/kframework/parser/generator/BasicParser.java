@@ -90,7 +90,7 @@ public class BasicParser {
 
 			if (GlobalSettings.verbose)
 				System.out.println("Including file: " + file.getAbsolutePath());
-			List<DefinitionItem> defItemList = Basic.parse(file.getAbsolutePath(), FileUtil.getFileContent(file.getAbsolutePath()));
+			List<DefinitionItem> defItemList = Basic.parse(file.getAbsolutePath(), FileUtil.getFileContent(file.getAbsolutePath()), context);
 
 			// go through every required file
 			for (ASTNode di : defItemList) {
