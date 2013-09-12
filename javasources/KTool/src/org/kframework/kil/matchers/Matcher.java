@@ -7,7 +7,6 @@ import org.kframework.kil.BagItem;
 import org.kframework.kil.Bracket;
 import org.kframework.kil.Cast;
 import org.kframework.kil.Cell;
-import org.kframework.kil.Constant;
 import org.kframework.kil.Empty;
 import org.kframework.kil.Freezer;
 import org.kframework.kil.FreezerHole;
@@ -45,7 +44,6 @@ public interface Matcher {
 	public void match(Bracket term, Term term2);
 	public void match(Cast term, Term term2);
 	public void match(Cell term, Term term2);
-	public void match(Constant term, Term term2);
 	public void match(Empty term, Term term2);
 	public void match(Freezer term, Term term2);
 	public void match(FreezerHole term, Term term2);

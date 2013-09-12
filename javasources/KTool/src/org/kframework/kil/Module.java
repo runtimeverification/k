@@ -138,10 +138,6 @@ public class Module extends DefinitionItem {
 		this.addProduction(ctSort, new Terminal(ctName));
 	}
 
-    public void addConstant(Constant ct) {
-        this.addProduction(ct.getSort(), new Terminal(ct.getValue()));
-    }
-
     public void addConstant(KLabelConstant kLabelConstant) {
         this.addProduction(kLabelConstant.getSort(), new Terminal(kLabelConstant.getLabel()));
     }

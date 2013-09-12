@@ -440,13 +440,6 @@ public class UnparserFilter extends BasicVisitor {
 	}
 
 	@Override
-	public void visit(Constant constant) {
-		prepare(constant);
-		indenter.write(constant.getValue());
-		postpare();
-	}
-
-	@Override
 	public void visit(Collection collection) {
 		prepare(collection);
 		java.util.List<Term> contents = collection.getContents();

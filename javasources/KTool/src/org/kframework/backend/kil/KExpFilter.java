@@ -148,16 +148,6 @@ public class KExpFilter extends BasicVisitor {
         result.append(kLabelConstant.getLabel());
     }
 
-	@Override
-	public void visit(Constant constant) {
-		final boolean isString = constant.getSort().equals("#String");
-		if (isString)
-			result.append("\"");
-		result.append(constant.getValue());
-		if (isString)
-			result.append("\"");
-	}
-
     @Override
     public void visit(Token token) {
         result.append(token);

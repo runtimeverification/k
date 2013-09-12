@@ -431,11 +431,6 @@ public class BasicTransformer implements Transformer {
     }
 
     @Override
-	public ASTNode transform(Constant node) throws TransformerException {
-		return transform((Term) node);
-	}
-
-    @Override
     public ASTNode transform(Token node) throws TransformerException {
         /* an instance of class Token is immutable */
         return transform((KLabel) node);

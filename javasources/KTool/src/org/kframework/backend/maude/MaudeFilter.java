@@ -597,18 +597,6 @@ public class MaudeFilter extends BackendFilter {
         result.append(StringUtil.escapeMaude(kLabelConstant.getLabel()));
     }
 
-	@Override
-	public void visit(Constant constant) {
-        assert false : "dead code";
-		if (constant.getSort().equals("#Id")) {
-			result.append("#id \"");
-		}
-		result.append(constant.getValue());
-		if (constant.getSort().equals("#Id")) {
-			result.append("\"");
-		}
-	}
-
 	private java.util.Set<String> maudeBuiltinTokenSorts =
 		ImmutableSet.of("#Float", "#LtlFormula");
 

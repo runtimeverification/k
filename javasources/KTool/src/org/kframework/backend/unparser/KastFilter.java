@@ -204,17 +204,6 @@ public class KastFilter extends BasicVisitor {
         result.write(kLabelConstant.getLabel());
     }
 
-	@Override
-	public void visit(Constant constant) {
-		if (constant.getSort().equals("#Id")) {
-			result.write("#id \"");
-		}
-		result.write(constant.getValue());
-		if (constant.getSort().equals("#Id")) {
-			result.write("\"");
-		}
-	}
-
     @Override
     public void visit(Token token) {
         result.write(token.toString());

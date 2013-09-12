@@ -486,13 +486,6 @@ public class BasicVisitor implements Visitor {
 	}
 
 	@Override
-	public void visit(Constant node) {
-		if (isVisited(node))
-			return;
-		visit((Term) node);
-	}
-
-	@Override
 	public void visit(Token node) {
 		if (isVisited(node))
 			return;

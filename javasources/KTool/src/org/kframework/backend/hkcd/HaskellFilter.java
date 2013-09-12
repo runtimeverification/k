@@ -1,9 +1,9 @@
 package org.kframework.backend.hkcd;
 
 import org.kframework.compile.utils.MaudeHelper;
-import org.kframework.kil.Constant;
 import org.kframework.kil.Empty;
 import org.kframework.kil.TermCons;
+import org.kframework.kil.Token;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 
@@ -46,9 +46,9 @@ public class HaskellFilter extends BasicVisitor {
 		result += "]";
 	}
 
-	public void visit(Constant cst) {
-		String s = cst.getSort();
-		String v = cst.getValue();
+	public void visit(Token cst) {
+		String s = cst.tokenSort();
+		String v = cst.value();
 
 		result += "KApp (";
 

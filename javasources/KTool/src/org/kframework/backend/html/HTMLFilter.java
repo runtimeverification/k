@@ -402,11 +402,6 @@ public class HTMLFilter extends BackendFilter {
 	}
 
 	@Override
-	public void visit(Constant c) {
-		result.append("<span title =\"" + c.getSort() + "\"> " + makeGreek(c.getValue()) + " </span> ");
-	}
-
-	@Override
 	public void visit(MapItem mi) {
 		mi.getKey().accept(this);
 		result.append("<span text-size=\"large\"> &#x21a6; </span>");
