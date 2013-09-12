@@ -72,7 +72,7 @@ public class KLabelConstant extends KLabel {
 	 *            string representation of the KLabel; must not be '`' escaped;
 	 * @return AST term representation the KLabel;
 	 */
-	public static final KLabelConstant of(String label) {
+	public static KLabelConstant of(String label) {
 		assert label != null;
 
 		KLabelConstant kLabelConstant = cache.get(label);
@@ -92,10 +92,9 @@ public class KLabelConstant extends KLabel {
 	/* unmodifiable view of the production list */
 	private final List<Production> productions;
 
-	@SuppressWarnings("unchecked")
 	private KLabelConstant(String label) {
 		this.label = label;
-		productions = (List<Production>) Collections.EMPTY_LIST;
+		productions = Collections.emptyList();
 	}
 
 	private KLabelConstant(String label, Context context) {

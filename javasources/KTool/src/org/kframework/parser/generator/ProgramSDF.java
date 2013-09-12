@@ -160,6 +160,9 @@ public class ProgramSDF {
 				psdfv.restrictions.add(new Restrictions(new Sort(p.getSort()), null, l.getFollow()));
 			}
 		}
+		for (String s : lexerSorts)
+			for (String t : ctv.terminals)
+				sdf.append("	\"" + StringUtil.escape(t) + "\" -> " + StringUtil.escapeSortName(s) + "Dz {reject}\n");
 
 		// adding cons over lexical rules
 		sdf.append("context-free syntax\n");

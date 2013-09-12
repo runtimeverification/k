@@ -6,3 +6,4 @@
 .metadata
 .cache
 junit-reports
+dist/examples/test

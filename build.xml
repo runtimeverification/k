@@ -18,7 +18,6 @@
 		<ant antfile="ktest.xml" dir="./tests/tools/Testing">
 			<property name="cfg" location="${config}" />
 		</ant>
-		<copy file="./tests/tools/Testing/ktest.jar" todir="./dist/lib/java/"/>
 		<antcall target="makeversion" />	
 	</target>
 
@@ -54,6 +53,12 @@
 			<fileset dir="${javasources}/KTool/src/org/kframework/backend/pdmc/pda/buchi/parser">
 				<include name="*" />
 				<exclude name="PromelaBuchiParser.jj" />
+			</fileset>
+		</delete>
+		<delete includeemptydirs="true">
+			<fileset dir="${javasources}/KTool/src/org/kframework/parser/basic">
+				<include name="**/*" />
+				<exclude name="Basic.jj" />
 			</fileset>
 		</delete>
 	</target>
@@ -138,13 +143,10 @@
 
 
 	<target name="test" depends="build">
-		<ant antfile="build.xml" dir="./tests/tools/Testing">
-			<property name="cfg" location="${config}" />
-		</ant>
-	</target>
-	<target name="test-clean">
-		<ant antfile="build.xml" dir="./tests/tools/Testing" target="clean">
-		  <property name="cfg" value="${config}" />
-		</ant>
+           <java jar="${javasources}/../dist/lib/java/k3.jar" fork="true">
+	     <arg value="-ktest"/>
+	     <arg value="-config"/>
+	     <arg value="${config}"/>
+	   </java>
 	</target>
 </project>

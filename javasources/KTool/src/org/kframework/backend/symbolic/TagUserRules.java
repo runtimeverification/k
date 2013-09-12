@@ -59,7 +59,9 @@ public class TagUserRules extends CopyOnWriteTransformer {
 				&& !node.getFilename().startsWith(
 						org.kframework.kil.loader.Constants.GENERATED_FILENAME))
                 || (GlobalSettings.matchingLogic && node.getFilename().equals(
-                        KPaths.getKBase(false) + File.separator + "include/io/io.k"))
+                        KPaths.getKBase(false) + File.separator + "include" +
+                                File.separator + "io" +
+                                File.separator + "io.k"))
                 ) {
 			List<Attribute> attrs = node.getAttributes().getContents();
 			attrs.add(new Attribute(SymbolicBackend.SYMBOLIC, ""));

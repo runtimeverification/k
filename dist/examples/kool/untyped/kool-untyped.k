@@ -863,7 +863,7 @@ method call or the array access.  */
        <env> Env </env>
     when notBool(X in keys(Env))  [structural]
 
-  context HOLE._(_) when HOLE =/=K super
+  context HOLE._::Id(_) when HOLE =/=K super
 
   rule (objectClosure(Obj:Bag <envStack> EStack </envStack>) . X
     => lookupMember(<envStack> EStack </envStack>, X:Id))(_:Exps)  [structural]

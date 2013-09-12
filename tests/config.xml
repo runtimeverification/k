@@ -650,13 +650,6 @@
   </test>
 
   <test
-      definition="tests/regression/mostConcrete/issue.k"
-      programs="tests/regression/mostConcrete"
-      results="tests/regression/mostConcrete"
-      extensions="issue" >
-  </test>
-
-  <test
       definition="tests/regression/negative-test/issue.k"
       programs="tests/regression/negative-test/programs"
       results="tests/regression/negative-test/tests"

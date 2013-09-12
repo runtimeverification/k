@@ -12,7 +12,7 @@ module BAG
 
   /* element membership */
   syntax Bool ::= K "in" MyBag    [function]
-  rule K1 in MyBagItem(K2) B:MyBag => K1 =K K2 orBool K1 in B
+  rule K1 in MyBagItem(K2) B:MyBag => (K1 =K K2) orBool (K1 in B)
   rule _ in .MyBag => false
 
   /* set cardinality */
