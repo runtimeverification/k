@@ -38,6 +38,10 @@ public class CheckListDecl extends BasicVisitor {
 				String msg = "Inline list declarations are not allowed.";
 				GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), pi.getFilename(), pi.getLocation()));
 			}
+			if (pi.getType() == ProductionType.LEXICAL && node.getItems().size() > 1) {
+				String msg = "Inline lexical/token declarations are not allowed.";
+				GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), pi.getFilename(), pi.getLocation()));
+			}
 		}
 
 	}
