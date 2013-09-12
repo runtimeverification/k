@@ -718,7 +718,7 @@ void Sentence(Module module) :
     | Attributes(syn)
     | "-/-" Group(sb) ("." { sb.append(specialAndImage()); } Group(sb))*
       { module.appendModuleItem(markLoc(loc, new Restrictions(
-          syn.getSort().getRealName(), null, sb.toString()))); return; } )?
+          new Sort(syn.getSort().getRealName()), null, sb.toString()))); return; } )?
     { module.appendModuleItem(markLoc(loc, syn)); }
   
   | ("priority" | "priorities")
@@ -734,7 +734,7 @@ void Sentence(Module module) :
   | type = String() "-/-"
       Group(sb) ("." { sb.append(specialAndImage()); } Group(sb))*
       { module.appendModuleItem(markLoc(loc, new Restrictions(
-          null, type, sb.toString()))); }
+          null, new Terminal(type), sb.toString()))); }
   )
 }
 

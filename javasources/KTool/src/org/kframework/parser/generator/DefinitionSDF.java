@@ -253,7 +253,7 @@ public class DefinitionSDF {
 			lexerSorts.add(p.getSort());
 			sdf.append("	" + l.getLexicalRule() + " -> " + StringUtil.escapeSortName(p.getSort()) + "Dz\n");
 			if (l.getFollow() != null && !l.getFollow().equals("")) {
-				psdfv.restrictions.add(new Restrictions(p.getSort(), null, l.getFollow()));
+				psdfv.restrictions.add(new Restrictions(new Sort(p.getSort()), null, l.getFollow()));
 			}
 		}
 

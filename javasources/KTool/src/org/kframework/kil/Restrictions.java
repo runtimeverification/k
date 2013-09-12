@@ -22,13 +22,9 @@ public class Restrictions extends ModuleItem {
 		this.sort = sort;
 	}
 
-	public Restrictions(String sort, String terminal, String pattern) {
-		if (sort != null && terminal != null)
-			System.out.println("A restriction can have only one of sort or terminal!");
-		if (sort != null)
-			this.sort = new Sort(sort);
-		else
-			this.terminal = new Terminal(terminal);
+	public Restrictions(Sort sort, Terminal terminal, String pattern) {
+		this.sort = sort;
+		this.terminal = terminal;
 		this.pattern = pattern;
 	}
 
