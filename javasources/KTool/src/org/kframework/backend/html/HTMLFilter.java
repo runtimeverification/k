@@ -415,10 +415,14 @@ public class HTMLFilter extends BackendFilter {
 
 	@Override
 	public void visit(KApp app) {
-		app.getLabel().accept(this);
-		result.append("(");
-		app.getChild().accept(this);
-		result.append(")");
+		if (app.getLabel() instanceof Token) {
+			result.append("<span title =\"" + ((Token)app.getLabel()).tokenSort() + "\"> " + makeGreek(((Token)app.getLabel()).value()) + " </span> ");
+		} else {
+			app.getLabel().accept(this);
+			result.append("(");
+			app.getChild().accept(this);
+			result.append(")");
+		}
 	}
 
 	@Override

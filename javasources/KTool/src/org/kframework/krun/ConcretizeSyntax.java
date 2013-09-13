@@ -136,8 +136,10 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 				}
 			}
 		} else if (label instanceof Token) {
-            return Token.of(((Token) label).tokenSort(), ((Token) label).value());
-        }
+			assert child instanceof KList;
+			assert ((KList)child).getContents().size() == 0;
+			return kapp;
+	        }
 		return super.transform(kapp);
 	}
 

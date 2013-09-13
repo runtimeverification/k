@@ -391,10 +391,14 @@ public class LatexFilter extends BackendFilter {
 
 	@Override
 	public void visit(KApp app) {
-		app.getLabel().accept(this);
-		result.append("(");
-		app.getChild().accept(this);
-		result.append(")");
+		if (app.getLabel() instanceof Token) {
+			result.append("\\constant[" + StringUtil.latexify(((Token)app.getLabel()).tokenSort()) + "]{" + StringUtil.latexify(((Token)app.getLabel()).value()) + "}");
+		} else {
+			app.getLabel().accept(this);
+			result.append("(");
+			app.getChild().accept(this);
+			result.append(")");
+		}
 	}
 
 	@Override

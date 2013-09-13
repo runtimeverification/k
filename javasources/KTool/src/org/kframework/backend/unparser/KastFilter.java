@@ -152,30 +152,42 @@ public class KastFilter extends BasicVisitor {
 
 	@Override
 	public void visit(KApp kapp) {
-		kapp.getLabel().accept(this);
-		result.write("(");
-		boolean stopnextline = false;
-		if (kapp.getChild() instanceof KList) {
-			KList listOfK = (KList)kapp.getChild();
-			if (listOfK.getContents().size() <= 1) {
+		if (kapp.getLabel() instanceof Token) {
+			Token token = (Token)kapp.getLabel();
+			if (token.tokenSort().equals("#Id")) {
+				result.write("#id \"");
+			}
+			result.write(token.value());
+			if (token.tokenSort().equals("#Id")) {
+				result.write("\"");
+			} 
+			result.write(token.toString());
+		} else {
+			kapp.getLabel().accept(this);
+			result.write("(");
+			boolean stopnextline = false;
+			if (kapp.getChild() instanceof KList) {
+				KList listOfK = (KList)kapp.getChild();
+				if (listOfK.getContents().size() <= 1) {
+					stopnextline = true;
+				}
+			}
+			if (kapp.getChild() instanceof Empty) {
 				stopnextline = true;
 			}
-		}
-		if (kapp.getChild() instanceof Empty) {
-			stopnextline = true;
-		}
-		if (nextline) {
-			if (!stopnextline) {
-				result.endLine();
-				result.indent(1);
+			if (nextline) {
+				if (!stopnextline) {
+					result.endLine();
+					result.indent(1);
+				}
+			} else {
+				result.indentToCurrent();
 			}
-		} else {
-			result.indentToCurrent();
-		}
-		kapp.getChild().accept(this);
-		result.write(")");
-		if (!nextline || !stopnextline) {
-			result.unindent();
+			kapp.getChild().accept(this);
+			result.write(")");
+			if (!nextline || !stopnextline) {
+				result.unindent();
+			}
 		}
 	}
 

@@ -70,6 +70,7 @@ public class AddBracketsFilter2 extends BasicTransformer {
 
 	@Override
 	public ASTNode transform(KApp ast) throws TransformerException {
+		if (ast.getLabel() instanceof Token) return ast;
 		boolean tmp = atTop;
 		atTop = false;
 		ASTNode result = super.transform(ast);
