@@ -143,7 +143,7 @@
 
 
 	<target name="test" depends="build">
-           <java jar="${javasources}/../dist/lib/java/k3.jar" fork="true">
+           <java jar="${javasources}/../dist/lib/java/k3.jar" fork="true" failonerror="true">
 	     <arg value="-ktest"/>
 	     <arg value="-config"/>
 	     <arg value="${config}"/>
