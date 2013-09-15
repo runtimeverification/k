@@ -15,7 +15,7 @@ syntax priorities atom > primary
 configuration <k> $PGM:K </k>
               <out stream="stdout"> .List </out>
 
-syntax #Id ::= "x"
+syntax Id ::= "x"
 rule 5 => isExp(x)
 rule <k> true => . </k>
      <out>... . => ListItem("Correct") </out>

@@ -25,7 +25,7 @@ L1 : while (y <= b)
 <k>
 (a = 0;
 b = x;
-(LL1 : while (y <= b)
+(ll1 : while (y <= b)
 {
   b = b - y; 
   a = a + 1;
