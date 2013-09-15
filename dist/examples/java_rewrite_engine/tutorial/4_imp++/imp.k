@@ -58,36 +58,35 @@ module IMP
 
 // AExp
   rule <k> X:Id => I ...</k>
-       <env>... X |-> L:Int ...</env>
+       <env>... X |-> L:KItem ...</env>
        <store>... L |-> I:KItem ...</store>  [lookup]
-  rule <k> ++X:Id => I +Int 1 ...</k>
-       <env>... X |-> L:Int ...</env>
-       <store>... L |-> (I:Int => I +Int 1) ...</store>  [increment]
+  rule <k> ++X => I +Int 1 ...</k>
+       <env>... X |-> L:KItem ...</env>
+       <store>... L |-> (I => I +Int 1) ...</store>  [increment]
   rule <k> read() => I ...</k>
        <in> MyListItem(I:Int) => .MyList ...</in>  [read]
-  rule I1:Int / I2:Int => I1 /Int I2  when I2 =/=Int 0
-  rule I1:Int + I2:Int => I1 +Int I2
-  rule Str1:String + Str2:String => Str1 +String Str2
+  rule I1 / I2 => I1 /Int I2  when I2 =/=Int 0
+  rule I1 + I2 => I1 +Int I2
+  rule Str1 + Str2 => Str1 +String Str2
 // BExp
-  rule I1:Int <= I2:Int => I1 <=Int I2
-  rule ! T:Bool => notBool T
-  rule true  && B:BExp => B
-  rule false && _:BExp => false
+  rule I1 <= I2 => I1 <=Int I2
+  rule ! T => notBool T
+  rule true  && B => B
+  rule false && _ => false
 // Block
-  rule <k> { Ss:Stmts } => Ss ~> Rho ...</k>
+  rule <k> { Ss } => Ss ~> Rho ...</k>
        <env> Rho:MyMap </env>   [structural]
-  rule <k> Rho:MyMap => . ...</k> <env> _:MyMap => Rho </env>   [structural]
+  rule <k> Rho:MyMap => . ...</k> <env> _ => Rho </env>   [structural]
 // Stmt
   rule _:Int; => .
   rule <k> X:Id = I:Int => I ...</k>
-       <env>... X |-> L:Int ...</env>
+       <env>... X |-> L:KItem ...</env>
        <store>... L |-> (_:KItem => I) ...</store>  [assignment]
-  rule if (true)  S:Block else _:Block => S
-  rule if (false) _:Block else S:Block => S
-  rule while (B:BExp) S:Block => if (B) { S while(B) S } else { .Stmts }
-    [structural]
+  rule if (true)  S else _ => S
+  rule if (false) _ else S => S
+  rule while (B) S => if (B) { S while(B) S } else { .Stmts }   [structural]
 
-  rule <k> int (X:Id, Xs:Ids => Xs); ...</k>
+  rule <k> int (X:Id, Xs => Xs); ...</k>
        <env> Rho:MyMap => Rho[X <- L] </env>
        <store>... .MyMap => L |-> 0 ...</store>
     when fresh(L:Int)   [structural]
@@ -95,24 +94,21 @@ module IMP
 
   syntax AExp ::= Printable
   syntax Printable ::= Int | String
-  rule <k> print(P:Printable, AEs:AExps => AEs); ...</k>
+  rule <k> print(P:Printable, AEs => AEs); ...</k>
        <out>... .MyList => MyListItem(P) </out>   [print]
   rule print(.AExps); => .  [structural]
   
   rule <k> halt; ~> _ => . </k>
 
-  rule <k> spawn S:Block => T ...</k>
-       <env> Rho:MyMap </env>
+  rule <k> spawn S => T ...</k> <env> Rho:MyMap </env>
        (. => <thread>... <k> S </k> <env> Rho </env> <id> T </id> ...</thread>)
     when fresh(T:Int)
   rule <k> join(T:Int); => . ...</k>
-       <thread>...
-         <k> . </k>
-         <id> T </id>
-       ...</thread>
+       <thread>... <k> . </k> <id> T </id> ...</thread>
 
 // Stmts
   rule .Stmts => .                  [structural]
+  // the following has sort annotation to avoid ambiguity with MyMap, MySet, etc
   rule S:Stmt Ss:Stmts => S ~> Ss   [structural]
 endmodule
 
