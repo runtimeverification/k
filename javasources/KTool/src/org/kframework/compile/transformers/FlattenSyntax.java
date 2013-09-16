@@ -272,7 +272,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 
             if (node.getSort().equals(BoolBuiltin.SORT_NAME)
                     || node.getSort().equals(IntBuiltin.SORT_NAME)
-                    || node.getSort().equals(FloatBuiltin.SORT_NAME)
+                    || node.getSort().equals("#Float")
                     || node.getSort().equals(StringBuiltin.SORT_NAME)) {
                 return node;
             }

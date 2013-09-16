@@ -200,7 +200,6 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 
 	private boolean isAtom(Term inner) {
         if (inner instanceof KLabelConstant) return true;
-        if (inner instanceof Builtin) return true;
         if (inner instanceof KApp && ((KApp)inner).getLabel() instanceof Token) return true;
 		if (inner instanceof Empty) return true;
 		if (inner instanceof FreezerHole) return true;

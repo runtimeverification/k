@@ -899,10 +899,6 @@ public class MaudeFilter extends BackendFilter {
 		term.getContent().accept(this);
 	}
 
-	public void visit(Builtin term) {
-		throw new RuntimeException("don't know how to maudify Builtin");
-	}
-
 	@Override
 	public void visit(Cast term) {
 		throw new RuntimeException("don't know how to maudify Cast");

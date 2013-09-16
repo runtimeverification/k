@@ -356,8 +356,8 @@ public class MetaK {
         /* TODO: replace with a proper table of builtins */
 		return sort.equals(BoolBuiltin.SORT_NAME)
                || sort.equals(IntBuiltin.SORT_NAME)
-               || sort.equals(FloatBuiltin.SORT_NAME)
                || sort.equals(StringBuiltin.SORT_NAME)
+               || sort.equals("#Float")
                /* LTL builtin sorts */
                || sort.equals("#LtlFormula")
                || sort.equals("#Prop")
