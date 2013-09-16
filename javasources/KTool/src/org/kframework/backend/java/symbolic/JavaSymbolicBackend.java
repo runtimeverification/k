@@ -23,8 +23,7 @@ import org.kframework.compile.transformers.ContextsToHeating;
 import org.kframework.compile.transformers.DesugarStreams;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.transformers.FreezeUserFreezers;
-import org.kframework.compile.transformers.ListToLookupUpdate;
-import org.kframework.compile.transformers.MapToLookupUpdate;
+import org.kframework.compile.transformers.DataStructureToLookupUpdate;
 import org.kframework.compile.transformers.RemoveBrackets;
 import org.kframework.compile.transformers.RemoveSyntacticCasts;
 import org.kframework.compile.transformers.ResolveAnonymousVariables;
@@ -35,7 +34,6 @@ import org.kframework.compile.transformers.ResolveHybrid;
 import org.kframework.compile.transformers.ResolveListOfK;
 import org.kframework.compile.transformers.ResolveOpenCells;
 import org.kframework.compile.transformers.ResolveRewrite;
-import org.kframework.compile.transformers.SetToLookupUpdate;
 import org.kframework.compile.transformers.SetVariablesInferredSort;
 import org.kframework.compile.transformers.SortCells;
 import org.kframework.compile.transformers.StrictnessToContexts;
@@ -171,9 +169,7 @@ public class JavaSymbolicBackend extends BasicBackend {
         steps.add(new ResolveOpenCells(context));
         steps.add(new ResolveRewrite(context));
         steps.add(new CompileDataStructures(context));
-        steps.add(new MapToLookupUpdate(context));
-        steps.add(new SetToLookupUpdate(context));
-        steps.add(new ListToLookupUpdate(context));
+        steps.add(new DataStructureToLookupUpdate(context));
 
         if (GlobalSettings.sortedCells) {
             steps.add(new SortCells(context));

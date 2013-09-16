@@ -1,28 +1,18 @@
 package org.kframework.backend.java.symbolic;
 
-import com.google.common.collect.ImmutableList;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.Definition;
-import org.kframework.backend.java.kil.KLabel;
-import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.indexing.IndexingPair;
-import org.kframework.backend.java.indexing.TopIndex;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.ConstrainedTerm;
-import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Rule;
-import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.compile.transformers.FlattenSyntax;
-import org.kframework.compile.transformers.MapToLookupUpdate;
+import org.kframework.compile.transformers.DataStructureToLookupUpdate;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.compile.utils.RuleCompilerSteps;
 //import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.matchers.MatcherException;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.api.*;
@@ -37,7 +27,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -111,7 +100,7 @@ public class JavaSymbolicKRun implements KRun {
     public KRunProofResult<Set<org.kframework.kil.Term>> prove(org.kframework.kil.Module module) {
         List<ConstrainedTerm> proofResults = new ArrayList<ConstrainedTerm>();
 
-        MapToLookupUpdate mapTransformer = new MapToLookupUpdate(context);
+        DataStructureToLookupUpdate mapTransformer = new DataStructureToLookupUpdate(context);
 
         try {
             List<Rule> rules = new ArrayList<Rule>();

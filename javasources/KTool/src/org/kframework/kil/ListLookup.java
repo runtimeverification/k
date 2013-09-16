@@ -22,12 +22,12 @@ public class ListLookup extends BuiltinLookup {
     private final Term value;
 
     public ListLookup(Variable base, Term key, Term value) {
-        super(base,key);
+        super(base, key);
         this.value = value;
     }
 
     public ListLookup(Variable base, int key, Term value) {
-        this(base, IntBuiltin.kAppOf(key),value);
+        this(base, IntBuiltin.kAppOf(key), value);
     }
 
     @Override
