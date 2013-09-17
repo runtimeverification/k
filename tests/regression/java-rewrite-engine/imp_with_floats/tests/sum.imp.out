@@ -3,18 +3,18 @@
         n |-> (((((((((10.0 -Float 1.0) -Float 1.0) -Float 1.0) -Float 
           1.0) -Float 1.0) -Float 1.0) -Float 1.0) -Float 1.0) -Float 1.0) 
           -Float 1.0
-        sum |-> (((((((((0.0 +Float 10.0) +Float (10.0 -Float 1.0)) +Float (
-          (10.0 -Float 1.0) -Float 1.0)) +Float (((10.0 -Float 1.0) -Float 
-          1.0) -Float 1.0)) +Float ((((10.0 -Float 1.0) -Float 1.0) -Float 
-          1.0) -Float 1.0)) +Float (((((10.0 -Float 1.0) -Float 1.0) -Float 
-          1.0) -Float 1.0) -Float 1.0)) +Float ((((((10.0 -Float 1.0) -Float
-           1.0) -Float 1.0) -Float 1.0) -Float 1.0) -Float 1.0)) +Float ((((
-          (((10.0 -Float 1.0) -Float 1.0) -Float 1.0) -Float 1.0) -Float 1.0
-          ) -Float 1.0) -Float 1.0)) +Float ((((((((10.0 -Float 1.0) -Float 
-          1.0) -Float 1.0) -Float 1.0) -Float 1.0) -Float 1.0) -Float 1.0) 
-          -Float 1.0)) +Float (((((((((10.0 -Float 1.0) -Float 1.0) -Float 
-          1.0) -Float 1.0) -Float 1.0) -Float 1.0) -Float 1.0) -Float 1.0) 
-          -Float 1.0)
+        sum |-> (((((((((0.0 +Float 10.0) +Float (10.0 -Float 1.0)) +Float ((
+          10.0 -Float 1.0) -Float 1.0)) +Float (((10.0 -Float 1.0) -Float 1.0
+          ) -Float 1.0)) +Float ((((10.0 -Float 1.0) -Float 1.0) -Float 1.0) 
+          -Float 1.0)) +Float (((((10.0 -Float 1.0) -Float 1.0) -Float 1.0) 
+          -Float 1.0) -Float 1.0)) +Float ((((((10.0 -Float 1.0) -Float 1.0) 
+          -Float 1.0) -Float 1.0) -Float 1.0) -Float 1.0)) +Float (((((((10.0
+           -Float 1.0) -Float 1.0) -Float 1.0) -Float 1.0) -Float 1.0) -Float
+           1.0) -Float 1.0)) +Float ((((((((10.0 -Float 1.0) -Float 1.0) 
+          -Float 1.0) -Float 1.0) -Float 1.0) -Float 1.0) -Float 1.0) -Float 
+          1.0)) +Float (((((((((10.0 -Float 1.0) -Float 1.0) -Float 1.0) 
+          -Float 1.0) -Float 1.0) -Float 1.0) -Float 1.0) -Float 1.0) -Float 
+          1.0)
     </state>
     <k>
         .K
