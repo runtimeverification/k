@@ -66,7 +66,7 @@ public class TermCons extends Term {
 	}
 
     private boolean isColon(ATerm atm) {
-        return atm.getType() == ATerm.APPL && ((ATermAppl)atm).getName().equals("Colon");
+        return atm.getType() == ATerm.APPL && (((ATermAppl)atm).getName().equals("Colon") || ((ATermAppl)atm).getName().equals("QuestionMark"));
     }
 
 	public TermCons(String sort, String cons, org.kframework.kil.loader.Context context) {
