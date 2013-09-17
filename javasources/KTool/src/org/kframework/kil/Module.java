@@ -15,13 +15,10 @@ import java.util.List;
 public class Module extends DefinitionItem {
 	private String name;
 	private List<ModuleItem> items = new ArrayList<ModuleItem>();
-	/** "module" or "interface" */
-	private String type;
 
 	public Module(Module m) {
 		super(m);
 		this.name = m.name;
-		this.type = m.type;
 		this.predefined = m.predefined;
 		this.items = m.items;
 	}
@@ -30,10 +27,9 @@ public class Module extends DefinitionItem {
 		super();
 	}
 
-	public Module(String name, String type, boolean predefined) {
+	public Module(String name, boolean predefined) {
 		super();
 		this.name = name;
-		this.type = type;
 		this.predefined = predefined;
 	}
 
@@ -57,21 +53,13 @@ public class Module extends DefinitionItem {
 		return items;
 	}
 
-	public void setType(String type) {
-		this.type = type;
-	}
-
-	public String getType() {
-		return type;
-	}
-
 	@Override
 	public String toString() {
 		String content = "";
 		for (ModuleItem i : items)
 			content += i + " \n";
 
-		return type + " " + name + "\n" + content + "\nend" + type;
+		return "module " + name + "\n" + content + "\nendmodule";
 	}
 
 	public List<String> getModuleKLabels() {

@@ -681,15 +681,10 @@ void Require(List<DefinitionItem> items) :
 /** Parses a Module and adds it to items */
 void Module(List<DefinitionItem> items) : { String loc = startLoc(); }
 {
-( "module" <MODNAME> { module = new Module(image(), "module", false); }
+  "module" <MODNAME> { module = new Module(image(), false); }
     (Import(module))*
     (Sentence(module))*
-  "endmodule"
-| "interface" <MODNAME> { module = new Module(image(), "interface", false); }
-    (Import(module))*
-    (Sentence(module))*
-  "endinterface"
-) { items.add(markLoc(loc, module)); module = null; }
+  "endmodule" { items.add(markLoc(loc, module)); module = null; }
 }
 
 /** Parses an Import and adds it to module */

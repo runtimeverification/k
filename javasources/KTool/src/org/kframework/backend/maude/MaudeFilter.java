@@ -57,42 +57,40 @@ public class MaudeFilter extends BackendFilter {
 
 	@Override
 	public void visit(Module mod) {
-		if (!mod.getType().equals("interface")) {
-			result.append("mod ");
-			result.append(mod.getName());
-			result.append(" is\n");
+          result.append("mod ");
+          result.append(mod.getName());
+          result.append(" is\n");
 
-            // TODO(AndreiS): move declaration of #token in a .maude file
-            result.append("op #token : #String #String -> KLabel .\n");
+          // TODO(AndreiS): move declaration of #token in a .maude file
+          result.append("op #token : #String #String -> KLabel .\n");
 
-			for (ModuleItem mi : mod.getItems()) {
-				mi.accept(this);
-				result.append("\n");
-			}
+          for (ModuleItem mi : mod.getItems()) {
+            mi.accept(this);
+            result.append("\n");
+          }
 
-            // TODO(AndreiS): move this in a more approprite place
-            for (String sort : context.getTokenSorts()) {
-                String tokenKItem = "_`(_`)(#token(\"" + sort + "\", V:" + StringBuiltin.SORT_NAME
-                                    + "), .KList)";
-                String sortKItem = "_`(_`)(#_(\"" + sort + "\")" + ", .KList)";
-                String valueKItem = "_`(_`)(#_(V:" + StringBuiltin.SORT_NAME + ")" + ", .KList)";
-                result.append("eq _`(_`)(" + AddPredicates.syntaxPredicate(sort) + ", "
-                              + tokenKItem + ") = _`(_`)(#_(true), .KList) .\n");
-                result.append("eq _`(_`)(#parseToken, _`,`,_(" + sortKItem + ", " + valueKItem
-                              + ")) = " + tokenKItem + " .\n");
-                result.append("eq _`(_`)(#tokenToString, " + tokenKItem + ") = " + valueKItem
-                              + " .\n");
-            }
+          // TODO(AndreiS): move this in a more approprite place
+          for (String sort : context.getTokenSorts()) {
+            String tokenKItem = "_`(_`)(#token(\"" + sort + "\", V:" + StringBuiltin.SORT_NAME
+              + "), .KList)";
+            String sortKItem = "_`(_`)(#_(\"" + sort + "\")" + ", .KList)";
+            String valueKItem = "_`(_`)(#_(V:" + StringBuiltin.SORT_NAME + ")" + ", .KList)";
+            result.append("eq _`(_`)(" + AddPredicates.syntaxPredicate(sort) + ", "
+                          + tokenKItem + ") = _`(_`)(#_(true), .KList) .\n");
+            result.append("eq _`(_`)(#parseToken, _`,`,_(" + sortKItem + ", " + valueKItem
+                          + ")) = " + tokenKItem + " .\n");
+            result.append("eq _`(_`)(#tokenToString, " + tokenKItem + ") = " + valueKItem
+                          + " .\n");
+          }
 
-			for (Map.Entry<String, DataStructureSort> entry : context.getDataStructureSorts().entrySet()) {
-				String lhs = "_`(_`)(" + AddPredicates.syntaxPredicate(entry.getKey()) + ", "
-                           + "_`(_`)(" + entry.getValue().type() + "2KLabel_(V:"
-                           + entry.getValue().type() + "), .KList))";
-				result.append("eq " + lhs + "  = _`(_`)(#_(true), .KList) .\n");
-			}
+          for (Map.Entry<String, DataStructureSort> entry : context.getDataStructureSorts().entrySet()) {
+            String lhs = "_`(_`)(" + AddPredicates.syntaxPredicate(entry.getKey()) + ", "
+              + "_`(_`)(" + entry.getValue().type() + "2KLabel_(V:"
+              + entry.getValue().type() + "), .KList))";
+            result.append("eq " + lhs + "  = _`(_`)(#_(true), .KList) .\n");
+          }
 
-			result.append("\nendm");
-		}
+          result.append("\nendm");
 	}
 
 	@Override
