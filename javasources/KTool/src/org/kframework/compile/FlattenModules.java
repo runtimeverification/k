@@ -51,7 +51,6 @@ public class FlattenModules  extends BasicCompilerStep<Definition> {
 			Queue<Module> mods = new LinkedList<Module>();
 			Module rmod = new Module();
 			rmod.setName(d.getMainModule());
-			rmod.setType("module");
 			rmod.setItems(new ArrayList<ModuleItem>());
 			result.getItems().add(rmod);
 			mods.add(modules.remove(d.getMainModule()));

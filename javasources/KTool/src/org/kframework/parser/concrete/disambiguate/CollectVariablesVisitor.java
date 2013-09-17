@@ -8,6 +8,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Bracket;
 import org.kframework.kil.Cell;
+import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Sort;
@@ -36,13 +37,14 @@ public class CollectVariablesVisitor extends BasicVisitor {
 	}
 
 	public void visit(Cell c) {
-		if (context.cellSorts.containsKey(c.getLabel())) {
-			try {
-				c.setContents((Term) c.getContents().accept(new CollectVariablesVisitor2(context, context.cellSorts.get(c.getLabel()))));
-			} catch (TransformerException e) {
-				e.printStackTrace();
+		if (c.getEllipses() == Ellipses.NONE)
+			if (context.cellSorts.containsKey(c.getLabel())) {
+				try {
+					c.setContents((Term) c.getContents().accept(new CollectVariablesVisitor2(context, context.cellSorts.get(c.getLabel()))));
+				} catch (TransformerException e) {
+					e.printStackTrace();
+				}
 			}
-		}
 		super.visit(c);
 	}
 

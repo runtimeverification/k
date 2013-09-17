@@ -77,7 +77,7 @@ public class ParseConfigsFilter extends BasicTransformer {
 					((Sentence) config).setAttributes(ss.getAttributes());
 				} else {
 					String parsed = null;
-					if (ss.getAttributes().containsAttribute("kore")) {
+					if (ss.containsAttribute("kore")) {
 						Stopwatch sww = new Stopwatch();
 						parsed = org.kframework.parser.concrete.KParser.ParseKoreString(ss.getContent());
 						if (GlobalSettings.verbose)

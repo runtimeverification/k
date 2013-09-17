@@ -4,15 +4,15 @@ require "io/uris.k"
 // require "builtins/smt.k"
 // require "modules/substitution.k"
 
-interface AUTO-INCLUDED-MODULE-SYNTAX
+module AUTO-INCLUDED-MODULE-SYNTAX
   imports BUILTIN-SYNTAX-HOOKS
 
-endinterface
+endmodule
 
-interface AUTO-INCLUDED-MODULE
+module AUTO-INCLUDED-MODULE
   imports BUILTIN-HOOKS
   imports K
   imports SYMBOLIC-K
   imports URIS
 
-endinterface
+endmodule
