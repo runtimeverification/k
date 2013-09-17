@@ -50,16 +50,10 @@
 		<delete file="${javasources}/../dist/lib/version.txt" />
 		<delete dir="./k/" />
 		<delete>
-			<fileset dir="${javasources}/KTool/src/org/kframework/backend/pdmc/pda/buchi/parser">
-				<include name="*" />
-				<exclude name="PromelaBuchiParser.jj" />
-			</fileset>
+			<fileset dir="${javasources}/KTool/src/org/kframework/backend/pdmc/pda/buchi/parser" includes="*.java" />
 		</delete>
-		<delete includeemptydirs="true">
-			<fileset dir="${javasources}/KTool/src/org/kframework/parser/basic">
-				<include name="**/*" />
-				<exclude name="Basic.jj" />
-			</fileset>
+		<delete>
+			<fileset dir="${javasources}/KTool/src/org/kframework/parser/basic" includes="*.java" />
 		</delete>
 	</target>
 
