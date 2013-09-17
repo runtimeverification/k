@@ -1,0 +1,10 @@
+With the current version of the tool (as of Sept 12, 2013), the
+callcc-env1.lambda program actually evaluates to 4, as expected.
+But the comments in the README are still valid, because it could just as
+well evaluate to 3.  For example, just replace ...+x with x+..., and it
+should evaluate to 3 now.
+
+Also, the first "fix" suggested in the READMEm to make "+" seqstrict, only
+works for that particular program.  It does not fix the problem if we change
+the program as indicated above.  In that case "+" it would need to be
+seqstrict(2 1).
