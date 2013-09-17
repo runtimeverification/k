@@ -921,6 +921,7 @@
       programs="tests/regression/java-rewrite-engine/imp_with_floats/programs"
       results="tests/regression/java-rewrite-engine/imp_with_floats/tests">
   <kompile-option name="-ml" />
+  <kompile-option name="-w" value="none" />
   <all-programs>
     <krun-option name="--backend" value="java-symbolic" />
     <krun-option name="--smt" value="gappa" />
