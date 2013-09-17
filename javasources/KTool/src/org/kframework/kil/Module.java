@@ -19,7 +19,6 @@ public class Module extends DefinitionItem {
 	public Module(Module m) {
 		super(m);
 		this.name = m.name;
-		this.predefined = m.predefined;
 		this.items = m.items;
 	}
 
@@ -27,10 +26,9 @@ public class Module extends DefinitionItem {
 		super();
 	}
 
-	public Module(String name, boolean predefined) {
+	public Module(String name) {
 		super();
 		this.name = name;
-		this.predefined = predefined;
 	}
 
 	public void appendModuleItem(ModuleItem item) {
