@@ -28,6 +28,9 @@ module FLOAT-HOOKS
 				| Float ">Float" Float		[function, left, latex({#1}\mathrel{>_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:_>Float_)]
 				| Float "==Float" Float		[function, left, latex({#1}\mathrel{==_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:_==Float_)]
 				| Float "=/=Float" Float	[function, left, latex({#1}\mathrel{\neq_{\scriptstyle\it Float}}{#2})]
+				| Float "<=Float" Float "<=Float" Float
+	[function, latex({#2}\in[{#1},{#3}]), hook(#FLOAT:_<=Float_<=Float_)]
+				
 
   rule F1:Float =/=Float F2:Float => notBool(F1 ==Float F2)
 

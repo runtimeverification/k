@@ -243,7 +243,7 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
     }
 
     public boolean checkUnsat() {
-        if (!K.smt) {
+        if (!K.smt.equals("z3")) {
             return false;
         }
 

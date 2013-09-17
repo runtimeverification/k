@@ -735,7 +735,7 @@
     <kompile-option name="-ml" />
     <all-programs>
       <krun-option name="--backend" value="java-symbolic" />
-      <krun-option name="--no-smt" />
+      <krun-option name="--smt" value="none" />
       <krun-option name="--parser" value="kast -groundParser" />
     </all-programs>
   </test>
@@ -767,7 +767,7 @@
     <kompile-option name="-ml" />
     <kompile-option name="-w" value="none" />
     <all-programs>
-      <krun-option name="--no-smt" />
+      <krun-option name="--smt" value="none" />
       <krun-option name="--backend" value="java-symbolic" />
       <krun-option name="--output-mode" value="pretty" />
     </all-programs>
@@ -783,7 +783,7 @@
     <kompile-option name="-ml" />
     <kompile-option name="-w" value="none" />
     <all-programs>
-      <krun-option name="--no-smt" />
+      <krun-option name="--smt" value="none" />
       <krun-option name="--backend" value="java-symbolic" />
       <krun-option name="--output-mode" value="pretty" />
     </all-programs>
@@ -799,7 +799,7 @@
     <kompile-option name="-ml" />
     <kompile-option name="-w" value="none" />
     <all-programs>
-      <krun-option name="--no-smt" />
+      <krun-option name="--smt" value="none" />
       <krun-option name="--backend" value="java-symbolic" />
       <krun-option name="--output-mode" value="pretty" />
     </all-programs>
@@ -814,7 +814,7 @@
     <kompile-option name="-ml" />
     <kompile-option name="-w" value="none" />
     <all-programs>
-      <krun-option name="--no-smt" />
+      <krun-option name="--smt" value="none" />
       <krun-option name="--backend" value="java-symbolic" />
       <krun-option name="--output-mode" value="pretty" />
     </all-programs>
@@ -828,7 +828,7 @@
     <kompile-option name="-ml" />
     <kompile-option name="-w" value="none" />
     <all-programs>
-      <krun-option name="--no-smt" />
+      <krun-option name="--smt" value="none" />
       <krun-option name="--backend" value="java-symbolic" />
       <krun-option name="--output-mode" value="pretty" />
     </all-programs>
@@ -850,7 +850,7 @@
     <kompile-option name="-ml" />
     <kompile-option name="-w" value="none" />
     <all-programs>
-      <krun-option name="--no-smt" />
+      <krun-option name="--smt" value="none" />
       <krun-option name="--backend" value="java-symbolic" />
       <krun-option name="--output-mode" value="pretty" />
     </all-programs>
@@ -864,7 +864,7 @@
     <kompile-option name="-ml" />
     <kompile-option name="-w" value="none" />
     <all-programs>
-      <krun-option name="--no-smt" />
+      <krun-option name="--smt" value="none" />
       <krun-option name="--backend" value="java-symbolic" />
       <krun-option name="--output-mode" value="pretty" />
     </all-programs>
@@ -878,7 +878,7 @@
   <kompile-option name="-ml" />
   <all-programs>
     <krun-option name="--backend" value="java-symbolic" />
-    <krun-option name="--no-smt" />
+    <krun-option name="--smt" value="none" />
     <krun-option name="--parser" value="kast -groundParser" />
   </all-programs>
 </test>
@@ -893,7 +893,7 @@
     <kompile-option name="-ml" />
     <kompile-option name="-w" value="none" />
     <all-programs>
-      <krun-option name="--no-smt" />
+      <krun-option name="--smt" value="none" />
       <krun-option name="--backend" value="java-symbolic" />
       <krun-option name="--output-mode" value="pretty" />
     </all-programs>
@@ -912,7 +912,18 @@
   <kompile-option name="-ml" />
   <all-programs>
     <krun-option name="--backend" value="java-symbolic" />
-    <krun-option name="--no-smt" />
+    <krun-option name="--smt" value="none" />
+  </all-programs>
+</test>
+
+<test definition="tests/regression/java-rewrite-engine/imp_with_floats/imp.k"
+      extensions="imp"
+      programs="tests/regression/java-rewrite-engine/imp_with_floats/programs"
+      results="tests/regression/java-rewrite-engine/imp_with_floats/tests">
+  <kompile-option name="-ml" />
+  <all-programs>
+    <krun-option name="--backend" value="java-symbolic" />
+    <krun-option name="--smt" value="gappa" />
   </all-programs>
 </test>
 
