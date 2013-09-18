@@ -180,6 +180,7 @@ public class SymbolicRewriter {
             }
         }
         //System.out.println("Result: " + results.toString());
+        //System.out.println();
     }
 
     /**

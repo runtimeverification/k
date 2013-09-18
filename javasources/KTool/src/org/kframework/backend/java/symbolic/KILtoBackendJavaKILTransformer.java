@@ -6,6 +6,7 @@ import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
+import org.kframework.backend.java.kil.CollectionVariable;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.StringToken;
@@ -67,6 +68,7 @@ import com.google.common.collect.Multimap;
 public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     private Definition definition = null;
+    private Map<org.kframework.kil.Variable, Integer> concreteCollectionSize = null;
 
     public KILtoBackendJavaKILTransformer(Context context) {
         super("Transform KIL into java backend KIL", context);
@@ -392,16 +394,31 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(org.kframework.kil.Variable node) throws TransformerException {
-        if (node.getSort().equals("Bag"))
+        if (node.getSort().equals("Bag")) {
             return new Variable(node.getName(), Kind.CELL_COLLECTION.toString());
+        }
+
         DataStructureSort dataStructureSort = context.dataStructureSortOf(node.getSort());
         if (dataStructureSort != null) {
-            if (dataStructureSort.type().equals(org.kframework.kil.KSorts.LIST))
-                return new Variable(node.getName(), KSorts.LIST);
-            if (dataStructureSort.type().equals(org.kframework.kil.KSorts.MAP))
-                return new Variable(node.getName(), KSorts.MAP);
-            if (dataStructureSort.type().equals(org.kframework.kil.KSorts.SET))
-                return new Variable(node.getName(), KSorts.SET);
+            String sort = null;
+            if (dataStructureSort.type().equals(org.kframework.kil.KSorts.LIST)) {
+                sort = KSorts.LIST;
+            } else if (dataStructureSort.type().equals(org.kframework.kil.KSorts.MAP)) {
+                sort = KSorts.MAP;
+            } else if (dataStructureSort.type().equals(org.kframework.kil.KSorts.SET)) {
+                sort = KSorts.SET;
+            } else {
+                assert false: "unexpected data structure " + dataStructureSort.type();
+            }
+
+            if (concreteCollectionSize.containsKey(node)) {
+                return new CollectionVariable(
+                        node.getName(),
+                        sort,
+                        concreteCollectionSize.get(node));
+            } else {
+                return new Variable(node.getName(), sort);
+            }
         }
         return new Variable(node.getName(), node.getSort());
     }
@@ -410,8 +427,9 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     public ASTNode transform(org.kframework.kil.Rule node) throws TransformerException {
         assert node.getBody() instanceof org.kframework.kil.Rewrite;
 
-        org.kframework.kil.Rewrite rewrite = (org.kframework.kil.Rewrite) node.getBody();
+        concreteCollectionSize = node.getConcreteDataStructureSize();
 
+        org.kframework.kil.Rewrite rewrite = (org.kframework.kil.Rewrite) node.getBody();
         Term leftHandSide = (Term) rewrite.getLeft().accept(this);
         Term rightHandSide = (Term) rewrite.getRight().accept(this);
 
@@ -458,6 +476,8 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         assert leftHandSide.kind() == rightHandSide.kind()
                || ((leftHandSide.kind() == Kind.KITEM || leftHandSide.kind() == Kind.K || leftHandSide.kind() == Kind.KLIST)
                    && (rightHandSide.kind() == Kind.KITEM || rightHandSide.kind() == Kind.K || rightHandSide.kind() == Kind.KLIST));
+
+        concreteCollectionSize = null;
 
         Rule rule = new Rule(
                 leftHandSide,
