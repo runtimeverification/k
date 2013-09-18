@@ -16,7 +16,7 @@ import org.w3c.dom.Element;
 /**
  * Base of all nodes that represent terms in the semantics. Each term is labeled with a sort.
  */
-public abstract class Term extends ASTNode implements Matchable {
+public abstract class Term extends ASTNode implements Matchable, Comparable<Term> {
 	protected String sort;
 
 	protected Term() {
@@ -83,4 +83,8 @@ public abstract class Term extends ASTNode implements Matchable {
         return result;
     }
 
+    @Override
+    public int compareTo(Term o) {
+        return toString().compareTo(o.toString());
+    }
 }
