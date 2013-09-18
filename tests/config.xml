@@ -98,6 +98,7 @@
       definition="dist/tutorial/2_imp/lesson_5/imp.k"
       programs="dist/tutorial/2_imp"
       extensions="imp"
+      tests="tests/tutorial/2_imp/lesson_5"
       />
 
 <!-- LAMBDA++ -->
@@ -925,6 +926,19 @@
   <all-programs>
     <krun-option name="--backend" value="java-symbolic" />
     <krun-option name="--smt" value="gappa" />
+  </all-programs>
+</test>
+
+<test
+      definition="dist/examples/java_rewrite_engine/tutorial/2_imp/imp.k"
+      programs="dist/tutorial/2_imp"
+      extensions="imp"
+      tests="tests/tutorial/2_imp/lesson_5"
+      >
+  <kompile-option name="-ml" />
+  <kompile-option name="-w" value="none" />
+  <all-programs>
+    <krun-option name="--backend" value="java-symbolic" />
   </all-programs>
 </test>
 

@@ -13,7 +13,7 @@ import java.util.Map;
  *
  * @author AndreiS
  */
-public abstract class Term extends JavaSymbolicObject implements Transformable, Unifiable {
+public abstract class Term extends JavaSymbolicObject implements Transformable, Unifiable, Comparable<Term> {
 
     protected final Kind kind;
     //protected final boolean normalized;
@@ -104,4 +104,8 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
         return (Term) super.substitute(variable, term, context);
     }
 
+    @Override
+    public int compareTo(Term o) {
+        return toString().compareTo(o.toString());
+    }
 }

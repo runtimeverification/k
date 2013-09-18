@@ -1,5 +1,6 @@
 package org.kframework.backend.java.symbolic;
 
+import com.google.common.collect.Multimap;
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.BuiltinList;
@@ -20,6 +21,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -48,9 +50,14 @@ public class BackendJavaKILtoKILTranslation extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(CellCollection cellCollection) {
+        final Multimap<String,Cell> cellMap = cellCollection.cellMap();
+        List<String> keys = new ArrayList<String>(cellMap.keySet());
+        Collections.sort(keys);
         List<org.kframework.kil.Term> contents = new ArrayList<org.kframework.kil.Term>();
-        for (Cell cell : cellCollection.cellMap().values()) {
-            contents.add((org.kframework.kil.Cell) transform(cell));
+        for (String key : keys) {
+            for (Cell cell : cellMap.get(key)) {
+                contents.add((org.kframework.kil.Cell) transform(cell));
+            }
         }
         if (cellCollection.hasFrame()) {
             contents.add((org.kframework.kil.Term) cellCollection.frame().accept(this));
@@ -119,6 +126,7 @@ public class BackendJavaKILtoKILTranslation extends CopyOnWriteTransformer {
             items.add(new org.kframework.kil.SetItem(
                     (org.kframework.kil.Term) entry.accept(this)));
         }
+        Collections.sort(items);
         if (set.hasFrame()) {
             items.add((org.kframework.kil.Term) set.frame().accept(this));
         }
@@ -146,11 +154,15 @@ public class BackendJavaKILtoKILTranslation extends CopyOnWriteTransformer {
     @Override
     public ASTNode transform(BuiltinMap map) {
         // TODO(AndreiS): use BuiltinMap
+        final Map<Term, Term> entries = map.getEntries();
+        List<Term> keys = new ArrayList<Term>(entries.keySet());
+        Collections.sort(keys);
         List<org.kframework.kil.Term> items = new ArrayList<org.kframework.kil.Term>();
-        for (Map.Entry<Term, Term> entry : map.getEntries().entrySet()) {
+        for (Term key : keys) {
+            Term value = entries.get(key);
             items.add(new org.kframework.kil.MapItem(
-                    (org.kframework.kil.Term) entry.getKey().accept(this),
-                    (org.kframework.kil.Term) entry.getValue().accept(this)));
+                    (org.kframework.kil.Term) key.accept(this),
+                    (org.kframework.kil.Term) value.accept(this)));
         }
         if (map.hasFrame()) {
             items.add((org.kframework.kil.Term) map.frame().accept(this));
