@@ -18,31 +18,43 @@ import java.util.Set;
  */
 public class Variable extends Term implements Sorted {
 
-    /* TODO(AndreiS): cache the variables */
-    protected final String name;
-    protected final String sort;
+    private static final String VARIABLE_PREFIX = "__var__";
+    private static int counter = 0;
 
-    public Variable(String name, String sort) {
+    public static Map<Variable, Variable> getFreshSubstitution(Set<Variable> variableSet) {
+        Map<Variable, Variable> substitution = new HashMap<Variable, Variable>();
+        for (Variable variable : variableSet) {
+            substitution.put(variable, variable.getFreshCopy());
+        }
+        return substitution;
+    }
+
+    public static Variable getFreshVariable(String sort) {
+        return new Variable(VARIABLE_PREFIX + (counter++), sort, true);
+    }
+
+    /* TODO(AndreiS): cache the variables */
+    private final String name;
+    private final String sort;
+    private final boolean anonymous;
+
+    public Variable(String name, String sort, boolean anonymous) {
         super(Kind.of(sort));
         this.name = name;
         this.sort = sort;
+        this.anonymous = anonymous;
+    }
+
+    public Variable(String name, String sort) {
+        this(name, sort, false);
     }
 
     public Variable(MetaVariable metaVariable) {
         this(metaVariable.variableName(), metaVariable.variableSort());
     }
 
-    public static Map<Variable, Variable> getFreshSubstitution(Set<Variable> variableSet) {
-        Map<Variable, Variable> substitution = new HashMap<Variable, Variable>();
-        for (Variable variable : variableSet) {
-            substitution.put(variable, AnonymousVariable.getFreshVariable(variable.sort()));
-        }
-        return substitution;
-    }
-
-    @Override
-    public boolean isSymbolic() {
-        return true;
+    public Variable getFreshCopy() {
+        return Variable.getFreshVariable(sort);
     }
 
     /**
@@ -52,12 +64,21 @@ public class Variable extends Term implements Sorted {
         return name;
     }
 
+    public boolean isAnonymous() {
+        return anonymous;
+    }
+
     /**
      * Returns a {@code String} representation of the sort of this variable.
      */
     @Override
     public String sort() {
         return sort;
+    }
+
+    @Override
+    public boolean isSymbolic() {
+        return true;
     }
 
 	@Override
