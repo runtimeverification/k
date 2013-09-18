@@ -27,6 +27,7 @@ import org.kframework.parser.concrete.disambiguate.CorrectRewritePriorityFilter;
 import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.InclusionFilter;
+import org.kframework.parser.concrete.disambiguate.MergeAmbFilter;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
@@ -156,6 +157,8 @@ public class ParseRulesFilter extends BasicTransformer {
 				config = config.accept(new CorrectCastPriorityFilter(context));
 				// config = config.accept(new CheckBinaryPrecedenceFilter());
 				config = config.accept(new PriorityFilter(context));
+				if (GlobalSettings.fastKast)
+					config = config.accept(new MergeAmbFilter(context));
 				config = config.accept(new VariableTypeInferenceFilter(context));
 				// config = config.accept(new AmbDuplicateFilter(context));
 				// config = config.accept(new TypeSystemFilter(context));
