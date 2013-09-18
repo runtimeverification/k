@@ -228,7 +228,7 @@ public class JavaClassesFactory {
 			if (appl.getName().endsWith("Hole"))
 				return Hole.KITEM_HOLE;
 			if (appl.getName().endsWith("Var"))
-				return storeNode(atm.getUniqueIdentifier(), new Variable(appl));
+				return new Variable(appl);
 			if (appl.getName().endsWith("Const")) {
 				String sort = StringUtil.getSortNameFromCons(appl.getName());
 				if (sort.equals(KSorts.KLABEL)) {
