@@ -939,6 +939,7 @@
   <kompile-option name="-w" value="none" />
   <all-programs>
     <krun-option name="--backend" value="java-symbolic" />
+    <krun-option name="--smt" value="none" />
   </all-programs>
 </test>
 
