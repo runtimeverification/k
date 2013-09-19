@@ -999,20 +999,5 @@
       </all-programs>
   </test>
 
-  <test
-      definition="dist/examples/java_rewrite_engine/simple/untyped/simple-untyped.k"
-      programs="dist/examples/simple/untyped/programs"
-      extensions="simple"
-      exclude="diverse/dekker.simple"
-      results="tests/examples/simple-untyped" >
-      <kompile-option name="-ml" />
-      <kompile-option name="-w" value="none" />
-      <all-programs>
-        <krun-option name="--backend" value="java-symbolic" />
-	<krun-option name="--smt" value="none" />
-        <krun-option name="--output-mode" value="none" />
-      </all-programs>
-  </test>
-
 </tests>
 
