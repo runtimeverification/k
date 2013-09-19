@@ -831,14 +831,14 @@ is thrown to correctly recover the execution context.  This can be easily
 achieved by pushing/popping the entire current control context onto the
 exception stack.  The three rules below modularly do precisely the above. */
 
-  // syntax KItem ::= (Id, Stmt, K, Map, ControlCellFragment)
+  // syntax KItem ::= (Id, Stmts, K, Map, ControlCellFragment)
   // AndreiS: the above conflicts with the tuple for the function call stack
   // (line 643)
-  syntax KItem ::= "(|" Id "," Stmt "," K "," MyMap "," ControlCellFragment "|)"
+  syntax KItem ::= "(|" Id "," Stmts "," K "," MyMap "," ControlCellFragment "|)"
 
   syntax KItem ::= "popx" 
 
-  rule <k> (try S1:Block catch(X:Id) {S2:Stmt} => S1 ~> popx) ~> K </k>
+  rule <k> (try S1:Block catch(X:Id) {S2:Stmts} => S1 ~> popx) ~> K </k>
        <control>
          <xstack> .MyList => MyListItem((| X, S2, K, Env, C |)) ...</xstack>
          C
@@ -851,7 +851,7 @@ exception stack.  The three rules below modularly do precisely the above. */
   rule <k> throw V:Val; ~> _ => { var X = V; S2 } ~> K </k>
        <control>
          <xstack>
-           MyListItem((| X:Id, S2:Stmt, K, Env:MyMap, C |)) => .MyList
+           MyListItem((| X:Id, S2:Stmts, K, Env:MyMap, C |)) => .MyList
          ...</xstack>
          (_ => C)
        </control>
