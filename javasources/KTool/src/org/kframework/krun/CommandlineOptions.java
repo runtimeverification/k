@@ -177,8 +177,9 @@ public class CommandlineOptions {
         options.addOption(prove); getOptionList().add(prove);
 
         // java rewrite engine specific options
-        Option no_smt = OptionBuilder.hasArg(false).withLongOpt("no-smt").withDescription("do not use SMT solvers for checking constraints").create();
-        options.addOption(no_smt); getOptionList().add(no_smt);
+        Option smt = OptionBuilder.hasArg(true).withLongOpt("smt").
+                withDescription("SMT solver to use for checking constraints (default: z3)").create();
+        options.addOption(smt); getOptionList().add(smt);
 
         //test generation options
         Option testgen = OptionBuilder.hasArg(false).withLongOpt("generate-tests").withDescription("Test programs will be generated along with normal search").create();

@@ -6,7 +6,6 @@ import com.microsoft.z3.Sort;
 import com.microsoft.z3.Symbol;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.kil.AnonymousVariable;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.JavaSymbolicObject;
 import org.kframework.backend.java.kil.KCollection;
@@ -18,7 +17,6 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.kil.Z3Term;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.loader.Context;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -243,7 +241,7 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
     }
 
     public boolean checkUnsat() {
-        if (!K.smt) {
+        if (!K.smt.equals("z3")) {
             return false;
         }
 
@@ -282,7 +280,7 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
     public void eliminateAnonymousVariables() {
         for (Iterator<Variable> iterator = substitution.keySet().iterator(); iterator.hasNext();) {
             Variable variable = iterator.next();
-            if (variable instanceof AnonymousVariable) {
+            if (variable.isAnonymous()) {
                 iterator.remove();
             }
         }

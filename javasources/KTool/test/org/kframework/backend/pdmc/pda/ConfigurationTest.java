@@ -11,7 +11,7 @@ public class ConfigurationTest {
 
     @Test
     public void testOf0() throws Exception {
-        Configuration<String, String> cfg = Configuration.<String,String>of("<a>");
+        Configuration<String, String> cfg = Configuration.of("<a>");
         Assert.assertTrue(cfg.stack.empty());
         Assert.assertNull(cfg.head.getLetter());
         Assert.assertEquals("a",cfg.head.getState());
@@ -19,7 +19,7 @@ public class ConfigurationTest {
 
     @Test
     public void testOf1() throws Exception {
-        Configuration<String, String> cfg = Configuration.<String,String>of("<a,b>");
+        Configuration<String, String> cfg = Configuration.of("<a,b>");
         assert cfg.stack.isEmpty() : "Stack must be empty, this is just a config head";
         assert cfg.head.getState().equals("a") : "the state must be 'a'";
         assert cfg.head.getLetter().equals("b") : "the stack head must be 'b'";
@@ -28,7 +28,7 @@ public class ConfigurationTest {
 
     @Test
     public void testOf2() throws Exception {
-        Configuration<String, String> cfg = Configuration.<String,String>of("<p,a b c>");
+        Configuration<String, String> cfg = Configuration.of("<p,a b c>");
         Assert.assertEquals(2,cfg.stack.size());
         Assert.assertEquals("p", cfg.head.getState());
         Assert.assertEquals("a", cfg.head.getLetter());

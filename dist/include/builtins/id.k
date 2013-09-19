@@ -12,6 +12,6 @@ module ID-HOOKS
   syntax String ::= "Id2String" "(" Id ")"		 [function, klabel(Id2String)]
   syntax Id ::= "String2Id" "(" String ")"		 [function, klabel(String2Id)]
   rule Id2String(X:Id) => #tokenToString(X)
-  rule String2Id(S:String) => #parseToken("#Id", S)
+  rule String2Id(S:String) => #parseToken("Id", S)
 endmodule
 

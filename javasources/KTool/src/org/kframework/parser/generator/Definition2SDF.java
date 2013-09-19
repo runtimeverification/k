@@ -11,7 +11,6 @@ import org.kframework.kil.Lexical;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Restrictions;
-import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
@@ -135,10 +134,10 @@ public class Definition2SDF {
 				List<ProductionItem> items = p.getItems();
 				for (int i = 0; i < items.size(); i++) {
 					ProductionItem itm = items.get(i);
-					if (itm.getType() == ProductionType.TERMINAL) {
+					if (itm instanceof Terminal) {
 						Terminal t = (Terminal) itm;
 						sdf.append("\"" + StringUtil.escape(t.getTerminal()) + "\" ");
-					} else if (itm.getType() == ProductionType.SORT) {
+					} else if (itm instanceof Sort) {
 						Sort srt = (Sort) itm;
 						// if we are on the first or last place and this sort is not a list, just print the sort
 						if (i == 0 || i == items.size() - 1) {

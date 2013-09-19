@@ -10,7 +10,7 @@ public class PushdownSystemTest {
 
     @Test
     public void testOf() throws Exception {
-        PushdownSystem<String,String> pds = PushdownSystem.<String,String>of(""+
+        PushdownSystem<String,String> pds = PushdownSystem.of(""+
                 "<p, a> => <q, b a>;\n" +
                 "<q, b> => <r, c a>;\n" +
                 "<r, c> => <p, b>;\n" +

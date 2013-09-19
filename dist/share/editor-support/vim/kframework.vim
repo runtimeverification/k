@@ -30,7 +30,6 @@ syn keyword kRequire      require nextgroup=kRequireFile skipwhite
 syn region  kRequireFile  contained start=+"+ end=+"+
  
 syn keyword kModule       module nextgroup=kModuleName skipwhite endmodule
-syn keyword kModule       interface nextgroup=kModuleName skipwhite endinterface
 syn keyword kImports      imports nextgroup=kModuleName skipwhite
 " not sure why \h is required, but it does not match without it
 syn match   kModuleName   contained "#\=\h\(\w\|-\)*"

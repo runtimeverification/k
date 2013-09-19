@@ -4,7 +4,6 @@ import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Collection;
 import org.kframework.kil.Map;
-import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.Visitable;
@@ -341,7 +340,7 @@ public class MetaK {
 			return t;
 		}
 		for (ProductionItem item : prod.getItems()) {
-			if (item.getType() == ProductionType.SORT) {
+			if (item instanceof Sort) {
 				t.getContents().add(Variable.getFreshVar(((Sort) item).getName()));
 			}
 		}

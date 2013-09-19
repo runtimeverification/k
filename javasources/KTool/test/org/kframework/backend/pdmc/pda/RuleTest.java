@@ -9,9 +9,9 @@ import org.junit.Test;
 public class RuleTest {
     @Test
     public void testOf() throws Exception {
-        Rule<String, String> rule = Rule.<String,String>of("<a,b> => <c>" );
-        Assert.assertEquals(Configuration.<String,String>of("<a,b>").getHead(), rule.getHead());
-        Assert.assertEquals(Configuration.<String,String>of("<c>"), rule.endConfiguration());
+        Rule<String, String> rule = Rule.of("<a,b> => <c>" );
+        Assert.assertEquals(Configuration.of("<a,b>").getHead(), rule.getHead());
+        Assert.assertEquals(Configuration.of("<c>"), rule.endConfiguration());
 
     }
 }

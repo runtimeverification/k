@@ -1,6 +1,6 @@
 require "builtins/builtins.k"
 
-interface K-TECHNIQUE
+module K-TECHNIQUE
 	// all basic K syntax is in the SDF grammar directly,
 	// but also needs to be defined in K - except for
 	// a few things added by compiler passes.
@@ -9,7 +9,7 @@ interface K-TECHNIQUE
 	// so we have to declare things like isSet in less obvious places
 	
 	syntax KItem
-endinterface
+endmodule
 
 module K-LISTK-EXTRAS
   imports K-TECHNIQUE
@@ -138,7 +138,7 @@ module K-SET-EXTRAS
 
 endmodule
 
-interface K-BAG-EXTRAS
+module K-BAG-EXTRAS
 	imports K-TECHNIQUE
 	//imports IF-THEN-ELSE
 
@@ -146,9 +146,9 @@ interface K-BAG-EXTRAS
 //				 | Bag "-Bag" Bag
 //	syntax Bool ::= K "in" Bag
 //				  | BagItem "in" Bag
-endinterface
+endmodule
 
-interface K-LIST-EXTRAS
+module K-LIST-EXTRAS
 	imports K-TECHNIQUE
 	//imports BOOL
 	imports INT-HOOKS
@@ -161,7 +161,7 @@ interface K-LIST-EXTRAS
    rule lengthList .List => 0 [structural, anywhere]
    rule isKResult((_:KResult => .KList),, _:K,, _:KList)
    rule isKResult(.KList) => true
-endinterface
+endmodule
 
 module K-RESULT
 	imports K-TECHNIQUE
@@ -176,7 +176,7 @@ module K-RESULT
 
 endmodule
 
-interface K-WRAPPERS-LABELS
+module K-WRAPPERS-LABELS
 	imports K-TECHNIQUE
 
 	syntax KLabel ::= "KLabel2KLabel" KLabel
@@ -192,7 +192,7 @@ interface K-WRAPPERS-LABELS
 
   rule isSet(Set2KLabel(_)(.KList)) => true [predicate,anywhere]
 
-endinterface
+endmodule
 
 module K-DESTRUCTORS
 	syntax KLabel ::= "getKLabel" K
@@ -200,7 +200,7 @@ module K-DESTRUCTORS
 
 endmodule
 
-interface K-WRAPPERS
+module K-WRAPPERS
 	imports K-TECHNIQUE
 // not used anymore
 //	syntax K ::= KLabel2K (KLabel)		[klabel('KLabel2K_)]
@@ -210,28 +210,28 @@ interface K-WRAPPERS
 //			   | Bag2K (Bag)			[klabel('Bag2K_)]
 //			   | List2K (List)			[klabel('List2K_)]
 //			   | Map2K (Map)			[klabel('Map2K_)]
-endinterface
+endmodule
 
-interface K-EVAL
+module K-EVAL
   imports K-TECHNIQUE
   syntax Bag ::= "#eval" Map          [cons(Bag1EvalSyn)]
   syntax Bag ::= "#evalHelper" Map    [cons(Bag1EvalHelperSyn)]
-endinterface
+endmodule
 
 module K-BUILTINS
   syntax KLabel ::=  "#" K [builtinWrapper]
 endmodule
 
 
-interface K-FRESH
+module K-FRESH
   imports K-TECHNIQUE
   syntax Bool ::= "fresh" "(" K ")"  [cons(Bool1FreshSyn)]
-endinterface
+endmodule
 
-interface K-FREZERS
+module K-FREZERS
   imports K-TECHNIQUE
   syntax KLabel ::= "#freezer" K
-endinterface
+endmodule
 
 module DEFAULT-CONFIGURATION
   imports K-TECHNIQUE
@@ -245,7 +245,7 @@ module K-TOKENS
   rule isToken(#token(_)) => true
 endmodule
 
-interface K
+module K
   imports K-TECHNIQUE
   imports DEFAULT-CONFIGURATION
   imports K-WRAPPERS
@@ -266,5 +266,5 @@ interface K
   imports K-SET-EXTRAS            // operations on Sets
   imports K-TOKENS
   //imports K-LATEX  
-endinterface
+endmodule
 

@@ -447,7 +447,7 @@ public class SortCells extends CopyOnWriteTransformer {
 				(MetaK.cellSort(cell.getId()))) {
 			GlobalSettings.kem.register(new KException(KException
 					.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER,
-					"Multiplicity constraints clash for cell" +
+					"Multiplicity constraints clash for cell " +
 							cell.getId(),
 					getName(), cell.getFilename(), cell.getLocation()));
 		}

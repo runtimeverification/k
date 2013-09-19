@@ -16,18 +16,27 @@ public final class GappaServer {
      * Method calling the gappa prover.
      * The library is loaded only once and it is persistent.
      * @param input - the string to prove
-     * @return a byte array in containing the ATerm in the BAF format.
+     * @return true if Gappa managed to prove the property or false if it didn't
      */
-    public static synchronized byte[] prove(String input) {
+    public static boolean prove(String input) {
         try {
             if (gappaProcess == null) init();
             gappaProcess.sendString(input);
             gappaProcess.flushOutput();
             final byte[] bytes = gappaProcess.readBytes();
-            return bytes;
+            String output = new String(bytes);
+            return "OK".equals(output);
         } catch (IOException e) {
             e.printStackTrace();
-            return null;
+            return false;
         }
+    }
+
+    public static boolean proveTrue(String input) {
+        return prove("{ " + input + " }");
+    }
+
+    public static boolean proveFalse(String input) {
+        return prove("{ not( " + input + ") }");
     }
 }

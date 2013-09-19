@@ -579,7 +579,9 @@ void Element(StringBuilder reg, StringBuilder follow) :
           | "-" | "\t" | "\n" | "\r" | " "
           | "\\" ["t", "n", "r", " "]
           | "\\" ~["a"-"z", "A"-"Z", "\t"])+>
-    { if (image.charAt(0) == '-' || image.charAt(image.length() - 1) == '-') {
+    { if (image.charAt(0) == '-' ||
+    		(image.charAt(image.length() - 1) == '-'
+    		 && image.charAt(image.length() - 2) != '\\')) {
         throw new TokenMgrError(
           "Lexical error at line " + matchedToken.beginLine +
           ", column " + matchedToken.beginColumn + ". Found \"-\" at " +
@@ -681,15 +683,10 @@ void Require(List<DefinitionItem> items) :
 /** Parses a Module and adds it to items */
 void Module(List<DefinitionItem> items) : { String loc = startLoc(); }
 {
-( "module" <MODNAME> { module = new Module(image(), "module", false); }
+  "module" <MODNAME> { module = new Module(image()); }
     (Import(module))*
     (Sentence(module))*
-  "endmodule"
-| "interface" <MODNAME> { module = new Module(image(), "interface", false); }
-    (Import(module))*
-    (Sentence(module))*
-  "endinterface"
-) { items.add(markLoc(loc, module)); module = null; }
+  "endmodule" { items.add(markLoc(loc, module)); module = null; }
 }
 
 /** Parses an Import and adds it to module */

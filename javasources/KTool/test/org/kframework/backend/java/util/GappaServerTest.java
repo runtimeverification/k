@@ -9,27 +9,27 @@ import org.junit.Test;
 public class GappaServerTest {
     @Test
     public void testProve1() throws Exception {
-        byte[] bytes = GappaServer.prove("{ x in [0,1] -> float<ieee_32,ne>(x * float<ieee_32,ne>(1 - x)) in [0,1] }");
-        Assert.assertEquals("OK", new String(bytes));
+        boolean result = GappaServer.prove("{ x in [0,1] -> float<ieee_32,ne>(x * float<ieee_32,ne>(1 - x)) in [0,1] }");
+        Assert.assertTrue(result);
     }
 
     @Test
     public void testProve2() throws Exception {
-        byte[] bytes;
+        boolean bytes;
         bytes = GappaServer.prove("{ x in [0,1] -> float<ieee_32,ne>(x * float<ieee_32,ne>(1 - x)) in [0,1] }");
-        Assert.assertEquals("OK", new String(bytes));
+        Assert.assertTrue(bytes);
         bytes = GappaServer.prove("{ x in [0,1] -> float<ieee_32,ne>(x * float<ieee_32,ne>(1 - x)) in [0,1] }");
-        Assert.assertEquals("OK", new String(bytes));
+        Assert.assertTrue(bytes);
     }
 
     @Test
     public void testProve3() throws Exception {
-        byte[] bytes;
+        boolean bytes;
         bytes = GappaServer.prove("{ x in [0,1] -> float<ieee_32,ne>(x * float<ieee_32,ne>(1 - x)) in [0,1] }");
-        Assert.assertEquals("OK", new String(bytes));
+        Assert.assertTrue(bytes);
         bytes = GappaServer.prove("{ x in [0,1] -> float<ieee_32,ne>(x * float<ieee_32,ne>(1 - x)) in [-2,-1] }");
-        Assert.assertEquals("FAIL", new String(bytes));
+        Assert.assertFalse(bytes);
         bytes = GappaServer.prove("{ x in [0,1] -> float<ieee_32,ne>(x * float<ieee_32,ne>(1 - x)) in [0,1] }");
-        Assert.assertEquals("OK", new String(bytes));
+        Assert.assertTrue(bytes);
     }
 }

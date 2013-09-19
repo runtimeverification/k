@@ -217,8 +217,8 @@ public class Cell extends Term {
 				return Multiplicity.SOME;
 			if ("1".equals(attr))
 				return Multiplicity.ONE;
-			GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, "Unknown multiplicity in configuration for cell " + this.getLabel() + ".", this.getFilename(),
-					this.getLocation()));
+			GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, "Unknown multiplicity in configuration for cell " + this.getLabel() + ".",
+					this.getFilename(), this.getLocation()));
 		}
 		return Multiplicity.ONE;
 	}
@@ -230,8 +230,8 @@ public class Cell extends Term {
 				return Ellipses.valueOf(attr.toUpperCase());
 			}
 		} catch (IllegalArgumentException e) {
-			GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, "Unknown ellipses value in configuration for cell " + this.getLabel() + ". Assuming none.",
-					this.getFilename(), this.getLocation()));
+			String msg = "Unknown ellipses value in configuration for cell " + this.getLabel() + ". Assuming none.";
+			GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, msg, this.getFilename(), this.getLocation()));
 		}
 		return Ellipses.NONE;
 	}

@@ -119,12 +119,11 @@ public class Test implements Comparable<Test> {
 				// ignore the programs from exclude list
 				boolean excluded = false;
 				for (String exclude : excludePrograms)
-					if (programPath.equals(Configuration.getHome()
-							+ Configuration.FS + programsFolder
-							+ Configuration.FS + exclude))
+					if (programPath.contains(exclude))
 						excluded = true;
-				if (excluded)
+				if (excluded) {
 					continue;
+                }
 
 				Map<String, String> krunOptions = null;
 				boolean special = false;

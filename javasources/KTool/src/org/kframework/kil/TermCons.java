@@ -3,7 +3,6 @@ package org.kframework.kil;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.loader.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.matchers.Matcher;
@@ -66,7 +65,7 @@ public class TermCons extends Term {
 	}
 
     private boolean isColon(ATerm atm) {
-        return atm.getType() == ATerm.APPL && ((ATermAppl)atm).getName().equals("Colon");
+        return atm.getType() == ATerm.APPL && (((ATermAppl)atm).getName().equals("Colon") || ((ATermAppl)atm).getName().equals("QuestionMark"));
     }
 
 	public TermCons(String sort, String cons, org.kframework.kil.loader.Context context) {
@@ -96,17 +95,17 @@ public class TermCons extends Term {
 	public String toString() {
 		String str = "";
 		if (production.items.size() > 0) {
-			if (production.items.get(0).getType() == ProductionType.USERLIST) {
+			if (production.items.get(0) instanceof UserList) {
 				String separator = ((UserList) production.items.get(0)).separator;
 				str = contents.get(0) + " " + separator + " " + contents.get(1) + " ";
 			} else
 				for (int i = 0, j = 0; i < production.items.size(); i++) {
 					ProductionItem pi = production.items.get(i);
-					if (pi.getType() == ProductionType.TERMINAL) {
+					if (pi instanceof Terminal) {
 						String terminall = pi.toString();
 						terminall = terminall.substring(1, terminall.length() - 1);
 						str += terminall + " ";
-					} else if (pi.getType() == ProductionType.SORT)
+					} else if (pi instanceof Sort)
 						str += contents.get(j++) + " ";
 				}
 		}

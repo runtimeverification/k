@@ -4,7 +4,6 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.KSorts;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
-import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.UserList;
@@ -44,7 +43,7 @@ public class CollectSubsortsVisitor extends BasicVisitor {
 			context.addSubsort(prd.getSort(), srt.getSort());
 		} else {
 			for (ProductionItem pi : prd.getItems()) {
-				if (pi.getType() == ProductionType.SORT) {
+				if (pi instanceof Sort) {
 					Sort s = (Sort) pi;
 					if (!s.isBaseSort())
 						context.addSubsort(KSorts.KITEM, s.getName());
