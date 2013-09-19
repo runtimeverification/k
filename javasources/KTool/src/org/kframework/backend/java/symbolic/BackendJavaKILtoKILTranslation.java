@@ -17,6 +17,7 @@ import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
 
@@ -34,16 +35,21 @@ import java.util.Map;
 public class BackendJavaKILtoKILTranslation extends CopyOnWriteTransformer {
 
     private final Context context;
+    private final ConfigurationStructureMap configurationStructureMap;
+    private org.kframework.kil.Cell currentCell;
 
     public BackendJavaKILtoKILTranslation(Context context) {
         this.context = context;
+        configurationStructureMap = context.getConfigurationStructureMap();
     }
 
     @Override
     public ASTNode transform(Cell cell) {
         org.kframework.kil.Cell returnCell = new org.kframework.kil.Cell();
-        returnCell.setLabel(cell.getLabel());
-        returnCell.setEndLabel(cell.getLabel());
+        final String label = cell.getLabel();
+        currentCell = configurationStructureMap.get(label).cell;
+        returnCell.setLabel(label);
+        returnCell.setEndLabel(label);
         returnCell.setContents((org.kframework.kil.Term) cell.getContent().accept(this));
         return returnCell;
     }
@@ -51,10 +57,11 @@ public class BackendJavaKILtoKILTranslation extends CopyOnWriteTransformer {
     @Override
     public ASTNode transform(CellCollection cellCollection) {
         final Multimap<String,Cell> cellMap = cellCollection.cellMap();
-        List<String> keys = new ArrayList<String>(cellMap.keySet());
-        Collections.sort(keys);
+        List<org.kframework.kil.Term> terms = currentCell.getCellTerms();
         List<org.kframework.kil.Term> contents = new ArrayList<org.kframework.kil.Term>();
-        for (String key : keys) {
+        for (org.kframework.kil.Term term : terms) {
+            if (! (term instanceof org.kframework.kil.Cell)) continue;
+            String key = ((org.kframework.kil.Cell) term).getLabel();
             for (Cell cell : cellMap.get(key)) {
                 contents.add((org.kframework.kil.Cell) transform(cell));
             }
