@@ -1,7 +1,6 @@
 package org.kframework.compile.transformers;
 
 import org.kframework.kil.*;
-import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
@@ -33,7 +32,7 @@ public class ResolveListOfK extends CopyOnWriteTransformer {
 		Iterator<Term> termIt = node.getContents().iterator();
 		Term t;
 		for (ProductionItem pitem : prod.getItems()) {
-			if (pitem.getType() == ProductionType.TERMINAL) continue;
+			if (pitem instanceof Terminal) continue;
 			t = termIt.next();
 			ASTNode resultAST = t.accept(this);
 			if (resultAST != t) change = true;

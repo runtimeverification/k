@@ -9,7 +9,6 @@ import org.kframework.compile.utils.MaudeHelper;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.Collection;
-import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
@@ -200,7 +199,7 @@ public class MaudeFilter extends BackendFilter {
 			} else {
 				first = false;
 			}
-			if (pi.getType().equals(ProductionType.SORT)) {
+			if (pi instanceof Sort) {
 				pi.accept(this);
 			}
 		}

@@ -1,7 +1,6 @@
 package org.kframework.parser.concrete.disambiguate;
 
 import org.kframework.kil.*;
-import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.loader.Context;
 
 /**
@@ -22,7 +21,7 @@ public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
 		// TODO: make this as a hard type checker where you throw exceptions every time you get a typing error
 		super.visit(tc);
 
-		if (tc.getProduction().getItems().get(0).getType() == ProductionType.USERLIST) {
+		if (tc.getProduction().getItems().get(0) instanceof UserList) {
 			UserList ulist = (UserList) tc.getProduction().getItems().get(0);
 
 			score += getFitnessUnit2(ulist.getSort(), tc.getContents().get(0));
@@ -30,7 +29,7 @@ public class GetFitnessUnitTypeCheckVisitor extends GetFitnessUnitBasicVisitor {
 		} else {
 			int j = 0;
 			for (int i = 0; i < tc.getProduction().getItems().size(); i++) {
-				if (tc.getProduction().getItems().get(i).getType() == ProductionType.SORT) {
+				if (tc.getProduction().getItems().get(i) instanceof Sort) {
 					Sort sort = (Sort) tc.getProduction().getItems().get(i);
 					Term child = (Term) tc.getContents().get(j);
 					score += getFitnessUnit2(sort.getName(), child);

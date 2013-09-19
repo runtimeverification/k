@@ -31,10 +31,6 @@ public class UserList extends ProductionItem {
 		listType = userList.listType;
 	}
 
-	public ProductionType getType() {
-		return ProductionType.USERLIST;
-	}
-
 	@Override
 	public String toString() {
 		if (listType.equals("*"))

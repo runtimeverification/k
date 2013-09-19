@@ -2,7 +2,6 @@ package org.kframework.backend.unparser;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
-import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
@@ -219,9 +218,9 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 			TermCons tc = (TermCons) t;
 			Production p = tc.getProduction();
 			EnumSet<Fixity> set = EnumSet.noneOf(Fixity.class);
-			if (p.getItems().get(0).getType() != ProductionType.TERMINAL)
+			if (!(p.getItems().get(0) instanceof Terminal))
 				set.add(Fixity.BARE_LEFT);
-			if (p.getItems().get(p.getItems().size() - 1).getType() != ProductionType.TERMINAL)
+			if (!(p.getItems().get(p.getItems().size() - 1) instanceof Terminal))
 				set.add(Fixity.BARE_RIGHT);
 			return set;
 		} else if (t instanceof Collection || t instanceof MapItem || t instanceof Freezer) {

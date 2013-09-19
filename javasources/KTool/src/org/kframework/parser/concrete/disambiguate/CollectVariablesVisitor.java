@@ -9,7 +9,6 @@ import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Bracket;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Cell.Ellipses;
-import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
@@ -54,7 +53,7 @@ public class CollectVariablesVisitor extends BasicVisitor {
 			return;
 
 		for (int i = 0, j = 0; i < node.getProduction().getItems().size(); i++) {
-			if (node.getProduction().getItems().get(i).getType() == ProductionType.SORT) {
+			if (node.getProduction().getItems().get(i) instanceof Sort) {
 				Term t = node.getContents().get(j);
 				try {
 					t.accept(new CollectVariablesVisitor2(context, ((Sort) node.getProduction().getItems().get(i)).getName()));
@@ -63,7 +62,7 @@ public class CollectVariablesVisitor extends BasicVisitor {
 				}
 				t.accept(this);
 				j++;
-			} else if (node.getProduction().getItems().get(i).getType() == ProductionType.USERLIST) {
+			} else if (node.getProduction().getItems().get(i) instanceof UserList) {
 				UserList ul = (UserList) node.getProduction().getItems().get(i);
 				Term t1 = node.getContents().get(0);
 				Term t2 = node.getContents().get(1);

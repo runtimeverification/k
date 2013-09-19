@@ -12,7 +12,6 @@ import org.kframework.kil.PriorityExtended;
 import org.kframework.kil.PriorityExtendedAssoc;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
-import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.Restrictions;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
@@ -117,10 +116,10 @@ public class DefinitionSDFVisitor extends BasicVisitor {
 						// add the small sort to the user sorts to add it to the variable declarations
 						userSorts.add((Sort) prd.getItems().get(0));
 					}
-				} else if (prd.getItems().get(0).getType() == ProductionType.TERMINAL && prd.getItems().size() == 1 && prd.isConstant()) {
+				} else if (prd.getItems().get(0) instanceof Terminal && prd.getItems().size() == 1 && prd.isConstant()) {
 					constants.add(prd);
 					constantSorts.add(prd.getSort());
-				} else if (prd.getItems().get(0).getType() == ProductionType.TERMINAL && prd.getItems().get(prd.getItems().size() - 1).getType() == ProductionType.TERMINAL) {
+				} else if (prd.getItems().get(0) instanceof Terminal && prd.getItems().get(prd.getItems().size() - 1) instanceof Terminal) {
 					outsides.add(prd);
 				} else if (prd.isListDecl()) {
 					outsides.add(prd);
@@ -154,7 +153,7 @@ public class DefinitionSDFVisitor extends BasicVisitor {
 						List<ProductionItem> items = p.getItems();
 						for (int i = 0; i < items.size(); i++) {
 							ProductionItem itm = items.get(i);
-							if (itm.getType() == ProductionType.TERMINAL) {
+							if (itm instanceof Terminal) {
 								Terminal t = (Terminal) itm;
 								if (!ground) {
 									if (t.getTerminal().equals(":"))
@@ -165,7 +164,7 @@ public class DefinitionSDFVisitor extends BasicVisitor {
 										sdf.append("\"" + StringUtil.escape(t.getTerminal()) + "\" ");
 								} else
 									sdf.append("\"" + StringUtil.escape(t.getTerminal()) + "\" ");
-							} else if (itm.getType() == ProductionType.SORT) {
+							} else if (itm instanceof Sort) {
 								Sort srt = (Sort) itm;
 								// if we are on the first or last place and this sort is not a list, just print the sort
 								if (i == 0 || i == items.size() - 1) {

@@ -3,7 +3,7 @@ package org.kframework.kil.loader;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.KSorts;
 import org.kframework.kil.Production;
-import org.kframework.kil.ProductionItem.ProductionType;
+import org.kframework.kil.Terminal;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
@@ -31,7 +31,7 @@ public class AddConsesVisitor extends BasicVisitor {
 			} else
 				p.putAttribute("cons", cons2);
 		} else if (p.getItems().size() == 1
-                    && p.getItems().get(0).getType() == ProductionType.TERMINAL
+                    && p.getItems().get(0) instanceof Terminal
                     && (p.getSort().startsWith("#")
                 || p.getSort().equals(KSorts.KLABEL))) {
 			// don't add any cons, if it is a constant

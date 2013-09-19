@@ -6,12 +6,13 @@ import java.util.Set;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
+import org.kframework.kil.Lexical;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
-import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
+import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
@@ -89,14 +90,17 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 		if (!context.isSubsortedEq(big.getSort(), small.getSort()))
 			return false;
 		for (int i = 0; i < big.getItems().size(); i++) {
-			if (big.getItems().get(i).getType() != small.getItems().get(i).getType()) {
+			if (!(big.getItems().get(i) instanceof Terminal && small.getItems().get(i) instanceof Terminal) &&
+				!(big.getItems().get(i) instanceof Sort && small.getItems().get(i) instanceof Sort) &&
+				!(big.getItems().get(i) instanceof UserList && small.getItems().get(i) instanceof UserList) &&
+				!(big.getItems().get(i) instanceof Lexical && small.getItems().get(i) instanceof Lexical)) {
 				return false;
-			} else if (big.getItems().get(i).getType() == ProductionType.SORT) {
+			} else if (big.getItems().get(i) instanceof Sort) {
 				String bigSort = ((Sort) big.getItems().get(i)).getName();
 				String smallSort = ((Sort) small.getItems().get(i)).getName();
 				if (!context.isSubsortedEq(bigSort, smallSort))
 					return false;
-			} else if (big.getItems().get(i).getType() == ProductionType.USERLIST) {
+			} else if (big.getItems().get(i) instanceof UserList) {
 				String bigSort = ((UserList) big.getItems().get(i)).getSort();
 				String smallSort = ((UserList) small.getItems().get(i)).getSort();
 				if (!context.isSubsortedEq(bigSort, smallSort))
@@ -126,18 +130,18 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 				ProductionItem itm1 = term1.getProduction().getItems().get(i);
 				ProductionItem itm2 = term2.getProduction().getItems().get(i);
 
-				if (itm1.getType() == ProductionType.TERMINAL && !itm1.equals(itm2))
+				if (itm1 instanceof Terminal && !itm1.equals(itm2))
 					return false;
-				else if (itm1.getType() == ProductionType.USERLIST) {
-					if (itm2.getType() != ProductionType.USERLIST)
+				else if (itm1 instanceof UserList) {
+					if (!(itm2 instanceof UserList))
 						return false;
 					UserList ul1 = (UserList) itm1;
 					UserList ul2 = (UserList) itm2;
 
 					if (!ul1.getSeparator().equals(ul2.getSeparator()))
 						return false;
-				} else if (itm1.getType() == ProductionType.SORT) {
-					if (itm2.getType() != ProductionType.SORT)
+				} else if (itm1 instanceof Sort) {
+					if (!(itm2 instanceof Sort))
 						return false;
 				}
 			}

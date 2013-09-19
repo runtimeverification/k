@@ -2,7 +2,6 @@ package org.kframework.backend.unparser;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
-import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.ColorUtil;
 
@@ -407,7 +406,7 @@ public class UnparserFilter extends BasicVisitor {
 			int where = 0;
 			for (int i = 0; i < production.getItems().size(); ++i) {
 				ProductionItem productionItem = production.getItems().get(i);
-				if (productionItem.getType() != ProductionType.TERMINAL) {
+				if (!(productionItem instanceof Terminal)) {
 					termCons.getContents().get(where++).accept(this);
 				} else {
 					indenter.write(((Terminal) productionItem).getTerminal());

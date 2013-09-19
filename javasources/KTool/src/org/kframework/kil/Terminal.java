@@ -28,10 +28,6 @@ public class Terminal extends ProductionItem {
 		return terminal;
 	}
 
-	public ProductionType getType() {
-		return ProductionType.TERMINAL;
-	}
-
 	@Override
 	public String toString() {
 		return "\"" + terminal + "\"";
