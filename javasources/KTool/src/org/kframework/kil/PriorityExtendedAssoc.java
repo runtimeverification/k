@@ -37,6 +37,7 @@ public class PriorityExtendedAssoc extends ModuleItem {
 
 	public PriorityExtendedAssoc(PriorityExtendedAssoc node) {
 		super(node);
+		this.assoc = node.assoc;
 		this.tags = node.tags;
 	}
 
