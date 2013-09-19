@@ -903,8 +903,10 @@
       definition="tests/regression/issue#36/issue.k"
       programs="tests/regression/issue#36"
       results="tests/regression/issue#36"
-	  extensions="issue"
       >
+    <all-programs>
+      <krun-option name="--output-mode" value="pretty" />
+    </all-programs>
   </test>
 
   
