@@ -6,6 +6,7 @@ import com.microsoft.z3.Sort;
 import com.microsoft.z3.Symbol;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.builtins.Int32Token;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.JavaSymbolicObject;
 import org.kframework.backend.java.kil.KCollection;
@@ -333,6 +334,8 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
                 if (variable.sort().equals(BoolToken.SORT_NAME)) {
                     variableSorts[i] = context.MkBoolSort();
                 } else if (variable.sort().equals(IntToken.SORT_NAME)) {
+                    variableSorts[i] = context.MkIntSort();
+                } else if (variable.sort().equals(Int32Token.SORT_NAME)) {
                     variableSorts[i] = context.MkIntSort();
                 } else {
                     throw new RuntimeException();

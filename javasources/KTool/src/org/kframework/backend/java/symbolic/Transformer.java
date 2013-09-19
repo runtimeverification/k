@@ -2,6 +2,7 @@ package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.builtins.Int32Token;
 import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.*;
@@ -27,6 +28,7 @@ public interface Transformer {
     public ASTNode transform(ConstrainedTerm constrainedTerm);
     public ASTNode transform(Hole hole);
     public ASTNode transform(IntToken intToken);
+    public ASTNode transform(Int32Token intToken);
     public ASTNode transform(KLabelConstant kLabelConstant);
     public ASTNode transform(KLabelFreezer kLabelFreezer);
     public ASTNode transform(KLabelInjection kLabelInjection);

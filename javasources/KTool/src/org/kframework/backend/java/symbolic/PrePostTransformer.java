@@ -6,6 +6,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.builtins.Int32Token;
 import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.*;
@@ -226,6 +227,11 @@ public abstract class PrePostTransformer implements Transformer {
 
     @Override
     public ASTNode transform(IntToken intToken) {
+        return transform((Token) intToken);
+    }
+
+    @Override
+    public ASTNode transform(Int32Token intToken) {
         return transform((Token) intToken);
     }
 

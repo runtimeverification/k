@@ -9,6 +9,7 @@ import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.CollectionVariable;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.builtins.Int32Token;
 import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
@@ -38,6 +39,7 @@ import org.kframework.kil.BoolBuiltin;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.GenericToken;
 import org.kframework.kil.IntBuiltin;
+import org.kframework.kil.Int32Builtin;
 import org.kframework.kil.Module;
 import org.kframework.kil.Production;
 import org.kframework.kil.StringBuiltin;
@@ -120,6 +122,8 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 return BoolToken.of(((BoolBuiltin) node.getLabel()).booleanValue());
             } else if (node.getLabel() instanceof IntBuiltin) {
                 return IntToken.of(((IntBuiltin) node.getLabel()).bigIntegerValue());
+            } else if (node.getLabel() instanceof Int32Builtin) {
+                return Int32Token.of(((Int32Builtin) node.getLabel()).intValue());
             } else if (node.getLabel() instanceof StringBuiltin) {
                 return StringToken.of(((StringBuiltin) node.getLabel()).stringValue());
             } else if (node.getLabel() instanceof GenericToken) {
