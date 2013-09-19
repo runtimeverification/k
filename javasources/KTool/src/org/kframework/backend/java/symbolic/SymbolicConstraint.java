@@ -336,7 +336,7 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
                 } else if (variable.sort().equals(IntToken.SORT_NAME)) {
                     variableSorts[i] = context.MkIntSort();
                 } else if (variable.sort().equals(Int32Token.SORT_NAME)) {
-                    variableSorts[i] = context.MkIntSort();
+                    variableSorts[i] = context.MkBitVecSort(32);
                 } else {
                     throw new RuntimeException();
                 }
