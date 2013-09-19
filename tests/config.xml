@@ -899,6 +899,14 @@
     </all-programs>
   </test>
 
+   <test
+      definition="tests/regression/issue#36/test.k"
+      programs="tests/regression/issue#36"
+      results="tests/regression/issue#36"
+      >
+  </test>
+
+  
   <test
       definition="tests/regression/issue677/test.k"
       programs="tests/regression/issue677/programs"
