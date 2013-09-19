@@ -579,7 +579,9 @@ void Element(StringBuilder reg, StringBuilder follow) :
           | "-" | "\t" | "\n" | "\r" | " "
           | "\\" ["t", "n", "r", " "]
           | "\\" ~["a"-"z", "A"-"Z", "\t"])+>
-    { if (image.charAt(0) == '-' || image.charAt(image.length() - 1) == '-') {
+    { if (image.charAt(0) == '-' ||
+    		(image.charAt(image.length() - 1) == '-'
+    		 && image.charAt(image.length() - 2) != '\\')) {
         throw new TokenMgrError(
           "Lexical error at line " + matchedToken.beginLine +
           ", column " + matchedToken.beginColumn + ". Found \"-\" at " +
