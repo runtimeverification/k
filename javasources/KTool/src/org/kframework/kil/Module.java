@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
-/** A module or interface. */
+/** A module. */
 public class Module extends DefinitionItem {
 	private String name;
 	private List<ModuleItem> items = new ArrayList<ModuleItem>();
