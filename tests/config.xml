@@ -956,7 +956,6 @@
   </all-programs>
 </test>
 
-<!--
   <test
       definition="dist/examples/java_rewrite_engine/tutorial/4_imp++/imp.k"
       programs="dist/tutorial/2_imp dist/tutorial/4_imp++"
@@ -971,7 +970,6 @@
 	<krun-option name="-smt" value="none" />
       </all-programs>
   </test>
--->
 
 </tests>
 
