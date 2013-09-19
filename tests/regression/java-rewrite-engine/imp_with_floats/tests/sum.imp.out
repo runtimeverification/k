@@ -1,4 +1,7 @@
 <T>
+    <k>
+        .K
+    </k>
     <state>
         n |-> (((((((((10.0 -Float 1.0) -Float 1.0) -Float 1.0) -Float 
           1.0) -Float 1.0) -Float 1.0) -Float 1.0) -Float 1.0) -Float 1.0) 
@@ -16,7 +19,4 @@
           -Float 1.0) -Float 1.0) -Float 1.0) -Float 1.0) -Float 1.0) -Float 
           1.0)
     </state>
-    <k>
-        .K
-    </k>
 </T>
