@@ -46,10 +46,10 @@ public class PriorityExtendedAssoc extends ModuleItem {
 		String blocks = "";
 
 		for (KLabelConstant pb : tags) {
-			blocks += pb + "\n> ";
+			blocks += pb + " ";
 		}
 		if (blocks.length() > 2)
-			blocks = blocks.substring(0, blocks.length() - 3);
+			blocks = blocks.substring(0, blocks.length() - 1);
 
 		return "  syntax " + assoc + " " + blocks + "\n";
 	}
