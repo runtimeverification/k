@@ -448,9 +448,17 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
 
             Variable variable;
             Term term;
-            /* when possible, substitute the variables in the RHS in terms of the variables in the
-             * LHS */
-            if (equality.rightHandSide instanceof Variable) {
+            /* when possible, substitute the anonymous variable */
+            if (equality.rightHandSide instanceof Variable
+                    && equality.leftHandSide instanceof Variable) {
+                if (((Variable) equality.leftHandSide).isAnonymous()) {
+                    variable = (Variable) equality.rightHandSide;
+                    term = equality.leftHandSide;
+                } else {
+                    variable = (Variable) equality.leftHandSide;
+                    term = equality.rightHandSide;
+                }
+            } else if (equality.rightHandSide instanceof Variable) {
                 variable = (Variable) equality.rightHandSide;
                 term = equality.leftHandSide;
             } else if (equality.leftHandSide instanceof Variable) {

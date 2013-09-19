@@ -332,7 +332,14 @@ public class PrePostVisitor implements Visitor {
 
     @Override
     public void visit(ConstrainedTerm node) {
-        throw new UnsupportedOperationException();
+        // TODO(Traian): check if this fix is correct
+        preVisitor.resetProceed();
+        node.accept(preVisitor);
+        if (!preVisitor.isProceed()) return;
+        node.term().accept(this);
+        node.lookups().accept(this);
+        node.constraint().accept(this);
+        node.accept(postVisitor);
     }
 
     @Override

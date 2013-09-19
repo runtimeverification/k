@@ -14,7 +14,7 @@ import java.util.Collections;
 
 
 /**
- * @author: AndreiS
+ * @author AndreiS
  */
 public class ConstrainedTerm extends Term {
 
@@ -47,10 +47,14 @@ public class ConstrainedTerm extends Term {
     public SymbolicConstraint constraint() {
         return constraint;
     }
+
     public boolean implies(ConstrainedTerm constrainedTerm) {
         return matchImplies(constrainedTerm) != null;
     }
 
+    public SymbolicConstraint lookups() {
+        return lookups;
+    }
     /*
     public SymbolicConstraint match(ConstrainedTerm constrainedTerm, Definition definition) {
         SymbolicConstraint unificationConstraint = new SymbolicConstraint(definition);
@@ -185,7 +189,7 @@ public class ConstrainedTerm extends Term {
 
     @Override
     public void accept(Visitor visitor) {
-        throw new UnsupportedOperationException();
+        visitor.visit(this);
     }
 
 }

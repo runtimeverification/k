@@ -68,7 +68,8 @@ import com.google.common.collect.Multimap;
 public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     private Definition definition = null;
-    private Map<org.kframework.kil.Variable, Integer> concreteCollectionSize = null;
+    private Map<org.kframework.kil.Variable, Integer> concreteCollectionSize
+            = Collections.emptyMap();
 
     public KILtoBackendJavaKILTransformer(Context context) {
         super("Transform KIL into java backend KIL", context);
@@ -477,7 +478,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                || ((leftHandSide.kind() == Kind.KITEM || leftHandSide.kind() == Kind.K || leftHandSide.kind() == Kind.KLIST)
                    && (rightHandSide.kind() == Kind.KITEM || rightHandSide.kind() == Kind.K || rightHandSide.kind() == Kind.KLIST));
 
-        concreteCollectionSize = null;
+        concreteCollectionSize = Collections.emptyMap();
 
         Rule rule = new Rule(
                 leftHandSide,
