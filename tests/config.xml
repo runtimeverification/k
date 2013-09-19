@@ -900,7 +900,7 @@
   </test>
 
    <test
-      definition="tests/regression/issue#36/test.k"
+      definition="tests/regression/issue#36/issue.k"
       programs="tests/regression/issue#36"
       results="tests/regression/issue#36"
       >
