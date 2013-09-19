@@ -95,7 +95,7 @@ public class SymbolicRewriter {
 
         for (step = 0; step != bound; ++step) {
             /* get the first solution */
-            computeRewriteStep(constrainedTerm);
+            computeRewriteStep(constrainedTerm, 1);
             ConstrainedTerm result = getTransition(0);
             if (result != null) {
                 constrainedTerm = result;
@@ -129,8 +129,12 @@ public class SymbolicRewriter {
         return n < results.size() ? results.get(n) : null;
     }
 
-    private void computeRewriteStep(ConstrainedTerm constrainedTerm) {
+    private void computeRewriteStep(ConstrainedTerm constrainedTerm, int successorBound) {
         results.clear();
+
+        if (successorBound == 0) {
+            return;
+        }
 
         for (Rule rule : getRules(constrainedTerm.term())) {
             ruleStopwatch.reset();
@@ -166,21 +170,26 @@ public class SymbolicRewriter {
 
                 /*
                 System.err.println("rule \n\t" + rule);
-                System.err.println("result constraint\n\t" + constraint1);
                 System.err.println("result term\n\t" + result);
-                System.err.println("============================================================"); */
-
-                //ruleStopwatch.stop();
-                //System.err.println("### " + ruleStopwatch);
-
+                System.err.println("result constraint\n\t" + constraint1);
+                System.err.println("============================================================");
+                */
 
                 /* compute all results */
                 results.add(new ConstrainedTerm(result, constraint1,
                     constrainedTerm.termContext()));
+
+                if (results.size() == successorBound) {
+                    return;
+                }
             }
         }
         //System.out.println("Result: " + results.toString());
         //System.out.println();
+    }
+
+    private void computeRewriteStep(ConstrainedTerm constrainedTerm) {
+        computeRewriteStep(constrainedTerm, -1);
     }
 
     /**
