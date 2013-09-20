@@ -147,8 +147,7 @@ public class Test implements Comparable<Test> {
                 // ignore the programs from exclude list
                 boolean excluded = false;
                 for (String exclude : excludePrograms)
-                    if (programPath.equals(programsFolder
-                            + Configuration.FILE_SEPARATOR + exclude))
+                    if (programPath.contains(exclude))
                         excluded = true;
                 if (excluded)
                     continue;

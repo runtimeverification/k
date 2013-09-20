@@ -988,7 +988,7 @@
       definition="dist/examples/java_rewrite_engine/simple/untyped/simple-untyped.k"
       programs="dist/examples/simple/untyped/programs"
       extensions="simple"
-      exclude="diverse/dekker.simple"
+      exclude="dekker.simple exceptions_07.simple"
       results="tests/examples/simple-untyped" >
       <kompile-option name="-ml" />
       <kompile-option name="-w" value="none" />
