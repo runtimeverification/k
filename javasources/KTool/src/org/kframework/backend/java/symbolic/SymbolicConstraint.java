@@ -451,25 +451,23 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
 
             Variable variable;
             Term term;
+            // TODO(AndreiS): the sort of a variable may become more specific
             /* when possible, substitute the anonymous variable */
-            if (equality.rightHandSide instanceof Variable
-                    && equality.leftHandSide instanceof Variable) {
-                if (((Variable) equality.leftHandSide).isAnonymous()) {
-                    variable = (Variable) equality.rightHandSide;
-                    term = equality.leftHandSide;
-                } else {
-                    variable = (Variable) equality.leftHandSide;
-                    term = equality.rightHandSide;
-                }
-            } else if (equality.rightHandSide instanceof Variable) {
+            if (equality.leftHandSide instanceof Variable
+                    && equality.rightHandSide instanceof Variable
+                    && ((Variable) equality.rightHandSide).isAnonymous()) {
                 variable = (Variable) equality.rightHandSide;
                 term = equality.leftHandSide;
             } else if (equality.leftHandSide instanceof Variable) {
                 variable = (Variable) equality.leftHandSide;
                 term = equality.rightHandSide;
+            } else if (equality.rightHandSide instanceof Variable) {
+                variable = (Variable) equality.rightHandSide;
+                term = equality.leftHandSide;
             } else {
                 continue;
             }
+
             if (term.variableSet().contains(variable)) {
                 continue;
             }
@@ -511,10 +509,10 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
             Map<Variable, Term> substitution,
             TermContext context) {
         Map.Entry<Variable, Term>[] entries = map.entrySet().toArray(new Map.Entry[map.size()]);
-        for (int index = 0; index < entries.length; ++index) {
-            Term term = entries[index].getValue().substitute(substitution, context);
-            if (term != entries[index].getValue()) {
-                map.put(entries[index].getKey(), term);
+        for (Map.Entry<Variable, Term> entry : entries) {
+            Term term = entry.getValue().substitute(substitution, context);
+            if (term != entry.getValue()) {
+                map.put(entry.getKey(), term);
             }
         }
     }

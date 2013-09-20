@@ -158,7 +158,8 @@ public class JavaSymbolicKRun implements KRun {
                 proofResults.addAll(symbolicRewriter.proveRule(initialTerm, targetTerm, rules));
             }
 
-            return null;
+            return new KRunProofResult<Set<org.kframework.kil.Term>>(
+                    proofResults.isEmpty(), Collections.<org.kframework.kil.Term>emptySet());
         } catch (TransformerException e) {
             e.printStackTrace();
             return null;
