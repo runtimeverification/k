@@ -27,14 +27,8 @@ public class HtmlBackend extends BasicBackend {
 
 		String html = htmlFilter.getHTML();
 
-		String output = KompileFrontEnd.output;
-		if (output == null) {
-			output = "./" + FileUtil.stripExtension(new File(definition.getMainFile()).getName()) + ".html";
-		}
+		FileUtil.saveInFile(GlobalSettings.outputDir + File.separator + FileUtil.stripExtension(new File(definition.getMainFile()).getName()) + ".html", html);
 
-		output = new File(output).getAbsolutePath();
-
-		FileUtil.saveInFile(output, html);
 		if (GlobalSettings.verbose) {
 			sw.printIntermediate("Generating HTML");
 		}

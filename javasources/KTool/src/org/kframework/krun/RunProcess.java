@@ -199,7 +199,7 @@ public class RunProcess {
 				return;
 
 			}
-			System.out.println("Krun was executed with the following arguments:" + K.lineSeparator + "k_definition=" + K.k_definition + K.lineSeparator + "syntax_module=" + K.syntax_module
+			System.out.println("Krun was executed with the following arguments:" + K.lineSeparator + "syntax_module=" + K.syntax_module
 					+ K.lineSeparator + "main_module=" + K.main_module + K.lineSeparator + "compiled_def=" + K.compiled_def + K.lineSeparator);
 			String compiledDefName = context.kompiled.getName();
 			int index = compiledDefName.indexOf("-kompiled");

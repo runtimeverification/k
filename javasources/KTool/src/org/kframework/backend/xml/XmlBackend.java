@@ -28,8 +28,7 @@ public class XmlBackend extends BasicBackend {
 
 		FileUtil.saveInFile(context.dotk.getAbsolutePath() + "/def.xml", xml);
 
-		File canonicalFile = GlobalSettings.mainFile.getCanonicalFile();
-		FileUtil.saveInFile(canonicalFile.getAbsolutePath().replaceFirst("\\.k$", "") + ".xml", xml);
+		FileUtil.saveInFile(GlobalSettings.outputDir + File.separator + FileUtil.stripExtension(GlobalSettings.mainFile.getName()) + ".xml", xml);
 	}
 
 	@Override

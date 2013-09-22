@@ -61,11 +61,7 @@ public class LatexBackend extends BasicBackend {
 	@Override
 	public void run(Definition definition) throws IOException {
 		List<File> files = latex(definition, context, definition.getMainModule());
-		try {
-			FileUtil.copyFiles(files, GlobalSettings.mainFile.getCanonicalFile().getParentFile());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		FileUtil.copyFiles(files, new File(GlobalSettings.outputDir));
 	}
 
 	@Override
