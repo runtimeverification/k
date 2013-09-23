@@ -9,7 +9,6 @@ import org.kframework.compile.utils.MaudeHelper;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.Collection;
-import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
@@ -57,42 +56,40 @@ public class MaudeFilter extends BackendFilter {
 
 	@Override
 	public void visit(Module mod) {
-		if (!mod.getType().equals("interface")) {
-			result.append("mod ");
-			result.append(mod.getName());
-			result.append(" is\n");
+          result.append("mod ");
+          result.append(mod.getName());
+          result.append(" is\n");
 
-            // TODO(AndreiS): move declaration of #token in a .maude file
-            result.append("op #token : #String #String -> KLabel .\n");
+          // TODO(AndreiS): move declaration of #token in a .maude file
+          result.append("op #token : #String #String -> KLabel .\n");
 
-			for (ModuleItem mi : mod.getItems()) {
-				mi.accept(this);
-				result.append("\n");
-			}
+          for (ModuleItem mi : mod.getItems()) {
+            mi.accept(this);
+            result.append("\n");
+          }
 
-            // TODO(AndreiS): move this in a more approprite place
-            for (String sort : context.getTokenSorts()) {
-                String tokenKItem = "_`(_`)(#token(\"" + sort + "\", V:" + StringBuiltin.SORT_NAME
-                                    + "), .KList)";
-                String sortKItem = "_`(_`)(#_(\"" + sort + "\")" + ", .KList)";
-                String valueKItem = "_`(_`)(#_(V:" + StringBuiltin.SORT_NAME + ")" + ", .KList)";
-                result.append("eq _`(_`)(" + AddPredicates.syntaxPredicate(sort) + ", "
-                              + tokenKItem + ") = _`(_`)(#_(true), .KList) .\n");
-                result.append("eq _`(_`)(#parseToken, _`,`,_(" + sortKItem + ", " + valueKItem
-                              + ")) = " + tokenKItem + " .\n");
-                result.append("eq _`(_`)(#tokenToString, " + tokenKItem + ") = " + valueKItem
-                              + " .\n");
-            }
+          // TODO(AndreiS): move this in a more approprite place
+          for (String sort : context.getTokenSorts()) {
+            String tokenKItem = "_`(_`)(#token(\"" + sort + "\", V:" + StringBuiltin.SORT_NAME
+              + "), .KList)";
+            String sortKItem = "_`(_`)(#_(\"" + sort + "\")" + ", .KList)";
+            String valueKItem = "_`(_`)(#_(V:" + StringBuiltin.SORT_NAME + ")" + ", .KList)";
+            result.append("eq _`(_`)(" + AddPredicates.syntaxPredicate(sort) + ", "
+                          + tokenKItem + ") = _`(_`)(#_(true), .KList) .\n");
+            result.append("eq _`(_`)(#parseToken, _`,`,_(" + sortKItem + ", " + valueKItem
+                          + ")) = " + tokenKItem + " .\n");
+            result.append("eq _`(_`)(#tokenToString, " + tokenKItem + ") = " + valueKItem
+                          + " .\n");
+          }
 
-			for (Map.Entry<String, DataStructureSort> entry : context.getDataStructureSorts().entrySet()) {
-				String lhs = "_`(_`)(" + AddPredicates.syntaxPredicate(entry.getKey()) + ", "
-                           + "_`(_`)(" + entry.getValue().type() + "2KLabel_(V:"
-                           + entry.getValue().type() + "), .KList))";
-				result.append("eq " + lhs + "  = _`(_`)(#_(true), .KList) .\n");
-			}
+          for (Map.Entry<String, DataStructureSort> entry : context.getDataStructureSorts().entrySet()) {
+            String lhs = "_`(_`)(" + AddPredicates.syntaxPredicate(entry.getKey()) + ", "
+              + "_`(_`)(" + entry.getValue().type() + "2KLabel_(V:"
+              + entry.getValue().type() + "), .KList))";
+            result.append("eq " + lhs + "  = _`(_`)(#_(true), .KList) .\n");
+          }
 
-			result.append("\nendm");
-		}
+          result.append("\nendm");
 	}
 
 	@Override
@@ -202,7 +199,7 @@ public class MaudeFilter extends BackendFilter {
 			} else {
 				first = false;
 			}
-			if (pi.getType().equals(ProductionType.SORT)) {
+			if (pi instanceof Sort) {
 				pi.accept(this);
 			}
 		}
@@ -597,18 +594,6 @@ public class MaudeFilter extends BackendFilter {
         result.append(StringUtil.escapeMaude(kLabelConstant.getLabel()));
     }
 
-	@Override
-	public void visit(Constant constant) {
-        assert false : "dead code";
-		if (constant.getSort().equals("#Id")) {
-			result.append("#id \"");
-		}
-		result.append(constant.getValue());
-		if (constant.getSort().equals("#Id")) {
-			result.append("\"");
-		}
-	}
-
 	private java.util.Set<String> maudeBuiltinTokenSorts =
 		ImmutableSet.of("#Float", "#LtlFormula");
 
@@ -909,10 +894,6 @@ public class MaudeFilter extends BackendFilter {
 	@Override
 	public void visit(Bracket term) {
 		term.getContent().accept(this);
-	}
-
-	public void visit(Builtin term) {
-		throw new RuntimeException("don't know how to maudify Builtin");
 	}
 
 	@Override

@@ -17,7 +17,6 @@ import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
-import org.kframework.kil.Constant;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
@@ -347,13 +346,6 @@ public class Context implements Serializable {
 
 	public boolean isParsingTag(String key) {
 		return parsingTags.contains(key);
-	}
-
-	public boolean isListUnit(Constant cst) {
-		if (!isListSort(cst.getSort()))
-			return false;
-		assert (cst.getValue().equals("." + cst.getSort()));
-		return true;
 	}
 
 	public static final int HASH_PRIME = 37;

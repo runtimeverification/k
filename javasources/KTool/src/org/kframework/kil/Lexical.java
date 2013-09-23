@@ -22,10 +22,6 @@ public class Lexical extends ProductionItem {
 		this.follow = terminal.follow;
 	}
 
-	public ProductionType getType() {
-		return ProductionType.LEXICAL;
-	}
-
 	@Override
 	public String toString() {
 		return "Lexical{" + lexicalRule + "}";

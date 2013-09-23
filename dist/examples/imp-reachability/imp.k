@@ -127,13 +127,14 @@ For each reachability formula given as input we have two corresponding generated
    (corresponding to consequece deduction rule).
 */
 
-  syntax #Id ::= "a" | "b" | "x" | "y" | "LL0" | "LL1" | "LL2"
+  syntax Id ::= Token{"a"} | Token{"b"} | Token{"x"} | Token{"y"}
+              | Token{"ll0"} | Token{"ll1"} | Token{"ll2"}
 
   syntax Stmt ::= "check0" | "check1" | "check2"   // one for each formula
 
   syntax Bag ::= "success"
 
-  rule (<k> (LL0 : (a = 0; b = x; (LL1 : while (y <= b) { b = b - y; a = a + 1; }))) ~> K:K </k>
+  rule (<k> (ll0 : (a = 0; b = x; (ll1 : while (y <= b) { b = b - y; a = a + 1; }))) ~> K:K </k>
        <state> a |-> A:Int b |-> B:Int x |-> X:Int y |-> Y:Int </state>
        <condition> Psi:Bool  </condition>
        =>
@@ -157,7 +158,7 @@ For each reachability formula given as input we have two corresponding generated
             ==K "unsat"
        [transition]
 
-  rule (<k> (LL1 : while (y <= b) ({ b = b - y; a = a + 1; })::Block)::Stmt ~> K:K </k>
+  rule (<k> (ll1 : while (y <= b) ({ b = b - y; a = a + 1; })::Block)::Stmt ~> K:K </k>
        <state> a |-> A:Int b |-> B:Int x |-> X:Int y |-> Y:Int </state>
        <condition> Psi:Bool  </condition>
        =>
@@ -185,7 +186,7 @@ For each reachability formula given as input we have two corresponding generated
             ==K "unsat"
        [transition]
 
-  rule (<k> (LL2 : { b = b - y; a = a + 1; })::Block ~> K </k>
+  rule (<k> (ll2 : { b = b - y; a = a + 1; })::Block ~> K </k>
        <state> a |-> A:Int b |-> B:Int x |-> X:Int y |-> Y:Int </state>
        <condition> Psi:Bool  </condition>
        =>

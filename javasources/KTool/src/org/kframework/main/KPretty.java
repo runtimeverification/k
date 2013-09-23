@@ -11,7 +11,7 @@ public class KPretty {
 		try {
 			String kast = args[0];
 			Context context = new Context();
-			Term t = KastParser.parse(kast);
+			Term t = KastParser.parse(kast, context);
 			UnparserFilter unparser = new UnparserFilter(false, false, false, context);
 			t.accept(unparser);
 			System.out.println(unparser.getResult());

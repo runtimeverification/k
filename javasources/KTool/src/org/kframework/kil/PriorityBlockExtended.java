@@ -54,10 +54,10 @@ public class PriorityBlockExtended extends ASTNode {
 	public String toString() {
 		String content = "";
 		for (Term production : productions)
-			content += production + "\n| ";
+			content += production + " ";
 
 		if (content.length() > 2)
-			content = content.substring(0, content.length() - 3);
+			content = content.substring(0, content.length() - 1);
 
 		if (assoc.equals(""))
 			return content;

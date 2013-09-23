@@ -73,7 +73,6 @@ public interface Visitor {
     public void visit(MapUpdate node);
     // </BuiltinDataStructure>
 	// <Token>
-    public void visit(Constant node);
     public void visit(Token node);
     public void visit(BoolBuiltin node);
     public void visit(IntBuiltin node);

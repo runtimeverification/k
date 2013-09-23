@@ -170,6 +170,7 @@ import org.kframework.kil.StringSentence;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
+import org.kframework.kil.loader.Context;
 
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -188,12 +189,14 @@ public class Basic {
   private List<DefinitionItem> items = new ArrayList<DefinitionItem>();;
   private Module module = null;
   private int beginLine, beginColumn;
+  private Context context;
 
   /** Parses a given string that was read from 'filename'. */
   public static List<DefinitionItem> parse(
-    String filename, String string) {
+    String filename, String string, Context context) {
     Basic parser = new Basic(new StringReader(string));
     parser.filename = filename;
+    parser.context = context;
     try {
       return parser.Start();
     } catch (ParseException e) {
@@ -516,7 +519,7 @@ List<KLabelConstant> KLabels() :
 { List<KLabelConstant> list = new ArrayList<KLabelConstant>(); }
 {
   // Note that we don't assign location information b/c KLabels are interned
-  (<KLABEL> { list.add(KLabelConstant.of(image())); })+
+  (<KLABEL> { list.add(KLabelConstant.of(image(), context)); })+
   // TODO: check if need context
   { return list; }
 }
@@ -576,7 +579,9 @@ void Element(StringBuilder reg, StringBuilder follow) :
           | "-" | "\t" | "\n" | "\r" | " "
           | "\\" ["t", "n", "r", " "]
           | "\\" ~["a"-"z", "A"-"Z", "\t"])+>
-    { if (image.charAt(0) == '-' || image.charAt(image.length() - 1) == '-') {
+    { if (image.charAt(0) == '-' ||
+    		(image.charAt(image.length() - 1) == '-'
+    		 && image.charAt(image.length() - 2) != '\\')) {
         throw new TokenMgrError(
           "Lexical error at line " + matchedToken.beginLine +
           ", column " + matchedToken.beginColumn + ". Found \"-\" at " +
@@ -678,15 +683,10 @@ void Require(List<DefinitionItem> items) :
 /** Parses a Module and adds it to items */
 void Module(List<DefinitionItem> items) : { String loc = startLoc(); }
 {
-( "module" <MODNAME> { module = new Module(image(), "module", false); }
+  "module" <MODNAME> { module = new Module(image()); }
     (Import(module))*
     (Sentence(module))*
-  "endmodule"
-| "interface" <MODNAME> { module = new Module(image(), "interface", false); }
-    (Import(module))*
-    (Sentence(module))*
-  "endinterface"
-) { items.add(markLoc(loc, module)); module = null; }
+  "endmodule" { items.add(markLoc(loc, module)); module = null; }
 }
 
 /** Parses an Import and adds it to module */
@@ -718,7 +718,7 @@ void Sentence(Module module) :
     | Attributes(syn)
     | "-/-" Group(sb) ("." { sb.append(specialAndImage()); } Group(sb))*
       { module.appendModuleItem(markLoc(loc, new Restrictions(
-          syn.getSort().getRealName(), null, sb.toString()))); return; } )?
+          new Sort(syn.getSort().getRealName()), null, sb.toString()))); return; } )?
     { module.appendModuleItem(markLoc(loc, syn)); }
   
   | ("priority" | "priorities")
@@ -734,7 +734,7 @@ void Sentence(Module module) :
   | type = String() "-/-"
       Group(sb) ("." { sb.append(specialAndImage()); } Group(sb))*
       { module.appendModuleItem(markLoc(loc, new Restrictions(
-          null, type, sb.toString()))); }
+          null, new Terminal(type), sb.toString()))); }
   )
 }
 

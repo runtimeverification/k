@@ -8,6 +8,8 @@ import org.w3c.dom.Element;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+
 
 /**
  * A rule declaration.
@@ -18,6 +20,7 @@ import java.util.List;
 public class Rule extends Sentence {
 
     private List<BuiltinLookup> lookups = Collections.emptyList();
+    private Map<Variable, Integer> concreteDataStructureSize = Collections.emptyMap();
 
     public Rule(Element element) {
 		super(element);
@@ -26,7 +29,8 @@ public class Rule extends Sentence {
 	public Rule(Rule node) {
 		super(node);
         lookups = node.lookups;
-	}
+        concreteDataStructureSize = node.concreteDataStructureSize;
+    }
 
 	public Rule() {
 		super();
@@ -80,4 +84,13 @@ public class Rule extends Sentence {
     public void setLookups(List<BuiltinLookup> lookups) {
         this.lookups = lookups;
     }
+
+    public Map<Variable, Integer> getConcreteDataStructureSize() {
+        return concreteDataStructureSize;
+    }
+
+    public void setConcreteDataStructureSize(Map<Variable, Integer> concreteDataStructureSize) {
+        this.concreteDataStructureSize = concreteDataStructureSize;
+    }
+
 }

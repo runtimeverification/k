@@ -961,8 +961,8 @@ public class Main {
             if (cmd.hasOption("prove")) {
                 K.prove = cmd.getOptionValue("prove");
             }
-            if (cmd.hasOption("no-smt")) {
-                K.smt = false;
+            if (cmd.hasOption("smt")) {
+                K.smt = cmd.getOptionValue("smt");
             }
             if (cmd.hasOption("deleteTempDir")) {
                 K.deleteTempDir = true;

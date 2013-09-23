@@ -2,7 +2,6 @@ package org.kframework.backend.unparser;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
-import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.ColorUtil;
 
@@ -361,12 +360,10 @@ public class UnparserFilter extends BasicVisitor {
 		prepare(kapp);
 		Term child = kapp.getChild();
 		Term label = kapp.getLabel();
-    if (label instanceof Token) {
-      // TODO(AndreiS): this code should be dead; after parsing constants should
-      // be loaded into Constant and then transformed into KApp of Token, empty
-      // KList right away.
-      assert child instanceof KList && ((KList) child).isEmpty();
-      indenter.write(((Token) label).value());
+		if (label instanceof Token) {
+			assert child instanceof KList : "child of KApp with Token is not KList";
+			assert ((KList) child).isEmpty() : "child of KApp with Token is not empty";
+			indenter.write(((Token) label).value());
 		} else {
 			label.accept(this);
 			indenter.write("(");
@@ -409,7 +406,7 @@ public class UnparserFilter extends BasicVisitor {
 			int where = 0;
 			for (int i = 0; i < production.getItems().size(); ++i) {
 				ProductionItem productionItem = production.getItems().get(i);
-				if (productionItem.getType() != ProductionType.TERMINAL) {
+				if (!(productionItem instanceof Terminal)) {
 					termCons.getContents().get(where++).accept(this);
 				} else {
 					indenter.write(((Terminal) productionItem).getTerminal());
@@ -436,13 +433,6 @@ public class UnparserFilter extends BasicVisitor {
 	public void visit(KLabelConstant kLabelConstant) {
 		prepare(kLabelConstant);
 		indenter.write(kLabelConstant.getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)"));
-		postpare();
-	}
-
-	@Override
-	public void visit(Constant constant) {
-		prepare(constant);
-		indenter.write(constant.getValue());
 		postpare();
 	}
 

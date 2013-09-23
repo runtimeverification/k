@@ -10,24 +10,24 @@
 -->
 
 <!-- LAMBDA -->
-  <test 
+  <test
       definition="dist/tutorial/1_lambda/lesson_1/lambda.k"
       programs="dist/tutorial/1_lambda/lesson_1"
       extensions="lambda"
       />
-  <test 
+  <test
       definition="dist/tutorial/1_lambda/lesson_2/lambda.k"
       programs="dist/tutorial/1_lambda/lesson_1"
       extensions="lambda"
       exclude="omega.lambda"
       />
-  <test 
+  <test
       definition="dist/tutorial/1_lambda/lesson_3/lambda.k"
       programs="dist/tutorial/1_lambda/lesson_1"
       extensions="lambda"
       exclude="omega.lambda"
       />
-  <test 
+  <test
       definition="dist/tutorial/1_lambda/lesson_4/lambda.k"
       programs="dist/tutorial/1_lambda/lesson_1"
       extensions="lambda"
@@ -70,7 +70,7 @@
         <krun-option name="--output-mode" value="pretty" />
       </all-programs>
    </test>
- 
+
 
 <!-- IMP -->
 
@@ -98,6 +98,7 @@
       definition="dist/tutorial/2_imp/lesson_5/imp.k"
       programs="dist/tutorial/2_imp"
       extensions="imp"
+      tests="tests/tutorial/2_imp/lesson_5"
       />
 
 <!-- LAMBDA++ -->
@@ -272,14 +273,14 @@
       exclude="diverse/dekker.simple"
       results="tests/examples/simple-untyped"
       />
-  <test 
+  <test
       definition="dist/examples/simple/typed/dynamic/simple-typed-dynamic.k"
       programs="dist/examples/simple/typed/programs"
       extensions="simple"
       exclude="diverse/dekker.simple"
       results="tests/examples/simple-typed-dynamic"
       />
-  <test 
+  <test
       definition="dist/examples/simple/typed/static/simple-typed-static.k"
       programs="dist/examples/simple/typed/programs"
       extensions="simple"
@@ -329,7 +330,7 @@
   FUN
 -->
 
-  <test 
+  <test
       definition="dist/examples/fun/untyped/fun-untyped.k"
       programs="dist/examples/fun/programs"
       extensions="fun"
@@ -341,7 +342,7 @@
   LOGIK
 -->
 
-  <test 
+  <test
       definition="dist/examples/logik/logik.k"
       programs="dist/examples/logik/programs"
       extensions="logik"
@@ -359,7 +360,7 @@
   AGENT
 -->
 
-  <test 
+  <test
       definition="dist/examples/agent/agent.k"
       programs="dist/examples/agent/programs"
       extensions="agent"
@@ -371,7 +372,7 @@
   BF
 -->
 
-  <test 
+  <test
       definition="dist/examples/bf/bf.k"
       programs="dist/examples/bf/programs"
       extensions="bf"
@@ -410,8 +411,8 @@
 <!--
   IMP-SYMBOLIC
 -->
- 
-  <test 
+
+  <test
       definition="dist/examples/imp-symbolic/imp.k"
       programs="dist/examples/imp-symbolic/programs"
       extensions="imp"
@@ -426,8 +427,8 @@
 <!--
   IMP-HOARE
 -->
- 
-  <test 
+
+  <test
       definition="dist/examples/imp-hoare/imp.k"
       programs="dist/examples/imp-hoare/programs"
       extensions="imp"
@@ -437,8 +438,8 @@
 <!--
   IMP-REACHABILITY
 -->
- 
-  <test 
+
+  <test
       definition="dist/examples/imp-reachability/imp.k"
       programs="dist/examples/imp-reachability"
       extensions="imp"
@@ -461,7 +462,7 @@
       definition="dist/examples/cink/ltlmc/cink.k"
       programs="dist/examples/cink/ltlmc/programs"
       extensions="cink"
-      results="tests/examples/cink/ltlmc" 
+      results="tests/examples/cink/ltlmc"
       exclude="form-peterson.cink form-dekker.cink form-threads.cink peterson-wrong1.cink peterson-wrong2.cink" >
       <kompile-option name="-transition" value="kripke" />
       <all-programs>
@@ -478,7 +479,7 @@
       definition="dist/examples/cink/basic/cink.k"
       programs="dist/examples/cink/basic/programs"
       extensions="cink"
-      results="tests/examples/cink/basic" 
+      results="tests/examples/cink/basic"
       exclude="fact.cink prim.cink"
       >
   </test>
@@ -528,12 +529,12 @@
       definition="dist/examples/prog-equiv/peq.k"
       programs="dist/examples/prog-equiv/programs"
       extensions="peq"
-      results="tests/examples/prog-equiv/" > 
+      results="tests/examples/prog-equiv/" >
       <kompile-option name="-addTopCell" />
   </test>
 
 <!--
-    
+
 -->
   <test
       definition="dist/tutorial/2_imp/lesson_4/imp.k"
@@ -546,7 +547,7 @@
     <all-programs>
       <krun-option name="--no-color" />
       <krun-option name="--output-mode" value="none" />
-      <krun-option name="-cPC" value="true" /> 
+      <krun-option name="-cPC" value="true" />
     </all-programs>
   </test>
 
@@ -735,7 +736,7 @@
     <kompile-option name="-ml" />
     <all-programs>
       <krun-option name="--backend" value="java-symbolic" />
-      <krun-option name="--no-smt" />
+      <krun-option name="--smt" value="none" />
       <krun-option name="--parser" value="kast -groundParser" />
     </all-programs>
   </test>
@@ -767,7 +768,7 @@
     <kompile-option name="-ml" />
     <kompile-option name="-w" value="none" />
     <all-programs>
-      <krun-option name="--no-smt" />
+      <krun-option name="--smt" value="none" />
       <krun-option name="--backend" value="java-symbolic" />
       <krun-option name="--output-mode" value="pretty" />
     </all-programs>
@@ -783,7 +784,7 @@
     <kompile-option name="-ml" />
     <kompile-option name="-w" value="none" />
     <all-programs>
-      <krun-option name="--no-smt" />
+      <krun-option name="--smt" value="none" />
       <krun-option name="--backend" value="java-symbolic" />
       <krun-option name="--output-mode" value="pretty" />
     </all-programs>
@@ -799,7 +800,7 @@
     <kompile-option name="-ml" />
     <kompile-option name="-w" value="none" />
     <all-programs>
-      <krun-option name="--no-smt" />
+      <krun-option name="--smt" value="none" />
       <krun-option name="--backend" value="java-symbolic" />
       <krun-option name="--output-mode" value="pretty" />
     </all-programs>
@@ -814,7 +815,7 @@
     <kompile-option name="-ml" />
     <kompile-option name="-w" value="none" />
     <all-programs>
-      <krun-option name="--no-smt" />
+      <krun-option name="--smt" value="none" />
       <krun-option name="--backend" value="java-symbolic" />
       <krun-option name="--output-mode" value="pretty" />
     </all-programs>
@@ -828,7 +829,7 @@
     <kompile-option name="-ml" />
     <kompile-option name="-w" value="none" />
     <all-programs>
-      <krun-option name="--no-smt" />
+      <krun-option name="--smt" value="none" />
       <krun-option name="--backend" value="java-symbolic" />
       <krun-option name="--output-mode" value="pretty" />
     </all-programs>
@@ -850,7 +851,7 @@
     <kompile-option name="-ml" />
     <kompile-option name="-w" value="none" />
     <all-programs>
-      <krun-option name="--no-smt" />
+      <krun-option name="--smt" value="none" />
       <krun-option name="--backend" value="java-symbolic" />
       <krun-option name="--output-mode" value="pretty" />
     </all-programs>
@@ -864,7 +865,7 @@
     <kompile-option name="-ml" />
     <kompile-option name="-w" value="none" />
     <all-programs>
-      <krun-option name="--no-smt" />
+      <krun-option name="--smt" value="none" />
       <krun-option name="--backend" value="java-symbolic" />
       <krun-option name="--output-mode" value="pretty" />
     </all-programs>
@@ -878,7 +879,7 @@
   <kompile-option name="-ml" />
   <all-programs>
     <krun-option name="--backend" value="java-symbolic" />
-    <krun-option name="--no-smt" />
+    <krun-option name="--smt" value="none" />
     <krun-option name="--parser" value="kast -groundParser" />
   </all-programs>
 </test>
@@ -893,11 +894,24 @@
     <kompile-option name="-ml" />
     <kompile-option name="-w" value="none" />
     <all-programs>
-      <krun-option name="--no-smt" />
+      <krun-option name="--smt" value="none" />
       <krun-option name="--backend" value="java-symbolic" />
       <krun-option name="--output-mode" value="pretty" />
     </all-programs>
   </test>
+
+   <test
+      definition="tests/regression/issue#36/issue.k"
+      programs="tests/regression/issue#36"
+      results="tests/regression/issue#36"
+	  extensions="issue"
+      >
+    <all-programs>
+      <krun-option name="--output-mode" value="pretty" />
+	  <krun-option name="--no-color" />
+    </all-programs>
+  </test>
+
 
   <test
       definition="tests/regression/issue677/test.k"
@@ -912,9 +926,78 @@
   <kompile-option name="-ml" />
   <all-programs>
     <krun-option name="--backend" value="java-symbolic" />
-    <krun-option name="--no-smt" />
+    <krun-option name="--smt" value="none" />
   </all-programs>
 </test>
+
+<test definition="tests/regression/java-rewrite-engine/imp_with_floats/imp.k"
+      extensions="imp"
+      programs="tests/regression/java-rewrite-engine/imp_with_floats/programs"
+      results="tests/regression/java-rewrite-engine/imp_with_floats/tests">
+  <kompile-option name="-ml" />
+  <kompile-option name="-w" value="none" />
+  <all-programs>
+    <krun-option name="--backend" value="java-symbolic" />
+    <krun-option name="--smt" value="gappa" />
+  </all-programs>
+</test>
+
+<test
+      definition="dist/examples/java_rewrite_engine/tutorial/2_imp/imp.k"
+      programs="dist/tutorial/2_imp"
+      extensions="imp"
+      tests="tests/tutorial/2_imp/lesson_5"
+      >
+  <kompile-option name="-ml" />
+  <kompile-option name="-w" value="none" />
+  <all-programs>
+    <krun-option name="--backend" value="java-symbolic" />
+    <krun-option name="--smt" value="none" />
+  </all-programs>
+</test>
+
+  <test
+      definition="dist/examples/java_rewrite_engine/tutorial/4_imp++/imp.k"
+      programs="dist/tutorial/2_imp dist/tutorial/4_imp++"
+      extensions="imp"
+      exclude="lesson_1/spawn.imp"
+      results="tests/tutorial/4_imp++/lesson_5"
+      >
+      <kompile-option name="-ml" />
+      <kompile-option name="-w" value="none" />
+      <all-programs>
+        <krun-option name="-backend" value="java-symbolic" />
+	<krun-option name="-smt" value="none" />
+	<krun-option name="-output-mode" value="none" />
+      </all-programs>
+  </test>
+
+<test
+      definition="tests/regression/label-and-context/label-and-context.k"
+      programs="tests/regression/label-and-context"
+      results="tests/regression/label-and-context"
+      extensions="issue">
+  <all-programs>
+    <krun-option name="--output-mode" value="pretty" />
+    <krun-option name="--no-color" />
+    <krun-option name="--parser" value="cat"/>
+  </all-programs>
+</test>
+
+  <test
+      definition="dist/examples/java_rewrite_engine/simple/untyped/simple-untyped.k"
+      programs="dist/examples/simple/untyped/programs"
+      extensions="simple"
+      exclude="dekker.simple exceptions_07.simple"
+      results="tests/examples/simple-untyped" >
+      <kompile-option name="-ml" />
+      <kompile-option name="-w" value="none" />
+      <all-programs>
+        <krun-option name="--backend" value="java-symbolic" />
+	<krun-option name="--smt" value="none" />
+        <krun-option name="--output-mode" value="none" />
+      </all-programs>
+  </test>
 
 </tests>
 

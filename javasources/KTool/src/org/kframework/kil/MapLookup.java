@@ -21,7 +21,7 @@ public class MapLookup extends BuiltinLookup {
     private final Term value;
 
     public MapLookup(Variable base, Term key, Term value) {
-        super(base,key);
+        super(base, key);
         this.value = value;
     }
 

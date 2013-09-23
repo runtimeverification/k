@@ -1,8 +1,8 @@
 package org.kframework.compile.checks;
 
+import org.kframework.kil.Lexical;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
-import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Sort;
 import org.kframework.kil.UserList;
@@ -34,8 +34,12 @@ public class CheckListDecl extends BasicVisitor {
 
 		for (int i = 0; i < node.getItems().size(); i++) {
 			ProductionItem pi = node.getItems().get(i);
-			if (pi.getType() == ProductionType.USERLIST && node.getItems().size() > 1) {
+			if (pi instanceof UserList && node.getItems().size() > 1) {
 				String msg = "Inline list declarations are not allowed.";
+				GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), pi.getFilename(), pi.getLocation()));
+			}
+			if (pi instanceof Lexical && node.getItems().size() > 1) {
+				String msg = "Inline lexical/token declarations are not allowed.";
 				GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), pi.getFilename(), pi.getLocation()));
 			}
 		}

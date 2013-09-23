@@ -311,4 +311,6 @@ module WCET
   Only once all interrupts have been fired will normal code resume. Thus, like a real assembly
   language, we can starve low-priority code by firing too many high-priority interrupts.*/
 
+  // hack for parsing the ids below in the specifications
+  syntax Id ::= Token{"data"}
 endmodule

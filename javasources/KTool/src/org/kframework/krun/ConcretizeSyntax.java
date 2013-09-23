@@ -74,7 +74,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 				return new Freezer((Term)l.getTerm().accept(this));
 			}
 			Term injected = ((KInjectedLabel)label).getTerm();
-			if (injected instanceof Builtin || injected instanceof Token || injected instanceof Constant) {
+			if (injected instanceof Token) {
 				return (Term)injected.accept(this);
 			}
 		} else if (label instanceof KLabelConstant) {
@@ -136,8 +136,10 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 				}
 			}
 		} else if (label instanceof Token) {
-            return new Constant(((Token) label).tokenSort(), ((Token) label).value());
-        }
+			assert child instanceof KList;
+			assert ((KList)child).getContents().size() == 0;
+			return kapp;
+	        }
 		return super.transform(kapp);
 	}
 

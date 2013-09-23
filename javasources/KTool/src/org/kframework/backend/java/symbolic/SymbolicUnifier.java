@@ -2,13 +2,16 @@ package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.builtins.Int32Token;
 import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
-import org.kframework.backend.java.kil.AnonymousVariable;
+import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
+import org.kframework.backend.java.kil.Collection;
+import org.kframework.backend.java.kil.CollectionVariable;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Hole;
@@ -27,13 +30,11 @@ import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.matchers.MatcherException;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 
 
@@ -46,7 +47,7 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     private SymbolicConstraint constraint;
     private boolean isStarNested;
-    public Collection<Collection<SymbolicConstraint>> multiConstraints;
+    public java.util.Collection<java.util.Collection<SymbolicConstraint>> multiConstraints;
     private final Definition definition;
     private final TermContext context;
 
@@ -54,7 +55,7 @@ public class SymbolicUnifier extends AbstractUnifier {
         this.constraint = constraint;
         this.context = context;
         this.definition = context.definition();
-        multiConstraints = new ArrayList<Collection<SymbolicConstraint>>();
+        multiConstraints = new ArrayList<java.util.Collection<SymbolicConstraint>>();
     }
 
     public boolean unify(SymbolicConstraint.Equality equality) {
@@ -82,6 +83,15 @@ public class SymbolicUnifier extends AbstractUnifier {
                + " and " + otherTerm + " (" + otherTerm.kind() + ")";
 
         if (term.isSymbolic() || otherTerm.isSymbolic()) {
+            /* special case for concrete collections  */
+            if (term instanceof CollectionVariable
+                    && !matchConcreteSize((CollectionVariable) term, otherTerm)) {
+                fail();
+            } else if (otherTerm instanceof CollectionVariable
+                    && !matchConcreteSize((CollectionVariable) otherTerm, term)) {
+                fail();
+            }
+
             /* add symbolic constraint */
             constraint.add(term, otherTerm);
             if (constraint.isFalse()) {
@@ -90,6 +100,37 @@ public class SymbolicUnifier extends AbstractUnifier {
         } else {
             /* unify */
             term.accept(this, otherTerm);
+        }
+    }
+
+    private boolean matchConcreteSize(CollectionVariable variable, Term term) {
+        if (term instanceof CollectionVariable) {
+            CollectionVariable otherVariable = (CollectionVariable) term;
+            return variable.concreteCollectionSize() == otherVariable.concreteCollectionSize();
+        }
+
+        if (!(term instanceof Collection)) {
+            return false;
+        }
+        Collection collection = (Collection) term;
+
+        if (collection.hasFrame()) {
+            return false;
+        }
+
+        if (collection instanceof BuiltinList) {
+            BuiltinList list = (BuiltinList) collection;
+            return variable.concreteCollectionSize()
+                   == list.elementsLeft().size() + list.elementsRight().size();
+        } else if (collection instanceof BuiltinMap) {
+            BuiltinMap map = (BuiltinMap) collection;
+            return variable.concreteCollectionSize() == map.getEntries().size();
+        } else if (collection instanceof BuiltinSet) {
+            BuiltinSet set = (BuiltinSet) collection;
+            return variable.concreteCollectionSize() == set.elements().size();
+        } else {
+            assert false: "unexpected collection class";
+            return false;
         }
     }
 
@@ -191,7 +232,7 @@ public class SymbolicUnifier extends AbstractUnifier {
             SymbolicConstraint mainConstraint = constraint;
             isStarNested = true;
 
-            Collection<SymbolicConstraint> constraints = new ArrayList<SymbolicConstraint>();
+            java.util.Collection<SymbolicConstraint> constraints = new ArrayList<SymbolicConstraint>();
             SelectionGenerator generator = new SelectionGenerator(otherCells.length, cells.length);
             do {
                 constraint = new SymbolicConstraint(context);
@@ -303,8 +344,7 @@ public class SymbolicUnifier extends AbstractUnifier {
                 } else if (otherCellMap.isEmpty()) {
                     constraint.add(new CellCollection(cellMap, frame, isStar), otherFrame);
                 } else {
-                    Variable variable = AnonymousVariable.getFreshVariable(
-                            Kind.CELL_COLLECTION.toString());
+                    Variable variable = Variable.getFreshVariable(Kind.CELL_COLLECTION.toString());
                     constraint.add(frame, new CellCollection(otherCellMap, variable, isStar));
                     constraint.add(new CellCollection(cellMap, variable, isStar), otherFrame);
                 }
@@ -398,6 +438,13 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     @Override
     public void unify(IntToken intToken, Term term) {
+        if (!intToken.equals(term)) {
+            fail();
+        }
+    }
+
+    @Override
+    public void unify(Int32Token intToken, Term term) {
         if (!intToken.equals(term)) {
             fail();
         }

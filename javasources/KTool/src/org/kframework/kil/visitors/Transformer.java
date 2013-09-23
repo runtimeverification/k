@@ -76,7 +76,6 @@ public interface Transformer {
     // </BuiltinDataStructure>
     // <Token>
     public ASTNode transform(Token node) throws TransformerException;
-    public ASTNode transform(Constant node) throws TransformerException;
     public ASTNode transform(BoolBuiltin node) throws TransformerException;
     public ASTNode transform(IntBuiltin node) throws TransformerException;
     public ASTNode transform(StringBuiltin node) throws TransformerException;

@@ -68,10 +68,6 @@ public class Sort extends ProductionItem {
 		return name;
 	}
 
-	public ProductionType getType() {
-		return ProductionType.SORT;
-	}
-
 	@Override
 	public String toString() {
 		return getName();

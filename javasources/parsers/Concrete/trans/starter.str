@@ -110,7 +110,7 @@ rules
 	mydebug = id //debug
 	mydebug(a) = id//debug(a)
 	// xmlify - starts from here
-	xmlStringEscape         = string-replace(|"&", "&amp;") ; string-replace(|">", "&gt;") ; string-replace(|"<", "&lt;") ; string-replace(|"\"", "&quot;")
+	xmlStringEscape         = string-replace(|"&", "&amp;") ; string-replace(|">", "&gt;") ; string-replace(|"<", "&lt;") ; string-replace(|"\"", "&quot;") ; string-replace(|"\n", "&#10;") ; string-replace(|"\r", "&#13;")
 	xmlStringEscapeFromString = string-replace(|"&", "&amp;") ; string-replace(|">", "&gt;") ; string-replace(|"<", "&lt;") ; string-replace(|"\\\"", "&quot;")
 	getLocAsString       = getLocAsString2 <+ ((prim("SSL_EXT_origin_location", <id>) ; write-to-string)) <+ !"(0,0,0,0)"
 	getLocAsString2:

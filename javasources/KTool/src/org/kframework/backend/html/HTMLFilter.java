@@ -6,7 +6,6 @@ import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Collection;
 import org.kframework.kil.LiterateComment.LiterateCommentType;
-import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.loader.*;
 import org.kframework.utils.general.GlobalSettings;
 
@@ -132,7 +131,7 @@ public class HTMLFilter extends BackendFilter {
 			result.append("<tr> <td> </td> <td class = \"textCentered\"> |  </td> <td>");
 		}
 		
-		if (p.getItems().get(0).getType() != ProductionType.USERLIST && p.containsAttribute(Constants.CONS_cons_ATTR)
+		if (!(p.getItems().get(0) instanceof UserList) && p.containsAttribute(Constants.CONS_cons_ATTR)
 				&& patternsVisitor.getPatterns().containsKey(p.getAttribute(Constants.CONS_cons_ATTR))
 				&& patternsVisitor.getPatternType(p.getAttribute(Constants.CONS_cons_ATTR)) != HTMLPatternType.DEFAULT) {
 		/* This condition pretty much is : "Does this production have a Latex or HTML attribute?"
@@ -145,7 +144,7 @@ public class HTMLFilter extends BackendFilter {
 			int n = 1;
 			HTMLFilter termFilter = new HTMLFilter(includePath, context);
 			for (ProductionItem pi : p.getItems()) {
-				if (pi.getType() != ProductionType.TERMINAL) {
+				if (!(pi instanceof Terminal)) {
 					termFilter.setResult("");
 					pi.accept(termFilter);
 					pattern = pattern.replace("{#" + n++ + "}", isLatex ? "\\)" + termFilter.getResult() + "\\(" : termFilter.getResult());
@@ -376,7 +375,7 @@ public class HTMLFilter extends BackendFilter {
 			Production pr = trm.getProduction();
 	
 			if (pr.getItems().size() > 0) {
-				if (pr.getItems().get(0).getType() == ProductionType.USERLIST) {
+				if (pr.getItems().get(0) instanceof UserList) {
 					String separator = ((UserList) pr.getItems().get(0)).getSeparator();
 					trm.getContents().get(0).accept(this);
 					result.append(" " + separator + " ");
@@ -386,10 +385,10 @@ public class HTMLFilter extends BackendFilter {
 				} else
 					for (int i = 0, j = 0; i < pr.getItems().size(); i++) {
 						ProductionItem pi = pr.getItems().get(i);
-						if (pi.getType() == ProductionType.TERMINAL) {
+						if (pi instanceof Terminal) {
 							pi.accept(this);
 							empty = false;
-						} else if (pi.getType() == ProductionType.SORT) {
+						} else if (pi instanceof Sort) {
 							Term t = trm.getContents().get(j++);
 							t.accept(this);	
 							empty = false;
@@ -399,11 +398,6 @@ public class HTMLFilter extends BackendFilter {
 			if(empty)
 				result.append("&nbsp; &nbsp; &middot; &nbsp; &nbsp;");
 		}
-	}
-
-	@Override
-	public void visit(Constant c) {
-		result.append("<span title =\"" + c.getSort() + "\"> " + makeGreek(c.getValue()) + " </span> ");
 	}
 
 	@Override
@@ -420,10 +414,14 @@ public class HTMLFilter extends BackendFilter {
 
 	@Override
 	public void visit(KApp app) {
-		app.getLabel().accept(this);
-		result.append("(");
-		app.getChild().accept(this);
-		result.append(")");
+		if (app.getLabel() instanceof Token) {
+			result.append("<span title =\"" + ((Token)app.getLabel()).tokenSort() + "\"> " + makeGreek(((Token)app.getLabel()).value()) + " </span> ");
+		} else {
+			app.getLabel().accept(this);
+			result.append("(");
+			app.getChild().accept(this);
+			result.append(")");
+		}
 	}
 
 	@Override

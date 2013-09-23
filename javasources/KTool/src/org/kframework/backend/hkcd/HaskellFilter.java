@@ -1,9 +1,10 @@
 package org.kframework.backend.hkcd;
 
 import org.kframework.compile.utils.MaudeHelper;
-import org.kframework.kil.Constant;
 import org.kframework.kil.Empty;
+import org.kframework.kil.KApp;
 import org.kframework.kil.TermCons;
+import org.kframework.kil.Token;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 
@@ -46,33 +47,35 @@ public class HaskellFilter extends BasicVisitor {
 		result += "]";
 	}
 
-	public void visit(Constant cst) {
-		String s = cst.getSort();
-		String v = cst.getValue();
+	public void visit(KApp kapp) {
+		if (kapp.getLabel() instanceof Token) {
+			String s = ((Token)kapp.getLabel()).tokenSort();
+			String v = ((Token)kapp.getLabel()).value();
 
-		result += "KApp (";
+			result += "KApp (";
 
-		// Perhaps we'd want to simply serialize some set of
-		// classes into Haskell. However, this cannot be done
-		// with existing set of Java classes for K since in
-		// Haskell we have different constructors for various
-		// types of constants, while in Java this information
-		// is stored in the field of Constant class.
-		// Implementation for such classes would basically be
-		// the same as this code.
-		if (s.equals("#Int")) {
-			result += "KInt (" + v + ")";
-		} else if (s.equals("#String")) {
-			result += "KString " + v;
-		} else if (s.equals("#Id")) {
-			result += "KId \"" + v + "\"";
-		} else if (s.equals("#Bool")) {
-			result += "KBool " + HaskellUtil.capitalizeFirst(v);
+			// Perhaps we'd want to simply serialize some set of
+			// classes into Haskell. However, this cannot be done
+			// with existing set of Java classes for K since in
+			// Haskell we have different constructors for various
+			// types of constants, while in Java this information
+			// is stored in the field of Constant class.
+			// Implementation for such classes would basically be
+			// the same as this code.
+			if (s.equals("#Int")) {
+				result += "KInt (" + v + ")";
+			} else if (s.equals("#String")) {
+				result += "KString " + v;
+			} else if (s.equals("#Id")) {
+				result += "KId \"" + v + "\"";
+			} else if (s.equals("#Bool")) {
+				result += "KBool " + HaskellUtil.capitalizeFirst(v);
+			}
+
+			// We take a shortcut here instead of processing a new
+			// empty of sort "KList".
+			result += ") []";
 		}
-
-		// We take a shortcut here instead of processing a new
-		// empty of sort "KList".
-		result += ") []";
 	}
 
 	// Empty terms of non basic sorts expand to

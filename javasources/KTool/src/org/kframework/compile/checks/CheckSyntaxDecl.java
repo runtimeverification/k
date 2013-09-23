@@ -4,7 +4,6 @@ import java.util.HashMap;
 
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
-import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Terminal;
@@ -51,7 +50,7 @@ public class CheckSyntaxDecl extends BasicVisitor {
 		}
 
 		for (ProductionItem pi : node.getItems()) {
-			if (pi.getType() == ProductionType.SORT) {
+			if (pi instanceof Sort) {
 				sorts++;
 				Sort s = (Sort) pi;
 				if (!(s.getName().endsWith("CellSort") || s.getName().endsWith("CellFragment")))
@@ -64,7 +63,7 @@ public class CheckSyntaxDecl extends BasicVisitor {
 					GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), s.getFilename(), s.getLocation()));
 				}
 			}
-			if (pi.getType() == ProductionType.USERLIST) {
+			if (pi instanceof UserList) {
 				sorts++;
 				UserList s = (UserList) pi;
 				if (!s.getSort().startsWith("#") && !context.definedSorts.contains(s.getSort())) {
@@ -76,7 +75,7 @@ public class CheckSyntaxDecl extends BasicVisitor {
 					GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), s.getFilename(), s.getLocation()));
 				}
 			}
-			if (pi.getType() == ProductionType.TERMINAL) {
+			if (pi instanceof Terminal) {
 				Terminal t = (Terminal) pi;
 				if (t.getTerminal().equals(""))
 					eTerminals++;

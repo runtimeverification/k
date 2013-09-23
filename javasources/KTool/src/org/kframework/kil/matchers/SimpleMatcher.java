@@ -10,7 +10,6 @@ import org.kframework.kil.BagItem;
 import org.kframework.kil.Bracket;
 import org.kframework.kil.Cast;
 import org.kframework.kil.Cell;
-import org.kframework.kil.Constant;
 import org.kframework.kil.Empty;
 import org.kframework.kil.Freezer;
 import org.kframework.kil.FreezerHole;
@@ -81,14 +80,6 @@ public class SimpleMatcher implements Matcher {
 	@Override
 	public void match(Cell term, Term term2) {
 		throw new MatcherException("Cell does not have a pattern match implementation.");
-	}
-
-	@Override
-	public void match(Constant term, Term term2) {
-		if (!(term2 instanceof Constant))
-			throw new MatcherException("Attempted to match Constant " + term + " with non-Constant " + term2);
-		if (!term.equals(term2))
-			throw new MatcherException("Constants " + term + " and " + term2 + " do not match.");
 	}
 
 	@Override

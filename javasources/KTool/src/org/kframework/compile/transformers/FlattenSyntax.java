@@ -116,14 +116,6 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 	}
 
 	@Override
-	public ASTNode transform(Constant node) throws TransformerException {
-        assert false : "dead code";
-		if (MetaK.isComputationSort(node.getSort()))
-			return node.accept(kTrans);
-		return node;
-	}
-
-	@Override
 	public ASTNode transform(TermCons tc) throws TransformerException {
 		if (MetaK.isComputationSort(tc.getSort()))
 			return tc.accept(kTrans);
@@ -178,23 +170,6 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
                     kLabel.getFilename(),
                     new KInjectedLabel(kLabel),
                     KList.EMPTY);
-		}
-
-		@Override
-		public ASTNode transform(Constant cst) throws TransformerException {
-            assert false : "deprecated class";
-            return null;
-/*			String l = cst.getLocation();
-			String f = cst.getFilename();
-
-			if (!MetaK.isBuiltinSort(cst.getSort(context))) {
-				KList list = new KList();
-				list.add(StringBuiltin.of(cst.getSort(context)));
-				list.add(StringBuiltin.of(StringUtil.escape(cst.getValue())));
-				return new KApp(KLabelConstant.of("#token", context), list).accept(this);
-			} else {
-				return new KApp(l, f, new KInjectedLabel(cst), KList.EMPTY);
-			} */
 		}
 
 		@Override
@@ -297,7 +272,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 
             if (node.getSort().equals(BoolBuiltin.SORT_NAME)
                     || node.getSort().equals(IntBuiltin.SORT_NAME)
-                    || node.getSort().equals(FloatBuiltin.SORT_NAME)
+                    || node.getSort().equals("#Float")
                     || node.getSort().equals(StringBuiltin.SORT_NAME)) {
                 return node;
             }

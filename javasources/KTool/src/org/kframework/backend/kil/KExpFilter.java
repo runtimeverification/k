@@ -114,11 +114,20 @@ public class KExpFilter extends BasicVisitor {
 
 	@Override
 	public void visit(KApp kapp) {
-		result.append("(");
-		kapp.getLabel().accept(this);
-		result.append(" ");
-		kapp.getChild().accept(this);
-		result.append(")");
+		if (kapp.getLabel() instanceof Token) {
+			final boolean isString = ((Token)kapp.getLabel()).getSort().equals("#String");
+			if (isString)
+				result.append("\"");
+			result.append(((Token)kapp.getLabel()).value());
+			if (isString)
+				result.append("\""); 
+		} else {
+			result.append("(");
+			kapp.getLabel().accept(this);
+			result.append(" ");
+			kapp.getChild().accept(this);
+			result.append(")");
+		}
 	}
 
 	/*
@@ -147,16 +156,6 @@ public class KExpFilter extends BasicVisitor {
     public void visit(KLabelConstant kLabelConstant) {
         result.append(kLabelConstant.getLabel());
     }
-
-	@Override
-	public void visit(Constant constant) {
-		final boolean isString = constant.getSort().equals("#String");
-		if (isString)
-			result.append("\"");
-		result.append(constant.getValue());
-		if (isString)
-			result.append("\"");
-	}
 
     @Override
     public void visit(Token token) {

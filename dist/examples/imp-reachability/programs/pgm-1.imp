@@ -21,11 +21,11 @@ L2 : {
 
 <k>
 if (y <= b) {
-(LL2 : {
+(ll2 : {
   b = b - y; 
   a = a + 1;
 })
-(LL1 : while (y <= b) {
+(ll1 : while (y <= b) {
   b = b - y; 
   a = a + 1;
 })} else {}

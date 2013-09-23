@@ -4,7 +4,6 @@ import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Collection;
 import org.kframework.kil.Map;
-import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.Visitable;
@@ -341,7 +340,7 @@ public class MetaK {
 			return t;
 		}
 		for (ProductionItem item : prod.getItems()) {
-			if (item.getType() == ProductionType.SORT) {
+			if (item instanceof Sort) {
 				t.getContents().add(Variable.getFreshVar(((Sort) item).getName()));
 			}
 		}
@@ -356,8 +355,8 @@ public class MetaK {
         /* TODO: replace with a proper table of builtins */
 		return sort.equals(BoolBuiltin.SORT_NAME)
                || sort.equals(IntBuiltin.SORT_NAME)
-               || sort.equals(FloatBuiltin.SORT_NAME)
                || sort.equals(StringBuiltin.SORT_NAME)
+               || sort.equals("#Float")
                /* LTL builtin sorts */
                || sort.equals("#LtlFormula")
                || sort.equals("#Prop")

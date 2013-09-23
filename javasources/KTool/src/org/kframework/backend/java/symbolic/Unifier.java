@@ -2,6 +2,7 @@ package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.builtins.Int32Token;
 import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.BuiltinMap;
@@ -39,6 +40,7 @@ public interface Unifier {
     public void unify(CellCollection cellCollection, Term term);
     public void unify(Hole hole, Term term);
     public void unify(IntToken intToken, Term term);
+    public void unify(Int32Token intToken, Term term);
     public void unify(KItem kItem, Term term);
     public void unify(KLabelConstant kLabelConstant, Term term);
     public void unify(KLabelFreezer kLabelFreezer, Term term);

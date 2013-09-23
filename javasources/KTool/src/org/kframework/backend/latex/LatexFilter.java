@@ -10,7 +10,6 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.LiterateComment.LiterateCommentType;
-import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.loader.*;
 import org.kframework.utils.StringUtil;
 
@@ -104,13 +103,13 @@ public class LatexFilter extends BackendFilter {
 		} else {
 			result.append("\\syntaxCont{");
 		}
-		if (p.getItems().get(0).getType() != ProductionType.USERLIST && p.containsAttribute(Constants.CONS_cons_ATTR)
+		if (!(p.getItems().get(0) instanceof UserList) && p.containsAttribute(Constants.CONS_cons_ATTR)
 				&& patternsVisitor.getPatterns().containsKey(p.getAttribute(Constants.CONS_cons_ATTR))) {
 			String pattern = patternsVisitor.getPatterns().get(p.getAttribute(Constants.CONS_cons_ATTR));
 			int n = 1;
 			LatexFilter termFilter = new LatexFilter(context);
 			for (ProductionItem pi : p.getItems()) {
-				if (pi.getType() != ProductionType.TERMINAL) {
+				if (!(pi instanceof Terminal)) {
 					termFilter.setResult(new StringBuilder());
 					pi.accept(termFilter);
 					pattern = pattern.replace("{#" + n++ + "}", "{" + termFilter.getResult() + "}");
@@ -371,11 +370,6 @@ public class LatexFilter extends BackendFilter {
         }
 
 	@Override
-	public void visit(Constant c) {
-		result.append("\\constant[" + StringUtil.latexify(c.getSort()) + "]{" + StringUtil.latexify(c.getValue()) + "}");
-	}
-	
-	@Override
 	public void visit(Token t) {
 		result.append("\\constant[" + StringUtil.latexify(t.tokenSort()) + "]{" + StringUtil.latexify(t.value()) + "}");
 	}
@@ -396,10 +390,14 @@ public class LatexFilter extends BackendFilter {
 
 	@Override
 	public void visit(KApp app) {
-		app.getLabel().accept(this);
-		result.append("(");
-		app.getChild().accept(this);
-		result.append(")");
+		if (app.getLabel() instanceof Token) {
+			result.append("\\constant[" + StringUtil.latexify(((Token)app.getLabel()).tokenSort()) + "]{" + StringUtil.latexify(((Token)app.getLabel()).value()) + "}");
+		} else {
+			app.getLabel().accept(this);
+			result.append("(");
+			app.getChild().accept(this);
+			result.append(")");
+		}
 	}
 
 	@Override

@@ -1,7 +1,6 @@
 package org.kframework.parser.concrete.disambiguate;
 
 import org.kframework.kil.*;
-import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.loader.Context;
 
 /**
@@ -20,7 +19,7 @@ public class GetFitnessUnitKCheckVisitor extends GetFitnessUnitBasicVisitor {
 	public void visit(TermCons tc) {
 		super.visit(tc);
 
-		if (tc.getProduction().getItems().get(0).getType() == ProductionType.USERLIST) {
+		if (tc.getProduction().getItems().get(0) instanceof UserList) {
 			UserList ulist = (UserList) tc.getProduction().getItems().get(0);
 
 			score += getFitnessUnit2(ulist.getSort(), tc.getContents().get(0));
@@ -28,7 +27,7 @@ public class GetFitnessUnitKCheckVisitor extends GetFitnessUnitBasicVisitor {
 		} else {
 			int j = 0;
 			for (int i = 0; i < tc.getProduction().getItems().size(); i++) {
-				if (tc.getProduction().getItems().get(i).getType() == ProductionType.SORT) {
+				if (tc.getProduction().getItems().get(i) instanceof Sort) {
 					Sort sort = (Sort) tc.getProduction().getItems().get(i);
 					Term child = (Term) tc.getContents().get(j);
 					score += getFitnessUnit2(sort.getName(), child);

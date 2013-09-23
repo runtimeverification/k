@@ -10,7 +10,6 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.Lexical;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
-import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.Restrictions;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Terminal;
@@ -136,7 +135,7 @@ public class DefinitionSDF {
 				List<ProductionItem> items = p.getItems();
 				for (int i = 0; i < items.size(); i++) {
 					ProductionItem itm = items.get(i);
-					if (itm.getType() == ProductionType.TERMINAL) {
+					if (itm instanceof Terminal) {
 						Terminal t = (Terminal) itm;
 						if (t.getTerminal().equals(":"))
 							sdf.append("ColonDz ");
@@ -144,7 +143,7 @@ public class DefinitionSDF {
 							sdf.append("QuestionMarkDz ");
 						else
 							sdf.append("\"" + StringUtil.escape(t.getTerminal()) + "\" ");
-					} else if (itm.getType() == ProductionType.SORT) {
+					} else if (itm instanceof Sort) {
 						Sort srt = (Sort) itm;
 						// if we are on the first or last place and this sort is not a list, just print the sort
 						if (i == 0 || i == items.size() - 1) {
@@ -251,7 +250,7 @@ public class DefinitionSDF {
 			lexerSorts.add(p.getSort());
 			sdf.append("	" + l.getLexicalRule() + " -> " + StringUtil.escapeSortName(p.getSort()) + "Dz\n");
 			if (l.getFollow() != null && !l.getFollow().equals("")) {
-				psdfv.restrictions.add(new Restrictions(p.getSort(), null, l.getFollow()));
+				psdfv.restrictions.add(new Restrictions(new Sort(p.getSort()), null, l.getFollow()));
 			}
 		}
 		for (String s : lexerSorts)

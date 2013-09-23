@@ -1,7 +1,6 @@
 package org.kframework.kil;
 
 import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -43,19 +42,19 @@ public class Production extends ASTNode {
 	}
 
 	public boolean isListDecl() {
-		return items.size() == 1 && items.get(0).getType() == ProductionType.USERLIST;
+		return items.size() == 1 && items.get(0) instanceof UserList;
 	}
 
 	public boolean isSubsort() {
-		return items.size() == 1 && items.get(0).getType() == ProductionType.SORT;
+		return items.size() == 1 && items.get(0) instanceof Sort;
 	}
 
 	public boolean isLexical() {
-		return items.size() == 1 && items.get(0).getType() == ProductionType.LEXICAL;
+		return items.size() == 1 && items.get(0) instanceof Lexical;
 	}
 
 	public boolean isConstant() {
-		return items.size() == 1 && items.get(0).getType() == ProductionType.TERMINAL && (sort.startsWith("#") || sort.equals(KSorts.KLABEL));
+		return items.size() == 1 && items.get(0) instanceof Terminal && (sort.startsWith("#") || sort.equals(KSorts.KLABEL));
 	}
 
 	public Production(Production node) {
@@ -113,16 +112,12 @@ public class Production extends ASTNode {
 	private String getPrefixLabel() {
 		String label = "";
 		for (ProductionItem pi : items) {
-			switch (pi.getType()) {
-			case SORT:
+			if (pi instanceof Sort) {
 				label += "_";
-				break;
-			case TERMINAL:
+			} else if (pi instanceof Terminal) {
 				label += ((Terminal) pi).getTerminal();
-				break;
-			case USERLIST:
+			} else if (pi instanceof UserList) {
 				label += "_" + ((UserList) pi).separator + "_";
-				break;
 			}
 		}
 		return label;
@@ -139,9 +134,9 @@ public class Production extends ASTNode {
 	public int getArity() {
 		int arity = 0;
 		for (ProductionItem i : items) {
-			if (i.getType() == ProductionType.USERLIST)
+			if (i instanceof UserList)
 				arity += 2;
-			if (i.getType() == ProductionType.SORT)
+			if (i instanceof Sort)
 				arity++;
 		}
 		return arity;
@@ -167,7 +162,7 @@ public class Production extends ASTNode {
 
 	public String getChildSort(int idx) {
 		int arity = -1;
-		if (items.get(0).getType() == ProductionType.USERLIST) {
+		if (items.get(0) instanceof UserList) {
 			if (idx == 0) {
 				return ((UserList) items.get(0)).getSort();
 			} else {
@@ -175,7 +170,7 @@ public class Production extends ASTNode {
 			}
 		}
 		for (ProductionItem i : items) {
-			if (i.getType() != ProductionType.TERMINAL)
+			if (!(i instanceof Terminal))
 				arity++;
 			if (arity == idx) {
 				return ((Sort) i).getName();
@@ -254,15 +249,15 @@ public class Production extends ASTNode {
 		int arity = 0;
 		for (int i = 0; i < items.size(); i++) {
 			ProductionItem item = items.get(i);
-			if (item.getType() == ProductionType.USERLIST) {
+			if (item instanceof UserList) {
 				if (idx == arity)
 					return !((UserList) item).getSeparator().equals("");
 				if (idx == arity + 1)
 					return false;
 				arity += 2;
-			} else if (item.getType() == ProductionType.SORT) {
+			} else if (item instanceof Sort) {
 				if (idx == arity)
-					return i != items.size() - 1 && items.get(i + 1).getType() == ProductionType.TERMINAL;
+					return i != items.size() - 1 && items.get(i + 1) instanceof Terminal;
 				arity++;
 			}
 		}
@@ -273,15 +268,15 @@ public class Production extends ASTNode {
 		int arity = 0;
 		for (int i = 0; i < items.size(); i++) {
 			ProductionItem item = items.get(i);
-			if (item.getType() == ProductionType.USERLIST) {
+			if (item instanceof UserList) {
 				if (idx == arity)
 					return false;
 				if (idx == arity + 1)
 					return !((UserList) item).getSeparator().equals("");
 				arity += 2;
-			} else if (item.getType() == ProductionType.SORT) {
+			} else if (item instanceof Sort) {
 				if (idx == arity)
-					return i != 0 && items.get(i - 1).getType() == ProductionType.TERMINAL;
+					return i != 0 && items.get(i - 1) instanceof Terminal;
 				arity++;
 			}
 		}

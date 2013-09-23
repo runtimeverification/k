@@ -1,6 +1,7 @@
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.builtins.Int32Token;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Rule;

@@ -6,7 +6,7 @@ import com.microsoft.z3.Sort;
 import com.microsoft.z3.Symbol;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.kil.AnonymousVariable;
+import org.kframework.backend.java.builtins.Int32Token;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.JavaSymbolicObject;
 import org.kframework.backend.java.kil.KCollection;
@@ -18,7 +18,6 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.kil.Z3Term;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.loader.Context;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -243,7 +242,7 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
     }
 
     public boolean checkUnsat() {
-        if (!K.smt) {
+        if (!K.smt.equals("z3")) {
             return false;
         }
 
@@ -282,7 +281,7 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
     public void eliminateAnonymousVariables() {
         for (Iterator<Variable> iterator = substitution.keySet().iterator(); iterator.hasNext();) {
             Variable variable = iterator.next();
-            if (variable instanceof AnonymousVariable) {
+            if (variable.isAnonymous()) {
                 iterator.remove();
             }
         }
@@ -336,6 +335,8 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
                     variableSorts[i] = context.MkBoolSort();
                 } else if (variable.sort().equals(IntToken.SORT_NAME)) {
                     variableSorts[i] = context.MkIntSort();
+                } else if (variable.sort().equals(Int32Token.SORT_NAME)) {
+                    variableSorts[i] = context.MkBitVecSort(32);
                 } else {
                     throw new RuntimeException();
                 }
@@ -450,17 +451,23 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
 
             Variable variable;
             Term term;
-            /* when possible, substitute the variables in the RHS in terms of the variables in the
-             * LHS */
-            if (equality.rightHandSide instanceof Variable) {
+            // TODO(AndreiS): the sort of a variable may become more specific
+            /* when possible, substitute the anonymous variable */
+            if (equality.leftHandSide instanceof Variable
+                    && equality.rightHandSide instanceof Variable
+                    && ((Variable) equality.rightHandSide).isAnonymous()) {
                 variable = (Variable) equality.rightHandSide;
                 term = equality.leftHandSide;
             } else if (equality.leftHandSide instanceof Variable) {
                 variable = (Variable) equality.leftHandSide;
                 term = equality.rightHandSide;
+            } else if (equality.rightHandSide instanceof Variable) {
+                variable = (Variable) equality.rightHandSide;
+                term = equality.leftHandSide;
             } else {
                 continue;
             }
+
             if (term.variableSet().contains(variable)) {
                 continue;
             }
@@ -502,10 +509,10 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
             Map<Variable, Term> substitution,
             TermContext context) {
         Map.Entry<Variable, Term>[] entries = map.entrySet().toArray(new Map.Entry[map.size()]);
-        for (int index = 0; index < entries.length; ++index) {
-            Term term = entries[index].getValue().substitute(substitution, context);
-            if (term != entries[index].getValue()) {
-                map.put(entries[index].getKey(), term);
+        for (Map.Entry<Variable, Term> entry : entries) {
+            Term term = entry.getValue().substitute(substitution, context);
+            if (term != entry.getValue()) {
+                map.put(entry.getKey(), term);
             }
         }
     }

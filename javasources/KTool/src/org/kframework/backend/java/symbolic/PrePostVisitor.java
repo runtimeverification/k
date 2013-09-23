@@ -2,6 +2,7 @@ package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.builtins.Int32Token;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.*;
 
@@ -186,6 +187,14 @@ public class PrePostVisitor implements Visitor {
     }
 
     @Override
+    public void visit(Int32Token intToken) {
+        preVisitor.resetProceed();
+        intToken.accept(preVisitor);
+        if (!preVisitor.isProceed()) return;
+        intToken.accept(postVisitor);
+    }
+
+    @Override
     public void visit(KCollection kCollection) {
         preVisitor.resetProceed();
         kCollection.accept(preVisitor);
@@ -332,7 +341,14 @@ public class PrePostVisitor implements Visitor {
 
     @Override
     public void visit(ConstrainedTerm node) {
-        throw new UnsupportedOperationException();
+        // TODO(Traian): check if this fix is correct
+        preVisitor.resetProceed();
+        node.accept(preVisitor);
+        if (!preVisitor.isProceed()) return;
+        node.term().accept(this);
+        node.lookups().accept(this);
+        node.constraint().accept(this);
+        node.accept(postVisitor);
     }
 
     @Override

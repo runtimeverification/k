@@ -6,7 +6,6 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.KSorts;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
-import org.kframework.kil.ProductionItem.ProductionType;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
@@ -61,7 +60,7 @@ public class AddEmptyLists extends BasicTransformer {
 		} else {
 			for (int i = 0, j = 0; j < p.getItems().size(); j++) {
 				ProductionItem pi = p.getItems().get(j);
-				if (!(pi.getType() == ProductionType.SORT))
+				if (!(pi instanceof Sort))
 					continue;
 
 				String srt = ((Sort) pi).getName();

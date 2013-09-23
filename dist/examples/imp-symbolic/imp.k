@@ -35,6 +35,11 @@ module IMP-SYNTAX
   syntax Dummy ::= "symInt" [dummySymInt]
   syntax Int ::= "#symInt" "(" Id ")" [onlyLabel, klabel(#symInt)]
   syntax priorities builtinWrapper > dummySymInt
+
+  // hack for parsing the ids below in the specifications
+  syntax Id ::= Token{"a"} | Token{"b"} | Token{"c"}
+              | Token{"sum"} | Token{"i"} | Token{"n"}
+              | Token{"x"} | Token{"min"}
 endmodule
 
 module IMP

@@ -143,7 +143,8 @@ public abstract class Token extends KLabel {
 
 	@Override
 	public String toString() {
-		return "#token(\"" + tokenSort() + "\", \"" + value() + "\")";
+		// TODO (BUG): has extra quotations when #Sort string
+		return "#token(\"" + tokenSort() + "\", " + StringUtil.escapeK(value()) + ")";
 	}
 
 	@Override
