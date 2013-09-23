@@ -131,8 +131,9 @@ public class Main {
                 }
             }
             if (count > 1) {
-                Error.report("Multiple compiled definitions found. Please specify one of: "
-                        + str.toString() + "with --compiled-def");
+                Error.report("Multiple compiled definitions found.\n"
+                        + "Please specify one of the following with --compiled-def:\n"
+                        + str.toString().replaceAll("\" ", "\"\n"));
             } else if (count == 1) {
                 return result;
             }
@@ -220,7 +221,7 @@ public class Main {
             if (kast == null) {
                 return rp.runParserOrDie(K.parser, K.term, false, null, context);
             } else {
-                Error.report("You cannot specify both the term and the configuration variables.");
+                Error.report("You cannot specify both the term and the configuration\nvariables.");
             }
         }
 
@@ -377,7 +378,7 @@ public class Main {
                         if (GlobalSettings.verbose)
                             sw.printTotal("Search total");
                     } else {
-                        Error.report("For the search option you need to specify that --maude-cmd=search");
+                        Error.report("For the search option you must specify that --maude-cmd=search");
                     }
                 } else if (K.model_checking.length() > 0) {
                     // run kast for the formula to be verified
@@ -441,7 +442,7 @@ public class Main {
                         krun.setBackendOption("io", false);
                         result = krun.search(null, null, K.searchType, patternRule, res, steps);
                     }else {
-                        Error.report("Pattern matching after execution is not supported by search and model checking");
+                        Error.report("Pattern matching after execution is not supported by search\nand model checking");
                     }
                 }
 
@@ -513,7 +514,7 @@ public class Main {
                     Term res = ((KRunState) krs).getRawResult();
 
                     if (!cmd.hasOption("output")) {
-                        Error.silentReport("Did not specify an output file. Cannot print output-mode binary to standard out. Saving to .k/krun/krun_output");
+                        Error.silentReport("Did not specify an output file. Cannot print output-mode binary to\nstandard out. Saving to .k/krun/krun_output");
                         BinaryLoader.toBinary(res, new FileOutputStream(
                                 K.krun_output));
                     } else {
@@ -521,7 +522,7 @@ public class Main {
                                 K.output));
                     }
                 } else {
-                    Error.report("binary output mode is not supported by search and model checking");
+                    Error.report("binary output mode is not supported by search and model\nchecking");
                 }
 
             } else {
@@ -633,9 +634,9 @@ public class Main {
                             AnsiConsole.out.println(debugger
                                     .printState(debugger.getCurrentState()));
                         } catch (IllegalStateException e) {
-                            Error.silentReport("Wrong command: If you previously used the step-all command you must select"
+                            Error.silentReport("Wrong command: If you previously used the step-all command you must"
                                     + K.lineSeparator
-                                    + "first a solution with step command before executing steps of rewrites!");
+                                    + "seletc first a solution with step command before executing steps of rewrites!");
                         }
                     }
                     // one step execution (by default) or more if you specify an
@@ -656,9 +657,9 @@ public class Main {
                         } catch (NumberFormatException e) {
                             Error.silentReport("Argument to step must be an integer.");
                         } catch (IllegalStateException e) {
-                            Error.silentReport("Wrong command: If you previously used the step-all command you must select"
+                            Error.silentReport("Wrong command: If you previously used the step-all command you must"
                                     + K.lineSeparator
-                                    + "first a solution with step command before executing steps of rewrites!");
+                                    + "select first a solution with step command before executing steps of rewrites!");
                         }
                     }
                     if (cmd.hasOption("step-all")) {
@@ -677,9 +678,9 @@ public class Main {
                         } catch (NumberFormatException e) {
                             Error.silentReport("Argument to step-all must be an integer.");
                         } catch (IllegalStateException e) {
-                            Error.silentReport("Wrong command: If you previously used the step-all command you must select"
+                            Error.silentReport("Wrong command: If you previously used the step-all command you must"
                                     + K.lineSeparator
-                                    + "first a solution with step command before executing steps of rewrites!");
+                                    + "select first a solution with step command before executing steps of rewrites!");
                         }
                     }
                     // "select n7" or "select 3" are both valid commands
@@ -979,7 +980,7 @@ public class Main {
             if (cmd.hasOption("c")) {
 
                 if (K.term != null) {
-                    Error.report("You cannot specify both the term and the configuration variables.");
+                    Error.report("You cannot specify both the term and the configuration\nvariables.");
                 }
 
                 K.configuration_variables = cmd.getOptionProperties("c");
@@ -1055,7 +1056,7 @@ public class Main {
             }
 
             if (K.compiled_def == null) {
-                Error.report("Could not find a compiled K definition. Please ensure that either a compiled\nK definition exists in the current directory with its default name, or that --k-definition or\n--compiled-def have been specified.");
+                Error.report("Could not find a compiled K definition. Please ensure that\neither a compiled K definition exists in the current directory with its default\nname, or that --k-definition or --compiled-def have been specified.");
             }
             File compiledFile = new File(K.compiled_def);
             if (!compiledFile.exists()) {
@@ -1183,7 +1184,7 @@ public class Main {
                 normalExecution(KAST, lang, rp, cmd_options, context);
             } else {
                 if (K.do_search) {
-                    Error.report("Cannot specify --search with --debug. In order to search inside the debugger, use the step-all command.");
+                    Error.report("Cannot specify --search with --debug. In order to search\nnside the debugger, use the step-all command.");
                 }
                 if (K.guidebug)
                     guiDebugExecution(KAST, lang, null, context);
