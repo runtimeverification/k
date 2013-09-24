@@ -66,7 +66,7 @@ public class KompileFrontEnd {
 
         GlobalSettings.symbolicEquality = cmd.hasOption("symeq");
         GlobalSettings.SMT = cmd.hasOption("smt");
-        GlobalSettings.matchingLogic = cmd.hasOption("ml");
+        GlobalSettings.javaBackend = cmd.hasOption("ml");
         GlobalSettings.NOSMT = cmd.hasOption("nosmt");
         
 		if (cmd.hasOption("verbose"))
@@ -230,7 +230,7 @@ public class KompileFrontEnd {
 			context.dotk = new File(output);
 			context.dotk.mkdirs();
 
-		} else if (GlobalSettings.matchingLogic) {
+		} else if (GlobalSettings.javaBackend) {
             backend = new JavaSymbolicBackend(Stopwatch.sw, context);
             if (output == null) {
                 output = FileUtil.stripExtension(mainFile.getName()) + "-kompiled";

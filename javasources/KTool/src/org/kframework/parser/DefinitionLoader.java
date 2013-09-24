@@ -90,7 +90,7 @@ public class DefinitionLoader {
 		} else {
 			javaDef = parseDefinition(mainFile, lang, autoinclude, context);
 
-			BinaryLoader.toBinary(javaDef, new FileOutputStream(context.dotk.getAbsolutePath() + "/defx-" + (GlobalSettings.matchingLogic ? "java-symbolic" : "maude") + ".bin"));
+			BinaryLoader.toBinary(javaDef, new FileOutputStream(context.dotk.getAbsolutePath() + "/defx-" + (GlobalSettings.javaBackend ? "java-symbolic" : "maude") + ".bin"));
 
 			if (GlobalSettings.xml) {
 				XStream xstream = new XStream();
