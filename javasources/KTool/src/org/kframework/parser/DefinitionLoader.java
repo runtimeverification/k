@@ -63,20 +63,20 @@ import org.w3c.dom.Element;
 import com.thoughtworks.xstream.XStream;
 
 public class DefinitionLoader {
-	public static org.kframework.kil.Definition loadDefinition(File mainFile, String lang, boolean autoinclude, Context context) throws IOException, Exception {
-		org.kframework.kil.Definition javaDef;
+	public static Definition loadDefinition(File mainFile, String lang, boolean autoinclude, Context context) throws IOException, Exception {
+		Definition javaDef;
 		File canoFile = mainFile.getCanonicalFile();
 
 		String extension = FileUtil.getExtension(mainFile.getAbsolutePath());
-		if (extension != null && (extension.equals(".xml") || extension.equals(".bin"))) {
+		if (".xml".equals(extension) || ".bin".equals(extension)) {
 			// unmarshalling
 			XStream xstream;
 			if (extension.equals(".xml")) {
 				xstream = new XStream();
 				xstream.aliasPackage("k", "org.kframework.kil");
-				javaDef = (org.kframework.kil.Definition) xstream.fromXML(canoFile);
+				javaDef = (Definition) xstream.fromXML(canoFile);
 			} else {
-				javaDef = (org.kframework.kil.Definition) BinaryLoader.fromBinary(new FileInputStream(canoFile));
+				javaDef = (Definition) BinaryLoader.fromBinary(new FileInputStream(canoFile));
 			}
 
 			if (GlobalSettings.verbose)

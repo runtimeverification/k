@@ -785,7 +785,7 @@ public class Main {
 
     /**
      * @param cmds
-     *            represents the arguments/options given to jkrun command..
+     *            represents the arguments/options given to krun command..
      */
     public static void execute_Krun(String cmds[]) {
         Context context = new Context();
