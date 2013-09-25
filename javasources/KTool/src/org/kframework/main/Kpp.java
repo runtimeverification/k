@@ -16,18 +16,19 @@ public class Kpp {
 	public static void codeClean(String[] args) {
 		if (args.length != 1)
 			System.err.println("Usage: kpp <filename>");
+        else {
+            File f = new File(args[0]);
+            if (!f.exists())
+                System.err.println("File not found.");
 
-		File f = new File(args[0]);
-		if (!f.exists())
-			System.err.println("File not found.");
-
-		try {
-			Kpp.codeClean(new BufferedReader(new FileReader(f)), System.out);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+            try {
+                Kpp.codeClean(new BufferedReader(new FileReader(f)), System.out);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 	}
 
 	public static void codeClean(BufferedReader input, OutputStream out) throws IOException {
