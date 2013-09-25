@@ -59,7 +59,7 @@ public class Main {
 	 * @throws Exception when loadDefinition fails
 	 * @throws IOException when loadDefinition fails 
 	 */
-	public static void main(String[] args) throws IOException, Exception {
+	public static void main(String[] args) throws Exception {
 		setJavaLibraryPath();
 
 		if (args.length >= 1) {
