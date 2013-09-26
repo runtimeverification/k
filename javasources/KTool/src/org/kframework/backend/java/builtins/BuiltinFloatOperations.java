@@ -5,7 +5,6 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.util.GappaPrinter;
 import org.kframework.backend.java.util.GappaServer;
 import org.kframework.krun.K;
-import org.kframework.utils.general.GlobalSettings;
 
 /**
  * Table of {@code public static} methods on builtin floats.
@@ -84,16 +83,10 @@ public class BuiltinFloatOperations {
     }
 */
 
-    private static String toGappa(Term term) {
-        GappaPrinter printer = new GappaPrinter();
-        term.accept(printer);
-        return printer.getResult();
-    }
-
     public static BoolToken gt(Term term1, Term term2) {
         if (!K.smt.equals("gappa")) return null;
-        String gterm1 = toGappa(term1);
-        String gterm2 = toGappa(term2);
+        String gterm1 = GappaPrinter.toGappaGround(term1);
+        String gterm2 = GappaPrinter.toGappaGround(term2);
         String inputFalse = gterm1 + " <= " + gterm2;
         if (GappaServer.proveFalse(inputFalse))
             return BoolToken.TRUE;
@@ -102,10 +95,10 @@ public class BuiltinFloatOperations {
         return null;
     }
 
-    public static BoolToken ge(IntToken term1, IntToken term2) {
+    public static BoolToken ge(Term term1, Term term2) {
         if (!K.smt.equals("gappa")) return null;
-        String gterm1 = toGappa(term1);
-        String gterm2 = toGappa(term2);
+        String gterm1 = GappaPrinter.toGappaGround(term1);
+        String gterm2 = GappaPrinter.toGappaGround(term2);
         final String inputTrue = gterm1 + " >= " + gterm2;
         if (GappaServer.proveTrue(inputTrue))
             return BoolToken.TRUE;
@@ -114,10 +107,10 @@ public class BuiltinFloatOperations {
         return null;
     }
 
-    public static BoolToken lt(IntToken term1, IntToken term2) {
+    public static BoolToken lt(Term term1, Term term2) {
         if (!K.smt.equals("gappa")) return null;
-        String gterm1 = toGappa(term1);
-        String gterm2 = toGappa(term2);
+        String gterm1 = GappaPrinter.toGappaGround(term1);
+        String gterm2 = GappaPrinter.toGappaGround(term2);
         final String inputFalse = gterm1 + " >= " + gterm2;
         if (GappaServer.proveFalse(inputFalse))
             return BoolToken.TRUE;
@@ -126,10 +119,10 @@ public class BuiltinFloatOperations {
         return null;
     }
 
-    public static BoolToken le(IntToken term1, IntToken term2) {
+    public static BoolToken le(Term term1, Term term2) {
         if (!K.smt.equals("gappa")) return null;
-        String gterm1 = toGappa(term1);
-        String gterm2 = toGappa(term2);
+        String gterm1 = GappaPrinter.toGappaGround(term1);
+        String gterm2 = GappaPrinter.toGappaGround(term2);
         final String inputTrue = gterm1 + " <= " + gterm2;
         if (GappaServer.proveTrue(inputTrue))
             return BoolToken.TRUE;

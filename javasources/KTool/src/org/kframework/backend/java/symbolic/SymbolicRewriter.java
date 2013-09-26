@@ -17,6 +17,7 @@ import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.util.LookupCell;
 import org.kframework.krun.api.io.FileSystem;
 
 import java.util.ArrayList;
@@ -105,7 +106,7 @@ public class SymbolicRewriter {
         }
 
         stopwatch.stop();
-        System.err.println("[" + step + ", " + stopwatch +"]");
+        System.err.println("[" + step + ", " + stopwatch + "]");
 
         return constrainedTerm;
     }
