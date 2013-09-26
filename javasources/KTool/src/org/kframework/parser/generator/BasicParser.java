@@ -59,7 +59,7 @@ public class BasicParser {
 				file = buildCanonicalPath("autoinclude.k", new File(fileName));
 				if (file == null)
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
-							KMessages.ERR1004 + fileName + " autoimporeted for every definition ", fileName, ""));
+							KMessages.ERR1004 + fileName + " autoimported for every definition ", fileName, ""));
 
 				slurp2(file, context);
 				moduleItems.addAll(tempmi);
@@ -84,9 +84,9 @@ public class BasicParser {
 	}
 
 	private void slurp2(File file, Context context) throws IOException {
-		String cannonicalPath = file.getCanonicalPath();
-		if (!filePaths.contains(cannonicalPath)) {
-			filePaths.add(cannonicalPath);
+		String canonicalPath = file.getCanonicalPath();
+		if (!filePaths.contains(canonicalPath)) {
+			filePaths.add(canonicalPath);
 
 			if (GlobalSettings.verbose)
 				System.out.println("Including file: " + file.getAbsolutePath());
