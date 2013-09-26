@@ -27,4 +27,15 @@ public class BuiltinSetOperations {
         return new BuiltinSet(elements);
     }
 
+    public static BoolToken in(Term term1, BuiltinSet term2) {
+        if (!term1.isGround()) {
+            throw new IllegalArgumentException("first argument " + term1 + " is not ground");
+        }
+        if (!term2.isGround()) {
+            throw new IllegalArgumentException("second argument " + term2 + " is not ground");
+        }
+
+        return BoolToken.of(term2.elements().contains(term1));
+    }
+
 }
