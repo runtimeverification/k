@@ -35,7 +35,6 @@ public class BasicVisitor implements Visitor {
 		if (isVisited(node))
 			return;
 		markAsVisited(node);
-		return;
 	}
 
 	@Override

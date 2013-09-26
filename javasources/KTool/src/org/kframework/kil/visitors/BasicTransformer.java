@@ -206,7 +206,7 @@ public class BasicTransformer implements Transformer {
 		TransformerException exception = null;
 		ArrayList<Term> terms = new ArrayList<Term>();
 		for (Term t : node.getContents()) {
-			ASTNode result = null;
+			ASTNode result;
 			try {
 				result = t.accept(this);
 				terms.add((Term) result);
