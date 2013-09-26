@@ -30,7 +30,7 @@ public class TagUserRules extends CopyOnWriteTransformer {
 
 	public static final Set<String> notSymbolicTags;
     static {
-        if (GlobalSettings.matchingLogic) {
+        if (GlobalSettings.javaBackend) {
             notSymbolicTags = Collections.emptySet();
         } else {
             notSymbolicTags = ImmutableSet.of(
@@ -58,7 +58,7 @@ public class TagUserRules extends CopyOnWriteTransformer {
 				KPaths.getKBase(false) + File.separator + "include")
 				&& !node.getFilename().startsWith(
 						org.kframework.kil.loader.Constants.GENERATED_FILENAME))
-                || (GlobalSettings.matchingLogic && node.getFilename().equals(
+                || (GlobalSettings.javaBackend && node.getFilename().equals(
                         KPaths.getKBase(false) + File.separator + "include" +
                                 File.separator + "io" +
                                 File.separator + "io.k"))

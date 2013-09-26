@@ -62,7 +62,7 @@ public class KagregFrontEnd {
 		GlobalSettings.verbose = true;
 //        GlobalSettings.symbolicEquality = false;
 //        GlobalSettings.SMT = false;
-//        GlobalSettings.matchingLogic = false;
+//        GlobalSettings.javaBackend = false;
 //        GlobalSettings.NOSMT = true;
 
 		String firstLang = FileUtil.getMainModule(firstDefinitionFile.getName());
@@ -83,7 +83,7 @@ public class KagregFrontEnd {
 		GlobalSettings.verbose = true;
 //        GlobalSettings.symbolicEquality = false;
 //        GlobalSettings.SMT = false;
-//        GlobalSettings.matchingLogic = false;
+//        GlobalSettings.javaBackend = false;
 //        GlobalSettings.NOSMT = true;
 
 		KParser.reset();

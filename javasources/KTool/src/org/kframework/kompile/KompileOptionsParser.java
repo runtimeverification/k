@@ -95,13 +95,16 @@ public class KompileOptionsParser {
 
 		Option outputFile = new Option("o", "output", true, "specify output file/directory. Default <file>-compiled");
 
+        // backend options
+        OptionGroup be = new OptionGroup();
+        Option ml = new Option("ml", "java-backend", false, "compile for Java backend");
+        be.addOption(ml);
+
 		// matching logic and symbolic execution options
 		OptionGroup sym = new OptionGroup();
-		Option ml = new Option("ml", "matching-logic", false, "generate support for matching logic prover");
 		Option smt = new Option("smt", "generate translation to SMTLib2");
 		Option symEq = new Option("symeq", "symbolic-equality", false, "generate sort equalities");
 		Option symbolic = new Option("symbolic", false, "generate symbolic semantics");
-		sym.addOption(ml);
 		sym.addOption(smt);
 		sym.addOption(symEq);
 		sym.addOption(symbolic);
@@ -126,6 +129,7 @@ public class KompileOptionsParser {
 		options.addOptionGroup(warn);
 		options.addOptionGroup(libGroup);
 		options.addOptionGroup(nofile);
+		options.addOptionGroup(be);
 		options.addOptionGroup(sym);
 		options.addOptionGroup(symOpt);
 		options.addOptionGroup(checkOpt);
