@@ -41,6 +41,7 @@ public class SymbolicRewriter {
     private int step;
     private final Stopwatch ruleStopwatch = new Stopwatch();
     private final Map<IndexingPair, Set<Rule>> ruleTable;
+    private final Set<Rule> unindexedRules;
     private final List<ConstrainedTerm> results = new ArrayList<ConstrainedTerm>();
 
 	public SymbolicRewriter(Definition definition) {
@@ -75,7 +76,7 @@ public class SymbolicRewriter {
 
                 ImmutableSet.Builder<Rule> setBuilder = ImmutableSet.builder();
                 for (Rule rule : definition.rules()) {
-                    if (pair.isUnifiable(rule.indexingPair()) || !rule.containsKCell()) {
+                    if (pair.isUnifiable(rule.indexingPair())) {
                         setBuilder.add(rule);
                     }
                 }
@@ -88,6 +89,14 @@ public class SymbolicRewriter {
         }
 
         ruleTable = mapBuilder.build();
+
+        ImmutableSet.Builder<Rule> setBuilder = ImmutableSet.builder();
+        for (Rule rule : definition.rules()) {
+            if (!rule.containsKCell()) {
+                setBuilder.add(rule);
+            }
+        }
+        unindexedRules = setBuilder.build();
 	}
 
     public ConstrainedTerm rewrite(ConstrainedTerm constrainedTerm, int bound) {
@@ -121,7 +130,7 @@ public class SymbolicRewriter {
                 rules.addAll(ruleTable.get(pair));
             }
         }
-
+        rules.addAll(unindexedRules);
         return rules;
     }
 
