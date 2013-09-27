@@ -98,7 +98,7 @@
       definition="dist/tutorial/2_imp/lesson_5/imp.k"
       programs="dist/tutorial/2_imp"
       extensions="imp"
-      tests="tests/tutorial/2_imp/lesson_5"
+      results="tests/tutorial/2_imp/lesson_5"
       />
 
 <!-- LAMBDA++ -->
@@ -930,10 +930,10 @@
   </all-programs>
 </test>
 
-<test definition="tests/regression/java-rewrite-engine/imp_with_floats/imp.k"
+<test definition="dist/examples/java_rewrite_engine/imp_with_floats/imp.k"
       extensions="imp"
-      programs="tests/regression/java-rewrite-engine/imp_with_floats/programs"
-      results="tests/regression/java-rewrite-engine/imp_with_floats/tests">
+      programs="dist/examples/java_rewrite_engine/imp_with_floats/programs"
+      results="tests/examples/java_rewrite_engine/imp_with_floats/tests">
   <kompile-option name="-ml" />
   <kompile-option name="-w" value="none" />
   <all-programs>
@@ -946,7 +946,7 @@
       definition="dist/examples/java_rewrite_engine/tutorial/2_imp/imp.k"
       programs="dist/tutorial/2_imp"
       extensions="imp"
-      tests="tests/tutorial/2_imp/lesson_5"
+      results="tests/tutorial/2_imp/lesson_5"
       >
   <kompile-option name="-ml" />
   <kompile-option name="-w" value="none" />
