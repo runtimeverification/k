@@ -1,10 +1,8 @@
 package org.kframework.kil;
 
-import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.w3c.dom.Element;
 
 import aterm.ATermAppl;
 import aterm.ATermInt;
@@ -16,11 +14,6 @@ import aterm.ATermList;
 public class ParseError extends ASTNode {
 	/** A unique identifier corresponding to a production, matching the SDF cons */
 	String message = null;
-
-	public ParseError(Element element, Context context) {
-		super(element);
-		throw new Error("Not implemented yet");
-	}
 
 	public ParseError(ATermAppl atm) {
 		super("temp", "temp");
