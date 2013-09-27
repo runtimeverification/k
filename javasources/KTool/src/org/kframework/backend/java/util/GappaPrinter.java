@@ -143,6 +143,7 @@ public class GappaPrinter extends BottomUpVisitor {
                 result.append(", ");
                 kList.get(2).accept(this);
                 result.append("]");
+                return;
             }
             throw new GappaPrinterException("Operation " + label + " not supported (yet)");
         } catch (GappaPrinterException e) {

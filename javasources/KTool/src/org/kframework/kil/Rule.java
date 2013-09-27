@@ -41,6 +41,12 @@ public class Rule extends Sentence {
 		this.setBody(new Rewrite(lhs, rhs, context));
 	}
 
+	public Rule(Term lhs, Term rhs, Term requires, Term ensures, Context context) {
+        this(lhs, rhs, context);
+        this.setRequires(requires);
+        this.setEnsures(ensures);
+	}
+
 	public Rule(Sentence term) {
 		super(term);
 	}

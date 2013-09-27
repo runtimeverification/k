@@ -307,7 +307,7 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
             if (GappaServer.proveTrue(input))
                 result = true;
 
-            System.out.println(constraint);
+//            System.out.println(constraint);
         } else if (K.smt.equals("z3")) {
             Set<Variable> rightHandSideVariables = new HashSet<Variable>(constraint.variableSet());
             rightHandSideVariables.removeAll(variableSet());
