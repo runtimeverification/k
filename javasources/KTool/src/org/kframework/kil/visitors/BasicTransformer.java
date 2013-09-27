@@ -91,19 +91,19 @@ public class BasicTransformer implements Transformer {
 
 	@Override
 	public ASTNode transform(Configuration node) throws TransformerException {
-		Configuration c = new Configuration(node);
+		Configuration c = node.shallowCopy();
 		return transform((Sentence) c);
 	}
 
 	@Override
 	public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
-		org.kframework.kil.Context c = new org.kframework.kil.Context(node);
+		org.kframework.kil.Context c = node.shallowCopy();
 		return transform((Sentence) c);
 	}
 
 	@Override
 	public ASTNode transform(Rule node) throws TransformerException {
-		Rule r = new Rule(node);
+		Rule r = node.shallowCopy();
 		return transform((Sentence) r);
 	}
 
@@ -188,7 +188,7 @@ public class BasicTransformer implements Transformer {
 
 	@Override
 	public ASTNode transform(Cell node) throws TransformerException {
-		Cell result = new Cell(node);
+		Cell result = node.shallowCopy();
 		result.setContents((Term) node.getContents().accept(this));
 		return transform((Term) result);
 	}
@@ -225,37 +225,37 @@ public class BasicTransformer implements Transformer {
 
 	@Override
 	public ASTNode transform(Bag node) throws TransformerException {
-		Bag result = new Bag(node);
+		Bag result = node.shallowCopy();
 		return transform((Collection) result);
 	}
 
 	@Override
 	public ASTNode transform(KSequence node) throws TransformerException {
-		KSequence result = new KSequence(node);
+		KSequence result = node.shallowCopy();
 		return transform((Collection) result);
 	}
 
 	@Override
 	public ASTNode transform(List node) throws TransformerException {
-		List result = new List(node);
+		List result = node.shallowCopy();
 		return transform((Collection) result);
 	}
 
 	@Override
 	public ASTNode transform(KList node) throws TransformerException {
-		KList result = new KList(node);
+		KList result = node.shallowCopy();
 		return transform((Collection) result);
 	}
 
 	@Override
 	public ASTNode transform(Map node) throws TransformerException {
-		Map result = new Map(node);
+		Map result = node.shallowCopy();
 		return transform((Collection) result);
 	}
 
 	@Override
 	public ASTNode transform(Set node) throws TransformerException {
-		Set result = new Set(node);
+		Set result = node.shallowCopy();
 		return transform((Collection) result);
 	}
 
@@ -267,19 +267,19 @@ public class BasicTransformer implements Transformer {
 
 	@Override
 	public ASTNode transform(BagItem node) throws TransformerException {
-		BagItem result = new BagItem(node);
+		BagItem result = node.shallowCopy();
 		return transform((CollectionItem) result);
 	}
 
 	@Override
 	public ASTNode transform(ListItem node) throws TransformerException {
-		ListItem result = new ListItem(node);
+		ListItem result = node.shallowCopy();
 		return transform((CollectionItem) result);
 	}
 
 	@Override
 	public ASTNode transform(MapItem node) throws TransformerException {
-		MapItem result = new MapItem(node);
+		MapItem result = node.shallowCopy();
 		result.setKey((Term) node.getKey().accept(this));
 		result.setValue((Term) node.getValue().accept(this));
 		return transform((CollectionItem) result);
@@ -287,7 +287,7 @@ public class BasicTransformer implements Transformer {
 
 	@Override
 	public ASTNode transform(SetItem node) throws TransformerException {
-		SetItem result = new SetItem(node);
+		SetItem result = node.shallowCopy();
 		return transform((CollectionItem) result);
 	}
 
@@ -496,7 +496,7 @@ public class BasicTransformer implements Transformer {
 
     @Override
 	public ASTNode transform(Rewrite node) throws TransformerException {
-		Rewrite result = new Rewrite(node);
+		Rewrite result = node.shallowCopy();
 		result.replaceChildren(
                 (Term) node.getLeft().accept(this),
                 (Term) node.getRight().accept(this),
@@ -532,7 +532,7 @@ public class BasicTransformer implements Transformer {
 	@Override
 	public ASTNode transform(Freezer node) throws TransformerException {
 		Term term = (Term) node.getTerm().accept(this);
-		Freezer result = new Freezer(node);
+		Freezer result = node.shallowCopy();
 		result.setTerm(term);
 		return transform((Term) node);
 	}
@@ -563,7 +563,7 @@ public class BasicTransformer implements Transformer {
 	@Override
 	public ASTNode transform(KInjectedLabel node) throws TransformerException {
 		Term term = (Term) node.getTerm().accept(this);
-		KInjectedLabel result = new KInjectedLabel(node);
+		KInjectedLabel result = node.shallowCopy();
 		result.setTerm(term);
 		return transform((Term) result);
 	}
@@ -576,7 +576,7 @@ public class BasicTransformer implements Transformer {
 	@Override
 	public ASTNode transform(FreezerLabel node) throws TransformerException {
 		Term term = (Term) node.getTerm().accept(this);
-		FreezerLabel result = new FreezerLabel(node);
+		FreezerLabel result = node.shallowCopy();
 		result.setTerm(term);
 		return transform((Term) result);
 	}
