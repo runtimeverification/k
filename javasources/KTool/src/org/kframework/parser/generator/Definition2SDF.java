@@ -180,7 +180,7 @@ public class Definition2SDF {
 
 		sdf.append("\n");
 		sdf.append("	DzDzINT		-> DzDzInt\n");
-		sdf.append("	DzDzID		-> DzDzId\n");
+		//sdf.append("	DzDzID		-> DzDzId\n");
 		sdf.append("	DzDzSTRING	-> DzDzString\n");
 		sdf.append("	DzDzFLOAT	-> DzDzFloat\n");
 
@@ -206,12 +206,6 @@ public class Definition2SDF {
 		sdf.append("\n\n");
 
 		sdf.append("\n%% terminals reject\n");
-		for (String t : terminals.terminals) {
-			if (t.matches("[a-zA-Z][a-zA-Z0-9]*")) {
-				sdf.append("	\"" + t + "\" -> DzDzID {reject}\n");
-			}
-		}
-		sdf.append("\n");
 		sdf.append(SDFHelper.getFollowRestrictionsForTerminals(terminals.terminals));
 
 		sdf.append("context-free restrictions\n");
@@ -219,7 +213,6 @@ public class Definition2SDF {
 
 		sdf.append("lexical restrictions\n");
 		sdf.append("%% some restrictions to ensure greedy matching for user defined constants\n");
-		sdf.append("	DzDzId  -/- [a-zA-Z0-9]\n");
 		sdf.append("	DzDzInt -/- [0-9]\n");
 		sdf.append("	\"is\" -/- [\\#A-Z]\n");
 		sdf.append("\n");

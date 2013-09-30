@@ -237,7 +237,7 @@ public class DefinitionSDF {
 
 		sdf.append("lexical restrictions\n");
 		sdf.append("%% some restrictions to ensure greedy matching for user defined constants\n");
-		sdf.append("	DzDzId  -/- [a-zA-Z0-9]\n");
+		//sdf.append("	DzDzId  -/- [a-zA-Z0-9]\n");
 		sdf.append("	DzDzInt -/- [0-9]\n");
 		sdf.append("	\"is\" -/- [\\#A-Z]\n");
 		sdf.append("\n");
