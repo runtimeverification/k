@@ -107,6 +107,10 @@ public class DefinitionSDFVisitor extends BasicVisitor {
 			for (Production prd : prt.getProductions()) {
 				if (prd.containsAttribute("onlyLabel")) {
 					// if a production has this attribute, don't add it to the list
+				} else if (prd.containsAttribute("notInRules") && !ground) {
+					// if a production has this attribute, don't add it to the list
+				} else if (prd.containsAttribute("notInGround") && ground) {
+					// if a production has this attribute, don't add it to the list
 				} else if (prd.isLexical()) {
 					lexical.add(prd);
 				} else if (prd.isSubsort()) {
