@@ -3,10 +3,14 @@ module RULES
     <k>
     return (x * x + y * y => V:Float);
     ...</k>
-    <state>...
-      x |-> X:Float
-      y |-> Y:Float
-    ...</state>
+    <env>...
+      x |-> LX:Int
+      y |-> LY:Int
+    ...</env>
+    <store>...
+      LX |-> X:Float
+      LY |-> Y:Float
+    ...</store>
   requires -100.0 <=Float X <=Float 100.0 andBool -100.0 <=Float Y <=Float 100.0
   ensures -0x1.p-37 <=Float V -Float (X *Float X +Float Y *Float Y) <=Float 0x1.p-37
 endmodule
