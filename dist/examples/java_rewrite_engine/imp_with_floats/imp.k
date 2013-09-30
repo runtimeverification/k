@@ -31,6 +31,8 @@ module IMP-SYNTAX
   syntax Id ::= Token{"n"} | Token{"sum"}   [prefer]
   syntax Id ::= Token{"a"} | Token{"b"}   [prefer]
   syntax Id ::= Token{"x"} | Token{"y"}   [prefer]
+  syntax Id ::= Token{"u_x"} | Token{"u_y"}   [prefer]
+  syntax Id ::= Token{"v_x"} | Token{"v_y"}   [prefer]
 endmodule
 
 module IMP
