@@ -69,6 +69,27 @@ module ALG-SYNTAX
   syntax Ids  ::= List{Id,  ","} [strict]
   syntax Exps  ::= List{Exp,  ","} [strict]
 
+// syntax of the semantics
+
+
+  syntax Val ::= "noVal" 
+               | "lambda" "(" Ids "@" Stmts ")" 
+                 [latex(\lambda\,{#1}\mathrel{\bullet}{#2})]
+               | "[" Vals "]" [kalbel("absList")]
+               | "{" Map "}"  [klabel("structOrArray")]
+
+  syntax Vals ::= List{Val,","}
+
+  syntax Id ::= "empty" | "topFront" | "topBack"
+               | "select" | "insert" | "size"
+               | "popFront" | "popBack" | "pushFront"
+               | "pushBack" | "update" | "lookup"
+
+  syntax Val ::= "lookup" "(" Vals "," Exp ")" [function]
+               | "update" "(" Vals "," Exp "," Val ")" [function]
+
+
+
 endmodule
 
 /*@
@@ -148,6 +169,7 @@ $\{\texttt{n}\mapsto 3~ \texttt{a}\mapsto \{0\mapsto [1,2,\texttt{.Vals}]~
  where $[a_0,a_1,\ldots]$ is a list (see below).
 */
 
+/*
   syntax Val ::= "noVal" 
                | "lambda" "(" Ids "@" Stmts ")" 
                  [latex(\lambda\,{#1}\mathrel{\bullet}{#2})]
@@ -155,6 +177,7 @@ $\{\texttt{n}\mapsto 3~ \texttt{a}\mapsto \{0\mapsto [1,2,\texttt{.Vals}]~
                | "{" Map "}"  [klabel("structOrArray")]
 
   syntax Vals ::= List{Val,","}
+*/
   syntax KResult ::= Val
 
 /*
@@ -288,7 +311,7 @@ EXamples: a map $\texttt{x}\mapsto 5$ represents a memory cell storing $5$ and r
 
   // update
   rule <k> X:Name[I:Int] = V:Val ; => . ...</k>
-       <state>... X |-> (Vx:Val => update(Vx, I, V)) ...</state>
+       <state>... X |-> (Vx:Val => update(Vx, I, V))::Val ...</state>
 
 
   // structure fields
@@ -296,18 +319,18 @@ EXamples: a map $\texttt{x}\mapsto 5$ represents a memory cell storing $5$ and r
   context '_._(HOLE,, E:Exp) when isFieldName(E)
 
   // lookup
-  rule '_._(V:Val,, E:Exp) => lookup(V, E) when isFieldName(E)
+  rule '_._(V:Val,, E:Exp) => lookup(V, E)::Val when isFieldName(E)
 
   // update
   rule <k> '_._(X:Name,, E:Exp) = V:Val ; => . ...</k>
-       <state>... X |-> (Vx:Val => update(Vx, E, V)) ...</state>
+       <state>... X |-> (Vx:Val => update(Vx, E, V)::Val) ...</state>
        when isFieldName(E)
 
 
 
   // method call
 
-  syntax #Id ::= "self"
+  syntax Id ::= Token{"self"}
 
   syntax K ::= "updateSelf" "(" Id "," Exp ")" [strict(2)]
 
@@ -432,8 +455,6 @@ The (extended) language includes only an implementation with cons lists, describ
 
 */
 
-  syntax #Id ::= "empty" | "topFront" | "topBack" | "select" | "insert" | "size" 
-               | "popFront" | "popBack" | "pushFront" | "pushBack" | "update"
 
 /*@
 Empty list:\\
@@ -535,8 +556,8 @@ Time complexity: $O(size(L))$ (inherited from cons lists)
 
 /*@
 Select and Lookup (two names for the same operation):\\
-select is used at high level, in algorithms.\\
-Lookup is used for compatibility with the other values: arrays and structures.\\
+select is used at high level, in algorithms;\\
+lookup is used for compatibility with the other values: arrays and structures.\\
 $\texttt{select}([v_0,\ldots,v_{n{-}1}], i)\Rightarrow \texttt{lookup}((v_0,\ldots,v_{n{-}1}),i)$\\
 $\texttt{lookup}([v_0,\ldots,v_{n{-}1}])\Rightarrow \texttt{lookup}((v_0,\ldots,v_{n{-}1}),i)$\\
 Time complexity: $O(i)$ (inherited from cons lists)
@@ -546,11 +567,11 @@ Time complexity: $O(i)$ (inherited from cons lists)
   context '_._(_,, select(HOLE))
 
 
-  rule '_._([Vl:Vals],, select(I:Int)) => lookup([Vl], I)
-  rule lookup([V:Val, Vl:Vals], 0) => V
-  rule lookup([V:Val, Vl:Vals], I:Int)
+  rule '_._([Vl:Vals],, select(I:Int)) => lookup([Vl], I)::Val
+  rule lookup([V:Val, Vl:Vals], 0)::Val => V
+  rule lookup([V:Val, Vl:Vals], I:Int)::Val
        => 
-       lookup([Vl:Vals], I -Int 1)
+       lookup([Vl:Vals], I -Int 1)::Val
        when I >Int 0
 
 /*@
@@ -654,36 +675,39 @@ Time complexity: $O(size(L))$
 //@ \subsection{Operations on structures and arrays}
 
   //@ Lookup:
-
+/*
   syntax Val ::= "lookup" "(" Vals "," Exp ")" [function]
                | "update" "(" Vals "," Exp "," Val ")" [function]
+*/
 
-  rule lookup({_ X |-> V:Val _}, X:Name) => V
+  rule lookup({_ X |-> V:Val _}, X:Name)::Val => V
 
-  rule lookup({_ X |-> V:Val _}, X:Name[I:Int]) => lookup(V, I)
+  rule lookup({_ X |-> V:Val _}, X:Name[I:Int])::Val => lookup(V, I)::Val
 
-  rule lookup({_ X |-> V:Val _}, '_._(X:Name,, E:Exp)) => lookup(V, E)
+  rule lookup({_ X |-> V:Val _}, '_._(X:Name,, E:Exp))::Val => lookup(V, E)::Val
 
-  rule lookup({_ X |-> V:Val _}, '_._(X:Name[I:Int],, E:Exp)) => lookup(lookup(V, I), E)
+  rule lookup({_ X |-> V:Val _}, '_._(X:Name[I:Int],, E:Exp))::Val => lookup(lookup(V, I)::Val, E)::Val
 
-  rule lookup({_ I |-> V:Val _}, I:Int) => V
+  rule lookup({_ I |-> V:Val _}, I:Int)::Val => V
 
 
   //@ Update:
 
-  rule update({ M:Map }, X:Name, V:Val) => { M[V/X] } 
+  rule update({ M:Map }, X:Name, V:Val)::Val => { M[V/X] } 
 
-  rule update({ M:Map }, I:Int, V:Val) => { M[V/I] } 
+  rule update({ M:Map }, I:Int, V:Val)::Val => { M[V/I] } 
 
-  rule update({M:Map X |-> V':Val}, '_._(X:Name,, E:Exp), V:Val)
+  rule update({M:Map X |-> V':Val}, '_._(X:Name,, E:Exp), V:Val)::Val
        =>
-       {M (X |-> (update(V', E, V)))}  
+       {M (X |-> (update(V', E, V)::Val))}
 
-  rule update({M:Map X |-> V:Val}, X:Name[I:Int], V':Val) => { M (X |-> (update(V, I, V'))) }
+  rule update({M:Map X |-> V:Val}, X:Name[I:Int], V':Val)::Val
+       =>
+       { M (X |-> (update(V, I, V')::Val)::Val) }
  
-  rule update({M:Map X |-> V':Val}, '_._(X:Name[I:Int],, E:Exp), V:Val)
+  rule update({M:Map X |-> V':Val}, '_._(X:Name[I:Int],, E:Exp), V:Val)::Val
        =>
-       {M (X |-> (update(V', I, (update(lookup(V', I), E, V)))))}
+       {M (X |-> (update(V', I, (update(lookup(V', I)::Val, E, V)::Val))::Val))}
 
 
   //@ Auxiliary functions
