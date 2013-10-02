@@ -7,4 +7,8 @@ should evaluate to 3 now.
 Also, the first "fix" suggested in the READMEm to make "+" seqstrict, only
 works for that particular program.  It does not fix the problem if we change
 the program as indicated above.  In that case "+" it would need to be
-seqstrict(2 1).
+seqstrict(2,1).
+
+Also, callcc-env2.lambda evaluates to 3 instead of 4, because of the
+particular order in which the strictness of the application operation is
+applied.  If you make application seqstrict(2,1) then you get 4. 
