@@ -95,8 +95,14 @@ endm
 
 --- Strictness Level
 
+mod K-SUPERCOOL is
+  including K-TECHNIQUE .
+  op cool : -> KLabel .
+endm
+
 mod K-STRICTNESS is 
   including K-HOLE .
+  including K-SUPERCOOL .
   including #STRING-INTERFACE .
   op #freezer : K -> KLabel [strat(0) frozen] .
 
@@ -105,14 +111,8 @@ mod K-STRICTNESS is
   op redex : -> KLabel .
 endm
 
-mod K-SUPERCOOL is
-  including K-TECHNIQUE .
-  op cool : -> KLabel .
-endm
-
 mod K-STRICTNESS-DEFAULTS is
   including K-STRICTNESS .
-  including K-SUPERCOOL .
   eq heat(heated(K)) = K .
   rl [heat-choice]: heat(heated(Ks,,K,,Ks')) => K
      [metadata "superheat=(choice)"] .
