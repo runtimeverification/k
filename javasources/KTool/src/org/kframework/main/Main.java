@@ -55,8 +55,6 @@ public class Main {
 				KTest.test(args2);
 			} else if (args[0].equals("-kast")) {
 				org.kframework.kast.KastFrontEnd.kast(args2);
-			} else if (args[0].equals("-hkcd")) {
-				HKCDFrontEnd.hkcd(args2);
 			} else if (args[0].equals("-krun")) {
 				org.kframework.krun.Main.execute_Krun(args2);
 			} else if (args[0].equals("-kpp")) {
