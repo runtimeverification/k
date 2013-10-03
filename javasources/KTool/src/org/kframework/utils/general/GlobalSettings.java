@@ -87,7 +87,6 @@ public class GlobalSettings {
 	public static boolean SMT = false;
 	public static boolean javaBackend = false;
 	public static boolean documentation = false;
-	public static boolean xml = false;
 	public static boolean NOSMT = false;
 	
 	public static String CHECK = null;
