@@ -84,6 +84,10 @@ public class KTest {
                     .getOptionValue(Configuration.RESULTS_OPTION);
         }
 
+        if (cmd.hasOption(Configuration.REPORT_OPTION)) {
+            Configuration.REPORT = true;
+        }
+
         // Resolve the configuration file
         if (cmd.hasOption(Configuration.CONFIG_OPTION)) {
             Configuration.CONFIG = cmd

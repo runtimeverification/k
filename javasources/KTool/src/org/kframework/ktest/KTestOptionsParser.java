@@ -59,7 +59,12 @@ public class KTestOptionsParser {
 		OptionGroup skipGroup = new OptionGroup();
 		Option skip = new Option(Configuration.SKIP_OPTION, true, "The list of steps separated by whitespace to be skipped (" + Configuration.KOMPILE_STEP + "/" + Configuration.PDF_STEP + "/" + Configuration.PROGRAMS_STEP + ")");
 		skipGroup.addOption(skip);
-		
+
+		// the list of excluded programs
+		OptionGroup reportGroup = new OptionGroup();
+		Option report = new Option(Configuration.REPORT_OPTION, false, "Whether to generate a junit-like report.");
+		reportGroup.addOption(report);
+
 		// verbose
 		OptionGroup vGroup = new OptionGroup();
 		Option verbose = new Option("v",  Configuration.VERBOSE_OPTION, false, "Verbose mode");
