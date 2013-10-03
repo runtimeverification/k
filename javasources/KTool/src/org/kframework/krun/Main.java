@@ -966,21 +966,6 @@ public class Main {
             if (cmd.hasOption("smt")) {
                 K.smt = cmd.getOptionValue("smt");
             }
-            if (K.smt.equals("z3")) {
-                String libz3 = "libz3";
-                switch (GlobalSettings.os()) {
-                    case WIN:
-                        libz3 += ".dll";
-                        break;
-                    case UNIX:
-                        libz3 += ".so";
-                        break;
-                    case OSX:
-                        libz3 += ".dylib";
-                }
-
-                System.load(KPaths.getJavaLibraryPath() + File.separator + libz3);
-            }
             if (cmd.hasOption("deleteTempDir")) {
                 K.deleteTempDir = true;
             }

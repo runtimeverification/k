@@ -19,19 +19,11 @@ import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.kil.Z3Term;
 import org.kframework.backend.java.util.GappaPrinter;
 import org.kframework.backend.java.util.GappaServer;
+import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.kil.ASTNode;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
@@ -251,7 +243,7 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
         normalize();
         Boolean result = false;
         try {
-            com.microsoft.z3.Context context = new com.microsoft.z3.Context();
+            com.microsoft.z3.Context context = Z3Wrapper.newContext();
             KILtoZ3 transformer = new KILtoZ3(Collections.<Variable>emptySet(), context);
             Solver solver = context.MkSolver();
             for (Equality equality : equalities) {
@@ -313,7 +305,7 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
             rightHandSideVariables.removeAll(variableSet());
 
             try {
-                com.microsoft.z3.Context context = new com.microsoft.z3.Context();
+                com.microsoft.z3.Context context = Z3Wrapper.newContext();
                 KILtoZ3 transformer = new KILtoZ3(rightHandSideVariables, context);
 
                 Solver solver = context.MkSolver();
