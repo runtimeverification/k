@@ -565,7 +565,7 @@
   <test
       definition="tests/regression/defaultTerms1/issue.k"
   />
-  <test
+   <test
       definition="tests/regression/freshMOS/issue.k"
       programs="tests/regression/freshMOS/programs"
       results="tests/regression/freshMOS/tests"
@@ -999,5 +999,11 @@
       </all-programs>
   </test>
 
+  <test
+      definition="tests/regression/cool-issue/test.k"
+      programs="tests/regression/cool-issue/programs"
+      results="tests/regression/cool-issue/tests"
+      extensions="test"
+  />
 </tests>
 
