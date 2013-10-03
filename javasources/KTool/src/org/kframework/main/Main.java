@@ -18,28 +18,9 @@ public class Main {
 	 * directory for this platform.
 	 */
 	private static void setJavaLibraryPath() {
-		String path = KPaths.getKBase(false) + "/lib/native";
+        String javaLibraryPath = KPaths.getJavaLibraryPath();
 
-		String arch = System.getProperty("os.arch");
-		if (GlobalSettings.isWindowsOS()) {
-			if (arch.toLowerCase().contains("64"))
-				path += "/cygwin/x64";
-			else
-				path += "/cygwin";
-		} else if (GlobalSettings.isMacOS()) {
-			path += "/macosx";
-		} else if (GlobalSettings.isUnixOS()) {
-			if (arch.toLowerCase().contains("64")) {
-				path += "/linux/x64";
-			} else {
-				path += "/linux";
-			}
-		} else {
-			/* unexpected os */
-			return;
-		}
-
-		System.setProperty("java.library.path", path);
+		System.setProperty("java.library.path", javaLibraryPath);
 
 		/* force java to reset the path (dirty hack) */
 		try {
