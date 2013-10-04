@@ -1,6 +1,5 @@
 package org.kframework.utils;
 
-import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.io.DataInputStream;
@@ -33,20 +32,7 @@ public class ExternalProcessServer {
     /** Start the server process */
     public void init() throws IOException {
         if (!firstTime) return;
-        File f = null;
-        String basePath = KPaths.getKBase(false);
-
-        if (GlobalSettings.isUnixOS()) {
-            f = new File(basePath + "/lib/native/linux/" + executable);
-            f.setExecutable(true, false);
-        }
-        if (GlobalSettings.isWindowsOS()) {
-            f = new File(basePath + "/lib/native/cygwin/" + executable + ".exe");
-        }
-        if (GlobalSettings.isMacOS()) {
-            f = new File(basePath + "/lib/native/macosx/" + executable);
-            f.setExecutable(true, false);
-        }
+        File f = GlobalSettings.getNativeExecutable(executable);
 
         ProcessBuilder pb = new ProcessBuilder(f.getAbsolutePath());
         pb.redirectError(Redirect.INHERIT);

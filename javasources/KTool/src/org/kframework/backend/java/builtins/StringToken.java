@@ -19,11 +19,10 @@ import java.util.Map;
 
 /**
  * A string token. String tokens represent a sequence of unicode code points.
- In this regard they differ from the underlying String class they are built
- off of in Java because Java Strings are a sequence of 16-bit UTF-16
- characters.
+ * In this regard they differ from the underlying String class they are built
+ * off of in Java because Java Strings are a sequence of 16-bit UTF-16 characters.
  *
- * @author: DwightG
+ * @author DwightG
  */
 public class StringToken extends Token {
 
@@ -61,7 +60,7 @@ public class StringToken extends Token {
      * Returns a {@code StringToklen} representation of a given {@code byte[]} value. This value is
      * interpreted as a sequence of code points in the Latin-1 Unicode block according to the
      * ISO-8859-1 encoding.
-     * @param value A Latin-1 representation o fthe sequence of code points.
+     * @param value A Latin-1 representation of the sequence of code points.
      */
     public static StringToken of(byte[] value) {
         try {
@@ -136,4 +135,18 @@ public class StringToken extends Token {
     public void accept(Visitor visitor) {
         visitor.visit(this);
     }
+
+    /**
+     * Returns the cached instance rather than the de-serialized instance if there is a cached
+     * instance.
+     */
+    private Object readResolve() {
+        StringToken stringToken = cache.get(value);
+        if (stringToken == null) {
+            stringToken = this;
+            cache.put(value, stringToken);
+        }
+        return stringToken;
+    }
+
 }

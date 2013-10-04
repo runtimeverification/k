@@ -169,7 +169,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
         if (!queue.isEmpty()) {
             /* TODO(AndreiS): handle iteration over builtin data structures */
             GlobalSettings.kem.register(new KException(
-                    KException.ExceptionType.WARNING,
+                    KException.ExceptionType.HIDDENWARNING,
                     KException.KExceptionGroup.CRITICAL,
                     "Unsupported map pattern in the rule left-hand side",
                     node.getFilename(),

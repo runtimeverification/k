@@ -6,6 +6,7 @@ import org.kframework.backend.java.symbolic.VariableVisitor;
 import org.kframework.backend.java.symbolic.Visitable;
 import org.kframework.kil.ASTNode;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -16,7 +17,8 @@ import java.util.Set;
  *
  * @author AndreiS
  */
-public abstract class JavaSymbolicObject extends ASTNode implements Transformable, Visitable {
+public abstract class JavaSymbolicObject extends ASTNode
+        implements Transformable, Visitable, Serializable {
 
     Set<Variable> variableSet = null;
 

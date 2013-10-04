@@ -31,7 +31,6 @@
 			<pathelement location="../../dist/lib/java/jung-io-2.0.1.jar" />
 			<pathelement location="../../dist/lib/java/jung-visualization-2.0.1.jar" />
 			<pathelement location="../../dist/lib/java/strategoxt.jar" />
-			<pathelement location="../../dist/lib/java/xstream.jar" />
 		</path>
 	</path>
 	<target name="init">

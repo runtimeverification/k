@@ -8,6 +8,7 @@ import org.kframework.kil.Attribute;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 
@@ -135,6 +136,19 @@ public class KLabelConstant extends KLabel {
     @Override
     public ASTNode accept(Transformer transformer) {
         return transformer.transform(this);
+    }
+
+    /**
+     * Returns the cached instance rather than the de-serialized instance if there is a cached
+     * instance.
+     */
+    private Object readResolve() {
+        KLabelConstant kLabelConstant = cache.get(label);
+        if (kLabelConstant == null) {
+            kLabelConstant = this;
+            cache.put(label, kLabelConstant);
+        }
+        return kLabelConstant;
     }
 
 }

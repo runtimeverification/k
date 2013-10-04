@@ -95,16 +95,20 @@ endm
 
 --- Strictness Level
 
+mod K-SUPERCOOL is
+  including K-TECHNIQUE .
+  op cool : -> KLabel .
+endm
+
 mod K-STRICTNESS is 
   including K-HOLE .
+  including K-SUPERCOOL .
   including #STRING-INTERFACE .
   op #freezer : K -> KLabel [strat(0) frozen] .
 
-  op cool : -> KLabel .
   op heat : -> KLabel .
   op heated : -> KLabel .
   op redex : -> KLabel .
-
 endm
 
 mod K-STRICTNESS-DEFAULTS is

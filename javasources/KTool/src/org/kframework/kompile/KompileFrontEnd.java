@@ -12,7 +12,6 @@ import org.kframework.backend.maude.MaudeBackend;
 import org.kframework.backend.maude.KompileBackend;
 import org.kframework.backend.symbolic.SymbolicBackend;
 import org.kframework.backend.unparser.UnparserBackend;
-import org.kframework.backend.xml.XmlBackend;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.MetaK;

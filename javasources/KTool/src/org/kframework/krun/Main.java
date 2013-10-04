@@ -702,9 +702,11 @@ public class Main {
 
     public static void guiDebugExecution(Term kast, String lang,
                                          KRunResult<SearchResults> state, Context context) {
-
+		
         try {
-            new MainWindow(new RunKRunCommand(kast, lang, false, obtainKRun(context)), context);
+			KRun krun = obtainKRun(context);
+			krun.setBackendOption("io",false);
+            new MainWindow(new RunKRunCommand(kast, lang, false,krun), context);
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

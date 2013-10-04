@@ -1,5 +1,7 @@
 package org.kframework.utils.file;
 
+import org.kframework.utils.general.GlobalSettings;
+
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -18,6 +20,7 @@ public class KPaths {
 		return !path.endsWith(".jar");
 	}
 
+    public static String javaLibraryPath = null;
 	public static String JAR_PATH = "lib/java/k3.jar";
 	public static String MAUDE_DIR = "lib/maude/binaries";
 	public static String MAUDE_LIB_DIR = "/lib/maude/lib";
@@ -47,4 +50,30 @@ public class KPaths {
 		}
 		return null;
 	}
+
+    public static String getJavaLibraryPath() {
+        if (javaLibraryPath == null) {
+            javaLibraryPath = KPaths.getKBase(false) + "/lib/native";
+
+            String arch = System.getProperty("os.arch");
+            switch (GlobalSettings.os()) {
+                case WIN:
+                    if (arch.toLowerCase().contains("64"))
+                        javaLibraryPath += "/cygwin/x64";
+                    else
+                        javaLibraryPath += "/cygwin";
+                    break;
+                case OSX:
+                    javaLibraryPath += "/macosx";
+                    break;
+                case UNIX:
+                    if (arch.toLowerCase().contains("64")) {
+                        javaLibraryPath += "/linux/x64";
+                    } else {
+                        javaLibraryPath += "/linux";
+                    }
+            }
+        }
+        return javaLibraryPath;
+    }
 }
