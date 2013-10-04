@@ -109,7 +109,6 @@
 				<include name="k/bin/kompile" />
 				<include name="k/bin/krun" />
 				<include name="k/bin/ksettest" />
-				<include name="k/bin/hkcd" />
 				<include name="k/bin/maude/binaries/maude.intelDarwin" />
 				<include name="k/bin/maude/binaries/maude.linux" />
 				<include name="k/bin/maude/binaries/maude.linux64" />
@@ -122,7 +121,6 @@
 				<exclude name="k/bin/kompile" />
 				<exclude name="k/bin/krun" />
 				<exclude name="k/bin/ksettest" />
-				<exclude name="k/bin/hkcd" />
 				<exclude name="k/bin/maude/binaries/maude.intelDarwin" />
 				<exclude name="k/bin/maude/binaries/maude.linux" />
 				<exclude name="k/bin/maude/binaries/maude.linux64" />

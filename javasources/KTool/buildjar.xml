@@ -23,8 +23,7 @@
           jung-graph-impl-2.0.1.jar
           jung-io-2.0.1.jar
           jung-visualization-2.0.1.jar
-          strategoxt.jar
-          xstream.jar" />
+          strategoxt.jar" />
 			</manifest>
 			<fileset dir="./bin"/>
 		</jar>

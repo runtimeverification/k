@@ -14,20 +14,7 @@ public class Sdf2Table {
 		ThreadedStreamCapturer errorStreamHandler;
 
 		try {
-			File f = null;
-			String basePath = KPaths.getKBase(false);
-
-			if (GlobalSettings.isUnixOS()) {
-				f = new File(basePath + "/lib/native/linux/sdf2table");
-				f.setExecutable(true, false);
-			}
-			if (GlobalSettings.isWindowsOS()) {
-				f = new File(basePath + "/lib/native/cygwin/sdf2table.exe");
-			}
-			if (GlobalSettings.isMacOS()) {
-				f = new File(basePath + "/lib/native/macosx/sdf2table");
-				f.setExecutable(true, false);
-			}
+			File f = GlobalSettings.getNativeExecutable("sdf2table");
 
 			// create process
 			ProcessBuilder pb = new ProcessBuilder(f.getAbsolutePath(), "-c", "-m", mainFile, "-o", mainFile + ".tbl");

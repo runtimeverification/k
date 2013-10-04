@@ -97,8 +97,8 @@ public class JavaSymbolicBackend extends BasicBackend {
             OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(
                     new File(context.dotk, JavaSymbolicBackend.DEFINITION_FILENAME)));
             BinaryLoader.toBinary(
-                    //new KILtoBackendJavaKILTransformer(context).transformDefinition(javaDef),
-                    javaDef,
+                    new KILtoBackendJavaKILTransformer(context).transformDefinition(javaDef),
+                    //javaDef,
                     outputStream);
             outputStream.close();
         } catch (IOException e) {

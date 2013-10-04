@@ -14,9 +14,11 @@
 \titleformat{\section}{\bfseries}{\thesection.}{1em}{}
 \titleformat{\subsection}{\bfseries}{\thesubsection.}{1em}{}
 \titleformat{\subsubsection}{\bfseries}{\thesubsubsection.}{1em}{}
+\titleformat{\paragraph}{\bfseries}{\theparagraph.}{1em}{}
 \titlespacing{\section}{0pt}{12pt}{6pt}
 \titlespacing{\subsection}{0pt}{12pt}{6pt}
 \titlespacing{\subsubsection}{0pt}{12pt}{6pt}
+\titlespacing{\paragraph}{0pt}{12pt}{6pt}
 */
 
 
@@ -467,6 +469,177 @@ to allow you to save the search graph to an xml format to be loaded by the
 debugger later, or to be used by third-party tools. Finally, it is also planned
 to allow execution via the \verb^step^ and \verb^resume^ commands to be
 terminated partway through by sending the SIGINT signal to the debugger.
+*/
+
+
+/*@
+\subsubsection{Debugging programs graphically: \texttt{-{}-debug-gui}}
+\label{sec:debugger-gui}
+The graphical debugger comes as an extension of the textual one, allowing the 
+user to visualize the search graph information in a two dimensional manner. In 
+order to access the graphical debugger you have to execute a program in \krun 
+with the \verb^--debug-gui^ flag. Example: krun program.ext - -debug-gui
+
+This type of execution instantiates a new window, containing a panel for 
+graph visualization, a panel for displaying the configuration and a command
+area with buttons representing different actions which can be performed upon 
+the graph or the selected vertex.
+
+
+\paragraph{Graph panel}
+\label{graph-panel}
+The "Graph panel" represents the location which will hold the current search graph
+of the program. Results of future exploration operations will be visible in this 
+area. As in general, the graph is comprised of vertices and edges. 
+
+\label{Vertex}
+A vertex represent a certain state of the program and is labeled with the "Config id"
+label, where the id is specific for each state individually. Every vertex presents an
+interactive feature, as it can be selected. Selection is performed by left clicking the 
+vertex. The label of the vertex is highlighted with a red color so that the user can be
+constantly aware of the current selection.
+ 
+Also available is the selection of multiple vertices. This can be accomplished in two
+ways: either by holding the "Shift" key while left clicking on the vertices of choice 
+or by holding the left click and moving the cursor to cover the entire area where the
+vertices to be selected are placed. The results of selection are further discussed in 
+the "Configuration panel" paragraph \ref{configuration-panel}, as well as in the 
+"Command area" section (see section).
+
+One final action that can be performed is centering the selected vertex inside the displayed
+graph layout. To accomplish this, you have to hold the "Ctrl" key while selecting a vertex. 
+This will generate a transition which will position the vertex in the middle of the graph panel area. 
+
+\label{Edge}
+Edges connect the vertices, retaining information about the transition applied and offering a
+hierarchical manner of data interpretation. Single selection is possible even upon edges. Left 
+clicking an edge will open a new frame, further details about this frame being found in the 
+"Difference between states panel" section.
+
+The execution of the graphical debugger is identical with that of the textual debugger \ref{sec:debugger}, 
+in what regards the processes that are conducted in the background. An automatic execution until the 
+first transition point in the semantics is launched. Once this state is reached, the debugger halts for 
+user input. In consequence, the graph panel initially contains two vertices. The uppermost one is equivalent 
+to the original state of the program, whilst the other one is obtained after the previously mentioned 
+automatic execution. Additions to the graph will be dictated by the users exploration actions. 
+
+Taking into account the size of the graph that can become considerably large, ZOOM-IN and ZOOM-OUT 
+capabilities are enabled. With the purpose of carrying out these capabilities in mind, the user
+must position his cursor inside the reserved area of the graph panel and utilize the scroll of the 
+mouse to zoom in or out. This way the graph can be manipulated and better controlled.
+
+To a degree, the graph panel can be interpreted as the visual correspondent of the \verb^show-search-graph^ 
+command from the textual debugger. The common element is represented by the fact that the purpose of both 
+concepts at hand is to display the entire search graph that has been constructed so far. The difference 
+surfaces from the manner of presentation, as well as from the scope of visibility of the graph. In the case 
+of the graphical debugger, the graph is always visible and is automatically modified according to the users actions.
+
+
+\paragraph{Configuration panel}
+\label{configuration-panel}
+The "Configuration panel" provides more specific information about a certain state. As mentioned in 
+the "Graph panel" section, the graph contains all the currently constructed states, represented as 
+vertices with labels. Apart from these labels, states have associated different configurations, which 
+are key points of interest in investigating the behaviour of a program. The process of displaying a 
+configuration at choice is managed by selecting the corresponding vertex from the graph panel \ref{graph-panel}. 
+After selection the configuration panel will be updated with the proper configuration of that state 
+outputted in an XML format. 
+
+On account of the XML format , the printed cells of the configuration can be further processed. 
+A cell can be collapsed by pressing the "-" symbol which accompanies the start tag of the cell.
+By doing so, the entire content of that cell will be replaced with a closed tag. Expansion of a
+collapsed cell is another available feature. By clicking the "+" symbol which appears in front of 
+a closed cell, the hidden content of that cell is displayed. The configuration panel acts like a 
+global handler for all the existing states. What that means is that all the expand and collapse 
+actions performed in a configuration are memorized and applied to a distinct configuration when 
+a different state is chosen from the graph. For example, if a user collapses the k cell of a 
+configuration, this cell will appear collapsed no matter the vertex selected from the graph panel.
+
+The initial manner of showing a configuration is by displaying all of its cells expanded. By adding 
+the ability of manipulating the content of the configuration, the user is able to obtain a better 
+view of the information that is essential for his process of evaluating the programs behaviour.
+
+\paragraph{Command area}
+\label{sec:command-area}
+The "Command area" reveals the actions available for user execution in form of accessible buttons. 
+These are in order: the "Help", "Step", "Step-all", "Collapse", "Expand", "Compare" and "Exit" 
+buttons. The first two buttons of the list are equivalent to the commands with the same name from 
+the textual debugger. The other four buttons are specific to the graphical debugger and its manner 
+of data representation. In addition, this area contains an input box where the user can enter the 
+number of steps that need to be passed to the debuggers background processes and executed. 
+
+\label{Step}
+The "Step" button performs an action which behaves identically to the \verb^step^ command from the 
+textual debugger (see section). The user has to select from the graph panel (see section selection vertex) 
+the vertex which holds the state from which to begin the execution of a given number of steps. The 
+input box of the command area is the element that has to be utilized to specify the number of desired 
+steps to be performed. The user has the option of not entering any input in this box. If no value is 
+written in the input box, the passed argument for execution is the default one step. 
+After selecting the vertex from the graph and assigning the number of steps to be executed, the user 
+presses the "Step" button. The command is executed and the resulting states of this action are 
+automatically added to the already constructed search graph. Once the graph is updated with the new 
+components, it is immediately redrawn to display the current information inside the graph panel. 
+As a final phase of the "Step" command the last state added in the graph is by default selected for the user.
+
+Another feature of the "Step" command is that it can be applied to a group of vertices from the graph, 
+not just one. The stages to be followed for this type of action are identical to those previously 
+described for the "Step" command, with the exception that a multiple selection should be done upon 
+the graph panel(see section graph panel multiple selection). The number of given steps will be executed 
+for each and every vertex of the selection and all of the resulting states and corresponding edges will 
+be inserted in the graph panel. All final states for every initially chosen vertex will be selected automatically. 
+The graph has unique components. No vertex containing a state can appear more than once inside the graph.
+
+\label{Step-all}
+The "Step-all" button is the correspondent of the \verb^step-all^ command from the textual debugger.
+First of all, a vertex or a group of vertices should be selected and the number of steps should be 
+provided (see section selection graph panel). Similar to the "Step" button, if no argument is assigned 
+in the input box the default one step is executed. After selection, the user presses the "Step-all" button.
+All successors in the entered number of transitions are computed and the newly created vertices and 
+edges are properly placed inside the graph panel.
+
+\label{Collapse}
+The "Collapse" button offers data manipulation support. Because the search graph can become difficult 
+to handle due to dimension concerns, the user is given the ability to reduce the number of visible 
+graph components.    
+First of all, a selection of the vertices (see section graph panel multipleselection) which do not 
+present interest and should be compressed is made. Then, the "Collapse" button is pressed and the
+group of vertices selected are mashed up into one graph component. The changes are observable in the 
+graph panel. The new component which accommodates a number of basic vertices has distinct properties. 
+The shape of this component is dictated by the number of vertices it holds. This translates to a new 
+triangle shaped component being added if 3 vertices were collapsed, or a square shaped in the case of 
+4 vertices and so on. The label for this component lists the configuration ids for the vertices which 
+were compressed.
+The button can be used only in certain conditions and if those requirements are not fulfilled it becomes 
+disabled. The conditions for enabling this button is to select at least 2 vertices from the graph. 
+Another important aspect is that collapsing extends not only to basic vertices. Any combination of more 
+than two graph elements (normal vertices, collapsed components) can be the subject of collapsing.
+
+\label{Expand}
+The "Expand" button represents the complementary action of the "Collapse" button. Information prioritizing 
+can be modified and a collapsed vertex should have the option of being brought back to a detailed view. 
+This action implies selecting from the graph the compressed component that should be expanded, then 
+clicking the "Expand" button. In consequence to this proceeding, the graph is redrawn and the elements 
+which formed the collapsed component are once again available in the displayed search graph. The enabling 
+of this button is conditioned by selecting a composed graph element. 
+
+\label{Compare} 
+The "Compare" button has the purpose of easing the workload to which the user has to submit to in order to 
+perceive the differences between configurations. The comparing action can be carried out for two basic 
+vertices. After the required number of vertices has been selected, the "Compare" button is clicked. 
+A new window appears displaying the "Difference between states panel". 
+
+\label{Exit}
+The "Exit" button represent the manner in which the user can stop the execution
+of the graphical debugger. Clicking this button will close the window associated to
+the debugging session.
+
+\paragraph{Difference between states panel}
+The "Difference between states panel" contains two configurations, displayed next to each other, one on the 
+left half of the panel and the other on the right half. The differences between the two configurations are
+highlighted for the user with a yellow color. This way the user can easily remark what has changed and
+what remains common for the two selected elements.
+
+  
 */
 
 /*@

@@ -25,7 +25,11 @@ import com.google.common.collect.Multimap;
  */
 public class Definition extends JavaSymbolicObject {
 
-    public static final Set<String> TOKEN_SORTS = ImmutableSet.of("Bool", "Int", "Id");
+    public static final Set<String> TOKEN_SORTS = ImmutableSet.of(
+            "Bool",
+            "Int",
+            "String",
+            "Id");
 
     private final List<Rule> rules;
     private final List<Rule> macros;
