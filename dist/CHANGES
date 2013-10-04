@@ -1,0 +1,6 @@
+CHANGELOG
+
+2013-10-04  Daejun Park  <dpark69@illinois.edu>
+
+    * The command-line options are totally changed. Refer to the following page
+      for details: https://github.com/kframework/k/wiki/Command-line-options
