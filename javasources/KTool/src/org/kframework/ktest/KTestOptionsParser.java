@@ -51,7 +51,7 @@ public class KTestOptionsParser {
 		addOptionS(OptionBuilder.withLongOpt(Configuration.PROGRAMS_OPTION).hasArg().withArgName("dir").withDescription("Programs directory or, in case the -config option is used, a root directory for programs.").create());
 		addOptionS(OptionBuilder.withLongOpt(Configuration.EXTENSIONS_OPTION).hasArg().withArgName("string").withDescription("The list of program extensions separated by whitespaces.").create());
 		addOptionS(OptionBuilder.withLongOpt(Configuration.EXCLUDE_OPTION).hasArg().withArgName("file").withDescription("The list of programs which will not be tested.").create());
-		addOptionS(OptionBuilder.withLongOpt(Configuration.RESULTS_OPTION).hasArg().withArgName("dir").withDescription("Directory containing I/O for programs or, in case the -config option is used, a root directory for the I/O for programs.").create());
+		addOptionS(OptionBuilder.withLongOpt(Configuration.RESULTS_OPTION).hasArg().withArgName("dir").withDescription("Directory containing input and expected output for programs or, in case the -config option is used, a root directory for the expected I/O for programs.").create());
 		addOptionS(OptionBuilder.withLongOpt(Configuration.SKIP_OPTION).hasArg().withArgName("steps").withDescription("The list of steps separated by whitespace to be skipped. A step is either [" + Configuration.KOMPILE_STEP + "|" + Configuration.PDF_STEP + "|" + Configuration.PROGRAMS_STEP + "].").create());
 		addOptionS(OptionBuilder.withLongOpt(Configuration.REPORT_OPTION).withDescription("Whether to generate a junit-like report.").create());
 		addOptionS(OptionBuilder.withLongOpt(Configuration.PROCESSES_OPTION).hasArg().withArgName("num").withDescription("The maximum number of threads.").create());

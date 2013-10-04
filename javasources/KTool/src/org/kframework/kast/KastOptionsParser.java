@@ -55,8 +55,8 @@ public class KastOptionsParser {
 		addOptionE(OptionBuilder.withLongOpt("fast-kast").withDescription("For testing the new concrete parser, the C SDF parser.").create());
 		addOptionE(OptionBuilder.withLongOpt("pretty").withDescription("Pretty print the output.").create());
 		addOptionE(OptionBuilder.withLongOpt("tabsize").hasArg().withArgName("num").withDescription("How many spaces to use for each indentation level.").create());
-		addOptionE(OptionBuilder.withLongOpt("maxwidth").hasArg().withArgName("num").withDescription("The indicative maximal width of the output.").create());
-		addOptionE(OptionBuilder.withLongOpt("aux-tabsize").hasArg().withArgName("num").withDescription("How many spaces to indent lines which do not fit into max-width.").create());
+		addOptionE(OptionBuilder.withLongOpt("maxwidth").hasArg().withArgName("num").withDescription("Line will be split before <num> chars.").create());
+		addOptionE(OptionBuilder.withLongOpt("aux-tabsize").hasArg().withArgName("num").withDescription("How many spaces to indent lines which do not fit into max-width. (Default: 2).").create());
 		addOptionE(OptionBuilder.withLongOpt("nextline").withDescription("Force newline before first argument.").create());
 	}
 

@@ -47,16 +47,16 @@ public class KompileOptionsParser {
 
 		// Common options
 		addOptionS(OptionBuilder.withLongOpt("directory").hasArg().withArgName("dir").withDescription("Path to the directory in which the output resides. An output can be either a kompiled K definition or a document which depends on the type of backend. The default is the current directory.").create("d"));
-		addOptionS(OptionBuilder.withLongOpt("backend").hasArg().withArgName("backend").withDescription("Choose a backend. <backend> is either [pdf|latex|html|maude|java|unparse|symbolic]. Either of [pdf|latex|html] generates document from the given K definition. Either [maude|java] creates the kompiled K definition. The 'unparse' generates an unparsed version of the given K definition. The 'symbolic' generates symbolic semantics.").create());
+		addOptionS(OptionBuilder.withLongOpt("backend").hasArg().withArgName("backend").withDescription("Choose a backend. <backend> is one of [pdf|latex|html|maude|java|unparse|symbolic]. Each of [pdf|latex|html] generates a document from the given K definition. Either of [maude|java] creates the kompiled K definition. 'unparse' generates an unparsed version of the given K definition. 'symbolic' generates symbolic semantics.").create());
 		addOptionS(OptionBuilder.withLongOpt("doc-style").hasArg().withArgName("string/file").withDescription("Specify a style option for the package 'k.sty' (when '--backend [pdf|latex]' is used) or path to an alternative .css file (when '--backend html' is used).").create());
 		addOptionS(OptionBuilder.withLongOpt("warnings").hasArg().withArgName("all|none").withDescription("Warning level. (Default: none).").create("w"));
 		addOptionS(OptionBuilder.withLongOpt("main-module").hasArg().withArgName("string").withDescription("Specify main module in which a program starts to execute. This information is used by 'krun'. The default is the name of the given K definition file without the extension (.k).").create());
 		addOptionS(OptionBuilder.withLongOpt("syntax-module").hasArg().withArgName("string").withDescription("Specify main module for syntax. This information is used by 'krun'. (Default: <main-module>-SYNTAX).").create());
 
 		// Advanced options
-		addOptionS(OptionBuilder.withLongOpt("transition").hasArg().withArgName("string").withDescription("<string> includes a space-separated list of tags designating rules to become transitions.").create());
-		addOptionS(OptionBuilder.withLongOpt("superheat").hasArg().withArgName("string").withDescription("Specifies which rules supercool the computation. To be used in combination with --superheat. <string> is a space-separated list of rule tags.").create());
-		addOptionS(OptionBuilder.withLongOpt("supercool").hasArg().withArgName("string").withDescription("Specifies which syntactic constructs superheat the computation. To be used in combination with --supercool. <string> is a space-separated list of production tags.").create());
+		addOptionS(OptionBuilder.withLongOpt("transition").hasArg().withArgName("string").withDescription("<string> is a space-separated list of tags designating rules to become transitions.").create());
+		addOptionS(OptionBuilder.withLongOpt("superheat").hasArg().withArgName("string").withDescription("Specifies which syntactic constructs superheat the computation. To be used in combination with --supercool. <string> is a space-separated list of production tags.").create());
+		addOptionS(OptionBuilder.withLongOpt("supercool").hasArg().withArgName("string").withDescription("Specifies which rules supercool the computation. To be used in combination with --superheat. <string> is a space-separated list of rule tags.").create());
 		addOptionS(OptionBuilder.withLongOpt("help-experimental").withDescription("Print help on non-standard options.").create("X"));
 
 		// Experimental options
@@ -66,7 +66,7 @@ public class KompileOptionsParser {
 		addOptionE(OptionBuilder.withLongOpt("add-top-cell").withDescription("Add a top cell to configuration and all rules.").create());
 		addOptionE(OptionBuilder.withLongOpt("kcells").hasArg().withArgName("string").withDescription("Cells which contain komputations.").create());
 		addOptionE(OptionBuilder.withLongOpt("sort-cells").withDescription("Sort cells according to the order in the configuration.").create());
-		addOptionE(OptionBuilder.withLongOpt("no-smt").withDescription("Do not call the smt solver. This must be used together with '--backend symbolic'.").create());
+		addOptionE(OptionBuilder.withLongOpt("no-smt").withDescription("Do not call the smt solver. This only has an effect with '--backend symbolic'.").create());
 		addOptionE(OptionBuilder.withLongOpt("fast-kast").withDescription("For testing the new concrete parser, the C SDF parser.").create());
 		addOptionE(OptionBuilder.withLongOpt("loud").withDescription("Prints 'Done' at the end if all is ok.").create());
 	}

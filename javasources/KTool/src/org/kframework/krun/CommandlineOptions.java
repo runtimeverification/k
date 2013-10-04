@@ -60,7 +60,7 @@ public class CommandlineOptions {
 		addOptionS(OptionBuilder.withLongOpt("verbose").withDescription("Verbose output.").create("v"));
 
 		// Common K options
-		addOptionS(OptionBuilder.withLongOpt("output").hasArg().withArgName("file").withDescription("Path to the file where the output message is stored.").create("o"));
+		addOptionS(OptionBuilder.withLongOpt("output").hasArg().withArgName("file").withDescription("Store output in the file instead of displaying it.").create("o"));
 		addOptionS(OptionBuilder.withLongOpt("directory").hasArg().withArgName("dir").withDescription("Path to the directory in which the kompiled K definition resides. The default is the current directory.").create("d"));
 		addOptionS(OptionBuilder.withLongOpt("main-module").hasArg().withArgName("name").withDescription("Specify main module in which a program starts to execute. The default is the module specified in the given compiled K definition.").create());
 		addOptionS(OptionBuilder.withLongOpt("syntax-module").hasArg().withArgName("name").withDescription("Specify main module for syntax. The default is the module specified in the given compiled K definition.").create());
@@ -69,6 +69,9 @@ public class CommandlineOptions {
 		addOptionS(OptionBuilder.withLongOpt("color").withDescription("Use colors in output. (Default: enabled).").create());
 		addOptionS(OptionBuilder.withLongOpt("no-color").withDescription("").create());
 		addOptionS(OptionBuilder.withLongOpt("parens").hasArg().withArgName("[greedy|smart]").withDescription("Select the parentheses-insertion algorithm. The default value is 'greedy'. Note that 'smart' can take much longer time to execute.").create());
+		addOptionS(OptionBuilder.withLongOpt("parser").hasArg().withArgName("file").withDescription("Command used to parse programs. (Default: kast).").create());
+		addOptionS(OptionBuilder.withLongOpt("cfg-parser").hasArg().withArgName("file").withDescription("Command used to parse configuration variables. (Default: kast --def -e).  See --parser above. Applies to subsequent -c options until another parser is specified with this option.").create());
+		addOptionS(OptionBuilder.withLongOpt("config").hasArgs(2).withValueSeparator('=').withArgName("name=value").withDescription("Specify values for variables in the configuration.").create("c"));
 
 		// Advanced K options
 		addOptionS(OptionBuilder.withLongOpt("search").withDescription("In conjunction with it you can specify 3 options that are optional: pattern (the pattern used for search), bound (the number of desired solutions) and depth (the maximum depth of the search).").create());
@@ -86,20 +89,18 @@ public class CommandlineOptions {
 
 		// Experimental options
 		addOptionE(OptionBuilder.withLongOpt("fast-kast").withDescription("For testing the new concrete parser, the C SDF parser.").create());
-		addOptionE(OptionBuilder.withLongOpt("parser").hasArg().withArgName("file").withDescription("Command used to parse programs. (Default: kast). You need to specify the path where you parser is located on the disk.").create());
-		addOptionE(OptionBuilder.withLongOpt("cfg-parser").hasArg().withArgName("file").withDescription("Command used to parse configuration variables. (Default: kast --def -e).  See --parser above. Applies to subsequent -c options until another parser is specified with this option.").create());
 		addOptionE(OptionBuilder.withLongOpt("statistics").withDescription("Print Maude's rewrite statistics.").create());
 		addOptionE(OptionBuilder.withLongOpt("no-statistics").withDescription("").create());
 		addOptionE(OptionBuilder.withLongOpt("term").hasArg().withArgName("string").withDescription("Input argument will be parsed with the specified parser and used as the sole input to krun.").create());
 		addOptionE(OptionBuilder.withLongOpt("maude-cmd").hasArg().withArgName("string").withDescription("Maude command used to execute the definition.").create());
-		addOptionE(OptionBuilder.withLongOpt("log-io").withDescription("Make the IO server to create logs. (Default: disabled).").create());
+
+		addOptionE(OptionBuilder.withLongOpt("log-io").withDescription("Make the IO server create logs. (Default: disabled).").create());
 		addOptionE(OptionBuilder.withLongOpt("no-log-io").withDescription("").create());
 		addOptionE(OptionBuilder.withLongOpt("debug").withDescription("Run an execution in debug mode.").create());
 		addOptionE(OptionBuilder.withLongOpt("debug-gui").withDescription("Run an execution in debug mode with graphical interface.").create());
 		addOptionE(OptionBuilder.withLongOpt("trace").withDescription("Turn on maude trace.").create());
 		addOptionE(OptionBuilder.withLongOpt("profile").withDescription("Turn on maude profiler.").create());
 		addOptionE(OptionBuilder.withLongOpt("ltlmc").hasArg().withArgName("file/string").withDescription("Specify the formula for model checking through a file or at commandline.").create());
-		addOptionE(OptionBuilder.withLongOpt("config").hasArgs(2).withValueSeparator('=').withArgName("name=value").withDescription("Specify values for variables in the configuration.").create("c"));
 		addOptionE(OptionBuilder.withLongOpt("prove").hasArg().withArgName("file").withDescription("Prove a set of reachability rules.").create());
 		addOptionE(OptionBuilder.withLongOpt("smt").hasArg().withArgName("solver").withDescription("SMT solver to use for checking constraints. <solver> is either [z3|gappa|none]. (Default: z3).").create());
 		addOptionE(OptionBuilder.withLongOpt("generate-tests").withDescription("Test programs will be generated along with normal search.").create());
