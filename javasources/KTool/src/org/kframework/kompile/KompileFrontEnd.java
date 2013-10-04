@@ -232,7 +232,7 @@ public class KompileFrontEnd {
 			context.dotk.mkdirs();
 			break;
 		case "java":
-			GlobalSettings.matchingLogic = true;
+			GlobalSettings.javaBackend = true;
 			backend = new JavaSymbolicBackend(Stopwatch.sw, context);
 			context.dotk = new File(output + File.separator + FileUtil.stripExtension(mainFile.getName()) + "-kompiled");
 			context.dotk.mkdirs();
