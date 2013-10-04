@@ -3,154 +3,72 @@ package org.kframework.kompile;
 import org.apache.commons.cli.*;
 import org.kframework.utils.ActualPosixParser;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+
 public class KompileOptionsParser {
 	Options options;
 	HelpFormatter help;
+	// For printing help messages: options = optionsStandard + optionsExperimental
+	private Options optionsStandard;
+	private Options optionsExperimental;
+	private ArrayList<Option> optionList = new ArrayList<Option>();
+
+	// wrapper function to add an option
+	private void addOptionWrapper(Option opt, boolean isStandard) {
+		// for parsing command-line options
+		options.addOption(opt);
+		// for printing help messages
+		optionList.add(opt);
+		if (isStandard) {
+			optionsStandard.addOption(opt);
+		} else {
+			optionsExperimental.addOption(opt);
+		}
+	}
+	// add a standard option
+	private void addOptionS(Option opt) {
+		addOptionWrapper(opt, true);
+	}
+	// add an experimental option
+	private void addOptionE(Option opt) {
+		addOptionWrapper(opt, false);
+	}
 
 	public KompileOptionsParser() {
 		options = new Options();
 		help = new HelpFormatter();
+		optionsStandard = new Options();
+		optionsExperimental = new Options();
 
-		// main options
-		OptionGroup main = new OptionGroup();
-		Option def = new Option("def", "definition", true, "main file to kompile");
-		Option step = new Option("step", "step", true, "name of the compilation phase after which compilation should stop.");
+		addOptionS(OptionBuilder.withLongOpt("help").withDescription("Print this help message.").create("h"));
+		addOptionS(OptionBuilder.withLongOpt("version").withDescription("Print version information.").create());
+		addOptionS(OptionBuilder.withLongOpt("verbose").withDescription("Verbose output.").create("v"));
 
-		// verbose and help
-		OptionGroup verb = new OptionGroup();
-		Option help = new Option("h", "help", false, "prints this message and exits");
-		Option version = new Option("version", false, "prints version number");
-		Option verbose = new Option("v", "verbose", false, "verbose mode");
-		// Option lint = new Option("lint", "lint", false, "Checks your definition for possible logical errors");
-		verb.addOption(help);
-		verb.addOption(version);
-		verb.addOption(verbose);
-		// verb.addOption(lint);
+		// Common options
+		addOptionS(OptionBuilder.withLongOpt("directory").hasArg().withArgName("dir").withDescription("Path to the directory in which the output resides. An output can be either a kompiled K definition or a document which depends on the type of backend. The default is the current directory.").create("d"));
+		addOptionS(OptionBuilder.withLongOpt("backend").hasArg().withArgName("backend").withDescription("Choose a backend. <backend> is one of [pdf|latex|html|maude|java|unparse|symbolic]. Each of [pdf|latex|html] generates a document from the given K definition. Either of [maude|java] creates the kompiled K definition. 'unparse' generates an unparsed version of the given K definition. 'symbolic' generates symbolic semantics.").create());
+		addOptionS(OptionBuilder.withLongOpt("doc-style").hasArg().withArgName("string/file").withDescription("Specify a style option for the package 'k.sty' (when '--backend [pdf|latex]' is used) or path to an alternative .css file (when '--backend html' is used).").create());
+		addOptionS(OptionBuilder.withLongOpt("warnings").hasArg().withArgName("all|none").withDescription("Warning level. (Default: none).").create("w"));
+		addOptionS(OptionBuilder.withLongOpt("main-module").hasArg().withArgName("string").withDescription("Specify main module in which a program starts to execute. This information is used by 'krun'. The default is the name of the given K definition file without the extension (.k).").create());
+		addOptionS(OptionBuilder.withLongOpt("syntax-module").hasArg().withArgName("string").withDescription("Specify main module for syntax. This information is used by 'krun'. (Default: <main-module>-SYNTAX).").create());
 
-		// Option tempDisamb = new Option("tempDisamb", "tempDisamb", false, "temporary to test the java disambiguator");
+		// Advanced options
+		addOptionS(OptionBuilder.withLongOpt("transition").hasArg().withArgName("string").withDescription("<string> is a space-separated list of tags designating rules to become transitions.").create());
+		addOptionS(OptionBuilder.withLongOpt("superheat").hasArg().withArgName("string").withDescription("Specifies which syntactic constructs superheat the computation. To be used in combination with --supercool. <string> is a space-separated list of production tags.").create());
+		addOptionS(OptionBuilder.withLongOpt("supercool").hasArg().withArgName("string").withDescription("Specifies which rules supercool the computation. To be used in combination with --superheat. <string> is a space-separated list of rule tags.").create());
+		addOptionS(OptionBuilder.withLongOpt("help-experimental").withDescription("Print help on non-standard options.").create("X"));
 
-		// verbose and help
-		OptionGroup nofile = new OptionGroup();
-		Option nofileopt = new Option("nofile", "nofilename", false, "don't include the long filenames in the XML.");
-		nofile.addOption(nofileopt);
-
-		// latex
-		OptionGroup tex = new OptionGroup();
-		Option pdf = new Option("pdf", false, "generate pdf from definition");
-		Option latex = new Option("latex", false, "generate latex from definition");
-		Option style = new Option("style", true, "pass styling information to the k.sty package");
-		Option maudify = new Option("m", "maudify", false, "maudify the definition");
-		Option compile = new Option("c", "compile", false, "compile the definition");
-		Option toXml = new Option("xml", false, "generate xml from definition");
-		Option toDoc = new Option("doc", "documentation", false, "generate the HTML documentation");
-
-		tex.addOption(latex);
-		tex.addOption(pdf);
-		tex.addOption(compile);
-		tex.addOption(maudify);
-		tex.addOption(toXml);
-		tex.addOption(toDoc);
-
-		OptionGroup warn = new OptionGroup();
-		Option warnings = new Option("w", "warnings", true, "Use with all/none to control warnings display");
-		warn.addOption(warnings);
-
-		// language module name
-		OptionGroup langGroup = new OptionGroup();
-		Option lang = new Option("l", "lang", true, "start module");
-		langGroup.addOption(lang);
-
-		// language module name
-		OptionGroup langSynGroup = new OptionGroup();
-		Option langSyn = new Option("synmod", "syntax-module", true, "start module for syntax");
-		langSynGroup.addOption(langSyn);
-
-		// language module name
-		// OptionGroup preludeGroup = new OptionGroup();
-		// Option prelude = new Option("prelude", true, "Load a different prelude file.");
-		// preludeGroup.addOption(prelude);
-
-		// lib
-		OptionGroup libGroup = new OptionGroup();
-		Option lib = new Option("lib", true, "Specify extra-libraries for compile/runtime.");
-		libGroup.addOption(lib);
-
-		Option toHTML = new Option("html", false, "generate html from definition");
-
-		Option kexp = new Option("kexp", false, "retrieve the KExp associated to a definition");
-
-		Option unparse = new Option("unparse", false, "unparse a definition");
-
-		Option addTopCell = new Option("addTopCell", false, "add a top cell to configuration and all rules");
-
-		Option kCells = new Option("k", "kcells", true, "cells which contain komputations");
-
-		Option sortCells = new Option("sortCells", false,
-				"sort cells according to the order in the configuration");
-
-		// transition
-		Option transition = new Option("transition", true, "<arg> tags to become rewrite rules");
-		Option superheat = new Option("superheat", true, "syntax <arg> tags triggering super heating nondetermistic choice for strictness");
-		Option supercool = new Option("supercool", true, "rule <arg> tags triggering super cooling tags are space-separated and can include the tag default");
-
-		Option outputFile = new Option("o", "output", true, "specify output file/directory. Default <file>-compiled");
-
-        // backend options
-        OptionGroup be = new OptionGroup();
-        Option ml = new Option("ml", "java-backend", false, "compile for Java backend");
-        be.addOption(ml);
-
-		// matching logic and symbolic execution options
-		OptionGroup sym = new OptionGroup();
-		Option smt = new Option("smt", "generate translation to SMTLib2");
-		Option symEq = new Option("symeq", "symbolic-equality", false, "generate sort equalities");
-		Option symbolic = new Option("symbolic", false, "generate symbolic semantics");
-		sym.addOption(smt);
-		sym.addOption(symEq);
-		sym.addOption(symbolic);
-
-		// no smt calls generated by kompiler
-		OptionGroup symOpt = new OptionGroup();
-		Option noSmt = new Option("nosmt", false, "do not call the smt solver; this must be used together with --symbolic");
-		symOpt.addOption(noSmt);
-		
-		// check reachability formulas
-		OptionGroup checkOpt = new OptionGroup();
-		Option check = new Option("check", true, "checks the set of reachability rules from <arg>");
-		checkOpt.addOption(check);
-		
-		// add options
-		options.addOption(new Option("fastKast", false, "Option to test new class instantiation"));
-		options.addOptionGroup(verb);
-		options.addOptionGroup(main);
-		options.addOptionGroup(langGroup);
-		options.addOptionGroup(langSynGroup);
-		options.addOptionGroup(tex);
-		options.addOptionGroup(warn);
-		options.addOptionGroup(libGroup);
-		options.addOptionGroup(nofile);
-		options.addOptionGroup(be);
-		options.addOptionGroup(sym);
-		options.addOptionGroup(symOpt);
-		options.addOptionGroup(checkOpt);
-		// options.addOption(tempDisamb);
-
-		Option loud = new Option("loud", false, "prints an OK message at the end if all is ok.");
-
-		options.addOption(loud);
-		options.addOption(toHTML);
-		options.addOption(kexp);
-		options.addOption(unparse);
-		options.addOption(addTopCell);
-		options.addOption(kCells);
-		options.addOption(sortCells);
-		options.addOption(transition);
-		options.addOption(supercool);
-		options.addOption(superheat);
-		options.addOption(def);
-		options.addOption(step);
-		options.addOption(outputFile);
-		options.addOption(style);
+		// Experimental options
+		addOptionE(OptionBuilder.withLongOpt("step").hasArg().withArgName("string").withDescription("Name of the compilation phase after which the compilation process should stop.").create());
+		addOptionE(OptionBuilder.withLongOpt("doc").withDescription("Generate reference manual of K framework.").create());
+		addOptionE(OptionBuilder.withLongOpt("lib").hasArg().withArgName("file").withDescription("Specify extra-libraries for compile/runtime.").create());
+		addOptionE(OptionBuilder.withLongOpt("add-top-cell").withDescription("Add a top cell to configuration and all rules.").create());
+		addOptionE(OptionBuilder.withLongOpt("kcells").hasArg().withArgName("string").withDescription("Cells which contain komputations.").create());
+		addOptionE(OptionBuilder.withLongOpt("sort-cells").withDescription("Sort cells according to the order in the configuration.").create());
+		addOptionE(OptionBuilder.withLongOpt("no-smt").withDescription("Do not call the smt solver. This only has an effect with '--backend symbolic'.").create());
+		addOptionE(OptionBuilder.withLongOpt("fast-kast").withDescription("For testing the new concrete parser, the C SDF parser.").create());
+		addOptionE(OptionBuilder.withLongOpt("loud").withDescription("Prints 'Done' at the end if all is ok.").create());
 	}
 
 	public CommandLine parse(String[] cmd) {
@@ -163,7 +81,7 @@ public class KompileOptionsParser {
 			// e.printStackTrace();
 		}
 
-		org.kframework.utils.Error.helpExit(help, options);
+		//org.kframework.utils.Error.helpExit(help, options);
 		return null;
 	}
 
@@ -173,5 +91,15 @@ public class KompileOptionsParser {
 
 	public HelpFormatter getHelp() {
 		return help;
+	}
+
+	public Options getOptionsStandard() {
+		return optionsStandard;
+	}
+	public Options getOptionsExperimental() {
+		return optionsExperimental;
+	}
+	public ArrayList<Option> getOptionList() {
+		return optionList;
 	}
 }
