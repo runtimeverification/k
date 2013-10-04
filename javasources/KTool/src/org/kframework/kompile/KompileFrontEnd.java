@@ -191,8 +191,10 @@ public class KompileFrontEnd {
 		String backendOpt;
 		if (cmd.hasOption("backend")) {
 			backendOpt = cmd.getOptionValue("backend");
+		/*
 		} else if (cmd.hasOption("xml")) {
 			backendOpt = "xml";
+		*/
 		} else if (cmd.hasOption("doc")) {
 			backendOpt = "doc";
 		} else {
@@ -214,10 +216,12 @@ public class KompileFrontEnd {
 			}
 			backend = new DocumentationBackend(Stopwatch.sw, context);
 			break;
+		/*
 		case "xml":
 			GlobalSettings.xml = true;
 			backend = new XmlBackend(Stopwatch.sw, context);
 			break;
+		*/
 		case "html":
 			if (!cmd.hasOption("doc-style")) {
 				GlobalSettings.style = "k-definition.css";
