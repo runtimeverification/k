@@ -38,7 +38,7 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
      * v is a fresh variable and term = C[t1 => t2] */
     private List<Term> splitRewrite(Term term) throws TransformerException {
     	final Variable v;
-        if (GlobalSettings.matchingLogic) {
+        if (GlobalSettings.javaBackend) {
             /* the java rewrite engine only supports heating/cooling on KItem */
             v = Variable.getFreshVar(KSorts.KITEM);
         } else {

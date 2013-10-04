@@ -17,6 +17,8 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.kil.Z3Term;
+import org.kframework.backend.java.util.GappaPrinter;
+import org.kframework.backend.java.util.GappaServer;
 import org.kframework.kil.ASTNode;
 
 import java.io.Serializable;
@@ -294,32 +296,43 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
 
     public boolean implies(SymbolicConstraint constraint) {
         normalize();
-
-        Set<Variable> rightHandSideVariables = new HashSet<Variable>(constraint.variableSet());
-        rightHandSideVariables.removeAll(variableSet());
-
         Boolean result = false;
-        try {
-            com.microsoft.z3.Context context = new com.microsoft.z3.Context();
-            KILtoZ3 transformer = new KILtoZ3(rightHandSideVariables, context);
 
-            Solver solver = context.MkSolver();
+        if (K.smt.equals("gappa")) {
+            constraint.normalize();
+            String gterm1 = GappaPrinter.toGappa(this);
+            String gterm2 = GappaPrinter.toGappa(constraint);
+            String input = "(" + gterm2 + ")";
+            if (!gterm1.equals("")) input = "(" + gterm1 + ") -> " + input;
+            if (GappaServer.proveTrue(input))
+                result = true;
 
-            for (Equality equality : equalities) {
-                solver.Assert(context.MkEq(
-                        ((Z3Term) equality.leftHandSide.accept(transformer)).expression(),
-                        ((Z3Term) equality.rightHandSide.accept(transformer)).expression()));
-            }
+//            System.out.println(constraint);
+        } else if (K.smt.equals("z3")) {
+            Set<Variable> rightHandSideVariables = new HashSet<Variable>(constraint.variableSet());
+            rightHandSideVariables.removeAll(variableSet());
 
-            //BoolExpr[] inequalities = new BoolExpr[constraint.equalities.size() + constraint.substitution.size()];
-            BoolExpr[] inequalities = new BoolExpr[constraint.equalities.size()];
-            int i = 0;
-            for (Equality equality : constraint.equalities) {
-                inequalities[i++] = context.MkNot(context.MkEq(
-                        ((Z3Term) equality.leftHandSide.accept(transformer)).expression(),
-                        ((Z3Term) equality.rightHandSide.accept(transformer)).expression()));
-            }
-            /* TODO(AndreiS): fix translation to smt
+            try {
+                com.microsoft.z3.Context context = new com.microsoft.z3.Context();
+                KILtoZ3 transformer = new KILtoZ3(rightHandSideVariables, context);
+
+                Solver solver = context.MkSolver();
+
+                for (Equality equality : equalities) {
+                    solver.Assert(context.MkEq(
+                            ((Z3Term) equality.leftHandSide.accept(transformer)).expression(),
+                            ((Z3Term) equality.rightHandSide.accept(transformer)).expression()));
+                }
+
+                //BoolExpr[] inequalities = new BoolExpr[constraint.equalities.size() + constraint.substitution.size()];
+                BoolExpr[] inequalities = new BoolExpr[constraint.equalities.size()];
+                int i = 0;
+                for (Equality equality : constraint.equalities) {
+                    inequalities[i++] = context.MkNot(context.MkEq(
+                            ((Z3Term) equality.leftHandSide.accept(transformer)).expression(),
+                            ((Z3Term) equality.rightHandSide.accept(transformer)).expression()));
+                }
+                /* TODO(AndreiS): fix translation to smt
             for (Map.Entry<Variable, Term> entry : constraint.substitution.entrySet()) {
                 inequalities[i++] = context.MkNot(context.MkEq(
                         ((Z3Term) entry.getKey().accept(transformer)).expression(),
@@ -327,46 +340,47 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
             }
             */
 
-            Sort[] variableSorts = new Sort[rightHandSideVariables.size()];
-            Symbol[] variableNames = new Symbol[rightHandSideVariables.size()];
-            i = 0;
-            for (Variable variable : rightHandSideVariables) {
-                if (variable.sort().equals(BoolToken.SORT_NAME)) {
-                    variableSorts[i] = context.MkBoolSort();
-                } else if (variable.sort().equals(IntToken.SORT_NAME)) {
-                    variableSorts[i] = context.MkIntSort();
-                } else if (variable.sort().equals(Int32Token.SORT_NAME)) {
-                    variableSorts[i] = context.MkBitVecSort(32);
-                } else {
-                    throw new RuntimeException();
+                Sort[] variableSorts = new Sort[rightHandSideVariables.size()];
+                Symbol[] variableNames = new Symbol[rightHandSideVariables.size()];
+                i = 0;
+                for (Variable variable : rightHandSideVariables) {
+                    if (variable.sort().equals(BoolToken.SORT_NAME)) {
+                        variableSorts[i] = context.MkBoolSort();
+                    } else if (variable.sort().equals(IntToken.SORT_NAME)) {
+                        variableSorts[i] = context.MkIntSort();
+                    } else if (variable.sort().equals(Int32Token.SORT_NAME)) {
+                        variableSorts[i] = context.MkBitVecSort(32);
+                    } else {
+                        throw new RuntimeException();
+                    }
+                    variableNames[i] = context.MkSymbol(variable.name());
+                    ++i;
                 }
-                variableNames[i] = context.MkSymbol(variable.name());
-                ++i;
-            }
 
-            Expr[] boundVariables = new Expr[rightHandSideVariables.size()];
-            i = 0;
-            for (Variable variable : rightHandSideVariables) {
-                boundVariables[i++] = KILtoZ3.valueOf(variable, context).expression();
-            }
+                Expr[] boundVariables = new Expr[rightHandSideVariables.size()];
+                i = 0;
+                for (Variable variable : rightHandSideVariables) {
+                    boundVariables[i++] = KILtoZ3.valueOf(variable, context).expression();
+                }
 
-            if (boundVariables.length > 0) {
-                solver.Assert(context.MkForall(
-                        boundVariables,
-                        context.MkOr(inequalities),
-                        1,
-                        null,
-                        null,
-                        null,
-                        null));
-            } else {
-                solver.Assert(context.MkOr(inequalities));
-            }
+                if (boundVariables.length > 0) {
+                    solver.Assert(context.MkForall(
+                            boundVariables,
+                            context.MkOr(inequalities),
+                            1,
+                            null,
+                            null,
+                            null,
+                            null));
+                } else {
+                    solver.Assert(context.MkOr(inequalities));
+                }
 
-            result = solver.Check() == Status.UNSATISFIABLE;
-            context.Dispose();
-        } catch (Z3Exception e) {
-            e.printStackTrace();
+                result = solver.Check() == Status.UNSATISFIABLE;
+                context.Dispose();
+            } catch (Z3Exception e) {
+                e.printStackTrace();
+            }
         }
         return result;
     }
@@ -451,25 +465,23 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
 
             Variable variable;
             Term term;
+            // TODO(AndreiS): the sort of a variable may become more specific
             /* when possible, substitute the anonymous variable */
-            if (equality.rightHandSide instanceof Variable
-                    && equality.leftHandSide instanceof Variable) {
-                if (((Variable) equality.leftHandSide).isAnonymous()) {
-                    variable = (Variable) equality.rightHandSide;
-                    term = equality.leftHandSide;
-                } else {
-                    variable = (Variable) equality.leftHandSide;
-                    term = equality.rightHandSide;
-                }
-            } else if (equality.rightHandSide instanceof Variable) {
+            if (equality.leftHandSide instanceof Variable
+                    && equality.rightHandSide instanceof Variable
+                    && ((Variable) equality.rightHandSide).isAnonymous()) {
                 variable = (Variable) equality.rightHandSide;
                 term = equality.leftHandSide;
             } else if (equality.leftHandSide instanceof Variable) {
                 variable = (Variable) equality.leftHandSide;
                 term = equality.rightHandSide;
+            } else if (equality.rightHandSide instanceof Variable) {
+                variable = (Variable) equality.rightHandSide;
+                term = equality.leftHandSide;
             } else {
                 continue;
             }
+
             if (term.variableSet().contains(variable)) {
                 continue;
             }
@@ -511,10 +523,10 @@ public class SymbolicConstraint extends JavaSymbolicObject implements Serializab
             Map<Variable, Term> substitution,
             TermContext context) {
         Map.Entry<Variable, Term>[] entries = map.entrySet().toArray(new Map.Entry[map.size()]);
-        for (int index = 0; index < entries.length; ++index) {
-            Term term = entries[index].getValue().substitute(substitution, context);
-            if (term != entries[index].getValue()) {
-                map.put(entries[index].getKey(), term);
+        for (Map.Entry<Variable, Term> entry : entries) {
+            Term term = entry.getValue().substitute(substitution, context);
+            if (term != entry.getValue()) {
+                map.put(entry.getKey(), term);
             }
         }
     }

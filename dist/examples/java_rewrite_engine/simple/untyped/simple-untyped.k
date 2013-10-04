@@ -226,6 +226,8 @@ straightforward. */
 //  rule var X:Id = E; => var X; X = E;                               [macro]
   rule if (E) S => if (E) S else {}
   rule for(Start Cond; Step) {S} => {Start while (Cond) {S Step;}}
+  /* andreis: added macro for the empty block */
+  rule for(Start Cond; Step) {} => {Start while (Cond) {Step;}}
   rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;
   rule var X:Id = E; => var X; X = E;
 
@@ -760,7 +762,7 @@ to something).  This means that once $S_1$ completes in the rule below, $S_2$
 becomes automatically the next computation item without any additional
 (explicit or implicit) rules. */
 
-  rule S1:Stmt S2:Stmts => S1 ~> S2  [structural]
+  rule S1:Stmts S2:Stmts => S1 ~> S2  [structural]
 
 /*@ \subsection{Expression statements}
 Expression statements are only used for their side effects, so their result

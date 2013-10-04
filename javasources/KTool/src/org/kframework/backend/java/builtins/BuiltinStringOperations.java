@@ -103,6 +103,14 @@ public class BuiltinStringOperations {
         }
     }
 
+    public static UninterpretedToken string2float(StringToken term) {
+        return UninterpretedToken.of("Float", term.value());
+    }
+
+    public static StringToken float2string(UninterpretedToken term) {
+        return StringToken.of(term.value());
+    }
+
     public static StringToken int2string(IntToken term) {
         return StringToken.of(term.bigIntegerValue().toString());
     }

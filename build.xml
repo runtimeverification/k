@@ -15,9 +15,6 @@
 
 	<target name="build">
 		<ant antfile="${javasources}/KTool/build.xml" dir="${javasources}/KTool" />
-		<ant antfile="ktest.xml" dir="./tests/tools/Testing">
-			<property name="cfg" location="${config}" />
-		</ant>
 		<antcall target="makeversion" />	
 	</target>
 

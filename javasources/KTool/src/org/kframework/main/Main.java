@@ -2,6 +2,7 @@ package org.kframework.main;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 
 import org.kframework.kagreg.KagregFrontEnd;
 import org.kframework.kcheck.KCheckFrontEnd;
@@ -58,13 +59,11 @@ public class Main {
 	 * @throws Exception when loadDefinition fails
 	 * @throws IOException when loadDefinition fails 
 	 */
-	public static void main(String[] args) throws IOException, Exception {
+	public static void main(String[] args) throws Exception {
 		setJavaLibraryPath();
 
 		if (args.length >= 1) {
-			String[] args2 = new String[args.length - 1];
-			for (int i = 0; i < args.length - 1; i++)
-				args2[i] = args[i + 1];
+            String[] args2 = Arrays.copyOfRange(args, 1, args.length);
 			if (args[0].equals("-kompile")) {
 				org.kframework.kompile.KompileFrontEnd.kompile(args2);
 			} else if (args[0].equals("-kagreg")) {

@@ -138,7 +138,7 @@ public class CheckVariables extends BasicVisitor {
 		for (Variable v : right.keySet()) {
 			if (!left.containsKey(v)) {
                 /* matching logic relaxes this restriction */
-                if (!GlobalSettings.matchingLogic) {
+                if (!GlobalSettings.javaBackend) {
                     GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
                             KException.KExceptionGroup.COMPILER,
                             "Unbounded Variable " + v.toString() + ".",

@@ -120,6 +120,7 @@ public class JavaSymbolicKRun implements KRun {
                 org.kframework.kil.Term kilRightHandSide =
                         ((org.kframework.kil.Rewrite) kilRule.getBody()).getRight();
                 org.kframework.kil.Term kilRequires = kilRule.getRequires();
+                org.kframework.kil.Term kilEnsures = kilRule.getEnsures();
 
                 //TODO: Deal with Ensures
                 
@@ -145,20 +146,29 @@ public class JavaSymbolicKRun implements KRun {
                 org.kframework.kil.Rule kilDummyRule = new org.kframework.kil.Rule(
                         kilRightHandSide,
                         MetaK.kWrap(org.kframework.kil.KSequence.EMPTY, "k"),
+                        kilEnsures,
+                        null,
                         context);
                 Rule dummyRule = transformer.transformRule(
                         (org.kframework.kil.Rule) kilDummyRule.accept(mapTransformer),
                         definition);
+                SymbolicConstraint targetConstraint = new SymbolicConstraint(termContext);
+                for (Term condition : dummyRule.condition()) {
+                    targetConstraint.add(
+                            condition,
+                            BoolToken.TRUE);
+                }
                 ConstrainedTerm targetTerm = new ConstrainedTerm(
                         dummyRule.leftHandSide().substitute(freshSubstitution, termContext),
                         dummyRule.lookups().substitute(freshSubstitution, termContext),
-                        new SymbolicConstraint(termContext),
+                        targetConstraint.substitute(freshSubstitution, termContext),
                         termContext);
 
                 proofResults.addAll(symbolicRewriter.proveRule(initialTerm, targetTerm, rules));
             }
 
-            return null;
+            return new KRunProofResult<Set<org.kframework.kil.Term>>(
+                    proofResults.isEmpty(), Collections.<org.kframework.kil.Term>emptySet());
         } catch (TransformerException e) {
             e.printStackTrace();
             return null;

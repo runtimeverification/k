@@ -110,7 +110,9 @@ public class ProgramSDFVisitor extends BasicVisitor {
 			for (Production prd : prt.getProductions()) {
 				startSorts.add(prd.getSort());
 
-				if (prd.isLexical()) {
+				if (prd.containsAttribute("notInPrograms")) {
+					// if a production has this attribute, don't add it to the list
+				} else if (prd.isLexical()) {
 					lexical.add(prd);
 				} else if (prd.isSubsort()) {
 					p.getProductions().add(prd);

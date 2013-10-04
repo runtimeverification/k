@@ -9,14 +9,14 @@ import org.kframework.backend.java.indexing.IndexingPair;
 import org.kframework.backend.java.indexing.KLabelIndex;
 import org.kframework.backend.java.indexing.TokenIndex;
 import org.kframework.backend.java.indexing.TopIndex;
-import org.kframework.backend.java.kil.Cell;
-import org.kframework.backend.java.kil.ConstrainedTerm;import org.kframework.backend.java.kil.Definition;
+import org.kframework.backend.java.kil.ConstrainedTerm;
+import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.util.LookupCell;
 import org.kframework.krun.api.io.FileSystem;
 
 import java.util.ArrayList;
@@ -41,6 +41,7 @@ public class SymbolicRewriter {
     private int step;
     private final Stopwatch ruleStopwatch = new Stopwatch();
     private final Map<IndexingPair, Set<Rule>> ruleTable;
+    private final Set<Rule> unindexedRules;
     private final List<ConstrainedTerm> results = new ArrayList<ConstrainedTerm>();
 
 	public SymbolicRewriter(Definition definition) {
@@ -75,7 +76,7 @@ public class SymbolicRewriter {
 
                 ImmutableSet.Builder<Rule> setBuilder = ImmutableSet.builder();
                 for (Rule rule : definition.rules()) {
-                    if (pair.isUnifiable(rule.indexingPair()) || !rule.containsKCell()) {
+                    if (pair.isUnifiable(rule.indexingPair())) {
                         setBuilder.add(rule);
                     }
                 }
@@ -88,6 +89,14 @@ public class SymbolicRewriter {
         }
 
         ruleTable = mapBuilder.build();
+
+        ImmutableSet.Builder<Rule> setBuilder = ImmutableSet.builder();
+        for (Rule rule : definition.rules()) {
+            if (!rule.containsKCell()) {
+                setBuilder.add(rule);
+            }
+        }
+        unindexedRules = setBuilder.build();
 	}
 
     public ConstrainedTerm rewrite(ConstrainedTerm constrainedTerm, int bound) {
@@ -105,7 +114,7 @@ public class SymbolicRewriter {
         }
 
         stopwatch.stop();
-        System.err.println("[" + step + ", " + stopwatch +"]");
+        System.err.println("[" + step + ", " + stopwatch + "]");
 
         return constrainedTerm;
     }
@@ -121,7 +130,7 @@ public class SymbolicRewriter {
                 rules.addAll(ruleTable.get(pair));
             }
         }
-
+        rules.addAll(unindexedRules);
         return rules;
     }
 

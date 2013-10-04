@@ -257,7 +257,7 @@ public class KompileFrontEnd {
 				BinaryLoader.toBinary(cmd, new FileOutputStream(
                         context.dotk.getAbsolutePath() + "/compile-options.bin"));
 			} catch (FileNotFoundException e) {
-				e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+				e.printStackTrace();
 			}
 		}
 

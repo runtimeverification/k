@@ -73,7 +73,7 @@ public abstract class BasicBackend implements Backend {
 		steps.add(new ResolveFreshVarMOS(context));
 		steps.add(new AddTopCellConfig(context));
 		if (GlobalSettings.addTopCell) {
-		steps.add(new AddTopCellRules(context));
+			steps.add(new AddTopCellRules(context));
 		}
 		steps.add(new ResolveBinder(context));
 		steps.add(new ResolveAnonymousVariables(context));

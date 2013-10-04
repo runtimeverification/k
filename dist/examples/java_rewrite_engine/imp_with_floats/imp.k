@@ -1,11 +1,14 @@
 require "builtins/map.k"
 
 module IMP-SYNTAX
+  syntax Float ::= Token{[\-]? [0][xX] [0-9a-fA-F] [\.] [0-9a-fA-F]* [pP] [\-\+]? [0-9]+}
   syntax AExp  ::= Float | Id
+                 | AExp "*" AExp              [left, seqstrict]
                  | AExp "/" AExp              [left, seqstrict]
                  > AExp "+" AExp              [left, seqstrict]
                  | AExp "-" AExp              [left, seqstrict]
                  | "(" AExp ")"               [bracket]
+                 > BExp "?" AExp ":" AExp     [strict(1)]
   syntax BExp  ::= Bool
                  | AExp ">" AExp              [seqstrict]
                  | AExp "<=" AExp             [seqstrict, latex({#1}\leq{#2})]
@@ -19,12 +22,17 @@ module IMP-SYNTAX
                    Block "else" Block         [strict(1)]
                  | "while" "(" BExp ")" Block
                  | Id "=" AExp ";"            [strict(2)]
+                 | "return" AExp ";"          [strict]
                  > Stmt Stmt                  [left]
   syntax Pgm ::= "float" Ids ";" Stmt
   syntax Ids ::= List{Id,","}
 
   // special identifiers (for matching-logic specifications)
   syntax Id ::= Token{"n"} | Token{"sum"}   [prefer]
+  syntax Id ::= Token{"a"} | Token{"b"}   [prefer]
+  syntax Id ::= Token{"x"} | Token{"y"}   [prefer]
+  syntax Id ::= Token{"u_x"} | Token{"u_y"}   [prefer]
+  syntax Id ::= Token{"v_x"} | Token{"v_y"}   [prefer]
 endmodule
 
 module IMP
@@ -40,6 +48,7 @@ module IMP
 
 // AExp
   rule <k> X:Id => I ...</k> <state>... X |-> I:KItem ...</state>
+  rule I1:Float * I2:Float => I1 *Float I2
   rule I1:Float / I2:Float => I1 /Float I2
   rule I1:Float + I2:Float => I1 +Float I2
   rule I1:Float - I2:Float => I1 -Float I2
