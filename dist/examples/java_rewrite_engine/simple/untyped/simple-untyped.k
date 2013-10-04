@@ -528,7 +528,7 @@ store, then we rewrite $X$ into $V$: */
 
   rule <k> X:Id => V ...</k>
        <env>... X |-> L:Int ...</env>
-       <store>... L |-> V:Val ...</store>  [lookup]
+       <store>... L |-> V:Val ...</store>  [lookup,transition]
 
 /*@ Note that the rule above excludes reading $\bot$, because $\bot$ is not
 a value and $V$ is checked at runtime to be a value. */

@@ -16,8 +16,13 @@ import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.strategies.Strategy;
+import org.kframework.backend.java.strategies.NullStrategy;
+import org.kframework.backend.java.strategies.StructuralStrategy;
+import org.kframework.backend.java.strategies.TransitionStrategy;
 import org.kframework.backend.java.util.LookupCell;
 import org.kframework.krun.api.io.FileSystem;
+import org.kframework.utils.general.GlobalSettings;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -37,6 +42,7 @@ import com.google.common.collect.ImmutableSet;
 public class SymbolicRewriter {
 
     private final Definition definition;
+    private Strategy strategy;
     private final Stopwatch stopwatch = new Stopwatch();
     private int step;
     private final Stopwatch ruleStopwatch = new Stopwatch();
@@ -46,6 +52,8 @@ public class SymbolicRewriter {
 
 	public SymbolicRewriter(Definition definition) {
         this.definition = definition;
+
+        strategy = new NullStrategy();
 
         /* populate the table of rules rewriting the top configuration */
         Set<Index> indices = new HashSet<Index>();
@@ -145,7 +153,10 @@ public class SymbolicRewriter {
             return;
         }
 
-        for (Rule rule : getRules(constrainedTerm.term())) {
+        strategy.apply(getRules(constrainedTerm.term()));
+        while (strategy.hasNext()) {
+            Rule rule = strategy.next();
+        //for (Rule rule : getRules(constrainedTerm.term())) {
             ruleStopwatch.reset();
             ruleStopwatch.start();
 
@@ -272,7 +283,13 @@ public class SymbolicRewriter {
     label:
         for (step = 0; !queue.isEmpty() && step != depth; ++step) {
             for (ConstrainedTerm term : queue) {
-                computeRewriteStep(term);
+                strategy = new StructuralStrategy(GlobalSettings.transition);
+                computeRewriteStep(term,1);
+                if (results.isEmpty()) {
+                  System.out.println("Ready for a transition");
+                  strategy = new TransitionStrategy(GlobalSettings.transition);
+                  computeRewriteStep(term);
+                }
 
                 if (results.isEmpty()) {
                     /* final term */

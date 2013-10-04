@@ -82,8 +82,10 @@ public class KompileFrontEnd {
 		if (cmd.hasOption("warnings"))
 			GlobalSettings.warnings = cmd.getOptionValue("warnings");
 
-		if (cmd.hasOption("transition"))
+		if (cmd.hasOption("transition")) {
 			GlobalSettings.transition = metadataParse(cmd.getOptionValue("transition"));
+      System.out.println("Options: " + cmd.getOptionValue("transition") + "\nTransition: " + GlobalSettings.transition);
+    }
 		if (cmd.hasOption("supercool"))
 			GlobalSettings.supercool = metadataParse(cmd.getOptionValue("supercool"));
 		if (cmd.hasOption("superheat"))
