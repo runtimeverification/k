@@ -530,7 +530,7 @@
       programs="dist/examples/prog-equiv/programs"
       extensions="peq"
       results="tests/examples/prog-equiv/" >
-      <kompile-option name="-addTopCell" />
+      <kompile-option name="--add-top-cell" />
   </test>
 
 <!--
@@ -543,7 +543,7 @@
       title="symbolic"
 	  exclude="lesson_4/test.imp"
       >
-    <kompile-option name="--symbolic" />
+    <kompile-option name="--backend" value="symbolic" />
     <all-programs>
       <krun-option name="--no-color" />
       <krun-option name="--output-mode" value="none" />
@@ -688,7 +688,7 @@
       <all-programs>
         <krun-option name="--output-mode" value="pretty" />
 	<krun-option name="--parser" value="kast -groundParser" parser-home="PARSER_HOME" />
-        <krun-option name="--no-parens" />
+        <krun-option name="--parens" value="smart" />
       </all-programs>
   </test>
 
@@ -733,7 +733,7 @@
       programs="tests/regression/java-rewrite-engine/strings/programs"
       results="tests/regression/java-rewrite-engine/strings/tests"
       extensions="test">
-    <kompile-option name="-ml" />
+    <kompile-option name="--backend" value="java" />
     <all-programs>
       <krun-option name="--backend" value="java-symbolic" />
       <krun-option name="--smt" value="none" />
@@ -746,7 +746,7 @@
       definition="tests/regression/lint/test.k"
       programs="tests/regression/lint"
       extensions="test">
-    <kompile-option name="-w" />
+    <kompile-option name="-w" value="all" />
   </test>
 
   <test
@@ -765,7 +765,7 @@
       results="tests/regression/java-rewrite-engine/list/test1/tests"
       extensions="issue"
       >
-    <kompile-option name="-ml" />
+    <kompile-option name="--backend" value="java" />
     <kompile-option name="-w" value="none" />
     <all-programs>
       <krun-option name="--smt" value="none" />
@@ -781,7 +781,7 @@
       results="tests/regression/java-rewrite-engine/list/test2/tests"
       extensions="issue"
       >
-    <kompile-option name="-ml" />
+    <kompile-option name="--backend" value="java" />
     <kompile-option name="-w" value="none" />
     <all-programs>
       <krun-option name="--smt" value="none" />
@@ -797,7 +797,7 @@
       results="tests/regression/java-rewrite-engine/set/test1/tests"
       extensions="issue"
       >
-    <kompile-option name="-ml" />
+    <kompile-option name="--backend" value="java" />
     <kompile-option name="-w" value="none" />
     <all-programs>
       <krun-option name="--smt" value="none" />
@@ -812,7 +812,7 @@
       results="tests/regression/java-rewrite-engine/set/test2/tests"
       extensions="issue"
       >
-    <kompile-option name="-ml" />
+    <kompile-option name="--backend" value="java" />
     <kompile-option name="-w" value="none" />
     <all-programs>
       <krun-option name="--smt" value="none" />
@@ -826,7 +826,7 @@
       programs="tests/regression/issue#8/programs"
       results="tests/regression/issue#8/tests"
       >
-    <kompile-option name="-ml" />
+    <kompile-option name="--backend" value="java" />
     <kompile-option name="-w" value="none" />
     <all-programs>
       <krun-option name="--smt" value="none" />
@@ -848,7 +848,7 @@
       programs="tests/regression/issue#1"
       results="tests/regression/issue#1"
       extensions="issue" >
-    <kompile-option name="-ml" />
+    <kompile-option name="--backend" value="java" />
     <kompile-option name="-w" value="none" />
     <all-programs>
       <krun-option name="--smt" value="none" />
@@ -862,7 +862,7 @@
       programs="tests/regression/issue#2"
       results="tests/regression/issue#2"
       extensions="issue" >
-    <kompile-option name="-ml" />
+    <kompile-option name="--backend" value="java" />
     <kompile-option name="-w" value="none" />
     <all-programs>
       <krun-option name="--smt" value="none" />
@@ -876,7 +876,7 @@
       programs="tests/regression/java-rewrite-engine/io/test1/programs"
       results="tests/regression/java-rewrite-engine/io/test1/tests"
       unixOnly="tests/regression/java-rewrite-engine/io/test1/prepare.sh">
-  <kompile-option name="-ml" />
+  <kompile-option name="--backend" value="java" />
   <all-programs>
     <krun-option name="--backend" value="java-symbolic" />
     <krun-option name="--smt" value="none" />
@@ -891,7 +891,7 @@
       programs="tests/regression/issue#12/programs"
       results="tests/regression/issue#12/tests"
       >
-    <kompile-option name="-ml" />
+    <kompile-option name="--backend" value="java" />
     <kompile-option name="-w" value="none" />
     <all-programs>
       <krun-option name="--smt" value="none" />
@@ -923,7 +923,7 @@
       extensions="test"
       programs="tests/regression/java-rewrite-engine/io/test2/programs"
       results="tests/regression/java-rewrite-engine/io/test2/tests">
-  <kompile-option name="-ml" />
+  <kompile-option name="--backend" value="java" />
   <all-programs>
     <krun-option name="--backend" value="java-symbolic" />
     <krun-option name="--smt" value="none" />
@@ -934,7 +934,7 @@
       extensions="imp"
       programs="dist/examples/java_rewrite_engine/imp_with_floats/programs"
       results="tests/examples/java_rewrite_engine/imp_with_floats/tests">
-  <kompile-option name="-ml" />
+  <kompile-option name="--backend" value="java" />
   <kompile-option name="-w" value="none" />
   <all-programs>
     <krun-option name="--backend" value="java-symbolic" />
@@ -948,7 +948,7 @@
       extensions="imp"
       results="tests/tutorial/2_imp/lesson_5"
       >
-  <kompile-option name="-ml" />
+  <kompile-option name="--backend" value="java" />
   <kompile-option name="-w" value="none" />
   <all-programs>
     <krun-option name="--backend" value="java-symbolic" />
@@ -963,7 +963,7 @@
       exclude="lesson_1/spawn.imp"
       results="tests/tutorial/4_imp++/lesson_5"
       >
-      <kompile-option name="-ml" />
+      <kompile-option name="--backend" value="java" />
       <kompile-option name="-w" value="none" />
       <all-programs>
         <krun-option name="-backend" value="java-symbolic" />
@@ -990,7 +990,7 @@
       extensions="simple"
       exclude="dekker.simple exceptions_07.simple matrix.simple"
       results="tests/examples/simple-untyped" >
-      <kompile-option name="-ml" />
+      <kompile-option name="--backend" value="java" />
       <kompile-option name="-w" value="none" />
       <all-programs>
         <krun-option name="--backend" value="java-symbolic" />
