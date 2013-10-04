@@ -68,7 +68,7 @@ module KOOL-TYPED-STATIC-SYNTAX
 The syntax of statically typed KOOL is identical to that of
 dynamically typed KOOL, they both taking as input the same programs.
 What differs is the \K strictness attributes.  Like in statically
-typed KOOL, almost all language constructs are strict now, since we
+typed SIMPLE, almost all language constructs are strict now, since we
 want each to type its arguments almost all the time.  Like in the
 other two KOOL definitions, we prefer to copy and then modify/extend
 the syntax of statically typed SIMPLE. */
