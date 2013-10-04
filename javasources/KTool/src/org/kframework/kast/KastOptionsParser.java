@@ -3,73 +3,61 @@ package org.kframework.kast;
 import org.apache.commons.cli.*;
 import org.kframework.utils.ActualPosixParser;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+
 public class KastOptionsParser {
 
 	Options options;
 	HelpFormatter help;
+	// For printing help messages: options = optionsStandard + optionsExperimental
+	private Options optionsStandard;
+	private Options optionsExperimental;
+	private ArrayList<Option> optionList = new ArrayList<Option>();
+
+	// wrapper function to add an option
+	private void addOptionWrapper(Option opt, boolean isStandard) {
+		// for parsing command-line options
+		options.addOption(opt);
+		// for printing help messages
+		optionList.add(opt);
+		if (isStandard) {
+			optionsStandard.addOption(opt);
+		} else {
+			optionsExperimental.addOption(opt);
+		}
+	}
+	// add a standard option
+	private void addOptionS(Option opt) {
+		addOptionWrapper(opt, true);
+	}
+	// add an experimental option
+	private void addOptionE(Option opt) {
+		addOptionWrapper(opt, false);
+	}
 
 	public KastOptionsParser() {
 		options = new Options();
 		help = new HelpFormatter();
+		optionsStandard = new Options();
+		optionsExperimental = new Options();
 
-		// main options
-		OptionGroup main = new OptionGroup();
-		Option def = new Option(null, "k-definition", true, "main file of the definition");
-		Option compiled = new Option(null, "compiled-def", true, "output directory of the compiled definition");
-		main.addOption(def);
-		main.addOption(compiled);
+		addOptionS(OptionBuilder.withLongOpt("help").withDescription("Print this help message.").create("h"));
+		addOptionS(OptionBuilder.withLongOpt("version").withDescription("Print version information.").create());
+		addOptionS(OptionBuilder.withLongOpt("verbose").withDescription("Verbose output.").create("v"));
 
-		// verbose and help
-		OptionGroup verb = new OptionGroup();
-		Option help = new Option("h", "help", false, "prints this message and exits");
-		Option version = new Option("version", false, "prints version number");
-		Option verbose = new Option("v", "verbose", false, "verbose mode");
-		verb.addOption(help);
-		verb.addOption(version);
-		verb.addOption(verbose);
+		addOptionS(OptionBuilder.withLongOpt("directory").hasArg().withArgName("dir").withDescription("Path to the directory in which the kompiled K definition resides. The default is the current directory.").create("d"));
+		addOptionS(OptionBuilder.withLongOpt("expression").hasArg().withArgName("string").withDescription("An expression to parse passed on the command line. Note that positional arguments are ignored when this option is given.").create("e"));
+		addOptionS(OptionBuilder.withLongOpt("parser").hasArg().withArgName("parser").withDescription("Choose a parser. <parser> is either [program|ground|rules|binary]. (Default: program).").create());
+		addOptionS(OptionBuilder.withLongOpt("sort").hasArg().withArgName("string").withDescription("The start sort for the default parser. (The default is the sort of $PGM from the configuration.)").create());
+		addOptionS(OptionBuilder.withLongOpt("help-experimental").withDescription("Print help on non-standard options.").create("X"));
 
-		// no filename
-		OptionGroup nofile = new OptionGroup();
-		Option nofileopt = new Option("nofile", "nofilename", false, "don't include the long filenames in the XML.");
-		nofile.addOption(nofileopt);
-
-		// / program
-		OptionGroup tex2 = new OptionGroup();
-		Option tbl = new Option("pgm", "program", true, "the program to parse");
-		Option exp = new Option("e", "expression", true, "an expression to parse passed on the command line");
-		tex2.addOption(tbl);
-		tex2.addOption(exp);
-
-		// indentation options
-		Option prettyPrint = new Option("pretty", false, "pretty print the output");
-		Option tabSize = new Option("tabsize", true, "how many spaces to use for each indentation level");
-		Option maxWidth = new Option("maxwidth", true, "the indicative maximal width of the output");
-		Option auxSize = new Option("auxtabsize", true, "how many spaces to indent lines which do not fit into max-width");
-		Option nextLine = new Option("nextline", false, "force newline before first argument");
-
-		// which parser to use
-		Option ruleParser = new Option("ruleParser", false, "use k definition parser for rules (meta variables and rewrites)");
-		Option groundParser = new Option("groundParser", false, "use k definition parser for ground terms");
-		Option startSymbol = new Option("sort", true, "the start sort for the default parser (default is the sort of $PGM from the configuration");
-		Option binaryParser = new Option("binaryParser", true, "reads binary file saved by krun and outputs the content as a kasted term");
-		OptionGroup parserGroup = new OptionGroup();
-		parserGroup.addOption(ruleParser);
-		parserGroup.addOption(groundParser);
-		parserGroup.addOption(startSymbol);
-		parserGroup.addOption(binaryParser);
-
-		// add options
-		options.addOption(new Option("fastKast", false, "Option to test new class instantiation"));
-		options.addOptionGroup(verb);
-		options.addOptionGroup(main);
-		options.addOptionGroup(tex2);
-		options.addOptionGroup(nofile);
-		options.addOptionGroup(parserGroup);
-		options.addOption(prettyPrint);
-		options.addOption(tabSize);
-		options.addOption(maxWidth);
-		options.addOption(auxSize);
-		options.addOption(nextLine);
+		addOptionE(OptionBuilder.withLongOpt("fast-kast").withDescription("For testing the new concrete parser, the C SDF parser.").create());
+		addOptionE(OptionBuilder.withLongOpt("pretty").withDescription("Pretty print the output.").create());
+		addOptionE(OptionBuilder.withLongOpt("tabsize").hasArg().withArgName("num").withDescription("How many spaces to use for each indentation level.").create());
+		addOptionE(OptionBuilder.withLongOpt("maxwidth").hasArg().withArgName("num").withDescription("Line will be split before <num> chars.").create());
+		addOptionE(OptionBuilder.withLongOpt("aux-tabsize").hasArg().withArgName("num").withDescription("How many spaces to indent lines which do not fit into max-width. (Default: 2).").create());
+		addOptionE(OptionBuilder.withLongOpt("nextline").withDescription("Force newline before first argument.").create());
 	}
 
 	public CommandLine parse(String[] cmd) {
@@ -79,10 +67,10 @@ public class KastOptionsParser {
 			return cl;
 		} catch (ParseException e) {
 			org.kframework.utils.Error.silentReport(e.getLocalizedMessage());
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 
-		org.kframework.utils.Error.helpExit(help, options);
+		//org.kframework.utils.Error.helpExit(help, options);
 		return null;
 	}
 
@@ -92,5 +80,15 @@ public class KastOptionsParser {
 
 	public HelpFormatter getHelp() {
 		return help;
+	}
+
+	public Options getOptionsStandard() {
+		return optionsStandard;
+	}
+	public Options getOptionsExperimental() {
+		return optionsExperimental;
+	}
+	public ArrayList<Option> getOptionList() {
+		return optionList;
 	}
 }

@@ -128,8 +128,6 @@ public class XmlLoader {
 			Node item = attr.getNamedItem(Tag.location);
 			if (item != null) {
 				Element e = (Element) node;
-				// don't add filename during testing, it takes too much space
-				if (!GlobalSettings.noFilename)
 					e.setAttribute("filename", filename);
 			}
 		}

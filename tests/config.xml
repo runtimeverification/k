@@ -530,7 +530,7 @@
       programs="dist/examples/prog-equiv/programs"
       extensions="peq"
       results="tests/examples/prog-equiv/" >
-      <kompile-option name="-addTopCell" />
+      <kompile-option name="--add-top-cell" />
   </test>
 
 <!--
@@ -543,7 +543,7 @@
       title="symbolic"
 	  exclude="lesson_4/test.imp"
       >
-    <kompile-option name="--symbolic" />
+    <kompile-option name="--backend" value="symbolic" />
     <all-programs>
       <krun-option name="--no-color" />
       <krun-option name="--output-mode" value="none" />
@@ -688,7 +688,7 @@
       <all-programs>
         <krun-option name="--output-mode" value="pretty" />
 	<krun-option name="--parser" value="kast -groundParser" parser-home="PARSER_HOME" />
-        <krun-option name="--no-parens" />
+        <krun-option name="--parens" value="smart" />
       </all-programs>
   </test>
 
@@ -732,7 +732,7 @@
       definition="tests/regression/lint/test.k"
       programs="tests/regression/lint"
       extensions="test">
-    <kompile-option name="-w" />
+    <kompile-option name="-w" value="all" />
   </test>
 
   <test

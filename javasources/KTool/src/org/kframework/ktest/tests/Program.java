@@ -33,8 +33,8 @@ public class Program implements Comparable<Program> {
 		ArrayList<String> command = new ArrayList<String>();
 		command.add(Configuration.getKrun());
 		command.add(programPath);
-		command.add("--compiled-def");
-		command.add(test.getCompiled());
+		command.add("--directory");
+		command.add(test.getDirectory());
 		for (Entry<String, String> entry : krunOptions.entrySet()) {
 			command.add(entry.getKey());
 			command.add(entry.getValue());
