@@ -12,7 +12,6 @@ import org.kframework.backend.maude.MaudeBackend;
 import org.kframework.backend.maude.KompileBackend;
 import org.kframework.backend.symbolic.SymbolicBackend;
 import org.kframework.backend.unparser.UnparserBackend;
-import org.kframework.backend.xml.XmlBackend;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.MetaK;
@@ -29,6 +28,7 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.OptionComparator;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -49,14 +49,36 @@ public class KompileFrontEnd {
 		return result;
 	}
 
+	private static final String USAGE = "kompile [options] <file>" + System.getProperty("line.separator");
+	private static final String HEADER_STANDARD = "";
+	private static final String FOOTER_STANDARD = "";
+	private static final String HEADER_EXPERIMENTAL = "Experimental options:";
+	private static final String FOOTER_EXPERIMENTAL = System.getProperty("line.separator") + "These options are non-standard and subject to change without notice.";
+	public static void printUsageS(KompileOptionsParser op) {
+		org.kframework.utils.Error.helpMsg(USAGE, HEADER_STANDARD, FOOTER_STANDARD, op.getOptionsStandard(), new OptionComparator(op.getOptionList()));
+	}
+	public static void printUsageE(KompileOptionsParser op) {
+		org.kframework.utils.Error.helpMsg(USAGE, HEADER_EXPERIMENTAL, FOOTER_EXPERIMENTAL, op.getOptionsExperimental(), new OptionComparator(op.getOptionList()));
+	}
+
 	public static void kompile(String[] args) {
 		KompileOptionsParser op = new KompileOptionsParser();
 
 		CommandLine cmd = op.parse(args);
+		if (cmd == null) {
+			printUsageS(op);
+			System.exit(1);
+		}
 
 		// options: help
-		if (cmd.hasOption("help"))
-			org.kframework.utils.Error.helpExit(op.getHelp(), op.getOptions());
+		if (cmd.hasOption("help")) {
+			printUsageS(op);
+			System.exit(0);
+		}
+		if (cmd.hasOption("help-experimental")) {
+			printUsageE(op);
+			System.exit(0);
+		}
 
 		if (cmd.hasOption("version")) {
 			String msg = FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE);
@@ -64,20 +86,14 @@ public class KompileFrontEnd {
 			System.exit(0);
 		}
 
-        GlobalSettings.symbolicEquality = cmd.hasOption("symeq");
-        GlobalSettings.SMT = cmd.hasOption("smt");
-        GlobalSettings.javaBackend = cmd.hasOption("ml");
-        GlobalSettings.NOSMT = cmd.hasOption("nosmt");
+        GlobalSettings.NOSMT = cmd.hasOption("no-smt");
         
 		if (cmd.hasOption("verbose"))
 			GlobalSettings.verbose = true;
 
-		if (cmd.hasOption("fastKast")) {
+		if (cmd.hasOption("fast-kast")) {
 			GlobalSettings.fastKast = true;
 		}
-
-		if (cmd.hasOption("nofilename"))
-			GlobalSettings.noFilename = true;
 
 		if (cmd.hasOption("warnings"))
 			GlobalSettings.warnings = cmd.getOptionValue("warnings");
@@ -89,8 +105,8 @@ public class KompileFrontEnd {
 		if (cmd.hasOption("superheat"))
 			GlobalSettings.superheat = metadataParse(cmd.getOptionValue("superheat"));
 
-		if (cmd.hasOption("style")) {
-			String style = cmd.getOptionValue("style");
+		if (cmd.hasOption("doc-style")) {
+			String style = cmd.getOptionValue("doc-style");
 			if (style.startsWith("+")) {
 				GlobalSettings.style += style.replace("+", ",");
 			} else {
@@ -98,19 +114,15 @@ public class KompileFrontEnd {
 			}
 		}
 
-		if (cmd.hasOption("sortCells")) {
+		if (cmd.hasOption("sort-cells")) {
 			GlobalSettings.sortedCells = true;
 //			GlobalSettings.addTopCell = true;
 		}
 
 
-		if (cmd.hasOption("addTopCell"))
+		if (cmd.hasOption("add-top-cell"))
 			GlobalSettings.addTopCell = true;
 
-		if (cmd.hasOption("check")) {
-			GlobalSettings.CHECK = new File(cmd.getOptionValue("check")).getAbsolutePath();
-		}
-		
 		// set lib if any
 		if (cmd.hasOption("lib")) {
 			GlobalSettings.lib = cmd.getOptionValue("lib");
@@ -125,9 +137,7 @@ public class KompileFrontEnd {
 
 
 		String def = null;
-		if (cmd.hasOption("def"))
-			def = cmd.getOptionValue("def");
-		else {
+		{
 			String[] restArgs = cmd.getArgs();
 			if (restArgs.length < 1)
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "You have to provide a file in order to compile!.", "command line", "System file."));
@@ -148,20 +158,20 @@ public class KompileFrontEnd {
 		}
 
 		output = null;
-		if (cmd.hasOption("output")) {
-			output = cmd.getOptionValue("output");
+		if (cmd.hasOption("directory")) {
+			output = cmd.getOptionValue("directory");
 		}
+		if (output == null) {
+			output = mainFile.getAbsoluteFile().getParent();
+		}
+		GlobalSettings.outputDir = output;
 
 		String lang = null;
-		if (cmd.hasOption("lang"))
-			lang = cmd.getOptionValue("lang");
+		if (cmd.hasOption("main-module"))
+			lang = cmd.getOptionValue("main-module");
 		else
 			lang = FileUtil.getMainModule(mainFile.getName());
 
-		// Matching Logic & Symbolic Calculus options
-		GlobalSettings.symbolicEquality = cmd.hasOption("symeq");
-		GlobalSettings.SMT = cmd.hasOption("smt");
-		
 		Context context = new Context();
 		if (cmd.hasOption("kcells")) {
 			String kCells = cmd.getOptionValue("kcells");
@@ -173,79 +183,77 @@ public class KompileFrontEnd {
 			assert !context.getKomputationCells().isEmpty();
 		}
 		
-		if (context.dotk == null) {
-			try {
-				context.dotk = new File(mainFile.getCanonicalFile().getParent() + File.separator + ".k");
-			} catch (IOException e) {
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Canonical file cannot be obtained for main file.", mainFile.getAbsolutePath(),
-						"File system."));
-			}
-			context.dotk.mkdirs();
-		}
+		context.dotk = new File(output + File.separator + ".k");
+		context.dotk.mkdirs();
 
 		
 		Backend backend = null;
-		if (cmd.hasOption("maudify")) {
-			backend = new MaudeBackend(Stopwatch.sw, context);
-		} else if (cmd.hasOption("latex")) {
-			GlobalSettings.documentation = true;
-			backend = new LatexBackend(Stopwatch.sw, context);
-		} else if (cmd.hasOption("pdf")) {
+		String backendOpt;
+		if (cmd.hasOption("backend")) {
+			backendOpt = cmd.getOptionValue("backend");
+		/*
+		} else if (cmd.hasOption("xml")) {
+			backendOpt = "xml";
+		*/
+		} else if (cmd.hasOption("doc")) {
+			backendOpt = "doc";
+		} else {
+			backendOpt = "maude";
+		}
+		switch (backendOpt) {
+		case "pdf":
 			GlobalSettings.documentation = true;
 			backend = new PdfBackend(Stopwatch.sw, context);
-		} else if (cmd.hasOption("xml")) {
+			break;
+		case "latex":
+			GlobalSettings.documentation = true;
+			backend = new LatexBackend(Stopwatch.sw, context);
+			break;
+		case "doc":
+			GlobalSettings.documentation = true;
+			if (!cmd.hasOption("doc-style")) {
+				GlobalSettings.style = "k-documentation.css";
+			}
+			backend = new DocumentationBackend(Stopwatch.sw, context);
+			break;
+		/*
+		case "xml":
 			GlobalSettings.xml = true;
 			backend = new XmlBackend(Stopwatch.sw, context);
-		} else if (cmd.hasOption("html")) {
-			if (!cmd.hasOption("style")) {
+			break;
+		*/
+		case "html":
+			if (!cmd.hasOption("doc-style")) {
 				GlobalSettings.style = "k-definition.css";
 			}
 			GlobalSettings.documentation = true;
 			backend = new HtmlBackend(Stopwatch.sw, context);
-		} else if (cmd.hasOption("unparse")) {
+			break;
+		case "maude":
+			backend = new KompileBackend(Stopwatch.sw, context);
+			context.dotk = new File(output + File.separator + FileUtil.stripExtension(mainFile.getName()) + "-kompiled");
+			context.dotk.mkdirs();
+			break;
+		case "java":
+			GlobalSettings.javaBackend = true;
+			backend = new JavaSymbolicBackend(Stopwatch.sw, context);
+			context.dotk = new File(output + File.separator + FileUtil.stripExtension(mainFile.getName()) + "-kompiled");
+			context.dotk.mkdirs();
+			break;
+		case "unparse":
 			backend = new UnparserBackend(Stopwatch.sw, context);
-		} else if (cmd.hasOption("kexp")) {
-			backend = new KExpBackend(Stopwatch.sw, context);
-		} else if (cmd.hasOption("doc")) {
-			GlobalSettings.documentation = true;
-			if (!cmd.hasOption("style")) {
-				GlobalSettings.style = "k-documentation.css";
-			}
-			backend = new DocumentationBackend(Stopwatch.sw, context);
-		} else if (cmd.hasOption("symbolic")) {
-			if (output == null) {
-				output = FileUtil.stripExtension(mainFile.getName()) + "-kompiled";
-			}
+			break;
+		case "symbolic":
 			GlobalSettings.symbolic = true;
 			backend = new SymbolicBackend(Stopwatch.sw, context);
-			context.dotk = new File(output);
+			context.dotk = new File(output + File.separator + FileUtil.stripExtension(mainFile.getName()) + "-kompiled");
 			context.dotk.mkdirs();
-
-		} else if (cmd.hasOption("check")) {
-			if (output == null) {
-				output = FileUtil.stripExtension(mainFile.getName()) + "-kompiled";
-			}
-			GlobalSettings.CHECK = new File(cmd.getOptionValue("check")).getAbsolutePath();
-			backend = new RLBackend(Stopwatch.sw, context);
-			context.dotk = new File(output);
-			context.dotk.mkdirs();
-
-		} else if (GlobalSettings.javaBackend) {
-            backend = new JavaSymbolicBackend(Stopwatch.sw, context);
-            if (output == null) {
-                output = FileUtil.stripExtension(mainFile.getName()) + "-kompiled";
-            }
-            context.dotk = new File(output);
-            context.dotk.mkdirs();
-        } else {
-			if (output == null) {
-				output = FileUtil.stripExtension(mainFile.getName()) + "-kompiled";
-			}
-			backend = new KompileBackend(Stopwatch.sw, context);
-			context.dotk = new File(output);
-			context.dotk.mkdirs();
+			break;
+		default:
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Invalid backend option: " + backendOpt, "", ""));
+			break;
 		}
-		
+
 		if (backend != null) {
 			genericCompile(mainFile, lang, backend, step, context);
 			try {

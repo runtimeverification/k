@@ -28,7 +28,6 @@
     <orderEntry type="library" name="strategoxt" level="project" />
     <orderEntry type="library" name="apache-commons" level="project" />
     <orderEntry type="library" name="jung" level="project" />
-    <orderEntry type="library" name="xstream" level="project" />
     <orderEntry type="library" name="diffutils" level="project" />
     <orderEntry type="library" name="console" level="project" />
     <orderEntry type="library" name="options" level="project" />

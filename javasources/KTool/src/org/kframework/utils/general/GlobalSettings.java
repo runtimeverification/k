@@ -40,13 +40,13 @@ public class GlobalSettings {
 
     private static OS os = null;
 	public static boolean verbose = false;
-	public static boolean noFilename = false;
 	public static String startFile = "";
 	public static String lib = "";
 	public static String synModule = null;
 	public static KExceptionManager kem = new KExceptionManager();
 	public static File mainFile;
 	public static String mainFileWithNoExtension;
+	public static String outputDir;
 	public static String warnings = "normal";
 	public static List<String> transition = new ArrayList<String>();
 	public static List<String> superheat = new ArrayList<String>();
@@ -87,7 +87,6 @@ public class GlobalSettings {
 	public static boolean SMT = false;
 	public static boolean javaBackend = false;
 	public static boolean documentation = false;
-	public static boolean xml = false;
 	public static boolean NOSMT = false;
 	
 	public static String CHECK = null;

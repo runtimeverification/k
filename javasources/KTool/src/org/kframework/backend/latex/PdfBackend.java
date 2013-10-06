@@ -76,11 +76,7 @@ public class PdfBackend extends BasicBackend {
 	public void run(Definition definition) throws IOException {
 		List<File> files = LatexBackend.latex(definition, context, definition.getMainModule());
 		files = pdf(files, definition.getMainModule());
-		String output = KompileFrontEnd.output;
-		if (output == null) {
-			output = "./" + FileUtil.stripExtension(new File(definition.getMainFile()).getName()) + ".pdf";
-		}
-		FileUtil.copyFile(files.get(0).getAbsolutePath(), new File(output).getAbsolutePath());
+		FileUtil.copyFile(files.get(0).getAbsolutePath(), GlobalSettings.outputDir + File.separator + FileUtil.stripExtension(new File(definition.getMainFile()).getName()) + ".pdf");
 	}
 
 	@Override

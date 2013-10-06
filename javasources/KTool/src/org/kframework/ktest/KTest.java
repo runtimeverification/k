@@ -27,6 +27,7 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.OptionComparator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -34,15 +35,36 @@ import org.xml.sax.SAXException;
 
 public class KTest {
 
+    private static final String USAGE = "ktest [options]" + System.getProperty("line.separator");
+    private static final String HEADER_STANDARD = "";
+    private static final String FOOTER_STANDARD = "";
+    private static final String HEADER_EXPERIMENTAL = "Experimental options:";
+    private static final String FOOTER_EXPERIMENTAL = System.getProperty("line.separator") + "These options are non-standard and subject to change without notice.";
+    public static void printUsageS(KTestOptionsParser op) {
+        org.kframework.utils.Error.helpMsg(USAGE, HEADER_STANDARD, FOOTER_STANDARD, op.getOptionsStandard(), new OptionComparator(op.getOptionList()));
+    }
+    public static void printUsageE(KTestOptionsParser op) {
+        org.kframework.utils.Error.helpMsg(USAGE, HEADER_EXPERIMENTAL, FOOTER_EXPERIMENTAL, op.getOptionsExperimental(), new OptionComparator(op.getOptionList()));
+    }
+
     public static void test(String[] args) {
 
         KTestOptionsParser op = new KTestOptionsParser();
         CommandLine cmd = op.parse(args);
+        if (cmd == null) {
+            printUsageS(op);
+            System.exit(1);
+        }
 
         // Help
-        if (cmd.hasOption(Configuration.HELP_OPTION))
-            KTestOptionsParser.helpExit(op.getHelp(), Configuration.KTEST,
-                    op.getOptions());
+        if (cmd.hasOption(Configuration.HELP_OPTION)) {
+            printUsageS(op);
+            System.exit(0);
+        }
+        if (cmd.hasOption(Configuration.HELP_EXPERIMENTAL_OPTION)) {
+            printUsageE(op);
+            System.exit(0);
+        }
 
         // Version
         if (cmd.hasOption(Configuration.VERSION_OPTION)) {

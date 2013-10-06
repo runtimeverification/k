@@ -14,13 +14,12 @@ import java.util.Map;
 /**
  * A uninterpreted token.
  *
- * @author: AndreiS
+ * @author AndreiS
  */
 public class UninterpretedToken extends Token {
 
     /* Token cache */
-    private static final Map<String, Map <String, UninterpretedToken>> cache
-            = new HashMap<String, Map <String, UninterpretedToken>>();
+    private static final Map<String, Map <String, UninterpretedToken>> cache = new HashMap<String, Map <String, UninterpretedToken>>();
 
     private final String sort;
     private final String value;
@@ -86,6 +85,26 @@ public class UninterpretedToken extends Token {
     @Override
     public void accept(Visitor visitor) {
         visitor.visit(this);
+    }
+
+    /**
+     * Returns the cached instance rather than the de-serialized instance if there is a cached
+     * instance.
+     */
+    private Object readResolve() {
+        Map<String, UninterpretedToken> sortCache = cache.get(sort);
+        if (sortCache == null) {
+            sortCache = new HashMap<String, UninterpretedToken>();
+            cache.put(sort, sortCache);
+        }
+
+        UninterpretedToken cachedGenericToken = sortCache.get(value);
+        if (cachedGenericToken == null) {
+            cachedGenericToken = this;
+            sortCache.put(value, cachedGenericToken);
+        }
+
+        return cachedGenericToken;
     }
 
 }

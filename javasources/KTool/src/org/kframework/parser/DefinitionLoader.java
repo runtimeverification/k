@@ -60,7 +60,6 @@ import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.thoughtworks.xstream.XStream;
 
 public class DefinitionLoader {
 	public static Definition loadDefinition(File mainFile, String lang, boolean autoinclude, Context context) throws IOException, Exception {
@@ -68,19 +67,11 @@ public class DefinitionLoader {
 		File canoFile = mainFile.getCanonicalFile();
 
 		String extension = FileUtil.getExtension(mainFile.getAbsolutePath());
-		if (".xml".equals(extension) || ".bin".equals(extension)) {
-			// unmarshalling
-			XStream xstream;
-			if (extension.equals(".xml")) {
-				xstream = new XStream();
-				xstream.aliasPackage("k", "org.kframework.kil");
-				javaDef = (Definition) xstream.fromXML(canoFile);
-			} else {
-				javaDef = (Definition) BinaryLoader.fromBinary(new FileInputStream(canoFile));
-			}
+		if (".bin".equals(extension)) {
+            javaDef = (Definition) BinaryLoader.fromBinary(new FileInputStream(canoFile));
 
 			if (GlobalSettings.verbose)
-				Stopwatch.sw.printIntermediate("Load definition from XML");
+				Stopwatch.sw.printIntermediate("Load definition from binary");
 
 			javaDef.preprocess(context);
 
@@ -91,17 +82,6 @@ public class DefinitionLoader {
 			javaDef = parseDefinition(mainFile, lang, autoinclude, context);
 
 			BinaryLoader.toBinary(javaDef, new FileOutputStream(context.dotk.getAbsolutePath() + "/defx-" + (GlobalSettings.javaBackend ? "java-symbolic" : "maude") + ".bin"));
-
-			if (GlobalSettings.xml) {
-				XStream xstream = new XStream();
-				xstream.aliasPackage("k", "org.kframework.kil");
-				xstream.toXML(javaDef, new FileOutputStream(context.dotk.getAbsolutePath() + "/defx.xml"));
-			}
-
-			if (GlobalSettings.verbose) {
-				Stopwatch.sw.printIntermediate("Serialize Definition to XML");
-			}
-
 		}
 		return javaDef;
 	}

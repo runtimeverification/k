@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * An integer token. Integer tokens have arbitrary precision.
  *
- * @author: AndreiS
+ * @author Pat
  */
 public class Int32Token extends Token {
 
@@ -117,6 +117,19 @@ public class Int32Token extends Token {
     @Override
     public void accept(Visitor visitor) {
         visitor.visit(this);
+    }
+
+    /**
+     * Returns the cached instance rather than the de-serialized instance if there is a cached
+     * instance.
+     */
+    private Object readResolve() {
+        Int32Token intToken = cache.get(value);
+        if (intToken == null) {
+            intToken = this;
+            cache.put(value, intToken);
+        }
+        return intToken;
     }
 
 }
