@@ -31,6 +31,7 @@ import org.kframework.utils.general.GlobalSettings;
 import org.kframework.utils.OptionComparator;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -197,8 +198,10 @@ public class KompileFrontEnd {
 		} else if (cmd.hasOption("xml")) {
 			backendOpt = "xml";
 		*/
+		/*
 		} else if (cmd.hasOption("doc")) {
 			backendOpt = "doc";
+		*/
 		} else {
 			backendOpt = "maude";
 		}
@@ -211,6 +214,7 @@ public class KompileFrontEnd {
 			GlobalSettings.documentation = true;
 			backend = new LatexBackend(Stopwatch.sw, context);
 			break;
+		/*
 		case "doc":
 			GlobalSettings.documentation = true;
 			if (!cmd.hasOption("doc-style")) {
@@ -218,6 +222,7 @@ public class KompileFrontEnd {
 			}
 			backend = new DocumentationBackend(Stopwatch.sw, context);
 			break;
+		*/
 		/*
 		case "xml":
 			GlobalSettings.xml = true;
@@ -234,12 +239,14 @@ public class KompileFrontEnd {
 		case "maude":
 			backend = new KompileBackend(Stopwatch.sw, context);
 			context.dotk = new File(output + File.separator + FileUtil.stripExtension(mainFile.getName()) + "-kompiled");
+			checkAnotherKompiled(context.dotk);
 			context.dotk.mkdirs();
 			break;
 		case "java":
 			GlobalSettings.javaBackend = true;
 			backend = new JavaSymbolicBackend(Stopwatch.sw, context);
 			context.dotk = new File(output + File.separator + FileUtil.stripExtension(mainFile.getName()) + "-kompiled");
+			checkAnotherKompiled(context.dotk);
 			context.dotk.mkdirs();
 			break;
 		case "unparse":
@@ -249,6 +256,7 @@ public class KompileFrontEnd {
 			GlobalSettings.symbolic = true;
 			backend = new SymbolicBackend(Stopwatch.sw, context);
 			context.dotk = new File(output + File.separator + FileUtil.stripExtension(mainFile.getName()) + "-kompiled");
+			checkAnotherKompiled(context.dotk);
 			context.dotk.mkdirs();
 			break;
 		default:
@@ -343,4 +351,21 @@ public class KompileFrontEnd {
 	// new File(GlobalSettings.mainFileWithNoExtension + extensions[i]).delete();
 	// }
 
+	private static void checkAnotherKompiled(File kompiled) {
+		File[] kompiledList = kompiled.getParentFile().listFiles(new FilenameFilter() {
+			@Override
+			public boolean accept(File current, String name) {
+				File f = new File(current, name);
+				return f.isDirectory() && f.getAbsolutePath().endsWith("-kompiled");
+			}
+		});
+		for (int i = 0; i < kompiledList.length; i++) {
+			if (!kompiledList[i].getName().equals(kompiled.getName())) {
+				String msg = "Creating multiple kompiled definition in the same directory is not allowed.";
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", kompiledList[i].getAbsolutePath()));
+			}
+		}
+	}
 }
+
+// vim: noexpandtab
