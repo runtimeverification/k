@@ -1,0 +1,19 @@
+function f() {
+  print("Trying to break from within a function ...\n");
+  break;  // normally, this should not be allowed
+}
+
+function main() {
+  while(true) {
+    f();
+    print("Should never reach this point.\n");
+  }
+  print("... and, wrongly, succeeding.\n");
+  /* One way to solve this problem dynamically is to empty the loop stack
+     when calling a function, but that is expensive, non-modular, and not
+     really justified.  Indeed, the clean solution here is to reject such
+     programs statically, but we have no static checker for untyped SIMPLE
+     (it can be done as part of the static semantics of the typed SIMPLE,
+     though).  For now, we can assume that programs do not have such uncaught
+     break/continue statements in functions.  */
+}
