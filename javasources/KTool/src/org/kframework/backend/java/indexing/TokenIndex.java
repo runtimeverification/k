@@ -1,7 +1,7 @@
 package org.kframework.backend.java.indexing;
 
 /**
- * @author: AndreiS
+ * @author AndreiS
  */
 public class TokenIndex implements Index {
 

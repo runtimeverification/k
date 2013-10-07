@@ -180,6 +180,11 @@ public class LocalVisitor implements Visitor {
     }
 
     @Override
+    public void visit(UninterpretedConstraint uninterpretedConstraint) {
+        visit((JavaSymbolicObject) uninterpretedConstraint);
+    }
+
+    @Override
     public void visit(UninterpretedToken uninterpretedToken) {
         visit((Token) uninterpretedToken);
     }

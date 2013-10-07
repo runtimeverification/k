@@ -5,6 +5,7 @@ import org.kframework.backend.java.indexing.TopIndex;
 import org.kframework.backend.java.symbolic.BottomUpVisitor;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.UninterpretedConstraint;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
@@ -25,7 +26,7 @@ public class Rule extends JavaSymbolicObject {
     private final Term rightHandSide;
     private final Collection<Term> condition;
     private final Collection<Variable> freshVariables;
-    private final SymbolicConstraint lookups;
+    private final UninterpretedConstraint lookups;
     private final IndexingPair indexingPair;
     private final boolean containsKCell;
 
@@ -34,7 +35,7 @@ public class Rule extends JavaSymbolicObject {
             Term rightHandSide,
             Collection<Term> condition,
             Collection<Variable> freshVariables,
-            SymbolicConstraint lookups,
+            UninterpretedConstraint lookups,
             Attributes attributes) {
         this.leftHandSide = leftHandSide;
         this.rightHandSide = rightHandSide;
@@ -113,7 +114,7 @@ public class Rule extends JavaSymbolicObject {
         return leftHandSide;
     }
 
-    public SymbolicConstraint lookups() {
+    public UninterpretedConstraint lookups() {
         return lookups;
     }
 
@@ -148,7 +149,7 @@ public class Rule extends JavaSymbolicObject {
         if (condition != null) {
             string += " when " + condition;
         }
-        if (!lookups.isTrue()) {
+        if (!lookups.equalities().isEmpty()) {
             if (condition != null) {
                 string += " when ";
             } else {

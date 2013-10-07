@@ -176,6 +176,17 @@ public class CopyOnWriteTransformer implements Transformer {
     }
 
     @Override
+    public ASTNode transform(UninterpretedConstraint uninterpretedConstraint) {
+        UninterpretedConstraint transformedUninterpretedConstraint = new UninterpretedConstraint();
+        for (UninterpretedConstraint.Equality equality : uninterpretedConstraint.equalities()) {
+            transformedUninterpretedConstraint.add(
+                    (Term) equality.leftHandSide().accept(this),
+                    (Term) equality.rightHandSide().accept(this));
+        }
+        return transformedUninterpretedConstraint;
+    }
+
+    @Override
     public ASTNode transform(UninterpretedToken uninterpretedToken) {
         return transform((Token) uninterpretedToken);
     }
@@ -522,7 +533,8 @@ public class CopyOnWriteTransformer implements Transformer {
         for (Variable variable : rule.freshVariables()) {
             processedFreshVariables.add((Variable) variable.accept(this));
         }
-        SymbolicConstraint processedLookups = (SymbolicConstraint) rule.lookups().accept(this);
+        UninterpretedConstraint processedLookups
+                = (UninterpretedConstraint) rule.lookups().accept(this);
 
         if (processedLeftHandSide != rule.leftHandSide()
                 || processedRightHandSide != rule.rightHandSide()

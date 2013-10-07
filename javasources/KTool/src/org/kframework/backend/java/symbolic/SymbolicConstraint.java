@@ -40,14 +40,14 @@ import org.kframework.krun.K;
  *
  * @author AndreiS
  */
-public class SymbolicConstraint extends JavaSymbolicObject implements Serializable {
+public class SymbolicConstraint extends JavaSymbolicObject {
 
     public enum TruthValue { TRUE, UNKNOWN, FALSE }
 
     /**
      * An equality between two terms (with variables).
      */
-    public class Equality implements Serializable {
+    public class Equality {
 
         public static final String SEPARATOR = " =? ";
 
