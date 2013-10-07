@@ -196,8 +196,10 @@ public class KompileFrontEnd {
 		} else if (cmd.hasOption("xml")) {
 			backendOpt = "xml";
 		*/
+		/*
 		} else if (cmd.hasOption("doc")) {
 			backendOpt = "doc";
+		*/
 		} else {
 			backendOpt = "maude";
 		}
@@ -210,6 +212,7 @@ public class KompileFrontEnd {
 			GlobalSettings.documentation = true;
 			backend = new LatexBackend(Stopwatch.sw, context);
 			break;
+		/*
 		case "doc":
 			GlobalSettings.documentation = true;
 			if (!cmd.hasOption("doc-style")) {
@@ -217,6 +220,7 @@ public class KompileFrontEnd {
 			}
 			backend = new DocumentationBackend(Stopwatch.sw, context);
 			break;
+		*/
 		/*
 		case "xml":
 			GlobalSettings.xml = true;
@@ -361,3 +365,5 @@ public class KompileFrontEnd {
 		}
 	}
 }
+
+// vim: noexpandtab
