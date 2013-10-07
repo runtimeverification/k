@@ -32,6 +32,7 @@ import org.kframework.ktest.execution.Task;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -599,12 +600,12 @@ public class Test implements Comparable<Test> {
     }
 
     public String getCompiled() {
-        return getDirectory() + Configuration.FILE_SEPARATOR + new File(getLanguage()).getName().replaceAll("\\.k$", "") + "-kompiled";
+        return getDirectory() + File.separator + FileUtil.stripExtension(new File(getLanguage()).getName()) + "-kompiled";
     }
 
     public String getDirectory() {
-        return new File(getLanguage()).getParent() + Configuration.FILE_SEPARATOR + ".ktest"
-                + (tag.equals("") ? "" : "-" + tag);
+        return new File(getLanguage()).getAbsoluteFile().getParent();
+                //+ (tag.equals("") ? "" : "-" + tag);
     }
 
     private String getReportFilename() {
@@ -670,11 +671,8 @@ public class Test implements Comparable<Test> {
         return true;
     }
 
-    private String getPdfDirectory() {
-        return new File(getLanguage()).getParent();
-    }
     private String getPdfCompiledFilename() {
-        return getPdfDirectory() + Configuration.FILE_SEPARATOR + new File(getLanguage()).getName().replaceAll("\\.k$", ".pdf");
+        return getDirectory() + File.separator + FileUtil.stripExtension(new File(getLanguage()).getName()) + ".pdf";
     }
 
     public void save() {
@@ -729,7 +727,7 @@ public class Test implements Comparable<Test> {
         command.add("--backend");
         command.add("pdf");
         command.add("--directory");
-        command.add(getPdfDirectory());
+        command.add(getDirectory());
         String[] arguments = new String[command.size()];
         int i = 0;
         for (String cmd : command) {

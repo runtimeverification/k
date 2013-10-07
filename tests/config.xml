@@ -536,6 +536,7 @@
 <!--
 
 -->
+<!-- TODO: Consider 'title' attribute
   <test
       definition="dist/tutorial/1_k/2_imp/lesson_4/imp.k"
       programs="dist/tutorial/1_k/2_imp"
@@ -543,13 +544,14 @@
       title="symbolic"
 	  exclude="lesson_4/test.imp"
       >
-    <kompile-option name="--backend" value="symbolic" />
+    <kompile-option name="-backend" value="symbolic" />
     <all-programs>
-      <krun-option name="--no-color" />
-      <krun-option name="--output-mode" value="none" />
+      <krun-option name="-no-color" />
+      <krun-option name="-output-mode" value="none" />
       <krun-option name="-cPC" value="true" />
     </all-programs>
   </test>
+-->
 
 
 <!--
