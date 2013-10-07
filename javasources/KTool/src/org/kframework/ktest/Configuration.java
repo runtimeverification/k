@@ -74,8 +74,7 @@ public class Configuration {
 	public static final String HELP_OPTION = "help";
 	public static final String HELP_EXPERIMENTAL_OPTION = "help-experimental";
 	public static final String VERSION_OPTION = "version";
-	public static final String LANGUAGE_OPTION = LANGUAGE;
-	public static final String CONFIG_OPTION = "config";
+	public static final String DIRECTORY_OPTION = "directory";
 	public static final String PROGRAMS_OPTION = PROGRAMS_DIR;
 	public static final String EXCLUDE_OPTION = EXCLUDE;
 	public static final String EXTENSIONS_OPTION = EXTENSIONS2;

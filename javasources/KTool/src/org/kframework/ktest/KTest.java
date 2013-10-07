@@ -35,8 +35,8 @@ import org.xml.sax.SAXException;
 
 public class KTest {
 
-    private static final String USAGE = "ktest [options]" + System.getProperty("line.separator");
-    private static final String HEADER_STANDARD = "";
+    private static final String USAGE = "ktest <file> [options]";
+    private static final String HEADER_STANDARD = "<file> is either a K definition (single job mode) or an XML configuration (batch mode).";
     private static final String FOOTER_STANDARD = "";
     private static final String HEADER_EXPERIMENTAL = "Experimental options:";
     private static final String FOOTER_EXPERIMENTAL = System.getProperty("line.separator") + "These options are non-standard and subject to change without notice.";
@@ -74,10 +74,58 @@ public class KTest {
             System.exit(0);
         }
 
-        // The language to be tested
-        if (cmd.hasOption(Configuration.LANGUAGE_OPTION)) {
-            Configuration.KDEF = cmd
-                    .getOptionValue(Configuration.LANGUAGE_OPTION);
+        // Input argument
+        String input = null;
+        String[] remainingArgs = cmd.getArgs();
+        if (remainingArgs.length < 1) {
+            String msg = "You have to provide an input file, which is either a K definition (*.k) or a test configuration (*.xml).";
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
+        } else {
+            input = remainingArgs[0];
+        }
+        // Single job mode
+        if (input.endsWith(".k")) {
+            Configuration.KDEF = input;
+            Configuration.SINGLE_DEF_MODE = true;
+            // Invalid: --directory
+            if (cmd.hasOption(Configuration.DIRECTORY_OPTION)) {
+                String msg = "You cannot use --" + Configuration.DIRECTORY_OPTION + " option when a single K definition is given: " + Configuration.KDEF;
+                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
+            }
+            // Required: --extensions
+            if (cmd.hasOption(Configuration.EXTENSIONS_OPTION)) {
+                Configuration.EXTENSIONS = Arrays.asList(cmd.getOptionValue(Configuration.EXTENSIONS_OPTION).split("\\s+"));
+            } else {
+                if (cmd.hasOption(Configuration.PROGRAMS_OPTION)) {
+                    String msg = "You have to provide a list of extensions by using --" + Configuration.EXTENSIONS_OPTION + " option, when --" + Configuration.PROGRAMS_OPTION + " is given.";
+                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
+                }
+            }
+        // Batch job mode
+        } else if (input.endsWith(".xml")) {
+            Configuration.CONFIG = input;
+            Configuration.SINGLE_DEF_MODE = false;
+            // Optional: --directory
+            if (cmd.hasOption(Configuration.DIRECTORY_OPTION)) {
+                Configuration.KDEF = cmd.getOptionValue(Configuration.DIRECTORY_OPTION);
+                if (!new File(Configuration.KDEF).isDirectory()) {
+                    String msg = "Invalid options: " + Configuration.KDEF + " is not a directory. You should provide a (root) directory where K definitions reside.";
+                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
+                }
+            }
+            // Invalid: --extensions
+            if (cmd.hasOption(Configuration.EXTENSIONS_OPTION)) {
+                String msg = "You cannot use --" + Configuration.EXTENSIONS_OPTION + " option when a test configuration is given: " + Configuration.CONFIG;
+                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
+            }
+            // Invalid: --exclude
+            if (cmd.hasOption(Configuration.EXCLUDE_OPTION)) {
+                String msg = "You cannot use --" + Configuration.EXCLUDE_OPTION + " option when a test configuration is given: " + Configuration.CONFIG;
+                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
+            }
+        } else {
+            String msg = "You have to provide a valid input file, which is either a K definition (*.k) or a test configuration (*.xml).";
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
         }
 
         // Programs folder
@@ -94,13 +142,7 @@ public class KTest {
                     Configuration.EXCLUDE_OPTION).split("\\s+"));
         }
 
-        // List of program (non-empty) extensions
-        if (cmd.hasOption(Configuration.EXTENSIONS_OPTION)) {
-            Configuration.EXTENSIONS = Arrays.asList(cmd.getOptionValue(
-                    Configuration.EXTENSIONS_OPTION).split("\\s+"));
-        }
-
-        // List of program (non-empty) extensions
+        // Results directory
         if (cmd.hasOption(Configuration.RESULTS_OPTION)) {
             Configuration.RESULTS_FOLDER = cmd
                     .getOptionValue(Configuration.RESULTS_OPTION);
@@ -108,12 +150,6 @@ public class KTest {
 
         if (cmd.hasOption(Configuration.REPORT_OPTION)) {
             Configuration.REPORT = true;
-        }
-
-        // Resolve the configuration file
-        if (cmd.hasOption(Configuration.CONFIG_OPTION)) {
-            Configuration.CONFIG = cmd
-                    .getOptionValue(Configuration.CONFIG_OPTION);
         }
 
         // Resolve skip options
@@ -142,29 +178,6 @@ public class KTest {
         if (cmd.hasOption(Configuration.PROCESSES_OPTION)) {
             Execution.POOL_SIZE = Integer.parseInt(cmd
                     .getOptionValue(Configuration.PROCESSES_OPTION));
-        }
-
-        // sanity checks
-        if (Configuration.CONFIG != null
-                && new File(Configuration.KDEF).isFile()) {
-            GlobalSettings.kem
-                    .register(new KException(
-                            ExceptionType.ERROR,
-                            KExceptionGroup.CRITICAL,
-                            "Please provide a root directory for the configuration file.",
-                            "command line", "System file."));
-        }
-        if (new File(Configuration.KDEF).isDirectory()
-                && Configuration.CONFIG == null) {
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-                    KExceptionGroup.CRITICAL, "Testing data missing.",
-                    "command line", "System file."));
-        }
-
-        // if a configuration file is not given then ktest will run only
-        // with command line arguments
-        if (Configuration.CONFIG == null) {
-            Configuration.SINGLE_DEF_MODE = true;
         }
 
         // execution
