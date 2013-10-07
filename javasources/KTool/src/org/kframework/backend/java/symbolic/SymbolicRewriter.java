@@ -158,7 +158,7 @@ public class SymbolicRewriter {
 
             ConstrainedTerm leftHandSide = new ConstrainedTerm(
                     rule.leftHandSide(),
-                    rule.lookups(),
+                    rule.lookups().getSymbolicConstraint(constrainedTerm.termContext()),
                     leftHandSideConstraint,
                     constrainedTerm.termContext());
 
@@ -215,7 +215,7 @@ public class SymbolicRewriter {
 
             ConstrainedTerm leftHandSideTerm = new ConstrainedTerm(
                     rule.leftHandSide(),
-                    rule.lookups(),
+                    rule.lookups().getSymbolicConstraint(constrainedTerm.termContext()),
                     leftHandSideConstraint,
                     constrainedTerm.termContext());
 
@@ -322,7 +322,9 @@ public class SymbolicRewriter {
             sideConstraint.addAll(rule.condition());
             ConstrainedTerm initialTerm = new ConstrainedTerm(
                     rule.leftHandSide().substitute(freshSubstitution, context),
-                    rule.lookups().substitute(freshSubstitution, context),
+                    rule.lookups().getSymbolicConstraint(context).substitute(
+                            freshSubstitution,
+                            context),
                     sideConstraint.substitute(freshSubstitution, context),
                     context);
 

@@ -1,0 +1,8 @@
+function main() {
+  var i=0, j=0;
+  while(true) {
+    var j=1;
+    break;
+  }
+  print(j,"\n");  // should print 0, not 1
+}

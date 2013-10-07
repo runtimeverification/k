@@ -46,6 +46,7 @@ public interface Visitor {
     public void visit(SymbolicConstraint node);
     public void visit(Term node);
     public void visit(Token token);
+    public void visit(UninterpretedConstraint uninterpretedConstraint);
     public void visit(UninterpretedToken uninterpretedToken);
     public void visit(Variable variable);
 

@@ -89,4 +89,11 @@ public class BoolToken extends Token {
         visitor.visit(this);
     }
 
+    /**
+     * Returns the static instance rather than the de-serialized instance.
+     */
+    private Object readResolve() {
+        return BoolToken.of(this.booleanValue());
+    }
+
 }

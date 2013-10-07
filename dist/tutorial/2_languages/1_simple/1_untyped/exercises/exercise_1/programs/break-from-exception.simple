@@ -1,0 +1,19 @@
+function main() {
+  var i=0;
+  while(true) {
+    print("i = ", ++i, "\n");
+    try {
+      if(i%2==0) {
+        var i=100;
+        continue;
+      } else {
+        throw i;
+      }
+    } catch(i) {
+      i=-i;
+      print(i,"\n");
+      if(i==-17) {break;}
+    }
+  }
+  print("final i = ", i, "\n");
+}

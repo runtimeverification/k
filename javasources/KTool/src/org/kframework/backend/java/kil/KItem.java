@@ -116,7 +116,7 @@ public class KItem extends Term implements Sorted {
 
                 ConstrainedTerm leftHandSide = new ConstrainedTerm(
                         ((KItem) rule.leftHandSide()).kList,
-                        rule.lookups(),
+                        rule.lookups().getSymbolicConstraint(context),
                         leftHandSideConstraint,
                         context);
 
