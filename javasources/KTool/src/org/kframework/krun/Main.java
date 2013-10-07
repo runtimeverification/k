@@ -178,7 +178,7 @@ public class Main {
         }
         if (stdin != null) {
             KApp noIO = KApp.of(KLabelConstant.of("'#noIO", context));
-            if (K.backend.equals("java-symbolic")) {
+            if (K.backend.equals("java")) {
                 DataStructureSort myList = context.dataStructureListSortOf(DataStructureSort.DEFAULT_LIST_SORT);
                 if (myList != null) {
                     output.put("$noIO", DataStructureBuiltin.element(myList, noIO));
@@ -188,7 +188,7 @@ public class Main {
             }
             output.put("$stdin", StringBuiltin.kAppOf(stdin + "\n"));
         } else {
-            if (K.backend.equals("java-symbolic")) {
+            if (K.backend.equals("java")) {
                 DataStructureSort myList = context.dataStructureListSortOf(DataStructureSort.DEFAULT_LIST_SORT);
                 if (myList != null) {
                     output.put("$noIO", DataStructureBuiltin.empty(myList));
@@ -208,7 +208,7 @@ public class Main {
     private static KRun obtainKRun(Context context) {
         if (K.backend.equals("maude")) {
             return new MaudeKRun(context);
-        } else if (K.backend.equals("java-symbolic")) {
+        } else if (K.backend.equals("java")) {
             try {
                 return new JavaSymbolicKRun(context);
             } catch (KRunExecutionException e) {
@@ -216,7 +216,7 @@ public class Main {
                 return null;
             }
         } else {
-            Error.report("Currently supported backends are 'maude' and 'java-symbolic'");
+            Error.report("Currently supported backends are 'maude' and 'java'");
             return null;
         }
     }
@@ -1104,7 +1104,7 @@ public class Main {
 
             if (K.term != null) {
                 if (K.parser.equals("kast") && !cmd.hasOption("parser")) {
-                    if (K.backend.equals("java-symbolic")) {
+                    if (K.backend.equals("java")) {
                         K.parser = "kast -ruleParser";
                     } else {
                         K.parser = "kast -groundParser";

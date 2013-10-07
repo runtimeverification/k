@@ -634,7 +634,8 @@ public abstract class PrePostTransformer implements Transformer {
         for (Variable variable : rule.freshVariables()) {
             processedFreshVariables.add((Variable) variable.accept(this));
         }
-        SymbolicConstraint processedLookups = (SymbolicConstraint) rule.lookups().accept(this);
+        UninterpretedConstraint processedLookups
+                = (UninterpretedConstraint) rule.lookups().accept(this);
 
         if (processedLeftHandSide != rule.leftHandSide()
                 || processedRightHandSide != rule.rightHandSide()
@@ -675,6 +676,25 @@ public abstract class PrePostTransformer implements Transformer {
         }
 
         return transformedSymbolicConstraint.accept(postTransformer);
+    }
+
+    @Override
+    public ASTNode transform(UninterpretedConstraint uninterpretedConstraint) {
+        ASTNode astNode = uninterpretedConstraint.accept(preTransformer);
+        if (astNode instanceof DoneTransforming) {
+            return ((DoneTransforming) astNode).getContents();
+        }
+        assert astNode instanceof UninterpretedConstraint : "preTransformer should not modify type";
+        uninterpretedConstraint = (UninterpretedConstraint) astNode;
+
+        UninterpretedConstraint transformedUninterpretedConstraint = new UninterpretedConstraint();
+        for (UninterpretedConstraint.Equality equality : uninterpretedConstraint.equalities()) {
+            transformedUninterpretedConstraint.add(
+                    (Term) equality.leftHandSide().accept(this),
+                    (Term) equality.rightHandSide().accept(this));
+        }
+
+        return transformedUninterpretedConstraint.accept(postTransformer);
     }
 
     @Override

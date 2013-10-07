@@ -163,6 +163,20 @@ public class PrePostVisitor implements Visitor {
     }
 
     @Override
+    public void visit(UninterpretedConstraint uninterpretedConstraint) {
+        preVisitor.resetProceed();
+        uninterpretedConstraint.accept(preVisitor);
+        if (!preVisitor.isProceed()) return;
+
+        for (UninterpretedConstraint.Equality equality : uninterpretedConstraint.equalities()) {
+            equality.leftHandSide().accept(this);
+            equality.rightHandSide().accept(this);
+        }
+
+        uninterpretedConstraint.accept(postVisitor);
+    }
+
+    @Override
     public void visit(UninterpretedToken uninterpretedToken) {
         preVisitor.resetProceed();
         uninterpretedToken.accept(preVisitor);

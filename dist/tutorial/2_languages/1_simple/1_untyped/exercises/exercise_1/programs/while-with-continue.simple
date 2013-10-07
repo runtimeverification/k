@@ -1,0 +1,9 @@
+function main() {
+  var i=0;
+  while(++i<=10) {
+    print(i,"\n");
+    continue;
+    print("Not OK!\n");
+  }
+  print("OK\n");
+}

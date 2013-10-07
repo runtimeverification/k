@@ -285,7 +285,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
             }
 
 			node = node.shallowCopy();
-            if (GlobalSettings.javaBackend || K.backend.equals("java-symbolic")) {
+            if (GlobalSettings.javaBackend || K.backend.equals("java")) {
                 /* the Java Rewrite Engine preserves sort information for variables */
             } else {
 			    node.setSort(KSorts.KITEM);
