@@ -228,6 +228,14 @@ public class BottomUpVisitor implements Visitor {
     }
 
     @Override
+    public void visit(UninterpretedConstraint uninterpretedConstraint) {
+        for (UninterpretedConstraint.Equality equality : uninterpretedConstraint.equalities()) {
+            equality.leftHandSide().accept(this);
+            equality.rightHandSide().accept(this);
+        }
+    }
+
+    @Override
     public void visit(UninterpretedToken uninterpretedToken) {
         visit((Term) uninterpretedToken);
     }

@@ -21,6 +21,8 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 
+import java.io.Serializable;
+
 
 /**
  * Interface for a unifier. A unifier implements a visitor pattern specialized for unification,

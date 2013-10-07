@@ -82,7 +82,7 @@ public class StepRewriter {
 
         ConstrainedTerm leftHandSide = new ConstrainedTerm(
                 rule.leftHandSide(),
-                rule.lookups(),
+                rule.lookups().getSymbolicConstraint(constrainedTerm.termContext()),
                 leftHandSideConstraint,
                 constrainedTerm.termContext());
 
@@ -126,7 +126,7 @@ public class StepRewriter {
 
         ConstrainedTerm leftHandSide = new ConstrainedTerm(
                 rule.leftHandSide(),
-                rule.lookups(),
+                rule.lookups().getSymbolicConstraint(context),
                 leftHandSideConstraint,
                 context);
 

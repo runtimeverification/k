@@ -20,7 +20,11 @@ import java.util.Set;
 public abstract class JavaSymbolicObject extends ASTNode
         implements Transformable, Visitable, Serializable {
 
-    Set<Variable> variableSet = null;
+    /**
+     * AndreiS: serializing this field causes a NullPointerException when hashing a de-serialized
+     * Variable (the variable has all fields set to null at the moment of hashing).
+     */
+    transient Set<Variable> variableSet = null;
 
     /**
      * Returns {@code true} if this JavaSymbolicObject does not contain any variables.

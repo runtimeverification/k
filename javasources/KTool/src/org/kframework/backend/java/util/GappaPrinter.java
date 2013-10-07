@@ -156,7 +156,7 @@ public class GappaPrinter extends BottomUpVisitor {
         try {
             if (!variable.sort().equals("Float"))
                 throw new GappaPrinterException("Variable " + variable + " is not Float.");
-            result.append(variable.name().toLowerCase());
+            result.append(variable.name().toLowerCase().replaceAll("_","o"));
         } catch (GappaPrinterException e) {
             System.err.println(e.getMessage());
         }

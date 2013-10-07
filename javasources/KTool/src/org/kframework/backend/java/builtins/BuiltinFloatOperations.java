@@ -87,7 +87,7 @@ public class BuiltinFloatOperations {
         if (!K.smt.equals("gappa")) return null;
         String gterm1 = GappaPrinter.toGappaGround(term1);
         String gterm2 = GappaPrinter.toGappaGround(term2);
-        String inputFalse = gterm1 + " <= " + gterm2;
+        String inputFalse = "(" + gterm1 + " - " + gterm2 + ")" + " <= 0";
         if (GappaServer.proveFalse(inputFalse))
             return BoolToken.TRUE;
         if (GappaServer.proveTrue(inputFalse))
@@ -99,7 +99,7 @@ public class BuiltinFloatOperations {
         if (!K.smt.equals("gappa")) return null;
         String gterm1 = GappaPrinter.toGappaGround(term1);
         String gterm2 = GappaPrinter.toGappaGround(term2);
-        final String inputTrue = gterm1 + " >= " + gterm2;
+        final String inputTrue = "(" + gterm1 + "-" + gterm2 + ")" + " >= 0";
         if (GappaServer.proveTrue(inputTrue))
             return BoolToken.TRUE;
         if (GappaServer.proveFalse(inputTrue))
@@ -111,7 +111,7 @@ public class BuiltinFloatOperations {
         if (!K.smt.equals("gappa")) return null;
         String gterm1 = GappaPrinter.toGappaGround(term1);
         String gterm2 = GappaPrinter.toGappaGround(term2);
-        final String inputFalse = gterm1 + " >= " + gterm2;
+        final String inputFalse = "(" + gterm1 + " - " +  gterm2 + ")" + " >= 0";
         if (GappaServer.proveFalse(inputFalse))
             return BoolToken.TRUE;
         if (GappaServer.proveTrue(inputFalse))
@@ -123,7 +123,7 @@ public class BuiltinFloatOperations {
         if (!K.smt.equals("gappa")) return null;
         String gterm1 = GappaPrinter.toGappaGround(term1);
         String gterm2 = GappaPrinter.toGappaGround(term2);
-        final String inputTrue = gterm1 + " <= " + gterm2;
+        final String inputTrue = "(" + gterm1 + "-" + gterm2 + ")" + " <= 0";
         if (GappaServer.proveTrue(inputTrue))
             return BoolToken.TRUE;
         if (GappaServer.proveFalse(inputTrue))
