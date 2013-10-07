@@ -974,7 +974,7 @@ public class Main {
                 K.compiled_def = null;
                 for (int i = 0; i < dirs.length; i++) {
                     if (dirs[i].getAbsolutePath().endsWith("-kompiled")) {
-                        if (context.kompiled != null) {
+                        if (K.compiled_def != null) {
                             String msg = "Multiple compiled definitions found.";
                             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", new File(".").getAbsolutePath()));
                         } else {
