@@ -807,22 +807,31 @@ public class Main {
                 K.term = cmd.getOptionValue("term");
             }
             if (cmd.hasOption("io")) {
-                K.io = true;
-            }
-            if (cmd.hasOption("no-io")) {
-                K.io = false;
+                String v = cmd.getOptionValue("io");
+                if (v.equals("on"))
+                    K.io = true;
+                else if (v.equals("off"))
+                    K.io = false;
+                else
+                    Error.report("Unrecognized option: --io " + v + "\nUsage: krun --io [on|off]");
             }
             if (cmd.hasOption("statistics")) {
-                K.statistics = true;
-            }
-            if (cmd.hasOption("no-statistics")) {
-                K.statistics = false;
+                String v = cmd.getOptionValue("statistics");
+                if (v.equals("on"))
+                    K.statistics = true;
+                else if (v.equals("off"))
+                    K.statistics = false;
+                else
+                    Error.report("Unrecognized option: --statistics " + v + "\nUsage: krun --statistics [on|off]");
             }
             if (cmd.hasOption("color")) {
-                K.color = true;
-            }
-            if (cmd.hasOption("no-color")) {
-                K.color = false;
+                String v = cmd.getOptionValue("color");
+                if (v.equals("on"))
+                    K.color = true;
+                else if (v.equals("off"))
+                    K.color = false;
+                else
+                    Error.report("Unrecognized option: --color " + v + "\nUsage: krun --color [on|off]");
             }
             if (cmd.hasOption("parens")) {
                 String v = cmd.getOptionValue("parens");
@@ -866,10 +875,13 @@ public class Main {
                 K.output_mode = cmd.getOptionValue("output-mode");
             }
             if (cmd.hasOption("log-io")) {
-                K.log_io = true;
-            }
-            if (cmd.hasOption("no-log-io")) {
-                K.log_io = false;
+                String v = cmd.getOptionValue("log-io");
+                if (v.equals("on"))
+                    K.log_io = true;
+                else if (v.equals("off"))
+                    K.log_io = false;
+                else
+                    Error.report("Unrecognized option: --log-io " + v + "\nUsage: krun --log-io [on|off]");
             }
             if (cmd.hasOption("debug")) {
                 K.debug = true;

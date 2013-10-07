@@ -187,7 +187,7 @@ public class KastFrontEnd {
 				GlobalSettings.whatParser = GlobalSettings.ParserType.PROGRAM;
 			} else if (parser.equals("ground")) {
 				GlobalSettings.whatParser = GlobalSettings.ParserType.GROUND;
-			} else if (parser.equals("rules")) {
+			} else if (parser.equals("rule")) {
 				GlobalSettings.whatParser = GlobalSettings.ParserType.RULES;
 			} else if (parser.equals("binary")) {
 				GlobalSettings.whatParser = GlobalSettings.ParserType.BINARY;

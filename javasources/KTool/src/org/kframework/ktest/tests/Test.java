@@ -87,7 +87,7 @@ public class Test implements Comparable<Test> {
 
         // general krun options
         generalKrunOptions.put("--output-mode", "none");
-        generalKrunOptions.put("--no-color", "");
+        generalKrunOptions.put("--color", "off");
 
         initializePrograms(homeDir);
     }
@@ -420,7 +420,7 @@ public class Test implements Comparable<Test> {
         }
 
         if (genOpts.getLength() == 0) {
-            generalKrunOptions.put("--no-color", "");
+            generalKrunOptions.put("--color", "off");
             generalKrunOptions.put("--output-mode", "none");
         }
     }

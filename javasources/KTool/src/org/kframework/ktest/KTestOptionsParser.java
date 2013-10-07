@@ -46,12 +46,12 @@ public class KTestOptionsParser {
 		addOptionS(OptionBuilder.withLongOpt(Configuration.VERSION_OPTION).withDescription("Print version information.").create());
 		addOptionS(OptionBuilder.withLongOpt(Configuration.VERBOSE_OPTION).withDescription("Verbose output.").create("v"));
 
-		addOptionS(OptionBuilder.withLongOpt(Configuration.PROGRAMS_OPTION).hasArg().withArgName("dir").withDescription("Programs directory in single job mode, or a root directory for programs in batch mode.").create());
+		addOptionS(OptionBuilder.withLongOpt(Configuration.PROGRAMS_OPTION).hasArg().withArgName("dir").withDescription("Programs directory in single job mode, or a root directory for programs in batch mode. By default this is the current directory.").create());
 		addOptionS(OptionBuilder.withLongOpt(Configuration.EXTENSIONS_OPTION).hasArg().withArgName("string").withDescription("The list of program extensions separated by whitespaces. Required in single job mode, invalid in batch mode.").create());
 		addOptionS(OptionBuilder.withLongOpt(Configuration.EXCLUDE_OPTION).hasArg().withArgName("file").withDescription("The list of programs which will not be tested. Valid only in single job mode.").create());
 		addOptionS(OptionBuilder.withLongOpt(Configuration.RESULTS_OPTION).hasArg().withArgName("dir").withDescription("Directory containing input and expected output for programs in single job mode, or a root directory for the expected I/O for programs in batch mode. By default this is the same as the programs directory.").create());
 		addOptionS(OptionBuilder.withLongOpt(Configuration.SKIP_OPTION).hasArg().withArgName("steps").withDescription("The list of steps separated by whitespace to be skipped. A step is either [" + Configuration.KOMPILE_STEP + "|" + Configuration.PDF_STEP + "|" + Configuration.PROGRAMS_STEP + "].").create());
-		addOptionS(OptionBuilder.withLongOpt(Configuration.DIRECTORY_OPTION).hasArg().withArgName("dir").withDescription("A root directory where K definitions reside. Valid only in batch mode.").create("d"));
+		addOptionS(OptionBuilder.withLongOpt(Configuration.DIRECTORY_OPTION).hasArg().withArgName("dir").withDescription("A root directory where K definitions reside. By default this is the current directory. Valid only in batch mode.").create("d"));
 		addOptionS(OptionBuilder.withLongOpt(Configuration.REPORT_OPTION).withDescription("Generate a junit-like report.").create());
 		addOptionS(OptionBuilder.withLongOpt(Configuration.PROCESSES_OPTION).hasArg().withArgName("num").withDescription("The maximum number of threads.").create());
 

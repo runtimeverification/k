@@ -87,7 +87,8 @@ public class KompileFrontEnd {
 			System.exit(0);
 		}
 
-        GlobalSettings.NOSMT = cmd.hasOption("no-smt");
+		if (cmd.hasOption("smt"))
+			GlobalSettings.NOSMT = cmd.getOptionValue("smt").equals("none");
         
 		if (cmd.hasOption("verbose"))
 			GlobalSettings.verbose = true;
