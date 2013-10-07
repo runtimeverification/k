@@ -670,9 +670,11 @@ public class Test implements Comparable<Test> {
         return true;
     }
 
+    private String getPdfDirectory() {
+        return new File(getLanguage()).getParent();
+    }
     private String getPdfCompiledFilename() {
-        return getDirectory() + Configuration.FILE_SEPARATOR + new File(getLanguage()).getName().replaceAll("\\.k$", ".pdf");
-
+        return getPdfDirectory() + Configuration.FILE_SEPARATOR + new File(getLanguage()).getName().replaceAll("\\.k$", ".pdf");
     }
 
     public void save() {
@@ -727,7 +729,7 @@ public class Test implements Comparable<Test> {
         command.add("--backend");
         command.add("pdf");
         command.add("--directory");
-        command.add(getDirectory());
+        command.add(getPdfDirectory());
         String[] arguments = new String[command.size()];
         int i = 0;
         for (String cmd : command) {

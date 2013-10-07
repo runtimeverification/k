@@ -1,3 +1,8 @@
+WARNING: The command line options for kompile, krun, kast and ktest have
+recently (starting with version 'jenkins-k-framework-git-359') changed!
+A list of changes can be found at
+https://github.com/kframework/k/wiki/Command-Line-Option-Changes.
+
 K tool, version 3.0
 
 K is a framework for programming language design and executable semantics.
