@@ -58,7 +58,7 @@ public class K {
 	public static String desk_file;
 	public static String pgm;
 	public static String term = null;
-	public static String k_definition = null;
+	public static String directory = null;
 	public static String main_module;
 	public static String syntax_module;
 	public static String parser = "kast";
@@ -76,6 +76,7 @@ public class K {
 
 	// variables to store if that specific option was set; also set default values for options
 	public static boolean help = false;
+	public static boolean helpExperimental = false;
 	public static boolean version = false;
 	public static boolean io = true;
 	public static boolean statistics = false;
@@ -89,8 +90,6 @@ public class K {
 	public static boolean guidebug = false;
 	public static boolean trace = false;
 	public static boolean profile = false;
-	//don't delete temp folders created by krun by default
-	public static boolean deleteTempDir = false;
     public static String smt = "z3";
     //generate tests from semantics?
     public static boolean do_testgen = false;

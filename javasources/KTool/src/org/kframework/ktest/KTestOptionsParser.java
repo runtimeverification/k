@@ -1,86 +1,60 @@
 package org.kframework.ktest;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionGroup;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.*;
 import org.kframework.utils.ActualPosixParser;
+
+import java.util.ArrayList;
+import java.util.Comparator;
 
 public class KTestOptionsParser {
 
 	Options options;
 	HelpFormatter help;
+	// For printing help messages: options = optionsStandard + optionsExperimental
+	private Options optionsStandard;
+	private Options optionsExperimental;
+	private ArrayList<Option> optionList = new ArrayList<Option>();
+
+	// wrapper function to add an option
+	private void addOptionWrapper(Option opt, boolean isStandard) {
+		// for parsing command-line options
+		options.addOption(opt);
+		// for printing help messages
+		optionList.add(opt);
+		if (isStandard) {
+			optionsStandard.addOption(opt);
+		} else {
+			optionsExperimental.addOption(opt);
+		}
+	}
+	// add a standard option
+	private void addOptionS(Option opt) {
+		addOptionWrapper(opt, true);
+	}
+	// add an experimental option
+	private void addOptionE(Option opt) {
+		addOptionWrapper(opt, false);
+	}
 
 	public KTestOptionsParser() {
 		options = new Options();
 		help = new HelpFormatter();
+		optionsStandard = new Options();
+		optionsExperimental = new Options();
 		
-		// Metadata options
-		OptionGroup helpGroup = new OptionGroup();
-		Option help = new Option("h", Configuration.HELP_OPTION, false, "Prints this message and exits");
-		Option version = new Option(Configuration.VERSION_OPTION, false, "Prints version number");
-		helpGroup.addOption(help);
-		helpGroup.addOption(version);
-		
-		// configuration file
-		OptionGroup configGroup = new OptionGroup();
-		Option config = new Option(Configuration.CONFIG_OPTION,  true, "XML configuration file containing tests");
-		configGroup.addOption(config);
+		addOptionS(OptionBuilder.withLongOpt(Configuration.HELP_OPTION).withDescription("Print this help message.").create("h"));
+		addOptionS(OptionBuilder.withLongOpt(Configuration.VERSION_OPTION).withDescription("Print version information.").create());
+		addOptionS(OptionBuilder.withLongOpt(Configuration.VERBOSE_OPTION).withDescription("Verbose output.").create("v"));
 
-		// language group
-		OptionGroup languageGroup = new OptionGroup();
-		Option language = new Option("def", Configuration.LANGUAGE_OPTION, true, "K definition or, in case the -config option is used, a root directory for K definitions");
-		languageGroup.addOption(language);
-		
-		// programs directory
-		OptionGroup programsGroup = new OptionGroup();
-		Option programs = new Option(Configuration.PROGRAMS_OPTION, true, "Programs directory or, in case the -config option is used, a root directory for programs");
-		programsGroup.addOption(programs);
-
-		// the list of excluded programs
-		OptionGroup extensionsGroup = new OptionGroup();
-		Option extensions = new Option(Configuration.EXTENSIONS_OPTION, true, "The list of program extensions separated by whitespaces");
-		extensionsGroup.addOption(extensions);
-		
-		// the list of excluded programs
-		OptionGroup excludeGroup = new OptionGroup();
-		Option exclude = new Option(Configuration.EXCLUDE_OPTION, true, "The list of programs which will not be tested");
-		excludeGroup.addOption(exclude);
-
-		// the list of excluded programs
-		OptionGroup resultsGroup = new OptionGroup();
-		Option results = new Option(Configuration.RESULTS_OPTION, true, "Directory containing I/O for programs or, in case the -config option is used, a root directory for the I/O for programs");
-		resultsGroup.addOption(results);
-		
-		// --skip
-		OptionGroup skipGroup = new OptionGroup();
-		Option skip = new Option(Configuration.SKIP_OPTION, true, "The list of steps separated by whitespace to be skipped (" + Configuration.KOMPILE_STEP + "/" + Configuration.PDF_STEP + "/" + Configuration.PROGRAMS_STEP + ")");
-		skipGroup.addOption(skip);
-		
-		// verbose
-		OptionGroup vGroup = new OptionGroup();
-		Option verbose = new Option("v",  Configuration.VERBOSE_OPTION, false, "Verbose mode");
-		vGroup.addOption(verbose);
-
-		// number of processes
-		OptionGroup procGroup = new OptionGroup();
-		Option processes = new Option(Configuration.PROCESSES_OPTION, true, "The maximum number of threads");
-		procGroup.addOption(processes);
-
-		// add all option groups to ktest options
-		options.addOptionGroup(helpGroup);
-		options.addOptionGroup(configGroup);
-		options.addOptionGroup(languageGroup);
-		options.addOptionGroup(programsGroup);
-		options.addOptionGroup(extensionsGroup);
-		options.addOptionGroup(excludeGroup);
-		options.addOptionGroup(resultsGroup);
-		options.addOptionGroup(skipGroup);
-		options.addOptionGroup(vGroup);
-		options.addOptionGroup(procGroup);
+		addOptionS(OptionBuilder.withLongOpt(Configuration.CONFIG_OPTION).hasArg().withArgName("file").withDescription("XML configuration file containing tests.").create());
+		addOptionS(OptionBuilder.withLongOpt(Configuration.LANGUAGE_OPTION).hasArg().withArgName("file/dir").withDescription("Path to the original K definition or, in case the -config option is used, a root directory for K definitions.").create("d"));
+		addOptionS(OptionBuilder.withLongOpt(Configuration.PROGRAMS_OPTION).hasArg().withArgName("dir").withDescription("Programs directory or, in case the -config option is used, a root directory for programs.").create());
+		addOptionS(OptionBuilder.withLongOpt(Configuration.EXTENSIONS_OPTION).hasArg().withArgName("string").withDescription("The list of program extensions separated by whitespaces.").create());
+		addOptionS(OptionBuilder.withLongOpt(Configuration.EXCLUDE_OPTION).hasArg().withArgName("file").withDescription("The list of programs which will not be tested.").create());
+		addOptionS(OptionBuilder.withLongOpt(Configuration.RESULTS_OPTION).hasArg().withArgName("dir").withDescription("Directory containing input and expected output for programs or, in case the -config option is used, a root directory for the expected I/O for programs.").create());
+		addOptionS(OptionBuilder.withLongOpt(Configuration.SKIP_OPTION).hasArg().withArgName("steps").withDescription("The list of steps separated by whitespace to be skipped. A step is either [" + Configuration.KOMPILE_STEP + "|" + Configuration.PDF_STEP + "|" + Configuration.PROGRAMS_STEP + "].").create());
+		addOptionS(OptionBuilder.withLongOpt(Configuration.REPORT_OPTION).withDescription("Whether to generate a junit-like report.").create());
+		addOptionS(OptionBuilder.withLongOpt(Configuration.PROCESSES_OPTION).hasArg().withArgName("num").withDescription("The maximum number of threads.").create());
 	}
 	
 	// parse the command line arguments
@@ -91,10 +65,10 @@ public class KTestOptionsParser {
 			return cl;
 		} catch (ParseException e) {
 			org.kframework.utils.Error.silentReport(e.getLocalizedMessage());
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 
-		helpExit(help, Configuration.KTEST, options);
+		//helpExit(help, Configuration.KTEST, options);
 		return null;
 	}
 
@@ -105,13 +79,14 @@ public class KTestOptionsParser {
 	public HelpFormatter getHelp() {
 		return help;
 	}	
-	
-	// prints the header of help message and exits with an error code
-	public static void helpExit(HelpFormatter help, String cmdLineSyntax, Options options) {
-		System.out.println("\n");
-		help.printHelp(79, cmdLineSyntax, "\nTest K definitions and programs.\n\n", options, Configuration.DETAILED_HELP_MESSAGE, true);
-		System.out.println("\n");
-		System.exit(1);
-	}
 
+	public Options getOptionsStandard() {
+		return optionsStandard;
+	}
+	public Options getOptionsExperimental() {
+		return optionsExperimental;
+	}
+	public ArrayList<Option> getOptionList() {
+		return optionList;
+	}
 }

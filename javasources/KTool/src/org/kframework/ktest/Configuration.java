@@ -9,8 +9,9 @@ public class Configuration {
 	// file separator
 	public static final String FILE_SEPARATOR = System.getProperty("file.separator");
 	public static final String USER_DIR = System.getProperty("user.dir");
-	
-	// timeout in miliseconds - this is mostly used by Jenkins
+    public static boolean REPORT = false;
+
+    // timeout in miliseconds - this is mostly used by Jenkins
 	public static long KOMPILE_ALL_TIMEOUT = 120;
 
 	// jenkins junit reports directory
@@ -71,16 +72,18 @@ public class Configuration {
 
 	// ktest command line option names
 	public static final String HELP_OPTION = "help";
+	public static final String HELP_EXPERIMENTAL_OPTION = "help-experimental";
 	public static final String VERSION_OPTION = "version";
 	public static final String LANGUAGE_OPTION = LANGUAGE;
 	public static final String CONFIG_OPTION = "config";
 	public static final String PROGRAMS_OPTION = PROGRAMS_DIR;
 	public static final String EXCLUDE_OPTION = EXCLUDE;
 	public static final String EXTENSIONS_OPTION = EXTENSIONS2;
+    public static final String REPORT_OPTION = "report";
 	public static final String RESULTS_OPTION = RESULTS;
     public static final String SKIP_OPTION = "skip";
 	public static final String VERBOSE_OPTION = "verbose";
-	
+
 	// program name
 	public static final String KTEST = "ktest";
 	public static final String KOMPILE_STEP = "kompile";

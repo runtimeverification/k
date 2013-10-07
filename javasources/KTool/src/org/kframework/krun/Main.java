@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.Console;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -76,6 +77,7 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.OptionComparator;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
 
@@ -89,94 +91,20 @@ public class Main {
             + K.lineSeparator
             + "history use up and down arrows."
             + K.lineSeparator;
-    private static final String HEADER = "";
-    private static final String FOOTER = "";
+    private static final String HEADER_STANDARD = "";
+    private static final String FOOTER_STANDARD = "";
+    private static final String HEADER_EXPERIMENTAL = "Experimental options:";
+    private static final String FOOTER_EXPERIMENTAL = K.lineSeparator + "These options are non-standard and subject to change without notice.";
+    public static void printKRunUsageS(CommandlineOptions op) {
+        org.kframework.utils.Error.helpMsg(USAGE_KRUN, HEADER_STANDARD, FOOTER_STANDARD, op.getOptionsStandard(), new OptionComparator(op.getOptionList()));
+    }
+    public static void printKRunUsageE(CommandlineOptions op) {
+        org.kframework.utils.Error.helpMsg(USAGE_KRUN, HEADER_EXPERIMENTAL, FOOTER_EXPERIMENTAL, op.getOptionsExperimental(), new OptionComparator(op.getOptionList()));
+    }
+    public static void printDebugUsage(CommandlineOptions op) {
+        org.kframework.utils.Error.helpMsg(USAGE_DEBUG, HEADER_STANDARD, FOOTER_STANDARD, op.getOptionsStandard(), new OptionComparator(op.getOptionList()));
+    }
     private static Stopwatch sw = new Stopwatch();
-
-    // needed for displaying the krun help
-    public static void printKRunUsage(Options options) {
-        HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter
-                .setOptionComparator(new CommandlineOptions.OptionComparator());
-        helpFormatter.setWidth(79);
-        helpFormatter.printHelp(USAGE_KRUN, HEADER, options, FOOTER);
-        System.out.println();
-    }
-
-    // needed for displaying the krun debugger help
-    public static void printDebugUsage(Options options) {
-        HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter
-                .setOptionComparator(new CommandlineOptions.OptionComparator());
-        helpFormatter.setWidth(79);
-        helpFormatter.printHelp(USAGE_DEBUG, HEADER, options, FOOTER);
-        System.out.println();
-    }
-
-    // find the maude compiled definitions on the disk
-    public static String initOptions(String path) {
-        String result = null;
-        // String path_ = null;
-        StringBuilder str = new StringBuilder();
-        int count = 0;
-
-        try {
-            File[] maudeFiles = FileUtil.searchSubFolders(path, ".*-kompiled");
-            for (File maudeFile : maudeFiles) {
-                String fullPath = maudeFile.getCanonicalPath();
-                if (fullPath.endsWith("-kompiled")) {
-                    result = fullPath;
-                    str.append("\"./" + maudeFile.getName() + "\" ");
-                    count++;
-                }
-            }
-            if (count > 1) {
-                Error.report("Multiple compiled definitions found.\n"
-                        + "Please specify one of the following with --compiled-def:\n"
-                        + str.toString().replaceAll("\" ", "\"\n"));
-            } else if (count == 1) {
-                return result;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
-    // set the main-module, syntax-module and k-definition according to their
-    // correlation with compiled-def
-    public static void resolveOption(String optionName, CommandLine cmd) {
-        String s;
-        if (K.k_definition != null) {
-            s = FileUtil.dropKExtension(K.k_definition, ".", K.fileSeparator);
-        } else {
-            // using --compiled-def
-            if (K.compiled_def != null && K.compiled_def.endsWith("-kompiled")) {
-                s = K.compiled_def.substring(0,
-                        K.compiled_def.lastIndexOf("-kompiled"));
-            } else {
-                s = null;
-            }
-        }
-
-        int index;
-
-        if (optionName == "compiled-def") {
-            if (cmd.hasOption("k-definition")) {
-                K.compiled_def = s + "-kompiled";
-            } else {
-                K.compiled_def = initOptions(K.userdir);
-                if (K.compiled_def != null) {
-                    index = K.compiled_def.indexOf("-kompiled");
-                    K.k_definition = K.compiled_def.substring(0, index);
-                }
-            }
-        } else if (optionName == "main-module") {
-            K.main_module = K.definition.getMainModule();
-        } else if (optionName == "syntax-module") {
-            K.syntax_module = K.definition.getMainSyntaxModule();
-        }
-    }
 
     private static Term parseTerm(String value, Context context) throws Exception {
         org.kframework.parser.concrete.KParser.ImportTblGround(K.compiled_def
@@ -623,7 +551,7 @@ public class Main {
                     continue;
                 } else {
                     if (cmd.hasOption("help")) {
-                        printDebugUsage(cmd_options.getOptions());
+                        printDebugUsage(cmd_options);
                     }
                     if (cmd.hasOption("abort")) {
                         System.exit(0);
@@ -774,9 +702,11 @@ public class Main {
 
     public static void guiDebugExecution(Term kast, String lang,
                                          KRunResult<SearchResults> state, Context context) {
-
+		
         try {
-            new MainWindow(new RunKRunCommand(kast, lang, false, obtainKRun(context)), context);
+			KRun krun = obtainKRun(context);
+			krun.setBackendOption("io",false);
+            new MainWindow(new RunKRunCommand(kast, lang, false,krun), context);
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -804,14 +734,19 @@ public class Main {
 
         CommandlineOptions cmd_options = new CommandlineOptions();
         CommandLine cmd = cmd_options.parse(cmds);
+        if (cmd == null) {
+            printKRunUsageS(cmd_options);
+         /* printKRunUsageE(cmd_options); */ /* TODO: Switch to this when the user has tried to use an experimental option. */
+            System.exit(1);
+        }
 
         // set verbose
         if (cmd.hasOption("verbose")) {
             GlobalSettings.verbose = true;
         }
 
-        // set verbose
-        if (cmd.hasOption("fastKast")) {
+        // set fast-kast
+        if (cmd.hasOption("fast-kast")) {
             GlobalSettings.fastKast = true;
         }
 
@@ -822,7 +757,7 @@ public class Main {
 
             // Parse the program arguments
 
-            if (cmd.hasOption("search") || cmd.hasOption("do-search")
+            if (cmd.hasOption("search")
                     || cmd.hasOption("search-final")
                     || cmd.hasOption("search-all")
                     || cmd.hasOption("search-one-step")
@@ -846,21 +781,18 @@ public class Main {
             if (cmd.hasOption("search-one-or-more-steps")) {
                 K.searchType = SearchType.PLUS;
             }
-            if (cmd.hasOption("config")) {
-                K.output_mode = "pretty";
-            }
-            if (cmd.hasOption("no-config")) {
-                K.output_mode = "none";
-            }
-            if (cmd.hasOption('h') || cmd.hasOption('?')) {
+            if (cmd.hasOption("help")) {
                 K.help = true;
             }
-            if (cmd.hasOption('v')) {
+            if (cmd.hasOption("help-experimental")) {
+                K.helpExperimental = true;
+            }
+            if (cmd.hasOption("version")) {
                 K.version = true;
             }
-            if (cmd.hasOption("k-definition")) {
-                K.k_definition = new File(cmd.getOptionValue("k-definition"))
-                        .getCanonicalPath();
+            // CLEANUP_OPTIONS: The option --directory was added, replacing --k-definition and --compiled-def.
+            if (cmd.hasOption("directory")) {
+                K.directory = new File(cmd.getOptionValue("directory")).getCanonicalPath();
             }
             if (cmd.hasOption("main-module")) {
                 K.main_module = cmd.getOptionValue("main-module");
@@ -893,10 +825,14 @@ public class Main {
                 K.color = false;
             }
             if (cmd.hasOption("parens")) {
-                K.parens = true;
-            }
-            if (cmd.hasOption("no-parens")) {
-                K.parens = false;
+                String v = cmd.getOptionValue("parens");
+                if (v.equals("greedy")) {
+                    K.parens = true;
+                } else if (v.equals("smart")) {
+                    K.parens = false;
+                } else {
+                    Error.report("Unrecognized option: --parens " + v + "\nUsage: krun --parens [greedy|smart]");
+                }
             }
 
             //testcase generation
@@ -904,11 +840,6 @@ public class Main {
                 K.do_testgen = true;
                 K.io = false;
                 K.do_search = true;
-            }
-            // k-definition beats compiled-def in a fight
-            if (cmd.hasOption("compiled-def") && !cmd.hasOption("k-definition")) {
-                K.compiled_def = new File(cmd.getOptionValue("compiled-def"))
-                        .getCanonicalPath();
             }
             if (cmd.hasOption("maude-cmd")) {
                 K.maude_cmd = cmd.getOptionValue("maude-cmd");
@@ -952,9 +883,6 @@ public class Main {
             if (cmd.hasOption("profile")) {
                 K.profile = true;
             }
-            if (cmd.hasOption("pgm")) {
-                K.pgm = cmd.getOptionValue("pgm");
-            }
             if (cmd.hasOption("ltlmc")) {
                 K.model_checking = cmd.getOptionValue("ltlmc");
             }
@@ -963,12 +891,6 @@ public class Main {
             }
             if (cmd.hasOption("smt")) {
                 K.smt = cmd.getOptionValue("smt");
-            }
-            if (cmd.hasOption("deleteTempDir")) {
-                K.deleteTempDir = true;
-            }
-            if (cmd.hasOption("no-deleteTempDir")) {
-                K.deleteTempDir = false;
             }
             if (cmd.hasOption("output")) {
                 if (!cmd.hasOption("color")) {
@@ -1001,21 +923,17 @@ public class Main {
             }
             // printing the output according to the given options
             if (K.help) {
-                printKRunUsage(cmd_options.getOptions());
+                printKRunUsageS(cmd_options);
+                System.exit(0);
+            }
+            if (K.helpExperimental) {
+                printKRunUsageE(cmd_options);
                 System.exit(0);
             }
             if (K.version) {
                 String msg = org.kframework.utils.file.FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE);
                 System.out.println(msg);
                 System.exit(0);
-            }
-            if (K.deleteTempDir) {
-                File[] folders = FileUtil.searchSubFolders(K.kdir, "krun\\d+");
-                if (folders != null && folders.length > 0) {
-                    for (int i = 0; i < folders.length; i++) {
-                        FileUtil.deleteDirectory(folders[i]);
-                    }
-                }
             }
 
             String[] remainingArguments = null;
@@ -1040,23 +958,39 @@ public class Main {
             if (GlobalSettings.verbose)
                 sw.printIntermediate("Parsing command line options");
 
-            // by default
-            if (!cmd.hasOption("k-definition")
-                    && !cmd.hasOption("compiled-def") && lang != null) {
-                K.k_definition = new File(K.userdir).getCanonicalPath()
-                        + K.fileSeparator + lang;
+            /* CLEANUP_OPTIONS */
+            if (!cmd.hasOption("directory")) {
+                K.directory = new File(K.userdir).getCanonicalPath();
+            }
+            {
+                // search for the definition
+                File[] dirs = new File(K.directory).listFiles(new FilenameFilter() {
+                    @Override
+                    public boolean accept(File current, String name) {
+                        return new File(current, name).isDirectory();
+                    }
+                });
+
+                K.compiled_def = null;
+                for (int i = 0; i < dirs.length; i++) {
+                    if (dirs[i].getAbsolutePath().endsWith("-kompiled")) {
+                        if (K.compiled_def != null) {
+                            String msg = "Multiple compiled definitions found.";
+                            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", new File(".").getAbsolutePath()));
+                        } else {
+                            K.compiled_def = dirs[i].getAbsolutePath();
+                        }
+                    }
+                }
+
+                if (K.compiled_def == null) {
+                    String msg = "Could not find a compiled definition.";
+                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", new File(".").getAbsolutePath()));
+                }
             }
 
             if (K.compiled_def == null) {
-                resolveOption("compiled-def", cmd);
-            }
-
-            if (K.k_definition != null && !K.k_definition.endsWith(".k")) {
-                K.k_definition = K.k_definition + ".k";
-            }
-
-            if (K.compiled_def == null) {
-                Error.report("Could not find a compiled K definition. Please ensure that\neither a compiled K definition exists in the current directory with its default\nname, or that --k-definition or --compiled-def have been specified.");
+                Error.report("Could not find a compiled K definition. Please ensure that\neither a compiled K definition exists in the current directory with its default\nname, or that --directory has been specified.");
             }
             File compiledFile = new File(K.compiled_def);
             if (!compiledFile.exists()) {
@@ -1150,10 +1084,10 @@ public class Main {
             }
 
             if (!cmd.hasOption("main-module")) {
-                resolveOption("main-module", cmd);
+                K.main_module = K.definition.getMainModule();
             }
             if (!cmd.hasOption("syntax-module")) {
-                resolveOption("syntax-module", cmd);
+                K.syntax_module = K.definition.getMainSyntaxModule();
             }
 
             if (GlobalSettings.verbose)

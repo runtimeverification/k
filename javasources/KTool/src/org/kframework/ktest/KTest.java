@@ -2,11 +2,7 @@ package org.kframework.ktest;
 
 import java.awt.Color;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,6 +15,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.io.FileUtils;
 import org.kframework.ktest.execution.Execution;
 import org.kframework.ktest.execution.Task;
 import org.kframework.ktest.tests.Program;
@@ -30,6 +27,7 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.OptionComparator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -37,15 +35,36 @@ import org.xml.sax.SAXException;
 
 public class KTest {
 
+    private static final String USAGE = "ktest [options]" + System.getProperty("line.separator");
+    private static final String HEADER_STANDARD = "";
+    private static final String FOOTER_STANDARD = "";
+    private static final String HEADER_EXPERIMENTAL = "Experimental options:";
+    private static final String FOOTER_EXPERIMENTAL = System.getProperty("line.separator") + "These options are non-standard and subject to change without notice.";
+    public static void printUsageS(KTestOptionsParser op) {
+        org.kframework.utils.Error.helpMsg(USAGE, HEADER_STANDARD, FOOTER_STANDARD, op.getOptionsStandard(), new OptionComparator(op.getOptionList()));
+    }
+    public static void printUsageE(KTestOptionsParser op) {
+        org.kframework.utils.Error.helpMsg(USAGE, HEADER_EXPERIMENTAL, FOOTER_EXPERIMENTAL, op.getOptionsExperimental(), new OptionComparator(op.getOptionList()));
+    }
+
     public static void test(String[] args) {
 
         KTestOptionsParser op = new KTestOptionsParser();
         CommandLine cmd = op.parse(args);
+        if (cmd == null) {
+            printUsageS(op);
+            System.exit(1);
+        }
 
         // Help
-        if (cmd.hasOption(Configuration.HELP_OPTION))
-            KTestOptionsParser.helpExit(op.getHelp(), Configuration.KTEST,
-                    op.getOptions());
+        if (cmd.hasOption(Configuration.HELP_OPTION)) {
+            printUsageS(op);
+            System.exit(0);
+        }
+        if (cmd.hasOption(Configuration.HELP_EXPERIMENTAL_OPTION)) {
+            printUsageE(op);
+            System.exit(0);
+        }
 
         // Version
         if (cmd.hasOption(Configuration.VERSION_OPTION)) {
@@ -85,6 +104,10 @@ public class KTest {
         if (cmd.hasOption(Configuration.RESULTS_OPTION)) {
             Configuration.RESULTS_FOLDER = cmd
                     .getOptionValue(Configuration.RESULTS_OPTION);
+        }
+
+        if (cmd.hasOption(Configuration.REPORT_OPTION)) {
+            Configuration.REPORT = true;
         }
 
         // Resolve the configuration file
@@ -371,44 +394,6 @@ public class KTest {
     }
 
     public static void copyFolder(File src, File dest) throws IOException {
-
-        if (src.getName().startsWith("."))
-            return;
-
-        if (src.isDirectory()) {
-
-            // if directory not exists, create it
-            if (!dest.exists()) {
-                dest.mkdir();
-            }
-
-            // list all the directory contents
-            String files[] = src.list();
-
-            for (String file : files) {
-                // construct the src and dest file structure
-                File srcFile = new File(src, file);
-                File destFile = new File(dest, file);
-                // recursive copy
-                copyFolder(srcFile, destFile);
-            }
-
-        } else {
-            // if file, then copy it
-            // Use bytes stream to support all file types
-            InputStream in = new FileInputStream(src);
-            OutputStream out = new FileOutputStream(dest);
-
-            byte[] buffer = new byte[1024];
-
-            int length;
-            // copy the file content in bytes
-            while ((length = in.read(buffer)) > 0) {
-                out.write(buffer, 0, length);
-            }
-
-            in.close();
-            out.close();
-        }
+        FileUtils.copyDirectory(src, dest);
     }
 }

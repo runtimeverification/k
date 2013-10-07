@@ -55,9 +55,10 @@ public class JavaSymbolicKRun implements KRun {
             InputStream inputStream = new BufferedInputStream(new FileInputStream(new File(
                     context.kompiled,
                     JavaSymbolicBackend.DEFINITION_FILENAME)));
-            org.kframework.kil.Definition kilDefinition
-                    = (org.kframework.kil.Definition) BinaryLoader.fromBinary(inputStream);
-            definition = transformer.transformDefinition(kilDefinition);
+            //org.kframework.kil.Definition kilDefinition
+            //        = (org.kframework.kil.Definition) BinaryLoader.fromBinary(inputStream);
+            //definition = transformer.transformDefinition(kilDefinition);
+            definition = (Definition) BinaryLoader.fromBinary(inputStream);
             inputStream.close();
 
             if (definition == null) {
@@ -166,6 +167,9 @@ public class JavaSymbolicKRun implements KRun {
 
                 proofResults.addAll(symbolicRewriter.proveRule(initialTerm, targetTerm, rules));
             }
+
+            System.err.println(proofResults.isEmpty());
+            System.err.println(proofResults);
 
             return new KRunProofResult<Set<org.kframework.kil.Term>>(
                     proofResults.isEmpty(), Collections.<org.kframework.kil.Term>emptySet());

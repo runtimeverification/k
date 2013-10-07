@@ -1,20 +1,52 @@
 package org.kframework.utils.general;
 
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.KPaths;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 public class GlobalSettings {
+
+    public static File getNativeExecutable(String executable) {
+        File f = null;
+        String basePath = KPaths.getKBase(false);
+
+        switch (GlobalSettings.os()) {
+            case UNIX:
+                f = new File(basePath + "/lib/native/linux/" + executable);
+                f.setExecutable(true, false);
+                break;
+            case WIN:
+                f = new File(basePath + "/lib/native/cygwin/" + executable + ".exe");
+                break;
+            case OSX:
+                f = new File(basePath + "/lib/native/macosx/" + executable);
+                f.setExecutable(true, false);
+                break;
+            default:
+                System.err.println("Unknown OS type. " + System.getProperty("os.name") + " not recognized.");
+                // abort
+                System.exit(1);
+        }
+
+        return f;
+    }
+
+    public enum OS {
+        OSX, UNIX, UNKNOWN, WIN
+    }
+
+    private static OS os = null;
 	public static boolean verbose = false;
-	public static boolean noFilename = false;
 	public static String startFile = "";
 	public static String lib = "";
 	public static String synModule = null;
 	public static KExceptionManager kem = new KExceptionManager();
 	public static File mainFile;
 	public static String mainFileWithNoExtension;
+	public static String outputDir;
 	public static String warnings = "normal";
 	public static List<String> transition = new ArrayList<String>();
 	public static List<String> superheat = new ArrayList<String>();
@@ -32,17 +64,19 @@ public class GlobalSettings {
 	public static ParserType whatParser = ParserType.PROGRAM;
 	public static boolean sortedCells = false;
 
-    public static boolean isUnixOS() {
-		String os = System.getProperty("os.name").toLowerCase();
-		return os.contains("nix") || os.contains("nux");
-	}
+    public static OS os() {
+        if (os == null) {
+            String osString = System.getProperty("os.name").toLowerCase();
+            if (osString.contains("nix") || osString.contains("nux")) os = OS.UNIX;
+            else if (osString.contains("win")) os = OS.WIN;
+            else if (osString.contains("mac")) os = OS.OSX;
+            else os = OS.UNKNOWN;
+        }
+        return os;
+    }
 
     public static boolean isWindowsOS() {
-		return System.getProperty("os.name").toLowerCase().contains("win");
-	}
-
-    public static boolean isMacOS() {
-		return System.getProperty("os.name").toLowerCase().contains("mac");
+        return os() == OS.WIN;
 	}
 
     public enum ParserType {
@@ -53,7 +87,6 @@ public class GlobalSettings {
 	public static boolean SMT = false;
 	public static boolean javaBackend = false;
 	public static boolean documentation = false;
-	public static boolean xml = false;
 	public static boolean NOSMT = false;
 	
 	public static String CHECK = null;
