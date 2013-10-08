@@ -1,10 +1,11 @@
 The file "peq.k" includes the K implementation of the circular coinduction proof system for the program equyivalence, defined as a bisimulation. The theory can be found in
 
-Andrei Arusoaie, Dorel Lucanu, Vlad Rusu. A Generic Approach to Symbolic Execution. HAL INRIA RR-8189, 2012.
-http://hal.inria.fr/hal-00766220
+Program Equivalence by Circular Reasoning
+Dorel Lucanu   Vlad Rusu  
+IFM,   Lecture Notes in Computer Science,   362-377,   2013  
 
 The compilation of the verifier must be done with the following command:
-  kompile peq.k --addTopCell
+  kompile peq.k
 
 Then you can check equivalence formulas. You can fins several examples of such formulas in the subfolder proframs. These formulas are executed as regular programs. Here is an example:
   krun programs/for-while.peq

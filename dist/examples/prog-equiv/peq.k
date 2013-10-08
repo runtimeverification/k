@@ -14,28 +14,40 @@ require "builtins/symbolic-k.k"
 
 module MAP-SYMBOLIC
 
-  syntax Bool ::= K "isNotModifiedBy" K //[function]
+  syntax Bool ::= K "isNotModifiedBy" K [function]
 
-  rule X:Int isNotModifiedBy S:K => true when isSymbolicInt(X) [anywhere]
-  rule X:Bool isNotModifiedBy S:K => true when isSymbolicBool(X)  [anywhere]
-  rule X:K isNotModifiedBy S:K => true when isSymbolicAExp(X) [anywhere]
+  rule X:Int isNotModifiedBy _:K => true when isSymbolicInt(X) [anywhere]
+  rule X:Bool isNotModifiedBy _:K => true when isSymbolicBool(X)  [anywhere]
 
   syntax Map ::= "followup" "(" K "," Map "," Bool ")"
-  rule isSymbolicMap(followup(S:K, M:Map, F:Bool)) => true [anywhere]
+  rule isSymbolicMap(followup(_:K, _:Map, _:Bool)) => true [anywhere]
 
   rule followup(S:K, (X:K |-> V:K M:Map), F:Bool) 
        =>
        X |-> V followup(S, M, F)
-       when (F impliesBool (X isNotModifiedBy S)) // to be revised
+       when isSymbolicInt(X) // to be revised
+       [anywhere]
+
+  rule followup(S:K, (X:K |-> V:K M:Map), F:Bool) 
+       =>
+       X |-> V followup(S, M, F)
+       when isSymbolicBool(X) // to be revised
+       [anywhere]
+
+
+  rule followup(S:K, (X:K |-> V:K M:Map), F:Bool) 
+       =>
+       X |-> V followup(S, M, F)
+       when (F impliesBool (X isNotModifiedBy S)) // it does not work; to be revised
        [anywhere]
 
 // temporary solution until the correct sorting of #symMap() is solved 
 
   syntax Map ::= "#symbMap" "(" Id ")"
-  rule isSymbolicMap(#symbMap(X:Id)) => true [anywhere]
+  rule isSymbolicMap(#symbMap(_:Id)) => true [anywhere]
 
   //@ Extend keys()
-  rule keys ((followup(S:K, M:Map, F:Bool) => .) _) [structural]
+  rule keys ((followup(_:K, _:Map, _:Bool) => .) _) [structural]
   rule keys ((#symbMap(_) => .) _) [structural]
 
   //@ Lookup
@@ -43,14 +55,14 @@ module MAP-SYMBOLIC
   rule [lookup] :  lookup(X:K, (_ X |-> V:K _)) => V
 
   rule [lookup] :
-       lookup(X:K, followup(SS:K, Rho:Map, F)) 
+       lookup(X:K, followup(SS:K, Rho:Map, F:Bool)) 
         => 
         lookup(X, Rho)
         when //isSymbolicStmt(SS) andBool 
         F impliesBool (X isNotModifiedBy SS) // to be revised
 
   rule [lookup] :
-       lookup(X:K, followup(SS:K, Rho:Map, F) Rho':Map) 
+       lookup(X:K, followup(_:K, Rho:Map, _:Bool) Rho':Map) 
        => 
        lookup(X, Rho)
        when //isSymbolicStmt(SS) andBool 
@@ -106,7 +118,7 @@ module IMP-SYNTAX
   				> Stmt ";" Stmt   [left]
   				| "(" Stmt ")"    [bracket]
 
-  syntax Elt ::= Id | Int
+  syntax Elt ::= Id | Int   // extension for streams
 
 //  syntax Stmt ::= Elt | Elt "::" Stmt | Id ":-" Stmt
 
@@ -146,8 +158,6 @@ module IMP-SYNTAX
 
   //@ the predicate for occurrence of a variable in a statement
   syntax Bool ::= "occurs" "(" Id "," Stmt ")"
-
-  rule notBool occurs(X:Id, S:Stmt) => (X  isNotModifiedBy S) [anywhere]  //trick
 
   /*@
     Extending with symbolic values:
@@ -190,7 +200,7 @@ module PEQ
                       <condition> true </condition>
                     </goal>
                   </goals>
-		  <success> false </success>
+		  <output stream="stdout"> ListItem("Proving ...\n") </output>
                   <hypos>
                     <hypo multiplicity="*">
                       <patt1>
@@ -237,6 +247,8 @@ module PEQ
   syntax K ::= "break"  // to temporarily stop one of the two programs
 
 
+  rule notBool occurs(X:K, S:K) => (X  isNotModifiedBy S) [anywhere]  //trick
+
 
 
 /*@
@@ -251,7 +263,7 @@ module PEQ
   rule [leq] : I1:Int <= I2:Int => I1 <=Int I2
   rule [not] : not T:Bool => notBool T
   rule [and-true] : true and B:BExp => B
-  rule [and-false]: false and B:BExp => false
+  rule [and-false]: false and _:BExp => false
 
   rule [program-no-vars]: <k> var .Ids ; S:Stmt => S ...</k> [structural]
 
@@ -274,7 +286,7 @@ module PEQ
   rule [skip] : skip => .
        [structural]
 
-  rule [sequential] : S1;S2 => S1 ~> S2 [structural]
+  rule [sequential] : S1:Stmt;S2:Stmt => S1 ~> S2 [structural]
 
   rule [if-true] : if true  then S:Stmt else _ => S
 //       [transition]
@@ -310,7 +322,7 @@ module PEQ
 */
 
   syntax Boolean ::= "isRecursive" "(" Stmt ")" [function]
-  rule isRecursive(while B:BExp do S:Stmt) => true
+  rule isRecursive(while _:BExp do _:Stmt) => true
   rule isRecursive(for I:Id from A1:AExp to A2:AExp do S:Stmt) => true
 
 
@@ -375,7 +387,7 @@ module PEQ
 
   rule [symbolic-aexp] :
        <k> #symAExp(XS:K) => lookup(#symAExp(XS), Rho) ...</k>
-       <env> Rho </env>
+       <env> Rho:Map </env>
        when #symAExp(XS) in keys(Rho)
 //       [transition]
 
@@ -458,7 +470,7 @@ module PEQ
          C
        </goal>
        when isSymbolicBool(B) andBool notBool(B in keys(Rho1))
-//       [transition]
+       [transition]
 
   // the other two cases
 
@@ -480,6 +492,7 @@ module PEQ
   rule <k> B:K => V ...</k>
        <env>... B |-> V:Bool ...</env>
        when isSymbolicBool(B) 
+
 
 /*@
   The following rules remove an inconsistent formula, where the
@@ -548,7 +561,9 @@ module PEQ
 
   rule <k> storeSyns(notBool(F:K), B:K, V:Bool) => . ...</k>
 
-//  rule <T>... <goals> .Bag </goals> <success> true </success> ...</T> => success
+  rule (<goals> .Bag </goals> => .)
+       <output> _ => ListItem("true") </output>
+
 
 /*@
   The next rule implements the basic entailment relation. The current version
@@ -571,13 +586,12 @@ module PEQ
        </goal>
        =>
        .)
-       <success> _ => true </success>
        <observers> Obs:List </observers>
        when eqObs(<env> Env </env>, 
                   <env> Env' </env>,
                   <observers> Obs </observers>, F)
             ==K true
-       [transition]
+//       [transition]
 
 
 /*@
@@ -715,10 +729,10 @@ module PEQ
   rule getSubst(L1:Id : S1:K, L2:Id : S2:K, M:Map) => getSubst(S1, S2, M)
 
 
-  rule getSubst(X:K, A:AExp, (M:Map X |-> I)) => (I replBy A)
+  rule getSubst(X:K, A:AExp, (M:Map X |-> I:Int)) => (I replBy A)
        when (isId(X) ==K true) orBool (isSymbolicAExp(X) ==K true) 
 
-  rule getSubst(X:Id, B:BExp, (M:Map X |-> I)) => (I replBy B)
+  rule getSubst(X:Id, B:BExp, (M:Map X |-> I:Int)) => (I replBy B)
 
 
   // to be completed
@@ -810,7 +824,7 @@ module PEQ
        <hypos>
          Hypos:Bag
        </hypos>
-      [transition]
+//      [transition]
 
   /*@ The case when the set of hypotheses is empty and 
        the configurations are observational equal.
@@ -820,19 +834,19 @@ module PEQ
   rule [check-hypo-no-hyp-obseq] : 
        <goal>
          <config> 
-           <k> checkHypo(K1, Env1, K2, Env2, .Bag) => storeHypo(K1) ...</k>
-           <env> _ => Env1:Map </env>
+           <k> checkHypo(K1:K, Env1:Map, K2:K, Env2:Map, .Bag) => storeHypo(K1) ...</k>
+           <env> _ => Env1 </env>
          </config> 
          <config> 
            <k> break => storeHypo(K2) ...</k>
          ...</config>
-         <condition> F:K </condition>
+         <condition> F:Bool </condition>
        ...</goal> 
        <observers> Obs:List </observers> 
        when (eqObs(<env> Env1 </env>, 
                    <env> Env2 </env>,
                    <observers> Obs </observers>, F) ==K true)
-       [transition]
+//       [transition]
 
 
 /*@
@@ -852,7 +866,7 @@ module PEQ
   rule [check-hypo] :
        <goal>
          <config> 
-           <k> checkHypo(K1, Env1, K2, Env2, 
+           <k> checkHypo(K1:K, Env1:Map, K2:K, Env2:Map, 
      	       		               	     <hypo>      
        					       <hcondition>
 					         F':Bool
@@ -887,12 +901,12 @@ module PEQ
        </goal>
        when (isSubst(getSubst(K1', K1, Env1')) ==K true)
             orBool (isSubst(getSubst(K2', K2, Env2')) ==K true)
-       [transition]
+ //      [transition]
 
   rule [check-hypo] :
        <goal>
          <config> 
-           <k> checkHypo(K1, Env1, K2, Env2, 
+           <k> checkHypo(K1:K, Env1:Map, K2:K, Env2:Map, 
      	       		               	     <hypo>      
        					       <hcondition>
 					         F':Bool
@@ -927,7 +941,7 @@ module PEQ
        </goal>
        when (isSubst(getSubst(K1', K2, Env1')) ==K true)
             orBool (isSubst(getSubst(K2', K1, Env2')) ==K true)
-       [transition]
+//       [transition]
 
 
   /*@ The case when the circularity rule can be applied;
@@ -946,7 +960,6 @@ module PEQ
        </goal>
        =>
        .)
-       <success> _ => true </success>
        when checkSat(filter(F andBool notBool(SF'))) ==K "unsat"
 
 /*@
@@ -956,7 +969,7 @@ module PEQ
   rule [check-hyp-fail] :
        <goal>
          <config> 
-           <k> checkHypo(K1, Env1, K2, Env2, 
+           <k> checkHypo(K1:K, Env1:Map, K2:K, Env2:Map, 
      	       		               	     (<hypo>      
        					       <hcondition>
 					       F':Bool
@@ -998,7 +1011,7 @@ module PEQ
             ((isSubst(getSubst(K1', K2, Env1')) =/=K true)
              orBool (isSubst(getSubst(K2', K1, Env2')) =/=K true)
             )
-       [transition]
+//       [transition]
 
   //@ The rules preparing the storing of an hypothesis: 
   rule [store-hypo] :
@@ -1007,7 +1020,7 @@ module PEQ
          <k> storeHypo(K1:K) => restore(K1, Env1) ...</k>
          <env> Env1:Map </env>
        </config> 
-       [transition]
+//       [transition]
 
 
   //@ Generates fresh symbolic values for the stored hypothesis
@@ -1063,7 +1076,7 @@ module PEQ
            <hcondition> F </hcondition>
          </hypo>
        </hypos>
-      [transition]
+//      [transition]
 
 
   /*@
@@ -1088,7 +1101,7 @@ module PEQ
        (eqObs(<env> Env1 </env>, 
              <env> Env2 </env>, 
              <observers> Obs </observers>, F) =/=K true)
-       [transition]
+//       [transition]
 
 /*
   rule [store-hypo-fail]:
@@ -1197,7 +1210,7 @@ module PEQ
 
   rule <config>
          <k> setInitValObs((X:Id, Xs:Ids) => Xs) ...</k>
-         <env> Env (. => X |-> IS1) </env>
+         <env> Env:Map (. => X |-> IS1) </env>
        </config> 
        <config> 
          <k> setInitValObs((X:Id, Xs:Ids) => Xs) ...</k>
@@ -1209,7 +1222,7 @@ module PEQ
 
   rule <config>
          <k> setInitValObs((X:Id, Xs:Ids) => Xs) ...</k>
-         <env> Env </env>
+         <env> Env:Map </env>
        </config> 
        when (X in keys(Env))
        [structural]
