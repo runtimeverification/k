@@ -11,11 +11,13 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.symbolic.Utils;
 
+import java.io.Serializable;
+
 
 /**
- * @author: AndreiS
+ * @author AndreiS
  */
-public class IndexingPair {
+public class IndexingPair implements Serializable {
 
     public static final IndexingPair TOP = new IndexingPair(TopIndex.TOP, TopIndex.TOP);
 

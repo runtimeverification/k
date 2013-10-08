@@ -1,0 +1,14 @@
+function factorial(y) {
+  print("Factorial of ", y, " is: ");
+  var t=1, i=0;
+  while(true) {
+    if(++i<=y) {t = t*i; continue;}
+    break;
+  }
+  return t;
+}
+
+function main() {
+  print("Input a natural number: ");
+  print(factorial(read()),"\n");
+}

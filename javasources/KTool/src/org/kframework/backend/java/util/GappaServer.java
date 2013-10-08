@@ -27,7 +27,8 @@ public final class GappaServer {
             String output = new String(bytes);
             return "OK".equals(output);
         } catch (IOException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
+            gappaProcess = null;
             return false;
         }
     }

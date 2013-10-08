@@ -40,6 +40,9 @@ public class Variable extends Term implements Sorted {
 
     public Variable(String name, String sort, boolean anonymous) {
         super(Kind.of(sort));
+
+        assert name != null && sort != null;
+
         this.name = name;
         this.sort = sort;
         this.anonymous = anonymous;

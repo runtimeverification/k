@@ -161,7 +161,9 @@ public class JavaSymbolicKRun implements KRun {
                 }
                 ConstrainedTerm targetTerm = new ConstrainedTerm(
                         dummyRule.leftHandSide().substitute(freshSubstitution, termContext),
-                        dummyRule.lookups().substitute(freshSubstitution, termContext),
+                        dummyRule.lookups().getSymbolicConstraint(termContext).substitute(
+                                freshSubstitution,
+                                termContext),
                         targetConstraint.substitute(freshSubstitution, termContext),
                         termContext);
 

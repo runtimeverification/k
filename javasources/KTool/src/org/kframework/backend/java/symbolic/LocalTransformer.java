@@ -183,6 +183,11 @@ public class LocalTransformer implements Transformer {
     }
 
     @Override
+    public ASTNode transform(UninterpretedConstraint uninterpretedConstraint) {
+        return transform((JavaSymbolicObject) uninterpretedConstraint);
+    }
+
+    @Override
     public ASTNode transform(UninterpretedToken uninterpretedToken) {
         return transform((Token) uninterpretedToken);
     }
