@@ -1,0 +1,27 @@
+function main() {
+  var i=0, j=0;
+  while(++j<=100) {
+    if(j%3==0) {
+      print("continue outter loop\n");
+      continue;
+    }
+    while(++i<=j) {
+      if(i%2==0) {
+        print("continue inner loop\n");
+        continue;
+      }
+      if(i==7) {
+        print("break inner loop\n");
+        break;
+      }
+      print("i = ", i, "\n");
+    }
+    print("i = ", i, "\n");
+    if(j>8) {
+      print("break outter loop\n");
+      break;
+    }
+    print("j = ", j, "\n");
+  }
+  print("j = ", j, "\n");
+}

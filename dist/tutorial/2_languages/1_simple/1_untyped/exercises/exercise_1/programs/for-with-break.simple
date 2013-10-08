@@ -1,0 +1,7 @@
+function main() {
+  var i=10;
+  for(var i=0; i<=10; ++i) {
+    break;
+  }
+  print(i, "\n"); // should be 10
+}

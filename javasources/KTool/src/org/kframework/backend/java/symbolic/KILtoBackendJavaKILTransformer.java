@@ -297,8 +297,8 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             Collection<org.kframework.kil.Term> baseTerms = node.baseTerms();
             if (!baseTerms.isEmpty()) {
                 assert baseTerms.size() == 1 : "Don't know how to handle multiple base terms for now.";
-                Iterator<org.kframework.kil.Term> iterator = baseTerms.iterator();
-                base = (Term) iterator.next().accept(this);
+                org.kframework.kil.Term baseTerm = baseTerms.iterator().next();
+                base = (Term) baseTerm.accept(this);
             }
         }
         return BuiltinList.of(base, 0, 0, elementsLeft, elementsRight);
@@ -460,7 +460,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             }
         }
 
-        SymbolicConstraint lookups = new SymbolicConstraint(new TermContext(definition));
+        UninterpretedConstraint lookups = new UninterpretedConstraint();
         for (org.kframework.kil.BuiltinLookup lookup : node.getLookups()) {
             Variable base = (Variable) lookup.base().accept(this);
             Term key = (Term) lookup.key().accept(this);

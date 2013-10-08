@@ -48,6 +48,7 @@ public interface Transformer {
     public ASTNode transform(StringToken stringToken);
     public ASTNode transform(Term node);
     public ASTNode transform(Token token);
+    public ASTNode transform(UninterpretedConstraint uninterpretedConstraint);
     public ASTNode transform(UninterpretedToken uninterpretedToken);
     public ASTNode transform(Variable variable);
 }

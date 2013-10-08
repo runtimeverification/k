@@ -45,7 +45,8 @@ public class MacroExpander extends TermTransformer {
         for (Term conditionItem : rule.condition()) {
             processedCondition.add(processTerm(conditionItem));
         }
-        SymbolicConstraint processedLookups = (SymbolicConstraint) rule.lookups().accept(this);
+        UninterpretedConstraint processedLookups
+                = (UninterpretedConstraint) rule.lookups().accept(this);
         return new Rule(
                 processedLeftHandSide,
                 processedRightHandSide,

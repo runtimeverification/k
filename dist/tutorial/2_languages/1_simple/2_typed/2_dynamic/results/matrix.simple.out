@@ -1,0 +1,16 @@
+Input the number of lines and columns (two natural numbers): Line 1 (4 elements): Line 2 (4 elements): Your matrix is:
+Line 1 (4 elements): 1 5 7 8
+Line 2 (4 elements): 27 1 2 3
+The transpose of your matrix is:
+Line 1 (2 elements): 1 27
+Line 2 (2 elements): 5 1
+Line 3 (2 elements): 7 2
+Line 4 (2 elements): 8 3
+You matrix multiplied with its transpose is:
+Line 1 (2 elements): 139 70
+Line 2 (2 elements): 70 743
+The transpose of your matrix multiplied with your matrix is:
+Line 1 (4 elements): 730 32 61 89
+Line 2 (4 elements): 32 26 37 43
+Line 3 (4 elements): 61 37 53 62
+Line 4 (4 elements): 89 43 62 73

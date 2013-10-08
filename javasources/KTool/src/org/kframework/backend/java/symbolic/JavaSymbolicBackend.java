@@ -43,6 +43,9 @@ import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.InitializeConfigurationStructure;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
+import org.kframework.kil.loader.AddConsesVisitor;
+import org.kframework.kil.loader.CollectConsesVisitor;
+import org.kframework.kil.loader.CollectSubsortsVisitor;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -75,7 +78,7 @@ public class JavaSymbolicBackend extends BasicBackend {
         @Override
         public ASTNode transform(Definition node) throws TransformerException {
             try {
-                File file = new File(context.dotk, "defx-java-symbolic.bin");
+                File file = new File(context.dotk, "defx-java.bin");
                 BinaryLoader.toBinary(node, new BufferedOutputStream(new FileOutputStream(file)));
             } catch (IOException e) {
                 e.printStackTrace();
@@ -131,6 +134,9 @@ public class JavaSymbolicBackend extends BasicBackend {
         steps.add(new FlattenModules(context));
 
         steps.add(new CompleteSortLatice(context));
+        steps.add(new CheckVisitorStep<Definition>(new AddConsesVisitor(context), context));
+        steps.add(new CheckVisitorStep<Definition>(new CollectConsesVisitor(context), context));
+        steps.add(new CheckVisitorStep<Definition>(new CollectSubsortsVisitor(context), context));
         steps.add(new DefinitionSerializer(context));
 
         steps.add(new StrictnessToContexts(context));
