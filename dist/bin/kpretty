@@ -1,3 +1,7 @@
 #!/usr/bin/env sh
 
+if "$(dirname $0)/../lib/scripts/checkJava"; then
 java -jar -Xmx1024m "$(dirname $0)/../lib/java/k3.jar" -kpretty "$@"
+else
+  exit 1
+fi
