@@ -691,8 +691,9 @@ public class MaudeFilter extends BackendFilter {
 
             result.append(DataStructureSort.LABELS.get(dataStructure.sort().type()).get(
                     DataStructureSort.Label.UNIT));
-
-            if (dataStructure instanceof CollectionBuiltin) {
+            if (dataStructure instanceof ListBuiltin) {
+                visitListBuiltinElements((ListBuiltin) dataStructure);
+            } else if (dataStructure instanceof CollectionBuiltin) {
                 visitCollectionElements((CollectionBuiltin) dataStructure);
             } else {
                 assert dataStructure instanceof MapBuiltin;
@@ -700,7 +701,7 @@ public class MaudeFilter extends BackendFilter {
                 visitMapElements((MapBuiltin) dataStructure);
             }
 
-            if (dataStructure.isLHSView()) {
+            if (dataStructure.isLHSView() && dataStructure.hasViewBase() && !(dataStructure instanceof ListBuiltin)) {
                 result.append(", ");
                 Variable variable = new Variable(
                         dataStructure.viewBase().getName(),
@@ -721,6 +722,45 @@ public class MaudeFilter extends BackendFilter {
         for (Term term : collection.elements()) {
             result.append(", ");
             result.append(DataStructureSort.LABELS.get(collection.sort().type()).get(
+                    DataStructureSort.Label.ELEMENT));
+            result.append("(");
+            term.accept(this);
+            result.append(")");
+        }
+    }
+
+    public void visitListBuiltinElements(ListBuiltin listBuiltin) {
+        // append lhs elements
+        for (Term term : listBuiltin.elementsLeft()) {
+            result.append(", ");
+            result.append(DataStructureSort.LABELS.get(listBuiltin.sort().type()).get(
+                    DataStructureSort.Label.ELEMENT));
+            result.append("(");
+            term.accept(this);
+            result.append(")");
+        }
+
+        // append base elements
+        for (Term term : listBuiltin.baseTerms()) {
+            result.append(", ");
+            if (term instanceof  Variable) {
+                Variable variable = new Variable(
+                        listBuiltin.viewBase().getName(),
+                        listBuiltin.sort().type());
+                variable.accept(this);
+            } else {
+                result.append(DataStructureSort.LABELS.get(listBuiltin.sort().type()).get(
+                        DataStructureSort.Label.ELEMENT));
+                result.append("(");
+                    term.accept(this);
+                    result.append(")");
+            }
+        }
+
+        // append rhs elements
+        for (Term term : listBuiltin.elementsRight()) {
+            result.append(", ");
+            result.append(DataStructureSort.LABELS.get(listBuiltin.sort().type()).get(
                     DataStructureSort.Label.ELEMENT));
             result.append("(");
             term.accept(this);
@@ -901,7 +941,32 @@ public class MaudeFilter extends BackendFilter {
 		throw new RuntimeException("don't know how to maudify Cast");
 	}
 
-	private static java.util.Map<KSort, String> maudeCollectionConstructors = new HashMap<KSort, String>();
+    @Override
+    public void visit(MapUpdate term) {
+        result.append("_`(_`)(Map2KLabel(");
+        result.append("update(");
+        result.append("remove(");
+        result.append(term.map().getName() + ":Map , (.Map ");
+        for (java.util.Map.Entry<Term, Term> t : term.removeEntries().entrySet()) {
+            t.getKey().accept(this);
+            result.append(" |-> ");
+            t.getValue().accept(this);
+            result.append(" ");
+        }
+        result.append(")), ");
+
+        result.append("(.Map ");
+        for (java.util.Map.Entry<Term, Term> t : term.updateEntries().entrySet()) {
+            t.getKey().accept(this);
+            result.append(" |-> ");
+            t.getValue().accept(this);
+            result.append(" ");
+        }
+        result.append("))");
+        result.append(") , .KList)");
+    }
+
+    private static java.util.Map<KSort, String> maudeCollectionConstructors = new HashMap<KSort, String>();
 	static {
 		maudeCollectionConstructors.put(KSort.Bag, "__");
 		maudeCollectionConstructors.put(KSort.Map, "__");

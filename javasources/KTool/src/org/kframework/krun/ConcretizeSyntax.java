@@ -69,14 +69,14 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 		child = child.shallowCopy();
 		List<Term> possibleTerms;
 		if (label instanceof KInjectedLabel && child.equals(KList.EMPTY)) {
-			if (label instanceof FreezerLabel) {
+            if (label instanceof FreezerLabel) {
 				FreezerLabel l = (FreezerLabel) label;
 				return new Freezer((Term)l.getTerm().accept(this));
 			}
 			Term injected = ((KInjectedLabel)label).getTerm();
-			if (injected instanceof Token) {
+//			if (injected instanceof Token) {
 				return (Term)injected.accept(this);
-			}
+//			}
 		} else if (label instanceof KLabelConstant) {
 			String klabel = ((KLabelConstant) label).getLabel();
 			Set<String> conses = context.labels.get(klabel);
