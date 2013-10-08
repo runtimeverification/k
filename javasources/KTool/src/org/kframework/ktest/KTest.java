@@ -285,7 +285,7 @@ public class KTest {
             i++;
         }
         if (Configuration.KOMPILE) {
-            System.out.println("(" + i + ")");
+            System.out.println("(" + i +  " in total)");
         } else {
             System.out.println("\nSkipped " + i + " definitions");
         }
@@ -331,7 +331,7 @@ public class KTest {
             }
         }
         if (Configuration.PDF) {
-            System.out.println("(" + i + ")");
+            System.out.println("(" + i + " in total)");
         } else {
             System.out.println("\nSkipped " + i + " definitions");
         }
@@ -372,7 +372,13 @@ public class KTest {
                 // execute
                 List<Program> pgms = test.getPrograms();
                 Map<Program, Task> all = new TreeMap<Program, Task>();
+
+                // total programs counter
                 i = 0;
+                // i/o counters
+                int in = 0;
+                int out = 0;
+
                 for (Program p : pgms) {
                     Task task = p.getTask(homeDir);
                     all.put(p, task);
@@ -380,9 +386,11 @@ public class KTest {
                         Execution.tpe.execute(task);
                     }
                     i++;
+                    if (p.hasInput()) in++;
+                    if (p.hasOutput()) out++;
                 }
                 if (Configuration.PROGRAMS) {
-                    System.out.println("(" + i + ")");
+                    System.out.println("(" + i + " in total, " + in + " with input, " + out + " with output)");
                 } else {
                     System.out.println("\nSkipped " + i + " programs");
                 }

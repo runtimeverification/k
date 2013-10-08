@@ -13,6 +13,7 @@ public class Program implements Comparable<Program> {
 	Map<String, String> krunOptions;
 	Test test;
 	String input, output, error;
+    boolean hasInput = false, hasOutput = false, hasError = false;
 
 	public Program(String name, Map<String, String> map, Test test,
 			String input, String output, String error) {
@@ -22,6 +23,9 @@ public class Program implements Comparable<Program> {
 		this.input = input;
 		this.output = output;
 		this.error = error;
+        hasInput = this.input == null ? false : true;
+        hasOutput = this.output == null ? false : true;
+        hasError = this.error == null ? false : true;
 	}
 
 	@Override
@@ -89,4 +93,16 @@ public class Program implements Comparable<Program> {
 		d = test.compareTo(o.test);
 		return d;
 	}
+
+    public boolean hasInput() {
+        return hasInput;
+    }
+
+    public boolean hasOutput() {
+        return hasOutput;
+    }
+
+    public boolean hasError() {
+        return hasError;
+    }
 }
