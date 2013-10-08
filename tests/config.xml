@@ -98,8 +98,11 @@
       definition="dist/tutorial/1_k/2_imp/lesson_5/imp.k"
       programs="dist/tutorial/1_k/2_imp"
       extensions="imp"
-      results="tests/tutorial/1_k/2_imp/lesson_5"
-      />
+      results="tests/tutorial/1_k/2_imp/lesson_5" >
+      <all-programs>
+        <krun-option name="--no-color" />
+      </all-programs>
+  </test>
 
 <!-- LAMBDA++ -->
 
@@ -783,8 +786,11 @@
       definition="tests/regression/cool-issue/test.k"
       programs="tests/regression/cool-issue/programs"
       results="tests/regression/cool-issue/tests"
-      extensions="test"
-  />
+      extensions="test">
+    <all-programs>
+       <krun-option name="--no-color" />
+    </all-programs>
+  </test>
 
 </tests>
 
