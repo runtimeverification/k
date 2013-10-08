@@ -3,6 +3,10 @@ package org.kframework.ktest;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -178,6 +182,13 @@ public class KTest {
         if (cmd.hasOption(Configuration.PROCESSES_OPTION)) {
             Execution.POOL_SIZE = Integer.parseInt(cmd
                     .getOptionValue(Configuration.PROCESSES_OPTION));
+        }
+
+        // delete junit-reports dir
+        try {
+            FileUtils.deleteDirectory(new File(Configuration.JR));
+        } catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
 
         // execution
