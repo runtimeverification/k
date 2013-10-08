@@ -54,6 +54,8 @@ public class KTestOptionsParser {
 		addOptionS(OptionBuilder.withLongOpt(Configuration.DIRECTORY_OPTION).hasArg().withArgName("dir").withDescription("A root directory where K definitions reside. Valid only in batch mode.").create("d"));
 		addOptionS(OptionBuilder.withLongOpt(Configuration.REPORT_OPTION).withDescription("Generate a junit-like report.").create());
 		addOptionS(OptionBuilder.withLongOpt(Configuration.PROCESSES_OPTION).hasArg().withArgName("num").withDescription("The maximum number of threads.").create());
+
+		addOptionE(OptionBuilder.withLongOpt("config").withDescription("Just for backward compatibility.").create());
 	}
 	
 	// parse the command line arguments
