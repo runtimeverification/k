@@ -1,0 +1,17 @@
+void main() {
+  int e = 100;
+  try {
+    try {
+      int x = 5;
+      if (x >= 0) {
+        throw x+2;
+      }
+      print(20, "\n");                      // should not be printed
+    } catch(string e) {
+      print(e," as a string\n");            // should not be printed
+    }
+  } catch(int e) {
+    print(e, " as an int\n");               // should print 7
+  }
+  print(e," as in the top declaration\n");  // should print 100
+}
