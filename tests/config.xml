@@ -503,6 +503,8 @@
     Cink arrays
 -->
 
+<!--
+
   <test
       definition="dist/examples/cink/arrays/cink.k"
       programs="dist/examples/cink/arrays/programs"
@@ -511,6 +513,8 @@
       exclude="sort.cink"
       >
   </test>
+-->
+
 <!--
     Cink arrays unidimensional
 -->
