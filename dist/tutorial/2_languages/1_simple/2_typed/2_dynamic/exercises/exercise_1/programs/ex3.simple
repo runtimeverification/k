@@ -1,0 +1,17 @@
+void main() {
+  int e = 100;
+  try {
+    try {
+      try {
+        throw "error";
+      } catch(int e) {
+        print(e," as an int\n");            // should not be printed
+      }
+    } catch(bool e) {
+      print(e, " as a bool\n");             // should not be printed
+    }
+  } catch(string e) {
+    print(e, " as a string\n");             // should print error
+  }
+  print(e," as in the top declaration\n");  // should print 100
+}

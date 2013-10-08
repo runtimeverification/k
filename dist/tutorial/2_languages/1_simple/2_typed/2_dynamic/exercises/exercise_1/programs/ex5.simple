@@ -1,0 +1,23 @@
+int x = 10;
+
+int inc(bool b) {
+  print(++x, "\n");
+  return 1;
+}
+
+void main() {
+  try {
+    try {
+      try {
+        throw inc;
+      } catch(void->int f) {
+        print("Wrong\n");
+      }
+    } catch(bool->void f) {
+      print("Wrong\n");
+    }
+  } catch(bool->int f) {
+    f(true);
+  }
+  print("Done\n");
+}

@@ -72,7 +72,8 @@ public class Program implements Comparable<Program> {
 				new File(programPath).getName(), successful(value),
 				value.getElapsed() + "", value.getStdout(), value.getStderr(),
 				value, output, !success(value)));
-		test.save();
+        if (Configuration.REPORT)
+		    test.save();
 	}
 
 	public String getProgramPath() {
