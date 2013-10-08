@@ -12,7 +12,7 @@
 */
 
 <k>
-  b := #symAExp(a1);
+  b := #symInt(a1);
   L : for i from b to b+1 do (
     #symStmt(s); 
     b := b + 1
@@ -23,7 +23,7 @@
 </env>
 ~
 <k>
- L:   i := #symAExp(a1);
+ L:   i := #symInt(a1);
   while (true) do (
       #symStmt(s);
  L:     i := i + 1
@@ -35,8 +35,8 @@
 
 if
 
-//i isNotModifiedBy symStmt(s)
-not occurs(i, #symStmt(s))
+i isNotModifiedBy #symStmt(s)
+//not occurs(i, #symStmt(s))
 
 using observers: allObs;
 

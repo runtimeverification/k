@@ -1,0 +1,17 @@
+<tests>
+<!--
+  Testing the prototype for equivalence of programs w.r.t. the approach
+  from IFM 2013.
+-->
+
+
+
+<!-- prog-equiv -->
+  <test
+      definition="dist/examples/prog-equiv/peq.k"
+      programs="dist/examples/prog-equiv/programs"
+      extensions="peq"
+      results="tests/examples/prog-equiv/" >
+  </test>
+ 
+</tests>
