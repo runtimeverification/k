@@ -961,6 +961,18 @@ public class Main {
             /* CLEANUP_OPTIONS */
             if (!cmd.hasOption("directory")) {
                 K.directory = new File(K.userdir).getCanonicalPath();
+            } else {
+                File f = new File(K.directory);
+                String errMsg = null;
+                if (!f.exists())
+                    errMsg = "Folder doesn't exist: " + K.directory;
+                else if (!f.isDirectory())
+                    errMsg = K.directory + " is not a folder";
+
+                if (errMsg != null)
+                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+                            KExceptionGroup.CRITICAL, errMsg,
+                            "command line", new File(".").getAbsolutePath()));
             }
             {
                 // search for the definition
