@@ -637,8 +637,9 @@ public class Test implements Comparable<Test> {
         report.appendChild(createReportElement(new File(language).getName(),
                 message, task.getElapsed() + "", task.getStdout(),
                 task.getStderr(), task, "", !compiled(task)));
-
-        save();
+        if (Configuration.REPORT) {
+            save();
+        }
     }
 
     public void reportPdfCompilation(Task task) {
@@ -651,8 +652,8 @@ public class Test implements Comparable<Test> {
                 .getName().replaceFirst("\\.k$", ".pdf"), message,
                 task.getElapsed() + "", task.getStdout(), task.getStderr(),
                 task, "", !compiledPdf(task)));
-
-        save();
+        if (Configuration.REPORT)
+            save();
     }
 
     public boolean compiledPdf(Task task) {
