@@ -188,7 +188,7 @@ public class KTest {
         try {
             FileUtils.deleteDirectory(new File(Configuration.JR));
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            // silently ignore
         }
 
         // execution
