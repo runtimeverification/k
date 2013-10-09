@@ -20,6 +20,7 @@ public class Variable extends Term implements Sorted {
 
     private static final String VARIABLE_PREFIX = "__var__";
     private static int counter = 0;
+    private static Map<Integer, Variable> deserializationAnonymousVariableMap = new HashMap<>();
 
     public static Map<Variable, Variable> getFreshSubstitution(Set<Variable> variableSet) {
         Map<Variable, Variable> substitution = new HashMap<Variable, Variable>();
@@ -124,6 +125,29 @@ public class Variable extends Term implements Sorted {
     @Override
     public ASTNode accept(Transformer transformer) {
         return transformer.transform(this);
+    }
+
+    /**
+     * Renames serialized anonymous variables to avoid name clashes with existing anonymous
+     * variables.
+     */
+    private Object readResolve() {
+        if (anonymous) {
+            int id = Integer.parseInt(name.substring(VARIABLE_PREFIX.length()));
+            if (id < counter) {
+                Variable variable = deserializationAnonymousVariableMap.get(id);
+                if (variable == null) {
+                    variable = getFreshVariable(sort);
+                    deserializationAnonymousVariableMap.put(id, variable);
+                }
+                return variable;
+            } else {
+                counter = id + 1;
+                return this;
+            }
+        } else {
+            return this;
+        }
     }
 
 }
