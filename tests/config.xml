@@ -798,16 +798,17 @@
 
 
 <!-- begin Java Rewrite Engine tests -->
+<!--
   <test
       definition="dist/examples/java_rewrite_engine/tutorial/1_k/2_imp/imp.k"
       programs="dist/tutorial/1_k/2_imp"
       extensions="imp"
       results="tests/tutorial/1_k/2_imp/lesson_5"
       >
-    <kompile-option name="--backend" value="java" />
+    <kompile-option name="-backend" value="java" />
     <all-programs>
-      <krun-option name="--backend" value="java" />
-      <krun-option name="--smt" value="none" />
+      <krun-option name="-backend" value="java" />
+      <krun-option name="-smt" value="none" />
     </all-programs>
   </test>
   
@@ -818,13 +819,29 @@
       exclude="lesson_1/spawn.imp"
       results="tests/tutorial/1_k/4_imp++/lesson_5"
       >
-    <kompile-option name="--backend" value="java" />
+    <kompile-option name="-backend" value="java" />
     <all-programs>
-      <krun-option name="--backend" value="java" />
-	    <krun-option name="--smt" value="none" />
-	    <krun-option name="--output-mode" value="none" />
+      <krun-option name="-backend" value="java" />
+	    <krun-option name="-smt" value="none" />
+	    <krun-option name="-output-mode" value="none" />
     </all-programs>
   </test>
+
+  <test
+      definition="dist/examples/java_rewrite_engine/simple/untyped/simple-untyped.k"
+      programs="dist/tutorial/2_languages/1_simple/1_untyped/programs"
+      extensions="simple"
+      exclude="dekker.simple exceptions_07.simple matrix.simple"
+      results="tests/examples/simple-untyped"
+      >
+    <kompile-option name="-backend" value="java" />
+    <all-programs>
+      <krun-option name="-backend" value="java" />
+	    <krun-option name="-smt" value="none" />
+      <krun-option name="-output-mode" value="none" />
+    </all-programs>
+  </test>
+-->
 <!-- end Java Rewrite Engine tests -->
 
 
