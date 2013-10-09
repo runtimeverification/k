@@ -796,5 +796,37 @@
     </all-programs>
   </test>
 
+
+<!-- begin Java Rewrite Engine tests -->
+  <test
+      definition="dist/examples/java_rewrite_engine/tutorial/1_k/2_imp/imp.k"
+      programs="dist/tutorial/1_k/2_imp"
+      extensions="imp"
+      results="tests/tutorial/1_k/2_imp/lesson_5"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--backend" value="java" />
+      <krun-option name="--smt" value="none" />
+    </all-programs>
+  </test>
+  
+  <test
+      definition="dist/examples/java_rewrite_engine/tutorial/1_k/4_imp++/imp.k"
+      programs="dist/tutorial/1_k/2_imp dist/tutorial/1_k/4_imp++"
+      extensions="imp"
+      exclude="lesson_1/spawn.imp"
+      results="tests/tutorial/1_k/4_imp++/lesson_5"
+      >
+    <kompile-option name="--backend" value="java" />
+    <all-programs>
+      <krun-option name="--backend" value="java" />
+	    <krun-option name="--smt" value="none" />
+	    <krun-option name="--output-mode" value="none" />
+    </all-programs>
+  </test>
+<!-- end Java Rewrite Engine tests -->
+
+
 </tests>
 
