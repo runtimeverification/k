@@ -251,17 +251,14 @@ public class KTest {
             alltests = parseXMLConfig(configFile, rootDir, rootProgramsDir,
                     rootResultsDir);
         } catch (ParserConfigurationException e) {
-            // TODO Auto-generated catch block
             exitCode = 1;
-            e.printStackTrace();
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.PARSER, e.getLocalizedMessage()));
         } catch (SAXException e) {
-            // TODO Auto-generated catch block
             exitCode = 1;
-            e.printStackTrace();
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.PARSER, e.getLocalizedMessage()));
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             exitCode = 1;
-            e.printStackTrace();
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.PARSER, e.getLocalizedMessage()));
         }
 
         testing(exitCode, new File(System.getProperty("user.dir")), alltests);
