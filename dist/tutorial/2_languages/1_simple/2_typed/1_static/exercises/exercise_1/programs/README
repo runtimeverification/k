@@ -1,0 +1,11 @@
+To test your definition, you can call
+
+  ktest config.xml
+
+in this folder.  If you want to skip the kompilation and pdf generation, then
+use the following command instead:
+
+  ktest config.xml --skip "kompile pdf"
+
+If your solution is correct, then all tests should pass, except for
+ex03, ex07, ex08, ex09, and ex13.

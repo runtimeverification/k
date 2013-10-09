@@ -1,0 +1,11 @@
+<tests>
+  <test
+      definition="../simple-typed-static.k"
+      programs="../../../../2_dynamic/exercises/exercise_2/programs/"
+      extension="simple"
+      results="." >
+      <all-programs>
+        <krun-option name="-pattern" value="&lt;tasks&gt;.Bag&lt;/tasks&gt;"/>
+      </all-programs>
+  </test>
+</tests>

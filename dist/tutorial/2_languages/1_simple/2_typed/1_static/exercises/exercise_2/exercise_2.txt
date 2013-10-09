@@ -1,0 +1,9 @@
+Compilers typically collect all the variables declared in a block and move
+them all in one place, renaming them appropriately everywhere to avoid name
+conflicts.  Consequently, they do not like you to declare a variable twice
+in the same block.  Modify the static semantics of SIMPLE to reject programs
+which declare the same variable twice in a block.  Your resulting type
+system should get stuck when a variable is declared the second time.
+
+Note: This exercise is rather simple.  It may fit better as an exercise for
+IMP++ in the K tutorial, not the language tutorial.  Or maybe keep it in both.
