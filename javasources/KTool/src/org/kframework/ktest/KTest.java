@@ -136,6 +136,7 @@ public class KTest {
         if (cmd.hasOption(Configuration.PROGRAMS_OPTION)) {
             Configuration.PGM_DIR = cmd
                     .getOptionValue(Configuration.PROGRAMS_OPTION);
+            org.kframework.utils.Error.checkIfInputDirectory(Configuration.PGM_DIR);
             // also set the results to be programs folder by default
             Configuration.RESULTS_FOLDER = Configuration.PGM_DIR;
         }
@@ -150,6 +151,7 @@ public class KTest {
         if (cmd.hasOption(Configuration.RESULTS_OPTION)) {
             Configuration.RESULTS_FOLDER = cmd
                     .getOptionValue(Configuration.RESULTS_OPTION);
+            org.kframework.utils.Error.checkIfInputDirectory(Configuration.RESULTS_FOLDER);
         }
 
         if (cmd.hasOption(Configuration.REPORT_OPTION)) {

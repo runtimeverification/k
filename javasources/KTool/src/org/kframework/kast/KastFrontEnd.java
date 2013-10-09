@@ -101,6 +101,7 @@ public class KastFrontEnd {
 		String directory;
 		if (cmd.hasOption("directory")) {
 			directory = new File(cmd.getOptionValue("directory")).getAbsolutePath();
+			org.kframework.utils.Error.checkIfInputDirectory(directory);
 		} else {
 			directory = new File(System.getProperty("user.dir")).getAbsolutePath();
 		}
@@ -228,3 +229,5 @@ public class KastFrontEnd {
 		}
 	}
 }
+
+// vim: noexpandtab
