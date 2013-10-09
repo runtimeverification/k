@@ -24,22 +24,22 @@ void f(int x) throws int, string, (int->int) {
 
 void main() {
   try {
-    f(0);
+    f(0);                   // rejected by type checker
   } catch(int x) {
     print(x,"\n");
   }
   try {
-    f(1);
+    f(1);                   // rejected by type checker
   } catch(string x) {
     print(x,"\n");
   }
   try {
-    f(2);
+    f(2);                   // rejected by type checker
   } catch(string x) {
     print(x,"\n");
   }
   try {
-    f(3);
+    f(3);                   // rejected by type checker
   } catch(int->int x) {
     print(x(7),"\n");
   }

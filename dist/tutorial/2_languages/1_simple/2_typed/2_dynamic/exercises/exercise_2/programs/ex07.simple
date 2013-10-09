@@ -1,9 +1,9 @@
 int x = 10;
 
-int inc(bool b) {
+int inc(bool b) {  // throws clause needed for type checking
   print(++x, "\n");
-  throw -1;
-  return 1;  // never reaches this
+  throw -1;        // type checker will reject it
+  return 1;        // never reaches this
 }
 
 void main() {
