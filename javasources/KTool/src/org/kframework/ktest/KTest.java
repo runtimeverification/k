@@ -20,6 +20,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.io.FileUtils;
+import org.kframework.krun.K;
 import org.kframework.ktest.execution.Execution;
 import org.kframework.ktest.execution.Task;
 import org.kframework.ktest.tests.Program;
@@ -231,6 +232,10 @@ public class KTest {
         Document doc = dBuilder.parse(new File(configFile));
         Element root = doc.getDocumentElement();
 
+        if (!root.getTagName().equals(Configuration.TESTS)) {
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Test configuration (XML) files must have <" + Configuration.TESTS + "> tag as root."));
+        }
+
         NodeList test = root.getElementsByTagName(Configuration.TEST);
         for (int i = 0; i < test.getLength(); i++)
             alltests.add(new Test((Element) test.item(i), rootDefDir,
@@ -267,7 +272,7 @@ public class KTest {
     private static void testing(int exitCode, File homeDir, List<Test> alltests) {
         // compile definitions first
         int i = 0, j = 0;
-        System.out.print("Kompiling the language definitions...");
+        System.out.print("Kompile the language definitions...");
         Map<Test, Task> definitions = new TreeMap<Test, Task>();
         for (Test test : alltests) {
             if (!test.isSkipKompile() && Configuration.KOMPILE){
@@ -288,8 +293,10 @@ public class KTest {
             }
         }
         System.out.println("(" + (i + j) + " in total)");
-        System.out.println("Skipped " + j + " definitions");
-        System.out.println("Compiling " + i + " definitions");
+        if (j > 0)
+            System.out.println("Skipped " + j + " definitions");
+        if (i > 0)
+            System.out.println("Compiling " + i + " definitions");
         Execution.finish();
 
         if (Configuration.KOMPILE) {
@@ -335,8 +342,10 @@ public class KTest {
             }
         }
         System.out.println("(" + (i + j) + " in total)");
-        System.out.println("Skipped " + j + " definitions");
-        System.out.println("Generate pdf for " + i + " definitions");
+        if (j > 0)
+            System.out.println("Skipped " + j + " definitions");
+        if (i > 0)
+            System.out.println("Generate pdf for " + i + " definitions");
         Execution.finish();
 
         if (Configuration.PDF) {

@@ -65,6 +65,7 @@ public class Configuration {
 	public static final String VALUE = "value";
 	public static final String UNIX_ONLY = "unixOnly";
 	public static final String TEST = "test";
+    public static final String TESTS = "tests";
     public static boolean KOMPILE = true;
     public static boolean KOMPILE_PDF = true;
     public static boolean PROGRAMS = true;
