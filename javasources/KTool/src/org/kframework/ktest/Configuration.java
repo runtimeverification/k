@@ -50,7 +50,7 @@ public class Configuration {
 	public static final String PROGRAM = "program";
 	public static final String NAME = "name";
 	public static final String EXCLUDE = "exclude";
-	public static final String EXTENSIONS2 = "extensions";
+	public static final String EXTENSIONS2 = "extension";
 	public static final String RECURSIVE = "recursive";
 	public static final String YES = "yes";
 	public static final String PDF2 = "pdf";

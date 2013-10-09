@@ -229,7 +229,6 @@ public class Test implements Comparable<Test> {
     }
 
     private String searchFile(String folder, String filename, boolean recursive) {
-
         String[] files = new File(folder).list();
         String file = null;
         if (files != null)
@@ -305,20 +304,26 @@ public class Test implements Comparable<Test> {
                 Configuration.PROGRAMS_DIR).split("\\s+"));
         if (allpd.size() > 0) {
             programsFolders = new LinkedList<String>();
+            resultsFolders = new LinkedList<String>();
             for (String pd : allpd) {
                 if (pd != null && !pd.equals("")) {
                     String p = resolveAbsolutePathRelativeTo(pd.trim(),
                             rootProgramsDir, Configuration.PGM_ERROR);
-                    if (p != null)
+                    if (p != null){
                         programsFolders.add(p);
+                        // also add this program folder as default result folder
+                        resultsFolders.add(p);
+                    }
                 }
             }
         }
 
         // get tests results
-        List<String> allrd = Arrays.asList(test.getAttribute(
-                Configuration.RESULTS).split("\\s+"));
+        List<String> allrd = new LinkedList<String>();
+        if (test.hasAttribute(Configuration.RESULTS))
+                allrd = Arrays.asList(test.getAttribute(Configuration.RESULTS).split("\\s+"));
         if (allrd.size() > 0) {
+            // reset the default results folder if Configuration.RESULTS is given
             resultsFolders = new LinkedList<String>();
             for (String rd : allrd)
                 if (rd != null && !rd.equals("")) {
@@ -327,7 +332,7 @@ public class Test implements Comparable<Test> {
                     if (p != null)
                         resultsFolders.add(p);
                 }
-        } else
+        } else if (resultsFolders.size() == 0)
             resultsFolders = null;
 
         // get report dir
@@ -374,14 +379,12 @@ public class Test implements Comparable<Test> {
                     option.getAttribute(Configuration.VALUE));
         }
 
-        // load programs with special option
+        // load programs with special krun options
         NodeList specialPgms = test.getElementsByTagName(Configuration.PROGRAM);
         for (int i = 0; i < specialPgms.getLength(); i++) {
             Element pgm = (Element) specialPgms.item(i);
             String programPath = pgm.getAttribute(Configuration.NAME);
-
             Map<String, String> map = getKrunOptions(pgm);
-
             String input = null;
             String output = null;
             String error = null;
