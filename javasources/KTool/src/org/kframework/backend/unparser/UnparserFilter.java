@@ -3,6 +3,7 @@ package org.kframework.backend.unparser;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.BasicVisitor;
+import org.kframework.krun.ColorSetting;
 import org.kframework.utils.ColorUtil;
 
 import java.util.LinkedList;
@@ -16,7 +17,7 @@ public class UnparserFilter extends BasicVisitor {
 	private boolean inConfiguration = false;
 	private boolean addParentheses;
 	private int inTerm = 0;
-	private boolean color = false;
+	private ColorSetting color = ColorSetting.OFF;
 	private boolean annotateLocation;
 	public static int TAB = 4;
 	private boolean forEquivalence = false; /* true when unparsing for kagreg; does not print configuration/imports/etc */
@@ -41,14 +42,14 @@ public class UnparserFilter extends BasicVisitor {
 	}
 
 	public UnparserFilter(boolean inConfiguration, boolean color, org.kframework.kil.loader.Context context) {
-		this(inConfiguration, color, true, context);
+		this(inConfiguration, color ? ColorSetting.ON : ColorSetting.OFF, true, context);
 	}
 
-	public UnparserFilter(boolean inConfiguration, boolean color, boolean addParentheses, org.kframework.kil.loader.Context context) {
+	public UnparserFilter(boolean inConfiguration, ColorSetting color, boolean addParentheses, org.kframework.kil.loader.Context context) {
 		this(inConfiguration, color, addParentheses, false, context);
 	}
 
-	public UnparserFilter(boolean inConfiguration, boolean color, boolean addParentheses, boolean annotateLocation, org.kframework.kil.loader.Context context) {
+	public UnparserFilter(boolean inConfiguration, ColorSetting color, boolean addParentheses, boolean annotateLocation, org.kframework.kil.loader.Context context) {
 		super(context);
 		this.inConfiguration = inConfiguration;
 		this.color = color;
@@ -258,16 +259,14 @@ public class UnparserFilter extends BasicVisitor {
 			}
 		}
 		String colorCode = "";
-		if (color) {
-			Cell declaredCell = context.cells.get(cell.getLabel());
-			if (declaredCell != null) {
-				String declaredColor = declaredCell.getCellAttributes().get("color");
-				if (declaredColor != null) {
-					colorCode = ColorUtil.RgbToAnsi(ColorUtil.colors.get(declaredColor));
-					indenter.write(colorCode);
-				}
-			}
-		}
+        Cell declaredCell = context.cells.get(cell.getLabel());
+        if (declaredCell != null) {
+            String declaredColor = declaredCell.getCellAttributes().get("color");
+            if (declaredColor != null) {
+                colorCode = ColorUtil.RgbToAnsi(ColorUtil.colors.get(declaredColor), color);
+                indenter.write(colorCode);
+            }
+        }
 
 		indenter.write("<" + cell.getLabel() + attributes + ">");
 		if (inConfiguration && inTerm == 0) {

@@ -80,7 +80,7 @@ public class K {
 	public static boolean version = false;
 	public static boolean io = true;
 	public static boolean statistics = false;
-	public static boolean color = true;
+	public static ColorSetting color = ColorSetting.ON;
 	public static boolean do_search = false;
 	public static boolean showSearchGraph = false;
 	//apply parenthesis by default

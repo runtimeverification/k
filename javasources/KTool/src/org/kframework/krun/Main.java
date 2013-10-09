@@ -821,11 +821,13 @@ public class Main {
             if (cmd.hasOption("color")) {
                 String v = cmd.getOptionValue("color");
                 if (v.equals("on"))
-                    K.color = true;
+                    K.color = ColorSetting.ON;
                 else if (v.equals("off"))
-                    K.color = false;
+                    K.color = ColorSetting.OFF;
+                else if (v.equals("extended"))
+                    K.color = ColorSetting.EXTENDED;
                 else
-                    Error.report("Unrecognized option: --color " + v + "\nUsage: krun --color [on|off]");
+                    Error.report("Unrecognized option: --color " + v + "\nUsage: krun --color [on|off|extended]");
             }
             if (cmd.hasOption("parens")) {
                 String v = cmd.getOptionValue("parens");
@@ -900,7 +902,7 @@ public class Main {
             }
             if (cmd.hasOption("output")) {
                 if (!cmd.hasOption("color")) {
-                    K.color = false;
+                    K.color = ColorSetting.OFF;
                 }
                 K.output = new File(cmd.getOptionValue("output"))
                         .getCanonicalPath();

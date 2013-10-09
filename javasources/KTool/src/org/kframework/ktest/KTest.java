@@ -3,10 +3,6 @@ package org.kframework.ktest;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,7 +16,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.io.FileUtils;
-import org.kframework.krun.K;
+import org.kframework.krun.ColorSetting;
 import org.kframework.ktest.execution.Execution;
 import org.kframework.ktest.execution.Task;
 import org.kframework.ktest.tests.Program;
@@ -312,7 +308,7 @@ public class KTest {
             String kompileStatus = "\n";
             for (Entry<Test, Task> entry : definitions.entrySet()) {
                 if (!entry.getKey().compiled(entry.getValue())) {
-                    kompileStatus += ColorUtil.RgbToAnsi(Color.red) + "FAIL: "
+                    kompileStatus += ColorUtil.RgbToAnsi(Color.red, ColorSetting.ON) + "FAIL: "
                             + entry.getKey().getLanguage()
                             + ColorUtil.ANSI_NORMAL + "\n";
                     exitCode = 1;
@@ -360,7 +356,7 @@ public class KTest {
             String pdfKompileStatus = "\n";
             for (Entry<Test, Task> entry : pdfDefinitions.entrySet()) {
                 if (!entry.getKey().compiledPdf(entry.getValue())) {
-                    pdfKompileStatus += ColorUtil.RgbToAnsi(Color.red)
+                    pdfKompileStatus += ColorUtil.RgbToAnsi(Color.red, ColorSetting.ON)
                             + "FAIL: " + entry.getKey().getLanguage()
                             + ColorUtil.ANSI_NORMAL + "\n";
                     exitCode = 1;
@@ -422,7 +418,7 @@ public class KTest {
                         String pgmOut = "";
                         for (Entry<Program, Task> entry : all.entrySet()) {
                             if (!entry.getKey().success(entry.getValue())) {
-                                pgmOut += ColorUtil.RgbToAnsi(Color.red) + "FAIL: "
+                                pgmOut += ColorUtil.RgbToAnsi(Color.red, ColorSetting.ON) + "FAIL: "
                                         + entry.getKey().getProgramPath()
                                         + ColorUtil.ANSI_NORMAL + "\n";
                                 exitCode = 1;

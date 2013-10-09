@@ -5,6 +5,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.krun.ColorSetting;
 import org.kframework.parser.DefinitionLoader;
 
 import java.io.IOException;
@@ -109,7 +110,7 @@ public class AddBracketsFilter2 extends BasicTransformer {
 			}
 			return result;
 		}
-		UnparserFilter unparser = new UnparserFilter(false, false, false, true, context);
+		UnparserFilter unparser = new UnparserFilter(false, ColorSetting.OFF, false, true, context);
 		ast.accept(unparser);
 		String unparsed = unparser.getResult();
 		try {

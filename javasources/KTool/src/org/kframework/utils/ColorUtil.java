@@ -1,25 +1,30 @@
 package org.kframework.utils;
 
+import org.kframework.krun.ColorSetting;
+
 import java.awt.Color;
+import java.util.Collections;
 import java.util.Map;
 import java.util.HashMap;
 
 public class ColorUtil {
 
-	public static Map<String, Color> colors;
-	public static Map<Color, String> ansiColors;
-	static {
-		colors = new HashMap<String, Color>();
-		ansiColors = new HashMap<Color, String>();
-		//white and black may not be visible on all terminals, so we cheat and display them normally
-		ansiColors.put(Color.white, "0");
-		ansiColors.put(Color.black, "0");
-		ansiColors.put(Color.red, "31");
-		ansiColors.put(Color.green, "32");
-		ansiColors.put(Color.blue, "34");
-		ansiColors.put(Color.cyan, "36");
-		ansiColors.put(Color.magenta, "35");
-		ansiColors.put(Color.yellow, "33");
+	public final static Map<String, Color> colors = initColors();
+
+    /**
+     * Terminal code corresponding to closest color for this one, from the list of basic 8
+     * terminal codes only.
+     */
+    private final static Map<Color, String> ansiColorsToTerminalCodes = initAnsiColors();
+
+    /**
+     * Terminal code corresponding to closest color for this one, from the list of 216 colors supported by
+     * linux terminals.
+     */
+    private final static Map<Color, String> eightBitColorsToTerminalCodes = initEightBitColors();
+
+    private static Map<String, Color> initColors() {
+        Map<String, Color> colors = new HashMap<String, Color>();
 		colors.put("black", Color.black);
 		colors.put("blue", Color.blue);
 		colors.put("brown", getColor("#C08040"));
@@ -107,32 +112,104 @@ public class ColorUtil {
 		colors.put("Yellow", getColor("#FFF200"));
 		colors.put("YellowGreen", getColor("#98CC70"));
 		colors.put("YellowOrange", getColor("#FAA21A"));
+
+        return Collections.unmodifiableMap(colors);
 	}
 
-	public static Color getColor(String rgb) {
+    public static Color getColor(String rgb) {
 		int r = Integer.valueOf(rgb.substring(1, 3), 16);
 		int g = Integer.valueOf(rgb.substring(3, 5), 16);
 		int b = Integer.valueOf(rgb.substring(5, 7), 16);
 		return new Color(r, g, b);
 	}
 
-	public static String RgbToAnsi(Color rgb) {
-		if (rgb == null) 
-			return "";
-		int min = Integer.MAX_VALUE;
-		Color minColor = null;
-	 	for (Color ansi : ansiColors.keySet()) {
-			int error = colorError(rgb, ansi);
-			if (min > error) {
-				minColor = ansi;
-				min = error;
-			}
-		}
-		return "\u001b[" + ansiColors.get(minColor) + "m";
-	}
+    private static Map<Color, String> initAnsiColors() {
+        Map<Color, String> map = new HashMap<Color, String>(8);
+        //white and black may not be visible on all terminals, so we cheat and display them normally
+        map.put(Color.white, getBasicTerminalCode(0));
+        map.put(Color.black, getBasicTerminalCode(0));
+        map.put(Color.red, getBasicTerminalCode(31));
+        map.put(Color.green, getBasicTerminalCode(32));
+        map.put(Color.blue, getBasicTerminalCode(34));
+        map.put(Color.cyan, getBasicTerminalCode(36));
+        map.put(Color.magenta, getBasicTerminalCode(35));
+        map.put(Color.yellow, getBasicTerminalCode(33));
 
-	public static final String ANSI_NORMAL = "\u001b[0m";
-	public static int colorError(Color c1, Color c2) {
+        return Collections.unmodifiableMap(map);
+    }
+
+    /**
+     * Basic colors codes have the form \e[&lt;code&gt;m . You can test them by running in your terminal:
+     * echo -en "\e[35mTEST"
+     */
+    private static String getBasicTerminalCode(int code) {
+        return "\u001b[" + code + "m";
+    }
+
+    private static Map<Color, String> initEightBitColors() {
+        Map<Integer, Integer> coordMap = new HashMap<Integer, Integer>();
+        coordMap.put(0,0);
+        coordMap.put(1,95);
+        coordMap.put(2,135);
+        coordMap.put(3,175);
+        coordMap.put(4,215);
+        coordMap.put(5,255);
+
+        Map<Color, String> map = new HashMap<Color, String>();
+        for (int i = 0; i < 6; i++) {
+            for (int j = 0; j < 6; j++) {
+                for (int k = 0; k < 6; k++) {
+                    int code = i *36 + j * 6 + k + 16;
+                    Color color = new Color(coordMap.get(i),coordMap.get(j),coordMap.get(k));
+                    map.put(color, getEightBitTerminalCode(code));
+                }
+            }
+        }
+
+        //Ansi colors will have priority over 8-bit ones, including all the hacks.
+        map.putAll(ansiColorsToTerminalCodes);
+
+        return Collections.unmodifiableMap(map);
+    }
+
+    /**
+     * 8-bit format example: echo -en "\e[38;5;180mTEST"
+     */
+    private static String getEightBitTerminalCode(int code) {
+        return "\u001b[38;5;" + code + "m";
+    }
+
+    public static String RgbToAnsi(Color rgb, ColorSetting colorSetting) {
+        switch(colorSetting) {
+            case OFF:
+                return "";
+            case ON:
+                return getClosestTerminalCode(rgb, ansiColorsToTerminalCodes);
+            case EXTENDED:
+                return getClosestTerminalCode(rgb, eightBitColorsToTerminalCodes);
+            default:
+                throw new UnsupportedOperationException("colorSettung: " + colorSetting);
+        }
+    }
+
+    private static String getClosestTerminalCode(Color rgb, Map<Color, String> codesMap) {
+        if (rgb == null)
+            return "";
+        int minColorError = Integer.MAX_VALUE;
+        Color minColor = null;
+        for (Color ansi : codesMap.keySet()) {
+           int colorError = getColorError(rgb, ansi);
+           if (colorError < minColorError) {
+               minColorError = colorError;
+                minColor = ansi;
+           }
+       }
+        return codesMap.get(minColor);
+    }
+
+    public static final String ANSI_NORMAL = "\u001b[0m";
+
+	private static int getColorError(Color c1, Color c2) {
 		int r = c1.getRed() - c2.getRed();
 		int g = c1.getGreen() - c2.getGreen();
 		int b = c1.getBlue() - c2.getBlue();
