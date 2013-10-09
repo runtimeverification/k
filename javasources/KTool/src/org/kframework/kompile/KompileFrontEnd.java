@@ -162,6 +162,7 @@ public class KompileFrontEnd {
 		output = null;
 		if (cmd.hasOption("directory")) {
 			output = cmd.getOptionValue("directory");
+			org.kframework.utils.Error.checkIfOutputDirectory(output);
 		}
 		if (output == null) {
 			output = mainFile.getAbsoluteFile().getParent();

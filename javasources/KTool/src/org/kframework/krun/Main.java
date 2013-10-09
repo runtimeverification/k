@@ -793,6 +793,7 @@ public class Main {
             // CLEANUP_OPTIONS: The option --directory was added, replacing --k-definition and --compiled-def.
             if (cmd.hasOption("directory")) {
                 K.directory = new File(cmd.getOptionValue("directory")).getCanonicalPath();
+                org.kframework.utils.Error.checkIfInputDirectory(K.directory);
             }
             if (cmd.hasOption("main-module")) {
                 K.main_module = cmd.getOptionValue("main-module");
