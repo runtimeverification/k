@@ -233,17 +233,21 @@ public class Test implements Comparable<Test> {
         String file = null;
         if (files != null)
             for (int i = 0; i < files.length; i++) {
-                if (new File(folder + Configuration.FILE_SEPARATOR + files[i])
-                        .isFile())
-                    if (files[i].equals(filename))
-                        file = new File(folder + Configuration.FILE_SEPARATOR
-                                + files[i]).getAbsolutePath();
+
+                // search in depth first
                 if (recursive)
                     if (new File(folder + Configuration.FILE_SEPARATOR
                             + files[i]).isDirectory())
                         file = searchFile(folder + Configuration.FILE_SEPARATOR
                                 + files[i], filename, recursive);
+                if (file != null)
+                    return file;
 
+                if (new File(folder + Configuration.FILE_SEPARATOR + files[i])
+                        .isFile())
+                    if (files[i].equals(filename))
+                        file = new File(folder + Configuration.FILE_SEPARATOR
+                                + files[i]).getAbsolutePath();
                 if (file != null)
                     return file;
             }
