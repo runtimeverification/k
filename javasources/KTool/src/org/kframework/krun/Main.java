@@ -24,24 +24,18 @@ import jline.MultiCompletor;
 import jline.SimpleCompletor;
 
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
 import org.fusesource.jansi.AnsiConsole;
 import org.kframework.backend.java.symbolic.JavaSymbolicKRun;
 import org.kframework.backend.java.symbolic.SpecificationCompilerSteps;
 import org.kframework.backend.maude.krun.MaudeKRun;
 import org.kframework.compile.ConfigurationCleaner;
 import org.kframework.compile.FlattenModules;
-import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.transformers.AddTopCellConfig;
 import org.kframework.compile.transformers.FlattenSyntax;
-import org.kframework.compile.transformers.RemoveBrackets;
-import org.kframework.compile.transformers.RemoveSyntacticCasts;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.BackendTerm;
 import org.kframework.kil.Bag;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.DataStructureBuiltin;
@@ -49,7 +43,6 @@ import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.Definition;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
-import org.kframework.kil.KSequence;
 import org.kframework.kil.ListItem;
 import org.kframework.kil.Module;
 import org.kframework.kil.Rule;
@@ -973,6 +966,18 @@ public class Main {
             /* CLEANUP_OPTIONS */
             if (!cmd.hasOption("directory")) {
                 K.directory = new File(K.userdir).getCanonicalPath();
+            } else {
+                File f = new File(K.directory);
+                String errMsg = null;
+                if (!f.exists())
+                    errMsg = "Folder doesn't exist: " + K.directory;
+                else if (!f.isDirectory())
+                    errMsg = K.directory + " is not a folder";
+
+                if (errMsg != null)
+                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+                            KExceptionGroup.CRITICAL, errMsg,
+                            "command line", new File(".").getAbsolutePath()));
             }
             {
                 // search for the definition
