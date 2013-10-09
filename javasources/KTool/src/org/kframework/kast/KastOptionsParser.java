@@ -48,14 +48,14 @@ public class KastOptionsParser {
 
 		addOptionS(OptionBuilder.withLongOpt("directory").hasArg().withArgName("dir").withDescription("Path to the directory in which the kompiled K definition resides. The default is the current directory.").create("d"));
 		addOptionS(OptionBuilder.withLongOpt("expression").hasArg().withArgName("string").withDescription("An expression to parse passed on the command line. Note that positional arguments are ignored when this option is given.").create("e"));
-		addOptionS(OptionBuilder.withLongOpt("parser").hasArg().withArgName("parser").withDescription("Choose a parser. <parser> is either [program|ground|rules|binary]. (Default: program).").create());
+		addOptionS(OptionBuilder.withLongOpt("parser").hasArg().withArgName("parser").withDescription("Choose a parser. <parser> is either [program|ground|rule|binary]. (Default: program).").create());
 		addOptionS(OptionBuilder.withLongOpt("sort").hasArg().withArgName("string").withDescription("The start sort for the default parser. (The default is the sort of $PGM from the configuration.)").create());
 		addOptionS(OptionBuilder.withLongOpt("help-experimental").withDescription("Print help on non-standard options.").create("X"));
 
-		addOptionE(OptionBuilder.withLongOpt("fast-kast").withDescription("For testing the new concrete parser, the C SDF parser.").create());
+		addOptionE(OptionBuilder.withLongOpt("fast-kast").withDescription("Using the (experimental) faster C SDF parser.").create());
 		addOptionE(OptionBuilder.withLongOpt("pretty").withDescription("Pretty print the output.").create());
 		addOptionE(OptionBuilder.withLongOpt("tabsize").hasArg().withArgName("num").withDescription("How many spaces to use for each indentation level.").create());
-		addOptionE(OptionBuilder.withLongOpt("maxwidth").hasArg().withArgName("num").withDescription("Line will be split before <num> chars.").create());
+		addOptionE(OptionBuilder.withLongOpt("max-width").hasArg().withArgName("num").withDescription("Line will be split before <num> chars.").create());
 		addOptionE(OptionBuilder.withLongOpt("aux-tabsize").hasArg().withArgName("num").withDescription("How many spaces to indent lines which do not fit into max-width. (Default: 2).").create());
 		addOptionE(OptionBuilder.withLongOpt("nextline").withDescription("Force newline before first argument.").create());
 	}
