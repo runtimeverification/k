@@ -266,28 +266,30 @@ public class KTest {
 
     private static void testing(int exitCode, File homeDir, List<Test> alltests) {
         // compile definitions first
-        int i = 0;
+        int i = 0, j = 0;
         System.out.print("Kompiling the language definitions...");
         Map<Test, Task> definitions = new TreeMap<Test, Task>();
         for (Test test : alltests) {
-            Task def = test.getDefinitionTask(homeDir);
-            definitions.put(test, def);
-            if (Configuration.KOMPILE) {
-                Execution.execute(def);
-            }
-            if (test.runOnOS()) {
-                Task unixOnlyScript = test.getUnixOnlyScriptTask(homeDir);
-                if (unixOnlyScript != null) {
-                    Execution.execute(unixOnlyScript);
+            if (!test.isSkipKompile() && Configuration.KOMPILE){
+                Task def = test.getDefinitionTask(homeDir);
+                definitions.put(test, def);
+                if (Configuration.KOMPILE) {
+                    Execution.execute(def);
                 }
+                if (test.runOnOS()) {
+                    Task unixOnlyScript = test.getUnixOnlyScriptTask(homeDir);
+                    if (unixOnlyScript != null) {
+                        Execution.execute(unixOnlyScript);
+                    }
+                }
+                i++;
+            } else {
+                j++;
             }
-            i++;
         }
-        if (Configuration.KOMPILE) {
-            System.out.println("(" + i +  " in total)");
-        } else {
-            System.out.println("\nSkipped " + i + " definitions");
-        }
+        System.out.println("(" + (i + j) + " in total)");
+        System.out.println("Skipped " + j + " definitions");
+        System.out.println("Compiling " + i + " definitions");
         Execution.finish();
 
         if (Configuration.KOMPILE) {
@@ -312,28 +314,29 @@ public class KTest {
             if (kompileStatus.equals("\n"))
                 kompileStatus = "SUCCESS";
             System.out.println(kompileStatus);
+        } else {
+            System.out.println("Done.");
         }
 
         // compile pdf definitions
-        i = 0;
+        i = 0; j = 0;
         System.out.print("Generating PDF documentation...");
         Map<Test, Task> pdfDefinitions = new TreeMap<Test, Task>();
         for (Test test : alltests) {
-            // also compile pdf if set
-            if (test.getPdf()) {
+            if (!test.isSkipPdf() && Configuration.PDF){
                 Task pdfDef = test.getPdfDefinitionTask(homeDir);
                 if (Configuration.PDF) {
                     pdfDefinitions.put(test, pdfDef);
                     Execution.execute(pdfDef);
                 }
                 i++;
+            } else {
+                j++;
             }
         }
-        if (Configuration.PDF) {
-            System.out.println("(" + i + " in total)");
-        } else {
-            System.out.println("\nSkipped " + i + " definitions");
-        }
+        System.out.println("(" + (i + j) + " in total)");
+        System.out.println("Skipped " + j + " definitions");
+        System.out.println("Generate pdf for " + i + " definitions");
         Execution.finish();
 
         if (Configuration.PDF) {
@@ -357,67 +360,72 @@ public class KTest {
             if (pdfKompileStatus.equals("\n"))
                 pdfKompileStatus = "SUCCESS";
             System.out.println(pdfKompileStatus);
+        } else {
+            System.out.println("Done.");
         }
 
         // execute all programs (for which corresponding definitions are
         // compiled)
         for (Entry<Test, Task> dentry : definitions.entrySet()) {
             Test test = dentry.getKey();
-            if (test.compiled(dentry.getValue()) && test.runOnOS()) {
+            if (!test.isSkipPrograms() && Configuration.PROGRAMS){
+                if (test.compiled(dentry.getValue()) && test.runOnOS()) {
+                    System.out.print("Running " + test.getLanguage()
+                            + " programs... " + test.getTag());
 
-                System.out.print("Running " + test.getLanguage()
-                        + " programs... " + test.getTag());
+                    // execute
+                    List<Program> pgms = test.getPrograms();
+                    Map<Program, Task> all = new TreeMap<Program, Task>();
 
-                // execute
-                List<Program> pgms = test.getPrograms();
-                Map<Program, Task> all = new TreeMap<Program, Task>();
+                    // total programs counter
+                    i = 0;
+                    // i/o counters
+                    int in = 0;
+                    int out = 0;
 
-                // total programs counter
-                i = 0;
-                // i/o counters
-                int in = 0;
-                int out = 0;
-
-                for (Program p : pgms) {
-                    Task task = p.getTask(homeDir);
-                    all.put(p, task);
+                    for (Program p : pgms) {
+                        Task task = p.getTask(homeDir);
+                        all.put(p, task);
+                        if (Configuration.PROGRAMS) {
+                            Execution.tpe.execute(task);
+                        }
+                        i++;
+                        if (p.hasInput()) in++;
+                        if (p.hasOutput()) out++;
+                    }
                     if (Configuration.PROGRAMS) {
-                        Execution.tpe.execute(task);
+                        System.out.println("(" + i + " in total, " + in + " with input, " + out + " with output)");
+                    } else {
+                        System.out.println("\nSkipped " + i + " programs");
                     }
-                    i++;
-                    if (p.hasInput()) in++;
-                    if (p.hasOutput()) out++;
-                }
-                if (Configuration.PROGRAMS) {
-                    System.out.println("(" + i + " in total, " + in + " with input, " + out + " with output)");
-                } else {
-                    System.out.println("\nSkipped " + i + " programs");
-                }
-                Execution.finish();
+                    Execution.finish();
 
-                if (Configuration.PROGRAMS) {
+                    if (Configuration.PROGRAMS) {
 
-                    if (!GlobalSettings.isWindowsOS()) {
-                        // report
+                        if (!GlobalSettings.isWindowsOS()) {
+                            // report
+                            for (Entry<Program, Task> entry : all.entrySet()) {
+                                entry.getKey().reportTest(entry.getValue());
+                            }
+                        }
+
+                        // console
+                        String pgmOut = "";
                         for (Entry<Program, Task> entry : all.entrySet()) {
-                            entry.getKey().reportTest(entry.getValue());
+                            if (!entry.getKey().success(entry.getValue())) {
+                                pgmOut += ColorUtil.RgbToAnsi(Color.red) + "FAIL: "
+                                        + entry.getKey().getProgramPath()
+                                        + ColorUtil.ANSI_NORMAL + "\n";
+                                exitCode = 1;
+                            }
                         }
+                        if (pgmOut.equals(""))
+                            pgmOut = "SUCCESS";
+                        System.out.println(pgmOut);
                     }
-
-                    // console
-                    String pgmOut = "";
-                    for (Entry<Program, Task> entry : all.entrySet()) {
-                        if (!entry.getKey().success(entry.getValue())) {
-                            pgmOut += ColorUtil.RgbToAnsi(Color.red) + "FAIL: "
-                                    + entry.getKey().getProgramPath()
-                                    + ColorUtil.ANSI_NORMAL + "\n";
-                            exitCode = 1;
-                        }
-                    }
-                    if (pgmOut.equals(""))
-                        pgmOut = "SUCCESS";
-                    System.out.println(pgmOut);
                 }
+            } else {
+                System.out.println("Skipped " + test.getLanguage() + " programs.");
             }
         }
 

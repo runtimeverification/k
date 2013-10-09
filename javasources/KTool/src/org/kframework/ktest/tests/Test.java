@@ -52,7 +52,9 @@ public class Test implements Comparable<Test> {
     private Map<String, String> kompileOptions = new HashMap<String, String>();
     private Map<String, String> generalKrunOptions = new HashMap<String, String>();
     private List<Program> specialPrograms = new LinkedList<Program>();
-    private boolean pdf;
+    private boolean skipPdf;
+    private boolean skipKompile;
+    private boolean skipPrograms;
 
     /* data needed for temporary stuff */
     private Document doc;
@@ -70,7 +72,6 @@ public class Test implements Comparable<Test> {
         this.excludePrograms = excludePrograms == null ? new LinkedList<String>()
                 : excludePrograms;
         this.recursive = true;
-        this.pdf = true;
         this.unixOnlyScript = null;
 
         // reports
@@ -352,12 +353,16 @@ public class Test implements Comparable<Test> {
         // get Jenkins tag
         tag = test.getAttribute(Configuration.TITLE);
 
-        // get pdf
-        if (test.getAttribute(Configuration.PDF2).equals(Configuration.YES)
-                || test.getAttribute(Configuration.PDF2).equals(""))
-            pdf = true;
-        else
-            pdf = false;
+        // get skip
+        if (test.hasAttribute(Configuration.SKIP_OPTION)) {
+            String skip = test.getAttribute(Configuration.SKIP_OPTION);
+            if (skip.contains(Configuration.KOMPILE_STEP))
+                this.skipKompile = true;
+            if (skip.contains(Configuration.PDF_STEP))
+                this.skipPdf = true;
+            if (skip.contains(Configuration.PROGRAMS_STEP))
+                this.skipPrograms = true;
+        }
 
         // set recursive
         String rec = test.getAttribute(Configuration.RECURSIVE);
@@ -724,10 +729,6 @@ public class Test implements Comparable<Test> {
         return null;
     }
 
-    public boolean getPdf() {
-        return pdf;
-    }
-
     public Task getPdfDefinitionTask(File homeDir) {
         ArrayList<String> command = new ArrayList<String>();
         command.add(Configuration.getKompile());
@@ -781,5 +782,18 @@ public class Test implements Comparable<Test> {
         if (!tag.equals(""))
             return "(" + tag + ")";
         return "";
+    }
+
+
+    public boolean isSkipPdf() {
+        return skipPdf;
+    }
+
+    public boolean isSkipKompile() {
+        return skipKompile;
+    }
+
+    public boolean isSkipPrograms() {
+        return skipPrograms;
     }
 }
