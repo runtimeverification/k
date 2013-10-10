@@ -75,6 +75,11 @@ public class KTest {
             System.exit(0);
         }
 
+        // Timeout
+        if (cmd.hasOption(Configuration.TIMEOUT_OPTION)) {
+            Configuration.KOMPILE_ALL_TIMEOUT = Long.parseLong(cmd.getOptionValue(Configuration.TIMEOUT_OPTION));
+        }
+
         // Input argument
         String input = null;
         String[] remainingArgs = cmd.getArgs();

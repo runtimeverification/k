@@ -25,7 +25,7 @@ public class Execution {
 		try {
 			Execution.tpe.shutdown();
 			Execution.tpe.awaitTermination(Configuration.KOMPILE_ALL_TIMEOUT,
-					TimeUnit.MINUTES);
+					TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

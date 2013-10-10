@@ -12,7 +12,7 @@ public class Configuration {
     public static boolean REPORT = false;
 
     // timeout in miliseconds - this is mostly used by Jenkins
-	public static long KOMPILE_ALL_TIMEOUT = 120;
+	public static long KOMPILE_ALL_TIMEOUT = 60 * 60; //60 minutes
 
 	// jenkins junit reports directory
 	public static String JR = "junit-reports";
@@ -83,6 +83,7 @@ public class Configuration {
 	public static final String RESULTS_OPTION = RESULTS;
     public static final String SKIP_OPTION = "skip";
 	public static final String VERBOSE_OPTION = "verbose";
+    public static final String TIMEOUT_OPTION = "timeout";
 
 	// program name
 	public static final String KTEST = "ktest";
