@@ -1,0 +1,8 @@
+void main() {
+  int x=0;
+  try {
+    int x=0;
+  } catch(int x) {
+   int x=1;
+  }
+}

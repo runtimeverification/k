@@ -11,7 +11,7 @@ between array variables and other variables, so you cannot declare
 an integer variable and a vector variable with the same name.  Finally,
 function parameters are considered outside the block defining the function
 body, so you are allowed to declare a variable in the function body having
-the same name as a function parameter.
+the same name as a function parameter.  Similarly for the parameter of catch.
 
-Note: This exercise is rather simple.  It may fit better as an exercise for
-IMP++ in the K tutorial, not the language tutorial.  Or maybe keep it in both.
+Note: This exercise also makes sense for IMP++.  It may be instructive to also
+propose it as an exercise in the K tutorial for IMP++.

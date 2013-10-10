@@ -1,0 +1,8 @@
+To test this definition, you can call
+
+  ktest config.xml
+
+in this folder.  If you want to skip the kompilation and pdf generation, then
+use the following command instead:
+
+  ktest config.xml --skip "kompile pdf"

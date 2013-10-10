@@ -1,0 +1,14 @@
+void f(int x) {
+  int x=0;
+  try {
+    int x=0;
+  } catch(int x) {
+   int x=1;
+  }
+  {int x[10,20,30];}
+}
+
+void main() {
+  int x=2;
+  f(x);
+}
