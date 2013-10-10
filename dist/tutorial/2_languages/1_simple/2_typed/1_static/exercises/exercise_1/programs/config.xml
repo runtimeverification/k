@@ -1,4 +1,17 @@
 <tests>
+
+<!-- original tests -->
+  <test
+      definition="../simple-typed-static.k"
+      programs="../../../../programs"
+      extension="simple"
+      results="../../../results" >
+      <all-programs>
+        <krun-option name="-pattern" value="&lt;tasks&gt;.Bag&lt;/tasks&gt;"/>
+      </all-programs>
+  </test>
+
+<!-- new tests -->
   <test
       definition="../simple-typed-static.k"
       programs="../../../../2_dynamic/exercises/exercise_2/programs/"
@@ -8,4 +21,5 @@
         <krun-option name="-pattern" value="&lt;tasks&gt;.Bag&lt;/tasks&gt;"/>
       </all-programs>
   </test>
+
 </tests>

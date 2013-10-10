@@ -184,7 +184,7 @@ such programs. */
 not need lists of identifiers anymore.  They have been replaced by the lists
 of parameters. */
  
- syntax Exps ::= List{Exp,","}          [strict]
+  syntax Exps ::= List{Exp,","}          [strict]
 
 
 /*@ \subsection{Statements}
