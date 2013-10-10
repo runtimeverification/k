@@ -271,9 +271,9 @@ public class KTest {
         System.out.print("Kompile the language definitions...");
         Map<Test, Task> definitions = new TreeMap<Test, Task>();
         for (Test test : alltests) {
+            Task def = test.getDefinitionTask(homeDir);
+            definitions.put(test, def);
             if (!test.isSkipKompile() && Configuration.KOMPILE){
-                Task def = test.getDefinitionTask(homeDir);
-                definitions.put(test, def);
                 if (Configuration.KOMPILE) {
                     Execution.execute(def);
                 }
@@ -374,7 +374,7 @@ public class KTest {
         for (Entry<Test, Task> dentry : definitions.entrySet()) {
             Test test = dentry.getKey();
             if (!test.isSkipPrograms() && Configuration.PROGRAMS){
-                if (test.compiled(dentry.getValue()) && test.runOnOS()) {
+                if (test.runOnOS()) {
                     System.out.print("Running " + test.getLanguage()
                             + " programs... " + test.getTag());
 
