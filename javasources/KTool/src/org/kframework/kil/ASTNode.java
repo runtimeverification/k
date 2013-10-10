@@ -111,15 +111,15 @@ public abstract class ASTNode implements Visitable, Transformable, Serializable 
 	protected void setLocation(ATermAppl elem) {
 		ATermList list = (ATermList) elem.getAnnotations().getFirst();
 		list = list.getNext();
-		String fileame = ((ATermAppl) ((ATermAppl) list.getFirst()).getChildAt(0)).getName();
-		ATermAppl atm = (ATermAppl) ((ATermAppl) list.getFirst()).getChildAt(1);
+		String filename = ((ATermAppl) list.getFirst().getChildAt(0)).getName();
+		ATermAppl atm = (ATermAppl) list.getFirst().getChildAt(1);
 		int loc0 = ((ATermInt) atm.getChildAt(0)).getInt();
 		int loc1 = ((ATermInt) atm.getChildAt(1)).getInt() + 1;
 		int loc2 = ((ATermInt) atm.getChildAt(2)).getInt();
 		int loc3 = ((ATermInt) atm.getChildAt(3)).getInt() + 1;
 		String loc = "(" + loc0 + "," + loc1 + "," + loc2 + "," + loc3 + ")";
 		this.setLocation(loc);
-		this.setFilename(fileame);
+		this.setFilename(filename);
 	}
 
 	/**

@@ -173,7 +173,7 @@ public class Poset implements Serializable {
 	public List<String> checkForCycles() {
 		// make next node list
 		Set<String> nodes = new HashSet<String>();
-		Set<String> vizited = new HashSet<String>();
+		Set<String> visited = new HashSet<String>();
 
 		for (Tuple t : relations) {
 			nodes.add(t.big);
@@ -182,11 +182,11 @@ public class Poset implements Serializable {
 
 		// DFS to search for a cycle
 		for (String node : nodes) {
-			if (!vizited.contains(node)) {
+			if (!visited.contains(node)) {
 				Stack<String> nodesStack = new Stack<String>();
 				Stack<Iterator<String>> iteratorStack = new Stack<Iterator<String>>();
 				nodesStack.push(node);
-				vizited.add(node);
+				visited.add(node);
 				iteratorStack.push(nodes.iterator());
 
 				while (nodesStack.size() > 0) {
@@ -202,10 +202,10 @@ public class Poset implements Serializable {
 								}
 								return circuit;
 							}
-							if (!vizited.contains(nextNode)) {
+							if (!visited.contains(nextNode)) {
 								nodesStack.push(nextNode);
 								iteratorStack.push(nodes.iterator());
-								vizited.add(nextNode);
+								visited.add(nextNode);
 								break;
 							}
 						}
