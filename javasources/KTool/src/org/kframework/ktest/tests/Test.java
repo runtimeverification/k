@@ -768,7 +768,7 @@ public class Test implements Comparable<Test> {
         d = this.getReportFilename().compareTo(o.getReportFilename());
         if (d != 0)
             return d;
-        d = (this.hashCode() == (o.hashCode())) ? 1 : 0;
+        d = (this.hashCode() == (o.hashCode())) ? 0 : 1;
         return d;
     }
 
