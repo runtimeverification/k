@@ -104,7 +104,7 @@ public class Configuration {
 	public static String getKHome() {
 		return new File(KTest.class.getProtectionDomain().getCodeSource()
 				.getLocation().getPath()).getParentFile().getParentFile()
-				.getParentFile().getParentFile().getPath();
+				.getParentFile().getPath();
 	}
 
 	public static String getKompile() {
@@ -119,9 +119,9 @@ public class Configuration {
 	private static String getExecutable(String exe) {
 		String os = System.getProperty("os.name").toLowerCase();
 		if (os.contains("win")) {
-			return getKHome() + FILE_SEPARATOR + "dist" + FILE_SEPARATOR + "bin" + FILE_SEPARATOR + exe + ".bat";
+			return getKHome() + FILE_SEPARATOR + "bin" + FILE_SEPARATOR + exe + ".bat";
 		}
-		return getKHome() + FILE_SEPARATOR + "dist" + FILE_SEPARATOR + "bin" + FILE_SEPARATOR + exe;
+		return getKHome() + FILE_SEPARATOR + "bin" + FILE_SEPARATOR + exe;
 	}
 	
 	public static String getReadme() {
