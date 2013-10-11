@@ -23,6 +23,19 @@ public class ColorUtil {
      */
     private final static Map<Color, String> eightBitColorsToTerminalCodes = initEightBitColors();
 
+    /**
+     * A cache to avoid computing the closest terminal color for a given color each time it is needed.
+     */
+    private final static Map<Map<Color, String>, Map<Color, String>> colorToCodeConvertCache
+        = initColorToCodeConvertCache();
+
+    private static HashMap<Map<Color, String>, Map<Color, String>> initColorToCodeConvertCache() {
+        HashMap<Map<Color, String>, Map<Color, String>> map = new HashMap<>();
+        map.put(ansiColorsToTerminalCodes, new HashMap<Color, String>());
+        map.put(eightBitColorsToTerminalCodes, new HashMap<Color, String>());
+        return map;
+    }
+
     private static Map<String, Color> initColors() {
         Map<String, Color> colors = new HashMap<String, Color>();
 		colors.put("black", Color.black);
@@ -195,15 +208,22 @@ public class ColorUtil {
     private static String getClosestTerminalCode(Color rgb, Map<Color, String> codesMap) {
         if (rgb == null)
             return "";
+        if (colorToCodeConvertCache.get(codesMap).get(rgb) == null) {
+            colorToCodeConvertCache.get(codesMap).put(rgb, getClosestTerminalCodeImpl(rgb, codesMap));
+        }
+        return colorToCodeConvertCache.get(codesMap).get(rgb);
+    }
+
+    private static String getClosestTerminalCodeImpl(Color rgb, Map<Color, String> codesMap) {
         int minColorError = Integer.MAX_VALUE;
         Color minColor = null;
         for (Color ansi : codesMap.keySet()) {
-           int colorError = getColorError(rgb, ansi);
-           if (colorError < minColorError) {
-               minColorError = colorError;
+            int colorError = getColorError(rgb, ansi);
+            if (colorError < minColorError) {
+                minColorError = colorError;
                 minColor = ansi;
-           }
-       }
+            }
+        }
         return codesMap.get(minColor);
     }
 
