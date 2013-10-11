@@ -16,9 +16,9 @@ To execute a program you can use 'krun programs/diverse/factorial.simple'.
 4. (Optional) To use the pdf backend, a relatively recent installation 
 of Latex is required.  Besides basic packages, the following (texlive)
 packages are needed: 
-  bera, datetime, ec, fancybox, fancyvrb, import, marginnote, microtype, 
-  ms, pdfcomment, pgf (up-to-date), preview, stmaryrd, times, titlesec, 
-  ucs, url, xcolor, and xkeyval.
+  bera, bezos, datetime, ec, etoolbox, fancybox, fancyvrb, import, listings,
+  marginnote, microtype, ms, pdfcomment, pgf (up-to-date), preview, soul,
+  stmaryrd, times, titlesec, ucs, url, xcolor, and xkeyval.
 
 We present some instructions for installing TeX Live on Unix-like machines.
 
@@ -43,6 +43,6 @@ of this package you can upgrade it using the TeX Live package manager.
 If using a partial TeX Live installation which does not provide all the 
 TeX Live packages specified above, these can be installed with the command:
     
-    # tlmgr install  bera datetime ec fancybox fancyvrb import marginnote \
-                     microtype ms pdfcomment pgf preview stmaryrd times \
-                     titlesec ucs url xcolor xkeyval
+    # tlmgr install  bera bezos datetime ec etoolbox fancybox fancyvrb import \
+                     listings marginnote microtype ms pdfcomment pgf preview \
+                     soul stmaryrd times titlesec ucs url xcolor xkeyval
