@@ -1,0 +1,13 @@
+To test your definition, you can call
+
+  ktest config.xml
+
+in this folder.  If you want to skip the kompilation and pdf generation, then
+use the following command instead:
+
+  ktest config.xml --skip "kompile pdf"
+
+Both the original SIMPLE untyped programs and the programs in this folder
+will be tested.  If your solution is correct, then all tests should pass,
+except, potentially, for the new break-from-function.simple (see the comments
+there for the reason).

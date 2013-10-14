@@ -1,0 +1,20 @@
+<tests>
+
+<!-- original tests -->
+  <test
+      definition="../simple-untyped.k"
+      programs="../../../programs"
+      extension="simple"
+      exclude="dekker" 
+      skip="pdf">
+  </test>
+
+<!-- new tests -->
+  <test
+      definition="../simple-untyped.k"
+      programs="."
+      extension="simple"
+      skip="pdf">
+  </test>
+
+</tests>
