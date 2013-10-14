@@ -182,7 +182,7 @@ public class RLBackend extends BasicBackend implements Backend {
 				+ "load \"builtins.maude\"\n" + "mod " + mainModule + " is \n"
 				+ "  including " + mainModule + "-BASE .\n" + "  including "
 				+ mainModule + "-BUILTINS .\n"
-				+ "  including K-STRICTNESS-DEFAULTS .\n" + "endm\n";
+				+ "endm\n";
 		FileUtil.saveInFile(
 				context.dotk.getAbsolutePath() + "/" + "main.maude", main);
 		context.kompiled = context.dotk;

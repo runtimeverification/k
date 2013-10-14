@@ -458,6 +458,9 @@ public class MaudeFilter extends BackendFilter {
 				break;
 			}
 		}
+        if (rule.getAttributes().containsKey("heat-choice")) {
+            isTransition = true;
+        }
 		if (!(rule.getBody() instanceof Rewrite)) {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, "This rule should have a rewrite at top by now.", getName(), rule.getFilename(), rule
 					.getLocation()));

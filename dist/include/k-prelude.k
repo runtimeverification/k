@@ -233,12 +233,16 @@ module K-FREZERS
   syntax KLabel ::= "#freezer" K
   syntax KLabel ::= "heat" | "heated" | "redex" | "cool"
 
-  rule <k> heat((redex(_:K,, K:K,, KL:KList) => K,,KL),,_) ...</k> 
+  rule heat(heated(K:K)) => K 
+  rule heat(heated(_,,K:K,,_)) => K
+     [heat-choice]
+
+  rule heat((redex(_:K,, K:K,, KL:KList) => K,,KL),,_)
     [owise]  
-  rule <k> heat((redex(K:K) => .KList),,_,,heated(_,,(.KList => K))) ...</k>
+  rule heat((redex(K:K) => .KList),,_,,heated(_,,(.KList => K)))
     [owise]
 
-  rule <k> cool(K:K) => K ...</k> [owise]
+  rule cool(K:K) => K [owise]
 endmodule
 
 module DEFAULT-CONFIGURATION

@@ -86,7 +86,7 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 		// "");
 
 		String main = load + "load \"base.maude\"\n" + "load \"builtins.maude\"\n" + "mod " + mainModule + " is \n" + "  including " + mainModule + "-BASE .\n" + "  including " + mainModule
-				+ "-BUILTINS .\n" + "  including K-STRICTNESS-DEFAULTS .\n" + "endm\n";
+				+ "-BUILTINS .\n" + "endm\n";
 		FileUtil.saveInFile(context.dotk.getAbsolutePath() + "/" + "main.maude", main);
 
 		 UnparserFilter unparserFilter = new UnparserFilter(this.context);

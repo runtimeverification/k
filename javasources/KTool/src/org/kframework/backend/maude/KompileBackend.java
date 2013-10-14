@@ -66,7 +66,7 @@ public class KompileBackend extends BasicBackend {
 		//String defFile = javaDef.getMainFile().replaceFirst("\\.[a-zA-Z]+$", "");
 
 		String main = load + "load \"base.maude\"\n" + "load \"builtins.maude\"\n" + "mod " + mainModule + " is \n" + "  including " + mainModule + "-BASE .\n" + "  including " + mainModule
-				+ "-BUILTINS .\n" + "  including K-STRICTNESS-DEFAULTS .\neq mainModule = '" + mainModule  + " .\nendm\n";
+				+ "-BUILTINS .\n" + "eq mainModule = '" + mainModule  + " .\nendm\n";
 		FileUtil.saveInFile(context.dotk.getAbsolutePath() + "/" + "main.maude", main);
 	}
 

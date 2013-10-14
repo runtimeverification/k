@@ -15,15 +15,6 @@ import java.util.List;
  * Time: 10:07 PM
  */
 public class ResolveSupercool extends CopyOnWriteTransformer {
-    @Override
-    public ASTNode transform(Module node) throws TransformerException {
-        ASTNode result =  super.transform(node);
-        if (result != node) {
-            node = (Module) result;
-            node.getItems().add(new Import("K-SUPERCOOL"));
-        }
-        return  node;
-    }
 
     public ResolveSupercool(org.kframework.kil.loader.Context context) {
         super("Cool the <k> cell for supercool rules", context);

@@ -92,73 +92,13 @@ mod K-TECHNIQUE is
   op <k>_</k> : K -> KCellSort [format(b o++ni --nib o)].
   op k : -> CellLabel .
 
+
+  op HOLE : -> K .
+  op #freezer : K -> KLabel [strat(0) frozen] .
+
 endm
 
 --- K notation starts from here on
-
-mod K-SENTENCE is
-  sort KSentence . 
-endm
-
-
-mod K-HOLE is
-  including K-TECHNIQUE .
-  op HOLE : -> K .
-endm
-
-
---- Strictness Level
-
-mod K-SUPERCOOL is
-  including K-TECHNIQUE .
-  op cool : -> KLabel .
-endm
-
-mod K-STRICTNESS is 
-  including K-HOLE .
-  including K-SUPERCOOL .
-  including #STRING-INTERFACE .
-  op #freezer : K -> KLabel [strat(0) frozen] .
-
-  op heat : -> KLabel .
-  op heated : -> KLabel .
-  op redex : -> KLabel .
-endm
-
-mod K-STRICTNESS-DEFAULTS is
-  including K-STRICTNESS .
-  eq heat(heated(K)) = K .
-  rl [heat-choice]: heat(heated(Ks,,K,,Ks')) => K
-     [metadata "superheat=(choice)"] .
-
-  vars K : K . var Ks Ks' : KList .  var NKs : NeKList .
-
----(
-  --- Normal cells
-  eq <_>_</_>(k,_`(_`)(cool,zk:K),k)
-   = <_>_</_>(k,zk:K,k)[metadata "supercool=(end)"].
-  eq <_>_</_>(k,_~>_(_`(_`)(cool,zk:K),_~>_(Next:KItem,GENERATEDKWRAPRest:K)),k)
-   = <_>_</_>(k,_~>_(_`(_`)(cool,_~>_(zk:K,Next:KItem)),GENERATEDKWRAPRest:K),k)[metadata "supercool=(next)" owise].
-
-   --- Unsorted cells
-  eq <k> _`(_`)(cool,zk:K) </k>
-   = <k> zk:K </k>[metadata "supercool=(end)"].
-  eq <k> _~>_(_`(_`)(heat,_`,`,_(_`(_`)(redex,_`,`,_(K:K,NKs:NeKList)),Ks:KList)),GENERATEDKWRAPRest:K) </k>
-   = <k> _~>_(_`(_`)(heat,_`,`,_(NKs:NeKList,Ks:KList)),GENERATEDKWRAPRest:K) </k>[owise].
-  eq <k> _~>_(_`(_`)(heat,_`,`,_(_`(_`)(redex,K:K),_`,`,_(Ks:KList,_`(_`)(heated,Ks':KList)))),GENERATEDKWRAPRest:K) </k>
-   = <k> _~>_(_`(_`)(heat,_`,`,_(Ks:KList,_`(_`)(heated,_`,`,_(Ks':KList,K:K)))),GENERATEDKWRAPRest:K) </k>[owise].
-  eq <k> _~>_(_`(_`)(cool,zk:K),_~>_(Next:KItem,GENERATEDKWRAPRest:K)) </k>
-   = <k> _~>_(_`(_`)(cool,_~>_(zk:K,Next:KItem)),GENERATEDKWRAPRest:K) </k>[metadata "supercool=(next)" owise].
----)
-endm
-
-mod K-CONTEXTS is
-  including K-HOLE .
-  including K-SENTENCE .
-  ops context_ : K -> [KSentence] [prec 126] .
-  ops context_when_ : K K -> [KSentence] [prec 126] .
-  op wrap-with : K K -> K .
-endm
 
 --- KLabel-Wrappers level
 
@@ -175,49 +115,5 @@ mod K-WRAPPERS-LABELS is
   op 'wrap-with : -> KLabel .
   op #_ : #Bool -> KLabel [metadata "wrapper=(builtin)"] .
 endm
-
-
----- K Rules Level 
-
-mod K-RULES is
-  including K-SENTENCE .
-  including K-TECHNIQUE .
---- TODO: and a mixing of structural/bidirectional attributes
-  op _=>_ : K K -> K [prec 125] .
-  op _=>_ : KLabel KLabel -> KLabel [prec 125] .
-  op _=>_ : CellLabel CellLabel -> CellLabel [prec 125] .
-  op _=>_ : KList KList -> KList [prec 125] .
-  op _=>_ : Map Map -> Map [prec 125] .
-  op _=>_ : List List -> List [prec 125] .
-  op _=>_ : Bag Bag -> Bag [prec 125] .
-  op _=>_ : Set Set -> Set [prec 125] .
-endm
-
-mod K-EVAL is 
-  including K-TECHNIQUE .
-  op #eval_ : Map -> Bag .
-endm
-
-mod K-CONDITION-SEARCH is
-  including K-TECHNIQUE .
-  op search_ : KList -> #Bool .
-  op search_ : KLabel -> #Bool .
-  op search_ : List -> #Bool .
-  op search_ : Bag -> #Bool .
-  op search_ : Set -> #Bool .
-endm
-
-mod K-BUILTINS is
-endm
-
-mod K is 
-  including K-TECHNIQUE .
-  including K-WRAPPERS-LABELS .
-  including K-BUILTINS .
-  including K-RULES .               --- to write k rules with in-place rewriting
-  including K-EVAL .
-  including K-CONTEXTS .
-endm
-
 
 load builtins.maude

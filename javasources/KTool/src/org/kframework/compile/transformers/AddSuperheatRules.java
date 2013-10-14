@@ -30,7 +30,6 @@ public class AddSuperheatRules extends CopyOnWriteTransformer {
 			node = node.shallowCopy();
 			node.setItems(new ArrayList<ModuleItem>(node.getItems()));
 			node.getItems().addAll(superHeats);
-			node.getItems().add(new Import("K-STRICTNESS"));
 		}
 		return node;
 	}
