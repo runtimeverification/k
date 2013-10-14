@@ -1,5 +1,5 @@
 1. Prerequisites
-Java Runtime Edition (tested with JRE6 or higher)
+Java Runtime Edition (requires JRE7 or higher)
   http://java.com/en/download/index.jsp
 To make sure java is installed properly, call "java" in a terminal.
 
@@ -8,7 +8,7 @@ Unzip this directory in your preferred location.  For convenient usage,
 update your $PATH with <preferred-location>/k/bin.
 
 3. Test
-Go to one of the examples (let's say k/examples/simple/untyped/).
+Go to one of the examples (say k/tutorial/2_languages/1_simple/1_untyped/).
 Assuming k/bin is in your $PATH, you can compile definitions using 
 the 'kompile simple-untyped.k' command.
 To execute a program you can use 'krun programs/diverse/factorial.simple'.
