@@ -1,0 +1,21 @@
+<tests>
+
+<!-- original tests -->
+  <test
+      definition="../simple-typed-dynamic.k"
+      programs="../../../../programs"
+      extension="simple"
+      results="../../../results"
+      exclude="dekker"
+      skip="pdf">
+  </test>
+
+<!-- new tests -->
+  <test
+      definition="../simple-typed-dynamic.k"
+      programs="."
+      extension="simple"
+      skip="pdf">
+  </test>
+
+</tests>
