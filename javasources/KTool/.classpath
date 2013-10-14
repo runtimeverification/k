@@ -21,7 +21,6 @@
 	<classpathentry kind="lib" path="../../dist/lib/java/jung-io-2.0.1.jar"/>
 	<classpathentry kind="lib" path="../../dist/lib/java/jung-visualization-2.0.1.jar"/>
 	<classpathentry kind="lib" path="../../dist/lib/java/strategoxt.jar"/>
-	<classpathentry kind="lib" path="../../dist/lib/java/xstream.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

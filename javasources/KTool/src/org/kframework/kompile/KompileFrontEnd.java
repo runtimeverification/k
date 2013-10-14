@@ -94,7 +94,7 @@ public class KompileFrontEnd {
 			GlobalSettings.verbose = true;
 
 		if (cmd.hasOption("fast-kast")) {
-			GlobalSettings.fastKast = true;
+			GlobalSettings.fastKast = !GlobalSettings.fastKast;
 		}
 
 		if (cmd.hasOption("warnings"))
