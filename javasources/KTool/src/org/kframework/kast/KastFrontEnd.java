@@ -71,7 +71,7 @@ public class KastFrontEnd {
 
 		// set fast kast option
 		if (cmd.hasOption("fast-kast")) {
-			GlobalSettings.fastKast = true;
+			GlobalSettings.fastKast = !GlobalSettings.fastKast;
 		}
 
 		String pgm = null;

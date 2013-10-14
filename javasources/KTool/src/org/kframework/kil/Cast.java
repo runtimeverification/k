@@ -40,6 +40,10 @@ public class Cast extends Term {
 	public Cast(ATermAppl atm) {
 		super(atm);
 		this.sort = StringUtil.getSortNameFromCons(atm.getName());
+		if (atm.getName().endsWith("1Cast"))
+			this.syntactic = false;
+		else
+			this.syntactic = true;
 
 		content = (Term) JavaClassesFactory.getTerm(atm.getArgument(0));
 	}
@@ -55,6 +59,10 @@ public class Cast extends Term {
 
 	public Cast(Element element) {
 		super(element);
+		if (element.getAttribute("syntactic").equals("true"))
+			this.syntactic = true;
+		else
+			this.syntactic = false;
 		this.content = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
 	}
 
@@ -123,5 +131,4 @@ public class Cast extends Term {
 		Cast c = (Cast) o;
 		return this.syntactic == c.syntactic && this.content.contains(c.content);
 	}
-
 }

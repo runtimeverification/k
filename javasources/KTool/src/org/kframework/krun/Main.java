@@ -740,7 +740,7 @@ public class Main {
 
         // set fast-kast
         if (cmd.hasOption("fast-kast")) {
-            GlobalSettings.fastKast = true;
+            GlobalSettings.fastKast = !GlobalSettings.fastKast;
         }
 
         if (GlobalSettings.verbose)
