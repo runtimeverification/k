@@ -108,7 +108,7 @@ endm
 
 
 --- Strictness Level
----(
+
 mod K-SUPERCOOL is
   including K-TECHNIQUE .
   op cool : -> KLabel .
@@ -133,7 +133,7 @@ mod K-STRICTNESS-DEFAULTS is
 
   vars K : K . var Ks Ks' : KList .  var NKs : NeKList .
 
-
+---(
   --- Normal cells
   eq <_>_</_>(k,_`(_`)(cool,zk:K),k)
    = <_>_</_>(k,zk:K,k)[metadata "supercool=(end)"].
@@ -149,9 +149,9 @@ mod K-STRICTNESS-DEFAULTS is
    = <k> _~>_(_`(_`)(heat,_`,`,_(Ks:KList,_`(_`)(heated,_`,`,_(Ks':KList,K:K)))),GENERATEDKWRAPRest:K) </k>[owise].
   eq <k> _~>_(_`(_`)(cool,zk:K),_~>_(Next:KItem,GENERATEDKWRAPRest:K)) </k>
    = <k> _~>_(_`(_`)(cool,_~>_(zk:K,Next:KItem)),GENERATEDKWRAPRest:K) </k>[metadata "supercool=(next)" owise].
-
-endm
 ---)
+endm
+
 mod K-CONTEXTS is
   including K-HOLE .
   including K-SENTENCE .

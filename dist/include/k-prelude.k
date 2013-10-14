@@ -237,7 +237,7 @@ module K-FREZERS
     [owise]  
   rule <k> heat((redex(K:K) => .KList),,_,,heated(_,,(.KList => K))) ...</k>
     [owise]
-  rule [heat-choice]: heat(heated(_,,K,,_)) => K [superheat(choice), transition, anywhere] 
+
   rule <k> cool(K:K) => K ...</k> [owise]
 endmodule
 
