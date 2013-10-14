@@ -488,6 +488,8 @@ public class MaudeFilter extends BackendFilter {
 		}
 		if (null != rule.getAttributes()) {
 			result.append(" [");
+            if (!isTransition && rule.getAttributes().containsKey("owise"))
+                result.append("owise ");
 			if (rule.getLabel() != null && !rule.getLabel().equals("")) {
 				result.append("label " + rule.getLabel() + " metadata");
 			} else {
