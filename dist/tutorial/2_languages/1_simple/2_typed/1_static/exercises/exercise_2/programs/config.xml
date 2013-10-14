@@ -5,7 +5,8 @@
       definition="../simple-typed-static.k"
       programs="../../../../programs"
       extension="simple"
-      results="../../../results" >
+      results="../../../results"
+      skip="pdf" >
       <all-programs>
         <krun-option name="-pattern" value="&lt;tasks&gt;.Bag&lt;/tasks&gt;"/>
       </all-programs>
@@ -15,7 +16,8 @@
   <test
       definition="../simple-typed-static.k"
       programs="."
-      extension="simple" >
+      extension="simple"
+      skip="pdf" >
       <all-programs>
         <krun-option name="-pattern" value="&lt;tasks&gt;.Bag&lt;/tasks&gt;"/>
       </all-programs>
