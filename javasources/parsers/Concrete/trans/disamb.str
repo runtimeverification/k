@@ -61,7 +61,7 @@ strategies
 
 	flattenKLists = bottomup(try(fks2)) ; bottomup(try(flists2))
 	fks2:
-		K1Seq(a, b) -> "K1Seq"#(<flatten-list> [a', b'])
+		"K1Seq"#([a, b]) -> "K1Seq"#(<flatten-list> [a', b'])
 		where a' := <try(fks3)> a
 		where b' := <try(fks3)> b
 	fks3:
@@ -79,8 +79,8 @@ strategies
 
 	// manual corrections
 	correctKseq:
-		amb(x) -> K1Seq(a, b)
-		where <one(?K1Seq(a, b))> x
+		amb(x) -> "K1Seq"#([a, b])
+		where <one(?"K1Seq"#([a, b]))> x
 
 	correctRewrite:
 		amb(x) -> rez2

@@ -66,10 +66,10 @@ public class AddConsesVisitor extends BasicVisitor {
 					String msg = "The cons attribute must start with '" + escSort + "' and not with " + cons;
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, p.getFilename(), p.getLocation()));
 				}
-				if (!cons.endsWith("Syn")) { // a normal cons must end with 'Syn'
-					String msg = "The cons attribute must end with 'Syn' and not with " + cons;
-					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, p.getFilename(), p.getLocation()));
-				}
+//				if (!cons.endsWith("Syn")) { // a normal cons must end with 'Syn'
+//					String msg = "The cons attribute must end with 'Syn' and not with " + cons;
+//					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, p.getFilename(), p.getLocation()));
+//				}
 				if (p.isListDecl() && !cons.endsWith("ListSyn")) { // if this is a list, it must end with 'ListSyn'
 					String msg = "The cons attribute must end with 'ListSyn' and not with " + cons;
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, p.getFilename(), p.getLocation()));
