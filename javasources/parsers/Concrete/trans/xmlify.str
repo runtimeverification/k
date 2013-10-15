@@ -167,11 +167,11 @@ rules
 		where loc := <getLocAsString>
 
 	to-xml1:
-		"KItem1App"#([a, b]) -> $[<KApp sort="K" loc="[loc]">
-									<label loc="[<getLocAsString> a]">
-										[<to-xml> a]
-									</label>
-									[<to-xml> b]
+		K1App(a, b) -> $[<KApp sort="K" loc="[loc]">
+							<label loc="[<getLocAsString> a]">
+								[<to-xml> a]
+							</label>
+							[<to-xml> b]
 		</KApp>
 		]
 		where mydebug(!"KApp: ")

@@ -7,52 +7,8 @@ module K-TECHNIQUE
 	// Unfortunately, FlattenModules explicitly ignores
 	// includes of K-TECHNIQUE and some other core modules,
 	// so we have to declare things like isSet in less obvious places
-
-	// WARNING! (RaduM) The productions defined in this module are
-	// very closely corelated with the internal structure of the
-	// K-Tool, modifying them may lead to unexpected behavior.
 	
-	
-	syntax KItem ::= KLabel "(" KList ")" [cons("KItem1App")]
-
-	syntax K ::= KItem
-			   | "(" K ")"	[cons("K1Bracket")]
-			   | K "~>" K	[left, cons(K1Seq)]
-			   > K "=>" K	[non-assoc, cons(K1Rewrite)]
-
-	syntax KList ::= K
-				   | "(" KList ")"		[cons("KList1Bracket")]
-				   | KList ",," KList	[left, cons(KList1List)]
-				   > KList "=>" KList	[non-assoc, cons("KList1Rewrite")]
-
-	syntax KLabel ::= KLabel "=>" KLabel	[cons("KLabel1Rewrite")]
-					| "(" KLabel ")"		[cons("KLabel1Bracket")]
-
-	syntax ListItem ::= "ListItem" "(" K ")"	[cons("ListItem1LIKItem")]
-	syntax List ::= ListItem
-				  | "(" List ")"				[cons("List1Bracket")]
-				  | List List					[left, cons("List1List")]
-				  > List "=>" List				[non-assoc, cons("List1Rewrite")]
-
-	syntax BagItem ::= "BagItem" "(" K ")"		[cons("BagItem1BIKItem")]
-	syntax Bag ::= BagItem
-				 | "(" Bag ")"					[cons("Bag1Bracket")]
-				 | Bag Bag 						[left, cons("Bag1List")]
-				 > Bag "=>" Bag					[non-assoc, cons("Bag1Rewrite")]
-
-	syntax SetItem ::= "SetItem" "(" K ")"		[cons("SetItem1SIKItem")]
-	syntax Set ::= SetItem
-				 | "(" Set ")"					[cons("Set1Bracket")]
-				 | Set Set						[left, cons("Set1List")]
-				 > Set "=>" Set					[non-assoc, cons("Set1Rewrite")]
-
-	syntax MapItem ::= "MapItem" "(" K "," K ")" [cons("MapItem1KKItem")]
-					 | K "|->" K				[cons("MapItem1LKLKItem")]
-	syntax Map ::= MapItem
-				 | "(" Map ")"					[cons("Map1Bracket")]
-				 | Map Map						[left, cons("Map1List")]
-				 > Map "=>" Map					[non-assoc, cons("Map1Rewrite")]
-
+	syntax KItem
 endmodule
 
 module K-LISTK-EXTRAS
