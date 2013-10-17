@@ -22,22 +22,22 @@ module K-EQUAL-HOOKS
 
   // inclusion between sets
   syntax Bool ::= Set "<=Set" Set    [function]
-  rule SetItem(K:K) Set1:Set <=Set SetItem(K) Set2:Set => Set1 <=Set Set2
+/*  rule SetItem(K:K) Set1:Set <=Set SetItem(K) Set2:Set => Set1 <=Set Set2
   rule .Set <=Set _:Set => true
   rule SetItem(K:K) _:Set <=Set Set2:Set => false
                             when notBool (K in Set2:Set)
-  // equality over sets
+*/  // equality over sets
   syntax Bool ::= Set "==Set" Set    [function]
-  rule Set1:Set ==Set Set2:Set => (Set1 <=Set Set2) andBool (Set2 <=Set Set1) 
+//  rule Set1:Set ==Set Set2:Set => (Set1 <=Set Set2) andBool (Set2 <=Set Set1) 
 
   // disequality over sets
   syntax Bool ::= Set "=/=Set" Set   [function]
-  rule Set1:Set =/=Set Set2:Set => notBool(Set1 ==Set Set2)
+//  rule Set1:Set =/=Set Set2:Set => notBool(Set1 ==Set Set2)
 
   // inclusion between maps
   syntax Bool ::= Map "<=Map" Map    [function]
 
-  rule (MapItem1:MapItem Map1:Map) <=Map (MapItem1 Map2:Map)
+/*  rule (MapItem1:MapItem Map1:Map) <=Map (MapItem1 Map2:Map)
         =>
        (Map1 <=Map Map2)
 
@@ -47,19 +47,19 @@ module K-EQUAL-HOOKS
   rule ((K1:K |-> K2:K) _:Map) <=Map Map2 => false
        when notBool $hasMapping(Map2, K1)
        orElseBool (K2 =/=K Map2:Map(K1))
-
+*/
 
   // equality over maps
   syntax Bool ::= Map "==Map" Map    [function]
-
+/*
   rule Map1:Map ==Map Map2:Map
        =>
       (Map1 <=Map Map2) andBool (Map2 <=Map Map1)
-
+*/
 
   // disequality over maps
   syntax Bool ::= Map "=/=Map" Map   [function]
-  rule Map1:Map =/=Map Map2:Map => notBool(Map1 ==Map Map2)
+//  rule Map1:Map =/=Map Map2:Map => notBool(Map1 ==Map Map2)
 
 
   // equality over KList
@@ -82,16 +82,16 @@ module K-EQUAL-HOOKS
 
   // equality over lists
   syntax Bool ::= List "==List" List [function]
-  rule ListItem(K1:K) L1:List ==List ListItem(K2:K) L2:List
+/*  rule ListItem(K1:K) L1:List ==List ListItem(K2:K) L2:List
        =>
        K1 ==K K2 andBool L1 ==List L2
   rule .List ==List ListItem(_:K) _:List => false
   rule ListItem(_:K) _:List ==List .List => false
   rule .List ==List .List => true
-
+*/
   // disequality over lists
   syntax Bool ::= List "=/=List" List [function]
-  rule L1:List =/=List L2:List => notBool(L1 ==List L2)
+//  rule L1:List =/=List L2:List => notBool(L1 ==List L2)
 
   syntax Bool ::= K "=K" K                  [function]
                 | List "=List" List         [function]

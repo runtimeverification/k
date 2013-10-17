@@ -69,11 +69,12 @@ public abstract class DataStructureBuiltin extends Term {
                     + argument.length;
 
             if (sort.type().equals(KSorts.LIST)) {
-                return new ListBuiltin(
+                ListBuiltin l = new ListBuiltin(
                         sort,
                         Collections.singletonList(argument[0]),
                         Collections.<Term>emptyList(),
                         Collections.<Term>emptyList());
+                return l;
             } else {
                 return new SetBuiltin(sort,
                         Collections.singletonList(argument[0]),

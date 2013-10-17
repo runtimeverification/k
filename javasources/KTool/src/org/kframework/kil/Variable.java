@@ -24,8 +24,9 @@ public class Variable extends Term {
 	private boolean syntactic = false;
 	/** Used by the type inferencer  */
 	private String expectedSort = null;
+    private static final String GENERATED_FRESH_VAR = "GeneratedFreshVar";
 
-	public String getExpectedSort() {
+    public String getExpectedSort() {
 		return expectedSort;
 	}
 
@@ -72,7 +73,7 @@ public class Variable extends Term {
 	}
 
 	public static Variable getFreshVar(String sort) {
-		return new Variable("GeneratedFreshVar" + nextVariableIndex++, sort);
+        return new Variable(GENERATED_FRESH_VAR + nextVariableIndex++, sort);
 	}
 
 	public void setName(String name) {
@@ -140,6 +141,10 @@ public class Variable extends Term {
 	public boolean isFresh() {
 		return fresh;
 	}
+
+    public boolean isGenerated(){
+        return name.startsWith(GENERATED_FRESH_VAR);
+    }
 
 	public boolean isSyntactic() {
 		return syntactic;
