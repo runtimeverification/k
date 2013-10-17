@@ -317,13 +317,13 @@
   QUINE
 -->
   <test
-      definition="dist/examples/quine/explicit/quine-explicit.k"
+      definition="dist/samples/quine/explicit/quine-explicit.k"
       programs="tests/examples/quine-explicit"
       results="tests/examples/quine-explicit"
       extension="quine" >
   </test>
   <test
-      definition="dist/examples/quine/short/quine-short.k"
+      definition="dist/samples/quine/short/quine-short.k"
       programs="tests/examples/quine-short"
       results="tests/examples/quine-short"
       extension="quine" >
@@ -364,8 +364,8 @@
 -->
 
   <test
-      definition="dist/examples/agent/agent.k"
-      programs="dist/examples/agent/programs"
+      definition="dist/samples/agent/agent.k"
+      programs="dist/samples/agent/programs"
       extension="agent"
       results="tests/examples/agent"
       >
@@ -376,8 +376,8 @@
 -->
 
   <test
-      definition="dist/examples/bf/bf.k"
-      programs="dist/examples/bf/programs"
+      definition="dist/samples/bf/bf.k"
+      programs="dist/samples/bf/programs"
       extension="bf"
       results="tests/examples/bf"
       >
@@ -387,8 +387,8 @@
   WCET
 -->
   <test
-      definition="dist/examples/wcet/wcet.k"
-      programs="dist/examples/wcet/programs"
+      definition="dist/samples/wcet/wcet.k"
+      programs="dist/samples/wcet/programs"
       extension="wcet">
       <all-programs>
         <krun-option name="-cTIMING" value="add |-> 1 sub |-> 1 mul |-> 1 div |-> 1 or |-> 1 and |-> 1 not |-> 1 load |-> 10 store |-> 10 jmp |-> 1 beq |-> 2 bne |-> 2 blt |-> 2 ble |-> 2 halt |-> 1 read |-> 100 write |-> 100 'rw(.KList) |-> 200 int |-> 5 rfi |-> 5" />
@@ -396,13 +396,13 @@
         <krun-option name="-cINITIAL" value=".Map" />
         <krun-option name="-pattern" value="&lt;k&gt; .K &lt;/k&gt;&lt;input&gt; .List &lt;/input&gt;" />
       </all-programs>
-      <program name="dist/examples/wcet/programs/interrupt.wcet">
+      <program name="dist/samples/wcet/programs/interrupt.wcet">
         <krun-option name="-cTIMING" value="add |-> 1 sub |-> 1 mul |-> 1 div |-> 1 or |-> 1 and |-> 1 not |-> 1 load |-> 10 store |-> 10 jmp |-> 1 beq |-> 2 bne |-> 2 blt |-> 2 ble |-> 2 halt |-> 1 read |-> 100 write |-> 100 'rw(.KList) |-> 200 int |-> 5 rfi |-> 5" />
         <krun-option name="-cINPUT" value="ListItem((400, data |-> 1000)) ListItem((401, data |-> 5)) ListItem((1000, data |-> 6))" />
         <krun-option name="-cINITIAL" value="data |-> 0" />
         <krun-option name="-pattern" value="&lt;k&gt; .K &lt;/k&gt;&lt;input&gt; .List &lt;/input&gt;" />
       </program>
-      <program name="dist/examples/wcet/programs/polling.wcet">
+      <program name="dist/samples/wcet/programs/polling.wcet">
         <krun-option name="-cTIMING" value="add |-> 1 sub |-> 1 mul |-> 1 div |-> 1 or |-> 1 and |-> 1 not |-> 1 load |-> 10 store |-> 10 jmp |-> 1 beq |-> 2 bne |-> 2 blt |-> 2 ble |-> 2 halt |-> 1 read |-> 100 write |-> 100 'rw(.KList) |-> 200 int |-> 5 rfi |-> 5" />
         <krun-option name="-cINPUT" value="ListItem((400, data |-> 1000)) ListItem((401, data |-> 5)) ListItem((1000, data |-> 6))" />
         <krun-option name="-cINITIAL" value="data |-> 0" />
@@ -416,8 +416,8 @@
 -->
 
   <test
-      definition="dist/examples/imp-symbolic/imp.k"
-      programs="dist/examples/imp-symbolic/programs"
+      definition="dist/samples/imp-symbolic/imp.k"
+      programs="dist/samples/imp-symbolic/programs"
       extension="imp"
       >
     <all-programs>
@@ -432,8 +432,8 @@
 -->
 
   <test
-      definition="dist/examples/imp-hoare/imp.k"
-      programs="dist/examples/imp-hoare/programs"
+      definition="dist/samples/imp-hoare/imp.k"
+      programs="dist/samples/imp-hoare/programs"
       extension="imp"
       >
   </test>
@@ -443,8 +443,8 @@
 -->
 
   <test
-      definition="dist/examples/imp-reachability/imp.k"
-      programs="dist/examples/imp-reachability"
+      definition="dist/samples/imp-reachability/imp.k"
+      programs="dist/samples/imp-reachability"
       extension="imp"
       exclude="pgm-1.imp pgm-2.imp pgm-3.imp"
       >
@@ -462,8 +462,8 @@
 -->
 
   <test
-      definition="dist/examples/prog-equiv/peq.k"
-      programs="dist/examples/prog-equiv/programs"
+      definition="dist/samples/prog-equiv/peq.k"
+      programs="dist/samples/prog-equiv/programs"
       extension="peq"
       results="tests/examples/prog-equiv/" >
       <kompile-option name="-add-top-cell" />

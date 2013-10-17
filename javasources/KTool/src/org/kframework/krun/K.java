@@ -12,13 +12,10 @@ import java.util.Properties;
 
 public class K {
 
-	public static boolean verbose = false;
-
 	// os specific
 	public static final String userdir = System.getProperty("user.dir");
 	public static final String fileSeparator = System.getProperty("file.separator");
 	public static final String lineSeparator = System.getProperty("line.separator");
-	public static final String k_base = KPaths.getKBase(false);
 
 	public static String kdir;
 	
@@ -34,7 +31,7 @@ public class K {
 		}
 	}
 	
-	public static String krunDir, krunTempDir, maude_in, maude_out, maude_err, kast_in, maude_output, processed_maude_output, krun_output;
+	public static String krunDir, krunTempDir, maude_in, maude_out, maude_err, maude_output, processed_maude_output, krun_output;
 
 	public static void setKDir() {
 		krunDir = kdir + fileSeparator + "krun";
@@ -42,9 +39,6 @@ public class K {
 		maude_in = krunTempDir + fileSeparator + "maude_in.maude";
 		maude_out = krunTempDir + fileSeparator + "maude_out.txt";
 		maude_err = krunTempDir + fileSeparator + "maude_err.txt";
-
-		// kast
-		kast_in = krunTempDir + fileSeparator + "kast_in.txt";
 
 		//where to write the XML output from Maude
 		maude_output = krunTempDir + fileSeparator + "maudeoutput.xml";
@@ -55,7 +49,6 @@ public class K {
 	}
 
 	// the default values for jkrun commandline options
-	public static String desk_file;
 	public static String pgm;
 	public static String term = null;
 	public static String directory = null;
@@ -70,7 +63,6 @@ public class K {
 	public static SearchType searchType = SearchType.FINAL;
 	public static String bound;
 	public static String depth;
-	public static String rule_labels = "";
 	public static String model_checking = "";
 	public static String output = "";
 
