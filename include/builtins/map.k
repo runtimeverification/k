@@ -1,9 +1,9 @@
-require "builtins/bag.k"
+// require "builtins/bag.k"
 require "builtins/set.k"
 
 
 module MAP
-  imports BAG
+//  imports BAG
   imports SET
 
   syntax MyMap ::= MyMap MyMap    [left,function, hook(Map:__), klabel('_Map_)]
@@ -60,10 +60,10 @@ module MAP
   rule keys(.MyMap) => .MySet
 
   /* bag of map values */
-	syntax MyBag ::= values(MyMap)    [function]
+/*	syntax MyBag ::= values(MyMap)    [function]
   rule values(_ |-> K:K M:MyMap) => MyBagItem(K) values(M)
   rule values(.MyMap) => .MyBag
-
+*/
   /* map size */
   syntax Int ::= size(MyMap)   [function]
   rule size(_ |-> _ M:MyMap) => 1 +Int size(M)
