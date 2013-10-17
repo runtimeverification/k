@@ -49,7 +49,6 @@ public class TarjanSCC<Data, Label> {
         boolean inStack;
     }
 
-
     public void addEdge(Data data1, Data data2, Label l) {
         TarjanSCCVertex vertex1 = vertexSet.get(data1);
         if (vertex1 == null) {
