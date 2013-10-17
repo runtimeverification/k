@@ -292,6 +292,18 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
         if (K.smt.equals("gappa")) {
             constraint.normalize();
+            System.out.println("Verifying whether " + toString() + "\n implies " + constraint.toString());
+            ListIterator<Equality> listIterator = constraint.equalities().listIterator();
+            while (listIterator.hasNext()) {
+                Equality e2 = listIterator.next();
+                for (Equality e1 : equalities()) {
+                    if (e2.equals(e1)) {
+                        listIterator.remove();
+                        break;
+                    }
+                }
+            }
+            if (constraint.equalities().isEmpty()) return true;
             String gterm1 = GappaPrinter.toGappa(this);
             String gterm2 = GappaPrinter.toGappa(constraint);
             String input = "(" + gterm2 + ")";
