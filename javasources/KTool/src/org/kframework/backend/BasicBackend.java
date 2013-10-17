@@ -53,6 +53,7 @@ public abstract class BasicBackend implements Backend {
 		steps.add(new RemoveBrackets(context));
 		steps.add(new AddEmptyLists(context));
 		steps.add(new RemoveSyntacticCasts(context));
+//        steps.add(new EnforceInferredSorts(context));
 		steps.add(new CheckVisitorStep<Definition>(new CheckVariables(context), context));
 		steps.add(new CheckVisitorStep<Definition>(new CheckRewrite(context), context));
 		steps.add(new FlattenModules(context));

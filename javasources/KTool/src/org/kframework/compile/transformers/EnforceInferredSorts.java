@@ -27,9 +27,11 @@ public class EnforceInferredSorts extends CopyOnWriteTransformer {
     @Override
     public ASTNode transform(Variable node) throws TransformerException {
         if (!node.isUserTyped()) {
-            Variable result = node.shallowCopy();
-            result.setSort(result.getExpectedSort());
-            node = result;
+            if (node.getExpectedSort() != null) {
+                Variable result = node.shallowCopy();
+                result.setSort(result.getExpectedSort());
+                node = result;
+            }
         }
         return node;
     }
