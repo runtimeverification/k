@@ -40,7 +40,6 @@ public class GlobalSettings {
 
     private static OS os = null;
 	public static boolean verbose = false;
-	public static String startFile = "";
 	public static String lib = "";
 	public static String synModule = null;
 	public static KExceptionManager kem = new KExceptionManager();
