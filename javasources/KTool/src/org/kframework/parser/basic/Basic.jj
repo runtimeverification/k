@@ -157,6 +157,7 @@ import org.kframework.kil.LiterateComment.LiterateCommentType;
 import org.kframework.kil.LiterateDefinitionComment;
 import org.kframework.kil.LiterateModuleComment;
 import org.kframework.kil.Module;
+import org.kframework.kil.ModuleItem;
 import org.kframework.kil.PriorityBlock;
 import org.kframework.kil.PriorityBlockExtended;
 import org.kframework.kil.PriorityExtended;
@@ -180,9 +181,27 @@ import org.kframework.utils.general.GlobalSettings;
 
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+// Comments get processed in an odd order that may cause them to be
+// out of order.  Thus we sort module items by their *end* position so
+// that comments within a module item are put before the module item
+// but commends between module items are put between the module items.
+class EndPositionComparator implements Comparator<ModuleItem> {
+  public int compare(ModuleItem o1, ModuleItem o2) {
+    String[] s1 = o1.getLocation().split("[\\(,\\)]");
+    int endLine1 = Integer.parseInt(s1[3]), endCol1 = Integer.parseInt(s1[4]);
+    String[] s2 = o2.getLocation().split("[\\(,\\)]");
+    int endLine2 = Integer.parseInt(s2[3]), endCol2 = Integer.parseInt(s2[4]);
+    if (endLine1 < endLine2 || endLine1 == endLine2 && endCol1 < endCol2) return -1;
+    if (endLine1 > endLine2 || endLine1 == endLine2 && endCol1 > endCol2) return 1;
+    return 0;
+  }
+}
 
 public class Basic {
   private String filename;
@@ -686,7 +705,11 @@ void Module(List<DefinitionItem> items) : { String loc = startLoc(); }
   "module" <MODNAME> { module = new Module(image()); }
     (Import(module))*
     (Sentence(module))*
-  "endmodule" { items.add(markLoc(loc, module)); module = null; }
+  "endmodule" {
+    // Sort to put comments in order
+    Collections.sort(module.getItems(), new EndPositionComparator());
+    items.add(markLoc(loc, module));
+    module = null; }
 }
 
 /** Parses an Import and adds it to module */
