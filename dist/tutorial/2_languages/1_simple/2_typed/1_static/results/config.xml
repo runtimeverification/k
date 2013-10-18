@@ -1,9 +1,9 @@
 <tests>
   <test
-      definition="../simple-typed-static.k"
+      definition="simple-typed-static.k"
       programs="../../programs/"
       extension="simple"
-      results="." >
+      skip="pdf" >
       <all-programs>
         <krun-option name="-pattern" value="&lt;tasks&gt;.Bag&lt;/tasks&gt;"/>
       </all-programs>

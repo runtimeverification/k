@@ -2,8 +2,8 @@
 
 <!-- original tests -->
   <test
-      definition="../simple-untyped.k"
-      programs="../../../programs"
+      definition="simple-untyped.k"
+      programs="../../../programs_and_results"
       extension="simple"
       exclude="dekker" 
       skip="pdf">
@@ -11,7 +11,7 @@
 
 <!-- new tests -->
   <test
-      definition="../simple-untyped.k"
+      definition="simple-untyped.k"
       programs="."
       extension="simple"
       skip="pdf">

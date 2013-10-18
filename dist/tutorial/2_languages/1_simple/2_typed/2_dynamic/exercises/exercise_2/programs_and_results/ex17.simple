@@ -1,0 +1,15 @@
+int foo(int x) throws bool {
+
+  if (x > 0) { throw false; } else { return x; }
+
+}
+
+void main() {
+
+    try {  throw foo; }
+    catch (int->int throws bool f) {
+        try { f(10); }
+        catch (bool i) { print("OK\n"); }
+    }
+
+}

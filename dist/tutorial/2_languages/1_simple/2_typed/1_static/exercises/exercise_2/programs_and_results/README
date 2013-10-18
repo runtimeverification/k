@@ -1,0 +1,3 @@
+Calling ktest on config.xml, both the original SIMPLE typed programs and several
+new programs will be tested.  If your solution is correct, then all tests should
+pass, except for ex01, ex02, ex03, ex05, and ex08 from the new programs.

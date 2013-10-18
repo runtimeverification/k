@@ -1,0 +1,15 @@
+To test the definition against all the programs in this folder, go to the
+parent folder where the simple-untyped.k definition is and execute
+
+  ktest simple-untyped.k --programs programs_and_results --extension simple --exclude dekker
+
+The --exclude option tells which programs to exclude from krunning.  You may
+want to exclude programs which take a lot of time, or which don't terminate.
+
+If you want to skip the PDF poster generation, which takes some time, execute
+
+  ktest simple-untyped.k --programs programs_and_results --extension simple --exclude dekker --skip pdf
+
+If you already kompiled your definition and want to only krun the programs:
+
+  ktest simple-untyped.k --programs programs_and_results --extension simple --exclude dekker --skip "kompile pdf"
