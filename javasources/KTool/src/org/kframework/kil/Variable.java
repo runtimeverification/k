@@ -69,6 +69,7 @@ public class Variable extends Term {
 		fresh = variable.fresh;
 		userTyped = variable.userTyped;
 		syntactic = variable.syntactic;
+        expectedSort = variable.expectedSort;
 	}
 
 	public static Variable getFreshVar(String sort) {

@@ -5,6 +5,7 @@ import org.kframework.backend.java.kil.Collection;
 import org.kframework.backend.pdmc.pda.*;
 import org.kframework.backend.pdmc.pda.buchi.BuchiAutomaton;
 import org.kframework.backend.pdmc.automaton.Transition;
+import org.kframework.backend.pdmc.pda.graph.TarjanSCC;
 import org.kframework.backend.pdmc.pda.pautomaton.PAutomaton;
 import org.kframework.backend.pdmc.pda.pautomaton.PAutomatonState;
 import org.kframework.backend.pdmc.pda.pautomaton.util.IndexedTransitions;
@@ -84,6 +85,10 @@ public class BuchiPushdownSystem<Control, Alphabet>
                         return gamma.getLeft() == null;
                     }
                 };
+
+        TarjanSCC<ConfigurationHead<Pair<Control, BuchiState>, Alphabet>, Boolean> graph
+                = new TarjanSCC<ConfigurationHead<Pair<Control, BuchiState>, Alphabet>, Boolean>();
+
         Configuration<Pair<Control, BuchiState>, Alphabet> initial = initialConfiguration();
         ConfigurationHead<Pair<Control, BuchiState>, Alphabet> initialHead = initial.getHead();
         PAutomatonState<Pair<Control, BuchiState>, Alphabet> initialState =
@@ -94,8 +99,10 @@ public class BuchiPushdownSystem<Control, Alphabet>
         trans.add(Transition.of(initialState, Pair.of(initialHead.getLetter(), false), finalState));
 
         while (!trans.isEmpty()) {
-            Iterator<Transition<PAutomatonState<Pair<Control, BuchiState>, Alphabet>, Pair<Alphabet, Boolean>>> iterator = trans.iterator();
-            Transition<PAutomatonState<Pair<Control, BuchiState>, Alphabet>, Pair<Alphabet, Boolean>> transition = iterator.next();
+            Iterator<Transition<PAutomatonState<Pair<Control, BuchiState>, Alphabet>, Pair<Alphabet, Boolean>>> iterator
+                    = trans.iterator();
+            Transition<PAutomatonState<Pair<Control, BuchiState>, Alphabet>, Pair<Alphabet, Boolean>> transition
+                    = iterator.next();
             iterator.remove();
             if (!rel.contains(transition)) {
                 rel.add(transition);
@@ -107,8 +114,10 @@ public class BuchiPushdownSystem<Control, Alphabet>
                 if (gamma != null) {
                     assert tp.getLetter() == null : "Expecting PDS state on the lhs of " + transition;
                     Pair<Control, BuchiState> p = tp.getState();
+                    final ConfigurationHead<Pair<Control, BuchiState>, Alphabet> configurationHead
+                            = ConfigurationHead.<Pair<Control, BuchiState>, Alphabet>of(p, gamma);
                     Set<Rule<Pair<Control, BuchiState>, Alphabet>> rules =
-                            getRules(ConfigurationHead.<Pair<Control, BuchiState>, Alphabet>of(p, gamma));
+                            getRules(configurationHead);
                     for (Rule<Pair<Control, BuchiState>, Alphabet> rule : rules) {
                         Pair<Control, BuchiState> pPrime = rule.endState();
                         Stack<Alphabet> stack = rule.endStack();
@@ -123,12 +132,17 @@ public class BuchiPushdownSystem<Control, Alphabet>
                                 break;
                             case 1:
                                 gamma1 = stack.peek();
+                                ConfigurationHead<Pair<Control, BuchiState>, Alphabet> endConfigurationHead
+                                        = ConfigurationHead.<Pair<Control, BuchiState>, Alphabet>of(pPrime, gamma1);
+                                graph.addEdge(configurationHead, endConfigurationHead, isFinal(p));
                                 trans.add(Transition.of(
                                         PAutomatonState.<Pair<Control, BuchiState>, Alphabet>of(pPrime),
                                         Pair.of(gamma1, b || isFinal(pPrime)), q));
                                 break;
                             case 2:
                                 gamma1 = stack.get(1);
+                                endConfigurationHead = ConfigurationHead.<Pair<Control, BuchiState>, Alphabet>of(pPrime, gamma1);
+                                graph.addEdge(configurationHead, endConfigurationHead, isFinal(p));
                                 gamma2 = stack.get(0);
                                 PAutomatonState<Pair<Control, BuchiState>, Alphabet> qPPrimeGamma1
                                         = PAutomatonState.of(pPrime, gamma1);

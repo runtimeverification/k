@@ -26,11 +26,11 @@ public class Configuration {
 	// mandatory
 	public static String KDEF = USER_DIR;
 	// programs
-	public static String PGM_DIR = USER_DIR;
+	public static String PGM_DIR = null; //USER_DIR;
 	public static List<String> EXTENSIONS = new LinkedList<String>();
 	// optional
 	public static boolean PDF = true;
-	public static String RESULTS_FOLDER = USER_DIR;
+	public static String RESULTS_FOLDER = null; //USER_DIR;
 	public static List<String> EXCLUDE_PROGRAMS = null;
 
 	// XML tag and attribute names used for parsing config.xml

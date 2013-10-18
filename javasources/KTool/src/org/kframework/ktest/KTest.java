@@ -133,14 +133,21 @@ public class KTest {
             String msg = "You have to provide a valid input file, which is either a K definition (*.k) or a test configuration (*.xml).";
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
         }
+        {
+            String inputDir = new File(input).getAbsoluteFile().getParent();
+            Configuration.PGM_DIR = inputDir;
+            Configuration.RESULTS_FOLDER = inputDir;
+        }
 
         // Programs folder
         if (cmd.hasOption(Configuration.PROGRAMS_OPTION)) {
             Configuration.PGM_DIR = cmd
                     .getOptionValue(Configuration.PROGRAMS_OPTION);
             org.kframework.utils.Error.checkIfInputDirectory(Configuration.PGM_DIR);
+            /*
             // also set the results to be programs folder by default
             Configuration.RESULTS_FOLDER = Configuration.PGM_DIR;
+            */
         }
 
         // List of excluded programs
