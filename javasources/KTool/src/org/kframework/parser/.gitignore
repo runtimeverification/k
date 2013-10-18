@@ -7,3 +7,10 @@ basic/SimpleCharStream.java
 basic/Token.java
 basic/TokenMgrError.java
 concrete/lib
+!concrete/lib/string_trim_last_one_0_0.java
+!concrete/lib/string_unescape_sort_0_0.java
+!concrete/lib/annolocation_0_0.java
+!concrete/lib/annolocationremove_0_0.java
+!concrete/lib/clear_console_0_0.java
+!concrete/lib/mergeamb_0_0.java
+!concrete/lib/xml_string_escape_from_string_0_0.java

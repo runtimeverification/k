@@ -22,6 +22,7 @@
 		<delete>
 			<fileset dir="${javasources}/KTool/src/org/kframework/parser/concrete/lib">
 				<include name="*.java" />
+                                <include name="*.tbl" />
 				<exclude name="string_trim_last_one_0_0.java" />
 				<exclude name="string_unescape_sort_0_0.java" />
 				<exclude name="annolocation_0_0.java" />
@@ -36,7 +37,7 @@
 		<delete dir="${javasources}/parsers/Concrete/trans/ConcreteMain" />
 		<delete dir="${javasources}/parsers/Concrete/include" />
 
-		<delete file="${javasources}/KTool/lib/resources/sdf/*" />
+		<delete dir="${javasources}/KTool/lib/resources/sdf" />
 
 		<antcall target="clean-java" />
 	</target>
@@ -48,9 +49,8 @@
 		<delete dir="./k/" />
 		<delete>
 			<fileset dir="${javasources}/KTool/src/org/kframework/backend/pdmc/pda/buchi/parser" includes="*.java" />
-		</delete>
-		<delete>
 			<fileset dir="${javasources}/KTool/src/org/kframework/parser/basic" includes="*.java" />
+			<fileset dir="${javasources}/KTool/src/org/kframework/utils/kastparser" includes="*.java" />
 		</delete>
 	</target>
 
