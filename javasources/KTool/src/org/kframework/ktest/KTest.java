@@ -41,10 +41,11 @@ public class KTest {
     private static final String FOOTER_STANDARD = "";
     private static final String HEADER_EXPERIMENTAL = "Experimental options:";
     private static final String FOOTER_EXPERIMENTAL = System.getProperty("line.separator") + "These options are non-standard and subject to change without notice.";
-    public static void printUsageS(KTestOptionsParser op) {
+
+    private static void printUsageS(KTestOptionsParser op) {
         org.kframework.utils.Error.helpMsg(USAGE, HEADER_STANDARD, FOOTER_STANDARD, op.getOptionsStandard(), new OptionComparator(op.getOptionList()));
     }
-    public static void printUsageE(KTestOptionsParser op) {
+    private static void printUsageE(KTestOptionsParser op) {
         org.kframework.utils.Error.helpMsg(USAGE, HEADER_EXPERIMENTAL, FOOTER_EXPERIMENTAL, op.getOptionsExperimental(), new OptionComparator(op.getOptionList()));
     }
 
@@ -171,15 +172,14 @@ public class KTest {
         if (cmd.hasOption(Configuration.SKIP_OPTION)) {
             String[] stepsToSkip = cmd
                     .getOptionValue(Configuration.SKIP_OPTION).split("\\s+");
-            for (int i = 0; i < stepsToSkip.length; i++) {
-                if (stepsToSkip[i].equals(Configuration.KOMPILE_STEP)) {
-                    Configuration.KOMPILE = false;
-                }
-                if (stepsToSkip[i].equals(Configuration.PDF_STEP)) {
-                    Configuration.PDF = false;
-                }
-                if (stepsToSkip[i].equals(Configuration.PROGRAMS_STEP)) {
-                    Configuration.PROGRAMS = false;
+            for (String step : stepsToSkip) {
+                switch (step) {
+                    case Configuration.KOMPILE_STEP:
+                        Configuration.KOMPILE = false; break;
+                    case Configuration.PDF_STEP:
+                        Configuration.PDF = false; break;
+                    case Configuration.PROGRAMS_STEP:
+                        Configuration.PROGRAMS = false; break;
                 }
             }
         }
@@ -253,7 +253,7 @@ public class KTest {
         return alltests;
     }
 
-    public static void testConfig(String configFile, String rootDir,
+    private static void testConfig(String configFile, String rootDir,
             String rootProgramsDir, String rootResultsDir) {
 
         int exitCode = 0;
@@ -277,18 +277,15 @@ public class KTest {
         testing(exitCode, new File(System.getProperty("user.dir")), alltests);
     }
 
-    private static void testing(int exitCode, File homeDir, List<Test> alltests) {
-        // compile definitions first
+    private static Map<Test, Task> generateDefinitions(File homeDir, List<Test> alltests) {
         int i = 0, j = 0;
         System.out.print("Kompile the language definitions...");
         Map<Test, Task> definitions = new TreeMap<Test, Task>();
         for (Test test : alltests) {
             Task def = test.getDefinitionTask(homeDir);
             definitions.put(test, def);
-            if (!test.isSkipKompile() && Configuration.KOMPILE){
-                if (Configuration.KOMPILE) {
-                    Execution.execute(def);
-                }
+            if (!test.isSkipKompile() && Configuration.KOMPILE) {
+                Execution.execute(def);
                 if (test.runOnOS()) {
                     Task unixOnlyScript = test.getUnixOnlyScriptTask(homeDir);
                     if (unixOnlyScript != null) {
@@ -306,9 +303,13 @@ public class KTest {
         if (i > 0)
             System.out.println("Compiling " + i + " definitions");
         Execution.finish();
+        return definitions;
+    }
+
+    private static int compileDefs(Map<Test, Task> definitions) {
+        int ret = 0;
 
         if (Configuration.KOMPILE) {
-
             if (!GlobalSettings.isWindowsOS()) {
                 // report
                 for (Entry<Test, Task> entry : definitions.entrySet()) {
@@ -323,7 +324,7 @@ public class KTest {
                     kompileStatus += ColorUtil.RgbToAnsi(Color.red, ColorSetting.ON) + "FAIL: "
                             + entry.getKey().getLanguage()
                             + ColorUtil.ANSI_NORMAL + "\n";
-                    exitCode = 1;
+                    ret = 1;
                 }
             }
             if (kompileStatus.equals("\n"))
@@ -333,8 +334,11 @@ public class KTest {
             System.out.println("Done.");
         }
 
-        // compile pdf definitions
-        i = 0; j = 0;
+        return ret;
+    }
+
+    private static int compilePdfs(File homeDir, List<Test> alltests) {
+        int ret = 0, i = 0, j = 0;
         System.out.print("Generating PDF documentation...");
         Map<Test, Task> pdfDefinitions = new TreeMap<Test, Task>();
         for (Test test : alltests) {
@@ -371,7 +375,7 @@ public class KTest {
                     pdfKompileStatus += ColorUtil.RgbToAnsi(Color.red, ColorSetting.ON)
                             + "FAIL: " + entry.getKey().getLanguage()
                             + ColorUtil.ANSI_NORMAL + "\n";
-                    exitCode = 1;
+                    ret = 1;
                 }
             }
             if (pdfKompileStatus.equals("\n"))
@@ -381,10 +385,14 @@ public class KTest {
             System.out.println("Done.");
         }
 
+        return ret;
+    }
+
+    private static int executePrograms(File homeDir, List<Test> tests) {
+        int ret = 0;
         // execute all programs (for which corresponding definitions are
         // compiled)
-        for (Entry<Test, Task> dentry : definitions.entrySet()) {
-            Test test = dentry.getKey();
+        for (Test test : tests) {
             if (!test.isSkipPrograms() && Configuration.PROGRAMS){
                 if (test.runOnOS()) {
                     System.out.print("Running " + test.getLanguage()
@@ -395,7 +403,7 @@ public class KTest {
                     Map<Program, Task> all = new TreeMap<Program, Task>();
 
                     // total programs counter
-                    i = 0;
+                    int i = 0;
                     // i/o counters
                     int in = 0;
                     int out = 0;
@@ -433,7 +441,7 @@ public class KTest {
                                 pgmOut += ColorUtil.RgbToAnsi(Color.red, ColorSetting.ON) + "FAIL: "
                                         + entry.getKey().getProgramPath()
                                         + ColorUtil.ANSI_NORMAL + "\n";
-                                exitCode = 1;
+                                ret = 1;
                             }
                         }
                         if (pgmOut.equals(""))
@@ -446,10 +454,25 @@ public class KTest {
             }
         }
 
-        System.exit(exitCode);
+        return ret;
     }
 
-    public static void copyFolder(File src, File dest) throws IOException {
-        FileUtils.copyDirectory(src, dest);
+    private static List<Test> generateTests(Map<Test, Task> definitions) {
+        List<Test> tests = new LinkedList<>();
+        for (Entry<Test, Task> dentry : definitions.entrySet())
+            tests.add(dentry.getKey());
+        return tests;
+    }
+
+    private static void testing(int exitCode, File homeDir, List<Test> alltests) {
+        Map<Test, Task> definitions = generateDefinitions(homeDir, alltests);
+        List<Test> tests = generateTests(definitions);
+
+        exitCode |= compileDefs(definitions);
+        exitCode |= compilePdfs(homeDir, alltests);
+        exitCode |= executePrograms(homeDir, tests);
+
+        if (exitCode != 0)
+            System.exit(exitCode);
     }
 }

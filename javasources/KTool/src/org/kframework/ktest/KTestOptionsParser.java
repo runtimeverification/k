@@ -63,11 +63,9 @@ public class KTestOptionsParser {
 	public CommandLine parse(String[] cmd) {
 		CommandLineParser parser = new ActualPosixParser();
 		try {
-			CommandLine cl = parser.parse(options, cmd);
-			return cl;
+			return parser.parse(options, cmd);
 		} catch (ParseException e) {
 			org.kframework.utils.Error.silentReport(e.getLocalizedMessage());
-			//e.printStackTrace();
 		}
 
 		//helpExit(help, Configuration.KTEST, options);

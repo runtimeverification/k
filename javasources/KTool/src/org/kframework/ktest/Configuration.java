@@ -53,7 +53,6 @@ public class Configuration {
 	public static final String EXTENSIONS2 = "extension";
 	public static final String RECURSIVE = "recursive";
 	public static final String YES = "yes";
-	public static final String PDF2 = "pdf";
 	public static final String TITLE = "title";
 	public static final String REPORT_DIR = "report-dir";
 	public static final String RESULTS = "results";
@@ -67,7 +66,6 @@ public class Configuration {
 	public static final String TEST = "test";
     public static final String TESTS = "tests";
     public static boolean KOMPILE = true;
-    public static boolean KOMPILE_PDF = true;
     public static boolean PROGRAMS = true;
 	public static boolean VERBOSE = false;
 
@@ -86,14 +84,10 @@ public class Configuration {
     public static final String TIMEOUT_OPTION = "timeout";
 
 	// program name
-	public static final String KTEST = "ktest";
 	public static final String KOMPILE_STEP = "kompile";
 	public static final String PDF_STEP = "pdf";
 	public static final String PROGRAMS_STEP = "programs";
 	public static final String PROCESSES_OPTION = "threads";
-
-	// help details
-	public static String DETAILED_HELP_MESSAGE = getReadme();
 
 	// some error messages
 	public static String PGM_ERROR = "Please check the programs folder from configuration file.";
@@ -101,7 +95,7 @@ public class Configuration {
 	public static String RES_ERROR = "Please check the results folder from configuration file.";
 
 	// get the K instalation home directory
-	public static String getKHome() {
+	private static String getKHome() {
 		return new File(KTest.class.getProtectionDomain().getCodeSource()
 				.getLocation().getPath()).getParentFile().getParentFile()
 				.getParentFile().getPath();
@@ -122,10 +116,5 @@ public class Configuration {
 			return getKHome() + FILE_SEPARATOR + "bin" + FILE_SEPARATOR + exe + ".bat";
 		}
 		return getKHome() + FILE_SEPARATOR + "bin" + FILE_SEPARATOR + exe;
-	}
-	
-	public static String getReadme() {
-		// return FileUtil.getFileContent(getKHome() + FS + "tests" + FS + "README");
-		return "";
 	}
 }
