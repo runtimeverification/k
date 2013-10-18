@@ -1,0 +1,8 @@
+<tests>
+  <test
+      definition="simple-typed-dynamic.k"
+      programs="../../programs/"
+      extension="simple"
+      skip="pdf" >
+  </test>
+</tests>

@@ -2,7 +2,7 @@
 
 <!-- original tests -->
   <test
-      definition="../simple-typed-static.k"
+      definition="simple-typed-static.k"
       programs="../../../../programs"
       extension="simple"
       results="../../../results"
@@ -14,7 +14,7 @@
 
 <!-- new tests -->
   <test
-      definition="../simple-typed-static.k"
+      definition="simple-typed-static.k"
       programs="../../../../2_dynamic/exercises/exercise_2/programs/"
       extension="simple"
       results="."

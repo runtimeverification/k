@@ -2,7 +2,7 @@
 
 <!-- original tests -->
   <test
-      definition="../simple-typed-dynamic.k"
+      definition="simple-typed-dynamic.k"
       programs="../../../../programs"
       extension="simple"
       results="../../../results"
@@ -12,8 +12,7 @@
 
 <!-- new tests -->
   <test
-      definition="../simple-typed-dynamic.k"
-      programs="."
+      definition="simple-typed-dynamic.k"
       extension="simple"
       skip="pdf">
   </test>

@@ -1,11 +1,12 @@
 To test your definition, you can call
 
-  ktest config.xml
+  ktest config.xml -d ..
 
-in this folder.  If you want to skip the kompilation and pdf generation, then
-use the following command instead:
+in this folder, or
 
-  ktest config.xml --skip "kompile pdf"
+  ktest results/config.xml
+
+in the parent folder.
 
 Both the original SIMPLE typed programs and several new programs will
 be tested.  If your solution is correct, then all tests should pass,
