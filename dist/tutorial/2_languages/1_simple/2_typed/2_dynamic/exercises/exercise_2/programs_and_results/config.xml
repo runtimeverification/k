@@ -1,11 +1,11 @@
 <tests>
 
-<!-- original tests -->
+<!-- original tests: note the newer results override the older ones -->
   <test
       definition="simple-typed-dynamic.k"
       programs="../../../../programs"
       extension="simple"
-      results="../../../results"
+      results="../../../results ."
       exclude="dekker"
       skip="pdf">
   </test>
