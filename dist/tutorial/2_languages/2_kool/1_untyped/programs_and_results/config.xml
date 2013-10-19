@@ -1,0 +1,6 @@
+<tests>
+  <test
+      definition="kool-untyped.k"
+      extension="kool"
+      />
+</tests>
