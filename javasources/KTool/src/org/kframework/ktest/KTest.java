@@ -17,6 +17,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.io.FileUtils;
 import org.kframework.krun.ColorSetting;
+import org.kframework.krun.Main;
 import org.kframework.ktest.execution.Execution;
 import org.kframework.ktest.execution.Task;
 import org.kframework.ktest.tests.Program;
@@ -40,7 +41,7 @@ public class KTest {
     private static final String HEADER_STANDARD = "<file> is either a K definition (single job mode) or an XML configuration (batch mode).";
     private static final String FOOTER_STANDARD = "";
     private static final String HEADER_EXPERIMENTAL = "Experimental options:";
-    private static final String FOOTER_EXPERIMENTAL = System.getProperty("line.separator") + "These options are non-standard and subject to change without notice.";
+    private static final String FOOTER_EXPERIMENTAL = Main.FOOTER_EXPERIMENTAL;
     public static void printUsageS(KTestOptionsParser op) {
         org.kframework.utils.Error.helpMsg(USAGE, HEADER_STANDARD, FOOTER_STANDARD, op.getOptionsStandard(), new OptionComparator(op.getOptionList()));
     }

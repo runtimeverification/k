@@ -87,7 +87,11 @@ public class Main {
     private static final String HEADER_STANDARD = "";
     private static final String FOOTER_STANDARD = "";
     private static final String HEADER_EXPERIMENTAL = "Experimental options:";
-    private static final String FOOTER_EXPERIMENTAL = K.lineSeparator + "These options are non-standard and subject to change without notice.";
+    public static final String FOOTER_EXPERIMENTAL
+        = K.lineSeparator + "These options are non-standard and subject to change without notice."
+        + K.lineSeparator + "In addition you can specify java virtual machine arguments by setting"
+        + K.lineSeparator + "the environment variable K_OPTS. Default vm arguments are "
+        + K.lineSeparator + "\"-Xss64m -Xmx1024m -Xss8m\", for all K tools on all platforms.";
     public static void printKRunUsageS(CommandlineOptions op) {
         org.kframework.utils.Error.helpMsg(USAGE_KRUN, HEADER_STANDARD, FOOTER_STANDARD, op.getOptionsStandard(), new OptionComparator(op.getOptionList()));
     }
