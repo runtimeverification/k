@@ -65,6 +65,7 @@ public class CommandlineOptions {
 		addOptionS(OptionBuilder.withLongOpt("syntax-module").hasArg().withArgName("name").withDescription("Specify main module for syntax. The default is the module specified in the given compiled K definition.").create());
 		addOptionS(OptionBuilder.withLongOpt("io").hasArg().withArgName("[on|off]").withDescription("Use real IO when running the definition. (Default: enabled).").create());
 		addOptionS(OptionBuilder.withLongOpt("color").hasArg().withArgName("[on|off|extended]").withDescription("Use colors in output. (Default: on).").create());
+        addOptionS(OptionBuilder.withLongOpt("terminal-color").hasArg().withArgName("color-name").withDescription("Background color of the terminal. Cells won't be colored in this color. (Default: black).").create());
 		addOptionS(OptionBuilder.withLongOpt("parens").hasArg().withArgName("[greedy|smart]").withDescription("Select the parentheses-insertion algorithm. The default value is 'greedy'. Note that 'smart' can take much longer time to execute.").create());
 		addOptionS(OptionBuilder.withLongOpt("parser").hasArg().withArgName("file").withDescription("Command used to parse programs. (Default: kast).").create());
 		addOptionS(OptionBuilder.withLongOpt("config-var-parser").hasArg().withArgName("file").withDescription("Command used to parse configuration variables. (Default: kast -e).  See --parser above. Applies to subsequent -c options until another parser is specified with this option.").create());

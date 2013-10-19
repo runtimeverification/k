@@ -1,5 +1,6 @@
 package org.kframework.krun;
 
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.Console;
 import java.io.File;
@@ -64,6 +65,7 @@ import org.kframework.krun.gui.UIDesign.MainWindow;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor;
 import org.kframework.utils.BinaryLoader;
+import org.kframework.utils.ColorUtil;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -833,6 +835,16 @@ public class Main {
                 else
                     Error.report("Unrecognized option: --color " + v + "\nUsage: krun --color [on|off|extended]");
             }
+            if (cmd.hasOption("terminal-color")) {
+                String v = cmd.getOptionValue("terminal-color");
+                Color terminalColor = ColorUtil.getColorByName(v);
+                if (terminalColor != null) {
+                    K.terminalColor = terminalColor;
+                } else {
+                    Error.report("Invalid terminal color: " + v);
+                }
+            }
+
             if (cmd.hasOption("parens")) {
                 String v = cmd.getOptionValue("parens");
                 if (v.equals("greedy")) {

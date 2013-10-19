@@ -4,8 +4,10 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Definition;
 import org.kframework.krun.api.SearchType;
+import org.kframework.utils.ColorUtil;
 import org.kframework.utils.file.KPaths;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
@@ -73,6 +75,7 @@ public class K {
 	public static boolean io = true;
 	public static boolean statistics = false;
 	public static ColorSetting color = ColorSetting.ON;
+    public static Color terminalColor = ColorUtil.getColorByName("black");
 	public static boolean do_search = false;
 	public static boolean showSearchGraph = false;
 	//apply parenthesis by default
