@@ -9,39 +9,38 @@ import org.kframework.krun.K;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created with IntelliJ IDEA.
- * User: owolabi
- * Date: 8/2/13
- * Time: 2:05 AM
- * To change this template use File | Settings | File Templates.
- */
-public class GeneratorResults{
-    private List<GeneratorResult> solutions;
-    private DirectedGraph<KRunState, Transition> graph;
-    private boolean isDefaultPattern;
+public class TestGenResults {
+	private List<TestGenResult> testGenResults;
+	private DirectedGraph<KRunState, Transition> graph;
+	private boolean isDefaultPattern;
 
     protected Context context;
 
-    public GeneratorResults(List<GeneratorResult> solutions, DirectedGraph<KRunState, Transition> graph, boolean isDefaultPattern, Context context) {
+	public TestGenResults(List<TestGenResult> results,
+			DirectedGraph<KRunState, Transition> graph,
+			boolean isDefaultPattern, Context context) {
         this.context = context;
-        this.solutions = solutions;
+        this.testGenResults = results;
         this.graph = graph;
         this.isDefaultPattern = isDefaultPattern;
     }
 
     @Override
     public String toString() {
-        int i = 1;
+        int n = 1;
         StringBuilder sb = new StringBuilder();
-        sb.append("Generator results:");
-        for (GeneratorResult solution : solutions) {
-//            Term search = solution.getState().getRawResult();
-            sb.append("\n\nSolution " + i + ", State " + solution.getState().getStateId() + ":");
-
-            sb.append("\nProgram:\n"+solution.getGeneratedProgram());
-
-            Map<String, Term> substitution = solution.getSubstitution();
+        sb.append("Test generation results:");
+        
+        for (TestGenResult testGenResult : testGenResults) {
+        	// TODO(YilongL): how to set state id?
+            sb.append("\n\nTest case " + n /*+ ", State " + testGenResult.getState().getStateId()*/ + ":");
+            
+            UnparserFilter t = new UnparserFilter(true, K.color, K.parens, context);
+            KRunState.concretize(testGenResult.getGeneratedProgram(), context).accept(t);
+            // sb.append("\nProgram:\n" + testGenResult.getGeneratedProgram()); // print abstract syntax form
+            sb.append("\nProgram:\n" + t.getResult()); // print concrete syntax form
+            sb.append("\nResult:");
+            Map<String, Term> substitution = testGenResult.getSubstitution();
 
             if (isDefaultPattern) {
                 UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
@@ -61,11 +60,13 @@ public class GeneratorResults{
                     sb.append("\nEmpty substitution");
                 }
             }
-            i++;
+            n++;
         }
-        if (i == 1) {
-            sb.append("\nNo search results");
+        
+        if (n == 1) {
+            sb.append("\nNo test generation results");
         }
+        
         return sb.toString();
     }
 
@@ -73,8 +74,8 @@ public class GeneratorResults{
         return graph;
     }
 
-    public List<GeneratorResult> getSolutions() {
-        return solutions;
+    public List<TestGenResult> getTestGenResults() {
+        return testGenResults;
     }
 }
 

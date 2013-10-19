@@ -226,42 +226,40 @@ public class JavaSymbolicKRun implements KRun {
                 context));
     }
 
-    public KRunResult<GeneratorResults> generate(
+    public KRunResult<TestGenResults> generate(
             Integer bound,
             Integer depth,
             SearchType searchType,
             org.kframework.kil.Rule pattern,
             org.kframework.kil.Term cfg,
             RuleCompilerSteps compilationInfo) throws KRunExecutionException {
-        //for now, test generation uses the "search-all" option
-        //we hope to add strategies on top of this in the future
+		// for now, test generation uses the "search-all" option
+		// we hope to add strategies on top of this in the future
         if (searchType != SearchType.STAR) {
             throw new UnsupportedOperationException("Search type should be SearchType.STAR");
         }
 
         SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
         TermContext termContext = new TermContext(definition, new PortableFileSystem());
-        ConstrainedTerm initialTerm = new ConstrainedTerm(Term.of(cfg, definition), termContext);
-        ConstrainedTerm targetTerm = new ConstrainedTerm(Term.of(cfg, definition), termContext);
+        ConstrainedTerm initCfg = new ConstrainedTerm(Term.of(cfg, definition), termContext);
 
+        List<TestGenResult> generatorResults = new ArrayList<TestGenResult>();
 
-        List<Rule> claims = Collections.emptyList();
-        List<SearchResult> searchResults = new ArrayList<SearchResult>();
-        List<GeneratorResult> generatedPrograms = new ArrayList<GeneratorResult>();
+        List<ConstrainedTerm> resultCfgs = symbolicRewriter.search(initCfg, null, null, bound, depth);
 
-        List<ConstrainedTerm> hits = symbolicRewriter.search(initialTerm, targetTerm, claims, bound, depth);
+        for (ConstrainedTerm result : resultCfgs) {
+			// construct the generated program by applying the substitution
+			// obtained from the result configuration to the initial one
+            Term pgm = Term.of(cfg, definition);
+            pgm = pgm.substitute(result.constraint().substitution(), termContext);
 
-        for (ConstrainedTerm result : hits ) {
-            //reconstruct the generated program
-            Term pgm = constructProgram(result,Term.of(cfg,definition));
-
-            org.kframework.kil.Term pgmTerm =  (org.kframework.kil.Term)  pgm.accept(
+            org.kframework.kil.Term pgmTerm = (org.kframework.kil.Term) pgm.accept(
                     new BackendJavaKILtoKILTranslation(context));
 
             org.kframework.kil.Term kilTerm = (org.kframework.kil.Term) result.term().accept(
                     new BackendJavaKILtoKILTranslation(context));
 
-            generatedPrograms.add(new GeneratorResult(
+            generatorResults.add(new TestGenResult(
                     new KRunState(kilTerm, context),
                     Collections.singletonMap("B:Bag", kilTerm),
                     compilationInfo,
@@ -269,17 +267,11 @@ public class JavaSymbolicKRun implements KRun {
                     pgmTerm));
         }
 
-        return new KRunResult<GeneratorResults>(new GeneratorResults(
-                generatedPrograms,
+        return new KRunResult<TestGenResults>(new TestGenResults(
+                generatorResults,
                 null,
                 true,
                 context));
-    }
-
-    private Term constructProgram(ConstrainedTerm term, Term config){
-        SymbolicConstraint constraint = term.constraint();
-        Term pgm = config.substitute(constraint.substitution(),term.termContext());
-        return pgm;
     }
 
     @Override
