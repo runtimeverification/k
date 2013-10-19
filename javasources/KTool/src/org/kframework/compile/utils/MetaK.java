@@ -358,7 +358,7 @@ public class MetaK {
                || sort.equals(StringBuiltin.SORT_NAME)
                || sort.equals("#Float")
                /* LTL builtin sorts */
-               || sort.equals("#LtlFormula")
+//               || sort.equals("#LtlFormula")
                || sort.equals("#Prop")
                || sort.equals("#ModelCheckerState")
                || sort.equals("#ModelCheckResult");
