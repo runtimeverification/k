@@ -271,7 +271,7 @@
 
   <test
       definition="dist/tutorial/2_languages/1_simple/1_untyped/simple-untyped.k"
-      programs="dist/tutorial/2_languages/1_simple/1_untyped/programs"
+      programs="dist/tutorial/2_languages/1_simple/1_untyped/programs_and_results"
       extension="simple"
       exclude="diverse/dekker.simple"
       results="tests/examples/simple-untyped"
