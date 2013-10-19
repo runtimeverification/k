@@ -6,10 +6,12 @@ int foo(int x) throws bool {
 
 void main() {
 
-    try {  throw foo; }
-    catch (int->int throws bool f) {
-        try { f(10); }
-        catch (bool i) { print(i); }
-    }
+  try {  throw foo; }
+  catch (int->int throws bool f) {
+    print("OK so far.\n");
+    try { f(10); }
+    catch (bool i) { print("OK\n",i,"Wrong! We cannot print booleans!\n"); }
+  }
+  print("Wrong! Should not reach this!\n"); 
 
 }
