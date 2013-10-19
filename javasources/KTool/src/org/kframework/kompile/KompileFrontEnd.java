@@ -19,6 +19,7 @@ import org.kframework.kcheck.RLBackend;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.CountNodesVisitor;
+import org.kframework.krun.Main;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
@@ -54,7 +55,7 @@ public class KompileFrontEnd {
 	private static final String HEADER_STANDARD = "";
 	private static final String FOOTER_STANDARD = "";
 	private static final String HEADER_EXPERIMENTAL = "Experimental options:";
-	private static final String FOOTER_EXPERIMENTAL = System.getProperty("line.separator") + "These options are non-standard and subject to change without notice.";
+	private static final String FOOTER_EXPERIMENTAL = Main.FOOTER_EXPERIMENTAL;
 	public static void printUsageS(KompileOptionsParser op) {
 		org.kframework.utils.Error.helpMsg(USAGE, HEADER_STANDARD, FOOTER_STANDARD, op.getOptionsStandard(), new OptionComparator(op.getOptionList()));
 	}
