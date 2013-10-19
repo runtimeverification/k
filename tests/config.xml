@@ -296,7 +296,7 @@
 
   <test
       definition="dist/tutorial/2_languages/2_kool/1_untyped/kool-untyped.k"
-      programs="dist/tutorial/2_languages/2_kool/1_untyped/programs"
+      programs="dist/tutorial/2_languages/2_kool/1_untyped/programs_and_results"
       extension="kool"
       results="tests/examples/kool-untyped"
       />
