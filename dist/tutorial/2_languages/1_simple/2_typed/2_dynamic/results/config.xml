@@ -4,6 +4,5 @@
       programs="../../programs/"
       extension="simple"
       exclude="dekker"
-      skip="pdf" >
-  </test>
+      skip="pdf" />
 </tests>
