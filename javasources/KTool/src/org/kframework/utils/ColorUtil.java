@@ -1,8 +1,10 @@
 package org.kframework.utils;
 
 import org.kframework.krun.ColorSetting;
+import org.kframework.krun.K;
 
 import java.awt.Color;
+import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Map;
 import java.util.HashMap;
@@ -40,91 +42,91 @@ public class ColorUtil {
         Map<String, Color> colors = new HashMap<String, Color>();
 		colors.put("black", Color.black);
 		colors.put("blue", Color.blue);
-		colors.put("brown", getColor("#C08040"));
+		colors.put("brown", getColorByRgb("#C08040"));
 		colors.put("cyan", Color.cyan);
 		colors.put("darkgray", Color.darkGray);
 		colors.put("gray", Color.gray);
 		colors.put("green", Color.green);
 		colors.put("lightgray", Color.lightGray);
-		colors.put("lime", getColor("#C0FF00"));
+		colors.put("lime", getColorByRgb("#C0FF00"));
 		colors.put("magenta", Color.magenta);
-		colors.put("olive", getColor("#808000"));
+		colors.put("olive", getColorByRgb("#808000"));
 		colors.put("orange", Color.orange);
 		colors.put("pink", Color.pink);
-		colors.put("purple", getColor("#C00040"));
+		colors.put("purple", getColorByRgb("#C00040"));
 		colors.put("red", Color.red);
-		colors.put("teal", getColor("#008080"));
-		colors.put("violet", getColor("#800080"));
+		colors.put("teal", getColorByRgb("#008080"));
+		colors.put("violet", getColorByRgb("#800080"));
 		colors.put("white", Color.white);
 		colors.put("yellow", Color.yellow);
-		colors.put("Apricot", getColor("#FBB982"));
-		colors.put("Aquamarine", getColor("#00B5BE"));
-		colors.put("Bittersweet", getColor("#C04F17"));
-		colors.put("Black", getColor("#221E1F"));
-		colors.put("Blue", getColor("#2D2F92"));
-		colors.put("BlueGreen", getColor("#00B3B8"));
-		colors.put("BlueViolet", getColor("#473992"));
-		colors.put("BrickRed", getColor("#B6321C"));
-		colors.put("Brown", getColor("#792500"));
-		colors.put("BurntOrange", getColor("#F7921D"));
-		colors.put("CadetBlue", getColor("#74729A"));
-		colors.put("CarnationPink", getColor("#F282B4"));
-		colors.put("Cerulean", getColor("#00A2E3"));
-		colors.put("CornflowerBlue", getColor("#41B0E4"));
-		colors.put("Cyan", getColor("#00AEEF"));
-		colors.put("Dandelion", getColor("#FDBC42"));
-		colors.put("DarkOrchid", getColor("#A4538A"));
-		colors.put("Emerald", getColor("#00A99D"));
-		colors.put("ForestGreen", getColor("#009B55"));
-		colors.put("Fuchsia", getColor("#8C368C"));
-		colors.put("Goldenrod", getColor("#FFDF42"));
-		colors.put("Gray", getColor("#949698"));
-		colors.put("Green", getColor("#00A64F"));
-		colors.put("GreenYellow", getColor("#DFE674"));
-		colors.put("JungleGreen", getColor("#00A99A"));
-		colors.put("Lavender", getColor("#F49EC4"));
-		colors.put("LimeGreen", getColor("#8DC73E"));
-		colors.put("Magenta", getColor("#EC008C"));
-		colors.put("Mahogany", getColor("#A9341F"));
-		colors.put("Maroon", getColor("#AF3235"));
-		colors.put("Melon", getColor("#F89E7B"));
-		colors.put("MidnightBlue", getColor("#006795"));
-		colors.put("Mulberry", getColor("#A93C93"));
-		colors.put("NavyBlue", getColor("#006EB8"));
-		colors.put("OliveGreen", getColor("#3C8031"));
-		colors.put("Orange", getColor("#F58137"));
-		colors.put("OrangeRed", getColor("#ED135A"));
-		colors.put("Orchid", getColor("#AF72B0"));
-		colors.put("Peach", getColor("#F7965A"));
-		colors.put("Periwinkle", getColor("#7977B8"));
-		colors.put("PineGreen", getColor("#008B72"));
-		colors.put("Plum", getColor("#92268F"));
-		colors.put("ProcessBlue", getColor("#00B0F0"));
-		colors.put("Purple", getColor("#99479B"));
-		colors.put("RawSienna", getColor("#974006"));
-		colors.put("Red", getColor("#ED1B23"));
-		colors.put("RedOrange", getColor("#F26035"));
-		colors.put("RedViolet", getColor("#A1246B"));
-		colors.put("Rhodamine", getColor("#EF559F"));
-		colors.put("RoyalBlue", getColor("#0071BC"));
-		colors.put("RoyalPurple", getColor("#613F99"));
-		colors.put("RubineRed", getColor("#ED017D"));
-		colors.put("Salmon", getColor("#F69289"));
-		colors.put("SeaGreen", getColor("#3FBC9D"));
-		colors.put("Sepia", getColor("#671800"));
-		colors.put("SkyBlue", getColor("#46C5DD"));
-		colors.put("SpringGreen", getColor("#C6DC67"));
-		colors.put("Tan", getColor("#DA9D76"));
-		colors.put("TealBlue", getColor("#00AEB3"));
-		colors.put("Thistle", getColor("#D883B7"));
-		colors.put("Turquoise", getColor("#00B4CE"));
-		colors.put("Violet", getColor("#58429B"));
-		colors.put("VioletRed", getColor("#EF58A0"));
-		colors.put("White", getColor("#FFFFFF"));
-		colors.put("WildStrawberry", getColor("#EE2967"));
-		colors.put("Yellow", getColor("#FFF200"));
-		colors.put("YellowGreen", getColor("#98CC70"));
-		colors.put("YellowOrange", getColor("#FAA21A"));
+		colors.put("Apricot", getColorByRgb("#FBB982"));
+		colors.put("Aquamarine", getColorByRgb("#00B5BE"));
+		colors.put("Bittersweet", getColorByRgb("#C04F17"));
+		colors.put("Black", getColorByRgb("#221E1F"));
+		colors.put("Blue", getColorByRgb("#2D2F92"));
+		colors.put("BlueGreen", getColorByRgb("#00B3B8"));
+		colors.put("BlueViolet", getColorByRgb("#473992"));
+		colors.put("BrickRed", getColorByRgb("#B6321C"));
+		colors.put("Brown", getColorByRgb("#792500"));
+		colors.put("BurntOrange", getColorByRgb("#F7921D"));
+		colors.put("CadetBlue", getColorByRgb("#74729A"));
+		colors.put("CarnationPink", getColorByRgb("#F282B4"));
+		colors.put("Cerulean", getColorByRgb("#00A2E3"));
+		colors.put("CornflowerBlue", getColorByRgb("#41B0E4"));
+		colors.put("Cyan", getColorByRgb("#00AEEF"));
+		colors.put("Dandelion", getColorByRgb("#FDBC42"));
+		colors.put("DarkOrchid", getColorByRgb("#A4538A"));
+		colors.put("Emerald", getColorByRgb("#00A99D"));
+		colors.put("ForestGreen", getColorByRgb("#009B55"));
+		colors.put("Fuchsia", getColorByRgb("#8C368C"));
+		colors.put("Goldenrod", getColorByRgb("#FFDF42"));
+		colors.put("Gray", getColorByRgb("#949698"));
+		colors.put("Green", getColorByRgb("#00A64F"));
+		colors.put("GreenYellow", getColorByRgb("#DFE674"));
+		colors.put("JungleGreen", getColorByRgb("#00A99A"));
+		colors.put("Lavender", getColorByRgb("#F49EC4"));
+		colors.put("LimeGreen", getColorByRgb("#8DC73E"));
+		colors.put("Magenta", getColorByRgb("#EC008C"));
+		colors.put("Mahogany", getColorByRgb("#A9341F"));
+		colors.put("Maroon", getColorByRgb("#AF3235"));
+		colors.put("Melon", getColorByRgb("#F89E7B"));
+		colors.put("MidnightBlue", getColorByRgb("#006795"));
+		colors.put("Mulberry", getColorByRgb("#A93C93"));
+		colors.put("NavyBlue", getColorByRgb("#006EB8"));
+		colors.put("OliveGreen", getColorByRgb("#3C8031"));
+		colors.put("Orange", getColorByRgb("#F58137"));
+		colors.put("OrangeRed", getColorByRgb("#ED135A"));
+		colors.put("Orchid", getColorByRgb("#AF72B0"));
+		colors.put("Peach", getColorByRgb("#F7965A"));
+		colors.put("Periwinkle", getColorByRgb("#7977B8"));
+		colors.put("PineGreen", getColorByRgb("#008B72"));
+		colors.put("Plum", getColorByRgb("#92268F"));
+		colors.put("ProcessBlue", getColorByRgb("#00B0F0"));
+		colors.put("Purple", getColorByRgb("#99479B"));
+		colors.put("RawSienna", getColorByRgb("#974006"));
+		colors.put("Red", getColorByRgb("#ED1B23"));
+		colors.put("RedOrange", getColorByRgb("#F26035"));
+		colors.put("RedViolet", getColorByRgb("#A1246B"));
+		colors.put("Rhodamine", getColorByRgb("#EF559F"));
+		colors.put("RoyalBlue", getColorByRgb("#0071BC"));
+		colors.put("RoyalPurple", getColorByRgb("#613F99"));
+		colors.put("RubineRed", getColorByRgb("#ED017D"));
+		colors.put("Salmon", getColorByRgb("#F69289"));
+		colors.put("SeaGreen", getColorByRgb("#3FBC9D"));
+		colors.put("Sepia", getColorByRgb("#671800"));
+		colors.put("SkyBlue", getColorByRgb("#46C5DD"));
+		colors.put("SpringGreen", getColorByRgb("#C6DC67"));
+		colors.put("Tan", getColorByRgb("#DA9D76"));
+		colors.put("TealBlue", getColorByRgb("#00AEB3"));
+		colors.put("Thistle", getColorByRgb("#D883B7"));
+		colors.put("Turquoise", getColorByRgb("#00B4CE"));
+		colors.put("Violet", getColorByRgb("#58429B"));
+		colors.put("VioletRed", getColorByRgb("#EF58A0"));
+		colors.put("White", getColorByRgb("#FFFFFF"));
+		colors.put("WildStrawberry", getColorByRgb("#EE2967"));
+		colors.put("Yellow", getColorByRgb("#FFF200"));
+		colors.put("YellowGreen", getColorByRgb("#98CC70"));
+		colors.put("YellowOrange", getColorByRgb("#FAA21A"));
 
         addSvgnamesColors(colors);
 
@@ -294,7 +296,7 @@ public class ColorUtil {
         return rawColor instanceof Integer ? (float) (int) rawColor : (float) (double) rawColor;
     }
 
-    public static Color getColor(String rgb) {
+    private static Color getColorByRgb(String rgb) {
 		int r = Integer.valueOf(rgb.substring(1, 3), 16);
 		int g = Integer.valueOf(rgb.substring(3, 5), 16);
 		int b = Integer.valueOf(rgb.substring(5, 7), 16);
@@ -303,15 +305,18 @@ public class ColorUtil {
 
     private static Map<Color, String> initAnsiColors() {
         Map<Color, String> map = new HashMap<Color, String>(8);
-        //white and black may not be visible on all terminals, so we cheat and display them normally
-        map.put(Color.white, getBasicTerminalCode(0));
-        map.put(Color.black, getBasicTerminalCode(0));
+        map.put(Color.black, getBasicTerminalCode(30));
         map.put(Color.red, getBasicTerminalCode(31));
         map.put(Color.green, getBasicTerminalCode(32));
-        map.put(Color.blue, getBasicTerminalCode(34));
-        map.put(Color.cyan, getBasicTerminalCode(36));
-        map.put(Color.magenta, getBasicTerminalCode(35));
         map.put(Color.yellow, getBasicTerminalCode(33));
+        map.put(Color.blue, getBasicTerminalCode(34));
+        map.put(Color.magenta, getBasicTerminalCode(35));
+        map.put(Color.cyan, getBasicTerminalCode(36));
+        map.put(Color.white, getBasicTerminalCode(37));
+
+        //We remove the background terminal color, so that K cells would never be colored in this,
+        //but rather in the next closest color
+        map.remove(K.terminalColor);
 
         return Collections.unmodifiableMap(map);
     }
@@ -347,6 +352,10 @@ public class ColorUtil {
         //Ansi colors will have priority over 8-bit ones, including all the hacks.
         map.putAll(ansiColorsToTerminalCodes);
 
+        //We remove the background terminal color, so that K cells would never be colored in this,
+        //but rather in the next closest color
+        map.remove(K.terminalColor);
+
         return Collections.unmodifiableMap(map);
     }
 
@@ -374,15 +383,16 @@ public class ColorUtil {
         if (rgb == null)
             return "";
         if (colorToCodeConvertCache.get(codesMap).get(rgb) == null) {
-            colorToCodeConvertCache.get(codesMap).put(rgb, getClosestTerminalCodeImpl(rgb, codesMap));
+            colorToCodeConvertCache.get(codesMap).put(rgb, getClosestTerminalCodeImpl(rgb, codesMap, K.terminalColor));
         }
         return colorToCodeConvertCache.get(codesMap).get(rgb);
     }
 
-    private static String getClosestTerminalCodeImpl(Color rgb, Map<Color, String> codesMap) {
+    private static String getClosestTerminalCodeImpl(Color rgb, Map<Color, String> codesMap, Color forbiddenColor) {
         int minColorError = Integer.MAX_VALUE;
         Color minColor = null;
         for (Color ansi : codesMap.keySet()) {
+            if (ansi.equals(forbiddenColor)) continue;
             int colorError = getColorError(rgb, ansi);
             if (colorError < minColorError) {
                 minColorError = colorError;
@@ -401,4 +411,14 @@ public class ColorUtil {
 
 		return r*r + g*g + b*b;
 	}
+
+    public static Color getColorByName(String colorName) {
+        try {
+            // Find the field and value of colorName
+            Field field = Class.forName("java.awt.Color").getField(colorName);
+            return (Color)field.get(null);
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }
