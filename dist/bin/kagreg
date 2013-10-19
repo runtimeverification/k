@@ -1,7 +1,11 @@
 #!/usr/bin/env sh
+
 ulimit -s `ulimit -H -s`
+if [ -z "$K_OPTS" ];
+  then export K_OPTS="-Xss64m -Xmx1024m -Xss8m"
+fi
 if "$(dirname $0)/../lib/scripts/checkJava"; then
-  java -ea -ss8m -Xms64m -Xmx1G -jar "$(dirname $0)/../lib/java/k3.jar" -kagreg "$@"
+  java $K_OPTS -ea -jar "$(dirname $0)/../lib/java/k3.jar" -kagreg "$@"
 else
   exit 1
 fi

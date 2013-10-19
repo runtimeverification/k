@@ -14,6 +14,7 @@ import org.kframework.compile.transformers.AddTopCellConfig;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.krun.Main;
 import org.kframework.parser.ProgramLoader;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
@@ -31,7 +32,7 @@ public class KastFrontEnd {
 	private static final String HEADER_STANDARD = "";
 	private static final String FOOTER_STANDARD = "";
 	private static final String HEADER_EXPERIMENTAL = "Experimental options:";
-	private static final String FOOTER_EXPERIMENTAL = System.getProperty("line.separator") + "These options are non-standard and subject to change without notice.";
+	private static final String FOOTER_EXPERIMENTAL = Main.FOOTER_EXPERIMENTAL;
 	public static void printUsageS(KastOptionsParser op) {
 		org.kframework.utils.Error.helpMsg(USAGE, HEADER_STANDARD, FOOTER_STANDARD, op.getOptionsStandard(), new OptionComparator(op.getOptionList()));
 	}
