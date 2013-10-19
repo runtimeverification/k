@@ -15,9 +15,8 @@
 <!-- new tests -->
   <test
       definition="simple-typed-static.k"
-      programs="../../../../2_dynamic/exercises/exercise_2/programs/"
+      programs="../../../../2_dynamic/exercises/exercise_2/programs_and_results/"
       extension="simple"
-      results="."
       skip="pdf" >
       <all-programs>
         <krun-option name="-pattern" value="&lt;tasks&gt;.Bag&lt;/tasks&gt;"/>
