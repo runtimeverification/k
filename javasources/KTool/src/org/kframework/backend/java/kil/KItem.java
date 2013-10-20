@@ -11,6 +11,7 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
+import org.kframework.krun.K;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.util.Collection;
@@ -171,6 +172,19 @@ public class KItem extends Term implements Sorted {
             //e.printStackTrace();
         } catch (IllegalArgumentException e) {
             //e.printStackTrace();
+        	if (K.do_testgen) {
+				for (Term arg : kList.getItems()) {
+					//if (!arg.isGround()) {
+					if (!(arg instanceof Variable)) {
+						Variable evalResult = DomainConstrainedVariable
+								.getFreshContrainedVariable(sort, this);
+						// TODO(YilongL): when to check sat?
+						return evalResult;
+					}
+				}
+				
+				assert false; // shouldn't be here
+        	}
         } catch (RuntimeException e) {
             if (GlobalSettings.verbose) {
                 System.err.println("Ignored exception thrown by hook " + kLabelConstant + " : ");

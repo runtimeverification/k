@@ -245,6 +245,16 @@ public class JavaSymbolicKRun implements KRun {
 
         List<TestGenResult> generatorResults = new ArrayList<TestGenResult>();
 
+//        for (Rule rule : definition.rules()) {
+//        	System.out.println(rule);
+//        }
+        
+        if (bound == null) {
+            bound = -1;
+        }
+        if (depth == null) {
+            depth = -1;
+        }
         List<ConstrainedTerm> resultCfgs = symbolicRewriter.search(initCfg, null, null, bound, depth);
 
         for (ConstrainedTerm result : resultCfgs) {

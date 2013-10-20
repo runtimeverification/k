@@ -18,8 +18,8 @@ import java.util.Set;
  */
 public class Variable extends Term implements Sorted {
 
-    private static final String VARIABLE_PREFIX = "__var__";
-    private static int counter = 0;
+    protected static final String VARIABLE_PREFIX = "__var__";
+    protected static int counter = 0;
     private static Map<Integer, Variable> deserializationAnonymousVariableMap = new HashMap<>();
 
     public static Map<Variable, Variable> getFreshSubstitution(Set<Variable> variableSet) {
@@ -33,7 +33,7 @@ public class Variable extends Term implements Sorted {
     public static Variable getFreshVariable(String sort) {
         return new Variable(VARIABLE_PREFIX + (counter++), sort, true);
     }
-
+    
     /* TODO(AndreiS): cache the variables */
     private final String name;
     private final String sort;
