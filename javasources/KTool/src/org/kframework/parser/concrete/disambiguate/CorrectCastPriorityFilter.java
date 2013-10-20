@@ -34,7 +34,7 @@ public class CorrectCastPriorityFilter extends BasicTransformer {
 		// this should be done only if the casting is syntactic, because on semantic cast there should be another branch
 		// that has a typed variable.
 		if (cst.getContent() instanceof Variable) {
-			if (!((Variable) cst.getContent()).isUserTyped()) {
+			if (!((Variable) cst.getContent()).isUserTyped() && !cst.isSyntactic()) {
 				Variable var = new Variable((Variable) cst.getContent());
 				var.setUserTyped(true);
 				var.setSort(cst.getSort());
