@@ -1,6 +1,9 @@
 <tests>
   <test
       definition="kool-untyped.k"
+programs="."
+results="."
       extension="kool"
+      exclude="cycle"
       />
 </tests>

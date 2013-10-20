@@ -298,12 +298,14 @@
       definition="dist/tutorial/2_languages/2_kool/1_untyped/kool-untyped.k"
       programs="dist/tutorial/2_languages/2_kool/1_untyped/programs_and_results"
       extension="kool"
+      exclude="cycle"
       results="tests/examples/kool-untyped"
       />
   <test
       definition="dist/tutorial/2_languages/2_kool/2_typed/1_dynamic/kool-typed-dynamic.k"
       programs="dist/tutorial/2_languages/2_kool/2_typed/programs"
       extension="kool"
+      exclude="cycle"
       results="tests/examples/kool-typed-dynamic"
       />
   <test
