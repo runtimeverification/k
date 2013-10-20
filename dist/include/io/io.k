@@ -42,19 +42,19 @@ module IO
 //  rule (MyListItem(#parseInput("Int", Delimiters:String)) => MyListItem(String2Int(substrString(S, 0, lengthString(S) -Int 1)))) MyListItem(#buffer(S:String => "")) when findChar(S, Delimiters, 0) =/=Int -1 andBool lengthString(S) >Int 1 [stdin]
 
   rule (MyListItem(#parseInput(Sort:String, Delimiters:String)) 
-     => MyListItem(#parse(substrString(S, 0, lengthString(S) -Int 1), Sort))) 
+    => MyListItem(#parse(substrString(S, 0, lengthString(S) -Int 1), Sort))) 
        MyListItem(#buffer(S:String => "")) 
        MyListItem(#istream(_)) 
     when findChar(S, Delimiters, 0) =/=Int -1 
-      andBool Sort =/=String "String" 
-      andBool lengthString(S) >Int 1 [stdin]
+       andBool Sort =/=String "String" 
+       andBool lengthString(S) >Int 1 [stdin]
 
   rule MyListItem(#parseInput(Sort:String, Delimiters:String)) 
        MyListItem(#buffer(S:String => substrString(S, 1, lengthString(S)))) 
        _:MyList 
     when findChar(S, Delimiters, 0) =/=Int -1 
-      andBool Sort =/=String "String" 
-      andBool lengthString(S) <=Int 1 [stdin]
+       andBool Sort =/=String "String" 
+       andBool lengthString(S) <=Int 1 [stdin]
   
   rule MyListItem(#buffer(_)) 
        (MyListItem(#noIO) MyListItem(#istream(_:Int)) => .MyList) [stdin]

@@ -47,17 +47,12 @@ public class JavaSymbolicKRun implements KRun {
     private final KILtoBackendJavaKILTransformer transformer;
 
     public JavaSymbolicKRun(Context context) throws KRunExecutionException {
-		this.context = context;
-        transformer = new KILtoBackendJavaKILTransformer(context);
-
+        /* context is unused for directory paths; the actual context is de-serialized */
         try {
             /* load the definition from a binary file */
             InputStream inputStream = new BufferedInputStream(new FileInputStream(new File(
                     context.kompiled,
                     JavaSymbolicBackend.DEFINITION_FILENAME)));
-            //org.kframework.kil.Definition kilDefinition
-            //        = (org.kframework.kil.Definition) BinaryLoader.fromBinary(inputStream);
-            //definition = transformer.transformDefinition(kilDefinition);
             definition = (Definition) BinaryLoader.fromBinary(inputStream);
             inputStream.close();
 
@@ -67,18 +62,14 @@ public class JavaSymbolicKRun implements KRun {
 
             /* initialize the builtin function table */
             BuiltinFunction.init(definition);
-        } catch (FileNotFoundException e) {
-            throw new KRunExecutionException(e);
         } catch (IOException e) {
             throw new KRunExecutionException(e);
         }
+
+        this.context = definition.context();
+        this.context.kompiled = context.kompiled;
+        transformer = new KILtoBackendJavaKILTransformer(this.context);
 	}
-	
-    public static Cell<Term> wrap(Term t, String label) {
-        Cell<Term> cell = new Cell<Term>(label,t);
-        System.out.println("Content Kind: "+t.kind());
-        return cell;
-    }
 
     @Override
     public KRunResult<KRunState> run(org.kframework.kil.Term cfg) throws KRunExecutionException {
