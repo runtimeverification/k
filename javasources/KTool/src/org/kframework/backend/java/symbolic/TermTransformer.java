@@ -42,7 +42,15 @@ public class TermTransformer extends CopyOnWriteTransformer {
         super(definition);
     }
 
-    public Term transformTerm(Term term) {
+    /**
+     * Performs the transformation used for all {@code Term} nodes on a
+     * {@code Term}.
+     * 
+     * @param term
+     *            the term to be transformed
+     * @return the transformed term
+     */
+    protected Term transformTerm(Term term) {
         return term;
     }
 

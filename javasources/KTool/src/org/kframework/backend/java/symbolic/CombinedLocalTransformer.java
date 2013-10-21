@@ -12,11 +12,13 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * Combines a list of {@code LocalTransformer}s.
+ * 
  * @author Traian
  */
 public class CombinedLocalTransformer extends LocalTransformer {
 
-    List<LocalTransformer> transformers;
+    private List<LocalTransformer> transformers;
 
     public CombinedLocalTransformer() {
         transformers = new ArrayList<LocalTransformer>();
@@ -40,6 +42,9 @@ public class CombinedLocalTransformer extends LocalTransformer {
         return name;
     }
 
+    /**
+     * Applies all internal transformers on the given node in order.
+     */
     private ASTNode transformAll(JavaSymbolicObject node) {
         for (Transformer t : transformers) {
             ASTNode astNode = node.accept(t);

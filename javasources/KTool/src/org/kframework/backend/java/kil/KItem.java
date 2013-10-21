@@ -91,6 +91,12 @@ public class KItem extends Term implements Sorted {
         }
     }
 
+    /**
+     * Evaluates this {@code KItem} if it is a predicate or function
+     * 
+     * @param context a term context
+     * @return the evaluated result on success, or this {@code KItem} otherwise
+     */
     public Term evaluateFunction(TermContext context) {
         Definition definition = context.definition();
         if (!(kLabel instanceof KLabelConstant)) {

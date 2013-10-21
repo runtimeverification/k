@@ -61,7 +61,7 @@ public class MacroExpander extends TermTransformer {
     }
 
     @Override
-    public Term transformTerm(Term term) {
+    protected Term transformTerm(Term term) {
         Term transformedTerm = rewriter.getOneSuccessor(term);
         return transformedTerm != null ? (Term) transformedTerm.accept(this) : term;
     }

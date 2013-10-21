@@ -19,6 +19,13 @@ import java.util.*;
 
 
 /**
+ * Performs transformation which includes pre-processing and post-processing.
+ * <p><br>
+ * Transformation on a given node is performed in three steps:
+ * <li>pre-processing that node;
+ * <li>applying transformation recursively on its children;
+ * <li>post-processing that node.
+ * 
  * @author AndreiS
  */
 public abstract class PrePostTransformer implements Transformer {
@@ -26,6 +33,9 @@ public abstract class PrePostTransformer implements Transformer {
     protected final TermContext context;
     protected final Definition definition;
 
+    /**
+     * Returns the {@code CombinedLocalTransformer} used for pre-processing.
+     */
     public CombinedLocalTransformer getPreTransformer() {
         return preTransformer;
     }
@@ -34,6 +44,9 @@ public abstract class PrePostTransformer implements Transformer {
         this.preTransformer = preTransformer;
     }
 
+    /**
+     * Returns the {@code CombinedLocalTransformer} used for post-processing.
+     */
     public CombinedLocalTransformer getPostTransformer() {
         return postTransformer;
     }
@@ -42,8 +55,8 @@ public abstract class PrePostTransformer implements Transformer {
         this.postTransformer = postTransformer;
     }
 
-    CombinedLocalTransformer preTransformer = new CombinedLocalTransformer();
-    CombinedLocalTransformer postTransformer = new CombinedLocalTransformer();
+    protected CombinedLocalTransformer preTransformer = new CombinedLocalTransformer();
+    protected CombinedLocalTransformer postTransformer = new CombinedLocalTransformer();
 
 	public PrePostTransformer(TermContext context) {
 		this.context = context;

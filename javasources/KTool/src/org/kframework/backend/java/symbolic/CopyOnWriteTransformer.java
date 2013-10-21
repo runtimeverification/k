@@ -46,6 +46,13 @@ import com.google.common.collect.Multimap;
 
 
 /**
+ * Performs transformation in post-order using a copy-on-write(COW) strategy.
+ * This class serves as an adapter class: it provides a default post-order
+ * traversal behavior for each KIL node and avoids constructing a new copy of
+ * the target node to return unless it is actually going to be mutated.
+ * <p>
+ * COW strategy allows safe sub-term sharing.
+ * 
  * @author AndreiS
  */
 public class CopyOnWriteTransformer implements Transformer {

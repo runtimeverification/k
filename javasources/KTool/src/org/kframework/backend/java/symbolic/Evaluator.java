@@ -5,11 +5,15 @@ import org.kframework.kil.ASTNode;
 
 
 /**
+ * Evaluates predicates and functions in post-order using a copy-on-write
+ * strategy.
+ * 
  * @author AndreiS
  */
 public class Evaluator extends CopyOnWriteTransformer {
 
-    private final Transformer localEvaluator;
+    // TODO(YilongL): why not just declare it as a LocalTransformer?
+    private final Transformer localEvaluator; // used to perform the actual evaluation
 
     public Evaluator(TermContext context) {
         super(context);

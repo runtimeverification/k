@@ -4,8 +4,10 @@ import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
 
 /**
-* @author Traian
-*/
+ * Evaluates predicates and functions without doing tree traversal.
+ * 
+ * @author Traian
+ */
 public class LocalEvaluator extends LocalTransformer {
 
     public LocalEvaluator(TermContext context) {

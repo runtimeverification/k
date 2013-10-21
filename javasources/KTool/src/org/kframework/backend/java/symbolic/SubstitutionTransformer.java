@@ -9,11 +9,9 @@ import org.kframework.kil.ASTNode;
 
 
 /**
- * Created with IntelliJ IDEA.
- * User: andrei
- * Date: 3/26/13
- * Time: 9:37 PM
- * To change this template use File | Settings | File Templates.
+ * Substitutes variables with terms according to a given substitution map.
+ * 
+ * @author AndreiS
  */
 public class SubstitutionTransformer extends PrePostTransformer {
 
@@ -56,6 +54,10 @@ public class SubstitutionTransformer extends PrePostTransformer {
         }
     }
 
+    /**
+     * Checks
+     *
+     */
     private class LocalSubstitutionChecker extends LocalTransformer {
         @Override
         public KList transform(KList kList) {
