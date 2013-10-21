@@ -180,8 +180,7 @@ public class KItem extends Term implements Sorted {
             //e.printStackTrace();
             if (K.do_testgen) {
                 for (Term arg : kList.getItems()) {
-                    // if (!arg.isGround()) {
-                    if (!(arg instanceof Variable)) {
+                    if (arg instanceof Variable) {
                         Variable evalResult = DomainConstrainedVariable
                                 .getFreshContrainedVariable(sort, this);
                         // TODO(YilongL): when to check sat?
