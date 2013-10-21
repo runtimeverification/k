@@ -4,43 +4,21 @@
     <output url="file://$MODULE_DIR$/bin" />
     <output-test url="file://$MODULE_DIR$/../../out/test/KTool" />
     <exclude-output />
-    <content url="file://$MODULE_DIR$/../../dist">
-      <excludeFolder url="file://$MODULE_DIR$/../../dist/lib/java" />
-      <excludeFolder url="file://$MODULE_DIR$/../../dist/lib/maude/binaries" />
-      <excludeFolder url="file://$MODULE_DIR$/../../dist/lib/native" />
-    </content>
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/test" />
     </content>
-    <content url="file://$MODULE_DIR$/../../tests" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/strj.jar!/" />
+          <root url="file://$MODULE_DIR$/../../../lib/java" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="library" name="strategoxt" level="project" />
-    <orderEntry type="library" name="apache-commons" level="project" />
-    <orderEntry type="library" name="jung" level="project" />
-    <orderEntry type="library" name="diffutils" level="project" />
-    <orderEntry type="library" name="console" level="project" />
-    <orderEntry type="library" name="options" level="project" />
-    <orderEntry type="library" name="guava-14.0.1" level="project" />
-    <orderEntry type="library" name="aterm-java" level="project" />
-    <orderEntry type="library" name="com.microsoft.z3" level="project" />
-    <orderEntry type="module-library" scope="TEST">
-      <library>
-        <CLASSES>
-          <root url="jar://$APPLICATION_HOME_DIR$/lib/junit-4.10.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
+        <jarDirectory url="file://$MODULE_DIR$/../../../lib/java" recursive="false" />
+        <jarDirectory url="file://$MODULE_DIR$/../../../lib/java" recursive="false" type="SOURCES" />
       </library>
     </orderEntry>
   </component>
