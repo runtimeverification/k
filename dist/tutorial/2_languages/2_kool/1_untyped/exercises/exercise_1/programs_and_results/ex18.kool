@@ -1,0 +1,23 @@
+class A {
+  private var x = 7;
+  method A() {
+  }
+  method init(a){
+    x=a.x;
+  }
+}
+
+class B extends A {
+  private var x = 17;
+  method B() {
+  }
+}
+
+class Main {
+  method Main() {
+    var a = new A();
+    var b = new B();
+    a.init(b);
+    print("This should not be reached.\n");
+  }
+}

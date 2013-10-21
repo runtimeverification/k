@@ -1,0 +1,28 @@
+class B {
+    private var x = 3;
+    method B() {
+	x = 5;
+    }
+    method get() {
+	return x;
+    }
+}
+
+class A extends B {
+    private var x = 7;
+    method A() {
+        super.B();
+	x = 10;
+    }
+    method get(){
+	return super.x;
+    }
+}
+
+class Main {
+  method Main() {
+    print("The next should not be printed.\n");
+    print((new A()).get());
+  }
+}
+

@@ -1,0 +1,21 @@
+class B {
+    private var x = 3;
+    method B() {
+	x = 5;
+    }
+}
+
+class A extends B {
+    private var y = 7;
+    method A() {
+        super.B();
+	y = 10;
+    }
+}
+
+class Main {
+  method Main() {
+    print("The next should not be printed.\n");
+    print((new A()).x);
+  }
+}

@@ -1,0 +1,2 @@
+Next should not be printed, because x is private in A
+and we do not default to B.

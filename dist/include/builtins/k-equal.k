@@ -73,11 +73,13 @@ module K-EQUAL-HOOKS
   rule LK1:KList =/=KList LK2:KList  => notBool(LK1 ==KList LK2)
 
   // equality over KLabel
-  syntax Bool ::= KLabel "==KLabel" KLabel   [function]
+  syntax Bool ::= KLabel "==KLabel" KLabel
+    [function, latex({#1}\mathrel{=_{\it KLabel}}{#2})]
   rule '_==KLabel_(K1:K,,K2:K) => K1 ==K K2 [function, anywhere]
 
   // disequality over KLabel
-  syntax Bool ::= KLabel "=/=KLabel" KLabel  [function]
+  syntax Bool ::= KLabel "=/=KLabel" KLabel
+    [function, latex({#1}\mathrel{\neq_{\it KLabel}}{#2})]
   rule Lbl1:KLabel =/=KLabel Lbl2:KLabel => notBool(Lbl1 ==KLabel Lbl2)
 
   // equality over lists

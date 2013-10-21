@@ -1,0 +1,14 @@
+Currently, all class members (fields and/or methods) are public in KOOL.
+Sometimes we want to keep members of a class private, in the sense that
+subclasses do not have direct access to those members.  This exercise asks
+you to add private members to untyped KOOL.  Syntactically, you should
+allow a new keyword, "private", to optionally precede member
+declarations.  For example, "private var x=10, y=10;" or "private
+method f(x,y) {...}".
+
+Semantically, the private members should have the
+same semantics as in conventional OO programming languages, say
+Java.  For simplicity, you can assume that all members defined in a
+class, private or public, are distinct.  Also, you can assume that
+methods are identified, for overriding purposes, only by their name
+(and not by their result or arguments type).

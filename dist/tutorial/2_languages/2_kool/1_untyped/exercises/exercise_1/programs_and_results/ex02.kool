@@ -1,0 +1,15 @@
+class A {
+    var x = 7;
+    private method A() {
+	x = 10;
+    }
+}
+
+class Main {
+  method Main() {
+    var a = new A();
+    print("This is reached: the constructor is called after the current class is set\n");
+    a.A();
+    print("But this should not be reachaed, because method A() is private.\n");
+  }
+}

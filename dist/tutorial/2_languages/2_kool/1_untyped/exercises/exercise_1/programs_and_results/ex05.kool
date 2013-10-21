@@ -1,0 +1,21 @@
+class B {
+    var x = 3;
+    method B() {
+	x = 5;
+    }
+}
+
+class A extends B {
+    private var y = 7;
+    method A() {
+        super.B();  // KOOL doesn't automatically call the superclass constructor
+	y = 10;
+    }
+}
+
+class Main {
+  method Main() {
+    print("The next should be printed now: ");
+    print((new A()).x);
+  }
+}

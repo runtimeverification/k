@@ -2,18 +2,20 @@
 
 <!-- original tests -->
   <test
-      definition="simple-untyped.k"
+      definition="kool-untyped.k"
       programs="../../../programs_and_results"
       results="../../../programs_and_results"
-      extension="simple"
-      exclude="dekker" 
+      extension="kool"
+      exclude="cycle" 
       skip="pdf">
   </test>
 
 <!-- new tests -->
   <test
-      definition="simple-untyped.k"
-      extension="simple"
+      definition="kool-untyped.k"
+programs="."
+results="."
+      extension="kool"
       skip="pdf">
   </test>
 

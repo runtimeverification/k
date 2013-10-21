@@ -1,0 +1,26 @@
+// This example shows that we can shadow a public field with a private one.
+// This works in Java, too.
+
+class B {
+  var x = 3;
+  method B() {
+  }
+  method get() {
+    return x;
+  }
+}
+
+class A extends B {
+  private var x = 7;
+  method A() {
+  }
+  method get(){
+    return x;
+  }
+}
+
+class Main {
+  method Main() {
+    print((new A()).get());
+  }
+}
