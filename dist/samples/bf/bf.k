@@ -13,7 +13,7 @@ module BF-SYNTAX
 			| "+" 
 			| "-" 
 			| "."
-			| "," 
+			| "," [onlyLabel]
 			| "[" Instructions "]"
 			| Ignore
 
@@ -54,7 +54,7 @@ module BF
   /*@
   Input the byte at the data pointer.
   */
-  rule <k> , => .K ...</k>
+  rule <k> '`,(.KList) => .K ...</k>
        <array>... P |-> (_ => V) ...</array>
        <ptr> P:Int </ptr>
        <in> ListItem(V:Int) => .List ...</in>
