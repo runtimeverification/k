@@ -37,7 +37,7 @@ public class KPaths {
 		// String env = System.getenv("K_BASE");
 		String path = new File(KPaths.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getAbsolutePath();
 		if (!path.endsWith(".jar"))
-			path = new File(path).getParentFile().getParentFile().getParentFile().getAbsolutePath() + "/dist/" + JAR_PATH;
+			path = new File(path).getParentFile().getParentFile().getParentFile().getParentFile().getAbsolutePath() + "/" + JAR_PATH;
 		try {
 			String decodedPath = URLDecoder.decode(path, "UTF-8");
 			File parent = new File(decodedPath).getParentFile().getParentFile().getParentFile();

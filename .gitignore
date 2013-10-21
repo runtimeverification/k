@@ -6,4 +6,8 @@
 .metadata
 .cache
 junit-reports
-dist/samples/test/
+samples/test/
+lib/version.txt
+lib/java/k3.jar
+lib/java/ktest.jar
+release/

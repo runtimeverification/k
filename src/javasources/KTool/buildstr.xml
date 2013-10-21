@@ -35,7 +35,7 @@
 		<delete file="../parsers/Concrete/trans/ConcreteMain.rtree" />
 		<delete file="../parsers/Concrete/trans/ConcreteMain.dep" />
 		<delete dir="../parsers/Concrete/trans/ConcreteMain" />
-		<java failonerror="true" dir="../parsers/Concrete/trans/" jar="${basedir}/../../dist/lib/java/strategoxt.jar" fork="true">
+		<java failonerror="true" dir="../parsers/Concrete/trans/" jar="${basedir}/../../../lib/java/strategoxt.jar" fork="true">
 			<arg line="-i starter.str -o ConcreteMain -la stratego-sglr --lib -I .. -p org.kframework.parser.concrete.lib --clean" />
 		</java>
 		<delete>

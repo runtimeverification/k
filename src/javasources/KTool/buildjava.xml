@@ -6,6 +6,7 @@
               as the first entry and export the buildfile again. -->
 <project basedir="." default="build" name="KTool">
 	<property environment="env" />
+	<property name="javalibs" location="../../../lib/java"/>
 	<property name="ECLIPSE_HOME" value="../../../eclisespoofax" />
 	<property name="debuglevel" value="source,lines,vars" />
 	<property name="target" value="1.7" />
@@ -14,23 +15,23 @@
 		<pathelement location="bin" />
 		<path id="KTool.classpath">
 			<pathelement location="bin" />
-			<pathelement location="../../dist/lib/java/aterm-java.jar" />
-			<pathelement location="../../dist/lib/java/collections-generic-4.01.jar" />
-			<pathelement location="../../dist/lib/java/com.microsoft.z3.jar" />
-			<pathelement location="../../dist/lib/java/commons-cli-1.2.jar" />
-			<pathelement location="../../dist/lib/java/commons-io-2.1.jar" />
-			<pathelement location="../../dist/lib/java/commons-lang3-3.1.jar" />
-			<pathelement location="../../dist/lib/java/diffutils-1.2.1.jar" />
-			<pathelement location="../../dist/lib/java/guava-14.0.1.jar" />
-			<pathelement location="../../dist/lib/java/jansi-1.8.jar" />
-			<pathelement location="../../dist/lib/java/jline-1.0.jar" />
-			<pathelement location="../../dist/lib/java/jopt-simple-3.3.jar" />
-			<pathelement location="../../dist/lib/java/jung-algorithms-2.0.1.jar" />
-			<pathelement location="../../dist/lib/java/jung-api-2.0.1.jar" />
-			<pathelement location="../../dist/lib/java/jung-graph-impl-2.0.1.jar" />
-			<pathelement location="../../dist/lib/java/jung-io-2.0.1.jar" />
-			<pathelement location="../../dist/lib/java/jung-visualization-2.0.1.jar" />
-			<pathelement location="../../dist/lib/java/strategoxt.jar" />
+			<pathelement location="${javalibs}/aterm-java.jar" />
+			<pathelement location="${javalibs}/collections-generic-4.01.jar" />
+			<pathelement location="${javalibs}/com.microsoft.z3.jar" />
+			<pathelement location="${javalibs}/commons-cli-1.2.jar" />
+			<pathelement location="${javalibs}/commons-io-2.1.jar" />
+			<pathelement location="${javalibs}/commons-lang3-3.1.jar" />
+			<pathelement location="${javalibs}/diffutils-1.2.1.jar" />
+			<pathelement location="${javalibs}/guava-14.0.1.jar" />
+			<pathelement location="${javalibs}/jansi-1.8.jar" />
+			<pathelement location="${javalibs}/jline-1.0.jar" />
+			<pathelement location="${javalibs}/jopt-simple-3.3.jar" />
+			<pathelement location="${javalibs}/jung-algorithms-2.0.1.jar" />
+			<pathelement location="${javalibs}/jung-api-2.0.1.jar" />
+			<pathelement location="${javalibs}/jung-graph-impl-2.0.1.jar" />
+			<pathelement location="${javalibs}/jung-io-2.0.1.jar" />
+			<pathelement location="${javalibs}/jung-visualization-2.0.1.jar" />
+			<pathelement location="${javalibs}/strategoxt.jar" />
 		</path>
 	</path>
 	<target name="init">
@@ -47,9 +48,9 @@
 				<exclude name="**/*.java" />
 			</fileset>
 		</copy>
-		<javacc target="src/org/kframework/backend/pdmc/pda/buchi/parser/PromelaBuchiParser.jj" javacchome="../../dist/lib/java" />
-		<javacc target="src/org/kframework/parser/basic/Basic.jj" javacchome="../../dist/lib/java"/>
-		<javacc target="src/org/kframework/utils/kastparser/KastParser.jj" javacchome="../../dist/lib/java" />
+		<javacc target="src/org/kframework/backend/pdmc/pda/buchi/parser/PromelaBuchiParser.jj" javacchome="../../../lib/java" />
+		<javacc target="src/org/kframework/parser/basic/Basic.jj" javacchome="../../../lib/java"/>
+		<javacc target="src/org/kframework/utils/kastparser/KastParser.jj" javacchome="../../../lib/java" />
 		<condition property="isJava7">
 			<equals arg1="${ant.java.version}" arg2="1.7" />
 		</condition>

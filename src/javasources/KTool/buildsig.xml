@@ -24,7 +24,7 @@
 	- create the path for the AntPropertyHelper
 	- compile the AntPropertyHelper
 	-->
-	<property name="build.strategoxt.sdf" value="${basedir}/../../dist/lib/native/${osNativesDir}/" />
+	<property name="build.strategoxt.sdf" value="${basedir}/../../../lib/native/${osNativesDir}/" />
 
 	<!-- call both targets -->
 	<target name="all.signature" depends="concrete.signature" />
