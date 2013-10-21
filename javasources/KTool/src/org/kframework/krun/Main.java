@@ -720,7 +720,12 @@ public class Main {
         Context context = new Context();
         K.init(context);
         // delete temporary krun directory
-        FileUtil.deleteDirectory(new File(K.krunDir));
+        try {
+            FileUtil.deleteDirectory(new File(K.krunDir));
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
                 try {

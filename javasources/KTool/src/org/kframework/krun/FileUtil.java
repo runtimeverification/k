@@ -5,6 +5,9 @@ import org.apache.commons.io.FileUtils;
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -114,52 +117,36 @@ public class FileUtil {
 			throw new IllegalArgumentException("Delete: deletion failed");
 	}
 
-	//delete a directory specified by the path
-	public static boolean deleteDirectory(File path) {
-		if (path.exists()) {
-			File[] files = path.listFiles();
-			if (files != null && files.length > 0) {
-				for (int i = 0; i < files.length; i++) {
-					if (files[i].isDirectory()) {
-						deleteDirectory(files[i]);
-					} else {
-						files[i].delete();
-					}
-				}
-			}
-		}
-		return (path.delete());
+	public static void deleteDirectory(File dir) throws IOException {
+        deleteDirectory(dir.toPath());
 	}
-	
-	//rename a folder having it's current name oldName with the specified newName 
+
+    private static void deleteDirectory(Path path) throws IOException {
+        if (Files.exists(path)) {
+            if (Files.isDirectory(path)) {
+                for (Path file : Files.newDirectoryStream(path)) {
+                    deleteDirectory(file);
+                }
+            }
+            Files.delete(path);
+        }
+    }
+
+    //rename a folder having it's current name oldName with the specified newName
 	public static void renameFolder(String oldName, String newName) throws IOException {
-		File srcFile = new File(oldName);
-		boolean bSucceeded = false;
+		Path srcFile = Paths.get(oldName);
 		
-		if (srcFile.exists()) {
+		if (Files.exists(srcFile)) {
 			RandomAccessFile lockFile = new RandomAccessFile(new File(K.kdir + K.fileSeparator + "krun.lock"),"rw");
 			FileChannel channel = lockFile.getChannel();
 			FileLock lock = channel.lock();
 
-			try {
-				File destFile = new File(newName);
-				//test if the krun directory is empty and if is not empty delete it
-				if (destFile.exists()) {
-					if (!FileUtil.deleteDirectory(destFile)) {
-						throw new IOException(oldName + " was not successfully deleted");
-					}
-				}
-				//rename krun temp directory into "krun" 
-				if (!srcFile.renameTo(destFile)) {
-					throw new IOException(oldName + " was not successfully renamed to " + newName);
-				} else {
-					bSucceeded = true;
-				}
-			} finally {
-				if (bSucceeded) {
-					srcFile.delete();
-				}
-			}
+            Path destFile = Paths.get(newName);
+            //test if the krun directory is empty and if is not empty delete it
+            FileUtil.deleteDirectory(destFile);
+            //rename krun temp directory into "krun"
+            Files.move(srcFile, destFile);
+
 			lock.release();
 			lockFile.close();
 		}
