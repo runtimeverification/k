@@ -154,9 +154,9 @@ public class SymbolicRewriter {
         }
 
         strategy.apply(getRules(constrainedTerm.term()));
-        while (strategy.hasNext()) {
-            Rule rule = strategy.next();
-        //for (Rule rule : getRules(constrainedTerm.term())) {
+        //while (strategy.hasNext()) {
+        //    Rule rule = strategy.next();
+        for (Rule rule : getRules(constrainedTerm.term())) {
             ruleStopwatch.reset();
             ruleStopwatch.start();
 
@@ -284,12 +284,12 @@ public class SymbolicRewriter {
         for (step = 0; !queue.isEmpty() && step != depth; ++step) {
             for (ConstrainedTerm term : queue) {
                 strategy = new StructuralStrategy(GlobalSettings.transition);
-                computeRewriteStep(term,1);
-                if (results.isEmpty()) {
-                  System.out.println("Ready for a transition");
-                  strategy = new TransitionStrategy(GlobalSettings.transition);
+                //computeRewriteStep(term,1);
+                //if (results.isEmpty()) {
+                //  System.out.println("Ready for a transition");
+                //  strategy = new TransitionStrategy(GlobalSettings.transition);
                   computeRewriteStep(term);
-                }
+                //}
 
                 if (results.isEmpty()) {
                     /* final term */
