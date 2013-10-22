@@ -304,11 +304,23 @@ public class Test implements Comparable<Test> {
                 test.getAttribute(Configuration.LANGUAGE), rootDefDir,
                 Configuration.DEF_ERROR);
 
+        // programs without extensions
+        if (!test.getAttribute(Configuration.PROGRAMS_DIR).trim().equals("") && test.getAttribute(Configuration.EXTENSIONS2).trim().equals("")) {
+            String msg = "You missed 'extension' attribute: ";
+            msg += "<test definition=" + test.getAttribute(Configuration.LANGUAGE) + " programs=" + test.getAttribute(Configuration.PROGRAMS_DIR) + " />";
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "", ""));
+        // extensions without programs
+        } else if (test.getAttribute(Configuration.PROGRAMS_DIR).trim().equals("") && !test.getAttribute(Configuration.EXTENSIONS2).trim().equals("")) {
+            String msg = "You cannot use 'extension' attribute without 'programs' attribute: ";
+            msg += "<test definition=" + test.getAttribute(Configuration.LANGUAGE) + " programs=" + test.getAttribute(Configuration.PROGRAMS_DIR) + " />";
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "", ""));
+        }
+
         // get programs dir
+        programsFolders = new LinkedList<String>();
         List<String> allpd = Arrays.asList(test.getAttribute(
-                Configuration.PROGRAMS_DIR).split("\\s+"));
+                Configuration.PROGRAMS_DIR).trim().split("\\s+"));
         if (allpd.size() > 0) {
-            programsFolders = new LinkedList<String>();
             for (String pd : allpd) {
                 if (pd != null && !pd.equals("")) {
                     String p = resolveAbsolutePathRelativeTo(pd.trim(),
@@ -321,21 +333,18 @@ public class Test implements Comparable<Test> {
         }
 
         // get tests results
-        List<String> allrd = new LinkedList<String>();
-        if (test.hasAttribute(Configuration.RESULTS))
-                allrd = Arrays.asList(test.getAttribute(Configuration.RESULTS).split("\\s+"));
         resultsFolders = new LinkedList<String>();
+        List<String> allrd = Arrays.asList(test.getAttribute(Configuration.RESULTS).trim().split("\\s+"));
         if (allrd.size() > 0) {
-            // reset the default results folder if Configuration.RESULTS is given
-            for (String rd : allrd)
+            for (String rd : allrd) {
                 if (rd != null && !rd.equals("")) {
                     String p = resolveAbsolutePathRelativeTo(rd.trim(),
                             rootResultsDir, Configuration.RES_ERROR);
-                    if (p != null)
+                    if (p != null) {
                         resultsFolders.add(p);
+                    }
                 }
-        } else {
-            resultsFolders.add(rootResultsDir);
+            }
         }
 
         // get report dir
@@ -371,11 +380,11 @@ public class Test implements Comparable<Test> {
 
         // extensions
         extensions = Arrays.asList(test.getAttribute(Configuration.EXTENSIONS2)
-                .split("\\s+"));
+                .trim().split("\\s+"));
 
         // exclude programs
         excludePrograms = Arrays.asList(test
-                .getAttribute(Configuration.EXCLUDE).split("\\s+"));
+                .getAttribute(Configuration.EXCLUDE).trim().split("\\s+"));
 
         // kompile options
         NodeList kompileOpts = test

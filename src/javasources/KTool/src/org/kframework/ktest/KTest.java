@@ -102,11 +102,37 @@ public class KTest {
                 String msg = "You cannot use --" + Configuration.DIRECTORY_OPTION + " option when a single K definition is given: " + Configuration.KDEF;
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
             }
-            // Required: --extensions
+            // Optional: --programs
+            if (cmd.hasOption(Configuration.PROGRAMS_OPTION)) {
+                Configuration.PGM_DIR = cmd.getOptionValue(Configuration.PROGRAMS_OPTION).trim();
+                if (Configuration.PGM_DIR.equals("")) {
+                    Configuration.PGM_DIR = null;
+                }
+            }
+            // Optional: --results
+            if (cmd.hasOption(Configuration.RESULTS_OPTION)) {
+                Configuration.RESULTS_FOLDER = cmd.getOptionValue(Configuration.RESULTS_OPTION).trim();
+                if (Configuration.RESULTS_FOLDER.equals("")) {
+                    Configuration.RESULTS_FOLDER = null;
+                }
+            }
+            // Optional: --extensions
             if (cmd.hasOption(Configuration.EXTENSIONS_OPTION)) {
-                Configuration.EXTENSIONS = Arrays.asList(cmd.getOptionValue(Configuration.EXTENSIONS_OPTION).split("\\s+"));
+                String extensionsOption = cmd.getOptionValue(Configuration.EXTENSIONS_OPTION).trim();
+                if (!extensionsOption.equals("")) {
+                    Configuration.EXTENSIONS = Arrays.asList(extensionsOption.split("\\s+"));
+                }
+            }
+            // Required: all or nothing: --programs and --extensions
+            if (Configuration.EXTENSIONS != null) {
+                // --extensions without --programs
+                if (Configuration.PGM_DIR == null) {
+                    String msg = "The given --extensions option has no effect. You might miss --programs option.";
+                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
+                }
             } else {
-                if (cmd.hasOption(Configuration.PROGRAMS_OPTION)) {
+                // --programs without --extensions
+                if (Configuration.PGM_DIR != null) {
                     String msg = "You have to provide a list of extensions by using --" + Configuration.EXTENSIONS_OPTION + " option, when --" + Configuration.PROGRAMS_OPTION + " is given.";
                     GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
                 }
@@ -123,6 +149,21 @@ public class KTest {
                     GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
                 }
             }
+            String inputDir = new File(input).getAbsoluteFile().getParent();
+            // Optional: --programs
+            if (cmd.hasOption(Configuration.PROGRAMS_OPTION)) {
+                Configuration.PGM_DIR = cmd.getOptionValue(Configuration.PROGRAMS_OPTION).trim();
+                org.kframework.utils.Error.checkIfInputDirectory(Configuration.PGM_DIR);
+            } else {
+                Configuration.PGM_DIR = inputDir;
+            }
+            // Optional: --results
+            if (cmd.hasOption(Configuration.RESULTS_OPTION)) {
+                Configuration.RESULTS_FOLDER = cmd.getOptionValue(Configuration.RESULTS_OPTION).trim();
+                org.kframework.utils.Error.checkIfInputDirectory(Configuration.RESULTS_FOLDER);
+            } else {
+                Configuration.RESULTS_FOLDER = inputDir;
+            }
             // Invalid: --extensions
             if (cmd.hasOption(Configuration.EXTENSIONS_OPTION)) {
                 String msg = "You cannot use --" + Configuration.EXTENSIONS_OPTION + " option when a test configuration is given: " + Configuration.CONFIG;
@@ -137,34 +178,11 @@ public class KTest {
             String msg = "You have to provide a valid input file, which is either a K definition (*.k) or a test configuration (*.xml).";
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
         }
-        {
-            String inputDir = new File(input).getAbsoluteFile().getParent();
-            Configuration.PGM_DIR = inputDir;
-            Configuration.RESULTS_FOLDER = inputDir;
-        }
-
-        // Programs folder
-        if (cmd.hasOption(Configuration.PROGRAMS_OPTION)) {
-            Configuration.PGM_DIR = cmd
-                    .getOptionValue(Configuration.PROGRAMS_OPTION);
-            org.kframework.utils.Error.checkIfInputDirectory(Configuration.PGM_DIR);
-            /*
-            // also set the results to be programs folder by default
-            Configuration.RESULTS_FOLDER = Configuration.PGM_DIR;
-            */
-        }
 
         // List of excluded programs
         if (cmd.hasOption(Configuration.EXCLUDE_OPTION)) {
             Configuration.EXCLUDE_PROGRAMS = Arrays.asList(cmd.getOptionValue(
                     Configuration.EXCLUDE_OPTION).split("\\s+"));
-        }
-
-        // Results directory
-        if (cmd.hasOption(Configuration.RESULTS_OPTION)) {
-            Configuration.RESULTS_FOLDER = cmd
-                    .getOptionValue(Configuration.RESULTS_OPTION);
-            org.kframework.utils.Error.checkIfInputDirectory(Configuration.RESULTS_FOLDER);
         }
 
         if (cmd.hasOption(Configuration.REPORT_OPTION)) {
@@ -213,8 +231,9 @@ public class KTest {
                     : Arrays.asList(Configuration.PGM_DIR.split("\\s+"));
             List<String> resultsFolder = Configuration.RESULTS_FOLDER == null ? new LinkedList<String>()
                     : Arrays.asList(Configuration.RESULTS_FOLDER.split("\\s+"));
+            List<String> extensions = Configuration.EXTENSIONS == null ? new LinkedList<String>() : Configuration.EXTENSIONS;
             Test test = new Test(Configuration.KDEF, pgmsFolder, resultsFolder,
-                    Configuration.EXTENSIONS, Configuration.EXCLUDE_PROGRAMS,
+                    extensions, Configuration.EXCLUDE_PROGRAMS,
                     System.getProperty("user.dir"));
             alltests.add(test);
 
