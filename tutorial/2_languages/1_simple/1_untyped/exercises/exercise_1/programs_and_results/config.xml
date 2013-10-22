@@ -6,8 +6,7 @@
       programs="../../../programs_and_results"
       results="../../../programs_and_results"
       extension="simple"
-      exclude="dekker" 
-      skip="pdf">
+      exclude="dekker" >
   </test>
 
 <!-- new tests -->
@@ -15,8 +14,7 @@
       definition="simple-untyped.k"
       programs="."
       results="."
-      extension="simple"
-      skip="pdf">
+      extension="simple" >
   </test>
 
 </tests>

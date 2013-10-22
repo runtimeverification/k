@@ -6,8 +6,7 @@
       programs="../../../programs_and_results"
       results="../../../programs_and_results"
       extension="kool"
-      exclude="cycle" 
-      skip="pdf">
+      exclude="cycle" >
   </test>
 
 <!-- new tests -->
@@ -15,8 +14,7 @@
       definition="kool-untyped.k"
       programs="."
       results="."
-      extension="kool"
-      skip="pdf">
+      extension="kool" >
   </test>
 
 </tests>
