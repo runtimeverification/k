@@ -456,7 +456,6 @@ public class Main {
                 Error.report(K.output_mode
                         + " is not a valid value for output-mode option");
             }
-
             System.exit(0);
         } catch (IOException e) {
             e.printStackTrace();
@@ -728,11 +727,7 @@ public class Main {
         }
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
-                try {
-                    FileUtil.renameFolder(K.krunTempDir, K.krunDir);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                renameKRunDir();
             }
         });
 
@@ -1157,6 +1152,14 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
+        }
+    }
+
+    private static synchronized void renameKRunDir() {
+        try {
+            FileUtil.renameFolder(K.krunTempDir, K.krunDir);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

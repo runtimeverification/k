@@ -6,17 +6,15 @@
       programs="../../../programs_and_results"
       results="../../../programs_and_results"
       extension="kool"
-      exclude="cycle" 
-      skip="pdf">
+      exclude="cycle" >
   </test>
 
 <!-- new tests -->
   <test
       definition="kool-untyped.k"
-programs="."
-results="."
-      extension="kool"
-      skip="pdf">
+      programs="."
+      results="."
+      extension="kool" >
   </test>
 
 </tests>

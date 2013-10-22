@@ -3,6 +3,6 @@
       definition="simple-typed-dynamic.k"
       programs="../../programs/"
       extension="simple"
-      exclude="dekker"
-      skip="pdf" />
+      results="."
+      exclude="dekker" />
 </tests>

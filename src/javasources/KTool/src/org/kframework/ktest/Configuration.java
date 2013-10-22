@@ -27,7 +27,7 @@ public class Configuration {
 	public static String KDEF = USER_DIR;
 	// programs
 	public static String PGM_DIR = null; //USER_DIR;
-	public static List<String> EXTENSIONS = new LinkedList<String>();
+	public static List<String> EXTENSIONS = null; //new LinkedList<String>();
 	// optional
 	public static boolean PDF = true;
 	public static String RESULTS_FOLDER = null; //USER_DIR;

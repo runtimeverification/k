@@ -39,13 +39,8 @@ public class MaudeTask extends Thread {
 			runCommand();
 			writeOutput();
 			writeError();
-			_maudeProcess.waitFor();
-			returnValue = _maudeProcess.exitValue();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
+            returnValue = _maudeProcess.waitFor();
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

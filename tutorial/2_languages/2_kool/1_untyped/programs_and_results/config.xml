@@ -1,8 +1,8 @@
 <tests>
   <test
       definition="kool-untyped.k"
-programs="."
-results="."
+      programs="."
+      results="."
       extension="kool"
       exclude="cycle"
       />

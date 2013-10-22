@@ -6,15 +6,15 @@
       programs="../../../programs_and_results"
       results="../../../programs_and_results"
       extension="simple"
-      exclude="dekker" 
-      skip="pdf">
+      exclude="dekker" >
   </test>
 
 <!-- new tests -->
   <test
       definition="simple-untyped.k"
-      extension="simple"
-      skip="pdf">
+      programs="."
+      results="."
+      extension="simple" >
   </test>
 
 </tests>
