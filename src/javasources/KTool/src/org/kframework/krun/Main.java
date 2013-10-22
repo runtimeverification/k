@@ -33,6 +33,7 @@ import org.kframework.backend.maude.krun.MaudeKRun;
 import org.kframework.compile.ConfigurationCleaner;
 import org.kframework.compile.FlattenModules;
 import org.kframework.compile.transformers.AddTopCellConfig;
+import org.kframework.compile.transformers.Cell2Map;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
@@ -138,7 +139,9 @@ public class Main {
         if (GlobalSettings.verbose)
             sw.printIntermediate("Plug configuration variables");
 
-        return (Term) cfgCleaned.accept(new SubstitutionFilter(args, context));
+        Term configuration = (Term) cfgCleaned.accept(new SubstitutionFilter(args, context));
+        configuration = (Term) configuration .accept(new Cell2Map(context));
+        return configuration;
     }
 
     public static Term makeConfiguration(Term kast, String stdin,
@@ -456,6 +459,7 @@ public class Main {
                 Error.report(K.output_mode
                         + " is not a valid value for output-mode option");
             }
+
             System.exit(0);
         } catch (IOException e) {
             e.printStackTrace();
@@ -727,7 +731,11 @@ public class Main {
         }
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
-                renameKRunDir();
+                try {
+                    FileUtil.renameFolder(K.krunTempDir, K.krunDir);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -1152,14 +1160,6 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
-        }
-    }
-
-    private static synchronized void renameKRunDir() {
-        try {
-            FileUtil.renameFolder(K.krunTempDir, K.krunDir);
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 

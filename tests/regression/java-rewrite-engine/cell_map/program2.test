@@ -1,0 +1,1 @@
+store(0, 0) ~> store(1, 0) ~> load(2)

@@ -18,6 +18,7 @@ import org.kframework.compile.transformers.AddPredicates;
 import org.kframework.compile.transformers.AddStreamCells;
 import org.kframework.compile.transformers.AddTopCellConfig;
 import org.kframework.compile.transformers.AddTopCellRules;
+import org.kframework.compile.transformers.Cell2Map;
 import org.kframework.compile.transformers.CompleteSortLatice;
 import org.kframework.compile.transformers.ContextsToHeating;
 import org.kframework.compile.transformers.DesugarStreams;
@@ -174,7 +175,10 @@ public class JavaSymbolicBackend extends BasicBackend {
         steps.add(new ResolveConfigurationAbstraction(context));
         steps.add(new ResolveOpenCells(context));
         steps.add(new ResolveRewrite(context));
+
+        /* data structure related stuff */
         steps.add(new CompileDataStructures(context));
+        steps.add(new Cell2Map(context));
         steps.add(new DataStructureToLookupUpdate(context));
 
         if (GlobalSettings.sortedCells) {

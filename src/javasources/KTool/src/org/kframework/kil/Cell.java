@@ -252,6 +252,14 @@ public class Cell extends Term {
 		this.cellAttributes = cellAttributes;
 	}
 
+    public boolean containsCellAttribute(String attribute) {
+        return cellAttributes.containsKey(attribute);
+    }
+
+    public String getCellAttribute(String attribute) {
+        return cellAttributes.get(attribute);
+    }
+
 	public void setLabel(String label) {
 		this.label = label;
 	}

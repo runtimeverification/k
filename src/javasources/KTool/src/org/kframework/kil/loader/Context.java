@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.kframework.compile.utils.CellMap;
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
@@ -55,16 +56,16 @@ public class Context implements Serializable {
 		"{",
 		"}");
 
-    public java.util.Map<String, Production> conses = new HashMap<String, Production>();
-	public java.util.Map<String, Set<Production>> productions = new HashMap<String, Set<Production>>();
-	public java.util.Map<String, Set<String>> labels = new HashMap<String, Set<String>>();
-	public java.util.Map<String, Cell> cells = new HashMap<String, Cell>();
-	public java.util.Map<String, String> cellKinds = new HashMap<String, String>();
-    public java.util.Map<String, String> cellSorts = new HashMap<String, String>();
-	public java.util.Map<String, Production> listConses = new HashMap<String, Production>();
-	public java.util.Map<String, Set<String>> listLabels = new HashMap<String, Set<String>>();
-	public java.util.Map<String, ASTNode> locations = new HashMap<String, ASTNode>();
-	public java.util.Map<String, Set<Production>> associativity = new HashMap<String, Set<Production>>();
+    public Map<String, Production> conses = new HashMap<String, Production>();
+	public Map<String, Set<Production>> productions = new HashMap<String, Set<Production>>();
+	public Map<String, Set<String>> labels = new HashMap<String, Set<String>>();
+	public Map<String, Cell> cells = new HashMap<String, Cell>();
+	public Map<String, String> cellKinds = new HashMap<String, String>();
+    public Map<String, String> cellSorts = new HashMap<String, String>();
+	public Map<String, Production> listConses = new HashMap<String, Production>();
+	public Map<String, Set<String>> listLabels = new HashMap<String, Set<String>>();
+	public Map<String, ASTNode> locations = new HashMap<String, ASTNode>();
+	public Map<String, Set<Production>> associativity = new HashMap<String, Set<Production>>();
 	private Poset subsorts = new Poset();
 	public java.util.Set<String> definedSorts = Sort.getBaseSorts();
 	private Poset priorities = new Poset();
@@ -75,6 +76,7 @@ public class Context implements Serializable {
 	public File kompiled = null;
     public boolean initialized = false;
     protected java.util.List<String> komputationCells = null;
+    public Map<String, CellMap> cellMaps = new HashMap<>();
 
     public int numModules, numSentences, numProductions, numCells;
 
