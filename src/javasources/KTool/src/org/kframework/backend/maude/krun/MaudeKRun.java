@@ -50,7 +50,9 @@ import java.util.Set;
 
 public class MaudeKRun implements KRun {
 	protected Context context;
-	public MaudeKRun(Context context) {
+    private FileReader processedMaudeOutputReader;
+
+    public MaudeKRun(Context context) {
 		this.context = context;
 	}
 
@@ -464,12 +466,17 @@ public class MaudeKRun implements KRun {
 			return result;
 		} catch (Exception e) {
 			throw new RuntimeException("Pretty-printer threw exception", e);
-		}
+		} finally {
+            try {
+                processedMaudeOutputReader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 	}
 
 	private DirectedGraph<KRunState, Transition> parseSearchGraph() throws Exception {
-		FileReader reader = new FileReader(K.maude_output);
-		Scanner scanner = new Scanner(reader);
+		Scanner scanner = new Scanner(new File(K.maude_output));
 		scanner.useDelimiter("\n");
 		FileWriter writer = new FileWriter(K.processed_maude_output);
 		while (scanner.hasNext()) {
@@ -479,9 +486,9 @@ public class MaudeKRun implements KRun {
 			writer.write(text, 0, text.length());
 		}
 		writer.close();
-			
-		File input = new File(K.processed_maude_output);
-		Document doc = XmlUtil.readXML(input);
+        scanner.close();
+
+		Document doc = XmlUtil.readXML(new File(K.processed_maude_output));
 		NodeList list = null;
 		Node nod = null;
 		list = doc.getElementsByTagName("graphml");
@@ -489,7 +496,6 @@ public class MaudeKRun implements KRun {
 		nod = list.item(0);
 		assertXML(nod != null && nod.getNodeType() == Node.ELEMENT_NODE);
 		XmlUtil.serializeXML(nod, K.processed_maude_output);
-		reader = new FileReader(K.processed_maude_output);
 			
 		Transformer<GraphMetadata, DirectedGraph<KRunState, Transition>> graphTransformer = new Transformer<GraphMetadata, DirectedGraph<KRunState, Transition>>() { 
 			public DirectedGraph<KRunState, Transition> transform(GraphMetadata g) { 
@@ -544,8 +550,10 @@ public class MaudeKRun implements KRun {
 				throw new RuntimeException("Found a hyper-edge. Has someone been tampering with our intermediate files?");
 			}
 		};
-				
-		GraphMLReader2<DirectedGraph<KRunState, Transition>, KRunState, Transition> graphmlParser = new GraphMLReader2<DirectedGraph<KRunState, Transition>, KRunState, Transition>(reader, graphTransformer, nodeTransformer, edgeTransformer, hyperEdgeTransformer);
+
+        processedMaudeOutputReader = new FileReader(K.processed_maude_output);
+		GraphMLReader2<DirectedGraph<KRunState, Transition>, KRunState, Transition> graphmlParser
+            = new GraphMLReader2<DirectedGraph<KRunState, Transition>, KRunState, Transition>(processedMaudeOutputReader, graphTransformer, nodeTransformer, edgeTransformer, hyperEdgeTransformer);
 		return graphmlParser.readGraph();
 	}
 

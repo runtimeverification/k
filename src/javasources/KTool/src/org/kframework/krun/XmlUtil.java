@@ -26,12 +26,15 @@ public class XmlUtil {
 	// FUNCTION to read DOM Tree from File
 	public static Document readXML(File f) {
 		try {
-			return readXML(new InputSource(new FileInputStream(f)));
-		} catch (FileNotFoundException e) {
-			// e.printStackTrace();
-			Error.report("Error while reading XML:" + e.getMessage());
+            FileInputStream stream = new FileInputStream(f);
+            try {
+                return readXML(new InputSource(stream));
+            } finally {
+                stream.close();
+            }
+        } catch (IOException e) {
+			throw new RuntimeException(e);
 		}
-		return null; //unreachable
 	}
 
 	public static Document readXML(String s) {

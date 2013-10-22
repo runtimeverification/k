@@ -5,9 +5,7 @@ import org.apache.commons.io.FileUtils;
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -124,9 +122,11 @@ public class FileUtil {
     private static void deleteDirectory(Path path) throws IOException {
         if (Files.exists(path)) {
             if (Files.isDirectory(path)) {
-                for (Path file : Files.newDirectoryStream(path)) {
+                DirectoryStream<Path> paths = Files.newDirectoryStream(path);
+                for (Path file : paths) {
                     deleteDirectory(file);
                 }
+                paths.close();
             }
             Files.delete(path);
         }
@@ -141,18 +141,42 @@ public class FileUtil {
 			FileChannel channel = lockFile.getChannel();
 			FileLock lock = channel.lock();
 
-            Path destFile = Paths.get(newName);
-            //test if the krun directory is empty and if is not empty delete it
-            FileUtil.deleteDirectory(destFile);
-            //rename krun temp directory into "krun"
-            Files.move(srcFile, destFile);
+            try {
+                Path destFile = Paths.get(newName);
 
-			lock.release();
-			lockFile.close();
+                //test if the krun directory exists and if true delete it
+                deleteDirectory(destFile);
+
+                //rename krun temp directory into "krun"
+                try {
+                    Files.move(srcFile, destFile);
+                    //Should never happen, but in case it does
+                    // the code below will fail and hopefully will provide more debug information.
+                } catch (AccessDeniedException e) {
+                    copyDir(srcFile, destFile);
+                    deleteDirectory(srcFile);
+                }
+            } finally {
+                lock.release();
+                lockFile.close();
+            }
 		}
 	}
 
-	//parse the output of Maude when --output-mode=raw
+    private static void copyDir(Path srcFile, Path destFile) throws IOException {
+        if (Files.isRegularFile(srcFile)) {
+            Files.copy(srcFile, destFile);
+        } else {
+            Files.createDirectory(destFile);
+            DirectoryStream<Path> paths = Files.newDirectoryStream(srcFile);
+            for( Path path : paths) {
+                copyDir(path, Paths.get(destFile.toString(), path.getFileName().toString()));
+            }
+            paths.close();
+        }
+    }
+
+    //parse the output of Maude when --output-mode=raw
 	public static String parseResultOutputMaude(String file) {
 		BufferedReader reader = null;
 		try {
