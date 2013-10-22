@@ -14,24 +14,28 @@
       definition="tutorial/1_k/1_lambda/lesson_1/lambda.k"
       programs="tutorial/1_k/1_lambda/lesson_1"
       extension="lambda"
+      results="tutorial/1_k/1_lambda/lesson_1"
       />
   <test
       definition="tutorial/1_k/1_lambda/lesson_2/lambda.k"
       programs="tutorial/1_k/1_lambda/lesson_1"
       extension="lambda"
       exclude="omega.lambda"
+      results="tutorial/1_k/1_lambda/lesson_1"
       />
   <test
       definition="tutorial/1_k/1_lambda/lesson_3/lambda.k"
       programs="tutorial/1_k/1_lambda/lesson_1"
       extension="lambda"
       exclude="omega.lambda"
+      results="tutorial/1_k/1_lambda/lesson_1"
       />
   <test
       definition="tutorial/1_k/1_lambda/lesson_4/lambda.k"
       programs="tutorial/1_k/1_lambda/lesson_1"
       extension="lambda"
       exclude="omega.lambda"
+      results="tutorial/1_k/1_lambda/lesson_1"
       />
   <test
       definition="tutorial/1_k/1_lambda/lesson_5/lambda.k"
@@ -39,6 +43,8 @@
               tutorial/1_k/1_lambda/lesson_5"
       extension="lambda"
       exclude="omega.lambda"
+      results="tutorial/1_k/1_lambda/lesson_1
+              tutorial/1_k/1_lambda/lesson_5"
       />
   <test
       definition="tutorial/1_k/1_lambda/lesson_6/lambda.k"
@@ -47,18 +53,23 @@
               tutorial/1_k/1_lambda/lesson_6"
       extension="lambda"
       exclude="omega.lambda"
+      results="tutorial/1_k/1_lambda/lesson_1
+              tutorial/1_k/1_lambda/lesson_5
+              tutorial/1_k/1_lambda/lesson_6"
       />
   <test
       definition="tutorial/1_k/1_lambda/lesson_7/lambda.k"
       programs="tutorial/1_k/1_lambda"
       extension="lambda"
       exclude="lesson_1/omega.lambda"
+      results="tutorial/1_k/1_lambda"
       />
   <test
       definition="tutorial/1_k/1_lambda/lesson_8/lambda.k"
       programs="tutorial/1_k/1_lambda"
       extension="lambda"
       exclude="lesson_1/omega.lambda"
+      results="tutorial/1_k/1_lambda"
       />
   <test
       definition="tutorial/1_k/1_lambda/lesson_9/lambda.k"
@@ -78,21 +89,25 @@
       definition="tutorial/1_k/2_imp/lesson_1/imp.k"
       programs="tutorial/1_k/2_imp"
       extension="imp"
+      results="tutorial/1_k/2_imp"
       />
   <test
       definition="tutorial/1_k/2_imp/lesson_2/imp.k"
       programs="tutorial/1_k/2_imp"
       extension="imp"
+      results="tutorial/1_k/2_imp"
       />
   <test
       definition="tutorial/1_k/2_imp/lesson_3/imp.k"
       programs="tutorial/1_k/2_imp"
       extension="imp"
+      results="tutorial/1_k/2_imp"
       />
   <test
       definition="tutorial/1_k/2_imp/lesson_4/imp.k"
       programs="tutorial/1_k/2_imp"
       extension="imp"
+      results="tutorial/1_k/2_imp"
       />
   <test
       definition="tutorial/1_k/2_imp/lesson_5/imp.k"
@@ -111,36 +126,42 @@
       programs="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
       extension="lambda"
       exclude="lesson_1/omega.lambda"
+      results="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
       />
   <test
       definition="tutorial/1_k/3_lambda++/lesson_2/lambda.k"
       programs="tutorial/1_k/1_lambda/lesson_1"
       extension="lambda"
       exclude="omega.lambda"
+      results="tutorial/1_k/1_lambda/lesson_1"
       />
   <test
       definition="tutorial/1_k/3_lambda++/lesson_3/lambda.k"
       programs="tutorial/1_k/1_lambda"
       extension="lambda"
       exclude="lesson_1/omega.lambda"
+      results="tutorial/1_k/1_lambda"
       />
   <test
       definition="tutorial/1_k/3_lambda++/lesson_4/lambda.k"
       programs="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
       extension="lambda"
       exclude="lesson_1/omega.lambda"
+      results="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
       />
   <test
       definition="tutorial/1_k/3_lambda++/lesson_5/lambda.k"
       programs="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
       extension="lambda"
       exclude="lesson_1/omega.lambda"
+      results="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
       />
   <test
       definition="tutorial/1_k/3_lambda++/lesson_6/lambda.k"
       programs="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
       extension="lambda"
       exclude="lesson_1/omega.lambda"
+      results="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
       />
 
 <!-- IMP++ -->
@@ -150,12 +171,14 @@
       programs="tutorial/1_k/2_imp tutorial/1_k/4_imp++"
       extension="imp"
       exclude="lesson_7/spawn.imp"
+      results="tutorial/1_k/2_imp tutorial/1_k/4_imp++"
       />
   <test
       definition="tutorial/1_k/4_imp++/lesson_2/imp.k"
       programs="tutorial/1_k/2_imp tutorial/1_k/4_imp++"
       extension="imp"
       exclude="lesson_7/spawn.imp"
+      results="tutorial/1_k/2_imp tutorial/1_k/4_imp++"
       />
   <test
       definition="tutorial/1_k/4_imp++/lesson_3/imp.k"
@@ -215,33 +238,42 @@
               tutorial/1_k/4_imp++"
       extension="imp"
       exclude="lesson_1/spawn.imp lesson_4/test.imp"
+      results="tutorial/1_k/2_imp
+              tutorial/1_k/4_imp++"
       />
   <test
       definition="tutorial/1_k/5_types/lesson_2/lambda.k"
       programs="tutorial/1_k/5_types/lesson_2"
       extension="lambda"
+      results="tutorial/1_k/5_types/lesson_2"
       />
   <test
       definition="tutorial/1_k/5_types/lesson_3/lambda.k"
       programs="tutorial/1_k/5_types/lesson_2"
       extension="lambda"
+      results="tutorial/1_k/5_types/lesson_2"
       />
   <test
       definition="tutorial/1_k/5_types/lesson_4/lambda.k"
       programs="tutorial/1_k/5_types/lesson_4"
       extension="lambda"
+      results="tutorial/1_k/5_types/lesson_4"
       />
   <test
       definition="tutorial/1_k/5_types/lesson_5/lambda.k"
       programs="tutorial/1_k/5_types/lesson_4
               tutorial/1_k/5_types/lesson_5"
       extension="lambda"
+      results="tutorial/1_k/5_types/lesson_4
+              tutorial/1_k/5_types/lesson_5"
       />
   <test
       definition="tutorial/1_k/5_types/lesson_6/lambda.k"
       programs="tutorial/1_k/5_types/lesson_4
               tutorial/1_k/5_types/lesson_5"
       extension="lambda"
+      results="tutorial/1_k/5_types/lesson_4
+              tutorial/1_k/5_types/lesson_5"
       />
   <test
       definition="tutorial/1_k/5_types/lesson_7/lambda.k"
@@ -249,6 +281,9 @@
               tutorial/1_k/5_types/lesson_5
               tutorial/1_k/5_types/lesson_6"
       extension="lambda"
+      results="tutorial/1_k/5_types/lesson_4
+              tutorial/1_k/5_types/lesson_5
+              tutorial/1_k/5_types/lesson_6"
       />
   <test
       definition="tutorial/1_k/5_types/lesson_8/lambda.k"
@@ -256,6 +291,9 @@
               tutorial/1_k/5_types/lesson_5
               tutorial/1_k/5_types/lesson_6"
       extension="lambda"
+      results="tutorial/1_k/5_types/lesson_4
+              tutorial/1_k/5_types/lesson_5
+              tutorial/1_k/5_types/lesson_6"
       />
   <test
       definition="tutorial/1_k/5_types/lesson_9/lambda.k"
@@ -263,6 +301,9 @@
               tutorial/1_k/5_types/lesson_5
               tutorial/1_k/5_types/lesson_6"
       extension="lambda"
+      results="tutorial/1_k/5_types/lesson_4
+              tutorial/1_k/5_types/lesson_5
+              tutorial/1_k/5_types/lesson_6"
       />
 
 <!--
@@ -288,6 +329,7 @@
       programs="tutorial/2_languages/1_simple/2_typed/programs"
       extension="simple"
       exclude="diverse/dekker.simple"
+      results="tutorial/2_languages/1_simple/2_typed/programs"
       />
 
 <!--
@@ -339,6 +381,7 @@
       definition="tutorial/2_languages/3_fun/1_untyped/fun-untyped.k"
       programs="tutorial/2_languages/3_fun/programs"
       extension="fun"
+      results="tutorial/2_languages/3_fun/programs"
       >
     <kompile-option name="-transition" value="otherwise"/>
   </test>
@@ -391,7 +434,9 @@
   <test
       definition="samples/wcet/wcet.k"
       programs="samples/wcet/programs"
-      extension="wcet">
+      extension="wcet"
+      results="samples/wcet/programs"
+      >
       <all-programs>
         <krun-option name="-cTIMING" value="add |-> 1 sub |-> 1 mul |-> 1 div |-> 1 or |-> 1 and |-> 1 not |-> 1 load |-> 10 store |-> 10 jmp |-> 1 beq |-> 2 bne |-> 2 blt |-> 2 ble |-> 2 halt |-> 1 read |-> 100 write |-> 100 'rw(.KList) |-> 200 int |-> 5 rfi |-> 5" />
         <krun-option name="-cINPUT" value=".List" />
@@ -421,6 +466,7 @@
       definition="samples/imp-symbolic/imp.k"
       programs="samples/imp-symbolic/programs"
       extension="imp"
+      results="samples/imp-symbolic/programs"
       >
     <all-programs>
       <krun-option name="-search" />
@@ -437,6 +483,7 @@
       definition="samples/imp-hoare/imp.k"
       programs="samples/imp-hoare/programs"
       extension="imp"
+      results="samples/imp-hoare/programs"
       >
   </test>
 
@@ -449,6 +496,7 @@
       programs="samples/imp-reachability"
       extension="imp"
       exclude="pgm-1.imp pgm-2.imp pgm-3.imp"
+      results="samples/imp-reachability"
       >
     <all-programs>
       <krun-option name="-search" />
@@ -479,6 +527,7 @@
       definition="tutorial/1_k/2_imp/lesson_4/imp.k"
       programs="tutorial/1_k/2_imp"
       extension="imp"
+      results="tutorial/1_k/2_imp"
       title="symbolic"
 	  exclude="lesson_4/test.imp"
       >
@@ -671,7 +720,9 @@
   <test
       definition="tests/regression/lint/test.k"
       programs="tests/regression/lint"
-      extension="test">
+      extension="test"
+      results="tests/regression/lint"
+      >
     <kompile-option name="-w" value="all" />
   </test>
 
