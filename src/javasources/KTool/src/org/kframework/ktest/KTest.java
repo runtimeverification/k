@@ -87,6 +87,9 @@ public class KTest {
         if (remainingArgs.length < 1) {
             String msg = "You have to provide an input file, which is either a K definition (*.k) or a test configuration (*.xml).";
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
+        } else if (remainingArgs.length > 1) {
+            String msg = "You cannot provide more than one argument. You may miss a dash '-' or a quote '\"' for options.";
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
         } else {
             input = remainingArgs[0];
         }
