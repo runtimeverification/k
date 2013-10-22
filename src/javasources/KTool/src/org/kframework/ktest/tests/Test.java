@@ -309,15 +309,12 @@ public class Test implements Comparable<Test> {
                 Configuration.PROGRAMS_DIR).split("\\s+"));
         if (allpd.size() > 0) {
             programsFolders = new LinkedList<String>();
-            resultsFolders = new LinkedList<String>();
             for (String pd : allpd) {
                 if (pd != null && !pd.equals("")) {
                     String p = resolveAbsolutePathRelativeTo(pd.trim(),
                             rootProgramsDir, Configuration.PGM_ERROR);
                     if (p != null){
                         programsFolders.add(p);
-                        // also add this program folder as default result folder
-                        resultsFolders.add(p);
                     }
                 }
             }
@@ -327,9 +324,9 @@ public class Test implements Comparable<Test> {
         List<String> allrd = new LinkedList<String>();
         if (test.hasAttribute(Configuration.RESULTS))
                 allrd = Arrays.asList(test.getAttribute(Configuration.RESULTS).split("\\s+"));
+        resultsFolders = new LinkedList<String>();
         if (allrd.size() > 0) {
             // reset the default results folder if Configuration.RESULTS is given
-            resultsFolders = new LinkedList<String>();
             for (String rd : allrd)
                 if (rd != null && !rd.equals("")) {
                     String p = resolveAbsolutePathRelativeTo(rd.trim(),
@@ -337,8 +334,9 @@ public class Test implements Comparable<Test> {
                     if (p != null)
                         resultsFolders.add(p);
                 }
-        } else if (resultsFolders.size() == 0)
-            resultsFolders = null;
+        } else {
+            resultsFolders.add(rootResultsDir);
+        }
 
         // get report dir
         reportDir = resolveAbsolutePathRelativeTo(
