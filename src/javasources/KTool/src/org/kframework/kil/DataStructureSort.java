@@ -60,6 +60,12 @@ public class DataStructureSort implements Serializable {
                     Label.ELEMENT, "SetItem",
                     Label.UNIT, ".Set"));
 
+    public static final String DEFAULT_LIST_SORT = "MyList";
+    public static final String DEFAULT_MAP_SORT = "MyMap";
+    public static final String DEFAULT_SET_SORT = "MySet";
+    public static final String DEFAULT_LISTITEM_LABEL = "'MyListItem";
+    public static final String DEFAULT_LIST_UNIT_LABEL = "'.MyList";
+
     /** Name of this data structure sort. */
     private final String name;
     /** Type of the builtin data structure this sort is hooked to (an element of {@code TYPES}). */
@@ -113,10 +119,6 @@ public class DataStructureSort implements Serializable {
     public String unitLabel() {
         return unitLabel;
     }
-
-    public static final String DEFAULT_LIST_SORT = "MyList";
-    public static final String DEFAULT_LISTITEM_LABEL = "'MyListItem";
-    public static final String DEFAULT_LIST_UNIT_LABEL = "'.MyList";
 
     /**
      * Returns a term of sort MyList containing one MyListItem element per argument.
