@@ -1,0 +1,21 @@
+class A {
+    private var x = 7;
+    method A(v) {
+	x = v;
+    }
+    method init(a){
+	x=a.x;
+    }
+    method get() {
+	return x;
+    }
+}
+
+class Main {
+    method Main(){
+	var a = new A(10);
+	var b = new A(20);
+	a.init(b);
+	print(a.get());
+    }
+}

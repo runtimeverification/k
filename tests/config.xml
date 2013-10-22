@@ -11,63 +11,74 @@
 
 <!-- LAMBDA -->
   <test
-      definition="dist/tutorial/1_k/1_lambda/lesson_1/lambda.k"
-      programs="dist/tutorial/1_k/1_lambda/lesson_1"
-      extensions="lambda"
+      definition="tutorial/1_k/1_lambda/lesson_1/lambda.k"
+      programs="tutorial/1_k/1_lambda/lesson_1"
+      extension="lambda"
+      results="tutorial/1_k/1_lambda/lesson_1"
       />
   <test
-      definition="dist/tutorial/1_k/1_lambda/lesson_2/lambda.k"
-      programs="dist/tutorial/1_k/1_lambda/lesson_1"
-      extensions="lambda"
+      definition="tutorial/1_k/1_lambda/lesson_2/lambda.k"
+      programs="tutorial/1_k/1_lambda/lesson_1"
+      extension="lambda"
       exclude="omega.lambda"
+      results="tutorial/1_k/1_lambda/lesson_1"
       />
   <test
-      definition="dist/tutorial/1_k/1_lambda/lesson_3/lambda.k"
-      programs="dist/tutorial/1_k/1_lambda/lesson_1"
-      extensions="lambda"
+      definition="tutorial/1_k/1_lambda/lesson_3/lambda.k"
+      programs="tutorial/1_k/1_lambda/lesson_1"
+      extension="lambda"
       exclude="omega.lambda"
+      results="tutorial/1_k/1_lambda/lesson_1"
       />
   <test
-      definition="dist/tutorial/1_k/1_lambda/lesson_4/lambda.k"
-      programs="dist/tutorial/1_k/1_lambda/lesson_1"
-      extensions="lambda"
+      definition="tutorial/1_k/1_lambda/lesson_4/lambda.k"
+      programs="tutorial/1_k/1_lambda/lesson_1"
+      extension="lambda"
       exclude="omega.lambda"
+      results="tutorial/1_k/1_lambda/lesson_1"
       />
   <test
-      definition="dist/tutorial/1_k/1_lambda/lesson_5/lambda.k"
-      programs="dist/tutorial/1_k/1_lambda/lesson_1
-              dist/tutorial/1_k/1_lambda/lesson_5"
-      extensions="lambda"
+      definition="tutorial/1_k/1_lambda/lesson_5/lambda.k"
+      programs="tutorial/1_k/1_lambda/lesson_1
+              tutorial/1_k/1_lambda/lesson_5"
+      extension="lambda"
       exclude="omega.lambda"
+      results="tutorial/1_k/1_lambda/lesson_1
+              tutorial/1_k/1_lambda/lesson_5"
       />
   <test
-      definition="dist/tutorial/1_k/1_lambda/lesson_6/lambda.k"
-      programs="dist/tutorial/1_k/1_lambda/lesson_1
-              dist/tutorial/1_k/1_lambda/lesson_5
-              dist/tutorial/1_k/1_lambda/lesson_6"
-      extensions="lambda"
+      definition="tutorial/1_k/1_lambda/lesson_6/lambda.k"
+      programs="tutorial/1_k/1_lambda/lesson_1
+              tutorial/1_k/1_lambda/lesson_5
+              tutorial/1_k/1_lambda/lesson_6"
+      extension="lambda"
       exclude="omega.lambda"
+      results="tutorial/1_k/1_lambda/lesson_1
+              tutorial/1_k/1_lambda/lesson_5
+              tutorial/1_k/1_lambda/lesson_6"
       />
   <test
-      definition="dist/tutorial/1_k/1_lambda/lesson_7/lambda.k"
-      programs="dist/tutorial/1_k/1_lambda"
-      extensions="lambda"
+      definition="tutorial/1_k/1_lambda/lesson_7/lambda.k"
+      programs="tutorial/1_k/1_lambda"
+      extension="lambda"
       exclude="lesson_1/omega.lambda"
+      results="tutorial/1_k/1_lambda"
       />
   <test
-      definition="dist/tutorial/1_k/1_lambda/lesson_8/lambda.k"
-      programs="dist/tutorial/1_k/1_lambda"
-      extensions="lambda"
+      definition="tutorial/1_k/1_lambda/lesson_8/lambda.k"
+      programs="tutorial/1_k/1_lambda"
+      extension="lambda"
       exclude="lesson_1/omega.lambda"
+      results="tutorial/1_k/1_lambda"
       />
   <test
-      definition="dist/tutorial/1_k/1_lambda/lesson_9/lambda.k"
-      programs="dist/tutorial/1_k/1_lambda"
-      extensions="lambda"
+      definition="tutorial/1_k/1_lambda/lesson_9/lambda.k"
+      programs="tutorial/1_k/1_lambda"
+      extension="lambda"
       exclude="lesson_1/omega.lambda"
       results="tests/tutorial/1_k/1_lambda/lesson_9" >
       <all-programs>
-        <krun-option name="--output-mode" value="pretty" />
+        <krun-option name="-output-mode" value="pretty" />
       </all-programs>
    </test>
 
@@ -75,131 +86,146 @@
 <!-- IMP -->
 
   <test
-      definition="dist/tutorial/1_k/2_imp/lesson_1/imp.k"
-      programs="dist/tutorial/1_k/2_imp"
-      extensions="imp"
+      definition="tutorial/1_k/2_imp/lesson_1/imp.k"
+      programs="tutorial/1_k/2_imp"
+      extension="imp"
+      results="tutorial/1_k/2_imp"
       />
   <test
-      definition="dist/tutorial/1_k/2_imp/lesson_2/imp.k"
-      programs="dist/tutorial/1_k/2_imp"
-      extensions="imp"
+      definition="tutorial/1_k/2_imp/lesson_2/imp.k"
+      programs="tutorial/1_k/2_imp"
+      extension="imp"
+      results="tutorial/1_k/2_imp"
       />
   <test
-      definition="dist/tutorial/1_k/2_imp/lesson_3/imp.k"
-      programs="dist/tutorial/1_k/2_imp"
-      extensions="imp"
+      definition="tutorial/1_k/2_imp/lesson_3/imp.k"
+      programs="tutorial/1_k/2_imp"
+      extension="imp"
+      results="tutorial/1_k/2_imp"
       />
   <test
-      definition="dist/tutorial/1_k/2_imp/lesson_4/imp.k"
-      programs="dist/tutorial/1_k/2_imp"
-      extensions="imp"
+      definition="tutorial/1_k/2_imp/lesson_4/imp.k"
+      programs="tutorial/1_k/2_imp"
+      extension="imp"
+      results="tutorial/1_k/2_imp"
       />
   <test
-      definition="dist/tutorial/1_k/2_imp/lesson_5/imp.k"
-      programs="dist/tutorial/1_k/2_imp"
-      extensions="imp"
-      results="tests/tutorial/1_k/2_imp/lesson_5"
-      />
+      definition="tutorial/1_k/2_imp/lesson_5/imp.k"
+      programs="tutorial/1_k/2_imp"
+      extension="imp"
+      results="tests/tutorial/1_k/2_imp/lesson_5" >
+      <all-programs>
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
 
 <!-- LAMBDA++ -->
 
   <test
-      definition="dist/tutorial/1_k/3_lambda++/lesson_1/lambda.k"
-      programs="dist/tutorial/1_k/1_lambda dist/tutorial/1_k/3_lambda++"
-      extensions="lambda"
+      definition="tutorial/1_k/3_lambda++/lesson_1/lambda.k"
+      programs="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
+      extension="lambda"
       exclude="lesson_1/omega.lambda"
+      results="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
       />
   <test
-      definition="dist/tutorial/1_k/3_lambda++/lesson_2/lambda.k"
-      programs="dist/tutorial/1_k/1_lambda/lesson_1"
-      extensions="lambda"
+      definition="tutorial/1_k/3_lambda++/lesson_2/lambda.k"
+      programs="tutorial/1_k/1_lambda/lesson_1"
+      extension="lambda"
       exclude="omega.lambda"
+      results="tutorial/1_k/1_lambda/lesson_1"
       />
   <test
-      definition="dist/tutorial/1_k/3_lambda++/lesson_3/lambda.k"
-      programs="dist/tutorial/1_k/1_lambda"
-      extensions="lambda"
+      definition="tutorial/1_k/3_lambda++/lesson_3/lambda.k"
+      programs="tutorial/1_k/1_lambda"
+      extension="lambda"
       exclude="lesson_1/omega.lambda"
+      results="tutorial/1_k/1_lambda"
       />
   <test
-      definition="dist/tutorial/1_k/3_lambda++/lesson_4/lambda.k"
-      programs="dist/tutorial/1_k/1_lambda dist/tutorial/1_k/3_lambda++"
-      extensions="lambda"
+      definition="tutorial/1_k/3_lambda++/lesson_4/lambda.k"
+      programs="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
+      extension="lambda"
       exclude="lesson_1/omega.lambda"
+      results="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
       />
   <test
-      definition="dist/tutorial/1_k/3_lambda++/lesson_5/lambda.k"
-      programs="dist/tutorial/1_k/1_lambda dist/tutorial/1_k/3_lambda++"
-      extensions="lambda"
+      definition="tutorial/1_k/3_lambda++/lesson_5/lambda.k"
+      programs="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
+      extension="lambda"
       exclude="lesson_1/omega.lambda"
+      results="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
       />
   <test
-      definition="dist/tutorial/1_k/3_lambda++/lesson_6/lambda.k"
-      programs="dist/tutorial/1_k/1_lambda dist/tutorial/1_k/3_lambda++"
-      extensions="lambda"
+      definition="tutorial/1_k/3_lambda++/lesson_6/lambda.k"
+      programs="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
+      extension="lambda"
       exclude="lesson_1/omega.lambda"
+      results="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
       />
 
 <!-- IMP++ -->
 
   <test
-      definition="dist/tutorial/1_k/4_imp++/lesson_1/imp.k"
-      programs="dist/tutorial/1_k/2_imp dist/tutorial/1_k/4_imp++"
-      extensions="imp"
+      definition="tutorial/1_k/4_imp++/lesson_1/imp.k"
+      programs="tutorial/1_k/2_imp tutorial/1_k/4_imp++"
+      extension="imp"
       exclude="lesson_7/spawn.imp"
+      results="tutorial/1_k/2_imp tutorial/1_k/4_imp++"
       />
   <test
-      definition="dist/tutorial/1_k/4_imp++/lesson_2/imp.k"
-      programs="dist/tutorial/1_k/2_imp dist/tutorial/1_k/4_imp++"
-      extensions="imp"
+      definition="tutorial/1_k/4_imp++/lesson_2/imp.k"
+      programs="tutorial/1_k/2_imp tutorial/1_k/4_imp++"
+      extension="imp"
       exclude="lesson_7/spawn.imp"
+      results="tutorial/1_k/2_imp tutorial/1_k/4_imp++"
       />
   <test
-      definition="dist/tutorial/1_k/4_imp++/lesson_3/imp.k"
-      programs="dist/tutorial/1_k/2_imp dist/tutorial/1_k/4_imp++"
-      extensions="imp"
+      definition="tutorial/1_k/4_imp++/lesson_3/imp.k"
+      programs="tutorial/1_k/2_imp tutorial/1_k/4_imp++"
+      extension="imp"
       exclude="lesson_7/spawn.imp"
       results="tests/tutorial/1_k/4_imp++/lesson_3" >
       <kompile-option name="-superheat" value="division" />
       <kompile-option name="-supercool" value="lookup increment" />
-      <program name="dist/tutorial/1_k/4_imp++/lesson_1/div.imp">
+      <program name="tutorial/1_k/4_imp++/lesson_1/div.imp">
         <krun-option name="-output-mode" value="pretty" />
         <krun-option name="-search" />
-	<krun-option name="-no-color" />
+	<krun-option name="-color" value="off" />
       </program>
   </test>
   <test
-      definition="dist/tutorial/1_k/4_imp++/lesson_4/imp.k"
-      programs="dist/tutorial/1_k/2_imp dist/tutorial/1_k/4_imp++"
-      extensions="imp"
+      definition="tutorial/1_k/4_imp++/lesson_4/imp.k"
+      programs="tutorial/1_k/2_imp tutorial/1_k/4_imp++"
+      extension="imp"
       exclude="lesson_7/spawn.imp"
       results="tests/tutorial/1_k/4_imp++/lesson_4"
       />
   <test
-      definition="dist/tutorial/1_k/4_imp++/lesson_5/imp.k"
-      programs="dist/tutorial/1_k/2_imp dist/tutorial/1_k/4_imp++"
-      extensions="imp"
+      definition="tutorial/1_k/4_imp++/lesson_5/imp.k"
+      programs="tutorial/1_k/2_imp tutorial/1_k/4_imp++"
+      extension="imp"
       exclude="lesson_7/spawn.imp"
       results="tests/tutorial/1_k/4_imp++/lesson_5"
       />
   <test
-      definition="dist/tutorial/1_k/4_imp++/lesson_6/imp.k"
-      programs="dist/tutorial/1_k/2_imp dist/tutorial/1_k/4_imp++"
-      extensions="imp"
+      definition="tutorial/1_k/4_imp++/lesson_6/imp.k"
+      programs="tutorial/1_k/2_imp tutorial/1_k/4_imp++"
+      extension="imp"
       exclude="lesson_7/spawn.imp"
       results="tests/tutorial/1_k/4_imp++/lesson_5"
       />
   <test
-      definition="dist/tutorial/1_k/4_imp++/lesson_7/imp.k"
-      programs="dist/tutorial/1_k/2_imp dist/tutorial/1_k/4_imp++"
-      extensions="imp"
+      definition="tutorial/1_k/4_imp++/lesson_7/imp.k"
+      programs="tutorial/1_k/2_imp tutorial/1_k/4_imp++"
+      extension="imp"
       exclude="lesson_1/spawn.imp"
       results="tests/tutorial/1_k/4_imp++/lesson_5"
       />
   <test
-      definition="dist/tutorial/1_k/4_imp++/lesson_8/imp.k"
-      programs="dist/tutorial/1_k/2_imp dist/tutorial/1_k/4_imp++"
-      extensions="imp"
+      definition="tutorial/1_k/4_imp++/lesson_8/imp.k"
+      programs="tutorial/1_k/2_imp tutorial/1_k/4_imp++"
+      extension="imp"
       exclude="lesson_1/spawn.imp"
       results="tests/tutorial/1_k/4_imp++/lesson_5"
       />
@@ -207,59 +233,77 @@
 <!-- TYPES -->
 
   <test
-      definition="dist/tutorial/1_k/5_types/lesson_1/imp.k"
-      programs="dist/tutorial/1_k/2_imp
-              dist/tutorial/1_k/4_imp++"
-      extensions="imp"
+      definition="tutorial/1_k/5_types/lesson_1/imp.k"
+      programs="tutorial/1_k/2_imp
+              tutorial/1_k/4_imp++"
+      extension="imp"
       exclude="lesson_1/spawn.imp lesson_4/test.imp"
+      results="tutorial/1_k/2_imp
+              tutorial/1_k/4_imp++"
       />
   <test
-      definition="dist/tutorial/1_k/5_types/lesson_2/lambda.k"
-      programs="dist/tutorial/1_k/5_types/lesson_2"
-      extensions="lambda"
+      definition="tutorial/1_k/5_types/lesson_2/lambda.k"
+      programs="tutorial/1_k/5_types/lesson_2"
+      extension="lambda"
+      results="tutorial/1_k/5_types/lesson_2"
       />
   <test
-      definition="dist/tutorial/1_k/5_types/lesson_3/lambda.k"
-      programs="dist/tutorial/1_k/5_types/lesson_2"
-      extensions="lambda"
+      definition="tutorial/1_k/5_types/lesson_3/lambda.k"
+      programs="tutorial/1_k/5_types/lesson_2"
+      extension="lambda"
+      results="tutorial/1_k/5_types/lesson_2"
       />
   <test
-      definition="dist/tutorial/1_k/5_types/lesson_4/lambda.k"
-      programs="dist/tutorial/1_k/5_types/lesson_4"
-      extensions="lambda"
+      definition="tutorial/1_k/5_types/lesson_4/lambda.k"
+      programs="tutorial/1_k/5_types/lesson_4"
+      extension="lambda"
+      results="tutorial/1_k/5_types/lesson_4"
       />
   <test
-      definition="dist/tutorial/1_k/5_types/lesson_5/lambda.k"
-      programs="dist/tutorial/1_k/5_types/lesson_4
-              dist/tutorial/1_k/5_types/lesson_5"
-      extensions="lambda"
+      definition="tutorial/1_k/5_types/lesson_5/lambda.k"
+      programs="tutorial/1_k/5_types/lesson_4
+              tutorial/1_k/5_types/lesson_5"
+      extension="lambda"
+      results="tutorial/1_k/5_types/lesson_4
+              tutorial/1_k/5_types/lesson_5"
       />
   <test
-      definition="dist/tutorial/1_k/5_types/lesson_6/lambda.k"
-      programs="dist/tutorial/1_k/5_types/lesson_4
-              dist/tutorial/1_k/5_types/lesson_5"
-      extensions="lambda"
+      definition="tutorial/1_k/5_types/lesson_6/lambda.k"
+      programs="tutorial/1_k/5_types/lesson_4
+              tutorial/1_k/5_types/lesson_5"
+      extension="lambda"
+      results="tutorial/1_k/5_types/lesson_4
+              tutorial/1_k/5_types/lesson_5"
       />
   <test
-      definition="dist/tutorial/1_k/5_types/lesson_7/lambda.k"
-      programs="dist/tutorial/1_k/5_types/lesson_4
-              dist/tutorial/1_k/5_types/lesson_5
-              dist/tutorial/1_k/5_types/lesson_6"
-      extensions="lambda"
+      definition="tutorial/1_k/5_types/lesson_7/lambda.k"
+      programs="tutorial/1_k/5_types/lesson_4
+              tutorial/1_k/5_types/lesson_5
+              tutorial/1_k/5_types/lesson_6"
+      extension="lambda"
+      results="tutorial/1_k/5_types/lesson_4
+              tutorial/1_k/5_types/lesson_5
+              tutorial/1_k/5_types/lesson_6"
       />
   <test
-      definition="dist/tutorial/1_k/5_types/lesson_8/lambda.k"
-      programs="dist/tutorial/1_k/5_types/lesson_4
-              dist/tutorial/1_k/5_types/lesson_5
-              dist/tutorial/1_k/5_types/lesson_6"
-      extensions="lambda"
+      definition="tutorial/1_k/5_types/lesson_8/lambda.k"
+      programs="tutorial/1_k/5_types/lesson_4
+              tutorial/1_k/5_types/lesson_5
+              tutorial/1_k/5_types/lesson_6"
+      extension="lambda"
+      results="tutorial/1_k/5_types/lesson_4
+              tutorial/1_k/5_types/lesson_5
+              tutorial/1_k/5_types/lesson_6"
       />
   <test
-      definition="dist/tutorial/1_k/5_types/lesson_9/lambda.k"
-      programs="dist/tutorial/1_k/5_types/lesson_4
-              dist/tutorial/1_k/5_types/lesson_5
-              dist/tutorial/1_k/5_types/lesson_6"
-      extensions="lambda"
+      definition="tutorial/1_k/5_types/lesson_9/lambda.k"
+      programs="tutorial/1_k/5_types/lesson_4
+              tutorial/1_k/5_types/lesson_5
+              tutorial/1_k/5_types/lesson_6"
+      extension="lambda"
+      results="tutorial/1_k/5_types/lesson_4
+              tutorial/1_k/5_types/lesson_5
+              tutorial/1_k/5_types/lesson_6"
       />
 
 <!--
@@ -267,24 +311,25 @@
 -->
 
   <test
-      definition="dist/tutorial/2_languages/1_simple/1_untyped/simple-untyped.k"
-      programs="dist/tutorial/2_languages/1_simple/1_untyped/programs"
-      extensions="simple"
+      definition="tutorial/2_languages/1_simple/1_untyped/simple-untyped.k"
+      programs="tutorial/2_languages/1_simple/1_untyped/programs_and_results"
+      extension="simple"
       exclude="diverse/dekker.simple"
       results="tests/examples/simple-untyped"
       />
   <test
-      definition="dist/tutorial/2_languages/1_simple/2_typed/2_dynamic/simple-typed-dynamic.k"
-      programs="dist/tutorial/2_languages/1_simple/2_typed/programs"
-      extensions="simple"
+      definition="tutorial/2_languages/1_simple/2_typed/2_dynamic/simple-typed-dynamic.k"
+      programs="tutorial/2_languages/1_simple/2_typed/programs"
+      extension="simple"
       exclude="diverse/dekker.simple"
       results="tests/examples/simple-typed-dynamic"
       />
   <test
-      definition="dist/tutorial/2_languages/1_simple/2_typed/1_static/simple-typed-static.k"
-      programs="dist/tutorial/2_languages/1_simple/2_typed/programs"
-      extensions="simple"
+      definition="tutorial/2_languages/1_simple/2_typed/1_static/simple-typed-static.k"
+      programs="tutorial/2_languages/1_simple/2_typed/programs"
+      extension="simple"
       exclude="diverse/dekker.simple"
+      results="tutorial/2_languages/1_simple/2_typed/programs"
       />
 
 <!--
@@ -292,21 +337,23 @@
 -->
 
   <test
-      definition="dist/tutorial/2_languages/2_kool/1_untyped/kool-untyped.k"
-      programs="dist/tutorial/2_languages/2_kool/1_untyped/programs"
-      extensions="kool"
+      definition="tutorial/2_languages/2_kool/1_untyped/kool-untyped.k"
+      programs="tutorial/2_languages/2_kool/1_untyped/programs_and_results"
+      extension="kool"
+      exclude="cycle"
       results="tests/examples/kool-untyped"
       />
   <test
-      definition="dist/tutorial/2_languages/2_kool/2_typed/1_dynamic/kool-typed-dynamic.k"
-      programs="dist/tutorial/2_languages/2_kool/2_typed/programs"
-      extensions="kool"
+      definition="tutorial/2_languages/2_kool/2_typed/1_dynamic/kool-typed-dynamic.k"
+      programs="tutorial/2_languages/2_kool/2_typed/programs"
+      extension="kool"
+      exclude="cycle"
       results="tests/examples/kool-typed-dynamic"
       />
   <test
-      definition="dist/tutorial/2_languages/2_kool/2_typed/2_static/kool-typed-static.k"
-      programs="dist/tutorial/2_languages/2_kool/2_typed/programs"
-      extensions="kool"
+      definition="tutorial/2_languages/2_kool/2_typed/2_static/kool-typed-static.k"
+      programs="tutorial/2_languages/2_kool/2_typed/programs"
+      extension="kool"
       results="tests/examples/kool-typed-static"
       />
 
@@ -314,16 +361,16 @@
   QUINE
 -->
   <test
-      definition="dist/examples/quine/explicit/quine-explicit.k"
+      definition="samples/quine/explicit/quine-explicit.k"
       programs="tests/examples/quine-explicit"
       results="tests/examples/quine-explicit"
-      extensions="quine" >
+      extension="quine" >
   </test>
   <test
-      definition="dist/examples/quine/short/quine-short.k"
+      definition="samples/quine/short/quine-short.k"
       programs="tests/examples/quine-short"
       results="tests/examples/quine-short"
-      extensions="quine" >
+      extension="quine" >
   </test>
 
 <!--
@@ -331,11 +378,12 @@
 -->
 
   <test
-      definition="dist/tutorial/2_languages/3_fun/1_untyped/fun-untyped.k"
-      programs="dist/tutorial/2_languages/3_fun/programs"
-      extensions="fun"
+      definition="tutorial/2_languages/3_fun/1_untyped/fun-untyped.k"
+      programs="tutorial/2_languages/3_fun/programs"
+      extension="fun"
+      results="tutorial/2_languages/3_fun/programs"
       >
-    <kompile-option name="--transition" value="otherwise"/>
+    <kompile-option name="-transition" value="otherwise"/>
   </test>
 
 <!--
@@ -343,15 +391,15 @@
 -->
 
   <test
-      definition="dist/tutorial/2_languages/4_logik/logik.k"
-      programs="dist/tutorial/2_languages/4_logik/programs"
-      extensions="logik"
+      definition="tutorial/2_languages/4_logik/logik.k"
+      programs="tutorial/2_languages/4_logik/programs"
+      extension="logik"
       results="tests/examples/logik"
       >
     <all-programs>
-      <krun-option name="--search" />
-      <krun-option name="--bound" value="2" />
-      <krun-option name="--no-color" />
+      <krun-option name="-search" />
+      <krun-option name="-bound" value="2" />
+      <krun-option name="-color" value="off" />
     </all-programs>
   </test>
 
@@ -361,9 +409,9 @@
 -->
 
   <test
-      definition="dist/examples/agent/agent.k"
-      programs="dist/examples/agent/programs"
-      extensions="agent"
+      definition="samples/agent/agent.k"
+      programs="samples/agent/programs"
+      extension="agent"
       results="tests/examples/agent"
       >
   </test>
@@ -373,9 +421,9 @@
 -->
 
   <test
-      definition="dist/examples/bf/bf.k"
-      programs="dist/examples/bf/programs"
-      extensions="bf"
+      definition="samples/bf/bf.k"
+      programs="samples/bf/programs"
+      extension="bf"
       results="tests/examples/bf"
       >
   </test>
@@ -384,26 +432,28 @@
   WCET
 -->
   <test
-      definition="dist/examples/wcet/wcet.k"
-      programs="dist/examples/wcet/programs"
-      extensions="wcet">
+      definition="samples/wcet/wcet.k"
+      programs="samples/wcet/programs"
+      extension="wcet"
+      results="samples/wcet/programs"
+      >
       <all-programs>
         <krun-option name="-cTIMING" value="add |-> 1 sub |-> 1 mul |-> 1 div |-> 1 or |-> 1 and |-> 1 not |-> 1 load |-> 10 store |-> 10 jmp |-> 1 beq |-> 2 bne |-> 2 blt |-> 2 ble |-> 2 halt |-> 1 read |-> 100 write |-> 100 'rw(.KList) |-> 200 int |-> 5 rfi |-> 5" />
         <krun-option name="-cINPUT" value=".List" />
         <krun-option name="-cINITIAL" value=".Map" />
-        <krun-option name="--pattern" value="&lt;k&gt; .K &lt;/k&gt;&lt;input&gt; .List &lt;/input&gt;" />
+        <krun-option name="-pattern" value="&lt;k&gt; .K &lt;/k&gt;&lt;input&gt; .List &lt;/input&gt;" />
       </all-programs>
-      <program name="dist/examples/wcet/programs/interrupt.wcet">
+      <program name="samples/wcet/programs/interrupt.wcet">
         <krun-option name="-cTIMING" value="add |-> 1 sub |-> 1 mul |-> 1 div |-> 1 or |-> 1 and |-> 1 not |-> 1 load |-> 10 store |-> 10 jmp |-> 1 beq |-> 2 bne |-> 2 blt |-> 2 ble |-> 2 halt |-> 1 read |-> 100 write |-> 100 'rw(.KList) |-> 200 int |-> 5 rfi |-> 5" />
         <krun-option name="-cINPUT" value="ListItem((400, data |-> 1000)) ListItem((401, data |-> 5)) ListItem((1000, data |-> 6))" />
         <krun-option name="-cINITIAL" value="data |-> 0" />
-        <krun-option name="--pattern" value="&lt;k&gt; .K &lt;/k&gt;&lt;input&gt; .List &lt;/input&gt;" />
+        <krun-option name="-pattern" value="&lt;k&gt; .K &lt;/k&gt;&lt;input&gt; .List &lt;/input&gt;" />
       </program>
-      <program name="dist/examples/wcet/programs/polling.wcet">
+      <program name="samples/wcet/programs/polling.wcet">
         <krun-option name="-cTIMING" value="add |-> 1 sub |-> 1 mul |-> 1 div |-> 1 or |-> 1 and |-> 1 not |-> 1 load |-> 10 store |-> 10 jmp |-> 1 beq |-> 2 bne |-> 2 blt |-> 2 ble |-> 2 halt |-> 1 read |-> 100 write |-> 100 'rw(.KList) |-> 200 int |-> 5 rfi |-> 5" />
         <krun-option name="-cINPUT" value="ListItem((400, data |-> 1000)) ListItem((401, data |-> 5)) ListItem((1000, data |-> 6))" />
         <krun-option name="-cINITIAL" value="data |-> 0" />
-        <krun-option name="--pattern" value="&lt;k&gt; .K &lt;/k&gt;&lt;input&gt; .List &lt;/input&gt;" />
+        <krun-option name="-pattern" value="&lt;k&gt; .K &lt;/k&gt;&lt;input&gt; .List &lt;/input&gt;" />
        </program>
   </test>
 
@@ -413,14 +463,15 @@
 -->
 
   <test
-      definition="dist/examples/imp-symbolic/imp.k"
-      programs="dist/examples/imp-symbolic/programs"
-      extensions="imp"
+      definition="samples/imp-symbolic/imp.k"
+      programs="samples/imp-symbolic/programs"
+      extension="imp"
+      results="samples/imp-symbolic/programs"
       >
     <all-programs>
       <krun-option name="-search" />
       <krun-option name="-parser" value="kast -groundParser" parser-home="PARSER_HOME"/>
-      <krun-option name="-no-color" />
+      <krun-option name="-color" value="off" />
     </all-programs>
   </test>
 
@@ -429,9 +480,10 @@
 -->
 
   <test
-      definition="dist/examples/imp-hoare/imp.k"
-      programs="dist/examples/imp-hoare/programs"
-      extensions="imp"
+      definition="samples/imp-hoare/imp.k"
+      programs="samples/imp-hoare/programs"
+      extension="imp"
+      results="samples/imp-hoare/programs"
       >
   </test>
 
@@ -440,116 +492,53 @@
 -->
 
   <test
-      definition="dist/examples/imp-reachability/imp.k"
-      programs="dist/examples/imp-reachability"
-      extensions="imp"
+      definition="samples/imp-reachability/imp.k"
+      programs="samples/imp-reachability"
+      extension="imp"
       exclude="pgm-1.imp pgm-2.imp pgm-3.imp"
+      results="samples/imp-reachability"
       >
     <all-programs>
-      <krun-option name="--search" />
-      <krun-option name="--depth" value="5" />
-      <krun-option name="--parser" value="kast -groundParser"  parser-home="PARSER_HOME"/>
-      <krun-option name="--no-color" />
+      <krun-option name="-search" />
+      <krun-option name="-depth" value="5" />
+      <krun-option name="-parser" value="kast -groundParser"  parser-home="PARSER_HOME"/>
+      <krun-option name="-color" value="off" />
     </all-programs>
   </test>
 
 
-<!--
-    Cink ltlmc
--->
-<!--
-  <test
-      definition="dist/examples/cink/ltlmc/cink.k"
-      programs="dist/examples/cink/ltlmc/programs"
-      extensions="cink"
-      results="tests/examples/cink/ltlmc"
-      exclude="form-peterson.cink form-dekker.cink form-threads.cink peterson-wrong1.cink peterson-wrong2.cink" >
-      <kompile-option name="-transition" value="kripke" />
-      <all-programs>
-        <krun-option name="-ltlmc" value="[]Ltl ((eqTo(critical1, 1) ->Ltl eqTo(critical2, 0)) /\Ltl (eqTo(critical2, 1) ->Ltl eqTo(critical1, 0)))" />
-      </all-programs>
-  </test>
--->
-
-<!--
-    Cink basic
--->
-<!--
-  <test
-      definition="dist/examples/cink/basic/cink.k"
-      programs="dist/examples/cink/basic/programs"
-      extensions="cink"
-      results="tests/examples/cink/basic"
-      exclude="fact.cink prim.cink"
-      >
-  </test>
--->
-<!--
-    Cink threads
--->
-<!--
-  <test
-      definition="dist/examples/cink/threads/cink.k"
-      programs="dist/examples/cink/threads/programs"
-      extensions="cink"
-      results="tests/examples/cink/threads"
-      >
-  </test>
--->
-<!--
-    Cink arrays
--->
-
-  <test
-      definition="dist/examples/cink/arrays/cink.k"
-      programs="dist/examples/cink/arrays/programs"
-      extensions="cink"
-      results="tests/examples/cink/arrays"
-      exclude="sort.cink"
-      >
-  </test>
-<!--
-    Cink arrays unidimensional
--->
-<!--
-  <test
-      definition="dist/examples/cink/arrays/unidimensional/cink.k"
-      programs="dist/examples/cink/arrays/unidimensional/programs"
-      extensions="cink"
-      results="tests/examples/cink/arrays/unidimensional"
-      exclude="sort.cink"
-      >
-  </test>
--->
 <!--
     Program equivalence
 -->
 
   <test
-      definition="dist/examples/prog-equiv/peq.k"
-      programs="dist/examples/prog-equiv/programs"
-      extensions="peq"
+      definition="samples/prog-equiv/peq.k"
+      programs="samples/prog-equiv/programs"
+      extension="peq"
       results="tests/examples/prog-equiv/" >
-      <kompile-option name="--add-top-cell" />
+      <kompile-option name="-add-top-cell" />
   </test>
 
 <!--
 
 -->
+<!-- TODO: Consider 'title' attribute
   <test
-      definition="dist/tutorial/1_k/2_imp/lesson_4/imp.k"
-      programs="dist/tutorial/1_k/2_imp"
-      extensions="imp"
+      definition="tutorial/1_k/2_imp/lesson_4/imp.k"
+      programs="tutorial/1_k/2_imp"
+      extension="imp"
+      results="tutorial/1_k/2_imp"
       title="symbolic"
 	  exclude="lesson_4/test.imp"
       >
-    <kompile-option name="--backend" value="symbolic" />
+    <kompile-option name="-backend" value="symbolic" />
     <all-programs>
-      <krun-option name="--no-color" />
-      <krun-option name="--output-mode" value="none" />
+      <krun-option name="-color" value="off" />
+      <krun-option name="-output-mode" value="none" />
       <krun-option name="-cPC" value="true" />
     </all-programs>
   </test>
+-->
 
 
 <!--
@@ -569,19 +558,19 @@
       definition="tests/regression/freshMOS/issue.k"
       programs="tests/regression/freshMOS/programs"
       results="tests/regression/freshMOS/tests"
-      extensions="issue"
+      extension="issue"
   />
   <test
       definition="tests/regression/openCells1/issue.k"
       programs="tests/regression/openCells1/programs"
       results="tests/regression/openCells1/tests"
-      extensions="issue"
+      extension="issue"
   />
   <test
       definition="tests/regression/sets-issue/issue.k"
       programs="tests/regression/sets-issue/programs"
       results="tests/regression/sets-issue/tests"
-      extensions="issue"
+      extension="issue"
   />
   <test
       definition="tests/regression/mapitem2klabel/issue.k"
@@ -590,7 +579,7 @@
       definition="tests/regression/issue/issue.k"
       programs="tests/regression/issue/programs"
       results="tests/regression/issue/tests"
-      extensions="issue"
+      extension="issue"
   />
   <test
       definition="tests/regression/issue403/issue.k"
@@ -611,18 +600,18 @@
       definition="tests/regression/strictness/issue.k"
       programs="tests/regression/strictness/programs"
       results="tests/regression/strictness/tests"
-      extensions="issue"
+      extension="issue"
   />
 
   <test
       definition="tests/regression/issue580/issue.k"
       programs="tests/regression/issue580/programs"
       results="tests/regression/issue580/tests"
-      extensions="issue" >
+      extension="issue" >
       <program name="tests/regression/issue580/programs/test.issue">
         <krun-option name="-output-mode" value="pretty" />
         <krun-option name="-search" />
-        <krun-option name="--pattern" value="&lt;k&gt; 6 &lt;/k&gt;" />
+        <krun-option name="-pattern" value="&lt;k&gt; 6 &lt;/k&gt;" />
       </program>
   </test>
 
@@ -630,7 +619,7 @@
       definition="tests/regression/subsort-klabel/issue.k"
       programs="tests/regression/subsort-klabel/programs"
       results="tests/regression/subsort-klabel/tests"
-      extensions="issue" >
+      extension="issue" >
       <program name="tests/regression/subsort-klabel/programs/test.issue">
         <krun-option name="-output-mode" value="pretty" />
       </program>
@@ -640,23 +629,23 @@
       definition="tests/regression/issue627/issue.k"
       programs="tests/regression/issue627/programs"
       results="tests/regression/issue627/tests"
-      extensions="issue" >
+      extension="issue" >
   </test>
 
   <test
       definition="tests/regression/issue631/issue.k"
       programs="tests/regression/issue631"
       results="tests/regression/issue631"
-      extensions="issue" >
+      extension="issue" >
   </test>
 
   <test
       definition="tests/regression/negative-test/issue.k"
       programs="tests/regression/negative-test/programs"
       results="tests/regression/negative-test/tests"
-      extensions="issue" >
+      extension="issue" >
     <program name="tests/regression/negative-test/programs/test.issue">
-      <krun-option name="-no-color"/>
+      <krun-option name="-color" value="off" />
     </program>
   </test>
 
@@ -664,7 +653,7 @@
       definition="tests/regression/escapedKLabel/issue.k"
       programs="tests/regression/escapedKLabel/programs"
       results="tests/regression/escapedKLabel/tests"
-      extensions="issue" >
+      extension="issue" >
       <program name="tests/regression/escapedKLabel/programs/test.issue">
         <krun-option name="-output-mode" value="pretty" />
       </program>
@@ -673,22 +662,22 @@
   <test
       definition="tests/regression/unparsing/issue.k"
       programs="tests/regression/unparsing/programs"
-      extensions="issue"
+      extension="issue"
       results="tests/regression/unparsing/out/">
       <all-programs>
-        <krun-option name="--output-mode" value="pretty" />
+        <krun-option name="-output-mode" value="pretty" />
       </all-programs>
   </test>
 
   <test
       definition="tests/regression/addbrackets/issue.k"
       programs="tests/regression/addbrackets/programs"
-      extensions="issue"
+      extension="issue"
       results="tests/regression/addbrackets/out/">
       <all-programs>
-        <krun-option name="--output-mode" value="pretty" />
-	<krun-option name="--parser" value="kast -groundParser" parser-home="PARSER_HOME" />
-        <krun-option name="--parens" value="smart" />
+        <krun-option name="-output-mode" value="pretty" />
+	<krun-option name="-parser" value="kast -groundParser" parser-home="PARSER_HOME" />
+        <krun-option name="-parens" value="smart" />
       </all-programs>
   </test>
 
@@ -696,24 +685,24 @@
       definition="tests/regression/issue647/issue.k"
       programs="tests/regression/issue647"
       results="tests/regression/issue647"
-      extensions="issue" />
+      extension="issue" />
 
   <test
       definition="tests/regression/issue663/issue.k"
       programs="tests/regression/issue663/programs"
       results="tests/regression/issue663/out"
-      extensions="issue">
+      extension="issue">
       <all-programs>
-        <krun-option name="--ltlmc" value="TrueLtl" />
+        <krun-option name="-ltlmc" value="TrueLtl" />
       </all-programs> />
   </test>
   <test
       definition="tests/regression/issue674/issue.k"
       programs="tests/regression/issue674"
       results="tests/regression/issue674"
-      extensions="issue" >
+      extension="issue" >
       <all-programs>
-        <krun-option name="--output-mode" value="pretty" />
+        <krun-option name="-output-mode" value="pretty" />
       </all-programs>
   </test>
 
@@ -721,17 +710,19 @@
       definition="tests/regression/basicFloat/issue.k"
       programs="tests/regression/basicFloat"
       results="tests/regression/basicFloat"
-      extensions="issue" />
+      extension="issue" />
   <test
       definition="tests/regression/follow/issue.k"
       programs="tests/regression/follow"
       results="tests/regression/follow"
-      extensions="issue" />
+      extension="issue" />
 
   <test
       definition="tests/regression/lint/test.k"
       programs="tests/regression/lint"
-      extensions="test">
+      extension="test"
+      results="tests/regression/lint"
+      >
     <kompile-option name="-w" value="all" />
   </test>
 
@@ -739,9 +730,9 @@
       definition="tests/regression/string2int/test.k"
       programs="tests/regression/string2int"
       results="tests/regression/string2int"
-      extensions="test" >
+      extension="test" >
       <all-programs>
-        <krun-option name="--output-mode" value="pretty" />
+        <krun-option name="-output-mode" value="pretty" />
       </all-programs>
   </test>
 
@@ -749,11 +740,11 @@
       definition="tests/regression/issue#36/issue.k"
       programs="tests/regression/issue#36"
       results="tests/regression/issue#36"
-	  extensions="issue"
+	  extension="issue"
       >
     <all-programs>
-      <krun-option name="--output-mode" value="pretty" />
-	  <krun-option name="--no-color" />
+      <krun-option name="-output-mode" value="pretty" />
+      <krun-option name="-color" value="off" />
     </all-programs>
   </test>
 
@@ -767,11 +758,11 @@
       definition="tests/regression/label-and-context/label-and-context.k"
       programs="tests/regression/label-and-context"
       results="tests/regression/label-and-context"
-      extensions="issue">
+      extension="issue">
   <all-programs>
-    <krun-option name="--output-mode" value="pretty" />
-    <krun-option name="--no-color" />
-    <krun-option name="--parser" value="cat"/>
+    <krun-option name="-output-mode" value="pretty" />
+    <krun-option name="-color" value="off" />
+    <krun-option name="-parser" value="cat"/>
   </all-programs>
 </test>
 
@@ -781,8 +772,60 @@
       definition="tests/regression/cool-issue/test.k"
       programs="tests/regression/cool-issue/programs"
       results="tests/regression/cool-issue/tests"
-      extensions="test"
-  />
+      extension="test">
+    <all-programs>
+       <krun-option name="-color" value="off" />
+    </all-programs>
+  </test>
+
+
+<!-- begin Java Rewrite Engine tests -->
+<!--
+  <test
+      definition="examples/java_rewrite_engine/tutorial/1_k/2_imp/imp.k"
+      programs="tutorial/1_k/2_imp"
+      extensions="imp"
+      results="tests/tutorial/1_k/2_imp/lesson_5"
+      >
+    <kompile-option name="-backend" value="java" />
+    <all-programs>
+      <krun-option name="-backend" value="java" />
+      <krun-option name="-smt" value="none" />
+    </all-programs>
+  </test>
+  
+  <test
+      definition="examples/java_rewrite_engine/tutorial/1_k/4_imp++/imp.k"
+      programs="tutorial/1_k/2_imp tutorial/1_k/4_imp++"
+      extensions="imp"
+      exclude="lesson_1/spawn.imp"
+      results="tests/tutorial/1_k/4_imp++/lesson_5"
+      >
+    <kompile-option name="-backend" value="java" />
+    <all-programs>
+      <krun-option name="-backend" value="java" />
+	    <krun-option name="-smt" value="none" />
+	    <krun-option name="-output-mode" value="none" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="examples/java_rewrite_engine/simple/untyped/simple-untyped.k"
+      programs="tutorial/2_languages/1_simple/1_untyped/programs"
+      extensions="simple"
+      exclude="dekker.simple exceptions_07.simple matrix.simple"
+      results="tests/examples/simple-untyped"
+      >
+    <kompile-option name="-backend" value="java" />
+    <all-programs>
+      <krun-option name="-backend" value="java" />
+	    <krun-option name="-smt" value="none" />
+      <krun-option name="-output-mode" value="none" />
+    </all-programs>
+  </test>
+-->
+<!-- end Java Rewrite Engine tests -->
+
 
 </tests>
 

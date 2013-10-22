@@ -1,9 +1,0 @@
-basic/lib
-basic/Basic.java
-basic/BasicConstants.java
-basic/BasicTokenManager.java
-basic/ParseException.java
-basic/SimpleCharStream.java
-basic/Token.java
-basic/TokenMgrError.java
-concrete/lib

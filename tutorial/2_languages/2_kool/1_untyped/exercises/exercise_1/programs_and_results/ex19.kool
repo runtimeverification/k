@@ -1,0 +1,39 @@
+// This example would work in Java, because the get() in f() is chosen to
+// be the private one of B.  In our case, it is dynamically dispatched
+// and ends up being the one of A, which is private to A, so we get stuck.
+
+class B {
+  private var x = 3;
+  method B() {
+    x = 5;
+  }
+  private method get() {
+    return x;
+  }
+  method f() {
+    return get();
+  }
+}
+
+class A extends B {
+  private var x = 7;
+  method A() {
+    super.B();
+    x = 10;
+  }
+  private method get(){
+    return x;
+  }
+  method g() {
+    return get();
+  }
+}
+
+class Main {
+  method Main() {
+    print("The following should work: ");
+    print((new A()).g());
+    print("\nBut the following should not."); 
+    print((new A()).f());
+  }
+}

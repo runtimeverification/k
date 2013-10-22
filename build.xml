@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project basedir="." default="build" name="KTool Build file">
 
-	<property location="javasources" name="javasources" />
+	<property location="src/javasources" name="javasources" />
 	<property name="version" value="nightly" />
 	<property name="config" value="./tests/config.xml" />
 
@@ -22,6 +22,7 @@
 		<delete>
 			<fileset dir="${javasources}/KTool/src/org/kframework/parser/concrete/lib">
 				<include name="*.java" />
+                                <include name="*.tbl" />
 				<exclude name="string_trim_last_one_0_0.java" />
 				<exclude name="string_unescape_sort_0_0.java" />
 				<exclude name="annolocation_0_0.java" />
@@ -36,26 +37,25 @@
 		<delete dir="${javasources}/parsers/Concrete/trans/ConcreteMain" />
 		<delete dir="${javasources}/parsers/Concrete/include" />
 
-		<delete file="${javasources}/KTool/lib/resources/sdf/*" />
+		<delete dir="${javasources}/KTool/lib/resources/sdf" />
 
 		<antcall target="clean-java" />
 	</target>
 
 	<target name="clean-java">
 		<delete dir="${javasources}/KTool/bin" />
-		<delete file="${javasources}/../dist/lib/java/k3.jar" />
-		<delete file="${javasources}/../dist/lib/version.txt" />
+		<delete file="${javasources}/../../lib/java/k3.jar" />
+		<delete file="${javasources}/../../lib/version.txt" />
 		<delete dir="./k/" />
 		<delete>
 			<fileset dir="${javasources}/KTool/src/org/kframework/backend/pdmc/pda/buchi/parser" includes="*.java" />
-		</delete>
-		<delete>
 			<fileset dir="${javasources}/KTool/src/org/kframework/parser/basic" includes="*.java" />
+			<fileset dir="${javasources}/KTool/src/org/kframework/utils/kastparser" includes="*.java" />
 		</delete>
 	</target>
 
 	<target name="makeversion">
-		<property name="version.file" value="./dist/lib/version.txt" />
+		<property name="version.file" value="./lib/version.txt" />
 
 		<exec executable="git" outputproperty="version.out">
 			<arg value="describe" />
@@ -92,10 +92,20 @@
 		<delete file="k-${version}.tgz" />
 
 		<copy todir="release/k">
-			<fileset dir="dist">
+			<fileset dir=".">
+				<include name="INSTALL" />
+				<include name="LICENSE" />
+				<include name="README" />
+				<include name="bin/**" />
+				<include name="documentation/**" />
+				<include name="include/**" />
+				<include name="lib/**" />
+				<include name="samples/**" />
+				<include name="tutorial/**" />
+				<include name="editor-support/**" />
 				<exclude name="**/.*/**" />
-				<exclude name="examples/**/*-kompiled/**" />
-				<exclude name="tutorial/**/*-kompiled/**" />
+				<exclude name="**/*-kompiled/**" />
+				<exclude name="**/*-kompiled-symbolic/**" />
 				<exclude name="bin/native/linux/implodePT" />
 				<exclude name="bin/native/macosx/implodePT" />
 				<exclude name="bin/native/cygwin/implodePT.exe" />
@@ -108,7 +118,8 @@
 				<include name="k/bin/kast" />
 				<include name="k/bin/kompile" />
 				<include name="k/bin/krun" />
-				<include name="k/bin/ksettest" />
+				<include name="k/bin/kpp" />
+				<include name="k/bin/ktest" />
 				<include name="k/bin/maude/binaries/maude.intelDarwin" />
 				<include name="k/bin/maude/binaries/maude.linux" />
 				<include name="k/bin/maude/binaries/maude.linux64" />
@@ -120,7 +131,8 @@
 				<exclude name="k/bin/kast" />
 				<exclude name="k/bin/kompile" />
 				<exclude name="k/bin/krun" />
-				<exclude name="k/bin/ksettest" />
+				<exclude name="k/bin/kpp" />
+				<exclude name="k/bin/ktest" />
 				<exclude name="k/bin/maude/binaries/maude.intelDarwin" />
 				<exclude name="k/bin/maude/binaries/maude.linux" />
 				<exclude name="k/bin/maude/binaries/maude.linux64" />
@@ -132,10 +144,13 @@
 
 
 	<target name="test" depends="build">
-           <java jar="${javasources}/../dist/lib/java/k3.jar" fork="true" failonerror="true">
+           <java jar="${javasources}/../../lib/java/k3.jar" fork="true" failonerror="true">
 	     <arg value="-ktest"/>
-	     <arg value="-config"/>
 	     <arg value="${config}"/>
+	     <arg value="-programs"/>
+	     <arg value="."/>
+	     <arg value="-results"/>
+	     <arg value="."/>
 	   </java>
 	</target>
 </project>

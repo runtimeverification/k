@@ -1,0 +1,15 @@
+To test this definition, you can call ktest on the config.xml file in this
+folder.  Recall that if you call ktest from any other folder than where
+your definition is, then you need the option "-d path/to/your/def/directory".
+For example, if you want to call it from this folder, then type
+
+  ktest config.xml -d ..
+
+If you want to call it from the parent folder then just type:
+
+  ktest results/config.xml
+
+Also recall that if your definition is already kompiled, then you can skip
+kompilation to save time using the --skip kompile option; if you want to skip
+both kompilation and pdf generation then use the option --skip "kompile pdf".
+

@@ -1,0 +1,22 @@
+void main() {
+  int e = 100;
+  try {
+    try {
+      try {
+        try {
+          throw -1;
+        } catch(string e) {
+          print("Wrong\n");
+        }
+      } catch(int e) {
+        print("OK, int\n");
+        throw false;
+      }
+    } catch(int->bool e) {
+      print("Wrong\n");
+    }
+  } catch(bool e) {
+    print("OK, bool\n");
+  }
+  print(e," as in the top declaration\n");
+}

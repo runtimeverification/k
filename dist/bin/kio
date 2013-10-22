@@ -1,3 +1,0 @@
-#!/usr/bin/env sh
-
-java -ea -jar -Xmx1024m "$(dirname $0)/../lib/java/k3.jar" -ioserver "$@"

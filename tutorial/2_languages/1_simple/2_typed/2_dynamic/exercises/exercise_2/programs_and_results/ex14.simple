@@ -1,0 +1,17 @@
+int foo(int x) throws bool {
+
+  if (x > 0) { throw false; } else { return x; }
+
+}
+
+void main() {
+
+  try {  throw foo; }
+  catch (int->int f) {
+    print("Wrong! Type of f is \"int->int throws bool\"\n");
+    try { f(10); }
+    catch (int i) { print("Wrong! f throws a bool, not an int!\n"); }
+  }
+  print("Wrong! Should not reach this!\n"); 
+
+}

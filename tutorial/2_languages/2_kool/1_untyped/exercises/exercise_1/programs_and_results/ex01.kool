@@ -1,0 +1,12 @@
+class A {
+    private var x = 7;
+    method A() {}
+}
+
+class Main {
+  method Main() {
+    var a = new A();
+    print("Accessing a private field: a.x = ");
+    print(a.x);
+  }
+}

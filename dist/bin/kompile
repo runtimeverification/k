@@ -1,4 +1,0 @@
-#!/usr/bin/env sh
-ulimit -s `ulimit -H -s`
-java -ea -ss8m -Xms64m -Xmx1G -jar "$(dirname $0)/../lib/java/k3.jar" -kompile "$@"
-

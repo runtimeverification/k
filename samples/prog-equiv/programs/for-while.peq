@@ -1,0 +1,38 @@
+/*
+
+  This formula express the equivalence between while and for.
+  To check it, give the following command in the parent folder:
+     krun programs/for-while.peq
+  If the content of the cell <output> inludes only the message "\ntrue\n" 
+  then the formula holds.
+  Am alternative is to use search command:
+     krun programs/for-while.peq -search
+                   --pattern="<T> <output> \"\\ntrue\\n\" </output> B:Bag </T>"
+                   --bound=1
+*/
+
+<k>
+  L : for i from #symInt(a1) to #symInt(a2) do #symStmt(s)
+</k>
+<env>
+  i -> #symInt(i1), SymMap(M)
+</env>
+~
+<k>
+ L:   i := #symInt(a1);
+  while (i <= #symInt(a2)) do (
+      #symStmt(s);
+ L:     i := i + 1
+    )
+</k>
+<env>
+  i -> #symInt(i1), SymMap(M)
+</env>
+
+if
+i isNotModifiedBy #symStmt(s)
+//not occurs(i, #symStmt(s))
+
+using observers: allObs;
+
+

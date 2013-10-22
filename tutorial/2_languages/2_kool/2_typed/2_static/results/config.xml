@@ -1,0 +1,8 @@
+<tests>
+  <test
+      definition="kool-typed-static.k"
+      programs="../../programs"
+      extension="kool"
+results="."
+      />
+</tests>

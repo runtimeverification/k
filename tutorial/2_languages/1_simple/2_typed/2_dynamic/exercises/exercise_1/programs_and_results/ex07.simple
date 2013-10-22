@@ -1,0 +1,29 @@
+int x = 10;
+
+int inc(bool b) {
+  print(++x, "\n");
+  throw -1;
+  return 1;  // never reaches this
+}
+
+void main() {
+  try {
+    try {
+      for(int i=0; i<=10; ++i) {
+        print(i,"\n");
+        if(i>7) {
+          try {
+            inc(true);
+          } catch(void->int f) {
+            print("Wrong\n");
+          }
+        }
+      }
+    } catch(bool->void f) {
+      print("Wrong\n");
+    }
+  } catch(int f) {
+    print("OK\n");
+  }
+  print("Done\n");
+}

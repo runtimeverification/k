@@ -1,0 +1,20 @@
+class B {
+    var x = 3;
+    method B() {
+	x = 5;
+    }
+}
+
+class A extends B {
+    private var x = 7;
+    method A() {
+	x = 10;
+    }
+}
+
+class Main {
+  method Main() {
+    print("Next should not be printed, because x is private in A\nand we do not default to B.\n");
+    print((new A()).x);
+  }
+}

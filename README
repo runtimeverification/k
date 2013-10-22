@@ -1,55 +1,67 @@
-﻿ 
-1. This is a readme file for the developers.
+WARNING: The command line options for kompile, krun, kast and ktest have
+recently (starting with version 'jenkins-k-framework-git-359') changed!
+A list of changes can be found at
+https://github.com/kframework/k/wiki/Command-Line-Option-Changes.
 
-2. Prerequisites
+K tool, version 3.0
 
-2.1 Java Development Kit (tested with JDK7 or higher)
-You can follow the instructions here: 
-http://docs.oracle.com/javase/7/docs/webnotes/install/index.html depending on 
-the type of your machine.
+K is a framework for programming language design and executable semantics.
+This distribution contains a tool prototype which implements many of K's
+features.  For more on the K framework and how to use the current tool,
+go to k/tutorial (start with the README file there).
 
-To make sure that everything works you should be able to call 'java' and
-'javac' from a Terminal.
+Note: This README file contains information regarding the stable release of
+the K tool indicated in the title above, regardless of whether it came with
+the release itself or with subsequent nightly/latest builds.  This file is
+updated only when new stable versions are officially released.
 
-2.2 Apache ANT
-Linux and Mac:
-    Most likely you will already have it.
-Windows:
-    Go to http://ant.apache.org/bindownload.cgi and download the zip with the 
-    binary distribution. Unzip it in your desired location and follow the 
-    instalation instructions from the 'INSTALL' file.
 
-You can test if it works by calling 'ant' in a Terminal.
+What is new (from v2.7)
+-----------------------
 
-3. Install
-Checkout this directory in your desired location and call 'ant' from the main
-directory to build the .jar binaries. For convenient usage, you can update
-your $PATH with <checkout-dir>/dist/bin (strongly recommended, but optional).
+* The front-end is now implemented completely in Java (previously it was
+implemented in a combination of Perl and Maude), making use of SDF (as
+distributed with the Spoofax system).
 
-4. Work on Java code
-Open eclipse and set your workspace to /javasources.  Go to 
-File->Import->General->Existing projects into workspace, and select all of 
-the projects from /javasources.  If you have the spoofax plugin installed in
-eclipse, you might be able to work and compile directly within eclipse (the
-main project is K3Java and can be used to test the main functionalities).
+Because the parser has changed, the syntax of K definitions has changed, too:
 
-If your do not have the Spoofax plugin, you can still use Eclipse as an editor
-and to test functionality not related to parsing.
+1. Modules and files:
 
-5. Work on Maude code
-Modify the Maude files found in /dist/bin/maude.  No need for recompilation.
+require "filename.k" // require the contents of another file found in the
+                     // current directory, or the 'include' directory.
 
-6. Build the final release directory/archives
-Call 'ant release' in the base directory.  This will create a k directory in
-trunk containing the release distribution and two archives k-latest.(zip|tgz)
+module MODULE-NAME
+  imports INCLUDED-MODULE
 
-You can use 'ant release -Dversion="3.0"' to create a tagged release.
+endmodule // in one word
 
-7. Compiling definitions and running programs
-Assuming /dist/bin is in your path, you can compile definitions using
-the 'kompile' command.  To execute a program you can use 'krun'.
+2. Use priorities instead of precedence:
+               | Exp "*" Exp
+               > Exp "+" Exp
 
-8. Troubleshooting
-If everything fails, try 'ant clean' and rebuild the entire project.
-If that still doesn't work, verify that the maude files provided in the
-distribution (k/bin/maude/binaries) are compatible with your system.
+3. Binary mixfix operators can be disambiguated with associativity attributes:
+  syntax Exp ::= Exp "*" Exp [left]
+               > left:
+               	 Exp "+" Exp [left]
+               | Exp "-" Exp [left]
+               > non-assoc:
+               	 Exp "=" Exp [right]
+
+4. You can use bracket productions to override priorities:
+               | "(" Exp ")"            [bracket]
+
+5. The scope of a variable in k3 is restricted to each rule.  In k2 it was the
+module.  As a result, the sort of each variable should be specified in each
+rule in which it is used.  If not specified, it is automatically assumed K.
+
+6. The only accepted comments are // ... for one line comments and /* ... */
+for multiline ones. Latex comments remain the same:
+               //@ ...
+               /*@ ... */
+               //! ...
+               /*! ... */
+
+Developers
+----------
+
+See src/README
