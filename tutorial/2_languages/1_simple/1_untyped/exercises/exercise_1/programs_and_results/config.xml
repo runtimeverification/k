@@ -13,6 +13,8 @@
 <!-- new tests -->
   <test
       definition="simple-untyped.k"
+      programs="."
+      results="."
       extension="simple"
       skip="pdf">
   </test>

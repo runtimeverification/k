@@ -13,8 +13,8 @@
 <!-- new tests -->
   <test
       definition="kool-untyped.k"
-programs="."
-results="."
+      programs="."
+      results="."
       extension="kool"
       skip="pdf">
   </test>

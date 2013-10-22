@@ -6,9 +6,32 @@ allow a new keyword, "private", to optionally precede member
 declarations.  For example, "private var x=10, y=10;" or "private
 method f(x,y) {...}".
 
-Semantically, the private members should have the
-same semantics as in conventional OO programming languages, say
-Java.  For simplicity, you can assume that all members defined in a
-class, private or public, are distinct.  Also, you can assume that
-methods are identified, for overriding purposes, only by their name
-(and not by their result or arguments type).
+There is no full agreement among programming language designers on
+what the precise semantics of private members should be, with or
+without types around, or whether private members should be allowed at
+all in an OO language.  For example, the overall attitude in the
+Smalltalk community is that private members should not be used or even
+allowed (indeed, Smalltalk does not have them), because they work
+against the OO philosophy.  Consequently, we will here make it clear
+what the desired semantics of private members is in untyped KOOL.
+
+Our high-level semantics of private members is the usual one: they can
+be directly accessed only by members of the same class.  In utyped
+KOOL, we keep the above semantics as general as possible, in that we
+impose no apriori restriction on how private members are declared.
+For example, we allow a non-private method to be overridden by a
+private method, and viceversa.  The only check we perform is a 
+dynamic one, namely that a private member (field or method) can only
+be accessed from code in the same class (but possibly in a different
+object instance).  We let the program execute normally, including
+dynamic method dispatch, and only check at access time whether the
+accessed member is private and, if it is, then whether it was accessed
+from the same class.
+
+For simplicity, we assume that all members defined in a class, private
+or public, are distinct.  Also, like before we assume that methods are
+identified, for overriding purposes, only by their name (and not by
+their result or arguments type).
+
+The sample programs and their expected results should fully clarify
+the desired semantics of private members in untyped KOOL.
