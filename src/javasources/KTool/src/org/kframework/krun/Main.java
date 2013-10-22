@@ -456,7 +456,7 @@ public class Main {
                 Error.report(K.output_mode
                         + " is not a valid value for output-mode option");
             }
-
+            System.exit(0);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
