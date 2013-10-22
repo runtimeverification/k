@@ -53,6 +53,7 @@ public class SymbolicRewriter {
 	public SymbolicRewriter(Definition definition) {
         this.definition = definition;
 
+        // Eventually the strategy will be specified in the command line.
         strategy = new NullStrategy();
 
         /* populate the table of rules rewriting the top configuration */
@@ -153,10 +154,11 @@ public class SymbolicRewriter {
             return;
         }
 
+        // Instead of iterator through all applicable rules, iterate through
+        // them as dictated by the strategy.
         strategy.apply(getRules(constrainedTerm.term()));
-        //while (strategy.hasNext()) {
-        //    Rule rule = strategy.next();
-        for (Rule rule : getRules(constrainedTerm.term())) {
+        while (strategy.hasNext()) {
+            Rule rule = strategy.next();
             ruleStopwatch.reset();
             ruleStopwatch.start();
 
@@ -283,13 +285,17 @@ public class SymbolicRewriter {
     label:
         for (step = 0; !queue.isEmpty() && step != depth; ++step) {
             for (ConstrainedTerm term : queue) {
+                // First, rewrite using the structural strategy, only looking
+                // for one matching rule.
                 strategy = new StructuralStrategy(GlobalSettings.transition);
-                //computeRewriteStep(term,1);
-                //if (results.isEmpty()) {
-                //  System.out.println("Ready for a transition");
-                //  strategy = new TransitionStrategy(GlobalSettings.transition);
+                computeRewriteStep(term,1);
+                // If we could not match a structural rule, then we will seach
+                // the space of possible transitions, matching all possible
+                // rules that are marked as transitions.
+                if (results.isEmpty()) {
+                  strategy = new TransitionStrategy(GlobalSettings.transition);
                   computeRewriteStep(term);
-                //}
+                }
 
                 if (results.isEmpty()) {
                     /* final term */

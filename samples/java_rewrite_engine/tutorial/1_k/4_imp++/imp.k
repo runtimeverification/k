@@ -59,7 +59,7 @@ module IMP
 // AExp
   rule <k> X:Id => I ...</k>
        <env>... X |-> L:KItem ...</env>
-       <store>... L |-> I:KItem ...</store>  [lookup]
+       <store>... L |-> I:KItem ...</store>  [lookup,transition]
   rule <k> ++X => I +Int 1 ...</k>
        <env>... X |-> L:KItem ...</env>
        <store>... L |-> (I => I +Int 1) ...</store>  [increment]
@@ -81,7 +81,7 @@ module IMP
   rule _:Int; => .
   rule <k> X:Id = I:Int => I ...</k>
        <env>... X |-> L:KItem ...</env>
-       <store>... L |-> (_:KItem => I) ...</store>  [assignment]
+       <store>... L |-> (_:KItem => I) ...</store>  [assignment,transition]
   rule if (true)  S else _ => S
   rule if (false) _ else S => S
   rule while (B) S => if (B) { S while(B) S } else { .Stmts }   [structural]
