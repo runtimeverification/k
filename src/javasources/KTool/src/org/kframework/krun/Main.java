@@ -76,6 +76,7 @@ import org.kframework.utils.OptionComparator;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
 
+import static org.apache.commons.io.FileUtils.deleteDirectory;
 import static org.apache.commons.io.FileUtils.writeStringToFile;
 
 public class Main {
@@ -727,7 +728,7 @@ public class Main {
             public void run() {
                 try {
                     //FileUtil.renameFolder(K.krunTempDir, K.krunDir);
-                    FileUtil.deleteDirectory(new File(K.krunTempDir));
+                    deleteDirectory(new File(K.krunTempDir));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
