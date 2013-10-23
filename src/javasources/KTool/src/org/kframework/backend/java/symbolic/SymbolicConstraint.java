@@ -91,6 +91,11 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             return rightHandSide;
         }
 
+        /**
+         * Checks if this equality is false.
+         * 
+         * @return true if this equality is definitely false; otherwise, false
+         */
         public boolean isFalse() {
             if (leftHandSide instanceof Bottom || rightHandSide instanceof Bottom)
                 return true;
@@ -119,11 +124,22 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             }
         }
 
+        /**
+         * Checks if this equality is true.
+         * 
+         * @return true if this equality is definitely true; otherwise, false
+         */
         public boolean isTrue() {
             if (leftHandSide  instanceof Bottom || rightHandSide instanceof Bottom) return false;
             return leftHandSide.equals(rightHandSide);
         }
 
+        /**
+         * Checks if the truth value of this equality is unknown.
+         * 
+         * @return true if the truth value of this equality cannot be decided
+         *         currently; otherwise, false
+         */
         public boolean isUnknown() {
             return !isTrue() && !isFalse();
         }
@@ -152,6 +168,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             return leftHandSide.equals(equality.leftHandSide)
                    && rightHandSide.equals(equality.rightHandSide);
         }
+        
+        // TODO(YilongL): method hashCode needs to be overriden?
 
         @Override
         public String toString() {
@@ -166,8 +184,32 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     private static final Joiner.MapJoiner substitutionJoiner
             = joiner.withKeyValueSeparator(Equality.SEPARATOR);
 
+    /**
+     * Stores ordinary equalities in this symbolic constraint.
+     * 
+     * @see SymbolicConstraint#substitution
+     */
     private final LinkedList<Equality> equalities = new LinkedList<Equality>();
+    
+    /**
+     * Specifies if this symbolic constraint is in normal form.
+     * <p>
+     * <br>
+     * A symbolic constraint is normal iff:
+     * <li>no variable from the keys of {@code substitution} occurs in
+     * {@code equalities};
+     * <li>equalities between variables and terms are stored in
+     * {@code substitution} rather than {@code equalities}.
+     */
     private boolean isNormal;
+    
+    /**
+     * Stores special equalities whose left-hand-sides are just variables.
+     * <p>
+     * <br>
+     * Invariant: {@code Variable}s on the left-hand-sides do not occur in the
+     * {@code Term}s on the right-hand-sides.
+     */
     private final Map<Variable, Term> substitution = new HashMap<Variable, Term>();
     private TruthValue truthValue;
     private final TermContext context;
@@ -182,6 +224,16 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         isNormal = true;
     }
     
+    /**
+     * Adds a new equality to this symbolic constraint.
+     * 
+     * @param leftHandSide
+     *            the left-hand-side of the equality
+     * @param rightHandSide
+     *            the right-hand-side of the equality
+     * @return the truth value of this symbolic constraint after including the
+     *         new equality
+     */
     public TruthValue add(Term leftHandSide, Term rightHandSide) {
         assert leftHandSide.kind() == rightHandSide.kind()
                 || ((leftHandSide.kind() == Kind.KITEM || leftHandSide.kind() == Kind.K
@@ -215,6 +267,15 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         return truthValue;
     }
 
+    /**
+     * Adds the side condition of a rule to this symbolic constraint. The side
+     * condition is represented as a set of {@code Term}s that are expected to
+     * be equal to {@code BoolToken#TRUE}.
+     * 
+     * @param condition
+     *            the side condition
+     * @return the truth value after including the side condition
+     */
     public TruthValue addAll(Collection<Term> condition) {
         for (Term term : condition) {
             add(term, BoolToken.TRUE);
@@ -223,6 +284,13 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         return truthValue;
     }
 
+    /**
+     * Adds all equalities in the given symbolic constraint to this one.
+     * 
+     * @param constraint
+     *            the given symbolic constraint
+     * @return the truth value after including the new equalities
+     */
     public TruthValue addAll(SymbolicConstraint constraint) {
         for (Map.Entry<Variable, Term> entry : constraint.substitution.entrySet()) {
             add(entry.getValue(), entry.getKey());
@@ -262,16 +330,30 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         return result;
     }
 
+    /**
+     * @return an unmodifiable view of the field {@code equalities}
+     */
     public List<Equality> equalities() {
         normalize();
         return Collections.unmodifiableList(equalities);
     }
 
+    /**
+     * @return an unmodifiable view of the field {@code substitution}
+     */
     public Map<Variable, Term> substitution() {
         normalize();
         return Collections.unmodifiableMap(substitution);
     }
 
+    /**
+     * Removes equalities between anonymous variables and terms.
+     * <p>
+     * <br>
+     * TODO(YilongL): the following needs to be revised to be precise<br>
+     * Anonymous variables are generated for doing unification; they are no
+     * longer needed at the end of a rewrite step.
+     */
     public void eliminateAnonymousVariables() {
         for (Iterator<Variable> iterator = substitution.keySet().iterator(); iterator.hasNext();) {
             Variable variable = iterator.next();
@@ -281,6 +363,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         }
     }
 
+    /**
+     * (Re-)computes the truth value of this symbolic constraint.
+     * @return the truth value
+     */
     public TruthValue getTruthValue() {
         normalize();
         return truthValue;
@@ -447,6 +533,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         return truthValue;
     }
 
+    /**
+     * Converts this symbolic constraint back to normal form.
+     */
     private void normalize() {
         if (isNormal) {
             return;
@@ -521,20 +610,42 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         assert equalitiesToRemove.size() == 0;
     }
 
+    /**
+     * Composes two substitutions. The first substitution holds the result
+     * composition.
+     * 
+     * @param subst1
+     *            the first substitution
+     * @param subst2
+     *            the second substitution
+     * @param context
+     *            the term context
+     */
     @SuppressWarnings("unchecked")
     public static void compose(
-            Map<Variable, Term> map,
-            Map<Variable, Term> substitution,
+            Map<Variable, Term> subst1,
+            Map<Variable, Term> subst2,
             TermContext context) {
-        Map.Entry<Variable, Term>[] entries = map.entrySet().toArray(new Map.Entry[map.size()]);
+        Map.Entry<Variable, Term>[] entries = subst1.entrySet().toArray(new Map.Entry[subst1.size()]);
         for (Map.Entry<Variable, Term> entry : entries) {
-            Term term = entry.getValue().substitute(substitution, context);
+            Term term = entry.getValue().substitute(subst2, context);
             if (term != entry.getValue()) {
-                map.put(entry.getKey(), term);
+                subst1.put(entry.getKey(), term);
             }
         }
+        // TODO(YilongL): not done yet; need to merge two subst's and makes sure
+        // the invariant
+        // holds(http://www.mathcs.duq.edu/simon/Fall04/notes-7-4/node4.html)
     }
 
+    /**
+     * Renames the given set of variables and returns the new names. Updates
+     * their occurrences in this symbolic constraint accordingly.
+     * 
+     * @param variableSet
+     *            the set of variables to be renamed
+     * @return a mapping from the old names to the new ones
+     */
     public Map<Variable, Variable> rename(Set<Variable> variableSet) {
         Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(variableSet);
 
