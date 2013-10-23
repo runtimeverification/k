@@ -225,12 +225,12 @@ public class JavaSymbolicKRun implements KRun {
             org.kframework.kil.Rule pattern,
             org.kframework.kil.Term cfg,
             RuleCompilerSteps compilationInfo) throws KRunExecutionException {
-		// for now, test generation uses the "search-all" option
-		// we hope to add strategies on top of this in the future
+        // for now, test generation uses the "search-all" option
+        // we hope to add strategies on top of this in the future
         if (searchType != SearchType.STAR) {
             throw new UnsupportedOperationException("Search type should be SearchType.STAR");
         }
-
+        
         SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
         TermContext termContext = new TermContext(definition, new PortableFileSystem());
         ConstrainedTerm initCfg = new ConstrainedTerm(Term.of(cfg, definition), termContext);
@@ -247,11 +247,11 @@ public class JavaSymbolicKRun implements KRun {
         if (depth == null) {
             depth = -1;
         }
-        List<ConstrainedTerm> resultCfgs = symbolicRewriter.search(initCfg, null, null, bound, depth);
+        List<ConstrainedTerm> resultCfgs = symbolicRewriter.generate(initCfg, null, null, bound, depth);
 
         for (ConstrainedTerm result : resultCfgs) {
-			// construct the generated program by applying the substitution
-			// obtained from the result configuration to the initial one
+            // construct the generated program by applying the substitution
+            // obtained from the result configuration to the initial one
             Term pgm = Term.of(cfg, definition);
             pgm = pgm.substitute(result.constraint().substitution(), termContext);
 
@@ -299,8 +299,8 @@ public class JavaSymbolicKRun implements KRun {
         throw new UnsupportedBackendOptionException("--debug");
     }
 
-	@Override
-	public void setBackendOption(String key, Object value) {
-	}
+    @Override
+    public void setBackendOption(String key, Object value) {
+    }
 
 }
