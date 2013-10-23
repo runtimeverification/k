@@ -13,5 +13,6 @@ function parameters are considered outside the block defining the function
 body, so you are allowed to declare a variable in the function body having
 the same name as a function parameter.  Similarly for the parameter of catch.
 
-Note: This exercise also makes sense for IMP++.  It may be instructive to also
-propose it as an exercise in the K tutorial for IMP++.
+Note to instructor: This exercise also makes sense for IMP++.  It may
+be instructive to also propose it as an exercise in the K tutorial for
+IMP++.
