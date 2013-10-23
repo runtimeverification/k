@@ -1,0 +1,12 @@
+Same as the "functions-with-throws" exercise of the dynamically typed
+SIMPLE, but for statically typed SIMPLE.  In other words, extend the
+syntax of statically typed SIMPLE to allow "throws" clauses as part of
+function declarations, and then define a static semantics for them.
+When type checking a function call, assume that the function can throw
+any of the exception types declared as part of its throw clause.  To
+test your static semantics, use the programs provided as part of
+exercise 2 in dynamically typed SIMPLE.
+
+Note for instructor: next time, may want to either move those
+exercises here, or otherwise switch the 1_static and 2_dynamic folders
+all together (and update the documentation).
