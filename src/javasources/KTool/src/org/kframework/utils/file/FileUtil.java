@@ -6,24 +6,17 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.io.*;
-import java.nio.channels.FileChannel;
 import java.util.List;
+
+import static org.apache.commons.io.FileUtils.copyFile;
+import static org.apache.commons.io.FileUtils.readFileToString;
+import static org.apache.commons.io.FileUtils.writeStringToFile;
 
 public class FileUtil {
 
 	public static void saveInFile(String file, String content) {
 		try {
-			File file1 = new File(new File(file).getAbsolutePath()); // to avoid null from getParent()
-			File f2 = new File(file1.getParent());
-			f2.mkdirs();
-			// file1.createNewFile();
-
-			BufferedWriter out = new BufferedWriter(new FileWriter(file1));
-			if (content != null) {
-				out.write(content);
-				out.flush();
-				out.close();
-			}
+            writeStringToFile(new File(file), content);
 		} catch (IOException e) {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot save file content: " + file, "internal", "FileUtil.java"));
 		}
@@ -52,56 +45,22 @@ public class FileUtil {
 
 	public static String getFileContent(String file) {
 		try {
-			BufferedReader reader = new BufferedReader(new FileReader(file));
-			String line = null;
-			StringBuilder stringBuilder = new StringBuilder();
-			String ls = System.getProperty("line.separator");
-			while ((line = reader.readLine()) != null) {
-				stringBuilder.append(line);
-				stringBuilder.append(ls);
-			}
-			reader.close();
-			return stringBuilder.toString();
-
+            return readFileToString(new File(file));
 		} catch (FileNotFoundException e) {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot retrieve file content. Make sure that file: " + file + " exists.", "internal", "FileUtil.java"));
 		} catch (IOException e) {
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot retrieve file content. An IO error occured: " + file, "internal", "FileUtil.java"));
 		}
-
 		return "";
-	}
-
-	public static void delete(String file) {
-		new File(file).delete();
 	}
 
 	public static void copyFiles(List<File> files, File parentFile) {
 		for (File file : files) {
 			try {
-				copyFile(file.getCanonicalPath(), parentFile.getCanonicalPath() + File.separator + file.getName());
+				copyFile(new File(file.getCanonicalPath()), new File(parentFile.getCanonicalPath() + File.separator + file.getName()));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
-	}
-
-	public static void copyFile(String fromFile, String toFile) throws IOException {
-        FileInputStream source = new FileInputStream(fromFile);
-        try {
-        FileOutputStream destination = new FileOutputStream(toFile);
-        try {
- 
-        FileChannel sourceFileChannel = source.getChannel();
-        FileChannel destinationFileChannel = destination.getChannel();
- 
-        long size = sourceFileChannel.size();
-        sourceFileChannel.transferTo(0, size, destinationFileChannel);
-        } finally {
-        	destination.close();
-        }
-        } finally {
-        	source.close();
-        }
 	}
 }

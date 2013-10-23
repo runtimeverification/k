@@ -34,7 +34,6 @@ import org.kframework.compile.ConfigurationCleaner;
 import org.kframework.compile.FlattenModules;
 import org.kframework.compile.transformers.AddTopCellConfig;
 import org.kframework.compile.transformers.Cell2Map;
-import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
@@ -77,6 +76,8 @@ import org.kframework.utils.OptionComparator;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
 
+import static org.apache.commons.io.FileUtils.writeStringToFile;
+
 public class Main {
 
     private static final String USAGE_KRUN = "krun [options] <file>"
@@ -105,14 +106,6 @@ public class Main {
         org.kframework.utils.Error.helpMsg(USAGE_DEBUG, HEADER_STANDARD, FOOTER_STANDARD, op.getOptionsStandard(), new OptionComparator(op.getOptionList()));
     }
     private static Stopwatch sw = new Stopwatch();
-
-    private static Term parseTerm(String value, Context context) throws Exception {
-        org.kframework.parser.concrete.KParser.ImportTblGround(K.compiled_def
-                + "/ground/Concrete.tbl");
-        ASTNode term = DefinitionLoader.parseCmdString(
-                value, "", "Command line argument", context);
-        return (Term) term.accept(new FlattenSyntax(context));
-    }
 
     public static Term plug(Map<String, Term> args, Context context) throws TransformerException {
         Configuration cfg = K.kompiled_cfg;
@@ -145,7 +138,7 @@ public class Main {
     }
 
     public static Term makeConfiguration(Term kast, String stdin,
-                                         RunProcess rp, boolean hasTerm, Context context) throws TransformerException {
+                                         RunProcess rp, boolean hasTerm, Context context) throws TransformerException, IOException {
 
         if (hasTerm) {
             if (kast == null) {
@@ -340,7 +333,7 @@ public class Main {
                     if (!proofFile.exists()) {
                         Error.report("Cannot find the file containing rules to prove");
                     }
-                    String content = FileUtil.getFileContent(proofFile.getAbsolutePath());
+                    String content = org.kframework.utils.file.FileUtil.getFileContent(proofFile.getAbsoluteFile().toString());
                     Definition parsed = DefinitionLoader.parseString(content,
                             proofFile.getAbsolutePath(), context);
                     Module mod = parsed.getSingletonModule();
@@ -390,7 +383,7 @@ public class Main {
                 if (!cmd.hasOption("output")) {
                     AnsiConsole.out.println(output);
                 } else {
-                    FileUtil.createFile(K.output, output);
+                    writeStringToFile(new File(K.output), output);
                 }
                 // print search graph
                 if ("search".equals(K.maude_cmd) && K.do_search && K.showSearchGraph) {
@@ -433,7 +426,7 @@ public class Main {
                 if (!cmd.hasOption("output")) {
                     System.out.println(output);
                 } else {
-                    FileUtil.createFile(K.output, output);
+                    writeStringToFile(new File(K.output), output);
                 }
             } else if ("none".equals(K.output_mode)) {
                 System.out.print("");

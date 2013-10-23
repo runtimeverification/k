@@ -43,10 +43,9 @@ public class XmlUtil {
 
 	public static Document readXML(InputSource input) {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		DocumentBuilder builder = null;
 		Document doc = null;
 		try {
-			builder = dbf.newDocumentBuilder();
+			DocumentBuilder builder = dbf.newDocumentBuilder();
 			doc = builder.parse(input);
 		} catch (ParserConfigurationException e) {
 			// e.printStackTrace();
@@ -73,45 +72,6 @@ public class XmlUtil {
 		}
 
 		return l;
-	}
-
-	public static Element getNextSiblingElement(Node node) {
-		Node nextSibling = node.getNextSibling();
-		while (nextSibling != null) {
-			if (nextSibling.getNodeType() == Node.ELEMENT_NODE) {
-				return (Element) nextSibling;
-			}
-			nextSibling = nextSibling.getNextSibling();
-		}
-
-		return null;
-	}
-
-	public static Element getPreviousSiblingElement(Node node) {
-		Node previousSibling = node.getPreviousSibling();
-		while (previousSibling != null) {
-			if (previousSibling.getNodeType() == Node.ELEMENT_NODE) {
-				return (Element) previousSibling;
-			}
-			previousSibling = previousSibling.getPreviousSibling();
-		}
-
-		return null;
-	}
-
-	//convert a node to its string representation
-	public static String convertNodeToString(Node node) {
-		try {
-			Transformer t = TransformerFactory.newInstance().newTransformer();
-			t.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-			StringWriter sw = new StringWriter();
-			t.transform(new DOMSource(node), new StreamResult(sw));
-			return sw.toString();
-		} catch (TransformerException e) {
-			// e.printStackTrace();
-			Error.report("Error while convert node to string:"+ e.getMessage());
-		}
-		return null;
 	}
 
 	// write the XML document to disk
@@ -147,33 +107,7 @@ public class XmlUtil {
 			}
 		}
 	}
-	
-	//convert the xml obtained from Maude with the -xml-log option back into its Maude representation
-	public static String xmlToMaude (String fileName) {
-		File input = new File(fileName);
-		Document doc = XmlUtil.readXML(input);
-		NodeList list = null;
-		Node nod = null;
-		
-		if (K.maude_cmd.equals("erewrite")) {
-			list = doc.getElementsByTagName("result");
-			nod = list.item(0);
-			if (nod == null) {
-				Error.report("XmltoMaude: The node with result tag wasn't found");
-			} else if (nod != null && nod.getNodeType() == Node.ELEMENT_NODE) {
-				Element elem = (Element) nod;
-				NodeList child = elem.getChildNodes();
-				for (int i = 0; i < child.getLength(); i++) {
-					if (child.item(i).getNodeType() == Node.ELEMENT_NODE) {
-						return process((Element) child.item(i));
-					}
-				}
-			}
-		}
-		return "";
-		
-	}
-	
+
 	public static String process(Element node) {
 		StringBuilder sb = new StringBuilder();
 		String op = node.getAttribute("op");
@@ -222,8 +156,8 @@ public class XmlUtil {
 	
 	public static Element getTerm(Document doc, String tagName, String attributeName, String xpathExpression, String solutionIdentifier) {
 		Element result = null;
-		NodeList list = null;
-		Node nod = null;
+		NodeList list;
+		Node nod;
 		
 		list = doc.getElementsByTagName(tagName);
 		if (list.getLength() == 0) {
@@ -234,7 +168,7 @@ public class XmlUtil {
 			nod = list.item(i);
 			if (nod == null) {
 				Error.report("The node with " + tagName + " tag wasn't found");
-			} else if (nod != null && nod.getNodeType() == Node.ELEMENT_NODE) {
+			} else if (nod.getNodeType() == Node.ELEMENT_NODE) {
 				Element elem = (Element) nod;
 				if (elem.getAttribute(attributeName).equals("NONE")) {
 					continue;
@@ -245,9 +179,8 @@ public class XmlUtil {
 					// using XPath for direct access to the desired node
 					XPathFactory factory = XPathFactory.newInstance();
 					XPath xpath = factory.newXPath();
-					String s = null;
+					String s = xpathExpression;
 					Object result1;
-					s = xpathExpression;
 					try {
 						result1 = xpath.evaluate(s, nod, XPathConstants.NODESET);
 						if (result1 != null) {
@@ -257,61 +190,16 @@ public class XmlUtil {
 							break;
 						}
 						else {
-							String output = FileUtil.getFileContent(K.maude_out);
+                            String output = org.kframework.utils.file.FileUtil.getFileContent(K.maude_out);
 							Error.report("Unable to parse Maude's search results:\n" + output);
 						}
 
 					} catch (XPathExpressionException e) {
 						Error.report("XPathExpressionException " + e.getMessage());
 					}
-				}
+                }
 			}
 		}
 		return result;
 	}
-	
-	/* retrieve the solution (a node in the xml file denoted by fileName) specified by its solution-number attribute 
-	or retrieve the term node from a node in the search graph obtained from a search command */
-	public static Element getSearchSolution(String fileName, String solutionIdentifier) {
-		Element result = null;
-		File input = new File(fileName);
-		Document doc = XmlUtil.readXML(input);
-		
-		//if solutionIdentifier represents a numeric value that it identifies a solution (specified by its solution-number attribute) from the search-result
-		//otherwise solutionIdentifier identifies an id of a node from the search graph
-		boolean isNumber = Utils.isNumber(solutionIdentifier);
-		if (isNumber) {
-			result = getTerm(doc, "search-result", "solution-number", "substitution/assignment/term[2]", solutionIdentifier);
-		}
-		else {
-			result = getTerm(doc, "node", "id", "data/term", solutionIdentifier);
-		}
-		return result;
-	}
-	
-	//create a xml document that contains the elem node (should be in the form a xml file obtained after a maude rewrite command) 
-	public static Document createXmlRewriteForm(Element elem) {
-		Document doc = null;
-		
-		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder docBuilder;
-		try {
-			docBuilder = docFactory.newDocumentBuilder();
-			// root element
-			doc = docBuilder.newDocument();
-			Element rootElement = doc.createElement("maudeml");
-			doc.appendChild(rootElement);
-			
-			Element resultNode = doc.createElement("result");
-			resultNode.appendChild(doc.adoptNode(elem.cloneNode(true)));
-			rootElement.appendChild(resultNode);
-			
-			return doc;
-		} catch (ParserConfigurationException e) {
-			e.printStackTrace();
-		}
- 
-		return doc;
-	}
-
 }

@@ -1,7 +1,6 @@
 package org.kframework.krun;
 
 import org.kframework.kil.loader.Context;
-import org.kframework.krun.tasks.MaudeTask;
 import org.kframework.kil.BackendTerm;
 import org.kframework.kil.Term;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -91,7 +90,7 @@ public class RunProcess {
 
 	}
 
-	public Term runParserOrDie(String parser, String pgm, boolean isPgm, String startSymbol, Context context) {
+	public Term runParserOrDie(String parser, String pgm, boolean isPgm, String startSymbol, Context context) throws IOException {
 		try {
 			return runParser(parser, pgm, isPgm, startSymbol, context);
 		} catch (TransformerException e) {
@@ -114,7 +113,7 @@ public class RunProcess {
         switch (parser) {
             case "kast":
                 if (!isNotFile) {
-                    content = FileUtil.getFileContent(value);
+                    content = org.kframework.utils.file.FileUtil.getFileContent(value);
                 }
 
                 term = ProgramLoader.processPgm(content, value, K.definition, startSymbol, context, ParserType.PROGRAM);
@@ -124,7 +123,7 @@ public class RunProcess {
                 break;
             case "kast -groundParser":
                 if (!isNotFile) {
-                    content = FileUtil.getFileContent(value);
+                    content = org.kframework.utils.file.FileUtil.getFileContent(value);
                 }
                 term = ProgramLoader.processPgm(content, value, K.definition, startSymbol, context, ParserType.GROUND);
                 break;
@@ -133,7 +132,7 @@ public class RunProcess {
                 break;
             case "kast -ruleParser":
                 if (!isNotFile) {
-                    content = FileUtil.getFileContent(value);
+                    content = org.kframework.utils.file.FileUtil.getFileContent(value);
                 }
                 term = ProgramLoader.processPgm(content, value, K.definition, startSymbol, context, ParserType.RULES);
                 break;
@@ -159,31 +158,6 @@ public class RunProcess {
         }
 
         return term;
-	}
-
-	// run the Maude process by specifying the command to execute, the output file and the error file
-	public int runMaude(String command, String outputFileName, String errorFileName) {
-		MaudeTask maude = new MaudeTask(command, outputFileName, errorFileName);
-		maude.start();
-		try {
-			maude.join();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		if (maude.returnValue != 0) {
-			System.out.println("Error " + maude.returnValue + " when executing Maude.");
-			System.exit(1);
-		}
-		return maude.returnValue;
-	}
-
-	public void checkMaudeForErrors(File errFile, String lang, Context context) {
-		if (errFile.exists()) {
-			String content = FileUtil.getFileContent(K.maude_err);
-			if (!content.equals("")) {
-				printError(content, lang, context);
-			}
-		}
 	}
 
 	// check if the execution of Maude process produced some errors

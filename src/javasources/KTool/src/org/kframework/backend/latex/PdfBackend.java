@@ -15,6 +15,8 @@ import org.kframework.utils.general.GlobalSettings;
 import java.io.*;
 import java.util.List;
 
+import static org.apache.commons.io.FileUtils.copyFile;
+
 public class PdfBackend extends BasicBackend {
 	public PdfBackend(Stopwatch sw, Context context) {
 		super(sw, context);
@@ -76,7 +78,7 @@ public class PdfBackend extends BasicBackend {
 	public void run(Definition definition) throws IOException {
 		List<File> files = LatexBackend.latex(definition, context, definition.getMainModule());
 		files = pdf(files, definition.getMainModule());
-		FileUtil.copyFile(files.get(0).getAbsolutePath(), GlobalSettings.outputDir + File.separator + FileUtil.stripExtension(new File(definition.getMainFile()).getName()) + ".pdf");
+        copyFile(files.get(0), new File(GlobalSettings.outputDir + File.separator + FileUtil.stripExtension(new File(definition.getMainFile()).getName()) + ".pdf"));
 	}
 
 	@Override
