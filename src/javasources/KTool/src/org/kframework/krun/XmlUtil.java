@@ -1,5 +1,6 @@
 package org.kframework.krun;
 
+import org.kframework.utils.file.FileUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -190,7 +191,7 @@ public class XmlUtil {
 							break;
 						}
 						else {
-                            String output = org.kframework.utils.file.FileUtil.getFileContent(K.maude_out);
+                            String output = FileUtil.getFileContent(K.maude_out);
 							Error.report("Unable to parse Maude's search results:\n" + output);
 						}
 

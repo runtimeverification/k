@@ -8,7 +8,6 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.runner.KRunner;
 import org.kframework.krun.Error;
-import org.kframework.krun.FileUtil;
 import org.kframework.krun.K;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.SubstitutionFilter;
@@ -19,6 +18,7 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.file.FileUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -47,7 +47,6 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 
-import static org.kframework.utils.file.FileUtil.saveInFile;
 
 public class MaudeKRun implements KRun {
 	protected Context context;
@@ -66,7 +65,7 @@ public class MaudeKRun implements KRun {
 	}
 	
 	private void executeKRun(String maudeCmd) throws KRunExecutionException {
-        saveInFile(K.maude_in, maudeCmd);
+        FileUtil.saveInFile(K.maude_in, maudeCmd);
         File outFile = FileUtil.createFile(K.maude_out);
 		File errFile = FileUtil.createFile(K.maude_err);
 
@@ -87,7 +86,7 @@ public class MaudeKRun implements KRun {
 			throw new RuntimeException("Runner threw exception", e);
 		}
 		if (errFile.exists()) {
-            String content = org.kframework.utils.file.FileUtil.getFileContent(K.maude_err);
+            String content = FileUtil.getFileContent(K.maude_err);
 			if (content.length() > 0) {
 				throw new KRunExecutionException(content);
 			}
@@ -178,7 +177,7 @@ public class MaudeKRun implements KRun {
 		KRunResult<KRunState> ret = new KRunResult<KRunState>(state);
 		String statistics = printStatistics(elem);
 		ret.setStatistics(statistics);
-        ret.setRawOutput(org.kframework.utils.file.FileUtil.getFileContent(K.maude_out));
+        ret.setRawOutput(FileUtil.getFileContent(K.maude_out));
 		parseCounter(list.item(2));
 		return ret;
 	}
@@ -468,7 +467,7 @@ public class MaudeKRun implements KRun {
             results = new SearchResults(solutions, graph, matches, context);
 			K.stateCounter += graph != null ? graph.getVertexCount() : 0;
 			KRunResult<SearchResults> result = new KRunResult<SearchResults>(results);
-            result.setRawOutput(org.kframework.utils.file.FileUtil.getFileContent(K.maude_out));
+            result.setRawOutput(FileUtil.getFileContent(K.maude_out));
 			return result;
 		} catch (Exception e) {
 			throw new RuntimeException("Pretty-printer threw exception", e);
@@ -623,7 +622,7 @@ public class MaudeKRun implements KRun {
         executeKRun(cmd);
         ioServer = io;
 		KRunProofResult<DirectedGraph<KRunState, Transition>> result = parseModelCheckResult();
-        result.setRawOutput(org.kframework.utils.file.FileUtil.getFileContent(K.maude_out));
+        result.setRawOutput(FileUtil.getFileContent(K.maude_out));
         return result;
 	}
 

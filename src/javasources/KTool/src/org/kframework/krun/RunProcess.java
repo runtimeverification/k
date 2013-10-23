@@ -9,6 +9,7 @@ import org.kframework.utils.ThreadedStreamCapturer;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.general.GlobalSettings.ParserType;
 
 import java.io.File;
@@ -113,7 +114,7 @@ public class RunProcess {
         switch (parser) {
             case "kast":
                 if (!isNotFile) {
-                    content = org.kframework.utils.file.FileUtil.getFileContent(value);
+                    content = FileUtil.getFileContent(value);
                 }
 
                 term = ProgramLoader.processPgm(content, value, K.definition, startSymbol, context, ParserType.PROGRAM);
@@ -123,7 +124,7 @@ public class RunProcess {
                 break;
             case "kast -groundParser":
                 if (!isNotFile) {
-                    content = org.kframework.utils.file.FileUtil.getFileContent(value);
+                    content = FileUtil.getFileContent(value);
                 }
                 term = ProgramLoader.processPgm(content, value, K.definition, startSymbol, context, ParserType.GROUND);
                 break;
@@ -132,7 +133,7 @@ public class RunProcess {
                 break;
             case "kast -ruleParser":
                 if (!isNotFile) {
-                    content = org.kframework.utils.file.FileUtil.getFileContent(value);
+                    content = FileUtil.getFileContent(value);
                 }
                 term = ProgramLoader.processPgm(content, value, K.definition, startSymbol, context, ParserType.RULES);
                 break;

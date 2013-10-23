@@ -70,6 +70,7 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 import org.kframework.utils.OptionComparator;
@@ -334,7 +335,7 @@ public class Main {
                     if (!proofFile.exists()) {
                         Error.report("Cannot find the file containing rules to prove");
                     }
-                    String content = org.kframework.utils.file.FileUtil.getFileContent(proofFile.getAbsoluteFile().toString());
+                    String content = FileUtil.getFileContent(proofFile.getAbsoluteFile().toString());
                     Definition parsed = DefinitionLoader.parseString(content,
                             proofFile.getAbsolutePath(), context);
                     Module mod = parsed.getSingletonModule();
@@ -959,7 +960,7 @@ public class Main {
                 System.exit(0);
             }
             if (K.version) {
-                String msg = org.kframework.utils.file.FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE);
+                String msg = FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE);
                 System.out.println(msg);
                 System.exit(0);
             }
