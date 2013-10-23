@@ -721,6 +721,7 @@ public class Main {
     public static void execute_Krun(String cmds[]) {
         Context context = new Context();
         K.init(context);
+        /*
         // delete temporary krun directory
         try {
             FileUtil.deleteDirectory(new File(K.krunDir));
@@ -728,10 +729,12 @@ public class Main {
             e.printStackTrace();
             System.exit(1);
         }
+        */
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
                 try {
-                    FileUtil.renameFolder(K.krunTempDir, K.krunDir);
+                    //FileUtil.renameFolder(K.krunTempDir, K.krunDir);
+                    FileUtil.deleteDirectory(new File(K.krunTempDir));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
