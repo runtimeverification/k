@@ -393,8 +393,7 @@ public class Main {
                     FileUtil.createFile(K.output, output);
                 }
                 // print search graph
-                if ("search".equals(K.maude_cmd) && K.do_search
-                        && K.showSearchGraph) {
+                if ("search".equals(K.maude_cmd) && K.do_search && K.showSearchGraph) {
                     System.out.println(K.lineSeparator + "The search graph is:"
                             + K.lineSeparator);
                     @SuppressWarnings("unchecked")

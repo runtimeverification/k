@@ -113,7 +113,7 @@ public class MaudeKRun implements KRun {
 		try {
 			return parseRunResult();
 		} catch (IOException e) {
-			throw new RuntimeException("Pretty-printer threw I/O exception", e);
+			throw new KRunExecutionException("Parsing maude output exception", e);
 		}
 	}
 
@@ -447,8 +447,10 @@ public class MaudeKRun implements KRun {
 			patternString += " such that " + patternCondition.getResult() + " = # true(.KList)";
 		}
 		cmd += patternString + " .";
-		cmd += K.lineSeparator + "show search graph .";
-		if (K.trace) {
+        if (K.showSearchGraph || K.debug || K.guidebug) {
+            cmd += K.lineSeparator + "show search graph .";
+        }
+        if (K.trace) {
 			cmd = "set trace on ." + K.lineSeparator + cmd;
 		}
 		cmd += getCounter();
@@ -459,8 +461,10 @@ public class MaudeKRun implements KRun {
 					(pattern, compilationInfo);
 			final boolean matches = patternString.trim().matches("=>[!*1+] " +
 					"<_>_</_>\\(generatedTop, B:Bag, generatedTop\\)");
-			results = new SearchResults(solutions, parseSearchGraph(), matches, context);
-			K.stateCounter += results.getGraph().getVertexCount();
+            DirectedGraph<KRunState, Transition> graph
+                = (K.showSearchGraph || K.debug || K.guidebug) ? parseSearchGraph() : null;
+            results = new SearchResults(solutions, graph, matches, context);
+			K.stateCounter += graph != null ? graph.getVertexCount() : 0;
 			KRunResult<SearchResults> result = new KRunResult<SearchResults>(results);
 			result.setRawOutput(FileUtil.getFileContent(K.maude_out));
 			return result;
@@ -468,7 +472,9 @@ public class MaudeKRun implements KRun {
 			throw new RuntimeException("Pretty-printer threw exception", e);
 		} finally {
             try {
-                processedMaudeOutputReader.close();
+                if (processedMaudeOutputReader != null) {
+                    processedMaudeOutputReader.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -553,7 +559,8 @@ public class MaudeKRun implements KRun {
 
         processedMaudeOutputReader = new FileReader(K.processed_maude_output);
 		GraphMLReader2<DirectedGraph<KRunState, Transition>, KRunState, Transition> graphmlParser
-            = new GraphMLReader2<DirectedGraph<KRunState, Transition>, KRunState, Transition>(processedMaudeOutputReader, graphTransformer, nodeTransformer, edgeTransformer, hyperEdgeTransformer);
+            = new GraphMLReader2<DirectedGraph<KRunState, Transition>, KRunState, Transition>(processedMaudeOutputReader, graphTransformer, nodeTransformer,
+            edgeTransformer, hyperEdgeTransformer);
 		return graphmlParser.readGraph();
 	}
 
