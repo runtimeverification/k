@@ -9,6 +9,5 @@ in this folder, or
 in the parent folder.
 
 Both the original SIMPLE typed programs and several new programs will
-be tested.  If your solution is correct, then all tests should pass,
-except for exceptions_02 and exceptions_09 from the original programs,
-and for ex03, ex07, ex08, ex09, and ex13 from the new programs.
+be tested.
+
