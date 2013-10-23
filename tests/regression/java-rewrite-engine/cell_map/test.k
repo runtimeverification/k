@@ -22,10 +22,10 @@ module TEST
     <k> load(K) => V ...</k>
     <key> K </key>
     <value> V:Int </value>
-  //rule
-  //  <k> store(K, V) => .K ...</k>
-  //  <key> K </key>
-  //  <value> _:Int => V </value>
+  rule
+    <k> store(K, V) => .K ...</k>
+    <key> K </key>
+    <value> _:Int => V </value>
   rule
     <k> store(K, V) => .K ...</k>
     (. => <entry> <key> K </key><value> V </value> </entry>)

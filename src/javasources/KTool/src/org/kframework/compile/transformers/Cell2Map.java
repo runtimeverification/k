@@ -78,23 +78,22 @@ public class Cell2Map extends CopyOnWriteTransformer {
                 }
 
                 Term key = null;
-                Bag valueBag = new Bag();
+                Bag value = new Bag();
                 for (Term term1 : entryCellContent.getContents()) {
                     if (term1 instanceof Cell
                         && ((Cell) term1).getLabel().equals(cellMap.keyCellLabel())) {
                         assert key == null : "there should be exactly one key cell";
                         key = ((Cell) term1).getContents();
                     } else {
-                        valueBag.getContents().add(term1);
+                        value.getContents().add(term1);
                     }
                 }
 
                 assert key != null : "there should be exactly one key cell";
-                Cell value = new Cell();
-                value.setLabel("");
-                value.setEndLabel("");
-                value.setContents(valueBag);
-                entries.put(key, value);
+                // TODO(AndreiS): allow for maps from K to Cells
+                // entries.put(key, value);
+                assert value.getContents().size() == 1 : "value have sort K";
+                entries.put(key, ((Cell) value.getContents().get(0)).getContents());
             } else if (term instanceof Variable) {
                 terms.add(new Variable(((Variable) term).getName(), mapSort.name()));
             } else {
