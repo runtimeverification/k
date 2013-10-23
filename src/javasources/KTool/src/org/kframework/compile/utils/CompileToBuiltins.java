@@ -23,6 +23,7 @@ import java.util.*;
 public class CompileToBuiltins extends CopyOnWriteTransformer {
 
     private static java.util.Map<String,String> builtinCollectionOps;
+    private static java.util.Map<String,String> builtinCollectionLabels;
     private static java.util.Set<String> undeclaredLabels;
 
     static {
@@ -30,8 +31,12 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
         builtinCollectionOps.put("_-Set_", "'_-MySet_");
         builtinCollectionOps.put("keys_", "'keys");
 
+        builtinCollectionLabels = new HashMap<>();
+        builtinCollectionLabels.put("inSet", "'_in_");
+
         undeclaredLabels = new HashSet<>();
     }
+
 
     public CompileToBuiltins(Context context) {
         super("Compile data structure into builtin data structures", context);    //To change body of overridden methods use File | Settings | File Templates.
@@ -63,7 +68,15 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
                 return term.accept(this);
             }
         }
-        return super.transform(node);
+        node = (KApp) super.transform(node);
+        if (node.getLabel() instanceof KLabelConstant) {
+            KLabelConstant label = (KLabelConstant) node.getLabel();
+            String newLabel = builtinCollectionLabels.get(label.getLabel());
+            if (newLabel != null) {
+                node = new KApp(KLabelConstant.of(newLabel), node.getChild());
+            }
+        }
+        return node;
     }
 
     @Override
