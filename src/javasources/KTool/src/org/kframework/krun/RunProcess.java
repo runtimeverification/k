@@ -104,65 +104,61 @@ public class RunProcess {
 	 * run the process denoted by the parser ("kast" or an external parser specified with --parser option) and return the AST obtained by parser
 	 */
 	public Term runParser(String parser, String value, boolean isNotFile, String startSymbol, Context context) throws TransformerException {
-		String KAST = new String();
-		String parserPath = new String();
+        Term term;
 
 		if (startSymbol == null) {
 			startSymbol = context.startSymbolPgm;
 		}		
 		String content = value;
-		
-		if ("kast".equals(parser)) {
-            if (!isNotFile) {
-		    	content = FileUtil.getFileContent(value);
-		    }
-			return ProgramLoader.processPgm(content, value, K.definition, startSymbol, context, ParserType.PROGRAM);
-        } else if ("kast -e".equals(parser)) {
-            return ProgramLoader.processPgm(value, value, K.definition, startSymbol, context, ParserType.PROGRAM);
-        } else if ("kast -groundParser".equals(parser)) {
-            if (!isNotFile) {
-		    	content = FileUtil.getFileContent(value);
-		    }
-            return ProgramLoader.processPgm(content, value, K.definition, startSymbol, context, ParserType.GROUND);
-        } else if ("kast -groundParser -e".equals(parser)) {
-            return ProgramLoader.processPgm(value, value, K.definition, startSymbol, context, ParserType.GROUND);
-        } else if ("kast -ruleParser".equals(parser)) {
-            if (!isNotFile) {
-		    	content = FileUtil.getFileContent(value);
-		    }
-            return ProgramLoader.processPgm(content, value, K.definition, startSymbol, context, ParserType.RULES);
-		} else {
-			List<String> tokens = new ArrayList<String>(Arrays.asList(parser.split(" ")));
-			tokens.add(value);
-			Map<String, String> environment = new HashMap<String, String>();
-			environment.put("KRUN_SORT", startSymbol);
-			environment.put("KRUN_COMPILED_DEF", context.kompiled.getAbsolutePath());
-			if (isNotFile) {
-				environment.put("KRUN_IS_NOT_FILE", "true");
-			}
-			this.execute(environment, tokens.toArray(new String[0]));
-		}
 
-		// if (parser.equals("kast")) {
-		// if (this.getErr() != null) {
-		// System.out.println("Warning: kast reported errors or warnings:\n" + this.getErr());
-		// }
-		// if (this.getExitCode() != 0) {
-		// System.out.println("Kast reported:\n" + this.getStdout());
-		// System.out.println("Fatal: kast returned a non-zero exit code: " + this.getExitCode());
-		// Error.report("\nAttempted command:\n" + "kast --definition=" + definition + " " + pgm);
-		// }
-		// } else
-		{
-			if (this.getExitCode() != 0) {
-				throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Parser returned a non-zero exit code: " + this.getExitCode() + "\nStdout:\n" + this.getStdout() + "\nStderr:\n" + this.getErr()));
-			}
-		}
+        switch (parser) {
+            case "kast":
+                if (!isNotFile) {
+                    content = FileUtil.getFileContent(value);
+                }
 
-		if (this.getStdout() != null) {
-			KAST = this.getStdout();
-		}
-		return new BackendTerm("", KAST); //hopefully sort information will get filled in later if we need it, e.g. by SubstitutionFilter
+                term = ProgramLoader.processPgm(content, value, K.definition, startSymbol, context, ParserType.PROGRAM);
+                break;
+            case "kast -e":
+                term = ProgramLoader.processPgm(value, value, K.definition, startSymbol, context, ParserType.PROGRAM);
+                break;
+            case "kast -groundParser":
+                if (!isNotFile) {
+                    content = FileUtil.getFileContent(value);
+                }
+                term = ProgramLoader.processPgm(content, value, K.definition, startSymbol, context, ParserType.GROUND);
+                break;
+            case "kast -groundParser -e":
+                term = ProgramLoader.processPgm(value, value, K.definition, startSymbol, context, ParserType.GROUND);
+                break;
+            case "kast -ruleParser":
+                if (!isNotFile) {
+                    content = FileUtil.getFileContent(value);
+                }
+                term = ProgramLoader.processPgm(content, value, K.definition, startSymbol, context, ParserType.RULES);
+                break;
+            default: //external parser
+                List<String> tokens = new ArrayList<>(Arrays.asList(parser.split(" ")));
+                tokens.add(value);
+                Map<String, String> environment = new HashMap<>();
+                environment.put("KRUN_SORT", startSymbol);
+                environment.put("KRUN_COMPILED_DEF", context.kompiled.getAbsolutePath());
+                if (isNotFile) {
+                    environment.put("KRUN_IS_NOT_FILE", "true");
+                }
+                this.execute(environment, tokens.toArray(new String[tokens.size()]));
+
+                if (this.getExitCode() != 0) {
+                    throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Parser returned a non-zero exit code: " + this.getExitCode() + "\nStdout:\n" + this.getStdout() + "\nStderr:\n" + this.getErr()));
+                }
+
+                String kast = this.getStdout() != null ? this.getStdout() : "";
+
+                //hopefully sort information will get filled in later if we need it, e.g. by SubstitutionFilter
+                term = new BackendTerm("", kast);
+        }
+
+        return term;
 	}
 
 	// run the Maude process by specifying the command to execute, the output file and the error file

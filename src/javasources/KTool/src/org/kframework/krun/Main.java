@@ -149,7 +149,7 @@ public class Main {
 
         if (hasTerm) {
             if (kast == null) {
-                return rp.runParserOrDie(K.parser, K.term, false, null, context);
+                return rp.runParserOrDie(K.getProgramParser(), K.term, false, null, context);
             } else {
                 Error.report("You cannot specify both the term and the configuration\nvariables.");
             }
@@ -808,7 +808,7 @@ public class Main {
                 K.syntax_module = cmd.getOptionValue("syntax-module");
             }
             if (cmd.hasOption("parser")) {
-                K.parser = cmd.getOptionValue("parser");
+                K.customParser = cmd.getOptionValue("parser");
             }
             if (cmd.hasOption("term")) {
                 K.term = cmd.getOptionValue("term");
@@ -1125,7 +1125,7 @@ public class Main {
                 sw.printIntermediate("Resolving main and syntax modules");
 
             if (K.pgm != null) {
-                KAST = rp.runParserOrDie(K.parser, K.pgm, false, null, context);
+                KAST = rp.runParserOrDie(K.getProgramParser(), K.pgm, false, null, context);
             } else {
                 KAST = null;
             }

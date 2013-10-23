@@ -56,7 +56,13 @@ public class K {
 	public static String directory = null;
 	public static String main_module;
 	public static String syntax_module;
+
+    /**
+     * The default parser
+     */
 	public static String parser = "kast";
+
+    public static String customParser;
 	public static String compiled_def;
 	public static String maude_cmd = "erewrite";
 	public static String output_mode = "pretty";
@@ -101,4 +107,8 @@ public class K {
 
 	public static String backend = "maude";
     public static String prove = "";
+
+    public static String getProgramParser() {
+        return customParser != null ? customParser : parser;
+    }
 }

@@ -100,7 +100,8 @@ public class MaudeKRun implements KRun {
 	public KRunResult<KRunState> run(Term cfg) throws KRunExecutionException {
 		MaudeFilter maudeFilter = new MaudeFilter(context);
 		cfg.accept(maudeFilter);
-		String cmd = "set show command off ." + K.lineSeparator + setCounter() + K.maude_cmd + " " + maudeFilter.getResult() + " .";
+		String cmd = "set show command off ." + K.lineSeparator
+            + setCounter() + K.maude_cmd + " " + maudeFilter.getResult() + " .";
 		if(K.trace) {
 			cmd = "set trace on ." + K.lineSeparator + cmd;
 		}

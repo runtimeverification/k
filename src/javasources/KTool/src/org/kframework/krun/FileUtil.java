@@ -27,22 +27,27 @@ public class FileUtil {
 	}
 
 	//create a file with the specified name and content and place it under a subfolder
-	public static File createFile(String file, String content) {
+	public static File createFile(String fileName, CharSequence content) {
+        BufferedWriter out = null;
 		try {
-			File file1 = new File(file);
-			File f2 = new File(file1.getParent());
-			f2.mkdirs();
-			BufferedWriter out = new BufferedWriter(new FileWriter(file1));
-			if (content != null) {
-				out.write(content);
-				out.flush();
-				out.close();
-			}
-			return file1;
-		} catch (Exception e) {
-			Error.report("Error while creating maude file " + file);
-		}
-		return null;
+			File file = new File(fileName);
+            if (file.getParent() != null) {
+                Files.createDirectories(Paths.get(file.getParent()));
+            }
+            out = new BufferedWriter(new FileWriter(file));
+            out.append(content);
+			return file;
+		} catch (IOException e) {
+            throw new RuntimeException("Error while creating file " + fileName, e);
+		} finally {
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
 	}
 
 	//generate an unique name for a file with the name fileName
