@@ -331,6 +331,71 @@ public class SymbolicRewriter {
 
         return searchResults;
     }
+    
+    /**
+    *
+    * @param initialTerm
+    * @param targetTerm not implemented yet
+    * @param rules not implemented yet
+    * @param bound a negative value specifies no bound
+    * @param depth a negative value specifies no bound
+    * @return
+    */
+    public List<ConstrainedTerm> generate(
+            ConstrainedTerm initialTerm,
+            ConstrainedTerm targetTerm,
+            List<Rule> rules,
+            int bound,
+            int depth) {
+        stopwatch.start();
+
+        List<ConstrainedTerm> testgenResults = new ArrayList<ConstrainedTerm>();
+        Set<ConstrainedTerm> visited = new HashSet<ConstrainedTerm>();
+        List<ConstrainedTerm> queue = new ArrayList<ConstrainedTerm>();
+        List<ConstrainedTerm> nextQueue = new ArrayList<ConstrainedTerm>();
+
+        visited.add(initialTerm);
+        queue.add(initialTerm);
+
+    label:
+        for (step = 0; !queue.isEmpty() && step != depth; ++step) {
+            for (ConstrainedTerm term : queue) {
+                computeRewriteStep(term);
+
+                if (results.isEmpty()) {
+                    /* final term */
+                    testgenResults.add(term);
+                    if (testgenResults.size() == bound) {
+                        break label;
+                    }
+
+                }
+
+                for (int i = 0; getTransition(i) != null; ++i) {
+                    if (visited.add(getTransition(i))) {
+                        nextQueue.add(getTransition(i));
+                    }
+                }
+            }
+
+            /* swap the queues */
+            List<ConstrainedTerm> temp;
+            temp = queue;
+            queue = nextQueue;
+            nextQueue = temp;
+            nextQueue.clear();
+        }
+
+        /* add the configurations on the depth frontier */
+        while (!queue.isEmpty() && testgenResults.size() != bound) {
+            testgenResults.add(queue.remove(0));
+        }
+
+        stopwatch.stop();
+        System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
+
+        return testgenResults;
+    }    
 
     public List<ConstrainedTerm> prove(List<Rule> rules, FileSystem fs) {
         stopwatch.start();

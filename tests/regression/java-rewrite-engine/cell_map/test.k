@@ -15,8 +15,9 @@ module TEST
 
   syntax Op ::= load(Int)
               | store(Int, Int)
-              | Op "~>" Op [left]
+              | Op ";" Op [right]
 
+  rule O1 ; O2 => O1 ~> O2
   rule
     <k> load(K) => V ...</k>
     <key> K </key>
@@ -27,6 +28,6 @@ module TEST
     <value> _:Int => V </value>
   rule
     <k> store(K, V) => .K ...</k>
-    (. => <key> K </key><value> V </value>)
+    (. => <entry> <key> K </key><value> V </value> </entry>)
 endmodule
 
