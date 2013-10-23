@@ -35,11 +35,12 @@ import org.kframework.backend.java.util.KSorts;
 import org.kframework.backend.symbolic.SymbolicBackend;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
+import org.kframework.kil.Bag;
 import org.kframework.kil.BoolBuiltin;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.GenericToken;
-import org.kframework.kil.IntBuiltin;
 import org.kframework.kil.Int32Builtin;
+import org.kframework.kil.IntBuiltin;
 import org.kframework.kil.Module;
 import org.kframework.kil.Production;
 import org.kframework.kil.StringBuiltin;
@@ -52,7 +53,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -216,9 +216,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             List<org.kframework.kil.Term> contents;
             if (node.getContents() instanceof org.kframework.kil.Bag) {
                 contents = new ArrayList<org.kframework.kil.Term>();
-                KILtoBackendJavaKILTransformer.flattenBag(
-                        contents,
-                        ((org.kframework.kil.Bag) node.getContents()).getContents());
+                Bag.flatten(contents, ((org.kframework.kil.Bag) node.getContents()).getContents());
             } else {
                 contents = Collections.singletonList(node.getContents());
             }
@@ -531,19 +529,6 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
         this.definition = null;
         return definition;
-    }
-
-    private static void flattenBag(
-            List<org.kframework.kil.Term> flatBag,
-            List<org.kframework.kil.Term> nestedBag) {
-        for (org.kframework.kil.Term term : nestedBag) {
-            if (term instanceof org.kframework.kil.Bag) {
-                org.kframework.kil.Bag bag = (org.kframework.kil.Bag) term;
-                KILtoBackendJavaKILTransformer.flattenBag(flatBag, bag.getContents());
-            } else {
-                flatBag.add(term);
-            }
-        }
     }
 
     private static void flattenKSequence(

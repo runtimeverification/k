@@ -102,7 +102,6 @@ public class JavaSymbolicBackend extends BasicBackend {
                     new File(context.dotk, JavaSymbolicBackend.DEFINITION_FILENAME)));
             BinaryLoader.toBinary(
                     new KILtoBackendJavaKILTransformer(context).transformDefinition(javaDef),
-                    //javaDef,
                     outputStream);
             outputStream.close();
         } catch (IOException e) {

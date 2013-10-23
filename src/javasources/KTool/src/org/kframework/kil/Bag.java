@@ -8,6 +8,7 @@ import org.w3c.dom.Element;
 
 import aterm.ATermAppl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -40,7 +41,25 @@ public class Bag extends Collection {
 		super("Bag", col);
 	}
 
-	@Override
+    public static Bag flatten(Bag bag) {
+        Bag flatBag = bag.shallowCopy();
+        flatBag.setContents(new ArrayList<Term>());
+        flatten(flatBag.getContents(), bag.getContents());
+        return flatBag;
+    }
+
+    public static void flatten(List<Term> flatBag, List<Term> nestedBag) {
+        for (Term term : nestedBag) {
+            if (term instanceof Bag) {
+                Bag bag = (Bag) term;
+                flatten(flatBag, bag.getContents());
+            } else {
+                flatBag.add(term);
+            }
+        }
+    }
+
+    @Override
 	public String toString() {
 		return super.toString();
 	}
