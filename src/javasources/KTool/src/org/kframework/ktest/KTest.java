@@ -42,7 +42,8 @@ public class KTest {
     private static final String FOOTER_STANDARD = "";
     private static final String HEADER_EXPERIMENTAL = "Experimental options:";
     private static final String FOOTER_EXPERIMENTAL = Main.FOOTER_EXPERIMENTAL;
-    public static void printUsageS(KTestOptionsParser op) {
+
+    private static void printUsageS(KTestOptionsParser op) {
         org.kframework.utils.Error.helpMsg(USAGE, HEADER_STANDARD, FOOTER_STANDARD, op.getOptionsStandard(), new OptionComparator(op.getOptionList()));
     }
     private static void printUsageE(KTestOptionsParser op) {

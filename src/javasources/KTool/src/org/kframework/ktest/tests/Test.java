@@ -60,7 +60,6 @@ public class Test implements Comparable<Test> {
     private Document doc;
     public Element report;
     private List<Program> programs;
-    private String reportDir = null;
 
     public Test(String language, List<String> programsFolder,
             List<String> resultsFolder, List<String> extensions,
@@ -83,7 +82,7 @@ public class Test implements Comparable<Test> {
             e.printStackTrace();
         }
 
-        report = getInitialElement(language);
+        report = getInitialElement();
         doc.appendChild(report);
 
         // general krun options
@@ -107,7 +106,7 @@ public class Test implements Comparable<Test> {
             e.printStackTrace();
         }
 
-        report = getInitialElement(language);
+        report = getInitialElement();
         doc.appendChild(report);
 
         initializePrograms(homeDir);
@@ -139,7 +138,7 @@ public class Test implements Comparable<Test> {
                         "System file."));
             }
 
-            if (programsFolder == null || programsFolder.equals(""))
+            if (programsFolder.equals(""))
                 return;
 
             List<String> allProgramPaths = searchAll(programsFolder,
@@ -161,7 +160,6 @@ public class Test implements Comparable<Test> {
                     if (p.programPath.equals(programPath)) {
                         krunOptions = p.krunOptions;
                         special = true;
-                        continue;
                     }
                 }
                 if (!special)
@@ -177,11 +175,11 @@ public class Test implements Comparable<Test> {
                         input = getFileAsStringOrNull(inputFile);
 
                         String outputFile = searchOutputFile(rf, new File(
-                                programPath).getName(), recursive);
+                                programPath).getName());
                         output = getFileAsStringOrNull(outputFile);
 
                         String errorFile = searchErrorFile(rf, new File(
-                                programPath).getName(), recursive);
+                                programPath).getName());
                         error = getFileAsStringOrNull(errorFile);
 
                         if (input != null || output != null || error != null) {
@@ -214,13 +212,11 @@ public class Test implements Comparable<Test> {
         return fileAsString;
     }
 
-    private String searchOutputFile(String resultsFolder2, String name,
-            boolean recursive2) {
+    private String searchOutputFile(String resultsFolder2, String name) {
         return searchFile(resultsFolder2, name + Configuration.OUT, recursive);
     }
 
-    private String searchErrorFile(String resultsFolder2, String name,
-            boolean recursive2) {
+    private String searchErrorFile(String resultsFolder2, String name) {
         return searchFile(resultsFolder2, name + Configuration.ERR, recursive);
     }
 
@@ -233,22 +229,22 @@ public class Test implements Comparable<Test> {
         String[] files = new File(folder).list();
         String file = null;
         if (files != null)
-            for (int i = 0; i < files.length; i++) {
+            for (String file1 : files) {
 
                 // search in depth first
                 if (recursive)
                     if (new File(folder + Configuration.FILE_SEPARATOR
-                            + files[i]).isDirectory())
+                            + file1).isDirectory())
                         file = searchFile(folder + Configuration.FILE_SEPARATOR
-                                + files[i], filename, recursive);
+                                + file1, filename, recursive);
                 if (file != null)
                     return file;
 
-                if (new File(folder + Configuration.FILE_SEPARATOR + files[i])
+                if (new File(folder + Configuration.FILE_SEPARATOR + file1)
                         .isFile())
-                    if (files[i].equals(filename))
+                    if (file1.equals(filename))
                         file = new File(folder + Configuration.FILE_SEPARATOR
-                                + files[i]).getAbsolutePath();
+                                + file1).getAbsolutePath();
                 if (file != null)
                     return file;
             }
@@ -269,11 +265,11 @@ public class Test implements Comparable<Test> {
         if (recursive) {
             String[] files = new File(programsFolder).list();
             if (files != null)
-                for (int i = 0; i < files.length; i++) {
+                for (String file : files) {
                     if (new File(programsFolder + Configuration.FILE_SEPARATOR
-                            + files[i]).isDirectory()) {
+                            + file).isDirectory()) {
                         paths.addAll(searchAll(programsFolder
-                                + Configuration.FILE_SEPARATOR + files[i],
+                                + Configuration.FILE_SEPARATOR + file,
                                 extensions, recursive));
                     }
                 }
@@ -286,12 +282,12 @@ public class Test implements Comparable<Test> {
         String[] files = new File(programsFolder2).list();
         List<String> fls = new LinkedList<String>();
         if (files != null) {
-            for (int i = 0; i < files.length; i++)
+            for (String file : files)
                 if (new File(programsFolder2 + Configuration.FILE_SEPARATOR
-                        + files[i]).isFile()) {
-                    if (files[i].endsWith(extension))
+                        + file).isFile()) {
+                    if (file.endsWith(extension))
                         fls.add(programsFolder2 + Configuration.FILE_SEPARATOR
-                                + files[i]);
+                                + file);
                 }
         }
         return fls;
@@ -348,7 +344,7 @@ public class Test implements Comparable<Test> {
         }
 
         // get report dir
-        reportDir = resolveAbsolutePathRelativeTo(
+        String reportDir = resolveAbsolutePathRelativeTo(
                 test.getAttribute(Configuration.REPORT_DIR), rootDefDir, "");
         if (report != null && reportDir.equals(""))
             reportDir = null;
@@ -411,11 +407,11 @@ public class Test implements Comparable<Test> {
                     input = getFileAsStringOrNull(inputFile);
 
                     String outputFile = searchOutputFile(rf, new File(
-                            programPath).getName(), recursive);
+                            programPath).getName());
                     output = getFileAsStringOrNull(outputFile);
 
                     String errorFile = searchErrorFile(rf,
-                            new File(programPath).getName(), recursive);
+                            new File(programPath).getName());
                     error = getFileAsStringOrNull(errorFile);
 
                     if (input != null || output != null || error != null) {
@@ -502,7 +498,7 @@ public class Test implements Comparable<Test> {
         return map;
     }
 
-    private Element getInitialElement(String definition) {
+    private Element getInitialElement() {
         Element testsuite = doc.createElement(Configuration.TESTSUITE);
         String name = getReportFilename().replaceFirst("-report.xml", "");
         name = name.replaceAll("\\.", "/");
@@ -577,29 +573,6 @@ public class Test implements Comparable<Test> {
         }
 
         return new Task(arguments, null, homeDir);
-    }
-
-    public void deleteFolder(File folder) {
-        if (!folder.exists()) {
-            return;
-        }
-
-        File[] files = folder.listFiles();
-        if (files != null) { // some JVMs return null for empty dirs
-            for (File f : files) {
-                if (f.isDirectory()) {
-                    deleteFolder(f);
-                } else {
-                    f.delete();
-                }
-            }
-        }
-        folder.delete();
-    }
-
-    public String compileStatus(Task task) {
-        return "Compiling " + language + "...\t\t"
-                + (compiled(task) ? "success" : "failed");
     }
 
     public boolean compiled(Task task) {

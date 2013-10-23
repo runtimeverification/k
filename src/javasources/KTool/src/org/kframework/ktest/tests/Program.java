@@ -9,11 +9,14 @@ import org.kframework.ktest.Configuration;
 import org.kframework.ktest.execution.Task;
 
 public class Program implements Comparable<Program> {
-	String programPath;
-	Map<String, String> krunOptions;
-	Test test;
-	String input, output, error;
-    boolean hasInput = false, hasOutput = false;
+	final String programPath;
+	final Map<String, String> krunOptions;
+	private final Test test;
+	private final String input;
+    private final String output;
+    private final String error;
+    private boolean hasInput = false;
+    private boolean hasOutput = false;
 
 	public Program(String name, Map<String, String> map, Test test,
 			String input, String output, String error) {
@@ -62,7 +65,7 @@ public class Program implements Comparable<Program> {
 
 		if (error == null && task.getExit() != 0)
 			return false;
-		
+
 		return true;
 	}
 
