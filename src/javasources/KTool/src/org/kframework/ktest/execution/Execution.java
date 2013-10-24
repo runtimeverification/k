@@ -29,7 +29,16 @@ public class Execution {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		Execution.tpe.shutdownNow();
+		try {
+			Execution.tpe.shutdownNow();
+			if (!Execution.tpe.awaitTermination(Configuration.KOMPILE_ALL_TIMEOUT, TimeUnit.SECONDS)) {
+				//System.out.println("Still waiting...");
+				System.exit(1);
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		//System.out.println("Exiting normally...");
 		Execution.tpe = getThreadPoolExecutor();
 	}
 
@@ -42,3 +51,5 @@ public class Execution {
 		return poolSize;
 	}
 }
+
+// vim: noexpandtab
