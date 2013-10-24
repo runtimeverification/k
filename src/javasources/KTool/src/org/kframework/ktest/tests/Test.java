@@ -803,4 +803,12 @@ public class Test implements Comparable<Test> {
     public boolean isSkipPrograms() {
         return skipPrograms;
     }
+
+    public String getKompileOptions() {
+        String kompileOption = "";
+        for (Entry<String, String> entry : kompileOptions.entrySet()) {
+            kompileOption += entry.getKey() + " " + entry.getValue();
+        }
+        return kompileOption;
+    }
 }

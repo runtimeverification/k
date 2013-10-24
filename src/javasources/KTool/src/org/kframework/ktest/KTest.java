@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -244,6 +245,30 @@ public class KTest {
         }
     }
 
+    private static void testConfig(String configFile, String rootDir,
+            String rootProgramsDir, String rootResultsDir) {
+
+        int exitCode = 0;
+        List<Test> alltests = new LinkedList<Test>();
+
+        // load config
+        try {
+            alltests = parseXMLConfig(configFile, rootDir, rootProgramsDir,
+                    rootResultsDir);
+        } catch (ParserConfigurationException e) {
+            exitCode = 1;
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.PARSER, e.getLocalizedMessage()));
+        } catch (SAXException e) {
+            exitCode = 1;
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.PARSER, e.getLocalizedMessage()));
+        } catch (IOException e) {
+            exitCode = 1;
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.PARSER, e.getLocalizedMessage()));
+        }
+
+        testing(exitCode, new File(System.getProperty("user.dir")), alltests);
+    }
+
     private static List<Test> parseXMLConfig(String configFile,
             String rootDefDir, String rootProgramsDir, String rootResultsDir)
             throws ParserConfigurationException, SAXException, IOException {
@@ -275,40 +300,54 @@ public class KTest {
         return alltests;
     }
 
-    private static void testConfig(String configFile, String rootDir,
-            String rootProgramsDir, String rootResultsDir) {
+    private static void testing(int exitCode, File homeDir, List<Test> alltests) {
+        List<Test> alltestsUnique = filterUniqueDefinition(alltests);
 
-        int exitCode = 0;
-        List<Test> alltests = new LinkedList<Test>();
+        exitCode |= resultKompile(execKompile(homeDir, alltestsUnique));
+        exitCode |= resultPdf(execPdf(homeDir, alltestsUnique));
+        exitCode |= execPrograms(homeDir, alltests);
 
-        // load config
-        try {
-            alltests = parseXMLConfig(configFile, rootDir, rootProgramsDir,
-                    rootResultsDir);
-        } catch (ParserConfigurationException e) {
-            exitCode = 1;
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.PARSER, e.getLocalizedMessage()));
-        } catch (SAXException e) {
-            exitCode = 1;
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.PARSER, e.getLocalizedMessage()));
-        } catch (IOException e) {
-            exitCode = 1;
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.PARSER, e.getLocalizedMessage()));
-        }
-
-        testing(exitCode, new File(System.getProperty("user.dir")), alltests);
+        if (exitCode != 0)
+            System.exit(exitCode);
     }
 
-    private static Map<Test, Task> generateDefinitions(File homeDir, List<Test> alltests) {
+    private static List<Test> filterUniqueDefinition(List<Test> alltests) {
+        List<Test> alltestsUnique = new LinkedList<Test>();
+        try {
+            Map<String, String> testItemM = new HashMap<String, String>();
+            for (Test test : alltests) {
+                String definition = new File(test.getLanguage()).getCanonicalPath();
+                String kompileOption = test.getKompileOptions();
+                String oldKompileOption = testItemM.get(definition);
+                // not duplicated
+                if (oldKompileOption == null) {
+                    alltestsUnique.add(test);
+                }
+                // sanitize
+                if (oldKompileOption != null && !oldKompileOption.equals(kompileOption)) {
+                    String msg = "There are multiple K definition \"" + definition + "\" with different kompile options: \"" + oldKompileOption + "\" vs \"" + kompileOption + "\"";
+                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
+                } else {
+                    testItemM.put(definition, kompileOption);
+                }
+            }
+        } catch (Exception e) {
+            String msg = "";
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
+            e.printStackTrace();
+        }
+        return alltestsUnique;
+    }
+
+    private static Map<Test, Task> execKompile(File homeDir, List<Test> alltests) {
         int i = 0, j = 0;
         System.out.print("Kompile the language definitions...");
-        Map<Test, Task> definitions = new TreeMap<Test, Task>();
+        Map<Test, Task> kompileTaskM = new TreeMap<Test, Task>();
         for (Test test : alltests) {
-            Task def = test.getDefinitionTask(homeDir);
-            definitions.put(test, def);
-            // not skip or not exists
             if ((!test.isSkipKompile() && Configuration.KOMPILE)
                 || !new File(test.getCompiled()).exists()) {
+                Task def = test.getDefinitionTask(homeDir);
+                kompileTaskM.put(test, def);
                 Execution.execute(def);
                 if (test.runOnOS()) {
                     Task unixOnlyScript = test.getUnixOnlyScriptTask(homeDir);
@@ -327,23 +366,23 @@ public class KTest {
         if (i > 0)
             System.out.println("Compiling " + i + " definitions");
         Execution.finish();
-        return definitions;
+        return kompileTaskM;
     }
 
-    private static int compileDefs(Map<Test, Task> definitions) {
+    private static int resultKompile(Map<Test, Task> kompileTaskM) {
         int ret = 0;
 
         if (Configuration.KOMPILE) {
             if (!GlobalSettings.isWindowsOS()) {
                 // report
-                for (Entry<Test, Task> entry : definitions.entrySet()) {
+                for (Entry<Test, Task> entry : kompileTaskM.entrySet()) {
                     entry.getKey().reportCompilation(entry.getValue());
                 }
             }
 
             // console display
             String kompileStatus = "\n";
-            for (Entry<Test, Task> entry : definitions.entrySet()) {
+            for (Entry<Test, Task> entry : kompileTaskM.entrySet()) {
                 if (!entry.getKey().compiled(entry.getValue())) {
                     kompileStatus += ColorUtil.RgbToAnsi(Color.red, ColorSetting.ON) + "FAIL: "
                             + entry.getKey().getLanguage()
@@ -361,17 +400,15 @@ public class KTest {
         return ret;
     }
 
-    private static int compilePdfs(File homeDir, List<Test> alltests) {
-        int ret = 0, i = 0, j = 0;
+    private static Map<Test, Task> execPdf(File homeDir, List<Test> alltests) {
+        int i = 0, j = 0;
         System.out.print("Generating PDF documentation...");
-        Map<Test, Task> pdfDefinitions = new TreeMap<Test, Task>();
+        Map<Test, Task> pdfTaskM = new TreeMap<Test, Task>();
         for (Test test : alltests) {
             if (!test.isSkipPdf() && Configuration.PDF){
                 Task pdfDef = test.getPdfDefinitionTask(homeDir);
-                if (Configuration.PDF) {
-                    pdfDefinitions.put(test, pdfDef);
-                    Execution.execute(pdfDef);
-                }
+                pdfTaskM.put(test, pdfDef);
+                Execution.execute(pdfDef);
                 i++;
             } else {
                 j++;
@@ -383,18 +420,23 @@ public class KTest {
         if (i > 0)
             System.out.println("Generate pdf for " + i + " definitions");
         Execution.finish();
+        return pdfTaskM;
+    }
+
+    private static int resultPdf(Map<Test, Task> pdfTaskM) {
+        int ret = 0;
 
         if (Configuration.PDF) {
 
             if (!GlobalSettings.isWindowsOS()) {
                 // create XML report
-                for (Entry<Test, Task> entry : pdfDefinitions.entrySet()) {
+                for (Entry<Test, Task> entry : pdfTaskM.entrySet()) {
                     entry.getKey().reportPdfCompilation(entry.getValue());
                 }
             }
             // console messages
             String pdfKompileStatus = "\n";
-            for (Entry<Test, Task> entry : pdfDefinitions.entrySet()) {
+            for (Entry<Test, Task> entry : pdfTaskM.entrySet()) {
                 if (!entry.getKey().compiledPdf(entry.getValue())) {
                     pdfKompileStatus += ColorUtil.RgbToAnsi(Color.red, ColorSetting.ON)
                             + "FAIL: " + entry.getKey().getLanguage()
@@ -412,11 +454,11 @@ public class KTest {
         return ret;
     }
 
-    private static int executePrograms(File homeDir, List<Test> tests) {
+    private static int execPrograms(File homeDir, List<Test> alltests) {
         int ret = 0;
         // execute all programs (for which corresponding definitions are
         // compiled)
-        for (Test test : tests) {
+        for (Test test : alltests) {
             if (!test.isSkipPrograms() && Configuration.PROGRAMS){
                 if (test.runOnOS()) {
                     System.out.print("Running " + test.getLanguage()
@@ -436,7 +478,7 @@ public class KTest {
                         Task task = p.getTask(homeDir);
                         all.put(p, task);
                         if (Configuration.PROGRAMS) {
-                            Execution.tpe.execute(task);
+                            Execution.execute(task);
                         }
                         i++;
                         if (p.hasInput()) in++;
@@ -479,24 +521,5 @@ public class KTest {
         }
 
         return ret;
-    }
-
-    private static List<Test> generateTests(Map<Test, Task> definitions) {
-        List<Test> tests = new LinkedList<>();
-        for (Entry<Test, Task> dentry : definitions.entrySet())
-            tests.add(dentry.getKey());
-        return tests;
-    }
-
-    private static void testing(int exitCode, File homeDir, List<Test> alltests) {
-        Map<Test, Task> definitions = generateDefinitions(homeDir, alltests);
-        List<Test> tests = generateTests(definitions);
-
-        exitCode |= compileDefs(definitions);
-        exitCode |= compilePdfs(homeDir, alltests);
-        exitCode |= executePrograms(homeDir, tests);
-
-        if (exitCode != 0)
-            System.exit(exitCode);
     }
 }
