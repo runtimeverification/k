@@ -2,6 +2,7 @@ package org.kframework.backend.java.builtins;
 
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -14,7 +15,7 @@ import java.util.Set;
  */
 public class BuiltinSetOperations {
 
-    public static BuiltinSet difference(BuiltinSet term1, BuiltinSet term2) {
+    public static BuiltinSet difference(BuiltinSet term1, BuiltinSet term2, TermContext context) {
         if (!term1.isGround()) {
             throw new IllegalArgumentException("first argument " + term1 + " is not ground");
         }
@@ -27,7 +28,7 @@ public class BuiltinSetOperations {
         return new BuiltinSet(elements);
     }
 
-    public static BoolToken in(Term term1, BuiltinSet term2) {
+    public static BoolToken in(Term term1, BuiltinSet term2, TermContext context) {
         if (!term1.isGround()) {
             throw new IllegalArgumentException("first argument " + term1 + " is not ground");
         }

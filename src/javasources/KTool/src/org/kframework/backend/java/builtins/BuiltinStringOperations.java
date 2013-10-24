@@ -1,5 +1,6 @@
 package org.kframework.backend.java.builtins;
 
+import org.kframework.backend.java.kil.TermContext;
 import org.kframework.utils.StringUtil;
 
 import java.math.BigInteger;
@@ -12,46 +13,46 @@ import java.math.BigInteger;
 
 public class BuiltinStringOperations {
 
-    public static StringToken add(StringToken term1, StringToken term2) {
+    public static StringToken add(StringToken term1, StringToken term2, TermContext context) {
         return StringToken.of(term1.stringValue() + term2.stringValue());
     }
 
-    public static BoolToken eq(StringToken term1, StringToken term2) {
+    public static BoolToken eq(StringToken term1, StringToken term2, TermContext context) {
         return BoolToken.of(term1.stringValue().compareTo(term2.stringValue()) == 0);
     }
 
-    public static BoolToken ne(StringToken term1, StringToken term2) {
+    public static BoolToken ne(StringToken term1, StringToken term2, TermContext context) {
         return BoolToken.of(term1.stringValue().compareTo(term2.stringValue()) != 0);
     }
 
-    public static BoolToken gt(StringToken term1, StringToken term2) {
+    public static BoolToken gt(StringToken term1, StringToken term2, TermContext context) {
         return BoolToken.of(term1.stringValue().compareTo(term2.stringValue()) > 0);
     }
 
-    public static BoolToken ge(StringToken term1, StringToken term2) {
+    public static BoolToken ge(StringToken term1, StringToken term2, TermContext context) {
         return BoolToken.of(term1.stringValue().compareTo(term2.stringValue()) >= 0);
     }
 
-    public static BoolToken lt(StringToken term1, StringToken term2) {
+    public static BoolToken lt(StringToken term1, StringToken term2, TermContext context) {
         return BoolToken.of(term1.stringValue().compareTo(term2.stringValue()) < 0);
     }
 
-    public static BoolToken le(StringToken term1, StringToken term2) {
+    public static BoolToken le(StringToken term1, StringToken term2, TermContext context) {
         return BoolToken.of(term1.stringValue().compareTo(term2.stringValue()) <= 0);
     }
 
-    public static IntToken len(StringToken term) {
+    public static IntToken len(StringToken term, TermContext context) {
         return IntToken.of(term.stringValue().codePointCount(0, term.stringValue().length()));
     }
 
-    public static IntToken ord(StringToken term) {
+    public static IntToken ord(StringToken term, TermContext context) {
         if (term.stringValue().codePointCount(0, term.stringValue().length()) != 1) {
             throw new IllegalArgumentException();
         }
         return IntToken.of(term.stringValue().codePointAt(0));
     }
 
-    public static StringToken chr(IntToken term) {
+    public static StringToken chr(IntToken term, TermContext context) {
         //safe because we know it's in the unicode code range or it will throw
         int codePoint = term.intValue();
         StringUtil.throwIfSurrogatePair(codePoint);
@@ -89,7 +90,7 @@ public class BuiltinStringOperations {
         return IntToken.of((foundOffset == -1 ? -1 : term1.stringValue().codePointCount(0, foundOffset)));
     }
 
-    public static IntToken string2int(StringToken term) {
+    public static IntToken string2int(StringToken term, TermContext context) {
         try {
             return IntToken.of(new BigInteger(term.stringValue()));
         } catch (NumberFormatException e) {
@@ -103,15 +104,15 @@ public class BuiltinStringOperations {
         }
     }
 
-    public static UninterpretedToken string2float(StringToken term) {
+    public static UninterpretedToken string2float(StringToken term, TermContext context) {
         return UninterpretedToken.of("Float", term.value());
     }
 
-    public static StringToken float2string(UninterpretedToken term) {
+    public static StringToken float2string(UninterpretedToken term, TermContext context) {
         return StringToken.of(term.value());
     }
 
-    public static StringToken int2string(IntToken term) {
+    public static StringToken int2string(IntToken term, TermContext context) {
         return StringToken.of(term.bigIntegerValue().toString());
     }
 /*
@@ -127,7 +128,7 @@ public class BuiltinStringOperations {
         return StringToken.of(name);
     }
 */
-    public static StringToken category(StringToken term) {
+    public static StringToken category(StringToken term, TermContext context) {
         if (term.stringValue().codePointCount(0, term.stringValue().length()) != 1) {
             throw new IllegalArgumentException();
         }
@@ -136,7 +137,7 @@ public class BuiltinStringOperations {
         return StringToken.of(StringUtil.getCategoryCode((byte)cat));
     }
 
-    public static StringToken directionality(StringToken term) {
+    public static StringToken directionality(StringToken term, TermContext context) {
         if (term.stringValue().codePointCount(0, term.stringValue().length()) != 1) {
             throw new IllegalArgumentException();
         }

@@ -14,6 +14,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -29,7 +30,6 @@ public class BuiltinFunction {
      * {@link Method} representation of Java implementation of said operations.
      */
     private static final Map<KLabelConstant, Method> table = new HashMap<KLabelConstant, Method>();
-    private static TermContext context;
 
     public static void init(Definition definition) {
         /* initialize {@code table} */
@@ -71,21 +71,12 @@ public class BuiltinFunction {
 
     }
 
-    private static void initContext(TermContext context) {
-        assert BuiltinFunction.context == null;
-        BuiltinFunction.context = context;
-    }
-
-    public static TermContext context() {
-        assert context != null;
-        return context;
-    }
-
     public static Term invoke(TermContext context, KLabelConstant label, Term ... arguments)
             throws IllegalAccessException, IllegalArgumentException {
-        initContext(context);
+        Object[] args =  Arrays.copyOf(arguments, arguments.length + 1, Object[].class);
+        args[arguments.length] =  context;
         try {
-            Term t = (Term) table.get(label).invoke(null, (Object[]) arguments);
+            Term t = (Term) table.get(label).invoke(null, args);
             return t;
         } catch (InvocationTargetException e) {
             Throwable t = e.getTargetException();
@@ -97,8 +88,6 @@ public class BuiltinFunction {
             }
             assert false : "Builtin functions should not throw checked exceptions";
             return null; //unreachable
-        } finally {
-            BuiltinFunction.context = null;
         }
     }
 
