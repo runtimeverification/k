@@ -306,7 +306,9 @@ public class KTest {
         for (Test test : alltests) {
             Task def = test.getDefinitionTask(homeDir);
             definitions.put(test, def);
-            if (!test.isSkipKompile() && Configuration.KOMPILE) {
+            // not skip or not exists
+            if ((!test.isSkipKompile() && Configuration.KOMPILE)
+                || !new File(test.getCompiled()).exists()) {
                 Execution.execute(def);
                 if (test.runOnOS()) {
                     Task unixOnlyScript = test.getUnixOnlyScriptTask(homeDir);
