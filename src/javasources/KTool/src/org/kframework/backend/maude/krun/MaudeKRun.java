@@ -8,18 +8,17 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.runner.KRunner;
 import org.kframework.krun.Error;
-import org.kframework.krun.FileUtil;
 import org.kframework.krun.K;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.SubstitutionFilter;
 import org.kframework.krun.XmlUtil;
 import org.kframework.krun.api.*;
-import org.kframework.krun.api.Transition.TransitionType;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.file.FileUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -48,6 +47,7 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 
+
 public class MaudeKRun implements KRun {
 	protected Context context;
     private FileReader processedMaudeOutputReader;
@@ -65,14 +65,14 @@ public class MaudeKRun implements KRun {
 	}
 	
 	private void executeKRun(String maudeCmd) throws KRunExecutionException {
-		FileUtil.createFile(K.maude_in, maudeCmd);
-		File outFile = FileUtil.createFile(K.maude_out);
+        FileUtil.saveInFile(K.maude_in, maudeCmd);
+        File outFile = FileUtil.createFile(K.maude_out);
 		File errFile = FileUtil.createFile(K.maude_err);
 
 		int returnValue;
 		try {
 			if (K.log_io) {
-				returnValue = KRunner.main(new String[] { "--maudeFile", K.compiled_def + K.fileSeparator + "main.maude", "--moduleName", K.main_module, "--commandFile", K.maude_in, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath(), "--createLogs" },
+				KRunner.main(new String[]{"--maudeFile", K.compiled_def + K.fileSeparator + "main.maude", "--moduleName", K.main_module, "--commandFile", K.maude_in, "--outputFile", outFile.getCanonicalPath(), "--errorFile", errFile.getCanonicalPath(), "--createLogs"},
                         context);
 			}
 			if (!ioServer) {
@@ -86,7 +86,7 @@ public class MaudeKRun implements KRun {
 			throw new RuntimeException("Runner threw exception", e);
 		}
 		if (errFile.exists()) {
-			String content = FileUtil.getFileContent(K.maude_err);
+            String content = FileUtil.getFileContent(K.maude_err);
 			if (content.length() > 0) {
 				throw new KRunExecutionException(content);
 			}
@@ -110,8 +110,8 @@ public class MaudeKRun implements KRun {
 		}
 		cmd += getCounter();
 
-		executeKRun(cmd);
-		try {
+        executeKRun(cmd);
+        try {
 			return parseRunResult();
 		} catch (IOException e) {
 			throw new KRunExecutionException("Parsing maude output exception", e);
@@ -163,8 +163,8 @@ public class MaudeKRun implements KRun {
 	private KRunResult<KRunState> parseRunResult() throws IOException {
 		File input = new File(K.maude_output);
 		Document doc = XmlUtil.readXML(input);
-		NodeList list = null;
-		Node nod = null;
+		NodeList list;
+		Node nod;
 		list = doc.getElementsByTagName("result");
 		nod = list.item(1);
 
@@ -173,11 +173,11 @@ public class MaudeKRun implements KRun {
 		List<Element> child = XmlUtil.getChildElements(elem);
 		assertXML(child.size() == 1);
 
-		KRunState state = parseElement((Element) child.get(0), context);
+		KRunState state = parseElement(child.get(0), context);
 		KRunResult<KRunState> ret = new KRunResult<KRunState>(state);
 		String statistics = printStatistics(elem);
 		ret.setStatistics(statistics);
-		ret.setRawOutput(FileUtil.getFileContent(K.maude_out));
+        ret.setRawOutput(FileUtil.getFileContent(K.maude_out));
 		parseCounter(list.item(2));
 		return ret;
 	}
@@ -455,8 +455,8 @@ public class MaudeKRun implements KRun {
 			cmd = "set trace on ." + K.lineSeparator + cmd;
 		}
 		cmd += getCounter();
-		executeKRun(cmd);
-		try {
+        executeKRun(cmd);
+        try {
 			SearchResults results;
 			final List<SearchResult> solutions = parseSearchResults
 					(pattern, compilationInfo);
@@ -467,7 +467,7 @@ public class MaudeKRun implements KRun {
             results = new SearchResults(solutions, graph, matches, context);
 			K.stateCounter += graph != null ? graph.getVertexCount() : 0;
 			KRunResult<SearchResults> result = new KRunResult<SearchResults>(results);
-			result.setRawOutput(FileUtil.getFileContent(K.maude_out));
+            result.setRawOutput(FileUtil.getFileContent(K.maude_out));
 			return result;
 		} catch (Exception e) {
 			throw new RuntimeException("Pretty-printer threw exception", e);
@@ -496,8 +496,8 @@ public class MaudeKRun implements KRun {
         scanner.close();
 
 		Document doc = XmlUtil.readXML(new File(K.processed_maude_output));
-		NodeList list = null;
-		Node nod = null;
+		NodeList list;
+		Node nod;
 		list = doc.getElementsByTagName("graphml");
 		assertXML(list.getLength() == 1);
 		nod = list.item(0);
@@ -569,8 +569,8 @@ public class MaudeKRun implements KRun {
 		List<SearchResult> results = new ArrayList<SearchResult>();
 		File input = new File(K.maude_output);
 		Document doc = XmlUtil.readXML(input);
-		NodeList list = null;
-		Node nod = null;
+		NodeList list;
+		Node nod;
 		list = doc.getElementsByTagName("search-result");
 		for (int i = 0; i < list.getLength(); i++) {
 			nod = list.item(i);
@@ -619,11 +619,11 @@ public class MaudeKRun implements KRun {
 		String cmd = "mod MCK is" + K.lineSeparator + " including " + K.main_module + " ." + K.lineSeparator + K.lineSeparator + " op #initConfig : -> Bag ." + K.lineSeparator + K.lineSeparator + " eq #initConfig  =" + K.lineSeparator + cfgFilter.getResult() + " ." + K.lineSeparator + "endm" + K.lineSeparator + K.lineSeparator + "red" + K.lineSeparator + "_`(_`)(('modelCheck`(_`,_`)).KLabel,_`,`,_(_`(_`)(Bag2KLabel(#initConfig),.KList)," + K.lineSeparator + formulaFilter.getResult() + ")" + K.lineSeparator + ") .";
 		boolean io = ioServer;
 		ioServer = false;
-		executeKRun(cmd);
-		ioServer = io;
+        executeKRun(cmd);
+        ioServer = io;
 		KRunProofResult<DirectedGraph<KRunState, Transition>> result = parseModelCheckResult();
-		result.setRawOutput(FileUtil.getFileContent(K.maude_out));
-		return result;
+        result.setRawOutput(FileUtil.getFileContent(K.maude_out));
+        return result;
 	}
 
     public KRunResult<TestGenResults> generate(Integer bound, Integer depth, SearchType searchType, Rule pattern, Term cfg, RuleCompilerSteps compilationInfo) throws KRunExecutionException{
@@ -633,8 +633,8 @@ public class MaudeKRun implements KRun {
 	private KRunProofResult<DirectedGraph<KRunState, Transition>> parseModelCheckResult() {
 		File input = new File(K.maude_output);
 		Document doc = XmlUtil.readXML(input);
-		NodeList list = null;
-		Node nod = null;
+		NodeList list;
+		Node nod;
 		list = doc.getElementsByTagName("result");
 		assertXML(list.getLength() == 1);
 		nod = list.item(0);
