@@ -339,9 +339,8 @@ public class KTest {
                 }
             }
         } catch (Exception e) {
-            String msg = "";
+            String msg = "File.getCanonicalPath() failed.";
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
-            e.printStackTrace();
         }
         return alltestsUnique;
     }

@@ -66,6 +66,7 @@ public class Test implements Comparable<Test> {
             List<String> resultsFolder, List<String> extensions,
             List<String> excludePrograms, String homeDir) {
         this.language = language;
+        this.directory = new File(language).getAbsoluteFile().getParent();
         this.programsFolders = programsFolder;
         this.resultsFolders = resultsFolder;
         this.extensions = extensions;
@@ -604,6 +605,7 @@ public class Test implements Comparable<Test> {
     }
 
     public String getDirectory() {
+        assert directory != null;
         return directory;
             //new File(getLanguage()).getAbsoluteFile().getParent();
                 //+ (tag.equals("") ? "" : "-" + tag);
