@@ -58,6 +58,13 @@ public class SymbolicUnifier extends AbstractUnifier {
         multiConstraints = new ArrayList<java.util.Collection<SymbolicConstraint>>();
     }
 
+    /**
+     * Unifies the two sides of the given equality.
+     * 
+     * @param equality
+     *            the given equality
+     * @return true if the unification succeeds; otherwise, false
+     */
     public boolean unify(SymbolicConstraint.Equality equality) {
         try {
             isStarNested = false;

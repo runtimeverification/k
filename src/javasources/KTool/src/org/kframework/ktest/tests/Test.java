@@ -42,6 +42,7 @@ public class Test implements Comparable<Test> {
 
     /* data read from config.xml */
     private String language;
+    private String directory;
     private List<String> programsFolders;
     private List<String> resultsFolders;
     private String tag = "";
@@ -60,12 +61,12 @@ public class Test implements Comparable<Test> {
     private Document doc;
     public Element report;
     private List<Program> programs;
-    private String reportDir = null;
 
     public Test(String language, List<String> programsFolder,
             List<String> resultsFolder, List<String> extensions,
             List<String> excludePrograms, String homeDir) {
         this.language = language;
+        this.directory = new File(language).getAbsoluteFile().getParent();
         this.programsFolders = programsFolder;
         this.resultsFolders = resultsFolder;
         this.extensions = extensions;
@@ -83,7 +84,7 @@ public class Test implements Comparable<Test> {
             e.printStackTrace();
         }
 
-        report = getInitialElement(language);
+        report = getInitialElement();
         doc.appendChild(report);
 
         // general krun options
@@ -107,7 +108,7 @@ public class Test implements Comparable<Test> {
             e.printStackTrace();
         }
 
-        report = getInitialElement(language);
+        report = getInitialElement();
         doc.appendChild(report);
 
         initializePrograms(homeDir);
@@ -139,7 +140,7 @@ public class Test implements Comparable<Test> {
                         "System file."));
             }
 
-            if (programsFolder == null || programsFolder.equals(""))
+            if (programsFolder.equals(""))
                 return;
 
             List<String> allProgramPaths = searchAll(programsFolder,
@@ -161,7 +162,6 @@ public class Test implements Comparable<Test> {
                     if (p.programPath.equals(programPath)) {
                         krunOptions = p.krunOptions;
                         special = true;
-                        continue;
                     }
                 }
                 if (!special)
@@ -177,11 +177,11 @@ public class Test implements Comparable<Test> {
                         input = getFileAsStringOrNull(inputFile);
 
                         String outputFile = searchOutputFile(rf, new File(
-                                programPath).getName(), recursive);
+                                programPath).getName());
                         output = getFileAsStringOrNull(outputFile);
 
                         String errorFile = searchErrorFile(rf, new File(
-                                programPath).getName(), recursive);
+                                programPath).getName());
                         error = getFileAsStringOrNull(errorFile);
 
                         if (input != null || output != null || error != null) {
@@ -214,13 +214,11 @@ public class Test implements Comparable<Test> {
         return fileAsString;
     }
 
-    private String searchOutputFile(String resultsFolder2, String name,
-            boolean recursive2) {
+    private String searchOutputFile(String resultsFolder2, String name) {
         return searchFile(resultsFolder2, name + Configuration.OUT, recursive);
     }
 
-    private String searchErrorFile(String resultsFolder2, String name,
-            boolean recursive2) {
+    private String searchErrorFile(String resultsFolder2, String name) {
         return searchFile(resultsFolder2, name + Configuration.ERR, recursive);
     }
 
@@ -233,22 +231,22 @@ public class Test implements Comparable<Test> {
         String[] files = new File(folder).list();
         String file = null;
         if (files != null)
-            for (int i = 0; i < files.length; i++) {
+            for (String file1 : files) {
 
                 // search in depth first
                 if (recursive)
                     if (new File(folder + Configuration.FILE_SEPARATOR
-                            + files[i]).isDirectory())
+                            + file1).isDirectory())
                         file = searchFile(folder + Configuration.FILE_SEPARATOR
-                                + files[i], filename, recursive);
+                                + file1, filename, recursive);
                 if (file != null)
                     return file;
 
-                if (new File(folder + Configuration.FILE_SEPARATOR + files[i])
+                if (new File(folder + Configuration.FILE_SEPARATOR + file1)
                         .isFile())
-                    if (files[i].equals(filename))
+                    if (file1.equals(filename))
                         file = new File(folder + Configuration.FILE_SEPARATOR
-                                + files[i]).getAbsolutePath();
+                                + file1).getAbsolutePath();
                 if (file != null)
                     return file;
             }
@@ -269,11 +267,11 @@ public class Test implements Comparable<Test> {
         if (recursive) {
             String[] files = new File(programsFolder).list();
             if (files != null)
-                for (int i = 0; i < files.length; i++) {
+                for (String file : files) {
                     if (new File(programsFolder + Configuration.FILE_SEPARATOR
-                            + files[i]).isDirectory()) {
+                            + file).isDirectory()) {
                         paths.addAll(searchAll(programsFolder
-                                + Configuration.FILE_SEPARATOR + files[i],
+                                + Configuration.FILE_SEPARATOR + file,
                                 extensions, recursive));
                     }
                 }
@@ -286,12 +284,12 @@ public class Test implements Comparable<Test> {
         String[] files = new File(programsFolder2).list();
         List<String> fls = new LinkedList<String>();
         if (files != null) {
-            for (int i = 0; i < files.length; i++)
+            for (String file : files)
                 if (new File(programsFolder2 + Configuration.FILE_SEPARATOR
-                        + files[i]).isFile()) {
-                    if (files[i].endsWith(extension))
+                        + file).isFile()) {
+                    if (file.endsWith(extension))
                         fls.add(programsFolder2 + Configuration.FILE_SEPARATOR
-                                + files[i]);
+                                + file);
                 }
         }
         return fls;
@@ -304,16 +302,23 @@ public class Test implements Comparable<Test> {
                 test.getAttribute(Configuration.LANGUAGE), rootDefDir,
                 Configuration.DEF_ERROR);
 
+        directory = new File(language).getAbsoluteFile().getParent();
+        if (test.hasAttribute(Configuration.DIRECTORY)) {
+            directory = resolveAbsolutePathRelativeTo(
+                    test.getAttribute(Configuration.DIRECTORY), directory,
+                    null); // no need to exist
+        }
+
         // programs without extensions
         if (!test.getAttribute(Configuration.PROGRAMS_DIR).trim().equals("") && test.getAttribute(Configuration.EXTENSIONS2).trim().equals("")) {
-            String msg = "You missed 'extension' attribute: ";
+            String msg = "The 'programs' attribute requires a 'extention' attribute:  ";
             msg += "<test definition=" + test.getAttribute(Configuration.LANGUAGE) + " programs=" + test.getAttribute(Configuration.PROGRAMS_DIR) + " />";
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "", ""));
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
         // extensions without programs
         } else if (test.getAttribute(Configuration.PROGRAMS_DIR).trim().equals("") && !test.getAttribute(Configuration.EXTENSIONS2).trim().equals("")) {
-            String msg = "You cannot use 'extension' attribute without 'programs' attribute: ";
-            msg += "<test definition=" + test.getAttribute(Configuration.LANGUAGE) + " programs=" + test.getAttribute(Configuration.PROGRAMS_DIR) + " />";
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "", ""));
+            String msg = "The 'extension' attribute requires a 'programs' attribute: ";
+            msg += "<test definition=" + test.getAttribute(Configuration.LANGUAGE) + " extention=" + test.getAttribute(Configuration.EXTENSIONS2) + " />";
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
         }
 
         // get programs dir
@@ -348,7 +353,7 @@ public class Test implements Comparable<Test> {
         }
 
         // get report dir
-        reportDir = resolveAbsolutePathRelativeTo(
+        String reportDir = resolveAbsolutePathRelativeTo(
                 test.getAttribute(Configuration.REPORT_DIR), rootDefDir, "");
         if (report != null && reportDir.equals(""))
             reportDir = null;
@@ -411,11 +416,11 @@ public class Test implements Comparable<Test> {
                     input = getFileAsStringOrNull(inputFile);
 
                     String outputFile = searchOutputFile(rf, new File(
-                            programPath).getName(), recursive);
+                            programPath).getName());
                     output = getFileAsStringOrNull(outputFile);
 
                     String errorFile = searchErrorFile(rf,
-                            new File(programPath).getName(), recursive);
+                            new File(programPath).getName());
                     error = getFileAsStringOrNull(errorFile);
 
                     if (input != null || output != null || error != null) {
@@ -445,7 +450,7 @@ public class Test implements Comparable<Test> {
     }
 
     private String resolveAbsolutePathRelativeTo(String path, String rootDir,
-            String errorMessage) {
+            String errorMessage) { // do not check existance when errorMessage is null
 
         if (path == null) {
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
@@ -465,16 +470,16 @@ public class Test implements Comparable<Test> {
                         "System file."));
             }
 
-            if (new File(rootDir + Configuration.FILE_SEPARATOR + path)
-                    .exists()) {
-                return new File(rootDir + Configuration.FILE_SEPARATOR + path)
-                        .getAbsolutePath();
-            } else
+            File resultFile = new File(rootDir + Configuration.FILE_SEPARATOR + path);
+            if (resultFile.exists() || errorMessage == null) {
+                return resultFile.getAbsolutePath();
+            } else {
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
                         KExceptionGroup.CRITICAL, "File " + rootDir
                                 + Configuration.FILE_SEPARATOR + path
                                 + " does not exists.\n" + errorMessage,
                         "command line", "System file."));
+            }
         }
         return null;
     }
@@ -502,7 +507,7 @@ public class Test implements Comparable<Test> {
         return map;
     }
 
-    private Element getInitialElement(String definition) {
+    private Element getInitialElement() {
         Element testsuite = doc.createElement(Configuration.TESTSUITE);
         String name = getReportFilename().replaceFirst("-report.xml", "");
         name = name.replaceAll("\\.", "/");
@@ -579,29 +584,6 @@ public class Test implements Comparable<Test> {
         return new Task(arguments, null, homeDir);
     }
 
-    public void deleteFolder(File folder) {
-        if (!folder.exists()) {
-            return;
-        }
-
-        File[] files = folder.listFiles();
-        if (files != null) { // some JVMs return null for empty dirs
-            for (File f : files) {
-                if (f.isDirectory()) {
-                    deleteFolder(f);
-                } else {
-                    f.delete();
-                }
-            }
-        }
-        folder.delete();
-    }
-
-    public String compileStatus(Task task) {
-        return "Compiling " + language + "...\t\t"
-                + (compiled(task) ? "success" : "failed");
-    }
-
     public boolean compiled(Task task) {
         if (task.getExit() != 0)
             return false;
@@ -623,7 +605,9 @@ public class Test implements Comparable<Test> {
     }
 
     public String getDirectory() {
-        return new File(getLanguage()).getAbsoluteFile().getParent();
+        assert directory != null;
+        return directory;
+            //new File(getLanguage()).getAbsoluteFile().getParent();
                 //+ (tag.equals("") ? "" : "-" + tag);
     }
 
@@ -802,5 +786,13 @@ public class Test implements Comparable<Test> {
 
     public boolean isSkipPrograms() {
         return skipPrograms;
+    }
+
+    public String getKompileOptions() {
+        String kompileOption = "";
+        for (Entry<String, String> entry : kompileOptions.entrySet()) {
+            kompileOption += entry.getKey() + " " + entry.getValue() + " ";
+        }
+        return kompileOption;
     }
 }

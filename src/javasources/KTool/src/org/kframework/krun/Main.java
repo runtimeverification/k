@@ -34,7 +34,6 @@ import org.kframework.compile.ConfigurationCleaner;
 import org.kframework.compile.FlattenModules;
 import org.kframework.compile.transformers.AddTopCellConfig;
 import org.kframework.compile.transformers.Cell2Map;
-import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
@@ -71,11 +70,15 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 import org.kframework.utils.OptionComparator;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
+
+import static org.apache.commons.io.FileUtils.deleteDirectory;
+import static org.apache.commons.io.FileUtils.writeStringToFile;
 
 public class Main {
 
@@ -105,14 +108,6 @@ public class Main {
         org.kframework.utils.Error.helpMsg(USAGE_DEBUG, HEADER_STANDARD, FOOTER_STANDARD, op.getOptionsStandard(), new OptionComparator(op.getOptionList()));
     }
     private static Stopwatch sw = new Stopwatch();
-
-    private static Term parseTerm(String value, Context context) throws Exception {
-        org.kframework.parser.concrete.KParser.ImportTblGround(K.compiled_def
-                + "/ground/Concrete.tbl");
-        ASTNode term = DefinitionLoader.parseCmdString(
-                value, "", "Command line argument", context);
-        return (Term) term.accept(new FlattenSyntax(context));
-    }
 
     public static Term plug(Map<String, Term> args, Context context) throws TransformerException {
         Configuration cfg = K.kompiled_cfg;
@@ -145,7 +140,7 @@ public class Main {
     }
 
     public static Term makeConfiguration(Term kast, String stdin,
-                                         RunProcess rp, boolean hasTerm, Context context) throws TransformerException {
+                                         RunProcess rp, boolean hasTerm, Context context) throws TransformerException, IOException {
 
         if (hasTerm) {
             if (kast == null) {
@@ -340,7 +335,7 @@ public class Main {
                     if (!proofFile.exists()) {
                         Error.report("Cannot find the file containing rules to prove");
                     }
-                    String content = FileUtil.getFileContent(proofFile.getAbsolutePath());
+                    String content = FileUtil.getFileContent(proofFile.getAbsoluteFile().toString());
                     Definition parsed = DefinitionLoader.parseString(content,
                             proofFile.getAbsolutePath(), context);
                     Module mod = parsed.getSingletonModule();
@@ -390,7 +385,7 @@ public class Main {
                 if (!cmd.hasOption("output")) {
                     AnsiConsole.out.println(output);
                 } else {
-                    FileUtil.createFile(K.output, output);
+                    writeStringToFile(new File(K.output), output);
                 }
                 // print search graph
                 if ("search".equals(K.maude_cmd) && K.do_search && K.showSearchGraph) {
@@ -433,7 +428,7 @@ public class Main {
                 if (!cmd.hasOption("output")) {
                     System.out.println(output);
                 } else {
-                    FileUtil.createFile(K.output, output);
+                    writeStringToFile(new File(K.output), output);
                 }
             } else if ("none".equals(K.output_mode)) {
                 System.out.print("");
@@ -721,22 +716,6 @@ public class Main {
     public static void execute_Krun(String cmds[]) {
         Context context = new Context();
         K.init(context);
-        // delete temporary krun directory
-        try {
-            FileUtil.deleteDirectory(new File(K.krunDir));
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            public void run() {
-                try {
-                    FileUtil.renameFolder(K.krunTempDir, K.krunDir);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
 
         CommandlineOptions cmd_options = new CommandlineOptions();
         CommandLine cmd = cmd_options.parse(cmds);
@@ -744,6 +723,18 @@ public class Main {
             printKRunUsageS(cmd_options);
          /* printKRunUsageE(cmd_options); */ /* TODO: Switch to this when the user has tried to use an experimental option. */
             System.exit(1);
+        }
+
+        if (!cmd.hasOption("debug-info")) {
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                public void run() {
+                    try {
+                        deleteDirectory(new File(K.krunTempDir));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
         }
 
         // set verbose
@@ -962,7 +953,7 @@ public class Main {
                 System.exit(0);
             }
             if (K.version) {
-                String msg = org.kframework.utils.file.FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE);
+                String msg = FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE);
                 System.out.println(msg);
                 System.exit(0);
             }

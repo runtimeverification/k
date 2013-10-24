@@ -8,9 +8,13 @@ import org.kframework.kil.matchers.MatcherException;
  */
 public abstract class AbstractUnifier implements Unifier {
 	
+    /**
+     * Fails the unification task.
+     * 
+     * @throws MatcherException
+     */
 	public void fail() {
 		throw new MatcherException("unification failed");
 	}
-
 
 }
