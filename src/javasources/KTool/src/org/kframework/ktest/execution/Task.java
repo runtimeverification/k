@@ -7,6 +7,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.regex.Pattern;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
 import org.kframework.ktest.Configuration;
 
 public class Task extends Thread {
@@ -42,36 +49,64 @@ public class Task extends Thread {
 			}
 			elapsed = System.currentTimeMillis();
 			Process p = pb.start();
+			//System.out.println("Start process...");
 
-			// send input
-			if (stdin != null) {
-				p.getOutputStream().write(stdin.getBytes());
-				p.getOutputStream().flush();
-				p.getOutputStream().close();
+			try {
+				// asynchronous output reader
+				final ExecutorService service = Executors.newFixedThreadPool(2);
+				final Future<String> outputGobbler = service.submit(new StreamGobbler(p.getInputStream()));
+				final Future<String> errorGobbler  = service.submit(new StreamGobbler(p.getErrorStream()));
+
+				// send input
+				if (stdin != null) {
+					p.getOutputStream().write(stdin.getBytes());
+					p.getOutputStream().flush();
+					p.getOutputStream().close();
+				}
+
+				// wait output reader
+				try {
+					stdout = outputGobbler.get();
+					stderr = errorGobbler.get();
+				} catch(final InterruptedException ie) {
+					ie.printStackTrace();
+				} catch(final ExecutionException ee) {
+					ee.printStackTrace();
+				}
+
+				// exit value
+				exit = p.waitFor();
+
+				try {
+					service.shutdownNow();
+					if (!service.awaitTermination(Configuration.KOMPILE_ALL_TIMEOUT, TimeUnit.SECONDS)) {
+						//System.out.println("Still waiting...");
+						System.exit(1);
+					}
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				//System.out.println("Finished process");
+
+			} catch (InterruptedException e) {
+				exit = Integer.MAX_VALUE;
+				p.destroy();
 			}
-			// get output
-			stdout = readString(p.getInputStream());
-
-			// get error
-			stderr = readString(p.getErrorStream());
-
-			// exit value
-			exit = p.waitFor();
 
 			// time
 			elapsed = (System.currentTimeMillis() - elapsed);
 
+			/*
 			// clean
 			p.getInputStream().close();
 			p.getErrorStream().close();
 			p.destroy();
+			*/
 			if (Configuration.VERBOSE) {
 				System.out.println(message + "] (time: " + elapsed + " ms)");
 			}
 
 		} catch (IOException io) {
-			exit = Integer.MAX_VALUE;
-		} catch (InterruptedException e) {
 			exit = Integer.MAX_VALUE;
 		}
 	}
@@ -129,3 +164,30 @@ public class Task extends Thread {
         return cmd;
     }
 }
+
+class StreamGobbler implements Callable<String> {
+	InputStream is;
+
+	StreamGobbler(InputStream is) {
+		this.is = is;
+	}
+
+	public String call() {
+		StringBuilder sb = new StringBuilder();
+		try {
+			InputStreamReader isr = new InputStreamReader(is);
+			BufferedReader br = new BufferedReader(isr);
+			String line = null;
+			while ((line = br.readLine()) != null) {
+				sb.append(line);
+				sb.append(System.getProperty("line.separator"));
+			}
+			br.close();
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+		}
+		return sb.toString();
+	}
+}
+
+// vim: noexpandtab
