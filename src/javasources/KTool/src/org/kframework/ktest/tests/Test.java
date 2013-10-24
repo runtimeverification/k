@@ -313,12 +313,12 @@ public class Test implements Comparable<Test> {
         if (!test.getAttribute(Configuration.PROGRAMS_DIR).trim().equals("") && test.getAttribute(Configuration.EXTENSIONS2).trim().equals("")) {
             String msg = "The 'programs' attribute requires a 'extention' attribute:  ";
             msg += "<test definition=" + test.getAttribute(Configuration.LANGUAGE) + " programs=" + test.getAttribute(Configuration.PROGRAMS_DIR) + " />";
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, Configuration.wrap(msg), "command line", "System file."));
         // extensions without programs
         } else if (test.getAttribute(Configuration.PROGRAMS_DIR).trim().equals("") && !test.getAttribute(Configuration.EXTENSIONS2).trim().equals("")) {
             String msg = "The 'extension' attribute requires a 'programs' attribute: ";
             msg += "<test definition=" + test.getAttribute(Configuration.LANGUAGE) + " extention=" + test.getAttribute(Configuration.EXTENSIONS2) + " />";
-            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, Configuration.wrap(msg), "command line", "System file."));
         }
 
         // get programs dir
