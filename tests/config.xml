@@ -782,9 +782,9 @@
 
 <!-- begin Java Rewrite Engine tests -->
  <test
-      definition="regression/java-rewrite-engine/visitor/imp.k"
-      programs="regression/java-rewrite-engine/visitor"
-      results="regression/java-rewrite-engine/visitor"
+      definition="tests/regression/java-rewrite-engine/visitor/imp.k"
+      programs="tests/regression/java-rewrite-engine/visitor"
+      results="tests/regression/java-rewrite-engine/visitor"
       extension="imp" >
    <kompile-option name="-backend" value="java" />
     <all-programs>
