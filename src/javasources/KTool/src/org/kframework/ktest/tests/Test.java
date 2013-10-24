@@ -42,6 +42,7 @@ public class Test implements Comparable<Test> {
 
     /* data read from config.xml */
     private String language;
+    private String directory;
     private List<String> programsFolders;
     private List<String> resultsFolders;
     private String tag = "";
@@ -304,6 +305,13 @@ public class Test implements Comparable<Test> {
                 test.getAttribute(Configuration.LANGUAGE), rootDefDir,
                 Configuration.DEF_ERROR);
 
+        directory = new File(language).getAbsoluteFile().getParent();
+        if (test.hasAttribute(Configuration.DIRECTORY)) {
+            directory = resolveAbsolutePathRelativeTo(
+                    test.getAttribute(Configuration.DIRECTORY), directory,
+                    null); // no need to exist
+        }
+
         // programs without extensions
         if (!test.getAttribute(Configuration.PROGRAMS_DIR).trim().equals("") && test.getAttribute(Configuration.EXTENSIONS2).trim().equals("")) {
             String msg = "You missed 'extension' attribute: ";
@@ -445,7 +453,7 @@ public class Test implements Comparable<Test> {
     }
 
     private String resolveAbsolutePathRelativeTo(String path, String rootDir,
-            String errorMessage) {
+            String errorMessage) { // do not check existance when errorMessage is null
 
         if (path == null) {
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
@@ -465,16 +473,16 @@ public class Test implements Comparable<Test> {
                         "System file."));
             }
 
-            if (new File(rootDir + Configuration.FILE_SEPARATOR + path)
-                    .exists()) {
-                return new File(rootDir + Configuration.FILE_SEPARATOR + path)
-                        .getAbsolutePath();
-            } else
+            File resultFile = new File(rootDir + Configuration.FILE_SEPARATOR + path);
+            if (resultFile.exists() || errorMessage == null) {
+                return resultFile.getAbsolutePath();
+            } else {
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
                         KExceptionGroup.CRITICAL, "File " + rootDir
                                 + Configuration.FILE_SEPARATOR + path
                                 + " does not exists.\n" + errorMessage,
                         "command line", "System file."));
+            }
         }
         return null;
     }
@@ -623,7 +631,8 @@ public class Test implements Comparable<Test> {
     }
 
     public String getDirectory() {
-        return new File(getLanguage()).getAbsoluteFile().getParent();
+        return directory;
+            //new File(getLanguage()).getAbsoluteFile().getParent();
                 //+ (tag.equals("") ? "" : "-" + tag);
     }
 
@@ -807,7 +816,7 @@ public class Test implements Comparable<Test> {
     public String getKompileOptions() {
         String kompileOption = "";
         for (Entry<String, String> entry : kompileOptions.entrySet()) {
-            kompileOption += entry.getKey() + " " + entry.getValue();
+            kompileOption += entry.getKey() + " " + entry.getValue() + " ";
         }
         return kompileOption;
     }

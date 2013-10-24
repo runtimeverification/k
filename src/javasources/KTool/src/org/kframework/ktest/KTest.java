@@ -314,21 +314,27 @@ public class KTest {
     private static List<Test> filterUniqueDefinition(List<Test> alltests) {
         List<Test> alltestsUnique = new LinkedList<Test>();
         try {
-            Map<String, String> testItemM = new HashMap<String, String>();
+            Map<String, String> kompileOptionM = new HashMap<String, String>();
+            Map<String, String>    definitionM = new HashMap<String, String>();
             for (Test test : alltests) {
                 String definition = new File(test.getLanguage()).getCanonicalPath();
+                String directory = new File(test.getDirectory()).getCanonicalPath();
                 String kompileOption = test.getKompileOptions();
-                String oldKompileOption = testItemM.get(definition);
+                String oldKompileOption = kompileOptionM.get(directory);
+                String oldDefinition    =    definitionM.get(directory);
                 // not duplicated
                 if (oldKompileOption == null) {
                     alltestsUnique.add(test);
                 }
                 // sanitize
                 if (oldKompileOption != null && !oldKompileOption.equals(kompileOption)) {
-                    String msg = "There are multiple K definition \"" + definition + "\" with different kompile options: \"" + oldKompileOption + "\" vs \"" + kompileOption + "\"";
+                    String msg = "There are multiple K definition with different kompile options whose directory is: " + directory + "\n";
+                    msg += "            definition=" + oldDefinition + ", kompile-option=" + oldKompileOption + "\n";
+                    msg += "            definition=" +    definition + ", kompile-option=" +    kompileOption;
                     GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
                 } else {
-                    testItemM.put(definition, kompileOption);
+                    kompileOptionM.put(directory, kompileOption);
+                       definitionM.put(directory, definition);
                 }
             }
         } catch (Exception e) {

@@ -58,6 +58,7 @@ public class Configuration {
 	public static final String RESULTS = "results";
 	public static final String PROGRAMS_DIR = "programs";
 	public static final String LANGUAGE = "definition";
+	public static final String DIRECTORY = "directory";
 	public static final String IN = ".in";
 	public static final String ERR = ".err";
 	public static final String OUT = ".out";
