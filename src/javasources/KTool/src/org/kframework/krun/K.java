@@ -5,7 +5,7 @@ import org.kframework.kil.Configuration;
 import org.kframework.kil.Definition;
 import org.kframework.krun.api.SearchType;
 import org.kframework.utils.ColorUtil;
-import org.kframework.utils.file.KPaths;
+import org.kframework.utils.file.FileUtil;
 
 import java.awt.*;
 import java.io.File;

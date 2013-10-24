@@ -93,6 +93,7 @@ public class CommandlineOptions {
 		addOptionE(OptionBuilder.withLongOpt("log-io").hasArg().withArgName("[on|off]").withDescription("Make the IO server create logs. (Default: disabled).").create());
 		addOptionE(OptionBuilder.withLongOpt("debug").withDescription("Run an execution in debug mode.").create());
 		addOptionE(OptionBuilder.withLongOpt("debug-gui").withDescription("Run an execution in debug mode with graphical interface.").create());
+		addOptionE(OptionBuilder.withLongOpt("debug-info").withDescription("Provide debugging information.").create());
 		addOptionE(OptionBuilder.withLongOpt("trace").withDescription("Turn on maude trace.").create());
 		addOptionE(OptionBuilder.withLongOpt("profile").withDescription("Turn on maude profiler.").create());
 		addOptionE(OptionBuilder.withLongOpt("ltlmc").hasArg().withArgName("file/string").withDescription("Specify the formula for model checking through a file or at commandline.").create());

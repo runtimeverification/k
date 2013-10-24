@@ -3,6 +3,8 @@ package org.kframework.utils.errorsystem;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.text.WordUtils;
+
 public class KException {
 	protected ExceptionType type;
 	protected KExceptionGroup exceptionGroup;
@@ -56,7 +58,7 @@ public class KException {
 
 	@Override
 	public String toString() {
-		return "[" + types.get(type) + "] " + labels.get(exceptionGroup) + ": " + message
+		return WordUtils.wrap("[" + types.get(type) + "] " + labels.get(exceptionGroup) + ": " + message, 78)
 			+ (filename == null ? "" : "\n\tFile: " + filename)
 			+ (location == null ? "" : "\n\tLocation: " + location)
 			+ (compilationPhase == null ? "" : "\n\tCompilation Phase: " + compilationPhase);

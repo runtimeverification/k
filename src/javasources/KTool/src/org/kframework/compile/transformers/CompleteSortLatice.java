@@ -103,7 +103,9 @@ public class CompleteSortLatice extends CopyOnWriteTransformer {
 
             sort2_loop:
                 for (String sort2 : node.getAllSorts()) {
-                    if (context.isSubsortedEq(sort2, sort1) || context.isListSort(sort2)) {
+                    // TODO(AndreiS): deal with equivalent sorts
+                    if (context.isSubsortedEq(sort2, sort1) || context.isSubsortedEq(sort1, sort2)
+                            || context.isListSort(sort2)) {
                         continue;
                     }
 

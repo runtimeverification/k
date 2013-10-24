@@ -12,6 +12,8 @@ import org.kframework.utils.general.GlobalSettings;
 import java.io.File;
 import java.io.IOException;
 
+import static org.apache.commons.io.FileUtils.copyFile;
+
 public class DocumentationBackend extends BasicBackend {
 	public DocumentationBackend(Stopwatch sw, Context context) {
 		super(sw, context);
@@ -30,9 +32,9 @@ public class DocumentationBackend extends BasicBackend {
 
 		FileUtil.saveInFile(GlobalSettings.outputDir + fileSep + FileUtil.stripExtension(GlobalSettings.mainFile.getName()) + ".html", html);
 		String kHTMLStyle = KPaths.getKBase(false) + fileSep + "include" + fileSep + "html" + fileSep + GlobalSettings.style;
-		final String toFile = GlobalSettings.outputDir + fileSep + GlobalSettings.style;
-		FileUtil.copyFile(kHTMLStyle, toFile);
-	}
+        final File toFile = new File(GlobalSettings.outputDir, GlobalSettings.style);
+        copyFile(new File(kHTMLStyle), toFile);
+    }
 
 	@Override
 	public String getDefaultStep() {

@@ -9,7 +9,7 @@ import org.kframework.ktest.Configuration;
 public class Execution {
 	public static int POOL_SIZE = initPoolSize(Runtime.getRuntime()
 			.availableProcessors());
-	public static ThreadPoolExecutor tpe = getThreadPoolExecutor();
+	private static ThreadPoolExecutor tpe = getThreadPoolExecutor();
 
 	private static ThreadPoolExecutor getThreadPoolExecutor() {
 		return (ThreadPoolExecutor) Executors

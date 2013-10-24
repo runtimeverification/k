@@ -37,7 +37,7 @@ public class KRunner {
 	private boolean _noServer;
 	protected Context context;
 
-	public KRunner(String[] args, Context context) throws Exception, IOException {
+	public KRunner(String[] args, Context context) throws Exception {
 		this.context = context;
 		// boolean append = true;
 		// parser.accepts("suppressio");
@@ -129,20 +129,9 @@ public class KRunner {
 		return maude.returnValue;
 	}
 
-	public static int main(String[] args, Context context) throws IOException, Exception {
+	public static int main(String[] args, Context context) throws Exception {
 		KRunner runner = new KRunner(args, context);
-		// try {
 		return runner.run();
-		// } catch (IOException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// } catch (InterruptedException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// } catch (Exception e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
 	}
 
 	void usageError() throws IOException {

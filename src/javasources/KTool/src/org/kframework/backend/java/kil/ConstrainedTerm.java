@@ -110,6 +110,13 @@ public class ConstrainedTerm extends Term {
         return term;
     }
 
+    /**
+     * Unifies this constrained term with another constrained term.
+     * 
+     * @param constrainedTerm
+     *            another constrained term
+     * @return solutions to the unification problem
+     */
     public Collection<SymbolicConstraint> unify(ConstrainedTerm constrainedTerm) {
         if (!term.kind.equals(constrainedTerm.term.kind)) {
             return Collections.emptyList();
@@ -122,7 +129,7 @@ public class ConstrainedTerm extends Term {
             return Collections.emptyList();
         }
 
-        Collection<SymbolicConstraint> constraints = new ArrayList<SymbolicConstraint>();
+        Collection<SymbolicConstraint> solutions = new ArrayList<SymbolicConstraint>();
         for (SymbolicConstraint solution : unificationConstraint.getMultiConstraints()) {
             if (SymbolicConstraint.TruthValue.FALSE == solution.addAll(constrainedTerm.lookups)) continue;
             if (SymbolicConstraint.TruthValue.FALSE == solution.addAll(constrainedTerm.constraint)) continue;
@@ -137,10 +144,10 @@ public class ConstrainedTerm extends Term {
                 continue;
             }
 
-            constraints.add(solution);
+            solutions.add(solution);
         }
 
-        return constraints;
+        return solutions;
     }
 
     @Override

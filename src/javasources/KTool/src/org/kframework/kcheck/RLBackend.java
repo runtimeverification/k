@@ -96,6 +96,9 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 
+import static org.apache.commons.io.FileUtils.deleteDirectory;
+import static org.apache.commons.io.FileUtils.moveDirectory;
+
 public class RLBackend extends BasicBackend implements Backend {
 
 	public static int idx = 5000;
@@ -205,12 +208,11 @@ public class RLBackend extends BasicBackend implements Backend {
 		K.main_module = mainModule;
 		K.init(context);
 		// delete temporary krun directory
-		org.kframework.krun.FileUtil.deleteDirectory(new File(K.krunDir));
+		deleteDirectory(new File(K.krunDir));
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
 				try {
-					org.kframework.krun.FileUtil.renameFolder(K.krunTempDir,
-							K.krunDir);
+                    moveDirectory(new File(K.krunTempDir), new File(K.krunDir));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

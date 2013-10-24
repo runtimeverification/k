@@ -204,11 +204,11 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     private boolean isNormal;
     
     /**
-     * Stores special equalities whose left-hand-sides are just variables.
+     * Stores special equalities whose left-hand sides are just variables.
      * <p>
      * <br>
-     * Invariant: {@code Variable}s on the left-hand-sides do not occur in the
-     * {@code Term}s on the right-hand-sides.
+     * Invariant: {@code Variable}s on the left-hand sides do not occur in the
+     * {@code Term}s on the right-hand sides.
      */
     private final Map<Variable, Term> substitution = new HashMap<Variable, Term>();
     private TruthValue truthValue;
@@ -228,9 +228,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      * Adds a new equality to this symbolic constraint.
      * 
      * @param leftHandSide
-     *            the left-hand-side of the equality
+     *            the left-hand side of the equality
      * @param rightHandSide
-     *            the right-hand-side of the equality
+     *            the right-hand side of the equality
      * @return the truth value of this symbolic constraint after including the
      *         new equality
      */
@@ -495,6 +495,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         return truthValue == TruthValue.UNKNOWN;
     }
 
+    /**
+     * TODO(YilongL):Gets solutions to this symbolic constraint?
+     * @return
+     */
     public Collection<SymbolicConstraint> getMultiConstraints() {
         if (!unifier.multiConstraints.isEmpty()) {
             assert unifier.multiConstraints.size() == 1;
@@ -510,16 +514,27 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         }
     }
 
+    /**
+     * Simplifies this symbolic constraint as much as possible. Decomposes large
+     * equalities into small ones using unification.
+     * 
+     * @return the truth value of this symbolic constraint after simplification
+     */
     public TruthValue simplify() {
-        boolean change;
+        boolean change; // specifies if the equalities have been further
+                         // simplified in the last iteration
+        
         label: do {
             change = false;
             normalize();
 
-            for (int i = 0; i < equalities.size(); ++i) {
-                Equality equality = equalities.get(i);
+            Iterator<Equality> iter = equalities.iterator();
+            while (iter.hasNext()) {
+                Equality equality = iter.next();
                 if (!equality.leftHandSide.isSymbolic() && !equality.rightHandSide.isSymbolic()) {
-                    equalities.remove(i);
+                    // if both sides of the equality could be further
+                    // decomposed, unify them
+                    iter.remove();
                     if (!unifier.unify(equality)) {
                         truthValue = TruthValue.FALSE;
                         break label;
@@ -758,6 +773,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Refers to a computation which never completes successfully.
+     */
     public static class Bottom extends Term {
         public Bottom() {
             super(Kind.BOTTOM);

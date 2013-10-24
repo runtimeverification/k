@@ -8,12 +8,11 @@ import java.util.Comparator;
 
 public class KTestOptionsParser {
 
-	Options options;
-	HelpFormatter help;
+	private final Options options;
 	// For printing help messages: options = optionsStandard + optionsExperimental
-	private Options optionsStandard;
-	private Options optionsExperimental;
-	private ArrayList<Option> optionList = new ArrayList<Option>();
+	private final Options optionsStandard;
+	private final Options optionsExperimental;
+	private final ArrayList<Option> optionList = new ArrayList<Option>();
 
 	// wrapper function to add an option
 	private void addOptionWrapper(Option opt, boolean isStandard) {
@@ -38,7 +37,6 @@ public class KTestOptionsParser {
 
 	public KTestOptionsParser() {
 		options = new Options();
-		help = new HelpFormatter();
 		optionsStandard = new Options();
 		optionsExperimental = new Options();
 		
@@ -71,14 +69,6 @@ public class KTestOptionsParser {
 		//helpExit(help, Configuration.KTEST, options);
 		return null;
 	}
-
-	public Options getOptions() {
-		return options;
-	}
-
-	public HelpFormatter getHelp() {
-		return help;
-	}	
 
 	public Options getOptionsStandard() {
 		return optionsStandard;
