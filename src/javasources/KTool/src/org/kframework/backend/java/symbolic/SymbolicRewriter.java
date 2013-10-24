@@ -287,12 +287,14 @@ public class SymbolicRewriter {
             for (ConstrainedTerm term : queue) {
                 // First, rewrite using the structural strategy, only looking
                 // for one matching rule.
+                boolean transition = false;
                 strategy = new StructuralStrategy(GlobalSettings.transition);
                 computeRewriteStep(term,1);
                 // If we could not match a structural rule, then we will seach
                 // the space of possible transitions, matching all possible
                 // rules that are marked as transitions.
                 if (results.isEmpty()) {
+                  transition = true;
                   strategy = new TransitionStrategy(GlobalSettings.transition);
                   computeRewriteStep(term);
                 }
@@ -307,7 +309,8 @@ public class SymbolicRewriter {
                 }
 
                 for (int i = 0; getTransition(i) != null; ++i) {
-                    if (visited.add(getTransition(i))) {
+                    // Only add a state to visited if it is a transition
+                    if (!transition || visited.add(getTransition(i))) {
                         nextQueue.add(getTransition(i));
                     }
                 }
