@@ -716,25 +716,6 @@ public class Main {
     public static void execute_Krun(String cmds[]) {
         Context context = new Context();
         K.init(context);
-        /*
-        // delete temporary krun directory
-        try {
-            FileUtil.deleteDirectory(new File(K.krunDir));
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
-        */
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            public void run() {
-                try {
-                    //FileUtil.renameFolder(K.krunTempDir, K.krunDir);
-                    deleteDirectory(new File(K.krunTempDir));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
 
         CommandlineOptions cmd_options = new CommandlineOptions();
         CommandLine cmd = cmd_options.parse(cmds);
@@ -742,6 +723,18 @@ public class Main {
             printKRunUsageS(cmd_options);
          /* printKRunUsageE(cmd_options); */ /* TODO: Switch to this when the user has tried to use an experimental option. */
             System.exit(1);
+        }
+
+        if (!cmd.hasOption("debug-info")) {
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                public void run() {
+                    try {
+                        deleteDirectory(new File(K.krunTempDir));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
         }
 
         // set verbose
