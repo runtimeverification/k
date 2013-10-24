@@ -90,7 +90,7 @@ public class KTest {
             String msg = "You have to provide an input file, which is either a K definition (*.k) or a test configuration (*.xml).";
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
         } else if (remainingArgs.length > 1) {
-            String msg = "You cannot provide more than one argument. You may miss a dash '-' or a quote '\"' for options.";
+            String msg = "You cannot provide more than one argument. You may miss a dash '-' or a quote '\"' for the options.";
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
         } else {
             input = remainingArgs[0];
@@ -101,7 +101,7 @@ public class KTest {
             Configuration.SINGLE_DEF_MODE = true;
             // Invalid: --directory
             if (cmd.hasOption(Configuration.DIRECTORY_OPTION)) {
-                String msg = "You cannot use --" + Configuration.DIRECTORY_OPTION + " option when a single K definition is given: " + Configuration.KDEF;
+                String msg = "You cannot use the --" + Configuration.DIRECTORY_OPTION + " option when a single K definition is given: " + Configuration.KDEF;
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
             }
             // Optional: --programs
@@ -129,13 +129,13 @@ public class KTest {
             if (Configuration.EXTENSIONS != null) {
                 // --extensions without --programs
                 if (Configuration.PGM_DIR == null) {
-                    String msg = "The given --extensions option has no effect. You might miss --programs option.";
+                    String msg = "The given --extensions option has no effect. You might miss a --programs option.";
                     GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
                 }
             } else {
                 // --programs without --extensions
                 if (Configuration.PGM_DIR != null) {
-                    String msg = "You have to provide a list of extensions by using --" + Configuration.EXTENSIONS_OPTION + " option, when --" + Configuration.PROGRAMS_OPTION + " is given.";
+                    String msg = "You have to provide a list of extensions by using a --" + Configuration.EXTENSIONS_OPTION + " option, when the --" + Configuration.PROGRAMS_OPTION + " is given.";
                     GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
                 }
             }
@@ -168,12 +168,12 @@ public class KTest {
             }
             // Invalid: --extensions
             if (cmd.hasOption(Configuration.EXTENSIONS_OPTION)) {
-                String msg = "You cannot use --" + Configuration.EXTENSIONS_OPTION + " option when a test configuration is given: " + Configuration.CONFIG;
+                String msg = "You cannot use the --" + Configuration.EXTENSIONS_OPTION + " option when a test configuration is given: " + Configuration.CONFIG;
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
             }
             // Invalid: --exclude
             if (cmd.hasOption(Configuration.EXCLUDE_OPTION)) {
-                String msg = "You cannot use --" + Configuration.EXCLUDE_OPTION + " option when a test configuration is given: " + Configuration.CONFIG;
+                String msg = "You cannot use the --" + Configuration.EXCLUDE_OPTION + " option when a test configuration is given: " + Configuration.CONFIG;
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
             }
         } else {
@@ -329,9 +329,10 @@ public class KTest {
                 }
                 // sanitize
                 if (oldKompileOption != null && !oldKompileOption.equals(kompileOption)) {
-                    String msg = "There are multiple K definition with different kompile options whose directory is: " + directory + "\n";
-                    msg += "            definition=" + oldDefinition + ", kompile-option=" + oldKompileOption + "\n";
-                    msg += "            definition=" +    definition + ", kompile-option=" +    kompileOption;
+                    String msg = "There are multiple K definitions with different kompile options where they share the same directory: " + directory + ". ";
+                    msg += "Two different options are ";
+                    msg += "<test definition=" + oldDefinition + "; kompile-option=" + oldKompileOption + " /> and ";
+                    msg += "<test definition=" +    definition + "; kompile-option=" +    kompileOption + " />.";
                     GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
                 } else {
                     kompileOptionM.put(directory, kompileOption);
@@ -339,6 +340,7 @@ public class KTest {
                 }
             }
         } catch (Exception e) {
+            e.printStackTrace();
             String msg = "File.getCanonicalPath() failed.";
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
         }
