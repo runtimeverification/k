@@ -1,6 +1,7 @@
 package org.kframework.backend.java.builtins;
 
 import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
 
 
 /**
@@ -8,12 +9,12 @@ import org.kframework.backend.java.kil.Term;
  */
 public class TermEquality {
 
-    public static BoolToken eq(Term term1, Term term2) {
+    public static BoolToken eq(Term term1, Term term2, TermContext context) {
         checkArguments(term1, term2);
         return term1.equals(term2) ? BoolToken.TRUE : BoolToken.FALSE;
     }
 
-    public static BoolToken ne(Term term1, Term term2) {
+    public static BoolToken ne(Term term1, Term term2, TermContext context) {
         checkArguments(term1, term2);
         return term1.equals(term2) ? BoolToken.FALSE : BoolToken.TRUE;
     }
