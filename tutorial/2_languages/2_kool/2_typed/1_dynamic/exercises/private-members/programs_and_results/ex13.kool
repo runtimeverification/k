@@ -1,0 +1,34 @@
+// This example works differently than in Java.  Unlike in Java, the get()
+// method called by f() is dynamically dispatched here.  That is because
+// we do not do any static analysis in dynamically typed KOOL.
+
+class B {
+    private int x = 3;
+    void B() {
+	x = 5;
+    }
+    private int get() {
+	return x;
+    }
+    int f() {
+      return get();
+    }
+}
+
+class A extends B {
+    private int x = 7;
+    void A() {
+        super.B();
+	x = 10;
+    }
+    int get(){
+	return x;
+    }
+}
+
+class Main {
+  void Main() {
+    print("The next should be printed:\n");
+    print((new A()).f());
+  }
+}
