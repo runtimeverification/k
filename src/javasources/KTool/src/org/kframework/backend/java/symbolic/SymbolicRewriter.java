@@ -18,7 +18,6 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.strategies.Strategy;
 import org.kframework.backend.java.strategies.NullStrategy;
-import org.kframework.backend.java.strategies.PriorityStrategy;
 import org.kframework.backend.java.strategies.StructuralStrategy;
 import org.kframework.backend.java.strategies.TransitionStrategy;
 import org.kframework.backend.java.util.LookupCell;
