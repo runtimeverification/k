@@ -1,0 +1,17 @@
+class A {
+  private int x = 7;
+
+  void A() {
+    x = 10;
+  }
+
+  int getx() {
+    return x;
+  }
+}
+
+class Main {
+  void Main() {
+    print((new A()).getx());
+  }
+}

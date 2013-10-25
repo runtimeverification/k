@@ -528,13 +528,13 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             change = false;
             normalize();
 
-            Iterator<Equality> iter = equalities.iterator();
-            while (iter.hasNext()) {
-                Equality equality = iter.next();
+            for (int i = 0; i < equalities.size(); ++i) {
+                Equality equality = equalities.get(i);
                 if (!equality.leftHandSide.isSymbolic() && !equality.rightHandSide.isSymbolic()) {
                     // if both sides of the equality could be further
                     // decomposed, unify them
-                    iter.remove();
+                    equalities.remove(i);
+                    i--;
                     if (!unifier.unify(equality)) {
                         truthValue = TruthValue.FALSE;
                         break label;

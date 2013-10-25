@@ -1,0 +1,20 @@
+class B {
+    int x = 3;
+    void B() {
+	x = 5;
+    }
+}
+
+class A extends B {
+    private int x = 7;
+    void A() {
+	x = 10;
+    }
+}
+
+class Main {
+  void Main() {
+    print("Next should not be printed, because x is private in A\nand we do not default to B.\n");
+    print((new A()).x);
+  }
+}

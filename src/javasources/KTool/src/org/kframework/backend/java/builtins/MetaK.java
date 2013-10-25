@@ -34,7 +34,7 @@ public class MetaK {
         return term.substitute(Variable.getFreshSubstitution(variables), context);
     }
 
-    public static BuiltinSet variables(Term term) {
+    public static BuiltinSet variables(Term term, TermContext context) {
         Set<Term> metaVariables = new HashSet<Term>();
         for (Variable variable : term.variableSet()) {
             metaVariables.add(new MetaVariable(variable));

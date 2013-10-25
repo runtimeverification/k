@@ -18,7 +18,7 @@ module K-FUNCTIONAL-VISITOR
    * if IfLabel(K',,IFList) holds then replace K' with VisitLabel(K',,VisitList)
    * otherwise recurse on the children of K'.
    */
-  syntax K ::= "#visit" "(" K "," KLabel "," KList "," KLabel "," KList ")"   [function]
+  syntax K ::= "#visit" "(" K "," KLabel "," KList "," KLabel "," KList ")"   [function, hook(Visitor:visit)]
 
   /*
    * Particular forms of #visit (default argument KList is .KList, default

@@ -2,6 +2,7 @@ package org.kframework.backend.java.builtins;
 
 
 import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.util.GappaPrinter;
 import org.kframework.backend.java.util.GappaServer;
 import org.kframework.krun.K;
@@ -83,7 +84,7 @@ public class BuiltinFloatOperations {
     }
 */
 
-    public static BoolToken gt(Term term1, Term term2) {
+    public static BoolToken gt(Term term1, Term term2, TermContext context) {
         if (!K.smt.equals("gappa")) return null;
         String gterm1 = GappaPrinter.toGappaGround(term1);
         String gterm2 = GappaPrinter.toGappaGround(term2);
@@ -95,7 +96,7 @@ public class BuiltinFloatOperations {
         return null;
     }
 
-    public static BoolToken ge(Term term1, Term term2) {
+    public static BoolToken ge(Term term1, Term term2, TermContext context) {
         if (!K.smt.equals("gappa")) return null;
         String gterm1 = GappaPrinter.toGappaGround(term1);
         String gterm2 = GappaPrinter.toGappaGround(term2);
@@ -107,7 +108,7 @@ public class BuiltinFloatOperations {
         return null;
     }
 
-    public static BoolToken lt(Term term1, Term term2) {
+    public static BoolToken lt(Term term1, Term term2, TermContext context) {
         if (!K.smt.equals("gappa")) return null;
         String gterm1 = GappaPrinter.toGappaGround(term1);
         String gterm2 = GappaPrinter.toGappaGround(term2);
@@ -119,7 +120,7 @@ public class BuiltinFloatOperations {
         return null;
     }
 
-    public static BoolToken le(Term term1, Term term2) {
+    public static BoolToken le(Term term1, Term term2, TermContext context) {
         if (!K.smt.equals("gappa")) return null;
         String gterm1 = GappaPrinter.toGappaGround(term1);
         String gterm2 = GappaPrinter.toGappaGround(term2);

@@ -1,11 +1,6 @@
 package org.kframework.backend.java.builtins;
 
-import org.kframework.backend.java.kil.Definition;
-import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.KSequence;
-import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.symbolic.BuiltinFunction;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -18,105 +13,105 @@ import java.nio.charset.CharacterCodingException;
 
 public class BuiltinIOOperations {
 
-    public static FileSystem fs() {
-        return BuiltinFunction.context().fileSystem();
+    public static FileSystem fs(TermContext context) {
+        return context.fileSystem();
     }
 
-    public static Definition definition() {
-        return BuiltinFunction.context().definition();
+    public static Definition definition(TermContext context) {
+        return context.definition();
     }
 
-    public static Context context() {
-        return BuiltinFunction.context().definition().context();
+    public static Context context(TermContext context) {
+        return context.definition().context();
     }
 
-    public static Term open(StringToken term1, StringToken term2) {
+    public static Term open(StringToken term1, StringToken term2, TermContext context) {
         try {
-            return IntToken.of(fs().open(term1.stringValue(), term2.stringValue()));
+            return IntToken.of(fs(context).open(term1.stringValue(), term2.stringValue()));
         } catch (IOException e) {
-            return processIOException(e.getMessage());
+            return processIOException(e.getMessage(), context);
         }
     }
 
-    public static Term tell(IntToken term) {
+    public static Term tell(IntToken term, TermContext context) {
         try {
-            return IntToken.of(fs().get(term.longValue()).tell());
+            return IntToken.of(fs(context).get(term.longValue()).tell());
         } catch (IOException e) {
-            return processIOException(e.getMessage());
+            return processIOException(e.getMessage(), context);
         }
     }
 
-    public static Term getc(IntToken term) {
+    public static Term getc(IntToken term, TermContext context) {
         try {
-            return IntToken.of(fs().get(term.longValue()).getc() & 0xff);
+            return IntToken.of(fs(context).get(term.longValue()).getc() & 0xff);
         } catch (IOException e) {
-            return processIOException(e.getMessage());
+            return processIOException(e.getMessage(), context);
         } catch (RuntimeException e) {
             throw e;
         }
     }
 
-    public static Term read(IntToken term1, IntToken term2) {
+    public static Term read(IntToken term1, IntToken term2, TermContext context) {
         try {
-            return StringToken.of(fs().get(term1.longValue()).read(term2.intValue()));
+            return StringToken.of(fs(context).get(term1.longValue()).read(term2.intValue()));
         } catch (IOException e) {
-            return processIOException(e.getMessage());
+            return processIOException(e.getMessage(), context);
         }
     }
 
-    public static Term close(IntToken term) {
+    public static Term close(IntToken term, TermContext context) {
         try {
-            fs().close(term.longValue());
+            fs(context).close(term.longValue());
             return new KSequence();
         } catch (IOException e) {
-            return processIOException(e.getMessage());
+            return processIOException(e.getMessage(), context);
         }
     }
 
-    public static Term seek(IntToken term1, IntToken term2) {
+    public static Term seek(IntToken term1, IntToken term2, TermContext context) {
         try {
-            fs().get(term1.longValue()).seek(term2.longValue());
+            fs(context).get(term1.longValue()).seek(term2.longValue());
             return new KSequence();
         } catch (IOException e) {
-            return processIOException(e.getMessage());
+            return processIOException(e.getMessage(), context);
         }
     }
 
-    public static Term putc(IntToken term1, IntToken term2) {
+    public static Term putc(IntToken term1, IntToken term2, TermContext context) {
         try {
-            fs().get(term1.longValue()).putc(term2.unsignedByteValue());
+            fs(context).get(term1.longValue()).putc(term2.unsignedByteValue());
             return new KSequence();
         } catch (IOException e) {
-            return processIOException(e.getMessage());
+            return processIOException(e.getMessage(), context);
         }
     }
 
-    public static Term write(IntToken term1, StringToken term2) {
+    public static Term write(IntToken term1, StringToken term2, TermContext context) {
         try {
-            fs().get(term1.longValue()).write(term2.byteArrayValue());
+            fs(context).get(term1.longValue()).write(term2.byteArrayValue());
             return new KSequence();
         } catch (CharacterCodingException e) {
             throw new IllegalArgumentException(e);
         } catch (IOException e) {
-            return processIOException(e.getMessage());
+            return processIOException(e.getMessage(), context);
         }
     }
 
-    public static Term parse(StringToken term1, StringToken term2) {
+    public static Term parse(StringToken term1, StringToken term2, TermContext context) {
         try {
             RunProcess rp = new RunProcess();
-            org.kframework.kil.Term kast = rp.runParser(K.parser, term1.stringValue(), true, term2.stringValue(), context());
-            Term term = Term.of(kast, definition());
-            term = term.evaluate(BuiltinFunction.context());
+            org.kframework.kil.Term kast = rp.runParser(K.parser, term1.stringValue(), true, term2.stringValue(), context(context));
+            Term term = Term.of(kast, definition(context));
+            term = term.evaluate(context);
             return term;
         } catch (TransformerException e) {
-            return processIOException("noparse");
+            return processIOException("noparse", context);
         }
     }
 
-    private static KItem processIOException(String errno) {
+    private static KItem processIOException(String errno, TermContext context) {
         String klabelString = "'#" + errno;
-        Definition def = BuiltinFunction.context().definition();
+        Definition def = context.definition();
         KLabelConstant klabel = KLabelConstant.of(klabelString, def.context());
         assert def.kLabels().contains(klabel) : "No KLabel in definition for errno '" + errno + "'";
         return new KItem(klabel, new KList(), def.context());

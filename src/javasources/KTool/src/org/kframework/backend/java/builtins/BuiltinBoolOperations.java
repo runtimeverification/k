@@ -1,6 +1,8 @@
 package org.kframework.backend.java.builtins;
 
 
+import org.kframework.backend.java.kil.TermContext;
+
 /**
  * Table of {@code public static} methods on builtin boolean values.
  *
@@ -8,31 +10,31 @@ package org.kframework.backend.java.builtins;
  */
 public class BuiltinBoolOperations {
 
-    public static BoolToken not(BoolToken term) {
+    public static BoolToken not(BoolToken term, TermContext context) {
         return BoolToken.of(!term.booleanValue());
     }
 
-    public static BoolToken and(BoolToken term1, BoolToken term2) {
+    public static BoolToken and(BoolToken term1, BoolToken term2, TermContext context) {
         return BoolToken.of(term1.booleanValue() && term2.booleanValue());
     }
 
-    public static BoolToken or(BoolToken term1, BoolToken term2) {
+    public static BoolToken or(BoolToken term1, BoolToken term2, TermContext context) {
         return BoolToken.of(term1.booleanValue() || term2.booleanValue());
     }
 
-    public static BoolToken xor(BoolToken term1, BoolToken term2) {
+    public static BoolToken xor(BoolToken term1, BoolToken term2, TermContext context) {
         return BoolToken.of(term1.booleanValue() ^ term2.booleanValue());
     }
 
-    public static BoolToken implies(BoolToken term1, BoolToken term2) {
+    public static BoolToken implies(BoolToken term1, BoolToken term2, TermContext context) {
         return BoolToken.of(!term1.booleanValue() || term2.booleanValue());
     }
 
-    public static BoolToken eq(BoolToken term1, BoolToken term2) {
+    public static BoolToken eq(BoolToken term1, BoolToken term2, TermContext context) {
         return BoolToken.of(term1.booleanValue() == term2.booleanValue());
     }
 
-    public static BoolToken ne(BoolToken term1, BoolToken term2) {
+    public static BoolToken ne(BoolToken term1, BoolToken term2, TermContext context) {
         return BoolToken.of(term1.booleanValue() != term2.booleanValue());
     }
 

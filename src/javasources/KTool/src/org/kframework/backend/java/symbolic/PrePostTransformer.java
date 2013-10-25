@@ -397,7 +397,7 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
     }
 
     protected class DoneTransforming extends ASTNode {
-        DoneTransforming(ASTNode node) {
+        public DoneTransforming(ASTNode node) {
             contents = node;
         }
 
