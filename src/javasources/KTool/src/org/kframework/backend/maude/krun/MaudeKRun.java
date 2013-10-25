@@ -33,10 +33,7 @@ import edu.uci.ics.jung.io.graphml.GraphMLReader2;
 import edu.uci.ics.jung.io.graphml.HyperEdgeMetadata;
 import edu.uci.ics.jung.io.graphml.NodeMetadata;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.ArrayList;
@@ -50,7 +47,6 @@ import java.util.Set;
 
 public class MaudeKRun implements KRun {
 	protected Context context;
-    private FileReader processedMaudeOutputReader;
 
     public MaudeKRun(Context context) {
 		this.context = context;
@@ -161,8 +157,7 @@ public class MaudeKRun implements KRun {
 
 
 	private KRunResult<KRunState> parseRunResult() throws IOException {
-		File input = new File(K.maude_output);
-		Document doc = XmlUtil.readXML(input);
+		Document doc = XmlUtil.readXMLFromFile(K.maude_output);
 		NodeList list;
 		Node nod;
 		list = doc.getElementsByTagName("result");
@@ -471,31 +466,25 @@ public class MaudeKRun implements KRun {
 			return result;
 		} catch (Exception e) {
 			throw new RuntimeException("Pretty-printer threw exception", e);
-		} finally {
-            try {
-                if (processedMaudeOutputReader != null) {
-                    processedMaudeOutputReader.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+		}
 	}
 
 	private DirectedGraph<KRunState, Transition> parseSearchGraph() throws Exception {
-		Scanner scanner = new Scanner(new File(K.maude_output));
-		scanner.useDelimiter("\n");
-		FileWriter writer = new FileWriter(K.processed_maude_output);
-		while (scanner.hasNext()) {
-			String text = scanner.next();
-			text = text.replaceAll("<data key=\"((rule)|(term))\">", "<data key=\"$1\"><![CDATA[");
-			text = text.replaceAll("</data>", "]]></data>");
-			writer.write(text, 0, text.length());
-		}
-		writer.close();
-        scanner.close();
+        try (
+            Scanner scanner = new Scanner(new File(K.maude_output));
+            Writer writer = new OutputStreamWriter(new BufferedOutputStream(
+                new FileOutputStream(K.processed_maude_output)))) {
 
-		Document doc = XmlUtil.readXML(new File(K.processed_maude_output));
+            scanner.useDelimiter("\n");
+            while (scanner.hasNext()) {
+                String text = scanner.next();
+                text = text.replaceAll("<data key=\"((rule)|(term))\">", "<data key=\"$1\"><![CDATA[");
+                text = text.replaceAll("</data>", "]]></data>");
+                writer.write(text, 0, text.length());
+            }
+        }
+
+		Document doc = XmlUtil.readXMLFromFile(K.processed_maude_output);
 		NodeList list;
 		Node nod;
 		list = doc.getElementsByTagName("graphml");
@@ -512,7 +501,7 @@ public class MaudeKRun implements KRun {
 		Transformer<NodeMetadata, KRunState> nodeTransformer = new Transformer<NodeMetadata, KRunState>() {
 			public KRunState transform(NodeMetadata n) {
 				String nodeXmlString = n.getProperty("term");
-				Element xmlTerm = XmlUtil.readXML(nodeXmlString).getDocumentElement();
+				Element xmlTerm = XmlUtil.readXMLFromString(nodeXmlString).getDocumentElement();
 				KRunState ret = parseElement(xmlTerm, context);
 				String id = n.getId();
 				id = id.substring(1);
@@ -523,7 +512,7 @@ public class MaudeKRun implements KRun {
 		Transformer<EdgeMetadata, Transition> edgeTransformer = new Transformer<EdgeMetadata, Transition>() {
 			public Transition transform(EdgeMetadata e) {
 				String edgeXmlString = e.getProperty("rule");
-				Element elem = XmlUtil.readXML(edgeXmlString).getDocumentElement();
+				Element elem = XmlUtil.readXMLFromString(edgeXmlString).getDocumentElement();
 				String metadataAttribute = elem.getAttribute("metadata");
 				Pattern pattern = Pattern.compile("([a-z]*)=\\((.*?)\\)");
 				Matcher matcher = pattern.matcher(metadataAttribute);
@@ -558,17 +547,18 @@ public class MaudeKRun implements KRun {
 			}
 		};
 
-        processedMaudeOutputReader = new FileReader(K.processed_maude_output);
-		GraphMLReader2<DirectedGraph<KRunState, Transition>, KRunState, Transition> graphmlParser
-            = new GraphMLReader2<DirectedGraph<KRunState, Transition>, KRunState, Transition>(processedMaudeOutputReader, graphTransformer, nodeTransformer,
-            edgeTransformer, hyperEdgeTransformer);
-		return graphmlParser.readGraph();
+        try (Reader processedMaudeOutputReader
+                 = new BufferedReader(new FileReader(K.processed_maude_output))) {
+            GraphMLReader2<DirectedGraph<KRunState, Transition>, KRunState, Transition> graphmlParser
+                = new GraphMLReader2<>(processedMaudeOutputReader, graphTransformer, nodeTransformer,
+                edgeTransformer, hyperEdgeTransformer);
+            return graphmlParser.readGraph();
+        }
 	}
 
 	private List<SearchResult> parseSearchResults(Rule pattern, RuleCompilerSteps compilationInfo) {
 		List<SearchResult> results = new ArrayList<SearchResult>();
-		File input = new File(K.maude_output);
-		Document doc = XmlUtil.readXML(input);
+		Document doc = XmlUtil.readXMLFromFile(K.maude_output);
 		NodeList list;
 		Node nod;
 		list = doc.getElementsByTagName("search-result");
@@ -631,8 +621,7 @@ public class MaudeKRun implements KRun {
     }
 
 	private KRunProofResult<DirectedGraph<KRunState, Transition>> parseModelCheckResult() {
-		File input = new File(K.maude_output);
-		Document doc = XmlUtil.readXML(input);
+		Document doc = XmlUtil.readXMLFromFile(K.maude_output);
 		NodeList list;
 		Node nod;
 		list = doc.getElementsByTagName("result");

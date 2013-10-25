@@ -10,7 +10,6 @@ import org.kframework.krun.ioserver.filesystem.portable.PortableFileSystem;
 import org.kframework.utils.BinaryLoader;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.util.logging.Logger;
 
 public class MainServer implements Runnable {
@@ -40,12 +39,12 @@ public class MainServer implements Runnable {
 	public static void main(String[] args) throws Exception {
 		Context context = new Context();
 		context.kompiled = new File(args[1]);
-		Definition javaDef = (Definition) BinaryLoader.fromBinary(
-			new FileInputStream(context.kompiled.getCanonicalPath() + "/defx-maude.bin"));
-		javaDef = new FlattenModules(context).compile(javaDef, null);
-		javaDef = (Definition) javaDef.accept(new AddTopCellConfig(context));
-		// This is essential for generating maude
-		javaDef.preprocess(context);
+        Definition javaDef = (Definition)
+            BinaryLoader.load(context.kompiled.getCanonicalPath() + "/defx-maude.bin");
+        javaDef = new FlattenModules(context).compile(javaDef, null);
+        javaDef = (Definition) javaDef.accept(new AddTopCellConfig(context));
+        // This is essential for generating maude
+        javaDef.preprocess(context);
         K.parser = args[2];
 		Logger logger = java.util.logging.Logger.getLogger("KRunner");
 		logger.setUseParentHandlers(false);

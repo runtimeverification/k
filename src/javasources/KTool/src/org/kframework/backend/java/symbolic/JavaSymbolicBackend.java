@@ -56,11 +56,8 @@ import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.general.GlobalSettings;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 
 
 /**
@@ -78,12 +75,7 @@ public class JavaSymbolicBackend extends BasicBackend {
 
         @Override
         public ASTNode transform(Definition node) throws TransformerException {
-            try {
-                File file = new File(context.dotk, "defx-java.bin");
-                BinaryLoader.toBinary(node, new BufferedOutputStream(new FileOutputStream(file)));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            BinaryLoader.save(new File(context.dotk, "defx-java.bin").toString(), node);
 
             return node;
         }
@@ -97,16 +89,9 @@ public class JavaSymbolicBackend extends BasicBackend {
 
     @Override
     public Definition lastStep(Definition javaDef) {
-        try {
-            OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(
-                    new File(context.dotk, JavaSymbolicBackend.DEFINITION_FILENAME)));
-            BinaryLoader.toBinary(
-                    new KILtoBackendJavaKILTransformer(context).transformDefinition(javaDef),
-                    outputStream);
-            outputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        BinaryLoader.save(
+            new File(context.dotk, JavaSymbolicBackend.DEFINITION_FILENAME).toString(), new KILtoBackendJavaKILTransformer(context).transformDefinition(javaDef)
+        );
 
         return javaDef;
     }

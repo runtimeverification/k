@@ -1,7 +1,6 @@
 package org.kframework.parser;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
@@ -68,7 +67,7 @@ public class DefinitionLoader {
 
 		String extension = FileUtil.getExtension(mainFile.getAbsolutePath());
 		if (".bin".equals(extension)) {
-            javaDef = (Definition) BinaryLoader.fromBinary(new FileInputStream(canoFile));
+            javaDef = (Definition) BinaryLoader.load(canoFile.toString());
 
 			if (GlobalSettings.verbose)
 				Stopwatch.sw.printIntermediate("Load definition from binary");
@@ -81,7 +80,8 @@ public class DefinitionLoader {
 		} else {
 			javaDef = parseDefinition(mainFile, lang, autoinclude, context);
 
-			BinaryLoader.toBinary(javaDef, new FileOutputStream(context.dotk.getAbsolutePath() + "/defx-" + (GlobalSettings.javaBackend ? "java" : "maude") + ".bin"));
+			BinaryLoader.save(context.dotk.getAbsolutePath()
+                + "/defx-" + (GlobalSettings.javaBackend ? "java" : "maude") + ".bin", javaDef);
 		}
 		return javaDef;
 	}

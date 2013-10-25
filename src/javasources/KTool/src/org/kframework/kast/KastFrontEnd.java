@@ -1,7 +1,6 @@
 package org.kframework.kast;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 
@@ -142,7 +141,7 @@ public class KastFrontEnd {
 							defXml.getAbsolutePath()));
 				}
 
-				javaDef = (org.kframework.kil.Definition) BinaryLoader.fromBinary(new FileInputStream(defXml));
+                javaDef = (org.kframework.kil.Definition) BinaryLoader.load(defXml.toString());
 				javaDef = new FlattenModules(context).compile(javaDef, null);
 				javaDef = (org.kframework.kil.Definition) javaDef.accept(new AddTopCellConfig(
                         context));

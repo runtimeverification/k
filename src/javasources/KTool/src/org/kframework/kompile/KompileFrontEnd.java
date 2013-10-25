@@ -2,20 +2,16 @@ package org.kframework.kompile;
 
 import org.apache.commons.cli.CommandLine;
 import org.kframework.backend.Backend;
-import org.kframework.backend.doc.DocumentationBackend;
 import org.kframework.backend.html.HtmlBackend;
 import org.kframework.backend.java.symbolic.JavaSymbolicBackend;
-import org.kframework.backend.kil.KExpBackend;
 import org.kframework.backend.latex.LatexBackend;
 import org.kframework.backend.latex.PdfBackend;
-import org.kframework.backend.maude.MaudeBackend;
 import org.kframework.backend.maude.KompileBackend;
 import org.kframework.backend.symbolic.SymbolicBackend;
 import org.kframework.backend.unparser.UnparserBackend;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.MetaK;
-import org.kframework.kcheck.RLBackend;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.CountNodesVisitor;
@@ -33,9 +29,6 @@ import org.kframework.utils.OptionComparator;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -267,13 +260,8 @@ public class KompileFrontEnd {
 
 		if (backend != null) {
 			genericCompile(mainFile, lang, backend, step, context);
-			try {
-				BinaryLoader.toBinary(cmd, new FileOutputStream(
-                        context.dotk.getAbsolutePath() + "/compile-options.bin"));
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			}
-		}
+            BinaryLoader.save(context.dotk.getAbsolutePath() + "/compile-options.bin", cmd);
+        }
 
 		verbose(cmd, context);
 	}
@@ -315,13 +303,11 @@ public class KompileFrontEnd {
 				javaDef = (Definition) e.getResult();
 			}
 
-			BinaryLoader.toBinary(
-                    MetaK.getConfiguration(javaDef, context),
-                    new FileOutputStream(context.dotk.getAbsolutePath() + "/configuration.bin"));
+			BinaryLoader.save(
+                context.dotk.getAbsolutePath() + "/configuration.bin", MetaK.getConfiguration(javaDef, context)
+            );
 
 			backend.run(javaDef);
-		} catch (IOException e) {
-			e.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

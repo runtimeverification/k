@@ -5,17 +5,18 @@ import java.io.*;
 public class ResourceExtractor {
 
 	public static void Extract(String resource, File destination) throws IOException {
-		BufferedInputStream k2 = new BufferedInputStream(Object.class.getResourceAsStream(resource));
-		BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(destination));
+		try (
+            InputStream k2 = new BufferedInputStream(Object.class.getResourceAsStream(resource));
+		    OutputStream os = new BufferedOutputStream(new FileOutputStream(destination))) {
 
-		while (true) {
-			int reader = k2.read();
-			if (reader >= 0) {
-				os.write(reader);
-			} else
-				break;
-		}
-		os.close();
+            while (true) {
+                int reader = k2.read();
+                if (reader >= 0) {
+                    os.write(reader);
+                } else
+                    break;
+            }
+        }
 	}
 
 	public static void ExtractDefSDF(File basePath) throws IOException {

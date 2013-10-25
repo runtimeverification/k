@@ -1,11 +1,6 @@
 package org.kframework.main;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 
 public class Kpp {
 
@@ -21,17 +16,15 @@ public class Kpp {
             if (!f.exists())
                 System.err.println("File not found.");
 
-            try {
-                Kpp.codeClean(new BufferedReader(new FileReader(f)), System.out);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
+            try (BufferedReader input = new BufferedReader(new FileReader(f))) {
+                Kpp.codeClean(input, System.out);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 	}
 
-	public static void codeClean(BufferedReader input, OutputStream out) throws IOException {
+	public static void codeClean(Reader input, OutputStream out) throws IOException {
 		int ch, previous = 0;
 		State state = State.CODE;
 

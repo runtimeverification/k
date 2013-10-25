@@ -4,10 +4,7 @@ import java.awt.*;
 import java.io.BufferedReader;
 import java.io.Console;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FilenameFilter;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -439,11 +436,9 @@ public class Main {
 
                     if (!cmd.hasOption("output")) {
                         Error.silentReport("Did not specify an output file. Cannot print output-mode binary to\nstandard out. Saving to .k/krun/krun_output");
-                        BinaryLoader.toBinary(res, new FileOutputStream(
-                                K.krun_output));
+                        BinaryLoader.save(K.krun_output, res);
                     } else {
-                        BinaryLoader.toBinary(res, new FileOutputStream(
-                                K.output));
+                        BinaryLoader.save(K.output, res);
                     }
                 } else {
                     Error.report("binary output mode is not supported by search and model\nchecking");
@@ -664,19 +659,16 @@ public class Main {
 
                     DirectedGraph<KRunState, Transition> savedGraph = null;
                     if(cmd.hasOption("save")) {
-                        BinaryLoader.toBinary(debugger.getGraph(), new FileOutputStream(new File(cmd.getOptionValue("save")).getCanonicalPath()));
+                        BinaryLoader.save(new File(cmd.getOptionValue("save")).getCanonicalPath(), debugger.getGraph()
+                        );
                         System.out.println("File successfully saved.");
                     }
                     if (cmd.hasOption("load")) {
-                        try {
-                            savedGraph = (DirectedGraph<KRunState, Transition>) BinaryLoader.fromBinary(new FileInputStream(cmd.getOptionValue("load")));
-                            krun = new MaudeKRun(context);
-                            debugger = krun.debug(savedGraph);
-                            debugger.setCurrentState(1);
-                            System.out.println("File successfully loaded.");
-                        } catch (FileNotFoundException e) {
-                            System.out.println("There is no such file, please try again.");
-                        }
+                        savedGraph = (DirectedGraph<KRunState, Transition>) BinaryLoader.load(cmd.getOptionValue("load"));
+                        krun = new MaudeKRun(context);
+                        debugger = krun.debug(savedGraph);
+                        debugger.setCurrentState(1);
+                        System.out.println("File successfully loaded.");
                     }
                     if (cmd.hasOption("read")) {
                         try {
@@ -1049,9 +1041,7 @@ public class Main {
                 String path = K.compiled_def + "/defx-" + K.backend + ".bin";
                 Definition javaDef;
                 if (new File(path).exists()) {
-                    javaDef = (Definition) BinaryLoader
-                            .fromBinary(new FileInputStream(K.compiled_def
-                                    + "/defx-" + K.backend + ".bin"));
+                    javaDef = (Definition) BinaryLoader.load(K.compiled_def + "/defx-" + K.backend + ".bin");
                 } else {
                     GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
                             KExceptionGroup.CRITICAL,
@@ -1089,17 +1079,13 @@ public class Main {
                 if (GlobalSettings.verbose)
                     sw.printIntermediate("Importing tables");
 
-                org.kframework.kil.Configuration configKompiled = (org.kframework.kil.Configuration) BinaryLoader
-                        .fromBinary(new FileInputStream(K.compiled_def
-                                + "/configuration.bin"));
+                K.kompiled_cfg = (org.kframework.kil.Configuration)
+                    BinaryLoader.load(K.compiled_def + "/configuration.bin");
 
-                CommandLine compileOptions = (CommandLine) BinaryLoader
-                        .fromBinary(new FileInputStream(K.compiled_def +
-                                "/compile-options.bin"));
+                CommandLine compileOptions = (CommandLine)
+                    BinaryLoader.load(K.compiled_def + "/compile-options.bin");
                 if (compileOptions.hasOption("sortCells"))
                     GlobalSettings.sortedCells = true;
-
-                K.kompiled_cfg = configKompiled;
 
                 if (GlobalSettings.verbose)
                     sw.printIntermediate("Reading configuration from binary");

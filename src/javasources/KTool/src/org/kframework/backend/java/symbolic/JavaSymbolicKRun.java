@@ -1,7 +1,6 @@
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.ConstrainedTerm;
@@ -20,12 +19,7 @@ import org.kframework.krun.api.io.FileSystem;
 import org.kframework.krun.ioserver.filesystem.portable.PortableFileSystem;
 import org.kframework.utils.BinaryLoader;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
 import java.util.List;
 import java.util.Map;
@@ -48,23 +42,16 @@ public class JavaSymbolicKRun implements KRun {
 
     public JavaSymbolicKRun(Context context) throws KRunExecutionException {
         /* context is unused for directory paths; the actual context is de-serialized */
-        try {
-            /* load the definition from a binary file */
-            InputStream inputStream = new BufferedInputStream(new FileInputStream(new File(
-                    context.kompiled,
-                    JavaSymbolicBackend.DEFINITION_FILENAME)));
-            definition = (Definition) BinaryLoader.fromBinary(inputStream);
-            inputStream.close();
+        /* load the definition from a binary file */
+        definition = (Definition) BinaryLoader.load(
+            new File(context.kompiled, JavaSymbolicBackend.DEFINITION_FILENAME).toString());
 
-            if (definition == null) {
-                throw new KRunExecutionException("cannot load definition");
-            }
-
-            /* initialize the builtin function table */
-            BuiltinFunction.init(definition);
-        } catch (IOException e) {
-            throw new KRunExecutionException(e);
+        if (definition == null) {
+            throw new KRunExecutionException("cannot load definition");
         }
+
+        /* initialize the builtin function table */
+        BuiltinFunction.init(definition);
 
         this.context = definition.context();
         this.context.kompiled = context.kompiled;

@@ -1,9 +1,6 @@
 package org.kframework.kagreg;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -199,9 +196,9 @@ public class KagregFrontEnd {
 		indenter.endLine();
 		indenter.write("endmodule");
 		indenter.endLine();
-		
-		BufferedWriter writer = new BufferedWriter(new FileWriter("result.k"));
-		writer.write(indenter.toString());
-		writer.close();
+
+        try (Writer writer = new BufferedWriter(new FileWriter("result.k"))) {
+            writer.write(indenter.toString());
+        }
 	}
 }

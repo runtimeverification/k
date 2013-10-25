@@ -7,6 +7,7 @@ import org.kframework.utils.general.GlobalSettings;
 
 import java.io.*;
 import java.util.List;
+import java.util.Properties;
 
 import static org.apache.commons.io.FileUtils.copyFile;
 import static org.apache.commons.io.FileUtils.readFileToString;
@@ -100,6 +101,15 @@ public class FileUtil {
         } else {
             dot = aux.lastIndexOf(extensionSeparator);
             return aux.substring(dot + 1);
+        }
+    }
+
+    /**
+     * Loads the properties from the given file into the given Properties object.
+     */
+    public static void loadProperties(Properties properties, String fileName) throws IOException {
+        try (FileInputStream inStream = new FileInputStream(fileName)) {
+            properties.load(inStream);
         }
     }
 }
