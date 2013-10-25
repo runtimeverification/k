@@ -806,12 +806,11 @@
     </all-programs>
   </test>
   
-<!--
   <test
-      definition="dist/examples/java_rewrite_engine/tutorial/1_k/4_imp++/imp.k"
-      programs="dist/tutorial/1_k/2_imp dist/tutorial/1_k/4_imp++"
-      extensions="imp"
-      exclude="lesson_1/spawn.imp"
+      definition="samples/java_rewrite_engine/tutorial/1_k/4_imp++/imp.k"
+      programs="tutorial/1_k/2_imp tutorial/1_k/4_imp++"
+      extension="imp"
+      exclude="lesson_1/spawn.imp io"
       results="tests/tutorial/1_k/4_imp++/lesson_5"
       >
     <kompile-option name="-backend" value="java" />
@@ -822,6 +821,7 @@
     </all-programs>
   </test>
 
+<!--
   <test
       definition="dist/examples/java_rewrite_engine/simple/untyped/simple-untyped.k"
       programs="dist/tutorial/2_languages/1_simple/1_untyped/programs"
