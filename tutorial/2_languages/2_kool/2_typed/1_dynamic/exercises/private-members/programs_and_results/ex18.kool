@@ -1,0 +1,28 @@
+// This example does not work in untyped KOOL
+
+class A {
+  private int x = 7;
+  void A() {
+  }
+  void init(A a){
+    x=a.x;   // this is OK when init called on a B instance, too
+  }
+  int get() {
+    return x;
+  }
+}
+
+class B extends A {
+  private int x = 17;
+  void B() {
+  }
+}
+
+class Main {
+  void Main() {
+    A a = new A();
+    B b = new B();
+    a.init(b);
+    print(a.get());
+  }
+}

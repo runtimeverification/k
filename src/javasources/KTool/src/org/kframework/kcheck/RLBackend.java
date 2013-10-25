@@ -1,7 +1,6 @@
 package org.kframework.kcheck;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -138,11 +137,8 @@ public class RLBackend extends BasicBackend implements Backend {
 		Properties specialMaudeHooks = new Properties();
 		Properties maudeHooks = new Properties();
 		try {
-			maudeHooks.load(new FileInputStream(propPath
-					+ "MaudeHooksMap.properties"));
-
-			specialMaudeHooks.load(new FileInputStream(propPath
-					+ "SpecialMaudeHooks.properties"));
+            FileUtil.loadProperties(maudeHooks, propPath + "MaudeHooksMap.properties");
+            FileUtil.loadProperties(specialMaudeHooks, propPath + "SpecialMaudeHooks.properties");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -245,9 +241,8 @@ public class RLBackend extends BasicBackend implements Backend {
 		 * initial context *
 		 ********************/
 		// setup initial context
-		K.kompiled_cfg = (org.kframework.kil.Configuration) BinaryLoader
-				.fromBinary(new FileInputStream(K.compiled_def
-						+ "/configuration.bin"));
+        K.kompiled_cfg = (org.kframework.kil.Configuration)
+            BinaryLoader.load(K.compiled_def + "/configuration.bin");
 		if (PGM != null) {
 			RunProcess rp = new RunProcess();
 			try {

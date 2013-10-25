@@ -29,9 +29,8 @@ public class KompileBackend extends BasicBackend {
 		Properties specialMaudeHooks = new Properties();
 		Properties maudeHooks = new Properties();
 		try {
-			maudeHooks.load(new FileInputStream(propPath + "MaudeHooksMap.properties"));
-
-			specialMaudeHooks.load(new FileInputStream(propPath + "SpecialMaudeHooks.properties"));
+            FileUtil.loadProperties(maudeHooks, propPath + "MaudeHooksMap.properties");
+            FileUtil.loadProperties(specialMaudeHooks, propPath + "SpecialMaudeHooks.properties");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

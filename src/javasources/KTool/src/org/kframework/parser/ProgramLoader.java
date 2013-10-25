@@ -1,7 +1,6 @@
 package org.kframework.parser;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 
 import org.kframework.compile.transformers.AddEmptyLists;
@@ -95,10 +94,6 @@ public class ProgramLoader {
 	 * Print maudified program to standard output.
 	 * 
 	 * Save it in kompiled cache under pgm.maude.
-	 * 
-	 * @param indentationOptions
-	 * @param prettyPrint
-	 * @param nextline
 	 */
 	public static Term processPgm(String content, String filename, Definition def, String startSymbol,
             Context context, GlobalSettings.ParserType whatParser) throws TransformerException {
@@ -133,7 +128,7 @@ public class ProgramLoader {
 				}
 				out = ((Rule) out).getBody();
 			} else if (whatParser == GlobalSettings.ParserType.BINARY) {
-				out = (org.kframework.kil.Cell) BinaryLoader.fromBinary(new FileInputStream(filename));
+                out = (org.kframework.kil.Cell) BinaryLoader.load(filename);
 			} else {
 				out = loadPgmAst(content, filename, startSymbol, context);
 			}

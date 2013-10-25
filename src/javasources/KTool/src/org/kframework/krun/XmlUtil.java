@@ -24,23 +24,21 @@ import java.util.List;
 
 public class XmlUtil {
 
-	// FUNCTION to read DOM Tree from File
-	public static Document readXML(File f) {
-		try {
-            FileInputStream stream = new FileInputStream(f);
-            try {
-                return readXML(new InputSource(stream));
-            } finally {
-                stream.close();
-            }
-        } catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
+	public static Document readXMLFromFile(String fileName) {
+        try (FileInputStream byteStream = new FileInputStream(fileName)) {
+            return readXML(new InputSource(byteStream));
+        }catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-	public static Document readXML(String s) {
-		return readXML(new InputSource(new StringReader(s)));
-	}
+    public static Document readXMLFromString(String s) {
+        try (Reader reader = new StringReader(s)) {
+            return readXML(new InputSource(reader));
+        }catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 	public static Document readXML(InputSource input) {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -48,17 +46,12 @@ public class XmlUtil {
 		try {
 			DocumentBuilder builder = dbf.newDocumentBuilder();
 			doc = builder.parse(input);
-		} catch (ParserConfigurationException e) {
-			// e.printStackTrace();
-			Error.report("Error while reading XML:" + e.getMessage());
-		} catch (SAXException e) {
-			// e.printStackTrace();
-			Error.report("Error while reading XML:" + e.getMessage());
-		} catch (IOException e) {
-			// e.printStackTrace();
+		} catch (ParserConfigurationException | IOException | SAXException e) {
+			e.printStackTrace();
+
 			Error.report("Error while reading XML:" + e.getMessage());
 		}
-		return doc;
+        return doc;
 	}
 
 	public static ArrayList<Element> getChildElements(Node node) {
@@ -77,17 +70,15 @@ public class XmlUtil {
 
 	// write the XML document to disk
 	public static void serializeXML(Node doc, String fileName) {
-		FileOutputStream f = null;
-		try {
-			Source xmlSource = new DOMSource(doc);
-			f = new FileOutputStream(fileName);
-			Result result = new StreamResult(f);
-			TransformerFactory transformerFactory = TransformerFactory.newInstance();
-			Transformer transformer = transformerFactory.newTransformer();
-			// transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "1");
-			transformer.transform(xmlSource, result);
+        Source xmlSource = new DOMSource(doc);
+		try (FileOutputStream outStream = new FileOutputStream(fileName)) {
+            Result result = new StreamResult(outStream);
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            // transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "1");
+            transformer.transform(xmlSource, result);
 		} catch (TransformerFactoryConfigurationError factoryError) {
 			// factoryError.printStackTrace();
 			Error.report("Error creating TransformerFactory:" + factoryError.getMessage());
@@ -97,15 +88,6 @@ public class XmlUtil {
 		} catch (IOException ioException) {
 			// ioException.printStackTrace();
 			Error.report("Error while serialize XML:" + ioException.getMessage());
-		}
-		finally{
-			if (f != null) {
-				try {
-					f.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
 		}
 	}
 

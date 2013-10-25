@@ -1,12 +1,6 @@
 package org.kframework.ktest.tests;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.StringWriter;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -204,14 +198,15 @@ public class Test implements Comparable<Test> {
     }
 
     private String getFileAsStringOrNull(String file) {
-        String fileAsString = null;
-        if (file != null)
-            try {
-                fileAsString = Task.readString(new FileInputStream(file));
-            } catch (FileNotFoundException e) {
+        if (file != null) {
+            try (FileInputStream in = new FileInputStream(file)) {
+                return Task.readString(in);
+            }
+            catch (IOException e) {
                 e.printStackTrace();
             }
-        return fileAsString;
+        }
+        return null;
     }
 
     private String searchOutputFile(String resultsFolder2, String name) {
@@ -683,16 +678,8 @@ public class Test implements Comparable<Test> {
         String reportPath = Configuration.JR + Configuration.FILE_SEPARATOR
                 + getReportFilename();
         new File(Configuration.JR).mkdirs();
-        try {
-
-            File repFile = new File(reportPath);
-            if (!repFile.exists())
-                repFile.createNewFile();
-
-            FileWriter fstream = new FileWriter(reportPath);
-            BufferedWriter out = new BufferedWriter(fstream);
-            out.write(format(doc));
-            out.close();
+        try (Writer writer = new BufferedWriter(new FileWriter(reportPath))) {
+            writer.write(format(doc));
         } catch (IOException e) {
             e.printStackTrace();
         }

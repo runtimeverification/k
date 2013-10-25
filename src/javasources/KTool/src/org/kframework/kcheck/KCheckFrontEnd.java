@@ -1,8 +1,6 @@
 package org.kframework.kcheck;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.apache.commons.cli.CommandLine;
@@ -110,14 +108,9 @@ public class KCheckFrontEnd {
 			context.dotk.mkdirs();
 
 			genericCompile(mainFile, lang, backend, null, context);
-			try {
-				BinaryLoader.toBinary(cmd, new FileOutputStream(
-                        context.dotk.getAbsolutePath() + "/compile-options.bin"));
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-			}
+        BinaryLoader.save(context.dotk.getAbsolutePath() + "/compile-options.bin", cmd);
 
-			verbose(cmd, context);
+        verbose(cmd, context);
 	}
 	private static void verbose(CommandLine cmd, Context context) {
 		if (GlobalSettings.verbose) {
@@ -154,13 +147,11 @@ public class KCheckFrontEnd {
 				javaDef = (Definition) e.getResult();
 			}
 
-			BinaryLoader.toBinary(
-                    MetaK.getConfiguration(javaDef, context),
-                    new FileOutputStream(context.dotk.getAbsolutePath() + "/configuration.bin"));
+            BinaryLoader.save(
+                context.dotk.getAbsolutePath() + "/configuration.bin", MetaK.getConfiguration(javaDef, context)
+            );
 
 			backend.run(javaDef);
-		} catch (IOException e) {
-			e.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

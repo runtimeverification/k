@@ -7,6 +7,7 @@ import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Collection;
 import org.kframework.kil.LiterateComment.LiterateCommentType;
 import org.kframework.kil.loader.*;
+import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.awt.*;
@@ -633,13 +634,13 @@ public class HTMLFilter extends BackendFilter {
 	
 	private void loadProperties() {
 		try {
-		    Latex2HTMLzero.load(new FileInputStream(includePath + "Latex2HTMLzero.properties"));
+            FileUtil.loadProperties(Latex2HTMLzero, includePath + "Latex2HTMLzero.properties");
 		} catch (IOException e) {
 			System.out.println("error loading " + includePath + "Latex2HTMLzero.properties");
 		}
 		
 		try {
-		    Latex2HTMLone.load(new FileInputStream(includePath + "Latex2HTMLone.properties"));
+            FileUtil.loadProperties(Latex2HTMLone, includePath + "Latex2HTMLone.properties");
 		} catch (IOException e) {
 			System.out.println("error loading Latex2HTMLone.properties");
 		}
