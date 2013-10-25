@@ -55,6 +55,7 @@ public class KTestOptionsParser {
         addOptionS(OptionBuilder.withLongOpt(Configuration.TIMEOUT_OPTION).hasArg().withArgName("num").withDescription("The testing time limit (seconds).").create());
 
 		addOptionE(OptionBuilder.withLongOpt("config").withDescription("Just for backward compatibility.").create());
+		addOptionE(OptionBuilder.withLongOpt("dry").withDescription("Dry run: print out the commend to be executed without actual execution.").create());
 	}
 	
 	// parse the command line arguments

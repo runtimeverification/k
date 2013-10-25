@@ -36,6 +36,9 @@ public class Configuration {
 	public static String RESULTS_FOLDER = null; //USER_DIR;
 	public static List<String> EXCLUDE_PROGRAMS = null;
 
+	public static boolean DRY_RUN = false;
+	public static final String DRY_RUN_OPTION = "dry";
+
 	// XML tag and attribute names used for parsing config.xml
 	// Some of these constants are used as ktest option names (see below)
 	public static final String PARSER_HOME = "parser-home";

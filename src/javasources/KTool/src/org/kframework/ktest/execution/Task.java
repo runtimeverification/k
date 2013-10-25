@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.regex.Pattern;
 
 import org.kframework.ktest.Configuration;
 
@@ -115,4 +116,16 @@ public class Task extends Thread {
 	public long getElapsed() {
 		return elapsed / 1000;
 	}
+
+    public String getCommand() {
+        String cmd = "";
+        for (String s : arguments) {
+            if (Pattern.compile("\\s").matcher(s).find()) {
+                cmd += "\"" + s + "\" ";
+            } else {
+                cmd += s + " ";
+            }
+        }
+        return cmd;
+    }
 }
