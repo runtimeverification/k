@@ -92,7 +92,7 @@ public abstract class BasicBackend implements Backend {
 		steps.add(new ResolveConfigurationAbstraction (context));
 		steps.add(new ResolveOpenCells(context));
 		steps.add(new ResolveRewrite(context));
-        steps.add(new CompileToBuiltins(context));
+//        steps.add(new CompileToBuiltins(context));
         steps.add(new CompileDataStructures(context));
 
 		if (GlobalSettings.sortedCells) {
