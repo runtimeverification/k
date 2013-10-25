@@ -19,6 +19,7 @@ import org.kframework.utils.general.GlobalSettings;
 import com.google.common.collect.ImmutableSet;
 
 import java.util.*;
+import java.util.List;
 import java.util.Map;
 
 public class MaudeFilter extends BackendFilter {
@@ -59,7 +60,7 @@ public class MaudeFilter extends BackendFilter {
           result.append("mod ");
           result.append(mod.getName());
           result.append(" is\n");
-
+          result.append(" including K-WRAPPERS-LABELS .\n");
           // TODO(AndreiS): move declaration of #token in a .maude file
           result.append("op #token : #String #String -> KLabel .\n");
 
@@ -686,42 +687,107 @@ public class MaudeFilter extends BackendFilter {
 	}
 
 	@Override
-	public void visit(DataStructureBuiltin dataStructure) {
-        result.append("_`(_`)(" + dataStructure.sort().type() + "2KLabel_(");
+    public void visit(DataStructureBuiltin dataStructure) {
+        if (dataStructure.isEmpty()) {
+            result.append("_`(_`)(" + dataStructure.sort().type() + "2KLabel_(");
+            result.append(DataStructureSort.LABELS.get(dataStructure.sort().type()).get(
+                    DataStructureSort.Label.UNIT));
+            result.append("), .KList)");
+            return;
+        }
 
-        if (!dataStructure.isEmpty()) {
+        boolean isFirst = true;
+        boolean leftEmpty = false;
+
+        List<Variable> variables = new ArrayList<>();
+        List<Term> restBaseTerms = new ArrayList<>(dataStructure.baseTerms());
+        Iterator<Term> iterator = restBaseTerms.iterator();
+        Term term;
+        while (iterator.hasNext()) {
+            term = iterator.next();
+            if (term instanceof Variable) {
+                if (term.getSort().equals(dataStructure.getSort())) {
+                    variables.add((Variable)term);
+                    iterator.remove();
+                    continue;
+                }
+            }
+            break;
+        }
+
+        if (variables.isEmpty()) {
+            if (dataStructure instanceof ListBuiltin) {
+                leftEmpty = ((ListBuiltin) dataStructure).elementsLeft().isEmpty();
+            } else if (dataStructure instanceof CollectionBuiltin) {
+                leftEmpty = ((CollectionBuiltin) dataStructure).elements().isEmpty();
+            } else {
+                assert (dataStructure instanceof MapBuiltin);
+                leftEmpty = ((MapBuiltin) dataStructure).elements().isEmpty();
+            }
+        }
+
+        if (!leftEmpty) {
+            isFirst = false;
+            result.append("_`(_`)(" + dataStructure.sort().type() + "2KLabel_(");
+
             result.append(DataStructureSort.LABELS.get(dataStructure.sort().type()).get(
                     DataStructureSort.Label.CONSTRUCTOR));
-			result.append("(");
+            result.append("(");
 
             result.append(DataStructureSort.LABELS.get(dataStructure.sort().type()).get(
                     DataStructureSort.Label.UNIT));
             if (dataStructure instanceof ListBuiltin) {
-                visitListBuiltinElements((ListBuiltin) dataStructure);
+                visitListBuiltinElements(((ListBuiltin) dataStructure).elementsLeft());
             } else if (dataStructure instanceof CollectionBuiltin) {
                 visitCollectionElements((CollectionBuiltin) dataStructure);
             } else {
                 assert dataStructure instanceof MapBuiltin;
-
                 visitMapElements((MapBuiltin) dataStructure);
             }
 
-            if (dataStructure.isLHSView() && dataStructure.hasViewBase() && !(dataStructure instanceof ListBuiltin)) {
+            for (Variable variable : variables) {
                 result.append(", ");
-                Variable variable = new Variable(
-                        dataStructure.viewBase().getName(),
-                        dataStructure.sort().type());
-                variable.accept(this);
+                result.append(variable.getName());
+                result.append(":");
+                result.append(context.dataStructureSortOf(variable.getSort()).type());
             }
+            result.append(")");
+            result.append("), .KList)");
+        }
+//            if (dataStructure.isLHSView() && dataStructure.hasViewBase() && !(dataStructure instanceof ListBuiltin)) {
+//                result.append(", ");
+//                Variable variable = new Variable(
+//                        dataStructure.viewBase().getName(),
+//                        dataStructure.sort().type());
+//                variable.accept(this);
+//            }
 
-			result.append(")");
-        } else {
-            result.append(DataStructureSort.LABELS.get(dataStructure.sort().type()).get(
-                    DataStructureSort.Label.UNIT));
+
+        for(Term baseTerm : restBaseTerms) {
+            if (! isFirst) {
+                result.append(" +" + dataStructure.getSort() + " ");
+            } else isFirst = false;
+            baseTerm.accept(this);
         }
 
-        result.append("), .KList)");
-	}
+        if (dataStructure instanceof ListBuiltin && !((ListBuiltin)dataStructure).elementsRight().isEmpty()) {
+            if (! isFirst) {
+                result.append(" +" + dataStructure.getSort() + " ");
+            }
+            result.append("_`(_`)(" + dataStructure.sort().type() + "2KLabel_(");
+
+            result.append(DataStructureSort.LABELS.get(dataStructure.sort().type()).get(
+                    DataStructureSort.Label.CONSTRUCTOR));
+            result.append("(");
+
+            result.append(DataStructureSort.LABELS.get(dataStructure.sort().type()).get(
+                    DataStructureSort.Label.UNIT));
+            visitListBuiltinElements(((ListBuiltin) dataStructure).elementsRight());
+            result.append(")");
+            result.append("), .KList)");
+        }
+
+    }
 
     private void visitCollectionElements(CollectionBuiltin collection) {
         for (Term term : collection.elements()) {
@@ -734,38 +800,11 @@ public class MaudeFilter extends BackendFilter {
         }
     }
 
-    public void visitListBuiltinElements(ListBuiltin listBuiltin) {
+    public void visitListBuiltinElements(java.util.Collection<Term> listBuiltin) {
         // append lhs elements
-        for (Term term : listBuiltin.elementsLeft()) {
+        for (Term term : listBuiltin) {
             result.append(", ");
-            result.append(DataStructureSort.LABELS.get(listBuiltin.sort().type()).get(
-                    DataStructureSort.Label.ELEMENT));
-            result.append("(");
-            term.accept(this);
-            result.append(")");
-        }
-
-        // append base elements
-        for (Term term : listBuiltin.baseTerms()) {
-            result.append(", ");
-            if (term instanceof  Variable) {
-                Variable variable = new Variable(
-                        listBuiltin.viewBase().getName(),
-                        listBuiltin.sort().type());
-                variable.accept(this);
-            } else {
-                result.append(DataStructureSort.LABELS.get(listBuiltin.sort().type()).get(
-                        DataStructureSort.Label.ELEMENT));
-                result.append("(");
-                    term.accept(this);
-                    result.append(")");
-            }
-        }
-
-        // append rhs elements
-        for (Term term : listBuiltin.elementsRight()) {
-            result.append(", ");
-            result.append(DataStructureSort.LABELS.get(listBuiltin.sort().type()).get(
+            result.append(DataStructureSort.LABELS.get(KSorts.LIST).get(
                     DataStructureSort.Label.ELEMENT));
             result.append("(");
             term.accept(this);
@@ -774,16 +813,16 @@ public class MaudeFilter extends BackendFilter {
     }
 
     private void visitMapElements(MapBuiltin map) {
-        for (Map.Entry<Term, Term> entry : map.elements().entrySet()) {
-            result.append(", ");
-            result.append(DataStructureSort.LABELS.get(map.sort().type()).get(
-                    DataStructureSort.Label.ELEMENT));
-            result.append("(");
-            entry.getKey().accept(this);
-            result.append(", ");
-            entry.getValue().accept(this);
-            result.append(")");
-        }
+            for (Map.Entry<Term, Term> entry : map.elements().entrySet()) {
+                result.append(", ");
+                result.append(DataStructureSort.LABELS.get(map.sort().type()).get(
+                        DataStructureSort.Label.ELEMENT));
+                result.append("(");
+                entry.getKey().accept(this);
+                result.append(", ");
+                entry.getValue().accept(this);
+                result.append(")");
+            }
     }
 
     @Override

@@ -38,10 +38,7 @@ import org.kframework.compile.transformers.ResolveRewrite;
 import org.kframework.compile.transformers.SetVariablesInferredSort;
 import org.kframework.compile.transformers.SortCells;
 import org.kframework.compile.transformers.StrictnessToContexts;
-import org.kframework.compile.utils.CheckVisitorStep;
-import org.kframework.compile.utils.CompileDataStructures;
-import org.kframework.compile.utils.CompilerSteps;
-import org.kframework.compile.utils.InitializeConfigurationStructure;
+import org.kframework.compile.utils.*;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.AddConsesVisitor;
@@ -161,6 +158,7 @@ public class JavaSymbolicBackend extends BasicBackend {
         steps.add(new ResolveRewrite(context));
 
         /* data structure related stuff */
+        steps.add(new CompileToBuiltins(context));
         steps.add(new CompileDataStructures(context));
         steps.add(new Cell2Map(context));
         steps.add(new DataStructureToLookupUpdate(context));

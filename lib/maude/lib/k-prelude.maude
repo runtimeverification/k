@@ -85,7 +85,7 @@ mod K-TECHNIQUE is
   op <_>_</_> : CellLabel K CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
   op <_>_</_> : CellLabel List CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
   op <_>_</_> : CellLabel Bag CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
-  op <_>_</_> : CellLabel Set CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
+  op <_>_</_> : CellLabel Set CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)]. 
   op <_>_</_> : CellLabel Map CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
 
   sort KCellSort .
@@ -114,6 +114,19 @@ mod K-WRAPPERS-LABELS is
   op Map2KLabel_ : Map -> KLabel [metadata "wrapper=(builtin)"] .
   op 'wrap-with : -> KLabel .
   op #_ : #Bool -> KLabel [metadata "wrapper=(builtin)"] .
+
+  op _+MySet_ : K K -> K [assoc] .
+  eq Set2KLabel(S1:Set)(.KList) +MySet Set2KLabel(S2:Set)(.KList) 
+   = Set2KLabel(S1:Set S2:Set)(.KList) . 
+
+  op _+MyList_ : K K -> K [assoc] .
+  eq List2KLabel(S1:List)(.KList) +MyList List2KLabel(S2:List)(.KList) 
+   = List2KLabel(S1:List S2:List)(.KList) . 
+
+  op _+MyMap_ : K K -> K [assoc] .
+  eq Map2KLabel(S1:Map)(.KList) +MyMap Map2KLabel(S2:Map)(.KList) 
+   = Map2KLabel(S1:Map S2:Map)(.KList) . 
+
 endm
 
 load builtins.maude

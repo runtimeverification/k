@@ -40,6 +40,8 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
     private enum Status { LHS, RHS, CONDITION }
 
     private Status status;
+    private String location;
+    private String filename;
 
     public CompileDataStructures(Context context) {
         super("Compile collections to internal K representation", context);
@@ -47,6 +49,10 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(Rule node) throws TransformerException {
+
+        location = node.getLocation();
+        filename = node.getFilename();
+
         assert node.getBody() instanceof Rewrite :
                 "expected rewrite at the top of rule\n" + node + "\n"
                 + "CompileDataStructures pass should be applied after ResolveRewrite pass";
@@ -134,8 +140,8 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
                         + "expected elements and at most one variable\n"
                         + node,
                         getName(),
-                        node.getFilename(),
-                        node.getLocation()));
+                        filename,
+                        location));
                 return null;
             }
             return dataStructure;
@@ -151,8 +157,8 @@ public class CompileDataStructures extends CopyOnWriteTransformer {
                         KException.KExceptionGroup.CRITICAL,
                         "unexpected non-empty KList applied to constant KLabel " + kLabelConstant,
                         getName(),
-                        node.getFilename(),
-                        node.getLocation()));
+                        filename,
+                        location));
                 return super.transform(node);
             }
         } else if (sort.type().equals(KSorts.MAP)) {
