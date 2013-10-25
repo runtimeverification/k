@@ -1055,7 +1055,7 @@ public class Main {
                 } else {
                     GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
                             KExceptionGroup.CRITICAL,
-                            "Could not find compiled definition for backend '" + K.backend + "'.  " +
+                            "Could not find compiled definition for backend '" + K.backend + "'.\n" +
                                     "Please ensure this backend has been kompiled."));
                     throw new AssertionError("unreachable");
                 }
