@@ -803,6 +803,7 @@
     <all-programs>
       <krun-option name="-backend" value="java" />
       <krun-option name="-smt" value="none" />
+      <krun-option name="-color" value="off" />
     </all-programs>
   </test>
   
