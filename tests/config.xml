@@ -14,28 +14,24 @@
       definition="tutorial/1_k/1_lambda/lesson_1/lambda.k"
       programs="tutorial/1_k/1_lambda/lesson_1"
       extension="lambda"
-      results="tutorial/1_k/1_lambda/lesson_1"
       />
   <test
       definition="tutorial/1_k/1_lambda/lesson_2/lambda.k"
       programs="tutorial/1_k/1_lambda/lesson_1"
       extension="lambda"
       exclude="omega.lambda"
-      results="tutorial/1_k/1_lambda/lesson_1"
       />
   <test
       definition="tutorial/1_k/1_lambda/lesson_3/lambda.k"
       programs="tutorial/1_k/1_lambda/lesson_1"
       extension="lambda"
       exclude="omega.lambda"
-      results="tutorial/1_k/1_lambda/lesson_1"
       />
   <test
       definition="tutorial/1_k/1_lambda/lesson_4/lambda.k"
       programs="tutorial/1_k/1_lambda/lesson_1"
       extension="lambda"
       exclude="omega.lambda"
-      results="tutorial/1_k/1_lambda/lesson_1"
       />
   <test
       definition="tutorial/1_k/1_lambda/lesson_5/lambda.k"
@@ -43,8 +39,6 @@
               tutorial/1_k/1_lambda/lesson_5"
       extension="lambda"
       exclude="omega.lambda"
-      results="tutorial/1_k/1_lambda/lesson_1
-              tutorial/1_k/1_lambda/lesson_5"
       />
   <test
       definition="tutorial/1_k/1_lambda/lesson_6/lambda.k"
@@ -53,34 +47,25 @@
               tutorial/1_k/1_lambda/lesson_6"
       extension="lambda"
       exclude="omega.lambda"
-      results="tutorial/1_k/1_lambda/lesson_1
-              tutorial/1_k/1_lambda/lesson_5
-              tutorial/1_k/1_lambda/lesson_6"
       />
   <test
       definition="tutorial/1_k/1_lambda/lesson_7/lambda.k"
       programs="tutorial/1_k/1_lambda"
       extension="lambda"
-      exclude="lesson_1/omega.lambda"
-      results="tutorial/1_k/1_lambda"
+      exclude="omega.lambda"
       />
   <test
       definition="tutorial/1_k/1_lambda/lesson_8/lambda.k"
       programs="tutorial/1_k/1_lambda"
       extension="lambda"
-      exclude="lesson_1/omega.lambda"
-      results="tutorial/1_k/1_lambda"
+      exclude="omega.lambda"
       />
   <test
       definition="tutorial/1_k/1_lambda/lesson_9/lambda.k"
       programs="tutorial/1_k/1_lambda"
       extension="lambda"
-      exclude="lesson_1/omega.lambda"
-      results="tests/tutorial/1_k/1_lambda/lesson_9" >
-      <all-programs>
-        <krun-option name="-output-mode" value="pretty" />
-      </all-programs>
-   </test>
+      exclude="omega.lambda"
+      />
 
 
 <!-- IMP -->
@@ -125,43 +110,37 @@
       definition="tutorial/1_k/3_lambda++/lesson_1/lambda.k"
       programs="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
       extension="lambda"
-      exclude="lesson_1/omega.lambda"
-      results="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
+      exclude="omega.lambda"
       />
   <test
       definition="tutorial/1_k/3_lambda++/lesson_2/lambda.k"
       programs="tutorial/1_k/1_lambda/lesson_1"
       extension="lambda"
       exclude="omega.lambda"
-      results="tutorial/1_k/1_lambda/lesson_1"
       />
   <test
       definition="tutorial/1_k/3_lambda++/lesson_3/lambda.k"
       programs="tutorial/1_k/1_lambda"
       extension="lambda"
-      exclude="lesson_1/omega.lambda"
-      results="tutorial/1_k/1_lambda"
+      exclude="omega.lambda"
       />
   <test
       definition="tutorial/1_k/3_lambda++/lesson_4/lambda.k"
       programs="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
       extension="lambda"
-      exclude="lesson_1/omega.lambda"
-      results="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
+      exclude="omega.lambda"
       />
   <test
       definition="tutorial/1_k/3_lambda++/lesson_5/lambda.k"
       programs="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
       extension="lambda"
-      exclude="lesson_1/omega.lambda"
-      results="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
+      exclude="omega.lambda"
       />
   <test
       definition="tutorial/1_k/3_lambda++/lesson_6/lambda.k"
       programs="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
       extension="lambda"
-      exclude="lesson_1/omega.lambda"
-      results="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
+      exclude="omega.lambda"
       />
 
 <!-- IMP++ -->

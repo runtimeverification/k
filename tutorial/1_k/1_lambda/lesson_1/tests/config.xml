@@ -1,0 +1,13 @@
+<tests>
+
+  <test
+    definition="lambda.k"
+    programs="."
+    extension="lambda"
+    results="." >
+    <all-programs>
+      <krun-option name="-output-mode" value="pretty" />
+    </all-programs>
+  </test>
+
+</tests>
