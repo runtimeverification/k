@@ -1,5 +1,5 @@
-// This does not work in Java, because the method get() called in f() is
-// not found.
+// This works in dynamically typed KOOL, but it is rejected by the static
+// semantics: the method get() called in f() is not is private at that time.
 
 class C {
     private int x = 1;

@@ -1,0 +1,30 @@
+class B {
+    private int x = 3;
+    void B() {
+	x = 5;
+    }
+    int get() {
+	return x;
+    }
+    int f() {
+      return get();
+    }
+}
+
+class A extends B {
+    private int x = 7;
+    void A() {
+        super.B();
+	x = 10;
+    }
+    private int get(){  // rejected staticaly
+	return x;
+    }
+}
+
+class Main {
+  void Main() {
+    print("The next should not be printed.\n");
+    print((new A()).f());
+  }
+}
