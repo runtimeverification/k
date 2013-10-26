@@ -20,7 +20,7 @@ import org.kframework.utils.StringUtil;
 
 public class Definition2SDF {
 
-	public static String getSdfForDefinition(Definition def, Context context) {
+	public static StringBuilder getSdfForDefinition(Definition def, Context context) {
 
 		StringBuilder sdf = new StringBuilder("module Integration\n\n");
 		sdf.append("imports Common\n");
@@ -248,6 +248,6 @@ public class Definition2SDF {
 				sdf.append("	" + StringUtil.escapeSortName(r.getSort().getName()) + " -/- " + r.getPattern() + "\n");
 		}
 
-		return sdf.toString();
+		return sdf;
 	}
 }

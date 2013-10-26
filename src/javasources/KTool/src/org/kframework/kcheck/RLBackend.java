@@ -146,11 +146,12 @@ public class RLBackend extends BasicBackend implements Backend {
 				maudeHooks, specialMaudeHooks, context);
 		javaDef.accept(builtinsFilter);
 		final String mainModule = javaDef.getMainModule();
-		String builtins = "mod " + mainModule + "-BUILTINS is\n"
-				+ " including " + mainModule + "-BASE .\n"
-				+ builtinsFilter.getResult() + "endm\n";
-		FileUtil.saveInFile(context.dotk.getAbsolutePath() + "/builtins.maude",
-				builtins);
+        StringBuilder builtins = new StringBuilder().append("mod ")
+            .append(mainModule).append("-BUILTINS is\n")
+            .append(" including ").append(mainModule).append("-BASE .\n")
+            .append(builtinsFilter.getResult()).append("endm\n");
+		FileUtil.save(context.dotk.getAbsolutePath() + "/builtins.maude",
+            builtins);
 		if (GlobalSettings.verbose)
 			sw.printIntermediate("Generating equations for hooks");
 		return super.firstStep(javaDef);
@@ -177,13 +178,12 @@ public class RLBackend extends BasicBackend implements Backend {
 		// String defFile = javaDef.getMainFile().replaceFirst("\\.[a-zA-Z]+$",
 		// "");
 
-		String main = load + "load \"base.maude\"\n"
-				+ "load \"builtins.maude\"\n" + "mod " + mainModule + " is \n"
-				+ "  including " + mainModule + "-BASE .\n" + "  including "
-				+ mainModule + "-BUILTINS .\n"
-				+ "endm\n";
-		FileUtil.saveInFile(
-				context.dotk.getAbsolutePath() + "/" + "main.maude", main);
+        StringBuilder main = new StringBuilder().append(load).append("load \"base.maude\"\n")
+            .append("load \"builtins.maude\"\n")
+            .append("mod ").append(mainModule).append(" is \n")
+            .append("  including ").append(mainModule).append("-BASE .\n")
+            .append("  including ").append(mainModule).append("-BUILTINS .\n").append("endm\n");
+		FileUtil.save(context.dotk.getAbsolutePath() + "/" + "main.maude", main);
 		context.kompiled = context.dotk;
 		/****************
 		 * end *
@@ -194,7 +194,7 @@ public class RLBackend extends BasicBackend implements Backend {
 
 		String unparsedText = unparserFilter.getResult();
 
-		FileUtil.saveInFile(".symbolic.k", unparsedText);
+		FileUtil.save(".symbolic.k", unparsedText);
 		// System.exit(1);
 
 		/****************************

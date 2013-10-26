@@ -60,8 +60,8 @@ public class MaudeKRun implements KRun {
 		}
 	}
 	
-	private void executeKRun(String maudeCmd) throws KRunExecutionException {
-        FileUtil.saveInFile(K.maude_in, maudeCmd);
+	private void executeKRun(StringBuilder maudeCmd) throws KRunExecutionException {
+        FileUtil.save(K.maude_in, maudeCmd);
         File outFile = FileUtil.createFile(K.maude_out);
 		File errFile = FileUtil.createFile(K.maude_err);
 
@@ -96,15 +96,17 @@ public class MaudeKRun implements KRun {
 	public KRunResult<KRunState> run(Term cfg) throws KRunExecutionException {
 		MaudeFilter maudeFilter = new MaudeFilter(context);
 		cfg.accept(maudeFilter);
-		String cmd = "set show command off ." + K.lineSeparator
-            + setCounter() + K.maude_cmd + " " + maudeFilter.getResult() + " .";
-		if(K.trace) {
-			cmd = "set trace on ." + K.lineSeparator + cmd;
-		}
+		StringBuilder cmd = new StringBuilder();
+        if(K.trace) {
+            cmd.append("set trace on .").append(K.lineSeparator);
+        }
+        cmd.append("set show command off .").append(K.lineSeparator)
+            .append(setCounter()).append(K.maude_cmd).append(" ")
+            .append(maudeFilter.getResult()).append(" .");
 		if(K.profile) {
-			cmd = "set profile on ." + K.lineSeparator + cmd + K.lineSeparator + "show profile .";
+			cmd.append("set profile on .").append(K.lineSeparator).append(K.lineSeparator).append("show profile .");
 		}
-		cmd += getCounter();
+		cmd.append(getCounter());
 
         executeKRun(cmd);
         try {
@@ -422,17 +424,21 @@ public class MaudeKRun implements KRun {
 										Term cfg,
 										RuleCompilerSteps compilationInfo)
 			throws KRunExecutionException {
-		String cmd = "set show command off ." + K.lineSeparator + setCounter() + "search ";
+        StringBuilder cmd = new StringBuilder();
+        if (K.trace) {
+            cmd.append("set trace on .").append(K.lineSeparator);
+        }
+		cmd.append("set show command off .").append(K.lineSeparator).append(setCounter()).append("search ");
 		if (bound != null && depth != null) {
-			cmd += "[" + bound + "," + depth + "] ";
+			cmd.append("[").append(bound).append(",").append(depth).append("] ");
 		} else if (bound != null) {
-			cmd += "[" + bound + "] ";
+			cmd.append("[").append(bound).append("] ");
 		} else if (depth != null) {
-			cmd += "[," + depth + "] ";
+			cmd.append("[,").append(depth).append("] ");
 		}
 		MaudeFilter maudeFilter = new MaudeFilter(context);
 		cfg.accept(maudeFilter);
-		cmd += maudeFilter.getResult() + " ";
+		cmd.append(maudeFilter.getResult()).append(" ");
 		MaudeFilter patternBody = new MaudeFilter(context);
 		pattern.getBody().accept(patternBody);
 		String patternString = "=>" + getSearchType(searchType) + " " + patternBody.getResult();
@@ -442,14 +448,11 @@ public class MaudeKRun implements KRun {
 			pattern.getRequires().accept(patternCondition);
 			patternString += " such that " + patternCondition.getResult() + " = # true(.KList)";
 		}
-		cmd += patternString + " .";
+		cmd.append(patternString).append(" .");
         if (K.showSearchGraph || K.debug || K.guidebug) {
-            cmd += K.lineSeparator + "show search graph .";
+            cmd.append(K.lineSeparator).append("show search graph .");
         }
-        if (K.trace) {
-			cmd = "set trace on ." + K.lineSeparator + cmd;
-		}
-		cmd += getCounter();
+		cmd.append(getCounter());
         executeKRun(cmd);
         try {
 			SearchResults results;
@@ -606,7 +609,18 @@ public class MaudeKRun implements KRun {
 		MaudeFilter cfgFilter = new MaudeFilter(context);
 		cfg.accept(cfgFilter);
 
-		String cmd = "mod MCK is" + K.lineSeparator + " including " + K.main_module + " ." + K.lineSeparator + K.lineSeparator + " op #initConfig : -> Bag ." + K.lineSeparator + K.lineSeparator + " eq #initConfig  =" + K.lineSeparator + cfgFilter.getResult() + " ." + K.lineSeparator + "endm" + K.lineSeparator + K.lineSeparator + "red" + K.lineSeparator + "_`(_`)(('modelCheck`(_`,_`)).KLabel,_`,`,_(_`(_`)(Bag2KLabel(#initConfig),.KList)," + K.lineSeparator + formulaFilter.getResult() + ")" + K.lineSeparator + ") .";
+        StringBuilder cmd = new StringBuilder()
+            .append("mod MCK is").append(K.lineSeparator)
+            .append(" including ")
+            .append(K.main_module).append(" .").append(K.lineSeparator).append(K.lineSeparator)
+            .append(" op #initConfig : -> Bag .").append(K.lineSeparator).append(K.lineSeparator)
+            .append(" eq #initConfig  =").append(K.lineSeparator)
+            .append(cfgFilter.getResult()).append(" .").append(K.lineSeparator)
+            .append("endm").append(K.lineSeparator).append(K.lineSeparator)
+            .append("red").append(K.lineSeparator)
+            .append("_`(_`)(('modelCheck`(_`,_`)).KLabel,_`,`,_(_`(_`)(Bag2KLabel(#initConfig),.KList),").append(K.lineSeparator)
+            .append(formulaFilter.getResult()).append(")").append(K.lineSeparator)
+            .append(") .");
 		boolean io = ioServer;
 		ioServer = false;
         executeKRun(cmd);

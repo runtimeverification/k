@@ -31,7 +31,7 @@ public class CommandParse extends Command {
 			Term kast = rp.runParser(K.parser, stringToParse, true, sort, context);
 			MaudeFilter mf = new MaudeFilter(context);
 			kast.accept(mf);
-			succeed(mf.getResult());
+			succeed(mf.getResult().toString());
 		} catch (TransformerException e) {
 			fail("noparse");
 		}

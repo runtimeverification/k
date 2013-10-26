@@ -3,7 +3,6 @@ package org.kframework.backend.html;
 import org.kframework.backend.BasicBackend;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
-import org.kframework.kompile.KompileFrontEnd;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
@@ -27,7 +26,7 @@ public class HtmlBackend extends BasicBackend {
 
 		String html = htmlFilter.getHTML();
 
-		FileUtil.saveInFile(GlobalSettings.outputDir + File.separator + FileUtil.stripExtension(new File(definition.getMainFile()).getName()) + ".html", html);
+		FileUtil.save(GlobalSettings.outputDir + File.separator + FileUtil.stripExtension(new File(definition.getMainFile()).getName()) + ".html", html);
 
 		if (GlobalSettings.verbose) {
 			sw.printIntermediate("Generating HTML");

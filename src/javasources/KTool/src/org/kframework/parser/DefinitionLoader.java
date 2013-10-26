@@ -1,7 +1,6 @@
 package org.kframework.parser;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
@@ -156,10 +155,10 @@ public class DefinitionLoader {
 				if (new File(context.dotk.getAbsolutePath() + "/pgm/Program.sdf").exists())
 					oldSdfPgm = FileUtil.getFileContent(context.dotk.getAbsolutePath() + "/pgm/Program.sdf");
 
-				String newSdfPgm = ProgramSDF.getSdfForPrograms(def, context);
+				StringBuilder newSdfPgmBuilder = ProgramSDF.getSdfForPrograms(def, context);
 
-				FileUtil.saveInFile(context.dotk.getAbsolutePath() + "/pgm/Program.sdf", newSdfPgm);
-				newSdfPgm = FileUtil.getFileContent(context.dotk.getAbsolutePath() + "/pgm/Program.sdf");
+				FileUtil.save(context.dotk.getAbsolutePath() + "/pgm/Program.sdf", newSdfPgmBuilder);
+                String newSdfPgm = FileUtil.getFileContent(context.dotk.getAbsolutePath() + "/pgm/Program.sdf");
 
 				if (GlobalSettings.verbose)
 					Stopwatch.sw.printIntermediate("File Gen Pgm");
@@ -180,8 +179,8 @@ public class DefinitionLoader {
 			String oldSdf = "";
 			if (new File(context.dotk.getAbsolutePath() + "/def/Integration.sdf").exists())
 				oldSdf = FileUtil.getFileContent(context.dotk.getAbsolutePath() + "/def/Integration.sdf");
-			FileUtil.saveInFile(context.dotk.getAbsolutePath() + "/def/Integration.sdf", DefinitionSDF.getSdfForDefinition(def, context));
-			FileUtil.saveInFile(context.dotk.getAbsolutePath() + "/ground/Integration.sdf", Definition2SDF.getSdfForDefinition(def, context));
+			FileUtil.save(context.dotk.getAbsolutePath() + "/def/Integration.sdf", DefinitionSDF.getSdfForDefinition(def, context));
+			FileUtil.save(context.dotk.getAbsolutePath() + "/ground/Integration.sdf", Definition2SDF.getSdfForDefinition(def, context));
 			String newSdf = FileUtil.getFileContent(context.dotk.getAbsolutePath() + "/def/Integration.sdf");
 
 			if (GlobalSettings.verbose)
@@ -283,7 +282,7 @@ public class DefinitionLoader {
 		Document doc = XmlLoader.getXMLDoc(parsed);
 		XmlLoader.addFilename(doc.getFirstChild(), filename);
 		XmlLoader.reportErrors(doc);
-		FileUtil.saveInFile(context.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
+		FileUtil.save(context.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
 
 		JavaClassesFactory.startConstruction(context);
 		org.kframework.kil.ASTNode config = (Term) JavaClassesFactory.getTerm((Element) doc.getFirstChild().getFirstChild().getNextSibling());
@@ -326,7 +325,7 @@ public class DefinitionLoader {
 
 		XmlLoader.addFilename(doc.getFirstChild(), filename);
 		XmlLoader.reportErrors(doc);
-		FileUtil.saveInFile(context.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
+		FileUtil.save(context.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
 		XmlLoader.writeXmlFile(doc, context.kompiled + "/pattern.xml");
 
 		JavaClassesFactory.startConstruction(context);
@@ -378,7 +377,7 @@ public class DefinitionLoader {
 
 		XmlLoader.addFilename(doc.getFirstChild(), filename);
 		XmlLoader.reportErrors(doc);
-		//		FileUtil.saveInFile(context.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
+		//		FileUtil.save(context.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
 		//		XmlLoader.writeXmlFile(doc, context.kompiled + "/pattern.xml");
 
 		JavaClassesFactory.startConstruction(context);
@@ -421,7 +420,7 @@ public class DefinitionLoader {
 
 		// XmlLoader.addFilename(doc.getFirstChild(), filename);
 		XmlLoader.reportErrors(doc);
-		FileUtil.saveInFile(context.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
+		FileUtil.save(context.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
 		XmlLoader.writeXmlFile(doc, context.kompiled + "/pattern.xml");
 
 		JavaClassesFactory.startConstruction(context);

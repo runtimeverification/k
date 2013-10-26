@@ -63,7 +63,7 @@ public class ProgramLoader {
 
 			XmlLoader.addFilename(doc.getFirstChild(), filename);
 			XmlLoader.reportErrors(doc);
-			FileUtil.saveInFile(context.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
+			FileUtil.save(context.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
 			JavaClassesFactory.startConstruction(context);
 			out = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
 			JavaClassesFactory.endConstruction();
