@@ -1,0 +1,5 @@
+Extend the static semantics of typed KOOL with private members.  See
+also the exercise "private-members" of the dynamic semantics of typed
+KOOL, because our objective here is to type precisely all the correct
+programs of that exercise (in addition to the programs of the original
+typed KOOL).

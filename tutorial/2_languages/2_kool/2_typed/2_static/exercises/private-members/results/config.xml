@@ -1,0 +1,17 @@
+<tests>
+
+  <test
+      definition="kool-typed-static.k"
+      programs="../../../../programs"
+      extension="kool"
+      results="../../../results"
+      />
+
+  <test
+      definition="kool-typed-static.k"
+      programs="../../../../1_dynamic/exercises/private-members/programs_and_results/"
+      extension="kool"
+      results="."
+      />
+
+</tests>
