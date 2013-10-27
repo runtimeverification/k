@@ -4,16 +4,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class KException {
-	protected ExceptionType type;
-	protected KExceptionGroup exceptionGroup;
-	protected String filename;
-	protected String location;
-	protected int level;
-	protected String message;
+	protected final ExceptionType type;
+	private final KExceptionGroup exceptionGroup;
+	private final String filename;
+	private final String location;
+	private final String message;
 	private String compilationPhase = null;
 
-	protected static Map<ExceptionType, String> types;
-	protected static Map<KExceptionGroup, String> labels;
+	private static final Map<ExceptionType, String> types;
+	private static final Map<KExceptionGroup, String> labels;
 	static {
 		types = new HashMap<KException.ExceptionType, String>();
 		types.put(ExceptionType.ERROR, "Error");
@@ -63,59 +62,7 @@ public class KException {
 		
 	}
 
-	public ExceptionType getType() {
-		return type;
-	}
-
-	public void setType(ExceptionType type) {
-		this.type = type;
-	}
-
-	public KExceptionGroup getExceptionGroup() {
-		return exceptionGroup;
-	}
-
-	public void setExceptionGroup(KExceptionGroup exceptionGroup) {
-		this.exceptionGroup = exceptionGroup;
-	}
-
-	public String getFilename() {
-		return filename;
-	}
-
-	public void setFilename(String filename) {
-		this.filename = filename;
-	}
-
-	public String getLocation() {
-		return location;
-	}
-
-	public void setLocation(String location) {
-		this.location = location;
-	}
-
-	public int getLevel() {
-		return level;
-	}
-
-	public void setLevel(int level) {
-		this.level = level;
-	}
-
-	public String getMessage() {
+    public String getMessage() {
 		return message;
-	}
-
-	public void setMessage(String message) {
-		this.message = message;
-	}
-
-	public String getCompilationPhase() {
-		return compilationPhase;
-	}
-
-	public void setCompilationPhase(String compilationPhase) {
-		this.compilationPhase = compilationPhase;
 	}
 }
