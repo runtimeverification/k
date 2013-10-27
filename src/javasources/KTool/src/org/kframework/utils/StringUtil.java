@@ -433,4 +433,51 @@ public class StringUtil {
 		String[] str = location.split("[\\(,\\)]");
 		return Integer.parseInt(str[1 + 1]);
 	}
+
+    /**
+     * split string to lines in a way that no lines will exceed 80 columns
+     * NOTE: strings splitted only at whitespace character ' ', if string contains no ' ', it's returned as is
+     * @param str string to split
+     * @return new string with newlines added
+     */
+    public static String splitLines(String str) {
+        return splitLines(str, 80);
+    }
+
+    /**
+     * split string to lines in a way that no lines will exceed `col` columns
+     * NOTE: strings splitted only at whitespace character ' ', if string contains no ' ', it's returned as is
+     * @param str string to split
+     * @param col rightmost column
+     * @return new string with newlines added
+     */
+    public static String splitLines(String str, int col) {
+        String[] lines = str.split("\n");
+        StringBuilder builder = new StringBuilder();
+        for (String line : lines) {
+            if (line.length() < 80) {
+                builder.append(line);
+                builder.append("\n");
+            } else {
+                builder.append(splitLine(line, col));
+                builder.append("\n");
+            }
+        }
+
+        return builder.toString();
+    }
+
+    private static String splitLine(String str, int col) {
+        if (str.length() < col)
+            return str;
+        int lastIdx = col - 1;
+        while (str.charAt(lastIdx) != ' ') {
+            --lastIdx;
+            if (lastIdx < 0) {
+                // string contains no whitespace
+                return str;
+            }
+        }
+        return str.substring(0, lastIdx) + "\n" + splitLine(str.substring(lastIdx + 1), col);
+    }
 }
