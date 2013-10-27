@@ -14,11 +14,18 @@ import java.util.Collections;
 
 
 /**
+ * A K term associated with symbolic constraints.
+ * 
  * @author AndreiS
  */
 public class ConstrainedTerm extends Term {
 
     private final Term term;
+    
+    /**
+     * Represents key lookups of builtin data-structures as a symbolic
+     * constraint.
+     */
     private final SymbolicConstraint lookups;
     private final SymbolicConstraint constraint;
     private final TermContext context;

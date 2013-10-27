@@ -196,6 +196,10 @@ public class KItem extends Term implements Sorted {
         return kList;
     }
 
+    /**
+     * A {@code KItem} cannot be further decomposed in a unification task if and
+     * only if its {@code KLabel} represents a function.
+     */
     @Override
     public boolean isSymbolic() {
         return kLabel.isFunction();
