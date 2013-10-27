@@ -1,5 +1,6 @@
 package org.kframework.utils.errorsystem;
 
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
@@ -26,7 +27,7 @@ public class KExceptionManager {
 
 			if (e.type == ExceptionType.ERROR)
 				errors = true;
-			System.err.println(e);
+            System.err.println(StringUtil.splitLines(e.toString()));
 		}
 		if (errors)
 			System.exit(1);
@@ -43,7 +44,7 @@ public class KExceptionManager {
 
 				if (e.type == ExceptionType.ERROR)
 					errors = true;
-				System.err.println(e);
+                System.err.println(StringUtil.splitLines(e.toString()));
 			}
 		if (errors)
 			System.exit(1);
