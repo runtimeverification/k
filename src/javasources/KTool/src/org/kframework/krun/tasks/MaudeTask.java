@@ -80,6 +80,7 @@ public class MaudeTask extends Thread {
 		while ((line = maudeOutput.readLine()) != null) {
 			outputFile.write(line + K.lineSeparator);
 		}
+        maudeOutput.close();
 		outputFile.close();
 	}
 
