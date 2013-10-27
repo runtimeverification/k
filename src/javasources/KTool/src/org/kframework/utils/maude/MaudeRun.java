@@ -103,11 +103,12 @@ public class MaudeRun {
 
 			InputStream is = p.getInputStream();
 			BufferedReader br = new BufferedReader(new InputStreamReader(is));
-			String line = "";
+			String line;
 			String output = "";
 			while ((line = br.readLine()) != null) {
 				output += line + "\n";
 			}
+            br.close();
 
 			p.waitFor();
 			if (output.matches("GLIBC")) {
@@ -121,11 +122,15 @@ public class MaudeRun {
 			if (output.matches("[Ee]rror")) {
 				return false;
 			}
-		} catch (Exception e) {
-			return false;
-		}
+		} catch (InterruptedException e) {
+            e.printStackTrace();
+            return false;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
 
-		return true;
+        return true;
 	}
 
 }
