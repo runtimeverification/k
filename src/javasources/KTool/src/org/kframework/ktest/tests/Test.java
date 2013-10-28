@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Collections;
+import java.util.ListIterator;
+import java.util.Iterator;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -165,30 +167,31 @@ public class Test implements Comparable<Test> {
                 String input = null;
                 String output = null;
                 String error = null;
+                String inputFile = null, outputFile = null, errorFile = null;
                 if (resultsFolders != null) {
-                    for (String rf : resultsFolders) {
-                        String inputFile = searchInputFile(rf, new File(
-                                programPath).getName(), recursive);
-                        input = getFileAsStringOrNull(inputFile);
-
-                        String outputFile = searchOutputFile(rf, new File(
-                                programPath).getName());
-                        output = getFileAsStringOrNull(outputFile);
-
-                        String errorFile = searchErrorFile(rf, new File(
-                                programPath).getName());
-                        error = getFileAsStringOrNull(errorFile);
-
-                        if (input != null || output != null || error != null) {
-                            if (Configuration.VERBOSE) {
-                                System.out.println("Program: " + programPath);
-                                System.out.println("   .in : " + inputFile);
-                                System.out.println("   .out: " + outputFile);
-                                System.out.println("   .err: " + errorFile);
-                            }
+                    for (String rf : new ListReverser<String>(resultsFolders)) {
+                        if (input == null) {
+                            inputFile = searchInputFile(rf, new File(programPath).getName(), recursive);
+                            input = getFileAsStringOrNull(inputFile);
+                        }
+                        if (output == null) {
+                            outputFile = searchOutputFile(rf, new File(programPath).getName());
+                            output = getFileAsStringOrNull(outputFile);
+                        }
+                        if (error == null) {
+                            errorFile = searchErrorFile(rf, new File(programPath).getName());
+                            error = getFileAsStringOrNull(errorFile);
+                        }
+                        if (input != null && output != null && error != null) {
                             break;
                         }
                     }
+                }
+                if (Configuration.VERBOSE) {
+                    System.out.println("Program: " + programPath);
+                    System.out.println("   .in : " + inputFile);
+                    System.out.println("   .out: " + outputFile);
+                    System.out.println("   .err: " + errorFile);
                 }
 
                 // custom programPath
@@ -353,7 +356,7 @@ public class Test implements Comparable<Test> {
                 }
             }
         }
-        Collections.reverse(resultsFolders);
+        //Collections.reverse(resultsFolders);
 
         // get report dir
         String reportDir = resolveAbsolutePathRelativeTo(
@@ -412,21 +415,22 @@ public class Test implements Comparable<Test> {
             String input = null;
             String output = null;
             String error = null;
+            String inputFile = null, outputFile = null, errorFile = null;
             if (resultsFolders != null) {
-                for (String rf : resultsFolders) {
-                    String inputFile = searchInputFile(rf,
-                            new File(programPath).getName(), recursive);
-                    input = getFileAsStringOrNull(inputFile);
-
-                    String outputFile = searchOutputFile(rf, new File(
-                            programPath).getName());
-                    output = getFileAsStringOrNull(outputFile);
-
-                    String errorFile = searchErrorFile(rf,
-                            new File(programPath).getName());
-                    error = getFileAsStringOrNull(errorFile);
-
-                    if (input != null || output != null || error != null) {
+                for (String rf : new ListReverser<String>(resultsFolders)) {
+                    if (input == null) {
+                        inputFile = searchInputFile(rf, new File(programPath).getName(), recursive);
+                        input = getFileAsStringOrNull(inputFile);
+                    }
+                    if (output == null) {
+                        outputFile = searchOutputFile(rf, new File(programPath).getName());
+                        output = getFileAsStringOrNull(outputFile);
+                    }
+                    if (error == null) {
+                        errorFile = searchErrorFile(rf, new File(programPath).getName());
+                        error = getFileAsStringOrNull(errorFile);
+                    }
+                    if (input != null && output != null && error != null) {
                         break;
                     }
                 }
@@ -789,5 +793,29 @@ public class Test implements Comparable<Test> {
             kompileOption += entry.getKey() + " " + entry.getValue() + " ";
         }
         return kompileOption;
+    }
+}
+
+class ListReverser<T> implements Iterable<T> {
+    private ListIterator<T> listIterator;
+    public ListReverser(List<T> list) {
+        this.listIterator = list.listIterator(list.size());
+    }
+    @Override
+    public Iterator<T> iterator() {
+        return new Iterator<T>() {
+            @Override
+            public boolean hasNext() {
+                return listIterator.hasPrevious();
+            }
+            @Override
+            public T next() {
+                return listIterator.previous();
+            }
+            @Override
+            public void remove() {
+                listIterator.remove();
+            }
+        };
     }
 }
