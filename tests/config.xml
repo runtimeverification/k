@@ -357,12 +357,13 @@
 -->
 
   <test
-      definition="tutorial/2_languages/3_fun/1_untyped/fun-untyped.k"
+      definition="tutorial/2_languages/3_fun/1_untyped/1_environment/fun-untyped.k"
       programs="tutorial/2_languages/3_fun/programs"
       extension="fun"
-      results="tutorial/2_languages/3_fun/programs"
-      >
-    <kompile-option name="-transition" value="otherwise"/>
+      results="tutorial/2_languages/3_fun/1_untyped/1_environment/tests" >
+      <all-programs>
+        <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
+      </all-programs>
   </test>
 
 <!--

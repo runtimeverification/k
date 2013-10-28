@@ -1,0 +1,5 @@
+Search results:
+
+Solution 1, State 0:
+V:K -->
+closure ( .Map , (({ (x, (y, z)) }) -> y) )

@@ -1,0 +1,13 @@
+<tests>
+
+  <test
+      definition="fun-untyped.k"
+      programs="../../../programs"
+      extension="fun"
+      results="." >
+      <all-programs>
+        <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
+      </all-programs>
+  </test>
+
+</tests>
