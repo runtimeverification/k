@@ -8,9 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Collections;
-import java.util.ListIterator;
-import java.util.Iterator;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -26,6 +23,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.kframework.ktest.Configuration;
 import org.kframework.ktest.execution.Task;
+import org.kframework.utils.ListReverser;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -177,15 +175,18 @@ public class Test implements Comparable<Test> {
                     for (String rf : new ListReverser<String>(resultsFolders)) {
                         if (input == null) {
                             inputFile = searchInputFile(rf, new File(programPath).getName(), recursive);
-                            input = getFileAsStringOrNull(inputFile);
+                            if (inputFile != null)
+                                input = FileUtil.getFileContent(inputFile);
                         }
                         if (output == null) {
                             outputFile = searchOutputFile(rf, new File(programPath).getName());
-                            output = getFileAsStringOrNull(outputFile);
+                            if (outputFile != null)
+                                output = FileUtil.getFileContent(outputFile);
                         }
                         if (error == null) {
                             errorFile = searchErrorFile(rf, new File(programPath).getName());
-                            error = getFileAsStringOrNull(errorFile);
+                            if (errorFile != null)
+                                error = FileUtil.getFileContent(errorFile);
                         }
                         if (input != null && output != null && error != null) {
                             break;
@@ -210,18 +211,6 @@ public class Test implements Comparable<Test> {
 
             }
         }
-    }
-
-    private String getFileAsStringOrNull(String file) {
-        if (file != null) {
-            try (FileInputStream in = new FileInputStream(file)) {
-                return Task.readString(in);
-            }
-            catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return null;
     }
 
     private String searchOutputFile(String resultsFolder2, String name) {
@@ -430,15 +419,18 @@ public class Test implements Comparable<Test> {
                 for (String rf : new ListReverser<String>(resultsFolders)) {
                     if (input == null) {
                         inputFile = searchInputFile(rf, new File(programPath).getName(), recursive);
-                        input = getFileAsStringOrNull(inputFile);
+                        if (inputFile != null)
+                            input = FileUtil.getFileContent(inputFile);
                     }
                     if (output == null) {
                         outputFile = searchOutputFile(rf, new File(programPath).getName());
-                        output = getFileAsStringOrNull(outputFile);
+                        if (outputFile != null)
+                            output = FileUtil.getFileContent(outputFile);
                     }
                     if (error == null) {
                         errorFile = searchErrorFile(rf, new File(programPath).getName());
-                        error = getFileAsStringOrNull(errorFile);
+                        if (errorFile != null)
+                            error = FileUtil.getFileContent(errorFile);
                     }
                     if (input != null && output != null && error != null) {
                         break;
@@ -803,29 +795,5 @@ public class Test implements Comparable<Test> {
             kompileOption += entry.getKey() + " " + entry.getValue() + " ";
         }
         return kompileOption;
-    }
-}
-
-class ListReverser<T> implements Iterable<T> {
-    private ListIterator<T> listIterator;
-    public ListReverser(List<T> list) {
-        this.listIterator = list.listIterator(list.size());
-    }
-    @Override
-    public Iterator<T> iterator() {
-        return new Iterator<T>() {
-            @Override
-            public boolean hasNext() {
-                return listIterator.hasPrevious();
-            }
-            @Override
-            public T next() {
-                return listIterator.previous();
-            }
-            @Override
-            public void remove() {
-                listIterator.remove();
-            }
-        };
     }
 }
