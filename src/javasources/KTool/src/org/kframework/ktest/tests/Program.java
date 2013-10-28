@@ -57,10 +57,10 @@ public class Program implements Comparable<Program> {
 	}
 
 	public boolean success(Task task) {
-		if (!task.getStderr().equals(error) && error != null)
+		if (error != null && !task.getStderr().replaceAll("\\r", "").equals(error.replaceAll("\\r", "")))
 			return false;
 		
-		if (!task.getStdout().equals(output) && output != null)
+		if (output != null && !task.getStdout().replaceAll("\\r", "").equals(output.replaceAll("\\r", "")))
 			return false;
 
 		if (error == null && task.getExit() != 0)
