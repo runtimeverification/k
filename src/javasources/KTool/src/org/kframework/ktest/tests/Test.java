@@ -8,9 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Collections;
-import java.util.ListIterator;
-import java.util.Iterator;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -26,6 +23,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.kframework.ktest.Configuration;
 import org.kframework.ktest.execution.Task;
+import org.kframework.utils.ListReverser;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -797,29 +795,5 @@ public class Test implements Comparable<Test> {
             kompileOption += entry.getKey() + " " + entry.getValue() + " ";
         }
         return kompileOption;
-    }
-}
-
-class ListReverser<T> implements Iterable<T> {
-    private ListIterator<T> listIterator;
-    public ListReverser(List<T> list) {
-        this.listIterator = list.listIterator(list.size());
-    }
-    @Override
-    public Iterator<T> iterator() {
-        return new Iterator<T>() {
-            @Override
-            public boolean hasNext() {
-                return listIterator.hasPrevious();
-            }
-            @Override
-            public T next() {
-                return listIterator.previous();
-            }
-            @Override
-            public void remove() {
-                listIterator.remove();
-            }
-        };
     }
 }
