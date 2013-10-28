@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Collections;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -179,6 +180,12 @@ public class Test implements Comparable<Test> {
                         error = getFileAsStringOrNull(errorFile);
 
                         if (input != null || output != null || error != null) {
+                            if (Configuration.VERBOSE) {
+                                System.out.println("Program: " + programPath);
+                                System.out.println("   .in : " + inputFile);
+                                System.out.println("   .out: " + outputFile);
+                                System.out.println("   .err: " + errorFile);
+                            }
                             break;
                         }
                     }
@@ -346,6 +353,7 @@ public class Test implements Comparable<Test> {
                 }
             }
         }
+        Collections.reverse(resultsFolders);
 
         // get report dir
         String reportDir = resolveAbsolutePathRelativeTo(
