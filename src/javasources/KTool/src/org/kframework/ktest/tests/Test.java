@@ -72,6 +72,11 @@ public class Test implements Comparable<Test> {
         this.recursive = true;
         this.unixOnlyScript = null;
 
+        if (resultsFolders.size() == 0) {
+            String msg = "[Warning] A '--results' option was not specified.";
+            System.out.println(Configuration.wrap(msg,10));
+        }
+
         // reports
         try {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -357,6 +362,11 @@ public class Test implements Comparable<Test> {
             }
         }
         //Collections.reverse(resultsFolders);
+        if (resultsFolders.size() == 0) {
+            String msg = "[Warning] A 'results' attribute was not specified: ";
+            msg += "<test definition=" + test.getAttribute(Configuration.LANGUAGE) + " programs=" + test.getAttribute(Configuration.PROGRAMS_DIR) + " />";
+            System.out.println(Configuration.wrap(msg,10));
+        }
 
         // get report dir
         String reportDir = resolveAbsolutePathRelativeTo(

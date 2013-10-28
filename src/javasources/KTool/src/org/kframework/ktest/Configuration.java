@@ -125,10 +125,12 @@ public class Configuration {
 		return getKHome() + FILE_SEPARATOR + "bin" + FILE_SEPARATOR + exe;
 	}
 
-	public static String wrap(String s) {
+	public static String wrap(String s, int indent) {
 		int maxWidth = 80;
-		int indent = 18;
 		return WordUtils.wrap(s, maxWidth - indent, System.getProperty("line.separator") + StringUtils.repeat(" ", indent), true);
+	}
+	public static String wrap(String s) {
+		return wrap(s,18);
 	}
 }
 
