@@ -49,16 +49,16 @@ public class SearchResult {
 						rawValue = null; //for static reasons
 					}
 				} else {
-          String sort;
-          // The backend doesn't have sorts, so instead it matches "KItem" and
-          // a predicate. This means that unless the sort of the var is "K",
-          // the var in the substituion map will always have sort "KItem".
-          if (var.getSort().equals("K")) {
-            sort = "K";
-          } else {
-            sort = "KItem";
+          String varString = "";
+          // The backend doesn't keep sort information around so we want to
+          // match the variable name only.
+          for (String key : rawSubstitution.keySet()) {
+            if (key.startsWith(var.getName() + ":")) {
+              varString = key;
+              break;
+            }
           }
-					rawValue = rawSubstitution.get(var.getName() + ":" + sort);
+					rawValue = rawSubstitution.get(varString);
 				}
 				substitution.put(var.getName() + ":" + var.getSort(), KRunState.concretize(rawValue, context));
 			}
