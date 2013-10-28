@@ -33,6 +33,7 @@ import org.kframework.parser.concrete.disambiguate.CorrectRewritePriorityFilter;
 import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
+import org.kframework.parser.concrete.disambiguate.MergeAmbFilter;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
@@ -292,18 +293,21 @@ public class DefinitionLoader {
 		new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation(context), context).check(config);
 		config = config.accept(new SentenceVariablesFilter(context));
 		config = config.accept(new CellEndLabelFilter(context));
-		// config = config.accept(new InclusionFilter(localModule));
+		//if (checkInclusion)
+		//	config = config.accept(new InclusionFilter(localModule, context));
 		config = config.accept(new CellTypesFilter(context));
-		// config = config.accept(new CorrectRewritePriorityFilter());
+		config = config.accept(new CorrectRewritePriorityFilter(context));
 		config = config.accept(new CorrectKSeqFilter(context));
 		config = config.accept(new CorrectCastPriorityFilter(context));
 		// config = config.accept(new CheckBinaryPrecedenceFilter());
-		// config = config.accept(new VariableTypeInferenceFilter());
-		config = config.accept(new AmbDuplicateFilter(context));
-		config = config.accept(new TypeSystemFilter(context));
 		config = config.accept(new PriorityFilter(context));
-		config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context));
-		config = config.accept(new TypeInferenceSupremumFilter(context));
+		if (GlobalSettings.fastKast)
+			config = config.accept(new MergeAmbFilter(context));
+		config = config.accept(new VariableTypeInferenceFilter(context));
+		// config = config.accept(new AmbDuplicateFilter(context));
+		// config = config.accept(new TypeSystemFilter(context));
+		// config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context));
+		// config = config.accept(new TypeInferenceSupremumFilter(context));
 		config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context));
 		config = config.accept(new PreferAvoidFilter(context));
 		config = config.accept(new FlattenListsFilter(context));
@@ -336,18 +340,21 @@ public class DefinitionLoader {
 		new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation(context), context).check(config);
 		config = config.accept(new SentenceVariablesFilter(context));
 		config = config.accept(new CellEndLabelFilter(context));
-		// config = config.accept(new InclusionFilter(localModule));
+		//if (checkInclusion)
+		//	config = config.accept(new InclusionFilter(localModule, context));
 		config = config.accept(new CellTypesFilter(context));
-		// config = config.accept(new CorrectRewritePriorityFilter());
+		config = config.accept(new CorrectRewritePriorityFilter(context));
 		config = config.accept(new CorrectKSeqFilter(context));
 		config = config.accept(new CorrectCastPriorityFilter(context));
 		// config = config.accept(new CheckBinaryPrecedenceFilter());
-		// config = config.accept(new VariableTypeInferenceFilter());
-		config = config.accept(new AmbDuplicateFilter(context));
-		config = config.accept(new TypeSystemFilter(context));
 		config = config.accept(new PriorityFilter(context));
-		config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context));
-		config = config.accept(new TypeInferenceSupremumFilter(context));
+		if (GlobalSettings.fastKast)
+			config = config.accept(new MergeAmbFilter(context));
+		config = config.accept(new VariableTypeInferenceFilter(context));
+		// config = config.accept(new AmbDuplicateFilter(context));
+		// config = config.accept(new TypeSystemFilter(context));
+		// config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context));
+		// config = config.accept(new TypeInferenceSupremumFilter(context));
 		config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context));
 		config = config.accept(new PreferAvoidFilter(context));
 		config = config.accept(new FlattenListsFilter(context));
@@ -387,18 +394,21 @@ public class DefinitionLoader {
 		new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation(context), context).check(config);
 		config = config.accept(new SentenceVariablesFilter(context));
 		config = config.accept(new CellEndLabelFilter(context));
-		// config = config.accept(new InclusionFilter(localModule, context));
+		//if (checkInclusion)
+		//	config = config.accept(new InclusionFilter(localModule, context));
 		config = config.accept(new CellTypesFilter(context));
 		config = config.accept(new CorrectRewritePriorityFilter(context));
 		config = config.accept(new CorrectKSeqFilter(context));
 		config = config.accept(new CorrectCastPriorityFilter(context));
 		// config = config.accept(new CheckBinaryPrecedenceFilter());
-		config = config.accept(new VariableTypeInferenceFilter(context));
-		config = config.accept(new AmbDuplicateFilter(context));
-		config = config.accept(new TypeSystemFilter(context));
 		config = config.accept(new PriorityFilter(context));
-		config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context));
-		config = config.accept(new TypeInferenceSupremumFilter(context));
+		if (GlobalSettings.fastKast)
+			config = config.accept(new MergeAmbFilter(context));
+		config = config.accept(new VariableTypeInferenceFilter(context));
+		// config = config.accept(new AmbDuplicateFilter(context));
+		// config = config.accept(new TypeSystemFilter(context));
+		// config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context));
+		// config = config.accept(new TypeInferenceSupremumFilter(context));
 		config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context));
 		config = config.accept(new PreferAvoidFilter(context));
 		config = config.accept(new FlattenListsFilter(context));
