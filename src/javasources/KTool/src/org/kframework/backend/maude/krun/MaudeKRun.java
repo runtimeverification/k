@@ -424,10 +424,10 @@ public class MaudeKRun implements KRun {
 										Term cfg,
 										RuleCompilerSteps compilationInfo)
 			throws KRunExecutionException {
-        StringBuilder cmd = new StringBuilder();
-        if (K.trace) {
-            cmd.append("set trace on .").append(K.lineSeparator);
-        }
+    StringBuilder cmd = new StringBuilder();
+    if (K.trace) {
+      cmd.append("set trace on .").append(K.lineSeparator);
+    }
 		cmd.append("set show command off .").append(K.lineSeparator).append(setCounter()).append("search ");
 		if (bound != null && depth != null) {
 			cmd.append("[").append(bound).append(",").append(depth).append("] ");
@@ -449,23 +449,23 @@ public class MaudeKRun implements KRun {
 			patternString += " such that " + patternCondition.getResult() + " = # true(.KList)";
 		}
 		cmd.append(patternString).append(" .");
-        if (K.showSearchGraph || K.debug || K.guidebug) {
-            cmd.append(K.lineSeparator).append("show search graph .");
-        }
+    if (K.showSearchGraph || K.debug || K.guidebug) {
+      cmd.append(K.lineSeparator).append("show search graph .");
+    }
 		cmd.append(getCounter());
-        executeKRun(cmd);
-        try {
+    executeKRun(cmd);
+    try {
 			SearchResults results;
 			final List<SearchResult> solutions = parseSearchResults
 					(pattern, compilationInfo);
 			final boolean matches = patternString.trim().matches("=>[!*1+] " +
 					"<_>_</_>\\(generatedTop, B:Bag, generatedTop\\)");
-            DirectedGraph<KRunState, Transition> graph
-                = (K.showSearchGraph || K.debug || K.guidebug) ? parseSearchGraph() : null;
-            results = new SearchResults(solutions, graph, matches, context);
+      DirectedGraph<KRunState, Transition> graph
+          = (K.showSearchGraph || K.debug || K.guidebug) ? parseSearchGraph() : null;
+      results = new SearchResults(solutions, graph, matches, context);
 			K.stateCounter += graph != null ? graph.getVertexCount() : 0;
 			KRunResult<SearchResults> result = new KRunResult<SearchResults>(results);
-            result.setRawOutput(FileUtil.getFileContent(K.maude_out));
+      result.setRawOutput(FileUtil.getFileContent(K.maude_out));
 			return result;
 		} catch (Exception e) {
 			throw new RuntimeException("Pretty-printer threw exception", e);
