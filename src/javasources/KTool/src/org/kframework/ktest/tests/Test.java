@@ -177,15 +177,18 @@ public class Test implements Comparable<Test> {
                     for (String rf : new ListReverser<String>(resultsFolders)) {
                         if (input == null) {
                             inputFile = searchInputFile(rf, new File(programPath).getName(), recursive);
-                            input = FileUtil.getFileContent(inputFile);
+                            if (inputFile != null)
+                                input = FileUtil.getFileContent(inputFile);
                         }
                         if (output == null) {
                             outputFile = searchOutputFile(rf, new File(programPath).getName());
-                            output = FileUtil.getFileContent(outputFile);
+                            if (outputFile != null)
+                                output = FileUtil.getFileContent(outputFile);
                         }
                         if (error == null) {
                             errorFile = searchErrorFile(rf, new File(programPath).getName());
-                            error = FileUtil.getFileContent(errorFile);
+                            if (errorFile != null)
+                                error = FileUtil.getFileContent(errorFile);
                         }
                         if (input != null && output != null && error != null) {
                             break;
@@ -418,15 +421,18 @@ public class Test implements Comparable<Test> {
                 for (String rf : new ListReverser<String>(resultsFolders)) {
                     if (input == null) {
                         inputFile = searchInputFile(rf, new File(programPath).getName(), recursive);
-                        input = FileUtil.getFileContent(inputFile);
+                        if (inputFile != null)
+                            input = FileUtil.getFileContent(inputFile);
                     }
                     if (output == null) {
                         outputFile = searchOutputFile(rf, new File(programPath).getName());
-                        output = FileUtil.getFileContent(outputFile);
+                        if (outputFile != null)
+                            output = FileUtil.getFileContent(outputFile);
                     }
                     if (error == null) {
                         errorFile = searchErrorFile(rf, new File(programPath).getName());
-                        error = FileUtil.getFileContent(errorFile);
+                        if (errorFile != null)
+                            error = FileUtil.getFileContent(errorFile);
                     }
                     if (input != null && output != null && error != null) {
                         break;
