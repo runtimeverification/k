@@ -1,10 +1,8 @@
 package org.kframework.ktest.execution;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.regex.Pattern;
 
 import java.util.concurrent.Callable;
@@ -14,6 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.io.IOUtils;
 import org.kframework.ktest.Configuration;
 
 public class Task extends Thread {
@@ -111,27 +110,6 @@ public class Task extends Thread {
 		}
 	}
 
-	public static String readString(InputStream is) {
-		try {
-			BufferedReader br = new BufferedReader(new InputStreamReader(is));
-
-			StringBuilder sb = new StringBuilder();
-
-			String line;
-			while ((line = br.readLine()) != null) {
-				sb.append(line);
-				sb.append(System.getProperty("line.separator"));
-			}
-
-			br.close();
-			return sb.toString();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		return "";
-	}
-
 	public String getStderr() {
 		if (stderr == null)
 			return "";
@@ -173,21 +151,13 @@ class StreamGobbler implements Callable<String> {
 	}
 
 	public String call() {
-		StringBuilder sb = new StringBuilder();
-		try {
-			InputStreamReader isr = new InputStreamReader(is);
-			BufferedReader br = new BufferedReader(isr);
-			String line = null;
-			while ((line = br.readLine()) != null) {
-				sb.append(line);
-				sb.append(System.getProperty("line.separator"));
-			}
-			br.close();
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
-		}
-		return sb.toString();
-	}
+        try {
+            return IOUtils.toString(is);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }
 
 // vim: noexpandtab
