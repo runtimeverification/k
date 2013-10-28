@@ -39,8 +39,9 @@ public class TypeSystemFilter extends BasicTransformer {
 		return super.transform(tc);
 	}
 
-	//	public ASTNode transform(Cast cast) throws TransformerException {
-	//		cast.setContent((Term) cast.getContent().accept(new TypeSystemFilter2(cast.getSort(), context)));
-	//		return super.transform(cast);
-	//	}
+	public ASTNode transform(Cast cast) throws TransformerException {
+		if (!cast.isSyntactic())
+			cast.setContent((Term) cast.getContent().accept(new TypeSystemFilter2(cast.getSort(), context)));
+		return super.transform(cast);
+	}
 }

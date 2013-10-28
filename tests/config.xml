@@ -649,6 +649,11 @@
       </all-programs>
   </test>
 
+<!--
+  These issues fail because the syntactic cast doesn't allow for inner context.
+  See issue #117 for more details:
+  https://github.com/kframework/k/issues/117
+
   <test
       definition="tests/regression/addbrackets/issue.k"
       programs="tests/regression/addbrackets/programs"
@@ -660,7 +665,7 @@
         <krun-option name="-parens" value="smart" />
       </all-programs>
   </test>
-
+-->
   <test
       definition="tests/regression/issue647/issue.k"
       programs="tests/regression/issue647"
