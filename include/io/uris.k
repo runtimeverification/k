@@ -124,7 +124,7 @@ module URIS
 // ------------------------------
 // Dynamic parsing
 
-  rule #parse(StringToParse:String, Sort:String) => 'String2K(#tcpRequest("parse\x01" +String Sort +String "\x01" +String StringToParse +String "\x01"))
+  rule #parse(StringToParse:String, Sort:String) => 'String2K(#tcpRequest("parse\x01" +String Sort +String "\x01" +String StringToParse +String "\x01"))::K
 
   syntax K ::= String2K(String) [function, hook(#K-PARSER:string2k)]
   syntax Bag ::= String2Bag(String) [function, hook(#K-PARSER:string2bag)]
