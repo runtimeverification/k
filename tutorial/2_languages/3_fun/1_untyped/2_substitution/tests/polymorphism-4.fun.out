@@ -1,0 +1,5 @@
+Search results:
+
+Solution 1, State 0:
+V:K -->
+fun (#symId("local",, 1) -> (let (y = #symId("local",, 1)) in y))

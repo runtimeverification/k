@@ -1,0 +1,165 @@
+Search results:
+
+Solution 1, State 0:
+V:K -->
+fun (x -> ((fun (x -> ((fun (x -> ((fun (x -> ((fun (x -> ((fun (x -> ((fun (
+  x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) 
+  x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x))))
+   x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x 
+  -> (fun (y -> x)))) x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x
+   -> (fun (y -> x)))) x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x -> 
+  ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) ((fun (x ->
+   ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) x)))) ((
+  fun (x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x
+  )))) x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> 
+  x)))) x)))) x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x -> ((fun (x 
+  -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) ((fun (x
+   -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) x)))) (
+  (fun (x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> 
+  x)))) x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y ->
+   x)))) x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x -> ((fun (x -> (
+  fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) ((fun (x -> ((fun (x -> 
+  (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) x)))) ((fun (x -> ((fun
+   (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) ((
+  fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) x
+  )))) x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x -> ((fun (x -> ((
+  fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) (
+  (fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) 
+  x)))) ((fun (x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun
+   (y -> x)))) x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (
+  fun (y -> x)))) x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x -> ((fun
+   (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) ((fun (x -> ((
+  fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) x)))) ((fun (
+  x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) 
+  x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x))))
+   x)))) x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x -> ((fun (x -> ((
+  fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) ((fun (x -> (
+  (fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) x)))) ((fun 
+  (x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x))))
+   x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))
+  ) x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x -> ((fun (x -> (fun (y
+   -> x)))) ((fun (x -> (fun (y -> x)))) x)))) ((fun (x -> ((fun (x -> (fun (
+  y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) x)))) ((fun (x -> ((fun (x ->
+   ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) ((fun (x 
+  -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) x)))) x)
+  ))) x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x -> ((fun (x -> ((fun
+   (x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))
+  ) x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x))
+  )) x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (
+  x -> (fun (y -> x)))) x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun 
+  (x -> (fun (y -> x)))) x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x 
+  -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) ((fun (x
+   -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) x)))) (
+  (fun (x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> 
+  x)))) x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y ->
+   x)))) x)))) x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x -> ((fun (x
+   -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) ((fun (
+  x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) x)))) 
+  ((fun (x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y ->
+   x)))) x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y 
+  -> x)))) x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x -> ((fun (x -> 
+  (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) ((fun (x -> ((fun (x ->
+   (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) x)))) ((fun (x -> ((
+  fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) (
+  (fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) 
+  x)))) x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x -> ((fun (x -> ((
+  fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) (
+  (fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) 
+  x)))) ((fun (x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun
+   (y -> x)))) x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (
+  fun (y -> x)))) x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x -> ((fun
+   (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) ((fun (x -> ((
+  fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) x)))) ((fun (
+  x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) 
+  x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x))))
+   x)))) x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x -> ((fun (x -> ((
+  fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) ((fun (x -> (
+  (fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) x)))) ((fun 
+  (x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x))))
+   x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))
+  ) x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x -> ((fun (x -> (fun (y
+   -> x)))) ((fun (x -> (fun (y -> x)))) x)))) ((fun (x -> ((fun (x -> (fun (
+  y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) x)))) ((fun (x -> ((fun (x ->
+   ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) ((fun (x 
+  -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) x)))) x)
+  ))) x)))) x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x -> ((fun (x ->
+   ((fun (x -> ((fun (x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x 
+  -> (fun (y -> x)))) x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x
+   -> (fun (y -> x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x -> (fun (
+  y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) ((fun (x -> ((fun (x -> (fun 
+  (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) x)))) x)))) ((fun (x -> ((
+  fun (x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x
+  )))) x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> 
+  x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((
+  fun (x -> (fun (y -> x)))) x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) (
+  (fun (x -> (fun (y -> x)))) x)))) x)))) x)))) x)))) ((fun (x -> ((fun (x ->
+   ((fun (x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y 
+  -> x)))) x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y
+   -> x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) 
+  ((fun (x -> (fun (y -> x)))) x)))) ((fun (x -> ((fun (x -> (fun (y -> x))))
+   ((fun (x -> (fun (y -> x)))) x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((
+  fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) (
+  (fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) 
+  x)))) ((fun (x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun
+   (y -> x)))) x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (
+  fun (y -> x)))) x)))) x)))) x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((fun
+   (x -> ((fun (x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (
+  fun (y -> x)))) x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> 
+  (fun (y -> x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x -> (fun (y ->
+   x)))) ((fun (x -> (fun (y -> x)))) x)))) ((fun (x -> ((fun (x -> (fun (y 
+  -> x)))) ((fun (x -> (fun (y -> x)))) x)))) x)))) x)))) ((fun (x -> ((fun (
+  x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) 
+  x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x))))
+   x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x 
+  -> (fun (y -> x)))) x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x
+   -> (fun (y -> x)))) x)))) x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((fun 
+  (x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x))))
+   x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))
+  ) x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x
+   -> (fun (y -> x)))) x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (
+  x -> (fun (y -> x)))) x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x ->
+   ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) ((fun (x 
+  -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) x)))) ((
+  fun (x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x
+  )))) x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> 
+  x)))) x)))) x)))) x)))) x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x 
+  -> ((fun (x -> ((fun (x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (
+  x -> (fun (y -> x)))) x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun 
+  (x -> (fun (y -> x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x -> (fun
+   (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) ((fun (x -> ((fun (x -> (
+  fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) x)))) x)))) ((fun (x -> 
+  ((fun (x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y ->
+   x)))) x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y 
+  -> x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) (
+  (fun (x -> (fun (y -> x)))) x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) 
+  ((fun (x -> (fun (y -> x)))) x)))) x)))) x)))) x)))) ((fun (x -> ((fun (x 
+  -> ((fun (x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y
+   -> x)))) x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (
+  y -> x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x -> (fun (y -> x))))
+   ((fun (x -> (fun (y -> x)))) x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))
+  ) ((fun (x -> (fun (y -> x)))) x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((
+  fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) (
+  (fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) 
+  x)))) ((fun (x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun
+   (y -> x)))) x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (
+  fun (y -> x)))) x)))) x)))) x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((fun
+   (x -> ((fun (x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (
+  fun (y -> x)))) x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> 
+  (fun (y -> x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x -> (fun (y ->
+   x)))) ((fun (x -> (fun (y -> x)))) x)))) ((fun (x -> ((fun (x -> (fun (y 
+  -> x)))) ((fun (x -> (fun (y -> x)))) x)))) x)))) x)))) ((fun (x -> ((fun (
+  x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) 
+  x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x))))
+   x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x 
+  -> (fun (y -> x)))) x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x
+   -> (fun (y -> x)))) x)))) x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((fun 
+  (x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x))))
+   x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))
+  ) x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x
+   -> (fun (y -> x)))) x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (
+  x -> (fun (y -> x)))) x)))) x)))) x)))) ((fun (x -> ((fun (x -> ((fun (x ->
+   ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) ((fun (x 
+  -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x)))) x)))) x)))) ((
+  fun (x -> ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> x
+  )))) x)))) ((fun (x -> ((fun (x -> (fun (y -> x)))) ((fun (x -> (fun (y -> 
+  x)))) x)))) x)))) x)))) x)))) x)))) x)))) x)))) x)))
