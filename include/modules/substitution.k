@@ -27,6 +27,7 @@ module VARIABLE
   rule #getVars1(((Set2KLabel S:Set)(.KList) => Set2KTerm(S:Set)),,_, _)
   rule #getVars1((L:KLabel(Ks:KList) => Ks),,_, _)
     when isVariable(L(Ks)) =/=K true andBool isSet(L(Ks)) =/=K true
+  rule #getVars1((.K => .KList),,_, _) 
   rule #getVars1(.KList, S:Set) => vars(S)
 
 // Generates a "fresh" local variable of the type of K that does not appear
@@ -261,6 +262,7 @@ module SUBSTITUTION
 
   rule #substitutePlainList(L:KLabel(Ks:KList), M:Map)
     => #substitutePlainList1(L:KLabel(Ks), M, .KList)
+  rule #substitutePlainList(.K, _) => .K
   
   rule #substitutePlainList1(_:KLabel((K:K => .KList),,_), M:Map, _,,
         (.KList => #substitutePlain(K,M)))
