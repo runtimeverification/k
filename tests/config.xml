@@ -796,7 +796,7 @@
       definition="samples/java_rewrite_engine/tutorial/1_k/4_imp++/imp.k"
       programs="tutorial/1_k/2_imp tutorial/1_k/4_imp++"
       extension="imp"
-      exclude="lesson_1/spawn.imp io"
+      exclude="lesson_1/spawn.imp"
       results="tests/tutorial/1_k/4_imp++/lesson_5"
       >
     <kompile-option name="-backend" value="java" />
