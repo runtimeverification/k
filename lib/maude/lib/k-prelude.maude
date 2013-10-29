@@ -80,20 +80,12 @@ mod K-TECHNIQUE is
   eq remove(M1, (Key |-> V M2)) = remove(remove(M1, Key, V), M2) .  
   eq remove(M, .Map) = M .
 
-  op _[_] : Map Map -> Map .
-  eq M:Map[M':Map] = update(M:Map, M':Map) .
-
-  op _[_/_] : Map KList KList -> Map .
-  eq M:Map[(K2:K,,KL2:KList) / (K1:K,,KL1:KList)]
-   = update(M:Map, K1:K, K2:K)[KL2:KList / KL1:KList] .
-  eq M:Map[.KList / .KList] = M:Map .
-
   sort CellLabel .
 
   op <_>_</_> : CellLabel K CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
   op <_>_</_> : CellLabel List CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
   op <_>_</_> : CellLabel Bag CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
-  op <_>_</_> : CellLabel Set CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)]. 
+  op <_>_</_> : CellLabel Set CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
   op <_>_</_> : CellLabel Map CellLabel -> BagItem [prec 0 format(nib g b o+ -b g b o)] .
 
   sort KCellSort .
@@ -122,74 +114,6 @@ mod K-WRAPPERS-LABELS is
   op Map2KLabel_ : Map -> KLabel [metadata "wrapper=(builtin)"] .
   op 'wrap-with : -> KLabel .
   op #_ : #Bool -> KLabel [metadata "wrapper=(builtin)"] .
-
-  op _+MySet_ : K K -> K [assoc] .
-  eq Set2KLabel(S1:Set)(.KList) +MySet Set2KLabel(S2:Set)(.KList) 
-   = Set2KLabel(S1:Set S2:Set)(.KList) . 
-
-  op _+MyList_ : K K -> K [assoc] .
-  eq List2KLabel(S1:List)(.KList) +MyList List2KLabel(S2:List)(.KList) 
-   = List2KLabel(S1:List S2:List)(.KList) . 
-
-  op _+MyMap_ : K K -> K [assoc] .
-  eq Map2KLabel(S1:Map)(.KList) +MyMap Map2KLabel(S2:Map)(.KList) 
-   = Map2KLabel(S1:Map S2:Map)(.KList) . 
-
-
-  op values_ :  Map -> Set .
-  eq values (X:K |-> V:K M:Map) = SetItem(V:K) values M:Map .
-  eq values .Map = .Set .
-
-  op keys_ :  Map -> Set .
-  eq keys (X:K |-> V:K M:Map) = SetItem(X:K) keys M:Map .
-  eq keys .Map = .Set .
-
-  op inSet : -> KLabel .
-  eq inSet(K:K,, Set2KLabel(SetItem(K:K) S:Set)(.KList)) = (# true)(.KList) .
-  eq inSet(K:K,, S:K) = (# false)(.KList) [owise] .
-
-  op '$hasMapping`(_`,_`) : -> KLabel .
-  eq '$hasMapping`(_`,_`)(Map2KLabel (X:KItem |-> V:KItem M:Map)(.KList),,X:KItem) =  (# true)(.KList) .
-  eq '$hasMapping`(_`,_`)(Map2KLabel M:Map(.KList),,X:KItem) =  (# false)(.KList) [owise] .
-
-
-  op deprecatedMapLookup : -> KLabel .
-  eq deprecatedMapLookup(Map2KLabel (X:KItem |-> V:KItem M:Map)(.KList),,X:KItem) = V:KItem .
-
-  op 'Set2KTerm : -> KLabel .
-  op #set : -> KLabel .
-  eq 'Set2KTerm(Set2KLabel S:Set(.KList))
-   = Set2KList(S:Set) .
-
-  op Set2KList : Set -> KList .
-  eq Set2KList(.Set) = .KList .
-  eq Set2KList(SetItem(K:K) S:Set) = K:K,,Set2KList(S:Set) .
-
-  op '#isMapInK : -> KLabel .
-  op #getMapFromK`(_`) : K -> Map  .
-  op '#map : -> KLabel .
-  eq '#isMapInK('#map(K:K)) = (# true)(.KList) .
-  eq #getMapFromK('#map(Map2KLabel M:Map(.KList))) = M:Map .
-
-  op _-Set_ : Set Set -> Set .
-  eq S1:Set -Set (SI1:SetItem SI2:SetItem S2:Set)
-   = ((S1:Set -Set SI1:SetItem) -Set SI2:SetItem) -Set S2:Set .
-  eq S1:Set -Set .Set = S1:Set .
- 
-  eq (S1:Set SI:SetItem) -Set SI:SetItem = S1:Set .
-  eq S1:Set -Set SI:SetItem = S1:Set [owise] .
-
-  op intersectSet`(_`,_`) : Set Set -> Set .
-  eq intersectSet(A:Set, B:Set) = A:Set -Set (A:Set -Set B:Set) .
-
-  op 'isEmptySet : -> KLabel .
-  eq 'isEmptySet(Set2KLabel .Set(.KList)) = (# true)(.KList) .
-  eq 'isEmptySet(Set2KLabel S:Set(.KList)) = (# false)(.KList) [owise] .
-
- 
-  op isSet : -> KLabel .
-  eq isSet(Set2KLabel S:Set(.KList)) = (# true)(.KList) .
-
 endm
 
 load builtins.maude

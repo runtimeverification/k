@@ -38,20 +38,20 @@ module IMP
   configuration <T color="yellow">
                   //<k color="green"> $PGM:Pgm </k>
                   <k color="green"> $PGM:K </k>
-                  <state color="red"> .Map </state>
+                  <state color="red"> .MyMap </state>
                 </T>
 
 // AExp
   rule <k> X:Id => I ...</k> <state>... X |-> I:KItem ...</state>
-  rule I1:Int / I2:Int => I1 /Int I2  when I2 =/=Int 0
-  rule I1:Int + I2:Int => I1 +Int I2
-  rule I1:Int - I2:Int => I1 -Int I2
+  rule I1 / I2 => I1 /Int I2  when I2 =/=Int 0
+  rule I1 + I2 => I1 +Int I2
+  rule I1 - I2 => I1 -Int I2
 // BExp
-  rule I1:Int < I2:Int => I1 <Int I2
-  rule I1:Int <= I2:Int => I1 <=Int I2
-  rule I1:Int > I2:Int => I1 >Int I2
-  rule I1:Int >= I2:Int => I1 >=Int I2
-  rule ! T:Bool => notBool T
+  rule I1 < I2 => I1 <Int I2
+  rule I1 <= I2 => I1 <=Int I2
+  rule I1 > I2 => I1 >Int I2
+  rule I1 >= I2 => I1 >=Int I2
+  rule ! T => notBool T
   rule true  && B => B
   rule false && _ => false
 // Block
@@ -60,7 +60,7 @@ module IMP
 // Stmt
   rule <k> X = I:Int; => . ...</k>
        <state>... X |-> (_:KItem => I) ...</state>
-  // the following has sort annotation to avoid ambiguity with Map, MySet, etc
+  // the following has sort annotation to avoid ambiguity with MyMap, MySet, etc
   rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
   rule if (true)  S else _ => S
   rule if (false) _ else S => S
@@ -68,7 +68,7 @@ module IMP
 // Pgm
   rule
     <k> int (X, Xs => Xs); _ </k>
-    <state> Rho:Map (.Map => X |-> 0) </state>
+    <state> Rho:MyMap (.MyMap => X |-> 0) </state>
     //when notBool (X in keys(Rho))
   rule int .Ids; S => S  [structural]
 endmodule

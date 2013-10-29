@@ -451,7 +451,7 @@ interestingly, the semantics of return stays unchanged. */
   rule <k> { S } => S ~> env(Env) ...</k>  <env> Env </env>  [structural]
 
 
-  rule S1:Stmts S2:Stmts => S1 ~> S2  [structural]
+  rule S1 S2 => S1 ~> S2  [structural]
 
   rule _:Val; => .
 
@@ -715,7 +715,7 @@ shortly).  The location where the object will be stored is also made
 available in the \textsf{crntObj} cell, so that method closures can
 refer to it (see rule above). */
 
-  syntax K ::= (Id,BagItem)
+  syntax ListItem ::= (Id,BagItem)
 
   rule <k> new Class:Id(Vs:Vals) ~> K
            => create(Class) ~> storeObj ~> Class(Vs); return this; </k>
@@ -725,7 +725,7 @@ refer to it (see rule above). */
        <control> C
          <crntObj> Obj
                    => <crntClass> Object </crntClass>
-                      <envStack> ListItem((Object, <env>.Map</env>)) </envStack>
+                      <envStack> (Object, <env>.Map</env>) </envStack>
                       <location> L </location>
          </crntObj>
          <fstack> . => ListItem((Env, K, C <crntObj> Obj </crntObj>)) ...</fstack>
@@ -768,7 +768,7 @@ empty). */
   rule <k> addEnvLayer => . ...</k>
        <env> Env => . </env>
        <crntClass> Class:Id </crntClass>
-       <envStack> . => ListItem((Class, <env>Env</env>)) ...</envStack>
+       <envStack> . => (Class, <env>Env</env>) ...</envStack>
     [structural]
 
 /*@ The following operation stores the created object at the location
@@ -822,14 +822,14 @@ invocations see the entire object, as needed for dynamic method dispatch. */
   context HOLE . _ when (HOLE =/=K super)
 
   rule objectClosure(<crntClass> Class:Id </crntClass>
-                     <envStack> EStack </envStack>)
+                     <envStack>... (Class,EnvC) EStack </envStack>)
        . X:Id
-    => lookupMember(<envStack> EStack </envStack>, Class, X)
+    => lookupMember(<envStack> (Class,EnvC) EStack </envStack>, X)
     [structural]
 
-  rule <k> super . X => lookupMember(<envStack>EStack</envStack>, Class, super . X) ...</k>
+  rule <k> super . X => lookupMember(<envStack>EStack</envStack>, X) ...</k>
        <crntClass> Class </crntClass>
-       <envStack> EStack </envStack>
+       <envStack>... (Class,EnvC) EStack </envStack>
     [structural]
 
 
@@ -865,13 +865,13 @@ method call or the array access.  */
 
   context HOLE._::Id(_) when HOLE =/=K super
 
-  rule (objectClosure(Obj:Bag <envStack> ListItem((C,_:BagItem)) EStack </envStack>) . X
-    => lookupMember(<envStack> ListItem((C,_:BagItem)) EStack </envStack>, C, X:Id))(_:Exps)  [structural]
+  rule (objectClosure(Obj:Bag <envStack> EStack </envStack>) . X
+    => lookupMember(<envStack> EStack </envStack>, X:Id))(_:Exps)  [structural]
 
   rule <k> (super . X
-            => lookupMember(<envStack>EStack</envStack>,Class, super.X))(_:Exps)...</k>
+            => lookupMember(<envStack>EStack</envStack>,X))(_:Exps)...</k>
        <crntClass> Class </crntClass>
-       <envStack> EStack </envStack>
+       <envStack>... (Class,_) EStack </envStack>
     [structural]
 
   context HOLE(_:Exps)
@@ -896,10 +896,10 @@ desired class.  It returns \texttt{true} iff it can find the class,
 otherwise it returns \texttt{false}; it only gets stuck when its first
 argument does not evaluate to an object.  */
 
-  rule objectClosure(<envStack> ListItem((C,_:BagItem)) ...</envStack> _)
+  rule objectClosure(<envStack> (C,_) ...</envStack> _)
        instanceOf C => true
 
-  rule objectClosure(<envStack> ListItem((C,_:BagItem)) => . ...</envStack> _)
+  rule objectClosure(<envStack> (C,_) => . ...</envStack> _)
        instanceOf C'  when C =/=K C'  [structural]
 
   rule objectClosure(<envStack> . </envStack> _) instanceOf _ => false
@@ -942,28 +942,22 @@ member's location based on the current class of the object. */
   context lvalue(HOLE . _)
 
   rule lvalue(objectClosure(<crntClass> C </crntClass>
-                            <envStack>... ListItem((C,EnvC:BagItem)) EStack </envStack>)
+                            <envStack>... (C,EnvC) EStack </envStack>)
               . X
-              => lookupMember(<envStack> ListItem((C,EnvC)) EStack </envStack>,
-                              C, X))  [structural]
+              => lookupMember(<envStack> (C,EnvC) EStack </envStack>,
+                              X))  [structural]
 
 /*@ \subsubsection{Lookup member}
 
 It searches for the given member in the given environment stack,
 starting with the most concrete class and going up in the hierarchy. */
 
-  syntax K ::= lookupMember(BagItem,Id,Exp)  [function]
+  syntax K ::= lookupMember(BagItem,Id)  [function]
 
-  rule lookupMember(<envStack> ListItem((C, <env>... X|->L ...</env>)) ...</envStack>, C, X)
+  rule lookupMember(<envStack> (_, <env>... X|->L ...</env>) ...</envStack>, X)
     => lookup(L)
 
-  rule lookupMember(<envStack> (ListItem((C1, _:BagItem)) => .) ListItem((C2, _:BagItem))  ...</envStack>, C1 => C2, 
-     super.X => X)
-
-  rule lookupMember(<envStack> ListItem((C1, _:BagItem)) => .  ...</envStack>, C2, _)
-    when C1 =/=K C2
-
-  rule lookupMember(<envStack> ListItem((C, <env> Env </env>))  ...</envStack>, C, X => super.X)
+  rule lookupMember(<envStack> (_, <env> Env </env>) => . ...</envStack>, X)
     when notBool(X in keys(Env))
 
 endmodule

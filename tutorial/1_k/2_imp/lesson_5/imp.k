@@ -165,7 +165,7 @@ and counting only the steps corresponding to computational rules as
 transitions (i.e., hiding the structural rules as unobservable, or
 internal steps). */
 
-  rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
+  rule S1 S2 => S1 ~> S2  [structural]
 
 /*@ \subsubsection{Conditional}
 The conditional statement has two semantic cases, corresponding to

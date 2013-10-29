@@ -718,7 +718,7 @@ to something).  This means that once $S_1$ completes in the rule below, $S_2$
 becomes automatically the next computation item without any additional
 (explicit or implicit) rules. */
 
-  rule S1:Stmts S2:Stmts => S1 ~> S2  [structural]
+  rule S1 S2 => S1 ~> S2  [structural]
 
 /*@ \subsection{Expression statements}
 Expression statements are only used for their side effects, so their result
@@ -1018,8 +1018,8 @@ value: */
 
   syntax Map ::= Int "..." Int "|->" K
     [function, latex({#1}\ldots{#2}\mapsto{#3})]
-//  rule N...M |-> _ => .MyMap  when N >Int M
-//  rule N...M |-> K => N |-> K (N +Int 1)...M |-> K  when N <=Int M
+  rule N...M |-> _ => .Map  when N >Int M
+  rule N...M |-> K => N |-> K (N +Int 1)...M |-> K  when N <=Int M
 
 /*@ The semantics of SIMPLE is now complete.  Make sure you kompile the
 definition with the right options in order to generate the desired model.
