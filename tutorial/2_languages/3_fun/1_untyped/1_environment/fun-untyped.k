@@ -262,9 +262,13 @@ the game tomorrow or whenever you wish.  We will define the formal
 semantics of \texttt{callcc} in the semantics module below.  For now,
 we can desugar the \texttt{try-catch} construct into callcc: */
 
+//  rule try E catch(X) E'
+//    => callcc (fun $k -> (fun throw -> E)
+//                         (fun $v -> $k ((fun (X)::Id -> E') $v)))  [macro]
+
   rule try E catch(X) E'
     => callcc (fun $k -> (fun throw -> E)
-                         (fun $v -> $k ((fun (X)::Id -> E') $v)))  [macro]
+                         (fun X -> $k E'))  [macro]
 endmodule
 
 
@@ -440,9 +444,12 @@ only thing left to do is to state that a tuple of values is also a
 value.  For lists, we have to additionally give the semantics of
 \texttt{cons}: */
 
-// the "function" tag is currently needed due to a tool bug
-  rule isVal({Vs:Vals}) => true  [function]
-  rule isVal([Vs:Vals]) => true  [function]
+  syntax Val ::= "{" Vals "}"
+               | "[" Vals "]"
+
+// The above is equivalent to the following two:
+//  rule isVal({Vs:Vals}) => true
+//  rule isVal([Vs:Vals]) => true
 
   rule cons V:Val [Vs:Vals] => [V,Vs]
 
@@ -453,8 +460,8 @@ The semantics of references is self-explanatory.  Note that
 operation would be harder to define in a substitution-based approach. */
 
   rule <k> & X => L ...</k>  <env>... X |-> L </env>
-  rule <k> @ L => V ...</k>  <store>... L |-> V ...</store>
-  rule <k> L := V:Val => V ...</k>  <store>... L |-> (_=>V) ...</store>
+  rule <k> @ L:Int => V:Val ...</k>  <store>... L |-> V ...</store>
+  rule <k> L:Int := V:Val => V ...</k>  <store>... L |-> (_=>V) ...</store>
 
 /*@ Sequential composition, which is needed only to accumulate the
 side effects due to assignments, was strict in the first argument.

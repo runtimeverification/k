@@ -80,8 +80,7 @@ module BINDER
   rule #binderSplit(L:KLabel(Ks:KList))
     => #binderSplit1(L, 1, Ks, .KList, .KList, .Set)
 
-  syntax K ::= #binderSplit1(KLabel,Int,KList,KList,KList,Set)
-    [function]
+  syntax K ::= #binderSplit1(KLabel,Int,KList,KList,KList,Set)  [function]
   rule #binderSplit1(L:KLabel, I:Int, K:K,,Ks:KList,
                      NBEs:KList, BEs:KList, Bound:Set)
     => #if isBound(L,I) ==K true
