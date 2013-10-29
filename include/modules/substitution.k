@@ -27,6 +27,8 @@ module VARIABLE
   rule #getVars1(((Set2KLabel S:Set)(.KList) => Set2KTerm(S:Set)),,_, _)
   rule #getVars1((L:KLabel(Ks:KList) => Ks),,_, _)
     when isVariable(L(Ks)) =/=K true andBool isSet(L(Ks)) =/=K true
+// Grigore: new in order to deal with cc(.K)
+  rule #getVars1((.K => .KList),,_, _) 
   rule #getVars1(.KList, S:Set) => vars(S)
 
 // Generates a "fresh" local variable of the type of K that does not appear
@@ -134,6 +136,7 @@ module FREE-VARS
     when isBinder(K)
 // Grigore: new in order to deal with cc(.K)
   rule #freeVars((.K => .KList),,_, _, _)
+  rule #freeVars((K1 ~> K2 => K1,,K2),,_, _, _)
 //  rule #freeVars( .K , _, Free:Set) => vars(Free)
 //  rule #freeVars( (.K,,K:K => K) , _, _)
 
@@ -261,6 +264,8 @@ module SUBSTITUTION
 
   rule #substitutePlainList(L:KLabel(Ks:KList), M:Map)
     => #substitutePlainList1(L:KLabel(Ks), M, .KList)
+// Grigore: new in order to deal with cc(.K)
+  rule #substitutePlainList(.K, _) => .K
   
   rule #substitutePlainList1(_:KLabel((K:K => .KList),,_), M:Map, _,,
         (.KList => #substitutePlain(K,M)))
