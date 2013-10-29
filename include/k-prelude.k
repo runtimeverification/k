@@ -28,11 +28,11 @@ module K-MAP-EXTRAS
 	imports K-EQUAL-HOOKS
 
   syntax K ::= Map "(" K ")"  [function, klabel(deprecatedMapLookup)]
-//  rule (_ K1:K |-> K2:K)(K1) => K2
+  // implemented in k-prelude.maude
 
-  syntax Map ::= Map "[" "undef" "/" KList "]"  [function]
+//  syntax Map ::= Map "[" "undef" "/" KList "]"  [function]
 
-  syntax Map ::= "Map" "(" KList "|->" KList ")"   [function]
+//  syntax Map ::= "Map" "(" KList "|->" KList ")"   [function]
 /*  rule Map((K1:K => .KList),,_ |-> (K2:K => .KList),,_:K,,_) (. => K1 |-> K2) [structural]
   rule Map((K1:K => .KList),,_ |-> K2:K) (. => K1 |-> K2)
   rule Map(.KList |-> _) => .
@@ -53,7 +53,7 @@ module K-MAP-EXTRAS
   rule M:Map[undef/ .KList] => M [structural, anywhere]
   rule (M:Map K:K |-> _)[undef/ K] => M [structural, anywhere]
 */
-  syntax Map ::= Map "[" Map "]"   [function, cons(Map1UpdateMapWithMapSyn)]
+//  syntax Map ::= Map "[" Map "]"   [function, cons(Map1UpdateMapWithMapSyn)]
 //  rule M:Map[M':Map K1:K |-> K2:K] => M[K2/K1][M'] [structural]
 //  rule M:Map[.Map] => M [structural]
 
@@ -62,19 +62,16 @@ module K-MAP-EXTRAS
 //    => Map(K1),,Map(K2),,Map(Ks) [structural]
 //  rule Map:Map(.KList) => .KList [structural]
 
-	syntax Set ::= "keys" Map  [function]
+	syntax Set ::= "keys" Map  [function, hook(Set:keys)]
+  // implemented in k-prelude.maude
 
-//  rule keys . => . [structural]
-//  rule (keys ((K:K |->_  => .) _)) (. => SetItem(K)) [structural]
+	syntax Set ::= "values" Map  [function, hook(Set:values)]
+  // implemented in k-prelude.maude
 
-	syntax Set ::= "values" Map  [function]
+  syntax Bool ::= "$hasMapping" "(" Map "," K ")" [function,maudeop("$hasMapping"), hook(Set:hasMapping)]
+  // implemented in k-prelude.maude
 
-//  rule values . => . [structural]
-//  rule (values ((_ |-> K:K  => .) _)) (. => SetItem(K)) [structural]
-
-  syntax Bool ::= "$hasMapping" "(" Map "," K ")" [function,maudeop("$hasMapping")]
-  syntax Bool ::= "#hasMapping" "(" Map "," K ")" [function, maudeop("#hasMapping")]
-//  rule $hasMapping(M:Map,K:K) => #hasMapping(M,K) ==K true
+//  syntax Bool ::= "#hasMapping" "(" Map "," K ")" [function, maudeop("#hasMapping")]
 
 //  rule #hasMapping(_:Map K:K |-> _:K,K) => true
 
@@ -82,10 +79,11 @@ module K-MAP-EXTRAS
 // The following are used in pattern-matching.k
 
   syntax K ::= #map(Map)
-  syntax Bool ::= #isMapInK(K)     [function]
-  syntax Map  ::= #getMapFromK(K)  [function]
-//  rule #isMapInK(#map(_)) => true
-//  rule #getMapFromK(#map(M:Map)) => M
+  // constructor wrapping Maps into K
+  syntax Bool ::= #isMapInK(K)     [function, hook(Map:isMapInK)]
+  // implemented in k-prelude.maude
+  syntax Map  ::= #getMapFromK(K)  [function, hook(Map:getMapFromK)]
+  // implemented in k-prelude.maude
 
 endmodule
 
@@ -94,19 +92,17 @@ module K-SET-EXTRAS
 	imports BOOL-HOOKS
 	imports K-EQUAL-HOOKS
 
-  syntax KLabel ::= "isSet"
+  syntax KLabel ::= "isSet" // Checks if the argument is a wrapped set
+  // implemented in k-prelude.maude
 
-//	syntax Set ::= "Set" KList
         syntax Set ::= Set "-Set" Set  [function, latex({#1}-_{\it Set}{#2})]
-/*  rule S1:Set -Set (SI1:SetItem SI2:SetItem S2:Set)
-    => ((S1 -Set SI1) -Set SI2) -Set S2
-  rule S1:Set -Set . => S1 
-  rule (SI:SetItem S:Set) -Set SI => S
-  rule S:Set -Set SI:SetItem => S when SI in S ==Bool false //  [owise]
-*/
+// implemented in k-prelude.maude
+
 	syntax Bool ::= K "in" Set   [function, klabel(inSet)]
-			      | SetItem "in" Set   [function, klabel(kInSet)]	
-			      | K "#inSet" Set   [function]	
+// implemented in k-prelude.maude
+
+//			      | SetItem "in" Set   [function, klabel(kInSet)]	
+//			      | K "#inSet" Set   [function]	
 /*   rule SetItem(K:K) in S:Set => K in S [structural, anywhere]
    rule K:K in S:Set => K #inSet S ==K true
      [structural, anywhere]
@@ -119,17 +115,17 @@ module K-SET-EXTRAS
 */
 
   syntax Set ::= intersectSet(Set, Set) [function]
-//  rule intersectSet(A:Set, B:Set) => A -Set (A -Set B)
+//  implemented in k-prelude.maude
 
   syntax Bool ::= isEmptySet(Set) [function]
-//  rule isEmptySet(A:Set) => (A ==Set .Set)
+//  implemented in k-prelude.maude
 
   syntax KLabel ::= "#set"
 
   syntax K ::= Set2KTerm(Set)        [function]
-//  rule Set2KTerm(S:Set) => Set2KTermAcc(S, #set(.KList))
+// implemented in k-prelude.maude
 
-  syntax K ::= Set2KTermAcc(Set, K)  [function]
+//  syntax K ::= Set2KTermAcc(Set, K)  [function]
 //  rule Set2KTermAcc((SetItem(K:K) => .Set)_, _(_,,(.KList => K)))
 //  rule Set2KTermAcc(.Set, K:K) => K
 
@@ -155,7 +151,7 @@ module K-LIST-EXTRAS
 
 //	syntax List ::= "List" KList
 
-	syntax Int ::= "lengthList" List [function]
+//	syntax Int ::= "lengthList" List [function]
 
 /*   rule lengthList ( _:ListItem L:List ) => 1 +Int lengthList L [structural, anywhere]
    rule lengthList .List => 0 [structural, anywhere]
@@ -191,8 +187,6 @@ module K-WRAPPERS-LABELS
 
 
 
-//  rule isSet(Set2KLabel(_)(.KList)) => true [predicate,anywhere]
-
 endmodule
 
 module K-DESTRUCTORS
@@ -203,14 +197,6 @@ endmodule
 
 module K-WRAPPERS
 	imports K-TECHNIQUE
-// not used anymore
-//	syntax K ::= KLabel2K (KLabel)		[klabel('KLabel2K_)]
-//			   | Celllabel2K (CellLabel)[klabel('Celllabel2K_)] 
-//			   | KList2K (KList)		[klabel('KList2K_)]
-//			   | Set2K (Set)			[klabel('Set2K_)]
-//			   | Bag2K (Bag)			[klabel('Bag2K_)]
-//			   | List2K (List)			[klabel('List2K_)]
-//			   | Map2K (Map)			[klabel('Map2K_)]
 endmodule
 
 module K-EVAL
