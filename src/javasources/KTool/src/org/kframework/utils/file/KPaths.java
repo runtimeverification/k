@@ -15,11 +15,6 @@ public class KPaths {
 		return file;
 	}
 
-	public static boolean isDebugMode() {
-		String path = new File(KPaths.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getAbsolutePath();
-		return !path.endsWith(".jar");
-	}
-
     public static String javaLibraryPath = null;
 	public static String JAR_PATH = "lib/java/k3.jar";
 	public static String MAUDE_DIR = "lib/maude/binaries";

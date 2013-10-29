@@ -1,0 +1,18 @@
+<tests>
+
+  <test
+    definition="lambda.k"
+    programs="../../lesson_1/tests
+              ."
+    extension="lambda"
+    exclude="omega"
+    results="../../lesson_1/tests
+             ../../lesson_2/tests
+             ../../lesson_3/tests
+             ." >
+    <all-programs>
+      <krun-option name="-output-mode" value="pretty" />
+    </all-programs>
+  </test>
+
+</tests>

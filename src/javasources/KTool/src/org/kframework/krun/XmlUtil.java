@@ -25,7 +25,7 @@ import java.util.List;
 public class XmlUtil {
 
 	public static Document readXMLFromFile(String fileName) {
-        try (FileInputStream byteStream = new FileInputStream(fileName)) {
+        try (InputStream byteStream = new BufferedInputStream(new FileInputStream(fileName))) {
             return readXML(new InputSource(byteStream));
         }catch (IOException e) {
             throw new RuntimeException(e);
@@ -71,7 +71,7 @@ public class XmlUtil {
 	// write the XML document to disk
 	public static void serializeXML(Node doc, String fileName) {
         Source xmlSource = new DOMSource(doc);
-		try (FileOutputStream outStream = new FileOutputStream(fileName)) {
+		try (OutputStream outStream = new BufferedOutputStream(new FileOutputStream(fileName))) {
             Result result = new StreamResult(outStream);
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();

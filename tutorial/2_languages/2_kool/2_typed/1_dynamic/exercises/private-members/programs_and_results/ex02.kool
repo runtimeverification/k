@@ -6,7 +6,7 @@ class A {
 }
 
 class Main {
-  method Main() {
+  void Main() {
     A a = new A();
     print("This is reached: the constructor is called after the current class is set\n");
     a.A();

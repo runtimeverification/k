@@ -8,7 +8,7 @@ class B {
 class A extends B {
     private int y = 7;
     void A() {
-        super.B();  // KOOL doesn't automatically call the superclass constructor
+        super.B();  // KOOL doesn't automatically call superclass constructors
 	y = 10;
     }
 }

@@ -33,7 +33,7 @@ public class LatexBackend extends BasicBackend {
 			String kLatexStyle = KPaths.getKBase(false) + fileSep + "include" + fileSep + "latex" + fileSep + "k.sty";
 			String dotKLatexStyle = context.dotk.getAbsolutePath() + fileSep + "k.sty";
 
-			FileUtil.saveInFile(dotKLatexStyle, FileUtil.getFileContent(kLatexStyle));
+			FileUtil.save(dotKLatexStyle, FileUtil.getFileContent(kLatexStyle));
 
 			String latexified = "\\nonstopmode" + endl + "\\documentclass{article}" + endl + "\\usepackage[" + GlobalSettings.style + "]{k}" + endl;
 			String preamble = lf.getPreamble().toString();
@@ -43,7 +43,7 @@ public class LatexBackend extends BasicBackend {
 			String latexifiedFile = context.dotk.getAbsolutePath() + fileSep + FileUtil.stripExtension(canonicalFile.getName()) + ".tex";
 			result.add(new File(latexifiedFile));
 			result.add(new File(dotKLatexStyle));
-			FileUtil.saveInFile(latexifiedFile, latexified);
+			FileUtil.save(latexifiedFile, latexified);
 
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Latex Generation");

@@ -30,9 +30,8 @@ public class KLabelConstant extends KLabel {
     /* unmodifiable view of a list of productions generating this {@code KLabelConstant} */
     private final List<Production> productions;
     /*
-     * boolean flag set iff a production tagged with "function" or "predicate" generates this
-     * {@code
-     * KLabelConstant}
+     * boolean flag set iff a production tagged with "function" or "predicate"
+     * generates this {@code KLabelConstant}
      */
     private final boolean isFunction;
 

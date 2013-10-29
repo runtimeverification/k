@@ -178,17 +178,6 @@ public class KItem extends Term implements Sorted {
             //e.printStackTrace();
         } catch (IllegalArgumentException e) {
             //e.printStackTrace();
-            if (K.do_testgen) {
-                for (Term arg : kList.getItems()) {
-                    if (arg instanceof Variable) {
-                        Variable evalResult = DomainConstrainedVariable
-                                .getFreshContrainedVariable(sort, this);
-                        // TODO(YilongL): when to check sat?
-                        return evalResult;
-                        }
-                    }
-                assert false; // shouldn't be here
-            }
         } catch (RuntimeException e) {
             if (GlobalSettings.verbose) {
                 System.err.println("Ignored exception thrown by hook " + kLabelConstant + " : ");
@@ -207,6 +196,10 @@ public class KItem extends Term implements Sorted {
         return kList;
     }
 
+    /**
+     * A {@code KItem} cannot be further decomposed in a unification task if and
+     * only if its {@code KLabel} represents a function.
+     */
     @Override
     public boolean isSymbolic() {
         return kLabel.isFunction();

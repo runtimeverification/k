@@ -1,7 +1,6 @@
 package org.kframework.parser;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
@@ -34,6 +33,7 @@ import org.kframework.parser.concrete.disambiguate.CorrectRewritePriorityFilter;
 import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
+import org.kframework.parser.concrete.disambiguate.MergeAmbFilter;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
@@ -156,10 +156,10 @@ public class DefinitionLoader {
 				if (new File(context.dotk.getAbsolutePath() + "/pgm/Program.sdf").exists())
 					oldSdfPgm = FileUtil.getFileContent(context.dotk.getAbsolutePath() + "/pgm/Program.sdf");
 
-				String newSdfPgm = ProgramSDF.getSdfForPrograms(def, context);
+				StringBuilder newSdfPgmBuilder = ProgramSDF.getSdfForPrograms(def, context);
 
-				FileUtil.saveInFile(context.dotk.getAbsolutePath() + "/pgm/Program.sdf", newSdfPgm);
-				newSdfPgm = FileUtil.getFileContent(context.dotk.getAbsolutePath() + "/pgm/Program.sdf");
+				FileUtil.save(context.dotk.getAbsolutePath() + "/pgm/Program.sdf", newSdfPgmBuilder);
+                String newSdfPgm = FileUtil.getFileContent(context.dotk.getAbsolutePath() + "/pgm/Program.sdf");
 
 				if (GlobalSettings.verbose)
 					Stopwatch.sw.printIntermediate("File Gen Pgm");
@@ -180,8 +180,8 @@ public class DefinitionLoader {
 			String oldSdf = "";
 			if (new File(context.dotk.getAbsolutePath() + "/def/Integration.sdf").exists())
 				oldSdf = FileUtil.getFileContent(context.dotk.getAbsolutePath() + "/def/Integration.sdf");
-			FileUtil.saveInFile(context.dotk.getAbsolutePath() + "/def/Integration.sdf", DefinitionSDF.getSdfForDefinition(def, context));
-			FileUtil.saveInFile(context.dotk.getAbsolutePath() + "/ground/Integration.sdf", Definition2SDF.getSdfForDefinition(def, context));
+			FileUtil.save(context.dotk.getAbsolutePath() + "/def/Integration.sdf", DefinitionSDF.getSdfForDefinition(def, context));
+			FileUtil.save(context.dotk.getAbsolutePath() + "/ground/Integration.sdf", Definition2SDF.getSdfForDefinition(def, context));
 			String newSdf = FileUtil.getFileContent(context.dotk.getAbsolutePath() + "/def/Integration.sdf");
 
 			if (GlobalSettings.verbose)
@@ -283,7 +283,7 @@ public class DefinitionLoader {
 		Document doc = XmlLoader.getXMLDoc(parsed);
 		XmlLoader.addFilename(doc.getFirstChild(), filename);
 		XmlLoader.reportErrors(doc);
-		FileUtil.saveInFile(context.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
+		FileUtil.save(context.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
 
 		JavaClassesFactory.startConstruction(context);
 		org.kframework.kil.ASTNode config = (Term) JavaClassesFactory.getTerm((Element) doc.getFirstChild().getFirstChild().getNextSibling());
@@ -293,18 +293,21 @@ public class DefinitionLoader {
 		new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation(context), context).check(config);
 		config = config.accept(new SentenceVariablesFilter(context));
 		config = config.accept(new CellEndLabelFilter(context));
-		// config = config.accept(new InclusionFilter(localModule));
+		//if (checkInclusion)
+		//	config = config.accept(new InclusionFilter(localModule, context));
 		config = config.accept(new CellTypesFilter(context));
-		// config = config.accept(new CorrectRewritePriorityFilter());
+		config = config.accept(new CorrectRewritePriorityFilter(context));
 		config = config.accept(new CorrectKSeqFilter(context));
 		config = config.accept(new CorrectCastPriorityFilter(context));
 		// config = config.accept(new CheckBinaryPrecedenceFilter());
-		// config = config.accept(new VariableTypeInferenceFilter());
-		config = config.accept(new AmbDuplicateFilter(context));
-		config = config.accept(new TypeSystemFilter(context));
 		config = config.accept(new PriorityFilter(context));
-		config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context));
-		config = config.accept(new TypeInferenceSupremumFilter(context));
+		if (GlobalSettings.fastKast)
+			config = config.accept(new MergeAmbFilter(context));
+		config = config.accept(new VariableTypeInferenceFilter(context));
+		// config = config.accept(new AmbDuplicateFilter(context));
+		// config = config.accept(new TypeSystemFilter(context));
+		// config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context));
+		// config = config.accept(new TypeInferenceSupremumFilter(context));
 		config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context));
 		config = config.accept(new PreferAvoidFilter(context));
 		config = config.accept(new FlattenListsFilter(context));
@@ -326,7 +329,7 @@ public class DefinitionLoader {
 
 		XmlLoader.addFilename(doc.getFirstChild(), filename);
 		XmlLoader.reportErrors(doc);
-		FileUtil.saveInFile(context.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
+		FileUtil.save(context.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
 		XmlLoader.writeXmlFile(doc, context.kompiled + "/pattern.xml");
 
 		JavaClassesFactory.startConstruction(context);
@@ -337,18 +340,21 @@ public class DefinitionLoader {
 		new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation(context), context).check(config);
 		config = config.accept(new SentenceVariablesFilter(context));
 		config = config.accept(new CellEndLabelFilter(context));
-		// config = config.accept(new InclusionFilter(localModule));
+		//if (checkInclusion)
+		//	config = config.accept(new InclusionFilter(localModule, context));
 		config = config.accept(new CellTypesFilter(context));
-		// config = config.accept(new CorrectRewritePriorityFilter());
+		config = config.accept(new CorrectRewritePriorityFilter(context));
 		config = config.accept(new CorrectKSeqFilter(context));
 		config = config.accept(new CorrectCastPriorityFilter(context));
 		// config = config.accept(new CheckBinaryPrecedenceFilter());
-		// config = config.accept(new VariableTypeInferenceFilter());
-		config = config.accept(new AmbDuplicateFilter(context));
-		config = config.accept(new TypeSystemFilter(context));
 		config = config.accept(new PriorityFilter(context));
-		config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context));
-		config = config.accept(new TypeInferenceSupremumFilter(context));
+		if (GlobalSettings.fastKast)
+			config = config.accept(new MergeAmbFilter(context));
+		config = config.accept(new VariableTypeInferenceFilter(context));
+		// config = config.accept(new AmbDuplicateFilter(context));
+		// config = config.accept(new TypeSystemFilter(context));
+		// config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context));
+		// config = config.accept(new TypeInferenceSupremumFilter(context));
 		config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context));
 		config = config.accept(new PreferAvoidFilter(context));
 		config = config.accept(new FlattenListsFilter(context));
@@ -378,7 +384,7 @@ public class DefinitionLoader {
 
 		XmlLoader.addFilename(doc.getFirstChild(), filename);
 		XmlLoader.reportErrors(doc);
-		//		FileUtil.saveInFile(context.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
+		//		FileUtil.save(context.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
 		//		XmlLoader.writeXmlFile(doc, context.kompiled + "/pattern.xml");
 
 		JavaClassesFactory.startConstruction(context);
@@ -388,18 +394,21 @@ public class DefinitionLoader {
 		new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation(context), context).check(config);
 		config = config.accept(new SentenceVariablesFilter(context));
 		config = config.accept(new CellEndLabelFilter(context));
-		// config = config.accept(new InclusionFilter(localModule, context));
+		//if (checkInclusion)
+		//	config = config.accept(new InclusionFilter(localModule, context));
 		config = config.accept(new CellTypesFilter(context));
 		config = config.accept(new CorrectRewritePriorityFilter(context));
 		config = config.accept(new CorrectKSeqFilter(context));
 		config = config.accept(new CorrectCastPriorityFilter(context));
 		// config = config.accept(new CheckBinaryPrecedenceFilter());
-		config = config.accept(new VariableTypeInferenceFilter(context));
-		config = config.accept(new AmbDuplicateFilter(context));
-		config = config.accept(new TypeSystemFilter(context));
 		config = config.accept(new PriorityFilter(context));
-		config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context));
-		config = config.accept(new TypeInferenceSupremumFilter(context));
+		if (GlobalSettings.fastKast)
+			config = config.accept(new MergeAmbFilter(context));
+		config = config.accept(new VariableTypeInferenceFilter(context));
+		// config = config.accept(new AmbDuplicateFilter(context));
+		// config = config.accept(new TypeSystemFilter(context));
+		// config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context));
+		// config = config.accept(new TypeInferenceSupremumFilter(context));
 		config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context));
 		config = config.accept(new PreferAvoidFilter(context));
 		config = config.accept(new FlattenListsFilter(context));
@@ -421,7 +430,7 @@ public class DefinitionLoader {
 
 		// XmlLoader.addFilename(doc.getFirstChild(), filename);
 		XmlLoader.reportErrors(doc);
-		FileUtil.saveInFile(context.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
+		FileUtil.save(context.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
 		XmlLoader.writeXmlFile(doc, context.kompiled + "/pattern.xml");
 
 		JavaClassesFactory.startConstruction(context);

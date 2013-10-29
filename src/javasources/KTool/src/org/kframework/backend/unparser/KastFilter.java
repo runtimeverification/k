@@ -25,8 +25,8 @@ public class KastFilter extends BasicVisitor {
 		this.nextline = nextline;
 	}
 
-	public String getResult() {
-		return result.toString();
+	public StringBuilder getResult() {
+		return result.getResult();
 	}
 
 	@Override

@@ -28,9 +28,9 @@ public class DocumentationBackend extends BasicBackend {
 
 		String html = htmlFilter.getHTML();
 
-		FileUtil.saveInFile(context.dotk.getAbsolutePath() + "/def.html", html);
+		FileUtil.save(context.dotk.getAbsolutePath() + "/def.html", html);
 
-		FileUtil.saveInFile(GlobalSettings.outputDir + fileSep + FileUtil.stripExtension(GlobalSettings.mainFile.getName()) + ".html", html);
+		FileUtil.save(GlobalSettings.outputDir + fileSep + FileUtil.stripExtension(GlobalSettings.mainFile.getName()) + ".html", html);
 		String kHTMLStyle = KPaths.getKBase(false) + fileSep + "include" + fileSep + "html" + fileSep + GlobalSettings.style;
         final File toFile = new File(GlobalSettings.outputDir, GlobalSettings.style);
         copyFile(new File(kHTMLStyle), toFile);

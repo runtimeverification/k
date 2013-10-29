@@ -314,6 +314,7 @@ public class KTest {
         exitCode |= resultPdf(execPdf(homeDir, alltestsUnique));
         exitCode |= execPrograms(homeDir, alltests);
 
+        //GlobalSettings.kem.print();
         if (exitCode != 0)
             System.exit(exitCode);
     }

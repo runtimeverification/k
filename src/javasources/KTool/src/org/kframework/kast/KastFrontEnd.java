@@ -1,8 +1,6 @@
 package org.kframework.kast;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
+import java.io.*;
 
 import org.apache.commons.cli.CommandLine;
 import org.kframework.backend.maude.MaudeFilter;
@@ -13,6 +11,7 @@ import org.kframework.compile.transformers.AddTopCellConfig;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.krun.K;
 import org.kframework.krun.Main;
 import org.kframework.parser.ProgramLoader;
 import org.kframework.utils.BinaryLoader;
@@ -207,7 +206,7 @@ public class KastFrontEnd {
 
 		try {
 			ASTNode out = ProgramLoader.processPgm(pgm, path, javaDef, sort, context, GlobalSettings.whatParser);
-			String kast;
+			StringBuilder kast;
 			if (prettyPrint) {
 				KastFilter kastFilter = new KastFilter(indentationOptions, nextline, context);
 				out.accept(kastFilter);
@@ -216,10 +215,21 @@ public class KastFrontEnd {
 				MaudeFilter maudeFilter = new MaudeFilter(context);
 				out.accept(maudeFilter);
 				kast = maudeFilter.getResult();
+                kast.append(K.lineSeparator);
 			}
-			System.out.println(kast);
 
-			if (GlobalSettings.verbose) {
+            try {
+                Writer outWriter = new OutputStreamWriter(System.out);
+                try {
+                    FileUtil.toWriter(kast, outWriter);
+                } finally {
+                    outWriter.flush();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            if (GlobalSettings.verbose) {
 				sw.printIntermediate("Maudify Program");
 				sw.printTotal("Total");
 			}

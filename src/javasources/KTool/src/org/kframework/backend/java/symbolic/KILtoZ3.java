@@ -18,6 +18,8 @@ import java.util.Set;
 
 
 /**
+ * Converts a term from the KIL representation into the Z3 representation.
+ * 
  * @author: AndreiS
  */
 public class KILtoZ3 extends CopyOnWriteTransformer {

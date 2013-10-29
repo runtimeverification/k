@@ -6,6 +6,9 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.io.*;
+import java.lang.reflect.Field;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Properties;
 
@@ -15,15 +18,61 @@ import static org.apache.commons.io.FileUtils.writeStringToFile;
 
 public class FileUtil {
 
-	public static void saveInFile(String file, String content) {
+    static final Field stringBuilderValue;
+    static final Field stringBuilderCount;
+
+    static {
+        try {
+            final Class<?> abstractStringBuilderClass
+                = Class.forName("java.lang.AbstractStringBuilder");
+            stringBuilderValue = abstractStringBuilderClass.getDeclaredField("value");
+            stringBuilderValue.setAccessible(true);
+            stringBuilderCount = abstractStringBuilderClass.getDeclaredField("count");
+            stringBuilderCount.setAccessible(true);
+        } catch (NoSuchFieldException | ClassNotFoundException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
+
+    public static void save(String fileName, String content) {
 		try {
-            writeStringToFile(new File(file), content);
+            writeStringToFile(new File(fileName), content);
 		} catch (IOException e) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot save file content: " + file, "internal", "FileUtil.java"));
+			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot save file content: " + fileName, "internal", "FileUtil.java"));
 		}
 	}
 
-	public static String getExtension(String file) {
+    /**
+     * A performance-optimized version of save() that uses reflection to access private fields of
+     * StringBuilder.
+     */
+    public static void save(String fileName, StringBuilder content) {
+        try {
+            Files.createDirectories(Paths.get(fileName).getParent());
+
+            try (Writer writer = new BufferedWriter(new FileWriter(fileName))){
+                toWriter(content, writer);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            GlobalSettings.kem.register(
+                new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
+                    "Cannot save file content: " + fileName + ", " + e.getMessage(),
+                    "internal", "FileUtil.java"));
+        }
+    }
+
+    public static void toWriter(StringBuilder content, Writer writer) throws IOException {
+        try {
+            char[] sbValue = (char[]) stringBuilderValue.get(content);
+            int sbCount = (int) stringBuilderCount.get(content);
+            writer.write(sbValue, 0, sbCount);
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    public static String getExtension(String file) {
 		int idx = file.lastIndexOf(".");
 		if (idx < 0)
 			return null;

@@ -14,20 +14,20 @@ public class UserList extends ProductionItem {
 
     public UserList(String sort, String separator) {
         this.sort = sort;
-        this.separator = separator;
+        this.separator = separator.trim();
         this.listType = "*";
     }
 
     public UserList(String sort, String separator, String listType) {
         this.sort = sort;
-        this.separator = separator;
+        this.separator = separator.trim();
         this.listType = listType;
     }
 
 	public UserList(UserList userList) {
 		super(userList);
 		sort = userList.sort;
-		separator = userList.separator;
+		separator = userList.separator.trim();
 		listType = userList.listType;
 	}
 
@@ -52,7 +52,7 @@ public class UserList extends ProductionItem {
 	}
 
 	public void setSeparator(String separator) {
-		this.separator = separator;
+		this.separator = separator.trim();
 	}
 
 	@Override

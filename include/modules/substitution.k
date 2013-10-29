@@ -80,8 +80,7 @@ module BINDER
   rule #binderSplit(L:KLabel(Ks:KList))
     => #binderSplit1(L, 1, Ks, .KList, .KList, .Set)
 
-  syntax K ::= #binderSplit1(KLabel,Int,KList,KList,KList,Set)
-    [function]
+  syntax K ::= #binderSplit1(KLabel,Int,KList,KList,KList,Set)  [function]
   rule #binderSplit1(L:KLabel, I:Int, K:K,,Ks:KList,
                      NBEs:KList, BEs:KList, Bound:Set)
     => #if isBound(L,I) ==K true
@@ -133,6 +132,11 @@ module FREE-VARS
   rule #freeVars(K:K,,Ks:KList, Bound:Set, Free:Set)
     => #freeVars1(Ks, #freeVarsBinder(K, Bound), Bound, Free)
     when isBinder(K)
+// Grigore: new in order to deal with cc(.K)
+  rule #freeVars((.K => .KList),,_, _, _)
+//  rule #freeVars( .K , _, Free:Set) => vars(Free)
+//  rule #freeVars( (.K,,K:K => K) , _, _)
+
 
   syntax K ::= #freeVars1(KList, K, Set, Set)  [function]
   rule #freeVars1(Ks:KList, vars(Free1:Set), Bound:Set, Free2:Set)
@@ -195,6 +199,8 @@ module SUBSTITUTION
   rule #substituteList1(_:KLabel((K:K => .KList),,_),M:Map,FV:K,
                         _,,(.KList => #substituteFV(K, M, FV)))
   rule #substituteList1(L:KLabel(.KList), _, _, Ks:KList) => L(Ks)
+// Grigore: new in order to deal with cc(.K)
+  rule #substituteList1(.K, _, _, _) => .K
 
   syntax K ::= #substituteBinder(K, Map, K)  [function]
   rule #substituteBinder(K:K, M:Map, FV:K)

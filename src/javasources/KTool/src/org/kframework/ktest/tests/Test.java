@@ -23,6 +23,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.kframework.ktest.Configuration;
 import org.kframework.ktest.execution.Task;
+import org.kframework.utils.ListReverser;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -68,6 +69,11 @@ public class Test implements Comparable<Test> {
                 : excludePrograms;
         this.recursive = true;
         this.unixOnlyScript = null;
+
+        if (resultsFolders.size() == 0) {
+            String msg = "[Warning] A '--results' option was not specified.";
+            System.out.println(Configuration.wrap(msg,10));
+        }
 
         // reports
         try {
@@ -164,24 +170,34 @@ public class Test implements Comparable<Test> {
                 String input = null;
                 String output = null;
                 String error = null;
+                String inputFile = null, outputFile = null, errorFile = null;
                 if (resultsFolders != null) {
-                    for (String rf : resultsFolders) {
-                        String inputFile = searchInputFile(rf, new File(
-                                programPath).getName(), recursive);
-                        input = getFileAsStringOrNull(inputFile);
-
-                        String outputFile = searchOutputFile(rf, new File(
-                                programPath).getName());
-                        output = getFileAsStringOrNull(outputFile);
-
-                        String errorFile = searchErrorFile(rf, new File(
-                                programPath).getName());
-                        error = getFileAsStringOrNull(errorFile);
-
-                        if (input != null || output != null || error != null) {
+                    for (String rf : new ListReverser<String>(resultsFolders)) {
+                        if (input == null) {
+                            inputFile = searchInputFile(rf, new File(programPath).getName(), recursive);
+                            if (inputFile != null)
+                                input = FileUtil.getFileContent(inputFile);
+                        }
+                        if (output == null) {
+                            outputFile = searchOutputFile(rf, new File(programPath).getName());
+                            if (outputFile != null)
+                                output = FileUtil.getFileContent(outputFile);
+                        }
+                        if (error == null) {
+                            errorFile = searchErrorFile(rf, new File(programPath).getName());
+                            if (errorFile != null)
+                                error = FileUtil.getFileContent(errorFile);
+                        }
+                        if (input != null && output != null && error != null) {
                             break;
                         }
                     }
+                }
+                if (Configuration.VERBOSE) {
+                    System.out.println("Program: " + programPath);
+                    System.out.println("   .in : " + inputFile);
+                    System.out.println("   .out: " + outputFile);
+                    System.out.println("   .err: " + errorFile);
                 }
 
                 // custom programPath
@@ -195,18 +211,6 @@ public class Test implements Comparable<Test> {
 
             }
         }
-    }
-
-    private String getFileAsStringOrNull(String file) {
-        if (file != null) {
-            try (FileInputStream in = new FileInputStream(file)) {
-                return Task.readString(in);
-            }
-            catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return null;
     }
 
     private String searchOutputFile(String resultsFolder2, String name) {
@@ -346,6 +350,12 @@ public class Test implements Comparable<Test> {
                 }
             }
         }
+        //Collections.reverse(resultsFolders);
+        if (resultsFolders.size() == 0) {
+            String msg = "[Warning] A 'results' attribute was not specified: ";
+            msg += "<test definition=" + test.getAttribute(Configuration.LANGUAGE) + " programs=" + test.getAttribute(Configuration.PROGRAMS_DIR) + " />";
+            System.out.println(Configuration.wrap(msg,10));
+        }
 
         // get report dir
         String reportDir = resolveAbsolutePathRelativeTo(
@@ -404,21 +414,25 @@ public class Test implements Comparable<Test> {
             String input = null;
             String output = null;
             String error = null;
+            String inputFile = null, outputFile = null, errorFile = null;
             if (resultsFolders != null) {
-                for (String rf : resultsFolders) {
-                    String inputFile = searchInputFile(rf,
-                            new File(programPath).getName(), recursive);
-                    input = getFileAsStringOrNull(inputFile);
-
-                    String outputFile = searchOutputFile(rf, new File(
-                            programPath).getName());
-                    output = getFileAsStringOrNull(outputFile);
-
-                    String errorFile = searchErrorFile(rf,
-                            new File(programPath).getName());
-                    error = getFileAsStringOrNull(errorFile);
-
-                    if (input != null || output != null || error != null) {
+                for (String rf : new ListReverser<String>(resultsFolders)) {
+                    if (input == null) {
+                        inputFile = searchInputFile(rf, new File(programPath).getName(), recursive);
+                        if (inputFile != null)
+                            input = FileUtil.getFileContent(inputFile);
+                    }
+                    if (output == null) {
+                        outputFile = searchOutputFile(rf, new File(programPath).getName());
+                        if (outputFile != null)
+                            output = FileUtil.getFileContent(outputFile);
+                    }
+                    if (error == null) {
+                        errorFile = searchErrorFile(rf, new File(programPath).getName());
+                        if (errorFile != null)
+                            error = FileUtil.getFileContent(errorFile);
+                    }
+                    if (input != null && output != null && error != null) {
                         break;
                     }
                 }

@@ -25,7 +25,7 @@ import org.kframework.utils.general.GlobalSettings;
  */
 public class ProgramSDF {
 
-	public static String getSdfForPrograms(Definition def, Context context) {
+	public static StringBuilder getSdfForPrograms(Definition def, Context context) {
 
 		// collect all the syntax modules
 		CollectSynModulesVisitor csmv = new CollectSynModulesVisitor(context);
@@ -179,6 +179,6 @@ public class ProgramSDF {
 				sdf.append("	" + StringUtil.escapeSortName(r.getSort().getName()) + " -/- " + r.getPattern() + "\n");
 		}
 
-		return sdf.toString();
+		return sdf;
 	}
 }
