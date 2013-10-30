@@ -130,6 +130,7 @@
 				<include name="k/bin/native/macosx/sglr-server" />
 				<include name="k/bin/native/linux/gappa" />
 				<include name="k/bin/native/macosx/gappa" />
+				<include name="k/lib/scripts/checkJava" />
 			</tarfileset>
 			<tarfileset dir="./release">
 				<include name="**" />
@@ -148,6 +149,7 @@
 				<exclude name="k/bin/native/macosx/sglr-server" />
 				<exclude name="k/bin/native/linux/gappa" />
 				<exclude name="k/bin/native/macosx/gappa" />
+				<exclude name="k/lib/scripts/checkJava" />
 			</tarfileset>
 		</tar>
 	</target>
