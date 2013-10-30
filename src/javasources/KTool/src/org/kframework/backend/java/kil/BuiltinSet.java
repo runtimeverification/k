@@ -5,6 +5,7 @@ import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Utils;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.KSorts;
 import org.kframework.kil.ASTNode;
 
 import java.util.ArrayDeque;
@@ -15,9 +16,9 @@ import java.util.Set;
 
 
 /**
- * @author: AndreiS
+ * @author AndreiS
  */
-public class BuiltinSet extends Collection {
+public class BuiltinSet extends Collection implements Sorted {
 
 //    public abstract class Operation {
 //
@@ -101,6 +102,15 @@ public class BuiltinSet extends Collection {
 //        }
 //    }
 
+
+    /**
+     * Returns a {@code String} representation of the sort of this object.
+     */
+    @Override
+    public String sort() {
+        return KSorts.SET;
+    }
+
     @Override
     public boolean equals(Object object) {
         if (this == object) {
@@ -177,4 +187,5 @@ public class BuiltinSet extends Collection {
         assert false : "Frame can only be substituted by a Variable or a BuiltinSet, or deleted.";
         return null;
     }
+
 }

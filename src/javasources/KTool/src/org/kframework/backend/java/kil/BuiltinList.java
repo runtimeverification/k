@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.symbolic.*;
 import org.kframework.backend.java.util.ImprovedArrayDeque;
+import org.kframework.backend.java.util.KSorts;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.IntBuiltin;
 
@@ -13,7 +14,7 @@ import java.util.*;
 /**
  * @author: TraianSF
  */
-public class BuiltinList extends Collection {
+public class BuiltinList extends Collection implements Sorted {
 
     private final ImprovedArrayDeque<Term> elementsLeft;
     protected final ImprovedArrayDeque<Term> elementsRight;
@@ -67,6 +68,15 @@ public class BuiltinList extends Collection {
         ArrayList<Term> elements = new ArrayList<Term>(elementsLeft);
         elements.addAll(elementsRight);
         return Collections.unmodifiableList(elements);
+    }
+
+
+    /**
+     * Returns a {@code String} representation of the sort of this object.
+     */
+    @Override
+    public String sort() {
+        return KSorts.LIST;
     }
 
     @Override
