@@ -16,8 +16,8 @@ public class ListLookup extends Term {
     private final Term list;
     private final Term key;
 
-    public ListLookup(Term list, Term key) {
-        super(Kind.KITEM);
+    public ListLookup(Term list, Term key, Kind kind) {
+        super(kind);
         this.list = list;
         this.key = key;
     }

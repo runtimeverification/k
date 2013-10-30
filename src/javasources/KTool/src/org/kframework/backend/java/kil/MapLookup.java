@@ -16,8 +16,8 @@ public class MapLookup extends Term {
     private final Term map;
     private final Term key;
 
-    public MapLookup(Term map, Term key) {
-        super(Kind.KITEM);
+    public MapLookup(Term map, Term key, Kind kind) {
+        super(kind);
         this.map = map;
         this.key = key;
     }
@@ -30,8 +30,8 @@ public class MapLookup extends Term {
         Term value = ((BuiltinMap) map).get(key);
         if (value != null) {
             return value;
-        } else if (map.isGround() && key.isGround() ) {
-            return BoolToken.FALSE;
+        } else if (map.isGround() && key.isGround()) {
+            return new Bottom(kind);
         } else {
             return this;
         }

@@ -30,7 +30,7 @@ import org.kframework.backend.maude.krun.MaudeKRun;
 import org.kframework.compile.ConfigurationCleaner;
 import org.kframework.compile.FlattenModules;
 import org.kframework.compile.transformers.AddTopCellConfig;
-import org.kframework.compile.transformers.Cell2Map;
+import org.kframework.compile.transformers.Cell2DataStructure;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
@@ -132,7 +132,7 @@ public class Main {
             sw.printIntermediate("Plug configuration variables");
 
         Term configuration = (Term) cfgCleaned.accept(new SubstitutionFilter(args, context));
-        configuration = (Term) configuration .accept(new Cell2Map(context));
+        configuration = (Term) configuration .accept(new Cell2DataStructure(context));
         return configuration;
     }
 

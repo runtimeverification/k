@@ -582,7 +582,7 @@ public class CopyOnWriteTransformer implements Transformer {
         Term value = (Term) node.value().accept(this);
 
         if (base != node.base() || key != node.key() || value != node.value()) {
-            return new ListLookup(base, key, value);
+            return new ListLookup(base, key, value, node.kind());
         } else {
             return node;
         }
@@ -649,7 +649,7 @@ public class CopyOnWriteTransformer implements Transformer {
         Term value = (Term) node.value().accept(this);
 
         if (map != node.base() || key != node.key() || value != node.value()) {
-            return new MapLookup(map, key, value);
+            return new MapLookup(map, key, value, node.kind());
         } else {
             return node;
         }

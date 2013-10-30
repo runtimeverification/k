@@ -133,7 +133,8 @@ public class BuiltinList extends Collection {
             while (index-- > 0) iterator.next();
             return iterator.next();
         }
-        if (frame == null) return new SymbolicConstraint.Bottom();
+        // TODO(AndreiS): use correct kind/sort
+        if (frame == null) return new Bottom(Kind.K);
         java.util.Collection<Term> left = elementsLeft;
         java.util.Collection<Term> right = elementsRight;
         if (onLeft) {
@@ -144,7 +145,12 @@ public class BuiltinList extends Collection {
             index = -index-1;
             right = Collections.<Term>emptyList();
         }
-        return new ListLookup(BuiltinList.of(frame, removeLeft, removeRight, left, right), IntToken.of(index));
+
+        // TODO(AndreiS): use correct kind/sort
+        return new ListLookup(
+                BuiltinList.of(frame, removeLeft, removeRight, left, right),
+                IntToken.of(index),
+                Kind.K);
     }
 
     public java.util.Collection<Term> elementsLeft() {

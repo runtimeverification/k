@@ -361,7 +361,7 @@ public class BasicTransformer implements Transformer {
         Variable base = (Variable) node.base().accept(this);
         Term key = (Term) node.key().accept(this);
         Term value = (Term) node.value().accept(this);
-        return new ListLookup(base, key, value);
+        return new ListLookup(base, key, value, node.kind());
     }
 
     @Override
@@ -406,7 +406,7 @@ public class BasicTransformer implements Transformer {
         Variable map = (Variable) node.base().accept(this);
         Term key = (Term) node.key().accept(this);
         Term value = (Term) node.value().accept(this);
-        return new MapLookup(map, key, value);
+        return new MapLookup(map, key, value, node.kind());
     }
 
     @Override

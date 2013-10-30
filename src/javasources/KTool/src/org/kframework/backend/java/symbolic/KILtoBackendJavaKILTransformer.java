@@ -41,6 +41,7 @@ import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.GenericToken;
 import org.kframework.kil.Int32Builtin;
 import org.kframework.kil.IntBuiltin;
+import org.kframework.kil.KSort;
 import org.kframework.kil.Module;
 import org.kframework.kil.Production;
 import org.kframework.kil.StringBuiltin;
@@ -462,15 +463,39 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         for (org.kframework.kil.BuiltinLookup lookup : node.getLookups()) {
             Variable base = (Variable) lookup.base().accept(this);
             Term key = (Term) lookup.key().accept(this);
+            Kind kind;
+            switch (lookup.kind()) {
+                case KItem:
+                    kind = Kind.KITEM;
+                    break;
+                case K:
+                    kind = Kind.K;
+                    break;
+                case KList:
+                    kind = Kind.KLIST;
+                    break;
+                case KLabel:
+                    kind = Kind.KLABEL;
+                    break;
+                case BagItem:
+                    kind = Kind.CELL;
+                    break;
+                case Bag:
+                    kind = Kind.CELL_COLLECTION;
+                    break;
+                default:
+                    assert false: "unexpected lookup kind";
+                    kind = null;
+            }
 
             if (lookup instanceof org.kframework.kil.SetLookup) {
                 lookups.add(new SetLookup(base, key), BoolToken.TRUE);
             } else {
                 Term value = (Term) lookup.value().accept(this);
                 if (lookup instanceof org.kframework.kil.MapLookup) {
-                    lookups.add(new MapLookup(base, key), value);
+                    lookups.add(new MapLookup(base, key, kind), value);
                 } else { // ListLookup
-                    lookups.add(new ListLookup(base, key), value);
+                    lookups.add(new ListLookup(base, key, kind), value);
                 }
             }
 

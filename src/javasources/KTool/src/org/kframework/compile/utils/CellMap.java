@@ -1,25 +1,20 @@
 package org.kframework.compile.utils;
 
-import java.io.Serializable;
+import org.kframework.kil.CellDataStructure;
 
 
 /**
  * @author AndreiS
  */
-public class CellMap implements Serializable {
+public class CellMap extends CellDataStructure {
 
-    private final String mapCellLabel;
     private final String entryCellLabel;
     private final String keyCellLabel;
 
     public CellMap(String mapCellLabel, String entryCellLabel, String keyCellLabel) {
-        this.mapCellLabel = mapCellLabel;
+        super(mapCellLabel);
         this.entryCellLabel = entryCellLabel;
         this.keyCellLabel = keyCellLabel;
-    }
-
-    public String mapCellLabel() {
-        return mapCellLabel;
     }
 
     public String entryCellLabel() {

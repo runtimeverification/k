@@ -2,6 +2,7 @@ package org.kframework.compile.transformers;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.BuiltinLookup;
+import org.kframework.kil.KSort;
 import org.kframework.kil.ListBuiltin;
 import org.kframework.kil.ListLookup;
 import org.kframework.kil.ListUpdate;
@@ -53,8 +54,8 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
     private class ExtendedListLookup extends ListLookup implements VariableCache {
         private Set<Variable> variables;
 
-        ExtendedListLookup(Variable list, int key, Term value) {
-            super(list, key, value);
+        ExtendedListLookup(Variable list, int key, Term value, KSort kind) {
+            super(list, key, value, kind);
             variables = new HashSet<Variable>();
             variables.add(list);
         }
@@ -68,8 +69,8 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
     private class ExtendedMapLookup extends MapLookup implements VariableCache {
         private Set<Variable> variables;
 
-        ExtendedMapLookup(Variable map, Term key, Term value) {
-            super(map, key, value);
+        ExtendedMapLookup(Variable map, Term key, Term value, KSort kind) {
+            super(map, key, value, kind);
             variables = new HashSet<Variable>();
             variables.add(map);
             variables.addAll(key.variables());
@@ -141,7 +142,8 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
                         lookups.add(new ListLookup(
                                 listLookup.base(),
                                 listLookup.key(),
-                                listLookup.value()));
+                                listLookup.value(),
+                                listLookup.kind()));
 
                         for (VariableCache item : queue) {
                             item.variables().removeAll(listLookup.value().variables());
@@ -151,7 +153,8 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
                         lookups.add(new MapLookup(
                                 mapLookup.base(),
                                 mapLookup.key(),
-                                mapLookup.value()));
+                                mapLookup.value(),
+                                mapLookup.kind()));
 
                         for (VariableCache item : queue) {
                             item.variables().removeAll(mapLookup.value().variables());
@@ -233,13 +236,21 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
 
             int key = 0;
             for (Term term : node.elementsLeft()) {
-                queue.add(new ExtendedListLookup(variable, key, term));
+                queue.add(new ExtendedListLookup(
+                        variable,
+                        key,
+                        term,
+                        KSort.getKSort(term.getSort())));
                 key++;
             }
 
             key = -node.elementsRight().size();
             for (Term term : node.elementsRight()) {
-                queue.add(new ExtendedListLookup(variable, key, term));
+                queue.add(new ExtendedListLookup(
+                        variable,
+                        key,
+                        term,
+                        KSort.getKSort(term.getSort())));
                 key++;
             }
 
@@ -315,7 +326,11 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
             }
 
             for (Map.Entry<Term, Term> entry : node.elements().entrySet()) {
-                queue.add(new ExtendedMapLookup(variable, entry.getKey(), entry.getValue()));
+                queue.add(new ExtendedMapLookup(
+                        variable,
+                        entry.getKey(),
+                        entry.getValue(),
+                        KSort.getKSort(entry.getValue().getSort())));
             }
 
             return variable;
