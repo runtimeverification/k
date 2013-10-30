@@ -120,11 +120,16 @@
 				<include name="k/bin/krun" />
 				<include name="k/bin/kpp" />
 				<include name="k/bin/ktest" />
+				<include name="k/bin/kcheck" />
 				<include name="k/bin/maude/binaries/maude.intelDarwin" />
 				<include name="k/bin/maude/binaries/maude.linux" />
 				<include name="k/bin/maude/binaries/maude.linux64" />
 				<include name="k/bin/native/linux/sdf2table" />
 				<include name="k/bin/native/macosx/sdf2table" />
+				<include name="k/bin/native/linux/sglr-server" />
+				<include name="k/bin/native/macosx/sglr-server" />
+				<include name="k/bin/native/linux/gappa" />
+				<include name="k/bin/native/macosx/gappa" />
 			</tarfileset>
 			<tarfileset dir="./release">
 				<include name="**" />
@@ -133,11 +138,16 @@
 				<exclude name="k/bin/krun" />
 				<exclude name="k/bin/kpp" />
 				<exclude name="k/bin/ktest" />
+				<exclude name="k/bin/kcheck" />
 				<exclude name="k/bin/maude/binaries/maude.intelDarwin" />
 				<exclude name="k/bin/maude/binaries/maude.linux" />
 				<exclude name="k/bin/maude/binaries/maude.linux64" />
 				<exclude name="k/bin/native/linux/sdf2table" />
 				<exclude name="k/bin/native/macosx/sdf2table" />
+				<exclude name="k/bin/native/linux/sglr-server" />
+				<exclude name="k/bin/native/macosx/sglr-server" />
+				<exclude name="k/bin/native/linux/gappa" />
+				<exclude name="k/bin/native/macosx/gappa" />
 			</tarfileset>
 		</tar>
 	</target>
