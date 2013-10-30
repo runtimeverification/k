@@ -8,13 +8,13 @@ module LAMBDA
 
   syntax Exp ::= Int | Bool | Id
                | "(" Exp ")"                        [bracket]
-               | Exp Exp                            [left, strict]
-               > Exp "*" Exp                        [left, strict]
-               | Exp "/" Exp                        [left, strict]
-               > Exp "+" Exp                        [left, strict]
-               > Exp "-" Exp                        [left, strict]
-               > Exp "<=" Exp                       [strict]
-               > "if" Exp "then" Exp "else" Exp     [strict]
+               | Exp Exp                            [left, seqstrict]
+               > Exp "*" Exp                        [left, seqstrict]
+               | Exp "/" Exp                        [left, seqstrict]
+               > Exp "+" Exp                        [left, seqstrict]
+               > Exp "-" Exp                        [left, seqstrict]
+               > Exp "<=" Exp                       [seqstrict]
+               > "if" Exp "then" Exp "else" Exp     [seqstrict]
                | "lambda" Id "." Exp
                | "mu" Id "." Exp
                | "let" Id "=" Exp "in" Exp          [strict(2)]
