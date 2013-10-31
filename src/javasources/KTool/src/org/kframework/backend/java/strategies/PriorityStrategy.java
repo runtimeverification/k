@@ -16,26 +16,34 @@ public class PriorityStrategy extends Strategy {
 
   public void apply(Collection<Rule> rules) {
     priorityMap.clear();
-    priorityMap.put(0, new HashSet<Rule>());
     priorities.clear();
     for (Rule r : rules) {
+      Integer p = 0;
       if (r.containsAttribute("priority")) {
-        System.out.println(r.getAttribute("priority")); 
+        p = Integer.parseInt(r.getAttribute("priority"));
       }
-      priorityMap.get(0).add(r);
+      if (!priorityMap.containsKey(p)) {
+        priorityMap.put(p, new HashSet<Rule>());
+      }
+      priorityMap.get(p).add(r);
+      priorities.add(p);
     }
-    iterator = priorityMap.get(0).iterator();
+    priorityIterator = priorities.descendingIterator();
   }
 
   public Rule next() {
-    return iterator.next();
+    if (ruleIterator == null || !ruleIterator.hasNext()) {
+      ruleIterator = priorityMap.get(priorityIterator.next()).iterator();
+    }
+    return ruleIterator.next();
   }
 
   public boolean hasNext() {
-    return iterator.hasNext();
+    return priorityIterator.hasNext() || ruleIterator.hasNext();
   }
 
-  private Iterator<Rule> iterator;
+  private Iterator<Integer> priorityIterator;
+  private Iterator<Rule> ruleIterator;
   private HashMap<Integer, HashSet<Rule>> priorityMap;
   private TreeSet<Integer> priorities;
 } 
