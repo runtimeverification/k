@@ -766,18 +766,6 @@
 
 
 <!-- begin Java Rewrite Engine tests -->
- <test
-      definition="tests/regression/java-rewrite-engine/visitor/imp.k"
-      programs="tests/regression/java-rewrite-engine/visitor"
-      results="tests/regression/java-rewrite-engine/visitor"
-      extension="imp" >
-   <kompile-option name="-backend" value="java" />
-    <all-programs>
-      <krun-option name="-backend" value="java" />
-      <krun-option name="-smt" value="none" />
-    </all-programs>
-  </test>
-
   <test
       definition="samples/java_rewrite_engine/tutorial/1_k/2_imp/imp.k"
       programs="tutorial/1_k/2_imp"
@@ -986,6 +974,32 @@
     </all-programs>
   </test>
 -->
+
+  <test
+      definition="tests/regression/java-rewrite-engine/visitor/imp.k"
+      programs="tests/regression/java-rewrite-engine/visitor"
+      results="tests/regression/java-rewrite-engine/visitor"
+      extension="imp" >
+    <kompile-option name="-backend" value="java" />
+    <all-programs>
+      <krun-option name="-backend" value="java" />
+      <krun-option name="-smt" value="none" />
+    </all-programs>
+  </test>
+
+
+  <test
+      definition="tests/regression/java-rewrite-engine/cell_map/test.k"
+      programs="tests/regression/java-rewrite-engine/cell_map/"
+      results="tests/regression/java-rewrite-engine/cell_map/"
+      extensions="test"
+      >
+    <kompile-option name="-backend" value="java" />
+    <all-programs>
+      <krun-option name="-backend" value="java" />
+      <krun-option name="-smt" value="none" />
+    </all-programs>
+  </test>
 <!-- end Java Rewrite Engine tests -->
 
 </tests>
