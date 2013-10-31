@@ -31,6 +31,13 @@ references-4.fun
 references-5.fun
 tail-recursion.fun
 
+constructor-days.fun
+constructor-list-length.fun
+constructor-tree-mirror.fun
+constructor-expr-toString.fun
+constructor-expr-distributivity.fun
+constructor-bst-sorting.fun
+
 callcc-1.fun
 callcc-2.fun
 callcc-3.fun
