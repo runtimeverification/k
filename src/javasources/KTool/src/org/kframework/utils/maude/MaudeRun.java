@@ -52,7 +52,8 @@ public class MaudeRun {
 		//} else if (osname.toLowerCase().contains("mac")) {
 			// I hope this condition is strong enough
         } else if (osname.equals("Mac OS X")) {
-            String subversion = version.substring(3, version.indexOf('.', 3));
+            String[] parsedVersion = version.split("\\.");
+            String subversion = parsedVersion[1];
             // if at least Snow Leopard
             if (Integer.parseInt(subversion) >= 6)
 			    maudeExe = maudeDir + fileSeparator + maude_mac;
