@@ -1,0 +1,2 @@
+push(1) ; push(2) ; pop_back() ; pop() ; push_back(0) ; back()
+

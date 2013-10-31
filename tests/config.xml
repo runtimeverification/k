@@ -987,7 +987,6 @@
     </all-programs>
   </test>
 
-
   <test
       definition="tests/regression/java-rewrite-engine/cell_map/test.k"
       programs="tests/regression/java-rewrite-engine/cell_map"
@@ -1000,7 +999,18 @@
       <krun-option name="-smt" value="none" />
     </all-programs>
   </test>
+  <test
+      definition="tests/regression/java-rewrite-engine/cell_list/test.k"
+      programs="tests/regression/java-rewrite-engine/cell_list"
+      results="tests/regression/java-rewrite-engine/cell_list"
+      extension="test"
+      >
+    <kompile-option name="-backend" value="java" />
+    <all-programs>
+      <krun-option name="-backend" value="java" />
+      <krun-option name="-smt" value="none" />
+    </all-programs>
+  </test>
 <!-- end Java Rewrite Engine tests -->
-
 </tests>
 
