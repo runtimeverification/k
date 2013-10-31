@@ -223,7 +223,7 @@ KOOL).  */
        <nextLoc> L:Int => L +Int 1 +Int N </nextLoc>
     when N >=Int 0
 
-  context _:Type _[HOLE];
+  context _:Type _::Exp[HOLE::Exps];
 
 
   syntax Id ::= "$1" | "$2"
