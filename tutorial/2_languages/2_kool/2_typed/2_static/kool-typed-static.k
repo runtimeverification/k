@@ -286,7 +286,7 @@ typed SIMPLE, so we do not discuss them much here. */
   syntax KResult ::= Type
 
 
-  context _:Type _[HOLE];
+  context _:Type _::Exp[HOLE::Exps];
 
   rule T:Type E:Exp[int,Ts:Types]; => T[] E[Ts];  [structural]
   rule T:Type E:Exp[.Types]; => T E;          [structural]

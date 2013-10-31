@@ -355,8 +355,8 @@ KOOL).  */
   rule <k> lvalue(X:Id => loc(L)) ...</k>  <env>... X |-> L:Int ...</env>
     [structural]
 
-  context lvalue(_[HOLE])
-  context lvalue(HOLE[_])
+  context lvalue(_::Exp[HOLE::Exps])
+  context lvalue(HOLE::Exp[_::Exps])
 
   rule lvalue(lookup(L:Int) => loc(L))  [structural]
 
