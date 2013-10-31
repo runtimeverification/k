@@ -206,7 +206,7 @@ right type to the allocated locations. */
        <nextLoc> L:Int => L +Int 1 +Int N </nextLoc>
     when N >=Int 0
 
-  context _:Type _[HOLE];
+  context _:Type _::Exp[HOLE::Exps];
 
 /*@ The desugaring of multi-dimensional arrays into unidimensional
 ones is also similar to that in untyped SIMPLE, although we have to
