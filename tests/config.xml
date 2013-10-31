@@ -990,9 +990,9 @@
 
   <test
       definition="tests/regression/java-rewrite-engine/cell_map/test.k"
-      programs="tests/regression/java-rewrite-engine/cell_map/"
-      results="tests/regression/java-rewrite-engine/cell_map/"
-      extensions="test"
+      programs="tests/regression/java-rewrite-engine/cell_map"
+      results="tests/regression/java-rewrite-engine/cell_map"
+      extension="test"
       >
     <kompile-option name="-backend" value="java" />
     <all-programs>
