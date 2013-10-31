@@ -1,4 +1,3 @@
-require "builtins/map.k"
 
 module IMP-SYNTAX
   syntax AExp  ::= Int | Id
@@ -32,13 +31,12 @@ endmodule
 
 module IMP
   imports IMP-SYNTAX
-  imports MAP
   syntax KResult ::= Int | Bool
 
   configuration <T color="yellow">
                   //<k color="green"> $PGM:Pgm </k>
                   <k color="green"> $PGM:K </k>
-                  <state color="red"> .MyMap </state>
+                  <state color="red"> .Map </state>
                 </T>
 
 // AExp
@@ -60,7 +58,7 @@ module IMP
 // Stmt
   rule <k> X = I:Int; => . ...</k>
        <state>... X |-> (_:KItem => I) ...</state>
-  // the following has sort annotation to avoid ambiguity with MyMap, MySet, etc
+  // the following has sort annotation to avoid ambiguity with Map, MySet, etc
   rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
   rule if (true)  S else _ => S
   rule if (false) _ else S => S
@@ -68,7 +66,7 @@ module IMP
 // Pgm
   rule
     <k> int (X, Xs => Xs); _ </k>
-    <state> Rho:MyMap (.MyMap => X |-> 0) </state>
+    <state> Rho:Map (.Map => X |-> 0) </state>
     //when notBool (X in keys(Rho))
   rule int .Ids; S => S  [structural]
 endmodule
