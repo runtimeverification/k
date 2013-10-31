@@ -11,7 +11,6 @@ import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -29,17 +28,19 @@ public class KompileBackend extends BasicBackend {
 		Properties specialMaudeHooks = new Properties();
 		Properties maudeHooks = new Properties();
 		try {
-			maudeHooks.load(new FileInputStream(propPath + "MaudeHooksMap.properties"));
-
-			specialMaudeHooks.load(new FileInputStream(propPath + "SpecialMaudeHooks.properties"));
+            FileUtil.loadProperties(maudeHooks, propPath + "MaudeHooksMap.properties");
+            FileUtil.loadProperties(specialMaudeHooks, propPath + "SpecialMaudeHooks.properties");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		MaudeBuiltinsFilter builtinsFilter = new MaudeBuiltinsFilter(maudeHooks, specialMaudeHooks, context);
 		javaDef.accept(builtinsFilter);
 		final String mainModule = javaDef.getMainModule();
-		String builtins = "mod " + mainModule + "-BUILTINS is\n" + " including " + mainModule + "-BASE .\n" + builtinsFilter.getResult() + "endm\n";
-		FileUtil.saveInFile(context.dotk.getAbsolutePath() + "/builtins.maude", builtins);
+        StringBuilder builtins = new StringBuilder()
+            .append("mod ").append(mainModule).append("-BUILTINS is\n").append(" including ")
+            .append(mainModule).append("-BASE .\n")
+            .append(builtinsFilter.getResult()).append("endm\n");
+		FileUtil.save(context.dotk.getAbsolutePath() + "/builtins.maude", builtins);
 		if (GlobalSettings.verbose)
 			sw.printIntermediate("Generating equations for hooks");
 		try {
@@ -65,9 +66,12 @@ public class KompileBackend extends BasicBackend {
 		final String mainModule = javaDef.getMainModule();
 		//String defFile = javaDef.getMainFile().replaceFirst("\\.[a-zA-Z]+$", "");
 
-		String main = load + "load \"base.maude\"\n" + "load \"builtins.maude\"\n" + "mod " + mainModule + " is \n" + "  including " + mainModule + "-BASE .\n" + "  including " + mainModule
-				+ "-BUILTINS .\n" + "eq mainModule = '" + mainModule  + " .\nendm\n";
-		FileUtil.saveInFile(context.dotk.getAbsolutePath() + "/" + "main.maude", main);
+        StringBuilder main = new StringBuilder().append(load).append("load \"base.maude\"\n")
+            .append("load \"builtins.maude\"\n").append("mod ").append(mainModule).append(" is \n")
+            .append("  including ").append(mainModule).append("-BASE .\n")
+            .append("  including ").append(mainModule).append("-BUILTINS .\n")
+            .append("eq mainModule = '").append(mainModule).append(" .\nendm\n");
+        FileUtil.save(context.dotk.getAbsolutePath() + "/" + "main.maude", main);
 	}
 
 	@Override

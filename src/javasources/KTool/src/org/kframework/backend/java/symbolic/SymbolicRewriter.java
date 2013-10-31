@@ -172,6 +172,7 @@ public class SymbolicRewriter {
             ConstrainedTerm leftHandSide = new ConstrainedTerm(
                     rule.leftHandSide(),
                     rule.lookups().getSymbolicConstraint(constrainedTerm.termContext()),
+
                     leftHandSideConstraint,
                     constrainedTerm.termContext());
 

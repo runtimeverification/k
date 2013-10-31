@@ -45,6 +45,12 @@ public class BackendJavaKILtoKILTranslation extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(Cell cell) {
+        // TODO(AndreiS): fix the printing of the cells which are representing maps
+        if (cell.getLabel().startsWith("value_cell_label_prefix_")) {
+            currentCell = configurationStructureMap.get(cell.getLabel().substring("value_cell_label_prefix_".length())).cell;
+            return cell.getContent().accept(this);
+        }
+
         org.kframework.kil.Cell returnCell = new org.kframework.kil.Cell();
         final String label = cell.getLabel();
         currentCell = configurationStructureMap.get(label).cell;

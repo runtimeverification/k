@@ -6,6 +6,7 @@
 .metadata
 .cache
 .idea
+*~
 junit-reports
 samples/test/
 lib/version.txt

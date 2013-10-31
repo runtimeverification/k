@@ -7,8 +7,11 @@ import org.kframework.kil.ASTNode;
 
 import com.microsoft.z3.Expr;
 
-
 /**
+ * The Z3 representation of a K term.
+ * 
+ * @see org.kframework.backend.java.symbolic.KILtoZ3
+ * 
  * @author: AndreiS
  */
 public class Z3Term extends Term {

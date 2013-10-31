@@ -5,6 +5,7 @@ import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.Int32Token;
 import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
+import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
@@ -78,8 +79,9 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     @Override
     public void unify(Term term, Term otherTerm) {
-        if (term instanceof SymbolicConstraint.Bottom || otherTerm instanceof SymbolicConstraint.Bottom)
+        if (term instanceof Bottom || otherTerm instanceof Bottom) {
             fail();
+        }
         if (term.kind() == Kind.KITEM || term.kind() == Kind.K || term.kind() == Kind.KLIST) {
             term = KCollection.upKind(term, otherTerm.kind());
             otherTerm = KCollection.upKind(otherTerm, term.kind());

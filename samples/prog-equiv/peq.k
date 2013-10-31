@@ -783,7 +783,8 @@ module PEQ
 
  //@ Two auxiliary rules
 
-  rule ((X:K |-> A:K) (X:K |-> A:K)) => (X:K |-> A:K) [anywhere]
+  //rule ((X:K |-> A:K) (X:K |-> A:K)) => (X:K |-> A:K) [anywhere]
+  rule MI:MapItem MI => MI [anywhere]
 
   rule E:Exp ;; emptySubst => E
 

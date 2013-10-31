@@ -20,7 +20,7 @@ public class MaudeRuleExtractor extends CopyOnWriteTransformer {
 	}
 
 	public String getResult() {
-		return maudeFilter.getResult();
+		return maudeFilter.getResult().toString();
 	}
 
 	@Override

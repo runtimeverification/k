@@ -18,7 +18,7 @@ import org.kframework.compile.transformers.AddPredicates;
 import org.kframework.compile.transformers.AddStreamCells;
 import org.kframework.compile.transformers.AddTopCellConfig;
 import org.kframework.compile.transformers.AddTopCellRules;
-import org.kframework.compile.transformers.Cell2Map;
+import org.kframework.compile.transformers.Cell2DataStructure;
 import org.kframework.compile.transformers.CompleteSortLatice;
 import org.kframework.compile.transformers.ContextsToHeating;
 import org.kframework.compile.transformers.DesugarStreams;
@@ -38,10 +38,7 @@ import org.kframework.compile.transformers.ResolveRewrite;
 import org.kframework.compile.transformers.SetVariablesInferredSort;
 import org.kframework.compile.transformers.SortCells;
 import org.kframework.compile.transformers.StrictnessToContexts;
-import org.kframework.compile.utils.CheckVisitorStep;
-import org.kframework.compile.utils.CompileDataStructures;
-import org.kframework.compile.utils.CompilerSteps;
-import org.kframework.compile.utils.InitializeConfigurationStructure;
+import org.kframework.compile.utils.*;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.AddConsesVisitor;
@@ -56,11 +53,8 @@ import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.general.GlobalSettings;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 
 
 /**
@@ -78,12 +72,7 @@ public class JavaSymbolicBackend extends BasicBackend {
 
         @Override
         public ASTNode transform(Definition node) throws TransformerException {
-            try {
-                File file = new File(context.dotk, "defx-java.bin");
-                BinaryLoader.toBinary(node, new BufferedOutputStream(new FileOutputStream(file)));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            BinaryLoader.save(new File(context.dotk, "defx-java.bin").toString(), node);
 
             return node;
         }
@@ -97,16 +86,9 @@ public class JavaSymbolicBackend extends BasicBackend {
 
     @Override
     public Definition lastStep(Definition javaDef) {
-        try {
-            OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(
-                    new File(context.dotk, JavaSymbolicBackend.DEFINITION_FILENAME)));
-            BinaryLoader.toBinary(
-                    new KILtoBackendJavaKILTransformer(context).transformDefinition(javaDef),
-                    outputStream);
-            outputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        BinaryLoader.save(
+            new File(context.dotk, JavaSymbolicBackend.DEFINITION_FILENAME).toString(), new KILtoBackendJavaKILTransformer(context).transformDefinition(javaDef)
+        );
 
         return javaDef;
     }
@@ -166,7 +148,7 @@ public class JavaSymbolicBackend extends BasicBackend {
         steps.add(new ResolveBuiltins(context));
         steps.add(new ResolveListOfK(context));
         steps.add(new FlattenSyntax(context));
-        steps.add(new ResolveBlockingInput(context, true));
+        steps.add(new ResolveBlockingInput(context, false));
         steps.add(new InitializeConfigurationStructure(context));
         //steps.add(new AddKStringConversion(context));
         //steps.add(new AddKLabelConstant(context));
@@ -176,8 +158,9 @@ public class JavaSymbolicBackend extends BasicBackend {
         steps.add(new ResolveRewrite(context));
 
         /* data structure related stuff */
+        steps.add(new CompileToBuiltins(context));
         steps.add(new CompileDataStructures(context));
-        steps.add(new Cell2Map(context));
+        steps.add(new Cell2DataStructure(context));
         steps.add(new DataStructureToLookupUpdate(context));
 
         if (GlobalSettings.sortedCells) {

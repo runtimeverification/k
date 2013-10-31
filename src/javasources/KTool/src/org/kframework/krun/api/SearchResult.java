@@ -49,7 +49,16 @@ public class SearchResult {
 						rawValue = null; //for static reasons
 					}
 				} else {
-					rawValue = rawSubstitution.get(var.getName() + ":" + var.getSort());
+          String varString = "";
+          // The backend doesn't keep sort information around so we want to
+          // match the variable name only.
+          for (String key : rawSubstitution.keySet()) {
+            if (key.startsWith(var.getName() + ":")) {
+              varString = key;
+              break;
+            }
+          }
+					rawValue = rawSubstitution.get(varString);
 				}
 				substitution.put(var.getName() + ":" + var.getSort(), KRunState.concretize(rawValue, context));
 			}

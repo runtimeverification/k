@@ -6,6 +6,8 @@ import java.util.Set;
 
 public class VarHashMap extends HashMap<String, Set<String>> {
 
+	private static final long serialVersionUID = 1L;
+
 	public int hashCode() {
 		int code = 0;
 		for (Map.Entry<String, Set<String>> entry : this.entrySet()) {

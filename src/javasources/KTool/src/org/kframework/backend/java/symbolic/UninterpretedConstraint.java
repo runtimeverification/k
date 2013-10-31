@@ -14,10 +14,19 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
+ * The uninterpreted version of a symbolic constraint. Used merely as a
+ * container for equalities between terms.
+ * 
+ * @see org.kframework.backend.java.symbolic.SymbolicConstraint
+ * 
  * @author AndreiS
  */
 public class UninterpretedConstraint extends JavaSymbolicObject {
 
+    /**
+     * An equality between terms. Used merely to store the left-hand side and
+     * the right-hand side of the equality.
+     */
     public class Equality implements Serializable {
 
         public static final String SEPARATOR = " = ";
@@ -78,10 +87,20 @@ public class UninterpretedConstraint extends JavaSymbolicObject {
         equalities.add(new Equality(leftHandSide, rightHandSide));
     }
 
+    /**
+     * @return an unmodifiable view of the equalities
+     */
     public Collection<Equality> equalities() {
         return Collections.unmodifiableList(equalities);
     }
 
+    /**
+     * Returns the interpreted counterpart of this constraint.
+     * 
+     * @param context
+     *            the term context
+     * @return the corresponding symbolic constraint
+     */
     public SymbolicConstraint getSymbolicConstraint(TermContext context) {
         SymbolicConstraint symbolicConstraint = new SymbolicConstraint(context);
         for (Equality equality : equalities) {

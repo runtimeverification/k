@@ -1,6 +1,5 @@
-// This example works differently than in Java.  Unlike in Java, the get()
-// method called by f() is dynamically dispatched here.  That is because
-// we do not do any static analysis in dynamically typed KOOL.
+// Note that, like in Java, the get() method called by f() is not dynamically
+// dispatched here.
 
 class B {
     private int x = 3;

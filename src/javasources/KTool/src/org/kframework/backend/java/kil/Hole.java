@@ -3,6 +3,7 @@ package org.kframework.backend.java.kil;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.KSorts;
 import org.kframework.kil.ASTNode;
 
 
@@ -11,7 +12,7 @@ import org.kframework.kil.ASTNode;
  *
  * @author AndreiS
  */
-public class Hole extends Term {
+public class Hole extends Term implements Sorted {
 
     public static final Hole HOLE = new Hole();
 
@@ -22,6 +23,14 @@ public class Hole extends Term {
     @Override
     public boolean isSymbolic() {
         return false;
+    }
+
+    /**
+     * Returns a {@code String} representation of the sort of this object.
+     */
+    @Override
+    public String sort() {
+        return KSorts.KITEM;
     }
 
     @Override
@@ -52,6 +61,13 @@ public class Hole extends Term {
     @Override
     public ASTNode accept(Transformer transformer) {
         return transformer.transform(this);
+    }
+
+    /**
+     * Returns the HOLE constant in this session rather than the de-serialized constant.
+     */
+    private Object readResolve() {
+        return HOLE;
     }
 
 }

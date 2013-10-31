@@ -21,12 +21,12 @@ public class KExpBackend extends BasicBackend {
 		KExpFilter unparserFilter = new KExpFilter(context);
 		definition.accept(unparserFilter);
 
-		String kexpText = unparserFilter.getResult();
+		StringBuilder kexpText = unparserFilter.getResult();
 
-		FileUtil.saveInFile(context.dotk.getAbsolutePath() + "/def.kexp", kexpText);
+		FileUtil.save(context.dotk.getAbsolutePath() + "/def.kexp", kexpText);
 
 		File canonicalFile = GlobalSettings.mainFile.getCanonicalFile();
-		FileUtil.saveInFile(FileUtil.stripExtension(canonicalFile.getAbsolutePath()) + ".kexp", kexpText);
+		FileUtil.save(FileUtil.stripExtension(canonicalFile.getAbsolutePath()) + ".kexp", kexpText);
 	}
 
 	@Override

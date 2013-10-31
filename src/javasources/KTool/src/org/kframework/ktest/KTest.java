@@ -78,6 +78,12 @@ public class KTest {
             System.exit(0);
         }
 
+        // Dry run
+        if (cmd.hasOption(Configuration.DRY_RUN_OPTION)) {
+            Configuration.DRY_RUN = true;
+            System.out.println("DRY: log=/tmp/ktest.`date +%Y_%m_%d_%H_%M_%S`; mkdir -p $log; trap \"rm -rf $log; exit\" SIGHUP SIGINT SIGTERM");
+        }
+
         // Timeout
         if (cmd.hasOption(Configuration.TIMEOUT_OPTION)) {
             Configuration.KOMPILE_ALL_TIMEOUT = Long.parseLong(cmd.getOptionValue(Configuration.TIMEOUT_OPTION));
@@ -308,6 +314,7 @@ public class KTest {
         exitCode |= resultPdf(execPdf(homeDir, alltestsUnique));
         exitCode |= execPrograms(homeDir, alltests);
 
+        //GlobalSettings.kem.print();
         if (exitCode != 0)
             System.exit(exitCode);
     }
@@ -349,18 +356,18 @@ public class KTest {
 
     private static Map<Test, Task> execKompile(File homeDir, List<Test> alltests) {
         int i = 0, j = 0;
-        System.out.print("Kompile the language definitions...");
+        wrapPrintStep("Kompile the language definitions...");
         Map<Test, Task> kompileTaskM = new TreeMap<Test, Task>();
         for (Test test : alltests) {
             if ((!test.isSkipKompile() && Configuration.KOMPILE)
                 || !new File(test.getCompiled()).exists()) {
                 Task def = test.getDefinitionTask(homeDir);
                 kompileTaskM.put(test, def);
-                Execution.execute(def);
+                wrapExecutionExecute(def);
                 if (test.runOnOS()) {
                     Task unixOnlyScript = test.getUnixOnlyScriptTask(homeDir);
                     if (unixOnlyScript != null) {
-                        Execution.execute(unixOnlyScript);
+                        wrapExecutionExecute(unixOnlyScript);
                     }
                 }
                 i++;
@@ -373,7 +380,8 @@ public class KTest {
             System.out.println("Skipped " + j + " definitions");
         if (i > 0)
             System.out.println("Compiling " + i + " definitions");
-        Execution.finish();
+        wrapExecutionFinish();
+
         return kompileTaskM;
     }
 
@@ -410,13 +418,13 @@ public class KTest {
 
     private static Map<Test, Task> execPdf(File homeDir, List<Test> alltests) {
         int i = 0, j = 0;
-        System.out.print("Generating PDF documentation...");
+        wrapPrintStep("Generating PDF documentation...");
         Map<Test, Task> pdfTaskM = new TreeMap<Test, Task>();
         for (Test test : alltests) {
             if (!test.isSkipPdf() && Configuration.PDF){
                 Task pdfDef = test.getPdfDefinitionTask(homeDir);
                 pdfTaskM.put(test, pdfDef);
-                Execution.execute(pdfDef);
+                wrapExecutionExecute(pdfDef);
                 i++;
             } else {
                 j++;
@@ -427,7 +435,7 @@ public class KTest {
             System.out.println("Skipped " + j + " definitions");
         if (i > 0)
             System.out.println("Generate pdf for " + i + " definitions");
-        Execution.finish();
+        wrapExecutionFinish();
         return pdfTaskM;
     }
 
@@ -469,8 +477,7 @@ public class KTest {
         for (Test test : alltests) {
             if (!test.isSkipPrograms() && Configuration.PROGRAMS){
                 if (test.runOnOS()) {
-                    System.out.print("Running " + test.getLanguage()
-                            + " programs... " + test.getTag());
+                    wrapPrintStep("Running " + test.getLanguage() + " programs... " + test.getTag());
 
                     // execute
                     List<Program> pgms = test.getPrograms();
@@ -486,7 +493,7 @@ public class KTest {
                         Task task = p.getTask(homeDir);
                         all.put(p, task);
                         if (Configuration.PROGRAMS) {
-                            Execution.execute(task);
+                            wrapExecutionExecute(task);
                         }
                         i++;
                         if (p.hasInput()) in++;
@@ -497,7 +504,7 @@ public class KTest {
                     } else {
                         System.out.println("\nSkipped " + i + " programs");
                     }
-                    Execution.finish();
+                    wrapExecutionFinish();
 
                     if (Configuration.PROGRAMS) {
 
@@ -529,5 +536,29 @@ public class KTest {
         }
 
         return ret;
+    }
+
+    private static void wrapExecutionExecute(Task task) {
+        if (Configuration.DRY_RUN) {
+            //System.out.println("DRY: " + task.getCommand());
+            System.out.println("DRY: p[$LINENO]=$!; " + task.getCommand() + " >$log/$LINENO.out 2>$log/$LINENO.err || echo \"Failed: $LINENO\" &");
+        } else {
+            Execution.execute(task);
+        }
+    }
+    private static void wrapExecutionFinish() {
+        if (Configuration.DRY_RUN) {
+            System.out.println("DRY: p[$LINENO]=$!; echo \"wait ${p[@]}\"; wait ${p[@]}");
+        } else {
+            Execution.finish();
+        }
+    }
+    private static void wrapPrintStep(String step) {
+        if (Configuration.DRY_RUN) {
+            System.out.println(step);
+            System.out.println("DRY: echo \"" + step + "\" &");
+        } else {
+            System.out.print(step);
+        }
     }
 }

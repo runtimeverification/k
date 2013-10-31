@@ -8,6 +8,7 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Production;
+import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 
 import java.io.FileInputStream;
@@ -37,7 +38,7 @@ public class BuiltinFunction {
             String separator = System.getProperty("file.separator");
             String path = KPaths.getKBase(false) + separator + "include" + separator + "java";
             Properties properties = new Properties();
-            properties.load(new FileInputStream(path + separator + "hooks.properties"));
+            FileUtil.loadProperties(properties, path + separator + "hooks.properties");
 
             for (String label : definition.context().labels.keySet()) {
                 for (Production production : definition.context().productionsOf(label)) {

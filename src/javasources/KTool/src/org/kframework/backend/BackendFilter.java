@@ -10,15 +10,17 @@ import org.kframework.kil.visitors.BasicVisitor;
  * Time: 6:24 PM
  */
 public class BackendFilter extends BasicVisitor {
-	protected java.lang.StringBuilder result;
+	protected StringBuilder result;
 
 	public BackendFilter(Context context) {
 		super(context);
 		result = new java.lang.StringBuilder();
 	}
 
-	public String getResult() {
-		return result.toString();
+    /**
+     * @return The result as StringBuilder, rather than String, for performance considerations.
+     */
+	public StringBuilder getResult() {
+		return result;
 	}
-
 }

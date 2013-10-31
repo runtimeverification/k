@@ -14,28 +14,24 @@
       definition="tutorial/1_k/1_lambda/lesson_1/lambda.k"
       programs="tutorial/1_k/1_lambda/lesson_1"
       extension="lambda"
-      results="tutorial/1_k/1_lambda/lesson_1"
       />
   <test
       definition="tutorial/1_k/1_lambda/lesson_2/lambda.k"
       programs="tutorial/1_k/1_lambda/lesson_1"
       extension="lambda"
       exclude="omega.lambda"
-      results="tutorial/1_k/1_lambda/lesson_1"
       />
   <test
       definition="tutorial/1_k/1_lambda/lesson_3/lambda.k"
       programs="tutorial/1_k/1_lambda/lesson_1"
       extension="lambda"
       exclude="omega.lambda"
-      results="tutorial/1_k/1_lambda/lesson_1"
       />
   <test
       definition="tutorial/1_k/1_lambda/lesson_4/lambda.k"
       programs="tutorial/1_k/1_lambda/lesson_1"
       extension="lambda"
       exclude="omega.lambda"
-      results="tutorial/1_k/1_lambda/lesson_1"
       />
   <test
       definition="tutorial/1_k/1_lambda/lesson_5/lambda.k"
@@ -43,8 +39,6 @@
               tutorial/1_k/1_lambda/lesson_5"
       extension="lambda"
       exclude="omega.lambda"
-      results="tutorial/1_k/1_lambda/lesson_1
-              tutorial/1_k/1_lambda/lesson_5"
       />
   <test
       definition="tutorial/1_k/1_lambda/lesson_6/lambda.k"
@@ -53,34 +47,25 @@
               tutorial/1_k/1_lambda/lesson_6"
       extension="lambda"
       exclude="omega.lambda"
-      results="tutorial/1_k/1_lambda/lesson_1
-              tutorial/1_k/1_lambda/lesson_5
-              tutorial/1_k/1_lambda/lesson_6"
       />
   <test
       definition="tutorial/1_k/1_lambda/lesson_7/lambda.k"
       programs="tutorial/1_k/1_lambda"
       extension="lambda"
-      exclude="lesson_1/omega.lambda"
-      results="tutorial/1_k/1_lambda"
+      exclude="omega.lambda"
       />
   <test
       definition="tutorial/1_k/1_lambda/lesson_8/lambda.k"
       programs="tutorial/1_k/1_lambda"
       extension="lambda"
-      exclude="lesson_1/omega.lambda"
-      results="tutorial/1_k/1_lambda"
+      exclude="omega.lambda"
       />
   <test
       definition="tutorial/1_k/1_lambda/lesson_9/lambda.k"
       programs="tutorial/1_k/1_lambda"
       extension="lambda"
-      exclude="lesson_1/omega.lambda"
-      results="tests/tutorial/1_k/1_lambda/lesson_9" >
-      <all-programs>
-        <krun-option name="-output-mode" value="pretty" />
-      </all-programs>
-   </test>
+      exclude="omega.lambda"
+      />
 
 
 <!-- IMP -->
@@ -125,43 +110,37 @@
       definition="tutorial/1_k/3_lambda++/lesson_1/lambda.k"
       programs="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
       extension="lambda"
-      exclude="lesson_1/omega.lambda"
-      results="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
+      exclude="omega.lambda"
       />
   <test
       definition="tutorial/1_k/3_lambda++/lesson_2/lambda.k"
       programs="tutorial/1_k/1_lambda/lesson_1"
       extension="lambda"
       exclude="omega.lambda"
-      results="tutorial/1_k/1_lambda/lesson_1"
       />
   <test
       definition="tutorial/1_k/3_lambda++/lesson_3/lambda.k"
       programs="tutorial/1_k/1_lambda"
       extension="lambda"
-      exclude="lesson_1/omega.lambda"
-      results="tutorial/1_k/1_lambda"
+      exclude="omega.lambda"
       />
   <test
       definition="tutorial/1_k/3_lambda++/lesson_4/lambda.k"
       programs="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
       extension="lambda"
-      exclude="lesson_1/omega.lambda"
-      results="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
+      exclude="omega.lambda"
       />
   <test
       definition="tutorial/1_k/3_lambda++/lesson_5/lambda.k"
       programs="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
       extension="lambda"
-      exclude="lesson_1/omega.lambda"
-      results="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
+      exclude="omega.lambda"
       />
   <test
       definition="tutorial/1_k/3_lambda++/lesson_6/lambda.k"
       programs="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
       extension="lambda"
-      exclude="lesson_1/omega.lambda"
-      results="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
+      exclude="omega.lambda"
       />
 
 <!-- IMP++ -->
@@ -377,14 +356,17 @@
   FUN
 -->
 
+<!--
   <test
-      definition="tutorial/2_languages/3_fun/1_untyped/fun-untyped.k"
+      definition="tutorial/2_languages/3_fun/1_untyped/1_environment/fun-untyped.k"
       programs="tutorial/2_languages/3_fun/programs"
       extension="fun"
-      results="tutorial/2_languages/3_fun/programs"
-      >
-    <kompile-option name="-transition" value="otherwise"/>
+      results="tutorial/2_languages/3_fun/1_untyped/1_environment/tests" >
+      <all-programs>
+        <krun-option name="-pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
+      </all-programs>
   </test>
+-->
 
 <!--
   LOGIK
@@ -669,6 +651,11 @@
       </all-programs>
   </test>
 
+<!--
+  These issues fail because the syntactic cast doesn't allow for inner context.
+  See issue #117 for more details:
+  https://github.com/kframework/k/issues/117
+
   <test
       definition="tests/regression/addbrackets/issue.k"
       programs="tests/regression/addbrackets/programs"
@@ -680,7 +667,7 @@
         <krun-option name="-parens" value="smart" />
       </all-programs>
   </test>
-
+-->
   <test
       definition="tests/regression/issue647/issue.k"
       programs="tests/regression/issue647"
@@ -781,37 +768,24 @@
 
 
 <!-- begin Java Rewrite Engine tests -->
- <test
-      definition="tests/regression/java-rewrite-engine/visitor/imp.k"
-      programs="tests/regression/java-rewrite-engine/visitor"
-      results="tests/regression/java-rewrite-engine/visitor"
-      extension="imp" >
-   <kompile-option name="-backend" value="java" />
-    <all-programs>
-      <krun-option name="-backend" value="java" />
-      <krun-option name="-smt" value="none" />
-    </all-programs>
-  </test>
-
-
-<!--
   <test
-      definition="dist/examples/java_rewrite_engine/tutorial/1_k/2_imp/imp.k"
-      programs="dist/tutorial/1_k/2_imp"
-      extensions="imp"
+      definition="samples/java_rewrite_engine/tutorial/1_k/2_imp/imp.k"
+      programs="tutorial/1_k/2_imp"
+      extension="imp"
       results="tests/tutorial/1_k/2_imp/lesson_5"
       >
     <kompile-option name="-backend" value="java" />
     <all-programs>
       <krun-option name="-backend" value="java" />
       <krun-option name="-smt" value="none" />
+      <krun-option name="-color" value="off" />
     </all-programs>
   </test>
-
+  
   <test
-      definition="dist/examples/java_rewrite_engine/tutorial/1_k/4_imp++/imp.k"
-      programs="dist/tutorial/1_k/2_imp dist/tutorial/1_k/4_imp++"
-      extensions="imp"
+      definition="samples/java_rewrite_engine/tutorial/1_k/4_imp++/imp.k"
+      programs="tutorial/1_k/2_imp tutorial/1_k/4_imp++"
+      extension="imp"
       exclude="lesson_1/spawn.imp"
       results="tests/tutorial/1_k/4_imp++/lesson_5"
       >
@@ -823,6 +797,7 @@
     </all-programs>
   </test>
 
+<!--
   <test
       definition="dist/examples/java_rewrite_engine/simple/untyped/simple-untyped.k"
       programs="dist/tutorial/2_languages/1_simple/1_untyped/programs"
@@ -1001,7 +976,43 @@
     </all-programs>
   </test>
 -->
-<!-- end Java Rewrite Engine tests -->
 
+  <test
+      definition="tests/regression/java-rewrite-engine/visitor/imp.k"
+      programs="tests/regression/java-rewrite-engine/visitor"
+      results="tests/regression/java-rewrite-engine/visitor"
+      extension="imp" >
+    <kompile-option name="-backend" value="java" />
+    <all-programs>
+      <krun-option name="-backend" value="java" />
+      <krun-option name="-smt" value="none" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="tests/regression/java-rewrite-engine/cell_map/test.k"
+      programs="tests/regression/java-rewrite-engine/cell_map"
+      results="tests/regression/java-rewrite-engine/cell_map"
+      extension="test"
+      >
+    <kompile-option name="-backend" value="java" />
+    <all-programs>
+      <krun-option name="-backend" value="java" />
+      <krun-option name="-smt" value="none" />
+    </all-programs>
+  </test>
+  <test
+      definition="tests/regression/java-rewrite-engine/cell_list/test.k"
+      programs="tests/regression/java-rewrite-engine/cell_list"
+      results="tests/regression/java-rewrite-engine/cell_list"
+      extension="test"
+      >
+    <kompile-option name="-backend" value="java" />
+    <all-programs>
+      <krun-option name="-backend" value="java" />
+      <krun-option name="-smt" value="none" />
+    </all-programs>
+  </test>
+<!-- end Java Rewrite Engine tests -->
 </tests>
 

@@ -5,7 +5,7 @@ module TEST
 
   configuration
     <k> $PGM:K </k>
-    <map>
+    <map map="">
       <entry multiplicity="*">
         <key key=""> .K </key>
         <value> .K </value>

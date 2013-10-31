@@ -206,7 +206,7 @@ right type to the allocated locations. */
        <nextLoc> L:Int => L +Int 1 +Int N </nextLoc>
     when N >=Int 0
 
-  context _:Type _[HOLE];
+  context _:Type _::Exp[HOLE::Exps];
 
 /*@ The desugaring of multi-dimensional arrays into unidimensional
 ones is also similar to that in untyped SIMPLE, although we have to
@@ -480,8 +480,10 @@ into a list of variable declarations. */
   rule <k> lvalue(X:Id => loc(L)) ...</k>  <env>... X |-> L:Int ...</env>
     [structural]
 
-  context lvalue(_[HOLE])
-  context lvalue(HOLE[_])
+  //context lvalue(_[HOLE])
+  //context lvalue(HOLE[_])
+  context lvalue(_::Exp[HOLE::Exps])
+  context lvalue(HOLE::Exp[_::Exps])
 
   rule lvalue(lookup(L:Int) => loc(L))  [structural]
 

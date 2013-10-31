@@ -60,31 +60,31 @@ public class BuiltinStringOperations {
         return StringToken.of(new String(chars));
     }
 
-    public static StringToken substr(StringToken term, IntToken start, IntToken end) {
+    public static StringToken substr(StringToken term, IntToken start, IntToken end, TermContext context) {
         int beginOffset = term.stringValue().offsetByCodePoints(0, start.intValue());
         int endOffset = term.stringValue().offsetByCodePoints(0, end.intValue());
         return StringToken.of(term.stringValue().substring(beginOffset, endOffset));
     }
 
-    public static IntToken find(StringToken term1, StringToken term2, IntToken idx) {
+    public static IntToken find(StringToken term1, StringToken term2, IntToken idx, TermContext context) {
         int offset = term1.stringValue().offsetByCodePoints(0, idx.intValue());
         int foundOffset = term1.stringValue().indexOf(term2.stringValue(), offset);
         return IntToken.of((foundOffset == -1 ? -1 : term1.stringValue().codePointCount(0, foundOffset)));
     }
 
-    public static IntToken rfind(StringToken term1, StringToken term2, IntToken idx) {
+    public static IntToken rfind(StringToken term1, StringToken term2, IntToken idx, TermContext context) {
         int offset = term1.stringValue().offsetByCodePoints(0, idx.intValue());
         int foundOffset = term1.stringValue().lastIndexOf(term2.stringValue(), offset);
         return IntToken.of((foundOffset == -1 ? -1 : term1.stringValue().codePointCount(0, foundOffset)));
     }
 
-    public static IntToken findChar(StringToken term1, StringToken term2, IntToken idx) {
+    public static IntToken findChar(StringToken term1, StringToken term2, IntToken idx, TermContext context) {
         int offset = term1.stringValue().offsetByCodePoints(0, idx.intValue());
         int foundOffset = StringUtil.indexOfAny(term1.stringValue(), term2.stringValue(), offset);
         return IntToken.of((foundOffset == -1 ? -1 : term1.stringValue().codePointCount(0, foundOffset)));
     }
 
-    public static IntToken rfindChar(StringToken term1, StringToken term2, IntToken idx) {
+    public static IntToken rfindChar(StringToken term1, StringToken term2, IntToken idx, TermContext context) {
         int offset = term1.stringValue().offsetByCodePoints(0, idx.intValue());
         int foundOffset = StringUtil.lastIndexOfAny(term1.stringValue(), term2.stringValue(), offset);
         return IntToken.of((foundOffset == -1 ? -1 : term1.stringValue().codePointCount(0, foundOffset)));

@@ -6,15 +6,20 @@ package org.kframework.kil;
  * @author TraianSF
  */
 public abstract class BuiltinLookup extends Term {
-    /** {@link org.kframework.kil.Term} representation of a key */
+    /** {@link Term} representation of a key */
     private final Term key;
 
-    /** {@link org.kframework.kil.Variable} representing the set */
+    /** {@link Variable} representing the set */
     private final Variable base;
 
-    protected BuiltinLookup(Variable base, Term key) {
+    /** {@link KSorts} representation of the the kind of the value returned by this lookup */
+    private final KSort kind;
+
+    protected BuiltinLookup(Variable base, Term key, KSort kind) {
+
         this.base = base;
         this.key = key;
+        this.kind = kind;
     }
 
     public Variable base() {
@@ -23,6 +28,10 @@ public abstract class BuiltinLookup extends Term {
 
     public Term key() {
         return key;
+    }
+
+    public KSort kind() {
+        return kind;
     }
 
     public abstract Term value();

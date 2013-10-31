@@ -18,6 +18,7 @@ import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
+import org.kframework.kil.CellDataStructure;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
@@ -76,7 +77,7 @@ public class Context implements Serializable {
 	public File kompiled = null;
     public boolean initialized = false;
     protected java.util.List<String> komputationCells = null;
-    public Map<String, CellMap> cellMaps = new HashMap<>();
+    public Map<String, CellDataStructure> cellDataStructures = new HashMap<>();
 
     public int numModules, numSentences, numProductions, numCells;
 

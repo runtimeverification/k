@@ -22,8 +22,22 @@ public abstract class KLabel extends Term {
         return false;
     }
 
+    /**
+     * Checks if this {@code KLabel} represents a constructor. A {@code KLabel}
+     * represents either a constructor or a function.
+     * 
+     * @return true if this {@code KLabel} represents a constructor; otherwise,
+     *         false
+     */
     public abstract boolean isConstructor();
 
+    /**
+     * Checks if this {@code KLabel} represents a function. A {@code KLabel}
+     * represents either a constructor or a function.
+     * 
+     * @return true if this {@code KLabel} represents a function; otherwise,
+     *         false
+     */
     public abstract boolean isFunction();
 
     @Override

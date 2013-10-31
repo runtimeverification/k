@@ -9,6 +9,7 @@ import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.Stopwatch;
+import org.kframework.utils.StringBuilderUtil;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.general.GlobalSettings;
 
@@ -30,17 +31,18 @@ public class MaudeBackend extends BasicBackend {
 		definition.accept(maudeFilter);
 
 		final String mainModule = definition.getMainModule();
-		String maudified = maudeFilter.getResult().replaceFirst(mainModule, mainModule + "-BASE");
+		StringBuilder maudified = maudeFilter.getResult();
+        StringBuilderUtil.replaceFirst(maudified, mainModule, mainModule + "-BASE");
 
-		FileUtil.saveInFile(context.dotk.getAbsolutePath() + "/base.maude", maudified);
+		FileUtil.save(context.dotk.getAbsolutePath() + "/base.maude", maudified);
 		if (GlobalSettings.verbose)
 			sw.printIntermediate("Generating Maude file");
-		
-		String consTable = getLabelTable(definition);
-		FileUtil.saveInFile(context.dotk.getAbsolutePath() + "/consTable.txt", consTable);
+
+        StringBuilder consTable = getLabelTable(definition);
+		FileUtil.save(context.dotk.getAbsolutePath() + "/consTable.txt", consTable);
 	}
 	
-	private String getLabelTable(Definition def) {
+	private StringBuilder getLabelTable(Definition def) {
 		StringBuilder b = new StringBuilder();
 		/*
 		b.append("# Each line has the SDF cons label, a literal tab, a space or * to mark preferred productions,\n"+
@@ -71,7 +73,7 @@ public class MaudeBackend extends BasicBackend {
 			}
 			b.append('\n');			
 		}
-		return b.toString();
+		return b;
 	}
 
 	@Override

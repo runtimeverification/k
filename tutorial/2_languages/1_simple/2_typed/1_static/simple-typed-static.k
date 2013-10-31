@@ -349,7 +349,7 @@ variable. */
 // The rule below may need to sort E to Exp in the future, if the
 // parser gets stricter; without that information, it may not be able
 // to complete the LHS into T E[int,Ts],.Exps; (and similarly for the RHS)
-  rule T:Type E[int,Ts:Types]; => T[] E[Ts];  [structural]
+  rule T:Type E:Exp[int,Ts:Types]; => T[] E[Ts];  [structural]
 // I want to write the rule below as _:Type (E:Exp[.Types] => E),
 // but the list completion seems to not work well with that.
   rule T:Type E:Exp[.Types]; => T E;          [structural]
@@ -479,7 +479,7 @@ array type to be at least as deep as the number of indexes: */
 // Let's hope that is not a problem anymore.
 
   rule (T[])[int, Ts:Types] => T[Ts]
-  rule T[.Types] => T
+  rule T:Type[.Types] => T
 
 //@ \texttt{sizeOf} only needs to check that its argument is an array:
 

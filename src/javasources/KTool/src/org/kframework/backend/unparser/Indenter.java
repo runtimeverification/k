@@ -85,6 +85,10 @@ public class Indenter {
 		indents.pop();
 	}
 
+    public StringBuilder getResult() {
+        return stringBuilder;
+    }
+
 	public String toString() {
 		return stringBuilder.toString();
 	}

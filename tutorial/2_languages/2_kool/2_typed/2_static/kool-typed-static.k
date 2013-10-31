@@ -286,9 +286,9 @@ typed SIMPLE, so we do not discuss them much here. */
   syntax KResult ::= Type
 
 
-  context _:Type _[HOLE];
+  context _:Type _::Exp[HOLE::Exps];
 
-  rule T:Type E[int,Ts:Types]; => T[] E[Ts];  [structural]
+  rule T:Type E:Exp[int,Ts:Types]; => T[] E[Ts];  [structural]
   rule T:Type E:Exp[.Types]; => T E;          [structural]
 
 
@@ -324,7 +324,7 @@ typed SIMPLE, so we do not discuss them much here. */
 
 
   rule (T[])[int, Ts:Types] => T[Ts]
-  rule T[.Types] => T
+  rule T:Type[.Types] => T
 
   rule sizeOf(T[]) => int
 

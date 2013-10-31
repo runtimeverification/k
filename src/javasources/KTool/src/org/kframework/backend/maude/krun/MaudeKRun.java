@@ -33,10 +33,7 @@ import edu.uci.ics.jung.io.graphml.GraphMLReader2;
 import edu.uci.ics.jung.io.graphml.HyperEdgeMetadata;
 import edu.uci.ics.jung.io.graphml.NodeMetadata;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.ArrayList;
@@ -50,7 +47,6 @@ import java.util.Set;
 
 public class MaudeKRun implements KRun {
 	protected Context context;
-    private FileReader processedMaudeOutputReader;
 
     public MaudeKRun(Context context) {
 		this.context = context;
@@ -64,8 +60,8 @@ public class MaudeKRun implements KRun {
 		}
 	}
 	
-	private void executeKRun(String maudeCmd) throws KRunExecutionException {
-        FileUtil.saveInFile(K.maude_in, maudeCmd);
+	private void executeKRun(StringBuilder maudeCmd) throws KRunExecutionException {
+        FileUtil.save(K.maude_in, maudeCmd);
         File outFile = FileUtil.createFile(K.maude_out);
 		File errFile = FileUtil.createFile(K.maude_err);
 
@@ -100,15 +96,17 @@ public class MaudeKRun implements KRun {
 	public KRunResult<KRunState> run(Term cfg) throws KRunExecutionException {
 		MaudeFilter maudeFilter = new MaudeFilter(context);
 		cfg.accept(maudeFilter);
-		String cmd = "set show command off ." + K.lineSeparator
-            + setCounter() + K.maude_cmd + " " + maudeFilter.getResult() + " .";
-		if(K.trace) {
-			cmd = "set trace on ." + K.lineSeparator + cmd;
-		}
+		StringBuilder cmd = new StringBuilder();
+        if(K.trace) {
+            cmd.append("set trace on .").append(K.lineSeparator);
+        }
+        cmd.append("set show command off .").append(K.lineSeparator)
+            .append(setCounter()).append(K.maude_cmd).append(" ")
+            .append(maudeFilter.getResult()).append(" .");
 		if(K.profile) {
-			cmd = "set profile on ." + K.lineSeparator + cmd + K.lineSeparator + "show profile .";
+			cmd.append("set profile on .").append(K.lineSeparator).append(K.lineSeparator).append("show profile .");
 		}
-		cmd += getCounter();
+		cmd.append(getCounter());
 
         executeKRun(cmd);
         try {
@@ -161,8 +159,7 @@ public class MaudeKRun implements KRun {
 
 
 	private KRunResult<KRunState> parseRunResult() throws IOException {
-		File input = new File(K.maude_output);
-		Document doc = XmlUtil.readXML(input);
+		Document doc = XmlUtil.readXMLFromFile(K.maude_output);
 		NodeList list;
 		Node nod;
 		list = doc.getElementsByTagName("result");
@@ -427,17 +424,21 @@ public class MaudeKRun implements KRun {
 										Term cfg,
 										RuleCompilerSteps compilationInfo)
 			throws KRunExecutionException {
-		String cmd = "set show command off ." + K.lineSeparator + setCounter() + "search ";
+    StringBuilder cmd = new StringBuilder();
+    if (K.trace) {
+      cmd.append("set trace on .").append(K.lineSeparator);
+    }
+		cmd.append("set show command off .").append(K.lineSeparator).append(setCounter()).append("search ");
 		if (bound != null && depth != null) {
-			cmd += "[" + bound + "," + depth + "] ";
+			cmd.append("[").append(bound).append(",").append(depth).append("] ");
 		} else if (bound != null) {
-			cmd += "[" + bound + "] ";
+			cmd.append("[").append(bound).append("] ");
 		} else if (depth != null) {
-			cmd += "[," + depth + "] ";
+			cmd.append("[,").append(depth).append("] ");
 		}
 		MaudeFilter maudeFilter = new MaudeFilter(context);
 		cfg.accept(maudeFilter);
-		cmd += maudeFilter.getResult() + " ";
+		cmd.append(maudeFilter.getResult()).append(" ");
 		MaudeFilter patternBody = new MaudeFilter(context);
 		pattern.getBody().accept(patternBody);
 		String patternString = "=>" + getSearchType(searchType) + " " + patternBody.getResult();
@@ -447,55 +448,46 @@ public class MaudeKRun implements KRun {
 			pattern.getRequires().accept(patternCondition);
 			patternString += " such that " + patternCondition.getResult() + " = # true(.KList)";
 		}
-		cmd += patternString + " .";
-        if (K.showSearchGraph || K.debug || K.guidebug) {
-            cmd += K.lineSeparator + "show search graph .";
-        }
-        if (K.trace) {
-			cmd = "set trace on ." + K.lineSeparator + cmd;
-		}
-		cmd += getCounter();
-        executeKRun(cmd);
-        try {
+		cmd.append(patternString).append(" .");
+    if (K.showSearchGraph || K.debug || K.guidebug) {
+      cmd.append(K.lineSeparator).append("show search graph .");
+    }
+		cmd.append(getCounter());
+    executeKRun(cmd);
+    try {
 			SearchResults results;
 			final List<SearchResult> solutions = parseSearchResults
 					(pattern, compilationInfo);
 			final boolean matches = patternString.trim().matches("=>[!*1+] " +
 					"<_>_</_>\\(generatedTop, B:Bag, generatedTop\\)");
-            DirectedGraph<KRunState, Transition> graph
-                = (K.showSearchGraph || K.debug || K.guidebug) ? parseSearchGraph() : null;
-            results = new SearchResults(solutions, graph, matches, context);
+      DirectedGraph<KRunState, Transition> graph
+          = (K.showSearchGraph || K.debug || K.guidebug) ? parseSearchGraph() : null;
+      results = new SearchResults(solutions, graph, matches, context);
 			K.stateCounter += graph != null ? graph.getVertexCount() : 0;
 			KRunResult<SearchResults> result = new KRunResult<SearchResults>(results);
-            result.setRawOutput(FileUtil.getFileContent(K.maude_out));
+      result.setRawOutput(FileUtil.getFileContent(K.maude_out));
 			return result;
 		} catch (Exception e) {
 			throw new RuntimeException("Pretty-printer threw exception", e);
-		} finally {
-            try {
-                if (processedMaudeOutputReader != null) {
-                    processedMaudeOutputReader.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+		}
 	}
 
 	private DirectedGraph<KRunState, Transition> parseSearchGraph() throws Exception {
-		Scanner scanner = new Scanner(new File(K.maude_output));
-		scanner.useDelimiter("\n");
-		FileWriter writer = new FileWriter(K.processed_maude_output);
-		while (scanner.hasNext()) {
-			String text = scanner.next();
-			text = text.replaceAll("<data key=\"((rule)|(term))\">", "<data key=\"$1\"><![CDATA[");
-			text = text.replaceAll("</data>", "]]></data>");
-			writer.write(text, 0, text.length());
-		}
-		writer.close();
-        scanner.close();
+        try (
+            Scanner scanner = new Scanner(new File(K.maude_output));
+            Writer writer = new OutputStreamWriter(new BufferedOutputStream(
+                new FileOutputStream(K.processed_maude_output)))) {
 
-		Document doc = XmlUtil.readXML(new File(K.processed_maude_output));
+            scanner.useDelimiter("\n");
+            while (scanner.hasNext()) {
+                String text = scanner.next();
+                text = text.replaceAll("<data key=\"((rule)|(term))\">", "<data key=\"$1\"><![CDATA[");
+                text = text.replaceAll("</data>", "]]></data>");
+                writer.write(text, 0, text.length());
+            }
+        }
+
+		Document doc = XmlUtil.readXMLFromFile(K.processed_maude_output);
 		NodeList list;
 		Node nod;
 		list = doc.getElementsByTagName("graphml");
@@ -512,7 +504,7 @@ public class MaudeKRun implements KRun {
 		Transformer<NodeMetadata, KRunState> nodeTransformer = new Transformer<NodeMetadata, KRunState>() {
 			public KRunState transform(NodeMetadata n) {
 				String nodeXmlString = n.getProperty("term");
-				Element xmlTerm = XmlUtil.readXML(nodeXmlString).getDocumentElement();
+				Element xmlTerm = XmlUtil.readXMLFromString(nodeXmlString).getDocumentElement();
 				KRunState ret = parseElement(xmlTerm, context);
 				String id = n.getId();
 				id = id.substring(1);
@@ -523,7 +515,7 @@ public class MaudeKRun implements KRun {
 		Transformer<EdgeMetadata, Transition> edgeTransformer = new Transformer<EdgeMetadata, Transition>() {
 			public Transition transform(EdgeMetadata e) {
 				String edgeXmlString = e.getProperty("rule");
-				Element elem = XmlUtil.readXML(edgeXmlString).getDocumentElement();
+				Element elem = XmlUtil.readXMLFromString(edgeXmlString).getDocumentElement();
 				String metadataAttribute = elem.getAttribute("metadata");
 				Pattern pattern = Pattern.compile("([a-z]*)=\\((.*?)\\)");
 				Matcher matcher = pattern.matcher(metadataAttribute);
@@ -558,17 +550,18 @@ public class MaudeKRun implements KRun {
 			}
 		};
 
-        processedMaudeOutputReader = new FileReader(K.processed_maude_output);
-		GraphMLReader2<DirectedGraph<KRunState, Transition>, KRunState, Transition> graphmlParser
-            = new GraphMLReader2<DirectedGraph<KRunState, Transition>, KRunState, Transition>(processedMaudeOutputReader, graphTransformer, nodeTransformer,
-            edgeTransformer, hyperEdgeTransformer);
-		return graphmlParser.readGraph();
+        try (Reader processedMaudeOutputReader
+                 = new BufferedReader(new FileReader(K.processed_maude_output))) {
+            GraphMLReader2<DirectedGraph<KRunState, Transition>, KRunState, Transition> graphmlParser
+                = new GraphMLReader2<>(processedMaudeOutputReader, graphTransformer, nodeTransformer,
+                edgeTransformer, hyperEdgeTransformer);
+            return graphmlParser.readGraph();
+        }
 	}
 
 	private List<SearchResult> parseSearchResults(Rule pattern, RuleCompilerSteps compilationInfo) {
 		List<SearchResult> results = new ArrayList<SearchResult>();
-		File input = new File(K.maude_output);
-		Document doc = XmlUtil.readXML(input);
+		Document doc = XmlUtil.readXMLFromFile(K.maude_output);
 		NodeList list;
 		Node nod;
 		list = doc.getElementsByTagName("search-result");
@@ -616,7 +609,18 @@ public class MaudeKRun implements KRun {
 		MaudeFilter cfgFilter = new MaudeFilter(context);
 		cfg.accept(cfgFilter);
 
-		String cmd = "mod MCK is" + K.lineSeparator + " including " + K.main_module + " ." + K.lineSeparator + K.lineSeparator + " op #initConfig : -> Bag ." + K.lineSeparator + K.lineSeparator + " eq #initConfig  =" + K.lineSeparator + cfgFilter.getResult() + " ." + K.lineSeparator + "endm" + K.lineSeparator + K.lineSeparator + "red" + K.lineSeparator + "_`(_`)(('modelCheck`(_`,_`)).KLabel,_`,`,_(_`(_`)(Bag2KLabel(#initConfig),.KList)," + K.lineSeparator + formulaFilter.getResult() + ")" + K.lineSeparator + ") .";
+        StringBuilder cmd = new StringBuilder()
+            .append("mod MCK is").append(K.lineSeparator)
+            .append(" including ")
+            .append(K.main_module).append(" .").append(K.lineSeparator).append(K.lineSeparator)
+            .append(" op #initConfig : -> Bag .").append(K.lineSeparator).append(K.lineSeparator)
+            .append(" eq #initConfig  =").append(K.lineSeparator)
+            .append(cfgFilter.getResult()).append(" .").append(K.lineSeparator)
+            .append("endm").append(K.lineSeparator).append(K.lineSeparator)
+            .append("red").append(K.lineSeparator)
+            .append("_`(_`)(('modelCheck`(_`,_`)).KLabel,_`,`,_(_`(_`)(Bag2KLabel(#initConfig),.KList),").append(K.lineSeparator)
+            .append(formulaFilter.getResult()).append(")").append(K.lineSeparator)
+            .append(") .");
 		boolean io = ioServer;
 		ioServer = false;
         executeKRun(cmd);
@@ -631,8 +635,7 @@ public class MaudeKRun implements KRun {
     }
 
 	private KRunProofResult<DirectedGraph<KRunState, Transition>> parseModelCheckResult() {
-		File input = new File(K.maude_output);
-		Document doc = XmlUtil.readXML(input);
+		Document doc = XmlUtil.readXMLFromFile(K.maude_output);
 		NodeList list;
 		Node nod;
 		list = doc.getElementsByTagName("result");

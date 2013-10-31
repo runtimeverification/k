@@ -62,11 +62,11 @@ public class RunProcess {
 			setExitCode(process.exitValue());
 
 			synchronized (inputStreamHandler) {
-				if (inputStreamHandler.isAlive())
+				while (inputStreamHandler.isAlive())
 					inputStreamHandler.wait();
 			}
 			synchronized (errorStreamHandler) {
-				if (errorStreamHandler.isAlive())
+				while (errorStreamHandler.isAlive())
 					errorStreamHandler.wait();
 			}
 

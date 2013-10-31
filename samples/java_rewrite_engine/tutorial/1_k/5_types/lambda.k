@@ -1,20 +1,18 @@
-require "builtins/map.k"
-require "builtins/meta-k.k"
+require "meta-k.k"
 
 
 module LAMBDA
-  imports MAP
   imports META-K
 
   syntax Exp ::= Int | Bool | Id
                | "(" Exp ")"                        [bracket]
-               | Exp Exp                            [left, strict]
-               > Exp "*" Exp                        [left, strict]
-               | Exp "/" Exp                        [left, strict]
-               > Exp "+" Exp                        [left, strict]
-               > Exp "-" Exp                        [left, strict]
-               > Exp "<=" Exp                       [strict]
-               > "if" Exp "then" Exp "else" Exp     [strict]
+               | Exp Exp                            [left, seqstrict]
+               > Exp "*" Exp                        [left, seqstrict]
+               | Exp "/" Exp                        [left, seqstrict]
+               > Exp "+" Exp                        [left, seqstrict]
+               > Exp "-" Exp                        [left, seqstrict]
+               > Exp "<=" Exp                       [seqstrict]
+               > "if" Exp "then" Exp "else" Exp     [seqstrict]
                | "lambda" Id "." Exp
                | "mu" Id "." Exp
                | "let" Id "=" Exp "in" Exp          [strict(2)]
@@ -22,7 +20,7 @@ module LAMBDA
   syntax Type ::= "int" | "bool"
                 | Type "->" Type                    [strict(2)]
                 | "(" Type ")"                      [bracket]
-  syntax TypeSchema ::= "forall" MySet "." Type     [klabel(schema)]
+  syntax TypeSchema ::= "forall" Set "." Type     [klabel(schema)]
 
   syntax Exp ::= Type
   syntax KResult ::= Type
@@ -34,7 +32,7 @@ module LAMBDA
 
   configuration <T color="yellow">
                   <k color="green"> $PGM:Exp </k>
-                  <tenv color="red"> .MyMap </tenv>
+                  <tenv color="red"> .Map </tenv>
                 </T>
 
 
@@ -42,7 +40,7 @@ module LAMBDA
   rule B:Bool => bool
   rule <k> X:Id => T ...</k> <tenv>... X |-> T:Type ...</tenv>
   rule <k> X:Id => #rename(T, S) ...</k>
-       <tenv>... X |-> forall S:MySet . T:Type ...</tenv>
+       <tenv>... X |-> forall S:Set . T:Type ...</tenv>
   rule (T1:Type -> T2:Type) T1 => T2
   rule int * int => int
   rule int / int => int
@@ -51,17 +49,18 @@ module LAMBDA
   rule int <= int => bool
   rule if bool then T:Type else T => T
   //rule <k> lambda X:Id . E:Exp => T:Type -> E::K ~> TEnv ...</k>
-  rule <k> lambda X:Id . E:Exp => T:Type -> (E)::K ~> TEnv ...</k>
-       <tenv> TEnv:MyMap => TEnv[X <- T] </tenv>
-  rule <k> mu X:Id . E:Exp => (T:Type -> T) E ~> TEnv ...</k>
-       <tenv> TEnv:MyMap => TEnv[X <- T] </tenv>
-  rule <k> let X:Id = T:Type in E:Exp => E ~> TEnv ...</k>
+  syntax K ::= env(Map)
+  rule <k> lambda X:Id . E:Exp => T:Type -> (E)::K ~> env(TEnv) ...</k>
+       <tenv> TEnv:Map => TEnv[T / X] </tenv>
+  rule <k> mu X:Id . E:Exp => (T:Type -> T) E ~> env(TEnv) ...</k>
+       <tenv> TEnv:Map => TEnv[T / X] </tenv>
+  rule <k> let X:Id = T:Type in E:Exp => E ~> env(TEnv) ...</k>
        <tenv>
-         TEnv:MyMap
+         TEnv:Map
        =>
-         TEnv[X <- forall #variables(T) -MySet #variables(TEnv) . T]
+         TEnv:Map[forall #variables(T) -Set #variables(env(TEnv)) . T / X]
        </tenv>
 
-  rule <k> T:Type ~> (TEnv:MyMap => .) ...</k> <tenv> _:MyMap => TEnv </tenv>
+  rule <k> T:Type ~> (env(TEnv:Map) => .) ...</k> <tenv> _:Map => TEnv </tenv>
 endmodule
 

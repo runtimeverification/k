@@ -13,7 +13,6 @@ import java.util.List;
 
 public class MaudeRun {
 
-	static String maudeExe = initializeMaudeExecutable();
 	static boolean internalMaude = true;
 
 	/**
@@ -53,7 +52,8 @@ public class MaudeRun {
 		//} else if (osname.toLowerCase().contains("mac")) {
 			// I hope this condition is strong enough
         } else if (osname.equals("Mac OS X")) {
-            String subversion = version.substring(3, version.indexOf('.', 3));
+            String[] parsedVersion = version.split("\\.");
+            String subversion = parsedVersion[1];
             // if at least Snow Leopard
             if (Integer.parseInt(subversion) >= 6)
 			    maudeExe = maudeDir + fileSeparator + maude_mac;
@@ -86,46 +86,4 @@ public class MaudeRun {
 
 		return maudeExe;
 	}
-
-	private static boolean checkLocalMaudeInstallation() {
-		String localMaude = "maude";
-
-		try {
-			java.lang.ProcessBuilder pb = new java.lang.ProcessBuilder(localMaude);
-			pb.redirectErrorStream(true);
-
-			Process p = pb.start();
-
-			OutputStream os = p.getOutputStream();
-			os.write("q\n".getBytes());
-			os.flush();
-			os.close();
-
-			InputStream is = p.getInputStream();
-			BufferedReader br = new BufferedReader(new InputStreamReader(is));
-			String line = "";
-			String output = "";
-			while ((line = br.readLine()) != null) {
-				output += line + "\n";
-			}
-
-			p.waitFor();
-			if (output.matches("GLIBC")) {
-				return false;
-			}
-
-			if (output.matches("[Ww]arning")) {
-				return false;
-			}
-
-			if (output.matches("[Ee]rror")) {
-				return false;
-			}
-		} catch (Exception e) {
-			return false;
-		}
-
-		return true;
-	}
-
 }

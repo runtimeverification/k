@@ -19,6 +19,7 @@ module LAMBDA
                > Exp "<=" Exp         [strict]
   rule I1:Int * I2:Int => I1 *Int I2
   rule I1:Int / I2:Int => I1 /Int I2
+//  rule I1:Int / I2:Int => I1 /Int I2  when I2 =/=Int 0
   rule I1:Int + I2:Int => I1 +Int I2
   rule I1:Int <= I2:Int => I1 <=Int I2
 endmodule

@@ -302,7 +302,7 @@ public class CopyOnWriteTransformer implements Transformer {
         Term list = (Term) listLookup.list().accept(this);
         Term key = (Term) listLookup.key().accept(this);
         if (list != listLookup.list() || key != listLookup.key()) {
-            listLookup = new ListLookup(list, key);
+            listLookup = new ListLookup(list, key, listLookup.kind());
         }
         return listLookup;
     }
@@ -416,7 +416,7 @@ public class CopyOnWriteTransformer implements Transformer {
         Term map = (Term) mapLookup.map().accept(this);
         Term key = (Term) mapLookup.key().accept(this);
         if (map != mapLookup.map() || key != mapLookup.key()) {
-            mapLookup = new MapLookup(map, key);
+            mapLookup = new MapLookup(map, key, mapLookup.kind());
         }
         return mapLookup;
 

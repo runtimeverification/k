@@ -12,7 +12,6 @@ import java.util.logging.Logger;
 public class MaudeTask extends Thread {
 	// private static final String LOG_FILE = "maude.log";
 	// private static final String LOGGER = "maude";
-	private Logger _logger;
 	private String _command;
 	private String _outputFile;
 	private String _errorFile;
@@ -25,11 +24,6 @@ public class MaudeTask extends Thread {
 		_command = command;
 		_outputFile = outputFile;
 		_errorFile = errorFile;
-	}
-
-	public MaudeTask(String command, String outputFile, String errorFile, Logger parentLogger) {
-		this(command, outputFile, errorFile);
-		set_logger(parentLogger);
 	}
 
 	@Override
@@ -80,26 +74,21 @@ public class MaudeTask extends Thread {
 		while ((line = maudeOutput.readLine()) != null) {
 			outputFile.write(line + K.lineSeparator);
 		}
+        maudeOutput.close();
 		outputFile.close();
 	}
 
 	private void writeError() throws IOException {
-		// redirect error in log file
-		BufferedReader maudeError = new BufferedReader(new InputStreamReader(_maudeProcess.getErrorStream()));
-		BufferedWriter errorFile = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(_errorFile)));
+		try (
+            BufferedReader maudeError
+                = new BufferedReader(new InputStreamReader(_maudeProcess.getErrorStream()));
+		    BufferedWriter errorFile
+                = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(_errorFile)))) {
 
-		String line;
-		while ((line = maudeError.readLine()) != null) {
-			errorFile.write(line + K.lineSeparator);
-		}
-		errorFile.close();
-	}
-
-	public Logger get_logger() {
-		return _logger;
-	}
-
-	public void set_logger(Logger _logger) {
-		this._logger = _logger;
+            String line;
+            while ((line = maudeError.readLine()) != null) {
+                errorFile.write(line + K.lineSeparator);
+            }
+        }
 	}
 }

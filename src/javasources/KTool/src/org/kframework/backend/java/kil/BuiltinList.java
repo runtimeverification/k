@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.symbolic.*;
 import org.kframework.backend.java.util.ImprovedArrayDeque;
+import org.kframework.backend.java.util.KSorts;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.IntBuiltin;
 
@@ -13,7 +14,7 @@ import java.util.*;
 /**
  * @author: TraianSF
  */
-public class BuiltinList extends Collection {
+public class BuiltinList extends Collection implements Sorted {
 
     private final ImprovedArrayDeque<Term> elementsLeft;
     protected final ImprovedArrayDeque<Term> elementsRight;
@@ -67,6 +68,15 @@ public class BuiltinList extends Collection {
         ArrayList<Term> elements = new ArrayList<Term>(elementsLeft);
         elements.addAll(elementsRight);
         return Collections.unmodifiableList(elements);
+    }
+
+
+    /**
+     * Returns a {@code String} representation of the sort of this object.
+     */
+    @Override
+    public String sort() {
+        return KSorts.LIST;
     }
 
     @Override
@@ -133,7 +143,8 @@ public class BuiltinList extends Collection {
             while (index-- > 0) iterator.next();
             return iterator.next();
         }
-        if (frame == null) return new SymbolicConstraint.Bottom();
+        // TODO(AndreiS): use correct kind/sort
+        if (frame == null) return new Bottom(Kind.K);
         java.util.Collection<Term> left = elementsLeft;
         java.util.Collection<Term> right = elementsRight;
         if (onLeft) {
@@ -144,7 +155,12 @@ public class BuiltinList extends Collection {
             index = -index-1;
             right = Collections.<Term>emptyList();
         }
-        return new ListLookup(BuiltinList.of(frame, removeLeft, removeRight, left, right), IntToken.of(index));
+
+        // TODO(AndreiS): use correct kind/sort
+        return new ListLookup(
+                BuiltinList.of(frame, removeLeft, removeRight, left, right),
+                IntToken.of(index),
+                Kind.K);
     }
 
     public java.util.Collection<Term> elementsLeft() {

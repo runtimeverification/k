@@ -7,7 +7,9 @@ import com.microsoft.z3.Symbol;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.Int32Token;
+import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.Definition;
+import org.kframework.backend.java.kil.Hole;
 import org.kframework.backend.java.kil.JavaSymbolicObject;
 import org.kframework.backend.java.kil.KCollection;
 import org.kframework.backend.java.kil.KItem;
@@ -19,6 +21,7 @@ import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.kil.Z3Term;
 import org.kframework.backend.java.util.GappaPrinter;
 import org.kframework.backend.java.util.GappaServer;
+import org.kframework.backend.java.util.KSorts;
 import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.kil.ASTNode;
 
@@ -102,9 +105,18 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             if (leftHandSide.isGround() && rightHandSide.isGround()) {
                 return !leftHandSide.equals(rightHandSide);
             }
-
             if (!(leftHandSide instanceof Sorted) || !(rightHandSide instanceof Sorted)) {
                 return false;
+            }
+
+            // TODO(AndreiS): treat HOLE more uniformly
+            if (leftHandSide == Hole.HOLE && (rightHandSide instanceof Sorted)
+                    && !definition.context().isSubsortedEq(((Sorted) rightHandSide).sort(), KSorts.KITEM)) {
+                return true;
+            }
+            if (rightHandSide == Hole.HOLE && (leftHandSide instanceof Sorted)
+                && !definition.context().isSubsortedEq(((Sorted) leftHandSide).sort(), KSorts.KITEM)) {
+                return true;
             }
 
             if (leftHandSide instanceof KItem
@@ -773,30 +785,4 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         throw new UnsupportedOperationException();
     }
 
-    /**
-     * Refers to a computation which never completes successfully.
-     */
-    public static class Bottom extends Term {
-        public Bottom() {
-            super(Kind.BOTTOM);
-        }
-
-        @Override
-        public boolean isSymbolic() {
-            return false;
-        }
-
-        @Override
-        public ASTNode accept(Transformer transformer) {
-            return this;
-        }
-
-        @Override
-        public void accept(Unifier unifier, Term patten) {
-        }
-
-        @Override
-        public void accept(Visitor visitor) {
-        }
-    }
 }

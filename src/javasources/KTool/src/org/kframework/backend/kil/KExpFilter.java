@@ -12,8 +12,8 @@ public class KExpFilter extends BasicVisitor {
 		result = new StringBuilder();
 	}
 
-	public String getResult() {
-		return result.toString();
+	public StringBuilder getResult() {
+		return result;
 	}
 
 	/*
