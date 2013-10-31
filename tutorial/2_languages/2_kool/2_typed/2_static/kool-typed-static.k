@@ -288,7 +288,7 @@ typed SIMPLE, so we do not discuss them much here. */
 
   context _:Type _[HOLE];
 
-  rule T:Type E[int,Ts:Types]; => T[] E[Ts];  [structural]
+  rule T:Type E:Exp[int,Ts:Types]; => T[] E[Ts];  [structural]
   rule T:Type E:Exp[.Types]; => T E;          [structural]
 
 
@@ -324,7 +324,7 @@ typed SIMPLE, so we do not discuss them much here. */
 
 
   rule (T[])[int, Ts:Types] => T[Ts]
-  rule T[.Types] => T
+  rule T:Type[.Types] => T
 
   rule sizeOf(T[]) => int
 
