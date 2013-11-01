@@ -1,6 +1,3 @@
-require "builtins/list.k"
-require "builtins/map.k"
-require "io/io.k"
 
 
 module IMP-SYNTAX
@@ -36,9 +33,6 @@ endmodule
 
 module IMP
   imports IMP-SYNTAX
-  imports LIST
-  imports MAP
-  imports IO
 
   syntax KResult ::= Int | Bool | String
 
@@ -47,13 +41,13 @@ module IMP
                     <thread multiplicity="*" color="blue">
                       <k color="green"> $PGM:Stmts </k>
                       //<k color="green"> $PGM:K </k>
-                      <env color="LightSkyBlue"> .MyMap </env>
+                      <env color="LightSkyBlue"> .Map </env>
                       <id color="black"> 0 </id>
                     </thread>
                   </threads>
-                  <store color="red"> .MyMap </store>
-                  <in color="magenta" stream="stdin"> .MyList </in>
-                  <out color="Orchid" stream="stdout"> .MyList </out>
+                  <store color="red"> .Map </store>
+                  <in color="magenta" stream="stdin"> .List </in>
+                  <out color="Orchid" stream="stdout"> .List </out>
                 </T>
 
 // AExp
@@ -64,7 +58,7 @@ module IMP
        <env>... X |-> L:KItem ...</env>
        <store>... L |-> (I => I +Int 1) ...</store>  [increment]
   rule <k> read() => I ...</k>
-       <in> MyListItem(I:Int) => .MyList ...</in>  [read]
+       <in> ListItem(I:Int) => .List ...</in>  [read]
   rule I1 / I2 => I1 /Int I2  when I2 =/=Int 0
   rule I1 + I2 => I1 +Int I2
   rule Str1 + Str2 => Str1 +String Str2
@@ -74,9 +68,10 @@ module IMP
   rule true  && B => B
   rule false && _ => false
 // Block
-  rule <k> { Ss } => Ss ~> Rho ...</k>
-       <env> Rho:MyMap </env>   [structural]
-  rule <k> Rho:MyMap => . ...</k> <env> _ => Rho </env>   [structural]
+  syntax K ::= env(Map)
+  rule <k> { Ss } => Ss ~> env(Rho) ...</k>
+       <env> Rho:Map </env>   [structural]
+  rule <k> env(Rho:Map) => . ...</k> <env> _ => Rho </env>   [structural]
 // Stmt
   rule _:Int; => .
   rule <k> X:Id = I:Int => I ...</k>
@@ -87,20 +82,20 @@ module IMP
   rule while (B) S => if (B) { S while(B) S } else { .Stmts }   [structural]
 
   rule <k> int (X:Id, Xs => Xs); ...</k>
-       <env> Rho:MyMap => Rho[X <- L] </env>
-       <store>... .MyMap => L |-> 0 ...</store>
+       <env> Rho:Map => Rho[L/X] </env>
+       <store>... .Map => L |-> 0 ...</store>
     when fresh(L:Int)   [structural]
   rule int .Ids; => .   [structural]
 
   syntax AExp ::= Printable
   syntax Printable ::= Int | String
   rule <k> print(P:Printable, AEs => AEs); ...</k>
-       <out>... .MyList => MyListItem(P) </out>   [print]
+       <out>... .List => ListItem(P) </out>   [print]
   rule print(.AExps); => .  [structural]
   
   rule <k> halt; ~> _ => . </k>
 
-  rule <k> spawn S => T ...</k> <env> Rho:MyMap </env>
+  rule <k> spawn S => T ...</k> <env> Rho:Map </env>
        (. => <thread>... <k> S </k> <env> Rho </env> <id> T </id> ...</thread>)
     when fresh(T:Int)
   rule <k> join(T:Int); => . ...</k>
@@ -108,7 +103,7 @@ module IMP
 
 // Stmts
   rule .Stmts => .                  [structural]
-  // the following has sort annotation to avoid ambiguity with MyMap, MySet, etc
+  // the following has sort annotation to avoid ambiguity with Map, Set, etc
   rule S:Stmt Ss:Stmts => S ~> Ss   [structural]
 endmodule
 

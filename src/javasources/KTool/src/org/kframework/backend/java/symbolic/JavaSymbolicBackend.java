@@ -148,7 +148,7 @@ public class JavaSymbolicBackend extends BasicBackend {
         steps.add(new ResolveBuiltins(context));
         steps.add(new ResolveListOfK(context));
         steps.add(new FlattenSyntax(context));
-        steps.add(new ResolveBlockingInput(context, true));
+        steps.add(new ResolveBlockingInput(context, false));
         steps.add(new InitializeConfigurationStructure(context));
         //steps.add(new AddKStringConversion(context));
         //steps.add(new AddKLabelConstant(context));
