@@ -710,7 +710,7 @@
       extension="test"
       results="tests/regression/lint"
       >
-    <kompile-option name="-w" value="all" />
+    <kompile-option name="-w" value="none" />
   </test>
 
   <test
