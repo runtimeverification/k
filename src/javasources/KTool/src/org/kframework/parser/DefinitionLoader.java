@@ -15,11 +15,7 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Term;
-import org.kframework.kil.loader.AddAutoIncludedModulesVisitor;
-import org.kframework.kil.loader.CollectConfigCellsVisitor;
-import org.kframework.kil.loader.CollectModuleImportsVisitor;
-import org.kframework.kil.loader.Context;
-import org.kframework.kil.loader.JavaClassesFactory;
+import org.kframework.kil.loader.*;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.basic.Basic;
 import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
@@ -127,6 +123,8 @@ public class DefinitionLoader {
 			}
 			if (GlobalSettings.verbose)
 				Stopwatch.sw.printIntermediate("Basic Parsing");
+
+            def = (Definition) def.accept(new RemoveUnusedModules(context));
 
 			new CheckVisitorStep<Definition>(new CheckListOfKDeprecation(context), context).check(def);
 			// HERE: add labels to sorts
