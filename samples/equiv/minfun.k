@@ -5,8 +5,9 @@ syntax FExp ::= Id
 	     | FExp "f-" FExp [strict]
 	     | FExp "f==" FExp [strict]
 	     | FExp "f<" FExp [strict]
-	     | "if" FExp "then" FExp "else" FExp [strict(1)]
+	     | "fif" FExp "fthen" FExp "felse" FExp [strict(1)]
 	     | Val
+	     | "let" Id "=" FExp "in" FExp [strict(2)]
 	     | "fix" Id FExp [binder]
 	     > FExp FExp [seqstrict]
 	     | "(" FExp ")" [bracket]
@@ -33,11 +34,13 @@ rule I1:Int f== I2:Int => I1 ==Int I2
 
 rule I1:Int f< I2:Int => I1 <Int I2
 
-rule if true then S1:FExp else _ => S1
+rule fif true fthen S1:FExp felse _ => S1
 
-rule if false then _ else S2:FExp => S2
+rule fif false fthen _ felse S2:FExp => S2
 
 rule (lambda X:Id . E:FExp) V:Val => E[V / X]
+
+rule let X:Id = V:Val in E:FExp => E[V / X]
 
 rule fix X:Id E:FExp => E[fix X E / X]
 
