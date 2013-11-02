@@ -63,8 +63,15 @@ public class DataStructureSort implements Serializable {
     public static final String DEFAULT_LIST_SORT = "MyList";
     public static final String DEFAULT_MAP_SORT = "MyMap";
     public static final String DEFAULT_SET_SORT = "MySet";
-    public static final String DEFAULT_LISTITEM_LABEL = "'MyListItem";
+    public static final String DEFAULT_LIST_LABEL = "'_List_";
+    public static final String DEFAULT_LIST_ITEM_LABEL = "'MyListItem";
     public static final String DEFAULT_LIST_UNIT_LABEL = "'.MyList";
+    public static final String DEFAULT_MAP_LABEL = "'_Map_";
+    public static final String DEFAULT_MAP_ITEM_LABEL = "'_|->_";
+    public static final String DEFAULT_MAP_UNIT_LABEL = "'.MyMap";
+    public static final String DEFAULT_SET_LABEL = "'_Set_";
+    public static final String DEFAULT_SET_ITEM_LABEL = "'MySetItem";
+    public static final String DEFAULT_SET_UNIT_LABEL = "'.MySet";
 
     /** Name of this data structure sort. */
     private final String name;

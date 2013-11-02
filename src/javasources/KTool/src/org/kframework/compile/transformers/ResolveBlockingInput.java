@@ -122,7 +122,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
 		if ((!newList && !(rewrite.getLeft() instanceof ListItem)) ||
             (newList && !(rewrite.getLeft() instanceof KApp &&
             ((KApp)rewrite.getLeft()).getLabel().equals(
-                KLabelConstant.of(DataStructureSort.DEFAULT_LISTITEM_LABEL, context))))) {
+                KLabelConstant.of(DataStructureSort.DEFAULT_LIST_ITEM_LABEL, context))))) {
 			GlobalSettings.kem.register(new KException(ExceptionType.WARNING, 
 					KExceptionGroup.COMPILER, 
 					"Expecting a list item but got " + rewrite.getLeft().getClass() + "." +
