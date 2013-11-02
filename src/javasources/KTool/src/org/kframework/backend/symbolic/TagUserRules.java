@@ -39,6 +39,9 @@ public class TagUserRules extends CopyOnWriteTransformer {
                     Constants.STRUCTURAL,
                     Constants.ANYWHERE,
                     SymbolicBackend.NOTSYMBOLIC);
+            if (!GlobalSettings.nonSymbolicTags.isEmpty()) {
+                notSymbolicTags.addAll(GlobalSettings.nonSymbolicTags);
+            }
         }
     }
 
@@ -63,7 +66,24 @@ public class TagUserRules extends CopyOnWriteTransformer {
                                 File.separator + "io" +
                                 File.separator + "io.k"))
                 ) {
-			List<Attribute> attrs = node.getAttributes().getContents();
+
+            // this handles the case when the user wants to
+            // specify exactly what rules should be transformed
+            // symAllowed is true when the rule is tagged in this purpose
+            boolean symAllowed = false;
+            for (String st : GlobalSettings.symbolicTags) {
+                if (node.containsAttribute(st)) {
+                    symAllowed = true;
+                }
+            }
+            // the first condition might not be needed, but we keep it
+            // to ensure that, by default, if no rules (identified by tags)
+            // are specified, then all rules are transformed by symbolic steps.
+            if (!GlobalSettings.symbolicTags.isEmpty() && !symAllowed) {
+                return super.transform(node);
+            }
+
+            List<Attribute> attrs = node.getAttributes().getContents();
 			attrs.add(new Attribute(SymbolicBackend.SYMBOLIC, ""));
 
 			Attributes atts = node.getAttributes().shallowCopy();

@@ -30,6 +30,7 @@ import org.kframework.utils.OptionComparator;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class KompileFrontEnd {
@@ -252,7 +253,13 @@ public class KompileFrontEnd {
 			context.dotk = new File(output + File.separator + FileUtil.stripExtension(mainFile.getName()) + "-kompiled");
 			checkAnotherKompiled(context.dotk);
 			context.dotk.mkdirs();
-			break;
+            if (cmd.hasOption("symbolic-rules")) {
+                GlobalSettings.symbolicTags = Arrays.asList(cmd.getOptionValue("symbolic-rules").trim().split("\\s+"));
+            }
+            if (cmd.hasOption("non-symbolic-rules")) {
+                GlobalSettings.nonSymbolicTags = Arrays.asList(cmd.getOptionValue("non-symbolic-rules").trim().split("\\s+"));
+            }
+            break;
 		default:
 			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Invalid backend option: " + backendOpt, "", ""));
 			break;

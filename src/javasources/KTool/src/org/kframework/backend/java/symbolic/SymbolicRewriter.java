@@ -156,7 +156,8 @@ public class SymbolicRewriter {
 
         // Instead of iterator through all applicable rules, iterate through
         // them as dictated by the strategy.
-        strategy.apply(getRules(constrainedTerm.term()));
+        Set<Rule> rules = getRules(constrainedTerm.term());
+        strategy.apply(rules);
         while (strategy.hasNext()) {
             Rule rule = strategy.next();
             ruleStopwatch.reset();
