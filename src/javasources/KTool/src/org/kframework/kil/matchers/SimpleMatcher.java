@@ -10,7 +10,6 @@ import org.kframework.kil.BagItem;
 import org.kframework.kil.Bracket;
 import org.kframework.kil.Cast;
 import org.kframework.kil.Cell;
-import org.kframework.kil.Empty;
 import org.kframework.kil.Freezer;
 import org.kframework.kil.FreezerHole;
 import org.kframework.kil.Hole;
@@ -19,6 +18,7 @@ import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSequence;
 import org.kframework.kil.List;
+import org.kframework.kil.ListTerminator;
 import org.kframework.kil.ListItem;
 import org.kframework.kil.Map;
 import org.kframework.kil.MapItem;
@@ -83,9 +83,9 @@ public class SimpleMatcher implements Matcher {
 	}
 
 	@Override
-	public void match(Empty term, Term term2) {
-		if (!(term2 instanceof Empty)) {
-			throw new MatcherException("Attempted to match Empty with " + term2 + ".");
+	public void match(ListTerminator term, Term term2) {
+		if (!(term2 instanceof ListTerminator)) {
+			throw new MatcherException("Attempted to match ListTerminator with " + term2 + ".");
 		}
 	}
 

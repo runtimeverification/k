@@ -6,7 +6,6 @@ import java.util.List;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
-import org.kframework.kil.Empty;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
@@ -35,7 +34,7 @@ public class FlattenDisambiguationFilter extends CopyOnWriteTransformer {
 					if (context.isSubsortedEq(ul.getSort(), t2.getSort())) {
 						t1.getContents().set(1, addEmpty(t2, t1.getSort()));
 					}
-					if (t2 instanceof Empty) {
+					if (t2 instanceof ListTerminator) {
 						t1.getContents().set(1, new ListTerminator(ul.getSeparator()));
 					}
 				}
@@ -43,8 +42,8 @@ public class FlattenDisambiguationFilter extends CopyOnWriteTransformer {
                         KLabelConstant.of(t1.getProduction().getKLabel(), context),
                         (Term) new KList(t1.getContents()).accept(this));
 			}
-		} else if (amb.getContents().get(0) instanceof Empty) {
-			Empty t1 = (Empty)amb.getContents().get(0);
+		} else if (amb.getContents().get(0) instanceof ListTerminator) {
+			ListTerminator t1 = (ListTerminator)amb.getContents().get(0);
 			if (MetaK.isComputationSort(t1.getSort())) {
 				return new ListTerminator(((UserList) context.listConses.get(t1.getSort()).getItems().get(0)).getSeparator());
 			}
@@ -56,7 +55,7 @@ public class FlattenDisambiguationFilter extends CopyOnWriteTransformer {
 		TermCons tc = new TermCons(sort, context.listConses.get(sort).getCons(), context);
 		List<Term> contents = new ArrayList<Term>();
 		contents.add(node);
-		contents.add(new Empty(sort));
+		contents.add(new ListTerminator(sort, null));
 		tc.setContents(contents);
 		return tc;
 	}

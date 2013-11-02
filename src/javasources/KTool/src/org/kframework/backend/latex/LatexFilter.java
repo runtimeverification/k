@@ -260,7 +260,7 @@ public class LatexFilter extends BackendFilter {
 	}
 
 	@Override
-	public void visit(Empty e) {
+	public void visit(ListTerminator e) {
         printEmpty(e.getSort());
     }
 

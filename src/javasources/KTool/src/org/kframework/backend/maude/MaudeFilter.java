@@ -435,7 +435,7 @@ public class MaudeFilter extends BackendFilter {
 	}
 
 	@Override
-	public void visit(Empty empty) {
+	public void visit(ListTerminator empty) {
 		String sort = empty.getSort();
 		if (MaudeHelper.basicSorts.contains(sort) || MetaK.isCellFragment(sort)) {
 			result.append(".");
@@ -624,7 +624,7 @@ public class MaudeFilter extends BackendFilter {
 	@Override
 	public void visit(Collection collection) {
 		if (collection.getContents().size() == 0) {
-			new Empty(collection.getSort()).accept(this);
+			new ListTerminator(collection.getSort(), null).accept(this);
 		} else if (collection.getContents().size() == 1) {
 			collection.getContents().get(0).accept(this);
 		} else {
@@ -870,7 +870,7 @@ public class MaudeFilter extends BackendFilter {
 	@Override
 	public void visit(Bag bag) {
 		if (bag.getContents().isEmpty()) {
-			new Empty(KSorts.BAG).accept(this);
+			new ListTerminator(KSorts.BAG, null).accept(this);
 			return;
 		}
 		for (Term item: bag.getContents()) {

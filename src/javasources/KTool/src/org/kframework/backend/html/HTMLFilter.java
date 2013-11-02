@@ -261,7 +261,7 @@ public class HTMLFilter extends BackendFilter {
 	}
 
 	@Override
-	public void visit(Empty e) {
+	public void visit(ListTerminator e) {
 		result.append(" <span title=\""+ e.getSort()+"\" class = \"bold\"> &nbsp;&nbsp;&middot;&nbsp;&nbsp;</span> ");
 	}
 

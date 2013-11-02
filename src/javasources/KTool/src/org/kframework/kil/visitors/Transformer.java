@@ -81,7 +81,6 @@ public interface Transformer {
     public ASTNode transform(StringBuiltin node) throws TransformerException;
     public ASTNode transform(GenericToken node) throws TransformerException;
     // </Token>
-	public ASTNode transform(Empty node) throws TransformerException;
 	public ASTNode transform(ListTerminator node) throws TransformerException;
 	public ASTNode transform(Hole node) throws TransformerException;
 	public ASTNode transform(KApp node) throws TransformerException;

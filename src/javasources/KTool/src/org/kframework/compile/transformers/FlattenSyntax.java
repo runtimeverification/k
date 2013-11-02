@@ -109,7 +109,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 	}
 
 	@Override
-	public ASTNode transform(Empty node) throws TransformerException {
+	public ASTNode transform(ListTerminator node) throws TransformerException {
 		if (MetaK.isComputationSort(node.getSort()))
 			return node.accept(kTrans);
 		return node;
@@ -173,7 +173,7 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 		}
 
 		@Override
-		public ASTNode transform(Empty emp) {
+		public ASTNode transform(ListTerminator emp) {
 			String l = emp.getLocation();
 			String f = emp.getFilename();
 			if (!MetaK.isComputationSort(emp.getSort())) {

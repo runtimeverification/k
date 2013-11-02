@@ -161,6 +161,11 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
+    public ASTNode transform(org.kframework.kil.Hole node) throws TransformerException {
+        return Hole.HOLE;
+    }
+
+    @Override
     public ASTNode transform(org.kframework.kil.FreezerHole node) throws TransformerException {
         return Hole.HOLE;
     }
@@ -236,8 +241,11 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 }
             }
 
-            // TODO(AndreiS): get the multiplicity
-            boolean isStar = !cells.isEmpty() && cells.keySet().iterator().next().equals("thread");
+            boolean isStar = false;
+            for (String cellLabel : cells.keySet()) {
+                isStar = isStar || context.getConfigurationStructureMap().get(cellLabel).multiplicity
+                        == org.kframework.kil.Cell.Multiplicity.ANY;
+            }
 
             return new Cell<CellCollection>(
                     node.getLabel(),
@@ -330,7 +338,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(org.kframework.kil.MapBuiltin node) throws TransformerException {
-        assert node.isLHSView() : "unsupported map " + node;
+//        assert node.isLHSView() : "unsupported map " + node;
 
         HashMap<Term, Term> entries = new HashMap<Term, Term>(node.elements().size());
         for (Map.Entry<org.kframework.kil.Term, org.kframework.kil.Term> entry :
@@ -340,19 +348,36 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             entries.put(key, value);
         }
 
-        if (node.hasViewBase()) {
-            Term base = (Term) node.viewBase().accept(this);
-            if (base instanceof MapUpdate) {
-                MapUpdate mapUpdate = (MapUpdate) base;
-                /* TODO(AndreiS): check key uniqueness */
-                entries.putAll(mapUpdate.updateMap());
-                return new MapUpdate(mapUpdate.map(), mapUpdate.removeSet(), entries);
+        ArrayList<Term> baseTerms = new ArrayList<>(node.baseTerms().size());
+        for (org.kframework.kil.Term term : node.baseTerms()) {
+            baseTerms.add((Term) term.accept(this));
+        }
+
+        if (node.isLHSView()) {
+            if (node.hasViewBase()) {
+                Term base = (Term) node.viewBase().accept(this);
+                if (base instanceof MapUpdate) {
+                    MapUpdate mapUpdate = (MapUpdate) base;
+                    /* TODO(AndreiS): check key uniqueness */
+                    entries.putAll(mapUpdate.updateMap());
+                    return new MapUpdate(mapUpdate.map(), mapUpdate.removeSet(), entries);
+                } else {
+                    /* base instanceof Variable */
+                    return new BuiltinMap(entries, (Variable) base);
+                }
             } else {
-                /* base instanceof Variable */
-                return new BuiltinMap(entries, (Variable) base);
+                return new BuiltinMap(entries);
             }
         } else {
-            return new BuiltinMap(entries);
+            baseTerms.add(new BuiltinMap(entries));
+            Term result = baseTerms.get(0);
+            for (int i = 1; i < baseTerms.size(); ++i) {
+                result = new KItem(
+                        KLabelConstant.of(DataStructureSort.DEFAULT_MAP_LABEL, context),
+                        new KList(ImmutableList.of(result, baseTerms.get(i))),
+                        context);
+            }
+            return result;
         }
     }
 

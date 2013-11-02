@@ -82,7 +82,7 @@ public class KastFilter extends BasicVisitor {
 	@Override
 	public void visit(KList listOfK) {
 		if (listOfK.getContents().size() == 0) {
-			new Empty(listOfK.getSort()).accept(this);
+			new ListTerminator(listOfK.getSort(), null).accept(this);
 		} else if (listOfK.getContents().size() == 1) {
 			listOfK.getContents().get(0).accept(this);
 		} else {
@@ -131,7 +131,7 @@ public class KastFilter extends BasicVisitor {
 	}
 
 	@Override
-	public void visit(Empty empty) {
+	public void visit(ListTerminator empty) {
 		String sort = empty.getSort();
 		if (MaudeHelper.basicSorts.contains(sort)) {
 			result.write(".");
@@ -172,7 +172,7 @@ public class KastFilter extends BasicVisitor {
 					stopnextline = true;
 				}
 			}
-			if (kapp.getChild() instanceof Empty) {
+			if (kapp.getChild() instanceof ListTerminator) {
 				stopnextline = true;
 			}
 			if (nextline) {

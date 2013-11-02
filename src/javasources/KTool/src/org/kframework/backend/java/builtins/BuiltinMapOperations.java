@@ -4,8 +4,11 @@ import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Variable;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -23,6 +26,21 @@ public class BuiltinMapOperations {
         } else {
             throw new IllegalArgumentException("argument " + term + " has frame");
         }
+    }
+
+    public static BuiltinMap construct(BuiltinMap term1, BuiltinMap term2, TermContext context) {
+        Variable frame = null;
+        if (term1.hasFrame() && term2.hasFrame()) {
+            throw new IllegalArgumentException("both map arguments have frames");
+        } else if (term1.hasFrame()) {
+            frame = term1.frame();
+        } else if (term2.hasFrame()) {
+            frame = term2.frame();
+        }
+
+        Map<Term, Term> entries = new HashMap<>(term1.getEntries());
+        entries.putAll(term2.getEntries());
+        return new BuiltinMap(entries, frame);
 
     }
 
