@@ -60,6 +60,10 @@ public class TestGenResults {
                     sb.append("\nEmpty substitution");
                 }
             }
+            //Temporarily printing the constraints until problems with
+            // translation of Term to Z3 are fixed
+            sb.append("\nConstraint: "+testGenResult.getConstraint());
+
             n++;
         }
         
