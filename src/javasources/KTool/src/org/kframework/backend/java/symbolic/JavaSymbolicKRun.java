@@ -1,5 +1,6 @@
 package org.kframework.backend.java.symbolic;
 
+
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Term;
@@ -234,12 +235,10 @@ public class JavaSymbolicKRun implements KRun {
         if (depth == null) {
             depth = -1;
         }
+
         List<ConstrainedTerm> resultCfgs = symbolicRewriter.generate(initCfg, null, null, bound, depth);
 
         for (ConstrainedTerm result : resultCfgs) {
-            if(result.constraint().substitution().isEmpty()){
-                continue;
-            }
             // construct the generated program by applying the substitution
             // obtained from the result configuration to the initial one
             Term pgm = Term.of(cfg, definition);
@@ -256,7 +255,8 @@ public class JavaSymbolicKRun implements KRun {
                     Collections.singletonMap("B:Bag", kilTerm),
                     compilationInfo,
                     context,
-                    pgmTerm));
+                    pgmTerm,
+                    result.constraint()));
         }
 
         return new KRunResult<TestGenResults>(new TestGenResults(

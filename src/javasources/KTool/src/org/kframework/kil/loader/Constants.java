@@ -84,4 +84,7 @@ public class Constants {
 		defaultAttributeValues.put("filename", Constants.GENERATED_FILENAME);
 		defaultAttributeValues.put("location", Constants.GENERATED_LOCATION);
 	}
+
+    static final String AUTO_INCLUDED_MODULE = "AUTO-INCLUDED-MODULE";
+    public static String AUTO_INCLUDED_SYNTAX_MODULE = "AUTO-INCLUDED-MODULE-SYNTAX";
 }

@@ -710,7 +710,7 @@
       extension="test"
       results="tests/regression/lint"
       >
-    <kompile-option name="-w" value="all" />
+    <kompile-option name="-w" value="none" />
   </test>
 
   <test
@@ -797,13 +797,12 @@
     </all-programs>
   </test>
 
-<!--
   <test
-      definition="dist/examples/java_rewrite_engine/simple/untyped/simple-untyped.k"
-      programs="dist/tutorial/2_languages/1_simple/1_untyped/programs"
-      extensions="simple"
+      definition="samples/java_rewrite_engine/simple/untyped/simple-untyped.k"
+      programs="tutorial/2_languages/1_simple/1_untyped/programs_and_results"
+      extension="simple"
       exclude="dekker.simple exceptions_07.simple matrix.simple"
-      results="tests/examples/simple-untyped"
+      results="tutorial/2_languages/1_simple/1_untyped/programs_and_results"
       >
     <kompile-option name="-backend" value="java" />
     <all-programs>
@@ -813,6 +812,7 @@
     </all-programs>
   </test>
 
+<!--
 
   <test
       definition="tests/regression/java-rewrite-engine/io/test1/test.k"
@@ -1005,6 +1005,19 @@
       definition="tests/regression/java-rewrite-engine/cell_list/test.k"
       programs="tests/regression/java-rewrite-engine/cell_list"
       results="tests/regression/java-rewrite-engine/cell_list"
+      extension="test"
+      >
+    <kompile-option name="-backend" value="java" />
+    <all-programs>
+      <krun-option name="-backend" value="java" />
+      <krun-option name="-smt" value="none" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="tests/regression/java-rewrite-engine/rhs_map_constructor/test.k"
+      programs="tests/regression/java-rewrite-engine/rhs_map_constructor"
+      results="tests/regression/java-rewrite-engine/rhs_map_constructor"
       extension="test"
       >
     <kompile-option name="-backend" value="java" />

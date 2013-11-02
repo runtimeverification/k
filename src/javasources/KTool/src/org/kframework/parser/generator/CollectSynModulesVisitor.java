@@ -26,7 +26,16 @@ public class CollectSynModulesVisitor extends BasicVisitor {
 
 	public void visit(Definition def) {
 		List<String> synQue = new LinkedList<String>();
-		synQue.add(def.getMainSyntaxModule());
+        if (def.getModulesMap().containsKey(def.getMainSyntaxModule())) {
+            synQue.add(def.getMainSyntaxModule());
+        } else {
+            String msg = "Module " + def.getMainSyntaxModule() + " is not imported by the main module " +
+                    def.getMainModule() + ".  The parser generator will use " + def.getMainModule() +
+                    " as the main syntax module.";
+            GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.PARSER, msg,
+                    def.getMainFile(), "File system."));
+            synQue.add(def.getMainModule());
+        }
 
 		Module bshm = def.getModulesMap().get("AUTO-INCLUDED-MODULE-SYNTAX");
 		if (bshm == null) {
