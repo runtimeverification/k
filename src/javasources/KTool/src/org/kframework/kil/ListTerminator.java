@@ -1,15 +1,21 @@
 package org.kframework.kil;
 
+import org.kframework.kil.loader.Constants;
+import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.StringUtil;
+
+import aterm.ATermAppl;
+import org.w3c.dom.Element;
 
 /**
  * A subclass of {@link Empty} used to represent both typed and untyped cons list terminators. Distinguished by {@link #sort} and {@link #separator}
  */
-public class ListTerminator extends Empty {
+public class ListTerminator extends Term {
 
-	private final String separator;
+	private final String separator; // Used only by toString()
 
 	public ListTerminator(String sort, String separator) {
 		super(sort);
@@ -26,17 +32,25 @@ public class ListTerminator extends Empty {
 		this.separator = terminator.separator;
 	}
 
-	public String toString() {
-		if (sort.equals(KSorts.K)) {
-			return ".List{\"" + separator + "\"} ";
-        } else {
-			return super.toString();
-        }
+	public ListTerminator(Element element, String separator) {
+		super(element);
+		this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
+                this.separator = separator;
 	}
 
-	public String getSeparator() {
-		return separator;
+	public ListTerminator(ATermAppl atm, String separator) {
+		super(atm);
+		this.sort = StringUtil.getSortNameFromCons(atm.getName());
+                this.separator = separator;
 	}
+
+	public String toString() {
+		if (separator != null && sort.equals(KSorts.K)) {
+			return ".List{\"" + separator + "\"}";
+        } else {
+		return "." + sort;
+	}
+        }
 
 	@Override
 	public void accept(Visitor visitor) {
@@ -49,6 +63,11 @@ public class ListTerminator extends Empty {
 	}
 
 	@Override
+	public void accept(Matcher matcher, Term toMatch) {
+		matcher.match(this, toMatch);
+	}
+
+	@Override
 	public ListTerminator shallowCopy() {
 		return new ListTerminator(this);
 	}
@@ -58,7 +77,7 @@ public class ListTerminator extends Empty {
 		if (!(o instanceof ListTerminator))
 			return false;
 		ListTerminator l = (ListTerminator) o;
-		return sort.equals(l.sort) && separator.equals(l.separator);
+		return sort.equals(l.sort) && (separator == null && l.separator == null || separator != null && l.separator != null && separator.equals(l.separator));
 	}
 
 	@Override

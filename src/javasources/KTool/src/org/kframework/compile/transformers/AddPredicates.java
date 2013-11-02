@@ -6,11 +6,11 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.BoolBuiltin;
 import org.kframework.kil.Configuration;
-import org.kframework.kil.Empty;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KSorts;
+import org.kframework.kil.ListTerminator;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Production;
@@ -50,12 +50,12 @@ public class AddPredicates extends CopyOnWriteTransformer {
             if (!lists.isEmpty()) {
                 for (String listSort : lists) {
                     Rule rule = new Rule(
-                            KApp.of(KLabelConstant.of(predicate(listSort), context), new Empty(listSort)),
+                            KApp.of(KLabelConstant.of(predicate(listSort), context), new ListTerminator(listSort, null)),
                             BoolBuiltin.TRUE, context);
                     rule.addAttribute(Attribute.PREDICATE);
                     result.add(rule);
                     rule = new Rule(
-                            KApp.of(KLabelConstant.KRESULT_PREDICATE, new Empty(listSort)),
+                            KApp.of(KLabelConstant.KRESULT_PREDICATE, new ListTerminator(listSort, null)),
                             BoolBuiltin.TRUE, context);
                     rule.addAttribute(Attribute.PREDICATE);
                     result.add(rule);

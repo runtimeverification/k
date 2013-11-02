@@ -14,7 +14,6 @@ import org.kframework.kil.Cast;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Definition;
-import org.kframework.kil.Empty;
 import org.kframework.kil.FreezerHole;
 import org.kframework.kil.Hole;
 import org.kframework.kil.KApp;
@@ -25,6 +24,7 @@ import org.kframework.kil.KSorts;
 import org.kframework.kil.Lexical;
 import org.kframework.kil.List;
 import org.kframework.kil.ListItem;
+import org.kframework.kil.ListTerminator;
 import org.kframework.kil.Map;
 import org.kframework.kil.MapItem;
 import org.kframework.kil.ParseError;
@@ -108,7 +108,7 @@ public class JavaClassesFactory {
 				return Set.EMPTY;
 			} else {
 				// user defined empty list
-				return new Empty(element);
+				return new ListTerminator(element, null);
 			}
 		}
 		if (KSorts.SET.equals(element.getNodeName()))
@@ -214,9 +214,9 @@ public class JavaClassesFactory {
 						list = list.getNext();
 					}
 					if (tc != null)
-						tc.getContents().add(new Empty(StringUtil.getSortNameFromCons(appl.getName())));
+						tc.getContents().add(new ListTerminator(StringUtil.getSortNameFromCons(appl.getName()), null));
 					else
-						return storeNode(atm.getUniqueIdentifier(), new Empty(StringUtil.getSortNameFromCons(appl.getName())));
+						return storeNode(atm.getUniqueIdentifier(), new ListTerminator(StringUtil.getSortNameFromCons(appl.getName()), null));
 					return storeNode(atm.getUniqueIdentifier(), head);
 				} else
 					return storeNode(atm.getUniqueIdentifier(), new TermCons(appl, context));
@@ -256,7 +256,7 @@ public class JavaClassesFactory {
 					return Set.EMPTY;
 				} else {
 					// user defined empty list
-					return new Empty(appl);
+					return new ListTerminator(appl, null);
 				}
 			}
 			if (appl.getName().endsWith("Item")) {

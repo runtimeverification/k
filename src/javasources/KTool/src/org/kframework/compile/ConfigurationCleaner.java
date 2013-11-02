@@ -24,7 +24,7 @@ public class ConfigurationCleaner extends CopyOnWriteTransformer {
 		if (node.getMultiplicity() == Multiplicity.ANY || node.getMultiplicity() == Multiplicity.MAYBE) {
 			if (node.variables().isEmpty()) {
                 if (GlobalSettings.sortedCells)
-                    return new Empty(MetaK.cellFragment(node.getId()));
+                    return new ListTerminator(MetaK.cellFragment(node.getId()), null);
                 else return new Bag();
 			}
 		}

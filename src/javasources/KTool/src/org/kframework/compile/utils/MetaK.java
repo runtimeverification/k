@@ -158,7 +158,7 @@ public class MetaK {
 		String sort = v.getSort();
 		KSort ksort = KSort.getKSort(sort).mainSort();
 		if (ksort.isDefaultable())
-			return new Empty(ksort.toString());
+			return new ListTerminator(ksort.toString(), null);
 		GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER, "Don't know the default value for term " + v.toString() + ". Assuming .K", v.getFilename(), v
 				.getLocation()));
 		return KSequence.EMPTY;

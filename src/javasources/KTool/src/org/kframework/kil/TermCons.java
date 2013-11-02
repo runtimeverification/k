@@ -55,7 +55,7 @@ public class TermCons extends Term {
                 if (isColon(list.getFirst())) continue;
 				contents.add((Term) JavaClassesFactory.getTerm(list.getFirst()));
 			}
-			contents.add(new Empty(sort));
+			contents.add(new ListTerminator(sort, null));
 		} else {
 			for (int i = 0; i < atm.getArity(); i++) {
                 if (isColon(atm.getArgument(i))) continue;

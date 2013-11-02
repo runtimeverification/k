@@ -48,7 +48,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 			if (child instanceof TermCons) {
 				TermCons termCons = (TermCons) child;
 				if (termCons.getProduction().isListDecl()) {
-					if (new AddEmptyLists(context).isAddEmptyList(tcParent.getProduction().getChildSort(i), termCons.getContents().get(0).getSort()) && termCons.getContents().get(1) instanceof Empty) {
+					if (new AddEmptyLists(context).isAddEmptyList(tcParent.getProduction().getChildSort(i), termCons.getContents().get(0).getSort()) && termCons.getContents().get(1) instanceof ListTerminator) {
 						
 						tcParent.getContents().set(i, termCons.getContents().get(0));
 					}
@@ -122,7 +122,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 				possibleTerms = new ArrayList<Term>();
 				if (sorts != null) {
 					for (String sort : sorts) {
-							possibleTerms.add(new Empty(sort));
+							possibleTerms.add(new ListTerminator(sort, null));
 					}
 					if (possibleTerms.size() == 0) {
 						return super.transform(kapp);
@@ -156,8 +156,8 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 		List<Term> contents = new ArrayList<Term>();
 		for (Term child : bag.getContents()) {
 			Term accept = (Term) child.accept(this);
-			if (accept instanceof Empty) {
-				Empty empty = (Empty) accept;
+			if (accept instanceof ListTerminator) {
+				ListTerminator empty = (ListTerminator) accept;
 				if (!empty.getSort().equals("Bag")) {
 					contents.add(accept);
 				}
@@ -166,7 +166,7 @@ public class ConcretizeSyntax extends CopyOnWriteTransformer {
 			}
 		}
 		if (contents.size() == 0) {
-			return new Empty("Bag");
+			return new ListTerminator("Bag", null);
 		}
 		if (contents.size() == 1) {
 			return contents.get(0);

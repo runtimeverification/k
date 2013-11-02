@@ -131,7 +131,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 			Production p = tc.getProduction();
 			if (p.isListDecl()) {
 				UserList userList = (UserList) p.getItems().get(0);
-				if (tc.getContents().get(1) instanceof Empty && tc.getContents().get(1).getSort().equals(p.getSort()) && context.isSubsortedEq(userList.getSort(), tc.getContents().get(0).getSort())) {
+				if (tc.getContents().get(1) instanceof ListTerminator && tc.getContents().get(1).getSort().equals(p.getSort()) && context.isSubsortedEq(userList.getSort(), tc.getContents().get(0).getSort())) {
 					return true;
 				}
 			}
@@ -152,7 +152,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 			Production p = tc.getProduction();
 			if (p.isListDecl()) {
 				UserList userList = (UserList) p.getItems().get(0);
-				if (tc.getContents().get(1) instanceof Empty && tc.getContents().get(1).getSort().equals(p.getSort()) && context.isSubsortedEq(userList.getSort(), tc.getContents().get(0).getSort())) {
+				if (tc.getContents().get(1) instanceof ListTerminator && tc.getContents().get(1).getSort().equals(p.getSort()) && context.isSubsortedEq(userList.getSort(), tc.getContents().get(0).getSort())) {
 					return Associativity.NONE;
 				} else {
 					return Associativity.RIGHT;
@@ -200,7 +200,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 	private boolean isAtom(Term inner) {
         if (inner instanceof KLabelConstant) return true;
         if (inner instanceof KApp && ((KApp)inner).getLabel() instanceof Token) return true;
-		if (inner instanceof Empty) return true;
+		if (inner instanceof ListTerminator) return true;
 		if (inner instanceof FreezerHole) return true;
 		if (inner instanceof Hole) return true;
 		if (inner instanceof Variable) return true;
@@ -244,7 +244,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 			Production p = tc.getProduction();
 			if (p.isListDecl()) {
 				UserList userList = (UserList) p.getItems().get(0);
-				if (tc.getContents().get(1) instanceof Empty && tc.getContents().get(1).getSort().equals(p.getSort()) && context.isSubsortedEq(userList.getSort(), tc.getContents().get(0).getSort())) {
+				if (tc.getContents().get(1) instanceof ListTerminator && tc.getContents().get(1).getSort().equals(p.getSort()) && context.isSubsortedEq(userList.getSort(), tc.getContents().get(0).getSort())) {
 					return EnumSet.allOf(Fixity.class);
 				}
 			}
@@ -315,7 +315,7 @@ public class AddBracketsFilter extends CopyOnWriteTransformer {
 			}
 			if (p.isListDecl()) {
 				UserList userList = (UserList) p.getItems().get(0);
-				if (tc.getContents().get(1) instanceof Empty && tc.getContents().get(1).getSort().equals(p.getSort()) && context.isSubsortedEq(userList.getSort(), tc.getContents().get(0).getSort())) {
+				if (tc.getContents().get(1) instanceof ListTerminator && tc.getContents().get(1).getSort().equals(p.getSort()) && context.isSubsortedEq(userList.getSort(), tc.getContents().get(0).getSort())) {
 					return EnumSet.allOf(Fixity.class);
 				}
 			}

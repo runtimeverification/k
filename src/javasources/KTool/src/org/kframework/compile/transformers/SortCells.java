@@ -212,7 +212,7 @@ public class SortCells extends CopyOnWriteTransformer {
 		Term child = node.getChild();
 		if (!(child instanceof KList)) {
 			KList newChild = new KList();
-			if (!(child instanceof Empty))
+			if (!(child instanceof ListTerminator))
 				newChild.add(child);
 			child = newChild;
 		}
@@ -232,7 +232,7 @@ public class SortCells extends CopyOnWriteTransformer {
 				if (kApp.getChild() instanceof KList) {
 					assert((KList) kApp
 						.getChild()).getContents().isEmpty();
-				} else assert  ((kApp.getChild() instanceof Empty));
+				} else assert  ((kApp.getChild() instanceof ListTerminator));
 				final Term kAppLabel = kApp.getLabel().shallowCopy();
 				assert ((kAppLabel instanceof KInjectedLabel));
 				kApp.setLabel(kAppLabel);
@@ -306,7 +306,7 @@ public class SortCells extends CopyOnWriteTransformer {
 			   		Empty(Bag)
 			 	*/
 			if (iCells == null) {
-				if (!fragment && replacementTerm instanceof Empty &&
+				if (!fragment && replacementTerm instanceof ListTerminator &&
 						(multiplicity == Cell.Multiplicity.ONE	||
 								multiplicity == Cell.Multiplicity.SOME)) {
 					GlobalSettings.kem.register(new KException(KException
@@ -320,11 +320,11 @@ public class SortCells extends CopyOnWriteTransformer {
 				iCells = new ArrayList<Term>();
 			}
 
-			if (!(replacementTerm instanceof Empty) && replacementTerm != null) {
+			if (!(replacementTerm instanceof ListTerminator) && replacementTerm != null) {
 				iCells.add(replacementTerm);
 			}
 			if (iCells.isEmpty()) {
-                outCells.add(new Empty(MetaK.cellFragment(cell.getId())));
+                outCells.add(new ListTerminator(MetaK.cellFragment(cell.getId()), null));
 			} else {
 				if (multiplicity == Cell.Multiplicity.ONE) {
 					if (iCells.size() != 1) {
@@ -353,7 +353,7 @@ public class SortCells extends CopyOnWriteTransformer {
 		cellMap = new HashMap<String, List<Term>>();
 		while (!cells.isEmpty()) {
 			Term i = cells.removeFirst();
-			if (i instanceof Empty || i instanceof TermComment) continue;
+			if (i instanceof ListTerminator || i instanceof TermComment) continue;
 			if (i instanceof Variable) {
 				if (framingVariable !=null) {
 					GlobalSettings.kem.register(new KException(KException
@@ -404,7 +404,7 @@ public class SortCells extends CopyOnWriteTransformer {
 		if (framingVariable == null) return null;
 		Cell.Multiplicity multiplicity = cell.getMultiplicity();
 		List<Term> iCells = cellMap.get(cell.getId());
-		Term replacementTerm =  new Empty(MetaK.cellFragment(cell.getId()));
+		Term replacementTerm =  new ListTerminator(MetaK.cellFragment(cell.getId()), null);
 		if (iCells != null) {
 			if (multiplicity == Cell.Multiplicity.ANY ||
 					multiplicity == Cell.Multiplicity.SOME) {
@@ -429,7 +429,7 @@ public class SortCells extends CopyOnWriteTransformer {
 			renamedVars.put(cell.getId(),replacementTerm);
 			return replacementTerm;
 		}
-		if (replacementTerm instanceof Empty) {
+		if (replacementTerm instanceof ListTerminator) {
 			if (oldTerm.getSort().equals(MetaK.cellSort(cell.getId()))) {
 				GlobalSettings.kem.register(new KException(KException
 						.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER,
@@ -443,7 +443,7 @@ public class SortCells extends CopyOnWriteTransformer {
 			}
 			return replacementTerm;
 		}
-		if (oldTerm instanceof Empty && replacementTerm.getSort().equals
+		if (oldTerm instanceof ListTerminator && replacementTerm.getSort().equals
 				(MetaK.cellSort(cell.getId()))) {
 			GlobalSettings.kem.register(new KException(KException
 					.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER,

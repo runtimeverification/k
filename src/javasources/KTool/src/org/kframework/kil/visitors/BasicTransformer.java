@@ -456,14 +456,9 @@ public class BasicTransformer implements Transformer {
         return transform((Token) node);
     }
 
-    @Override
-	public ASTNode transform(Empty node) throws TransformerException {
-		return transform((Term) node);
-	}
-
 	@Override
 	public ASTNode transform(ListTerminator node) throws TransformerException {
-		return transform((Empty) node);
+		return transform((Term) node);
 	}
 
 	@Override

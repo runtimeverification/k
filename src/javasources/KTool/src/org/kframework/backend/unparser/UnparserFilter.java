@@ -315,19 +315,9 @@ public class UnparserFilter extends BasicVisitor {
 	}
 
 	@Override
-	public void visit(Empty empty) {
-		prepare(empty);
-		indenter.write("." + empty.getSort());
-		postpare();
-	}
-
-	@Override
 	public void visit(ListTerminator terminator) {
 		prepare(terminator);
-		if (terminator.getSort().equals("K"))
-			indenter.write(".List{\"" + terminator.getSeparator() + "\"}");
-		else
-			indenter.write("." + terminator.getSort());
+                indenter.write(terminator.toString());
 		postpare();
 	}
 
