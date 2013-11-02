@@ -90,8 +90,8 @@ public class ParseRulesFilter extends BasicTransformer {
 					// TODO(RaduM): load directly from ATerms
 					ASTNode anode = Sglr.run_sglri(context.dotk.getAbsolutePath() + "/def/Concrete.tbl", "CondSentence", ss.getContent(), ss.getFilename());
 
-					int startLine = StringUtil.getStartLineFromLocation(ss.getLocation());
-					int startCol = StringUtil.getStartColFromLocation(ss.getLocation());
+					int startLine = StringUtil.getStartLineFromLocation(ss.getContentLocation());
+					int startCol = StringUtil.getStartColFromLocation(ss.getContentLocation());
 					anode.accept(new UpdateLocationVisitor(context, startLine, startCol));
 					anode.accept(new ReportErrorsVisitor(context, "rule"));
 
@@ -121,7 +121,7 @@ public class ParseRulesFilter extends BasicTransformer {
 
 					// replace the old xml node with the newly parsed sentence
 					Node xmlTerm = doc.getFirstChild().getFirstChild().getNextSibling();
-					XmlLoader.updateLocation(xmlTerm, XmlLoader.getLocNumber(ss.getLocation(), 0), XmlLoader.getLocNumber(ss.getLocation(), 1));
+					XmlLoader.updateLocation(xmlTerm, XmlLoader.getLocNumber(ss.getContentLocation(), 0), XmlLoader.getLocNumber(ss.getContentLocation(), 1));
 					XmlLoader.addFilename(xmlTerm, ss.getFilename());
 					XmlLoader.reportErrors(doc, ss.getType());
 

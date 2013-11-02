@@ -68,8 +68,8 @@ public class ParseConfigsFilter extends BasicTransformer {
 				if (GlobalSettings.fastKast) {
 					// TODO(RaduM): load directly from ATerms
 					config = Sglr.run_sglri(context.dotk.getAbsolutePath() + "/def/Concrete.tbl", "CondSentence", ss.getContent(), ss.getFilename());
-					int startLine = StringUtil.getStartLineFromLocation(ss.getLocation());
-					int startCol = StringUtil.getStartColFromLocation(ss.getLocation());
+					int startLine = StringUtil.getStartLineFromLocation(ss.getContentLocation());
+					int startCol = StringUtil.getStartColFromLocation(ss.getContentLocation());
 					config.accept(new UpdateLocationVisitor(context, startLine, startCol));
 					config.accept(new ReportErrorsVisitor(context, "configuration"));
 
@@ -89,7 +89,7 @@ public class ParseConfigsFilter extends BasicTransformer {
 
 					// replace the old xml node with the newly parsed sentence
 					Node xmlTerm = doc.getFirstChild().getFirstChild().getNextSibling();
-					XmlLoader.updateLocation(xmlTerm, XmlLoader.getLocNumber(ss.getLocation(), 0), XmlLoader.getLocNumber(ss.getLocation(), 1));
+					XmlLoader.updateLocation(xmlTerm, XmlLoader.getLocNumber(ss.getContentLocation(), 0), XmlLoader.getLocNumber(ss.getContentLocation(), 1));
 					XmlLoader.addFilename(xmlTerm, ss.getFilename());
 					XmlLoader.reportErrors(doc, ss.getType());
 
