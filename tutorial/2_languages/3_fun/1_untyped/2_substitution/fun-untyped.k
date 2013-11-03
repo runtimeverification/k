@@ -123,17 +123,17 @@ module FUN-UNTYPED
 
   syntax Exp ::= "mu" Case
   rule mu X:Id -> E:Exp => E[(mu X -> E) / X]
-  rule letrec F:Id = E in E' => let F = (mu F -> E) in E'
+  rule letrec F:Id = E in E' => let F = (mu F -> E) in E'  [macro]
 
 //  rule letrec Bs in E => (fun {ids(Bs)} -> E) (mu {ids(Bs)} -> {exps(Bs)})
 //  syntax Exp ::= "mu" Cases
 //  rule mu P -> E => E[]
 //
-//MU: mu F1 = E1 and F2 = E2 
+//MU: mu F1 = E1 and F2 = E2
 //
 //MU = {E1[pj1(MU)/F1] , E2[pj2(MU)/F2]}
 //
-//mu F = E and Bs 
+//mu F = E and Bs
 
 
 //  rule <k> letrec Bs in E
