@@ -356,17 +356,16 @@
   FUN
 -->
 
-<!--
   <test
       definition="tutorial/2_languages/3_fun/1_untyped/1_environment/fun-untyped.k"
       programs="tutorial/2_languages/3_fun/programs"
       extension="fun"
       results="tutorial/2_languages/3_fun/1_untyped/1_environment/tests" >
       <all-programs>
-        <krun-option name="-pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
+        <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
+        <krun-option name="--parens" value="smart"/>
       </all-programs>
   </test>
--->
 
 <!--
   LOGIK
