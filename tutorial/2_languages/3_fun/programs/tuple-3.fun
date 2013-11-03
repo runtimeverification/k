@@ -1,4 +1,4 @@
 // testing functions taking tuple arguments
 
-let f{x,y,z} = x + y + z
-in f{1,2,3}
+let f Triple(x,y,z) = x + y + z
+in f Triple(1,2,3)
