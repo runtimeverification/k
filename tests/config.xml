@@ -319,14 +319,14 @@
       definition="tutorial/2_languages/2_kool/1_untyped/kool-untyped.k"
       programs="tutorial/2_languages/2_kool/1_untyped/programs_and_results"
       extension="kool"
-      exclude="cycle"
+      exclude="cycle.kool"
       results="tests/examples/kool-untyped"
       />
   <test
       definition="tutorial/2_languages/2_kool/2_typed/1_dynamic/kool-typed-dynamic.k"
       programs="tutorial/2_languages/2_kool/2_typed/programs"
       extension="kool"
-      exclude="cycle"
+      exclude="cycle.kool"
       results="tests/examples/kool-typed-dynamic"
       />
   <test
