@@ -62,7 +62,6 @@ public class DefinitionSDFVisitor extends BasicVisitor {
 		for (int i = 0; i < node.getPriorityBlocks().size(); i++) {
 			PriorityBlockExtended pbe1 = node.getPriorityBlocks().get(i);
 			PriorityBlock pb1 = new PriorityBlock();
-			pb1.setAssoc(pbe1.getAssoc());
 
 			for (KLabelConstant tag : pbe1.getProductions()) {
 				Set<Production> prods2 = SDFHelper.getProductionsForTag(tag.getLabel(), context);

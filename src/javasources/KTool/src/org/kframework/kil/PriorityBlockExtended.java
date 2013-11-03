@@ -10,12 +10,11 @@ import org.w3c.dom.Element;
 
 import java.util.ArrayList;
 
-/** A group within a {@code syntax priorities} declaration. {@link #assoc} is currently unused.
+/** A group within a {@code syntax priorities} declaration.
  * @see PriorityExtended */
 public class PriorityBlockExtended extends ASTNode {
 
 	java.util.List<KLabelConstant> productions = new ArrayList<KLabelConstant>();
-	String assoc;
 
 	public java.util.List<KLabelConstant> getProductions() {
 		return productions;
@@ -25,28 +24,17 @@ public class PriorityBlockExtended extends ASTNode {
 		this.productions = productions;
 	}
 
-	public String getAssoc() {
-		return assoc;
-	}
-
-	public void setAssoc(String assoc) {
-		this.assoc = assoc;
-	}
-
 	public PriorityBlockExtended() {
 		super();
-		this.assoc = "";
 	}
 
 	public PriorityBlockExtended(PriorityBlockExtended node) {
 		super(node);
-		this.assoc = node.assoc;
 		this.productions.addAll(node.productions);
 	}
 
 	public PriorityBlockExtended(java.util.List<KLabelConstant> productions) {
 		super();
-		this.assoc = "";
 		this.productions.addAll(productions);
 	}
 
@@ -59,9 +47,7 @@ public class PriorityBlockExtended extends ASTNode {
 		if (content.length() > 2)
 			content = content.substring(0, content.length() - 1);
 
-		if (assoc.equals(""))
-			return content;
-		return assoc + ": " + content;
+		return content;
 	}
 
 	@Override
@@ -84,9 +70,6 @@ public class PriorityBlockExtended extends ASTNode {
 			return false;
 		PriorityBlockExtended pb = (PriorityBlockExtended) obj;
 
-		if (!pb.getAssoc().equals(this.assoc))
-			return false;
-
 		if (pb.productions.size() != productions.size())
 			return false;
 
@@ -100,7 +83,7 @@ public class PriorityBlockExtended extends ASTNode {
 
 	@Override
 	public int hashCode() {
-		int hash = assoc.hashCode();
+		int hash = 0;
 
 		for (Term prd : productions)
 			hash += prd.hashCode();
