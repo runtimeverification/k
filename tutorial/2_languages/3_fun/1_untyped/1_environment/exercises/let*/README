@@ -1,0 +1,15 @@
+Add a let* construct to FUN.  Syntactically, let* has the same syntax
+as let and letrec, that is,
+
+  syntax Exp ::= "let*" Bindings "in" Exp
+
+Semantically, let* process its bindings in order, adding the current
+binding to the environment before moving to the next binding.  For
+example, the program
+
+  let* x=1
+  and  y=x
+  in y
+
+is well defined and evaluates to 1, but it would be undefined if we
+replaced let* with let.
