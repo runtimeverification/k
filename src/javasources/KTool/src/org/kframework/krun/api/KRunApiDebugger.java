@@ -1,6 +1,5 @@
 package org.kframework.krun.api;
 
-import java.util.Set;
 
 import org.apache.commons.collections15.BidiMap;
 import org.apache.commons.collections15.bidimap.DualHashBidiMap;
@@ -14,7 +13,6 @@ import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
-import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -35,7 +33,6 @@ public class KRunApiDebugger implements KRunDebugger {
 	private BidiMap<Integer, KRunState> states;
 
 	private static Rule defaultPattern;
-	private static Set<String> defaultVars;
 	private static RuleCompilerSteps defaultPatternInfo;
 	
 	protected Context context;
@@ -48,7 +45,6 @@ public class KRunApiDebugger implements KRunDebugger {
                     context);
 			CollectVariablesVisitor vars = new CollectVariablesVisitor(context);
 			pattern.accept(vars);
-			defaultVars = vars.getVars().keySet();
 			defaultPatternInfo = new RuleCompilerSteps(K.definition, context);
 			pattern = defaultPatternInfo.compile(new Rule((Sentence) pattern), null);
 
