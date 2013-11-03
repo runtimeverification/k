@@ -6,6 +6,6 @@ import java.util.Collection;
 
 public abstract class Strategy {
   public abstract void apply(Collection<Rule> rules);
-  public abstract Rule next();
+  public abstract Collection<Rule> next();
   public abstract boolean hasNext();
 }

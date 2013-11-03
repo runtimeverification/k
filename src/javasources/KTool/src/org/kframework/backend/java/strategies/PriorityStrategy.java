@@ -31,19 +31,15 @@ public class PriorityStrategy extends Strategy {
     priorityIterator = priorities.descendingIterator();
   }
 
-  public Rule next() {
-    if (ruleIterator == null || !ruleIterator.hasNext()) {
-      ruleIterator = priorityMap.get(priorityIterator.next()).iterator();
-    }
-    return ruleIterator.next();
+  public Collection<Rule> next() {
+    return priorityMap.get(priorityIterator.next());
   }
 
   public boolean hasNext() {
-    return priorityIterator.hasNext() || ruleIterator.hasNext();
+    return priorityIterator.hasNext();
   }
 
   private Iterator<Integer> priorityIterator;
-  private Iterator<Rule> ruleIterator;
   private HashMap<Integer, HashSet<Rule>> priorityMap;
   private TreeSet<Integer> priorities;
 } 

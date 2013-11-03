@@ -10,16 +10,18 @@ public class NullStrategy extends Strategy {
   }
 
   public void apply(Collection<Rule> rules) {
-    iterator = rules.iterator();
+    this.rules = rules;
   }
 
-  public Rule next() {
-    return iterator.next();
+  public Collection<Rule> next() {
+    Collection<Rule> n = rules;
+    rules = null;
+    return n;
   }
 
   public boolean hasNext() {
-    return iterator.hasNext();
+    return rules != null;
   }
 
-  private Iterator<Rule> iterator;
+  private Collection<Rule> rules;
 } 
