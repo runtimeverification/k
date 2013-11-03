@@ -2,4 +2,4 @@ Search results:
 
 Solution 1, State 0:
 V:K -->
-{ (({ (1, (({ 2 }), .List{","})) }), (({ (3, 4) }), .List{","})) }
+Pair ( Pair ( 1, (Wrapper ( 2 )), .List{","} ), (Pair ( 3, 4 )), .List{","} )
