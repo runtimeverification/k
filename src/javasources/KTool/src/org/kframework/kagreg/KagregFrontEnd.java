@@ -137,6 +137,7 @@ public class KagregFrontEnd {
 		indenter.endLine();
 
 		List<String> labeledSorts = new ArrayList<String>();
+		labeledSorts.add("KResult"); // temporary bug fix for https://code.google.com/p/k-framework/issues/detail?id=541
 		AddSortLabels addSortLabels1 = new AddSortLabels(context1, labeledSorts);
 		firstDef = (Definition)addSortLabels1.transform(firstDef);
 

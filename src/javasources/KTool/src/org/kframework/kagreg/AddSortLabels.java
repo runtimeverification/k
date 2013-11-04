@@ -16,8 +16,23 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
+/*
+ * Add to each sort a labeled production for that sort.
+ * 
+ * E.g. transform
+ * syntax Exp ::= Id
+ *              | Exp "+" Exp into
+ * syntax Exp ::= Id 
+ * 	            | Exp "+" Exp
+ *              | "LExp" Id ":" Exp
+ *              
+ * If multiple syntax declarations for the same sort appear, makes sure only one is changed.
+ */
 public class AddSortLabels extends CopyOnWriteTransformer {
 	
+	/* 
+	 * list of sorts already labeled, when encountered again ignore.
+	 */
 	final protected List<String> labeledSorts;
 
 	public AddSortLabels(Context context, List<String> labeledSorts) {
@@ -53,7 +68,7 @@ public class AddSortLabels extends CopyOnWriteTransformer {
 //		acv.visit(production);
 		List<PriorityBlock> priorityBlocks = syntax.getPriorityBlocks();
 		if (priorityBlocks.size() == 0) {
-			System.out.println(syntax.getSort() + " empty priorityBlocks");
+//			System.out.println(syntax.getSort() + " empty priorityBlocks");
 			PriorityBlock priorityBlock = new PriorityBlock();
 			List<Production> productions = new ArrayList<Production>();
 			productions.add(production);
