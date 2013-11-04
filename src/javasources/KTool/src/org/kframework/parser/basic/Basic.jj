@@ -337,7 +337,7 @@ public class Basic {
     if (matcher.matches()) {
       content = matcher.group(2);
       label = matcher.group(1);
-      offset = matcher.start(2)+1;
+      offset = matcher.start(2);
     } else {
       content = str;
       label = "";
@@ -377,7 +377,7 @@ public class Basic {
     if (index == 0) return line;
     SimpleCharStream s = new SimpleCharStream(new StringReader(str), line, column);
     try {
-      for (int i = 0; i < index; i++) { s.readChar(); }
+      for (int i = 0; i <= index; i++) { s.readChar(); }
     } catch (IOException e) { /* Impossible */ e.printStackTrace(); System.exit(1); }
     return s.getEndLine();
   }
@@ -387,7 +387,7 @@ public class Basic {
     if (index == 0) return column;
     SimpleCharStream s = new SimpleCharStream(new StringReader(str), line, column);
     try {
-      for (int i = 0; i < index; i++) { s.readChar(); }
+      for (int i = 0; i <= index; i++) { s.readChar(); }
     } catch (IOException e) { /* Impossible */ e.printStackTrace(); System.exit(1); }
     return s.getEndColumn();
   }
