@@ -5,6 +5,7 @@ load builtins-interface.maude
 mod K-TECHNIQUE is 
   including #INT-INTERFACE .
   including #BOOL-INTERFACE .
+  including #STRING-INTERFACE .
 
   var K : K . var Ks : KList .
   var LItem : ListItem .  var List : List .
@@ -96,6 +97,12 @@ mod K-TECHNIQUE is
   op HOLE : -> K .
   op #freezer : K -> KLabel [strat(0) frozen] .
 
+  op #_ : #String -> KLabel [metadata "wrapper=(builtin)"] .
+
+  op #token : #String #String -> KLabel .
+  op K2Sort : -> KLabel .
+  eq K2Sort(#token(Sort:#String, Value:#String)(.KList)) = # Sort:#String (.KList) .
+
 endm
 
 --- K notation starts from here on
@@ -114,6 +121,7 @@ mod K-WRAPPERS-LABELS is
   op Map2KLabel_ : Map -> KLabel [metadata "wrapper=(builtin)"] .
   op 'wrap-with : -> KLabel .
   op #_ : #Bool -> KLabel [metadata "wrapper=(builtin)"] .
+
 endm
 
 load builtins.maude

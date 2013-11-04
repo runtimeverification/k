@@ -1,0 +1,6 @@
+Search results:
+
+Solution 1, State 0:
+V:K -->
+Tree ( Tree ( Tree ( Leaf ( 5 ), (Leaf ( 4 )), .List{","} ), (Leaf ( 3 )), 
+  .List{","} ), (Tree ( Leaf ( 2 ), (Leaf ( 1 )), .List{","} )), .List{","} )
