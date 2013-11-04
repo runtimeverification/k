@@ -158,11 +158,6 @@ public class SymbolicRewriter {
         while (strategy.hasNext()) {
             transition = strategy.nextIsTransition();
             Collection<Rule> rules = strategy.next();
-            if (transition) {
-              System.out.println("Checking " + rules.size() + " transition rules.");
-            } else {
-              System.out.println("Checking " + rules.size() + " structural rules.");
-            }
             for (Rule rule : rules) {
                 ruleStopwatch.reset();
                 ruleStopwatch.start();
