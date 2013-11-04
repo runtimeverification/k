@@ -168,7 +168,7 @@
       <kompile-option name="-superheat" value="division" />
       <kompile-option name="-supercool" value="lookup increment" />
       <program name="tutorial/1_k/4_imp++/lesson_1/div.imp">
-        <krun-option name="-output-mode" value="pretty" />
+        <krun-option name="-output" value="pretty" />
         <krun-option name="-search" />
 	<krun-option name="-color" value="off" />
       </program>
@@ -515,7 +515,7 @@
     <kompile-option name="-backend" value="symbolic" />
     <all-programs>
       <krun-option name="-color" value="off" />
-      <krun-option name="-output-mode" value="none" />
+      <krun-option name="-output" value="none" />
       <krun-option name="-cPC" value="true" />
     </all-programs>
   </test>
@@ -590,7 +590,7 @@
       results="tests/regression/issue580/tests"
       extension="issue" >
       <program name="tests/regression/issue580/programs/test.issue">
-        <krun-option name="-output-mode" value="pretty" />
+        <krun-option name="-output" value="pretty" />
         <krun-option name="-search" />
         <krun-option name="-pattern" value="&lt;k&gt; 6 &lt;/k&gt;" />
       </program>
@@ -602,7 +602,7 @@
       results="tests/regression/subsort-klabel/tests"
       extension="issue" >
       <program name="tests/regression/subsort-klabel/programs/test.issue">
-        <krun-option name="-output-mode" value="pretty" />
+        <krun-option name="-output" value="pretty" />
       </program>
   </test>
 
@@ -636,7 +636,7 @@
       results="tests/regression/escapedKLabel/tests"
       extension="issue" >
       <program name="tests/regression/escapedKLabel/programs/test.issue">
-        <krun-option name="-output-mode" value="pretty" />
+        <krun-option name="-output" value="pretty" />
       </program>
   </test>
 
@@ -646,7 +646,7 @@
       extension="issue"
       results="tests/regression/unparsing/out/">
       <all-programs>
-        <krun-option name="-output-mode" value="pretty" />
+        <krun-option name="-output" value="pretty" />
       </all-programs>
   </test>
 
@@ -661,7 +661,7 @@
       extension="issue"
       results="tests/regression/addbrackets/out/">
       <all-programs>
-        <krun-option name="-output-mode" value="pretty" />
+        <krun-option name="-output" value="pretty" />
 	<krun-option name="-parser" value="kast -groundParser" parser-home="PARSER_HOME" />
         <krun-option name="-parens" value="smart" />
       </all-programs>
@@ -688,7 +688,7 @@
       results="tests/regression/issue674"
       extension="issue" >
       <all-programs>
-        <krun-option name="-output-mode" value="pretty" />
+        <krun-option name="-output" value="pretty" />
       </all-programs>
   </test>
 
@@ -718,7 +718,7 @@
       results="tests/regression/string2int"
       extension="test" >
       <all-programs>
-        <krun-option name="-output-mode" value="pretty" />
+        <krun-option name="-output" value="pretty" />
       </all-programs>
   </test>
 
@@ -729,7 +729,7 @@
 	  extension="issue"
       >
     <all-programs>
-      <krun-option name="-output-mode" value="pretty" />
+      <krun-option name="-output" value="pretty" />
       <krun-option name="-color" value="off" />
     </all-programs>
   </test>
@@ -747,7 +747,7 @@
       results="tests/regression/label-and-context"
       extension="issue">
   <all-programs>
-    <krun-option name="-output-mode" value="pretty" />
+    <krun-option name="-output" value="pretty" />
     <krun-option name="-color" value="off" />
     <krun-option name="-parser" value="cat"/>
   </all-programs>
@@ -792,7 +792,7 @@
     <all-programs>
       <krun-option name="-backend" value="java" />
 	    <krun-option name="-smt" value="none" />
-	    <krun-option name="-output-mode" value="none" />
+	    <krun-option name="-output" value="none" />
     </all-programs>
   </test>
 
@@ -807,7 +807,7 @@
     <all-programs>
       <krun-option name="-backend" value="java" />
 	    <krun-option name="-smt" value="none" />
-      <krun-option name="-output-mode" value="none" />
+      <krun-option name="-output" value="none" />
     </all-programs>
   </test>
 
@@ -864,7 +864,7 @@
     <all-programs>
       <krun-option name="-smt" value="none" />
       <krun-option name="-backend" value="java-symbolic" />
-      <krun-option name="-output-mode" value="pretty" />
+      <krun-option name="-output" value="pretty" />
     </all-programs>
   </test>
   <test
@@ -877,7 +877,7 @@
     <all-programs>
       <krun-option name="-smt" value="none" />
       <krun-option name="-backend" value="java-symbolic" />
-      <krun-option name="-output-mode" value="pretty" />
+      <krun-option name="-output" value="pretty" />
     </all-programs>
   </test>
 
@@ -891,7 +891,7 @@
     <all-programs>
       <krun-option name="-smt" value="none" />
       <krun-option name="-backend" value="java-symbolic" />
-      <krun-option name="-output-mode" value="pretty" />
+      <krun-option name="-output" value="pretty" />
     </all-programs>
   </test>
   <test
@@ -904,7 +904,7 @@
     <all-programs>
       <krun-option name="-smt" value="none" />
       <krun-option name="-backend" value="java-symbolic" />
-      <krun-option name="-output-mode" value="pretty" />
+      <krun-option name="-output" value="pretty" />
     </all-programs>
   </test>
 
@@ -918,7 +918,7 @@
     <all-programs>
       <krun-option name="-smt" value="none" />
       <krun-option name="-backend" value="java-symbolic" />
-      <krun-option name="-output-mode" value="pretty" />
+      <krun-option name="-output" value="pretty" />
     </all-programs>
   </test>
 
@@ -932,7 +932,7 @@
     <all-programs>
       <krun-option name="-smt" value="none" />
       <krun-option name="-backend" value="java-symbolic" />
-      <krun-option name="-output-mode" value="pretty" />
+      <krun-option name="-output" value="pretty" />
     </all-programs>
   </test>
 
@@ -945,7 +945,7 @@
     <all-programs>
       <krun-option name="-smt" value="none" />
       <krun-option name="-backend" value="java-symbolic" />
-      <krun-option name="-output-mode" value="pretty" />
+      <krun-option name="-output" value="pretty" />
     </all-programs>
   </test>
 
@@ -958,7 +958,7 @@
     <all-programs>
       <krun-option name="-smt" value="none" />
       <krun-option name="-backend" value="java-symbolic" />
-      <krun-option name="-output-mode" value="pretty" />
+      <krun-option name="-output" value="pretty" />
     </all-programs>
   </test>
 
