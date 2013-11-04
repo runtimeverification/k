@@ -7,7 +7,7 @@ syntax FExp ::= Id
 	     | FExp "f<" FExp [strict]
 	     | "fif" FExp "fthen" FExp "felse" FExp [strict(1)]
 	     | Val
-	     | "let" Id "=" FExp "in" FExp [strict(2)]
+	     | "let" Id "be" FExp "in" FExp [strict(2), binder]
 	     | "fix" Id FExp [binder]
 	     > FExp FExp [seqstrict]
 	     | "(" FExp ")" [bracket]
@@ -40,7 +40,7 @@ rule fif false fthen _ felse S2:FExp => S2
 
 rule (lambda X:Id . E:FExp) V:Val => E[V / X]
 
-rule let X:Id = V:Val in E:FExp => E[V / X]
+rule let X:Id be V:Val in E:FExp => E[V / X]
 
 rule fix X:Id E:FExp => E[fix X E / X]
 
