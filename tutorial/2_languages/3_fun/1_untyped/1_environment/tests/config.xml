@@ -7,6 +7,7 @@
       results="." >
       <all-programs>
         <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
+        <krun-option name="--parens" value="smart"/>
       </all-programs>
   </test>
 

@@ -94,14 +94,14 @@ public class KExpFilter extends BasicVisitor {
 	*/
 
 	@Override
-	public void visit(Empty empty) {
+	public void visit(ListTerminator empty) {
 		String sort = empty.getSort();
 		if (MaudeHelper.basicSorts.contains(sort)) {
 			if (!sort.equals(KSorts.KLIST)) {
 				result.append("()");
 			}
 		} else {
-			throw new RuntimeException("don't know how to transform Empty syntax list to K Expression");
+			throw new RuntimeException("don't know how to transform empty syntax list to K Expression");
 		}
 	}
 

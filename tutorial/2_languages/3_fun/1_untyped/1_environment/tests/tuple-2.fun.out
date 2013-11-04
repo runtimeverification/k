@@ -2,4 +2,4 @@ Search results:
 
 Solution 1, State 0:
 V:K -->
-{ (({ (1, ({ 2 })) }), ({ (3, 4) })) }
+Pair ( Pair ( 1, Wrapper ( 2 ) ), Pair ( 3, 4 ) )

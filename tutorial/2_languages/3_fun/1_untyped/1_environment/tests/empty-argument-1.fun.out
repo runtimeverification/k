@@ -2,4 +2,4 @@ Search results:
 
 Solution 1, State 0:
 V:K -->
-closure ( .Map , (({ .List{","} }) -> 7) )
+closure ( .Map , Nothing -> 7 )

@@ -6,7 +6,6 @@ import java.io.StreamTokenizer;
 import java.io.StringReader;
 
 import org.kframework.compile.utils.MetaK;
-import org.kframework.kil.Empty;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSequence;

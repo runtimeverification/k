@@ -1,7 +1,7 @@
 // testing empty argument
 
 let x = 7
-in let f{} = x
-   in f{}
+in let f Nothing = x
+   in f Nothing
 
 // 7

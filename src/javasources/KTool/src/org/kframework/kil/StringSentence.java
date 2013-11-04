@@ -12,11 +12,13 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  */
 public class StringSentence extends ModuleItem {
 	private String content;
+	private String contentLocation;
 	private String label;
 	private String type;
 
-	public StringSentence(String content, String type, String label) {
+	public StringSentence(String content, String contentLocation, String type, String label) {
 		this.content = content;
+                this.contentLocation = contentLocation;
 		this.type = type;
 		this.label = label;
 	}
@@ -46,6 +48,10 @@ public class StringSentence extends ModuleItem {
 
 	public void setContent(String content) {
 		this.content = content;
+	}
+
+	public String getContentLocation() {
+		return contentLocation;
 	}
 
 	@Override

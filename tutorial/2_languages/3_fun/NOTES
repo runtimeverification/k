@@ -1,0 +1,5 @@
+Eventually, when parsing problems are fixed, we should allow tuples as
+builtin and as extending normal expressions.  We want to write f(1,2,3)
+meaning that the tuple (1,2,3) is passed to f, while we can write
+either f 1 or f(1) for one argument invocations.  For now, use
+constructors for tuples, for example f Triple(1,2,3), etc.

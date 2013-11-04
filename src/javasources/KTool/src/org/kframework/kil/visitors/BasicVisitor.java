@@ -79,10 +79,10 @@ public class BasicVisitor implements Visitor {
 	}
 
 	@Override
-	public void visit(Require require) {
-		if (isVisited(require))
+	public void visit(Require node) {
+		if (isVisited(node))
 			return;
-		visit((DefinitionItem) require);
+		visit((DefinitionItem) node);
 	}
 
 	@Override
@@ -520,17 +520,10 @@ public class BasicVisitor implements Visitor {
 	}
 
 	@Override
-	public void visit(Empty node) {
-		if (isVisited(node))
-			return;
-		visit((Term) node);
-	}
-
-	@Override
 	public void visit(ListTerminator node) {
 		if (isVisited(node))
 			return;
-		visit((Empty) node);
+		visit((Term) node);
 	}
 
 	@Override

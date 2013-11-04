@@ -41,7 +41,6 @@ public class KRunState implements Serializable{
 	}
 
 	public static Term concretize(Term result, Context context) {
-		Term rawResult = result;
 		try {
 			result = (Term) result.accept(new ConcretizeSyntax(context));
 			result = (Term) result.accept(new TypeInferenceSupremumFilter(context));

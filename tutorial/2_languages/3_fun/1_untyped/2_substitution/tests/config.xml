@@ -7,7 +7,8 @@
       results="../../1_environment/tests ." >
       <all-programs>
         <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
-      </all-programs>
+        <krun-option name="--parens" value="smart"/>
+       </all-programs>
   </test>
 
 </tests>

@@ -179,6 +179,7 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -332,14 +333,19 @@ public class Basic {
     // First, try to parse any rule label at the start
     Matcher matcher = pattern.matcher(str);
     String content, label;
+    int offset = 0;
     if (matcher.matches()) {
       content = matcher.group(2);
       label = matcher.group(1);
+      offset = matcher.start(2);
     } else {
       content = str;
       label = "";
+      offset = 0;
     }
 
+    String location = "("+offsetLine(str, sentenceBeginLine, sentenceBeginColumn, offset)+
+                      ","+offsetColumn(str, sentenceBeginLine, sentenceBeginColumn, offset)+")";
     // Second, try to parse any attributes at the end.
     // Unfortunately, attributes after a StringSentence are not
     // parsable by an LR parser so we have to try parsing at spots
@@ -351,11 +357,10 @@ public class Basic {
       parser.filename = this.filename;
       parser.module = this.module;
       parser.items = this.items;
-      parser.beginLine = sentenceBeginLine;
-      parser.beginColumn = sentenceBeginColumn;
+      parser.beginLine = offsetLine(str, sentenceBeginLine, sentenceBeginColumn, offset + i);
+      parser.beginColumn = offsetLine(str, sentenceBeginLine, sentenceBeginColumn, offset + i);
       try {
-        StringSentence ss = new StringSentence(
-          content.substring(0, i), type, label);
+        StringSentence ss = new StringSentence(content.substring(0, i), location, type, label);
         parser.AttributesEOF(ss);
         return ss;
       } catch (ParseException e) {
@@ -364,7 +369,27 @@ public class Basic {
         /* Our guess was wrong. Try another position. */
       }
     }
-    return new StringSentence(content, type, label);
+    return new StringSentence(content, location, type, label);
+  }
+
+  private int offsetLine(String str, int line, int column, int index)
+  {
+    if (index == 0) return line;
+    SimpleCharStream s = new SimpleCharStream(new StringReader(str), line, column);
+    try {
+      for (int i = 0; i < index; i++) { s.readChar(); }
+    } catch (IOException e) { /* Impossible */ e.printStackTrace(); System.exit(1); }
+    return s.getEndLine();
+  }
+
+  private int offsetColumn(String str, int line, int column, int index)
+  {
+    if (index == 0) return column;
+    SimpleCharStream s = new SimpleCharStream(new StringReader(str), line, column);
+    try {
+      for (int i = 0; i < index; i++) { s.readChar(); }
+    } catch (IOException e) { /* Impossible */ e.printStackTrace(); System.exit(1); }
+    return s.getEndColumn();
   }
 
 }

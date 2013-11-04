@@ -79,7 +79,6 @@ public interface Visitor {
     public void visit(StringBuiltin node);
     public void visit(GenericToken node);
     // </Token>
-	public void visit(Empty node);
 	public void visit(ListTerminator node);
 	public void visit(Hole node);
 	public void visit(FreezerHole node);

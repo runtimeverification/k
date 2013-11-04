@@ -1,9 +1,9 @@
 package org.kframework.compile.transformers;
 
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Empty;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KSorts;
+import org.kframework.kil.ListTerminator;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Sort;
@@ -109,7 +109,7 @@ public class AddEmptyLists extends BasicTransformer {
 		TermCons tc = new TermCons(sort, getListCons(sort), context);
 		List<Term> genContents = new ArrayList<Term>();
 		genContents.add(node);
-		genContents.add(new Empty(sort));
+		genContents.add(new ListTerminator(sort, null));
 
 		tc.setContents(genContents);
 		return tc;

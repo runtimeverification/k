@@ -1,4 +1,4 @@
 // testing two tuple arguments to a function
 
-let f {a,b} {x,y} = a{x,y} + b{x,y}
-in f {fun {x,y} -> x * y, fun {x,y} -> x + y} {10,20}
+let f Pair(a,b) Pair(x,y) = a Pair(x,y) + b Pair(x,y)
+in f Pair(fun Pair(x,y) -> x * y, fun Pair(x,y) -> x + y) Pair(10,20)

@@ -319,14 +319,14 @@
       definition="tutorial/2_languages/2_kool/1_untyped/kool-untyped.k"
       programs="tutorial/2_languages/2_kool/1_untyped/programs_and_results"
       extension="kool"
-      exclude="cycle"
+      exclude="cycle.kool"
       results="tests/examples/kool-untyped"
       />
   <test
       definition="tutorial/2_languages/2_kool/2_typed/1_dynamic/kool-typed-dynamic.k"
       programs="tutorial/2_languages/2_kool/2_typed/programs"
       extension="kool"
-      exclude="cycle"
+      exclude="cycle.kool"
       results="tests/examples/kool-typed-dynamic"
       />
   <test
@@ -356,17 +356,16 @@
   FUN
 -->
 
-<!--
   <test
       definition="tutorial/2_languages/3_fun/1_untyped/1_environment/fun-untyped.k"
       programs="tutorial/2_languages/3_fun/programs"
       extension="fun"
       results="tutorial/2_languages/3_fun/1_untyped/1_environment/tests" >
       <all-programs>
-        <krun-option name="-pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
+        <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
+        <krun-option name="--parens" value="smart"/>
       </all-programs>
   </test>
--->
 
 <!--
   LOGIK
@@ -710,7 +709,7 @@
       extension="test"
       results="tests/regression/lint"
       >
-    <kompile-option name="-w" value="all" />
+    <kompile-option name="-w" value="none" />
   </test>
 
   <test
@@ -797,13 +796,12 @@
     </all-programs>
   </test>
 
-<!--
   <test
-      definition="dist/examples/java_rewrite_engine/simple/untyped/simple-untyped.k"
-      programs="dist/tutorial/2_languages/1_simple/1_untyped/programs"
-      extensions="simple"
+      definition="samples/java_rewrite_engine/simple/untyped/simple-untyped.k"
+      programs="tutorial/2_languages/1_simple/1_untyped/programs_and_results"
+      extension="simple"
       exclude="dekker.simple exceptions_07.simple matrix.simple"
-      results="tests/examples/simple-untyped"
+      results="tutorial/2_languages/1_simple/1_untyped/programs_and_results"
       >
     <kompile-option name="-backend" value="java" />
     <all-programs>
@@ -813,6 +811,7 @@
     </all-programs>
   </test>
 
+<!--
 
   <test
       definition="tests/regression/java-rewrite-engine/io/test1/test.k"
@@ -1005,6 +1004,19 @@
       definition="tests/regression/java-rewrite-engine/cell_list/test.k"
       programs="tests/regression/java-rewrite-engine/cell_list"
       results="tests/regression/java-rewrite-engine/cell_list"
+      extension="test"
+      >
+    <kompile-option name="-backend" value="java" />
+    <all-programs>
+      <krun-option name="-backend" value="java" />
+      <krun-option name="-smt" value="none" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="tests/regression/java-rewrite-engine/rhs_map_constructor/test.k"
+      programs="tests/regression/java-rewrite-engine/rhs_map_constructor"
+      results="tests/regression/java-rewrite-engine/rhs_map_constructor"
       extension="test"
       >
     <kompile-option name="-backend" value="java" />
