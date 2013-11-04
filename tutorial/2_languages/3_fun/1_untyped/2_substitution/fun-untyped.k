@@ -13,10 +13,13 @@ require "modules/substitution.k"
 
 module FUN-UNTYPED-SYNTAX
 
-  syntax Exp ::= Int | Bool | Id
-               | "(" Exp ")"             [bracket]
+  syntax            Name ::= Token{[a-z][\_a-zA-Z0-9]*}      [notInRules]
+  syntax ConstructorName ::= Token{[A-Z][a-zA-Z0-9]*}        [notInRules]
+
+  syntax Exp ::= Int | Bool | String | Name
+               | "(" Exp ")"                       [bracket]
                | Exp Exp                           [strict, left]
-               | "&" Id
+               | "&" Name
                | "@" Exp                           [strict]
                | "callcc" Exp                      [strict]
                | "cons" Exp Exp                    [strict]
@@ -42,15 +45,17 @@ module FUN-UNTYPED-SYNTAX
                > "let" Bindings "in" Exp
                | "letrec" Bindings "in" Exp        [prefer]
                | "if" Exp "then" Exp "else" Exp    [strict(1)]
-               | "try" Exp "catch" "(" Id ")" Exp
+               | "try" Exp "catch" "(" Name ")" Exp
                > Exp ";" Exp                       [strict(1), right]
                > "fun" Cases
-               | "{" Exps "}"          [strict]  // tuple
-               | "[" Exps "]"          [strict]  // lists
-               | "[" Exps "|" Exp "]"            // list [head|tail] pattern
+               | "[" Exps "]"          [strict]
+               | "[" Exps "|" Exp "]"
+
+  syntax Exp ::= ConstructorName
+               | ConstructorName "(" Exps ")"      [prefer, strict(2)]
 
   syntax Exps ::= List{Exp,","}        [strict]
-  syntax Ids  ::= List{Id,","}
+  syntax Names  ::= List{Name,","}
 
   syntax Case  ::= Exp "->" Exp  [binder]
   syntax Cases ::= List{Case, "|"}
@@ -63,8 +68,8 @@ module FUN-UNTYPED-SYNTAX
 
   rule [E:Exp,Es|T] => [E|[Es|T]]  when Es =/=K .Exps        [macro]
 
-  syntax Id ::= "head" | "tail" | "null?" | "ref" | "throw"
-  syntax Id ::= "$h" | "$t" | "$l" | "$x" | "$k" | "$v"
+  syntax Name ::= "head" | "tail" | "null?" | "ref" | "throw"
+  syntax Name ::= "$h" | "$t" | "$l" | "$x" | "$k" | "$v"
   rule head => fun [$h|$t] -> $h                             [macro]
   rule tail => fun [$h|$t] -> $t                             [macro]
   rule null? => fun [.Exps] -> true | [$h|$t] -> false       [macro]
@@ -75,7 +80,14 @@ module FUN-UNTYPED-SYNTAX
     => callcc (fun $k -> (fun throw -> E)
                          (fun X -> $k E'))  [macro]
 
+/*@ We put the mu here in the syntax module, instead of only in the
+semantics as a means to define letrec, so that we can also use it
+in programs.
+This is particularly useful when testing the definition against
+programs, because it allows us to test mu as well. */
+
   syntax Exp ::= "mu" Case
+
 endmodule
 
 
@@ -88,15 +100,16 @@ module FUN-UNTYPED
                   <store color="white"> .Map </store>
                 </T>
 
-//@ fun is a Val; Id is Val
+//@ Both Name and functions are values now:
 
-  syntax Val ::= Id | Int | Bool | "fun" Cases
+  syntax Val ::= Name | Int | Bool | String | "fun" Cases
   syntax Vals ::= List{Val,","}
   syntax Exp ::= Val
   syntax KResult ::= Val
 
   rule I1:Int + I2:Int => I1 +Int I2
-  rule (I1:Int - I2:Int) => I1 -Int I2
+  rule S1:String + S2:String => S1 +String S2
+  rule I1:Int - I2:Int => I1 -Int I2
   rule I1:Int * I2:Int => I1 *Int I2
   rule I1:Int / I2:Int => I1 /Int I2 when I2 =/=K 0
   rule I1:Int % I2:Int => I1 %Int I2 when I2 =/=K 0
@@ -112,44 +125,37 @@ module FUN-UNTYPED
   rule true  || _ => true
   rule false || E => E
 
+  syntax Variable ::= Name
+  syntax Val ::= ConstructorName
+               | ConstructorName "(" Vals ")"
+
   rule (fun P->E | _) V:Val => E[getMatching(P,V)]  when isMatching(P,V)
   rule (fun (P->_ | Cs:Cases => Cs)) V:Val  when notBool isMatching(P,V)
 
   rule decomposeMatching(([H:Exp|T:Exp] => H,T),([V:Val,Vs:Vals] => V,[Vs]))
 
-//  rule let Bs in E => (E[getMatching(ids(Bs),exps(Bs))])
+/*@ We can reduce multiple bindings to one list binding, and then
+apply the usual desugaring of let into function application. */
 
-  rule let Bs in E => (fun {ids(Bs)} -> E) {exps(Bs)}
+  rule let Bs in E => ((fun [names(Bs)] -> E) [exps(Bs)])
+
+/*@ We only give the semantics of one-binding letrec.
+Multipe bindings are left as an exercise. */
 
   syntax Exp ::= "mu" Case
-  rule mu X:Id -> E:Exp => E[(mu X -> E) / X]
-  rule letrec F:Id = E in E' => let F = (mu F -> E) in E'
-
-//  rule letrec Bs in E => (fun {ids(Bs)} -> E) (mu {ids(Bs)} -> {exps(Bs)})
-//  syntax Exp ::= "mu" Cases
-//  rule mu P -> E => E[]
-//
-//MU: mu F1 = E1 and F2 = E2 
-//
-//MU = {E1[pj1(MU)/F1] , E2[pj2(MU)/F2]}
-//
-//mu F = E and Bs 
-
-
-//  rule <k> letrec Bs in E
-//        => bind(ids(Bs)) ~> assignTo(ids(Bs),exps(Bs)) ~> E ~> env(Rho)...</k>
-//       <env> Rho </env>
+  rule mu X:Name -> E => E[(mu X -> E) / X]
+  rule letrec F:Name = E in E' => let F = (mu F -> E) in E'  [macro]
 
   rule if  true then E else _ => E
   rule if false then _ else E => E
 
-  syntax Val ::= "{" Vals "}"
-               | "[" Vals "]"
-
+  syntax Val ::= "[" Vals "]"
   rule cons V:Val [Vs:Vals] => [V,Vs]
 
-//  rule <k> & X => L ...</k>  <env>... X |-> L </env>
+/*@ We cannot have \texttt{\&} anymore, but we can give direct
+semantics to \texttt{ref}: */
 
+//  rule <k> & X => L ...</k>  <env>... X |-> L </env>
   rule <k> ref V:Val => L ...</k> <store>... . => L |-> V ...</store>
   when fresh(L:Int)
   rule <k> @ L:Int => V:Val ...</k>  <store>... L |-> V ...</store>
@@ -162,38 +168,14 @@ module FUN-UNTYPED
   rule <k> cc(K) V:Val ~> _ => V ~> K </k>
 
 
-/*
-  syntax K ::= bindTo(Ids,Exps)         [strict(2)]
-             | bindTo(Map)
-             | bind(Ids)
+//@ Auxiliary getters
 
-  rule bindTo(Xs:Ids,Vs:Vals) => bindTo(getMatching(Xs,Vs))
-
-  rule bindTo(.Map) => .  [structural]
-  rule <k> bindTo((X:Id |-> V:Val => .) _) ...</k>
-       <env> Rho => Rho[L/X] </env>
-       <store>... . => L |-> V ...</store>
-    when fresh(L:Int)  [structural]
-
-  rule bind(.Ids) => .                  [structural]
-  rule <k> bind(X:Id,Xs => Xs) ...</k>
-       <env> Rho => Rho[L/X] </env>
-    when fresh(L:Int)                   [structural]
-
-  syntax K ::= assignTo(Ids,Exps)  [strict(2)]
-
-  rule <k> assignTo(.Ids,.Vals) => . ...</k>            [structural]
-  rule <k> assignTo((X:Id,Xs => Xs),(V:Val,Vs => Vs)) ...</k>
-       <env>... X |-> L ...</env>
-       <store>... . => L |-> V ...</store>              [structural]
-*/
-
-  syntax Ids ::= ids(Bindings)  [function]
-  rule ids(.Bindings) => .Ids
-  rule ids(X:Id=_ and Bs) => X,ids(Bs)
+  syntax Names ::= names(Bindings)  [function]
+  rule names(.Bindings) => .Names
+  rule names(X:Name=_ and Bs) => X,names(Bs)
 
   syntax Exps ::= exps(Bindings)  [function]
   rule exps(.Bindings) => .Exps
-  rule exps(_:Id=E and Bs) => E,exps(Bs)
+  rule exps(_:Name=E and Bs) => E,exps(Bs)
 
 endmodule

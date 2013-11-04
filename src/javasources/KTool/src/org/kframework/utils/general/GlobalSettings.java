@@ -5,6 +5,7 @@ import org.kframework.utils.file.KPaths;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class GlobalSettings {
@@ -90,4 +91,6 @@ public class GlobalSettings {
 	
 	public static String CHECK = null;
 	public static boolean symbolic = false; // true if the --symbolic argument has been provided to kompile
+    public static List<String> symbolicTags = new LinkedList<>();
+    public static List<String> nonSymbolicTags = new LinkedList<>();
 }

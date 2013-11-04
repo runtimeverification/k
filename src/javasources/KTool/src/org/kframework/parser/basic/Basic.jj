@@ -337,7 +337,7 @@ public class Basic {
     if (matcher.matches()) {
       content = matcher.group(2);
       label = matcher.group(1);
-      offset = matcher.start(2);
+      offset = matcher.start(2)+1;
     } else {
       content = str;
       label = "";

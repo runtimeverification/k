@@ -70,6 +70,7 @@ public class CommandlineOptions {
 		addOptionS(OptionBuilder.withLongOpt("parser").hasArg().withArgName("file").withDescription("Command used to parse programs. (Default: kast).").create());
 		addOptionS(OptionBuilder.withLongOpt("config-var-parser").hasArg().withArgName("file").withDescription("Command used to parse configuration variables. (Default: kast -e).  See --parser above. Applies to subsequent -c options until another parser is specified with this option.").create());
 		addOptionS(OptionBuilder.withLongOpt("config-var").hasArgs(2).withValueSeparator('=').withArgName("name=value").withDescription("Specify values for variables in the configuration.").create("c"));
+		addOptionS(OptionBuilder.withLongOpt("output").hasArg().withArgName("mode").withDescription("How to display Maude results. <mode> is either [pretty|raw|binary|none]. (Default: pretty).").create("o"));
 
 		// Advanced K options
 		addOptionS(OptionBuilder.withLongOpt("search").withDescription("In conjunction with it you can specify 3 options that are optional: pattern (the pattern used for search), bound (the number of desired solutions) and depth (the maximum depth of the search).").create());
@@ -101,8 +102,7 @@ public class CommandlineOptions {
 		addOptionE(OptionBuilder.withLongOpt("smt").hasArg().withArgName("solver").withDescription("SMT solver to use for checking constraints. <solver> is either [z3|gappa|none]. (Default: z3).").create());
 		addOptionE(OptionBuilder.withLongOpt("generate-tests").withDescription("Test programs will be generated along with normal search.").create());
 
-		addOptionE(OptionBuilder.withLongOpt("output").hasArg().withArgName("file").withDescription("Store output in the file instead of displaying it.").create("o"));
-		addOptionE(OptionBuilder.withLongOpt("output-mode").hasArg().withArgName("mode").withDescription("How to display Maude results. <mode> is either [pretty|raw|binary|none]. (Default: pretty).").create());
+		addOptionE(OptionBuilder.withLongOpt("output-file").hasArg().withArgName("file").withDescription("Store output in the file instead of displaying it.").create());
 	}
 
 	//create options displayed in the krun debugger help

@@ -16,14 +16,12 @@ import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.java.strategies.Strategy;
-import org.kframework.backend.java.strategies.NullStrategy;
-import org.kframework.backend.java.strategies.StructuralStrategy;
-import org.kframework.backend.java.strategies.TransitionStrategy;
+import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
 import org.kframework.backend.java.util.LookupCell;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.utils.general.GlobalSettings;
 
+import java.util.Collection;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -42,19 +40,18 @@ import com.google.common.collect.ImmutableSet;
 public class SymbolicRewriter {
 
     private final Definition definition;
-    private Strategy strategy;
+    private final TransitionCompositeStrategy strategy
+        = new TransitionCompositeStrategy(GlobalSettings.transition);
     private final Stopwatch stopwatch = new Stopwatch();
     private int step;
     private final Stopwatch ruleStopwatch = new Stopwatch();
     private final Map<IndexingPair, Set<Rule>> ruleTable;
     private final Set<Rule> unindexedRules;
     private final List<ConstrainedTerm> results = new ArrayList<ConstrainedTerm>();
+    private boolean transition;
 
 	public SymbolicRewriter(Definition definition) {
         this.definition = definition;
-
-        // Eventually the strategy will be specified in the command line.
-        strategy = new NullStrategy();
 
         /* populate the table of rules rewriting the top configuration */
         Set<Index> indices = new HashSet<Index>();
@@ -154,57 +151,66 @@ public class SymbolicRewriter {
             return;
         }
 
-        // Instead of iterator through all applicable rules, iterate through
-        // them as dictated by the strategy.
-        strategy.apply(getRules(constrainedTerm.term()));
+        // Applying a strategy to a set of rules divides the rules up into
+        // equivalence classes of rules. We iterate through these equivalence
+        // classes one at a time, seeing which one contains rules we can apply.
+        strategy.reset(getRules(constrainedTerm.term()));
         while (strategy.hasNext()) {
-            Rule rule = strategy.next();
-            ruleStopwatch.reset();
-            ruleStopwatch.start();
+            transition = strategy.nextIsTransition();
+            Collection<Rule> rules = strategy.next();
+            for (Rule rule : rules) {
+                ruleStopwatch.reset();
+                ruleStopwatch.start();
 
-            SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(
-                constrainedTerm.termContext());
-            leftHandSideConstraint.addAll(rule.condition());
-            for (Variable variable : rule.freshVariables()) {
-                leftHandSideConstraint.add(variable, IntToken.fresh());
-            }
-
-            ConstrainedTerm leftHandSide = new ConstrainedTerm(
-                    rule.leftHandSide(),
-                    rule.lookups().getSymbolicConstraint(constrainedTerm.termContext()),
-
-                    leftHandSideConstraint,
-                    constrainedTerm.termContext());
-
-            for (SymbolicConstraint constraint1 : constrainedTerm.unify(leftHandSide)) {
-                /* rename rule variables in the constraints */
-                Map<Variable, Variable> freshSubstitution = constraint1.rename(rule.variableSet());
-
-                Term result = rule.rightHandSide();
-                /* rename rule variables in the rule RHS */
-                result = result.substitute(freshSubstitution, constrainedTerm.termContext());
-                /* apply the constraints substitution on the rule RHS */
-                result = result.substituteAndEvaluate(constraint1.substitution(),
-                    constrainedTerm.termContext());
-                /* evaluate pending functions in the rule RHS */
-//                result = result.evaluate(constrainedTerm.termContext());
-                /* eliminate anonymous variables */
-                constraint1.eliminateAnonymousVariables();
-
-                /*
-                System.err.println("rule \n\t" + rule);
-                System.err.println("result term\n\t" + result);
-                System.err.println("result constraint\n\t" + constraint1);
-                System.err.println("============================================================");
-                */
-
-                /* compute all results */
-                results.add(new ConstrainedTerm(result, constraint1,
-                    constrainedTerm.termContext()));
-
-                if (results.size() == successorBound) {
-                    return;
+                SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(
+                        constrainedTerm.termContext());
+                leftHandSideConstraint.addAll(rule.condition());
+                for (Variable variable : rule.freshVariables()) {
+                    leftHandSideConstraint.add(variable, IntToken.fresh());
                 }
+
+                ConstrainedTerm leftHandSide = new ConstrainedTerm(
+                        rule.leftHandSide(),
+                        rule.lookups().getSymbolicConstraint(constrainedTerm.termContext()),
+                        leftHandSideConstraint,
+                        constrainedTerm.termContext());
+
+                for (SymbolicConstraint constraint1 : constrainedTerm.unify(leftHandSide)) {
+                    /* rename rule variables in the constraints */
+                    Map<Variable, Variable> freshSubstitution = constraint1.rename(rule.variableSet());
+
+                    Term result = rule.rightHandSide();
+                    /* rename rule variables in the rule RHS */
+                    result = result.substitute(freshSubstitution, constrainedTerm.termContext());
+                    /* apply the constraints substitution on the rule RHS */
+                    result = result.substituteAndEvaluate(constraint1.substitution(),
+                            constrainedTerm.termContext());
+                    /* evaluate pending functions in the rule RHS */
+//                    result = result.evaluate(constrainedTerm.termContext());
+                    /* eliminate anonymous variables */
+                    constraint1.eliminateAnonymousVariables();
+
+                    /*
+                    System.err.println("rule \n\t" + rule);
+                    System.err.println("result term\n\t" + result);
+                    System.err.println("result constraint\n\t" + constraint1);
+                    System.err.println("============================================================");
+                    */
+
+                    /* compute all results */
+                    results.add(new ConstrainedTerm(result, constraint1,
+                            constrainedTerm.termContext()));
+
+                    if (results.size() == successorBound) {
+                        return;
+                    }
+                }
+            }
+            // If we've found matching results from one equivalence class then
+            // we are done, as we can't match rules from two equivalence classes
+            // in the same step.
+            if (results.size() > 0) {
+                return;
             }
         }
         //System.out.println("Result: " + results.toString());
@@ -286,19 +292,7 @@ public class SymbolicRewriter {
     label:
         for (step = 0; !queue.isEmpty() && step != depth; ++step) {
             for (ConstrainedTerm term : queue) {
-                // First, rewrite using the structural strategy, only looking
-                // for one matching rule.
-                boolean transition = false;
-                strategy = new StructuralStrategy(GlobalSettings.transition);
-                computeRewriteStep(term,1);
-                // If we could not match a structural rule, then we will seach
-                // the space of possible transitions, matching all possible
-                // rules that are marked as transitions.
-                if (results.isEmpty()) {
-                  transition = true;
-                  strategy = new TransitionStrategy(GlobalSettings.transition);
-                  computeRewriteStep(term);
-                }
+                computeRewriteStep(term);
 
                 if (results.isEmpty()) {
                     /* final term */
@@ -313,6 +307,10 @@ public class SymbolicRewriter {
                     // Only add a state to visited if it is a transition
                     if (!transition || visited.add(getTransition(i))) {
                         nextQueue.add(getTransition(i));
+                    }
+                    // If we found a structural rule we only need one transition
+                    if (!transition) {
+                      break;
                     }
                 }
             }

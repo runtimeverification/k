@@ -13,7 +13,7 @@
              ../../lesson_5/tests
              ." >
     <all-programs>
-      <krun-option name="-output-mode" value="pretty" />
+      <krun-option name="-output" value="pretty" />
     </all-programs>
   </test>
 

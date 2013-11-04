@@ -1,0 +1,10 @@
+let* x1=1
+and  x2=x1
+and  x3=x2+x1
+and  x4=x3+x2
+and  x5=x4+x3
+and  x6=x5+x4
+and  x7=x6+x5
+and  x8=x7+x6
+and  x9=x8+x7
+in x9

@@ -88,7 +88,7 @@ public class Test implements Comparable<Test> {
         doc.appendChild(report);
 
         // general krun options
-        generalKrunOptions.put("--output-mode", "none");
+        generalKrunOptions.put("--output", "none");
         generalKrunOptions.put("--color", "off");
 
         initializePrograms(homeDir);
@@ -454,7 +454,7 @@ public class Test implements Comparable<Test> {
 
         if (genOpts.getLength() == 0) {
             generalKrunOptions.put("--color", "off");
-            generalKrunOptions.put("--output-mode", "none");
+            generalKrunOptions.put("--output", "none");
         }
     }
 

@@ -379,7 +379,7 @@ public class Main {
 
             if ("pretty".equals(K.output_mode)) {
                 String output = result.toString();
-                if (!cmd.hasOption("output")) {
+                if (!cmd.hasOption("output-file")) {
                     AnsiConsole.out.println(output);
                 } else {
                     writeStringToFile(new File(K.output), output);
@@ -422,7 +422,7 @@ public class Main {
             } else if ("raw".equals(K.output_mode)) {
                 String output = result.getRawOutput();
                 ;
-                if (!cmd.hasOption("output")) {
+                if (!cmd.hasOption("output-file")) {
                     System.out.println(output);
                 } else {
                     writeStringToFile(new File(K.output), output);
@@ -434,8 +434,8 @@ public class Main {
                 if (krs instanceof KRunState) {
                     Term res = ((KRunState) krs).getRawResult();
 
-                    if (!cmd.hasOption("output")) {
-                        Error.silentReport("Did not specify an output file. Cannot print output-mode binary to\nstandard out. Saving to .k/krun/krun_output");
+                    if (!cmd.hasOption("output-file")) {
+                        Error.silentReport("Did not specify an output file. Cannot print binary output to\nstandard out. Saving to .k/krun/krun_output");
                         BinaryLoader.save(K.krun_output, res);
                     } else {
                         BinaryLoader.save(K.output, res);
@@ -446,7 +446,7 @@ public class Main {
 
             } else {
                 Error.report(K.output_mode
-                        + " is not a valid value for output-mode option");
+                        + " is not a valid value for output option");
             }
 
             System.exit(0);
@@ -873,8 +873,8 @@ public class Main {
             if (cmd.hasOption("graph")) {
                 K.showSearchGraph = true;
             }
-            if (cmd.hasOption("output-mode")) {
-                K.output_mode = cmd.getOptionValue("output-mode");
+            if (cmd.hasOption("output")) {
+                K.output_mode = cmd.getOptionValue("output");
             }
             if (cmd.hasOption("log-io")) {
                 String v = cmd.getOptionValue("log-io");
@@ -906,11 +906,11 @@ public class Main {
             if (cmd.hasOption("smt")) {
                 K.smt = cmd.getOptionValue("smt");
             }
-            if (cmd.hasOption("output")) {
+            if (cmd.hasOption("output-file")) {
                 if (!cmd.hasOption("color")) {
                     K.color = ColorSetting.OFF;
                 }
-                K.output = new File(cmd.getOptionValue("output"))
+                K.output = new File(cmd.getOptionValue("output-file"))
                         .getCanonicalPath();
             }
             if (cmd.hasOption("c")) {
