@@ -5,21 +5,20 @@ import org.kframework.backend.java.kil.Rule;
 import java.util.Collection;
 import java.util.Iterator;
 
-public class NullStrategy extends Strategy {
-  public NullStrategy() {
+public class NullStrategy implements Strategy {
+  public void reset(Collection<Rule> rules) {
+    this.rules = rules;
   }
 
-  public void apply(Collection<Rule> rules) {
-    iterator = rules.iterator();
-  }
-
-  public Rule next() {
-    return iterator.next();
+  public Collection<Rule> next() {
+    Collection<Rule> n = rules;
+    rules = null;
+    return n;
   }
 
   public boolean hasNext() {
-    return iterator.hasNext();
+    return rules != null;
   }
 
-  private Iterator<Rule> iterator;
+  private Collection<Rule> rules;
 } 
