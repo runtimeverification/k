@@ -5,9 +5,8 @@ import org.kframework.backend.java.kil.Rule;
 import java.util.Collection;
 import java.util.LinkedList;
 
-public class TransitionStrategy extends Strategy {
-  public TransitionStrategy(Strategy strategy, Collection<String> tags) {
-    this.strategy = strategy;
+public class TransitionStrategy implements Strategy {
+  public TransitionStrategy(Collection<String> tags) {
     this.tags = tags;
   }
 
@@ -15,7 +14,7 @@ public class TransitionStrategy extends Strategy {
     return structural == null && transition != null;
   }
 
-  public void apply(Collection<Rule> rules) {
+  public void reset(Collection<Rule> rules) {
     transition = new LinkedList<Rule>();
     structural = new LinkedList<Rule>();
     for (Rule r : rules) {
@@ -35,26 +34,22 @@ public class TransitionStrategy extends Strategy {
   }
 
   public Collection<Rule> next() {
-    Collection<Rule> n;
+    Collection<Rule> n = null;
     if (structural != null) {
       n = structural;
       structural = null;
     } else if (transition != null) {
       n = transition;
       transition = null;
-    } else {
-      apply(strategy.next());
-      n = next();
     }
     return n;
   }
 
   public boolean hasNext() {
-    return structural != null || transition != null || strategy.hasNext();
+    return structural != null || transition != null;
   }
 
   private Collection<Rule> transition;
   private Collection<Rule> structural;
   private Collection<String> tags;
-  private Strategy strategy;
 } 

@@ -5,11 +5,8 @@ import org.kframework.backend.java.kil.Rule;
 import java.util.Collection;
 import java.util.Iterator;
 
-public class NullStrategy extends Strategy {
-  public NullStrategy() {
-  }
-
-  public void apply(Collection<Rule> rules) {
+public class NullStrategy implements Strategy {
+  public void reset(Collection<Rule> rules) {
     this.rules = rules;
   }
 

@@ -16,6 +16,7 @@ import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
 import org.kframework.backend.java.strategies.Strategy;
 import org.kframework.backend.java.strategies.NullStrategy;
 import org.kframework.backend.java.strategies.PriorityStrategy;
@@ -43,7 +44,8 @@ import com.google.common.collect.ImmutableSet;
 public class SymbolicRewriter {
 
     private final Definition definition;
-    private Strategy strategy;
+    private final TransitionCompositeStrategy strategy
+        = new TransitionCompositeStrategy(GlobalSettings.transition);
     private final Stopwatch stopwatch = new Stopwatch();
     private int step;
     private final Stopwatch ruleStopwatch = new Stopwatch();
@@ -54,9 +56,6 @@ public class SymbolicRewriter {
 
 	public SymbolicRewriter(Definition definition) {
         this.definition = definition;
-
-        // Eventually the strategy will be specified in the command line.
-        strategy = new PriorityStrategy();
 
         /* populate the table of rules rewriting the top configuration */
         Set<Index> indices = new HashSet<Index>();
@@ -159,11 +158,10 @@ public class SymbolicRewriter {
         // Applying a strategy to a set of rules divides the rules up into
         // equivalence classes of rules. We iterate through these equivalence
         // classes one at a time, seeing which one contains rules we can apply.
-        strategy.apply(getRules(constrainedTerm.term()));
-        TransitionStrategy s = new TransitionStrategy(strategy, GlobalSettings.transition);
-        while (s.hasNext()) {
-            transition = s.nextIsTransition();
-            Collection<Rule> rules = s.next();
+        strategy.reset(getRules(constrainedTerm.term()));
+        while (strategy.hasNext()) {
+            transition = strategy.nextIsTransition();
+            Collection<Rule> rules = strategy.next();
             for (Rule rule : rules) {
                 ruleStopwatch.reset();
                 ruleStopwatch.start();

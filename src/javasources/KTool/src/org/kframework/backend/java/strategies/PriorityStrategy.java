@@ -8,13 +8,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.TreeSet;
 
-public class PriorityStrategy extends Strategy {
+public class PriorityStrategy implements Strategy {
   public PriorityStrategy() {
     priorityMap = new java.util.HashMap<Integer,HashSet<Rule>>();
     priorities = new java.util.TreeSet<Integer>();
+    priorityIterator = priorities.descendingIterator();
   }
 
-  public void apply(Collection<Rule> rules) {
+  public void reset(Collection<Rule> rules) {
     priorityMap.clear();
     priorities.clear();
     for (Rule r : rules) {
