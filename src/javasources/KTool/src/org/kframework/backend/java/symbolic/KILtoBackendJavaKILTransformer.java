@@ -382,6 +382,16 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
+    public ASTNode transform(org.kframework.kil.Map node) throws TransformerException {
+    //TODO(Owolabi): Make this work for non-empty Maps.
+
+//        for(org.kframework.kil.Term term: node.getContents()){
+//           Term backendTerm = this.transformTerm(term,this.definition);
+//        }
+        return new BuiltinMap();
+    }
+
+    @Override
     public ASTNode transform(org.kframework.kil.ListUpdate node) throws TransformerException {
         Variable base = (Variable) node.base().accept(this);
 

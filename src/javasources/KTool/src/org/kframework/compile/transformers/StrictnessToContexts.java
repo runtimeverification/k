@@ -160,6 +160,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
     }
 
     private Term getHoleTerm(Production prod) {
+        System.out.println("Production: "+ prod);
         Term hole;
         String strictType = prod.getAttribute("strictType");
         if (null == strictType) {
