@@ -144,6 +144,16 @@ public class SymbolicUnifier extends AbstractUnifier {
     }
 
     @Override
+    public void unify(BuiltinList builtinList, Term term) {
+        if (!(term instanceof BuiltinList)) {
+            this.fail();
+        }
+
+        throw new UnsupportedOperationException(
+                "list matching is only supported when one of the lists is a variable.");
+    }
+
+    @Override
     public void unify(BuiltinMap builtinMap, Term term) {
         if (!(term instanceof BuiltinMap)) {
             this.fail();

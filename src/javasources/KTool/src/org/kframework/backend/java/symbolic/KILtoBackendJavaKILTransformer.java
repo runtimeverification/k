@@ -295,17 +295,40 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             elementsRight.add(newEntry);
         }
 
+        ArrayList<Term> baseTerms = new ArrayList<>(node.baseTerms().size());
+        for (org.kframework.kil.Term term : node.baseTerms()) {
+            baseTerms.add((Term) term.accept(this));
+        }
+
         Term base = null;
         if (node.hasViewBase()) {
-            assert node.viewBase() instanceof org.kframework.kil.Variable : "The viewbase " + node.viewBase() +
-                    " must be a variable";
             base = (Variable) node.viewBase().accept(this);
         } else {
-            Collection<org.kframework.kil.Term> baseTerms = node.baseTerms();
-            if (!baseTerms.isEmpty()) {
-                assert baseTerms.size() == 1 : "Don't know how to handle multiple base terms for now.";
-                org.kframework.kil.Term baseTerm = baseTerms.iterator().next();
-                base = (Term) baseTerm.accept(this);
+            if (!node.baseTerms().isEmpty()) {
+                if (node.baseTerms().size() == 1
+                        && !(node.baseTerms().iterator().next().accept(this) instanceof KItem)) {
+                    base = (Term) node.baseTerms().iterator().next().accept(this);
+                } else {
+                    Term result = BuiltinList.of(
+                            null,
+                            0,
+                            0,
+                            elementsLeft,
+                            new ArrayList<Term>());
+                    baseTerms.add(BuiltinList.of(
+                            null,
+                            0,
+                            0,
+                            new ArrayList<Term>(),
+                            elementsRight));
+                    for (Term baseTerm : baseTerms) {
+                        result = new KItem(
+                                KLabelConstant.of(DataStructureSort.DEFAULT_LIST_LABEL, context),
+                                new KList(ImmutableList.of(result, baseTerm)),
+                                context);
+                    }
+                    return result;
+                }
             }
         }
         return BuiltinList.of(base, 0, 0, elementsLeft, elementsRight);

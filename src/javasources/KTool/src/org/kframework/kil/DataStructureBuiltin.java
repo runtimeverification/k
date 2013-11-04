@@ -7,9 +7,11 @@ import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 
@@ -125,29 +127,50 @@ public abstract class DataStructureBuiltin extends Term {
             ArrayList<Term> elementsLeft = new ArrayList<Term>();
             ArrayList<Term> elementsRight = new ArrayList<Term>();
             ArrayList<Term> terms = new ArrayList<Term>();
-            for (Term term : argument) {
-                if (term instanceof ListBuiltin) {
-                    ListBuiltin listBuiltin = (ListBuiltin) term;
-                    if (left) {
-                        elementsLeft.addAll(listBuiltin.elementsLeft());
-                        if (listBuiltin.baseTerms().isEmpty()) {
-                            elementsLeft.addAll(listBuiltin.elementsRight());
-                        } else {
-                            terms.addAll(listBuiltin.baseTerms());
-                            elementsRight.addAll(listBuiltin.elementsRight());
-                            left = false;
-                        }
-                    } else { // if right
-                        assert listBuiltin.baseTerms().isEmpty();
-                        elementsRight.addAll(listBuiltin.elementsLeft());
-                        elementsRight.addAll(listBuiltin.elementsRight());
-                    }
-                } else {
-                    assert left;
-                    terms.add(term);
-                    left = false;
+
+            int leftIndex;
+            for (leftIndex = 0; leftIndex < argument.length; ++leftIndex) {
+                if (!(argument[leftIndex] instanceof ListBuiltin)) {
+                    break;
+                }
+                ListBuiltin listBuiltin = (ListBuiltin) argument[leftIndex];
+
+                if (!listBuiltin.baseTerms().isEmpty()) {
+                    break;
+                }
+                elementsLeft.addAll(listBuiltin.elementsLeft());
+                elementsLeft.addAll(listBuiltin.elementsRight());
+            }
+
+            int rightIndex;
+            for (rightIndex = argument.length - 1; rightIndex > leftIndex; --rightIndex) {
+                if (!(argument[rightIndex] instanceof ListBuiltin)) {
+                    break;
+                }
+                ListBuiltin listBuiltin = (ListBuiltin) argument[rightIndex];
+
+                if (!listBuiltin.baseTerms().isEmpty()) {
+                    break;
+                }
+
+                for (Term element : listBuiltin.elementsRight()) {
+                    elementsRight.add(0, element);
+                }
+                for (Term element : listBuiltin.elementsLeft()) {
+                    elementsRight.add(0, element);
                 }
             }
+
+            if (leftIndex == rightIndex && argument[rightIndex] instanceof ListBuiltin) {
+                ListBuiltin listBuiltin = (ListBuiltin) argument[leftIndex];
+                elementsLeft.addAll(listBuiltin.elementsLeft());
+                for (Term element : listBuiltin.elementsRight()) {
+                    elementsRight.add(0, element);
+                }
+            } else {
+                terms.addAll(Arrays.asList(argument).subList(leftIndex, rightIndex + 1));
+            }
+
             return ListBuiltin.of(sort, elementsLeft, elementsRight, terms);
         } else if (sort.type().equals(KSorts.MAP)) {
             Map<Term, Term> elements = new HashMap<Term, Term>();

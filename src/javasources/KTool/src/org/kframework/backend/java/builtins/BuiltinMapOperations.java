@@ -13,7 +13,7 @@ import java.util.Set;
 
 
 /**
- * Table of {@code public static} methods on builtin sets.
+ * Table of {@code public static} methods on builtin maps.
  *
  * @author AndreiS
  */

@@ -292,7 +292,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
                 }
             }
 
-            assert baseTerms.size() <= 1 : "We don't support lists with more baseterms.";
+            //assert baseTerms.size() <= 1 : "We don't support lists with more baseterms.";
             if (baseTerms.size() == 1 && elementsLeft.isEmpty() && elementsRight.isEmpty()) {
                 /* if the ListBuiltin instance consists of only one base term,
                  * return the base term instead */

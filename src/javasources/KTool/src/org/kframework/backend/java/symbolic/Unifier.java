@@ -5,6 +5,7 @@ import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.Int32Token;
 import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
+import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.Cell;
@@ -36,6 +37,7 @@ public interface Unifier {
     public String getName();
 
     public void unify(BoolToken boolToken, Term term);
+    public void unify(BuiltinList builtinList, Term term);
     public void unify(BuiltinMap builtinMap, Term term);
     public void unify(BuiltinSet builtinSet, Term term);
     public void unify(Cell cell, Term term);
