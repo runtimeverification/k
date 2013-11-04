@@ -158,6 +158,11 @@ public class SymbolicRewriter {
         while (strategy.hasNext()) {
             transition = strategy.nextIsTransition();
             Collection<Rule> rules = strategy.next();
+            if (transition) {
+              System.out.println("Checking " + rules.size() + " transition rules.");
+            } else {
+              System.out.println("Checking " + rules.size() + " structural rules.");
+            }
             for (Rule rule : rules) {
                 ruleStopwatch.reset();
                 ruleStopwatch.start();
@@ -307,6 +312,10 @@ public class SymbolicRewriter {
                     // Only add a state to visited if it is a transition
                     if (!transition || visited.add(getTransition(i))) {
                         nextQueue.add(getTransition(i));
+                    }
+                    // If we found a structural rule we only need one transition
+                    if (!transition) {
+                      break;
                     }
                 }
             }
