@@ -80,7 +80,8 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     public Definition transformDefinition(org.kframework.kil.Definition node) {
         try {
-            return new MacroExpander((Definition) node.accept(this)).processDefinition();
+            //return new MacroExpander((Definition) node.accept(this)).processDefinition();
+            return (Definition) node.accept(this);
         } catch (TransformerException e) {
             e.printStackTrace();
             return null;
