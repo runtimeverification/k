@@ -26,7 +26,7 @@ module LAMBDA
   syntax KResult ::= Type
 
   configuration <k color="green"> $PGM:Exp </k>
-                <mgu color="blue" multiplicity="?"> .Mgu </mgu>
+                <mgu color="blue"> .Mgu </mgu>
 
   rule I:Int => int
   rule B:Bool => bool
