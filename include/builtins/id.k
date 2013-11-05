@@ -1,7 +1,7 @@
 require "string.k"
 
 module ID-SYNTAX-HOOKS
-  syntax Id ::= Token{[A-Za-z][A-Za-z0-9]*}   [notInRules]
+  syntax Id ::= Token{[A-Za-z\_][A-Za-z0-9\_]*}   [notInRules]
 endmodule
 
 module ID-HOOKS
