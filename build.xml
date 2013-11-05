@@ -121,15 +121,15 @@
 				<include name="k/bin/kpp" />
 				<include name="k/bin/ktest" />
 				<include name="k/bin/kcheck" />
-				<include name="k/bin/maude/binaries/maude.intelDarwin" />
-				<include name="k/bin/maude/binaries/maude.linux" />
-				<include name="k/bin/maude/binaries/maude.linux64" />
-				<include name="k/bin/native/linux/sdf2table" />
-				<include name="k/bin/native/macosx/sdf2table" />
-				<include name="k/bin/native/linux/sglr-server" />
-				<include name="k/bin/native/macosx/sglr-server" />
-				<include name="k/bin/native/linux/gappa" />
-				<include name="k/bin/native/macosx/gappa" />
+				<include name="k/lib/maude/binaries/maude.intelDarwin" />
+				<include name="k/lib/maude/binaries/maude.linux" />
+				<include name="k/lib/maude/binaries/maude.linux64" />
+				<include name="k/lib/native/linux/sdf2table" />
+				<include name="k/lib/native/macosx/sdf2table" />
+				<include name="k/lib/native/linux/sglr-server" />
+				<include name="k/lib/native/macosx/sglr-server" />
+				<include name="k/lib/native/linux/gappa" />
+				<include name="k/lib/native/macosx/gappa" />
 				<include name="k/lib/scripts/checkJava" />
 			</tarfileset>
 			<tarfileset dir="./release">
