@@ -1,15 +1,15 @@
 package org.kframework.backend.java.util;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.symbolic.BottomUpVisitor;
-import org.kframework.backend.java.symbolic.BuiltinFunction;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Traian
@@ -17,11 +17,13 @@ import java.util.Map;
 public class GappaPrinter extends BottomUpVisitor {
 
     public static String intervalOp = "'_<=Float_<=Float_";
+    private static String unaryMinusOp = "'--Float_";
+    private static String absOp = "'absFloat";
 
    	public static Map<String,String> binaryOps = new HashMap<String, String>();
 	static {
         binaryOps.put("'_>=Float_", ">=");
-        binaryOps.put("'_<=Float_", ">=");
+        binaryOps.put("'_<=Float_", "<=");
 		binaryOps.put("'_+Float_", "+");
         binaryOps.put("'_-Float_", "-");
 		binaryOps.put("'_*Float_", "*");
@@ -32,6 +34,15 @@ public class GappaPrinter extends BottomUpVisitor {
         binaryOps.put("'_impliesBool_", " -> ");
 	};
 
+   	public static Map<String,String> doubleBinaryOps = new HashMap<String, String>();
+	static {
+		doubleBinaryOps.put("'_+Float64_", "+");
+        doubleBinaryOps.put("'_-Float64_", "-");
+		doubleBinaryOps.put("'_*Float64_", "*");
+		doubleBinaryOps.put("'_/Float64_", "/");
+        doubleBinaryOps.put("'_/Float64_", "/");
+	};
+
     public static  Map<String,String> negativeBinaryOps = new HashMap<String, String>();
 	static {
         negativeBinaryOps.put("'_>Float_", "<=");
@@ -40,12 +51,12 @@ public class GappaPrinter extends BottomUpVisitor {
 
     public static Map<String,String> unaryOps = new HashMap<String, String>();
     static {
-        unaryOps.put("'-Float_", "-");
         unaryOps.put("'notBool_", "not");
     }
 
     private final boolean acceptVariables;
     private Exception exception = null;
+    private Set<String> variables = new HashSet<>();
 
     public static GappaPrinter toGappa(Term term) {
         return toGappa(term, true);
@@ -61,7 +72,8 @@ public class GappaPrinter extends BottomUpVisitor {
         return printer;
     }
 
-    public static Pair<String, Exception> toGappa(SymbolicConstraint constraint) {
+    public static GappaPrintResult toGappa(SymbolicConstraint constraint) {
+        Set<String> variables = null;
         String result = "";
         boolean first = true;
         Exception error = null;
@@ -74,6 +86,7 @@ public class GappaPrinter extends BottomUpVisitor {
                 continue;
             }
             String gappaLHS = gappaLHSPrinter.getResult();
+            variables = gappaLHSPrinter.variables;
             if (equality.rightHandSide().equals(BoolToken.TRUE)) {
                eqString += "(" + gappaLHS + ")";
             } else if (equality.rightHandSide().equals(BoolToken.FALSE)) {
@@ -85,30 +98,14 @@ public class GappaPrinter extends BottomUpVisitor {
                     continue;
                 }
                 String gappaRHS = gappaRHSPrinter.getResult();
+                variables.addAll(gappaRHSPrinter.variables);
                 eqString += "(" + gappaLHS + " = " +
                         gappaRHS + ")";
             }
             result += eqString;
         }
-        final String finalResult = result;
-        final Exception finalError = error;
-        Pair<String,Exception> resultPair = new Pair<String, Exception>() {
-            @Override
-            public String getLeft() {
-                return finalResult;
-            }
-
-            @Override
-            public Exception getRight() {
-                return finalError;
-            }
-
-            @Override
-            public Exception setValue(Exception value) {
-                return null;
-            }
-        };
-        return resultPair;
+        GappaPrintResult printResult = new GappaPrintResult(result, error, variables);
+        return printResult;
     }
 
     public String getResult() {
@@ -156,13 +153,18 @@ public class GappaPrinter extends BottomUpVisitor {
             return;
         }
         gappaOp = negativeBinaryOps.get(label);
-        boolean negative;
+        boolean closeParens;
         if (gappaOp != null) {
             result.append("not(");
-            negative = true;
+            closeParens = true;
         } else {
             gappaOp = binaryOps.get(label);
-            negative = false;
+            closeParens = false;
+        }
+        if (doubleBinaryOps.containsKey(label)) {
+            gappaOp = doubleBinaryOps.get(label);
+            result.append("rnd(");
+            closeParens = true;
         }
         if (gappaOp != null) {
             result.append("(");
@@ -170,7 +172,7 @@ public class GappaPrinter extends BottomUpVisitor {
             result.append(") " + gappaOp + " (" );
             kList.get(1).accept(this);
             result.append(")");
-            if (negative)
+            if (closeParens)
                 result.append(")");
             return;
         }
@@ -183,6 +185,17 @@ public class GappaPrinter extends BottomUpVisitor {
             result.append("]");
             return;
         }
+        if (label.equals(unaryMinusOp)) {
+            result.append("-");
+            kList.get(0).accept(this);
+            return;
+        }
+        if (label.equals(absOp)) {
+            result.append("|");
+            kList.get(0).accept(this);
+            result.append("|");
+            return;
+        }
         exception =  new GappaPrinterException("Operation " + label + " not supported (yet)");
     }
 
@@ -192,7 +205,9 @@ public class GappaPrinter extends BottomUpVisitor {
             exception =  new GappaPrinterException("Variable " + variable + " is not Float.");
             return;
         }
-        result.append(variable.name().toLowerCase().replaceAll("_", "o"));
+        String variableName = variable.name().toLowerCase().replaceAll("_", "o");
+        variables.add(variableName);
+        result.append(variableName);
     }
 
     public Exception getException() {
@@ -203,5 +218,18 @@ public class GappaPrinter extends BottomUpVisitor {
         public GappaPrinterException(String s) {
             super(s);
         }
+    }
+
+
+    public static class GappaPrintResult {
+        GappaPrintResult(String result, Exception exception, Set<String> variables) {
+            this.result = result;
+            this.exception = exception;
+            this.variables = variables;
+        }
+
+        public String result;
+        public Exception exception;
+        public Set<String> variables;
     }
 }

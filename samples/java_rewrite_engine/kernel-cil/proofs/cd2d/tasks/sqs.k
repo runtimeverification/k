@@ -1,10 +1,11 @@
 /*@
-  requires VELOCITY(x) && VELOCITY(y) ;
-  ensures \abs(\result - sqR(x,y)) < E_sqv ;
+  requires DISTANCE(x) && DISTANCE(y) ;
+  ensures \abs(\result - sqR(x,y)) < E_sqs ;
   assigns \nothing ;
   @*/
-//double sqv(double x,double y) { return x*x + y*y; }
-module SQV-RULE
+//double sqs(double x,double y) { return x*x + y*y; }
+
+module SQS-RULE
   rule <threads>
            <thread>...
 	     <k> return (x*x + y * y => V:Float); </k>
@@ -12,6 +13,6 @@ module SQV-RULE
 	   ...</thread>
        </threads>
        <store> Lx |-> Vx:Float Ly |-> Vy:Float </store>
-    requires VELOCITY(Vx) andBool VELOCITY(Vy)
-     ensures absFloat(V -Float sqR(Vx, Vy)) <=Float E_sqv
+    requires DISTANCE(Vx) andBool DISTANCE(Vy)
+     ensures absFloat(V -Float sqR(Vx, Vy)) <=Float E_sqs
 endmodule
