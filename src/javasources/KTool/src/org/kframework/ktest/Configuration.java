@@ -126,7 +126,7 @@ public class Configuration {
 	}
 
 	public static String wrap(String s, int indent) {
-		int maxWidth = 80;
+		int maxWidth = 78;
 		return WordUtils.wrap(s, maxWidth - indent, System.getProperty("line.separator") + StringUtils.repeat(" ", indent), true);
 	}
 	public static String wrap(String s) {
