@@ -158,6 +158,8 @@ public class SymbolicUnifier extends AbstractUnifier {
         if (!(term instanceof BuiltinMap)) {
             this.fail();
         }
+//        if (builtinMap.equals(BuiltinMap.EMPTY) && term.equals(BuiltinMap.EMPTY))
+//            return;
 
         throw new UnsupportedOperationException(
                 "map matching is only supported when one of the maps is a variable.");
@@ -271,7 +273,11 @@ public class SymbolicUnifier extends AbstractUnifier {
                     }
                 }
 
-                constraint.add(new CellCollection(cellMap, true), otherFrame);
+                if (otherFrame != null) {
+                    constraint.add(new CellCollection(cellMap, true), otherFrame);
+                } else {
+                    if (!cellMap.isEmpty()) fail();
+                }
                 constraints.add(constraint);
             } while (generator.generate());
 

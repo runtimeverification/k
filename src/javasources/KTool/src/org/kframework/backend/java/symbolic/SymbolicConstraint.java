@@ -5,6 +5,7 @@ import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Expr;
 import com.microsoft.z3.Sort;
 import com.microsoft.z3.Symbol;
+import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.Int32Token;
@@ -403,8 +404,15 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 }
             }
             if (constraint.equalities().isEmpty()) return true;
-            String gterm1 = GappaPrinter.toGappa(this);
-            String gterm2 = GappaPrinter.toGappa(constraint);
+            Pair<String,Exception> premises = GappaPrinter.toGappa(this);
+            String gterm1 = premises.getLeft();
+            Pair<String, Exception> conclusion = GappaPrinter.toGappa(constraint);
+            if (conclusion.getRight() != null) {
+                System.err.print(conclusion.getRight().getMessage());
+                System.err.println(" Cannot prove the full implication!");
+                return false;
+            }
+            String gterm2 = conclusion.getLeft();
             String input = "(" + gterm2 + ")";
             if (!gterm1.equals("")) input = "(" + gterm1 + ") -> " + input;
             if (GappaServer.proveTrue(input))

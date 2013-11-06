@@ -12,7 +12,8 @@ module FLOAT-HOOKS
   imports K
 
   syntax Float ::=              
-				   Float "^Float" Float		[function, left, latex({#1}^{#2}), hook(#FLOAT:_^Float_)]
+                                   "--Float" Float              [function, hook(#FLOAT:_-Float)]
+				 > Float "^Float" Float		[function, left, latex({#1}^{#2}), hook(#FLOAT:_^Float_)]
                                  > left:
 				   Float "*Float" Float		[function, left, latex({#1}\mathrel{\ast_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:_*Float_)]
 				 | Float "/Float" Float		[function, left, latex({#1}\mathrel{\div_{\scriptstyle\it Float}}{#2}), hook(#FLOAT:_/Float_)]

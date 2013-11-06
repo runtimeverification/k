@@ -1,5 +1,6 @@
 package org.kframework.backend.java.util;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.*;
@@ -44,39 +45,73 @@ public class GappaPrinter extends BottomUpVisitor {
     }
 
     private final boolean acceptVariables;
+    private Exception exception = null;
 
-    public static String toGappa(Term term) {
+    public static GappaPrinter toGappa(Term term) {
         return toGappa(term, true);
     }
 
-    public static String toGappaGround(Term term) {
+    public static GappaPrinter toGappaGround(Term term) {
         return toGappa(term, false);
     }
 
-    public static String toGappa(Term term, boolean acceptVariables) {
+    public static GappaPrinter toGappa(Term term, boolean acceptVariables) {
         GappaPrinter printer = new GappaPrinter(acceptVariables);
         term.accept(printer);
-        return printer.getResult();
+        return printer;
     }
 
-    public static String toGappa(SymbolicConstraint constraint) {
+    public static Pair<String, Exception> toGappa(SymbolicConstraint constraint) {
         String result = "";
         boolean first = true;
+        Exception error = null;
         for (SymbolicConstraint.Equality equality : constraint.equalities()) {
-            if (!first) result += " /\\ "; else first = false;
-            if (equality.rightHandSide().equals(BoolToken.TRUE)) {
-               result += "(" + toGappa(equality.leftHandSide()) + ")";
-            } else if (equality.rightHandSide().equals(BoolToken.FALSE)) {
-               result += "not(" + toGappa(equality.leftHandSide()) + ")";
-            } else {
-                result += "(" + toGappa(equality.leftHandSide()) + " = " +
-                        toGappa(equality.rightHandSide()) + ")";
+            String eqString = "";
+            if (!first) eqString += " /\\ "; else first = false;
+            GappaPrinter gappaLHSPrinter = toGappa(equality.leftHandSide());
+            if (gappaLHSPrinter.exception != null) {
+                error = gappaLHSPrinter.exception;
+                continue;
             }
+            String gappaLHS = gappaLHSPrinter.getResult();
+            if (equality.rightHandSide().equals(BoolToken.TRUE)) {
+               eqString += "(" + gappaLHS + ")";
+            } else if (equality.rightHandSide().equals(BoolToken.FALSE)) {
+               eqString += "not(" + gappaLHS + ")";
+            } else {
+                GappaPrinter gappaRHSPrinter = toGappa(equality.rightHandSide());
+                if (gappaRHSPrinter.exception != null) {
+                    error = gappaRHSPrinter.exception;
+                    continue;
+                }
+                String gappaRHS = gappaRHSPrinter.getResult();
+                eqString += "(" + gappaLHS + " = " +
+                        gappaRHS + ")";
+            }
+            result += eqString;
         }
-        return result;
+        final String finalResult = result;
+        final Exception finalError = error;
+        Pair<String,Exception> resultPair = new Pair<String, Exception>() {
+            @Override
+            public String getLeft() {
+                return finalResult;
+            }
+
+            @Override
+            public Exception getRight() {
+                return finalError;
+            }
+
+            @Override
+            public Exception setValue(Exception value) {
+                return null;
+            }
+        };
+        return resultPair;
     }
 
-    String getResult() {
+    public String getResult() {
         return result.toString();
     }
 
@@ -98,68 +133,70 @@ public class GappaPrinter extends BottomUpVisitor {
 
     @Override
     public void visit(KItem kItem) {
-        try {
-            if (!kItem.isGround() && !acceptVariables)
-                throw new GappaPrinterException(kItem + " is not ground");
-            final KLabel kLabel = kItem.kLabel();
-            if (!(kLabel instanceof KLabelConstant))
-                throw new GappaPrinterException(kLabel + " is not constant");
-            KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
+        if (!kItem.isGround() && !acceptVariables) {
+            exception = new GappaPrinterException(kItem + " is not ground");
+            return;
+        }
+        final KLabel kLabel = kItem.kLabel();
+        if (!(kLabel instanceof KLabelConstant)) {
+            exception = new GappaPrinterException(kLabel + " is not constant");
+            return;
+        }
+        KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
 //            if (!BuiltinFunction.isBuiltinKLabel(kLabelConstant)) {
 //                throw new GappaPrinterException(kLabelConstant + " is not builtin");
 //            }
-            KList kList = kItem.kList();
-            String label = kLabelConstant.label();
-            String gappaOp = unaryOps.get(label);
-            if (gappaOp != null) {
-                result.append(gappaOp + "(");
-                kList.get(0).accept(this);
-                result.append(")");
-                return;
-            }
-            gappaOp = negativeBinaryOps.get(label);
-            boolean negative;
-            if (gappaOp != null) {
-                result.append("not(");
-                negative = true;
-            } else {
-                gappaOp = binaryOps.get(label);
-                negative = false;
-            }
-            if (gappaOp != null) {
-                result.append("(");
-                kList.get(0).accept(this);
-                result.append(") " + gappaOp + " (" );
-                kList.get(1).accept(this);
-                result.append(")");
-                if (negative)
-                    result.append(")");
-                return;
-            }
-            if (label.equals(intervalOp)) {
-                kList.get(1).accept(this);
-                result.append(" in [");
-                kList.get(0).accept(this);
-                result.append(", ");
-                kList.get(2).accept(this);
-                result.append("]");
-                return;
-            }
-            throw new GappaPrinterException("Operation " + label + " not supported (yet)");
-        } catch (GappaPrinterException e) {
-            System.err.println(e.getMessage());
+        KList kList = kItem.kList();
+        String label = kLabelConstant.label();
+        String gappaOp = unaryOps.get(label);
+        if (gappaOp != null) {
+            result.append(gappaOp + "(");
+            kList.get(0).accept(this);
+            result.append(")");
+            return;
         }
+        gappaOp = negativeBinaryOps.get(label);
+        boolean negative;
+        if (gappaOp != null) {
+            result.append("not(");
+            negative = true;
+        } else {
+            gappaOp = binaryOps.get(label);
+            negative = false;
+        }
+        if (gappaOp != null) {
+            result.append("(");
+            kList.get(0).accept(this);
+            result.append(") " + gappaOp + " (" );
+            kList.get(1).accept(this);
+            result.append(")");
+            if (negative)
+                result.append(")");
+            return;
+        }
+        if (label.equals(intervalOp)) {
+            kList.get(1).accept(this);
+            result.append(" in [");
+            kList.get(0).accept(this);
+            result.append(", ");
+            kList.get(2).accept(this);
+            result.append("]");
+            return;
+        }
+        exception =  new GappaPrinterException("Operation " + label + " not supported (yet)");
     }
 
     @Override
     public void visit(Variable variable) {
-        try {
-            if (!variable.sort().equals("Float"))
-                throw new GappaPrinterException("Variable " + variable + " is not Float.");
-            result.append(variable.name().toLowerCase().replaceAll("_","o"));
-        } catch (GappaPrinterException e) {
-            System.err.println(e.getMessage());
+        if (!variable.sort().equals("Float")) {
+            exception =  new GappaPrinterException("Variable " + variable + " is not Float.");
+            return;
         }
+        result.append(variable.name().toLowerCase().replaceAll("_", "o"));
+    }
+
+    public Exception getException() {
+        return exception;
     }
 
     private class GappaPrinterException extends Exception {
