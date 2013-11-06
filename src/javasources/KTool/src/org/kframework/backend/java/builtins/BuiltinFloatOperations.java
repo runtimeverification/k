@@ -84,10 +84,30 @@ public class BuiltinFloatOperations {
     }
 */
 
+    public static UninterpretedToken unaryMinus(Term term, TermContext context) {
+        if (!(term instanceof UninterpretedToken))
+            return null;
+        UninterpretedToken token = ((UninterpretedToken) term);
+        String sort = token.sort();
+        if (!sort.equals("Float")) return null;
+        String value = token.value();
+        if (value.startsWith("-")) value = value.substring(1);
+        else value = "-" + value;
+        return UninterpretedToken.of(sort, value);
+    }
+
     public static BoolToken gt(Term term1, Term term2, TermContext context) {
         if (!K.smt.equals("gappa")) return null;
-        String gterm1 = GappaPrinter.toGappaGround(term1);
-        String gterm2 = GappaPrinter.toGappaGround(term2);
+        GappaPrinter gappaPrinter = GappaPrinter.toGappaGround(term1);
+        if (gappaPrinter.getException() != null) {
+            return null;
+        }
+        String gterm1 = gappaPrinter.getResult();
+        gappaPrinter = GappaPrinter.toGappaGround(term2);
+        if (gappaPrinter.getException() != null) {
+            return null;
+        }
+        String gterm2 = gappaPrinter.getResult();
         String inputFalse = "(" + gterm1 + " - " + gterm2 + ")" + " <= 0";
         if (GappaServer.proveFalse(inputFalse))
             return BoolToken.TRUE;
@@ -98,8 +118,16 @@ public class BuiltinFloatOperations {
 
     public static BoolToken ge(Term term1, Term term2, TermContext context) {
         if (!K.smt.equals("gappa")) return null;
-        String gterm1 = GappaPrinter.toGappaGround(term1);
-        String gterm2 = GappaPrinter.toGappaGround(term2);
+        GappaPrinter gappaPrinter = GappaPrinter.toGappaGround(term1);
+        if (gappaPrinter.getException() != null) {
+            return null;
+        }
+        String gterm1 = gappaPrinter.getResult();
+        gappaPrinter = GappaPrinter.toGappaGround(term2);
+        if (gappaPrinter.getException() != null) {
+            return null;
+        }
+        String gterm2 = gappaPrinter.getResult();
         final String inputTrue = "(" + gterm1 + "-" + gterm2 + ")" + " >= 0";
         if (GappaServer.proveTrue(inputTrue))
             return BoolToken.TRUE;
@@ -110,8 +138,16 @@ public class BuiltinFloatOperations {
 
     public static BoolToken lt(Term term1, Term term2, TermContext context) {
         if (!K.smt.equals("gappa")) return null;
-        String gterm1 = GappaPrinter.toGappaGround(term1);
-        String gterm2 = GappaPrinter.toGappaGround(term2);
+        GappaPrinter gappaPrinter = GappaPrinter.toGappaGround(term1);
+        if (gappaPrinter.getException() != null) {
+            return null;
+        }
+        String gterm1 = gappaPrinter.getResult();
+        gappaPrinter = GappaPrinter.toGappaGround(term2);
+        if (gappaPrinter.getException() != null) {
+            return null;
+        }
+        String gterm2 = gappaPrinter.getResult();
         final String inputFalse = "(" + gterm1 + " - " +  gterm2 + ")" + " >= 0";
         if (GappaServer.proveFalse(inputFalse))
             return BoolToken.TRUE;
@@ -122,8 +158,16 @@ public class BuiltinFloatOperations {
 
     public static BoolToken le(Term term1, Term term2, TermContext context) {
         if (!K.smt.equals("gappa")) return null;
-        String gterm1 = GappaPrinter.toGappaGround(term1);
-        String gterm2 = GappaPrinter.toGappaGround(term2);
+        GappaPrinter gappaPrinter = GappaPrinter.toGappaGround(term1);
+        if (gappaPrinter.getException() != null) {
+            return null;
+        }
+        String gterm1 = gappaPrinter.getResult();
+        gappaPrinter = GappaPrinter.toGappaGround(term2);
+        if (gappaPrinter.getException() != null) {
+            return null;
+        }
+        String gterm2 = gappaPrinter.getResult();
         final String inputTrue = "(" + gterm1 + "-" + gterm2 + ")" + " <= 0";
         if (GappaServer.proveTrue(inputTrue))
             return BoolToken.TRUE;

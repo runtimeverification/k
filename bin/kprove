@@ -1,0 +1,1 @@
+krun --backend java --prove "$@"

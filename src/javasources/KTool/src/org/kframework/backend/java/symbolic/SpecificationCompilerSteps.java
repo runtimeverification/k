@@ -12,6 +12,7 @@ import org.kframework.compile.transformers.ResolveListOfK;
 import org.kframework.compile.transformers.ResolveOpenCells;
 import org.kframework.compile.transformers.ResolveRewrite;
 import org.kframework.compile.utils.CompileDataStructures;
+import org.kframework.compile.utils.CompileToBuiltins;
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.kil.Module;
 import org.kframework.kil.loader.Context;
@@ -40,6 +41,7 @@ public class SpecificationCompilerSteps extends CompilerSteps<Module> {
         add(new ResolveContextAbstraction(context));
         add(new ResolveOpenCells(context));
         add(new ResolveRewrite(context));
+        add(new CompileToBuiltins(context));
         add(new CompileDataStructures(context));
         //add(new DataStructureToLookupUpdate(context));
     }
