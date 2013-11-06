@@ -54,16 +54,16 @@ public class KCheckFrontEnd {
 
 			GlobalSettings.addTopCell = true;
 
-			if (!cmd.hasOption("rlfile")) {
+			if (!cmd.hasOption("prove")) {
 				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "You have to provide a rl file!.", "command line", "Command line arguments."));
 			}else {
-				GlobalSettings.CHECK = new File(cmd.getOptionValue("rlfile")).getAbsolutePath();
+				GlobalSettings.CHECK = new File(cmd.getOptionValue("prove")).getAbsolutePath();
 			}
 			
 
 			String def = null;
-			if (cmd.hasOption("def"))
-				def = cmd.getOptionValue("def");
+			if (cmd.hasOption("definition"))
+				def = cmd.getOptionValue("definition");
 			else {
 				String[] restArgs = cmd.getArgs();
 				if (restArgs.length < 1)

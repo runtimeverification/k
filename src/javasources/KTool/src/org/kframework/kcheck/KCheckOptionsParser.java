@@ -19,10 +19,12 @@ public class KCheckOptionsParser {
 
 			// main options
 			OptionGroup main = new OptionGroup();
-			Option def = new Option("def", "definition", true, "main file to kompile");
-			Option rl = new Option("rlfile", "reachability-rules", true, "file containing reachability rules");
+			Option def = new Option("d", "definition", true, "main file to kompile");
 			main.addOption(def);
-			main.addOption(rl);
+
+            OptionGroup prove = new OptionGroup();
+            Option prove_opt = new Option("prove", true, "file containing reachability rules");
+			prove.addOption(prove_opt);
 
 			// program for loading configuration
 			OptionGroup pgmG = new OptionGroup();
@@ -41,6 +43,7 @@ public class KCheckOptionsParser {
 			simplify.addOption(sim);
 			
 			options.addOptionGroup(main);
+            options.addOptionGroup(prove);
 			options.addOptionGroup(verb);
 			options.addOptionGroup(simplify);
 			options.addOptionGroup(pgmG);
