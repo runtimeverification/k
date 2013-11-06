@@ -1,5 +1,5 @@
 Search results:
 
 Solution 1, State 23:
-O:List -->
-ListItem(#buffer ( "15" ))
+S:String -->
+"15"
