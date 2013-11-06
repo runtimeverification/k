@@ -56,6 +56,7 @@ public class KTestOptionsParser {
 
 		addOptionE(OptionBuilder.withLongOpt("config").withDescription("Just for backward compatibility.").create());
 		addOptionE(OptionBuilder.withLongOpt("dry").withDescription("Dry run: print out the commend to be executed without actual execution.").create());
+		addOptionE(OptionBuilder.withLongOpt("ignore-white-spaces").hasArg().withArgName("on|off").withDescription("Ignore white spaces when comparsing results. (Default: on).").create());
 	}
 	
 	// parse the command line arguments
@@ -81,3 +82,5 @@ public class KTestOptionsParser {
 		return optionList;
 	}
 }
+
+// vim: noexpandtab

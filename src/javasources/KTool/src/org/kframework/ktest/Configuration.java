@@ -75,6 +75,7 @@ public class Configuration {
     public static boolean KOMPILE = true;
     public static boolean PROGRAMS = true;
 	public static boolean VERBOSE = false;
+	public static boolean IGNORE_WHITE_SPACES = true;
 
 	// ktest command line option names
 	public static final String HELP_OPTION = "help";

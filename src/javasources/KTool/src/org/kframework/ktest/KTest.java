@@ -84,6 +84,10 @@ public class KTest {
             System.out.println("DRY: log=/tmp/ktest.`date +%Y_%m_%d_%H_%M_%S`; mkdir -p $log; trap \"rm -rf $log; exit\" SIGHUP SIGINT SIGTERM");
         }
 
+        if (cmd.hasOption("ignore-white-spaces") && cmd.getOptionValue("ignore-white-spaces").equals("off")) {
+            Configuration.IGNORE_WHITE_SPACES = false;
+        }
+
         // Timeout
         if (cmd.hasOption(Configuration.TIMEOUT_OPTION)) {
             Configuration.KOMPILE_ALL_TIMEOUT = Long.parseLong(cmd.getOptionValue(Configuration.TIMEOUT_OPTION));

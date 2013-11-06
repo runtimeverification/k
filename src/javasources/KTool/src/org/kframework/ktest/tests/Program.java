@@ -57,16 +57,25 @@ public class Program implements Comparable<Program> {
 	}
 
 	public boolean success(Task task) {
-		if (error != null && !task.getStderr().replaceAll("\\r", "").trim().equals(error.replaceAll("\\r", "").trim()))
+		if (error != null && !eq(task.getStderr(), error))
 			return false;
 		
-		if (output != null && !task.getStdout().replaceAll("\\r", "").trim().equals(output.replaceAll("\\r", "").trim()))
+		if (output != null && !eq(task.getStdout(), output))
 			return false;
 
 		if (error == null && task.getExit() != 0)
 			return false;
 
 		return true;
+	}
+	private boolean eq(String s1, String s2) {
+		String regexp;
+		if (Configuration.IGNORE_WHITE_SPACES) {
+			regexp = "\\r|\\s";
+		} else {
+			regexp = "\\r";
+		}
+		return s1.replaceAll(regexp,"").trim().equals(s2.replaceAll(regexp,"").trim());
 	}
 
 	public String successful(Task task) {
@@ -104,3 +113,5 @@ public class Program implements Comparable<Program> {
         return hasOutput;
     }
 }
+
+// vim: noexpandtab
