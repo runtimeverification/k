@@ -1,0 +1,13 @@
+This exercise asks you to add limitted input/output to FUN.
+Specifically, to extend the environment-based definition of FUN to
+include two more "special" names, "read" and "print", whose semantics
+is as follows:
+
+- "read" evaluates to the first item in the stdin, which is expected to
+  be an integer.  For simplicity, we assume that "read" only reads
+  integers and only from stdin.
+
+- "print" behaves like a function which takes one argument, evaluates
+  it, and then prints the result to stdout; the print statement itself
+  evaluates to the printed result.  For simplicity, we assume
+  that "print" can only print integer or string results.
