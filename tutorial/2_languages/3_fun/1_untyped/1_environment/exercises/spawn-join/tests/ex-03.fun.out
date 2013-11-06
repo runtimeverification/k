@@ -1,0 +1,17 @@
+Search results:
+
+Solution 1, State 41:
+O:List -->
+ListItem(#buffer ( "20" ))
+
+Solution 2, State 42:
+O:List -->
+ListItem(#buffer ( "5" ))
+
+Solution 3, State 43:
+O:List -->
+ListItem(#buffer ( "15" ))
+
+Solution 4, State 44:
+O:List -->
+ListItem(#buffer ( "10" ))

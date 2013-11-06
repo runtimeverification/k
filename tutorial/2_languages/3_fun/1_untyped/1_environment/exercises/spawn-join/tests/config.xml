@@ -1,0 +1,28 @@
+<tests>
+
+  <test
+      definition="fun-untyped.k"
+      programs="../../../../../programs"
+      extension="fun"
+      results="../../../tests" >
+      <kompile-option name="--transition" value="lookup assignment io"/>
+      <all-programs>
+        <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
+        <krun-option name="--parens" value="smart"/>
+      </all-programs>
+  </test>
+
+  <test
+      definition="fun-untyped.k"
+      programs="."
+      extension="fun"
+      results="." >
+      <kompile-option name="--transition" value="lookup assignment io"/>
+      <all-programs>
+        <krun-option name="--search" />
+        <krun-option name="--pattern" value="&lt;out&gt; O:List &lt;/out&gt;" />
+        <krun-option name="--parens" value="smart"/>
+      </all-programs>
+  </test>
+
+</tests>
