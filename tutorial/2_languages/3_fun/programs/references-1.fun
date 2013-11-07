@@ -24,4 +24,4 @@ factorial x =
   then 1
   else x * factorial(x - 1)
 
-in max (map factorial [1, 2, 3, 4, 5, factorial 5]) Pair(ref 1, 1)
+in max (map factorial [1, 2, 3, factorial 4]) Pair(ref 1, 1)

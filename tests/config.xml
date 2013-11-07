@@ -367,6 +367,20 @@
       </all-programs>
   </test>
 
+  <test
+      definition="tutorial/2_languages/3_fun/1_untyped/2_substitution/fun-untyped.k"
+      programs="tutorial/2_languages/3_fun/programs"
+      extension="fun"
+      exclude="callcc-looping references-5
+               constructor-bst-sorting constructor-expr-distributivity factorial-and-list-max nth pattern references-1 stuck-letrec"
+      results="tutorial/2_languages/3_fun/1_untyped/1_environment/tests
+               tutorial/2_languages/3_fun/1_untyped/2_substitution/tests" >
+      <all-programs>
+        <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
+        <krun-option name="--parens" value="smart"/>
+       </all-programs>
+  </test>
+
 <!--
   LOGIK
 -->

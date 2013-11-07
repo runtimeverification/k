@@ -135,14 +135,15 @@ module FUN-UNTYPED
   rule decomposeMatching(([H:Exp|T:Exp] => H,T),([V:Val,Vs:Vals] => V,[Vs]))
 
 /*@ We can reduce multiple bindings to one list binding, and then
-apply the usual desugaring of let into function application. */
+apply the usual desugaring of let into function application. 
+It is important that the rule below is a macro, so let is eliminated
+immediately, otherwise it may interfere in ugly ways with substitution. */
 
-  rule let Bs in E => ((fun [names(Bs)] -> E) [exps(Bs)])
+  rule let Bs in E => ((fun [names(Bs)] -> E) [exps(Bs)])  [macro]
 
 /*@ We only give the semantics of one-binding letrec.
 Multipe bindings are left as an exercise. */
 
-  syntax Exp ::= "mu" Case
   rule mu X:Name -> E => E[(mu X -> E) / X]
   rule letrec F:Name = E in E' => let F = (mu F -> E) in E'  [macro]
 
