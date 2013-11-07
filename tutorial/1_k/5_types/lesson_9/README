@@ -177,6 +177,6 @@ same term but with each of the given variables replaced by a fresh copy.
 The operations freeVariables and freshVariables are useful in many K
 definitions, so they are predefined in module substitution.k.
 
-Out definition of this let-polymorphic type inferencer is now
+Our definition of this let-polymorphic type inferencer is now
 complete.  To test it, kompile it and then krun all the LAMBDA
 programs discussed since Lesson 4.  They should all work as expected.
