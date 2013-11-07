@@ -7,8 +7,10 @@
 letrec max = fun [h] x y -> h
              |   [h|t] x y -> let x = max t x y
                               in  if h > x then h else x
+
 and   fact = fun 0 -> 1
              |   x -> x * fact(x - 1)
+
 in fact (max [1, 3, fact 4, 2, 5, 0, -1, -5] true 5)
 
 // 620448401733239439360000

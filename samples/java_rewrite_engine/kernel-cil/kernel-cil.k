@@ -506,17 +506,17 @@ language constructs to their library counterparts when their arguments
 become values of expected sorts: */
 
   rule I1:Int + I2:Int => I1 +Int I2
-  rule I1:Float + I2:Float => I1 +Float I2
+  rule I1:Float + I2:Float => I1 +Float64 I2
   rule Str1:String + Str2:String => Str1 +String Str2
   rule I1:Int - I2:Int => I1 -Int I2
-  rule I1:Float - I2:Float => I1 -Float I2
+  rule I1:Float - I2:Float => I1 -Float64 I2
   rule I1:Int * I2:Int => I1 *Int I2
-  rule I1:Float * I2:Float => I1 *Float I2
-  rule I1:Float / I2:Float => I1 /Float I2
+  rule I1:Float * I2:Float => I1 *Float64 I2
+  rule I1:Float / I2:Float => I1 /Float64 I2
   rule I1:Int / I2:Int => I1 /Int I2 when I2 =/=K 0
   rule I1:Int % I2:Int => I1 %Int I2 when I2 =/=K 0
   rule - I:Int => 0 -Int I
-  rule - I:Float => 0.0 -Float I
+  rule - I:Float => 0.0 -Float64 I
   rule I1:Int < I2:Int => I1 <Int I2
   rule I1:Float < I2:Float => I1 <Float I2
   rule I1:Int <= I2:Int => I1 <=Int I2

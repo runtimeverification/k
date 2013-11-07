@@ -392,7 +392,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
         if (K.smt.equals("gappa")) {
             constraint.normalize();
-            System.out.println("Verifying whether " + toString() + "\n implies " + constraint.toString());
             ListIterator<Equality> listIterator = constraint.equalities().listIterator();
             while (listIterator.hasNext()) {
                 Equality e2 = listIterator.next();
@@ -404,17 +403,25 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 }
             }
             if (constraint.equalities().isEmpty()) return true;
-            Pair<String,Exception> premises = GappaPrinter.toGappa(this);
-            String gterm1 = premises.getLeft();
-            Pair<String, Exception> conclusion = GappaPrinter.toGappa(constraint);
-            if (conclusion.getRight() != null) {
-                System.err.print(conclusion.getRight().getMessage());
+            GappaPrinter.GappaPrintResult premises = GappaPrinter.toGappa(this);
+            String gterm1 = premises.result;
+            GappaPrinter.GappaPrintResult conclusion = GappaPrinter.toGappa(constraint);
+            if (conclusion.exception != null) {
+                System.err.print(conclusion.exception.getMessage());
                 System.err.println(" Cannot prove the full implication!");
                 return false;
             }
-            String gterm2 = conclusion.getLeft();
-            String input = "(" + gterm2 + ")";
-            if (!gterm1.equals("")) input = "(" + gterm1 + ") -> " + input;
+            String gterm2 = conclusion.result;
+            String input = "";
+            Set<String> variables = new HashSet<>();
+            variables.addAll(premises.variables);
+            variables.addAll(conclusion.variables);
+            for (String variable : variables) {
+                GappaServer.addVariable(variable);
+            }
+            if (!gterm1.equals("")) input += "(" + gterm1 + ") -> ";
+            input += "(" + gterm2 + ")";
+            System.out.println("Verifying " + input);
             if (GappaServer.proveTrue(input))
                 result = true;
 

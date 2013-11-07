@@ -1,0 +1,6 @@
+The current substitution-based definition of FUN allows only letrec
+with one binding.  This exercise asks you to add letrec with
+arbitrarily many bindings to substitution-based FUN.  If correctly
+defined, all the programs that executed correctly with the
+environment-based FUN should also execute correctly with your
+new substitution-based definition of FUN (albeit probably more slowly).

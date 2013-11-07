@@ -46,9 +46,11 @@ public class ExternalProcessServer {
                 int exitCode;
                 try {
                     exitCode = server.waitFor();
-                    System.err.println(executable + " server exited with code " + exitCode);
+                    if (DEBUG)
+                        System.err.println(executable + " server exited with code " + exitCode);
                 } catch (InterruptedException e) {
-                    System.err.println("Interrupted while waiting for " + executable + " server");
+                    if (DEBUG)
+                        System.err.println("Interrupted while waiting for " + executable + " server");
                 }
             }
         });
@@ -94,5 +96,9 @@ public class ExternalProcessServer {
 
     public void flushOutput() throws IOException {
         output.flush();
+    }
+
+    public void destroy() {
+        server.destroy();
     }
 }
