@@ -38,6 +38,7 @@ public class Configuration {
 
 	public static boolean DRY_RUN = false;
 	public static final String DRY_RUN_OPTION = "dry";
+	public static boolean DEBUG = false;
 
 	// XML tag and attribute names used for parsing config.xml
 	// Some of these constants are used as ktest option names (see below)
@@ -72,6 +73,11 @@ public class Configuration {
 	public static final String UNIX_ONLY = "unixOnly";
 	public static final String TEST = "test";
     public static final String TESTS = "tests";
+	public static final String INCLUDE = "include";
+	public static final String CONFIG_FILE = "config-file";
+	public static final String DEFINITION_DIR = "definition-dir";
+	public static final String ROOT_PROGRAMS = "root-programs";
+	public static final String ROOT_RESULTS = "root-results";
     public static boolean KOMPILE = true;
     public static boolean PROGRAMS = true;
 	public static boolean VERBOSE = false;

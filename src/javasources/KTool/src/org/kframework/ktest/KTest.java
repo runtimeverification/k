@@ -14,6 +14,9 @@ import java.util.TreeMap;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.*;
+import javax.xml.transform.stream.*;
+import javax.xml.transform.dom.*;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.io.FileUtils;
@@ -34,6 +37,7 @@ import org.kframework.utils.OptionComparator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 public class KTest {
@@ -82,6 +86,10 @@ public class KTest {
         if (cmd.hasOption(Configuration.DRY_RUN_OPTION)) {
             Configuration.DRY_RUN = true;
             System.out.println("DRY: log=/tmp/ktest.`date +%Y_%m_%d_%H_%M_%S`; mkdir -p $log; trap \"rm -rf $log; exit\" SIGHUP SIGINT SIGTERM");
+        }
+
+        if (cmd.hasOption("debug")) {
+            Configuration.DEBUG = true;
         }
 
         if (cmd.hasOption("ignore-white-spaces") && cmd.getOptionValue("ignore-white-spaces").equals("off")) {
@@ -295,7 +303,23 @@ public class KTest {
         }
 
         System.out.println("Buildfile: " + configFile);
-        Document doc = dBuilder.parse(new File(configFile));
+      //Document doc = dBuilder.parse(new File(configFile));
+        Document doc = dBuilder.newDocument();
+        doc.appendChild(doc.createElement(Configuration.TESTS));
+        addConfigW(doc, configFile, rootDefDir, rootProgramsDir, rootResultsDir);
+
+        if (Configuration.DEBUG) {
+          try {
+            DOMSource source = new DOMSource(doc);
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            StreamResult result = new StreamResult(configFile + ".xml"); //System.out
+            transformer.transform(source, result);
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        }
+
         Element root = doc.getDocumentElement();
 
         if (!root.getTagName().equals(Configuration.TESTS)) {
@@ -565,4 +589,96 @@ public class KTest {
             System.out.print(step);
         }
     }
+
+    private static void addConfigW(Document destDoc, String configFile, String rootDefinition, String rootPrograms, String rootResults)
+        throws IOException, SAXException, ParserConfigurationException {
+        configFile     = makeAbsolutePath(Configuration.USER_DIR, configFile);
+        rootDefinition = makeAbsolutePath(Configuration.USER_DIR, rootDefinition);
+        rootPrograms   = makeAbsolutePath(Configuration.USER_DIR, rootPrograms);
+        rootResults    = makeAbsolutePath(Configuration.USER_DIR, rootResults);
+        addConfig(destDoc, configFile, rootDefinition, rootPrograms, rootResults);
+    }
+    private static void addConfig(Document destDoc, String configFile, String rootDefinition, String rootPrograms, String rootResults)
+      throws IOException, SAXException, ParserConfigurationException {
+        addConfigSanitize(destDoc, configFile, rootDefinition, rootPrograms, rootResults);
+        Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(configFile);
+        Element root = doc.getDocumentElement();
+        NodeList nodeList = root.getChildNodes();
+        for (int i = 0; i < nodeList.getLength(); ++i) {
+            Node node = nodeList.item(i);
+            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                Element elem = (Element) node;
+                if (elem.getTagName().equals("test")) {
+                    Element test = (Element) destDoc.importNode(elem,true);
+                    if (test.hasAttribute(Configuration.LANGUAGE)) {
+                        test.setAttribute(Configuration.LANGUAGE,  makeAbsolutePath(rootDefinition, test.getAttribute(Configuration.LANGUAGE)));
+                    } else {
+                        String msg = "The attribute '" + Configuration.LANGUAGE + "' is required.";
+                        GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
+                    }
+                    if (test.hasAttribute(Configuration.DIRECTORY)) {
+                        test.setAttribute(Configuration.DIRECTORY, makeAbsolutePath(rootDefinition, test.getAttribute(Configuration.DIRECTORY)));
+                    } else {
+                        test.setAttribute(Configuration.DIRECTORY, dirname(test.getAttribute(Configuration.LANGUAGE)));
+                    }
+                    // NOTE: if 'programs' or 'results' are not given, they are replaced with 'programs=""' or 'results=""'.
+                    test.setAttribute(Configuration.PROGRAMS_DIR, makeAbsolutePaths(rootPrograms, test.getAttribute(Configuration.PROGRAMS_DIR)));
+                    test.setAttribute(Configuration.RESULTS,      makeAbsolutePaths(rootResults,  test.getAttribute(Configuration.RESULTS)));
+                    destDoc.getDocumentElement().appendChild(test);
+                } else if (elem.getTagName().equals(Configuration.INCLUDE)) {
+                    String cwd = dirname(configFile);
+                    String newConfigFile, newRootDefinition, newRootPrograms, newRootResults;
+                    if (elem.hasAttribute(Configuration.CONFIG_FILE))     { newConfigFile     = makeAbsolutePath(cwd, elem.getAttribute(Configuration.CONFIG_FILE));    } else { newConfigFile     = null; String msg = "An element '" + Configuration.INCLUDE + "' requires a '" + Configuration.CONFIG_FILE + "' attribute."; GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file.")); }
+                    if (elem.hasAttribute(Configuration.DEFINITION_DIR))  { newRootDefinition = makeAbsolutePath(cwd, elem.getAttribute(Configuration.DEFINITION_DIR)); } else { newRootDefinition = cwd;  }
+                    if (elem.hasAttribute(Configuration.ROOT_PROGRAMS))   { newRootPrograms   = makeAbsolutePath(cwd, elem.getAttribute(Configuration.ROOT_PROGRAMS));  } else { newRootPrograms   = dirname(newConfigFile); }
+                    if (elem.hasAttribute(Configuration.ROOT_RESULTS))    { newRootResults    = makeAbsolutePath(cwd, elem.getAttribute(Configuration.ROOT_RESULTS));   } else { newRootResults    = dirname(newConfigFile); }
+                    addConfig(destDoc, newConfigFile, newRootDefinition, newRootPrograms, newRootResults);
+                } else {
+                    String msg = "Invalid element name in the configuration file: " + elem.getTagName();
+                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
+                }
+            }
+        }
+    }
+    private static void addConfigSanitize(Document destDoc, String configFile, String rootDefinition, String rootPrograms, String rootResults) {
+        if (!new File(configFile).exists()) {
+            String msg = "The configuration file does not exists.";
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, configFile, "System file."));
+        }
+        org.kframework.utils.Error.checkIfInputDirectory(rootDefinition);
+        org.kframework.utils.Error.checkIfInputDirectory(rootPrograms);
+        org.kframework.utils.Error.checkIfInputDirectory(rootResults);
+    }
+
+    private static String makeAbsolutePaths(String root, String dirs) {
+        String resultDirs = "";
+        List<String> dirL = Arrays.asList(dirs.trim().split("\\s+"));
+        if (dirL.size() > 0) {
+            for (String dir : dirL) {
+                if (dir != null && !dir.equals("")) {
+                    resultDirs = resultDirs + " " + makeAbsolutePath(root, dir.trim());
+                }
+            }
+        }
+        return resultDirs.trim();
+    }
+
+    private static String makeAbsolutePath(String root, String dir) {
+        if (!new File(root).isAbsolute()) {
+            String msg = "Internal Errors: Not a root: " + root;
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
+        }
+        String resultDir;
+        if (new File(dir).isAbsolute()) {
+            resultDir = dir;
+        } else {
+            resultDir = root + Configuration.FILE_SEPARATOR + dir;
+        }
+        return new File(resultDir).getAbsolutePath();
+    }
+
+    private static String dirname(String path) {
+        return new File(path).getAbsoluteFile().getParent();
+    }
+
 }
