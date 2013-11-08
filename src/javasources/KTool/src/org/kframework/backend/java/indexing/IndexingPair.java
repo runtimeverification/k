@@ -70,8 +70,8 @@ public class IndexingPair implements Serializable {
         }
     }
 
-    private final Index first;
-    private final Index second;
+    public final Index first;
+    public final Index second;
 
     public IndexingPair(Index first, Index second) {
         this.first = first;

@@ -45,7 +45,9 @@ public class SymbolicRewriter {
     private final Stopwatch stopwatch = new Stopwatch();
     private int step;
     private final Stopwatch ruleStopwatch = new Stopwatch();
-    private final Map<IndexingPair, Set<Rule>> ruleTable;
+    private final Map<Index, Set<Rule>> ruleTable;
+    private final Map<Index, Set<Rule>> heatingRuleTable;
+    private final Map<Index, Set<Rule>> coolingRuleTable;
     private final Set<Rule> unindexedRules;
     private final List<ConstrainedTerm> results = new ArrayList<ConstrainedTerm>();
     private boolean transition;
@@ -75,25 +77,46 @@ public class SymbolicRewriter {
             indices.add(new TokenIndex(sort));
         }
 
-        ImmutableMap.Builder<IndexingPair, Set<Rule>> mapBuilder = ImmutableMap.builder();
-        for (Index first : indices) {
-            for (Index second : indices) {
-                IndexingPair pair = new IndexingPair(first, second);
-
-                ImmutableSet.Builder<Rule> setBuilder = ImmutableSet.builder();
-                for (Rule rule : definition.rules()) {
-                    if (pair.isUnifiable(rule.indexingPair())) {
-                        setBuilder.add(rule);
-                    }
-                }
-
-                ImmutableSet<Rule> rules = setBuilder.build();
-                if (!rules.isEmpty()) {
-                    mapBuilder.put(pair, rules);
-                }
+        /* Map each index to a set of rules unifiable with that index */
+        /* Heating rules and regular rules have their first index checked */
+        /* Cooling rules have their second index checked */
+        ImmutableMap.Builder<Index, Set<Rule>> mapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Index, Set<Rule>> heatingMapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Index, Set<Rule>> coolingMapBuilder = ImmutableMap.builder();
+        for (Index index : indices) {
+          ImmutableSet.Builder<Rule> setBuilder = ImmutableSet.builder();
+          ImmutableSet.Builder<Rule> heatingSetBuilder = ImmutableSet.builder();
+          ImmutableSet.Builder<Rule> coolingSetBuilder = ImmutableSet.builder();
+          for (Rule rule : definition.rules()) {
+            if (rule.containsAttribute("heat")) {
+              if (index.isUnifiable(rule.indexingPair().first)) {
+                heatingSetBuilder.add(rule);
+              }
+            } else if (rule.containsAttribute("cool")) {
+              if (index.isUnifiable(rule.indexingPair().second)) {
+                coolingSetBuilder.add(rule);
+              }
+            } else {
+              if (index.isUnifiable(rule.indexingPair().first)) {
+                setBuilder.add(rule);
+              }
             }
+          }
+          ImmutableSet<Rule> rules = setBuilder.build();
+          if (!rules.isEmpty()) {
+            mapBuilder.put(index, rules);
+          }
+          rules = heatingSetBuilder.build();
+          if (!rules.isEmpty()) {
+            heatingMapBuilder.put(index, rules);
+          }
+          rules = coolingSetBuilder.build();
+          if (!rules.isEmpty()) {
+            coolingMapBuilder.put(index, rules);
+          }
         }
-
+        heatingRuleTable = heatingMapBuilder.build();
+        coolingRuleTable = coolingMapBuilder.build();
         ruleTable = mapBuilder.build();
 
         ImmutableSet.Builder<Rule> setBuilder = ImmutableSet.builder();
@@ -132,8 +155,14 @@ public class SymbolicRewriter {
     private Set<Rule> getRules(Term term) {
         Set<Rule> rules = new HashSet<Rule>();
         for (IndexingPair pair : term.getIndexingPairs()) {
-            if (ruleTable.get(pair) != null) {
-                rules.addAll(ruleTable.get(pair));
+            if (ruleTable.get(pair.first) != null) {
+                rules.addAll(ruleTable.get(pair.first));
+            }
+            if (heatingRuleTable.get(pair.first) != null) {
+                rules.addAll(heatingRuleTable.get(pair.first));
+            }
+            if (coolingRuleTable.get(pair.second) != null) {
+                rules.addAll(coolingRuleTable.get(pair.second));
             }
         }
         rules.addAll(unindexedRules);
