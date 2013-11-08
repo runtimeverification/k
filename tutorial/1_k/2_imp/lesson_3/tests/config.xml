@@ -1,0 +1,13 @@
+<tests>
+
+  <test
+    definition="imp.k"
+    programs="../../lesson_1/tests"
+    extension="imp"
+    results="." >
+    <all-programs>
+      <krun-option name="-parens" value="smart" />
+    </all-programs>
+  </test>
+
+</tests>

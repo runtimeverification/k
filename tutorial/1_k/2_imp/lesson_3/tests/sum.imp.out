@@ -1,0 +1,9 @@
+[33m<T>
+    [0m[32m<k>
+        [0mint n, sum ; n = 100 ; sum = 0 ; while ( ! n <= 0 ) { sum = sum +
+           n ; n = n + -1 ; }[32m
+    </k>[0m
+    [31m<state>
+        [0m.Map[31m
+    </state>[0m[33m
+</T>[0m
