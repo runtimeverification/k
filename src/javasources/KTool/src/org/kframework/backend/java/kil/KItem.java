@@ -11,7 +11,6 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
-import org.kframework.krun.K;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.util.Collection;
@@ -116,7 +115,7 @@ public class KItem extends Term implements Sorted {
 
             for (Rule rule : definition.functionRules().get((KLabelConstant) kLabel)) {
                 SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(context);
-                leftHandSideConstraint.addAll(rule.condition());
+                leftHandSideConstraint.addAll(rule.requires());
                 for (Variable variable : rule.freshVariables()) {
                     leftHandSideConstraint.add(variable, IntToken.fresh());
                 }
@@ -140,6 +139,8 @@ public class KItem extends Term implements Sorted {
                 if (!constraint.isSubstitution()) {
                     continue;
                 }
+
+                constraint.orientSubstitution(rule.variableSet(), context);
 
                 /* rename rule variables in the constraints */
                 Map<Variable, Variable> freshSubstitution = constraint.rename(rule.variableSet());

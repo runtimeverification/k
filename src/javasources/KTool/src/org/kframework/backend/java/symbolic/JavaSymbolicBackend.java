@@ -87,7 +87,7 @@ public class JavaSymbolicBackend extends BasicBackend {
     @Override
     public Definition lastStep(Definition javaDef) {
         BinaryLoader.save(
-            new File(context.dotk, JavaSymbolicBackend.DEFINITION_FILENAME).toString(), new KILtoBackendJavaKILTransformer(context).transformDefinition(javaDef)
+            new File(context.dotk, JavaSymbolicBackend.DEFINITION_FILENAME).toString(), new KILtoBackendJavaKILTransformer(context, true).transformDefinition(javaDef)
         );
 
         return javaDef;

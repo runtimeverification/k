@@ -6,4 +6,37 @@ module CD2D
   syntax Id ::= Token{"x"} | Token{"y"}
               | Token{"u_x"} | Token{"u_y"}
               | Token{"v_x"} | Token{"v_y"}
+              | Token{"sqv"} | Token{"tau_vv"}
+
+  configuration <T color="red">
+                  <threads color="orange">
+                    <thread multiplicity="*" color="yellow">
+                      //<k color="green"> ($PGM:Stmts ~> execute) </k>
+                      <k color="green"> $PGM:K ~> setGEnv </k>
+                      //<br/>
+                      <control color="cyan">
+                        <fstack color="blue"> .List </fstack>
+                        <xstack color="purple"> .List </xstack>
+                      </control>
+                      //<br/>
+                      <env color="violet"> .Map </env>
+                      <holds color="black"> .Map </holds>
+                      <id color="pink"> 0 </id>
+                    </thread>
+                  </threads>
+                  //<br/>
+                  <genv color="pink"> .Map </genv>
+                  <store color="white"> .Map </store>
+                  <busy color="cyan"> .Set </busy>
+                  <terminated color="red"> .Set </terminated>
+                  //<br/>
+                  <in color="magenta" > .List </in>
+                  <out color="brown" > .List </out>
+                  <nextLoc color="gray"> 0 </nextLoc>
+                </T>
+
+  syntax KItem ::= "setGEnv"
+  rule <k> setGEnv => . </k>
+       <env> Env:Map </env>
+       <genv> .Map => Env </genv>   [structural]
 endmodule

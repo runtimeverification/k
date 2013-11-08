@@ -70,12 +70,19 @@ import com.google.common.collect.Multimap;
  */
 public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
+    private boolean freshRules;
     private Definition definition = null;
     private Map<org.kframework.kil.Variable, Integer> concreteCollectionSize
             = Collections.emptyMap();
 
     public KILtoBackendJavaKILTransformer(Context context) {
         super("Transform KIL into java backend KIL", context);
+        freshRules = false;
+    }
+
+    public KILtoBackendJavaKILTransformer(Context context, boolean freshRules) {
+        this(context);
+        this.freshRules = freshRules;
     }
 
     public Definition transformDefinition(org.kframework.kil.Definition node) {
@@ -497,6 +504,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         Term rightHandSide = (Term) rewrite.getRight().accept(this);
 
         Collection<Term> requires = new ArrayList<Term>();
+        Collection<Term> ensures = new ArrayList<Term>();
         Collection<Variable> freshVariables = new ArrayList<Variable>();
         //TODO: Deal with Ensures
         if (node.getRequires() != null) {
@@ -515,6 +523,17 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 } else {
                     requires.add(term);
                 }
+            }
+        }
+
+        if (node.getEnsures() != null) {
+            Term term = (Term) node.getEnsures().accept(this);
+            if (term instanceof KItem && ((KItem) term).kLabel().toString().equals("'_andBool_")) {
+                for (Term item : ((KItem) term).kList().getItems()) {
+                    ensures.add(item);
+                }
+            } else {
+                ensures.add(term);
             }
         }
 
@@ -570,11 +589,15 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 leftHandSide,
                 rightHandSide,
                 requires,
+                ensures,
                 freshVariables,
                 lookups,
                 node.getAttributes());
 
-        return rule.getFreshRule(new TermContext(definition));
+        if (freshRules) {
+            return rule.getFreshRule(new TermContext(definition));
+        }
+        return rule;
     }
 
     @Override

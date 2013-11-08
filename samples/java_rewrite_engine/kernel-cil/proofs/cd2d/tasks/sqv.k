@@ -7,11 +7,12 @@
 module SQV-RULE
   rule <threads>
            <thread>...
-	     <k> return (x*x + y * y => V:Float); </k>
-	     <env> x |-> Lx:Int y |-> Ly:Int </env>
+	     <k> sqv(Vx:Float, Vy:Float) => V:Float </k>
+             <env> GENV </env>
 	   ...</thread>
        </threads>
-       <store> Lx |-> Vx:Float Ly |-> Vy:Float </store>
+       <store>... STORE ...</store>
+       <genv> GENV </genv>
     requires VELOCITY(Vx) andBool VELOCITY(Vy)
      ensures absFloat(V -Float sqR(Vx, Vy)) <=Float E_sqv
 endmodule

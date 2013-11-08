@@ -531,9 +531,13 @@ public class CopyOnWriteTransformer implements Transformer {
     public ASTNode transform(Rule rule) {
         Term processedLeftHandSide = (Term) rule.leftHandSide().accept(this);
         Term processedRightHandSide = (Term) rule.rightHandSide().accept(this);
-        List<Term> processedCondition = new ArrayList<Term>(rule.condition().size());
-        for (Term conditionItem : rule.condition()) {
-            processedCondition.add((Term) conditionItem.accept(this));
+        List<Term> processedRequires = new ArrayList<Term>(rule.requires().size());
+        for (Term conditionItem : rule.requires()) {
+            processedRequires.add((Term) conditionItem.accept(this));
+        }
+        List<Term> processedEnsures = new ArrayList<Term>(rule.ensures().size());
+        for (Term conditionItem : rule.ensures()) {
+            processedEnsures.add((Term) conditionItem.accept(this));
         }
         List<Variable> processedFreshVariables = new ArrayList<Variable>(
                 rule.freshVariables().size());
@@ -545,13 +549,15 @@ public class CopyOnWriteTransformer implements Transformer {
 
         if (processedLeftHandSide != rule.leftHandSide()
                 || processedRightHandSide != rule.rightHandSide()
-                || !processedCondition.equals(rule.condition())
+                || !processedRequires.equals(rule.requires())
+                || !processedEnsures.equals(rule.ensures())
                 || !processedFreshVariables.equals(rule.freshVariables())
                 || processedLookups != rule.lookups()) {
             return new Rule(
                     processedLeftHandSide,
                     processedRightHandSide,
-                    processedCondition,
+                    processedRequires,
+                    processedEnsures,
                     processedFreshVariables,
                     processedLookups,
                     rule.getAttributes());

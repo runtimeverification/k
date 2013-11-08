@@ -1,7 +1,6 @@
 package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.indexing.IndexingPair;
-import org.kframework.backend.java.indexing.TopIndex;
 import org.kframework.backend.java.symbolic.BottomUpVisitor;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformer;
@@ -24,7 +23,8 @@ public class Rule extends JavaSymbolicObject {
 
     private final Term leftHandSide;
     private final Term rightHandSide;
-    private final Collection<Term> condition;
+    private final Collection<Term> requires;
+    private final Collection<Term> ensures;
     private final Collection<Variable> freshVariables;
     private final UninterpretedConstraint lookups;
     private final IndexingPair indexingPair;
@@ -33,13 +33,15 @@ public class Rule extends JavaSymbolicObject {
     public Rule(
             Term leftHandSide,
             Term rightHandSide,
-            Collection<Term> condition,
+            Collection<Term> requires,
+            Collection<Term> ensures,
             Collection<Variable> freshVariables,
             UninterpretedConstraint lookups,
             Attributes attributes) {
         this.leftHandSide = leftHandSide;
         this.rightHandSide = rightHandSide;
-        this.condition = condition;
+        this.requires = requires;
+        this.ensures = ensures;
         this.freshVariables = freshVariables;
         this.lookups = lookups;
 
@@ -72,8 +74,8 @@ public class Rule extends JavaSymbolicObject {
     private boolean tempContainsKCell = false;
 
     /*
-    public Rule(Term leftHandSide, Term rightHandSide, Term condition) {
-        this(leftHandSide, rightHandSide, condition, null);
+    public Rule(Term leftHandSide, Term rightHandSide, Term requires) {
+        this(leftHandSide, rightHandSide, requires, null);
     }
 
     public Rule(Term leftHandSide, Term rightHandSide, Attributes attributes) {
@@ -85,8 +87,12 @@ public class Rule extends JavaSymbolicObject {
     }
     */
 
-    public Collection<Term> condition() {
-        return condition;
+    public Collection<Term> requires() {
+        return requires;
+    }
+
+    public Collection<Term> ensures() {
+        return ensures;
     }
 
     public Collection<Variable> freshVariables() {
@@ -146,16 +152,19 @@ public class Rule extends JavaSymbolicObject {
     @Override
     public String toString() {
         String string = "rule " + leftHandSide + " => " + rightHandSide;
-        if (condition != null) {
-            string += " when " + condition;
+        if (requires != null) {
+            string += " requires " + requires;
         }
         if (!lookups.equalities().isEmpty()) {
-            if (condition != null) {
+            if (requires == null) {
                 string += " when ";
             } else {
                 string += " " + SymbolicConstraint.SEPARATOR + " ";
             }
             string += lookups;
+        }
+        if (ensures != null) {
+            string += " ensures " + ensures;
         }
         return string;
     }
@@ -169,5 +178,4 @@ public class Rule extends JavaSymbolicObject {
     public void accept(Visitor visitor) {
         visitor.visit(this);
     }
-
 }

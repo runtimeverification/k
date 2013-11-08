@@ -9,9 +9,9 @@ import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.compile.transformers.DataStructureToLookupUpdate;
-import org.kframework.compile.utils.MetaK;
-import org.kframework.compile.utils.RuleCompilerSteps;
+import org.kframework.compile.utils.*;
 //import org.kframework.kil.*;
+import org.kframework.kil.Module;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.KRunExecutionException;
@@ -65,19 +65,46 @@ public class JavaSymbolicKRun implements KRun {
     }
 
     private KRunResult<KRunState> internalRun(org.kframework.kil.Term cfg, int bound) throws KRunExecutionException {
-        SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
-        Term term = Term.of(cfg, definition);
-        TermContext termContext = new TermContext(definition, new PortableFileSystem());
-        term = term.evaluate(termContext);
-        ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, termContext);
-        ConstrainedTerm result = symbolicRewriter.rewrite(constrainedTerm, bound);
+        ConstrainedTerm result = javaKILRun(cfg, bound);
         org.kframework.kil.Term kilTerm = (org.kframework.kil.Term) result.term().accept(
                 new BackendJavaKILtoKILTranslation(context));
         return new KRunResult<KRunState>(new KRunState(kilTerm, context));
     }
 
+    private ConstrainedTerm javaKILRun(org.kframework.kil.Term cfg, int bound) {
+        SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
+        Term term = Term.of(cfg, definition);
+        TermContext termContext = new TermContext(definition, new PortableFileSystem());
+        term = term.evaluate(termContext);
+        ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, termContext);
+        return symbolicRewriter.rewrite(constrainedTerm, bound);
+    }
+
     @Override
-    public KRunProofResult<Set<org.kframework.kil.Term>> prove(org.kframework.kil.Module module) {
+    public KRunProofResult<Set<org.kframework.kil.Term>> prove(Module module, org.kframework.kil.Term cfg) throws KRunExecutionException {
+        TermContext termContext = new TermContext(definition, new PortableFileSystem());
+        Map<org.kframework.kil.Term, org.kframework.kil.Term> substitution = null;
+        if (cfg != null) {
+            cfg = run(cfg).getResult().getRawResult();
+            ConfigurationSubstitutionVisitor configurationSubstitutionVisitor =
+                    new ConfigurationSubstitutionVisitor(context);
+            cfg.accept(configurationSubstitutionVisitor);
+            substitution = configurationSubstitutionVisitor.getSubstitution();
+            System.out.println(substitution);
+            Module mod = module;
+            try {
+                mod = (Module) module.accept(new Substitution(substitution,context));
+                System.out.println(mod.toString());
+            } catch (TransformerException e) {
+                assert false : "This should not have happened!";
+            }
+            module = mod;
+        }
+        try {
+            module = new SpecificationCompilerSteps(context).compile(module, null);
+        } catch (CompilerStepDone e) {
+            assert false: "dead code";
+        }
         List<ConstrainedTerm> proofResults = new ArrayList<ConstrainedTerm>();
 
         DataStructureToLookupUpdate mapTransformer = new DataStructureToLookupUpdate(context);
@@ -87,9 +114,11 @@ public class JavaSymbolicKRun implements KRun {
             for (org.kframework.kil.ModuleItem moduleItem : module.getItems()) {
                 assert moduleItem instanceof org.kframework.kil.Rule;
 
-                rules.add(transformer.transformRule(
+                Rule rule = transformer.transformRule(
                         (org.kframework.kil.Rule) moduleItem.accept(mapTransformer),
-                        definition));
+                        definition);
+                Rule freshRule = rule.getFreshRule(termContext);
+                System.out.println(freshRule.toString());
             }
 
             SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
@@ -102,50 +131,34 @@ public class JavaSymbolicKRun implements KRun {
                 org.kframework.kil.Term kilRequires = kilRule.getRequires();
                 org.kframework.kil.Term kilEnsures = kilRule.getEnsures();
 
-                //TODO: Deal with Ensures
-                
-                /* rename rule variables */
-                Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(
-                        transformer.transformRule(
-                                (org.kframework.kil.Rule) moduleItem.accept(mapTransformer),
-                                definition).variableSet());
-
-                TermContext termContext = new TermContext(definition, new PortableFileSystem());
-                SymbolicConstraint initialConstraint = new SymbolicConstraint(termContext);
-                //initialConstraint.addAll(rule.condition());
-                initialConstraint.add(
-                        transformer.transformTerm(kilRequires, definition),
-                        BoolToken.TRUE);
-                ConstrainedTerm initialTerm = new ConstrainedTerm(
-                        transformer.transformTerm(kilLeftHandSide, definition).substitute(
-                                freshSubstitution,
-                                termContext),
-                        initialConstraint.substitute(freshSubstitution, termContext),
-                        termContext);
-
                 org.kframework.kil.Rule kilDummyRule = new org.kframework.kil.Rule(
                         kilRightHandSide,
                         MetaK.kWrap(org.kframework.kil.KSequence.EMPTY, "k"),
+                        kilRequires,
                         kilEnsures,
-                        null,
                         context);
                 Rule dummyRule = transformer.transformRule(
                         (org.kframework.kil.Rule) kilDummyRule.accept(mapTransformer),
                         definition);
-                SymbolicConstraint targetConstraint = new SymbolicConstraint(termContext);
-                for (Term condition : dummyRule.condition()) {
-                    targetConstraint.add(
-                            condition,
-                            BoolToken.TRUE);
-                }
-                ConstrainedTerm targetTerm = new ConstrainedTerm(
-                        dummyRule.leftHandSide().substitute(freshSubstitution, termContext),
-                        dummyRule.lookups().getSymbolicConstraint(termContext).substitute(
-                                freshSubstitution,
-                                termContext),
-                        targetConstraint.substitute(freshSubstitution, termContext),
+
+                SymbolicConstraint initialConstraint = new SymbolicConstraint(termContext);
+                //initialConstraint.addAll(rule.condition());
+                initialConstraint.addAll(dummyRule.requires());
+                ConstrainedTerm initialTerm = new ConstrainedTerm(
+                        transformer.transformTerm(kilLeftHandSide, definition),
+                        initialConstraint,
                         termContext);
 
+                SymbolicConstraint targetConstraint = new SymbolicConstraint(termContext);
+                targetConstraint.addAll(dummyRule.ensures());
+                ConstrainedTerm targetTerm = new ConstrainedTerm(
+                        dummyRule.leftHandSide(),
+                        dummyRule.lookups().getSymbolicConstraint(termContext),
+                        targetConstraint,
+                        termContext);
+
+                System.out.println("Initial: " + initialTerm);
+                System.out.println("Target: " + targetTerm);
                 proofResults.addAll(symbolicRewriter.proveRule(initialTerm, targetTerm, rules));
             }
 

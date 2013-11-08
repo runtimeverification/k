@@ -46,7 +46,7 @@ module MAP
 //  rule update(M:MyMap, .MyMap) => M
 
   /* map domain restriction */
-  syntax MyMap ::= MyMap "[" KList "<-" "undef" "]"    [function] 
+  syntax MyMap ::= MyMap "[" K "<-" "undef" "]"    [function, hook(Map:remove)] 
 //  rule
 //    M:MyMap[K1:K,,K2:K,,KL:KList <- undef]
 //  =>

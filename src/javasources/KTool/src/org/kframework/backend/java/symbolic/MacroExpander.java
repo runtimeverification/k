@@ -1,10 +1,8 @@
 package org.kframework.backend.java.symbolic;
 
-import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,16 +39,21 @@ public class MacroExpander extends TermTransformer {
     public Rule processRule(Rule rule) {
         Term processedLeftHandSide = processTerm(rule.leftHandSide());
         Term processedRightHandSide = processTerm(rule.rightHandSide());
-        Collection<Term> processedCondition = new ArrayList<Term>(rule.condition().size());
-        for (Term conditionItem : rule.condition()) {
-            processedCondition.add(processTerm(conditionItem));
+        Collection<Term> processedRequires = new ArrayList<Term>(rule.requires().size());
+        for (Term conditionItem : rule.requires()) {
+            processedRequires.add(processTerm(conditionItem));
+        }
+        Collection<Term> processedEnsures = new ArrayList<Term>(rule.ensures().size());
+        for (Term conditionItem : rule.ensures()) {
+            processedEnsures.add(processTerm(conditionItem));
         }
         UninterpretedConstraint processedLookups
                 = (UninterpretedConstraint) rule.lookups().accept(this);
         return new Rule(
                 processedLeftHandSide,
                 processedRightHandSide,
-                processedCondition,
+                processedRequires,
+                processedEnsures,
                 rule.freshVariables(),
                 processedLookups,
                 rule.getAttributes());

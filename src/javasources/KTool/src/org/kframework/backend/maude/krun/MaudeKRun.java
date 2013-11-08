@@ -751,7 +751,7 @@ public class MaudeKRun implements KRun {
 		return new KRunApiDebugger(this, graph);
 	}
 
-    public KRunProofResult<Set<Term>> prove(Module m) {
+    public KRunProofResult<Set<Term>> prove(Module m, Term KAST) {
         throw new UnsupportedBackendOptionException("--prove");
     }
 }

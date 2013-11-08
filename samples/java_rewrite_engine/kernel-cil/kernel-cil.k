@@ -71,33 +71,33 @@ the increment). */
   syntax Exp ::= Float | Int | Bool | String | Id
                | "(" Exp ")"             [bracket]
                | "++" Exp
-               > Exp "[" Exps "]"        [strict]
-               > Exp "(" Exps ")"        [strict]
-               > "-" Exp                 [strict]
-               | "sizeOf" "(" Exp ")"    [strict]
+               > Exp "[" Exps "]"        [seqstrict]
+               > Exp "(" Exps ")"        [seqstrict]
+               > "-" Exp                 [seqstrict]
+               | "sizeOf" "(" Exp ")"    [seqstrict]
                | "read" "(" ")"
                > left:
-                 Exp "*" Exp             [strict, left]
-               | Exp "/" Exp             [strict, left]
-               | Exp "%" Exp             [strict, left]
+                 Exp "*" Exp             [seqstrict, left]
+               | Exp "/" Exp             [seqstrict, left]
+               | Exp "%" Exp             [seqstrict, left]
                > left:
-                 Exp "+" Exp             [strict, left]
-               | Exp "-" Exp             [strict, left]
+                 Exp "+" Exp             [seqstrict, left]
+               | Exp "-" Exp             [seqstrict, left]
                > non-assoc:
-                 Exp "<" Exp             [strict, non-assoc]
-               | Exp "<=" Exp            [strict, non-assoc]
-               | Exp "<=" Exp "<=" Exp   [strict, non-assoc]
-               | Exp ">" Exp             [strict, non-assoc]
-               | Exp ">=" Exp            [strict, non-assoc]
-               | Exp "==" Exp            [strict, non-assoc]
-               | Exp "!=" Exp            [strict, non-assoc]
-               > "!" Exp                 [strict]
+                 Exp "<" Exp             [seqstrict, non-assoc]
+               | Exp "<=" Exp            [seqstrict, non-assoc]
+               | Exp "<=" Exp "<=" Exp   [seqstrict, non-assoc]
+               | Exp ">" Exp             [seqstrict, non-assoc]
+               | Exp ">=" Exp            [seqstrict, non-assoc]
+               | Exp "==" Exp            [seqstrict, non-assoc]
+               | Exp "!=" Exp            [seqstrict, non-assoc]
+               > "!" Exp                 [seqstrict]
                > left:
-                 Exp "&&" Exp            [strict(1), left]
-               | Exp "||" Exp            [strict(1), left]
-               > Exp "?" Exp ":" Exp     [strict(1), non-assoc]
+                 Exp "&&" Exp            [seqstrict(1), left]
+               | Exp "||" Exp            [seqstrict(1), left]
+               > Exp "?" Exp ":" Exp     [seqstrict(1), non-assoc]
                > "spawn" Block
-               > Exp "=" Exp             [strict(2), right]
+               > Exp "=" Exp             [seqstrict(2), right]
 
 /*@ We also need comma-separated lists of identifiers and of expressions.
 Moreover, we want them to be strict, that is, to evaluate to lists of results
@@ -107,7 +107,7 @@ the constructs above). */
   syntax TypedId ::= Type Id
   syntax TypedIds ::= List{TypedId,","}
   syntax Ids  ::= List{Id,","}
-  syntax Exps ::= List{Exp,","}          [strict]  // automatically hybrid now
+  syntax Exps ::= List{Exp,","}          [seqstrict]  // automatically hybrid now
 
 /*@ \subsection{Statements}
 Most of the statement constructs are standard for imperative languages.
@@ -131,20 +131,20 @@ arguments. */
                 | "{" Stmts "}"
 
   syntax Stmt ::= Decl | Block
-                | Exp ";"                               [strict]
-                | "if" "(" Exp ")" Block "else" Block   [avoid, strict(1)]
+                | Exp ";"                               [seqstrict]
+                | "if" "(" Exp ")" Block "else" Block   [avoid, seqstrict(1)]
                 | "if" "(" Exp ")" Block
                 | "while" "(" Exp ")" Block
                 | "for" "(" Stmt Exp ";" Exp ")" Block
-                | "return" Exp ";"                      [strict]
+                | "return" Exp ";"                      [seqstrict]
                 | "return" ";"
-                | "print" "(" Exps ")" ";"              [strict]
+                | "print" "(" Exps ")" ";"              [seqstrict]
                 | "try" Block "catch" "(" Type Id ")" Block
-                | "throw" Exp ";"                       [strict]
-                | "join" Exp ";"                        [strict]
-                | "acquire" Exp ";"                     [strict]
-                | "release" Exp ";"                     [strict]
-                | "rendezvous" Exp ";"                  [strict]
+                | "throw" Exp ";"                       [seqstrict]
+                | "join" Exp ";"                        [seqstrict]
+                | "acquire" Exp ";"                     [seqstrict]
+                | "release" Exp ";"                     [seqstrict]
+                | "rendezvous" Exp ";"                  [seqstrict]
 
   syntax Stmts ::= Stmt
                  | Stmts Stmts                          [right]
@@ -289,8 +289,8 @@ to the \K tool, as indicated by the \textit{\$PGM} variable, followed by the
                   <busy color="cyan"> .Set </busy>
                   <terminated color="red"> .Set </terminated>
                   //<br/>
-                  <in color="magenta" > .List </in>
-                  <out color="brown" > .List </out>
+                  <in color="magenta" stream="stdin"> .List </in>
+                  <out color="brown" stream="stdout"> .List </out>
                   <nextLoc color="gray"> 0 </nextLoc>
                 </T>
 

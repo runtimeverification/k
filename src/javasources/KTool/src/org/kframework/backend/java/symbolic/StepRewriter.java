@@ -1,7 +1,6 @@
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.builtins.Int32Token;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Rule;
@@ -75,7 +74,7 @@ public class StepRewriter {
 
         SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(
             constrainedTerm.termContext());
-        leftHandSideConstraint.addAll(rule.condition());
+        leftHandSideConstraint.addAll(rule.requires());
         for (Variable variable : rule.freshVariables()) {
             leftHandSideConstraint.add(variable, IntToken.fresh());
         }
@@ -87,6 +86,7 @@ public class StepRewriter {
                 constrainedTerm.termContext());
 
         for (SymbolicConstraint constraint : constrainedTerm.unify(leftHandSide)) {
+            constraint.addAll(rule.ensures());
             /* rename rule variables in the constraints */
             Map<Variable, Variable> freshSubstitution = constraint.rename(rule.variableSet());
 
@@ -119,7 +119,7 @@ public class StepRewriter {
         ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, context);
 
         SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(context);
-        leftHandSideConstraint.addAll(rule.condition());
+        leftHandSideConstraint.addAll(rule.requires());
         for (Variable variable : rule.freshVariables()) {
             leftHandSideConstraint.add(variable, IntToken.fresh());
         }

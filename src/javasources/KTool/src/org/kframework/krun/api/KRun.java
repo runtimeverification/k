@@ -121,14 +121,15 @@ public interface KRun {
 	public KRunDebugger debug(DirectedGraph<KRunState, Transition> graph);
 
     /**
-    Prove a set of reachability rules using Matching Logic.
-    @param module A {@link Module} containing a set of reachability rules to be proven.
-    @exception UnsupportedOperationException The backend implementing this interface does not
-    support proofs
-    @return An object containing metadata about whether the proof succeeded, and a counterexample
-    if it failed.
+     Prove a set of reachability rules using Matching Logic.
+     * @param module A {@link org.kframework.kil.Module} containing a set of reachability rules to be proven.
+     * @param cfg The configuration used to initialize the prover
+     @exception UnsupportedOperationException The backend implementing this interface does not
+     support proofs
+     @return An object containing metadata about whether the proof succeeded, and a counterexample
+     if it failed.
     */
-    public KRunProofResult<Set<Term>> prove(Module module);
+    public KRunProofResult<Set<Term>> prove(Module module, Term cfg) throws KRunExecutionException;
 
 	/**
 	Set a backend-specific option on the krun object. This function should silently succeed doing nothing if the backend implementing this does not use the option in question.

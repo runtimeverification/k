@@ -47,6 +47,26 @@ import org.kframework.krun.K;
  */
 public class SymbolicConstraint extends JavaSymbolicObject {
 
+    public void orientSubstitution(Set<Variable> variables, TermContext termContext) {
+        Map<Variable, Term> newSubstitution = new HashMap<>();
+        for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
+            if (variables.contains(entry.getValue())) {
+                newSubstitution.put((Variable) entry.getValue(), entry.getKey());
+            }
+        }
+
+        Map<Variable, Term> result = new HashMap<>();
+        for (Map.Entry<Variable, Term> entry : newSubstitution.entrySet()) {
+            substitution.remove(entry.getValue());
+            result.put(entry.getKey(), entry.getValue().substitute(newSubstitution, termContext));
+        }
+        for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
+            result.put(entry.getKey(), entry.getValue().substitute(newSubstitution, termContext));
+        }
+
+        substitution = result;
+    }
+
     public enum TruthValue { TRUE, UNKNOWN, FALSE }
 
     /**
@@ -224,7 +244,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      * Invariant: {@code Variable}s on the left-hand sides do not occur in the
      * {@code Term}s on the right-hand sides.
      */
-    private final Map<Variable, Term> substitution = new HashMap<Variable, Term>();
+    private Map<Variable, Term> substitution = new HashMap<Variable, Term>();
     private TruthValue truthValue;
     private final TermContext context;
     private final Definition definition;

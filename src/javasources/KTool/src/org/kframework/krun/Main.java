@@ -336,12 +336,11 @@ public class Main {
                     Definition parsed = DefinitionLoader.parseString(content,
                             proofFile.getAbsolutePath(), context);
                     Module mod = parsed.getSingletonModule();
-                    try {
-                        mod = new SpecificationCompilerSteps(context).compile(mod, null);
-                    } catch (CompilerStepDone e) {
-                        assert false: "dead code";
+                    Term cfg = null;
+                    if (KAST != null) {
+                        cfg = makeConfiguration(KAST, null, rp, (K.term != null), context);
                     }
-                    result = krun.prove(mod);
+                    result = krun.prove(mod, cfg);
                 } else if (cmd.hasOption("depth")) {
                     int depth = Integer.parseInt(K.depth);
                     result = krun.step(makeConfiguration(KAST, null, rp,

@@ -2,8 +2,16 @@ require "../../extended-float.k"
 
 module CD2D-SPEC
   imports EXTENDED-FLOAT
-  syntax Float ::=  "absFloat" "(" Float ")" "<=Float" Float [function]
+  syntax Bool ::=  "absFloat" "(" Float ")" "<=Float" Float [function]
   rule absFloat(X:Float) <=Float Y:Float => --Float Y <=Float X <=Float Y
+
+  syntax Float ::=  dmax(Float, Float) [function]
+  rule dmax(X:Float, Y:Float) => Y requires X <=Float Y
+  rule dmax(X:Float, Y:Float) => X requires Y <=Float X
+
+  syntax Float ::=  dmin(Float, Float) [function]
+  rule dmin(X:Float, Y:Float) => X requires X <=Float Y
+  rule dmin(X:Float, Y:Float) => Y requires Y <=Float X
 
   syntax Float ::= "E_sqv" [function]
   rule E_sqv => 0x1.p-30
@@ -13,6 +21,9 @@ module CD2D-SPEC
 
   syntax Float ::= "E_dot" [function]
   rule E_dot => 0x1.p-34
+
+  syntax Float ::= "E_tau" [function]
+  rule E_tau => 0x1.p-21
 
   syntax Float ::= "VE_MAX" [function]
   rule VE_MAX => 1200.0
@@ -32,6 +43,11 @@ module CD2D-SPEC
   syntax Float ::= dotR(Float,Float,Float,Float) [function]
   rule dotR(Ax:Float, Ay:Float, Bx:Float, By:Float) 
     => Ax *Float Bx +Float Ay *Float By
-  
+
+  syntax Float ::= tauR(Float, Float, Float, Float, Float, Float) [function]
+  rule tauR(Ux:Float, Uy:Float, Vx:Float, Vy:Float, B:Float, T:Float) =>
+    dmin(dmax(B *Float sqR(Vx,Vy), --Float dotR(Ux,Uy, Vx, Vy)), T *Float sqR(Vx, Vy)) 
+
+ 
 
 endmodule

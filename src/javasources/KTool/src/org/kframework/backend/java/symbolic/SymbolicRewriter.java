@@ -154,6 +154,7 @@ public class SymbolicRewriter {
         // Applying a strategy to a set of rules divides the rules up into
         // equivalence classes of rules. We iterate through these equivalence
         // classes one at a time, seeing which one contains rules we can apply.
+        System.out.println(LookupCell.find(constrainedTerm.term(),"k"));
         strategy.reset(getRules(constrainedTerm.term()));
         while (strategy.hasNext()) {
             transition = strategy.nextIsTransition();
@@ -164,7 +165,7 @@ public class SymbolicRewriter {
 
                 SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(
                         constrainedTerm.termContext());
-                leftHandSideConstraint.addAll(rule.condition());
+                leftHandSideConstraint.addAll(rule.requires());
                 for (Variable variable : rule.freshVariables()) {
                     leftHandSideConstraint.add(variable, IntToken.fresh());
                 }
@@ -176,6 +177,8 @@ public class SymbolicRewriter {
                         constrainedTerm.termContext());
 
                 for (SymbolicConstraint constraint1 : constrainedTerm.unify(leftHandSide)) {
+                    constraint1.orientSubstitution(rule.variableSet(), constrainedTerm.termContext());
+                    constraint1.addAll(rule.ensures());
                     /* rename rule variables in the constraints */
                     Map<Variable, Variable> freshSubstitution = constraint1.rename(rule.variableSet());
 
@@ -231,7 +234,7 @@ public class SymbolicRewriter {
 
             SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(
                 constrainedTerm.termContext());
-            leftHandSideConstraint.addAll(rule.condition());
+            leftHandSideConstraint.addAll(rule.requires());
 
             ConstrainedTerm leftHandSideTerm = new ConstrainedTerm(
                     rule.leftHandSide(),
@@ -243,6 +246,7 @@ public class SymbolicRewriter {
             if (constraint == null) {
                 continue;
             }
+            constraint.addAll(rule.ensures());
 
             /* rename rule variables in the constraints */
             Map<Variable, Variable> freshSubstitution = constraint.rename(rule.variableSet());
@@ -409,7 +413,7 @@ public class SymbolicRewriter {
 
             TermContext context = new TermContext(definition, fs);
             SymbolicConstraint sideConstraint = new SymbolicConstraint(context);
-            sideConstraint.addAll(rule.condition());
+            sideConstraint.addAll(rule.requires());
             ConstrainedTerm initialTerm = new ConstrainedTerm(
                     rule.leftHandSide().substitute(freshSubstitution, context),
                     rule.lookups().getSymbolicConstraint(context).substitute(
