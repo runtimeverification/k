@@ -72,33 +72,28 @@
 
   <test
       definition="tutorial/1_k/2_imp/lesson_1/imp.k"
-      programs="tutorial/1_k/2_imp"
+      programs="tutorial/1_k/2_imp/"
       extension="imp"
-      results="tutorial/1_k/2_imp"
       />
   <test
       definition="tutorial/1_k/2_imp/lesson_2/imp.k"
       programs="tutorial/1_k/2_imp"
       extension="imp"
-      results="tutorial/1_k/2_imp"
       />
   <test
       definition="tutorial/1_k/2_imp/lesson_3/imp.k"
       programs="tutorial/1_k/2_imp"
       extension="imp"
-      results="tutorial/1_k/2_imp"
       />
   <test
       definition="tutorial/1_k/2_imp/lesson_4/imp.k"
       programs="tutorial/1_k/2_imp"
       extension="imp"
-      results="tutorial/1_k/2_imp"
       />
   <test
       definition="tutorial/1_k/2_imp/lesson_5/imp.k"
       programs="tutorial/1_k/2_imp"
-      extension="imp"
-      results="tests/tutorial/1_k/2_imp/lesson_5" >
+      extension="imp" >
       <all-programs>
         <krun-option name="-color" value="off" />
       </all-programs>
@@ -150,14 +145,14 @@
       programs="tutorial/1_k/2_imp tutorial/1_k/4_imp++"
       extension="imp"
       exclude="lesson_7/spawn.imp"
-      results="tutorial/1_k/2_imp tutorial/1_k/4_imp++"
+      results="tutorial/1_k/4_imp++"
       />
   <test
       definition="tutorial/1_k/4_imp++/lesson_2/imp.k"
       programs="tutorial/1_k/2_imp tutorial/1_k/4_imp++"
       extension="imp"
       exclude="lesson_7/spawn.imp"
-      results="tutorial/1_k/2_imp tutorial/1_k/4_imp++"
+      results="tutorial/1_k/4_imp++"
       />
   <test
       definition="tutorial/1_k/4_imp++/lesson_3/imp.k"
@@ -217,8 +212,6 @@
               tutorial/1_k/4_imp++"
       extension="imp"
       exclude="lesson_1/spawn.imp lesson_4/test.imp"
-      results="tutorial/1_k/2_imp
-              tutorial/1_k/4_imp++"
       />
   <test
       definition="tutorial/1_k/5_types/lesson_2/lambda.k"
