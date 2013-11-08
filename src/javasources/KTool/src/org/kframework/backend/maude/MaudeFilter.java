@@ -943,7 +943,7 @@ public class MaudeFilter extends BackendFilter {
 
 	@Override
 	public void visit(Cast term) {
-		throw new RuntimeException("don't know how to maudify Cast");
+		throw new RuntimeException("don't know how to maudify Cast at "+term.getFilename()+" "+term.getLocation());
 	}
 
     @Override
