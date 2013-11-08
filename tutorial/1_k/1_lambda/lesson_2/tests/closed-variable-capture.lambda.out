@@ -1,3 +1,5 @@
-<k>
-    lambda y . ((lambda x . (lambda y . (x y))) y)
-</k>
+Search results:
+
+Solution 1, State 0:
+V:K -->
+lambda y . ((lambda x . (lambda y . (x y))) y)

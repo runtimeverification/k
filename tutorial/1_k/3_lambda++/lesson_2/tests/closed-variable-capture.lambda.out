@@ -1,0 +1,5 @@
+Search results:
+
+Solution 1, State 0:
+V:K -->
+closure ( x |-> #symNat(2) , y , (x y) )

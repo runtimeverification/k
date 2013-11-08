@@ -1,0 +1,29 @@
+<tests>
+
+  <test
+    definition="lambda.k"
+    programs="../../../1_lambda/lesson_1/tests
+              ../../../1_lambda/lesson_5/tests
+              ../../../1_lambda/lesson_6/tests
+              ../../../1_lambda/lesson_7/tests
+              ../../lesson_1/tests
+              ../../lesson_4/tests"
+    extension="lambda"
+    exclude="omega"
+    results="../../../1_lambda/lesson_1/tests
+             ../../../1_lambda/lesson_2/tests
+             ../../../1_lambda/lesson_3/tests
+             ../../../1_lambda/lesson_5/tests
+             ../../../1_lambda/lesson_6/tests
+             ../../../1_lambda/lesson_7/tests
+             ../../lesson_1/tests
+             ../../lesson_2/tests
+             ../../lesson_4/tests
+             ." >
+    <all-programs>
+      <krun-option name="-output" value="pretty" />
+      <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
+    </all-programs>
+  </test>
+
+</tests>

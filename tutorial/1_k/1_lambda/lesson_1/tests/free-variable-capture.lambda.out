@@ -1,3 +1,5 @@
-<k>
-    a (((lambda x . (lambda y . x)) y) z)
-</k>
+Search results:
+
+Solution 1, State 0:
+V:K -->
+a (((lambda x . (lambda y . x)) y) z)
