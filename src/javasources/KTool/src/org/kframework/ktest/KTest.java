@@ -616,10 +616,11 @@ public class KTest {
                         String msg = "The attribute '" + Configuration.LANGUAGE + "' is required.";
                         GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
                     }
+                    String defDir = dirname(test.getAttribute(Configuration.LANGUAGE));
                     if (test.hasAttribute(Configuration.DIRECTORY)) {
-                        test.setAttribute(Configuration.DIRECTORY, makeAbsolutePath(rootDefinition, test.getAttribute(Configuration.DIRECTORY)));
+                        test.setAttribute(Configuration.DIRECTORY, makeAbsolutePath(defDir, test.getAttribute(Configuration.DIRECTORY)));
                     } else {
-                        test.setAttribute(Configuration.DIRECTORY, dirname(test.getAttribute(Configuration.LANGUAGE)));
+                        test.setAttribute(Configuration.DIRECTORY, defDir);
                     }
                     // NOTE: if 'programs' or 'results' are not given, they are replaced with 'programs=""' or 'results=""'.
                     test.setAttribute(Configuration.PROGRAMS_DIR, makeAbsolutePaths(rootPrograms, test.getAttribute(Configuration.PROGRAMS_DIR)));
