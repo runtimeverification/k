@@ -50,29 +50,35 @@ public class PortableFileSystem implements FileSystem {
         if (!("r".equals(mode) || "w".equals(mode) || "rw".equals(mode))) {
             throw new IllegalArgumentException();
         }
-        if (mode.equals("w")) {
-            throw new UnsupportedOperationException();
-        } else {
-            try {
+        try {
+            FileDescriptor fileFD;
+            File file;
+            if (mode.equals("w")) {
+                FileOutputStream f = new FileOutputStream(path);
+                fileFD = f.getFD();
+                file = new OutputStreamFile(f);
+            } else {
                 RandomAccessFile f = new RandomAccessFile(path, mode);
-                long fd = fdCounter++;
-                descriptors.put(fd, f.getFD());
-                files.put(f.getFD(), new RandomAccessFileFile(f));
-                return fd;
-            } catch (FileNotFoundException e) {
-                try {
-                    processFileNotFoundException(e);
-                } catch (IOException ioe) {
-                    if (ioe.getMessage().equals("EISDIR") && mode.equals("r")) {
-                        //man 2 open says you can open a directory in readonly mode with open, but
-                        //java has no support for it. So we throw an UnsupportedOperationException
-                        //instead of failing with EISDIR
-                        throw new UnsupportedOperationException();
-                    }
-                    throw ioe;
-                }
-                throw e; //unreachable
+                fileFD = f.getFD();
+                file = new RandomAccessFileFile(f);
             }
+            long fd = fdCounter++;
+            descriptors.put(fd, fileFD);
+            files.put(fileFD, file);
+            return fd;
+        } catch (FileNotFoundException e) {
+            try {
+                processFileNotFoundException(e);
+            } catch (IOException ioe) {
+                if (ioe.getMessage().equals("EISDIR") && mode.equals("r")) {
+                    //man 2 open says you can open a directory in readonly mode with open, but
+                    //java has no support for it. So we throw an UnsupportedOperationException
+                    //instead of failing with EISDIR
+                    throw new UnsupportedOperationException();
+                }
+                throw ioe;
+            }
+            throw e; //unreachable
         }
     }
 
