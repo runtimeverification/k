@@ -154,7 +154,7 @@ public class SymbolicRewriter {
         // Applying a strategy to a set of rules divides the rules up into
         // equivalence classes of rules. We iterate through these equivalence
         // classes one at a time, seeing which one contains rules we can apply.
-        System.out.println(LookupCell.find(constrainedTerm.term(),"k"));
+//        System.out.println(LookupCell.find(constrainedTerm.term(),"k"));
         strategy.reset(getRules(constrainedTerm.term()));
         while (strategy.hasNext()) {
             transition = strategy.nextIsTransition();

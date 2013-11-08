@@ -441,7 +441,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             }
             if (!gterm1.equals("")) input += "(" + gterm1 + ") -> ";
             input += "(" + gterm2 + ")";
-            System.out.println("Verifying " + input);
+//            System.out.println("Verifying " + input);
             if (GappaServer.proveTrue(input))
                 result = true;
 

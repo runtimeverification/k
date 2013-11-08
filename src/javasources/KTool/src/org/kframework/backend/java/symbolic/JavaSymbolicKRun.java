@@ -90,11 +90,11 @@ public class JavaSymbolicKRun implements KRun {
                     new ConfigurationSubstitutionVisitor(context);
             cfg.accept(configurationSubstitutionVisitor);
             substitution = configurationSubstitutionVisitor.getSubstitution();
-            System.out.println(substitution);
+//            System.out.println(substitution);
             Module mod = module;
             try {
                 mod = (Module) module.accept(new Substitution(substitution,context));
-                System.out.println(mod.toString());
+//                System.out.println(mod.toString());
             } catch (TransformerException e) {
                 assert false : "This should not have happened!";
             }
@@ -118,7 +118,7 @@ public class JavaSymbolicKRun implements KRun {
                         (org.kframework.kil.Rule) moduleItem.accept(mapTransformer),
                         definition);
                 Rule freshRule = rule.getFreshRule(termContext);
-                System.out.println(freshRule.toString());
+//                System.out.println(freshRule.toString());
             }
 
             SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
@@ -157,8 +157,8 @@ public class JavaSymbolicKRun implements KRun {
                         targetConstraint,
                         termContext);
 
-                System.out.println("Initial: " + initialTerm);
-                System.out.println("Target: " + targetTerm);
+//                System.out.println("Initial: " + initialTerm);
+//                System.out.println("Target: " + targetTerm);
                 proofResults.addAll(symbolicRewriter.proveRule(initialTerm, targetTerm, rules));
             }
 
