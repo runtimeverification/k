@@ -1,0 +1,7 @@
+// This program evaluated to 10 if we used callcc instead of callCC.
+// But with callCC it evaluates to 2.
+
+letrec f x = callCC (lambda return .
+  (if (x <= 0) then ((return 1) / 0) else 2)
+)
+in let a = f 3 in 10
