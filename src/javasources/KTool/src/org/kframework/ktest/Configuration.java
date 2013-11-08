@@ -74,10 +74,10 @@ public class Configuration {
 	public static final String TEST = "test";
     public static final String TESTS = "tests";
 	public static final String INCLUDE = "include";
-	public static final String CONFIG_FILE = "config-file";
-	public static final String DEFINITION_DIR = "definition-dir";
-	public static final String ROOT_PROGRAMS = "root-programs";
-	public static final String ROOT_RESULTS = "root-results";
+	public static final String CONFIG_FILE = "file";
+	public static final String DEFINITION_DIR = "directory";
+	public static final String ROOT_PROGRAMS = "programs";
+	public static final String ROOT_RESULTS = "results";
     public static boolean KOMPILE = true;
     public static boolean PROGRAMS = true;
 	public static boolean VERBOSE = false;
