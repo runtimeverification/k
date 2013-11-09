@@ -1,3 +1,11 @@
+The text in this file will eventually be incorporated within the K
+reference manual.
+
+-----------------------------
+
+KTEST:
+------
+
 To test the definition against all the programs in this folder, go to the
 parent folder where the simple-untyped.k definition is and execute
 

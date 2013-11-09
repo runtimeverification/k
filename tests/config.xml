@@ -285,7 +285,7 @@
 
   <test
       definition="tutorial/2_languages/1_simple/1_untyped/simple-untyped.k"
-      programs="tutorial/2_languages/1_simple/1_untyped/programs_and_results"
+      programs="tutorial/2_languages/1_simple/1_untyped/tests"
       extension="simple"
       exclude="diverse/dekker.simple"
       results="tests/examples/simple-untyped"

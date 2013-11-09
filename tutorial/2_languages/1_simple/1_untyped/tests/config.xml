@@ -1,0 +1,9 @@
+<tests>
+
+  <test definition="simple-untyped"
+        programs="."
+        extension="simple"
+        exclude="dekker"
+        results="." />
+
+</tests>
