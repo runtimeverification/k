@@ -1,7 +1,7 @@
 <tests>
 
   <include file="../../../tests/config.xml"
-           more-programs="."
+           more-programs="../../../../2_dynamic/exercises/functions-with-throws/tests/"
            more-results="." />
 
 </tests>

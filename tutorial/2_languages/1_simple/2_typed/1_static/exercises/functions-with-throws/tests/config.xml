@@ -5,7 +5,7 @@
       definition="simple-typed-static.k"
       programs="../../../../programs"
       extension="simple"
-      results="../../../results ." >
+      results="../../../tests ." >
       <all-programs>
         <krun-option name="-pattern" value="&lt;tasks&gt;.Bag&lt;/tasks&gt;"/>
       </all-programs>
@@ -14,7 +14,7 @@
 <!-- new tests -->
   <test
       definition="simple-typed-static.k"
-      programs="../../../../2_dynamic/exercises/functions-with-throws/programs_and_results/"
+      programs="../../../../2_dynamic/exercises/functions-with-throws/tests/"
       extension="simple"
       results="." >
       <all-programs>

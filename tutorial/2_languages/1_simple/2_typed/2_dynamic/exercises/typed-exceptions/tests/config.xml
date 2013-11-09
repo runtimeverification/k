@@ -5,7 +5,7 @@
       definition="simple-typed-dynamic.k"
       programs="../../../../programs"
       extension="simple"
-      results="../../../results"
+      results="../../../tests"
       exclude="dekker" >
   </test>
 
