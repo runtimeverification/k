@@ -32,6 +32,8 @@ public class MapLookup extends Term {
             return value;
         } else if (map.isGround() && key.isGround()) {
             return new Bottom(kind);
+        } else if (((BuiltinMap) map).isEmpty()) {
+            return new Bottom(kind);
         } else {
             return this;
         }
