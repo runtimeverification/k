@@ -698,7 +698,7 @@ resulting location: */
 
   rule <k> loc(L:Int) = V:Val => V ...</k>
        <store>... L |-> (_:KItem => V) ...</store>
-    [assignment]
+    [assignment,transition]
 
 /*@ \section{Statements}
 We next define the \K semantics of statements. */
@@ -992,7 +992,7 @@ tag in the transition option of \texttt{kompile}. */
 
   syntax KItem ::= lookup(Int)
   rule <k> lookup(L:Int) => V ...</k>
-       <store>... L |-> V:Val ...</store>   [lookup]
+       <store>... L |-> V:Val ...</store>   [lookup,transition]
 
 /*@ \subsubsection{Environment recovery}
 We have already discussed the environment recovery auxiliary operation in the
@@ -1057,8 +1057,8 @@ corresponding store lookup operation. */
 // Array element: evaluate the array and its index;
 // then the array lookup rule above applies.
 
-  context lvalue(_:Exp[HOLE::Exp])
-  context lvalue(HOLE::Exp[_:Exp])
+  context lvalue(_::Exp[HOLE::Exps])
+  context lvalue(HOLE::Exp[_::Exps])
 
 // Finally, return the address of the desired object member
 
