@@ -1,4 +1,5 @@
 <tests>
+
   <test
       definition="simple-typed-static.k"
       programs="../../programs/"
@@ -8,4 +9,5 @@
         <krun-option name="-pattern" value="&lt;tasks&gt;.Bag&lt;/tasks&gt;"/>
       </all-programs>
   </test>
+
 </tests>

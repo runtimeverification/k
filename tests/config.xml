@@ -301,8 +301,7 @@
       definition="tutorial/2_languages/1_simple/2_typed/1_static/simple-typed-static.k"
       programs="tutorial/2_languages/1_simple/2_typed/programs"
       extension="simple"
-      exclude="diverse/dekker.simple"
-      results="tutorial/2_languages/1_simple/2_typed/programs"
+      results="tutorial/2_languages/1_simple/2_typed/1_static/tests"
       />
 
 <!--
