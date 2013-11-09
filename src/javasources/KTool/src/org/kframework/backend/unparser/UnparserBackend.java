@@ -1,5 +1,6 @@
 package org.kframework.backend.unparser;
 
+import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.BasicBackend;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
@@ -25,7 +26,7 @@ public class UnparserBackend extends BasicBackend {
 
 		FileUtil.save(context.dotk.getAbsolutePath() + "/def.k", unparsedText);
 
-		FileUtil.save(GlobalSettings.outputDir + File.separator + FileUtil.stripExtension(GlobalSettings.mainFile.getName()) + ".unparsed.k", unparsedText);
+        FileUtil.save(GlobalSettings.outputDir + File.separator + FilenameUtils.getFullPathNoEndSeparator(GlobalSettings.mainFile.getName()) + ".unparsed.k", unparsedText);
 	}
 
 	@Override

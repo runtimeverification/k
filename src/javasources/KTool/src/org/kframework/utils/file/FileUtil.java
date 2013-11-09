@@ -1,5 +1,6 @@
 package org.kframework.utils.file;
 
+import org.apache.commons.io.FilenameUtils;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -72,25 +73,11 @@ public class FileUtil {
         }
     }
 
-    public static String getExtension(String file) {
-		int idx = file.lastIndexOf(".");
-		if (idx < 0)
-			return null;
-		return file.substring(idx);
-	}
-
-	public static String stripExtension(String file) {
-		int idx = file.lastIndexOf(".");
-		if (idx < 0)
-			return file;
-		return file.substring(0, idx);
-	}
-
-	/**
+    /**
 	 * Get language name in uppercase (main module name) given the filename of definition.
 	 */
 	public static String getMainModule(String filename) {
-		return stripExtension(filename).toUpperCase();
+        return FilenameUtils.getFullPathNoEndSeparator(filename).toUpperCase();
 	}
 
 	public static String getFileContent(String file) {

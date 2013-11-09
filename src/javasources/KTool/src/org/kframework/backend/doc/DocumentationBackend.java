@@ -1,5 +1,6 @@
 package org.kframework.backend.doc;
 
+import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.BasicBackend;
 import org.kframework.backend.html.HTMLFilter;
 import org.kframework.kil.Definition;
@@ -30,7 +31,7 @@ public class DocumentationBackend extends BasicBackend {
 
 		FileUtil.save(context.dotk.getAbsolutePath() + "/def.html", html);
 
-		FileUtil.save(GlobalSettings.outputDir + fileSep + FileUtil.stripExtension(GlobalSettings.mainFile.getName()) + ".html", html);
+        FileUtil.save(GlobalSettings.outputDir + fileSep + FilenameUtils.getFullPathNoEndSeparator(GlobalSettings.mainFile.getName()) + ".html", html);
 		String kHTMLStyle = KPaths.getKBase(false) + fileSep + "include" + fileSep + "html" + fileSep + GlobalSettings.style;
         final File toFile = new File(GlobalSettings.outputDir, GlobalSettings.style);
         copyFile(new File(kHTMLStyle), toFile);

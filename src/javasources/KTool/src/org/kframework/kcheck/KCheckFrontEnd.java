@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.Backend;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.CompilerSteps;
@@ -103,7 +104,7 @@ public class KCheckFrontEnd {
 			}
 
 			Backend backend = new RLBackend(Stopwatch.sw, context);
-			output = FileUtil.stripExtension(mainFile.getName()) + "-kompiled";
+        output = FilenameUtils.getFullPathNoEndSeparator(mainFile.getName()) + "-kompiled";
 			context.dotk = new File(output);
 			context.dotk.mkdirs();
 

@@ -1,5 +1,6 @@
 package org.kframework.backend.latex;
 
+import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.BasicBackend;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
@@ -40,7 +41,7 @@ public class LatexBackend extends BasicBackend {
 			latexified += preamble + "\\begin{document}" + endl + lf.getResult() + "\\end{document}" + endl;
 
 			File canonicalFile = GlobalSettings.mainFile.getCanonicalFile();
-			String latexifiedFile = context.dotk.getAbsolutePath() + fileSep + FileUtil.stripExtension(canonicalFile.getName()) + ".tex";
+            String latexifiedFile = context.dotk.getAbsolutePath() + fileSep + FilenameUtils.getFullPathNoEndSeparator(canonicalFile.getName()) + ".tex";
 			result.add(new File(latexifiedFile));
 			result.add(new File(dotKLatexStyle));
 			FileUtil.save(latexifiedFile, latexified);

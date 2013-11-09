@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.io.FilenameUtils;
 import org.kframework.compile.checks.CheckListDecl;
 import org.kframework.compile.checks.CheckListOfKDeprecation;
 import org.kframework.compile.checks.CheckSortTopUniqueness;
@@ -61,8 +62,8 @@ public class DefinitionLoader {
 		Definition javaDef;
 		File canoFile = mainFile.getCanonicalFile();
 
-		String extension = FileUtil.getExtension(mainFile.getAbsolutePath());
-		if (".bin".equals(extension)) {
+		String extension = FilenameUtils.getExtension(mainFile.getAbsolutePath());
+		if ("bin".equals(extension)) {
             javaDef = (Definition) BinaryLoader.load(canoFile.toString());
 
 			if (GlobalSettings.verbose)

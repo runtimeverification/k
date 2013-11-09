@@ -1,5 +1,6 @@
 package org.kframework.backend.kil;
 
+import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.BasicBackend;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
@@ -26,7 +27,7 @@ public class KExpBackend extends BasicBackend {
 		FileUtil.save(context.dotk.getAbsolutePath() + "/def.kexp", kexpText);
 
 		File canonicalFile = GlobalSettings.mainFile.getCanonicalFile();
-		FileUtil.save(FileUtil.stripExtension(canonicalFile.getAbsolutePath()) + ".kexp", kexpText);
+        FileUtil.save(FilenameUtils.getFullPathNoEndSeparator(canonicalFile.getAbsolutePath()) + ".kexp", kexpText);
 	}
 
 	@Override

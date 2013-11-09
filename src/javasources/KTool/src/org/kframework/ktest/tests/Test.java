@@ -21,6 +21,7 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.commons.io.FilenameUtils;
 import org.kframework.ktest.Configuration;
 import org.kframework.ktest.execution.Task;
 import org.kframework.utils.ListReverser;
@@ -610,7 +611,7 @@ public class Test implements Comparable<Test> {
     }
 
     public String getCompiled() {
-        return getDirectory() + File.separator + FileUtil.stripExtension(new File(getLanguage()).getName()) + "-kompiled";
+        return getDirectory() + File.separator + FilenameUtils.getFullPathNoEndSeparator(new File(getLanguage()).getName()) + "-kompiled";
     }
 
     public String getDirectory() {
@@ -685,7 +686,7 @@ public class Test implements Comparable<Test> {
     }
 
     private String getPdfCompiledFilename() {
-        return getDirectory() + File.separator + FileUtil.stripExtension(new File(getLanguage()).getName()) + ".pdf";
+        return getDirectory() + File.separator + FilenameUtils.getFullPathNoEndSeparator(new File(getLanguage()).getName()) + ".pdf";
     }
 
     public void save() {

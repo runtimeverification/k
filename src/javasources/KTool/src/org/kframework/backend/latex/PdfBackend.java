@@ -1,15 +1,14 @@
 package org.kframework.backend.latex;
 
+import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.BasicBackend;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
-import org.kframework.kompile.KompileFrontEnd;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.KMessages;
-import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.io.*;
@@ -64,7 +63,7 @@ public class PdfBackend extends BasicBackend {
 				sw.printIntermediate("Latex2PDF");
 			}
 
-			files.add(new File(FileUtil.stripExtension(latexFile.getCanonicalPath()) + ".pdf"));
+            files.add(new File(FilenameUtils.getFullPathNoEndSeparator(latexFile.getCanonicalPath()) + ".pdf"));
 		} catch (IOException e) {
 			KException exception = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1001, "", "");
 			GlobalSettings.kem.register(exception);
@@ -78,7 +77,7 @@ public class PdfBackend extends BasicBackend {
 	public void run(Definition definition) throws IOException {
 		List<File> files = LatexBackend.latex(definition, context, definition.getMainModule());
 		files = pdf(files, definition.getMainModule());
-        copyFile(files.get(0), new File(GlobalSettings.outputDir + File.separator + FileUtil.stripExtension(new File(definition.getMainFile()).getName()) + ".pdf"));
+        copyFile(files.get(0), new File(GlobalSettings.outputDir + File.separator + FilenameUtils.getFullPathNoEndSeparator(new File(definition.getMainFile()).getName()) + ".pdf"));
 	}
 
 	@Override
