@@ -345,7 +345,7 @@ variable. */
     when notBool(X in keys(Rho))
   rule <k> T:Type X:Id; => stmt ...</k> <tenv> Rho => Rho[T/X] </tenv>
 
-  context _:Type _[HOLE];
+  context _:Type _::Exp[HOLE::Exps];
 // The rule below may need to sort E to Exp in the future, if the
 // parser gets stricter; without that information, it may not be able
 // to complete the LHS into T E[int,Ts],.Exps; (and similarly for the RHS)
