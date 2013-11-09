@@ -2,4 +2,4 @@ Search results:
 
 Solution 1, State 0:
 V:K -->
-15
+1 /Int 0 ~> env ( .Map )

@@ -2,4 +2,4 @@ Search results:
 
 Solution 1, State 0:
 V:K -->
-15
+closure ( $exit |-> #symNat(1) , x , x )

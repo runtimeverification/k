@@ -6,7 +6,7 @@
               ../../../../../1_lambda/lesson_5/tests/
               ../../../../../1_lambda/lesson_6/tests/
               ../../../../../1_lambda/lesson_7/tests/
-              ../../../tests/"
+              ../../../../lesson_1/tests/"
     extension="lambda"
     exclude="omega"
     results="../../../../../1_lambda/lesson_1/tests/
@@ -15,10 +15,12 @@
              ../../../../../1_lambda/lesson_5/tests/
              ../../../../../1_lambda/lesson_6/tests/
              ../../../../../1_lambda/lesson_7/tests/
-             ../../../tests/" >
+             ../../../../lesson_2/tests/
+             ../../../../lesson_1/exercises/callCC/tests/ " >
     <kompile-option name="--main-module" value="CALLCC"/>
     <all-programs>
       <krun-option name="-output" value="pretty" />
+      <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
     </all-programs>
   </test>
 
