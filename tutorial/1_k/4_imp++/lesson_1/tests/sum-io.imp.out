@@ -1,0 +1,15 @@
+[33m<T>
+    [0m[32m<k>
+        [0m"Add numbers up to (<= 0 to quit)? " ~> '_,_(HOLE,, .List{","})
+           ~> print ( HOLE ) ; ~> n = read ( ) ; ~> if ( n <= 0 ) { halt ; } 
+          else { s = 0 ; while ( ! n <= 0 ) { s = s + n ; n = n + -1 ; } 
+          print ( "Sum = ", s, "\n" ) ; } ~> while ( true ) { print ( 
+          "Add numbers up to (<= 0 to quit)? " ) ; n = read ( ) ; if ( n <= 0
+           ) { halt ; } else { s = 0 ; while ( ! n <= 0 ) { s = s + n ; n = n
+           + -1 ; } print ( "Sum = ", s, "\n" ) ; } }[32m
+    </k>[0m
+    [31m<state>
+        [0mn |-> 0
+        s |-> 0[31m
+    </state>[0m[33m
+</T>[0m

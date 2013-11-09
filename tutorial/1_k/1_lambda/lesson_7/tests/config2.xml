@@ -1,0 +1,7 @@
+<tests>
+
+  <include file="../../lesson_6/tests/config.xml"
+           more-programs="."
+           more-results="." />
+
+</tests>

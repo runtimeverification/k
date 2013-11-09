@@ -1,0 +1,6 @@
+<tests>
+
+  <include file="../../../1_lambda/lesson_8/tests"
+           more-results="../../lesson_2/tests" />
+
+</tests>

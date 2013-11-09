@@ -138,7 +138,7 @@
       exclude="omega.lambda"
       />
 
-<!-- IMP++ -->
+<!-- IMP++ 
 
   <test
       definition="tutorial/1_k/4_imp++/lesson_1/imp.k"
@@ -203,6 +203,7 @@
       exclude="lesson_1/spawn.imp"
       results="tests/tutorial/1_k/4_imp++/lesson_5"
       />
+-->
 
 <!-- TYPES -->
 

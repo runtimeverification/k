@@ -1,0 +1,5 @@
+<tests>
+
+  <include file="../../lesson_5/tests" />
+
+</tests>

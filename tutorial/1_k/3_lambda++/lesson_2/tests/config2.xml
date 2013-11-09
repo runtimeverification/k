@@ -1,0 +1,7 @@
+<tests>
+
+  <include file="../../../1_lambda/lesson_1/tests"
+           exclude="omega"
+           results="." />
+
+</tests>

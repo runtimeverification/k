@@ -1,0 +1,7 @@
+<tests>
+
+  <include file="../../lesson_1/tests"
+           more-programs="."
+           more-results="../../lesson_2/tests ." />
+
+</tests>

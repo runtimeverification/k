@@ -1,0 +1,2 @@
+The current "halt;" statement of IMP++ only halts the current thread.
+Define an "abort;" statement which halts the entire program.

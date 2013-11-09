@@ -1,0 +1,5 @@
+<tests>
+
+  <include file="../../lesson_7/tests/config.xml" />
+
+</tests>
