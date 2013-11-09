@@ -3,8 +3,8 @@
 <!-- original tests -->
   <test
       definition="simple-untyped.k"
-      programs="../../../programs_and_results"
-      results="../../../programs_and_results"
+      programs="../../../tests"
+      results="../../../tests"
       extension="simple"
       exclude="dekker" >
   </test>
