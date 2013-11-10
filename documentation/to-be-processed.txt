@@ -79,3 +79,22 @@ Also recall that if your definition is already kompiled, then you can skip
 kompilation to save time using the --skip kompile option; if you want to skip
 both kompilation and pdf generation then use the option --skip "kompile pdf".
 
+FILE READ/WRITE:
+----------------
+
+If you want to write something to a file at once,  you can go with  #open and
+#write .
+
+For example,
+
+ rule <k> run => writeFile("file", "content") ... </k>
+
+ syntax K ::= writeFile(String,String)
+ rule writeFile(File:String, Content:String)
+   => writeFD(#open(File), Content)
+
+ syntax K ::= writeFD(Int,String)
+ rule writeFD(FD:Int, Content:String)
+   => #write(FD, Content) ~> #close(FD)
+
+TODO: how to read from a file
