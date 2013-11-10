@@ -1,0 +1,8 @@
+// This program prints 3 messages in a random order. There are 3! = 6 possible
+// orders for the messages. If we replace the first halt with an abort, then
+// only the first message is guaranteed to printed, and the number of possible
+// messsage orders becomes 11.
+
+spawn { print("Hi from thread 1!\n"); halt; };
+spawn { print("Hi from thread 2!\n"); halt; };
+spawn { print("Hi from thread 3!\n"); halt; };

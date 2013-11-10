@@ -1,0 +1,10 @@
+int x,y,z;
+
+x=1;
+y=2;
+z=3;
+
+spawn {int y; x=10;abort;y=20;};
+spawn {z=30;};
+
+print(z,x);

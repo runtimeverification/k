@@ -1,0 +1,10 @@
+<tests>
+
+  <test
+    definition="imp.k"
+    programs="."
+    extension="imp"
+    results="."
+  />
+
+</tests>
