@@ -1,0 +1,4 @@
+print("Start\n");
+int t1; t1 = spawn {print("In spawned thread\n");};
+halt;
+print("Unreachable\n");

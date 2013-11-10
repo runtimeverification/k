@@ -1,3 +1,6 @@
+Here are instructions for installing K from the release zip/tgz archive.
+Users who checked out the sources should follow the instructions in src/README.
+
 1. Prerequisites
 Java Runtime Edition (requires JRE7 or higher)
   http://java.com/en/download/index.jsp

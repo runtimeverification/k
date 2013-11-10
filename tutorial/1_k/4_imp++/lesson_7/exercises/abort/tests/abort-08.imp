@@ -1,0 +1,4 @@
+int t; t = spawn {halt;};
+print("child spawned\n");
+join(t);
+print("child halted\n");

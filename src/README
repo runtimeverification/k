@@ -27,7 +27,8 @@ directory to build the .jar binaries. For convenient usage, you can update
 your $PATH with <checkout-dir>/dist/bin (strongly recommended, but optional).
 
 4. Work on Java code
-Open eclipse and set your workspace to /javasources.  Go to 
+We here only give instructions for Eclipse, but similar instructions apply
+for other ISEs.  Open eclipse and set your workspace to /javasources.  Go to
 File->Import->General->Existing projects into workspace, and select all of 
 the projects from /javasources.  If you have the spoofax plugin installed in
 eclipse, you might be able to work and compile directly within eclipse (the
