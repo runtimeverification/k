@@ -234,14 +234,14 @@ public class KompileFrontEnd {
 			break;
 		case "maude":
 			backend = new KompileBackend(Stopwatch.sw, context);
-            context.dotk = new File(output + File.separator + FilenameUtils.getFullPathNoEndSeparator(mainFile.getName()) + "-kompiled");
+            context.dotk = new File(output + File.separator + FilenameUtils.getBaseName(mainFile.getName()) + "-kompiled");
 			checkAnotherKompiled(context.dotk);
 			context.dotk.mkdirs();
 			break;
 		case "java":
 			GlobalSettings.javaBackend = true;
 			backend = new JavaSymbolicBackend(Stopwatch.sw, context);
-            context.dotk = new File(output + File.separator + FilenameUtils.getFullPathNoEndSeparator(mainFile.getName()) + "-kompiled");
+            context.dotk = new File(output + File.separator + FilenameUtils.getBaseName(mainFile.getName()) + "-kompiled");
 			checkAnotherKompiled(context.dotk);
 			context.dotk.mkdirs();
 			break;
@@ -251,7 +251,7 @@ public class KompileFrontEnd {
 		case "symbolic":
 			GlobalSettings.symbolic = true;
 			backend = new SymbolicBackend(Stopwatch.sw, context);
-            context.dotk = new File(output + File.separator + FilenameUtils.getFullPathNoEndSeparator(mainFile.getName()) + "-kompiled");
+            context.dotk = new File(output + File.separator + FilenameUtils.getBaseName(mainFile.getName()) + "-kompiled");
 			checkAnotherKompiled(context.dotk);
 			context.dotk.mkdirs();
             if (cmd.hasOption("symbolic-rules")) {
