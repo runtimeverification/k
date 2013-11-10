@@ -3,4 +3,6 @@ zero := 0 : zero;
 blink := hd(zero) : hd(one) : blink;
 zip(xs, ys) := hd(xs) : zip(ys, tl(xs));
 blink2 := zip(zero,one);
-hd(tl(blink2))
+//hd(tl(blink2))
+//blink
+blink2
