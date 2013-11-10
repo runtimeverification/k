@@ -655,8 +655,12 @@ public class KTest {
         }
     }
     private static void addConfigSanitize(Document destDoc, String configFile, String rootDefinition, String rootPrograms, String rootResults) {
-        if (!new File(configFile).exists()) {
+        if (!new File(configFile).isFile()) {
             String msg = "The configuration file does not exists.";
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, configFile, "System file."));
+        }
+        if (!configFile.endsWith(".xml")) {
+            String msg = "The configuration file is required to be given as an XML format.";
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, configFile, "System file."));
         }
         org.kframework.utils.Error.checkIfInputDirectory(rootDefinition);
