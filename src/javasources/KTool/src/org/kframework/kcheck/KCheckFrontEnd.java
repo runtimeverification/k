@@ -104,7 +104,7 @@ public class KCheckFrontEnd {
 			}
 
 			Backend backend = new RLBackend(Stopwatch.sw, context);
-        output = FilenameUtils.getFullPathNoEndSeparator(mainFile.getName()) + "-kompiled";
+        output = FilenameUtils.getBaseName(mainFile.getName()) + "-kompiled";
 			context.dotk = new File(output);
 			context.dotk.mkdirs();
 

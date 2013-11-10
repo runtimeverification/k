@@ -611,7 +611,7 @@ public class Test implements Comparable<Test> {
     }
 
     public String getCompiled() {
-        return getDirectory() + File.separator + FilenameUtils.getFullPathNoEndSeparator(new File(getLanguage()).getName()) + "-kompiled";
+        return getDirectory() + File.separator + FilenameUtils.getBaseName(new File(getLanguage()).getName()) + "-kompiled";
     }
 
     public String getDirectory() {
@@ -686,7 +686,7 @@ public class Test implements Comparable<Test> {
     }
 
     private String getPdfCompiledFilename() {
-        return getDirectory() + File.separator + FilenameUtils.getFullPathNoEndSeparator(new File(getLanguage()).getName()) + ".pdf";
+        return getDirectory() + File.separator + FilenameUtils.getBaseName(new File(getLanguage()).getName()) + ".pdf";
     }
 
     public void save() {

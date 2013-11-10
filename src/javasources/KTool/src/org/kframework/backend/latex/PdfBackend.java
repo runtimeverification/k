@@ -63,7 +63,7 @@ public class PdfBackend extends BasicBackend {
 				sw.printIntermediate("Latex2PDF");
 			}
 
-            files.add(new File(FilenameUtils.getFullPathNoEndSeparator(latexFile.getCanonicalPath()) + ".pdf"));
+            files.add(new File(FilenameUtils.getBaseName(latexFile.getCanonicalPath()) + ".pdf"));
 		} catch (IOException e) {
 			KException exception = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1001, "", "");
 			GlobalSettings.kem.register(exception);
@@ -77,7 +77,7 @@ public class PdfBackend extends BasicBackend {
 	public void run(Definition definition) throws IOException {
 		List<File> files = LatexBackend.latex(definition, context, definition.getMainModule());
 		files = pdf(files, definition.getMainModule());
-        copyFile(files.get(0), new File(GlobalSettings.outputDir + File.separator + FilenameUtils.getFullPathNoEndSeparator(new File(definition.getMainFile()).getName()) + ".pdf"));
+        copyFile(files.get(0), new File(GlobalSettings.outputDir + File.separator + FilenameUtils.getBaseName(new File(definition.getMainFile()).getName()) + ".pdf"));
 	}
 
 	@Override
