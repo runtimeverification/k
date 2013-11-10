@@ -79,6 +79,75 @@ Also recall that if your definition is already kompiled, then you can skip
 kompilation to save time using the --skip kompile option; if you want to skip
 both kompilation and pdf generation then use the option --skip "kompile pdf".
 
+KTEST:
+------
+
+The general philosophy of ktest is that the config file contains all the static
+info (where the programs and their results are), but it does not contains the
+dynamic info (where the actual definition to be tested is).  The same
+philosophy holds when we use include.  So all the non-definition attributes
+need to be statically solved at the place where the include attribute appears.
+The use of an include attribute is nothing but syntactic sugar, so the user
+does not have to repeat all that information which has already been given in
+the included configuration.  The include attributes can be desugared completely
+statically, and thus independently from where the config file containing the
+include attribute is called.
+
+In short, the inclusion of a config2.xml file into a config1.xml file is
+equivalent to having a flat config1'.xml file instead of config1.xml, which
+would behave exactly the same way as config1.xml, wherever ktest may call it
+from.  So imagine that you have that config1'.xml built that way, completely
+statically (actually, this is probably the way you implement it anyway).  Now,
+the same way I can call ktest on config1'.xml from wherever I want, the same
+way I want to be able to completely equivalently call ktest on config1.xml from
+the same place.
+
+For example, suppose that you are somewhere called "the working directory" and
+that the definition you want to test is at path/lang.k from the working
+directory.  Suppose that for some reason you really need to put your
+config1'.xml/config1.xml file at path1 from the working directory.  Then your
+config1'.xml file will look something like this:
+
+<test> definition="path/lang.k" programs="P1" ...  </test>
+
+where P1 is the relative path from the directory path1 to where the programs
+are, and you would call it with the command
+
+  ktest path1/config1'.xml
+
+Now suppose that a config2.xml file for testing lank.k against the same
+programs has already been created in the past and that you would like to
+replace the verbose and redundant config1'.xml with a config1.xml which simply
+includes config2.xml.  For concreteness, assume that config2.xml is at relative
+path path2 from where config1'.xml/config1.xml is, and that its contents is
+
+<test> definition="lang.k" programs="P2" ...  </test>
+
+Then it must be the case that P1=path1/P2.  Knowing this, we can call ktest on
+config2.xml as follows:
+
+  ktest path1/path2/config2.xml --directory path
+
+This suggests that we include config2.xml into config1.xml as follows:
+
+  <include file="path2/config2.xml" directory="path">
+
+That is, the include attribute in config.xml contains exactly and only the
+information that I would have to manually pass to ktest to call config2.xml
+instead of config1'.xml or config1.xml.
+
+However, since configuration files have fixed programs folders, we have to
+agree on what are the programs corresponding to the include attribute in
+config1.xml.  There is only one reasonable way that can be, namely the same
+programs folder as in config1'.xml, that is, P1.  So in a command like
+
+  ktest path1/config1.xml --directory path --programs P
+
+the root directory P is applied to P1 and NOT to P2 (again, think config1'.xml
+instead of config1.xml).  So the above command would be equivalent to
+
+  ktest path1/path2/config2.xml --directory path --programs P/path1/P2
+
 FILE READ/WRITE:
 ----------------
 
