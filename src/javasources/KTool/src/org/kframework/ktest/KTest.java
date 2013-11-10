@@ -642,8 +642,8 @@ public class KTest {
                     if (elem.hasAttribute(Configuration.DEFINITION_DIR))  { newRootDefinition = makeAbsolutePath(rootDefinition, elem.getAttribute(Configuration.DEFINITION_DIR)); }
                     if (elem.hasAttribute(Configuration.ROOT_PROGRAMS))   { newRootPrograms   = makeAbsolutePath(rootPrograms,   elem.getAttribute(Configuration.ROOT_PROGRAMS));  }
                     if (elem.hasAttribute(Configuration.ROOT_RESULTS))    { newRootResults    = makeAbsolutePath(rootResults,    elem.getAttribute(Configuration.ROOT_RESULTS));   }
-                    String newMorePrograms = morePrograms + " " + makeAbsolutePaths(rootPrograms, elem.getAttribute(Configuration.MORE_PROGRAMS));
-                    String newMoreResults  = moreResults  + " " + makeAbsolutePaths(rootResults,  elem.getAttribute(Configuration.MORE_RESULTS));
+                    String newMorePrograms = makeAbsolutePaths(rootPrograms, elem.getAttribute(Configuration.MORE_PROGRAMS)) + " " + morePrograms;
+                    String newMoreResults  = makeAbsolutePaths(rootResults,  elem.getAttribute(Configuration.MORE_RESULTS))  + " " + moreResults;
                     String newExclude = exclude;
                     if (elem.hasAttribute(Configuration.EXCLUDE)) { newExclude = elem.getAttribute(Configuration.EXCLUDE); }
                     addConfig(destDoc, newConfigFile, newRootDefinition, newRootPrograms, newRootResults, newMorePrograms, newMoreResults, newExclude);
