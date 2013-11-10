@@ -596,9 +596,9 @@ public class KTest {
         rootDefinition = makeAbsolutePath(Configuration.USER_DIR, rootDefinition);
         rootPrograms   = makeAbsolutePath(Configuration.USER_DIR, rootPrograms);
         rootResults    = makeAbsolutePath(Configuration.USER_DIR, rootResults);
-        addConfig(destDoc, configFile, rootDefinition, rootPrograms, rootResults);
+        addConfig(destDoc, configFile, rootDefinition, rootPrograms, rootResults, "", "");
     }
-    private static void addConfig(Document destDoc, String configFile, String rootDefinition, String rootPrograms, String rootResults)
+    private static void addConfig(Document destDoc, String configFile, String rootDefinition, String rootPrograms, String rootResults, String morePrograms, String moreResults)
       throws IOException, SAXException, ParserConfigurationException {
         addConfigSanitize(destDoc, configFile, rootDefinition, rootPrograms, rootResults);
         Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(configFile);
@@ -623,8 +623,8 @@ public class KTest {
                         test.setAttribute(Configuration.DIRECTORY, defDir);
                     }
                     // NOTE: if 'programs' or 'results' are not given, they are replaced with 'programs=""' or 'results=""'.
-                    test.setAttribute(Configuration.PROGRAMS_DIR, makeAbsolutePaths(rootPrograms, test.getAttribute(Configuration.PROGRAMS_DIR)));
-                    test.setAttribute(Configuration.RESULTS,      makeAbsolutePaths(rootResults,  test.getAttribute(Configuration.RESULTS)));
+                    test.setAttribute(Configuration.PROGRAMS_DIR, makeAbsolutePaths(rootPrograms, test.getAttribute(Configuration.PROGRAMS_DIR)) + " " + morePrograms);
+                    test.setAttribute(Configuration.RESULTS,      makeAbsolutePaths(rootResults,  test.getAttribute(Configuration.RESULTS))      + " " + moreResults);
                     destDoc.getDocumentElement().appendChild(test);
                 } else if (elem.getTagName().equals(Configuration.INCLUDE)) {
                     String configFileDir = dirname(configFile);
@@ -641,7 +641,9 @@ public class KTest {
                     if (elem.hasAttribute(Configuration.DEFINITION_DIR))  { newRootDefinition = makeAbsolutePath(rootDefinition, elem.getAttribute(Configuration.DEFINITION_DIR)); }
                     if (elem.hasAttribute(Configuration.ROOT_PROGRAMS))   { newRootPrograms   = makeAbsolutePath(rootPrograms,   elem.getAttribute(Configuration.ROOT_PROGRAMS));  }
                     if (elem.hasAttribute(Configuration.ROOT_RESULTS))    { newRootResults    = makeAbsolutePath(rootResults,    elem.getAttribute(Configuration.ROOT_RESULTS));   }
-                    addConfig(destDoc, newConfigFile, newRootDefinition, newRootPrograms, newRootResults);
+                    String newMorePrograms = morePrograms + " " + makeAbsolutePaths(rootPrograms, elem.getAttribute(Configuration.MORE_PROGRAMS));
+                    String newMoreResults  = moreResults  + " " + makeAbsolutePaths(rootResults,  elem.getAttribute(Configuration.MORE_RESULTS));
+                    addConfig(destDoc, newConfigFile, newRootDefinition, newRootPrograms, newRootResults, newMorePrograms, newMoreResults);
                 } else {
                     String msg = "Invalid element name in the configuration file: " + elem.getTagName();
                     GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
