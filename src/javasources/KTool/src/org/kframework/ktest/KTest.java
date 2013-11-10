@@ -626,6 +626,15 @@ public class KTest {
                     test.setAttribute(Configuration.PROGRAMS_DIR, makeAbsolutePaths(rootPrograms, test.getAttribute(Configuration.PROGRAMS_DIR)) + " " + morePrograms);
                     test.setAttribute(Configuration.RESULTS,      makeAbsolutePaths(rootResults,  test.getAttribute(Configuration.RESULTS))      + " " + moreResults);
                     if (exclude != null) { test.setAttribute(Configuration.EXCLUDE, exclude); }
+                    NodeList programL = test.getElementsByTagName(Configuration.PROGRAM);
+                    for (int j = 0; j < programL.getLength(); j++) {
+                        Element program = (Element) programL.item(j);
+                        if (!program.hasAttribute(Configuration.NAME)) {
+                            String msg = "The program element requires a name attribute.";
+                            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
+                        }
+                        program.setAttribute(Configuration.NAME, makeAbsolutePath(rootPrograms, program.getAttribute(Configuration.NAME)));
+                    }
                     destDoc.getDocumentElement().appendChild(test);
                 } else if (elem.getTagName().equals(Configuration.INCLUDE)) {
                     String configFileDir = dirname(configFile);
