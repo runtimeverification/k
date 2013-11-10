@@ -688,7 +688,12 @@ public class KTest {
         } else {
             resultDir = root + Configuration.FILE_SEPARATOR + dir;
         }
-        return new File(resultDir).getAbsolutePath();
+        try {
+            return new File(resultDir).getCanonicalPath();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private static String dirname(String path) {
