@@ -77,7 +77,7 @@ public class FileUtil {
 	 * Get language name in uppercase (main module name) given the filename of definition.
 	 */
 	public static String getMainModule(String filename) {
-        return FilenameUtils.getFullPathNoEndSeparator(filename).toUpperCase();
+        return FilenameUtils.getBaseName(filename).toUpperCase();
 	}
 
 	public static String getFileContent(String file) {
