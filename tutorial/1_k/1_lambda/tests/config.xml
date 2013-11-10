@@ -14,6 +14,6 @@
   <include file="../lesson_6/tests/config.xml" directory="lesson_6" />
   <include file="../lesson_7/tests/config.xml" directory="lesson_7" />
   <include file="../lesson_8/tests/config.xml" directory="lesson_8" />
-  <include file="../lesson_8/tests/config.xml" directory="lesson_8" />
+  <include file="../lesson_9/tests/config.xml" directory="lesson_9" />
 
 </tests>
