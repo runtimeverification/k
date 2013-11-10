@@ -627,12 +627,20 @@ public class KTest {
                     test.setAttribute(Configuration.RESULTS,      makeAbsolutePaths(rootResults,  test.getAttribute(Configuration.RESULTS)));
                     destDoc.getDocumentElement().appendChild(test);
                 } else if (elem.getTagName().equals(Configuration.INCLUDE)) {
-                    String cwd = dirname(configFile);
-                    String newConfigFile, newRootDefinition, newRootPrograms, newRootResults;
-                    if (elem.hasAttribute(Configuration.CONFIG_FILE))     { newConfigFile     = makeAbsolutePath(cwd, elem.getAttribute(Configuration.CONFIG_FILE));    } else { newConfigFile     = null; String msg = "An element '" + Configuration.INCLUDE + "' requires a '" + Configuration.CONFIG_FILE + "' attribute."; GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file.")); }
-                    if (elem.hasAttribute(Configuration.DEFINITION_DIR))  { newRootDefinition = makeAbsolutePath(cwd, elem.getAttribute(Configuration.DEFINITION_DIR)); } else { newRootDefinition = cwd;  }
-                    if (elem.hasAttribute(Configuration.ROOT_PROGRAMS))   { newRootPrograms   = makeAbsolutePath(cwd, elem.getAttribute(Configuration.ROOT_PROGRAMS));  } else { newRootPrograms   = dirname(newConfigFile); }
-                    if (elem.hasAttribute(Configuration.ROOT_RESULTS))    { newRootResults    = makeAbsolutePath(cwd, elem.getAttribute(Configuration.ROOT_RESULTS));   } else { newRootResults    = dirname(newConfigFile); }
+                    String configFileDir = dirname(configFile);
+                    String newConfigFile = null;
+                    if (elem.hasAttribute(Configuration.CONFIG_FILE)) {
+                        newConfigFile = makeAbsolutePath(configFileDir, elem.getAttribute(Configuration.CONFIG_FILE));
+                    } else {
+                        String msg = "An element '" + Configuration.INCLUDE + "' requires a '" + Configuration.CONFIG_FILE + "' attribute.";
+                        GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
+                    }
+                    String newRootDefinition = rootDefinition;
+                    String newRootPrograms   = dirname(newConfigFile);
+                    String newRootResults    = dirname(newConfigFile);
+                    if (elem.hasAttribute(Configuration.DEFINITION_DIR))  { newRootDefinition = makeAbsolutePath(rootDefinition, elem.getAttribute(Configuration.DEFINITION_DIR)); }
+                    if (elem.hasAttribute(Configuration.ROOT_PROGRAMS))   { newRootPrograms   = makeAbsolutePath(rootPrograms,   elem.getAttribute(Configuration.ROOT_PROGRAMS));  }
+                    if (elem.hasAttribute(Configuration.ROOT_RESULTS))    { newRootResults    = makeAbsolutePath(rootResults,    elem.getAttribute(Configuration.ROOT_RESULTS));   }
                     addConfig(destDoc, newConfigFile, newRootDefinition, newRootPrograms, newRootResults);
                 } else {
                     String msg = "Invalid element name in the configuration file: " + elem.getTagName();
