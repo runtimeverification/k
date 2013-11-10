@@ -41,7 +41,7 @@ public class LatexBackend extends BasicBackend {
 			latexified += preamble + "\\begin{document}" + endl + lf.getResult() + "\\end{document}" + endl;
 
 			File canonicalFile = GlobalSettings.mainFile.getCanonicalFile();
-            String latexifiedFile = context.dotk.getAbsolutePath() + fileSep + FilenameUtils.getBaseName(canonicalFile.getName()) + ".tex";
+            String latexifiedFile = context.dotk.getAbsolutePath() + fileSep + FilenameUtils.removeExtension(canonicalFile.getName()) + ".tex";
 			result.add(new File(latexifiedFile));
 			result.add(new File(dotKLatexStyle));
 			FileUtil.save(latexifiedFile, latexified);
