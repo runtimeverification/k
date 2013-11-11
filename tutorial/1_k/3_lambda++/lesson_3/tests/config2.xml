@@ -1,6 +1,0 @@
-<tests>
-
-  <include file="../../../1_lambda/lesson_8/tests/config.xml"
-           more-results="../../lesson_2/tests" />
-
-</tests>
