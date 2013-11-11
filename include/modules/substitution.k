@@ -135,6 +135,7 @@ module FREE-VARS
     when isBinder(K)
 // Grigore: new in order to deal with cc(.K)
   rule #freeVars((.K => .KList),,_, _, _)
+  rule #freeVars((K1:KItem ~> K => K1,,K),,_, _, _)
 //  rule #freeVars( .K , _, Free:Set) => vars(Free)
 //  rule #freeVars( (.K,,K:K => K) , _, _)
 
@@ -202,6 +203,12 @@ module SUBSTITUTION
   rule #substituteList1(L:KLabel(.KList), _, _, Ks:KList) => L(Ks)
 // Grigore: new in order to deal with cc(.K)
   rule #substituteList1(.K, _, _, _) => .K
+  rule #substituteList1(K1:KItem ~> K2:KItem ~> K, M:Map, FV:K, .KList) 
+    => #substituteKArrow(K1:KItem ~> K2:KItem ~> K, M:Map, FV:K, .K) 
+
+  syntax K ::= #substituteKArrow(K, Map, K, K)  [function]
+  rule #substituteKArrow(.K, M, FV, K) => K
+  rule #substituteKArrow((K1:KItem => .K) ~> _, M:Map, FV:K, _ ~> (.K => #substituteFV(K1,M,FV)))
 
   syntax K ::= #substituteBinder(K, Map, K)  [function]
   rule #substituteBinder(K:K, M:Map, FV:K)
