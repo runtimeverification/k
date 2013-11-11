@@ -14,32 +14,57 @@
       definition="tutorial/1_k/1_lambda/lesson_1/lambda.k"
       programs="tutorial/1_k/1_lambda/lesson_1"
       extension="lambda"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tutorial/1_k/1_lambda/lesson_2/lambda.k"
       programs="tutorial/1_k/1_lambda/lesson_1"
       extension="lambda"
       exclude="omega.lambda"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tutorial/1_k/1_lambda/lesson_3/lambda.k"
       programs="tutorial/1_k/1_lambda/lesson_1"
       extension="lambda"
       exclude="omega.lambda"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tutorial/1_k/1_lambda/lesson_4/lambda.k"
       programs="tutorial/1_k/1_lambda/lesson_1"
       extension="lambda"
       exclude="omega.lambda"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tutorial/1_k/1_lambda/lesson_5/lambda.k"
       programs="tutorial/1_k/1_lambda/lesson_1
               tutorial/1_k/1_lambda/lesson_5"
       extension="lambda"
       exclude="omega.lambda"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tutorial/1_k/1_lambda/lesson_6/lambda.k"
       programs="tutorial/1_k/1_lambda/lesson_1
@@ -47,25 +72,45 @@
               tutorial/1_k/1_lambda/lesson_6"
       extension="lambda"
       exclude="omega.lambda"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tutorial/1_k/1_lambda/lesson_7/lambda.k"
       programs="tutorial/1_k/1_lambda"
       extension="lambda"
       exclude="omega.lambda"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tutorial/1_k/1_lambda/lesson_8/lambda.k"
       programs="tutorial/1_k/1_lambda"
       extension="lambda"
       exclude="omega.lambda"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tutorial/1_k/1_lambda/lesson_9/lambda.k"
       programs="tutorial/1_k/1_lambda"
       extension="lambda"
       exclude="omega.lambda"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
 
 
 <!-- IMP -->
@@ -74,22 +119,42 @@
       definition="tutorial/1_k/2_imp/lesson_1/imp.k"
       programs="tutorial/1_k/2_imp/"
       extension="imp"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tutorial/1_k/2_imp/lesson_2/imp.k"
       programs="tutorial/1_k/2_imp"
       extension="imp"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tutorial/1_k/2_imp/lesson_3/imp.k"
       programs="tutorial/1_k/2_imp"
       extension="imp"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tutorial/1_k/2_imp/lesson_4/imp.k"
       programs="tutorial/1_k/2_imp"
       extension="imp"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tutorial/1_k/2_imp/lesson_5/imp.k"
       programs="tutorial/1_k/2_imp"
@@ -106,37 +171,67 @@
       programs="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
       extension="lambda"
       exclude="omega.lambda"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tutorial/1_k/3_lambda++/lesson_2/lambda.k"
       programs="tutorial/1_k/1_lambda/lesson_1"
       extension="lambda"
       exclude="omega.lambda"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tutorial/1_k/3_lambda++/lesson_3/lambda.k"
       programs="tutorial/1_k/1_lambda"
       extension="lambda"
       exclude="omega.lambda"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tutorial/1_k/3_lambda++/lesson_4/lambda.k"
       programs="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
       extension="lambda"
       exclude="omega.lambda"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tutorial/1_k/3_lambda++/lesson_5/lambda.k"
       programs="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
       extension="lambda"
       exclude="omega.lambda"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tutorial/1_k/3_lambda++/lesson_6/lambda.k"
       programs="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
       extension="lambda"
       exclude="omega.lambda"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
 
 <!-- IMP++ 
 
@@ -213,25 +308,45 @@
               tutorial/1_k/4_imp++"
       extension="imp"
       exclude="lesson_1/tests/spawn.imp lesson_4/test.imp"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tutorial/1_k/5_types/lesson_2/lambda.k"
       programs="tutorial/1_k/5_types/lesson_2"
       extension="lambda"
       results="tutorial/1_k/5_types/lesson_2"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tutorial/1_k/5_types/lesson_3/lambda.k"
       programs="tutorial/1_k/5_types/lesson_2"
       extension="lambda"
       results="tutorial/1_k/5_types/lesson_2"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tutorial/1_k/5_types/lesson_4/lambda.k"
       programs="tutorial/1_k/5_types/lesson_4"
       extension="lambda"
       results="tutorial/1_k/5_types/lesson_4"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tutorial/1_k/5_types/lesson_5/lambda.k"
       programs="tutorial/1_k/5_types/lesson_4
@@ -239,7 +354,12 @@
       extension="lambda"
       results="tutorial/1_k/5_types/lesson_4
               tutorial/1_k/5_types/lesson_5"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tutorial/1_k/5_types/lesson_6/lambda.k"
       programs="tutorial/1_k/5_types/lesson_4
@@ -247,7 +367,12 @@
       extension="lambda"
       results="tutorial/1_k/5_types/lesson_4
               tutorial/1_k/5_types/lesson_5"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tutorial/1_k/5_types/lesson_7/lambda.k"
       programs="tutorial/1_k/5_types/lesson_4
@@ -257,7 +382,12 @@
       results="tutorial/1_k/5_types/lesson_4
               tutorial/1_k/5_types/lesson_5
               tutorial/1_k/5_types/lesson_6"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tutorial/1_k/5_types/lesson_8/lambda.k"
       programs="tutorial/1_k/5_types/lesson_4
@@ -267,7 +397,12 @@
       results="tutorial/1_k/5_types/lesson_4
               tutorial/1_k/5_types/lesson_5
               tutorial/1_k/5_types/lesson_6"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tutorial/1_k/5_types/lesson_9/lambda.k"
       programs="tutorial/1_k/5_types/lesson_4
@@ -277,7 +412,12 @@
       results="tutorial/1_k/5_types/lesson_4
               tutorial/1_k/5_types/lesson_5
               tutorial/1_k/5_types/lesson_6"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
 
 <!--
   SIMPLE
@@ -289,14 +429,24 @@
       extension="simple"
       exclude="diverse/dekker.simple"
       results="tutorial/2_languages/1_simple/1_untyped/tests"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tutorial/2_languages/1_simple/2_typed/2_dynamic/simple-typed-dynamic.k"
       programs="tutorial/2_languages/1_simple/2_typed/programs"
       extension="simple"
       exclude="diverse/dekker.simple"
       results="tutorial/2_languages/1_simple/2_typed/2_dynamic/tests"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tutorial/2_languages/1_simple/2_typed/1_static/simple-typed-static.k"
       programs="tutorial/2_languages/1_simple/2_typed/programs"
@@ -317,20 +467,35 @@
       extension="kool"
       exclude="cycle.kool"
       results="tests/examples/kool-untyped"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tutorial/2_languages/2_kool/2_typed/1_dynamic/kool-typed-dynamic.k"
       programs="tutorial/2_languages/2_kool/2_typed/programs"
       extension="kool"
       exclude="cycle.kool"
       results="tests/examples/kool-typed-dynamic"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tutorial/2_languages/2_kool/2_typed/2_static/kool-typed-static.k"
       programs="tutorial/2_languages/2_kool/2_typed/programs"
       extension="kool"
       results="tests/examples/kool-typed-static"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
 
 <!--
   QUINE
@@ -340,12 +505,20 @@
       programs="tests/examples/quine-explicit"
       results="tests/examples/quine-explicit"
       extension="quine" >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
   </test>
   <test
       definition="samples/quine/short/quine-short.k"
       programs="tests/examples/quine-short"
       results="tests/examples/quine-short"
       extension="quine" >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
   </test>
 
 <!--
@@ -405,6 +578,10 @@
       extension="agent"
       results="tests/examples/agent"
       >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
   </test>
 
 <!--
@@ -417,6 +594,10 @@
       extension="bf"
       results="tests/examples/bf"
       >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
   </test>
 
 <!--
@@ -476,6 +657,10 @@
       extension="imp"
       results="samples/imp-hoare/programs"
       >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
   </test>
 
 <!--
@@ -508,6 +693,10 @@
       extension="peq"
       results="tests/examples/prog-equiv/" >
       <kompile-option name="-add-top-cell" />
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
   </test>
 
 <!--
@@ -550,19 +739,34 @@
       programs="tests/regression/freshMOS/programs"
       results="tests/regression/freshMOS/tests"
       extension="issue"
-  />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tests/regression/openCells1/issue.k"
       programs="tests/regression/openCells1/programs"
       results="tests/regression/openCells1/tests"
       extension="issue"
-  />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tests/regression/sets-issue/issue.k"
       programs="tests/regression/sets-issue/programs"
       results="tests/regression/sets-issue/tests"
       extension="issue"
-  />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tests/regression/mapitem2klabel/issue.k"
   />
@@ -571,7 +775,12 @@
       programs="tests/regression/issue/programs"
       results="tests/regression/issue/tests"
       extension="issue"
-  />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tests/regression/issue403/issue.k"
   />
@@ -592,13 +801,22 @@
       programs="tests/regression/strictness/programs"
       results="tests/regression/strictness/tests"
       extension="issue"
-  />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
 
   <test
       definition="tests/regression/issue580/issue.k"
       programs="tests/regression/issue580/programs"
       results="tests/regression/issue580/tests"
       extension="issue" >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
       <program name="tests/regression/issue580/programs/test.issue">
         <krun-option name="-output" value="pretty" />
         <krun-option name="-search" />
@@ -611,6 +829,10 @@
       programs="tests/regression/subsort-klabel/programs"
       results="tests/regression/subsort-klabel/tests"
       extension="issue" >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
       <program name="tests/regression/subsort-klabel/programs/test.issue">
         <krun-option name="-output" value="pretty" />
       </program>
@@ -621,6 +843,10 @@
       programs="tests/regression/issue627/programs"
       results="tests/regression/issue627/tests"
       extension="issue" >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
   </test>
 
   <test
@@ -628,6 +854,10 @@
       programs="tests/regression/issue631"
       results="tests/regression/issue631"
       extension="issue" >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
   </test>
 
   <test
@@ -681,7 +911,13 @@
       definition="tests/regression/issue647/issue.k"
       programs="tests/regression/issue647"
       results="tests/regression/issue647"
-      extension="issue" />
+      extension="issue"
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
 
   <test
       definition="tests/regression/issue663/issue.k"
@@ -706,12 +942,24 @@
       definition="tests/regression/basicFloat/issue.k"
       programs="tests/regression/basicFloat"
       results="tests/regression/basicFloat"
-      extension="issue" />
+      extension="issue"
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
   <test
       definition="tests/regression/follow/issue.k"
       programs="tests/regression/follow"
       results="tests/regression/follow"
-      extension="issue" />
+      extension="issue"
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
 
   <test
       definition="tests/regression/lint/test.k"
@@ -720,6 +968,10 @@
       results="tests/regression/lint"
       >
     <kompile-option name="-w" value="none" />
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
   </test>
 
   <test
@@ -750,7 +1002,12 @@
       programs="tests/regression/issue677/programs"
       extension="test"
       results="tests/regression/issue677/tests"
-      />
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
 <test
       definition="tests/regression/label-and-context/label-and-context.k"
       programs="tests/regression/label-and-context"

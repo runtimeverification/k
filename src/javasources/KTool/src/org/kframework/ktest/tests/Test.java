@@ -88,9 +88,11 @@ public class Test implements Comparable<Test> {
         report = getInitialElement();
         doc.appendChild(report);
 
+        /*
         // general krun options
         generalKrunOptions.put("--output", "none");
         generalKrunOptions.put("--color", "off");
+        */
 
         initializePrograms(homeDir);
     }
@@ -453,10 +455,12 @@ public class Test implements Comparable<Test> {
             generalKrunOptions = getKrunOptions(all);
         }
 
+        /*
         if (genOpts.getLength() == 0) {
             generalKrunOptions.put("--color", "off");
             generalKrunOptions.put("--output", "none");
         }
+        */
     }
 
     private String resolveAbsolutePathRelativeTo(String path, String rootDir,
