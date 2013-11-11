@@ -2,14 +2,14 @@ package org.kframework.utils;
 
 import org.apache.commons.cli.Option;
 
-import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 public class OptionComparator implements Comparator<Object> {
 
-    private ArrayList<Option> optionList;
+    private List<Option> optionList;
 
-    public OptionComparator(ArrayList<Option> optionList) {
+    public OptionComparator(List<Option> optionList) {
         this.optionList = optionList;
     }
 
