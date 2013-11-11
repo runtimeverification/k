@@ -17,6 +17,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.*;
 import javax.xml.transform.stream.*;
 import javax.xml.transform.dom.*;
+import javax.xml.validation.*;
+import javax.xml.XMLConstants;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.io.FileUtils;
@@ -601,6 +603,7 @@ public class KTest {
     private static void addConfig(Document destDoc, String configFile, String rootDefinition, String rootPrograms, String rootResults, String morePrograms, String moreResults, String exclude)
       throws IOException, SAXException, ParserConfigurationException {
         addConfigSanitize(destDoc, configFile, rootDefinition, rootPrograms, rootResults);
+        sanitizeXML(configFile);
         Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(configFile);
         Element root = doc.getDocumentElement();
         NodeList nodeList = root.getChildNodes();
@@ -713,4 +716,25 @@ public class KTest {
         return new File(path).getAbsoluteFile().getParent();
     }
 
+    private static void sanitizeXML(String configFile) {
+      try {
+        Source schemaFile = new StreamSource(new File(Configuration.getSchema()));
+        Source xmlFile = new StreamSource(new File(configFile));
+
+        SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        Schema schema = schemaFactory.newSchema(schemaFile);
+        Validator validator = schema.newValidator();
+
+        try {
+            validator.validate(xmlFile);
+        } catch (SAXException e) {
+            String msg = "The given configuration file is not valid: " + e.getLocalizedMessage();
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, configFile, "System file."));
+        }
+      } catch (SAXException e) {
+        e.printStackTrace();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
 }

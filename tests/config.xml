@@ -690,7 +690,7 @@
       extension="issue">
       <all-programs>
         <krun-option name="-ltlmc" value="TrueLtl" />
-      </all-programs> />
+      </all-programs>
   </test>
   <test
       definition="tests/regression/issue674/issue.k"

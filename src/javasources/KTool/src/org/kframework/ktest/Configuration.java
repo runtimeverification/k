@@ -134,6 +134,10 @@ public class Configuration {
 		return getKHome() + FILE_SEPARATOR + "bin" + FILE_SEPARATOR + exe;
 	}
 
+	public static String getSchema() {
+		return getKHome() + FILE_SEPARATOR + "lib" + FILE_SEPARATOR + "ktest.xsd";
+	}
+
 	public static String wrap(String s, int indent) {
 		int maxWidth = 78;
 		return WordUtils.wrap(s, maxWidth - indent, System.getProperty("line.separator") + StringUtils.repeat(" ", indent), true);
