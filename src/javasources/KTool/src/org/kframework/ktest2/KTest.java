@@ -12,6 +12,10 @@ import org.kframework.ktest2.Config.InvalidConfigError;
 import org.kframework.ktest2.Test.TestCase;
 import org.kframework.ktest2.Test.TestSuite;
 import org.kframework.utils.OptionComparator;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.file.KPaths;
+import org.kframework.utils.general.GlobalSettings;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -71,7 +75,7 @@ public class KTest {
     }
 
     private void printVersion() {
-        System.out.println("2");
+        System.out.println(FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE));
     }
 
     public static void main(String[] args) {
@@ -80,7 +84,11 @@ public class KTest {
         } catch (ParseException | InvalidArgumentException | SAXException |
                 ParserConfigurationException | IOException | InterruptedException |
                 InvalidConfigError e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
+            GlobalSettings.kem.register(
+                    new KException(KException.ExceptionType.ERROR,
+                            KException.KExceptionGroup.CRITICAL,
+                            e.getMessage(), "command line", "System file."));
             System.exit(1);
         }
     }
