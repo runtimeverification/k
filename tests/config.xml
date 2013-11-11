@@ -9,7 +9,9 @@
   Testing the Tutorial languages and programs
 -->
 
-<!-- LAMBDA -->
+  <include file="../tutorial/1_k/tests/config.xml" directory="tutorial/1_k" />
+
+<!-- LAMBDA 
   <test
       definition="tutorial/1_k/1_lambda/lesson_1/lambda.k"
       programs="tutorial/1_k/1_lambda/lesson_1"
@@ -105,15 +107,19 @@
       programs="tutorial/1_k/1_lambda"
       extension="lambda"
       exclude="omega.lambda"
+<<<<<<< HEAD
       >
       <all-programs>
         <krun-option name="-output" value="none" />
         <krun-option name="-color" value="off" />
       </all-programs>
   </test>
+=======
+      />
+-->
 
 
-<!-- IMP -->
+<!-- IMP 
 
   <test
       definition="tutorial/1_k/2_imp/lesson_1/imp.k"
@@ -163,8 +169,9 @@
         <krun-option name="-color" value="off" />
       </all-programs>
   </test>
+-->
 
-<!-- LAMBDA++ -->
+<!-- LAMBDA++
 
   <test
       definition="tutorial/1_k/3_lambda++/lesson_1/lambda.k"
@@ -226,12 +233,17 @@
       programs="tutorial/1_k/1_lambda tutorial/1_k/3_lambda++"
       extension="lambda"
       exclude="omega.lambda"
+<<<<<<< HEAD
       >
       <all-programs>
         <krun-option name="-output" value="none" />
         <krun-option name="-color" value="off" />
       </all-programs>
   </test>
+=======
+      />
+-->
+
 
 <!-- IMP++ 
 
