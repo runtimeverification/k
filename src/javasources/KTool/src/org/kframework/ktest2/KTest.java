@@ -7,7 +7,6 @@ import org.kframework.ktest2.CmdArgs.CmdArg;
 import org.kframework.ktest2.CmdArgs.CmdArgParser;
 import org.kframework.ktest2.CmdArgs.Constants;
 import org.kframework.ktest2.CmdArgs.InvalidArgumentException;
-import org.kframework.ktest2.Config.ConfigFileError;
 import org.kframework.ktest2.Config.ConfigFileParser;
 import org.kframework.ktest2.Config.InvalidConfigError;
 import org.kframework.ktest2.Test.TestCase;
@@ -29,7 +28,7 @@ public class KTest {
     }
 
     public void run() throws InvalidArgumentException, IOException, SAXException,
-            ParserConfigurationException, ConfigFileError, InterruptedException, InvalidConfigError {
+            ParserConfigurationException, InterruptedException, InvalidConfigError {
         if (argParser.cmdOpts.hasOption(Constants.HELP_OPTION))
             printHelpMsg();
         else if (argParser.cmdOpts.hasOption(Constants.VERSION_OPTION))
@@ -79,8 +78,8 @@ public class KTest {
         try {
             new KTest(args).run();
         } catch (ParseException | InvalidArgumentException | SAXException |
-                ParserConfigurationException | IOException | ConfigFileError |
-                InterruptedException | InvalidConfigError e) {
+                ParserConfigurationException | IOException | InterruptedException |
+                InvalidConfigError e) {
             System.out.println(e.getMessage());
             System.exit(1);
         }

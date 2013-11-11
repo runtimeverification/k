@@ -2,14 +2,21 @@ package org.kframework.ktest2.Config;
 
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.ktest2.CmdArgs.CmdArg;
+import org.kframework.ktest2.KTest;
 import org.kframework.ktest2.PgmArg;
 import org.kframework.ktest2.Test.TestCase;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -19,13 +26,21 @@ import java.util.Map;
 
 public class ConfigFileParser {
 
-    private final File configFile;
     private final Document doc;
     private final CmdArg cmdArgs;
 
     public ConfigFileParser(File configFile, CmdArg cmdArgs) throws IOException, SAXException,
             ParserConfigurationException {
-        this.configFile = configFile;
+        // validate xml file structure
+        Source schemaFile = new StreamSource(new File(getSchema()));
+        Source xmlFile = new StreamSource(configFile);
+        SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants
+                .W3C_XML_SCHEMA_NS_URI);
+        Schema schema = schemaFactory.newSchema(schemaFile);
+        Validator validator = schema.newValidator();
+        validator.validate(xmlFile);
+
+        // parse xml file
         this.cmdArgs = cmdArgs;
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -36,12 +51,10 @@ public class ConfigFileParser {
      * Parse config file.
      * @return List of test cases, all file path fields will be normalized using command line
      * arguments (directory, programs and results file paths)
-     * @throws org.kframework.ktest.Config.ConfigFileError when config file is malformed
+     * @throws InvalidConfigError when config file contains invalid information
      */
-    public List<TestCase> parse() throws ConfigFileError, InvalidConfigError {
+    public List<TestCase> parse() throws InvalidConfigError {
         NodeList testsNode = doc.getElementsByTagName("tests");
-        if (testsNode.getLength() != 1)
-            throw new ConfigFileError(configFile, "config file doesn't have `tests' element");
         NodeList tests = testsNode.item(0).getChildNodes();
         return parseTestCases(tests);
     }
@@ -51,26 +64,19 @@ public class ConfigFileParser {
      *
      * @param tests NodeList that contains `test' elements
      * @return list of `TestCase's
-     * @throws ConfigFileError config file is malformed
+     * @throws InvalidConfigError when config file contains invalid information
      */
-    private List<TestCase> parseTestCases(NodeList tests) throws ConfigFileError,
-            InvalidConfigError {
+    private List<TestCase> parseTestCases(NodeList tests) throws InvalidConfigError {
         List<TestCase> testCases = new LinkedList<>();
 
         for (int testNodeIdx = 0; testNodeIdx < tests.getLength(); testNodeIdx++) {
             if (tests.item(testNodeIdx).getNodeType() != Node.ELEMENT_NODE)
                 continue;
-            if (!tests.item(testNodeIdx).getNodeName().equals("test"))
-                System.out.println("warning: found an element that is not `test': " + tests.item
-                        (testNodeIdx).getNodeName());
 
             Element testNode = (Element) tests.item(testNodeIdx);
             NamedNodeMap testAttrs = testNode.getAttributes();
 
             Node definitionNode = testAttrs.getNamedItem("definition");
-            if (definitionNode == null)
-                throw new ConfigFileError(configFile, "test element doesn't have `definition' " +
-                        "attribute");
 
             String definition = normalize(definitionNode.getNodeValue(), cmdArgs.directory);
             String[] programs = normalize(splitNodeValue(testAttrs.getNamedItem("programs")),
@@ -199,5 +205,15 @@ public class ConfigFileParser {
         if (node == null)
             return new String[0];
         return node.getNodeValue().split("\\s+");
+    }
+
+    private String getSchema() {
+        return FilenameUtils.concat(getKHome(), FilenameUtils.concat("lib", "ktest.xsd"));
+    }
+
+    private String getKHome() {
+        return new File(KTest.class.getProtectionDomain().getCodeSource()
+                .getLocation().getPath()).getParentFile().getParentFile()
+                .getParentFile().getPath();
     }
 }
