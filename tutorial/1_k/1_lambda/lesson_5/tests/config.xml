@@ -1,19 +1,7 @@
 <tests>
 
-  <test
-    definition="lambda.k"
-    programs="../../lesson_1/tests
-              ."
-    extension="lambda"
-    exclude="omega"
-    results="../../lesson_1/tests
-             ../../lesson_2/tests
-             ../../lesson_3/tests
-             ." >
-    <all-programs>
-      <krun-option name="-output" value="pretty" />
-      <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
-    </all-programs>
-  </test>
+  <include file="../../lesson_4/tests/config.xml"
+           more-programs="."
+           more-results="." />
 
 </tests>

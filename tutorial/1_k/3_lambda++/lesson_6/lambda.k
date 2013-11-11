@@ -43,7 +43,7 @@ We move all the LAMBDA++ syntax here. */
                > Exp "+" Exp          [strict, left]
                > Exp "<=" Exp         [strict]
 // Other functional constructs
-               | "if" Exp "then" Exp "else" Exp  [strict(1)] // Conditional
+  syntax Exp ::= "if" Exp "then" Exp "else" Exp  [strict(1)] // Conditional
                | "let" Id "=" Exp "in" Exp                   // Let binder
                | "letrec" Id Id "=" Exp "in" Exp             // Letrec
                | "mu" Id "." Exp      [latex(\mu{#1}.{#2})]  // Mu
