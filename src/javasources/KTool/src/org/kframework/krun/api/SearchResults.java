@@ -32,19 +32,22 @@ public class SearchResults {
 			if (isDefaultPattern) {
 				UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
 				substitution.get("B:Bag").accept(unparser);
-				solutionStrings.add(unparser.getResult());
+				solutionStrings.add("\n" + unparser.getResult());
 			} else {
 				boolean empty = true;
 				
+        StringBuilder varStringBuilder = new StringBuilder();
 				for (String variable : substitution.keySet()) {
 					UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
 					substitution.get(variable).accept(unparser);
-					solutionStrings.add(variable + " -->\n" + unparser.getResult());
+          varStringBuilder.append("\n" + variable + " -->\n" + unparser.getResult());
 					empty = false;
 				}
 				if (empty) {
 					solutionStrings.add("Empty subsitution");
-				}
+				} else {
+          solutionStrings.add(varStringBuilder.toString());
+        }
 			}
 		}
 		StringBuilder sb = new StringBuilder();
@@ -54,7 +57,7 @@ public class SearchResults {
 		} else {
 			int i = 1;
 			for (String string : solutionStrings) {
-				sb.append("\n\nSolution " + i + ":\n" + string);
+				sb.append("\n\nSolution " + i + ":" + string);
 				i++;
 			}
 		}
