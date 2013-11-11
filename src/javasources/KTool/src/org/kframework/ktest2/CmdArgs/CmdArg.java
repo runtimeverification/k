@@ -119,9 +119,9 @@ public class CmdArg {
         String directory = getDirectoryArg(cmdOpts, Constants.DIRECTORY_OPTION,
                 System.getProperty("user.dir"));
         String programs = getDirectoryArg(cmdOpts, Constants.PROGRAMS_OPTION,
-                FilenameUtils.getFullPath(targetFile));
+                System.getProperty("user.dir"));
         String results = getDirectoryArg(cmdOpts, Constants.RESULTS_OPTION,
-                FilenameUtils.getFullPath(targetFile));
+                System.getProperty("user.dir"));
 
         String[] extensions = cmdOpts.getOptionValue(Constants.EXTENSIONS_OPTION, "").split("\\s+");
         String[] excludes = cmdOpts.getOptionValue(Constants.EXCLUDE_OPTION, "").split("\\s+");
