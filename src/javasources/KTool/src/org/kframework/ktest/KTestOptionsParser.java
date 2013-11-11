@@ -4,7 +4,6 @@ import org.apache.commons.cli.*;
 import org.kframework.utils.ActualPosixParser;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 
 public class KTestOptionsParser {
 

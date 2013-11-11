@@ -12,6 +12,7 @@ import org.kframework.ktest2.Config.ConfigFileParser;
 import org.kframework.ktest2.Config.InvalidConfigError;
 import org.kframework.ktest2.Test.TestCase;
 import org.kframework.ktest2.Test.TestSuite;
+import org.kframework.utils.OptionComparator;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -66,7 +67,8 @@ public class KTest {
                 "configuration (batch mode).";
         final String footer = "";
 
-        helpFormatter.printHelp(usage, header, argParser.options, footer);
+        org.kframework.utils.Error.helpMsg(usage, header, footer, argParser.getOptions(),
+                new OptionComparator(argParser.getOptionList()));
     }
 
     private void printVersion() {
