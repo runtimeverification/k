@@ -43,7 +43,7 @@ public class SearchResults {
 					empty = false;
 				}
 				if (empty) {
-          solutionStrings.add("Empty subsitution");
+					solutionStrings.add("Empty subsitution");
 				}
 			}
 		}
