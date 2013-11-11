@@ -6,6 +6,9 @@
         results="." >
     <kompile-option name="--superheat" value="division" />
     <kompile-option name="--supercool" value="lookup increment" />
+    <all-programs>
+      <krun-option name="--output" value="none"/>
+    </all-programs>
     <program name="div">
       <krun-option name="--output" value="pretty" />
       <krun-option name="--search" />

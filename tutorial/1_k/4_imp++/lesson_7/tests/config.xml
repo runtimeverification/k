@@ -1,9 +1,10 @@
 <tests>
 
   <include file="../../lesson_6/tests/config.xml"
-           exclude="lesson_1/tests/spawn"
            more-programs="."
            more-results="." />
 
 </tests>
+
+<!--            exclude="lesson_1/tests/spawn"  -->
 
