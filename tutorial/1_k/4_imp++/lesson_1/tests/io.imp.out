@@ -1,10 +1,10 @@
-[33m<T>
-    [0m[32m<k>
-        [0m"Input two numbers: " ~> '_,_(HOLE,, .List{","}) ~> print ( HOLE 
-          ) ; ~> int x, y ; ~> x = read ( ) ; ~> y = read ( ) ; ~> print ( 
-          "Their sum is: ", x + y, "\n" ) ;[32m
-    </k>[0m
-    [31m<state>
-        [0m.Map[31m
-    </state>[0m[33m
-</T>[0m
+<T>
+    <k>
+        "Input two numbers: " ~> '_,_(HOLE,, .List{","}) ~> print ( HOLE ) ;
+           ~> int x, y ; ~> x = read ( ) ; ~> y = read ( ) ; ~> print ( 
+          "Their sum is: ", x + y, "\n" ) ;
+    </k>
+    <state>
+        .Map
+    </state>
+</T>

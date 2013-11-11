@@ -1,10 +1,10 @@
-[33m<T>
-    [0m[32m<k>
-        [0m"x = " ~> '_,_(HOLE,, .List{","}) ~> print ( HOLE ) ; ~> x = read
-           ( ) ; ~> spawn x = x / 2 ; ~> spawn x = x + 10 ; ~> print ( x, 
-          "\n" ) ;[32m
-    </k>[0m
-    [31m<state>
-        [0mx |-> 0[31m
-    </state>[0m[33m
-</T>[0m
+<T>
+    <k>
+        "x = " ~> '_,_(HOLE,, .List{","}) ~> print ( HOLE ) ; ~> x = read ( )
+           ; ~> spawn x = x / 2 ; ~> spawn x = x + 10 ; ~> print ( x, "\n" ) 
+          ;
+    </k>
+    <state>
+        x |-> 0
+    </state>
+</T>

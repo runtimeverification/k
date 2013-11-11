@@ -6,7 +6,7 @@
     extension="imp"
     results="." >
     <all-programs>
-      <krun-option name="-parens" value="smart" />
+      <krun-option name="-color" value="off" />
     </all-programs>
   </test>
 

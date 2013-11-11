@@ -9,7 +9,9 @@
   Testing the Tutorial languages and programs
 -->
 
+<!--
   <include file="../tutorial/1_k/tests/config.xml" directory="tutorial/1_k" />
+-->
 
 <!-- LAMBDA 
   <test
