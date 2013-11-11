@@ -6,7 +6,7 @@ import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.K;
 
-import java.util.HashSet;
+import java.util.TreeSet;
 import java.util.List;
 import java.util.Map;
 
@@ -26,40 +26,37 @@ public class SearchResults {
 
 	@Override
 	public String toString() {
-    HashSet<String> solutionSet = new HashSet<String>();
+    TreeSet<String> solutionStrings = new TreeSet<String>();
 		for (SearchResult solution : solutions) {
 			Map<String, Term> substitution = solution.getSubstitution();
 			if (isDefaultPattern) {
 				UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
 				substitution.get("B:Bag").accept(unparser);
-        solutionSet.add(unparser.getResult());
-				//sb.append("\n" + unparser.getResult());
+        solutionStrings.add(unparser.getResult());
 			} else {
 				boolean empty = true;
 				
 				for (String variable : substitution.keySet()) {
 					UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
-					//sb.append("\n" + variable + " -->");
 					substitution.get(variable).accept(unparser);
-					//sb.append("\n" + unparser.getResult());
-          solutionSet.add(variable + " -->\n" + unparser.getResult());
+          solutionStrings.add(variable + " -->\n" + unparser.getResult());
 					empty = false;
 				}
 				if (empty) {
-          solutionSet.add("Empty subsitution");
-					//sb.append("\nEmpty substitution");
+          solutionStrings.add("Empty subsitution");
 				}
 			}
 		}
 		StringBuilder sb = new StringBuilder();
 		sb.append("Search results:");
-    int i = 1;
-    for (String string : solutionSet) {
-      sb.append("\n\nSolution " + i + ":\n" + string);
-      i++;
-    }
-		if (i == 1) {
+    if (solutionStrings.isEmpty()) {
 			sb.append("\nNo search results");
+    } else {
+      int i = 1;
+      for (String string : solutionStrings) {
+        sb.append("\n\nSolution " + i + ":\n" + string);
+        i++;
+      }
 		}
 		return sb.toString();
 	}
