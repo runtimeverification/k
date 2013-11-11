@@ -1,6 +1,6 @@
 <tests>
 
-  <include file="../../../1_lambda/lesson_1/tests"
+  <include file="../../../1_lambda/lesson_1/tests/config.xml"
            exclude="omega"
            results="." />
 

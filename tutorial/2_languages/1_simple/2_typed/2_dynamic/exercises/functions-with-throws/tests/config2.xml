@@ -1,6 +1,6 @@
 <tests>
 
-  <include file="../../../tests"
+  <include file="../../../tests/config.xml"
            more-programs="."
            more-results="." />
 

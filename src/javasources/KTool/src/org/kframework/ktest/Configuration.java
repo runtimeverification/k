@@ -78,6 +78,8 @@ public class Configuration {
 	public static final String DEFINITION_DIR = "directory";
 	public static final String ROOT_PROGRAMS = "programs";
 	public static final String ROOT_RESULTS = "results";
+	public static final String MORE_PROGRAMS = "more-programs";
+	public static final String MORE_RESULTS = "more-results";
     public static boolean KOMPILE = true;
     public static boolean PROGRAMS = true;
 	public static boolean VERBOSE = false;
