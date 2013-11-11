@@ -18,8 +18,6 @@ import java.util.Set;
 
 
 /**
- * Converts a term from the KIL representation into the Z3 representation.
- * 
  * @author: AndreiS
  */
 public class KILtoZ3 extends CopyOnWriteTransformer {
@@ -158,7 +156,23 @@ public class KILtoZ3 extends CopyOnWriteTransformer {
                 Expr expression1 = ((Z3Term) kItem.kList().get(0).accept(this)).expression();
                 Expr expression2 = ((Z3Term) kItem.kList().get(1).accept(this)).expression();
                 return new Z3Term(context.MkNot(context.MkEq(expression1, expression2)));
-            } else {
+                
+            }else if (kLabel.label().equals("'[E]K_._") && kItem.kList().size() == 2) {
+                Expr expression1 = (ArithExpr) ((Z3Term) kItem.kList().get(0).accept(this)).expression();
+                Expr expression2 = (BoolExpr) ((Z3Term) kItem.kList().get(1).accept(this)).expression();
+                Expr[] newExpr = new Expr[1];
+                newExpr[0] = expression1;
+                return new Z3Term(context.MkExists(newExpr, expression2, 1, null, null, null, null));
+
+            }else if (kLabel.label().equals("'[A]K_._") && kItem.kList().size() == 2) {
+                Expr expression1 = (ArithExpr) ((Z3Term) kItem.kList().get(0).accept(this)).expression();
+                Expr expression2 = (BoolExpr) ((Z3Term) kItem.kList().get(1).accept(this)).expression();
+                Expr[] newExpr = new Expr[1];
+                newExpr[0] = expression1;
+                return new Z3Term(context.MkExists(newExpr, expression2, 1, null, null, null, null));
+            }
+            
+            else {
                 throw new RuntimeException("cannot translate term to Z3 format " + kItem);
             }
         } catch (ClassCastException e) {
@@ -178,11 +192,11 @@ public class KILtoZ3 extends CopyOnWriteTransformer {
             if (variable.sort().equals(BoolToken.SORT_NAME)) {
                 //if (boundVariables.contains(variable)) {}
                 return new Z3Term(context.MkBoolConst(variable.name()));
-            } else if (variable.sort().equals(IntToken.SORT_NAME)) {
+            } else /*if (variable.sort().equals(IntToken.SORT_NAME))*/ {
                 return new Z3Term(context.MkIntConst(variable.name()));
-            } else {
+            } /*else {
                 throw new RuntimeException();
-            }
+            }*/
         } catch (Z3Exception e) {
             throw new RuntimeException(e.getMessage(), e.getCause());
         }
