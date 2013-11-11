@@ -58,6 +58,7 @@ public class KTestOptionsParser {
 		addOptionE(OptionBuilder.withLongOpt("dry").withDescription("Dry run: print out the commend to be executed without actual execution.").create());
 		addOptionE(OptionBuilder.withLongOpt("debug").withDescription("Debugging information.").create());
 		addOptionE(OptionBuilder.withLongOpt("ignore-white-spaces").hasArg().withArgName("on|off").withDescription("Ignore white spaces when comparsing results. (Default: on).").create());
+		addOptionE(OptionBuilder.withLongOpt("ignore-balanced-parentheses").hasArg().withArgName("on|off").withDescription("Ignore balanced parentheses when comparsing results. (Default: on).").create());
 	}
 	
 	// parse the command line arguments

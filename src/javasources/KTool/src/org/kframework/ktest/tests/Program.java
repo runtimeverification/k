@@ -75,7 +75,23 @@ public class Program implements Comparable<Program> {
 		} else {
 			regexp = "\\r";
 		}
-		return s1.replaceAll(regexp,"").trim().equals(s2.replaceAll(regexp,"").trim());
+		s1 = s1.replaceAll(regexp,"");
+		s2 = s2.replaceAll(regexp,"");
+		if (Configuration.IGNORE_BALANCED) {
+			s1 = removeAllBalanced(s1);
+			s2 = removeAllBalanced(s2);
+		}
+		return s1.trim().equals(s2.trim());
+	}
+	private static String removeAllBalanced(String s1) {
+		String s2 = s1.replaceAll("\\((.*?)\\)", "$1")
+					  .replaceAll("\\{(.*?)\\}", "$1")
+					  .replaceAll("\\[(.*?)\\]", "$1");
+		if (s1.equals(s2)) {
+			return s1;
+		} else {
+			return removeAllBalanced(s2);
+		}
 	}
 
 	public String successful(Task task) {

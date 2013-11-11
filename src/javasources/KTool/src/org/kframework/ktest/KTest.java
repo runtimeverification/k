@@ -97,6 +97,9 @@ public class KTest {
         if (cmd.hasOption("ignore-white-spaces") && cmd.getOptionValue("ignore-white-spaces").equals("off")) {
             Configuration.IGNORE_WHITE_SPACES = false;
         }
+        if (cmd.hasOption("ignore-balanced-parentheses") && cmd.getOptionValue("ignore-balanced-parentheses").equals("off")) {
+            Configuration.IGNORE_BALANCED = false;
+        }
 
         // Timeout
         if (cmd.hasOption(Configuration.TIMEOUT_OPTION)) {
