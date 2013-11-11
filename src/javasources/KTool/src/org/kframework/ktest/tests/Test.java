@@ -8,6 +8,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.HashSet;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -132,7 +134,8 @@ public class Test implements Comparable<Test> {
 
         }
 
-        for (String programsFolder : programsFolders) {
+        Set<String> programNames = new HashSet<String>();
+        for (String programsFolder : new ListReverser<String>(programsFolders)) {
 
             if (!programsFolder.equals("")
                     && !new File(programsFolder).exists()) {
@@ -150,6 +153,10 @@ public class Test implements Comparable<Test> {
                     extensions, recursive);
 
             for (String programPath : allProgramPaths) {
+                // ignore duplicated program names
+                if (!programNames.add(new File(programPath).getName())) {
+                    continue;
+                }
                 // ignore the programs from exclude list
                 boolean excluded = false;
                 for (String exclude : excludePrograms)
