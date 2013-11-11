@@ -84,7 +84,7 @@ public class KTest {
         } catch (ParseException | InvalidArgumentException | SAXException |
                 ParserConfigurationException | IOException | InterruptedException |
                 InvalidConfigError e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             GlobalSettings.kem.register(
                     new KException(KException.ExceptionType.ERROR,
                             KException.KExceptionGroup.CRITICAL,
