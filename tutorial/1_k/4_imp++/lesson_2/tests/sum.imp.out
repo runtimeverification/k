@@ -1,0 +1,13 @@
+[33m<T>
+    [0m[32m<k>
+        [0m.K[32m
+    </k>[0m
+    [31m<store>
+        [0m(#symNat(1) |-> 0) ::MapItem
+        ((#symNat(2)) |-> 5050) ::MapItem[31m
+    </store>[0m
+    [37m<env>
+        [0mn |-> (#symNat(1))
+        sum |-> (#symNat(2))[37m
+    </env>[0m[33m
+</T>[0m

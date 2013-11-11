@@ -1,0 +1,29 @@
+[33m<T>
+    [0m[32m<k>
+        [0m.K[32m
+    </k>[0m
+    [31m<store>
+        [0m(#symNat(1) |-> 2) ::MapItem
+        (#symNat(2) |-> 10) ::MapItem
+        (#symNat(3) |-> 11) ::MapItem
+        (#symNat(4) |-> 0) ::MapItem
+        (#symNat(5) |-> 1) ::MapItem
+        (#symNat(6) |-> 4) ::MapItem
+        (#symNat(7) |-> 0) ::MapItem
+        (#symNat(8) |-> 0) ::MapItem
+        (#symNat(9) |-> 20) ::MapItem
+        ((#symNat(10)) |-> 10) ::MapItem[31m
+    </store>[0m
+    [37m<env>
+        [0mi |-> (#symNat(1))
+        m |-> (#symNat(2))
+        n |-> (#symNat(3))
+        q |-> (#symNat(4))
+        r |-> (#symNat(5))
+        s |-> (#symNat(6))
+        t |-> (#symNat(7))
+        x |-> (#symNat(8))
+        y |-> (#symNat(9))
+        z |-> (#symNat(10))[37m
+    </env>[0m[33m
+</T>[0m

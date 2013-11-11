@@ -1,0 +1,16 @@
+<tests>
+
+  <test definition="imp.k"
+        programs="../../lesson_1/tests ../../../2_imp/lesson_1/tests"
+        extension="imp"
+        results="." >
+    <kompile-option name="--superheat" value="division" />
+    <kompile-option name="--supercool" value="lookup increment" />
+    <program name="div">
+      <krun-option name="--output" value="pretty" />
+      <krun-option name="--search" />
+      <krun-option name="--color" value="off" />
+    </program>
+  </test>
+
+</tests>
