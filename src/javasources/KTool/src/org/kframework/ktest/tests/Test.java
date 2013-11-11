@@ -311,7 +311,7 @@ public class Test implements Comparable<Test> {
 
         // programs without extensions
         if (!test.getAttribute(Configuration.PROGRAMS_DIR).trim().equals("") && test.getAttribute(Configuration.EXTENSIONS2).trim().equals("")) {
-            String msg = "The 'programs' attribute requires a 'extention' attribute:  ";
+            String msg = "The 'programs' attribute requires an 'extension' attribute:  ";
             msg += "<test definition=" + test.getAttribute(Configuration.LANGUAGE) + " programs=" + test.getAttribute(Configuration.PROGRAMS_DIR) + " />";
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, Configuration.wrap(msg), "command line", "System file."));
         // extensions without programs
