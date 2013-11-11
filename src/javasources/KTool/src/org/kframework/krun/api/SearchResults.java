@@ -26,20 +26,20 @@ public class SearchResults {
 
 	@Override
 	public String toString() {
-    TreeSet<String> solutionStrings = new TreeSet<String>();
+		TreeSet<String> solutionStrings = new TreeSet<String>();
 		for (SearchResult solution : solutions) {
 			Map<String, Term> substitution = solution.getSubstitution();
 			if (isDefaultPattern) {
 				UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
 				substitution.get("B:Bag").accept(unparser);
-        solutionStrings.add(unparser.getResult());
+				solutionStrings.add(unparser.getResult());
 			} else {
 				boolean empty = true;
 				
 				for (String variable : substitution.keySet()) {
 					UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
 					substitution.get(variable).accept(unparser);
-          solutionStrings.add(variable + " -->\n" + unparser.getResult());
+					solutionStrings.add(variable + " -->\n" + unparser.getResult());
 					empty = false;
 				}
 				if (empty) {
@@ -49,14 +49,14 @@ public class SearchResults {
 		}
 		StringBuilder sb = new StringBuilder();
 		sb.append("Search results:");
-    if (solutionStrings.isEmpty()) {
+		if (solutionStrings.isEmpty()) {
 			sb.append("\nNo search results");
-    } else {
-      int i = 1;
-      for (String string : solutionStrings) {
-        sb.append("\n\nSolution " + i + ":\n" + string);
-        i++;
-      }
+		} else {
+			int i = 1;
+			for (String string : solutionStrings) {
+				sb.append("\n\nSolution " + i + ":\n" + string);
+				i++;
+			}
 		}
 		return sb.toString();
 	}
