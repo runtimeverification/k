@@ -69,14 +69,15 @@ public class Program implements Comparable<Program> {
 		return true;
 	}
 	private boolean eq(String s1, String s2) {
-		String regexp;
 		if (Configuration.IGNORE_WHITE_SPACES) {
-			regexp = "\\r|\\s|\\n";
+			s1 = s1.replaceAll("\\r|\\s|\\n","");
+			s2 = s2.replaceAll("\\r|\\s|\\n","");
+			s1 = s1.replaceAll("\u001B\\[[;\\d]*m", "");
+			s1 = s2.replaceAll("\u001B\\[[;\\d]*m", "");
 		} else {
-			regexp = "\\r";
+			s1 = s1.replaceAll("\\r","");
+			s2 = s2.replaceAll("\\r","");
 		}
-		s1 = s1.replaceAll(regexp,"");
-		s2 = s2.replaceAll(regexp,"");
 		if (Configuration.IGNORE_BALANCED) {
 			s1 = removeAllBalanced(s1);
 			s2 = removeAllBalanced(s2);
