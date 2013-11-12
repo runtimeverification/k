@@ -73,7 +73,7 @@ public class Program implements Comparable<Program> {
 			s1 = s1.replaceAll("\\r|\\s|\\n","");
 			s2 = s2.replaceAll("\\r|\\s|\\n","");
 			s1 = s1.replaceAll("\u001B\\[[;\\d]*m", "");
-			s1 = s2.replaceAll("\u001B\\[[;\\d]*m", "");
+			s2 = s2.replaceAll("\u001B\\[[;\\d]*m", "");
 		} else {
 			s1 = s1.replaceAll("\\r","");
 			s2 = s2.replaceAll("\\r","");
