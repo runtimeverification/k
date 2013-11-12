@@ -210,7 +210,7 @@ public class Test implements Comparable<Test> {
                     System.out.println("   .err: " + errorFile);
                     String opt = "";
                     for (Entry<String, String> entry : krunOptions.entrySet()) {
-                        opt += entry.getKey() + "=" + entry.getValue() + " ";
+                        opt += entry.getKey() + " " + entry.getValue() + " ";
                     }
                     System.out.println("   .opt: " + opt);
                 }
