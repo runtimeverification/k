@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+
+if "$(dirname $0)/../lib/scripts/checkJava"; then
+  java -Djava.awt.headless=true $K_OPTS -ea -jar "$(dirname $0)/../lib/java/k3.jar" -ktest2 "$@"
+else
+  exit 1
+fi
