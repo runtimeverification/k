@@ -108,7 +108,7 @@ public class TestSuite {
             for (int i = 0; i < kompileOpts.size(); i++)
                 args[i+2] = kompileOpts.get(i).toString();
             // execute
-            Proc<TestCase> p = new Proc<>(tc, args, verbose, colorSetting);
+            Proc<TestCase> p = new Proc<>(tc, args, timeout, verbose, colorSetting);
             ps.add(p);
             tpe.execute(p);
         }
@@ -139,7 +139,7 @@ public class TestSuite {
             String definitionPath = tc.getDefinition();
             assert new File(definitionPath).isFile();
             Proc<TestCase> p = new Proc<>(tc, new String[] { "kompile", "--pdf", definitionPath },
-                    verbose, colorSetting);
+                    timeout, verbose, colorSetting);
             ps.add(p);
             tpe.execute(p);
         }
@@ -270,7 +270,7 @@ public class TestSuite {
                 + (errorContents == null ? "" : "error "));
         */
         Proc<KRunProgram> p = new Proc<>(program, args, inputContents, outputContents,
-                errorContents, new DefaultStringComparator(), verbose, colorSetting);
+                errorContents, new DefaultStringComparator(), timeout, verbose, colorSetting);
         tpe.execute(p);
         return p;
     }

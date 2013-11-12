@@ -25,6 +25,7 @@ public class Proc<T> implements Runnable {
 
     private final T obj;
 
+    private final int timeout;
     private final boolean verbose;
     private final ColorSetting colorSetting;
 
@@ -46,19 +47,21 @@ public class Proc<T> implements Runnable {
      * @param strComparator comparator object to compare program outputs with expected outputs
      */
     public Proc(T obj, String[] args, String procInput, String expectedOut, String expectedErr,
-                Comparator<String> strComparator, boolean verbose, ColorSetting colorSetting) {
+                Comparator<String> strComparator, int timeout, boolean verbose,
+                ColorSetting colorSetting) {
         this.obj = obj;
         this.args = args;
         this.expectedOut = expectedOut;
         this.expectedErr = expectedErr;
         this.procInput = procInput;
         this.strComparator = strComparator;
+        this.timeout = timeout;
         this.verbose = verbose;
         this.colorSetting = colorSetting;
     }
 
-    public Proc(T obj, String[] args, boolean verbose, ColorSetting colorSetting) {
-        this(obj, args, "", "", "", new DefaultStringComparator(), verbose, colorSetting);
+    public Proc(T obj, String[] args, int timeout, boolean verbose, ColorSetting colorSetting) {
+        this(obj, args, "", "", "", new DefaultStringComparator(), timeout, verbose, colorSetting);
     }
 
     @Override
