@@ -639,19 +639,10 @@ public class KTest {
                     if (exclude   != null) { test.setAttribute(Configuration.EXCLUDE,     exclude); }
                     if (extension != null) { test.setAttribute(Configuration.EXTENSIONS2, extension); }
                     // kompile-option, {all-programs, program}/krun-option
+                    makeAbsoluteProgramName(test, rootPrograms);
                     if (kompileOptions != null) { replaceChild(destDoc, test, Configuration.KOMPILE_OPTION, kompileOptions); }
                     if (allOptions     != null) { replaceChild(destDoc, test, Configuration.ALL_PROGRAMS,   allOptions); }
                     if (krunOptions    != null) { replaceChild(destDoc, test, Configuration.PROGRAM,        krunOptions); }
-                    // program
-                    NodeList programL = test.getElementsByTagName(Configuration.PROGRAM);
-                    for (int j = 0; j < programL.getLength(); j++) {
-                        Element program = (Element) programL.item(j);
-                        if (!program.hasAttribute(Configuration.NAME)) {
-                            String msg = "The program element requires a name attribute.";
-                            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
-                        }
-                        program.setAttribute(Configuration.NAME, makeAbsolutePath(rootPrograms, program.getAttribute(Configuration.NAME)));
-                    }
                     // finish
                     destDoc.getDocumentElement().appendChild(test);
                 } else if (elem.getTagName().equals(Configuration.INCLUDE)) {
@@ -681,6 +672,7 @@ public class KTest {
                     if (extension == null && elem.hasAttribute(Configuration.EXTENSIONS2)) { extension = elem.getAttribute(Configuration.EXTENSIONS2); }
                     if (exclude   == null && elem.hasAttribute(Configuration.EXCLUDE))     { exclude   = elem.getAttribute(Configuration.EXCLUDE); }
                     // kompile-option, {all-programs, program}/krun-option
+                    makeAbsoluteProgramName(elem, rootPrograms);
                     NodeList ko, ao, ro;
                     if (kompileOptions == null && (ko = elem.getElementsByTagName(Configuration.KOMPILE_OPTION)).getLength() > 0) { kompileOptions = ko; }
                     if (allOptions     == null && (ao = elem.getElementsByTagName(Configuration.ALL_PROGRAMS  )).getLength() > 0) { allOptions     = ao; }
@@ -776,6 +768,18 @@ public class KTest {
         }
         for (int i = 0; i < childs.getLength(); i++) {
             elem.appendChild(doc.importNode(childs.item(i), true));
+        }
+    }
+
+    private static void makeAbsoluteProgramName(Element elem, String rootPrograms) {
+        NodeList programL = elem.getElementsByTagName(Configuration.PROGRAM);
+        for (int j = 0; j < programL.getLength(); j++) {
+            Element program = (Element) programL.item(j);
+            if (!program.hasAttribute(Configuration.NAME)) {
+                String msg = "The program element requires a name attribute.";
+                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
+            }
+            program.setAttribute(Configuration.NAME, makeAbsolutePath(rootPrograms, program.getAttribute(Configuration.NAME)));
         }
     }
 }
