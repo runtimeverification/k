@@ -4,7 +4,7 @@
            more-results="." >
     <kompile-option name="--transition"
                     value="lookup increment assignment read print" />
-    <program name="../../lesson_1/tests/spawn.imp" >
+    <program name="spawn.imp" >
       <krun-option name="--search" />
     </program>
   </include>
