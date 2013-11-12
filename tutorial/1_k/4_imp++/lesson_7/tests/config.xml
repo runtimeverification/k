@@ -2,7 +2,11 @@
 
   <include file="../../lesson_6/tests/config.xml"
            more-programs="."
-           more-results="." />
+           more-results="." >
+    <program name="spawn.imp" >
+      <krun-option name="--search" />
+    </program>
+  </include>
 
 </tests>
 

@@ -4,7 +4,7 @@
            more-results="." >
     <kompile-option name="-superheat" value="division" />
     <kompile-option name="-supercool" value="lookup increment" />
-    <program name="div.imp">
+    <program name="../../lesson_1/tests/div.imp">
       <krun-option name="-search" />
     </program>
   </include>
