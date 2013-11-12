@@ -148,10 +148,11 @@ public class CmdArg {
     private static KTestStep[] parseSkips(CommandLine cmdOpts) throws InvalidArgumentException {
         Set<KTestStep> skips_set = new HashSet<>();
         for (String s : cmdOpts.getOptionValue(Constants.SKIP_OPTION, "").split("\\s+"))
-            switch (s) {
+            switch (s.trim()) {
                 case "kompile": skips_set.add(KTestStep.KOMPILE); break;
                 case "pdf": skips_set.add(KTestStep.PDF); break;
                 case "krun": skips_set.add(KTestStep.KRUN); break;
+                case "": break;
                 default: throw new InvalidArgumentException("--" + Constants.SKIP_OPTION + " " +
                         "option should be [kompile|pdf|krun]+");
             }
