@@ -1,5 +1,12 @@
 <tests>
 
-  <include file="../../lesson_5/tests/config.xml" />
+  <include file="../../lesson_5/tests/config.xml" 
+           more-results="." >
+    <kompile-option name="--transition"
+                    value="lookup increment assignment read print" />
+    <program name="spawn.imp" >
+      <krun-option name="--search" />
+    </program>
+  </include>
 
 </tests>

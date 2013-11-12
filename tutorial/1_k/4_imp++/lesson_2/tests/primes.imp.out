@@ -3,27 +3,27 @@
         .K
     </k>
     <store>
-        (#symNat(1) |-> 2) ::MapItem
-        (#symNat(2) |-> 10) ::MapItem
-        (#symNat(3) |-> 11) ::MapItem
-        (#symNat(4) |-> 0) ::MapItem
-        (#symNat(5) |-> 1) ::MapItem
-        (#symNat(6) |-> 4) ::MapItem
-        (#symNat(7) |-> 0) ::MapItem
-        (#symNat(8) |-> 0) ::MapItem
-        (#symNat(9) |-> 20) ::MapItem
-        ((#symNat(10)) |-> 10) ::MapItem
+        #symNat(1) |-> 2
+        #symNat(2) |-> 10
+        #symNat(3) |-> 11
+        #symNat(4) |-> 0
+        #symNat(5) |-> 1
+        #symNat(6) |-> 4
+        #symNat(7) |-> 0
+        #symNat(8) |-> 0
+        #symNat(9) |-> 20
+        #symNat(10) |-> 10
     </store>
     <env>
-        i |-> (#symNat(1))
-        m |-> (#symNat(2))
-        n |-> (#symNat(3))
-        q |-> (#symNat(4))
-        r |-> (#symNat(5))
-        s |-> (#symNat(6))
-        t |-> (#symNat(7))
-        x |-> (#symNat(8))
-        y |-> (#symNat(9))
-        z |-> (#symNat(10))
+        i |-> #symNat(1)
+        m |-> #symNat(2)
+        n |-> #symNat(3)
+        q |-> #symNat(4)
+        r |-> #symNat(5)
+        s |-> #symNat(6)
+        t |-> #symNat(7)
+        x |-> #symNat(8)
+        y |-> #symNat(9)
+        z |-> #symNat(10)
     </env>
 </T>

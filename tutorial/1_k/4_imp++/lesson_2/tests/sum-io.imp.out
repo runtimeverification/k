@@ -1,19 +1,20 @@
 <T>
     <k>
         "Add numbers up to (<= 0 to quit)? " ~> '_,_(HOLE,, .List{","}) ~> 
-          print ( HOLE ) ; ~> n = read ( ) ; ~> if ( n <= 0 ) { halt ; } else
-           { s = 0 ; while ( ! n <= 0 ) { s = s + n ; n = n + -1 ; } print ( 
-          "Sum = ", s, "\n" ) ; } ~> while ( true ) { print ( 
-          "Add numbers up to (<= 0 to quit)? " ) ; n = read ( ) ; if ( n <= 0
-           ) { halt ; } else { s = 0 ; while ( ! n <= 0 ) { s = s + n ; n = n
-           + -1 ; } print ( "Sum = ", s, "\n" ) ; } }
+          print ( HOLE ) ; ~> n = read ( ) ; ~> if ( (n <= 0) ) ({ halt ; }) 
+          else ({ (((s = 0 ;) (while ( (! (n <= 0)) ) ({ ((s = (s + n) ;) (n 
+          = (n + -1) ;)) }))) (print ( ("Sum = ", (s, "\n")) ) ;)) }) ~> 
+          while ( true ) ({ (((print ( "Add numbers up to (<= 0 to quit)? " )
+           ;) (n = read ( ) ;)) (if ( (n <= 0) ) ({ halt ; }) else ({ (((s = 
+          0 ;) (while ( (! (n <= 0)) ) ({ ((s = (s + n) ;) (n = (n + -1) ;)) 
+          }))) (print ( ("Sum = ", (s, "\n")) ) ;)) }))) })
     </k>
     <store>
-        (#symNat(1) |-> 0) ::MapItem
-        ((#symNat(2)) |-> 0) ::MapItem
+        #symNat(1) |-> 0
+        #symNat(2) |-> 0
     </store>
     <env>
-        n |-> (#symNat(1))
-        s |-> (#symNat(2))
+        n |-> #symNat(1)
+        s |-> #symNat(2)
     </env>
 </T>

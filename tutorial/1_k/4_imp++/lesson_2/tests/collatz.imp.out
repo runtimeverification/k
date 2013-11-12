@@ -3,17 +3,17 @@
         .K
     </k>
     <store>
-        (#symNat(1) |-> 2) ::MapItem
-        (#symNat(2) |-> 1) ::MapItem
-        (#symNat(3) |-> 1) ::MapItem
-        (#symNat(4) |-> 3) ::MapItem
-        ((#symNat(5)) |-> 66) ::MapItem
+        #symNat(1) |-> 2
+        #symNat(2) |-> 1
+        #symNat(3) |-> 1
+        #symNat(4) |-> 3
+        #symNat(5) |-> 66
     </store>
     <env>
-        m |-> (#symNat(1))
-        n |-> (#symNat(2))
-        q |-> (#symNat(3))
-        r |-> (#symNat(4))
-        s |-> (#symNat(5))
+        m |-> #symNat(1)
+        n |-> #symNat(2)
+        q |-> #symNat(3)
+        r |-> #symNat(4)
+        s |-> #symNat(5)
     </env>
 </T>

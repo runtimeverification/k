@@ -3,11 +3,11 @@
         .K
     </k>
     <store>
-        (#symNat(1) |-> 0) ::MapItem
-        ((#symNat(2)) |-> 5050) ::MapItem
+        #symNat(1) |-> 0
+        #symNat(2) |-> 5050
     </store>
     <env>
-        n |-> (#symNat(1))
-        sum |-> (#symNat(2))
+        n |-> #symNat(1)
+        sum |-> #symNat(2)
     </env>
 </T>

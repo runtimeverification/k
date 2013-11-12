@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><tests><test definition="/home/grosu/k/tutorial/1_k/4_imp++/lesson_6/imp.k" directory="/home/grosu/k/tutorial/1_k/4_imp++/lesson_6" exclude="div.imp sum.imp collatz.imp primes.imp" extension="imp" programs="/home/grosu/k/tutorial/1_k/2_imp/lesson_1/tests     /home/grosu/k/tutorial/1_k/4_imp++/lesson_1/tests     " results="/home/grosu/k/tutorial/1_k/2_imp/lesson_1/tests /home/grosu/k/tutorial/1_k/2_imp/lesson_2/tests /home/grosu/k/tutorial/1_k/2_imp/lesson_3/tests /home/grosu/k/tutorial/1_k/2_imp/lesson_4/tests /home/grosu/k/tutorial/1_k/2_imp/lesson_5/tests /home/grosu/k/tutorial/1_k/4_imp++/lesson_1/tests /home/grosu/k/tutorial/1_k/4_imp++/lesson_2/tests /home/grosu/k/tutorial/1_k/4_imp++/lesson_4/tests /home/grosu/k/tutorial/1_k/4_imp++/lesson_5/tests /home/grosu/k/tutorial/1_k/4_imp++/lesson_6/tests ">
+    
+  <kompile-option name="--transition" value="lookup increment assignment read print"/><all-programs>
+      <krun-option name="--output" value="none"/>
+      <krun-option name="--color" value="off"/>
+    </all-programs><program name="/home/grosu/k/tutorial/1_k/2_imp/lesson_1/tests/spawn.imp">
+      <krun-option name="--search"/>
+    </program></test></tests>

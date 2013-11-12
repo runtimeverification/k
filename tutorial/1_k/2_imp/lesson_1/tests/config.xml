@@ -5,9 +5,6 @@
     programs="."
     extension="imp"
     results="." >
-    <all-programs>
-      <krun-option name="-color" value="off" />
-    </all-programs>
   </test>
 
 </tests>

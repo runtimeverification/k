@@ -1,13 +1,13 @@
 <T>
     <k>
         "x = " ~> '_,_(HOLE,, .List{","}) ~> print ( HOLE ) ; ~> x = read ( )
-           ; ~> spawn x = x / 2 ; ~> spawn x = x + 10 ; ~> print ( x, "\n" ) 
-          ;
+           ; ~> spawn (x = (x / 2) ;) ~> spawn (x = (x + 10) ;) ~> print ( (x
+          , "\n") ) ;
     </k>
     <store>
-        (#symNat(1) |-> 0) ::MapItem
+        #symNat(1) |-> 0
     </store>
     <env>
-        x |-> (#symNat(1))
+        x |-> #symNat(1)
     </env>
 </T>
