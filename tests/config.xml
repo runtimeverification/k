@@ -6,10 +6,22 @@
 
 <tests>
 <!--
-  Testing the Tutorial languages and programs
+  Testing the Tutorial languages and programs.
+
+  Note (by Grigore): I don't like it that I have to mention the
+  programs="tests" and results="tests" there, but that is temporarily
+  needed because all the other tests assume that the root programs and
+  results foders are the main k directory, so we call ktest in the main
+  directory with the options programs=results=".".  Instead, we should
+  make all programs and results be relative to this config file, and then
+  we just call ktest tests/config.xml from the root directory (and we also
+  need to modify jenkins to account for it).
 -->
 
-  <include file="../tutorial/1_k/tests/config.xml" directory="tutorial/1_k" />
+  <include file="../tutorial/1_k/tests/config.xml"
+           directory="tutorial/1_k"
+           programs="tests"
+           results="tests" />
 
 <!-- LAMBDA 
   <test
