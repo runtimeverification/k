@@ -280,6 +280,7 @@ public class TestSuite {
         if (condition)
             System.out.println("SUCCESS");
         else
-            System.out.println(ColorUtil.RgbToAnsi(Color.red, colorSetting) + "FAIL");
+            System.out.println(ColorUtil.RgbToAnsi(Color.red, colorSetting) + "FAIL" + ColorUtil
+                    .ANSI_NORMAL);
     }
 }

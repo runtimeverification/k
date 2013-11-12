@@ -101,8 +101,8 @@ public class Proc<T> implements Runnable {
                 } else if (strComparator.compare(pgmOut, expectedOut) != 0)
                     // outputs don't match
                     System.out.format(
-                            "%sERROR: %s output doesn't match with expected output (time: %d ms)%n",
-                            red, procCmd, endTime);
+                        "%sERROR: %s output doesn't match with expected output (time: %d ms)%s%n",
+                        red, procCmd, endTime, ColorUtil.ANSI_NORMAL);
                 else
                     // outputs match
                     if (verbose)
@@ -113,8 +113,8 @@ public class Proc<T> implements Runnable {
                 // program ended with error ..
                 if (expectedErr == null)
                     // we're not comparing error outputs
-                    System.out.format("%sERROR: %s failed with error (time: %d ms)%n",
-                            red, procCmd, endTime);
+                    System.out.format("%sERROR: %s failed with error (time: %d ms)%s%n",
+                            red, procCmd, endTime, ColorUtil.ANSI_NORMAL);
                 else if (strComparator.compare(pgmErr, expectedErr) == 0)
                     // error outputs match
                     if (verbose)
@@ -123,7 +123,7 @@ public class Proc<T> implements Runnable {
                     // error outputs don't match
                     System.out.format(
                             "%sERROR: %s throwed error, but expected error message doesn't match "+
-                            "(time: %d ms)%n", red, procCmd, endTime);
+                            "(time: %d ms)%s%n", red, procCmd, endTime, ColorUtil.ANSI_NORMAL);
 
             }
         } catch (IOException | InterruptedException e) {
