@@ -208,6 +208,11 @@ public class Test implements Comparable<Test> {
                     System.out.println("   .in : " + inputFile);
                     System.out.println("   .out: " + outputFile);
                     System.out.println("   .err: " + errorFile);
+                    String opt = "";
+                    for (Entry<String, String> entry : krunOptions.entrySet()) {
+                        opt += entry.getKey() + "=" + entry.getValue() + " ";
+                    }
+                    System.out.println("   .opt: " + opt);
                 }
 
                 // custom programPath
