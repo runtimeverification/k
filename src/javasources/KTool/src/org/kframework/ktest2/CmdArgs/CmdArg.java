@@ -7,8 +7,8 @@ import org.kframework.krun.ColorSetting;
 import org.kframework.ktest2.KTestStep;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Represents valid command line arguments. This class can only be instantiated using
@@ -17,10 +17,7 @@ import java.util.Arrays;
  * Being valid means:
  *   - File paths are valid(e.g. point to a files/directories) relative to current directory
  *   - Only one unnamed argument is passed
- *           (TODO: what happens in case of `--verbose something' ? (osa1))
  *   - File extension is either .k or .xml
- *
- * Wrong strings in --skip parameters are ignored for now. (TODO: osa1)
  */
 public class CmdArg {
 
@@ -134,41 +131,31 @@ public class CmdArg {
 
         boolean verbose = cmdOpts.hasOption(Constants.VERBOSE_OPTION);
 
-        ColorSetting colorSetting = parseColorSetting(cmdOpts);
+        return new CmdArg(directory, programs, results, extensions, excludes, parseSkips(cmdOpts),
+                generateReport, targetFile, verbose, parseColorSetting(cmdOpts),
+                parseTimeout(cmdOpts));
+    }
 
+    private static int parseTimeout(CommandLine cmdOpts) throws InvalidArgumentException {
         String timeout_str = cmdOpts.getOptionValue(Constants.TIMEOUT_OPTION, "5000");
-        int timeout;
         try {
-            timeout = Integer.parseInt(timeout_str);
+            return Integer.parseInt(timeout_str);
         } catch (NumberFormatException e) {
             throw new InvalidArgumentException("timeout value is not an integer: " + timeout_str);
         }
-
-        return new CmdArg(directory, programs, results, extensions, excludes, getSkips(cmdOpts),
-                generateReport, targetFile, verbose, colorSetting, timeout);
     }
 
-    private static KTestStep[] getSkips(CommandLine cmdOpts) {
-        final String[] skips_str = cmdOpts.getOptionValue(Constants.SKIP_OPTION, "").split("\\s+");
-        Arrays.sort(skips_str); // needed for binary search
-        ArrayList<KTestStep> skips = new ArrayList<>();
-        if (Arrays.binarySearch(skips_str, "kompile") >= 0)
-            skips.add(KTestStep.KOMPILE);
-        if (Arrays.binarySearch(skips_str, "pdf") >= 0)
-            skips.add(KTestStep.PDF);
-        if (Arrays.binarySearch(skips_str, "krun") >= 0)
-            skips.add(KTestStep.KRUN);
-        return skips.toArray(new KTestStep[skips.size()]);
-    }
-
-    private static String getDirectoryArg(CommandLine cmdOpts, String argName,
-                                          String default_) throws
-            InvalidArgumentException {
-        final String ret = cmdOpts.getOptionValue(argName, default_);
-        if (!new File(ret).isDirectory())
-            throw new InvalidArgumentException("--" + argName + " argument is not a folder: " +
-                    ret);
-        return ret;
+    private static KTestStep[] parseSkips(CommandLine cmdOpts) throws InvalidArgumentException {
+        Set<KTestStep> skips_set = new HashSet<>();
+        for (String s : cmdOpts.getOptionValue(Constants.SKIP_OPTION, "").split("\\s+"))
+            switch (s) {
+                case "kompile": skips_set.add(KTestStep.KOMPILE); break;
+                case "pdf": skips_set.add(KTestStep.PDF); break;
+                case "krun": skips_set.add(KTestStep.KRUN); break;
+                default: throw new InvalidArgumentException("--" + Constants.SKIP_OPTION + " " +
+                        "option should be [kompile|pdf|krun]+");
+            }
+        return skips_set.toArray(new KTestStep[skips_set.size()]);
     }
 
     private static ColorSetting parseColorSetting(CommandLine cmdOpts)
@@ -181,6 +168,16 @@ public class CmdArg {
             default: throw new InvalidArgumentException("--" + Constants.COLOR_SETTING + " option" +
                     " should be [on|off|extended]");
         }
+    }
+
+    private static String getDirectoryArg(CommandLine cmdOpts, String argName,
+                                          String default_)
+            throws InvalidArgumentException {
+        final String ret = cmdOpts.getOptionValue(argName, default_);
+        if (!new File(ret).isDirectory())
+            throw new InvalidArgumentException("--" + argName + " argument is not a folder: " +
+                    ret);
+        return ret;
     }
 }
 

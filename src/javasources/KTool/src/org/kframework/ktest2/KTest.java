@@ -64,7 +64,6 @@ public class KTest {
     }
 
     private void printHelpMsg() {
-        // TODO: sort options as in kframework.ktest
         HelpFormatter helpFormatter = new HelpFormatter();
         helpFormatter.setWidth(79);
 

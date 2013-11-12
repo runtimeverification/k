@@ -51,8 +51,6 @@ public class TestCase {
      */
     private final Map<String, List<PgmArg>> pgmSpecificKRunOpts;
 
-
-    // TODO: add something like validateArgs to make sure only valid test cases are produced (osa1)
     public TestCase(String definition, String[] programs, String[] extensions,
                     String[] excludes, String[] results, List<PgmArg> kompileOpts,
                     List<PgmArg> krunOpts, Map<String, List<PgmArg>> pgmSpecificKRunOpts)

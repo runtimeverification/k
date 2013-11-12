@@ -4,6 +4,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.kframework.krun.ColorSetting;
 import org.kframework.utils.ColorUtil;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.general.GlobalSettings;
 
 import java.awt.*;
 import java.io.IOException;
@@ -124,12 +126,14 @@ public class Proc<T> implements Runnable {
                             "(time: %d ms)%n", red, procCmd, endTime);
 
             }
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
+            returnCode = 1;
             e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            GlobalSettings.kem.register(
+                    new KException(KException.ExceptionType.WARNING,
+                            KException.KExceptionGroup.INTERNAL, e.getMessage(), "command line",
+                            "System file."));
         }
-        // TODO: error handlers (osa1)
         proc = null;
     }
 
@@ -137,9 +141,14 @@ public class Proc<T> implements Runnable {
      * Kill spawned process. If no process is spawned or spawned process is ended, nothing happens.
      */
     public void kill() {
-        proc.destroy();
-        String procCmd = StringUtils.join(args, ' ');
-        System.out.format("ERROR: %s killed (timeout)%n", procCmd);
+        if (proc != null) {
+            proc.destroy();
+            String procCmd = StringUtils.join(args, ' ');
+            GlobalSettings.kem.register(new KException(KException.ExceptionType.WARNING,
+                    KException.KExceptionGroup.INTERNAL, procCmd + " is killed", "command line",
+                    "System file."));
+            returnCode = 1;
+        }
     }
 
     public int getReturnCode() {
