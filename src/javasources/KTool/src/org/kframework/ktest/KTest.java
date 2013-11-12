@@ -601,9 +601,10 @@ public class KTest {
         rootDefinition = makeAbsolutePath(Configuration.USER_DIR, rootDefinition);
         rootPrograms   = makeAbsolutePath(Configuration.USER_DIR, rootPrograms);
         rootResults    = makeAbsolutePath(Configuration.USER_DIR, rootResults);
-        addConfig(destDoc, configFile, rootDefinition, rootPrograms, rootResults, "", "", null);
+        addConfig(destDoc, configFile, rootDefinition, rootPrograms, rootResults, "", "", null, null, null, null, null);
     }
-    private static void addConfig(Document destDoc, String configFile, String rootDefinition, String rootPrograms, String rootResults, String morePrograms, String moreResults, String exclude)
+    private static void addConfig(Document destDoc, String configFile, String rootDefinition, String rootPrograms, String rootResults,
+      String morePrograms, String moreResults, String extension, String exclude, NodeList kompileOptions, NodeList allOptions, NodeList krunOptions)
       throws IOException, SAXException, ParserConfigurationException {
         addConfigSanitize(destDoc, configFile, rootDefinition, rootPrograms, rootResults);
         sanitizeXML(configFile);
@@ -616,22 +617,32 @@ public class KTest {
                 Element elem = (Element) node;
                 if (elem.getTagName().equals("test")) {
                     Element test = (Element) destDoc.importNode(elem,true);
+                    // definition
                     if (test.hasAttribute(Configuration.LANGUAGE)) {
                         test.setAttribute(Configuration.LANGUAGE,  makeAbsolutePath(rootDefinition, test.getAttribute(Configuration.LANGUAGE)));
                     } else {
                         String msg = "The attribute '" + Configuration.LANGUAGE + "' is required.";
                         GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
                     }
+                    // directory
                     String defDir = dirname(test.getAttribute(Configuration.LANGUAGE));
                     if (test.hasAttribute(Configuration.DIRECTORY)) {
                         test.setAttribute(Configuration.DIRECTORY, makeAbsolutePath(defDir, test.getAttribute(Configuration.DIRECTORY)));
                     } else {
                         test.setAttribute(Configuration.DIRECTORY, defDir);
                     }
+                    // programs, results
                     // NOTE: if 'programs' or 'results' are not given, they are replaced with 'programs=""' or 'results=""'.
                     test.setAttribute(Configuration.PROGRAMS_DIR, makeAbsolutePaths(rootPrograms, test.getAttribute(Configuration.PROGRAMS_DIR)) + " " + morePrograms);
                     test.setAttribute(Configuration.RESULTS,      makeAbsolutePaths(rootResults,  test.getAttribute(Configuration.RESULTS))      + " " + moreResults);
-                    if (exclude != null) { test.setAttribute(Configuration.EXCLUDE, exclude); }
+                    // extension, exclude
+                    if (exclude   != null) { test.setAttribute(Configuration.EXCLUDE,     exclude); }
+                    if (extension != null) { test.setAttribute(Configuration.EXTENSIONS2, extension); }
+                    // kompile-option, {all-programs, program}/krun-option
+                    if (kompileOptions != null) { replaceChild(destDoc, test, Configuration.KOMPILE_OPTION, kompileOptions); }
+                    if (allOptions     != null) { replaceChild(destDoc, test, Configuration.ALL_PROGRAMS,   allOptions); }
+                    if (krunOptions    != null) { replaceChild(destDoc, test, Configuration.PROGRAM,        krunOptions); }
+                    // program
                     NodeList programL = test.getElementsByTagName(Configuration.PROGRAM);
                     for (int j = 0; j < programL.getLength(); j++) {
                         Element program = (Element) programL.item(j);
@@ -641,8 +652,10 @@ public class KTest {
                         }
                         program.setAttribute(Configuration.NAME, makeAbsolutePath(rootPrograms, program.getAttribute(Configuration.NAME)));
                     }
+                    // finish
                     destDoc.getDocumentElement().appendChild(test);
                 } else if (elem.getTagName().equals(Configuration.INCLUDE)) {
+                    // file
                     String configFileDir = dirname(configFile);
                     String newConfigFile = null;
                     if (elem.hasAttribute(Configuration.CONFIG_FILE)) {
@@ -651,17 +664,30 @@ public class KTest {
                         String msg = "An element '" + Configuration.INCLUDE + "' requires a '" + Configuration.CONFIG_FILE + "' attribute.";
                         GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
                     }
+                    // directory, programs, results
+                    String relativeDirOfNewConfigFile = new File(elem.getAttribute(Configuration.CONFIG_FILE)).getParent(); // '../path/to' when <include file="../path/to/config.xml" />
+                    if (relativeDirOfNewConfigFile == null) { relativeDirOfNewConfigFile = ""; }
+                    String defaultRootProgramsAndResults = makeAbsolutePath(rootPrograms, relativeDirOfNewConfigFile);
                     String newRootDefinition = rootDefinition;
-                    String newRootPrograms   = dirname(newConfigFile);
-                    String newRootResults    = dirname(newConfigFile);
+                    String newRootPrograms   = defaultRootProgramsAndResults;
+                    String newRootResults    = defaultRootProgramsAndResults;
                     if (elem.hasAttribute(Configuration.DEFINITION_DIR))  { newRootDefinition = makeAbsolutePath(rootDefinition, elem.getAttribute(Configuration.DEFINITION_DIR)); }
                     if (elem.hasAttribute(Configuration.ROOT_PROGRAMS))   { newRootPrograms   = makeAbsolutePath(rootPrograms,   elem.getAttribute(Configuration.ROOT_PROGRAMS));  }
                     if (elem.hasAttribute(Configuration.ROOT_RESULTS))    { newRootResults    = makeAbsolutePath(rootResults,    elem.getAttribute(Configuration.ROOT_RESULTS));   }
+                    // more-programs, more-results
                     String newMorePrograms = makeAbsolutePaths(rootPrograms, elem.getAttribute(Configuration.MORE_PROGRAMS)) + " " + morePrograms;
                     String newMoreResults  = makeAbsolutePaths(rootResults,  elem.getAttribute(Configuration.MORE_RESULTS))  + " " + moreResults;
-                    String newExclude = exclude;
-                    if (elem.hasAttribute(Configuration.EXCLUDE)) { newExclude = elem.getAttribute(Configuration.EXCLUDE); }
-                    addConfig(destDoc, newConfigFile, newRootDefinition, newRootPrograms, newRootResults, newMorePrograms, newMoreResults, newExclude);
+                    // extension, exclude
+                    if (extension == null && elem.hasAttribute(Configuration.EXTENSIONS2)) { extension = elem.getAttribute(Configuration.EXTENSIONS2); }
+                    if (exclude   == null && elem.hasAttribute(Configuration.EXCLUDE))     { exclude   = elem.getAttribute(Configuration.EXCLUDE); }
+                    // kompile-option, {all-programs, program}/krun-option
+                    NodeList ko, ao, ro;
+                    if (kompileOptions == null && (ko = elem.getElementsByTagName(Configuration.KOMPILE_OPTION)).getLength() > 0) { kompileOptions = ko; }
+                    if (allOptions     == null && (ao = elem.getElementsByTagName(Configuration.ALL_PROGRAMS  )).getLength() > 0) { allOptions     = ao; }
+                    if (krunOptions    == null && (ro = elem.getElementsByTagName(Configuration.PROGRAM       )).getLength() > 0) { krunOptions    = ro; }
+                    // finish
+                    addConfig(destDoc, newConfigFile, newRootDefinition, newRootPrograms, newRootResults,
+                              newMorePrograms, newMoreResults, extension, exclude, kompileOptions, allOptions, krunOptions);
                 } else {
                     String msg = "Invalid element name in the configuration file: " + elem.getTagName();
                     GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
@@ -702,7 +728,9 @@ public class KTest {
             GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
         }
         String resultDir;
-        if (new File(dir).isAbsolute()) {
+        if (dir.equals("")) {
+            resultDir = root;
+        } else if (new File(dir).isAbsolute()) {
             resultDir = dir;
         } else {
             resultDir = root + Configuration.FILE_SEPARATOR + dir;
@@ -739,5 +767,15 @@ public class KTest {
       } catch (IOException e) {
         e.printStackTrace();
       }
+    }
+
+    private static void replaceChild(Document doc, Element elem, String name, NodeList childs) {
+        assert childs.getLength() > 0;
+        for (NodeList oldChilds; (oldChilds = elem.getElementsByTagName(name)).getLength() > 0; ) {
+            elem.removeChild(oldChilds.item(0));
+        }
+        for (int i = 0; i < childs.getLength(); i++) {
+            elem.appendChild(doc.importNode(childs.item(i), true));
+        }
     }
 }
