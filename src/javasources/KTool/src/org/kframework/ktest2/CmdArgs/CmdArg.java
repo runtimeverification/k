@@ -3,6 +3,7 @@ package org.kframework.ktest2.CmdArgs;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.io.FilenameUtils;
+import org.kframework.krun.ColorSetting;
 import org.kframework.ktest2.KTestStep;
 
 import java.io.File;
@@ -73,6 +74,8 @@ public class CmdArg {
      */
     public final boolean verbose;
 
+    public final ColorSetting colorSetting;
+
     /**
      * Timeout for processes spawned by ktest. (in seconds)
      */
@@ -80,7 +83,7 @@ public class CmdArg {
 
     private CmdArg(String directory, String programs, String results, String[] extensions,
                    String[] excludes, KTestStep[] skips, boolean generateReport,
-                   String targetFile, boolean verbose, int timeout) {
+                   String targetFile, boolean verbose, ColorSetting colorSetting, int timeout) {
         this.directory = directory;
         this.programs = programs;
         this.results = results;
@@ -90,6 +93,7 @@ public class CmdArg {
         this.generateReport = generateReport;
         this.targetFile = targetFile;
         this.verbose = verbose;
+        this.colorSetting = colorSetting;
         this.timeout = timeout;
     }
 
@@ -130,6 +134,8 @@ public class CmdArg {
 
         boolean verbose = cmdOpts.hasOption(Constants.VERBOSE_OPTION);
 
+        ColorSetting colorSetting = parseColorSetting(cmdOpts);
+
         String timeout_str = cmdOpts.getOptionValue(Constants.TIMEOUT_OPTION, "5000");
         int timeout;
         try {
@@ -139,7 +145,7 @@ public class CmdArg {
         }
 
         return new CmdArg(directory, programs, results, extensions, excludes, getSkips(cmdOpts),
-                generateReport, targetFile, verbose, timeout);
+                generateReport, targetFile, verbose, colorSetting, timeout);
     }
 
     private static KTestStep[] getSkips(CommandLine cmdOpts) {
@@ -163,6 +169,18 @@ public class CmdArg {
             throw new InvalidArgumentException("--" + argName + " argument is not a folder: " +
                     ret);
         return ret;
+    }
+
+    private static ColorSetting parseColorSetting(CommandLine cmdOpts)
+            throws InvalidArgumentException {
+        String s = cmdOpts.getOptionValue(Constants.COLOR_SETTING, "on");
+        switch (s) {
+            case "on": return ColorSetting.ON;
+            case "off": return ColorSetting.OFF;
+            case "extended": return ColorSetting.EXTENDED;
+            default: throw new InvalidArgumentException("--" + Constants.COLOR_SETTING + " option" +
+                    " should be [on|off|extended]");
+        }
     }
 }
 

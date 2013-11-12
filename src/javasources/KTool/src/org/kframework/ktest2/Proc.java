@@ -2,7 +2,10 @@ package org.kframework.ktest2;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.kframework.krun.ColorSetting;
+import org.kframework.utils.ColorUtil;
 
+import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -23,6 +26,7 @@ public class Proc<T> implements Runnable {
     private final T obj;
 
     private final boolean verbose;
+    private final ColorSetting colorSetting;
 
     /**
      * Return code of process. -1 if process is not run/finished yet.
@@ -42,7 +46,7 @@ public class Proc<T> implements Runnable {
      * @param strComparator comparator object to compare program outputs with expected outputs
      */
     public Proc(T obj, String[] args, String procInput, String expectedOut, String expectedErr,
-                Comparator<String> strComparator, boolean verbose) {
+                Comparator<String> strComparator, boolean verbose, ColorSetting colorSetting) {
         this.obj = obj;
         this.args = args;
         this.expectedOut = expectedOut;
@@ -50,10 +54,11 @@ public class Proc<T> implements Runnable {
         this.procInput = procInput;
         this.strComparator = strComparator;
         this.verbose = verbose;
+        this.colorSetting = colorSetting;
     }
 
-    public Proc(T obj, String[] args, boolean verbose) {
-        this(obj, args, "", "", "", new DefaultStringComparator(), verbose);
+    public Proc(T obj, String[] args, boolean verbose, ColorSetting colorSetting) {
+        this(obj, args, "", "", "", new DefaultStringComparator(), verbose, colorSetting);
     }
 
     @Override
@@ -80,6 +85,7 @@ public class Proc<T> implements Runnable {
             String pgmOut = IOUtils.toString(outStream);
             String pgmErr = IOUtils.toString(errorStream);
 
+            String red = ColorUtil.RgbToAnsi(Color.RED, colorSetting);
             if (returnCode == 0) {
 
                 // program ended successfully ..
@@ -90,8 +96,8 @@ public class Proc<T> implements Runnable {
                 } else if (strComparator.compare(pgmOut, expectedOut) != 0)
                     // outputs don't match
                     System.out.format(
-                            "ERROR: %s output doesn't match with expected output (time: %d ms)%n",
-                            procCmd, endTime);
+                            "%sERROR: %s output doesn't match with expected output (time: %d ms)%n",
+                            red, procCmd, endTime);
                 else
                     // outputs match
                     if (verbose)
@@ -102,8 +108,8 @@ public class Proc<T> implements Runnable {
                 // program ended with error ..
                 if (expectedErr == null)
                     // we're not comparing error outputs
-                    System.out.format(
-                            "ERROR: %s failed with error (time: %d ms)%n", procCmd, endTime);
+                    System.out.format("%sERROR: %s failed with error (time: %d ms)%n",
+                            red, procCmd, endTime);
                 else if (strComparator.compare(pgmErr, expectedErr) == 0)
                     // error outputs match
                     if (verbose)
@@ -111,8 +117,8 @@ public class Proc<T> implements Runnable {
                 else
                     // error outputs don't match
                     System.out.format(
-                            "ERROR: %s throwed error, but expected error message doesn't match " +
-                            "(time: %d ms)%n", procCmd, endTime);
+                            "%sERROR: %s throwed error, but expected error message doesn't match "+
+                            "(time: %d ms)%n", red, procCmd, endTime);
 
             }
         } catch (IOException e) {

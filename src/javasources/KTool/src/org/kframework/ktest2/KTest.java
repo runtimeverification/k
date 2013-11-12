@@ -31,7 +31,7 @@ public class KTest {
         argParser = new CmdArgParser(args);
     }
 
-    public void run() throws InvalidArgumentException, IOException, SAXException,
+    public int run() throws InvalidArgumentException, IOException, SAXException,
             ParserConfigurationException, InterruptedException, InvalidConfigError {
         if (argParser.cmdOpts.hasOption(Constants.HELP_OPTION))
             printHelpMsg();
@@ -43,21 +43,24 @@ public class KTest {
             switch (FilenameUtils.getExtension(cmdArgs.targetFile)) {
                 case "xml":
                     tests = new TestSuite(
-                                new ConfigFileParser(new File(cmdArgs.targetFile),
-                                        cmdArgs).parse(),
-                                cmdArgs.skips, cmdArgs.verbose, cmdArgs.timeout);
+                            new ConfigFileParser(new File(cmdArgs.targetFile),
+                                    cmdArgs).parse(),
+                            cmdArgs.skips, cmdArgs.verbose, cmdArgs.colorSetting,
+                            cmdArgs.timeout);
                     break;
                 case "k":
                     tests = new TestSuite(TestCase.makeTestCaseFromK(cmdArgs),
-                                cmdArgs.skips, cmdArgs.verbose, cmdArgs.timeout);
+                            cmdArgs.skips, cmdArgs.verbose, cmdArgs.colorSetting,
+                            cmdArgs.timeout);
                     break;
                 default:
                     // this code should be unreacable, because `validateArgs' should ensure that
                     // targetFile extension can only be .k or .xml
                     tests = null; assert false;
             }
-            System.out.println(tests.run() ? "SUCCESS" : "FAIL");
+            return (tests.run() ? 0 : 1);
         }
+        return 0;
     }
 
     private void printHelpMsg() {
@@ -80,7 +83,7 @@ public class KTest {
 
     public static void main(String[] args) {
         try {
-            new KTest(args).run();
+            System.exit(new KTest(args).run());
         } catch (ParseException | InvalidArgumentException | SAXException |
                 ParserConfigurationException | IOException | InterruptedException |
                 InvalidConfigError e) {

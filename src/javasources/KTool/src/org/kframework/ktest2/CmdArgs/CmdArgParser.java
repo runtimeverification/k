@@ -21,6 +21,10 @@ public class CmdArgParser {
         addOption(OptionBuilder.withLongOpt(Constants.VERBOSE_OPTION).withDescription
                 ("Verbose output.").create("v"));
 
+        addOption(OptionBuilder.withLongOpt(Constants.COLOR_SETTING).hasArg().withArgName
+                ("[on|off|extended]").withDescription("Use colors in output. (Default: on)")
+                .create());
+
         addOption(OptionBuilder.withLongOpt(Constants.PROGRAMS_OPTION).hasArg().withArgName
                 ("dir").withDescription("Programs directory in single job mode, " +
                 "or a root directory for programs in batch mode. By default this is the directory" +

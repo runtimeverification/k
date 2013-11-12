@@ -1,13 +1,17 @@
 package org.kframework.ktest2.Test;
 
 import org.apache.commons.io.IOUtils;
+import org.kframework.krun.ColorSetting;
 import org.kframework.ktest2.DefaultStringComparator;
 import org.kframework.ktest2.KTestStep;
 import org.kframework.ktest2.PgmArg;
 import org.kframework.ktest2.Proc;
+import org.kframework.utils.ColorUtil;
 
+import java.awt.*;
 import java.io.*;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -25,6 +29,8 @@ public class TestSuite {
 
     private final boolean verbose;
 
+    private final ColorSetting colorSetting;
+
     /**
      * List of ktest steps to skip. This array should be sorted because it'll be used for binary
      * search (Java doesn't have linear search algorithm in stdlib)
@@ -36,18 +42,22 @@ public class TestSuite {
      */
     private final int timeout;
 
-    public TestSuite(List<TestCase> tests, KTestStep[] skips, boolean verbose, int timeout) {
+    public TestSuite(List<TestCase> tests, KTestStep[] skips, boolean verbose,
+                     ColorSetting colorSetting, int timeout) {
         this.tests = tests;
         this.skips = skips;
         this.verbose = verbose;
+        this.colorSetting = colorSetting;
         this.timeout = timeout;
     }
 
-    public TestSuite(TestCase singleTest, KTestStep[] skips, boolean verbose, int timeout) {
+    public TestSuite(TestCase singleTest, KTestStep[] skips, boolean verbose,
+                     ColorSetting colorSetting, int timeout) {
         tests = new LinkedList<>();
         tests.add(singleTest);
         this.skips = skips;
         this.verbose = verbose;
+        this.colorSetting = colorSetting;
         this.timeout = timeout;
     }
 
@@ -98,7 +108,7 @@ public class TestSuite {
             for (int i = 0; i < kompileOpts.size(); i++)
                 args[i+2] = kompileOpts.get(i).toString();
             // execute
-            Proc<TestCase> p = new Proc<>(tc, args, verbose);
+            Proc<TestCase> p = new Proc<>(tc, args, verbose, colorSetting);
             ps.add(p);
             tpe.execute(p);
         }
@@ -109,7 +119,7 @@ public class TestSuite {
             if (p.getReturnCode() == 0)
                 successfulTests.add(p.getObj());
 
-        System.out.println(successfulTests.size() == len ? "SUCCESS" : "FAIL");
+        printResult(successfulTests.size() == len);
 
         return successfulTests;
     }
@@ -129,7 +139,7 @@ public class TestSuite {
             String definitionPath = tc.getDefinition();
             assert new File(definitionPath).isFile();
             Proc<TestCase> p = new Proc<>(tc, new String[] { "kompile", "--pdf", definitionPath },
-                    verbose);
+                    verbose, colorSetting);
             ps.add(p);
             tpe.execute(p);
         }
@@ -139,7 +149,7 @@ public class TestSuite {
         for (Proc<TestCase> p : ps)
             ret &= p.getReturnCode() == 0;
 
-        System.out.println(ret ? "SUCCESS" : "FAIL");
+        printResult(ret);
 
         return ret;
     }
@@ -193,7 +203,8 @@ public class TestSuite {
                 if (p != null) // p may be null when krun test is skipped because of missing
                                // input file
                     testCaseRet &= p.getReturnCode() == 0;
-            System.out.println(testCaseRet ? "SUCCESS" : "FAIL");
+
+            printResult(testCaseRet);
         }
 
         return successfulTests.size() == tests.size();
@@ -259,8 +270,15 @@ public class TestSuite {
                 + (errorContents == null ? "" : "error "));
         */
         Proc<KRunProgram> p = new Proc<>(program, args, inputContents, outputContents,
-                errorContents, new DefaultStringComparator(), verbose);
+                errorContents, new DefaultStringComparator(), verbose, colorSetting);
         tpe.execute(p);
         return p;
+    }
+
+    private void printResult(boolean condition) {
+        if (condition)
+            System.out.println("SUCCESS");
+        else
+            System.out.println(ColorUtil.RgbToAnsi(Color.red, colorSetting) + "FAIL");
     }
 }
