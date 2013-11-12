@@ -36,18 +36,18 @@ public class SearchResults {
 			} else {
 				boolean empty = true;
 				
-        StringBuilder varStringBuilder = new StringBuilder();
+				StringBuilder varStringBuilder = new StringBuilder();
 				for (String variable : substitution.keySet()) {
 					UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
 					substitution.get(variable).accept(unparser);
-          varStringBuilder.append("\n" + variable + " -->\n" + unparser.getResult());
+					varStringBuilder.append("\n" + variable + " -->\n" + unparser.getResult());
 					empty = false;
 				}
 				if (empty) {
-					solutionStrings.add("Empty subsitution");
+					solutionStrings.add("\nEmpty substitution");
 				} else {
-          solutionStrings.add(varStringBuilder.toString());
-        }
+					solutionStrings.add(varStringBuilder.toString());
+				}
 			}
 		}
 		StringBuilder sb = new StringBuilder();
