@@ -639,13 +639,13 @@
         <krun-option name="-cINITIAL" value=".Map" />
         <krun-option name="-pattern" value="&lt;k&gt; .K &lt;/k&gt;&lt;input&gt; .List &lt;/input&gt;" />
       </all-programs>
-      <program name="samples/wcet/programs/interrupt.wcet">
+      <program name="interrupt.wcet">
         <krun-option name="-cTIMING" value="add |-> 1 sub |-> 1 mul |-> 1 div |-> 1 or |-> 1 and |-> 1 not |-> 1 load |-> 10 store |-> 10 jmp |-> 1 beq |-> 2 bne |-> 2 blt |-> 2 ble |-> 2 halt |-> 1 read |-> 100 write |-> 100 'rw(.KList) |-> 200 int |-> 5 rfi |-> 5" />
         <krun-option name="-cINPUT" value="ListItem((400, data |-> 1000)) ListItem((401, data |-> 5)) ListItem((1000, data |-> 6))" />
         <krun-option name="-cINITIAL" value="data |-> 0" />
         <krun-option name="-pattern" value="&lt;k&gt; .K &lt;/k&gt;&lt;input&gt; .List &lt;/input&gt;" />
       </program>
-      <program name="samples/wcet/programs/polling.wcet">
+      <program name="polling.wcet">
         <krun-option name="-cTIMING" value="add |-> 1 sub |-> 1 mul |-> 1 div |-> 1 or |-> 1 and |-> 1 not |-> 1 load |-> 10 store |-> 10 jmp |-> 1 beq |-> 2 bne |-> 2 blt |-> 2 ble |-> 2 halt |-> 1 read |-> 100 write |-> 100 'rw(.KList) |-> 200 int |-> 5 rfi |-> 5" />
         <krun-option name="-cINPUT" value="ListItem((400, data |-> 1000)) ListItem((401, data |-> 5)) ListItem((1000, data |-> 6))" />
         <krun-option name="-cINITIAL" value="data |-> 0" />
@@ -841,7 +841,7 @@
         <krun-option name="-output" value="none" />
         <krun-option name="-color" value="off" />
       </all-programs>
-      <program name="tests/regression/issue580/programs/test.issue">
+      <program name="test.issue">
         <krun-option name="-output" value="pretty" />
         <krun-option name="-search" />
         <krun-option name="-pattern" value="&lt;k&gt; 6 &lt;/k&gt;" />
@@ -857,7 +857,7 @@
         <krun-option name="-output" value="none" />
         <krun-option name="-color" value="off" />
       </all-programs>
-      <program name="tests/regression/subsort-klabel/programs/test.issue">
+      <program name="test.issue">
         <krun-option name="-output" value="pretty" />
       </program>
   </test>
@@ -889,7 +889,7 @@
       programs="tests/regression/negative-test/programs"
       results="tests/regression/negative-test/tests"
       extension="issue" >
-    <program name="tests/regression/negative-test/programs/test.issue">
+    <program name="test.issue">
       <krun-option name="-color" value="off" />
     </program>
   </test>
@@ -899,7 +899,7 @@
       programs="tests/regression/escapedKLabel/programs"
       results="tests/regression/escapedKLabel/tests"
       extension="issue" >
-      <program name="tests/regression/escapedKLabel/programs/test.issue">
+      <program name="test.issue">
         <krun-option name="-output" value="pretty" />
       </program>
   </test>
