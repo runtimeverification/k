@@ -221,8 +221,9 @@ public class TestSuite {
     }
 
     /**
-     * Execute krun step of a program.
-     * @param program
+     * Execute a krun step.
+     * @param program KRunProgram object that holds required information to run a krun process
+     * @return Proc object for krun process
      */
     private Proc<KRunProgram> runKRun(KRunProgram program) {
         String[] args = new String[program.args.size() + 1];
