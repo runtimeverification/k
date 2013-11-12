@@ -71,7 +71,7 @@ public class Program implements Comparable<Program> {
 	private boolean eq(String s1, String s2) {
 		String regexp;
 		if (Configuration.IGNORE_WHITE_SPACES) {
-			regexp = "\\r|\\s";
+			regexp = "\\r|\\s|\\n";
 		} else {
 			regexp = "\\r";
 		}
