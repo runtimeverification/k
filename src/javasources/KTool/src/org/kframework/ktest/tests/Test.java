@@ -169,7 +169,7 @@ public class Test implements Comparable<Test> {
                 boolean special = false;
                 // treat special programs
                 for (Program p : specialPrograms) {
-                    if (p.programPath.equals(programPath)) {
+                    if (p.programPath.equals(new File(programPath).getName())) {
                         krunOptions = p.krunOptions;
                         special = true;
                     }
@@ -429,6 +429,7 @@ public class Test implements Comparable<Test> {
             String input = null;
             String output = null;
             String error = null;
+            /*
             String inputFile = null, outputFile = null, errorFile = null;
             if (resultsFolders != null) {
                 for (String rf : new ListReverser<String>(resultsFolders)) {
@@ -452,10 +453,9 @@ public class Test implements Comparable<Test> {
                     }
                 }
             }
+            */
 
-            Program program = new Program(resolveAbsolutePathRelativeTo(
-                    programPath, rootProgramsDir, Configuration.PGM_ERROR),
-                    map, this, input, output, error);
+            Program program = new Program(programPath, map, this, input, output, error);
             specialPrograms.add(program);
         }
 
