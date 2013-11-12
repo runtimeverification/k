@@ -51,12 +51,48 @@
       </xs:element>
       <xs:element name="include">
         <xs:complexType>
+          <xs:sequence>
+            <xs:element name="kompile-option" minOccurs="0" maxOccurs="unbounded" >
+              <xs:complexType>
+                <xs:attribute name="name" type="xs:string" use="required" />
+                <xs:attribute name="value" type="xs:string" use="optional" />
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="all-programs" minOccurs="0" maxOccurs="1" >
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="krun-option" minOccurs="1" maxOccurs="unbounded" >
+                    <xs:complexType>
+                      <xs:attribute name="name" type="xs:string" use="required" />
+                      <xs:attribute name="value" type="xs:string" use="optional" />
+                      <xs:attribute name="parser-home" type="xs:string" use="optional" />
+                    </xs:complexType>
+                  </xs:element>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="program" minOccurs="0" maxOccurs="unbounded" >
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="krun-option" minOccurs="1" maxOccurs="unbounded" >
+                    <xs:complexType>
+                      <xs:attribute name="name" type="xs:string" use="required" />
+                      <xs:attribute name="value" type="xs:string" use="optional" />
+                      <xs:attribute name="parser-home" type="xs:string" use="optional" />
+                    </xs:complexType>
+                  </xs:element>
+                </xs:sequence>
+                <xs:attribute name="name" type="xs:string" use="required" />
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
           <xs:attribute name="file" type="xs:string" use="required" />
           <xs:attribute name="directory" type="xs:string" use="optional" />
           <xs:attribute name="programs" type="xs:string" use="optional" />
           <xs:attribute name="results" type="xs:string" use="optional" />
           <xs:attribute name="more-programs" type="xs:string" use="optional" />
           <xs:attribute name="more-results" type="xs:string" use="optional" />
+          <xs:attribute name="extension" type="xs:string" use="optional" />
           <xs:attribute name="exclude" type="xs:string" use="optional" />
         </xs:complexType>
       </xs:element>
