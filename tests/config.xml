@@ -16,12 +16,12 @@
   make all programs and results be relative to this config file, and then
   we just call ktest tests/config.xml from the root directory (and we also
   need to modify jenkins to account for it).
--->
 
   <include file="../tutorial/1_k/tests/config.xml"
            directory="tutorial/1_k"
            programs="tests"
            results="tests" />
+-->
 
 <!-- LAMBDA 
   <test
