@@ -1,0 +1,441 @@
+Search results:
+
+Solution 1:
+<T>
+    <in>
+        ListItem(#buffer ( "" ))
+    </in>
+    <out>
+        ListItem(#buffer ( "x = 11\n" ))
+    </out>
+    <threads>
+        <thread>
+            <k>
+                .K
+            </k>
+            <id>
+                #symInt(3)
+            </id>
+            <env>
+                t1 |-> #symNat(2)
+                x |-> #symNat(1)
+            </env>
+        </thread>
+        <thread>
+            <k>
+                .K
+            </k>
+            <id>
+                #symInt(5)
+            </id>
+            <env>
+                t1 |-> #symNat(2)
+                t2 |-> #symNat(4)
+                x |-> #symNat(1)
+            </env>
+        </thread>
+        <thread>
+            <k>
+                .K
+            </k>
+            <id>
+                0
+            </id>
+            <env>
+                t1 |-> #symNat(2)
+                t2 |-> #symNat(4)
+                x |-> #symNat(1)
+            </env>
+        </thread>
+    </threads>
+    <store>
+        #symNat(1) |-> 11
+        #symNat(2) |-> #symInt(3)
+        #symNat(4) |-> #symInt(5)
+    </store>
+</T>
+
+Solution 2:
+<T>
+    <in>
+        ListItem(#buffer ( "" ))
+    </in>
+    <out>
+        ListItem(#buffer ( "x = 11\n" ))
+    </out>
+    <threads>
+        <thread>
+            <k>
+                .K
+            </k>
+            <id>
+                #symInt(3)
+            </id>
+            <env>
+                t1 |-> #symNat(2)
+                x |-> #symNat(1)
+            </env>
+        </thread>
+        <thread>
+            <k>
+                .K
+            </k>
+            <id>
+                #symInt(7)
+            </id>
+            <env>
+                t1 |-> #symNat(2)
+                t2 |-> #symNat(6)
+                x |-> #symNat(1)
+            </env>
+        </thread>
+        <thread>
+            <k>
+                .K
+            </k>
+            <id>
+                0
+            </id>
+            <env>
+                t1 |-> #symNat(2)
+                t2 |-> #symNat(6)
+                x |-> #symNat(1)
+            </env>
+        </thread>
+    </threads>
+    <store>
+        #symNat(1) |-> 11
+        #symNat(2) |-> #symInt(3)
+        #symNat(6) |-> #symInt(7)
+    </store>
+</T>
+
+Solution 3:
+<T>
+    <in>
+        ListItem(#buffer ( "" ))
+    </in>
+    <out>
+        ListItem(#buffer ( "x = 16\n" ))
+    </out>
+    <threads>
+        <thread>
+            <k>
+                .K
+            </k>
+            <id>
+                #symInt(3)
+            </id>
+            <env>
+                t1 |-> #symNat(2)
+                x |-> #symNat(1)
+            </env>
+        </thread>
+        <thread>
+            <k>
+                .K
+            </k>
+            <id>
+                #symInt(5)
+            </id>
+            <env>
+                t1 |-> #symNat(2)
+                t2 |-> #symNat(4)
+                x |-> #symNat(1)
+            </env>
+        </thread>
+        <thread>
+            <k>
+                .K
+            </k>
+            <id>
+                0
+            </id>
+            <env>
+                t1 |-> #symNat(2)
+                t2 |-> #symNat(4)
+                x |-> #symNat(1)
+            </env>
+        </thread>
+    </threads>
+    <store>
+        #symNat(1) |-> 16
+        #symNat(2) |-> #symInt(3)
+        #symNat(4) |-> #symInt(5)
+    </store>
+</T>
+
+Solution 4:
+<T>
+    <in>
+        ListItem(#buffer ( "" ))
+    </in>
+    <out>
+        ListItem(#buffer ( "x = 21\n" ))
+    </out>
+    <threads>
+        <thread>
+            <k>
+                .K
+            </k>
+            <id>
+                #symInt(3)
+            </id>
+            <env>
+                t1 |-> #symNat(2)
+                x |-> #symNat(1)
+            </env>
+        </thread>
+        <thread>
+            <k>
+                .K
+            </k>
+            <id>
+                #symInt(5)
+            </id>
+            <env>
+                t1 |-> #symNat(2)
+                t2 |-> #symNat(4)
+                x |-> #symNat(1)
+            </env>
+        </thread>
+        <thread>
+            <k>
+                .K
+            </k>
+            <id>
+                0
+            </id>
+            <env>
+                t1 |-> #symNat(2)
+                t2 |-> #symNat(4)
+                x |-> #symNat(1)
+            </env>
+        </thread>
+    </threads>
+    <store>
+        #symNat(1) |-> 21
+        #symNat(2) |-> #symInt(3)
+        #symNat(4) |-> #symInt(5)
+    </store>
+</T>
+
+Solution 5:
+<T>
+    <in>
+        ListItem(#buffer ( "" ))
+    </in>
+    <out>
+        ListItem(#buffer ( "x = 21\n" ))
+    </out>
+    <threads>
+        <thread>
+            <k>
+                .K
+            </k>
+            <id>
+                #symInt(3)
+            </id>
+            <env>
+                t1 |-> #symNat(2)
+                x |-> #symNat(1)
+            </env>
+        </thread>
+        <thread>
+            <k>
+                .K
+            </k>
+            <id>
+                #symInt(7)
+            </id>
+            <env>
+                t1 |-> #symNat(2)
+                t2 |-> #symNat(6)
+                x |-> #symNat(1)
+            </env>
+        </thread>
+        <thread>
+            <k>
+                .K
+            </k>
+            <id>
+                0
+            </id>
+            <env>
+                t1 |-> #symNat(2)
+                t2 |-> #symNat(6)
+                x |-> #symNat(1)
+            </env>
+        </thread>
+    </threads>
+    <store>
+        #symNat(1) |-> 21
+        #symNat(2) |-> #symInt(3)
+        #symNat(6) |-> #symInt(7)
+    </store>
+</T>
+
+Solution 6:
+<T>
+    <in>
+        ListItem(#buffer ( "" ))
+    </in>
+    <out>
+        ListItem(#buffer ( "x = 21\n" ))
+    </out>
+    <threads>
+        <thread>
+            <k>
+                .K
+            </k>
+            <id>
+                #symInt(3)
+            </id>
+            <env>
+                t1 |-> #symNat(2)
+                x |-> #symNat(1)
+            </env>
+        </thread>
+        <thread>
+            <k>
+                .K
+            </k>
+            <id>
+                #symInt(9)
+            </id>
+            <env>
+                t1 |-> #symNat(2)
+                t2 |-> #symNat(8)
+                x |-> #symNat(1)
+            </env>
+        </thread>
+        <thread>
+            <k>
+                .K
+            </k>
+            <id>
+                0
+            </id>
+            <env>
+                t1 |-> #symNat(2)
+                t2 |-> #symNat(8)
+                x |-> #symNat(1)
+            </env>
+        </thread>
+    </threads>
+    <store>
+        #symNat(1) |-> 21
+        #symNat(2) |-> #symInt(3)
+        #symNat(8) |-> #symInt(9)
+    </store>
+</T>
+
+Solution 7:
+<T>
+    <in>
+        ListItem(#buffer ( "" ))
+    </in>
+    <out>
+        ListItem(#buffer ( "x = 33\n" ))
+    </out>
+    <threads>
+        <thread>
+            <k>
+                .K
+            </k>
+            <id>
+                #symInt(3)
+            </id>
+            <env>
+                t1 |-> #symNat(2)
+                x |-> #symNat(1)
+            </env>
+        </thread>
+        <thread>
+            <k>
+                .K
+            </k>
+            <id>
+                #symInt(5)
+            </id>
+            <env>
+                t1 |-> #symNat(2)
+                t2 |-> #symNat(4)
+                x |-> #symNat(1)
+            </env>
+        </thread>
+        <thread>
+            <k>
+                .K
+            </k>
+            <id>
+                0
+            </id>
+            <env>
+                t1 |-> #symNat(2)
+                t2 |-> #symNat(4)
+                x |-> #symNat(1)
+            </env>
+        </thread>
+    </threads>
+    <store>
+        #symNat(1) |-> 33
+        #symNat(2) |-> #symInt(3)
+        #symNat(4) |-> #symInt(5)
+    </store>
+</T>
+
+Solution 8:
+<T>
+    <in>
+        ListItem(#buffer ( "" ))
+    </in>
+    <out>
+        ListItem(#buffer ( "x = 33\n" ))
+    </out>
+    <threads>
+        <thread>
+            <k>
+                .K
+            </k>
+            <id>
+                #symInt(3)
+            </id>
+            <env>
+                t1 |-> #symNat(2)
+                x |-> #symNat(1)
+            </env>
+        </thread>
+        <thread>
+            <k>
+                .K
+            </k>
+            <id>
+                #symInt(7)
+            </id>
+            <env>
+                t1 |-> #symNat(2)
+                t2 |-> #symNat(6)
+                x |-> #symNat(1)
+            </env>
+        </thread>
+        <thread>
+            <k>
+                .K
+            </k>
+            <id>
+                0
+            </id>
+            <env>
+                t1 |-> #symNat(2)
+                t2 |-> #symNat(6)
+                x |-> #symNat(1)
+            </env>
+        </thread>
+    </threads>
+    <store>
+        #symNat(1) |-> 33
+        #symNat(2) |-> #symInt(3)
+        #symNat(6) |-> #symInt(7)
+    </store>
+</T>
