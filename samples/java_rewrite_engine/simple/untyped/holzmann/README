@@ -16,6 +16,6 @@ most one reader and one writer.
 
 One unverified feature of this queue is that readers can utilize busy-waiting,
 by looping continuously until queueGet(...) returns 1. Right now, this causes
-search to be infinite because of the use of local variables. Additionally, we
-have not yet been able to verify larger programs such a four_put_four_get.simple
+search to be infinite because of local variables in loops. Additionally, we
+have not been able to verify larger programs such as four_put_four_get.simple
 due to memory and time constraints of searching such a large state space.
