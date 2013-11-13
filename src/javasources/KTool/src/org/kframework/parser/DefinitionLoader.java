@@ -62,7 +62,7 @@ public class DefinitionLoader {
 		Definition javaDef;
 		File canoFile = mainFile.getCanonicalFile();
 
-		String extension = FilenameUtils.removeExtension(mainFile.getAbsolutePath());
+		String extension = FilenameUtils.getExtension(mainFile.getAbsolutePath());
 		if ("bin".equals(extension)) {
             javaDef = (Definition) BinaryLoader.load(canoFile.toString());
 
