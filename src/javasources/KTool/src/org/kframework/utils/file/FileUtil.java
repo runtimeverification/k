@@ -144,8 +144,7 @@ public class FileUtil {
      * Loads the properties from the given file into the given Properties object.
      */
     public static void loadProperties(Properties properties, String fileName) throws IOException {
-        try (FileInputStream inStream = new FileInputStream(fileName)) {
-            properties.load(inStream);
-        }
+        FileInputStream inStream = new FileInputStream(fileName);
+        properties.load(inStream);
     }
 }
