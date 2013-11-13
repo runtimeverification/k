@@ -1,6 +1,5 @@
 package org.kframework.backend.maude;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.kframework.backend.BackendFilter;
 import org.kframework.compile.transformers.AddPredicates;
 import org.kframework.compile.utils.ConfigurationStructure;
@@ -22,7 +21,6 @@ import java.util.*;
 import java.util.Map;
 
 public class MaudeFilter extends BackendFilter {
-    private Definition definition;
 	private boolean firstAttribute;
 	ConfigurationStructureMap cfgStr;
 
@@ -34,7 +32,6 @@ public class MaudeFilter extends BackendFilter {
 	@Override
 	public void visit(Definition definition) {
         // TODO: remove hack for token membership predicates
-        this.definition = definition;
 
 		for (DefinitionItem di : definition.getItems()) {
 			di.accept(this);
@@ -983,15 +980,5 @@ public class MaudeFilter extends BackendFilter {
 
 	public static String getMaudeConstructor(String sort) {
 		return maudeCollectionConstructors.get(KSort.getKSort(sort));
-	}
-
-	public String getMaudeLocation(ASTNode node) {
-		String loc = node.getLocation();
-		loc = loc.replaceAll(",", ":");
-		loc = loc.replaceFirst("\\(", "(" + node.getFilename() + ":");
-		if (!loc.startsWith("("))
-			loc = "(" + loc + ")";
-
-		return loc;
 	}
 }
