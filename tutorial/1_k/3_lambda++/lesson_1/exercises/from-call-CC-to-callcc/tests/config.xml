@@ -1,26 +1,7 @@
 <tests>
 
-  <test
-    definition="lambda.k"
-    programs="../../../../../1_lambda/lesson_1/tests/
-              ../../../../../1_lambda/lesson_5/tests/
-              ../../../../../1_lambda/lesson_6/tests/
-              ../../../../../1_lambda/lesson_7/tests/
-              ../../../tests/"
-    extension="lambda"
-    exclude="omega"
-    results="../../../../../1_lambda/lesson_1/tests/
-             ../../../../../1_lambda/lesson_2/tests/
-             ../../../../../1_lambda/lesson_3/tests/
-             ../../../../../1_lambda/lesson_5/tests/
-             ../../../../../1_lambda/lesson_6/tests/
-             ../../../../../1_lambda/lesson_7/tests/
-             ../../../tests/" >
+  <include file="../../../tests/config.xml" >
     <kompile-option name="--main-module" value="CALLCC"/>
-    <all-programs>
-      <krun-option name="-output" value="pretty" />
-      <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
-    </all-programs>
-  </test>
+  </include>
 
 </tests>
