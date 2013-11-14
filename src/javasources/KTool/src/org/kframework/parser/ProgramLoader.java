@@ -3,7 +3,7 @@ package org.kframework.parser;
 import java.io.File;
 import java.io.IOException;
 
-import org.kframework.backend.java.symbolic.ResolveVariableAttribute;
+import org.kframework.kil.loader.ResolveVariableAttribute;
 import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.transformers.RemoveBrackets;

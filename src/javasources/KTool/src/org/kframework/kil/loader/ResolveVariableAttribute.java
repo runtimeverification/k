@@ -1,4 +1,4 @@
-package org.kframework.backend.java.symbolic;
+package org.kframework.kil.loader;
 
 import org.kframework.backend.java.kil.KLabel;
 import org.kframework.backend.java.kil.Variable;
@@ -26,7 +26,6 @@ public class ResolveVariableAttribute extends CopyOnWriteTransformer {
     public org.kframework.kil.ASTNode transform(KApp kapp) throws TransformerException {
         if (kapp.getLabel() instanceof Token) {
             Token node = (Token) kapp.getLabel();
-            System.out.println(node + " -> sort: " + node.tokenSort());
 
             if (context.variableTokenSorts.contains(node.tokenSort()))
                 return new org.kframework.kil.Variable(node.value(), node.tokenSort());
