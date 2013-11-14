@@ -9,18 +9,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.Int32Token;
-import org.kframework.backend.java.kil.Bottom;
-import org.kframework.backend.java.kil.Definition;
-import org.kframework.backend.java.kil.Hole;
-import org.kframework.backend.java.kil.JavaSymbolicObject;
-import org.kframework.backend.java.kil.KCollection;
-import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.Kind;
-import org.kframework.backend.java.kil.Sorted;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
-import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.java.kil.Z3Term;
+import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.util.GappaPrinter;
 import org.kframework.backend.java.util.GappaServer;
 import org.kframework.backend.java.util.KSorts;
@@ -29,6 +18,7 @@ import org.kframework.kil.ASTNode;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.Collection;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
@@ -46,6 +36,7 @@ import org.kframework.krun.K;
  * @author AndreiS
  */
 public class SymbolicConstraint extends JavaSymbolicObject {
+    private final boolean DEBUG = true;
 
     public void orientSubstitution(Set<Variable> variables, TermContext termContext) {
         Map<Variable, Term> newSubstitution = new HashMap<>();
@@ -68,6 +59,16 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     }
 
     public enum TruthValue { TRUE, UNKNOWN, FALSE }
+
+
+    public class Implication {
+        SymbolicConstraint left;
+        SymbolicConstraint right;
+
+        public Implication(SymbolicConstraint left, SymbolicConstraint right) {
+            this.left = left; this.right = right;
+        }
+    }
 
     /**
      * An equality between two terms (with variables).
@@ -250,6 +251,12 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     private final Definition definition;
     private final SymbolicUnifier unifier;
 
+    public SymbolicConstraint(SymbolicConstraint constraint, TermContext context) {
+        this(context);
+        substitution = new HashMap<>(constraint.substitution);
+        addAll(constraint);
+    }
+
     public SymbolicConstraint(TermContext context) {
         this.context = context;
         this.definition = context.definition();
@@ -407,25 +414,63 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     }
 
     public boolean implies(SymbolicConstraint constraint) {
-        normalize();
-        Boolean result = false;
+        LinkedList<Implication> implications = new LinkedList<>();
+        implications.add(new Implication(this, constraint));
+        while (!implications.isEmpty()) {
+            Implication implication = implications.remove();
 
-        if (K.smt.equals("gappa")) {
-            constraint.normalize();
-            ListIterator<Equality> listIterator = constraint.equalities().listIterator();
-            while (listIterator.hasNext()) {
-                Equality e2 = listIterator.next();
-                for (Equality e1 : equalities()) {
-                    if (e2.equals(e1)) {
-                        listIterator.remove();
-                        break;
-                    }
+            SymbolicConstraint left = implication.left;
+            SymbolicConstraint right = implication.right;
+            if (left.isFalse()) continue;
+
+            right = left.simplifyConstraint(right);
+            if (right.isTrue() || right.equalities().isEmpty()) {
+                if (DEBUG) {
+                    System.out.println("Implication proved by simplification");
+                }
+                continue;
+            }
+            IfThenElseFinder ifThenElseFinder = new IfThenElseFinder(context);
+            right.accept(ifThenElseFinder);
+            if (!ifThenElseFinder.result.isEmpty()) {
+                KItem ite = ifThenElseFinder.result.get(0);
+                Term condition = ite.kList().get(0);
+                if (DEBUG) {
+                    System.out.println("Split on " + condition);
+                }
+                SymbolicConstraint left1 = new SymbolicConstraint(left, context);
+                left1.add(condition, BoolToken.TRUE);
+                implications.add(new Implication(left1, new SymbolicConstraint(right,context)));
+                SymbolicConstraint left2 = new SymbolicConstraint(left, context);
+                left2.add(condition, BoolToken.FALSE);
+                implications.add(new Implication(left2, new SymbolicConstraint(right,context)));
+                continue;
+            }
+            if (DEBUG) {
+                System.out.println("After simplification, verifying whether\n\t" + left.toString() + "\nimplies\n\t" + right.toString());
+            }
+            if (!impliesSMT(left,right)) {
+                if (DEBUG) {
+                    System.out.println("Failure!");
+                }
+                return false;
+            } else {
+                if (DEBUG) {
+                    System.out.println("Proved!");
                 }
             }
-            if (constraint.equalities().isEmpty()) return true;
-            GappaPrinter.GappaPrintResult premises = GappaPrinter.toGappa(this);
+        }
+       return true;
+    }
+
+
+    private static boolean impliesSMT(SymbolicConstraint left, SymbolicConstraint right) {
+        boolean result = false;
+        if (K.smt.equals("gappa")) {
+
+            GappaPrinter.GappaPrintResult premises = GappaPrinter.toGappa(left);
             String gterm1 = premises.result;
-            GappaPrinter.GappaPrintResult conclusion = GappaPrinter.toGappa(constraint);
+            GappaPrinter.GappaPrintResult conclusion = GappaPrinter.toGappa(right);
             if (conclusion.exception != null) {
                 System.err.print(conclusion.exception.getMessage());
                 System.err.println(" Cannot prove the full implication!");
@@ -447,8 +492,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
 //            System.out.println(constraint);
         } else if (K.smt.equals("z3")) {
-            Set<Variable> rightHandSideVariables = new HashSet<Variable>(constraint.variableSet());
-            rightHandSideVariables.removeAll(variableSet());
+            Set<Variable> rightHandSideVariables = new HashSet<Variable>(right.variableSet());
+            rightHandSideVariables.removeAll(left.variableSet());
 
             try {
                 com.microsoft.z3.Context context = Z3Wrapper.newContext();
@@ -456,16 +501,16 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
                 Solver solver = context.MkSolver();
 
-                for (Equality equality : equalities) {
+                for (Equality equality : left.equalities) {
                     solver.Assert(context.MkEq(
                             ((Z3Term) equality.leftHandSide.accept(transformer)).expression(),
                             ((Z3Term) equality.rightHandSide.accept(transformer)).expression()));
                 }
 
                 //BoolExpr[] inequalities = new BoolExpr[constraint.equalities.size() + constraint.substitution.size()];
-                BoolExpr[] inequalities = new BoolExpr[constraint.equalities.size()];
+                BoolExpr[] inequalities = new BoolExpr[right.equalities.size()];
                 int i = 0;
-                for (Equality equality : constraint.equalities) {
+                for (Equality equality : right.equalities) {
                     inequalities[i++] = context.MkNot(context.MkEq(
                             ((Z3Term) equality.leftHandSide.accept(transformer)).expression(),
                             ((Z3Term) equality.rightHandSide.accept(transformer)).expression()));
@@ -520,7 +565,39 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 e.printStackTrace();
             }
         }
-        return result;
+        return  result;
+    }
+
+    private SymbolicConstraint simplifyConstraint(SymbolicConstraint constraint) {
+        constraint.normalize();
+        List<Equality> equalities = new LinkedList<>(constraint.equalities());
+        ListIterator<Equality> listIterator = equalities.listIterator();
+        while (listIterator.hasNext()) {
+            Equality e2 = listIterator.next();
+            for (Equality e1 : equalities()) {
+                if (e2.equals(e1)) {
+                    listIterator.remove();
+                    break;
+                }
+            }
+        }
+        Map<Term, Term> substitution = new HashMap<>();
+        for (Equality e1:equalities()) {
+            if (e1.rightHandSide.isGround()) {
+                substitution.put(e1.leftHandSide,e1.rightHandSide);
+            }
+            if (e1.leftHandSide.isGround()) {
+                substitution.put(e1.rightHandSide,e1.leftHandSide);
+            }
+        }
+        constraint = (SymbolicConstraint) substituteTerms(constraint, substitution);
+        constraint.renormalize();
+        constraint.simplify();
+        return constraint;
+    }
+
+    private JavaSymbolicObject substituteTerms(JavaSymbolicObject constraint, Map<Term, Term> substitution) {
+        return (JavaSymbolicObject) constraint.accept(new TermSubstitutionTransformer(substitution,context));
     }
 
     public boolean isFalse() {
@@ -603,6 +680,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         if (isNormal) {
             return;
         }
+        renormalize();
+    }
+    private void renormalize() {
         isNormal = true;
         Set<Equality> equalitiesToRemove = new HashSet<Equality>();
         for (Iterator<Equality> iterator = equalities.iterator(); iterator.hasNext();) {
@@ -821,4 +901,33 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Finds an innermost occurrence of the #if_#then_#else_#fi function.
+     *
+     * @author Traian
+     */
+    private class IfThenElseFinder extends PrePostVisitor {
+        final List<KItem> result;
+        private String IF_THEN_ELSE_LABEL="'#if_#then_#else_#fi";
+
+        public IfThenElseFinder(TermContext context) {
+            result = new ArrayList<>();
+            preVisitor.addVisitor(new LocalVisitor() {
+                @Override
+                protected void visit(JavaSymbolicObject object) {
+                    proceed = result.isEmpty();
+                }
+            });
+            postVisitor.addVisitor(new LocalVisitor(){
+                @Override
+                public void visit(KItem kItem) {
+                    if (!result.isEmpty()) return;
+                    if (kItem.kLabel() instanceof KLabelConstant &&
+                            ((KLabelConstant) kItem.kLabel()).label().equals(IF_THEN_ELSE_LABEL)) {
+                        result.add(kItem);
+                    }
+                }
+            });
+        }
+    }
 }

@@ -33,18 +33,7 @@ import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.KSorts;
 import org.kframework.backend.symbolic.SymbolicBackend;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Attribute;
-import org.kframework.kil.Bag;
-import org.kframework.kil.BoolBuiltin;
-import org.kframework.kil.DataStructureSort;
-import org.kframework.kil.GenericToken;
-import org.kframework.kil.Int32Builtin;
-import org.kframework.kil.IntBuiltin;
-import org.kframework.kil.KSort;
-import org.kframework.kil.Module;
-import org.kframework.kil.Production;
-import org.kframework.kil.StringBuiltin;
+import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -58,7 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 
@@ -230,14 +219,17 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             List<org.kframework.kil.Term> contents;
             if (node.getContents() instanceof org.kframework.kil.Bag) {
                 contents = new ArrayList<org.kframework.kil.Term>();
-                Bag.flatten(contents, ((org.kframework.kil.Bag) node.getContents()).getContents());
+                org.kframework.kil.Bag.flatten(contents, ((org.kframework.kil.Bag) node.getContents()).getContents());
             } else {
                 contents = Collections.singletonList(node.getContents());
             }
 
-            Multimap<String, Cell> cells = HashMultimap.create();
+            Multimap<String, Cell> cells = ArrayListMultimap.create();
             Variable variable = null;
             for (org.kframework.kil.Term term : contents) {
+                if (term instanceof TermComment) {
+                    continue;
+                }
                 if (term instanceof org.kframework.kil.Cell) {
                     Cell cell = (Cell) term.accept(this);
                     cells.put(cell.getLabel(), cell);

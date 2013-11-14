@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 
@@ -33,7 +33,7 @@ public class Definition extends JavaSymbolicObject {
 
     private final List<Rule> rules;
     private final List<Rule> macros;
-    private final Multimap<KLabelConstant, Rule> functionRules = HashMultimap.create();
+    private final Multimap<KLabelConstant, Rule> functionRules = ArrayListMultimap.create();
     private final Set<KLabelConstant> kLabels;
     private final Set<KLabelConstant> frozenKLabels;
     private final Context context;

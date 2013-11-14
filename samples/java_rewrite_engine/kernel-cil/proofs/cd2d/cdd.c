@@ -22,11 +22,11 @@
 
 /*@ ensures \result == dmax(a,b); */
 double max(double a, double b){
-    return (a<b)?b:a;
+    return (a<=b)?b:a;
 }
 /*@ ensures \result == dmin(a,b); */
 double min(double a, double b){
-    return (a<b)?a:b;
+    return (a<=b)?a:b;
 }
 /*@
   requires VELOCITY(x) && VELOCITY(y) ;
@@ -61,7 +61,7 @@ int horizontal_los(double s_x, double s_y)
 {
   double sqS = sqs(s_x, s_y);
   double sqD = D*D;
-  return (sqS - sqD < E_hlos);
+  return (sqS - sqD <= E_hlos);
 }
 
 /*@  requires DISTANCE(s_x) && DISTANCE(s_y);
@@ -99,6 +99,6 @@ double omega_vv(double s_x, double s_y, double v_x, double v_y){
 
 int cd2d(double s_x, double s_y, double v_x, double v_y){
   /*@  assert horizontal_losR(s_x,s_y,D) || omega_vvR_outDr(s_x,s_y,v_x,v_y,D,0.0,T) < 0 ; */ 
-  return  (horizontal_los(s_x, s_y)) ||  (omega_vv(s_x, s_y, v_x, v_y) < E_cd2d);
+  return  (horizontal_los(s_x, s_y)) ||  (omega_vv(s_x, s_y, v_x, v_y) <= E_cd2d);
    
 }

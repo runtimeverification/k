@@ -78,6 +78,7 @@ public class Context implements Serializable {
     public boolean initialized = false;
     protected java.util.List<String> komputationCells = null;
     public Map<String, CellDataStructure> cellDataStructures = new HashMap<>();
+    public Set<String> variableTokenSorts = new HashSet<>();
 
     public int numModules, numSentences, numProductions, numCells;
 
