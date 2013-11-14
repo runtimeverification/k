@@ -193,6 +193,18 @@ public class Main {
             output.put("$stdin", StringBuiltin.EMPTY);
         }
 
+        if (K.load_cfg != null) {
+            try {
+                  Term saved_cfg = (Term) BinaryLoader.fromBinary(
+                              new FileInputStream(K.load_cfg));
+                  output.put("$PGM", saved_cfg);
+            } catch(FileNotFoundException e) {
+                Error.report(e.getMessage());
+                System.exit(1);
+
+            }
+        }
+
         if (GlobalSettings.verbose)
             sw.printIntermediate("Make configuration");
 
@@ -874,6 +886,9 @@ public class Main {
             }
             if (cmd.hasOption("output")) {
                 K.output_mode = cmd.getOptionValue("output");
+            }
+            if (cmd.hasOption("load-cfg")) {
+                K.load_cfg = cmd.getOptionValue("load-cfg");
             }
             if (cmd.hasOption("log-io")) {
                 String v = cmd.getOptionValue("log-io");
