@@ -1081,11 +1081,6 @@ public class Main {
                 K.kompiled_cfg = (org.kframework.kil.Configuration)
                     BinaryLoader.load(K.compiled_def + "/configuration.bin");
 
-                CommandLine compileOptions = (CommandLine)
-                    BinaryLoader.load(K.compiled_def + "/compile-options.bin");
-                if (compileOptions.hasOption("sortCells"))
-                    GlobalSettings.sortedCells = true;
-
                 if (GlobalSettings.verbose)
                     sw.printIntermediate("Reading configuration from binary");
             }
