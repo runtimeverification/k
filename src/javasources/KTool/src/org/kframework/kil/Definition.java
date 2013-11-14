@@ -133,6 +133,7 @@ public class Definition extends ASTNode {
 		this.accept(new UpdateAssocVisitor(context));
 		this.accept(new CollectLocationsVisitor(context));
         this.accept(new CountNodesVisitor(context));
+        this.accept(new CollectVariableTokens(context));
 
         /* collect lexical token sorts */
         TokenSortCollector tokenSortCollector = new TokenSortCollector(context);
