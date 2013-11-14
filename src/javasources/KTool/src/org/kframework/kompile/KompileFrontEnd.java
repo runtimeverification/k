@@ -114,7 +114,6 @@ public class KompileFrontEnd {
 
 		if (cmd.hasOption("sort-cells")) {
 			GlobalSettings.sortedCells = true;
-//			GlobalSettings.addTopCell = true;
 		}
 
 
@@ -182,22 +181,10 @@ public class KompileFrontEnd {
 			assert !context.getKomputationCells().isEmpty();
 		}
 		
-		context.dotk = new File(output + File.separator + ".k");
-		context.dotk.mkdirs();
-
-		
 		Backend backend = null;
 		String backendOpt;
 		if (cmd.hasOption("backend")) {
 			backendOpt = cmd.getOptionValue("backend");
-		/*
-		} else if (cmd.hasOption("xml")) {
-			backendOpt = "xml";
-		*/
-		/*
-		} else if (cmd.hasOption("doc")) {
-			backendOpt = "doc";
-		*/
 		} else {
 			backendOpt = "maude";
 		}
@@ -210,21 +197,6 @@ public class KompileFrontEnd {
 			GlobalSettings.documentation = true;
 			backend = new LatexBackend(Stopwatch.sw, context);
 			break;
-		/*
-		case "doc":
-			GlobalSettings.documentation = true;
-			if (!cmd.hasOption("doc-style")) {
-				GlobalSettings.style = "k-documentation.css";
-			}
-			backend = new DocumentationBackend(Stopwatch.sw, context);
-			break;
-		*/
-		/*
-		case "xml":
-			GlobalSettings.xml = true;
-			backend = new XmlBackend(Stopwatch.sw, context);
-			break;
-		*/
 		case "html":
 			if (!cmd.hasOption("doc-style")) {
 				GlobalSettings.style = "k-definition.css";
@@ -321,31 +293,6 @@ public class KompileFrontEnd {
 			e.printStackTrace();
 		}
 	}
-
-	// private static void lint(File mainFile, String mainModule) {
-	// try {
-	// File canonicalFile = mainFile.getCanonicalFile();
-	// org.kframework.kil.Definition javaDef = org.kframework.parser.DefinitionLoader.parseDefinition(canonicalFile, mainModule, true);
-	//
-	// KlintRule lintRule = new UnusedName(javaDef);
-	// lintRule.run();
-	//
-	// lintRule = new UnusedSyntax(javaDef);
-	// lintRule.run();
-	//
-	// lintRule = new InfiniteRewrite(javaDef);
-	// lintRule.run();
-	// } catch (IOException e1) {
-	// e1.printStackTrace();
-	// } catch (Exception e1) {
-	// e1.printStackTrace();
-	// }
-	// }
-
-	// public static void pdfClean(String[] extensions) {
-	// for (int i = 0; i < extensions.length; i++)
-	// new File(GlobalSettings.mainFileWithNoExtension + extensions[i]).delete();
-	// }
 
 	private static void checkAnotherKompiled(File kompiled) {
 		File[] kompiledList = kompiled.getParentFile().listFiles(new FilenameFilter() {
