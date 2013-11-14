@@ -75,10 +75,6 @@ public class BuiltinFloatOperations {
         return IntToken.of(term.bigIntegerValue().abs());
     }
 
-    public static BoolToken eq(IntToken term1, IntToken term2) {
-        return BoolToken.of(term1.bigIntegerValue().compareTo(term2.bigIntegerValue()) == 0);
-    }
-
     public static BoolToken ne(IntToken term1, IntToken term2) {
         return BoolToken.of(term1.bigIntegerValue().compareTo(term2.bigIntegerValue()) != 0);
     }
@@ -94,6 +90,11 @@ public class BuiltinFloatOperations {
         if (value.startsWith("-")) value = value.substring(1);
         else value = "-" + value;
         return UninterpretedToken.of(sort, value);
+    }
+
+    public static BoolToken eq(Term term1, Term term2, TermContext context) {
+        if (term1.equals(term2)) return BoolToken.TRUE;
+        return null;
     }
 
     public static BoolToken gt(Term term1, Term term2, TermContext context) {

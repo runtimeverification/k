@@ -20,10 +20,28 @@ public class GappaPrinter extends BottomUpVisitor {
     private static String unaryMinusOp = "'--Float_";
     private static String absOp = "'absFloat";
 
+    public static Map<String,String> comparisonOps = new HashMap<String, String>();
+    static {
+        comparisonOps.put("'_>=Float_", ">=");
+        comparisonOps.put("'_<=Float_", "<=");
+    }
+
+    public static  Map<String,String> reverseComparisonOps = new HashMap<String, String>();
+    static {
+        reverseComparisonOps.put(">=", "<=");
+        reverseComparisonOps.put("<=", ">=");
+    };
+
+    public static  Map<String,String> negativeComparisonOps = new HashMap<String, String>();
+    static {
+        negativeComparisonOps.put("'_>Float_", "<=");
+        negativeComparisonOps.put("'_<Float_", ">=");
+    };
+
    	public static Map<String,String> binaryOps = new HashMap<String, String>();
 	static {
-        binaryOps.put("'_>=Float_", ">=");
-        binaryOps.put("'_<=Float_", "<=");
+        comparisonOps.put("'_>=Float_", ">=");
+        comparisonOps.put("'_<=Float_", "<=");
 		binaryOps.put("'_+Float_", "+");
         binaryOps.put("'_-Float_", "-");
 		binaryOps.put("'_*Float_", "*");
@@ -41,12 +59,6 @@ public class GappaPrinter extends BottomUpVisitor {
 		doubleBinaryOps.put("'_*Float64_", "*");
 		doubleBinaryOps.put("'_/Float64_", "/");
         doubleBinaryOps.put("'_/Float64_", "/");
-	};
-
-    public static  Map<String,String> negativeBinaryOps = new HashMap<String, String>();
-	static {
-        negativeBinaryOps.put("'_>Float_", "<=");
-        negativeBinaryOps.put("'_<Float_", ">=");
 	};
 
     public static Map<String,String> unaryOps = new HashMap<String, String>();
@@ -146,20 +158,37 @@ public class GappaPrinter extends BottomUpVisitor {
         KList kList = kItem.kList();
         String label = kLabelConstant.label();
         String gappaOp = unaryOps.get(label);
+        Term term = null;
+        if (gappaOp != null) {
+            term = kList.get(0);
+        } else if (label.equals("'_-Float_") || label.equals("'_-Float64_")) {
+            term=kList.get(0);
+            if (term instanceof UninterpretedToken &&
+                ((UninterpretedToken) term).value().equals("0.0")) {
+                term = kList.get(1);
+                gappaOp = "-";
+            }
+        }
         if (gappaOp != null) {
             result.append(gappaOp + "(");
-            kList.get(0).accept(this);
+            term.accept(this);
             result.append(")");
             return;
         }
-        gappaOp = negativeBinaryOps.get(label);
-        boolean closeParens;
+        gappaOp = negativeComparisonOps.get(label);
+        boolean closeParens, comparison = false;
         if (gappaOp != null) {
             result.append("not(");
             closeParens = true;
+            comparison = true;
         } else {
-            gappaOp = binaryOps.get(label);
             closeParens = false;
+            gappaOp = comparisonOps.get(label);
+            if (gappaOp != null) {
+                comparison = true;
+            } else {
+                gappaOp = binaryOps.get(label);
+            }
         }
         if (doubleBinaryOps.containsKey(label)) {
             gappaOp = doubleBinaryOps.get(label);
@@ -167,11 +196,34 @@ public class GappaPrinter extends BottomUpVisitor {
             closeParens = true;
         }
         if (gappaOp != null) {
-            result.append("(");
-            kList.get(0).accept(this);
-            result.append(") " + gappaOp + " (" );
-            kList.get(1).accept(this);
-            result.append(")");
+            Term left = kList.get(0);
+            Term right = kList.get(1);
+            if (comparison && !(right instanceof UninterpretedToken) && left instanceof UninterpretedToken) {
+                Term temp = left;
+                left = right;
+                right = temp;
+                gappaOp = reverseComparisonOps.get(gappaOp);
+            }
+            if (comparison && !(right instanceof UninterpretedToken)) {
+                result.append("(");
+                openParens(left);
+                left.accept(this);
+                closeParens(left);
+                result.append(" - ");
+                openParens(right);
+                right.accept(this);
+                closeParens(right);
+                result.append(")");
+                right = UninterpretedToken.of("Float", "0.0");
+            } else {
+                openParens(left);
+                left.accept(this);
+                closeParens(left);
+            }
+            result.append(gappaOp);
+            openParens(right);
+            right.accept(this);
+            closeParens(right);
             if (closeParens)
                 result.append(")");
             return;
@@ -197,6 +249,14 @@ public class GappaPrinter extends BottomUpVisitor {
             return;
         }
         exception =  new GappaPrinterException("Operation " + label + " not supported (yet)");
+    }
+
+    private void closeParens(Term left) {
+        if (left instanceof KItem) result.append(")");
+    }
+
+    private void openParens(Term left) {
+        if (left instanceof KItem) result.append("(");
     }
 
     @Override

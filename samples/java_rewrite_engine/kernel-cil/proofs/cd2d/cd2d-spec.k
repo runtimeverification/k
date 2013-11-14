@@ -2,16 +2,18 @@ require "../../extended-float.k"
 
 module CD2D-SPEC
   imports EXTENDED-FLOAT
+
+//  rule F:Float ==Float F => true
+//  rule F:Float =/=Float F => false
+
   syntax Bool ::=  "absFloat" "(" Float ")" "<=Float" Float [function]
   rule absFloat(X:Float) <=Float Y:Float => --Float Y <=Float X <=Float Y
 
   syntax Float ::=  dmax(Float, Float) [function]
-  rule dmax(X:Float, Y:Float) => Y requires X <=Float Y
-  rule dmax(X:Float, Y:Float) => X requires Y <=Float X
+  rule dmax(X:Float, Y:Float) => #if X <=Float Y #then Y #else X #fi
 
   syntax Float ::=  dmin(Float, Float) [function]
-  rule dmin(X:Float, Y:Float) => X requires X <=Float Y
-  rule dmin(X:Float, Y:Float) => Y requires Y <=Float X
+  rule dmin(X:Float, Y:Float) => #if X <=Float Y #then X #else Y #fi
 
   syntax Float ::= "E_sqv" [function]
   rule E_sqv => 0x1.p-30

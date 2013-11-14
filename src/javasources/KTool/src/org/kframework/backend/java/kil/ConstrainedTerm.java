@@ -11,6 +11,7 @@ import org.kframework.krun.api.io.FileSystem;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 
 
 /**
@@ -85,6 +86,9 @@ public class ConstrainedTerm extends Term {
         SymbolicConstraint unificationConstraint = new SymbolicConstraint(constrainedTerm.termContext());
         unificationConstraint.add(term, constrainedTerm.term);
         unificationConstraint.simplify();
+        Set variables = constrainedTerm.variableSet();
+        variables.removeAll(variableSet());
+        unificationConstraint.orientSubstitution(variables, context);
         if (unificationConstraint.isFalse() || !unificationConstraint.isSubstitution()) {
             return null;
         }
@@ -94,6 +98,8 @@ public class ConstrainedTerm extends Term {
         implicationConstraint.addAll(constrainedTerm.lookups);
         implicationConstraint.addAll(constrainedTerm.constraint);
         implicationConstraint.simplify();
+        implicationConstraint.orientSubstitution(variables, context);
+        implicationConstraint = implicationConstraint.substitute(implicationConstraint.substitution(),context);
 
         unificationConstraint.addAll(constraint);
         unificationConstraint.simplify();

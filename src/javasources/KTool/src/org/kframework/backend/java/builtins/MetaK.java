@@ -47,4 +47,9 @@ public class MetaK {
         return new BuiltinSet(metaVariables);
     }
 
+    public static Term ite(BoolToken boolToken, Term t, Term e, TermContext context) {
+        if (boolToken.booleanValue()) return t;
+        return e;
+    }
+
 }
