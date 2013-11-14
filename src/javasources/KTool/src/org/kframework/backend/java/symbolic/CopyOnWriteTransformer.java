@@ -40,7 +40,7 @@ import org.kframework.kil.ASTNode;
 
 import java.util.*;
 
-import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 
@@ -91,7 +91,7 @@ public class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(CellCollection cellCollection) {
         boolean change = false;
-        Multimap<String, Cell> cells = HashMultimap.create();
+        Multimap<String, Cell> cells = ArrayListMultimap.create();
         for (Map.Entry<String, Cell> entry : cellCollection.cellMap().entries()) {
             Cell cell = (Cell) entry.getValue().accept(this);
             cells.put(entry.getKey(), cell);
@@ -108,7 +108,7 @@ public class CopyOnWriteTransformer implements Transformer {
             if (transformedFrame instanceof CellCollection) {
                 isStar = isStar || ((CellCollection) transformedFrame).isStar();
                 if (cells == cellCollection.cellMap()) {
-                    cells = HashMultimap.create(cellCollection.cellMap());
+                    cells = ArrayListMultimap.create(cellCollection.cellMap());
                 }
                 cells.putAll(((CellCollection) transformedFrame).cellMap());
                 frame = ((CellCollection) transformedFrame).hasFrame() ?

@@ -1,6 +1,5 @@
 package org.kframework.backend.java.kil;
 
-import com.google.common.collect.HashMultimap;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Utils;
@@ -9,6 +8,7 @@ import org.kframework.kil.ASTNode;
 
 import java.util.Set;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
 
@@ -26,7 +26,7 @@ public class CellCollection extends Collection {
 
     public CellCollection(Multimap<String, Cell> cells, Variable frame, boolean isStar) {
         super(frame, Kind.CELL_COLLECTION);
-        this.cells = HashMultimap.create(cells);
+        this.cells = ArrayListMultimap.create(cells);
         this.isStar = isStar;
 
         assert !isStar || cells.keySet().size() <= 1;
@@ -36,7 +36,7 @@ public class CellCollection extends Collection {
     }
 
     public CellCollection(Variable frame) {
-        this(HashMultimap.<String, Cell>create(), frame, false);
+        this(ArrayListMultimap.<String, Cell>create(), frame, false);
     }
 
     public CellCollection(Multimap<String, Cell> cells, boolean star) {
@@ -44,7 +44,7 @@ public class CellCollection extends Collection {
     }
 
     public CellCollection() {
-        this(HashMultimap.<String, Cell>create(), null, false);
+        this(ArrayListMultimap.<String, Cell>create(), null, false);
     }
 
     public java.util.Collection<Cell> cells() {

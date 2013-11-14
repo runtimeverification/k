@@ -58,7 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 
@@ -235,7 +235,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 contents = Collections.singletonList(node.getContents());
             }
 
-            Multimap<String, Cell> cells = HashMultimap.create();
+            Multimap<String, Cell> cells = ArrayListMultimap.create();
             Variable variable = null;
             for (org.kframework.kil.Term term : contents) {
                 if (term instanceof org.kframework.kil.Cell) {
