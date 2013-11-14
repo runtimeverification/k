@@ -180,6 +180,9 @@ public class KompileFrontEnd {
 			context.setKomputationCells(komputationCells);
 			assert !context.getKomputationCells().isEmpty();
 		}
+
+        context.dotk = new File(output + File.separator + ".k");
+        context.dotk.mkdirs();
 		
 		Backend backend = null;
 		String backendOpt;
