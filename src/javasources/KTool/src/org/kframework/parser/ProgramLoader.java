@@ -3,6 +3,7 @@ package org.kframework.parser;
 import java.io.File;
 import java.io.IOException;
 
+import org.kframework.kil.loader.ResolveVariableAttribute;
 import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.transformers.RemoveBrackets;
@@ -130,7 +131,8 @@ public class ProgramLoader {
 			} else if (whatParser == GlobalSettings.ParserType.BINARY) {
                 out = (org.kframework.kil.Cell) BinaryLoader.load(filename);
 			} else {
-				out = loadPgmAst(content, filename, startSymbol, context);
+                out = loadPgmAst(content, filename, startSymbol, context);
+                out = out.accept(new ResolveVariableAttribute(context));
 			}
 			if (GlobalSettings.verbose) {
 				sw.printIntermediate("Parsing Program");

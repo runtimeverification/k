@@ -7,6 +7,7 @@ module CD2D
               | Token{"u_x"} | Token{"u_y"}
               | Token{"v_x"} | Token{"v_y"}
               | Token{"sqv"} | Token{"tau_vv"}
+              | Token{"max"} | Token{"min"}
 
   configuration <T color="red">
                   <threads color="orange">

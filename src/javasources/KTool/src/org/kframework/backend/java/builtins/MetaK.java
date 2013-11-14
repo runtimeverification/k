@@ -34,12 +34,22 @@ public class MetaK {
         return term.substitute(Variable.getFreshSubstitution(variables), context);
     }
 
+    public static Term renameVariables(Term term, TermContext context) {
+        Set<Variable> variables = term.variableSet();
+        return term.substitute(Variable.getFreshSubstitution(variables), context);
+    }
+
     public static BuiltinSet variables(Term term, TermContext context) {
         Set<Term> metaVariables = new HashSet<Term>();
         for (Variable variable : term.variableSet()) {
             metaVariables.add(new MetaVariable(variable));
         }
         return new BuiltinSet(metaVariables);
+    }
+
+    public static Term ite(BoolToken boolToken, Term t, Term e, TermContext context) {
+        if (boolToken.booleanValue()) return t;
+        return e;
     }
 
 }
