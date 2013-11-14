@@ -241,7 +241,7 @@ simply the semantics later on, by not having to treat special cases. */
   syntax Clause ::= mkProperClause(Clause) [function]
   syntax Term ::= mkProper(Term) [function]
   syntax Terms ::= mkPropers(Terms) [function]
-  rule mkProper(L) => L(.Terms)
+  rule mkProper(L:Literal) => L(.Terms)
   rule mkProper(L:Literal(Ts)) => L(mkPropers(Ts))
 
   rule mkPropers(T,Ts) => mkProper(T),mkPropers(Ts)
@@ -338,7 +338,7 @@ many instances, one for each context. */
 /*@ Pick a clause and generate a fresh instance of it when the
 \textsf{fresh} cell is empty: */
 
-  rule <fresh> . => renameVariables(C) </fresh>  <clause> C </clause>
+  rule <fresh> . => renameVariables(C) </fresh> <clause> C </clause>
     [transition]
 
   syntax K ::= renameVariables(K) [function, hook(MetaK:renameVariables)]
