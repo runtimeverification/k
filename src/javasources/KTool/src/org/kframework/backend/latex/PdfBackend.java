@@ -1,7 +1,6 @@
 package org.kframework.backend.latex;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 import org.kframework.backend.BasicBackend;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
@@ -35,7 +34,7 @@ public class PdfBackend extends BasicBackend {
             process.waitFor();
             if (process.exitValue() != 0)
                 GlobalSettings.kem.register(
-                        new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, IOUtils.toString(process.getErrorStream()), "", ""));
+                        new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1003, "", ""));
 
             if (GlobalSettings.verbose)
                 sw.printIntermediate("Latex2PDF");
