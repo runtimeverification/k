@@ -224,6 +224,9 @@ public class KompileFrontEnd {
 		case "unparse":
 			backend = new UnparserBackend(Stopwatch.sw, context);
 			break;
+		case "unflatten":
+			backend = new UnparserBackend(Stopwatch.sw, context, true);
+			break;
 		case "symbolic":
 			GlobalSettings.symbolic = true;
 			backend = new SymbolicBackend(Stopwatch.sw, context);
