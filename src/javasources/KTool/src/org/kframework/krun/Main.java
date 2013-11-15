@@ -25,7 +25,6 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.fusesource.jansi.AnsiConsole;
 import org.kframework.backend.java.symbolic.JavaSymbolicKRun;
-import org.kframework.backend.java.symbolic.SpecificationCompilerSteps;
 import org.kframework.backend.maude.krun.MaudeKRun;
 import org.kframework.compile.ConfigurationCleaner;
 import org.kframework.compile.FlattenModules;
@@ -143,7 +142,7 @@ public class Main {
             if (kast == null) {
                 return rp.runParserOrDie(K.getProgramParser(), K.term, false, null, context);
             } else {
-                Error.report("You cannot specify both the term and the configuration\nvariables.");
+                org.kframework.utils.Error.report("You cannot specify both the term and the configuration\nvariables.");
             }
         }
 
@@ -206,11 +205,11 @@ public class Main {
             try {
                 return new JavaSymbolicKRun(context);
             } catch (KRunExecutionException e) {
-                Error.report(e.getMessage());
+                org.kframework.utils.Error.report(e.getMessage());
                 return null;
             }
         } else {
-            Error.report("Currently supported backends are 'maude' and 'java'");
+            org.kframework.utils.Error.report("Currently supported backends are 'maude' and 'java'");
             return null;
         }
     }
@@ -300,7 +299,7 @@ public class Main {
                         if (GlobalSettings.verbose)
                             sw.printTotal("Search total");
                     } else {
-                        Error.report("For the search option you must specify that --maude-cmd=search");
+                        org.kframework.utils.Error.report("For the search option you must specify that --maude-cmd=search");
                     }
                 } else if (K.model_checking.length() > 0) {
                     // run kast for the formula to be verified
@@ -330,7 +329,7 @@ public class Main {
                 } else if (K.prove.length() > 0) {
                     File proofFile = new File(K.prove);
                     if (!proofFile.exists()) {
-                        Error.report("Cannot find the file containing rules to prove");
+                        org.kframework.utils.Error.report("Cannot find the file containing rules to prove");
                     }
                     String content = FileUtil.getFileContent(proofFile.getAbsoluteFile().toString());
                     Definition parsed = DefinitionLoader.parseString(content,
@@ -363,7 +362,7 @@ public class Main {
                         krun.setBackendOption("io", false);
                         result = krun.search(null, null, K.searchType, patternRule, res, steps);
                     }else {
-                        Error.report("Pattern matching after execution is not supported by search\nand model checking");
+                        org.kframework.utils.Error.report("Pattern matching after execution is not supported by search\nand model checking");
                     }
                 }
 
@@ -373,7 +372,7 @@ public class Main {
             } catch (TransformerException e) {
                 e.report();
             } catch (UnsupportedBackendOptionException e) {
-                Error.report("Backend \"" + K.backend + "\" does not support option " + e.getMessage());
+                org.kframework.utils.Error.report("Backend \"" + K.backend + "\" does not support option " + e.getMessage());
             }
 
             if ("pretty".equals(K.output_mode)) {
@@ -434,17 +433,17 @@ public class Main {
                     Term res = ((KRunState) krs).getRawResult();
 
                     if (!cmd.hasOption("output-file")) {
-                        Error.silentReport("Did not specify an output file. Cannot print binary output to\nstandard out. Saving to .k/krun/krun_output");
+                        org.kframework.utils.Error.silentReport("Did not specify an output file. Cannot print binary output to\nstandard out. Saving to .k/krun/krun_output");
                         BinaryLoader.save(K.krun_output, res);
                     } else {
                         BinaryLoader.save(K.output, res);
                     }
                 } else {
-                    Error.report("binary output mode is not supported by search and model\nchecking");
+                    org.kframework.utils.Error.report("binary output mode is not supported by search and model\nchecking");
                 }
 
             } else {
-                Error.report(K.output_mode
+                org.kframework.utils.Error.report(K.output_mode
                         + " is not a valid value for output option");
             }
 
@@ -494,7 +493,7 @@ public class Main {
                     debugger = krun.debug(state.getResult().getGraph());
                 }
             } catch (UnsupportedBackendOptionException e) {
-                Error.report("Backend \"" + K.backend + "\" does not support option " + e.getMessage());
+                org.kframework.utils.Error.report("Backend \"" + K.backend + "\" does not support option " + e.getMessage());
                 throw e; //unreachable
             }
             while (true) {
@@ -552,7 +551,7 @@ public class Main {
                             AnsiConsole.out.println(debugger
                                     .printState(debugger.getCurrentState()));
                         } catch (IllegalStateException e) {
-                            Error.silentReport("Wrong command: If you previously used the step-all command you must"
+                            org.kframework.utils.Error.silentReport("Wrong command: If you previously used the step-all command you must"
                                     + K.lineSeparator
                                     + "seletc first a solution with step command before executing steps of rewrites!");
                         }
@@ -573,9 +572,9 @@ public class Main {
                             AnsiConsole.out.println(debugger
                                     .printState(debugger.getCurrentState()));
                         } catch (NumberFormatException e) {
-                            Error.silentReport("Argument to step must be an integer.");
+                            org.kframework.utils.Error.silentReport("Argument to step must be an integer.");
                         } catch (IllegalStateException e) {
-                            Error.silentReport("Wrong command: If you previously used the step-all command you must"
+                            org.kframework.utils.Error.silentReport("Wrong command: If you previously used the step-all command you must"
                                     + K.lineSeparator
                                     + "select first a solution with step command before executing steps of rewrites!");
                         }
@@ -594,9 +593,9 @@ public class Main {
                             AnsiConsole.out.println(states);
 
                         } catch (NumberFormatException e) {
-                            Error.silentReport("Argument to step-all must be an integer.");
+                            org.kframework.utils.Error.silentReport("Argument to step-all must be an integer.");
                         } catch (IllegalStateException e) {
-                            Error.silentReport("Wrong command: If you previously used the step-all command you must"
+                            org.kframework.utils.Error.silentReport("Wrong command: If you previously used the step-all command you must"
                                     + K.lineSeparator
                                     + "select first a solution with step command before executing steps of rewrites!");
                         }
@@ -611,7 +610,7 @@ public class Main {
                             AnsiConsole.out.println(debugger
                                     .printState(debugger.getCurrentState()));
                         } catch (NumberFormatException e) {
-                            Error.silentReport("Argument to select must bean integer.");
+                            org.kframework.utils.Error.silentReport("Argument to select must bean integer.");
                         } catch (IllegalArgumentException e) {
                             System.out
                                     .println("A node with the specified state number could not be found in the"
@@ -630,7 +629,7 @@ public class Main {
                             AnsiConsole.out.println(debugger
                                     .printState(stateNum));
                         } catch (NumberFormatException e) {
-                            Error.silentReport("Argument to select node to show must be an integer.");
+                            org.kframework.utils.Error.silentReport("Argument to select node to show must be an integer.");
                         } catch (IllegalArgumentException e) {
                             System.out
                                     .println("A node with the specified state number could not be found in the"
@@ -646,9 +645,9 @@ public class Main {
                             AnsiConsole.out.println(debugger.printEdge(state1,
                                     state2));
                         } catch (ArrayIndexOutOfBoundsException e) {
-                            Error.silentReport("Must specify two nodes with an edge between them.");
+                            org.kframework.utils.Error.silentReport("Must specify two nodes with an edge between them.");
                         } catch (NumberFormatException e) {
-                            Error.silentReport("Arguments to select edge to show must be integers.");
+                            org.kframework.utils.Error.silentReport("Arguments to select edge to show must be integers.");
                         } catch (IllegalArgumentException e) {
                             System.out
                                     .println("An edge with the specified endpoints could not be found in the"
@@ -676,7 +675,7 @@ public class Main {
                             AnsiConsole.out.println(
                                     debugger.printState(debugger.getCurrentState()));
                         } catch (IllegalStateException e) {
-                            Error.silentReport(e.getMessage());
+                            org.kframework.utils.Error.silentReport(e.getMessage());
                         }
                     }
                 }
@@ -802,7 +801,7 @@ public class Main {
                 else if (v.equals("off"))
                     K.io = false;
                 else
-                    Error.report("Unrecognized option: --io " + v + "\nUsage: krun --io [on|off]");
+                    org.kframework.utils.Error.report("Unrecognized option: --io " + v + "\nUsage: krun --io [on|off]");
             }
             if (cmd.hasOption("statistics")) {
                 String v = cmd.getOptionValue("statistics");
@@ -811,7 +810,7 @@ public class Main {
                 else if (v.equals("off"))
                     K.statistics = false;
                 else
-                    Error.report("Unrecognized option: --statistics " + v + "\nUsage: krun --statistics [on|off]");
+                    org.kframework.utils.Error.report("Unrecognized option: --statistics " + v + "\nUsage: krun --statistics [on|off]");
             }
             if (cmd.hasOption("color")) {
                 String v = cmd.getOptionValue("color");
@@ -822,7 +821,7 @@ public class Main {
                 else if (v.equals("extended"))
                     K.color = ColorSetting.EXTENDED;
                 else
-                    Error.report("Unrecognized option: --color " + v + "\nUsage: krun --color [on|off|extended]");
+                    org.kframework.utils.Error.report("Unrecognized option: --color " + v + "\nUsage: krun --color [on|off|extended]");
             }
             if (cmd.hasOption("terminal-color")) {
                 String v = cmd.getOptionValue("terminal-color");
@@ -830,7 +829,7 @@ public class Main {
                 if (terminalColor != null) {
                     K.terminalColor = terminalColor;
                 } else {
-                    Error.report("Invalid terminal color: " + v);
+                    org.kframework.utils.Error.report("Invalid terminal color: " + v);
                 }
             }
 
@@ -841,7 +840,7 @@ public class Main {
                 } else if (v.equals("smart")) {
                     K.parens = false;
                 } else {
-                    Error.report("Unrecognized option: --parens " + v + "\nUsage: krun --parens [greedy|smart]");
+                    org.kframework.utils.Error.report("Unrecognized option: --parens " + v + "\nUsage: krun --parens [greedy|smart]");
                 }
             }
 
@@ -882,7 +881,7 @@ public class Main {
                 else if (v.equals("off"))
                     K.log_io = false;
                 else
-                    Error.report("Unrecognized option: --log-io " + v + "\nUsage: krun --log-io [on|off]");
+                    org.kframework.utils.Error.report("Unrecognized option: --log-io " + v + "\nUsage: krun --log-io [on|off]");
             }
             if (cmd.hasOption("debug")) {
                 K.debug = true;
@@ -915,7 +914,7 @@ public class Main {
             if (cmd.hasOption("c")) {
 
                 if (K.term != null) {
-                    Error.report("You cannot specify both the term and the configuration\nvariables.");
+                    org.kframework.utils.Error.report("You cannot specify both the term and the configuration\nvariables.");
                 }
 
                 K.configuration_variables = cmd.getOptionProperties("c");
@@ -1003,11 +1002,11 @@ public class Main {
             }
 
             if (K.compiled_def == null) {
-                Error.report("Could not find a compiled K definition. Please ensure that\neither a compiled K definition exists in the current directory with its default\nname, or that --directory has been specified.");
+                org.kframework.utils.Error.report("Could not find a compiled K definition. Please ensure that\neither a compiled K definition exists in the current directory with its default\nname, or that --directory has been specified.");
             }
             File compiledFile = new File(K.compiled_def);
             if (!compiledFile.exists()) {
-                Error.report("\nCould not find compiled definition: "
+                org.kframework.utils.Error.report("\nCould not find compiled definition: "
                         + K.compiled_def
                         + "\nPlease compile the definition by using `kompile'.");
             }
@@ -1120,7 +1119,7 @@ public class Main {
                 normalExecution(KAST, lang, rp, cmd_options, context);
             } else {
                 if (K.do_search) {
-                    Error.report("Cannot specify --search with --debug. In order to search\nnside the debugger, use the step-all command.");
+                    org.kframework.utils.Error.report("Cannot specify --search with --debug. In order to search\nnside the debugger, use the step-all command.");
                 }
                 if (K.guidebug)
                     guiDebugExecution(KAST, lang, null, context);

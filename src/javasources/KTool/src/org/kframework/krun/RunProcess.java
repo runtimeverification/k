@@ -34,7 +34,7 @@ public class RunProcess {
 
 		try {
 			if (commands.length <= 0) {
-				Error.report("Need command options to run");
+				org.kframework.utils.Error.report("Need command options to run");
 			}
 
 			// create process
@@ -83,10 +83,10 @@ public class RunProcess {
 
 		} catch (IOException e) {
 			// e.printStackTrace();
-			Error.report("Error while running process:" + e.getMessage());
+			org.kframework.utils.Error.report("Error while running process:" + e.getMessage());
 		} catch (InterruptedException e) {
 			// e.printStackTrace();
-			Error.report("Error while running process:" + e.getMessage());
+			org.kframework.utils.Error.report("Error while running process:" + e.getMessage());
 		}
 
 	}
@@ -176,7 +176,7 @@ public class RunProcess {
 			int index = compiledDefName.indexOf("-kompiled");
 			compiledDefName = compiledDefName.substring(0, index);
 			if (lang != null && !lang.equals(compiledDefName)) {
-				Error.silentReport("Compiled definition file name (" + compiledDefName + ") and the extension of the program (" + lang + ") aren't the same. "
+				org.kframework.utils.Error.silentReport("Compiled definition file name (" + compiledDefName + ") and the extension of the program (" + lang + ") aren't the same. "
 						+ "Maybe you should use --syntax-module or --main-module options of krun");
 			}
 
@@ -188,9 +188,9 @@ public class RunProcess {
 			// get the absolute path on disk for the maude_err file disregard the rename of krun temp dir took place or not
 			String fileName = new File(K.maude_err).getName();
 			String fullPath = new File(K.kdir + K.fileSeparator + "krun" + K.fileSeparator + fileName).getCanonicalPath();
-			Error.silentReport("Maude produced warnings or errors.\n" + content);
+			org.kframework.utils.Error.silentReport("Maude produced warnings or errors.\n" + content);
 		} catch (IOException e) {
-			Error.report("Error in checkMaudeForErrors method:" + e.getMessage());
+			org.kframework.utils.Error.report("Error in checkMaudeForErrors method:" + e.getMessage());
 		}
 	}
 

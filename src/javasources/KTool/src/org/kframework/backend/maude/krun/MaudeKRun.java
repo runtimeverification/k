@@ -7,7 +7,6 @@ import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.runner.KRunner;
-import org.kframework.krun.Error;
 import org.kframework.krun.K;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.SubstitutionFilter;
@@ -88,7 +87,7 @@ public class MaudeKRun implements KRun {
 			}
 		}
 		if (returnValue != 0) {
-			Error.report("Maude returned non-zero value: " + returnValue);
+			org.kframework.utils.Error.report("Maude returned non-zero value: " + returnValue);
 		}
 
 	}
