@@ -631,6 +631,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             List<SymbolicConstraint> multiConstraints = new ArrayList<SymbolicConstraint>();
             for (SymbolicConstraint constraint : unifier.multiConstraints.iterator().next()) {
                 constraint.addAll(this);
+                constraint.simplify();
                 multiConstraints.add(constraint);
             }
             return multiConstraints;
