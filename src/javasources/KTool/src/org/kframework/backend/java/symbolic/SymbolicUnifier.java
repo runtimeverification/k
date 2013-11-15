@@ -199,7 +199,7 @@ public class SymbolicUnifier extends AbstractUnifier {
         }
         CellCollection otherCellCollection = (CellCollection) term;
 
-        if (cellCollection.isStar() != otherCellCollection.isStar()) {
+        if (cellCollection.isStar() != otherCellCollection.isStar() && !otherCellCollection.cells().isEmpty()) {
             fail();
         }
 
@@ -241,9 +241,17 @@ public class SymbolicUnifier extends AbstractUnifier {
                 fail();
             }
 
-            String label = unifiableCellLabels.iterator().next();
-            Cell[] cells = cellCollection.get(label).toArray(new Cell[0]);
-            Cell[] otherCells = otherCellCollection.get(label).toArray(new Cell[0]);
+            Cell[] otherCells;
+            Cell[] cells;
+            if (!otherCellCollection.cells().isEmpty()) {
+                String label = unifiableCellLabels.iterator().next();
+                cells = cellCollection.get(label).toArray(new Cell[0]);
+                otherCells = otherCellCollection.get(label).toArray(new Cell[0]);
+            } else {
+                String label = cellCollection.labelSet().iterator().next();
+                cells = cellCollection.get(label).toArray(new Cell[0]);
+                otherCells = new Cell[0];
+            }
             Variable otherFrame = otherCellCollection.hasFrame() ? otherCellCollection.frame() : null;
 
             if (otherFrame == null && cells.length > otherCells.length) {
@@ -330,6 +338,7 @@ public class SymbolicUnifier extends AbstractUnifier {
         }
 
         public boolean generate() {
+            if (selection.isEmpty()) return false;
             pop();
             while (selection.size() != size) {
                 if (index == coSize) {

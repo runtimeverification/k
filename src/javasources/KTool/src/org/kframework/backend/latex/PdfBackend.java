@@ -12,77 +12,52 @@ import org.kframework.utils.errorsystem.KMessages;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.io.*;
-import java.util.List;
 
 import static org.apache.commons.io.FileUtils.copyFile;
 
 public class PdfBackend extends BasicBackend {
-	public PdfBackend(Stopwatch sw, Context context) {
-		super(sw, context);
-	}
+    public PdfBackend(Stopwatch sw, Context context) {
+        super(sw, context);
+    }
 
-	private static List<File> pdf(List<File> files, String lang) {
-		File latexFile = files.get(0);
-		files.clear();
+    private static File pdf(File latexFile) {
+        Stopwatch sw = new Stopwatch();
+        try {
+            // Run pdflatex.
+            String pdfLatex = "pdflatex";
+            String argument = latexFile.getCanonicalPath();
 
-		try {
-			Stopwatch sw = new Stopwatch();
-			// Run pdflatex.
-			String pdfLatex = "pdflatex";
-			String argument = latexFile.getCanonicalPath();
-			// System.out.println(argument);
+            ProcessBuilder pb = new ProcessBuilder(pdfLatex, argument, "-interaction", "nonstopmode");
+            pb.directory(latexFile.getParentFile());
 
-			ProcessBuilder pb = new ProcessBuilder(pdfLatex, argument, "-interaction", "nonstopmode");
-			pb.directory(latexFile.getParentFile());
+            Process process = pb.start();
+            process.waitFor();
+            if (process.exitValue() != 0)
+                GlobalSettings.kem.register(
+                        new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1003, "", ""));
 
-			pb.redirectErrorStream(true);
-			try {
-				Process process = pb.start();
-				InputStream is = process.getInputStream();
-				InputStreamReader isr = new InputStreamReader(is);
-				BufferedReader br = new BufferedReader(isr);
-				while (br.readLine() != null) {
-				}
-				process.waitFor();
-				if (process.exitValue() != 0) {
-					KException exception = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1003, "", "");
-					GlobalSettings.kem.register(exception);
-				}
-				process = pb.start();
-				is = process.getInputStream();
-				isr = new InputStreamReader(is);
-				br = new BufferedReader(isr);
-				while (br.readLine() != null) {
-				}
-				process.waitFor();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+            if (GlobalSettings.verbose)
+                sw.printIntermediate("Latex2PDF");
 
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Latex2PDF");
-			}
+            return new File(FilenameUtils.removeExtension(latexFile.getCanonicalPath()) + ".pdf");
+        } catch (IOException | InterruptedException e) {
+            GlobalSettings.kem.register(
+                    new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1001, "", ""));
+        }
+        return null; // unreachable code
+    }
 
-            files.add(new File(FilenameUtils.removeExtension(latexFile.getCanonicalPath()) + ".pdf"));
-		} catch (IOException e) {
-			KException exception = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1001, "", "");
-			GlobalSettings.kem.register(exception);
-		}
+    @Override
+    public void run(Definition definition) throws IOException {
+        LatexBackend latexBackend = new LatexBackend(sw, context);
+        latexBackend.run(definition);
+        File latexFile = latexBackend.getLatexifiedFile();
+        File pdfFile = pdf(latexFile);
+        copyFile(pdfFile, new File(GlobalSettings.outputDir + File.separator + FilenameUtils.removeExtension(new File(definition.getMainFile()).getName()) + ".pdf"));
+    }
 
-		return files;
-	}
-
-
-	@Override
-	public void run(Definition definition) throws IOException {
-		List<File> files = LatexBackend.latex(definition, context, definition.getMainModule());
-		files = pdf(files, definition.getMainModule());
-        copyFile(files.get(0), new File(GlobalSettings.outputDir + File.separator + FilenameUtils.removeExtension(new File(definition.getMainFile()).getName()) + ".pdf"));
-	}
-
-	@Override
-	public String getDefaultStep() {
-		return "FirstStep";
-	}
-
+    @Override
+    public String getDefaultStep() {
+        return "FirstStep";
+    }
 }

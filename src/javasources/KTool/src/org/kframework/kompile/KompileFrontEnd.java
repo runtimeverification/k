@@ -112,11 +112,6 @@ public class KompileFrontEnd {
 			}
 		}
 
-		if (cmd.hasOption("sort-cells")) {
-			GlobalSettings.sortedCells = true;
-		}
-
-
 		if (cmd.hasOption("add-top-cell"))
 			GlobalSettings.addTopCell = true;
 
@@ -180,6 +175,9 @@ public class KompileFrontEnd {
 			context.setKomputationCells(komputationCells);
 			assert !context.getKomputationCells().isEmpty();
 		}
+
+        context.dotk = new File(output + File.separator + ".k");
+        context.dotk.mkdirs();
 		
 		Backend backend = null;
 		String backendOpt;
@@ -221,6 +219,9 @@ public class KompileFrontEnd {
 		case "unparse":
 			backend = new UnparserBackend(Stopwatch.sw, context);
 			break;
+		case "unflatten":
+			backend = new UnparserBackend(Stopwatch.sw, context, true);
+			break;
 		case "symbolic":
 			GlobalSettings.symbolic = true;
 			backend = new SymbolicBackend(Stopwatch.sw, context);
@@ -239,10 +240,8 @@ public class KompileFrontEnd {
 			break;
 		}
 
-		if (backend != null) {
+		if (backend != null)
 			genericCompile(mainFile, lang, backend, step, context);
-            BinaryLoader.save(context.dotk.getAbsolutePath() + "/compile-options.bin", cmd);
-        }
 
 		verbose(cmd, context);
 	}

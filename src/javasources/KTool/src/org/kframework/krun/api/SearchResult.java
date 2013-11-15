@@ -4,9 +4,6 @@ import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.krun.SubstitutionFilter;
-import org.kframework.utils.general.GlobalSettings;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,36 +32,27 @@ public class SearchResult {
 		this.compilationInfo = compilationInfo;
 	}
 
-	public Map<String, Term> getSubstitution() {
-		if (substitution == null) {
-			substitution = new HashMap<String, Term>();
-			for (Variable var : compilationInfo.getVars()) {
-				Term rawValue;
-				if (GlobalSettings.sortedCells) {
-					Term cellFragment = compilationInfo.getCellFragment(var);
-					try {
-						rawValue = (Term)cellFragment.accept(new SubstitutionFilter(rawSubstitution, context));
-					} catch (TransformerException e) {
-						assert false; //shouldn't happen
-						rawValue = null; //for static reasons
-					}
-				} else {
-          String varString = "";
-          // The backend doesn't keep sort information around so we want to
-          // match the variable name only.
-          for (String key : rawSubstitution.keySet()) {
-            if (key.startsWith(var.getName() + ":")) {
-              varString = key;
-              break;
+    public Map<String, Term> getSubstitution() {
+        if (substitution == null) {
+            substitution = new HashMap<String, Term>();
+            for (Variable var : compilationInfo.getVars()) {
+                Term rawValue;
+                String varString = "";
+                // The backend doesn't keep sort information around so we want to
+                // match the variable name only.
+                for (String key : rawSubstitution.keySet()) {
+                    if (key.startsWith(var.getName() + ":")) {
+                        varString = key;
+                        break;
+                    }
+                }
+                rawValue = rawSubstitution.get(varString);
+
+                substitution.put(var.getName() + ":" + var.getSort(), KRunState.concretize(rawValue, context));
             }
-          }
-					rawValue = rawSubstitution.get(varString);
-				}
-				substitution.put(var.getName() + ":" + var.getSort(), KRunState.concretize(rawValue, context));
-			}
-		}
-		return substitution;
-	}
+        }
+        return substitution;
+    }
 
 	public KRunState getState() {
 		return state;

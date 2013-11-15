@@ -18,7 +18,7 @@ public class LatexFilter extends BackendFilter {
 		super(context);
 	}
 
-	String endl = System.getProperty("line.separator");
+	private String endl = System.getProperty("line.separator");
 	private StringBuilder preamble = new StringBuilder();
 	private boolean firstProduction = false;
 	private boolean terminalBefore = false;
@@ -36,14 +36,8 @@ public class LatexFilter extends BackendFilter {
 		wantParens.push(Boolean.TRUE);
 	}
 
-	// private boolean termComment;
-
 	public void setResult(StringBuilder result) {
 		this.result = result;
-	}
-
-	public void setPreamble(StringBuilder preamble) {
-		this.preamble = preamble;
 	}
 
 	public StringBuilder getPreamble() {
@@ -64,12 +58,10 @@ public class LatexFilter extends BackendFilter {
 
     @Override
     public void visit(PriorityExtended node) {
-        return;
     }
 
     @Override
     public void visit(PriorityExtendedAssoc node) {
-        return;
     }
 
     @Override
@@ -213,7 +205,6 @@ public class LatexFilter extends BackendFilter {
 	}
 
 	private void printList(List<Term> contents, String str) {
-		// result.append("\\begin{array}{l}");
 		boolean first = true;
 		for (Term trm : contents) {
 			if (first) {
@@ -223,7 +214,6 @@ public class LatexFilter extends BackendFilter {
 			}
 			trm.accept(this);
 		}
-		// result.append("\\end{array}");
 	}
 
 	public void visit(TermComment tc) {
@@ -333,17 +323,13 @@ public class LatexFilter extends BackendFilter {
 		if (trm.getContent() instanceof Rewrite)
 			super.visit(trm);
 		else {
-			String pattern = getBracketPattern(trm);
+            String pattern = "\\left({#1}\\right)";
 			LatexFilter termFilter = new LatexFilter(context);
 			termFilter.getWantParens().push(Boolean.FALSE);
 			trm.getContent().accept(termFilter);
 			pattern = pattern.replace("{#1}", "{" + termFilter.getResult() + "}");
 			result.append(pattern);
 		}
-	}
-
-	private String getBracketPattern(Bracket trm) {
-		return "\\left({#1}\\right)";
 	}
 
 	@Override

@@ -164,9 +164,6 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 		steps.add(new ResolveRewrite(context));
 		steps.add(new CompileDataStructures(context));
 
-		if (GlobalSettings.sortedCells) {
-			steps.add(new SortCells(context));
-		}
 		// steps.add(new LineariseTransformer()); // symbolic step
 		steps.add(new ReplaceConstants(context)); // symbolic step
 		steps.add(new AddPathCondition(context)); // symbolic step
