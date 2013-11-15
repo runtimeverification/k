@@ -57,7 +57,6 @@ import org.kframework.compile.transformers.ResolveOpenCells;
 import org.kframework.compile.transformers.ResolveRewrite;
 import org.kframework.compile.transformers.ResolveSupercool;
 import org.kframework.compile.transformers.ResolveSyntaxPredicates;
-import org.kframework.compile.transformers.SortCells;
 import org.kframework.compile.transformers.StrictnessToContexts;
 import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.compile.utils.CompileDataStructures;
@@ -380,9 +379,6 @@ public class RLBackend extends BasicBackend implements Backend {
 		steps.add(new ResolveRewrite(context));
 		steps.add(new CompileDataStructures(context));
 
-		if (GlobalSettings.sortedCells) {
-			steps.add(new SortCells(context));
-		}
 		// steps.add(new LineariseTransformer()); // symbolic step
 		steps.add(new ReplaceConstants(context)); // symbolic step
 		steps.add(new AddPathCondition(context)); // symbolic step

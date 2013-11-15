@@ -36,7 +36,6 @@ import org.kframework.compile.transformers.ResolveListOfK;
 import org.kframework.compile.transformers.ResolveOpenCells;
 import org.kframework.compile.transformers.ResolveRewrite;
 import org.kframework.compile.transformers.SetVariablesInferredSort;
-import org.kframework.compile.transformers.SortCells;
 import org.kframework.compile.transformers.StrictnessToContexts;
 import org.kframework.compile.utils.*;
 import org.kframework.kil.ASTNode;
@@ -51,7 +50,6 @@ import org.kframework.main.FirstStep;
 import org.kframework.main.LastStep;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
-import org.kframework.utils.general.GlobalSettings;
 
 import java.io.File;
 import java.io.IOException;
@@ -165,9 +163,6 @@ public class JavaSymbolicBackend extends BasicBackend {
         steps.add(new Cell2DataStructure(context));
         steps.add(new DataStructureToLookupUpdate(context));
 
-        if (GlobalSettings.sortedCells) {
-            steps.add(new SortCells(context));
-        }
         //steps.add(new ResolveSupercool(context));
         steps.add(new AddStrictStar(context));
         steps.add(new AddDefaultComputational(context));

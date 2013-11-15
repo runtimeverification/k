@@ -112,11 +112,6 @@ public class KompileFrontEnd {
 			}
 		}
 
-		if (cmd.hasOption("sort-cells")) {
-			GlobalSettings.sortedCells = true;
-		}
-
-
 		if (cmd.hasOption("add-top-cell"))
 			GlobalSettings.addTopCell = true;
 
