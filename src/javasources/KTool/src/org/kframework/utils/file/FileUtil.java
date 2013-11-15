@@ -109,7 +109,7 @@ public class FileUtil {
             f2.mkdirs();
             return file1;
         } catch (Exception e) {
-            org.kframework.krun.Error.report("Error while creating file " + file);
+            org.kframework.utils.Error.report("Error while creating file " + file);
         }
         return null;
     }
@@ -119,7 +119,7 @@ public class FileUtil {
         try {
             return File.createTempFile(dirName, "").getName();
         } catch (IOException e) {
-            org.kframework.krun.Error.report("Error while generating unique directory name:" + e.getMessage());
+            org.kframework.utils.Error.report("Error while generating unique directory name:" + e.getMessage());
         }
         return null;
     }

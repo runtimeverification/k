@@ -1,6 +1,5 @@
 package org.kframework.compile;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -23,9 +22,7 @@ public class ConfigurationCleaner extends CopyOnWriteTransformer {
 	public ASTNode transform(Cell node) throws TransformerException {
 		if (node.getMultiplicity() == Multiplicity.ANY || node.getMultiplicity() == Multiplicity.MAYBE) {
 			if (node.variables().isEmpty()) {
-                if (GlobalSettings.sortedCells)
-                    return new ListTerminator(MetaK.cellFragment(node.getId()), null);
-                else return new Bag();
+                return new Bag();
 			}
 		}
 

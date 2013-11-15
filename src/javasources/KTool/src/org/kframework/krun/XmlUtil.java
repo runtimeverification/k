@@ -49,7 +49,7 @@ public class XmlUtil {
 		} catch (ParserConfigurationException | IOException | SAXException e) {
 			e.printStackTrace();
 
-			Error.report("Error while reading XML:" + e.getMessage());
+			org.kframework.utils.Error.report("Error while reading XML:" + e.getMessage());
 		}
         return doc;
 	}
@@ -81,13 +81,13 @@ public class XmlUtil {
             transformer.transform(xmlSource, result);
 		} catch (TransformerFactoryConfigurationError factoryError) {
 			// factoryError.printStackTrace();
-			Error.report("Error creating TransformerFactory:" + factoryError.getMessage());
+			org.kframework.utils.Error.report("Error creating TransformerFactory:" + factoryError.getMessage());
 		} catch (TransformerException transformerError) {
 			// transformerError.printStackTrace();
-			Error.report("Error transforming document:" + transformerError.getMessage());
+			org.kframework.utils.Error.report("Error transforming document:" + transformerError.getMessage());
 		} catch (IOException ioException) {
 			// ioException.printStackTrace();
-			Error.report("Error while serialize XML:" + ioException.getMessage());
+			org.kframework.utils.Error.report("Error while serialize XML:" + ioException.getMessage());
 		}
 	}
 
@@ -144,13 +144,13 @@ public class XmlUtil {
 		
 		list = doc.getElementsByTagName(tagName);
 		if (list.getLength() == 0) {
-			Error.silentReport("The node with " +  tagName + "tag wasn't found. Make sure that you applied a" + K.lineSeparator + "search before using select command");
+			org.kframework.utils.Error.silentReport("The node with " +  tagName + "tag wasn't found. Make sure that you applied a" + K.lineSeparator + "search before using select command");
 			return result;
 		}
 		for (int i = 0; i < list.getLength(); i++) {
 			nod = list.item(i);
 			if (nod == null) {
-				Error.report("The node with " + tagName + " tag wasn't found");
+				org.kframework.utils.Error.report("The node with " + tagName + " tag wasn't found");
 			} else if (nod.getNodeType() == Node.ELEMENT_NODE) {
 				Element elem = (Element) nod;
 				if (elem.getAttribute(attributeName).equals("NONE")) {
@@ -174,11 +174,11 @@ public class XmlUtil {
 						}
 						else {
                             String output = FileUtil.getFileContent(K.maude_out);
-							Error.report("Unable to parse Maude's search results:\n" + output);
+							org.kframework.utils.Error.report("Unable to parse Maude's search results:\n" + output);
 						}
 
 					} catch (XPathExpressionException e) {
-						Error.report("XPathExpressionException " + e.getMessage());
+						org.kframework.utils.Error.report("XPathExpressionException " + e.getMessage());
 					}
                 }
 			}

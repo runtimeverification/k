@@ -23,8 +23,7 @@ public class KompileBackend extends BasicBackend {
 	@Override
 	public Definition firstStep(Definition javaDef) {
 		String fileSep = System.getProperty("file.separator");
-		String propPath = KPaths.getKBase(false) + fileSep + "lib" + fileSep + "maude" +
-				fileSep;
+		String propPath = KPaths.getKBase(false) + fileSep + "lib" + fileSep + "maude" + fileSep;
 		Properties specialMaudeHooks = new Properties();
 		Properties maudeHooks = new Properties();
 		try {

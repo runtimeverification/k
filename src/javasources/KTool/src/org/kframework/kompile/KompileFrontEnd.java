@@ -112,11 +112,6 @@ public class KompileFrontEnd {
 			}
 		}
 
-		if (cmd.hasOption("sort-cells")) {
-			GlobalSettings.sortedCells = true;
-		}
-
-
 		if (cmd.hasOption("add-top-cell"))
 			GlobalSettings.addTopCell = true;
 
@@ -245,10 +240,8 @@ public class KompileFrontEnd {
 			break;
 		}
 
-		if (backend != null) {
+		if (backend != null)
 			genericCompile(mainFile, lang, backend, step, context);
-            BinaryLoader.save(context.dotk.getAbsolutePath() + "/compile-options.bin", cmd);
-        }
 
 		verbose(cmd, context);
 	}
