@@ -14,13 +14,9 @@ public class LatexPatternsVisitor extends BasicVisitor {
 	}
 
 	private Map<String, String> patterns = new HashMap<String, String>();
-	String pattern = "";
-	int nonTerm;
-	boolean prevNonTerm;
-
-	public void setPatterns(Map<String, String> patterns) {
-		this.patterns = patterns;
-	}
+	private String pattern = "";
+	private int nonTerm;
+	private boolean prevNonTerm;
 
 	public Map<String, String> getPatterns() {
 		return patterns;
@@ -72,20 +68,15 @@ public class LatexPatternsVisitor extends BasicVisitor {
 		prevNonTerm = false;
 	}
 
-	// Premature optimization :-)
-
 	@Override
 	public void visit(Rule node) {
-		return;
 	}
 
 	@Override
 	public void visit(Configuration node) {
-		return;
 	}
 
 	@Override
 	public void visit(org.kframework.kil.Context node) {
-		return;
 	}
 }

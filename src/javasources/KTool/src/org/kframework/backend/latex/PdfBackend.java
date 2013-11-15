@@ -1,6 +1,7 @@
 package org.kframework.backend.latex;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.kframework.backend.BasicBackend;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
@@ -30,26 +31,11 @@ public class PdfBackend extends BasicBackend {
             ProcessBuilder pb = new ProcessBuilder(pdfLatex, argument, "-interaction", "nonstopmode");
             pb.directory(latexFile.getParentFile());
 
-            pb.redirectErrorStream(true);
-
             Process process = pb.start();
-            InputStream is = process.getInputStream();
-            InputStreamReader isr = new InputStreamReader(is);
-            BufferedReader br = new BufferedReader(isr);
-            while (br.readLine() != null) {
-            }
             process.waitFor();
-            if (process.exitValue() != 0) {
-                KException exception = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1003, "", "");
-                GlobalSettings.kem.register(exception);
-            }
-            process = pb.start();
-            is = process.getInputStream();
-            isr = new InputStreamReader(is);
-            br = new BufferedReader(isr);
-            while (br.readLine() != null) {
-            }
-            process.waitFor();
+            if (process.exitValue() != 0)
+                GlobalSettings.kem.register(
+                        new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, IOUtils.toString(process.getErrorStream()), "", ""));
 
             if (GlobalSettings.verbose)
                 sw.printIntermediate("Latex2PDF");
@@ -75,5 +61,4 @@ public class PdfBackend extends BasicBackend {
     public String getDefaultStep() {
         return "FirstStep";
     }
-
 }
