@@ -1,4 +1,4 @@
-append(nil,L,L) :- .
+append(nil(),L,L) :- .
 append(cons(H,T),L,cons(H,Z)) :- append(T,L,Z).
 
 // Next has only one solution
@@ -8,7 +8,7 @@ append(cons(H,T),L,cons(H,Z)) :- append(T,L,Z).
 //?- append(L1, cons(a,L2), cons(a,cons(b,cons(a,nil)))).
 
 // Next has one parametric, most general solution
-?- append(cons(a,nil), Y, Z).
+?- append(cons(a,nil()), Y, Z).
 
 // Next query has an infinite number of solutions
 //?- append(L1, cons(a,L2), L3).  
