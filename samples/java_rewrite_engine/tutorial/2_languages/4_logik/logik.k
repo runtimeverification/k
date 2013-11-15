@@ -194,10 +194,15 @@ one cannot do it in general (same like for all Turing-complete
 languages).  */
 
 module LOGIK
+  syntax K ::= renameVariables(K) [function, hook(MetaK:renameVariables)]
+  syntax K ::= variables(K) [function, hook(MetaK:variables)]
+  syntax K ::= variablesMap(K) [function, hook(MetaK:variablesMap)]
+  syntax Bool ::= unifiable(K,K) [function, hook(MetaK:unifiable)]
+
 
 /*@ Unification is at the core of logic programming.  Here we are
 going to use the predefined unification procedure (the same one we
-used in the type inferencers in Tutorial 5. */
+used in the type inferencers in Tutorial 5). */
 
 /*@ \section{Syntax}
 
@@ -210,8 +215,6 @@ Horn clauses followed by a query: */
   syntax Query ::= "?-" Terms "."
   syntax Pgm ::= Query | Clause Pgm
 
-  
-
 /*@ Variables and literals are defined as tokens following the conventions 
 used in Prolog (variables start with \_ or capital letter, while literals
 start with lower case letters): */  
@@ -219,34 +222,6 @@ start with lower case letters): */
 
   syntax Term ::= Token{[\_A-Z][a-zA-Z0-9\_]*}                   [variable, onlyLabel]
   syntax Literal ::= Token{[a-z][a-zA-Z0-9\_]*}                  [onlyLabel]
-
-
-  
-/*@ \subsection{Normalizing the definition}
-
-The following simple macros ensure that all clauses will have both a
-conclusion and a condition, and that all predicate and operation
-symbols take a (potentially empty) list of arguments.  These will
-simply the semantics later on, by not having to treat special cases. */
-
-  rule mkProperClause(T.) => mkProper(T) :- .Terms .
-  rule mkProperClause(T :- Ts .) => mkProper(T) :- mkPropers(Ts) .                                       
-// What I would really like to say here, but the tool does not allow us
-// to do that yet, is:
-//   rule IdAsTerm(X) => X(.Terms) when isCapitalizedId(X) =/= true  [macro]
-// Instead, we currently have to add rules like the following
-//  rule (X:Literal => X(.Terms)) :- _ .                           
-//  rule (X:Literal => X(.Terms)),_        
-
-  syntax Clause ::= mkProperClause(Clause) [function]
-  syntax Term ::= mkProper(Term) [function]
-  syntax Terms ::= mkPropers(Terms) [function]
-  rule mkProper(L:Literal) => L(.Terms)
-  rule mkProper(L:Literal(Ts)) => L(mkPropers(Ts))
-
-  rule mkPropers(T,Ts) => mkProper(T),mkPropers(Ts)
-  rule mkPropers(.Terms) => .Terms
-                        
 
 /*@ \section{Configuration}
 
@@ -260,27 +235,41 @@ optional.  Indeed, we start with the main top cell and, when a
 solution is found, we move it into the \textsf{solution} cell and
 discard the main cell. */
 
-  configuration <T color="yellow">
+  configuration <T color="yellow" multiplicity="?">
                   <k color="green"> $PGM:Pgm </k>
                   <fresh color="orange"> .K </fresh>
                   <br/>
                   <clauses color="red">
                     <clause color="pink" multiplicity="*"> .K </clause>
                   </clauses>
-                  <solution> .Map </solution>
+                  <mgu> .K </mgu>
                 </T>
+                <solution multiplicity="?"> .K </solution>
 
 /*@ \section{Pre- and post-processing}
 
 Before we launch the semantics, we first scan the given program and
 place each clause in its own cell, and then place the query in the
-\textsf{k} cell: */
+\textsf{k} cell and initialize the mgu with the variables from the query.
+
+Note that we put a fresh instance of the clause to avoid interference with 
+the query variables.  By a ``fresh instance'' of a clause we mean one whose
+variables are renamed with fresh names; we need that in order to avoid
+undesired unification conflicts due to particular names chosen for
+variables in the original program, as well as conflicts due to
+subsequent uses of the same clause.  It is safe to rename the
+variables in a clause, because clauses are universally quantified in
+their variables.  This process of creating a fresh instance of a
+clause is similar to how we created fresh instances of type schemas in
+the higher-order type inferencer discussed in Tutorial 5.  Indeed, we
+can safely regard clauses as ``clause schemas'' comprising infinitely
+many instances, one for each context.  */
 
   rule <k> C:Clause Pgm => Pgm </k>
-       (. => <clause> mkProperClause(C) </clause>)
+       (. => <clause> renameVariables(C) </clause>)
 
-  rule <k> ?- Ls:Terms. => mkPropers(Ls) ...</k>
-//       <solution> _ => initialSubstitution(getVariables(Ls)) </solution>
+  rule <k> ?- Ls:Terms. => Ls ...</k>
+       <mgu> _ => variablesMap(variables(Ls)) </mgu>
 
 //@ We also sequentialize the goals for easier processing:
   rule L:Term, Ls:Terms => L ~> Ls
@@ -292,8 +281,8 @@ cell.  In that case, to ease reading of the final solution we move the
 mgu in the \textsf{solution} cell and delete the rest of the
 configuration: */
 
-//  rule <T>... <k> . </k> <mgu> Theta:Mgu </mgu> ...</T>
-//    => <solution> Mgu2Map(Theta) </solution>
+rule <T>... <k> . </k> <mgu> Theta </mgu> ...</T>
+  => <solution> Theta </solution>
 
 /*@ Since we are not interested in seeing the failed attempts to solve
 the query, we collapse all the error configurations into an empty
@@ -302,6 +291,8 @@ were declared optional).  This way, if we see an empty configuration
 when we search for all solutions, we know that some attempts failed
 (but we do not know which ones). */
 
+// this would be nice, but we need feedback from the external unifier 
+// for this.
 //  rule <T>... <mgu> _:MguError </mgu> ...</T> => .
 
 /*@ \section{Semantics}
@@ -323,38 +314,33 @@ clauses, and then derive {\em false}). */
 /*@ The following two rules are tightly connected and they together
 perform the following core task: pick a fresh instance of a clause
 which unifies with the first goal item, then add its conditions as new
-goals.  By a ``fresh instance'' of a clause we mean one whose
-variables are renamed with fresh names; we need that in order to avoid
-undesired unification conflicts due to particular names chosen for
-variables in the original program, as well as conflicts due to
-subsequent uses of the same clause.  It is safe to rename the
-variables in a clause, because clauses are universally quantified in
-their variables.  This process of creating a fresh instance of a
-clause is similar to how we created fresh instances of type schemas in
-the higher-order type inferencer discussed in Tutorial 5.  Indeed, we
-can safely regard clauses as ``clause schemas'' comprising infinitely
-many instances, one for each context. */
+goals.*/
 
 /*@ Pick a clause and generate a fresh instance of it when the
 \textsf{fresh} cell is empty: */
 
   rule <fresh> . => renameVariables(C) </fresh> <clause> C </clause>
+       <k> T:Term ...</k>
+  requires unifiable(T,head(C))
     [transition]
 
-  syntax K ::= renameVariables(K) [function, hook(MetaK:renameVariables)]
+  syntax Term ::= head(Clause) [function]
+  rule head(L.) => L
+  rule head(L:-_.) => L
 
-/*@ Unify the goal with the fresh clause's head, replace the goal
+/*@ If the goal is unifiable with the fresh clause's head, replace the goal
 with the clause body, and empty the \textsf{fresh} cell (so that
 another clause can be chosen using the rule above):  */
 
+  rule <k> L:Term => . ...</k>
+       <fresh>  L:Term . => . </fresh>
+
   rule <k> L:Term => Ls ...</k>
        <fresh>  L:Term :- Ls:Terms. => . </fresh>
-//       <mgu> Theta:Mgu => updateMgu(Theta,L,L') </mgu>
 
 /*@ Note that there is no problem if a clause is chosen whose
-conclusion literal does not unify with the first goal literal.  In
-this case the mgu update operation fails, so the post-processing rule
-above dissolves the configuration in an empty one.  The search
+conclusion literal does not unify with the first goal literal.  
+The search
 option of \texttt{krun} will systematically try all clauses, so no
 solution is missed.  Of course, the above is not the most efficient
 way to implement a logic programming language, but recall that our
