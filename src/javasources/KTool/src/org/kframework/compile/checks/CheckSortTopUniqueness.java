@@ -1,9 +1,6 @@
 package org.kframework.compile.checks;
 
-import java.util.HashMap;
-
 import org.kframework.kil.KSorts;
-import org.kframework.kil.Production;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.loader.Context;
@@ -21,8 +18,6 @@ public class CheckSortTopUniqueness extends BasicVisitor {
 	public CheckSortTopUniqueness(Context context) {
 		super(context);
 	}
-
-	java.util.Map<Production, Production> prods = new HashMap<Production, Production>();
 
 	@Override
 	public void visit(Syntax node) {

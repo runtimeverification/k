@@ -5,22 +5,27 @@ import org.kframework.backend.BasicBackend;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.Stopwatch;
+import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class LatexBackend extends BasicBackend {
+
+    private String latexifiedFile;
+
 	public LatexBackend(Stopwatch sw, Context context) {
 		super(sw, context);
 	}
 
-	public static List<File> latex(Definition javaDef, Context context, String mainModule) {
-		List<File> result = new ArrayList<File>();
+    @Override
+	public void run(Definition javaDef) {
+        List<File> generatedFiles = new LinkedList<>();
 		try {
 			Stopwatch sw = new Stopwatch();
 
@@ -41,33 +46,28 @@ public class LatexBackend extends BasicBackend {
 			latexified += preamble + "\\begin{document}" + endl + lf.getResult() + "\\end{document}" + endl;
 
 			File canonicalFile = GlobalSettings.mainFile.getCanonicalFile();
-            String latexifiedFile = context.dotk.getAbsolutePath() + fileSep + FilenameUtils.removeExtension(canonicalFile.getName()) + ".tex";
-			result.add(new File(latexifiedFile));
-			result.add(new File(dotKLatexStyle));
+            latexifiedFile = context.dotk.getAbsolutePath() + fileSep + FilenameUtils.removeExtension(canonicalFile.getName()) + ".tex";
+			generatedFiles.add(new File(latexifiedFile));
+			generatedFiles.add(new File(dotKLatexStyle));
 			FileUtil.save(latexifiedFile, latexified);
 
-			if (GlobalSettings.verbose) {
+			if (GlobalSettings.verbose)
 				sw.printIntermediate("Latex Generation");
-			}
 
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
+            FileUtil.copyFiles(generatedFiles, new File(GlobalSettings.outputDir));
+		} catch (IOException e) {
+            GlobalSettings.kem.register(
+                    new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, e.getMessage(), "", ""));
 		}
-
-		return result;
 	}
 
-	@Override
-	public void run(Definition definition) throws IOException {
-		List<File> files = latex(definition, context, definition.getMainModule());
-		FileUtil.copyFiles(files, new File(GlobalSettings.outputDir));
-	}
+    public File getLatexifiedFile() {
+        return new File(latexifiedFile);
+    }
+
 
 	@Override
 	public String getDefaultStep() {
 		return "FirstStep";
 	}
-
 }

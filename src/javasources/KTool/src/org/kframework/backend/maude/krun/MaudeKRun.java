@@ -7,7 +7,6 @@ import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.runner.KRunner;
-import org.kframework.krun.Error;
 import org.kframework.krun.K;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.SubstitutionFilter;
@@ -88,7 +87,7 @@ public class MaudeKRun implements KRun {
 			}
 		}
 		if (returnValue != 0) {
-			Error.report("Maude returned non-zero value: " + returnValue);
+			org.kframework.utils.Error.report("Maude returned non-zero value: " + returnValue);
 		}
 
 	}
@@ -206,7 +205,6 @@ public class MaudeKRun implements KRun {
 		}
 	}
 
-	public static Pattern cellPattern = Pattern.compile("<([^_>]+)>(_+)</([^_>]+)>");
 	public static Pattern emptyPattern = Pattern.compile("\\.(Map|Bag|List|Set|K)");
 
 	public static Term parseXML(Element xml, Context context) {
@@ -223,21 +221,6 @@ public class MaudeKRun implements KRun {
 
 				cell.setLabel(list.get(0).getAttribute("op"));
 				cell.setContents(parseXML(list.get(1), context));
-				return cell;
-			} else if (GlobalSettings.sortedCells && sort.equals("BagItem") && 
-					   (m = cellPattern.matcher(op)).matches()) {
-				Cell cell = new Cell();
-				assertXMLTerm(list.size() == m.group(2).length() && m.group(1).equals(m.group(3)));
-				cell.setLabel(m.group(1));
-				if (m.group(2).length() > 1) {
-					Bag bag = new Bag();
-					for (Element el : list) {
-						bag.getContents().add(parseXML(el, context));
-					}
-					cell.setContents(bag);
-				} else {
-					cell.setContents(parseXML(list.get(0), context));
-				}
 				return cell;
 			} else if ((sort.equals("BagItem") || sort.equals("[Bag]")) && op.equals("BagItem")) {
 				assertXMLTerm(list.size() == 1);

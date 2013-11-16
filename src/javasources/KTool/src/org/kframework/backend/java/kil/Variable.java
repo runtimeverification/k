@@ -18,7 +18,7 @@ import java.util.Set;
  */
 public class Variable extends Term implements Sorted {
 
-    protected static final String VARIABLE_PREFIX = "__var__";
+    protected static final String VARIABLE_PREFIX = "_";
     protected static int counter = 0;
     private static Map<Integer, Variable> deserializationAnonymousVariableMap = new HashMap<>();
 

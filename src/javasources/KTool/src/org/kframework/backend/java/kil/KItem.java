@@ -175,9 +175,7 @@ public class KItem extends Term implements Sorted {
             Term result = BuiltinFunction.invoke(context, kLabelConstant, arguments);
             if (result == null) result = this;
             return result;
-        } catch (IllegalAccessException e) {
-            //e.printStackTrace();
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalAccessException | IllegalArgumentException e) {
             //e.printStackTrace();
         } catch (RuntimeException e) {
             if (GlobalSettings.verbose) {

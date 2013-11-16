@@ -379,24 +379,16 @@ public class MaudeFilter extends BackendFilter {
 	 * @param cell
 	 */
 	@Override
-	public void visit(Cell cell) {
-		String id = cell.getId();
-		if (!GlobalSettings.sortedCells) {
-			result.append("<_>_</_>(" + id + ", ");
-		} else {
-			result.append("( <" + id + "> ");
-		}
-			if (cell.getContents() != null) {
-				cell.getContents().accept(this);
-			} else {
-				result.append("null");
-			}
-		if (!GlobalSettings.sortedCells) {
-			result.append(", " + id + ")");
-		} else {
-			result.append(" </" + id + "> )");
-		}
-	}
+    public void visit(Cell cell) {
+        String id = cell.getId();
+        result.append("<_>_</_>(" + id + ", ");
+        if (cell.getContents() != null) {
+            cell.getContents().accept(this);
+        } else {
+            result.append("null");
+        }
+        result.append(", " + id + ")");
+    }
 
 	@Override
 	public void visit(Variable variable) {

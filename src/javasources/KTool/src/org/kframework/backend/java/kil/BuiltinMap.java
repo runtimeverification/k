@@ -23,7 +23,7 @@ public class BuiltinMap extends Collection implements Sorted {
 
     private final Map<Term, Term> entries;
 
-    public BuiltinMap(Map<Term, Term> entries, Variable frame) {
+    public BuiltinMap(Map<? extends Term, ? extends Term> entries, Variable frame) {
         super(frame, Kind.KITEM);
         this.entries = new HashMap<Term, Term>(entries);
     }
@@ -33,7 +33,7 @@ public class BuiltinMap extends Collection implements Sorted {
         entries = new HashMap<Term, Term>();
     }
 
-    public BuiltinMap(Map<Term, Term> entries) {
+    public BuiltinMap(Map<? extends Term,? extends Term> entries) {
         super(null, Kind.KITEM);
         this.entries = new HashMap<Term, Term>(entries);
     }
@@ -134,7 +134,7 @@ public class BuiltinMap extends Collection implements Sorted {
         return transformer.transform(this);
     }
 
-    public static BuiltinMap of(Map<Term, Term> entries, Term frame) {
+    public static BuiltinMap of(Map<? extends Term, ? extends Term> entries, Term frame) {
         if (frame == null) {
             return new BuiltinMap(entries);
         }
