@@ -176,7 +176,6 @@
 
 <!--
   KOOL
--->
 
   <test
       definition="tutorial/2_languages/2_kool/1_untyped/kool-untyped.k"
@@ -213,6 +212,8 @@
         <krun-option name="-color" value="off" />
       </all-programs>
   </test>
+-->
+
 
 <!--
   QUINE
@@ -240,7 +241,6 @@
 
 <!--
   FUN
--->
 
   <test
       definition="tutorial/2_languages/3_fun/1_untyped/1_environment/fun-untyped.k"
@@ -248,8 +248,8 @@
       extension="fun"
       results="tutorial/2_languages/3_fun/1_untyped/1_environment/tests" >
       <all-programs>
-        <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
-        <krun-option name="--parens" value="smart"/>
+        <krun-option name="-pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
+        <krun-option name="-parens" value="smart"/>
       </all-programs>
   </test>
 
@@ -262,10 +262,12 @@
       results="tutorial/2_languages/3_fun/1_untyped/1_environment/tests
                tutorial/2_languages/3_fun/1_untyped/2_substitution/tests" >
       <all-programs>
-        <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
-        <krun-option name="--parens" value="smart"/>
+        <krun-option name="-pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
+        <krun-option name="-parens" value="smart"/>
        </all-programs>
   </test>
+-->
+
 
 <!--
   LOGIK
