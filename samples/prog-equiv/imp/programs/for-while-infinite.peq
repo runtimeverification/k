@@ -7,7 +7,7 @@
   then the formula holds.
   Am alternative is to use search command:
      krun programs/for-while-infinite.peq -search 
-                   --pattern="<T> <goals> success </goals> B:Bag </T>"
+                   --pattern="<T> <goals> .Bag </goals> B:Bag </T>"
                    --bound=1
 */
 
@@ -19,7 +19,7 @@
 )
 </k>
 <env>
-  b -> 0, i -> #symInt(i1), SymMap(M)
+  b -> 0, SymMap(M)
 </env>
 ~
 <k>
@@ -30,14 +30,15 @@
     )
 </k>
 <env>
-  i -> #symInt(i1), SymMap(M)
+   SymMap(M)
 </env>
 
 if
 
 i isNotModifiedBy #symStmt(s)
-//not occurs(i, #symStmt(s))
+and
+b isNotModifiedBy #symStmt(s)
 
-using observers: allObs;
+using observers: i;
 
 
