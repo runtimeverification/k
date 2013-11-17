@@ -1,5 +1,6 @@
 package org.kframework.backend.latex;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.BasicBackend;
 import org.kframework.kil.Definition;
@@ -12,12 +13,10 @@ import org.kframework.utils.general.GlobalSettings;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
 
 public class LatexBackend extends BasicBackend {
 
-    private String latexifiedFile;
+    private File latexifiedFile;
 
 	public LatexBackend(Stopwatch sw, Context context) {
 		super(sw, context);
@@ -25,7 +24,6 @@ public class LatexBackend extends BasicBackend {
 
     @Override
 	public void run(Definition javaDef) {
-        List<File> generatedFiles = new LinkedList<>();
 		try {
 			Stopwatch sw = new Stopwatch();
 
@@ -46,15 +44,14 @@ public class LatexBackend extends BasicBackend {
 			latexified += preamble + "\\begin{document}" + endl + lf.getResult() + "\\end{document}" + endl;
 
 			File canonicalFile = GlobalSettings.mainFile.getCanonicalFile();
-            latexifiedFile = context.dotk.getAbsolutePath() + fileSep + FilenameUtils.removeExtension(canonicalFile.getName()) + ".tex";
-			generatedFiles.add(new File(latexifiedFile));
-			generatedFiles.add(new File(dotKLatexStyle));
-			FileUtil.save(latexifiedFile, latexified);
+            String latexifiedFilePath = context.dotk.getAbsolutePath() + fileSep + FilenameUtils.removeExtension(canonicalFile.getName()) + ".tex";
+            latexifiedFile = new File(latexifiedFilePath);
+			FileUtil.save(latexifiedFilePath, latexified);
 
 			if (GlobalSettings.verbose)
 				sw.printIntermediate("Latex Generation");
 
-            FileUtil.copyFiles(generatedFiles, new File(GlobalSettings.outputDir));
+            FileUtils.copyFile(latexifiedFile, new File(GlobalSettings.outputDir + File.separator + latexifiedFile.getName()));
 		} catch (IOException e) {
             GlobalSettings.kem.register(
                     new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, e.getMessage(), "", ""));
@@ -62,7 +59,7 @@ public class LatexBackend extends BasicBackend {
 	}
 
     public File getLatexifiedFile() {
-        return new File(latexifiedFile);
+        return latexifiedFile;
     }
 
 
