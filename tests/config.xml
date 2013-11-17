@@ -10,10 +10,10 @@
 
 -->
 
-  <include file="../tutorial/1_k/tests/config.xml"
-           directory="tutorial/1_k"
-           programs="tutorial/1_k/tests"
-           results="tutorial/1_k/tests" />
+  <include file="../tutorial/tests/config.xml"
+           directory="tutorial"
+           programs="tutorial/tests"
+           results="tutorial/tests" />
 
 <!-- TYPES -->
 
@@ -134,9 +134,9 @@
       </all-programs>
   </test>
 
+
 <!--
   SIMPLE
--->
 
   <test
       definition="tutorial/2_languages/1_simple/1_untyped/simple-untyped.k"
@@ -171,6 +171,8 @@
         <krun-option name="-pattern" value="&lt;tasks&gt;.Bag&lt;/tasks&gt;"/>
       </all-programs>
   </test>
+-->
+
 
 <!--
   KOOL

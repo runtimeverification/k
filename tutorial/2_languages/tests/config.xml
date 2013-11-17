@@ -1,0 +1,11 @@
+<!-- Expected to be called from k/2_languages, with the command
+
+  ktest tests/config.xml
+
+-->
+
+<tests>
+
+  <include file="../1_simple/tests/config.xml" directory="1_simple" />
+
+</tests>
