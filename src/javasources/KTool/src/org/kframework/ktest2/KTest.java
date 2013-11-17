@@ -9,6 +9,7 @@ import org.kframework.ktest2.CmdArgs.Constants;
 import org.kframework.ktest2.CmdArgs.InvalidArgumentException;
 import org.kframework.ktest2.Config.ConfigFileParser;
 import org.kframework.ktest2.Config.InvalidConfigError;
+import org.kframework.ktest2.Config.LocationData;
 import org.kframework.ktest2.Test.TestCase;
 import org.kframework.ktest2.Test.TestSuite;
 import org.kframework.utils.OptionComparator;
@@ -19,6 +20,7 @@ import org.kframework.utils.general.GlobalSettings;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 import java.io.File;
 import java.io.IOException;
 
@@ -32,7 +34,8 @@ public class KTest {
     }
 
     public int run() throws InvalidArgumentException, IOException, SAXException,
-            ParserConfigurationException, InterruptedException, InvalidConfigError {
+            ParserConfigurationException, InterruptedException, InvalidConfigError,
+            TransformerException {
         if (argParser.cmdOpts.hasOption(Constants.HELP_OPTION))
             printHelpMsg();
         else if (argParser.cmdOpts.hasOption(Constants.VERSION_OPTION))
@@ -81,17 +84,28 @@ public class KTest {
     }
 
     public static void main(String[] args) {
+        boolean error = false;
         try {
             System.exit(new KTest(args).run());
         } catch (ParseException | InvalidArgumentException | SAXException |
                 ParserConfigurationException | IOException | InterruptedException |
-                InvalidConfigError e) {
+                TransformerException e) {
             //e.printStackTrace();
             GlobalSettings.kem.register(
                     new KException(KException.ExceptionType.ERROR,
                             KException.KExceptionGroup.CRITICAL,
                             e.getMessage(), "command line", "System file."));
-            System.exit(1);
+            error = true;
+        } catch (InvalidConfigError e) {
+            LocationData location = e.getLocation();
+            GlobalSettings.kem.register(
+                    new KException(KException.ExceptionType.ERROR,
+                            KException.KExceptionGroup.CRITICAL,
+                            e.getMessage(), location.getSystemId(), location.getPosStr()));
+            error = true;
         }
+
+        if (error)
+            System.exit(1);
     }
 }
