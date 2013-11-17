@@ -1,3 +1,25 @@
-Hi from thread 1!
-Hi from thread 2!
-Hi from thread 3!
+Search results:
+
+Solution 1:
+S:String -->
+"Hi from thread 1!\nHi from thread 2!\nHi from thread 3!\n"
+
+Solution 2:
+S:String -->
+"Hi from thread 1!\nHi from thread 3!\nHi from thread 2!\n"
+
+Solution 3:
+S:String -->
+"Hi from thread 2!\nHi from thread 1!\nHi from thread 3!\n"
+
+Solution 4:
+S:String -->
+"Hi from thread 2!\nHi from thread 3!\nHi from thread 1!\n"
+
+Solution 5:
+S:String -->
+"Hi from thread 3!\nHi from thread 1!\nHi from thread 2!\n"
+
+Solution 6:
+S:String -->
+"Hi from thread 3!\nHi from thread 2!\nHi from thread 1!\n"

@@ -4,6 +4,10 @@
         programs="."
         extension="simple"
         exclude="dekker"
-        results="." />
+        results="." >
+        <all-programs>
+          <krun-option name="--output" value="none" />
+        </all-programs>
+  </test>
 
 </tests>

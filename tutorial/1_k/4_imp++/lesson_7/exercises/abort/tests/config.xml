@@ -1,10 +1,13 @@
 <tests>
 
-  <test
-    definition="imp.k"
-    programs="."
-    extension="imp"
-    results="."
-  />
+  <include file="../../../tests/config.xml"
+           more-programs="."
+           more-results="."
+           exclude="io" >  <!-- Because of bug #159-->
+           <all-programs>
+             <krun-option name="--search" />
+             <krun-option name="--pattern" value="&lt;out&gt; ListItem(#buffer(S:String)) &lt;/out&gt;" />
+           </all-programs>
+  </include>
 
 </tests>
