@@ -136,8 +136,8 @@ equality is required, only the maps and conditions are given as parameters.
   syntax Bool ::= impliesML(Map, Bool, Map, Bool) [function]
 
   rule impliesML(M:Map, F:Bool, M':Map, F':Bool) => true 
-       when checkSat((F andBool substMap2Bool(getSubstMap(M', M)))
-                      andBool notBool(F')
+       when checkSat((filter(F) andBool substMap2Bool(getSubstMap(M', M)))
+                      andBool notBool(filter(F'))
                     ) ==K "unsat" 
   
 
@@ -367,23 +367,12 @@ equality is required, only the maps and conditions are given as parameters.
   syntax Map ::= "followup" "(" K "," Map "," Bool ")"
   rule isSymbolicMap(followup(_:K, _:Map, _:Bool)) => true [anywhere]
 
-  rule followup(S:K, (X:K |-> V:K M:Map), F:Bool) 
-       =>
-       X |-> V followup(S, M, F)
-       when isSymbolicInt(X) // to be revised
-       [anywhere]
-
-  rule followup(S:K, (X:K |-> V:K M:Map), F:Bool) 
-       =>
-       X |-> V followup(S, M, F)
-       when isSymbolicBool(X) // to be revised
-       [anywhere]
 
 
   rule followup(S:K, (X:K |-> V:K M:Map), F:Bool) 
        =>
        X |-> V followup(S, M, F)
-       when (F impliesBool (X isNotModifiedBy S)) // it does not work; to be revised
+       when (F myImpliesBool (X isNotModifiedBy S)) // it does not work; to be revised
        [anywhere]
 
 // temporary solution until the correct sorting of #symMap() is solved 
@@ -404,7 +393,7 @@ equality is required, only the maps and conditions are given as parameters.
         => 
         lookup(X, Rho)
         when //isSymbolicStmt(SS) andBool 
-        F impliesBool (X isNotModifiedBy SS) // to be revised
+        F myImpliesBool (X isNotModifiedBy SS) // to be revised
 
   rule [lookup] :
        lookup(X:K, followup(_:K, Rho:Map, _:Bool) Rho':Map) 
@@ -552,12 +541,27 @@ equality is required, only the maps and conditions are given as parameters.
   rule (I:Id isNotModifiedBy S:Stmt) [E:K / V:K] => I isNotModifiedBy S  [anywhere]
 
 */
-  rule B:Bool impliesBool true => true  [anywhere]
 
-  rule B:Bool impliesBool B => true  [anywhere]
 
-  rule (B:Bool andBool B':Bool) impliesBool B => true  [anywhere]
-  rule (B':Bool andBool B:Bool) impliesBool B => true  [anywhere]
+
+  syntax Bool ::= Bool "myImpliesBool" Bool
+
+
+  rule B:Bool myImpliesBool true => true  [anywhere]
+
+  rule B:Bool myImpliesBool B => true  [anywhere]
+
+
+  rule (B1:Bool andBool B2:Bool) myImpliesBool B:Bool => true
+       when B1 myImpliesBool B
+       [anywhere]
+
+  rule (B1:Bool andBool B2:Bool) myImpliesBool B:Bool => true
+       when B2 myImpliesBool B
+       [anywhere]
+
+  rule (B:Bool andBool B':Bool) myImpliesBool B => true  [anywhere]
+  rule (B':Bool andBool B:Bool) myImpliesBool B => true  [anywhere]
 
   rule B:Bool andBool true => B  [anywhere]
 
@@ -570,8 +574,6 @@ equality is required, only the maps and conditions are given as parameters.
   rule B:Bool orBool true => true  [anywhere]
 
   rule true orBool B:Bool => true  [anywhere]
-
-  rule B:Bool impliesBool B => true [anywhere]
 
 endmodule
 
@@ -620,6 +622,7 @@ module PEQ
                     </hypo>
                   </hypos>
                   <observers> .List </observers>
+<debug> .K </debug>
                 </T>
 
 /*@
@@ -1071,17 +1074,17 @@ module PEQ
              | hypoInfo(Bool, Map, Map)
 
   rule computeSubst(X:K replBy E:K) => X:K replBy E:K ~> computeSubst(emptySubst)
-//       [transition]
+       [transition]
 
   rule computeSubst(X:K replBy E:K ;; S:Substitution) => X:K replBy E:K ~> computeSubst(S)
-//       [transition]
+       [transition]
 
   rule (X:Int replBy A:Int => .) ~> computeSubst(S:Substitution) ~> hypoInfo((F':Bool => F' [ A / X ]), _, _)
-//       [transition]
+       [transition]
 
   rule <k> (X:Int replBy A:Int => .) ~> computeSubst(S:Substitution) ...</k>
        <k>  computeSubst(S:Substitution) ~> hypoInfo((F':Bool => F' [ A / X ]), _, _) ...</k>
-//       [transition]
+       [transition]
 
 
 
@@ -1122,11 +1125,12 @@ module PEQ
          <condition> F:K </condition>
        ...</goal>
        <observers> Obs:List </observers> 
+<debug> Bla:K => Bla ~> getSubst(K1', K1) ~> getSubst(K2', K2) </debug>
        when (eqObs(<env> Env1 </env>, 
                    <env> Env2 </env>,
                    <observers> Obs </observers>, F) ==K true)
        andBool ((isSubst(getSubst(K1', K1)) ==K true)
-            orBool (isSubst(getSubst(K2', K2)) ==K true))
+                 andBool (isSubst(getSubst(K2', K2)) ==K true))
        [transition]
 
   rule [check-hypo] :
@@ -1166,11 +1170,12 @@ module PEQ
          <condition> F:K </condition>
        ...</goal>
        <observers> Obs:List </observers> 
+<debug> Bla:K => Bla ~> getSubst(K2', K1) ~> getSubst(K1', K2) </debug>
        when (eqObs(<env> Env1 </env>, 
                    <env> Env2 </env>,
                    <observers> Obs </observers>, F) ==K true)
        andBool ((isSubst(getSubst(K1', K2)) ==K true)
-            orBool (isSubst(getSubst(K2', K1)) ==K true))
+                andBool (isSubst(getSubst(K2', K1)) ==K true))
        [transition]
 
 /* tbr
@@ -1299,7 +1304,8 @@ module PEQ
        </goal>
        =>
        .)
-       when impliesML( (Env1 Env2), F, (Env1' Env2'), F')  ==K true
+       when (impliesML(Env1, F, Env1', F')  ==K true)
+       andBool (impliesML(Env2, F, Env2', F')  ==K true)
        [transition]
 
 
@@ -1316,7 +1322,9 @@ module PEQ
          <condition> F:Bool </condition>
          C:Bag
        </goal>
-       when impliesML( (Env1 Env2), F, (Env1' Env2'), F')  =/=K true
+<debug> Bla:K =>  Bla ~> substMap2Bool(getSubstMap(Env1, Env1')) ~> substMap2Bool(getSubstMap(Env2', Env2')) ~> checkSat(filter(F)) ~> checkSat(notBool filter(F')) </debug>
+       when (impliesML(Env1, F, Env1', F')  =/=K true)
+       orBool (impliesML(Env2, F, Env2', F')  =/=K true)
        [transition]
 
 /*@
@@ -1379,8 +1387,8 @@ module PEQ
   //@ The rules preparing the storing of an hypothesis: 
   rule [store-hypo] :
        <config> 
-//         <k> storeHypo(K1:K) => getFresh(Env1) ~> restore(K1, Env1) ...</k>
-         <k> storeHypo(K1:K) => restore(K1, Env1) ...</k>
+         <k> storeHypo(K1:K) => getFresh(Env1) ~> restore(K1, Env1) ...</k>
+//         <k> storeHypo(K1:K) => restore(K1, Env1) ...</k>
          <env> Env1:Map </env>
        </config> 
 //       [transition]
