@@ -112,22 +112,6 @@ public class FileUtil {
         return null;
     }
 
-    //parse the output of Maude when --output-mode=raw
-    //get the extension of a file specified by the fullPath with the specified extension and path separator
-    public static String getExtension(String fullPath, String extensionSeparator, String pathSeparator) {
-        int dot, pos;
-        String aux;
-
-        pos = fullPath.lastIndexOf(pathSeparator);
-        aux = fullPath.substring(pos + 1);
-        if (!aux.contains(extensionSeparator)) {
-            return "";
-        } else {
-            dot = aux.lastIndexOf(extensionSeparator);
-            return aux.substring(dot + 1);
-        }
-    }
-
     /**
      * Loads the properties from the given file into the given Properties object.
      */
