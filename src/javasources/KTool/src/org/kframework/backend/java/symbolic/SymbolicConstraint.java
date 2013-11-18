@@ -36,7 +36,7 @@ import org.kframework.krun.K;
  * @author AndreiS
  */
 public class SymbolicConstraint extends JavaSymbolicObject {
-    private final boolean DEBUG = true;
+    private static final boolean DEBUG = true;
 
     public void orientSubstitution(Set<Variable> variables, TermContext termContext) {
         Map<Variable, Term> newSubstitution = new HashMap<>();
@@ -446,9 +446,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 implications.add(new Implication(left2, new SymbolicConstraint(right,context)));
                 continue;
             }
-            if (DEBUG) {
-                System.out.println("After simplification, verifying whether\n\t" + left.toString() + "\nimplies\n\t" + right.toString());
-            }
+//            if (DEBUG) {
+//                System.out.println("After simplification, verifying whether\n\t" + left.toString() + "\nimplies\n\t" + right.toString());
+//            }
             if (!impliesSMT(left,right)) {
                 if (DEBUG) {
                     System.out.println("Failure!");
@@ -486,7 +486,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             }
             if (!gterm1.equals("")) input += "(" + gterm1 + ") -> ";
             input += "(" + gterm2 + ")";
-//            System.out.println("Verifying " + input);
+            if (DEBUG) {
+                System.out.println("Verifying " + input);
+            }
             if (GappaServer.proveTrue(input))
                 result = true;
 

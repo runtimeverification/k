@@ -10,14 +10,14 @@ double dot(double u_x, double u_y, double v_x, double v_y){
 module DOT-RULE
   rule <threads>
            <thread>...
-	     <k> return (u_x*v_x + u_y * v_y => V:Float); </k>
-	     <env> u_x |-> Lux:Int u_y |-> Luy:Int 
-                   v_x |-> Lvx:Int v_y |-> Lvy:Int </env>
+	     <k> dot(Ux:Float, Uy:Float, Vx:Float, Vy:Float) => V:Float </k>
+             <env> GENV </env>
 	   ...</thread>
        </threads>
-       <store> Lux |-> Vux:Float Luy |-> Vuy:Float
-               Lvx |-> Vvx:Float Lvy |-> Vvy:Float </store>
-    requires DISTANCE(Vux) andBool DISTANCE(Vuy) andBool
-             VELOCITY(Vvx) andBool VELOCITY(Vvy)
-     ensures absFloat(V -Float dotR(Vux, Vuy, Vvx, Vvy)) <=Float E_dot
+       <store>... STORE ...</store>
+       <genv> GENV </genv>
+    requires DISTANCE(Ux) andBool DISTANCE(Uy) 
+     andBool VELOCITY(Vx) andBool VELOCITY(Vy)
+     ensures absFloat(V -Float dotR(Ux, Uy, Vx, Vy)) <=Float E_dot
 endmodule
+
