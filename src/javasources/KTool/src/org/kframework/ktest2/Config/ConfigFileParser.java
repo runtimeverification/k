@@ -4,6 +4,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.kframework.ktest2.Annotated;
 import org.kframework.ktest2.CmdArgs.CmdArg;
 import org.kframework.ktest2.KTest;
+import org.kframework.ktest2.KTestStep;
 import org.kframework.ktest2.PgmArg;
 import org.kframework.ktest2.Test.TestCase;
 import org.w3c.dom.*;
@@ -26,10 +27,7 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ConfigFileParser {
 
@@ -59,9 +57,7 @@ public class ConfigFileParser {
         doc = docBuilder.newDocument();
         DOMResult domResult = new DOMResult(doc);
 
-        // Create SAX parser/XMLReader that will parse XML. If factory
-        // options are not required then this can be short cut by:
-        //      xmlReader = XMLReaderFactory.createXMLReader();
+        // Create SAX parser/XMLReader that will parse XML.
         XMLReader xmlReader = XMLReaderFactory.createXMLReader();
 
         // Create our filter to wrap the SAX parser, that captures the
@@ -76,15 +72,6 @@ public class ConfigFileParser {
 
         // Finally read the XML into the DOM.
         nullTransformer.transform(saxSource, domResult);
-
-        /*
-         * Find one of the element nodes in our DOM and output the location
-         * information.
-        Node n = doc.getElementsByTagName("all-programs").item(0);
-        LocationData locationData = (LocationData)
-                n.getUserData(LocationData.LOCATION_DATA_KEY);
-        System.out.println(locationData);
-         */
     }
 
     /**
@@ -134,6 +121,7 @@ public class ConfigFileParser {
 
             String[] extensions = splitNodeValue(testAttrs.getNamedItem("extension"));
             String[] excludes = splitNodeValue(testAttrs.getNamedItem("exclude"));
+            Set<KTestStep> skips = parseSkips(testAttrs.getNamedItem("skip"), location);
 
             // handle children of `test' node
             NodeList childNodes = testNode.getChildNodes();
@@ -143,10 +131,27 @@ public class ConfigFileParser {
             Map<String, List<PgmArg>> pgmSpecificKRunOpts = parsePgmSpecificKRunOpts(childNodes);
 
             testCases.add(new TestCase(definition, programs, extensions, excludes, results,
-                    kompileOpts, krunOpts, pgmSpecificKRunOpts));
+                    kompileOpts, krunOpts, pgmSpecificKRunOpts, skips));
         }
 
         return testCases;
+    }
+
+    private Set<KTestStep> parseSkips(Node node, LocationData location) throws InvalidConfigError {
+        Set<KTestStep> skips = new HashSet<>();
+        if (node == null)
+            return skips;
+        for (String s : node.getNodeValue().split("\\s+")) {
+            switch (s.trim()) {
+                case "kompile": skips.add(KTestStep.KOMPILE); break;
+                case "pdf": skips.add(KTestStep.PDF); break;
+                case "krun": skips.add(KTestStep.KRUN); break;
+                case "": break;
+                default: throw new InvalidConfigError(
+                        "skip attribute option should be [kompile|pdf|krun]+", location);
+            }
+        }
+        return skips;
     }
 
     private Annotated<String, LocationData> annotate(String str, LocationData location) {

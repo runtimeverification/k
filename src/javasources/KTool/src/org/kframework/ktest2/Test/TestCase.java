@@ -6,6 +6,7 @@ import org.kframework.ktest2.Annotated;
 import org.kframework.ktest2.CmdArgs.CmdArg;
 import org.kframework.ktest2.Config.InvalidConfigError;
 import org.kframework.ktest2.Config.LocationData;
+import org.kframework.ktest2.KTestStep;
 import org.kframework.ktest2.PgmArg;
 
 import java.io.File;
@@ -53,6 +54,11 @@ public class TestCase {
      */
     private final Map<String, List<PgmArg>> pgmSpecificKRunOpts;
 
+    /**
+     * Which tests to skip for this particular test case.
+     */
+    private final Set<KTestStep> skips;
+
     public TestCase(Annotated<String, LocationData> definition,
                     List<Annotated<String, LocationData>> programs,
                     String[] extensions,
@@ -60,7 +66,8 @@ public class TestCase {
                     List<Annotated<String, LocationData>> results,
                     List<PgmArg> kompileOpts,
                     List<PgmArg> krunOpts,
-                    Map<String, List<PgmArg>> pgmSpecificKRunOpts) throws InvalidConfigError {
+                    Map<String, List<PgmArg>> pgmSpecificKRunOpts,
+                    Set<KTestStep> skips) throws InvalidConfigError {
         this.definition = definition;
         this.programs = toSet(programs);
         this.extensions = toSet(extensions);
@@ -69,6 +76,7 @@ public class TestCase {
         this.kompileOpts = kompileOpts;
         this.krunOpts = krunOpts;
         this.pgmSpecificKRunOpts = pgmSpecificKRunOpts;
+        this.skips = skips;
         this.validateTestCase();
     }
 
@@ -87,7 +95,8 @@ public class TestCase {
         HashMap<String, List<PgmArg>> emptyOptsMap = new HashMap<>(0);
 
         return new TestCase(targetFile, programs, cmdArgs.extensions,
-                cmdArgs.excludes, results, emptyOpts, emptyOpts, emptyOptsMap);
+                cmdArgs.excludes, results, emptyOpts, emptyOpts, emptyOptsMap,
+                new HashSet<KTestStep>());
     }
 
     /**
@@ -119,6 +128,15 @@ public class TestCase {
         for (Annotated<String, LocationData> pgmDir : programs)
             ret.addAll(searchPrograms(pgmDir.getObj()));
         return ret;
+    }
+
+    /**
+     * Do we need to skip a step for this test case?
+     * @param step step to skip
+     * @return whether to skip the step or not
+     */
+    public boolean skip(KTestStep step) {
+        return skips.contains(step);
     }
 
     private void validateTestCase() throws InvalidConfigError {

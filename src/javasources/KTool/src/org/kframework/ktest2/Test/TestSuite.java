@@ -71,13 +71,21 @@ public class TestSuite {
         List<TestCase> successfulTests = tests;
 
         if (!skips.contains(KTestStep.KOMPILE)) {
-            successfulTests = runKompileSteps(tests);
+            successfulTests = runKompileSteps(filterSkips(tests, KTestStep.KOMPILE));
             ret &= successfulTests.size() == tests.size();
         }
         if (!skips.contains(KTestStep.PDF))
-            ret &= runPDFSteps(successfulTests);
+            ret &= runPDFSteps(filterSkips(successfulTests, KTestStep.PDF));
         if (!skips.contains(KTestStep.KRUN))
-            ret &= runKRunSteps(successfulTests);
+            ret &= runKRunSteps(filterSkips(successfulTests, KTestStep.KRUN));
+        return ret;
+    }
+
+    private List<TestCase> filterSkips(List<TestCase> tests, KTestStep step) {
+        List<TestCase> ret = new LinkedList<>();
+        for (TestCase test : tests)
+            if (!test.skip(step))
+                ret.add(test);
         return ret;
     }
 
