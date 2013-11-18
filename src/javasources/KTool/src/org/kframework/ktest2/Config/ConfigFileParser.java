@@ -111,7 +111,8 @@ public class ConfigFileParser {
             Node definitionNode = testAttrs.getNamedItem("definition");
 
             Annotated<String, LocationData> definition =
-                    annotate(normalize(definitionNode.getNodeValue(), cmdArgs.directory), location);
+                    annotate(normalize(addDefinitionExt(definitionNode.getNodeValue()),
+                                       cmdArgs.directory), location);
             List<Annotated<String, LocationData>> programs =
                     annotateLst(normalize(splitNodeValue(testAttrs.getNamedItem("programs")),
                                 cmdArgs.programs), location);
@@ -135,6 +136,12 @@ public class ConfigFileParser {
         }
 
         return testCases;
+    }
+
+    private String addDefinitionExt(String nodeValue) {
+        if (FilenameUtils.getExtension(nodeValue).equals("k"))
+            return nodeValue;
+        return nodeValue + ".k";
     }
 
     private Set<KTestStep> parseSkips(Node node, LocationData location) throws InvalidConfigError {
@@ -258,8 +265,7 @@ public class ConfigFileParser {
                     && childNode.getNodeName().equals("program")) {
                 Element elem = (Element) childNode;
                 ret.put(FilenameUtils.concat(cmdArgs.programs, elem.getAttribute("name")),
-                        parseKrunOpts(elem.getChildNodes()
-                ));
+                        parseKrunOpts(elem.getChildNodes()));
             }
         }
         return ret;
