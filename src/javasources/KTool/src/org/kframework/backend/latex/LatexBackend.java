@@ -36,7 +36,10 @@ public class LatexBackend extends BasicBackend {
         latexStyleFile = new File(context.dotk.getAbsolutePath() + fileSep + "k.sty");
         FileUtils.writeStringToFile(latexStyleFile, FileUtil.getFileContent(kLatexStyle));
 
-        String latexified = "\\nonstopmode" + endl + "\\documentclass{article}" + endl + "\\usepackage[" + GlobalSettings.style + "]{k}" + endl;
+        String latexified = "\\nonstopmode" + endl +
+                "\\PassOptionsToPackage{pdftex,usenames,dvipsnames,svgnames,x11names}{xcolor}"+ endl +
+                "\\PassOptionsToPackage{pdftex}{hyperref}"+ endl +
+                "\\documentclass{article}" + endl + "\\usepackage[" + GlobalSettings.style + "]{k}" + endl;
         String preamble = lf.getPreamble().toString();
         latexified += preamble + "\\begin{document}" + endl + lf.getResult() + "\\end{document}" + endl;
 
