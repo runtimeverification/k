@@ -78,6 +78,11 @@ public class TestSuite {
             ret &= runPDFSteps(filterSkips(successfulTests, KTestStep.PDF));
         if (!skips.contains(KTestStep.KRUN))
             ret &= runKRunSteps(filterSkips(successfulTests, KTestStep.KRUN));
+
+        String colorCode = ColorUtil.RgbToAnsi(ret ? Color.green : Color.red, colorSetting);
+        String msg = ret ? "SUCCESS" : "FAIL (see details above)";
+        System.out.format("%n%s%s%s%n", colorCode, msg, ColorUtil.ANSI_NORMAL);
+
         return ret;
     }
 
