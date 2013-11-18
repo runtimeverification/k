@@ -406,8 +406,7 @@
       definition="samples/prog-equiv/imp/peq.k"
       programs="samples/prog-equiv/imp/programs"
       extension="peq"
-      results="tests/examples/prog-equiv/" >
-      <kompile-option name="-add-top-cell" />
+      results="samples/prog-equiv/imp//programs" >
       <all-programs>
         <krun-option name="-output" value="none" />
         <krun-option name="-color" value="off" />
