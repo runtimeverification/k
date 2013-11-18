@@ -1,20 +1,7 @@
 <tests>
 
-<!-- original tests -->
-  <test
-      definition="simple-typed-dynamic.k"
-      programs="../../../../programs"
-      extension="simple"
-      results="../../../tests"
-      exclude="dekker" >
-  </test>
-
-<!-- new tests -->
-  <test
-      definition="simple-typed-dynamic.k"
-      programs="."
-      results="."
-      extension="simple" >
-  </test>
+  <include file="../../../tests/config.xml"
+           more-programs="."
+           more-results="." />
 
 </tests>

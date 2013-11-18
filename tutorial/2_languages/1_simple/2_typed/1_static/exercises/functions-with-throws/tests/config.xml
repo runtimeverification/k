@@ -1,25 +1,7 @@
 <tests>
 
-<!-- original tests -->
-  <test
-      definition="simple-typed-static.k"
-      programs="../../../../programs"
-      extension="simple"
-      results="../../../tests ." >
-      <all-programs>
-        <krun-option name="-pattern" value="&lt;tasks&gt;.Bag&lt;/tasks&gt;"/>
-      </all-programs>
-  </test>
-
-<!-- new tests -->
-  <test
-      definition="simple-typed-static.k"
-      programs="../../../../2_dynamic/exercises/functions-with-throws/tests/"
-      extension="simple"
-      results="." >
-      <all-programs>
-        <krun-option name="-pattern" value="&lt;tasks&gt;.Bag&lt;/tasks&gt;"/>
-      </all-programs>
-  </test>
+  <include file="../../../tests/config.xml"
+           more-programs="../../../../2_dynamic/exercises/functions-with-throws/tests/"
+           more-results="." />
 
 </tests>

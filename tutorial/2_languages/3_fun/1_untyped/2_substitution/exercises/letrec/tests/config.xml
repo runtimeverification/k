@@ -1,17 +1,10 @@
 <tests>
 
-  <test
-      definition="fun-untyped.k"
-      programs="../../../../../programs ."
-      extension="fun"
-      exclude="callcc-looping references-5
-               constructor-bst-sorting
-               stuck-letrec"
-      results="../../../../1_environment/tests ../../../tests ." >
-      <all-programs>
-        <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
-        <krun-option name="--parens" value="smart"/>
-      </all-programs>
-  </test>
+  <include file="../../../tests/config.xml"
+           exclude="callcc-looping references-5
+                    constructor-bst-sorting
+                    stuck-letrec"
+           more-programs="."
+           more-results="../../../../1_environment/tests ../../../tests ." />
 
 </tests>
