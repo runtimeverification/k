@@ -1,5 +1,20 @@
 require "builtins/symbolic-k.k"
 
+/*!
+\setlength{\parindent}{1em}
+\title{CinK -- an experiment on how to think in \K}
+\author{Dorel Lucanu (\texttt{dlucanu@info.uaic.ro})}
+\organization{Alexandru Ioan Cuza University of Ia\c{s}i, Romania}
+\newcommand{\pattern}[2]{{#1}%
+  \ifthenelse{\equal{#2}{}}{}{%
+    \,{\pmb{\wedge}}\,{#2}%
+  }%
+}
+
+\newcommand{\IMP}{\textsc{imp}\xspace}
+\newcommand{\STREAM}{\textsc{stream}\xspace}
+
+*/
 
 //@ \section{Syntax}
 
@@ -107,7 +122,7 @@ the current confuguration. Therefore we assume that it is of the form
 $\pattern{\pi}{\phi}\implies \pattern{\pi'}{\phi'}$, where $\pattern{\pi}{\phi}$ will play
 the role of the current configuration, and $\pattern{\pi'}{\phi'}$ the role of the 
 hypothesis. Further, we always assume that $\pattern{\pi'}{\phi'}$ is in abstract form,
-i.e., of the form $(\exists X)$\pattern{\overline{\pi}'}{\phi'\land \sigma}$, 
+i.e., of the form $(\exists X)\pattern{\overline{\pi}'}{\phi'\land \sigma}$, 
 where \emph{$\overline{\pi}$ is an abstraction of $\pi$ via $\sigma^\pi$} 
 (i.e., $\sigma^\pi(\overline{\pi})=\pi$), and $\sigma^\pi$ in the pattern condition is viewed
 as a conjunction formula $\bigwedge x = \sigma^\pi(x)$ (the equality is in the symbolic
@@ -124,7 +139,7 @@ $\pattern{\kall{cfg}{\kall{k}{K}\kall{env}{M}}}{\phi}\implies
 \pattern{\kall{cfg}{\kall{k}{K'}\kall{env}{M'}}}{\phi'}$
 iff
 $K = K'$ and
-$\phi\land\bigwedge_{x\in\mathot{dom}(M')}(M'(x)=M(x))\implies \phi'$.
+$\phi\land\bigwedge_{x\in\mathit{dom}(M')}(M'(x)=M(x))\implies \phi'$.
 Note that for the equivalence formulas, $K$ and $K'$ are pairs of 
 programs and $M$ and $M"$ are pairs of maps. Since for the programs the
 equality is required, only the maps and conditions are given as parameters.
