@@ -40,7 +40,6 @@ public class ConfigFileParser {
             ParserConfigurationException, TransformerException {
         this.cmdArgs = cmdArgs;
 
-        /*
         // validate xml file structure
         Source schemaFile = new StreamSource(new File(getSchema()));
         Source xmlFile = new StreamSource(configFile);
@@ -49,7 +48,6 @@ public class ConfigFileParser {
         Schema schema = schemaFactory.newSchema(schemaFile);
         Validator validator = schema.newValidator();
         validator.validate(xmlFile);
-        */
 
         // parse xml file
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
