@@ -35,14 +35,14 @@ public class TestSuite {
      * List of ktest steps to skip. This array should be sorted because it'll be used for binary
      * search (Java doesn't have linear search algorithm in stdlib)
      */
-    private final KTestStep[] skips;
+    private final Set<KTestStep> skips;
 
     /**
      * Timeout for a process.
      */
     private final int timeout;
 
-    public TestSuite(List<TestCase> tests, KTestStep[] skips, boolean verbose,
+    public TestSuite(List<TestCase> tests, Set<KTestStep> skips, boolean verbose,
                      ColorSetting colorSetting, int timeout) {
         this.tests = tests;
         this.skips = skips;
@@ -51,7 +51,7 @@ public class TestSuite {
         this.timeout = timeout;
     }
 
-    public TestSuite(TestCase singleTest, KTestStep[] skips, boolean verbose,
+    public TestSuite(TestCase singleTest, Set<KTestStep> skips, boolean verbose,
                      ColorSetting colorSetting, int timeout) {
         tests = new LinkedList<>();
         tests.add(singleTest);
@@ -70,13 +70,13 @@ public class TestSuite {
         boolean ret = true;
         List<TestCase> successfulTests = tests;
 
-        if (Arrays.binarySearch(skips, KTestStep.KOMPILE) < 0) {
+        if (!skips.contains(KTestStep.KOMPILE)) {
             successfulTests = runKompileSteps(tests);
             ret &= successfulTests.size() == tests.size();
         }
-        if (Arrays.binarySearch(skips, KTestStep.PDF) < 0)
+        if (!skips.contains(KTestStep.PDF))
             ret &= runPDFSteps(successfulTests);
-        if (Arrays.binarySearch(skips, KTestStep.KRUN) < 0)
+        if (!skips.contains(KTestStep.KRUN))
             ret &= runKRunSteps(successfulTests);
         return ret;
     }
