@@ -403,8 +403,8 @@
 -->
 
   <test
-      definition="samples/prog-equiv/peq.k"
-      programs="samples/prog-equiv/programs"
+      definition="samples/prog-equiv/imp/peq.k"
+      programs="samples/prog-equiv/imp/programs"
       extension="peq"
       results="tests/examples/prog-equiv/" >
       <kompile-option name="-add-top-cell" />
