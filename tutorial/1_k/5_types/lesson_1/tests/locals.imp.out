@@ -1,0 +1,8 @@
+<T>
+    <k>
+        stmt
+    </k>
+    <tenv>
+        x |-> int
+    </tenv>
+</T>

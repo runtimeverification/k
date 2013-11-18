@@ -12,11 +12,11 @@ module LAMBDA
                | Exp "/" Exp                      [strict]
                > Exp "+" Exp                      [strict, left]
                > Exp "<=" Exp                     [strict]
-               > "lambda" Id "." Exp
+               > "lambda" Id "." Exp              [binder]
                | "if" Exp "then" Exp "else" Exp   [strict]
                | "let" Id "=" Exp "in" Exp
                | "letrec" Id Id "=" Exp "in" Exp
-               | "mu" Id "." Exp
+               | "mu" Id "." Exp                  [binder]
 
   syntax Type ::= "int" | "bool"
                 | Type "->" Type

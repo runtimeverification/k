@@ -1,0 +1,14 @@
+<tests>
+
+  <test
+    definition="lambda.k"
+    programs="."
+    extension="lambda"
+    results="." >
+    <all-programs>
+      <krun-option name="--search" />
+      <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
+    </all-programs>
+  </test>
+
+</tests>

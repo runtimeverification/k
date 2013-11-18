@@ -1,8 +1,13 @@
 <tests>
-  <test
-      definition="simple-typed-dynamic.k"
-      programs="../../programs/"
-      extension="simple"
-      results="."
-      exclude="dekker" />
+
+  <test definition="simple-typed-dynamic.k"
+        programs="../../programs/"
+        extension="simple"
+        results="."
+        exclude="dekker" >
+        <all-programs>
+          <krun-option name="--output" value="none" />
+        </all-programs>
+  </test>
+
 </tests>

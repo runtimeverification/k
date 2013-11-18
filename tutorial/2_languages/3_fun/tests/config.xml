@@ -1,0 +1,6 @@
+<tests>
+
+  <include file="../1_untyped/1_environment/tests/config.xml" directory="1_untyped/1_environment" />
+  <include file="../1_untyped/2_substitution/tests/config.xml" directory="1_untyped/2_substitution" />
+
+</tests>

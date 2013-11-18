@@ -1,2 +1,5 @@
-7
-Reachable with halt, but not with abort.
+Search results:
+
+Solution 1:
+S:String -->
+"7\nReachable with halt, but not with abort.\n"

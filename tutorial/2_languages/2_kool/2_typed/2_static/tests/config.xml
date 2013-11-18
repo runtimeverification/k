@@ -1,0 +1,13 @@
+<tests>
+
+  <test
+      definition="kool-typed-static.k"
+      programs="../../programs"
+      extension="kool"
+      results="." >
+      <all-programs>
+        <krun-option name="--output" value="none"/>
+      </all-programs>
+  </test>
+
+</tests>
