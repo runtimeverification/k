@@ -1,0 +1,13 @@
+<tests>
+
+  <test
+      definition="imp.k"
+      programs="../../../2_imp/lesson_1/tests
+                ../../../4_imp++/lesson_1/tests
+                ../../../4_imp++/lesson_7/tests"
+      extension="imp"
+      results="." >
+  </test>
+
+
+</tests>

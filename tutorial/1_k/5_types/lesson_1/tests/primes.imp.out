@@ -1,0 +1,17 @@
+<T>
+    <k>
+        stmt
+    </k>
+    <tenv>
+        i |-> int
+        m |-> int
+        n |-> int
+        q |-> int
+        r |-> int
+        s |-> int
+        t |-> int
+        x |-> int
+        y |-> int
+        z |-> int
+    </tenv>
+</T>
