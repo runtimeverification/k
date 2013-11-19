@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
+import org.kframework.kil.Bracket;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Configuration;
+import org.kframework.kil.Rewrite;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
@@ -16,6 +18,7 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
+import org.strategoxt.stratego_sglr.sorts_1_0;
 
 public class CellTypesFilter extends BasicTransformer {
 
@@ -33,7 +36,11 @@ public class CellTypesFilter extends BasicTransformer {
 	}
 
 	public ASTNode transform(Cell cell) throws TransformerException {
-		String sort = context.cellKinds.get(cell.getLabel());
+		String sort;
+		if (cell.hasLeftEllipsis() || cell.hasRightEllipsis())
+			sort = context.cellKinds.get(cell.getLabel());
+		else
+			sort = context.cellSorts.get(cell.getLabel());
 
 		if (sort == null) {
 			if (cell.getLabel().equals("k"))
@@ -76,12 +83,25 @@ public class CellTypesFilter extends BasicTransformer {
 		}
 
 		public ASTNode transform(Term trm) throws TransformerException {
-			if (!context.isSubsortedEq(expectedSort, trm.getSort())) {
+			if (!context.isSubsortedEq(expectedSort, trm.getSort()) && !trm.getSort().equals("K")) {
 				// if the found sort is not a subsort of what I was expecting
 				String msg = "Wrong type in cell '" + cellLabel + "'. Expected sort: " + expectedSort + " but found " + trm.getSort();
 				throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, getName(), trm.getFilename(), trm.getLocation()));
 			}
 			return trm;
+		}
+
+		@Override
+		public ASTNode transform(Bracket node) throws TransformerException {
+			node.setContent((Term) node.getContent().accept(this));
+			return node;
+		}
+
+		@Override
+		public ASTNode transform(Rewrite node) throws TransformerException {
+			Rewrite result = new Rewrite(node);
+			result.replaceChildren((Term) node.getLeft().accept(this), (Term) node.getRight().accept(this), context);
+			return result;
 		}
 
 		@Override
