@@ -78,7 +78,7 @@ public class CmdArg {
      */
     public final int timeout;
 
-    private CmdArg(String directory, String programs, String results, String[] extensions,
+    public CmdArg(String directory, String programs, String results, String[] extensions,
                    String[] excludes, Set<KTestStep> skips, boolean generateReport,
                    String targetFile, boolean verbose, ColorSetting colorSetting, int timeout) {
         this.directory = directory;

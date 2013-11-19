@@ -100,42 +100,89 @@ public class ConfigFileParser {
             if (tests.item(testNodeIdx).getNodeType() != Node.ELEMENT_NODE)
                 continue;
 
-            Element testNode = (Element) tests.item(testNodeIdx);
-            NamedNodeMap testAttrs = testNode.getAttributes();
-            // I couldn't find a way to annotate attributes with location information using SAX api
-            // (maybe it's not possible?) so I'm annotation attributes with location data of
-            // parent node (element)
-            LocationData location =
-                    (LocationData) testNode.getUserData(LocationData.LOCATION_DATA_KEY);
-
-            Node definitionNode = testAttrs.getNamedItem("definition");
-
-            Annotated<String, LocationData> definition =
-                    annotate(normalize(addDefinitionExt(definitionNode.getNodeValue()),
-                                       cmdArgs.directory), location);
-            List<Annotated<String, LocationData>> programs =
-                    annotateLst(normalize(splitNodeValue(testAttrs.getNamedItem("programs")),
-                                cmdArgs.programs), location);
-            List<Annotated<String, LocationData>> results =
-                    annotateLst(normalize(splitNodeValue(testAttrs.getNamedItem("results")),
-                                cmdArgs.results), location);
-
-            String[] extensions = splitNodeValue(testAttrs.getNamedItem("extension"));
-            String[] excludes = splitNodeValue(testAttrs.getNamedItem("exclude"));
-            Set<KTestStep> skips = parseSkips(testAttrs.getNamedItem("skip"), location);
-
-            // handle children of `test' node
-            NodeList childNodes = testNode.getChildNodes();
-
-            List<PgmArg> kompileOpts = parseKompileOpts(childNodes);
-            List<PgmArg> krunOpts = parseAllPgmsKrunOpts(childNodes);
-            Map<String, List<PgmArg>> pgmSpecificKRunOpts = parsePgmSpecificKRunOpts(childNodes);
-
-            testCases.add(new TestCase(definition, programs, extensions, excludes, results,
-                    kompileOpts, krunOpts, pgmSpecificKRunOpts, skips));
+            Element node = (Element) tests.item(testNodeIdx);
+            switch (node.getNodeName()) {
+                case "test": testCases.add(parseTestCase(node)); break;
+                case "include": testCases.addAll(parseInclude(node)); break;
+                default: assert false; // this case should not happen, XML files are validated
+                                       // using XSD and this should be ensured by XSD file
+            }
         }
 
         return testCases;
+    }
+
+    private List<TestCase> parseInclude(Element includeNode) throws InvalidConfigError {
+        NamedNodeMap includeAttrs = includeNode.getAttributes();
+        LocationData location =
+                (LocationData) includeNode.getUserData(LocationData.LOCATION_DATA_KEY);
+
+        String fileValue = includeAttrs.getNamedItem("file").getNodeValue();
+        String file =
+                FilenameUtils.concat(cmdArgs.directory,
+                        FilenameUtils.concat(FilenameUtils.getBaseName(cmdArgs.targetFile),
+                                fileValue));
+        if (!new File(file).isFile())
+            throw new InvalidConfigError(
+                    "file attribute " + file + " in `include' is not a valid file", location);
+
+        String directory = FilenameUtils.concat(cmdArgs.directory,
+                getAttributeWDefault(includeAttrs, "directory", ""));
+        String programs = FilenameUtils.concat(cmdArgs.programs,
+                getAttributeWDefault(includeAttrs, "programs", ""));
+        String results = FilenameUtils.concat(cmdArgs.results,
+                getAttributeWDefault(includeAttrs, "results", ""));
+
+        CmdArg cmdArgs1 = new CmdArg(directory, programs, results, cmdArgs.extensions,
+                cmdArgs.excludes, cmdArgs.skips, cmdArgs.generateReport, file, cmdArgs.verbose,
+                cmdArgs.colorSetting, cmdArgs.timeout);
+
+        ConfigFileParser configFileParser;
+        try {
+            configFileParser = new ConfigFileParser(new File(file), cmdArgs1);
+        } catch (Exception e) {
+            // I'm not happy with that part ...
+            throw new InvalidConfigError("error occured while parsing included file " + file +
+                    ":\n" + e.getMessage(), location);
+        }
+        List<TestCase> ret = configFileParser.parse();
+
+        return ret;
+    }
+
+    private TestCase parseTestCase(Element testNode) throws InvalidConfigError {
+        NamedNodeMap testAttrs = testNode.getAttributes();
+        // I couldn't find a way to annotate attributes with location information using SAX api
+        // (maybe it's not possible?) so I'm annotation attributes with location data of
+        // parent node (element)
+        LocationData location =
+                (LocationData) testNode.getUserData(LocationData.LOCATION_DATA_KEY);
+
+        Node definitionNode = testAttrs.getNamedItem("definition");
+
+        Annotated<String, LocationData> definition =
+                annotate(normalize(addDefinitionExt(definitionNode.getNodeValue()),
+                        cmdArgs.directory), location);
+        List<Annotated<String, LocationData>> programs =
+                annotateLst(normalize(splitNodeValue(testAttrs.getNamedItem("programs")),
+                        cmdArgs.programs), location);
+        List<Annotated<String, LocationData>> results =
+                annotateLst(normalize(splitNodeValue(testAttrs.getNamedItem("results")),
+                        cmdArgs.results), location);
+
+        String[] extensions = splitNodeValue(testAttrs.getNamedItem("extension"));
+        String[] excludes = splitNodeValue(testAttrs.getNamedItem("exclude"));
+        Set<KTestStep> skips = parseSkips(testAttrs.getNamedItem("skip"), location);
+
+        // handle children of `test' node
+        NodeList childNodes = testNode.getChildNodes();
+
+        List<PgmArg> kompileOpts = parseKompileOpts(childNodes);
+        List<PgmArg> krunOpts = parseAllPgmsKrunOpts(childNodes);
+        Map<String, List<PgmArg>> pgmSpecificKRunOpts = parsePgmSpecificKRunOpts(childNodes);
+
+        return new TestCase(definition, programs, extensions, excludes, results,
+                kompileOpts, krunOpts, pgmSpecificKRunOpts, skips);
     }
 
     private String addDefinitionExt(String nodeValue) {
@@ -275,6 +322,13 @@ public class ConfigFileParser {
         if (node == null)
             return new String[0];
         return node.getNodeValue().split("\\s+");
+    }
+
+    private String getAttributeWDefault(NamedNodeMap attrs, String name, String def) {
+        Node n = attrs.getNamedItem(name);
+        if (n == null)
+            return def;
+        return n.getNodeValue();
     }
 
     private String getSchema() {
