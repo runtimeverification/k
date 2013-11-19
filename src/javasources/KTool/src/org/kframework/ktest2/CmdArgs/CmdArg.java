@@ -102,6 +102,7 @@ public class CmdArg {
      * @throws InvalidArgumentException in case of an invalid argument
      */
     public static CmdArg validateArgs(CommandLine cmdOpts) throws InvalidArgumentException {
+        String currentDir = System.getProperty("user.dir");
         String[] args = cmdOpts.getArgs();
 
         if (args.length != 1)
@@ -118,11 +119,11 @@ public class CmdArg {
                     "(should be .xml or .k)");
 
         String directory = getDirectoryArg(cmdOpts, Constants.DIRECTORY_OPTION,
-                System.getProperty("user.dir"));
+                currentDir);
         String programs = getDirectoryArg(cmdOpts, Constants.PROGRAMS_OPTION,
-                System.getProperty("user.dir"));
+                FilenameUtils.concat(currentDir, FilenameUtils.getFullPath(targetFile)));
         String results = getDirectoryArg(cmdOpts, Constants.RESULTS_OPTION,
-                System.getProperty("user.dir"));
+                FilenameUtils.concat(currentDir, FilenameUtils.getFullPath(targetFile)));
 
         String[] extensions = cmdOpts.getOptionValue(Constants.EXTENSIONS_OPTION, "").split("\\s+");
         String[] excludes = cmdOpts.getOptionValue(Constants.EXCLUDE_OPTION, "").split("\\s+");
