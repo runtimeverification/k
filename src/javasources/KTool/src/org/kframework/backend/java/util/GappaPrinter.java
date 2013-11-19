@@ -1,6 +1,7 @@
 package org.kframework.backend.java.util;
 
 import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.symbolic.BottomUpVisitor;
@@ -28,20 +29,19 @@ public class GappaPrinter extends BottomUpVisitor {
 
     public static  Map<String,String> reverseComparisonOps = new HashMap<String, String>();
     static {
+        reverseComparisonOps.put("'_>=Float_", "'_<=Float_");
+        reverseComparisonOps.put("'_<=Float_", "'_>=Float_");
         reverseComparisonOps.put(">=", "<=");
         reverseComparisonOps.put("<=", ">=");
     };
 
-    public static  Map<String,String> negativeComparisonOps = new HashMap<String, String>();
-    static {
-        negativeComparisonOps.put("'_>Float_", "<=");
-        negativeComparisonOps.put("'_<Float_", ">=");
-    };
 
    	public static Map<String,String> binaryOps = new HashMap<String, String>();
 	static {
         comparisonOps.put("'_>=Float_", ">=");
         comparisonOps.put("'_<=Float_", "<=");
+        comparisonOps.put("'_>Float_", ">=");
+        comparisonOps.put("'_<Float_", "<=");
 		binaryOps.put("'_+Float_", "+");
         binaryOps.put("'_-Float_", "-");
 		binaryOps.put("'_*Float_", "*");
@@ -90,21 +90,40 @@ public class GappaPrinter extends BottomUpVisitor {
         boolean first = true;
         Exception error = null;
         for (SymbolicConstraint.Equality equality : constraint.equalities()) {
-            String eqString = "";
-            if (!first) eqString += " /\\ "; else first = false;
-            GappaPrinter gappaLHSPrinter = toGappa(equality.leftHandSide());
+            Term equalityLHS = equality.leftHandSide();
+            Term equalityRHS = equality.rightHandSide();
+            if (equalityRHS.equals(BoolToken.FALSE)) {
+                if (equalityLHS instanceof KItem) {
+                    KLabel klabel = ((KItem) equalityLHS).kLabel();
+                    if (klabel instanceof KLabelConstant) {
+                        KLabelConstant klabelCt = ((KLabelConstant) klabel);
+                        String label = klabelCt.label();
+                        String newlabel = reverseComparisonOps.get(label);
+                        if (newlabel != null) {
+                            klabelCt = KLabelConstant.of(newlabel, klabelCt.context());
+                            equalityLHS = new KItem(klabelCt, ((KItem) equalityLHS).kList(), klabelCt.context());
+                            equalityRHS = BoolToken.TRUE;
+                        }
+                    }
+                }
+            }
+            GappaPrinter gappaLHSPrinter = toGappa(equalityLHS);
             if (gappaLHSPrinter.exception != null) {
                 error = gappaLHSPrinter.exception;
                 continue;
             }
             String gappaLHS = gappaLHSPrinter.getResult();
+            if (gappaLHS.isEmpty()) System.out.println("THis is empty: " + equalityLHS.toString());
             variables = gappaLHSPrinter.variables;
-            if (equality.rightHandSide().equals(BoolToken.TRUE)) {
+            String eqString = "";
+            if (!first) eqString += " /\\ "; else first = false;
+
+            if (equalityRHS.equals(BoolToken.TRUE)) {
                eqString += "(" + gappaLHS + ")";
-            } else if (equality.rightHandSide().equals(BoolToken.FALSE)) {
+            } else if (equalityRHS.equals(BoolToken.FALSE)) {
                eqString += "not(" + gappaLHS + ")";
             } else {
-                GappaPrinter gappaRHSPrinter = toGappa(equality.rightHandSide());
+                GappaPrinter gappaRHSPrinter = toGappa(equalityRHS);
                 if (gappaRHSPrinter.exception != null) {
                     error = gappaRHSPrinter.exception;
                     continue;
@@ -175,20 +194,13 @@ public class GappaPrinter extends BottomUpVisitor {
             result.append(")");
             return;
         }
-        gappaOp = negativeComparisonOps.get(label);
-        boolean closeParens, comparison = false;
+        boolean comparison = false;
+        boolean closeParens = false;
+        gappaOp = comparisonOps.get(label);
         if (gappaOp != null) {
-            result.append("not(");
-            closeParens = true;
             comparison = true;
         } else {
-            closeParens = false;
-            gappaOp = comparisonOps.get(label);
-            if (gappaOp != null) {
-                comparison = true;
-            } else {
-                gappaOp = binaryOps.get(label);
-            }
+            gappaOp = binaryOps.get(label);
         }
         if (doubleBinaryOps.containsKey(label)) {
             gappaOp = doubleBinaryOps.get(label);
@@ -214,7 +226,7 @@ public class GappaPrinter extends BottomUpVisitor {
                 right.accept(this);
                 closeParens(right);
                 result.append(")");
-                right = UninterpretedToken.of("Float", "0.0");
+                right = UninterpretedToken.of("#Float", "0.0");
             } else {
                 openParens(left);
                 left.accept(this);
@@ -239,7 +251,11 @@ public class GappaPrinter extends BottomUpVisitor {
         }
         if (label.equals(unaryMinusOp)) {
             result.append("-");
-            kList.get(0).accept(this);
+            Term minused =  kList.get(0);
+            boolean parens = !(minused instanceof UninterpretedToken);
+            if (parens) result.append("(");
+            minused.accept(this);
+            if (parens) result.append(")");
             return;
         }
         if (label.equals(absOp)) {

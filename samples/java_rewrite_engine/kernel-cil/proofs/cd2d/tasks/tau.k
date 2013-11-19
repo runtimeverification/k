@@ -8,7 +8,7 @@ double tau_vv(double s_x, double s_y, double v_x, double v_y){
 }
 */
 
-module SQV-RULE
+module TAU-RULE
   rule <threads>
            <thread>...
 	     <k> tau_vv(Sx:Float, Sy:Float, Vx:Float, Vy:Float) => V:Float </k>

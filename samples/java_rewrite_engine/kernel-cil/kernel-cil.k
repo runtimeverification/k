@@ -442,6 +442,10 @@ global variable before declaring a local function).  */
        <store>... .Map => L |-> define(Xs, B) ...</store>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
 
+  rule <k> X:Id => B ...</k>
+       <env>... X |-> L ...</env>
+       <store>... L |-> define(.Ids,B) ...</store>
+
   rule <k> T:Type F:Id(Xs:TypedIds) B:Block => . ...</k>
        <env> Env:Map => Env[L/F] </env>
        <store>... .Map => L |-> lambda(Xs, B) ...</store>
