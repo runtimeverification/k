@@ -221,7 +221,7 @@ public class Test implements Comparable<Test> {
                             + Configuration.FILE_SEPARATOR, "");
                 } 
                 Program p = new Program(programPath, krunOptions, this, input,
-                        output, error);
+                        output, error, inputFile, outputFile);
                 programs.add(p);
 
             }
@@ -455,7 +455,7 @@ public class Test implements Comparable<Test> {
             }
             */
 
-            Program program = new Program(programPath, map, this, input, output, error);
+            Program program = new Program(programPath, map, this, input, output, error, null, null);
             specialPrograms.add(program);
         }
 

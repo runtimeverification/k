@@ -6,12 +6,24 @@
 
 
 
-<!-- prog-equiv -->
   <test
-      definition="dist/examples/prog-equiv/peq.k"
-      programs="dist/examples/prog-equiv/programs"
-      extensions="peq"
-      results="tests/examples/prog-equiv/" >
+      definition="imp/peq.k"
+      programs="imp/programs"
+      extension="peq"
+      results="imp/programs" >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
   </test>
- 
+  <test
+      definition="streams/seq.k"
+      programs="streams/programs"
+      extension="seq"
+      results="streams/programs" >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test> 
 </tests>

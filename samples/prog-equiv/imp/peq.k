@@ -2,7 +2,11 @@ require "builtins/symbolic-k.k"
 
 /*!
 \setlength{\parindent}{1em}
-\title{CinK -- an experiment on how to think in \K}
+
+\newcommand{\IMP}{\textsc{imp}\xspace}
+\newcommand{\STREAM}{\textsc{stream}\xspace}
+
+\title{PEQ (Program Equivalence on \IMP)}
 \author{Dorel Lucanu (\texttt{dlucanu@info.uaic.ro})}
 \organization{Alexandru Ioan Cuza University of Ia\c{s}i, Romania}
 \newcommand{\pattern}[2]{{#1}%
@@ -11,8 +15,6 @@ require "builtins/symbolic-k.k"
   }%
 }
 
-\newcommand{\IMP}{\textsc{imp}\xspace}
-\newcommand{\STREAM}{\textsc{stream}\xspace}
 
 */
 
@@ -41,7 +43,7 @@ module IMP-SYNTAX
   				| "(" BExp ")"    [bracket]
 
 
-  syntax Stmt ::= "skip" | Elt | Elt "::" Stmt | Id ":-" Stmt
+  syntax Stmt ::= "skip" // | Elt | Elt "::" Stmt | Id ":-" Stmt
   				| Id ":=" AExp   [strict(2)]
   				| "if" BExp "then" Stmt "else" Stmt [strict(1)]
   				| "while" BExp "do" Stmt
@@ -52,8 +54,7 @@ module IMP-SYNTAX
   				| "(" Stmt ")"    [bracket]
 
   syntax Elt ::= Id | Int   // extension for streams
-
-//  syntax Stmt ::= Elt | Elt "::" Stmt | Id ":-" Stmt
+  syntax Stmt ::=  Elt // trebuie sa fie aici, altfel prgramul cicleaza!!!
 
   syntax Pgm ::= "var" Ids ";" Stmt
   syntax Ids ::= List{Id, ","}
@@ -186,6 +187,7 @@ equality is required, only the maps and conditions are given as parameters.
   rule getSubstMap((#symbMap(IM:Id) M1:Map), M2:Map)
        =>
        getSubstMap(M1, M2)
+
 /*
    translation of a map substitution into a boolean
 */
@@ -423,7 +425,7 @@ equality is required, only the maps and conditions are given as parameters.
   to the SMT solver.
 */
 
-//  rule K2SMTLib(X:K isNotModifiedBy S:K) => "true" [anywhere] // doesn't work
+  rule K2SMTLib(X:K isNotModifiedBy S:K) => "true" [anywhere] // doesn't work
 
   // the following will be removed when K2SMTLib is fixed
 
@@ -583,7 +585,6 @@ module PEQ
                     </hypo>
                   </hypos>
                   <observers> .List </observers>
-<debug> .K </debug>
                 </T>
 
 /*@
@@ -949,7 +950,7 @@ module PEQ
   entailment.
 */
 
-  rule [obs-equality] :
+  rule [basic-entailment] :
        (<goal>
          <config>
            <k> K:K </k>
@@ -1032,7 +1033,6 @@ module PEQ
          <condition> F:Bool </condition>
        ...</goal> 
        <observers> Obs:List </observers> 
-<debug> Bla:K =>  Bla ~> ".Bag" ~> K2SMTLib(filter(F))  </debug>
        when (eqObs(<env> Env1 </env>, 
                    <env> Env2 </env>,
                    <observers> Obs </observers>, F) ==K true)
@@ -1130,7 +1130,6 @@ module PEQ
          <condition> F:K </condition>
        ...</goal>
        <observers> Obs:List </observers> 
-<debug> Bla => Bla ~> K2SMTLib(filter(F)) ~> getSubst(K1', K1) ~> getSubst(K2', K2) </debug>
        when (eqObs(<env> Env1 </env>, 
                    <env> Env2 </env>,
                    <observers> Obs </observers>, F) ==K true)
@@ -1183,12 +1182,62 @@ module PEQ
          <condition> F:K </condition>
        ...</goal>
        <observers> Obs:List </observers> 
-<debug> Bla => Bla ~> K2SMTLib(filter(F)) ~>getSubst(K1', K2) ~> getSubst(K2', K1) </debug>
        when (eqObs(<env> Env1 </env>, 
                    <env> Env2 </env>,
                    <observers> Obs </observers>, F) ==K true)
        andBool ((isSubst(getSubst(K1', K2)) ==K true)
-                orBool (isSubst(getSubst(K2', K1)) ==K true))
+                andBool (isSubst(getSubst(K2', K1)) ==K true))
+       [transition]
+
+/*@
+  The case when an hypothesis does not match the current formula.
+*/ 
+
+  rule [check-hyp-fail] :
+       <goal>
+         <config> 
+           <k> checkHypo(K1, Env1, K2, Env2, 
+     	       		               	     (<hypo>      
+       					       <hcondition>
+					       F':Bool
+       					       </hcondition> 
+       					       <patt1>        
+         				         <hk1>
+          					   K1':K 
+         					 </hk1> 
+         					 <henv1>
+          					   Env1':Map
+          					 </henv1> 
+       					       </patt1> 
+       					       <patt2>        
+         				         <hk2> 
+           					   K2':K
+						 </hk2> 
+         					 <henv2>
+         					   Env2':Map
+         					 </henv2> 
+       					       </patt2> 
+     					     </hypo>
+                        		     =>
+					     .
+                                            )
+                                           Hypos':Bag
+                        )
+           ...</k>
+           <env> _ => Env1 </env>
+         ...</config> 
+         <config> 
+           <k> break ...</k>
+         ...</config>
+         <condition> F:K </condition>
+       ...</goal>
+       <observers> Obs:List </observers>
+       when ((isSubst(getSubst(K1', K1)) =/=K true)
+             orBool (isSubst(getSubst(K2', K2)) =/=K true)
+            ) andBool
+            ((isSubst(getSubst(K1', K2)) =/=K true)
+             orBool (isSubst(getSubst(K2', K1)) =/=K true)
+            )
        [transition]
 
 
@@ -1212,7 +1261,6 @@ module PEQ
        </goal>
        =>
        .)
-<debug> Bla:K =>  Bla ~> "success" ~> substMap2Bool(getSubstMap(Env1', Env1)) ~> substMap2Bool(getSubstMap(Env2', Env2)) ~> K2SMTLib(filter(F)) ~> K2SMTLib(filter(F')) </debug>
        when (impliesML(Env1, Env2, F, Env1', Env2', F')  ==K true)
        [transition]
 
@@ -1237,7 +1285,6 @@ module PEQ
          <condition> F:Bool </condition>
          C:Bag
        </goal>
-<debug> Bla:K =>  Bla ~> "fail" ~> substMap2Bool(getSubstMap(Env1', Env1)) ~> substMap2Bool(getSubstMap(Env2', Env2)) ~> K2SMTLib(filter(F)) ~> K2SMTLib(filter(F')) </debug>
        when (impliesML(Env1, Env2, F, Env1', Env2', F')  =/=K true)
        [transition]
 
@@ -1249,7 +1296,7 @@ module PEQ
        <config> 
          <k> storeHypo(K1:K) => getFresh(Env1) ~> restore(K1, Env1) ...</k>
          <env> Env1:Map </env>
-       </config> 
+       ...</config> 
 //       [transition]
 
 
@@ -1260,7 +1307,7 @@ module PEQ
        <config>
          <k> getFresh(((X:Id |-> _:Int) => .) _ ) ...</k>
          <env>... X |-> (V:Int => VS) ...</env>
-       </config>
+       ...</config>
        <condition> F:Bool => (F andBool (VS ==Int V)) </condition>
        when fresh(VS:Int)
 
@@ -1283,11 +1330,11 @@ module PEQ
          <config> 
            <k> restore(K1:K, Env1':Map) => . ...</k>
            <env> Env1:Map => Env1' </env>
-         </config> 
+         ...</config> 
          <config> 
            <k> restore(K2:K, Env2':Map) => . ...</k>
            <env> Env2:Map => Env2' </env>
-         </config>
+         ...</config>
          <condition> F:Bool </condition>
        ...</goal>
        <hypos>
@@ -1318,11 +1365,11 @@ module PEQ
          <config> 
            <k> lbldStmt(L1:Id, K1:K) => . ...</k>
            <env> Env1:Map </env>
-         </config> 
+         ...</config> 
          <config> 
            <k> lbldStmt(L2:Id, K2:K) => . ...</k>
            <env> Env2:Map </env>
-         </config>
+         ...</config>
          <condition> F:K </condition>
        ...</goal>
        <observers> Obs:List </observers>
@@ -1531,24 +1578,11 @@ module PEQ
 //@ rules that translate the locally defined predicates to SMTLIB
 
 
+// regula asta trebuie sa fie aici; daca se muta, programul cicleaza!!!!
 
-  // SExp (Streams)
-
-  rule <k> X:Id :- S:Stmt => . ...</k>
-       <env>... . => X |-> S ...</env>
-
-  rule <k> (I:Int => .) :: S:Stmt ...</k>
-       <env>... O |-> (_ => I)  ...</env>
-       <observers> ListItem(O:Id) </observers>
-
-  rule .K :: S:Stmt => S
 
   rule getSubstMap((M1:Map X:Id |-> S:Stmt), M2:Map)
        =>
        getSubstMap(M1, M2) 
-
-  rule getSubst(X:K :: S1:K, X:K :: S2:K) => getSubst(S1, S2)
-
-//  rule eqEnv((X:Id |-> S:Stmt Env1:Map), Env2:Map, F:Bool) => eqEnv(Env1, Env2, F) 
 
 endmodule

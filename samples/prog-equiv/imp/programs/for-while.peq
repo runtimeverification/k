@@ -36,7 +36,6 @@ and
 and
 #symAExp(a2) isNotModifiedBy #symStmt(s)
 
-
 //not occurs(i, #symStmt(s))
 
 using observers: allObs;

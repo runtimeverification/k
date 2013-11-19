@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Ambiguity;
+import org.kframework.kil.Bracket;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Configuration;
+import org.kframework.kil.Rewrite;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
@@ -82,6 +84,19 @@ public class CellTypesFilter extends BasicTransformer {
 				throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, getName(), trm.getFilename(), trm.getLocation()));
 			}
 			return trm;
+		}
+
+		@Override
+		public ASTNode transform(Bracket node) throws TransformerException {
+			node.setContent((Term) node.getContent().accept(this));
+			return node;
+		}
+
+		@Override
+		public ASTNode transform(Rewrite node) throws TransformerException {
+			Rewrite result = new Rewrite(node);
+			result.replaceChildren((Term) node.getLeft().accept(this), (Term) node.getRight().accept(this), context);
+			return result;
 		}
 
 		@Override

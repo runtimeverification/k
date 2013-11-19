@@ -133,7 +133,8 @@ constraint.
                   | "getVars" | "accumulateVars"
                   | "clash" | "cycle"
 
-  syntax MguError ::= "dummy-used-only-for-declaration-purposes"
+  syntax MguError
+syntax MguOrError ::= Mgu | MguError
   rule isMguError(clash(_)) => true
   rule isMguError(cycle(_)) => true
 

@@ -89,7 +89,7 @@ public class KTest {
         // Dry run
         if (cmd.hasOption(Configuration.DRY_RUN_OPTION)) {
             Configuration.DRY_RUN = true;
-            System.out.println("DRY: log=/tmp/ktest.`date +%Y_%m_%d_%H_%M_%S`; mkdir -p $log; trap \"rm -rf $log; exit\" SIGHUP SIGINT SIGTERM");
+            //System.out.println("DRY: log=/tmp/ktest.`date +%Y_%m_%d_%H_%M_%S`; mkdir -p $log; trap \"rm -rf $log; exit\" SIGHUP SIGINT SIGTERM");
         }
 
         if (cmd.hasOption("debug")) {
@@ -528,7 +528,7 @@ public class KTest {
                         Task task = p.getTask(homeDir);
                         all.put(p, task);
                         if (Configuration.PROGRAMS) {
-                            wrapExecutionExecute(task);
+                            wrapExecutionExecute(task,p);
                         }
                         i++;
                         if (p.hasInput()) in++;
@@ -573,17 +573,31 @@ public class KTest {
         return ret;
     }
 
+    private static void wrapExecutionExecute(Task task, Program p) {
+        if (Configuration.DRY_RUN) {
+            String msg = "DRY: " + task.getCommand();
+            if (p.inputFile != null) {
+                msg += " <" + p.inputFile;
+            }
+            if (p.outputFile != null) {
+                msg += " >" + p.outputFile;
+            }
+            System.out.println(msg);
+        } else {
+            Execution.execute(task);
+        }
+    }
     private static void wrapExecutionExecute(Task task) {
         if (Configuration.DRY_RUN) {
             //System.out.println("DRY: " + task.getCommand());
-            System.out.println("DRY: p[$LINENO]=$!; " + task.getCommand() + " >$log/$LINENO.out 2>$log/$LINENO.err || echo \"Failed: $LINENO\" &");
+            //System.out.println("DRY: p[$LINENO]=$!; " + task.getCommand() + " >$log/$LINENO.out 2>$log/$LINENO.err || echo \"Failed: $LINENO\" &");
         } else {
             Execution.execute(task);
         }
     }
     private static void wrapExecutionFinish() {
         if (Configuration.DRY_RUN) {
-            System.out.println("DRY: p[$LINENO]=$!; echo \"wait ${p[@]}\"; wait ${p[@]}");
+            //System.out.println("DRY: p[$LINENO]=$!; echo \"wait ${p[@]}\"; wait ${p[@]}");
         } else {
             Execution.finish();
         }
@@ -591,7 +605,7 @@ public class KTest {
     private static void wrapPrintStep(String step) {
         if (Configuration.DRY_RUN) {
             System.out.println(step);
-            System.out.println("DRY: echo \"" + step + "\" &");
+            //System.out.println("DRY: echo \"" + step + "\" &");
         } else {
             System.out.print(step);
         }
