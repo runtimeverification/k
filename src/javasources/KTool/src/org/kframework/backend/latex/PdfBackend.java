@@ -1,6 +1,7 @@
 package org.kframework.backend.latex;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.kframework.backend.BasicBackend;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
@@ -28,9 +29,11 @@ public class PdfBackend extends BasicBackend {
             String argument = latexFile.getCanonicalPath();
 
             ProcessBuilder pb = new ProcessBuilder(pdfLatex, argument, "-interaction", "nonstopmode");
+            pb.redirectErrorStream(true);
             pb.directory(latexFile.getParentFile());
 
             Process process = pb.start();
+            IOUtils.toString(process.getInputStream());
             process.waitFor();
             if (process.exitValue() != 0)
                 GlobalSettings.kem.register(

@@ -87,9 +87,9 @@ public class ConfigFileParser {
     }
 
     /**
-     * Parse <test> ... </test> nodes in NodeList.
+     * Parse `test' and `include' nodes in NodeList.
      *
-     * @param tests NodeList that contains `test' elements
+     * @param tests NodeList that contains `test' and `include' elements
      * @return list of `TestCase's
      * @throws InvalidConfigError when config file contains invalid information
      */
@@ -112,26 +112,32 @@ public class ConfigFileParser {
         return testCases;
     }
 
+    /**
+     * Parse a `include' node.
+     * @param includeNode `include' element
+     * @return List of test cases.
+     * @throws InvalidConfigError
+     */
     private List<TestCase> parseInclude(Element includeNode) throws InvalidConfigError {
         NamedNodeMap includeAttrs = includeNode.getAttributes();
         LocationData location =
                 (LocationData) includeNode.getUserData(LocationData.LOCATION_DATA_KEY);
 
         String fileValue = includeAttrs.getNamedItem("file").getNodeValue();
-        String file =
-                FilenameUtils.concat(cmdArgs.directory,
-                        FilenameUtils.concat(FilenameUtils.getBaseName(cmdArgs.targetFile),
-                                fileValue));
+        String file = concat(FilenameUtils.getFullPath(cmdArgs.targetFile),fileValue);
+
         if (!new File(file).isFile())
             throw new InvalidConfigError(
                     "file attribute " + file + " in `include' is not a valid file", location);
 
-        String directory = FilenameUtils.concat(cmdArgs.directory,
+        String directory = concat(cmdArgs.directory,
                 getAttributeWDefault(includeAttrs, "directory", ""));
-        String programs = FilenameUtils.concat(cmdArgs.programs,
-                getAttributeWDefault(includeAttrs, "programs", ""));
-        String results = FilenameUtils.concat(cmdArgs.results,
-                getAttributeWDefault(includeAttrs, "results", ""));
+
+        String programs = getAttributeWDefault(includeAttrs, "programs",
+                FilenameUtils.getFullPath(file));
+
+        String results = getAttributeWDefault(includeAttrs, "results",
+                FilenameUtils.getFullPath(file));
 
         CmdArg cmdArgs1 = new CmdArg(directory, programs, results, cmdArgs.extensions,
                 cmdArgs.excludes, cmdArgs.skips, cmdArgs.generateReport, file, cmdArgs.verbose,
@@ -145,11 +151,15 @@ public class ConfigFileParser {
             throw new InvalidConfigError("error occured while parsing included file " + file +
                     ":\n" + e.getMessage(), location);
         }
-        List<TestCase> ret = configFileParser.parse();
-
-        return ret;
+        return configFileParser.parse();
     }
 
+    /**
+     * Parse a `test' node.
+     * @param testNode `test' element.
+     * @return a test case
+     * @throws InvalidConfigError
+     */
     private TestCase parseTestCase(Element testNode) throws InvalidConfigError {
         NamedNodeMap testAttrs = testNode.getAttributes();
         // I couldn't find a way to annotate attributes with location information using SAX api
@@ -220,7 +230,8 @@ public class ConfigFileParser {
     }
 
     private String normalize(String path, String root) {
-        return FilenameUtils.concat(root, path);
+        assert concat(root, path) != null;
+        return concat(root, path);
     }
 
     private String[] normalize(String[] paths, String root) {
@@ -311,7 +322,7 @@ public class ConfigFileParser {
             if (childNode.getNodeType() == Node.ELEMENT_NODE
                     && childNode.getNodeName().equals("program")) {
                 Element elem = (Element) childNode;
-                ret.put(FilenameUtils.concat(cmdArgs.programs, elem.getAttribute("name")),
+                ret.put(concat(cmdArgs.programs, elem.getAttribute("name")),
                         parseKrunOpts(elem.getChildNodes()));
             }
         }
@@ -332,12 +343,21 @@ public class ConfigFileParser {
     }
 
     private String getSchema() {
-        return FilenameUtils.concat(getKHome(), FilenameUtils.concat("lib", "ktest.xsd"));
+        return concat(getKHome(), concat("lib", "ktest.xsd"));
     }
 
     private String getKHome() {
         return new File(KTest.class.getProtectionDomain().getCodeSource()
                 .getLocation().getPath()).getParentFile().getParentFile()
                 .getParentFile().getPath();
+    }
+
+    private String concat(String s1, String s2) {
+        // HACK: FilenameUtils.concat return "" when two "." is concatenated,
+        // we don't want this because new File("").isDirectory() return false, which causes
+        // test validation to fail (it checks directory/results/programs to be valid folders)
+        String ret = FilenameUtils.concat(s1, s2);
+        if (ret.equals("")) return ".";
+        return ret;
     }
 }
