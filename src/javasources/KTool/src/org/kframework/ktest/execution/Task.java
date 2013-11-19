@@ -133,7 +133,7 @@ public class Task extends Thread {
     public String getCommand() {
         String cmd = "";
         for (String s : arguments) {
-            if (Pattern.compile("\\s").matcher(s).find()) {
+            if (Pattern.compile("\\s|<|>|\\*|~").matcher(s).find()) {
                 cmd += "\"" + s + "\" ";
             } else {
                 cmd += s + " ";
