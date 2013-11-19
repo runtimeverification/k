@@ -29,24 +29,45 @@
 
 module STREAM 
 
-  //@ Integer Expressions
-  syntax IExp ::=  Int
-                | "hd" "(" SExp ")" [strict, context(svalue)]
+  //@ Boolean Expressions
 
+  syntax BExp ::= Bool
+                | IExp "=" IExp [strict]
+                | "!" BExp [strict]
+                | BExp "&" BExp [strict(1)]
+
+  //@ Integer Expressions
+  syntax IExp ::=  Int | Id
+                | "hd" "(" SExp ")" [strict]
+                | "(" IExp ")" [brackets]
+                > Id "(" IExps ")" [strict(2)]
+                > Id "." IExp [strict(2)]
+                > IExp "<|" BExp "|>" IExp [strict(2)]
+                | IExp "+" IExp [strict]
+
+  syntax IExps ::= List{IExp,","} [strict]
   //@ Stream Expressions
-  syntax SExp ::= Id
-                | "tl" "(" SExp ")" [strict, context(svalue), prefer]
-                > Id "(" SExps ")" [strict(2), context(svalue)]
-                > IExp ":" SExp [right]
+
+
+  syntax SExp ::= Id 
+                | "tl" "(" SExp ")" [strict, prefer]
+//                | "(" SExp ")" [brackets]
+                > Id "(" SExps ")" [strict(2)]
+                > Id "." SExp [lsexp]
+                > IExp ":" SExp [strict(1), right, constr]
                 | "[]"
-  syntax SExps ::= List{SExp,","} [strict, context(svalue)]
+  syntax SExps ::= List{SExp,","} [strict]
+
 
   //@ Expressions
   syntax Exp ::= IExp | SExp
+  syntax Exps ::= List{Exp,","} [strict]
 
   //@ Stream Specifications
-  syntax SSpec ::= Id ":=" SExp ";"
-                 | Id "(" Ids ")" ":=" SExp ";"
+  syntax SSpec ::= Id ":~" SExp ";"
+                 | Id "(" Ids ")" ":~" SExp ";"
+                 | Id ":=" IExp ";"
+                 | Id "(" Ids ")" ":=" IExp ";"
   syntax Ids ::= List{Id,","}
   syntax SSpecs ::= SSpec | SSpec SSpecs [right]
 
@@ -57,19 +78,6 @@ module STREAM
 */
   syntax SPgm ::= SSpecs Exp 
 
-
-//@ Contexts
-  syntax K ::= svalue(K) [klabel(svalue)]
-/*@
-  We have to specify which arguments of the svalu context are strict:
-*/
-
-  context svalue(hd(HOLE => svalue(HOLE)))  // a head argument
-  context svalue(tl(HOLE => svalue(HOLE)))  // a tail argument
-  context svalue((HOLE => svalue(HOLE)) : _) // the constructor: 1st case
-  context svalue((HOLE => svalue(HOLE)), _:SExps) // the constructor: 2nd case
-  context svalue(_:SExp, (HOLE => svalue(HOLE)))  // expression list: 1st case
-  context svalue((HOLE => svalue(HOLE)), .SExps)  // expression list: 2nd case
 
   //@ Configuration
 
@@ -87,14 +95,17 @@ module STREAM
     <out> [] </out> 
 
  //@ The right-hand side of a specification is stored as a $\lambda$-expression:
-  syntax K ::= "lambda" "(" Ids ")" SExp
+  syntax K ::= "lambda" "(" Ids ")" Exp
 
 /*@ The result values are integers and stream expression for that at  least
   the head is evaluated to an integer:
 */
-  syntax KResult ::= Int 
+
+  syntax KResult ::= Int | Bool
+
 
   rule isKResult(_:Int : _:SExp) => true
+
 
   //@ Preprocessing
 
@@ -102,54 +113,76 @@ module STREAM
 
   rule (SS:SSpec E:Exp) => SS ~> E
 
-  rule <k> F:Id := SE:SExp; => . ...</k>
+  rule <k> F:Id :~ SE:SExp; => . ...</k>
        <sspecs>... . => F |-> lambda(.Ids) SE </sspecs>
 
-  rule <k> F:Id(Ys:Ids) := SE:SExp; => . ...</k>
+  rule <k> F:Id(Ys:Ids) :~ SE:SExp; => . ...</k>
        <sspecs>... . => F |-> lambda(Ys) SE </sspecs>
 
-  //@ Computations:
-  rule IE:IExp : SE':SExp => IE ~> SE'
+  rule <k> F:Id := IE:IExp; => . ...</k>
+       <sspecs>... . => F |-> lambda(.Ids) IE </sspecs>
+
+  rule <k> F:Id(Ys:Ids) := IE:IExp; => . ...</k>
+       <sspecs>... . => F |-> lambda(Ys) IE </sspecs>
+
+ //@ Computations:
+
+  rule I1:Int = I2:Int => I1 ==Int I2
+
+  rule ! B:Bool => notBool B
+
+  rule true & BE:BExp => BE
+
+  rule false & _:BExp => false
+
+  rule IE:IExp <| true |> _:IExp => IE 
+
+  rule _:IExp <| false |> IE:IExp => IE
+
 
  //@ The evaluation of the head:
-  rule svalue(hd(I:Int : _) => I)
 
-  rule hd(I:Int : _) => I
+  rule hd(I:Int : _) => I [anywhere]
 
   //@ The evaluation of tail:
-  rule svalue(tl(_:Int : SE:SExp) => SE)
 
-  rule tl(_:Int : SE:SExp) => SE
+  rule tl(_:Int : SE:SExp) => SE [anywhere]
   
-  //@ When the head is completely evaluated is move in the cell out:
-  rule <k> I:Int => . ...</k>
+  //@ When the head is completely evaluated is moved in the cell out:
+  rule <k> I:Int => . </k>
        <out> SE:SExp => append(I, SE) </out>
 
+  rule <k> I:Int : SE:SExp => SE </k>
+       <out> OUT:SExp => append(I, OUT) </out>
+
  //@ Stream specification without parameters:
-  rule <k> svalue(F:Id => SE) ...</k>
-       <sspecs>... F |-> lambda(.Ids) SE:SExp ...</sspecs>
 
   rule <k> F:Id => SE ...</k>
-       <sspecs>... F |-> lambda(.Ids) SE:SExp ...</sspecs>
+       <sspecs>... F |-> lambda(.Ids) SE ...</sspecs>
        [transition]
 
  //@ Stream specification with parameters:
-  rule <k> svalue(F:Id(SEs:SExps) => SE[SEs / Xs]) ...</k>
-       <sspecs>... F |-> lambda(Xs:Ids) SE:SExp ...</sspecs>
 
   rule <k> F:Id(SEs:SExps) => SE[SEs / Xs] ...</k>
        <sspecs>... F |-> lambda(Xs:Ids) SE:SExp ...</sspecs>
        [transition]
 
+  rule <k> F:Id(IEs:IExps) => IE[IEs / Xs] ...</k>
+       <sspecs>... F |-> lambda(Xs:Ids) IE:IExp ...</sspecs>
+       [transition]
+
+
   //@ \section{Auxiliary Operations}
 
   //@ Substitution
 
-  syntax SExp ::= SExp "[" SExps "/" Ids "]" [function]
+  syntax Exp ::= Exp "[" Exps "/" Ids "]" [function]
 
-  rule SE:SExp[(V:SExp, (V':SExp, Vs:SExps)) / (X:Id, (X':Id, Xs:Ids))] => (replace(X, V, SE))[(V', Vs) / (X', Xs)]
+  rule SE:Exp[(V:SExp, (V':Exp, Vs:Exps)) / (X:Id, (X':Id, Xs:Ids))]
+       =>
+      (replace(X, V, SE))[(V', Vs) / (X', Xs)]
 
-  rule SE:SExp[(V:SExp, .SExps) / (X:Id, .Ids)] => replace(X, V, SE)
+  rule SE:Exp[(V:Exp, .Exps) / (X:Id, .Ids)] => replace(X, V, SE)
 
 
   //@ Append

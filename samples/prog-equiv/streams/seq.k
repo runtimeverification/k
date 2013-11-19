@@ -1,29 +1,66 @@
 require "builtins/symbolic-k.k"
 
 
+/*!
+\setlength{\parindent}{1em}
+
+\newcommand{\IMP}{\textsc{imp}\xspace}
+\newcommand{\STREAM}{\textsc{stream}\xspace}
+
+\title{SEQ (Program Equivalence on \STREAM)}
+\author{Dorel Lucanu (\texttt{dlucanu@info.uaic.ro})}
+\organization{Alexandru Ioan Cuza University of Ia\c{s}i, Romania}
+\newcommand{\pattern}[2]{{#1}%
+  \ifthenelse{\equal{#2}{}}{}{%
+    \,{\pmb{\wedge}}\,{#2}%
+  }%
+}
+*/
+
+
 //@ \section{Syntax}
 
 module STREAM-SYNTAX
 
+  //@ Boolean Expressions
+
+  syntax BExp ::= Bool
+                | IExp "=" IExp [strict]
+                | "!" BExp [strict]
+                | BExp "&" BExp [strict(1)]
 
   //@ Integer Expressions
-  syntax IExp ::=  Int
-                | "hd" "(" SExp ")" [strict, context(svalue)]
+  syntax IExp ::=  Int | Id
+                | "hd" "(" SExp ")" [strict]
+                | "(" IExp ")" [brackets]
+                > Id "(" IExps ")" [strict(2)]
+                > Id "." IExp [strict(2)]
+                > IExp "<|" BExp "|>" IExp [strict(2)]
+                | IExp "+" IExp [strict]
 
+  syntax IExps ::= List{IExp,","} [strict]
   //@ Stream Expressions
-  syntax SExp ::= Id
-                | "tl" "(" SExp ")" [strict, context(svalue), prefer]
-                > Id "(" SExps ")" [strict(2), context(svalue)]
-                > IExp ":" SExp [right]
+
+
+  syntax SExp ::= Id 
+                | "tl" "(" SExp ")" [strict, prefer]
+//                | "(" SExp ")" [brackets]
+                > Id "(" SExps ")" [strict(2)]
+                > Id "." SExp [lsexp]
+                > IExp ":" SExp [strict(1), right, constr]
                 | "[]"
-  syntax SExps ::= List{SExp,","} [strict, context(svalue)]
+  syntax SExps ::= List{SExp,","} [strict]
+
 
   //@ Expressions
   syntax Exp ::= IExp | SExp
+  syntax Exps ::= List{Exp,","} [strict]
 
   //@ Stream Specifications
-  syntax SSpec ::= Id ":=" SExp ";"
-                 | Id "(" Ids ")" ":=" SExp ";"
+  syntax SSpec ::= Id ":~" Exp ";"
+                 | Id "(" Ids ")" ":~" Exp ";"
+                 | Id ":=" IExp ";"
+                 | Id "(" Ids ")" ":=" IExp ";"
   syntax Ids ::= List{Id,","}
   syntax SSpecs ::= SSpec | SSpec SSpecs [right]
 
@@ -81,7 +118,7 @@ the current confuguration. Therefore we assume that it is of the form
 $\pattern{\pi}{\phi}\implies \pattern{\pi'}{\phi'}$, where $\pattern{\pi}{\phi}$ will play
 the role of the current configuration, and $\pattern{\pi'}{\phi'}$ the role of the 
 hypothesis. Further, we always assume that $\pattern{\pi'}{\phi'}$ is in abstract form,
-i.e., of the form $(\exists X)$\pattern{\overline{\pi}'}{\phi'\land \sigma}$, 
+i.e., of the form $(\exists X)\pattern{\overline{\pi}'}{\phi'\land \sigma}$, 
 where \emph{$\overline{\pi}$ is an abstraction of $\pi$ via $\sigma^\pi$} 
 (i.e., $\sigma^\pi(\overline{\pi})=\pi$), and $\sigma^\pi$ in the pattern condition is viewed
 as a conjunction formula $\bigwedge x = \sigma^\pi(x)$ (the equality is in the symbolic
@@ -105,8 +142,6 @@ substitution always exists).
 
   rule getSubst(K:K, K) => emptySubst
 
- 
-
   rule getSubst(K1:K ~> K2:K, K1':K ~> K2':K)
        =>
        getSubst(K1, K1') ;; getSubst(K2, K2')
@@ -124,19 +159,19 @@ substitution always exists).
 
   rule getSubst(#symInt(X:K), IE:IExp) => (#symInt(X) replBy IE)
 
-  rule getSubst(hd(SE:SExp), hd(SE':SExps)) => getSubst(SE, SE') 
+  rule getSubst(hd(SE:SExp), hd(SE':SExp)) => getSubst(SE, SE') 
 
-  rule getSubst(tl(SE:SExp), tl(SE':SExps)) => getSubst(SE, SE') 
+  rule getSubst(tl(SE:SExp), tl(SE':SExp)) => getSubst(SE, SE') 
 
   rule getSubst(F:Id(SEs:SExps), F(SEs':SExps)) => getSubst(SEs, SEs')
 
-  rule getSubst((IE:SExp : SE:SExp), (IE':IExp : SE':SExp))
+  rule getSubst((IE:IExp : SE:SExp), (IE':IExp : SE':SExp))
        => getSubst(IE, IE') ;; getSubst(SE, SE')
 
   rule getSubst((SE:SExp, SEs:SExps), (SE':SExp, SEs':SExps))
        => getSubst(SE, SE') ;; getSubst(SEs, SEs')
 
-  rule getSubst(.Exps, .Exps) => emptySubst
+  rule getSubst(.SExps, .SExps) => emptySubst
 
   // to be completed
 
@@ -172,21 +207,27 @@ substitution always exists).
 /*
   syntax Bool ::= "eqObs" "(" OutCellSort "," OutCellSort ")" [function]
 
-  rule eqObs(<out> SE:SExp </out>,
-             <out> SE </out>)
+  rule eqObs(<out> OUT1:SExp </out>,
+             <out> OUT2 </out>)
        =>
        true
+*/
+/*
+  It is easier to test OUT1 ==K OUT2 each time we need to compute the 
+  observability relation.
 */
 
   //@ \section{Auxiliary Operations}
 
   //@ Substitution
 
-  syntax SExp ::= SExp "[" SExps "/" Ids "]" [function]
+  syntax Exp ::= Exp "[" Exps "/" Ids "]" [function]
 
-  rule SE:SExp[(V:SExp, (V':SExp, Vs:SExps)) / (X:Id, (X':Id, Xs:Ids))] => (replace(X, V, SE))[(V', Vs) / (X', Xs)]
+  rule SE:Exp[(V:SExp, (V':Exp, Vs:Exps)) / (X:Id, (X':Id, Xs:Ids))]
+       =>
+      (replace(X, V, SE))[(V', Vs) / (X', Xs)]
 
-  rule SE:SExp[(V:SExp, .SExps) / (X:Id, .Ids)] => replace(X, V, SE)
+  rule SE:Exp[(V:Exp, .Exps) / (X:Id, .Ids)] => replace(X, V, SE)
 
 
   //@ Append
@@ -194,7 +235,7 @@ substitution always exists).
   syntax SExp ::= append(Int, SExp) [function]
 
   rule append(I:Int, []) => I : []
-  rule append(I:Int, (J:Int : SE)) => J : append(I, SE)
+  rule append(I:Int, (J:Int : SE:SExp)) => J : append(I, SE)
 
 
   //@ Replace X:K by V:K in E:K
@@ -222,6 +263,15 @@ substitution always exists).
        replace(X, V, E),, replaceListList(XKL, V, EKL)
 
 
+  syntax Bool ::= isInstanceOfSExp(SExp, SExp) [function]
+
+  rule isInstanceOfSExp(_:SExp, []) => true
+  rule isInstanceOfSExp(IE:IExp : SE:SExp, IE : SE':SExp)
+       =>
+       isInstanceOfSExp(SE, SE')
+
+
+endmodule
 
 //@ \section{Semantics}
 
@@ -254,88 +304,120 @@ module SEQ
                     <hypo multiplicity="*">
                       <patt1>
                         <hk1 color="green"> .K  </hk1>
-                        <hsspecs1 color="red"> .Map </hsspecs11>
                         <hout1> [] </hout1> 
                       </patt1>
                       <patt2>
                         <hk2 color="green"> .K  </hk2>
-                        <hsspec2 color="red"> .Map </hsspec2>
                         <hout2> [] </hout2> 
                       </patt2>
                     </hypo>
                   </hypos>
-<debug> .K </debug>
                 </T>
 
  //@ The right-hand side of a specification is stored as a $\lambda$-expression:
-  syntax K ::= "lambda" "(" Ids ")" SExp
+  syntax K ::= "lambda" "(" Ids ")" Exp
 
 /*@ The result values are integers and stream expression for that at  least
   the head is evaluated to an integer:
 */
-  syntax KResult ::= Int 
+  syntax KResult ::= Int | Bool
+
 
   rule isKResult(_:Int : _:SExp) => true
 
-/*@
-  We use a new syntactic construct that help us to store hypotheses. The basic
-  idea is to add the hypotheses in a controlled way. For instance, we may add
-  hypothesis only when on the top in the two k cells we have  statement with
-  the same label (the label is a kind of "rendevous" synchronisarion). 
-*/
 
-  syntax K ::= "storeHypo" "(" K ")"   // for storing hypotheses
 
-            |  "checkHypo" "(" K "," Map "," K "," Map "," HyposCellFragment ")"
-               // for checking hypotheses one by one 
+  //@ Preprocessing
 
-  syntax K ::= "break"  // to temporarily stop one of the two programs
+  rule SS:SSpec SSs:SSpecs E:Exp => SS ~> SSs E
 
-//@ Contexts
-  syntax K ::= svalue(K) [klabel(svalue)]
-/*@
-  We have to specify which arguments of the svalu context are strict:
-*/
+  rule (SS:SSpec E:Exp) => SS ~> E
 
-  context svalue(hd(HOLE => svalue(HOLE)))  // a head argument
-  context svalue(tl(HOLE => svalue(HOLE)))  // a tail argument
-  context svalue((HOLE => svalue(HOLE)) : _) // the constructor: 1st case
-  context svalue((HOLE => svalue(HOLE)), _:SExps) // the constructor: 2nd case
-  context svalue(_:SExp, (HOLE => svalue(HOLE)))  // expression list: 1st case
-  context svalue((HOLE => svalue(HOLE)), .SExps)  // expression list: 2nd case
+  rule <k> F:Id :~ SE:SExp; => . ...</k>
+       <sspecs>... . => F |-> lambda(.Ids) SE </sspecs>
+
+  rule <k> F:Id(Ys:Ids) :~ SE:SExp; => . ...</k>
+       <sspecs>... . => F |-> lambda(Ys) SE </sspecs>
+
+  rule <k> F:Id := IE:IExp; => . ...</k>
+       <sspecs>... . => F |-> lambda(.Ids) IE </sspecs>
+
+  rule <k> F:Id(Ys:Ids) := IE:IExp; => . ...</k>
+       <sspecs>... . => F |-> lambda(Ys) IE </sspecs>
 
  //@ Computations:
-  rule IE:IExp : SE':SExp => IE ~> SE'
+
+  rule I1:Int = I2:Int => I1 ==Int I2
+
+  rule ! B:Bool => notBool B
+
+  rule true & BE:BExp => BE
+
+  rule false & _:BExp => false
+
+  rule IE:IExp <| true |> _:IExp => IE 
+
+  rule _:IExp <| false |> IE:IExp => IE
+
 
  //@ The evaluation of the head:
-  rule svalue(hd(I:Int : _) => I)
 
-  rule hd(I:Int : _) => I
+  rule hd(I:Int : _) => I [anywhere]
 
   //@ The evaluation of tail:
-  rule svalue(tl(_:Int : SE:SExp) => SE)
 
-  rule tl(_:Int : SE:SExp) => SE
+  rule tl(_:Int : SE:SExp) => SE [anywhere]
   
-  //@ When the head is completely evaluated is move in the cell out:
-  rule <k> I:Int => . ...</k>
+  //@ When the head is completely evaluated is moved in the cell out:
+  rule <k> I:Int => . </k>
        <out> SE:SExp => append(I, SE) </out>
 
+  rule <k> I:Int : SE:SExp => SE </k>
+       <out> OUT:SExp => append(I, OUT) </out>
+
  //@ Stream specification without parameters:
-  rule <k> svalue(F:Id => SE) ...</k>
-       <sspecs>... F |-> lambda(.Ids) SE:SExp ...</sspecs>
 
   rule <k> F:Id => SE ...</k>
-       <sspecs>... F |-> lambda(.Ids) SE:SExp ...</sspecs>
+       <sspecs>... F |-> lambda(.Ids) SE ...</sspecs>
        [transition]
 
  //@ Stream specification with parameters:
-  rule <k> svalue(F:Id(SEs:SExps) => SE[SEs / Xs]) ...</k>
-       <sspecs>... F |-> lambda(Xs:Ids) SE:SExp ...</sspecs>
 
   rule <k> F:Id(SEs:SExps) => SE[SEs / Xs] ...</k>
        <sspecs>... F |-> lambda(Xs:Ids) SE:SExp ...</sspecs>
        [transition]
+
+  rule <k> F:Id(IEs:IExps) => IE[IEs / Xs] ...</k>
+       <sspecs>... F |-> lambda(Xs:Ids) IE:IExp ...</sspecs>
+       [transition]
+
+
+  //@ The semantics of the new introduced labelled expressions:
+
+  rule [labelled-sexp] :
+       <k>
+          ( L:Id . SE:SExp
+            =>
+            lbldStmt(L, SE ~> K) ~> SE
+          ) ~> K:K 
+       </k>
+
+  rule [labelled-sexp] :
+       <k>
+          ( L:Id . IE:IExp : SE:SExp
+            =>
+            lbldStmt(L, (IE : SE)) ~> (IE : SE)
+          )
+       </k>
+
+  rule [labelled-sexp] :
+       <k>
+          ( L:Id . IE:IExp
+            =>
+            lbldStmt(L, IE) ~> IE
+          )
+       </k>
+
 
 
 /*@
@@ -346,7 +428,7 @@ module SEQ
   entailment.
 */
 
-  rule [obs-equality] :
+  rule [basic-entailment] :
        (<goal>
          <config>
            <k> K:K </k>
@@ -372,6 +454,21 @@ module SEQ
   This relation must be more elaborated.
 */
 
+/*@
+  We use a new syntactic construct that help us to store hypotheses. The basic
+  idea is to add the hypotheses in a controlled way. For instance, we may add
+  hypothesis only when on the top in the two k cells we have  statement with
+  the same label (the label is a kind of "rendevous" synchronisarion). 
+*/
+
+  syntax K ::= "storeHypo" "(" K ")"   // for storing hypotheses
+            |  "lbldStmt" "(" Id "," K ")"    // event signalling a labelled
+                                              // statement
+            |  "checkHypo" "(" K ","  K "," HyposCellFragment ")"
+               // for checking hypotheses one by one 
+
+  syntax K ::= "break"  // to temporarily stop one of the two programs
+
 
 /*@
   When two statemets with the same label are synchronized, there are two ways
@@ -387,12 +484,12 @@ module SEQ
   rule [stmt-sync] : 
        <goal>
          <config> 
-           <k> SE1:SExp => checkHypo(SE1, SE2, Hypos) ...</k>
+           <k> lbldStmt(L:Id, SE1:K) => checkHypo(SE1, SE2, Hypos) ...</k>
            <sspecs> SSp1:Map </sspecs>
            <out> OUT1:SExp </out>
          </config> 
          <config> 
-           <k> SE2:SExp => break ...</k>
+           <k> lbldStmt(L:Id, SE2:K) => break ...</k>
            <sspecs> SSp2:Map </sspecs>
            <out> OUT2:SExp </out>
          </config>
@@ -400,7 +497,7 @@ module SEQ
        <hypos>
          Hypos:Bag
        </hypos>
-//      [transition]
+
 
   /*@ The case when the set of hypotheses is empty and 
        the configurations are observational equal.
@@ -433,41 +530,8 @@ module SEQ
   the substitution restrictied to the environment component to the hypothesis
   path formula, as well the formula representing the substitution restricted
   to program (k cell) component.
-  Recall that the substitution given by the environment (env cell) is obtained
-  with getMapSubst(), and that given by programs is obtained with getSubst().
-  Since the configurations in the current formula are unordered, we have 
-  to check two cases.
 
-  We consider two additional computational tasks:\\
-  computeSubst(Substitution) - that evaluates the components of the given
-  substitution in the current environment,\\
-  hypoInfo(Bool, Map, Map) - that stores the info about the currently tested
-  circular hypothesis; the condiition comoponent of the hypothesis is updated
-  with the substitution given by the programs. 
 */
-
-
-  syntax K ::= computeSubst(Substitution)
-
-  rule computeSubst(X:K replBy E:K)
-       =>
-       X:K replBy E:K ~> computeSubst(emptySubst)
-//       [transition]
-
-  rule computeSubst(X:K replBy E:K ;; S:Substitution)
-       =>
-       X:K replBy E:K ~> computeSubst(S)
-//       [transition]
-
-  rule (X:Int replBy A:Int => .) ~> computeSubst(S:Substitution)
-                                 ~> hypoInfo((F':Bool => F' [ A / X ]), _, _)
-//       [transition]
-
-  rule <k> (X:Int replBy A:Int => .) ~> computeSubst(S:Substitution) ...</k>
-       <k>  computeSubst(S:Substitution) ~> 
-           hypoInfo((F':Bool => F' [ A / X ]), _, _)
-       ...</k>
-//       [transition]
 
   /*@
   First case: there is substitution between the current configuration
@@ -476,51 +540,44 @@ module SEQ
   */
 
   rule [check-hypo] :
-       <goal>
+       (<goal>
          <config> 
-           <k> checkHypo(K1:K, Env1:Map, K2:K, Env2:Map, 
-     	       		               	     <hypo>      
-       					       <hcondition>
-					         F':Bool
-       					       </hcondition> 
-       					       <patt1>        
-         				         <hk1>
-          					   K1':K 
-         					 </hk1> 
-         					 <henv1>
-          					   Env1':Map
-          					 </henv1> 
-       					       </patt1> 
-       					       <patt2>        
-         				         <hk2> 
-           					   K2':K
-						 </hk2> 
-         					 <henv2>
-         					   Env2':Map
-         					 </henv2> 
-       					       </patt2> 
-     					     </hypo>
-                                             Hypos':Bag
+           <k> checkHypo(SE1:K, SE2:K, 
+       		               	     <hypo>     
+       				       <patt1>        
+         			         <hk1>
+          				   SE1':K 
+         				 </hk1> 
+         				 <hout1>
+          				   OUT1':SExp
+          				 </hout1> 
+       				       </patt1> 
+       				       <patt2>        
+        			         <hk2> 
+          				   SE2':K
+					 </hk2> 
+         				 <hout2>
+         				   OUT2':SExp
+         				 </hout2> 
+       				       </patt2> 
+     				     </hypo>
+                                     Hypos':Bag
                       )
-              =>
-             computeSubst(getSubst(K1', K1)) ~> hypoInfo(F', Env1', Env2')
-             ~> checkHypo(K1:K, Env1:Map, K2:K, Env2:Map, Hypos')
            ...</k>
-           <env> _ => Env1 </env>
+           <out> OUT1 </out>
          ...</config> 
          <config> 
-           <k> break => computeSubst(getSubst(K2', K2)) ~> break ...</k>
-           <env> _ => Env2 </env>
+           <k> break ...</k>
+           <out> OUT2 </out>
          ...</config>
-         <condition> F:K </condition>
        ...</goal>
-       <observers> Obs:List </observers> 
-<debug> Bla => Bla ~> K2SMTLib(filter(F)) ~> getSubst(K1', K1) ~> getSubst(K2', K2) </debug>
-       when (eqObs(<env> Env1 </env>, 
-                   <env> Env2 </env>,
-                   <observers> Obs </observers>, F) ==K true)
-       andBool ((isSubst(getSubst(K1', K1)) ==K true)
-                 andBool (isSubst(getSubst(K2', K2)) ==K true))
+       =>
+       .)
+       when (OUT1 ==K OUT2)
+       andBool (isSubst(getSubst(SE1', SE1)) ==K true)
+       andBool (isSubst(getSubst(SE2', SE2)) ==K true)
+       andBool isInstanceOfSExp(OUT1, OUT1') ==K true
+       andBool isInstanceOfSExp(OUT2, OUT2') ==K true
        [transition]
   /*@
   Second case: there is substitution between the current configuration
@@ -529,101 +586,84 @@ module SEQ
   */
 
   rule [check-hypo] :
-       <goal>
-         <config> 
-           <k> checkHypo(K1:K, Env1:Map, K2:K, Env2:Map, 
-     	       		               	     <hypo>      
-       					       <hcondition>
-					         F':Bool
-       					       </hcondition> 
-       					       <patt1>        
-         				         <hk1>
-          					   K1':K 
-         					 </hk1> 
-         					 <henv1>
-          					   Env1':Map
-          					 </henv1> 
-       					       </patt1> 
-       					       <patt2>        
-         				         <hk2> 
-           					   K2':K
-						 </hk2> 
-         					 <henv2>
-         					   Env2':Map
-         					 </henv2> 
-       					       </patt2> 
-     					     </hypo>
-                                             Hypos':Bag
-                      )
-            =>
-             computeSubst(getSubst(K2', K1)) ~> hypoInfo(F', Env2', Env1')
-             ~> checkHypo(K1:K, Env1:Map, K2:K, Env2:Map, Hypos')
-           ...</k>
-           <env> _ => Env1 </env>
-         ...</config> 
-         <config> 
-           <k> break => computeSubst(getSubst(K1', K2)) ~> break ...</k>
-           <env> _ => Env2 </env>
-         ...</config>
-         <condition> F:K </condition>
-       ...</goal>
-       <observers> Obs:List </observers> 
-<debug> Bla => Bla ~> K2SMTLib(filter(F)) ~>getSubst(K1', K2) ~> getSubst(K2', K1) </debug>
-       when (eqObs(<env> Env1 </env>, 
-                   <env> Env2 </env>,
-                   <observers> Obs </observers>, F) ==K true)
-       andBool ((isSubst(getSubst(K1', K2)) ==K true)
-                orBool (isSubst(getSubst(K2', K1)) ==K true))
-       [transition]
-
-
-  /*@ The case when the circularity rule can be applied. The goal is removed.
-  */
-
-  rule [circularity] :
        (<goal>
          <config> 
-           <k> computeSubst(emptySubst) ~>
-               hypoInfo(F':Bool, Env1':Map, Env2':Map)
+           <k> checkHypo(SE1:K, SE2:K, 
+       		               	     <hypo>     
+       				       <patt1>        
+         			         <hk1>
+          				   SE1':K 
+         				 </hk1> 
+         				 <hout1>
+          				   OUT1':SExp
+          				 </hout1> 
+       				       </patt1> 
+       				       <patt2>        
+        			         <hk2> 
+          				   SE2':K
+					 </hk2> 
+         				 <hout2>
+         				   OUT2':SExp
+         				 </hout2> 
+       				       </patt2> 
+     				     </hypo>
+                                     Hypos':Bag
+                      )
            ...</k>
-           <env> Env1:Map </env>
+           <out> OUT1 </out>
          ...</config> 
          <config> 
-           <k> computeSubst(emptySubst) ...</k>
-           <env> Env2:Map </env>
+           <k> break ...</k>
+           <out> OUT2 </out>
          ...</config>
-         <condition> F:Bool </condition>
-         C:Bag
-       </goal>
+       ...</goal>
        =>
        .)
-<debug> Bla:K =>  Bla ~> "success" ~> substMap2Bool(getSubstMap(Env1', Env1)) ~> substMap2Bool(getSubstMap(Env2', Env2)) ~> K2SMTLib(filter(F)) ~> K2SMTLib(filter(F')) </debug>
-       when (impliesML(Env1, Env2, F, Env1', Env2', F')  ==K true)
+       when (OUT1 ==K OUT2)
+       andBool (isSubst(getSubst(SE2', SE1)) ==K true)
+       andBool (isSubst(getSubst(SE1', SE2)) ==K true)
+       andBool isInstanceOfSExp(OUT1, OUT2') ==K true
+       andBool isInstanceOfSExp(OUT2, OUT1') ==K true
        [transition]
 
-  /*@ The case when the circularity rule cannot be applied. The next hypothesis
-      is checked.
-  */
-
-  rule [circularity-fail] :
+  rule [check-hypo] :
        <goal>
          <config> 
-           <k>
-              computeSubst(emptySubst) ~> hypoInfo(F':Bool, Env1':Map, Env2':Map)
-               =>
-              .
+           <k> checkHypo(SE1:K, SE2:K, 
+       		               	    (<hypo>     
+       				       <patt1>        
+         			         <hk1>
+          				   SE1':K 
+         				 </hk1> 
+         				 <hout1>
+          				   OUT1':SExp
+          				 </hout1> 
+       				       </patt1> 
+       				       <patt2>        
+        			         <hk2> 
+          				   SE2':K
+					 </hk2> 
+         				 <hout2>
+         				   OUT2':SExp
+         				 </hout2> 
+       				       </patt2> 
+     				     </hypo>
+                                     =>
+                                     .)
+                                    Hypos':Bag
+                      )
            ...</k>
-           <env> Env1:Map </env>
+           <out> OUT1 </out>
          ...</config> 
          <config> 
-           <k> computeSubst(emptySubst) => . ...</k>
-           <env> Env2:Map </env>
+           <k> break ...</k>
+           <out> OUT2 </out>
          ...</config>
-         <condition> F:Bool </condition>
-         C:Bag
-       </goal>
-<debug> Bla:K =>  Bla ~> "fail" ~> substMap2Bool(getSubstMap(Env1', Env1)) ~> substMap2Bool(getSubstMap(Env2', Env2)) ~> K2SMTLib(filter(F)) ~> K2SMTLib(filter(F')) </debug>
-       when (impliesML(Env1, Env2, F, Env1', Env2', F')  =/=K true)
+       ...</goal>
+       when (isSubst(getSubst(SE1', SE1)) =/=K true)
+       orBool (isSubst(getSubst(SE2', SE2)) =/=K true)
+       orBool isInstanceOfSExp(OUT1, OUT1') =/=K true
+       orBool isInstanceOfSExp(OUT2, OUT2') =/=K true
        [transition]
 
 
@@ -632,48 +672,23 @@ module SEQ
   */
   rule [store-hypo] :
        <config> 
-         <k> storeHypo(K1:K) => getFresh(Env1) ~> restore(K1, Env1) ...</k>
-         <env> Env1:Map </env>
-       </config> 
+         <k> storeHypo(K1:K) => restore(K1) ...</k> // just for conformance
+       ...</config> 
 //       [transition]
 
 
-  //@ Generates fresh symbolic values for the stored hypothesis
-  syntax K ::= "getFresh" "(" Map ")"
-
-  rule [getFresh] :
-       <config>
-         <k> getFresh(((X:Id |-> _:Int) => .) _ ) ...</k>
-         <env>... X |-> (V:Int => VS) ...</env>
-       </config>
-       <condition> F:Bool => (F andBool (VS ==Int V)) </condition>
-       when fresh(VS:Int)
-
-  rule [getFresh] :
-       getFresh((X:K |-> V:K => .) _)
-       when (isId(X) =/=K true) orBool (isInt(V) =/=K true)
-
-  rule [getFresh] :
-       getFresh((#symbMap(_) => .) _)
-
-  rule [getFresh] :
-       getFresh((followup(_,_,_) => .) _)
-
-  rule getFresh(.Map) => .K
-
-  syntax K ::= "restore" "(" K "," Map ")"
+  syntax K ::= "restore" "(" K ")"
 
   rule [restore] :
        <goal>
          <config> 
-           <k> restore(K1:K, Env1':Map) => . ...</k>
-           <env> Env1:Map => Env1' </env>
-         </config> 
+           <k> restore(K1:K) => . ...</k>
+             <out> OUT1 </out>
+         ...</config> 
          <config> 
-           <k> restore(K2:K, Env2':Map) => . ...</k>
-           <env> Env2:Map => Env2' </env>
-         </config>
-         <condition> F:Bool </condition>
+           <k> restore(K2:K) => . ...</k>
+             <out> OUT2 </out>
+         ...</config>
        ...</goal>
        <hypos>
          Hypos:Bag
@@ -682,13 +697,12 @@ module SEQ
          <hypo>
            <patt1> 
              <hk1> K1 </hk1>
-             <henv1> Env1 </henv1>
+             <hout1> OUT1 </hout1>
            </patt1> 
            <patt2> 
              <hk2> K2 </hk2>
-             <henv2> Env2 </henv2>
+             <hout2> OUT2 </hout2>
            </patt2>
-           <hcondition> F </hcondition>
          </hypo>
        </hypos>
 //      [transition]
@@ -702,68 +716,17 @@ module SEQ
        <goal>
          <config> 
            <k> lbldStmt(L1:Id, K1:K) => . ...</k>
-           <env> Env1:Map </env>
-         </config> 
+           <out> OUT1:SExp </out>
+         ...</config> 
          <config> 
            <k> lbldStmt(L2:Id, K2:K) => . ...</k>
-           <env> Env2:Map </env>
-         </config>
-         <condition> F:K </condition>
+           <out> OUT2:SExp </out>
+         ...</config>
        ...</goal>
-       <observers> Obs:List </observers>
        when
        (L1 =/=K L2) orBool
-       (eqObs(<env> Env1 </env>, 
-             <env> Env2 </env>, 
-             <observers> Obs </observers>, F) =/=K true)
+       (OUT1 =/=K OUT2)
 //       [transition]
-
-/*@
-  The following rules are commented  because of the state explosion problem. 
-*/ 
-
-
-/*
-  rule [store-hypo-fail]:
-       <goal>
-         <config> 
-           <k> lbldStmt(L1:Id, K1:K) => . ...</k>
-           <env> Env1:Map </env>
-         </config> 
-         <config> 
-           <k> lbldStmt(L2:Id, K2:K) ...</k>
-           <env> Env2:Map </env>
-         </config>
-         <condition> F:K </condition>
-       ...</goal>
-       <observers> Obs:List </observers>
-       when
-       (L1 =/=K L2) orBool
-       (eqObs(<env> Env1 </env> 
-             <env> Env2 </env> 
-             <observers> Obs </observers>, F) =/=K true)
-       [transition]
-
-  rule [store-hypo-fail]:
-       <goal>
-         <config> 
-           <k> lbldStmt(L1:Id, K1:K) ...</k>
-           <env> Env1:Map </env>
-         </config> 
-         <config> 
-           <k> lbldStmt(L2:Id, K2:K) => . ...</k>
-           <env> Env2:Map </env>
-         </config>
-         <condition> F:K </condition>
-       ...</goal>
-       <observers> Obs:List </observers>
-       when
-       (L1 =/=K L2) orBool
-       (eqObs(<env> Env1 </env> 
-             <env> Env2 </env> 
-             <observers> Obs </observers>, F) =/=K true)
-       [transition]
-*/
 
 /*@
   The following rule creates the initial configuration from the equivalence
@@ -773,146 +736,20 @@ module SEQ
   rule [initial] :
        <config>
          <k> 
-           <k> P1:Stmt </k>
-           <env> Inits1:InitVals </env>
+           <k> SE1:SExp </k>
+           <sspecs> SSs1:SSpecs </sspecs>
            ~
-           <k> P2:Stmt </k>
-           <env> Inits2:InitVals </env>
-           if F:BExp
-           using observers: Obs:Ids; 
+           <k> SE2:SExp </k>
+           <sspecs> SSs2:SSpecs </sspecs> ;
            =>
-           setInitVal(Inits1) ~> setInitValObs(Obs) ~> P1
+           SSs1 SE1
          </k>
        ...</config>
-       <condition> _ => injectForm(F) </condition>
       (. =>
        <config>
-         <k> 
-           setInitVal(Inits2) ~> setInitValObs(Obs) ~> P2
-         </k>
-         <env> . </env>
+         <k> SSs2 SE2 </k>
+         <sspecs> .Map </sspecs>
+         <out> [] </out>
        </config>)
-       <observers> . => Ids2List(Obs) </observers>
-
-/*@
-  The auxiliary construct \texttt{initVal()} is used for initializing the 
-  observer variables with the same values in the two initial program
-  configurations. 
-*/
-
-
-  syntax K ::= "setInitVal" "(" InitVals ")"
-
-  rule setInitVal(.InitVals) => .
-       [structural]
-
-  rule <k> setInitVal((X:Id -> V:Int, XVs:InitVals) => XVs) ...</k>
-       <env>... . => X |-> V ...</env>
-       [structural]
-
-  rule <k> setInitVal((SymMap(M:Id), XVs:InitVals) => XVs) ...</k>
-       <env>... . => #symbMap(M) ...</env>
-       [structural]
-
-  syntax K ::= "setInitValObs" "(" Ids ")"
-
-  rule <k> setInitValObs(.Ids) => . ...</k>
-       <k> setInitValObs(.Ids) => . ...</k>
-       [structural]
-
-  rule <k> setInitValObs(allObs) => . ...</k>
-       <k> setInitValObs(allObs) => . ...</k>
-       [structural]
-
-  /*@ The values for observers must be different, in order to correctly 
-      define substitution.
-  */
-
-  rule <config>
-         <k> setInitValObs((X:Id, Xs:Ids) => Xs) ...</k>
-         <env> Env:Map (. => X |-> IS1) </env>
-       </config> 
-       <config> 
-         <k> setInitValObs((X:Id, Xs:Ids) => Xs) ...</k>
-         <env>... . => X |-> IS2 ...</env>
-       </config> 
-       <condition> B:K => B andBool (IS1 ==Int IS2) </condition>
-       when (fresh(IS1:Int) andBool fresh(IS2:Int)) andBool notBool(X in keys(Env))
-       [structural]
-
-  rule <config>
-         <k> setInitValObs((X:Id, Xs:Ids) => Xs) ...</k>
-         <env> Env:Map </env>
-       </config> 
-       when (X in keys(Env))
-       [structural]
-
-/*@ 
-  The next function translates the initial condition into internal
-  form.\\
-  TBD: refactor it!!!!
-*/
-
-
-  syntax Bool ::= "injectForm" "(" BExp ")" [function]
-
-  rule injectForm(true) => true
-
-  rule injectForm(A1:AExp == A2:AExp)
-       =>
-       injectAExp(A1)  ==Int injectAExp(A2)
-
-
-  rule injectForm(B1:BExp and B2:BExp)
-       =>
-       injectForm(B1) andBool injectForm(B2)
-
-
-  rule injectForm(not B:BExp)
-       =>
-       notBool injectForm(B)
-
-
-  syntax Int ::= "injectAExp" "(" AExp ")" [function]
-  rule injectAExp(I:Int) => I
-  rule injectAExp(A1:AExp + A2:AExp)
-       =>
-       injectAExp(A1)  +Int injectAExp(A2)
-
-
-  rule injectAExp(A1:AExp * A2:AExp)
-       =>
-       injectAExp(A1)  *Int injectAExp(A2)
-
-
-  rule injectAExp(A1:AExp / A2:AExp)
-       =>
-       injectAExp(A1)  /Int injectAExp(A2)
-
-
-  rule injectForm(X:Id isNotModifiedBy S:Stmt ) 
-       =>
-       X isNotModifiedBy S
-
-  rule injectForm(X:AExp isNotModifiedBy S:Stmt ) 
-       =>
-       X isNotModifiedBy S
-
-  rule injectForm(X:BExp isNotModifiedBy S:Stmt ) 
-       =>
-       X isNotModifiedBy S
-
-
-/*@
-  The following is a helper function that transform a list of
-  identifiers into a builtin list; it is used for storing the observer
-  variables into the cell \texttt{observers}.
-*/ 
-  syntax List ::= "Ids2List" "(" Ids ")" [function]
-  rule Ids2List(.Ids) => .List
-  rule Ids2List(X:Id, Xs:Ids) => ListItem(X) Ids2List(Xs)
-
-
- 
 
 endmodule
