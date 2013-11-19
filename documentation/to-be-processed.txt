@@ -162,9 +162,9 @@ command line option of the same name.
 A <test> element requires a K definition to be tested. For example, the
 following <test> element just kompiles "lang.k".
 
-<test
-  definition="lang.k"
-/>
+  <test
+    definition="lang.k"
+  />
 
 Given the above, ktest does nothing but kompilation, but might be useful when
 you want to only check if your K definition is valid to kompile.
@@ -178,21 +178,21 @@ For example, the following <test> element kompiles "lang.k" and runs all
 programs under the directories "P1" and "P2", whose extension is either "E1"
 or "E2".
 
-<test
-  definition="lang.k"
-  programs="P1 P2"
-  extension="E1 E2"
-/>
+  <test
+    definition="lang.k"
+    programs="P1 P2"
+    extension="E1 E2"
+  />
 
 In other words, given the above <test> element, ktest has the same behavior
 with the following bash shell script:
 
-kompile lang.k
-for i in `find P1 -name '*.E1' -o -name '*.E2'`
-         `find P2 -name '*.E1' -o -name '*.E2'`
-do
-  krun $i
-done
+  kompile lang.k
+  for i in `find P1 -name '*.E1' -o -name '*.E2'`
+           `find P2 -name '*.E1' -o -name '*.E2'`
+  do
+    krun $i
+  done
 
 Note that if there exist multiple files with the same name under the "P1" and
 "P2" directories, the one in the "P2" is only executed.
@@ -228,29 +228,29 @@ multiple <test> elements that have the same K definition but have different
 
 To sum, for example, given the following <test> element:
 
-<test
-  definition="lang.k"
-  directory="D"
-  programs="P1 P2"
-  extension="E1 E2"
-  exclude="X1 X2"
-  results="R1 R2"
-  />
-  <kompile-option name="--O1" value="V1" />
-  <kompile-option name="--O2" value="V2" />
-  <all-programs>
-    <krun-option name="--O3" value="V3" />
-    <krun-option name="--O4" value="V4" />
-  </all-programs>
-  <program name="N1">
-    <krun-option name="--O5" value="V5" />
-    <krun-option name="--O6" value="V6" />
-  </program>
-  <program name="N2">
-    <krun-option name="--O7" value="V7" />
-    <krun-option name="--O8" value="V8" />
-  </program>
-</test>
+  <test
+    definition="lang.k"
+    directory="D"
+    programs="P1 P2"
+    extension="E1 E2"
+    exclude="X1 X2"
+    results="R1 R2"
+    />
+    <kompile-option name="--O1" value="V1" />
+    <kompile-option name="--O2" value="V2" />
+    <all-programs>
+      <krun-option name="--O3" value="V3" />
+      <krun-option name="--O4" value="V4" />
+    </all-programs>
+    <program name="N1">
+      <krun-option name="--O5" value="V5" />
+      <krun-option name="--O6" value="V6" />
+    </program>
+    <program name="N2">
+      <krun-option name="--O7" value="V7" />
+      <krun-option name="--O8" value="V8" />
+    </program>
+  </test>
 
 ktest works as follows:
 
@@ -275,61 +275,61 @@ A configuration file can have multiple <include> elements as well as <test>
 elements. By an <include> element, you can include another configuration file.
 For example, you can include "another_config.xml" file as follows:
 
-<include
-  file="another_config.xml"
-/>
+  <include
+    file="another_config.xml"
+  />
 
 Basically, an <include> element inherits all attributes and elements from the
 included configuration file, which can be, of course, overwritten by
 explicitly specifying them, except "definition", "directory", "programs", and
 "results" attributes. For example, let a configuration file be:
 
-<include
-  file="another_config.xml"
-  exclude="new_exclude"
-/>
+  <include
+    file="another_config.xml"
+    exclude="new_exclude"
+  />
 
 and the included configuration file "another_config.xml" be:
 
-<test
-  definition="D"
-  programs="P"
-  exclude="X"
-/>
+  <test
+    definition="D"
+    programs="P"
+    exclude="X"
+  />
 
 then the included <test> element is virtually same with the following:
 
-<test
-  definition="D"
-  programs="P"
-  exclude="new_exclude"
-/>
+  <test
+    definition="D"
+    programs="P"
+    exclude="new_exclude"
+  />
 
 Although the "programs" and "results" attributes cannot be overwritten, they
 can be incremented by using "more-programs" and "more-results" attributes.
 For example, let a configuration file be:
 
-<include
-  file="config.xml"
-  more-programs="P"
-  more-results="R"
-/>
+  <include
+    file="config.xml"
+    more-programs="P"
+    more-results="R"
+  />
 
 and the included configuration file "config.xml" be:
 
-<test
-  definition="lang.k"
-  programs="P1 P2"
-  results="R1 R2"
-/>
+  <test
+    definition="lang.k"
+    programs="P1 P2"
+    results="R1 R2"
+  />
 
 then the included <test> element is virtually same with the following:
 
-<test
-  definition="lang.k"
-  programs="P1 P2 P"
-  results="R1 R2 R"
-/>
+  <test
+    definition="lang.k"
+    programs="P1 P2 P"
+    results="R1 R2 R"
+  />
 
 Note that "definition" attribute cannot be overwritten at all.
 
