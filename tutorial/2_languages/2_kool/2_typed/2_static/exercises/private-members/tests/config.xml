@@ -1,0 +1,7 @@
+<tests>
+
+  <include file="../../../tests/config.xml"
+           more-programs="../../../../1_dynamic/exercises/private-members/programs_and_results/"
+           more-results="." />
+
+</tests>

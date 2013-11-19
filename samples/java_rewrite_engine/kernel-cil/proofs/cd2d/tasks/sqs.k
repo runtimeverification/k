@@ -8,11 +8,12 @@
 module SQS-RULE
   rule <threads>
            <thread>...
-	     <k> return (x*x + y * y => V:Float); </k>
-	     <env> x |-> Lx:Int y |-> Ly:Int </env>
+	     <k> sqs(X:Float, Y:Float) => V:Float </k>
+             <env> GENV </env>
 	   ...</thread>
        </threads>
-       <store> Lx |-> Vx:Float Ly |-> Vy:Float </store>
-    requires DISTANCE(Vx) andBool DISTANCE(Vy)
-     ensures absFloat(V -Float sqR(Vx, Vy)) <=Float E_sqs
+       <store>... STORE ...</store>
+       <genv> GENV </genv>
+    requires DISTANCE(X) andBool DISTANCE(Y)
+     ensures absFloat(V -Float sqR(X, Y)) <=Float E_sqs
 endmodule

@@ -1,16 +1,8 @@
 <tests>
 
-  <test
-      definition="fun-untyped.k"
-      programs="../../../../../programs"
-      extension="fun"
-      results="../../../tests" >
-      <kompile-option name="--transition" value="lookup assignment io"/>
-      <all-programs>
-        <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
-        <krun-option name="--parens" value="smart"/>
-      </all-programs>
-  </test>
+  <include file="../../../tests/config.xml" >
+           <kompile-option name="--transition" value="lookup assignment io"/>
+  </include>
 
   <test
       definition="fun-untyped.k"
@@ -21,7 +13,6 @@
       <all-programs>
         <krun-option name="--search" />
         <krun-option name="--pattern" value="&lt;out&gt; ListItem(#buffer(S:String)) &lt;/out&gt;" />
-        <krun-option name="--parens" value="smart"/>
       </all-programs>
   </test>
 

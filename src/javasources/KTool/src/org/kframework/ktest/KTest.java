@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -616,6 +618,7 @@ public class KTest {
             if (node.getNodeType() == Node.ELEMENT_NODE) {
                 Element elem = (Element) node;
                 if (elem.getTagName().equals("test")) {
+                    resolveEnvVarsElem(elem);
                     Element test = (Element) destDoc.importNode(elem,true);
                     // definition
                     if (test.hasAttribute(Configuration.LANGUAGE)) {
@@ -646,6 +649,7 @@ public class KTest {
                     // finish
                     destDoc.getDocumentElement().appendChild(test);
                 } else if (elem.getTagName().equals(Configuration.INCLUDE)) {
+                    resolveEnvVarsElem(elem);
                     // file
                     String configFileDir = dirname(configFile);
                     String newConfigFile = null;
@@ -783,6 +787,63 @@ public class KTest {
                 String msg = "The name attribute of a program element has to be a file-name not a file-path: " + program.getAttribute(Configuration.NAME);
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", "System file."));
             }
+        }
+    }
+
+    private static void resolveEnvVarsElem(Element test) {
+        resolveEnvVarsAtt(test, Configuration.LANGUAGE);
+        resolveEnvVarsAtt(test, Configuration.DIRECTORY);
+        resolveEnvVarsAtt(test, Configuration.PROGRAMS_DIR);
+        resolveEnvVarsAtt(test, Configuration.EXTENSIONS2);
+        resolveEnvVarsAtt(test, Configuration.EXCLUDE);
+        resolveEnvVarsAtt(test, Configuration.RESULTS);
+        resolveEnvVarsAtt(test, Configuration.SKIP_OPTION);
+        resolveEnvVarsAtt(test, Configuration.CONFIG_FILE);
+        resolveEnvVarsAtt(test, Configuration.MORE_PROGRAMS);
+        resolveEnvVarsAtt(test, Configuration.MORE_RESULTS);
+        // kompile-option
+        resolveEnvVarsOpt(test.getElementsByTagName(Configuration.KOMPILE_OPTION));
+        // all-programs
+        NodeList allPrograms = test.getElementsByTagName(Configuration.ALL_PROGRAMS);
+        for (int i = 0; i < allPrograms.getLength(); i++) {
+            Element allProgram = (Element) allPrograms.item(i);
+            resolveEnvVarsOpt(allProgram.getElementsByTagName(Configuration.KRUN_OPTION));
+        }
+        // program
+        NodeList programs = test.getElementsByTagName(Configuration.ALL_PROGRAMS);
+        for (int i = 0; i < programs.getLength(); i++) {
+            Element program = (Element) programs.item(i);
+            resolveEnvVarsAtt(program, Configuration.NAME);
+            resolveEnvVarsOpt(program.getElementsByTagName(Configuration.KRUN_OPTION));
+        }
+    }
+    private static void resolveEnvVarsOpt(NodeList nl) {
+        for (int i = 0; i < nl.getLength(); i++) {
+            Element elem = (Element) nl.item(i);
+            resolveEnvVarsAtt(elem, Configuration.NAME);
+            resolveEnvVarsAtt(elem, Configuration.VALUE);
+            resolveEnvVarsAtt(elem, Configuration.PARSER_HOME);
+        }
+    }
+    private static void resolveEnvVarsAtt(Element test, String name) {
+        if (test.hasAttribute(name)) {
+            test.setAttribute(name, resolveEnvVars(test.getAttribute(name)));
+        }
+    }
+    private static String resolveEnvVars(String s) {
+        Matcher m = Pattern.compile("\\$\\{(.*?)\\}").matcher(s);
+        if (m.find()) {
+            String var = m.group(1);
+            String val = System.getenv(var);
+            if (val != null) {
+                return resolveEnvVars(m.replaceFirst(val));
+            } else {
+                String msg = "The variable is not defined in the system environment: " + var;
+                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, Configuration.wrap(msg), "command line", "System file."));
+                return null; // cannot reach here
+            }
+        } else {
+            return s;
         }
     }
 }

@@ -1,11 +1,14 @@
 package org.kframework.backend.java.builtins;
 
 
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
+import com.google.common.collect.ImmutableList;
+import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.util.GappaPrinter;
 import org.kframework.backend.java.util.GappaServer;
+import org.kframework.kil.loader.Context;
 import org.kframework.krun.K;
+
+import java.util.Collections;
 
 /**
  * Table of {@code public static} methods on builtin floats.
@@ -14,11 +17,35 @@ import org.kframework.krun.K;
  */
 public class BuiltinFloatOperations {
 
-    /*
-    public static IntToken add(IntToken term1, IntToken term2) {
-        return IntToken.of(term1.bigIntegerValue().add(term2.bigIntegerValue()));
+    public static Term add(Term term1, Term term2, TermContext context) {
+        if (term1.equals(UninterpretedToken.of("#Float","0.0")))
+            return term2;
+        if (term2.equals(UninterpretedToken.of("#Float","0.0")))
+            return term1;
+        return null;
     }
 
+     public static Term sub(Term term1, Term term2, TermContext context) {
+        if (term1.equals(UninterpretedToken.of("#Float","0.0"))) {
+            Context context1 = context.definition().context();
+            return new KItem(
+                    KLabelConstant.of("'--Float_",context1),
+                    new KList(ImmutableList.<Term>of(term2),null),
+                    context1).evaluate(context);
+        }
+        if (term2.equals(UninterpretedToken.of("#Float","0.0")))
+            return term1;
+        return null;
+    }
+
+     public static Term mul(Term term1, Term term2, TermContext context) {
+        if (term1.equals(UninterpretedToken.of("#Float","0.0")) ||
+                term2.equals(UninterpretedToken.of("#Float","0.0")))
+            return UninterpretedToken.of("#Float","0.0");
+        return null;
+    }
+
+    /*
     public static IntToken sub(IntToken term1, IntToken term2) {
         return IntToken.of(term1.bigIntegerValue().subtract(term2.bigIntegerValue()));
     }
@@ -80,12 +107,20 @@ public class BuiltinFloatOperations {
     }
 */
 
-    public static UninterpretedToken unaryMinus(Term term, TermContext context) {
+    public static Term unaryMinus(Term term, TermContext context) {
+        if (term instanceof KItem) {
+            KLabel kLabel = ((KItem) term).kLabel();
+            if (kLabel instanceof KLabelConstant) {
+                if (((KLabelConstant) kLabel).label().equals("'--Float_")) {
+                    return ((KItem) term).kList().get(0);
+                }
+            }
+        }
         if (!(term instanceof UninterpretedToken))
             return null;
         UninterpretedToken token = ((UninterpretedToken) term);
         String sort = token.sort();
-        if (!sort.equals("Float")) return null;
+        if (!sort.equals("#Float")) return null;
         String value = token.value();
         if (value.startsWith("-")) value = value.substring(1);
         else value = "-" + value;

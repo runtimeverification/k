@@ -148,6 +148,142 @@ instead of config1.xml).  So the above command would be equivalent to
 
   ktest path1/path2/config2.xml --directory path --programs P/path1/P2
 
+
+KTEST: PATH RESOLUTION:
+-----------------------
+
+Every path of a configuration file is relative. Three different kinds of paths
+exist: definition, programs, and results. A root for the relative directories
+can be specified using command line options. For example, let command line
+arguments of ktest be:
+
+  $ ktest C/config.xml --directory D --programs P --results R
+
+and 'C/config.xml' be:
+
+  <test
+    definition="D1/lang.k"
+    programs="P1 P2"
+    results="R1 R2"
+  />
+
+then the paths are resolved as follows:
+
+  <test
+    definition="D/D1/lang.k"
+    programs="P/P1 P/P2"
+    results="R/R1 R/R2"
+  />
+
+Note that the option --directory is optional, and its default value is the
+current directory. Also, the options --programs and --results are optional,
+and their default values are the directory where the given configuration file
+resides. For example, the following command
+
+  ktest C/config.xml
+
+is virtually same with the following:
+
+  ktest C/config.xml --directory . --programs C --results C
+
+
+The root can be also specified using <include>'s attributes. The same rule is
+applied here. For example, let a configuration file 'C/config.xml' have the
+following <include> element:
+
+  C/config.xml:
+
+  <include
+    file=C1/config1.xml
+    directory=D
+    programs=P
+    results=R
+  />
+
+and the included configuration file 'C/C1/config1.xml' be:
+
+  C/C1/config1.xml:
+
+  <test
+    definition="D1/lang.k"
+    programs="P1 P2"
+    results="R1 R2"
+  />
+
+then the <include> element is resolved as follows:
+
+  C/config.xml:
+
+  <test
+    definition="D/D1/lang.k"
+    programs="P/P1 P/P2"
+    results="R/R1 R/R2"
+  />
+
+Note that the attribute 'definition' is optional, and its default value is the
+current directory. Also the attributes 'programs' and 'results' are optional,
+and their default values are the directory where the included configuration
+file resides. For example, the following <include> element
+
+  <include
+    file=C1/config1.xml
+  />
+
+is vitally same with the following:
+
+  <include
+    file=C1/config1.xml
+    directory=.
+    programs=C1
+    results=C1
+  />
+
+
+To sum, the roots given by command line options and <include>'s attributes are
+accumulated to resolve the relative paths. For example, let command line
+argument of ktest be:
+
+  $ ktest C/config.xml --directory D --programs P --results R
+
+and configuration file 'C/config.xml' be:
+
+  C/config.xml:
+
+  <include
+    file=C1/config1.xml
+    directory=D0
+    programs=P0
+    results=R0
+  />
+
+and the included configuration file 'C/C1/config1.xml' be:
+
+  C/C1/config1.xml:
+
+  <test
+    definition="D1/lang.k"
+    programs="P1 P2"
+    results="R1 R2"
+  />
+
+then the paths are eventually resolved as follows:
+
+  <test
+    definition="D/D0/D1/lang.k"
+    programs="P/P0/P1 P/P0/P2"
+    results="R/R0/R1 R/R0/R2"
+  />
+
+Note that when they are not specified, the default roots are:
+
+  D  = .
+  P  = C
+  R  = C
+  D0 = .
+  P0 = C1
+  R0 = C1
+
+
 FILE READ/WRITE:
 ----------------
 

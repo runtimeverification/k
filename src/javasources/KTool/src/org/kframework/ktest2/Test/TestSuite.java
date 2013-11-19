@@ -35,14 +35,14 @@ public class TestSuite {
      * List of ktest steps to skip. This array should be sorted because it'll be used for binary
      * search (Java doesn't have linear search algorithm in stdlib)
      */
-    private final KTestStep[] skips;
+    private final Set<KTestStep> skips;
 
     /**
      * Timeout for a process.
      */
     private final int timeout;
 
-    public TestSuite(List<TestCase> tests, KTestStep[] skips, boolean verbose,
+    public TestSuite(List<TestCase> tests, Set<KTestStep> skips, boolean verbose,
                      ColorSetting colorSetting, int timeout) {
         this.tests = tests;
         this.skips = skips;
@@ -51,7 +51,7 @@ public class TestSuite {
         this.timeout = timeout;
     }
 
-    public TestSuite(TestCase singleTest, KTestStep[] skips, boolean verbose,
+    public TestSuite(TestCase singleTest, Set<KTestStep> skips, boolean verbose,
                      ColorSetting colorSetting, int timeout) {
         tests = new LinkedList<>();
         tests.add(singleTest);
@@ -70,14 +70,27 @@ public class TestSuite {
         boolean ret = true;
         List<TestCase> successfulTests = tests;
 
-        if (Arrays.binarySearch(skips, KTestStep.KOMPILE) < 0) {
-            successfulTests = runKompileSteps(tests);
+        if (!skips.contains(KTestStep.KOMPILE)) {
+            successfulTests = runKompileSteps(filterSkips(tests, KTestStep.KOMPILE));
             ret &= successfulTests.size() == tests.size();
         }
-        if (Arrays.binarySearch(skips, KTestStep.PDF) < 0)
-            ret &= runPDFSteps(successfulTests);
-        if (Arrays.binarySearch(skips, KTestStep.KRUN) < 0)
-            ret &= runKRunSteps(successfulTests);
+        if (!skips.contains(KTestStep.PDF))
+            ret &= runPDFSteps(filterSkips(successfulTests, KTestStep.PDF));
+        if (!skips.contains(KTestStep.KRUN))
+            ret &= runKRunSteps(filterSkips(successfulTests, KTestStep.KRUN));
+
+        String colorCode = ColorUtil.RgbToAnsi(ret ? Color.green : Color.red, colorSetting);
+        String msg = ret ? "SUCCESS" : "FAIL (see details above)";
+        System.out.format("%n%s%s%s%n", colorCode, msg, ColorUtil.ANSI_NORMAL);
+
+        return ret;
+    }
+
+    private List<TestCase> filterSkips(List<TestCase> tests, KTestStep step) {
+        List<TestCase> ret = new LinkedList<>();
+        for (TestCase test : tests)
+            if (!test.skip(step))
+                ret.add(test);
         return ret;
     }
 

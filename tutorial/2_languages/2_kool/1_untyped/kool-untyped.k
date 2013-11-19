@@ -819,7 +819,7 @@ invocations see the entire object, as needed for dynamic method dispatch. */
   rule <k> X:Id => this . X ...</k> <env> Env:Map </env>
     when notBool(X in keys(Env))  [structural]
 
-  context HOLE . _ when (HOLE =/=K super)
+  context HOLE._::Id when (HOLE =/=K super)
 
   rule objectClosure(<crntClass> Class:Id </crntClass>
                      <envStack>... (Class,EnvC) EStack </envStack>)

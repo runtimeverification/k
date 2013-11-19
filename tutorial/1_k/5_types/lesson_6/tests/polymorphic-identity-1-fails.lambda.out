@@ -1,0 +1,25 @@
+Search results:
+
+Solution 1:
+V:K -->
+#symType(1)
+
+Solution 2:
+V:K -->
+#symType(10) = #symType(7)
+
+Solution 3:
+V:K -->
+#symType(12) = bool
+
+Solution 4:
+V:K -->
+#symType(5) = #symType(6)
+
+Solution 5:
+V:K -->
+#symType(7) = #symType(4)
+
+Solution 6:
+V:K -->
+#symType(8) = #symType(7)

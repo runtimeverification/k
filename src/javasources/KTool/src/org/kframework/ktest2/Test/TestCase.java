@@ -2,8 +2,11 @@ package org.kframework.ktest2.Test;
 
 
 import org.apache.commons.io.FilenameUtils;
+import org.kframework.ktest2.Annotated;
 import org.kframework.ktest2.CmdArgs.CmdArg;
 import org.kframework.ktest2.Config.InvalidConfigError;
+import org.kframework.ktest2.Config.LocationData;
+import org.kframework.ktest2.KTestStep;
 import org.kframework.ktest2.PgmArg;
 
 import java.io.File;
@@ -14,12 +17,12 @@ public class TestCase {
     /**
      * Absolute path of K definition file.
      */
-    private final String definition;
+    private final Annotated<String, LocationData> definition;
 
     /**
      * Absolute paths of program files directories.
      */
-    private final Set<String> programs;
+    private final Set<Annotated<String, LocationData>> programs;
 
     /**
      * Valid extensions for programs. (without dot)
@@ -34,7 +37,7 @@ public class TestCase {
     /**
      * Absolute path of result files directories.
      */
-    private final Set<String> results;
+    private final Set<Annotated<String, LocationData>> results;
 
     /**
      * List of command line arguments to pass to kompile.
@@ -51,10 +54,20 @@ public class TestCase {
      */
     private final Map<String, List<PgmArg>> pgmSpecificKRunOpts;
 
-    public TestCase(String definition, String[] programs, String[] extensions,
-                    String[] excludes, String[] results, List<PgmArg> kompileOpts,
-                    List<PgmArg> krunOpts, Map<String, List<PgmArg>> pgmSpecificKRunOpts)
-            throws InvalidConfigError {
+    /**
+     * Which tests to skip for this particular test case.
+     */
+    private final Set<KTestStep> skips;
+
+    public TestCase(Annotated<String, LocationData> definition,
+                    List<Annotated<String, LocationData>> programs,
+                    String[] extensions,
+                    String[] excludes,
+                    List<Annotated<String, LocationData>> results,
+                    List<PgmArg> kompileOpts,
+                    List<PgmArg> krunOpts,
+                    Map<String, List<PgmArg>> pgmSpecificKRunOpts,
+                    Set<KTestStep> skips) throws InvalidConfigError {
         this.definition = definition;
         this.programs = toSet(programs);
         this.extensions = toSet(extensions);
@@ -63,24 +76,35 @@ public class TestCase {
         this.kompileOpts = kompileOpts;
         this.krunOpts = krunOpts;
         this.pgmSpecificKRunOpts = pgmSpecificKRunOpts;
+        this.skips = skips;
         this.validateTestCase();
     }
 
     public static TestCase makeTestCaseFromK(CmdArg cmdArgs) throws InvalidConfigError {
-        String[] programs = new String[]{cmdArgs.programs};
-        String[] results = new String[]{cmdArgs.results};
+        Annotated<String, LocationData> targetFile =
+                new Annotated<>(cmdArgs.targetFile, new LocationData());
+
+        List<Annotated<String, LocationData>> programs = new LinkedList<>();
+        programs.add(new Annotated<>(cmdArgs.results, new LocationData()));
+
+        List<Annotated<String,LocationData>> results = new LinkedList<>();
+        results.add(new Annotated<>(cmdArgs.results, new LocationData()));
+
         List<PgmArg> emptyOpts = new ArrayList<>(0);
+
         HashMap<String, List<PgmArg>> emptyOptsMap = new HashMap<>(0);
-        return new TestCase(cmdArgs.targetFile, programs, cmdArgs.extensions,
-                cmdArgs.excludes, results, emptyOpts, emptyOpts, emptyOptsMap);
+
+        return new TestCase(targetFile, programs, cmdArgs.extensions,
+                cmdArgs.excludes, results, emptyOpts, emptyOpts, emptyOptsMap,
+                new HashSet<KTestStep>());
     }
 
     /**
      * @return absolute path of definition file
      */
     public String getDefinition() {
-        assert new File(definition).isFile();
-        return definition;
+        assert new File(definition.getObj()).isFile();
+        return definition.getObj();
     }
 
     /**
@@ -91,8 +115,8 @@ public class TestCase {
     }
 
     public boolean isDefinitionKompiled() {
-        return new File(FilenameUtils.concat(FilenameUtils.getFullPath(definition),
-                FilenameUtils.getBaseName(definition) + "-kompiled")).isDirectory();
+        return new File(FilenameUtils.concat(FilenameUtils.getFullPath(definition.getObj()),
+                FilenameUtils.getBaseName(definition.getObj()) + "-kompiled")).isDirectory();
     }
 
     /**
@@ -101,20 +125,35 @@ public class TestCase {
      */
     public List<KRunProgram> getPrograms() {
         List<KRunProgram> ret = new LinkedList<>();
-        for (String pgmDir : programs)
-            ret.addAll(searchPrograms(pgmDir));
+        for (Annotated<String, LocationData> pgmDir : programs)
+            ret.addAll(searchPrograms(pgmDir.getObj()));
         return ret;
     }
 
+    /**
+     * Do we need to skip a step for this test case?
+     * @param step step to skip
+     * @return whether to skip the step or not
+     */
+    public boolean skip(KTestStep step) {
+        return skips.contains(step);
+    }
+
     private void validateTestCase() throws InvalidConfigError {
-        if (!new File(definition).isFile())
-            throw new InvalidConfigError("definition file " + definition + " is not a file.");
-        for (String s : programs)
-            if (!new File(s).isDirectory())
-                throw new InvalidConfigError("program directory " + s + " is not a directory.");
-        for (String s : results)
-            if (!new File(s).isDirectory())
-                throw new InvalidConfigError("result directory " + s + " is not a directory.");
+        if (!new File(definition.getObj()).isFile())
+            throw new InvalidConfigError(
+                    "definition file " + definition.getObj() + " is not a file.",
+                    definition.getAnn());
+        for (Annotated<String, LocationData> p : programs)
+            if (!new File(p.getObj()).isDirectory())
+                throw new InvalidConfigError(
+                        "program directory " + p.getObj() + " is not a directory.",
+                        p.getAnn());
+        for (Annotated<String, LocationData> r : results)
+            if (!new File(r.getObj()).isDirectory())
+                throw new InvalidConfigError(
+                        "result directory " + r.getObj() + " is not a directory.",
+                        r.getAnn());
     }
 
     private List<PgmArg> getPgmOptions(String pgm) {
@@ -150,7 +189,8 @@ public class TestCase {
                     String outputFileName = FilenameUtils.getName(pgmFilePath) + ".out";
                     String errorFileName = FilenameUtils.getName(pgmFilePath) + ".err";
 
-                    String definitionFilePath = FilenameUtils.getFullPathNoEndSeparator(definition);
+                    String definitionFilePath =
+                            FilenameUtils.getFullPathNoEndSeparator(definition.getObj());
                     String inputFilePath = searchFile(inputFileName, results);
                     String outputFilePath = searchFile(outputFileName, results);
                     String errorFilePath = searchFile(errorFileName, results);
@@ -178,11 +218,11 @@ public class TestCase {
      * @param dirs set of directories to search
      * @return absolute path if file is found, null otherwise
      */
-    private String searchFile(String fname, Set<String> dirs) {
-        for (String dir : dirs) {
+    private String searchFile(String fname, Set<Annotated<String, LocationData>> dirs) {
+        for (Annotated<String, LocationData> dir : dirs) {
             // TODO: validate validate validate validate validate
             // (forgetting to pass --programs or makes this part break) (osa1)
-            String ret = searchFile(fname, dir);
+            String ret = searchFile(fname, dir.getObj());
             if (ret != null)
                 return ret;
         }
@@ -208,9 +248,16 @@ public class TestCase {
         return null;
     }
 
-    private Set<String> toSet(String[] arr) {
-        Set<String> ret = new HashSet<>();
+    private <T> Set<T> toSet(T[] arr) {
+        Set<T> ret = new HashSet<>();
         Collections.addAll(ret, arr);
+        return ret;
+    }
+
+    private <T> Set<T> toSet(List<T> lst) {
+        Set<T> ret = new HashSet<>();
+        for (T e : lst)
+            ret.add(e);
         return ret;
     }
 }

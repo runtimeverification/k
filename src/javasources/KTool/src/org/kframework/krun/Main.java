@@ -23,6 +23,7 @@ import jline.SimpleCompletor;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
+import org.apache.commons.io.FilenameUtils;
 import org.fusesource.jansi.AnsiConsole;
 import org.kframework.backend.java.symbolic.JavaSymbolicKRun;
 import org.kframework.backend.maude.krun.MaudeKRun;
@@ -971,7 +972,7 @@ public class Main {
             if (K.pgm != null) {
                 File pgmFile = new File(K.pgm);
                 if (pgmFile.exists()) {
-                    lang = FileUtil.getExtension(K.pgm, ".", K.fileSeparator);
+                    lang = FilenameUtils.getExtension(K.pgm);
                 }
             }
 

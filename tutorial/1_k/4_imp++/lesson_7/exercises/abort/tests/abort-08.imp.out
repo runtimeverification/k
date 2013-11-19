@@ -1,2 +1,5 @@
-child spawned
-child halted
+Search results:
+
+Solution 1:
+S:String -->
+"child spawned\nchild halted\n"

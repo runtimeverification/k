@@ -1,21 +1,14 @@
 <tests>
 
-  <test
-      definition="fun-untyped.k"
-      programs="../../../../../programs"
-      extension="fun"
-      results="../../../tests" >
-      <all-programs>
-        <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
-        <krun-option name="--parens" value="smart"/>
-      </all-programs>
-  </test>
+  <include file="../../../tests/config.xml" />
 
-  <test
-      definition="fun-untyped.k"
-      programs="."
-      extension="fun"
-      results="." >
+  <test definition="fun-untyped.k"
+        programs="."
+        extension="fun"
+        results="." >
+        <all-programs>
+          <krun-option name="-o" value="none" />
+        </all-programs>
   </test>
 
 </tests>

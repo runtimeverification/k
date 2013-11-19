@@ -1,17 +1,17 @@
 Search results:
 
-Solution 1, State 41:
+Solution 1:
 S:String -->
-"20"
+"10"
 
-Solution 2, State 42:
-S:String -->
-"5"
-
-Solution 3, State 43:
+Solution 2:
 S:String -->
 "15"
 
-Solution 4, State 44:
+Solution 3:
 S:String -->
-"10"
+"20"
+
+Solution 4:
+S:String -->
+"5"

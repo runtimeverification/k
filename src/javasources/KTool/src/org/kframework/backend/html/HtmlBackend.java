@@ -28,6 +28,8 @@ public class HtmlBackend extends BasicBackend {
 		String html = htmlFilter.getHTML();
 
         FileUtil.save(GlobalSettings.outputDir + File.separator + FilenameUtils.removeExtension(new File(definition.getMainFile()).getName()) + ".html", html);
+        FileUtil.save(GlobalSettings.outputDir + File.separator + "k-definition.css",
+                FileUtil.getFileContent(htmlIncludePath + "k-definition.css"));
 
 		if (GlobalSettings.verbose) {
 			sw.printIntermediate("Generating HTML");

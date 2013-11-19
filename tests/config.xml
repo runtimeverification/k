@@ -10,207 +10,10 @@
 
 -->
 
-  <include file="../tutorial/1_k/tests/config.xml"
-           directory="tutorial/1_k"
-           programs="tutorial/1_k/tests"
-           results="tutorial/1_k/tests" />
-
-<!-- TYPES -->
-
-  <test
-      definition="tutorial/1_k/5_types/lesson_1/imp.k"
-      programs="tutorial/1_k/2_imp
-              tutorial/1_k/4_imp++"
-      extension="imp"
-      exclude="lesson_1/tests/spawn.imp lesson_4/test.imp"
-      >
-      <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
-      </all-programs>
-  </test>
-  <test
-      definition="tutorial/1_k/5_types/lesson_2/lambda.k"
-      programs="tutorial/1_k/5_types/lesson_2"
-      extension="lambda"
-      results="tutorial/1_k/5_types/lesson_2"
-      >
-      <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
-      </all-programs>
-  </test>
-  <test
-      definition="tutorial/1_k/5_types/lesson_3/lambda.k"
-      programs="tutorial/1_k/5_types/lesson_2"
-      extension="lambda"
-      results="tutorial/1_k/5_types/lesson_2"
-      >
-      <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
-      </all-programs>
-  </test>
-  <test
-      definition="tutorial/1_k/5_types/lesson_4/lambda.k"
-      programs="tutorial/1_k/5_types/lesson_4"
-      extension="lambda"
-      results="tutorial/1_k/5_types/lesson_4"
-      >
-      <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
-      </all-programs>
-  </test>
-  <test
-      definition="tutorial/1_k/5_types/lesson_5/lambda.k"
-      programs="tutorial/1_k/5_types/lesson_4
-              tutorial/1_k/5_types/lesson_5"
-      extension="lambda"
-      results="tutorial/1_k/5_types/lesson_4
-              tutorial/1_k/5_types/lesson_5"
-      >
-      <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
-      </all-programs>
-  </test>
-  <test
-      definition="tutorial/1_k/5_types/lesson_6/lambda.k"
-      programs="tutorial/1_k/5_types/lesson_4
-              tutorial/1_k/5_types/lesson_5"
-      extension="lambda"
-      results="tutorial/1_k/5_types/lesson_4
-              tutorial/1_k/5_types/lesson_5"
-      >
-      <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
-      </all-programs>
-  </test>
-  <test
-      definition="tutorial/1_k/5_types/lesson_7/lambda.k"
-      programs="tutorial/1_k/5_types/lesson_4
-              tutorial/1_k/5_types/lesson_5
-              tutorial/1_k/5_types/lesson_6"
-      extension="lambda"
-      results="tutorial/1_k/5_types/lesson_4
-              tutorial/1_k/5_types/lesson_5
-              tutorial/1_k/5_types/lesson_6"
-      >
-      <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
-      </all-programs>
-  </test>
-  <test
-      definition="tutorial/1_k/5_types/lesson_8/lambda.k"
-      programs="tutorial/1_k/5_types/lesson_4
-              tutorial/1_k/5_types/lesson_5
-              tutorial/1_k/5_types/lesson_6"
-      extension="lambda"
-      results="tutorial/1_k/5_types/lesson_4
-              tutorial/1_k/5_types/lesson_5
-              tutorial/1_k/5_types/lesson_6"
-      >
-      <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
-      </all-programs>
-  </test>
-  <test
-      definition="tutorial/1_k/5_types/lesson_9/lambda.k"
-      programs="tutorial/1_k/5_types/lesson_4
-              tutorial/1_k/5_types/lesson_5
-              tutorial/1_k/5_types/lesson_6"
-      extension="lambda"
-      results="tutorial/1_k/5_types/lesson_4
-              tutorial/1_k/5_types/lesson_5
-              tutorial/1_k/5_types/lesson_6"
-      >
-      <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
-      </all-programs>
-  </test>
-
-<!--
-  SIMPLE
--->
-
-  <test
-      definition="tutorial/2_languages/1_simple/1_untyped/simple-untyped.k"
-      programs="tutorial/2_languages/1_simple/1_untyped/tests"
-      extension="simple"
-      exclude="diverse/dekker.simple"
-      results="tutorial/2_languages/1_simple/1_untyped/tests"
-      >
-      <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
-      </all-programs>
-  </test>
-  <test
-      definition="tutorial/2_languages/1_simple/2_typed/2_dynamic/simple-typed-dynamic.k"
-      programs="tutorial/2_languages/1_simple/2_typed/programs"
-      extension="simple"
-      exclude="diverse/dekker.simple"
-      results="tutorial/2_languages/1_simple/2_typed/2_dynamic/tests"
-      >
-      <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
-      </all-programs>
-  </test>
-  <test
-      definition="tutorial/2_languages/1_simple/2_typed/1_static/simple-typed-static.k"
-      programs="tutorial/2_languages/1_simple/2_typed/programs"
-      extension="simple"
-      results="tutorial/2_languages/1_simple/2_typed/1_static/tests" >
-      <all-programs>
-        <krun-option name="-pattern" value="&lt;tasks&gt;.Bag&lt;/tasks&gt;"/>
-      </all-programs>
-  </test>
-
-<!--
-  KOOL
--->
-
-  <test
-      definition="tutorial/2_languages/2_kool/1_untyped/kool-untyped.k"
-      programs="tutorial/2_languages/2_kool/1_untyped/programs_and_results"
-      extension="kool"
-      exclude="cycle.kool"
-      results="tests/examples/kool-untyped"
-      >
-      <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
-      </all-programs>
-  </test>
-  <test
-      definition="tutorial/2_languages/2_kool/2_typed/1_dynamic/kool-typed-dynamic.k"
-      programs="tutorial/2_languages/2_kool/2_typed/programs"
-      extension="kool"
-      exclude="cycle.kool"
-      results="tests/examples/kool-typed-dynamic"
-      >
-      <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
-      </all-programs>
-  </test>
-  <test
-      definition="tutorial/2_languages/2_kool/2_typed/2_static/kool-typed-static.k"
-      programs="tutorial/2_languages/2_kool/2_typed/programs"
-      extension="kool"
-      results="tests/examples/kool-typed-static"
-      >
-      <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
-      </all-programs>
-  </test>
+  <include file="../tutorial/tests/config.xml"
+           directory="tutorial"
+           programs="tutorial/tests"
+           results="tutorial/tests" />
 
 <!--
   QUINE
@@ -236,34 +39,6 @@
       </all-programs>
   </test>
 
-<!--
-  FUN
--->
-
-  <test
-      definition="tutorial/2_languages/3_fun/1_untyped/1_environment/fun-untyped.k"
-      programs="tutorial/2_languages/3_fun/programs"
-      extension="fun"
-      results="tutorial/2_languages/3_fun/1_untyped/1_environment/tests" >
-      <all-programs>
-        <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
-        <krun-option name="--parens" value="smart"/>
-      </all-programs>
-  </test>
-
-  <test
-      definition="tutorial/2_languages/3_fun/1_untyped/2_substitution/fun-untyped.k"
-      programs="tutorial/2_languages/3_fun/programs"
-      extension="fun"
-      exclude="callcc-looping references-5
-               constructor-bst-sorting constructor-expr-distributivity factorial-and-list-max nth pattern references-1 stuck-letrec"
-      results="tutorial/2_languages/3_fun/1_untyped/1_environment/tests
-               tutorial/2_languages/3_fun/1_untyped/2_substitution/tests" >
-      <all-programs>
-        <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
-        <krun-option name="--parens" value="smart"/>
-       </all-programs>
-  </test>
 
 <!--
   LOGIK
@@ -403,11 +178,10 @@
 -->
 
   <test
-      definition="samples/prog-equiv/peq.k"
-      programs="samples/prog-equiv/programs"
+      definition="samples/prog-equiv/imp/peq.k"
+      programs="samples/prog-equiv/imp/programs"
       extension="peq"
-      results="tests/examples/prog-equiv/" >
-      <kompile-option name="-add-top-cell" />
+      results="samples/prog-equiv/imp//programs" >
       <all-programs>
         <krun-option name="-output" value="none" />
         <krun-option name="-color" value="off" />
@@ -1023,4 +797,3 @@
   </test>
 <!-- end Java Rewrite Engine tests -->
 </tests>
-

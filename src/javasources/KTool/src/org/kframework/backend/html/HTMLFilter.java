@@ -22,7 +22,8 @@ import java.util.regex.Pattern;
 
 public class HTMLFilter extends BackendFilter {
 	String endl = System.getProperty("line.separator");
-	private String css = GlobalSettings.style;
+	private String cssFile = GlobalSettings.style;
+    private String css = "";
 	private String preamble = "";
 	private String title = "";
 	private String author = "";
@@ -62,7 +63,8 @@ public class HTMLFilter extends BackendFilter {
 			"<html lang=\"en\">" + endl + 
 			"<head>" + endl + 
 			"	<title>" + title + "</title>" + endl + 
-			"	<link rel=\"stylesheet\" type=\"text/css\" href=\"" + css + "\">" + endl +
+			"	<link rel=\"stylesheet\" type=\"text/css\" href=\"" + cssFile + "\">" + endl +
+            "   <style>" + endl + css + endl + "   </style>" +
 			// this file is maybe not encoded in utf-8...
 			"	<meta charset=\"utf-8\" />" + endl + 
 			// MathJax->
@@ -229,10 +231,18 @@ public class HTMLFilter extends BackendFilter {
 	}
 
 	public void visit(Collection col) {
+        if (col.isEmpty()) {
+            printEmpty(col.getSort());
+            return;
+        }
 		List<Term> contents = col.getContents();
 		printList(contents, "");
 	}
-	
+
+    private void printEmpty(String sort) {
+        result.append("&bull;");
+    }
+
 	private void printList(List<Term> contents, String str) {
 		boolean first = true;
 		for (Term trm : contents) {
@@ -311,11 +321,11 @@ public class HTMLFilter extends BackendFilter {
 	@Override
 	public void visit(Rewrite rew) {
 		
-		result.append("<div class=\"textCentered\"> <em> ");
+		result.append("<table class=\"rewrite\"> <tr class='rewriteLeft'> <td> <em>");
 		rew.getLeft().accept(this);
-		result.append("</em> <hr class=\"reduce\"/> <em> ");
+		result.append("</em></td></tr> <tr class='rewriteRight'> <td><em>");
 		rew.getRight().accept(this);
-		result.append("</em> </div>");
+		result.append("</em> </td> </tr> </table>");
 	}
 
 	@Override
@@ -410,6 +420,10 @@ public class HTMLFilter extends BackendFilter {
 
 	@Override
 	public void visit(KSequence k) {
+        if (k.isEmpty()) {
+            printEmpty("K");
+            return;
+        }
 		printList(k.getContents(), "&#x219d; ");
 	}
 

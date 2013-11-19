@@ -10,10 +10,8 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.Properties;
 
-import static org.apache.commons.io.FileUtils.copyFile;
 import static org.apache.commons.io.FileUtils.readFileToString;
 import static org.apache.commons.io.FileUtils.writeStringToFile;
 
@@ -91,16 +89,6 @@ public class FileUtil {
 		return "";
 	}
 
-	public static void copyFiles(List<File> files, File parentFile) {
-		for (File file : files) {
-			try {
-				copyFile(new File(file.getCanonicalPath()), new File(parentFile.getCanonicalPath() + File.separator + file.getName()));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
     // create a file with the specified name, create parent directory if it doesn't exist
     public static File createFile(String file) {
         try {
@@ -122,22 +110,6 @@ public class FileUtil {
             org.kframework.utils.Error.report("Error while generating unique directory name:" + e.getMessage());
         }
         return null;
-    }
-
-    //parse the output of Maude when --output-mode=raw
-    //get the extension of a file specified by the fullPath with the specified extension and path separator
-    public static String getExtension(String fullPath, String extensionSeparator, String pathSeparator) {
-        int dot, pos;
-        String aux;
-
-        pos = fullPath.lastIndexOf(pathSeparator);
-        aux = fullPath.substring(pos + 1);
-        if (!aux.contains(extensionSeparator)) {
-            return "";
-        } else {
-            dot = aux.lastIndexOf(extensionSeparator);
-            return aux.substring(dot + 1);
-        }
     }
 
     /**
