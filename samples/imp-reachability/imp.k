@@ -28,12 +28,12 @@ module IMP-SYNTAX
                  | "if" "(" BExp ")"
                    Block "else" Block         [strict(1)]
                  | "while" "(" BExp ")" Block
-		 > Stmt Stmt                  [left]
+                 > Stmt Stmt                  [left]
                  > Id ":" Stmt
   syntax Pgm   ::= "int" Ids ";" Stmt
   syntax Ids   ::= List{Id,","}
 
-  syntax Stmt ::= "#ps" "(" TCellFragment ")"
+  syntax Pgm ::= "#ps" "(" TCellFragment ")"
 
   //@ K tool issues
   syntax Int ::= "#symInt" "(" Id ")" [onlyLabel, klabel(#symInt)]
@@ -130,7 +130,7 @@ For each reachability formula given as input we have two corresponding generated
   syntax Id ::= Token{"a"} | Token{"b"} | Token{"x"} | Token{"y"}
               | Token{"ll0"} | Token{"ll1"} | Token{"ll2"}
 
-  syntax Stmt ::= "check0" | "check1" | "check2"   // one for each formula
+  syntax Pgm ::= "check0" | "check1" | "check2"   // one for each formula
 
   syntax Bag ::= "success"
 
