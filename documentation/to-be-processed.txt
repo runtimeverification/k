@@ -149,6 +149,194 @@ instead of config1.xml).  So the above command would be equivalent to
   ktest path1/path2/config2.xml --directory path --programs P/path1/P2
 
 
+
+KTEST: CONFIGURATION FILES: TEST ELEMENT:
+-----------------------------------------
+
+In a batch mode, ktest requires a configuration file.
+
+A configuration file can have multiple <test> elements. A <test> element
+corresponds to a single job mode where each attribute corresponds to the
+command line option of the same name.
+
+A <test> element requires a K definition to be tested. For example, the
+following <test> element just kompiles "lang.k".
+
+<test
+  definition="lang.k"
+/>
+
+Given the above, ktest does nothing but kompilation, but might be useful when
+you want to only check if your K definition is valid to kompile.
+
+A <test> element can also have "programs" attributes that specify root
+directories of programs to be tested.  Note that all nested sub-directories
+are considered when searching the programs.  Several root directories can be
+given, separated by white spaces.  A "programs" attribute requires an
+"extension" attribute that indicates extensions of programs to be executed.
+For example, the following <test> element kompiles "lang.k" and runs all
+programs under the directories "P1" and "P2", whose extension is either "E1"
+or "E2".
+
+<test
+  definition="lang.k"
+  programs="P1 P2"
+  extension="E1 E2"
+/>
+
+In other words, given the above <test> element, ktest has the same behavior
+with the following bash shell script:
+
+kompile lang.k
+for i in `find P1 -name '*.E1' -o -name '*.E2'`
+         `find P2 -name '*.E1' -o -name '*.E2'`
+do
+  krun $i
+done
+
+Note that if there exist multiple files with the same name under the "P1" and
+"P2" directories, the one in the "P2" is only executed.
+
+An "exclude" attribute specifies which programs not to be executed. A program
+whose file name contains a pattern given by a "exclude" attribute is excluded
+for the execution.
+
+A "results" attribute specifies root directories of reference outputs. For
+each program "pgm.ext", a reference output file "pgm.out" is searched under
+the directories given by a "results" attribute. As the "programs" attribute, a
+"results" attribute can have several root directories separated by white
+spaces, and also, the one from the last root directory  is used when multiple
+reference outputs with the same name exist. The directories given by a
+"results" attribute are also used when searching an input file of each
+program.
+
+A <test> element can have several <kompile-option> elements, which is used at
+the kompilation of the given K definition. The default options of krun can be
+specified by a <all-programs> element that contains multiple <krun-option>
+elements. Note that the <all-programs> element can be given once at most.
+Program specific options can be given by <program> elements. A <program>
+element has a "name" attribute and multiple <krun-option> elements. A program
+whose name contains a pattern given by a "name" attribute is executed with the
+options specified by the <program> element.
+
+A <test> element can have an optional "directory" attribute, which specifies
+where the kompiled directory is created. If this attribute is not given, the
+kompiled directory is created, by default, at the directory in which the K
+definition resides. The "directory" attribute is necessary when you provide
+multiple <test> elements that have the same K definition but have different
+<kompile-option> elements.
+
+To sum, for example, given the following <test> element:
+
+<test
+  definition="lang.k"
+  directory="D"
+  programs="P1 P2"
+  extension="E1 E2"
+  exclude="X1 X2"
+  results="R1 R2"
+  />
+  <kompile-option name="--O1" value="V1" />
+  <kompile-option name="--O2" value="V2" />
+  <all-programs>
+    <krun-option name="--O3" value="V3" />
+    <krun-option name="--O4" value="V4" />
+  </all-programs>
+  <program name="N1">
+    <krun-option name="--O5" value="V5" />
+    <krun-option name="--O6" value="V6" />
+  </program>
+  <program name="N2">
+    <krun-option name="--O7" value="V7" />
+    <krun-option name="--O8" value="V8" />
+  </program>
+</test>
+
+ktest works as follows:
+
+At first, "lang.k" is kompiled with the options "--O1=V1 --O2=V2", whose
+kompiled directory "lang-kompiled" is saved at "D".  And then, all programs
+under the "P1" and "P2" directories, whose extension is either "E1" or "E2",
+are executed with the options "--O3=V3 --O4=V4". However, a program whose name
+contains "N1" (or "N2, resp.) is executed with another series of options
+"--O5=V5 --O6=V6" (or "--O7=V7 --O8=V8", resp.). Furthermore, a program whose
+name contains "X1" or "X2" is excluded in the execution. When a program, say
+"pgm.ext", is executed, an input file "pgm.in" under the "R1" or "R2", if any,
+is given as a stdin; and an output file "pgm.out" is used for comparison with
+the actual stdout. Note that if there exist multiple files with the same name
+under the "P1" and "P2" (or "R1" and "R2", resp.) directories, the only one in
+the "P2" (or "R2", resp.) is used.
+
+
+KTEST: CONFIGURATION FILES: INCLUDE ELEMENT:
+--------------------------------------------
+
+A configuration file can have multiple <include> elements as well as <test>
+elements. By an <include> element, you can include another configuration file.
+For example, you can include "another_config.xml" file as follows:
+
+<include
+  file="another_config.xml"
+/>
+
+Basically, an <include> element inherits all attributes and elements from the
+included configuration file, which can be, of course, overwritten by
+explicitly specifying them, except "definition", "directory", "programs", and
+"results" attributes. For example, let a configuration file be:
+
+<include
+  file="another_config.xml"
+  exclude="new_exclude"
+/>
+
+and the included configuration file "another_config.xml" be:
+
+<test
+  definition="D"
+  programs="P"
+  exclude="X"
+/>
+
+then the included <test> element is virtually same with the following:
+
+<test
+  definition="D"
+  programs="P"
+  exclude="new_exclude"
+/>
+
+Although the "programs" and "results" attributes cannot be overwritten, they
+can be incremented by using "more-programs" and "more-results" attributes.
+For example, let a configuration file be:
+
+<include
+  file="config.xml"
+  more-programs="P"
+  more-results="R"
+/>
+
+and the included configuration file "config.xml" be:
+
+<test
+  definition="lang.k"
+  programs="P1 P2"
+  results="R1 R2"
+/>
+
+then the included <test> element is virtually same with the following:
+
+<test
+  definition="lang.k"
+  programs="P1 P2 P"
+  results="R1 R2 R"
+/>
+
+Note that "definition" attribute cannot be overwritten at all.
+
+Also note that an <include> element can also have "directory", "programs", or
+"results" attributes, but they have another meaning: path resolution.
+
+
 KTEST: PATH RESOLUTION:
 -----------------------
 
