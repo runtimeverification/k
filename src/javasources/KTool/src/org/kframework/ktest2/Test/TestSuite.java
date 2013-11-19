@@ -151,7 +151,8 @@ public class TestSuite {
         for (TestCase tc : tests) {
             String definitionPath = tc.getDefinition();
             assert new File(definitionPath).isFile();
-            Proc<TestCase> p = new Proc<>(tc, new String[] { "kompile", "--pdf", definitionPath },
+            Proc<TestCase> p = new Proc<>(tc,
+                    new String[] { "kompile", "--backend=pdf", definitionPath },
                     timeout, verbose, colorSetting);
             ps.add(p);
             tpe.execute(p);
