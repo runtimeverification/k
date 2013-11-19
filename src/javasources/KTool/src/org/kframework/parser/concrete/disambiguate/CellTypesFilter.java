@@ -35,17 +35,7 @@ public class CellTypesFilter extends BasicTransformer {
 	}
 
 	public ASTNode transform(Cell cell) throws TransformerException {
-		String sort;
-		if (cell.hasLeftEllipsis() || cell.hasRightEllipsis())
-			// if I have an opened cell, disambiguate using the top sort
-			sort = context.cellKinds.get(cell.getLabel());
-		else {
-			if (context.cellKinds.get(cell.getLabel()).equals("K"))
-				// in the case we have a subsort of K, disambiguate using the most concrete sort
-				sort = context.cellSorts.get(cell.getLabel());
-			else
-				sort = context.cellKinds.get(cell.getLabel());
-		}
+		String sort = context.cellKinds.get(cell.getLabel());
 
 		if (sort == null) {
 			if (cell.getLabel().equals("k"))
@@ -89,11 +79,9 @@ public class CellTypesFilter extends BasicTransformer {
 
 		public ASTNode transform(Term trm) throws TransformerException {
 			if (!context.isSubsortedEq(expectedSort, trm.getSort())) {
-				if (!(context.isSubsortedEq("K", expectedSort) && trm.getSort().equals("K"))) {
-					// if the found sort is not a subsort of what I was expecting
-					String msg = "Wrong type in cell '" + cellLabel + "'. Expected sort: " + expectedSort + " but found " + trm.getSort();
-					throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, getName(), trm.getFilename(), trm.getLocation()));
-				}
+				// if the found sort is not a subsort of what I was expecting
+				String msg = "Wrong type in cell '" + cellLabel + "'. Expected sort: " + expectedSort + " but found " + trm.getSort();
+				throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, getName(), trm.getFilename(), trm.getLocation()));
 			}
 			return trm;
 		}
