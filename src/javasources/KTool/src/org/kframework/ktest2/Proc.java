@@ -25,6 +25,9 @@ public class Proc<T> implements Runnable {
      */
     private final String expectedOut;
 
+    /**
+     * Output produced by program.
+     */
     private String pgmOut;
 
     /**
@@ -32,6 +35,9 @@ public class Proc<T> implements Runnable {
      */
     private final String expectedErr;
 
+    /**
+     * Error produced by program.
+     */
     private String pgmErr;
 
     /**
@@ -68,6 +74,9 @@ public class Proc<T> implements Runnable {
      */
     private String reason = null;
 
+    /**
+     * How long did process take.
+     */
     private long timeDelta;
 
     /**
@@ -102,6 +111,7 @@ public class Proc<T> implements Runnable {
 
     @Override
     public void run() {
+        // TODO: what happens when a process is run multiple times?
         ProcessBuilder pb = new ProcessBuilder(args);
 
         try {
