@@ -25,10 +25,14 @@ public class Proc<T> implements Runnable {
      */
     private final String expectedOut;
 
+    private String pgmOut;
+
     /**
      * Expected program error.
      */
     private final String expectedErr;
+
+    private String pgmErr;
 
     /**
      * Input string to pass to program.
@@ -63,6 +67,8 @@ public class Proc<T> implements Runnable {
      * Reason of failure. null if process is not started yet or it's succeeded.
      */
     private String reason = null;
+
+    private long timeDelta;
 
     /**
      *
@@ -112,12 +118,12 @@ public class Proc<T> implements Runnable {
             inStream.close();
 
             int returnCode = proc.waitFor();
-            long timeDelta = System.currentTimeMillis() - startTime;
+            timeDelta = System.currentTimeMillis() - startTime;
 
-            String pgmOut = IOUtils.toString(outStream);
-            String pgmErr = IOUtils.toString(errorStream);
+            pgmOut = IOUtils.toString(outStream);
+            pgmErr = IOUtils.toString(errorStream);
 
-            handlePgmResult(returnCode, pgmOut, pgmErr, timeDelta);
+            handlePgmResult(returnCode);
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
             GlobalSettings.kem.register(
@@ -161,15 +167,24 @@ public class Proc<T> implements Runnable {
         return reason;
     }
 
+    public long getTimeDelta() {
+        return timeDelta;
+    }
+
+    public String getPgmOut() {
+        return pgmOut;
+    }
+
+    public String getPgmErr() {
+        return pgmErr;
+    }
+
     /**
      * Compare expected outputs with program outputs, set `reason' and `success' variables,
      * print information messages.
      * @param returnCode return code of the process
-     * @param pgmOut process output string
-     * @param pgmErr process error string
-     * @param timeDelta process time
      */
-    private void handlePgmResult(int returnCode, String pgmOut, String pgmErr, long timeDelta) {
+    private void handlePgmResult(int returnCode) {
         String procCmd = StringUtils.join(args, ' ');
         String red = ColorUtil.RgbToAnsi(Color.RED, colorSetting);
         if (returnCode == 0) {

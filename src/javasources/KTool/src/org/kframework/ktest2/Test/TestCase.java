@@ -202,7 +202,8 @@ public class TestCase {
                         args.add(arg.toString());
                     args.add(new PgmArg("directory", definitionFilePath).toString());
 
-                    ret.add(new KRunProgram(args, inputFilePath, outputFilePath, errorFilePath));
+                    ret.add(new KRunProgram(FilenameUtils.getBaseName(pgmFilePath),
+                            args, inputFilePath, outputFilePath, errorFilePath));
                 }
             } else {
                 ret.addAll(searchPrograms(pgmFile.getAbsolutePath()));
