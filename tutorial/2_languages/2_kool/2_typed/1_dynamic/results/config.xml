@@ -1,8 +1,0 @@
-<tests>
-  <test
-      definition="kool-typed-dynamic.k"
-      programs="../../programs"
-      extension="kool"
-results="."
-      />
-</tests>

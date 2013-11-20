@@ -16,7 +16,12 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Term;
-import org.kframework.kil.loader.*;
+import org.kframework.kil.loader.AddAutoIncludedModulesVisitor;
+import org.kframework.kil.loader.CollectConfigCellsVisitor;
+import org.kframework.kil.loader.CollectModuleImportsVisitor;
+import org.kframework.kil.loader.Context;
+import org.kframework.kil.loader.JavaClassesFactory;
+import org.kframework.kil.loader.RemoveUnusedModules;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.basic.Basic;
 import org.kframework.parser.concrete.disambiguate.AmbDuplicateFilter;
@@ -56,7 +61,6 @@ import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-
 public class DefinitionLoader {
 	public static Definition loadDefinition(File mainFile, String lang, boolean autoinclude, Context context) throws Exception {
 		Definition javaDef;
@@ -64,7 +68,7 @@ public class DefinitionLoader {
 
 		String extension = FilenameUtils.getExtension(mainFile.getAbsolutePath());
 		if ("bin".equals(extension)) {
-            javaDef = (Definition) BinaryLoader.load(canoFile.toString());
+			javaDef = (Definition) BinaryLoader.load(canoFile.toString());
 
 			if (GlobalSettings.verbose)
 				Stopwatch.sw.printIntermediate("Load definition from binary");
@@ -77,8 +81,7 @@ public class DefinitionLoader {
 		} else {
 			javaDef = parseDefinition(mainFile, lang, autoinclude, context);
 
-			BinaryLoader.save(context.dotk.getAbsolutePath()
-                + "/defx-" + (GlobalSettings.javaBackend ? "java" : "maude") + ".bin", javaDef);
+			BinaryLoader.save(context.dotk.getAbsolutePath() + "/defx-" + (GlobalSettings.javaBackend ? "java" : "maude") + ".bin", javaDef);
 		}
 		return javaDef;
 	}
@@ -125,7 +128,7 @@ public class DefinitionLoader {
 			if (GlobalSettings.verbose)
 				Stopwatch.sw.printIntermediate("Basic Parsing");
 
-            def = (Definition) def.accept(new RemoveUnusedModules(context));
+			def = (Definition) def.accept(new RemoveUnusedModules(context));
 
 			new CheckVisitorStep<Definition>(new CheckListOfKDeprecation(context), context).check(def);
 			// HERE: add labels to sorts
@@ -158,7 +161,7 @@ public class DefinitionLoader {
 				StringBuilder newSdfPgmBuilder = ProgramSDF.getSdfForPrograms(def, context);
 
 				FileUtil.save(context.dotk.getAbsolutePath() + "/pgm/Program.sdf", newSdfPgmBuilder);
-                String newSdfPgm = FileUtil.getFileContent(context.dotk.getAbsolutePath() + "/pgm/Program.sdf");
+				String newSdfPgm = FileUtil.getFileContent(context.dotk.getAbsolutePath() + "/pgm/Program.sdf");
 
 				if (GlobalSettings.verbose)
 					Stopwatch.sw.printIntermediate("File Gen Pgm");
@@ -303,6 +306,12 @@ public class DefinitionLoader {
 		if (GlobalSettings.fastKast)
 			config = config.accept(new MergeAmbFilter(context));
 		config = config.accept(new VariableTypeInferenceFilter(context));
+		try {
+			config = config.accept(new TypeSystemFilter(context));
+			config = config.accept(new TypeInferenceSupremumFilter(context));
+		} catch (TransformerException e) {
+			e.report();
+		}
 		// config = config.accept(new AmbDuplicateFilter(context));
 		// config = config.accept(new TypeSystemFilter(context));
 		// config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context));
@@ -350,6 +359,12 @@ public class DefinitionLoader {
 		if (GlobalSettings.fastKast)
 			config = config.accept(new MergeAmbFilter(context));
 		config = config.accept(new VariableTypeInferenceFilter(context));
+		try {
+			config = config.accept(new TypeSystemFilter(context));
+			config = config.accept(new TypeInferenceSupremumFilter(context));
+		} catch (TransformerException e) {
+			e.report();
+		}
 		// config = config.accept(new AmbDuplicateFilter(context));
 		// config = config.accept(new TypeSystemFilter(context));
 		// config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context));

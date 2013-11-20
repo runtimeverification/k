@@ -20,7 +20,7 @@ public class PdfBackend extends BasicBackend {
         super(sw, context);
     }
 
-    private static File pdf(File latexFile) {
+    private static File generatePdf(File latexFile) {
         Stopwatch sw = new Stopwatch();
         try {
             // Run pdflatex.
@@ -50,9 +50,9 @@ public class PdfBackend extends BasicBackend {
     @Override
     public void run(Definition definition) throws IOException {
         LatexBackend latexBackend = new LatexBackend(sw, context);
-        latexBackend.run(definition);
-        File latexFile = latexBackend.getLatexifiedFile();
-        File pdfFile = pdf(latexFile);
+        latexBackend.compile(definition);
+        File latexFile = latexBackend.getLatexFile();
+        File pdfFile = generatePdf(latexFile);
         copyFile(pdfFile, new File(GlobalSettings.outputDir + File.separator + FilenameUtils.removeExtension(new File(definition.getMainFile()).getName()) + ".pdf"));
     }
 

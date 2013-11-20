@@ -254,7 +254,7 @@ discard the main cell. */
   configuration <T color="yellow" multiplicity="?">
                   <k color="green"> $PGM:Pgm </k>
                   <fresh color="orange"> .K </fresh>
-                  <mgu color="blue"> .Mgu </mgu>
+                  <mgu color="blue"> (.Mgu)::MguOrError </mgu>
                   <br/>
                   <clauses color="red">
                     <clause color="pink" multiplicity="*"> .K </clause>

@@ -1,0 +1,13 @@
+Search results:
+
+Solution 1:
+V:K -->
+#symType(1)
+
+Solution 2:
+V:K -->
+#symType(5) = #symType(6)
+
+Solution 3:
+V:K -->
+#symType(7) = #symType(4)

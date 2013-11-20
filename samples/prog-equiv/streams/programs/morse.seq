@@ -1,0 +1,44 @@
+/*
+ This is an example of STREAM equivalence.
+*/
+                                     
+
+/*
+
+  --- alternative function
+  op f : Stream -> Stream .
+  eq hd(f(S)) = hd(S) .
+  eq hd(tl(f(S))) = not(hd(S)) .
+  eq tl(tl(f(S))) = f(tl(S)) .
+  
+  --- Thue-Morse seqence M = 0:zip(inv(M),tail(M))
+  op morse : -> Stream .
+  eq hd(morse) = 0 .
+  eq hd(tl(morse)) = 1 .
+  eq tl(tl(morse)) = zip(tl(morse), not(tl(morse))) .
+  
+  --- Thue-Morse sequence M = f(0:tail(M))
+  op altMorse : -> Stream .
+  eq hd(altMorse) = 0 .
+  eq hd(tl(altMorse)) = 1 .
+  eq tl(tl(altMorse)) =  f(tl(altMorse)) .
+*/
+
+<k> L.morse </k>
+<sspecs>
+not(xs) :~ 1 <| hd(xs) = 0 |> 0 : L.not(tl(xs));
+zip(xs, ys) :~ hd(xs) : L.zip(ys, tl(xs));
+morse :~ 0 : L.1 : L.zip(tl(L.morse), not(tl(L.morse)));
+</sspecs> 
+
+~
+
+<k> L.f(morse) </k>
+<sspecs>
+neg(x) := 1 <| x = 0 |> 0;
+not(xs) :~ 1 <| hd(xs) = 0 |> 0 : L.not(tl(xs));
+zip(xs, ys) :~ hd(xs) : L.zip(ys, tl(xs));
+f(xs) :~ hd(xs) : L.neg(hd(xs)) : L.f(tl(xs));
+morse :~ 0 : L.1 : L.zip(tl(L.morse), not(tl(L.morse)));
+</sspecs> ;
+

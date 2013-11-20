@@ -1,9 +1,9 @@
-/*@
-  requires VELOCITY(x) && VELOCITY(y) ;
-  ensures \abs(\result - sqR(x,y)) < E_sqv ;
-  assigns \nothing ;
-  @*/
-//double sqv(double x,double y) { return x*x + y*y; }
+/*@ ensures \result == dmax(a,b); */
+/*
+double max(double a, double b){
+    return (a<=b)?b:a;
+}
+*/
 module MAX-RULE
   rule <threads>
            <thread>...

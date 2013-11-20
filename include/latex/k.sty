@@ -1,6 +1,7 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{k}[2012/02/14 Package for typesetting K Framework definitions http://k-framework.org]
 
+\RequirePackage{bookmark}
 \RequirePackage{kvoptions}
 \RequirePackage{ifthen}
 % \RequirePackage{etoolbox}
@@ -69,8 +70,8 @@
 
 \ifk@beamer
 \else
-\RequirePackage[pdftex]{hyperref}
-\RequirePackage[pdftex,usenames,dvipsnames,svgnames,x11names]{xcolor}
+\RequirePackage{hyperref}
+\RequirePackage{xcolor}
 \fi
 
 \ifk@poster

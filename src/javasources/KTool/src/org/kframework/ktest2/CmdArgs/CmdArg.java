@@ -54,7 +54,7 @@ public class CmdArg {
     /**
      * The list of steps separated by whitespace to be skipped.
      */
-    public final KTestStep[] skips;
+    public final Set<KTestStep> skips;
 
     /**
      * Generate a junit-like report.
@@ -79,7 +79,7 @@ public class CmdArg {
     public final int timeout;
 
     private CmdArg(String directory, String programs, String results, String[] extensions,
-                   String[] excludes, KTestStep[] skips, boolean generateReport,
+                   String[] excludes, Set<KTestStep> skips, boolean generateReport,
                    String targetFile, boolean verbose, ColorSetting colorSetting, int timeout) {
         this.directory = directory;
         this.programs = programs;
@@ -145,18 +145,18 @@ public class CmdArg {
         }
     }
 
-    private static KTestStep[] parseSkips(CommandLine cmdOpts) throws InvalidArgumentException {
-        Set<KTestStep> skips_set = new HashSet<>();
+    private static Set<KTestStep> parseSkips(CommandLine cmdOpts) throws InvalidArgumentException {
+        Set<KTestStep> skips = new HashSet<>();
         for (String s : cmdOpts.getOptionValue(Constants.SKIP_OPTION, "").split("\\s+"))
             switch (s.trim()) {
-                case "kompile": skips_set.add(KTestStep.KOMPILE); break;
-                case "pdf": skips_set.add(KTestStep.PDF); break;
-                case "krun": skips_set.add(KTestStep.KRUN); break;
+                case "kompile": skips.add(KTestStep.KOMPILE); break;
+                case "pdf": skips.add(KTestStep.PDF); break;
+                case "krun": skips.add(KTestStep.KRUN); break;
                 case "": break;
                 default: throw new InvalidArgumentException("--" + Constants.SKIP_OPTION + " " +
                         "option should be [kompile|pdf|krun]+");
             }
-        return skips_set.toArray(new KTestStep[skips_set.size()]);
+        return skips;
     }
 
     private static ColorSetting parseColorSetting(CommandLine cmdOpts)

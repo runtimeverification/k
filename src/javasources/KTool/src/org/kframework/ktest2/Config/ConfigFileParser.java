@@ -1,28 +1,33 @@
 package org.kframework.ktest2.Config;
 
 import org.apache.commons.io.FilenameUtils;
+import org.kframework.ktest2.Annotated;
 import org.kframework.ktest2.CmdArgs.CmdArg;
 import org.kframework.ktest2.KTest;
+import org.kframework.ktest2.KTestStep;
 import org.kframework.ktest2.PgmArg;
 import org.kframework.ktest2.Test.TestCase;
 import org.w3c.dom.*;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.XMLReaderFactory;
 
 import javax.xml.XMLConstants;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.*;
 import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ConfigFileParser {
 
@@ -30,7 +35,9 @@ public class ConfigFileParser {
     private final CmdArg cmdArgs;
 
     public ConfigFileParser(File configFile, CmdArg cmdArgs) throws IOException, SAXException,
-            ParserConfigurationException {
+            ParserConfigurationException, TransformerException {
+        this.cmdArgs = cmdArgs;
+
         // validate xml file structure
         Source schemaFile = new StreamSource(new File(getSchema()));
         Source xmlFile = new StreamSource(configFile);
@@ -41,10 +48,30 @@ public class ConfigFileParser {
         validator.validate(xmlFile);
 
         // parse xml file
-        this.cmdArgs = cmdArgs;
-        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-        doc = dBuilder.parse(configFile);
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer nullTransformer = transformerFactory.newTransformer();
+
+        // Create an empty document to be populated within a DOMResult.
+        DocumentBuilder docBuilder = documentBuilderFactory.newDocumentBuilder();
+        doc = docBuilder.newDocument();
+        DOMResult domResult = new DOMResult(doc);
+
+        // Create SAX parser/XMLReader that will parse XML.
+        XMLReader xmlReader = XMLReaderFactory.createXMLReader();
+
+        // Create our filter to wrap the SAX parser, that captures the
+        // locations of elements and annotates their nodes as they are
+        // inserted into the DOM.
+        LocationAnnotator locationAnnotator = new LocationAnnotator(xmlReader, doc);
+
+        // Create the SAXSource to use the annotator.
+        String systemId = configFile.getAbsolutePath();
+        InputSource inputSource = new InputSource(systemId);
+        SAXSource saxSource = new SAXSource(locationAnnotator, inputSource);
+
+        // Finally read the XML into the DOM.
+        nullTransformer.transform(saxSource, domResult);
     }
 
     /**
@@ -75,17 +102,27 @@ public class ConfigFileParser {
 
             Element testNode = (Element) tests.item(testNodeIdx);
             NamedNodeMap testAttrs = testNode.getAttributes();
+            // I couldn't find a way to annotate attributes with location information using SAX api
+            // (maybe it's not possible?) so I'm annotation attributes with location data of
+            // parent node (element)
+            LocationData location =
+                    (LocationData) testNode.getUserData(LocationData.LOCATION_DATA_KEY);
 
             Node definitionNode = testAttrs.getNamedItem("definition");
 
-            String definition = normalize(definitionNode.getNodeValue(), cmdArgs.directory);
-            String[] programs = normalize(splitNodeValue(testAttrs.getNamedItem("programs")),
-                    cmdArgs.programs);
-            String[] results = normalize(splitNodeValue(testAttrs.getNamedItem("results")),
-                    cmdArgs.results);
+            Annotated<String, LocationData> definition =
+                    annotate(normalize(addDefinitionExt(definitionNode.getNodeValue()),
+                                       cmdArgs.directory), location);
+            List<Annotated<String, LocationData>> programs =
+                    annotateLst(normalize(splitNodeValue(testAttrs.getNamedItem("programs")),
+                                cmdArgs.programs), location);
+            List<Annotated<String, LocationData>> results =
+                    annotateLst(normalize(splitNodeValue(testAttrs.getNamedItem("results")),
+                                cmdArgs.results), location);
 
             String[] extensions = splitNodeValue(testAttrs.getNamedItem("extension"));
             String[] excludes = splitNodeValue(testAttrs.getNamedItem("exclude"));
+            Set<KTestStep> skips = parseSkips(testAttrs.getNamedItem("skip"), location);
 
             // handle children of `test' node
             NodeList childNodes = testNode.getChildNodes();
@@ -95,10 +132,44 @@ public class ConfigFileParser {
             Map<String, List<PgmArg>> pgmSpecificKRunOpts = parsePgmSpecificKRunOpts(childNodes);
 
             testCases.add(new TestCase(definition, programs, extensions, excludes, results,
-                    kompileOpts, krunOpts, pgmSpecificKRunOpts));
+                    kompileOpts, krunOpts, pgmSpecificKRunOpts, skips));
         }
 
         return testCases;
+    }
+
+    private String addDefinitionExt(String nodeValue) {
+        if (FilenameUtils.getExtension(nodeValue).equals("k"))
+            return nodeValue;
+        return nodeValue + ".k";
+    }
+
+    private Set<KTestStep> parseSkips(Node node, LocationData location) throws InvalidConfigError {
+        Set<KTestStep> skips = new HashSet<>();
+        if (node == null)
+            return skips;
+        for (String s : node.getNodeValue().split("\\s+")) {
+            switch (s.trim()) {
+                case "kompile": skips.add(KTestStep.KOMPILE); break;
+                case "pdf": skips.add(KTestStep.PDF); break;
+                case "krun": skips.add(KTestStep.KRUN); break;
+                case "": break;
+                default: throw new InvalidConfigError(
+                        "skip attribute option should be [kompile|pdf|krun]+", location);
+            }
+        }
+        return skips;
+    }
+
+    private Annotated<String, LocationData> annotate(String str, LocationData location) {
+        return new Annotated<>(str, location);
+    }
+
+    private List<Annotated<String, LocationData>> annotateLst(String[] strs, LocationData location) {
+        List<Annotated<String, LocationData>> ret = new LinkedList<>();
+        for (String str : strs)
+            ret.add(annotate(str, location));
+        return ret;
     }
 
     private String normalize(String path, String root) {
@@ -194,8 +265,7 @@ public class ConfigFileParser {
                     && childNode.getNodeName().equals("program")) {
                 Element elem = (Element) childNode;
                 ret.put(FilenameUtils.concat(cmdArgs.programs, elem.getAttribute("name")),
-                        parseKrunOpts(elem.getChildNodes()
-                ));
+                        parseKrunOpts(elem.getChildNodes()));
             }
         }
         return ret;

@@ -1,5 +1,6 @@
 package org.kframework.backend.latex;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.BasicBackend;
 import org.kframework.kil.Definition;
@@ -12,59 +13,64 @@ import org.kframework.utils.general.GlobalSettings;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
 
 public class LatexBackend extends BasicBackend {
 
-    private String latexifiedFile;
+    private File latexFile;
+    private File latexStyleFile;
 
 	public LatexBackend(Stopwatch sw, Context context) {
 		super(sw, context);
 	}
 
-    @Override
-	public void run(Definition javaDef) {
-        List<File> generatedFiles = new LinkedList<>();
-		try {
-			Stopwatch sw = new Stopwatch();
+    public void compile(Definition javaDef) throws IOException {
+        Stopwatch sw = new Stopwatch();
 
-			String fileSep = System.getProperty("file.separator");
+        String fileSep = System.getProperty("file.separator");
+        String endl = System.getProperty("line.separator");
 
-			LatexFilter lf = new LatexFilter(context);
-			javaDef.accept(lf);
+        LatexFilter lf = new LatexFilter(context);
+        javaDef.accept(lf);
 
-			String endl = System.getProperty("line.separator");
+        String kLatexStyle = KPaths.getKBase(false) + fileSep + "include" + fileSep + "latex" + fileSep + "k.sty";
+        latexStyleFile = new File(context.dotk.getAbsolutePath() + fileSep + "k.sty");
+        FileUtils.writeStringToFile(latexStyleFile, FileUtil.getFileContent(kLatexStyle));
 
-			String kLatexStyle = KPaths.getKBase(false) + fileSep + "include" + fileSep + "latex" + fileSep + "k.sty";
-			String dotKLatexStyle = context.dotk.getAbsolutePath() + fileSep + "k.sty";
+        String latexified = "\\nonstopmode" + endl +
+                "\\PassOptionsToPackage{pdftex,usenames,dvipsnames,svgnames,x11names}{xcolor}"+ endl +
+                "\\PassOptionsToPackage{pdftex}{hyperref}"+ endl +
+                "\\documentclass{article}" + endl + "\\usepackage[" + GlobalSettings.style + "]{k}" + endl;
+        String preamble = lf.getPreamble().toString();
+        latexified += preamble + "\\begin{document}" + endl + lf.getResult() + "\\end{document}" + endl;
 
-			FileUtil.save(dotKLatexStyle, FileUtil.getFileContent(kLatexStyle));
+        File canonicalFile = GlobalSettings.mainFile.getCanonicalFile();
+        String latexFilePath = context.dotk.getAbsolutePath() + fileSep + FilenameUtils.removeExtension(canonicalFile.getName()) + ".tex";
+        latexFile = new File(latexFilePath);
+        FileUtils.writeStringToFile(latexFile, latexified);
 
-			String latexified = "\\nonstopmode" + endl + "\\documentclass{article}" + endl + "\\usepackage[" + GlobalSettings.style + "]{k}" + endl;
-			String preamble = lf.getPreamble().toString();
-			latexified += preamble + "\\begin{document}" + endl + lf.getResult() + "\\end{document}" + endl;
-
-			File canonicalFile = GlobalSettings.mainFile.getCanonicalFile();
-            latexifiedFile = context.dotk.getAbsolutePath() + fileSep + FilenameUtils.removeExtension(canonicalFile.getName()) + ".tex";
-			generatedFiles.add(new File(latexifiedFile));
-			generatedFiles.add(new File(dotKLatexStyle));
-			FileUtil.save(latexifiedFile, latexified);
-
-			if (GlobalSettings.verbose)
-				sw.printIntermediate("Latex Generation");
-
-            FileUtil.copyFiles(generatedFiles, new File(GlobalSettings.outputDir));
-		} catch (IOException e) {
-            GlobalSettings.kem.register(
-                    new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, e.getMessage(), "", ""));
-		}
-	}
-
-    public File getLatexifiedFile() {
-        return new File(latexifiedFile);
+        if (GlobalSettings.verbose)
+            sw.printIntermediate("Latex Generation");
     }
 
+    public void copyFiles() throws IOException {
+        FileUtils.copyFile(latexFile, new File(GlobalSettings.outputDir + File.separator + latexFile.getName()));
+        FileUtils.copyFile(latexStyleFile, new File(GlobalSettings.outputDir + File.separator + latexStyleFile.getName()));
+    }
+
+    @Override
+	public void run(Definition javaDef) {
+        try {
+            compile(javaDef);
+            copyFiles();
+        } catch (IOException e) {
+            GlobalSettings.kem.register(
+                    new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, e.getMessage(), "", ""));
+        }
+    }
+
+    public File getLatexFile() {
+        return latexFile;
+    }
 
 	@Override
 	public String getDefaultStep() {

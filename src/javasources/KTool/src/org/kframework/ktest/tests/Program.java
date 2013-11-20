@@ -17,9 +17,11 @@ public class Program implements Comparable<Program> {
     private final String error;
     private boolean hasInput = false;
     private boolean hasOutput = false;
+    public final String inputFile;
+    public final String outputFile;
 
 	public Program(String name, Map<String, String> map, Test test,
-			String input, String output, String error) {
+			String input, String output, String error, String inputFile, String outputFile) {
 		this.programPath = name;
 		this.krunOptions = map;
 		this.test = test;
@@ -28,6 +30,8 @@ public class Program implements Comparable<Program> {
 		this.error = error;
         hasInput = this.input != null;
         hasOutput = this.output != null;
+		this.inputFile = inputFile;
+		this.outputFile = outputFile;
 	}
 
 	@Override

@@ -35,20 +35,43 @@ text-align: center;
 text-align: center;
 display: inline-block;
 vertical-align: top;
-min-width: 20px;
+min-width: 2em;
 }
+.rewrite
+{
+padding: 0;
+padding-left: 2px;
+padding-right: 2px;
+margin: 0;
+border-collapse: collapse;
+text-align: center;
+display: inline-block;
+vertical-align: top;
+min-width: 2em;
+}
+.rewriteLeft
+{
+border-bottom-style:solid;
+border-bottom-color:black;
+border-bottom-width:1.5px;
+}
+
 .cell
 {
+font-style:normal;
+font-weight:normal;
 display: inline-block;
 vertical-align: top;
 text-align:left;
 }
-hr.reduce
+hr.rewriteLine
 {
 color: black;
 background-color: black;
-height: 3px;
+height: 1.5px;
+padding: 0px;
 }
+/*
 hr.reduce:after
 {
 width: 0;
@@ -59,6 +82,7 @@ border-top : 6px solid black;
 position: absolute;
 content: "";
 }
+*/
 .tab
 {
 display: inline-block;
