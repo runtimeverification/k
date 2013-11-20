@@ -108,7 +108,7 @@ public class CmdArg {
         if (args.length != 1)
             throw new InvalidArgumentException("ktest requires exactly one <file> parameter.");
 
-        String targetFile = args[0];
+        String targetFile = FilenameUtils.concat(currentDir, args[0]);
         if (!new File(targetFile).isFile())
             throw new InvalidArgumentException("target file argument is not a valid file: " +
                     targetFile);
