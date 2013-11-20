@@ -235,7 +235,7 @@ public class ConfigFileParser {
 
     private String[] normalize(String[] paths, String root) {
         for (int i = 0; i < paths.length; i++)
-            paths[i] = concat(paths[i], root);
+            paths[i] = concat(root, paths[i]);
         return paths;
     }
 
