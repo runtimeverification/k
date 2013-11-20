@@ -230,13 +230,12 @@ public class ConfigFileParser {
     }
 
     private String normalize(String path, String root) {
-        assert concat(root, path) != null;
         return concat(root, path);
     }
 
     private String[] normalize(String[] paths, String root) {
         for (int i = 0; i < paths.length; i++)
-            paths[i] = normalize(paths[i], root);
+            paths[i] = concat(paths[i], root);
         return paths;
     }
 
@@ -357,6 +356,7 @@ public class ConfigFileParser {
         // we don't want this because new File("").isDirectory() return false, which causes
         // test validation to fail (it checks directory/results/programs to be valid folders)
         String ret = FilenameUtils.concat(s1, s2);
+        assert ret != null : "concat(" + s1 + ", " + s2 + ") returned null";
         if (ret.equals("")) return ".";
         return ret;
     }
