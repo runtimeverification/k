@@ -32,8 +32,7 @@ public class TestSuite {
     private final ColorSetting colorSetting;
 
     /**
-     * List of ktest steps to skip. This array should be sorted because it'll be used for binary
-     * search (Java doesn't have linear search algorithm in stdlib)
+     * Set of ktest steps to skip.
      */
     private final Set<KTestStep> skips;
 
@@ -129,7 +128,7 @@ public class TestSuite {
 
         // collect successful test cases
         for (Proc<TestCase> p : ps)
-            if (p.getReturnCode() == 0)
+            if (p.isSuccess())
                 successfulTests.add(p.getObj());
 
         printResult(successfulTests.size() == len);
@@ -161,7 +160,7 @@ public class TestSuite {
 
         boolean ret = true;
         for (Proc<TestCase> p : ps)
-            ret &= p.getReturnCode() == 0;
+            ret &= p.isSuccess();
 
         printResult(ret);
 
@@ -216,7 +215,7 @@ public class TestSuite {
             for (Proc<KRunProgram> p : testCaseProcs)
                 if (p != null) // p may be null when krun test is skipped because of missing
                                // input file
-                    testCaseRet &= p.getReturnCode() == 0;
+                    testCaseRet &= p.isSuccess();
 
             printResult(testCaseRet);
         }
