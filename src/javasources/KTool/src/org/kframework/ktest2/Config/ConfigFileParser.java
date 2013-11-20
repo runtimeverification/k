@@ -133,11 +133,11 @@ public class ConfigFileParser {
         String directory = concat(cmdArgs.directory,
                 getAttributeWDefault(includeAttrs, "directory", ""));
 
-        String programs = getAttributeWDefault(includeAttrs, "programs",
-                FilenameUtils.getFullPath(file));
+        String programs = concat(cmdArgs.programs,
+                getAttributeWDefault(includeAttrs, "programs", FilenameUtils.getFullPath(file)));
 
-        String results = getAttributeWDefault(includeAttrs, "results",
-                FilenameUtils.getFullPath(file));
+        String results = concat(cmdArgs.results,
+                getAttributeWDefault(includeAttrs, "results", FilenameUtils.getFullPath(file)));
 
         CmdArg cmdArgs1 = new CmdArg(directory, programs, results, cmdArgs.extensions,
                 cmdArgs.excludes, cmdArgs.skips, cmdArgs.generateReport, file, cmdArgs.verbose,
