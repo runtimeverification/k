@@ -128,7 +128,7 @@ public class TestSuite {
 
         // collect successful test cases
         for (Proc<TestCase> p : ps)
-            if (p.getReturnCode() == 0)
+            if (p.isSuccess())
                 successfulTests.add(p.getObj());
 
         printResult(successfulTests.size() == len);
@@ -160,7 +160,7 @@ public class TestSuite {
 
         boolean ret = true;
         for (Proc<TestCase> p : ps)
-            ret &= p.getReturnCode() == 0;
+            ret &= p.isSuccess();
 
         printResult(ret);
 
@@ -215,7 +215,7 @@ public class TestSuite {
             for (Proc<KRunProgram> p : testCaseProcs)
                 if (p != null) // p may be null when krun test is skipped because of missing
                                // input file
-                    testCaseRet &= p.getReturnCode() == 0;
+                    testCaseRet &= p.isSuccess();
 
             printResult(testCaseRet);
         }
