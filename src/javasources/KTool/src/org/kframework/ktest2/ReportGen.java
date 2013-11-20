@@ -1,5 +1,7 @@
 package org.kframework.ktest2;
 
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -11,7 +13,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.StringWriter;
+import java.io.*;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,7 +39,11 @@ public class ReportGen {
                 Report.reportSuccess(name, timeDelta, stdout, stderr));
     }
 
-    public void save() throws ParserConfigurationException, TransformerException {
+    public void save() throws ParserConfigurationException, TransformerException, IOException {
+        File junitFolder = new File("junit-reports");
+        if (!junitFolder.isDirectory())
+            junitFolder.mkdirs();
+
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();
         Document doc = db.newDocument();
@@ -53,7 +59,11 @@ public class ReportGen {
             StreamResult result = new StreamResult(new StringWriter());
             DOMSource source = new DOMSource(elem);
             transformer.transform(source, result);
-            System.out.println(result.getWriter().toString());
+
+            File targetFile = new File(junitFolder.getAbsolutePath(),
+                    FilenameUtils.removeExtension(e.getKey()) + ".xml");
+            System.out.println("targetFile for XML: " + targetFile.getAbsolutePath());
+            IOUtils.write(result.getWriter().toString(), new FileOutputStream(targetFile));
         }
     }
 
@@ -63,7 +73,8 @@ public class ReportGen {
      * @param reports reports to generate testsuite element
      * @return testsuite element
      */
-    public Element genElem(Document doc, String name, List<Report> reports) throws ParserConfigurationException {
+    private Element genElem(Document doc, String name, List<Report> reports)
+            throws ParserConfigurationException {
         Element testSuiteElem = doc.createElement("testsuite");
         testSuiteElem.setAttribute("name", name);
 

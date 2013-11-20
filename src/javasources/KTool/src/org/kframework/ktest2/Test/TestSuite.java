@@ -69,8 +69,8 @@ public class TestSuite {
      * @return whether all tests passed or not
      * @throws InterruptedException when some process is interrupted for some reason
      */
-    public boolean run()
-            throws InterruptedException, TransformerException, ParserConfigurationException {
+    public boolean run() throws InterruptedException, TransformerException,
+            ParserConfigurationException, IOException {
         boolean ret = true;
         List<TestCase> successfulTests = tests;
 
@@ -141,7 +141,7 @@ public class TestSuite {
                 successfulTests.add(p.getObj());
             else if (reportGen != null) {
                 TestCase failedTest = p.getObj();
-                reportGen.addFailure(failedTest.getDefinition(),
+                reportGen.addFailure(makeRelative(failedTest.getDefinition()),
                         FilenameUtils.getName(failedTest.getDefinition()),
                         p.getTimeDelta(),
                         p.getPgmOut(),
@@ -182,7 +182,7 @@ public class TestSuite {
                 ret = false;
                 if (reportGen != null) {
                     TestCase failedTest = p.getObj();
-                    reportGen.addFailure(failedTest.getDefinition(),
+                    reportGen.addFailure(makeRelative(failedTest.getDefinition()),
                             FilenameUtils.getBaseName(failedTest.getDefinition()) + ".pdf",
                             p.getTimeDelta(),
                             p.getPgmOut(),
@@ -250,7 +250,7 @@ public class TestSuite {
                     KRunProgram pgm = p.getObj();
                     if (p.isSuccess()) {
                         if (reportGen != null)
-                            reportGen.addSuccess(tc.getDefinition(),
+                            reportGen.addSuccess(makeRelative(tc.getDefinition()),
                                     FilenameUtils.getName(pgm.pgmName),
                                     p.getTimeDelta(),
                                     p.getPgmOut(),
@@ -258,7 +258,7 @@ public class TestSuite {
                     } else {
                         testCaseRet = false;
                         if (reportGen != null)
-                            reportGen.addFailure(tc.getDefinition(),
+                            reportGen.addFailure(makeRelative(tc.getDefinition()),
                                     FilenameUtils.getName(pgm.pgmName),
                                     p.getTimeDelta(),
                                     p.getPgmOut(),
@@ -345,5 +345,10 @@ public class TestSuite {
         else
             System.out.println(ColorUtil.RgbToAnsi(Color.red, colorSetting) + "FAIL" + ColorUtil
                     .ANSI_NORMAL);
+    }
+
+    private String makeRelative(String absolutePath) {
+        // I'm not sure if this works as expected, but I'm simply removing prefix of absolutePath
+        return absolutePath.replaceFirst(System.getProperty("user.dir"), "");
     }
 }
