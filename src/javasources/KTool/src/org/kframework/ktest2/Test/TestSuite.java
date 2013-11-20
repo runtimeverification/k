@@ -175,7 +175,7 @@ public class TestSuite {
      * @throws InterruptedException
      */
     private boolean runKRunSteps(List<TestCase> tests) throws InterruptedException {
-        List<TestCase> successfulTests = new LinkedList<>();
+        List<TestCase> kompileSuccesses = new LinkedList<>();
 
         // collect definitions that are not yet kompiled and kompile them first
         ArrayList<TestCase> notKompiled = new ArrayList<>();
@@ -183,14 +183,15 @@ public class TestSuite {
             if (!tc.isDefinitionKompiled())
                 notKompiled.add(tc);
             else
-                successfulTests.add(tc);
+                kompileSuccesses.add(tc);
         }
         System.out.println("Kompiling definitions that are not yet kompiled.");
-        successfulTests.addAll(runKompileSteps(notKompiled));
+        kompileSuccesses.addAll(runKompileSteps(notKompiled));
 
         // at this point we have a subset of tests that are successfully kompiled,
         // so run programs of those tests
-        for (TestCase tc : successfulTests) {
+        boolean testCaseRet = true;
+        for (TestCase tc : kompileSuccesses) {
 
             List<KRunProgram> programs = tc.getPrograms();
             int inputs = 0, outputs = 0, errors = 0;
@@ -212,7 +213,6 @@ public class TestSuite {
                 testCaseProcs.add(runKRun(program));
             stopTpe();
 
-            boolean testCaseRet = true;
             for (Proc<KRunProgram> p : testCaseProcs)
                 if (p != null) // p may be null when krun test is skipped because of missing
                                // input file
@@ -221,7 +221,7 @@ public class TestSuite {
             printResult(testCaseRet);
         }
 
-        return successfulTests.size() == tests.size();
+        return kompileSuccesses.size() == tests.size() && testCaseRet;
     }
 
     private void startTpe() {
