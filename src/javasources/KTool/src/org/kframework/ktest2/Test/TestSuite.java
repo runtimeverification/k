@@ -32,8 +32,7 @@ public class TestSuite {
     private final ColorSetting colorSetting;
 
     /**
-     * List of ktest steps to skip. This array should be sorted because it'll be used for binary
-     * search (Java doesn't have linear search algorithm in stdlib)
+     * Set of ktest steps to skip.
      */
     private final Set<KTestStep> skips;
 
