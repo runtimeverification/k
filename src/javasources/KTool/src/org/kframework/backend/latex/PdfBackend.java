@@ -33,6 +33,14 @@ public class PdfBackend extends BasicBackend {
             pb.directory(latexFile.getParentFile());
 
             Process process = pb.start();
+            // Note to the reader from future: In order for `process.waitFor()' to return on Windows,
+            // we need to consume process' output and error streams. `pb.redirectErrorStream(true)'
+            // and next line does this. Before removing these lines please make sure pdf generation
+            // works fine on Windows too.
+            // Some more information:
+            //    - http://stackoverflow.com/tags/runtime.exec/info
+            //    - http://www.javaworld.com/javaworld/jw-12-2000/jw-1229-traps.html?page=1
+            // this information is old and apparently not all of them needed with Java 7.
             IOUtils.toString(process.getInputStream());
             process.waitFor();
             if (process.exitValue() != 0)

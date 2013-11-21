@@ -14,7 +14,6 @@ import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
 import org.kframework.kil.DefinitionItem;
-import org.kframework.kil.Sentence;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.AddAutoIncludedModulesVisitor;
 import org.kframework.kil.loader.CollectConfigCellsVisitor;
@@ -276,7 +275,7 @@ public class DefinitionLoader {
 		return null;
 	}
 
-	public static Term parseCmdString(String content, String sort, String filename, Context context) throws TransformerException {
+	public static Term parseCmdString(String content, String filename, Context context) throws TransformerException {
 		if (!context.initialized) {
 			System.err.println("You need to load the definition before you call parsePattern!");
 			System.exit(1);
@@ -365,60 +364,6 @@ public class DefinitionLoader {
 		} catch (TransformerException e) {
 			e.report();
 		}
-		// config = config.accept(new AmbDuplicateFilter(context));
-		// config = config.accept(new TypeSystemFilter(context));
-		// config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context));
-		// config = config.accept(new TypeInferenceSupremumFilter(context));
-		config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context));
-		config = config.accept(new PreferAvoidFilter(context));
-		config = config.accept(new FlattenListsFilter(context));
-		config = config.accept(new AmbDuplicateFilter(context));
-		// last resort disambiguation
-		config = config.accept(new AmbFilter(context));
-
-		return config;
-	}
-
-	/**
-	 * Parses a string of the form: A => B when X [attributes], where the 'when' clause and the attributes can be absent.
-	 * @param sentence The input string.
-	 * @param filename Required for error reporting. Can be anything.
-	 * @param context The context is required for disambiguation purposes.
-	 * @return A {@link Sentence} element.
-	 * @throws TransformerException
-	 */
-	public static ASTNode parseSentence(String sentence, String filename, Context context) throws TransformerException {
-		if (!context.initialized) {
-			System.err.println("You need to load the definition before you call parsePattern!");
-			System.exit(1);
-		}
-
-		String parsed = org.kframework.parser.concrete.KParser.ParseKRuleString(sentence);
-		Document doc = XmlLoader.getXMLDoc(parsed);
-
-		XmlLoader.addFilename(doc.getFirstChild(), filename);
-		XmlLoader.reportErrors(doc);
-		//		FileUtil.save(context.kompiled.getAbsolutePath() + "/pgm.xml", parsed);
-		//		XmlLoader.writeXmlFile(doc, context.kompiled + "/pattern.xml");
-
-		JavaClassesFactory.startConstruction(context);
-		ASTNode config = JavaClassesFactory.getTerm((Element) doc.getDocumentElement().getFirstChild().getNextSibling());
-		JavaClassesFactory.endConstruction();
-
-		new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation(context), context).check(config);
-		config = config.accept(new SentenceVariablesFilter(context));
-		config = config.accept(new CellEndLabelFilter(context));
-		//if (checkInclusion)
-		//	config = config.accept(new InclusionFilter(localModule, context));
-		config = config.accept(new CellTypesFilter(context));
-		config = config.accept(new CorrectRewritePriorityFilter(context));
-		config = config.accept(new CorrectKSeqFilter(context));
-		config = config.accept(new CorrectCastPriorityFilter(context));
-		// config = config.accept(new CheckBinaryPrecedenceFilter());
-		config = config.accept(new PriorityFilter(context));
-		if (GlobalSettings.fastKast)
-			config = config.accept(new MergeAmbFilter(context));
-		config = config.accept(new VariableTypeInferenceFilter(context));
 		// config = config.accept(new AmbDuplicateFilter(context));
 		// config = config.accept(new TypeSystemFilter(context));
 		// config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context));
