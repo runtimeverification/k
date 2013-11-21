@@ -266,10 +266,8 @@ public class TestSuite {
                                     p.getReason());
                     }
                 }
-
-            printResult(testCaseRet);
         }
-
+        printResult(testCaseRet);
         return kompileSuccesses.size() == tests.size() && testCaseRet;
     }
 

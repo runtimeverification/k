@@ -205,11 +205,11 @@ public class Proc<T> implements Runnable {
                 // we're not comparing outputs
                 success = true;
                 if (verbose)
-                    System.out.format("DONE: %s (time %d ms)%n", procCmd, timeDelta);
+                    System.out.format("Done with [%s] (time %d ms)%n", procCmd, timeDelta);
             } else if (strComparator.compare(pgmOut, expectedOut.getObj()) != 0) {
                 // outputs don't match
                 System.out.format(
-                        "%sERROR: %s output doesn't match with expected output (time: %d ms)%s%n",
+                        "%sERROR: [%s] output doesn't match with expected output (time: %d ms)%s%n",
                         red, procCmd, timeDelta, ColorUtil.ANSI_NORMAL);
                 reportOutMatch(expectedOut, pgmOut);
             }
@@ -217,7 +217,7 @@ public class Proc<T> implements Runnable {
                 // outputs match
                 success = true;
                 if (verbose)
-                    System.out.format("DONE: %s (time %d ms)%n", procCmd, timeDelta);
+                    System.out.format("Done with [%s] (time %d ms)%n", procCmd, timeDelta);
             }
 
         } else {
@@ -225,7 +225,7 @@ public class Proc<T> implements Runnable {
             // program ended with error ..
             if (expectedErr == null) {
                 // we're not comparing error outputs
-                System.out.format("%sERROR: %s failed with error (time: %d ms)%s%n",
+                System.out.format("%sERROR: [%s] failed with error (time: %d ms)%s%n",
                         red, procCmd, timeDelta, ColorUtil.ANSI_NORMAL);
                 reportErr(pgmErr);
             }
@@ -233,12 +233,12 @@ public class Proc<T> implements Runnable {
                 // error outputs match
                 success = true;
                 if (verbose)
-                    System.out.format("DONE: %s (time %d ms)%n", procCmd, timeDelta);
+                    System.out.format("Done with [%s] (time %d ms)%n", procCmd, timeDelta);
             }
             else {
                 // error outputs don't match
                 System.out.format(
-                        "%sERROR: %s throwed error, but expected error message doesn't match "+
+                        "%sERROR: [%s] throwed error, but expected error message doesn't match "+
                                 "(time: %d ms)%s%n", red, procCmd, timeDelta, ColorUtil.ANSI_NORMAL);
                 reportErrMatch(expectedErr, pgmErr);
             }
