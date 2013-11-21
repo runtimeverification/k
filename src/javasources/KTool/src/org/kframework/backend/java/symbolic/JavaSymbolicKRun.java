@@ -15,6 +15,7 @@ import org.kframework.kil.Module;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.KRunExecutionException;
+import org.kframework.krun.SubstitutionFilter;
 import org.kframework.krun.api.*;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.krun.ioserver.filesystem.portable.PortableFileSystem;
@@ -195,26 +196,59 @@ public class JavaSymbolicKRun implements KRun {
             depth = -1;
         }
 
+        // The pattern needs to be a rewrite in order for the transformer to be
+        // able to handle it, so we need to give it a right-hand-side.
+        org.kframework.kil.Cell c = new org.kframework.kil.Cell();
+        c.setLabel("generatedTop");
+        c.setContents(new org.kframework.kil.Bag());
+        pattern.setBody(new org.kframework.kil.Rewrite(pattern.getBody(), c, context));
+
+        // Change Map, List, and Set to MyMap, MyList, and MySet.
+        CompileToBuiltins builtinTransformer = new CompileToBuiltins(context);
+        try {
+            pattern = (org.kframework.kil.Rule)builtinTransformer.transform(pattern);
+        } catch (TransformerException e) {
+            e.report();
+        }
+        Rule patternRule = transformer.transformRule(pattern, definition);
+
         List<SearchResult> searchResults = new ArrayList<SearchResult>();
-        List<ConstrainedTerm> hits = symbolicRewriter.search(initialTerm, targetTerm, claims, bound, depth);
+        List<Map<Variable,Term>> hits = symbolicRewriter.search(
+                initialTerm, targetTerm, claims, patternRule, bound, depth, searchType);
 
+        for (Map<Variable,Term> map : hits) {
+            // Construct substitution map from the search results
+            Map<String, org.kframework.kil.Term> substitutionMap =
+                    new HashMap<String, org.kframework.kil.Term>();
+            for (Variable var : map.keySet()) {
+                org.kframework.kil.Term kilTerm =
+                        (org.kframework.kil.Term) map.get(var).accept(
+                                new BackendJavaKILtoKILTranslation(context));
+                substitutionMap.put(var.toString(), kilTerm);
+            }
 
-        for (ConstrainedTerm result :hits ) {
+            try {
+                // Apply the substitution to the pattern
+                org.kframework.kil.Term rawResult =
+                        (org.kframework.kil.Term) pattern.getBody().accept(
+                                new SubstitutionFilter(substitutionMap, context));
 
-            org.kframework.kil.Term kilTerm = (org.kframework.kil.Term) result.term().accept(
-                    new BackendJavaKILtoKILTranslation(context));
+                searchResults.add(new SearchResult(
+                        new KRunState(rawResult, context),
+                        substitutionMap,
+                        compilationInfo,
+                        context));
+            } catch(TransformerException e) {
+                e.report();
+            }
 
-            searchResults.add(new SearchResult(
-                    new KRunState(kilTerm, context),
-                    Collections.singletonMap("B:Bag", kilTerm),
-                    compilationInfo,
-                    context));
         }
 
+        // TODO(ericmikida): Make the isDefaultPattern option set in some reasonable way
         return new KRunResult<SearchResults>(new SearchResults(
                 searchResults,
                 null,
-                true,
+                false,
                 context));
     }
 
