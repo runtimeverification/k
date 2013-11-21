@@ -21,9 +21,9 @@ public class Proc<T> implements Runnable {
     private final String[] args;
 
     /**
-     * Expected program output.
+     * Expected program output with location information for output file.
      */
-    private final String expectedOut;
+    private final Annotated<String, String> expectedOut;
 
     /**
      * Output produced by program.
@@ -33,7 +33,7 @@ public class Proc<T> implements Runnable {
     /**
      * Expected program error.
      */
-    private final String expectedErr;
+    private final Annotated<String, String> expectedErr;
 
     /**
      * Error produced by program.
@@ -91,9 +91,9 @@ public class Proc<T> implements Runnable {
      * @param procInput null or empty string to not pass anything to program input
      * @param strComparator comparator object to compare program outputs with expected outputs
      */
-    public Proc(T obj, String[] args, String procInput, String expectedOut, String expectedErr,
-                Comparator<String> strComparator, int timeout, boolean verbose,
-                ColorSetting colorSetting) {
+    public Proc(T obj, String[] args, String procInput, Annotated<String, String> expectedOut,
+                Annotated<String, String> expectedErr, Comparator<String> strComparator,
+                int timeout, boolean verbose, ColorSetting colorSetting) {
         this.obj = obj;
         this.args = args;
         this.expectedOut = expectedOut;
@@ -106,7 +106,8 @@ public class Proc<T> implements Runnable {
     }
 
     public Proc(T obj, String[] args, int timeout, boolean verbose, ColorSetting colorSetting) {
-        this(obj, args, "", "", "", new DefaultStringComparator(), timeout, verbose, colorSetting);
+        this(obj, args, "", null, null, new DefaultStringComparator(),
+                timeout, verbose, colorSetting);
     }
 
     @Override
@@ -205,7 +206,7 @@ public class Proc<T> implements Runnable {
                 success = true;
                 if (verbose)
                     System.out.format("DONE: %s (time %d ms)%n", procCmd, timeDelta);
-            } else if (strComparator.compare(pgmOut, expectedOut) != 0) {
+            } else if (strComparator.compare(pgmOut, expectedOut.getObj()) != 0) {
                 // outputs don't match
                 System.out.format(
                         "%sERROR: %s output doesn't match with expected output (time: %d ms)%s%n",
@@ -228,7 +229,7 @@ public class Proc<T> implements Runnable {
                         red, procCmd, timeDelta, ColorUtil.ANSI_NORMAL);
                 reportErr(pgmErr);
             }
-            else if (strComparator.compare(pgmErr, expectedErr) == 0) {
+            else if (strComparator.compare(pgmErr, expectedErr.getObj()) == 0) {
                 // error outputs match
                 success = true;
                 if (verbose)
@@ -249,12 +250,12 @@ public class Proc<T> implements Runnable {
         reason = err;
     }
 
-    private void reportErrMatch(String expected, String found) {
+    private void reportErrMatch(Annotated<String, String> expected, String found) {
         assert reason == null;
         reason = String.format("Expected program error:%n%s%n%nbut found:%n%s%n", expected, found);
     }
 
-    private void reportOutMatch(String expected, String found) {
+    private void reportOutMatch(Annotated<String, String> expected, String found) {
         assert reason == null;
         reason = String.format("Expected program output:%n%s%n%nbut found:%n%s%n", expected, found);
     }

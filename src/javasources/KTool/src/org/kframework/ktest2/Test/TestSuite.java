@@ -333,8 +333,19 @@ public class TestSuite {
                 + (outputContents == null ? "" : "output ")
                 + (errorContents == null ? "" : "error "));
         */
-        Proc<KRunProgram> p = new Proc<>(program, args, inputContents, outputContents,
-                errorContents, new DefaultStringComparator(), timeout, verbose, colorSetting);
+
+        // Annotate expected output and error messages with paths of files that these strings
+        // are defined in (to be used in error messages)
+        Annotated<String, String> outputContentsAnn = null;
+        if (outputContents != null)
+            outputContentsAnn = new Annotated<>(outputContents, program.outputFile);
+
+        Annotated<String, String> errorContentsAnn = null;
+        if (errorContents != null)
+            errorContentsAnn = new Annotated<>(errorContents, program.errorFile);
+
+        Proc<KRunProgram> p = new Proc<>(program, args, inputContents, outputContentsAnn,
+                errorContentsAnn, new DefaultStringComparator(), timeout, verbose, colorSetting);
         tpe.execute(p);
         return p;
     }

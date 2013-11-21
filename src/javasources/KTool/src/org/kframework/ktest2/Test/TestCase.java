@@ -32,7 +32,7 @@ public class TestCase {
     /**
      * Program names that are excluded from krun processes.
      */
-    private final Set<String> excludes;
+    private Set<String> excludes;
 
     /**
      * Absolute path of result files directories.
@@ -42,17 +42,17 @@ public class TestCase {
     /**
      * List of command line arguments to pass to kompile.
      */
-    private final List<PgmArg> kompileOpts;
+    private List<PgmArg> kompileOpts;
 
     /**
      * List of command line arguments to pass to krun.
      */
-    private final List<PgmArg> krunOpts;
+    private List<PgmArg> krunOpts;
 
     /**
      * Program full path, list of kompile arguments pairs.
      */
-    private final Map<String, List<PgmArg>> pgmSpecificKRunOpts;
+    private Map<String, List<PgmArg>> pgmSpecificKRunOpts;
 
     /**
      * Which tests to skip for this particular test case.
@@ -99,6 +99,22 @@ public class TestCase {
                 new HashSet<KTestStep>());
     }
 
+    public boolean isDefinitionKompiled() {
+        return new File(FilenameUtils.concat(FilenameUtils.getFullPath(definition.getObj()),
+                FilenameUtils.getBaseName(definition.getObj()) + "-kompiled")).isDirectory();
+    }
+
+    /**
+     * Generate set of programs to run for this test case.
+     * @return set of programs to krun
+     */
+    public List<KRunProgram> getPrograms() {
+        List<KRunProgram> ret = new LinkedList<>();
+        for (Annotated<String, LocationData> pgmDir : programs)
+            ret.addAll(searchPrograms(pgmDir.getObj()));
+        return ret;
+    }
+
     /**
      * @return absolute path of definition file
      */
@@ -114,20 +130,20 @@ public class TestCase {
         return kompileOpts;
     }
 
-    public boolean isDefinitionKompiled() {
-        return new File(FilenameUtils.concat(FilenameUtils.getFullPath(definition.getObj()),
-                FilenameUtils.getBaseName(definition.getObj()) + "-kompiled")).isDirectory();
+    public void setKompileOpts(List<PgmArg> kompileOpts) {
+        this.kompileOpts = kompileOpts;
     }
 
-    /**
-     * Generate set of programs to run for this test case.
-     * @return set of programs to krun
-     */
-    public List<KRunProgram> getPrograms() {
-        List<KRunProgram> ret = new LinkedList<>();
-        for (Annotated<String, LocationData> pgmDir : programs)
-            ret.addAll(searchPrograms(pgmDir.getObj()));
-        return ret;
+    public void setExcludes(String[] excludes) {
+        this.excludes = toSet(excludes);
+    }
+
+    public void setKrunOpts(List<PgmArg> krunOpts) {
+        this.krunOpts = krunOpts;
+    }
+
+    public void setPgmSpecificKRunOpts(Map<String, List<PgmArg>> pgmSpecificKRunOpts) {
+        this.pgmSpecificKRunOpts = pgmSpecificKRunOpts;
     }
 
     /**
