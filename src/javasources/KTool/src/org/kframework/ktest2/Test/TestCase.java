@@ -22,7 +22,7 @@ public class TestCase {
     /**
      * Absolute paths of program files directories.
      */
-    private final Set<Annotated<String, LocationData>> programs;
+    private final List<Annotated<String, LocationData>> programs;
 
     /**
      * Valid extensions for programs. (without dot)
@@ -32,27 +32,27 @@ public class TestCase {
     /**
      * Program names that are excluded from krun processes.
      */
-    private final Set<String> excludes;
+    private Set<String> excludes;
 
     /**
      * Absolute path of result files directories.
      */
-    private final Set<Annotated<String, LocationData>> results;
+    private final List<Annotated<String, LocationData>> results;
 
     /**
      * List of command line arguments to pass to kompile.
      */
-    private final List<PgmArg> kompileOpts;
+    private List<PgmArg> kompileOpts;
 
     /**
      * List of command line arguments to pass to krun.
      */
-    private final List<PgmArg> krunOpts;
+    private List<PgmArg> krunOpts;
 
     /**
      * Program full path, list of kompile arguments pairs.
      */
-    private final Map<String, List<PgmArg>> pgmSpecificKRunOpts;
+    private Map<String, List<PgmArg>> pgmSpecificKRunOpts;
 
     /**
      * Which tests to skip for this particular test case.
@@ -68,11 +68,15 @@ public class TestCase {
                     List<PgmArg> krunOpts,
                     Map<String, List<PgmArg>> pgmSpecificKRunOpts,
                     Set<KTestStep> skips) throws InvalidConfigError {
+        // programs and results should be ordered set because of how search algorithm works
+        // TODO: what happens when same element added to ListOrderedSet? I think what we want is
+        // to move that new element to last position but I don't think this is what currently
+        // happening
         this.definition = definition;
-        this.programs = toSet(programs);
+        this.programs = programs;
         this.extensions = toSet(extensions);
         this.excludes = toSet(excludes);
-        this.results = toSet(results);
+        this.results = results;
         this.kompileOpts = kompileOpts;
         this.krunOpts = krunOpts;
         this.pgmSpecificKRunOpts = pgmSpecificKRunOpts;
@@ -99,6 +103,22 @@ public class TestCase {
                 new HashSet<KTestStep>());
     }
 
+    public boolean isDefinitionKompiled() {
+        return new File(FilenameUtils.concat(FilenameUtils.getFullPath(definition.getObj()),
+                FilenameUtils.getBaseName(definition.getObj()) + "-kompiled")).isDirectory();
+    }
+
+    /**
+     * Generate set of programs to run for this test case.
+     * @return set of programs to krun
+     */
+    public List<KRunProgram> getPrograms() {
+        List<KRunProgram> ret = new LinkedList<>();
+        for (Annotated<String, LocationData> pgmDir : programs)
+            ret.addAll(searchPrograms(pgmDir.getObj()));
+        return ret;
+    }
+
     /**
      * @return absolute path of definition file
      */
@@ -114,20 +134,28 @@ public class TestCase {
         return kompileOpts;
     }
 
-    public boolean isDefinitionKompiled() {
-        return new File(FilenameUtils.concat(FilenameUtils.getFullPath(definition.getObj()),
-                FilenameUtils.getBaseName(definition.getObj()) + "-kompiled")).isDirectory();
+    public void setKompileOpts(List<PgmArg> kompileOpts) {
+        this.kompileOpts = kompileOpts;
     }
 
-    /**
-     * Generate set of programs to run for this test case.
-     * @return set of programs to krun
-     */
-    public List<KRunProgram> getPrograms() {
-        List<KRunProgram> ret = new LinkedList<>();
-        for (Annotated<String, LocationData> pgmDir : programs)
-            ret.addAll(searchPrograms(pgmDir.getObj()));
-        return ret;
+    public void setExcludes(String[] excludes) {
+        this.excludes = toSet(excludes);
+    }
+
+    public void setKrunOpts(List<PgmArg> krunOpts) {
+        this.krunOpts = krunOpts;
+    }
+
+    public void setPgmSpecificKRunOpts(Map<String, List<PgmArg>> pgmSpecificKRunOpts) {
+        this.pgmSpecificKRunOpts = pgmSpecificKRunOpts;
+    }
+
+    public void addProgram(Annotated<String, LocationData> program) {
+        programs.add(program);
+    }
+
+    public void addResult(Annotated<String, LocationData> result) {
+        results.add(result);
     }
 
     /**
@@ -202,7 +230,8 @@ public class TestCase {
                         args.add(arg.toString());
                     args.add(new PgmArg("directory", definitionFilePath).toString());
 
-                    ret.add(new KRunProgram(args, inputFilePath, outputFilePath, errorFilePath));
+                    ret.add(new KRunProgram(FilenameUtils.getBaseName(pgmFilePath),
+                            args, inputFilePath, outputFilePath, errorFilePath));
                 }
             } else {
                 ret.addAll(searchPrograms(pgmFile.getAbsolutePath()));
@@ -212,14 +241,16 @@ public class TestCase {
     }
 
     /**
-     * Search file in set of directories.
+     * Search file in list of directories in reverse order.
      * Search is recursive, meaning that subfolders are also searched.
      * @param fname file name (not path)
-     * @param dirs set of directories to search
+     * @param dirs list of directories to search
      * @return absolute path if file is found, null otherwise
      */
-    private String searchFile(String fname, Set<Annotated<String, LocationData>> dirs) {
-        for (Annotated<String, LocationData> dir : dirs) {
+    private String searchFile(String fname, List<Annotated<String, LocationData>> dirs) {
+        ListIterator<Annotated<String, LocationData>> li = dirs.listIterator(dirs.size());
+        while (li.hasPrevious()) {
+            Annotated<String, LocationData> dir = li.previous();
             // TODO: validate validate validate validate validate
             // (forgetting to pass --programs or makes this part break) (osa1)
             String ret = searchFile(fname, dir.getObj());
@@ -251,13 +282,6 @@ public class TestCase {
     private <T> Set<T> toSet(T[] arr) {
         Set<T> ret = new HashSet<>();
         Collections.addAll(ret, arr);
-        return ret;
-    }
-
-    private <T> Set<T> toSet(List<T> lst) {
-        Set<T> ret = new HashSet<>();
-        for (T e : lst)
-            ret.add(e);
         return ret;
     }
 }

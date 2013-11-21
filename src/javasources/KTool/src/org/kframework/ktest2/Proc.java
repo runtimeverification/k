@@ -19,12 +19,45 @@ import java.util.Comparator;
 public class Proc<T> implements Runnable {
 
     private final String[] args;
-    private final String expectedOut;
-    private final String expectedErr;
+
+    /**
+     * Expected program output with location information for output file.
+     */
+    private final Annotated<String, String> expectedOut;
+
+    /**
+     * Output produced by program.
+     */
+    private String pgmOut;
+
+    /**
+     * Expected program error.
+     */
+    private final Annotated<String, String> expectedErr;
+
+    /**
+     * Error produced by program.
+     */
+    private String pgmErr;
+
+    /**
+     * Input string to pass to program.
+     */
     private final String procInput;
+
+    /**
+     * Comparator to compare program outputs with expected outputs.
+     */
     private final Comparator<String> strComparator;
+
+    /**
+     * Proccess object for internal use.
+     */
     private Process proc = null;
 
+    /**
+     * Some arbitrary user data to later get with `getObj()'.
+     */
     private final T obj;
 
     private final int timeout;
@@ -32,9 +65,19 @@ public class Proc<T> implements Runnable {
     private final ColorSetting colorSetting;
 
     /**
-     * Return code of process. -1 if process is not run/finished yet.
+     * Whether the process succeeded or not.
      */
-    private int returnCode = -1;
+    private boolean success = false;
+
+    /**
+     * Reason of failure. null if process is not started yet or it's succeeded.
+     */
+    private String reason = null;
+
+    /**
+     * How long did process take.
+     */
+    private long timeDelta;
 
     /**
      *
@@ -48,9 +91,9 @@ public class Proc<T> implements Runnable {
      * @param procInput null or empty string to not pass anything to program input
      * @param strComparator comparator object to compare program outputs with expected outputs
      */
-    public Proc(T obj, String[] args, String procInput, String expectedOut, String expectedErr,
-                Comparator<String> strComparator, int timeout, boolean verbose,
-                ColorSetting colorSetting) {
+    public Proc(T obj, String[] args, String procInput, Annotated<String, String> expectedOut,
+                Annotated<String, String> expectedErr, Comparator<String> strComparator,
+                int timeout, boolean verbose, ColorSetting colorSetting) {
         this.obj = obj;
         this.args = args;
         this.expectedOut = expectedOut;
@@ -63,12 +106,13 @@ public class Proc<T> implements Runnable {
     }
 
     public Proc(T obj, String[] args, int timeout, boolean verbose, ColorSetting colorSetting) {
-        this(obj, args, "", "", "", new DefaultStringComparator(), timeout, verbose, colorSetting);
+        this(obj, args, "", null, null, new DefaultStringComparator(),
+                timeout, verbose, colorSetting);
     }
 
     @Override
     public void run() {
-        String procCmd = StringUtils.join(args, ' ');
+        // TODO: what happens when a process is run multiple times?
         ProcessBuilder pb = new ProcessBuilder(args);
 
         try {
@@ -84,55 +128,20 @@ public class Proc<T> implements Runnable {
             IOUtils.write(procInput, inStream);
             inStream.close();
 
-            returnCode = proc.waitFor();
-            long endTime = System.currentTimeMillis() - startTime;
+            int returnCode = proc.waitFor();
+            timeDelta = System.currentTimeMillis() - startTime;
 
-            String pgmOut = IOUtils.toString(outStream);
-            String pgmErr = IOUtils.toString(errorStream);
+            pgmOut = IOUtils.toString(outStream);
+            pgmErr = IOUtils.toString(errorStream);
 
-            String red = ColorUtil.RgbToAnsi(Color.RED, colorSetting);
-            if (returnCode == 0) {
-
-                // program ended successfully ..
-                if (expectedOut == null) {
-                    // we're not comparing outputs
-                    if (verbose)
-                        System.out.format("DONE: %s (time %d ms)%n", procCmd, endTime);
-                } else if (strComparator.compare(pgmOut, expectedOut) != 0)
-                    // outputs don't match
-                    System.out.format(
-                        "%sERROR: %s output doesn't match with expected output (time: %d ms)%s%n",
-                        red, procCmd, endTime, ColorUtil.ANSI_NORMAL);
-                else
-                    // outputs match
-                    if (verbose)
-                        System.out.format("DONE: %s (time %d ms)%n", procCmd, endTime);
-
-            } else {
-
-                // program ended with error ..
-                if (expectedErr == null)
-                    // we're not comparing error outputs
-                    System.out.format("%sERROR: %s failed with error (time: %d ms)%s%n",
-                            red, procCmd, endTime, ColorUtil.ANSI_NORMAL);
-                else if (strComparator.compare(pgmErr, expectedErr) == 0)
-                    // error outputs match
-                    if (verbose)
-                        System.out.format("DONE: %s (time %d ms)%n", procCmd, endTime);
-                else
-                    // error outputs don't match
-                    System.out.format(
-                            "%sERROR: %s throwed error, but expected error message doesn't match "+
-                            "(time: %d ms)%s%n", red, procCmd, endTime, ColorUtil.ANSI_NORMAL);
-
-            }
+            handlePgmResult(returnCode);
         } catch (IOException | InterruptedException e) {
-            returnCode = 1;
             e.printStackTrace();
             GlobalSettings.kem.register(
                     new KException(KException.ExceptionType.WARNING,
                             KException.KExceptionGroup.INTERNAL, e.getMessage(), "command line",
                             "System file."));
+            reportErr("program failed with exception: " + e.getMessage());
         }
         proc = null;
     }
@@ -147,15 +156,107 @@ public class Proc<T> implements Runnable {
             GlobalSettings.kem.register(new KException(KException.ExceptionType.WARNING,
                     KException.KExceptionGroup.INTERNAL, procCmd + " is killed", "command line",
                     "System file."));
-            returnCode = 1;
+            success = false;
         }
     }
 
-    public int getReturnCode() {
-        return returnCode;
+    /**
+     * @return true if process finished with success.
+     */
+    public boolean isSuccess() {
+        return success;
     }
 
     public T getObj() {
         return obj;
+    }
+
+    /**
+     * @return reason of failure. null when process is not started yet or it's succeeded.
+     */
+    public String getReason() {
+        return reason;
+    }
+
+    public long getTimeDelta() {
+        return timeDelta;
+    }
+
+    public String getPgmOut() {
+        return pgmOut;
+    }
+
+    public String getPgmErr() {
+        return pgmErr;
+    }
+
+    /**
+     * Compare expected outputs with program outputs, set `reason' and `success' variables,
+     * print information messages.
+     * @param returnCode return code of the process
+     */
+    private void handlePgmResult(int returnCode) {
+        String procCmd = StringUtils.join(args, ' ');
+        String red = ColorUtil.RgbToAnsi(Color.RED, colorSetting);
+        if (returnCode == 0) {
+
+            // program ended successfully ..
+            if (expectedOut == null) {
+                // we're not comparing outputs
+                success = true;
+                if (verbose)
+                    System.out.format("Done with [%s] (time %d ms)%n", procCmd, timeDelta);
+            } else if (strComparator.compare(pgmOut, expectedOut.getObj()) != 0) {
+                // outputs don't match
+                System.out.format(
+                        "%sERROR: [%s] output doesn't match with expected output (time: %d ms)%s%n",
+                        red, procCmd, timeDelta, ColorUtil.ANSI_NORMAL);
+                reportOutMatch(expectedOut, pgmOut);
+            }
+            else {
+                // outputs match
+                success = true;
+                if (verbose)
+                    System.out.format("Done with [%s] (time %d ms)%n", procCmd, timeDelta);
+            }
+
+        } else {
+
+            // program ended with error ..
+            if (expectedErr == null) {
+                // we're not comparing error outputs
+                System.out.format("%sERROR: [%s] failed with error (time: %d ms)%s%n",
+                        red, procCmd, timeDelta, ColorUtil.ANSI_NORMAL);
+                reportErr(pgmErr);
+            }
+            else if (strComparator.compare(pgmErr, expectedErr.getObj()) == 0) {
+                // error outputs match
+                success = true;
+                if (verbose)
+                    System.out.format("Done with [%s] (time %d ms)%n", procCmd, timeDelta);
+            }
+            else {
+                // error outputs don't match
+                System.out.format(
+                        "%sERROR: [%s] throwed error, but expected error message doesn't match "+
+                                "(time: %d ms)%s%n", red, procCmd, timeDelta, ColorUtil.ANSI_NORMAL);
+                reportErrMatch(expectedErr, pgmErr);
+            }
+        }
+    }
+
+    private void reportErr(String err) {
+        assert reason == null;
+        reason = err;
+    }
+
+    private void reportErrMatch(Annotated<String, String> expected, String found) {
+        assert reason == null;
+        reason = String.format("Expected program error:%n%s%n%nbut found:%n%s%n", expected, found);
+    }
+
+    private void reportOutMatch(Annotated<String, String> expected, String found) {
+        assert reason == null;
+        reason = String.format("Expected program output:%n%s%n%nbut found:%n%s%n", expected, found);
     }
 }

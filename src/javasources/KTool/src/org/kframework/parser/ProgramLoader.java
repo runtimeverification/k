@@ -1,23 +1,21 @@
 package org.kframework.parser;
 
-import java.io.File;
-import java.io.IOException;
-
-import org.kframework.kil.loader.ResolveVariableAttribute;
+import org.kframework.backend.symbolic.RemoveExtraVariable;
+import org.kframework.backend.symbolic.SubstituteFreshVariablesWithSymbolic;
 import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.transformers.RemoveBrackets;
 import org.kframework.compile.transformers.RemoveSyntacticCasts;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.Definition;
-import org.kframework.kil.Rule;
-import org.kframework.kil.Sentence;
-import org.kframework.kil.Term;
+import org.kframework.compile.utils.TermContainsCells;
+import org.kframework.kcheck.utils.ExtractCellContent;
+import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
+import org.kframework.kil.loader.ResolveVariableAttribute;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.krun.K;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
@@ -33,6 +31,9 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.io.File;
+import java.io.IOException;
 
 public class ProgramLoader {
 
@@ -85,12 +86,6 @@ public class ProgramLoader {
 		return loadPgmAst(content, filename, true, startSymbol, context);
 	}
 
-	public static ASTNode loadPgmAst(File pgmFile, boolean kappize, String startSymbol, Context context) throws IOException, TransformerException {
-		String filename = pgmFile.getCanonicalFile().getAbsolutePath();
-		String content = FileUtil.getFileContent(filename);
-		return loadPgmAst(content, filename, kappize, startSymbol, context);
-	}
-
 	/**
 	 * Print maudified program to standard output.
 	 * 
@@ -108,7 +103,7 @@ public class ProgramLoader {
 			ASTNode out;
 			if (whatParser == GlobalSettings.ParserType.GROUND) {
 				org.kframework.parser.concrete.KParser.ImportTblGround(context.kompiled.getCanonicalPath() + "/ground/Concrete.tbl");
-				out = DefinitionLoader.parseCmdString(content, "", filename, context);
+				out = DefinitionLoader.parseCmdString(content, filename, context);
 				out = out.accept(new RemoveBrackets(context));
 				out = out.accept(new AddEmptyLists(context));
 				out = out.accept(new RemoveSyntacticCasts(context));
@@ -120,7 +115,12 @@ public class ProgramLoader {
 				out = out.accept(new RemoveBrackets(context));
 				out = out.accept(new AddEmptyLists(context));
 				out = out.accept(new RemoveSyntacticCasts(context));
-				try {
+                out = out.accept(new SubstituteFreshVariablesWithSymbolic(context));
+                TermContainsCells tcc = new TermContainsCells(context);
+                out.accept(tcc);
+
+                try {
+                    // this appends wrapping cells to anything. Why is that?
 					out = new RuleCompilerSteps(def, context).compile(
                             new Rule((Sentence) out),
                             null);
@@ -128,6 +128,16 @@ public class ProgramLoader {
 					out = (ASTNode) e.getResult();
 				}
 				out = ((Rule) out).getBody();
+
+                // if the parser is called on a simple program, with no wrapping cells
+                // then return only the content of the <k> cell. This is because we add
+                // cells in the previous step (RuleCompilerSteps).
+                if (!tcc.getTermContainsCells()) {
+                    ExtractCellContent extractor = new ExtractCellContent(context, "k");
+                    out.accept(extractor);
+                    out = extractor.getContent();
+                    out = out.accept(new RemoveExtraVariable(context));
+                }
 			} else if (whatParser == GlobalSettings.ParserType.BINARY) {
                 out = (org.kframework.kil.Cell) BinaryLoader.load(filename);
 			} else {
