@@ -49,12 +49,12 @@ public class KTest {
                             new ConfigFileParser(new File(cmdArgs.targetFile),
                                     cmdArgs).parse(),
                             cmdArgs.skips, cmdArgs.verbose, cmdArgs.colorSetting,
-                            cmdArgs.timeout);
+                            cmdArgs.timeout, true);
                     break;
                 case "k":
                     tests = new TestSuite(TestCase.makeTestCaseFromK(cmdArgs),
                             cmdArgs.skips, cmdArgs.verbose, cmdArgs.colorSetting,
-                            cmdArgs.timeout);
+                            cmdArgs.timeout, true);
                     break;
                 default:
                     // this code should be unreacable, because `validateArgs' should ensure that
