@@ -167,6 +167,14 @@ public class ConfigFileParser {
         if (hasElement(childNodes, "program"))
             overridePgmSpecificKRunOpts(ret, parsePgmSpecificKRunOpts(childNodes));
 
+        // handle extended attributes
+        if (includeAttrs.getNamedItem("more-programs") != null)
+            for (String p : splitNodeValue(includeAttrs.getNamedItem("more-programs")))
+                extendPrograms(ret, annotate(normalize(p, cmdArgs.programs), location));
+        if (includeAttrs.getNamedItem("more-results") != null)
+            for (String r : splitNodeValue(includeAttrs.getNamedItem("more-results")))
+                extendResults(ret, annotate(normalize(r, cmdArgs.programs), location));
+
         return ret;
     }
 
@@ -189,6 +197,16 @@ public class ConfigFileParser {
             List<TestCase> tests, Map<String, List<PgmArg>> pgmSpecificKrunOpts) {
         for (TestCase tc : tests)
             tc.setPgmSpecificKRunOpts(pgmSpecificKrunOpts);
+    }
+
+    private void extendPrograms(List<TestCase> tests, Annotated<String, LocationData> p) {
+        for (TestCase tc : tests)
+            tc.addProgram(p);
+    }
+
+    private void extendResults(List<TestCase> tests, Annotated<String, LocationData> r) {
+        for (TestCase tc : tests)
+            tc.addResult(r);
     }
 
     private boolean hasElement(NodeList nodes, String elemName) {
