@@ -151,7 +151,69 @@ public class ConfigFileParser {
             throw new InvalidConfigError("error occured while parsing included file " + file +
                     ":\n" + e.getMessage(), location);
         }
-        return configFileParser.parse();
+
+        List<TestCase> ret = configFileParser.parse();
+
+        // handle overridden attributes
+        NodeList childNodes = includeNode.getChildNodes();
+        if (includeAttrs.getNamedItem("exclude") != null)
+            overrideExcludes(ret, splitNodeValue(includeAttrs.getNamedItem("exclude")));
+        // note that we need to run `hasElement' because parse* methods will return containers
+        // with 0 element when relevant elements are not found.
+        if (hasElement(childNodes, "kompile-option"))
+            overrideKompileOptions(ret, parseKompileOpts(childNodes));
+        if (hasElement(childNodes, "all-programs"))
+            overrideKrunOpts(ret, parseAllPgmsKrunOpts(childNodes));
+        if (hasElement(childNodes, "program"))
+            overridePgmSpecificKRunOpts(ret, parsePgmSpecificKRunOpts(childNodes));
+
+        // handle extended attributes
+        if (includeAttrs.getNamedItem("more-programs") != null)
+            for (String p : splitNodeValue(includeAttrs.getNamedItem("more-programs")))
+                extendPrograms(ret, annotate(normalize(p, cmdArgs.programs), location));
+        if (includeAttrs.getNamedItem("more-results") != null)
+            for (String r : splitNodeValue(includeAttrs.getNamedItem("more-results")))
+                extendResults(ret, annotate(normalize(r, cmdArgs.programs), location));
+
+        return ret;
+    }
+
+    private void overrideExcludes(List<TestCase> tests, String[] excludes) {
+        for (TestCase tc : tests)
+            tc.setExcludes(excludes);
+    }
+
+    private void overrideKompileOptions(List<TestCase> tests, List<PgmArg> kompileOpts) {
+        for (TestCase tc : tests)
+            tc.setKompileOpts(kompileOpts);
+    }
+
+    private void overrideKrunOpts(List<TestCase> tests, List<PgmArg> krunOpts) {
+        for (TestCase tc : tests)
+            tc.setKrunOpts(krunOpts);
+    }
+
+    private void overridePgmSpecificKRunOpts(
+            List<TestCase> tests, Map<String, List<PgmArg>> pgmSpecificKrunOpts) {
+        for (TestCase tc : tests)
+            tc.setPgmSpecificKRunOpts(pgmSpecificKrunOpts);
+    }
+
+    private void extendPrograms(List<TestCase> tests, Annotated<String, LocationData> p) {
+        for (TestCase tc : tests)
+            tc.addProgram(p);
+    }
+
+    private void extendResults(List<TestCase> tests, Annotated<String, LocationData> r) {
+        for (TestCase tc : tests)
+            tc.addResult(r);
+    }
+
+    private boolean hasElement(NodeList nodes, String elemName) {
+        for (int i = 0; i < nodes.getLength(); i++)
+            if (nodes.item(i).getNodeName().equals(elemName))
+                return true;
+        return false;
     }
 
     /**
