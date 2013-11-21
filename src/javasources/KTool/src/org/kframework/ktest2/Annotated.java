@@ -5,6 +5,7 @@ public class Annotated<T1, T2> {
     private final T2 ann;
 
     public Annotated(T1 obj, T2 ann) {
+        assert(obj != null);
         this.obj = obj;
         this.ann = ann;
     }

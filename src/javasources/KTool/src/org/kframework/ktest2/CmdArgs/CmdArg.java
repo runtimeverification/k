@@ -78,7 +78,7 @@ public class CmdArg {
      */
     public final int timeout;
 
-    private CmdArg(String directory, String programs, String results, String[] extensions,
+    public CmdArg(String directory, String programs, String results, String[] extensions,
                    String[] excludes, Set<KTestStep> skips, boolean generateReport,
                    String targetFile, boolean verbose, ColorSetting colorSetting, int timeout) {
         this.directory = directory;
@@ -102,12 +102,13 @@ public class CmdArg {
      * @throws InvalidArgumentException in case of an invalid argument
      */
     public static CmdArg validateArgs(CommandLine cmdOpts) throws InvalidArgumentException {
+        String currentDir = System.getProperty("user.dir");
         String[] args = cmdOpts.getArgs();
 
         if (args.length != 1)
             throw new InvalidArgumentException("ktest requires exactly one <file> parameter.");
 
-        String targetFile = args[0];
+        String targetFile = FilenameUtils.concat(currentDir, args[0]);
         if (!new File(targetFile).isFile())
             throw new InvalidArgumentException("target file argument is not a valid file: " +
                     targetFile);
@@ -118,11 +119,11 @@ public class CmdArg {
                     "(should be .xml or .k)");
 
         String directory = getDirectoryArg(cmdOpts, Constants.DIRECTORY_OPTION,
-                System.getProperty("user.dir"));
+                currentDir);
         String programs = getDirectoryArg(cmdOpts, Constants.PROGRAMS_OPTION,
-                System.getProperty("user.dir"));
+                FilenameUtils.concat(currentDir, FilenameUtils.getFullPath(targetFile)));
         String results = getDirectoryArg(cmdOpts, Constants.RESULTS_OPTION,
-                System.getProperty("user.dir"));
+                FilenameUtils.concat(currentDir, FilenameUtils.getFullPath(targetFile)));
 
         String[] extensions = cmdOpts.getOptionValue(Constants.EXTENSIONS_OPTION, "").split("\\s+");
         String[] excludes = cmdOpts.getOptionValue(Constants.EXCLUDE_OPTION, "").split("\\s+");

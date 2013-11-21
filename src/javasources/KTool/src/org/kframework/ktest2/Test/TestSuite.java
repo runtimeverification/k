@@ -32,8 +32,7 @@ public class TestSuite {
     private final ColorSetting colorSetting;
 
     /**
-     * List of ktest steps to skip. This array should be sorted because it'll be used for binary
-     * search (Java doesn't have linear search algorithm in stdlib)
+     * Set of ktest steps to skip.
      */
     private final Set<KTestStep> skips;
 
@@ -129,7 +128,7 @@ public class TestSuite {
 
         // collect successful test cases
         for (Proc<TestCase> p : ps)
-            if (p.getReturnCode() == 0)
+            if (p.isSuccess())
                 successfulTests.add(p.getObj());
 
         printResult(successfulTests.size() == len);
@@ -151,7 +150,8 @@ public class TestSuite {
         for (TestCase tc : tests) {
             String definitionPath = tc.getDefinition();
             assert new File(definitionPath).isFile();
-            Proc<TestCase> p = new Proc<>(tc, new String[] { "kompile", "--pdf", definitionPath },
+            Proc<TestCase> p = new Proc<>(tc,
+                    new String[] { "kompile", "--backend=pdf", definitionPath },
                     timeout, verbose, colorSetting);
             ps.add(p);
             tpe.execute(p);
@@ -160,7 +160,7 @@ public class TestSuite {
 
         boolean ret = true;
         for (Proc<TestCase> p : ps)
-            ret &= p.getReturnCode() == 0;
+            ret &= p.isSuccess();
 
         printResult(ret);
 
@@ -174,7 +174,7 @@ public class TestSuite {
      * @throws InterruptedException
      */
     private boolean runKRunSteps(List<TestCase> tests) throws InterruptedException {
-        List<TestCase> successfulTests = new LinkedList<>();
+        List<TestCase> kompileSuccesses = new LinkedList<>();
 
         // collect definitions that are not yet kompiled and kompile them first
         ArrayList<TestCase> notKompiled = new ArrayList<>();
@@ -182,14 +182,15 @@ public class TestSuite {
             if (!tc.isDefinitionKompiled())
                 notKompiled.add(tc);
             else
-                successfulTests.add(tc);
+                kompileSuccesses.add(tc);
         }
         System.out.println("Kompiling definitions that are not yet kompiled.");
-        successfulTests.addAll(runKompileSteps(notKompiled));
+        kompileSuccesses.addAll(runKompileSteps(notKompiled));
 
         // at this point we have a subset of tests that are successfully kompiled,
         // so run programs of those tests
-        for (TestCase tc : successfulTests) {
+        boolean testCaseRet = true;
+        for (TestCase tc : kompileSuccesses) {
 
             List<KRunProgram> programs = tc.getPrograms();
             int inputs = 0, outputs = 0, errors = 0;
@@ -211,16 +212,15 @@ public class TestSuite {
                 testCaseProcs.add(runKRun(program));
             stopTpe();
 
-            boolean testCaseRet = true;
             for (Proc<KRunProgram> p : testCaseProcs)
                 if (p != null) // p may be null when krun test is skipped because of missing
                                // input file
-                    testCaseRet &= p.getReturnCode() == 0;
+                    testCaseRet &= p.isSuccess();
 
             printResult(testCaseRet);
         }
 
-        return successfulTests.size() == tests.size();
+        return kompileSuccesses.size() == tests.size() && testCaseRet;
     }
 
     private void startTpe() {
