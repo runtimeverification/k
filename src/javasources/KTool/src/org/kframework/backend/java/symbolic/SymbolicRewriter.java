@@ -300,6 +300,9 @@ public class SymbolicRewriter {
         return null;
     }
 
+    // Unifies the term with the pattern, and returns a map from variables in
+    // the pattern to the terms they unify with. Returns null if the term
+    // can't be unified with the pattern.
     private Map<Variable, Term> getSubstitutionMap(ConstrainedTerm term, Rule pattern) {
         // Create the initial constraints based on the pattern
         SymbolicConstraint termConstraint = new SymbolicConstraint(term.termContext());
@@ -355,7 +358,6 @@ public class SymbolicRewriter {
     
      * @return a list of substitution mappings for results that matched the pattern
      */
-    //public List<ConstrainedTerm> search(
     public List<Map<Variable,Term>> search(
             ConstrainedTerm initialTerm,
             ConstrainedTerm targetTerm,
@@ -368,11 +370,13 @@ public class SymbolicRewriter {
 
         List<Map<Variable,Term>> searchResults = new ArrayList<Map<Variable,Term>>();
         Set<ConstrainedTerm> visited = new HashSet<ConstrainedTerm>();
-        List<ConstrainedTerm> queue = new ArrayList<ConstrainedTerm>();
-        List<ConstrainedTerm> nextQueue = new ArrayList<ConstrainedTerm>();
+
+        // The search queues will map terms to their depth in terms of transitions.
+        Map<ConstrainedTerm,Integer> queue = new HashMap<ConstrainedTerm,Integer>();
+        Map<ConstrainedTerm,Integer> nextQueue = new HashMap<ConstrainedTerm,Integer>();
 
         visited.add(initialTerm);
-        queue.add(initialTerm);
+        queue.put(initialTerm,0);
 
         if (searchType == SearchType.ONE) {
             depth = 1;
@@ -385,8 +389,10 @@ public class SymbolicRewriter {
         }
 
     label:
-        for (step = 0; !queue.isEmpty() && step != depth; ++step) {
-            for (ConstrainedTerm term : queue) {
+        for (step = 0; !queue.isEmpty(); ++step) {
+            for (Map.Entry<ConstrainedTerm, Integer> entry : queue.entrySet()) {
+                ConstrainedTerm term = entry.getKey();
+                Integer currentDepth = entry.getValue();
                 computeRewriteStep(term);
 
                 if (results.isEmpty() && searchType == SearchType.FINAL) {
@@ -400,19 +406,24 @@ public class SymbolicRewriter {
                 }
 
                 for (ConstrainedTerm result : results) {
-                    // Only add a state to visited if it is a transition
-                    if (!transition || visited.add(result)) {
-                        nextQueue.add(result);
-                    }
-                    // If we found a structural rule we only need one transition
                     if (!transition) {
+                        nextQueue.put(result, currentDepth);
                         break;
-                    } else if (searchType != SearchType.FINAL) {
-                        Map<Variable, Term> map = getSubstitutionMap(result, pattern);
-                        if (map != null) {
-                            searchResults.add(map);
-                            if (searchResults.size() == bound) {
-                                break label;
+                    } else {
+                        // Continue searching if we haven't reached our target
+                        // depth and we haven't already visited this state.
+                        if (currentDepth + 1 != depth && visited.add(result)) {
+                            nextQueue.put(result, currentDepth + 1);
+                        }
+                        // If we aren't searching for only final results, then
+                        // also add this as a result if it matches the pattern.
+                        if (searchType != SearchType.FINAL || currentDepth + 1 == depth) {
+                            Map<Variable, Term> map = getSubstitutionMap(result, pattern);
+                            if (map != null) {
+                                searchResults.add(map);
+                                if (searchResults.size() == bound) {
+                                    break label;
+                                }
                             }
                         }
                     }
@@ -420,7 +431,7 @@ public class SymbolicRewriter {
             }
 
             /* swap the queues */
-            List<ConstrainedTerm> temp;
+            Map<ConstrainedTerm, Integer> temp;
             temp = queue;
             queue = nextQueue;
             nextQueue = temp;
