@@ -364,16 +364,6 @@ public class MetaK {
                || sort.equals("#ModelCheckResult");
 	}
 
-    /**
-     * Checks data sorts
-     * @param String sort
-     * @return true if sort is data sort
-     */
-    public static boolean isDataSort(String sort) {
-        List<String> dataSorts = Arrays.asList("Int", "Bool", "String");
-        return dataSorts.contains(sort);
-    }
-
 	public static boolean isComputationSort(String sort) {
 		return sort.equals(KSorts.K) || sort.equals(KSorts.KITEM) || !MetaK.isKSort(sort);
 	}

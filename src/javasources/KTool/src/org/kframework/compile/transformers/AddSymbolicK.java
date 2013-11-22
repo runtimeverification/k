@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 public class AddSymbolicK extends CopyOnWriteTransformer {
 
-    private static final String SymbolicConstructorPrefix = "#sym";
+	private static final String SymbolicConstructorPrefix = "#sym";
 
 	public AddSymbolicK(Context context) {
 		super("Add symbolic constructors", context);
@@ -90,8 +90,5 @@ public class AddSymbolicK extends CopyOnWriteTransformer {
 			return node;
 	}
 
-    public static String getSymbolicConstructorPrefix() {
-        return SymbolicConstructorPrefix;
-    }
 }
 
