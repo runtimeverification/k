@@ -86,20 +86,20 @@ public class TestCase {
 
     public static TestCase makeTestCaseFromK(CmdArg cmdArgs) throws InvalidConfigError {
         Annotated<String, LocationData> targetFile =
-                new Annotated<>(cmdArgs.targetFile, new LocationData());
+                new Annotated<>(cmdArgs.getTargetFile(), new LocationData());
 
         List<Annotated<String, LocationData>> programs = new LinkedList<>();
-        programs.add(new Annotated<>(cmdArgs.results, new LocationData()));
+        programs.add(new Annotated<>(cmdArgs.getResults(), new LocationData()));
 
         List<Annotated<String,LocationData>> results = new LinkedList<>();
-        results.add(new Annotated<>(cmdArgs.results, new LocationData()));
+        results.add(new Annotated<>(cmdArgs.getResults(), new LocationData()));
 
         List<PgmArg> emptyOpts = new ArrayList<>(0);
 
         HashMap<String, List<PgmArg>> emptyOptsMap = new HashMap<>(0);
 
-        return new TestCase(targetFile, programs, cmdArgs.extensions,
-                cmdArgs.excludes, results, emptyOpts, emptyOpts, emptyOptsMap,
+        return new TestCase(targetFile, programs, cmdArgs.getExtensions(),
+                cmdArgs.getExcludes(), results, emptyOpts, emptyOpts, emptyOptsMap,
                 new HashSet<KTestStep>());
     }
 

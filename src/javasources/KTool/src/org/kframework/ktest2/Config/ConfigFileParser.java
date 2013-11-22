@@ -124,24 +124,26 @@ public class ConfigFileParser {
                 (LocationData) includeNode.getUserData(LocationData.LOCATION_DATA_KEY);
 
         String fileValue = includeAttrs.getNamedItem("file").getNodeValue();
-        String file = concat(FilenameUtils.getFullPath(cmdArgs.targetFile),fileValue);
+        String file = concat(FilenameUtils.getFullPath(cmdArgs.getTargetFile()),fileValue);
 
         if (!new File(file).isFile())
             throw new InvalidConfigError(
                     "file attribute " + file + " in `include' is not a valid file", location);
 
-        String directory = concat(cmdArgs.directory,
+        String directory = concat(cmdArgs.getDirectory(),
                 getAttributeWDefault(includeAttrs, "directory", ""));
 
-        String programs = concat(cmdArgs.programs,
+        String programs = concat(cmdArgs.getPrograms(),
                 getAttributeWDefault(includeAttrs, "programs", FilenameUtils.getFullPath(file)));
 
-        String results = concat(cmdArgs.results,
+        String results = concat(cmdArgs.getResults(),
                 getAttributeWDefault(includeAttrs, "results", FilenameUtils.getFullPath(file)));
 
-        CmdArg cmdArgs1 = new CmdArg(directory, programs, results, cmdArgs.extensions,
-                cmdArgs.excludes, cmdArgs.skips, cmdArgs.generateReport, file, cmdArgs.verbose,
-                cmdArgs.colorSetting, cmdArgs.timeout);
+        CmdArg cmdArgs1 = new CmdArg(cmdArgs)
+                .setDirectory(directory)
+                .setPrograms(programs)
+                .setResults(results)
+                .setTargetFile(file);
 
         ConfigFileParser configFileParser;
         try {
@@ -170,10 +172,10 @@ public class ConfigFileParser {
         // handle extended attributes
         if (includeAttrs.getNamedItem("more-programs") != null)
             for (String p : splitNodeValue(includeAttrs.getNamedItem("more-programs")))
-                extendPrograms(ret, annotate(normalize(p, cmdArgs.programs), location));
+                extendPrograms(ret, annotate(normalize(p, cmdArgs.getPrograms()), location));
         if (includeAttrs.getNamedItem("more-results") != null)
             for (String r : splitNodeValue(includeAttrs.getNamedItem("more-results")))
-                extendResults(ret, annotate(normalize(r, cmdArgs.programs), location));
+                extendResults(ret, annotate(normalize(r, cmdArgs.getPrograms()), location));
 
         return ret;
     }
@@ -234,13 +236,13 @@ public class ConfigFileParser {
 
         Annotated<String, LocationData> definition =
                 annotate(normalize(addDefinitionExt(definitionNode.getNodeValue()),
-                        cmdArgs.directory), location);
+                        cmdArgs.getDirectory()), location);
         List<Annotated<String, LocationData>> programs =
                 annotateLst(normalize(splitNodeValue(testAttrs.getNamedItem("programs")),
-                        cmdArgs.programs), location);
+                        cmdArgs.getPrograms()), location);
         List<Annotated<String, LocationData>> results =
                 annotateLst(normalize(splitNodeValue(testAttrs.getNamedItem("results")),
-                        cmdArgs.results), location);
+                        cmdArgs.getResults()), location);
 
         String[] extensions = splitNodeValue(testAttrs.getNamedItem("extension"));
         String[] excludes = splitNodeValue(testAttrs.getNamedItem("exclude"));
@@ -383,7 +385,7 @@ public class ConfigFileParser {
             if (childNode.getNodeType() == Node.ELEMENT_NODE
                     && childNode.getNodeName().equals("program")) {
                 Element elem = (Element) childNode;
-                ret.put(concat(cmdArgs.programs, elem.getAttribute("name")),
+                ret.put(concat(cmdArgs.getPrograms(), elem.getAttribute("name")),
                         parseKrunOpts(elem.getChildNodes()));
             }
         }
