@@ -396,8 +396,6 @@ public class MaudeFilter extends BackendFilter {
                 || context.getDataStructureSorts().containsKey(variable.getSort())) {
             result.append("_`(_`)(");
             if (context.getDataStructureSorts().containsKey(variable.getSort())) {
-                  // chathhorn
-                // result.append(context.dataStructureSortOf(variable.getSort()).type() + "2KLabel_(");
                   String ktype = context.dataStructureSortOf(variable.getSort()).type();
                   ktype = ktype.equals("K") ? "KList" : ktype;
                 result.append(ktype + "2KLabel_(");
@@ -804,7 +802,6 @@ public class MaudeFilter extends BackendFilter {
 	public void visit(KInjectedLabel kInjectedLabel) {
 		Term term = kInjectedLabel.getTerm();
         String sort = term.getSort();
-        // chathhorn
         if (sort.equals("K")) sort = "KList";
         if (MetaK.isKSort(sort)) {
 			//result.append(StringUtil.escapeMaude(kInjectedLabel.getInjectedSort(term.getSort())));
