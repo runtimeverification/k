@@ -1,5 +1,7 @@
 package org.kframework.utils;
 
+import org.kframework.utils.general.GlobalSettings;
+
 import java.util.Formatter;
 
 public class Stopwatch {
@@ -26,13 +28,15 @@ public class Stopwatch {
 
 	public void printIntermediate(String message) {
 		long current = System.currentTimeMillis();
-		f.format("%-60s = %5d%n", message, current - lastIntermediate);
+        if (GlobalSettings.verbose)
+		    f.format("%-60s = %5d%n", message, current - lastIntermediate);
 		lastIntermediate = current;
 	}
 
 	public void printTotal(String message) {
         printIntermediate("Cleanup");
-		f.format("%-60s = %5d%n", message, lastIntermediate - start);
+        if (GlobalSettings.verbose)
+		    f.format("%-60s = %5d%n", message, lastIntermediate - start);
 	}
 
 	public long getIntermediateMilliseconds() {

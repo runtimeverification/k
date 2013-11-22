@@ -92,8 +92,7 @@ public class ProgramLoader {
 	 */
 	public static Term processPgm(String content, String filename, Definition def, String startSymbol,
             Context context, GlobalSettings.ParserType whatParser) throws TransformerException {
-		if (GlobalSettings.verbose)
-			Stopwatch.sw.printIntermediate("Importing Files");
+		Stopwatch.sw.printIntermediate("Importing Files");
 
 		try {
 			ASTNode out;
@@ -125,9 +124,7 @@ public class ProgramLoader {
                 out = loadPgmAst(content, filename, startSymbol, context);
                 out = out.accept(new ResolveVariableAttribute(context));
 			}
-			if (GlobalSettings.verbose) {
-                Stopwatch.sw.printIntermediate("Parsing Program");
-			}
+            Stopwatch.sw.printIntermediate("Parsing Program");
 
 			return (Term) out;
 		} catch (IOException e) {

@@ -151,8 +151,7 @@ public class RLBackend extends BasicBackend implements Backend {
             .append(builtinsFilter.getResult()).append("endm\n");
 		FileUtil.save(context.dotk.getAbsolutePath() + "/builtins.maude",
             builtins);
-		if (GlobalSettings.verbose)
-			sw.printIntermediate("Generating equations for hooks");
+		sw.printIntermediate("Generating equations for hooks");
 		return super.firstStep(javaDef);
 	}
 

@@ -114,8 +114,8 @@ public class KCheckFrontEnd {
         verbose(cmd, context);
 	}
 	private static void verbose(CommandLine cmd, Context context) {
+        Stopwatch.sw.printTotal("Total");
 		if (GlobalSettings.verbose) {
-			Stopwatch.sw.printTotal("Total");
             context.printStatistics();
         }
 		GlobalSettings.kem.print();
@@ -136,9 +136,6 @@ public class KCheckFrontEnd {
 
 			CompilerSteps<Definition> steps = backend.getCompilationSteps();
 
-			if (GlobalSettings.verbose) {
-				steps.setSw(Stopwatch.sw);
-			}
 			if (step == null) {
 				step = backend.getDefaultStep();
 			}

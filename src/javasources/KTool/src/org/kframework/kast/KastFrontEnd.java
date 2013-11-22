@@ -228,10 +228,8 @@ public class KastFrontEnd {
                 e.printStackTrace();
             }
 
-            if (GlobalSettings.verbose) {
-				Stopwatch.sw.printIntermediate("Maudify Program");
-                Stopwatch.sw.printTotal("Total");
-			}
+            Stopwatch.sw.printIntermediate("Maudify Program");
+            Stopwatch.sw.printTotal("Total");
 			GlobalSettings.kem.print();
 		} catch (TransformerException e) {
 			e.report();

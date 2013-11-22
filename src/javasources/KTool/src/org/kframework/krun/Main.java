@@ -129,8 +129,7 @@ public class Main {
             cfgCleaned = ((Configuration) cfgCleanedNode).getBody();
         }
 
-        if (GlobalSettings.verbose)
-            sw.printIntermediate("Plug configuration variables");
+        sw.printIntermediate("Plug configuration variables");
 
         Term configuration = (Term) cfgCleaned.accept(new SubstitutionFilter(args, context));
         configuration = (Term) configuration .accept(new Cell2DataStructure(context));
@@ -194,8 +193,7 @@ public class Main {
             output.put("$stdin", StringBuiltin.EMPTY);
         }
 
-        if (GlobalSettings.verbose)
-            sw.printIntermediate("Make configuration");
+        sw.printIntermediate("Make configuration");
 
         return plug(output, context);
     }
@@ -244,8 +242,7 @@ public class Main {
                         pattern = (ASTNode) e.getResult();
                     }
                     patternRule = new Rule((Sentence) pattern);
-                    if (GlobalSettings.verbose)
-                        sw.printIntermediate("Parsing search pattern");
+                    sw.printIntermediate("Parsing search pattern");
                 }
 
                 if (K.do_search) {
@@ -298,8 +295,7 @@ public class Main {
                                             (K.term != null), context), steps);
                         }
 
-                        if (GlobalSettings.verbose)
-                            sw.printTotal("Search total");
+                        sw.printTotal("Search total");
                     } else {
                         org.kframework.utils.Error.report("For the search option you must specify that --maude-cmd=search");
                     }
@@ -326,8 +322,7 @@ public class Main {
                                     makeConfiguration(KAST, null, rp,
                                             (K.term != null), context));
 
-                    if (GlobalSettings.verbose)
-                        sw.printTotal("Model checking total");
+                    sw.printTotal("Model checking total");
                 } else if (K.prove.length() > 0) {
                     File proofFile = new File(K.prove);
                     if (!proofFile.exists()) {
@@ -347,14 +342,12 @@ public class Main {
                     result = krun.step(makeConfiguration(KAST, null, rp,
                             (K.term != null), context), depth);
 
-                    if (GlobalSettings.verbose)
-                        sw.printTotal("Bounded execution total");
+                    sw.printTotal("Bounded execution total");
                 } else {
                     result = krun.run(makeConfiguration(KAST, null, rp,
                             (K.term != null), context));
 
-                    if (GlobalSettings.verbose)
-                        sw.printTotal("Normal execution total");
+                    sw.printTotal("Normal execution total");
                 }
 
                 if (cmd.hasOption("pattern") && !K.do_search) {
@@ -739,8 +732,7 @@ public class Main {
             GlobalSettings.fastKast = !GlobalSettings.fastKast;
         }
 
-        if (GlobalSettings.verbose)
-            sw.printIntermediate("Deleting temporary krun directory");
+        sw.printIntermediate("Deleting temporary krun directory");
 
         try {
 
@@ -969,8 +961,7 @@ public class Main {
                 }
             }
 
-            if (GlobalSettings.verbose)
-                sw.printIntermediate("Parsing command line options");
+            sw.printIntermediate("Parsing command line options");
 
             /* CLEANUP_OPTIONS */
             if (!cmd.hasOption("directory")) {
@@ -1029,8 +1020,7 @@ public class Main {
 			 * System.out.println("K.compiled_def=" + K.compiled_def);
 			 */
 
-            if (GlobalSettings.verbose)
-                sw.printIntermediate("Checking compiled definition");
+            sw.printIntermediate("Checking compiled definition");
 
             // in KAST variable we obtain the output from running kast process
             // on a program defined in K
@@ -1050,14 +1040,12 @@ public class Main {
                     throw new AssertionError("unreachable");
                 }
 
-                if (GlobalSettings.verbose)
-                    sw.printIntermediate("Reading definition from binary");
+                sw.printIntermediate("Reading definition from binary");
 
                 // This is essential for generating maude
                 javaDef = new FlattenModules(context).compile(javaDef, null);
 
-                if (GlobalSettings.verbose)
-                    sw.printIntermediate("Flattening modules");
+                sw.printIntermediate("Flattening modules");
 
                 try {
                     javaDef = (Definition) javaDef
@@ -1066,24 +1054,20 @@ public class Main {
                     e.report();
                 }
 
-                if (GlobalSettings.verbose)
-                    sw.printIntermediate("Adding top cell to configuration");
+                sw.printIntermediate("Adding top cell to configuration");
 
                 javaDef.preprocess(context);
 
-                if (GlobalSettings.verbose)
-                    sw.printIntermediate("Preprocessing definition");
+                sw.printIntermediate("Preprocessing definition");
 
                 K.definition = javaDef;
 
-                if (GlobalSettings.verbose)
-                    sw.printIntermediate("Importing tables");
+                sw.printIntermediate("Importing tables");
 
                 K.kompiled_cfg = (org.kframework.kil.Configuration)
                     BinaryLoader.load(K.compiled_def + "/configuration.bin");
 
-                if (GlobalSettings.verbose)
-                    sw.printIntermediate("Reading configuration from binary");
+                sw.printIntermediate("Reading configuration from binary");
             }
 
             if (!cmd.hasOption("main-module")) {
@@ -1093,8 +1077,7 @@ public class Main {
                 K.syntax_module = K.definition.getMainSyntaxModule();
             }
 
-            if (GlobalSettings.verbose)
-                sw.printIntermediate("Resolving main and syntax modules");
+            sw.printIntermediate("Resolving main and syntax modules");
 
             if (K.pgm != null) {
                 KAST = rp.runParserOrDie(K.getProgramParser(), K.pgm, false, null, context);
@@ -1102,8 +1085,7 @@ public class Main {
                 KAST = null;
             }
 
-            if (GlobalSettings.verbose)
-                sw.printIntermediate("Kast process");
+            sw.printIntermediate("Kast process");
 
             if (K.term != null) {
                 if (K.parser.equals("kast") && !cmd.hasOption("parser")) {

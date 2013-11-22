@@ -66,8 +66,7 @@ public class SymbolicBackend extends BasicBackend implements Backend {
             .append(" including ").append(mainModule).append("-BASE .\n")
             .append(builtinsFilter.getResult()).append("endm\n");
         FileUtil.save(context.dotk.getAbsolutePath() + "/builtins.maude", builtins);
-		if (GlobalSettings.verbose)
-			sw.printIntermediate("Generating equations for hooks");
+		sw.printIntermediate("Generating equations for hooks");
 		return super.firstStep(javaDef);
 	}
 
