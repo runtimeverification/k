@@ -91,6 +91,39 @@ doc UserList {{{ A production item for a cons-list with separator, like List{Use
 doc Lexical {{{ A terminal in a {@link Production}. }}}
 
 /*******************************
+**** TERMS                  ****
+*******************************/
+
+syn ASTNode ::=
+  "Term" String[sort] [Term, abstract]
+
+syn Term ::=
+  // BackendTerm.java:public class BackendTerm extends Term {
+  // Bracket.java:public class Bracket extends Term {
+  Cast
+  // Cell.java:public class Cell extends Term {
+  // FreezerHole.java:public class FreezerHole extends Term {
+  // Freezer.java:public class Freezer extends Term {
+| "HOLE" [Hole]
+| Term[label] "(" Term[child] ")" [KApp]
+  // KInjectedLabel.java:public class KInjectedLabel extends Term {
+  KLabel
+  ListTerminator
+| "(" Term[left] "=>" Term[right] ")" [Rewrite]
+  TermComment.java
+  // TermCons.java:public class TermCons extends Term {
+  Terminal
+  Variable
+
+  // BuiltinLookup.java:public abstract class BuiltinLookup extends Term {
+  // CollectionItem.java:public abstract class CollectionItem extends Term {
+  // Collection.java:public abstract class Collection extends Term {
+  // DataStructureBuiltin.java:public abstract class DataStructureBuiltin extends Term {
+  // ListUpdate.java:public class ListUpdate extends Term {
+  // MapUpdate.java:public class MapUpdate extends Term {
+  // SetUpdate.java:public class SetUpdate extends Term {
+    
+/*******************************
 **** EXTRA CODE FOR CLASSES ****
 *******************************/
 code ModuleItem {{{
