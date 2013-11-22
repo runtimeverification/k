@@ -24,8 +24,6 @@ public class LatexBackend extends BasicBackend {
 	}
 
     public void compile(Definition javaDef) throws IOException {
-        Stopwatch sw = new Stopwatch();
-
         String fileSep = System.getProperty("file.separator");
         String endl = System.getProperty("line.separator");
 

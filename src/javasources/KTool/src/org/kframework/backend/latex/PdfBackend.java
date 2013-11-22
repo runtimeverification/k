@@ -21,8 +21,7 @@ public class PdfBackend extends BasicBackend {
         super(sw, context);
     }
 
-    private static File generatePdf(File latexFile) {
-        Stopwatch sw = new Stopwatch();
+    private File generatePdf(File latexFile) {
         try {
             // Run pdflatex.
             String pdfLatex = "pdflatex";

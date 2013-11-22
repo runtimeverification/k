@@ -130,7 +130,7 @@ public class KCheckFrontEnd {
             Context context) {
 		org.kframework.kil.Definition javaDef;
 		try {
-			Stopwatch.sw.Start();
+			Stopwatch.sw.start();
 			javaDef = DefinitionLoader.loadDefinition(mainFile, lang, backend.autoinclude(), context);
             javaDef.accept(new CountNodesVisitor(context));
 

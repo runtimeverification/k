@@ -95,6 +95,7 @@ public class Main {
         + K.lineSeparator + "In addition you can specify java virtual machine arguments by setting"
         + K.lineSeparator + "the environment variable K_OPTS. Default vm arguments are "
         + K.lineSeparator + "\"-Xss64m -Xmx1024m -Xss8m\", for all K tools on all platforms.";
+
     public static void printKRunUsageS(CommandlineOptions op) {
         org.kframework.utils.Error.helpMsg(USAGE_KRUN, HEADER_STANDARD, FOOTER_STANDARD, op.getOptionsStandard(), new OptionComparator(op.getOptionList()));
     }
@@ -104,7 +105,7 @@ public class Main {
     public static void printDebugUsage(CommandlineOptions op) {
         org.kframework.utils.Error.helpMsg(USAGE_DEBUG, HEADER_STANDARD, FOOTER_STANDARD, op.getOptionsStandard(), new OptionComparator(op.getOptionList()));
     }
-    private static Stopwatch sw = new Stopwatch();
+    private static Stopwatch sw = Stopwatch.sw;
 
     public static Term plug(Map<String, Term> args, Context context) throws TransformerException {
         Configuration cfg = K.kompiled_cfg;
