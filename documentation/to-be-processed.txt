@@ -491,3 +491,18 @@ For example,
    => #write(FD, Content) ~> #close(FD)
 
 TODO: how to read from a file
+
+
+KRUN: CONFIGURATION PARSER VARIABLES:
+-------------------------------------
+
+Suppose that you want to parse configuration variables (say CFG1, CFG2, ...) 
+with different parsers ('parser1', 'parser2', ...).
+Here is how you can set a parser for each configuration variable:
+
+-$ krun -config-var-parser="parser1" -cCFG1="some term" -cCFG3="another term"
+        -config-var-parser="parser2" -cCFG2="other term" 
+
+Note that once you have setup parser1 then it is active until -config-var-parser
+option is used again. That is, in our example, the values of CFG1 and CFG3 are
+parsed using parser1 and the value of CFG2 is parser using parser2.
