@@ -12,6 +12,7 @@ import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.SubstitutionFilter;
 import org.kframework.krun.XmlUtil;
 import org.kframework.krun.api.*;
+import org.kframework.utils.Stopwatch;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -108,6 +109,7 @@ public class MaudeKRun implements KRun {
 		cmd.append(getCounter());
 
         executeKRun(cmd);
+        Stopwatch.sw.printIntermediate("Execution");
         try {
 			return parseRunResult();
 		} catch (IOException e) {

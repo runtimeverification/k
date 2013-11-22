@@ -151,9 +151,14 @@ module STREAM
   //@ When the head is completely evaluated is moved in the cell out:
   rule <k> I:Int => . </k>
        <out> SE:SExp => append(I, SE) </out>
-
+/*
+  // this rule exhibith the infinite evaluation process and it 
+  // is useful for equivalence (see prog-equiv/streams/
   rule <k> I:Int : SE:SExp => SE </k>
        <out> OUT:SExp => append(I, OUT) </out>
+*/
+  rule <k> I:Int : SE:SExp => . </k>
+       <out> OUT:SExp => replace([], I : SE, OUT)  </out>
 
  //@ Stream specification without parameters:
 

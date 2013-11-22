@@ -56,6 +56,14 @@ public class CmdArgParser {
                 ("num").withDescription("Time limit for a test case (seconds). Default is 5000 " +
                 "seconds.").create());
 
+
+        addOption(OptionBuilder.withLongOpt("ignore-white-spaces").hasArg().withArgName("on|off")
+                .withDescription("Ignore white spaces when comparsing results. (Default: on).")
+                .create());
+        addOption(OptionBuilder.withLongOpt("ignore-balanced-parentheses").hasArg()
+                .withArgName("on|off").withDescription("Ignore balanced parentheses when " +
+                "comparsing results. (Default: on).").create());
+
         cmdOpts = new PosixParser().parse(options, args);
     }
 

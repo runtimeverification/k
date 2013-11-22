@@ -1,13 +1,14 @@
 package org.kframework.ktest2.Test;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.kframework.krun.ColorSetting;
-import org.kframework.ktest2.DefaultStringComparator;
-import org.kframework.ktest2.KTestStep;
-import org.kframework.ktest2.PgmArg;
-import org.kframework.ktest2.Proc;
+import org.kframework.ktest2.*;
+import org.kframework.ktest2.CmdArgs.CmdArg;
 import org.kframework.utils.ColorUtil;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 import java.awt.*;
 import java.io.*;
 import java.util.*;
@@ -41,23 +42,43 @@ public class TestSuite {
      */
     private final int timeout;
 
+    private final ReportGen reportGen;
+
+    private final Comparator<String> strComparator;
+
     public TestSuite(List<TestCase> tests, Set<KTestStep> skips, boolean verbose,
-                     ColorSetting colorSetting, int timeout) {
+                     Comparator<String> strComparator, ColorSetting colorSetting,
+                     int timeout, boolean report) {
         this.tests = tests;
         this.skips = skips;
         this.verbose = verbose;
+        this.strComparator = strComparator;
         this.colorSetting = colorSetting;
         this.timeout = timeout;
+        reportGen = report ? new ReportGen() : null;
     }
 
     public TestSuite(TestCase singleTest, Set<KTestStep> skips, boolean verbose,
-                     ColorSetting colorSetting, int timeout) {
+                     Comparator<String> strComparator, ColorSetting colorSetting,
+                     int timeout, boolean report) {
         tests = new LinkedList<>();
         tests.add(singleTest);
         this.skips = skips;
         this.verbose = verbose;
+        this.strComparator = strComparator;
         this.colorSetting = colorSetting;
         this.timeout = timeout;
+        reportGen = report ? new ReportGen() : null;
+    }
+
+    public TestSuite(List<TestCase> tests, CmdArg cmdArg) {
+        this(tests, cmdArg.getSkips(), cmdArg.isVerbose(),
+                cmdArg.getStringComparator(), cmdArg.getColorSetting(), cmdArg.getTimeout(), true);
+    }
+
+    public TestSuite(TestCase singleTest, CmdArg cmdArg) {
+        this(singleTest, cmdArg.getSkips(), cmdArg.isVerbose(),
+                cmdArg.getStringComparator(), cmdArg.getColorSetting(), cmdArg.getTimeout(), true);
     }
 
     /**
@@ -65,7 +86,8 @@ public class TestSuite {
      * @return whether all tests passed or not
      * @throws InterruptedException when some process is interrupted for some reason
      */
-    public boolean run() throws InterruptedException {
+    public boolean run() throws InterruptedException, TransformerException,
+            ParserConfigurationException, IOException {
         boolean ret = true;
         List<TestCase> successfulTests = tests;
 
@@ -81,6 +103,10 @@ public class TestSuite {
         String colorCode = ColorUtil.RgbToAnsi(ret ? Color.green : Color.red, colorSetting);
         String msg = ret ? "SUCCESS" : "FAIL (see details above)";
         System.out.format("%n%s%s%s%n", colorCode, msg, ColorUtil.ANSI_NORMAL);
+
+        // save reports
+        if (reportGen != null)
+            reportGen.save();
 
         return ret;
     }
@@ -120,16 +146,25 @@ public class TestSuite {
             for (int i = 0; i < kompileOpts.size(); i++)
                 args[i+2] = kompileOpts.get(i).toString();
             // execute
-            Proc<TestCase> p = new Proc<>(tc, args, timeout, verbose, colorSetting);
+            Proc<TestCase> p = new Proc<>(tc, args, strComparator, timeout, verbose, colorSetting);
             ps.add(p);
             tpe.execute(p);
         }
         stopTpe();
 
-        // collect successful test cases
+        // collect successful test cases, report failures
         for (Proc<TestCase> p : ps)
             if (p.isSuccess())
                 successfulTests.add(p.getObj());
+            else if (reportGen != null) {
+                TestCase failedTest = p.getObj();
+                reportGen.addFailure(makeRelative(failedTest.getDefinition()),
+                        FilenameUtils.getName(failedTest.getDefinition()),
+                        p.getTimeDelta(),
+                        p.getPgmOut(),
+                        p.getPgmErr(),
+                        p.getReason());
+            }
 
         printResult(successfulTests.size() == len);
 
@@ -152,15 +187,27 @@ public class TestSuite {
             assert new File(definitionPath).isFile();
             Proc<TestCase> p = new Proc<>(tc,
                     new String[] { "kompile", "--backend=pdf", definitionPath },
-                    timeout, verbose, colorSetting);
+                    strComparator, timeout, verbose, colorSetting);
             ps.add(p);
             tpe.execute(p);
         }
         stopTpe();
 
         boolean ret = true;
-        for (Proc<TestCase> p : ps)
-            ret &= p.isSuccess();
+        for (Proc<TestCase> p : ps) {
+            if (!p.isSuccess()) {
+                ret = false;
+                if (reportGen != null) {
+                    TestCase failedTest = p.getObj();
+                    reportGen.addFailure(makeRelative(failedTest.getDefinition()),
+                            FilenameUtils.getBaseName(failedTest.getDefinition()) + ".pdf",
+                            p.getTimeDelta(),
+                            p.getPgmOut(),
+                            p.getPgmErr(),
+                            p.getReason());
+                }
+            }
+        }
 
         printResult(ret);
 
@@ -215,11 +262,29 @@ public class TestSuite {
             for (Proc<KRunProgram> p : testCaseProcs)
                 if (p != null) // p may be null when krun test is skipped because of missing
                                // input file
-                    testCaseRet &= p.isSuccess();
+                {
 
-            printResult(testCaseRet);
+                    KRunProgram pgm = p.getObj();
+                    if (p.isSuccess()) {
+                        if (reportGen != null)
+                            reportGen.addSuccess(makeRelative(tc.getDefinition()),
+                                    FilenameUtils.getName(pgm.pgmName),
+                                    p.getTimeDelta(),
+                                    p.getPgmOut(),
+                                    p.getPgmErr());
+                    } else {
+                        testCaseRet = false;
+                        if (reportGen != null)
+                            reportGen.addFailure(makeRelative(tc.getDefinition()),
+                                    FilenameUtils.getName(pgm.pgmName),
+                                    p.getTimeDelta(),
+                                    p.getPgmOut(),
+                                    p.getPgmErr(),
+                                    p.getReason());
+                    }
+                }
         }
-
+        printResult(testCaseRet);
         return kompileSuccesses.size() == tests.size() && testCaseRet;
     }
 
@@ -283,8 +348,19 @@ public class TestSuite {
                 + (outputContents == null ? "" : "output ")
                 + (errorContents == null ? "" : "error "));
         */
-        Proc<KRunProgram> p = new Proc<>(program, args, inputContents, outputContents,
-                errorContents, new DefaultStringComparator(), timeout, verbose, colorSetting);
+
+        // Annotate expected output and error messages with paths of files that these strings
+        // are defined in (to be used in error messages)
+        Annotated<String, String> outputContentsAnn = null;
+        if (outputContents != null)
+            outputContentsAnn = new Annotated<>(outputContents, program.outputFile);
+
+        Annotated<String, String> errorContentsAnn = null;
+        if (errorContents != null)
+            errorContentsAnn = new Annotated<>(errorContents, program.errorFile);
+
+        Proc<KRunProgram> p = new Proc<>(program, args, inputContents, outputContentsAnn,
+                errorContentsAnn, strComparator, timeout, verbose, colorSetting);
         tpe.execute(p);
         return p;
     }
@@ -295,5 +371,10 @@ public class TestSuite {
         else
             System.out.println(ColorUtil.RgbToAnsi(Color.red, colorSetting) + "FAIL" + ColorUtil
                     .ANSI_NORMAL);
+    }
+
+    private String makeRelative(String absolutePath) {
+        // I'm not sure if this works as expected, but I'm simply removing prefix of absolutePath
+        return absolutePath.replaceFirst(System.getProperty("user.dir"), "");
     }
 }

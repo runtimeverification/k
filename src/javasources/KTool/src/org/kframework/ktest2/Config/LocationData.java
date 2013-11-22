@@ -13,7 +13,6 @@ public class LocationData {
     private final int startColumn;
     private final int endLine;
     private final int endColumn;
-    private final boolean isCmdLine;
 
     public LocationData(String systemId, int startLine,
                         int startColumn, int endLine, int endColumn) {
@@ -23,7 +22,6 @@ public class LocationData {
         this.startColumn = startColumn;
         this.endLine = endLine;
         this.endColumn = endColumn;
-        this.isCmdLine = false;
     }
 
     public LocationData() {
@@ -32,7 +30,6 @@ public class LocationData {
         startColumn = -1;
         endLine = -1;
         endColumn = -1;
-        this.isCmdLine = true;
     }
 
     public String getSystemId() {
@@ -48,7 +45,7 @@ public class LocationData {
     }
 
     public boolean isCmdLine() {
-        return isCmdLine;
+        return systemId == null;
     }
 
     public int getEndLine() {
@@ -61,10 +58,14 @@ public class LocationData {
 
     @Override
     public String toString() {
+        if (systemId == null)
+            return "command line";
         return getSystemId() + getPosStr();
     }
 
     public String getPosStr() {
+        if (startLine == -1 || startColumn == -1 || endLine == -1 || endColumn == -1)
+            return "";
         return "[line " + startLine + ":"
                 + startColumn + " to line " + endLine + ":"
                 + endColumn + "]";

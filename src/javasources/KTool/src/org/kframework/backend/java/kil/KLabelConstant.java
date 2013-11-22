@@ -156,4 +156,13 @@ public class KLabelConstant extends KLabel {
         return context;
     }
 
+    public boolean isBinder() {
+        for (Production production : productions) {
+            if (production.containsAttribute("binder")) {
+                return true;
+                //assuming is binder if one production says so.
+            }
+        }
+        return false;
+    }
 }

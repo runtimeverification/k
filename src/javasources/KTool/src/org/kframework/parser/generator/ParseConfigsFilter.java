@@ -79,10 +79,10 @@ public class ParseConfigsFilter extends BasicTransformer {
 				} else {
 					String parsed = null;
 					if (ss.containsAttribute("kore")) {
-						Stopwatch sww = new Stopwatch();
+						long startTime = System.currentTimeMillis();
 						parsed = org.kframework.parser.concrete.KParser.ParseKoreString(ss.getContent());
 						if (GlobalSettings.verbose)
-							System.out.println("Parsing with Kore: " + ss.getFilename() + ":" + ss.getLocation() + " - " + sww.getTotalMilliseconds());
+							System.out.println("Parsing with Kore: " + ss.getFilename() + ":" + ss.getLocation() + " - " + (System.currentTimeMillis() - startTime));
 					} else
 						parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
 					Document doc = XmlLoader.getXMLDoc(parsed);

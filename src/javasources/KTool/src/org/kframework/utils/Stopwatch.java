@@ -1,42 +1,48 @@
 package org.kframework.utils;
 
+import org.kframework.utils.general.GlobalSettings;
+
 import java.util.Formatter;
 
 public class Stopwatch {
 	public static final Stopwatch sw = new Stopwatch();
-	private long start = 0;
-	private long start2 = 0;
+	private long start;
+	private long lastIntermediate;
 	Formatter f = new Formatter(System.out);
 
-	public Stopwatch() {
+    public static void init() {
+        //Have to stay empty. The role of the method is to trigger static initialization of the class.
+    }
+
+    /**
+     * This is a singleton.
+     */
+	private Stopwatch() {
 		start = System.currentTimeMillis();
-		start2 = start;
+		lastIntermediate = start;
 	}
 
-	public void Start() {
-		start = System.currentTimeMillis();
-		start2 = start;
+	public void start() {
+        printIntermediate("Init");
 	}
 
 	public void printIntermediate(String message) {
-		long endd = System.currentTimeMillis();
-		f.format("%-60s = %5d%n", message, endd - start2);
-		start2 = endd;
+		long current = System.currentTimeMillis();
+        if (GlobalSettings.verbose)
+		    f.format("%-60s = %5d%n", message, current - lastIntermediate);
+		lastIntermediate = current;
 	}
 
 	public void printTotal(String message) {
-		long endd = System.currentTimeMillis();
-		f.format("%-60s = %5d%n", message, endd - start);
-	}
-
-	public long getTotalMilliseconds() {
-		return System.currentTimeMillis() - start;
+        printIntermediate("Cleanup");
+        if (GlobalSettings.verbose)
+		    f.format("%-60s = %5d%n", message, lastIntermediate - start);
 	}
 
 	public long getIntermediateMilliseconds() {
 		long endd = System.currentTimeMillis();
-		long rez = start2 - endd;
-		start2 = endd;
+		long rez = lastIntermediate - endd;
+		lastIntermediate = endd;
 		return rez;
 	}
 }

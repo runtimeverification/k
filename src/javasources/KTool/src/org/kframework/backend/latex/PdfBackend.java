@@ -21,8 +21,7 @@ public class PdfBackend extends BasicBackend {
         super(sw, context);
     }
 
-    private static File generatePdf(File latexFile) {
-        Stopwatch sw = new Stopwatch();
+    private File generatePdf(File latexFile) {
         try {
             // Run pdflatex.
             String pdfLatex = "pdflatex";
@@ -47,8 +46,7 @@ public class PdfBackend extends BasicBackend {
                 GlobalSettings.kem.register(
                         new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1003, "", ""));
 
-            if (GlobalSettings.verbose)
-                sw.printIntermediate("Latex2PDF");
+            sw.printIntermediate("Latex2PDF");
 
             return new File(FilenameUtils.removeExtension(latexFile.getCanonicalPath()) + ".pdf");
         } catch (IOException | InterruptedException e) {

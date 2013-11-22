@@ -31,9 +31,7 @@ public class HtmlBackend extends BasicBackend {
         FileUtil.save(GlobalSettings.outputDir + File.separator + "k-definition.css",
                 FileUtil.getFileContent(htmlIncludePath + "k-definition.css"));
 
-		if (GlobalSettings.verbose) {
-			sw.printIntermediate("Generating HTML");
-		}
+        sw.printIntermediate("Generating HTML");
 
 	}
 

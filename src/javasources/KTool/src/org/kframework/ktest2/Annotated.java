@@ -24,6 +24,16 @@ public class Annotated<T1, T2> {
     }
 
     @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(obj.toString());
+        sb.append(" [");
+        sb.append(ann.toString());
+        sb.append("]");
+        return sb.toString();
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (obj instanceof Annotated)
             return ((Annotated<T1, T2>) obj).getObj().equals(this.obj);

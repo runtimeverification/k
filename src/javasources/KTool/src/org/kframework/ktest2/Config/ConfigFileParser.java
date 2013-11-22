@@ -124,24 +124,26 @@ public class ConfigFileParser {
                 (LocationData) includeNode.getUserData(LocationData.LOCATION_DATA_KEY);
 
         String fileValue = includeAttrs.getNamedItem("file").getNodeValue();
-        String file = concat(FilenameUtils.getFullPath(cmdArgs.targetFile),fileValue);
+        String file = concat(FilenameUtils.getFullPath(cmdArgs.getTargetFile()),fileValue);
 
         if (!new File(file).isFile())
             throw new InvalidConfigError(
                     "file attribute " + file + " in `include' is not a valid file", location);
 
-        String directory = concat(cmdArgs.directory,
+        String directory = concat(cmdArgs.getDirectory(),
                 getAttributeWDefault(includeAttrs, "directory", ""));
 
-        String programs = concat(cmdArgs.programs,
+        String programs = concat(cmdArgs.getPrograms(),
                 getAttributeWDefault(includeAttrs, "programs", FilenameUtils.getFullPath(file)));
 
-        String results = concat(cmdArgs.results,
+        String results = concat(cmdArgs.getResults(),
                 getAttributeWDefault(includeAttrs, "results", FilenameUtils.getFullPath(file)));
 
-        CmdArg cmdArgs1 = new CmdArg(directory, programs, results, cmdArgs.extensions,
-                cmdArgs.excludes, cmdArgs.skips, cmdArgs.generateReport, file, cmdArgs.verbose,
-                cmdArgs.colorSetting, cmdArgs.timeout);
+        CmdArg cmdArgs1 = new CmdArg(cmdArgs)
+                .setDirectory(directory)
+                .setPrograms(programs)
+                .setResults(results)
+                .setTargetFile(file);
 
         ConfigFileParser configFileParser;
         try {
@@ -151,7 +153,69 @@ public class ConfigFileParser {
             throw new InvalidConfigError("error occured while parsing included file " + file +
                     ":\n" + e.getMessage(), location);
         }
-        return configFileParser.parse();
+
+        List<TestCase> ret = configFileParser.parse();
+
+        // handle overridden attributes
+        NodeList childNodes = includeNode.getChildNodes();
+        if (includeAttrs.getNamedItem("exclude") != null)
+            overrideExcludes(ret, splitNodeValue(includeAttrs.getNamedItem("exclude")));
+        // note that we need to run `hasElement' because parse* methods will return containers
+        // with 0 element when relevant elements are not found.
+        if (hasElement(childNodes, "kompile-option"))
+            overrideKompileOptions(ret, parseKompileOpts(childNodes));
+        if (hasElement(childNodes, "all-programs"))
+            overrideKrunOpts(ret, parseAllPgmsKrunOpts(childNodes));
+        if (hasElement(childNodes, "program"))
+            overridePgmSpecificKRunOpts(ret, parsePgmSpecificKRunOpts(childNodes));
+
+        // handle extended attributes
+        if (includeAttrs.getNamedItem("more-programs") != null)
+            for (String p : splitNodeValue(includeAttrs.getNamedItem("more-programs")))
+                extendPrograms(ret, annotate(normalize(p, cmdArgs.getPrograms()), location));
+        if (includeAttrs.getNamedItem("more-results") != null)
+            for (String r : splitNodeValue(includeAttrs.getNamedItem("more-results")))
+                extendResults(ret, annotate(normalize(r, cmdArgs.getPrograms()), location));
+
+        return ret;
+    }
+
+    private void overrideExcludes(List<TestCase> tests, String[] excludes) {
+        for (TestCase tc : tests)
+            tc.setExcludes(excludes);
+    }
+
+    private void overrideKompileOptions(List<TestCase> tests, List<PgmArg> kompileOpts) {
+        for (TestCase tc : tests)
+            tc.setKompileOpts(kompileOpts);
+    }
+
+    private void overrideKrunOpts(List<TestCase> tests, List<PgmArg> krunOpts) {
+        for (TestCase tc : tests)
+            tc.setKrunOpts(krunOpts);
+    }
+
+    private void overridePgmSpecificKRunOpts(
+            List<TestCase> tests, Map<String, List<PgmArg>> pgmSpecificKrunOpts) {
+        for (TestCase tc : tests)
+            tc.setPgmSpecificKRunOpts(pgmSpecificKrunOpts);
+    }
+
+    private void extendPrograms(List<TestCase> tests, Annotated<String, LocationData> p) {
+        for (TestCase tc : tests)
+            tc.addProgram(p);
+    }
+
+    private void extendResults(List<TestCase> tests, Annotated<String, LocationData> r) {
+        for (TestCase tc : tests)
+            tc.addResult(r);
+    }
+
+    private boolean hasElement(NodeList nodes, String elemName) {
+        for (int i = 0; i < nodes.getLength(); i++)
+            if (nodes.item(i).getNodeName().equals(elemName))
+                return true;
+        return false;
     }
 
     /**
@@ -172,13 +236,13 @@ public class ConfigFileParser {
 
         Annotated<String, LocationData> definition =
                 annotate(normalize(addDefinitionExt(definitionNode.getNodeValue()),
-                        cmdArgs.directory), location);
+                        cmdArgs.getDirectory()), location);
         List<Annotated<String, LocationData>> programs =
                 annotateLst(normalize(splitNodeValue(testAttrs.getNamedItem("programs")),
-                        cmdArgs.programs), location);
+                        cmdArgs.getPrograms()), location);
         List<Annotated<String, LocationData>> results =
                 annotateLst(normalize(splitNodeValue(testAttrs.getNamedItem("results")),
-                        cmdArgs.results), location);
+                        cmdArgs.getResults()), location);
 
         String[] extensions = splitNodeValue(testAttrs.getNamedItem("extension"));
         String[] excludes = splitNodeValue(testAttrs.getNamedItem("exclude"));
@@ -321,7 +385,7 @@ public class ConfigFileParser {
             if (childNode.getNodeType() == Node.ELEMENT_NODE
                     && childNode.getNodeName().equals("program")) {
                 Element elem = (Element) childNode;
-                ret.put(concat(cmdArgs.programs, elem.getAttribute("name")),
+                ret.put(concat(cmdArgs.getPrograms(), elem.getAttribute("name")),
                         parseKrunOpts(elem.getChildNodes()));
             }
         }
