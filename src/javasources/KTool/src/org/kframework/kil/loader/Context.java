@@ -84,6 +84,7 @@ public class Context implements Serializable {
 
     public void printStatistics() {
         Formatter f = new Formatter(System.out);
+        f.format("%n");
         f.format("%-60s = %5d%n", "Number of Modules", numModules);
         f.format("%-60s = %5d%n", "Number of Sentences", numSentences);
         f.format("%-60s = %5d%n", "Number of Productions", numProductions);

@@ -80,9 +80,7 @@ public class ParseRulesFilter extends BasicTransformer {
 
 	public ASTNode transform(StringSentence ss) throws TransformerException {
 		if (ss.getType().equals(Constants.RULE) || ss.getType().equals(Constants.CONTEXT)) {
-			Stopwatch sw = null;
-			if (GlobalSettings.verbose)
-				sw = new Stopwatch();
+            long startTime = System.currentTimeMillis();
 			try {
 				ASTNode config;
 
@@ -111,10 +109,11 @@ public class ParseRulesFilter extends BasicTransformer {
 				} else {
 					String parsed = null;
 					if (ss.containsAttribute("kore")) {
-						Stopwatch sww = new Stopwatch();
+
+						long koreStartTime = System.currentTimeMillis();
 						parsed = org.kframework.parser.concrete.KParser.ParseKoreString(ss.getContent());
 						if (GlobalSettings.verbose)
-							System.out.println("Parsing with Kore: " + ss.getFilename() + ":" + ss.getLocation() + " - " + sww.getTotalMilliseconds());
+							System.out.println("Parsing with Kore: " + ss.getFilename() + ":" + ss.getLocation() + " - " + (System.currentTimeMillis() - koreStartTime));
 					} else
 						parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
 					Document doc = XmlLoader.getXMLDoc(parsed);
@@ -172,7 +171,7 @@ public class ParseRulesFilter extends BasicTransformer {
 				config = config.accept(new AmbFilter(context));
 
 				if (GlobalSettings.verbose) {
-					f.format("Parsing rule: Time: %6d Location: %s:%s\n", sw.getTotalMilliseconds(), ss.getFilename(), ss.getLocation());
+					f.format("Parsing rule: Time: %6d Location: %s:%s\n", (System.currentTimeMillis() - startTime), ss.getFilename(), ss.getLocation());
 					f.flush();
 				}
 				return config;

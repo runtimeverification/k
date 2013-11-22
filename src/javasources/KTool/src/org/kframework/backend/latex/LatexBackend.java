@@ -24,8 +24,6 @@ public class LatexBackend extends BasicBackend {
 	}
 
     public void compile(Definition javaDef) throws IOException {
-        Stopwatch sw = new Stopwatch();
-
         String fileSep = System.getProperty("file.separator");
         String endl = System.getProperty("line.separator");
 
@@ -48,8 +46,7 @@ public class LatexBackend extends BasicBackend {
         latexFile = new File(latexFilePath);
         FileUtils.writeStringToFile(latexFile, latexified);
 
-        if (GlobalSettings.verbose)
-            sw.printIntermediate("Latex Generation");
+        sw.printIntermediate("Latex Generation");
     }
 
     public void copyFiles() throws IOException {

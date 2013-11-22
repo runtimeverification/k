@@ -4,9 +4,11 @@ package org.kframework.ktest2.CmdArgs;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.krun.ColorSetting;
+import org.kframework.ktest2.IgnoringStringComparator;
 import org.kframework.ktest2.KTestStep;
 
 import java.io.File;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -25,62 +27,76 @@ public class CmdArg {
      * A root directory where K definitions reside. By default this is the current directory.
      * Valid only in batch mode.
      */
-    public final String directory;
+    private String directory;
 
     /**
      * Programs directory in single job mode, or a root directory for programs in batch mode. By
      * default this is the directory where <file> reside.
      */
-    public final String programs;
+    private String programs;
 
     /**
      * Directory containing input and expected output for programs in single job mode,
      * or a root directory for the expected I/O for programs in batch mode. By default this is
      * the directory where <file> reside.
      */
-    public final String results;
+    private String results;
 
     /**
      * The list of program extensions separated by whitespaces. Required in single job mode,
      * invalid in batch mode.
      */
-    public final String[] extensions;
+    private final String[] extensions;
 
     /**
      * The list of programs which will not be tested. Valid only in single job mode.
      */
-    public final String[] excludes;
+    private final String[] excludes;
 
     /**
      * The list of steps separated by whitespace to be skipped.
      */
-    public final Set<KTestStep> skips;
+    private final Set<KTestStep> skips;
 
     /**
      * Generate a junit-like report.
      */
-    public final boolean generateReport;
+    private final boolean generateReport;
 
     /**
      * Config XML file for batch mode, K definition for single job mode.
      */
-    public final String targetFile;
+    private String targetFile;
 
     /**
      * Enable verbose output.
      */
-    public final boolean verbose;
+    private final boolean verbose;
 
-    public final ColorSetting colorSetting;
+    /**
+     * Colorful output settings.
+     */
+    private final ColorSetting colorSetting;
 
     /**
      * Timeout for processes spawned by ktest. (in seconds)
      */
-    public final int timeout;
+    private final int timeout;
 
-    private CmdArg(String directory, String programs, String results, String[] extensions,
+    /**
+     * Ignore whitespace while comparing program outputs.
+     */
+    private final boolean ignoreWS;
+
+    /**
+     * Ignore balanced parens while comparing program outputs.
+     */
+    private final boolean ignoreBalancedParens;
+
+    public CmdArg(String directory, String programs, String results, String[] extensions,
                    String[] excludes, Set<KTestStep> skips, boolean generateReport,
-                   String targetFile, boolean verbose, ColorSetting colorSetting, int timeout) {
+                   String targetFile, boolean verbose, ColorSetting colorSetting, int timeout,
+                   boolean ignoreWS, boolean ignoreBalancedParens) {
         this.directory = directory;
         this.programs = programs;
         this.results = results;
@@ -92,6 +108,28 @@ public class CmdArg {
         this.verbose = verbose;
         this.colorSetting = colorSetting;
         this.timeout = timeout;
+        this.ignoreWS = ignoreWS;
+        this.ignoreBalancedParens = ignoreBalancedParens;
+    }
+
+    /**
+     * Copy constructor.
+     * @param obj CmdArg object to copy
+     */
+    public CmdArg(CmdArg obj) {
+        this.directory = obj.directory;
+        this.programs = obj.programs;
+        this.results = obj.results;
+        this.extensions = obj.extensions;
+        this.excludes = obj.excludes;
+        this.skips = obj.skips;
+        this.generateReport = obj.generateReport;
+        this.targetFile = obj.targetFile;
+        this.verbose = obj.verbose;
+        this.colorSetting = obj.colorSetting;
+        this.timeout = obj.timeout;
+        this.ignoreWS = obj.ignoreWS;
+        this.ignoreBalancedParens = obj.ignoreBalancedParens;
     }
 
     /**
@@ -102,12 +140,13 @@ public class CmdArg {
      * @throws InvalidArgumentException in case of an invalid argument
      */
     public static CmdArg validateArgs(CommandLine cmdOpts) throws InvalidArgumentException {
+        String currentDir = System.getProperty("user.dir");
         String[] args = cmdOpts.getArgs();
 
         if (args.length != 1)
             throw new InvalidArgumentException("ktest requires exactly one <file> parameter.");
 
-        String targetFile = args[0];
+        String targetFile = FilenameUtils.concat(currentDir, args[0]);
         if (!new File(targetFile).isFile())
             throw new InvalidArgumentException("target file argument is not a valid file: " +
                     targetFile);
@@ -118,11 +157,11 @@ public class CmdArg {
                     "(should be .xml or .k)");
 
         String directory = getDirectoryArg(cmdOpts, Constants.DIRECTORY_OPTION,
-                System.getProperty("user.dir"));
+                currentDir);
         String programs = getDirectoryArg(cmdOpts, Constants.PROGRAMS_OPTION,
-                System.getProperty("user.dir"));
+                FilenameUtils.concat(currentDir, FilenameUtils.getFullPath(targetFile)));
         String results = getDirectoryArg(cmdOpts, Constants.RESULTS_OPTION,
-                System.getProperty("user.dir"));
+                FilenameUtils.concat(currentDir, FilenameUtils.getFullPath(targetFile)));
 
         String[] extensions = cmdOpts.getOptionValue(Constants.EXTENSIONS_OPTION, "").split("\\s+");
         String[] excludes = cmdOpts.getOptionValue(Constants.EXCLUDE_OPTION, "").split("\\s+");
@@ -131,9 +170,83 @@ public class CmdArg {
 
         boolean verbose = cmdOpts.hasOption(Constants.VERBOSE_OPTION);
 
+        boolean ignoreWS = true;
+        if (cmdOpts.hasOption("ignore-white-spaces")
+                && cmdOpts.getOptionValue("ignore-white-spaces").equals("off"))
+            ignoreWS = false;
+
+        boolean ignoreBalancedParens = true;
+        if (cmdOpts.hasOption("ignore-balanced-parentheses")
+                && cmdOpts.getOptionValue("ignore-balanced-parentheses").equals("off"))
+            ignoreBalancedParens = false;
+
         return new CmdArg(directory, programs, results, extensions, excludes, parseSkips(cmdOpts),
                 generateReport, targetFile, verbose, parseColorSetting(cmdOpts),
-                parseTimeout(cmdOpts));
+                parseTimeout(cmdOpts), ignoreWS, ignoreBalancedParens);
+    }
+
+    public String getDirectory() {
+        return directory;
+    }
+
+    public String getPrograms() {
+        return programs;
+    }
+
+    public String getResults() {
+        return results;
+    }
+
+    public String getTargetFile() {
+        return targetFile;
+    }
+
+    public Set<KTestStep> getSkips() {
+        return skips;
+    }
+
+    public boolean isVerbose() {
+        return verbose;
+    }
+
+    public ColorSetting getColorSetting() {
+        return colorSetting;
+    }
+
+    public String[] getExtensions() {
+        return extensions;
+    }
+
+    public String[] getExcludes() {
+        return excludes;
+    }
+
+    public int getTimeout() {
+        return timeout;
+    }
+
+    public CmdArg setDirectory(String directory) {
+        this.directory = directory;
+        return this;
+    }
+
+    public CmdArg setPrograms(String programs) {
+        this.programs = programs;
+        return this;
+    }
+
+    public CmdArg setResults(String results) {
+        this.results = results;
+        return this;
+    }
+
+    public CmdArg setTargetFile(String targetFile) {
+        this.targetFile = targetFile;
+        return this;
+    }
+
+    public Comparator<String> getStringComparator() {
+        return new IgnoringStringComparator(ignoreWS, ignoreBalancedParens);
     }
 
     private static int parseTimeout(CommandLine cmdOpts) throws InvalidArgumentException {

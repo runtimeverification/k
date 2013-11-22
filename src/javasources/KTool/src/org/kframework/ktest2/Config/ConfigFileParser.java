@@ -87,9 +87,9 @@ public class ConfigFileParser {
     }
 
     /**
-     * Parse <test> ... </test> nodes in NodeList.
+     * Parse `test' and `include' nodes in NodeList.
      *
-     * @param tests NodeList that contains `test' elements
+     * @param tests NodeList that contains `test' and `include' elements
      * @return list of `TestCase's
      * @throws InvalidConfigError when config file contains invalid information
      */
@@ -100,42 +100,163 @@ public class ConfigFileParser {
             if (tests.item(testNodeIdx).getNodeType() != Node.ELEMENT_NODE)
                 continue;
 
-            Element testNode = (Element) tests.item(testNodeIdx);
-            NamedNodeMap testAttrs = testNode.getAttributes();
-            // I couldn't find a way to annotate attributes with location information using SAX api
-            // (maybe it's not possible?) so I'm annotation attributes with location data of
-            // parent node (element)
-            LocationData location =
-                    (LocationData) testNode.getUserData(LocationData.LOCATION_DATA_KEY);
-
-            Node definitionNode = testAttrs.getNamedItem("definition");
-
-            Annotated<String, LocationData> definition =
-                    annotate(normalize(addDefinitionExt(definitionNode.getNodeValue()),
-                                       cmdArgs.directory), location);
-            List<Annotated<String, LocationData>> programs =
-                    annotateLst(normalize(splitNodeValue(testAttrs.getNamedItem("programs")),
-                                cmdArgs.programs), location);
-            List<Annotated<String, LocationData>> results =
-                    annotateLst(normalize(splitNodeValue(testAttrs.getNamedItem("results")),
-                                cmdArgs.results), location);
-
-            String[] extensions = splitNodeValue(testAttrs.getNamedItem("extension"));
-            String[] excludes = splitNodeValue(testAttrs.getNamedItem("exclude"));
-            Set<KTestStep> skips = parseSkips(testAttrs.getNamedItem("skip"), location);
-
-            // handle children of `test' node
-            NodeList childNodes = testNode.getChildNodes();
-
-            List<PgmArg> kompileOpts = parseKompileOpts(childNodes);
-            List<PgmArg> krunOpts = parseAllPgmsKrunOpts(childNodes);
-            Map<String, List<PgmArg>> pgmSpecificKRunOpts = parsePgmSpecificKRunOpts(childNodes);
-
-            testCases.add(new TestCase(definition, programs, extensions, excludes, results,
-                    kompileOpts, krunOpts, pgmSpecificKRunOpts, skips));
+            Element node = (Element) tests.item(testNodeIdx);
+            switch (node.getNodeName()) {
+                case "test": testCases.add(parseTestCase(node)); break;
+                case "include": testCases.addAll(parseInclude(node)); break;
+                default: assert false; // this case should not happen, XML files are validated
+                                       // using XSD and this should be ensured by XSD file
+            }
         }
 
         return testCases;
+    }
+
+    /**
+     * Parse a `include' node.
+     * @param includeNode `include' element
+     * @return List of test cases.
+     * @throws InvalidConfigError
+     */
+    private List<TestCase> parseInclude(Element includeNode) throws InvalidConfigError {
+        NamedNodeMap includeAttrs = includeNode.getAttributes();
+        LocationData location =
+                (LocationData) includeNode.getUserData(LocationData.LOCATION_DATA_KEY);
+
+        String fileValue = includeAttrs.getNamedItem("file").getNodeValue();
+        String file = concat(FilenameUtils.getFullPath(cmdArgs.getTargetFile()),fileValue);
+
+        if (!new File(file).isFile())
+            throw new InvalidConfigError(
+                    "file attribute " + file + " in `include' is not a valid file", location);
+
+        String directory = concat(cmdArgs.getDirectory(),
+                getAttributeWDefault(includeAttrs, "directory", ""));
+
+        String programs = concat(cmdArgs.getPrograms(),
+                getAttributeWDefault(includeAttrs, "programs", FilenameUtils.getFullPath(file)));
+
+        String results = concat(cmdArgs.getResults(),
+                getAttributeWDefault(includeAttrs, "results", FilenameUtils.getFullPath(file)));
+
+        CmdArg cmdArgs1 = new CmdArg(cmdArgs)
+                .setDirectory(directory)
+                .setPrograms(programs)
+                .setResults(results)
+                .setTargetFile(file);
+
+        ConfigFileParser configFileParser;
+        try {
+            configFileParser = new ConfigFileParser(new File(file), cmdArgs1);
+        } catch (Exception e) {
+            // I'm not happy with that part ...
+            throw new InvalidConfigError("error occured while parsing included file " + file +
+                    ":\n" + e.getMessage(), location);
+        }
+
+        List<TestCase> ret = configFileParser.parse();
+
+        // handle overridden attributes
+        NodeList childNodes = includeNode.getChildNodes();
+        if (includeAttrs.getNamedItem("exclude") != null)
+            overrideExcludes(ret, splitNodeValue(includeAttrs.getNamedItem("exclude")));
+        // note that we need to run `hasElement' because parse* methods will return containers
+        // with 0 element when relevant elements are not found.
+        if (hasElement(childNodes, "kompile-option"))
+            overrideKompileOptions(ret, parseKompileOpts(childNodes));
+        if (hasElement(childNodes, "all-programs"))
+            overrideKrunOpts(ret, parseAllPgmsKrunOpts(childNodes));
+        if (hasElement(childNodes, "program"))
+            overridePgmSpecificKRunOpts(ret, parsePgmSpecificKRunOpts(childNodes));
+
+        // handle extended attributes
+        if (includeAttrs.getNamedItem("more-programs") != null)
+            for (String p : splitNodeValue(includeAttrs.getNamedItem("more-programs")))
+                extendPrograms(ret, annotate(normalize(p, cmdArgs.getPrograms()), location));
+        if (includeAttrs.getNamedItem("more-results") != null)
+            for (String r : splitNodeValue(includeAttrs.getNamedItem("more-results")))
+                extendResults(ret, annotate(normalize(r, cmdArgs.getPrograms()), location));
+
+        return ret;
+    }
+
+    private void overrideExcludes(List<TestCase> tests, String[] excludes) {
+        for (TestCase tc : tests)
+            tc.setExcludes(excludes);
+    }
+
+    private void overrideKompileOptions(List<TestCase> tests, List<PgmArg> kompileOpts) {
+        for (TestCase tc : tests)
+            tc.setKompileOpts(kompileOpts);
+    }
+
+    private void overrideKrunOpts(List<TestCase> tests, List<PgmArg> krunOpts) {
+        for (TestCase tc : tests)
+            tc.setKrunOpts(krunOpts);
+    }
+
+    private void overridePgmSpecificKRunOpts(
+            List<TestCase> tests, Map<String, List<PgmArg>> pgmSpecificKrunOpts) {
+        for (TestCase tc : tests)
+            tc.setPgmSpecificKRunOpts(pgmSpecificKrunOpts);
+    }
+
+    private void extendPrograms(List<TestCase> tests, Annotated<String, LocationData> p) {
+        for (TestCase tc : tests)
+            tc.addProgram(p);
+    }
+
+    private void extendResults(List<TestCase> tests, Annotated<String, LocationData> r) {
+        for (TestCase tc : tests)
+            tc.addResult(r);
+    }
+
+    private boolean hasElement(NodeList nodes, String elemName) {
+        for (int i = 0; i < nodes.getLength(); i++)
+            if (nodes.item(i).getNodeName().equals(elemName))
+                return true;
+        return false;
+    }
+
+    /**
+     * Parse a `test' node.
+     * @param testNode `test' element.
+     * @return a test case
+     * @throws InvalidConfigError
+     */
+    private TestCase parseTestCase(Element testNode) throws InvalidConfigError {
+        NamedNodeMap testAttrs = testNode.getAttributes();
+        // I couldn't find a way to annotate attributes with location information using SAX api
+        // (maybe it's not possible?) so I'm annotation attributes with location data of
+        // parent node (element)
+        LocationData location =
+                (LocationData) testNode.getUserData(LocationData.LOCATION_DATA_KEY);
+
+        Node definitionNode = testAttrs.getNamedItem("definition");
+
+        Annotated<String, LocationData> definition =
+                annotate(normalize(addDefinitionExt(definitionNode.getNodeValue()),
+                        cmdArgs.getDirectory()), location);
+        List<Annotated<String, LocationData>> programs =
+                annotateLst(normalize(splitNodeValue(testAttrs.getNamedItem("programs")),
+                        cmdArgs.getPrograms()), location);
+        List<Annotated<String, LocationData>> results =
+                annotateLst(normalize(splitNodeValue(testAttrs.getNamedItem("results")),
+                        cmdArgs.getResults()), location);
+
+        String[] extensions = splitNodeValue(testAttrs.getNamedItem("extension"));
+        String[] excludes = splitNodeValue(testAttrs.getNamedItem("exclude"));
+        Set<KTestStep> skips = parseSkips(testAttrs.getNamedItem("skip"), location);
+
+        // handle children of `test' node
+        NodeList childNodes = testNode.getChildNodes();
+
+        List<PgmArg> kompileOpts = parseKompileOpts(childNodes);
+        List<PgmArg> krunOpts = parseAllPgmsKrunOpts(childNodes);
+        Map<String, List<PgmArg>> pgmSpecificKRunOpts = parsePgmSpecificKRunOpts(childNodes);
+
+        return new TestCase(definition, programs, extensions, excludes, results,
+                kompileOpts, krunOpts, pgmSpecificKRunOpts, skips);
     }
 
     private String addDefinitionExt(String nodeValue) {
@@ -173,12 +294,12 @@ public class ConfigFileParser {
     }
 
     private String normalize(String path, String root) {
-        return FilenameUtils.concat(root, path);
+        return concat(root, path);
     }
 
     private String[] normalize(String[] paths, String root) {
         for (int i = 0; i < paths.length; i++)
-            paths[i] = normalize(paths[i], root);
+            paths[i] = concat(root, paths[i]);
         return paths;
     }
 
@@ -264,7 +385,7 @@ public class ConfigFileParser {
             if (childNode.getNodeType() == Node.ELEMENT_NODE
                     && childNode.getNodeName().equals("program")) {
                 Element elem = (Element) childNode;
-                ret.put(FilenameUtils.concat(cmdArgs.programs, elem.getAttribute("name")),
+                ret.put(concat(cmdArgs.getPrograms(), elem.getAttribute("name")),
                         parseKrunOpts(elem.getChildNodes()));
             }
         }
@@ -277,13 +398,30 @@ public class ConfigFileParser {
         return node.getNodeValue().split("\\s+");
     }
 
+    private String getAttributeWDefault(NamedNodeMap attrs, String name, String def) {
+        Node n = attrs.getNamedItem(name);
+        if (n == null)
+            return def;
+        return n.getNodeValue();
+    }
+
     private String getSchema() {
-        return FilenameUtils.concat(getKHome(), FilenameUtils.concat("lib", "ktest.xsd"));
+        return concat(getKHome(), concat("lib", "ktest.xsd"));
     }
 
     private String getKHome() {
         return new File(KTest.class.getProtectionDomain().getCodeSource()
                 .getLocation().getPath()).getParentFile().getParentFile()
                 .getParentFile().getPath();
+    }
+
+    private String concat(String s1, String s2) {
+        // HACK: FilenameUtils.concat return "" when two "." is concatenated,
+        // we don't want this because new File("").isDirectory() return false, which causes
+        // test validation to fail (it checks directory/results/programs to be valid folders)
+        String ret = FilenameUtils.concat(s1, s2);
+        assert ret != null : "concat(" + s1 + ", " + s2 + ") returned null";
+        if (ret.equals("")) return ".";
+        return ret;
     }
 }

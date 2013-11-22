@@ -8,6 +8,7 @@ import org.kframework.kagreg.KagregFrontEnd;
 import org.kframework.kcheck.KCheckFrontEnd;
 import org.kframework.ktest.KTest;
 import org.kframework.utils.Error;
+import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 
@@ -41,6 +42,7 @@ public class Main {
 	 * @throws IOException when loadDefinition fails 
 	 */
 	public static void main(String[] args) throws Exception {
+        Stopwatch.init();
 		setJavaLibraryPath();
 
 		if (args.length >= 1) {

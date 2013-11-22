@@ -1,6 +1,7 @@
 package org.kframework.backend.latex;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.kframework.backend.BasicBackend;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
@@ -20,24 +21,32 @@ public class PdfBackend extends BasicBackend {
         super(sw, context);
     }
 
-    private static File generatePdf(File latexFile) {
-        Stopwatch sw = new Stopwatch();
+    private File generatePdf(File latexFile) {
         try {
             // Run pdflatex.
             String pdfLatex = "pdflatex";
             String argument = latexFile.getCanonicalPath();
 
             ProcessBuilder pb = new ProcessBuilder(pdfLatex, argument, "-interaction", "nonstopmode");
+            pb.redirectErrorStream(true);
             pb.directory(latexFile.getParentFile());
 
             Process process = pb.start();
+            // Note to the reader from future: In order for `process.waitFor()' to return on Windows,
+            // we need to consume process' output and error streams. `pb.redirectErrorStream(true)'
+            // and next line does this. Before removing these lines please make sure pdf generation
+            // works fine on Windows too.
+            // Some more information:
+            //    - http://stackoverflow.com/tags/runtime.exec/info
+            //    - http://www.javaworld.com/javaworld/jw-12-2000/jw-1229-traps.html?page=1
+            // this information is old and apparently not all of them needed with Java 7.
+            IOUtils.toString(process.getInputStream());
             process.waitFor();
             if (process.exitValue() != 0)
                 GlobalSettings.kem.register(
                         new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1003, "", ""));
 
-            if (GlobalSettings.verbose)
-                sw.printIntermediate("Latex2PDF");
+            sw.printIntermediate("Latex2PDF");
 
             return new File(FilenameUtils.removeExtension(latexFile.getCanonicalPath()) + ".pdf");
         } catch (IOException | InterruptedException e) {

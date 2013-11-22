@@ -40,7 +40,6 @@ public class KastFrontEnd {
 
 	public static void kast(String[] args) {
 		Context context = new Context();
-		Stopwatch sw = new Stopwatch();
 		KastOptionsParser op = new KastOptionsParser();
 		CommandLine cmd = op.parse(args);
 		if (cmd == null) {
@@ -229,10 +228,8 @@ public class KastFrontEnd {
                 e.printStackTrace();
             }
 
-            if (GlobalSettings.verbose) {
-				sw.printIntermediate("Maudify Program");
-				sw.printTotal("Total");
-			}
+            Stopwatch.sw.printIntermediate("Maudify Program");
+            Stopwatch.sw.printTotal("Total");
 			GlobalSettings.kem.print();
 		} catch (TransformerException e) {
 			e.report();

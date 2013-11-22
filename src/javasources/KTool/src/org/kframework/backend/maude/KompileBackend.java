@@ -40,8 +40,7 @@ public class KompileBackend extends BasicBackend {
             .append(mainModule).append("-BASE .\n")
             .append(builtinsFilter.getResult()).append("endm\n");
 		FileUtil.save(context.dotk.getAbsolutePath() + "/builtins.maude", builtins);
-		if (GlobalSettings.verbose)
-			sw.printIntermediate("Generating equations for hooks");
+		sw.printIntermediate("Generating equations for hooks");
 		try {
 			javaDef = (Definition) javaDef.accept(new DeleteFunctionRules(maudeHooks
 					.stringPropertyNames(), context));

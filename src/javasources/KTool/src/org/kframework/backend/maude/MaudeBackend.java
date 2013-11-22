@@ -35,8 +35,7 @@ public class MaudeBackend extends BasicBackend {
         StringBuilderUtil.replaceFirst(maudified, mainModule, mainModule + "-BASE");
 
 		FileUtil.save(context.dotk.getAbsolutePath() + "/base.maude", maudified);
-		if (GlobalSettings.verbose)
-			sw.printIntermediate("Generating Maude file");
+		sw.printIntermediate("Generating Maude file");
 
         StringBuilder consTable = getLabelTable(definition);
 		FileUtil.save(context.dotk.getAbsolutePath() + "/consTable.txt", consTable);

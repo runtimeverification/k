@@ -5,6 +5,7 @@ public class Annotated<T1, T2> {
     private final T2 ann;
 
     public Annotated(T1 obj, T2 ann) {
+        assert(obj != null);
         this.obj = obj;
         this.ann = ann;
     }
@@ -20,6 +21,16 @@ public class Annotated<T1, T2> {
     @Override
     public int hashCode() {
         return obj.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(obj.toString());
+        sb.append(" [");
+        sb.append(ann.toString());
+        sb.append("]");
+        return sb.toString();
     }
 
     @Override

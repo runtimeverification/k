@@ -85,12 +85,6 @@ public class ProgramLoader {
 		return loadPgmAst(content, filename, true, startSymbol, context);
 	}
 
-	public static ASTNode loadPgmAst(File pgmFile, boolean kappize, String startSymbol, Context context) throws IOException, TransformerException {
-		String filename = pgmFile.getCanonicalFile().getAbsolutePath();
-		String content = FileUtil.getFileContent(filename);
-		return loadPgmAst(content, filename, kappize, startSymbol, context);
-	}
-
 	/**
 	 * Print maudified program to standard output.
 	 * 
@@ -98,17 +92,13 @@ public class ProgramLoader {
 	 */
 	public static Term processPgm(String content, String filename, Definition def, String startSymbol,
             Context context, GlobalSettings.ParserType whatParser) throws TransformerException {
-		// compile a definition here
-		Stopwatch sw = new Stopwatch();
-
-		if (GlobalSettings.verbose)
-			sw.printIntermediate("Importing Files");
+		Stopwatch.sw.printIntermediate("Importing Files");
 
 		try {
 			ASTNode out;
 			if (whatParser == GlobalSettings.ParserType.GROUND) {
 				org.kframework.parser.concrete.KParser.ImportTblGround(context.kompiled.getCanonicalPath() + "/ground/Concrete.tbl");
-				out = DefinitionLoader.parseCmdString(content, "", filename, context);
+				out = DefinitionLoader.parseCmdString(content, filename, context);
 				out = out.accept(new RemoveBrackets(context));
 				out = out.accept(new AddEmptyLists(context));
 				out = out.accept(new RemoveSyntacticCasts(context));
@@ -134,9 +124,7 @@ public class ProgramLoader {
                 out = loadPgmAst(content, filename, startSymbol, context);
                 out = out.accept(new ResolveVariableAttribute(context));
 			}
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Parsing Program");
-			}
+            Stopwatch.sw.printIntermediate("Parsing Program");
 
 			return (Term) out;
 		} catch (IOException e) {
