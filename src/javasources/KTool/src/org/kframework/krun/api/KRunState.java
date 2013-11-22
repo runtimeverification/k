@@ -1,7 +1,5 @@
 package org.kframework.krun.api;
 
-import org.kframework.backend.symbolic.SubstituteFreshVariablesWithSymbolic;
-import org.kframework.backend.symbolic.SubstituteSymbolicValuesWithVariables;
 import org.kframework.backend.unparser.AddBracketsFilter;
 import org.kframework.backend.unparser.AddBracketsFilter2;
 import org.kframework.backend.unparser.UnparserFilter;
@@ -66,9 +64,6 @@ public class KRunState implements Serializable{
 						"Could not load parser: brackets may be unsound"));
 				}
 			}
-            // transform the symbolic values back into variable names
-            result = (Term) result.accept(new SubstituteSymbolicValuesWithVariables(context));
-
 		} catch (TransformerException e) {
 			assert false : "Concretization threw a TransformerException";
 		}

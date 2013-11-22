@@ -58,7 +58,9 @@
 		<property name="version.file" value="./lib/version.txt" />
 
 		<exec executable="git" outputproperty="version.out">
-			<arg value="describe" />
+			<arg value="rev-parse" />
+			<arg value="--short" />
+			<arg value="HEAD^" />
 		</exec>
 
 		<tstamp>

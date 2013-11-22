@@ -4,6 +4,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.kframework.krun.ColorSetting;
 import org.kframework.ktest2.*;
+import org.kframework.ktest2.CmdArgs.CmdArg;
 import org.kframework.utils.ColorUtil;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -43,25 +44,41 @@ public class TestSuite {
 
     private final ReportGen reportGen;
 
+    private final Comparator<String> strComparator;
+
     public TestSuite(List<TestCase> tests, Set<KTestStep> skips, boolean verbose,
-                     ColorSetting colorSetting, int timeout, boolean report) {
+                     Comparator<String> strComparator, ColorSetting colorSetting,
+                     int timeout, boolean report) {
         this.tests = tests;
         this.skips = skips;
         this.verbose = verbose;
+        this.strComparator = strComparator;
         this.colorSetting = colorSetting;
         this.timeout = timeout;
         reportGen = report ? new ReportGen() : null;
     }
 
     public TestSuite(TestCase singleTest, Set<KTestStep> skips, boolean verbose,
-                     ColorSetting colorSetting, int timeout, boolean report) {
+                     Comparator<String> strComparator, ColorSetting colorSetting,
+                     int timeout, boolean report) {
         tests = new LinkedList<>();
         tests.add(singleTest);
         this.skips = skips;
         this.verbose = verbose;
+        this.strComparator = strComparator;
         this.colorSetting = colorSetting;
         this.timeout = timeout;
         reportGen = report ? new ReportGen() : null;
+    }
+
+    public TestSuite(List<TestCase> tests, CmdArg cmdArg) {
+        this(tests, cmdArg.getSkips(), cmdArg.isVerbose(),
+                cmdArg.getStringComparator(), cmdArg.getColorSetting(), cmdArg.getTimeout(), true);
+    }
+
+    public TestSuite(TestCase singleTest, CmdArg cmdArg) {
+        this(singleTest, cmdArg.getSkips(), cmdArg.isVerbose(),
+                cmdArg.getStringComparator(), cmdArg.getColorSetting(), cmdArg.getTimeout(), true);
     }
 
     /**
@@ -129,7 +146,7 @@ public class TestSuite {
             for (int i = 0; i < kompileOpts.size(); i++)
                 args[i+2] = kompileOpts.get(i).toString();
             // execute
-            Proc<TestCase> p = new Proc<>(tc, args, timeout, verbose, colorSetting);
+            Proc<TestCase> p = new Proc<>(tc, args, strComparator, timeout, verbose, colorSetting);
             ps.add(p);
             tpe.execute(p);
         }
@@ -170,7 +187,7 @@ public class TestSuite {
             assert new File(definitionPath).isFile();
             Proc<TestCase> p = new Proc<>(tc,
                     new String[] { "kompile", "--backend=pdf", definitionPath },
-                    timeout, verbose, colorSetting);
+                    strComparator, timeout, verbose, colorSetting);
             ps.add(p);
             tpe.execute(p);
         }
@@ -343,7 +360,7 @@ public class TestSuite {
             errorContentsAnn = new Annotated<>(errorContents, program.errorFile);
 
         Proc<KRunProgram> p = new Proc<>(program, args, inputContents, outputContentsAnn,
-                errorContentsAnn, new DefaultStringComparator(), timeout, verbose, colorSetting);
+                errorContentsAnn, strComparator, timeout, verbose, colorSetting);
         tpe.execute(p);
         return p;
     }

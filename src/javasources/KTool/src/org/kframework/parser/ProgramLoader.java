@@ -1,21 +1,23 @@
 package org.kframework.parser;
 
-import org.kframework.backend.symbolic.RemoveExtraVariable;
-import org.kframework.backend.symbolic.SubstituteFreshVariablesWithSymbolic;
+import java.io.File;
+import java.io.IOException;
+
+import org.kframework.kil.loader.ResolveVariableAttribute;
 import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.compile.transformers.RemoveBrackets;
 import org.kframework.compile.transformers.RemoveSyntacticCasts;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
-import org.kframework.compile.utils.TermContainsCells;
-import org.kframework.kcheck.utils.ExtractCellContent;
-import org.kframework.kil.*;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.Definition;
+import org.kframework.kil.Rule;
+import org.kframework.kil.Sentence;
+import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
-import org.kframework.kil.loader.ResolveVariableAttribute;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.krun.K;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
@@ -31,9 +33,6 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import java.io.File;
-import java.io.IOException;
 
 public class ProgramLoader {
 
@@ -93,11 +92,7 @@ public class ProgramLoader {
 	 */
 	public static Term processPgm(String content, String filename, Definition def, String startSymbol,
             Context context, GlobalSettings.ParserType whatParser) throws TransformerException {
-		// compile a definition here
-		Stopwatch sw = new Stopwatch();
-
-		if (GlobalSettings.verbose)
-			sw.printIntermediate("Importing Files");
+		Stopwatch.sw.printIntermediate("Importing Files");
 
 		try {
 			ASTNode out;
@@ -115,12 +110,7 @@ public class ProgramLoader {
 				out = out.accept(new RemoveBrackets(context));
 				out = out.accept(new AddEmptyLists(context));
 				out = out.accept(new RemoveSyntacticCasts(context));
-                out = out.accept(new SubstituteFreshVariablesWithSymbolic(context));
-                TermContainsCells tcc = new TermContainsCells(context);
-                out.accept(tcc);
-
-                try {
-                    // this appends wrapping cells to anything. Why is that?
+				try {
 					out = new RuleCompilerSteps(def, context).compile(
                             new Rule((Sentence) out),
                             null);
@@ -128,25 +118,13 @@ public class ProgramLoader {
 					out = (ASTNode) e.getResult();
 				}
 				out = ((Rule) out).getBody();
-
-                // if the parser is called on a simple program, with no wrapping cells
-                // then return only the content of the <k> cell. This is because we add
-                // cells in the previous step (RuleCompilerSteps).
-                if (!tcc.getTermContainsCells()) {
-                    ExtractCellContent extractor = new ExtractCellContent(context, "k");
-                    out.accept(extractor);
-                    out = extractor.getContent();
-                    out = out.accept(new RemoveExtraVariable(context));
-                }
 			} else if (whatParser == GlobalSettings.ParserType.BINARY) {
                 out = (org.kframework.kil.Cell) BinaryLoader.load(filename);
 			} else {
                 out = loadPgmAst(content, filename, startSymbol, context);
                 out = out.accept(new ResolveVariableAttribute(context));
 			}
-			if (GlobalSettings.verbose) {
-				sw.printIntermediate("Parsing Program");
-			}
+            Stopwatch.sw.printIntermediate("Parsing Program");
 
 			return (Term) out;
 		} catch (IOException e) {

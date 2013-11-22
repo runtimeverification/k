@@ -105,9 +105,9 @@ public class Proc<T> implements Runnable {
         this.colorSetting = colorSetting;
     }
 
-    public Proc(T obj, String[] args, int timeout, boolean verbose, ColorSetting colorSetting) {
-        this(obj, args, "", null, null, new DefaultStringComparator(),
-                timeout, verbose, colorSetting);
+    public Proc(T obj, String[] args, Comparator<String> strComparator, int timeout,
+                boolean verbose, ColorSetting colorSetting) {
+        this(obj, args, "", null, null, strComparator, timeout, verbose, colorSetting);
     }
 
     @Override

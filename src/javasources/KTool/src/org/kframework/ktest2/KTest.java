@@ -42,28 +42,28 @@ public class KTest {
             printVersion();
         else {
             CmdArg cmdArgs = CmdArg.validateArgs(argParser.cmdOpts);
-            TestSuite tests;
-            switch (FilenameUtils.getExtension(cmdArgs.targetFile)) {
-                case "xml":
-                    tests = new TestSuite(
-                            new ConfigFileParser(new File(cmdArgs.targetFile),
-                                    cmdArgs).parse(),
-                            cmdArgs.skips, cmdArgs.verbose, cmdArgs.colorSetting,
-                            cmdArgs.timeout, true);
-                    break;
-                case "k":
-                    tests = new TestSuite(TestCase.makeTestCaseFromK(cmdArgs),
-                            cmdArgs.skips, cmdArgs.verbose, cmdArgs.colorSetting,
-                            cmdArgs.timeout, true);
-                    break;
-                default:
-                    // this code should be unreacable, because `validateArgs' should ensure that
-                    // targetFile extension can only be .k or .xml
-                    tests = null; assert false;
-            }
-            return (tests.run() ? 0 : 1);
+            return (makeTestSuite(cmdArgs.getTargetFile(), cmdArgs).run() ? 0 : 1);
         }
         return 0;
+    }
+
+    private TestSuite makeTestSuite(String targetFile, CmdArg cmdArgs) throws SAXException,
+            TransformerException, ParserConfigurationException, IOException, InvalidConfigError {
+        TestSuite ret;
+        switch (FilenameUtils.getExtension(targetFile)) {
+        case "xml":
+            ret = new TestSuite(new ConfigFileParser(
+                    new File(cmdArgs.getTargetFile()), cmdArgs).parse(), cmdArgs);
+            break;
+        case "k":
+            ret = new TestSuite(TestCase.makeTestCaseFromK(cmdArgs), cmdArgs);
+            break;
+        default:
+            // this code should be unreacable, because `validateArgs' should ensure that
+            // targetFile extension can only be .k or .xml
+            ret = null; assert false;
+        }
+        return ret;
     }
 
     private void printHelpMsg() {
