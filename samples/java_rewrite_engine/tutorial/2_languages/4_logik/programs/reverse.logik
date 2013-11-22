@@ -14,7 +14,7 @@ reverse(L1,L2) :-
   reverseFast(L1,nil,L2).
 
 // Next should have only one solution; --search suffices
-//?- reverseSlow(cons(a,cons(b,cons(c,nil))), L).
+?- reverseSlow(cons(a,cons(b,cons(c,nil))), L).
 
 // Next has only one solution, but LOGIK is not able to infer that there is
 // only one.  So use --search --bound 2 when you krun it.
@@ -27,7 +27,7 @@ reverse(L1,L2) :-
 // Next finds all conditions characterising palindromes of size 3: A=C
 //?- reverseSlow(cons(A,cons(B,cons(C,nil))),cons(A,cons(B,cons(C,nil)))).
 
-?- reverseSlow(cons(a,cons(X,cons(c,nil))),L), reverseSlow(L, T).
+//?- reverseSlow(cons(a,cons(X,cons(c,nil))),L), reverseSlow(L, T).
 
 
 // Now all the above but using the fast reverse
