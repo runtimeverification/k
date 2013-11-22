@@ -1,6 +1,6 @@
 #include "cdd.h"
 
-#define D 5.0
+//#define D 5.0
 //#define T 300.0
 #define SP_MAX 600.0
 //#define VE_MAX 1200.0
@@ -9,7 +9,7 @@
 //#define E_sqv 0x1.p-30
 //#define E_sqs 0x1.p-37
 //#define E_dot 0x1.p-34
-#define E_hlos 0x1.p-36
+//#define E_hlos 0x1.p-36
 //#define E_tau 0x1.p-21
 #define E_omega 0x1.p-1
 #define E_cd2d 0x2.p-1

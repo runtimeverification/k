@@ -423,6 +423,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             SymbolicConstraint right = implication.right;
             if (left.isFalse()) continue;
 
+            if (DEBUG) {
+                System.out.println("Attempting to prove: \n\t" + left + "\n  implies \n\t" + right);
+            }
+
             right = left.simplifyConstraint(right);
             if (right.isTrue() || right.equalities().isEmpty()) {
                 if (DEBUG) {

@@ -4,7 +4,7 @@ module CD2D
   imports KERNEL-CIL
   imports CD2D-SPEC
   syntax Id ::= Token{"sqs"} | Token{"sqv"} | Token{"dot"} | Token{"tau_vv"}
-              | Token{"max"} | Token{"min"}
+              | Token{"max"} | Token{"min"} | Token{"horizontal_los"}
 
   configuration <T color="red">
                   <threads color="orange">

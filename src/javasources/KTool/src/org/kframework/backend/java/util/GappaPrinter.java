@@ -92,6 +92,11 @@ public class GappaPrinter extends BottomUpVisitor {
         for (SymbolicConstraint.Equality equality : constraint.equalities()) {
             Term equalityLHS = equality.leftHandSide();
             Term equalityRHS = equality.rightHandSide();
+            if (equalityLHS instanceof BoolToken) {
+                Term term = equalityLHS;
+                equalityLHS = equalityRHS;
+                equalityRHS = term;
+            }
             if (equalityRHS.equals(BoolToken.FALSE)) {
                 if (equalityLHS instanceof KItem) {
                     KLabel klabel = ((KItem) equalityLHS).kLabel();
