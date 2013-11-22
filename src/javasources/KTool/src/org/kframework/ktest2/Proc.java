@@ -227,6 +227,8 @@ public class Proc<T> implements Runnable {
                 // we're not comparing error outputs
                 System.out.format("%sERROR: [%s] failed with error (time: %d ms)%s%n",
                         red, procCmd, timeDelta, ColorUtil.ANSI_NORMAL);
+                if (verbose)
+                    System.out.format("error was: %s%n", pgmErr);
                 reportErr(pgmErr);
             }
             else if (strComparator.compare(pgmErr, expectedErr.getObj()) == 0) {
