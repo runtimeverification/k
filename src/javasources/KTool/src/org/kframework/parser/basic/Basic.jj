@@ -149,6 +149,7 @@ package org.kframework.parser.basic;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
+import org.kframework.kil.Attributes;
 import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Import;
 import org.kframework.kil.KLabelConstant;
@@ -229,6 +230,19 @@ public class Basic {
         ExceptionType.ERROR, KExceptionGroup.PARSER, e.toString(), filename, null));
       return new ArrayList<DefinitionItem>();
     }
+  }
+
+  /** Parses a given string that was fead from 'filename' as a list of
+  attributes.  Note that the source position in the returned result is
+  relative to the String. */
+  public static Attributes parseAttributes(String string, String filename) throws ParseException {
+    Basic parser = new Basic(new StringReader(string));
+    parser.filename = filename;
+    parser.module = null;
+    parser.items = new ArrayList<DefinitionItem>();
+    StringSentence ss = new StringSentence("", "", "", "");
+    parser.AttributesBodyEOF(ss);
+    return ss.getAttributes();
   }
 
   /***** Source Location *****/
@@ -660,7 +674,7 @@ void Group(StringBuilder sb) : {}
 | "]" { matchedToken.kind = RSQUARE; }
 | "(" { matchedToken.kind = LPAREN; }
 | ")" { matchedToken.kind = RPAREN; }
-| <KEY: ["a"-"z"](["A"-"Z", "a"-"z", "-", "0"-"9"])*>
+| <KEY: ["a"-"z"](["A"-"Z", "a"-"z", "-", "0"-"9"])*("<" (["A"-"Z", "a"-"z", "-", "0"-"9"])+ ">")?>
 }
 
 /** The same as 'Attributes()', but requires that the entire input be
@@ -668,12 +682,15 @@ consumed.  Used for implementing the re-parsing in
 makeStringSentence.
 */
 void AttributesEOF(ASTNode node) : {} { Attributes(node) <EOF> }
+void AttributesBodyEOF(ASTNode node) : {} {
+  { SwitchTo(ATTR_STATE); } AttributesBody(node) <EOF> { SwitchTo(DEFAULT); } }
 
 /** Parses a set of attributes and adds them to 'node' */
+void AttributesBody(ASTNode node) : {} { Tag(node) ("," Tag(node))* }
 void Attributes(ASTNode node) : {}
 {
   "[" { SwitchTo(ATTR_STATE); }
-  Tag(node) ("," Tag(node))*
+  AttributesBody(node)
   "]" { SwitchTo(DEFAULT); }
 }
 
