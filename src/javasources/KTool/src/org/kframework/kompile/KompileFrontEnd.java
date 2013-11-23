@@ -205,7 +205,7 @@ public class KompileFrontEnd {
 			break;
 		case "kore":
 			backend = new KoreBackend(Stopwatch.sw, context);
-                        break;
+			break;
 		case "maude":
 			backend = new KompileBackend(Stopwatch.sw, context);
             context.dotk = new File(output + File.separator + FilenameUtils.removeExtension(mainFile.getName()) + "-kompiled");
