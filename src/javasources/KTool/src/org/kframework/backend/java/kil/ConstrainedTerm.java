@@ -86,7 +86,7 @@ public class ConstrainedTerm extends Term {
         SymbolicConstraint unificationConstraint = new SymbolicConstraint(constrainedTerm.termContext());
         unificationConstraint.add(term, constrainedTerm.term);
         unificationConstraint.simplify();
-        Set variables = constrainedTerm.variableSet();
+        Set<Variable> variables = constrainedTerm.variableSet();
         variables.removeAll(variableSet());
         unificationConstraint.orientSubstitution(variables, context);
         if (unificationConstraint.isFalse() || !unificationConstraint.isSubstitution()) {

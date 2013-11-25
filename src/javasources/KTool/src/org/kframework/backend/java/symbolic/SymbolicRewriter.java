@@ -340,7 +340,7 @@ public class SymbolicRewriter {
                 if (value == null) {
                     return null;
                 }
-                map.put(variable, new Cell("generatedTop", value));
+                map.put(variable, new Cell<Term>("generatedTop", value));
             }
         }
         return map;
