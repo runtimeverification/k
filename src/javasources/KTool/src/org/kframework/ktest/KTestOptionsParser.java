@@ -60,7 +60,7 @@ public class KTestOptionsParser {
 		addOptionE(OptionBuilder.withLongOpt("ignore-balanced-parentheses").hasArg().withArgName("on|off").withDescription("Ignore balanced parentheses when comparsing results. (Default: on).").create());
 	}
 	
-	// parse the command line arguments
+	//parse the command line arguments
 	public CommandLine parse(String[] cmd) {
 		CommandLineParser parser = new ActualPosixParser();
 		try {
