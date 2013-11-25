@@ -385,8 +385,7 @@ public class ConfigFileParser {
             if (childNode.getNodeType() == Node.ELEMENT_NODE
                     && childNode.getNodeName().equals("program")) {
                 Element elem = (Element) childNode;
-                ret.put(concat(cmdArgs.getPrograms(), elem.getAttribute("name")),
-                        parseKrunOpts(elem.getChildNodes()));
+                ret.put(elem.getAttribute("name"), parseKrunOpts(elem.getChildNodes()));
             }
         }
         return ret;

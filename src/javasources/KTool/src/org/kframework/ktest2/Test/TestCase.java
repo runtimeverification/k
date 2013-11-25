@@ -185,14 +185,10 @@ public class TestCase {
     }
 
     private List<PgmArg> getPgmOptions(String pgm) {
-        // TODO: this bad code required because I think we have a bug in config parser
-        // we should not make file name in krun options absolute.
-        // it may be the case that what we're specifying in krun specific options is a pattern
-        // for file name, not a file name or path
-        for (Map.Entry<String, List<PgmArg>> entry : pgmSpecificKRunOpts.entrySet())
-            if (FilenameUtils.getName(entry.getKey()).equals(FilenameUtils.getName(pgm)))
-                return entry.getValue();
-        return krunOpts;
+        List<PgmArg> ret = pgmSpecificKRunOpts.get(FilenameUtils.getName(pgm));
+        if (ret == null)
+            return krunOpts;
+        return ret;
     }
 
     /**
