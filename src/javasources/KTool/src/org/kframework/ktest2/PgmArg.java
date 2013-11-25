@@ -23,6 +23,8 @@ public class PgmArg {
         }
         if (arg.startsWith("-"))
             return arg + "=" + val;
+        else if (arg.startsWith("c"))
+            return "-" + arg + "=" + val;
         return "--" + arg + "=" + val;
     }
 }
