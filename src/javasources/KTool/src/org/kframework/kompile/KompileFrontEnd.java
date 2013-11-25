@@ -128,6 +128,10 @@ public class KompileFrontEnd {
 			step = cmd.getOptionValue("step");
 		}
 
+        if(cmd.hasOption("concrete-sort")){
+             GlobalSettings.use_concrete = true;
+        }
+
 
 		String def = null;
 		{

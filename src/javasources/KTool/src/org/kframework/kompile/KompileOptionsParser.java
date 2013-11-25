@@ -69,8 +69,9 @@ public class KompileOptionsParser {
 		addOptionE(OptionBuilder.withLongOpt("fast-kast").withDescription("Using the (experimental) faster C SDF parser.").create());
         addOptionE(OptionBuilder.withLongOpt("symbolic-rules").hasArg().withArgName("tags").withDescription("Apply symbolic transformations only to rules annotated with tags from <tags> set. This only has an effect with '--backend symbolic'.").create());
         addOptionE(OptionBuilder.withLongOpt("non-symbolic-rules").hasArg().withArgName("tags").withDescription("Do not apply symbolic transformations to rules annotated with tags from <tags> set. This only has an effect with '--backend symbolic'.").create());
+        addOptionE(OptionBuilder.withLongOpt("concrete-sort").withDescription("Use concrete sorts when generating heating and cooling rules.").create());
 
-		addOptionE(OptionBuilder.withLongOpt("loud").withDescription("Prints 'Done' at the end if all is ok.").create());
+        addOptionE(OptionBuilder.withLongOpt("loud").withDescription("Prints 'Done' at the end if all is ok.").create());
 	}
 
 	public CommandLine parse(String[] cmd) {
