@@ -185,7 +185,8 @@ public class TestCase {
     }
 
     private List<PgmArg> getPgmOptions(String pgm) {
-        List<PgmArg> ret = pgmSpecificKRunOpts.get(pgm);
+        String pgmName = FilenameUtils.getName(pgm);
+        List<PgmArg> ret = pgmSpecificKRunOpts.get(pgmName);
         // TODO: I'm using all-programs options only when no program specific options specified,
         // make sure this is intended behavior (osa1)
         if (ret == null)
