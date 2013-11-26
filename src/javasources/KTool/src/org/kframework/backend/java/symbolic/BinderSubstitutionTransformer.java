@@ -45,8 +45,8 @@ public class BinderSubstitutionTransformer extends SubstitutionTransformer {
                         Term bindingExp = kList.get(1);
                         Set<Variable> variables = boundVars.variableSet();
                         Map<Variable,Variable> freshSubstitution = Variable.getFreshSubstitution(variables);
-                        Term freshBoundVars = boundVars.substituteWithBinders(freshSubstitution, context);
-                        Term freshbindingExp = bindingExp.substituteWithBinders(freshSubstitution, context);
+                        Term freshBoundVars = boundVars.substitute(freshSubstitution, context);
+                        Term freshbindingExp = bindingExp.substitute(freshSubstitution, context);
                         kList = new KList(ImmutableList.<Term>of(freshBoundVars,freshbindingExp));
                         kItem = new KItem(kLabel, kList, context.definition().context());
 //                    }
