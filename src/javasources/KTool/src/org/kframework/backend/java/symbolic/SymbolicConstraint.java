@@ -40,15 +40,64 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
     public void orientSubstitution(Set<Variable> variables, TermContext termContext) {
         Map<Variable, Term> newSubstitution = new HashMap<>();
+        
+        /* compute the preimages of each variable in the codomain of the substitution */
+        Map<Variable, Set<Variable>> preimages = new HashMap<Variable, Set<Variable>>();
         for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
-            if (variables.contains(entry.getValue())) {
-                newSubstitution.put((Variable) entry.getValue(), entry.getKey());
+            if (entry.getValue() instanceof Variable) {
+                Variable rhs = (Variable) entry.getValue();
+                if (preimages.get(rhs) == null) {
+                    preimages.put(rhs, new HashSet<Variable>());
+                }
+                preimages.get(rhs).add(entry.getKey());
+            }
+        }
+        
+        Set<Variable> substitutionToRemove = new HashSet<Variable>();
+        for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
+            Variable lhs = entry.getKey();
+            Term rhs = entry.getValue();
+            if (variables.contains(rhs) && !newSubstitution.containsKey(rhs)) {
+                /*
+                 * case 1: both lhs & rhs are required to be on the LHS
+                 *      before              after
+                 *     lhs  ---> rhs        lhs  ---> lhs' (added to newSubstitution)
+                 *     lhs' ---> rhs  ==>   rhs  ---> lhs' (added to newSubstitution)
+                 *     lhs''---> rhs        lhs''---> rhs  (rhs will get substituted later)
+                 */
+                if (variables.contains(lhs)) {
+                    /*
+                     * preimagesOfRHS is guaranteed to contain all variables
+                     * that are constrained to be equal to the variable rhs
+                     * because rhs cannot appear on the LHS of the substitution
+                     */
+                    Set<Variable> preimagesOfRHS = new HashSet<Variable>(preimages.get(rhs));
+                    preimagesOfRHS.removeAll(variables);
+                    if (preimagesOfRHS.isEmpty()) 
+                        throw new RuntimeException("Orientation failed");
+                    Variable newRHS = preimagesOfRHS.iterator().next();
+                    newSubstitution.put(lhs, newRHS);
+                    newSubstitution.put((Variable) rhs, newRHS);
+                    substitutionToRemove.add(lhs);
+                    substitutionToRemove.add(newRHS);
+                } 
+                /*
+                 * case 2: rhs is required to be on the LHS but not lhs
+                 *      before              after
+                 *     lhs ---> rhs  ==>   rhs  ---> lhs (added to newSubstitution)
+                 */                
+                else {
+                    newSubstitution.put((Variable) rhs, lhs);
+                    substitutionToRemove.add(lhs);
+                }
             }
         }
 
         Map<Variable, Term> result = new HashMap<>();
+        for (Variable var : substitutionToRemove)
+            substitution.remove(var);
         for (Map.Entry<Variable, Term> entry : newSubstitution.entrySet()) {
-            substitution.remove(entry.getValue());
+            // TODO(YilongL): why not evaluate entry.getValue() after the substitution?
             result.put(entry.getKey(), entry.getValue().substitute(newSubstitution, termContext));
         }
         for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
@@ -204,7 +253,13 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                    && rightHandSide.equals(equality.rightHandSide);
         }
         
-        // TODO(YilongL): method hashCode needs to be overriden?
+        @Override
+        public int hashCode() {
+            int hash = 1;
+            hash = hash * Utils.HASH_PRIME + leftHandSide.hashCode();
+            hash = hash * Utils.HASH_PRIME + rightHandSide.hashCode();
+            return hash;
+        }
 
         @Override
         public String toString() {
@@ -780,6 +835,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         for (Map.Entry<Variable, Term> entry : entries) {
             Term term = entry.getValue().substitute(subst2, context);
             if (term != entry.getValue()) {
+                term = term.evaluate(context);
                 subst1.put(entry.getKey(), term);
             }
         }
