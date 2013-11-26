@@ -5,7 +5,6 @@ import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Expr;
 import com.microsoft.z3.Sort;
 import com.microsoft.z3.Symbol;
-import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.Int32Token;
@@ -16,7 +15,6 @@ import org.kframework.backend.java.util.KSorts;
 import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.kil.ASTNode;
 
-import java.io.Serializable;
 import java.util.*;
 import java.util.Collection;
 
@@ -97,11 +95,12 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         for (Variable var : substitutionToRemove)
             substitution.remove(var);
         for (Map.Entry<Variable, Term> entry : newSubstitution.entrySet()) {
+            substitution.remove(entry.getValue());
             // TODO(YilongL): why not evaluate entry.getValue() after the substitution?
-            result.put(entry.getKey(), entry.getValue().substitute(newSubstitution, termContext));
+            result.put(entry.getKey(), entry.getValue().substituteWithBinders(newSubstitution, termContext));
         }
         for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
-            result.put(entry.getKey(), entry.getValue().substitute(newSubstitution, termContext));
+            result.put(entry.getKey(), entry.getValue().substituteWithBinders(newSubstitution, termContext));
         }
 
         substitution = result;
@@ -229,8 +228,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         }
 
         private Equality substitute(Map<Variable, ? extends Term> substitution) {
-            leftHandSide = leftHandSide.substitute(substitution, context);
-            rightHandSide = rightHandSide.substitute(substitution, context);
+            leftHandSide = leftHandSide.substituteWithBinders(substitution, context);
+            rightHandSide = rightHandSide.substituteWithBinders(substitution, context);
             return this;
         }
 
@@ -340,12 +339,12 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
                 + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
 
-        Term normalizedLeftHandSide = leftHandSide.substitute(substitution, context);
+        Term normalizedLeftHandSide = leftHandSide.substituteWithBinders(substitution, context);
         if (normalizedLeftHandSide != leftHandSide) {
             normalizedLeftHandSide = normalizedLeftHandSide.evaluate(context);
         }
 
-        Term normalizedRightHandSide = rightHandSide.substitute(substitution, context);
+        Term normalizedRightHandSide = rightHandSide.substituteWithBinders(substitution, context);
         if (normalizedRightHandSide != rightHandSide) {
             normalizedRightHandSide = normalizedRightHandSide.evaluate(context);
         }
@@ -833,7 +832,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             TermContext context) {
         Map.Entry<Variable, Term>[] entries = subst1.entrySet().toArray(new Map.Entry[subst1.size()]);
         for (Map.Entry<Variable, Term> entry : entries) {
-            Term term = entry.getValue().substitute(subst2, context);
+            Term term = entry.getValue().substituteWithBinders(subst2, context);
             if (term != entry.getValue()) {
                 term = term.evaluate(context);
                 subst1.put(entry.getKey(), term);
@@ -864,7 +863,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
         /* rename in substitution values */
         for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
-            entry.setValue(entry.getValue().substitute(freshSubstitution, context));
+            entry.setValue(entry.getValue().substituteWithBinders(freshSubstitution, context));
         }
 
         for (Equality equality : equalities) {
@@ -878,20 +877,20 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      * Returns a new {@code SymbolicConstraint} instance obtained from this symbolic constraint
      * by applying substitution.
      */
-    public SymbolicConstraint substitute(Map<Variable, ? extends Term> substitution, TermContext context) {
+    public SymbolicConstraint substituteWithBinders(Map<Variable, ? extends Term> substitution, TermContext context) {
         if (substitution.isEmpty()) {
             return this;
         }
 
-        return (SymbolicConstraint) accept(new SubstitutionTransformer(substitution, context));
+        return (SymbolicConstraint) accept(new BinderSubstitutionTransformer(substitution, context));
     }
 
     /**
      * Returns a new {@code SymbolicConstraint} instance obtained from this symbolic constraint by
      * substituting variable with term.
      */
-    public SymbolicConstraint substitute(Variable variable, Term term, TermContext context) {
-        return substitute(Collections.singletonMap(variable, term), context);
+    public SymbolicConstraint substituteWithBinders(Variable variable, Term term, TermContext context) {
+        return substituteWithBinders(Collections.singletonMap(variable, term), context);
     }
 
     @Override

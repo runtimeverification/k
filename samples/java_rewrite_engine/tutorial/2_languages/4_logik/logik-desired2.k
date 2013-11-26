@@ -1,8 +1,7 @@
-module LOGIK
+module LOGIK-DESIRED2
   syntax Term ::= Literal "(" Terms ")"
   syntax Terms ::= List{Term,","}
   syntax Clause ::= Term ":-" Terms "."
-                  | "forall" Set "." Terms "->" Term          [binder]
   syntax Query ::= "?-" Terms "."
   syntax Pgm ::= Query | Clause Pgm
 
@@ -11,22 +10,32 @@ module LOGIK
 
   configuration <T color="yellow" multiplicity="?">
                   <k color="green"> $PGM:Pgm </k>
-                  <clause color="pink" multiplicity="*"> .K </clause>
+                  <clauses>
+                    <clause color="pink" multiplicity="*"> .K </clause>
+                  </clauses>
                 </T>
-                <solution multiplicity="?"> .K </solution>
+                <solution> .K </solution>
+
+  
+  syntax HornClause ::=  "forall" K "." Implication         [binder]
+  syntax Implication ::= Terms "->" Term 
 
   rule <k> L:-Ls. Pgm => Pgm </k>
-       (. => <clause> forall #variables(L,Ls) . Ls -> L </clause>)
+       (. => <clause> forall variables(L,Ls) . Ls -> L </clause>)
 
   rule <k> ?- Ls:Terms. => Ls ...</k>
-       <solution> . => #variablesMap(Ls) </solution>
+       <solution> . => variablesMap(Ls) </solution>
 
   rule L:Term, Ls:Terms => L ~> Ls
   rule .Terms => .
 
   rule <T>... <k> . </k> ...</T> => .
 
-  rule <k> L:Term => Ls:Term ...</k>
+  rule <k> L:Term => Ls:Terms ...</k>
        <clause> forall _ . Ls -> L </clause>
     [transition]
+
+  syntax K ::= variables(K) [function, hook(MetaK:variables)]
+  syntax K ::= variablesMap(K) [function, hook(MetaK:variablesMap)]
+  syntax K ::= renameVariables(K) [function, hook(MetaK:renameVariables)]
 endmodule

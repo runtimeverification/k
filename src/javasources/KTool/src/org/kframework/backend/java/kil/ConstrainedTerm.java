@@ -10,11 +10,10 @@ import org.kframework.backend.java.symbolic.Utils;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.ProductionsOfSort;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.loader.Context;
-import org.kframework.krun.K;
-import org.kframework.krun.api.io.FileSystem;
 
 import com.google.common.collect.ImmutableSet;
+import org.kframework.kil.loader.Context;
+import org.kframework.krun.K;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -111,7 +110,7 @@ public class ConstrainedTerm extends Term {
         implicationConstraint.addAll(constrainedTerm.constraint);
         implicationConstraint.simplify();
         implicationConstraint.orientSubstitution(variables, context);
-        implicationConstraint = implicationConstraint.substitute(implicationConstraint.substitution(),context);
+        implicationConstraint = implicationConstraint.substituteWithBinders(implicationConstraint.substitution(), context);
 
         unificationConstraint.addAll(constraint);
         unificationConstraint.simplify();

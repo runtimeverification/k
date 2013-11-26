@@ -53,11 +53,11 @@ public class BuiltinSet extends Collection implements Sorted {
     private final Set<Term> elements;
 //    private final Queue<Operation> operations;
 
-    public BuiltinSet(Set<Term> elements) {
+    public BuiltinSet(Set<? extends Term> elements) {
         this(elements, null);
     }
 
-    public BuiltinSet(Set<Term> elements, Variable frame) {
+    public BuiltinSet(Set<? extends Term> elements, Variable frame) {
         super(frame, Kind.KITEM);
         this.elements = new HashSet<Term>(elements);
 //        operations = new ArrayDeque<Operation>();

@@ -18,9 +18,7 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
-import org.kframework.backend.java.util.LookupCell;
 import org.kframework.backend.java.util.ProductionsOfSort;
-import org.kframework.backend.java.util.TestCaseGenerationUtil;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.krun.api.SearchType;
 import org.kframework.utils.general.GlobalSettings;
@@ -222,7 +220,7 @@ public class SymbolicRewriter {
 
                     Term result = rule.rightHandSide();
                     /* rename rule variables in the rule RHS */
-                    result = result.substitute(freshSubstitution, constrainedTerm.termContext());
+                    result = result.substituteWithBinders(freshSubstitution, constrainedTerm.termContext());
                     /* apply the constraints substitution on the rule RHS */
                     result = result.substituteAndEvaluate(constraint1.substitution(),
                             constrainedTerm.termContext());
@@ -291,9 +289,9 @@ public class SymbolicRewriter {
 
             Term result = rule.rightHandSide();
             /* rename rule variables in the rule RHS */
-            result = result.substitute(freshSubstitution, constrainedTerm.termContext());
+            result = result.substituteWithBinders(freshSubstitution, constrainedTerm.termContext());
             /* apply the constraints substitution on the rule RHS */
-            result = result.substitute(constraint.substitution(), constrainedTerm.termContext());
+            result = result.substituteWithBinders(constraint.substitution(), constrainedTerm.termContext());
             /* evaluate pending functions in the rule RHS */
             result = result.evaluate(constrainedTerm.termContext());
             /* eliminate anonymous variables */
@@ -382,7 +380,7 @@ public class SymbolicRewriter {
         Map<ConstrainedTerm,Integer> nextQueue = new HashMap<ConstrainedTerm,Integer>();
 
         visited.add(initialTerm);
-        queue.put(initialTerm,0);
+        queue.put(initialTerm, 0);
 
         if (searchType == SearchType.ONE) {
             depth = 1;
@@ -533,15 +531,15 @@ public class SymbolicRewriter {
             SymbolicConstraint sideConstraint = new SymbolicConstraint(context);
             sideConstraint.addAll(rule.requires());
             ConstrainedTerm initialTerm = new ConstrainedTerm(
-                    rule.leftHandSide().substitute(freshSubstitution, context),
-                    rule.lookups().getSymbolicConstraint(context).substitute(
+                    rule.leftHandSide().substituteWithBinders(freshSubstitution, context),
+                    rule.lookups().getSymbolicConstraint(context).substituteWithBinders(
                             freshSubstitution,
                             context),
-                    sideConstraint.substitute(freshSubstitution, context),
+                    sideConstraint.substituteWithBinders(freshSubstitution, context),
                     context);
 
             ConstrainedTerm targetTerm = new ConstrainedTerm(
-                    rule.rightHandSide().substitute(freshSubstitution, context),
+                    rule.rightHandSide().substituteWithBinders(freshSubstitution, context),
                     context);
 
             proofResults.addAll(proveRule(initialTerm, targetTerm, rules));

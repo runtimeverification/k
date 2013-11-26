@@ -1,9 +1,6 @@
 package org.kframework.backend.java.kil;
 
-import org.kframework.backend.java.symbolic.SubstitutionTransformer;
-import org.kframework.backend.java.symbolic.Transformable;
-import org.kframework.backend.java.symbolic.VariableVisitor;
-import org.kframework.backend.java.symbolic.Visitable;
+import org.kframework.backend.java.symbolic.*;
 import org.kframework.kil.ASTNode;
 
 import java.io.Serializable;
@@ -35,7 +32,21 @@ public abstract class JavaSymbolicObject extends ASTNode
 
     /**
      * Returns a new {@code JavaSymbolicObject} instance obtained from this JavaSymbolicObject by
-     * applying substitution.
+     * applying a substitution in (in a binder sensitive way) .
+     */
+    public JavaSymbolicObject substituteWithBinders(
+            Map<Variable, ? extends Term> substitution,
+            TermContext context) {
+        if (substitution.isEmpty() || isGround()) {
+            return this;
+        }
+
+        return (JavaSymbolicObject) accept(new BinderSubstitutionTransformer(substitution, context));
+    }
+
+    /**
+     * Returns a new {@code JavaSymbolicObject} instance obtained from this JavaSymbolicObject by
+     * applying a substitution in (in a binder insensitive way) .
      */
     public JavaSymbolicObject substitute(
             Map<Variable, ? extends Term> substitution,
@@ -47,9 +58,18 @@ public abstract class JavaSymbolicObject extends ASTNode
         return (JavaSymbolicObject) accept(new SubstitutionTransformer(substitution, context));
     }
 
+
     /**
      * Returns a new {@code JavaSymbolicObject} instance obtained from this JavaSymbolicObject by
-     * substituting variable with term.
+     * substituting variable (in a binder sensitive way) with term.
+     */
+    public JavaSymbolicObject substituteWithBinders(Variable variable, Term term, TermContext context) {
+        return substituteWithBinders(Collections.singletonMap(variable, term), context);
+    }
+
+    /**
+     * Returns a new {@code JavaSymbolicObject} instance obtained from this JavaSymbolicObject by
+     * substituting variable (in a binder insensitive way) with term.
      */
     public JavaSymbolicObject substitute(Variable variable, Term term, TermContext context) {
         return substitute(Collections.singletonMap(variable, term), context);
