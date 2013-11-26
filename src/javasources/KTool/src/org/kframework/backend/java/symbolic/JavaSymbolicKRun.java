@@ -23,9 +23,6 @@ import org.kframework.utils.BinaryLoader;
 
 import java.io.File;
 import java.util.*;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 
 import edu.uci.ics.jung.graph.DirectedGraph;
@@ -265,6 +262,18 @@ public class JavaSymbolicKRun implements KRun {
         if (searchType != SearchType.STAR) {
             throw new UnsupportedOperationException("Search type should be SearchType.STAR");
         }
+        
+        // TODO: get rid of this ugly hack
+        Object o = ((org.kframework.kil.Bag) ((org.kframework.kil.Cell) cfg).getContents()).getContents().get(0);
+        o = ((org.kframework.kil.Bag) ((org.kframework.kil.Cell) o).getContents()).getContents().get(1);
+        Map<org.kframework.kil.Term, org.kframework.kil.Term> stateMap = new HashMap<org.kframework.kil.Term, org.kframework.kil.Term>();
+        stateMap.put((org.kframework.kil.Term) org.kframework.kil.GenericToken.kAppOf("Id", "n1"), (org.kframework.kil.Term) org.kframework.kil.IntBuiltin.kAppOf("1"));
+        stateMap.put((org.kframework.kil.Term) org.kframework.kil.GenericToken.kAppOf("Id", "n2"), (org.kframework.kil.Term) org.kframework.kil.IntBuiltin.kAppOf("2"));
+        ((org.kframework.kil.Cell) o)
+                .setContents(new org.kframework.kil.MapBuiltin(context
+                        .dataStructureSortOf("MyMap"), 
+                        stateMap, 
+                        Collections.<org.kframework.kil.Term>emptyList()));
         
         SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
         TermContext termContext = new TermContext(definition, new PortableFileSystem());
