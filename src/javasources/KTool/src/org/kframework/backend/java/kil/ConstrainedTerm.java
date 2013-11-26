@@ -1,28 +1,40 @@
 package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
+import org.kframework.backend.java.symbolic.SymbolicConstraint.Equality;
+import org.kframework.backend.java.symbolic.SymbolicConstraint.TruthValue;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
+import org.kframework.backend.java.symbolic.UninterpretedConstraint;
 import org.kframework.backend.java.symbolic.Utils;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.ProductionsOfSort;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.loader.Context;
+import org.kframework.krun.K;
 import org.kframework.krun.api.io.FileSystem;
+
+import com.google.common.collect.ImmutableSet;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 
 /**
  * A K term associated with symbolic constraints.
- * 
+ *
  * @author AndreiS
  */
 public class ConstrainedTerm extends Term {
 
     private final Term term;
-    
+
     /**
      * Represents key lookups of builtin data-structures as a symbolic
      * constraint.
@@ -31,7 +43,7 @@ public class ConstrainedTerm extends Term {
     private final SymbolicConstraint constraint;
     private final TermContext context;
 
-    public ConstrainedTerm(Term term, SymbolicConstraint lookups, SymbolicConstraint constraint, 
+    public ConstrainedTerm(Term term, SymbolicConstraint lookups, SymbolicConstraint constraint,
             TermContext context) {
         super(term.kind);
         this.term = term;
@@ -125,7 +137,7 @@ public class ConstrainedTerm extends Term {
 
     /**
      * Unifies this constrained term with another constrained term.
-     * 
+     *
      * @param constrainedTerm
      *            another constrained term
      * @return solutions to the unification problem
@@ -143,24 +155,217 @@ public class ConstrainedTerm extends Term {
         }
 
         Collection<SymbolicConstraint> solutions = new ArrayList<SymbolicConstraint>();
-        for (SymbolicConstraint solution : unificationConstraint.getMultiConstraints()) {
-            if (SymbolicConstraint.TruthValue.FALSE == solution.addAll(constrainedTerm.lookups)) continue;
-            if (SymbolicConstraint.TruthValue.FALSE == solution.addAll(constrainedTerm.constraint)) continue;
-            if (SymbolicConstraint.TruthValue.FALSE == solution.addAll(constraint)) continue;
+        for (SymbolicConstraint candidate : unificationConstraint.getMultiConstraints()) {
+            if (SymbolicConstraint.TruthValue.FALSE == candidate.addAll(constrainedTerm.lookups)) continue;
+            if (SymbolicConstraint.TruthValue.FALSE == candidate.addAll(constrainedTerm.constraint)) continue;
+            if (SymbolicConstraint.TruthValue.FALSE == candidate.addAll(constraint)) continue;
 
-            solution.simplify();
-            if (solution.isFalse()) {
+            candidate.simplify();
+            if (candidate.isFalse()) {
                 continue;
             }
 
-            if (solution.checkUnsat()) {
+            if (candidate.checkUnsat()) {
                 continue;
             }
 
-            solutions.add(solution);
+            solutions.add(candidate);
+        }
+
+        if (K.do_testgen) {
+            boolean changed;
+            Collection<SymbolicConstraint> tmpSolutions = solutions;
+            Set<Variable> sortIntersectionVariables = new HashSet<Variable>();
+            Map<SymbolicConstraint, Set<Variable>> orientedVarsOfCnstr = new HashMap<SymbolicConstraint, Set<Variable>>();
+
+            do {
+                changed = false;
+                solutions = tmpSolutions;
+                tmpSolutions = new ArrayList<SymbolicConstraint>();
+//                System.out.printf("sols=%s\n", solutions);
+
+            iteratingSymbCnstr:
+                for (SymbolicConstraint cnstr : solutions) {
+                    Set<Variable> orientedVars = orientedVarsOfCnstr.get(cnstr);
+                    orientedVarsOfCnstr.remove(cnstr);
+                    if (orientedVars == null) orientedVars = new HashSet<Variable>();
+//                    System.out.printf("cnstr=%s\n", cnstr);
+
+                    for (Equality eq1 : cnstr.equalities()) {
+                        // dissolve negative membership predicates
+                        Term lhsOfEq = eq1.leftHandSide();
+                        if (lhsOfEq instanceof KItem && ((KItem) lhsOfEq).kLabel().toString().equals("'_=/=K_")) {
+                            Term mbPredicate = ((KItem) lhsOfEq).kList().get(0);
+                            if (!(mbPredicate instanceof KItem)) continue;
+                            if (!((KLabelConstant) ((KItem) mbPredicate).kLabel()).label().startsWith("is"))
+                                continue;
+
+                            // retrieve sort name of the predicate
+                            String sortName = ((KLabelConstant) ((KItem) mbPredicate).kLabel()).label().substring("is".length());
+
+                            // retrieve the argument; which must be a variable
+                            Variable arg = (Variable) ((KItem) mbPredicate).kList().get(0);
+
+                            // construct common part of the new constraints
+                            UninterpretedConstraint templCnstr = new UninterpretedConstraint();
+                            Collection<UninterpretedConstraint> uninterpretedCnstrs = new ArrayList<UninterpretedConstraint>();
+                            for (Equality eq2 : cnstr.equalities())
+                                if (!eq2.equals(eq1))
+                                    templCnstr.add(eq2.leftHandSide(), eq2.rightHandSide());
+                            for (Map.Entry<Variable, Term> entry : cnstr.substitution().entrySet()) {
+                                templCnstr.add(entry.getKey(), entry.getValue());
+                            }
+
+                            // compute difference of two sorts, e.g., AExp \ KResult
+                            for (Term term : computeSortDifference(arg.sort(), sortName)) {
+                                UninterpretedConstraint uninterpretedCnstr = templCnstr.deepCopy();
+                                uninterpretedCnstr.add(arg, term);
+                                uninterpretedCnstrs.add(uninterpretedCnstr);
+                            }
+
+                            // get the interpreted version of the constraint
+                            for (UninterpretedConstraint uninterpretedCnstr : uninterpretedCnstrs) {
+                                SymbolicConstraint newCnstr = uninterpretedCnstr.getSymbolicConstraint(context);
+                                if (newCnstr.simplify() != TruthValue.FALSE) {
+                                    tmpSolutions.add(newCnstr);
+                                    // ALMOST FORGOT!!!
+                                    orientedVarsOfCnstr.put(newCnstr, new HashSet<Variable>(orientedVars));
+                                }
+                            }
+                            changed = true;
+                            continue iteratingSymbCnstr;
+                        }
+
+                        // dissolve positive membership predicates
+                        if (eq1.toString().startsWith("isKResult(")) {
+                            // TODO
+                        }
+                    }
+
+
+                    cnstr.orientSubstitution(orientedVars, context);
+                    for (Entry<Variable, Term> subst : cnstr.substitution().entrySet()) {
+                        // handle equality involving two variables with different
+                        // sorts, e.g. x1:sort1 =? x2:sort2
+                        if (subst.getValue() instanceof Variable) {
+                            Variable lhs = subst.getKey();
+                            Variable rhs = (Variable) subst.getValue();
+
+                            if (!lhs.sort().equals(rhs.sort())) {
+                                if (sortIntersectionVariables.contains(lhs) || sortIntersectionVariables.contains(rhs))
+                                    continue;
+
+                                UninterpretedConstraint uninterpretedCnstr = new UninterpretedConstraint();
+                                for (Equality eq : cnstr.equalities())
+                                    uninterpretedCnstr.add(eq.leftHandSide(), eq.rightHandSide());
+                                for (Map.Entry<Variable, Term> entry : cnstr.substitution().entrySet()) {
+                                    uninterpretedCnstr.add(entry.getKey(), entry.getValue());
+                                }
+
+                                // TODO: what if there is no unique GLBSort?
+                                Variable commonSubsortVar = Variable.getFreshVariable(context.definition().context().getGLBSort(ImmutableSet.<String>of(lhs.sort(), rhs.sort())));
+                                sortIntersectionVariables.add(commonSubsortVar);
+                                uninterpretedCnstr.add(rhs, commonSubsortVar);
+
+                                SymbolicConstraint newCnstr = uninterpretedCnstr.getSymbolicConstraint(context);
+                                if (newCnstr.simplify() != TruthValue.FALSE) {
+                                    tmpSolutions.add(newCnstr);
+                                    orientedVarsOfCnstr.put(newCnstr, new HashSet<Variable>(orientedVars));
+                                    orientedVarsOfCnstr.get(newCnstr).add(lhs);
+                                    orientedVarsOfCnstr.get(newCnstr).add(rhs);
+                                }
+                                //newCnstr.orientSubstitution(ImmutableSet.<Variable>of(lhs, rhs), context);
+                                changed = true;
+                                continue iteratingSymbCnstr;
+                            }
+                        }
+
+                        // TODO: dissolve data-structure lookups
+                        if (subst.getValue() instanceof MapLookup) {
+                            MapLookup mapLookup = (MapLookup) subst.getValue();
+                            BuiltinMap map = (BuiltinMap) mapLookup.map();
+                            Variable key = (Variable) mapLookup.key();
+
+                            UninterpretedConstraint templCnstr = new UninterpretedConstraint();
+                            Collection<UninterpretedConstraint> uninterpretedCnstrs = new ArrayList<UninterpretedConstraint>();
+                            for (Equality eq : cnstr.equalities())
+                                templCnstr.add(eq.leftHandSide(), eq.rightHandSide());
+                            for (Map.Entry<Variable, Term> entry : cnstr.substitution().entrySet())
+                                templCnstr.add(entry.getKey(), entry.getValue());
+
+                            for (Map.Entry<Term, Term> mapItem : map.getEntries().entrySet()) {
+                                UninterpretedConstraint uninterpretedCnstr = templCnstr.deepCopy();
+                                uninterpretedCnstr.add(key, mapItem.getKey());
+                                uninterpretedCnstrs.add(uninterpretedCnstr);
+                            }
+
+                            // get the interpreted version of the constraint
+                            for (UninterpretedConstraint uninterpretedCnstr : uninterpretedCnstrs) {
+                                SymbolicConstraint newCnstr = uninterpretedCnstr.getSymbolicConstraint(context);
+                                if (newCnstr.simplify() != TruthValue.FALSE) {
+                                    tmpSolutions.add(newCnstr);
+                                    // ALMOST FORGOT!!!
+                                    orientedVarsOfCnstr.put(newCnstr, new HashSet<Variable>(orientedVars));
+                                }
+                            }
+                            changed = true;
+                            continue iteratingSymbCnstr;
+                        }
+                    }
+
+                    tmpSolutions.add(cnstr);
+                }
+            } while (changed);
         }
 
         return solutions;
+    }
+
+    private Set<Term> computeSortDifference(String sort1, String sort2) {
+        Set<Term> results = new HashSet<Term>();
+        Context defContext = context.definition().context();
+
+        Set<String> whiteSorts = new HashSet<String>();
+        for (String sort : defContext.getAllSorts()) {
+            if (defContext.isSubsortedEq(sort1, sort)) {
+                whiteSorts.add(sort);
+            }
+        }
+
+        Set<String> blackSorts = new HashSet<String>();
+        for (String sort : whiteSorts) {
+            if (defContext.isSubsortedEq(sort1, sort) && defContext.isSubsortedEq(sort2, sort)) {
+                blackSorts.add(sort);
+            }
+        }
+        whiteSorts.removeAll(blackSorts);
+
+        Set<String> greySorts = new HashSet<String>();
+        for (String sort : whiteSorts) {
+            if (defContext.isSubsortedEq(sort1, sort)) {
+                for (String blackSort : blackSorts) {
+                    if (defContext.isSubsorted(sort, blackSort)) {
+                        greySorts.add(sort);
+                    }
+                }
+            }
+        }
+        whiteSorts.removeAll(greySorts);
+
+        Set<String> sortsToRemove = new HashSet<String>();
+        for (String s1 : whiteSorts)
+            for (String s2 : whiteSorts)
+                if (defContext.isSubsorted(s1, s2)) {
+                    sortsToRemove.add(s2);
+                }
+        whiteSorts.removeAll(sortsToRemove);
+
+        for (String whiteSort : whiteSorts)
+            results.add(Variable.getFreshVariable(whiteSort));
+        for (String greySort : greySorts)
+            results.addAll(ProductionsOfSort.getProdTermsOf(greySort));
+
+        return results;
     }
 
     @Override
@@ -194,7 +399,7 @@ public class ConstrainedTerm extends Term {
 
     @Override
     public String toString() {
-        return term + SymbolicConstraint.SEPARATOR + constraint;
+        return term + SymbolicConstraint.SEPARATOR + constraint + SymbolicConstraint.SEPARATOR + lookups;
     }
 
     @Override
