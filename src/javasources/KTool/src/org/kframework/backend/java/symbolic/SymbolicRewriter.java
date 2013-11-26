@@ -19,6 +19,8 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
 import org.kframework.backend.java.util.LookupCell;
+import org.kframework.backend.java.util.ProductionsOfSort;
+import org.kframework.backend.java.util.TestCaseGenerationUtil;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.krun.api.SearchType;
 import org.kframework.utils.general.GlobalSettings;
@@ -57,7 +59,11 @@ public class SymbolicRewriter {
 
 	public SymbolicRewriter(Definition definition) {
         this.definition = definition;
-
+        
+        /* computes the map from sorts to production terms */
+        ProductionsOfSort.init(definition);
+//        System.out.println(ProductionsOfSort.getProdTermsOf("AExp"));
+        
         /* populate the table of rules rewriting the top configuration */
         Set<Index> indices = new HashSet<Index>();
         indices.add(TopIndex.TOP);
@@ -472,6 +478,9 @@ public class SymbolicRewriter {
     label:
         for (step = 0; !queue.isEmpty() && step != depth; ++step) {
             for (ConstrainedTerm term : queue) {
+                // TODO(YilongL): handle the following pruning condition nice and clean
+                if (term.variableSet().size() > 10) continue;
+                
                 computeRewriteStep(term);
 
                 if (results.isEmpty()) {
@@ -480,7 +489,6 @@ public class SymbolicRewriter {
                     if (testgenResults.size() == bound) {
                         break label;
                     }
-
                 }
 
                 for (int i = 0; getTransition(i) != null; ++i) {
@@ -493,6 +501,7 @@ public class SymbolicRewriter {
             /* swap the queues */
             List<ConstrainedTerm> temp;
             temp = queue;
+//            queue = TestCaseGenerationUtil.getArbitraryStates(nextQueue, 30);
             queue = nextQueue;
             nextQueue = temp;
             nextQueue.clear();
@@ -500,7 +509,10 @@ public class SymbolicRewriter {
 
         /* add the configurations on the depth frontier */
         while (!queue.isEmpty() && testgenResults.size() != bound) {
-            testgenResults.add(queue.remove(0));
+            ConstrainedTerm cnstrTerm = queue.remove(0);
+            computeRewriteStep(cnstrTerm, 1);
+            if (results.isEmpty())
+                testgenResults.add(cnstrTerm);
         }
 
         stopwatch.stop();
