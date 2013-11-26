@@ -27,7 +27,6 @@ import java.util.Set;
  * Represents a language definition.
  * Includes contents from all {@code required}-d files.
  * @see DefinitionLoader
- * @see BasicParser
  */
 public class Definition extends ASTNode {
 
@@ -55,20 +54,11 @@ public class Definition extends ASTNode {
 
 		mainFile = element.getAttribute(Constants.MAINFILE);
 		mainModule = element.getAttribute(Constants.MAINMODULE);
-		// mainSyntaxModule = element.getAttribute(Constants.MAINSYNTAXMODULE);
 		items = new ArrayList<DefinitionItem>();
 
 		List<Element> elements = XML.getChildrenElements(element);
 		for (Element e : elements)
 			items.add((DefinitionItem) JavaClassesFactory.getTerm(e));
-	}
-
-	public void appendDefinitionItem(DefinitionItem di) {
-		items.add(di);
-	}
-
-	public void appendBeforeDefinitionItem(DefinitionItem di) {
-		items.add(0, di);
 	}
 
 	@Override
@@ -176,26 +166,6 @@ public class Definition extends ASTNode {
 		return modules.get(0);
 	}
 
-	public Definition updateSingletonModule(Module mod) {
-		int moduleCount = 0;
-		List<DefinitionItem> newDefinitionItems = new ArrayList<DefinitionItem>();
-		for (DefinitionItem i : this.getItems()) {
-			if (i instanceof Module) {
-				moduleCount++;
-				newDefinitionItems.add(mod);
-			} else {
-				newDefinitionItems.add(i);
-			}
-		}
-		if (moduleCount != 1) {
-			String msg = "Should have been only one module when calling this method.";
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, msg, this.getFilename(), this.getLocation()));
-		}
-		Definition result = new Definition(this);
-		result.setItems(newDefinitionItems);
-		return result;
-	}
-
 	@Override
 	public Definition shallowCopy() {
 		return new Definition(this);
@@ -205,9 +175,8 @@ public class Definition extends ASTNode {
 		Configuration result = null;
 		for (DefinitionItem i : this.getItems()) {
 			if (i instanceof Module) {
-				if (((Module)i).isPredefined()) {
+				if (i.isPredefined())
 					continue;
-				}
 				for (ModuleItem j : ((Module) i).getItems()) {
 					if (j instanceof Configuration) {
 						if (result != null) {
@@ -219,9 +188,8 @@ public class Definition extends ASTNode {
 				}
 			}
 		}
-		if (result == null) {
+		if (result == null)
 			throw new ConfigurationNotFound();
-		}
 		return result;
 	}
 }

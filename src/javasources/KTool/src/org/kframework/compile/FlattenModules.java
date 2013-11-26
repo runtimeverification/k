@@ -28,19 +28,18 @@ public class FlattenModules  extends BasicCompilerStep<Definition> {
 	}
 
 	private class FlattenModulesVisitor extends BasicVisitor  {
-		public FlattenModulesVisitor(org.kframework.kil.loader.Context context) {
+		public FlattenModulesVisitor(Context context) {
 			super(context);
 		}
 
-		HashMap<String,Module> modules = new HashMap<String,Module>();
-		Definition result;
+		private final HashMap<String,Module> modules = new HashMap<>();
+		private Definition result;
 
 		@Override
 		public void visit(Definition d) {
             result = new Definition(d);
 			Set<String> included = new HashSet<String>();
 			Configuration cfg = null;
-//			boolean nextId = false;
 			super.visit(d);
 			result.setFilename(d.getFilename());
 			result.setLocation(d.getLocation());
@@ -84,31 +83,6 @@ public class FlattenModules  extends BasicCompilerStep<Definition> {
 					rmod.getItems().add(i);
 				}
 			}
-//			if (null == cfg) {
-//				cfg = new Configuration();
-//				Cell k = new Cell();
-//				k.setLabel("k");
-//				k.setEllipses(Ellipses.NONE);
-//				k.setSort("K");
-//				k.setContents(new Variable("$PGM","K"));
-//				cfg.setBody(k);
-//			}
-//			if (nextId) {
-//				Bag bag;
-//				if (cfg.getBody() instanceof Bag) {
-//					bag = (Bag) cfg.getBody();
-//				} else {
-//					bag = new Bag();
-//					bag.getContents().add(cfg.getBody());
-//					cfg.setBody(bag);
-//				}
-//				Cell nId = new Cell();
-//				nId.setLabel("nextId");
-//				nId.setElipses("none");
-//				Constant zero = new Constant("#Int", "0");
-//				nId.setContents(zero);
-//				bag.getContents().add(nId);
-//			}
 			if (null != cfg)
 				rmod.getItems().add(cfg);
 		}
