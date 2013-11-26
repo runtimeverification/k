@@ -84,7 +84,6 @@ public class KompileOptionsParser {
 		return optionList;
 	}
 
-    // wrapper function to add an option
     private void addOptionWrapper(Option opt, boolean isStandard) {
         // for parsing command-line options
         options.addOption(opt);
@@ -97,12 +96,10 @@ public class KompileOptionsParser {
         }
     }
 
-    // add a standard option
     private void addOptionS(Option opt) {
         addOptionWrapper(opt, true);
     }
 
-    // add an experimental option
     private void addOptionE(Option opt) {
         addOptionWrapper(opt, false);
     }
