@@ -364,6 +364,12 @@ public class MetaK {
                || sort.equals("#ModelCheckResult");
 	}
 
+    public static boolean isDataSort(String sort) {
+        return sort.equals(BoolBuiltin.SORT_NAME)
+                || sort.equals(IntBuiltin.SORT_NAME)
+                || sort.equals(StringBuiltin.SORT_NAME);
+    }
+
 	public static boolean isComputationSort(String sort) {
 		return sort.equals(KSorts.K) || sort.equals(KSorts.KITEM) || !MetaK.isKSort(sort);
 	}
