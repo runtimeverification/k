@@ -502,10 +502,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         //TODO: Deal with Ensures
         if (node.getRequires() != null) {
             Term term = (Term) node.getRequires().accept(this);
-            if (term instanceof KItem &&
-                // TODO(YilongL): hasn't the compiler already transformed '_andBool_ to '#andBool?
-                    (((KItem) term).kLabel().toString().equals("'_andBool_") ||
-                     (((KItem) term).kLabel().toString().equals("'#andBool") && K.do_testgen) )) {
+            if (term instanceof KItem && ((KItem) term).kLabel().toString().equals("'#andBool")) {
                 for (Term item : ((KItem) term).kList().getItems()) {
                     if (item instanceof KItem && ((KItem) item).kLabel().toString().equals("'fresh(_)")) {
                         freshVariables.add((Variable) ((KItem) item).kList().get(0));
