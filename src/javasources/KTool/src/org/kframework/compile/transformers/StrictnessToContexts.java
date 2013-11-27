@@ -150,15 +150,25 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                 termCons.getContents().set(arguments.get(i), getHoleTerm(prod));
 
                 // is seqstrict the elements before the argument should be KResult
+                KApp sideCond = null;
                 if (isSeq) {
                     for (int j = 0; j < i; ++j) {
-                        termCons.getContents().get(arguments.get(j)).setSort(KSorts.KRESULT);
+                        Term arg = termCons.getContents().get(arguments.get(j));
+                        if (GlobalSettings.use_concrete) {
+                            KApp kResultPred = KApp.of(KLabelConstant.KRESULT_PREDICATE, arg);
+                            sideCond = sideCond == null ? kResultPred : 
+                                KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, sideCond, kResultPred);
+                        } else {
+                            arg.setSort(KSorts.KRESULT);
+                        }
                     }
                 }
 
                 org.kframework.kil.Context ctx = new org.kframework.kil.Context();
                 ctx.setBody(termCons);
                 ctx.setAttributes(prod.getAttributes());
+                if (sideCond != null)
+                    ctx.setRequires(sideCond);
                 items.add(ctx);
             }
         }
