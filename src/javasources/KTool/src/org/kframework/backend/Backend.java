@@ -30,10 +30,13 @@ public interface Backend {
 
 	public boolean autoinclude();
 
-	/**
-	 * Returns all compilation steps of this backend.
-	 */
-    // TODO(YilongL): why mixing the uses of "compilation step" and
-    // "compiler step"? what about a uniform name?
+    /**
+     * Gets all compilation steps of this backend.
+     * 
+     * @return a compound compilation step consisting of all the compilation
+     *         steps
+     */
 	public CompilerSteps<Definition> getCompilationSteps();
+    // TODO(YilongL): why mixing the uses of "compilation step" and
+    // "compiler step"? what about a uniform name?	
 }

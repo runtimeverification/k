@@ -7,7 +7,7 @@ import org.kframework.utils.Stopwatch;
  * Represents a compilation step for a certain type of abstract syntax tree
  * (AST) in the definition. <br>
  * <p>
- * For instance, the ASTs this compilation operates on can be just
+ * For instance, the ASTs on which this compilation operates can be just
  * {@code Module}s or {@code Rule}s of the definition.
  * </p>
  * 

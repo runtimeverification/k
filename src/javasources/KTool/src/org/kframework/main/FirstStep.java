@@ -5,7 +5,6 @@ import org.kframework.compile.utils.BasicCompilerStep;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
-import org.kframework.utils.Stopwatch;
 
 /**
  * Represents the first compilation step for the definition in a certain
