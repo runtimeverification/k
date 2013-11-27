@@ -73,11 +73,19 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     }
 
     /**
-     * Returns a new {@code Term} instance obtained from this term by applying substitution.
+     * Returns a new {@code Term} instance obtained from this term by applying a binder insensitive substitution.
      */
     @Override
     public Term substitute(Map<Variable, ? extends Term> substitution, TermContext context) {
         return (Term) super.substitute(substitution, context);
+    }
+
+    /**
+     * Returns a new {@code Term} instance obtained from this term by applying a binder-aware substitution.
+     */
+    @Override
+    public Term substituteWithBinders(Map<Variable, ? extends Term> substitution, TermContext context) {
+        return (Term) super.substituteWithBinders(substitution, context);
     }
 
     /**
@@ -100,8 +108,8 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
      * term.
      */
     @Override
-    public Term substitute(Variable variable, Term term, TermContext context) {
-        return (Term) super.substitute(variable, term, context);
+    public Term substituteWithBinders(Variable variable, Term term, TermContext context) {
+        return (Term) super.substituteWithBinders(variable, term, context);
     }
 
     @Override

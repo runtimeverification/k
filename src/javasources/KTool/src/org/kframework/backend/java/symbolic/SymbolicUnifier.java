@@ -1,39 +1,16 @@
 package org.kframework.backend.java.symbolic;
 
+import com.google.common.collect.ImmutableList;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.Int32Token;
 import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
-import org.kframework.backend.java.kil.Bottom;
-import org.kframework.backend.java.kil.BuiltinList;
-import org.kframework.backend.java.kil.BuiltinMap;
-import org.kframework.backend.java.kil.BuiltinSet;
-import org.kframework.backend.java.kil.Cell;
-import org.kframework.backend.java.kil.CellCollection;
-import org.kframework.backend.java.kil.Collection;
-import org.kframework.backend.java.kil.CollectionVariable;
-import org.kframework.backend.java.kil.Definition;
-import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.kil.Hole;
-import org.kframework.backend.java.kil.KLabelFreezer;
-import org.kframework.backend.java.kil.KLabelInjection;
-import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.KCollection;
-import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.KSequence;
-import org.kframework.backend.java.kil.Kind;
-import org.kframework.backend.java.kil.MetaVariable;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
-import org.kframework.backend.java.kil.Token;
-import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.kil.*;
 import org.kframework.kil.matchers.MatcherException;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import org.kframework.backend.java.kil.Collection;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -445,8 +422,24 @@ public class SymbolicUnifier extends AbstractUnifier {
         }
 
         KItem patternKItem = (KItem) term;
-        unify(kItem.kLabel(), patternKItem.kLabel());
-        unify(kItem.kList(), patternKItem.kList());
+        KLabel kLabel = kItem.kLabel();
+        KList kList = kItem.kList();
+        unify(kLabel, patternKItem.kLabel());
+        if (kLabel instanceof KLabelConstant) {
+            KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
+            if (kLabelConstant.isBinder()) {
+                assert kList.getItems().size()==2 && !kList.hasFrame() :
+                        "Only supporting binders of the form lambda x. e for now";
+                Term boundVars = kList.get(0);
+                Term bindingExp = kList.get(1);
+                Set<Variable> variables = boundVars.variableSet();
+                Map<Variable,Variable> freshSubstitution = Variable.getFreshSubstitution(variables);
+                Term freshBoundVars = boundVars.substituteWithBinders(freshSubstitution, context);
+                Term freshbindingExp = bindingExp.substituteWithBinders(freshSubstitution, context);
+                kList = new KList(ImmutableList.<Term>of(freshBoundVars,freshbindingExp));
+            }
+        }
+        unify(kList, patternKItem.kList());
     }
 
     @Override

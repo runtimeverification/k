@@ -23,7 +23,7 @@ public class SubstitutionTransformer extends PrePostTransformer {
         postTransformer.addTransformer(new LocalSubstitutionTransformer());
         postTransformer.addTransformer(new VariableUpdaterTransformer());
 //        preTransformer.addTransformer(new LocalVariableChecker());
-        preTransformer.addTransformer(new LocalSubstitutionChecker());
+        preTransformer.addTransformer(new LocalSubstitutionChecker(context));
     }
 
     private class LocalSubstitutionTransformer extends LocalTransformer {
@@ -59,13 +59,16 @@ public class SubstitutionTransformer extends PrePostTransformer {
      *
      */
     private class LocalSubstitutionChecker extends LocalTransformer {
+        public LocalSubstitutionChecker(TermContext context) {
+            super(context);
+        }
+
         @Override
         public KList transform(KList kList) {
             assert !kList.hasFrame() : "only KList with a fixed number of elements is supported";
 
             return kList;
         }
-
     }
 
     private class LocalVariableChecker extends LocalTransformer {

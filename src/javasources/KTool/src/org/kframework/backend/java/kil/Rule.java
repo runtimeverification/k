@@ -132,9 +132,6 @@ public class Rule extends JavaSymbolicObject {
         return rightHandSide;
     }
 
-    /**
-     * Returns a new {@code Rule} instance obtained from this rule by applying substitution.
-     */
     @Override
     public Rule substitute(Map<Variable, ? extends Term> substitution, TermContext context) {
         return (Rule) super.substitute(substitution, context);
@@ -145,8 +142,8 @@ public class Rule extends JavaSymbolicObject {
      * term.
      */
     @Override
-    public Rule substitute(Variable variable, Term term, TermContext context) {
-        return (Rule) super.substitute(variable, term, context);
+    public Rule substituteWithBinders(Variable variable, Term term, TermContext context) {
+        return (Rule) super.substituteWithBinders(variable, term, context);
     }
 
     @Override

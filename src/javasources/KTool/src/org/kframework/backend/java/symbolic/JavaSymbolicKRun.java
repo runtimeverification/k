@@ -1,7 +1,6 @@
 package org.kframework.backend.java.symbolic;
 
 
-import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.ConstrainedTerm;
@@ -298,7 +297,7 @@ public class JavaSymbolicKRun implements KRun {
             // construct the generated program by applying the substitution
             // obtained from the result configuration to the initial one
             Term pgm = Term.of(cfg, definition);
-            pgm = pgm.substitute(result.constraint().substitution(), termContext);
+            pgm = pgm.substituteWithBinders(result.constraint().substitution(), termContext);
 
             org.kframework.kil.Term pgmTerm = (org.kframework.kil.Term) pgm.accept(
                     new BackendJavaKILtoKILTranslation(context));

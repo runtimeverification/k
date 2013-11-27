@@ -7,7 +7,12 @@ import org.kframework.kil.visitors.Transformer;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * Represents a compound compilation step which consists of a list of
+ * compilation steps.
+ * 
+ * @param <T>
+ */
 public class CompilerSteps<T extends ASTNode> extends BasicCompilerStep<T> {
 
 	List<CompilerStep<T>> steps;

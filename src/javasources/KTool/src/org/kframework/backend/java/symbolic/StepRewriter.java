@@ -92,9 +92,9 @@ public class StepRewriter {
 
             Term result = rule.rightHandSide();
             /* rename rule variables in the rule RHS */
-            result = result.substitute(freshSubstitution, constrainedTerm.termContext());
+            result = result.substituteWithBinders(freshSubstitution, constrainedTerm.termContext());
             /* apply the constraints substitution on the rule RHS */
-            result = result.substitute(constraint.substitution(), constrainedTerm.termContext());
+            result = result.substituteWithBinders(constraint.substitution(), constrainedTerm.termContext());
             /* evaluate pending functions in the rule RHS */
             result = result.evaluate(constrainedTerm.termContext());
             /* eliminate anonymous variables */
@@ -139,7 +139,7 @@ public class StepRewriter {
 
             Term result = rule.rightHandSide();
             /* apply the constraints substitution on the rule RHS */
-            result = result.substitute(constraint.substitution(), context);
+            result = result.substituteWithBinders(constraint.substitution(), context);
             /* evaluate pending functions in the rule RHS */
             result = result.evaluate(context);
 

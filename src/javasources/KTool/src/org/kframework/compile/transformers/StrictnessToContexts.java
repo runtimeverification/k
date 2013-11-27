@@ -132,12 +132,15 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                 TermCons termCons = (TermCons) MetaK.getTerm(prod, context);
                 for (int j = 0; j < prod.getArity(); ++j) {
                     if (GlobalSettings.javaBackend) {
-                        /* the Java Rewrite Engine only supports strictness with KItem variables
-                        * The only exception is if the "use_concrete" flag is used (needed for test
-                        * generation)*/
-                            if(!GlobalSettings.use_concrete){
-                                termCons.getContents().get(j).setSort(KSorts.KITEM);
-                            }
+                        /*
+                         * the Java Rewrite Engine only supports strictness with
+                         * KItem variables The only exception is if the
+                         * "use_concrete" flag is used (needed for test
+                         * generation)
+                         */
+                        if (!GlobalSettings.use_concrete) {
+                            termCons.getContents().get(j).setSort(KSorts.KITEM);
+                        }
                     } else {
                         termCons.getContents().get(j).setSort(KSorts.K);
                     }
@@ -147,15 +150,25 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                 termCons.getContents().set(arguments.get(i), getHoleTerm(prod));
 
                 // is seqstrict the elements before the argument should be KResult
+                KApp sideCond = null;
                 if (isSeq) {
                     for (int j = 0; j < i; ++j) {
-                        termCons.getContents().get(arguments.get(j)).setSort(KSorts.KRESULT);
+                        Term arg = termCons.getContents().get(arguments.get(j));
+                        if (GlobalSettings.use_concrete) {
+                            KApp kResultPred = KApp.of(KLabelConstant.KRESULT_PREDICATE, arg);
+                            sideCond = sideCond == null ? kResultPred : 
+                                KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, sideCond, kResultPred);
+                        } else {
+                            arg.setSort(KSorts.KRESULT);
+                        }
                     }
                 }
 
                 org.kframework.kil.Context ctx = new org.kframework.kil.Context();
                 ctx.setBody(termCons);
                 ctx.setAttributes(prod.getAttributes());
+                if (sideCond != null)
+                    ctx.setRequires(sideCond);
                 items.add(ctx);
             }
         }
