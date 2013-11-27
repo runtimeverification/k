@@ -275,7 +275,7 @@ equality is required, only the maps and conditions are given as parameters.
   rule getSubst(L1:Id : S1:K, L2:Id : S2:K) => getSubst(S1, S2)
 
 
-  rule getSubst(X:Id, A:AExp) => (X replBy A)
+  rule getSubst(X:Id, X:Id) => emptySubst
   
   rule getSubst(#symAExp(X:K), A:AExp) => (#symAExp(X) replBy A)
 
@@ -293,13 +293,61 @@ equality is required, only the maps and conditions are given as parameters.
   Check if a Map is a substitution (real map):
 */
 
-  syntax K ::= "isSubst" "("  K ")"  [function]
+  syntax Bool ::= "isSubst" "("  K ")"  [function]
 
+ rule isSubst(S:K) => isRelation(S) andBool isAssocArray(S)
+
+/*
   rule isSubst(emptySubst) => true
 
   rule isSubst(I:K replBy A:K) => true
 
   rule isSubst(M:K ;; (I:K replBy A:K)) => isSubst(M)
+*/
+
+  syntax K ::= "isRelation" "("  K ")"  [function]
+
+  rule isRelation(emptySubst) => true
+
+  rule isRelation(I:K replBy A:K) => true
+
+  rule isRelation(Rest:K ;; (I:K replBy A:K)) => isRelation(Rest)
+
+  syntax Bool ::= "isAssocArray" "("  K ")"  [function]
+
+  rule isAssocArray(emptySubst) => true
+
+  rule isAssocArray(I:K replBy A:K) => true
+
+  rule isAssocArray(I:K replBy A:K ;; Rest:K) => isAssocArray(Rest)
+       when isInDom(I, Rest) =/=K true
+
+  rule isAssocArray(I:K replBy A:K ;; Rest:K) => isAssocArray(Rest)
+       when isInDom(I, Rest) ==K true andBool valOf(I, Rest) ==K A
+
+  syntax Bool ::= isInDom(K, K) [function]
+
+  rule isInDom(X:K, emptySubst) => false
+
+
+  rule isInDom(I:K, I replBy A:K) => true
+
+  rule isInDom(I:K, (I replBy A:K ;; Rest:K)) => true
+
+  rule isInDom(I:K, X replBy A:K) => false
+       when I=/=K X
+
+  rule isInDom(I:K, (X replBy A:K ;; Rest:K)) => isInDom(I,  Rest)
+       when I=/=K X
+
+  syntax K ::= valOf(K, K)
+
+  rule valOf(I:K, I replBy A:K) => A
+
+  rule valOf(I:K, (I replBy A:K ;; Rest:K)) => A
+
+  rule valOf(I:K, (X replBy A:K ;; Rest:K)) => valOf(I,  Rest)
+       when I=/=K X
 
 
  //@ Two auxiliary rules
@@ -1073,6 +1121,7 @@ module PEQ
        =>
        X:K replBy E:K ~> computeSubst(S)
 //       [transition]
+
 
   rule (X:Int replBy A:Int => .) ~> computeSubst(S:Substitution)
                                  ~> hypoInfo((F':Bool => F' [ A / X ]), _, _)

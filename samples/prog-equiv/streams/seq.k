@@ -345,6 +345,10 @@ module SEQ
   rule <k> F:Id(Ys:Ids) := IE:IExp; => . ...</k>
        <sspecs>... . => F |-> lambda(Ys) IE </sspecs>
 
+ // cotext
+
+  context L:Id . HOLE : _
+
  //@ Computations:
 
   rule I1:Int = I2:Int => I1 ==Int I2
@@ -402,9 +406,10 @@ module SEQ
           ) ~> K:K 
        </k>
 
+
   rule [labelled-sexp] :
        <k>
-          ( L:Id . IE:IExp : SE:SExp
+          ( L:Id . IE:Int : SE:SExp
             =>
             lbldStmt(L, (IE : SE)) ~> (IE : SE)
           )
