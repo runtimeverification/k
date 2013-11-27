@@ -37,6 +37,7 @@ import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.krun.K;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -501,10 +502,10 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         //TODO: Deal with Ensures
         if (node.getRequires() != null) {
             Term term = (Term) node.getRequires().accept(this);
-            if (term instanceof KItem && 
+            if (term instanceof KItem &&
                 // TODO(YilongL): hasn't the compiler already transformed '_andBool_ to '#andBool?
                     (((KItem) term).kLabel().toString().equals("'_andBool_") ||
-                     ((KItem) term).kLabel().toString().equals("'#andBool"))) {
+                     (((KItem) term).kLabel().toString().equals("'#andBool") && K.do_testgen) )) {
                 for (Term item : ((KItem) term).kList().getItems()) {
                     if (item instanceof KItem && ((KItem) item).kLabel().toString().equals("'fresh(_)")) {
                         freshVariables.add((Variable) ((KItem) item).kList().get(0));
