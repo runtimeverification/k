@@ -22,9 +22,9 @@ import java.util.Stack;
 public class LocationAnnotator extends XMLFilterImpl {
 
     private Locator locator;
-    private Stack<Locator> locatorStack = new Stack<>();
-    private Stack<Element> elementStack = new Stack<>();
-    private UserDataHandler dataHandler = new LocationDataHandler();
+    private final Stack<Locator> locatorStack = new Stack<>();
+    private final Stack<Element> elementStack = new Stack<>();
+    private final UserDataHandler dataHandler = new LocationDataHandler();
 
     LocationAnnotator(XMLReader xmlReader, Document dom) {
         super(xmlReader);

@@ -41,9 +41,8 @@ public class Report {
     /**
      * Generate `<testcase ...> ... </testcase>' element for a test.
      * @return testcase element
-     * @throws ParserConfigurationException
      */
-    public Element genElement(Document doc) throws ParserConfigurationException {
+    public Element genElement(Document doc) {
         Element testElem = doc.createElement("testcase");
         testElem.setAttribute("name", name);
         testElem.setAttribute("status", failed ? "failed" : "success");

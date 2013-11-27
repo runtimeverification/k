@@ -84,7 +84,6 @@ public class KTest {
     }
 
     public static void main(String[] args) {
-        boolean error = false;
         try {
             System.exit(new KTest(args).run());
         } catch (ParseException | InvalidArgumentException | SAXException |
@@ -95,17 +94,13 @@ public class KTest {
                     new KException(KException.ExceptionType.ERROR,
                             KException.KExceptionGroup.CRITICAL,
                             e.getMessage(), "command line", "System file."));
-            error = true;
         } catch (InvalidConfigError e) {
             LocationData location = e.getLocation();
             GlobalSettings.kem.register(
                     new KException(KException.ExceptionType.ERROR,
                             KException.KExceptionGroup.CRITICAL,
                             e.getMessage(), location.getSystemId(), location.getPosStr()));
-            error = true;
         }
-
-        if (error)
-            System.exit(1);
+        System.exit(1);
     }
 }
