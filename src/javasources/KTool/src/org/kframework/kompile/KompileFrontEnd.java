@@ -10,6 +10,7 @@ import org.kframework.backend.latex.LatexBackend;
 import org.kframework.backend.latex.PdfBackend;
 import org.kframework.backend.maude.KompileBackend;
 import org.kframework.backend.symbolic.SymbolicBackend;
+import org.kframework.backend.unparser.UnflattenBackend;
 import org.kframework.backend.unparser.UnparserBackend;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.CompilerSteps;
@@ -230,6 +231,15 @@ public class KompileFrontEnd {
 		case "unflatten":
 			backend = new UnparserBackend(Stopwatch.sw, context, true);
 			break;
+        case "unflatten-java":
+            GlobalSettings.javaBackend = true;
+            Backend innerBackend = new JavaSymbolicBackend(Stopwatch.sw, context);
+            context.dotk = new File(output + File.separator + FilenameUtils.removeExtension(mainFile.getName())
+                    + "-kompiled");
+            checkAnotherKompiled(context.dotk);
+            context.dotk.mkdirs();            
+            backend = new UnflattenBackend(Stopwatch.sw, context, innerBackend);
+            break;			
 		case "symbolic":
 			GlobalSettings.symbolic = true;
 			backend = new SymbolicBackend(Stopwatch.sw, context);
