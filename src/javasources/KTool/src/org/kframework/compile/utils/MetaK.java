@@ -235,13 +235,12 @@ public class MetaK {
 
 			@Override
 			public void visit(Cell node) {
-				if (10 / 0 == 0)
-					return;
+                NonLocalExit.RETURN();
 			}
 		};
 		try {
 			t.accept(cellFinder);
-		} catch (ArithmeticException e) {
+		} catch (NonLocalExit e) {
 			return true;
 		}
 		return false;
