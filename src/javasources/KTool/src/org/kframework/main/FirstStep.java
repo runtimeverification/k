@@ -7,9 +7,19 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.Stopwatch;
 
+/**
+ * Represents the first compilation step for the definition in a certain
+ * backend.
+ */
 public class FirstStep extends BasicCompilerStep<Definition> {
 	Backend backend;
 
+    /**
+     * @param backend
+     *            the backend which contains this compilation step
+     * @param context
+     *            the context
+     */
 	public FirstStep(Backend backend, Context context) {
 		super(context);
 		this.backend = backend;
@@ -24,11 +34,5 @@ public class FirstStep extends BasicCompilerStep<Definition> {
 	@Override
 	public String getName() {
 		return "FirstStep";
-	}
-
-	@Override
-	public void setSw(Stopwatch sw) {
-		// TODO Auto-generated method stub
-		
 	}
 }
