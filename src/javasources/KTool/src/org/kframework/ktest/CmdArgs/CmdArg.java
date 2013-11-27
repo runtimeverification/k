@@ -250,7 +250,7 @@ public class CmdArg {
     }
 
     private static int parseTimeout(CommandLine cmdOpts) throws InvalidArgumentException {
-        String timeout_str = cmdOpts.getOptionValue(Constants.TIMEOUT_OPTION, "5000");
+        String timeout_str = cmdOpts.getOptionValue(Constants.TIMEOUT_OPTION, "60000");
         try {
             return Integer.parseInt(timeout_str);
         } catch (NumberFormatException e) {

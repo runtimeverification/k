@@ -12,6 +12,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Comparator;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.*;
 
 /**
  * A unified process class for kompile, kompile --pdf and krun processes.
@@ -51,16 +54,15 @@ public class Proc<T> implements Runnable {
     private final Comparator<String> strComparator;
 
     /**
-     * Proccess object for internal use.
-     */
-    private Process proc = null;
-
-    /**
      * Some arbitrary user data to later get with `getObj()'.
      */
     private final T obj;
 
+    /**
+     * Timeout for process in milliseconds.
+     */
     private final int timeout;
+
     private final boolean verbose;
     private final ColorSetting colorSetting;
 
@@ -78,6 +80,8 @@ public class Proc<T> implements Runnable {
      * How long did process take.
      */
     private long timeDelta;
+
+    public static final int SIGTERM = 143;
 
     /**
      *
@@ -117,7 +121,7 @@ public class Proc<T> implements Runnable {
 
         try {
             long startTime = System.currentTimeMillis();
-            proc = pb.start();
+            Process proc = pb.start();
 
             // I'm using a different naming convention because this is more intuitive for me
             InputStream errorStream = proc.getErrorStream(); // program's error stream
@@ -128,11 +132,14 @@ public class Proc<T> implements Runnable {
             IOUtils.write(procInput, inStream);
             inStream.close();
 
-            int returnCode = proc.waitFor();
+            int returnCode = wait(proc);
             timeDelta = System.currentTimeMillis() - startTime;
 
-            pgmOut = IOUtils.toString(outStream);
-            pgmErr = IOUtils.toString(errorStream);
+            if (returnCode != SIGTERM) {
+                // WARNING: I have no idea what is returned on Windows and MacOS
+                pgmOut = IOUtils.toString(outStream);
+                pgmErr = IOUtils.toString(errorStream);
+            }
 
             handlePgmResult(returnCode);
         } catch (IOException | InterruptedException e) {
@@ -142,21 +149,6 @@ public class Proc<T> implements Runnable {
                             KException.KExceptionGroup.INTERNAL, e.getMessage(), "command line",
                             "System file."));
             reportErr("program failed with exception: " + e.getMessage());
-        }
-        proc = null;
-    }
-
-    /**
-     * Kill spawned process. If no process is spawned or spawned process is ended, nothing happens.
-     */
-    public void kill() {
-        if (proc != null) {
-            proc.destroy();
-            String procCmd = StringUtils.join(args, ' ');
-            GlobalSettings.kem.register(new KException(KException.ExceptionType.WARNING,
-                    KException.KExceptionGroup.INTERNAL, procCmd + " is killed", "command line",
-                    "System file."));
-            success = false;
         }
     }
 
@@ -190,6 +182,19 @@ public class Proc<T> implements Runnable {
         return pgmErr;
     }
 
+    private int wait(final Process proc) throws InterruptedException {
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                proc.destroy();
+            }
+        }, timeout);
+        int ret = proc.waitFor();
+        timer.cancel();
+        return ret;
+    }
+
     /**
      * Compare expected outputs with program outputs, set `reason' and `success' variables,
      * print information messages.
@@ -219,6 +224,12 @@ public class Proc<T> implements Runnable {
                 if (verbose)
                     System.out.format("Done with [%s] (time %d ms)%n", procCmd, timeDelta);
             }
+
+        } else if (returnCode == SIGTERM) {
+
+            System.out.format("%sERROR: [%s] killed due to timeout.%s%n",
+                    red, procCmd, ColorUtil.ANSI_NORMAL);
+            reportTimeout();
 
         } else {
 
@@ -260,5 +271,10 @@ public class Proc<T> implements Runnable {
     private void reportOutMatch(Annotated<String, String> expected, String found) {
         assert reason == null;
         reason = String.format("Expected program output:%n%s%n%nbut found:%n%s%n", expected, found);
+    }
+
+    private void reportTimeout() {
+        assert reason == null;
+        reason = "Timeout";
     }
 }
