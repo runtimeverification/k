@@ -1,12 +1,12 @@
-package org.kframework.ktest2.Config;
+package org.kframework.ktest.Config;
 
 import org.apache.commons.io.FilenameUtils;
-import org.kframework.ktest2.Annotated;
-import org.kframework.ktest2.CmdArgs.CmdArg;
-import org.kframework.ktest2.KTest;
-import org.kframework.ktest2.KTestStep;
-import org.kframework.ktest2.PgmArg;
-import org.kframework.ktest2.Test.TestCase;
+import org.kframework.ktest.Annotated;
+import org.kframework.ktest.CmdArgs.CmdArg;
+import org.kframework.ktest.KTest;
+import org.kframework.ktest.KTestStep;
+import org.kframework.ktest.PgmArg;
+import org.kframework.ktest.Test.TestCase;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;

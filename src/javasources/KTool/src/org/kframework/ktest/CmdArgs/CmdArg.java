@@ -1,11 +1,11 @@
-package org.kframework.ktest2.CmdArgs;
+package org.kframework.ktest.CmdArgs;
 
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.krun.ColorSetting;
-import org.kframework.ktest2.IgnoringStringComparator;
-import org.kframework.ktest2.KTestStep;
+import org.kframework.ktest.IgnoringStringComparator;
+import org.kframework.ktest.KTestStep;
 
 import java.io.File;
 import java.util.Comparator;

@@ -1,4 +1,4 @@
-package org.kframework.ktest2;
+package org.kframework.ktest;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;

@@ -1,13 +1,13 @@
-package org.kframework.ktest2.Test;
+package org.kframework.ktest.Test;
 
 
 import org.apache.commons.io.FilenameUtils;
-import org.kframework.ktest2.Annotated;
-import org.kframework.ktest2.CmdArgs.CmdArg;
-import org.kframework.ktest2.Config.InvalidConfigError;
-import org.kframework.ktest2.Config.LocationData;
-import org.kframework.ktest2.KTestStep;
-import org.kframework.ktest2.PgmArg;
+import org.kframework.ktest.Annotated;
+import org.kframework.ktest.CmdArgs.CmdArg;
+import org.kframework.ktest.Config.InvalidConfigError;
+import org.kframework.ktest.Config.LocationData;
+import org.kframework.ktest.KTestStep;
+import org.kframework.ktest.PgmArg;
 
 import java.io.File;
 import java.util.*;

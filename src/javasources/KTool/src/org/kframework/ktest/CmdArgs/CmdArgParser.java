@@ -1,4 +1,4 @@
-package org.kframework.ktest2.CmdArgs;
+package org.kframework.ktest.CmdArgs;
 
 import org.apache.commons.cli.*;
 

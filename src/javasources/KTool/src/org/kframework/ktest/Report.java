@@ -1,4 +1,4 @@
-package org.kframework.ktest2;
+package org.kframework.ktest;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
