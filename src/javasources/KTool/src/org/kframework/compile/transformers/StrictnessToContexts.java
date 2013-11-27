@@ -132,8 +132,12 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                 TermCons termCons = (TermCons) MetaK.getTerm(prod, context);
                 for (int j = 0; j < prod.getArity(); ++j) {
                     if (GlobalSettings.javaBackend) {
-                        /* the Java Rewrite Engine only supports strictness with KItem variables */
-                        termCons.getContents().get(j).setSort(KSorts.KITEM);
+                        /* the Java Rewrite Engine only supports strictness with KItem variables
+                        * The only exception is if the "use_concrete" flag is used (needed for test
+                        * generation)*/
+                            if(!GlobalSettings.use_concrete){
+                                termCons.getContents().get(j).setSort(KSorts.KITEM);
+                            }
                     } else {
                         termCons.getContents().get(j).setSort(KSorts.K);
                     }

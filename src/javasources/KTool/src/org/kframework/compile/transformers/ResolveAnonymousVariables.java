@@ -15,7 +15,7 @@ public class ResolveAnonymousVariables extends CopyOnWriteTransformer {
 	
 	@Override
 	public ASTNode transform(Variable node) throws TransformerException {
-		if (MetaK.isAnonVar(node)) 
+		if (MetaK.isAnonVar(node))
 			return Variable.getFreshVar(node.getSort());
 		return node;
 	}

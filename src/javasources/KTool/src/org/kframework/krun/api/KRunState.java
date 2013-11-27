@@ -16,6 +16,7 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
+import org.kframework.backend.symbolic.TokenVariableToSymbolic;
 
 import java.io.Serializable;
 import java.io.IOException;
@@ -64,6 +65,7 @@ public class KRunState implements Serializable{
 						"Could not load parser: brackets may be unsound"));
 				}
 			}
+            result = (Term) result.accept(new TokenVariableToSymbolic(context));
 		} catch (TransformerException e) {
 			assert false : "Concretization threw a TransformerException";
 		}
@@ -76,7 +78,7 @@ public class KRunState implements Serializable{
 
 		return result;
 	}
-	
+
 	public KRunState(Term rawResult, int stateId, Context context) {
 		this(rawResult, context);
 		this.stateId = stateId;

@@ -5,6 +5,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.Backend;
 import org.kframework.backend.html.HtmlBackend;
 import org.kframework.backend.java.symbolic.JavaSymbolicBackend;
+import org.kframework.backend.kore.KoreBackend;
 import org.kframework.backend.latex.LatexBackend;
 import org.kframework.backend.latex.PdfBackend;
 import org.kframework.backend.maude.KompileBackend;
@@ -127,6 +128,10 @@ public class KompileFrontEnd {
 			step = cmd.getOptionValue("step");
 		}
 
+        if(cmd.hasOption("concrete-sort")){
+             GlobalSettings.use_concrete = true;
+        }
+
 
 		String def = null;
 		{
@@ -201,6 +206,9 @@ public class KompileFrontEnd {
 			}
 			GlobalSettings.documentation = true;
 			backend = new HtmlBackend(Stopwatch.sw, context);
+			break;
+		case "kore":
+			backend = new KoreBackend(Stopwatch.sw, context);
 			break;
 		case "maude":
 			backend = new KompileBackend(Stopwatch.sw, context);

@@ -13,6 +13,7 @@ module SYMBOLIC-K
   imports BUILTIN-HOOKS
   imports ID-HOOKS
   imports FREE-VARS
+  imports SYMBOLIC-SYNTAX
 //  imports SIMPLIFICATION
 
   syntax Bool ::= "forall" Set "." Bool [binder]

@@ -1,7 +1,6 @@
 package org.kframework.backend.java.symbolic;
 
 
-import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.ConstrainedTerm;
@@ -23,9 +22,6 @@ import org.kframework.utils.BinaryLoader;
 
 import java.io.File;
 import java.util.*;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 
 import edu.uci.ics.jung.graph.DirectedGraph;
@@ -266,6 +262,18 @@ public class JavaSymbolicKRun implements KRun {
             throw new UnsupportedOperationException("Search type should be SearchType.STAR");
         }
         
+        // TODO: get rid of this ugly hack
+        Object o = ((org.kframework.kil.Bag) ((org.kframework.kil.Cell) cfg).getContents()).getContents().get(0);
+        o = ((org.kframework.kil.Bag) ((org.kframework.kil.Cell) o).getContents()).getContents().get(1);
+        Map<org.kframework.kil.Term, org.kframework.kil.Term> stateMap = new HashMap<org.kframework.kil.Term, org.kframework.kil.Term>();
+        stateMap.put((org.kframework.kil.Term) org.kframework.kil.GenericToken.kAppOf("Id", "n1"), (org.kframework.kil.Term) org.kframework.kil.IntBuiltin.kAppOf("1"));
+        stateMap.put((org.kframework.kil.Term) org.kframework.kil.GenericToken.kAppOf("Id", "n2"), (org.kframework.kil.Term) org.kframework.kil.IntBuiltin.kAppOf("2"));
+        ((org.kframework.kil.Cell) o)
+                .setContents(new org.kframework.kil.MapBuiltin(context
+                        .dataStructureSortOf("MyMap"), 
+                        stateMap, 
+                        Collections.<org.kframework.kil.Term>emptyList()));
+        
         SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
         TermContext termContext = new TermContext(definition, new PortableFileSystem());
         ConstrainedTerm initCfg = new ConstrainedTerm(Term.of(cfg, definition), termContext);
@@ -289,7 +297,7 @@ public class JavaSymbolicKRun implements KRun {
             // construct the generated program by applying the substitution
             // obtained from the result configuration to the initial one
             Term pgm = Term.of(cfg, definition);
-            pgm = pgm.substitute(result.constraint().substitution(), termContext);
+            pgm = pgm.substituteWithBinders(result.constraint().substitution(), termContext);
 
             org.kframework.kil.Term pgmTerm = (org.kframework.kil.Term) pgm.accept(
                     new BackendJavaKILtoKILTranslation(context));

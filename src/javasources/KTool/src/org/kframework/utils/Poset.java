@@ -12,6 +12,13 @@ public class Poset implements Serializable {
 
 	private java.util.Set<Tuple> relations = new HashSet<Tuple>();
 	private java.util.Set<String> elements = new HashSet<String>();
+	
+	/**
+	 * Returns a unmodifiable view of elements in this poset.
+	 */
+	public java.util.Set<String> getElements() {
+	    return java.util.Collections.unmodifiableSet(elements);
+	}
 
 	public void addRelation(String big, String small) {
 		relations.add(new Tuple(big, small));

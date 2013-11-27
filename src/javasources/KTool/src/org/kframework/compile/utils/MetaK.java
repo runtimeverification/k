@@ -6,7 +6,6 @@ import org.kframework.kil.Collection;
 import org.kframework.kil.Map;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.Visitable;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.StringUtil;
@@ -94,36 +93,6 @@ public class MetaK {
 		return key.startsWith("#");
 	}
 
-	public static Definition setConfiguration(Definition node, org.kframework.kil.loader.Context context, final Configuration conf) {
-		try {
-			return (Definition) node.accept(new CopyOnWriteTransformer("Configuration setter",
-                    context) {
-				@Override
-				public ASTNode transform(Configuration node) {
-					return conf;
-				}
-
-				@Override
-				public ASTNode transform(org.kframework.kil.Context node) {
-					return node;
-				}
-
-				@Override
-				public ASTNode transform(Rule node) {
-					return node;
-				}
-
-				@Override
-				public ASTNode transform(Syntax node) {
-					return node;
-				}
-			});
-		} catch (TransformerException e) {
-			e.printStackTrace();
-		}
-		return node;
-	}
-
 	public static Configuration getConfiguration(Definition node, org.kframework.kil.loader.Context context) {
 		final List<Configuration> result = new LinkedList<Configuration>();
 		node.accept(new BasicVisitor(context) {
@@ -133,19 +102,13 @@ public class MetaK {
 			}
 
 			@Override
-			public void visit(org.kframework.kil.Context node) {
-				return;
-			}
+			public void visit(org.kframework.kil.Context node) { }
 
 			@Override
-			public void visit(Rule node) {
-				return;
-			}
+			public void visit(Rule node) { }
 
 			@Override
-			public void visit(Syntax node) {
-				return;
-			}
+			public void visit(Syntax node) { }
 		});
 		if (result.size() == 0) {
 			GlobalSettings.kem
@@ -238,59 +201,37 @@ public class MetaK {
 	public static boolean hasCell(Term t, org.kframework.kil.loader.Context context) {
 		Visitor cellFinder = new BasicVisitor(context) {
 			@Override
-			public void visit(KSequence node) {
-				return;
-			}
+			public void visit(KSequence node) { }
 
 			@Override
-			public void visit(org.kframework.kil.List node) {
-				return;
-			}
+			public void visit(org.kframework.kil.List node) { }
 
 			@Override
-			public void visit(ListItem node) {
-				return;
-			}
+			public void visit(ListItem node) { }
 
 			@Override
-			public void visit(TermCons node) {
-				return;
-			}
+			public void visit(TermCons node) { }
 
 			@Override
-			public void visit(org.kframework.kil.Set node) {
-				return;
-			}
+			public void visit(org.kframework.kil.Set node) { }
 
 			@Override
-			public void visit(SetItem node) {
-				return;
-			}
+			public void visit(SetItem node) { }
 
 			@Override
-			public void visit(KApp node) {
-				return;
-			}
+			public void visit(KApp node) { }
 
 			@Override
-			public void visit(KList node) {
-				return;
-			}
+			public void visit(KList node) { }
 
 			@Override
-			public void visit(Map node) {
-				return;
-			}
+			public void visit(Map node) { }
 
 			@Override
-			public void visit(MapItem node) {
-				return;
-			}
+			public void visit(MapItem node) { }
 
 			@Override
-			public void visit(UserList node) {
-				return;
-			}
+			public void visit(UserList node) { }
 
 			@Override
 			public void visit(Cell node) {
@@ -364,6 +305,12 @@ public class MetaK {
                || sort.equals("#ModelCheckResult");
 	}
 
+    public static boolean isDataSort(String sort) {
+        return sort.equals(BoolBuiltin.SORT_NAME)
+                || sort.equals(IntBuiltin.SORT_NAME)
+                || sort.equals(StringBuiltin.SORT_NAME);
+    }
+
 	public static boolean isComputationSort(String sort) {
 		return sort.equals(KSorts.K) || sort.equals(KSorts.KITEM) || !MetaK.isKSort(sort);
 	}
@@ -414,72 +361,10 @@ public class MetaK {
 		}
 	}
 
-
-	public static Term fillHole(Term t, final Term replacement, org.kframework.kil.loader.Context context) {
-		CopyOnWriteTransformer holeFiller = new CopyOnWriteTransformer("Hole Filling", context) {
-			@Override
-			public ASTNode transform(Hole node) {
-				return replacement;
-			}
-		};
-		try {
-			Term result = (Term) t.accept(holeFiller);
-			return result;
-		} catch (TransformerException e) {
-			e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-
-		}
-		return null;
-	}
-
-	public static Term createFreezer(Term body) {
-
-		return null;  //To change body of created methods use File | Settings | File Templates.
-	}
-
 	public static boolean isPredicateLabel(String name) {
 		if (name.startsWith("is")) {
 			return true;
 		}
-		return false;
-	}
-
-	public static Term getHoleReplacement(Term t, org.kframework.kil.loader.Context context) {
-		final List<Term> result = new ArrayList<Term>();
-		Visitor holeReplacementFinder = new BasicVisitor(context) {
-			@Override
-			public void visit(Rewrite node) {
-				final Term left = node.getLeft();
-				if (left instanceof Hole) {
-					result.add(node.getRight());
-				}
-				if (left instanceof Variable) {
-					if (((Variable)left).getName().equals(MetaK.Constants.hole)) {
-						result.add(node.getRight());
-						if (10 / 0 == 0)
-							return;
-					}
-				}
-
-			}
-		};
-		try {
-			t.accept(holeReplacementFinder);
-		} catch (ArithmeticException e) {
-			return result.get(0);
-		}
-		//return new Hole("K");
-        return Hole.KITEM_HOLE;
-	}
-
-	public static boolean isPredefinedPredicate(String name) {
-		return name.startsWith("is") || name.equals(KLabelConstant.KNEQ_KLABEL.getLabel())
-                || name.equals(KLabelConstant.KEQ_KLABEL.getLabel());
-	}
-	
-	public static boolean isAbstractableSort(String name) {
-		if (name.equals(BoolBuiltin.SORT_NAME) || name.equals(IntBuiltin.SORT_NAME))
-			return true;
 		return false;
 	}
 }

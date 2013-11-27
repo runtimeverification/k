@@ -37,10 +37,29 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
      * C[v], v, t1, t2 such that
      * v is a fresh variable and term = C[t1 => t2] */
     private List<Term> splitRewrite(Term term) throws TransformerException {
-    	final Variable v;
+        final Variable v;
         if (GlobalSettings.javaBackend) {
             /* the java rewrite engine only supports heating/cooling on KItem */
-            v = Variable.getFreshVar(KSorts.KITEM);
+            if(GlobalSettings.use_concrete){
+                if(term instanceof TermCons){
+                    TermCons termCons = (TermCons)term;
+                    int index = 0;
+                    //TODO(OwolabiL): what if there is more than 1 KItem?
+                    for (int i = 0; i < termCons.arity(); i++) {
+                        if (termCons.getContents().get(i).getSort().equals("KItem")){
+                            index = i;
+                            break;
+                        }
+                    }
+                    v = Variable.getFreshVar(termCons.getProduction().getChildSort(index));
+                }else{
+                    //TODO(OwolabiL): Remove if this is never used
+                    v = Variable.getFreshVar(term.getSort());
+                }
+
+            } else{
+                v = Variable.getFreshVar(KSorts.KITEM);
+            }
         } else {
             v = Variable.getFreshVar(KSorts.K);
         }
@@ -52,7 +71,7 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
     			return v;
     		}
     	};
-    	Term result = (Term)term.accept(transformer); 
+    	Term result = (Term)term.accept(transformer);
     	list.add(0, v);
     	list.add(0, result);
     	return list;

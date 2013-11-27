@@ -3,7 +3,6 @@ package org.kframework.backend.java.builtins;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.SymbolicUnifier;
-import org.kframework.kil.loader.Context;
 import org.kframework.kil.matchers.MatcherException;
 
 import java.util.HashMap;
@@ -59,13 +58,17 @@ public class MetaK {
         }
         return new BuiltinSet(metaVariables);
     }
+      public static BuiltinSet trueVariables(Term term, TermContext context) {
+        Set<Variable> trueVariables = term.variableSet();
+        return new BuiltinSet(trueVariables);
+    }
 
-    public static BuiltinMap variablesMap(BuiltinSet variableSet, TermContext context) {
-        Set<Term> variables = variableSet.elements();
+    public static BuiltinMap variablesMap(Term term, TermContext context) {
+        Set<Variable> variables = term.variableSet();
         Map<MetaVariable, Variable> result = new HashMap<>(variables.size());
-        for (Term variable : variables) {
-            assert variable instanceof MetaVariable : "this function only applies on metavariables";
-            result.put((MetaVariable) variable, ((MetaVariable) variable).variable());
+        for (Variable variable : variables) {
+            assert variable instanceof Variable : "this function only applies on variables";
+            result.put(new MetaVariable(variable), variable);
         }
         return BuiltinMap.of(result, null);
     }

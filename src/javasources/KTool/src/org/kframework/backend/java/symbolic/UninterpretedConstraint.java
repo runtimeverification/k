@@ -143,4 +143,9 @@ public class UninterpretedConstraint extends JavaSymbolicObject {
         visitor.visit(this);
     }
 
+    public UninterpretedConstraint deepCopy() {
+        UninterpretedConstraint result = new UninterpretedConstraint();
+        result.equalities.addAll(equalities);
+        return result;        
+    }
 }

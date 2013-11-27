@@ -209,7 +209,6 @@ rule classToString(class(Class,Mode,Extends,Implements,Fields),Cache) =>
   "  @Override public String toString() {" ~~~
   "    StringBuilder sb = new StringBuilder();" ~~~
        toStrings(Fields) ~~~
-  "    sb.setLength(sb.length() - 1);" ~~~
   "    return sb.toString();" ~~~
   "  }" ~~~
   "" ~~~
@@ -461,6 +460,7 @@ rule <k>P</k><cache>.Program => P</cache>
 rule <k>code Class C S => S</k>
 rule <k>(doc Class D) S => S</k>
 rule <k>(doc Class Field D) S => S</k>
+//rule <k>.Program</k><cache>_ => .Program</cache>
 
 //configuration <T><k>$PGM:Program</k><out>.Strings</out></T>
 configuration <T><k>$PGM:Program</k><cache>.Program</cache><out stream="stdout">.List</out></T>
@@ -473,10 +473,15 @@ rule <k>syn Extends ::= .SyntaxBody S => S</k>
 //rule <k>(syn Extends ::= (Body [Class::Id, Attrs] | B => B)) S</k>
 //     <cache>P</cache>
 //     <out>... . => ListItem(classToString(applyProdAttrs(class(Class, default, Id2String(Extends), ., generateFields(Body)), [Attrs]), appendPrograms(P, S)))</out>
-rule <k>(. => writeToFile(Id2String(Class)~".javax", classToString(applyProdAttrs(class(Class, default, Id2String(Extends), ., generateFields(Body)), [Attrs]), appendPrograms(P, S)))) ~>
+// P was appendPrograms(P, S)
+rule <k>(. => writeNonEmptyToFile(Id2String(Class)~".javax", classToString(applyProdAttrs(class(Class, default, Id2String(Extends), ., generateFields(Body)), [Attrs]), P))) ~>
         (syn Extends ::= (Body [Class::Id, Attrs] | B => B)) S</k>
      <cache>P</cache>
 //     <out>... . => ListItem(classToString(applyProdAttrs(class(Class, default, Id2String(Extends), ., generateFields(Body)), [Attrs]), appendPrograms(P, S)))</out>
+
+syntax KItem ::= writeNonEmptyToFile(String, String)
+rule writeNonEmptyToFile(File, "") => .
+rule writeNonEmptyToFile(File, Str) => writeToFile(File, Str) when Str =/=String ""
 
 //syntax KItem ::= writeToFile(String, String) | checkOpen(String, K) | writeToFileNum(String, Int, String) | checkWrite(String, Int, String, K)
 //rule writeToFile(Filename, Content) => writeToFileNum(Filename, checkOpen(Filename, #open(Filename, "w")), Content)

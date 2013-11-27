@@ -90,5 +90,8 @@ public class AddSymbolicK extends CopyOnWriteTransformer {
 			return node;
 	}
 
+    public static String getSymbolicConstructorPrefix() {
+        return SymbolicConstructorPrefix;
+    }
 }
 

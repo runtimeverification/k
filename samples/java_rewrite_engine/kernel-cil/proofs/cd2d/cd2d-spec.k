@@ -27,11 +27,17 @@ module CD2D-SPEC
   syntax Float ::= "E_tau" [function]
   rule E_tau => 0x1.p-21
 
+  syntax Float ::= "E_hlos" [function]
+  rule E_hlos => 0x1.p-36
+
   syntax Float ::= "VE_MAX" [function]
   rule VE_MAX => 1200.0
   
   syntax Float ::= "DS_MAX" [function]
   rule DS_MAX => 100.0
+
+  syntax Float ::= "D" [function]
+  rule D => 5.0
 
   syntax Bool ::= DISTANCE(Float) [function]
   rule DISTANCE(X:Float) => (--Float DS_MAX) <=Float X <=Float DS_MAX
@@ -50,6 +56,6 @@ module CD2D-SPEC
   rule tauR(Ux:Float, Uy:Float, Vx:Float, Vy:Float, B:Float, T:Float) =>
     dmin(dmax(B *Float sqR(Vx,Vy), --Float dotR(Ux,Uy, Vx, Vy)), T *Float sqR(Vx, Vy)) 
 
- 
-
+  syntax Bool ::= horizontalLosR(Float, Float, Float) [function]
+  rule horizontalLosR(Sx,Sy,D) => sqR(Sx,Sy) <=Float D *Float D 
 endmodule

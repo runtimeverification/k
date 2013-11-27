@@ -194,6 +194,13 @@ public class Context implements Serializable {
 	public boolean isListSort(String sort) {
 		return listConses.containsKey(sort);
 	}
+	
+	/**
+	 * Returns a unmodifiable view of all sorts.
+	 */
+	public Set<String> getAllSorts() {
+	    return Collections.unmodifiableSet(subsorts.getElements());
+	}
 
 	/**
 	 * Takes a List sort and returns the sort of the elements of that List sort. e.g, for List{Exp, ","}, returns Exp.
