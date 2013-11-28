@@ -56,13 +56,16 @@ public class ProductionsOfSort {
         assert ProductionsOfSort.definition != null;
 
         List<KItem> freshTerms = new ArrayList<KItem>();
-        for (Production prod : prodsOfSort.get(sort)) {
-            ImmutableList.Builder<Term> listBuilder = ImmutableList.builder();
-            for (ProductionItem prodItem : prod.getItems())
-                if (prodItem instanceof Sort)
-                    listBuilder.add(Variable.getFreshVariable(((Sort) prodItem).getName()));
-            KItem kitem = new KItem(klabelOfProd.get(prod), new KList(listBuilder.build()), definition.context());
-            freshTerms.add(kitem);
+        List<Production> prods = prodsOfSort.get(sort);
+        if (prods != null) {
+            for (Production prod : prods) {
+                ImmutableList.Builder<Term> listBuilder = ImmutableList.builder();
+                for (ProductionItem prodItem : prod.getItems())
+                    if (prodItem instanceof Sort)
+                        listBuilder.add(Variable.getFreshVariable(((Sort) prodItem).getName()));
+                KItem kitem = new KItem(klabelOfProd.get(prod), new KList(listBuilder.build()), definition.context());
+                freshTerms.add(kitem);
+            }
         }
         return freshTerms;
     }
