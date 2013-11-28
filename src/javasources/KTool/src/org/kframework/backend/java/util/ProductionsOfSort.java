@@ -12,6 +12,7 @@ import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.kil.Attribute;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Sort;
@@ -35,7 +36,7 @@ public class ProductionsOfSort {
 
         for (KLabelConstant klabel : definition.kLabels())
             for (Production prod : klabel.productions()) {
-                if (prod.containsAttribute("bracket")) 
+                if (prod.containsAttribute(Attribute.BRACKET.getKey())) 
                     continue;
                 
                 String sort = prod.getSort();
