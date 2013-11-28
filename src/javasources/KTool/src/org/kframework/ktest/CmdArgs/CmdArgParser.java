@@ -54,7 +54,7 @@ public class CmdArgParser {
                 ("Generate a junit-like report.").create());
         addOption(OptionBuilder.withLongOpt(Constants.TIMEOUT_OPTION).hasArg().withArgName
                 ("num").withDescription("Time limit for each process (milliseconds). " +
-                "Default is 60000 milliseconds.").create());
+                "Default is 300000 milliseconds.").create());
 
 
         addOption(OptionBuilder.withLongOpt("ignore-white-spaces").hasArg().withArgName("on|off")
