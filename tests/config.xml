@@ -507,16 +507,19 @@
 
 
   <test
-      definition="regression/generalized-strictness/config.xml"
-      programs="regression/generalized-strictness"
-      results="regression/generalized-strictness"
+      definition="tests/regression/cool-issue/test.k"
+      programs="tests/regression/cool-issue/programs"
+      results="tests/regression/cool-issue/tests"
       extension="test">
+    <all-programs>
+       <krun-option name="-color" value="off" />
+    </all-programs>
   </test>
 
-  <include file="../tutorial/tests/config.xml"
-           directory="tutorial"
-           programs="tutorial/tests"
-           results="tutorial/tests" />
+  <include file="regression/generalized-strictness/config.xml"
+           directory="regression/generalized-strictness"
+           programs="regression/generalized-strictness"
+           results="regression/generalized-strictness" />
 
 
 
