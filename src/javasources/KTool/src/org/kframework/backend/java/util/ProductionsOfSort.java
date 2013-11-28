@@ -35,6 +35,9 @@ public class ProductionsOfSort {
 
         for (KLabelConstant klabel : definition.kLabels())
             for (Production prod : klabel.productions()) {
+                if (prod.containsAttribute("bracket")) 
+                    continue;
+                
                 String sort = prod.getSort();
                 if (!prodsBuilders.containsKey(sort)) {
                     ImmutableList.Builder<Production> b = ImmutableList.builder();
