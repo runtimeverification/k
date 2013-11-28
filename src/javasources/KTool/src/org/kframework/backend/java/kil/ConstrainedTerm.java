@@ -227,7 +227,6 @@ public class ConstrainedTerm extends Term {
                                 SymbolicConstraint newCnstr = uninterpretedCnstr.getSymbolicConstraint(context);
                                 if (newCnstr.simplify() != TruthValue.FALSE) {
                                     tmpSolutions.add(newCnstr);
-                                    // ALMOST FORGOT!!!
                                     orientedVarsOfCnstr.put(newCnstr, new HashSet<Variable>(orientedVars));
                                 }
                             }
@@ -268,7 +267,6 @@ public class ConstrainedTerm extends Term {
                             }
                             changed = true;
                             continue iteratingSymbCnstr;
-                            
                         }
                     }
 
@@ -284,26 +282,32 @@ public class ConstrainedTerm extends Term {
                                 if (sortIntersectionVariables.contains(lhs) || sortIntersectionVariables.contains(rhs))
                                     continue;
 
-                                UninterpretedConstraint uninterpretedCnstr = new UninterpretedConstraint();
+                                // construct common part of the new constraints
+                                UninterpretedConstraint templCnstr = new UninterpretedConstraint();
+                                Collection<UninterpretedConstraint> uninterpretedCnstrs = new ArrayList<UninterpretedConstraint>();
                                 for (Equality eq : cnstr.equalities())
-                                    uninterpretedCnstr.add(eq.leftHandSide(), eq.rightHandSide());
+                                    templCnstr.add(eq.leftHandSide(), eq.rightHandSide());
                                 for (Map.Entry<Variable, Term> entry : cnstr.substitution().entrySet()) {
-                                    uninterpretedCnstr.add(entry.getKey(), entry.getValue());
+                                    templCnstr.add(entry.getKey(), entry.getValue());
                                 }
-
-                                // TODO: what if there is no unique GLBSort?
-                                Variable commonSubsortVar = Variable.getFreshVariable(context.definition().context().getGLBSort(ImmutableSet.<String>of(lhs.sort(), rhs.sort())));
-                                sortIntersectionVariables.add(commonSubsortVar);
-                                uninterpretedCnstr.add(rhs, commonSubsortVar);
-
-                                SymbolicConstraint newCnstr = uninterpretedCnstr.getSymbolicConstraint(context);
-                                if (newCnstr.simplify() != TruthValue.FALSE) {
-                                    tmpSolutions.add(newCnstr);
-                                    orientedVarsOfCnstr.put(newCnstr, new HashSet<Variable>(orientedVars));
-                                    orientedVarsOfCnstr.get(newCnstr).add(lhs);
-                                    orientedVarsOfCnstr.get(newCnstr).add(rhs);
+                                
+                                for (Variable var : computeSortIntersection(lhs.sort(), rhs.sort())) {
+                                    sortIntersectionVariables.add(var);
+                                    UninterpretedConstraint uninterpretedCnstr = templCnstr.deepCopy();
+                                    uninterpretedCnstr.add(rhs, var);
+                                    uninterpretedCnstrs.add(uninterpretedCnstr);
                                 }
-                                //newCnstr.orientSubstitution(ImmutableSet.<Variable>of(lhs, rhs), context);
+                                
+                                // get the interpreted version of the constraint
+                                for (UninterpretedConstraint uninterpretedCnstr : uninterpretedCnstrs) {
+                                    SymbolicConstraint newCnstr = uninterpretedCnstr.getSymbolicConstraint(context);
+                                    if (newCnstr.simplify() != TruthValue.FALSE) {
+                                        tmpSolutions.add(newCnstr);
+                                        orientedVarsOfCnstr.put(newCnstr, new HashSet<Variable>(orientedVars));
+                                        orientedVarsOfCnstr.get(newCnstr).add(lhs);
+                                        orientedVarsOfCnstr.get(newCnstr).add(rhs);                                        
+                                    }
+                                }
                                 changed = true;
                                 continue iteratingSymbCnstr;
                             }
@@ -333,7 +337,6 @@ public class ConstrainedTerm extends Term {
                                 SymbolicConstraint newCnstr = uninterpretedCnstr.getSymbolicConstraint(context);
                                 if (newCnstr.simplify() != TruthValue.FALSE) {
                                     tmpSolutions.add(newCnstr);
-                                    // ALMOST FORGOT!!!
                                     orientedVarsOfCnstr.put(newCnstr, new HashSet<Variable>(orientedVars));
                                 }
                             }
