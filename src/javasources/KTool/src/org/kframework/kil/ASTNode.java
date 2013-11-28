@@ -189,23 +189,43 @@ public abstract class ASTNode implements Visitable, Transformable, Serializable 
 	 * @return whether the attribute key occurs in the list of attributes.
 	 */
 	public boolean containsAttribute(String key) {
+        return containsAttribute(key, false);
+    }
+
+    /**
+	 * @param key
+     * @param prefix  whether it should search for an attribute having {@key} as a prefix for its key
+	 * @return whether the attribute key occurs in the list of attributes.
+	 */
+	public boolean containsAttribute(String key, boolean prefix) {
 		if (attributes == null)
 			return false;
 
-		return attributes.containsKey(key);
+		return attributes.containsKey(key, prefix);
 	}
 
 	/**
 	 * Retrieves the attribute by key from the list of attributes
-	 * 
+	 *
 	 * @param key
 	 * @return a value for key in the list of attributes or the default value.
 	 */
-	public String getAttribute(String key) {
+    public String getAttribute(String key) {
+        return getAttribute(key, false);
+
+    }
+	/**
+	 * Retrieves the attribute by key from the list of attributes
+	 * 
+	 * @param key
+     * @param prefix  whether it should look for a key having {@key} as a prefix
+	 * @return a value for key in the list of attributes or the default value.
+	 */
+	public String getAttribute(String key, boolean prefix) {
 		final String defaultValue = Constants.defaultAttributeValues.get(key);
 		if (attributes == null)
 			return defaultValue;
-		final String value = attributes.get(key);
+		final String value = attributes.get(key, prefix);
 		if (value == null)
 			return defaultValue;
 		return value;

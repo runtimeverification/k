@@ -58,26 +58,47 @@ public class Attributes extends ASTNode {
 		return content.substring(0, content.length() - 2) + "]";
 	}
 
-	public boolean containsKey(String key) {
+    public boolean containsKey(String key) {
+        return containsKey(key, false);
+    }
+
+	public boolean containsKey(String key, boolean prefix) {
 		if (contents == null)
 			return false;
-		for (Attribute attr : contents)
-			if (attr.getKey().equals(key))
-				return true;
+		for (Attribute attr : contents) {
+            if (prefix) {
+                if (attr.getKey().startsWith(key))
+                    return true;
+            } else if (attr.getKey().equals(key))
+                return true;
+        }
 		return false;
 	}
+    public Attribute getAttributeByKey(String key) {
+        return getAttributeByKey(key, false);
+    }
 
-	public Attribute getAttributeByKey(String key) {
+	public Attribute getAttributeByKey(String key, boolean prefix) {
 		for (Attribute attr : contents)
-			if (attr.getKey().equals(key))
-				return attr;
+            if (prefix) {
+                if (attr.getKey().startsWith(key))
+                    return attr;
+            } else if (attr.getKey().equals(key))
+                return attr;
 		return null;
 	}
 
-	public String get(String key) {
+    public String get(String key) {
+        return get(key, false);
+    }
+
+	public String get(String key, boolean prefix) {
 		for (Attribute attr : contents)
-			if (attr.getKey().equals(key))
-				return attr.getValue();
+            if (prefix) {
+                if (attr.getKey().startsWith(key))
+                    return attr.getValue();
+            } else if (attr.getKey().equals(key))
+                return attr.getValue();
 		return null;
 	}
 
@@ -101,7 +122,7 @@ public class Attributes extends ASTNode {
 		if (oldAttr != null) {
 			oldAttr.setValue(attr.getValue());
 		} else {
-			contents.add(attr);
+			contents.add(attr.shallowCopy());
 		}
 
 	}
