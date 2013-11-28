@@ -1,5 +1,6 @@
 package org.kframework.kil;
 
+import org.kframework.backend.symbolic.AddSymbolicVariablesDeclaration;
 import org.kframework.compile.sharing.DataStructureSortCollector;
 import org.kframework.compile.sharing.TokenSortCollector;
 import org.kframework.kil.loader.*;
@@ -123,6 +124,7 @@ public class Definition extends ASTNode {
 
 	public void preprocess(org.kframework.kil.loader.Context context) {
 		// Collect information
+        this.accept(new AddSymbolicVariablesDeclaration(context, this.getMainSyntaxModule()));
 		this.accept(new UpdateReferencesVisitor(context));
 		this.accept(new AddConsesVisitor(context));
 		this.accept(new CollectConsesVisitor(context));
