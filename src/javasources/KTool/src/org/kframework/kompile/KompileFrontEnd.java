@@ -231,6 +231,8 @@ public class KompileFrontEnd {
 			backend = new UnparserBackend(Stopwatch.sw, context, true);
 			break;
         case "unflatten-java":
+            // TODO(YilongL): make it general to all backends; add info about
+            // this backend in KompileOptionsParser
             GlobalSettings.javaBackend = true;
             Backend innerBackend = new JavaSymbolicBackend(Stopwatch.sw, context);
             context.dotk = new File(output + File.separator + FilenameUtils.removeExtension(mainFile.getName())
