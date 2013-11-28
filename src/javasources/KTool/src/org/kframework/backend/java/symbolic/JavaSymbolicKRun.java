@@ -280,9 +280,12 @@ public class JavaSymbolicKRun implements KRun {
 
         List<TestGenResult> generatorResults = new ArrayList<TestGenResult>();
 
-//        for (Rule rule : definition.rules()) {
-//        	System.out.println(rule);
-//        }
+        List<String> strRules = new ArrayList<String>();
+        for (Rule rule : definition.rules()) strRules.add(rule.toString());
+        Collections.sort(strRules);
+        for (String s : strRules) {
+            System.out.println(s);
+        }
         
         if (bound == null) {
             bound = -1;
