@@ -237,10 +237,40 @@ public class ConstrainedTerm extends Term {
 
                         // dissolve positive membership predicates
                         if (eq1.toString().startsWith("isKResult(")) {
-                            // TODO
+                            KItem mbPredicate = (KItem) eq1.leftHandSide();
+                            String sortName = ((KLabelConstant) mbPredicate.kLabel()).label().substring("is".length());
+                            Variable arg = (Variable) mbPredicate.kList().get(0);
+
+                            // construct common part of the new constraints
+                            UninterpretedConstraint templCnstr = new UninterpretedConstraint();
+                            Collection<UninterpretedConstraint> uninterpretedCnstrs = new ArrayList<UninterpretedConstraint>();
+                            for (Equality eq2 : cnstr.equalities())
+                                if (!eq2.equals(eq1))
+                                    templCnstr.add(eq2.leftHandSide(), eq2.rightHandSide());
+                            for (Map.Entry<Variable, Term> entry : cnstr.substitution().entrySet()) {
+                                templCnstr.add(entry.getKey(), entry.getValue());
+                            }
+
+                            // compute intersection of two sorts, e.g., AExp /\ KResult
+                            for (Variable var : computeSortIntersection(arg.sort(), sortName)) {
+                                UninterpretedConstraint uninterpretedCnstr = templCnstr.deepCopy();
+                                uninterpretedCnstr.add(arg, var);
+                                uninterpretedCnstrs.add(uninterpretedCnstr);
+                            }
+
+                            // get the interpreted version of the constraint
+                            for (UninterpretedConstraint uninterpretedCnstr : uninterpretedCnstrs) {
+                                SymbolicConstraint newCnstr = uninterpretedCnstr.getSymbolicConstraint(context);
+                                if (newCnstr.simplify() != TruthValue.FALSE) {
+                                    tmpSolutions.add(newCnstr);
+                                    orientedVarsOfCnstr.put(newCnstr, new HashSet<Variable>(orientedVars));
+                                }
+                            }
+                            changed = true;
+                            continue iteratingSymbCnstr;
+                            
                         }
                     }
-
 
                     cnstr.orientSubstitution(orientedVars, context);
                     for (Entry<Variable, Term> subst : cnstr.substitution().entrySet()) {
@@ -318,6 +348,31 @@ public class ConstrainedTerm extends Term {
         }
 
         return solutions;
+    }
+
+    private Set<Variable> computeSortIntersection(String sort1, String sort2) {
+        Set<Variable> results = new HashSet<Variable>();
+        Context defContext = context.definition().context();
+
+        Set<String> subsorts = new HashSet<String>();
+        for (String sort : defContext.getAllSorts()) {
+            if (defContext.isSubsortedEq(sort1, sort) && defContext.isSubsortedEq(sort2, sort)) {
+                subsorts.add(sort);
+            }
+        }
+        
+        Set<String> sortsToRemove = new HashSet<String>();
+        for (String s1 : subsorts)
+            for (String s2 : subsorts)
+                if (defContext.isSubsorted(s1, s2)) {
+                    sortsToRemove.add(s2);
+                }
+        subsorts.removeAll(sortsToRemove);
+        
+        for (String sort : subsorts) {
+            results.add(Variable.getFreshVariable(sort));
+        }
+        return results;
     }
 
     private Set<Term> computeSortDifference(String sort1, String sort2) {
