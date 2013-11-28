@@ -133,7 +133,6 @@ public class KompileFrontEnd {
              GlobalSettings.use_concrete = true;
         }
 
-
 		String def = null;
 		{
 			String[] restArgs = cmd.getArgs();
