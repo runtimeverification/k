@@ -63,7 +63,6 @@ public class ReportGen {
             File targetFile = new File(junitFolder.getAbsolutePath(),
                     FilenameUtils.getPath(e.getKey()).replaceAll(File.separator, "-")
                             + FilenameUtils.getBaseName(e.getKey()) + ".xml");
-            System.out.println("targetFile for XML: " + targetFile.getAbsolutePath());
             IOUtils.write(result.getWriter().toString(), new FileOutputStream(targetFile));
         }
     }

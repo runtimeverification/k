@@ -41,7 +41,7 @@ public class TestSuite {
 
     private final Comparator<String> strComparator;
 
-    public TestSuite(List<TestCase> tests, Set<KTestStep> skips, boolean verbose,
+    private TestSuite(List<TestCase> tests, Set<KTestStep> skips, boolean verbose,
                      Comparator<String> strComparator, ColorSetting colorSetting,
                      int timeout, boolean report) {
         this.tests = tests;
@@ -53,7 +53,7 @@ public class TestSuite {
         reportGen = report ? new ReportGen() : null;
     }
 
-    public TestSuite(TestCase singleTest, Set<KTestStep> skips, boolean verbose,
+    private TestSuite(TestCase singleTest, Set<KTestStep> skips, boolean verbose,
                      Comparator<String> strComparator, ColorSetting colorSetting,
                      int timeout, boolean report) {
         tests = new LinkedList<>();
@@ -68,12 +68,14 @@ public class TestSuite {
 
     public TestSuite(List<TestCase> tests, CmdArg cmdArg) {
         this(tests, cmdArg.getSkips(), cmdArg.isVerbose(),
-                cmdArg.getStringComparator(), cmdArg.getColorSetting(), cmdArg.getTimeout(), true);
+                cmdArg.getStringComparator(), cmdArg.getColorSetting(), cmdArg.getTimeout(),
+                cmdArg.getGenerateReport());
     }
 
     public TestSuite(TestCase singleTest, CmdArg cmdArg) {
         this(singleTest, cmdArg.getSkips(), cmdArg.isVerbose(),
-                cmdArg.getStringComparator(), cmdArg.getColorSetting(), cmdArg.getTimeout(), true);
+                cmdArg.getStringComparator(), cmdArg.getColorSetting(), cmdArg.getTimeout(),
+                cmdArg.getGenerateReport());
     }
 
     /**

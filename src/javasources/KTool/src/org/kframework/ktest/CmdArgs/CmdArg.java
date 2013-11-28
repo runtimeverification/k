@@ -225,6 +225,10 @@ public class CmdArg {
         return timeout;
     }
 
+    public boolean getGenerateReport() {
+        return generateReport;
+    }
+
     public CmdArg setDirectory(String directory) {
         this.directory = directory;
         return this;
