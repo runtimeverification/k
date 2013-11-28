@@ -1,10 +1,10 @@
-package org.kframework.ktest2.Test;
+package org.kframework.ktest.Test;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.kframework.krun.ColorSetting;
-import org.kframework.ktest2.*;
-import org.kframework.ktest2.CmdArgs.CmdArg;
+import org.kframework.ktest.*;
+import org.kframework.ktest.CmdArgs.CmdArg;
 import org.kframework.utils.ColorUtil;
 
 import javax.xml.parsers.ParserConfigurationException;

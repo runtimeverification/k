@@ -1,4 +1,4 @@
-package org.kframework.ktest2;
+package org.kframework.ktest;
 
 /**
  * Represents a program argument. `val' may be null, in that case argument is passed without value.

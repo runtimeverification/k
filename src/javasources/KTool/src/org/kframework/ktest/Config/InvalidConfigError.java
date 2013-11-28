@@ -1,4 +1,4 @@
-package org.kframework.ktest2.Config;
+package org.kframework.ktest.Config;
 
 public class InvalidConfigError extends Throwable {
 

@@ -1,4 +1,4 @@
-package org.kframework.ktest2.Test;
+package org.kframework.ktest.Test;
 
 
 import java.util.List;

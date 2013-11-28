@@ -1,4 +1,4 @@
-package org.kframework.ktest2;
+package org.kframework.ktest;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -21,7 +21,7 @@ import java.util.Map;
 
 public class ReportGen {
 
-    private Map<String, List<Report>> reports;
+    private final Map<String, List<Report>> reports;
 
     public ReportGen() {
         reports = new HashMap<>();
@@ -74,8 +74,7 @@ public class ReportGen {
      * @param reports reports to generate testsuite element
      * @return testsuite element
      */
-    private Element genElem(Document doc, String name, List<Report> reports)
-            throws ParserConfigurationException {
+    private Element genElem(Document doc, String name, List<Report> reports) {
         Element testSuiteElem = doc.createElement("testsuite");
         testSuiteElem.setAttribute("name", name);
 

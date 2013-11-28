@@ -1,4 +1,4 @@
-package org.kframework.ktest2;
+package org.kframework.ktest;
 
 public class Annotated<T1, T2> {
     private final T1 obj;
@@ -36,7 +36,7 @@ public class Annotated<T1, T2> {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Annotated)
-            return ((Annotated<T1, T2>) obj).getObj().equals(this.obj);
+            return ((Annotated) obj).getObj().equals(this.obj);
         return false;
     }
 }

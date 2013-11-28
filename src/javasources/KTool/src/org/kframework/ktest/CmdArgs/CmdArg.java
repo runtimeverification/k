@@ -1,11 +1,11 @@
-package org.kframework.ktest2.CmdArgs;
+package org.kframework.ktest.CmdArgs;
 
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.krun.ColorSetting;
-import org.kframework.ktest2.IgnoringStringComparator;
-import org.kframework.ktest2.KTestStep;
+import org.kframework.ktest.IgnoringStringComparator;
+import org.kframework.ktest.KTestStep;
 
 import java.io.File;
 import java.util.Comparator;
@@ -93,7 +93,7 @@ public class CmdArg {
      */
     private final boolean ignoreBalancedParens;
 
-    public CmdArg(String directory, String programs, String results, String[] extensions,
+    private CmdArg(String directory, String programs, String results, String[] extensions,
                    String[] excludes, Set<KTestStep> skips, boolean generateReport,
                    String targetFile, boolean verbose, ColorSetting colorSetting, int timeout,
                    boolean ignoreWS, boolean ignoreBalancedParens) {
@@ -250,7 +250,7 @@ public class CmdArg {
     }
 
     private static int parseTimeout(CommandLine cmdOpts) throws InvalidArgumentException {
-        String timeout_str = cmdOpts.getOptionValue(Constants.TIMEOUT_OPTION, "5000");
+        String timeout_str = cmdOpts.getOptionValue(Constants.TIMEOUT_OPTION, "60000");
         try {
             return Integer.parseInt(timeout_str);
         } catch (NumberFormatException e) {

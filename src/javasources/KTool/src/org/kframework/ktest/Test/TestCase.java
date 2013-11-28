@@ -1,13 +1,13 @@
-package org.kframework.ktest2.Test;
+package org.kframework.ktest.Test;
 
 
 import org.apache.commons.io.FilenameUtils;
-import org.kframework.ktest2.Annotated;
-import org.kframework.ktest2.CmdArgs.CmdArg;
-import org.kframework.ktest2.Config.InvalidConfigError;
-import org.kframework.ktest2.Config.LocationData;
-import org.kframework.ktest2.KTestStep;
-import org.kframework.ktest2.PgmArg;
+import org.kframework.ktest.Annotated;
+import org.kframework.ktest.CmdArgs.CmdArg;
+import org.kframework.ktest.Config.InvalidConfigError;
+import org.kframework.ktest.Config.LocationData;
+import org.kframework.ktest.KTestStep;
+import org.kframework.ktest.PgmArg;
 
 import java.io.File;
 import java.util.*;
@@ -69,9 +69,6 @@ public class TestCase {
                     Map<String, List<PgmArg>> pgmSpecificKRunOpts,
                     Set<KTestStep> skips) throws InvalidConfigError {
         // programs and results should be ordered set because of how search algorithm works
-        // TODO: what happens when same element added to ListOrderedSet? I think what we want is
-        // to move that new element to last position but I don't think this is what currently
-        // happening
         this.definition = definition;
         this.programs = programs;
         this.extensions = toSet(extensions);
@@ -116,6 +113,16 @@ public class TestCase {
         List<KRunProgram> ret = new LinkedList<>();
         for (Annotated<String, LocationData> pgmDir : programs)
             ret.addAll(searchPrograms(pgmDir.getObj()));
+        // at this point ret may contain programs with same names, what we want is to search
+        // program directories right to left, and have at most one program with same name
+        Set<String> pgmNames = new HashSet<>();
+        for (int i = ret.size() - 1; i >= 0; i--) {
+            String pgmName = FilenameUtils.getName(ret.get(i).pgmName);
+            if (pgmNames.contains(pgmName))
+                ret.remove(i);
+            else
+                pgmNames.add(pgmName);
+        }
         return ret;
     }
 
@@ -185,10 +192,7 @@ public class TestCase {
     }
 
     private List<PgmArg> getPgmOptions(String pgm) {
-        String pgmName = FilenameUtils.getName(pgm);
-        List<PgmArg> ret = pgmSpecificKRunOpts.get(pgmName);
-        // TODO: I'm using all-programs options only when no program specific options specified,
-        // make sure this is intended behavior (osa1)
+        List<PgmArg> ret = pgmSpecificKRunOpts.get(FilenameUtils.getName(pgm));
         if (ret == null)
             return krunOpts;
         return ret;
