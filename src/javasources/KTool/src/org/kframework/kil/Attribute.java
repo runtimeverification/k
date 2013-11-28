@@ -14,7 +14,7 @@ import org.w3c.dom.Element;
  */
 public class Attribute extends ASTNode {
 
-    public static final String BUILTIN_KEY = "bruiltin";
+    public static final String BUILTIN_KEY = "builtin";
     public static final String FUNCTION_KEY = "function";
     public static final String PREDICATE_KEY = "predicate";
     public static final String HOOK_KEY = "hook";
