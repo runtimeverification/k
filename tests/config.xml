@@ -517,9 +517,9 @@
   </test>
 
   <include file="regression/generalized-strictness/config.xml"
-           directory="regression/generalized-strictness"
-           programs="regression/generalized-strictness"
-           results="regression/generalized-strictness" />
+           directory="tests/regression/generalized-strictness"
+           programs="tests/regression/generalized-strictness"
+           results="tests/regression/generalized-strictness" />
 
 
 
