@@ -507,14 +507,17 @@
 
 
   <test
-      definition="tests/regression/cool-issue/test.k"
-      programs="tests/regression/cool-issue/programs"
-      results="tests/regression/cool-issue/tests"
+      definition="regression/generalized-strictness/config.xml"
+      programs="regression/generalized-strictness"
+      results="regression/generalized-strictness"
       extension="test">
-    <all-programs>
-       <krun-option name="-color" value="off" />
-    </all-programs>
   </test>
+
+  <include file="../tutorial/tests/config.xml"
+           directory="tutorial"
+           programs="tutorial/tests"
+           results="tutorial/tests" />
+
 
 
 <!-- begin Java Rewrite Engine tests -->
