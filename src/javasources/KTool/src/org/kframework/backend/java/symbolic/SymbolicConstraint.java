@@ -190,20 +190,45 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 return true;
             }
 
-            if (leftHandSide instanceof KItem
-                    && ((KItem) leftHandSide).kLabel().isConstructor()) {
-                return !definition.context().isSubsortedEq(
-                        ((Sorted) rightHandSide).sort(),
-                        ((KItem) leftHandSide).sort());
-            } else if (rightHandSide instanceof KItem
-                    && ((KItem) rightHandSide).kLabel().isConstructor()) {
-                return !definition.context().isSubsortedEq(
+            // TODO(YilongL): find a general way to deal with this
+            if (!K.do_testgen) {
+                if (leftHandSide instanceof KItem
+                        && ((KItem) leftHandSide).kLabel().isConstructor()) {
+                    return !definition.context().isSubsortedEq(
+                            ((Sorted) rightHandSide).sort(),
+                            ((KItem) leftHandSide).sort());
+                } else if (rightHandSide instanceof KItem
+                        && ((KItem) rightHandSide).kLabel().isConstructor()) {
+                    return !definition.context().isSubsortedEq(
+                            ((Sorted) leftHandSide).sort(),
+                            ((KItem) rightHandSide).sort());
+                } else {
+                    return null == definition.context().getGLBSort(ImmutableSet.<String>of(
                         ((Sorted) leftHandSide).sort(),
-                        ((KItem) rightHandSide).sort());
+                        ((Sorted) rightHandSide).sort()));
+                }
             } else {
-                return null == definition.context().getGLBSort(ImmutableSet.<String>of(
-                    ((Sorted) leftHandSide).sort(),
-                    ((Sorted) rightHandSide).sort()));
+                if (leftHandSide instanceof KItem
+                        && ((KItem) leftHandSide).kLabel().isConstructor()) {
+                    for (String pms : ((KItem) leftHandSide).possibleMinimalSorts()) {
+                        if (definition.context().isSubsortedEq(((Sorted) rightHandSide).sort(), pms)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                } else if (rightHandSide instanceof KItem
+                        && ((KItem) rightHandSide).kLabel().isConstructor()) {
+                    for (String pms : ((KItem) rightHandSide).possibleMinimalSorts()) {
+                        if (definition.context().isSubsortedEq(((Sorted) leftHandSide).sort(), pms)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                } else {
+                    return definition.context().getCommonSubsorts(ImmutableSet.<String>of(
+                        ((Sorted) leftHandSide).sort(),
+                        ((Sorted) rightHandSide).sort())).isEmpty();
+                }
             }
         }
 

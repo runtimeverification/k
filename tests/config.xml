@@ -516,6 +516,12 @@
     </all-programs>
   </test>
 
+  <include file="regression/generalized-strictness/config.xml"
+           directory="tests/regression/generalized-strictness"
+           programs="tests/regression/generalized-strictness"
+           results="tests/regression/generalized-strictness" />
+
+
 
 <!-- begin Java Rewrite Engine tests -->
   <test

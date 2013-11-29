@@ -14,8 +14,9 @@ import java.util.Set;
 public class SyntaxByTag extends BasicVisitor {
 	private final Set<Production> productions = new HashSet<Production>();
 	private final String key;
-	
-	@Override
+    private final boolean prefix;
+
+    @Override
 	public void visit(Configuration node) { return; }
 	
 	@Override
@@ -26,21 +27,30 @@ public class SyntaxByTag extends BasicVisitor {
 	
 	@Override
 	public void visit(Production node) {
-		if (key.equals("") || node.containsAttribute(key))
+		if (key.equals("") || node.containsAttribute(key, prefix))
 			productions.add(node);
 	};
 
     public SyntaxByTag(String key, Context context) {
-    	super(context);
+        this(key, false, context);
+    }
+
+    public SyntaxByTag(String key, boolean prefix, Context context) {
+        super(context);
         this.key = key;
+        this.prefix = prefix;
     }
 
     public Set<Production> getProductions() {
         return productions;
     }
 
-	public static Set<Production> get(ASTNode node, String key, Context context) {
-		SyntaxByTag visitor = new SyntaxByTag(key, context);
+    public static Set<Production> get(ASTNode node, String key, Context context) {
+        return get(node, key, false, context);
+    }
+
+	public static Set<Production> get(ASTNode node, String key, boolean prefix, Context context) {
+		SyntaxByTag visitor = new SyntaxByTag(key, prefix, context);
 		node.accept(visitor);
 		return visitor.getProductions();
 	}

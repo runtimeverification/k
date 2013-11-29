@@ -229,6 +229,17 @@ public class Context implements Serializable {
 	public String getGLBSort(Set<String> sorts) {
 		return subsorts.getGLB(sorts);
 	}
+	
+    /**
+     * Finds the most general common subsorts of a given set of sorts
+     * 
+     * @param sorts
+     *            the given set of sorts
+     * @return an immutable set of the most general common subsorts
+     */
+    public Set<String> getCommonSubsorts(Set<String> sorts) {
+        return subsorts.getMaximalLowerBounds(sorts);
+    }
 
 	public void addPriority(String bigPriority, String smallPriority) {
 		// add the new priority

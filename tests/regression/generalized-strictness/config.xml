@@ -1,0 +1,13 @@
+<tests>
+
+  <test definition="test"
+        programs="."
+        extension="test"
+        results="." >
+        <all-programs>
+          <krun-option name="--output" value="pretty" />
+          <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
+        </all-programs>
+  </test>
+
+</tests>

@@ -506,3 +506,50 @@ Here is how you can set a parser for each configuration variable:
 Note that once you have setup parser1 then it is active until -config-var-parser
 option is used again. That is, in our example, the values of CFG1 and CFG3 are
 parsed using parser1 and the value of CFG2 is parser using parser2.
+
+GENERALIZED STRICTNESS:
+-----------------------
+
+This feature allows one to customize strictness for all positions or for individual positions.  
+Example 1:
+  syntax Exp ::= Exp "+" Exp [left, strict<k>(all(context('rvalue)))]
+  syntax K ::= rvalue(K) [strict,context(result(RVal))]
+  syntax RVal ::= Int
+
+The first line declares "+" strict in the <k> cell, on all arguments, wrapping all of them for evaluation with the 'rvalue context wrapper.
+The second line declares rvalue which is itself strict, and which when used as a context cools for results of type RVal (defined on the third line).
+
+Example 2:
+  syntax Exp ::=   Exp "=" Exp [right, strict(1, 2(context(rvalue))), assign]
+  syntax Exp ::= "rvalue" "(" Exp ")" [context(result(RVal)), strict, klabel(rvalue)]
+  
+  The first line declares "=" strict (in the <k> cell), evaluating the first argument to the default computation result type (KResult) and the second argument to the default wrapped with the rvalue context wrapper (note the klabel annotation on line 2).
+
+General syntax:
+StrictAttribute ::=  StrictHead | StrictHead "(" StrictPositions ")" 
+StrictHead ::= StrictType | StrictType "<" CellNames ">"
+StrictType ::= "strict" | "seqstrict"
+CellNames ::= List{CellName,","}
+
+StrictPositions ::= List{StrictPosition, ","}
+StrictPosition ::= Position | Posistion "(" StrictPositionAttributes ")"
+Position ::= Int | "all" | "other"
+StrictPositionAttributes ::= List{StrictPositionAttribute, ","}
+StrictPositionAttribute ::= "context" "(" KLabel ")" 
+                          | ContextPositionAttribute
+
+ContextPositionAttribute ::= "result" "(" KSort ")"
+                           | "cell" "(" CellNames ")"
+
+ContextContextAttribute ::= "context" "(" ContextPositionAttributes ")"
+ContextPositionAttributes ::= List{ContextPositionAttribute, ","}
+
+The semantics when transforming these into context is based on the following principles
+(1) the "<" CellNames ">"  arguments of StrictHead are transformed into "cell" "(" CellNames ")" attributes for all positions.
+(2) StrictPosition declarations are processed in order.  If duplicates are found, the latter update the attributes values they redeclare.
+(3) "all" refers to all positions, updating the existing ones and adding those missing
+(4) "other" refers to all positions which have not been declared up to encountering "other"
+(5) If "context" attribute is found, the RHS of the context rule is wrapped with the corresponding label and the subattributes of the "context" attribute are used to update the current attributes.
+(6) The attributes passed to the context rule for a given position are obtained by updating the production attributes with the StrictPositionAttributes (perhaps updated using the context attributes as specified at (5)) corresponding to that position.
+
+Note: Currently, generalized strictness does not apply to strict labels

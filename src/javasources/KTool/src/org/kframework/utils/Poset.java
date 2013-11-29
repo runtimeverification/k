@@ -2,6 +2,7 @@ package org.kframework.utils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -140,6 +141,60 @@ public class Poset implements Serializable {
 			}
 		}
 		return glb;
+	}
+	
+    /**
+     * Finds the maximal lower bounds of a subset of the elements in this poset.
+     * 
+     * @param subset
+     *            the subset of elements
+     * @return an immutable set of the maximal lower bounds
+     */
+	public Set<String> getMaximalLowerBounds(Set<String> subset) {
+	    assert elements.containsAll(subset);
+	     
+        if (subset == null || subset.size() == 0) {
+            return Collections.emptySet();
+        }
+        if (subset.size() == 1) {
+            return Collections.singleton(subset.iterator().next());
+        }
+
+        /* find lower bounds of the given subset */
+        Set<String> lowerBounds = new HashSet<String>();
+        for (String elem : elements) {
+            boolean isLTESubset = true;
+            for (String subsetElem : subset) {
+                if (!(isInRelation(subsetElem, elem) || elem.equals(subsetElem))) {
+                    isLTESubset = false;
+                    break;
+                }
+            }
+            if (isLTESubset) {
+                lowerBounds.add(elem);
+            }
+        }
+        
+        /* find maximal lower bounds from the candidate lower bounds */
+        if (lowerBounds.size() == 0) {
+            return Collections.emptySet();
+        }
+        Set<String> nonMaximalLBs = new HashSet<String>();
+        for (String lb1 : lowerBounds) {
+            // if lb1 has been identified as non-maximal, elements less than
+            // that must have been also identified as non-maximal in the same
+            // outer loop
+            if (!nonMaximalLBs.contains(lb1)) {
+                for (String lb2 : lowerBounds) {
+                    if (isInRelation(lb1, lb2)) {
+                        nonMaximalLBs.add(lb2);
+                    }
+                }
+            }
+        }
+        
+        lowerBounds.removeAll(nonMaximalLBs);
+        return Collections.unmodifiableSet(lowerBounds);
 	}
 
 	private class Tuple implements Serializable {

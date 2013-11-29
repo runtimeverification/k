@@ -17,7 +17,7 @@ import java.util.*;
 public class AddSymbolicVariablesDeclaration extends BasicVisitor {
     private final String syntaxModule;
 
-    private String terminal  = "[A-Z][a-zA-Z0-9]*[\\:][a-zA-Z]+";
+    private String terminal  = "[\\$][A-Z][a-zA-Z0-9]*[\\:][a-zA-Z]+";
     private String follow = "[a-zA-Z]";
     private final String symVariable = "SymVariable";
 
@@ -34,7 +34,8 @@ public class AddSymbolicVariablesDeclaration extends BasicVisitor {
             // adding lexical construct
             Lexical lexical = new Lexical(terminal, follow);
             org.kframework.kil.Attributes attributes = new Attributes();
-            attributes.set("onlyLabel", "");
+//            attributes.set("onlyLabel", "");
+            attributes.set("notInRules", "");
             attributes.set("variable", "");
 
             // adding default Int ::= SymVar

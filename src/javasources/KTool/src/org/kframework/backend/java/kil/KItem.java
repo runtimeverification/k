@@ -13,7 +13,10 @@ import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
 import org.kframework.utils.general.GlobalSettings;
 
+import com.google.common.collect.Sets;
+
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -30,12 +33,19 @@ public class KItem extends Term implements Sorted {
     private final KLabel kLabel;
     private final KList kList;
     private final String sort;
+    
+    /**
+     * Valid only if {@code kLabel} is a constructor. Must contain a sort
+     * which is subsorted or equal to {@code sort} when it is valid.
+     */
+    private final Set<String> possibleMinimalSorts;
 
     public KItem(KLabel kLabel, KList kList, Context context) {
         super(Kind.KITEM);
 
         this.kLabel = kLabel;
         this.kList = kList;
+        Set<String> possibleMinimalSorts = kLabel.isConstructor() ? new HashSet<String>() : null;
 
         if (kLabel instanceof KLabelConstant) {
             KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
@@ -43,36 +53,74 @@ public class KItem extends Term implements Sorted {
             if (productions.size() != 0) {
                 Set<String> sorts = new HashSet<String>();
 
-            label:
                 for (Production production : productions) {
+                    boolean mustMatch = true;
+                    boolean mayMatch = true;
+
+                    /* check if the production can match this KItem */
                     if (!kList.hasFrame() && kList.size() == production.getArity()) {
                         for (int i = 0; i < kList.size(); ++i) {
                             String childSort;
-                            if (kList.get(i) instanceof Sorted) {
-                                childSort = ((Sorted) kList.get(i)).sort();
+                            Term childTerm = kList.get(i);
+
+                            if (childTerm instanceof Sorted) {
+                                childSort = ((Sorted) childTerm).sort();
                             } else {
                                 childSort = kind.toString();
                             }
 
                             if (!context.isSubsortedEq(production.getChildSort(i), childSort)) {
-                                continue label;
+                                mustMatch = false;
+
+                                if (kLabel.isConstructor()) {
+                                    if (childTerm instanceof Variable) {
+                                        Set<String> set = Sets.newHashSet(production.getChildSort(i), ((Variable) childTerm).sort());
+                                        if (context.getCommonSubsorts(set).isEmpty()) {
+                                            mayMatch = false;
+                                        }
+                                    } else if (childTerm instanceof KItem) {
+                                        mayMatch = false;
+                                        for (String pms : ((KItem) childTerm).possibleMinimalSorts()) {
+                                            if (context.isSubsortedEq(production.getChildSort(i), pms)) {
+                                                mayMatch = true;
+                                                break;
+                                            }
+                                        }
+                                    } else { // e.g., childTerm is a HOLE
+                                        mayMatch = false;
+                                    }
+                                 
+                                    if (!mayMatch) {
+                                        // mayMatch == false => mustMatch == false
+                                        break;
+                                    }
+                                }
                             }
                         }
+                    }
 
+                    if (mustMatch) {
                         sorts.add(production.getSort());
+                    }
+                    
+                    if (mayMatch && kLabel.isConstructor()) {
+                        possibleMinimalSorts.add(production.getSort());
                     }
                 }
 
-                if (!sorts.isEmpty()) {
+                if (!sorts.isEmpty()) { /* one or more productions match this KItem */
                     if (sorts.size() == 1) {
                         sort = sorts.iterator().next();
                     } else {
+                        // TODO(YilongL): Why set the sort of the KItem to be
+                        // the GLB of the sorts of all matching productions?
+                        // What if there is no GLB?
                         sort = context.getGLBSort(sorts);
                     }
-                } else {
+                } else {    /* no production matches this KItem */
                     sort = kind.toString();
                 }
-            } else {
+            } else {    /* productions.size() == 0 */
                 /* a list terminator does not have conses */
                 Set<String> listSorts = context.listLabels.get(kLabelConstant.label());
                 if (listSorts != null && !kList.hasFrame() && kList.size() == 0) {
@@ -85,11 +133,29 @@ public class KItem extends Term implements Sorted {
                     sort = kind.toString();
                 }
             }
-        } else {
+        } else {    /* not a KLabelConstant */
             sort = kind.toString();
         }
+        
+        
+        if (possibleMinimalSorts != null) {
+            possibleMinimalSorts.add(sort);
+            Set<String> nonMinimalSorts = new HashSet<String>();
+            for (String s1 : possibleMinimalSorts) {
+                for (String s2 : possibleMinimalSorts) {
+                    if (context.isSubsorted(s1, s2)) {
+                        nonMinimalSorts.add(s1);
+                    }
+                }
+            }
+            possibleMinimalSorts.removeAll(nonMinimalSorts);            
+            this.possibleMinimalSorts = possibleMinimalSorts;
+        } else {
+            this.possibleMinimalSorts = null;
+        }
+//        System.out.printf("KItem = %s, sort = %s, possibleMinimalSorts = %s\n", this, sort, possibleMinimalSorts);
     }
-
+    
     /**
      * Evaluates this {@code KItem} if it is a predicate or function
      * 
@@ -212,6 +278,19 @@ public class KItem extends Term implements Sorted {
         return sort;
     }
 
+    /**
+     * @return a unmodifiable view of the possible minimal sorts of this
+     *         {@code KItem} when its {@code KLabel} is a constructor;
+     *         otherwise, null;
+     */
+    public Set<String> possibleMinimalSorts() {
+        if (possibleMinimalSorts != null) {
+            return Collections.unmodifiableSet(possibleMinimalSorts);
+        } else {
+            return null;
+        }
+    }
+    
     @Override
     public boolean equals(Object object) {
         if (this == object) {

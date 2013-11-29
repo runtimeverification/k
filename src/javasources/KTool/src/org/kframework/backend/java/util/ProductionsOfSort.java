@@ -12,6 +12,7 @@ import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.kil.Attribute;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Sort;
@@ -35,7 +36,7 @@ public class ProductionsOfSort {
 
         for (KLabelConstant klabel : definition.kLabels())
             for (Production prod : klabel.productions()) {
-                if (prod.containsAttribute("bracket")) 
+                if (prod.containsAttribute(Attribute.BRACKET.getKey())) 
                     continue;
                 
                 String sort = prod.getSort();
@@ -56,13 +57,16 @@ public class ProductionsOfSort {
         assert ProductionsOfSort.definition != null;
 
         List<KItem> freshTerms = new ArrayList<KItem>();
-        for (Production prod : prodsOfSort.get(sort)) {
-            ImmutableList.Builder<Term> listBuilder = ImmutableList.builder();
-            for (ProductionItem prodItem : prod.getItems())
-                if (prodItem instanceof Sort)
-                    listBuilder.add(Variable.getFreshVariable(((Sort) prodItem).getName()));
-            KItem kitem = new KItem(klabelOfProd.get(prod), new KList(listBuilder.build()), definition.context());
-            freshTerms.add(kitem);
+        List<Production> prods = prodsOfSort.get(sort);
+        if (prods != null) {
+            for (Production prod : prods) {
+                ImmutableList.Builder<Term> listBuilder = ImmutableList.builder();
+                for (ProductionItem prodItem : prod.getItems())
+                    if (prodItem instanceof Sort)
+                        listBuilder.add(Variable.getFreshVariable(((Sort) prodItem).getName()));
+                KItem kitem = new KItem(klabelOfProd.get(prod), new KList(listBuilder.build()), definition.context());
+                freshTerms.add(kitem);
+            }
         }
         return freshTerms;
     }

@@ -1,7 +1,8 @@
 package org.kframework.compile.transformers;
 
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
+import java.util.Set;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
@@ -56,30 +57,31 @@ public class AddKCell extends CopyOnWriteTransformer {
 			return node;
 		}
 		node = node.shallowCopy();
-		for (int i = 1; i < komputationCells.size(); ++i) {
+        String computationCellsAttr = node.getAttribute(Attribute.CELL_KEY);
+        List<String> computationCells;
+        if (computationCellsAttr != null) {
+            computationCells = new ArrayList<>();
+            Collections.addAll(computationCells, computationCellsAttr.split(","));
+        } else {
+            computationCells = komputationCells;
+        }
+		for (int i = 1; i < computationCells.size(); ++i) {
 			// first all other rules are scheduled to be added
 			Rule newRule = node.shallowCopy();
 			newRule.setBody(MetaK.kWrap(node.getBody(), this.komputationCells.get(i)));
 			newRules.add(newRule);
 		}
-		assert !this.komputationCells.isEmpty();
-		node.setBody(MetaK.kWrap(node.getBody(), this.komputationCells.get(0))); // then first rule replaces older rule
+		assert !computationCells.isEmpty();
+		node.setBody(MetaK.kWrap(node.getBody(), computationCells.get(0))); // then first rule replaces older rule
 		
 		return node;
 	}
 
     @Override
 	public ASTNode transform(Configuration cfg) throws TransformerException {
-		if (!intersects(MetaK.getAllCellLabels(cfg.getBody(), context), komputationCells))
-		{
-			Cell k = new Cell();
-			k.setLabel("k");
-			k.setEllipses(Ellipses.NONE);
-			k.setContents(KSequence.EMPTY);
-			
-			cfg = cfg.shallowCopy();
-
-			Bag bag;
+		if (!intersects(MetaK.getAllCellLabels(cfg.getBody(), context), komputationCells)) {
+            cfg = cfg.shallowCopy();
+            Bag bag;
 			if (cfg.getBody() instanceof Bag) {
 				bag = (Bag) cfg.getBody().shallowCopy();
 			} else {
@@ -87,7 +89,13 @@ public class AddKCell extends CopyOnWriteTransformer {
 				bag.getContents().add(cfg.getBody());
 			}
 			cfg.setBody(bag);
-			bag.getContents().add(k);
+            for (String kCell : komputationCells) {
+                Cell k = new Cell();
+                k.setLabel(kCell);
+                k.setEllipses(Ellipses.NONE);
+                k.setContents(KSequence.EMPTY);
+                bag.getContents().add(k);
+            }
 		}
 		
 		return cfg;

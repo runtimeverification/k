@@ -128,7 +128,7 @@ KLABEL ::= anything (other than "<")
 
 ID (RegEx): [a-zA-Z][a-zA-Z0-9]*
 
-KEY(Attribute): [a-z][a-zA-Z0-9-]*
+KEY(Attribute): [a-z1-9][a-zA-Z0-9-]*
 
 "List" is both "UPPER_ID" and custom operator
 
@@ -241,7 +241,11 @@ public class Basic {
     parser.module = null;
     parser.items = new ArrayList<DefinitionItem>();
     StringSentence ss = new StringSentence("", "", "", "");
-    parser.AttributesBodyEOF(ss);
+    try {
+      parser.AttributesBodyEOF(ss);
+    } catch (TokenMgrError e) {
+      throw new ParseException(e.getMessage());
+    }
     return ss.getAttributes();
   }
 
@@ -674,7 +678,7 @@ void Group(StringBuilder sb) : {}
 | "]" { matchedToken.kind = RSQUARE; }
 | "(" { matchedToken.kind = LPAREN; }
 | ")" { matchedToken.kind = RPAREN; }
-| <KEY: ["a"-"z"](["A"-"Z", "a"-"z", "-", "0"-"9"])*("<" (["A"-"Z", "a"-"z", "-", "0"-"9"])+ ">")?>
+| <KEY: ["a"-"z","1"-"9"](["A"-"Z", "a"-"z", "-", "0"-"9"])*("<" (["A"-"Z", "a"-"z", "-", "0"-"9"])+ ">")?>
 }
 
 /** The same as 'Attributes()', but requires that the entire input be
