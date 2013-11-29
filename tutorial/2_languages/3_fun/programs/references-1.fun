@@ -1,3 +1,5 @@
+datatype ('a,'b) pair = Pair('a,'b)
+
 letrec
 
 max l Pair(x,y) =

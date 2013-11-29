@@ -1,3 +1,5 @@
+datatype 'a bst = Empty | Node('a bst, 'a, 'a bst)
+
 letrec bst_sort l = flatten (mk_bst l)
    and flatten = fun Empty -> [] 
                    | Node(l,n,r) -> append (flatten l) (cons n (flatten r))
