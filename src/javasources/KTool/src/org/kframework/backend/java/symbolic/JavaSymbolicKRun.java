@@ -37,6 +37,8 @@ public class JavaSymbolicKRun implements KRun {
     private final Definition definition;
 	private final Context context;
     private final KILtoBackendJavaKILTransformer transformer;
+    //Liyi Li: add a build-in SymbolicRewriter to fix the simulation rules
+    private SymbolicRewriter simulationRewriter;
 
     public JavaSymbolicKRun(Context context) throws KRunExecutionException {
         /* context is unused for directory paths; the actual context is de-serialized */
@@ -54,6 +56,7 @@ public class JavaSymbolicKRun implements KRun {
         this.context = definition.context();
         this.context.kompiled = context.kompiled;
         transformer = new KILtoBackendJavaKILTransformer(this.context);
+        this.simulationRewriter = new SymbolicRewriter(this.definition);
 	}
 
     @Override
@@ -336,7 +339,57 @@ public class JavaSymbolicKRun implements KRun {
             throws KRunExecutionException {
         return internalRun(cfg, steps);
     }
-
+    
+    /*
+     * author: Liyi Li
+     * to get the symbolic rewriter
+     */
+    public SymbolicRewriter getSimulationRewriter(){
+    	
+    	return this.simulationRewriter;
+    }
+    
+    /* author: Liyi Li
+     * a function return all the next step of a given simulation term
+     */
+    public ConstrainedTerm simulationSteps(org.kframework.kil.Term cfg)
+            throws KRunExecutionException {
+    	
+    	Term term = Term.of(cfg, definition);
+        TermContext termContext = new TermContext(definition, new PortableFileSystem());
+        term = term.evaluate(termContext);
+        ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, termContext);
+        ConstrainedTerm result = this.simulationRewriter.computeSimulationStep(constrainedTerm);
+  
+    	return result;
+    }
+    
+    /* author: Liyi Li
+     * a function return all the next steps of a given term
+     */
+    public ArrayList<org.kframework.kil.Term> steps(org.kframework.kil.Term cfg)
+            throws KRunExecutionException {
+    	
+    	Term term = Term.of(cfg, definition);
+        TermContext termContext = new TermContext(definition, new PortableFileSystem());
+        term = term.evaluate(termContext);
+        ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, termContext);
+        ArrayList<ConstrainedTerm> temp = this.simulationRewriter.rewriteAll(constrainedTerm);
+        
+        ArrayList<org.kframework.kil.Term> results = new ArrayList<org.kframework.kil.Term>();
+        
+        for(int i=0;i<temp.size();++i){
+        	
+        	org.kframework.kil.Term kilTerm = (org.kframework.kil.Term) temp.get(i).term().accept(
+                    new BackendJavaKILtoKILTranslation(context));
+        	
+        	results.add(kilTerm);
+        }
+                
+    	return results;
+    }
+    
+ 
     @Override
     public KRunDebugger debug(org.kframework.kil.Term cfg) {
         throw new UnsupportedBackendOptionException("--debug");

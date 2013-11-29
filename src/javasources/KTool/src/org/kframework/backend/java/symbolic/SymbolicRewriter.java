@@ -39,6 +39,7 @@ import com.google.common.collect.ImmutableSet;
  *
  *
  * @author AndreiS
+ * 
  */
 public class SymbolicRewriter {
 
@@ -51,10 +52,16 @@ public class SymbolicRewriter {
     private final Map<Index, Set<Rule>> ruleTable;
     private final Map<Index, Set<Rule>> heatingRuleTable;
     private final Map<Index, Set<Rule>> coolingRuleTable;
+    private final Map<Index,Set<Rule>> simulationRuleTable;
     private final Set<Rule> unindexedRules;
     private final List<ConstrainedTerm> results = new ArrayList<ConstrainedTerm>();
     private boolean transition;
+    
 
+    /*
+     * Liyi Li : add simulation rules in the constructor, and allow user to input label [alphaRule] as
+     * the indication that the rule will be used as simulation
+     */
     public SymbolicRewriter(Definition definition) {
         this.definition = definition;
 
@@ -90,10 +97,14 @@ public class SymbolicRewriter {
         ImmutableMap.Builder<Index, Set<Rule>> mapBuilder = ImmutableMap.builder();
         ImmutableMap.Builder<Index, Set<Rule>> heatingMapBuilder = ImmutableMap.builder();
         ImmutableMap.Builder<Index, Set<Rule>> coolingMapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Index, Set<Rule>> simulationMapBuilder = ImmutableMap.builder();
+
         for (Index index : indices) {
             ImmutableSet.Builder<Rule> setBuilder = ImmutableSet.builder();
             ImmutableSet.Builder<Rule> heatingSetBuilder = ImmutableSet.builder();
             ImmutableSet.Builder<Rule> coolingSetBuilder = ImmutableSet.builder();
+            ImmutableSet.Builder<Rule> simulationSetBuilder = ImmutableSet.builder();
+
             for (Rule rule : definition.rules()) {
                 if (rule.containsAttribute("heat")) {
                     if (index.isUnifiable(rule.indexingPair().first)) {
@@ -103,6 +114,12 @@ public class SymbolicRewriter {
                     if (index.isUnifiable(rule.indexingPair().second)) {
                         coolingSetBuilder.add(rule);
                     }
+                } else if(rule.containsAttribute("alphaRule")){
+                	
+                	if(index.isUnifiable(rule.indexingPair().first)) {
+                		simulationSetBuilder.add(rule);
+                	}
+                	
                 } else {
                     if (index.isUnifiable(rule.indexingPair().first)) {
                         setBuilder.add(rule);
@@ -121,11 +138,16 @@ public class SymbolicRewriter {
             if (!rules.isEmpty()) {
                 coolingMapBuilder.put(index, rules);
             }
+            rules = simulationSetBuilder.build();
+            if(!rules.isEmpty()){
+            	simulationMapBuilder.put(index,rules);
+            }
         }
         heatingRuleTable = heatingMapBuilder.build();
         coolingRuleTable = coolingMapBuilder.build();
         ruleTable = mapBuilder.build();
-
+        simulationRuleTable = simulationMapBuilder.build();
+        
         ImmutableSet.Builder<Rule> setBuilder = ImmutableSet.builder();
         for (Rule rule : definition.rules()) {
             if (!rule.containsKCell()) {
@@ -158,6 +180,39 @@ public class SymbolicRewriter {
     public ConstrainedTerm rewrite(ConstrainedTerm constrainedTerm) {
         return rewrite(constrainedTerm, -1);
     }
+    
+    /* author: Liyi Li
+     * a function return all the next steps of a given term
+     */
+    public ArrayList<ConstrainedTerm> rewriteAll(ConstrainedTerm constrainedTerm){
+    	
+    	computeRewriteStep(constrainedTerm);
+    	
+    	return (ArrayList<ConstrainedTerm>) results;
+    }
+    
+    /*
+     * author: Liyi Li
+     * return the rules for simulations only
+     */
+    public Map<Index,Set<Rule>> getSimulationMap(){
+    	
+    	return this.simulationRuleTable;
+    }
+    
+    /*
+     * author: Liyi Li
+     * return the rules for simulations only
+     */
+    private Set<Rule> getSimulationRules(Term term) {
+        Set<Rule> rules = new HashSet<Rule>();
+        for (IndexingPair pair : term.getIndexingPairs()) {
+            if (simulationRuleTable.get(pair.first) != null) {
+                rules.addAll(ruleTable.get(pair.first));
+            }
+        }
+        return rules;
+    }
 
     private Set<Rule> getRules(Term term) {
         Set<Rule> rules = new HashSet<Rule>();
@@ -178,6 +233,89 @@ public class SymbolicRewriter {
 
     private ConstrainedTerm getTransition(int n) {
         return n < results.size() ? results.get(n) : null;
+    }
+    
+    /*
+     * author : Liyi Li
+     * computer steps by rules of simulation
+     */
+    
+    public ConstrainedTerm computeSimulationStep(ConstrainedTerm constrainedTerm) {
+    	ArrayList<ConstrainedTerm> stepResults = new ArrayList<ConstrainedTerm>();
+
+        // Applying a strategy to a set of rules divides the rules up into
+        // equivalence classes of rules. We iterate through these equivalence
+        // classes one at a time, seeing which one contains rules we can apply.
+        //        System.out.println(LookupCell.find(constrainedTerm.term(),"k"));
+        strategy.reset(getSimulationRules(constrainedTerm.term()));
+        while (strategy.hasNext()) {
+            transition = strategy.nextIsTransition();
+            Collection<Rule> rules = strategy.next();
+            for (Rule rule : rules) {
+                ruleStopwatch.reset();
+                ruleStopwatch.start();
+
+                SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(
+                        constrainedTerm.termContext());
+                leftHandSideConstraint.addAll(rule.requires());
+                for (Variable variable : rule.freshVariables()) {
+                    leftHandSideConstraint.add(variable, IntToken.fresh());
+                }
+
+                ConstrainedTerm leftHandSide = new ConstrainedTerm(
+                        rule.leftHandSide(),
+                        rule.lookups().getSymbolicConstraint(constrainedTerm.termContext()),
+                        leftHandSideConstraint,
+                        constrainedTerm.termContext());
+
+                for (SymbolicConstraint constraint1 : constrainedTerm.unify(leftHandSide)) {
+                    constraint1.orientSubstitution(rule.variableSet(), constrainedTerm.termContext());
+                    constraint1.addAll(rule.ensures());
+                    /* rename rule variables in the constraints */
+                    Map<Variable, Variable> freshSubstitution = constraint1.rename(rule.variableSet());
+
+                    Term result = rule.rightHandSide();
+                    /* rename rule variables in the rule RHS */
+                    result = result.substituteWithBinders(freshSubstitution, constrainedTerm.termContext());
+                    /* apply the constraints substitution on the rule RHS */
+                    result = result.substituteAndEvaluate(constraint1.substitution(),
+                            constrainedTerm.termContext());
+                    /* evaluate pending functions in the rule RHS */
+                    //                    result = result.evaluate(constrainedTerm.termContext());
+                    /* eliminate anonymous variables */
+                    constraint1.eliminateAnonymousVariables();
+
+                    /*
+                    System.err.println("rule \n\t" + rule);
+                    System.err.println("result term\n\t" + result);
+                    System.err.println("result constraint\n\t" + constraint1);
+                    System.err.println("============================================================");
+                     */
+
+                    /* compute all results */
+                    stepResults.add(new ConstrainedTerm(result, constraint1,
+                            constrainedTerm.termContext()));
+
+                    if (stepResults.size() == 1) {
+                        return stepResults.get(0);
+                    }
+                }
+            }
+            // If we've found matching results from one equivalence class then
+            // we are done, as we can't match rules from two equivalence classes
+            // in the same step.
+            if (stepResults.size() > 0) {
+                return stepResults.get(0);
+            }
+        }
+        //System.out.println("Result: " + results.toString());
+        //System.out.println();
+        
+        if(stepResults.isEmpty()){
+        	return null;
+        } else{
+        	return stepResults.get(0);
+        }
     }
 
     private void computeRewriteStep(ConstrainedTerm constrainedTerm, int successorBound) {
