@@ -181,6 +181,7 @@ public class KItem extends Term implements Sorted {
         if (!definition.functionRules().get((KLabelConstant) kLabel).isEmpty()) {
             ConstrainedTerm constrainedTerm = new ConstrainedTerm(kList, context);
 
+            // TODO(YilongL): Need to handle attribute [owise] correctly
             for (Rule rule : definition.functionRules().get((KLabelConstant) kLabel)) {
                 SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(context);
                 leftHandSideConstraint.addAll(rule.requires());
