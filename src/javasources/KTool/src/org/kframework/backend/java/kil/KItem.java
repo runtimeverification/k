@@ -80,10 +80,12 @@ public class KItem extends Term implements Sorted {
                                         }
                                     } else if (childTerm instanceof KItem) {
                                         mayMatch = false;
-                                        for (String pms : ((KItem) childTerm).possibleMinimalSorts()) {
-                                            if (context.isSubsortedEq(production.getChildSort(i), pms)) {
-                                                mayMatch = true;
-                                                break;
+                                        if (((KItem) childTerm).kLabel.isConstructor()) {
+                                            for (String pms : ((KItem) childTerm).possibleMinimalSorts()) {
+                                                if (context.isSubsortedEq(production.getChildSort(i), pms)) {
+                                                    mayMatch = true;
+                                                    break;
+                                                }
                                             }
                                         }
                                     } else { // e.g., childTerm is a HOLE
