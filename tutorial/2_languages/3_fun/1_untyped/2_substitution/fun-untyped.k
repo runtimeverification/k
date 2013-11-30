@@ -33,8 +33,7 @@ module FUN-UNTYPED-SYNTAX
                > left:
                  Exp "+" Exp                       [strict, left, arith]
                | Exp "^" Exp                       [strict, left, arith]
-// left attribute should not be necessary; currently a parsing bug
-               | Exp "-" Exp                       [strict, arith]
+               | Exp "-" Exp                       [strict, prefer, arith]
                > non-assoc:
                  Exp "<" Exp                       [strict, arith]
                | Exp "<=" Exp                      [strict, arith]

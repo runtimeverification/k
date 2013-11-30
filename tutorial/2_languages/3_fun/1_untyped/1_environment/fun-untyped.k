@@ -160,7 +160,8 @@ define global syntax priirities later (at the end of the syntax module). */
                  Exp "+" Exp                       [strict, left, arith]
                | Exp "^" Exp                       [strict, left, arith]
 // left attribute should not be necessary; currently a parsing bug
-               | Exp "-" Exp                       [strict, arith]
+               | Exp "-" Exp                       [strict, prefer, arith]
+// the "prefer" attribute above is to not parse x-1 as x(-1)
 // Due to some parsing problems, we currently cannot add unary minus:
 //               | "-" Exp                           [strict, arith]
                > non-assoc:
