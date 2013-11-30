@@ -1,19 +1,6 @@
-<T>
-    <k>
-        closure ( f00 |-> #symInt(1) f01 |-> #symInt(2) f02 |-> #symInt(3)
-           f03 |-> #symInt(4) , (x -> (f03 (f03 x))) )
-    </k>
-    <store>
-        #symInt(1) |-> closure ( .Map , (x -> (fun (y -> x))) )
-        #symInt(2) |-> closure ( f00 |-> #symInt(1) , (x -> (f00 (f00 x))) )
-        #symInt(3) |-> closure ( f00 |-> #symInt(1) f01 |-> #symInt(2) , (x ->
-           (f01 (f01 x))) )
-        #symInt(4) |-> closure ( f00 |-> #symInt(1) f01 |-> #symInt(2) f02
-           |-> #symInt(3) , (x -> (f02 (f02 x))) )
-        #symInt(5) |-> closure ( f00 |-> #symInt(1) f01 |-> #symInt(2) f02
-           |-> #symInt(3) f03 |-> #symInt(4) , (x -> (f03 (f03 x))) )
-    </store>
-    <env>
-        .Map
-    </env>
-</T>
+Search results:
+
+Solution 1:
+V:K -->
+closure ( f00 |-> (#symInt(1)) f01 |-> (#symInt(2)) f02 |-> (#symInt(3)) f03
+   |-> (#symInt(4)) , x -> f03 (f03 x) )
