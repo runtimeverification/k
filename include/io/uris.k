@@ -114,8 +114,8 @@ module URIS
   // when we reach whitespace, if it parses create a ListItem
   rule (ListItem(#parseInput("String", Delimiters:String)) => ListItem(S)) ListItem(#buffer(S:String => "")) _:List when findChar(S, Delimiters, 0) =/=Int -1 [stdin]
   // a hack: handle the case when we read integers without the help of the IO server
-  rule (ListItem(#parseInput("Int", Delimiters:String)) => ListItem(String2Int(substrString(S, 0, lengthString(S) -Int 1)))) ListItem(#buffer(S:String => "")) when findChar(S, Delimiters, 0) =/=Int -1 andBool lengthString(S) >Int 1 [stdin]
-  rule (ListItem(#parseInput(Sort:String, Delimiters:String)) => ListItem(#parse(substrString(S, 0, lengthString(S) -Int 1), Sort))) ListItem(#buffer(S:String => "")) ListItem(#istream(_)) when findChar(S, Delimiters, 0) =/=Int -1 andBool Sort =/=String "String" andBool lengthString(S) >Int 1 [stdin]
+  rule (ListItem(#parseInput("Int", Delimiters:String)) => ListItem(String2Int(substrString(S, 0, findChar(S, Delimiters, 0))))) ListItem(#buffer(S:String => substrString(S,findChar(S, Delimiters, 0) +Int 1, lengthString(S)))) when findChar(S, Delimiters, 0) =/=Int -1 andBool lengthString(S) >Int 1 [stdin]
+  rule (ListItem(#parseInput(Sort:String, Delimiters:String)) => ListItem(#parse(substrString(S, 0, findChar(S, Delimiters, 0)), Sort))) ListItem(#buffer(S:String =>  substrString(S,findChar(S, Delimiters, 0) +Int 1, lengthString(S)))) _:List when findChar(S, Delimiters, 0) =/=Int -1 andBool Sort =/=String "String" andBool lengthString(S) >Int 1 [stdin]
   rule ListItem(#parseInput(Sort:String, Delimiters:String)) ListItem(#buffer(S:String => substrString(S, 1, lengthString(S)))) _:List when findChar(S, Delimiters, 0) =/=Int -1 andBool Sort =/=String "String" andBool lengthString(S) <=Int 1 [stdin]
   
   rule ListItem(#buffer(_)) (ListItem(#noIO) ListItem(#istream(_:Int)) => .List) [stdin]
