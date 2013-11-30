@@ -281,10 +281,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         public int hashCode() {
             return super.hashCode();
             /*
-             * the following implementation is wrong because the objects
-             * referenced by the two fields, namely leftHandSide and
-             * rightHandSide, can be modified, which induces inconsistent
-             * hashCodes to be returned
+             * the following implementation is wrong because the the fields used
+             * for computing hashCode, namely leftHandSide and rightHandSide,
+             * can be modified, which induces inconsistent hashCodes to be
+             * returned
              */
 //            int hash = 1;
 //            hash = hash * Utils.HASH_PRIME + leftHandSide.hashCode();
