@@ -279,17 +279,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         
         @Override
         public int hashCode() {
-            return super.hashCode();
-            /*
-             * the following implementation is wrong because the the fields used
-             * for computing hashCode, namely leftHandSide and rightHandSide,
-             * can be modified, which induces inconsistent hashCodes to be
-             * returned
-             */
-//            int hash = 1;
-//            hash = hash * Utils.HASH_PRIME + leftHandSide.hashCode();
-//            hash = hash * Utils.HASH_PRIME + rightHandSide.hashCode();
-//            return hash;
+            int hash = 1;
+            hash = hash * Utils.HASH_PRIME + leftHandSide.hashCode();
+            hash = hash * Utils.HASH_PRIME + rightHandSide.hashCode();
+            return hash;
         }
 
         @Override
@@ -775,6 +768,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         }
         renormalize();
     }
+    
     private void renormalize() {
         isNormal = true;
         Set<Equality> equalitiesToRemove = new HashSet<Equality>();
@@ -826,14 +820,23 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 if (previousEquality == equality) {
                     break;
                 }
-                previousEquality.substitute(tempSubstitution);
-                //TODO(AndreiS): Only evaluate if the term has changed
-                previousEquality.evaluate();
-                if (previousEquality.isTrue()) {
-                    equalitiesToRemove.add(previousEquality);
-                } else if (previousEquality.isFalse()) {
-                    truthValue = TruthValue.FALSE;
-                    return;
+                
+                /*
+                 * Do not modify the previousEquality if it has been added to
+                 * the HashSet equalitiesToRemove since this may result in
+                 * inconsistent hashCodes in the HashSet; besides, there is no
+                 * need to do so
+                 */
+                if (!equalitiesToRemove.contains(previousEquality)) {
+                    previousEquality.substitute(tempSubstitution);
+                    //TODO(AndreiS): Only evaluate if the term has changed
+                    previousEquality.evaluate();
+                    if (previousEquality.isTrue()) {
+                        equalitiesToRemove.add(previousEquality);
+                    } else if (previousEquality.isFalse()) {
+                        truthValue = TruthValue.FALSE;
+                        return;
+                    }
                 }
             }
             equalitiesToRemove.add(equality);
