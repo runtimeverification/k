@@ -5,7 +5,10 @@ import org.kframework.backend.unparser.AddBracketsFilter2;
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Term;
+import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
+import org.kframework.kil.visitors.BasicVisitor;
+import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.ConcretizeSyntax;
 import org.kframework.krun.FlattenDisambiguationFilter;
@@ -20,6 +23,10 @@ import org.kframework.backend.symbolic.TokenVariableToSymbolic;
 
 import java.io.Serializable;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class KRunState implements Serializable{
 
@@ -49,10 +56,27 @@ public class KRunState implements Serializable{
 			if (!K.parens) {
 				result = (Term) result.accept(new AddBracketsFilter(context));
 				try {
+				    final Set<Variable> existingFreeVariables = new HashSet<Variable>();
+				    if (K.do_testgen) {
+	                    // TODO(YilongL): is it specific to the test generation that
+	                    // the result can be a non-ground term?				        
+				        Visitor variableCollector = new BasicVisitor(context) {
+				            @Override
+				            public void visit(Variable var) {
+				                existingFreeVariables.add(var);
+				            }
+				        };
+				        result.accept(variableCollector);
+				    }
+				    
 					AddBracketsFilter2 filter = new AddBracketsFilter2(context);
 					result = (Term) result.accept(filter);
+					Map<String, Term> subst = new HashMap<String, Term>(filter.substitution);
+					for (Variable var : existingFreeVariables) {
+					    subst.put(var.getName(), var);
+					}
 					while (true) {
-						Term newResult = (Term) result.accept(new SubstitutionFilter(filter.substitution, context));
+						Term newResult = (Term) result.accept(new SubstitutionFilter(subst, context));
 						if (newResult.equals(result)) {
 							break;
 						}
