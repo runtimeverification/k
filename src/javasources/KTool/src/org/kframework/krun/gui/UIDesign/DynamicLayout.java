@@ -24,264 +24,263 @@ import edu.uci.ics.jung.graph.Graph;
 
 public class DynamicLayout<V, E> extends AbstractLayout<V, E> {
 
-  protected Dimension size = new Dimension(600, 600);
-  protected Graph<V, E> graph;
-  protected Map<V, Integer> basePositions = new HashMap<V, Integer>();
-  protected transient Set<V> alreadyDone = new HashSet<V>();
-  protected transient Point m_currentPoint = new Point();
-  /**
-   * The default horizontal vertex spacing. Initialized to 50.
-   */
-  public static int DEFAULT_DISTX = 50;
+    protected Dimension size = new Dimension(600, 600);
+    protected Graph<V, E> graph;
+    protected Map<V, Integer> basePositions = new HashMap<V, Integer>();
+    protected transient Set<V> alreadyDone = new HashSet<V>();
+    protected transient Point m_currentPoint = new Point();
+    /**
+     * The default horizontal vertex spacing. Initialized to 50.
+     */
+    public static int DEFAULT_DISTX = 50;
 
-  /**
-   * The default vertical vertex spacing. Initialized to 50.
-   */
-  public static int DEFAULT_DISTY = 50;
+    /**
+     * The default vertical vertex spacing. Initialized to 50.
+     */
+    public static int DEFAULT_DISTY = 50;
 
-  /**
-   * The horizontal vertex spacing. Defaults to {@code DEFAULT_XDIST}.
-   */
-  protected int distX = 50;
+    /**
+     * The horizontal vertex spacing. Defaults to {@code DEFAULT_XDIST}.
+     */
+    protected int distX = 50;
 
-  /**
-   * The vertical vertex spacing. Defaults to {@code DEFAULT_YDIST}.
-   */
-  protected int distY = 50;
+    /**
+     * The vertical vertex spacing. Defaults to {@code DEFAULT_YDIST}.
+     */
+    protected int distY = 50;
 
-  protected Map<V, Point2D> locations =
-          LazyMap.decorate(new HashMap<V, Point2D>(),
-                  new Transformer<V, Point2D>() {
-                    public Point2D transform(V arg0) {
-                      return new Point2D.Double();
-                    }
-                  });
+    protected Map<V, Point2D> locations = LazyMap.decorate(new HashMap<V, Point2D>(),
+            new Transformer<V, Point2D>() {
+                public Point2D transform(V arg0) {
+                    return new Point2D.Double();
+                }
+            });
 
-  /**
-   * Creates an instance for the specified graph with default X and Y distances.
-   */
-  public DynamicLayout(Graph<V, E> g) {
-    this(g, DEFAULT_DISTX, DEFAULT_DISTY);
-  }
-
-  /**
-   * Creates an instance for the specified graph and X distance with default Y
-   * distance.
-   */
-  public DynamicLayout(Graph<V, E> g, int distx) {
-    this(g, distx, DEFAULT_DISTY);
-  }
-
-  /**
-   * Creates an instance for the specified graph, X distance, and Y distance.
-   */
-  public DynamicLayout(Graph<V, E> g, int distx, int disty) {
-    super(g);
-    if (g == null)
-      throw new IllegalArgumentException("Graph must be non-null");
-    if (distx < 1 || disty < 1)
-      throw new IllegalArgumentException("X and Y distances must each be positive");
-    this.graph = g;
-    this.distX = distx;
-    this.distY = disty;
-    buildTree();
-  }
-
-  @SuppressWarnings("unused")
-  protected void buildTree() {
-    alreadyDone.clear();
-
-    this.m_currentPoint = new Point(0, 20);
-    Collection<V> roots = getRoots();
-    if (roots.size() > 0 && graph != null) {
-      calculateDimensionX(roots);
-      for (V v : roots) {
-        if (v == null)
-        	continue;
-    	calculateDimensionX(v);
-        m_currentPoint.x += this.basePositions.get(v) / 2 + this.distX;
-        buildTree(v, this.m_currentPoint.x);
-      }
+    /**
+     * Creates an instance for the specified graph with default X and Y
+     * distances.
+     */
+    public DynamicLayout(Graph<V, E> g) {
+        this(g, DEFAULT_DISTX, DEFAULT_DISTY);
     }
-    int width = 0;
-    for (V v : roots) {
-      width += basePositions.get(v);
-    }
-  }
 
-  private Collection<V> getRoots() {
-    Collection<V> roots = new ArrayList<V>();
-    Collection<V> mda = (Collection<V>) graph.getVertices();
-    V root = null;
-    for (V v : mda) {
-      try {
-        // replaced (Vertex)v).isRoot()
-        if (graph.getPredecessors(v) == null || graph.getPredecessors(v).isEmpty()) {
-          roots.add((V) v);
+    /**
+     * Creates an instance for the specified graph and X distance with default Y
+     * distance.
+     */
+    public DynamicLayout(Graph<V, E> g, int distx) {
+        this(g, distx, DEFAULT_DISTY);
+    }
+
+    /**
+     * Creates an instance for the specified graph, X distance, and Y distance.
+     */
+    public DynamicLayout(Graph<V, E> g, int distx, int disty) {
+        super(g);
+        if (g == null)
+            throw new IllegalArgumentException("Graph must be non-null");
+        if (distx < 1 || disty < 1)
+            throw new IllegalArgumentException("X and Y distances must each be positive");
+        this.graph = g;
+        this.distX = distx;
+        this.distY = disty;
+        buildTree();
+    }
+
+    @SuppressWarnings("unused")
+    protected void buildTree() {
+        alreadyDone.clear();
+
+        this.m_currentPoint = new Point(0, 20);
+        Collection<V> roots = getRoots();
+        if (roots.size() > 0 && graph != null) {
+            calculateDimensionX(roots);
+            for (V v : roots) {
+                if (v == null)
+                    continue;
+                calculateDimensionX(v);
+                m_currentPoint.x += this.basePositions.get(v) / 2 + this.distX;
+                buildTree(v, this.m_currentPoint.x);
+            }
         }
-      } catch (Exception e) {
-        if (root == null)
-          root = v;
-      }
-      ;
-    }
-    if (roots.isEmpty()){
-    	if (root != null){
-    		roots.add(root);
-    	}
-    	else{
-    	  roots.addAll(mda);
-    	}
-    }
-    return roots;
-
-  }
-
-  protected void buildTree(V v, int x) {
-
-    if (!alreadyDone.contains(v)) {
-      alreadyDone.add(v);
-
-      // go one level further down
-      this.m_currentPoint.y += this.distY;
-      this.m_currentPoint.x = x;
-
-      this.setCurrentPositionFor(v);
-
-      int sizeXofCurrent = basePositions.get(v);
-
-      int lastX = x - sizeXofCurrent / 2;
-
-      int sizeXofChild;
-      int startXofChild;
-
-      for (V element : graph.getSuccessors(v)) {
-        sizeXofChild = this.basePositions.get(element);
-        startXofChild = lastX + sizeXofChild / 2;
-        buildTree(element, startXofChild);
-        lastX = lastX + sizeXofChild + distX;
-      }
-      this.m_currentPoint.y -= this.distY;
-    }
-  }
-
-  private int calculateDimensionX(V v) {
-
-    int size = 0;
-    int childrenNum = graph.getSuccessors(v).size();
-
-    if (childrenNum != 0) {
-      for (V element : graph.getSuccessors(v)) {
-        if (!(element.equals(v))) {
-          size += calculateDimensionX(element) + distX;
+        int width = 0;
+        for (V v : roots) {
+            width += basePositions.get(v);
         }
-      }
     }
-    size = Math.max(0, size - distX);
-    basePositions.put(v, size);
 
-    return size;
-  }
-
-  private int calculateDimensionX(Collection<V> roots) {
-
-    int size = 0;
-    for (V v : roots) {
-    	if (v == null)
-    		continue;
-    	if (graph.getSuccessors(v) == null){
-    		continue;
-    	}
-      int childrenNum = graph.getSuccessors(v).size();
-
-      if (childrenNum != 0) {
-        for (V element : graph.getSuccessors(v)) {
-          size += calculateDimensionX(element) + distX;
+    private Collection<V> getRoots() {
+        Collection<V> roots = new ArrayList<V>();
+        Collection<V> mda = (Collection<V>) graph.getVertices();
+        V root = null;
+        for (V v : mda) {
+            try {
+                // replaced (Vertex)v).isRoot()
+                if (graph.getPredecessors(v) == null || graph.getPredecessors(v).isEmpty()) {
+                    roots.add((V) v);
+                }
+            } catch (Exception e) {
+                if (root == null)
+                    root = v;
+            }
+            ;
         }
-      }
-      size = Math.max(0, size - distX);
-      basePositions.put(v, size);
+        if (roots.isEmpty()) {
+            if (root != null) {
+                roots.add(root);
+            } else {
+                roots.addAll(mda);
+            }
+        }
+        return roots;
+
     }
-    
-    return size;
-  }
 
-  /**
-   * This method is not supported by this class. The size of the layout is
-   * determined by the topology of the tree, and by the horizontal and vertical
-   * spacing (optionally set by the constructor).
-   */
-  public void setSize(Dimension size) {
-    throw new UnsupportedOperationException("Size of TreeLayout is set" +
-            " by vertex spacing in constructor");
-  }
+    protected void buildTree(V v, int x) {
 
-  protected void setCurrentPositionFor(V vertex) {
-    int x = m_currentPoint.x;
-    int y = m_currentPoint.y;
-    if (x < 0)
-      size.width -= x;
+        if (!alreadyDone.contains(v)) {
+            alreadyDone.add(v);
 
-    if (x > size.width - distX)
-      size.width = x + distX;
+            // go one level further down
+            this.m_currentPoint.y += this.distY;
+            this.m_currentPoint.x = x;
 
-    if (y < 0)
-      size.height -= y;
-    if (y > size.height - distY)
-      size.height = y + distY;
-    locations.get(vertex).setLocation(m_currentPoint);
+            this.setCurrentPositionFor(v);
 
-  }
+            int sizeXofCurrent = basePositions.get(v);
 
-  public Graph<V, E> getGraph() {
-    return graph;
-  }
+            int lastX = x - sizeXofCurrent / 2;
 
-  public Dimension getSize() {
-    return size;
-  }
+            int sizeXofChild;
+            int startXofChild;
 
-  public void initialize() {
-
-  }
-
-  public boolean isLocked(V v) {
-    return false;
-  }
-
-  public void lock(V v, boolean state) {
-  }
-
-  public void reset() {
-  }
-
-  public void resetGraphPosition(Graph<V, E> graph) {
-    buildTree();
-  }
-
-  public void setGraph(Graph<V, E> graph) {
-    this.graph = graph;
-    if (size != null && graph != null) {
-      initialize();
+            for (V element : graph.getSuccessors(v)) {
+                sizeXofChild = this.basePositions.get(element);
+                startXofChild = lastX + sizeXofChild / 2;
+                buildTree(element, startXofChild);
+                lastX = lastX + sizeXofChild + distX;
+            }
+            this.m_currentPoint.y -= this.distY;
+        }
     }
-  }
 
-  public void setInitializer(Transformer<V, Point2D> initializer) {
-  }
+    private int calculateDimensionX(V v) {
 
-  /**
-   * Returns the center of this layout's area.
-   */
-  public Point2D getCenter() {
-    return new Point2D.Double(size.getWidth() / 2, size.getHeight() / 2);
-  }
+        int size = 0;
+        int childrenNum = graph.getSuccessors(v).size();
 
-  public void setLocation(V v, Point2D location) {
-    locations.get(v).setLocation(location);
-  }
+        if (childrenNum != 0) {
+            for (V element : graph.getSuccessors(v)) {
+                if (!(element.equals(v))) {
+                    size += calculateDimensionX(element) + distX;
+                }
+            }
+        }
+        size = Math.max(0, size - distX);
+        basePositions.put(v, size);
 
-  public Point2D transform(V v) {
-    return locations.get(v);
-  }
+        return size;
+    }
+
+    private int calculateDimensionX(Collection<V> roots) {
+
+        int size = 0;
+        for (V v : roots) {
+            if (v == null)
+                continue;
+            if (graph.getSuccessors(v) == null) {
+                continue;
+            }
+            int childrenNum = graph.getSuccessors(v).size();
+
+            if (childrenNum != 0) {
+                for (V element : graph.getSuccessors(v)) {
+                    size += calculateDimensionX(element) + distX;
+                }
+            }
+            size = Math.max(0, size - distX);
+            basePositions.put(v, size);
+        }
+
+        return size;
+    }
+
+    /**
+     * This method is not supported by this class. The size of the layout is
+     * determined by the topology of the tree, and by the horizontal and
+     * vertical spacing (optionally set by the constructor).
+     */
+    public void setSize(Dimension size) {
+        throw new UnsupportedOperationException("Size of TreeLayout is set"
+                + " by vertex spacing in constructor");
+    }
+
+    protected void setCurrentPositionFor(V vertex) {
+        int x = m_currentPoint.x;
+        int y = m_currentPoint.y;
+        if (x < 0)
+            size.width -= x;
+
+        if (x > size.width - distX)
+            size.width = x + distX;
+
+        if (y < 0)
+            size.height -= y;
+        if (y > size.height - distY)
+            size.height = y + distY;
+        locations.get(vertex).setLocation(m_currentPoint);
+
+    }
+
+    public Graph<V, E> getGraph() {
+        return graph;
+    }
+
+    public Dimension getSize() {
+        return size;
+    }
+
+    public void initialize() {
+
+    }
+
+    public boolean isLocked(V v) {
+        return false;
+    }
+
+    public void lock(V v, boolean state) {
+    }
+
+    public void reset() {
+    }
+
+    public void resetGraphPosition(Graph<V, E> graph) {
+        buildTree();
+    }
+
+    public void setGraph(Graph<V, E> graph) {
+        this.graph = graph;
+        if (size != null && graph != null) {
+            initialize();
+        }
+    }
+
+    public void setInitializer(Transformer<V, Point2D> initializer) {
+    }
+
+    /**
+     * Returns the center of this layout's area.
+     */
+    public Point2D getCenter() {
+        return new Point2D.Double(size.getWidth() / 2, size.getHeight() / 2);
+    }
+
+    public void setLocation(V v, Point2D location) {
+        locations.get(v).setLocation(location);
+    }
+
+    public Point2D transform(V v) {
+        return locations.get(v);
+    }
 
 }

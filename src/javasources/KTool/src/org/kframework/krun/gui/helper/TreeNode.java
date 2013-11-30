@@ -2,40 +2,40 @@ package org.kframework.krun.gui.helper;
 
 public class TreeNode {
 
-  private String name;
-  private String content;
+    private String name;
+    private String content;
 
-  public TreeNode() {
-  }
+    public TreeNode() {
+    }
 
-  public TreeNode(String name) {
-    this.name = name;
-  }
+    public TreeNode(String name) {
+        this.name = name;
+    }
 
-  public TreeNode(String name, String content) {
-    this.setName(name);
-    this.setContent(content);
-  }
+    public TreeNode(String name, String content) {
+        this.setName(name);
+        this.setContent(content);
+    }
 
-  public String getName() {
-    return name;
-  }
+    public String getName() {
+        return name;
+    }
 
-  public void setName(String name) {
-    this.name = name;
-  }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-  public String getContent() {
-    return content;
-  }
+    public String getContent() {
+        return content;
+    }
 
-  public void setContent(String content) {
-    this.content = content;
-  }
+    public void setContent(String content) {
+        this.content = content;
+    }
 
-  @Override
-  public String toString() {
-    return this.name;
-  }
+    @Override
+    public String toString() {
+        return this.name;
+    }
 
 }
