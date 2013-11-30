@@ -279,10 +279,17 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         
         @Override
         public int hashCode() {
-            int hash = 1;
-            hash = hash * Utils.HASH_PRIME + leftHandSide.hashCode();
-            hash = hash * Utils.HASH_PRIME + rightHandSide.hashCode();
-            return hash;
+            return super.hashCode();
+            /*
+             * the following implementation is wrong because the objects
+             * referenced by the two fields, namely leftHandSide and
+             * rightHandSide, can be modified, which induces inconsistent
+             * hashCodes to be returned
+             */
+//            int hash = 1;
+//            hash = hash * Utils.HASH_PRIME + leftHandSide.hashCode();
+//            hash = hash * Utils.HASH_PRIME + rightHandSide.hashCode();
+//            return hash;
         }
 
         @Override
