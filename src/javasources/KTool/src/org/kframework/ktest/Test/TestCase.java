@@ -135,10 +135,31 @@ public class TestCase {
     }
 
     /**
-     * @return program options to pass kompile process
+     * @return extra program options to pass kompile process after passing taget file
      */
     public List<PgmArg> getKompileOpts() {
         return kompileOpts;
+    }
+
+    /**
+     * @return command array to pass process builder
+     */
+    public String[] getKompileCmd() {
+        assert new File(getDefinition()).isFile();
+        String[] args = new String[kompileOpts.size() + 2];
+        args[0] = "kompile";
+        args[1] = getDefinition();
+        for (int i = 0; i < kompileOpts.size(); i++)
+            args[i+2] = kompileOpts.get(i).toString();
+        return args;
+    }
+
+    /**
+     * @return command array to pass process builder
+     */
+    public String[] getPdfCmd() {
+        assert new File(getDefinition()).isFile();
+        return new String[] { "kompile", "--backend=pdf", getDefinition() };
     }
 
     public void setKompileOpts(List<PgmArg> kompileOpts) {

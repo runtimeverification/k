@@ -133,17 +133,8 @@ public class TestSuite {
         System.out.format("Kompile the language definitions...(%d in total)%n", len);
         startTpe();
         for (TestCase tc : tests) {
-            String definitionPath = tc.getDefinition();
-            assert new File(definitionPath).isFile();
-            // build argument array
-            List<PgmArg> kompileOpts = tc.getKompileOpts();
-            String[] args = new String[kompileOpts.size() + 2];
-            args[0] = "kompile";
-            args[1] = definitionPath;
-            for (int i = 0; i < kompileOpts.size(); i++)
-                args[i+2] = kompileOpts.get(i).toString();
-            // execute
-            Proc<TestCase> p = new Proc<>(tc, args, strComparator, timeout, verbose, colorSetting);
+            Proc<TestCase> p = new Proc<>(tc, tc.getKompileCmd(),
+                    strComparator, timeout, verbose, colorSetting);
             ps.add(p);
             tpe.execute(p);
         }
@@ -175,10 +166,7 @@ public class TestSuite {
         System.out.format("Generate PDF files...(%d in total)%n", len);
         startTpe();
         for (TestCase tc : tests) {
-            String definitionPath = tc.getDefinition();
-            assert new File(definitionPath).isFile();
-            Proc<TestCase> p = new Proc<>(tc,
-                    new String[] { "kompile", "--backend=pdf", definitionPath },
+            Proc<TestCase> p = new Proc<>(tc, tc.getPdfCmd(),
                     strComparator, timeout, verbose, colorSetting);
             ps.add(p);
             tpe.execute(p);
@@ -273,10 +261,7 @@ public class TestSuite {
      * @return Proc object for krun process
      */
     private Proc<KRunProgram> runKRun(KRunProgram program) {
-        String[] args = new String[program.args.size() + 1];
-        args[0] = "krun";
-        for (int i = 1; i < args.length; i++)
-            args[i] = program.args.get(i - 1);
+        String[] args = program.getKrunCmd();
 
         // passing null to Proc is OK, it means `ignore'
         String inputContents = null, outputContents = null, errorContents = null;

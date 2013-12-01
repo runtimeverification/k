@@ -19,4 +19,15 @@ public class KRunProgram {
         this.outputFile = outputFile;
         this.errorFile = errorFile;
     }
+
+    /**
+     * @return command array to pass process builder
+     */
+    public String[] getKrunCmd() {
+        String[] args1 = new String[args.size() + 1];
+        args1[0] = "krun";
+        for (int i = 1; i < args1.length; i++)
+            args1[i] = args.get(i - 1);
+        return args1;
+    }
 }
