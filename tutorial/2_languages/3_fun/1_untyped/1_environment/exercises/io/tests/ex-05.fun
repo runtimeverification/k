@@ -1,1 +1,1 @@
-print ("A" + " nice" + " composed" + " string\n")
+print ("A" ^ " nice" ^ " composed" ^ " string\n")

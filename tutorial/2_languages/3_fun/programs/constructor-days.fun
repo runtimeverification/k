@@ -1,3 +1,6 @@
+datatype day = Monday | Tuesday | Wednesday
+             | Thursday | Friday | Saturday | Sunday
+
 let day_after =
    fun Monday -> Tuesday
      | Tuesday -> Wednesday

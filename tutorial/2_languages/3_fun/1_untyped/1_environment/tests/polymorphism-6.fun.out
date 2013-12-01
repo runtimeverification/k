@@ -3,5 +3,4 @@ Search results:
 Solution 1:
 V:K -->
 closure ( f00 |-> (#symInt(1)) f01 |-> (#symInt(2)) f02 |-> (#symInt(3)) f03
-   |-> (#symInt(4)) f04 |-> (#symInt(5)) f05 |-> (#symInt(6)) f06 |-> (
-  #symInt(7)) f07 |-> (#symInt(8)) , x -> f07 (f07 x) )
+   |-> (#symInt(4)) , x -> f03 (f03 x) )

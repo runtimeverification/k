@@ -1,0 +1,55 @@
+Define a Damas-Milner style let-polymorphic type inferencer for FUN.
+
+Start with the syntax of FUN in the environment- or substitution-based
+definition, and modify it accordingly (adding more strictness, removing
+the current macro for datatypes, etc.).  Then add the type inference rules.
+
+This exercise is not trivial, be prepared!  There are many different ways
+to do it.  Here is how I did it (took me about 10h in total, including
+some changes in the two dynamic semantics of FUN):
+
+1) I first added all the trivial rules, for basic values and arithmetic
+expressions, following the style in 5_types/lesson_9.  Now you can type
+some simple programs.
+
+2) As a warmup, I added rules for functions with only one trivial case,
+fun x -> e, and let and letrec binders with only one binding.  This
+should be quite similar to the definition in 5_types/lesson_9 and it
+already allows you to type some programs.
+
+3) Started to add infrastrucure for typing constructor terms.  The first
+step, which was the hardest for me, was to process all the datatype
+declarations.  I added a new cell to the configuration for this purpose,
+which I populated with a map associating to each constructor name that
+appears in any datatype declaration a type schema.  For simplicity, you
+can assume that all datatype declarations are at the top of the program,
+and that each constuctor name appears in only one datatype declaration.
+
+4) Added rules for evaluation of constructor terms.  In my case, I only
+needed two rules for this task, one for constant constructors and one for
+constructors with arguments.  Each time I lookup a constructor name in
+the new cell, I create a fresh instance of its corresponding schema,
+the same way we lookup variables bound to type schemas by let.
+
+5) Added rules for typing functions with cases.  The idea here is to
+"evaluate" each case to a function type.  To evaluate a case, first
+evaluate its pattern in a special way, binding each variable in the
+pattern to a fresh type, and then evaluate the expression.  Once
+done with all cases, enforce constraints stating that all the resulting
+function types are equal, which is also the resulting type of the function.
+
+6) Defined the typing rules for let and letrec.  In my case, I only
+have one rule for each, but I needed to define some auxilliary operations.
+As expected, letrec is trickier: first bind all the names to fresh type
+variables, then type all the expressions in the resulting type environment,
+then generate all the constraints saying that types of the names are the
+same as the type of their corresponding expressions, then (!!!) update the
+type environment with the corresponding type schemas.
+
+7) The rest was a smooth ride, including the references and callcc
+(one simple rule per language construct).
+
+As usual, all the tests are provided (more than 50).  Just run ktest
+from your working directory with the test/config.xml file as parameter.
+
+Good luck and enjoy!  This is a very nice one.

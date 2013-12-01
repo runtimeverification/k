@@ -8,6 +8,9 @@ import org.kframework.backend.java.kil.ConstrainedTerm;
 
 public class TestCaseGenerationUtil {
 
+    public static final boolean BOUND_WIDTH = false;
+    public static final boolean BOUND_NUMBER_OF_FREE_VARIABLES = false;
+
     /**
      * Selects a certain number of states randomly from the given list of
      * states.

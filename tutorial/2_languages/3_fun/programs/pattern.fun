@@ -1,3 +1,6 @@
+datatype ('a,'b) pair = Pair('a,'b)
+datatype ('a,'b,'c) triple = Triple('a,'b,'c)
+
 letrec length = fun [] -> 0
                 |   [h|t] -> 1 + length t
 and   complex = fun Triple([Pair(h1,h2)|t], l, [Pair(a,2), Pair(3,b), c])

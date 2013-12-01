@@ -1,3 +1,5 @@
+datatype 'a tree = Leaf('a) | Tree('a tree, 'a tree)
+
 letrec mirror =
    fun Leaf(n) -> Leaf(n)
      | Tree(left, right) -> Tree(mirror(right), mirror(left))

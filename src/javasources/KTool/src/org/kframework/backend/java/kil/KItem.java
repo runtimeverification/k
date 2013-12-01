@@ -80,10 +80,12 @@ public class KItem extends Term implements Sorted {
                                         }
                                     } else if (childTerm instanceof KItem) {
                                         mayMatch = false;
-                                        for (String pms : ((KItem) childTerm).possibleMinimalSorts()) {
-                                            if (context.isSubsortedEq(production.getChildSort(i), pms)) {
-                                                mayMatch = true;
-                                                break;
+                                        if (((KItem) childTerm).kLabel.isConstructor()) {
+                                            for (String pms : ((KItem) childTerm).possibleMinimalSorts()) {
+                                                if (context.isSubsortedEq(production.getChildSort(i), pms)) {
+                                                    mayMatch = true;
+                                                    break;
+                                                }
                                             }
                                         }
                                     } else { // e.g., childTerm is a HOLE
@@ -179,6 +181,12 @@ public class KItem extends Term implements Sorted {
         if (!definition.functionRules().get((KLabelConstant) kLabel).isEmpty()) {
             ConstrainedTerm constrainedTerm = new ConstrainedTerm(kList, context);
 
+            // TODO(YilongL): There are at least two missing features here:
+            // 1) consider applying rules with attribute [owise] only after
+            // no other rules can be applied;
+            // 2) check the determinism of the function definition across
+            // multiple rules; currently the determinism is only check w.r.t
+            // one rule
             for (Rule rule : definition.functionRules().get((KLabelConstant) kLabel)) {
                 SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(context);
                 leftHandSideConstraint.addAll(rule.requires());
