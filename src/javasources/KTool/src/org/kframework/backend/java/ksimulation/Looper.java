@@ -7,6 +7,8 @@ import org.kframework.backend.java.symbolic.*;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.kil.Term;
 
+import com.microsoft.z3.Z3Exception;
+
 public class Looper extends Thread {
 	
 	private JavaSymbolicKRun impl;
@@ -39,6 +41,9 @@ public class Looper extends Thread {
 			try {
 				temp = getNextMoves(this.currentPairs.get(i));
 			} catch (KRunExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (Z3Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -86,7 +91,7 @@ public class Looper extends Thread {
 		return temp;
 	}
 	
-	private ArrayList<ArrayList<Term []>> getNextMoves(Term [] input) throws KRunExecutionException{
+	private ArrayList<ArrayList<Term []>> getNextMoves(Term [] input) throws KRunExecutionException, Z3Exception{
 		
 		ArrayList<Term> implResult = impl.steps(input[0]);
 		ArrayList<Term> specResult = spec.steps(input[1]);
@@ -122,7 +127,7 @@ public class Looper extends Thread {
 	}
 	
 	
-	private ArrayList<Term []> useDeciders(Term impl,ArrayList<Term> specs){
+	private ArrayList<Term []> useDeciders(Term impl,ArrayList<Term> specs) throws KRunExecutionException, Z3Exception{
 		
 		ArrayList<Term []> temp = new ArrayList<Term []>();
 		

@@ -169,7 +169,7 @@ public class KILtoZ3 extends CopyOnWriteTransformer {
                 Expr expression2 = (BoolExpr) ((Z3Term) kItem.kList().get(1).accept(this)).expression();
                 Expr[] newExpr = new Expr[1];
                 newExpr[0] = expression1;
-                return new Z3Term(context.MkExists(newExpr, expression2, 1, null, null, null, null));
+                return new Z3Term(context.MkForall(newExpr, expression2, 1, null, null, null, null));
             }
             
             else {
