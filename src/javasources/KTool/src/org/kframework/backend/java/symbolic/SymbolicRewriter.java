@@ -19,6 +19,7 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
 import org.kframework.backend.java.util.ProductionsOfSort;
+import org.kframework.backend.java.util.TestCaseGenerationUtil;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.krun.api.SearchType;
 import org.kframework.utils.general.GlobalSettings;
@@ -475,9 +476,12 @@ public class SymbolicRewriter {
 
         label:
             for (step = 0; !queue.isEmpty() && step != depth; ++step) {
+                //System.out.println("step = " + step);
                 for (ConstrainedTerm term : queue) {
                     // TODO(YilongL): handle the following pruning condition nice and clean
-                    if (term.variableSet().size() > 10) continue;
+                    if (TestCaseGenerationUtil.BOUND_NUMBER_OF_FREE_VARIABLES) {
+                        if (term.variableSet().size() > 10) continue;
+                    }
 
                     computeRewriteStep(term);
 
@@ -499,8 +503,11 @@ public class SymbolicRewriter {
                 /* swap the queues */
                 List<ConstrainedTerm> temp;
                 temp = queue;
-                //            queue = TestCaseGenerationUtil.getArbitraryStates(nextQueue, 30);
-                queue = nextQueue;
+                if (TestCaseGenerationUtil.BOUND_WIDTH) {
+                    queue = TestCaseGenerationUtil.getArbitraryStates(nextQueue, 200);
+                } else {
+                    queue = nextQueue;
+                }
                 nextQueue = temp;
                 nextQueue.clear();
             }
