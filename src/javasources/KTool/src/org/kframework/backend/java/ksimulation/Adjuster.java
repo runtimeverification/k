@@ -147,6 +147,8 @@ public class Adjuster {
 		
 		if(solver.Check() == Status.SATISFIABLE){
 		return true;
+		} else if(solver.Check()==Status.UNKNOWN){
+			return implside.equals(specside);
 		}
 		
 		return false;
