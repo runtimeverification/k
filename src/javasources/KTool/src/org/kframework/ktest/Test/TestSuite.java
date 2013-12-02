@@ -342,10 +342,30 @@ public class TestSuite {
         if (errorContents != null)
             errorContentsAnn = new Annotated<>(errorContents, program.errorFile);
 
+        if (verbose)
+            printVerboseRunningMsg(program);
         Proc<KRunProgram> p = new Proc<>(program, args, inputContents, outputContentsAnn,
                 errorContentsAnn, strComparator, timeout, verbose, colorSetting);
         tpe.execute(p);
         return p;
+    }
+
+    private void printVerboseRunningMsg(KRunProgram program) {
+        StringBuilder b = new StringBuilder();
+        b.append("Running [");
+        b.append(StringUtils.join(program.args, " "));
+        b.append("]");
+        if (program.inputFile != null) {
+            b.append(" [input: ");
+            b.append(program.inputFile);
+            b.append("]");
+        }
+        if (program.outputFile != null) {
+            b.append(" [output: ");
+            b.append(program.outputFile);
+            b.append("]");
+        }
+        System.out.println(b);
     }
 
     private void printResult(boolean condition) {
