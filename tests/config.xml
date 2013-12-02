@@ -781,6 +781,7 @@
       extension="test"
       >
     <kompile-option name="-backend" value="java" />
+    <kompile-option name="-warnings" value="none" />
     <all-programs>
       <krun-option name="-backend" value="java" />
     </all-programs>
