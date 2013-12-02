@@ -14,7 +14,6 @@ import java.io.OutputStream;
 import java.util.Comparator;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.*;
 
 /**
  * A unified process class for kompile, kompile --pdf and krun processes.
