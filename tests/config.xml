@@ -16,7 +16,9 @@
            results="tutorial/tests" />
 
   <include file="../samples/tests/config.xml"
-           directory="samples" />
+           directory="samples"
+           programs="samples/tests"
+           results="samples/tests" />
 
 <!--
   QUINE
