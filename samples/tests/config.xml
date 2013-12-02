@@ -1,0 +1,4 @@
+<tests>
+  <include file="../java_rewrite_engine/tests/config.xml"
+           directory="java_rewrite_engine" />
+</tests>

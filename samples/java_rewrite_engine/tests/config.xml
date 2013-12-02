@@ -1,0 +1,3 @@
+<tests>
+  <include  file="../tutorial/tests/config.xml" directory="tutorial" />
+</tests>
