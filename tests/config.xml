@@ -796,5 +796,17 @@
       <krun-option name="-smt" value="none" />
     </all-programs>
   </test>
+
+  <test
+      definition="tests/regression/java-rewrite-engine/smt_model/test.k"
+      programs="tests/regression/java-rewrite-engine/smt_model"
+      results="tests/regression/java-rewrite-engine/smt_model"
+      extension="test"
+      >
+    <kompile-option name="-backend" value="java" />
+    <all-programs>
+      <krun-option name="-backend" value="java" />
+    </all-programs>
+  </test>
 <!-- end Java Rewrite Engine tests -->
 </tests>
