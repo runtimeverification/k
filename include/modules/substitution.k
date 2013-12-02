@@ -135,7 +135,7 @@ module FREE-VARS
     when isBinder(K)
 // Grigore: new in order to deal with cc(.K)
   rule #freeVars((.K => .KList),,_, _, _)
-  rule #freeVars((K1:KItem ~> K => K1,,K),,_, _, _)
+  rule #freeVars((K1:KItem ~> K:K => K1,,K),,_, _, _)
 //  rule #freeVars( .K , _, Free:Set) => vars(Free)
 //  rule #freeVars( (.K,,K:K => K) , _, _)
 

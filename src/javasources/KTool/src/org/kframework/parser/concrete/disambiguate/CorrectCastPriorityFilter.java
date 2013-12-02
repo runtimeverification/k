@@ -11,6 +11,7 @@ import org.kframework.kil.Sort;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.Variable;
+import org.kframework.kil.Cast.CastType;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicHookWorker;
 import org.kframework.kil.visitors.BasicTransformer;
@@ -34,11 +35,11 @@ public class CorrectCastPriorityFilter extends BasicTransformer {
 		// this should be done only if the casting is syntactic, because on semantic cast there should be another branch
 		// that has a typed variable.
 		if (cst.getContent() instanceof Variable) {
-			if (!((Variable) cst.getContent()).isUserTyped() && !cst.isSyntactic()) {
+			if (!((Variable) cst.getContent()).isUserTyped() && cst.getType() != CastType.OUTER) {
 				Variable var = new Variable((Variable) cst.getContent());
 				var.setUserTyped(true);
 				var.setSort(cst.getSort());
-				var.setSyntactic(cst.isSyntactic());
+				var.setSyntactic(cst.getType() != CastType.SEMANTIC);
 				return var;
 			}
 		}

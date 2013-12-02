@@ -30,7 +30,7 @@ context-free syntax
 	VARID ":KLabel"		-> KLabelVarDz {cons("KLabel12Var")}
 	VARIDz				-> KLabel {cons("KLabel1Var")}
 	VARID ":KResult"	-> KVarDz {cons("KResult12Var")}
-	
+
 	"HOLE"			-> K {cons("K1Hole")}
 
 	":" -> ColonDz {cons("Colon")}
@@ -62,9 +62,9 @@ lexical syntax
 	"MapItem"		-> VARID {reject}
 
 context-free restrictions
-	ColonDz -/- [A-Z] 
-	QuestionMarkDz -/- [A-Z]
-	VARIDz -/- [\:].[\#A-Z]
+	ColonDz			-/- [A-Z] 
+	QuestionMarkDz	-/- [A-Z]
+	VARIDz			-/- [\:].[\#A-Z]
 
 	ListVarDz		-/- [a-zA-Z0-9\{]
 	ListItemVarDz	-/- [a-zA-Z0-9\{]

@@ -167,6 +167,7 @@ public class SymbolicBackend extends BasicBackend implements Backend {
 		steps.add(new ReplaceConstants(context)); // symbolic step
 		steps.add(new AddPathCondition(context)); // symbolic step
 		steps.add(new AddPathConditionToReachabilityKRule(context)); // symbolic step
+        steps.add(new ResolveLtlAttributes(context)); // symbolic step (special case for ltl)
 
 		steps.add(new ResolveSupercool(context));
 		steps.add(new AddStrictStar(context));
