@@ -1,9 +1,9 @@
 package org.kframework.kil;
 
-import org.kframework.kil.loader.*;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.Transformer;
+import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.matchers.Matcher;
+import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.StringUtil;
@@ -99,6 +99,18 @@ public class Cast extends Term {
 
 	public Cast(String sort) {
 		super(sort);
+	}
+
+	public String getSort() {
+		if (type == CastType.INNER)
+			return KSorts.K;
+		return sort;
+	}
+
+	public String getInnerSort() {
+		if (type == CastType.OUTER)
+			return KSorts.K;
+		return sort;
 	}
 
 	@Override

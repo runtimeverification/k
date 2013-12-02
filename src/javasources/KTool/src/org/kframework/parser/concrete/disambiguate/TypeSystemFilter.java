@@ -40,8 +40,7 @@ public class TypeSystemFilter extends BasicTransformer {
 	}
 
 	public ASTNode transform(Cast cast) throws TransformerException {
-		// if (!cast.isSyntactic())
-		cast.setContent((Term) cast.getContent().accept(new TypeSystemFilter2(cast.getSort(), context)));
+		cast.setContent((Term) cast.getContent().accept(new TypeSystemFilter2(cast.getInnerSort(), context)));
 		return super.transform(cast);
 	}
 }
