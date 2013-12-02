@@ -42,7 +42,11 @@ public class KTest {
             printVersion();
         else {
             CmdArg cmdArgs = CmdArg.validateArgs(argParser.cmdOpts);
-            return (makeTestSuite(cmdArgs.getTargetFile(), cmdArgs).run() ? 0 : 1);
+            TestSuite testSuite = makeTestSuite(cmdArgs.getTargetFile(), cmdArgs);
+            if (cmdArgs.getDry())
+                testSuite.dryRun();
+            else
+                return (testSuite.run() ? 0 : 1);
         }
         return 0;
     }

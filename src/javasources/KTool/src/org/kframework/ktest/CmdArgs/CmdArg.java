@@ -93,10 +93,15 @@ public class CmdArg {
      */
     private final boolean ignoreBalancedParens;
 
+    /**
+     * Dry run.
+     */
+    private final boolean dry;
+
     private CmdArg(String directory, String programs, String results, String[] extensions,
                    String[] excludes, Set<KTestStep> skips, boolean generateReport,
                    String targetFile, boolean verbose, ColorSetting colorSetting, int timeout,
-                   boolean ignoreWS, boolean ignoreBalancedParens) {
+                   boolean ignoreWS, boolean ignoreBalancedParens, boolean dry) {
         this.directory = directory;
         this.programs = programs;
         this.results = results;
@@ -110,6 +115,7 @@ public class CmdArg {
         this.timeout = timeout;
         this.ignoreWS = ignoreWS;
         this.ignoreBalancedParens = ignoreBalancedParens;
+        this.dry = dry;
     }
 
     /**
@@ -130,6 +136,7 @@ public class CmdArg {
         this.timeout = obj.timeout;
         this.ignoreWS = obj.ignoreWS;
         this.ignoreBalancedParens = obj.ignoreBalancedParens;
+        this.dry = obj.dry;
     }
 
     /**
@@ -180,9 +187,11 @@ public class CmdArg {
                 && cmdOpts.getOptionValue("ignore-balanced-parentheses").equals("off"))
             ignoreBalancedParens = false;
 
+        boolean dry = cmdOpts.hasOption("dry");
+
         return new CmdArg(directory, programs, results, extensions, excludes, parseSkips(cmdOpts),
                 generateReport, targetFile, verbose, parseColorSetting(cmdOpts),
-                parseTimeout(cmdOpts), ignoreWS, ignoreBalancedParens);
+                parseTimeout(cmdOpts), ignoreWS, ignoreBalancedParens, dry);
     }
 
     public String getDirectory() {
@@ -227,6 +236,10 @@ public class CmdArg {
 
     public boolean getGenerateReport() {
         return generateReport;
+    }
+
+    public boolean getDry() {
+        return dry;
     }
 
     public CmdArg setDirectory(String directory) {

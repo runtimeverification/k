@@ -2,6 +2,7 @@ package org.kframework.ktest.Test;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.kframework.krun.ColorSetting;
 import org.kframework.ktest.*;
 import org.kframework.ktest.CmdArgs.CmdArg;
@@ -106,6 +107,39 @@ public class TestSuite {
             reportGen.save();
 
         return ret;
+    }
+
+    /**
+     * Print the commands that would be executed, but do not execute them.
+     * (inspired by GNU Make)
+     */
+    public void dryRun() {
+        if (!skips.contains(KTestStep.KOMPILE)) {
+            List<TestCase> kompileSteps = filterSkips(tests, KTestStep.KOMPILE);
+            for (TestCase tc : kompileSteps)
+                System.out.println(StringUtils.join(tc.getKompileCmd(), " "));
+        }
+        if (!skips.contains(KTestStep.PDF)) {
+            List<TestCase> pdfSteps = filterSkips(tests, KTestStep.PDF);
+            for (TestCase tc : pdfSteps)
+                System.out.println(StringUtils.join(tc.getPdfCmd(), " "));
+        }
+        if (!skips.contains(KTestStep.KRUN)) {
+            List<TestCase> krunSteps = filterSkips(tests, KTestStep.KRUN);
+            for (TestCase tc : krunSteps) {
+                List<KRunProgram> programs = tc.getPrograms();
+                for (KRunProgram program : programs) {
+                    String[] krunCmd = program.getKrunCmd();
+                    LinkedList<String> krunCmd1 = new LinkedList<>();
+                    Collections.addAll(krunCmd1, krunCmd);
+                    if (program.outputFile != null)
+                        krunCmd1.add("> " + program.outputFile);
+                    if (program.inputFile != null)
+                        krunCmd1.add("< " + program.inputFile);
+                    System.out.println(StringUtils.join(krunCmd1, " "));
+                }
+            }
+        }
     }
 
     private List<TestCase> filterSkips(List<TestCase> tests, KTestStep step) {

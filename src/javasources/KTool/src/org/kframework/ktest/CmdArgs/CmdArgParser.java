@@ -64,6 +64,9 @@ public class CmdArgParser {
                 .withArgName("on|off").withDescription("Ignore balanced parentheses when " +
                 "comparsing results. (Default: on).").create());
 
+        addOption(OptionBuilder.withLongOpt("dry").withDescription("Dry run: print out the " +
+                "command to be executed without actual execution.").create());
+
         cmdOpts = new PosixParser().parse(options, args);
     }
 
