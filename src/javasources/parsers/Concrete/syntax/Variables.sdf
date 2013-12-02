@@ -30,7 +30,7 @@ context-free syntax
 	VARID ":KLabel"		-> KLabelVarDz {cons("KLabel12Var")}
 	VARIDz				-> KLabel {cons("KLabel1Var")}
 	VARID ":KResult"	-> KVarDz {cons("KResult12Var")}
-	
+
 	"HOLE"			-> K {cons("K1Hole")}
 
 	":" -> ColonDz {cons("Colon")}
@@ -49,6 +49,12 @@ context-free syntax
 	BagVarDz		-> Bag
 	BagItemVarDz	-> BagItem
 
+	":"		-> CastTypeDz {cons("Semantic")}
+	"::"	-> CastTypeDz {cons("Syntactic")}
+	"<:>"	-> CastTypeDz {cons("Syntactic")}
+	"<:"	-> CastTypeDz {cons("Inner")}
+	":>"	-> CastTypeDz {cons("Outer")}
+
 lexical syntax
 	%% Variables and the Anonymous Variable
 	("$"|"?")?[A-Z] [a-zA-Z0-9\']*  -> VARID
@@ -62,9 +68,11 @@ lexical syntax
 	"MapItem"		-> VARID {reject}
 
 context-free restrictions
-	ColonDz -/- [A-Z] 
-	QuestionMarkDz -/- [A-Z]
-	VARIDz -/- [\:].[\#A-Z]
+	ColonDz			-/- [A-Z] 
+	QuestionMarkDz	-/- [A-Z]
+	VARIDz			-/- [\:].[\#A-Z]
+	CastTypeDz		-/- [\:\<\>]
+	CastTypeDz		-/- ~[\#A-Z]
 
 	ListVarDz		-/- [a-zA-Z0-9\{]
 	ListItemVarDz	-/- [a-zA-Z0-9\{]

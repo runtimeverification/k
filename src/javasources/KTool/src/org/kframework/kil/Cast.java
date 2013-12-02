@@ -14,9 +14,31 @@ import aterm.ATermAppl;
 
 /** Represents parentheses uses for grouping. All productions labeled bracket parse to this. */
 public class Cast extends Term {
+	public enum CastType {
+		/**
+		 * Casting of the form _:Sort. Sort restrictions are imposed for both the inner term, as well as the outer term.
+		 * This also creates a runtime check for the inner term.
+		 */
+		SEMANTIC,
+		/**
+		 * Casting of the form _::Sort. Sort restrictions are imposed for both the inner term, as well as the outer term.
+		 * No runtime checks.
+		 */
+		SYNTACTIC,
+		/**
+		 * Casting of the form _<:Sort. Sort restrictions are imposed only for the inner term.
+		 * The outer sort, namely the sort of this construct, is K. No runtime checks.
+		 */
+		INNER,
+		/**
+		 * Casting of the form _:>Sort. The sort of the inner production is restricted to K.
+		 * The outer sort, namely the sort of this construct, is Sort. No runtime checks.
+		 */
+		OUTER
+	}
 
 	private Term content;
-	private boolean syntactic = true;
+	private CastType type;
 
 	public Term getContent() {
 		return content;
@@ -29,7 +51,7 @@ public class Cast extends Term {
 	public Cast(Cast i) {
 		super(i);
 		this.content = i.content;
-		this.syntactic = i.syntactic;
+		this.type = i.type;
 	}
 
 	public Cast(Term t, Context context) {
@@ -40,10 +62,15 @@ public class Cast extends Term {
 	public Cast(ATermAppl atm) {
 		super(atm);
 		this.sort = StringUtil.getSortNameFromCons(atm.getName());
-		if (atm.getName().endsWith("1Cast"))
-			this.syntactic = false;
-		else
-			this.syntactic = true;
+		String atmtype = ((ATermAppl) atm.getArgument(1)).getName();
+		if (atmtype.equals("Semantic"))
+			this.type = CastType.SEMANTIC;
+		else if (atmtype.equals("Syntactic"))
+			this.type = CastType.SYNTACTIC;
+		else if (atmtype.equals("Inner"))
+			this.type = CastType.INNER;
+		else if (atmtype.equals("Outer"))
+			this.type = CastType.OUTER;
 
 		content = (Term) JavaClassesFactory.getTerm(atm.getArgument(0));
 	}
@@ -59,10 +86,14 @@ public class Cast extends Term {
 
 	public Cast(Element element) {
 		super(element);
-		if (element.getAttribute("syntactic").equals("true"))
-			this.syntactic = true;
-		else
-			this.syntactic = false;
+		if (element.getAttribute("type").equals("semantic"))
+			this.type = CastType.SEMANTIC;
+		else if (element.getAttribute("type").equals("syntactic"))
+			this.type = CastType.SYNTACTIC;
+		else if (element.getAttribute("type").equals("inner"))
+			this.type = CastType.INNER;
+		else if (element.getAttribute("type").equals("outer"))
+			this.type = CastType.OUTER;
 		this.content = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
 	}
 
@@ -95,17 +126,9 @@ public class Cast extends Term {
 		return "(" + content + ")";
 	}
 
-	public void setSyntactic(boolean syntactic) {
-		this.syntactic = syntactic;
-	}
-
-	public boolean isSyntactic() {
-		return syntactic;
-	}
-
 	@Override
 	public int hashCode() {
-		return content.hashCode() + (this.syntactic ? 1 : 0);
+		return content.hashCode() + this.type.hashCode() + this.sort.hashCode();
 	}
 
 	@Override
@@ -117,7 +140,7 @@ public class Cast extends Term {
 		if (!(o instanceof Cast))
 			return false;
 		Cast c = (Cast) o;
-		return this.syntactic == c.syntactic && this.content.equals(c.content);
+		return this.type == c.type && this.content.equals(c.content);
 	}
 
 	@Override
@@ -129,6 +152,18 @@ public class Cast extends Term {
 		if (!(o instanceof Cast))
 			return false;
 		Cast c = (Cast) o;
-		return this.syntactic == c.syntactic && this.content.contains(c.content);
+		return this.type == c.type && this.content.contains(c.content);
+	}
+
+	public CastType getType() {
+		return type;
+	}
+
+	public void setType(CastType type) {
+		this.type = type;
+	}
+
+	public boolean isSyntactic() {
+		return type != CastType.SEMANTIC;
 	}
 }

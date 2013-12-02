@@ -187,26 +187,19 @@ rules
 		where loc := <getLocAsString>
 
 	to-xml2:
-		a#(b) -> $[<cast sort="[sort]" loc="[loc]" syntactic="false">
+		a#([b, c]) -> $[<cast sort="[sort]" loc="[loc]" type="[<to-cast-type> c]">
 					[children]
 		</cast>
 		]
 		where <string-ends-with(|"1Cast")> a
 		where mydebug(!"1Cast: ")
-		where children := <all(to-xml)> b
+		where children := <to-xml> b
 		where sort := <getSort> a
 		where loc := <getLocAsString>
-
-	to-xml2:
-		a#(b) -> $[<cast sort="[sort]" loc="[loc]" syntactic="true">
-					[children]
-		</cast>
-		]
-		where <string-ends-with(|"12Cast")> a
-		where mydebug(!"12Cast: ")
-		where children := <all(to-xml)> b
-		where sort := <getSort> a
-		where loc := <getLocAsString>
+	to-cast-type: "Syntactic"#(_)	-> $[syntactic]
+	to-cast-type: "Semantic"#(_)	-> $[semantic]
+	to-cast-type: "Inner"#(_)		-> $[inner]
+	to-cast-type: "Outer"#(_)		-> $[outer]
 
 	to-xml2:
 		a#(_) -> $[<hole sort="K" loc="[loc]" />
