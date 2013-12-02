@@ -1,6 +1,8 @@
 package org.kframework.ktest.Test;
 
 
+import org.kframework.ktest.ExecNames;
+
 import java.util.List;
 
 public class KRunProgram {
@@ -25,7 +27,7 @@ public class KRunProgram {
      */
     public String[] getKrunCmd() {
         String[] args1 = new String[args.size() + 1];
-        args1[0] = "krun";
+        args1[0] = ExecNames.getKrun();
         for (int i = 1; i < args1.length; i++)
             args1[i] = args.get(i - 1);
         return args1;

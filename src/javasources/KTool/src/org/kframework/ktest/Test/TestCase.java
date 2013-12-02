@@ -6,6 +6,7 @@ import org.kframework.ktest.Annotated;
 import org.kframework.ktest.CmdArgs.CmdArg;
 import org.kframework.ktest.Config.InvalidConfigError;
 import org.kframework.ktest.Config.LocationData;
+import org.kframework.ktest.ExecNames;
 import org.kframework.ktest.KTestStep;
 import org.kframework.ktest.PgmArg;
 
@@ -147,7 +148,7 @@ public class TestCase {
     public String[] getKompileCmd() {
         assert new File(getDefinition()).isFile();
         String[] args = new String[kompileOpts.size() + 2];
-        args[0] = "kompile";
+        args[0] = ExecNames.getKompile();
         args[1] = getDefinition();
         for (int i = 0; i < kompileOpts.size(); i++)
             args[i+2] = kompileOpts.get(i).toString();
@@ -159,7 +160,7 @@ public class TestCase {
      */
     public String[] getPdfCmd() {
         assert new File(getDefinition()).isFile();
-        return new String[] { "kompile", "--backend=pdf", getDefinition() };
+        return new String[] { ExecNames.getKompile(), "--backend=pdf", getDefinition() };
     }
 
     public void setKompileOpts(List<PgmArg> kompileOpts) {
