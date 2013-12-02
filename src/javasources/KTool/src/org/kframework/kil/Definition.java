@@ -117,12 +117,12 @@ public class Definition extends ASTNode {
         this.accept(new AddSymbolicVariablesDeclaration(context, this.getMainSyntaxModule()));
 		this.accept(new UpdateReferencesVisitor(context));
 		this.accept(new AddConsesVisitor(context));
+		this.accept(new UpdateAssocVisitor(context));
 		this.accept(new CollectConsesVisitor(context));
 		this.accept(new CollectSubsortsVisitor(context));
 		this.accept(new CollectPrioritiesVisitor(context));
 		this.accept(new CollectStartSymbolPgmVisitor(context));
 		this.accept(new CollectConfigCellsVisitor(context));
-		this.accept(new UpdateAssocVisitor(context));
 		this.accept(new CollectLocationsVisitor(context));
         this.accept(new CountNodesVisitor(context));
         this.accept(new CollectVariableTokens(context));

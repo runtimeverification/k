@@ -34,7 +34,10 @@ public class UpdateAssocVisitor extends BasicVisitor {
 	public void visit(PriorityBlock pri) {
 		if (!pri.getAssoc().equals("")) {
 			for (Production p : pri.getProductions()) {
-				context.putAssoc(p.getCons(), pri.getProductions());
+				if (!p.getAttributes().containsKey("left") && !p.getAttributes().containsKey("right") && !p.getAttributes().containsKey("non-assoc")) {
+					p.addAttribute(pri.getAssoc(), "");
+					context.putAssoc(p.getCons(), pri.getProductions());
+				}
 			}
 		}
 	}
