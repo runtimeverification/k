@@ -1,0 +1,11 @@
+int x;
+if (false) {
+  int x,x;
+} else {
+  int x,y;
+}
+print("OK");
+/*
+  Yes, this should pass, as our checker is dynamic, i.e., only catching
+problems if they are executed
+*/
