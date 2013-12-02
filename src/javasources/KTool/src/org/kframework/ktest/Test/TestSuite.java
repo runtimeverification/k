@@ -275,10 +275,9 @@ public class TestSuite {
                             FilenameUtils.getName(pgm.pgmName));
                     if (p.isSuccess())
                         successes++;
-                    else
-                        printResult(false);
                 }
         }
+        printResult(successes == tests.size());
         return successes == tests.size();
     }
 
