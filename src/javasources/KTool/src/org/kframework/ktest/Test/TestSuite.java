@@ -243,7 +243,6 @@ public class TestSuite {
 
         // at this point we have a subset of tests that are successfully kompiled,
         // so run programs of those tests
-        boolean testCaseRet = true;
         for (TestCase tc : kompileSuccesses) {
 
             List<KRunProgram> programs = tc.getPrograms();
@@ -275,8 +274,7 @@ public class TestSuite {
                             FilenameUtils.getName(pgm.pgmName));
                 }
         }
-        printResult(testCaseRet);
-        return kompileSuccesses.size() == tests.size() && testCaseRet;
+        return kompileSuccesses.size() == tests.size();
     }
 
     private void startTpe() {
