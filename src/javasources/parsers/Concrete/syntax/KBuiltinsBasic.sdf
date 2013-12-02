@@ -7,6 +7,17 @@ context-free syntax
 	%% KLabel
 	KLabelDz	-> KLabel {cons("KLabel1Const")}
 
+	":"		-> CastTypeDz {cons("Semantic")}
+	"::"	-> CastTypeDz {cons("Syntactic")}
+	"<:>"	-> CastTypeDz {cons("Syntactic")}
+	"<:"	-> CastTypeDz {cons("Inner")}
+	":>"	-> CastTypeDz {cons("Outer")}
+
+context-free restrictions
+	CastTypeDz		-/- [\:\<\>]
+	CastTypeDz		-/- ~[\#A-Z]
+	
+
 lexical syntax
 	[a-zA-Z\_][a-zA-Z0-9\_]*	-> DzDzID
 	[\-\+]? [0-9]+			-> DzDzINT {prefer}

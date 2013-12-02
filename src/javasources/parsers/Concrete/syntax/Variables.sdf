@@ -49,12 +49,6 @@ context-free syntax
 	BagVarDz		-> Bag
 	BagItemVarDz	-> BagItem
 
-	":"		-> CastTypeDz {cons("Semantic")}
-	"::"	-> CastTypeDz {cons("Syntactic")}
-	"<:>"	-> CastTypeDz {cons("Syntactic")}
-	"<:"	-> CastTypeDz {cons("Inner")}
-	":>"	-> CastTypeDz {cons("Outer")}
-
 lexical syntax
 	%% Variables and the Anonymous Variable
 	("$"|"?")?[A-Z] [a-zA-Z0-9\']*  -> VARID
@@ -71,8 +65,6 @@ context-free restrictions
 	ColonDz			-/- [A-Z] 
 	QuestionMarkDz	-/- [A-Z]
 	VARIDz			-/- [\:].[\#A-Z]
-	CastTypeDz		-/- [\:\<\>]
-	CastTypeDz		-/- ~[\#A-Z]
 
 	ListVarDz		-/- [a-zA-Z0-9\{]
 	ListItemVarDz	-/- [a-zA-Z0-9\{]
