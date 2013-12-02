@@ -244,6 +244,7 @@ public class TestSuite {
         // at this point we have a subset of tests that are successfully kompiled,
         // so run programs of those tests
         int successes = 0;
+        int totalTests = 0;
         for (TestCase tc : kompileSuccesses) {
 
             List<KRunProgram> programs = tc.getPrograms();
@@ -262,8 +263,10 @@ public class TestSuite {
             // I'm testing tast cases sequentially
             List<Proc<KRunProgram>> testCaseProcs = new ArrayList<>(programs.size());
             startTpe();
-            for (KRunProgram program : programs)
+            for (KRunProgram program : programs) {
                 testCaseProcs.add(runKRun(program));
+                totalTests++;
+            }
             stopTpe();
 
             for (Proc<KRunProgram> p : testCaseProcs)
@@ -277,8 +280,8 @@ public class TestSuite {
                         successes++;
                 }
         }
-        printResult(successes == tests.size());
-        return successes == tests.size();
+        printResult(successes == totalTests);
+        return successes == totalTests;
     }
 
     private void startTpe() {
