@@ -52,6 +52,10 @@ public class ConfigFileParser {
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer nullTransformer = transformerFactory.newTransformer();
 
+        // annotate XML file with location information of elements and resolve environment
+        // variables in attributes/elements
+        // (also see comments in ConfigPreProcessor)
+
         // Create an empty document to be populated within a DOMResult.
         DocumentBuilder docBuilder = documentBuilderFactory.newDocumentBuilder();
         doc = docBuilder.newDocument();
@@ -60,10 +64,9 @@ public class ConfigFileParser {
         // Create SAX parser/XMLReader that will parse XML.
         XMLReader xmlReader = XMLReaderFactory.createXMLReader();
 
-        // Create our filter to wrap the SAX parser, that captures the
-        // locations of elements and annotates their nodes as they are
-        // inserted into the DOM.
-        LocationAnnotator locationAnnotator = new LocationAnnotator(xmlReader, doc);
+        // Create our filter to wrap the SAX parser, that captures the locations of elements
+        // and annotates their nodes as they are inserted into the DOM.
+        ConfigPreProcessor locationAnnotator = new ConfigPreProcessor(xmlReader, doc);
 
         // Create the SAXSource to use the annotator.
         String systemId = configFile.getAbsolutePath();

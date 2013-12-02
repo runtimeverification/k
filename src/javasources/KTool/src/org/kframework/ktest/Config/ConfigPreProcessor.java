@@ -1,9 +1,8 @@
 package org.kframework.ktest.Config;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.UserDataHandler;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.general.GlobalSettings;
+import org.w3c.dom.*;
 import org.w3c.dom.events.Event;
 import org.w3c.dom.events.EventListener;
 import org.w3c.dom.events.EventTarget;
@@ -15,18 +14,26 @@ import org.xml.sax.helpers.LocatorImpl;
 import org.xml.sax.helpers.XMLFilterImpl;
 
 import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * See http://javacoalface.blogspot.com/2011/04/line-and-column-numbers-in-xml-dom.html
+ * For location data annotation part, see
+ * http://javacoalface.blogspot.com/2011/04/line-and-column-numbers-in-xml-dom.html
  */
-public class LocationAnnotator extends XMLFilterImpl {
+// Please note that this class is not intended to do all kinds of different transformation at once,
+// at first my plan was to have several processor passes and combine them on demand, but everything
+// about XML parsing in Java is so complex , I couldn't do that. So instead in this pass I'm
+// both annotating elements with location information and resolving environment variables in
+// attributes/text nodes.
+public class ConfigPreProcessor extends XMLFilterImpl {
 
     private Locator locator;
     private final Stack<Locator> locatorStack = new Stack<>();
     private final Stack<Element> elementStack = new Stack<>();
     private final UserDataHandler dataHandler = new LocationDataHandler();
 
-    LocationAnnotator(XMLReader xmlReader, Document dom) {
+    ConfigPreProcessor(XMLReader xmlReader, Document dom) {
         super(xmlReader);
 
         // Add listener to DOM, so we know which node was added.
@@ -74,9 +81,16 @@ public class LocationAnnotator extends XMLFilterImpl {
                     locator.getLineNumber(),
                     locator.getColumnNumber());
 
-            elementStack.pop().setUserData(
-                    LocationData.LOCATION_DATA_KEY, location,
-                    dataHandler);
+            // annotate element with location data
+            Element elem = elementStack.pop();
+            elem.setUserData(LocationData.LOCATION_DATA_KEY, location, dataHandler);
+
+            // resolve env variables in attributes of element
+            NamedNodeMap nodes = elem.getAttributes();
+            for (int i = 0; i < nodes.getLength(); i++) {
+                Node node = nodes.item(i);
+                node.setNodeValue(resolveEnvVars(node.getNodeValue()));
+            }
         }
     }
 
@@ -96,6 +110,26 @@ public class LocationAnnotator extends XMLFilterImpl {
                             locatonData, dataHandler);
                 }
             }
+        }
+    }
+
+    private String resolveEnvVars(String str) {
+        Matcher m = Pattern.compile("\\$\\{(.*?)\\}").matcher(str);
+        if (m.find()) {
+            String var = m.group(1);
+            String val = System.getenv(var);
+            if (val != null) {
+                return resolveEnvVars(m.replaceFirst(val));
+            } else {
+                String msg = "The variable is not defined in the system environment: " + var;
+                GlobalSettings.kem.register(
+                        new KException(
+                                KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL,
+                                msg, "command line", "System file."));
+                return null; // unreachable code
+            }
+        } else {
+            return str;
         }
     }
 }
