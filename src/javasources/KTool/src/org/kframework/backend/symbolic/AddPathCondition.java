@@ -131,7 +131,7 @@ public class AddPathCondition extends CopyOnWriteTransformer {
         return node;
     }
 
-    private Term andBool(List<Term> filteredTerms) {
+    public static Term andBool(List<Term> filteredTerms) {
 
         Iterator<Term> it = filteredTerms.iterator();
         Term and = it.next();
