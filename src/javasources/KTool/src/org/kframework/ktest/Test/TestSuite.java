@@ -42,6 +42,15 @@ public class TestSuite {
 
     private final Comparator<String> strComparator;
 
+    private int kompileTime; // total time spent on compiling
+    private int pdfTime; // total time spent on pdf generation
+    private int krunTime; // total time spent on running programs
+    private int kompileSteps; // total number of kompile tasks, this number is not known until
+                              // ktest finishes job, because while running krun tests, adinitional
+                              // compilations may be neccessary
+    private int pdfSteps; // total number of pdf generation tasks
+    private int krunSteps; // total number of krun tasks
+
     private TestSuite(List<TestCase> tests, Set<KTestStep> skips, boolean verbose,
                      Comparator<String> strComparator, ColorSetting colorSetting,
                      int timeout, boolean report) {
@@ -101,6 +110,17 @@ public class TestSuite {
         String colorCode = ColorUtil.RgbToAnsi(ret ? Color.green : Color.red, colorSetting);
         String msg = ret ? "SUCCESS" : "FAIL (see details above)";
         System.out.format("%n%s%s%s%n", colorCode, msg, ColorUtil.ANSI_NORMAL);
+
+        System.out.format("----------------------------%n" +
+                "Definitions kompiled: %s (%s'%s'')%n" +
+                "PDF posters kompiled: %s (%s'%s'')%n" +
+                "Programs krun: %s (%s'%s'')%n" +
+                "Total time: %s'%s''%n" +
+                "----------------------------%n",
+                kompileSteps, kompileTime / 60, kompileTime % 60,
+                pdfSteps, pdfTime / 60, pdfTime % 60,
+                krunSteps, krunTime / 60, krunTime % 60,
+                (kompileTime + pdfTime + krunTime) / 60, (kompileTime + pdfTime + krunTime) % 60);
 
         // save reports
         if (reportGen != null)
@@ -171,12 +191,14 @@ public class TestSuite {
                     strComparator, timeout, verbose, colorSetting);
             ps.add(p);
             tpe.execute(p);
+            kompileSteps++;
         }
         stopTpe();
 
         // collect successful test cases, report failures
         for (Proc<TestCase> p : ps) {
             TestCase tc = p.getObj();
+            kompileTime += p.getTimeDeltaSec();
             if (p.isSuccess())
                 successfulTests.add(tc);
             makeReport(p, makeRelative(tc.getDefinition()),
@@ -204,12 +226,14 @@ public class TestSuite {
                     strComparator, timeout, verbose, colorSetting);
             ps.add(p);
             tpe.execute(p);
+            pdfSteps++;
         }
         stopTpe();
 
         boolean ret = true;
         for (Proc<TestCase> p : ps) {
             TestCase tc = p.getObj();
+            pdfTime += p.getTimeDeltaSec();
             if (!p.isSuccess())
                 ret = false;
             makeReport(p, makeRelative(tc.getDefinition()),
@@ -274,6 +298,7 @@ public class TestSuite {
                                // input file
                 {
                     KRunProgram pgm = p.getObj();
+                    krunTime += p.getTimeDeltaSec();
                     makeReport(p, makeRelative(tc.getDefinition()),
                             FilenameUtils.getName(pgm.pgmName));
                     if (p.isSuccess())
@@ -347,6 +372,7 @@ public class TestSuite {
         Proc<KRunProgram> p = new Proc<>(program, args, inputContents, outputContentsAnn,
                 errorContentsAnn, strComparator, timeout, verbose, colorSetting);
         tpe.execute(p);
+        krunSteps++;
         return p;
     }
 
