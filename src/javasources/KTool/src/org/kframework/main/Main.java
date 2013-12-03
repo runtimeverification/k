@@ -48,7 +48,7 @@ public class Main {
 		if (args.length >= 1) {
             String[] args2 = Arrays.copyOfRange(args, 1, args.length);
 			if (args[0].equals("-kompile")) {
-				org.kframework.kompile.KompileFrontEnd.kompile(args2);
+				org.kframework.kompile.KompileFrontEnd.main(args2);
 			} else if (args[0].equals("-kagreg")) {
 				KagregFrontEnd.kagreg(args2);
 			} else if (args[0].equals("-kcheck")) {
