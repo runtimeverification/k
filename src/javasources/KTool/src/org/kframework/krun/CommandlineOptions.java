@@ -103,6 +103,7 @@ public class CommandlineOptions {
 		addOptionE(OptionBuilder.withLongOpt("generate-tests").withDescription("Test programs will be generated along with normal search.").create());
 
 		addOptionE(OptionBuilder.withLongOpt("output-file").hasArg().withArgName("file").withDescription("Store output in the file instead of displaying it.").create());
+		addOptionE(OptionBuilder.withLongOpt("load-cfg").hasArg().withArgName("file").withDescription("Load a configuration saved with the \"binary\" output mode into the $PGM configuration variable instead of a program.").create());
 	}
 
 	//create options displayed in the krun debugger help
