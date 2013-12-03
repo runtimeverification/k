@@ -8,7 +8,6 @@ import java.util.ArrayList;
 public class KompileOptionsParser {
 
 	private final Options options;
-	private final HelpFormatter help;
 	// For printing help messages: options = optionsStandard + optionsExperimental
 	private final Options optionsStandard;
 	private final Options optionsExperimental;
@@ -17,7 +16,6 @@ public class KompileOptionsParser {
     @SuppressWarnings("static-access")
     public KompileOptionsParser() {
         options = new Options();
-        help = new HelpFormatter();
         optionsStandard = new Options();
         optionsExperimental = new Options();
 
@@ -57,21 +55,12 @@ public class KompileOptionsParser {
     public CommandLine parse(String[] cmd) {
         CommandLineParser parser = new ActualPosixParser();
         try {
-            CommandLine cl = parser.parse(options, cmd);
-            return cl;
+            return parser.parse(options, cmd);
         } catch (ParseException e) {
             org.kframework.utils.Error.report(e.getLocalizedMessage());
         }
         return null; // unreachable code
     }
-
-	Options getOptions() {
-		return options;
-	}
-
-	HelpFormatter getHelp() {
-		return help;
-	}
 
 	Options getOptionsStandard() {
 		return optionsStandard;
