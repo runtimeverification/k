@@ -3,21 +3,15 @@ parent(jim,david).
 parent(steve,jim).
 parent(nathan,steve).
 
-grandparent(A,B):-
+grandparent(A,B) :-
   parent(A,X),
   parent(X,B).
 
-ancestor(A,B):-
+ancestor(A,B) :-
+  parent(A,B).
+ancestor(A,B) :-
   parent(A,X),
-  parents(X,B).
-
-parents(X,X).
-parents(A,B):-
-  ancestor(A,B).
+  ancestor(X,B).
 
 // This gives too many solutions, as it also includes A and B in solutions
 ?- ancestor(A,X), ancestor(X,B).
-
-//both(X) :- ancestor(A,X), ancestor(X,B).
-
-//?- both(X).

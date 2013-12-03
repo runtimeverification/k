@@ -1,0 +1,4 @@
+takeout(X,[X|R],R).
+takeout(X,[F|R],[F|S]) :- takeout(X,R,S).
+
+?- takeout(2,[1,2,3],L).

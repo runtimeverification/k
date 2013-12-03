@@ -1,0 +1,12 @@
+Run programs (from the parent directory) with the command:
+
+  krun --search --pattern "<solution>M:Map</solution>" programs/pgm.logik
+
+This will only show solutions when they exist.  If you also want to see
+the entire configuration, for example when you want to know why it
+failed to find a solution, then run it with the command
+
+  krun --search programs/pgm.logik
+
+But note that, in the latter case, a .Bag solution is always reported
+whenever there is a possibility that unification may fail.

@@ -1,0 +1,5 @@
+takeout(X,[X|R],R).
+takeout(X,[F|R],[F|S]) :- takeout(X,R,S).
+
+// 3 solutions
+?- takeout(X,[1,2,3],L).
