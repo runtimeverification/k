@@ -61,7 +61,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class DefinitionLoader {
-	public static Definition loadDefinition(File mainFile, String lang, boolean autoinclude, Context context) throws Exception {
+	public static Definition loadDefinition(File mainFile, String lang, boolean autoinclude, Context context) throws IOException {
 		Definition javaDef;
 		File canoFile = mainFile.getCanonicalFile();
 
