@@ -38,8 +38,6 @@ import java.util.List;
 
 public class KompileFrontEnd {
 
-	public static String output;
-
 	private static List<String> metadataParse(String tags) {
 		String[] alltags = tags.split("\\s+");
 		List<String> result = new ArrayList<String>();
@@ -154,15 +152,8 @@ public class KompileFrontEnd {
 			}
 		}
 
-		output = null;
-		if (cmd.hasOption("directory")) {
-			output = cmd.getOptionValue("directory");
-			org.kframework.utils.Error.checkIfOutputDirectory(output);
-		}
-		if (output == null) {
-			output = mainFile.getAbsoluteFile().getParent();
-		}
-		GlobalSettings.outputDir = output;
+        GlobalSettings.outputDir = cmd.getOptionValue("directory", mainFile.getAbsoluteFile().getParent());
+        org.kframework.utils.Error.checkIfOutputDirectory(GlobalSettings.outputDir);
 
 		String lang = null;
 		if (cmd.hasOption("main-module"))
@@ -181,7 +172,7 @@ public class KompileFrontEnd {
 			assert !context.getKomputationCells().isEmpty();
 		}
 
-        context.dotk = new File(output + File.separator + ".k");
+        context.dotk = new File(GlobalSettings.outputDir + File.separator + ".k");
         context.dotk.mkdirs();
 		
 		Backend backend = null;
@@ -212,14 +203,14 @@ public class KompileFrontEnd {
 			break;
 		case "maude":
 			backend = new KompileBackend(Stopwatch.sw, context);
-            context.dotk = new File(output + File.separator + FilenameUtils.removeExtension(mainFile.getName()) + "-kompiled");
+            context.dotk = new File(GlobalSettings.outputDir + File.separator + FilenameUtils.removeExtension(mainFile.getName()) + "-kompiled");
 			checkAnotherKompiled(context.dotk);
 			context.dotk.mkdirs();
 			break;
 		case "java":
 			GlobalSettings.javaBackend = true;
 			backend = new JavaSymbolicBackend(Stopwatch.sw, context);
-            context.dotk = new File(output + File.separator + FilenameUtils.removeExtension(mainFile.getName())
+            context.dotk = new File(GlobalSettings.outputDir + File.separator + FilenameUtils.removeExtension(mainFile.getName())
                     + "-kompiled");
 			checkAnotherKompiled(context.dotk);
 			context.dotk.mkdirs();
@@ -235,7 +226,7 @@ public class KompileFrontEnd {
             // this backend in KompileOptionsParser
             GlobalSettings.javaBackend = true;
             Backend innerBackend = new JavaSymbolicBackend(Stopwatch.sw, context);
-            context.dotk = new File(output + File.separator + FilenameUtils.removeExtension(mainFile.getName())
+            context.dotk = new File(GlobalSettings.outputDir + File.separator + FilenameUtils.removeExtension(mainFile.getName())
                     + "-kompiled");
             checkAnotherKompiled(context.dotk);
             context.dotk.mkdirs();            
@@ -244,7 +235,7 @@ public class KompileFrontEnd {
 		case "symbolic":
 			GlobalSettings.symbolic = true;
 			backend = new SymbolicBackend(Stopwatch.sw, context);
-            context.dotk = new File(output + File.separator + FilenameUtils.removeExtension(mainFile.getName()) + "-kompiled");
+            context.dotk = new File(GlobalSettings.outputDir + File.separator + FilenameUtils.removeExtension(mainFile.getName()) + "-kompiled");
 			checkAnotherKompiled(context.dotk);
 			context.dotk.mkdirs();
             if (cmd.hasOption("symbolic-rules")) {
