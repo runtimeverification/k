@@ -15,6 +15,11 @@
            programs="tutorial/tests"
            results="tutorial/tests" />
 
+  <include file="../samples/tests/config.xml"
+           directory="samples"
+           programs="samples/tests"
+           results="samples/tests" />
+
 <!--
   QUINE
 -->
@@ -42,7 +47,6 @@
 
 <!--
   LOGIK
--->
 
   <test
       definition="tutorial/2_languages/4_logik/logik.k"
@@ -56,6 +60,7 @@
       <krun-option name="-color" value="off" />
     </all-programs>
   </test>
+-->
 
 
 <!--
@@ -524,34 +529,6 @@
 
 
 <!-- begin Java Rewrite Engine tests -->
-  <test
-      definition="samples/java_rewrite_engine/tutorial/1_k/2_imp/imp.k"
-      programs="tutorial/1_k/2_imp"
-      extension="imp"
-      results="tests/tutorial/1_k/2_imp/lesson_5"
-      >
-    <kompile-option name="-backend" value="java" />
-    <all-programs>
-      <krun-option name="-backend" value="java" />
-      <krun-option name="-smt" value="none" />
-      <krun-option name="-color" value="off" />
-    </all-programs>
-  </test>
-  
-  <test
-      definition="samples/java_rewrite_engine/tutorial/1_k/4_imp++/imp.k"
-      programs="tutorial/1_k/2_imp tutorial/1_k/4_imp++"
-      extension="imp"
-      exclude="lesson_1/tests/spawn.imp"
-      results="tests/tutorial/1_k/4_imp++/lesson_5"
-      >
-    <kompile-option name="-backend" value="java" />
-    <all-programs>
-      <krun-option name="-backend" value="java" />
-	    <krun-option name="-smt" value="none" />
-	    <krun-option name="-output" value="none" />
-    </all-programs>
-  </test>
 
 <!-- Commented out by Grigore; please fix it.
   <test
@@ -794,6 +771,19 @@
     <all-programs>
       <krun-option name="-backend" value="java" />
       <krun-option name="-smt" value="none" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="tests/regression/java-rewrite-engine/smt_model/test.k"
+      programs="tests/regression/java-rewrite-engine/smt_model"
+      results="tests/regression/java-rewrite-engine/smt_model"
+      extension="test"
+      >
+    <kompile-option name="-backend" value="java" />
+    <kompile-option name="-warnings" value="none" />
+    <all-programs>
+      <krun-option name="-backend" value="java" />
     </all-programs>
   </test>
 <!-- end Java Rewrite Engine tests -->

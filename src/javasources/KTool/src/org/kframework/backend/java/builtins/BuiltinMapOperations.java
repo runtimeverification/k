@@ -44,4 +44,14 @@ public class BuiltinMapOperations {
 
     }
 
+    public static BuiltinMap update(BuiltinMap term, Term key, Term value, TermContext context) {
+        if (!term.hasFrame()) {
+            Map<Term, Term> entries = new HashMap<>(term.getEntries());
+            entries.put(key, value);
+            return new BuiltinMap(entries);
+        } else {
+            throw new IllegalArgumentException("argument " + term + " has frame");
+        }
+    }
+
 }

@@ -1,0 +1,29 @@
+In the IMP tutorial, we had a check to prevent from declaring the same
+(global) variable multiple times.  However, this check has dissapeared
+once we switched to local variables in IMP++, as we want to allow
+redeclarations of a variable in a nested block (a.k.a. variable
+shadowing).
+
+This exercise comes to alleviate this issue, by requiring you to
+dynamically check (during the execution of the program) if a variable
+is declared  multiple times in the same block, and if so, to report an
+error about that and halt the execution of the program.
+
+Specifically, the first time the redeclaration of the same variable, say
+'var', is attempted in the same block, the message (without quotes)
+
+  'Error: variable var already declared in this block.'
+
+should be printed to the console and the program should halt.
+
+------------
+
+Hint: use a new cell to keep a set of the variables declared in the
+current block.  You will need to empty it when entering a block and to
+restore its prior contents when exiting the block.  You can use the
+env cell as a model.
+
+Note: To get the string corresponding to a variable name you need to
+use the  function Id2String.  For example, if var is an identifier,
+Id2String(var) would evaluate to the string "var".
+

@@ -1,0 +1,9 @@
+reverseFast(nil,L,L).
+reverseFast(cons(H,T),L1,L2) :-
+  reverseFast(T,cons(H,L1),L2).
+
+reverse(L1,L2) :-
+  reverseFast(L1,nil,L2).
+
+// Next finds all conditions characterising palindromes of size 3: A=C
+?- reverse(cons(A,cons(B,cons(C,nil))), cons(A,cons(B,cons(C,nil)))).

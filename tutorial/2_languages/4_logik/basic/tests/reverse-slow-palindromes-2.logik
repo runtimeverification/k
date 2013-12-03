@@ -1,0 +1,10 @@
+append(nil,L,L).
+append(cons(H,T),L,cons(H,Z)) :- append(T,L,Z).
+
+reverse(nil,nil).
+reverse(cons(H,T),L) :-
+  reverse(T,T1),
+  append(T1,cons(H,nil),L).
+
+// Next finds all conditions characterising palindromes of size 3: A=C
+?- reverse(cons(A,cons(B,cons(C,nil))), cons(A,cons(B,cons(C,nil)))).

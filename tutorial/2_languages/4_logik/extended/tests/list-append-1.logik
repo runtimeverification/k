@@ -1,0 +1,5 @@
+append([],L,L).
+append([H|T],L,[H|Z]) :- append(T,L,Z).
+
+// Next has only one solution
+?- append([a], [b], V).

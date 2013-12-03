@@ -20,7 +20,8 @@ module LAMBDA
   syntax Type ::= "int" | "bool"
                 | Type "->" Type                    [strict(2)]
                 | "(" Type ")"                      [bracket]
-  syntax TypeSchema ::= "forall" Set "." Type
+  syntax TypeSchema ::= "forall" Set "." Type       [klabel(nomatterwhat)]
+// unfortunately, due to a bug, the ablve klabel is needed
 
   syntax Exp ::= Type
   syntax KResult ::= Type
@@ -48,8 +49,9 @@ module LAMBDA
   rule int - int => int
   rule int <= int => bool
   rule if bool then T:Type else T => T
+  //rule <k> lambda X:Id . E:Exp => T:Type -> E::K ~> TEnv ...</k>
   syntax K ::= env(Map)
-  rule <k> lambda X:Id . E:Exp => T:Type -> (E)::Type ~> env(TEnv) ...</k>
+  rule <k> lambda X:Id . E:Exp => T:Type -> (E)::K ~> env(TEnv) ...</k>
        <tenv> TEnv:Map => TEnv[T / X] </tenv>
   rule <k> mu X:Id . E:Exp => (T:Type -> T) E ~> env(TEnv) ...</k>
        <tenv> TEnv:Map => TEnv[T / X] </tenv>

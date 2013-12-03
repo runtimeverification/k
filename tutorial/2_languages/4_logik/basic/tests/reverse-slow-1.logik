@@ -1,0 +1,10 @@
+append(nil,L,L).
+append(cons(H,T),L,cons(H,Z)) :- append(T,L,Z).
+
+reverse(nil,nil).
+reverse(cons(H,T),L) :-
+  reverse(T,T1),
+  append(T1,cons(H,nil),L).
+
+// Next should have only one solution
+?- reverse(cons(a,cons(b,cons(c,nil))), L).

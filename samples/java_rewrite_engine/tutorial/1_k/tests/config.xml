@@ -1,0 +1,12 @@
+<!-- Expected to be called from k/1_k, with the command
+
+  ktest tests/config.xml
+
+-->
+
+<tests>
+
+  <include file="../2_imp/tests/config.xml" directory="2_imp" />
+  <include file="../4_imp++/tests/config.xml" directory="4_imp++" />
+
+</tests>
