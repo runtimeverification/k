@@ -1,4 +1,4 @@
-package org.kframework.ktest2;
+package org.kframework.ktest;
 
 public class Annotated<T1, T2> {
     private final T1 obj;

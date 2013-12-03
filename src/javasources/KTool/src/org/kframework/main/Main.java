@@ -54,7 +54,7 @@ public class Main {
 			} else if (args[0].equals("-kcheck")) {
 				KCheckFrontEnd.kcheck(args2);
 			} else if (args[0].equals("-ktest")) {
-				KTest.test(args2);
+				KTest.main(args2);
 			} else if (args[0].equals("-kast")) {
 				org.kframework.kast.KastFrontEnd.kast(args2);
 			} else if (args[0].equals("-krun")) {
@@ -69,9 +69,7 @@ public class Main {
 				}
 			} else if (args[0].equals("-kpretty")) {
 				org.kframework.main.KPretty.main(args2);
-            } else if (args[0].equals("-ktest2")) {
-                org.kframework.ktest2.KTest.main(args2);
-			} else {
+            } else {
 				Error.report("The first argument of K3 not recognized. Try -kompile, -kast, -krun or -kpp.");
 			}
 		} else
