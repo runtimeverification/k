@@ -47,7 +47,6 @@
 
 <!--
   LOGIK
--->
 
   <test
       definition="tutorial/2_languages/4_logik/logik.k"
@@ -61,6 +60,7 @@
       <krun-option name="-color" value="off" />
     </all-programs>
   </test>
+-->
 
 
 <!--
