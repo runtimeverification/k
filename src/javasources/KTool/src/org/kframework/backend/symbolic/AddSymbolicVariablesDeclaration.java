@@ -12,7 +12,8 @@ import java.util.*;
  * User: andrei.arusoaie
  * Date: 11/28/13
  * Time: 8:46 AM
- * To change this template use File | Settings | File Templates.
+ * Generate syntax for symbolic variables.
+ * This works only for the maude symbolic backend.
  */
 public class AddSymbolicVariablesDeclaration extends BasicVisitor {
     private final String syntaxModule;
