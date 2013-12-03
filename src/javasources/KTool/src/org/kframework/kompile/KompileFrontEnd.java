@@ -51,210 +51,174 @@ public class KompileFrontEnd {
 	private static final String FOOTER_STANDARD = "";
 	private static final String HEADER_EXPERIMENTAL = "Experimental options:";
 	private static final String FOOTER_EXPERIMENTAL = Main.FOOTER_EXPERIMENTAL;
+
 	public static void printUsageS(KompileOptionsParser op) {
 		org.kframework.utils.Error.helpMsg(USAGE, HEADER_STANDARD, FOOTER_STANDARD, op.getOptionsStandard(), new OptionComparator(op.getOptionList()));
 	}
+
 	public static void printUsageE(KompileOptionsParser op) {
 		org.kframework.utils.Error.helpMsg(USAGE, HEADER_EXPERIMENTAL, FOOTER_EXPERIMENTAL, op.getOptionsExperimental(), new OptionComparator(op.getOptionList()));
 	}
 
-	public static void kompile(String[] args) {
+	public static void main(String[] args) {
 		KompileOptionsParser op = new KompileOptionsParser();
-
 		CommandLine cmd = op.parse(args);
-		if (cmd == null) {
-			printUsageS(op);
-			System.exit(1);
-		}
 
-		// options: help
-		if (cmd.hasOption("help")) {
-			printUsageS(op);
-			System.exit(0);
-		}
-		if (cmd.hasOption("help-experimental")) {
-			printUsageE(op);
-			System.exit(0);
-		}
+        if (cmd.hasOption("help"))
+            printUsageS(op);
+        else if (cmd.hasOption("help-experimental"))
+            printUsageE(op);
+        else if (cmd.hasOption("version")) {
+            String msg = FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE);
+            System.out.println(msg);
+        } else if (cmd.getArgs().length < 1)
+            GlobalSettings.kem.register(
+                    new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
+                    "You have to provide a file in order to compile.",
+                    "command line", "System file."));
+        else {
+            GlobalSettings.NOSMT |= "none".equals(cmd.getOptionValue("smt"));
+            GlobalSettings.verbose |= cmd.hasOption("verbose");
+            GlobalSettings.fastKast |= cmd.hasOption("fast-kast");
+            GlobalSettings.warnings = cmd.getOptionValue("warnings", GlobalSettings.warnings);
+            GlobalSettings.addTopCell |= cmd.hasOption("add-top-cell");
+            GlobalSettings.lib = cmd.getOptionValue("lib", GlobalSettings.lib);
+            GlobalSettings.synModule =
+                    cmd.getOptionValue("syntax-module", GlobalSettings.synModule);
+            GlobalSettings.use_concrete |= cmd.hasOption("concrete-sort");
 
-		if (cmd.hasOption("version")) {
-			String msg = FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE);
-			System.out.println(msg);
-			System.exit(0);
-		}
+            if (cmd.hasOption("transition"))
+                GlobalSettings.transition = metadataParse(cmd.getOptionValue("transition"));
+            if (cmd.hasOption("supercool"))
+                GlobalSettings.supercool = metadataParse(cmd.getOptionValue("supercool"));
+            if (cmd.hasOption("superheat"))
+                GlobalSettings.superheat = metadataParse(cmd.getOptionValue("superheat"));
 
-		if (cmd.hasOption("smt"))
-			GlobalSettings.NOSMT = cmd.getOptionValue("smt").equals("none");
-        
-		if (cmd.hasOption("verbose"))
-			GlobalSettings.verbose = true;
-
-		if (cmd.hasOption("fast-kast")) {
-			GlobalSettings.fastKast = !GlobalSettings.fastKast;
-		}
-
-		if (cmd.hasOption("warnings"))
-			GlobalSettings.warnings = cmd.getOptionValue("warnings");
-
-		if (cmd.hasOption("transition"))
-			GlobalSettings.transition = metadataParse(cmd.getOptionValue("transition"));
-		if (cmd.hasOption("supercool"))
-			GlobalSettings.supercool = metadataParse(cmd.getOptionValue("supercool"));
-		if (cmd.hasOption("superheat"))
-			GlobalSettings.superheat = metadataParse(cmd.getOptionValue("superheat"));
-
-		if (cmd.hasOption("doc-style")) {
-			String style = cmd.getOptionValue("doc-style");
-			if (style.startsWith("+")) {
-				GlobalSettings.style += style.replace("+", ",");
-			} else {
-				GlobalSettings.style = style;
-			}
-		}
-
-		if (cmd.hasOption("add-top-cell"))
-			GlobalSettings.addTopCell = true;
-
-		// set lib if any
-		if (cmd.hasOption("lib")) {
-			GlobalSettings.lib = cmd.getOptionValue("lib");
-		}
-		if (cmd.hasOption("syntax-module"))
-			GlobalSettings.synModule = cmd.getOptionValue("syntax-module");
-
-		String step = null;
-		if (cmd.hasOption("step")) {
-			step = cmd.getOptionValue("step");
-		}
-
-        if(cmd.hasOption("concrete-sort")){
-             GlobalSettings.use_concrete = true;
+            if (cmd.hasOption("doc-style")) {
+                String style = cmd.getOptionValue("doc-style");
+                if (style.startsWith("+"))
+                    GlobalSettings.style += style.replace("+", ",");
+                else
+                    GlobalSettings.style = style;
+            }
         }
 
-		String def = null;
-		{
-			String[] restArgs = cmd.getArgs();
-			if (restArgs.length < 1)
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "You have to provide a file in order to compile!.", "command line", "System file."));
-			else
-				def = restArgs[0];
-		}
+        kompile(cmd);
+	}
 
-		File mainFile = new File(def);
-		GlobalSettings.mainFile = mainFile;
-		GlobalSettings.mainFileWithNoExtension = mainFile.getAbsolutePath().replaceFirst("\\.k$", "").replaceFirst("\\.xml$", "");
-		if (!mainFile.exists()) {
-			File errorFile = mainFile;
-			mainFile = new File(def + ".k");
-			if (!mainFile.exists()) {
-				String msg = "File: " + errorFile.getName() + "(.k) not found.";
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, errorFile.getAbsolutePath(), "File system."));
-			}
-		}
+    private static void kompile(CommandLine cmd) {
+        String def = cmd.getArgs()[0];
+        String step = cmd.getOptionValue("step", null);
+        File mainFile = new File(def);
+        GlobalSettings.mainFile = mainFile;
+        GlobalSettings.mainFileWithNoExtension = mainFile.getAbsolutePath()
+                .replaceFirst("\\.k$", "").replaceFirst("\\.xml$", "");
+        if (!mainFile.exists()) {
+            File errorFile = mainFile;
+            mainFile = new File(def + ".k");
+            if (!mainFile.exists()) {
+                String msg = "File: " + errorFile.getName() + "(.k) not found.";
+                GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+                        KExceptionGroup.CRITICAL, msg,
+                        errorFile.getAbsolutePath(), "File system."));
+            }
+        }
 
         GlobalSettings.outputDir = cmd.getOptionValue("directory", mainFile.getAbsoluteFile().getParent());
         org.kframework.utils.Error.checkIfOutputDirectory(GlobalSettings.outputDir);
 
-		String lang = null;
-		if (cmd.hasOption("main-module"))
-			lang = cmd.getOptionValue("main-module");
-		else
-			lang = FileUtil.getMainModule(mainFile.getName());
-
-		Context context = new Context();
-		if (cmd.hasOption("kcells")) {
-			String kCells = cmd.getOptionValue("kcells");
-			List<String> komputationCells = new ArrayList<String>();
-			for (String s : kCells.split(" ")) {
-				komputationCells.add(s);
-			}
-			context.setKomputationCells(komputationCells);
-			assert !context.getKomputationCells().isEmpty();
-		}
+        Context context = new Context();
+        if (cmd.hasOption("kcells")) {
+            String kCells = cmd.getOptionValue("kcells");
+            List<String> komputationCells = new ArrayList<String>();
+            for (String s : kCells.split(" ")) {
+                komputationCells.add(s);
+            }
+            context.setKomputationCells(komputationCells);
+            assert !context.getKomputationCells().isEmpty();
+        }
 
         context.dotk = new File(GlobalSettings.outputDir + File.separator + ".k");
         context.dotk.mkdirs();
-		
-		Backend backend = null;
-		String backendOpt;
-		if (cmd.hasOption("backend")) {
-			backendOpt = cmd.getOptionValue("backend");
-		} else {
-			backendOpt = "maude";
-		}
-		switch (backendOpt) {
-		case "pdf":
-			GlobalSettings.documentation = true;
-			backend = new PdfBackend(Stopwatch.sw, context);
-			break;
-		case "latex":
-			GlobalSettings.documentation = true;
-			backend = new LatexBackend(Stopwatch.sw, context);
-			break;
-		case "html":
-			if (!cmd.hasOption("doc-style")) {
-				GlobalSettings.style = "k-definition.css";
-			}
-			GlobalSettings.documentation = true;
-			backend = new HtmlBackend(Stopwatch.sw, context);
-			break;
-		case "kore":
-			backend = new KoreBackend(Stopwatch.sw, context);
-			break;
-		case "maude":
-			backend = new KompileBackend(Stopwatch.sw, context);
-            context.dotk = new File(GlobalSettings.outputDir + File.separator + FilenameUtils.removeExtension(mainFile.getName()) + "-kompiled");
-			checkAnotherKompiled(context.dotk);
-			context.dotk.mkdirs();
-			break;
-		case "java":
-			GlobalSettings.javaBackend = true;
-			backend = new JavaSymbolicBackend(Stopwatch.sw, context);
-            context.dotk = new File(GlobalSettings.outputDir + File.separator + FilenameUtils.removeExtension(mainFile.getName())
-                    + "-kompiled");
-			checkAnotherKompiled(context.dotk);
-			context.dotk.mkdirs();
-			break;
-		case "unparse":
-			backend = new UnparserBackend(Stopwatch.sw, context);
-			break;
-		case "unflatten":
-			backend = new UnparserBackend(Stopwatch.sw, context, true);
-			break;
-        case "unflatten-java":
-            // TODO(YilongL): make it general to all backends; add info about
-            // this backend in KompileOptionsParser
-            GlobalSettings.javaBackend = true;
-            Backend innerBackend = new JavaSymbolicBackend(Stopwatch.sw, context);
-            context.dotk = new File(GlobalSettings.outputDir + File.separator + FilenameUtils.removeExtension(mainFile.getName())
-                    + "-kompiled");
-            checkAnotherKompiled(context.dotk);
-            context.dotk.mkdirs();            
-            backend = new UnflattenBackend(Stopwatch.sw, context, innerBackend);
-            break;			
-		case "symbolic":
-			GlobalSettings.symbolic = true;
-			backend = new SymbolicBackend(Stopwatch.sw, context);
-            context.dotk = new File(GlobalSettings.outputDir + File.separator + FilenameUtils.removeExtension(mainFile.getName()) + "-kompiled");
-			checkAnotherKompiled(context.dotk);
-			context.dotk.mkdirs();
-            if (cmd.hasOption("symbolic-rules")) {
-                GlobalSettings.symbolicTags = Arrays.asList(cmd.getOptionValue("symbolic-rules").trim().split("\\s+"));
-            }
-            if (cmd.hasOption("non-symbolic-rules")) {
-                GlobalSettings.nonSymbolicTags = Arrays.asList(cmd.getOptionValue("non-symbolic-rules").trim().split("\\s+"));
-            }
-            break;
-		default:
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Invalid backend option: " + backendOpt, "", ""));
-			break;
-		}
 
-		if (backend != null)
-			genericCompile(mainFile, lang, backend, step, context);
+        Backend backend = null;
+        String backendOpt = cmd.getOptionValue("backend", "maude");
+        switch (backendOpt) {
+            case "pdf":
+                GlobalSettings.documentation = true;
+                backend = new PdfBackend(Stopwatch.sw, context);
+                break;
+            case "latex":
+                GlobalSettings.documentation = true;
+                backend = new LatexBackend(Stopwatch.sw, context);
+                break;
+            case "html":
+                if (!cmd.hasOption("doc-style")) {
+                    GlobalSettings.style = "k-definition.css";
+                }
+                GlobalSettings.documentation = true;
+                backend = new HtmlBackend(Stopwatch.sw, context);
+                break;
+            case "kore":
+                backend = new KoreBackend(Stopwatch.sw, context);
+                break;
+            case "maude":
+                backend = new KompileBackend(Stopwatch.sw, context);
+                context.dotk = new File(GlobalSettings.outputDir + File.separator + FilenameUtils.removeExtension(mainFile.getName()) + "-kompiled");
+                checkAnotherKompiled(context.dotk);
+                context.dotk.mkdirs();
+                break;
+            case "java":
+                GlobalSettings.javaBackend = true;
+                backend = new JavaSymbolicBackend(Stopwatch.sw, context);
+                context.dotk = new File(GlobalSettings.outputDir + File.separator + FilenameUtils.removeExtension(mainFile.getName())
+                        + "-kompiled");
+                checkAnotherKompiled(context.dotk);
+                context.dotk.mkdirs();
+                break;
+            case "unparse":
+                backend = new UnparserBackend(Stopwatch.sw, context);
+                break;
+            case "unflatten":
+                backend = new UnparserBackend(Stopwatch.sw, context, true);
+                break;
+            case "unflatten-java":
+                // TODO(YilongL): make it general to all backends; add info about
+                // this backend in KompileOptionsParser
+                GlobalSettings.javaBackend = true;
+                Backend innerBackend = new JavaSymbolicBackend(Stopwatch.sw, context);
+                context.dotk = new File(GlobalSettings.outputDir + File.separator + FilenameUtils.removeExtension(mainFile.getName())
+                        + "-kompiled");
+                checkAnotherKompiled(context.dotk);
+                context.dotk.mkdirs();
+                backend = new UnflattenBackend(Stopwatch.sw, context, innerBackend);
+                break;
+            case "symbolic":
+                GlobalSettings.symbolic = true;
+                backend = new SymbolicBackend(Stopwatch.sw, context);
+                context.dotk = new File(GlobalSettings.outputDir + File.separator + FilenameUtils.removeExtension(mainFile.getName()) + "-kompiled");
+                checkAnotherKompiled(context.dotk);
+                context.dotk.mkdirs();
+                if (cmd.hasOption("symbolic-rules")) {
+                    GlobalSettings.symbolicTags = Arrays.asList(cmd.getOptionValue("symbolic-rules").trim().split("\\s+"));
+                }
+                if (cmd.hasOption("non-symbolic-rules")) {
+                    GlobalSettings.nonSymbolicTags = Arrays.asList(cmd.getOptionValue("non-symbolic-rules").trim().split("\\s+"));
+                }
+                break;
+            default:
+                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Invalid backend option: " + backendOpt, "", ""));
+                break;
+        }
 
-		verbose(cmd, context);
-	}
+        if (backend != null) {
+            String lang = cmd.getOptionValue("main-module",
+                    FileUtil.getMainModule(mainFile.getName()));
+            genericCompile(mainFile, lang, backend, step, context);
+        }
+
+        verbose(cmd, context);
+    }
 
 	private static void verbose(CommandLine cmd, Context context) {
         Stopwatch.sw.printTotal("Total");
@@ -308,12 +272,12 @@ public class KompileFrontEnd {
 				return f.isDirectory() && f.getAbsolutePath().endsWith("-kompiled");
 			}
 		});
-		for (int i = 0; i < kompiledList.length; i++) {
-			if (!kompiledList[i].getName().equals(kompiled.getName())) {
-				String msg = "Creating multiple kompiled definition in the same directory is not allowed.";
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", kompiledList[i].getAbsolutePath()));
-			}
-		}
+        for (File aKompiledList : kompiledList) {
+            if (!aKompiledList.getName().equals(kompiled.getName())) {
+                String msg = "Creating multiple kompiled definition in the same directory is not allowed.";
+                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", aKompiledList.getAbsolutePath()));
+            }
+        }
 	}
 }
 
