@@ -42,9 +42,14 @@ public class TestSuite {
 
     private final Comparator<String> strComparator;
 
-    private int kompileTime; // total time spent on compiling
-    private int pdfTime; // total time spent on pdf generation
-    private int krunTime; // total time spent on running programs
+    // real times are times spend on a step, other times are total time spend by processess
+    // generated for a step
+    private long kompileRealTime;
+    private long kompileCPUTime;
+    private long pdfRealTime;
+    private long pdfCPUTime;
+    private long krunRealTime;
+    private long krunCPUTime;
     private int kompileSteps; // total number of kompile tasks, this number is not known until
                               // ktest finishes job, because while running krun tests, adinitional
                               // compilations may be neccessary
@@ -111,16 +116,7 @@ public class TestSuite {
         String msg = ret ? "SUCCESS" : "FAIL (see details above)";
         System.out.format("%n%s%s%s%n", colorCode, msg, ColorUtil.ANSI_NORMAL);
 
-        System.out.format("----------------------------%n" +
-                "Definitions kompiled: %s (%s'%s'')%n" +
-                "PDF posters kompiled: %s (%s'%s'')%n" +
-                "Programs krun: %s (%s'%s'')%n" +
-                "Total time: %s'%s''%n" +
-                "----------------------------%n",
-                kompileSteps, kompileTime / 60, kompileTime % 60,
-                pdfSteps, pdfTime / 60, pdfTime % 60,
-                krunSteps, krunTime / 60, krunTime % 60,
-                (kompileTime + pdfTime + krunTime) / 60, (kompileTime + pdfTime + krunTime) % 60);
+        printTimeInfo();
 
         // save reports
         if (reportGen != null)
@@ -195,10 +191,11 @@ public class TestSuite {
             kompileSteps++;
         }
         stopTpe();
-        kompileTime += (System.currentTimeMillis() - startTime) / 1000;
+        kompileRealTime += System.currentTimeMillis() - startTime;
 
         // collect successful test cases, report failures
         for (Proc<TestCase> p : ps) {
+            kompileCPUTime += p.getTimeDelta();
             TestCase tc = p.getObj();
             if (p.isSuccess())
                 successfulTests.add(tc);
@@ -231,10 +228,11 @@ public class TestSuite {
             pdfSteps++;
         }
         stopTpe();
-        pdfTime += (System.currentTimeMillis() - startTime) / 1000;
+        pdfRealTime += System.currentTimeMillis() - startTime;
 
         boolean ret = true;
         for (Proc<TestCase> p : ps) {
+            pdfCPUTime += p.getTimeDelta();
             TestCase tc = p.getObj();
             if (!p.isSuccess())
                 ret = false;
@@ -295,12 +293,13 @@ public class TestSuite {
                 totalTests++;
             }
             stopTpe();
-            krunTime += (System.currentTimeMillis() - startTime) / 1000;
+            krunRealTime += System.currentTimeMillis() - startTime;
 
             for (Proc<KRunProgram> p : testCaseProcs)
                 if (p != null) // p may be null when krun test is skipped because of missing
                                // input file
                 {
+                    krunCPUTime += p.getTimeDelta();
                     KRunProgram pgm = p.getObj();
                     makeReport(p, makeRelative(tc.getDefinition()),
                             FilenameUtils.getName(pgm.pgmName));
@@ -423,5 +422,45 @@ public class TestSuite {
         else
             reportGen.addFailure(definition, testName,
                     p.getTimeDelta(), p.getPgmOut(), p.getPgmErr(), p.getReason());
+    }
+
+    private void printTimeInfo() {
+        long kompileCPUTime = this.kompileCPUTime / 1000;
+        long pdfCPUTime = this.pdfCPUTime / 1000;
+        long krunCPUTime = this.krunCPUTime / 1000;
+
+        long kompileRealTime = this.kompileRealTime / 1000;
+        long pdfRealTime = this.pdfRealTime / 1000;
+        long krunRealTime = this.krunRealTime / 1000;
+
+        String defInfo = String.format(
+                "Definitions kompiled: %s (time: %s'%s'' elapsed, %s'%s'' CPU)%n",
+                kompileSteps,
+                kompileRealTime / 60, kompileRealTime % 60,
+                kompileCPUTime / 60, kompileCPUTime % 60);
+        String pdfInfo = String.format(
+                "PDF posters kompiled: %s (time: %s'%s'' elapsed, %s'%s'' CPU)%n",
+                pdfSteps,
+                pdfRealTime / 60, pdfRealTime % 60,
+                pdfCPUTime / 60, pdfCPUTime % 60);
+        String krunInfo = String.format(
+                "Programs krun: %s (time: %s'%s'' elapsed, %s'%s'' CPU)%n",
+                krunSteps,
+                krunRealTime / 60, krunRealTime % 60,
+                krunCPUTime / 60, krunCPUTime % 60);
+
+        long totalRealTime = kompileRealTime + pdfRealTime + krunRealTime;
+        long totalCPUTime = kompileCPUTime + pdfCPUTime + krunCPUTime;
+        String totalInfo = String.format(
+                "Total time: %s'%s'' elapsed, %s'%s'' CPU%n",
+                totalRealTime / 60, totalRealTime % 60,
+                totalCPUTime / 60, totalCPUTime % 60);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("----------------------------\n");
+        sb.append(defInfo).append(pdfInfo).append(krunInfo).append(totalInfo);
+        sb.append("----------------------------\n");
+
+        System.out.println(sb);
     }
 }

@@ -174,10 +174,6 @@ public class Proc<T> implements Runnable {
         return timeDelta;
     }
 
-    public long getTimeDeltaSec() {
-        return timeDelta / 1000;
-    }
-
     public String getPgmOut() {
         return pgmOut;
     }
