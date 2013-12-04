@@ -73,6 +73,7 @@ public class K {
 	public static String depth;
 	public static String model_checking = "";
 	public static String output = "";
+	public static String load_cfg = null;
 
 	// variables to store if that specific option was set; also set default values for options
 	public static boolean help = false;

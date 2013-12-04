@@ -1,4 +1,4 @@
-package org.kframework.ktest2.CmdArgs;
+package org.kframework.ktest.CmdArgs;
 
 import org.apache.commons.cli.*;
 
@@ -53,8 +53,8 @@ public class CmdArgParser {
         addOption(OptionBuilder.withLongOpt(Constants.REPORT_OPTION).withDescription
                 ("Generate a junit-like report.").create());
         addOption(OptionBuilder.withLongOpt(Constants.TIMEOUT_OPTION).hasArg().withArgName
-                ("num").withDescription("Time limit for a test case (seconds). Default is 5000 " +
-                "seconds.").create());
+                ("num").withDescription("Time limit for each process (milliseconds). " +
+                "Default is 300000 milliseconds.").create());
 
 
         addOption(OptionBuilder.withLongOpt("ignore-white-spaces").hasArg().withArgName("on|off")
@@ -63,6 +63,9 @@ public class CmdArgParser {
         addOption(OptionBuilder.withLongOpt("ignore-balanced-parentheses").hasArg()
                 .withArgName("on|off").withDescription("Ignore balanced parentheses when " +
                 "comparsing results. (Default: on).").create());
+
+        addOption(OptionBuilder.withLongOpt("dry").withDescription("Dry run: print out the " +
+                "command to be executed without actual execution.").create());
 
         cmdOpts = new PosixParser().parse(options, args);
     }

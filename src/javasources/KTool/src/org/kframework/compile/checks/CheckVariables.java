@@ -127,6 +127,7 @@ public class CheckVariables extends BasicVisitor {
 		inCondition = false;
 		left.clear();
 		right.clear();
+        fresh.clear();
 		current = left;
 		node.getBody().accept(this);
 		if (node.getRequires() != null) {

@@ -1,10 +1,11 @@
-package org.kframework.ktest2.Test;
+package org.kframework.ktest.Test;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.kframework.krun.ColorSetting;
-import org.kframework.ktest2.*;
-import org.kframework.ktest2.CmdArgs.CmdArg;
+import org.kframework.ktest.*;
+import org.kframework.ktest.CmdArgs.CmdArg;
 import org.kframework.utils.ColorUtil;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -19,11 +20,6 @@ import java.util.concurrent.TimeUnit;
 
 public class TestSuite {
 
-    /**
-     * List of test cases. It's assumed that every definition can have at most one test case.
-     * (no two <test ...> ... </test> elements share same `definition' attribute)
-     * TODO: maybe check this and throw a warning? (osa1)
-     */
     private final List<TestCase> tests;
 
     private ThreadPoolExecutor tpe;
@@ -46,7 +42,16 @@ public class TestSuite {
 
     private final Comparator<String> strComparator;
 
-    public TestSuite(List<TestCase> tests, Set<KTestStep> skips, boolean verbose,
+    private int kompileTime; // total time spent on compiling
+    private int pdfTime; // total time spent on pdf generation
+    private int krunTime; // total time spent on running programs
+    private int kompileSteps; // total number of kompile tasks, this number is not known until
+                              // ktest finishes job, because while running krun tests, adinitional
+                              // compilations may be neccessary
+    private int pdfSteps; // total number of pdf generation tasks
+    private int krunSteps; // total number of krun tasks
+
+    private TestSuite(List<TestCase> tests, Set<KTestStep> skips, boolean verbose,
                      Comparator<String> strComparator, ColorSetting colorSetting,
                      int timeout, boolean report) {
         this.tests = tests;
@@ -58,7 +63,7 @@ public class TestSuite {
         reportGen = report ? new ReportGen() : null;
     }
 
-    public TestSuite(TestCase singleTest, Set<KTestStep> skips, boolean verbose,
+    private TestSuite(TestCase singleTest, Set<KTestStep> skips, boolean verbose,
                      Comparator<String> strComparator, ColorSetting colorSetting,
                      int timeout, boolean report) {
         tests = new LinkedList<>();
@@ -73,12 +78,14 @@ public class TestSuite {
 
     public TestSuite(List<TestCase> tests, CmdArg cmdArg) {
         this(tests, cmdArg.getSkips(), cmdArg.isVerbose(),
-                cmdArg.getStringComparator(), cmdArg.getColorSetting(), cmdArg.getTimeout(), true);
+                cmdArg.getStringComparator(), cmdArg.getColorSetting(), cmdArg.getTimeout(),
+                cmdArg.getGenerateReport());
     }
 
     public TestSuite(TestCase singleTest, CmdArg cmdArg) {
         this(singleTest, cmdArg.getSkips(), cmdArg.isVerbose(),
-                cmdArg.getStringComparator(), cmdArg.getColorSetting(), cmdArg.getTimeout(), true);
+                cmdArg.getStringComparator(), cmdArg.getColorSetting(), cmdArg.getTimeout(),
+                cmdArg.getGenerateReport());
     }
 
     /**
@@ -104,11 +111,55 @@ public class TestSuite {
         String msg = ret ? "SUCCESS" : "FAIL (see details above)";
         System.out.format("%n%s%s%s%n", colorCode, msg, ColorUtil.ANSI_NORMAL);
 
+        System.out.format("----------------------------%n" +
+                "Definitions kompiled: %s (%s'%s'')%n" +
+                "PDF posters kompiled: %s (%s'%s'')%n" +
+                "Programs krun: %s (%s'%s'')%n" +
+                "Total time: %s'%s''%n" +
+                "----------------------------%n",
+                kompileSteps, kompileTime / 60, kompileTime % 60,
+                pdfSteps, pdfTime / 60, pdfTime % 60,
+                krunSteps, krunTime / 60, krunTime % 60,
+                (kompileTime + pdfTime + krunTime) / 60, (kompileTime + pdfTime + krunTime) % 60);
+
         // save reports
         if (reportGen != null)
             reportGen.save();
 
         return ret;
+    }
+
+    /**
+     * Print the commands that would be executed, but do not execute them.
+     * (inspired by GNU Make)
+     */
+    public void dryRun() {
+        if (!skips.contains(KTestStep.KOMPILE)) {
+            List<TestCase> kompileSteps = filterSkips(tests, KTestStep.KOMPILE);
+            for (TestCase tc : kompileSteps)
+                System.out.println(StringUtils.join(tc.getKompileCmd(), " "));
+        }
+        if (!skips.contains(KTestStep.PDF)) {
+            List<TestCase> pdfSteps = filterSkips(tests, KTestStep.PDF);
+            for (TestCase tc : pdfSteps)
+                System.out.println(StringUtils.join(tc.getPdfCmd(), " "));
+        }
+        if (!skips.contains(KTestStep.KRUN)) {
+            List<TestCase> krunSteps = filterSkips(tests, KTestStep.KRUN);
+            for (TestCase tc : krunSteps) {
+                List<KRunProgram> programs = tc.getPrograms();
+                for (KRunProgram program : programs) {
+                    String[] krunCmd = program.getKrunCmd();
+                    LinkedList<String> krunCmd1 = new LinkedList<>();
+                    Collections.addAll(krunCmd1, krunCmd);
+                    if (program.outputFile != null)
+                        krunCmd1.add("> " + program.outputFile);
+                    if (program.inputFile != null)
+                        krunCmd1.add("< " + program.inputFile);
+                    System.out.println(StringUtils.join(krunCmd1, " "));
+                }
+            }
+        }
     }
 
     private List<TestCase> filterSkips(List<TestCase> tests, KTestStep step) {
@@ -136,35 +187,23 @@ public class TestSuite {
         System.out.format("Kompile the language definitions...(%d in total)%n", len);
         startTpe();
         for (TestCase tc : tests) {
-            String definitionPath = tc.getDefinition();
-            assert new File(definitionPath).isFile();
-            // build argument array
-            List<PgmArg> kompileOpts = tc.getKompileOpts();
-            String[] args = new String[kompileOpts.size() + 2];
-            args[0] = "kompile";
-            args[1] = definitionPath;
-            for (int i = 0; i < kompileOpts.size(); i++)
-                args[i+2] = kompileOpts.get(i).toString();
-            // execute
-            Proc<TestCase> p = new Proc<>(tc, args, strComparator, timeout, verbose, colorSetting);
+            Proc<TestCase> p = new Proc<>(tc, tc.getKompileCmd(),
+                    strComparator, timeout, verbose, colorSetting);
             ps.add(p);
             tpe.execute(p);
+            kompileSteps++;
         }
         stopTpe();
 
         // collect successful test cases, report failures
-        for (Proc<TestCase> p : ps)
+        for (Proc<TestCase> p : ps) {
+            TestCase tc = p.getObj();
+            kompileTime += p.getTimeDeltaSec();
             if (p.isSuccess())
-                successfulTests.add(p.getObj());
-            else if (reportGen != null) {
-                TestCase failedTest = p.getObj();
-                reportGen.addFailure(makeRelative(failedTest.getDefinition()),
-                        FilenameUtils.getName(failedTest.getDefinition()),
-                        p.getTimeDelta(),
-                        p.getPgmOut(),
-                        p.getPgmErr(),
-                        p.getReason());
-            }
+                successfulTests.add(tc);
+            makeReport(p, makeRelative(tc.getDefinition()),
+                    FilenameUtils.getName(tc.getDefinition()));
+        }
 
         printResult(successfulTests.size() == len);
 
@@ -183,30 +222,22 @@ public class TestSuite {
         System.out.format("Generate PDF files...(%d in total)%n", len);
         startTpe();
         for (TestCase tc : tests) {
-            String definitionPath = tc.getDefinition();
-            assert new File(definitionPath).isFile();
-            Proc<TestCase> p = new Proc<>(tc,
-                    new String[] { "kompile", "--backend=pdf", definitionPath },
+            Proc<TestCase> p = new Proc<>(tc, tc.getPdfCmd(),
                     strComparator, timeout, verbose, colorSetting);
             ps.add(p);
             tpe.execute(p);
+            pdfSteps++;
         }
         stopTpe();
 
         boolean ret = true;
         for (Proc<TestCase> p : ps) {
-            if (!p.isSuccess()) {
+            TestCase tc = p.getObj();
+            pdfTime += p.getTimeDeltaSec();
+            if (!p.isSuccess())
                 ret = false;
-                if (reportGen != null) {
-                    TestCase failedTest = p.getObj();
-                    reportGen.addFailure(makeRelative(failedTest.getDefinition()),
-                            FilenameUtils.getBaseName(failedTest.getDefinition()) + ".pdf",
-                            p.getTimeDelta(),
-                            p.getPgmOut(),
-                            p.getPgmErr(),
-                            p.getReason());
-                }
-            }
+            makeReport(p, makeRelative(tc.getDefinition()),
+                    FilenameUtils.getBaseName(tc.getDefinition()) + ".pdf");
         }
 
         printResult(ret);
@@ -236,7 +267,8 @@ public class TestSuite {
 
         // at this point we have a subset of tests that are successfully kompiled,
         // so run programs of those tests
-        boolean testCaseRet = true;
+        int successes = 0;
+        int totalTests = 0;
         for (TestCase tc : kompileSuccesses) {
 
             List<KRunProgram> programs = tc.getPrograms();
@@ -255,37 +287,26 @@ public class TestSuite {
             // I'm testing tast cases sequentially
             List<Proc<KRunProgram>> testCaseProcs = new ArrayList<>(programs.size());
             startTpe();
-            for (KRunProgram program : programs)
+            for (KRunProgram program : programs) {
                 testCaseProcs.add(runKRun(program));
+                totalTests++;
+            }
             stopTpe();
 
             for (Proc<KRunProgram> p : testCaseProcs)
                 if (p != null) // p may be null when krun test is skipped because of missing
                                // input file
                 {
-
                     KRunProgram pgm = p.getObj();
-                    if (p.isSuccess()) {
-                        if (reportGen != null)
-                            reportGen.addSuccess(makeRelative(tc.getDefinition()),
-                                    FilenameUtils.getName(pgm.pgmName),
-                                    p.getTimeDelta(),
-                                    p.getPgmOut(),
-                                    p.getPgmErr());
-                    } else {
-                        testCaseRet = false;
-                        if (reportGen != null)
-                            reportGen.addFailure(makeRelative(tc.getDefinition()),
-                                    FilenameUtils.getName(pgm.pgmName),
-                                    p.getTimeDelta(),
-                                    p.getPgmOut(),
-                                    p.getPgmErr(),
-                                    p.getReason());
-                    }
+                    krunTime += p.getTimeDeltaSec();
+                    makeReport(p, makeRelative(tc.getDefinition()),
+                            FilenameUtils.getName(pgm.pgmName));
+                    if (p.isSuccess())
+                        successes++;
                 }
         }
-        printResult(testCaseRet);
-        return kompileSuccesses.size() == tests.size() && testCaseRet;
+        printResult(successes == totalTests);
+        return successes == totalTests;
     }
 
     private void startTpe() {
@@ -304,10 +325,7 @@ public class TestSuite {
      * @return Proc object for krun process
      */
     private Proc<KRunProgram> runKRun(KRunProgram program) {
-        String[] args = new String[program.args.size() + 1];
-        args[0] = "krun";
-        for (int i = 1; i < args.length; i++)
-            args[i] = program.args.get(i - 1);
+        String[] args = program.getKrunCmd();
 
         // passing null to Proc is OK, it means `ignore'
         String inputContents = null, outputContents = null, errorContents = null;
@@ -339,16 +357,6 @@ public class TestSuite {
                         + "won't be matched against error file%n", program.errorFile);
             }
 
-        // TODO: maybe enable this only when in verbose mode, othewise output is becoming just
-        // too verbose
-        /*
-        String procCmd = StringUtils.join(args, ' ');
-        System.out.format("Running %s [ %s]%n", procCmd,
-                (inputContents == null ? "" : "input ")
-                + (outputContents == null ? "" : "output ")
-                + (errorContents == null ? "" : "error "));
-        */
-
         // Annotate expected output and error messages with paths of files that these strings
         // are defined in (to be used in error messages)
         Annotated<String, String> outputContentsAnn = null;
@@ -359,10 +367,31 @@ public class TestSuite {
         if (errorContents != null)
             errorContentsAnn = new Annotated<>(errorContents, program.errorFile);
 
+        if (verbose)
+            printVerboseRunningMsg(program);
         Proc<KRunProgram> p = new Proc<>(program, args, inputContents, outputContentsAnn,
                 errorContentsAnn, strComparator, timeout, verbose, colorSetting);
         tpe.execute(p);
+        krunSteps++;
         return p;
+    }
+
+    private void printVerboseRunningMsg(KRunProgram program) {
+        StringBuilder b = new StringBuilder();
+        b.append("Running [");
+        b.append(StringUtils.join(program.args, " "));
+        b.append("]");
+        if (program.inputFile != null) {
+            b.append(" [input: ");
+            b.append(program.inputFile);
+            b.append("]");
+        }
+        if (program.outputFile != null) {
+            b.append(" [output: ");
+            b.append(program.outputFile);
+            b.append("]");
+        }
+        System.out.println(b);
     }
 
     private void printResult(boolean condition) {
@@ -376,5 +405,16 @@ public class TestSuite {
     private String makeRelative(String absolutePath) {
         // I'm not sure if this works as expected, but I'm simply removing prefix of absolutePath
         return absolutePath.replaceFirst(System.getProperty("user.dir"), "");
+    }
+
+    private void makeReport(Proc p, String definition, String testName) {
+        if (reportGen == null)
+            return;
+        if (p.isSuccess())
+            reportGen.addSuccess(definition, testName,
+                    p.getTimeDelta(), p.getPgmOut(), p.getPgmErr());
+        else
+            reportGen.addFailure(definition, testName,
+                    p.getTimeDelta(), p.getPgmOut(), p.getPgmErr(), p.getReason());
     }
 }

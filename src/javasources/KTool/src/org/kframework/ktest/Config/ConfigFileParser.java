@@ -1,12 +1,12 @@
-package org.kframework.ktest2.Config;
+package org.kframework.ktest.Config;
 
 import org.apache.commons.io.FilenameUtils;
-import org.kframework.ktest2.Annotated;
-import org.kframework.ktest2.CmdArgs.CmdArg;
-import org.kframework.ktest2.KTest;
-import org.kframework.ktest2.KTestStep;
-import org.kframework.ktest2.PgmArg;
-import org.kframework.ktest2.Test.TestCase;
+import org.kframework.ktest.Annotated;
+import org.kframework.ktest.CmdArgs.CmdArg;
+import org.kframework.ktest.KTest;
+import org.kframework.ktest.KTestStep;
+import org.kframework.ktest.PgmArg;
+import org.kframework.ktest.Test.TestCase;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -52,6 +52,10 @@ public class ConfigFileParser {
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer nullTransformer = transformerFactory.newTransformer();
 
+        // annotate XML file with location information of elements and resolve environment
+        // variables in attributes/elements
+        // (also see comments in ConfigPreProcessor)
+
         // Create an empty document to be populated within a DOMResult.
         DocumentBuilder docBuilder = documentBuilderFactory.newDocumentBuilder();
         doc = docBuilder.newDocument();
@@ -60,10 +64,9 @@ public class ConfigFileParser {
         // Create SAX parser/XMLReader that will parse XML.
         XMLReader xmlReader = XMLReaderFactory.createXMLReader();
 
-        // Create our filter to wrap the SAX parser, that captures the
-        // locations of elements and annotates their nodes as they are
-        // inserted into the DOM.
-        LocationAnnotator locationAnnotator = new LocationAnnotator(xmlReader, doc);
+        // Create our filter to wrap the SAX parser, that captures the locations of elements
+        // and annotates their nodes as they are inserted into the DOM.
+        ConfigPreProcessor locationAnnotator = new ConfigPreProcessor(xmlReader, doc);
 
         // Create the SAXSource to use the annotator.
         String systemId = configFile.getAbsolutePath();
@@ -385,8 +388,7 @@ public class ConfigFileParser {
             if (childNode.getNodeType() == Node.ELEMENT_NODE
                     && childNode.getNodeName().equals("program")) {
                 Element elem = (Element) childNode;
-                ret.put(concat(cmdArgs.getPrograms(), elem.getAttribute("name")),
-                        parseKrunOpts(elem.getChildNodes()));
+                ret.put(elem.getAttribute("name"), parseKrunOpts(elem.getChildNodes()));
             }
         }
         return ret;

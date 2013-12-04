@@ -193,6 +193,11 @@ public class Main {
             output.put("$stdin", StringBuiltin.EMPTY);
         }
 
+        if (K.load_cfg != null) {
+            Term saved_cfg = (Term) BinaryLoader.load(K.load_cfg);
+            output.put("$PGM", saved_cfg);
+        }
+
         sw.printIntermediate("Make configuration");
 
         return plug(output, context);
@@ -867,6 +872,9 @@ public class Main {
             }
             if (cmd.hasOption("output")) {
                 K.output_mode = cmd.getOptionValue("output");
+            }
+            if (cmd.hasOption("load-cfg")) {
+                K.load_cfg = cmd.getOptionValue("load-cfg");
             }
             if (cmd.hasOption("log-io")) {
                 String v = cmd.getOptionValue("log-io");

@@ -1,4 +1,4 @@
-package org.kframework.ktest2;
+package org.kframework.ktest;
 
 public enum KTestStep {
     KOMPILE, PDF, KRUN
