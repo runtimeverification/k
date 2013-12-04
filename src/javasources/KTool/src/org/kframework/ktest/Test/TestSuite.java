@@ -404,7 +404,11 @@ public class TestSuite {
 
     private String makeRelative(String absolutePath) {
         // I'm not sure if this works as expected, but I'm simply removing prefix of absolutePath
-        return absolutePath.replaceFirst(System.getProperty("user.dir"), "");
+        String pathRegex = System.getProperty("user.dir")
+                // on Windows, `\` characters in file paths are causing problem, so we need to
+                // escape one more level:
+                .replaceAll("\\\\", "\\\\\\\\");
+        return absolutePath.replaceFirst(pathRegex, "");
     }
 
     private void makeReport(Proc p, String definition, String testName) {
