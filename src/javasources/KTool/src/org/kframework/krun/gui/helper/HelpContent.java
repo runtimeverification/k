@@ -8,26 +8,27 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 public class HelpContent extends JPanel {
 
-  private static final long serialVersionUID = 1L;
-  HelpInfo observer;
-  TreeFromFile tree;
+    private static final long serialVersionUID = 1L;
+    HelpInfo observer;
+    TreeFromFile tree = new TreeFromFile();
 
-  public HelpContent(HelpInfo obs) {
-    setLayout(new BorderLayout());
-    observer = obs;
-    tree = new TreeFromFile();
-    tree.tree.addTreeSelectionListener(new TreeSelectionListener() {
-      public void valueChanged(TreeSelectionEvent e) {
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode) e
-                .getPath().getLastPathComponent();
-        notifyObservers(((TreeNode) node.getUserObject()).getContent());
-      }
-    });
-    this.add(tree.tree);
-  }
+    public HelpContent(HelpInfo obs) {
+        setLayout(new BorderLayout());
+        observer = obs;
+        // tree = new TreeFromFile();
+        tree.tree.addTreeSelectionListener(new TreeSelectionListener() {
+            public void valueChanged(TreeSelectionEvent e) {
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.getPath()
+                        .getLastPathComponent();
+                notifyObservers(((TreeNode) node.getUserObject()).getContent());
+            }
+        });
+        this.add(tree.tree);
+    }
 
-  private void notifyObservers(String node) {
-    observer.displayInfo(node);
-  }
+    private void notifyObservers(String node) {
+
+        observer.displayInfo(node, tree);
+    }
 
 }

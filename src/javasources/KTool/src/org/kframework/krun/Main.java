@@ -686,16 +686,14 @@ public class Main {
         }
     }
 
-    public static void guiDebugExecution(Term kast, String lang,
-                                         KRunResult<SearchResults> state, Context context) {
-		
+    public static void guiDebugExecution(Term kast, String lang, KRunResult<SearchResults> state,
+            Context context) {
         try {
-			KRun krun = obtainKRun(context);
-			krun.setBackendOption("io",false);
-            new MainWindow(new RunKRunCommand(kast, lang, false,krun), context);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            KRun krun = obtainKRun(context);
+            krun.setBackendOption("io", false);
+            new MainWindow(new RunKRunCommand(kast, lang, context));
+        } catch (Exception e) {
+            org.kframework.utils.Error.report("Unable to start gui due to : " + e.getMessage());
         }
     }
 

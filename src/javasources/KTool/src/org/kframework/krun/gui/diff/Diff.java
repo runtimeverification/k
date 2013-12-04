@@ -1,140 +1,117 @@
 package org.kframework.krun.gui.diff;
 
-import java.awt.Color;
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import javax.swing.JTextPane;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
+
+import org.apache.commons.lang3.StringEscapeUtils;
+
 import difflib.Delta;
 import difflib.DiffUtils;
 import difflib.Patch;
 
 /**
  * Class used to perform diff between two strings
- * 
- * @author danielV
- * 
  */
 public class Diff {
 
-  private static final int MaxPerRow = 100;
-  private static final String SEP = "";
-  private StringBuilder sb = new StringBuilder();
+    private static final String STYLESAME = "";// "font-size:smaller;";
+    private static final String YELLLOW = "#FFFF00";
+    private static final String ORANGE = "#FFCC00";
+    private static final String GREEN = "#00FF00";
+    private static final String GRAY = "#E0E0E0";
+    private StringBuilder sb = new StringBuilder();
 
-  StringBuilder l2b(List<?> l) {
-    sb.delete(0, sb.length());
-    for (Object object : l) {
-      sb.append(object + "\n");
-    }
-    if (sb.length() >= 1)
-      sb.deleteCharAt(sb.length() - 1); // last "\n"
-    return sb;
-  }
-
-  // performs diffs and stored formated result in testPane
-  public static void comparableTest(String str1, String str2, JTextPane textPane)
-          throws IOException {
-    synchronized (Diff.class) {
-      textPane.setText("");
-      StyledDocument doc = textPane.getStyledDocument();
-      SimpleAttributeSet diffP = new SimpleAttributeSet();
-      StyleConstants.setBackground(diffP, Color.YELLOW);
-      StyleConstants.setBold(diffP, true);
-
-      List<String> original = getAllTrimLines(str1);
-      List<String> revised = getAllTrimLines(str2);
-      Patch patch = DiffUtils.diff(original, revised);
-      List<Delta> deltas = patch.getDeltas();
-      Diff l2B = new Diff();
-      int last = 0;
-      for (Delta delta : deltas) {
-        if (last + 1 < delta.getOriginal().getPosition()) { // not continuous
-          for (int i = last + 1; i < delta.getOriginal().getPosition(); i++) {
-            try {
-              doc.insertString(doc.getLength(), original.get(i)
-                      + createSpaces(original.get(i).length()) + SEP + original.get(i) + "\n",
-                      null);
-            } catch (BadLocationException e) {
-              e.printStackTrace();
-            }
-          }
+    StringBuilder l2b(List<?> l) {
+        sb.delete(0, sb.length());
+        for (Object object : l) {
+            sb.append(object + "\n");
         }
-        List<?> or = delta.getOriginal().getLines();
-        List<?> re = delta.getRevised().getLines();
-        try {
-          String strOr = l2B.l2b(or).toString().replaceAll("\\r", "");
-          String strRe = l2B.l2b(re).toString().replaceAll("\\r", "");
-          String[] splitOr = strOr.split("\n");
-          String[] splitRe = strRe.split("\n");
-          int i = 0;
-          for (; i < splitOr.length; i++) {
-            doc.insertString(doc.getLength(),
-                    splitOr[i] + createSpaces(splitOr[i].length()) + SEP, diffP);
-            if (i < splitRe.length) {
-              doc.insertString(doc.getLength(), splitRe[i] + "\n", diffP);
+        if (sb.length() >= 1)
+            sb.deleteCharAt(sb.length() - 1); // last "\n"
+        return sb;
+    }
+
+    public static String comparableTest(String str1, String str2) {
+        String[] x = str1.split("\\n");
+        String[] y = str2.split("\\n");
+
+        List<String> original = new LinkedList<String>();
+        for (String s : x)
+            original.add(StringEscapeUtils.escapeHtml4(s));
+        List<String> revised = new LinkedList<String>();
+        for (String s : y)
+            revised.add(StringEscapeUtils.escapeHtml4(s));
+        StringBuilder tl = new StringBuilder();
+        StringBuilder tr = new StringBuilder();
+        StringBuilder fin = new StringBuilder();
+        Patch patch = DiffUtils.diff(original, revised);
+        List<Delta> deltas = patch.getDeltas();
+        Diff l2B = new Diff();
+        int last = 0;
+        String colorOrg;
+        String colorRev;
+        for (Delta delta : deltas) {
+            tl.delete(0, tl.length());
+            tr.delete(0, tr.length());
+            if (last + 1 < delta.getOriginal().getPosition()) { // not
+                                                                // continuous
+                tl.append("<td style='" + STYLESAME + "'>\n");
+                tr.append("<td style='" + STYLESAME + "'>\n");
+                for (int i = last + 1; i < delta.getOriginal().getPosition(); i++) {
+                    tl.append(original.get(i) + "\n");
+                    tr.append(original.get(i) + "\n");
+                }
+                tl.append("</td>\n");
+                tr.append("</td>\n");
+                fin.append("<tr>" + tl + tr + "</tr>");
             }
-            else {
-              doc.insertString(doc.getLength(), createSpaces(0) + "\n", diffP);
+            List<?> or = delta.getOriginal().getLines();
+            List<?> re = delta.getRevised().getLines();
+            String org = l2B.l2b(or).toString();
+            String rev = l2B.l2b(re).toString();
+            boolean deleted = false;
+            if (org.trim().isEmpty()) {
+                colorOrg = GRAY;
+                int lines = rev.split("\n").length;
+                for (int i = 0; i < lines; i++) {
+                    org += "\n";
+                }
+                // text was added
+                colorRev = GREEN;
+            } else if (rev.trim().isEmpty()) {
+                colorRev = GRAY;
+                int lines = org.split("\n").length;
+                for (int i = 1; i < lines; i++) {
+                    rev += "\n";
+                }
+                deleted = true;
+                // text was removed
+                colorOrg = ORANGE;
+            } else {
+                colorOrg = colorRev = YELLLOW;
             }
-          }
-          for (; i < splitRe.length; i++) {
-            doc.insertString(doc.getLength(), createSpaces(0) + splitRe[i] + "\n", diffP);
-          }
-        } catch (BadLocationException e) {
-          e.printStackTrace();
+            tl.delete(0, tl.length());
+            tr.delete(0, tr.length());
+            tl.append("<td style='background-color:" + colorOrg + ";'>" + (deleted ? "<del>" : "")
+                    + org.replaceAll("\\n", "<br>") + "<br>" + (deleted ? "</del>" : "") + "</td>");
+            tr.append("<td style='background-color:" + colorRev + ";'>"
+                    + rev.replaceAll("\\n", "<br>") + "<br></td>");
+            fin.append("<tr>" + tl + tr + "</tr>");
+            last = delta.getOriginal().last();
         }
-        last = delta.getOriginal().last();
-      }
-      if (last + 1 < original.size()) { // last is not delta
-        for (int i = last + 1; i < original.size(); i++) {
-          try {
-            doc.insertString(doc.getLength(), original.get(i)
-                    + createSpaces(original.get(i).length()) + SEP + original.get(i) + "\n", null);
-          } catch (BadLocationException e) {
-            e.printStackTrace();
-          }
+        if (last + 1 < original.size()) { // last is not delta
+            tl.delete(0, tl.length());
+            tr.delete(0, tr.length());
+            tl.append("<td style='" + STYLESAME + "'>\n");
+            tr.append("<td style='" + STYLESAME + "'>\n");
+            for (int i = last + 1; i < original.size(); i++) {
+                tl.append(original.get(i) + "\n");
+                tr.append(original.get(i) + "\n");
+            }
+            tl.append("</td>\n");
+            tr.append("</td>\n");
+            fin.append("<tr>" + tl + tr + "</tr>");
         }
-      }
+        return ("<html><table>" + fin + "</table></html>");
     }
-  }
-
-  // splits given string by new line and trim each line to maxRow chars
-  private static List<String> getAllTrimLines(String strToTrim) {
-    List<String> rez = new LinkedList<String>();
-    rez.addAll(Arrays.asList(strToTrim.replaceAll("\t", "     ").split("\n")));
-    for (int i = 0; i < rez.size(); i++) {
-      String currentStr = rez.get(i);
-      if (currentStr.length() > MaxPerRow) {
-        rez.remove(i);
-        List<String> trim = limitRowToMax(currentStr);
-        rez.addAll(i, trim);
-        // increase index so that we do not check again what we just added
-        i += trim.size() - 1;
-      }
-    }
-    return rez;
-  }
-
-  private static List<String> limitRowToMax(String row) {
-    List<String> ret = new LinkedList<String>();
-    while (row.length() > MaxPerRow) {
-      ret.add(row.substring(0, MaxPerRow));
-      row = row.substring(MaxPerRow);
-    }
-    return ret;
-  }
-
-  private static String createSpaces(int le) {
-    String ret = "";
-    for (int i = 0; i < MaxPerRow - le; i++) {
-      ret += " ";
-    }
-    return ret;
-  }
-
 }

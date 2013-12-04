@@ -5,16 +5,16 @@ import edu.uci.ics.jung.graph.Graph;
 
 class ClusterVertexSizeFunction<V> implements Transformer<V, Integer> {
 
-  private int size;
+    private int size;
 
-  public ClusterVertexSizeFunction(Integer size) {
-    this.size = size;
-  }
-
-  public Integer transform(V v) {
-    if (v instanceof Graph) {
-      return 50;
+    public ClusterVertexSizeFunction(Integer size) {
+        this.size = size;
     }
-    return size;
-  }
+
+    public Integer transform(V v) {
+        if (v instanceof Graph) {
+            return 50;
+        }
+        return size;
+    }
 }

@@ -142,7 +142,10 @@ public class KRunState implements Serializable{
 	public boolean equals(Object o) {
 		if (!(o instanceof KRunState)) return false;
 		KRunState s = (KRunState)o;
-		return rawResult.equals(s.rawResult);
+		/*jung uses intensively equals while drawing graphs 
+		  use SemanticEquals since it caches results 
+		*/
+		return SemanticEqual.checkEquality(rawResult, s.rawResult);
 	}
 
 	@Override

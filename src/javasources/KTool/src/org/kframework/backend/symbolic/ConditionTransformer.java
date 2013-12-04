@@ -22,6 +22,7 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 public class ConditionTransformer extends CopyOnWriteTransformer {
 
     List<Term> filteredTerms = new ArrayList<Term>();
+    List<Term> generatedPredicates = new ArrayList<>();
 
     public ConditionTransformer(Context context) {
         super("Filter side conditions", context);
@@ -37,19 +38,22 @@ public class ConditionTransformer extends CopyOnWriteTransformer {
                     List<Term> terms = ((KList) content).getContents();
                     List<Term> remainingTerms = new ArrayList<Term>();
                     for (Term t : terms) {
-                        CheckSmtlibVisitor csv = new CheckSmtlibVisitor(context);
+                        CheckSmtLibByAddingPredicates csv = new CheckSmtLibByAddingPredicates(context);
                         t.accept(csv);
-                        if (csv.smtValid())
+                        if (csv.smtValid()) {
                             filteredTerms.add(t.shallowCopy());
+                            generatedPredicates.addAll(csv.getContents());
+                        }
                         else remainingTerms.add(t.shallowCopy());
                     }
                     content = new KList(remainingTerms);
                 }
             } else {
-                CheckSmtlibVisitor csv = new CheckSmtlibVisitor(context);
+                CheckSmtLibByAddingPredicates csv = new CheckSmtLibByAddingPredicates(context);
                 content.accept(csv);
                 if (csv.smtValid()) {
                     filteredTerms.add(content.shallowCopy());
+                    generatedPredicates.addAll(csv.getContents());
                     content = new KList();
                 }
             }
@@ -64,5 +68,9 @@ public class ConditionTransformer extends CopyOnWriteTransformer {
 
     public List<Term> getFilteredTerms() {
         return filteredTerms;
+    }
+
+    public List<Term> getGeneratedPredicates() {
+        return generatedPredicates;
     }
 }

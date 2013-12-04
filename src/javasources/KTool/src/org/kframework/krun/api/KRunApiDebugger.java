@@ -26,6 +26,8 @@ import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.util.Pair;
 
+import java.util.Map.Entry;
+
 public class KRunApiDebugger implements KRunDebugger {
 	private KRun krun;
 	private Integer currentState;
@@ -109,8 +111,11 @@ public class KRunApiDebugger implements KRunDebugger {
 		}
 		for (int i = 0; steps == null || i < steps; i++) {
 			KRunState nextStep = krun.step(getState(currentState).getRawResult(), 1).getResult();
-			if (states.containsValue(nextStep)) {
-				int stateId = states.getKey(nextStep);
+			Entry<Integer, KRunState> prevValue = containsValue(nextStep);	
+			if (prevValue!=null) {
+				nextStep = prevValue.getValue();
+
+				int stateId = prevValue.getKey();
 				if (stateId == currentState) {
 					//we've stopped moving, so that means we must have reached a final state
 					return;
@@ -119,8 +124,10 @@ public class KRunApiDebugger implements KRunDebugger {
 				currentState = stateId;
 				continue;
 			}
-			nextStep.setStateId(K.stateCounter++);
-			putState(nextStep);
+			else {
+				nextStep.setStateId(K.stateCounter++);
+				putState(nextStep);
+			}
 			graph.addVertex(nextStep);
 			graph.addEdge(Transition.unlabelled(context), getState(currentState), nextStep);
 			currentState = nextStep.getStateId();
@@ -140,13 +147,6 @@ public class KRunApiDebugger implements KRunDebugger {
 			throw new IllegalStateException("Cannot step without a current state to step from.");
 		}
 		SearchResults results = krun.search(null, steps, SearchType.PLUS, defaultPattern, getState(currentState).getRawResult(), defaultPatternInfo).getResult();
-		for (SearchResult result : results.getSolutions()) {
-			KRunState state = result.getState();
-			if (states.containsValue(state)) {
-				int stateNum = states.getKey(state);
-				state.setStateId(stateNum);
-			}	
-		}
 		mergeSearchGraph(results.getGraph());
 		currentState = null;
 		return results;
@@ -154,7 +154,9 @@ public class KRunApiDebugger implements KRunDebugger {
 
 	private void mergeSearchGraph(DirectedGraph<KRunState, Transition> graphFragment) {
 		for (KRunState state : graphFragment.getVertices()) {
-			if (!states.containsValue(state)) {
+			//check if graph already contains state
+		    Entry<Integer, KRunState> prevValue = containsValue(state);
+			if (prevValue==null) {
 				putState(state);
 				graph.addVertex(state);
 			}
@@ -162,8 +164,17 @@ public class KRunApiDebugger implements KRunDebugger {
 		for (Transition edge : graphFragment.getEdges()) {
 			Pair<KRunState> vertices = graphFragment.getEndpoints(edge);
 			Transition existingEdge = graph.findEdge(vertices.getFirst(), vertices.getSecond());
-			KRunState first = canonicalizeState(vertices.getFirst());
-			KRunState second = canonicalizeState(vertices.getSecond());
+			KRunState first =vertices.getFirst();
+			KRunState second = vertices.getSecond();
+			//if graph already contained state used old state
+			Entry<Integer, KRunState> prevValue = containsValue(first);
+			if (prevValue!=null){
+				first = prevValue.getValue();
+			}
+			prevValue = containsValue(second);
+			if(prevValue!=null){
+				second = prevValue.getValue();
+			}
 			if (existingEdge != null && existingEdge.getType() == TransitionType.UNLABELLED) {
 				graph.removeEdge(existingEdge);
 				graph.addEdge(edge, first, second);
@@ -173,6 +184,17 @@ public class KRunApiDebugger implements KRunDebugger {
 		}		
 	}
 
+	/* checks if state already exists(using Semantic equal)
+	 * if it exists return old value
+	 * this intends to replace states.containsValue which uses hash and equals defined in KRunState
+	 */
+	private Entry<Integer, KRunState> containsValue(KRunState state){
+		for (Entry<Integer,KRunState> e : states.entrySet() ){
+			if(SemanticEqual.checkEquality(state.getRawResult(), e.getValue().getRawResult()))
+				return e ;
+		}
+		return null;
+	}
 	private KRunState canonicalizeState(KRunState state) {
 		int stateNum = states.getKey(state);
 		return states.get(stateNum);
@@ -229,7 +251,8 @@ public class KRunApiDebugger implements KRunDebugger {
 				"have an stdin buffer");
 		}
 		KRunState newState = new KRunState(result, context);
-		if (states.containsValue(newState)) {
+		Entry<Integer, KRunState> prevValue = containsValue(newState);
+		if (prevValue!=null) {
 			KRunState canonicalNewState = canonicalizeState(newState);
 			Transition edge = graph.findEdge(getState(currentState), canonicalNewState);
 			if (edge == null) {

@@ -67,7 +67,7 @@ public class CommandlineOptions {
 		addOptionS(OptionBuilder.withLongOpt("color").hasArg().withArgName("[on|off|extended]").withDescription("Use colors in output. (Default: on).").create());
         addOptionS(OptionBuilder.withLongOpt("terminal-color").hasArg().withArgName("color-name").withDescription("Background color of the terminal. Cells won't be colored in this color. (Default: black).").create());
 		addOptionS(OptionBuilder.withLongOpt("parens").hasArg().withArgName("[greedy|smart]").withDescription("Select the parentheses-insertion algorithm. The default value is 'greedy'. Note that 'smart' can take much longer time to execute.").create());
-		addOptionS(OptionBuilder.withLongOpt("parser").hasArg().withArgName("file").withDescription("Command used to parse programs. (Default: kast).").create());
+		addOptionS(OptionBuilder.withLongOpt("parser").hasArg().withArgName("command").withDescription("Command used to parse programs. (Default: kast).").create());
 		addOptionS(OptionBuilder.withLongOpt("config-var-parser").hasArg().withArgName("file").withDescription("Command used to parse configuration variables. (Default: kast -e).  See --parser above. Applies to subsequent -c options until another parser is specified with this option.").create());
 		addOptionS(OptionBuilder.withLongOpt("config-var").hasArgs(2).withValueSeparator('=').withArgName("name=value").withDescription("Specify values for variables in the configuration.").create("c"));
 		addOptionS(OptionBuilder.withLongOpt("output").hasArg().withArgName("mode").withDescription("How to display Maude results. <mode> is either [pretty|raw|binary|none]. (Default: pretty).").create("o"));
