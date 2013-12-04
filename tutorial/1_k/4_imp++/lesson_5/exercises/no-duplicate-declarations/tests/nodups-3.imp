@@ -1,11 +1,13 @@
-int x;
+int x,z;
 if (false) {
   int x,x;
 } else {
   int x,y;
 }
+int z;
 print("OK");
 /*
-  Yes, this should pass, as our checker is dynamic, i.e., only catching
-problems if they are executed
+  This test should only fail for 'z' as, although in program order the 
+redeclaration of 'x' is encountered first, it is not reachable in execution 
+order.
 */
