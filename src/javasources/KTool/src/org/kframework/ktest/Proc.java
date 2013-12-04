@@ -8,12 +8,11 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.awt.*;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.Comparator;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.*;
 
 /**
  * A unified process class for kompile, kompile --pdf and krun processes.
@@ -131,17 +130,19 @@ public class Proc<T> implements Runnable {
             IOUtils.write(procInput, inStream);
             inStream.close();
 
+            // asynchronously read outputs
+            final ExecutorService service = Executors.newFixedThreadPool(2);
+            final Future<String> outputGobbler = service.submit(new StreamGobbler(outStream));
+            final Future<String> errorGobbler  = service.submit(new StreamGobbler(errorStream));
+
             int returnCode = wait(proc);
             timeDelta = System.currentTimeMillis() - startTime;
 
-            if (returnCode != SIGTERM) {
-                // WARNING: I have no idea what is returned on Windows and MacOS
-                pgmOut = IOUtils.toString(outStream);
-                pgmErr = IOUtils.toString(errorStream);
-            }
+            pgmOut = outputGobbler.get();
+            pgmErr = errorGobbler.get();
 
             handlePgmResult(returnCode);
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException | InterruptedException | ExecutionException e) {
             e.printStackTrace();
             GlobalSettings.kem.register(
                     new KException(KException.ExceptionType.WARNING,
@@ -279,5 +280,17 @@ public class Proc<T> implements Runnable {
     private void reportTimeout() {
         assert reason == null;
         reason = "Timeout";
+    }
+}
+
+class StreamGobbler implements Callable<String> {
+    InputStream is;
+
+    StreamGobbler(InputStream is) {
+        this.is = is;
+    }
+
+    public String call() throws IOException {
+        return IOUtils.toString(is);
     }
 }
