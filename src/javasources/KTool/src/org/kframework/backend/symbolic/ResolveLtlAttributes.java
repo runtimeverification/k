@@ -81,10 +81,12 @@ public class ResolveLtlAttributes extends CopyOnWriteTransformer {
                             List<Term> filtered = ct.getFilteredTerms();
                             filtered.add(BoolBuiltin.TRUE);
                             Term bSmtValid = AddPathCondition.andBool(filtered);
+                            Term predicates = AddPathCondition.andBool(ct.getGeneratedPredicates());
 
                             // step: bPrime /\ checkSat(phi /\ not b)
                             Term check = AddPathCondition.checkSat(KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, phi, KApp.of(KLabelConstant.NOTBOOL_KLABEL, bSmtValid)), context);
                             requires = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, bSmtInvalid, check);
+                            requires = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, predicates, requires);
 
                             // reconstruct the rule
                             left = KApp.of(KLabelConstant.of(ltlSatLabel.getLabel()), bagVar, rest);

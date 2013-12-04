@@ -12,7 +12,7 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  * Date: 11/25/13
  * Time: 3:02 PM
  * Transform symbolic variables into K variables. This is done
- * only in the symbolic backend.
+ * only in the Maude symbolic backend.
  */
 public class TokenVariableToSymbolic extends CopyOnWriteTransformer {
     public TokenVariableToSymbolic(Context context) {
