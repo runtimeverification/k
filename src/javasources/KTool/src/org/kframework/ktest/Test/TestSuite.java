@@ -185,6 +185,7 @@ public class TestSuite {
         List<Proc<TestCase>> ps = new ArrayList<>(len);
 
         System.out.format("Kompile the language definitions...(%d in total)%n", len);
+        long startTime = System.currentTimeMillis();
         startTpe();
         for (TestCase tc : tests) {
             Proc<TestCase> p = new Proc<>(tc, tc.getKompileCmd(),
@@ -194,11 +195,11 @@ public class TestSuite {
             kompileSteps++;
         }
         stopTpe();
+        kompileTime += (System.currentTimeMillis() - startTime) / 1000;
 
         // collect successful test cases, report failures
         for (Proc<TestCase> p : ps) {
             TestCase tc = p.getObj();
-            kompileTime += p.getTimeDeltaSec();
             if (p.isSuccess())
                 successfulTests.add(tc);
             makeReport(p, makeRelative(tc.getDefinition()),
@@ -221,6 +222,7 @@ public class TestSuite {
         int len = tests.size();
         System.out.format("Generate PDF files...(%d in total)%n", len);
         startTpe();
+        long startTime = System.currentTimeMillis();
         for (TestCase tc : tests) {
             Proc<TestCase> p = new Proc<>(tc, tc.getPdfCmd(),
                     strComparator, timeout, verbose, colorSetting);
@@ -229,11 +231,11 @@ public class TestSuite {
             pdfSteps++;
         }
         stopTpe();
+        pdfTime += (System.currentTimeMillis() - startTime) / 1000;
 
         boolean ret = true;
         for (Proc<TestCase> p : ps) {
             TestCase tc = p.getObj();
-            pdfTime += p.getTimeDeltaSec();
             if (!p.isSuccess())
                 ret = false;
             makeReport(p, makeRelative(tc.getDefinition()),
@@ -286,19 +288,20 @@ public class TestSuite {
             // we can have more parallelism here, but just to keep things same as old ktest,
             // I'm testing tast cases sequentially
             List<Proc<KRunProgram>> testCaseProcs = new ArrayList<>(programs.size());
+            long startTime = System.currentTimeMillis();
             startTpe();
             for (KRunProgram program : programs) {
                 testCaseProcs.add(runKRun(program));
                 totalTests++;
             }
             stopTpe();
+            krunTime += (System.currentTimeMillis() - startTime) / 1000;
 
             for (Proc<KRunProgram> p : testCaseProcs)
                 if (p != null) // p may be null when krun test is skipped because of missing
                                // input file
                 {
                     KRunProgram pgm = p.getObj();
-                    krunTime += p.getTimeDeltaSec();
                     makeReport(p, makeRelative(tc.getDefinition()),
                             FilenameUtils.getName(pgm.pgmName));
                     if (p.isSuccess())
