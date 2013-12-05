@@ -28,6 +28,7 @@ import org.kframework.compile.transformers.DataStructureToLookupUpdate;
 import org.kframework.compile.transformers.RemoveBrackets;
 import org.kframework.compile.transformers.RemoveSyntacticCasts;
 import org.kframework.compile.transformers.ResolveAnonymousVariables;
+import org.kframework.compile.transformers.ResolveBinder;
 import org.kframework.compile.transformers.ResolveBlockingInput;
 import org.kframework.compile.transformers.ResolveBuiltins;
 import org.kframework.compile.transformers.ResolveFunctions;
@@ -138,7 +139,7 @@ public class JavaSymbolicBackend extends BasicBackend {
         steps.add(new AddTopCellConfig(context));
         steps.add(new AddTopCellRules(context));
 
-        //steps.add(new ResolveBinder(context));
+        steps.add(new ResolveBinder(context));
         steps.add(new ResolveAnonymousVariables(context));
         //steps.add(new AddK2SMTLib(context));
         steps.add(new AddPredicates(context));
