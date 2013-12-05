@@ -20,6 +20,7 @@ import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
 import org.kframework.backend.java.util.ProductionsOfSort;
 import org.kframework.backend.java.util.TestCaseGenerationUtil;
+import org.kframework.krun.K;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.krun.api.SearchType;
 import org.kframework.utils.general.GlobalSettings;
@@ -67,7 +68,9 @@ public class SymbolicRewriter {
         this.definition = definition;
 
         /* computes the map from sorts to production terms */
+        if (K.do_testgen) {
         ProductionsOfSort.init(definition);
+        }
         //        System.out.println(ProductionsOfSort.getProdTermsOf("AExp"));
 
         /* populate the table of rules rewriting the top configuration */

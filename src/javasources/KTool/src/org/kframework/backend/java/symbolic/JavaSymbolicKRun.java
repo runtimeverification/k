@@ -57,7 +57,7 @@ public class JavaSymbolicKRun implements KRun {
         this.context = definition.context();
         this.context.kompiled = context.kompiled;
         transformer = new KILtoBackendJavaKILTransformer(this.context);
-       // this.simulationRewriter = new SymbolicRewriter(this.definition);
+        this.simulationRewriter = new SymbolicRewriter(this.definition);
 	}
 
     @Override
