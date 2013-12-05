@@ -1,5 +1,6 @@
 package org.kframework.main;
 
+import java.awt.GraphicsEnvironment;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -58,7 +59,18 @@ public class Main {
 			} else if (args[0].equals("-kast")) {
 				org.kframework.kast.KastFrontEnd.kast(args2);
 			} else if (args[0].equals("-krun")) {
-				org.kframework.krun.Main.execute_Krun(args2);
+			    // unable to load commandlineOptions since it loads K class 
+			    // K loads Color which sets headless field in GraphicsEnvironment 
+			    // and since this can be set only once we can not reset it by java.awt.headless
+			    for (String s : args){
+			        if(s.contains("debug-gui")){
+			            System.setProperty("java.awt.headless", "false");
+			            //force headless filed to be instantiated
+			            java.awt.GraphicsEnvironment.isHeadless() ;
+			            break;
+			        }
+			    }
+			    org.kframework.krun.Main.execute_Krun(args2);
 			} else if (args[0].equals("-kpp")) {
 				org.kframework.main.Kpp.codeClean(args2);
 			} else if (args[0].equals("-ioserver")) {
