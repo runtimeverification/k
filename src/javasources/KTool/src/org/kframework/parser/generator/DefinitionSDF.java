@@ -201,7 +201,7 @@ public class DefinitionSDF {
 		sdf.append("\n");
 
 		sdf.append("context-free restrictions\n");
-		sdf.append("	VariableDz -/- [a-zA-Z0-9\\{]\n");
+		sdf.append("	VariableDz -/- [a-zA-Z0-9]\n");
 
 		sdf.append("lexical syntax\n");
 		for (Production p : psdfv.constants) {

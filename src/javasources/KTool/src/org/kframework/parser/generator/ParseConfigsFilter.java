@@ -1,7 +1,5 @@
 package org.kframework.parser.generator;
 
-import org.kframework.compile.checks.CheckListOfKDeprecation;
-import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Configuration;
 import org.kframework.kil.Module;
@@ -29,7 +27,6 @@ import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
 import org.kframework.parser.concrete.disambiguate.VariableTypeInferenceFilter;
 import org.kframework.parser.utils.ReportErrorsVisitor;
 import org.kframework.parser.utils.Sglr;
-import org.kframework.utils.Stopwatch;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.XmlLoader;
 import org.kframework.utils.errorsystem.KException;
@@ -101,7 +98,6 @@ public class ParseConfigsFilter extends BasicTransformer {
 					st.setAttributes(ss.getAttributes());
 				}
 
-				new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation(context), context).check(config);
 				// disambiguate configs
 				config = config.accept(new SentenceVariablesFilter(context));
 				config = config.accept(new CellEndLabelFilter(context));

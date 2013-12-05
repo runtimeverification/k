@@ -28,8 +28,6 @@ public class string_unescape_sort_0_0 extends Strategy {
 		String str = istr.stringValue();
 
 		//str = StringUtil.unEscapeSortName(str);
-		str = str.replace("Dl", "{");
-		str = str.replace("Dr", "}");
 		str = str.replace("Dz", "#");
 		str = str.replace("Dd", "D");
 

@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Formatter;
 
-import org.kframework.compile.checks.CheckListOfKDeprecation;
-import org.kframework.compile.utils.CheckVisitorStep;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Module;
 import org.kframework.kil.Rule;
@@ -79,7 +77,7 @@ public class ParseRulesFilter extends BasicTransformer {
 
 	public ASTNode transform(StringSentence ss) throws TransformerException {
 		if (ss.getType().equals(Constants.RULE) || ss.getType().equals(Constants.CONTEXT)) {
-            long startTime = System.currentTimeMillis();
+			long startTime = System.currentTimeMillis();
 			try {
 				ASTNode config;
 
@@ -144,7 +142,6 @@ public class ParseRulesFilter extends BasicTransformer {
 					a = a + 1;
 				}
 
-				new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation(context), context).check(config);
 				config = config.accept(new SentenceVariablesFilter(context));
 				config = config.accept(new CellEndLabelFilter(context));
 				if (checkInclusion)

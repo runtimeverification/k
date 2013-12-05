@@ -310,14 +310,10 @@ public class StringUtil {
 	public static String escapeSortName(String str) {
 		str = str.replace("D", "Dd");
 		str = str.replace("#", "Dz");
-		str = str.replace("{", "Dl");
-		str = str.replace("}", "Dr");
 		return str;
 	}
 
 	public static String unEscapeSortName(String str) {
-		str = str.replace("Dl", "{");
-		str = str.replace("Dr", "}");
 		str = str.replace("Dz", "#");
 		str = str.replace("Dd", "D");
 		return str;

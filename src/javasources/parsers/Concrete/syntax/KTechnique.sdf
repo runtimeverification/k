@@ -9,7 +9,6 @@ context-free priorities
 	".K"				-> K {cons("K12Empty"), prefer}
 	DotDz				-> K {cons("K1Empty")}
 	K "~>" K			-> K {left, cons("K1Seq")}
-	".List{K}"			-> KList {cons("ListDlKDr12Empty")}
 	".KList"			-> KList {cons("KList12Empty")}
 	KList   ",," KList	-> KList {left, cons("KList1List")}
 } > { non-assoc:
@@ -90,7 +89,7 @@ context-free restrictions
 	DotDz		-/- [a-zA-Z\.]
 
 lexical restrictions
-	".List"		-/- [a-zA-Z0-9\{\}]
+	".List"		-/- [a-zA-Z0-9]
 	".ListItem"	-/- [a-zA-Z0-9]
 	".Map"		-/- [a-zA-Z0-9]
 	".MapItem"	-/- [a-zA-Z0-9]
@@ -99,7 +98,6 @@ lexical restrictions
 	".Bag"		-/- [a-zA-Z0-9]
 	".BagItem"	-/- [a-zA-Z0-9]
 	".K"		-/- [a-zA-Z0-9]
-	".List{K}"	-/- [a-zA-Z0-9]
 	".KList"	-/- [a-zA-Z0-9]
 
 	"List"		-/- [a-zA-Z0-9]
@@ -111,6 +109,5 @@ lexical restrictions
 	"Bag"		-/- [a-zA-Z0-9]
 	"BagItem"	-/- [a-zA-Z0-9]
 	"K"			-/- [a-zA-Z0-9]
-	"List{K}"	-/- [a-zA-Z0-9]
 	"KList"		-/- [a-zA-Z0-9]
 

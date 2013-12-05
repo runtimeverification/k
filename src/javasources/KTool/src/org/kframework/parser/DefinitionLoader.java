@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.compile.checks.CheckListDecl;
-import org.kframework.compile.checks.CheckListOfKDeprecation;
 import org.kframework.compile.checks.CheckSortTopUniqueness;
 import org.kframework.compile.checks.CheckStreams;
 import org.kframework.compile.checks.CheckSyntaxDecl;
@@ -126,7 +125,6 @@ public class DefinitionLoader {
 
 			def = (Definition) def.accept(new RemoveUnusedModules(context));
 
-			new CheckVisitorStep<Definition>(new CheckListOfKDeprecation(context), context).check(def);
 			// HERE: add labels to sorts
 
 			def.preprocess(context);
@@ -241,8 +239,6 @@ public class DefinitionLoader {
 			org.kframework.kil.Definition def = new org.kframework.kil.Definition();
 			def.setItems(di);
 
-			new CheckVisitorStep<Definition>(new CheckListOfKDeprecation(context), context).check(def);
-
 			// ------------------------------------- import files in Stratego
 			org.kframework.parser.concrete.KParser.ImportTbl(context.kompiled.getAbsolutePath() + "/def/Concrete.tbl");
 
@@ -279,7 +275,6 @@ public class DefinitionLoader {
 		JavaClassesFactory.endConstruction();
 
 		// TODO: reject rewrites
-		new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation(context), context).check(config);
 		config = config.accept(new SentenceVariablesFilter(context));
 		config = config.accept(new CellEndLabelFilter(context));
 		//if (checkInclusion)
@@ -332,7 +327,6 @@ public class DefinitionLoader {
 		JavaClassesFactory.endConstruction();
 
 		// TODO: reject rewrites
-		new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation(context), context).check(config);
 		config = config.accept(new SentenceVariablesFilter(context));
 		config = config.accept(new CellEndLabelFilter(context));
 		//if (checkInclusion)
@@ -385,7 +379,6 @@ public class DefinitionLoader {
 		JavaClassesFactory.endConstruction();
 
 		// TODO: don't allow rewrites
-		new CheckVisitorStep<ASTNode>(new CheckListOfKDeprecation(context), context).check(config);
 		config = config.accept(new SentenceVariablesFilter(context));
 		config = config.accept(new CellEndLabelFilter(context));
 		config = config.accept(new CellTypesFilter(context));
