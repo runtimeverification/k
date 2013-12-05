@@ -58,7 +58,7 @@ rules
 
 	justFine =
 		mydisambiguate ; justFine2
-	justFinePgms = bottomup(try(removeDuplicateAmb)) ; topdown(try(annolocation)) ; makeConsLists ; justFinePgms2
+	justFinePgms = topdown(try(annolocation)) ; flatten-amb-top ; topdown(try(merge-amb ; flatten-amb-top )) ; justFinePgms2
 
 	removeDuplicateAmb:
 		amb([x, x]) -> x
