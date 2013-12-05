@@ -11,4 +11,4 @@ hanoi(N,X,Y,Z) :-
     hanoi(1,X,Y,_),
     hanoi(M,Z,Y,X).
 
-?- hanoi(3,left,right,center).
+?- hanoi(2,"left","right","center").

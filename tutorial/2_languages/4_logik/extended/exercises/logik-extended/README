@@ -1,0 +1,13 @@
+Extend LOGIK with the following 3 features:
+
+1) Arithmetic constructs for terms: t1 * t2, t1 + t2, t1 - t2
+
+2) List constructs: [t1,t2,...,tn], and [h|t] for patterns
+
+3) Boolean predicates: t1 <= t2, t1 > t2
+
+4) Equality test/assignment predicate: t1 is t2.  Here t2 is evaluated
+to a value (i.e., no variables) and then its value is unified with t1.
+
+5) Write predicate: write(t).  Here t is expected to evaluate to a string
+or an integer.

@@ -1,5 +1,5 @@
 member(X, [X|_]).
 member(X, [_|T]) :- member(X,T).
 
-// Next has 7 solutions
+// Next has 6 or 7 solutions (depending what we mean by a "solution")
 ?- member(X, [1,2,3,4,5,6,5]).

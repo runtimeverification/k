@@ -1,4 +1,4 @@
-factorial(0,1). 
+factorial(0,1).
 
 factorial(N,F) :-
    N>0,
