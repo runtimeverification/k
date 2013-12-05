@@ -177,8 +177,19 @@ syntax MguOrError ::= Mgu | MguError
 // Turns an Mgu into a Map, ignoring the symbolic bindings
   syntax Map ::= Mgu2Map(K) [function]
 
-  rule Mgu2Map(subst((eqn(K1:K,,_:K) => .KList),,_))
-    when isSymbolicK(K1)   // ignore symbolic bindings
+  rule Mgu2Map(subst((eqn(K1:K,,K2:K) => eqn(K2:K,,K1:K)),,_))
+    when isSymbolicK(K1) 
+    andBool isVariable(K2)
+    andBool isSymbolicK(K2) =/=K true 
+// reorient symbolic-to-concrete variable bindings
+
+  rule Mgu2Map(subst((eqn(K1:K,,K2:K) => .KList),,_))
+    when isSymbolicK(K1) 
+    andBool isSymbolicK(K2)
+  rule Mgu2Map(subst((eqn(K1:K,,K2:K) => .KList),,_))
+    when isSymbolicK(K1) 
+    andBool (isVariable(K2) =/=K true) 
+  // ignore symbolic bindings
   rule Mgu2Map(subst((eqn(K1:K,,K2:K) => .KList),,_))
        (. => K1 |-> K2)
     when isSymbolicK(K1) =/=K true
