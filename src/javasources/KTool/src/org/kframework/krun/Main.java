@@ -25,6 +25,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.io.FilenameUtils;
 import org.fusesource.jansi.AnsiConsole;
+import org.kframework.backend.java.ksimulation.Waitor;
 import org.kframework.backend.java.symbolic.JavaSymbolicKRun;
 import org.kframework.backend.maude.krun.MaudeKRun;
 import org.kframework.compile.ConfigurationCleaner;
@@ -696,6 +697,114 @@ public class Main {
             org.kframework.utils.Error.report("Unable to start gui due to : " + e.getMessage());
         }
     }
+    
+    public static Term preDefineSimulation(CommandlineOptions cmd_options,
+    		CommandLine cmd,Context context,String directory,String pgm) throws IOException, KRunExecutionException{
+    	
+    	K.directory=directory;
+    	K.pgm = pgm;
+
+        File[] dirs = new File(K.directory).listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File current, String name) {
+                return new File(current, name).isDirectory();
+            }
+        });
+        
+        K.compiled_def = null;
+        for (int i = 0; i < dirs.length; i++) {
+            if (dirs[i].getAbsolutePath().endsWith("-kompiled")) {
+                if (K.compiled_def != null) {
+                    String msg = "Multiple compiled definitions found.";
+                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", new File(".").getAbsolutePath()));
+                } else {
+                    K.compiled_def = dirs[i].getAbsolutePath();
+                }
+            }
+        }
+
+        if (K.compiled_def == null) {
+            String msg = "Could not find a compiled definition.";
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", new File(".").getAbsolutePath()));
+        }
+        
+
+        File compiledFile = new File(K.compiled_def);
+        if (!compiledFile.exists()) {
+            org.kframework.utils.Error.report("\nCould not find compiled definition: "
+                    + K.compiled_def
+                    + "\nPlease compile the definition by using `kompile'.");
+        }
+
+        context.dotk = new File(
+                new File(K.compiled_def).getParent() + File.separator
+                        + ".k");
+        if (!context.dotk.exists()) {
+            context.dotk.mkdirs();
+        }
+        context.kompiled = new File(K.compiled_def);
+        K.kdir = context.dotk.getCanonicalPath();
+        K.setKDir();
+        
+        Term KAST = null;
+        RunProcess rp = new RunProcess();
+
+        if (!context.initialized) {
+            String path = K.compiled_def + "/defx-" + K.backend + ".bin";
+            Definition javaDef;
+            if (new File(path).exists()) {
+                javaDef = (Definition) BinaryLoader.load(K.compiled_def + "/defx-" + K.backend + ".bin");
+            } else {
+                GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+                        KExceptionGroup.CRITICAL,
+                        "Could not find compiled definition for backend '" + K.backend + "'.\n" +
+                                "Please ensure this backend has been kompiled."));
+                throw new AssertionError("unreachable");
+            }
+
+            // This is essential for generating maude
+            javaDef = new FlattenModules(context).compile(javaDef, null);
+
+            try {
+                javaDef = (Definition) javaDef
+                        .accept(new AddTopCellConfig(context));
+            } catch (TransformerException e) {
+                e.report();
+            }
+
+            javaDef.preprocess(context);
+
+            K.definition = javaDef;
+
+            K.kompiled_cfg = (org.kframework.kil.Configuration)
+                BinaryLoader.load(K.compiled_def + "/configuration.bin");
+        }
+
+        if (!cmd.hasOption("main-module")) {
+            K.main_module = K.definition.getMainModule();
+        }
+        if (!cmd.hasOption("syntax-module")) {
+            K.syntax_module = K.definition.getMainSyntaxModule();
+        }
+
+        if (K.pgm != null) {
+            KAST = rp.runParserOrDie(K.getProgramParser(), K.pgm, false, null, context);
+        } else {
+            KAST = null;
+        }
+
+        if (K.term != null) {
+            if (K.parser.equals("kast") && !cmd.hasOption("parser")) {
+                if (K.backend.equals("java")) {
+                    K.parser = "kast -ruleParser";
+                } else {
+                    K.parser = "kast -groundParser";
+                }
+            }
+        }
+        
+        return KAST;
+    }
 
     /**
      * @param cmds
@@ -947,7 +1056,43 @@ public class Main {
                 System.out.println(msg);
                 System.exit(0);
             }
-
+            
+            if(cmd.hasOption("simulation")) {
+            	
+            	String[] temp = cmd.getOptionValue("simulation").split("\\s+");
+            	K.simulationDefinitionLeft=temp[0];
+            	K.simulationDefinitionRight=temp[1];
+            	K.simulationProgLeft=temp[2];
+            	K.simulationProgRight=temp[3];
+            	
+            	Context contextLeft = new Context();
+            	Context contextRight = new Context();
+            	Term leftInitTerm = null;
+            	Term rightInitTerm = null;
+            	Waitor runSimulation = null;
+            	
+            	try {
+					leftInitTerm = Main.preDefineSimulation(cmd_options, cmd,
+							contextLeft, K.simulationDefinitionLeft, K.simulationProgLeft);
+					rightInitTerm = Main.preDefineSimulation(cmd_options, cmd,
+							contextRight, K.simulationDefinitionRight, K.simulationProgRight);
+				} catch (KRunExecutionException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+            	
+            	try {
+					runSimulation = new Waitor(contextLeft, contextRight, leftInitTerm, rightInitTerm);
+				} catch (KRunExecutionException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+            	
+            	runSimulation.start();
+            	
+            	return;
+            }
+            
             String[] remainingArguments = null;
             if (cmd_options.getCommandLine().getOptions().length > 0) {
                 remainingArguments = cmd.getArgs();

@@ -74,6 +74,11 @@ public class K {
 	public static String model_checking = "";
 	public static String output = "";
 	public static String load_cfg = null;
+	public static String simulationDefinitionLeft = "";
+	public static String simulationDefinitionRight = "";
+	public static String simulationProgLeft = "";
+	public static String simulationProgRight = "";
+
 
 	// variables to store if that specific option was set; also set default values for options
 	public static boolean help = false;

@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.fusesource.jansi.AnsiConsole;
 import org.kframework.backend.java.symbolic.JavaSymbolicKRun;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.KRunExecutionException;
@@ -77,7 +78,8 @@ public class Waitor extends Thread{
 			
 			if(Waitor.result){
 				
-				System.out.print(true);
+				AnsiConsole.out
+                .println(true);
 				break;
 			}
 			else {
@@ -95,7 +97,8 @@ public class Waitor extends Thread{
 				
 				if(temp==0){
 				
-				System.out.print(false);
+					AnsiConsole.out
+                    .println(false);
 				break;
 				}
 			}
