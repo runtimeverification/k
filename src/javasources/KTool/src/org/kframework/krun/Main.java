@@ -701,7 +701,7 @@ public class Main {
     public static Term preDefineSimulation(CommandlineOptions cmd_options,
     		CommandLine cmd,Context context,String directory,String pgm) throws IOException, KRunExecutionException{
     	
-    	K.directory=directory;
+    	K.directory=new File(directory).getCanonicalPath();;
     	K.pgm = pgm;
 
         File[] dirs = new File(K.directory).listFiles(new FilenameFilter() {
