@@ -698,6 +698,11 @@ public class Main {
         }
     }
     
+    
+    /*
+     * author: Liyi Li
+     * it will be used for simulation tool
+     */
     public static Term preDefineSimulation(CommandlineOptions cmd_options,
     		CommandLine cmd,Context context,String directory,String pgm) throws IOException, KRunExecutionException{
     	
