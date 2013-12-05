@@ -43,7 +43,7 @@ public class CmdArgParser {
                 .create());
         addOption(OptionBuilder.withLongOpt(Constants.SKIP_OPTION).hasArg().withArgName
                 ("steps")
-                .withDescription("The list of steps separated by whitespace to be skipped. A step" +
+                .withDescription("The list of steps to be skipped, separated by whitespace. A step" +
                         " is either [" + Constants.KOMPILE_STEP + "|" + Constants.PDF_STEP +
                         "|" + Constants.KRUN_STEP + "].").create());
         addOption(OptionBuilder.withLongOpt(Constants.DIRECTORY_OPTION).hasArg()
@@ -58,11 +58,11 @@ public class CmdArgParser {
 
 
         addOption(OptionBuilder.withLongOpt("ignore-white-spaces").hasArg().withArgName("on|off")
-                .withDescription("Ignore white spaces when comparsing results. (Default: on).")
+                .withDescription("Ignore white spaces when comparing results. (Default: on).")
                 .create());
         addOption(OptionBuilder.withLongOpt("ignore-balanced-parentheses").hasArg()
                 .withArgName("on|off").withDescription("Ignore balanced parentheses when " +
-                "comparsing results. (Default: on).").create());
+                "comparing results. (Default: on).").create());
 
         addOption(OptionBuilder.withLongOpt("dry").withDescription("Dry run: print out the " +
                 "command to be executed without actual execution.").create());
