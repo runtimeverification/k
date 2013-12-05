@@ -355,7 +355,7 @@ rules
 		a#(b) -> $[<empty sort="[srt]" loc="[loc]"/>
 		]
 		where <string-ends-with(|"Empty")> a
-		where mydebug(!"SynTerm: ")
+		where mydebug(!"Empty: ")
 		where srt := <getSort> a
 		where loc := <getLocAsString>
 
