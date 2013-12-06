@@ -1,6 +1,20 @@
 package org.kframework.backend.java.symbolic;
 
-import com.google.common.collect.ImmutableMap;
+import static org.kframework.backend.java.util.TestCaseGenerationSettings.PHASE_ONE_BOUND_FREEVARS;
+import static org.kframework.backend.java.util.TestCaseGenerationSettings.PHASE_ONE_BOUND_SUCCESSORS;
+import static org.kframework.backend.java.util.TestCaseGenerationSettings.PHASE_ONE_MAX_NUM_FREEVARS;
+import static org.kframework.backend.java.util.TestCaseGenerationSettings.PHASE_ONE_MAX_NUM_SUCCESSORS;
+import static org.kframework.backend.java.util.TestCaseGenerationSettings.PHASE_TWO_MAX_NUM_SUCCESSORS;
+import static org.kframework.backend.java.util.TestCaseGenerationSettings.TWO_PHASE_GENERATION;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.indexing.BottomIndex;
 import org.kframework.backend.java.indexing.FreezerIndex;
@@ -21,27 +35,19 @@ import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
 import org.kframework.backend.java.util.ProductionsOfSort;
 import org.kframework.backend.java.util.TestCaseGenerationUtil;
 import org.kframework.krun.K;
-import org.kframework.krun.api.io.FileSystem;
 import org.kframework.krun.api.SearchType;
+import org.kframework.krun.api.io.FileSystem;
 import org.kframework.utils.general.GlobalSettings;
 
-import java.util.Collection;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-
 
 /**
  *
  *
  * @author AndreiS
- * 
+ *
  */
 public class SymbolicRewriter {
 
@@ -58,7 +64,7 @@ public class SymbolicRewriter {
     private final Set<Rule> unindexedRules;
     private final List<ConstrainedTerm> results = new ArrayList<ConstrainedTerm>();
     private boolean transition;
-    
+
 
     /*
      * Liyi Li : add simulation rules in the constructor, and allow user to input label [alphaRule] as
@@ -119,11 +125,11 @@ public class SymbolicRewriter {
                         coolingSetBuilder.add(rule);
                     }
                 } else if(rule.containsAttribute("alphaRule")){
-                	
+
                 	if(index.isUnifiable(rule.indexingPair().first)) {
                 		simulationSetBuilder.add(rule);
                 	}
-                	
+
                 } else {
                     if (index.isUnifiable(rule.indexingPair().first)) {
                         setBuilder.add(rule);
@@ -151,7 +157,7 @@ public class SymbolicRewriter {
         coolingRuleTable = coolingMapBuilder.build();
         ruleTable = mapBuilder.build();
         simulationRuleTable = simulationMapBuilder.build();
-        
+
         ImmutableSet.Builder<Rule> setBuilder = ImmutableSet.builder();
         for (Rule rule : definition.rules()) {
             if (!rule.containsKCell()) {
@@ -184,26 +190,26 @@ public class SymbolicRewriter {
     public ConstrainedTerm rewrite(ConstrainedTerm constrainedTerm) {
         return rewrite(constrainedTerm, -1);
     }
-    
+
     /* author: Liyi Li
      * a function return all the next steps of a given term
      */
     public ArrayList<ConstrainedTerm> rewriteAll(ConstrainedTerm constrainedTerm){
-    	
+
     	computeRewriteStep(constrainedTerm);
-    	
+
     	return (ArrayList<ConstrainedTerm>) results;
     }
-    
+
     /*
      * author: Liyi Li
      * return the rules for simulations only
      */
     public Map<Index,Set<Rule>> getSimulationMap(){
-    	
+
     	return this.simulationRuleTable;
     }
-    
+
     /*
      * author: Liyi Li
      * return the rules for simulations only
@@ -238,12 +244,12 @@ public class SymbolicRewriter {
     private ConstrainedTerm getTransition(int n) {
         return n < results.size() ? results.get(n) : null;
     }
-    
+
     /*
      * author : Liyi Li
      * computer steps by rules of simulation
      */
-    
+
     public ConstrainedTerm computeSimulationStep(ConstrainedTerm constrainedTerm) {
     	ArrayList<ConstrainedTerm> stepResults = new ArrayList<ConstrainedTerm>();
 
@@ -314,7 +320,7 @@ public class SymbolicRewriter {
         }
         //System.out.println("Result: " + results.toString());
         //System.out.println();
-        
+
         if(stepResults.isEmpty()){
         	return null;
         } else{
@@ -616,55 +622,135 @@ public class SymbolicRewriter {
         queue.add(initialTerm);
 
         label:
-            for (step = 0; !queue.isEmpty() && step != depth; ++step) {
-                //System.out.println("step = " + step);
-                for (ConstrainedTerm term : queue) {
-                    // TODO(YilongL): handle the following pruning condition nice and clean
-                    if (TestCaseGenerationUtil.BOUND_NUMBER_OF_FREE_VARIABLES) {
-                        if (term.variableSet().size() > 10) continue;
-                    }
-
-                    computeRewriteStep(term);
-
-                    if (results.isEmpty()) {
-                        /* final term */
-                        testgenResults.add(term);
-                        if (testgenResults.size() == bound) {
-                            break label;
-                        }
-                    }
-
-                    for (int i = 0; getTransition(i) != null; ++i) {
-                        if (visited.add(getTransition(i))) {
-                            nextQueue.add(getTransition(i));
-                        }
+        for (step = 0; !queue.isEmpty() && step != depth; ++step) {
+//            System.out.printf("testgen #step %s\n", step);
+            for (ConstrainedTerm term : queue) {
+                // TODO(YilongL): handle the following pruning condition nice
+                // and clean
+                if (PHASE_ONE_BOUND_FREEVARS) {
+                    if (TestCaseGenerationUtil.getNumOfFreeVars(term,
+                            definition.context()) > PHASE_ONE_MAX_NUM_FREEVARS) {
+                        continue;
                     }
                 }
 
-                /* swap the queues */
-                List<ConstrainedTerm> temp;
-                temp = queue;
-                if (TestCaseGenerationUtil.BOUND_WIDTH) {
-                    queue = TestCaseGenerationUtil.getArbitraryStates(nextQueue, 200);
-                } else {
-                    queue = nextQueue;
+                computeRewriteStep(term);
+
+                if (results.isEmpty()) {
+                    /* final term */
+                    testgenResults.add(term);
+                    if (testgenResults.size() == bound) {
+                        break label;
+                    }
                 }
-                nextQueue = temp;
-                nextQueue.clear();
+
+                for (int i = 0; getTransition(i) != null; ++i) {
+                    if (visited.add(getTransition(i))) {
+                        nextQueue.add(getTransition(i));
+                    }
+                }
             }
+
+            /* swap the queues */
+            List<ConstrainedTerm> temp;
+            temp = queue;
+            if (PHASE_ONE_BOUND_SUCCESSORS) {
+                queue = TestCaseGenerationUtil.getArbitraryStates(nextQueue,
+                        PHASE_ONE_MAX_NUM_SUCCESSORS);
+            } else {
+                queue = nextQueue;
+            }
+            nextQueue = temp;
+            nextQueue.clear();
+        }
 
         /* add the configurations on the depth frontier */
         while (!queue.isEmpty() && testgenResults.size() != bound) {
             ConstrainedTerm cnstrTerm = queue.remove(0);
-            computeRewriteStep(cnstrTerm, 1);
-            if (results.isEmpty())
-                testgenResults.add(cnstrTerm);
+
+            if (TWO_PHASE_GENERATION) {
+                ConstrainedTerm grndTerm = getFirstReachableGroundTerm(cnstrTerm, -1);
+
+//                System.out.printf("cnstrTerm = %s\n", cnstrTerm);
+//                System.out.printf("grndTerm = %s\n", grndTerm);
+
+                if (grndTerm != null) {
+                    testgenResults.add(grndTerm);
+                }
+            } else {
+                computeRewriteStep(cnstrTerm, 1);
+                if (results.isEmpty()) {
+                    testgenResults.add(cnstrTerm);
+                }
+            }
         }
 
         stopwatch.stop();
         System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
 
         return testgenResults;
+    }
+
+    /**
+     * Searches for a ground term which the given term can reach within a given
+     * bound of rewrite steps.
+     * <p>
+     * Since this method is leveraging heuristics to avoid full-fledged BFS,
+     * there is no guarantee to always find an existing ground term.
+     *
+     * @param initTerm
+     *            the given term
+     *
+     * @param depth
+     *            the given bound of rewrite steps; a negative value specifies
+     *            no bound
+     *
+     * @return the first ground term that is found, or null if no ground term is
+     *         found
+     */
+    private ConstrainedTerm getFirstReachableGroundTerm(ConstrainedTerm initTerm, int depth) {
+        Set<ConstrainedTerm> visited = new HashSet<ConstrainedTerm>();
+        List<ConstrainedTerm> queue = new ArrayList<ConstrainedTerm>();
+        List<ConstrainedTerm> nextQueue = new ArrayList<ConstrainedTerm>();
+
+        visited.add(initTerm);
+        queue.add(initTerm);
+
+        for (int step = 0; !queue.isEmpty() && step != depth; ++step) {
+//            System.out.printf("searching for ground term #step %s\n", step);
+            for (ConstrainedTerm term : queue) {
+                computeRewriteStep(term);
+
+                if (results.isEmpty()) {
+                    /* final term */
+                    return term;
+                }
+
+                for (int i = 0; getTransition(i) != null; ++i) {
+                    if (visited.add(getTransition(i))) {
+                        nextQueue.add(getTransition(i));
+                    }
+                }
+            }
+
+            /* swap the queues */
+            List<ConstrainedTerm> temp;
+            temp = queue;
+            queue = TestCaseGenerationUtil.getMostConcreteStates(nextQueue,
+                    PHASE_TWO_MAX_NUM_SUCCESSORS, definition.context());
+            nextQueue = temp;
+            nextQueue.clear();
+        }
+
+        while (!queue.isEmpty()) {
+            ConstrainedTerm cnstrTerm = queue.remove(0);
+            computeRewriteStep(cnstrTerm, 1);
+            if (results.isEmpty()) {
+                return cnstrTerm;
+            }
+        }
+
+        return null;
     }
 
     public List<ConstrainedTerm> prove(List<Rule> rules, FileSystem fs) {
