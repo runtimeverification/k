@@ -381,7 +381,7 @@ public class TestSuite {
     private void printVerboseRunningMsg(KRunProgram program) {
         StringBuilder b = new StringBuilder();
         b.append("Running [");
-        b.append(StringUtils.join(program.args, " "));
+        b.append(StringUtils.join(QuoteHandling.quoteArguments(program.args), " "));
         b.append("]");
         if (program.inputFile != null) {
             b.append(" [input: ");

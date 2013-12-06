@@ -201,7 +201,7 @@ public class Proc<T> implements Runnable {
      * @param returnCode return code of the process
      */
     private void handlePgmResult(int returnCode) {
-        String procCmd = StringUtils.join(args, ' ');
+        String procCmd = StringUtils.join(QuoteHandling.quoteArguments(args), ' ');
         String red = ColorUtil.RgbToAnsi(Color.RED, colorSetting);
         if (returnCode == 0) {
 
