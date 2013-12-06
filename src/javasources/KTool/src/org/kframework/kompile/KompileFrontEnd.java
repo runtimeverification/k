@@ -93,25 +93,11 @@ public class KompileFrontEnd {
     }
 
     private static void kompile(CommandLine cmd) throws IOException {
-        String def = cmd.getArgs()[0];
-        String step = cmd.getOptionValue("step", null);
-        File mainFile = new File(def);
-        GlobalSettings.mainFile = mainFile;
-        GlobalSettings.mainFileWithNoExtension = mainFile.getAbsolutePath()
-                .replaceFirst("\\.k$", "").replaceFirst("\\.xml$", "");
-        if (!mainFile.exists()) {
-            File errorFile = mainFile;
-            mainFile = new File(def + ".k");
-            if (!mainFile.exists()) {
-                String msg = "File: " + errorFile.getName() + "(.k) not found.";
-                GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-                        KExceptionGroup.CRITICAL, msg,
-                        errorFile.getAbsolutePath(), "File system."));
-            }
-        }
-
+        final String def = cmd.getArgs()[0];
+        final String step = cmd.getOptionValue("step", null);
+        GlobalSettings.setMainFile(def);
         GlobalSettings.outputDir = cmd.getOptionValue("directory",
-                mainFile.getAbsoluteFile().getParent());
+                GlobalSettings.mainFile.getAbsoluteFile().getParent());
         org.kframework.utils.Error.checkIfOutputDirectory(GlobalSettings.outputDir);
 
         Context context = new Context();
@@ -150,7 +136,7 @@ public class KompileFrontEnd {
             case "maude":
                 backend = new KompileBackend(Stopwatch.sw, context);
                 context.dotk = new File(GlobalSettings.outputDir + File.separator +
-                        FilenameUtils.removeExtension(mainFile.getName()) + "-kompiled");
+                        FilenameUtils.removeExtension(GlobalSettings.mainFile.getName()) + "-kompiled");
                 checkAnotherKompiled(context.dotk);
                 context.dotk.mkdirs();
                 break;
@@ -158,7 +144,7 @@ public class KompileFrontEnd {
                 GlobalSettings.javaBackend = true;
                 backend = new JavaSymbolicBackend(Stopwatch.sw, context);
                 context.dotk = new File(GlobalSettings.outputDir + File.separator +
-                        FilenameUtils.removeExtension(mainFile.getName()) + "-kompiled");
+                        FilenameUtils.removeExtension(GlobalSettings.mainFile.getName()) + "-kompiled");
                 checkAnotherKompiled(context.dotk);
                 context.dotk.mkdirs();
                 break;
@@ -174,7 +160,7 @@ public class KompileFrontEnd {
                 GlobalSettings.javaBackend = true;
                 Backend innerBackend = new JavaSymbolicBackend(Stopwatch.sw, context);
                 context.dotk = new File(GlobalSettings.outputDir + File.separator +
-                        FilenameUtils.removeExtension(mainFile.getName()) + "-kompiled");
+                        FilenameUtils.removeExtension(GlobalSettings.mainFile.getName()) + "-kompiled");
                 checkAnotherKompiled(context.dotk);
                 context.dotk.mkdirs();
                 backend = new UnflattenBackend(Stopwatch.sw, context, innerBackend);
@@ -183,7 +169,7 @@ public class KompileFrontEnd {
                 GlobalSettings.symbolic = true;
                 backend = new SymbolicBackend(Stopwatch.sw, context);
                 context.dotk = new File(GlobalSettings.outputDir + File.separator +
-                        FilenameUtils.removeExtension(mainFile.getName()) + "-kompiled");
+                        FilenameUtils.removeExtension(GlobalSettings.mainFile.getName()) + "-kompiled");
                 checkAnotherKompiled(context.dotk);
                 context.dotk.mkdirs();
                 if (cmd.hasOption("symbolic-rules")) {
@@ -203,8 +189,8 @@ public class KompileFrontEnd {
 
         if (backend != null) {
             String lang = cmd.getOptionValue("main-module",
-                    FileUtil.getMainModule(mainFile.getName()));
-            genericCompile(mainFile, lang, backend, step, context);
+                    FileUtil.getMainModule(GlobalSettings.mainFile.getName()));
+            genericCompile(lang, backend, step, context);
         }
 
         verbose(cmd, context);
@@ -221,11 +207,11 @@ public class KompileFrontEnd {
     }
 
 
-    private static void genericCompile(File mainFile, String lang, Backend backend, String step,
+    private static void genericCompile(String lang, Backend backend, String step,
                                        Context context) throws IOException {
         org.kframework.kil.Definition javaDef;
         Stopwatch.sw.start();
-        javaDef = DefinitionLoader.loadDefinition(mainFile, lang,
+        javaDef = DefinitionLoader.loadDefinition(GlobalSettings.mainFile, lang,
                 backend.autoinclude(), context);
         javaDef.accept(new CountNodesVisitor(context));
 
@@ -246,12 +232,12 @@ public class KompileFrontEnd {
         backend.run(javaDef);
     }
 
-    public static void printUsageS(KompileOptionsParser op) {
+    private static void printUsageS(KompileOptionsParser op) {
         org.kframework.utils.Error.helpMsg(USAGE, HEADER_STANDARD, FOOTER_STANDARD,
                 op.getOptionsStandard(), new OptionComparator(op.getOptionList()));
     }
 
-    public static void printUsageE(KompileOptionsParser op) {
+    private static void printUsageE(KompileOptionsParser op) {
         org.kframework.utils.Error.helpMsg(USAGE, HEADER_EXPERIMENTAL, FOOTER_EXPERIMENTAL,
                 op.getOptionsExperimental(), new OptionComparator(op.getOptionList()));
     }

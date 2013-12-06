@@ -1,5 +1,8 @@
 package org.kframework.utils.general;
 
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.KPaths;
 
@@ -33,6 +36,19 @@ public class GlobalSettings {
         }
 
         return f;
+    }
+
+    public static void setMainFile(String def) {
+        mainFile = new File(def);
+        mainFileWithNoExtension = mainFile.getAbsolutePath().replaceFirst("\\.k$", "").replaceFirst("\\.xml$", "");
+        if (!mainFile.exists()) {
+            File errorFile = mainFile;
+            mainFile = new File(def + ".k");
+            if (!mainFile.exists()) {
+                String msg = "File: " + errorFile.getName() + "(.k) not found.";
+                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, errorFile.getAbsolutePath(), "File system."));
+            }
+        }
     }
 
     public enum OS {

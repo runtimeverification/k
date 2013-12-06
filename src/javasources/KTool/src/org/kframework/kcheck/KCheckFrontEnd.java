@@ -73,19 +73,9 @@ public class KCheckFrontEnd {
 					def = restArgs[0];
 			}
 
-			File mainFile = new File(def);
-			GlobalSettings.mainFile = mainFile;
-			GlobalSettings.mainFileWithNoExtension = mainFile.getAbsolutePath().replaceFirst("\\.k$", "").replaceFirst("\\.xml$", "");
-			if (!mainFile.exists()) {
-				File errorFile = mainFile;
-				mainFile = new File(def + ".k");
-				if (!mainFile.exists()) {
-					String msg = "File: " + errorFile.getName() + "(.k) not found.";
-					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, errorFile.getAbsolutePath(), "File system."));
-				}
-			}
+                        GlobalSettings.setMainFile(def);
 
-			String lang = FileUtil.getMainModule(mainFile.getName());
+			String lang = FileUtil.getMainModule(GlobalSettings.mainFile.getName());
 
 			// Matching Logic & Symbolic Calculus options
 			GlobalSettings.symbolicEquality = true;
@@ -95,20 +85,20 @@ public class KCheckFrontEnd {
 			
 			if (context.dotk == null) {
 				try {
-					context.dotk = new File(mainFile.getCanonicalFile().getParent() + File.separator + ".k");
+					context.dotk = new File(GlobalSettings.mainFile.getCanonicalFile().getParent() + File.separator + ".k");
 				} catch (IOException e) {
-					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Canonical file cannot be obtained for main file.", mainFile.getAbsolutePath(),
+					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Canonical file cannot be obtained for main file.", GlobalSettings.mainFile.getAbsolutePath(),
 							"File system."));
 				}
 				context.dotk.mkdirs();
 			}
 
 			Backend backend = new RLBackend(Stopwatch.sw, context);
-        output = FilenameUtils.removeExtension(mainFile.getName()) + "-kompiled";
+        output = FilenameUtils.removeExtension(GlobalSettings.mainFile.getName()) + "-kompiled";
 			context.dotk = new File(output);
 			context.dotk.mkdirs();
 
-			genericCompile(mainFile, lang, backend, null, context);
+			genericCompile(lang, backend, null, context);
         BinaryLoader.save(context.dotk.getAbsolutePath() + "/compile-options.bin", cmd);
 
         verbose(cmd, context);
@@ -123,7 +113,6 @@ public class KCheckFrontEnd {
 
 
 	private static void genericCompile(
-            File mainFile,
             String lang,
             Backend backend,
             String step,
@@ -131,7 +120,7 @@ public class KCheckFrontEnd {
 		org.kframework.kil.Definition javaDef;
 		try {
 			Stopwatch.sw.start();
-			javaDef = DefinitionLoader.loadDefinition(mainFile, lang, backend.autoinclude(), context);
+			javaDef = DefinitionLoader.loadDefinition(GlobalSettings.mainFile, lang, backend.autoinclude(), context);
             javaDef.accept(new CountNodesVisitor(context));
 
 			CompilerSteps<Definition> steps = backend.getCompilationSteps();

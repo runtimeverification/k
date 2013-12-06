@@ -50,7 +50,7 @@ public class Main {
 			} else if (args[0].equals("-kcheck")) {
 				org.kframework.kcheck.KCheckFrontEnd.kcheck(args2);
 			} else if (args[0].equals("-ktest")) {
-				org.kframework.ktest.KTest.test(args2);
+				org.kframework.ktest.KTest.main(args2);
 			} else if (args[0].equals("-kast")) {
 				org.kframework.kast.KastFrontEnd.kast(args2);
 			} else if (args[0].equals("-krun")) {
