@@ -1,8 +1,6 @@
 package org.kframework.ktest;
 
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 public class QuoteHandling {
@@ -44,13 +42,6 @@ public class QuoteHandling {
         String[] ret = args.clone();
         for (int i = 0; i < ret.length; i++)
             ret[i] = quoteArgument(ret[i]);
-        return ret;
-    }
-
-    public static List<String> quoteArguments(final List<String> args) {
-        List<String> ret = new LinkedList<String>();
-        for (String s : args)
-            ret.add(quoteArgument(s));
         return ret;
     }
 
