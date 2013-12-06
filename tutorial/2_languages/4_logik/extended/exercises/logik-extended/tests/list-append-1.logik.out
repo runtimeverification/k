@@ -2,4 +2,4 @@ Search results:
 
 Solution 1:
 Solution:Map -->
-V |-> [ (a ( .Vals )) | ([ (b ( .Vals )) | ([ .List{","} ]) ]) ]
+"V" |-> [ (a ( .Vals )) | ([ (b ( .Vals )) | ([ .List{","} ]) ]) ]

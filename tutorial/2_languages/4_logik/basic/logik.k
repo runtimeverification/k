@@ -277,9 +277,8 @@ place each clause in its own cell, and then place the query in the
 
 /*@ When all the goals are solved, indicated by the empty \textsf{k}
 cell, the calculated most general unifier (mgu) is in the \textsf{mgu}
-cell.  In that case, to ease reading of the final solution we move the
-mgu in the \textsf{solution} cell and delete the rest of the
-configuration: */
+cell.  In that case, to ease reading of the final solution we apply
+the mgu to the solution map and delete the rest of the configuration: */
 
   rule (<T>... <k> . </k> <mgu> Theta:Mgu </mgu> ...</T> => .)
        <solution> Solution:Map => applyMgu(Theta,Solution) </solution>

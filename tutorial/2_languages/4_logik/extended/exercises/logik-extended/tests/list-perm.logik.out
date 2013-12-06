@@ -2,24 +2,24 @@ Search results:
 
 Solution 1:
 Solution:Map -->
-P |-> [ 1 | ([ 2 | ([ 3 | ([ .List{","} ]) ]) ]) ]
+"P" |-> [ 1 | ([ 2 | ([ 3 | ([ .List{","} ]) ]) ]) ]
 
 Solution 2:
 Solution:Map -->
-P |-> [ 1 | ([ 3 | ([ 2 | ([ .List{","} ]) ]) ]) ]
+"P" |-> [ 1 | ([ 3 | ([ 2 | ([ .List{","} ]) ]) ]) ]
 
 Solution 3:
 Solution:Map -->
-P |-> [ 2 | ([ 1 | ([ 3 | ([ .List{","} ]) ]) ]) ]
+"P" |-> [ 2 | ([ 1 | ([ 3 | ([ .List{","} ]) ]) ]) ]
 
 Solution 4:
 Solution:Map -->
-P |-> [ 2 | ([ 3 | ([ 1 | ([ .List{","} ]) ]) ]) ]
+"P" |-> [ 2 | ([ 3 | ([ 1 | ([ .List{","} ]) ]) ]) ]
 
 Solution 5:
 Solution:Map -->
-P |-> [ 3 | ([ 1 | ([ 2 | ([ .List{","} ]) ]) ]) ]
+"P" |-> [ 3 | ([ 1 | ([ 2 | ([ .List{","} ]) ]) ]) ]
 
 Solution 6:
 Solution:Map -->
-P |-> [ 3 | ([ 2 | ([ 1 | ([ .List{","} ]) ]) ]) ]
+"P" |-> [ 3 | ([ 2 | ([ 1 | ([ .List{","} ]) ]) ]) ]

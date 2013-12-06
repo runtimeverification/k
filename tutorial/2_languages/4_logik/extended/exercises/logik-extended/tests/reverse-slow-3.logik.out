@@ -2,11 +2,8 @@ Search results:
 
 Solution 1:
 Solution:Map -->
-L |-> '_`(_`)(cons,, (c ( .List{","} )), (cons ( (X, (cons ( ((a ( .Vals )), (
-  nil ( .Vals ))) ))) )))
-T |-> '_`(_`)(cons,, (a ( .List{","} )), (cons ( (X, (cons ( ((c ( .Vals )), (
-  nil ( .Vals ))) ))) )))
-X |-> #symVariable(33)
-X |-> #symVariable(244)
-X |-> #symVariable(339)
-X |-> #symVariable(550)
+"L" |-> '_`(_`)(cons,, (c ( .List{","} )), (cons ( (X, (cons ( ((a ( .Vals ))
+  , (nil ( .Vals ))) ))) )))
+"T" |-> '_`(_`)(cons,, (a ( .List{","} )), (cons ( (X, (cons ( ((c ( .Vals ))
+  , (nil ( .Vals ))) ))) )))
+"X" |-> X
