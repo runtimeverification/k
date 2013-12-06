@@ -163,8 +163,7 @@ public class CmdArg {
             throw new InvalidArgumentException("target file format is not valid: " + ext +
                     "(should be .xml or .k)");
 
-        String directory = getDirectoryArg(cmdOpts, Constants.DIRECTORY_OPTION,
-                currentDir);
+        String directory = getDirectoryArg(cmdOpts, Constants.DIRECTORY_OPTION, currentDir);
         String programs = getDirectoryArg(cmdOpts, Constants.PROGRAMS_OPTION,
                 FilenameUtils.concat(currentDir, FilenameUtils.getFullPath(targetFile)));
         String results = getDirectoryArg(cmdOpts, Constants.RESULTS_OPTION,
@@ -301,14 +300,14 @@ public class CmdArg {
         }
     }
 
-    private static String getDirectoryArg(CommandLine cmdOpts, String argName,
-                                          String default_)
+    private static String getDirectoryArg(CommandLine cmdOpts, String argName, String default_)
             throws InvalidArgumentException {
         final String ret = cmdOpts.getOptionValue(argName, default_);
-        if (!new File(ret).isDirectory())
+        File f = new File(ret);
+        if (!f.isDirectory())
             throw new InvalidArgumentException("--" + argName + " argument is not a folder: " +
                     ret);
-        return ret;
+        return f.getAbsolutePath();
     }
 }
 
