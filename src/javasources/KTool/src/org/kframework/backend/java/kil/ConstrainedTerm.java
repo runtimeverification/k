@@ -171,7 +171,7 @@ public class ConstrainedTerm extends Term {
             solutions.add(candidate);
         }
 
-        if (K.do_testgen) {
+        if (K.do_testgen && !solutions.isEmpty()) {
             boolean changed;
             Collection<SymbolicConstraint> tmpSolutions = solutions;
             Set<Variable> sortIntersectionVariables = new HashSet<Variable>();
@@ -350,10 +350,14 @@ public class ConstrainedTerm extends Term {
             } while (changed);
         }
 
+//        System.out.printf(
+//                "###unify###\nsubject = %s\npattern = %s\nsols = %s\n", this,
+//                constrainedTerm, solutions);
         return solutions;
     }
 
     private Set<Variable> computeSortIntersection(String sort1, String sort2) {
+        // TODO(YilongL): call Context#getCommonSubsorts to simplify the code
         Set<Variable> results = new HashSet<Variable>();
         Context defContext = context.definition().context();
 
