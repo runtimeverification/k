@@ -1,0 +1,5 @@
+<tests>
+
+  <include file="../basic/tests/config.xml" directory="basic" />
+
+</tests>
