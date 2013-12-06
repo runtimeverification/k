@@ -257,19 +257,19 @@ discard the main cell. */
                     <clause color="pink" multiplicity="*"> .K </clause>
                   </clauses>
                 </T>
-                <solution> .Map </solution>
+                <solution multiplicity="?"> .Map </solution>
 
 /*@ \section{Pre- and post-processing}
 
 Before we launch the semantics, we first scan the given program and
 place each clause in its own cell, and then place the query in the
-\textsf{k} cell: */
+\textsf{k} cell, creating the solution cell, too: */
 
   rule <k> C:Clause Pgm => Pgm </k>
        (. => <clause> C </clause>)
 
   rule <k> ?- Ls:Terms. => Ls ...</k>
-       <solution> .Map => #metaVariablesMap(Ls) </solution>
+       (. => <solution> #metaVariablesMap(Ls) </solution>)
 
 //@ We also sequentialize the goals for easier processing:
   rule L:Term, Ls:Terms => L ~> Ls
@@ -291,8 +291,7 @@ were declared optional).  This way, if we see an empty configuration
 when we search for all solutions, we know that some attempts failed
 (but we do not know which ones). */
 
-  rule (<T>... <mgu> _:MguError </mgu> ...</T> => .)
-       <solution> _ => "No" |-> "Solution" </solution>
+  rule <T>... <mgu> _:MguError </mgu> ...</T> <solution> _ </solution> => .
 
 /*@ \section{Semantics}
 
