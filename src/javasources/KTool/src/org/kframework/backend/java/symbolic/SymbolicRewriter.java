@@ -224,6 +224,14 @@ public class SymbolicRewriter {
         return rules;
     }
 
+    /**
+     * Gets the rules that could be applied to a given term according to the
+     * rule indexing mechanism.
+     *
+     * @param term
+     *            the given term
+     * @return a set of rules that could be applied
+     */
     private Set<Rule> getRules(Term term) {
         Set<Rule> rules = new HashSet<Rule>();
         for (IndexingPair pair : term.getIndexingPairs()) {
