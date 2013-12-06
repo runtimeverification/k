@@ -137,6 +137,13 @@ public class CheckVariables extends BasicVisitor {
 		}
 		//TODO: add checks for Ensures, too.
 		for (Variable v : right.keySet()) {
+			if (MetaK.isAnonVar(v) && !v.isFresh()) {
+				GlobalSettings.kem.register(new KException(KException
+						.ExceptionType.ERROR,
+						KException.KExceptionGroup.COMPILER,
+						"Anonymous variable found in the right hand side of a rewrite.",
+						getName(), v.getFilename(), v.getLocation()));
+			}
 			if (!left.containsKey(v)) {
                 /* matching logic relaxes this restriction */
                 if (!GlobalSettings.javaBackend) {
