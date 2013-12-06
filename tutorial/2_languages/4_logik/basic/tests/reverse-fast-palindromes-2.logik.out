@@ -1,0 +1,8 @@
+Search results:
+
+Solution 1:
+Solution:Map -->
+A |-> #symVariable(10)
+A |-> #symVariable(24)
+B |-> #symVariable(17)
+C |-> A

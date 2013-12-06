@@ -1,0 +1,13 @@
+Search results:
+
+Solution 1:
+Solution:Map -->
+L1 |-> cons ( ((a ( .Terms )), (cons ( ((b ( .Terms )), (nil ( .Terms ))) ))) 
+  )
+L2 |-> nil ( .Terms )
+
+Solution 2:
+Solution:Map -->
+L1 |-> nil ( .Terms )
+L2 |-> cons ( ((b ( .Terms )), (cons ( ((a ( .Terms )), (nil ( .Terms ))) ))) 
+  )
