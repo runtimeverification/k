@@ -16,7 +16,6 @@ import org.kframework.parser.basic.Basic;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.errorsystem.KMessages;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
@@ -28,6 +27,7 @@ public class BasicParser {
 	private File mainFile;
 	private String mainModule;
 	private boolean autoinclude;
+	private static final String missingFileMsg = "Could not find 'required' file: ";
 
 	public BasicParser(boolean autoinclude) {
 		this.autoinclude = autoinclude;
@@ -45,7 +45,7 @@ public class BasicParser {
 			// parse first the file given at console for fast failure in case of error
 			File file = new File(fileName);
 			if (!file.exists())
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1004 + fileName + " given at console.", "", ""));
+				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, missingFileMsg + fileName + " given at console.", "", ""));
 
 			slurp2(file, context);
 
@@ -57,7 +57,7 @@ public class BasicParser {
 				file = buildCanonicalPath("autoinclude.k", new File(fileName));
 				if (file == null)
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
-							KMessages.ERR1004 + fileName + " autoimported for every definition ", fileName, ""));
+							missingFileMsg + fileName + " autoimported for every definition ", fileName, ""));
 
 				slurp2(file, context);
 				moduleItems.addAll(tempmi);
@@ -98,7 +98,7 @@ public class BasicParser {
 					File newFile = buildCanonicalPath(req.getValue(), file);
 
 					if (newFile == null)
-						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1004 + req.getValue(), req.getFilename(), req
+						GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, missingFileMsg + req.getValue(), req.getFilename(), req
 								.getLocation()));
 
 					slurp2(newFile, context);

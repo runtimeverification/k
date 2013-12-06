@@ -9,7 +9,6 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.errorsystem.KMessages;
 import org.kframework.utils.general.GlobalSettings;
 
 import java.io.*;
@@ -44,14 +43,14 @@ public class PdfBackend extends BasicBackend {
             process.waitFor();
             if (process.exitValue() != 0)
                 GlobalSettings.kem.register(
-                        new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1003, "", ""));
+                        new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "pdflatex returned a non-zero exit code.  The pdf might be generated, but with bugs. please inspect the latex logs in the .k directory.", "", ""));
 
             sw.printIntermediate("Latex2PDF");
 
             return new File(FilenameUtils.removeExtension(latexFile.getCanonicalPath()) + ".pdf");
         } catch (IOException | InterruptedException e) {
             GlobalSettings.kem.register(
-                    new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, KMessages.ERR1001, "", ""));
+                    new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot generate the pdf version of the definition. It seems that `pdflatex` is not installed or is not in your path. To generate the pdf version you can run `pdflatex` having as argument the latex version of the definition.", "", ""));
         }
         return null; // unreachable code
     }
