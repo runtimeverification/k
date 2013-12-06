@@ -153,6 +153,20 @@ syntax MguOrError ::= Mgu | MguError
   rule accumulateVars(#vars(Xs:KList)) => #vars(Xs)   [structural, anywhere]
 
 
+  syntax Map ::= applyMgu(Mgu, Map) [function]
+  rule applyMgu(Mgu, ((X |-> V) M:Map)) 
+    => (X |-> applyMgu(Mgu,V)) applyMgu(Mgu, M)
+  rule applyMgu(_,.Map) => .Map
+
+
+  syntax Map ::= #metaVariablesMap(K) [function]
+  rule #metaVariablesMap(K:K) => #metaVarsMap(getVars(K))
+  
+  syntax Map ::= #metaVarsMap(K) [function]
+  rule #metaVarsMap(#vars((X:K => .KList),,_)) 
+       (.Map => #tokenToString(X) |-> X)
+  rule #metaVarsMap(#vars(.KList)) => .Map 
+
 //  configuration <k> .K </k> <nextVar> 0 </nextVar>
 
   syntax K ::= getAlpha(K)  [function]
@@ -166,6 +180,10 @@ syntax MguOrError ::= Mgu | MguError
                   #vars((X => .KList),,_))
   rule freshSubst(subst(Eqns:KList),,#vars(.KList)) => subst(Eqns)
 
+
+
+
+
 // alpha conversion moved here by grigore
  syntax K ::= renameVariables(K)  [function]
             | applyAlpha(K)
@@ -177,6 +195,13 @@ syntax MguOrError ::= Mgu | MguError
 // Turns an Mgu into a Map, ignoring the symbolic bindings
   syntax Map ::= Mgu2Map(K) [function]
 
+  rule Mgu2Map(subst((eqn(K1:K,,_:K) => .KList),,_))
+    when isSymbolicK(K1)   // ignore symbolic bindings
+  rule Mgu2Map(subst((eqn(K1:K,,K2:K) => .KList),,_))
+       (. => K1 |-> K2)
+    when isSymbolicK(K1) =/=K true
+
+/*
   rule Mgu2Map(subst((eqn(K1:K,,K2:K) => eqn(K2:K,,K1:K)),,_))
     when isSymbolicK(K1) 
     andBool isVariable(K2)
@@ -194,6 +219,12 @@ syntax MguOrError ::= Mgu | MguError
        (. => K1 |-> K2)
     when isSymbolicK(K1) =/=K true
 
+*/
+
+
   rule Mgu2Map(subst(.KList)) => .Map
+
+
+
 endmodule
 

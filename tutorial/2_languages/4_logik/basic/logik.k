@@ -257,7 +257,7 @@ discard the main cell. */
                     <clause color="pink" multiplicity="*"> .K </clause>
                   </clauses>
                 </T>
-                <solution multiplicity="?"> .Map </solution>
+                <solution> .Map </solution>
 
 /*@ \section{Pre- and post-processing}
 
@@ -268,7 +268,8 @@ place each clause in its own cell, and then place the query in the
   rule <k> C:Clause Pgm => Pgm </k>
        (. => <clause> C </clause>)
 
-  rule ?- Ls:Terms. => Ls
+  rule <k> ?- Ls:Terms. => Ls ...</k>
+       <solution> .Map => #metaVariablesMap(Ls) </solution>
 
 //@ We also sequentialize the goals for easier processing:
   rule L:Term, Ls:Terms => L ~> Ls
@@ -280,8 +281,8 @@ cell.  In that case, to ease reading of the final solution we move the
 mgu in the \textsf{solution} cell and delete the rest of the
 configuration: */
 
-  rule <T>... <k> . </k> <mgu> Theta:Mgu </mgu> ...</T>
-    => <solution> Mgu2Map(Theta) </solution>
+  rule (<T>... <k> . </k> <mgu> Theta:Mgu </mgu> ...</T> => .)
+       <solution> Solution:Map => applyMgu(Theta,Solution) </solution>
 
 /*@ Since we are not interested in seeing the failed attempts to solve
 the query, we collapse all the error configurations into an empty
@@ -290,7 +291,8 @@ were declared optional).  This way, if we see an empty configuration
 when we search for all solutions, we know that some attempts failed
 (but we do not know which ones). */
 
-  rule <T>... <mgu> _:MguError </mgu> ...</T> => .
+  rule (<T>... <mgu> _:MguError </mgu> ...</T> => .)
+       <solution> _ => "No" |-> "Solution" </solution>
 
 /*@ \section{Semantics}
 
