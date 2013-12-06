@@ -1,0 +1,24 @@
+Search results:
+
+Solution 1:
+Solution:Map -->
+L |-> '_`(_`)(cons,, #symVariable(10), (cons ( (#symVariable(10), (nil ( .Vals
+   ))) )))
+
+Solution 2:
+Solution:Map -->
+L |-> '_`(_`)(cons,, #symVariable(10), (cons ( (#symVariable(38), (cons ( (
+  #symVariable(10), (nil ( .Vals ))) ))) )))
+
+Solution 3:
+Solution:Map -->
+L |-> '_`(_`)(cons,, #symVariable(10), (cons ( (#symVariable(38), (cons ( (
+  #symVariable(38), (cons ( (#symVariable(10), (nil ( .Vals ))) ))) ))) )))
+
+Solution 4:
+Solution:Map -->
+L |-> '_`(_`)(cons,, #symVariable(10), (nil ( .Vals )))
+
+Solution 5:
+Solution:Map -->
+L |-> '_`(_`)(nil,, .List{","})

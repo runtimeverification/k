@@ -1,0 +1,11 @@
+Search results:
+
+Solution 1:
+Solution:Map -->
+L |-> '_`(_`)(cons,, (a ( .List{","} )), (cons ( ((b ( .Vals )), (nil ( .Vals 
+  ))) )))
+
+Solution 2:
+Solution:Map -->
+L |-> '_`(_`)(cons,, (b ( .List{","} )), (cons ( ((a ( .Vals )), (nil ( .Vals 
+  ))) )))

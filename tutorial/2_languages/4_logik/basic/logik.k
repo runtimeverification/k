@@ -206,7 +206,9 @@ used in the type inferencers in Tutorial 5. */
 The syntax of LOGIK is straightforward: a program is a sequence of
 Horn clauses followed by a query: */
 
-  syntax Term ::= Variable | Literal | Literal "(" Terms ")"
+  syntax Term ::= Variable
+                | Literal                           [klabel('LiteralAsTerm)]
+                | Literal "(" Terms ")"
   syntax Terms ::= List{Term,","}
   syntax Clause ::= Term ":-" Terms "." | Term "."
   syntax Query ::= "?-" Terms "."
@@ -232,12 +234,7 @@ symbols take a (potentially empty) list of arguments.  These will
 simply the semantics later on, by not having to treat special cases. */
 
   rule L. => L :- .Terms .                                       [macro]
-// What I would really like to say here, but the tool does not allow us
-// to do that yet, is:
-//   rule IdAsTerm(X) => X(.Terms) when isCapitalizedId(X) =/= true  [macro]
-// Instead, we currently have to add rules like the following
-  rule (X:Literal => X(.Terms)) :- _ .                           [macro]
-  rule (X:Literal => X(.Terms)),_                                [macro]
+  rule 'LiteralAsTerm(X:Literal) => X(.Terms)                    [macro]
 
 /*@ \section{Configuration}
 
