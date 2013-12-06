@@ -8,7 +8,7 @@ public class QuoteHandling {
     private static final String SINGLE_QUOTE = "\'";
     private static final String DOUBLE_QUOTE = "\"";
 
-    private static Set<String> escapes = new HashSet<>();
+    private static final Set<String> escapes = new HashSet<>();
     static {
         escapes.add("<");
         escapes.add(">");
