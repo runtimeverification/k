@@ -5,9 +5,6 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 
-import org.kframework.kagreg.KagregFrontEnd;
-import org.kframework.kcheck.KCheckFrontEnd;
-import org.kframework.ktest.KTest;
 import org.kframework.utils.Error;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.KPaths;
@@ -17,12 +14,10 @@ public class Main {
 
 	/**
 	 * Sets the {@code java.library.path} system property to include the native libraries
-	 * directory for this platform.
+	 * directory containing extra Jar files distributed with K for this platform.
 	 */
 	private static void setJavaLibraryPath() {
-        String javaLibraryPath = KPaths.getJavaLibraryPath();
-
-		System.setProperty("java.library.path", javaLibraryPath);
+		System.setProperty("java.library.path", KPaths.getJavaLibraryPath());
 
 		/* force java to reset the path (dirty hack) */
 		try {
@@ -51,11 +46,11 @@ public class Main {
 			if (args[0].equals("-kompile")) {
 				org.kframework.kompile.KompileFrontEnd.main(args2);
 			} else if (args[0].equals("-kagreg")) {
-				KagregFrontEnd.kagreg(args2);
+				org.kframework.kagreg.KagregFrontEnd.kagreg(args2);
 			} else if (args[0].equals("-kcheck")) {
-				KCheckFrontEnd.kcheck(args2);
+				org.kframework.kcheck.KCheckFrontEnd.kcheck(args2);
 			} else if (args[0].equals("-ktest")) {
-				KTest.main(args2);
+				org.kframework.ktest.KTest.test(args2);
 			} else if (args[0].equals("-kast")) {
 				org.kframework.kast.KastFrontEnd.kast(args2);
 			} else if (args[0].equals("-krun")) {
