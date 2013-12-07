@@ -1,5 +1,7 @@
 package org.kframework.backend.java.kil;
 
+import com.google.common.collect.Multimap;
+import org.apache.commons.collections15.MultiMap;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
@@ -164,5 +166,15 @@ public class KLabelConstant extends KLabel {
             }
         }
         return false;
+    }
+
+    public Multimap<Integer, Integer> getBinderMap() {
+        for (Production production : productions) {
+            if (production.containsAttribute("binder")) {
+                return production.getBinderMap();
+                //assuming is binder if one production says so.
+            }
+        }
+        return  null;
     }
 }

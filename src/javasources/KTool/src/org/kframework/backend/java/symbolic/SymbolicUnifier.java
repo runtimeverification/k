@@ -428,15 +428,21 @@ public class SymbolicUnifier extends AbstractUnifier {
         if (kLabel instanceof KLabelConstant) {
             KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
             if (kLabelConstant.isBinder()) {
-                assert kList.getItems().size()==2 && !kList.hasFrame() :
-                        "Only supporting binders of the form lambda x. e for now";
-                Term boundVars = kList.get(0);
-                Term bindingExp = kList.get(1);
-                Set<Variable> variables = boundVars.variableSet();
-                Map<Variable,Variable> freshSubstitution = Variable.getFreshSubstitution(variables);
-                Term freshBoundVars = boundVars.substituteWithBinders(freshSubstitution, context);
-                Term freshbindingExp = bindingExp.substituteWithBinders(freshSubstitution, context);
-                kList = new KList(ImmutableList.<Term>of(freshBoundVars,freshbindingExp));
+                Multimap<Integer, Integer> binderMap = kLabelConstant.getBinderMap();
+                List<Term> terms = new ArrayList<>(kList.getContents());
+                for (Integer boundVarPosition : binderMap.keySet()) {
+                    Term boundVars = terms.get(boundVarPosition);
+                    Set<Variable> variables = boundVars.variableSet();
+                    Map<Variable,Variable> freshSubstitution = Variable.getFreshSubstitution(variables);
+                    Term freshBoundVars = boundVars.substituteWithBinders(freshSubstitution, context);
+                    terms.set(boundVarPosition, freshBoundVars);
+                    for (Integer bindingExpPosition : binderMap.get(boundVarPosition)) {
+                        Term bindingExp = terms.get(bindingExpPosition);
+                        Term freshbindingExp = bindingExp.substituteWithBinders(freshSubstitution, context);
+                        terms.set(bindingExpPosition, freshbindingExp);
+                    }
+                }
+                kList = new KList(ImmutableList.copyOf(terms));
             }
         }
         unify(kList, patternKItem.kList());
