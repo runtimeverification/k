@@ -60,7 +60,9 @@ public class KTest {
                     new File(cmdArgs.getTargetFile()), cmdArgs).parse(), cmdArgs);
             break;
         case "k":
-            ret = new TestSuite(TestCase.makeTestCaseFromK(cmdArgs), cmdArgs);
+            TestCase tc = TestCase.makeTestCaseFromK(cmdArgs);
+            tc.validate();
+            ret = new TestSuite(tc, cmdArgs);
             break;
         default:
             // this code should be unreacable, because `validateArgs' should ensure that

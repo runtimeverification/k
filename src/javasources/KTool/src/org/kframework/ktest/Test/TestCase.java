@@ -77,7 +77,6 @@ public class TestCase {
         this.krunOpts = krunOpts;
         this.pgmSpecificKRunOpts = pgmSpecificKRunOpts;
         this.skips = skips;
-        this.validateTestCase();
     }
 
     public static TestCase makeTestCaseFromK(CmdArg cmdArgs) throws InvalidConfigError {
@@ -208,7 +207,7 @@ public class TestCase {
         return skips.contains(step);
     }
 
-    private void validateTestCase() throws InvalidConfigError {
+    public void validate() throws InvalidConfigError {
         if (!new File(definition.getObj()).isFile())
             throw new InvalidConfigError(
                     "definition file " + definition.getObj() + " is not a file.",

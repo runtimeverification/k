@@ -180,6 +180,8 @@ public class ConfigFileParser {
             for (String r : splitNodeValue(includeAttrs.getNamedItem("more-results")))
                 extendResults(ret, annotate(normalize(r, cmdArgs.getPrograms()), location));
 
+        for (TestCase tc : ret)
+            tc.validate();
         return ret;
     }
 
@@ -258,8 +260,10 @@ public class ConfigFileParser {
         List<PgmArg> krunOpts = parseAllPgmsKrunOpts(childNodes);
         Map<String, List<PgmArg>> pgmSpecificKRunOpts = parsePgmSpecificKRunOpts(childNodes);
 
-        return new TestCase(definition, programs, extensions, excludes, results,
+        TestCase ret = new TestCase(definition, programs, extensions, excludes, results,
                 kompileOpts, krunOpts, pgmSpecificKRunOpts, skips);
+        ret.validate();
+        return ret;
     }
 
     private String addDefinitionExt(String nodeValue) {
