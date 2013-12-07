@@ -171,8 +171,11 @@ public class SymbolicConstraint extends JavaSymbolicObject {
          * @return true if this equality is definitely false; otherwise, false
          */
         public boolean isFalse() {
-            if (leftHandSide instanceof Bottom || rightHandSide instanceof Bottom)
+            if (leftHandSide instanceof Bottom || rightHandSide instanceof Bottom) {
                 return true;
+            }
+            /* both leftHandSide & rightHandSide must have been evaluated before
+             * this method is invoked */
             if (leftHandSide.isGround() && rightHandSide.isGround()) {
                 return !leftHandSide.equals(rightHandSide);
             }
