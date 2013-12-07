@@ -2,7 +2,6 @@ package org.kframework.ktest.Test;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.kframework.krun.ColorSetting;
 import org.kframework.ktest.*;
 import org.kframework.ktest.CmdArgs.CmdArg;
@@ -183,7 +182,7 @@ public class TestSuite {
         long startTime = System.currentTimeMillis();
         startTpe();
         for (TestCase tc : tests) {
-            Proc<TestCase> p = new Proc<>(tc, tc.getKompileCmd(),
+            Proc<TestCase> p = new Proc<>(tc, tc.getKompileCmd(), tc.toKompileLogString(),
                     strComparator, timeout, verbose, colorSetting);
             ps.add(p);
             tpe.execute(p);
@@ -220,7 +219,7 @@ public class TestSuite {
         startTpe();
         long startTime = System.currentTimeMillis();
         for (TestCase tc : tests) {
-            Proc<TestCase> p = new Proc<>(tc, tc.getPdfCmd(),
+            Proc<TestCase> p = new Proc<>(tc, tc.getPdfCmd(), tc.toPdfLogString(),
                     strComparator, timeout, verbose, colorSetting);
             ps.add(p);
             tpe.execute(p);
@@ -371,7 +370,8 @@ public class TestSuite {
         if (verbose)
             printVerboseRunningMsg(program);
         Proc<KRunProgram> p = new Proc<>(program, args, inputContents, outputContentsAnn,
-                errorContentsAnn, strComparator, timeout, verbose, colorSetting);
+                errorContentsAnn, program.toLogString(), strComparator, timeout, verbose,
+                colorSetting);
         tpe.execute(p);
         krunSteps++;
         return p;
@@ -380,7 +380,7 @@ public class TestSuite {
     private void printVerboseRunningMsg(KRunProgram program) {
         StringBuilder b = new StringBuilder();
         b.append("Running [");
-        b.append(StringUtils.join(QuoteHandling.quoteArguments(program.getKrunCmd()), " "));
+        b.append(program.toLogString());
         b.append("]");
         if (program.inputFile != null) {
             b.append(" [input: ");

@@ -1,7 +1,6 @@
 package org.kframework.ktest;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.kframework.krun.ColorSetting;
 import org.kframework.utils.ColorUtil;
 import org.kframework.utils.errorsystem.KException;
@@ -45,6 +44,11 @@ public class Proc<T> implements Runnable {
      * Input string to pass to program.
      */
     private final String procInput;
+
+    /**
+     * String to be used while logging the process results.
+     */
+    private final String logStr;
 
     /**
      * Comparator to compare program outputs with expected outputs.
@@ -94,12 +98,14 @@ public class Proc<T> implements Runnable {
      * @param strComparator comparator object to compare program outputs with expected outputs
      */
     public Proc(T obj, String[] args, String procInput, Annotated<String, String> expectedOut,
-                Annotated<String, String> expectedErr, Comparator<String> strComparator,
-                int timeout, boolean verbose, ColorSetting colorSetting) {
+                Annotated<String, String> expectedErr, String logStr,
+                Comparator<String> strComparator, int timeout, boolean verbose,
+                ColorSetting colorSetting) {
         this.obj = obj;
         this.args = args;
         this.expectedOut = expectedOut;
         this.expectedErr = expectedErr;
+        this.logStr = logStr;
         this.procInput = procInput;
         this.strComparator = strComparator;
         this.timeout = timeout;
@@ -107,9 +113,9 @@ public class Proc<T> implements Runnable {
         this.colorSetting = colorSetting;
     }
 
-    public Proc(T obj, String[] args, Comparator<String> strComparator, int timeout,
+    public Proc(T obj, String[] args, String logStr, Comparator<String> strComparator, int timeout,
                 boolean verbose, ColorSetting colorSetting) {
-        this(obj, args, "", null, null, strComparator, timeout, verbose, colorSetting);
+        this(obj, args, "", null, null, logStr, strComparator, timeout, verbose, colorSetting);
     }
 
     @Override
@@ -201,7 +207,6 @@ public class Proc<T> implements Runnable {
      * @param returnCode return code of the process
      */
     private void handlePgmResult(int returnCode) {
-        String procCmd = StringUtils.join(QuoteHandling.quoteArguments(args), ' ');
         String red = ColorUtil.RgbToAnsi(Color.RED, colorSetting);
         if (returnCode == 0) {
 
@@ -210,25 +215,25 @@ public class Proc<T> implements Runnable {
                 // we're not comparing outputs
                 success = true;
                 if (verbose)
-                    System.out.format("Done with [%s] (time %d ms)%n", procCmd, timeDelta);
+                    System.out.format("Done with [%s] (time %d ms)%n", logStr, timeDelta);
             } else if (strComparator.compare(pgmOut, expectedOut.getObj()) != 0) {
                 // outputs don't match
                 System.out.format(
                         "%sERROR: [%s] output doesn't match with expected output (time: %d ms)%s%n",
-                        red, procCmd, timeDelta, ColorUtil.ANSI_NORMAL);
+                        red, logStr, timeDelta, ColorUtil.ANSI_NORMAL);
                 reportOutMatch(expectedOut, pgmOut);
             }
             else {
                 // outputs match
                 success = true;
                 if (verbose)
-                    System.out.format("Done with [%s] (time %d ms)%n", procCmd, timeDelta);
+                    System.out.format("Done with [%s] (time %d ms)%n", logStr, timeDelta);
             }
 
         } else if (returnCode == SIGTERM) {
 
             System.out.format("%sERROR: [%s] killed due to timeout.%s%n",
-                    red, procCmd, ColorUtil.ANSI_NORMAL);
+                    red, logStr, ColorUtil.ANSI_NORMAL);
             reportTimeout();
 
         } else {
@@ -237,7 +242,7 @@ public class Proc<T> implements Runnable {
             if (expectedErr == null) {
                 // we're not comparing error outputs
                 System.out.format("%sERROR: [%s] failed with error (time: %d ms)%s%n",
-                        red, procCmd, timeDelta, ColorUtil.ANSI_NORMAL);
+                        red, logStr, timeDelta, ColorUtil.ANSI_NORMAL);
                 if (verbose)
                     System.out.format("error was: %s%n", pgmErr);
                 reportErr(pgmErr);
@@ -246,13 +251,13 @@ public class Proc<T> implements Runnable {
                 // error outputs match
                 success = true;
                 if (verbose)
-                    System.out.format("Done with [%s] (time %d ms)%n", procCmd, timeDelta);
+                    System.out.format("Done with [%s] (time %d ms)%n", logStr, timeDelta);
             }
             else {
                 // error outputs don't match
                 System.out.format(
                         "%sERROR: [%s] throwed error, but expected error message doesn't match "+
-                                "(time: %d ms)%s%n", red, procCmd, timeDelta, ColorUtil.ANSI_NORMAL);
+                                "(time: %d ms)%s%n", red, logStr, timeDelta, ColorUtil.ANSI_NORMAL);
                 reportErrMatch(expectedErr, pgmErr);
             }
         }
