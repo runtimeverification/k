@@ -104,7 +104,7 @@ public class TestSuite {
 
         if (!skips.contains(KTestStep.KOMPILE)) {
             successfulTests = runKompileSteps(filterSkips(tests, KTestStep.KOMPILE));
-            ret &= successfulTests.size() == tests.size();
+            ret = successfulTests.size() == tests.size();
         }
         if (!skips.contains(KTestStep.PDF))
             ret &= runPDFSteps(filterSkips(successfulTests, KTestStep.PDF));

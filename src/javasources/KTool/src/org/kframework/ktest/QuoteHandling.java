@@ -38,13 +38,6 @@ public class QuoteHandling {
         }
     }
 
-    public static String[] quoteArguments(final String[] args) {
-        String[] ret = args.clone();
-        for (int i = 0; i < ret.length; i++)
-            ret[i] = quoteArgument(ret[i]);
-        return ret;
-    }
-
     /*
     public static void main(String[] args) {
         System.out.println(quoteArgument("test"));

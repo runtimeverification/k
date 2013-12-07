@@ -25,12 +25,7 @@ public class Annotated<T1, T2> {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(obj.toString());
-        sb.append(" [");
-        sb.append(ann.toString());
-        sb.append("]");
-        return sb.toString();
+        return obj.toString() + " [" + ann.toString() + "]";
     }
 
     @Override

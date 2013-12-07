@@ -134,13 +134,6 @@ public class TestCase {
     }
 
     /**
-     * @return extra program options to pass kompile process after passing taget file
-     */
-    public List<PgmArg> getKompileOpts() {
-        return kompileOpts;
-    }
-
-    /**
      * @return command array to pass process builder
      */
     public String[] getKompileCmd() {
