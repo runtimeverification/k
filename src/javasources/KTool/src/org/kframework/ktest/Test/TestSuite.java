@@ -133,28 +133,25 @@ public class TestSuite {
         if (!skips.contains(KTestStep.KOMPILE)) {
             List<TestCase> kompileSteps = filterSkips(tests, KTestStep.KOMPILE);
             for (TestCase tc : kompileSteps)
-                System.out.println(StringUtils.join(
-                        QuoteHandling.quoteArguments(tc.getKompileCmd()), " "));
+                System.out.println(tc.toKompileLogString());
         }
         if (!skips.contains(KTestStep.PDF)) {
             List<TestCase> pdfSteps = filterSkips(tests, KTestStep.PDF);
             for (TestCase tc : pdfSteps)
-                System.out.println(StringUtils.join(
-                        QuoteHandling.quoteArguments(tc.getPdfCmd()), " "));
+                System.out.println(tc.toPdfLogString());
         }
         if (!skips.contains(KTestStep.KRUN)) {
             List<TestCase> krunSteps = filterSkips(tests, KTestStep.KRUN);
             for (TestCase tc : krunSteps) {
                 List<KRunProgram> programs = tc.getPrograms();
                 for (KRunProgram program : programs) {
-                    String[] krunCmd = QuoteHandling.quoteArguments(program.getKrunCmd());
-                    LinkedList<String> krunCmd1 = new LinkedList<>();
-                    Collections.addAll(krunCmd1, krunCmd);
+                    StringBuilder krunLogCmd = new StringBuilder();
+                    krunLogCmd.append(program.toLogString());
                     if (program.outputFile != null)
-                        krunCmd1.add("> " + program.outputFile);
+                        krunLogCmd.append("> ").append(program.outputFile);
                     if (program.inputFile != null)
-                        krunCmd1.add("< " + program.inputFile);
-                    System.out.println(StringUtils.join(krunCmd1, " "));
+                        krunLogCmd.append("< ").append(program.inputFile);
+                    System.out.println(krunLogCmd.toString());
                 }
             }
         }

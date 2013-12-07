@@ -2,13 +2,11 @@ package org.kframework.ktest.Test;
 
 
 import org.apache.commons.io.FilenameUtils;
-import org.kframework.ktest.Annotated;
+import org.apache.commons.lang3.StringUtils;
+import org.kframework.ktest.*;
 import org.kframework.ktest.CmdArgs.CmdArg;
 import org.kframework.ktest.Config.InvalidConfigError;
 import org.kframework.ktest.Config.LocationData;
-import org.kframework.ktest.ExecNames;
-import org.kframework.ktest.KTestStep;
-import org.kframework.ktest.PgmArg;
 
 import java.io.File;
 import java.util.*;
@@ -156,11 +154,32 @@ public class TestCase {
     }
 
     /**
+     * @return String representation of kompile command to be used in logging.
+     */
+    public String toKompileLogString() {
+        String[] args = new String[kompileOpts.size() + 2];
+        args[0] = ExecNames.getKompile();
+        args[1] = getDefinition();
+        for (int i = 0; i < kompileOpts.size(); i++) {
+            PgmArg arg = kompileOpts.get(i);
+            args[i+2] = new PgmArg(arg.arg, QuoteHandling.quoteArgument(arg.val)).toString();
+        }
+        return StringUtils.join(args, " ");
+    }
+
+    /**
      * @return command array to pass process builder
      */
     public String[] getPdfCmd() {
         assert new File(getDefinition()).isFile();
         return new String[] { ExecNames.getKompile(), "--backend=pdf", getDefinition() };
+    }
+
+    /**
+     * @return String representation of PDF command to be used in logging.
+     */
+    public String toPdfLogString() {
+        return StringUtils.join(getPdfCmd(), " ");
     }
 
     public void setKompileOpts(List<PgmArg> kompileOpts) {
