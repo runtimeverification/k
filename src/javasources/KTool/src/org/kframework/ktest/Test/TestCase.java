@@ -251,14 +251,13 @@ public class TestCase {
                     String errorFilePath = searchFile(errorFileName, results);
 
                     // set krun args
-                    List<String> args = new LinkedList<>();
-                    args.add(pgmFilePath);
+                    List<PgmArg> args = new LinkedList<>();
                     for (PgmArg arg : getPgmOptions(pgmFilePath))
-                        args.add(arg.toString());
-                    args.add(new PgmArg("directory", definitionFilePath).toString());
+                        args.add(arg);
+                    args.add(new PgmArg("directory", definitionFilePath));
 
-                    ret.add(new KRunProgram(FilenameUtils.getBaseName(pgmFilePath),
-                            args, inputFilePath, outputFilePath, errorFilePath));
+                    ret.add(new KRunProgram(
+                            pgmFilePath, args, inputFilePath, outputFilePath, errorFilePath));
                 }
             } else {
                 ret.addAll(searchPrograms(pgmFile.getAbsolutePath()));
