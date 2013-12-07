@@ -238,7 +238,9 @@ public class TestCase {
      */
     private List<KRunProgram> searchPrograms(String pgmDir) {
         List<KRunProgram> ret = new LinkedList<>();
-        for (File pgmFile : new File(pgmDir).listFiles()) {
+        File[] files = new File(pgmDir).listFiles();
+        assert files != null : "searchPrograms returned null -- this is a bug, please report.";
+        for (File pgmFile : files) {
             if (pgmFile.isFile()) {
                 String pgmFilePath = pgmFile.getAbsolutePath();
                 if (extensions.contains(FilenameUtils.getExtension(pgmFilePath))) {
@@ -288,8 +290,6 @@ public class TestCase {
         ListIterator<Annotated<String, LocationData>> li = dirs.listIterator(dirs.size());
         while (li.hasPrevious()) {
             Annotated<String, LocationData> dir = li.previous();
-            // TODO: validate validate validate validate validate
-            // (forgetting to pass --programs or makes this part break) (osa1)
             String ret = searchFile(fname, dir.getObj());
             if (ret != null)
                 return ret;
@@ -304,7 +304,9 @@ public class TestCase {
      * @return absolute path if found, null if not
      */
     private String searchFile(String fname, String dir) {
-        for (File f : new File(dir).listFiles()) {
+        File[] files = new File(dir).listFiles();
+        assert files != null : "listFiles returned null -- this is a bug, please report";
+        for (File f : files) {
             if (f.isFile() && f.getName().equals(fname))
                 return f.getAbsolutePath();
             else if (f.isDirectory()) {
