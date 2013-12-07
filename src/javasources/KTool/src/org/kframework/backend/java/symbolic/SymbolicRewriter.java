@@ -2,9 +2,9 @@ package org.kframework.backend.java.symbolic;
 
 import static org.kframework.backend.java.util.TestCaseGenerationSettings.PHASE_ONE_BOUND_FREEVARS;
 import static org.kframework.backend.java.util.TestCaseGenerationSettings.PHASE_ONE_BOUND_SUCCESSORS;
-import static org.kframework.backend.java.util.TestCaseGenerationSettings.PHASE_ONE_ONLY_OUTPUT_GROUND_TERM;
 import static org.kframework.backend.java.util.TestCaseGenerationSettings.PHASE_ONE_MAX_NUM_FREEVARS;
 import static org.kframework.backend.java.util.TestCaseGenerationSettings.PHASE_ONE_MAX_NUM_SUCCESSORS;
+import static org.kframework.backend.java.util.TestCaseGenerationSettings.PHASE_ONE_ONLY_OUTPUT_GROUND_TERM;
 import static org.kframework.backend.java.util.TestCaseGenerationSettings.PHASE_TWO_MAX_NUM_SUCCESSORS;
 import static org.kframework.backend.java.util.TestCaseGenerationSettings.PHASE_TWO_MAX_REWRITE_STEPS;
 import static org.kframework.backend.java.util.TestCaseGenerationSettings.TWO_PHASE_GENERATION;
@@ -13,10 +13,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.kframework.backend.java.builtins.IntToken;
@@ -67,7 +65,7 @@ public class SymbolicRewriter {
     private final Map<Index,Set<Rule>> simulationRuleTable;
     private final Set<Rule> unindexedRules;
     private final List<ConstrainedTerm> results = new ArrayList<ConstrainedTerm>();
-    private final Map<ConstrainedTerm, Rule> appliedRules = new HashMap<ConstrainedTerm, Rule>();
+    private final List<Rule> appliedRules = new ArrayList<Rule>();
     private boolean transition;
 
 
@@ -402,7 +400,7 @@ public class SymbolicRewriter {
                     ConstrainedTerm newCnstrTerm = new ConstrainedTerm(result,
                             constraint1, constrainedTerm.termContext());
                     results.add(newCnstrTerm);
-                    appliedRules.put(newCnstrTerm, rule);
+                    appliedRules.add(rule);
 
                     if (results.size() == successorBound) {
                         return;
@@ -723,16 +721,18 @@ public class SymbolicRewriter {
         
         Set<String> shadowedLabels = new HashSet<String>();
         
-        for (Entry<ConstrainedTerm, Rule> entry : appliedRules.entrySet()) {
-            String label = entry.getValue().getAttribute("testgen-precede"); 
+        for (Rule rule : appliedRules) {
+            String label = rule.getAttribute("testgen-precede"); 
             if (label != null) {
                 shadowedLabels.add(label);
             }
         }
         
-        for (Iterator<ConstrainedTerm> iter = results.iterator(); iter.hasNext();) {
-            if (shadowedLabels.contains(appliedRules.get(iter.next()).label())) {
-                iter.remove();
+        List<ConstrainedTerm> tmpResults = new ArrayList<ConstrainedTerm>(results);
+        results.clear();
+        for (int i = 0; i < tmpResults.size(); i++) {
+            if (!shadowedLabels.contains(appliedRules.get(i).label())) {
+                results.add(tmpResults.get(i));
             }
         }
     }
@@ -766,6 +766,7 @@ public class SymbolicRewriter {
 //            System.out.printf("searching for ground term #step %s\n", step);
             for (ConstrainedTerm term : queue) {
                 computeRewriteStep(term);
+                eliminateShadowedRewriteSteps();
 
                 if (results.isEmpty()) {
                     /* final term */
