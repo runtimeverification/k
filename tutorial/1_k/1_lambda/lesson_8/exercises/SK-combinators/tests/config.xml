@@ -1,0 +1,7 @@
+<tests>
+
+  <include file="../../mu-derived/tests/config.xml"
+           more-programs="."
+           more-results="." />
+
+</tests>
