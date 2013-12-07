@@ -1,14 +1,7 @@
 <tests>
 
-  <test
-    definition="imp.k"
-    programs="."
-    extension="imp"
-    results="." >
+  <include file="../../../tests/config.xml"
+           more-programs="."
+           more-results="." />
 
-    <all-programs>
-      <krun-option name="--search" />
-      <krun-option name="--pattern" value="&lt;k&gt; K:K &lt;/k&gt; &lt;out&gt; ListItem(#buffer(S:String)) &lt;/out&gt;" />
-    </all-programs>
-  </test>
 </tests>

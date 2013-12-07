@@ -7,8 +7,17 @@ Recall that the S and K combinators are defined as follows:
   K E1 E2 = E1
   S E1 E2 E3 = E1 E3 (E2 E3)
 
-where the application is that of LAMBDA (left associative binary operation).
-To distinguish them from K variables, we prefer to write them SS and KK.
+where the application is that of LAMBDA (left associative binary operation),
+and that the lambda construct can be desugared to combinators using the
+following simple rules:
+
+  lambda X . X = S K K
+  lambda X . Y = K Y    when Y is a name different from X
+  lambda X . (E1 E2) = S (lambda X . E1) (lambda X . E2)
+  lambda X . B = K B    when B is any constant, including S or K
+
+To distinguish the S and K combinators from K variables and make them
+more visible, we prefer to write them as SS and KK instead of S and K.
 
 If defined correctly and completely, all the tests should pass when you call
 ktest on the provided config.xml file.  The tests include all the programs
