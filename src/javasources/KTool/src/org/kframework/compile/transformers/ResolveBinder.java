@@ -97,6 +97,8 @@ public class ResolveBinder extends CopyOnWriteTransformer {
                 m.region(m.end(), m.regionEnd());
             }
 
+            prod.setBinderMap(bndMap);
+
             /* do not generate the rules below for the java backend */
             if (!GlobalSettings.javaBackend) {
                 Rule rule = new Rule(

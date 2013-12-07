@@ -1,5 +1,6 @@
 package org.kframework.kil;
 
+import com.google.common.collect.Multimap;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
@@ -20,6 +21,7 @@ public class Production extends ASTNode {
 	protected List<ProductionItem> items;
 	protected String sort;
 	protected String ownerModuleName;
+    private Multimap<Integer, Integer> binderMap;
 
 	public static Production makeFunction(String funSort, String funName, String argSort, org.kframework.kil.loader.Context context) {
 		List<ProductionItem> prodItems = new ArrayList<ProductionItem>();
@@ -282,4 +284,12 @@ public class Production extends ASTNode {
 		}
 		throw new IllegalArgumentException("Index not found in production");
 	}
+
+    public Multimap<Integer, Integer> getBinderMap() {
+        return binderMap;
+    }
+
+    public void setBinderMap(Multimap<Integer, Integer> binderMap) {
+        this.binderMap = binderMap;
+    }
 }
