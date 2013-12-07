@@ -21,6 +21,7 @@ import java.util.Map;
  */
 public class Rule extends JavaSymbolicObject {
 
+    private final String label;
     private final Term leftHandSide;
     private final Term rightHandSide;
     private final Collection<Term> requires;
@@ -31,6 +32,7 @@ public class Rule extends JavaSymbolicObject {
     private final boolean containsKCell;
 
     public Rule(
+            String label,
             Term leftHandSide,
             Term rightHandSide,
             Collection<Term> requires,
@@ -38,6 +40,7 @@ public class Rule extends JavaSymbolicObject {
             Collection<Variable> freshVariables,
             UninterpretedConstraint lookups,
             Attributes attributes) {
+        this.label = label;
         this.leftHandSide = leftHandSide;
         this.rightHandSide = rightHandSide;
         this.requires = requires;
@@ -86,6 +89,10 @@ public class Rule extends JavaSymbolicObject {
         this(leftHandSide, rightHandSide, null, null);
     }
     */
+    
+    public String label() {
+        return label;
+    }
 
     public Collection<Term> requires() {
         return requires;
@@ -148,7 +155,10 @@ public class Rule extends JavaSymbolicObject {
 
     @Override
     public String toString() {
-        String string = "rule " + leftHandSide + " => " + rightHandSide;
+        String string = "rule ";
+        if ((label != null) && (!label.isEmpty()))
+            string += "[" + label + "]: ";
+        string += leftHandSide + " => " + rightHandSide;
         if (requires != null) {
             string += " requires " + requires;
         }

@@ -502,7 +502,8 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         //TODO: Deal with Ensures
         if (node.getRequires() != null) {
             Term term = (Term) node.getRequires().accept(this);
-            if (term instanceof KItem && ((KItem) term).kLabel().toString().equals("'#andBool")) {
+            if (term instanceof KItem && ((KItem) term).kLabel().toString()
+                    .equals(org.kframework.kil.KLabelConstant.ANDBOOL_KLABEL.getLabel())) {
                 for (Term item : ((KItem) term).kList().getItems()) {
                     if (item instanceof KItem && ((KItem) item).kLabel().toString().equals("'fresh(_)")) {
                         freshVariables.add((Variable) ((KItem) item).kList().get(0));
@@ -521,6 +522,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
         if (node.getEnsures() != null) {
             Term term = (Term) node.getEnsures().accept(this);
+            // TODO(YilongL): "'_andBool_" or "#andBool"?
             if (term instanceof KItem && ((KItem) term).kLabel().toString().equals("'_andBool_")) {
                 for (Term item : ((KItem) term).kList().getItems()) {
                     ensures.add(item);
@@ -579,6 +581,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         concreteCollectionSize = Collections.emptyMap();
 
         Rule rule = new Rule(
+                node.getLabel(),
                 leftHandSide,
                 rightHandSide,
                 requires,

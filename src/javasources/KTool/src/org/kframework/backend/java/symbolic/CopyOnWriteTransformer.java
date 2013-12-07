@@ -554,6 +554,7 @@ public class CopyOnWriteTransformer implements Transformer {
                 || !processedFreshVariables.equals(rule.freshVariables())
                 || processedLookups != rule.lookups()) {
             return new Rule(
+                    rule.label(),
                     processedLeftHandSide,
                     processedRightHandSide,
                     processedRequires,

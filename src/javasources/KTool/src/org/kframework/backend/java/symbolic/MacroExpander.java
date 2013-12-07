@@ -50,6 +50,7 @@ public class MacroExpander extends TermTransformer {
         UninterpretedConstraint processedLookups
                 = (UninterpretedConstraint) rule.lookups().accept(this);
         return new Rule(
+                rule.label(),
                 processedLeftHandSide,
                 processedRightHandSide,
                 processedRequires,
