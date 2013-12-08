@@ -317,7 +317,7 @@ public class UnparserFilter extends BasicVisitor {
 	@Override
 	public void visit(ListTerminator terminator) {
 	    prepare(terminator);
-//	    indenter.write(terminator.toString());
+	    indenter.write(terminator.toString());
 	    postpare();
 	}
 
