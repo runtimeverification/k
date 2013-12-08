@@ -1,0 +1,17 @@
+OK
+
+==========
+Statistics
+==========
+
+Objects created:
+   Main |-> 1
+   X |-> 1
+   Y |-> 2
+   Z |-> 2
+
+Methods invoked:
+   Main.Main |-> 1
+   X.X |-> 1
+   Y.Y |-> 2
+   Z.Z |-> 2

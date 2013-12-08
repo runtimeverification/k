@@ -1,0 +1,15 @@
+100 200 1 20 2
+
+==========
+Statistics
+==========
+
+Objects created:
+   Main |-> 1
+   C3 |-> 1
+
+Methods invoked:
+   Main.Main |-> 1
+   C1.C1 |-> 1
+   C2.C2 |-> 1
+   C3.C3 |-> 1

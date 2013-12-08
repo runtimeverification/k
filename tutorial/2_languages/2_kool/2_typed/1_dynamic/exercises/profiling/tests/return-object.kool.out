@@ -1,0 +1,17 @@
+10
+
+==========
+Statistics
+==========
+
+Objects created:
+   Main |-> 1
+   C |-> 1
+   G |-> 1
+
+Methods invoked:
+   Main.Main |-> 1
+   C.C |-> 1
+   C.m1 |-> 1
+   G.G |-> 1
+   G.print2 |-> 1

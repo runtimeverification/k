@@ -1,0 +1,23 @@
+Instance of class C
+Instance of class C1
+Instance of class C2
+Instance of class C3
+
+==========
+Statistics
+==========
+
+Objects created:
+   Main |-> 1
+   C |-> 1
+   C1 |-> 1
+   C2 |-> 1
+   C3 |-> 1
+
+Methods invoked:
+   Main.Main |-> 1
+   C.C |-> 1
+   C.test |-> 4
+   C1.C1 |-> 1
+   C2.C2 |-> 1
+   C3.C3 |-> 1

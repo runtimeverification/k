@@ -1,0 +1,41 @@
+class A {
+  int x;
+  void A(int x) {
+    this.x = x;
+  }
+}
+
+class B {
+  A a;
+  int x;
+  void B(int x) {
+    if(x<7) {
+      a = new A(x);
+    }
+    this.x = x;
+  }
+}
+
+class C {
+  A a;
+  B b;
+  int c;
+  void C(int x) {
+    if(x>0) {
+      a = new A(x);
+      if(x>1) {
+        b = new B(x);
+      }
+    }
+    c = x;
+  }
+}
+
+class Main {
+  void Main() {
+    for(int i=0; i<10; ++i) {
+      print((new C(i)).c," ");
+    }
+  print("\n");
+  }
+}

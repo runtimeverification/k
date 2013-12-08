@@ -1,0 +1,17 @@
+12
+
+==========
+Statistics
+==========
+
+Objects created:
+   Main |-> 1
+   Leaf |-> 3
+   Node |-> 2
+
+Methods invoked:
+   Main.Main |-> 1
+   Leaf.Leaf |-> 3
+   Leaf.sum |-> 3
+   Node.Node |-> 2
+   Node.sum |-> 2

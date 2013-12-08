@@ -1,0 +1,20 @@
+11 12 11 99
+
+==========
+Statistics
+==========
+
+Objects created:
+   Main |-> 1
+   C2 |-> 1
+
+Methods invoked:
+   Main.Main |-> 1
+   C1.getx1 |-> 1
+   C1.gety1 |-> 1
+   C1.setx1 |-> 1
+   C1.sety1 |-> 1
+   C2.C2 |-> 1
+   C2.getx2 |-> 1
+   C2.gety2 |-> 1
+   C2.sety2 |-> 1

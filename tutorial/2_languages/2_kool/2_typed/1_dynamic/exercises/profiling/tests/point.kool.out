@@ -1,0 +1,20 @@
+x = 4, y = 6
+x = 17, y = 28
+color = 87
+
+==========
+Statistics
+==========
+
+Objects created:
+   Main |-> 1
+   ColorPoint |-> 1
+   Point |-> 1
+
+Methods invoked:
+   Main.Main |-> 1
+   ColorPoint.ColorPoint |-> 1
+   ColorPoint.printColor |-> 1
+   Point.Point |-> 2
+   Point.move |-> 2
+   Point.printLocation |-> 2

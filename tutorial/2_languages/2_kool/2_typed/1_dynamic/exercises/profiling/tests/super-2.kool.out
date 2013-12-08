@@ -1,0 +1,29 @@
+2 2 3
+11 3 3
+11 111 111
+
+==========
+Statistics
+==========
+
+Objects created:
+   Main |-> 1
+   A |-> 1
+   B |-> 1
+   C |-> 1
+
+Methods invoked:
+   Main.Main |-> 1
+   Main.p |-> 3
+   A.A |-> 6
+   A.f |-> 4
+   A.g |-> 1
+   A.h |-> 3
+   B.A |-> 2
+   B.B |-> 3
+   B.g |-> 2
+   B.h |-> 2
+   C.A |-> 1
+   C.B |-> 1
+   C.C |-> 1
+   C.g |-> 2

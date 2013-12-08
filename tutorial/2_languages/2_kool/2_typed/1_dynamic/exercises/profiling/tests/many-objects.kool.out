@@ -1,0 +1,17 @@
+0 1 2 3 4 5 6 7 8 9 
+
+==========
+Statistics
+==========
+
+Objects created:
+   Main |-> 1
+   A |-> 14
+   B |-> 8
+   C |-> 10
+
+Methods invoked:
+   Main.Main |-> 1
+   A.A |-> 14
+   B.B |-> 8
+   C.C |-> 10

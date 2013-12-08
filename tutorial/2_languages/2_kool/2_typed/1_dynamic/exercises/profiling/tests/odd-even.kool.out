@@ -1,0 +1,15 @@
+1
+
+==========
+Statistics
+==========
+
+Objects created:
+   Main |-> 1
+   OddEven |-> 1
+
+Methods invoked:
+   Main.Main |-> 1
+   OddEven.OddEven |-> 1
+   OddEven.even |-> 9
+   OddEven.odd |-> 9

@@ -1,0 +1,11 @@
+a = 3
+
+==========
+Statistics
+==========
+
+Objects created:
+   Main |-> 1
+
+Methods invoked:
+   Main.Main |-> 1

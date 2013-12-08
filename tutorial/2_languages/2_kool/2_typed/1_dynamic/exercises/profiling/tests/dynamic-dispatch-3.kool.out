@@ -1,0 +1,22 @@
+100 1000
+10 100
+10 1
+
+==========
+Statistics
+==========
+
+Objects created:
+   Main |-> 1
+   A |-> 1
+   B |-> 1
+   C |-> 1
+
+Methods invoked:
+   Main.Main |-> 1
+   A.A |-> 3
+   A.m1 |-> 1
+   B.B |-> 2
+   B.m2 |-> 2
+   C.C |-> 1
+   C.m1 |-> 1

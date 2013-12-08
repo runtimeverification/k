@@ -1,0 +1,12 @@
+7
+
+==========
+Statistics
+==========
+
+Objects created:
+   Main |-> 1
+
+Methods invoked:
+   Main.Main |-> 1
+   Main.foo |-> 1

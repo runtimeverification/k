@@ -1,0 +1,36 @@
+Size of the array to sort = Type 4 numbers: Finished reading the 4 numbers
+The original unsorted array is:
+5 1 4 2 
+Reversing the array ... Done!
+The reversed array is:
+2 4 1 5 
+Sorting the array using insertion sort ... Done!
+The resulting array is:
+1 2 4 5 
+Reversing the array ... Done!
+Sorting the array using bubble sort ... Done!
+The resulting array is:
+1 2 4 5 
+Reversing the array ... Done!
+Sorting the array using heap sort ... Done!
+The resulting array is:
+1 2 4 5 
+
+==========
+Statistics
+==========
+
+Objects created:
+   Main |-> 1
+   Sorting |-> 1
+
+Methods invoked:
+   Main.Main |-> 1
+   Main.map |-> 1
+   Sorting.Sorting |-> 1
+   Sorting.bubbleSort |-> 1
+   Sorting.heapSort |-> 1
+   Sorting.insertionSort |-> 1
+   Sorting.printArray |-> 5
+   Sorting.reverse |-> 3
+   Sorting.siftDown |-> 5
