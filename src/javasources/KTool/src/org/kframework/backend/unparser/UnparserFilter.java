@@ -316,9 +316,9 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(ListTerminator terminator) {
-		prepare(terminator);
-                indenter.write(terminator.toString());
-		postpare();
+	    prepare(terminator);
+//	    indenter.write(terminator.toString());
+	    postpare();
 	}
 
 	@Override
@@ -389,14 +389,21 @@ public class UnparserFilter extends BasicVisitor {
 			String separator = userList.getSeparator();
 			java.util.List<Term> contents = termCons.getContents();
 			contents.get(0).accept(this);
-			indenter.write(separator + " ");
-			contents.get(1).accept(this);
+			if (!(contents.get(1) instanceof ListTerminator)) {
+    			indenter.write(separator + " ");
+    			contents.get(1).accept(this);
+			}
 		} else {
 			int where = 0;
 			for (int i = 0; i < production.getItems().size(); ++i) {
 				ProductionItem productionItem = production.getItems().get(i);
 				if (!(productionItem instanceof Terminal)) {
-					termCons.getContents().get(where++).accept(this);
+				    Term term = termCons.getContents().get(where++);
+					if (term instanceof ListTerminator) {
+					    indenter.write("." + (Sort) productionItem);
+					} else {
+					    term.accept(this);
+					}
 				} else {
 					indenter.write(((Terminal) productionItem).getTerminal());
 				}

@@ -36,7 +36,8 @@ public class TestGenResults {
             sb.append("\n\nTest case " + n /*+ ", State " + testGenResult.getState().getStateId()*/ + ":");
             
             UnparserFilter t = new UnparserFilter(true, K.color, K.parens, context);
-            KRunState.concretize(testGenResult.getGeneratedProgram(), context).accept(t);
+            Term concretePgm = KRunState.concretize(testGenResult.getGeneratedProgram(), context);
+            concretePgm.accept(t);
             // sb.append("\nProgram:\n" + testGenResult.getGeneratedProgram()); // print abstract syntax form
             sb.append("\nProgram:\n" + t.getResult()); // print concrete syntax form
             sb.append("\nResult:");
