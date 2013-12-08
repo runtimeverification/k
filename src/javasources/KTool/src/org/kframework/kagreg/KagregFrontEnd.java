@@ -13,6 +13,7 @@ import org.kframework.kil.ConfigurationNotUnique;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Import;
 import org.kframework.kil.loader.Context;
+import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.parser.concrete.KParser;
 import org.kframework.utils.Error;
@@ -29,7 +30,7 @@ import org.kframework.utils.general.GlobalSettings;
  */
 public class KagregFrontEnd {
 
-	public static void kagreg(String[] args) throws IOException, Exception {
+	public static void kagreg(String[] args) throws IOException, TransformerException {
 		if (args.length != 2) {
 			Error.report("There must be exactly two K definitions as arguments to kagreg.");
 		}
