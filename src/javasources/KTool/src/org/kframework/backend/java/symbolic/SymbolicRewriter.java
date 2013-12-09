@@ -34,7 +34,7 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
-import org.kframework.backend.java.util.ProductionsOfSort;
+import org.kframework.backend.java.util.GroupProductionsBySort;
 import org.kframework.backend.java.util.TestCaseGenerationUtil;
 import org.kframework.krun.K;
 import org.kframework.krun.api.SearchType;
@@ -67,20 +67,13 @@ public class SymbolicRewriter {
     private final List<ConstrainedTerm> results = new ArrayList<ConstrainedTerm>();
     private final List<Rule> appliedRules = new ArrayList<Rule>();
     private boolean transition;
-
-
+    
     /*
      * Liyi Li : add simulation rules in the constructor, and allow user to input label [alphaRule] as
      * the indication that the rule will be used as simulation
      */
     public SymbolicRewriter(Definition definition) {
         this.definition = definition;
-
-        /* computes the map from sorts to production terms */
-        if (K.do_testgen) {
-        ProductionsOfSort.init(definition);
-        }
-        //        System.out.println(ProductionsOfSort.getProdTermsOf("AExp"));
 
         /* populate the table of rules rewriting the top configuration */
         Set<Index> indices = new HashSet<Index>();

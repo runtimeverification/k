@@ -20,15 +20,15 @@ import org.kframework.kil.Sort;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-public class ProductionsOfSort {
+public class GroupProductionsBySort {
 
-    private static Definition definition;
-    private static Map<String, List<Production>> prodsOfSort;
-    private static Map<Production, KLabelConstant> klabelOfProd;
+    private final Definition definition;
+    private final Map<String, List<Production>> prodsOfSort;
+    private final Map<Production, KLabelConstant> klabelOfProd;
 
-    public static void init(Definition definition) {
-        assert ProductionsOfSort.definition == null;
-        ProductionsOfSort.definition = definition;
+    public GroupProductionsBySort(Definition definition) {
+        assert definition != null;
+        this.definition = definition;
 
         ImmutableMap.Builder<String, List<Production>> sort2ProdsBuilder = ImmutableMap.builder();
         Map<String, ImmutableList.Builder<Production>> prodsBuilders = new HashMap<String, ImmutableList.Builder<Production>>();
@@ -53,9 +53,7 @@ public class ProductionsOfSort {
         prodsOfSort = sort2ProdsBuilder.build();
     }
 
-    public static List<KItem> getProdTermsOf(String sort) {
-        assert ProductionsOfSort.definition != null;
-
+    public List<KItem> getProductionsAsTerms(String sort) {
         List<KItem> freshTerms = new ArrayList<KItem>();
         List<Production> prods = prodsOfSort.get(sort);
         if (prods != null) {

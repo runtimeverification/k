@@ -8,10 +8,8 @@ import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.UninterpretedConstraint;
 import org.kframework.backend.java.symbolic.Utils;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.ProductionsOfSort;
+import org.kframework.backend.java.util.GroupProductionsBySort;
 import org.kframework.kil.ASTNode;
-
-import com.google.common.collect.ImmutableSet;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.K;
 
@@ -20,6 +18,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -31,6 +30,9 @@ import java.util.Set;
  * @author AndreiS
  */
 public class ConstrainedTerm extends Term {
+    
+    private static final Map<Definition, GroupProductionsBySort> cachedGroupProductionsBySort = 
+            new HashMap<Definition, GroupProductionsBySort>();
 
     private final Term term;
 
@@ -424,9 +426,20 @@ public class ConstrainedTerm extends Term {
         for (String whiteSort : whiteSorts)
             results.add(Variable.getFreshVariable(whiteSort));
         for (String greySort : greySorts)
-            results.addAll(ProductionsOfSort.getProdTermsOf(greySort));
+            results.addAll(getProductionsAsTerms(greySort));
 
         return results;
+    }
+    
+    private List<KItem> getProductionsAsTerms(String sort) {
+        Definition def = context.definition();
+        GroupProductionsBySort gpbs = cachedGroupProductionsBySort.get(def);
+        if (gpbs == null) {
+            gpbs = new GroupProductionsBySort(def);
+            cachedGroupProductionsBySort.put(def, gpbs);
+        }
+        
+        return gpbs.getProductionsAsTerms(sort);
     }
 
     @Override
