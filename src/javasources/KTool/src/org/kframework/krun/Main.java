@@ -28,6 +28,8 @@ import org.fusesource.jansi.AnsiConsole;
 import org.kframework.backend.java.ksimulation.Waitor;
 import org.kframework.backend.java.symbolic.JavaSymbolicKRun;
 import org.kframework.backend.maude.krun.MaudeKRun;
+import org.kframework.backend.symbolic.TokenVariableToSymbolic;
+import org.kframework.backend.symbolic.VariableReplaceTransformer;
 import org.kframework.compile.ConfigurationCleaner;
 import org.kframework.compile.FlattenModules;
 import org.kframework.compile.transformers.AddTopCellConfig;
@@ -49,6 +51,7 @@ import org.kframework.kil.Sentence;
 import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
+import org.kframework.kil.loader.ResolveVariableAttribute;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.api.KRun;
 import org.kframework.krun.api.KRunDebugger;
@@ -162,6 +165,7 @@ public class Main {
                 parser = "kast -groundParser -e";
             }
             parsed = rp.runParserOrDie(parser, value, false, null, context);
+            parsed = (Term) parsed.accept(new ResolveVariableAttribute(context));
             output.put("$" + name, parsed);
             hasPGM = hasPGM || name.equals("$PGM");
         }

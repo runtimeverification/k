@@ -23,7 +23,7 @@ public class VariableReplaceTransformer extends CopyOnWriteTransformer {
     private Map<Variable, Variable> generatedVariables;
     private Set<String> vars;
 
-    public VariableReplaceTransformer(String name, Context context) {
+    public VariableReplaceTransformer(Context context) {
         super("Replace Variables", context);
         generatedVariables = new HashMap<Variable, Variable>();
         vars = new HashSet<String>();
