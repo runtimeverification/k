@@ -11,6 +11,8 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * Combines a list of {@code LocalVisitor}s.
+ * 
  * @author Traian
  */
 public class CombinedLocalVisitor extends LocalVisitor {
@@ -39,6 +41,12 @@ public class CombinedLocalVisitor extends LocalVisitor {
         return name;
     }
 
+    /**
+     * Invokes all internal visitors on the given node in order.
+     * 
+     * @param node
+     *            the given node
+     */
     private void visitAll(JavaSymbolicObject node) {
         for (LocalVisitor t : Visitors) {
             t.resetProceed();

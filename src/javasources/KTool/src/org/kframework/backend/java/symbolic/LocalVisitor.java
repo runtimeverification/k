@@ -7,10 +7,19 @@ import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.*;
 
 /**
+ * Visits a given node without traversing its children. This class serves as an
+ * adapter class: method {@code visit} simply recurs with its argument being
+ * casted to a super-class until that argument becomes a
+ * {@code JavaSymbolicObject}.
+ * 
  * @author Traian
  */
 public class LocalVisitor implements Visitor {
 
+    /**
+     * TODO(YilongL): Revise it! Checks if the visiting process should proceed
+     * after calling this visitor.
+     */
     public boolean isProceed() {
         return proceed;
     }
@@ -23,7 +32,7 @@ public class LocalVisitor implements Visitor {
 
     @Override
     public String getName() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 
     @Override

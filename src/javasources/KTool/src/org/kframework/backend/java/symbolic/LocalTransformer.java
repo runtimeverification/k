@@ -10,7 +10,7 @@ import org.kframework.kil.ASTNode;
 
 /**
  * Performs transformation on a given node without doing tree traversal. This
- * class serves as an adapter class: method {@code Transform} simply recurs with
+ * class serves as an adapter class: method {@code transform} simply recurs with
  * its argument being casted to a super-class until that argument becomes a
  * {@code JavaSymbolicObject}.
  * 
