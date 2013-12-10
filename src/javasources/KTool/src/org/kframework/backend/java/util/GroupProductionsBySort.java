@@ -24,6 +24,7 @@ public class GroupProductionsBySort {
 
     private final Definition definition;
     private final Map<String, List<Production>> prodsOfSort;
+    /* the relation between productions and K label constants is many-to-one */
     private final Map<Production, KLabelConstant> klabelOfProd;
 
     public GroupProductionsBySort(Definition definition) {
@@ -36,6 +37,8 @@ public class GroupProductionsBySort {
 
         for (KLabelConstant klabel : definition.kLabels())
             for (Production prod : klabel.productions()) {
+                // TODO(YilongL): This is not the right way to handle bracket
+                // productions; fix it!
                 if (prod.containsAttribute(Attribute.BRACKET.getKey())) 
                     continue;
                 

@@ -64,6 +64,10 @@ public class CheckingNestedStructurePlugin implements KastStructureCheckerPlugin
         Set<String> sorts = cachedSortsOfKLabel.get(kLabel);
         if (sorts == null) {
             Set<String> set = new HashSet<String>();
+            // TODO(YilongL): there could be multiple productions generating a
+            // same KLabelConstant, thus multiple sorts; need to find the
+            // correct or the most concrete sort!
+//            assert kLabel.productions().size() == 1 : "TODO(YilongL): fix it";
             for (Production prod : kLabel.productions()) {
                 set.add(prod.getSort());
             }
@@ -88,7 +92,7 @@ public class CheckingNestedStructurePlugin implements KastStructureCheckerPlugin
                 
                 int depth = nestedLevelOfSort.get(sort) + 1;
                 Integer maxDepth = maxNestedLevelOfSort.get(sort);
-                if ((maxDepth == null) || (depth > maxDepth)) {
+                if ((maxDepth != null) && (depth > maxDepth)) {
                     this.proceed = false;
                     checker.flagFailure(CheckingNestedStructurePlugin.this);
                     return;
