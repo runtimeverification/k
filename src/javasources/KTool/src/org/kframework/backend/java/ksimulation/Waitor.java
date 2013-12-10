@@ -70,7 +70,9 @@ public class Waitor extends Thread{
 		while(true){
 			
 			try {
-				this.wait();
+				synchronized(this){
+					this.wait();
+				}
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

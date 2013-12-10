@@ -51,7 +51,9 @@ public class Looper extends Thread {
 			if(temp==null){
 				
 				Waitor.downThreadNumber();
-				refs.notify();
+				synchronized(refs){
+					refs.notify();
+				}
 				return;
 			}
 			
@@ -61,7 +63,9 @@ public class Looper extends Thread {
 		if(result.isEmpty()){
 			
 			Waitor.result=true;
-			refs.notify();
+			synchronized(refs){
+				refs.notify();
+			}
 			return;
 		}
 		
