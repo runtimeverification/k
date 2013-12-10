@@ -17,8 +17,9 @@ import org.kframework.backend.java.kil.*;
 public class LocalVisitor implements Visitor {
 
     /**
-     * TODO(YilongL): Revise it! Checks if the visiting process should proceed
-     * after calling this visitor.
+     * Checks if the visiting procedure (e.g., {@code PrePostVisitor#visit} or
+     * {@code CombinedLocalVisitor#visit}) which accepts this
+     * {@code LocalVisitor} should proceed after this local visitor is done.
      */
     public boolean isProceed() {
         return proceed;
