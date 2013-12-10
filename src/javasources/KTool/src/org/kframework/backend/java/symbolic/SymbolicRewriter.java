@@ -34,7 +34,6 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
-import org.kframework.backend.java.util.GroupProductionsBySort;
 import org.kframework.backend.java.util.TestCaseGenerationUtil;
 import org.kframework.krun.K;
 import org.kframework.krun.api.SearchType;
@@ -67,6 +66,7 @@ public class SymbolicRewriter {
     private final List<ConstrainedTerm> results = new ArrayList<ConstrainedTerm>();
     private final List<Rule> appliedRules = new ArrayList<Rule>();
     private boolean transition;
+    private final PluggableKastStructureChecker pluggableKastChecker;
     
     /*
      * Liyi Li : add simulation rules in the constructor, and allow user to input label [alphaRule] as
@@ -74,6 +74,14 @@ public class SymbolicRewriter {
      */
     public SymbolicRewriter(Definition definition) {
         this.definition = definition;
+        
+        /* initialize the K AST checker for test generation */
+        if (K.do_testgen) {
+            pluggableKastChecker = new PluggableKastStructureChecker();
+            pluggableKastChecker.register(new CheckingNestedStructurePlugin());
+        } else {
+            pluggableKastChecker = null;
+        }
 
         /* populate the table of rules rewriting the top configuration */
         Set<Index> indices = new HashSet<Index>();
@@ -627,7 +635,7 @@ public class SymbolicRewriter {
 
         visited.add(initialTerm);
         queue.add(initialTerm);
-
+        
         label:
         for (step = 0; !queue.isEmpty() && step != depth; ++step) {
 //            System.out.printf("testgen #step %s\n", step);
@@ -642,7 +650,10 @@ public class SymbolicRewriter {
                 }
 
                 computeRewriteStep(term);
+                /* first eliminate shadowed rules */
                 eliminateShadowedRewriteSteps();
+                /* then eliminate terms fail the K AST checker */
+                performKastStructureCheck(initialTerm);
 
                 if (results.isEmpty()) {
                     /* final term */
@@ -730,6 +741,27 @@ public class SymbolicRewriter {
         }
     }
 
+    private void performKastStructureCheck(ConstrainedTerm initTerm) {
+        List<ConstrainedTerm> tmpResults = new ArrayList<ConstrainedTerm>(results);
+        results.clear();
+        for (ConstrainedTerm intermediateTerm : tmpResults) {
+            /* substitute the initial term to get a partially instantiated pgm */
+            Term pgm = initTerm.term().substituteWithBinders(
+                    intermediateTerm.constraint().substitution(),
+                    initTerm.termContext());
+            
+            pluggableKastChecker.reset();
+            pgm.accept(pluggableKastChecker);
+            if (pluggableKastChecker.isSuccess()) {
+                results.add(intermediateTerm);
+//                System.out.print("Pass");
+//            } else {
+//                System.err.print("Fail");
+            }
+//            System.out.printf("partial pgm: %s\n", pgm);
+        }
+    }    
+    
     /**
      * Searches for a ground term which the given term can reach within a given
      * bound of rewrite steps.
@@ -760,6 +792,7 @@ public class SymbolicRewriter {
             for (ConstrainedTerm term : queue) {
                 computeRewriteStep(term);
                 eliminateShadowedRewriteSteps();
+                performKastStructureCheck(initTerm);
 
                 if (results.isEmpty()) {
                     /* final term */
