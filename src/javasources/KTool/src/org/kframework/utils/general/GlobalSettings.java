@@ -67,8 +67,11 @@ public class GlobalSettings {
 	public static List<String> transition = new ArrayList<String>();
 	public static List<String> superheat = new ArrayList<String>();
 	public static List<String> supercool = new ArrayList<String>();
-	static {
-		transition.add("transition");
+
+    public static final String TRANSITION = "transition";
+
+    static {
+		transition.add(TRANSITION);
 		superheat.add("superheat");
 		supercool.add("supercool");
 	}

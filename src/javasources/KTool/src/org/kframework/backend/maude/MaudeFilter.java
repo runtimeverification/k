@@ -19,24 +19,37 @@ import com.google.common.collect.ImmutableSet;
 
 import java.util.*;
 import java.util.Map;
+import java.util.Set;
 
 public class MaudeFilter extends BackendFilter {
 	private boolean firstAttribute;
 	ConfigurationStructureMap cfgStr;
+    private Set<String> unusedTransitions;
 
-	public MaudeFilter(Context context) {
+    public MaudeFilter(Context context) {
 		super(context);
+        unusedTransitions = new HashSet<>(GlobalSettings.transition.size());
 		this.cfgStr = context.getConfigurationStructureMap();
 	}
 
 	@Override
 	public void visit(Definition definition) {
+        unusedTransitions.addAll(GlobalSettings.transition);
+        // if --transition was not specified do not consider the default tag "transition"
+        if (unusedTransitions.size() ==1 && unusedTransitions.contains(GlobalSettings.TRANSITION))
+            unusedTransitions.clear();
         // TODO: remove hack for token membership predicates
 
 		for (DefinitionItem di : definition.getItems()) {
 			di.accept(this);
 			result.append(" \n");
 		}
+        if (!(unusedTransitions.isEmpty())) {
+            GlobalSettings.kem
+                    .register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER,
+                            "These specified transition tags were not used (mispelled?):\n\t\t" + unusedTransitions,
+                            "command line arguments", "--transition"));
+        }
 	}
 
 	@Override
@@ -446,6 +459,7 @@ public class MaudeFilter extends BackendFilter {
 		for (Attribute a : rule.getAttributes().getContents()) {
 			if (GlobalSettings.transition.contains(a.getKey())) {
 				isTransition = true;
+                unusedTransitions.remove(a.getKey());
 				break;
 			}
 		}
