@@ -186,6 +186,16 @@ public class JavaSymbolicKRun implements KRun {
 
         SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
         FileSystem fs = new PortableFileSystem();
+
+        // Change Map, List, and Set to MyMap, MyList, and MySet.
+        CompileToBuiltins builtinTransformer = new CompileToBuiltins(context);
+        try {
+            pattern = (org.kframework.kil.Rule)builtinTransformer.transform(pattern);
+            cfg = (org.kframework.kil.Term)cfg.accept(builtinTransformer);
+        } catch (TransformerException e) {
+            e.report();
+        }
+
         TermContext termContext = new TermContext(definition, fs);
         ConstrainedTerm initialTerm = new ConstrainedTerm(Term.of(cfg, definition), termContext);
         ConstrainedTerm targetTerm = new ConstrainedTerm(Term.of(cfg, definition), termContext);
@@ -203,14 +213,6 @@ public class JavaSymbolicKRun implements KRun {
         c.setLabel("generatedTop");
         c.setContents(new org.kframework.kil.Bag());
         pattern.setBody(new org.kframework.kil.Rewrite(pattern.getBody(), c, context));
-
-        // Change Map, List, and Set to MyMap, MyList, and MySet.
-        CompileToBuiltins builtinTransformer = new CompileToBuiltins(context);
-        try {
-            pattern = (org.kframework.kil.Rule)builtinTransformer.transform(pattern);
-        } catch (TransformerException e) {
-            e.report();
-        }
         Rule patternRule = transformer.transformRule(pattern, definition);
 
         List<SearchResult> searchResults = new ArrayList<SearchResult>();

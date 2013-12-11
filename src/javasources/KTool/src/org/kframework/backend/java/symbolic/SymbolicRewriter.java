@@ -539,6 +539,19 @@ public class SymbolicRewriter {
         List<Map<Variable,Term>> searchResults = new ArrayList<Map<Variable,Term>>();
         Set<ConstrainedTerm> visited = new HashSet<ConstrainedTerm>();
 
+        // If depth is 0 then we are just trying to match the pattern.
+        // This is a kind of hacky fix, but the pattern matching for a non-search
+        // execution is based on the maude backend.
+        if (depth == 0) {
+            Map<Variable, Term> map = getSubstitutionMap(initialTerm, pattern);
+            if (map != null) {
+                searchResults.add(map);
+            }
+            stopwatch.stop();
+            System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
+            return searchResults;
+        }
+
         // The search queues will map terms to their depth in terms of transitions.
         Map<ConstrainedTerm,Integer> queue = new HashMap<ConstrainedTerm,Integer>();
         Map<ConstrainedTerm,Integer> nextQueue = new HashMap<ConstrainedTerm,Integer>();
