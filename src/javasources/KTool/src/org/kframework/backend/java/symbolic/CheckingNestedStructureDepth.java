@@ -16,7 +16,7 @@ import org.kframework.kil.Production;
  * @author YilongL
  * 
  */
-public class CheckingNestedStructurePlugin implements KastStructureCheckerPlugin {
+public class CheckingNestedStructureDepth implements KastStructureCheckerPlugin {
 
     private final Map<String, Integer> nestedLevelOfSort = new HashMap<String, Integer>(); 
     private final Map<String, Integer> maxNestedLevelOfSort = new HashMap<String, Integer>(); 
@@ -25,7 +25,7 @@ public class CheckingNestedStructurePlugin implements KastStructureCheckerPlugin
     private final LocalVisitor postVisitor = new DecNestedLevelOfSort();
     private PluggableKastStructureChecker checker;
     
-    public CheckingNestedStructurePlugin() {
+    public CheckingNestedStructureDepth() {
         // TODO(YilongL): handle user-specified depth properly
         this.setMaxNestedLevelOf("AExp", 3);
     }
@@ -94,7 +94,7 @@ public class CheckingNestedStructurePlugin implements KastStructureCheckerPlugin
                 Integer maxDepth = maxNestedLevelOfSort.get(sort);
                 if ((maxDepth != null) && (depth > maxDepth)) {
                     this.proceed = false;
-                    checker.flagFailure(CheckingNestedStructurePlugin.this);
+                    checker.flagFailure(CheckingNestedStructureDepth.this);
                     return;
                 } else {
                     nestedLevelOfSort.put(sort, depth);
