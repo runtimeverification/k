@@ -540,8 +540,8 @@ public class SymbolicRewriter {
         Set<ConstrainedTerm> visited = new HashSet<ConstrainedTerm>();
 
         // If depth is 0 then we are just trying to match the pattern.
-        // This is a kind of hacky fix, but the pattern matching for a non-search
-        // execution is based on the maude backend.
+        // A more clean solution would require a bit of a rework to how patterns
+        // are handled in krun.Main when not doing search.
         if (depth == 0) {
             Map<Variable, Term> map = getSubstitutionMap(initialTerm, pattern);
             if (map != null) {
