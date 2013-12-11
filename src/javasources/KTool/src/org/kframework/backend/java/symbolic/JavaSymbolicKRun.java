@@ -8,6 +8,7 @@ import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.util.TestCaseGenerationUtil;
 import org.kframework.compile.transformers.DataStructureToLookupUpdate;
 import org.kframework.compile.utils.*;
 //import org.kframework.kil.*;
@@ -310,7 +311,18 @@ public class JavaSymbolicKRun implements KRun {
             // obtained from the result configuration to the initial one
             Term pgm = Term.of(cfg, definition);
             pgm = pgm.substituteWithBinders(result.constraint().substitution(), termContext);
+            
+            /* concretize the pgm */
+            final Map<Variable, Term> subst = new HashMap<Variable, Term>();
+            pgm.accept(new BottomUpVisitor() {
+               @Override
+               public void visit(Variable var) {
+                   subst.put(var, TestCaseGenerationUtil.getSimplestTermOfSort(var.sort(), context));
+               }
+            });
+            pgm = pgm.substituteWithBinders(subst, termContext);
 
+            /* translate back to generic KIL term */
             org.kframework.kil.Term pgmTerm = (org.kframework.kil.Term) pgm.accept(
                     new BackendJavaKILtoKILTranslation(context));
 

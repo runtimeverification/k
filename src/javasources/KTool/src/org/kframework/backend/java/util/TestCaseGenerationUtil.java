@@ -8,7 +8,12 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.kil.ConstrainedTerm;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.loader.Context;
 
@@ -80,5 +85,20 @@ public class TestCaseGenerationUtil {
             }
         }
         return set.size();
+    }
+
+    public static Term getSimplestTermOfSort(String sort, Context context) {
+        // TODO(YilongL): This is cheating; fix it!
+        switch (sort) {
+        case "Block":
+            return new KItem(KLabelConstant.of("'{}", context), new KList(), context);
+            
+        case "BExp":
+            return BoolToken.TRUE;
+
+        default:
+            break;
+        }
+        return null;
     }        
 }
