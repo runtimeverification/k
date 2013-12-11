@@ -8,6 +8,7 @@ import org.kframework.ktest.IgnoringStringComparator;
 import org.kframework.ktest.KTestStep;
 
 import java.io.File;
+import java.text.NumberFormat;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
@@ -59,6 +60,11 @@ public class CmdArg {
     private final Set<KTestStep> skips;
 
     /**
+     * Maximum number of threads spawned for parallel execution.
+     */
+    private final int threads;
+
+    /**
      * Generate a junit-like report.
      */
     private final boolean generateReport;
@@ -99,7 +105,7 @@ public class CmdArg {
     private final boolean dry;
 
     private CmdArg(String directory, String programs, String results, String[] extensions,
-                   String[] excludes, Set<KTestStep> skips, boolean generateReport,
+                   String[] excludes, Set<KTestStep> skips, int threads, boolean generateReport,
                    String targetFile, boolean verbose, ColorSetting colorSetting, int timeout,
                    boolean ignoreWS, boolean ignoreBalancedParens, boolean dry) {
         this.directory = directory;
@@ -108,6 +114,7 @@ public class CmdArg {
         this.extensions = extensions;
         this.excludes = excludes;
         this.skips = skips;
+        this.threads = threads;
         this.generateReport = generateReport;
         this.targetFile = targetFile;
         this.verbose = verbose;
@@ -129,6 +136,7 @@ public class CmdArg {
         this.extensions = obj.extensions;
         this.excludes = obj.excludes;
         this.skips = obj.skips;
+        this.threads = obj.threads;
         this.generateReport = obj.generateReport;
         this.targetFile = obj.targetFile;
         this.verbose = obj.verbose;
@@ -189,8 +197,9 @@ public class CmdArg {
         boolean dry = cmdOpts.hasOption("dry");
 
         return new CmdArg(directory, programs, results, extensions, excludes, parseSkips(cmdOpts),
-                generateReport, targetFile, verbose, parseColorSetting(cmdOpts),
-                parseTimeout(cmdOpts), ignoreWS, ignoreBalancedParens, dry);
+                parseThreads(cmdOpts), generateReport, targetFile, verbose,
+                parseColorSetting(cmdOpts), parseTimeout(cmdOpts), ignoreWS, ignoreBalancedParens,
+                dry);
     }
 
     public String getDirectory() {
@@ -239,6 +248,10 @@ public class CmdArg {
 
     public boolean getDry() {
         return dry;
+    }
+
+    public int getThreads() {
+        return threads;
     }
 
     public CmdArg setDirectory(String directory) {
@@ -308,6 +321,22 @@ public class CmdArg {
             throw new InvalidArgumentException("--" + argName + " argument is not a folder: " +
                     ret);
         return f.getAbsolutePath();
+    }
+
+    private static int parseThreads(CommandLine cmdOpts) throws InvalidArgumentException {
+        String threadsStr = cmdOpts.getOptionValue("threads");
+        int threads = Runtime.getRuntime().availableProcessors();
+        if (threadsStr != null)
+            try {
+                threads = Integer.valueOf(threadsStr);
+            } catch (NumberFormatException e) {
+                throw new InvalidArgumentException(
+                        "--threads argument should be an integer greater than 0");
+            }
+        if (threads <= 0)
+            throw new InvalidArgumentException(
+                    "--threads argument should be an integer greater than 0");
+        return threads;
     }
 }
 

@@ -33,6 +33,11 @@ public class TestSuite {
     private final Set<KTestStep> skips;
 
     /**
+     * Threads to spawn in parallel.
+     */
+    private final int threads;
+
+    /**
      * Timeout for a process.
      */
     private final int timeout;
@@ -55,11 +60,12 @@ public class TestSuite {
     private int pdfSteps; // total number of pdf generation tasks
     private int krunSteps; // total number of krun tasks
 
-    private TestSuite(List<TestCase> tests, Set<KTestStep> skips, boolean verbose,
+    private TestSuite(List<TestCase> tests, Set<KTestStep> skips, int threads, boolean verbose,
                      Comparator<String> strComparator, ColorSetting colorSetting,
                      int timeout, boolean report) {
         this.tests = tests;
         this.skips = skips;
+        this.threads = threads;
         this.verbose = verbose;
         this.strComparator = strComparator;
         this.colorSetting = colorSetting;
@@ -67,12 +73,13 @@ public class TestSuite {
         reportGen = report ? new ReportGen() : null;
     }
 
-    private TestSuite(TestCase singleTest, Set<KTestStep> skips, boolean verbose,
+    private TestSuite(TestCase singleTest, Set<KTestStep> skips, int threads, boolean verbose,
                      Comparator<String> strComparator, ColorSetting colorSetting,
                      int timeout, boolean report) {
         tests = new LinkedList<>();
         tests.add(singleTest);
         this.skips = skips;
+        this.threads = threads;
         this.verbose = verbose;
         this.strComparator = strComparator;
         this.colorSetting = colorSetting;
@@ -81,13 +88,13 @@ public class TestSuite {
     }
 
     public TestSuite(List<TestCase> tests, CmdArg cmdArg) {
-        this(tests, cmdArg.getSkips(), cmdArg.isVerbose(),
+        this(tests, cmdArg.getSkips(), cmdArg.getThreads(), cmdArg.isVerbose(),
                 cmdArg.getStringComparator(), cmdArg.getColorSetting(), cmdArg.getTimeout(),
                 cmdArg.getGenerateReport());
     }
 
     public TestSuite(TestCase singleTest, CmdArg cmdArg) {
-        this(singleTest, cmdArg.getSkips(), cmdArg.isVerbose(),
+        this(singleTest, cmdArg.getSkips(), cmdArg.getThreads(), cmdArg.isVerbose(),
                 cmdArg.getStringComparator(), cmdArg.getColorSetting(), cmdArg.getTimeout(),
                 cmdArg.getGenerateReport());
     }
@@ -310,8 +317,7 @@ public class TestSuite {
     }
 
     private void startTpe() {
-        tpe = (ThreadPoolExecutor) Executors.newFixedThreadPool(
-                Runtime.getRuntime().availableProcessors());
+        tpe = (ThreadPoolExecutor) Executors.newFixedThreadPool(threads);
     }
 
     private void stopTpe() throws InterruptedException {

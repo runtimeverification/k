@@ -16,6 +16,7 @@ public class Constants {
     public static final String SKIP_OPTION = "skip";
     public static final String TIMEOUT_OPTION = "timeout";
     public static final String COLOR_SETTING = "color";
+    public static final String THREADS_SETTING = "threads";
 
     public static final String KOMPILE_STEP = "kompile";
     public static final String PDF_STEP = "pdf";
