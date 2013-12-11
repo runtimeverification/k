@@ -141,7 +141,7 @@ public class LatexFilter extends BackendFilter {
         @Override
         public void visit(Lexical t) {
                 result.append("Token\\{");
-                result.append("\\mbox{``}" + StringUtil.latexify(t.getLexicalRule()) +  "\\mbox{''}\\}");
+                result.append(StringUtil.latexify(t.getLexicalRule()) +  "\\}");
         }
 
 	@Override
