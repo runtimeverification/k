@@ -1,43 +1,7 @@
 package org.kframework.backend.java.symbolic;
 
-import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.kil.BuiltinList;
-import org.kframework.backend.java.kil.BuiltinMap;
-import org.kframework.backend.java.kil.BuiltinSet;
-import org.kframework.backend.java.kil.Cell;
-import org.kframework.backend.java.kil.CellCollection;
-import org.kframework.backend.java.kil.CollectionVariable;
-import org.kframework.backend.java.kil.Definition;
-import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.builtins.Int32Token;
-import org.kframework.backend.java.builtins.StringToken;
-import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.kil.KLabelFreezer;
-import org.kframework.backend.java.kil.Hole;
-import org.kframework.backend.java.kil.KLabelInjection;
-import org.kframework.backend.java.kil.KLabel;
-import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.KSequence;
-import org.kframework.backend.java.kil.Kind;
-import org.kframework.backend.java.kil.ListLookup;
-import org.kframework.backend.java.kil.MapLookup;
-import org.kframework.backend.java.kil.SetLookup;
-import org.kframework.backend.java.kil.MapUpdate;
-import org.kframework.backend.java.kil.SetUpdate;
-import org.kframework.backend.java.kil.Rule;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
-import org.kframework.backend.java.builtins.UninterpretedToken;
-import org.kframework.backend.java.kil.Token;
-import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.java.util.KSorts;
-import org.kframework.backend.symbolic.SymbolicBackend;
-import org.kframework.kil.*;
-import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.krun.K;
+import static org.kframework.kil.KLabelConstant.ANDBOOL_KLABEL;
+import static org.kframework.kil.KLabelConstant.BOOL_ANDBOOL_KLABEL;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -47,6 +11,54 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.builtins.Int32Token;
+import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.builtins.StringToken;
+import org.kframework.backend.java.builtins.UninterpretedToken;
+import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.BuiltinSet;
+import org.kframework.backend.java.kil.Cell;
+import org.kframework.backend.java.kil.CellCollection;
+import org.kframework.backend.java.kil.CollectionVariable;
+import org.kframework.backend.java.kil.Definition;
+import org.kframework.backend.java.kil.Hole;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KLabel;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.KLabelFreezer;
+import org.kframework.backend.java.kil.KLabelInjection;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.KSequence;
+import org.kframework.backend.java.kil.Kind;
+import org.kframework.backend.java.kil.ListLookup;
+import org.kframework.backend.java.kil.MapLookup;
+import org.kframework.backend.java.kil.MapUpdate;
+import org.kframework.backend.java.kil.Rule;
+import org.kframework.backend.java.kil.SetLookup;
+import org.kframework.backend.java.kil.SetUpdate;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Token;
+import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.util.KSorts;
+import org.kframework.backend.symbolic.SymbolicBackend;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.Attribute;
+import org.kframework.kil.BoolBuiltin;
+import org.kframework.kil.DataStructureSort;
+import org.kframework.kil.GenericToken;
+import org.kframework.kil.Int32Builtin;
+import org.kframework.kil.IntBuiltin;
+import org.kframework.kil.Module;
+import org.kframework.kil.Production;
+import org.kframework.kil.StringBuiltin;
+import org.kframework.kil.TermComment;
+import org.kframework.kil.loader.Context;
+import org.kframework.kil.visitors.CopyOnWriteTransformer;
+import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
@@ -502,8 +514,9 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         //TODO: Deal with Ensures
         if (node.getRequires() != null) {
             Term term = (Term) node.getRequires().accept(this);
-            if (term instanceof KItem && ((KItem) term).kLabel().toString()
-                    .equals(org.kframework.kil.KLabelConstant.ANDBOOL_KLABEL.getLabel())) {
+            if (term instanceof KItem &&
+                   (((KItem) term).kLabel().toString().equals(ANDBOOL_KLABEL.getLabel()) || 
+                    ((KItem) term).kLabel().toString().equals(BOOL_ANDBOOL_KLABEL.getLabel()))) {
                 for (Term item : ((KItem) term).kList().getItems()) {
                     if (item instanceof KItem && ((KItem) item).kLabel().toString().equals("'fresh(_)")) {
                         freshVariables.add((Variable) ((KItem) item).kList().get(0));
