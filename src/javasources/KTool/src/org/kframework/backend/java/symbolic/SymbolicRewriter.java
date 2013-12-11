@@ -78,7 +78,8 @@ public class SymbolicRewriter {
         /* initialize the K AST checker for test generation */
         if (K.do_testgen) {
             pluggableKastChecker = new PluggableKastStructureChecker();
-            pluggableKastChecker.register(new CheckingNestedStructurePlugin());
+            pluggableKastChecker.register(new CheckingNestedStructureDepth());
+            pluggableKastChecker.register(new CheckingLeftAssocConstructs(definition));
         } else {
             pluggableKastChecker = null;
         }

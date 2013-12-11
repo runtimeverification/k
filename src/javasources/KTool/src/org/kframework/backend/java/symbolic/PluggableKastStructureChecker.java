@@ -34,8 +34,12 @@ public class PluggableKastStructureChecker extends PrePostVisitor {
         plugins.add(plugin);
         plugin.registerTo(this);
         
-        this.getPreVisitor().addVisitor(plugin.getPreVisitor());
-        this.getPostVisitor().addVisitor(plugin.getPostVisitor());
+        if (plugin.getPreVisitor() != null) {
+            this.getPreVisitor().addVisitor(plugin.getPreVisitor());
+        }
+        if (plugin.getPostVisitor() != null) {
+            this.getPostVisitor().addVisitor(plugin.getPostVisitor());
+        }
     }
     
     public boolean isSuccess() {
