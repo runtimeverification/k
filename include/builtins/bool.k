@@ -8,8 +8,8 @@ endmodule
 
 module BOOL-HOOKS
   imports BOOL-SYNTAX-HOOKS
- 
-  syntax Bool ::= "notBool" Bool          [function, left, smtlib(not), boolOperation, latex(\neg_{\scriptstyle\it Bool}{#1}), hook(#BOOL:notBool_)]
+
+  syntax Bool ::= "notBool" Bool          [function, smtlib(not), boolOperation, latex(\neg_{\scriptstyle\it Bool}{#1}), hook(#BOOL:notBool_)]
 				> Bool "andBool" Bool     [function, left, smtlib(and), boolOperation, latex({#1}\wedge_{\scriptstyle\it Bool}{#2}), hook(#BOOL:_andBool_)]
 				| Bool "andThenBool" Bool [function, left, smtlib(and), boolOperation]
 				> Bool "xorBool" Bool	  [function, left, smtlib(xor), boolOperation, hook(#BOOL:_xorBool_)]
@@ -52,11 +52,11 @@ module BOOL-HOOKS
   rule false impliesBool _:Bool => true
   rule _:Bool impliesBool true => true
   rule B:Bool impliesBool false => notBool B
-  
+
   rule B1:Bool =/=Bool B2:Bool => notBool(B1 ==Bool B2)
 
   // Andrei S: why are the rules below needed?
-  // Traian S.:  They are needed in the generated code, as we allow 
+  // Traian S.:  They are needed in the generated code, as we allow
   // '#andBool to take multiple parameters.
   syntax KLabel ::= "'#andBool" [predicate]
   rule '#andBool(_,, (true => .KList),, _) [function, anywhere]
@@ -64,4 +64,3 @@ module BOOL-HOOKS
   rule '#andBool(.KList) => true  [function, anywhere]
   rule '#andBool(_,, false,, _) => false [function, anywhere]
 endmodule
-
