@@ -1,6 +1,7 @@
 <tests>
 
   <include file="../../lesson_1/tests/config.xml"
+           exclude="fibbo.lambda"
            more-programs="."
            more-results="../../lesson_2/tests ." />
 
