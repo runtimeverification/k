@@ -159,7 +159,8 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
             // generated heating rule; need to be revised later
             for (int i = 0; i < ((TermCons) body).getContents().size(); i++) {
                 if (((TermCons) body).getContents().get(i) instanceof Rewrite) {
-                    heatingRule.setLabel("heating(" + node.getAttribute("klabel") + "," + i + ")");
+                    heatingRule.setLabel(MetaK.Constants.heatingTag + "("
+                            + node.getAttribute("klabel") + "," + i + ")");
                     break;
                 }
             }
@@ -175,7 +176,8 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
             // revised later
             for (int i = 0; i < ((TermCons) body).getContents().size(); i++) {
                 if (((TermCons) body).getContents().get(i) instanceof Rewrite) {
-                    coolingRule.setLabel("cooling(" + node.getAttribute("klabel") + "," + i + ")");
+                    coolingRule.setLabel(MetaK.Constants.coolingTag + "("
+                            + node.getAttribute("klabel") + "," + i + ")");
                     break;
                 }
             }
