@@ -3,7 +3,6 @@ package org.kframework.backend.java.ksimulation;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import org.fusesource.jansi.AnsiConsole;
 import org.kframework.backend.java.symbolic.*;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.backend.java.kil.ConstrainedTerm;

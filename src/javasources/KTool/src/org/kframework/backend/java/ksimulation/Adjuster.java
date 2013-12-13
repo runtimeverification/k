@@ -41,6 +41,7 @@ public class Adjuster {
 		if(impl.getSimulationRewriter().getSimulationMap().isEmpty() 
 				|| spec.getSimulationRewriter().getSimulationMap().isEmpty()){
 			
+			
 			return true;
 		}
 		

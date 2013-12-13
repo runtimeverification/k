@@ -1,7 +1,6 @@
 package org.kframework.backend.java.symbolic;
 
 
-import org.fusesource.jansi.AnsiConsole;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Term;

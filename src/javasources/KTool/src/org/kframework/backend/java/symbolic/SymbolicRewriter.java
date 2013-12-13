@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.fusesource.jansi.AnsiConsole;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.indexing.BottomIndex;
 import org.kframework.backend.java.indexing.FreezerIndex;
@@ -129,8 +130,9 @@ public class SymbolicRewriter {
                     if (index.isUnifiable(rule.indexingPair().second)) {
                         coolingSetBuilder.add(rule);
                     }
-                } else if(rule.containsAttribute("alphaRule")){
-
+                } else if(rule.containsAttribute("alpha")){
+                	AnsiConsole.out
+                    .println("here");
                 	if(index.isUnifiable(rule.indexingPair().first)) {
                 		simulationSetBuilder.add(rule);
                 	}
