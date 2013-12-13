@@ -3,23 +3,23 @@ package org.kframework.backend.java.ksimulation;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import org.fusesource.jansi.AnsiConsole;
 import org.kframework.backend.java.symbolic.*;
 import org.kframework.krun.KRunExecutionException;
-import org.kframework.kil.Term;
-
+import org.kframework.backend.java.kil.ConstrainedTerm;
 import com.microsoft.z3.Z3Exception;
 
 public class Looper extends Thread {
 	
 	private JavaSymbolicKRun impl;
 	private JavaSymbolicKRun spec;
-	private HashSet<Term []> memoing;
-	private ArrayList<Term []> currentPairs;
+	private HashSet<ConstrainedTerm []> memoing;
+	private ArrayList<ConstrainedTerm []> currentPairs;
 	private Waitor refs;
 	private Adjuster decider;
 	
 	public Looper(JavaSymbolicKRun implRules,JavaSymbolicKRun specRules,
-			ArrayList<Term []> pairs,HashSet<Term []> memo,Adjuster decider,Waitor father){
+			ArrayList<ConstrainedTerm []> pairs,HashSet<ConstrainedTerm []> memo,Adjuster decider,Waitor father){
 
 		impl = implRules;
 		spec = specRules;
@@ -33,8 +33,9 @@ public class Looper extends Thread {
 
 	public void run(){
 		
-		ArrayList<ArrayList<Term []>> result = new ArrayList<ArrayList<Term []>>();
-		ArrayList<ArrayList<Term []>> temp = new ArrayList<ArrayList<Term []>>();
+		Waitor.upThreadNumber();
+		ArrayList<ArrayList<ConstrainedTerm []>> result = new ArrayList<ArrayList<ConstrainedTerm []>>();
+		ArrayList<ArrayList<ConstrainedTerm []>> temp = null;
 		
 		for(int i=0;i<this.currentPairs.size();++i){
 			
@@ -69,23 +70,31 @@ public class Looper extends Thread {
 			return;
 		}
 		
+
+		
 		if(!Waitor.result){
 			
 			for(int i=0;i<result.size();++i){
 				
-				HashSet<Term []> newMemo = new HashSet<Term []>();
+				HashSet<ConstrainedTerm []> newMemo = new HashSet<ConstrainedTerm []>();
 				newMemo.addAll(memoing);
+
 				newMemo.addAll(joinAllList(result));
+
 				Looper child = new Looper(impl,spec,result.get(i),newMemo,decider,refs);
-				Waitor.upThreadNumber();
+				
+
 				child.start();
 			}
+			Waitor.downThreadNumber();
 		}
 	}
 	
-	public HashSet<Term []> joinAllList(ArrayList<ArrayList<Term []>> input){
+
+	
+	public HashSet<ConstrainedTerm []> joinAllList(ArrayList<ArrayList<ConstrainedTerm []>> input){
 		
-		HashSet<Term []> temp = new HashSet<Term []>();
+		HashSet<ConstrainedTerm []> temp = new HashSet<ConstrainedTerm []>();
 		
 		for(int i=0;i<input.size();++i){
 			
@@ -95,18 +104,18 @@ public class Looper extends Thread {
 		return temp;
 	}
 	
-	private ArrayList<ArrayList<Term []>> getNextMoves(Term [] input) throws KRunExecutionException, Z3Exception{
+	private ArrayList<ArrayList<ConstrainedTerm []>> getNextMoves(ConstrainedTerm [] input) throws KRunExecutionException, Z3Exception{
 		
-		ArrayList<Term> implResult = impl.steps(input[0]);
-		ArrayList<Term> specResult = spec.steps(input[1]);
-		ArrayList<Term> newImpls = new ArrayList<Term>();
-		ArrayList<ArrayList<Term []>> result = new ArrayList<ArrayList<Term []>>();
+		
+		ArrayList<ConstrainedTerm> implResult = impl.steps(input[0]);
+		ArrayList<ConstrainedTerm> specResult = spec.steps(input[1]);
+		ArrayList<ConstrainedTerm> newImpls = new ArrayList<ConstrainedTerm>();
+		ArrayList<ArrayList<ConstrainedTerm []>> result = new ArrayList<ArrayList<ConstrainedTerm []>>();
 		
 		if(specResult.isEmpty() && !implResult.isEmpty()){
 			
 			return null;
 		}
-		
 		
 		for(int i=0;i<implResult.size();++i){
 			
@@ -117,7 +126,7 @@ public class Looper extends Thread {
 		
 		for(int i=0;i<newImpls.size();++i){
 			
-			ArrayList<Term []> temp = useDeciders(newImpls.get(i),specResult);
+			ArrayList<ConstrainedTerm []> temp = useDeciders(newImpls.get(i),specResult);
 			
 			if (temp.isEmpty()){
 				
@@ -131,15 +140,15 @@ public class Looper extends Thread {
 	}
 	
 	
-	private ArrayList<Term []> useDeciders(Term impl,ArrayList<Term> specs) throws KRunExecutionException, Z3Exception{
+	private ArrayList<ConstrainedTerm []> useDeciders(ConstrainedTerm impl,ArrayList<ConstrainedTerm> specs) throws KRunExecutionException, Z3Exception{
 		
-		ArrayList<Term []> temp = new ArrayList<Term []>();
+		ArrayList<ConstrainedTerm []> temp = new ArrayList<ConstrainedTerm []>();
 		
 		for(int i=0;i<specs.size();++i){
 			
 			if(decider.isSat(impl, specs.get(i))){
 				
-				Term [] tempList = new Term[2];
+				ConstrainedTerm [] tempList = new ConstrainedTerm[2];
 				tempList[0] = impl;
 				tempList[1] = specs.get(i);
 				temp.add(tempList);
@@ -149,11 +158,11 @@ public class Looper extends Thread {
 		return temp;
 	}
 	
-	private boolean testMemoing(Term impl,ArrayList<Term> specs){
+	private boolean testMemoing(ConstrainedTerm impl,ArrayList<ConstrainedTerm> specs){
 		
 		boolean result = false;
 		
-		Term [] temp = new Term[2];
+		ConstrainedTerm [] temp = new ConstrainedTerm[2];
 		
 		temp[0] = impl;
 		
@@ -161,20 +170,20 @@ public class Looper extends Thread {
 			
 			temp[1]=specs.get(i);
 			
-			result = this.memoing.contains(temp);
+			result = result || this.memoing.contains(temp);
 			
 		}
 		
 		return result;
 	}
 	
-	public ArrayList<ArrayList<Term []>> filterAll(ArrayList<Term []> elems,ArrayList<ArrayList<Term []>> list){
+	public ArrayList<ArrayList<ConstrainedTerm []>> filterAll(ArrayList<ConstrainedTerm []> elems,ArrayList<ArrayList<ConstrainedTerm []>> list){
 		
 		if(list.isEmpty()){
 			
 			for(int i=0;i<elems.size();++i){
 				
-				ArrayList<Term []> newElem = new ArrayList<Term []>();
+				ArrayList<ConstrainedTerm []> newElem = new ArrayList<ConstrainedTerm []>();
 				newElem.add(elems.get(i));
 				list.add(newElem);
 			}
@@ -182,11 +191,11 @@ public class Looper extends Thread {
 			return list;
 		}
 		
-		ArrayList<ArrayList<Term []>> result = new ArrayList<ArrayList<Term []>>();
+		ArrayList<ArrayList<ConstrainedTerm []>> result = new ArrayList<ArrayList<ConstrainedTerm []>>();
 		
 		for(int i=0;i<elems.size();++i){
 			
-			ArrayList<ArrayList<Term []>> temp = addElemToAll(elems.get(i),list);
+			ArrayList<ArrayList<ConstrainedTerm []>> temp = addElemToAll(elems.get(i),list);
 			
 			result.addAll(temp);
 		}
@@ -195,13 +204,13 @@ public class Looper extends Thread {
 	}
 	
 	
-	public ArrayList<ArrayList<Term []>> addElemToAll(Term [] elem,ArrayList<ArrayList<Term []>> list){
+	public ArrayList<ArrayList<ConstrainedTerm []>> addElemToAll(ConstrainedTerm [] elem,ArrayList<ArrayList<ConstrainedTerm []>> list){
 		
-		ArrayList<ArrayList<Term []>> temp =new ArrayList<ArrayList<Term []>>();
+		ArrayList<ArrayList<ConstrainedTerm []>> temp =new ArrayList<ArrayList<ConstrainedTerm []>>();
 		
 		for(int i = 0;i<list.size();++i){
 			
-			ArrayList<Term []> newElem = new ArrayList<Term []>();
+			ArrayList<ConstrainedTerm []> newElem = new ArrayList<ConstrainedTerm []>();
 			newElem.addAll(list.get(i));
 			newElem.add(elem);	
 			temp.add(newElem);
@@ -211,7 +220,7 @@ public class Looper extends Thread {
 	}
 	
 	
-	public ArrayList<ArrayList<Term []>> filter(ArrayList<ArrayList<Term []>> left,ArrayList<ArrayList<Term []>> right){
+	public ArrayList<ArrayList<ConstrainedTerm []>> filter(ArrayList<ArrayList<ConstrainedTerm []>> left,ArrayList<ArrayList<ConstrainedTerm []>> right){
 		
 		if(left.isEmpty()){
 			
@@ -222,13 +231,13 @@ public class Looper extends Thread {
 			return left;
 		}
 		
-		ArrayList<ArrayList<Term []>> temp =new ArrayList<ArrayList<Term []>>();
+		ArrayList<ArrayList<ConstrainedTerm []>> temp =new ArrayList<ArrayList<ConstrainedTerm []>>();
 		
 		for(int i=0;i<left.size();++i){
 			
 			for(int j=0;j<right.size();++j){
 				
-				ArrayList<Term []> newElem = new ArrayList<Term []>();
+				ArrayList<ConstrainedTerm []> newElem = new ArrayList<ConstrainedTerm []>();
 				
 				newElem.addAll(left.get(i));
 				newElem.addAll(right.get(j));

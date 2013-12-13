@@ -14,7 +14,8 @@ import org.kframework.backend.java.symbolic.KILtoZ3;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.SymbolicConstraint.Equality;
 import org.kframework.backend.java.util.Z3Wrapper;
-import org.kframework.kil.Term;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.Cell;
 import org.kframework.krun.KRunExecutionException;
 
 import com.microsoft.z3.BoolExpr;
@@ -35,7 +36,7 @@ public class Adjuster {
 		this.spec=spec;
 	}
 	
-	public boolean isSat(Term implElem,Term specElem) throws KRunExecutionException, Z3Exception{
+	public boolean isSat(ConstrainedTerm implElem,ConstrainedTerm specElem) throws KRunExecutionException, Z3Exception{
 		
 		if(impl.getSimulationRewriter().getSimulationMap().isEmpty() 
 				|| spec.getSimulationRewriter().getSimulationMap().isEmpty()){
@@ -66,9 +67,15 @@ public class Adjuster {
 		org.kframework.backend.java.kil.Term newImplTerm = 
 				implside.term().substituteWithBinders(implVars, implside.termContext());
 		
+		@SuppressWarnings("unchecked")
+		Term newImplContent = ((Cell<Term>)newImplTerm).getContent();
+		
 		org.kframework.backend.java.kil.Term newSpecTerm = 
 				specside.term().substituteWithBinders(specVars, specside.termContext());
 		
+		@SuppressWarnings("unchecked")
+		Term newSepcContent = ((Cell<Term>)newSpecTerm).getContent();
+
 		SymbolicConstraint newImplside = 
 				implside.constraint().substituteWithBinders(implVars, implside.termContext());
 		SymbolicConstraint newSpecside = 
@@ -93,8 +100,8 @@ public class Adjuster {
         
         Solver solver = context.MkSolver();
         
-        BoolExpr first = context.MkEq(((Z3Term)newImplTerm.accept(transformer)).expression(),
-				((Z3Term)newSpecTerm.accept(transformer)).expression());
+        BoolExpr first = context.MkEq(((Z3Term)newImplContent.accept(transformer)).expression(),
+				((Z3Term)newSepcContent.accept(transformer)).expression());
         
         ArrayList<BoolExpr> temp = new ArrayList<BoolExpr>();
         

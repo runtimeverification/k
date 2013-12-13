@@ -175,6 +175,15 @@ public class JavaSymbolicKRun implements KRun {
             return null;
         }
     }
+    
+    /*
+     * by Liyi Li
+     * get the def of the rewriter
+     */
+    public Definition getDef(){
+    	
+    	return this.definition;
+    }
 
 	@Override
 	public KRunResult<SearchResults> search(
@@ -378,14 +387,10 @@ public class JavaSymbolicKRun implements KRun {
     /* author: Liyi Li
      * a function return all the next step of a given simulation term
      */
-    public ConstrainedTerm simulationSteps(org.kframework.kil.Term cfg)
+    public ConstrainedTerm simulationSteps(ConstrainedTerm cfg)
             throws KRunExecutionException {
     	
-    	Term term = Term.of(cfg, definition);
-        TermContext termContext = new TermContext(definition, new PortableFileSystem());
-        term = term.evaluate(termContext);
-        ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, termContext);
-        ConstrainedTerm result = this.simulationRewriter.computeSimulationStep(constrainedTerm);
+        ConstrainedTerm result = this.simulationRewriter.computeSimulationStep(cfg);
   
     	return result;
     }
@@ -393,41 +398,13 @@ public class JavaSymbolicKRun implements KRun {
     /* author: Liyi Li
      * a function return all the next steps of a given term
      */
-    public ArrayList<org.kframework.kil.Term> steps(org.kframework.kil.Term cfg)
+    public ArrayList<ConstrainedTerm> steps(ConstrainedTerm cfg)
             throws KRunExecutionException {
-    	
-    	Term term = Term.of(cfg, definition);
-        TermContext termContext = new TermContext(definition, new PortableFileSystem());
-        term = term.evaluate(termContext);
-        ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, termContext);
-        ArrayList<ConstrainedTerm> temp = this.simulationRewriter.rewriteAll(constrainedTerm);
-        
-        ArrayList<org.kframework.kil.Term> results = new ArrayList<org.kframework.kil.Term>();
-        
-        for(int i=0;i<temp.size();++i){
-        	
-        	org.kframework.kil.Term kilTerm = (org.kframework.kil.Term) temp.get(i).term().accept(
-                    new BackendJavaKILtoKILTranslation(context));
-        	
-        	results.add(kilTerm);
-        }
 
+        ArrayList<ConstrainedTerm> results = this.simulationRewriter.rewriteAll(cfg);    
         
-    	
-    	/*SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
-    	Term term = Term.of(cfg, definition);
-        TermContext termContext = new TermContext(definition, new PortableFileSystem());
-        term = term.evaluate(termContext);
-        term = term.evaluate(termContext);
-        ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, termContext);
-        
-        ConstrainedTerm result = this.simulationRewriter.rewrite(constrainedTerm, 1);
-        org.kframework.kil.Term kilTerm = (org.kframework.kil.Term) result.term().accept(
-                new BackendJavaKILtoKILTranslation(context));
-        ArrayList<org.kframework.kil.Term> results = new ArrayList<org.kframework.kil.Term>();
-        results.add(kilTerm);
-        */
-        
+
+
     	return results;
     }
     

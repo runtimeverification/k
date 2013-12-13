@@ -9,7 +9,10 @@ import org.fusesource.jansi.AnsiConsole;
 import org.kframework.backend.java.symbolic.JavaSymbolicKRun;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.KRunExecutionException;
-import org.kframework.kil.Term;
+import org.kframework.krun.ioserver.filesystem.portable.PortableFileSystem;
+import org.kframework.backend.java.kil.ConstrainedTerm;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
 
 public class Waitor extends Thread{
 	
@@ -48,18 +51,29 @@ public class Waitor extends Thread{
 		}
 	}
 	
-	public Waitor(Context implRules,Context specRules,Term implTerm,Term specTerm) throws KRunExecutionException{
+	public Waitor(Context implRules,Context specRules,org.kframework.kil.Term implTerm,org.kframework.kil.Term specTerm) throws KRunExecutionException{
 		
 		this.impl = new JavaSymbolicKRun(implRules);
 		this.spec = new JavaSymbolicKRun(specRules);
 		this.impl.initialSimulationRewriter();
 		this.spec.initialSimulationRewriter();
 		decider = new Adjuster(impl,spec);
-		Term [] pair = new Term[2];
-		pair[0] = implTerm;
-		pair[1] = specTerm;
-		HashSet<Term []> memo = new HashSet<Term[]>();
-		ArrayList<Term []> pairs = new ArrayList<Term []>();
+		ConstrainedTerm [] pair = new ConstrainedTerm[2];
+		
+		
+		Term term = Term.of(implTerm, impl.getDef());
+		TermContext termContext = new TermContext(impl.getDef(), new PortableFileSystem());
+		ConstrainedTerm implConstraint = new ConstrainedTerm(term, termContext);
+		pair[0] = implConstraint;
+		
+		term = Term.of(specTerm, spec.getDef());
+		termContext = new TermContext(spec.getDef(), new PortableFileSystem());
+		ConstrainedTerm specConstraint = new ConstrainedTerm(term, termContext);
+		pair[1] = specConstraint;
+		
+		
+		HashSet<ConstrainedTerm []> memo = new HashSet<ConstrainedTerm[]>();
+		ArrayList<ConstrainedTerm []> pairs = new ArrayList<ConstrainedTerm []>();
 		pairs.add(pair);
 		
 		child = new Looper(impl,spec,pairs,memo,decider,this);
@@ -99,7 +113,7 @@ public class Waitor extends Thread{
 					read.unlock();
 				}
 				
-				if(temp==0){
+				if(temp<=0){
 				
 					AnsiConsole.out
                     .println(false);
