@@ -712,10 +712,10 @@ public class Main {
      * author: Liyi Li
      * it will be used for simulation tool
      */
-    public static Term preDefineSimulation(CommandlineOptions cmd_options,
-    		CommandLine cmd,Context context,String directory,String pgm) throws IOException, KRunExecutionException{
+    public static org.kframework.kil.Term preDefineSimulation(CommandlineOptions cmd_options,
+    		CommandLine cmd,Context context,String directory,String pgm) throws IOException, KRunExecutionException, TransformerException{
     	
-    	K.directory=new File(directory).getCanonicalPath();;
+    	K.directory=new File(directory).getCanonicalPath();
     	K.pgm = pgm;
 
         File[] dirs = new File(K.directory).listFiles(new FilenameFilter() {
@@ -760,7 +760,7 @@ public class Main {
         K.kdir = context.dotk.getCanonicalPath();
         K.setKDir();
         
-        Term KAST = null;
+        org.kframework.kil.Term KAST = null;
         RunProcess rp = new RunProcess();
 
         if (!context.initialized) {
@@ -817,7 +817,9 @@ public class Main {
             }
         }
         
-        return KAST;
+        org.kframework.kil.Term term = makeConfiguration(KAST, null, rp,
+                (K.term != null), context);
+        return term;
     }
 
     /**
@@ -1091,6 +1093,9 @@ public class Main {
 					rightInitTerm = Main.preDefineSimulation(cmd_options, cmd,
 							contextRight, K.simulationDefinitionRight, K.simulationProgRight);
 				} catch (KRunExecutionException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (TransformerException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}

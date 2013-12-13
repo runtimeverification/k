@@ -52,6 +52,8 @@ public class Waitor extends Thread{
 		
 		this.impl = new JavaSymbolicKRun(implRules);
 		this.spec = new JavaSymbolicKRun(specRules);
+		this.impl.initialSimulationRewriter();
+		this.spec.initialSimulationRewriter();
 		decider = new Adjuster(impl,spec);
 		Term [] pair = new Term[2];
 		pair[0] = implTerm;

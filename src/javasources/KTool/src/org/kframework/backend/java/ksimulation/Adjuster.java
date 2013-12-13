@@ -55,6 +55,9 @@ public class Adjuster {
 			return false;
 		}
 		
+
+		
+		
 		Map<Variable,Variable> implVars = 
 				implside.constraint().rename(implside.term().variableSet());
 		Map<Variable,Variable> specVars = 

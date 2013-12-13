@@ -1,6 +1,7 @@
 package org.kframework.backend.java.symbolic;
 
 
+import org.fusesource.jansi.AnsiConsole;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Term;
@@ -58,7 +59,7 @@ public class JavaSymbolicKRun implements KRun {
         this.context = definition.context();
         this.context.kompiled = context.kompiled;
         transformer = new KILtoBackendJavaKILTransformer(this.context);
-        this.simulationRewriter = new SymbolicRewriter(this.definition);
+        //this.simulationRewriter = new SymbolicRewriter(this.definition);
 	}
 
     @Override
@@ -369,6 +370,11 @@ public class JavaSymbolicKRun implements KRun {
     	return this.simulationRewriter;
     }
     
+    public void initialSimulationRewriter(){
+    	
+    	this.simulationRewriter = new SymbolicRewriter(definition);
+    }
+    
     /* author: Liyi Li
      * a function return all the next step of a given simulation term
      */
@@ -405,7 +411,23 @@ public class JavaSymbolicKRun implements KRun {
         	
         	results.add(kilTerm);
         }
-                
+
+        
+    	
+    	/*SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
+    	Term term = Term.of(cfg, definition);
+        TermContext termContext = new TermContext(definition, new PortableFileSystem());
+        term = term.evaluate(termContext);
+        term = term.evaluate(termContext);
+        ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, termContext);
+        
+        ConstrainedTerm result = this.simulationRewriter.rewrite(constrainedTerm, 1);
+        org.kframework.kil.Term kilTerm = (org.kframework.kil.Term) result.term().accept(
+                new BackendJavaKILtoKILTranslation(context));
+        ArrayList<org.kframework.kil.Term> results = new ArrayList<org.kframework.kil.Term>();
+        results.add(kilTerm);
+        */
+        
     	return results;
     }
     
