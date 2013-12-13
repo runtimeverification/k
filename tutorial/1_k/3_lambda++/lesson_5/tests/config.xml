@@ -1,6 +1,7 @@
 <tests>
 
   <include file="../../lesson_4/tests/config.xml"
+           exclude="omega"
            more-results="../../lesson_1/tests ." />
 
 </tests>
