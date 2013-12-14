@@ -2,12 +2,12 @@ package org.kframework.backend.java.symbolic;
 
 
 import org.kframework.backend.java.kil.Definition;
-import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.util.TestCaseGenerationSettings;
 import org.kframework.backend.java.util.TestCaseGenerationUtil;
 import org.kframework.compile.transformers.DataStructureToLookupUpdate;
 import org.kframework.compile.utils.*;
@@ -273,9 +273,9 @@ public class JavaSymbolicKRun implements KRun {
         Object o = ((org.kframework.kil.Bag) ((org.kframework.kil.Cell) cfg).getContents()).getContents().get(0);
         o = ((org.kframework.kil.Bag) ((org.kframework.kil.Cell) o).getContents()).getContents().get(1);
         Map<org.kframework.kil.Term, org.kframework.kil.Term> stateMap = new HashMap<org.kframework.kil.Term, org.kframework.kil.Term>();
-        stateMap.put((org.kframework.kil.Term) org.kframework.kil.GenericToken.kAppOf("Id", "n1"), (org.kframework.kil.Term) org.kframework.kil.IntBuiltin.kAppOf("1"));
-//      stateMap.put((org.kframework.kil.Term) org.kframework.kil.GenericToken.kAppOf("Id", "n2"), (org.kframework.kil.Term) org.kframework.kil.IntBuiltin.kAppOf("2"));
-        stateMap.put((org.kframework.kil.Term) org.kframework.kil.GenericToken.kAppOf("Id", "$1"), (org.kframework.kil.Term) org.kframework.kil.IntBuiltin.kAppOf("0"));
+        stateMap.put((org.kframework.kil.Term) org.kframework.kil.GenericToken.kAppOf("Id", "x"), (org.kframework.kil.Term) org.kframework.kil.IntBuiltin.kAppOf("3"));
+//        stateMap.put((org.kframework.kil.Term) org.kframework.kil.GenericToken.kAppOf("Id", "y"), (org.kframework.kil.Term) org.kframework.kil.IntBuiltin.kAppOf("2"));
+        stateMap.put((org.kframework.kil.Term) org.kframework.kil.GenericToken.kAppOf("Id", "$1"), (org.kframework.kil.Term) org.kframework.kil.IntBuiltin.kAppOf("1"));
         ((org.kframework.kil.Cell) o)
                 .setContents(new org.kframework.kil.MapBuiltin(context
                         .dataStructureSortOf("MyMap"), 
@@ -314,15 +314,18 @@ public class JavaSymbolicKRun implements KRun {
             Term pgm = Term.of(cfg, definition);
             pgm = pgm.substituteWithBinders(result.constraint().substitution(), termContext);
             
-            /* concretize the pgm */
-            final Map<Variable, Term> subst = new HashMap<Variable, Term>();
-            pgm.accept(new BottomUpVisitor() {
-               @Override
-               public void visit(Variable var) {
-                   subst.put(var, TestCaseGenerationUtil.getSimplestTermOfSort(var.sort(), context));
-               }
-            });
-            pgm = pgm.substituteWithBinders(subst, termContext);
+            /* concretize the pgm; only reasonable when the 2nd phase of the
+             * test generation is performed */
+            if (TestCaseGenerationSettings.TWO_PHASE_GENERATION) {
+                final Map<Variable, Term> subst = new HashMap<Variable, Term>();
+                pgm.accept(new BottomUpVisitor() {
+                   @Override
+                   public void visit(Variable var) {
+                       subst.put(var, TestCaseGenerationUtil.getSimplestTermOfSort(var.sort(), context));
+                   }
+                });
+                pgm = pgm.substituteWithBinders(subst, termContext);
+            }
 
             /* translate back to generic KIL term */
             org.kframework.kil.Term pgmTerm = (org.kframework.kil.Term) pgm.accept(
