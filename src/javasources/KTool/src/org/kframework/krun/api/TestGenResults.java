@@ -69,11 +69,10 @@ public class TestGenResults {
             // temporary hack to eliminate constraints due to the rigidity of
             // term equality; TODO(YilongL): fix it
             String strCnstr = testGenResult.getConstraint().toString();
-            strCnstr = strCnstr.replaceAll("'_=/=K_\\(.*,, '\\{\\}\\(\\.KList\\)\\) =\\? Bool\\(#\"true\"\\) /\\\\ ", "");
-            strCnstr = strCnstr.replaceAll(" /\\\\ " + "'_=/=K_\\(.*,, '\\{\\}\\(\\.KList\\)\\) =\\? Bool\\(#\"true\"\\)", "");
-            strCnstr = strCnstr.replaceAll("'_=/=K_\\(.*,, '\\{\\}\\(\\.KList\\)\\) =\\? Bool\\(#\"true\"\\)", "");
-            strCnstr = strCnstr.replace(SymbolicConstraint.SEPARATOR + " ",
-                    SymbolicConstraint.SEPARATOR + "\n");
+            strCnstr = strCnstr.replaceAll("'_=/=K_\\(.*?,, '\\{\\}\\(\\.KList\\)\\) =\\? Bool\\(#\"true\"\\) /\\\\ ", "");
+            strCnstr = strCnstr.replaceAll(" /\\\\ " + "'_=/=K_\\(.*?,, '\\{\\}\\(\\.KList\\)\\) =\\? Bool\\(#\"true\"\\)", "");
+            strCnstr = strCnstr.replaceAll("'_=/=K_\\(.*?,, '\\{\\}\\(\\.KList\\)\\) =\\? Bool\\(#\"true\"\\)", "");
+            strCnstr = strCnstr.replace("/\\ ", "/\\\n");
             sb.append(strCnstr);
             
             n++;
