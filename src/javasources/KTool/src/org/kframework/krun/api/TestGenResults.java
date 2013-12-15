@@ -1,13 +1,14 @@
 package org.kframework.krun.api;
 
-import edu.uci.ics.jung.graph.DirectedGraph;
+import java.util.List;
+import java.util.Map;
+
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.K;
 
-import java.util.List;
-import java.util.Map;
+import edu.uci.ics.jung.graph.DirectedGraph;
 
 public class TestGenResults {
 	private List<TestGenResult> testGenResults;
@@ -61,10 +62,13 @@ public class TestGenResults {
                     sb.append("\nEmpty substitution");
                 }
             }
-            //Temporarily printing the constraints until problems with
+            // Temporarily printing the constraints until problems with
             // translation of Term to Z3 are fixed
-            sb.append("\nConstraint: "+testGenResult.getConstraint());
-
+            sb.append("\nConstraint:\n");
+            String strCnstr = testGenResult.getConstraint().toString();
+            strCnstr = strCnstr.replace("/\\", "/\\\n");
+            sb.append(strCnstr);
+            
             n++;
         }
         
