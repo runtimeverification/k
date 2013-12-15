@@ -3,6 +3,7 @@ package org.kframework.krun.api;
 import java.util.List;
 import java.util.Map;
 
+import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
@@ -65,8 +66,14 @@ public class TestGenResults {
             // Temporarily printing the constraints until problems with
             // translation of Term to Z3 are fixed
             sb.append("\nConstraint:\n");
+            // temporary hack to eliminate constraints due to the rigidity of
+            // term equality; TODO(YilongL): fix it
             String strCnstr = testGenResult.getConstraint().toString();
-            strCnstr = strCnstr.replace("/\\", "/\\\n");
+            strCnstr = strCnstr.replaceAll("'_=/=K_\\(.*,, '\\{\\}\\(\\.KList\\)\\) =\\? Bool\\(#\"true\"\\) /\\\\ ", "");
+            strCnstr = strCnstr.replaceAll(" /\\\\ " + "'_=/=K_\\(.*,, '\\{\\}\\(\\.KList\\)\\) =\\? Bool\\(#\"true\"\\)", "");
+            strCnstr = strCnstr.replaceAll("'_=/=K_\\(.*,, '\\{\\}\\(\\.KList\\)\\) =\\? Bool\\(#\"true\"\\)", "");
+            strCnstr = strCnstr.replace(SymbolicConstraint.SEPARATOR + " ",
+                    SymbolicConstraint.SEPARATOR + "\n");
             sb.append(strCnstr);
             
             n++;
