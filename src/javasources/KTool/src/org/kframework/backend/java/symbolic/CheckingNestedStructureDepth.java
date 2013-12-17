@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.Production;
 
 /**
@@ -27,7 +28,9 @@ public class CheckingNestedStructureDepth implements KastStructureCheckerPlugin 
     
     public CheckingNestedStructureDepth() {
         // TODO(YilongL): handle user-specified depth properly
-        this.setMaxNestedLevelOf("AExp", 3);
+        this.setMaxNestedLevelOf("AExp", 2);
+        this.setMaxNestedLevelOf("BExp", 1);
+        this.setMaxNestedLevelOf("Block", 2);
     }
 
     @Override
@@ -86,20 +89,29 @@ public class CheckingNestedStructureDepth implements KastStructureCheckerPlugin 
             
             KLabelConstant kLabel = (KLabelConstant) kItem.kLabel();
             for (String sort : computeSortsOf(kLabel)) {
-                if (nestedLevelOfSort.get(sort) == null) {
-                    nestedLevelOfSort.put(sort, 0);
-                }
-                
-                int depth = nestedLevelOfSort.get(sort) + 1;
-                Integer maxDepth = maxNestedLevelOfSort.get(sort);
-                if ((maxDepth != null) && (depth > maxDepth)) {
-                    this.proceed = false;
-                    checker.flagFailure(CheckingNestedStructureDepth.this);
-                    return;
-                } else {
-                    nestedLevelOfSort.put(sort, depth);
-                }
+                check(sort);
             }            
+        }
+        
+        @Override
+        public void visit(Variable variable) {
+            check(variable.sort());
+        }
+        
+        private void check(String sort) {
+            if (nestedLevelOfSort.get(sort) == null) {
+                nestedLevelOfSort.put(sort, 0);
+            }
+            
+            int depth = nestedLevelOfSort.get(sort) + 1;
+            Integer maxDepth = maxNestedLevelOfSort.get(sort);
+            if ((maxDepth != null) && (depth > maxDepth)) {
+                this.proceed = false;
+                checker.flagFailure(CheckingNestedStructureDepth.this);
+                return;
+            } else {
+                nestedLevelOfSort.put(sort, depth);
+            }
         }
     }
     
@@ -115,5 +127,10 @@ public class CheckingNestedStructureDepth implements KastStructureCheckerPlugin 
                 nestedLevelOfSort.put(sort, nestedLevelOfSort.get(sort) - 1);
             }            
         }
+        
+        @Override
+        public void visit(Variable variable) {
+            nestedLevelOfSort.put(variable.sort(), nestedLevelOfSort.get(variable.sort()) - 1);
+        }        
     }
 }

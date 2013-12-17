@@ -72,7 +72,7 @@ public class KompileFrontEnd {
             GlobalSettings.lib = cmd.getOptionValue("lib", GlobalSettings.lib);
             GlobalSettings.synModule =
                     cmd.getOptionValue("syntax-module", GlobalSettings.synModule);
-            GlobalSettings.use_concrete |= cmd.hasOption("concrete-sort");
+            GlobalSettings.testgen |= cmd.hasOption("test-gen");
 
             if (cmd.hasOption("transition"))
                 GlobalSettings.transition = metadataParse(cmd.getOptionValue("transition"));

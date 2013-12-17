@@ -108,7 +108,7 @@ public class GlobalSettings {
 	public static boolean NOSMT = false;
 
 	//needed for test generation in Java backend
-	public static boolean use_concrete = false;
+	public static boolean testgen = false;
 	
 	public static String CHECK = null;
 	public static boolean symbolic = false; // true if the --symbolic argument has been provided to kompile

@@ -235,7 +235,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                          * "use_concrete" flag is used (needed for test
                          * generation)
                          */
-                        if (!GlobalSettings.use_concrete) {
+                        if (!GlobalSettings.testgen) {
                             termCons.getContents().get(j).setSort(KSorts.KITEM);
                         }
                     } else {
@@ -252,7 +252,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                 if (isSeq) {
                     for (int j = 0; j < i; ++j) {
                         Term arg = termCons.getContents().get(-1 + Integer.parseInt(newStrictAttrs.get(j).getKey()));
-                        if (GlobalSettings.use_concrete) {
+                        if (GlobalSettings.testgen) {
                             KApp kResultPred = KApp.of(KLabelConstant.KRESULT_PREDICATE, arg);
                             sideCond = sideCond == null ? kResultPred : 
                                 KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, sideCond, kResultPred);

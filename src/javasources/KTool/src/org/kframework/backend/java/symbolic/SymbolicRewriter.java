@@ -67,7 +67,8 @@ public class SymbolicRewriter {
     private final List<ConstrainedTerm> results = new ArrayList<ConstrainedTerm>();
     private final List<Rule> appliedRules = new ArrayList<Rule>();
     private boolean transition;
-    private final PluggableKastStructureChecker pluggableKastChecker;
+    private final PluggableKastStructureChecker phase1PluggableKastChecker;
+    private final PluggableKastStructureChecker phase2PluggableKastChecker;
     
     /*
      * Liyi Li : add simulation rules in the constructor, and allow user to input label [alphaRule] as
@@ -78,11 +79,15 @@ public class SymbolicRewriter {
         
         /* initialize the K AST checker for test generation */
         if (K.do_testgen) {
-            pluggableKastChecker = new PluggableKastStructureChecker();
-            pluggableKastChecker.register(new CheckingNestedStructureDepth());
-            pluggableKastChecker.register(new CheckingLeftAssocConstructs(definition));
+            phase1PluggableKastChecker = new PluggableKastStructureChecker();
+            phase1PluggableKastChecker.register(new CheckingNestedStructureDepth());
+            phase1PluggableKastChecker.register(new CheckingLeftAssocConstructs(definition));
+            
+            phase2PluggableKastChecker = new PluggableKastStructureChecker();
+            phase2PluggableKastChecker.register(new CheckingLeftAssocConstructs(definition));
         } else {
-            pluggableKastChecker = null;
+            phase1PluggableKastChecker = null;
+            phase2PluggableKastChecker = null;
         }
 
         /* populate the table of rules rewriting the top configuration */
@@ -648,50 +653,79 @@ public class SymbolicRewriter {
         Set<ConstrainedTerm> visited = new HashSet<ConstrainedTerm>();
         List<ConstrainedTerm> queue = new ArrayList<ConstrainedTerm>();
         List<ConstrainedTerm> nextQueue = new ArrayList<ConstrainedTerm>();
+        List<Rule> nextQueueOfRules = new ArrayList<Rule>();
 
         visited.add(initialTerm);
         queue.add(initialTerm);
         
         label:
         for (step = 0; !queue.isEmpty() && step != depth; ++step) {
-//            System.out.printf("testgen #step %s\n", step);
+            System.out.printf("testgen #step = %s, size = %s\n", step, queue.size());
+            
+            Map<String, Integer> ruleDistStats = new HashMap<>();
+            nextQueueOfRules.clear();
+
             for (ConstrainedTerm term : queue) {
-                // TODO(YilongL): handle the following pruning condition nice
-                // and clean
-                if (PHASE_ONE_BOUND_FREEVARS) {
-                    if (TestCaseGenerationUtil.getNumOfFreeVars(term,
-                            definition.context()) > PHASE_ONE_MAX_NUM_FREEVARS) {
-                        continue;
-                    }
-                }
-
                 computeRewriteStep(term);
-                /* first eliminate shadowed rules */
+                
+                /* first eliminate terms that fail the K AST checker */
+                performKastStructureCheck(phase1PluggableKastChecker, initialTerm);
+                /* then eliminate terms that have too many free variables */
+                if (PHASE_ONE_BOUND_FREEVARS) {
+                    eliminateTermsWithNumOfFreeVarsGT(PHASE_ONE_MAX_NUM_FREEVARS);
+                }
+                /* finally eliminate shadowed rules */
                 eliminateShadowedRewriteSteps();
-                /* then eliminate terms fail the K AST checker */
-                performKastStructureCheck(initialTerm);
 
+                TestCaseGenerationUtil.updateRuleDistStats(ruleDistStats, appliedRules);
+                
                 if (results.isEmpty()) {
                     /* final term */
                     testgenResults.add(term);
                     if (testgenResults.size() == bound) {
                         break label;
                     }
+                    
+                    // TODO(YilongL): how to determine if this final term is
+                    // proper result or junk? should it be user-defined or
+                    // provided by developers?
+//                    Cell<?> kCell = LookupCell.find(term, "k");
+////                    System.err.println(kCell.getContent());
+//                    if (kCell.getContent().toString().length() <= 10) {
+//                        testgenResults.add(term);
+//                        if (testgenResults.size() == bound) {
+//                            break label;
+//                        }
+//                    }
                 }
 
                 for (int i = 0; getTransition(i) != null; ++i) {
                     if (visited.add(getTransition(i))) {
                         nextQueue.add(getTransition(i));
+                        nextQueueOfRules.add(appliedRules.get(i));
                     }
                 }
             }
-
+            
+            System.out.println("rule distribution stats: " + ruleDistStats);            
+            
+            /* debugging: test generation runs into a (local) dead end */
+//            if (nextQueue.isEmpty()) {
+//                System.err.printf("The state queue drains out...\n)");
+//                System.err.println("last round :");
+//                for (ConstrainedTerm term : queue) {
+//                    System.err.println(term);
+//                }
+//            }
+            
             /* swap the queues */
             List<ConstrainedTerm> temp;
             temp = queue;
             if (PHASE_ONE_BOUND_SUCCESSORS) {
-                queue = TestCaseGenerationUtil.getArbitraryStates(nextQueue,
-                        PHASE_ONE_MAX_NUM_SUCCESSORS);
+//                queue = TestCaseGenerationUtil.getArbitraryStates(nextQueue,
+//                        PHASE_ONE_MAX_NUM_SUCCESSORS);
+                queue = TestCaseGenerationUtil.getStatesByRR(nextQueue,
+                        nextQueueOfRules, PHASE_ONE_MAX_NUM_SUCCESSORS);
             } else {
                 queue = nextQueue;
             }
@@ -708,8 +742,7 @@ public class SymbolicRewriter {
                 // may involve infinite rewrites?
                 ConstrainedTerm grndTerm = getFirstReachableGroundTerm(cnstrTerm, PHASE_TWO_MAX_REWRITE_STEPS);
 
-//                System.out.printf("cnstrTerm = %s\n", cnstrTerm);
-//                System.out.printf("grndTerm = %s\n", grndTerm);
+//                System.out.printf("cnstrTerm = %s\ngrndTerm = %s\n", cnstrTerm, grndTerm);
 
                 if (grndTerm != null) {
                     testgenResults.add(grndTerm);
@@ -732,6 +765,20 @@ public class SymbolicRewriter {
         return testgenResults;
     }
 
+    private void eliminateTermsWithNumOfFreeVarsGT(int maxNumOfFreeVars) {
+        List<ConstrainedTerm> tmpResults = new ArrayList<ConstrainedTerm>(results);
+        List<Rule> tmpAppliedRules = new ArrayList<Rule>(appliedRules);
+        results.clear();
+        appliedRules.clear();
+        for (int i = 0; i < tmpResults.size(); i++) {
+            if (TestCaseGenerationUtil.getNumOfFreeVars(tmpResults.get(i),
+                    definition.context()) <= maxNumOfFreeVars) {
+                results.add(tmpResults.get(i));
+                appliedRules.add(tmpAppliedRules.get(i));
+            }
+        }
+    }
+
     /**
      * Eliminates rewrite steps obtained from applying rules that are shadowed
      * by its preceding rules for test generation.
@@ -749,27 +796,33 @@ public class SymbolicRewriter {
         }
         
         List<ConstrainedTerm> tmpResults = new ArrayList<ConstrainedTerm>(results);
+        List<Rule> tmpAppliedRules = new ArrayList<Rule>(appliedRules);
         results.clear();
+        appliedRules.clear();
         for (int i = 0; i < tmpResults.size(); i++) {
-            if (!shadowedLabels.contains(appliedRules.get(i).label())) {
+            if (!shadowedLabels.contains(tmpAppliedRules.get(i).label())) {
                 results.add(tmpResults.get(i));
+                appliedRules.add(tmpAppliedRules.get(i));
             }
         }
     }
 
-    private void performKastStructureCheck(ConstrainedTerm initTerm) {
+    private void performKastStructureCheck(PluggableKastStructureChecker checker, ConstrainedTerm initTerm) {
         List<ConstrainedTerm> tmpResults = new ArrayList<ConstrainedTerm>(results);
+        List<Rule> tmpAppliedRules = new ArrayList<Rule>(appliedRules);
         results.clear();
-        for (ConstrainedTerm intermediateTerm : tmpResults) {
+        appliedRules.clear();
+        for (int i = 0; i < tmpResults.size(); i++) {
             /* substitute the initial term to get a partially instantiated pgm */
             Term pgm = initTerm.term().substituteWithBinders(
-                    intermediateTerm.constraint().substitution(),
+                    tmpResults.get(i).constraint().substitution(),
                     initTerm.termContext());
             
-            pluggableKastChecker.reset();
-            pgm.accept(pluggableKastChecker);
-            if (pluggableKastChecker.isSuccess()) {
-                results.add(intermediateTerm);
+            checker.reset();
+            pgm.accept(checker);
+            if (checker.isSuccess()) {
+                results.add(tmpResults.get(i));
+                appliedRules.add(tmpAppliedRules.get(i));
 //                System.out.print("Pass");
 //            } else {
 //                System.err.print("Fail");
@@ -807,8 +860,8 @@ public class SymbolicRewriter {
 //            System.out.printf("searching for ground term #step %s\n", step);
             for (ConstrainedTerm term : queue) {
                 computeRewriteStep(term);
+                performKastStructureCheck(phase2PluggableKastChecker, initTerm);
                 eliminateShadowedRewriteSteps();
-                performKastStructureCheck(initTerm);
 
                 if (results.isEmpty()) {
                     /* final term */

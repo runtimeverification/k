@@ -40,7 +40,7 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
         final Variable v;
         if (GlobalSettings.javaBackend) {
             /* the java rewrite engine only supports heating/cooling on KItem */
-            if(GlobalSettings.use_concrete){
+            if(GlobalSettings.testgen){
                 if(term instanceof TermCons){
                     TermCons termCons = (TermCons)term;
                     int index = 0;
@@ -151,13 +151,37 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
     	Rule heatingRule = new Rule(lhsHeat, rhsHeat, context);
     	heatingRule.setRequires(substituteHole(node.getRequires(), freshVariable));
     	heatingRule.setEnsures(substituteHole(node.getEnsures(), freshVariable));
-		heatingRule.getAttributes().getContents().addAll(node.getAttributes().getContents());
+    	heatingRule.getAttributes().getContents().addAll(node.getAttributes().getContents());
     	heatingRule.putAttribute(MetaK.Constants.heatingTag,"");
+        if (GlobalSettings.testgen) {
+            // TODO(YilongL): 1) is the body always a TermCons? 2) the following
+            // naming convention may not guarantee a unique label for each
+            // generated heating rule; need to be revised later
+            for (int i = 0; i < ((TermCons) body).getContents().size(); i++) {
+                if (((TermCons) body).getContents().get(i) instanceof Rewrite) {
+                    heatingRule.setLabel(MetaK.Constants.heatingTag + "("
+                            + node.getAttribute("klabel") + "," + i + ")");
+                    break;
+                }
+            }
+        }
     	rules.add(heatingRule);
-    	
+
     	Rule coolingRule = new Rule(rhsHeat, lhsHeat, context);
-		coolingRule.getAttributes().getContents().addAll(node.getAttributes().getContents());
+    	coolingRule.getAttributes().getContents().addAll(node.getAttributes().getContents());
     	coolingRule.putAttribute(MetaK.Constants.coolingTag,"");
+        if (GlobalSettings.testgen) {
+            // TODO(YilongL): the following naming convention may not guarantee
+            // a unique label for each generated cooling rule; need to be
+            // revised later
+            for (int i = 0; i < ((TermCons) body).getContents().size(); i++) {
+                if (((TermCons) body).getContents().get(i) instanceof Rewrite) {
+                    coolingRule.setLabel(MetaK.Constants.coolingTag + "("
+                            + node.getAttribute("klabel") + "," + i + ")");
+                    break;
+                }
+            }
+        }    	
     	rules.add(coolingRule);
     	
     	return null;
