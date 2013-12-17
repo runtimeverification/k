@@ -2,7 +2,6 @@ package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.loader.Context;
 
 
 /**
@@ -16,9 +15,9 @@ public class Evaluator extends CopyOnWriteTransformer {
     // TODO(YilongL): why not just declare it as a LocalTransformer?
     private final Transformer localEvaluator; // used to perform the actual evaluation
 
-    public Evaluator(TermContext context,Context theContext) {
+    public Evaluator(TermContext context) {
         super(context);
-        localEvaluator = new LocalEvaluator(context,theContext);
+        localEvaluator = new LocalEvaluator(context);
     }
 
     @Override
@@ -52,3 +51,4 @@ public class Evaluator extends CopyOnWriteTransformer {
     }
 
 }
+

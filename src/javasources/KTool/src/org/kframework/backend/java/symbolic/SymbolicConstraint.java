@@ -26,7 +26,7 @@ import com.microsoft.z3.Status;
 import com.microsoft.z3.Z3Exception;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.K;
-import org.kframework.kil.loader.Context;
+
 
 /**
  * A conjunction of equalities between terms (with variables).
@@ -127,9 +127,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
         private Term leftHandSide;
         private Term rightHandSide;
-        private final Context theContext;
-        
-        private Equality(Term leftHandSide, Term rightHandSide,Context theContext) {
+
+        private Equality(Term leftHandSide, Term rightHandSide) {
             if (leftHandSide instanceof Bottom) rightHandSide = leftHandSide;
             if (rightHandSide instanceof Bottom) leftHandSide = rightHandSide;
             assert leftHandSide.kind() == rightHandSide.kind()
@@ -150,12 +149,11 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
             this.leftHandSide = leftHandSide;
             this.rightHandSide = rightHandSide;
-            this.theContext=theContext;
         }
 
         public Equality evaluate() {
-            leftHandSide = leftHandSide.evaluate(context,this.theContext);
-            rightHandSide = rightHandSide.evaluate(context,this.theContext);
+            leftHandSide = leftHandSide.evaluate(context);
+            rightHandSide = rightHandSide.evaluate(context);
             return this;
         }
 
@@ -371,15 +369,15 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
         Term normalizedLeftHandSide = leftHandSide.substituteWithBinders(substitution, context);
         if (normalizedLeftHandSide != leftHandSide) {
-            normalizedLeftHandSide = normalizedLeftHandSide.evaluate(context,this.definition.context());
+            normalizedLeftHandSide = normalizedLeftHandSide.evaluate(context);
         }
 
         Term normalizedRightHandSide = rightHandSide.substituteWithBinders(substitution, context);
         if (normalizedRightHandSide != rightHandSide) {
-            normalizedRightHandSide = normalizedRightHandSide.evaluate(context,this.definition.context());
+            normalizedRightHandSide = normalizedRightHandSide.evaluate(context);
         }
 
-        Equality equality = this.new Equality(normalizedLeftHandSide, normalizedRightHandSide,this.definition.context());
+        Equality equality = this.new Equality(normalizedLeftHandSide, normalizedRightHandSide);
         if (equality.isUnknown()){
             equalities.add(equality);
             truthValue = TruthValue.UNKNOWN;
@@ -817,7 +815,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             Map<Variable, Term> tempSubstitution = new HashMap<Variable, Term>();
             tempSubstitution.put(variable, term);
 
-            SymbolicConstraint.compose(substitution, tempSubstitution, context,this.definition.context());
+            SymbolicConstraint.compose(substitution, tempSubstitution, context);
             substitution.put(variable, term);
 
             for (Iterator<Equality> previousIterator = equalities.iterator(); previousIterator.hasNext();) {
@@ -869,12 +867,12 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     public static void compose(
             Map<Variable, Term> subst1,
             Map<Variable, Term> subst2,
-            TermContext context,Context theContext) {
+            TermContext context) {
         Map.Entry<Variable, Term>[] entries = subst1.entrySet().toArray(new Map.Entry[subst1.size()]);
         for (Map.Entry<Variable, Term> entry : entries) {
             Term term = entry.getValue().substituteWithBinders(subst2, context);
             if (term != entry.getValue()) {
-                term = term.evaluate(context,theContext);
+                term = term.evaluate(context);
                 subst1.put(entry.getKey(), term);
             }
         }

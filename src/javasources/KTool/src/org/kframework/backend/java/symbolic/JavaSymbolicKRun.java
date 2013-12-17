@@ -77,7 +77,7 @@ public class JavaSymbolicKRun implements KRun {
         SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
         Term term = Term.of(cfg, definition);
         TermContext termContext = new TermContext(definition, new PortableFileSystem());
-        term = term.evaluate(termContext,this.context);
+        term = term.evaluate(termContext);
         ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, termContext);
         return symbolicRewriter.rewrite(constrainedTerm, bound);
     }

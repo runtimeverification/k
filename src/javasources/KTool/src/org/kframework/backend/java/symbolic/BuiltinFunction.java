@@ -68,7 +68,7 @@ public class BuiltinFunction {
         }
 
         /* initialize sort information in {@code SortMembership} */
-        SortMembership.init(definition.context());
+        //SortMembership.init(definition.context());
 
     }
 
