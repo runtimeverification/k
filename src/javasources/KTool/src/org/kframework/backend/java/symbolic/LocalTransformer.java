@@ -7,7 +7,7 @@ import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
-
+import org.kframework.kil.loader.Context;
 /**
  * Performs transformation on a given node without doing tree traversal. This
  * class serves as an adapter class: method {@code transform} simply recurs with
@@ -20,6 +20,7 @@ public class LocalTransformer implements Transformer {
 
     protected final TermContext context;
 
+    
     public LocalTransformer() {
         this.context = null;
     }

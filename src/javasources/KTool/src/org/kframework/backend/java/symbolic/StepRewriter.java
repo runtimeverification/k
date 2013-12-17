@@ -7,6 +7,7 @@ import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.kil.loader.Context;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -96,7 +97,7 @@ public class StepRewriter {
             /* apply the constraints substitution on the rule RHS */
             result = result.substituteWithBinders(constraint.substitution(), constrainedTerm.termContext());
             /* evaluate pending functions in the rule RHS */
-            result = result.evaluate(constrainedTerm.termContext());
+            result = result.evaluate(constrainedTerm.termContext(),this.definition.context());
             /* eliminate anonymous variables */
             constraint.eliminateAnonymousVariables();
 
@@ -141,7 +142,7 @@ public class StepRewriter {
             /* apply the constraints substitution on the rule RHS */
             result = result.substituteWithBinders(constraint.substitution(), context);
             /* evaluate pending functions in the rule RHS */
-            result = result.evaluate(context);
+            result = result.evaluate(context,this.definition.context());
 
             /* compute all results */
             termResults.add(term);

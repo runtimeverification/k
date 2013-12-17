@@ -2,6 +2,7 @@ package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.loader.Context;
 
 /**
  * Evaluates predicates and functions without doing tree traversal.
@@ -10,13 +11,17 @@ import org.kframework.kil.ASTNode;
  */
 public class LocalEvaluator extends LocalTransformer {
 
-    public LocalEvaluator(TermContext context) {
+    protected final Context theContext;
+
+    public LocalEvaluator(TermContext context,Context theContext) {
         super(context);
+    	this.theContext=theContext;
+
     }
 
     @Override
     public ASTNode transform(KItem kItem) {
-        return kItem.evaluateFunction(context);
+        return kItem.evaluateFunction(context,this.theContext);
     }
 
     @Override

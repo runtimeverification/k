@@ -9,6 +9,7 @@ import org.kframework.kil.ASTNode;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.kframework.kil.loader.Context;
 
 /**
  * @author Traian
@@ -23,31 +24,33 @@ public class BuiltinVisitorOperations {
         private KLabel ifLabel;
         private KLabel visitLabel;
 
-        BuiltinVisitor(TermContext context, KLabel guardLabel, List<Term> guardParams, KLabel visitLabel, List<Term> visitParams) {
+        BuiltinVisitor(TermContext context, KLabel guardLabel, List<Term> guardParams, KLabel visitLabel, List<Term> visitParams,Context theContext) {
             super(context);
             this.guardParams = guardParams;
             this.visitParams = visitParams;
             this.ifLabel = guardLabel;
             this.visitLabel = visitLabel;
-            this.preTransformer.addTransformer(new TermVisitor(context));
+            this.preTransformer.addTransformer(new TermVisitor(context,theContext));
         }
 
         private class TermVisitor extends LocalTransformer {
-            private TermVisitor(TermContext context) {
+        	private Context theContext;
+            private TermVisitor(TermContext context,Context theContext) {
                 super(context);
+                this.theContext=theContext;
             }
 
             @Override
             public ASTNode transform(Term node) {
                 guardParams.set(0, node);
                 KItem test = new KItem(ifLabel, new KList(ImmutableList.copyOf(guardParams)), context.definition().context());
-                Term truth = test.evaluate(context);
+                Term truth = test.evaluate(context,theContext);
                 //TODO:  Think about what happens when test has syumbolic values in it.
                 if (!(truth instanceof BoolToken)) return node;
                 if (!((BoolToken) truth).booleanValue()) return node;
                 visitParams.set(0, node);
                 node = new KItem(visitLabel, new KList(ImmutableList.copyOf(visitParams)), context.definition().context());
-                node = node.evaluate(context);
+                node = node.evaluate(context,theContext);
                 return new DoneTransforming(node);
             }
         }
@@ -74,7 +77,7 @@ public class BuiltinVisitorOperations {
     }
 
     //public static Term visit(Term k, KLabel visitLabel, KList visitList, KLabel ifLabel, KList ifList) {
-    public static Term visit(Term k, Term visitLabelTerm, Term visitListTerm, Term ifLabelTerm, Term ifListTerm, TermContext context) {
+    public static Term visit(Term k, Term visitLabelTerm, Term visitListTerm, Term ifLabelTerm, Term ifListTerm, TermContext context,Context theContext) {
         KLabel visitLabel = injectedKLabel(visitLabelTerm);
         KLabel ifLabel = injectedKLabel(ifLabelTerm);
         KList ifList = injectedKList(ifListTerm);
@@ -85,7 +88,7 @@ public class BuiltinVisitorOperations {
         final ArrayList<Term> visitParams = new ArrayList<>();
         visitParams.add(k);
         visitParams.addAll(visitList.getItems());
-        PrePostTransformer visitor = new BuiltinVisitor(context, ifLabel, guardParams, visitLabel, visitParams);
+        PrePostTransformer visitor = new BuiltinVisitor(context, ifLabel, guardParams, visitLabel, visitParams,theContext);
         return (Term) k.accept(visitor);
     }
 }

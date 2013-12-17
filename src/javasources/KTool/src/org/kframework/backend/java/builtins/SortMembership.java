@@ -13,15 +13,15 @@ import org.kframework.kil.loader.Context;
  */
 public class SortMembership {
 
-    private static Context context = null;
+    //private static Context context = null;
 
     public static void init(Context context) {
-        assert SortMembership.context == null;
+     //   assert SortMembership.context == null;
 
-        SortMembership.context = context;
+    //    SortMembership.context = context;
     }
 
-    public static Term check(KItem kItem) {
+    public static Term check(KItem kItem,Context context) {
         String sortName = ((KLabelConstant) kItem.kLabel()).label().substring("is".length());
         Sorted sorted = (Sorted) kItem.kList().getItems().get(0);
 

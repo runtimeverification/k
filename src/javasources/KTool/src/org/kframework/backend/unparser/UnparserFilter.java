@@ -9,6 +9,7 @@ import org.kframework.utils.ColorUtil;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
+import org.fusesource.jansi.AnsiConsole;
 
 public class UnparserFilter extends BasicVisitor {
 	private Indenter indenter = new Indenter();
@@ -59,11 +60,13 @@ public class UnparserFilter extends BasicVisitor {
 	}
 
 	public String getResult() {
+		
 		return indenter.toString();
 	}
 
 	@Override
 	public void visit(Definition def) {
+
 		prepare(def);
 		super.visit(def);
 		postpare();
@@ -71,6 +74,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Import imp) {
+
 		prepare(imp);
 		if (!forEquivalence) {
 			indenter.write("imports " + imp.getName());
@@ -81,6 +85,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Module mod) {
+
 		prepare(mod);
 		if (!mod.isPredefined()) {
 			if (!forEquivalence) {
@@ -102,6 +107,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Syntax syn) {
+
 		prepare(syn);
 		firstPriorityBlock = true;
 		indenter.write("syntax " + syn.getSort().getName());
@@ -117,6 +123,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(PriorityBlock priorityBlock) {
+
 		prepare(priorityBlock);
 		if (firstPriorityBlock) {
 			indenter.write(" ::=");
@@ -131,6 +138,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Production prod) {
+
 		prepare(prod);
 		if (firstProduction) {
 			indenter.write(" ");
@@ -152,6 +160,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Sort sort) {
+
 		prepare(sort);
 		indenter.write(sort.getName());
 		super.visit(sort);
@@ -160,6 +169,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Terminal terminal) {
+
 		prepare(terminal);
 		indenter.write("\"" + terminal.getTerminal() + "\"");
 		super.visit(terminal);
@@ -168,6 +178,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(UserList userList) {
+
 		prepare(userList);
 		indenter.write("List{" + userList.getSort() + ",\"" + userList.getSeparator() + "\"}");
 		super.visit(userList);
@@ -176,6 +187,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(KList listOfK) {
+
 		prepare(listOfK);
 		java.util.List<Term> termList = listOfK.getContents();
 		for (int i = 0; i < termList.size(); ++i) {
@@ -192,6 +204,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Attributes attributes) {
+
 		prepare(attributes);
 		java.util.List<String> reject = new LinkedList<String>();
 		reject.add("cons");
@@ -224,6 +237,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Attribute attribute) {
+
 		prepare(attribute);
 		indenter.write(attribute.getKey());
 		if (!attribute.getValue().equals("")) {
@@ -234,6 +248,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Configuration configuration) {
+
 		prepare(configuration);
 		if (!forEquivalence) {
 			indenter.write("configuration");
@@ -251,6 +266,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Cell cell) {
+
 		prepare(cell);
 		String attributes = "";
 		for (Entry<String, String> entry : cell.getCellAttributes().entrySet()) {
@@ -303,6 +319,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Variable variable) {
+
 		prepare(variable);
 		if (variable.isFresh())
 			indenter.write("?");
@@ -316,6 +333,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(ListTerminator terminator) {
+
 		prepare(terminator);
                 indenter.write(terminator.toString());
 		postpare();
@@ -346,6 +364,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(KApp kapp) {
+
 		prepare(kapp);
 		Term child = kapp.getChild();
 		Term label = kapp.getLabel();
@@ -364,6 +383,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(KSequence ksequence) {
+
 		prepare(ksequence);
 		java.util.List<Term> contents = ksequence.getContents();
 		if (!contents.isEmpty()) {
@@ -381,6 +401,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(TermCons termCons) {
+
 		prepare(termCons);
 		inTerm++;
 		Production production = termCons.getProduction();
@@ -411,6 +432,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Rewrite rewrite) {
+
 		prepare(rewrite);
 		rewrite.getLeft().accept(this);
 		indenter.write(" => ");
@@ -420,6 +442,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(KLabelConstant kLabelConstant) {
+
 		prepare(kLabelConstant);
 		indenter.write(kLabelConstant.getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)"));
 		postpare();
@@ -427,6 +450,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Collection collection) {
+
 		prepare(collection);
 		java.util.List<Term> contents = collection.getContents();
 		for (int i = 0; i < contents.size(); ++i) {
@@ -447,6 +471,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(CollectionItem collectionItem) {
+
 		prepare(collectionItem);
 		super.visit(collectionItem);
 		postpare();
@@ -454,6 +479,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(BagItem bagItem) {
+
 		prepare(bagItem);
 		indenter.write("BagItem(");
 		super.visit(bagItem);
@@ -463,6 +489,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(ListItem listItem) {
+
 		prepare(listItem);
 		indenter.write("ListItem(");
 		super.visit(listItem);
@@ -472,6 +499,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(SetItem setItem) {
+
 		prepare(setItem);
 		indenter.write("SetItem(");
 		super.visit(setItem);
@@ -481,6 +509,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(MapItem mapItem) {
+
 		prepare(mapItem);
 		mapItem.getKey().accept(this);
 		indenter.write(" |-> ");
@@ -490,13 +519,14 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Hole hole) {
-		prepare(hole);
+
 		indenter.write("HOLE");
 		postpare();
 	}
 
 	@Override
 	public void visit(FreezerHole hole) {
+
 		prepare(hole);
 		indenter.write("HOLE(" + hole.getIndex() + ")");
 		postpare();
@@ -504,6 +534,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Freezer freezer) {
+
 		prepare(freezer);
 		freezer.getTerm().accept(this);
 		postpare();
@@ -511,6 +542,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(KInjectedLabel kInjectedLabel) {
+
 		prepare(kInjectedLabel);
 		Term term = kInjectedLabel.getTerm();
 		if (MetaK.isKSort(term.getSort())) {
@@ -525,6 +557,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(KLabel kLabel) {
+
 		prepare(kLabel);
 		indenter.endLine();
 		indenter.write("Don't know how to pretty print KLabel");
@@ -535,6 +568,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(TermComment termComment) {
+
 		prepare(termComment);
 		indenter.write("<br/>");
 		super.visit(termComment);
@@ -543,6 +577,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(org.kframework.kil.List list) {
+
 		prepare(list);
 		super.visit(list);
 		postpare();
@@ -550,6 +585,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(org.kframework.kil.Map map) {
+
 		prepare(map);
 		super.visit(map);
 		postpare();
@@ -557,6 +593,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Bag bag) {
+
 		prepare(bag);
 		super.visit(bag);
 		postpare();
@@ -564,6 +601,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(org.kframework.kil.Set set) {
+
 		prepare(set);
 		super.visit(set);
 		postpare();
@@ -571,6 +609,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(org.kframework.kil.Ambiguity ambiguity) {
+
 		prepare(ambiguity);
 		indenter.write("amb(");
 		indenter.endLine();
@@ -591,6 +630,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(org.kframework.kil.Context context) {
+
 		prepare(context);
 		indenter.write("context ");
 		variableList.clear();
@@ -611,6 +651,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(LiterateDefinitionComment literateDefinitionComment) {
+
 		prepare(literateDefinitionComment);
 		// indenter.write(literateDefinitionComment.getValue());
 		// indenter.endLine();
@@ -619,6 +660,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Require require) {
+
 		prepare(require);
 		if (!forEquivalence) {
 			indenter.write("require \"" + require.getValue() + "\"");
@@ -629,6 +671,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(BackendTerm term) {
+
 		prepare(term);
 		indenter.write(term.getValue());
 		postpare();
@@ -636,6 +679,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Bracket br) {
+
 		prepare(br);
 		indenter.write("(");
 		br.getContent().accept(this);
@@ -645,6 +689,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Cast c) {
+
 		prepare(c);
 		c.getContent().accept(this);
 		indenter.write(" :");
@@ -657,12 +702,14 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Token t) {
+
 		prepare(t);
 		indenter.write("#token(\"" + t.tokenSort() + "\", \"" + t.value() + "\")");
 		postpare();
 	}
 
 	private void prepare(ASTNode astNode) {
+
 		if (!stack.empty()) {
 			if (needsParanthesis(stack.peek(), astNode)) {
 				indenter.write("(");
@@ -675,6 +722,7 @@ public class UnparserFilter extends BasicVisitor {
 	}
 
 	private void postpare() {
+
 		ASTNode astNode = stack.pop();
 		if (!stack.empty()) {
 			if (needsParanthesis(stack.peek(), astNode)) {
@@ -690,6 +738,7 @@ public class UnparserFilter extends BasicVisitor {
 	}
 
 	private boolean needsParanthesis(ASTNode upper, ASTNode astNode) {
+
 		if (!addParentheses)
 			return false;
 		if (astNode instanceof Rewrite) {

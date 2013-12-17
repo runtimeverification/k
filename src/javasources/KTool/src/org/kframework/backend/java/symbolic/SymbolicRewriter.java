@@ -44,7 +44,7 @@ import org.kframework.utils.general.GlobalSettings;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-
+import org.kframework.kil.loader.Context;
 /**
  *
  *
@@ -309,7 +309,7 @@ public class SymbolicRewriter {
                     result = result.substituteWithBinders(freshSubstitution, constrainedTerm.termContext());
                     /* apply the constraints substitution on the rule RHS */
                     result = result.substituteAndEvaluate(constraint1.substitution(),
-                            constrainedTerm.termContext());
+                            constrainedTerm.termContext(),this.definition.context());
                     /* evaluate pending functions in the rule RHS */
                     //                    result = result.evaluate(constrainedTerm.termContext());
                     /* eliminate anonymous variables */
@@ -392,7 +392,7 @@ public class SymbolicRewriter {
                     result = result.substituteWithBinders(freshSubstitution, constrainedTerm.termContext());
                     /* apply the constraints substitution on the rule RHS */
                     result = result.substituteAndEvaluate(constraint1.substitution(),
-                            constrainedTerm.termContext());
+                            constrainedTerm.termContext(),this.definition.context());
                     /* evaluate pending functions in the rule RHS */
                     //                    result = result.evaluate(constrainedTerm.termContext());
                     /* eliminate anonymous variables */
@@ -464,7 +464,7 @@ public class SymbolicRewriter {
             /* apply the constraints substitution on the rule RHS */
             result = result.substituteWithBinders(constraint.substitution(), constrainedTerm.termContext());
             /* evaluate pending functions in the rule RHS */
-            result = result.evaluate(constrainedTerm.termContext());
+            result = result.evaluate(constrainedTerm.termContext(),this.definition.context());
             /* eliminate anonymous variables */
             constraint.eliminateAnonymousVariables();
 

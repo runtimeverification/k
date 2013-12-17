@@ -9,7 +9,6 @@ import org.kframework.kil.loader.Context;
 import org.kframework.krun.K;
 
 import java.util.Collections;
-
 /**
  * Table of {@code public static} methods on builtin floats.
  *
@@ -25,13 +24,13 @@ public class BuiltinFloatOperations {
         return null;
     }
 
-     public static Term sub(Term term1, Term term2, TermContext context) {
+     public static Term sub(Term term1, Term term2, TermContext context,Context theContext) {
         if (term1.equals(UninterpretedToken.of("#Float","0.0"))) {
             Context context1 = context.definition().context();
             return new KItem(
                     KLabelConstant.of("'--Float_",context1),
                     new KList(ImmutableList.<Term>of(term2),null),
-                    context1).evaluate(context);
+                    context1).evaluate(context,theContext);
         }
         if (term2.equals(UninterpretedToken.of("#Float","0.0")))
             return term1;

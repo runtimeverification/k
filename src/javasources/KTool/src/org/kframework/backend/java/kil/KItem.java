@@ -164,7 +164,7 @@ public class KItem extends Term implements Sorted {
      * @param context a term context
      * @return the evaluated result on success, or this {@code KItem} otherwise
      */
-    public Term evaluateFunction(TermContext context) {
+    public Term evaluateFunction(TermContext context,Context theContext) {
         Definition definition = context.definition();
         if (!(kLabel instanceof KLabelConstant)) {
             return this;
@@ -174,7 +174,7 @@ public class KItem extends Term implements Sorted {
         /* evaluate a sort membership predicate */
         if (kLabelConstant.label().startsWith("is") && kList.getItems().size() == 1
                 && kList.getItems().get(0) instanceof Sorted) {
-            return SortMembership.check(this);
+            return SortMembership.check(this, theContext);
         }
 
         /* apply rules for user defined functions */
@@ -225,7 +225,7 @@ public class KItem extends Term implements Sorted {
                 /* apply the constraints substitution on the rule RHS */
                 result = result.substitute(constraint.substitution(), context);
                 /* evaluate pending functions in the rule RHS */
-                result = result.evaluate(context);
+                result = result.evaluate(context,theContext);
                 /* eliminate anonymous variables */
                 constraint.eliminateAnonymousVariables();
 
@@ -335,7 +335,7 @@ public class KItem extends Term implements Sorted {
     public void accept(Visitor visitor) {
         visitor.visit(this);
     }
-
+    
     @Override
     public ASTNode accept(Transformer transformer) {
         return transformer.transform(this);

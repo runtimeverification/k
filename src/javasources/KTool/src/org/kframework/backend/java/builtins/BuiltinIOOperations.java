@@ -97,12 +97,12 @@ public class BuiltinIOOperations {
         }
     }
 
-    public static Term parse(StringToken term1, StringToken term2, TermContext context) {
+    public static Term parse(StringToken term1, StringToken term2, TermContext context,Context theContext) {
         try {
             RunProcess rp = new RunProcess();
             org.kframework.kil.Term kast = rp.runParser(K.parser, term1.stringValue(), true, term2.stringValue(), context(context));
             Term term = Term.of(kast, definition(context));
-            term = term.evaluate(context);
+            term = term.evaluate(context,theContext);
             return term;
         } catch (TransformerException e) {
             return processIOException("noparse", context);
