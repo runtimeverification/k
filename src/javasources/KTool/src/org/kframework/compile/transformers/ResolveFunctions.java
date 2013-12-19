@@ -5,6 +5,8 @@ import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.general.GlobalSettings;
 
 /**
  * Add the function attribute to rules which rewrite either a TermCons of
@@ -43,6 +45,12 @@ public class ResolveFunctions extends CopyOnWriteTransformer {
 	private Rule addFunction(Rule node) {
 		node = node.shallowCopy();
 		node.setAttributes(node.getAttributes().shallowCopy());
+        if (node.containsAttribute("heat")) {
+            GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
+                    KException.KExceptionGroup.COMPILER,
+                    "Top symbol tagged as function but evaluation strategies are not supported for functions.",
+                    getName(), node.getFilename(), node.getLocation()));
+        }
 		node.putAttribute("function", "");
 		return node;
 	}
