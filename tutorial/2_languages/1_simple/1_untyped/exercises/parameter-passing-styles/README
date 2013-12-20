@@ -1,0 +1,21 @@
+Parameter passing styles in SIMPLE
+
+Currently, data is only passed by value in function calls.
+Your task is to extend this behavior to allow call-by-reference and 
+"call-by-address".
+
+"Call-by-address" is actually improperly called this way, as it is just a 
+passing by value of location values (obtained through the address operator) 
+which is combined with the power of dereferencing these location values.
+Therefore, to extend the language with call-by-address, you are required to add 
+(1) a taking of address operator ("&") which expects an l-value expression as 
+    its argument and evaluates to the location corresponding to that l-value.
+(2) a dereferencing operator ("*") which expects its argument to evaluate to a 
+    location value and evaluates to the object represented by that value.
+
+"Call-by-reference" passing style requires that the expression to be passed 
+by-reference evaluates to an l-value, in which case the variable to which the 
+expression must be bound is bound to the same location as that pointed to by 
+the expression.  To identify the arguments which are to be passed by 
+reference, we will prefix them with the "&" operator.
+

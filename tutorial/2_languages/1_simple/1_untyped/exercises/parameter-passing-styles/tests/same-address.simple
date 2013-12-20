@@ -1,0 +1,8 @@
+function main() {
+  var x, y = & x, z = & x;
+  if (y == z) {
+    print("OK!\n");
+  } else {
+    print("Not OK!\n");
+  } 
+}

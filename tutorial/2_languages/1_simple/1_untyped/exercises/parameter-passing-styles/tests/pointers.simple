@@ -1,0 +1,15 @@
+function main() {
+  var a[3], x, y = &x, z = &a[2], t = &z;
+  x = 5;
+  print("* y = ", * y, "\n");
+  * y = * y + 1;
+  print("x = ", x, "\n");
+
+  a[2] = 7;
+  print("* z = ", * z, "\n");
+  * z = * z + 1;
+  print("a[2]=", a[2], "\n");
+
+  **t = 4;
+  print("a[2] = ", a[2], "\n");
+}

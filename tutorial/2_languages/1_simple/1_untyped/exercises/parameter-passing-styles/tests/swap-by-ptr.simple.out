@@ -1,0 +1,3 @@
+Before swap: x = 7 and y = 10
+After swap(&x,&y): x = 10 and y = 7
+After swap(&x,&x): x = 0 and y = 7

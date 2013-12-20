@@ -1,0 +1,15 @@
+function swap(& x,& y) {
+  x = x + y;
+  y = x - y;
+  x = x - y;
+}
+
+function main() {
+  var x = 7;
+  var y = 10;
+  print("Before swap(x,y): x = ", x, " and y = ", y, "\n");
+  swap(x,y);
+  print("After swap(x,y): x = ", x, " and y = ", y, "\n");
+  swap(x,x);
+  print("After swap(x,x): x = ", x, " and y = ", y, "\n");
+}

@@ -1,0 +1,6 @@
+function f(&x, y, &z) {
+}
+
+function main() {
+  print("OK!");
+}
