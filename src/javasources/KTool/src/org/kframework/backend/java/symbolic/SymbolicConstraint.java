@@ -151,10 +151,13 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             this.rightHandSide = rightHandSide;
         }
 
-        public Equality evaluate() {
+        /**
+         * Evaluates pending functions and predicate operations in this
+         * equality.
+         */
+        public void evaluate() {
             leftHandSide = leftHandSide.evaluate(context);
             rightHandSide = rightHandSide.evaluate(context);
-            return this;
         }
 
         public Term leftHandSide() {
@@ -255,14 +258,13 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             return !isTrue() && !isFalse();
         }
 
-        private Equality substitute(Map<Variable, ? extends Term> substitution) {
+        private void substitute(Map<Variable, ? extends Term> substitution) {
             leftHandSide = leftHandSide.substituteWithBinders(substitution, context);
             rightHandSide = rightHandSide.substituteWithBinders(substitution, context);
-            return this;
         }
 
-        private Equality substitute(Variable variable, Term term) {
-            return substitute(Collections.singletonMap(variable, term));
+        private void substitute(Variable variable, Term term) {
+            substitute(Collections.singletonMap(variable, term));
         }
 
         @Override
