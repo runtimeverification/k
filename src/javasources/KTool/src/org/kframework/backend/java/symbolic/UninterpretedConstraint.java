@@ -87,6 +87,12 @@ public class UninterpretedConstraint extends JavaSymbolicObject {
         equalities.add(new Equality(leftHandSide, rightHandSide));
     }
 
+    public void addAll(UninterpretedConstraint constraint) {
+        for (Equality eq : constraint.equalities) {
+            equalities.add(eq);
+        }
+    }
+
     /**
      * @return an unmodifiable view of the equalities
      */
