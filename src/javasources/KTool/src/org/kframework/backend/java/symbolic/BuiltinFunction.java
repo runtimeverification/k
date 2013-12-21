@@ -1,6 +1,5 @@
 package org.kframework.backend.java.symbolic;
 
-import org.kframework.backend.java.builtins.MetaK;
 import org.kframework.backend.java.builtins.SortMembership;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KLabelConstant;
@@ -11,7 +10,6 @@ import org.kframework.kil.Production;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
