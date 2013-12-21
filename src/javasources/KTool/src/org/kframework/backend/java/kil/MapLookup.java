@@ -1,11 +1,16 @@
 package org.kframework.backend.java.kil;
 
-import org.kframework.backend.java.builtins.BoolToken;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.UninterpretedConstraint;
 import org.kframework.backend.java.symbolic.Utils;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.KSorts;
+import org.kframework.krun.K;
 
 /**
  *
@@ -30,6 +35,18 @@ public class MapLookup extends Term {
         Term value = ((BuiltinMap) map).get(key);
         if (value != null) {
             return value;
+        } else if (K.do_testgen && map.isGround() && key instanceof Variable) {
+            // TODO(YilongL): get rid of the tag K.do_testgen later
+            value = Variable.getFreshVariable(KSorts.K);
+            List<UninterpretedConstraint> multiConstraints = new ArrayList<UninterpretedConstraint>();
+            /* perform narrowing on the key according to the keys of the map */
+            for (Term k : ((BuiltinMap) map).getEntries().keySet()) {
+                UninterpretedConstraint cnstr = new UninterpretedConstraint();
+                cnstr.add(key, k);
+                cnstr.add(value, ((BuiltinMap) map).get(k));
+                multiConstraints.add(cnstr);
+            }
+            return new TermFormulaPair(value, multiConstraints);
         } else if (map.isGround() && key.isGround()) {
             return new Bottom(kind);
         } else if (((BuiltinMap) map).isEmpty()) {
