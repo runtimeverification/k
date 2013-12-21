@@ -1,0 +1,65 @@
+<idea-plugin version="2">
+    <id>ro.uaic.fmse.kplugin</id>
+    <name>K Framework Support</name>
+    <version>1.0</version>
+    <vendor email="denis.bogdanas@gmail.com" url="https://fmse.info.uaic.ro">UAIC</vendor>
+
+    <description><![CDATA[
+      Support for K Framework language. Version 1.0 supports just code highlighting. More features are planned.
+      ]]></description>
+
+    <change-notes><![CDATA[
+      Initial version. Support for all "known" K features except tokens and priorities.
+      Errors for tokens could be disabled in from Settings/Editor/Colors & Fonts
+      ]]>
+    </change-notes>
+
+    <category>Custom Languages</category>
+
+    <!-- please see http://confluence.jetbrains.net/display/IDEADEV/Build+Number+Ranges for description -->
+    <idea-version since-build="133.193"/>
+
+    <!-- please see http://confluence.jetbrains.net/display/IDEADEV/Plugin+Compatibility+with+IntelliJ+Platform+Products
+         on how to target different products -->
+    <!-- uncomment to enable plugin in all products
+    <depends>com.intellij.modules.lang</depends>
+    -->
+
+    <application-components>
+        <!-- Add your application components here -->
+    </application-components>
+
+    <project-components>
+        <!-- Add your project components here -->
+    </project-components>
+
+    <actions>
+        <!-- Add your actions here -->
+    </actions>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Add your extensions here -->
+        <fileTypeFactory implementation="ro.uaic.fmse.kplugin.KFileTypeFactory"/>
+        <lang.parserDefinition language="K" implementationClass="ro.uaic.fmse.kplugin.KParserDefinition"/>
+        <lang.syntaxHighlighterFactory key="K"
+                                       implementationClass="ro.uaic.fmse.kplugin.highlighting.KSyntaxHighlighterFactory"/>
+        <colorSettingsPage implementation="ro.uaic.fmse.kplugin.highlighting.KColorSettingsPage"/>
+        <lang.braceMatcher language="K"
+                           implementationClass="ro.uaic.fmse.kplugin.highlighting.KBraceMatcher"/>
+
+        <annotator language="K" implementationClass="ro.uaic.fmse.kplugin.highlighting.KSyntaxAnnotator"/>
+        <lang.findUsagesProvider language="K" implementationClass="ro.uaic.fmse.kplugin.usages.KFindUsagesProvider"/>
+        <lang.refactoringSupport language="K"
+                                 implementationClass="ro.uaic.fmse.kplugin.KRefactoringSupportProvider"/>
+        <lang.foldingBuilder language="K" implementationClass="ro.uaic.fmse.kplugin.KFoldingBuilder"/>
+        <usageTypeProvider implementation="ro.uaic.fmse.kplugin.usages.KUsageTypeProvider"/>
+        <gotoSymbolContributor implementation="ro.uaic.fmse.kplugin.navigation.KChooseByNameContributor"/>
+        <lang.psiStructureViewFactory language="K"
+                                      implementationClass="ro.uaic.fmse.kplugin.navigation.KStructureViewFactory"/>
+        <lang.commenter language="K" implementationClass="ro.uaic.fmse.kplugin.KCommenter"/>
+        <lang.documentationProvider language="K"
+                                    implementationClass="ro.uaic.fmse.kplugin.RuleVarDocumentationProvider"/>
+        <lang.documentationProvider language="K"
+                                    implementationClass="ro.uaic.fmse.kplugin.RegularProductionDocumentationProvider"/>
+    </extensions>
+</idea-plugin>
