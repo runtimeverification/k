@@ -49,7 +49,8 @@ syntax_rhs_regular ::= (attribute_block_list | type | STRING)+ &(production_sep 
 syntax_rhs_aux_function ::= id? "(" type? ("," type)* ")" attribute_block_list?
                             {mixin = "ro.uaic.fmse.kplugin.psi.impl.PsiKSyntaxRhsAuxFunctionBase"}
 syntax_rhs_list ::= "List" "{" type "," STRING "}" attribute_block_list?
-syntax_rhs_token ::= "Token" "{" (OPERATOR|OTHER|INTEGER_LITERAL|id)* "}" attribute_block_list?
+syntax_rhs_token ::= "Token" "{" token_elem* "}" attribute_block_list?
+private token_elem ::= INTEGER_LITERAL|STRING|OPERATOR|OTHER|id|",,"|","|"_"|label
 
 syntax_priorities ::= "syntax" "priorities" expr+ &new_item {implements="ro.uaic.fmse.kplugin.psi.IModuleItem"}
 
