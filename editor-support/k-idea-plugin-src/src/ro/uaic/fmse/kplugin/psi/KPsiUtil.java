@@ -13,10 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ro.uaic.fmse.kplugin.KFileType;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Denis Bogdanas
@@ -82,11 +79,13 @@ public class KPsiUtil {
     }
 
     @Nullable
-    public static KRegularProduction findFirstSyntaxDef(Module module, String name) {
-        Collection<VirtualFile> virtualFiles = FileBasedIndex.getInstance().getContainingFiles(FileTypeIndex.NAME,
-                KFileType.INSTANCE, module.getModuleContentScope());
+    public static KRegularProduction findFirstSyntaxDef(KFile refFile, String name) {
+        Collection<VirtualFile> virtualFiles = refFile.getRequires().size() > 0
+                ? FileBasedIndex.getInstance().getContainingFiles(FileTypeIndex.NAME,
+                KFileType.INSTANCE, getModule(refFile).getModuleContentScope())
+                : Arrays.asList(refFile.getVirtualFile());
         for (VirtualFile virtualFile : virtualFiles) {
-            KFile kFile = (KFile) PsiManager.getInstance(module.getProject()).findFile(virtualFile);
+            KFile kFile = (KFile) PsiManager.getInstance(refFile.getProject()).findFile(virtualFile);
             if (kFile != null) {
                 Collection<KRegularProduction> syntaxDefs =
                         PsiTreeUtil.findChildrenOfType(kFile, KRegularProduction.class);
@@ -107,7 +106,7 @@ public class KPsiUtil {
 
     @NotNull
     public static ResolveResult[] resolveAuxFunctions(PsiReference psiReference, String name) {
-        KRegularProduction syntaxDef = findFirstSyntaxDef(getModule(psiReference.getElement()), name);
+        KRegularProduction syntaxDef = findFirstSyntaxDef((KFile) psiReference.getElement().getContainingFile(), name);
         return syntaxDef != null ? new ResolveResult[]{new PsiElementResolveResult(syntaxDef)} : new ResolveResult[0];
     }
 
