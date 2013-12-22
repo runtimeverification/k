@@ -56,7 +56,8 @@ syntax_priorities ::= "syntax" "priorities" expr+ &new_item {implements="ro.uaic
 //it is forbidden to have an expression after an attribute
 private attribute_block_list ::= attribute_block+ &(production_sep | new_item)
 attribute_block ::= "[" attribute ("," attribute)* "]"
-attribute ::= item_name "(" expr_no_brackets* ")" | item_name
+attribute ::= item_name "(" balanced_expr* ")" | item_name
+private balanced_expr ::= expr_no_brackets | "(" balanced_expr* ")"
 
 rule ::= "rule" rule_name? rule_body &new_item {implements="ro.uaic.fmse.kplugin.psi.IModuleItem"} //{pin=1}
 rule_name ::= "[" item_name "]" ":"
