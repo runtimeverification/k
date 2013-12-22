@@ -1,16 +1,19 @@
 package ro.uaic.fmse.kplugin.highlighting;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.openapi.fileTypes.SyntaxHighlighter;
 import com.intellij.openapi.options.colors.AttributesDescriptor;
 import com.intellij.openapi.options.colors.ColorDescriptor;
 import com.intellij.openapi.options.colors.ColorSettingsPage;
+import com.intellij.openapi.util.io.FileUtil;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ro.uaic.fmse.kplugin.KIcons;
 
 import javax.swing.*;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -64,48 +67,17 @@ public class KColorSettingsPage implements ColorSettingsPage {
     return new KSyntaxHighlighter();
   }
 
-  @NotNull
-  @Override
-  public String getDemoText() {
-    return
-        "require \"core.k\"\n" +
-            "require \"subtyping.k\"\n" +
-            "\n" +
-            "//@ \\section{Module PRIMITIVE-TYPES}\n" +
-            "\n" +
-            "module <name>PRIMITIVE-TYPES</name>\n" +
-            "    imports <name>CORE</name>\n" +
-            "    imports <name>SUBTYPING</name>\n" +
-            "\n" +
-            "//@ \\subsection{Type labels}\n" +
-            "//@Here we rewrite Java AST terms for primitive types into their corresponding Type.\n" +
-            "\n" +
-            "rule 'Byte(.KList) => byte      <attribute>[structural, anywhere]</attribute>\n" +
-            "\n" +
-            "//@ \\subsection{Integer types normalization}\n" +
-            "\n" +
-            "syntax K ::= \"bitCount\" \"(\" Type \")\" <attribute>[function]</attribute>\n" +
-            "\n" +
-            "syntax <error>error</error>\n" +
-            "\n" +
-            "rule <name>[StartExecutionPhase]:</name>\n" +
-            "    <cell><k></cell> . =>\n" +
-            "      //K-AST for new <MainClass>().main(new String[0]);\n" +
-            "      'ExprStm(\n" +
-            "        'Invoke(\n" +
-            "          'MethodName('TypeName(String2Id(MainClassS)),, String2Id(\"main\"))\n" +
-            "        )\n" +
-            "      )\n" +
-            "    <cell></k></cell>\n" +
-            "    <cell><env></cell> . <cell></env></cell>\n" +
-            "    <cell><mainClass></cell> ListItem(MainClassS<colon>:</colon><type>String</type>) <cell></mainClass></cell>\n" +
-            "    <cell><globalPhase></cell> ElaborationPhase => ExecutionPhase  <cell></globalPhase></cell>\n" +
-            "\n" +
-            "rule <name>[ContinueLabeledNotMatch]:</name>\n" +
-            "    (whileLabel(<var>LabelK</var>:K) => .) ~> 'Continue('Some(<var>X</var>:Id)) ~> (whileImpl(_,_) => .)\n" +
-            "when\n" +
-            "    <var>LabelK</var> =/=K <var>X</var>";
-  }
+    @NotNull
+    @Override
+    public String getDemoText() {
+        try {
+            return FileUtil.loadTextAndClose(
+                    this.getClass().getResourceAsStream("/ro/uaic/fmse/kplugin/highlighting/KColorSettingsDemo.txt"));
+        } catch (IOException e) {
+            Logger.getInstance(this.getClass().getName()).error(e);
+            return "";
+        }
+    }
 
   @Nullable
   @Override
