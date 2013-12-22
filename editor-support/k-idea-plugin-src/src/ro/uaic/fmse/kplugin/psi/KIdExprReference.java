@@ -36,7 +36,7 @@ public class KIdExprReference extends PsiReferenceBase.Poly<IKIdExprBase> {
     }
 
     @NotNull
-    private ResolveResult[] resolveRuleVar() {
+    public ResolveResult[] resolveRuleVar() {
         //The target of a local variable reference is the first typed variable declaration.
         final List<KVarDec> varDecs = KUtil.findVarDecsInSameRule(name, myElement);
         return varDecs.size() >= 1

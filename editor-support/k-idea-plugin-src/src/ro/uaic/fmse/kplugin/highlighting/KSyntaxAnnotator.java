@@ -6,6 +6,7 @@ import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiErrorElement;
+import com.intellij.psi.ResolveResult;
 import org.jetbrains.annotations.NotNull;
 import ro.uaic.fmse.kplugin.psi.*;
 
@@ -51,9 +52,11 @@ public class KSyntaxAnnotator implements Annotator {
         } else if (element instanceof KIdExpr) {
             //highlight variable references
             @SuppressWarnings("RedundantCast")
-            PsiElement target = ((KIdExpr) element).getReference().resolve();
-            if (target != null && target instanceof KVarDec) {
+            ResolveResult[] resolveResults = ((KIdExprReference) ((KIdExpr) element).getReference()).resolveRuleVar();
+            if (resolveResults.length >= 1) {
                 createAnnotation(holder, element.getTextRange(), KSyntaxHighlighter.VAR);
+            } else {
+                createAnnotation(holder, element.getTextRange(), KSyntaxHighlighter.FUNCTION_CALL);
             }
         } else if (element instanceof PsiErrorElement || element instanceof KOtherItemBody) {
             createAnnotation(holder, element.getTextRange(), KSyntaxHighlighter.ERROR);
