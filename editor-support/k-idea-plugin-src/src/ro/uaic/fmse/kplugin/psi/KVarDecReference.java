@@ -2,14 +2,10 @@ package ro.uaic.fmse.kplugin.psi;
 
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiElementResolveResult;
 import com.intellij.psi.PsiReferenceBase;
 import com.intellij.psi.ResolveResult;
 import com.intellij.util.IncorrectOperationException;
 import org.jetbrains.annotations.NotNull;
-import ro.uaic.fmse.kplugin.KUtil;
-
-import java.util.List;
 
 /**
  * @author Denis Bogdanas
@@ -28,16 +24,7 @@ public class KVarDecReference extends PsiReferenceBase.Poly<IKVarDecBase> {
     @NotNull
     @Override
     public ResolveResult[] multiResolve(boolean incompleteCode) {
-        return resolveRuleVar();
-    }
-
-    @NotNull
-    private ResolveResult[] resolveRuleVar() {
-        //The target of a local variable reference is the first typed variable declaration.
-        final List<KVarDec> varDecs = KUtil.findVarDecsInSameRule(name, myElement);
-        return varDecs.size() >= 1
-                ? new ResolveResult[]{new PsiElementResolveResult(varDecs.get(0))}
-                : new ResolveResult[0];
+        return KPsiUtil.resolveRuleVar(this, name);
     }
 
     @NotNull

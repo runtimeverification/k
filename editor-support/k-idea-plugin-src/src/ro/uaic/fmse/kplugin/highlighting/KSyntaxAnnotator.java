@@ -51,8 +51,8 @@ public class KSyntaxAnnotator implements Annotator {
 
         } else if (element instanceof KIdExpr) {
             //highlight variable references
-            @SuppressWarnings("RedundantCast")
-            ResolveResult[] resolveResults = ((KIdExprReference) ((KIdExpr) element).getReference()).resolveRuleVar();
+            @SuppressWarnings("ConstantConditions")
+            ResolveResult[] resolveResults = ((KIdExprReference) element.getReference()).resolveRuleVar();
             if (resolveResults.length >= 1) {
                 createAnnotation(holder, element.getTextRange(), KSyntaxHighlighter.VAR);
             } else {

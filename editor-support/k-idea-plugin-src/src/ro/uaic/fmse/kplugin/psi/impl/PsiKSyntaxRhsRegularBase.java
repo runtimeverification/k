@@ -60,7 +60,7 @@ public class PsiKSyntaxRhsRegularBase extends ASTWrapperPsiElement implements KR
 
     @Override
     public PsiReference getReference() {
-        return new KRegularProductionReference(this);
+        return getName() != null ? new KRegularProductionReference(this) : null;
     }
 
     @Nullable

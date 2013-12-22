@@ -12,8 +12,6 @@
   elementTypeHolderClass="ro.uaic.fmse.kplugin.psi.KTypes"
   elementTypeClass="ro.uaic.fmse.kplugin.psi.KElementType"
   tokenTypeClass="ro.uaic.fmse.kplugin.psi.KTokenType"
-
-  psiImplUtilClass="ro.uaic.fmse.kplugin.psi.impl.KPsiImplUtil"
 }
 
 //Important: always delete the old parser before generating the new one.

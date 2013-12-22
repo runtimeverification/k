@@ -1,14 +1,11 @@
 package ro.uaic.fmse.kplugin.psi;
 
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiElementResolveResult;
 import com.intellij.psi.PsiReferenceBase;
 import com.intellij.psi.ResolveResult;
 import com.intellij.util.IncorrectOperationException;
 import org.jetbrains.annotations.NotNull;
-import ro.uaic.fmse.kplugin.KUtil;
 
 /**
  * @author Denis Bogdanas
@@ -27,15 +24,7 @@ public class KRegularProductionReference extends PsiReferenceBase.Poly<KRegularP
     @NotNull
     @Override
     public ResolveResult[] multiResolve(boolean incompleteCode) {
-        return resolveAuxFunctions();
-    }
-
-    @NotNull
-    private ResolveResult[] resolveAuxFunctions() {
-        Project project = myElement.getProject();
-        KRegularProduction syntaxDef = KUtil.findFirstSyntaxDef(project, name);
-
-        return syntaxDef != null ? new ResolveResult[]{new PsiElementResolveResult(syntaxDef)} : new ResolveResult[0];
+        return KPsiUtil.resolveAuxFunctions(this, name);
     }
 
     @NotNull

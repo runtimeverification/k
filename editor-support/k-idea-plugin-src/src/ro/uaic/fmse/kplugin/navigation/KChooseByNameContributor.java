@@ -4,7 +4,7 @@ import com.intellij.navigation.ChooseByNameContributor;
 import com.intellij.navigation.NavigationItem;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
-import ro.uaic.fmse.kplugin.KUtil;
+import ro.uaic.fmse.kplugin.psi.KPsiUtil;
 import ro.uaic.fmse.kplugin.psi.KRegularProduction;
 
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ public class KChooseByNameContributor implements ChooseByNameContributor {
     @NotNull
     @Override
     public String[] getNames(Project project, boolean includeNonProjectItems) {
-        List<KRegularProduction> syntaxDefs = KUtil.findSyntaxDefs(project);
+        List<KRegularProduction> syntaxDefs = KPsiUtil.findSyntaxDefs(project);
         List<String> names = new ArrayList<>(syntaxDefs.size());
         for (KRegularProduction syntaxDef : syntaxDefs) {
             if (syntaxDef.getName() != null && syntaxDef.getName().length() > 0) {
@@ -32,7 +32,7 @@ public class KChooseByNameContributor implements ChooseByNameContributor {
     @Override
     public NavigationItem[] getItemsByName(String name, String pattern, Project project,
                                            boolean includeNonProjectItems) {
-        List<KRegularProduction> syntaxDefs = KUtil.findSyntaxDefs(project, name);
+        List<KRegularProduction> syntaxDefs = KPsiUtil.findSyntaxDefs(project, name);
         //noinspection SuspiciousToArrayCall
         return syntaxDefs.toArray(new NavigationItem[syntaxDefs.size()]);
     }

@@ -1,17 +1,17 @@
-package ro.uaic.fmse.kplugin;
+package ro.uaic.fmse.kplugin.psi;
 
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiManager;
+import com.intellij.psi.*;
 import com.intellij.psi.search.FileTypeIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.indexing.FileBasedIndex;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import ro.uaic.fmse.kplugin.psi.*;
+import ro.uaic.fmse.kplugin.KFileType;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,10 +22,10 @@ import java.util.List;
  * @author Denis Bogdanas
  *         Created on 12/11/13.
  */
-public class KUtil {
+public class KPsiUtil {
 
     @NotNull
-    public static List<KVarDec> findVarDecsInSameRule(String name, PsiElement element) {
+    public static List<KVarDec> findVarDecsInSameRule(PsiElement element, String name) {
         KRule rule = getRule(element);
         if (rule != null) {
             return findVarDecs(name, rule);
@@ -82,11 +82,11 @@ public class KUtil {
     }
 
     @Nullable
-    public static KRegularProduction findFirstSyntaxDef(Project project, String name) {
+    public static KRegularProduction findFirstSyntaxDef(Module module, String name) {
         Collection<VirtualFile> virtualFiles = FileBasedIndex.getInstance().getContainingFiles(FileTypeIndex.NAME,
-                KFileType.INSTANCE, GlobalSearchScope.allScope(project));
+                KFileType.INSTANCE, module.getModuleContentScope());
         for (VirtualFile virtualFile : virtualFiles) {
-            KFile kFile = (KFile) PsiManager.getInstance(project).findFile(virtualFile);
+            KFile kFile = (KFile) PsiManager.getInstance(module.getProject()).findFile(virtualFile);
             if (kFile != null) {
                 Collection<KRegularProduction> syntaxDefs =
                         PsiTreeUtil.findChildrenOfType(kFile, KRegularProduction.class);
@@ -98,5 +98,25 @@ public class KUtil {
             }
         }
         return null;
+    }
+
+    public static Module getModule(PsiElement element) {
+        return ProjectRootManager.getInstance(element.getProject()).getFileIndex()
+                .getModuleForFile(element.getContainingFile().getVirtualFile());
+    }
+
+    @NotNull
+    public static ResolveResult[] resolveAuxFunctions(PsiReference psiReference, String name) {
+        KRegularProduction syntaxDef = findFirstSyntaxDef(getModule(psiReference.getElement()), name);
+        return syntaxDef != null ? new ResolveResult[]{new PsiElementResolveResult(syntaxDef)} : new ResolveResult[0];
+    }
+
+    @NotNull
+    public static ResolveResult[] resolveRuleVar(PsiReference psiReference, String name) {
+        //The target of a local variable reference is the first typed variable declaration.
+        final List<KVarDec> varDecs = findVarDecsInSameRule(psiReference.getElement(), name);
+        return varDecs.size() >= 1
+                ? new ResolveResult[]{new PsiElementResolveResult(varDecs.get(0))}
+                : new ResolveResult[0];
     }
 }
