@@ -80,6 +80,8 @@ public class KPsiUtil {
 
     @Nullable
     public static KRegularProduction findFirstSyntaxDef(KFile refFile, String name) {
+        //If the file have no "require" clauses resolve the reference in the current file scope.
+        //Otherwise resolve it in the module scope.
         Collection<VirtualFile> virtualFiles = refFile.getRequires().size() > 0
                 ? FileBasedIndex.getInstance().getContainingFiles(FileTypeIndex.NAME,
                 KFileType.INSTANCE, getModule(refFile).getModuleContentScope())

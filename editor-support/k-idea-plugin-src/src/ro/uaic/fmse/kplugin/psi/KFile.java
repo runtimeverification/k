@@ -12,31 +12,31 @@ import javax.swing.*;
 import java.util.List;
 
 public class KFile extends PsiFileBase {
-  public KFile(@NotNull FileViewProvider viewProvider) {
-    super(viewProvider, KLanguage.INSTANCE);
-  }
+    public KFile(@NotNull FileViewProvider viewProvider) {
+        super(viewProvider, KLanguage.INSTANCE);
+    }
 
-  @NotNull
-  @Override
-  public FileType getFileType() {
-    return KFileType.INSTANCE;
-  }
+    @NotNull
+    @Override
+    public FileType getFileType() {
+        return KFileType.INSTANCE;
+    }
 
-  @Override
-  public String toString() {
-    return this.getViewProvider().getVirtualFile().getName();
-  }
+    @Override
+    public String toString() {
+        return this.getViewProvider().getVirtualFile().getName();
+    }
 
-  @Override
-  public Icon getIcon(int flags) {
-    return super.getIcon(flags);
-  }
+    @Override
+    public Icon getIcon(int flags) {
+        return super.getIcon(flags);
+    }
 
-  @NotNull
-  @Override
-  public String getName() {
-    return this.getViewProvider().getVirtualFile().getNameWithoutExtension();
-  }
+    @NotNull
+    @Override
+    public String getName() {
+        return this.getViewProvider().getVirtualFile().getNameWithoutExtension();
+    }
 
     @NotNull
     public List<KRequire> getRequires() {

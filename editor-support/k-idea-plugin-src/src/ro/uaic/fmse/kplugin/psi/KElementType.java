@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import ro.uaic.fmse.kplugin.KLanguage;
 
 public class KElementType extends IElementType {
-  public KElementType(@NotNull @NonNls String debugName) {
-    super(debugName, KLanguage.INSTANCE);
-  }
+    public KElementType(@NotNull @NonNls String debugName) {
+        super(debugName, KLanguage.INSTANCE);
+    }
 }

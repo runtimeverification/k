@@ -18,54 +18,54 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class KColorSettingsPage implements ColorSettingsPage {
-  private static final AttributesDescriptor[] DESCRIPTORS = new AttributesDescriptor[]{
-      new AttributesDescriptor("Keyword", KSyntaxHighlighter.KEYWORD),
-      new AttributesDescriptor("Number", KSyntaxHighlighter.NUMBER),
-      new AttributesDescriptor("String", KSyntaxHighlighter.STRING),
-      new AttributesDescriptor("Comment", KSyntaxHighlighter.COMMENT),
-      new AttributesDescriptor("Operator", KSyntaxHighlighter.OPERATOR),
-      new AttributesDescriptor("Bracket", KSyntaxHighlighter.BRACKET),
-      new AttributesDescriptor("Double comma", KSyntaxHighlighter.DOUBLE_COMMA),
-      new AttributesDescriptor("Comma", KSyntaxHighlighter.COMMA),
-      new AttributesDescriptor("Underscore", KSyntaxHighlighter.UNDERSCORE),
-      new AttributesDescriptor("Label", KSyntaxHighlighter.LABEL),
+    private static final AttributesDescriptor[] DESCRIPTORS = new AttributesDescriptor[]{
+            new AttributesDescriptor("Keyword", KSyntaxHighlighter.KEYWORD),
+            new AttributesDescriptor("Number", KSyntaxHighlighter.NUMBER),
+            new AttributesDescriptor("String", KSyntaxHighlighter.STRING),
+            new AttributesDescriptor("Comment", KSyntaxHighlighter.COMMENT),
+            new AttributesDescriptor("Operator", KSyntaxHighlighter.OPERATOR),
+            new AttributesDescriptor("Bracket", KSyntaxHighlighter.BRACKET),
+            new AttributesDescriptor("Double comma", KSyntaxHighlighter.DOUBLE_COMMA),
+            new AttributesDescriptor("Comma", KSyntaxHighlighter.COMMA),
+            new AttributesDescriptor("Underscore", KSyntaxHighlighter.UNDERSCORE),
+            new AttributesDescriptor("Label", KSyntaxHighlighter.LABEL),
 
-      new AttributesDescriptor("Colon", KSyntaxHighlighter.COLON),
-      new AttributesDescriptor("Type", KSyntaxHighlighter.TYPE),
-      new AttributesDescriptor("Variable", KSyntaxHighlighter.VAR),
-      new AttributesDescriptor("Auxiliary function call", KSyntaxHighlighter.FUNCTION_CALL),
-      new AttributesDescriptor("Cell", KSyntaxHighlighter.CELL),
-      new AttributesDescriptor("Attribute", KSyntaxHighlighter.ATTRIBUTE_BLOCK),
-      new AttributesDescriptor("Module or rule name", KSyntaxHighlighter.ITEM_NAME),
-      new AttributesDescriptor("Error", KSyntaxHighlighter.ERROR),
-      new AttributesDescriptor("Bad Character", KSyntaxHighlighter.BAD_CHARACTER),
-  };
+            new AttributesDescriptor("Colon", KSyntaxHighlighter.COLON),
+            new AttributesDescriptor("Type", KSyntaxHighlighter.TYPE),
+            new AttributesDescriptor("Variable", KSyntaxHighlighter.VAR),
+            new AttributesDescriptor("Auxiliary function call", KSyntaxHighlighter.FUNCTION_CALL),
+            new AttributesDescriptor("Cell", KSyntaxHighlighter.CELL),
+            new AttributesDescriptor("Attribute", KSyntaxHighlighter.ATTRIBUTE_BLOCK),
+            new AttributesDescriptor("Module or rule name", KSyntaxHighlighter.ITEM_NAME),
+            new AttributesDescriptor("Error", KSyntaxHighlighter.ERROR),
+            new AttributesDescriptor("Bad Character", KSyntaxHighlighter.BAD_CHARACTER),
+    };
 
-  @NonNls
-  private static final Map<String, TextAttributesKey> ourTags = new HashMap<>();
+    @NonNls
+    private static final Map<String, TextAttributesKey> ourTags = new HashMap<>();
 
-  static {
-    ourTags.put("cell", KSyntaxHighlighter.CELL);
-    ourTags.put("attribute", KSyntaxHighlighter.ATTRIBUTE_BLOCK);
-    ourTags.put("name", KSyntaxHighlighter.ITEM_NAME);
-    ourTags.put("colon", KSyntaxHighlighter.COLON);
-    ourTags.put("type", KSyntaxHighlighter.TYPE);
-    ourTags.put("var", KSyntaxHighlighter.VAR);
-    ourTags.put("func-call", KSyntaxHighlighter.FUNCTION_CALL);
-    ourTags.put("error", KSyntaxHighlighter.ERROR);
-  }
+    static {
+        ourTags.put("cell", KSyntaxHighlighter.CELL);
+        ourTags.put("attribute", KSyntaxHighlighter.ATTRIBUTE_BLOCK);
+        ourTags.put("name", KSyntaxHighlighter.ITEM_NAME);
+        ourTags.put("colon", KSyntaxHighlighter.COLON);
+        ourTags.put("type", KSyntaxHighlighter.TYPE);
+        ourTags.put("var", KSyntaxHighlighter.VAR);
+        ourTags.put("func-call", KSyntaxHighlighter.FUNCTION_CALL);
+        ourTags.put("error", KSyntaxHighlighter.ERROR);
+    }
 
-  @Nullable
-  @Override
-  public Icon getIcon() {
-    return KIcons.FILE;
-  }
+    @Nullable
+    @Override
+    public Icon getIcon() {
+        return KIcons.FILE;
+    }
 
-  @NotNull
-  @Override
-  public SyntaxHighlighter getHighlighter() {
-    return new KSyntaxHighlighter();
-  }
+    @NotNull
+    @Override
+    public SyntaxHighlighter getHighlighter() {
+        return new KSyntaxHighlighter();
+    }
 
     @NotNull
     @Override
@@ -79,27 +79,27 @@ public class KColorSettingsPage implements ColorSettingsPage {
         }
     }
 
-  @Nullable
-  @Override
-  public Map<String, TextAttributesKey> getAdditionalHighlightingTagToDescriptorMap() {
-    return ourTags;
-  }
+    @Nullable
+    @Override
+    public Map<String, TextAttributesKey> getAdditionalHighlightingTagToDescriptorMap() {
+        return ourTags;
+    }
 
-  @NotNull
-  @Override
-  public AttributesDescriptor[] getAttributeDescriptors() {
-    return DESCRIPTORS;
-  }
+    @NotNull
+    @Override
+    public AttributesDescriptor[] getAttributeDescriptors() {
+        return DESCRIPTORS;
+    }
 
-  @NotNull
-  @Override
-  public ColorDescriptor[] getColorDescriptors() {
-    return ColorDescriptor.EMPTY_ARRAY;
-  }
+    @NotNull
+    @Override
+    public ColorDescriptor[] getColorDescriptors() {
+        return ColorDescriptor.EMPTY_ARRAY;
+    }
 
-  @NotNull
-  @Override
-  public String getDisplayName() {
-    return "K";
-  }
+    @NotNull
+    @Override
+    public String getDisplayName() {
+        return "K";
+    }
 }

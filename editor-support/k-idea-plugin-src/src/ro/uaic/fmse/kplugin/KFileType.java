@@ -7,33 +7,33 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 
 public class KFileType extends LanguageFileType {
-  public static final KFileType INSTANCE = new KFileType();
+    public static final KFileType INSTANCE = new KFileType();
 
-  private KFileType() {
-    super(KLanguage.INSTANCE);
-  }
+    private KFileType() {
+        super(KLanguage.INSTANCE);
+    }
 
-  @NotNull
-  @Override
-  public String getName() {
-    return "K file";
-  }
+    @NotNull
+    @Override
+    public String getName() {
+        return "K file";
+    }
 
-  @NotNull
-  @Override
-  public String getDescription() {
-    return "K language file";
-  }
+    @NotNull
+    @Override
+    public String getDescription() {
+        return "K language file";
+    }
 
-  @NotNull
-  @Override
-  public String getDefaultExtension() {
-    return "k";
-  }
+    @NotNull
+    @Override
+    public String getDefaultExtension() {
+        return "k";
+    }
 
-  @Nullable
-  @Override
-  public Icon getIcon() {
-    return KIcons.FILE;
-  }
+    @Nullable
+    @Override
+    public Icon getIcon() {
+        return KIcons.FILE;
+    }
 }

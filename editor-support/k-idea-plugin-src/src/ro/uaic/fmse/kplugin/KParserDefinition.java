@@ -21,53 +21,53 @@ import ro.uaic.fmse.kplugin.psi.KTypes;
 import java.io.Reader;
 
 public class KParserDefinition implements ParserDefinition {
-  public static final TokenSet WHITE_SPACES = TokenSet.create(TokenType.WHITE_SPACE);
-  public static final TokenSet COMMENTS = TokenSet.create(KTypes.COMMENT);
-  public static final TokenSet STRING_LITERALS = TokenSet.create(KTypes.STRING);
+    public static final TokenSet WHITE_SPACES = TokenSet.create(TokenType.WHITE_SPACE);
+    public static final TokenSet COMMENTS = TokenSet.create(KTypes.COMMENT);
+    public static final TokenSet STRING_LITERALS = TokenSet.create(KTypes.STRING);
 
-  public static final IFileElementType FILE = new IFileElementType(Language.<KLanguage>findInstance(KLanguage.class));
+    public static final IFileElementType FILE = new IFileElementType(Language.<KLanguage>findInstance(KLanguage.class));
 
-  @NotNull
-  @Override
-  public Lexer createLexer(Project project) {
-    return new FlexAdapter(new KLexer((Reader) null));
-  }
+    @NotNull
+    @Override
+    public Lexer createLexer(Project project) {
+        return new FlexAdapter(new KLexer((Reader) null));
+    }
 
-  @NotNull
-  public TokenSet getWhitespaceTokens() {
-    return WHITE_SPACES;
-  }
+    @NotNull
+    public TokenSet getWhitespaceTokens() {
+        return WHITE_SPACES;
+    }
 
-  @NotNull
-  public TokenSet getCommentTokens() {
-    return COMMENTS;
-  }
+    @NotNull
+    public TokenSet getCommentTokens() {
+        return COMMENTS;
+    }
 
-  @NotNull
-  public TokenSet getStringLiteralElements() {
-    return STRING_LITERALS;
-  }
+    @NotNull
+    public TokenSet getStringLiteralElements() {
+        return STRING_LITERALS;
+    }
 
-  @NotNull
-  public PsiParser createParser(final Project project) {
-    return new KParser();
-  }
+    @NotNull
+    public PsiParser createParser(final Project project) {
+        return new KParser();
+    }
 
-  @Override
-  public IFileElementType getFileNodeType() {
-    return FILE;
-  }
+    @Override
+    public IFileElementType getFileNodeType() {
+        return FILE;
+    }
 
-  public PsiFile createFile(FileViewProvider viewProvider) {
-    return new KFile(viewProvider);
-  }
+    public PsiFile createFile(FileViewProvider viewProvider) {
+        return new KFile(viewProvider);
+    }
 
-  public SpaceRequirements spaceExistanceTypeBetweenTokens(ASTNode left, ASTNode right) {
-    return SpaceRequirements.MAY;
-  }
+    public SpaceRequirements spaceExistanceTypeBetweenTokens(ASTNode left, ASTNode right) {
+        return SpaceRequirements.MAY;
+    }
 
-  @NotNull
-  public PsiElement createElement(ASTNode node) {
-    return KTypes.Factory.createElement(node);
-  }
+    @NotNull
+    public PsiElement createElement(ASTNode node) {
+        return KTypes.Factory.createElement(node);
+    }
 }

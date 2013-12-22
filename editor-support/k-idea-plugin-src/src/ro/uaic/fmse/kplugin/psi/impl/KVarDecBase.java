@@ -5,7 +5,10 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import org.jetbrains.annotations.NotNull;
-import ro.uaic.fmse.kplugin.psi.*;
+import ro.uaic.fmse.kplugin.psi.IKVarDecBase;
+import ro.uaic.fmse.kplugin.psi.KElementFactory;
+import ro.uaic.fmse.kplugin.psi.KVarDec;
+import ro.uaic.fmse.kplugin.psi.KVarDecReference;
 
 /**
  * @author Denis Bogdanas

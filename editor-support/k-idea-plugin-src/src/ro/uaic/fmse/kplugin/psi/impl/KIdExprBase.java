@@ -8,8 +8,8 @@ import com.intellij.util.IncorrectOperationException;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import ro.uaic.fmse.kplugin.psi.IKIdExprBase;
-import ro.uaic.fmse.kplugin.psi.KIdExprReference;
 import ro.uaic.fmse.kplugin.psi.KElementFactory;
+import ro.uaic.fmse.kplugin.psi.KIdExprReference;
 
 /**
  * @author Denis Bogdanas

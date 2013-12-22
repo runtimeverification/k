@@ -6,12 +6,12 @@ import org.jetbrains.annotations.NotNull;
 import ro.uaic.fmse.kplugin.KLanguage;
 
 public class KTokenType extends IElementType {
-  public KTokenType(@NotNull @NonNls String debugName) {
-    super(debugName, KLanguage.INSTANCE);
-  }
+    public KTokenType(@NotNull @NonNls String debugName) {
+        super(debugName, KLanguage.INSTANCE);
+    }
 
-  @Override
-  public String toString() {
-    return "KTokenType." + super.toString();
-  }
+    @Override
+    public String toString() {
+        return "KTokenType." + super.toString();
+    }
 }
