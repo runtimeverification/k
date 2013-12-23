@@ -11,7 +11,7 @@ public class Constants {
     public static final String RESULTS_OPTION = "results";
 
     public static final String EXCLUDE_OPTION = "exclude";
-    public static final String EXTENSIONS_OPTION = "extensions";
+    public static final String EXTENSION_OPTION = "extension";
     public static final String REPORT_OPTION = "report";
     public static final String SKIP_OPTION = "skip";
     public static final String TIMEOUT_OPTION = "timeout";
