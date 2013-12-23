@@ -9,7 +9,7 @@ import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Sorted;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.java.symbolic.Utils;
+import org.kframework.backend.java.util.Utils;
 
 import java.io.Serializable;
 

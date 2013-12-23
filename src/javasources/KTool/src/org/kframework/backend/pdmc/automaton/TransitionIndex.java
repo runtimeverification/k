@@ -1,6 +1,6 @@
 package org.kframework.backend.pdmc.automaton;
 
-import org.kframework.backend.java.symbolic.Utils;
+import org.kframework.backend.java.util.Utils;
 
 import java.util.HashMap;
 import java.util.Map;

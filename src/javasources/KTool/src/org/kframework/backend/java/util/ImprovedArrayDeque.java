@@ -1,6 +1,5 @@
 package org.kframework.backend.java.util;
 
-import org.kframework.backend.java.symbolic.Utils;
 
 import java.util.*;
 

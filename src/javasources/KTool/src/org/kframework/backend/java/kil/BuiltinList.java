@@ -5,6 +5,7 @@ import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.symbolic.*;
 import org.kframework.backend.java.util.ImprovedArrayDeque;
 import org.kframework.backend.java.util.KSorts;
+import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.IntBuiltin;
 

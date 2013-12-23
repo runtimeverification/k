@@ -1,6 +1,6 @@
 package org.kframework.backend.java.kil;
 
-import org.kframework.backend.java.symbolic.Utils;
+import org.kframework.backend.java.util.Utils;
 
 import java.util.Collections;
 import java.util.Set;

@@ -1,6 +1,6 @@
 package org.kframework.backend.pdmc.pda;
 
-import org.kframework.backend.java.symbolic.Utils;
+import org.kframework.backend.java.util.Utils;
 import org.kframework.backend.pdmc.pda.buchi.Evaluator;
 
 import java.util.HashMap;
