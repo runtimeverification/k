@@ -144,11 +144,19 @@ public class Proc<T> implements Runnable {
             int returnCode = wait(proc);
             timeDelta = System.currentTimeMillis() - startTime;
 
-            pgmOut = outputGobbler.get();
-            pgmErr = errorGobbler.get();
+            try {
+                pgmOut = outputGobbler.get();
+                pgmErr = errorGobbler.get();
+            } catch (InterruptedException | ExecutionException e) {
+                // program was killed before producing output,
+                // set pgmOut and pgmErr null manually, in case one of the outputs is produced
+                // but other is not (not sure if that's possible, just to make sure..)
+                pgmOut = null;
+                pgmErr = null;
+            }
 
             handlePgmResult(returnCode);
-        } catch (IOException | InterruptedException | ExecutionException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
             GlobalSettings.kem.register(
                     new KException(KException.ExceptionType.WARNING,
@@ -180,10 +188,18 @@ public class Proc<T> implements Runnable {
         return timeDelta;
     }
 
+    /**
+     * @return Program output. null when proces is not started yet or it's failed before
+     *         producing output (i.e. when killed because of timeout)
+     */
     public String getPgmOut() {
         return pgmOut;
     }
 
+    /**
+     * @return Program error output. null when proces is not started yet or it's failed before
+     *         producing error output (i.e. when killed because of timeout)
+     */
     public String getPgmErr() {
         return pgmErr;
     }
@@ -232,6 +248,8 @@ public class Proc<T> implements Runnable {
 
         } else if (returnCode == SIGTERM) {
 
+            // TODO: is it possible for program to be killed because of something other than
+            //       timeout? (full memory etc.)
             System.out.format("%sERROR: [%s] killed due to timeout.%s%n",
                     red, logStr, ColorUtil.ANSI_NORMAL);
             reportTimeout();
