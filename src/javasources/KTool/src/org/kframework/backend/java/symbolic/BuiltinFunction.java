@@ -19,6 +19,9 @@ import java.util.Properties;
 
 
 /**
+ * Utility class that handles the builtin (hooked) operations and their Java
+ * implementations.
+ * 
  * @author AndreiS
  */
 public class BuiltinFunction {
@@ -45,7 +48,7 @@ public class BuiltinFunction {
                                     production.getAttribute(Attribute.HOOK_KEY));
                             String className = hook.substring(0, hook.lastIndexOf('.'));
                             String methodName = hook.substring(hook.lastIndexOf('.') + 1);
-                            Class c = Class.forName(className);
+                            Class<?> c = Class.forName(className);
                             for (Method method : c.getDeclaredMethods()) {
                                 if (method.getName().equals(methodName)) {
                                     table.put(
@@ -65,6 +68,19 @@ public class BuiltinFunction {
         }
     }
 
+    /**
+     * Invokes the Java implementation of a builtin (hooked) operation.
+     * 
+     * @param context
+     *            the {@code TermContext}
+     * @param label
+     *            the corresponding K label of the builtin operation
+     * @param arguments
+     *            the arguments of the builtin operation
+     * @return the result of the builtin operation if the evaluation succeeds
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     */
     public static Term invoke(TermContext context, KLabelConstant label, Term ... arguments)
             throws IllegalAccessException, IllegalArgumentException {
         Object[] args =  Arrays.copyOf(arguments, arguments.length + 1, Object[].class);
@@ -85,6 +101,14 @@ public class BuiltinFunction {
         }
     }
 
+    /**
+     * Checks if the given K label represents a builtin (hooked) operation.
+     * 
+     * @param label
+     *            the given K label
+     * @return true if the given K label corresponds to a builtin operation;
+     *         otherwise, false
+     */
     public static boolean isBuiltinKLabel(KLabelConstant label) {
         return table.containsKey(label);
     }
