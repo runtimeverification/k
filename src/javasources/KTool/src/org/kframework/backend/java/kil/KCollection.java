@@ -14,8 +14,12 @@ import java.util.List;
 
 
 /**
+ * Represents either a {@link KList}, a {@link KSequence}, or a
+ * {@link KCollectionFragment}.
+ * 
  * @author AndreiS
  */
+@SuppressWarnings("serial")
 public abstract class KCollection extends Collection implements Iterable<Term> {
 
     protected final ImmutableList<Term> items;
@@ -112,6 +116,22 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
         return transformer.transform(this);
     }
 
+    /**
+     * Promotes a given {@link Term} to a given {@link Kind}. The {@code Kind}s
+     * involved in this method can only be {@code Kind#KITEM}, {@code Kind#K},
+     * or {@code Kind#KLIST}. If the kind of the given {@code Term} is already
+     * above or equal to the target {@code Kind}, do nothing.
+     * <p>
+     * To be more specific, a {@code KItem} can be promoted to a single-element
+     * {@code KSequence} and, similarly, a {@code KSequence} can be promoted to
+     * a single-element {@code KList}.
+     * 
+     * @param term
+     *            the given term to be promoted
+     * @param kind
+     *            the target kind that the term is to be promoted to
+     * @return the resulting term after kind promotion
+     */
     public static Term upKind(Term term, Kind kind) {
         assert term.kind() == Kind.KITEM || term.kind() == Kind.K || term.kind() == Kind.KLIST;
         assert kind == Kind.KITEM || kind == Kind.K || kind == Kind.KLIST;
@@ -128,6 +148,22 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
         return term;
     }
 
+    /**
+     * Degrades a given {@link Term} to a given {@link Kind}. The {@code Kind}s
+     * involved in this method can only be {@code Kind#KITEM}, {@code Kind#K},
+     * or {@code Kind#KLIST}. If the kind of the given {@code Term} is already
+     * lower than or equal to the target {@code Kind}, do nothing.
+     * <p>
+     * To be more specific, a single-element {@code KList} can be degraded to a
+     * {@code KSequence} and, similarly, a single-element {@code KSequence} can
+     * be degraded to a {@code KItem}.
+     * 
+     * @param term
+     *            the given term to be degraded
+     * @param kind
+     *            the target kind that the term is to be degraded to
+     * @return the resulting term after kind degradation
+     */
     public static Term downKind(Term term) {
         assert term.kind() == Kind.KITEM || term.kind() == Kind.K || term.kind() == Kind.KLIST;
 
