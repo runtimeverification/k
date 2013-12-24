@@ -1,16 +1,24 @@
 package org.kframework.backend.java.builtins;
 
-import org.kframework.backend.java.kil.*;
-import org.kframework.backend.java.symbolic.BuiltinFunction;
+import java.io.IOException;
+import java.nio.charset.CharacterCodingException;
+
+import org.kframework.backend.java.kil.Definition;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.KSequence;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.K;
 import org.kframework.krun.RunProcess;
 import org.kframework.krun.api.io.FileSystem;
 
-import java.io.IOException;
-import java.nio.charset.CharacterCodingException;
-
+/**
+ * Table of {@code public static} methods for builtin IO operations.
+ */
 public class BuiltinIOOperations {
 
     public static FileSystem fs(TermContext context) {
