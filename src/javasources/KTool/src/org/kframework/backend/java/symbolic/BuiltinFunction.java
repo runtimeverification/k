@@ -1,6 +1,5 @@
 package org.kframework.backend.java.symbolic;
 
-import org.kframework.backend.java.builtins.SortMembership;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Term;
@@ -64,10 +63,6 @@ public class BuiltinFunction {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        /* initialize sort information in {@code SortMembership} */
-        //SortMembership.init(definition.context());
-
     }
 
     public static Term invoke(TermContext context, KLabelConstant label, Term ... arguments)

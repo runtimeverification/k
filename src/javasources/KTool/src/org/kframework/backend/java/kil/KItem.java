@@ -174,7 +174,7 @@ public class KItem extends Term implements Sorted {
         /* evaluate a sort membership predicate */
         if (kLabelConstant.label().startsWith("is") && kList.getItems().size() == 1
                 && kList.getItems().get(0) instanceof Sorted) {
-            return SortMembership.check(this,context.definition().context());
+            return SortMembership.check(this, context.definition().context());
         }
 
         /* apply rules for user defined functions */
