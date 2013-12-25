@@ -30,10 +30,10 @@ public class SortMembership {
      */
     public static Term check(KItem kItem, Context context) {
         String sortName = ((KLabelConstant) kItem.kLabel()).label().substring("is".length());
-        Sorted sorted = (Sorted) kItem.kList().getItems().get(0);
+        Sorted sorted = (Sorted) kItem.kList().getContents().get(0);
 
-        if (kItem.kList().getItems().get(0) instanceof KItem
-                && ((KItem) kItem.kList().getItems().get(0)).kLabel().isConstructor()) {
+        if (kItem.kList().getContents().get(0) instanceof KItem
+                && ((KItem) kItem.kList().getContents().get(0)).kLabel().isConstructor()) {
             return context.isSubsortedEq(sortName, sorted.sort()) ? BoolToken.TRUE : BoolToken.FALSE;
         } else if (context.isSubsortedEq(sortName, sorted.sort())) {
             return BoolToken.TRUE;

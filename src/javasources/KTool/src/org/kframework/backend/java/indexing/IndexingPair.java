@@ -32,7 +32,7 @@ public class IndexingPair implements Serializable {
                 KItem frozenKItem = (KItem) freezer.term();
                 return new FreezerIndex(
                         (KLabelConstant) frozenKItem.kLabel(),
-                        frozenKItem.kList().getItems().indexOf(Hole.HOLE));
+                        frozenKItem.kList().getContents().indexOf(Hole.HOLE));
             }
         } else if (term instanceof Sorted) {
             Sorted sorted = (Sorted) term;

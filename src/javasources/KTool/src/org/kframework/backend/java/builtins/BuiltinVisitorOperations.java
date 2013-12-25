@@ -81,10 +81,10 @@ public class BuiltinVisitorOperations {
         KList visitList = injectedKList(visitListTerm);
         final ArrayList<Term> guardParams = new ArrayList<>();
         guardParams.add(k);
-        guardParams.addAll(ifList.getItems());
+        guardParams.addAll(ifList.getContents());
         final ArrayList<Term> visitParams = new ArrayList<>();
         visitParams.add(k);
-        visitParams.addAll(visitList.getItems());
+        visitParams.addAll(visitList.getContents());
         PrePostTransformer visitor = new BuiltinVisitor(context, ifLabel, guardParams, visitLabel, visitParams);
         return (Term) k.accept(visitor);
     }

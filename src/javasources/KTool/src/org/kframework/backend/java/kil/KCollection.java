@@ -43,7 +43,7 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
 
                 assert !kCollection.hasFrame() : "associative use of KCollection";
 
-                normalizedItems.addAll(kCollection.getItems());
+                normalizedItems.addAll(kCollection.getContents());
             } else {
                 normalizedItems.add(term);
             }
@@ -82,14 +82,10 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
     public abstract String getSeparatorName();
     public abstract String getIdentityName();
 
-    public ImmutableList<Term> getItems() {
+    @Override
+    public ImmutableList<Term> getContents() {
         return contents;
     }
-    
-    @Override
-    public List<Term> getContents() {
-        return super.contents;
-    }    
 
     @Override
     public Iterator<Term> iterator() {

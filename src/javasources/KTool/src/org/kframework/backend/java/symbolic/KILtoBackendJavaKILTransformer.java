@@ -517,7 +517,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             if (term instanceof KItem &&
                    (((KItem) term).kLabel().toString().equals(ANDBOOL_KLABEL.getLabel()) || 
                     ((KItem) term).kLabel().toString().equals(BOOL_ANDBOOL_KLABEL.getLabel()))) {
-                for (Term item : ((KItem) term).kList().getItems()) {
+                for (Term item : ((KItem) term).kList().getContents()) {
                     if (item instanceof KItem && ((KItem) item).kLabel().toString().equals("'fresh(_)")) {
                         freshVariables.add((Variable) ((KItem) item).kList().get(0));
                     } else {
@@ -537,7 +537,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             Term term = (Term) node.getEnsures().accept(this);
             // TODO(YilongL): "'_andBool_" or "#andBool"?
             if (term instanceof KItem && ((KItem) term).kLabel().toString().equals("'_andBool_")) {
-                for (Term item : ((KItem) term).kList().getItems()) {
+                for (Term item : ((KItem) term).kList().getContents()) {
                     ensures.add(item);
                 }
             } else {

@@ -23,7 +23,7 @@ public class KCollectionFragment extends KCollection {
     private final KCollection kCollection;
 
     public KCollectionFragment(KCollection kCollection, int index) {
-        super(kCollection.getItems(),
+        super(kCollection.getContents(),
               kCollection.hasFrame() ? kCollection.frame() : null,
               kCollection.kind());
 
@@ -67,7 +67,7 @@ public class KCollectionFragment extends KCollection {
     }
 
     @Override
-    public ImmutableList<Term> getItems() {
+    public ImmutableList<Term> getContents() {
         throw  new UnsupportedOperationException();
     }
 

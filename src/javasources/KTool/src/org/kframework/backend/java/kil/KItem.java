@@ -183,8 +183,8 @@ public class KItem extends Term implements Sorted {
         KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
 
         /* evaluate a sort membership predicate */
-        if (kLabelConstant.label().startsWith("is") && kList.getItems().size() == 1
-                && kList.getItems().get(0) instanceof Sorted) {
+        if (kLabelConstant.label().startsWith("is") && kList.getContents().size() == 1
+                && kList.getContents().get(0) instanceof Sorted) {
             return SortMembership.check(this, context.definition().context());
         }
 
@@ -256,7 +256,7 @@ public class KItem extends Term implements Sorted {
         //}
 
         try {
-            Term[] arguments = kList.getItems().toArray(new Term[kList.getItems().size()]);
+            Term[] arguments = kList.getContents().toArray(new Term[kList.getContents().size()]);
             Term result = BuiltinFunction.invoke(context, kLabelConstant, arguments);
             if (result == null) result = this;
             return result;
