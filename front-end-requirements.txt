@@ -1,0 +1,147 @@
+Here is the compiled list of requirements for the K syntax and the Phase 1
+(or basic) parser.  To do it, I have spend half a day reading the messages
+that we exchanged on this topic on the k-list, and kept all the desirable
+features and removed all the implementation-specific details.
+
+I did not add "Scannerless parser" to the list of requirements, because how
+we implement things should be kept separate from the design.  If we can
+implement the requirements below using a scannerless parser (which I doubt),
+then great.  If not, then we will come up with something else.
+
+In some places we also have "possible solution" or "possible problem"
+statements, as a heads-up, but not explicit part of the requirement.  In
+other words, we can change the possible solutions and find additional
+solutions to address the possible problems, without changing the requirements.
+
+=============
+=== REQ 1 ===
+=============
+
+FIXED syntax and parsing algorithm.
+
+The K syntax should be fixed and its parsing independent from the syntax of
+any language defined in K.  That is, the syntax of the user-defined language
+should have no influence whatsoever on how we parse the syntax of K.  The
+K parser should be a fixed algorithm/procedure and do exactly the same
+thing, which should be simple and well-explained, no matter what or how the
+user-defined language looks like.  This gives us maximum separation of
+concerns, with good and uniform error messages, among many other benefits.
+
+Clarification: By the "K syntax" I mean everything that is a direct part of
+Kore: modules, syntax declarations, rules, attributes, K labeled representation
+of term, etc.  For example, in ... X + '_*_(Y,Z) ..., the KLabel '_*_ is K
+syntax, while + is not (it is concrete syntax).  It is the K syntax parser's
+job to figure out that '_*_(...,...) is a K Label applied to something.
+
+Clarification: Technically speaking, "independent from the syntax of any
+language" is a bit too strong, because a user-defined language can contain
+arbitrary strings.  The claim is true for any other language constructs except
+for (some or all of) its tokens.  This is further discussed under Req 4 below.
+
+=============
+=== REQ 2 ===
+=============
+
+SIMPLE and FAST parsing algorithm.
+
+The same algorithm/procedure used by the basic parser above will also be
+implemented by IDEs in order to highlight the K syntax in a special way,
+to give users hints where the scope of the => arrow ends, etc.  Therefore,
+the K syntax and its parser must be simple and fast.
+
+=============
+=== REQ 3 ===
+=============
+
+K syntax HAS PRIORITY.
+
+The K syntax has priority over the user-defined syntax.  This simple rule
+helps users write clean definitions, where nothing unexpected happens and where
+good error messages can be reported.  Besides, it will make the basic parser
+be in full synch with the highlighting, scoping, etc., information reported
+by the IDE.
+
+=============
+=== REQ 4 ===
+=============
+
+Provide simple ESCAPE mechanism
+
+No matter what the K syntax and basic parser do by default, the user should
+have an escape mechanism.  For example, we should allow users to define "rule",
+"=>", etc., in their language and then to write rules over these without
+interfering with K's syntax.
+
+Possible solution: we have already discussed this several times and it seems
+that we converged to using backquote as an escape mechanism.  For example,
+"`rule" and "`=>" tells the K basic parser: these are mine, go away.
+
+Possible problem: what if "=>" or "rule" or other pieces of K syntax appear
+in strings in the semantics?  Do we want to backquote them there as well?
+Probably we shouldn't, but that may mean that we need to treat strings
+specially.  There are different types of strings, though: "abc", 'abc', `abc`,
+and maybe some users what ```abc''', etc., in their language.
+
+Possible solution 1: we can have a special [string] tag to some token
+productions, e.g.
+
+  syntax MyString ::= Token{[''][.]*['']}   [string]
+
+Then the Phase 1 parser skips everything inside such "string" tokens.
+That means that the Phase 1 parser probably cannot be scannerless.
+
+Possible solution 2: we can make the Phase 1 parser be aware of ALL the
+user-defined tokens except for those tagged as [notInRules] (or [onlyLabel],
+or whatever other name we may come up with).  Then, as part of its Phase 1
+parsing, it first computes the user-defined tokens and puts them into "bubbles",
+and then it excludes those from its K syntax parsing/scanning/tokenizer.
+
+=============
+=== REQ 5 ===
+=============
+
+KORE = K syntax = Phase 1 parsing
+
+The syntax of K is such that one can write definitions using only the KORE
+fragment of K and this way completely avoid any expensive Phase 2 parsing.
+
+=============
+=== REQ 6 ===
+=============
+
+Full K = KORE + Concrete syntax for K terms
+
+The only thing that Full K (i.e., what's in .k files) allows in addition
+to KORE (i.e., what's in .kore files) is the use of concrete syntax for
+K terms.  That is, "X+Y" instead of "'_+_(X,Y)", etc.  All the K syntax
+will be resolved by the Phase 1 parser, putting in conceptual bubbles
+the concrete syntax fragments, which will be then subsequently resolved
+by the Phase 2 parser.  The only thing the Phase 2 parser will do is to
+transform concrete syntax into its labelled form, nothing else.  Phase 2
+parser will therefore never see any K syntax: no =>, no ~>, no <cell>,
+not even variables X, X:Int, X::Int, etc.
+
+=============
+=== REQ 7 ===
+=============
+
+Maintain the existing good notation
+
+It would be silly if in order to accommodate the above we would have to
+change the existing good syntax of K that people like and that we fought
+so hard to get to.  For example, we want to write
+
+  rule <k> X=V => V ...</k>  <state>...X|->(_=>V)...</state>
+  rule <k> print(I,Xs => Xs) ...</k> <out>... .=>I </out>
+
+insted of
+  
+  rule <k> (X=V => V) ...</k>  <state>...X|->(_=>V)...</state>
+  rule <k> print((I,Xs => Xs)) ...</k> <out>... .=>I </out>
+
+Possible solution: Many editors and IDEs allow you to define pairs of
+"delimiters", and then they will highlight them in a nice, balanced and
+nested way.  For example, when you move the cursor on ")" it highlights
+the corresponding "(" to the left, and viceversa, and similarly for other
+delimiters: "[" and "]", "{" and "}", etc.  We can add to the list of
+usual delimiters "<cell>" and "</cell>", etc.
