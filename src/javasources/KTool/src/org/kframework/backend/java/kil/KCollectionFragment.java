@@ -19,37 +19,37 @@ import java.util.Iterator;
 @SuppressWarnings("serial")
 public class KCollectionFragment extends KCollection {
 
-    private final int index;
+    private final int startIndex;
     private final KCollection kCollection;
 
-    public KCollectionFragment(KCollection kCollection, int index) {
+    public KCollectionFragment(KCollection kCollection, int startIndex) {
         super(kCollection.getContents(),
               kCollection.hasFrame() ? kCollection.frame() : null,
               kCollection.kind());
 
-        assert 0 <= index && index <= kCollection.size();
+        assert 0 <= startIndex && startIndex <= kCollection.size();
 
         this.kCollection = kCollection;
-        this.index = index;
+        this.startIndex = startIndex;
     }
 
     /**
      * Not supported in this class.
      */
     @Override
-    public KCollection fragment(int length) {
+    public KCollection fragment(int fromIndex) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public Term get(int index) {
-        assert index >= this.index;
+        assert index >= this.startIndex;
 
         return contents.get(index);
     }
 
-    public int getIndex() {
-        return index;
+    public int getStartIndex() {
+        return startIndex;
     }
 
     public KCollection getKCollection() {
@@ -73,19 +73,21 @@ public class KCollectionFragment extends KCollection {
 
     @Override
     public Iterator<Term> iterator() {
-        return contents.listIterator(index);
+        return contents.listIterator(startIndex);
     }
 
     @Override
     public int size() {
-        return contents.size() - index;
+        return contents.size() - startIndex;
     }
+    
+    // TODO(YilongL): why not override methods equals() and hashCode()?
 
     @Override
     public String toString() {
         Joiner joiner = Joiner.on(getSeparatorName());
         StringBuilder stringBuilder = new StringBuilder();
-        joiner.appendTo(stringBuilder, contents.subList(index, contents.size()));
+        joiner.appendTo(stringBuilder, contents.subList(startIndex, contents.size()));
         if (super.hasFrame()) {
             if (stringBuilder.length() != 0) {
                 stringBuilder.append(getSeparatorName());

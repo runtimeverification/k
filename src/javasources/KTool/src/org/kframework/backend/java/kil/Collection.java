@@ -31,7 +31,7 @@ public abstract class Collection extends Term {
     protected final Variable frame;
 
     /**
-     * @see {@link #contents}
+     * @see {@link Collection#contents}
      * @return an unmodifiable view of the explicitly specified elements in this
      *         {@code Collection}
      */
@@ -92,6 +92,7 @@ public abstract class Collection extends Term {
         }
 
         Collection collection = (Collection) object;
+        // TODO(YilongL): why not take into consideration Collection#contents?
         return frame == null ? collection.frame == null : frame.equals(collection.frame);
     }
 
