@@ -22,6 +22,9 @@ import java.util.List;
 @SuppressWarnings("serial")
 public abstract class KCollection extends Collection implements Iterable<Term> {
 
+    /**
+     * A list of {@code Term}s contained in this {@code KCollection}.
+     */
     protected final ImmutableList<Term> items;
 
     protected KCollection(ImmutableList<Term> items, Variable frame, Kind kind) {

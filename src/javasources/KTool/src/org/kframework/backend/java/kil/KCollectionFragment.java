@@ -12,12 +12,11 @@ import java.util.Iterator;
 
 
 /**
- * Created with IntelliJ IDEA.
- * User: andrei
- * Date: 3/26/13
- * Time: 10:22 AM
- * To change this template use File | Settings | File Templates.
+ * Represents a fragment of a {@link KCollection}.
+ * 
+ * @author AndreiS
  */
+@SuppressWarnings("serial")
 public class KCollectionFragment extends KCollection {
 
     private final int index;

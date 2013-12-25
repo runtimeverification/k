@@ -23,16 +23,28 @@ import com.google.common.collect.Multimap;
  */
 public class SymbolicUnifier extends AbstractUnifier {
 
+    /**
+     * Represents the existing {@code SymbolicConstraint} before invoking this
+     * unifier and then becomes the overall {@code SymbolicConstraint} after the
+     * unification is done.
+     */
     private SymbolicConstraint constraint;
+    
+    /**
+     * TODO(YilongL)
+     */
     private boolean isStarNested;
+    
+    /**
+     * A disjunction of {@code SymbolicConstraint}s created by this unifier.
+     */
     public java.util.Collection<java.util.Collection<SymbolicConstraint>> multiConstraints;
-    private final Definition definition;
     private final TermContext context;
 
     public SymbolicUnifier(SymbolicConstraint constraint, TermContext context) {
         this.constraint = constraint;
         this.context = context;
-        this.definition = context.definition();
+        context.definition();
         multiConstraints = new ArrayList<java.util.Collection<SymbolicConstraint>>();
     }
 
