@@ -9,11 +9,24 @@ import org.kframework.kil.ASTNode;
 
 
 /**
+ * Represents a list of K, or {@link KSequence} in the Java backend. Or in the
+ * usual syntax of K, it can be defined as the following:
+ * <p>
+ * <blockquote>
+ * 
+ * <pre>
+ * syntax KList ::= List{K}{","}
+ * </pre>
+ * 
+ * </blockquote>
+ * <p>
+ * 
  * @author AndreiS
  */
+@SuppressWarnings("serial")
 public class KList extends KCollection {
 
-    private static final String OPERATOR_NAME = ",, ";
+    private static final String SEPARATOR_NAME = ",, ";
     private static final String IDENTITY_NAME = "." + Kind.KLIST;
 
     public KList(ImmutableList<Term> items, Variable frame) {
@@ -45,13 +58,13 @@ public class KList extends KCollection {
     }
 
     @Override
-    public KCollection fragment(int length) {
-        return new KList(contents.subList(length, contents.size()), frame);
+    public KCollection fragment(int fromIndex) {
+        return new KList(contents.subList(fromIndex, contents.size()), frame);
     }
 
     @Override
-    public String getOperatorName() {
-        return KList.OPERATOR_NAME;
+    public String getSeparatorName() {
+        return KList.SEPARATOR_NAME;
     }
 
     @Override

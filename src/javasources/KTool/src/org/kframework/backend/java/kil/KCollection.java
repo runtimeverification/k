@@ -65,13 +65,21 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
         this.contents = ImmutableList.of();
     }
 
-    public abstract KCollection fragment(int length);
+    /**
+     * Returns a view of the fragment of this {@code KCollection} that starts
+     * from the specified {@code fromIndex}.
+     * 
+     * @param fromIndex
+     *            the start index of the fragment
+     * @return a view of the specified fragment
+     */
+    public abstract KCollection fragment(int fromIndex);
 
     public Term get(int index) {
         return contents.get(index);
     }
 
-    public abstract String getOperatorName();
+    public abstract String getSeparatorName();
     public abstract String getIdentityName();
 
     public ImmutableList<Term> getItems() {
@@ -102,12 +110,12 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
 
     @Override
     public String toString() {
-        Joiner joiner = Joiner.on(getOperatorName());
+        Joiner joiner = Joiner.on(getSeparatorName());
         StringBuilder stringBuilder = new StringBuilder();
         joiner.appendTo(stringBuilder, contents);
         if (super.frame != null) {
             if (stringBuilder.length() != 0) {
-                stringBuilder.append(getOperatorName());
+                stringBuilder.append(getSeparatorName());
             }
             stringBuilder.append(super.frame);
         }

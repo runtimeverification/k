@@ -24,10 +24,21 @@ import java.util.Set;
 
 
 /**
- * A K application.
- *
+ * Represents a K application which applies a {@link KLabel} to a {@link KList}.
+ * Or in the usual syntax of K, it can be defined as the following:
+ * <p>
+ * <blockquote>
+ * 
+ * <pre>
+ * syntax KItem ::= KLabel "(" KList ")"
+ * </pre>
+ * 
+ * </blockquote>
+ * <p>
+ * 
  * @author AndreiS
  */
+@SuppressWarnings("serial")
 public class KItem extends Term implements Sorted {
 
     private final KLabel kLabel;

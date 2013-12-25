@@ -33,9 +33,12 @@ public class KCollectionFragment extends KCollection {
         this.index = index;
     }
 
+    /**
+     * Not supported in this class.
+     */
     @Override
     public KCollection fragment(int length) {
-        throw new UnsupportedOperationException();  //To change body of implemented methods use File | Settings | File Templates.
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -54,8 +57,8 @@ public class KCollectionFragment extends KCollection {
     }
 
     @Override
-    public String getOperatorName() {
-        return kCollection.getOperatorName();
+    public String getSeparatorName() {
+        return kCollection.getSeparatorName();
     }
 
     @Override
@@ -80,12 +83,12 @@ public class KCollectionFragment extends KCollection {
 
     @Override
     public String toString() {
-        Joiner joiner = Joiner.on(getOperatorName());
+        Joiner joiner = Joiner.on(getSeparatorName());
         StringBuilder stringBuilder = new StringBuilder();
         joiner.appendTo(stringBuilder, contents.subList(index, contents.size()));
         if (super.hasFrame()) {
             if (stringBuilder.length() != 0) {
-                stringBuilder.append(getOperatorName());
+                stringBuilder.append(getSeparatorName());
             }
             stringBuilder.append(super.frame());
         }
