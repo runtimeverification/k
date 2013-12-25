@@ -42,7 +42,7 @@ public class KCollectionFragment extends KCollection {
     public Term get(int index) {
         assert index >= this.index;
 
-        return items.get(index);
+        return contents.get(index);
     }
 
     public int getIndex() {
@@ -70,19 +70,19 @@ public class KCollectionFragment extends KCollection {
 
     @Override
     public Iterator<Term> iterator() {
-        return items.listIterator(index);
+        return contents.listIterator(index);
     }
 
     @Override
     public int size() {
-        return items.size() - index;
+        return contents.size() - index;
     }
 
     @Override
     public String toString() {
         Joiner joiner = Joiner.on(getOperatorName());
         StringBuilder stringBuilder = new StringBuilder();
-        joiner.appendTo(stringBuilder, items.subList(index, items.size()));
+        joiner.appendTo(stringBuilder, contents.subList(index, contents.size()));
         if (super.hasFrame()) {
             if (stringBuilder.length() != 0) {
                 stringBuilder.append(getOperatorName());

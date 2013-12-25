@@ -46,7 +46,7 @@ public class KSequence extends KCollection {
 
     @Override
     public KCollection fragment(int length) {
-        return new KSequence(items.subList(length, items.size()), frame);
+        return new KSequence(contents.subList(length, contents.size()), frame);
     }
 
     @Override
@@ -71,7 +71,7 @@ public class KSequence extends KCollection {
 
         KSequence kSequence = (KSequence) object;
         return super.frame == null ? kSequence.frame == null : frame.equals(kSequence.frame)
-                && super.items.equals(kSequence.items);
+                && super.contents.equals(kSequence.contents);
     }
 
     @Override

@@ -46,7 +46,7 @@ public class KList extends KCollection {
 
     @Override
     public KCollection fragment(int length) {
-        return new KList(items.subList(length, items.size()), frame);
+        return new KList(contents.subList(length, contents.size()), frame);
     }
 
     @Override
@@ -71,7 +71,7 @@ public class KList extends KCollection {
 
         KList kList = (KList) object;
         return (super.frame == null ? kList.frame == null : frame.equals(kList.frame))
-                && super.items.equals(kList.items);
+                && super.contents.equals(kList.contents);
     }
 
     @Override

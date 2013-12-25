@@ -24,8 +24,11 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
 
     /**
      * A list of {@code Term}s contained in this {@code KCollection}.
+     * <p>
+     * This field shadows {@link Collection#contents} to ensure that the
+     * contents of {@code KCollection} are immutable.
      */
-    protected final ImmutableList<Term> items;
+    protected final ImmutableList<Term> contents;
 
     protected KCollection(ImmutableList<Term> items, Variable frame, Kind kind) {
         super(frame, kind);
@@ -45,7 +48,7 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
                 normalizedItems.add(term);
             }
         }
-        this.items = ImmutableList.copyOf(normalizedItems);
+        this.contents = ImmutableList.copyOf(normalizedItems);
     }
 
     /*
@@ -59,36 +62,41 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
 
     protected KCollection(Variable frame, Kind kind) {
         super(frame, kind);
-        this.items = ImmutableList.of();
+        this.contents = ImmutableList.of();
     }
 
     public abstract KCollection fragment(int length);
 
     public Term get(int index) {
-        return items.get(index);
+        return contents.get(index);
     }
 
     public abstract String getOperatorName();
     public abstract String getIdentityName();
 
     public ImmutableList<Term> getItems() {
-        return items;
+        return contents;
     }
+    
+    @Override
+    public List<Term> getContents() {
+        return super.contents;
+    }    
 
     @Override
     public Iterator<Term> iterator() {
-        return items.iterator();
+        return contents.iterator();
     }
 
     public int size() {
-        return items.size();
+        return contents.size();
     }
 
     @Override
     public int hashCode() {
         int hash = 1;
         hash = hash * Utils.HASH_PRIME + (super.frame == null ? 0 : super.frame.hashCode());
-        hash = hash * Utils.HASH_PRIME + items.hashCode();
+        hash = hash * Utils.HASH_PRIME + contents.hashCode();
         return hash;
     }
 
@@ -96,7 +104,7 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
     public String toString() {
         Joiner joiner = Joiner.on(getOperatorName());
         StringBuilder stringBuilder = new StringBuilder();
-        joiner.appendTo(stringBuilder, items);
+        joiner.appendTo(stringBuilder, contents);
         if (super.frame != null) {
             if (stringBuilder.length() != 0) {
                 stringBuilder.append(getOperatorName());
