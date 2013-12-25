@@ -2,6 +2,7 @@ package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ public abstract class Collection extends Term {
      * Represents the elements of this {@code Collection} that are explicitly
      * specified. These elements are stored as a list of {@code Term}s.
      */
-    protected java.util.List<Term> contents;
+    protected final java.util.List<Term> contents;
 
     /**
      * Represents the rest part of this {@code Collection} which is not
@@ -81,7 +82,16 @@ public abstract class Collection extends Term {
     public boolean isSymbolic() {
         return false;
     }
+    
+    @Override
+    public int hashCode() {
+        int hash = 1;
+        hash = hash * Utils.HASH_PRIME + (frame == null ? 0 : frame.hashCode());
+        hash = hash * Utils.HASH_PRIME + contents.hashCode();
+        return hash;
+    }
 
+    @Override
     public boolean equals(Object object) {
         if (this == object) {
             return true;
@@ -92,8 +102,9 @@ public abstract class Collection extends Term {
         }
 
         Collection collection = (Collection) object;
-        // TODO(YilongL): why not take into consideration Collection#contents?
-        return frame == null ? collection.frame == null : frame.equals(collection.frame);
+        return (frame == null ? collection.frame == null : frame
+                .equals(collection.frame))
+                && contents.equals(collection.contents);
     }
 
     @Override

@@ -106,8 +106,24 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
     public int hashCode() {
         int hash = 1;
         hash = hash * Utils.HASH_PRIME + (super.frame == null ? 0 : super.frame.hashCode());
-        hash = hash * Utils.HASH_PRIME + contents.hashCode();
+        hash = hash * Utils.HASH_PRIME + this.contents.hashCode();
         return hash;
+    }
+    
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        
+        if (!(object instanceof KCollection)) {
+            return false;
+        }
+        
+        KCollection kCollection = (KCollection) object;
+        return (frame == null ? kCollection.frame == null : frame
+                .equals(kCollection.frame))
+                && contents.equals(kCollection.contents);
     }
 
     @Override

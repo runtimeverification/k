@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableList;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
 import java.util.Iterator;
@@ -81,8 +82,28 @@ public class KCollectionFragment extends KCollection {
         return contents.size() - startIndex;
     }
     
-    // TODO(YilongL): why not override methods equals() and hashCode()?
-
+    @Override
+    public int hashCode() {
+        int hash = super.hashCode();
+        hash = hash * Utils.HASH_PRIME + this.startIndex;
+        return hash;
+    }
+    
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        
+        if (!(object instanceof KCollectionFragment)) {
+            return false;
+        }
+        
+        KCollectionFragment kCollectionFragment = (KCollectionFragment) object;
+        return startIndex == kCollectionFragment.startIndex
+                && this.kCollection.equals(kCollectionFragment.kCollection);
+    }
+        
     @Override
     public String toString() {
         Joiner joiner = Joiner.on(getSeparatorName());
