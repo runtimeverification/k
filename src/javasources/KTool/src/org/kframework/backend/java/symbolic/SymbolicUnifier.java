@@ -441,7 +441,7 @@ public class SymbolicUnifier extends AbstractUnifier {
             KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
             if (kLabelConstant.isBinder()) {
                 Multimap<Integer, Integer> binderMap = kLabelConstant.getBinderMap();
-                List<Term> terms = new ArrayList<>(kList.getContents());
+                List<Term> terms = new ArrayList<>(kList.getItems());
                 for (Integer boundVarPosition : binderMap.keySet()) {
                     Term boundVars = terms.get(boundVarPosition);
                     Set<Variable> variables = boundVars.variableSet();
