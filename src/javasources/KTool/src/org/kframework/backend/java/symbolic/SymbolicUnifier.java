@@ -82,11 +82,11 @@ public class SymbolicUnifier extends AbstractUnifier {
 
         if (term.isSymbolic() || otherTerm.isSymbolic()) {
             /* special case for concrete collections  */
-            if (term instanceof CollectionVariable
-                    && !matchConcreteSize((CollectionVariable) term, otherTerm)) {
+            if (term instanceof ConcreteCollectionVariable
+                    && !matchConcreteSize((ConcreteCollectionVariable) term, otherTerm)) {
                 fail();
-            } else if (otherTerm instanceof CollectionVariable
-                    && !matchConcreteSize((CollectionVariable) otherTerm, term)) {
+            } else if (otherTerm instanceof ConcreteCollectionVariable
+                    && !matchConcreteSize((ConcreteCollectionVariable) otherTerm, term)) {
                 fail();
             }
 
@@ -101,9 +101,9 @@ public class SymbolicUnifier extends AbstractUnifier {
         }
     }
 
-    private boolean matchConcreteSize(CollectionVariable variable, Term term) {
-        if (term instanceof CollectionVariable) {
-            CollectionVariable otherVariable = (CollectionVariable) term;
+    private boolean matchConcreteSize(ConcreteCollectionVariable variable, Term term) {
+        if (term instanceof ConcreteCollectionVariable) {
+            ConcreteCollectionVariable otherVariable = (ConcreteCollectionVariable) term;
             return variable.concreteCollectionSize() == otherVariable.concreteCollectionSize();
         }
 

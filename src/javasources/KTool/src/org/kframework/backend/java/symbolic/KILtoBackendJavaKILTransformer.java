@@ -22,7 +22,7 @@ import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
-import org.kframework.backend.java.kil.CollectionVariable;
+import org.kframework.backend.java.kil.ConcreteCollectionVariable;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Hole;
 import org.kframework.backend.java.kil.KItem;
@@ -76,9 +76,10 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     private Definition definition = null;
     
     /**
-     * Concrete collection size (TODO(YilongL): define this!). This field is set
-     * at the beginning of {@link #transform(org.kframework.kil.Rule)} and reset
-     * before that method returns. Moreover, it is only used in
+     * Maps variables representing concrete collections to their sizes. This
+     * field is set at the beginning of
+     * {@link #transform(org.kframework.kil.Rule)} and reset before that method
+     * returns. Moreover, it is only used in
      * {@link #transform(org.kframework.kil.Variable)} when transforming
      * {@code Variable}s inside that {@code Rule}.
      */
@@ -495,7 +496,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             }
 
             if (concreteCollectionSize.containsKey(node)) {
-                return new CollectionVariable(
+                return new ConcreteCollectionVariable(
                         node.getName(),
                         sort,
                         concreteCollectionSize.get(node));
