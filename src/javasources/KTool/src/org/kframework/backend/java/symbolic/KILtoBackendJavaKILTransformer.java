@@ -74,6 +74,14 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     private boolean freshRules;
     private Definition definition = null;
+    
+    /**
+     * Concrete collection size (TODO(YilongL): define this!). This field is set
+     * at the beginning of {@link #transform(org.kframework.kil.Rule)} and reset
+     * before that method returns. Moreover, it is only used in
+     * {@link #transform(org.kframework.kil.Variable)} when transforming
+     * {@code Variable}s inside that {@code Rule}.
+     */
     private Map<org.kframework.kil.Variable, Integer> concreteCollectionSize
             = Collections.emptyMap();
 
@@ -469,7 +477,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(org.kframework.kil.Variable node) throws TransformerException {
-        if (node.getSort().equals("Bag")) {
+        if (node.getSort().equals(org.kframework.kil.KSorts.BAG)) {
             return new Variable(node.getName(), Kind.CELL_COLLECTION.toString());
         }
 
