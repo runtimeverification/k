@@ -253,10 +253,11 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                     continue;
                 }
                 if (term instanceof org.kframework.kil.Cell) {
-                    Cell cell = (Cell) term.accept(this);
+                    Cell<?> cell = (Cell<?>) term.accept(this);
                     cells.put(cell.getLabel(), cell);
                 } else if (variable == null && term instanceof org.kframework.kil.Variable
-                        && term.getSort().equals("Bag")) {
+                        && (term.getSort().equals(org.kframework.kil.KSorts.BAG)
+                            || org.kframework.compile.utils.MetaK.isCellSort(term.getSort()))) {
                     variable = (Variable) term.accept(this);
                 } else {
                     throw new RuntimeException();
@@ -478,7 +479,8 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(org.kframework.kil.Variable node) throws TransformerException {
-        if (node.getSort().equals(org.kframework.kil.KSorts.BAG)) {
+        if (node.getSort().equals(org.kframework.kil.KSorts.BAG)
+                || org.kframework.compile.utils.MetaK.isCellSort(node.getSort())) {
             return new Variable(node.getName(), Kind.CELL_COLLECTION.toString());
         }
 

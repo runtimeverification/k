@@ -48,12 +48,15 @@ import org.kframework.utils.general.GlobalSettings;
  */
 public class SortCells extends CopyOnWriteTransformer {
     
-    Map<Variable,Map<String,Term>> variables
-            = new HashMap<Variable, Map<String, Term>>();
-    Map<Term,Term> substitution = new HashMap<Term, Term>();
+    private final Map<Variable, Map<String, Term>> variables = new HashMap<Variable, Map<String, Term>>();
+    
+    private final Map<Term, Term> substitution = new HashMap<Term, Term>();
 
     private final ConfigurationStructureMap configurationStructureMap;
 
+    private Map<String,List<Term>> cellMap;
+    private Map<String, Term> renamedVars;
+    private Variable framingVariable;
 
     public SortCells(org.kframework.kil.loader.Context context) {
         super("SortCells", context);
@@ -118,10 +121,6 @@ public class SortCells extends CopyOnWriteTransformer {
 //        }
 //        return node;
 //    }
-
-    private Map<String,List<Term>> cellMap;
-    Map<String, Term> renamedVars;
-    Variable framingVariable;
 
     @Override
     public ASTNode transform(Cell node) throws TransformerException {
@@ -275,7 +274,7 @@ public class SortCells extends CopyOnWriteTransformer {
         return node;
     }
 
-    ASTNode transformTop(Cell node, boolean fragment) {
+    private ASTNode transformTop(Cell node, boolean fragment) {
         ConfigurationStructureMap config = configurationStructureMap;
         String id = node.getId();
         node = node.shallowCopy();
@@ -482,6 +481,9 @@ public class SortCells extends CopyOnWriteTransformer {
         return fragment;
     }
 
+    /**
+     * 
+     */
     private class ResolveRemainingVariables extends CopyOnWriteTransformer {
         private ResolveRemainingVariables(org.kframework.kil.loader.Context context) {
             super("SortCells: resolving remaining variables", context);
