@@ -16,7 +16,7 @@ import static java.util.Collections.emptySet;
  */
 public class SetBuiltin extends CollectionBuiltin {
     public SetBuiltin(DataStructureSort sort, java.util.Collection<Term> elements, Collection<Term> terms) {
-        super(sort, elements, terms);
+        super(sort, terms, elements);
     }
 
     @Override

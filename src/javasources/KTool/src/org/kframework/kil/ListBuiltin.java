@@ -19,7 +19,7 @@ public class ListBuiltin extends CollectionBuiltin {
 
     public ListBuiltin(DataStructureSort sort, Collection<Term> elementsLeft, Collection<Term> elementsRight,
                        Collection<Term> terms) {
-        super(sort, elementsLeft, terms);
+        super(sort, terms, elementsLeft);
         this.elementsRight = elementsRight;
     }
 
