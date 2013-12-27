@@ -371,7 +371,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
                  * return the base term instead */
                 return baseTerms.get(0);
             } else {
-                return new MapBuiltin(node.sort(), elements, baseTerms);
+                return new MapBuiltin(node.sort(), baseTerms, elements);
             }
         }
     }
@@ -435,7 +435,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
                  * return the base term instead */
                 return baseTerms.get(0);
             } else {
-                return new SetBuiltin(node.sort(), elements, baseTerms);
+                return new SetBuiltin(node.sort(), baseTerms, elements);
             }
         }
     }

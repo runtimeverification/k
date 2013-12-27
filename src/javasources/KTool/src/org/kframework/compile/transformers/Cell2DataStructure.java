@@ -128,7 +128,7 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
             }
         }
 
-        return new ListBuiltin(listSort, elementsLeft, elementsRight, terms);
+        return new ListBuiltin(listSort, terms, elementsLeft, elementsRight);
     }
 
     private MapBuiltin getMapBuiltin(Bag cellContent, CellMap cellMap) {
@@ -169,7 +169,7 @@ public class Cell2DataStructure extends CopyOnWriteTransformer {
             }
         }
 
-        return new MapBuiltin(mapSort, entries, terms);
+        return new MapBuiltin(mapSort, terms, entries);
     }
 
     private void makeCellDataStructures() {

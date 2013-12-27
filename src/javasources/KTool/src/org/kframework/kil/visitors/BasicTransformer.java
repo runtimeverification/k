@@ -305,7 +305,7 @@ public class BasicTransformer implements Transformer {
             elements.add(transformedTerm);
         }
 
-        return CollectionBuiltin.of(node.sort(), elements, terms);
+        return CollectionBuiltin.of(node.sort(), terms, elements);
     }
 
     @Override
@@ -398,7 +398,7 @@ public class BasicTransformer implements Transformer {
             elements.put(transformedKey, transformedValue);
         }
 
-		return new MapBuiltin(node.sort(), elements, terms);
+		return new MapBuiltin(node.sort(), terms, elements);
 	}
 
     @Override

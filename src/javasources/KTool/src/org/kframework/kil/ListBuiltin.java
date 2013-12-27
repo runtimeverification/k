@@ -17,9 +17,9 @@ import java.util.Set;
 public class ListBuiltin extends CollectionBuiltin {
     private final Collection<Term> elementsRight;
 
-    public ListBuiltin(DataStructureSort sort, Collection<Term> elementsLeft, Collection<Term> elementsRight,
-                       Collection<Term> terms) {
-        super(sort, terms, elementsLeft);
+    public ListBuiltin(DataStructureSort sort, Collection<Term> baseTerms, Collection<Term> elementsLeft,
+                       Collection<Term> elementsRight) {
+        super(sort, baseTerms, elementsLeft);
         this.elementsRight = elementsRight;
     }
 
@@ -78,7 +78,7 @@ public class ListBuiltin extends CollectionBuiltin {
             }
         }
         right.addAll(elementsRight);
-        return new ListBuiltin(sort, left, right, base);
+        return new ListBuiltin(sort, base, left, right);
     }
 
     @Override

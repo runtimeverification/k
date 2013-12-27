@@ -27,12 +27,12 @@ public class CollectionBuiltin extends DataStructureBuiltin {
     }
 
     public static CollectionBuiltin of(DataStructureSort sort,
-                                       Collection<Term> elements,
-                                       Collection<Term> terms) {
+                                       Collection<Term> baseTerms,
+                                       Collection<Term> elements) {
         if (sort.type().equals(KSorts.LIST)) {
-            return new CollectionBuiltin(sort, terms, elements);
+            return new CollectionBuiltin(sort, baseTerms, elements);
         }
-        return new SetBuiltin(sort, elements, terms);
+        return new SetBuiltin(sort, baseTerms, elements);
     }
 
     public Collection<Term> elements() {

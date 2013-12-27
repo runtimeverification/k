@@ -227,8 +227,8 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 
             return KApp.of(new KInjectedLabel(CollectionBuiltin.of(
                     node.sort(),
-                    elements,
-                    terms)));
+                    terms,
+                    elements)));
         }
 
         @Override
@@ -252,8 +252,8 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 
             return KApp.of(new KInjectedLabel(new MapBuiltin(
                     node.sort(),
-                    elements,
-                    terms)));
+                    terms,
+                    elements)));
         }
 
 		@Override

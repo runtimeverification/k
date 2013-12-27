@@ -54,8 +54,8 @@ public abstract class DataStructureBuiltin extends Term {
         } else if (sort.type().equals(KSorts.MAP)) {
             return new MapBuiltin(
                     sort,
-                    Collections.<Term, Term>emptyMap(),
-                    Collections.<Term>emptyList());
+                    Collections.<Term>emptyList(),
+                    Collections.<Term, Term>emptyMap());
         } else {
             assert false : "unknown collection type";
             return null;
@@ -73,14 +73,14 @@ public abstract class DataStructureBuiltin extends Term {
             if (sort.type().equals(KSorts.LIST)) {
                 ListBuiltin l = new ListBuiltin(
                         sort,
-                        Collections.singletonList(argument[0]),
                         Collections.<Term>emptyList(),
+                        Collections.singletonList(argument[0]),
                         Collections.<Term>emptyList());
                 return l;
             } else {
                 return new SetBuiltin(sort,
-                        Collections.singletonList(argument[0]),
-                        Collections.<Term>emptyList());
+                        Collections.<Term>emptyList(),
+                        Collections.singletonList(argument[0]));
             }
         } else if (sort.type().equals(KSorts.MAP)) {
             assert argument.length == 2:
@@ -88,8 +88,8 @@ public abstract class DataStructureBuiltin extends Term {
 
             return new MapBuiltin(
                     sort,
-                    Collections.singletonMap(argument[0], argument[1]),
-                    Collections.<Term>emptyList());
+                    Collections.<Term>emptyList(),
+                    Collections.singletonMap(argument[0], argument[1]));
         } else {
             assert false : "unknown collection type";
             return null;
@@ -121,7 +121,7 @@ public abstract class DataStructureBuiltin extends Term {
                 }
             }
 
-            return new SetBuiltin(sort, elements, terms);
+            return new SetBuiltin(sort, terms, elements);
         } else if (sort.type().equals(KSorts.LIST)) {
             boolean left = true;
             ArrayList<Term> elementsLeft = new ArrayList<Term>();
@@ -185,7 +185,7 @@ public abstract class DataStructureBuiltin extends Term {
                 }
             }
 
-            return new MapBuiltin(sort, elements, terms);
+            return new MapBuiltin(sort, terms, elements);
         } else {
             assert false : "unknown collection type";
             return null;

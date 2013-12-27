@@ -499,7 +499,7 @@ public class CopyOnWriteTransformer implements Transformer {
         }
 
         if (change) {
-            return CollectionBuiltin.of(node.sort(), elements, terms);
+            return CollectionBuiltin.of(node.sort(), terms, elements);
         } else {
             return node;
         }
@@ -636,7 +636,7 @@ public class CopyOnWriteTransformer implements Transformer {
 		}
 
 		if (change) {
-			return new MapBuiltin(node.sort(), elements, terms);
+			return new MapBuiltin(node.sort(), terms, elements);
 		} else {
 			return node;
 		}

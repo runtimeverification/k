@@ -288,8 +288,8 @@ public class JavaSymbolicKRun implements KRun {
         ((org.kframework.kil.Cell) o)
                 .setContents(new org.kframework.kil.MapBuiltin(context
                         .dataStructureSortOf("MyMap"), 
-                        stateMap, 
-                        Collections.<org.kframework.kil.Term>emptyList()));
+                        Collections.<org.kframework.kil.Term>emptyList(), 
+                        stateMap));
         
         SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
         TermContext termContext = new TermContext(definition, new PortableFileSystem());
