@@ -9,22 +9,24 @@ import org.kframework.kil.ASTNode;
 import java.util.Set;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.ListMultimap;
 
 
 /**
- * Created with IntelliJ IDEA.
- * User: andrei
- * Date: 3/20/13
- * Time: 7:02 PM
- * To change this template use File | Settings | File Templates.
+ * Represents a collection of {@link Cell}s. The ordering of the internal cells
+ * is fixed and agrees with the ordering of the cells used to construct this
+ * cell collection.
+ * 
+ * @author AndreiS
+ * 
  */
+@SuppressWarnings("rawtypes")
 public class CellCollection extends Collection {
 
-    private final Multimap<String, Cell> cells;
+    private final ListMultimap<String, Cell> cells;
     private final boolean isStar;
 
-    public CellCollection(Multimap<String, Cell> cells, Variable frame, boolean isStar) {
+    public CellCollection(ListMultimap<String, Cell> cells, Variable frame, boolean isStar) {
         super(frame, Kind.CELL_COLLECTION);
         this.cells = ArrayListMultimap.create(cells);
         this.isStar = isStar;
@@ -39,7 +41,7 @@ public class CellCollection extends Collection {
         this(ArrayListMultimap.<String, Cell>create(), frame, false);
     }
 
-    public CellCollection(Multimap<String, Cell> cells, boolean star) {
+    public CellCollection(ListMultimap<String, Cell> cells, boolean star) {
         this(cells, null, star);
     }
 
@@ -51,7 +53,7 @@ public class CellCollection extends Collection {
         return cells.values();
     }
 
-    public Multimap<String, Cell> cellMap() {
+    public ListMultimap<String, Cell> cellMap() {
         return cells;
     }
 

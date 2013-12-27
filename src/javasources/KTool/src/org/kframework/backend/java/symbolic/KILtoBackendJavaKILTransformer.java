@@ -62,7 +62,7 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.ListMultimap;
 
 
 /**
@@ -246,7 +246,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 contents = Collections.singletonList(node.getContents());
             }
 
-            Multimap<String, Cell> cells = ArrayListMultimap.create();
+            ListMultimap<String, Cell> cells = ArrayListMultimap.create();
             Variable variable = null;
             for (org.kframework.kil.Term term : contents) {
                 if (term instanceof TermComment) {

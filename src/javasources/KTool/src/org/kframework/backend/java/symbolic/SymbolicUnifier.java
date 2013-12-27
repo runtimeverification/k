@@ -13,6 +13,7 @@ import java.util.*;
 import org.kframework.backend.java.kil.Collection;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 
 
@@ -201,14 +202,14 @@ public class SymbolicUnifier extends AbstractUnifier {
                       otherCellCollection.get(label).iterator().next());
             }
 
-            Multimap<String, Cell> cellMap = ArrayListMultimap.create();
+            ListMultimap<String, Cell> cellMap = ArrayListMultimap.create();
             for (String label : cellCollection.labelSet()) {
                 if (!unifiableCellLabels.contains(label)) {
                     cellMap.putAll(label, cellCollection.get(label));
                 }
             }
 
-            Multimap<String, Cell> otherCellMap = ArrayListMultimap.create();
+            ListMultimap<String, Cell> otherCellMap = ArrayListMultimap.create();
             for (String label : otherCellCollection.labelSet()) {
                 if (!unifiableCellLabels.contains(label)) {
                     otherCellMap.putAll(label, otherCellCollection.get(label));
@@ -263,7 +264,7 @@ public class SymbolicUnifier extends AbstractUnifier {
                     continue;
                 }
 
-                Multimap<String, Cell> cellMap = ArrayListMultimap.create();
+                ListMultimap<String, Cell> cellMap = ArrayListMultimap.create();
                 for (int i = 0; i < cells.length; ++i) {
                     if (!generator.selected.contains(i)) {
                         cellMap.put(cells[i].getLabel(), cells[i]);
@@ -353,9 +354,9 @@ public class SymbolicUnifier extends AbstractUnifier {
     }
 
     private void addCellCollectionConstraint(
-            Multimap<String, Cell> cellMap,
+            ListMultimap<String, Cell> cellMap,
             Variable frame,
-            Multimap<String, Cell> otherCellMap,
+            ListMultimap<String, Cell> otherCellMap,
             Variable otherFrame,
             boolean isStar) {
         if (frame != null) {
