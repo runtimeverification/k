@@ -34,7 +34,7 @@ public enum Kind {
     
     static {
         names.put(BOTTOM, "Bottom");
-        names.put(CELL, "Cell");
+        names.put(CELL, "Cell"); // <= TODO(YilongL): is the sort of Cell "BagItem" in generic KIL?
         names.put(CELL_COLLECTION, "Bag");
         names.put(K, "K");
         names.put(KITEM, "KItem");

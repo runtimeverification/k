@@ -314,7 +314,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     /**
      * Specifies if this symbolic constraint is in normal form.
      * <p>
-     * <br>
      * A symbolic constraint is normal iff:
      * <li>no variable from the keys of {@code substitution} occurs in
      * {@code equalities};
@@ -326,7 +325,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     /**
      * Stores special equalities whose left-hand sides are just variables.
      * <p>
-     * <br>
      * Invariant: {@code Variable}s on the left-hand sides do not occur in the
      * {@code Term}s on the right-hand sides.
      */
@@ -334,6 +332,11 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     private TruthValue truthValue;
     private final TermContext context;
     private final Definition definition;
+    
+    /**
+     * The symbolic unifier associated with this constraint. There is an
+     * one-to-one relationship between unifiers and constraints.
+     */
     private final SymbolicUnifier unifier;
 
     public SymbolicConstraint(SymbolicConstraint constraint, TermContext context) {

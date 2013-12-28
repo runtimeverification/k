@@ -29,7 +29,7 @@ public class SymbolicUnifier extends AbstractUnifier {
      * unifier and then becomes the overall {@code SymbolicConstraint} after the
      * unification is done.
      */
-    private SymbolicConstraint constraint;
+    private final SymbolicConstraint fConstraint;
     
     /**
      * TODO(YilongL)
@@ -39,11 +39,11 @@ public class SymbolicUnifier extends AbstractUnifier {
     /**
      * A disjunction of {@code SymbolicConstraint}s created by this unifier.
      */
-    public java.util.Collection<java.util.Collection<SymbolicConstraint>> multiConstraints;
+    public final java.util.Collection<java.util.Collection<SymbolicConstraint>> multiConstraints;
     private final TermContext context;
 
     public SymbolicUnifier(SymbolicConstraint constraint, TermContext context) {
-        this.constraint = constraint;
+        this.fConstraint = constraint;
         this.context = context;
         context.definition();
         multiConstraints = new ArrayList<java.util.Collection<SymbolicConstraint>>();
@@ -92,8 +92,8 @@ public class SymbolicUnifier extends AbstractUnifier {
             }
 
             /* add symbolic constraint */
-            constraint.add(term, otherTerm);
-            if (constraint.isFalse()) {
+            fConstraint.add(term, otherTerm);
+            if (fConstraint.isFalse()) {
                 fail();
             }
         } else {
@@ -139,6 +139,9 @@ public class SymbolicUnifier extends AbstractUnifier {
             this.fail();
         }
 
+        // TODO(YilongL): what if the term is a Variable, it won't be even able
+        // to pass the check above!
+        
         throw new UnsupportedOperationException(
                 "list matching is only supported when one of the lists is a variable.");
     }
@@ -165,6 +168,10 @@ public class SymbolicUnifier extends AbstractUnifier {
                 "set matching is only supported when one of the sets is a variable.");
     }
 
+    /**
+     * Two cells can be unified if and only if they have the same cell label and
+     * their contents can be unified.
+     */
     @Override
     public void unify(Cell cell, Term term) {
         if (!(term instanceof Cell)) {
@@ -173,15 +180,20 @@ public class SymbolicUnifier extends AbstractUnifier {
 
         Cell otherCell = (Cell) term;
         if (!cell.getLabel().equals(otherCell.getLabel())) {
-                // AndreiS: commented out the check below as matching might fail due to KItem < K
-                // < KList subsorting
-                //|| !cell.contentKind().equals(otherCell.contentKind())) {
+            /*
+             * AndreiS: commented out the check below as matching might fail due
+             * to KItem < K < KList subsorting:
+             * !cell.contentKind().equals(otherCell.contentKind())
+             */            
             fail();
         }
 
         unify(cell.getContent(), otherCell.getContent());
     }
 
+    /**
+     * 
+     */
     @Override
     public void unify(CellCollection cellCollection, Term term) {
         if (!(term instanceof CellCollection)) {
@@ -248,13 +260,12 @@ public class SymbolicUnifier extends AbstractUnifier {
                 fail();
             }
 
-            SymbolicConstraint mainConstraint = constraint;
             isStarNested = true;
 
             java.util.Collection<SymbolicConstraint> constraints = new ArrayList<SymbolicConstraint>();
             SelectionGenerator generator = new SelectionGenerator(otherCells.length, cells.length);
             do {
-                constraint = new SymbolicConstraint(context);
+                SymbolicConstraint constraint = new SymbolicConstraint(context);
 
                 try {
                     for (int i = 0; i < otherCells.length; ++i) {
@@ -279,7 +290,6 @@ public class SymbolicUnifier extends AbstractUnifier {
                 constraints.add(constraint);
             } while (generator.generate());
 
-            constraint = mainConstraint;
             isStarNested = false;
 
             if (constraints.isEmpty()) {
@@ -287,7 +297,7 @@ public class SymbolicUnifier extends AbstractUnifier {
             }
 
             if (constraints.size() == 1) {
-                constraint.addAll(constraints.iterator().next());
+                fConstraint.addAll(constraints.iterator().next());
             } else {
                 multiConstraints.add(constraints);
             }
@@ -362,22 +372,22 @@ public class SymbolicUnifier extends AbstractUnifier {
         if (frame != null) {
             if (otherFrame != null) {
                 if (cellMap.isEmpty() && otherCellMap.isEmpty()) {
-                    constraint.add(frame, otherFrame);
+                    fConstraint.add(frame, otherFrame);
                 } else if (cellMap.isEmpty()) {
-                    constraint.add(frame, new CellCollection(otherCellMap, otherFrame, isStar));
+                    fConstraint.add(frame, new CellCollection(otherCellMap, otherFrame, isStar));
                 } else if (otherCellMap.isEmpty()) {
-                    constraint.add(new CellCollection(cellMap, frame, isStar), otherFrame);
+                    fConstraint.add(new CellCollection(cellMap, frame, isStar), otherFrame);
                 } else {
                     Variable variable = Variable.getFreshVariable(Kind.CELL_COLLECTION.toString());
-                    constraint.add(frame, new CellCollection(otherCellMap, variable, isStar));
-                    constraint.add(new CellCollection(cellMap, variable, isStar), otherFrame);
+                    fConstraint.add(frame, new CellCollection(otherCellMap, variable, isStar));
+                    fConstraint.add(new CellCollection(cellMap, variable, isStar), otherFrame);
                 }
             } else {
                 if (!cellMap.isEmpty()) {
                     fail();
                 }
 
-                constraint.add(frame, new CellCollection(otherCellMap, isStar));
+                fConstraint.add(frame, new CellCollection(otherCellMap, isStar));
             }
         } else {
             if (otherFrame != null) {
@@ -385,7 +395,7 @@ public class SymbolicUnifier extends AbstractUnifier {
                     fail();
                 }
 
-                constraint.add(new CellCollection(cellMap, isStar), otherFrame);
+                fConstraint.add(new CellCollection(cellMap, isStar), otherFrame);
             } else {
                 if (!cellMap.isEmpty() || !otherCellMap.isEmpty()) {
                     fail();
@@ -533,19 +543,19 @@ public class SymbolicUnifier extends AbstractUnifier {
             if (!kCollection.hasFrame()) {
                 fail();
             }
-            constraint.add(kCollection.frame(), otherKCollection.fragment(length));
+            fConstraint.add(kCollection.frame(), otherKCollection.fragment(length));
         } else if (otherKCollection.size() < kCollection.size()) {
             if (!otherKCollection.hasFrame()) {
                 fail();
             }
-            constraint.add(kCollection.fragment(length), otherKCollection.frame());
+            fConstraint.add(kCollection.fragment(length), otherKCollection.frame());
         } else {
             if (kCollection.hasFrame() && otherKCollection.hasFrame()) {
-                constraint.add(kCollection.frame(), otherKCollection.frame());
+                fConstraint.add(kCollection.frame(), otherKCollection.frame());
             } else if (kCollection.hasFrame()) {
-                constraint.add(kCollection.frame(), otherKCollection.fragment(length));
+                fConstraint.add(kCollection.frame(), otherKCollection.fragment(length));
             } else if (otherKCollection.hasFrame()) {
-                constraint.add(kCollection.fragment(length), otherKCollection.frame());
+                fConstraint.add(kCollection.fragment(length), otherKCollection.frame());
             }
         }
     }
