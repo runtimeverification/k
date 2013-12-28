@@ -553,3 +553,28 @@ The semantics when transforming these into context is based on the following pri
 (6) The attributes passed to the context rule for a given position are obtained by updating the production attributes with the StrictPositionAttributes (perhaps updated using the context attributes as specified at (5)) corresponding to that position.
 
 Note: Currently, generalized strictness does not apply to strict labels
+
+
+MACRO / FUNCTION / ANYWHERE RULES
+-----------------------
+
+What is the difference between 'macro', 'anywhere', and 'function'?
+The generated maude code seems to be same except metadata. Who makes, if any, a difference?
+
+They all generate the same code now.  However, they are semantically different:
+
+macro should only be used for desugaring, and should be applied to programs before any evaluation is started.
+
+function should only be used for annotating function declarations
+
+anywhere should be used for rules which we want to apply anywhere, disabling configuration concretization for them.
+
+
+  Function rules are anywhere rules, but anywhere rules are not constrained to functions. 
+
+The [function] attribute can be attached to syntax declarations. All the rules corresponding to that function are annotated automatically as [anywhere] which is only a rule attribute. However, if we want to say that a rule applies anywhere without being related to a function declaration, we simply annotate it with [anywhere] and the contextual transformation will not affect that rule. Therefore the functionality of [function] is implemented using [anywhere], and [anywhere] is an attribute which does not fill the context for that rule.
+
+Does desugaring also apply to rules?  
+
+It surely applies to programs.
+Concerning rules, that has been debated in the past, but I'm not sure we reached a definite conclusion. 
