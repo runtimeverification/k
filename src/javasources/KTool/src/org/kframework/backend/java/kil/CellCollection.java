@@ -24,14 +24,20 @@ import com.google.common.collect.ListMultimap;
 public class CellCollection extends Collection {
 
     private final ListMultimap<String, Cell> cells;
-    private final boolean isStar;
+    
+    /**
+     * Contains {@code true} if the explicitly specified part of this cell
+     * collection contains one or more types of cells whose multiplicity
+     * attributes are {@code "*"}'s; otherwise, {@code false}.
+     */
+    private final boolean hasStar;
 
-    public CellCollection(ListMultimap<String, Cell> cells, Variable frame, boolean isStar) {
+    public CellCollection(ListMultimap<String, Cell> cells, Variable frame, boolean hasStar) {
         super(frame, Kind.CELL_COLLECTION);
         this.cells = ArrayListMultimap.create(cells);
-        this.isStar = isStar;
+        this.hasStar = hasStar;
 
-        if (isStar) {
+        if (hasStar) {
             // TODO(YilongL): why the assertion below? is it merely a limitation
             // of the current implementation?
             assert cells.keySet().size() <= 1;
@@ -70,8 +76,13 @@ public class CellCollection extends Collection {
         return cells.get(label);
     }
 
-    public boolean isStar() {
-        return isStar;
+    /**
+     * Checks if the explicitly specified part of this cell collection contains
+     * one or more types of cells whose multiplicity attributes are {@code "*"}
+     * 's.
+     */
+    public boolean hasStar() {
+        return hasStar;
     }
 
     public Set<String> labelSet() {

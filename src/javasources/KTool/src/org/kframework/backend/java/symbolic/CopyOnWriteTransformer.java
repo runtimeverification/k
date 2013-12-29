@@ -102,11 +102,11 @@ public class CopyOnWriteTransformer implements Transformer {
         }
 
         if (cellCollection.hasFrame()) {
-            boolean isStar = cellCollection.isStar();
+            boolean hasStar = cellCollection.hasStar();
             Variable frame;
             Term transformedFrame = (Term) cellCollection.frame().accept(this);
             if (transformedFrame instanceof CellCollection) {
-                isStar = isStar || ((CellCollection) transformedFrame).isStar();
+                hasStar = hasStar || ((CellCollection) transformedFrame).hasStar();
                 if (cells == cellCollection.cellMap()) {
                     cells = ArrayListMultimap.create(cellCollection.cellMap());
                 }
@@ -118,11 +118,11 @@ public class CopyOnWriteTransformer implements Transformer {
             }
 
             if (cells != cellCollection.cellMap() || frame != cellCollection.frame()) {
-                cellCollection = new CellCollection(cells, frame, isStar);
+                cellCollection = new CellCollection(cells, frame, hasStar);
             }
         } else {
             if (cells != cellCollection.cellMap()) {
-                cellCollection = new CellCollection(cells, cellCollection.isStar());
+                cellCollection = new CellCollection(cells, cellCollection.hasStar());
             }
         }
 

@@ -201,14 +201,14 @@ public class SymbolicUnifier extends AbstractUnifier {
         }
         CellCollection otherCellCollection = (CellCollection) term;
 
-        if (cellCollection.isStar() != otherCellCollection.isStar() && !otherCellCollection.cells().isEmpty()) {
+        if (cellCollection.hasStar() != otherCellCollection.hasStar() && !otherCellCollection.cells().isEmpty()) {
             fail();
         }
 
         Set<String> unifiableCellLabels = new HashSet<String>(cellCollection.labelSet());
         unifiableCellLabels.retainAll(otherCellCollection.labelSet());
 
-        if (!cellCollection.isStar()) {
+        if (!cellCollection.hasStar()) {
             for (String label : unifiableCellLabels) {
                 unify(cellCollection.get(label).iterator().next(),
                       otherCellCollection.get(label).iterator().next());
@@ -233,7 +233,7 @@ public class SymbolicUnifier extends AbstractUnifier {
                     cellCollection.hasFrame() ? cellCollection.frame() : null,
                     otherCellMap,
                     otherCellCollection.hasFrame() ? otherCellCollection.frame() : null,
-                    cellCollection.isStar());
+                    cellCollection.hasStar());
         } else {
             assert !isStarNested : "nested cells with multiplicity='*' not supported";
             // TODO(AndreiS): fix this assertions
@@ -368,26 +368,26 @@ public class SymbolicUnifier extends AbstractUnifier {
             Variable frame,
             ListMultimap<String, Cell> otherCellMap,
             Variable otherFrame,
-            boolean isStar) {
+            boolean hasStar) {
         if (frame != null) {
             if (otherFrame != null) {
                 if (cellMap.isEmpty() && otherCellMap.isEmpty()) {
                     fConstraint.add(frame, otherFrame);
                 } else if (cellMap.isEmpty()) {
-                    fConstraint.add(frame, new CellCollection(otherCellMap, otherFrame, isStar));
+                    fConstraint.add(frame, new CellCollection(otherCellMap, otherFrame, hasStar));
                 } else if (otherCellMap.isEmpty()) {
-                    fConstraint.add(new CellCollection(cellMap, frame, isStar), otherFrame);
+                    fConstraint.add(new CellCollection(cellMap, frame, hasStar), otherFrame);
                 } else {
                     Variable variable = Variable.getFreshVariable(Kind.CELL_COLLECTION.toString());
-                    fConstraint.add(frame, new CellCollection(otherCellMap, variable, isStar));
-                    fConstraint.add(new CellCollection(cellMap, variable, isStar), otherFrame);
+                    fConstraint.add(frame, new CellCollection(otherCellMap, variable, hasStar));
+                    fConstraint.add(new CellCollection(cellMap, variable, hasStar), otherFrame);
                 }
             } else {
                 if (!cellMap.isEmpty()) {
                     fail();
                 }
 
-                fConstraint.add(frame, new CellCollection(otherCellMap, isStar));
+                fConstraint.add(frame, new CellCollection(otherCellMap, hasStar));
             }
         } else {
             if (otherFrame != null) {
@@ -395,7 +395,7 @@ public class SymbolicUnifier extends AbstractUnifier {
                     fail();
                 }
 
-                fConstraint.add(new CellCollection(cellMap, isStar), otherFrame);
+                fConstraint.add(new CellCollection(cellMap, hasStar), otherFrame);
             } else {
                 if (!cellMap.isEmpty() || !otherCellMap.isEmpty()) {
                     fail();
