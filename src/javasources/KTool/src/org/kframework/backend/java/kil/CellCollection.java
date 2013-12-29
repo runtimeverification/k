@@ -31,9 +31,14 @@ public class CellCollection extends Collection {
         this.cells = ArrayListMultimap.create(cells);
         this.isStar = isStar;
 
-        assert !isStar || cells.keySet().size() <= 1;
-        for (String label : cells.keySet()) {
-            assert isStar || cells.get(label).size() == 1;
+        if (isStar) {
+            // TODO(YilongL): why the assertion below? is it merely a limitation
+            // of the current implementation?
+            assert cells.keySet().size() <= 1;
+        } else {
+            for (String label : cells.keySet()) {
+                assert cells.get(label).size() == 1;
+            }
         }
     }
 
