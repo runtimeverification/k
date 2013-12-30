@@ -42,6 +42,7 @@ import org.kframework.kil.UserList;
 import org.kframework.kil.Variable;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.visitors.Visitor;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -49,12 +50,36 @@ import org.kframework.utils.general.GlobalSettings;
 
 public class MetaK {
 
+	public static final String cellSort = "CellSort";
+	public static final String cellFragment = "CellFragment";
+
 	public static Term incrementCondition(Term condition, Term kresultCnd) {
 		if (condition == null) {
 			return kresultCnd;
 		}
 		return KApp.of(KLabelConstant.ANDBOOL_KLABEL, condition, kresultCnd);
 	}
+
+	public static boolean isCellSort(String bigSort) {
+		return (bigSort.endsWith(cellSort)
+				||bigSort.endsWith(cellFragment));
+	}
+
+	public static boolean isCellFragment(String bigSort) {
+		return (bigSort.endsWith(cellFragment));
+	}
+
+    public static String cellSort(String cellName) {
+        return StringUtil.makeProper(cellName) + cellSort;
+    }
+
+    public static String cellFragment(String cellName) {
+        return StringUtil.makeProper(cellName) + cellFragment;
+    }
+
+    public static String cellUnit(String cellName) {
+        return "." + cellFragment(cellName);
+    }
 
 	public static class Constants {
 		public static final String anyVarSymbol = "_";
