@@ -1,18 +1,43 @@
 package org.kframework.backend.java.symbolic;
 
-import com.google.common.collect.ImmutableList;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.Int32Token;
+import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
-import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.kil.Bottom;
+import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.BuiltinSet;
+import org.kframework.backend.java.kil.Cell;
+import org.kframework.backend.java.kil.CellCollection;
+import org.kframework.backend.java.kil.Collection;
+import org.kframework.backend.java.kil.ConcreteCollectionVariable;
+import org.kframework.backend.java.kil.Hole;
+import org.kframework.backend.java.kil.KCollection;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KLabel;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.KLabelFreezer;
+import org.kframework.backend.java.kil.KLabelInjection;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.KSequence;
+import org.kframework.backend.java.kil.Kind;
+import org.kframework.backend.java.kil.MetaVariable;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Token;
+import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.matchers.MatcherException;
 
-import java.util.*;
-import org.kframework.backend.java.kil.Collection;
-
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 
@@ -67,6 +92,14 @@ public class SymbolicUnifier extends AbstractUnifier {
         }
     }
 
+    /**
+     * Performs generic operations for the unification of two terms.
+     * Term-specific operations are then delegated to the specific {@code unify}
+     * method by overloading. That is to say, in general, the safe way to unify
+     * any two terms is to invoke this generic {@code unify} method; do not
+     * invoke the specialized ones directly unless you know exactly what you are
+     * doing.
+     */
     @Override
     public void unify(Term term, Term otherTerm) {
         if (term instanceof Bottom || otherTerm instanceof Bottom) {
@@ -82,6 +115,7 @@ public class SymbolicUnifier extends AbstractUnifier {
                + " and " + otherTerm + " (" + otherTerm.kind() + ")";
 
         if (term.isSymbolic() || otherTerm.isSymbolic()) {
+            // TODO(YilongL): can we move this adhoc code to another place?
             /* special case for concrete collections  */
             if (term instanceof ConcreteCollectionVariable
                     && !matchConcreteSize((ConcreteCollectionVariable) term, otherTerm)) {
@@ -135,12 +169,11 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     @Override
     public void unify(BuiltinList builtinList, Term term) {
+        assert !(term instanceof Variable);
+        
         if (!(term instanceof BuiltinList)) {
             this.fail();
         }
-
-        // TODO(YilongL): what if the term is a Variable, it won't be even able
-        // to pass the check above!
         
         throw new UnsupportedOperationException(
                 "list matching is only supported when one of the lists is a variable.");
@@ -148,6 +181,8 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     @Override
     public void unify(BuiltinMap builtinMap, Term term) {
+        assert !(term instanceof Variable);
+        
         if (!(term instanceof BuiltinMap)) {
             this.fail();
         }
@@ -160,6 +195,7 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     @Override
     public void unify(BuiltinSet builtinSet, Term term) {
+        assert !(term instanceof Variable);
         if (!(term instanceof BuiltinSet)) {
             this.fail();
         }
@@ -174,11 +210,13 @@ public class SymbolicUnifier extends AbstractUnifier {
      */
     @Override
     public void unify(Cell cell, Term term) {
+        assert !(term instanceof Variable);
+        
         if (!(term instanceof Cell)) {
             this.fail();
         }
 
-        Cell otherCell = (Cell) term;
+        Cell<?> otherCell = (Cell<?>) term;
         if (!cell.getLabel().equals(otherCell.getLabel())) {
             /*
              * AndreiS: commented out the check below as matching might fail due
@@ -196,6 +234,8 @@ public class SymbolicUnifier extends AbstractUnifier {
      */
     @Override
     public void unify(CellCollection cellCollection, Term term) {
+        assert !(term instanceof Variable);
+        
         if (!(term instanceof CellCollection)) {
             fail();
         }
@@ -406,6 +446,8 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     @Override
     public void unify(KLabelConstant kLabelConstant, Term term) {
+        assert !(term instanceof Variable);
+        
         if (!kLabelConstant.equals(term)) {
             fail();
         }
@@ -413,6 +455,8 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     @Override
     public void unify(KLabelFreezer kLabelFreezer, Term term) {
+        assert !(term instanceof Variable);
+
         if(!(term instanceof KLabelFreezer)) {
             fail();
         }
@@ -423,6 +467,8 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     @Override
     public void unify(KLabelInjection kLabelInjection, Term term) {
+        assert !(term instanceof Variable);
+
         if(!(term instanceof KLabelInjection)) {
             fail();
         }
@@ -433,6 +479,8 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     @Override
     public void unify(Hole hole, Term term) {
+        assert !(term instanceof Variable);
+
         if (!hole.equals(term)) {
             fail();
         }
@@ -440,6 +488,8 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     @Override
     public void unify(KItem kItem, Term term) {
+        assert !(term instanceof Variable);
+
         if (!(term instanceof KItem)) {
             fail();
         }
@@ -473,6 +523,8 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     @Override
     public void unify(Token token, Term term) {
+        assert !(term instanceof Variable);
+
         if (!token.equals(term)) {
             fail();
         }
@@ -480,6 +532,8 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     @Override
     public void unify(UninterpretedToken uninterpretedToken, Term term) {
+        assert !(term instanceof Variable);
+
         if (!uninterpretedToken.equals(term)) {
             fail();
         }
@@ -487,6 +541,8 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     @Override
     public void unify(BoolToken boolToken, Term term) {
+        assert !(term instanceof Variable);
+
         if (!boolToken.equals(term)) {
             fail();
         }
@@ -494,6 +550,8 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     @Override
     public void unify(IntToken intToken, Term term) {
+        assert !(term instanceof Variable);
+
         if (!intToken.equals(term)) {
             fail();
         }
@@ -501,6 +559,8 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     @Override
     public void unify(Int32Token intToken, Term term) {
+        assert !(term instanceof Variable);
+
         if (!intToken.equals(term)) {
             fail();
         }
@@ -508,6 +568,8 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     @Override
     public void unify(StringToken stringToken, Term term) {
+        assert !(term instanceof Variable);
+
         if (!stringToken.equals(term)) {
             fail();
         }
@@ -515,6 +577,8 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     @Override
     public void unify(KList kList, Term term) {
+        assert !(term instanceof Variable);
+
         if(!(term instanceof KList)){
             fail();
         }
@@ -525,6 +589,8 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     @Override
     public void unify(KSequence kSequence, Term term) {
+        assert !(term instanceof Variable);
+
         if (!(term instanceof KSequence)) {
             this.fail();
         }
@@ -534,6 +600,8 @@ public class SymbolicUnifier extends AbstractUnifier {
     }
 
     private void matchKCollection(KCollection kCollection, KCollection otherKCollection) {
+        assert kCollection.getClass().equals(otherKCollection.getClass());
+        
         int length = Math.min(kCollection.size(), otherKCollection.size());
         for(int index = 0; index < length; ++index) {
             unify(kCollection.get(index), otherKCollection.get(index));
@@ -562,6 +630,9 @@ public class SymbolicUnifier extends AbstractUnifier {
 
     @Override
     public void unify(MetaVariable metaVariable, Term term) {
+        // TODO(YilongL): not sure about the assertion below
+        // assert !(term instanceof Variable);
+
         if (!metaVariable.equals(term)) {
             fail();
         }
