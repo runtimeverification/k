@@ -38,7 +38,6 @@ import org.kframework.kil.matchers.MatcherException;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 
 
@@ -254,14 +253,14 @@ public class SymbolicUnifier extends AbstractUnifier {
                       otherCellCollection.get(label).iterator().next());
             }
 
-            ListMultimap<String, Cell> cellMap = ArrayListMultimap.create();
+            Multimap<String, Cell> cellMap = ArrayListMultimap.create();
             for (String label : cellCollection.labelSet()) {
                 if (!unifiableCellLabels.contains(label)) {
                     cellMap.putAll(label, cellCollection.get(label));
                 }
             }
 
-            ListMultimap<String, Cell> otherCellMap = ArrayListMultimap.create();
+            Multimap<String, Cell> otherCellMap = ArrayListMultimap.create();
             for (String label : otherCellCollection.labelSet()) {
                 if (!unifiableCellLabels.contains(label)) {
                     otherCellMap.putAll(label, otherCellCollection.get(label));
@@ -315,7 +314,7 @@ public class SymbolicUnifier extends AbstractUnifier {
                     continue;
                 }
 
-                ListMultimap<String, Cell> cellMap = ArrayListMultimap.create();
+                Multimap<String, Cell> cellMap = ArrayListMultimap.create();
                 for (int i = 0; i < cells.length; ++i) {
                     if (!generator.selected.contains(i)) {
                         cellMap.put(cells[i].getLabel(), cells[i]);
@@ -404,9 +403,9 @@ public class SymbolicUnifier extends AbstractUnifier {
     }
 
     private void addCellCollectionConstraint(
-            ListMultimap<String, Cell> cellMap,
+            Multimap<String, Cell> cellMap,
             Variable frame,
-            ListMultimap<String, Cell> otherCellMap,
+            Multimap<String, Cell> otherCellMap,
             Variable otherFrame,
             boolean hasStar) {
         if (frame != null) {

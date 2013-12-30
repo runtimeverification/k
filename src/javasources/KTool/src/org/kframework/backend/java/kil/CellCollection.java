@@ -9,7 +9,7 @@ import org.kframework.kil.ASTNode;
 import java.util.Set;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multimap;
 
 
 /**
@@ -23,7 +23,7 @@ import com.google.common.collect.ListMultimap;
 @SuppressWarnings("rawtypes")
 public class CellCollection extends Collection {
 
-    private final ListMultimap<String, Cell> cells;
+    private final Multimap<String, Cell> cells;
     
     /**
      * Contains {@code true} if the explicitly specified part of this cell
@@ -32,7 +32,7 @@ public class CellCollection extends Collection {
      */
     private final boolean hasStar;
 
-    public CellCollection(ListMultimap<String, Cell> cells, Variable frame, boolean hasStar) {
+    public CellCollection(Multimap<String, Cell> cells, Variable frame, boolean hasStar) {
         super(frame, Kind.CELL_COLLECTION);
         this.cells = ArrayListMultimap.create(cells);
         this.hasStar = hasStar;
@@ -52,7 +52,7 @@ public class CellCollection extends Collection {
         this(ArrayListMultimap.<String, Cell>create(), frame, false);
     }
 
-    public CellCollection(ListMultimap<String, Cell> cells, boolean star) {
+    public CellCollection(Multimap<String, Cell> cells, boolean star) {
         this(cells, null, star);
     }
 
@@ -64,7 +64,7 @@ public class CellCollection extends Collection {
         return cells.values();
     }
 
-    public ListMultimap<String, Cell> cellMap() {
+    public Multimap<String, Cell> cellMap() {
         return cells;
     }
 

@@ -42,7 +42,7 @@ import java.util.*;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multimap;
 
 
 /**
@@ -91,7 +91,7 @@ public class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(CellCollection cellCollection) {
         boolean change = false;
-        ListMultimap<String, Cell> cells = ArrayListMultimap.create();
+        Multimap<String, Cell> cells = ArrayListMultimap.create();
         for (Map.Entry<String, Cell> entry : cellCollection.cellMap().entries()) {
             Cell cell = (Cell) entry.getValue().accept(this);
             cells.put(entry.getKey(), cell);

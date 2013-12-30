@@ -62,7 +62,7 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multimap;
 
 
 /**
@@ -246,7 +246,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 contents = Collections.singletonList(node.getContents());
             }
 
-            ListMultimap<String, Cell> cells = ArrayListMultimap.create();
+            Multimap<String, Cell> cells = ArrayListMultimap.create();
             Variable variable = null;
             for (org.kframework.kil.Term term : contents) {
                 if (term instanceof TermComment) {
@@ -255,9 +255,9 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 if (term instanceof org.kframework.kil.Cell) {
                     Cell<?> cell = (Cell<?>) term.accept(this);
                     cells.put(cell.getLabel(), cell);
-                } else if (variable == null && term instanceof org.kframework.kil.Variable
-                        && (term.getSort().equals(org.kframework.kil.KSorts.BAG)
-                            || org.kframework.compile.utils.MetaK.isCellSort(term.getSort()))) {
+                } else if (variable == null
+                        && term instanceof org.kframework.kil.Variable
+                        && (term.getSort().equals(org.kframework.kil.KSorts.BAG))) {
                     variable = (Variable) term.accept(this);
                 } else {
                     throw new RuntimeException();
@@ -479,8 +479,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(org.kframework.kil.Variable node) throws TransformerException {
-        if (node.getSort().equals(org.kframework.kil.KSorts.BAG)
-                || org.kframework.compile.utils.MetaK.isCellSort(node.getSort())) {
+        if (node.getSort().equals(org.kframework.kil.KSorts.BAG)) {
             return new Variable(node.getName(), Kind.CELL_COLLECTION.toString());
         }
 
