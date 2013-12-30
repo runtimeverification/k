@@ -52,8 +52,8 @@ public class CellCollection extends Collection {
         this(ArrayListMultimap.<String, Cell>create(), frame, false);
     }
 
-    public CellCollection(Multimap<String, Cell> cells, boolean star) {
-        this(cells, null, star);
+    public CellCollection(Multimap<String, Cell> cells, boolean hasStar) {
+        this(cells, null, hasStar);
     }
 
     public CellCollection() {

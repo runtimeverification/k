@@ -240,107 +240,236 @@ public class SymbolicUnifier extends AbstractUnifier {
         }
         CellCollection otherCellCollection = (CellCollection) term;
 
-        if (cellCollection.hasStar() != otherCellCollection.hasStar() && !otherCellCollection.cells().isEmpty()) {
-            fail();
-        }
+        /*
+         * YilongL: the configuration structure of the subject term should be
+         * concrete.
+         */
+        assert !cellCollection.hasFrame();
 
         Set<String> unifiableCellLabels = new HashSet<String>(cellCollection.labelSet());
         unifiableCellLabels.retainAll(otherCellCollection.labelSet());
 
         if (!cellCollection.hasStar()) {
-            for (String label : unifiableCellLabels) {
-                unify(cellCollection.get(label).iterator().next(),
-                      otherCellCollection.get(label).iterator().next());
-            }
-
-            Multimap<String, Cell> cellMap = ArrayListMultimap.create();
-            for (String label : cellCollection.labelSet()) {
-                if (!unifiableCellLabels.contains(label)) {
-                    cellMap.putAll(label, cellCollection.get(label));
-                }
-            }
-
-            Multimap<String, Cell> otherCellMap = ArrayListMultimap.create();
-            for (String label : otherCellCollection.labelSet()) {
-                if (!unifiableCellLabels.contains(label)) {
-                    otherCellMap.putAll(label, otherCellCollection.get(label));
-                }
-            }
-
-            addCellCollectionConstraint(
-                    cellMap,
-                    cellCollection.hasFrame() ? cellCollection.frame() : null,
-                    otherCellMap,
-                    otherCellCollection.hasFrame() ? otherCellCollection.frame() : null,
-                    cellCollection.hasStar());
-        } else {
-            assert !isStarNested : "nested cells with multiplicity='*' not supported";
-            // TODO(AndreiS): fix this assertions
-            //assert !cellCollection.hasFrame();
-            //assert cellCollection.size() >= otherCellCollection.size();
-            if (!(!cellCollection.hasFrame() && cellCollection.size() >= otherCellCollection.size())) {
-                fail();
-            }
-
-            Cell[] otherCells;
-            Cell[] cells;
-            if (!otherCellCollection.cells().isEmpty()) {
-                String label = unifiableCellLabels.iterator().next();
-                cells = cellCollection.get(label).toArray(new Cell[0]);
-                otherCells = otherCellCollection.get(label).toArray(new Cell[0]);
-            } else {
-                String label = cellCollection.labelSet().iterator().next();
-                cells = cellCollection.get(label).toArray(new Cell[0]);
-                otherCells = new Cell[0];
-            }
-            Variable otherFrame = otherCellCollection.hasFrame() ? otherCellCollection.frame() : null;
-
-            if (otherFrame == null && cells.length > otherCells.length) {
-                fail();
-            }
-
-            isStarNested = true;
-
-            java.util.Collection<SymbolicConstraint> constraints = new ArrayList<SymbolicConstraint>();
-            SelectionGenerator generator = new SelectionGenerator(otherCells.length, cells.length);
-            do {
-                SymbolicConstraint constraint = new SymbolicConstraint(context);
-
-                try {
-                    for (int i = 0; i < otherCells.length; ++i) {
-                        unify(cells[generator.selection.get(i)], otherCells[i]);
-                    }
-                } catch (MatcherException e) {
-                    continue;
+            if (!otherCellCollection.hasStar()) {
+                /* Case 1: TODO(YilongL) */
+                for (String label : unifiableCellLabels) {
+                    assert cellCollection.get(label).size() == 1
+                            && otherCellCollection.get(label).size() == 1;
+                    unify(cellCollection.get(label).iterator().next(),
+                          otherCellCollection.get(label).iterator().next());
                 }
 
                 Multimap<String, Cell> cellMap = ArrayListMultimap.create();
-                for (int i = 0; i < cells.length; ++i) {
-                    if (!generator.selected.contains(i)) {
-                        cellMap.put(cells[i].getLabel(), cells[i]);
+                for (String label : cellCollection.labelSet()) {
+                    if (!unifiableCellLabels.contains(label)) {
+                        cellMap.putAll(label, cellCollection.get(label));
                     }
                 }
 
-                if (otherFrame != null) {
-                    constraint.add(new CellCollection(cellMap, true), otherFrame);
-                } else {
-                    if (!cellMap.isEmpty()) fail();
+                Multimap<String, Cell> otherCellMap = ArrayListMultimap.create();
+                for (String label : otherCellCollection.labelSet()) {
+                    if (!unifiableCellLabels.contains(label)) {
+                        otherCellMap.putAll(label, otherCellCollection.get(label));
+                    }
                 }
-                constraints.add(constraint);
-            } while (generator.generate());
 
-            isStarNested = false;
-
-            if (constraints.isEmpty()) {
+                // since cellCollection has no frame, otherCellMap must be empty
+                if (!otherCellMap.isEmpty()) {
+                    fail();
+                }
+                
+                if (otherCellCollection.hasFrame()) {
+                    fConstraint.add(new CellCollection(cellMap, false), otherCellCollection.frame());
+                } else if (!cellMap.isEmpty()) {
+                    // otherCellCollection has no frame and cellMap is not empty, fail
+                    fail();
+                }
+            } else {
+                /*
+                 * Case 2: since cellCollection has no frame, the
+                 * starred-cell(s) in otherCellCollection can never match
+                 */
                 fail();
             }
+        } else {
+            assert !isStarNested : "nested cells with multiplicity='*' not supported";
+            // TODO(AndreiS): fix this assertions
 
-            if (constraints.size() == 1) {
-                fConstraint.addAll(constraints.iterator().next());
+            if (!otherCellCollection.hasStar()) {
+                /* Case 3: otherCellCollection must be a single frame */
+                if (! (otherCellCollection.cells().isEmpty() && otherCellCollection.hasFrame())) {
+                    fail();
+                }
+                
+                fConstraint.add(new CellCollection(cellCollection.cellMap(),
+                        true), otherCellCollection.frame());
             } else {
-                multiConstraints.add(constraints);
+                /*
+                 * Case 4: the two cell collections must have one common type of
+                 * starred-cells
+                 */
+                
+                if (unifiableCellLabels.size() != 1) {
+                    fail();
+                }
+                
+                if (cellCollection.size() < otherCellCollection.size()
+                        || cellCollection.size() > otherCellCollection.size()
+                        && !otherCellCollection.hasFrame()) {
+                    fail();
+                }
+
+                String label = unifiableCellLabels.iterator().next();
+                Cell<?>[] cells = cellCollection.get(label).toArray(new Cell[1]);
+                Cell<?>[] otherCells = otherCellCollection.get(label).toArray(new Cell[1]);
+                Variable otherFrame = otherCellCollection.hasFrame() ? otherCellCollection.frame() : null;
+
+                isStarNested = true;
+
+                java.util.Collection<SymbolicConstraint> constraints = new ArrayList<SymbolicConstraint>();
+                SelectionGenerator generator = new SelectionGenerator(otherCells.length, cells.length);
+                do {
+                    SymbolicConstraint constraint = new SymbolicConstraint(context);
+
+                    try {
+                        for (int i = 0; i < otherCells.length; ++i) {
+                            unify(cells[generator.selection.get(i)], otherCells[i]);
+                        }
+                    } catch (MatcherException e) {
+                        continue;
+                    }
+
+                    Multimap<String, Cell> cellMap = ArrayListMultimap.create();
+                    for (int i = 0; i < cells.length; ++i) {
+                        if (!generator.selected.contains(i)) {
+                            cellMap.put(cells[i].getLabel(), cells[i]);
+                        }
+                    }
+
+                    if (otherFrame != null) {
+                        constraint.add(new CellCollection(cellMap, true), otherFrame);
+                    } else {
+                        if (!cellMap.isEmpty()) fail();
+                    }
+                    constraints.add(constraint);
+                } while (generator.generate());
+
+                isStarNested = false;
+
+                if (constraints.isEmpty()) {
+                    fail();
+                }
+
+                if (constraints.size() == 1) {
+                    fConstraint.addAll(constraints.iterator().next());
+                } else {
+                    multiConstraints.add(constraints);
+                }
             }
         }
+        
+
+//        if (cellCollection.hasStar() != otherCellCollection.hasStar() && !otherCellCollection.cells().isEmpty()) {
+//            fail();
+//        }
+//
+////        Set<String> unifiableCellLabels = new HashSet<String>(cellCollection.labelSet());
+////        unifiableCellLabels.retainAll(otherCellCollection.labelSet());
+//
+//        if (!cellCollection.hasStar()) {
+//            for (String label : unifiableCellLabels) {
+//                unify(cellCollection.get(label).iterator().next(),
+//                      otherCellCollection.get(label).iterator().next());
+//            }
+//
+//            Multimap<String, Cell> cellMap = ArrayListMultimap.create();
+//            for (String label : cellCollection.labelSet()) {
+//                if (!unifiableCellLabels.contains(label)) {
+//                    cellMap.putAll(label, cellCollection.get(label));
+//                }
+//            }
+//
+//            Multimap<String, Cell> otherCellMap = ArrayListMultimap.create();
+//            for (String label : otherCellCollection.labelSet()) {
+//                if (!unifiableCellLabels.contains(label)) {
+//                    otherCellMap.putAll(label, otherCellCollection.get(label));
+//                }
+//            }
+//
+//            addCellCollectionConstraint(
+//                    cellMap,
+//                    cellCollection.hasFrame() ? cellCollection.frame() : null,
+//                    otherCellMap,
+//                    otherCellCollection.hasFrame() ? otherCellCollection.frame() : null,
+//                    cellCollection.hasStar());
+//        } else {
+//            assert !isStarNested : "nested cells with multiplicity='*' not supported";
+//            // TODO(AndreiS): fix this assertions
+//            //assert !cellCollection.hasFrame();
+//            //assert cellCollection.size() >= otherCellCollection.size();
+//            if (!(!cellCollection.hasFrame() && cellCollection.size() >= otherCellCollection.size())) {
+//                fail();
+//            }
+//
+//            Cell[] otherCells;
+//            Cell[] cells;
+//            if (!otherCellCollection.cells().isEmpty()) {
+//                String label = unifiableCellLabels.iterator().next();
+//                cells = cellCollection.get(label).toArray(new Cell[0]);
+//                otherCells = otherCellCollection.get(label).toArray(new Cell[0]);
+//            } else {
+//                String label = cellCollection.labelSet().iterator().next();
+//                cells = cellCollection.get(label).toArray(new Cell[0]);
+//                otherCells = new Cell[0];
+//            }
+//            Variable otherFrame = otherCellCollection.hasFrame() ? otherCellCollection.frame() : null;
+//
+//            if (otherFrame == null && cells.length > otherCells.length) {
+//                fail();
+//            }
+//
+//            isStarNested = true;
+//
+//            java.util.Collection<SymbolicConstraint> constraints = new ArrayList<SymbolicConstraint>();
+//            SelectionGenerator generator = new SelectionGenerator(otherCells.length, cells.length);
+//            do {
+//                SymbolicConstraint constraint = new SymbolicConstraint(context);
+//
+//                try {
+//                    for (int i = 0; i < otherCells.length; ++i) {
+//                        unify(cells[generator.selection.get(i)], otherCells[i]);
+//                    }
+//                } catch (MatcherException e) {
+//                    continue;
+//                }
+//
+//                Multimap<String, Cell> cellMap = ArrayListMultimap.create();
+//                for (int i = 0; i < cells.length; ++i) {
+//                    if (!generator.selected.contains(i)) {
+//                        cellMap.put(cells[i].getLabel(), cells[i]);
+//                    }
+//                }
+//
+//                if (otherFrame != null) {
+//                    constraint.add(new CellCollection(cellMap, true), otherFrame);
+//                } else {
+//                    if (!cellMap.isEmpty()) fail();
+//                }
+//                constraints.add(constraint);
+//            } while (generator.generate());
+//
+//            isStarNested = false;
+//
+//            if (constraints.isEmpty()) {
+//                fail();
+//            }
+//
+//            if (constraints.size() == 1) {
+//                fConstraint.addAll(constraints.iterator().next());
+//            } else {
+//                multiConstraints.add(constraints);
+//            }
+//        }
     }
 
     private class SelectionGenerator {
