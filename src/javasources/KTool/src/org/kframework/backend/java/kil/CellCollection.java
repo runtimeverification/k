@@ -5,6 +5,7 @@ import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.loader.Context;
 
 import java.util.Set;
 
@@ -32,32 +33,35 @@ public class CellCollection extends Collection {
      */
     private final boolean hasStar;
 
-    public CellCollection(Multimap<String, Cell> cells, Variable frame, boolean hasStar) {
+    public CellCollection(Multimap<String, Cell> cells, Variable frame, Context context) {
         super(frame, Kind.CELL_COLLECTION);
         this.cells = ArrayListMultimap.create(cells);
-        this.hasStar = hasStar;
-
-        if (hasStar) {
-            // TODO(YilongL): why the assertion below? is it merely a limitation
-            // of the current implementation?
-            assert cells.keySet().size() <= 1;
-        } else {
-            for (String label : cells.keySet()) {
-                assert cells.get(label).size() == 1;
+        
+        int numOfStarredCellTypes = 0;
+        for (String cellLabel : cells.keySet()) {
+            if (context.getConfigurationStructureMap().get(cellLabel).multiplicity 
+                    == org.kframework.kil.Cell.Multiplicity.ANY) {
+                numOfStarredCellTypes++;
+            } else {
+                assert cells.get(cellLabel).size() == 1;
             }
         }
+
+        assert numOfStarredCellTypes <= 1 : 
+            "Multiple types of starred cells in one cell collection not supported at present";
+        hasStar = numOfStarredCellTypes > 0;
     }
 
     public CellCollection(Variable frame) {
-        this(ArrayListMultimap.<String, Cell>create(), frame, false);
+        this(ArrayListMultimap.<String, Cell>create(), frame, null);
     }
 
-    public CellCollection(Multimap<String, Cell> cells, boolean hasStar) {
-        this(cells, null, hasStar);
+    public CellCollection(Multimap<String, Cell> cells, Context context) {
+        this(cells, null, context);
     }
 
     public CellCollection() {
-        this(ArrayListMultimap.<String, Cell>create(), null, false);
+        this(ArrayListMultimap.<String, Cell>create(), null, null);
     }
 
     public java.util.Collection<Cell> cells() {

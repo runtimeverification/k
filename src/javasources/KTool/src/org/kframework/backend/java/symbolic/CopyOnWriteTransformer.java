@@ -118,11 +118,11 @@ public class CopyOnWriteTransformer implements Transformer {
             }
 
             if (cells != cellCollection.cellMap() || frame != cellCollection.frame()) {
-                cellCollection = new CellCollection(cells, frame, hasStar);
+                cellCollection = new CellCollection(cells, frame, definition.context());
             }
         } else {
             if (cells != cellCollection.cellMap()) {
-                cellCollection = new CellCollection(cells, cellCollection.hasStar());
+                cellCollection = new CellCollection(cells, definition.context());
             }
         }
 

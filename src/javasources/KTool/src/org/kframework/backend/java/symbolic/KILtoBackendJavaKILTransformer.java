@@ -264,15 +264,9 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 }
             }
 
-            boolean hasStar = false;
-            for (String cellLabel : cells.keySet()) {
-                hasStar = hasStar || context.getConfigurationStructureMap().get(cellLabel).multiplicity
-                        == org.kframework.kil.Cell.Multiplicity.ANY;
-            }
-
             return new Cell<CellCollection>(
                     node.getLabel(),
-                    new CellCollection(cells, variable, hasStar));
+                    new CellCollection(cells, variable, context));
         } else {
             Term content = (Term) node.getContents().accept(this);
 
