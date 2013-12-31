@@ -315,12 +315,16 @@ public class SymbolicUnifier extends AbstractUnifier {
                             && otherCellCollection.get(cellLabel).size() == 1;
                     unify(cellCollection.get(cellLabel).iterator().next(),
                             otherCellCollection.get(cellLabel).iterator().next());
+                    iter.remove();
                 }
-                iter.remove();
             }
             
             // YilongL: the assertion here must hold
-            assert unifiableCellLabels.size() == 1;
+            if (unifiableCellLabels.isEmpty()) {
+                fail();
+            } else {
+                assert unifiableCellLabels.size() == 1;
+            }
 
             if (cellCollection.size() < otherCellCollection.size()
                     || cellCollection.size() > otherCellCollection.size()
