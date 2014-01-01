@@ -44,7 +44,6 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.KSorts;
-import org.kframework.backend.symbolic.SymbolicBackend;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.BoolBuiltin;
@@ -621,8 +620,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         Module singletonModule = node.getSingletonModule();
 
         for (org.kframework.kil.Rule rule : singletonModule.getRules()) {
-            if (!rule.containsAttribute(SymbolicBackend.SYMBOLIC)
-                || rule.containsAttribute(Attribute.PREDICATE.getKey())
+            if (rule.containsAttribute(Attribute.PREDICATE.getKey())
                 || rule.containsAttribute(Attribute.ANYWHERE.getKey())) {
                 continue;
             }

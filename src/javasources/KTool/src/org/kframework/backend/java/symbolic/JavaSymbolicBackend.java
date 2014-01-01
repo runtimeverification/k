@@ -1,7 +1,6 @@
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.BasicBackend;
-import org.kframework.backend.symbolic.TagUserRules;
 import org.kframework.compile.FlattenModules;
 import org.kframework.compile.ResolveConfigurationAbstraction;
 import org.kframework.compile.checks.CheckConfigurationCells;
@@ -38,6 +37,7 @@ import org.kframework.compile.transformers.ResolveOpenCells;
 import org.kframework.compile.transformers.ResolveRewrite;
 import org.kframework.compile.transformers.SetVariablesInferredSort;
 import org.kframework.compile.transformers.StrictnessToContexts;
+import org.kframework.compile.transformers.RemovePreincludedRules;
 import org.kframework.compile.utils.*;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
@@ -157,7 +157,6 @@ public class JavaSymbolicBackend extends BasicBackend {
         steps.add(new ResolveOpenCells(context));
         steps.add(new ResolveRewrite(context));
 
-
         /* data structure related stuff */
         steps.add(new CompileToBuiltins(context));
         steps.add(new CompileDataStructures(context));
@@ -170,8 +169,8 @@ public class JavaSymbolicBackend extends BasicBackend {
         steps.add(new AddOptionalTags(context));
         steps.add(new DeclareCellLabels(context));
 
-		/* tag with symbolic the rules that are form k dist */
-        steps.add(new TagUserRules(context));
+        /* remove rules that are from k dist */
+        steps.add(new RemovePreincludedRules(context));
 
         steps.add(new LastStep(this, context));
 
