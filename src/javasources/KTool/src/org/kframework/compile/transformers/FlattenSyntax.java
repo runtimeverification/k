@@ -115,6 +115,10 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
 		return node;
 	}
 
+	/**
+	 * Flattens this TermCons if it has sort K, KItem, or any sort other than
+	 * those defined in {@link KSort}.
+	 */
 	@Override
 	public ASTNode transform(TermCons tc) throws TransformerException {
 		if (MetaK.isComputationSort(tc.getSort()))

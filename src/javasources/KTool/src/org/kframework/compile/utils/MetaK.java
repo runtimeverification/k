@@ -157,11 +157,22 @@ public class MetaK {
 		return KSequence.EMPTY;
 	}
 
+    /**
+     * Checks if the specified sort has been defined in {@link KSort}.
+     * 
+     * @param sort
+     *            the specified sort
+     * @return {@code true} if the specified sort has been defined in
+     *         {@code KSort}; otherwise, false
+     */
 	public static boolean isKSort(String sort) {
 		try {
 			KSort.valueOf(sort);
 		} catch (IllegalArgumentException e) {
-			return sort.equals(KSorts.KLIST);
+            // TODO(YilongL): I think we can return false for sure, since we
+            // have KList defined in KSort
+//			return sort.equals(KSorts.KLIST);
+		    return false;
 		}
 		return true;
 	}
@@ -340,6 +351,15 @@ public class MetaK {
                 || sort.equals(StringBuiltin.SORT_NAME);
     }
 
+    /**
+     * Checks if the specified sort is a computation sort, that is, K, KItem, or
+     * any sort other than those defined in {@link KSort}.
+     * 
+     * @param sort
+     *            the specified sort
+     * @return {@code true} if the specified sort is K, KItem, or any sort other
+     *         than those defined in {@code KSort}; otherwise, {@code false}
+     */
 	public static boolean isComputationSort(String sort) {
 		return sort.equals(KSorts.K) || sort.equals(KSorts.KITEM) || !MetaK.isKSort(sort);
 	}
