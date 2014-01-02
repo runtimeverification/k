@@ -22,17 +22,15 @@ import java.io.Reader;
  *         Created on 12/14/13.
  */
 public class KFindUsagesProvider implements FindUsagesProvider {
-    private static final DefaultWordsScanner WORDS_SCANNER =
-            new DefaultWordsScanner(new FlexAdapter(new KLexer((Reader) null)),
-                    TokenSet.create(KTypes.KEYWORD, KTypes.BUILTIN_ID, KTypes.BUILTIN_FUNC, KTypes.USER_ID,
-                            KTypes.STRING),
-                    TokenSet.create(KTypes.COMMENT),
-                    TokenSet.create(KTypes.INTEGER_LITERAL));
 
     @Nullable
     @Override
     public WordsScanner getWordsScanner() {
-        return WORDS_SCANNER;
+        return new DefaultWordsScanner(new FlexAdapter(new KLexer((Reader) null)),
+                TokenSet.create(KTypes.KEYWORD, KTypes.BUILTIN_ID, KTypes.BUILTIN_FUNC, KTypes.USER_ID,
+                        KTypes.STRING),
+                TokenSet.create(KTypes.COMMENT),
+                TokenSet.create(KTypes.INTEGER_LITERAL));
     }
 
     @Override
