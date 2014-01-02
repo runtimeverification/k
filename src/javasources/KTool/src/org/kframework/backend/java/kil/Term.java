@@ -1,10 +1,12 @@
 package org.kframework.backend.java.kil;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.indexing.IndexingPair;
 import org.kframework.backend.java.symbolic.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 
@@ -70,6 +72,16 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
      */
     public Term evaluate(TermContext context) {
         return (Term) this.accept(new Evaluator(context));
+    }
+    
+    /**
+     * Returns a new {@code Term} instance obtained from this term by evaluating pending
+     * function and predicate operations.
+     */
+    public Pair<Term, List<UninterpretedConstraint>> evaluate2(TermContext context) {
+        // TODO(YilongL): find out all invoking locations of this method and
+        // revise accordingly to handle the constraint obtained in evaluation
+        return MyEvaluator.evaluate(this, context);
     }
 
     /**

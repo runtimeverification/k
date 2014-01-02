@@ -19,7 +19,7 @@ public class TypeSystemFilter extends BasicTransformer {
 
 	public ASTNode transform(TermCons tc) throws TransformerException {
 		// choose only the allowed subsorts for a TermCons
-		if (tc.getProduction().getItems().get(0) instanceof UserList) {
+		if (!tc.getProduction().getItems().isEmpty() && tc.getProduction().getItems().get(0) instanceof UserList) {
 			UserList ulist = (UserList) tc.getProduction().getItems().get(0);
 			tc.getContents().set(0, (Term) tc.getContents().get(0).accept(new TypeSystemFilter2(ulist.getSort(), context)));
 			tc.getContents().set(1, (Term) tc.getContents().get(1).accept(new TypeSystemFilter2(tc.getProduction().getSort(), context)));

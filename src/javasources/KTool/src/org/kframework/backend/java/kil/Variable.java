@@ -2,8 +2,8 @@ package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
-import org.kframework.backend.java.symbolic.Utils;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
 import java.util.HashMap;
@@ -22,6 +22,14 @@ public class Variable extends Term implements Sorted {
     protected static int counter = 0;
     private static Map<Integer, Variable> deserializationAnonymousVariableMap = new HashMap<>();
 
+    /**
+     * Given a set of {@link Variable}s, returns a substitution that maps each
+     * element inside to a fresh {@code Variable}.
+     * 
+     * @param variableSet
+     *            the set of {@code Variable}s
+     * @return the substitution
+     */
     public static Map<Variable, Variable> getFreshSubstitution(Set<Variable> variableSet) {
         Map<Variable, Variable> substitution = new HashMap<Variable, Variable>();
         for (Variable variable : variableSet) {
@@ -30,6 +38,13 @@ public class Variable extends Term implements Sorted {
         return substitution;
     }
 
+    /**
+     * Returns a fresh {@code Variable} of a given sort.
+     * 
+     * @param sort
+     *            the given sort
+     * @return the fresh variable
+     */
     public static Variable getFreshVariable(String sort) {
         return new Variable(VARIABLE_PREFIX + (counter++), sort, true);
     }

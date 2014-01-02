@@ -1,22 +1,52 @@
 package org.kframework.compile.utils;
 
-import org.kframework.kil.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
+import org.kframework.kil.Attribute;
+import org.kframework.kil.Bag;
+import org.kframework.kil.BoolBuiltin;
+import org.kframework.kil.Cell;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.Collection;
+import org.kframework.kil.Configuration;
+import org.kframework.kil.Definition;
+import org.kframework.kil.GenericToken;
+import org.kframework.kil.Hole;
+import org.kframework.kil.IntBuiltin;
+import org.kframework.kil.KApp;
+import org.kframework.kil.KLabelConstant;
+import org.kframework.kil.KList;
+import org.kframework.kil.KSequence;
+import org.kframework.kil.KSort;
+import org.kframework.kil.KSorts;
+import org.kframework.kil.ListItem;
+import org.kframework.kil.ListTerminator;
 import org.kframework.kil.Map;
+import org.kframework.kil.MapItem;
+import org.kframework.kil.Production;
+import org.kframework.kil.ProductionItem;
+import org.kframework.kil.Rewrite;
+import org.kframework.kil.Rule;
+import org.kframework.kil.SetItem;
+import org.kframework.kil.Sort;
+import org.kframework.kil.StringBuiltin;
+import org.kframework.kil.Syntax;
+import org.kframework.kil.Term;
+import org.kframework.kil.TermCons;
+import org.kframework.kil.Terminal;
+import org.kframework.kil.UserList;
+import org.kframework.kil.Variable;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.Visitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
-
-import java.util.*;
-import java.util.List;
-import java.util.Set;
 
 public class MetaK {
 
@@ -127,11 +157,22 @@ public class MetaK {
 		return KSequence.EMPTY;
 	}
 
+    /**
+     * Checks if the specified sort has been defined in {@link KSort}.
+     * 
+     * @param sort
+     *            the specified sort
+     * @return {@code true} if the specified sort has been defined in
+     *         {@code KSort}; otherwise, false
+     */
 	public static boolean isKSort(String sort) {
 		try {
 			KSort.valueOf(sort);
 		} catch (IllegalArgumentException e) {
-			return sort.equals(KSorts.KLIST);
+            // TODO(YilongL): I think we can return false for sure, since we
+            // have KList defined in KSort
+//			return sort.equals(KSorts.KLIST);
+		    return false;
 		}
 		return true;
 	}
@@ -310,6 +351,15 @@ public class MetaK {
                 || sort.equals(StringBuiltin.SORT_NAME);
     }
 
+    /**
+     * Checks if the specified sort is a computation sort, that is, K, KItem, or
+     * any sort other than those defined in {@link KSort}.
+     * 
+     * @param sort
+     *            the specified sort
+     * @return {@code true} if the specified sort is K, KItem, or any sort other
+     *         than those defined in {@code KSort}; otherwise, {@code false}
+     */
 	public static boolean isComputationSort(String sort) {
 		return sort.equals(KSorts.K) || sort.equals(KSorts.KITEM) || !MetaK.isKSort(sort);
 	}

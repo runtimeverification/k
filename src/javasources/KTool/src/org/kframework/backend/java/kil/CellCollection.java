@@ -2,9 +2,10 @@ package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
-import org.kframework.backend.java.symbolic.Utils;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.loader.Context;
 
 import java.util.Set;
 
@@ -13,38 +14,54 @@ import com.google.common.collect.Multimap;
 
 
 /**
- * Created with IntelliJ IDEA.
- * User: andrei
- * Date: 3/20/13
- * Time: 7:02 PM
- * To change this template use File | Settings | File Templates.
+ * Represents a collection of {@link Cell}s. The ordering of the internal cells
+ * is fixed and agrees with the ordering of the cells used to construct this
+ * cell collection.
+ * 
+ * @author AndreiS
+ * 
  */
+@SuppressWarnings("rawtypes")
 public class CellCollection extends Collection {
 
     private final Multimap<String, Cell> cells;
-    private final boolean isStar;
+    
+    /**
+     * Contains {@code true} if the explicitly specified part of this cell
+     * collection contains one or more types of cells whose multiplicity
+     * attributes are {@code "*"}'s; otherwise, {@code false}.
+     */
+    private final boolean hasStar;
 
-    public CellCollection(Multimap<String, Cell> cells, Variable frame, boolean isStar) {
+    public CellCollection(Multimap<String, Cell> cells, Variable frame, Context context) {
         super(frame, Kind.CELL_COLLECTION);
         this.cells = ArrayListMultimap.create(cells);
-        this.isStar = isStar;
-
-        assert !isStar || cells.keySet().size() <= 1;
-        for (String label : cells.keySet()) {
-            assert isStar || cells.get(label).size() == 1;
+        
+        int numOfStarredCellTypes = 0;
+        for (String cellLabel : cells.keySet()) {
+            if (context.getConfigurationStructureMap().get(cellLabel).multiplicity 
+                    == org.kframework.kil.Cell.Multiplicity.ANY) {
+                numOfStarredCellTypes++;
+            } else {
+                assert cells.get(cellLabel).size() == 1;
+            }
         }
+
+        assert numOfStarredCellTypes <= 1 : 
+            "Multiple types of starred cells in one cell collection not supported at present";
+        hasStar = numOfStarredCellTypes > 0;
     }
 
     public CellCollection(Variable frame) {
-        this(ArrayListMultimap.<String, Cell>create(), frame, false);
+        this(ArrayListMultimap.<String, Cell>create(), frame, null);
     }
 
-    public CellCollection(Multimap<String, Cell> cells, boolean star) {
-        this(cells, null, star);
+    public CellCollection(Multimap<String, Cell> cells, Context context) {
+        this(cells, null, context);
     }
 
     public CellCollection() {
-        this(ArrayListMultimap.<String, Cell>create(), null, false);
+        this(ArrayListMultimap.<String, Cell>create(), null, null);
     }
 
     public java.util.Collection<Cell> cells() {
@@ -63,8 +80,13 @@ public class CellCollection extends Collection {
         return cells.get(label);
     }
 
-    public boolean isStar() {
-        return isStar;
+    /**
+     * Checks if the explicitly specified part of this cell collection contains
+     * one or more types of cells whose multiplicity attributes are {@code "*"}
+     * 's.
+     */
+    public boolean hasStar() {
+        return hasStar;
     }
 
     public Set<String> labelSet() {

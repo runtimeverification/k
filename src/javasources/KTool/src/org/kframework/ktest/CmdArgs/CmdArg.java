@@ -8,7 +8,6 @@ import org.kframework.ktest.IgnoringStringComparator;
 import org.kframework.ktest.KTestStep;
 
 import java.io.File;
-import java.text.NumberFormat;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
@@ -177,8 +176,10 @@ public class CmdArg {
         String results = getDirectoryArg(cmdOpts, Constants.RESULTS_OPTION,
                 FilenameUtils.concat(currentDir, FilenameUtils.getFullPath(targetFile)));
 
-        String[] extensions = cmdOpts.getOptionValue(Constants.EXTENSIONS_OPTION, "").split("\\s+");
-        String[] excludes = cmdOpts.getOptionValue(Constants.EXCLUDE_OPTION, "").split("\\s+");
+        String[] extensions = cmdOpts.getOptionValue(Constants.EXTENSION_OPTION, "").split("\\s+");
+        String[] excludes = new String[0];
+        if (cmdOpts.hasOption(Constants.EXCLUDE_OPTION))
+            excludes = cmdOpts.getOptionValue(Constants.EXCLUDE_OPTION).split("\\s+");
 
         boolean generateReport = cmdOpts.hasOption(Constants.REPORT_OPTION);
 

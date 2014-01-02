@@ -12,8 +12,9 @@ import java.util.Map;
 
 
 /**
- * A uninterpreted token.
- *
+ * Represents an uninterpreted token which consists of the {@code String}
+ * representation of a sort and a value.
+ * 
  * @author AndreiS
  */
 public class UninterpretedToken extends Token {

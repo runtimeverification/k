@@ -28,7 +28,7 @@ import aterm.ATermList;
  * Class for representing a K cell term.  The textual representation of a K cell is the following:
  * <table>
  * <tr><td>Cell </td>
- * <td>::= "<" Label CellAttribute* ">"  CellContents  "</" Label ">"</td></tr>
+ * <td>::= "<" Label CellAttribute* ">"  CellContents  "<" Label ">"</td></tr>
  * <tr><td>Label</td><td>::= Id</td></tr>
  * <tr><td>CellContents</td><td>::= Term</td></tr>
  * <tr><td>CellAttribute</td><td> = "ellipses" "=" ( '"left"' | '"right"' | '"both"' | '"none"')</td></tr>

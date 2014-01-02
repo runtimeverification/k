@@ -6,8 +6,8 @@ import org.kframework.backend.java.symbolic.BuiltinFunction;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
-import org.kframework.backend.java.symbolic.Utils;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
@@ -24,10 +24,21 @@ import java.util.Set;
 
 
 /**
- * A K application.
- *
+ * Represents a K application which applies a {@link KLabel} to a {@link KList}.
+ * Or in the usual syntax of K, it can be defined as the following:
+ * <p>
+ * <blockquote>
+ * 
+ * <pre>
+ * syntax KItem ::= KLabel "(" KList ")"
+ * </pre>
+ * 
+ * </blockquote>
+ * <p>
+ * 
  * @author AndreiS
  */
+@SuppressWarnings("serial")
 public class KItem extends Term implements Sorted {
 
     private final KLabel kLabel;
@@ -172,9 +183,9 @@ public class KItem extends Term implements Sorted {
         KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
 
         /* evaluate a sort membership predicate */
-        if (kLabelConstant.label().startsWith("is") && kList.getItems().size() == 1
-                && kList.getItems().get(0) instanceof Sorted) {
-            return SortMembership.check(this,context.definition().context());
+        if (kLabelConstant.label().startsWith("is") && kList.getContents().size() == 1
+                && kList.getContents().get(0) instanceof Sorted) {
+            return SortMembership.check(this, context.definition().context());
         }
 
         /* apply rules for user defined functions */
@@ -245,7 +256,7 @@ public class KItem extends Term implements Sorted {
         //}
 
         try {
-            Term[] arguments = kList.getItems().toArray(new Term[kList.getItems().size()]);
+            Term[] arguments = kList.getContents().toArray(new Term[kList.getContents().size()]);
             Term result = BuiltinFunction.invoke(context, kLabelConstant, arguments);
             if (result == null) result = this;
             return result;

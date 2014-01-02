@@ -22,7 +22,7 @@ import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
-import org.kframework.backend.java.kil.CollectionVariable;
+import org.kframework.backend.java.kil.ConcreteCollectionVariable;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Hole;
 import org.kframework.backend.java.kil.KItem;
@@ -44,7 +44,6 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.KSorts;
-import org.kframework.backend.symbolic.SymbolicBackend;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.BoolBuiltin;
@@ -74,6 +73,15 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     private boolean freshRules;
     private Definition definition = null;
+    
+    /**
+     * Maps variables representing concrete collections to their sizes. This
+     * field is set at the beginning of
+     * {@link #transform(org.kframework.kil.Rule)} and reset before that method
+     * returns. Moreover, it is only used in
+     * {@link #transform(org.kframework.kil.Variable)} when transforming
+     * {@code Variable}s inside that {@code Rule}.
+     */
     private Map<org.kframework.kil.Variable, Integer> concreteCollectionSize
             = Collections.emptyMap();
 
@@ -244,25 +252,20 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                     continue;
                 }
                 if (term instanceof org.kframework.kil.Cell) {
-                    Cell cell = (Cell) term.accept(this);
+                    Cell<?> cell = (Cell<?>) term.accept(this);
                     cells.put(cell.getLabel(), cell);
-                } else if (variable == null && term instanceof org.kframework.kil.Variable
-                        && term.getSort().equals("Bag")) {
+                } else if (variable == null
+                        && term instanceof org.kframework.kil.Variable
+                        && (term.getSort().equals(org.kframework.kil.KSorts.BAG))) {
                     variable = (Variable) term.accept(this);
                 } else {
                     throw new RuntimeException();
                 }
             }
 
-            boolean isStar = false;
-            for (String cellLabel : cells.keySet()) {
-                isStar = isStar || context.getConfigurationStructureMap().get(cellLabel).multiplicity
-                        == org.kframework.kil.Cell.Multiplicity.ANY;
-            }
-
             return new Cell<CellCollection>(
                     node.getLabel(),
-                    new CellCollection(cells, variable, isStar));
+                    new CellCollection(cells, variable, context));
         } else {
             Term content = (Term) node.getContents().accept(this);
 
@@ -469,7 +472,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(org.kframework.kil.Variable node) throws TransformerException {
-        if (node.getSort().equals("Bag")) {
+        if (node.getSort().equals(org.kframework.kil.KSorts.BAG)) {
             return new Variable(node.getName(), Kind.CELL_COLLECTION.toString());
         }
 
@@ -487,7 +490,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             }
 
             if (concreteCollectionSize.containsKey(node)) {
-                return new CollectionVariable(
+                return new ConcreteCollectionVariable(
                         node.getName(),
                         sort,
                         concreteCollectionSize.get(node));
@@ -517,7 +520,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             if (term instanceof KItem &&
                    (((KItem) term).kLabel().toString().equals(ANDBOOL_KLABEL.getLabel()) || 
                     ((KItem) term).kLabel().toString().equals(BOOL_ANDBOOL_KLABEL.getLabel()))) {
-                for (Term item : ((KItem) term).kList().getItems()) {
+                for (Term item : ((KItem) term).kList().getContents()) {
                     if (item instanceof KItem && ((KItem) item).kLabel().toString().equals("'fresh(_)")) {
                         freshVariables.add((Variable) ((KItem) item).kList().get(0));
                     } else {
@@ -537,7 +540,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             Term term = (Term) node.getEnsures().accept(this);
             // TODO(YilongL): "'_andBool_" or "#andBool"?
             if (term instanceof KItem && ((KItem) term).kLabel().toString().equals("'_andBool_")) {
-                for (Term item : ((KItem) term).kList().getItems()) {
+                for (Term item : ((KItem) term).kList().getContents()) {
                     ensures.add(item);
                 }
             } else {
@@ -617,8 +620,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         Module singletonModule = node.getSingletonModule();
 
         for (org.kframework.kil.Rule rule : singletonModule.getRules()) {
-            if (!rule.containsAttribute(SymbolicBackend.SYMBOLIC)
-                || rule.containsAttribute(Attribute.PREDICATE.getKey())
+            if (rule.containsAttribute(Attribute.PREDICATE.getKey())
                 || rule.containsAttribute(Attribute.ANYWHERE.getKey())) {
                 continue;
             }

@@ -10,19 +10,20 @@ import com.google.common.collect.ImmutableSet;
 
 
 /**
- * A data structure sort. Each data structure sort is hooked to one of the following builtin
- * data structures: Bag, List, Map or Set (an element of {@code TYPES}).
- * Each data structure sort must provide the following primitive operations:
+ * Represents a sort which corresponds to some data structure. Each data
+ * structure sort is hooked to one of the following builtin data structures:
+ * Bag, List, Map or Set (an element of {@link DataStructureSort#TYPES}). Each
+ * data structure sort must provide the following primitive operations:
  * <p>
- * (1) constructor: takes two data structures and constructs the union (bag, map, set) or the
- *     concatenation (list);
- * (2) element: takes one K term (bag, list, set) or two K terms (map) and constructs an element
- *     (bag, list, set) or an entry (map);
- * (3) unit: constructs the empty data structure.
+ * (1) constructor: takes two data structures and constructs the union (bag,
+ * map, set) or the concatenation (list);<br>
+ * (2) element: takes one K term (bag, list, set) or two K terms (map) and
+ * constructs an element (bag, list, set) or an entry (map);<br>
+ * (3) unit: constructs the empty data structure.<br>
  * </p>
- * Additionally, a data structure sort may provide other hooked operations. Each backend must
- * implement these builtin data structures types.
- *
+ * Additionally, a data structure sort may provide other hooked operations. Each
+ * backend must implement these builtin data structures types.
+ * 
  * @author AndreiS
  */
 public class DataStructureSort implements Serializable {

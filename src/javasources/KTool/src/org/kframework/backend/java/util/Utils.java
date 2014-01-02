@@ -1,7 +1,4 @@
-package org.kframework.backend.java.symbolic;
-
-import java.util.Collections;
-import java.util.ListIterator;
+package org.kframework.backend.java.util;
 
 
 /**

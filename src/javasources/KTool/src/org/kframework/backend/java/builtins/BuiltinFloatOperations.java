@@ -8,7 +8,6 @@ import org.kframework.backend.java.util.GappaServer;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.K;
 
-import java.util.Collections;
 /**
  * Table of {@code public static} methods on builtin floats.
  *

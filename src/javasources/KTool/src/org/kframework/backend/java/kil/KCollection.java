@@ -4,8 +4,8 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 
 import org.kframework.backend.java.symbolic.Transformer;
-import org.kframework.backend.java.symbolic.Utils;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
 import java.util.ArrayList;
@@ -14,18 +14,28 @@ import java.util.List;
 
 
 /**
+ * Represents either a {@link KList}, a {@link KSequence}, or a
+ * {@link KCollectionFragment}.
+ * 
  * @author AndreiS
  */
+@SuppressWarnings("serial")
 public abstract class KCollection extends Collection implements Iterable<Term> {
 
-    protected final ImmutableList<Term> items;
+    /**
+     * A list of {@code Term}s contained in this {@code KCollection}.
+     * <p>
+     * This field shadows {@link Collection#contents} to ensure that the
+     * contents of {@code KCollection} are immutable.
+     */
+    protected final ImmutableList<Term> contents;
 
     protected KCollection(ImmutableList<Term> items, Variable frame, Kind kind) {
         super(frame, kind);
 
         List<Term> normalizedItems = new ArrayList<Term>();
         for (Term term : items) {
-            if (term.kind() == kind) {
+            if (!(term instanceof Variable) && (term.kind() == kind)) {
                 assert term instanceof KCollection :
                         "associative use of KCollection(" + items + ", " + frame + ")";
 
@@ -33,12 +43,12 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
 
                 assert !kCollection.hasFrame() : "associative use of KCollection";
 
-                normalizedItems.addAll(kCollection.getItems());
+                normalizedItems.addAll(kCollection.getContents());
             } else {
                 normalizedItems.add(term);
             }
         }
-        this.items = ImmutableList.copyOf(normalizedItems);
+        this.contents = ImmutableList.copyOf(normalizedItems);
     }
 
     /*
@@ -52,47 +62,78 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
 
     protected KCollection(Variable frame, Kind kind) {
         super(frame, kind);
-        this.items = ImmutableList.of();
+        this.contents = ImmutableList.of();
     }
 
-    public abstract KCollection fragment(int length);
+    /**
+     * Returns a view of the fragment of this {@code KCollection} that starts
+     * from the specified {@code fromIndex}.
+     * 
+     * @param fromIndex
+     *            the start index of the fragment
+     * @return a view of the specified fragment
+     */
+    public abstract KCollection fragment(int fromIndex);
 
     public Term get(int index) {
-        return items.get(index);
+        return contents.get(index);
     }
 
-    public abstract String getOperatorName();
+    public abstract String getSeparatorName();
     public abstract String getIdentityName();
 
-    public ImmutableList<Term> getItems() {
-        return items;
+    @Override
+    public ImmutableList<Term> getContents() {
+        return contents;
     }
 
     @Override
     public Iterator<Term> iterator() {
-        return items.iterator();
+        return contents.iterator();
     }
 
+    /**
+     * Returns the size of the contents of this {@code KCollection}.
+     * 
+     * @see {@link KCollection#contents}
+     * @return the size of the contents
+     */
     public int size() {
-        return items.size();
+        return contents.size();
     }
 
     @Override
     public int hashCode() {
         int hash = 1;
         hash = hash * Utils.HASH_PRIME + (super.frame == null ? 0 : super.frame.hashCode());
-        hash = hash * Utils.HASH_PRIME + items.hashCode();
+        hash = hash * Utils.HASH_PRIME + this.contents.hashCode();
         return hash;
+    }
+    
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        
+        if (!(object instanceof KCollection)) {
+            return false;
+        }
+        
+        KCollection kCollection = (KCollection) object;
+        return (frame == null ? kCollection.frame == null : frame
+                .equals(kCollection.frame))
+                && contents.equals(kCollection.contents);
     }
 
     @Override
     public String toString() {
-        Joiner joiner = Joiner.on(getOperatorName());
+        Joiner joiner = Joiner.on(getSeparatorName());
         StringBuilder stringBuilder = new StringBuilder();
-        joiner.appendTo(stringBuilder, items);
+        joiner.appendTo(stringBuilder, contents);
         if (super.frame != null) {
             if (stringBuilder.length() != 0) {
-                stringBuilder.append(getOperatorName());
+                stringBuilder.append(getSeparatorName());
             }
             stringBuilder.append(super.frame);
         }
@@ -112,6 +153,22 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
         return transformer.transform(this);
     }
 
+    /**
+     * Promotes a given {@link Term} to a given {@link Kind}. The {@code Kind}s
+     * involved in this method can only be {@code Kind#KITEM}, {@code Kind#K},
+     * or {@code Kind#KLIST}. If the kind of the given {@code Term} is already
+     * above or equal to the target {@code Kind}, do nothing.
+     * <p>
+     * To be more specific, a {@code KItem} can be promoted to a single-element
+     * {@code KSequence} and, similarly, a {@code KSequence} can be promoted to
+     * a single-element {@code KList}.
+     * 
+     * @param term
+     *            the given term to be promoted
+     * @param kind
+     *            the target kind that the term is to be promoted to
+     * @return the resulting term after kind promotion
+     */
     public static Term upKind(Term term, Kind kind) {
         assert term.kind() == Kind.KITEM || term.kind() == Kind.K || term.kind() == Kind.KLIST;
         assert kind == Kind.KITEM || kind == Kind.K || kind == Kind.KLIST;
@@ -128,6 +185,22 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
         return term;
     }
 
+    /**
+     * Degrades a given {@link Term} to a given {@link Kind}. The {@code Kind}s
+     * involved in this method can only be {@code Kind#KITEM}, {@code Kind#K},
+     * or {@code Kind#KLIST}. If the kind of the given {@code Term} is already
+     * lower than or equal to the target {@code Kind}, do nothing.
+     * <p>
+     * To be more specific, a single-element {@code KList} can be degraded to a
+     * {@code KSequence} and, similarly, a single-element {@code KSequence} can
+     * be degraded to a {@code KItem}.
+     * 
+     * @param term
+     *            the given term to be degraded
+     * @param kind
+     *            the target kind that the term is to be degraded to
+     * @return the resulting term after kind degradation
+     */
     public static Term downKind(Term term) {
         assert term.kind() == Kind.KITEM || term.kind() == Kind.K || term.kind() == Kind.KLIST;
 

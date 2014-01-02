@@ -9,7 +9,7 @@ import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Sorted;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.java.symbolic.Utils;
+import org.kframework.backend.java.util.Utils;
 
 import java.io.Serializable;
 
@@ -32,7 +32,7 @@ public class IndexingPair implements Serializable {
                 KItem frozenKItem = (KItem) freezer.term();
                 return new FreezerIndex(
                         (KLabelConstant) frozenKItem.kLabel(),
-                        frozenKItem.kList().getItems().indexOf(Hole.HOLE));
+                        frozenKItem.kList().getContents().indexOf(Hole.HOLE));
             }
         } else if (term instanceof Sorted) {
             Sorted sorted = (Sorted) term;

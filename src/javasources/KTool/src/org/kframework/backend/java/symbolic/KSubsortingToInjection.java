@@ -7,11 +7,10 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
 
 
 /**
- * Created with IntelliJ IDEA.
- * User: andrei
- * Date: 4/27/13
- * Time: 7:39 PM
- * To change this template use File | Settings | File Templates.
+ * TODO(YilongL): add documentation or remove this class
+ * 
+ * @author AndreiS
+ * 
  */
 public class KSubsortingToInjection extends CopyOnWriteTransformer {
 
@@ -28,6 +27,5 @@ public class KSubsortingToInjection extends CopyOnWriteTransformer {
     public KList transform(KList kList) {
         return kList;
     }
-
 
 }

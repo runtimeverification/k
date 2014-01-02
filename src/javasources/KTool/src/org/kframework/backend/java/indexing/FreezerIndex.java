@@ -1,7 +1,7 @@
 package org.kframework.backend.java.indexing;
 
 import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.symbolic.Utils;
+import org.kframework.backend.java.util.Utils;
 
 
 /**

@@ -20,8 +20,8 @@ public class MapBuiltin extends DataStructureBuiltin {
 
     private final Map<Term, Term> elements;
 
-    public MapBuiltin(DataStructureSort sort, Map<Term, Term> elements, Collection<Term> terms) {
-        super(sort, terms);
+    public MapBuiltin(DataStructureSort sort, Collection<Term> baseTerms, Map<Term, Term> elements) {
+        super(sort, baseTerms);
         this.elements = elements;
     }
 

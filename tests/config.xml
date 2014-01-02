@@ -530,13 +530,13 @@
 
 <!-- begin Java Rewrite Engine tests -->
 
-<!-- Commented out by Grigore; please fix it.
+  <!-- TODO(YilongL): fix failing tests in tests/threads -->
   <test
       definition="samples/java_rewrite_engine/simple/untyped/simple-untyped.k"
-      programs="tutorial/2_languages/1_simple/1_untyped/programs_and_results"
+      programs="tutorial/2_languages/1_simple/1_untyped/tests/"
       extension="simple"
-      exclude="dekker.simple exceptions_07.simple matrix.simple"
-      results="tutorial/2_languages/1_simple/1_untyped/programs_and_results"
+      exclude="dekker.simple exceptions_07.simple matrix.simple threads_04.simple threads_07.simple threads_08.simple threads_10.simple threads_11.simple"
+      results="tutorial/2_languages/1_simple/1_untyped/tests/"
       >
     <kompile-option name="-backend" value="java" />
     <all-programs>
@@ -545,7 +545,7 @@
       <krun-option name="-output" value="none" />
     </all-programs>
   </test>
--->
+
 
 <!--
 

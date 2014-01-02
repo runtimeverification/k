@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import org.kframework.backend.java.kil.JavaSymbolicObject;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
 import java.io.Serializable;
@@ -85,6 +86,12 @@ public class UninterpretedConstraint extends JavaSymbolicObject {
 
     public void add(Term leftHandSide, Term rightHandSide) {
         equalities.add(new Equality(leftHandSide, rightHandSide));
+    }
+
+    public void addAll(UninterpretedConstraint constraint) {
+        for (Equality eq : constraint.equalities) {
+            equalities.add(eq);
+        }
     }
 
     /**

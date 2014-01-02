@@ -12,6 +12,7 @@ import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.util.GappaPrinter;
 import org.kframework.backend.java.util.GappaServer;
 import org.kframework.backend.java.util.KSorts;
+import org.kframework.backend.java.util.Utils;
 import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.kil.ASTNode;
 
@@ -151,10 +152,13 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             this.rightHandSide = rightHandSide;
         }
 
-        public Equality evaluate() {
+        /**
+         * Evaluates pending functions and predicate operations in this
+         * equality.
+         */
+        public void evaluate() {
             leftHandSide = leftHandSide.evaluate(context);
             rightHandSide = rightHandSide.evaluate(context);
-            return this;
         }
 
         public Term leftHandSide() {
@@ -255,14 +259,13 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             return !isTrue() && !isFalse();
         }
 
-        private Equality substitute(Map<Variable, ? extends Term> substitution) {
+        private void substitute(Map<Variable, ? extends Term> substitution) {
             leftHandSide = leftHandSide.substituteWithBinders(substitution, context);
             rightHandSide = rightHandSide.substituteWithBinders(substitution, context);
-            return this;
         }
 
-        private Equality substitute(Variable variable, Term term) {
-            return substitute(Collections.singletonMap(variable, term));
+        private void substitute(Variable variable, Term term) {
+            substitute(Collections.singletonMap(variable, term));
         }
 
         @Override
@@ -311,7 +314,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     /**
      * Specifies if this symbolic constraint is in normal form.
      * <p>
-     * <br>
      * A symbolic constraint is normal iff:
      * <li>no variable from the keys of {@code substitution} occurs in
      * {@code equalities};
@@ -323,7 +325,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     /**
      * Stores special equalities whose left-hand sides are just variables.
      * <p>
-     * <br>
      * Invariant: {@code Variable}s on the left-hand sides do not occur in the
      * {@code Term}s on the right-hand sides.
      */
@@ -331,6 +332,11 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     private TruthValue truthValue;
     private final TermContext context;
     private final Definition definition;
+    
+    /**
+     * The symbolic unifier associated with this constraint. There is an
+     * one-to-one relationship between unifiers and constraints.
+     */
     private final SymbolicUnifier unifier;
 
     public SymbolicConstraint(SymbolicConstraint constraint, TermContext context) {

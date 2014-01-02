@@ -102,11 +102,11 @@ public class CopyOnWriteTransformer implements Transformer {
         }
 
         if (cellCollection.hasFrame()) {
-            boolean isStar = cellCollection.isStar();
+            boolean hasStar = cellCollection.hasStar();
             Variable frame;
             Term transformedFrame = (Term) cellCollection.frame().accept(this);
             if (transformedFrame instanceof CellCollection) {
-                isStar = isStar || ((CellCollection) transformedFrame).isStar();
+                hasStar = hasStar || ((CellCollection) transformedFrame).hasStar();
                 if (cells == cellCollection.cellMap()) {
                     cells = ArrayListMultimap.create(cellCollection.cellMap());
                 }
@@ -118,11 +118,11 @@ public class CopyOnWriteTransformer implements Transformer {
             }
 
             if (cells != cellCollection.cellMap() || frame != cellCollection.frame()) {
-                cellCollection = new CellCollection(cells, frame, isStar);
+                cellCollection = new CellCollection(cells, frame, definition.context());
             }
         } else {
             if (cells != cellCollection.cellMap()) {
-                cellCollection = new CellCollection(cells, cellCollection.isStar());
+                cellCollection = new CellCollection(cells, definition.context());
             }
         }
 
@@ -229,15 +229,15 @@ public class CopyOnWriteTransformer implements Transformer {
 
     @Override
     public ASTNode transform(KList kList) {
-        List<Term> items = transformList(kList.getItems());
+        List<Term> items = transformList(kList.getContents());
 
         if (kList.hasFrame()) {
             Variable frame = (Variable) kList.frame().accept(this);
-            if (items != kList.getItems() || frame != kList.frame()) {
+            if (items != kList.getContents() || frame != kList.frame()) {
                 kList = new KList(ImmutableList.<Term>copyOf(items), frame);
             }
         } else {
-            if (items != kList.getItems()) {
+            if (items != kList.getContents()) {
                 kList = new KList(ImmutableList.<Term>copyOf(items));
             }
         }
@@ -247,7 +247,7 @@ public class CopyOnWriteTransformer implements Transformer {
 
     @Override
     public ASTNode transform(KSequence kSequence) {
-        List<Term> items = transformList(kSequence.getItems());
+        List<Term> items = transformList(kSequence.getContents());
 
         if (kSequence.hasFrame()) {
             Variable frame;
@@ -255,14 +255,14 @@ public class CopyOnWriteTransformer implements Transformer {
 
             if (transformedFrame.kind() == Kind.K) {
                 if (transformedFrame instanceof KSequence) {
-                    if (items == kSequence.getItems()) {
+                    if (items == kSequence.getContents()) {
                         items = new ArrayList<Term>(items);
                     }
-                    items.addAll(((KSequence) transformedFrame).getItems());
+                    items.addAll(((KSequence) transformedFrame).getContents());
                     frame = ((KSequence) transformedFrame).hasFrame() ?
                             ((KSequence) transformedFrame).frame() : null;
                 } else if (transformedFrame instanceof KCollectionFragment) {
-                    if (items == kSequence.getItems()) {
+                    if (items == kSequence.getContents()) {
                         items = new ArrayList<Term>(items);
                     }
                     Iterables.addAll(items, (KCollectionFragment) transformedFrame);
@@ -274,18 +274,18 @@ public class CopyOnWriteTransformer implements Transformer {
             } else {
                 assert transformedFrame.kind() == Kind.KITEM;
 
-                if (items == kSequence.getItems()) {
+                if (items == kSequence.getContents()) {
                     items = new ArrayList<Term>(items);
                 }
                 items.add(transformedFrame);
                 frame = null;
             }
 
-            if (items != kSequence.getItems() || frame != kSequence.frame()) {
+            if (items != kSequence.getContents() || frame != kSequence.frame()) {
                 kSequence = new KSequence(ImmutableList.<Term>copyOf(items), frame);
             }
         } else {
-            if (items != kSequence.getItems()) {
+            if (items != kSequence.getContents()) {
                 kSequence = new KSequence(ImmutableList.<Term>copyOf(items));
             }
         }

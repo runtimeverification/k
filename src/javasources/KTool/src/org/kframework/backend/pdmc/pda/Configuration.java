@@ -1,7 +1,8 @@
 package org.kframework.backend.pdmc.pda;
 
 import com.google.common.base.Joiner;
-import org.kframework.backend.java.symbolic.Utils;
+
+import org.kframework.backend.java.util.Utils;
 
 import java.util.Collections;
 import java.util.Iterator;

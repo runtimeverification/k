@@ -12,7 +12,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/** A bag. Contents should be a Cell or BagItem node, or term of sort Bag or BagItem */
+/**
+ * A bag. Contents should be a Cell or BagItem node, or term of sort Bag or
+ * BagItem.
+ */
 public class Bag extends Collection {
 
 	public static final Bag EMPTY = new Bag(Collections.<Term> emptyList());

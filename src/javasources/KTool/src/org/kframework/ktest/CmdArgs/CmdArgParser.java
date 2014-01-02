@@ -29,7 +29,7 @@ public class CmdArgParser {
                 .withArgName("dir").withDescription("Programs directory in single job mode, " +
                         "or a root directory for programs in batch mode. By default this is the " +
                         "directory where <file> reside.").create());
-        addOption(OptionBuilder.withLongOpt(Constants.EXTENSIONS_OPTION).hasArg()
+        addOption(OptionBuilder.withLongOpt(Constants.EXTENSION_OPTION).hasArg()
                 .withArgName("string").withDescription("The list of program extensions separated " +
                         "by whitespaces. Required in single job mode, invalid in batch mode.")
                 .create());

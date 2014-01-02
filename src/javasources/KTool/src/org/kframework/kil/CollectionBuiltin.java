@@ -20,19 +20,19 @@ public class CollectionBuiltin extends DataStructureBuiltin {
 
     public CollectionBuiltin(
             DataStructureSort sort,
-            Collection<Term> elements,
-            Collection<Term> terms) {
-        super(sort, terms);
+            Collection<Term> baseTerms,
+            Collection<Term> elements) {
+        super(sort, baseTerms);
         this.elements = elements;
     }
 
     public static CollectionBuiltin of(DataStructureSort sort,
-                                       Collection<Term> elements,
-                                       Collection<Term> terms) {
+                                       Collection<Term> baseTerms,
+                                       Collection<Term> elements) {
         if (sort.type().equals(KSorts.LIST)) {
-            return new CollectionBuiltin(sort, elements, terms);
+            return new CollectionBuiltin(sort, baseTerms, elements);
         }
-        return new SetBuiltin(sort, elements, terms);
+        return new SetBuiltin(sort, baseTerms, elements);
     }
 
     public Collection<Term> elements() {
@@ -46,7 +46,7 @@ public class CollectionBuiltin extends DataStructureBuiltin {
 
     @Override
     public Term shallowCopy() {
-        throw new UnsupportedOperationException();  //To change body of implemented methods use File | Settings | File Templates.
+        return new CollectionBuiltin(dataStructureSort, baseTerms, elements);
     }
 
     @Override

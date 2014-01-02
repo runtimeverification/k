@@ -6,48 +6,51 @@ import com.google.common.collect.ImmutableList;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
 import java.util.Iterator;
 
 
 /**
- * Created with IntelliJ IDEA.
- * User: andrei
- * Date: 3/26/13
- * Time: 10:22 AM
- * To change this template use File | Settings | File Templates.
+ * Represents a fragment of a {@link KCollection}.
+ * 
+ * @author AndreiS
  */
+@SuppressWarnings("serial")
 public class KCollectionFragment extends KCollection {
 
-    private final int index;
+    private final int startIndex;
     private final KCollection kCollection;
 
-    public KCollectionFragment(KCollection kCollection, int index) {
-        super(kCollection.getItems(),
+    public KCollectionFragment(KCollection kCollection, int startIndex) {
+        super(kCollection.getContents(),
               kCollection.hasFrame() ? kCollection.frame() : null,
               kCollection.kind());
 
-        assert 0 <= index && index <= kCollection.size();
+        assert 0 <= startIndex && startIndex <= kCollection.size();
 
         this.kCollection = kCollection;
-        this.index = index;
+        this.startIndex = startIndex;
     }
 
+    /**
+     * Not supported in this class.
+     */
     @Override
-    public KCollection fragment(int length) {
-        throw new UnsupportedOperationException();  //To change body of implemented methods use File | Settings | File Templates.
+    public KCollection fragment(int fromIndex) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Term get(int index) {
-        assert index >= this.index;
+        assert index >= this.startIndex;
 
-        return items.get(index);
+        return contents.get(index);
     }
 
-    public int getIndex() {
-        return index;
+    public int getStartIndex() {
+        return startIndex;
     }
 
     public KCollection getKCollection() {
@@ -55,8 +58,8 @@ public class KCollectionFragment extends KCollection {
     }
 
     @Override
-    public String getOperatorName() {
-        return kCollection.getOperatorName();
+    public String getSeparatorName() {
+        return kCollection.getSeparatorName();
     }
 
     @Override
@@ -65,28 +68,50 @@ public class KCollectionFragment extends KCollection {
     }
 
     @Override
-    public ImmutableList<Term> getItems() {
+    public ImmutableList<Term> getContents() {
         throw  new UnsupportedOperationException();
     }
 
     @Override
     public Iterator<Term> iterator() {
-        return items.listIterator(index);
+        return contents.listIterator(startIndex);
     }
 
     @Override
     public int size() {
-        return items.size() - index;
+        return contents.size() - startIndex;
     }
-
+    
+    @Override
+    public int hashCode() {
+        int hash = super.hashCode();
+        hash = hash * Utils.HASH_PRIME + this.startIndex;
+        return hash;
+    }
+    
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        
+        if (!(object instanceof KCollectionFragment)) {
+            return false;
+        }
+        
+        KCollectionFragment kCollectionFragment = (KCollectionFragment) object;
+        return startIndex == kCollectionFragment.startIndex
+                && this.kCollection.equals(kCollectionFragment.kCollection);
+    }
+        
     @Override
     public String toString() {
-        Joiner joiner = Joiner.on(getOperatorName());
+        Joiner joiner = Joiner.on(getSeparatorName());
         StringBuilder stringBuilder = new StringBuilder();
-        joiner.appendTo(stringBuilder, items.subList(index, items.size()));
+        joiner.appendTo(stringBuilder, contents.subList(startIndex, contents.size()));
         if (super.hasFrame()) {
             if (stringBuilder.length() != 0) {
-                stringBuilder.append(getOperatorName());
+                stringBuilder.append(getSeparatorName());
             }
             stringBuilder.append(super.frame());
         }

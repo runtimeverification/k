@@ -9,11 +9,24 @@ import org.kframework.kil.ASTNode;
 
 
 /**
+ * Represents a list of KItem, or {@link KItem} in the Java backend. Or in the
+ * usual syntax of K, it can be defined as the following:
+ * <p>
+ * <blockquote>
+ * 
+ * <pre>
+ * syntax K ::= List{KItem}{"~>"}
+ * </pre>
+ * 
+ * </blockquote>
+ * <p>
+ * 
  * @author AndreiS
  */
+@SuppressWarnings("serial")
 public class KSequence extends KCollection {
 
-    private static final String OPERATOR_NAME = " ~> ";
+    private static final String SEPARATOR_NAME = " ~> ";
     private static final String IDENTITY_NAME = "." + Kind.K;
 
     public KSequence(ImmutableList<Term> items, Variable frame) {
@@ -45,13 +58,13 @@ public class KSequence extends KCollection {
     }
 
     @Override
-    public KCollection fragment(int length) {
-        return new KSequence(items.subList(length, items.size()), frame);
+    public KCollection fragment(int fromIndex) {
+        return new KSequence(contents.subList(fromIndex, contents.size()), frame);
     }
 
     @Override
-    public String getOperatorName() {
-        return KSequence.OPERATOR_NAME;
+    public String getSeparatorName() {
+        return KSequence.SEPARATOR_NAME;
     }
 
     @Override
@@ -71,7 +84,7 @@ public class KSequence extends KCollection {
 
         KSequence kSequence = (KSequence) object;
         return super.frame == null ? kSequence.frame == null : frame.equals(kSequence.frame)
-                && super.items.equals(kSequence.items);
+                && super.contents.equals(kSequence.contents);
     }
 
     @Override

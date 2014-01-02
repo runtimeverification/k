@@ -2,16 +2,24 @@ package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
-import org.kframework.backend.java.symbolic.Utils;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
 
 /**
- *
- *
+ * Represents a K cell term in the Java backend. Since cells can be nested, the
+ * content of a cell is either a collection of cells (i.e., a
+ * {@link CellCollection}) or a non-cell K term.
+ * <p>
+ * In contrast to its generic KIL counterpart, the multiplicity information is
+ * stored in the {@code CellCollection} that contains this cell.
+ * 
+ * @see org.kframework.kil.Cell
+ * 
  * @author AndreiS
  */
+@SuppressWarnings("serial")
 public class Cell<T extends Term> extends Term {
 
     private final String label;
@@ -60,7 +68,7 @@ public class Cell<T extends Term> extends Term {
             return false;
         }
 
-        Cell cell = (Cell) object;
+        Cell<?> cell = (Cell<?>) object;
         return label.equals(cell.label) && content.equals(cell.content);
     }
 
