@@ -530,13 +530,12 @@
 
 <!-- begin Java Rewrite Engine tests -->
 
-  <!-- TODO(YilongL): fix failing tests in tests/threads -->
   <!-- note: threads_05.simple always runs into infinite loop in Java backend -->
   <test
       definition="samples/java_rewrite_engine/simple/untyped/simple-untyped.k"
       programs="tutorial/2_languages/1_simple/1_untyped/tests/"
       extension="simple"
-      exclude="dekker.simple exceptions_07.simple matrix.simple threads_05.simple"
+      exclude="dekker.simple threads_05.simple"
       results="tutorial/2_languages/1_simple/1_untyped/tests/"
       >
     <kompile-option name="-backend" value="java" />
