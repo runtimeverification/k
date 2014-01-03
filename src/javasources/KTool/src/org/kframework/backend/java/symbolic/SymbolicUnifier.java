@@ -55,7 +55,7 @@ public class SymbolicUnifier extends AbstractUnifier {
      * unifier and then becomes the overall {@code SymbolicConstraint} after the
      * unification is done.
      */
-    private final SymbolicConstraint fConstraint;
+    private SymbolicConstraint fConstraint;
     
     /**
      * TODO(YilongL)
@@ -337,12 +337,18 @@ public class SymbolicUnifier extends AbstractUnifier {
             Cell<?>[] otherCells = otherCellCollection.get(label).toArray(new Cell[1]);
             Variable otherFrame = otherCellCollection.hasFrame() ? otherCellCollection.frame() : null;
 
+            // TODO(YilongL): maybe extract the code below that performs searching to a single method
+            // temporarily store the current constraint at a safe place before
+            // starting to search for multiple unifiers
+            SymbolicConstraint mainConstraint = fConstraint;
             isStarNested = true;
 
             java.util.Collection<SymbolicConstraint> constraints = new ArrayList<SymbolicConstraint>();
             SelectionGenerator generator = new SelectionGenerator(otherCells.length, cells.length);
+            // start searching for all possible unifiers
             do {
-                SymbolicConstraint constraint = new SymbolicConstraint(termContext);
+                // clear the constraint before each attempt of unification
+                fConstraint = new SymbolicConstraint(termContext);
 
                 try {
                     for (int i = 0; i < otherCells.length; ++i) {
@@ -361,13 +367,15 @@ public class SymbolicUnifier extends AbstractUnifier {
                 cm.putAll(cellMap);
 
                 if (otherFrame != null) {
-                    constraint.add(new CellCollection(cm, context), otherFrame);
+                    fConstraint.add(new CellCollection(cm, context), otherFrame);
                 } else {
                     if (!cm.isEmpty()) fail();
                 }
-                constraints.add(constraint);
+                constraints.add(fConstraint);
             } while (generator.generate());
 
+            // restore the current constraint after searching
+            fConstraint = mainConstraint;
             isStarNested = false;
 
             if (constraints.isEmpty()) {
