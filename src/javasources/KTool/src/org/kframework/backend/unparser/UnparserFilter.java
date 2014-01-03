@@ -519,7 +519,7 @@ public class UnparserFilter extends BasicVisitor {
 
 	@Override
 	public void visit(Hole hole) {
-
+        prepare(hole);
 		indenter.write("HOLE");
 		postpare();
 	}
