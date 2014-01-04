@@ -955,17 +955,6 @@ public class Main {
                 }
             }
 
-            if (cmd.hasOption("parens")) {
-                String v = cmd.getOptionValue("parens");
-                if (v.equals("greedy")) {
-                    K.parens = true;
-                } else if (v.equals("smart")) {
-                    K.parens = false;
-                } else {
-                    org.kframework.utils.Error.report("Unrecognized option: --parens " + v + "\nUsage: krun --parens [greedy|smart]");
-                }
-            }
-
             //testcase generation
             if (cmd.hasOption("generate-tests")) {
                 K.do_testgen = true;
