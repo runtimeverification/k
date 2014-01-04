@@ -27,6 +27,7 @@ import org.kframework.backend.java.indexing.KLabelIndex;
 import org.kframework.backend.java.indexing.TokenIndex;
 import org.kframework.backend.java.indexing.TopIndex;
 import org.kframework.backend.java.kil.Cell;
+import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KLabelConstant;
@@ -135,9 +136,7 @@ public class SymbolicRewriter {
                     if (index.isUnifiable(rule.indexingPair().second)) {
                         coolingSetBuilder.add(rule);
                     }
-                } else if(rule.containsAttribute("alpha")){
-                	AnsiConsole.out
-                    .println("here");
+                } else if(rule.containsAttribute("alphaRule")){
                 	if(index.isUnifiable(rule.indexingPair().first)) {
                 		simulationSetBuilder.add(rule);
                 	}
@@ -230,7 +229,7 @@ public class SymbolicRewriter {
         Set<Rule> rules = new HashSet<Rule>();
         for (IndexingPair pair : term.getIndexingPairs()) {
             if (simulationRuleTable.get(pair.first) != null) {
-                rules.addAll(ruleTable.get(pair.first));
+                rules.addAll(simulationRuleTable.get(pair.first));
             }
         }
         return rules;
@@ -269,10 +268,8 @@ public class SymbolicRewriter {
      * author : Liyi Li
      * computer steps by rules of simulation
      */
-
-    public ConstrainedTerm computeSimulationStep(ConstrainedTerm constrainedTerm) {
-    	ArrayList<ConstrainedTerm> stepResults = new ArrayList<ConstrainedTerm>();
-
+    @SuppressWarnings("unchecked")
+	public ConstrainedTerm computeSimulationStep(ConstrainedTerm constrainedTerm) {
         // Applying a strategy to a set of rules divides the rules up into
         // equivalence classes of rules. We iterate through these equivalence
         // classes one at a time, seeing which one contains rules we can apply.
@@ -280,7 +277,8 @@ public class SymbolicRewriter {
         strategy.reset(getSimulationRules(constrainedTerm.term()));
         while (strategy.hasNext()) {
             transition = strategy.nextIsTransition();
-            Collection<Rule> rules = strategy.next();
+            List<Rule> rules = ((List<Rule>)strategy.next());
+            
             for (Rule rule : rules) {
                 ruleStopwatch.reset();
                 ruleStopwatch.start();
@@ -288,64 +286,47 @@ public class SymbolicRewriter {
                 SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(
                         constrainedTerm.termContext());
                 leftHandSideConstraint.addAll(rule.requires());
-                for (Variable variable : rule.freshVariables()) {
-                    leftHandSideConstraint.add(variable, IntToken.fresh());
-                }
+                            
+                CellCollection newTemp = new CellCollection();
+                
+                newTemp.cellMap().put(((Cell<Term>)rule.leftHandSide()).getLabel(), (Cell<Term>)rule.leftHandSide());
+                
+                Cell<Term> newRuleTerm = new Cell<Term>("generatedTop",newTemp);
 
-                ConstrainedTerm leftHandSide = new ConstrainedTerm(
-                        rule.leftHandSide(),
+                ConstrainedTerm leftHandSideTerm = new ConstrainedTerm(
+                		newRuleTerm,
                         rule.lookups().getSymbolicConstraint(constrainedTerm.termContext()),
                         leftHandSideConstraint,
                         constrainedTerm.termContext());
 
-                for (SymbolicConstraint constraint1 : constrainedTerm.unify(leftHandSide)) {
-                    constraint1.orientSubstitution(rule.variableSet(), constrainedTerm.termContext());
-                    constraint1.addAll(rule.ensures());
-                    /* rename rule variables in the constraints */
-                    Map<Variable, Variable> freshSubstitution = constraint1.rename(rule.variableSet());
-
-                    Term result = rule.rightHandSide();
-                    /* rename rule variables in the rule RHS */
-                    result = result.substituteWithBinders(freshSubstitution, constrainedTerm.termContext());
-                    /* apply the constraints substitution on the rule RHS */
-                    result = result.substituteAndEvaluate(constraint1.substitution(),
-                            constrainedTerm.termContext());
-                    /* evaluate pending functions in the rule RHS */
-                    //                    result = result.evaluate(constrainedTerm.termContext());
-                    /* eliminate anonymous variables */
-                    constraint1.eliminateAnonymousVariables();
-
-                    /*
-                    System.err.println("rule \n\t" + rule);
-                    System.err.println("result term\n\t" + result);
-                    System.err.println("result constraint\n\t" + constraint1);
-                    System.err.println("============================================================");
-                     */
-
-                    /* compute all results */
-                    stepResults.add(new ConstrainedTerm(result, constraint1,
-                            constrainedTerm.termContext()));
-
-                    if (stepResults.size() == 1) {
-                        return stepResults.get(0);
-                    }
+                SymbolicConstraint constraint = constrainedTerm.matchImplies(leftHandSideTerm);
+                if (constraint == null) {
+                    continue;
                 }
+                constraint.addAll(rule.ensures());
+
+                /* rename rule variables in the constraints */
+                Map<Variable, Variable> freshSubstitution = constraint.rename(rule.variableSet());
+
+                Term result = rule.rightHandSide();
+                /* rename rule variables in the rule RHS */
+                result = result.substituteWithBinders(freshSubstitution, constrainedTerm.termContext());
+                /* apply the constraints substitution on the rule RHS */
+                result = result.substituteWithBinders(constraint.substitution(), constrainedTerm.termContext());
+                /* evaluate pending functions in the rule RHS */
+                //result = result.evaluate(constrainedTerm.termContext());
+                /* eliminate anonymous variables */
+                constraint.eliminateAnonymousVariables();
+
+                /* return first solution */
+                return new ConstrainedTerm(result, constraint, constrainedTerm.termContext());
             }
-            // If we've found matching results from one equivalence class then
-            // we are done, as we can't match rules from two equivalence classes
-            // in the same step.
-            if (stepResults.size() > 0) {
-                return stepResults.get(0);
-            }
+            
         }
         //System.out.println("Result: " + results.toString());
         //System.out.println();
-
-        if(stepResults.isEmpty()){
-        	return null;
-        } else{
-        	return stepResults.get(0);
-        }
+        
+        return null;
     }
 
     private void computeRewriteStep(ConstrainedTerm constrainedTerm, int successorBound) {

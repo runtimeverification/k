@@ -16,6 +16,7 @@ import org.kframework.backend.java.symbolic.SymbolicConstraint.Equality;
 import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Cell;
+import org.kframework.krun.K;
 import org.kframework.krun.KRunExecutionException;
 
 import com.microsoft.z3.BoolExpr;
@@ -23,6 +24,7 @@ import com.microsoft.z3.Expr;
 import com.microsoft.z3.Solver;
 import com.microsoft.z3.Status;
 import com.microsoft.z3.Z3Exception;
+import org.fusesource.jansi.AnsiConsole;
 
 public class Adjuster {
 	
@@ -41,7 +43,6 @@ public class Adjuster {
 		if(impl.getSimulationRewriter().getSimulationMap().isEmpty() 
 				|| spec.getSimulationRewriter().getSimulationMap().isEmpty()){
 			
-			
 			return true;
 		}
 		
@@ -49,7 +50,7 @@ public class Adjuster {
 		ConstrainedTerm specside = spec.simulationSteps(specElem);
 		
 		if(specside == null){
-			
+
 			return true;
 		}
 		
@@ -57,8 +58,10 @@ public class Adjuster {
 			return false;
 		}
 		
-
-		
+		if(K.smt.equals("none")){
+			
+			return implside.term().equals(specside.term());
+		}
 		
 		Map<Variable,Variable> implVars = 
 				implside.constraint().rename(implside.term().variableSet());
@@ -103,6 +106,19 @@ public class Adjuster {
         
         BoolExpr first = context.MkEq(((Z3Term)newImplContent.accept(transformer)).expression(),
 				((Z3Term)newSepcContent.accept(transformer)).expression());
+        
+        if(allVarsInTerm.isEmpty()){
+        	
+        	solver.Assert(first);
+        	
+    		if(solver.Check() == Status.SATISFIABLE){
+    			return true;
+    			} else if(solver.Check()==Status.UNKNOWN){
+    				return implside.term().equals(specside.term());
+    			}
+    			
+    			return false;
+        }
         
         ArrayList<BoolExpr> temp = new ArrayList<BoolExpr>();
         
@@ -154,12 +170,12 @@ public class Adjuster {
         }
 
         solver.Assert(context.MkForall(varsInZ3,context.MkImplies(forAllLeftSide, forAllRightSide)
-        		, 1, null, null, null, null));
+            		, 1, null, null, null, null));
 		
 		if(solver.Check() == Status.SATISFIABLE){
 		return true;
 		} else if(solver.Check()==Status.UNKNOWN){
-			return implside.equals(specside);
+			return implside.term().equals(specside.term());
 		}
 		
 		return false;
