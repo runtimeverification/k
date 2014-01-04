@@ -995,6 +995,12 @@ public class Main {
             }
             if (cmd.hasOption("output")) {
                 K.output_mode = cmd.getOptionValue("output");
+                
+                if (K.output_mode.equals("smart")){
+                	
+                	K.output_mode="pretty";
+                	K.parens=false;
+                }
             }
             if (cmd.hasOption("load-cfg")) {
                 K.load_cfg = cmd.getOptionValue("load-cfg");
