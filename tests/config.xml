@@ -530,7 +530,7 @@
 
 <!-- begin Java Rewrite Engine tests -->
 
-  <!-- note: threads_05.simple always runs into infinite loop in Java backend -->
+  <!-- YilongL: threads_05.simple always runs into infinite loop in Java backend -->
   <!-- AndreiS: exceptions_07.simple is non-deterministic -->
   <test
       definition="samples/java_rewrite_engine/simple/untyped/simple-untyped.k"
@@ -547,6 +547,21 @@
     </all-programs>
   </test>
 
+  <test
+      definition="samples/java_rewrite_engine/tutorial/2_languages/1_simple/2_typed/1_static/simple-typed-static.k"
+      programs="tutorial/2_languages/1_simple/2_typed/programs/"
+      extension="simple"
+      exclude="higher-order.simple matrix.simple sortings.simple"
+      results="tutorial/2_languages/1_simple/2_typed/1_static/tests/"
+      >
+    <kompile-option name="-backend" value="java" />
+    <all-programs>
+      <krun-option name="-backend" value="java" />
+      <krun-option name="-smt" value="none" />
+      <krun-option name="-search" />
+      <krun-option name="-pattern" value="&lt;tasks&gt;.Bag&lt;/tasks&gt;"/>
+    </all-programs>
+  </test>
 
 <!--
 
