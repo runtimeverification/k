@@ -144,6 +144,10 @@ public class ConstrainedTerm extends Term {
      * @return solutions to the unification problem
      */
     public Collection<SymbolicConstraint> unify(ConstrainedTerm constrainedTerm) {
+//        if (++Utils.constrainedTermUnifyInvocationCounter == Integer.MAX_VALUE) {
+//            System.err.println("Set breakpoint here to start debugging");
+//        }
+        
         if (!term.kind.equals(constrainedTerm.term.kind)) {
             return Collections.emptyList();
         }
@@ -353,7 +357,8 @@ public class ConstrainedTerm extends Term {
         }
 
 //        System.out.printf(
-//                "###unify###\nsubject = %s\npattern = %s\nsols = %s\n", this,
+//                "###unify %s###\nsubject = %s\npattern = %s\nsols = %s\n",
+//                Utils.constrainedTermUnifyInvocationCounter, this,
 //                constrainedTerm, solutions);
         return solutions;
     }
