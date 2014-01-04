@@ -107,11 +107,12 @@ public class JavaSymbolicBackend extends BasicBackend {
 
         steps.add(new CheckVisitorStep<Definition>(new CheckConfigurationCells(context), context));
         steps.add(new RemoveBrackets(context));
+        // SetVariablesInferredSort must be performed before AddEmptyLists
+        steps.add(new SetVariablesInferredSort(context));
         steps.add(new AddEmptyLists(context));
         steps.add(new RemoveSyntacticCasts(context));
         steps.add(new CheckVisitorStep<Definition>(new CheckVariables(context), context));
         steps.add(new CheckVisitorStep<Definition>(new CheckRewrite(context), context));
-        steps.add(new SetVariablesInferredSort(context));
         steps.add(new FlattenModules(context));
 
         steps.add(new CompleteSortLatice(context));
