@@ -550,7 +550,6 @@
       definition="samples/java_rewrite_engine/tutorial/2_languages/1_simple/2_typed/1_static/simple-typed-static.k"
       programs="tutorial/2_languages/1_simple/2_typed/programs/"
       extension="simple"
-      exclude="higher-order.simple matrix.simple sortings.simple"
       results="tutorial/2_languages/1_simple/2_typed/1_static/tests/"
       >
     <kompile-option name="-backend" value="java" />
