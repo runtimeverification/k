@@ -390,9 +390,8 @@
       extension="issue"
       results="tests/regression/addbrackets/out/">
       <all-programs>
-        <krun-option name="-output" value="pretty" />
+        <krun-option name="-output" value="smart" />
 	<krun-option name="-parser" value="kast -groundParser" parser-home="PARSER_HOME" />
-        <krun-option name="-parens" value="smart" />
       </all-programs>
   </test>
 
