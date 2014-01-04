@@ -4,6 +4,7 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.krun.ColorSetting;
+import org.kframework.krun.K;
 import org.kframework.utils.ColorUtil;
 
 import java.util.LinkedList;
@@ -372,7 +373,24 @@ public class UnparserFilter extends BasicVisitor {
 			assert child instanceof KList : "child of KApp with Token is not KList";
 			assert ((KList) child).isEmpty() : "child of KApp with Token is not empty";
 			indenter.write(((Token) label).value());
-		} else {
+		} else if (K.output_mode.equals("pretty") && (label instanceof KLabelConstant)) {
+			
+			String rawLabel = "( "+((KLabelConstant) label).getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)").replaceAll("'", "") + " )";
+			java.util.List<Term> termList = ((KList)child).getContents();
+			
+			if(termList.size()==0){
+				indenter.write(rawLabel);
+			} else{
+				int i = 0;
+				String [] rawLabelList = rawLabel.split("_");
+				for (i = 0; i < termList.size(); ++i) {
+					indenter.write(rawLabelList[i]);
+					termList.get(i).accept(this);
+				}
+				indenter.write(rawLabelList[i]);
+			}
+		}
+		else {
 			label.accept(this);
 			indenter.write("(");
 			child.accept(this);
