@@ -203,11 +203,6 @@ arguments. */
 //
 // With that, I could have also eliminated the empty block
 
-/*  syntax Id ::= "print"       [reject]
-              | "read"        [reject]
-              | "join"        [reject]
-              | "function"    [reject]
-              | "return"      [reject]*/
 /*@ \section{Desugared Syntax}
 This part desugars some of SIMPLE's language constructs into core ones.
 We only want to give semantics to core constructs, so we get rid of the
