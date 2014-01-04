@@ -211,6 +211,7 @@ straightforward. */
 
   rule if (E) S => if (E) S else {}                                 [macro]
   rule for(Start Cond; Step) {S} => {Start while (Cond) {S Step;}}  [macro]
+  rule for(Start Cond; Step) {} => {Start while (Cond) {Step;}}     [macro]
   rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;          [macro]
   rule var X:Id = E; => var X; X = E;                               [macro]
 
@@ -319,7 +320,7 @@ to the \K tool, as indicated by the \textit{\$PGM} variable, followed by the
                   <br/>
                   <genv color="pink"> .Map </genv>
                   <store color="white"> .Map </store>
-                  <busy color="cyan">.Set</busy>
+                  <busy color="cyan"> .Set </busy>
                   <terminated color="red"> .Set </terminated>
                   <br/>
                   <in color="magenta" stream="stdin"> .List </in>
@@ -389,7 +390,7 @@ file in the auxiliary operation section, initializes each location in
 the list $L \ldots L'$ to $V$.  Note that, since the dimensions of
 array declarations can be arbitrary expressions, this virtually means
 that we can dynamically allocate memory in SIMPLE by means of array
-declarations. */ 
+declarations. */
 
   context var _:Id[HOLE];
 
@@ -633,7 +634,7 @@ $7+_{\scriptsize\it Int}\texttt{nothing}$ can evaluate to anything, or
 may not evaluate at all (be undefined).  If one wants to make sure that
 such artificial values are never misused, then one needs to define a static
 checker (also using \K, like our the type checker in
-\texttt{examples/simple/typed/static}) and reject programs that do. 
+\texttt{examples/simple/typed/static}) and reject programs that do.
 Note that, unlike the undefined symbol $\bot$ which had the sort $K$
 instead of $\it Val$, we defined \texttt{nothing} to be a value.  That
 is because, as explained above, we do not want the program to get
@@ -786,9 +787,9 @@ is thrown to correctly recover the execution context.  This can be easily
 achieved by pushing/popping the entire current control context onto the
 exception stack.  The three rules below modularly do precisely the above. */
 
-  syntax K ::= (Id,Stmt,K,Map,ControlCellFragment)
+  syntax K ::= (Id,Stmts,K,Map,ControlCellFragment)
 
-  syntax K ::= "popx" 
+  syntax K ::= "popx"
 
   rule <k> (try S1 catch(X) {S2} => S1 ~> popx) ~> K </k>
        <control>
@@ -949,7 +950,7 @@ We have already discussed the environment recovery auxiliary operation in the
 IMP++ tutorial: */
 
   syntax K ::= env(Map)
-  rule <k> env(Env) => . ...</k>  <env> _ => Env </env>  [structural]
+  rule <k> env(Env) => . ...</k> <env> _ => Env </env>  [structural]
 
 /*@  While theoretically sufficient, the basic definition for environment
 recovery alone is suboptimal.  Consider a loop \texttt{while (E)S},
