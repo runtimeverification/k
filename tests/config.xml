@@ -561,6 +561,20 @@
     </all-programs>
   </test>
 
+  <test
+      definition="samples/java_rewrite_engine/tutorial/2_languages/1_simple/2_typed/2_dynamic/simple-typed-dynamic.k"
+      programs="tutorial/2_languages/1_simple/2_typed/programs/"
+      extension="simple"
+      exclude="dekker.simple exceptions_07.simple higher-order.simple matrix.simple sortings.simple"
+      results="tutorial/2_languages/1_simple/2_typed/2_dynamic/tests/"
+      >
+    <kompile-option name="-backend" value="java" />
+    <all-programs>
+      <krun-option name="-backend" value="java" />
+      <krun-option name="-smt" value="none" />
+      <krun-option name="-output" value="none" />
+    </all-programs>
+  </test>
 <!--
 
   <test
