@@ -387,7 +387,7 @@ public class UnparserFilter extends BasicVisitor {
 					indenter.write(rawLabelList[i]);
 					termList.get(i).accept(this);
 				}
-				//indenter.write(rawLabelList[i]);
+				indenter.write(rawLabelList[i]);
 			}
 		}
 		else {

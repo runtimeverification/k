@@ -3,5 +3,5 @@ Search results:
 Solution 1:
 V:K -->
 (#symType(2) -> #symType(3)) = (int -> #symType(6)) ~> #symType(6) ~> if 
-  #symType(4) then #symType(5) else HOLE ~> tenv ( x |-> #symType(1) ) ~> 
-  '_->_(#symType(1),, HOLE) ~> tenv ( .Map )
+  #symType(4) then #symType(5) else HOLE ~> tenv ( x |-> #symType(1) ) ~> ( 
+  #symType(1)->HOLE ) ~> tenv ( .Map )

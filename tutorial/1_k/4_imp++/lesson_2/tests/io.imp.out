@@ -1,6 +1,6 @@
 <T>
     <k>
-        "Input two numbers: " ~> '_,_(HOLE,, .List{","}) ~> print ( HOLE ) ;
+        "Input two numbers: " ~> ( HOLE,.List{","} ) ~> print ( HOLE ) ;
            ~> int (x, y) ; ~> x = read ( ) ; ~> y = read ( ) ; ~> print ( (
           "Their sum is: ", ((x + y), "\n")) ) ;
     </k>
