@@ -6,10 +6,9 @@ import java.util.Map;
 
 import org.kframework.backend.java.indexing.IndexingPair;
 import org.kframework.backend.java.symbolic.BottomUpVisitor;
-import org.kframework.backend.java.symbolic.Evaluator;
 import org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer;
 import org.kframework.backend.java.symbolic.LocalEvaluator;
-import org.kframework.backend.java.symbolic.MyEvaluator;
+import org.kframework.backend.java.symbolic.Evaluator;
 import org.kframework.backend.java.symbolic.SubstitutionTransformer;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformable;
@@ -77,7 +76,7 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
      * function and predicate operations.
      */
     public Term evaluate(TermContext context) {
-        return (Term) this.accept(new Evaluator(context));
+        return evaluate(null, context);
     }
     
     /**
@@ -92,7 +91,7 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
      * @return the result {@code Term} instance
      */
     public Term evaluate(SymbolicConstraint constraint, TermContext context) {
-        return MyEvaluator.evaluate(this, constraint, context);
+        return Evaluator.evaluate(this, constraint, context);
     }
 
     /**
