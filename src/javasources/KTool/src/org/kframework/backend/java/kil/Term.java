@@ -72,8 +72,11 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     }
 
     /**
-     * Returns a new {@code Term} instance obtained from this term by evaluating pending
-     * function and predicate operations.
+     * Returns a new {@code Term} instance obtained from this term by evaluating
+     * pending function and predicate operations. <br>
+     * TODO(YilongL): gradually eliminate the use of this method and switch to
+     * the one with constraint, i.e., {@link this#evaluate(SymbolicConstraint,
+     * TermContext)}.
      */
     public Term evaluate(TermContext context) {
         return evaluate(null, context);
