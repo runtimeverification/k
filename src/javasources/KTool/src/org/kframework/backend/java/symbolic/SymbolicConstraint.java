@@ -278,10 +278,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             rightHandSide = rightHandSide.substituteWithBinders(substitution, context);
         }
 
-        private void substitute(Variable variable, Term term) {
-            substitute(Collections.singletonMap(variable, term));
-        }
-
         @Override
         public boolean equals(Object object) {
             if (this == object) {
@@ -403,25 +399,15 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
         Term normalizedLeftHandSide = leftHandSide.substituteWithBinders(substitution, context);
         if (normalizedLeftHandSide != leftHandSide) {
-//            normalizedLeftHandSide = normalizedLeftHandSide.evaluate(context);
             normalizedLeftHandSide = normalizedLeftHandSide.evaluate(this, context);
         }
 
         Term normalizedRightHandSide = rightHandSide.substituteWithBinders(substitution, context);
         if (normalizedRightHandSide != rightHandSide) {
-            normalizedRightHandSide = normalizedRightHandSide.evaluate(context);
+            normalizedRightHandSide = normalizedRightHandSide.evaluate(this, context);
         }
 
-//        Equality equality = this.new Equality(normalizedLeftHandSide, normalizedRightHandSide);
         checkTruthValBeforePutIntoConstraint(normalizedLeftHandSide, normalizedRightHandSide);
-//        if (equality.isUnknown()){
-//            equalities.add(equality);
-//            truthValue = TruthValue.UNKNOWN;
-//            isNormal = false;
-//        } else if (equality.isFalse()) {
-//            equalities.add(equality);
-//            truthValue = TruthValue.FALSE;
-//        }
 
         return truthValue;
     }
@@ -554,6 +540,11 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 iterator.remove();
             }
         }
+        
+        /* reset this symbolic constraint to be true when it becomes empty */
+        if (equalities.isEmpty() && substitution.isEmpty()) {
+            truthValue = TruthValue.TRUE;
+        }        
     }
 
     /**
@@ -840,6 +831,11 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             return;
         }
         renormalize();
+        
+        /* reset this symbolic constraint to be true when it becomes empty */
+        if (equalities.isEmpty() && substitution.isEmpty()) {
+            truthValue = TruthValue.TRUE;
+        }        
     }
     
     private void renormalize() {
@@ -944,18 +940,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             if (term != subst.getValue()) {
                 term = term.evaluate(context);
                 /*
-                 * important: treat the new subst as an equality and check its
-                 * truth value before putting it into the substitution map
+                 * important: check the truth value of the substitution before
+                 * putting it into the substitution map
                  */
                 checkTruthValBeforePutIntoConstraint(subst.getKey(), term);
-//                Equality equality = new Equality(subst.getKey(), term);
-//                if (equality.isUnknown()) {
-//                    substMap1.put(subst.getKey(), term);
-//                } else if (equality.isFalse()) {
-//                    substMap1.put(subst.getKey(), term);
-//                    truthValue = TruthValue.FALSE;
-//                    return;
-//                }
             }
         }
         

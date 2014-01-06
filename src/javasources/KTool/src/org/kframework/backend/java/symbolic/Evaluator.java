@@ -1,54 +1,27 @@
 package org.kframework.backend.java.symbolic;
 
-import org.kframework.backend.java.kil.*;
-import org.kframework.kil.ASTNode;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
 
 
 /**
- * Evaluates predicates and functions in post-order using a copy-on-write
- * strategy.
- * 
- * @author AndreiS
+ * Evaluates functions/predicates and collects symbolic constraint generated
+ * in the evaluation process.
  */
-public class Evaluator extends CopyOnWriteTransformer {
+public class Evaluator extends PrePostTransformer {
 
-    // TODO(YilongL): why not just declare it as a LocalTransformer?
-    private final Transformer localEvaluator; // used to perform the actual evaluation
-
-    public Evaluator(TermContext context) {
+    private Evaluator(SymbolicConstraint constraint, TermContext context) {
         super(context);
-        localEvaluator = new LocalEvaluator(context);
+        this.getPostTransformer().addTransformer(new LocalEvaluator(constraint, context));
+    }
+    
+    public static Term evaluate(Term term, TermContext context) {
+        return Evaluator.evaluate(term, null, context);
     }
 
-    @Override
-    public ASTNode transform(KItem kItem) {
-        return ((Term) super.transform(kItem)).accept(localEvaluator);
+    public static Term evaluate(Term term, SymbolicConstraint constraint,
+            TermContext context) {
+        Evaluator evaluator = new Evaluator(constraint, context);
+        return (Term) term.accept(evaluator);
     }
-
-    @Override
-    public ASTNode transform(ListLookup listLookup) {
-        return ((Term) super.transform(listLookup)).accept(localEvaluator);
-    }
-
-    @Override
-    public ASTNode transform(MapLookup mapLookup) {
-        return ((Term) super.transform(mapLookup)).accept(localEvaluator);
-    }
-
-    @Override
-    public ASTNode transform(MapUpdate mapUpdate) {
-        return ((Term) super.transform(mapUpdate)).accept(localEvaluator);
-    }
-
-    @Override
-    public ASTNode transform(SetLookup setLookup) {
-        return ((Term) super.transform(setLookup)).accept(localEvaluator);
-    }
-
-    @Override
-    public ASTNode transform(SetUpdate setUpdate) {
-        return ((Term) super.transform(setUpdate)).accept(localEvaluator);
-    }
-
 }
-
