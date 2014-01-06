@@ -88,7 +88,9 @@ public class K {
 	public static boolean statistics = false;
 	public static ColorSetting color = ColorSetting.ON;
     public static Color terminalColor = ColorUtil.getColorByName("black");
-	public static boolean do_search = false;
+    public static boolean do_concrete_exec = true;
+    public static boolean do_search = false;
+    public static boolean do_testgen = false; // generate tests from semantics
 	public static boolean showSearchGraph = false;
 	//apply parenthesis by default
 	public static boolean parens = true;
@@ -98,8 +100,6 @@ public class K {
 	public static boolean trace = false;
 	public static boolean profile = false;
     public static String smt = "z3";
-    //generate tests from semantics?
-    public static boolean do_testgen = false;
 
 
 	public static Properties configuration_variables = new Properties();

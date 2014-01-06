@@ -960,6 +960,7 @@ public class Main {
                 K.do_testgen = true;
                 K.io = false;
                 K.do_search = true;
+                K.do_concrete_exec = false;
             }
             if (cmd.hasOption("maude-cmd")) {
                 K.maude_cmd = cmd.getOptionValue("maude-cmd");
