@@ -1,6 +1,12 @@
 package org.kframework.backend.java.symbolic;
 
-import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.ListLookup;
+import org.kframework.backend.java.kil.MapLookup;
+import org.kframework.backend.java.kil.MapUpdate;
+import org.kframework.backend.java.kil.SetLookup;
+import org.kframework.backend.java.kil.SetUpdate;
+import org.kframework.backend.java.kil.TermContext;
 import org.kframework.kil.ASTNode;
 
 /**
@@ -9,14 +15,29 @@ import org.kframework.kil.ASTNode;
  * @author Traian
  */
 public class LocalEvaluator extends LocalTransformer {
+    
+    /**
+     * The symbolic constraint of the {@code ConstrainedTerm} which contains the
+     * terms to be evaluated by this evaluator.
+     */
+    private final SymbolicConstraint constraint;
 
     public LocalEvaluator(TermContext context) {
-        super(context);
+        this(null, context);
     }
 
+    public LocalEvaluator(SymbolicConstraint constraint, TermContext context) {
+        super(context);
+        this.constraint = constraint;
+    }
+    
+    public SymbolicConstraint constraint() {
+        return constraint;
+    }
+    
     @Override
     public ASTNode transform(KItem kItem) {
-        return kItem.evaluateFunction(context);
+        return kItem.evaluateFunction(constraint, context);
     }
 
     @Override

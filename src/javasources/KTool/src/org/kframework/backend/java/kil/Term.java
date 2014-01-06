@@ -1,13 +1,19 @@
 package org.kframework.backend.java.kil;
 
-import org.apache.commons.lang3.tuple.Pair;
-import org.kframework.backend.java.indexing.IndexingPair;
-import org.kframework.backend.java.symbolic.*;
-
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
+
+import org.kframework.backend.java.indexing.IndexingPair;
+import org.kframework.backend.java.symbolic.BottomUpVisitor;
+import org.kframework.backend.java.symbolic.Evaluator;
+import org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer;
+import org.kframework.backend.java.symbolic.LocalEvaluator;
+import org.kframework.backend.java.symbolic.MyEvaluator;
+import org.kframework.backend.java.symbolic.SubstitutionTransformer;
+import org.kframework.backend.java.symbolic.SymbolicConstraint;
+import org.kframework.backend.java.symbolic.Transformable;
+import org.kframework.backend.java.symbolic.Unifiable;
 
 
 /**
@@ -75,13 +81,18 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     }
     
     /**
-     * Returns a new {@code Term} instance obtained from this term by evaluating pending
-     * function and predicate operations.
+     * Returns a new {@code Term} instance obtained from this term by evaluating
+     * pending function and predicate operations.
+     * 
+     * @param constraint
+     *            the symbolic constraint of the {@link ConstrainedTerm} which
+     *            contains this {@code Term}
+     * @param context
+     *            the term context
+     * @return the result {@code Term} instance
      */
-    public Pair<Term, List<UninterpretedConstraint>> evaluate2(TermContext context) {
-        // TODO(YilongL): find out all invoking locations of this method and
-        // revise accordingly to handle the constraint obtained in evaluation
-        return MyEvaluator.evaluate(this, context);
+    public Term evaluate(SymbolicConstraint constraint, TermContext context) {
+        return MyEvaluator.evaluate(this, constraint, context);
     }
 
     /**

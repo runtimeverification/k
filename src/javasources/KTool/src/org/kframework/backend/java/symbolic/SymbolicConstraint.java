@@ -39,6 +39,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
     public void orientSubstitution(Set<Variable> variables, TermContext termContext) {
         Map<Variable, Term> newSubstitution = new HashMap<>();
+        if (substitution.keySet().containsAll(variables)) {
+            /* avoid setting isNormal to false */
+            return;
+        }
         
         /* compute the preimages of each variable in the codomain of the substitution */
         Map<Variable, Set<Variable>> preimages = new HashMap<Variable, Set<Variable>>();
@@ -72,8 +76,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                      */
                     Set<Variable> preimagesOfRHS = new HashSet<Variable>(preimages.get(rhs));
                     preimagesOfRHS.removeAll(variables);
-                    if (preimagesOfRHS.isEmpty()) 
+                    if (preimagesOfRHS.isEmpty()) {
                         throw new RuntimeException("Orientation failed");
+                    }
                     Variable newRHS = preimagesOfRHS.iterator().next();
                     newSubstitution.put(lhs, newRHS);
                     newSubstitution.put((Variable) rhs, newRHS);
@@ -104,7 +109,16 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             result.put(entry.getKey(), entry.getValue().substituteWithBinders(newSubstitution, termContext));
         }
 
-        substitution = result;
+        substitution.clear();
+        for (Map.Entry<Variable, Term> subst : result.entrySet()) {
+            checkTruthValBeforePutIntoConstraint(subst.getKey(), subst.getValue());
+        }
+        
+        /*
+         * after re-orientation, the RHS's of the {@code equalities} may contain
+         * variables on the LHS's of the {@code substitution}
+         */
+        isNormal = false;
     }
 
     public enum TruthValue { TRUE, UNKNOWN, FALSE }
@@ -306,6 +320,15 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
     /**
      * Stores ordinary equalities in this symbolic constraint.
+     * <p>
+     * Invariant: there can be at most one equality in this list whose result is
+     * {@code TruthValue#FALSE} (since this symbolic constraint becomes
+     * {@code TruthValue#FALSE} then); the {@link TruthValue} of the rest
+     * equalities must be {@code TruthValue#UNKNOWN}.
+     * <p>
+     * In order to preserve this invariant, whenever an equality has been
+     * changed (i.e., substitution and/or evaluation), the truth value of this
+     * equality shall be re-checked.
      * 
      * @see SymbolicConstraint#substitution
      */
@@ -325,10 +348,15 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     /**
      * Stores special equalities whose left-hand sides are just variables.
      * <p>
-     * Invariant: {@code Variable}s on the left-hand sides do not occur in the
-     * {@code Term}s on the right-hand sides.
+     * Invariants:
+     * <li> {@code Variable}s on the left-hand sides do not occur in the
+     * {@code Term}s on the right-hand sides;
+     * <li>the invariant of {@code SymbolicConstraint#equalities} also applies
+     * here.
+     * 
+     * @see SymbolicConstraint#equalities
      */
-    private Map<Variable, Term> substitution = new HashMap<Variable, Term>();
+    private final Map<Variable, Term> substitution = new HashMap<Variable, Term>();
     private TruthValue truthValue;
     private final TermContext context;
     private final Definition definition;
@@ -341,7 +369,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
     public SymbolicConstraint(SymbolicConstraint constraint, TermContext context) {
         this(context);
-        substitution = new HashMap<>(constraint.substitution);
+        substitution.putAll(constraint.substitution);
         addAll(constraint);
     }
 
@@ -375,7 +403,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
         Term normalizedLeftHandSide = leftHandSide.substituteWithBinders(substitution, context);
         if (normalizedLeftHandSide != leftHandSide) {
-            normalizedLeftHandSide = normalizedLeftHandSide.evaluate(context);
+//            normalizedLeftHandSide = normalizedLeftHandSide.evaluate(context);
+            normalizedLeftHandSide = normalizedLeftHandSide.evaluate(this, context);
         }
 
         Term normalizedRightHandSide = rightHandSide.substituteWithBinders(substitution, context);
@@ -383,17 +412,52 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             normalizedRightHandSide = normalizedRightHandSide.evaluate(context);
         }
 
-        Equality equality = this.new Equality(normalizedLeftHandSide, normalizedRightHandSide);
-        if (equality.isUnknown()){
-            equalities.add(equality);
-            truthValue = TruthValue.UNKNOWN;
-            isNormal = false;
-        } else if (equality.isFalse()) {
-            equalities.add(equality);
-            truthValue = TruthValue.FALSE;
-        }
+//        Equality equality = this.new Equality(normalizedLeftHandSide, normalizedRightHandSide);
+        checkTruthValBeforePutIntoConstraint(normalizedLeftHandSide, normalizedRightHandSide);
+//        if (equality.isUnknown()){
+//            equalities.add(equality);
+//            truthValue = TruthValue.UNKNOWN;
+//            isNormal = false;
+//        } else if (equality.isFalse()) {
+//            equalities.add(equality);
+//            truthValue = TruthValue.FALSE;
+//        }
 
         return truthValue;
+    }
+    
+    /**
+     * Private helper method that checks the truth value of a specified equality
+     * and put it into the equality list or substitution map maintained by this
+     * symbolic constraint properly.
+     * 
+     * @param leftHandSide
+     *            the left-hand side of the specified equality
+     * @param rightHandSide
+     *            the right-hand side of the specified equality
+     */
+    private void checkTruthValBeforePutIntoConstraint(Term leftHandSide, Term rightHandSide) {
+        boolean isSubst = leftHandSide instanceof Variable;
+        Equality equality = this.new Equality(leftHandSide, rightHandSide);
+        if (equality.isUnknown()){
+            if (isSubst) {
+                Term origVal = substitution.put((Variable) leftHandSide, rightHandSide);
+                if (origVal == null) {
+                    isNormal = false;
+                }
+            } else {
+                equalities.add(equality);
+                isNormal = false;
+            }
+            truthValue = TruthValue.UNKNOWN;
+        } else if (equality.isFalse()) {
+            if (isSubst) {
+                substitution.put((Variable) leftHandSide, rightHandSide);
+            } else {
+                equalities.add(equality);
+            }
+            truthValue = TruthValue.FALSE;
+        }
     }
 
     /**
@@ -818,11 +882,12 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 continue;
             }
 
-            Map<Variable, Term> tempSubstitution = new HashMap<Variable, Term>();
-            tempSubstitution.put(variable, term);
-
-            SymbolicConstraint.compose(substitution, tempSubstitution, context);
-            substitution.put(variable, term);
+            Map<Variable, Term> tempSubst = Collections.singletonMap(variable, term);
+            composeSubstitution(tempSubst, context, false);
+            if (truthValue == TruthValue.FALSE) {
+                return;
+            }
+//            substitution.put(variable, term);
 
             for (Iterator<Equality> previousIterator = equalities.iterator(); previousIterator.hasNext();) {
                 Equality previousEquality = previousIterator.next();
@@ -837,7 +902,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                  * need to do so
                  */
                 if (!equalitiesToRemove.contains(previousEquality)) {
-                    previousEquality.substitute(tempSubstitution);
+                    previousEquality.substitute(tempSubst);
                     //TODO(AndreiS): Only evaluate if the term has changed
                     previousEquality.evaluate();
                     if (previousEquality.isTrue()) {
@@ -859,32 +924,52 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     }
 
     /**
-     * Composes two substitutions. The first substitution holds the result
-     * composition.
+     * Private helper method that composes a specified substitution map with the
+     * substitution map of this symbolic constraint.
      * 
-     * @param subst1
-     *            the first substitution
-     * @param subst2
-     *            the second substitution
+     * @param substMap
+     *            the specified substitution map
      * @param context
      *            the term context
+     * @param mayInvalidateNormality
+     *            whether this operation may cause
+     *            {@link SymbolicConstraint#isNormal} to be {@code false}
      */
-    @SuppressWarnings("unchecked")
-    public static void compose(
-            Map<Variable, Term> subst1,
-            Map<Variable, Term> subst2,
-            TermContext context) {
-        Map.Entry<Variable, Term>[] entries = subst1.entrySet().toArray(new Map.Entry[subst1.size()]);
-        for (Map.Entry<Variable, Term> entry : entries) {
-            Term term = entry.getValue().substituteWithBinders(subst2, context);
-            if (term != entry.getValue()) {
+    private void composeSubstitution(Map<Variable, Term> substMap,
+            TermContext context, boolean mayInvalidateNormality) {
+        @SuppressWarnings("unchecked")
+        Map.Entry<Variable, Term>[] entries = substitution.entrySet().toArray(new Map.Entry[substitution.size()]);
+        for (Map.Entry<Variable, Term> subst : entries) {
+            Term term = subst.getValue().substituteWithBinders(substMap, context);
+            if (term != subst.getValue()) {
                 term = term.evaluate(context);
-                subst1.put(entry.getKey(), term);
+                /*
+                 * important: treat the new subst as an equality and check its
+                 * truth value before putting it into the substitution map
+                 */
+                checkTruthValBeforePutIntoConstraint(subst.getKey(), term);
+//                Equality equality = new Equality(subst.getKey(), term);
+//                if (equality.isUnknown()) {
+//                    substMap1.put(subst.getKey(), term);
+//                } else if (equality.isFalse()) {
+//                    substMap1.put(subst.getKey(), term);
+//                    truthValue = TruthValue.FALSE;
+//                    return;
+//                }
             }
         }
-        // TODO(YilongL): not done yet; need to merge two subst's and makes sure
-        // the invariant
-        // holds(http://www.mathcs.duq.edu/simon/Fall04/notes-7-4/node4.html)
+        
+        // on composing two substitution maps:
+        // http://www.mathcs.duq.edu/simon/Fall04/notes-7-4/node4.html
+        Set<Variable> variables = new HashSet<Variable>(substitution.keySet());
+        variables.retainAll(substMap.keySet());
+        assert variables.isEmpty() : 
+            "There shall be no common variables in the two substitution maps to be composed.";
+        substitution.putAll(substMap);
+        
+        if (mayInvalidateNormality) {
+            isNormal = false;
+        }
     }
 
     /**

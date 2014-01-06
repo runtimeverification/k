@@ -172,10 +172,14 @@ public class KItem extends Term implements Sorted {
     /**
      * Evaluates this {@code KItem} if it is a predicate or function
      * 
-     * @param context a term context
+     * @param constraint
+     *            the existing symbolic constraint that needs to be taken into
+     *            consideration when evaluating this function
+     * @param context
+     *            a term context
      * @return the evaluated result on success, or this {@code KItem} otherwise
      */
-    public Term evaluateFunction(TermContext context) {
+    public Term evaluateFunction(SymbolicConstraint constraint, TermContext context) {
         Definition definition = context.definition();
         if (!(kLabel instanceof KLabelConstant)) {
             return this;
@@ -200,6 +204,12 @@ public class KItem extends Term implements Sorted {
             // one rule
             for (Rule rule : definition.functionRules().get((KLabelConstant) kLabel)) {
                 SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(context);
+                if (constraint != null) { // TODO(YilongL): shall I preserve
+                                          // this check? I tend to eliminate it
+                                          // and ensure constraint to be always
+                                          // non-null
+                    leftHandSideConstraint.addAll(constraint);
+                }
                 leftHandSideConstraint.addAll(rule.requires());
                 for (Variable variable : rule.freshVariables()) {
                     leftHandSideConstraint.add(variable, IntToken.fresh());
@@ -219,27 +229,29 @@ public class KItem extends Term implements Sorted {
                     continue;
                 }
 
-                SymbolicConstraint constraint = solutions.iterator().next();
+                SymbolicConstraint solution = solutions.iterator().next();
 
-                if (!constraint.isSubstitution()) {
+                if (!solution.isSubstitution()) {
                     continue;
                 }
 
-                constraint.orientSubstitution(rule.variableSet(), context);
+                solution.orientSubstitution(rule.variableSet(), context);
 
                 /* rename rule variables in the constraints */
-                Map<Variable, Variable> freshSubstitution = constraint.rename(rule.variableSet());
+                Map<Variable, Variable> freshSubstitution = solution.rename(rule.variableSet());
 
                 Term result = rule.rightHandSide();
                 /* rename rule variables in the rule RHS */
                 result = result.substitute(freshSubstitution, context);
                 /* apply the constraints substitution on the rule RHS */
-                result = result.substitute(constraint.substitution(), context);
+                result = result.substitute(solution.substitution(), context);
                 /* evaluate pending functions in the rule RHS */
                 result = result.evaluate(context);
                 /* eliminate anonymous variables */
-                constraint.eliminateAnonymousVariables();
+                solution.eliminateAnonymousVariables();
 
+                /* update the constraint and return the result */
+                constraint = solution;
                 return result;
             }
         }
