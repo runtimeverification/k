@@ -376,19 +376,28 @@ public class UnparserFilter extends BasicVisitor {
 		} else if (K.output_mode.equals("pretty") && (label instanceof KLabelConstant) && ((KLabelConstant) label).getLabel().contains("'_")) {
 			
 			String rawLabel = "( "+((KLabelConstant) label).getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)").replaceAll("'", "") + " )";
-			java.util.List<Term> termList = ((KList)child).getContents();
-			
-			if(termList.size()==0){
-				indenter.write(rawLabel);
-			} else{
-				int i = 0;
-				String [] rawLabelList = rawLabel.split("_");
-				for (i = 0; i < termList.size(); ++i) {
-					indenter.write(rawLabelList[i]);
-					termList.get(i).accept(this);
-				}
-				indenter.write(rawLabelList[i]);
-			}
+
+            if (child instanceof KList) {
+                java.util.List<Term> termList = ((KList)child).getContents();
+
+                if(termList.size()==0){
+                    indenter.write(rawLabel);
+                } else{
+                    int i = 0;
+                    String [] rawLabelList = rawLabel.split("_");
+                    for (i = 0; i < termList.size(); ++i) {
+                        indenter.write(rawLabelList[i]);
+                        termList.get(i).accept(this);
+                    }
+                    indenter.write(rawLabelList[i]);
+                }
+            }
+            else {
+                // child is a KList variable
+                indenter.write("(");
+                child.accept(this);
+                indenter.write(")");
+            }
 		}
 		else {
 			label.accept(this);
