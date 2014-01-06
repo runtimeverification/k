@@ -540,6 +540,11 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 iterator.remove();
             }
         }
+        
+        /* reset this symbolic constraint to be true when it becomes empty */
+        if (equalities.isEmpty() && substitution.isEmpty()) {
+            truthValue = TruthValue.TRUE;
+        }        
     }
 
     /**
@@ -826,6 +831,11 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             return;
         }
         renormalize();
+        
+        /* reset this symbolic constraint to be true when it becomes empty */
+        if (equalities.isEmpty() && substitution.isEmpty()) {
+            truthValue = TruthValue.TRUE;
+        }        
     }
     
     private void renormalize() {
