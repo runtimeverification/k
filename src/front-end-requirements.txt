@@ -82,6 +82,11 @@ Probably we shouldn't, but that may mean that we need to treat strings
 specially.  There are different types of strings, though: "abc", 'abc', `abc`,
 and maybe some users what ```abc''', etc., in their language.
 
+Possible solution 0: we can simply ignore the problem at the beginning.  The
+cases where one writes "rule" or "syntax" or other K-specific keywords in
+strings in a semantic definition should be rare, so we can afford to ask
+the user to escape those keywords.
+
 Possible solution 1: we can have a special [string] tag to some token
 productions, e.g.
 
