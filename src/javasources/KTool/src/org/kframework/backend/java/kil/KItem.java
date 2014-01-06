@@ -246,12 +246,19 @@ public class KItem extends Term implements Sorted {
                 /* apply the constraints substitution on the rule RHS */
                 result = result.substitute(solution.substitution(), context);
                 /* evaluate pending functions in the rule RHS */
-                result = result.evaluate(context);
+                //TODO(AndreiS): Only evaluate if the term has changed
+                result = result.evaluate(solution, context);
                 /* eliminate anonymous variables */
                 solution.eliminateAnonymousVariables();
 
                 /* update the constraint and return the result */
-                constraint = solution;
+                if (constraint != null) {
+                    constraint = solution;
+                } else {
+                    if (solution.isUnknown() || solution.isFalse()) {
+                        throw new RuntimeException("unable to update the symbolic constraint");
+                    }
+                }
                 return result;
             }
         }
