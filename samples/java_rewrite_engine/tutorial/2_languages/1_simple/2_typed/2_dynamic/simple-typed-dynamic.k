@@ -220,7 +220,7 @@ make sure that all the declared variables have the right types.  The
 auxiliary operation \texttt{T<Vs>}, defined at the end of the file,
 adds the length of \texttt{Vs} dimensions to the type \texttt{T}. */
 
-  syntax Id ::= "$1" | "$2"
+  syntax Id ::= Token{"$1"} | Token{"$2"}
   rule T:Type X:Id[N1:Int, N2:Int, Vs:Vals];
     => T[]<Vs> X[N1];
        {
