@@ -11,6 +11,7 @@ import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
+import org.kframework.krun.K;
 import org.kframework.utils.general.GlobalSettings;
 
 import com.google.common.collect.Sets;
@@ -196,18 +197,14 @@ public class KItem extends Term implements Sorted {
         if (!definition.functionRules().get((KLabelConstant) kLabel).isEmpty()) {
             ConstrainedTerm constrainedTerm = new ConstrainedTerm(kList, context);
 
-            // TODO(YilongL): There are at least two missing features here:
-            // 1) consider applying rules with attribute [owise] only after
-            // no other rules can be applied;
-            // 2) check the determinism of the function definition across
-            // multiple rules; currently the determinism is only check w.r.t
-            // one rule
+            // TODO(YilongL): consider applying rules with attribute [owise]
+            // only after no other rules can be applied
+            Term result = null;
             for (Rule rule : definition.functionRules().get((KLabelConstant) kLabel)) {
                 SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(context);
-                if (constraint != null) { // TODO(YilongL): shall I preserve
-                                          // this check? I tend to eliminate it
-                                          // and ensure constraint to be always
-                                          // non-null
+                if (constraint != null) { 
+                    // TODO(YilongL): shall I preserve this check? I tend to
+                    // eliminate it and ensure constraint to be always non-null
                     leftHandSideConstraint.addAll(constraint);
                 }
                 leftHandSideConstraint.addAll(rule.requires());
@@ -223,7 +220,9 @@ public class KItem extends Term implements Sorted {
 
                 Collection<SymbolicConstraint> solutions = constrainedTerm.unify(leftHandSide);
 
-                assert solutions.size() <= 1 : "function definition is not deterministic";
+                if (K.do_concrete_exec) {
+                    assert solutions.size() <= 1 : "function definition is not deterministic";
+                }
 
                 if (solutions.isEmpty()) {
                     continue;
@@ -240,26 +239,31 @@ public class KItem extends Term implements Sorted {
                 /* rename rule variables in the constraints */
                 Map<Variable, Variable> freshSubstitution = solution.rename(rule.variableSet());
 
-                Term result = rule.rightHandSide();
+                Term rightHandSide = rule.rightHandSide();
                 /* rename rule variables in the rule RHS */
-                result = result.substitute(freshSubstitution, context);
+                rightHandSide = rightHandSide.substitute(freshSubstitution, context);
                 /* apply the constraints substitution on the rule RHS */
-                result = result.substitute(solution.substitution(), context);
+                rightHandSide = rightHandSide.substitute(solution.substitution(), context);
                 /* evaluate pending functions in the rule RHS */
                 //TODO(AndreiS): Only evaluate if the term has changed
-                result = result.evaluate(solution, context);
+                rightHandSide = rightHandSide.evaluate(solution, context);
                 /* eliminate anonymous variables */
                 solution.eliminateAnonymousVariables();
 
                 /* update the constraint and return the result */
                 if (constraint != null) {
+                    // TODO(YilongL): fix it; object ref. is passed-by-value!
                     constraint = solution;
                 } else {
                     if (solution.isUnknown() || solution.isFalse()) {
                         throw new RuntimeException("unable to update the symbolic constraint");
                     }
                 }
-                return result;
+                
+                if (K.do_concrete_exec) {
+                    assert result == null : "function definition is not deterministic";
+                }
+                result = rightHandSide;
             }
         }
 
