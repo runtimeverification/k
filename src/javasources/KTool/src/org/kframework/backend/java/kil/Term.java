@@ -73,7 +73,7 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
 
     /**
      * Returns a new {@code Term} instance obtained from this term by evaluating
-     * pending function and predicate operations. <br>
+     * pending functions and predicates. <br>
      * TODO(YilongL): gradually eliminate the use of this method and switch to
      * the one with constraint, i.e., {@link this#evaluate(SymbolicConstraint,
      * TermContext)}.
@@ -84,7 +84,15 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     
     /**
      * Returns a new {@code Term} instance obtained from this term by evaluating
-     * pending function and predicate operations.
+     * pending functions and predicates.
+     * <p>
+     * This method carries a symbolic constraint as argument for two reasons: 1)
+     * at the time when this method is called, the symbolic constraint
+     * associated with the outer constrained term which contains this term may
+     * not been properly simplified and normalized, which means the evaluation
+     * process may still need the information of this constraint when performing
+     * unification; 2) the evaluation process may create new constraints in
+     * certain cases (e.g., in test generation).
      * 
      * @param constraint
      *            the symbolic constraint of the {@link ConstrainedTerm} which

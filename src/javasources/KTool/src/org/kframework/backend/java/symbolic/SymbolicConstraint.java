@@ -169,10 +169,12 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         /**
          * Evaluates pending functions and predicate operations in this
          * equality.
+         * 
+         * @param constraint
          */
-        public void evaluate() {
-            leftHandSide = leftHandSide.evaluate(context);
-            rightHandSide = rightHandSide.evaluate(context);
+        public void evaluate(SymbolicConstraint constraint) {
+            leftHandSide = leftHandSide.evaluate(constraint, context);
+            rightHandSide = rightHandSide.evaluate(constraint, context);
         }
 
         public Term leftHandSide() {
@@ -875,7 +877,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         for (Iterator<Equality> iterator = equalities.iterator(); iterator.hasNext();) {
             Equality equality = iterator.next();
             if (equality.substitute(substitution)) {
-                equality.evaluate();
+                equality.evaluate(this);
             }
 
             if (equality.isTrue()) {
@@ -929,7 +931,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                  */
                 if (!equalitiesToRemove.contains(previousEquality)) {
                     if (previousEquality.substitute(tempSubst)) {
-                        previousEquality.evaluate();
+                        previousEquality.evaluate(this);
                     }
                     if (previousEquality.isTrue()) {
                         equalitiesToRemove.add(previousEquality);
@@ -968,7 +970,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         for (Map.Entry<Variable, Term> subst : entries) {
             Term term = subst.getValue().substituteWithBinders(substMap, context);
             if (term != subst.getValue()) {
-                term = term.evaluate(context);
+                term = term.evaluate(this, context);
                 /*
                  * important: check the truth value of the substitution before
                  * putting it into the substitution map

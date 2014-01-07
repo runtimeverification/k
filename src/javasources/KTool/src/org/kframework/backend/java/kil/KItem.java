@@ -250,13 +250,20 @@ public class KItem extends Term implements Sorted {
                 /* eliminate anonymous variables */
                 solution.eliminateAnonymousVariables();
 
-                /* update the constraint and return the result */
-                if (constraint != null) {
-                    // TODO(YilongL): fix it; object ref. is passed-by-value!
-                    constraint = solution;
-                } else {
+                /* update the constraint */
+                if (K.do_concrete_exec) {
+                    // in concrete execution mode, the evaluation of
+                    // user-defined functions will not create new constraints
+                } else if (constraint != null) {
+                    throw new RuntimeException(
+                            "Fix it; need to find a proper way to update " +
+                            "the constraint without interferring with the " +
+                            "potential ongoing normalization process");
+                } else { // constraint == null
                     if (solution.isUnknown() || solution.isFalse()) {
-                        throw new RuntimeException("unable to update the symbolic constraint");
+                        throw new RuntimeException(
+                                "Fix it; no reference to the symbolic " +
+                                "constraint that needs to be updated");
                     }
                 }
                 
@@ -264,6 +271,10 @@ public class KItem extends Term implements Sorted {
                     assert result == null : "function definition is not deterministic";
                 }
                 result = rightHandSide;
+            }
+            
+            if (result != null) {
+                return result;
             }
         }
 
