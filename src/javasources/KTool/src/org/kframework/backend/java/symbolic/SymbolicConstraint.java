@@ -273,9 +273,29 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             return !isTrue() && !isFalse();
         }
 
-        private void substitute(Map<Variable, ? extends Term> substitution) {
-            leftHandSide = leftHandSide.substituteWithBinders(substitution, context);
-            rightHandSide = rightHandSide.substituteWithBinders(substitution, context);
+        /**
+         * Substitutes this equality with according to a specified substitution
+         * map.
+         * 
+         * @param substitution
+         *            the specified substitution map
+         * @return {@code true} if this equality has changed after the
+         *         substitution; otherwise, {@code false}
+         */
+        private boolean substitute(Map<Variable, ? extends Term> substitution) {
+            Term leftHandSide = this.leftHandSide.substituteWithBinders(substitution, context);
+            Term rightHandSide = this.rightHandSide.substituteWithBinders(substitution, context);
+            
+            boolean changed = false;            
+            if (leftHandSide != this.leftHandSide) {
+                changed = true;
+                this.leftHandSide = leftHandSide;
+            }
+            if (rightHandSide != this.rightHandSide) {
+                changed = true;
+                this.rightHandSide = rightHandSide;
+            }
+            return changed;
         }
 
         @Override
@@ -822,6 +842,13 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
         return truthValue;
     }
+    
+    /**
+     * Recursive invocations of {@code SymbolicConstraint#normalize()} may occur
+     * (if not handled properly) since the method {@code Term#evaluate} is
+     * called during normalization process.
+     */
+    private boolean recursiveNormalize = false;
 
     /**
      * Converts this symbolic constraint back to normal form.
@@ -830,12 +857,16 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         if (isNormal) {
             return;
         }
+        
+        assert !recursiveNormalize : "recursive normalization shall not happen";      
+        recursiveNormalize = true;
         renormalize();
         
         /* reset this symbolic constraint to be true when it becomes empty */
         if (equalities.isEmpty() && substitution.isEmpty()) {
             truthValue = TruthValue.TRUE;
         }        
+        recursiveNormalize = false;
     }
     
     private void renormalize() {
@@ -843,9 +874,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         Set<Equality> equalitiesToRemove = new HashSet<Equality>();
         for (Iterator<Equality> iterator = equalities.iterator(); iterator.hasNext();) {
             Equality equality = iterator.next();
-            equality.substitute(substitution);
-            //TODO(AndreiS): Only evaluate if the term has changed
-            equality.evaluate();
+            if (equality.substitute(substitution)) {
+                equality.evaluate();
+            }
 
             if (equality.isTrue()) {
                 equalitiesToRemove.add(equality);
@@ -883,7 +914,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             if (truthValue == TruthValue.FALSE) {
                 return;
             }
-//            substitution.put(variable, term);
 
             for (Iterator<Equality> previousIterator = equalities.iterator(); previousIterator.hasNext();) {
                 Equality previousEquality = previousIterator.next();
@@ -898,9 +928,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                  * need to do so
                  */
                 if (!equalitiesToRemove.contains(previousEquality)) {
-                    previousEquality.substitute(tempSubst);
-                    //TODO(AndreiS): Only evaluate if the term has changed
-                    previousEquality.evaluate();
+                    if (previousEquality.substitute(tempSubst)) {
+                        previousEquality.evaluate();
+                    }
                     if (previousEquality.isTrue()) {
                         equalitiesToRemove.add(previousEquality);
                     } else if (previousEquality.isFalse()) {
