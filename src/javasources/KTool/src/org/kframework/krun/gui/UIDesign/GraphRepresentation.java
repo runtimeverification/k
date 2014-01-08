@@ -9,6 +9,7 @@ import org.kframework.krun.ConcretizeSyntax;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.Transition;
 import org.kframework.krun.gui.Controller.RunKRunCommand;
+import org.kframework.krun.gui.Controller.XmlUnparseFilter;
 import org.kframework.krun.gui.UIDesign.xmlEditor.XMLEditorKit;
 import org.kframework.krun.gui.diff.DiffFrame;
 import org.kframework.krun.gui.helper.HelpFrame;
@@ -16,6 +17,7 @@ import org.kframework.parser.concrete.disambiguate.BestFitFilter;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
 import org.apache.commons.lang3.StringEscapeUtils;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -686,17 +688,31 @@ public class GraphRepresentation extends JPanel implements ItemListener {
     }
 
     private static String getXmlFromKrunState(KRunState pick, Context definitionHelper) {
-        // TODO : create our own filter that ignores xml characters from a tag
-        StringBuffer rez = new StringBuffer();
-        String str = getStrFromKrunState(pick, definitionHelper);
-        for (String line : str.split("\n")) {
-            line = line.trim();
-            if (line.startsWith("<") && line.endsWith(">"))
-                rez.append(line + "\n");
-            else
-                rez.append(StringEscapeUtils.escapeXml(line) + "\n");
+        Term term = pick.getResult();
+        try {
+            term = (Term) term.accept(new ConcretizeSyntax(definitionHelper));
+            term = (Term) term.accept(new TypeInferenceSupremumFilter(definitionHelper));
+            term = (Term) term.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(
+                    definitionHelper), definitionHelper));
+            // as a last resort, undo concretization
+            term = (Term) term.accept(new org.kframework.krun.FlattenDisambiguationFilter(
+                    definitionHelper));
+        } catch (TransformerException e) {
+            e.printStackTrace();
         }
-        return rez.toString();
+        if (term.getClass() == Cell.class) {
+            Cell generatedTop = (Cell) term;
+            if (generatedTop.getLabel().equals("generatedTop")) {
+                term = generatedTop.getContents();
+            }
+        }
+        // set the color map
+        ColorVisitor cv = new ColorVisitor(definitionHelper);
+        term.accept(cv);
+
+        XmlUnparseFilter unparser = new XmlUnparseFilter(true, false, definitionHelper);
+        term.accept(unparser);
+        return unparser.getResult();
     }
 
     private static String getStrFromKrunState(KRunState pick, Context definitionHelper) {
