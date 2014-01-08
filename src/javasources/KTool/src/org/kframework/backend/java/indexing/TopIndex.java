@@ -14,7 +14,12 @@ public class TopIndex implements Index {
     public boolean isUnifiable(Index index) {
         return true;
     }
-
+    
+    @Override
+    public int hashCode() {
+        return 1;
+    }
+    
     @Override
     public String toString() {
         return "@Top";

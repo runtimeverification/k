@@ -14,6 +14,11 @@ public class BottomIndex implements Index {
     public boolean isUnifiable(Index index) {
         return index instanceof BottomIndex || index instanceof TopIndex;
     }
+    
+    @Override
+    public int hashCode() {
+        return 0;
+    }
 
     @Override
     public String toString() {
