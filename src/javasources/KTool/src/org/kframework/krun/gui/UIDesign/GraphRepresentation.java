@@ -193,20 +193,29 @@ public class GraphRepresentation extends JPanel implements ItemListener {
         step.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 synchronized (ActionListener.class) {
+
+                    int oldNoOfVertices = vvd.getLayout().getGraph().getVertexCount();
                     Object[] picked = vvd.getSelectedVertices().toArray();
+                    int noOfSteps = determineNoOfSteps();
                     if (picked.length > 0) {
                         for (int i = 0; i < picked.length; i++) {
-                            if (!(picked[i] instanceof KRunState))
+
+                            if (!(picked[i] instanceof KRunState)){
                                 continue;
+                            }
                             KRunState pick = (KRunState) picked[i];
                             try {
-                                // run command just for leaves
-                                if (vvd.getVv().getGraphLayout().getGraph()
-                                        .getSuccessorCount(pick) == 0) {
-                                    commandProcessor.step(pick, determineNoOfSteps());
-                                }
+                                commandProcessor.step(pick, determineNoOfSteps());
+
                                 // reset the selection
                                 vvd.getVv().getPickedVertexState().pick(pick, false);
+                                // enable selection of the results
+
+                                int newNoOfVertices = vvd.getLayout().getGraph().getVertexCount();
+                                if(newNoOfVertices == oldNoOfVertices)
+                                {
+                                    selectActionStepResults(pick, 0, noOfSteps);
+                                }
                             } catch (IOException e1) {
                                 e1.printStackTrace();
                             } catch (Exception e1) {
@@ -214,7 +223,10 @@ public class GraphRepresentation extends JPanel implements ItemListener {
                             }
                         }
                         redrawGraphAndResetScroll();
-                    } else if (picked.length == 0) {
+
+
+                    }
+                    else if (picked.length == 0) {
                         showMessageOfSelectRequirement("Step");
                     }
                     resetNoOfSteps();
@@ -223,10 +235,29 @@ public class GraphRepresentation extends JPanel implements ItemListener {
         });
     }
 
+    public void selectActionStepResults(KRunState vertex, int step, int totalSteps){
+        if(step >= totalSteps){
+            return;
+        }
+        else{
+            Object[] successors = vvd.getLayout().getGraph().getSuccessors(vertex).toArray();
+            if(++step == totalSteps){               
+                vvd.getVv().getPickedVertexState().pick(successors[0], true);   
+                return;         
+            }
+            else{
+                selectActionStepResults((KRunState)successors[0], step, totalSteps);
+            }
+        }
+
+    }
+
     public void addActionForStepAllButton() {
         stepAll.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 synchronized (ActionListener.class) {
+                    int oldNoOfVertices = vvd.getLayout().getGraph().getVertexCount();
+                    int noOfSteps = determineNoOfSteps();
                     Object[] picked = vvd.getSelectedVertices().toArray();
                     if (picked.length > 0) {
                         for (int i = 0; i < picked.length; i++) {
@@ -235,13 +266,18 @@ public class GraphRepresentation extends JPanel implements ItemListener {
                             KRunState pick = (KRunState) picked[i];
                             try {
                                 // run command just for leaves
-                                if (vvd.getVv().getGraphLayout().getGraph()
-                                        .getSuccessorCount(pick) == 0
-                                        || picked.length == 1) {
-                                    commandProcessor.step_all(determineNoOfSteps(), pick);
-                                }
+                                //if (vvd.getVv().getGraphLayout().getGraph().getSuccessorCount(pick) == 0
+                                //      || picked.length == 1) {
+                                commandProcessor.step_all(determineNoOfSteps(), pick);
+                                //}
                                 // reset the selection
                                 vvd.getVv().getPickedVertexState().pick(pick, false);
+
+                                int newNoOfVertices = vvd.getLayout().getGraph().getVertexCount();
+                                if(newNoOfVertices == oldNoOfVertices)
+                                {
+                                    selectActionStepAllResults(pick, 0, noOfSteps);
+                                }
 
                             } catch (IOException e1) {
                                 e1.printStackTrace();
@@ -250,7 +286,8 @@ public class GraphRepresentation extends JPanel implements ItemListener {
                             }
                         }
                         redrawGraphAndResetScroll();
-                    } else if (picked.length == 0) {
+                    }
+                    else if (picked.length == 0) {
                         showMessageOfSelectRequirement("Step-all");
                     }
                     resetNoOfSteps();
@@ -258,6 +295,29 @@ public class GraphRepresentation extends JPanel implements ItemListener {
             }
         });
     }
+
+    public void selectActionStepAllResults(KRunState vertex, int step, int totalSteps){
+        if(step >= totalSteps){
+            return;
+        }
+        else{
+            Object[] successors = vvd.getLayout().getGraph().getSuccessors(vertex).toArray();
+            if(++step == totalSteps){       
+                for(int i = 0; i < successors.length; i++){     
+                    vvd.getVv().getPickedVertexState().pick(successors[i], true);   
+                }
+                return;         
+            }
+            else{
+                for(int i = 0; i < successors.length; i++){     
+
+                    selectActionStepAllResults((KRunState)successors[0], step, totalSteps);
+                }
+            }
+        }
+
+    }
+
 
     public void addActionForCollapse() {
         collapse.addActionListener(new ActionListener() {
@@ -744,3 +804,4 @@ public class GraphRepresentation extends JPanel implements ItemListener {
     }
 
 }
+

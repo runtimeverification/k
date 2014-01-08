@@ -13,6 +13,7 @@ import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
 import org.kframework.kil.MapItem;
 import org.kframework.kil.Term;
+import org.kframework.kil.TermCons;
 
 /*
  * Class used to check for semantic equality
@@ -87,6 +88,8 @@ public class SemanticEqual {
             return areEqual((Cell) t1, (Cell) t2);
         } else if (t1 instanceof KInjectedLabel) {
             return areEqual((KInjectedLabel) t1, (KInjectedLabel) t2);
+        }else if (t1 instanceof TermCons){
+            return areEqual((TermCons) t1, (TermCons) t2);
         }
         return t1.equals(t2);
     }
@@ -204,6 +207,16 @@ public class SemanticEqual {
         return areEqual(k1.getTerm(), k2.getTerm());
     }
 
+    /*
+     * Checks equality for TermCons terms.
+     */
+    private static boolean areEqual(TermCons t1, TermCons t2) {
+        if (!checkForNull(t1, t2)) {
+            return false;
+        }
+        return areListEqual(t1.getContents(), t2.getContents());
+    }
+    
     /*
      * Check if both terms are null or not
      */
