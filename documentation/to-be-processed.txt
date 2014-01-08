@@ -578,3 +578,13 @@ Does desugaring also apply to rules?
 
 It surely applies to programs.
 Concerning rules, that has been debated in the past, but I'm not sure we reached a definite conclusion. 
+
+
+The best way to understand these is to forget about the Maude backend.  They translate the same way in Maude because Maude does nor provide us with the subtle differences that we need here.
+
+macro: yes, they are supposed to apply statically, before any rewriting starts, both on the program and on the semantic rules.  So in terms of performance, they are supposed to not count (i.e., their amortized cost is zero).
+
+function: is a label has this attribute, then it is as if it is a builtin function, the only difference being that it is "implemented" using K rules.  We even considered changing the language in which functions are implemented, and following a functional style instead.  So they are meant to be very fast, almost instantaneous, when compared to the other rules.  Different backends are free to implement the functions different ways.  The symbolic execution engine also considers than as part of the axiomatization of the underlying domain in which semantic rules are applied.  So mathematically speaking, functions do not count as semantic computational steps.
+
+anywhere: these are just rules which can apply anywhere they match, so they are expected to be comparatively very slow.  Their application counts as computational steps, so they are interleaved etc. in formal analyses.  It is hard to reason with them in reachability logic.  One should avoid such rules by any means if possible, and use strictness and normal rules instead.
+
