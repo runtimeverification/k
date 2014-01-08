@@ -340,11 +340,12 @@ public class SymbolicRewriter {
         // equivalence classes of rules. We iterate through these equivalence
         // classes one at a time, seeing which one contains rules we can apply.
         //        System.out.println(LookupCell.find(constrainedTerm.term(),"k"));
-        strategy.reset(getRules(constrainedTerm.term()));
-        while (strategy.hasNext()) {
-            transition = strategy.nextIsTransition();
-            Collection<Rule> rules = strategy.next();
-            for (Rule rule : rules) {
+//        strategy.reset(getRules(constrainedTerm.term()));
+//        while (strategy.hasNext()) {
+//            transition = strategy.nextIsTransition();
+//            Collection<Rule> rules = strategy.next();
+//            for (Rule rule : rules) {
+        for (Rule rule : getRules(constrainedTerm.term())) {
                 ruleStopwatch.reset();
                 ruleStopwatch.start();
 
@@ -395,13 +396,13 @@ public class SymbolicRewriter {
                         return;
                     }
                 }
-            }
-            // If we've found matching results from one equivalence class then
-            // we are done, as we can't match rules from two equivalence classes
-            // in the same step.
-            if (results.size() > 0) {
-                return;
-            }
+//            }
+//            // If we've found matching results from one equivalence class then
+//            // we are done, as we can't match rules from two equivalence classes
+//            // in the same step.
+//            if (results.size() > 0) {
+//                return;
+//            }
         }
         //System.out.println("Result: " + results.toString());
         //System.out.println();

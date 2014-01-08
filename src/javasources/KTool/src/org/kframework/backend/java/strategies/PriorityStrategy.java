@@ -9,38 +9,38 @@ import java.util.HashSet;
 import java.util.TreeSet;
 
 public class PriorityStrategy implements Strategy {
-  public PriorityStrategy() {
-    priorityMap = new java.util.HashMap<Integer,HashSet<Rule>>();
-    priorities = new java.util.TreeSet<Integer>();
-    priorityIterator = priorities.descendingIterator();
-  }
-
-  public void reset(Collection<Rule> rules) {
-    priorityMap.clear();
-    priorities.clear();
-    for (Rule r : rules) {
-      Integer p = 0;
-      if (r.containsAttribute("priority")) {
-        p = Integer.parseInt(r.getAttribute("priority"));
-      }
-      if (!priorityMap.containsKey(p)) {
-        priorityMap.put(p, new HashSet<Rule>());
-      }
-      priorityMap.get(p).add(r);
-      priorities.add(p);
+    public PriorityStrategy() {
+        priorityMap = new java.util.HashMap<Integer, HashSet<Rule>>();
+        priorities = new java.util.TreeSet<Integer>();
+        priorityIterator = priorities.descendingIterator();
     }
-    priorityIterator = priorities.descendingIterator();
-  }
 
-  public Collection<Rule> next() {
-    return priorityMap.get(priorityIterator.next());
-  }
+    public void reset(Collection<Rule> rules) {
+        priorityMap.clear();
+        priorities.clear();
+        for (Rule r : rules) {
+            Integer p = 0;
+            if (r.containsAttribute("priority")) {
+                p = Integer.parseInt(r.getAttribute("priority"));
+            }
+            if (!priorityMap.containsKey(p)) {
+                priorityMap.put(p, new HashSet<Rule>());
+            }
+            priorityMap.get(p).add(r);
+            priorities.add(p);
+        }
+        priorityIterator = priorities.descendingIterator();
+    }
 
-  public boolean hasNext() {
-    return priorityIterator.hasNext();
-  }
+    public Collection<Rule> next() {
+        return priorityMap.get(priorityIterator.next());
+    }
 
-  private Iterator<Integer> priorityIterator;
-  private HashMap<Integer, HashSet<Rule>> priorityMap;
-  private TreeSet<Integer> priorities;
-} 
+    public boolean hasNext() {
+        return priorityIterator.hasNext();
+    }
+
+    private Iterator<Integer> priorityIterator;
+    private HashMap<Integer, HashSet<Rule>> priorityMap;
+    private TreeSet<Integer> priorities;
+}
