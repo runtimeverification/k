@@ -56,21 +56,21 @@ public class KRunState implements Serializable{
 			if (!K.parens) {
 				result = (Term) result.accept(new AddBracketsFilter(context));
 				try {
+				    /* collect existing free variables in the result */
 				    final Set<Variable> existingFreeVariables = new HashSet<Variable>();
-				    if (K.do_testgen) {
-	                    // TODO(YilongL): is it specific to the test generation that
-	                    // the result can be a non-ground term?				        
-				        Visitor variableCollector = new BasicVisitor(context) {
-				            @Override
-				            public void visit(Variable var) {
-				                existingFreeVariables.add(var);
-				            }
-				        };
-				        result.accept(variableCollector);
-				    }
+                    Visitor variableCollector = new BasicVisitor(context) {
+                        @Override
+                        public void visit(Variable var) {
+                            existingFreeVariables.add(var);
+                        }
+                    };
+                    result.accept(variableCollector);
 				    
+                    /* add brackets */
 					AddBracketsFilter2 filter = new AddBracketsFilter2(context);
 					result = (Term) result.accept(filter);
+					
+					/* initialize the substitution map of the filter using existing free variables */
 					Map<String, Term> subst = new HashMap<String, Term>(filter.substitution);
 					for (Variable var : existingFreeVariables) {
 					    subst.put(var.getName(), var);
