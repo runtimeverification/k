@@ -187,8 +187,9 @@ public class KItem extends Term implements Sorted {
 
         if (kLabel.getClass().equals(KLabelInjection.class)) {
             /*
-             * if the kLabel is a KLabelInjection, then the term injected inside
-             * it must be a function whose return value is a KLabel or a KList
+             * if the kLabel is a KLabelInjection and the term injected inside
+             * is a TermCons, then this TermCons must be a function whose return
+             * value is a KLabel or a KList
              */
             Term term = ((KLabelInjection) kLabel).term();
             if (term instanceof TermCons) {
@@ -196,10 +197,8 @@ public class KItem extends Term implements Sorted {
                 String kLabel = termCons.production().getAttribute("klabel");
                 kLabelConstant = KLabelConstant.of(kLabel, definition.context());
                 arguments = termCons.contents().toArray(new Term[termCons.contents().size()]);
-            } else if (term instanceof KLabel) {
-                return this;
             } else {
-                assert false : "YilongL: Fix it; implement the missing case";
+                return this;
             }
         } else {
             if (!(kLabel instanceof KLabelConstant)) {
@@ -313,7 +312,7 @@ public class KItem extends Term implements Sorted {
                 result = new KItem(new KLabelInjection(result), new KList(), definition.context());
             } else if (result instanceof KList) {
                 // TODO: handle the case that KList as return value
-                assert false : "YilongL: Fix it; implement the missing case";
+                assert false : "YilongL: Fix it; handle the case where the return value is a KList";
             }
             return result;
         } catch (IllegalAccessException | IllegalArgumentException e) {
