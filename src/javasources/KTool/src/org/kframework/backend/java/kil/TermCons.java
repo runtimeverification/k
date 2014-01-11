@@ -29,6 +29,10 @@ public class TermCons extends Term {
     public java.util.List<Term> contents() {
         return contents;
     }
+    
+    public org.kframework.kil.Production production() {
+        return production;
+    }
 
     @Override
     public ASTNode accept(Transformer transformer) {

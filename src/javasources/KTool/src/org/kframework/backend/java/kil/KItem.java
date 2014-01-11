@@ -1,11 +1,18 @@
 package org.kframework.backend.java.kil;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.SortMembership;
 import org.kframework.backend.java.symbolic.BuiltinFunction;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
-import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
@@ -15,13 +22,6 @@ import org.kframework.krun.K;
 import org.kframework.utils.general.GlobalSettings;
 
 import com.google.common.collect.Sets;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 
 /**
@@ -182,99 +182,121 @@ public class KItem extends Term implements Sorted {
      */
     public Term evaluateFunction(SymbolicConstraint constraint, TermContext context) {
         Definition definition = context.definition();
-        if (!(kLabel instanceof KLabelConstant)) {
-            return this;
-        }
-        KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
+        KLabelConstant kLabelConstant = null; // the function symbol
+        Term[] arguments = null;
 
-        /* evaluate a sort membership predicate */
-        if (kLabelConstant.label().startsWith("is") && kList.getContents().size() == 1
-                && kList.getContents().get(0) instanceof Sorted) {
-            return SortMembership.check(this, context.definition().context());
-        }
-
-        /* apply rules for user defined functions */
-        if (!definition.functionRules().get((KLabelConstant) kLabel).isEmpty()) {
-            ConstrainedTerm constrainedTerm = new ConstrainedTerm(kList, context);
-
-            // TODO(YilongL): consider applying rules with attribute [owise]
-            // only after no other rules can be applied
-            Term result = null;
-            for (Rule rule : definition.functionRules().get((KLabelConstant) kLabel)) {
-                SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(context);
-                if (constraint != null) { 
-                    // TODO(YilongL): shall I preserve this check? I tend to
-                    // eliminate it and ensure constraint to be always non-null
-                    leftHandSideConstraint.addAll(constraint);
-                }
-                leftHandSideConstraint.addAll(rule.requires());
-                for (Variable variable : rule.freshVariables()) {
-                    leftHandSideConstraint.add(variable, IntToken.fresh());
-                }
-
-                ConstrainedTerm leftHandSide = new ConstrainedTerm(
-                        ((KItem) rule.leftHandSide()).kList,
-                        rule.lookups().getSymbolicConstraint(context),
-                        leftHandSideConstraint,
-                        context);
-
-                Collection<SymbolicConstraint> solutions = constrainedTerm.unify(leftHandSide);
-
-                if (K.do_concrete_exec) {
-                    assert solutions.size() <= 1 : "function definition is not deterministic";
-                }
-
-                if (solutions.isEmpty()) {
-                    continue;
-                }
-
-                SymbolicConstraint solution = solutions.iterator().next();
-
-                if (!solution.isSubstitution()) {
-                    continue;
-                }
-
-                solution.orientSubstitution(rule.variableSet(), context);
-
-                /* rename rule variables in the constraints */
-                Map<Variable, Variable> freshSubstitution = solution.rename(rule.variableSet());
-
-                Term rightHandSide = rule.rightHandSide();
-                /* rename rule variables in the rule RHS */
-                rightHandSide = rightHandSide.substitute(freshSubstitution, context);
-                /* apply the constraints substitution on the rule RHS */
-                rightHandSide = rightHandSide.substitute(solution.substitution(), context);
-                /* evaluate pending functions in the rule RHS */
-                //TODO(AndreiS): Only evaluate if the term has changed
-                rightHandSide = rightHandSide.evaluate(solution, context);
-                /* eliminate anonymous variables */
-                solution.eliminateAnonymousVariables();
-
-                /* update the constraint */
-                if (K.do_concrete_exec) {
-                    // in concrete execution mode, the evaluation of
-                    // user-defined functions will not create new constraints
-                } else if (constraint != null) {
-                    throw new RuntimeException(
-                            "Fix it; need to find a proper way to update " +
-                            "the constraint without interferring with the " +
-                            "potential ongoing normalization process");
-                } else { // constraint == null
-                    if (solution.isUnknown() || solution.isFalse()) {
-                        throw new RuntimeException(
-                                "Fix it; no reference to the symbolic " +
-                                "constraint that needs to be updated");
-                    }
-                }
-                
-                if (K.do_concrete_exec) {
-                    assert result == null : "function definition is not deterministic";
-                }
-                result = rightHandSide;
+        if (kLabel.getClass().equals(KLabelInjection.class)) {
+            /*
+             * if the kLabel is a KLabelInjection, then the term injected inside
+             * it must be a function whose return value is a KLabel or a KList
+             */
+            Term term = ((KLabelInjection) kLabel).term();
+            if (term instanceof TermCons) {
+                TermCons termCons = (TermCons) term;
+                String kLabel = termCons.production().getAttribute("klabel");
+                kLabelConstant = KLabelConstant.of(kLabel, definition.context());
+                arguments = termCons.contents().toArray(new Term[termCons.contents().size()]);
+            } else if (term instanceof KLabel) {
+                return this;
+            } else {
+                assert false : "YilongL: Fix it; implement the missing case";
             }
-            
-            if (result != null) {
-                return result;
+        } else {
+            if (!(kLabel instanceof KLabelConstant)) {
+                return this;
+            }
+            kLabelConstant = (KLabelConstant) kLabel;
+            arguments = kList.getContents().toArray(new Term[kList.getContents().size()]);
+
+            /* evaluate a sort membership predicate */
+            if (kLabelConstant.label().startsWith("is") && kList.getContents().size() == 1
+                    && kList.getContents().get(0) instanceof Sorted) {
+                return SortMembership.check(this, context.definition().context());
+            }
+
+            /* apply rules for user defined functions */
+            if (!definition.functionRules().get((KLabelConstant) kLabel).isEmpty()) {
+                ConstrainedTerm constrainedTerm = new ConstrainedTerm(kList, context);
+
+                // TODO(YilongL): consider applying rules with attribute [owise]
+                // only after no other rules can be applied
+                Term result = null;
+                for (Rule rule : definition.functionRules().get((KLabelConstant) kLabel)) {
+                    SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(context);
+                    if (constraint != null) { 
+                        // TODO(YilongL): shall I preserve this check? I tend to
+                        // eliminate it and ensure constraint to be always non-null
+                        leftHandSideConstraint.addAll(constraint);
+                    }
+                    leftHandSideConstraint.addAll(rule.requires());
+                    for (Variable variable : rule.freshVariables()) {
+                        leftHandSideConstraint.add(variable, IntToken.fresh());
+                    }
+
+                    ConstrainedTerm leftHandSide = new ConstrainedTerm(
+                            ((KItem) rule.leftHandSide()).kList,
+                            rule.lookups().getSymbolicConstraint(context),
+                            leftHandSideConstraint,
+                            context);
+
+                    Collection<SymbolicConstraint> solutions = constrainedTerm.unify(leftHandSide);
+
+                    if (K.do_concrete_exec) {
+                        assert solutions.size() <= 1 : "function definition is not deterministic";
+                    }
+
+                    if (solutions.isEmpty()) {
+                        continue;
+                    }
+
+                    SymbolicConstraint solution = solutions.iterator().next();
+
+                    if (!solution.isSubstitution()) {
+                        continue;
+                    }
+
+                    solution.orientSubstitution(rule.variableSet(), context);
+
+                    /* rename rule variables in the constraints */
+                    Map<Variable, Variable> freshSubstitution = solution.rename(rule.variableSet());
+
+                    Term rightHandSide = rule.rightHandSide();
+                    /* rename rule variables in the rule RHS */
+                    rightHandSide = rightHandSide.substitute(freshSubstitution, context);
+                    /* apply the constraints substitution on the rule RHS */
+                    rightHandSide = rightHandSide.substitute(solution.substitution(), context);
+                    /* evaluate pending functions in the rule RHS */
+                    //TODO(AndreiS): Only evaluate if the term has changed
+                    rightHandSide = rightHandSide.evaluate(solution, context);
+                    /* eliminate anonymous variables */
+                    solution.eliminateAnonymousVariables();
+
+                    /* update the constraint */
+                    if (K.do_concrete_exec) {
+                        // in concrete execution mode, the evaluation of
+                        // user-defined functions will not create new constraints
+                    } else if (constraint != null) {
+                        throw new RuntimeException(
+                                "Fix it; need to find a proper way to update " +
+                                        "the constraint without interferring with the " +
+                                "potential ongoing normalization process");
+                    } else { // constraint == null
+                        if (solution.isUnknown() || solution.isFalse()) {
+                            throw new RuntimeException(
+                                    "Fix it; no reference to the symbolic " +
+                                    "constraint that needs to be updated");
+                        }
+                    }
+
+                    if (K.do_concrete_exec) {
+                        assert result == null : "function definition is not deterministic";
+                    }
+                    result = rightHandSide;
+                }
+
+                if (result != null) {
+                    return result;
+                }
             }
         }
 
@@ -282,17 +304,17 @@ public class KItem extends Term implements Sorted {
             return this;
         }
 
-        /* this can be removed, and IllegalArgumentException would be thrown below */
-        //for (Term term : kList.getItems()) {
-        //    if (!term.isGround()) {
-        //        return this;
-        //    }
-        //}
-
         try {
-            Term[] arguments = kList.getContents().toArray(new Term[kList.getContents().size()]);
             Term result = BuiltinFunction.invoke(context, kLabelConstant, arguments);
-            if (result == null) result = this;
+//            System.err.println(this + " => " + result);
+            if (result == null) {
+                result = this;
+            } else if (result instanceof KLabel) {
+                result = new KItem(new KLabelInjection(result), new KList(), definition.context());
+            } else if (result instanceof KList) {
+                // TODO: handle the case that KList as return value
+                assert false : "YilongL: Fix it; implement the missing case";
+            }
             return result;
         } catch (IllegalAccessException | IllegalArgumentException e) {
             //e.printStackTrace();
