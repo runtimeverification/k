@@ -101,6 +101,7 @@ public class PrePostVisitor implements Visitor {
 
     @Override
     public void visit(Collection collection) {
+        // TODO(YilongL): change to "throw new UnsupportedOperationException();"
         preVisitor.resetProceed();
         collection.accept(preVisitor);
         if (!preVisitor.isProceed()) return;
