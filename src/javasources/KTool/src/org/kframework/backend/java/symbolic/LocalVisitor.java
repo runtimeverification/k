@@ -183,6 +183,11 @@ public class LocalVisitor implements Visitor {
     public void visit(Term node) {
         visit((JavaSymbolicObject) node);
     }
+    
+    @Override
+    public void visit(TermCons termCons) {
+        visit((Term) termCons);
+    }
 
     @Override
     public void visit(Token token) {

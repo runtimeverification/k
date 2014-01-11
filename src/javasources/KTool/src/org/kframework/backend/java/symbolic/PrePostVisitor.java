@@ -90,7 +90,7 @@ public class PrePostVisitor implements Visitor {
         preVisitor.resetProceed();
         cellCollection.accept(preVisitor);
         if (!preVisitor.isProceed()) return;
-        for (Cell cell : cellCollection.cells()) {
+        for (Cell<?> cell : cellCollection.cells()) {
             cell.accept(this);
         }
         if (cellCollection.hasFrame()) {
@@ -106,6 +106,9 @@ public class PrePostVisitor implements Visitor {
         if (!preVisitor.isProceed()) return;
         if (collection.hasFrame()) {
             collection.frame().accept(this);
+        }
+        for (Term term : collection.getContents()) {
+            term.accept(this);
         }
         collection.accept(postVisitor);
     }
@@ -152,6 +155,17 @@ public class PrePostVisitor implements Visitor {
         kItem.kLabel().accept(this);
         kItem.kList().accept(this);
         kItem.accept(postVisitor);
+    }
+
+    @Override
+    public void visit(TermCons termCons) {
+        preVisitor.resetProceed();
+        termCons.accept(preVisitor);
+        if (!preVisitor.isProceed()) return;
+        for (Term term : termCons.contents()) {
+            term.accept(this);
+        }
+        termCons.accept(postVisitor);
     }
 
     @Override

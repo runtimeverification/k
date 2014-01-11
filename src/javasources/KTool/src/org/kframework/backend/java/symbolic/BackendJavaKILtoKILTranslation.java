@@ -15,6 +15,7 @@ import org.kframework.backend.java.kil.KLabelInjection;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermCons;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.compile.utils.ConfigurationStructureMap;
@@ -68,7 +69,7 @@ public class BackendJavaKILtoKILTranslation extends CopyOnWriteTransformer {
         for (org.kframework.kil.Term term : terms) {
             if (! (term instanceof org.kframework.kil.Cell)) continue;
             String key = ((org.kframework.kil.Cell) term).getLabel();
-            for (Cell cell : cellMap.get(key)) {
+            for (Cell<?> cell : cellMap.get(key)) {
                 contents.add((org.kframework.kil.Cell) transform(cell));
             }
         }
@@ -89,6 +90,17 @@ public class BackendJavaKILtoKILTranslation extends CopyOnWriteTransformer {
         return new org.kframework.kil.KApp(
                 (org.kframework.kil.Term) kItem.kLabel().accept(this),
                 (org.kframework.kil.Term) kItem.kList().accept(this));
+    }
+    
+    @Override
+    public ASTNode transform(TermCons termCons) {
+        String cons = termCons.cons();
+        String psort = context.conses.get(cons).getSort();
+        List<org.kframework.kil.Term> contents = new ArrayList<org.kframework.kil.Term>();
+        for (Term term : termCons.contents()) {
+            contents.add((org.kframework.kil.Term) term.accept(this));
+        }
+        return new org.kframework.kil.TermCons(psort, cons, contents, context);
     }
 
     @Override

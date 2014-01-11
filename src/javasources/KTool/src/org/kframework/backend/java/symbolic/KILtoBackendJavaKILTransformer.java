@@ -40,6 +40,7 @@ import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.SetLookup;
 import org.kframework.backend.java.kil.SetUpdate;
 import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermCons;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
@@ -160,7 +161,16 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
         return new KItem(kLabel, kList, this.context);
     }
-
+    
+    @Override
+    public ASTNode transform(org.kframework.kil.TermCons node) throws TransformerException {
+        List<Term> contents = new ArrayList<Term>();
+        for (org.kframework.kil.Term term : node.getContents()) {
+            contents.add((Term) term.accept(this));
+        }
+        return new TermCons(node.getCons(), contents, definition.context());
+    }
+    
     @Override
     public ASTNode transform(org.kframework.kil.KLabelConstant node) throws TransformerException {
         return KLabelConstant.of(node.getLabel(), this.context);

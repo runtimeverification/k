@@ -12,6 +12,6 @@ import org.kframework.backend.java.kil.Term;
  */
 public interface Unifiable {
 
-    public void accept(Unifier unifier, Term patten);
+    public void accept(Unifier unifier, Term pattern);
 
 }

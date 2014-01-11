@@ -36,6 +36,7 @@ public class ListBuiltin extends CollectionBuiltin {
         return transformer.transform(this);
     }
 
+    // TODO(YilongL): shouldn't elementsLeft and elementsRight have type java.util.List?
     public static ListBuiltin of(DataStructureSort sort, Collection<Term> elementsLeft, Collection<Term> elementsRight,
                        Collection<Term> terms) {
         ArrayList<Term> left = new ArrayList<Term>(elementsLeft);

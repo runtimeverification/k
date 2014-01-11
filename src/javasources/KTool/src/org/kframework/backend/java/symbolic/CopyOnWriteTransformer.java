@@ -1,9 +1,15 @@
 package org.kframework.backend.java.symbolic;
 
-import com.google.common.collect.Iterables;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
 import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.Int32Token;
+import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.BuiltinList;
@@ -33,15 +39,15 @@ import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.SetLookup;
 import org.kframework.backend.java.kil.SetUpdate;
 import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermCons;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.ASTNode;
 
-import java.util.*;
-
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 
 
@@ -93,7 +99,7 @@ public class CopyOnWriteTransformer implements Transformer {
         boolean change = false;
         Multimap<String, Cell> cells = ArrayListMultimap.create();
         for (Map.Entry<String, Cell> entry : cellCollection.cellMap().entries()) {
-            Cell cell = (Cell) entry.getValue().accept(this);
+            Cell<?> cell = (Cell<?>) entry.getValue().accept(this);
             cells.put(entry.getKey(), cell);
             change = change || cell != entry.getValue();
         }
@@ -589,6 +595,17 @@ public class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(Term node) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ASTNode transform(TermCons termCons) {
+        List<Term> transformedContents = transformList(termCons.contents());
+        if (transformedContents != termCons.contents()) {
+            return new TermCons(termCons.cons(), transformedContents, context
+                    .definition().context());
+        } else {
+            return termCons;
+        }
     }
 
     @Override
