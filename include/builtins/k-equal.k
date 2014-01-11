@@ -5,12 +5,12 @@ module K-EQUAL-HOOKS
   imports BOOL-HOOKS
   imports K-SET-EXTRAS
   imports K-MAP-EXTRAS
-  
+
 
   syntax Bool ::= left:
   				  K "==K" K           [function, hook(#K-EQUAL:_==K_), latex({#1}\mathrel{=_K}{#2}), equalEqualK]
 				| K "=/=K" K          [function, hook(#K-EQUAL:_=/=K_), latex({#1}\mathrel{\neq_K}{#2}), notEqualEqualK]
-				
+
   syntax priorities equalEqualK notEqualEqualK > boolOperation
   rule K1:K =/=K K2:K => notBool(K1 ==K K2)
 
@@ -28,7 +28,7 @@ module K-EQUAL-HOOKS
                             when notBool (K in Set2:Set)
   // equality over sets
   syntax Bool ::= Set "==Set" Set    [function]
-  rule Set1:Set ==Set Set2:Set => (Set1 <=Set Set2) andBool (Set2 <=Set Set1) 
+  rule Set1:Set ==Set Set2:Set => (Set1 <=Set Set2) andBool (Set2 <=Set Set1)
 
   // disequality over sets
   syntax Bool ::= Set "=/=Set" Set   [function]
@@ -74,7 +74,7 @@ module K-EQUAL-HOOKS
 
   // equality over KLabel
   syntax Bool ::= KLabel "==KLabel" KLabel
-    [function, latex({#1}\mathrel{=_{\it KLabel}}{#2})]
+    [function, hook(KEqual:_==KLabel_), latex({#1}\mathrel{=_{\it KLabel}}{#2})]
   rule '_==KLabel_(K1:K,,K2:K) => K1 ==K K2 [function, anywhere]
 
   // disequality over KLabel
@@ -110,4 +110,3 @@ module K-EQUAL-HOOKS
   rule (_:K,,_:KList) =KList .KList => false
   rule .KList =KList (_:K,,_:KList) => false
 endmodule
-
