@@ -260,8 +260,6 @@ public class TermCons extends Term {
 					}
 				}
 			}
-			
-			
 			return new KApp(new KLabelConstant(label),new KList(tempList));
 		}
 	}
