@@ -72,7 +72,6 @@ public class SymbolicUnifier extends AbstractUnifier {
     public SymbolicUnifier(SymbolicConstraint constraint, TermContext context) {
         this.fConstraint = constraint;
         this.termContext = context;
-        context.definition();
         multiConstraints = new ArrayList<java.util.Collection<SymbolicConstraint>>();
     }
 
@@ -112,6 +111,15 @@ public class SymbolicUnifier extends AbstractUnifier {
             otherTerm = KCollection.upKind(otherTerm, term.kind());
         }
 
+        if (term.kind() == Kind.CELL || term.kind() == Kind.CELL_COLLECTION) {
+            Context context = termContext.definition().context();
+            term = CellCollection.upKind(term, otherTerm.kind(), context);
+            otherTerm = CellCollection.upKind(otherTerm, term.kind(), context);
+        }
+        
+        // TODO(YilongL): may need to replace the following assertion to the
+        // method fail() in the future because it crashes the Java rewrite
+        // engine instead of just failing the unification process
         assert term.kind() == otherTerm.kind():
                "kind mismatch between " + term + " (" + term.kind() + ")"
                + " and " + otherTerm + " (" + otherTerm.kind() + ")";

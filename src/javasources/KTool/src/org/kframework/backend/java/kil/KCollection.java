@@ -197,8 +197,6 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
      * 
      * @param term
      *            the given term to be degraded
-     * @param kind
-     *            the target kind that the term is to be degraded to
      * @return the resulting term after kind degradation
      */
     public static Term downKind(Term term) {

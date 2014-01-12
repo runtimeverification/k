@@ -1,32 +1,53 @@
 package org.kframework.backend.java.symbolic;
 
 
-import com.microsoft.z3.BoolExpr;
-import com.microsoft.z3.Expr;
-import com.microsoft.z3.Sort;
-import com.microsoft.z3.Symbol;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
+
 import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.Int32Token;
-import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.kil.Bottom;
+import org.kframework.backend.java.kil.CellCollection;
+import org.kframework.backend.java.kil.Definition;
+import org.kframework.backend.java.kil.Hole;
+import org.kframework.backend.java.kil.JavaSymbolicObject;
+import org.kframework.backend.java.kil.KCollection;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.Kind;
+import org.kframework.backend.java.kil.Sorted;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.kil.Z3Term;
 import org.kframework.backend.java.util.GappaPrinter;
 import org.kframework.backend.java.util.GappaServer;
 import org.kframework.backend.java.util.KSorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.kil.ASTNode;
-
-import java.util.*;
-import java.util.Collection;
+import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.krun.K;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
-
+import com.microsoft.z3.BoolExpr;
+import com.microsoft.z3.Expr;
 import com.microsoft.z3.Solver;
+import com.microsoft.z3.Sort;
 import com.microsoft.z3.Status;
+import com.microsoft.z3.Symbol;
 import com.microsoft.z3.Z3Exception;
-import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.krun.K;
 
 
 /**
@@ -146,11 +167,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         private Equality(Term leftHandSide, Term rightHandSide) {
             if (leftHandSide instanceof Bottom) rightHandSide = leftHandSide;
             if (rightHandSide instanceof Bottom) leftHandSide = rightHandSide;
-            assert leftHandSide.kind() == rightHandSide.kind()
-                    || ((leftHandSide.kind() == Kind.KITEM || leftHandSide.kind() == Kind.K
-                         || leftHandSide.kind() == Kind.KLIST)
-                        && (rightHandSide.kind() == Kind.KITEM || rightHandSide.kind() == Kind.K
-                            || rightHandSide.kind() == Kind.KLIST)):
+
+            assert checkKindMisMatch(leftHandSide, rightHandSide):
                     "kind mismatch between "
                     + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
                     + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
@@ -158,9 +176,23 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             if (leftHandSide.kind() == Kind.K || leftHandSide.kind() == Kind.KLIST) {
                 leftHandSide = KCollection.downKind(leftHandSide);
             }
+            if (leftHandSide.kind() == Kind.CELL_COLLECTION) {
+                leftHandSide = CellCollection.downKind(leftHandSide);
+            }
             if (rightHandSide.kind() == Kind.K || rightHandSide.kind() == Kind.KLIST) {
                 rightHandSide = KCollection.downKind(rightHandSide);
             }
+            if (rightHandSide.kind() == Kind.CELL_COLLECTION) {
+                rightHandSide = CellCollection.downKind(rightHandSide);
+            }
+            
+            // YilongL: we can not do the following here for now because builtin
+            // lookups maynot have the correct, or concrete, kind/sort
+            // e.g., currently, node ListLookup (always) has Kind.K
+            // Besides, it is better leave the complex decision in one place,
+            // which is the SymbolicUnifier, the assertion at the beginning is
+            // merely a simple sanity check
+            // assert leftHandSide.kind() == rightHandSide.kind();
 
             this.leftHandSide = leftHandSide;
             this.rightHandSide = rightHandSide;
@@ -410,11 +442,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      *         new equality
      */
     public TruthValue add(Term leftHandSide, Term rightHandSide) {
-        assert leftHandSide.kind() == rightHandSide.kind()
-                || ((leftHandSide.kind() == Kind.KITEM || leftHandSide.kind() == Kind.K
-                     || leftHandSide.kind() == Kind.KLIST)
-                    && (rightHandSide.kind() == Kind.KITEM || rightHandSide.kind() == Kind.K
-                        || rightHandSide.kind() == Kind.KLIST)):
+        assert checkKindMisMatch(leftHandSide, rightHandSide):
                 "kind mismatch between "
                 + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
                 + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
@@ -432,6 +460,16 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         checkTruthValBeforePutIntoConstraint(normalizedLeftHandSide, normalizedRightHandSide);
 
         return truthValue;
+    }
+    
+    private boolean checkKindMisMatch(Term leftHandSide, Term rightHandSide) {
+        return leftHandSide.kind() == rightHandSide.kind()
+                || ((leftHandSide.kind() == Kind.KITEM
+                        || leftHandSide.kind() == Kind.K || leftHandSide.kind() == Kind.KLIST) && (rightHandSide
+                        .kind() == Kind.KITEM || rightHandSide.kind() == Kind.K || rightHandSide
+                        .kind() == Kind.KLIST))
+                || ((leftHandSide.kind() == Kind.CELL || leftHandSide.kind() == Kind.CELL_COLLECTION) && (rightHandSide
+                        .kind() == Kind.CELL || rightHandSide.kind() == Kind.CELL_COLLECTION));
     }
     
     /**

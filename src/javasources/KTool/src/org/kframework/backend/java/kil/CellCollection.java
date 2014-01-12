@@ -154,4 +154,67 @@ public class CellCollection extends Collection implements Sorted {
         return transformer.transform(this);
     }
 
+    /**
+     * Promotes a given {@link Term} to a given {@link Kind}. The {@code Kind}s
+     * involved in this method can only be {@code Kind#CELL} or
+     * {@code Kind#CELL_COLLECTION}. If the kind of the given {@code Term} is
+     * already above or equal to the target {@code Kind}, do nothing.
+     * <p>
+     * To be more specific, a {@code Cell} can be promoted to a single-element
+     * {@code CellCollection}.
+     * 
+     * @param term
+     *            the given term to be promoted
+     * @param kind
+     *            the target kind that the term is to be promoted to
+     * @return the resulting term after kind promotion
+     */
+    public static Term upKind(Term term, Kind kind, Context context) {
+        assert term.kind() == Kind.CELL || term.kind() == Kind.CELL_COLLECTION;
+        assert kind == Kind.CELL || kind == Kind.CELL_COLLECTION;
+
+        /* promote Cell to CellCollection */
+        if (term.kind() == Kind.CELL && kind == Kind.CELL_COLLECTION) {
+            if (term instanceof Cell) {
+                Cell cell = (Cell) term;
+                Multimap<String, Cell> cells = ArrayListMultimap.create();
+                cells.put(cell.getLabel(), cell);
+                term = new CellCollection(cells, context);
+            } else {
+                // do nothing since we cannot simply promote a variable from
+                // sort BagItem to Bag
+            }
+        }
+
+        return term;
+    }
+    
+    /**
+     * Degrades a given {@link Term} to a given {@link Kind}. The {@code Kind}s
+     * involved in this method can only be {@code Kind#CELL} or
+     * {@code Kind#CELL_COLLECTION}. If the kind of the given {@code Term} is
+     * already lower than or equal to the target {@code Kind}, do nothing.
+     * <p>
+     * To be more specific, a single-element {@code CellCollection} can be
+     * degraded to a {@code Cell}.
+     * 
+     * @param term
+     *            the given term to be degraded
+     * @return the resulting term after kind degradation
+     */
+    public static Term downKind(Term term) {
+        assert term.kind() == Kind.CELL || term.kind() == Kind.CELL_COLLECTION;
+
+        if (term instanceof CellCollection
+                && !((CellCollection) term).hasFrame()
+                && ((CellCollection) term).size() == 1) {
+            term = ((CellCollection) term).cells().iterator().next();
+        } 
+        
+        // YilongL: do not degrade the kind of a Variable since you cannot
+        // upgrade it later
+
+        return term;
+    }
+
 }

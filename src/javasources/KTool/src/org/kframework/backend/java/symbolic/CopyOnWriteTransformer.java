@@ -108,17 +108,22 @@ public class CopyOnWriteTransformer implements Transformer {
         }
 
         if (cellCollection.hasFrame()) {
-            boolean hasStar = cellCollection.hasStar();
             Variable frame;
             Term transformedFrame = (Term) cellCollection.frame().accept(this);
             if (transformedFrame instanceof CellCollection) {
-                hasStar = hasStar || ((CellCollection) transformedFrame).hasStar();
                 if (cells == cellCollection.cellMap()) {
                     cells = ArrayListMultimap.create(cellCollection.cellMap());
                 }
                 cells.putAll(((CellCollection) transformedFrame).cellMap());
                 frame = ((CellCollection) transformedFrame).hasFrame() ?
                         ((CellCollection) transformedFrame).frame() : null;
+            } else if (transformedFrame instanceof Cell) {
+                if (cells == cellCollection.cellMap()) {
+                    cells = ArrayListMultimap.create(cellCollection.cellMap());
+                }
+                Cell<?> cell = (Cell<?>) transformedFrame;
+                cells.put(cell.getLabel(), cell);
+                frame = null;
             } else {
                 frame = (Variable) transformedFrame;
             }
