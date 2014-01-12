@@ -935,7 +935,7 @@ argument does not evaluate to an object.  */
 
 //  rule objectClosure(<envStack> (C,_) ...</envStack> _)
 //       instanceOf C => true
-  rule objectClosure(<envStack> ListItem((C,_)) ...</envStack>)
+  rule objectClosure(<envStack> ListItem((C,_)) ...</envStack> _)
        instanceOf C => true
 
 //  rule objectClosure(<envStack> (C,_) => . ...</envStack> _)
