@@ -10,9 +10,12 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import jline.ArgumentCompletor;
 import jline.Completor;
@@ -55,6 +58,7 @@ import org.kframework.kil.loader.ResolveVariableAttribute;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.api.KRun;
 import org.kframework.krun.api.KRunDebugger;
+import org.kframework.krun.api.KRunProofResult;
 import org.kframework.krun.api.KRunResult;
 import org.kframework.krun.api.KRunState;
 import org.kframework.krun.api.SearchResults;
@@ -225,7 +229,8 @@ public class Main {
     }
 
     // execute krun in normal mode (i.e. not in debug mode)
-    public static void normalExecution(Term KAST, String lang, RunProcess rp,
+    @SuppressWarnings("unchecked")
+	public static void normalExecution(Term KAST, String lang, RunProcess rp,
                                        CommandlineOptions cmd_options, Context context) {
         try {
             CommandLine cmd = cmd_options.getCommandLine();
@@ -385,8 +390,23 @@ public class Main {
                 org.kframework.utils.Error.report("Backend \"" + K.backend + "\" does not support option " + e.getMessage());
             }
 
-            if ("pretty".equals(K.output_mode)) {
-                String output = result.toString();
+            if ("pretty".equals(K.output_mode) || "kore".equals(K.output_mode)) {
+            	
+            	String output = null;
+            	
+            	if(result instanceof KRunProofResult){
+            		
+            		Set<Term> temp = (Set<Term>) result.getResult();
+            		Set<Term> theResultSet = new HashSet<Term>();
+            		Iterator<Term> tempList = temp.iterator();
+            		while(tempList.hasNext()){
+            		    theResultSet.add(((Term)tempList.next()).kilToKore());
+            		}
+            		((KRunProofResult<Set<Term>>)result).setResult(theResultSet);
+            		output=result.toString();
+            	} else {
+                output = result.toString();
+            	}
                 if (!cmd.hasOption("output-file")) {
                     AnsiConsole.out.println(output);
                 } else {

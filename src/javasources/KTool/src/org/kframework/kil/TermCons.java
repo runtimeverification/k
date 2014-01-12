@@ -3,6 +3,7 @@ package org.kframework.kil;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.fusesource.jansi.AnsiConsole;
 import org.kframework.kil.loader.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.matchers.Matcher;
@@ -243,6 +244,7 @@ public class TermCons extends Term {
 		} else {
 			
 			ArrayList<Term> tempList = new ArrayList<Term>();
+			String label = "";
 			int where = 0;
 			for (int i = 0; i < production.getItems().size(); ++i) {
 				ProductionItem productionItem = production.getItems().get(i);
@@ -251,55 +253,16 @@ public class TermCons extends Term {
 					KSequence tempK = KSequence.adjust(this.getContents().get(where++).kilToKore());
 					tempList.add(tempK);
 				} else {
-					tempList.add(new KLabelConstant(((Terminal) productionItem).getTerminal()));
+					
+					if ( !((Terminal) productionItem).getTerminal().equals("(") 
+							&& !((Terminal) productionItem).getTerminal().equals(")")){
+						label += ((Terminal) productionItem).getTerminal();
+					}
 				}
 			}
 			
-			if(tempList.size()==0){
-				
-				return new KList();
-			} else if(tempList.size()==1){
-				
-				return tempList.get(0);
-			} else if(tempList.size()==2){
-				
-				if(tempList.get(0) instanceof KLabelConstant){
-					
-					return new KApp(new KLabelConstant(((KLabelConstant)tempList.get(0)).getLabel()+"(_)"),
-							KList.adjust(tempList.get(1)));
-				}else {
-					
-					return new KApp(new KLabelConstant("__"),new KList(tempList));
-				}
-			}
 			
-			KSequence tempFirst = KSequence.adjust(tempList.get(tempList.size()-1));
-			KSequence tempSecond = KSequence.adjust(tempList.get(tempList.size()-3));
-			ArrayList<Term> newList = new ArrayList<Term>();
-			newList.add(tempSecond);
-			newList.add(tempFirst);
-			KLabelConstant tempLabel = (KLabelConstant) tempList.get(tempList.size()-2);
-			KApp result = new KApp(new KLabelConstant("_"+tempLabel.getLabel()+"_"),new KList(newList));
-			
-			for(int i = tempList.size()-4;i>=0;i--){
-				
-				if(tempList.get(i) instanceof KSequence){
-					
-					newList = new ArrayList<Term>();
-					newList.add(KSequence.adjust(result));
-					newList.add(KSequence.adjust(tempList.get(i)));
-					
-					result = new KApp(new KLabelConstant("_"+tempLabel.getLabel()+"_"),new KList(newList));
-
-				}
-				
-				if(tempList.get(i) instanceof KLabelConstant){
-					
-					tempLabel = (KLabelConstant) tempList.get(i);
-				}
-			}
-			
-			return result;
+			return new KApp(new KLabelConstant(label),new KList(tempList));
 		}
 	}
 }

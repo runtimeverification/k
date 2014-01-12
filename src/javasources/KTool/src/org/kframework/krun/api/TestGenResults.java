@@ -39,7 +39,11 @@ public class TestGenResults {
             
             UnparserFilter t = new UnparserFilter(true, K.color, K.parens, context);
             Term concretePgm = KRunState.concretize(testGenResult.getGeneratedProgram(), context);
-            concretePgm.accept(t);
+            if(K.output_mode.equals("kore")){
+            	concretePgm.kilToKore().accept(t);
+            } else {
+            	concretePgm.accept(t);
+            }
             // sb.append("\nProgram:\n" + testGenResult.getGeneratedProgram()); // print abstract syntax form
             sb.append("\nProgram:\n" + t.getResult()); // print concrete syntax form
             sb.append("\nResult:");
@@ -47,7 +51,11 @@ public class TestGenResults {
 
             if (isDefaultPattern) {
                 UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
-                substitution.get("B:Bag").accept(unparser);
+                if(K.output_mode.equals("kore")){
+                	substitution.get("B:Bag").kilToKore().accept(unparser);
+                } else {
+                	substitution.get("B:Bag").accept(unparser);
+                }
                 sb.append("\n" + unparser.getResult());
             } else {
                 boolean empty = true;
@@ -55,7 +63,11 @@ public class TestGenResults {
                 for (String variable : substitution.keySet()) {
                     UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
                     sb.append("\n" + variable + " -->");
-                    substitution.get(variable).accept(unparser);
+                    if(K.output_mode.equals("kore")){
+                    	substitution.get(variable).kilToKore().accept(unparser);
+                    } else {
+                    	substitution.get(variable).accept(unparser);
+                    }
                     sb.append("\n" + unparser.getResult());
                     empty = false;
                 }

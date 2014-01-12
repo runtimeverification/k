@@ -112,7 +112,11 @@ public class KRunState implements Serializable{
 	public String toString() {
 		if (stateId == null) {
 			UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
-			getResult().accept(unparser);
+			if(K.output_mode.equals("kore")){
+				getResult().kilToKore().accept(unparser);
+			} else {
+				getResult().accept(unparser);
+			}
 			return unparser.getResult();
 		} else {
 			return "Node " + stateId;
