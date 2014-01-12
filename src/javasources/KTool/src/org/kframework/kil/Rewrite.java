@@ -1,5 +1,7 @@
 package org.kframework.kil;
 
+import java.util.ArrayList;
+
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
@@ -144,5 +146,21 @@ public class Rewrite extends Term {
 			return false;
 		Rewrite r = (Rewrite) o;
 		return left.contains(r.left) && right.contains(r.right);
+	}
+
+	@Override
+	public Term kilToKore() {
+		
+		KLabel tempLabel = new KLabelConstant("_=>_");
+		
+		KSequence keyTerm = KSequence.adjust(this.getLeft().kilToKore());
+		KSequence valueTerm = KSequence.adjust(this.getRight().kilToKore());
+		
+		ArrayList<Term> tempList = new ArrayList<Term>();
+		tempList.add(keyTerm);
+		tempList.add(valueTerm);
+		
+		KApp result = new KApp(tempLabel, new KList(tempList));
+		return result;
 	}
 }

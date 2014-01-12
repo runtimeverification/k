@@ -6,7 +6,9 @@ import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.Map;
 
@@ -90,5 +92,46 @@ public class MapUpdate extends Term {
     public void accept(Visitor visitor) {
         visitor.visit(this);
     }
+    
+	@Override
+	public Term kilToKore() {
+		
+		KLabel tempLabel = new KLabelConstant("mapUpdate(_,_,_)");
+		
+		HashMap<Term,Term> removeMap = new HashMap<Term,Term>(this.removeEntries);
+		ArrayList<Term> removeList = new ArrayList<Term>();
+		
+		for (java.util.Map.Entry<Term, Term> entry : removeMap.entrySet()) {
+			
+			ArrayList<Term> tempList = new ArrayList<Term>();
+			tempList.add(KSequence.adjust(entry.getKey().kilToKore()));
+			tempList.add(KSequence.adjust(entry.getValue().kilToKore()));
 
+			KApp temp = new KApp(new KLabelConstant("_|->_"),new KList(tempList));
+			removeList.add(KSequence.adjust(temp));
+		}
+		
+		HashMap<Term,Term> updateMap = new HashMap<Term,Term>(this.updateEntries);
+		ArrayList<Term> updateList = new ArrayList<Term>();
+		
+		for (java.util.Map.Entry<Term, Term> entry : updateMap.entrySet()) {
+			
+			ArrayList<Term> tempList = new ArrayList<Term>();
+			tempList.add(KSequence.adjust(entry.getKey().kilToKore()));
+			tempList.add(KSequence.adjust(entry.getValue().kilToKore()));
+
+			KApp temp = new KApp(new KLabelConstant("_|->_"),new KList(tempList));
+			updateList.add(KSequence.adjust(temp));
+		}
+		
+		KApp leftItem = new KApp(new KLabelConstant("List"),new KList(removeList));
+		KApp rightItem = new KApp(new KLabelConstant("List"),new KList(updateList));
+		
+		java.util.List<Term> tempList = new java.util.ArrayList<Term>();
+		tempList.add(KList.adjust(this.map.kilToKore()));
+		tempList.add(leftItem);
+		tempList.add(rightItem);
+		
+		return new KApp(tempLabel,new KList(tempList));
+	}
 }

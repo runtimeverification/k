@@ -66,4 +66,9 @@ public class TermComment extends Term {
 			return false;
 		return true;
 	}
+
+	@Override
+	public Term kilToKore() {
+		return new KLabelConstant("<br />");
+	}
 }

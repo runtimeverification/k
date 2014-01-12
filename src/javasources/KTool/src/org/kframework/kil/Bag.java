@@ -86,4 +86,16 @@ public class Bag extends Collection {
 	public Bag shallowCopy() {
 		return new Bag(this);
 	}
+	
+	@Override
+	public Term kilToKore(){
+		
+		List<Term> tempList = new ArrayList<Term>(this.contents);
+		
+		for(int i = 0;i< tempList.size();++i){
+			tempList.set(i, (Term) tempList.get(i).kilToKore());
+		}
+		
+		return new Bag(tempList);
+	}
 }

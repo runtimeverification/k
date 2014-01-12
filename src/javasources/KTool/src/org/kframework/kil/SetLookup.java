@@ -1,5 +1,7 @@
 package org.kframework.kil;
 
+import java.util.ArrayList;
+
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
@@ -68,4 +70,19 @@ public class SetLookup extends BuiltinLookup {
         visitor.visit(this);
     }
 
+	@Override
+	public Term kilToKore() {
+		
+		KLabel tempLabel = new KLabelConstant("_(_)");
+		
+		KSequence nameTerm = KSequence.adjust(this.base().kilToKore());
+		KSequence keyTerm = KSequence.adjust(this.key().kilToKore());
+		
+		ArrayList<Term> tempList = new ArrayList<Term>();
+		tempList.add(nameTerm);
+		tempList.add(keyTerm);
+		
+		KApp result = new KApp(tempLabel, new KList(tempList));
+		return result;
+	}
 }

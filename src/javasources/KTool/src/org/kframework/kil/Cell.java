@@ -340,4 +340,11 @@ public class Cell extends Term {
 		}
 		return cells;
 	}
+	
+	@Override
+	public Term kilToKore(){
+		Cell result = new Cell(this);
+		result.setContents(this.contents.kilToKore());
+		return result;
+	}
 }

@@ -2,6 +2,10 @@ package org.kframework.kil.matchers;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cast;
+import org.kframework.kil.KApp;
+import org.kframework.kil.KLabelConstant;
+import org.kframework.kil.KList;
+import org.kframework.kil.KSequence;
 import org.kframework.kil.Map;
 import org.kframework.kil.MapItem;
 import org.kframework.kil.Term;
@@ -115,6 +119,37 @@ public class MapLookupPattern extends Term {
 			return false;
 		// TODO: finish implementing this equals
 		return true;
+	}
+	
+	@Override
+	public Term kilToKore() {
+		
+		ArrayList<Term> tempList = new ArrayList<Term>();
+		for(int i = 0;i<this.lookups.size();++i){
+			
+			Term tempKey = this.lookups.get(i).getKey();
+			Term tempValue = this.lookups.get(i).getValue();
+			
+			ArrayList<Term> mapList = new ArrayList<Term>();
+			mapList.add(tempKey);
+			mapList.add(tempValue);
+			
+			KApp tempNode = new KApp((new KLabelConstant("_|->_")),(new KList(mapList)));
+			tempList.add(tempNode);
+		}
+		
+		KSequence firstNode = KSequence.adjust(new KList(tempList));
+		KLabelConstant secondLabel = null;
+		if(this.remainder.isFresh()){
+			secondLabel = new KLabelConstant("?"+this.remainder.getName()+":"+this.remainder.getSort());
+		} else {
+			secondLabel = new KLabelConstant(this.remainder.getName()+":"+this.remainder.getSort());
+		}
+		
+		ArrayList<Term> resultList = new ArrayList<Term>();
+		resultList.add(firstNode);
+		resultList.add(KSequence.adjust(secondLabel));
+		return new KApp(new KLabelConstant("mapLookUpPattern(_,_)"),new KList(resultList));
 	}
 }  
 

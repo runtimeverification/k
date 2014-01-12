@@ -92,7 +92,7 @@ public class KLabelConstant extends KLabel {
 	/* unmodifiable view of the production list */
 	private final List<Production> productions;
 
-	private KLabelConstant(String label) {
+	public KLabelConstant(String label) {
 		this.label = label;
 		productions = Collections.emptyList();
 	}
@@ -176,5 +176,10 @@ public class KLabelConstant extends KLabel {
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
+	}
+	
+	@Override
+	public Term kilToKore() {
+		return this;
 	}
 }

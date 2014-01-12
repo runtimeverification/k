@@ -1,5 +1,7 @@
 package org.kframework.kil;
 
+import java.util.ArrayList;
+
 /**
  * Abstract class for Builtin Lookups
  *
@@ -35,4 +37,22 @@ public abstract class BuiltinLookup extends Term {
     }
 
     public abstract Term value();
+    
+	@Override
+	public Term kilToKore() {
+		
+		KLabel tempLabel = new KLabelConstant("_(_)->_");
+		
+		KSequence nameTerm = KSequence.adjust(this.base.kilToKore());
+		KSequence keyTerm = KSequence.adjust(this.key.kilToKore());
+		KSequence valueTerm = KSequence.adjust(this.value().kilToKore());
+		
+		ArrayList<Term> tempList = new ArrayList<Term>();
+		tempList.add(nameTerm);
+		tempList.add(keyTerm);
+		tempList.add(valueTerm);
+		
+		KApp result = new KApp(tempLabel, new KList(tempList));
+		return result;
+	}
 }

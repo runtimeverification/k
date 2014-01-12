@@ -154,4 +154,14 @@ public class Variable extends Term {
 	public void setSyntactic(boolean syntactic) {
 		this.syntactic = syntactic;
 	}
+
+	@Override
+	public Term kilToKore() {
+		
+		if(this.isFresh()){
+			return new KLabelConstant("?"+this.name+":"+this.getSort());
+		} else {
+			return new KLabelConstant(this.name+":"+this.getSort());
+		}
+	}
 }

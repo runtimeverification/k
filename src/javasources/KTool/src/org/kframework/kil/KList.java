@@ -9,6 +9,7 @@ import org.w3c.dom.Element;
 
 import aterm.ATermAppl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -71,5 +72,50 @@ public class KList extends Collection {
 	@Override
 	public KList shallowCopy() {
 		return new KList(this);
+	}
+	
+	public static KList wrap(KSequence item){
+		
+		List<Term> tempList = new ArrayList<Term>();
+		tempList.add(item);
+		
+		return new KList(tempList);
+	}
+	
+	/*
+	 * Liyi Li
+	 * input either KList KItem K or KLabel and return the wraping KList
+	 * 
+	 */
+	public static KList adjust(Term item){
+		
+		if(item instanceof KList){
+			return (KList) item;
+		} else if (item instanceof KSequence) {
+			return KList.wrap((KSequence) item);
+		} else if (item instanceof KApp) {
+			return KList.wrap(KSequence.wrap((KApp) item));
+		} else if (item instanceof KLabel) {
+			return KList.wrap(KSequence.wrap(KApp.wrap((KLabel) item)));
+		} else if ((item instanceof Bag) || (item instanceof Cell)) {
+			List<Term> tempList = new ArrayList<Term>();
+			tempList.add(item);
+			return new KList(tempList);
+		} else {
+			return null;
+		}
+	}
+
+	@Override
+	public Term kilToKore() {
+		
+		List<Term> resultList = new ArrayList<Term>();
+		for(int i=0;i<this.contents.size();++i){
+			
+			KList temp = KList.adjust(this.contents.get(i).kilToKore());
+			resultList.addAll(temp.getContents());
+		}
+		
+		return new KList(resultList);
 	}
 }

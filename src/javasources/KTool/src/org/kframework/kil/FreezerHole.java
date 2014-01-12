@@ -58,4 +58,10 @@ public class FreezerHole extends Term {
 	public int hashCode() {
 		return index;
 	}
+
+	@Override
+	public Term kilToKore() {
+		return new KApp(new KLabelConstant("HOLE"),
+				KList.adjust(new KLabelConstant(String.valueOf(this.getIndex()))));
+	}
 }

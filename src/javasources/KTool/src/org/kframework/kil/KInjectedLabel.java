@@ -94,4 +94,9 @@ public class KInjectedLabel extends Term {
 	public int hashCode() {
 		return term.hashCode();
 	}
+
+	@Override
+	public Term kilToKore() {
+		return new KApp(new KLabelConstant(this.getInjectedSort(this.sort)+"2Klabel"),KList.adjust(this.term.kilToKore()));
+	}
 }

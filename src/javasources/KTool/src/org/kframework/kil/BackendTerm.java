@@ -65,4 +65,9 @@ public class BackendTerm extends Term {
 		BackendTerm b = (BackendTerm)o;
 		return value.equals(b.value);
 	}
+
+	@Override
+	public Term kilToKore() {
+		return new KApp(new KLabelConstant(this.getValue()),new KList());
+	}
 }

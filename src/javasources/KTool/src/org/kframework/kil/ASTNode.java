@@ -6,6 +6,7 @@ import java.util.Set;
 import org.kframework.compile.utils.SyntaxByTag;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
+import org.kframework.kil.visitors.ToKorible;
 import org.kframework.kil.visitors.Transformable;
 import org.kframework.kil.visitors.Visitable;
 import org.w3c.dom.Element;

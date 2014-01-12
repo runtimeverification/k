@@ -65,4 +65,10 @@ public class BagItem extends CollectionItem {
 	public BagItem shallowCopy() {
 		return new BagItem(this);
 	}
+
+	@Override
+	public Term kilToKore() {
+		// TODO Auto-generated method stub
+		return this.getItem().kilToKore();
+	}
 }

@@ -53,4 +53,9 @@ public class ListItem extends CollectionItem {
 	public ListItem shallowCopy() {
 		return new ListItem(this);
 	}
+
+	@Override
+	public Term kilToKore() {
+		return this.getItem().kilToKore();
+	}
 }

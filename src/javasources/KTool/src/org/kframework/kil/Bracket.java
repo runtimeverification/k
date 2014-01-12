@@ -1,5 +1,7 @@
 package org.kframework.kil;
 
+import java.util.ArrayList;
+
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.matchers.Matcher;
@@ -118,6 +120,12 @@ public class Bracket extends Term {
 			return false;
 		Bracket b = (Bracket) o;
 		return content.contains(b.content);
+	}
+
+	@Override
+	public Term kilToKore() {
+		
+		return new KApp(new KLabelConstant("(_)"),KList.adjust(this.content.kilToKore()));
 	}
 
 }

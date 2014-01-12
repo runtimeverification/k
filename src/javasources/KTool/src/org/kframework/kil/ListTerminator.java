@@ -84,4 +84,13 @@ public class ListTerminator extends Term {
 	public int hashCode() {
 		return (sort + separator).hashCode();
 	}
+
+	@Override
+	public Term kilToKore() {
+		if (separator != null && sort.equals(KSorts.K)) {
+			return new KLabelConstant(".List{\"" + separator + "\"}");
+        } else {
+		return new KLabelConstant("." + sort);
+		}
+	}
 }
