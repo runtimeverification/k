@@ -251,12 +251,15 @@ public class CompileToBuiltins extends CopyOnWriteTransformer {
     }
 
     private boolean isCollection(String sort) {
+        // TODO(YilongL): why doesn't "Bag" count?
         return sort.equals(KSorts.MAP)
                 || sort.equals(KSorts.LIST)
                 || sort.equals(KSorts.SET);
     }
 
     private boolean isCollectionItem(String sort) {
+        // TODO(YilongL): why doesn't "BagItem" count? Because a cell is not
+        // wrapped inside "BagItem(_)"?
         return  sort.equals(KSorts.MAP_ITEM)
                 || sort.equals(KSorts.LIST_ITEM)
                 || sort.equals(KSorts.SET_ITEM);

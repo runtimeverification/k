@@ -74,6 +74,13 @@ public class KItem extends Term implements Sorted {
                         for (int i = 0; i < kList.size(); ++i) {
                             String childSort;
                             Term childTerm = kList.get(i);
+                            /* extract the real injected term when necessary */
+                            if (childTerm instanceof KItem){
+                                KItem kItem = (KItem) childTerm;
+                                if (isInjectionWrapper(kItem)) {
+                                    childTerm = extractInjectedTerm(kItem);
+                                }
+                            }
 
                             if (childTerm instanceof Sorted) {
                                 childSort = ((Sorted) childTerm).sort();
@@ -405,6 +412,32 @@ public class KItem extends Term implements Sorted {
     @Override
     public ASTNode accept(Transformer transformer) {
         return transformer.transform(this);
+    }
+
+    /**
+     * Checks if the specified KItem is merely used as a wrapper for a non-K
+     * term.
+     * 
+     * @param kItem
+     *            the specified KItem
+     * @return {@code true} if the specified KItem is an injection wrapper;
+     *         otherwise, {@code false}
+     */
+    public static boolean isInjectionWrapper(KItem kItem) {
+        return (kItem.kLabel.getClass() == KLabelInjection.class)
+                && (kItem.kList.contents.isEmpty());
+    }
+    
+    /**
+     * Extracts the injected non-K term inside the specified KItem.
+     * 
+     * @param kItem
+     *            the specified KItem
+     * @return the injected term
+     */
+    public static Term extractInjectedTerm(KItem kItem) {
+        assert isInjectionWrapper(kItem);
+        return ((KLabelInjection) kItem.kLabel).term();
     }
 
 }

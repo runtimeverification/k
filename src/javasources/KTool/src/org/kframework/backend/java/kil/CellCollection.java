@@ -1,13 +1,13 @@
 package org.kframework.backend.java.kil;
 
-import org.kframework.backend.java.symbolic.Unifier;
+import java.util.Set;
+
 import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
-
-import java.util.Set;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -22,7 +22,7 @@ import com.google.common.collect.Multimap;
  * 
  */
 @SuppressWarnings("rawtypes")
-public class CellCollection extends Collection {
+public class CellCollection extends Collection implements Sorted {
 
     private final Multimap<String, Cell> cells;
     
@@ -95,6 +95,14 @@ public class CellCollection extends Collection {
 
     public int size() {
         return cells.size();
+    }
+
+    @Override
+    public String sort() {
+        // TODO(YilongL): Should I return "MyBag" instead of "Bag" like BuiltinList, etc.?
+        // Or should I convert "Bag" to "MyBag" in Java backend kompilation?
+        // Note: the sort of Kind#Cell_Collection may also need to be changed to "MyBag"
+        return org.kframework.kil.KSorts.BAG;
     }
 
     @Override
