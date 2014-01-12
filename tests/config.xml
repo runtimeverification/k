@@ -575,6 +575,22 @@
       <krun-option name="-output" value="none" />
     </all-programs>
   </test>
+
+  <test
+      definition="samples/java_rewrite_engine/tutorial/2_languages/2_kool/1_untyped/kool-untyped.k"
+      programs="samples/java_rewrite_engine/tutorial/2_languages/2_kool/1_untyped/tests/"
+      extension="kool"
+      exclude="cycle.kool"
+      results="tutorial/2_languages/2_kool/1_untyped/tests/"
+      >
+    <kompile-option name="-backend" value="java" />
+    <all-programs>
+      <krun-option name="-backend" value="java" />
+      <krun-option name="-smt" value="none" />
+      <krun-option name="-output" value="none" />
+    </all-programs>
+  </test>
+
 <!--
 
   <test
