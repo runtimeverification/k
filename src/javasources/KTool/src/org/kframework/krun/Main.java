@@ -394,7 +394,7 @@ public class Main {
             	
             	String output = null;
             	
-            	if(result instanceof KRunProofResult){
+            	if(result instanceof KRunProofResult && "kore".equals(K.output_mode)){
             		
             		Set<Term> temp = (Set<Term>) result.getResult();
             		Set<Term> theResultSet = new HashSet<Term>();
