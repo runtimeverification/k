@@ -30,6 +30,7 @@ public class Cell<T extends Term> extends Term {
         super(Kind.CELL);
 
         assert content.kind() == Kind.CELL_COLLECTION
+                || content.kind == Kind.CELL
                 || content.kind() == Kind.K
                 || content.kind() == Kind.KITEM
                 || content.kind() == Kind.KLABEL
