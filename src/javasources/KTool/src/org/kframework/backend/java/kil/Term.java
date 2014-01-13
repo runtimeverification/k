@@ -1,7 +1,7 @@
 package org.kframework.backend.java.kil;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import org.kframework.backend.java.indexing.IndexingPair;
@@ -40,10 +40,10 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     }
 
     /**
-     * Returns a {@link Collection} view of .
+     * Returns a {@link List} view of the indexing pairs.
      */
-    public Collection<IndexingPair> getIndexingPairs() {
-        final Collection<IndexingPair> indexingPairs = new ArrayList<IndexingPair>();
+    public List<IndexingPair> getIndexingPairs() {
+        final List<IndexingPair> indexingPairs = new ArrayList<IndexingPair>();
         accept(new BottomUpVisitor() {
             @Override
             public void visit(Cell cell) {
