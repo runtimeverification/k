@@ -15,6 +15,8 @@ public class Constants {
     public static final String REPORT_OPTION = "report";
     public static final String SKIP_OPTION = "skip";
     public static final String TIMEOUT_OPTION = "timeout";
+    public static final String UPDATE_OUT_OPTION = "update-out";
+    public static final String GENERATE_OUT_OPTION = "generate-out";
     public static final String COLOR_SETTING = "color";
     public static final String THREADS_SETTING = "threads";
 

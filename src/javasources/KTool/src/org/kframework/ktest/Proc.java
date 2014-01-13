@@ -68,6 +68,11 @@ public class Proc<T> implements Runnable {
     private final boolean verbose;
     private final ColorSetting colorSetting;
 
+    private final boolean updateOut;
+    private final boolean generateOut;
+    private final String outputFile;
+    private final String newOutputFile;
+
     /**
      * Whether the process succeeded or not.
      */
@@ -100,7 +105,9 @@ public class Proc<T> implements Runnable {
     public Proc(T obj, String[] args, String procInput, Annotated<String, String> expectedOut,
                 Annotated<String, String> expectedErr, String logStr,
                 Comparator<String> strComparator, int timeout, boolean verbose,
-                ColorSetting colorSetting) {
+                ColorSetting colorSetting,
+                boolean updateOut, boolean generateOut,
+                String outputFile, String newOutputFile) {
         this.obj = obj;
         this.args = args;
         this.expectedOut = expectedOut;
@@ -111,11 +118,17 @@ public class Proc<T> implements Runnable {
         this.timeout = timeout;
         this.verbose = verbose;
         this.colorSetting = colorSetting;
+        this.updateOut = updateOut;
+        this.generateOut = generateOut;
+        this.outputFile = outputFile;
+        this.newOutputFile = newOutputFile;
     }
 
     public Proc(T obj, String[] args, String logStr, Comparator<String> strComparator, int timeout,
-                boolean verbose, ColorSetting colorSetting) {
-        this(obj, args, "", null, null, logStr, strComparator, timeout, verbose, colorSetting);
+                boolean verbose, ColorSetting colorSetting,
+                boolean updateOut, boolean generateOut) {
+        this(obj, args, "", null, null, logStr, strComparator, timeout, verbose, colorSetting,
+            updateOut, generateOut, null, null);
     }
 
     @Override
@@ -222,9 +235,11 @@ public class Proc<T> implements Runnable {
      * print information messages.
      * @param returnCode return code of the process
      */
-    private void handlePgmResult(int returnCode) {
+    private void handlePgmResult(int returnCode) throws IOException {
         String red = ColorUtil.RgbToAnsi(Color.RED, colorSetting);
         if (returnCode == 0) {
+
+            boolean doGenerateOut = false;
 
             // program ended successfully ..
             if (expectedOut == null) {
@@ -232,18 +247,29 @@ public class Proc<T> implements Runnable {
                 success = true;
                 if (verbose)
                     System.out.format("Done with [%s] (time %d ms)%n", logStr, timeDelta);
+                doGenerateOut = true;
             } else if (strComparator.compare(pgmOut, expectedOut.getObj()) != 0) {
                 // outputs don't match
                 System.out.format(
                         "%sERROR: [%s] output doesn't match with expected output (time: %d ms)%s%n",
                         red, logStr, timeDelta, ColorUtil.ANSI_NORMAL);
                 reportOutMatch(expectedOut, pgmOut);
+                doGenerateOut = true;
             }
             else {
                 // outputs match
                 success = true;
                 if (verbose)
                     System.out.format("Done with [%s] (time %d ms)%n", logStr, timeDelta);
+            }
+
+            if (updateOut && outputFile != null) {
+                IOUtils.write(pgmOut, new FileOutputStream(new File(outputFile)));
+                System.out.println("Updating output file: " + outputFile);
+            }
+            if (doGenerateOut && generateOut && newOutputFile != null) {
+                IOUtils.write(pgmOut, new FileOutputStream(new File(newOutputFile)));
+                System.out.println("Generating output file: " + newOutputFile);
             }
 
         } else if (returnCode == SIGTERM) {

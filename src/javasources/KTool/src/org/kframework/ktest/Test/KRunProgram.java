@@ -17,15 +17,17 @@ public class KRunProgram {
     public final String inputFile;
     public final String outputFile;
     public final String errorFile;
+    public final String newOutputFile;
 
     public KRunProgram(String pgmPath, List<PgmArg> args, String inputFile, String outputFile,
-                       String errorFile) {
+                       String errorFile, String newOutputFile) {
         this.pgmName = FilenameUtils.getBaseName(pgmPath);
         this.pgmPath = pgmPath;
         this.args = args;
         this.inputFile = inputFile;
         this.outputFile = outputFile;
         this.errorFile = errorFile;
+        this.newOutputFile = newOutputFile;
     }
 
     /**
