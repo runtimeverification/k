@@ -154,9 +154,9 @@ public class TestSuite {
                     StringBuilder krunLogCmd = new StringBuilder();
                     krunLogCmd.append(program.toLogString());
                     if (program.outputFile != null)
-                        krunLogCmd.append("> ").append(program.outputFile);
+                        krunLogCmd.append(" >").append(program.outputFile);
                     if (program.inputFile != null)
-                        krunLogCmd.append("< ").append(program.inputFile);
+                        krunLogCmd.append(" <").append(program.inputFile);
                     System.out.println(krunLogCmd.toString());
                 }
             }
