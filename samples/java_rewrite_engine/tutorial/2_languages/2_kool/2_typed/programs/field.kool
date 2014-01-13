@@ -1,0 +1,10 @@
+// Testing field initialization and access.
+
+class theMain {
+  int a=3;
+  void theMain() {
+    print("a = ", a, "\n");
+  }
+}
+
+// a = 3
