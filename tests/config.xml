@@ -565,7 +565,7 @@
       definition="samples/java_rewrite_engine/tutorial/2_languages/1_simple/2_typed/2_dynamic/simple-typed-dynamic.k"
       programs="tutorial/2_languages/1_simple/2_typed/programs/"
       extension="simple"
-      exclude="dekker.simple exceptions_07.simple"
+      exclude="dekker.simple exceptions_07.simple threads_05.simple"
       results="tutorial/2_languages/1_simple/2_typed/2_dynamic/tests/"
       >
     <kompile-option name="-backend" value="java" />
