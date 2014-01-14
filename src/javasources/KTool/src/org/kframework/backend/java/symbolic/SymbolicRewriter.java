@@ -388,9 +388,10 @@ public class SymbolicRewriter {
                     /* compute all results */
                     ConstrainedTerm newCnstrTerm = new ConstrainedTerm(result,
                             constraint1, constrainedTerm.termContext());
-                    if (K.do_concrete_exec) {
-                        assert newCnstrTerm.isGround();
-                    }
+                    // TODO(YilongL): the following assertion is not always true; fix it
+//                    if (K.do_concrete_exec) {
+//                        assert newCnstrTerm.isGround();
+//                    }
                     results.add(newCnstrTerm);
                     appliedRules.add(rule);
 
