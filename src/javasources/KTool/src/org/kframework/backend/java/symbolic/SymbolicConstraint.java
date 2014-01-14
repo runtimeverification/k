@@ -483,6 +483,11 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      *            the right-hand side of the specified equality
      */
     private void checkTruthValBeforePutIntoConstraint(Term leftHandSide, Term rightHandSide) {
+        if (truthValue == TruthValue.FALSE) {
+            return;
+        }
+        
+        // assume the truthValue to be TRUE or UNKNOWN from now on
         boolean isSubst = leftHandSide instanceof Variable;
         Equality equality = this.new Equality(leftHandSide, rightHandSide);
         if (equality.isUnknown()){
@@ -835,13 +840,29 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      */
     public Collection<SymbolicConstraint> getMultiConstraints() {
         if (!unifier.multiConstraints.isEmpty()) {
-            assert unifier.multiConstraints.size() == 1;
-
+            assert unifier.multiConstraints.size() <= 2;
+            
             List<SymbolicConstraint> multiConstraints = new ArrayList<SymbolicConstraint>();
-            for (SymbolicConstraint constraint : unifier.multiConstraints.iterator().next()) {
-                constraint.addAll(this);
-                constraint.simplify();
-                multiConstraints.add(constraint);
+            Iterator<Collection<SymbolicConstraint>> iterator = unifier.multiConstraints.iterator();
+            if (unifier.multiConstraints.size() == 1) {
+                for (SymbolicConstraint constraint : iterator.next()) {
+                    constraint.addAll(this);
+                    constraint.simplify();
+                    multiConstraints.add(constraint);
+                }
+            } else {
+                Collection<SymbolicConstraint> constraints = iterator.next();
+                Collection<SymbolicConstraint> otherConstraints = iterator.next();
+                for (SymbolicConstraint cnstr1 : constraints) {
+                    for (SymbolicConstraint cnstr2 : otherConstraints) {
+                        SymbolicConstraint constraint = new SymbolicConstraint(
+                                this, context);
+                        constraint.addAll(cnstr1);
+                        constraint.addAll(cnstr2);
+                        constraint.simplify();
+                        multiConstraints.add(constraint);
+                    }
+                }
             }
             return multiConstraints;
         } else {
