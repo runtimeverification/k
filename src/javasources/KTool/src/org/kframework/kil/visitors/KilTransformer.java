@@ -94,88 +94,88 @@ public class KilTransformer {
 		} else if (node instanceof Cell){
 			
 			return this.kilToKore((Cell)node);
-		} else if (node instanceof Ambiguity){
+		} if (node instanceof Ambiguity){
 			
 			return this.kilToKore((Ambiguity)node);
-		} else if (node instanceof Bag){
+		} if (node instanceof Bag){
 			
 			return this.kilToKore((Bag)node);
-		} else if (node instanceof KSequence){
+		} if (node instanceof KSequence){
 			
 			return this.kilToKore((KSequence)node);
-		} else if (node instanceof org.kframework.kil.List){
+		} if (node instanceof org.kframework.kil.List){
 			
 			return this.kilToKore((org.kframework.kil.List)node);
-		} else if (node instanceof KList){
+		} if (node instanceof KList){
 			
 			return this.kilToKore((KList)node);
-		} else if (node instanceof Map){
+		} if (node instanceof Map){
 			
 			return this.kilToKore((Map)node);
-		} else if (node instanceof Set){
+		} if (node instanceof Set){
 			
 			return this.kilToKore((Set)node);
-		} else if (node instanceof BagItem){
+		} if (node instanceof BagItem){
 			
 			return this.kilToKore((BagItem)node);
-		} else if (node instanceof SetItem){
+		} if (node instanceof SetItem){
 			
 			return this.kilToKore((SetItem)node);
-		} else if (node instanceof ListItem){
+		} if (node instanceof ListItem){
 			
 			return this.kilToKore((ListItem)node);
-		} else if (node instanceof MapItem){
+		} if (node instanceof MapItem){
 			
 			return this.kilToKore((MapItem)node);
-		} else if (node instanceof SetBuiltin){
+		} if (node instanceof SetBuiltin){
 			
 			return this.kilToKore((CollectionBuiltin)node);
-		} else if (node instanceof SetLookup){
+		} if (node instanceof SetLookup){
 			
 			return this.kilToKore((SetLookup)node);
-		} else if (node instanceof SetUpdate){
+		} if (node instanceof SetUpdate){
 			
 			return this.kilToKore((SetUpdate)node);
-		} else if (node instanceof ListBuiltin){
+		} if (node instanceof ListBuiltin){
 			
 			return this.kilToKore((ListBuiltin)node);
-		} else if (node instanceof ListUpdate){
+		} if (node instanceof ListUpdate){
 			
 			return this.kilToKore((ListUpdate)node);
-		} else if ((node instanceof ListLookup) || (node instanceof MapLookup)){
+		} if ((node instanceof ListLookup) || (node instanceof MapLookup)){
 			
 			return this.kilToKore((BuiltinLookup)node);
-		} else if (node instanceof MapBuiltin){
+		} if (node instanceof MapBuiltin){
 			
 			return this.kilToKore((MapBuiltin)node);
-		} else if (node instanceof MapUpdate){
+		} if (node instanceof MapUpdate){
 			
 			return this.kilToKore((MapUpdate)node);
-		} else if (node instanceof Token){
+		} if (node instanceof Token){
 			
 			return this.kilToKore((Token)node);
-		} else if (node instanceof ListTerminator){
+		} if (node instanceof ListTerminator){
 			
 			return this.kilToKore((ListTerminator)node);
-		} else if (node instanceof Hole){
+		} if (node instanceof Hole){
 			
 			return this.kilToKore((Hole)node);
-		} else if (node instanceof KApp){
+		} if (node instanceof KApp){
 			
 			return this.kilToKore((KApp)node);
-		} else if (node instanceof KLabelConstant){
+		} if (node instanceof KLabelConstant){
 			
 			return this.kilToKore((KLabelConstant)node);
 		} else if (node instanceof KInjectedLabel){
 			
 			return this.kilToKore((KInjectedLabel)node);
-		} else if (node instanceof FreezerHole){
+		} if (node instanceof FreezerHole){
 			
 			return this.kilToKore((FreezerHole)node);
-		} else if (node instanceof Rewrite){
+		} if (node instanceof Rewrite){
 			
 			return this.kilToKore((Rewrite)node);
-		} else if (node instanceof TermCons){
+		} if (node instanceof TermCons){
 			
 			return this.kilToKore((TermCons)node);
 		} else if (node instanceof Bracket){
