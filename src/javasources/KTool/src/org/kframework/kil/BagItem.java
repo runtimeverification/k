@@ -66,9 +66,4 @@ public class BagItem extends CollectionItem {
 		return new BagItem(this);
 	}
 
-	@Override
-	public Term kilToKore() {
-		// TODO Auto-generated method stub
-		return this.getItem().kilToKore();
-	}
 }

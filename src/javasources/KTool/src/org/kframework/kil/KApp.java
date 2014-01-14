@@ -183,16 +183,5 @@ public class KApp extends Term {
 	public int hashCode() {
 		return label.hashCode() * 23 + child.hashCode();
 	}
-	
-	public static KApp wrap(KLabel item){
-		
-		return new KApp(item,new KList());
-	}
-
-	@Override
-	public Term kilToKore() {
-		
-		return new KApp(this.label.kilToKore(),KList.adjust(this.child.kilToKore()));
-	}
 
 }

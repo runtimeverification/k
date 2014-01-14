@@ -86,26 +86,5 @@ public class ListBuiltin extends CollectionBuiltin {
     public String toString() {
         return elements().toString() + baseTerms().toString() + elementsRight.toString();
     }
-    
-	@Override
-	public Term kilToKore() {
-		
-		KLabel tempLabel = new KLabelConstant("CollectionBuiltin");
-		
-		java.util.List<Term> tempList = new java.util.ArrayList<Term>();
-		tempList.addAll(this.elementsLeft());
-		tempList.addAll(this.baseTerms);
-		tempList.addAll(this.elementsRight);
-		
-		for(int i=0;i<tempList.size();i++){
-			
-			KSequence elem = KSequence.adjust((tempList.get(i).kilToKore()));
-			tempList.set(i, elem);
-		}
-		
-		KList resultKList = new KList(tempList);
-		
-		KApp result = new KApp(tempLabel, resultKList);
-		return result;
-	}
+
 }

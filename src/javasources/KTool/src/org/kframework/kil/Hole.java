@@ -72,9 +72,4 @@ public class Hole extends Term {
 		return sort.hashCode();
 	}
 
-	@Override
-	public Term kilToKore() {
-		// TODO Auto-generated method stub
-		return new KLabelConstant("HOLE");
-	}
 }

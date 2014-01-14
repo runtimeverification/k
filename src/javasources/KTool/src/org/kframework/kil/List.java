@@ -64,23 +64,4 @@ public class List extends Collection {
 	public List shallowCopy() {
 		return new List(this);
 	}
-
-	@Override
-	public Term kilToKore() {
-		
-		KLabel tempLabel = new KLabelConstant("List");
-		
-		java.util.List<Term> tempList = new java.util.ArrayList<Term>(this.contents);
-		
-		for(int i=0;i<tempList.size();i++){
-			
-			KSequence elem = KSequence.adjust((tempList.get(i).kilToKore()));
-			tempList.set(i, elem);
-		}
-		
-		KList resultKList = new KList(tempList);
-		
-		KApp result = new KApp(tempLabel, resultKList);
-		return result;
-	}
 }

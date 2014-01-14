@@ -87,33 +87,4 @@ public class ListUpdate extends Term {
         visitor.visit(this);
     }
 
-	@Override
-	public Term kilToKore() {
-		
-		KLabel tempLabel = new KLabelConstant("_[_/_]");
-		
-		java.util.List<Term> leftList = new java.util.ArrayList<Term>(this.removeLeft);
-		java.util.List<Term> rightList = new java.util.ArrayList<Term>(this.removeRight);
-		
-		for(int i=0;i<leftList.size();++i){
-			
-			leftList.set(i, KSequence.adjust(leftList.get(i).kilToKore()));
-		}
-		
-		for(int i=0;i<rightList.size();++i){
-			
-			rightList.set(i, KSequence.adjust(rightList.get(i).kilToKore()));
-		}
-		
-		KApp leftItem = new KApp(new KLabelConstant("List"),new KList(leftList));
-		KApp rightItem = new KApp(new KLabelConstant("List"),new KList(rightList));
-		
-		java.util.List<Term> tempList = new java.util.ArrayList<Term>();
-		tempList.add(KList.adjust(this.base.kilToKore()));
-		tempList.add(leftItem);
-		tempList.add(rightItem);
-		
-		return new KApp(tempLabel,new KList(tempList));
-	}
-
 }

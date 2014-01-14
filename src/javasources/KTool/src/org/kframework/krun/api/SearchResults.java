@@ -4,6 +4,7 @@ import edu.uci.ics.jung.graph.DirectedGraph;
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
+import org.kframework.kil.visitors.KilTransformer;
 import org.kframework.krun.K;
 
 import java.util.TreeSet;
@@ -31,8 +32,9 @@ public class SearchResults {
 			Map<String, Term> substitution = solution.getSubstitution();
 			if (isDefaultPattern) {
 				UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
+				KilTransformer trans = new KilTransformer();
 				if(K.output_mode.equals("kore")){
-					substitution.get("B:Bag").kilToKore().accept(unparser);
+					trans.kilToKore(substitution.get("B:Bag")).accept(unparser);
 				} else {
 					substitution.get("B:Bag").accept(unparser);
 				}
@@ -43,8 +45,9 @@ public class SearchResults {
 				StringBuilder varStringBuilder = new StringBuilder();
 				for (String variable : substitution.keySet()) {
 					UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
+					KilTransformer trans = new KilTransformer();
 					if(K.output_mode.equals("kore")){
-						substitution.get(variable).kilToKore().accept(unparser);
+						trans.kilToKore(substitution.get(variable)).accept(unparser);
 					} else {
 						substitution.get(variable).accept(unparser);
 					}

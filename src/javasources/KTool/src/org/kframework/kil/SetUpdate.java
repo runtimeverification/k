@@ -79,24 +79,4 @@ public class SetUpdate extends Term {
         visitor.visit(this);
     }
 
-	@Override
-	public Term kilToKore() {
-		
-		KLabel tempLabel = new KLabelConstant("setUpdate(_,_)");
-		
-		java.util.List<Term> updateList = new java.util.ArrayList<Term>(this.removeEntries);
-		
-		for(int i=0;i<updateList.size();++i){
-			
-			updateList.set(i, KSequence.adjust(updateList.get(i).kilToKore()));
-		}
-		
-		KApp updateItem = new KApp(new KLabelConstant("List"),new KList(updateList));
-		
-		java.util.List<Term> tempList = new java.util.ArrayList<Term>();
-		tempList.add(KList.adjust(this.set.kilToKore()));
-		tempList.add(updateItem);
-		
-		return new KApp(tempLabel,new KList(tempList));
-	}
 }

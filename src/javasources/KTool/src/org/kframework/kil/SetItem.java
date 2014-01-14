@@ -55,8 +55,4 @@ public class SetItem extends CollectionItem {
 		return new SetItem(this);
 	}
 
-	@Override
-	public Term kilToKore() {
-		return this.getItem().kilToKore();
-	}
 }

@@ -120,29 +120,6 @@ public class SetInsertPattern extends Term {
 		// TODO: finish implementing this equals
 		return true;
 	}
-
-	@Override
-	public Term kilToKore() {
-		
-		ArrayList<Term> tempList = new ArrayList<Term>(this.insertions);
-		for(int i = 0;i<tempList.size();++i){
-			
-			KSequence elem = KSequence.adjust(tempList.get(i).kilToKore());
-			tempList.set(i, elem);
-		}
-		
-		KSequence firstNode = KSequence.adjust(new KList(tempList));
-		KLabelConstant secondLabel = null;
-		if(this.remainder.isFresh()){
-			secondLabel = new KLabelConstant("?"+this.remainder.getName()+":"+this.remainder.getSort());
-		} else {
-			secondLabel = new KLabelConstant(this.remainder.getName()+":"+this.remainder.getSort());
-		}
-		
-		ArrayList<Term> resultList = new ArrayList<Term>();
-		resultList.add(firstNode);
-		resultList.add(KSequence.adjust(secondLabel));
-		return new KApp(new KLabelConstant("setInsertPattern(_,_)"),new KList(resultList));
-	}
+  
 }  
 

@@ -230,37 +230,4 @@ public class TermCons extends Term {
 		return new TermCons(this);
 	}
 
-	@Override
-	public Term kilToKore() {
-
-		if (production.isListDecl()) {
-			UserList userList = (UserList) production.getItems().get(0);
-			String separator = userList.getSeparator();
-			java.util.List<Term> contents = this.getContents();
-			ArrayList<Term> tempList = new ArrayList<Term>();
-			tempList.add(KSequence.adjust(contents.get(0).kilToKore()));
-			tempList.add(KSequence.adjust(contents.get(1).kilToKore()));
-			return new KApp(new KLabelConstant("_"+separator+"_"),new KList(tempList));
-		} else {
-			
-			ArrayList<Term> tempList = new ArrayList<Term>();
-			String label = "";
-			int where = 0;
-			for (int i = 0; i < production.getItems().size(); ++i) {
-				ProductionItem productionItem = production.getItems().get(i);
-				if (!(productionItem instanceof Terminal)) {
-					
-					KSequence tempK = KSequence.adjust(this.getContents().get(where++).kilToKore());
-					tempList.add(tempK);
-				} else {
-					
-					if ( !((Terminal) productionItem).getTerminal().equals("(") 
-							&& !((Terminal) productionItem).getTerminal().equals(")")){
-						label += ((Terminal) productionItem).getTerminal();
-					}
-				}
-			}
-			return new KApp(new KLabelConstant(label),new KList(tempList));
-		}
-	}
 }

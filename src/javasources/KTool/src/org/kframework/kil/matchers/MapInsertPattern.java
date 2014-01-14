@@ -122,35 +122,5 @@ public class MapInsertPattern extends Term {
 		return true;
 	}
 
-	@Override
-	public Term kilToKore() {
-		
-		ArrayList<Term> tempList = new ArrayList<Term>();
-		for(int i = 0;i<this.insertions.size();++i){
-			
-			Term tempKey = this.insertions.get(i).getKey();
-			Term tempValue = this.insertions.get(i).getValue();
-			
-			ArrayList<Term> mapList = new ArrayList<Term>();
-			mapList.add(tempKey);
-			mapList.add(tempValue);
-			
-			KApp tempNode = new KApp((new KLabelConstant("_|->_")),(new KList(mapList)));
-			tempList.add(tempNode);
-		}
-		
-		KSequence firstNode = KSequence.adjust(new KList(tempList));
-		KLabelConstant secondLabel = null;
-		if(this.remainder.isFresh()){
-			secondLabel = new KLabelConstant("?"+this.remainder.getName()+":"+this.remainder.getSort());
-		} else {
-			secondLabel = new KLabelConstant(this.remainder.getName()+":"+this.remainder.getSort());
-		}
-		
-		ArrayList<Term> resultList = new ArrayList<Term>();
-		resultList.add(firstNode);
-		resultList.add(KSequence.adjust(secondLabel));
-		return new KApp(new KLabelConstant("mapInsertPattern(_,_)"),new KList(resultList));
-	}
 }  
 

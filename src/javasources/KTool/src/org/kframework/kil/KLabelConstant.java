@@ -177,9 +177,4 @@ public class KLabelConstant extends KLabel {
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}
-	
-	@Override
-	public Term kilToKore() {
-		return this;
-	}
 }

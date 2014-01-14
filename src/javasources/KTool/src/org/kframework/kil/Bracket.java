@@ -122,10 +122,4 @@ public class Bracket extends Term {
 		return content.contains(b.content);
 	}
 
-	@Override
-	public Term kilToKore() {
-		
-		return new KApp(new KLabelConstant("(_)"),KList.adjust(this.content.kilToKore()));
-	}
-
 }

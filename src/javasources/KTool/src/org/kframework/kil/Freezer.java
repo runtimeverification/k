@@ -77,8 +77,4 @@ public class Freezer extends Term {
 		return term.hashCode();
 	}
 
-	@Override
-	public Term kilToKore() {
-		return this.getTerm().kilToKore();
-	}
 }

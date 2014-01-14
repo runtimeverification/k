@@ -3,7 +3,6 @@ package org.kframework.kil;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.matchers.Matchable;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.kil.visitors.ToKorible;
 import org.kframework.utils.StringUtil;
 
 import java.util.HashSet;
@@ -17,7 +16,7 @@ import org.w3c.dom.Element;
 /**
  * Base of all nodes that represent terms in the semantics. Each term is labeled with a sort.
  */
-public abstract class Term extends ASTNode implements Matchable, Comparable<Term>, ToKorible {
+public abstract class Term extends ASTNode implements Matchable, Comparable<Term> {
 	protected String sort;
 
 	protected Term() {

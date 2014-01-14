@@ -105,21 +105,8 @@ public class SetImpl extends Term {
 		// TODO: finish implementing this equals
 		return true;
 	}
-	
-	@Override
-	public Term kilToKore() {
-		
-		KLabel tempLabel = new KLabelConstant("CollectionBuiltin");
-		
-		java.util.List<Term> tempList = new java.util.ArrayList<Term>();
-		tempList.addAll(this.set);
-		
-		for(int i=0;i<tempList.size();i++){
-			
-			KSequence elem = KSequence.adjust((tempList.get(i).kilToKore()));
-			tempList.set(i, elem);
-		}
-		
-		return new KList(tempList);
+
+	public Set<Term> getSet(){
+		return this.set;
 	}
 }

@@ -72,35 +72,4 @@ public class MapBuiltin extends DataStructureBuiltin {
         visitor.visit(this);
     }
 
-	@Override
-	public Term kilToKore() {
-		
-		KLabel tempLabel = new KLabelConstant("MapBuiltin");
-		
-		java.util.List<Term> tempList = new java.util.ArrayList<Term>();
-
-		for (java.util.Map.Entry<Term, Term> entry : this.elements().entrySet()) {
-			
-			KSequence keyTerm = KSequence.adjust(entry.getKey().kilToKore());
-			KSequence valueTerm = KSequence.adjust(entry.getValue().kilToKore());
-			
-			ArrayList<Term> newList = new ArrayList<Term>();
-			newList.add(keyTerm);
-			newList.add(valueTerm);
-			tempList.add(KSequence.adjust(new KApp(new KLabelConstant("_|->_"),new KList(newList))));
-		}
-		
-		ArrayList<Term> newList = new ArrayList<Term>(this.baseTerms);
-		for(int i=0;i<newList.size();i++){
-			
-			KSequence elem = KSequence.adjust(newList.get(i).kilToKore());
-			tempList.add(elem);
-		}
-		
-		KList resultKList = new KList(tempList);
-		
-		KApp result = new KApp(tempLabel, resultKList);
-		return result;
-	}
-
 }

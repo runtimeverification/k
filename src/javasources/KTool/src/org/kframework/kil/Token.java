@@ -161,11 +161,5 @@ public abstract class Token extends KLabel {
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}
-	
-	@Override
-	public Term kilToKore(){
-		
-		return new KLabelConstant("#token(\"" + this.tokenSort() + "\", "+this.value()+")");
-	}
 
 }

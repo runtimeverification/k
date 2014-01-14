@@ -55,6 +55,7 @@ import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.ResolveVariableAttribute;
+import org.kframework.kil.visitors.KilTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.api.KRun;
 import org.kframework.krun.api.KRunDebugger;
@@ -399,8 +400,9 @@ public class Main {
             		Set<Term> temp = (Set<Term>) result.getResult();
             		Set<Term> theResultSet = new HashSet<Term>();
             		Iterator<Term> tempList = temp.iterator();
+            		KilTransformer trans = new KilTransformer();
             		while(tempList.hasNext()){
-            		    theResultSet.add(((Term)tempList.next()).kilToKore());
+            		    theResultSet.add(trans.kilToKore(tempList.next()));
             		}
             		((KRunProofResult<Set<Term>>)result).setResult(theResultSet);
             		output=result.toString();
@@ -416,7 +418,6 @@ public class Main {
                 if ("search".equals(K.maude_cmd) && K.do_search && K.showSearchGraph) {
                     System.out.println(K.lineSeparator + "The search graph is:"
                             + K.lineSeparator);
-                    @SuppressWarnings("unchecked")
                     KRunResult<SearchResults> searchResult = (KRunResult<SearchResults>) result;
                     AnsiConsole.out
                             .println(searchResult.getResult().getGraph());
