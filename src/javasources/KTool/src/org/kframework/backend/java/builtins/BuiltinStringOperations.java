@@ -1,9 +1,9 @@
 package org.kframework.backend.java.builtins;
 
+import java.math.BigInteger;
+
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.utils.StringUtil;
-
-import java.math.BigInteger;
 
 /**
  * Table of {@code public static} methods on builtin strings.
@@ -143,5 +143,10 @@ public class BuiltinStringOperations {
         }
         byte cat = Character.getDirectionality(term.stringValue().codePointAt(0));
         return StringToken.of(StringUtil.getDirectionalityCode(cat));
+    }
+    
+    public static StringToken id2string(UninterpretedToken token, TermContext context) {
+        assert token.sort().equals("Id");
+        return StringToken.of(token.value());
     }
 }
