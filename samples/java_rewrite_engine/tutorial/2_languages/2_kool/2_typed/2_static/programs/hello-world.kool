@@ -1,0 +1,9 @@
+// Testing main
+
+class theMain {
+  void theMain() {
+    print("Hello world!\n");
+  }
+}
+
+// Hello world!

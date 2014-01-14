@@ -215,6 +215,9 @@ public class KItem extends Term implements Sorted {
             arguments = kList.getContents().toArray(new Term[kList.getContents().size()]);
 
             /* evaluate a sort membership predicate */
+            // TODO(YilongL): maybe we can move sort membership evaluation after
+            // applying user-defined rules to allow the users to provide their
+            // own rules for checking sort membership
             if (kLabelConstant.label().startsWith("is") && kList.getContents().size() == 1
                     && kList.getContents().get(0) instanceof Sorted) {
                 return SortMembership.check(this, context.definition().context());

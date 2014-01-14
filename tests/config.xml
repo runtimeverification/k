@@ -606,6 +606,22 @@
     </all-programs>
   </test>
 
+  <!-- YilongL: the output of cycle.kool depends on the implementation of the rewrite engine -->
+  <test
+      definition="samples/java_rewrite_engine/tutorial/2_languages/2_kool/2_typed/2_static/kool-typed-static.k"
+      programs="samples/java_rewrite_engine/tutorial/2_languages/2_kool/2_typed/2_static/programs/"
+      extension="kool"
+      exclude="cycle.kool"
+      results="tutorial/2_languages/2_kool/2_typed/2_static/tests/"
+      >
+    <kompile-option name="-backend" value="java" />
+    <all-programs>
+      <krun-option name="-backend" value="java" />
+      <krun-option name="-smt" value="none" />
+      <krun-option name="-output" value="none" />
+    </all-programs>
+  </test>
+
 <!--
 
   <test
