@@ -64,7 +64,7 @@ public class SymbolicUnifier extends AbstractUnifier {
     private boolean isStarNested;
     
     /**
-     * A disjunction of {@code SymbolicConstraint}s created by this unifier.
+     * A conjunction of disjunctions of {@code SymbolicConstraint}s created by this unifier.
      */
     public final java.util.Collection<java.util.Collection<SymbolicConstraint>> multiConstraints;
     private final TermContext termContext;
@@ -142,7 +142,9 @@ public class SymbolicUnifier extends AbstractUnifier {
             }
         } else {
             /* unify */
-            term.accept(this, otherTerm);
+            if (!term.equals(otherTerm)) {
+                term.accept(this, otherTerm);
+            }
         }
     }
 
