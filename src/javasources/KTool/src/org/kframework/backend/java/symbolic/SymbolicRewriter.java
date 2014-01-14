@@ -343,9 +343,8 @@ public class SymbolicRewriter {
         strategy.reset(getRules(constrainedTerm.term()));
         while (strategy.hasNext()) {
             transition = strategy.nextIsTransition();
-            Collection<Rule> rules = strategy.next();
+            ArrayList<Rule> rules = new ArrayList<Rule>(strategy.next());
             for (Rule rule : rules) {
-//        for (Rule rule : getRules(constrainedTerm.term())) {
                 ruleStopwatch.reset();
                 ruleStopwatch.start();
 
@@ -389,6 +388,9 @@ public class SymbolicRewriter {
                     /* compute all results */
                     ConstrainedTerm newCnstrTerm = new ConstrainedTerm(result,
                             constraint1, constrainedTerm.termContext());
+                    if (K.do_concrete_exec) {
+                        assert newCnstrTerm.isGround();
+                    }
                     results.add(newCnstrTerm);
                     appliedRules.add(rule);
 
