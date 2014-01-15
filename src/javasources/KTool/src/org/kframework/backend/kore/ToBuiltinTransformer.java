@@ -25,12 +25,14 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
 		super(name, context);
 	}
 	
+	@Override
 	public ASTNode transform(BagItem node) throws TransformerException{
 		
 		ASTNode temp = node.getItem().accept(this);
 		return new BagItem((Term) temp);
 	}
 	
+	@Override
 	public ASTNode transform(ListItem node) throws TransformerException{
 		
 		ArrayList<Term> temp = new ArrayList<Term>();
@@ -41,6 +43,7 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
 
 	}
 	
+	@Override
 	public ASTNode transform(MapItem node) throws TransformerException{
 		
 		HashMap<Term,Term> temp = new HashMap<Term,Term>();
@@ -49,6 +52,7 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
 		return new MapBuiltin(this.context.dataStructureListSortOf("MyMap"),new ArrayList<Term>(),temp);
 	}
 	
+	@Override
 	public ASTNode transform(SetItem node) throws TransformerException{
 		
 		ArrayList<Term> temp = new ArrayList<Term>();
@@ -57,6 +61,7 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
 		return new SetBuiltin(this.context.dataStructureListSortOf("MySet"),new ArrayList<Term>(),temp);
 	}
 
+	@Override
 	public ASTNode transform(Set node) throws TransformerException{
 		
 		ArrayList<Term> temp = new ArrayList<Term>(node.getContents());
@@ -73,6 +78,7 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
 		return result;
 	}
 	
+	@Override
 	public ASTNode transform(Map node) throws TransformerException{
 		
 		ArrayList<Term> temp = new ArrayList<Term>(node.getContents());
@@ -105,6 +111,7 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
 		return index;
 	}
 	
+	@Override
 	public ASTNode transform(List node) throws TransformerException{
 		
 		ArrayList<Term> temp = new ArrayList<Term>(node.getContents());
