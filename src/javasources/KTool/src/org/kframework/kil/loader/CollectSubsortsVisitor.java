@@ -34,8 +34,11 @@ public class CollectSubsortsVisitor extends BasicVisitor {
 		if (!Sort.isBasesort(prd.getSort()))
 			context.addSubsort(KSorts.KITEM, prd.getSort());
 		if (prd.isSubsort()) {
-			Sort srt = (Sort) prd.getItems().get(0);
-			context.addSubsort(prd.getSort(), srt.toString());
+            if (!prd.containsAttribute("onlyLabel")
+                    && !prd.containsAttribute("notInRules")) {
+                Sort srt = (Sort) prd.getItems().get(0);
+                context.addSubsort(prd.getSort(), srt.toString());
+            }
 		} else if (prd.isListDecl()) {
 			UserList srt = (UserList) prd.getItems().get(0);
 			context.listConses.put(prd.getSort(), prd);
