@@ -109,7 +109,7 @@ the wrapper in the generated documentation, we associate it an
 //@ \subsection{Types}
 
   syntax Type ::= "void" | "int" | "bool" | "string"
-                //| Id                     [klabel("'class")]  // see next
+                | Id                     [notInRules, klabel("'class")]  // see next
                 | class(Id)         // explicit KOOL class type
                 | Type "[" "]"
                 > Types "->" Type
