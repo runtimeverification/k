@@ -132,7 +132,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
         substitution.clear();
         for (Map.Entry<Variable, Term> subst : result.entrySet()) {
-            checkTruthValBeforePutIntoConstraint(subst.getKey(), subst.getValue());
+            checkTruthValBeforePutIntoConstraint(subst.getKey(), subst.getValue(), true);
         }
         
         /*
@@ -447,6 +447,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
                 + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
 
+        // TODO(YilongL): why not evaluate the leftHandSide? assume this method must be called
+        // with some eval'd LHS & RHS?
         Term normalizedLeftHandSide = leftHandSide.substituteWithBinders(substitution, context);
         if (normalizedLeftHandSide != leftHandSide) {
             normalizedLeftHandSide = normalizedLeftHandSide.evaluate(this, context);
@@ -457,7 +459,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             normalizedRightHandSide = normalizedRightHandSide.evaluate(this, context);
         }
 
-        checkTruthValBeforePutIntoConstraint(normalizedLeftHandSide, normalizedRightHandSide);
+        checkTruthValBeforePutIntoConstraint(normalizedLeftHandSide, normalizedRightHandSide, false);
 
         return truthValue;
     }
@@ -481,17 +483,19 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      *            the left-hand side of the specified equality
      * @param rightHandSide
      *            the right-hand side of the specified equality
+     * @param putInSubst
+     *            specifies whether the equality can be safely added to the
+     *            substitution map of this symbolic constraint
      */
-    private void checkTruthValBeforePutIntoConstraint(Term leftHandSide, Term rightHandSide) {
+    private void checkTruthValBeforePutIntoConstraint(Term leftHandSide, Term rightHandSide, boolean putInSubst) {
         if (truthValue == TruthValue.FALSE) {
             return;
         }
         
         // assume the truthValue to be TRUE or UNKNOWN from now on
-        boolean isSubst = leftHandSide instanceof Variable;
         Equality equality = this.new Equality(leftHandSide, rightHandSide);
         if (equality.isUnknown()){
-            if (isSubst) {
+            if (putInSubst) {
                 Term origVal = substitution.put((Variable) leftHandSide, rightHandSide);
                 if (origVal == null) {
                     isNormal = false;
@@ -502,7 +506,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             }
             truthValue = TruthValue.UNKNOWN;
         } else if (equality.isFalse()) {
-            if (isSubst) {
+            if (putInSubst) {
                 substitution.put((Variable) leftHandSide, rightHandSide);
             } else {
                 equalities.add(equality);
@@ -877,6 +881,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      * @return the truth value of this symbolic constraint after simplification
      */
     public TruthValue simplify() {
+        if (truthValue == TruthValue.FALSE) {
+            return truthValue;
+        }
+        
         boolean change; // specifies if the equalities have been further
                          // simplified in the last iteration
         
@@ -972,6 +980,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
             Map<Variable, Term> tempSubst = Collections.singletonMap(variable, term);
             composeSubstitution(tempSubst, context, false);
+            if (this.substitution().toString().contains("_76:Term=Literal(#\"a\")") && this.substitution().toString().contains("L1:Term='_(_)(Literal(#\"cons\"),, '_,_(_76:Term,,")) {
+                System.out.println("XXX" + this.substitution);
+            }
             if (truthValue == TruthValue.FALSE) {
                 return;
             }
@@ -1034,7 +1045,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                  * important: check the truth value of the substitution before
                  * putting it into the substitution map
                  */
-                checkTruthValBeforePutIntoConstraint(subst.getKey(), term);
+                checkTruthValBeforePutIntoConstraint(subst.getKey(), term, true);
             }
         }
         
