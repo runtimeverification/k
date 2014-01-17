@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.BagItem;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.List;
 import org.kframework.kil.ListBuiltin;
@@ -20,6 +19,10 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
+/*
+ * author: Liyi Li
+ * this class will translate List,Set,Map to Builtins
+ */
 public class ToBuiltinTransformer extends CopyOnWriteTransformer {
 
 	public ToBuiltinTransformer(String name, Context context) {
