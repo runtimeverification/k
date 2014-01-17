@@ -8,13 +8,28 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.TreeSet;
 
+/**
+ * The PriorityStrategy partitions rules such that rule a and rule b will be
+ * in the same equivalence class iff a and b both have attribute "priority(x)"
+ * where x is some integer. If a rule is not tagged with any priority it will
+ * be given a priority of 0. Equivalence classes are returned in descending
+ * priority order, begginning with the highest priority class.
+ *
+ * @author ericmikida
+ *
+ */
+
 public class PriorityStrategy implements Strategy {
-    public PriorityStrategy() {
+    blic PriorityStrategy() {
         priorityMap = new java.util.HashMap<Integer, HashSet<Rule>>();
         priorities = new java.util.TreeSet<Integer>();
         priorityIterator = priorities.descendingIterator();
     }
 
+    /**
+     * Clears the priority list and rule map, then iterates through rules and
+     * inserts each rule into the appropriate priority class in the map.
+     */
     public void reset(Collection<Rule> rules) {
         priorityMap.clear();
         priorities.clear();
@@ -32,10 +47,18 @@ public class PriorityStrategy implements Strategy {
         priorityIterator = priorities.descendingIterator();
     }
 
+    /**
+     * Takes the next priority in the priority list and returns the
+     * corresponding rule collection.
+     */
     public Collection<Rule> next() {
         return priorityMap.get(priorityIterator.next());
     }
 
+    /**
+     * There is another class of rules iff there is another priority in the
+     * priority list.
+     **/
     public boolean hasNext() {
         return priorityIterator.hasNext();
     }
