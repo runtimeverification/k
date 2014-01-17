@@ -20,7 +20,7 @@ import java.util.TreeSet;
  */
 
 public class PriorityStrategy implements Strategy {
-    blic PriorityStrategy() {
+    public PriorityStrategy() {
         priorityMap = new java.util.HashMap<Integer, HashSet<Rule>>();
         priorities = new java.util.TreeSet<Integer>();
         priorityIterator = priorities.descendingIterator();
