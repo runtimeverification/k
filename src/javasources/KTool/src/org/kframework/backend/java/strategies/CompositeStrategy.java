@@ -28,6 +28,8 @@ import java.util.Iterator;
  * them back to the stack until we eventually get back to the top of the stack.
  *
  * @author ericmikida
+ *
+ */
 
 public class CompositeStrategy implements Strategy {
     public CompositeStrategy() {
