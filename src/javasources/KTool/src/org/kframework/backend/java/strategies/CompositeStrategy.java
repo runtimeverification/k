@@ -3,6 +3,7 @@ package org.kframework.backend.java.strategies;
 import org.kframework.backend.java.kil.Rule;
 
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Iterator;
 
@@ -94,7 +95,9 @@ public class CompositeStrategy implements Strategy {
             top.reset(next());
             stack.addFirst(top);
         }
-        return stack.peekFirst().next();
+        // TODO(YilongL): I have no idea why children.peekFirst().next() could
+        // return duplicate elements.
+        return new LinkedHashSet<Rule>(children.peekFirst().next());
     }
 
     /**
