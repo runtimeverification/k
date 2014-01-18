@@ -7,6 +7,7 @@ import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.BuiltinMgu;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
@@ -427,6 +428,18 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
         variable = (Variable) astNode;
         variable = (Variable) super.transform(variable);
         return variable.accept(postTransformer);
+    }
+    
+    @Override
+    public ASTNode transform(BuiltinMgu mgu) {
+        ASTNode astNode = mgu.accept(preTransformer);
+        if (astNode instanceof DoneTransforming) {
+            return ((DoneTransforming) astNode).getContents();
+        }
+        assert astNode instanceof BuiltinMgu : "preTransformer should not modify type";
+        mgu = (BuiltinMgu) astNode;
+        mgu = (BuiltinMgu) super.transform(mgu);
+        return mgu.accept(postTransformer);
     }
 
     protected class DoneTransforming extends ASTNode {

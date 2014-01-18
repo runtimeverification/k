@@ -1,20 +1,21 @@
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.Int32Token;
+import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.BuiltinMgu;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
-import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Hole;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KLabelFreezer;
 import org.kframework.backend.java.kil.KLabelInjection;
-import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.MetaVariable;
@@ -22,8 +23,6 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermCons;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
-
-import java.io.Serializable;
 
 
 /**
@@ -41,6 +40,7 @@ public interface Unifier {
     public void unify(BuiltinList builtinList, Term term);
     public void unify(BuiltinMap builtinMap, Term term);
     public void unify(BuiltinSet builtinSet, Term term);
+    public void unify(BuiltinMgu builtinMgu, Term term);
     public void unify(Cell cell, Term term);
     public void unify(CellCollection cellCollection, Term term);
     public void unify(Hole hole, Term term);

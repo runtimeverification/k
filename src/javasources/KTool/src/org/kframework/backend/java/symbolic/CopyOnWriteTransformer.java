@@ -14,6 +14,7 @@ import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.BuiltinMgu;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
@@ -616,6 +617,16 @@ public class CopyOnWriteTransformer implements Transformer {
     @Override
     public ASTNode transform(Variable variable) {
         return variable;
+    }
+    
+    @Override
+    public ASTNode transform(BuiltinMgu mgu) {
+        SymbolicConstraint transformedConstraint = (SymbolicConstraint) mgu.constraint().accept(this);
+        if (transformedConstraint == mgu.constraint()) {
+            return BuiltinMgu.of(transformedConstraint, context);
+        } else {
+            return mgu;
+        }
     }
 
     protected List<Term> transformList(List<Term> list) {

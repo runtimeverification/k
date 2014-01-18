@@ -1,11 +1,40 @@
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.Int32Token;
+import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
-import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.BuiltinMgu;
+import org.kframework.backend.java.kil.BuiltinSet;
+import org.kframework.backend.java.kil.Cell;
+import org.kframework.backend.java.kil.CellCollection;
+import org.kframework.backend.java.kil.Collection;
+import org.kframework.backend.java.kil.ConstrainedTerm;
+import org.kframework.backend.java.kil.Hole;
+import org.kframework.backend.java.kil.JavaSymbolicObject;
+import org.kframework.backend.java.kil.KCollection;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KLabel;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.KLabelFreezer;
+import org.kframework.backend.java.kil.KLabelInjection;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.KSequence;
+import org.kframework.backend.java.kil.ListLookup;
+import org.kframework.backend.java.kil.MapLookup;
+import org.kframework.backend.java.kil.MapUpdate;
+import org.kframework.backend.java.kil.MetaVariable;
+import org.kframework.backend.java.kil.Rule;
+import org.kframework.backend.java.kil.SetLookup;
+import org.kframework.backend.java.kil.SetUpdate;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermCons;
+import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Token;
+import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.ASTNode;
 
 /**
@@ -206,5 +235,10 @@ public class LocalTransformer implements Transformer {
     @Override
     public ASTNode transform(Variable variable) {
         return transform((Term) variable);
+    }
+    
+    @Override
+    public ASTNode transform(BuiltinMgu mgu) {
+        return transform((Term) mgu);
     }
 }

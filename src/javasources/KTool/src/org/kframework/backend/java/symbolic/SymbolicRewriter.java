@@ -566,6 +566,11 @@ public class SymbolicRewriter {
                     ConstrainedTerm term = entry.getKey();
                     Integer currentDepth = entry.getValue();
                     computeRewriteStep(term);
+//                    System.out.println(step);
+//                    System.err.println(term);
+//                    for (ConstrainedTerm r : results) {
+//                        System.out.println(r);
+//                    }
 
                     if (results.isEmpty() && searchType == SearchType.FINAL) {
                         Map<Variable, Term> map = getSubstitutionMap(term, pattern);
@@ -601,6 +606,7 @@ public class SymbolicRewriter {
                         }
                     }
                 }
+//                System.out.println("+++++++++++++++++++++++");
 
                 /* swap the queues */
                 Map<ConstrainedTerm, Integer> temp;

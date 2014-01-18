@@ -69,7 +69,7 @@ public class JavaSymbolicKRun implements KRun {
     private KRunResult<KRunState> internalRun(org.kframework.kil.Term cfg, int bound) throws KRunExecutionException {
         ConstrainedTerm result = javaKILRun(cfg, bound);
         org.kframework.kil.Term kilTerm = (org.kframework.kil.Term) result.term().accept(
-                new BackendJavaKILtoKILTranslation(context));
+                new BackendJavaKILtoKILTransformer(context));
         return new KRunResult<KRunState>(new KRunState(kilTerm, context));
     }
 
@@ -236,7 +236,7 @@ public class JavaSymbolicKRun implements KRun {
             for (Variable var : map.keySet()) {
                 org.kframework.kil.Term kilTerm =
                         (org.kframework.kil.Term) map.get(var).accept(
-                                new BackendJavaKILtoKILTranslation(context));
+                                new BackendJavaKILtoKILTransformer(context));
                 substitutionMap.put(var.toString(), kilTerm);
             }
 
@@ -339,10 +339,10 @@ public class JavaSymbolicKRun implements KRun {
 
             /* translate back to generic KIL term */
             org.kframework.kil.Term pgmTerm = (org.kframework.kil.Term) pgm.accept(
-                    new BackendJavaKILtoKILTranslation(context));
+                    new BackendJavaKILtoKILTransformer(context));
 
             org.kframework.kil.Term kilTerm = (org.kframework.kil.Term) result.term().accept(
-                    new BackendJavaKILtoKILTranslation(context));
+                    new BackendJavaKILtoKILTransformer(context));
 
             generatorResults.add(new TestGenResult(
                     new KRunState(kilTerm, context),

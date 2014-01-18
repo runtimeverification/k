@@ -7,6 +7,7 @@ import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.BuiltinMgu;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
@@ -48,6 +49,7 @@ public interface Transformer {
     public ASTNode transform(BuiltinList builtinList);
     public ASTNode transform(BuiltinMap builtinMap);
     public ASTNode transform(BuiltinSet builtinSet);
+    public ASTNode transform(BuiltinMgu builtinMgu);
     public ASTNode transform(Cell cell);
     public ASTNode transform(CellCollection cellCollection);
     public ASTNode transform(Collection collection);

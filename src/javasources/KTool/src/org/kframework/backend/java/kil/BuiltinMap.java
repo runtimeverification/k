@@ -19,8 +19,6 @@ import com.google.common.base.Joiner;
  */
 public class BuiltinMap extends Collection implements Sorted {
 
-    public static final BuiltinMap EMPTY = new BuiltinMap();
-
     private final Map<Term, Term> entries;
 
     public BuiltinMap(Map<? extends Term, ? extends Term> entries, Variable frame) {

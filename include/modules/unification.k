@@ -7,12 +7,12 @@ module UNIFICATION
   imports K-EQUAL-HOOKS
 
 //@ Public interface to the unification procedure (what the user needs to know)
-  syntax Mgu ::= ".Mgu"
+  syntax Mgu ::= ".Mgu"  [constructor, hook(Unification:emptyMgu)]
   rule .Mgu => subst(.KList)  [structural, anywhere]  // empty mgu
   rule isMgu(subst(_)) => true  [function]  // so we can write Theta:Mgu
 
-  syntax Mgu ::= updateMgu(Mgu,K,K)  [function]  // updates Mgu with equation
-  syntax K ::= applyMgu(Mgu,K)       [function, latex({#1}({#2}))]  // applies Mgu to any term
+  syntax Mgu ::= updateMgu(Mgu,K,K)  [function, hook(Unification:updateMgu)]  // updates Mgu with equation
+  syntax K ::= applyMgu(Mgu,K)       [function, hook(Unification:applyMgu), latex({#1}({#2}))]  // applies Mgu to any term
   rule applyMgu(Theta:Mgu,K) => applySubst(Theta,K)
 
   syntax Set ::= applyMgu(Mgu,Set)  [function, latex({#1}({#2}))]
@@ -33,10 +33,10 @@ syntax ThingThatCanBeUnified ::= "_" [onlyLabel, klabel($dontcare)]
 
   rule eqns((eqn(K:K,,K) => .KList),,_)   [structural, anywhere]
 
-/*@ Generic rule for decomposing the constraints.  
-Matching on any KAST label, the 
-*/ 
-  rule eqns((.KList => eqn(K1,,K2)),, 
+/*@ Generic rule for decomposing the constraints.
+Matching on any KAST label, the
+*/
+  rule eqns((.KList => eqn(K1,,K2)),,
             eqn(L:KLabel((K1:K => .KList),,Ks:KList),,
                 L((K2:K => .KList),,Ks':KList)),,_)
     when (isVariable(L(K1,,Ks)) =/=K true)
@@ -50,7 +50,7 @@ Matching on any KAST label, the
     when isVariable(K) =/=K true   [structural, anywhere]
 
 
-  rule unifyEqs(subst(_:KList),,eqns( 
+  rule unifyEqs(subst(_:KList),,eqns(
             eqn(L1:KLabel(Ks:KList),,
                 L2:KLabel(Ks':KList)),,_))
     => clash(L1:KLabel(Ks:KList),,
@@ -83,7 +83,7 @@ remaining equations by applying the new mgu binding to them. */
     => cycle(X,,K)
     when X subTerm K [anywhere]
 
-/*@ Final rule of the unification algorithm, retrieving the substitution 
+/*@ Final rule of the unification algorithm, retrieving the substitution
 once all constraints were incorporated.
 */
   rule unifyEqs(subst(Eqns:KList),,eqns(.KList)) => subst(Eqns)
@@ -94,16 +94,16 @@ once all constraints were incorporated.
     [structural, anywhere]
   syntax Bool ::= K "properSubTerm" K [function]
   rule K1 properSubTerm L:KLabel(.KList) => false   [structural, anywhere]
-  rule K1:K properSubTerm L:KLabel(K2:K,,Ks:KList) 
+  rule K1:K properSubTerm L:KLabel(K2:K,,Ks:KList)
       => (K1 subTerm K2) orElseBool (K1 properSubTerm L:KLabel(Ks))
    [structural, anywhere]
-/*@ Generic first order substitution on K ASTs.  
+/*@ Generic first order substitution on K ASTs.
 Note that ~> is not handled  and neither are binding operations.
 */
 
   rule substitute(X:K,,K:K,,.KList) => .KList   [structural, anywhere]
   rule substitute(X:K,,K:K,,K1:K,,K2:K,,Ks:KList)
-    => substitute(X,,K,,K1),,substitute(X,,K,,K2),,substitute(X,,K,,Ks) 
+    => substitute(X,,K,,K1),,substitute(X,,K,,K2),,substitute(X,,K,,Ks)
     [structural, anywhere]
   rule substitute(X:K,,K:K,,X) => K   [structural, anywhere]
   rule substitute(X:K,,K:K,,L:KLabel(Ks:KList))
@@ -112,11 +112,11 @@ Note that ~> is not handled  and neither are binding operations.
    [structural, anywhere]
 
   syntax K ::= "unify" "(" K "," K ")" [function]
-  rule unify(K1, K2) => unifyEqs(subst(.KList),,eqns(eqn(K1,,K2))) 
+  rule unify(K1, K2) => unifyEqs(subst(.KList),,eqns(eqn(K1,,K2)))
    [structural, anywhere]
 /*@ updateMgu adds a constraint cu the current MGU substitution.
-The existing mgu is first applied to the constraint being introduced to 
-guarantee that the variables in the domain of the mgu don't appear in the 
+The existing mgu is first applied to the constraint being introduced to
+guarantee that the variables in the domain of the mgu don't appear in the
 constraint.
 */
 
@@ -127,21 +127,21 @@ constraint.
   rule applySubst(subst((eqn(K1:K,,K2:K) => .KList),,_),
                     (K:K => substitute(K1,, K2,, K)))   [structural, anywhere]
   rule applySubst(subst(.KList),K) => K   [structural, anywhere]
-  
+
   syntax KLabel ::= "unifyEqs" | "subst" | "#vars" | "substitute"
                   | "eqn" | "eqns" | "mgu"
                   | "getVars" | "accumulateVars"
                   | "clash" | "cycle"
 
   syntax MguError
-syntax MguOrError ::= Mgu | MguError
+  syntax MguOrError ::= Mgu | MguError
   rule isMguError(clash(_)) => true
   rule isMguError(cycle(_)) => true
 
   rule getVars(K) => accumulateVars(#vars(.KList),, K)
     [structural, anywhere]
 
-  rule accumulateVars(#vars(Xs:KList),,X:Variable,,Ks:KList) 
+  rule accumulateVars(#vars(Xs:KList),,X:Variable,,Ks:KList)
     => #if (X inKList Xs)
        #then accumulateVars(#vars(Xs),,Ks)
        #else accumulateVars(#vars(Xs,,X),,Ks)
@@ -154,18 +154,18 @@ syntax MguOrError ::= Mgu | MguError
 
 
   syntax Map ::= applyMgu(Mgu, Map) [function]
-  rule applyMgu(Mgu, ((X |-> V) M:Map)) 
+  rule applyMgu(Mgu, ((X |-> V) M:Map))
     => (X |-> applyMgu(Mgu,V)) applyMgu(Mgu, M)
   rule applyMgu(_,.Map) => .Map
 
 
   syntax Map ::= #metaVariablesMap(K) [function]
   rule #metaVariablesMap(K:K) => #metaVarsMap(getVars(K))
-  
+
   syntax Map ::= #metaVarsMap(K) [function]
-  rule #metaVarsMap(#vars((X:K => .KList),,_)) 
+  rule #metaVarsMap(#vars((X:K => .KList),,_))
        (.Map => #tokenToString(X) |-> X)
-  rule #metaVarsMap(#vars(.KList)) => .Map 
+  rule #metaVarsMap(#vars(.KList)) => .Map
 
 //  configuration <k> .K </k> <nextVar> 0 </nextVar>
 
@@ -175,7 +175,7 @@ syntax MguOrError ::= Mgu | MguError
 
   syntax K ::= freshSubst(KList)  [function]
 
-  rule freshSubst(subst(_,,(.KList => 
+  rule freshSubst(subst(_,,(.KList =>
                   eqn(X:K,,#freshSym(X)))),,
                   #vars((X => .KList),,_))
   rule freshSubst(subst(Eqns:KList),,#vars(.KList)) => subst(Eqns)
@@ -185,7 +185,7 @@ syntax MguOrError ::= Mgu | MguError
 
 
 // alpha conversion moved here by grigore
- syntax K ::= renameVariables(K)  [function]
+ syntax K ::= renameVariables(K)  [function, hook(MetaK:renameVariables)]
             | applyAlpha(K)
 
 // rule renameVariables(K) => getAlpha(K) ~> applyAlpha(K)
@@ -203,17 +203,17 @@ syntax MguOrError ::= Mgu | MguError
 
 /*
   rule Mgu2Map(subst((eqn(K1:K,,K2:K) => eqn(K2:K,,K1:K)),,_))
-    when isSymbolicK(K1) 
+    when isSymbolicK(K1)
     andBool isVariable(K2)
-    andBool isSymbolicK(K2) =/=K true 
+    andBool isSymbolicK(K2) =/=K true
 // reorient symbolic-to-concrete variable bindings
 
   rule Mgu2Map(subst((eqn(K1:K,,K2:K) => .KList),,_))
-    when isSymbolicK(K1) 
+    when isSymbolicK(K1)
     andBool isSymbolicK(K2)
   rule Mgu2Map(subst((eqn(K1:K,,K2:K) => .KList),,_))
-    when isSymbolicK(K1) 
-    andBool (isVariable(K2) =/=K true) 
+    when isSymbolicK(K1)
+    andBool (isVariable(K2) =/=K true)
   // ignore symbolic bindings
   rule Mgu2Map(subst((eqn(K1:K,,K2:K) => .KList),,_))
        (. => K1 |-> K2)
@@ -227,4 +227,3 @@ syntax MguOrError ::= Mgu | MguError
 
 
 endmodule
-

@@ -215,4 +215,9 @@ public class CombinedLocalVisitor extends LocalVisitor {
     public void visit(Variable node) {
         visitAll(node);
     }
+    
+    @Override
+    public void visit(BuiltinMgu node) {
+        visitAll(node);
+    }
 }

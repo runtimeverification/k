@@ -6,6 +6,7 @@ import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.BuiltinMgu;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
@@ -47,6 +48,7 @@ public interface Visitor {
     public void visit(BuiltinList builtinList);
     public void visit(BuiltinMap builtinMap);
     public void visit(BuiltinSet builtinSet);
+    public void visit(BuiltinMgu builtinMgu);
     public void visit(Cell cell);
     public void visit(CellCollection cellCollection);
     public void visit(Collection collection);

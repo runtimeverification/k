@@ -2,6 +2,7 @@ package org.kframework.backend.java.symbolic;
 
 import com.google.common.collect.Multimap;
 import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.BuiltinMgu;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.Cell;
@@ -33,13 +34,13 @@ import java.util.Map;
  *
  * @author: AndreiS
  */
-public class BackendJavaKILtoKILTranslation extends CopyOnWriteTransformer {
+public class BackendJavaKILtoKILTransformer extends CopyOnWriteTransformer {
 
     private final Context context;
     private final ConfigurationStructureMap configurationStructureMap;
     private org.kframework.kil.Cell currentCell;
 
-    public BackendJavaKILtoKILTranslation(Context context) {
+    public BackendJavaKILtoKILTransformer(Context context) {
         this.context = context;
         configurationStructureMap = context.getConfigurationStructureMap();
     }
@@ -207,6 +208,14 @@ public class BackendJavaKILtoKILTranslation extends CopyOnWriteTransformer {
 //        System.out.println("NODE: "+node.toString());
 //        System.out.println("**********VARIABLE"+ variable.name()+"->"+variable.sort());
         return node;
+    }
+    
+    @Override
+    public ASTNode transform(BuiltinMgu mgu) {
+        // TODO(YilongL): properly translate the Mgu into KItem form using the toK function
+        return new org.kframework.kil.KApp(
+                new org.kframework.kil.KLabelConstant("'someMgu(" + mgu.constraint().toString() + ")"),
+                new org.kframework.kil.KList());
     }
 
 }
