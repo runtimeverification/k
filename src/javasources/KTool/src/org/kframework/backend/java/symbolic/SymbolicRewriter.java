@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -544,8 +545,8 @@ public class SymbolicRewriter {
         }
 
         // The search queues will map terms to their depth in terms of transitions.
-        Map<ConstrainedTerm,Integer> queue = new HashMap<ConstrainedTerm,Integer>();
-        Map<ConstrainedTerm,Integer> nextQueue = new HashMap<ConstrainedTerm,Integer>();
+        Map<ConstrainedTerm,Integer> queue = new LinkedHashMap<ConstrainedTerm,Integer>();
+        Map<ConstrainedTerm,Integer> nextQueue = new LinkedHashMap<ConstrainedTerm,Integer>();
 
         visited.add(initialTerm);
         queue.put(initialTerm, 0);
