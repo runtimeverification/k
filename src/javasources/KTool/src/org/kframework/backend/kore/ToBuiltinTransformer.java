@@ -20,7 +20,6 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
 /*
- * author: Liyi Li
  * this class will translate List,Set,Map to Builtins
  */
 public class ToBuiltinTransformer extends CopyOnWriteTransformer {
@@ -29,13 +28,16 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
 		super(name, context);
 	}
 	
+    public ToBuiltinTransformer(Context context) {
+        super("Transform OLD into NEW", context);
+    }
+	
 	@Override
 	public ASTNode transform(ListItem node) throws TransformerException{
 		
 		ArrayList<Term> temp = new ArrayList<Term>();
 		temp.add((Term) node.getItem().accept(this));
-		
-		return new ListBuiltin(this.context.dataStructureListSortOf(DataStructureSort.DEFAULT_LIST_SORT),
+		return new ListBuiltin(this.context.dataStructureSortOf(DataStructureSort.DEFAULT_LIST_SORT),
 				new ArrayList<Term>(),temp,new ArrayList<Term>());
 
 	}
@@ -46,7 +48,7 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
 		HashMap<Term,Term> temp = new HashMap<Term,Term>();
 		temp.put((Term) node.getKey().accept(this), (Term) node.getValue().accept(this));
 		
-		return new MapBuiltin(this.context.dataStructureListSortOf(DataStructureSort.DEFAULT_MAP_SORT),new ArrayList<Term>(),temp);
+		return new MapBuiltin(this.context.dataStructureSortOf(DataStructureSort.DEFAULT_MAP_SORT),new ArrayList<Term>(),temp);
 	}
 	
 	@Override
@@ -55,52 +57,55 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
 		ArrayList<Term> temp = new ArrayList<Term>();
 		temp.add((Term) node.getItem().accept(this));
 		
-		return new SetBuiltin(this.context.dataStructureListSortOf(DataStructureSort.DEFAULT_SET_SORT),new ArrayList<Term>(),temp);
+		return new SetBuiltin(this.context.dataStructureSortOf(DataStructureSort.DEFAULT_SET_SORT),new ArrayList<Term>(),temp);
 	}
 
 	@Override
 	public ASTNode transform(Set node) throws TransformerException{
 		
 		ArrayList<Term> temp = new ArrayList<Term>(node.getContents());
-		SetBuiltin result = new SetBuiltin(this.context.dataStructureListSortOf(DataStructureSort.DEFAULT_SET_SORT),new ArrayList<Term>(),new ArrayList<Term>());
+		ArrayList<Term> elements = new ArrayList<Term>();
+		ArrayList<Term> baseTerms = new ArrayList<Term>();
 		
 		for(int i = 0; i < temp.size(); ++i){
 			
 			if(temp.get(i) instanceof SetItem){
-				result.elements().add((Term) ((SetItem)temp.get(i)).getItem().accept(this));
+				elements.add((Term) ((SetItem)temp.get(i)).getItem().accept(this));
 			} else {
-				result.baseTerms().add((Term) temp.get(i).accept(this));
+				baseTerms.add((Term) temp.get(i).accept(this));
 			}
 		}
-		return result;
+		return new SetBuiltin(this.context.dataStructureSortOf(DataStructureSort.DEFAULT_SET_SORT),
+				baseTerms,elements);
 	}
 	
 	@Override
 	public ASTNode transform(Map node) throws TransformerException{
 		
 		ArrayList<Term> temp = new ArrayList<Term>(node.getContents());
-		MapBuiltin result = new MapBuiltin(this.context.dataStructureListSortOf(DataStructureSort.DEFAULT_MAP_SORT)
-				,new ArrayList<Term>(),new HashMap<Term,Term>());
+		HashMap<Term,Term> elements = new HashMap<Term,Term>();
+		ArrayList<Term> baseTerms = new ArrayList<Term>();
 		
 		for(int i = 0;i < temp.size(); ++i){
 			
 			if(temp.get(i) instanceof MapItem){
-				result.elements().put((Term)((MapItem)temp.get(i)).getKey().accept(this),
+				elements.put((Term)((MapItem)temp.get(i)).getKey().accept(this),
 						(Term)((MapItem)temp.get(i)).getValue().accept(this));
 			} else {
-				result.baseTerms().add((Term) temp.get(i).accept(this));
+				baseTerms.add((Term) temp.get(i).accept(this));
 			}
 		}
-		return result;
+		return new MapBuiltin(this.context.dataStructureSortOf(DataStructureSort.DEFAULT_MAP_SORT)
+				,baseTerms,elements);
 	}
 	
-	private int dealWithBaseItem(ListBuiltin result,ArrayList<Term> list,int left,int right) throws TransformerException{
+	private int dealWithBaseItem(ArrayList<Term> elementRight,ArrayList<Term> list,int left,int right) throws TransformerException{
 		
 		int index = left;
 		for( ;index <= right; ++index){
 			
 			if(list.get(index) instanceof ListItem){
-				result.elementsRight().add((Term) ((ListItem)list.get(index)).getItem().accept(this));
+				elementRight.add((Term) ((ListItem)list.get(index)).getItem().accept(this));
 			} else {
 				break;
 			}
@@ -112,14 +117,15 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
 	public ASTNode transform(List node) throws TransformerException{
 		
 		ArrayList<Term> temp = new ArrayList<Term>(node.getContents());
-		ListBuiltin result = new ListBuiltin(this.context.dataStructureListSortOf(DataStructureSort.DEFAULT_LIST_SORT),
-				new ArrayList<Term>(),new ArrayList<Term>(),new ArrayList<Term>());
-		
+		ArrayList<Term> elementLeft = new ArrayList<Term>();
+		ArrayList<Term> elementRight = new ArrayList<Term>();
+		ArrayList<Term> baseTerms = new ArrayList<Term>();
+
 		int i = 0;
 		for( ;i < temp.size(); ++i){
 			
 			if(temp.get(i) instanceof ListItem){
-				result.elementsLeft().add((Term) ((ListItem)temp.get(i)).getItem().accept(this));
+				elementLeft.add((Term) ((ListItem)temp.get(i)).getItem().accept(this));
 			} else {
 				break;
 			}
@@ -129,7 +135,7 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
 		for( ;j >= i; --j){
 			
 			if(temp.get(j) instanceof ListItem){
-				result.elementsRight().add((Term) ((ListItem)temp.get(i)).getItem().accept(this));
+				elementRight.add((Term) ((ListItem)temp.get(i)).getItem().accept(this));
 			} else {
 				break;
 			}
@@ -138,14 +144,15 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
 		while(i<=j){
 			
 			ArrayList<Term> tempBase = new ArrayList<Term>();
+			ArrayList<Term> newRight = new ArrayList<Term>();
 			tempBase.add((Term) temp.get(i).accept(this));
 			i++;
-			ListBuiltin newAdd = new ListBuiltin(this.context.dataStructureListSortOf(DataStructureSort.DEFAULT_LIST_SORT),
-					tempBase, new ArrayList<Term>(), new ArrayList<Term>());
-			i=this.dealWithBaseItem(newAdd, temp, i, j);
-			result.baseTerms().add(newAdd);
+			i=this.dealWithBaseItem(newRight, temp, i, j);
+			baseTerms.add(new ListBuiltin(this.context.dataStructureSortOf(DataStructureSort.DEFAULT_LIST_SORT),
+					tempBase, new ArrayList<Term>(), newRight));
 		}
 		
-		return result;
+		return new ListBuiltin(this.context.dataStructureSortOf(DataStructureSort.DEFAULT_LIST_SORT),
+				baseTerms,elementLeft,elementRight);
 	}
 }

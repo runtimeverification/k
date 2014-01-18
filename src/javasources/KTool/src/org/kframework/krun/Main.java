@@ -30,6 +30,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.fusesource.jansi.AnsiConsole;
 import org.kframework.backend.java.ksimulation.Waitor;
 import org.kframework.backend.java.symbolic.JavaSymbolicKRun;
+import org.kframework.backend.kore.KilTransformer;
 import org.kframework.backend.maude.krun.MaudeKRun;
 import org.kframework.backend.symbolic.TokenVariableToSymbolic;
 import org.kframework.backend.symbolic.VariableReplaceTransformer;
@@ -55,7 +56,6 @@ import org.kframework.kil.StringBuiltin;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.ResolveVariableAttribute;
-import org.kframework.kil.visitors.KilTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.api.KRun;
 import org.kframework.krun.api.KRunDebugger;
@@ -393,22 +393,8 @@ public class Main {
 
             if ("pretty".equals(K.output_mode) || "kore".equals(K.output_mode)) {
             	
-            	String output = null;
+            	String output = result.toString();
             	
-            	if(result instanceof KRunProofResult && "kore".equals(K.output_mode)){
-            		
-            		Set<Term> temp = (Set<Term>) result.getResult();
-            		Set<Term> theResultSet = new HashSet<Term>();
-            		Iterator<Term> tempList = temp.iterator();
-            		KilTransformer trans = new KilTransformer();
-            		while(tempList.hasNext()){
-            		    theResultSet.add(trans.kilToKore(tempList.next()));
-            		}
-            		((KRunProofResult<Set<Term>>)result).setResult(theResultSet);
-            		output=result.toString();
-            	} else {
-                output = result.toString();
-            	}
                 if (!cmd.hasOption("output-file")) {
                     AnsiConsole.out.println(output);
                 } else {

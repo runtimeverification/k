@@ -4,35 +4,26 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Bracket;
-import org.kframework.kil.Cast;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.KApp;
-import org.kframework.kil.KLabel;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSequence;
-import org.kframework.kil.KSorts;
 import org.kframework.kil.ListBuiltin;
 import org.kframework.kil.ListLookup;
-import org.kframework.kil.ListTerminator;
 import org.kframework.kil.ListUpdate;
 import org.kframework.kil.MapBuiltin;
 import org.kframework.kil.MapLookup;
 import org.kframework.kil.MapUpdate;
-import org.kframework.kil.Rewrite;
 import org.kframework.kil.SetBuiltin;
 import org.kframework.kil.SetLookup;
 import org.kframework.kil.SetUpdate;
 import org.kframework.kil.Term;
-import org.kframework.kil.TermComment;
-import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
 /*
- * author: Liyi Li
  * 
  * this Class will translate kil components to KLabel Form
  * 
@@ -43,55 +34,15 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
 		super(name, context);
 	}
 	
-	@Override
-	public ASTNode transform(Rewrite node) throws TransformerException {
-		
-		ArrayList<Term> result = new ArrayList<Term>();
-		result.add((Term) node.getLeft().accept(this));
-		result.add((Term) node.getRight().accept(this));
-		return new KApp(new KLabelConstant("_=>_"),new KList(result));
-	}
-	
-	
-	@Override
-	public ASTNode transform(ListTerminator node) throws TransformerException {
-		if (node.separator() != null && node.getSort().equals(KSorts.K)) {
-			return new KLabelConstant(".List{\"" + node.separator() + "\"}");
-        } else {
-		return new KLabelConstant("." + node.getSort());
-		}
-	}
-	
-	@Override
-	public ASTNode transform(Cast node) throws TransformerException {
-		
-		KLabel tempLabel = new KLabelConstant("_::_");
-		Term contentTerm = (Term) node.getContent().accept(this);
-		Term sortTerm = new KLabelConstant(node.getSort());
-		
-		ArrayList<Term> tempList = new ArrayList<Term>();
-		tempList.add(contentTerm);
-		tempList.add(sortTerm);
-		
-		KApp result = new KApp(tempLabel, new KList(tempList));
-		return result;
-	}
-
-	@Override
-	public ASTNode transform(Bracket node) throws TransformerException {
-		
-		return new KApp(new KLabelConstant("(_)"),(Term) node.getContent().accept(this));
-	}
-	
-	public ASTNode transform(TermComment node) throws TransformerException {
-		return new KLabelConstant("<br />");
-	}
+    public ToKAppTransformer(Context context) {
+        super("Transform NEW into KAPP", context);
+    }
 	
 	@Override
 	public ASTNode transform(SetLookup node) throws TransformerException{
 		
 		ArrayList<Term> temp = new ArrayList<Term>();
-		temp.add(node.base());
+		temp.add((Term) node.base().accept(this));
 		temp.add((Term)node.key().accept(this));
 		temp.add((Term)node.value().accept(this));
 		
@@ -102,7 +53,7 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
 	public ASTNode transform(ListLookup node) throws TransformerException{
 		
 		ArrayList<Term> temp = new ArrayList<Term>();
-		temp.add(node.base());
+		temp.add((Term) node.base().accept(this));
 		temp.add((Term)node.key().accept(this));
 		temp.add((Term)node.value().accept(this));
 		
@@ -113,7 +64,7 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
 	public ASTNode transform(MapLookup node) throws TransformerException{
 		
 		ArrayList<Term> temp = new ArrayList<Term>();
-		temp.add(node.base());
+		temp.add((Term) node.base().accept(this));
 		temp.add((Term)node.key().accept(this));
 		temp.add((Term)node.value().accept(this));
 		
@@ -134,7 +85,7 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
 		termSeq.add(newTerm);
 		KSequence newEntryTerm = new KSequence(termSeq);
         ArrayList<Term> newArg = new ArrayList<Term>();
-        newArg.add(node.set());
+        newArg.add((Term) node.set().accept(this));
         newArg.add(newEntryTerm);
 		
 		return new KApp(new KLabelConstant("Set:update"),new KList(newArg));
@@ -166,7 +117,7 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
 		KSequence newLeftTerm = new KSequence(newLeftSeq);
 		KSequence newRightTerm = new KSequence(newRightSeq);
         ArrayList<Term> newArg = new ArrayList<Term>();
-        newArg.add(node.base());
+        newArg.add((Term) node.base().accept(this));
         newArg.add(newLeftTerm);
         newArg.add(newRightTerm);
 		
@@ -214,7 +165,7 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
 		KSequence newLeftTerm = new KSequence(newLeftSeq);
 		KSequence newRightTerm = new KSequence(newRightSeq);
         ArrayList<Term> newArg = new ArrayList<Term>();
-        newArg.add(node.map());
+        newArg.add((Term) node.map().accept(this));
         newArg.add(newLeftTerm);
         newArg.add(newRightTerm);
 		
@@ -261,7 +212,6 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
 	}
 	
 	/*
-	 * author: Liyi Li
 	 * a helper function to parse all baseterm in ListBultin into a list of terms
 	 * which are translated into k-label form
 	 */
@@ -324,20 +274,20 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
 		
 		tempElem.addAll(tempElemRight);
 		
-		if(tempBase.size()==0){
+		if(tempElem.size()==0){
 			
 			return new KLabelConstant(DataStructureSort.DEFAULT_LIST_UNIT_LABEL);
 		}
 		
 		ArrayList<Term> basedTerm = new ArrayList<Term>();
-		basedTerm.add(tempBase.get(tempBase.size()-1));
+		basedTerm.add(tempElem.get(tempElem.size()-1));
 		basedTerm.add(new KLabelConstant(DataStructureSort.DEFAULT_LIST_UNIT_LABEL));
 		KApp basedKapp = new KApp(new KLabelConstant(DataStructureSort.DEFAULT_LIST_LABEL),new KList(basedTerm));
 		
-		for(int i = tempBase.size()-2; i >= 0; --i){
+		for(int i = tempElem.size()-2; i >= 0; --i){
 			
 			ArrayList<Term> tempTerm = new ArrayList<Term>();
-			tempTerm.add(tempBase.get(i));
+			tempTerm.add(tempElem.get(i));
 			tempTerm.add(basedKapp);
 			basedKapp = new KApp(new KLabelConstant(DataStructureSort.DEFAULT_LIST_LABEL),new KList(tempTerm));
 		}
@@ -384,39 +334,6 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
 			tempTerm.add(tempBase.get(i));
 			tempTerm.add(basedKapp);
 			basedKapp = new KApp(new KLabelConstant(DataStructureSort.DEFAULT_MAP_LABEL),new KList(tempTerm));
-		}
-		
-		return basedKapp;
-	}
-	
-	@Override
-	public ASTNode transform(TermCons node) throws TransformerException{
-		
-		String itemLabel = node.getProduction().getCons();
-		String unitLabel = "'."+node.getProduction().getSort();
-		
-		ArrayList<Term> tempBase = new ArrayList<Term>(node.getContents());
-		for(int i = 0; i < tempBase.size(); ++i){
-			
-			tempBase.set(i,(Term) tempBase.get(i).accept(this));
-		}
-		
-		if(tempBase.size()==0){
-			
-			return new KLabelConstant(unitLabel);
-		}
-		
-		ArrayList<Term> basedTerm = new ArrayList<Term>();
-		basedTerm.add(tempBase.get(tempBase.size()-1));
-		basedTerm.add(new KLabelConstant(unitLabel));
-		KApp basedKapp = new KApp(new KLabelConstant(itemLabel),new KList(basedTerm));
-		
-		for(int i = tempBase.size()-2; i >= 0; --i){
-			
-			ArrayList<Term> tempTerm = new ArrayList<Term>();
-			tempTerm.add(tempBase.get(i));
-			tempTerm.add(basedKapp);
-			basedKapp = new KApp(new KLabelConstant(itemLabel),new KList(tempTerm));
 		}
 		
 		return basedKapp;

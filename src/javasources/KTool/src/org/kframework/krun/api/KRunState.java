@@ -8,7 +8,6 @@ import org.kframework.kil.Term;
 import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.kil.visitors.KilTransformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.ConcretizeSyntax;
@@ -20,6 +19,7 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
+import org.kframework.backend.kore.KilTransformer;
 import org.kframework.backend.symbolic.TokenVariableToSymbolic;
 
 import java.io.Serializable;
@@ -113,9 +113,9 @@ public class KRunState implements Serializable{
 	public String toString() {
 		if (stateId == null) {
 			UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
-			KilTransformer trans = new KilTransformer();
+			KilTransformer trans = new KilTransformer(true, K.color, K.parens, context);
 			if(K.output_mode.equals("kore")){
-				trans.kilToKore(getResult()).accept(unparser);
+				return trans.kilToKore(getResult());
 			} else {
 				getResult().accept(unparser);
 			}

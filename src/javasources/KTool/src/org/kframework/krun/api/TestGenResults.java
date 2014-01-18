@@ -7,7 +7,6 @@ import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.KilTransformer;
 import org.kframework.krun.K;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
@@ -39,13 +38,8 @@ public class TestGenResults {
             sb.append("\n\nTest case " + n /*+ ", State " + testGenResult.getState().getStateId()*/ + ":");
             
             UnparserFilter t = new UnparserFilter(true, K.color, K.parens, context);
-            KilTransformer trans = new KilTransformer();
             Term concretePgm = KRunState.concretize(testGenResult.getGeneratedProgram(), context);
-            if(K.output_mode.equals("kore")){
-            	trans.kilToKore(concretePgm).accept(t);
-            } else {
-            	concretePgm.accept(t);
-            }
+            concretePgm.accept(t);
             // sb.append("\nProgram:\n" + testGenResult.getGeneratedProgram()); // print abstract syntax form
             sb.append("\nProgram:\n" + t.getResult()); // print concrete syntax form
             sb.append("\nResult:");
@@ -53,11 +47,7 @@ public class TestGenResults {
 
             if (isDefaultPattern) {
                 UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
-                if(K.output_mode.equals("kore")){
-                	trans.kilToKore(substitution.get("B:Bag")).accept(unparser);
-                } else {
-                	substitution.get("B:Bag").accept(unparser);
-                }
+                substitution.get("B:Bag").accept(unparser);
                 sb.append("\n" + unparser.getResult());
             } else {
                 boolean empty = true;
@@ -65,11 +55,7 @@ public class TestGenResults {
                 for (String variable : substitution.keySet()) {
                     UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
                     sb.append("\n" + variable + " -->");
-                    if(K.output_mode.equals("kore")){
-                    	trans.kilToKore(substitution.get(variable)).accept(unparser);
-                    } else {
-                    	substitution.get(variable).accept(unparser);
-                    }
+                    substitution.get(variable).accept(unparser);
                     sb.append("\n" + unparser.getResult());
                     empty = false;
                 }

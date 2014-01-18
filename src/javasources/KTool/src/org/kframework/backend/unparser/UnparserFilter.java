@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 public class UnparserFilter extends BasicVisitor {
-	private Indenter indenter = new Indenter();
+	protected Indenter indenter = new Indenter();
 	private boolean firstPriorityBlock = false;
 	private boolean firstProduction = false;
 	private boolean inConfiguration = false;
@@ -695,7 +695,7 @@ public class UnparserFilter extends BasicVisitor {
 		postpare();
 	}
 
-	private void prepare(ASTNode astNode) {
+	protected void prepare(ASTNode astNode) {
 		if (!stack.empty()) {
 			if (needsParenthesis(stack.peek(), astNode)) {
 				indenter.write("(");
@@ -707,7 +707,7 @@ public class UnparserFilter extends BasicVisitor {
 		}
 	}
 
-	private void postpare() {
+	protected void postpare() {
 		ASTNode astNode = stack.pop();
 		if (!stack.empty()) {
 			if (needsParenthesis(stack.peek(), astNode)) {
