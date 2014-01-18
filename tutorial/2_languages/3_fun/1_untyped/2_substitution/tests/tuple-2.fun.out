@@ -2,4 +2,4 @@ Search results:
 
 Solution 1:
 V:K -->
-Pair ( Pair ( 1, (Wrapper ( 2 )), .List{","} ), (Pair ( 3, 4 )), .List{","} )
+Pair ( ((Pair ( (1, ((Wrapper ( 2 )))) )), ((Pair ( (3, 4) )))) )
