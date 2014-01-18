@@ -70,7 +70,7 @@ public class MapItem extends CollectionItem {
 	}
 
 	public String toString() {
-		return this.key + " |->" + this.value;
+		return this.key + " |-> " + this.value;
 	}
 
 	@Override
