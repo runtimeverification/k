@@ -97,7 +97,7 @@ public class CompositeStrategy implements Strategy {
         }
         // TODO(YilongL): I have no idea why children.peekFirst().next() could
         // return duplicate elements.
-        return new LinkedHashSet<Rule>(children.peekFirst().next());
+        return new LinkedHashSet<Rule>(stack.peekFirst().next());
     }
 
     /**

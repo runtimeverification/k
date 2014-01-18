@@ -1,0 +1,11 @@
+Search results:
+
+Solution 1:
+Solution:K -->
+L1:Term |-> cons ( (a, ((cons ( (b, nil) )))) )
+L2:Term |-> nil
+
+Solution 2:
+Solution:K -->
+L1:Term |-> nil
+L2:Term |-> cons ( (b, ((cons ( (a, nil) )))) )

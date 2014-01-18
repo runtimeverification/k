@@ -1,0 +1,23 @@
+Search results:
+
+Solution 1:
+Solution:K -->
+L:Term |-> cons ( (_2664:Term, ((cons ( (_3244:Term, ((cons ( (_2664, nil) )))
+  ) )))) )
+
+Solution 2:
+Solution:K -->
+L:Term |-> cons ( (_6844:Term, ((cons ( (_8932:Term, ((cons ( (_8932, ((cons (
+   (_6844, nil) )))) )))) )))) )
+
+Solution 3:
+Solution:K -->
+L:Term |-> cons ( (_943:Term, ((cons ( (_943, nil) )))) )
+
+Solution 4:
+Solution:K -->
+L:Term |-> cons ( (_96:Term, nil) )
+
+Solution 5:
+Solution:K -->
+L:Term |-> nil
