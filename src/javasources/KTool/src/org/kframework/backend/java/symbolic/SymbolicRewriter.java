@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -243,8 +244,7 @@ public class SymbolicRewriter {
      * @return a list of rules that could be applied
      */
     private List<Rule> getRules(Term term) {
-//        Collection<Rule> rules = new HashSet<Rule>();
-        List<Rule> rules = new ArrayList<Rule>();
+        Set<Rule> rules = new LinkedHashSet<Rule>();
         for (IndexingPair pair : term.getIndexingPairs()) {
             if (ruleTable.get(pair.first) != null) {
                 rules.addAll(ruleTable.get(pair.first));
@@ -257,7 +257,7 @@ public class SymbolicRewriter {
             }
         }
         rules.addAll(unindexedRules);
-        return rules;
+        return new ArrayList<Rule>(rules);
     }
 
     private ConstrainedTerm getTransition(int n) {

@@ -60,6 +60,10 @@ public class JavaSymbolicKRun implements KRun {
         transformer = new KILtoBackendJavaKILTransformer(this.context);
         //this.simulationRewriter = new SymbolicRewriter(this.definition);
 	}
+    
+    public Definition getDefinition(){
+        return this.definition;
+    }
 
     @Override
     public KRunResult<KRunState> run(org.kframework.kil.Term cfg) throws KRunExecutionException {
@@ -174,15 +178,6 @@ public class JavaSymbolicKRun implements KRun {
             e.printStackTrace();
             return null;
         }
-    }
-    
-    /*
-     * by Liyi Li
-     * get the def of the rewriter
-     */
-    public Definition getDef(){
-    	
-    	return this.definition;
     }
 
 	@Override

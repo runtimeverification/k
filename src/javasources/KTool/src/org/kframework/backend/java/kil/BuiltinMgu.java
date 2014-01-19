@@ -4,6 +4,7 @@ import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
 public class BuiltinMgu extends Term implements Sorted {
@@ -60,6 +61,27 @@ public class BuiltinMgu extends Term implements Sorted {
     @Override
     public String sort() {
         return MGU_SORT;
+    }
+    
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+
+        if (!(object instanceof BuiltinMgu)) {
+            return false;
+        }
+
+        BuiltinMgu mgu = (BuiltinMgu) object;
+        return constraint.equals(mgu.constraint);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 1;
+        hash = hash * Utils.HASH_PRIME + constraint.hashCode();
+        return hash;
     }
 
 }

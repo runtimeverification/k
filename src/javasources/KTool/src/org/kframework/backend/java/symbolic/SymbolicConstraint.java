@@ -980,9 +980,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
             Map<Variable, Term> tempSubst = Collections.singletonMap(variable, term);
             composeSubstitution(tempSubst, context, false);
-            if (this.substitution().toString().contains("_76:Term=Literal(#\"a\")") && this.substitution().toString().contains("L1:Term='_(_)(Literal(#\"cons\"),, '_,_(_76:Term,,")) {
-                System.out.println("XXX" + this.substitution);
-            }
             if (truthValue == TruthValue.FALSE) {
                 return;
             }
@@ -1130,6 +1127,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
     @Override
     public int hashCode() {
+        // TODO(YilongL): normalize and sort equalities?
         int hash = 1;
         hash = hash * Utils.HASH_PRIME + equalities.hashCode();
         hash = hash * Utils.HASH_PRIME + substitution.hashCode();
