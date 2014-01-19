@@ -2,21 +2,21 @@ Search results:
 
 Solution 1:
 Solution:K -->
-L:Term |-> cons ( (_147:Term, nil) )
+L:Term |-> cons ( (_133:Term, ((cons ( (_133, nil) )))) )
 
 Solution 2:
 Solution:K -->
-L:Term |-> cons ( (_217:Term, ((cons ( (_217, nil) )))) )
+L:Term |-> cons ( (_133:Term, ((cons ( (_172:Term, ((cons ( (_133, nil) )))) )
+  ))) )
 
 Solution 3:
 Solution:K -->
-L:Term |-> cons ( (_284:Term, ((cons ( (_217:Term, ((cons ( (_284, nil) )))) )
-  ))) )
+L:Term |-> cons ( (_133:Term, ((cons ( (_172:Term, ((cons ( (_172, ((cons ( (
+  _133, nil) )))) )))) )))) )
 
 Solution 4:
 Solution:K -->
-L:Term |-> cons ( (_354:Term, ((cons ( (_284:Term, ((cons ( (_284, ((cons ( (
-  _354, nil) )))) )))) )))) )
+L:Term |-> cons ( (_133:Term, nil) )
 
 Solution 5:
 Solution:K -->

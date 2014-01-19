@@ -624,13 +624,11 @@
 
   <!-- TODO(YilongL): change the type of the solution cell to Map
     and revise the search pattern accordingly -->
-  <!-- TODO(YilongL): reverse-slow-palindromes-1 and reverse-slow-2
-    seem to reveal a performance bug in the rewrite engine -->
   <test
       definition="samples/java_rewrite_engine/tutorial/2_languages/4_logik/logik.k"
       programs="tutorial/2_languages/4_logik/basic/tests/"
       extension="logik"
-      exclude="append-6 reverse-slow-palindromes-1 reverse-slow-2"
+      exclude="append-6"
       results="samples/java_rewrite_engine/tutorial/2_languages/4_logik/tests"
       >
     <kompile-option name="-backend" value="java" />

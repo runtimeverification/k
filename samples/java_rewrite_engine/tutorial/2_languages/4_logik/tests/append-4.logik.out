@@ -2,31 +2,31 @@ Search results:
 
 Solution 1:
 Solution:K -->
-L1:Term |-> cons ( (_76:Term, ((cons ( (_111:Term, ((cons ( (_153:Term, ((cons
-   ( (_198:Term, nil) )))) )))) )))) )
+L1:Term |-> cons ( (_102:Term, ((cons ( (_139:Term, ((cons ( (_179:Term, ((
+  cons ( (_222:Term, nil) )))) )))) )))) )
 L2:Term |-> L2:Term
-L3:Term |-> cons ( (_76, ((cons ( (_111, ((cons ( (_153, ((cons ( (_198, ((
+L3:Term |-> cons ( (_102, ((cons ( (_139, ((cons ( (_179, ((cons ( (_222, ((
   cons ( (a, (L2)) )))) )))) )))) )))) )
 
 Solution 2:
 Solution:K -->
-L1:Term |-> cons ( (_76:Term, ((cons ( (_111:Term, ((cons ( (_153:Term, nil) )
-  ))) )))) )
+L1:Term |-> cons ( (_102:Term, ((cons ( (_139:Term, ((cons ( (_179:Term, nil) 
+  )))) )))) )
 L2:Term |-> L2:Term
-L3:Term |-> cons ( (_76, ((cons ( (_111, ((cons ( (_153, ((cons ( (a, (L2)) ))
-  )) )))) )))) )
+L3:Term |-> cons ( (_102, ((cons ( (_139, ((cons ( (_179, ((cons ( (a, (L2)) )
+  ))) )))) )))) )
 
 Solution 3:
 Solution:K -->
-L1:Term |-> cons ( (_76:Term, ((cons ( (_111:Term, nil) )))) )
+L1:Term |-> cons ( (_102:Term, ((cons ( (_139:Term, nil) )))) )
 L2:Term |-> L2:Term
-L3:Term |-> cons ( (_76, ((cons ( (_111, ((cons ( (a, (L2)) )))) )))) )
+L3:Term |-> cons ( (_102, ((cons ( (_139, ((cons ( (a, (L2)) )))) )))) )
 
 Solution 4:
 Solution:K -->
-L1:Term |-> cons ( (_76:Term, nil) )
+L1:Term |-> cons ( (_102:Term, nil) )
 L2:Term |-> L2:Term
-L3:Term |-> cons ( (_76, ((cons ( (a, (L2)) )))) )
+L3:Term |-> cons ( (_102, ((cons ( (a, (L2)) )))) )
 
 Solution 5:
 Solution:K -->
