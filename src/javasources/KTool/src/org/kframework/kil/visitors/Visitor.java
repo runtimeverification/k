@@ -1,6 +1,7 @@
 package org.kframework.kil.visitors;
 
 import org.kframework.kil.*;
+import org.kframework.kil.KItemProjection;
 
 
 public interface Visitor {
@@ -83,8 +84,10 @@ public interface Visitor {
 	public void visit(Hole node);
 	public void visit(FreezerHole node);
 	public void visit(KApp node);
+    public void visit(KItemProjection node);
 	public void visit(KLabel node);
     public void visit(KLabelConstant node);
+    public void visit(KLabelInjection node);
 	public void visit(Rewrite node);
 	public void visit(TermCons node);
 	public void visit(Bracket node);
