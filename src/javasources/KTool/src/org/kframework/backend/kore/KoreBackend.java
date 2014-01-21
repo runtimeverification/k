@@ -349,7 +349,7 @@ class KoreFilter extends UnparserFilter {
   @Override
 	public void visit(KList node) {
 		prepare(node);
-          visitList(node.getContents(), ", ", "");
+          visitList(node.getContents(), ", ", ".KList");
           postpare();
 /*
 if (isVisited(node))
@@ -390,7 +390,7 @@ if (isVisited(node))
 
           if(node.getChild() instanceof KList && ((KList)node.getChild()).isEmpty()){
         	  
-        	  this.indenter.write(DataStructureSort.DEFAULT_LIST_UNIT_LABEL);
+        	  this.indenter.write(".KList");
           } else {
         	  node.getChild().accept(this);
           }
@@ -400,7 +400,7 @@ if (isVisited(node))
 
 	public void visit(KLabelConstant node) {
 		prepare(node);
-		this.indenter.write("'"+node.getLabel()+"'"); // TODO: escape the label
+		this.indenter.write(node.getLabel()); // TODO: escape the label
 		postpare();
 	}
 
