@@ -156,6 +156,10 @@ public class ConstrainedTerm extends Term {
         unificationConstraint.add(term, constrainedTerm.term());
         unificationConstraint.simplify();
         if (unificationConstraint.isFalse()) {
+//            System.out.printf(
+//                    "###unify %s###\nsubject = %s\npattern = %s\nsols = %s\n",
+//                    Utils.constrainedTermUnifyInvocationCounter, this,
+//                    constrainedTerm, Collections.emptyList());
             return Collections.emptyList();
         }
 

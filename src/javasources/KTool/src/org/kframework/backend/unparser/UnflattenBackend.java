@@ -45,6 +45,9 @@ public class UnflattenBackend extends BasicBackend {
 	    }
 
 	    /* then unparse it */
+        // TODO(YilongL): there should be an option to specify whether we want
+        // to unparse it since two differently kompiled definition may look the
+        // same after unparsing (e.g., empty list)
 	    UnparserFilter unparserFilter = new UnparserFilter(context);
 	    definition.accept(unparserFilter);
 
