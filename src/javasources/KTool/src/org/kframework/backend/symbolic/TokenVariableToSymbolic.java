@@ -6,6 +6,9 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
+import java.util.*;
+import java.util.List;
+
 /**
  * Created with IntelliJ IDEA.
  * User: andrei.arusoaie
@@ -21,22 +24,22 @@ public class TokenVariableToSymbolic extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(KApp node) throws TransformerException {
-        if (node.getLabel().toString().contains(AddSymbolicK.getSymbolicConstructorPrefix())) {
-
+        if (node.getLabel().toString().startsWith(AddSymbolicK.getSymbolicConstructorPrefix())) {
             String sort = node.getLabel().toString().substring(AddSymbolicK.getSymbolicConstructorPrefix().length());
-
-            Term child = ((KList) node.getChild()).getContents().get(0);
-            if (child instanceof KApp) {
-                Term token = ((KApp) child).getLabel();
-                if (token instanceof GenericToken) {
-                    GenericToken gToken = (GenericToken) token;
-                    if (gToken.tokenSort().equals("#Id")) {
-                        Variable v = new Variable(gToken.value(), sort);
-                        return v;
+            List<Term> contents = ((KList) node.getChild()).getContents();
+            if (!contents.isEmpty()) {
+                Term child = contents.get(0);
+                if (child instanceof KApp) {
+                    Term token = ((KApp) child).getLabel();
+                    if (token instanceof GenericToken) {
+                        GenericToken gToken = (GenericToken) token;
+                        if (gToken.tokenSort().equals("#Id")) {
+                            Variable v = new Variable(gToken.value(), sort);
+                            return v;
+                        }
                     }
                 }
             }
-
         }
 
         return super.transform(node);
