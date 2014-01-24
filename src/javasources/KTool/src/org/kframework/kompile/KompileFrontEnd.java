@@ -80,7 +80,9 @@ public class KompileFrontEnd {
                 GlobalSettings.supercool = metadataParse(cmd.getOptionValue("supercool"));
             if (cmd.hasOption("superheat"))
                 GlobalSettings.superheat = metadataParse(cmd.getOptionValue("superheat"));
-
+            if (cmd.hasOption("documentation"))
+                GlobalSettings.doctags = metadataParse(cmd.getOptionValue("documentation"));
+            
             if (cmd.hasOption("doc-style")) {
                 String style = cmd.getOptionValue("doc-style");
                 if (style.startsWith("+"))
@@ -123,6 +125,10 @@ public class KompileFrontEnd {
                 GlobalSettings.documentation = true;
                 backend = new LatexBackend(Stopwatch.sw, context);
                 break;
+            case "doc":
+                GlobalSettings.documentation = true;
+                backend = new LatexBackend(Stopwatch.sw, context, true);                
+            	break;
             case "html":
                 if (!cmd.hasOption("doc-style")) {
                     GlobalSettings.style = "k-definition.css";
