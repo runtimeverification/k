@@ -196,13 +196,16 @@ public class CopyOnWriteTransformer implements Transformer {
 
     @Override
     public ASTNode transform(UninterpretedConstraint uninterpretedConstraint) {
+        boolean changed = false;
         UninterpretedConstraint transformedUninterpretedConstraint = new UninterpretedConstraint();
         for (UninterpretedConstraint.Equality equality : uninterpretedConstraint.equalities()) {
-            transformedUninterpretedConstraint.add(
-                    (Term) equality.leftHandSide().accept(this),
-                    (Term) equality.rightHandSide().accept(this));
+            Term transformedLHS = (Term) equality.leftHandSide().accept(this);
+            Term transformedRHS = (Term) equality.rightHandSide().accept(this);
+            changed = changed || transformedLHS != equality.leftHandSide()
+                    || transformedRHS != equality.rightHandSide();
+            transformedUninterpretedConstraint.add(transformedLHS, transformedRHS);
         }
-        return transformedUninterpretedConstraint;
+        return changed ? transformedUninterpretedConstraint : uninterpretedConstraint;
     }
 
     @Override
@@ -561,9 +564,12 @@ public class CopyOnWriteTransformer implements Transformer {
 
         if (processedLeftHandSide != rule.leftHandSide()
                 || processedRightHandSide != rule.rightHandSide()
-                || !processedRequires.equals(rule.requires())
-                || !processedEnsures.equals(rule.ensures())
-                || !processedFreshVariables.equals(rule.freshVariables())
+//                || !processedRequires.equals(rule.requires())
+//                || !processedEnsures.equals(rule.ensures())
+//                || !processedFreshVariables.equals(rule.freshVariables())
+                || processedRequires != rule.requires()
+                || processedEnsures != rule.ensures()
+                || processedFreshVariables != rule.freshVariables()
                 || processedLookups != rule.lookups()) {
             return new Rule(
                     rule.label(),

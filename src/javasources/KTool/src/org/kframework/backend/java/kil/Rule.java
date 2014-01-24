@@ -10,6 +10,9 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+
 import java.util.Collection;
 import java.util.Map;
 
@@ -24,9 +27,9 @@ public class Rule extends JavaSymbolicObject {
     private final String label;
     private final Term leftHandSide;
     private final Term rightHandSide;
-    private final Collection<Term> requires;
-    private final Collection<Term> ensures;
-    private final Collection<Variable> freshVariables;
+    private final ImmutableList<Term> requires;
+    private final ImmutableList<Term> ensures;
+    private final ImmutableSet<Variable> freshVariables;
     private final UninterpretedConstraint lookups;
     private final IndexingPair indexingPair;
     private final boolean containsKCell;
@@ -43,9 +46,9 @@ public class Rule extends JavaSymbolicObject {
         this.label = label;
         this.leftHandSide = leftHandSide;
         this.rightHandSide = rightHandSide;
-        this.requires = requires;
-        this.ensures = ensures;
-        this.freshVariables = freshVariables;
+        this.requires = ImmutableList.copyOf(requires);
+        this.ensures = ImmutableList.copyOf(ensures);
+        this.freshVariables = ImmutableSet.copyOf(freshVariables);
         this.lookups = lookups;
 
         Collection<IndexingPair> indexingPairs = leftHandSide.getIndexingPairs();
@@ -94,15 +97,15 @@ public class Rule extends JavaSymbolicObject {
         return label;
     }
 
-    public Collection<Term> requires() {
+    public ImmutableList<Term> requires() {
         return requires;
     }
 
-    public Collection<Term> ensures() {
+    public ImmutableList<Term> ensures() {
         return ensures;
     }
 
-    public Collection<Variable> freshVariables() {
+    public ImmutableSet<Variable> freshVariables() {
         return freshVariables;
     }
 

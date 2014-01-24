@@ -1,12 +1,18 @@
 package org.kframework.backend.java.kil;
 
-import org.kframework.backend.java.symbolic.Unifier;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
 import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
-import java.util.*;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 /**
  *
@@ -17,15 +23,15 @@ public class MapUpdate extends Term {
     /** {@link Term} representation of the map */
     private final Term map;
     /** {@code Set} of keys to be removed from the map */
-    private final Set<Term> removeSet;
+    private final ImmutableSet<Term> removeSet;
     /** {@code Map} of entries to be updated in the map */
-    private final Map<Term, Term> updateMap;
+    private final ImmutableMap<Term, Term> updateMap;
 
     public MapUpdate(Term map, Set<Term> removeSet, Map<Term, Term> updateMap) {
         super(Kind.KITEM);
         this.map = map;
-        this.removeSet = new HashSet<Term>(removeSet);
-        this.updateMap = updateMap;
+        this.removeSet = ImmutableSet.copyOf(removeSet);
+        this.updateMap = ImmutableMap.copyOf(updateMap);
     }
 
     public Term evaluateUpdate() {
@@ -63,12 +69,12 @@ public class MapUpdate extends Term {
         return map;
     }
 
-    public Set<Term> removeSet() {
-        return Collections.unmodifiableSet(removeSet);
+    public ImmutableSet<Term> removeSet() {
+        return removeSet;
     }
 
-    public Map<Term, Term> updateMap(){
-        return Collections.unmodifiableMap(updateMap);
+    public ImmutableMap<Term, Term> updateMap(){
+        return updateMap;
     }
 
     @Override

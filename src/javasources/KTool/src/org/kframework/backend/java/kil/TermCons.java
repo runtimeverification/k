@@ -12,7 +12,7 @@ import com.google.common.collect.ImmutableList;
 public class TermCons extends Term {
     
     private final String cons;
-    private final java.util.List<Term> contents;
+    private final ImmutableList<Term> contents;
     private final org.kframework.kil.Production production;
 
     public TermCons(String cons, java.util.List<Term> contents, Context context) {
@@ -26,7 +26,7 @@ public class TermCons extends Term {
         return cons;
     }
     
-    public java.util.List<Term> contents() {
+    public ImmutableList<Term> contents() {
         return contents;
     }
     
