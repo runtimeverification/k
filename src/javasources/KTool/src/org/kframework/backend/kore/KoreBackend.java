@@ -303,7 +303,7 @@ class KoreFilter extends UnparserFilter {
 		visit((Term) node);
 
 	}
-*/
+*/  @Override
 	public void visit(Ambiguity node) {
           assert false : "Ambiguities not supported in Kore";
 	}
@@ -357,19 +357,19 @@ if (isVisited(node))
 		visit((Collection) node);
 */
 	}
-
+    @Override
 	public void visit(BoolBuiltin node) {
 		prepare(node);
           this.indenter.write(node.value()); // TODO: true() vs #"true"()
           postpare();
 	}
-
+    @Override
 	public void visit(IntBuiltin node) {
 		prepare(node);
 		this.indenter.write(node.value()); // TODO: true() vs #"true"()
           postpare();
 	}
-
+    @Override
 	public void visit(StringBuiltin node) {
 		prepare(node);
 		this.indenter.write(node.value());
@@ -382,7 +382,7 @@ if (isVisited(node))
           sb.append("HOLE");
 	}
 */
-	
+    @Override
 	public void visit(KApp node) {
 		prepare(node);
           node.getLabel().accept(this);
@@ -397,19 +397,19 @@ if (isVisited(node))
           this.indenter.write(")");
           postpare();
 	}
-
+    @Override
 	public void visit(KLabelConstant node) {
 		prepare(node);
 		this.indenter.write(node.getLabel()); // TODO: escape the label
 		postpare();
 	}
-
+    @Override
 	public void visit(TermCons node) {
 		prepare(node);
           visit(new KApp(KLabelConstant.of(node.getProduction().getKLabel(), context), new KList(node.getContents())));
           postpare();
 	}
-
+    @Override
 	public void visit(Variable node) {
 		prepare(node);
 		this.indenter.write(node.getName() + ":" + node.getSort());
