@@ -1,17 +1,20 @@
 package org.kframework.backend.java.symbolic;
 
-import org.kframework.backend.java.kil.Definition;
-import org.kframework.backend.java.kil.Rule;
-import org.kframework.backend.java.kil.Term;
-
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.kframework.backend.java.kil.Definition;
+import org.kframework.backend.java.kil.JavaSymbolicObject;
+import org.kframework.backend.java.kil.Rule;
+import org.kframework.backend.java.kil.Term;
+
 
 /**
- * Expands the macros in each rule of a definition.
- *
+ * Expands the macros in each rule of a definition and those in the initial
+ * configuration.
+ * 
  * @author AndreiS
+ * 
  */
 public class MacroExpander extends TermTransformer {
 
@@ -48,7 +51,7 @@ public class MacroExpander extends TermTransformer {
             processedEnsures.add(processTerm(conditionItem));
         }
         UninterpretedConstraint processedLookups
-                = (UninterpretedConstraint) rule.lookups().accept(this);
+            = (UninterpretedConstraint) expandMacro(rule.lookups());
         return new Rule(
                 rule.label(),
                 processedLeftHandSide,
@@ -61,13 +64,32 @@ public class MacroExpander extends TermTransformer {
     }
 
     public Term processTerm(Term term) {
-        return (Term) term.accept(this);
+        return (Term) expandMacro(term);
+    }
+    
+    /**
+     * Private helper method that keeps expanding macros in a specified node
+     * until no macro is found.
+     * 
+     * @param node
+     *            the specified node
+     * @return the expanded node
+     */
+    private JavaSymbolicObject expandMacro(JavaSymbolicObject node) {
+        node = (JavaSymbolicObject) node.accept(this);
+        JavaSymbolicObject expandedNode = (JavaSymbolicObject) node.accept(this);
+        while (node != expandedNode) {
+            node = expandedNode;
+            expandedNode = (JavaSymbolicObject) node.accept(this);
+        }
+
+        return node;
     }
 
     @Override
     protected Term transformTerm(Term term) {
         Term transformedTerm = rewriter.getOneSuccessor(term);
-        return transformedTerm != null ? (Term) transformedTerm.accept(this) : term;
+        return transformedTerm != null ? transformedTerm : term;
     }
 
 }

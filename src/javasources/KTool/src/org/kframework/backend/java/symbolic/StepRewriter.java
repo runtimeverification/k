@@ -26,9 +26,8 @@ public class StepRewriter {
     private Collection<ConstrainedTerm> constrainedTermResults = new ArrayList<ConstrainedTerm>();
     private Collection<Term> termResults = new ArrayList<Term>();
 
-
     public StepRewriter(Collection<Rule> rules, Definition definition) {
-        this.rules = rules;
+        this.rules = new ArrayList<Rule>(rules);
         this.definition = definition;
     }
 
@@ -49,8 +48,8 @@ public class StepRewriter {
     public Term getOneSuccessor(Term term) {
         for (Rule rule : rules) {
             rewriteByRule(term, rule);
-            if (!constrainedTermResults.isEmpty()) {
-                return constrainedTermResults.iterator().next();
+            if (!termResults.isEmpty()) {
+                return termResults.iterator().next();
             }
         }
         return null;
@@ -113,7 +112,7 @@ public class StepRewriter {
         stopwatch.reset();
         stopwatch.start();
 
-        constrainedTermResults = new ArrayList<ConstrainedTerm>();
+        termResults = new ArrayList<Term>();
 
         TermContext context = new TermContext(definition);
         ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, context);
@@ -144,7 +143,7 @@ public class StepRewriter {
             result = result.evaluate(context);
 
             /* compute all results */
-            termResults.add(term);
+            termResults.add(result);
         }
 
         stopwatch.stop();

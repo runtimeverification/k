@@ -64,7 +64,7 @@ public class SetUpdate extends Term {
 
     @Override
     public boolean isSymbolic() {
-        throw new UnsupportedOperationException();
+        return false;
     }
 
     @Override
@@ -99,8 +99,8 @@ public class SetUpdate extends Term {
     }
 
     @Override
-    public void accept(Unifier unifier, Term patten) {
-        throw new UnsupportedOperationException();
+    public void accept(Unifier unifier, Term pattern) {
+        unifier.unify(this, pattern);
     }
 
     @Override

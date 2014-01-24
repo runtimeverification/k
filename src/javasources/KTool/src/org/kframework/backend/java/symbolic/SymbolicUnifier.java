@@ -31,7 +31,9 @@ import org.kframework.backend.java.kil.KLabelInjection;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Kind;
+import org.kframework.backend.java.kil.MapUpdate;
 import org.kframework.backend.java.kil.MetaVariable;
+import org.kframework.backend.java.kil.SetUpdate;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermCons;
 import org.kframework.backend.java.kil.TermContext;
@@ -207,6 +209,19 @@ public class SymbolicUnifier extends AbstractUnifier {
     }
 
     @Override
+    public void unify(MapUpdate mapUpdate, Term term) {
+        // this method is only used during macro expansion of rewrite rules
+        assert !(term instanceof Variable);
+        
+        if (!(term instanceof MapUpdate)) {
+            this.fail();
+        }
+        
+        throw new UnsupportedOperationException(
+                "Currently, mapUpdate can only be matched with a variable.");
+    }
+
+    @Override
     public void unify(BuiltinSet builtinSet, Term term) {
         assert !(term instanceof Variable);
         if (!(term instanceof BuiltinSet)) {
@@ -215,6 +230,19 @@ public class SymbolicUnifier extends AbstractUnifier {
 
         throw new UnsupportedOperationException(
                 "set matching is only supported when one of the sets is a variable.");
+    }
+    
+    @Override
+    public void unify(SetUpdate setUpdate, Term term) {
+        // this method is only used during macro expansion of rewrite rules
+        assert !(term instanceof Variable);
+        
+        if (!(term instanceof SetUpdate)) {
+            this.fail();
+        }
+        
+        throw new UnsupportedOperationException(
+                "Currently, setUpdate can only be matched with a variable.");
     }
     
     @Override
@@ -728,7 +756,7 @@ public class SymbolicUnifier extends AbstractUnifier {
             }
         }
     }
-
+    
     @Override
     public void unify(MetaVariable metaVariable, Term term) {
         // TODO(YilongL): not sure about the assertion below

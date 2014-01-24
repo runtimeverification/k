@@ -99,8 +99,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     public Definition transformDefinition(org.kframework.kil.Definition node) {
         try {
-            //return new MacroExpander((Definition) node.accept(this)).processDefinition();
-            return (Definition) node.accept(this);
+            return new MacroExpander((Definition) node.accept(this)).processDefinition();
         } catch (TransformerException e) {
             e.printStackTrace();
             return null;
@@ -640,13 +639,13 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         Module singletonModule = node.getSingletonModule();
 
         /*
-         * Liyi Li:
-         * add new constraint such that if an anywhere rule contains an attribute with "alphaRule"
-         * then we remove the rule
+         * Liyi Li: add new constraint such that if an anywhere rule contains an
+         * attribute with "alphaRule" then we remove the rule
          */
         for (org.kframework.kil.Rule rule : singletonModule.getRules()) {
             if (rule.containsAttribute(Attribute.PREDICATE.getKey())
-                || (rule.containsAttribute(Attribute.ANYWHERE.getKey()) && (! rule.containsAttribute("alphaRule")))) {
+                    || (rule.containsAttribute(Attribute.ANYWHERE.getKey()) && (!rule
+                            .containsAttribute("alphaRule")))) {
                 continue;
             }
 

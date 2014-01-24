@@ -113,8 +113,8 @@ public class MapUpdate extends Term {
     }
 
     @Override
-    public void accept(Unifier unifier, Term patten) {
-        throw new UnsupportedOperationException();
+    public void accept(Unifier unifier, Term pattern) {
+        unifier.unify(this, pattern);
     }
 
     @Override

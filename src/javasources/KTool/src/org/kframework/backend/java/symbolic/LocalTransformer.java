@@ -49,7 +49,6 @@ public class LocalTransformer implements Transformer {
 
     protected final TermContext context;
 
-    
     public LocalTransformer() {
         this.context = null;
     }
