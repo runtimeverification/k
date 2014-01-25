@@ -6,7 +6,7 @@ module LIST
   imports K-EQUAL-HOOKS
   imports INT-HOOKS
 
-  syntax MyList ::= MyList "," MyList   [left, function, hook(List:__), klabel('_List_)]
+  syntax MyList ::= MyList MyList   [left, function, hook(List:__), klabel('_List_)]
                   | ".MyList"       [function, hook(List:.List)]
                   | MyListItem(K)   [function, hook(List:ListItem)]
 
