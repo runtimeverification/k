@@ -73,7 +73,7 @@ public class ResolveOpenCells extends CopyOnWriteTransformer {
 		}
 		node.setContents(col);
 
-		if (ellipses == Ellipses.BOTH && kind != KSort.K && kind != KSort.List) {
+		if (ellipses == Ellipses.BOTH && kind != KSort.K) {
 			ellipses = Ellipses.RIGHT;
 		}
         if (ellipses == Ellipses.BOTH || ellipses == Ellipses.LEFT) {

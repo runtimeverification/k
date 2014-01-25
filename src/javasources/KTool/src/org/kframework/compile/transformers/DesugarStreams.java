@@ -69,7 +69,7 @@ public class DesugarStreams extends CopyOnWriteTransformer {
 			buffer.setContents(bufferTerms);
 			items.add(newListItem(buffer));
 			
-			items.add(new Variable("$noIO", (!newList ? "ListItem" : "MyList")));//		  eq noIOVariable = mkVariable('$noIO,List) .
+			items.add(new Variable("$noIO", (!newList ? "ListItem" : "List")));//		  eq noIOVariable = mkVariable('$noIO,List) .
 			
 //			syntax List ::= "#istream" "(" Int ")"        [cons(List1InputStreamSyn)]
 			TermCons stdinStream = new TermCons("Stream", "Stream1InputStreamSyn", context);
@@ -87,7 +87,7 @@ public class DesugarStreams extends CopyOnWriteTransformer {
 			stdoutStream.setContents(stdinStreamTerms);
 			items.add(newListItem(stdoutStream));
 			
-			items.add(new Variable("$noIO", (!newList ? "ListItem" : "MyList")));//		  eq noIOVariable = mkVariable('$noIO,List) .
+			items.add(new Variable("$noIO", (!newList ? "ListItem" : "List")));//		  eq noIOVariable = mkVariable('$noIO,List) .
 
 //			syntax List ::= "#buffer" "(" K ")"           [cons(List1IOBufferSyn)]
 			TermCons buffer = new TermCons("Stream", "Stream1IOBufferSyn", context);

@@ -1,7 +1,7 @@
 package org.kframework.kil;
 
 public enum KSort {
-	K, Bag, Set, Map, List, BagItem, SetItem, MapItem, ListItem, KItem, KList, CellLabel, KLabel, ;
+	K, Bag, BagItem, KItem, KList, CellLabel, KLabel, ;
 
 	public static KSort getKSort(String sort) {
 		try {
@@ -16,15 +16,6 @@ public enum KSort {
 		case Bag:
 		case BagItem:
 			return Bag;
-		case Map:
-		case MapItem:
-			return Map;
-		case Set:
-		case SetItem:
-			return Set;
-		case List:
-		case ListItem:
-			return List;
 		case KItem:
 			return K;
 		default:
@@ -33,6 +24,6 @@ public enum KSort {
 	}
 
 	public boolean isDefaultable() {
-		return (this == Map || this == Bag || this == List || this == Set || this == K);
+		return (this == Bag || this == K);
 	}
 }

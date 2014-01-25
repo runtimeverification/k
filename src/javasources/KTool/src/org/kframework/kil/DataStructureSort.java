@@ -61,18 +61,18 @@ public class DataStructureSort implements Serializable {
                     Label.ELEMENT, "SetItem",
                     Label.UNIT, ".Set"));
 
-    public static final String DEFAULT_LIST_SORT = "MyList";
-    public static final String DEFAULT_MAP_SORT = "MyMap";
-    public static final String DEFAULT_SET_SORT = "MySet";
+    public static final String DEFAULT_LIST_SORT = "List";
+    public static final String DEFAULT_MAP_SORT = "Map";
+    public static final String DEFAULT_SET_SORT = "Set";
     public static final String DEFAULT_LIST_LABEL = "'_List_";
-    public static final String DEFAULT_LIST_ITEM_LABEL = "'MyListItem";
-    public static final String DEFAULT_LIST_UNIT_LABEL = "'.MyList";
+    public static final String DEFAULT_LIST_ITEM_LABEL = "'ListItem";
+    public static final String DEFAULT_LIST_UNIT_LABEL = "'.List";
     public static final String DEFAULT_MAP_LABEL = "'_Map_";
     public static final String DEFAULT_MAP_ITEM_LABEL = "'_|->_";
-    public static final String DEFAULT_MAP_UNIT_LABEL = "'.MyMap";
+    public static final String DEFAULT_MAP_UNIT_LABEL = "'.Map";
     public static final String DEFAULT_SET_LABEL = "'_Set_";
-    public static final String DEFAULT_SET_ITEM_LABEL = "'MySetItem";
-    public static final String DEFAULT_SET_UNIT_LABEL = "'.MySet";
+    public static final String DEFAULT_SET_ITEM_LABEL = "'SetItem";
+    public static final String DEFAULT_SET_UNIT_LABEL = "'.Set";
 
     /** Name of this data structure sort. */
     private final String name;
@@ -129,7 +129,7 @@ public class DataStructureSort implements Serializable {
     }
 
     /**
-     * Returns a term of sort MyList containing one MyListItem element per argument.
+     * Returns a term of sort List containing one ListItem element per argument.
      */
     public static Term listOf(Context context, Term... listItems) {
         DataStructureSort myList = context.dataStructureListSortOf(DEFAULT_LIST_SORT);

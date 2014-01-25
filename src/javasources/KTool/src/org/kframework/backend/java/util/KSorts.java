@@ -7,9 +7,9 @@ public class KSorts {
 
     public static final String KITEM = "KItem";
 
-    public static final String BAG = "MyBag";
-    public static final String LIST = "MyList";
-    public static final String MAP = "MyMap";
-    public static final String SET = "MySet";
+    public static final String BAG = "Bag";
+    public static final String LIST = "List";
+    public static final String MAP = "Map";
+    public static final String SET = "Set";
 
 }

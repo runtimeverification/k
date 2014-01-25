@@ -283,7 +283,7 @@ public class JavaSymbolicKRun implements KRun {
         stateMap.put((org.kframework.kil.Term) org.kframework.kil.GenericToken.kAppOf("Id", "$1"), (org.kframework.kil.Term) org.kframework.kil.IntBuiltin.kAppOf("1"));
         ((org.kframework.kil.Cell) o)
                 .setContents(new org.kframework.kil.MapBuiltin(context
-                        .dataStructureSortOf("MyMap"), 
+                        .dataStructureSortOf("Map"),
                         Collections.<org.kframework.kil.Term>emptyList(), 
                         stateMap));
         

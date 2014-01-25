@@ -20,12 +20,6 @@ public class Sort extends ProductionItem {
 		baseSorts.add("KResult");
 		baseSorts.add(KSorts.KITEM);
 		baseSorts.add(KSorts.KLIST);
-		baseSorts.add("Map");
-		baseSorts.add("MapItem");
-		baseSorts.add("List");
-		baseSorts.add("ListItem");
-		baseSorts.add("Set");
-		baseSorts.add("SetItem");
 		baseSorts.add("Bag");
 		baseSorts.add("BagItem");
 		baseSorts.add(KSorts.KLABEL);

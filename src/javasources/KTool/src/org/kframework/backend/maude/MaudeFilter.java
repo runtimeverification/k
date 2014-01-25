@@ -979,9 +979,6 @@ public class MaudeFilter extends BackendFilter {
     private static java.util.Map<KSort, String> maudeCollectionConstructors = new HashMap<KSort, String>();
 	static {
 		maudeCollectionConstructors.put(KSort.Bag, "__");
-		maudeCollectionConstructors.put(KSort.Map, "__");
-		maudeCollectionConstructors.put(KSort.Set, "__");
-		maudeCollectionConstructors.put(KSort.List, "__");
 		maudeCollectionConstructors.put(KSort.K, "_~>_");
 		maudeCollectionConstructors.put(KSort.KList, "_`,`,_");
 	}
