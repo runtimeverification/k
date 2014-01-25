@@ -2,6 +2,7 @@ package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.ConstrainedTerm;
+import org.kframework.backend.java.kil.ConstrainedTerm.UnificationType;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
@@ -131,10 +132,11 @@ public class StepRewriter {
 
         for (SymbolicConstraint constraint : constrainedTerm.unify(leftHandSide)) {
             /* check the constraint represents a match */
-            if (!constraint.isSubstitution()
-                    || !constraint.substitution().keySet().equals(rule.variableSet())) {
+            if (constrainedTerm.getTypeOfUnification() != UnificationType.PatternMatching) {
                 continue;
             }
+            
+            constraint.orientSubstitution(leftHandSide.variableSet(), constrainedTerm.termContext());
 
             Term result = rule.rightHandSide();
             /* apply the constraints substitution on the rule RHS */

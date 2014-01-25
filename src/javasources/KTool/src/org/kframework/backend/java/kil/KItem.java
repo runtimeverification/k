@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.SortMembership;
+import org.kframework.backend.java.kil.ConstrainedTerm.UnificationType;
 import org.kframework.backend.java.symbolic.BuiltinFunction;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformer;
@@ -70,6 +71,11 @@ public class KItem extends Term implements Sorted {
                     boolean mayMatch = true;
 
                     /* check if the production can match this KItem */
+                    // TODO(YilongL): I guess the only point of this check is to
+                    // distinguish between overloaded productions, however, once
+                    // we have passed the front-end the arguments of a K label
+                    // can violate its original declaration, therefore the code
+                    // below would need to be revised
                     if (!kList.hasFrame() && kList.size() == production.getArity()) {
                         for (int i = 0; i < kList.size(); ++i) {
                             String childSort;
@@ -249,22 +255,31 @@ public class KItem extends Term implements Sorted {
                             context);
 
                     Collection<SymbolicConstraint> solutions = constrainedTerm.unify(leftHandSide);
-
-                    if (K.do_concrete_exec) {
-                        assert solutions.size() <= 1 : "function definition is not deterministic";
-                    }
-
                     if (solutions.isEmpty()) {
                         continue;
                     }
-
+                    
                     SymbolicConstraint solution = solutions.iterator().next();
-
-                    if (!solution.isSubstitution()) {
-                        continue;
+                    if (K.do_kompilation) {
+                        assert solutions.size() <= 1 : "function definition is not deterministic";
+                        if (!(constrainedTerm.getTypeOfUnification() == UnificationType.PatternMatching && solution.isSubstitution())) {
+                            continue;
+                        }
+                    } else if (K.do_concrete_exec) {
+                        assert solutions.size() <= 1 : "function definition is not deterministic";
+                        // TODO(YilongL): temporarily disable the following assertion until I get renormalize() right!
+//                        assert constrainedTerm.getTypeOfUnification() == UnificationType.PatternMatching : "the result of unification between:"
+//                                + constrainedTerm.term()
+//                                + " (the ground subject term) and "
+//                                + leftHandSide.term()
+//                                + " (the pattern) should be a substitution";
+//                        assert solution.isSubstitution() : "the solution shall not contain pending functions but found:\n" + solution.equalities();
+                        if (!solution.isSubstitution()) {
+                            continue;
+                        }
                     }
-
-                    solution.orientSubstitution(rule.variableSet(), context);
+                    
+                    solution.orientSubstitution(rule.leftHandSide().variableSet(), context);
 
                     /* rename rule variables in the constraints */
                     Map<Variable, Variable> freshSubstitution = solution.rename(rule.variableSet());
@@ -281,14 +296,18 @@ public class KItem extends Term implements Sorted {
                     solution.eliminateAnonymousVariables();
 
                     /* update the constraint */
-                    if (K.do_concrete_exec) {
-                        // in concrete execution mode, the evaluation of
-                        // user-defined functions will not create new constraints
+                    if (K.do_kompilation) {
+                        // in kompilation mode, the constraint should be
+                        // trivially empty; besides, there is no need to update
+                        assert constraint.isTrue();
+                    } else if (K.do_concrete_exec) {
+                        // in concrete execution mode, the evaluation of user-defined
+                        // functions will not create new constraints
                     } else if (constraint != null) {
                         throw new RuntimeException(
-                                "Fix it; need to find a proper way to update " +
-                                        "the constraint without interferring with the " +
-                                "potential ongoing normalization process");
+                                "Fix it; need to find a proper way to update "
+                                        + "the constraint without interferring with the "
+                                        + "potential ongoing normalization process");
                     } else { // constraint == null
                         if (solution.isUnknown() || solution.isFalse()) {
                             throw new RuntimeException(

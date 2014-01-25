@@ -1,6 +1,5 @@
 package org.kframework.backend.java.util;
 
-import org.kframework.backend.java.kil.ConstrainedTerm;
 
 
 /**
@@ -11,10 +10,5 @@ import org.kframework.backend.java.kil.ConstrainedTerm;
 public class Utils {
 
     public static final int HASH_PRIME = 47;
-
-    /**
-     * Static counter that records the number of invocations of the method
-     * {@link ConstrainedTerm#unify(ConstrainedTerm)}.
-     */
-    public static int constrainedTermUnifyInvocationCounter = 0;
+    
 }

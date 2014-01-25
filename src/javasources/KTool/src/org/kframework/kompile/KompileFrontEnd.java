@@ -18,6 +18,7 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.CountNodesVisitor;
+import org.kframework.krun.K;
 import org.kframework.krun.Main;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.utils.BinaryLoader;
@@ -93,6 +94,7 @@ public class KompileFrontEnd {
     }
 
     private static void kompile(CommandLine cmd) throws IOException {
+        K.do_kompilation = true;
         final String def = cmd.getArgs()[0];
         final String step = cmd.getOptionValue("step", null);
         GlobalSettings.setMainFile(def);

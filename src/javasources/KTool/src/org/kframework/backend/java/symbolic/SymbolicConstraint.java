@@ -58,6 +58,7 @@ import com.microsoft.z3.Z3Exception;
 public class SymbolicConstraint extends JavaSymbolicObject {
     private static final boolean DEBUG = true;
 
+    // TODO(YilongL): can't we use this.context instead of passing in a new one?
     public void orientSubstitution(Set<Variable> variables, TermContext termContext) {
         Map<Variable, Term> newSubstitution = new HashMap<>();
         if (substitution.keySet().containsAll(variables)) {
@@ -449,11 +450,14 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
         // TODO(YilongL): why not evaluate the leftHandSide? assume this method must be called
         // with some eval'd LHS & RHS?
+        // TODO(YilongL): adding the following statementes DOUBLES the execution time!!!
+//        leftHandSide = leftHandSide.evaluate(this, context);
         Term normalizedLeftHandSide = leftHandSide.substituteWithBinders(substitution, context);
         if (normalizedLeftHandSide != leftHandSide) {
             normalizedLeftHandSide = normalizedLeftHandSide.evaluate(this, context);
         }
 
+//        rightHandSide = rightHandSide.evaluate(this, context);
         Term normalizedRightHandSide = rightHandSide.substituteWithBinders(substitution, context);
         if (normalizedRightHandSide != rightHandSide) {
             normalizedRightHandSide = normalizedRightHandSide.evaluate(this, context);
