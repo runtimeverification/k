@@ -6,35 +6,35 @@ module SET
   imports K-EQUAL-HOOKS
   imports INT-HOOKS
 
-  syntax MySet ::= MySet MySet    [left, function, hook(Set:__), klabel('_Set_)]
-                 | ".MySet"       [function, hook(Set:.Set)]
-                 | MySetItem(K)   [function, hook(Set:SetItem)]
+  syntax Set ::= Set Set      [left, function, hook(Set:__), klabel('_Set_)]
+               | ".Set"       [function, hook(Set:.Set)]
+               | SetItem(K)   [function, hook(Set:SetItem)]
 
   /* set difference */
-  syntax MySet ::= MySet "-MySet" MySet   [function, hook(Set:difference), latex({#1}-_{\it Set}{#2})]
-//  rule (MySetItem(K:K) S1:MySet) -MySet S2:MySet => S1 -MySet S2
+  syntax Set ::= Set "-Set" Set   [function, hook(Set:difference), latex({#1}-_{\it Set}{#2})]
+//  rule (SetItem(K:K) S1:Set) -Set S2:Set => S1 -Set S2
 //  when K in S2
-//  rule (MySetItem(K:K) S1:MySet) -MySet S2:MySet => MySetItem(K) (S1 -MySet S2)
+//  rule (SetItem(K:K) S1:Set) -Set S2:Set => SetItem(K) (S1 -Set S2)
 //  when notBool(K in S2)
-//  rule .MySet -MySet _:MySet => .MySet
+//  rule .Set -Set _:Set => .Set
 
   /* set difference axioms */
-//  rule S1:MySet -MySet (MySetItem(K:K) S2:MySet) => S1 -MySet S2
+//  rule S1:Set -Set (SetItem(K:K) S2:Set) => S1 -Set S2
 //  when notBool(K in S1)
-//  rule S:MySet -MySet .MySet => S
+//  rule S:Set -Set .Set => S
 
   /* set intersection */
-  syntax MySet ::= intersectSet(MySet, MySet)   [function]
-//  rule intersectSet(S1:MySet, S2:MySet) => S1 -MySet (S1 -MySet S2)
+  syntax Set ::= intersectSet(Set, Set)   [function]
+//  rule intersectSet(S1:Set, S2:Set) => S1 -Set (S1 -Set S2)
 
   /* element membership */
-  syntax Bool ::= K "in" MySet    [function, hook(Set:in)]
-//  rule K1:K in MySetItem(K2:K) S:MySet => K1 =K K2 orBool K1 in S
-//  rule _ in .MySet => false
+  syntax Bool ::= K "in" Set    [function, hook(Set:in)]
+//  rule K1:K in SetItem(K2:K) S:Set => K1 =K K2 orBool K1 in S
+//  rule _ in .Set => false
 
   /* set cardinality */
-  syntax Int ::= size(MySet)   [function]
-//  rule size(MySetItem(_) S:MySet) => 1 +Int size(S)
-//  rule size(.MySet) => 0
+  syntax Int ::= size(Set)   [function]
+//  rule size(SetItem(_) S:Set) => 1 +Int size(S)
+//  rule size(.Set) => 0
 endmodule
 

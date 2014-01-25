@@ -26,9 +26,10 @@ module K-MAP-EXTRAS
     imports K-SET-EXTRAS
 	imports BOOL-HOOKS
 	imports K-EQUAL-HOOKS
+	imports SET
 
-  syntax K ::= Map "(" K ")"  [function, klabel(deprecatedMapLookup)]
-  rule (_ K1:K |-> K2:K)(K1) => K2
+  //syntax K ::= Map "(" K ")"  [function, klabel(deprecatedMapLookup)]
+  //rule (_ K1:K |-> K2:K)(K1) => K2
 
   syntax Map ::= Map "[" "undef" "/" KList "]"  [function]
 
@@ -53,7 +54,7 @@ module K-MAP-EXTRAS
   rule M:Map[undef/ .KList] => M [structural, anywhere]
   rule (M:Map K:K |-> _)[undef/ K] => M [structural, anywhere]
 
-  syntax Map ::= Map "[" Map "]"   [function, cons(Map1UpdateMapWithMapSyn)]
+  //syntax Map ::= Map "[" Map "]"   [function, cons(Map1UpdateMapWithMapSyn)]
   rule M:Map[M':Map K1:K |-> K2:K] => M[K2/K1][M'] [structural]
   rule M:Map[.Map] => M [structural]
 
@@ -62,15 +63,15 @@ module K-MAP-EXTRAS
 //    => Map(K1),,Map(K2),,Map(Ks) [structural]
 //  rule Map:Map(.KList) => .KList [structural]
 
-	syntax Set ::= "keys" Map  [function]
+//	syntax Set ::= "keys" Map  [function]
 
-  rule keys . => . [structural]
+  rule keys(.Map) => .Set [structural]
   rule (keys ((K:K |->_  => .) _)) (. => SetItem(K)) [structural]
 
-	syntax Set ::= "values" Map  [function]
+  //syntax Set ::= "values" Map  [function]
 
-  rule values . => . [structural]
-  rule (values ((_ |-> K:K  => .) _)) (. => SetItem(K)) [structural]
+  rule values(.Map) => .Bag [structural]
+  rule (values ((_ |-> K:K  => .Map) _)) (.Bag => BagItem(K)) [structural]
 
   syntax Bool ::= "$hasMapping" "(" Map "," K ")" [function,maudeop("$hasMapping")]
   syntax Bool ::= "#hasMapping" "(" Map "," K ")" [function, maudeop("#hasMapping")]
@@ -93,20 +94,21 @@ module K-SET-EXTRAS
 	imports K-TECHNIQUE
 	imports BOOL-HOOKS
 	imports K-EQUAL-HOOKS
+	imports SET
 
   syntax KLabel ::= "isSet"
 
 //	syntax Set ::= "Set" KList
         syntax Set ::= Set "-Set" Set  [function, latex({#1}-_{\it Set}{#2})]
-  rule S1:Set -Set (SI1:SetItem SI2:SetItem S2:Set)
-    => ((S1 -Set SI1) -Set SI2) -Set S2
+  rule S1:Set -Set (SetItem(I1) SetItem(I2) S2:Set)
+    => ((S1 -Set SetItem(I1)) -Set SetItem(I2)) -Set S2
   rule S1:Set -Set . => S1
-  rule (SI:SetItem S:Set) -Set SI => S
-  rule S:Set -Set SI:SetItem => S when SI in S ==Bool false //  [owise]
+  rule (SetItem(SI) S:Set) -Set SetItem(SI) => S
+  rule S:Set -Set SetItem(SI) => S when SetItem(SI) in S ==Bool false //  [owise]
 
-	syntax Bool ::= K "in" Set   [function, klabel(inSet)]
+	syntax Bool ::= /*K "in" Set   [function, klabel(inSet)]
 			      | SetItem "in" Set   [function, klabel(kInSet)]
-			      | K "#inSet" Set   [function]
+			      |*/ K "#inSet" Set   [function]
    rule SetItem(K:K) in S:Set => K in S [structural, anywhere]
    rule K:K in S:Set => K #inSet S ==K true
      [structural, anywhere]
@@ -157,7 +159,7 @@ module K-LIST-EXTRAS
 
 	syntax Int ::= "lengthList" List [function]
 
-   rule lengthList ( _:ListItem L:List ) => 1 +Int lengthList L [structural, anywhere]
+   rule lengthList ( ListItem(_) L:List ) => 1 +Int lengthList L [structural, anywhere]
    rule lengthList .List => 0 [structural, anywhere]
    rule isKResult((_:KResult => .KList),, _:K,, _:KList)
    rule isKResult(.KList) => true

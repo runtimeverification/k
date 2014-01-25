@@ -1,10 +1,14 @@
 require "bool.k"
 require "k-prelude.k"
+require "list.k"
+
 module K-EQUAL-HOOKS
   imports #K-EQUAL-INTERFACE
   imports BOOL-HOOKS
   imports K-SET-EXTRAS
   imports K-MAP-EXTRAS
+  imports LIST
+  imports MAP
 
 
   syntax Bool ::= left:
@@ -37,7 +41,7 @@ module K-EQUAL-HOOKS
   // inclusion between maps
   syntax Bool ::= Map "<=Map" Map    [function]
 
-  rule (MapItem1:MapItem Map1:Map) <=Map (MapItem1 Map2:Map)
+  rule (K1 |-> K2 Map1:Map) <=Map (K1 |-> K2 Map2:Map)
         =>
        (Map1 <=Map Map2)
 

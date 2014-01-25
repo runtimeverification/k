@@ -112,10 +112,7 @@ module SYMBOLIC-K
 //  rule K2Sort(_:Array) => "(Array Int Int)" // support only integer arrays
 
   // declare isSymbolicSort for List, Set, Bag and Map
-  syntax K ::= "isSymbolicList" "(" List ")" [prefixlabel(isSymbolicList), predicate]
-  syntax K ::= "isSymbolicSet" "(" Set ")" [prefixlabel(isSymbolicSet), predicate]
   syntax K ::= "isSymbolicBag" "(" Bag ")" [prefixlabel(isSymbolicBag), predicate]
-  syntax K ::= "isSymbolicMap" "(" Map ")" [prefixlabel(isSymbolicMap), predicate]
 
 
   // define isSymbolicK

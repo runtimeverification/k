@@ -159,7 +159,7 @@ public class JavaSymbolicBackend extends BasicBackend {
         steps.add(new ResolveRewrite(context));
 
         /* data structure related stuff */
-        steps.add(new CompileToBuiltins(context));
+       // steps.add(new CompileToBuiltins(context));
         steps.add(new CompileDataStructures(context));
         steps.add(new Cell2DataStructure(context));
         steps.add(new DataStructureToLookupUpdate(context));
