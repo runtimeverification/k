@@ -1,29 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="JAVA_MODULE" version="4">
-  <component name="EclipseModuleManager">
-    <libelement value="jar://$MODULE_DIR$/../../../lib/java/aterm-java.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/../../../lib/java/com.microsoft.z3.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/../../../lib/java/collections-generic-4.01.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/../../../lib/java/commons-cli-1.2.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/../../../lib/java/commons-io-2.1.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/../../../lib/java/commons-lang3-3.1.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/../../../lib/java/diffutils-1.2.1.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/../../../lib/java/guava-14.0.1.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/../../../lib/java/jansi-1.8.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/../../../lib/java/jline-1.0.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/../../../lib/java/jopt-simple-3.3.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/../../../lib/java/jung-algorithms-2.0.1.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/../../../lib/java/jung-api-2.0.1.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/../../../lib/java/jung-graph-impl-2.0.1.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/../../../lib/java/jung-io-2.0.1.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/../../../lib/java/jung-visualization-2.0.1.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/../../../lib/java/strategoxt.jar!/" />
-    <src_description expected_position="1">
-      <src_folder value="file://$MODULE_DIR$/src" expected_position="0" />
-      <src_folder value="file://$MODULE_DIR$/test" expected_position="1" />
-      <src_folder value="file://$MODULE_DIR$/lib/resources" expected_position="3" />
-    </src_description>
-  </component>
   <component name="NewModuleRootManager" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/bin" />
     <output-test url="file://$MODULE_DIR$/../../out/test/KTool" />
@@ -32,168 +8,21 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
     </content>
-    <content url="file://$MODULE_DIR$">
-      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/lib/resources" isTestSource="false" />
-    </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module-library">
-      <library name="aterm-java.jar">
+      <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../lib/java/aterm-java.jar!/" />
+          <root url="file://$MODULE_DIR$/../../../lib/java" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
+        <jarDirectory url="file://$MODULE_DIR$/../../../lib/java" recursive="false" />
+        <jarDirectory url="file://$MODULE_DIR$/../../../lib/java" recursive="false" type="SOURCES" />
       </library>
     </orderEntry>
-    <orderEntry type="module-library">
-      <library name="com.microsoft.z3.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../lib/java/com.microsoft.z3.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="collections-generic-4.01.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../lib/java/collections-generic-4.01.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="commons-cli-1.2.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../lib/java/commons-cli-1.2.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="commons-io-2.1.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../lib/java/commons-io-2.1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="commons-lang3-3.1.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../lib/java/commons-lang3-3.1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="diffutils-1.2.1.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../lib/java/diffutils-1.2.1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="guava-14.0.1.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../lib/java/guava-14.0.1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="jansi-1.8.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../lib/java/jansi-1.8.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="jline-1.0.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../lib/java/jline-1.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="jopt-simple-3.3.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../lib/java/jopt-simple-3.3.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="jung-algorithms-2.0.1.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../lib/java/jung-algorithms-2.0.1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="jung-api-2.0.1.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../lib/java/jung-api-2.0.1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="jung-graph-impl-2.0.1.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../lib/java/jung-graph-impl-2.0.1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="jung-io-2.0.1.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../lib/java/jung-io-2.0.1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="jung-visualization-2.0.1.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../lib/java/jung-visualization-2.0.1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="strategoxt.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../lib/java/strategoxt.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="junit4">
+    <orderEntry type="module-library" scope="TEST">
+      <library>
         <CLASSES>
           <root url="jar://$APPLICATION_HOME_DIR$/lib/junit-4.10.jar!/" />
         </CLASSES>
