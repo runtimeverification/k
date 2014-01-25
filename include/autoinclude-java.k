@@ -1,5 +1,5 @@
 require "k-prelude.k"
-require "builtins/symbolic-k.k"
+//require "builtins/symbolic-k.k"
 require "io/uris.k"
 require "builtins/map.k"
 require "builtins/set.k"
@@ -16,17 +16,11 @@ endmodule
 module AUTO-INCLUDED-MODULE
   imports BUILTIN-HOOKS
   imports K
-  imports SYMBOLIC-K
+//  imports SYMBOLIC-K
   imports URIS
   imports LIST
   imports MAP
   imports SET
   imports IO
-  imports K-LISTK-EXTRAS
-  imports K-LIST-EXTRAS
-  imports K-MAP-EXTRAS            // operations on Maps
-  imports K-BAG-EXTRAS            // operations on Bags
-  imports K-SET-EXTRAS            // operations on Sets
-
 
 endmodule

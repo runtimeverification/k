@@ -5,8 +5,8 @@ require "list.k"
 module K-EQUAL-HOOKS
   imports #K-EQUAL-INTERFACE
   imports BOOL-HOOKS
-  imports K-SET-EXTRAS
-  imports K-MAP-EXTRAS
+  //imports K-SET-EXTRAS
+  //imports K-MAP-EXTRAS
   imports LIST
   imports MAP
 
@@ -47,10 +47,6 @@ module K-EQUAL-HOOKS
 
 
   rule .Map <=Map _:Map => true [function, anywhere]
-
-  rule ((K1:K |-> K2:K) _:Map) <=Map Map2 => false
-       when notBool $hasMapping(Map2, K1)
-       orElseBool (K2 =/=K Map2:Map(K1))
 
 
   // equality over maps

@@ -54,7 +54,10 @@ public class BasicParser {
 				List<DefinitionItem> tempmi = moduleItems;
 				moduleItems = new ArrayList<DefinitionItem>();
 
-				file = buildCanonicalPath("autoinclude.k", new File(fileName));
+                if (GlobalSettings.javaBackend)
+                    file = buildCanonicalPath("autoinclude-java.k", new File(fileName));
+                else
+				    file = buildCanonicalPath("autoinclude.k", new File(fileName));
 				if (file == null)
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
 							missingFileMsg + fileName + " autoimported for every definition ", fileName, ""));

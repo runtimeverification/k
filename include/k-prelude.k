@@ -27,6 +27,7 @@ module K-MAP-EXTRAS
 	imports BOOL-HOOKS
 	imports K-EQUAL-HOOKS
 	imports SET
+	imports MAP
 
   //syntax K ::= Map "(" K ")"  [function, klabel(deprecatedMapLookup)]
   //rule (_ K1:K |-> K2:K)(K1) => K2
@@ -78,6 +79,10 @@ module K-MAP-EXTRAS
   rule $hasMapping(M:Map,K:K) => #hasMapping(M,K) ==K true
 
   rule #hasMapping(_:Map K:K |-> _:K,K) => true
+  rule ((K1:K |-> K2:K) _:Map) <=Map Map2 => false
+       when notBool $hasMapping(Map2, K1)
+       orElseBool (K2 =/=K Map2:Map(K1))
+
 
 
 // The following are used in pattern-matching.k
@@ -274,11 +279,6 @@ module K
   //imports K-EXTRAS                // defines a KLabel substitution
   imports K-FREZERS
   imports K-FRESH
-  imports K-LISTK-EXTRAS
-  imports K-LIST-EXTRAS
-  imports K-MAP-EXTRAS            // operations on Maps
-  imports K-BAG-EXTRAS            // operations on Bags
-  imports K-SET-EXTRAS            // operations on Sets
   imports K-TOKENS
   //imports K-LATEX
 endmodule
