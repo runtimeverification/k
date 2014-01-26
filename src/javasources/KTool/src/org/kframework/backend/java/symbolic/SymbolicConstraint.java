@@ -199,17 +199,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             this.rightHandSide = rightHandSide;
         }
 
-        /**
-         * Evaluates pending functions and predicate operations in this
-         * equality.
-         * 
-         * @param constraint
-         */
-        public void evaluate(SymbolicConstraint constraint) {
-            leftHandSide = leftHandSide.evaluate(constraint, context);
-            rightHandSide = rightHandSide.evaluate(constraint, context);
-        }
-
         public Term leftHandSide() {
             return leftHandSide;
         }
@@ -314,23 +303,22 @@ public class SymbolicConstraint extends JavaSymbolicObject {
          * 
          * @param substitution
          *            the specified substitution map
-         * @return {@code true} if this equality has changed after the
-         *         substitution; otherwise, {@code false}
          */
-        private boolean substitute(Map<Variable, ? extends Term> substitution) {
-            Term leftHandSide = this.leftHandSide.substituteWithBinders(substitution, context);
-            Term rightHandSide = this.rightHandSide.substituteWithBinders(substitution, context);
-            
-            boolean changed = false;            
-            if (leftHandSide != this.leftHandSide) {
-                changed = true;
-                this.leftHandSide = leftHandSide;
-            }
-            if (rightHandSide != this.rightHandSide) {
-                changed = true;
-                this.rightHandSide = rightHandSide;
-            }
-            return changed;
+        private void substitute(Map<Variable, ? extends Term> substitution) {
+            leftHandSide = leftHandSide.substituteWithBinders(substitution, context);
+            rightHandSide = rightHandSide.substituteWithBinders(substitution, context);
+        }
+        
+        /**
+         * Substitutes this equality with according to a specified substitution
+         * map and evaluates pending functions.
+         * 
+         * @param substitution
+         *            the specified substitution map
+         */
+        public void substituteAndEvaluate(Map<Variable, ? extends Term> substitution) {
+            leftHandSide = leftHandSide.substituteAndEvaluate(substitution, context);
+            rightHandSide = rightHandSide.substituteAndEvaluate(substitution, context);
         }
 
         @Override
@@ -448,22 +436,11 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
                 + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
 
-        // TODO(YilongL): why not evaluate the leftHandSide? assume this method must be called
-        // with some eval'd LHS & RHS?
-        // TODO(YilongL): adding the following statementes DOUBLES the execution time!!!
-//        leftHandSide = leftHandSide.evaluate(this, context);
-        Term normalizedLeftHandSide = leftHandSide.substituteWithBinders(substitution, context);
-        if (normalizedLeftHandSide != leftHandSide) {
-            normalizedLeftHandSide = normalizedLeftHandSide.evaluate(this, context);
-        }
+        simplify();
+        leftHandSide = leftHandSide.substituteAndEvaluate(substitution, context);
+        rightHandSide = rightHandSide.substituteAndEvaluate(substitution, context);
 
-//        rightHandSide = rightHandSide.evaluate(this, context);
-        Term normalizedRightHandSide = rightHandSide.substituteWithBinders(substitution, context);
-        if (normalizedRightHandSide != rightHandSide) {
-            normalizedRightHandSide = normalizedRightHandSide.evaluate(this, context);
-        }
-
-        checkTruthValBeforePutIntoConstraint(normalizedLeftHandSide, normalizedRightHandSide, false);
+        checkTruthValBeforePutIntoConstraint(leftHandSide, rightHandSide, false);
 
         return truthValue;
     }
@@ -947,9 +924,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         Set<Equality> equalitiesToRemove = new HashSet<Equality>();
         for (Iterator<Equality> iterator = equalities.iterator(); iterator.hasNext();) {
             Equality equality = iterator.next();
-            if (equality.substitute(substitution)) {
-                equality.evaluate(this);
-            }
+            equality.substituteAndEvaluate(substitution);
 
             if (equality.isTrue()) {
                 equalitiesToRemove.add(equality);
@@ -1001,9 +976,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                  * need to do so
                  */
                 if (!equalitiesToRemove.contains(previousEquality)) {
-                    if (previousEquality.substitute(tempSubst)) {
-                        previousEquality.evaluate(this);
-                    }
+                    previousEquality.substituteAndEvaluate(tempSubst);
                     if (previousEquality.isTrue()) {
                         equalitiesToRemove.add(previousEquality);
                     } else if (previousEquality.isFalse()) {
@@ -1039,13 +1012,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         @SuppressWarnings("unchecked")
         Map.Entry<Variable, Term>[] entries = substitution.entrySet().toArray(new Map.Entry[substitution.size()]);
         for (Map.Entry<Variable, Term> subst : entries) {
-            Term term = subst.getValue().substituteWithBinders(substMap, context);
+            Term term = subst.getValue().substituteAndEvaluate(substMap, context);
             if (term != subst.getValue()) {
-                term = term.evaluate(this, context);
-                /*
-                 * important: check the truth value of the substitution before
-                 * putting it into the substitution map
-                 */
                 checkTruthValBeforePutIntoConstraint(subst.getKey(), term, true);
             }
         }

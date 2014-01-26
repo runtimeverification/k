@@ -140,9 +140,7 @@ public class StepRewriter {
 
             Term result = rule.rightHandSide();
             /* apply the constraints substitution on the rule RHS */
-            result = result.substituteWithBinders(constraint.substitution(), context);
-            /* evaluate pending functions in the rule RHS */
-            result = result.evaluate(context);
+            result = result.substituteAndEvaluate(constraint.substitution(), context);
 
             /* compute all results */
             termResults.add(result);

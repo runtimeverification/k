@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.kframework.backend.java.indexing.IndexingPair;
+import org.kframework.backend.java.symbolic.BinderSubstitutionTransformer;
 import org.kframework.backend.java.symbolic.BottomUpVisitor;
-import org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer;
-import org.kframework.backend.java.symbolic.LocalEvaluator;
 import org.kframework.backend.java.symbolic.Evaluator;
+import org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer;
 import org.kframework.backend.java.symbolic.SubstitutionTransformer;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformable;
@@ -24,7 +24,8 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
 
     protected final Kind kind;
     //protected final boolean normalized;
-
+    protected boolean isEvaluated = false;
+    
     protected Term(Kind kind) {
         this.kind = kind;
     }
@@ -71,6 +72,14 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
         return kind;
     }
 
+    public boolean isEvaluated() {
+        return isEvaluated;
+    }
+    
+    public void resetEvalStatus() {
+        isEvaluated = false;
+    }
+
     /**
      * Returns a new {@code Term} instance obtained from this term by evaluating
      * pending functions and predicates. <br>
@@ -102,7 +111,11 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
      * @return the result {@code Term} instance
      */
     public Term evaluate(SymbolicConstraint constraint, TermContext context) {
-        return Evaluator.evaluate(this, constraint, context);
+        try {
+            return isEvaluated ? this : Evaluator.evaluate(this, constraint, context);
+        } finally {
+            isEvaluated = true;
+        }
     }
 
     /**
@@ -125,15 +138,12 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
      * Returns a new {@code Term} instance obtained from this term by applying substitution.
      */
     public Term substituteAndEvaluate(Map<Variable, ? extends Term> substitution, TermContext context) {
-
         if (substitution.isEmpty() || isGround()) {
             return this;
         }
 
-        SubstitutionTransformer transformer = new SubstitutionTransformer(substitution, context);
-        transformer.getPostTransformer().addTransformer(new LocalEvaluator(context));
-
-        return (Term) accept(transformer);
+        SubstitutionTransformer transformer = new BinderSubstitutionTransformer(substitution, context);
+        return ((Term) accept(transformer)).evaluate(context);
     }
 
      /**

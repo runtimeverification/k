@@ -238,11 +238,6 @@ public class KItem extends Term implements Sorted {
                 Term result = null;
                 for (Rule rule : definition.functionRules().get((KLabelConstant) kLabel)) {
                     SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(context);
-                    if (constraint != null) { 
-                        // TODO(YilongL): shall I preserve this check? I tend to
-                        // eliminate it and ensure constraint to be always non-null
-                        leftHandSideConstraint.addAll(constraint);
-                    }
                     leftHandSideConstraint.addAll(rule.requires());
                     for (Variable variable : rule.freshVariables()) {
                         leftHandSideConstraint.add(variable, IntToken.fresh());
@@ -268,15 +263,12 @@ public class KItem extends Term implements Sorted {
                     } else if (K.do_concrete_exec) {
                         assert solutions.size() <= 1 : "function definition is not deterministic";
                         // TODO(YilongL): temporarily disable the following assertion until I get renormalize() right!
-//                        assert constrainedTerm.getTypeOfUnification() == UnificationType.PatternMatching : "the result of unification between:"
-//                                + constrainedTerm.term()
-//                                + " (the ground subject term) and "
-//                                + leftHandSide.term()
-//                                + " (the pattern) should be a substitution";
-//                        assert solution.isSubstitution() : "the solution shall not contain pending functions but found:\n" + solution.equalities();
-                        if (!solution.isSubstitution()) {
-                            continue;
-                        }
+                        assert constrainedTerm.getTypeOfUnification() == UnificationType.PatternMatching : "the result of unification between:"
+                                + constrainedTerm.term()
+                                + " (the ground subject term) and "
+                                + leftHandSide.term()
+                                + " (the pattern) should be a substitution";
+                        assert solution.isSubstitution() : "the solution shall not contain pending functions but found:\n" + solution.equalities();
                     }
                     
                     solution.orientSubstitution(rule.leftHandSide().variableSet(), context);
@@ -288,21 +280,15 @@ public class KItem extends Term implements Sorted {
                     /* rename rule variables in the rule RHS */
                     rightHandSide = rightHandSide.substitute(freshSubstitution, context);
                     /* apply the constraints substitution on the rule RHS */
-                    rightHandSide = rightHandSide.substitute(solution.substitution(), context);
-                    /* evaluate pending functions in the rule RHS */
-                    //TODO(AndreiS): Only evaluate if the term has changed
-                    rightHandSide = rightHandSide.evaluate(solution, context);
+                    rightHandSide = rightHandSide.substituteAndEvaluate(solution.substitution(), context);
                     /* eliminate anonymous variables */
                     solution.eliminateAnonymousVariables();
 
                     /* update the constraint */
-                    if (K.do_kompilation) {
-                        // in kompilation mode, the constraint should be
-                        // trivially empty; besides, there is no need to update
-                        assert constraint.isTrue();
-                    } else if (K.do_concrete_exec) {
-                        // in concrete execution mode, the evaluation of user-defined
-                        // functions will not create new constraints
+                    if (K.do_kompilation || K.do_concrete_exec) {
+                        // in kompilation and concrete execution mode, the
+                        // evaluation of user-defined functions will not create
+                        // new constraints
                     } else if (constraint != null) {
                         throw new RuntimeException(
                                 "Fix it; need to find a proper way to update "
