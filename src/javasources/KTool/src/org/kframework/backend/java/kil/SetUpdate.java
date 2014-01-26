@@ -11,6 +11,7 @@ import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 
 /**
  *
@@ -40,21 +41,23 @@ public class SetUpdate extends Term {
 
         BuiltinSet builtinSet = ((BuiltinSet) set);
 
-        Set<Term> entries = new HashSet<Term>(builtinSet.elements());
+        Set<Term> elems = new HashSet<Term>(builtinSet.elements());
+        Set<Term> elemsToRemove = new HashSet<Term>();
         for (Iterator<Term> iterator = removeSet.iterator(); iterator.hasNext();) {
-            if (entries.remove(iterator.next())) {
-                iterator.remove();
+            Term nextElem = iterator.next();
+            if (elems.remove(nextElem)) {
+                elemsToRemove.add(nextElem);
             }
         }
 
-        if (!removeSet.isEmpty()) {
-            return this;
+        if (removeSet.size() > elemsToRemove.size()) {
+            return new SetUpdate(set, Sets.difference(elems, elemsToRemove));
         }
 
         if (builtinSet.hasFrame()) {
-            return new BuiltinSet(entries, builtinSet.frame());
+            return new BuiltinSet(elems, builtinSet.frame());
         } else {
-            return new BuiltinSet(entries);
+            return new BuiltinSet(elems);
         }
     }
 

@@ -436,7 +436,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
                 + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
 
-        simplify();
+        normalize();
         leftHandSide = leftHandSide.substituteAndEvaluate(substitution, context);
         rightHandSide = rightHandSide.substituteAndEvaluate(substitution, context);
 

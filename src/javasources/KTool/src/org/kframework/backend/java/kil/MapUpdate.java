@@ -1,6 +1,7 @@
 package org.kframework.backend.java.kil;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -13,6 +14,7 @@ import org.kframework.kil.ASTNode;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 
 /**
  *
@@ -46,14 +48,16 @@ public class MapUpdate extends Term {
         BuiltinMap builtinMap = ((BuiltinMap) map);
 
         Map<Term, Term> entries = new HashMap<Term, Term>(builtinMap.getEntries());
+        Set<Term> keysToRemove = new HashSet<Term>();
         for (Iterator<Term> iterator = removeSet.iterator(); iterator.hasNext();) {
-            if (entries.remove(iterator.next()) != null) {
-                iterator.remove();
+            Term nextKey = iterator.next();
+            if (entries.remove(nextKey) != null) {
+                keysToRemove.add(nextKey);
             }
         }
 
-        if (!removeSet.isEmpty()) {
-            return new MapUpdate(builtinMap, removeSet, updateMap);
+        if (removeSet.size() > keysToRemove.size()) {
+            return new MapUpdate(builtinMap, Sets.difference(removeSet, keysToRemove), updateMap);
         }
 
         entries.putAll(updateMap);
