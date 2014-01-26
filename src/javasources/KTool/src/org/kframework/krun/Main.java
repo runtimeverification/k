@@ -1273,6 +1273,14 @@ public class Main {
             }
 
             GlobalSettings.kem.print();
+            
+            if(cmd.hasOption("tempkoreoutput")){
+            	
+            	KilTransformer trans = new KilTransformer(true, K.color, K.parens, context);
+            	
+            	System.out.println(K.kdir);
+            	return;
+            }
 
             if (!K.debug && !K.guidebug) {
                 normalExecution(KAST, lang, rp, cmd_options, context);
