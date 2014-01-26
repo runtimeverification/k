@@ -204,7 +204,8 @@ type the actual construct. */
                 | "if" "(" Exp ")" Block "else" Block      [avoid, strict]
                 | "if" "(" Exp ")" Block
                 | "while" "(" Exp ")" Block                [strict]
-                | "for" "(" Stmt Exp ";" Exp ")" Block
+                //| "for" "(" Stmt Exp ";" Exp ")" Block
+                | "for" "(" Stmts Exp ";" Exp ")" Block
                 | "return" Exp ";"                         [strict]
                 | "return" ";"
                 | "print" "(" Exps ")" ";"                 [strict]
