@@ -1244,6 +1244,13 @@ public class Main {
 
                 sw.printIntermediate("Reading configuration from binary");
             }
+            
+            if (cmd.hasOption("tempkoreoutput")){
+            	
+    			KilTransformer trans = new KilTransformer(true, K.color, K.parens, context);
+    			writeStringToFile(new File(K.compiled_def+".kore"),trans.kilToKore(K.definition));
+            	return;
+            }
 
             if (!cmd.hasOption("main-module")) {
                 K.main_module = K.definition.getMainModule();
@@ -1273,14 +1280,6 @@ public class Main {
             }
 
             GlobalSettings.kem.print();
-            
-            if(cmd.hasOption("tempkoreoutput")){
-            	
-            	KilTransformer trans = new KilTransformer(true, K.color, K.parens, context);
-            	
-            	System.out.println(K.kdir);
-            	return;
-            }
 
             if (!K.debug && !K.guidebug) {
                 normalExecution(KAST, lang, rp, cmd_options, context);

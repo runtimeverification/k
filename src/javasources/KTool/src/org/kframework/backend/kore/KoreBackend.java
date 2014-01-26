@@ -120,6 +120,7 @@ class KoreFilter extends UnparserFilter {
     postpare();
   }
 
+  /*
   @Override
   public void visit(Rule node) { visit((Sentence)node); }
   
@@ -128,7 +129,7 @@ class KoreFilter extends UnparserFilter {
   
   @Override
   public void visit(Configuration node) { visit((Sentence)node); }
-
+*/
 
 /*
   public void visit(PriorityExtended node) {
@@ -303,7 +304,7 @@ class KoreFilter extends UnparserFilter {
 		visit((Term) node);
 
 	}
-*/  @Override
+*/
 	public void visit(Ambiguity node) {
           assert false : "Ambiguities not supported in Kore";
 	}
@@ -329,14 +330,14 @@ class KoreFilter extends UnparserFilter {
     }
   }
 
-  @Override
+  	@Override
 	public void visit(KSequence node) { 
 		prepare(node);
 		visitList(node.getContents(), " ~> ", ".K");
 		postpare();
 	}
 
-  @Override
+  	@Override
 	public void visit(org.kframework.kil.List node) {
     visit((ASTNode)node);
 /*
@@ -346,7 +347,7 @@ class KoreFilter extends UnparserFilter {
 */
 	}
 
-  @Override
+  	@Override
 	public void visit(KList node) {
 		prepare(node);
           visitList(node.getContents(), ", ", ".KList");
@@ -357,19 +358,22 @@ if (isVisited(node))
 		visit((Collection) node);
 */
 	}
-    @Override
+
+  	@Override
 	public void visit(BoolBuiltin node) {
 		prepare(node);
           this.indenter.write(node.value()); // TODO: true() vs #"true"()
           postpare();
 	}
-    @Override
+
+	@Override
 	public void visit(IntBuiltin node) {
 		prepare(node);
 		this.indenter.write(node.value()); // TODO: true() vs #"true"()
           postpare();
 	}
-    @Override
+
+	@Override
 	public void visit(StringBuiltin node) {
 		prepare(node);
 		this.indenter.write(node.value());
@@ -382,7 +386,7 @@ if (isVisited(node))
           sb.append("HOLE");
 	}
 */
-    @Override
+	@Override
 	public void visit(KApp node) {
 		prepare(node);
           node.getLabel().accept(this);
@@ -397,19 +401,21 @@ if (isVisited(node))
           this.indenter.write(")");
           postpare();
 	}
-    @Override
+
+	@Override
 	public void visit(KLabelConstant node) {
 		prepare(node);
 		this.indenter.write(node.getLabel()); // TODO: escape the label
 		postpare();
 	}
-    @Override
+/*
 	public void visit(TermCons node) {
 		prepare(node);
           visit(new KApp(KLabelConstant.of(node.getProduction().getKLabel(), context), new KList(node.getContents())));
           postpare();
 	}
-    @Override
+*/
+	@Override
 	public void visit(Variable node) {
 		prepare(node);
 		this.indenter.write(node.getName() + ":" + node.getSort());
