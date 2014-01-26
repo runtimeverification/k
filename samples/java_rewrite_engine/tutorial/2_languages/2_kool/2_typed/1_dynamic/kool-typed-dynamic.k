@@ -106,7 +106,8 @@ untyped KOOL.  */
                 | "if" "(" Exp ")" Block "else" Block   [avoid, strict(1)]
                 | "if" "(" Exp ")" Block
                 | "while" "(" Exp ")" Block
-                | "for" "(" Stmt Exp ";" Exp ")" Block
+                //| "for" "(" Stmt Exp ";" Exp ")" Block
+                | "for" "(" Stmts Exp ";" Exp ")" Block
                 | "print" "(" Exps ")" ";"              [strict]
                 | "return" Exp ";"                      [strict]
                 | "return" ";"
@@ -122,14 +123,10 @@ untyped KOOL.  */
 
 //@ \subsection{Desugaring macros}
 
-//  rule if (E) S => if (E) S else {}                                     [macro]
-//  rule for(Start Cond; Step) {S:Stmts} => {Start while(Cond){S Step;}}  [macro]
-//  rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;               [macro]
-//  rule T:Type X:Id = E; => T X; X = E;                                  [macro]
-  rule if (E) S => if (E) S else {}
-  rule for(Start Cond; Step) {S:Stmts} => {Start while(Cond){S Step;}}
-  rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;
-  rule T:Type X:Id = E; => T X; X = E;
+  rule if (E) S => if (E) S else {}                                     [macro]
+  rule for(Start Cond; Step) {S:Stmts} => {Start while(Cond){S Step;}}  [macro]
+  rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;               [macro]
+  rule T:Type X:Id = E; => T X; X = E;                                  [macro]
 
   rule class C:Id S => class C extends theObject S                     // KOOL
 

@@ -137,8 +137,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         }
         
         /*
-         * after re-orientation, the RHS's of the {@code equalities} may contain
-         * variables on the LHS's of the {@code substitution}
+         * after re-orientation, the {@code equalities} may contain variables on
+         * the LHS's of the {@code substitution}
          */
         isNormal = false;
     }
