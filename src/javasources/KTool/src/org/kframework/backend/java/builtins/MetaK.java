@@ -161,6 +161,7 @@ public class MetaK {
      * @return the K label
      */
     public static KLabel getKLabel(KItem kItem, TermContext context) {
-        return kItem.kLabel();
+        // TODO(AndreiS): handle KLabel variables
+        return (KLabel) kItem.kLabel();
     }
 }

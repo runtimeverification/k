@@ -35,7 +35,8 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
 
         List<Term> normalizedItems = new ArrayList<Term>();
         for (Term term : items) {
-            if (!(term instanceof Variable) && (term.kind() == kind)) {
+            // TODO (AndreiS): fix KItem projection
+            if (!(term instanceof Variable) && !(term instanceof KItemProjection) && (term.kind() == kind)) {
                 assert term instanceof KCollection :
                         "associative use of KCollection(" + items + ", " + frame + ")";
 

@@ -107,10 +107,11 @@ public class BuiltinFloatOperations {
 
     public static Term unaryMinus(Term term, TermContext context) {
         if (term instanceof KItem) {
-            KLabel kLabel = ((KItem) term).kLabel();
-            if (kLabel instanceof KLabelConstant) {
+            Term kLabel = ((KItem) term).kLabel();
+            Term kList = ((KItem) term).kList();
+            if (kLabel instanceof KLabelConstant && kList instanceof KList) {
                 if (((KLabelConstant) kLabel).label().equals("'--Float_")) {
-                    return ((KItem) term).kList().get(0);
+                    return ((KList) kList).get(0);
                 }
             }
         }

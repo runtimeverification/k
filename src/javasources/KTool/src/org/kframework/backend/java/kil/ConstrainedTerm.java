@@ -227,6 +227,7 @@ public class ConstrainedTerm extends Term {
         }
 
         if (K.do_testgen && !solutions.isEmpty()) {
+            // TODO(AndreiS): deal with KLabel variables
             boolean changed;
             List<SymbolicConstraint> tmpSolutions = solutions;
             Set<Variable> sortIntersectionVariables = new HashSet<Variable>();
@@ -249,7 +250,7 @@ public class ConstrainedTerm extends Term {
                         // dissolve negative membership predicates
                         Term lhsOfEq = eq1.leftHandSide();
                         if (lhsOfEq instanceof KItem && ((KItem) lhsOfEq).kLabel().toString().equals("'_=/=K_")) {
-                            Term mbPredicate = ((KItem) lhsOfEq).kList().get(0);
+                            Term mbPredicate = ((KList) ((KItem) lhsOfEq).kList()).get(0);
                             if (!(mbPredicate instanceof KItem)) continue;
                             if (!((KLabelConstant) ((KItem) mbPredicate).kLabel()).label().startsWith("is"))
                                 continue;
@@ -258,7 +259,7 @@ public class ConstrainedTerm extends Term {
                             String sortName = ((KLabelConstant) ((KItem) mbPredicate).kLabel()).label().substring("is".length());
 
                             // retrieve the argument; which must be a variable
-                            Variable arg = (Variable) ((KItem) mbPredicate).kList().get(0);
+                            Variable arg = (Variable) ((KList) ((KItem) mbPredicate).kList()).get(0);
 
                             // construct common part of the new constraints
                             UninterpretedConstraint templCnstr = new UninterpretedConstraint();
@@ -293,7 +294,7 @@ public class ConstrainedTerm extends Term {
                         if (eq1.toString().startsWith("isKResult(")) {
                             KItem mbPredicate = (KItem) eq1.leftHandSide();
                             String sortName = ((KLabelConstant) mbPredicate.kLabel()).label().substring("is".length());
-                            Variable arg = (Variable) mbPredicate.kList().get(0);
+                            Variable arg = (Variable) ((KList) mbPredicate.kList()).get(0);
 
                             // construct common part of the new constraints
                             UninterpretedConstraint templCnstr = new UninterpretedConstraint();

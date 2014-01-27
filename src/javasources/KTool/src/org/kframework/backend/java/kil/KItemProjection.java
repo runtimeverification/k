@@ -23,11 +23,13 @@ public class KItemProjection extends Term {
             return this;
         }
 
-        if (!((KItem) term).kList().iterator().hasNext() && !(((KItem) term).kList().hasFrame())) {
+        if (!(((KItem) term).kLabel() instanceof KLabelInjection)) {
             return this;
         }
 
-        if (!(((KItem) term).kLabel() instanceof KLabelInjection)) {
+        if (!(((KItem) term).kList() instanceof KList)
+                || ((KList) ((KItem) term).kList()).size() != 0
+                || ((KList) ((KItem) term).kList()).hasFrame()) {
             return this;
         }
 

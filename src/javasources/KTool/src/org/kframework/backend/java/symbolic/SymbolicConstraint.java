@@ -16,20 +16,7 @@ import java.util.Set;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.Int32Token;
 import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.kil.Bottom;
-import org.kframework.backend.java.kil.CellCollection;
-import org.kframework.backend.java.kil.Definition;
-import org.kframework.backend.java.kil.Hole;
-import org.kframework.backend.java.kil.JavaSymbolicObject;
-import org.kframework.backend.java.kil.KCollection;
-import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.kil.Kind;
-import org.kframework.backend.java.kil.Sorted;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
-import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.java.kil.Z3Term;
+import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.util.GappaPrinter;
 import org.kframework.backend.java.util.GappaServer;
 import org.kframework.backend.java.util.KSorts;
@@ -236,14 +223,15 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             }
 
             // TODO(YilongL): find a general way to deal with this
+            // TODO(AndreiS): handle KLabel variables
             if (!K.do_testgen) {
-                if (leftHandSide instanceof KItem
-                        && ((KItem) leftHandSide).kLabel().isConstructor()) {
+                if (leftHandSide instanceof KItem && ((KItem) leftHandSide).kLabel() instanceof KLabel
+                        && ((KLabel) ((KItem) leftHandSide).kLabel()).isConstructor()) {
                     return !definition.context().isSubsortedEq(
                             ((Sorted) rightHandSide).sort(),
                             ((KItem) leftHandSide).sort());
-                } else if (rightHandSide instanceof KItem
-                        && ((KItem) rightHandSide).kLabel().isConstructor()) {
+                } else if (rightHandSide instanceof KItem && ((KItem) rightHandSide).kLabel() instanceof KLabel
+                        && ((KLabel) ((KItem) rightHandSide).kLabel()).isConstructor()) {
                     return !definition.context().isSubsortedEq(
                             ((Sorted) leftHandSide).sort(),
                             ((KItem) rightHandSide).sort());
@@ -253,16 +241,16 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                         ((Sorted) rightHandSide).sort()));
                 }
             } else {
-                if (leftHandSide instanceof KItem
-                        && ((KItem) leftHandSide).kLabel().isConstructor()) {
+                if (leftHandSide instanceof KItem && ((KItem) leftHandSide).kLabel() instanceof KLabel
+                        && ((KLabel) ((KItem) leftHandSide).kLabel()).isConstructor()) {
                     for (String pms : ((KItem) leftHandSide).possibleMinimalSorts()) {
                         if (definition.context().isSubsortedEq(((Sorted) rightHandSide).sort(), pms)) {
                             return false;
                         }
                     }
                     return true;
-                } else if (rightHandSide instanceof KItem
-                        && ((KItem) rightHandSide).kLabel().isConstructor()) {
+                } else if (rightHandSide instanceof KItem && ((KItem) rightHandSide).kLabel() instanceof KLabel
+                        && ((KLabel) ((KItem) rightHandSide).kLabel()).isConstructor()) {
                     for (String pms : ((KItem) rightHandSide).possibleMinimalSorts()) {
                         if (definition.context().isSubsortedEq(((Sorted) leftHandSide).sort(), pms)) {
                             return false;
@@ -631,7 +619,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             right.accept(ifThenElseFinder);
             if (!ifThenElseFinder.result.isEmpty()) {
                 KItem ite = ifThenElseFinder.result.get(0);
-                Term condition = ite.kList().get(0);
+                // TODO (AndreiS): handle KList variables
+                Term condition = ((KList) ite.kList()).get(0);
                 if (DEBUG) {
                     System.out.println("Split on " + condition);
                 }

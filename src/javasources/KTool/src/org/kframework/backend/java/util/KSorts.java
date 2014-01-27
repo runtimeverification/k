@@ -6,6 +6,8 @@ package org.kframework.backend.java.util;
 public class KSorts {
 
     public static final String KITEM = "KItem";
+    public static final String KSEQUENCE = "K";
+    public static final String KLIST = "KList";
 
     public static final String BAG = "MyBag";
     public static final String LIST = "MyList";

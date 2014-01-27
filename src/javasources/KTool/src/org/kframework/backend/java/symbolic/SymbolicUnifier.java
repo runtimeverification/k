@@ -624,14 +624,17 @@ public class SymbolicUnifier extends AbstractUnifier {
         }
 
         KItem patternKItem = (KItem) term;
-        KLabel kLabel = kItem.kLabel();
-        KList kList = kItem.kList();
+        Term kLabel = kItem.kLabel();
+        Term kList = kItem.kList();
         unify(kLabel, patternKItem.kLabel());
+        // TODO(AndreiS): deal with KLabel variables
         if (kLabel instanceof KLabelConstant) {
             KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
             if (kLabelConstant.isBinder()) {
+                // TODO(AndreiS): deal with non-concrete KLists
+                assert kList instanceof KList;
                 Multimap<Integer, Integer> binderMap = kLabelConstant.getBinderMap();
-                List<Term> terms = new ArrayList<>(kList.getContents());
+                List<Term> terms = new ArrayList<>(((KList) kList).getContents());
                 for (Integer boundVarPosition : binderMap.keySet()) {
                     Term boundVars = terms.get(boundVarPosition);
                     Set<Variable> variables = boundVars.variableSet();

@@ -2,7 +2,9 @@ package org.kframework.compile.transformers;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
+import org.kframework.kil.Definition;
 import org.kframework.kil.KApp;
+import org.kframework.kil.KItemProjection;
 import org.kframework.kil.KLabelInjection;
 import org.kframework.kil.KSorts;
 import org.kframework.kil.PriorityBlock;
@@ -15,7 +17,6 @@ import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
-import org.kframework.kil.KItemProjection;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import java.util.ArrayList;
@@ -28,6 +29,10 @@ import java.util.List;
  */
 public class AddInjections extends CopyOnWriteTransformer{
 
+    private enum TransformationState { TRANSFORM_PRODUCTIONS, TRANSFORM_TERMS, REMOVE_REDUNDANT_INJECTIONS }
+
+    private TransformationState state;
+
 //    private Stack<String> expectedSortStack;
 
     public AddInjections(Context context) {
@@ -36,7 +41,29 @@ public class AddInjections extends CopyOnWriteTransformer{
     }
 
     @Override
+    public Definition transform(Definition definition) throws TransformerException {
+        state = TransformationState.TRANSFORM_PRODUCTIONS;
+        definition = (Definition) super.transform(definition);
+        state = TransformationState.TRANSFORM_TERMS;
+        definition = (Definition) super.transform(definition);
+        state = TransformationState.REMOVE_REDUNDANT_INJECTIONS;
+        definition = (Definition) super.transform(definition);
+        return definition;
+    }
+
+    /* Phase one: transform productions such that each user-defined production has sort subsorted to KItem and each
+     * not-terminal has sort subsorted to K */
+    @Override
     public Syntax transform(Syntax node) throws TransformerException {
+        if (state != TransformationState.TRANSFORM_PRODUCTIONS) {
+            return node;
+        }
+
+        // TODO(AndreiS): normalize productions
+        if (node.getPriorityBlocks().size() != 1 || node.getPriorityBlocks().get(0).getProductions().size() != 1) {
+            return node;
+        }
+
         assert node.getPriorityBlocks().size() == 1;
         assert node.getPriorityBlocks().get(0).getProductions().size() == 1;
 
@@ -76,6 +103,8 @@ public class AddInjections extends CopyOnWriteTransformer{
      * {@link org.kframework.kil.ProductionItem}. Other instances are not changed. */
     @Override
     public Sort transform(Sort node) {
+        assert state == TransformationState.TRANSFORM_PRODUCTIONS;
+
         if (node.getName().equals(KSorts.KLABEL) || node.getName().equals(KSorts.KLIST)) {
             Sort returnNode = node.shallowCopy();
             returnNode.setName(KSorts.KITEM);
@@ -255,8 +284,13 @@ public class AddInjections extends CopyOnWriteTransformer{
 //        return change ? transformedTerms : terms;
 //    }
 
+    /* Phase two: transform terms such that each term respects the transform productions */
     @Override
     public Rule transform(Rule node) throws TransformerException {
+        if (state != TransformationState.TRANSFORM_TERMS) {
+            return node;
+        }
+
         Rule transformedNode = (Rule) super.transform(node);
         if (!node.containsAttribute(Attribute.FUNCTION_KEY)) {
             return transformedNode;
@@ -278,6 +312,8 @@ public class AddInjections extends CopyOnWriteTransformer{
 
     @Override
     public ASTNode transform(TermCons node) throws TransformerException {
+        assert state == TransformationState.TRANSFORM_TERMS;
+
         boolean change = false;
         List<Term> transformedContents = new ArrayList<>();
         for (Term term : node.getContents()) {
@@ -286,7 +322,7 @@ public class AddInjections extends CopyOnWriteTransformer{
 
             if (transformedTerm.getSort().equals(KSorts.KLABEL)
                     || transformedTerm.getSort().equals(KSorts.KLIST)) {
-                transformedTerm = KApp.of(new KLabelInjection(node));
+                transformedTerm = KApp.of(new KLabelInjection(transformedTerm));
             }
             transformedContents.add(transformedTerm);
 
@@ -303,9 +339,10 @@ public class AddInjections extends CopyOnWriteTransformer{
             transformedNode = node;
         }
 
-        if (node.getSort().equals(KSorts.K) || node.getSort().equals(KSorts.KLABEL)
-                || node.getSort().equals(KSorts.KLIST)) {
-            return new KItemProjection(node.getSort(), transformedNode);
+        String sort = node.getProduction().getSort();
+        if (sort.equals(KSorts.K) || sort.equals(KSorts.KLABEL) || sort.equals(KSorts.KLIST)) {
+            transformedNode.setSort(KSorts.KITEM);
+            return new KItemProjection(sort, transformedNode);
         } else {
             return transformedNode;
         }

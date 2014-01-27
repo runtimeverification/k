@@ -43,8 +43,8 @@ import com.google.common.collect.Sets;
 @SuppressWarnings("serial")
 public class KItem extends Term implements Sorted {
 
-    private final KLabel kLabel;
-    private final KList kList;
+    private final Term kLabel;
+    private final Term kList;
     private final String sort;
     
     /**
@@ -53,15 +53,19 @@ public class KItem extends Term implements Sorted {
      */
     private final Set<String> possibleMinimalSorts;
 
-    public KItem(KLabel kLabel, KList kList, Context context) {
+    public KItem(Term kLabel, Term kList, Context context) {
         super(Kind.KITEM);
 
         this.kLabel = kLabel;
         this.kList = kList;
-        Set<String> possibleMinimalSorts = kLabel.isConstructor() ? new HashSet<String>() : null;
 
-        if (kLabel instanceof KLabelConstant) {
+        Set<String> possibleMinimalSorts = null;
+        if (kLabel instanceof KLabelConstant && kList instanceof KList) {
             KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
+            if (kLabelConstant.isConstructor()) {
+                possibleMinimalSorts = new HashSet<>();
+            }
+
             List<Production> productions = kLabelConstant.productions();
             if (productions.size() != 0) {
                 Set<String> sorts = new HashSet<String>();
@@ -76,10 +80,10 @@ public class KItem extends Term implements Sorted {
                     // we have passed the front-end the arguments of a K label
                     // can violate its original declaration, therefore the code
                     // below would need to be revised
-                    if (!kList.hasFrame() && kList.size() == production.getArity()) {
-                        for (int i = 0; i < kList.size(); ++i) {
+                    if (!((KList) kList).hasFrame() && ((KList) kList).size() == production.getArity()) {
+                        for (int i = 0; i < ((KList) kList).size(); ++i) {
                             String childSort;
-                            Term childTerm = kList.get(i);
+                            Term childTerm = ((KList) kList).get(i);
                             /* extract the real injected term when necessary */
                             if (childTerm instanceof KItem){
                                 KItem kItem = (KItem) childTerm;
@@ -97,7 +101,7 @@ public class KItem extends Term implements Sorted {
                             if (!context.isSubsortedEq(production.getChildSort(i), childSort)) {
                                 mustMatch = false;
 
-                                if (kLabel.isConstructor()) {
+                                if (kLabelConstant.isConstructor()) {
                                     if (childTerm instanceof Variable) {
                                         Set<String> set = Sets.newHashSet(production.getChildSort(i), ((Variable) childTerm).sort());
                                         if (context.getCommonSubsorts(set).isEmpty()) {
@@ -105,7 +109,8 @@ public class KItem extends Term implements Sorted {
                                         }
                                     } else if (childTerm instanceof KItem) {
                                         mayMatch = false;
-                                        if (((KItem) childTerm).kLabel.isConstructor()) {
+                                        if (((KItem) childTerm).kLabel instanceof KLabel
+                                                && ((KLabel) ((KItem) childTerm).kLabel).isConstructor()) {
                                             for (String pms : ((KItem) childTerm).possibleMinimalSorts()) {
                                                 if (context.isSubsortedEq(production.getChildSort(i), pms)) {
                                                     mayMatch = true;
@@ -130,7 +135,7 @@ public class KItem extends Term implements Sorted {
                         sorts.add(production.getSort());
                     }
                     
-                    if (mayMatch && kLabel.isConstructor()) {
+                    if (mayMatch && kLabelConstant.isConstructor()) {
                         possibleMinimalSorts.add(production.getSort());
                     }
                 }
@@ -150,7 +155,7 @@ public class KItem extends Term implements Sorted {
             } else {    /* productions.size() == 0 */
                 /* a list terminator does not have conses */
                 Set<String> listSorts = context.listLabels.get(kLabelConstant.label());
-                if (listSorts != null && !kList.hasFrame() && kList.size() == 0) {
+                if (listSorts != null && !((KList) kList).hasFrame() && ((KList) kList).size() == 0) {
                     if (listSorts.size() == 1) {
                         sort = listSorts.iterator().next();
                     } else {
@@ -218,14 +223,18 @@ public class KItem extends Term implements Sorted {
                 return this;
             }
             kLabelConstant = (KLabelConstant) kLabel;
-            arguments = kList.getContents().toArray(new Term[kList.getContents().size()]);
+
+            if (!(kList instanceof  KList)) {
+                return this;
+            }
+            arguments = ((KList) kList).getContents().toArray(new Term[((KList) kList).getContents().size()]);
 
             /* evaluate a sort membership predicate */
             // TODO(YilongL): maybe we can move sort membership evaluation after
             // applying user-defined rules to allow the users to provide their
             // own rules for checking sort membership
-            if (kLabelConstant.label().startsWith("is") && kList.getContents().size() == 1
-                    && kList.getContents().get(0) instanceof Sorted) {
+            if (kLabelConstant.label().startsWith("is") && ((KList) kList).getContents().size() == 1
+                    && ((KList) kList).getContents().get(0) instanceof Sorted) {
                 return SortMembership.check(this, context.definition().context());
             }
 
@@ -342,11 +351,11 @@ public class KItem extends Term implements Sorted {
         return this;
     }
 
-    public KLabel kLabel() {
+    public Term kLabel() {
         return kLabel;
     }
 
-    public KList kList() {
+    public Term kList() {
         return kList;
     }
 
@@ -356,7 +365,7 @@ public class KItem extends Term implements Sorted {
      */
     @Override
     public boolean isSymbolic() {
-        return kLabel.isFunction();
+        return !(kLabel instanceof KLabel) || ((KLabel) kLabel).isFunction();
     }
 
     /**
@@ -432,8 +441,8 @@ public class KItem extends Term implements Sorted {
      *         otherwise, {@code false}
      */
     public static boolean isInjectionWrapper(KItem kItem) {
-        return (kItem.kLabel.getClass() == KLabelInjection.class)
-                && (kItem.kList.contents.isEmpty());
+        return kItem.kLabel.getClass() == KLabelInjection.class && kItem.kList instanceof KList
+                && ((KList) kItem.kList).contents.isEmpty();
     }
     
     /**

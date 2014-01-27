@@ -159,6 +159,15 @@ public class PrePostVisitor implements Visitor {
     }
 
     @Override
+    public void visit(KItemProjection kItemProjection) {
+        preVisitor.resetProceed();
+        kItemProjection.accept(preVisitor);
+        if (!preVisitor.isProceed()) return;
+        kItemProjection.term().accept(this);
+        kItemProjection.accept(postVisitor);
+    }
+
+    @Override
     public void visit(TermCons termCons) {
         preVisitor.resetProceed();
         termCons.accept(preVisitor);
