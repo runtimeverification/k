@@ -271,7 +271,6 @@ public class KItem extends Term implements Sorted {
                         }
                     } else if (K.do_concrete_exec) {
                         assert solutions.size() <= 1 : "function definition is not deterministic";
-                        // TODO(YilongL): temporarily disable the following assertion until I get renormalize() right!
                         assert constrainedTerm.getTypeOfUnification() == UnificationType.PatternMatching : "the result of unification between:"
                                 + constrainedTerm.term()
                                 + " (the ground subject term) and "
