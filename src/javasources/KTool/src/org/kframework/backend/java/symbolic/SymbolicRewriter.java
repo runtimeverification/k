@@ -376,7 +376,11 @@ public class SymbolicRewriter {
                     result = result.substituteAndEvaluate(constraint1.substitution(),
                             constrainedTerm.termContext());
                     /* evaluate pending functions in the rule RHS */
-                    //                    result = result.evaluate(constrainedTerm.termContext());
+                    if (rule.containsAttribute("getModel")) {
+                        // TODO(YilongL): this check is a hack-ish workaround
+                        // for the smt_model test; do it nicely
+                        result = result.evaluate(constrainedTerm.termContext());
+                    }
                     /* eliminate anonymous variables */
                     constraint1.eliminateAnonymousVariables();
 

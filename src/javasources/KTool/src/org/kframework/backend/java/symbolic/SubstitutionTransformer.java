@@ -21,7 +21,7 @@ public class SubstitutionTransformer extends PrePostTransformer {
     public SubstitutionTransformer(Map<Variable, ? extends Term> substitution, TermContext context) {
     	super(context);
         this.substitution = substitution;
-//      preTransformer.addTransformer(new LocalVariableChecker());
+        preTransformer.addTransformer(new LocalVariableChecker());
         preTransformer.addTransformer(new LocalSubstitutionChecker(context));
         postTransformer.addTransformer(new LocalSubstitutionTransformer());
         postTransformer.addTransformer(new VariableUpdaterTransformer());
@@ -72,7 +72,6 @@ public class SubstitutionTransformer extends PrePostTransformer {
         }
     }
 
-    @SuppressWarnings("unused")
     private class LocalVariableChecker extends LocalTransformer {
         @Override
         public ASTNode transform(JavaSymbolicObject object) {
