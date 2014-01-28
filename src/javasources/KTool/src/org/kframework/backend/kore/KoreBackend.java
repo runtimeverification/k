@@ -21,24 +21,14 @@ public class KoreBackend extends BasicBackend {
     KoreFilter filter = new KoreFilter(context);
     ToBuiltinTransformer oldFilter = new ToBuiltinTransformer(context);
     ToKAppTransformer newFilter = new ToKAppTransformer(context);
-    ASTNode oldtonew = null;
-    ASTNode newtokapp = null;
     
     try {
-		oldtonew = definition.accept(oldFilter);
+		definition.accept(oldFilter).accept(newFilter).accept(filter);
 	} catch (TransformerException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
 	}
     
-    try {
-		newtokapp = oldtonew.accept(newFilter);
-	} catch (TransformerException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
-    
-    newtokapp.accept(filter);
     String output = filter.getResult();
     System.out.println("\n\n+++KORE+++\n");
     System.out.println(output);

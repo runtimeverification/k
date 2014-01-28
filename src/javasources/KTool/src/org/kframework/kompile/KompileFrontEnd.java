@@ -5,6 +5,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.Backend;
 import org.kframework.backend.html.HtmlBackend;
 import org.kframework.backend.java.symbolic.JavaSymbolicBackend;
+import org.kframework.backend.kore.KilTransformer;
 import org.kframework.backend.kore.KoreBackend;
 import org.kframework.backend.latex.LatexBackend;
 import org.kframework.backend.latex.PdfBackend;
@@ -16,6 +17,7 @@ import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Definition;
+import org.kframework.kil.Module;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.CountNodesVisitor;
 import org.kframework.krun.K;
@@ -30,6 +32,7 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
+import static org.apache.commons.io.FileUtils.writeStringToFile;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -37,6 +40,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 public class KompileFrontEnd {
@@ -217,6 +221,9 @@ public class KompileFrontEnd {
                 backend.autoinclude(), context);
         javaDef.accept(new CountNodesVisitor(context));
 
+        //Liyi Li: add definition here in order to get the kore files
+        Definition toKore = new Definition(javaDef);
+        
         CompilerSteps<Definition> steps = backend.getCompilationSteps();
 
         if (step == null) {
@@ -232,6 +239,37 @@ public class KompileFrontEnd {
                 MetaK.getConfiguration(javaDef, context));
 
         backend.run(javaDef);
+        
+    	KilTransformer trans = new KilTransformer(true, K.color, K.parens, context);
+        ArrayList<Module> temp = new ArrayList<Module>();
+        File mainKoreFile = new File((toKore.getMainFile().substring(0, toKore.getMainFile().length()-2))+".kore");
+        for(int i = 0; i < toKore.getItems().size(); ++i){
+        	
+        	if(toKore.getItems().get(i) instanceof Module){
+        		temp.add((Module) toKore.getItems().get(i));
+        	} else{
+        		
+            	writeStringToFile(mainKoreFile,trans.kilToKore(toKore.getItems().get(i)));
+        	}
+        }
+        
+        HashMap<String,File> fileTable = new HashMap<String,File>();
+        
+        for(int i = 0; i < temp.size(); ++i){
+        	
+        	if(!fileTable.containsKey((temp.get(i).getFilename()))){
+        		
+        		fileTable.put(temp.get(i).getFilename(), 
+        				new File((temp.get(i).getFilename().substring(0, 
+        						temp.get(i).getFilename().length()-2))+".kore"));
+        		}
+        }
+        
+        for(int i = 0; i < temp.size(); ++i){
+        	
+        	writeStringToFile(fileTable.get(temp.get(i).getFilename()),trans.kilToKore(temp.get(i)));
+        }
+        
     }
 
     private static void printUsageS(KompileOptionsParser op) {

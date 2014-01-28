@@ -86,8 +86,6 @@ public class CommandlineOptions {
 		addOptionS(OptionBuilder.withLongOpt("backend").hasArg().withArgName("backend").withDescription("Specify the krun backend to execute with. <backend> is either [maude|java]. (Default: maude).").create());
 		addOptionS(OptionBuilder.withLongOpt("simulation").hasArg().withArgName("string").withDescription("Simulation property of two programs in two semantics.").create());
 		addOptionS(OptionBuilder.withLongOpt("help-experimental").withDescription("Print help on non-standard options.").create("X"));
-		addOptionS(OptionBuilder.withLongOpt("tempkoreoutput").withDescription("Output Kore file.").create());
-
 		
 		// Experimental options
 		addOptionE(OptionBuilder.withLongOpt("fast-kast").withDescription("Using the (experimental) faster C SDF parser.").create());

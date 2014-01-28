@@ -29,25 +29,13 @@ public class KilTransformer {
 	}
 	
 	public String kilToKore(ASTNode node){
-		
-	    ASTNode oldtonew = null;
-	    ASTNode newtokapp = null;
-	    
+
 	    try {
-			oldtonew = node.accept(builtinTrans);
+			node.accept(builtinTrans).accept(kappTrans).accept(koreTrans);
 		} catch (TransformerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	    
-	    try {
-			newtokapp = oldtonew.accept(kappTrans);
-		} catch (TransformerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	    
-	    newtokapp.accept(koreTrans);
 	    return "\n\n+++KORE+++\n"+koreTrans.getResult();
 	}
 }
