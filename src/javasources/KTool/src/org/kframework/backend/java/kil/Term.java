@@ -18,6 +18,8 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     protected final Kind kind;
     // protected final boolean normalized;
     
+    protected int hashCode = 0;
+    
     protected Term(Kind kind) {
         this.kind = kind;
     }

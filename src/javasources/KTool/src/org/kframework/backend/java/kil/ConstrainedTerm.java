@@ -515,11 +515,13 @@ public class ConstrainedTerm extends Term {
 
     @Override
     public int hashCode() {
-        int hash = 1;
-        hash = hash * Utils.HASH_PRIME + term.hashCode();
-        hash = hash * Utils.HASH_PRIME + lookups.hashCode();
-        hash = hash * Utils.HASH_PRIME + constraint.hashCode();
-        return hash;
+        if (hashCode == 0) {
+            hashCode = 1;
+            hashCode = hashCode * Utils.HASH_PRIME + term.hashCode();
+            hashCode = hashCode * Utils.HASH_PRIME + lookups.hashCode();
+            hashCode = hashCode * Utils.HASH_PRIME + constraint.hashCode();
+        }
+        return hashCode;
     }
 
     @Override

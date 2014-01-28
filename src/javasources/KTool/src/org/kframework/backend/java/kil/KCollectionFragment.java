@@ -84,9 +84,11 @@ public class KCollectionFragment extends KCollection {
     
     @Override
     public int hashCode() {
-        int hash = super.hashCode();
-        hash = hash * Utils.HASH_PRIME + this.startIndex;
-        return hash;
+        if (hashCode == 0) {
+            hashCode = super.hashCode();
+            hashCode = hashCode * Utils.HASH_PRIME + startIndex;
+        }
+        return hashCode;
     }
     
     @Override
@@ -101,7 +103,7 @@ public class KCollectionFragment extends KCollection {
         
         KCollectionFragment kCollectionFragment = (KCollectionFragment) object;
         return startIndex == kCollectionFragment.startIndex
-                && this.kCollection.equals(kCollectionFragment.kCollection);
+                && kCollection.equals(kCollectionFragment.kCollection);
     }
         
     @Override

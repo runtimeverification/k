@@ -88,11 +88,13 @@ public class MapUpdate extends Term {
 
     @Override
     public int hashCode() {
-        int hash = 1;
-        hash = hash * Utils.HASH_PRIME + map.hashCode();
-        hash = hash * Utils.HASH_PRIME + removeSet.hashCode();
-        hash = hash * Utils.HASH_PRIME + updateMap.hashCode();
-        return hash;
+        if (hashCode == 0) {
+            hashCode = 1;
+            hashCode = hashCode * Utils.HASH_PRIME + map.hashCode();
+            hashCode = hashCode * Utils.HASH_PRIME + removeSet.hashCode();
+            hashCode = hashCode * Utils.HASH_PRIME + updateMap.hashCode();
+        }
+        return hashCode;
     }
 
     @Override

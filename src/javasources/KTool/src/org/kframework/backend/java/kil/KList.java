@@ -83,8 +83,8 @@ public class KList extends KCollection {
         }
 
         KList kList = (KList) object;
-        return (super.frame == null ? kList.frame == null : frame.equals(kList.frame))
-                && super.contents.equals(kList.contents);
+        return (frame == null ? kList.frame == null : frame.equals(kList.frame))
+                && contents.equals(kList.contents);
     }
 
     @Override

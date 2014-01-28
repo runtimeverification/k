@@ -55,10 +55,12 @@ public class MapLookup extends Term {
 
     @Override
     public int hashCode() {
-        int hash = 1;
-        hash = hash * Utils.HASH_PRIME + key.hashCode();
-        hash = hash * Utils.HASH_PRIME + map.hashCode();
-        return hash;
+        if (hashCode == 0) {
+            hashCode = 1;
+            hashCode = hashCode * Utils.HASH_PRIME + key.hashCode();
+            hashCode = hashCode * Utils.HASH_PRIME + map.hashCode();
+        }
+        return hashCode;
     }
 
     @Override

@@ -19,26 +19,11 @@ import java.util.List;
 public abstract class Collection extends Term {
 
     /**
-     * Represents the elements of this {@code Collection} that are explicitly
-     * specified. These elements are stored as a list of {@code Term}s.
-     */
-    protected final java.util.List<Term> contents;
-
-    /**
      * Represents the rest part of this {@code Collection} which is not
      * explicitly specified (that is, simply being referred as a variable in
      * whole).
      */
     protected final Variable frame;
-
-    /**
-     * @see {@link Collection#contents}
-     * @return an unmodifiable view of the explicitly specified elements in this
-     *         {@code Collection}
-     */
-    public List<Term> getContents() {
-        return Collections.unmodifiableList(contents);
-    }
 
     /**
      * Creates an instance of class {@code Collection} given its kind and a
@@ -58,7 +43,6 @@ public abstract class Collection extends Term {
                 + "; expected kind " + kind;
 
         this.frame = frame;
-        this.contents = new ArrayList<Term>();
     }
 
     /**
@@ -85,26 +69,12 @@ public abstract class Collection extends Term {
     
     @Override
     public int hashCode() {
-        int hash = 1;
-        hash = hash * Utils.HASH_PRIME + (frame == null ? 0 : frame.hashCode());
-        hash = hash * Utils.HASH_PRIME + contents.hashCode();
-        return hash;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean equals(Object object) {
-        if (this == object) {
-            return true;
-        }
-
-        if (!(object instanceof Collection)) {
-            return false;
-        }
-
-        Collection collection = (Collection) object;
-        return (frame == null ? collection.frame == null : frame
-                .equals(collection.frame))
-                && contents.equals(collection.contents);
+        throw new UnsupportedOperationException();
     }
 
     @Override
