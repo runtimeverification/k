@@ -240,7 +240,7 @@ public class KompileFrontEnd {
 
         backend.run(javaDef);
         
-    	KilTransformer trans = new KilTransformer(true, K.color, K.parens, context);
+    	KilTransformer trans = new KilTransformer(context);
         ArrayList<Module> temp = new ArrayList<Module>();
         File mainKoreFile = new File((toKore.getMainFile().substring(0, toKore.getMainFile().length()-2))+".kore");
         for(int i = 0; i < toKore.getItems().size(); ++i){
