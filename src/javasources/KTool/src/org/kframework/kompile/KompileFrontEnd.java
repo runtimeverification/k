@@ -196,6 +196,44 @@ public class KompileFrontEnd {
         if (backend != null) {
             String lang = cmd.getOptionValue("main-module",
                     FileUtil.getMainModule(GlobalSettings.mainFile.getName()));
+            
+            if(cmd.hasOption("kore")){
+            	
+            	Definition toKore = DefinitionLoader.loadDefinition(GlobalSettings.mainFile, lang,
+                        backend.autoinclude(), context);
+                
+            	KilTransformer trans = new KilTransformer(context);
+                ArrayList<Module> temp = new ArrayList<Module>();
+                File mainKoreFile = new File((toKore.getMainFile().substring(0, toKore.getMainFile().length()-2))+".kore");
+                for(int i = 0; i < toKore.getItems().size(); ++i){
+                	
+                	if(toKore.getItems().get(i) instanceof Module){
+                		temp.add((Module) toKore.getItems().get(i));
+                	} else{
+                		
+                    	writeStringToFile(mainKoreFile,trans.kilToKore(toKore.getItems().get(i)));
+                	}
+                }
+                
+                HashMap<String,File> fileTable = new HashMap<String,File>();
+                
+                for(int i = 0; i < temp.size(); ++i){
+                	
+                	if(!fileTable.containsKey((temp.get(i).getFilename()))){
+                		
+                		fileTable.put(temp.get(i).getFilename(), 
+                				new File((temp.get(i).getFilename().substring(0, 
+                						temp.get(i).getFilename().length()-2))+".kore"));
+                		}
+                }
+                
+                for(int i = 0; i < temp.size(); ++i){
+                	
+                	writeStringToFile(fileTable.get(temp.get(i).getFilename()),trans.kilToKore(temp.get(i)));
+                }
+                return;
+            }
+            
             genericCompile(lang, backend, step, context);
         }
 
@@ -220,9 +258,6 @@ public class KompileFrontEnd {
         javaDef = DefinitionLoader.loadDefinition(GlobalSettings.mainFile, lang,
                 backend.autoinclude(), context);
         javaDef.accept(new CountNodesVisitor(context));
-
-        //Liyi Li: add definition here in order to get the kore files
-        Definition toKore = new Definition(javaDef);
         
         CompilerSteps<Definition> steps = backend.getCompilationSteps();
 
@@ -239,36 +274,6 @@ public class KompileFrontEnd {
                 MetaK.getConfiguration(javaDef, context));
 
         backend.run(javaDef);
-        
-    	KilTransformer trans = new KilTransformer(context);
-        ArrayList<Module> temp = new ArrayList<Module>();
-        File mainKoreFile = new File((toKore.getMainFile().substring(0, toKore.getMainFile().length()-2))+".kore");
-        for(int i = 0; i < toKore.getItems().size(); ++i){
-        	
-        	if(toKore.getItems().get(i) instanceof Module){
-        		temp.add((Module) toKore.getItems().get(i));
-        	} else{
-        		
-            	writeStringToFile(mainKoreFile,trans.kilToKore(toKore.getItems().get(i)));
-        	}
-        }
-        
-        HashMap<String,File> fileTable = new HashMap<String,File>();
-        
-        for(int i = 0; i < temp.size(); ++i){
-        	
-        	if(!fileTable.containsKey((temp.get(i).getFilename()))){
-        		
-        		fileTable.put(temp.get(i).getFilename(), 
-        				new File((temp.get(i).getFilename().substring(0, 
-        						temp.get(i).getFilename().length()-2))+".kore"));
-        		}
-        }
-        
-        for(int i = 0; i < temp.size(); ++i){
-        	
-        	writeStringToFile(fileTable.get(temp.get(i).getFilename()),trans.kilToKore(temp.get(i)));
-        }
         
     }
 

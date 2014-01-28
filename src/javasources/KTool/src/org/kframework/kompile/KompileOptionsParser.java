@@ -48,6 +48,7 @@ public class KompileOptionsParser {
         addOptionE(OptionBuilder.withLongOpt("symbolic-rules").hasArg().withArgName("tags").withDescription("Apply symbolic transformations only to rules annotated with tags from <tags> set. This only has an effect with '--backend symbolic'.").create());
         addOptionE(OptionBuilder.withLongOpt("non-symbolic-rules").hasArg().withArgName("tags").withDescription("Do not apply symbolic transformations to rules annotated with tags from <tags> set. This only has an effect with '--backend symbolic'.").create());
         addOptionE(OptionBuilder.withLongOpt("test-gen").withDescription("Compile for test-case generation purpose in the Java backend. Use concrete sorts and automatically generated labels for heating and cooling rules. This only has an effect with '--backend java'.").create());
+        addOptionE(OptionBuilder.withLongOpt("kore").withDescription("Generate kore files of a given k definition").create());
 
         addOptionE(OptionBuilder.withLongOpt("loud").withDescription("Prints 'Done' at the end if all is ok.").create());
     }
