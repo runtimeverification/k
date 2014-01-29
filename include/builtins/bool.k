@@ -59,8 +59,8 @@ module BOOL-HOOKS
   // Traian S.:  They are needed in the generated code, as we allow
   // '#andBool to take multiple parameters.
   syntax KLabel ::= "'#andBool" [predicate]
-  rule '#andBool(_,, (true => .KList),, _) [function, anywhere]
+  rule '#andBool(_,, (true => .KList),, _) [function, anywhere, nojava]
   rule '#andBool(K:K) => K [anywhere]
   rule '#andBool(.KList) => true  [function, anywhere]
-  rule '#andBool(_,, false,, _) => false [function, anywhere]
+  rule '#andBool(_,, false,, _) => false [function, anywhere, nojava]
 endmodule

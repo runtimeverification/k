@@ -287,6 +287,11 @@ public class AddInjections extends CopyOnWriteTransformer{
     /* Phase two: transform terms such that each term respects the transform productions */
     @Override
     public Rule transform(Rule node) throws TransformerException {
+        // TODO(AndreiS): remove this check when include files do not contain the old List, Map, and Set
+        if (node.containsAttribute("nojava")) {
+            return node;
+        }
+
         if (state != TransformationState.TRANSFORM_TERMS) {
             return node;
         }

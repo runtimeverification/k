@@ -40,7 +40,7 @@ module K-MAP-EXTRAS
   syntax Map ::= Map "[" KList "/" KList "]"  [function]
   rule (M:Map => M[K2/K1][K2'/K1'])[(K2:K,,K2':K => .KList),,_
                         /  (K1:K,,K1':K => .KList),,_]
-   [structural, anywhere]
+   [structural, anywhere, nojava]
   rule M:Map[.KList / .KList] => M
    [structural, anywhere]
 
@@ -130,7 +130,7 @@ module K-SET-EXTRAS
   rule Set2KTerm(S:Set) => Set2KTermAcc(S, #set(.KList))
 
   syntax K ::= Set2KTermAcc(Set, K)  [function]
-  rule Set2KTermAcc((SetItem(K:K) => .Set)_, _(_,,(.KList => K)))
+  rule Set2KTermAcc((SetItem(K:K) => .Set)_, _(_,,(.KList => K))) [nojava]
   rule Set2KTermAcc(.Set, K:K) => K
 
 
@@ -138,15 +138,6 @@ module K-SET-EXTRAS
 
 endmodule
 
-module K-BAG-EXTRAS
-	imports K-TECHNIQUE
-	//imports IF-THEN-ELSE
-
-//	syntax Bag ::= "Bag" KList
-//				 | Bag "-Bag" Bag
-//	syntax Bool ::= K "in" Bag
-//				  | BagItem "in" Bag
-endmodule
 
 module K-LIST-EXTRAS
 	imports K-TECHNIQUE
@@ -159,7 +150,7 @@ module K-LIST-EXTRAS
 
    rule lengthList ( _:ListItem L:List ) => 1 +Int lengthList L [structural, anywhere]
    rule lengthList .List => 0 [structural, anywhere]
-   rule isKResult((_:KResult => .KList),, _:K,, _:KList)
+   rule isKResult(_:KResult,,K:K,,KL:KList) => isKResult(K,,KL)
    rule isKResult(.KList) => true
 endmodule
 
@@ -275,8 +266,8 @@ module K
   imports K-LISTK-EXTRAS
   imports K-LIST-EXTRAS
   imports K-MAP-EXTRAS            // operations on Maps
-  imports K-BAG-EXTRAS            // operations on Bags
   imports K-SET-EXTRAS            // operations on Sets
   imports K-TOKENS
   //imports K-LATEX
 endmodule
+
