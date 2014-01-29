@@ -219,6 +219,7 @@ public class KompileFrontEnd {
         Stopwatch.sw.start();
         javaDef = DefinitionLoader.loadDefinition(GlobalSettings.mainFile, lang,
                 backend.autoinclude(), context);
+        
         javaDef.accept(new CountNodesVisitor(context));
 
         CompilerSteps<Definition> steps = backend.getCompilationSteps();

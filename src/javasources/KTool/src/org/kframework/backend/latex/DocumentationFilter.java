@@ -1,7 +1,13 @@
 package org.kframework.backend.latex;
 
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.general.GlobalSettings;
+import org.kframework.kil.DefinitionItem;
+import org.kframework.kil.Module;
+import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Rule;
+import org.kframework.kil.Import;
+import org.kframework.kil.Require;
 import org.kframework.kil.Attributes;
 
 public class DocumentationFilter extends LatexFilter {
@@ -11,7 +17,21 @@ public class DocumentationFilter extends LatexFilter {
 	public DocumentationFilter(org.kframework.kil.loader.Context context){
 		super(context);
 	}
+
     @Override
+    public void visit(Module mod) {
+        result.append("\\begin{module}{\\moduleName{" + StringUtil.latexify(mod.getName()) + "}}" + endl);
+        if (isVisited(mod))
+            return;
+        for (ModuleItem mi : mod.getItems()) {
+            mi.accept(this);
+        }
+        visit((DefinitionItem) mod);
+        result.append("\\end{module}" + endl);
+    }
+
+	
+	@Override
     public void visit(Rule rule) {
     	// termComment = false;
 		Attributes atts = rule.getAttributes(); 
@@ -22,29 +42,7 @@ public class DocumentationFilter extends LatexFilter {
     		    break;
     		}
     	}
-		if(process){
-	    	result.append("\\krule");
-			if (!"".equals(rule.getLabel())) {
-				result.append("[" + rule.getLabel() + "]");
-			}
-			result.append("{" + endl);
-			rule.getBody().accept(this);
-			result.append("}{");
-			if (rule.getRequires() != null) {
-				rule.getRequires().accept(this);
-			}
-			result.append("}{");
-			if (rule.getEnsures() != null) {
-				rule.getEnsures().accept(this);
-			}
-			result.append("}{");
-			rule.getAttributes().accept(this);
-			result.append("}");
-			result.append("{");
-			// if (termComment) result.append("large");
-			result.append("}");
-			result.append(endl);
-		}
+		if(process) super.visit(rule);
 	}
-
+    
 }

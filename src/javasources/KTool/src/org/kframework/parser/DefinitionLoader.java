@@ -123,6 +123,8 @@ public class DefinitionLoader {
 			}
 			Stopwatch.sw.printIntermediate("Basic Parsing");
 
+			//This following line was commented out to make the latex backend 
+			//parse files importing from other files
 			def = (Definition) def.accept(new RemoveUnusedModules(context));
 
 			// HERE: add labels to sorts

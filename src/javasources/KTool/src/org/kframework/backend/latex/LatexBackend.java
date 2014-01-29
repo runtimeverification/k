@@ -82,4 +82,11 @@ public class LatexBackend extends BasicBackend {
 	public String getDefaultStep() {
 		return "FirstStep";
 	}
+	
+	@Override
+	public boolean autoinclude(){
+        //When the autoinclude stuff gets worked out, uncomment this next line.	    
+        //return !makeDocument;
+	    return true;
+	}
 }
