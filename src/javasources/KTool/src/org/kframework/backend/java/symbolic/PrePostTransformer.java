@@ -1,17 +1,14 @@
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.Int32Token;
+import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.*;
-import org.kframework.backend.java.kil.Collection;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-
-import java.util.*;
 
 
 /**
@@ -70,8 +67,8 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
             return ((DoneTransforming) astNode).getContents();
         }
         assert astNode instanceof Cell : "preTransformer should not modify type";
-        cell = (Cell) astNode;
-        cell = (Cell) super.transform(cell);
+        cell = (Cell<?>) astNode;
+        cell = (Cell<?>) super.transform(cell);
         return cell.accept(postTransformer);
     }
 
@@ -155,6 +152,30 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
         kItem = (KItem) astNode;
         kItem = (KItem) super.transform(kItem);
         return kItem.accept(postTransformer);
+    }
+
+    @Override
+    public ASTNode transform(KItemProjection kItemProjection) {
+        ASTNode astNode = kItemProjection.accept(preTransformer);
+        if (astNode instanceof DoneTransforming) {
+            return ((DoneTransforming) astNode).getContents();
+        }
+        assert astNode instanceof KItemProjection : "preTransformer should not modify type";
+        kItemProjection = (KItemProjection) astNode;
+        kItemProjection = (KItemProjection) super.transform(kItemProjection);
+        return kItemProjection.accept(postTransformer);
+    }
+    
+    @Override
+    public ASTNode transform(TermCons termCons) {
+        ASTNode astNode = termCons.accept(preTransformer);
+        if (astNode instanceof DoneTransforming) {
+            return ((DoneTransforming) astNode).getContents();
+        }
+        assert astNode instanceof TermCons : "preTransformer should not modify type";
+        termCons = (TermCons) astNode;
+        termCons = (TermCons) super.transform(termCons);
+        return termCons.accept(postTransformer);
     }
 
     @Override
@@ -390,6 +411,18 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
         variable = (Variable) astNode;
         variable = (Variable) super.transform(variable);
         return variable.accept(postTransformer);
+    }
+    
+    @Override
+    public ASTNode transform(BuiltinMgu mgu) {
+        ASTNode astNode = mgu.accept(preTransformer);
+        if (astNode instanceof DoneTransforming) {
+            return ((DoneTransforming) astNode).getContents();
+        }
+        assert astNode instanceof BuiltinMgu : "preTransformer should not modify type";
+        mgu = (BuiltinMgu) astNode;
+        mgu = (BuiltinMgu) super.transform(mgu);
+        return mgu.accept(postTransformer);
     }
 
     protected class DoneTransforming extends ASTNode {

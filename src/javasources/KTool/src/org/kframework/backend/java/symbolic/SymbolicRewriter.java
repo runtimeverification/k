@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,8 +44,8 @@ import org.kframework.krun.api.io.FileSystem;
 import org.kframework.utils.general.GlobalSettings;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 
 /**
  *
@@ -59,11 +61,11 @@ public class SymbolicRewriter {
     private final Stopwatch stopwatch = new Stopwatch();
     private int step;
     private final Stopwatch ruleStopwatch = new Stopwatch();
-    private final Map<Index, Set<Rule>> ruleTable;
-    private final Map<Index, Set<Rule>> heatingRuleTable;
-    private final Map<Index, Set<Rule>> coolingRuleTable;
-    private final Map<Index,Set<Rule>> simulationRuleTable;
-    private final Set<Rule> unindexedRules;
+    private final Map<Index, List<Rule>> ruleTable;
+    private final Map<Index, List<Rule>> heatingRuleTable;
+    private final Map<Index, List<Rule>> coolingRuleTable;
+    private final Map<Index, List<Rule>> simulationRuleTable;
+    private final List<Rule> unindexedRules;
     private final List<ConstrainedTerm> results = new ArrayList<ConstrainedTerm>();
     private final List<Rule> appliedRules = new ArrayList<Rule>();
     private boolean transition;
@@ -91,7 +93,7 @@ public class SymbolicRewriter {
         }
 
         /* populate the table of rules rewriting the top configuration */
-        Set<Index> indices = new HashSet<Index>();
+        List<Index> indices = new ArrayList<Index>();
         indices.add(TopIndex.TOP);
         indices.add(BottomIndex.BOTTOM);
         for (KLabelConstant kLabel : definition.kLabels()) {
@@ -112,53 +114,53 @@ public class SymbolicRewriter {
             indices.add(new TokenIndex(sort));
         }
 
-        /* Map each index to a set of rules unifiable with that index */
+        /* Map each index to a list of rules unifiable with that index */
         /* Heating rules and regular rules have their first index checked */
         /* Cooling rules have their second index checked */
-        ImmutableMap.Builder<Index, Set<Rule>> mapBuilder = ImmutableMap.builder();
-        ImmutableMap.Builder<Index, Set<Rule>> heatingMapBuilder = ImmutableMap.builder();
-        ImmutableMap.Builder<Index, Set<Rule>> coolingMapBuilder = ImmutableMap.builder();
-        ImmutableMap.Builder<Index, Set<Rule>> simulationMapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Index, List<Rule>> mapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Index, List<Rule>> heatingMapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Index, List<Rule>> coolingMapBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<Index, List<Rule>> simulationMapBuilder = ImmutableMap.builder();
 
         for (Index index : indices) {
-            ImmutableSet.Builder<Rule> setBuilder = ImmutableSet.builder();
-            ImmutableSet.Builder<Rule> heatingSetBuilder = ImmutableSet.builder();
-            ImmutableSet.Builder<Rule> coolingSetBuilder = ImmutableSet.builder();
-            ImmutableSet.Builder<Rule> simulationSetBuilder = ImmutableSet.builder();
+            ImmutableList.Builder<Rule> listBuilder = ImmutableList.builder();
+            ImmutableList.Builder<Rule> heatingListBuilder = ImmutableList.builder();
+            ImmutableList.Builder<Rule> coolingListBuilder = ImmutableList.builder();
+            ImmutableList.Builder<Rule> simulationListBuilder = ImmutableList.builder();
 
             for (Rule rule : definition.rules()) {
                 if (rule.containsAttribute("heat")) {
                     if (index.isUnifiable(rule.indexingPair().first)) {
-                        heatingSetBuilder.add(rule);
+                        heatingListBuilder.add(rule);
                     }
                 } else if (rule.containsAttribute("cool")) {
                     if (index.isUnifiable(rule.indexingPair().second)) {
-                        coolingSetBuilder.add(rule);
+                        coolingListBuilder.add(rule);
                     }
                 } else if(rule.containsAttribute("alphaRule")){
                 	if(index.isUnifiable(rule.indexingPair().first)) {
-                		simulationSetBuilder.add(rule);
+                		simulationListBuilder.add(rule);
                 	}
 
                 } else {
                     if (index.isUnifiable(rule.indexingPair().first)) {
-                        setBuilder.add(rule);
+                        listBuilder.add(rule);
                     }
                 }
             }
-            ImmutableSet<Rule> rules = setBuilder.build();
+            ImmutableList<Rule> rules = listBuilder.build();
             if (!rules.isEmpty()) {
                 mapBuilder.put(index, rules);
             }
-            rules = heatingSetBuilder.build();
+            rules = heatingListBuilder.build();
             if (!rules.isEmpty()) {
                 heatingMapBuilder.put(index, rules);
             }
-            rules = coolingSetBuilder.build();
+            rules = coolingListBuilder.build();
             if (!rules.isEmpty()) {
                 coolingMapBuilder.put(index, rules);
             }
-            rules = simulationSetBuilder.build();
+            rules = simulationListBuilder.build();
             if(!rules.isEmpty()){
             	simulationMapBuilder.put(index,rules);
             }
@@ -168,13 +170,13 @@ public class SymbolicRewriter {
         ruleTable = mapBuilder.build();
         simulationRuleTable = simulationMapBuilder.build();
 
-        ImmutableSet.Builder<Rule> setBuilder = ImmutableSet.builder();
+        ImmutableList.Builder<Rule> listBuilder = ImmutableList.builder();
         for (Rule rule : definition.rules()) {
             if (!rule.containsKCell()) {
-                setBuilder.add(rule);
+                listBuilder.add(rule);
             }
         }
-        unindexedRules = setBuilder.build();
+        unindexedRules = listBuilder.build();
     }
 
     public ConstrainedTerm rewrite(ConstrainedTerm constrainedTerm, int bound) {
@@ -215,8 +217,7 @@ public class SymbolicRewriter {
      * author: Liyi Li
      * return the rules for simulations only
      */
-    public Map<Index,Set<Rule>> getSimulationMap(){
-
+    public Map<Index, List<Rule>> getSimulationMap(){
     	return this.simulationRuleTable;
     }
 
@@ -224,8 +225,8 @@ public class SymbolicRewriter {
      * author: Liyi Li
      * return the rules for simulations only
      */
-    private Set<Rule> getSimulationRules(Term term) {
-        Set<Rule> rules = new HashSet<Rule>();
+    private List<Rule> getSimulationRules(Term term) {
+        List<Rule> rules = new ArrayList<Rule>();
         for (IndexingPair pair : term.getIndexingPairs()) {
             if (simulationRuleTable.get(pair.first) != null) {
                 rules.addAll(simulationRuleTable.get(pair.first));
@@ -240,10 +241,10 @@ public class SymbolicRewriter {
      *
      * @param term
      *            the given term
-     * @return a set of rules that could be applied
+     * @return a list of rules that could be applied
      */
-    private Set<Rule> getRules(Term term) {
-        Set<Rule> rules = new HashSet<Rule>();
+    private List<Rule> getRules(Term term) {
+        Set<Rule> rules = new LinkedHashSet<Rule>();
         for (IndexingPair pair : term.getIndexingPairs()) {
             if (ruleTable.get(pair.first) != null) {
                 rules.addAll(ruleTable.get(pair.first));
@@ -256,7 +257,7 @@ public class SymbolicRewriter {
             }
         }
         rules.addAll(unindexedRules);
-        return rules;
+        return new ArrayList<Rule>(rules);
     }
 
     private ConstrainedTerm getTransition(int n) {
@@ -269,7 +270,7 @@ public class SymbolicRewriter {
      */
     @SuppressWarnings("unchecked")
 	public ConstrainedTerm computeSimulationStep(ConstrainedTerm constrainedTerm) {
-        // Applying a strategy to a set of rules divides the rules up into
+        // Applying a strategy to a list of rules divides the rules up into
         // equivalence classes of rules. We iterate through these equivalence
         // classes one at a time, seeing which one contains rules we can apply.
         //        System.out.println(LookupCell.find(constrainedTerm.term(),"k"));
@@ -336,16 +337,16 @@ public class SymbolicRewriter {
             return;
         }
 
-        // Applying a strategy to a set of rules divides the rules up into
+        // Applying a strategy to a list of rules divides the rules up into
         // equivalence classes of rules. We iterate through these equivalence
         // classes one at a time, seeing which one contains rules we can apply.
         //        System.out.println(LookupCell.find(constrainedTerm.term(),"k"));
-//        strategy.reset(getRules(constrainedTerm.term()));
-//        while (strategy.hasNext()) {
-//            transition = strategy.nextIsTransition();
-//            Collection<Rule> rules = strategy.next();
-//            for (Rule rule : rules) {
-        for (Rule rule : getRules(constrainedTerm.term())) {
+        strategy.reset(getRules(constrainedTerm.term()));
+        while (strategy.hasNext()) {
+            transition = strategy.nextIsTransition();
+            ArrayList<Rule> rules = new ArrayList<Rule>(strategy.next());
+//            System.err.println(rules);
+            for (Rule rule : rules) {
                 ruleStopwatch.reset();
                 ruleStopwatch.start();
 
@@ -365,17 +366,26 @@ public class SymbolicRewriter {
                 for (SymbolicConstraint constraint1 : constrainedTerm.unify(leftHandSide)) {
                     constraint1.orientSubstitution(rule.variableSet(), constrainedTerm.termContext());
                     constraint1.addAll(rule.ensures());
-                    /* rename rule variables in the constraints */
-                    Map<Variable, Variable> freshSubstitution = constraint1.rename(rule.variableSet());
-
+                    
                     Term result = rule.rightHandSide();
-                    /* rename rule variables in the rule RHS */
-                    result = result.substituteWithBinders(freshSubstitution, constrainedTerm.termContext());
+
+                    /* the RHS of the rule has introduced new variables */
+                    if (rule.hasUnboundedVariables()) {
+                        /* rename rule variables in the constraints */
+                        Map<Variable, Variable> freshSubstitution = constraint1.rename(rule.variableSet());
+                        /* rename rule variables in the rule RHS */
+                        result = result.substituteWithBinders(freshSubstitution, constrainedTerm.termContext());
+                    }
+                    
                     /* apply the constraints substitution on the rule RHS */
                     result = result.substituteAndEvaluate(constraint1.substitution(),
                             constrainedTerm.termContext());
                     /* evaluate pending functions in the rule RHS */
-                    //                    result = result.evaluate(constrainedTerm.termContext());
+                    if (rule.containsAttribute("getModel")) {
+                        // TODO(YilongL): this check is a hack-ish workaround
+                        // for the smt_model test; do it nicely
+                        result = result.evaluate(constrainedTerm.termContext());
+                    }
                     /* eliminate anonymous variables */
                     constraint1.eliminateAnonymousVariables();
 
@@ -389,6 +399,10 @@ public class SymbolicRewriter {
                     /* compute all results */
                     ConstrainedTerm newCnstrTerm = new ConstrainedTerm(result,
                             constraint1, constrainedTerm.termContext());
+                    // TODO(YilongL): the following assertion is not always true; fix it
+//                    if (K.do_concrete_exec) {
+//                        assert newCnstrTerm.isGround();
+//                    }
                     results.add(newCnstrTerm);
                     appliedRules.add(rule);
 
@@ -396,13 +410,13 @@ public class SymbolicRewriter {
                         return;
                     }
                 }
-//            }
-//            // If we've found matching results from one equivalence class then
-//            // we are done, as we can't match rules from two equivalence classes
-//            // in the same step.
-//            if (results.size() > 0) {
-//                return;
-//            }
+            }
+            // If we've found matching results from one equivalence class then
+            // we are done, as we can't match rules from two equivalence classes
+            // in the same step.
+            if (results.size() > 0) {
+                return;
+            }
         }
         //System.out.println("Result: " + results.toString());
         //System.out.println();
@@ -541,8 +555,8 @@ public class SymbolicRewriter {
         }
 
         // The search queues will map terms to their depth in terms of transitions.
-        Map<ConstrainedTerm,Integer> queue = new HashMap<ConstrainedTerm,Integer>();
-        Map<ConstrainedTerm,Integer> nextQueue = new HashMap<ConstrainedTerm,Integer>();
+        Map<ConstrainedTerm,Integer> queue = new LinkedHashMap<ConstrainedTerm,Integer>();
+        Map<ConstrainedTerm,Integer> nextQueue = new LinkedHashMap<ConstrainedTerm,Integer>();
 
         visited.add(initialTerm);
         queue.put(initialTerm, 0);
@@ -563,6 +577,11 @@ public class SymbolicRewriter {
                     ConstrainedTerm term = entry.getKey();
                     Integer currentDepth = entry.getValue();
                     computeRewriteStep(term);
+//                    System.out.println(step);
+//                    System.err.println(term);
+//                    for (ConstrainedTerm r : results) {
+//                        System.out.println(r);
+//                    }
 
                     if (results.isEmpty() && searchType == SearchType.FINAL) {
                         Map<Variable, Term> map = getSubstitutionMap(term, pattern);
@@ -598,6 +617,7 @@ public class SymbolicRewriter {
                         }
                     }
                 }
+//                System.out.println("+++++++++++++++++++++++");
 
                 /* swap the queues */
                 Map<ConstrainedTerm, Integer> temp;

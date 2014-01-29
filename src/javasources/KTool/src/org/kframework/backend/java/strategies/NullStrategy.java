@@ -4,6 +4,15 @@ import java.util.Collection;
 
 import org.kframework.backend.java.kil.Rule;
 
+/**
+ * Using the NullStrategy will behave the same as using no strategy at all.
+ * Calling next() will just return the collection of rules passed in from
+ * reset().
+ *
+ * @author ericmikida
+ *
+ */
+
 public class NullStrategy implements Strategy {
     public void reset(Collection<Rule> rules) {
         this.rules = rules;

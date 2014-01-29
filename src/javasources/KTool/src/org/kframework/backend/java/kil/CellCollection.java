@@ -1,13 +1,13 @@
 package org.kframework.backend.java.kil;
 
-import org.kframework.backend.java.symbolic.Unifier;
+import java.util.Set;
+
 import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
-
-import java.util.Set;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -22,7 +22,7 @@ import com.google.common.collect.Multimap;
  * 
  */
 @SuppressWarnings("rawtypes")
-public class CellCollection extends Collection {
+public class CellCollection extends Collection implements Sorted {
 
     private final Multimap<String, Cell> cells;
     
@@ -98,6 +98,14 @@ public class CellCollection extends Collection {
     }
 
     @Override
+    public String sort() {
+        // TODO(YilongL): Should I return "MyBag" instead of "Bag" like BuiltinList, etc.?
+        // Or should I convert "Bag" to "MyBag" in Java backend kompilation?
+        // Note: the sort of Kind#Cell_Collection may also need to be changed to "MyBag"
+        return org.kframework.kil.KSorts.BAG;
+    }
+
+    @Override
     public boolean equals(Object object) {
         if (this == object) {
             return true;
@@ -108,15 +116,18 @@ public class CellCollection extends Collection {
         }
 
         CellCollection collection = (CellCollection) object;
-        return super.equals(collection) && cells.equals(collection.cells);
+        return (frame == null ? collection.frame == null : frame
+                .equals(collection.frame)) && cells.equals(collection.cells);
     }
 
     @Override
     public int hashCode() {
-        int hash = 1;
-        hash = hash * Utils.HASH_PRIME + (super.frame == null ? 0 : super.frame.hashCode());
-        hash = hash * Utils.HASH_PRIME + cells.hashCode();
-        return hash;
+        if (hashCode == 0) {
+            hashCode = 1;
+            hashCode = hashCode * Utils.HASH_PRIME + (frame == null ? 0 : frame.hashCode());
+            hashCode = hashCode * Utils.HASH_PRIME + cells.hashCode();
+        }
+        return hashCode;
     }
 
     @Override
@@ -144,6 +155,69 @@ public class CellCollection extends Collection {
     @Override
     public ASTNode accept(Transformer transformer) {
         return transformer.transform(this);
+    }
+
+    /**
+     * Promotes a given {@link Term} to a given {@link Kind}. The {@code Kind}s
+     * involved in this method can only be {@code Kind#CELL} or
+     * {@code Kind#CELL_COLLECTION}. If the kind of the given {@code Term} is
+     * already above or equal to the target {@code Kind}, do nothing.
+     * <p>
+     * To be more specific, a {@code Cell} can be promoted to a single-element
+     * {@code CellCollection}.
+     * 
+     * @param term
+     *            the given term to be promoted
+     * @param kind
+     *            the target kind that the term is to be promoted to
+     * @return the resulting term after kind promotion
+     */
+    public static Term upKind(Term term, Kind kind, Context context) {
+        assert term.kind() == Kind.CELL || term.kind() == Kind.CELL_COLLECTION;
+        assert kind == Kind.CELL || kind == Kind.CELL_COLLECTION;
+
+        /* promote Cell to CellCollection */
+        if (term.kind() == Kind.CELL && kind == Kind.CELL_COLLECTION) {
+            if (term instanceof Cell) {
+                Cell cell = (Cell) term;
+                Multimap<String, Cell> cells = ArrayListMultimap.create();
+                cells.put(cell.getLabel(), cell);
+                term = new CellCollection(cells, context);
+            } else {
+                // do nothing since we cannot simply promote a variable from
+                // sort BagItem to Bag
+            }
+        }
+
+        return term;
+    }
+    
+    /**
+     * Degrades a given {@link Term} to a given {@link Kind}. The {@code Kind}s
+     * involved in this method can only be {@code Kind#CELL} or
+     * {@code Kind#CELL_COLLECTION}. If the kind of the given {@code Term} is
+     * already lower than or equal to the target {@code Kind}, do nothing.
+     * <p>
+     * To be more specific, a single-element {@code CellCollection} can be
+     * degraded to a {@code Cell}.
+     * 
+     * @param term
+     *            the given term to be degraded
+     * @return the resulting term after kind degradation
+     */
+    public static Term downKind(Term term) {
+        assert term.kind() == Kind.CELL || term.kind() == Kind.CELL_COLLECTION;
+
+        if (term instanceof CellCollection
+                && !((CellCollection) term).hasFrame()
+                && ((CellCollection) term).size() == 1) {
+            term = ((CellCollection) term).cells().iterator().next();
+        } 
+        
+        // YilongL: do not degrade the kind of a Variable since you cannot
+        // upgrade it later
+
+        return term;
     }
 
 }

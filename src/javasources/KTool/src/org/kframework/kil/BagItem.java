@@ -65,4 +65,5 @@ public class BagItem extends CollectionItem {
 	public BagItem shallowCopy() {
 		return new BagItem(this);
 	}
+
 }

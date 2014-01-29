@@ -30,6 +30,7 @@ public class Cell<T extends Term> extends Term {
         super(Kind.CELL);
 
         assert content.kind() == Kind.CELL_COLLECTION
+                || content.kind == Kind.CELL
                 || content.kind() == Kind.K
                 || content.kind() == Kind.KITEM
                 || content.kind() == Kind.KLABEL
@@ -74,10 +75,12 @@ public class Cell<T extends Term> extends Term {
 
     @Override
     public int hashCode() {
-        int hash = 1;
-        hash = hash * Utils.HASH_PRIME + label.hashCode();
-        hash = hash * Utils.HASH_PRIME + content.hashCode();
-        return hash;
+        if (hashCode == 0) {
+            hashCode = 1;
+            hashCode = hashCode * Utils.HASH_PRIME + label.hashCode();
+            hashCode = hashCode * Utils.HASH_PRIME + content.hashCode();
+        }
+        return hashCode;
     }
 
     @Override

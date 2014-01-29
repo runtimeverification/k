@@ -1,8 +1,8 @@
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.Int32Token;
+import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.*;
@@ -22,6 +22,7 @@ public interface Transformer {
     public ASTNode transform(BuiltinList builtinList);
     public ASTNode transform(BuiltinMap builtinMap);
     public ASTNode transform(BuiltinSet builtinSet);
+    public ASTNode transform(BuiltinMgu builtinMgu);
     public ASTNode transform(Cell cell);
     public ASTNode transform(CellCollection cellCollection);
     public ASTNode transform(Collection collection);
@@ -32,6 +33,7 @@ public interface Transformer {
     public ASTNode transform(KLabelConstant kLabelConstant);
     public ASTNode transform(KLabelFreezer kLabelFreezer);
     public ASTNode transform(KLabelInjection kLabelInjection);
+    public ASTNode transform(KItemProjection kItemProjection);
     public ASTNode transform(KItem kItem);
     public ASTNode transform(KCollection kCollection);
     public ASTNode transform(KLabel kLabel);
@@ -47,6 +49,7 @@ public interface Transformer {
     public ASTNode transform(SymbolicConstraint symbolicConstraint);
     public ASTNode transform(StringToken stringToken);
     public ASTNode transform(Term node);
+    public ASTNode transform(TermCons termCons);
     public ASTNode transform(Token token);
     public ASTNode transform(UninterpretedConstraint uninterpretedConstraint);
     public ASTNode transform(UninterpretedToken uninterpretedToken);

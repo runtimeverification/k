@@ -154,4 +154,5 @@ public class Variable extends Term {
 	public void setSyntactic(boolean syntactic) {
 		this.syntactic = syntactic;
 	}
+
 }

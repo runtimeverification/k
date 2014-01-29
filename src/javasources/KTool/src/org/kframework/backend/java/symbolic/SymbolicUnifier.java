@@ -15,6 +15,7 @@ import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.BuiltinMgu;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
@@ -30,8 +31,11 @@ import org.kframework.backend.java.kil.KLabelInjection;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Kind;
+import org.kframework.backend.java.kil.MapUpdate;
 import org.kframework.backend.java.kil.MetaVariable;
+import org.kframework.backend.java.kil.SetUpdate;
 import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermCons;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
@@ -63,7 +67,7 @@ public class SymbolicUnifier extends AbstractUnifier {
     private boolean isStarNested;
     
     /**
-     * A disjunction of {@code SymbolicConstraint}s created by this unifier.
+     * A conjunction of disjunctions of {@code SymbolicConstraint}s created by this unifier.
      */
     public final java.util.Collection<java.util.Collection<SymbolicConstraint>> multiConstraints;
     private final TermContext termContext;
@@ -71,7 +75,6 @@ public class SymbolicUnifier extends AbstractUnifier {
     public SymbolicUnifier(SymbolicConstraint constraint, TermContext context) {
         this.fConstraint = constraint;
         this.termContext = context;
-        context.definition();
         multiConstraints = new ArrayList<java.util.Collection<SymbolicConstraint>>();
     }
 
@@ -111,6 +114,15 @@ public class SymbolicUnifier extends AbstractUnifier {
             otherTerm = KCollection.upKind(otherTerm, term.kind());
         }
 
+        if (term.kind() == Kind.CELL || term.kind() == Kind.CELL_COLLECTION) {
+            Context context = termContext.definition().context();
+            term = CellCollection.upKind(term, otherTerm.kind(), context);
+            otherTerm = CellCollection.upKind(otherTerm, term.kind(), context);
+        }
+        
+        // TODO(YilongL): may need to replace the following assertion to the
+        // method fail() in the future because it crashes the Java rewrite
+        // engine instead of just failing the unification process
         assert term.kind() == otherTerm.kind():
                "kind mismatch between " + term + " (" + term.kind() + ")"
                + " and " + otherTerm + " (" + otherTerm.kind() + ")";
@@ -133,7 +145,9 @@ public class SymbolicUnifier extends AbstractUnifier {
             }
         } else {
             /* unify */
-            term.accept(this, otherTerm);
+            if (!term.equals(otherTerm)) {
+                term.accept(this, otherTerm);
+            }
         }
     }
 
@@ -195,6 +209,19 @@ public class SymbolicUnifier extends AbstractUnifier {
     }
 
     @Override
+    public void unify(MapUpdate mapUpdate, Term term) {
+        // this method is only used during macro expansion of rewrite rules
+        assert !(term instanceof Variable);
+        
+        if (!(term instanceof MapUpdate)) {
+            this.fail();
+        }
+        
+        throw new UnsupportedOperationException(
+                "Currently, mapUpdate can only be matched with a variable.");
+    }
+
+    @Override
     public void unify(BuiltinSet builtinSet, Term term) {
         assert !(term instanceof Variable);
         if (!(term instanceof BuiltinSet)) {
@@ -203,6 +230,30 @@ public class SymbolicUnifier extends AbstractUnifier {
 
         throw new UnsupportedOperationException(
                 "set matching is only supported when one of the sets is a variable.");
+    }
+    
+    @Override
+    public void unify(SetUpdate setUpdate, Term term) {
+        // this method is only used during macro expansion of rewrite rules
+        assert !(term instanceof Variable);
+        
+        if (!(term instanceof SetUpdate)) {
+            this.fail();
+        }
+        
+        throw new UnsupportedOperationException(
+                "Currently, setUpdate can only be matched with a variable.");
+    }
+    
+    @Override
+    public void unify(BuiltinMgu builtinMgu, Term term) {
+        assert !(term instanceof Variable);
+        if (!(term instanceof BuiltinMgu)) {
+            this.fail();
+        }
+
+        throw new UnsupportedOperationException(
+                "Mgu matching is only supported when one of the Mgu's is a variable.");
     }
 
     /**
@@ -573,14 +624,17 @@ public class SymbolicUnifier extends AbstractUnifier {
         }
 
         KItem patternKItem = (KItem) term;
-        KLabel kLabel = kItem.kLabel();
-        KList kList = kItem.kList();
+        Term kLabel = kItem.kLabel();
+        Term kList = kItem.kList();
         unify(kLabel, patternKItem.kLabel());
+        // TODO(AndreiS): deal with KLabel variables
         if (kLabel instanceof KLabelConstant) {
             KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
             if (kLabelConstant.isBinder()) {
+                // TODO(AndreiS): deal with non-concrete KLists
+                assert kList instanceof KList;
                 Multimap<Integer, Integer> binderMap = kLabelConstant.getBinderMap();
-                List<Term> terms = new ArrayList<>(kList.getContents());
+                List<Term> terms = new ArrayList<>(((KList) kList).getContents());
                 for (Integer boundVarPosition : binderMap.keySet()) {
                     Term boundVars = terms.get(boundVarPosition);
                     Set<Variable> variables = boundVars.variableSet();
@@ -705,7 +759,7 @@ public class SymbolicUnifier extends AbstractUnifier {
             }
         }
     }
-
+    
     @Override
     public void unify(MetaVariable metaVariable, Term term) {
         // TODO(YilongL): not sure about the assertion below
@@ -719,6 +773,30 @@ public class SymbolicUnifier extends AbstractUnifier {
     @Override
     public void unify(Variable variable, Term term) {
         unify((Term) variable, term);
+    }
+    
+    @Override
+    public void unify(TermCons termCons, Term term) {
+        if (!(term instanceof TermCons)) {
+            fail();
+        }
+        
+        TermCons otherTermCons = (TermCons) term;
+        if (!(termCons.cons().equals(otherTermCons.cons()))) {
+            fail();
+        }
+        
+        List<Term> contents = termCons.contents();
+        List<Term> otherContents = otherTermCons.contents();
+        if (contents.size() != otherContents.size()) {
+            fail();
+        }
+        
+        Iterator<Term> iter = contents.iterator();
+        Iterator<Term> otherIter = otherContents.iterator();
+        while (iter.hasNext()) {
+            unify(iter.next(), otherIter.next());
+        }
     }
 
     @Override

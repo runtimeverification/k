@@ -99,14 +99,14 @@ public class GappaPrinter extends BottomUpVisitor {
             }
             if (equalityRHS.equals(BoolToken.FALSE)) {
                 if (equalityLHS instanceof KItem) {
-                    KLabel klabel = ((KItem) equalityLHS).kLabel();
-                    if (klabel instanceof KLabelConstant) {
+                    Term klabel = ((KItem) equalityLHS).kLabel();
+                    if (klabel instanceof KLabelConstant && ((KItem) equalityLHS).kList() instanceof KList) {
                         KLabelConstant klabelCt = ((KLabelConstant) klabel);
                         String label = klabelCt.label();
                         String newlabel = reverseComparisonOps.get(label);
                         if (newlabel != null) {
                             klabelCt = KLabelConstant.of(newlabel, klabelCt.context());
-                            equalityLHS = new KItem(klabelCt, ((KItem) equalityLHS).kList(), klabelCt.context());
+                            equalityLHS = new KItem(klabelCt, (KList) ((KItem) equalityLHS).kList(), klabelCt.context());
                             equalityRHS = BoolToken.TRUE;
                         }
                     }
@@ -170,7 +170,7 @@ public class GappaPrinter extends BottomUpVisitor {
             exception = new GappaPrinterException(kItem + " is not ground");
             return;
         }
-        final KLabel kLabel = kItem.kLabel();
+        final Term kLabel = kItem.kLabel();
         if (!(kLabel instanceof KLabelConstant)) {
             exception = new GappaPrinterException(kLabel + " is not constant");
             return;
@@ -179,7 +179,13 @@ public class GappaPrinter extends BottomUpVisitor {
 //            if (!BuiltinFunction.isBuiltinKLabel(kLabelConstant)) {
 //                throw new GappaPrinterException(kLabelConstant + " is not builtin");
 //            }
-        KList kList = kItem.kList();
+
+        if (!(kItem.kList() instanceof KList)) {
+            exception = new GappaPrinterException(kItem.kList() + " is not a concrete klist");
+            return;
+        }
+        KList kList = (KList) kItem.kList();
+
         String label = kLabelConstant.label();
         String gappaOp = unaryOps.get(label);
         Term term = null;

@@ -1,5 +1,7 @@
 package org.kframework.kil;
 
+import java.util.ArrayList;
+
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.matchers.Matcher;
 import org.kframework.kil.visitors.Transformer;
@@ -67,5 +69,4 @@ public class SetLookup extends BuiltinLookup {
     public void accept(Visitor visitor) {
         visitor.visit(this);
     }
-
 }

@@ -1,0 +1,35 @@
+Search results:
+
+Solution 1:
+Solution:K -->
+L1:Term |-> cons ( (_76:Term, ((cons ( (_84:Term, ((cons ( (_92:Term, ((cons (
+   (_100:Term, nil) )))) )))) )))) )
+L2:Term |-> L2:Term
+L3:Term |-> cons ( (_76, ((cons ( (_84, ((cons ( (_92, ((cons ( (_100, ((cons 
+  ( (a, (L2)) )))) )))) )))) )))) )
+
+Solution 2:
+Solution:K -->
+L1:Term |-> cons ( (_76:Term, ((cons ( (_84:Term, ((cons ( (_92:Term, nil) )))
+  ) )))) )
+L2:Term |-> L2:Term
+L3:Term |-> cons ( (_76, ((cons ( (_84, ((cons ( (_92, ((cons ( (a, (L2)) ))))
+   )))) )))) )
+
+Solution 3:
+Solution:K -->
+L1:Term |-> cons ( (_76:Term, ((cons ( (_84:Term, nil) )))) )
+L2:Term |-> L2:Term
+L3:Term |-> cons ( (_76, ((cons ( (_84, ((cons ( (a, (L2)) )))) )))) )
+
+Solution 4:
+Solution:K -->
+L1:Term |-> cons ( (_76:Term, nil) )
+L2:Term |-> L2:Term
+L3:Term |-> cons ( (_76, ((cons ( (a, (L2)) )))) )
+
+Solution 5:
+Solution:K -->
+L1:Term |-> nil
+L2:Term |-> L2:Term
+L3:Term |-> cons ( (a, (L2)) )

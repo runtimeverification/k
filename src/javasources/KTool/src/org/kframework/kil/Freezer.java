@@ -76,4 +76,5 @@ public class Freezer extends Term {
 	public int hashCode() {
 		return term.hashCode();
 	}
+
 }

@@ -1,18 +1,11 @@
 package org.kframework.backend.java.kil;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import org.kframework.backend.java.indexing.IndexingPair;
-import org.kframework.backend.java.symbolic.BottomUpVisitor;
-import org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer;
-import org.kframework.backend.java.symbolic.LocalEvaluator;
-import org.kframework.backend.java.symbolic.Evaluator;
-import org.kframework.backend.java.symbolic.SubstitutionTransformer;
-import org.kframework.backend.java.symbolic.SymbolicConstraint;
-import org.kframework.backend.java.symbolic.Transformable;
-import org.kframework.backend.java.symbolic.Unifiable;
+import org.kframework.backend.java.symbolic.*;
 
 
 /**
@@ -23,8 +16,10 @@ import org.kframework.backend.java.symbolic.Unifiable;
 public abstract class Term extends JavaSymbolicObject implements Transformable, Unifiable, Comparable<Term> {
 
     protected final Kind kind;
-    //protected final boolean normalized;
-
+    // protected final boolean normalized;
+    
+    protected int hashCode = 0;
+    
     protected Term(Kind kind) {
         this.kind = kind;
     }
@@ -40,10 +35,10 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     }
 
     /**
-     * Returns a {@link Collection} view of .
+     * Returns a {@link List} view of the indexing pairs.
      */
-    public Collection<IndexingPair> getIndexingPairs() {
-        final Collection<IndexingPair> indexingPairs = new ArrayList<IndexingPair>();
+    public List<IndexingPair> getIndexingPairs() {
+        final List<IndexingPair> indexingPairs = new ArrayList<IndexingPair>();
         accept(new BottomUpVisitor() {
             @Override
             public void visit(Cell cell) {
@@ -125,14 +120,12 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
      * Returns a new {@code Term} instance obtained from this term by applying substitution.
      */
     public Term substituteAndEvaluate(Map<Variable, ? extends Term> substitution, TermContext context) {
-
         if (substitution.isEmpty() || isGround()) {
             return this;
         }
 
-        SubstitutionTransformer transformer = new SubstitutionTransformer(substitution, context);
+        SubstitutionTransformer transformer = new BinderSubstitutionTransformer(substitution, context);
         transformer.getPostTransformer().addTransformer(new LocalEvaluator(context));
-
         return (Term) accept(transformer);
     }
 

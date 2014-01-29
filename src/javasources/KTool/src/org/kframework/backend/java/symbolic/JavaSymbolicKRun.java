@@ -58,8 +58,11 @@ public class JavaSymbolicKRun implements KRun {
         this.context = definition.context();
         this.context.kompiled = context.kompiled;
         transformer = new KILtoBackendJavaKILTransformer(this.context);
-        //this.simulationRewriter = new SymbolicRewriter(this.definition);
 	}
+    
+    public Definition getDefinition(){
+        return this.definition;
+    }
 
     @Override
     public KRunResult<KRunState> run(org.kframework.kil.Term cfg) throws KRunExecutionException {
@@ -69,7 +72,7 @@ public class JavaSymbolicKRun implements KRun {
     private KRunResult<KRunState> internalRun(org.kframework.kil.Term cfg, int bound) throws KRunExecutionException {
         ConstrainedTerm result = javaKILRun(cfg, bound);
         org.kframework.kil.Term kilTerm = (org.kframework.kil.Term) result.term().accept(
-                new BackendJavaKILtoKILTranslation(context));
+                new BackendJavaKILtoKILTransformer(context));
         return new KRunResult<KRunState>(new KRunState(kilTerm, context));
     }
 
@@ -78,7 +81,7 @@ public class JavaSymbolicKRun implements KRun {
         Term term = Term.of(cfg, definition);
         TermContext termContext = new TermContext(definition, new PortableFileSystem());
         SymbolicConstraint constraint = new SymbolicConstraint(termContext);
-        term = term.evaluate(constraint, termContext);
+        term = term.evaluate(termContext);
         ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, constraint, termContext);
         return symbolicRewriter.rewrite(constrainedTerm, bound);
     }
@@ -175,15 +178,6 @@ public class JavaSymbolicKRun implements KRun {
             return null;
         }
     }
-    
-    /*
-     * by Liyi Li
-     * get the def of the rewriter
-     */
-    public Definition getDef(){
-    	
-    	return this.definition;
-    }
 
 	@Override
 	public KRunResult<SearchResults> search(
@@ -236,7 +230,7 @@ public class JavaSymbolicKRun implements KRun {
             for (Variable var : map.keySet()) {
                 org.kframework.kil.Term kilTerm =
                         (org.kframework.kil.Term) map.get(var).accept(
-                                new BackendJavaKILtoKILTranslation(context));
+                                new BackendJavaKILtoKILTransformer(context));
                 substitutionMap.put(var.toString(), kilTerm);
             }
 
@@ -339,10 +333,10 @@ public class JavaSymbolicKRun implements KRun {
 
             /* translate back to generic KIL term */
             org.kframework.kil.Term pgmTerm = (org.kframework.kil.Term) pgm.accept(
-                    new BackendJavaKILtoKILTranslation(context));
+                    new BackendJavaKILtoKILTransformer(context));
 
             org.kframework.kil.Term kilTerm = (org.kframework.kil.Term) result.term().accept(
-                    new BackendJavaKILtoKILTranslation(context));
+                    new BackendJavaKILtoKILTransformer(context));
 
             generatorResults.add(new TestGenResult(
                     new KRunState(kilTerm, context),

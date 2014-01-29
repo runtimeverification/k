@@ -19,6 +19,7 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
+import org.kframework.backend.kore.KilTransformer;
 import org.kframework.backend.symbolic.TokenVariableToSymbolic;
 
 import java.io.Serializable;
@@ -56,21 +57,21 @@ public class KRunState implements Serializable{
 			if (!K.parens) {
 				result = (Term) result.accept(new AddBracketsFilter(context));
 				try {
+				    /* collect existing free variables in the result */
 				    final Set<Variable> existingFreeVariables = new HashSet<Variable>();
-				    if (K.do_testgen) {
-	                    // TODO(YilongL): is it specific to the test generation that
-	                    // the result can be a non-ground term?				        
-				        Visitor variableCollector = new BasicVisitor(context) {
-				            @Override
-				            public void visit(Variable var) {
-				                existingFreeVariables.add(var);
-				            }
-				        };
-				        result.accept(variableCollector);
-				    }
+                    Visitor variableCollector = new BasicVisitor(context) {
+                        @Override
+                        public void visit(Variable var) {
+                            existingFreeVariables.add(var);
+                        }
+                    };
+                    result.accept(variableCollector);
 				    
+                    /* add brackets */
 					AddBracketsFilter2 filter = new AddBracketsFilter2(context);
 					result = (Term) result.accept(filter);
+					
+					/* initialize the substitution map of the filter using existing free variables */
 					Map<String, Term> subst = new HashMap<String, Term>(filter.substitution);
 					for (Variable var : existingFreeVariables) {
 					    subst.put(var.getName(), var);
@@ -112,7 +113,12 @@ public class KRunState implements Serializable{
 	public String toString() {
 		if (stateId == null) {
 			UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
-			getResult().accept(unparser);
+			KilTransformer trans = new KilTransformer(true, K.color, K.parens, context);
+			if(K.output_mode.equals("kore")){
+				return trans.kilToKore(getResult());
+			} else {
+				getResult().accept(unparser);
+			}
 			return unparser.getResult();
 		} else {
 			return "Node " + stateId;

@@ -11,6 +11,7 @@ import org.w3c.dom.Element;
 
 import aterm.ATermAppl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -48,7 +49,7 @@ public class KApp extends Term {
 	 * @param child the KList which the given KLabel is applied to. A non-null instance of {@link KList}, {@link Variable} of sort KList, or {@link Ambiguity}.
 	 */
 	public KApp(String location, String filename, Term label, Term child) {
-		super(location, filename, "K");
+		super(location, filename, KSorts.KITEM);
 		setLabel(label);
 		setChild(child);
 	}
@@ -60,7 +61,7 @@ public class KApp extends Term {
 	 * @param child the KList which the given KLabel is applied to. A non-null instance of {@link KList}, {@link Variable} of sort KList, or {@link Ambiguity}.
 	 */
 	public KApp(Term label, Term child) {
-		super("K");
+		super(KSorts.KITEM);
 		setLabel(label);
 		setChild(child);
 	}

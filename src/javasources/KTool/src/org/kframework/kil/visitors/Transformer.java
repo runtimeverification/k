@@ -1,6 +1,7 @@
 package org.kframework.kil.visitors;
 
 import org.kframework.kil.*;
+import org.kframework.kil.KItemProjection;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public interface Transformer {
@@ -84,8 +85,10 @@ public interface Transformer {
 	public ASTNode transform(ListTerminator node) throws TransformerException;
 	public ASTNode transform(Hole node) throws TransformerException;
 	public ASTNode transform(KApp node) throws TransformerException;
-	public ASTNode transform(KLabel node) throws TransformerException;
+    public ASTNode transform(KItemProjection node) throws TransformerException;
+    public ASTNode transform(KLabel node) throws TransformerException;
     public ASTNode transform(KLabelConstant node) throws TransformerException;
+    public ASTNode transform(KLabelInjection node) throws TransformerException;
 	public ASTNode transform(KInjectedLabel node) throws TransformerException;
     public ASTNode transform(FreezerHole node) throws TransformerException;
 	public ASTNode transform(FreezerLabel node) throws TransformerException;

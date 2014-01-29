@@ -5,9 +5,7 @@ import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.BoolBuiltin;
 
 /**
  *
@@ -52,10 +50,12 @@ public class SetLookup extends Term {
 
     @Override
     public int hashCode() {
-        int hash = 1;
-        hash = hash * Utils.HASH_PRIME + key.hashCode();
-        hash = hash * Utils.HASH_PRIME + base.hashCode();
-        return hash;
+        if (hashCode == 0) {
+            hashCode = 1;
+            hashCode = hashCode * Utils.HASH_PRIME + key.hashCode();
+            hashCode = hashCode * Utils.HASH_PRIME + base.hashCode();
+        }
+        return hashCode;
     }
 
     @Override

@@ -565,7 +565,7 @@
       definition="samples/java_rewrite_engine/tutorial/2_languages/1_simple/2_typed/2_dynamic/simple-typed-dynamic.k"
       programs="tutorial/2_languages/1_simple/2_typed/programs/"
       extension="simple"
-      exclude="dekker.simple exceptions_07.simple"
+      exclude="dekker.simple exceptions_07.simple threads_05.simple"
       results="tutorial/2_languages/1_simple/2_typed/2_dynamic/tests/"
       >
     <kompile-option name="-backend" value="java" />
@@ -575,6 +575,100 @@
       <krun-option name="-output" value="none" />
     </all-programs>
   </test>
+
+  <test
+      definition="samples/java_rewrite_engine/tutorial/2_languages/2_kool/1_untyped/kool-untyped.k"
+      programs="samples/java_rewrite_engine/tutorial/2_languages/2_kool/1_untyped/tests/"
+      extension="kool"
+      exclude="cycle.kool"
+      results="tutorial/2_languages/2_kool/1_untyped/tests/"
+      >
+    <kompile-option name="-backend" value="java" />
+    <all-programs>
+      <krun-option name="-backend" value="java" />
+      <krun-option name="-smt" value="none" />
+      <krun-option name="-output" value="none" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="samples/java_rewrite_engine/tutorial/2_languages/2_kool/2_typed/1_dynamic/kool-typed-dynamic.k"
+      programs="samples/java_rewrite_engine/tutorial/2_languages/2_kool/2_typed/programs/"
+      extension="kool"
+      exclude="cycle.kool"
+      results="tutorial/2_languages/2_kool/2_typed/1_dynamic/tests/"
+      >
+    <kompile-option name="-backend" value="java" />
+    <all-programs>
+      <krun-option name="-backend" value="java" />
+      <krun-option name="-smt" value="none" />
+      <krun-option name="-output" value="none" />
+    </all-programs>
+  </test>
+
+  <!-- YilongL: the output of cycle.kool depends on the implementation of the rewrite engine -->
+  <test
+      definition="samples/java_rewrite_engine/tutorial/2_languages/2_kool/2_typed/2_static/kool-typed-static.k"
+      programs="samples/java_rewrite_engine/tutorial/2_languages/2_kool/2_typed/programs/"
+      extension="kool"
+      exclude="cycle.kool"
+      results="tutorial/2_languages/2_kool/2_typed/2_static/tests/"
+      >
+    <kompile-option name="-backend" value="java" />
+    <all-programs>
+      <krun-option name="-backend" value="java" />
+      <krun-option name="-smt" value="none" />
+      <krun-option name="-output" value="none" />
+    </all-programs>
+  </test>
+
+  <!-- TODO(YilongL): change the type of the solution cell to Map
+    and revise the search pattern accordingly -->
+  <test
+      definition="samples/java_rewrite_engine/tutorial/2_languages/4_logik/logik.k"
+      programs="tutorial/2_languages/4_logik/basic/tests/"
+      extension="logik"
+      exclude="append-6"
+      results="samples/java_rewrite_engine/tutorial/2_languages/4_logik/tests"
+      >
+    <kompile-option name="-backend" value="java" />
+    <all-programs>
+      <krun-option name="-backend" value="java" />
+      <krun-option name="--search" />
+      <krun-option name="--pattern" value="&lt;solution&gt; Solution:K &lt;/solution&gt;" />
+    </all-programs>
+    <program name="append-4.logik">
+      <krun-option name="-backend" value="java" />
+      <krun-option name="--search" />
+      <krun-option name="--bound" value="5" />
+      <krun-option name="--pattern" value="&lt;solution&gt; Solution:K &lt;/solution&gt;" />
+    </program>
+    <program name="reverse-slow-palindromes-1.logik">
+      <krun-option name="-backend" value="java" />
+      <krun-option name="--search" />
+      <krun-option name="--bound" value="5" />
+      <krun-option name="--pattern" value="&lt;solution&gt; Solution:K &lt;/solution&gt;" />
+    </program>
+    <program name="reverse-fast-palindromes-1.logik">
+      <krun-option name="-backend" value="java" />
+      <krun-option name="--search" />
+      <krun-option name="--bound" value="5" />
+      <krun-option name="--pattern" value="&lt;solution&gt; Solution:K &lt;/solution&gt;" />
+    </program>
+    <program name="reverse-slow-2.logik">
+      <krun-option name="-backend" value="java" />
+      <krun-option name="--search" />
+      <krun-option name="--bound" value="1" />
+      <krun-option name="--pattern" value="&lt;solution&gt; Solution:K &lt;/solution&gt;" />
+    </program>
+    <program name="reverse-fast-2.logik">
+      <krun-option name="-backend" value="java" />
+      <krun-option name="--search" />
+      <krun-option name="--bound" value="1" />
+      <krun-option name="--pattern" value="&lt;solution&gt; Solution:K &lt;/solution&gt;" />
+    </program>
+  </test>
+
 <!--
 
   <test

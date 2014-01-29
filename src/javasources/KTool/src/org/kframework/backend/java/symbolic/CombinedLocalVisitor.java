@@ -197,6 +197,11 @@ public class CombinedLocalVisitor extends LocalVisitor {
     }
 
     @Override
+    public void visit(TermCons node) {
+        visitAll(node);
+    }
+
+    @Override
     public void visit(Token node) {
         visitAll(node);
     }
@@ -208,6 +213,11 @@ public class CombinedLocalVisitor extends LocalVisitor {
 
     @Override
     public void visit(Variable node) {
+        visitAll(node);
+    }
+    
+    @Override
+    public void visit(BuiltinMgu node) {
         visitAll(node);
     }
 }

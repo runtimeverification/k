@@ -181,7 +181,10 @@ arguments. */
                 | "if" "(" Exp ")" Block "else" Block   [avoid, strict(1)]
                 | "if" "(" Exp ")" Block
                 | "while" "(" Exp ")" Block
-                | "for" "(" Stmt Exp ";" Exp ")" Block
+                //| "for" "(" Stmt Exp ";" Exp ")" Block
+                | "for" "(" Stmts Exp ";" Exp ")" Block // YilongL: I had to change Stmt to Stmts because macro expansion
+                                                        // may break this property and result in too general sort info. of
+                                                        // a KItem which fails the unification procedure
                 | "return" Exp ";"                      [strict]
                 | "return" ";"
                 | "print" "(" Exps ")" ";"              [strict]
@@ -209,16 +212,11 @@ We only want to give semantics to core constructs, so we get rid of the
 derived ones before we start the semantics.  All desugaring macros below are
 straightforward. */
 
-//  rule if (E) S => if (E) S else {}                                 [macro]
-//  rule for(Start Cond; Step) {S} => {Start while (Cond) {S Step;}}  [macro]
-//  rule for(Start Cond; Step) {} => {Start while (Cond) {Step;}}     [macro]
-//  rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;          [macro]
-//  rule var X:Id = E; => var X; X = E;                               [macro]
-  rule if (E) S => if (E) S else {}
-  rule for(Start Cond; Step) {S} => {Start while (Cond) {S Step;}}
-  rule for(Start Cond; Step) {} => {Start while (Cond) {Step;}}
-  rule var E1, E2, Es; => var E1; var E2, Es;
-  rule var X:Id = E; => var X; X = E;
+  rule if (E) S => if (E) S else {}                                 [macro]
+  rule for(Start Cond; Step) {S} => {Start while (Cond) {S Step;}}  [macro]
+  rule for(Start Cond; Step) {} => {Start while (Cond) {Step;}}     [macro]
+  rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;          [macro]
+  rule var X:Id = E; => var X; X = E;                               [macro]
 
 /*@ For the semantics, we can therefore assume from now on that each
 conditional has both branches, that there are only \texttt{while} loops, and
@@ -632,8 +630,7 @@ nulary \texttt{return;} statements. */
        <env> _ => Env </env>
 
   syntax Val ::= "nothing"
-  //rule return; => return nothing;   [macro]
-  rule return; => return nothing;
+  rule return; => return nothing;   [macro]
 
 /*@ Like for division-by-zero, it is left unspecified what happens
 when the \texttt{nothing} value is used in domain calculations.  For

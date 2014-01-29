@@ -1,15 +1,21 @@
 package org.kframework.backend.java.kil;
 
-import com.google.common.base.Joiner;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.Iterator;
+import java.util.List;
+
 import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.symbolic.*;
+import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Unifier;
+import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.ImprovedArrayDeque;
 import org.kframework.backend.java.util.KSorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.IntBuiltin;
 
-import java.util.*;
+import com.google.common.base.Joiner;
 
 
 /**
@@ -91,19 +97,24 @@ public class BuiltinList extends Collection implements Sorted {
         }
 
         BuiltinList list = (BuiltinList) object;
-        return removeLeft == list.removeLeft && removeRight == list.removeRight && super.equals(list)
-                && elementsLeft.equals(list.elementsLeft) && elementsRight.equals(list.elementsRight);
+        return (frame == null ? list.frame == null : frame.equals(list.frame))
+                && removeLeft == list.removeLeft
+                && removeRight == list.removeRight
+                && elementsLeft.equals(list.elementsLeft)
+                && elementsRight.equals(list.elementsRight);
     }
 
     @Override
     public int hashCode() {
-        int hash = 1;
-        hash = hash * Utils.HASH_PRIME + (super.frame == null ? 0 : super.frame.hashCode());
-        hash = hash * Utils.HASH_PRIME + removeLeft;
-        hash = hash * Utils.HASH_PRIME + removeRight;
-        hash = hash * Utils.HASH_PRIME + elementsLeft.hashCode();
-        hash = hash * Utils.HASH_PRIME + elementsRight.hashCode();
-        return hash;
+        if (hashCode == 0) {
+            hashCode = 1;
+            hashCode = hashCode * Utils.HASH_PRIME + (frame == null ? 0 : frame.hashCode());
+            hashCode = hashCode * Utils.HASH_PRIME + removeLeft;
+            hashCode = hashCode * Utils.HASH_PRIME + removeRight;
+            hashCode = hashCode * Utils.HASH_PRIME + elementsLeft.hashCode();
+            hashCode = hashCode * Utils.HASH_PRIME + elementsRight.hashCode();
+        }
+        return hashCode;
     }
 
     @Override

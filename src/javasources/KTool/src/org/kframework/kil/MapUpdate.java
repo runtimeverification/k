@@ -6,7 +6,9 @@ import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.Map;
 
@@ -90,5 +92,5 @@ public class MapUpdate extends Term {
     public void accept(Visitor visitor) {
         visitor.visit(this);
     }
-
+    
 }

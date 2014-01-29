@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import org.kframework.compile.utils.CellMap;
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.MetaK;
@@ -57,7 +59,7 @@ public class Context implements Serializable {
 		"{",
 		"}");
 
-    public Map<String, Production> conses = new HashMap<String, Production>();
+    public BiMap<String, Production> conses = HashBiMap.create();
 	public Map<String, Set<Production>> productions = new HashMap<String, Set<Production>>();
 	public Map<String, Set<String>> labels = new HashMap<String, Set<String>>();
 	public Map<String, Cell> cells = new HashMap<String, Cell>();

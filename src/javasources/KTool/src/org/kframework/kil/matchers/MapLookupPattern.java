@@ -2,6 +2,10 @@ package org.kframework.kil.matchers;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cast;
+import org.kframework.kil.KApp;
+import org.kframework.kil.KLabelConstant;
+import org.kframework.kil.KList;
+import org.kframework.kil.KSequence;
 import org.kframework.kil.Map;
 import org.kframework.kil.MapItem;
 import org.kframework.kil.Term;

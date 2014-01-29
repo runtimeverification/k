@@ -9,6 +9,7 @@ import org.w3c.dom.Element;
 
 import aterm.ATermAppl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -72,4 +73,5 @@ public class KList extends Collection {
 	public KList shallowCopy() {
 		return new KList(this);
 	}
+
 }

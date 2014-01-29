@@ -83,6 +83,7 @@ public class CheckingNestedStructureDepth implements KastStructureCheckerPlugin 
     private class IncNestedLevelOfSort extends LocalVisitor {
         @Override
         public void visit(KItem kItem) {
+            // TODO(AndreiS): deal with KLabel variables
             if (!(kItem.kLabel() instanceof KLabelConstant)) {
                 return;
             }
@@ -118,6 +119,7 @@ public class CheckingNestedStructureDepth implements KastStructureCheckerPlugin 
     private class DecNestedLevelOfSort extends LocalVisitor {
         @Override
         public void visit(KItem kItem) {
+            // TODO(AndreiS): deal with KLabel variables
             if (!(kItem.kLabel() instanceof KLabelConstant)) {
                 return;
             }

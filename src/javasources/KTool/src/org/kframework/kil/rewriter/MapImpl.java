@@ -1,10 +1,16 @@
 package org.kframework.kil.rewriter;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cast;
+import org.kframework.kil.KApp;
+import org.kframework.kil.KLabel;
+import org.kframework.kil.KLabelConstant;
+import org.kframework.kil.KList;
+import org.kframework.kil.KSequence;
 import org.kframework.kil.MapItem;
 import org.kframework.kil.Term;
 import org.kframework.kil.matchers.MatchCompilationException;
@@ -99,5 +105,9 @@ public class MapImpl extends Term {
 		MapImpl c = (MapImpl) o;
 		// TODO: finish implementing this equals
 		return true;
+	}
+	
+	public Map<Term, Term> map(){
+		return this.map;
 	}
 }

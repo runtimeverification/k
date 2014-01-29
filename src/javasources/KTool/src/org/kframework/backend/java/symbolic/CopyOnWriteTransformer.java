@@ -1,47 +1,23 @@
 package org.kframework.backend.java.symbolic;
 
-import com.google.common.collect.Iterables;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
 import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.Int32Token;
+import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
-import org.kframework.backend.java.kil.BuiltinList;
-import org.kframework.backend.java.kil.BuiltinMap;
-import org.kframework.backend.java.kil.BuiltinSet;
-import org.kframework.backend.java.kil.Cell;
-import org.kframework.backend.java.kil.CellCollection;
-import org.kframework.backend.java.kil.Collection;
-import org.kframework.backend.java.kil.ConstrainedTerm;
-import org.kframework.backend.java.kil.Definition;
-import org.kframework.backend.java.kil.Hole;
-import org.kframework.backend.java.kil.KCollection;
-import org.kframework.backend.java.kil.KCollectionFragment;
-import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.KLabel;
-import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.kil.KLabelFreezer;
-import org.kframework.backend.java.kil.KLabelInjection;
-import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.KSequence;
-import org.kframework.backend.java.kil.Kind;
-import org.kframework.backend.java.kil.ListLookup;
-import org.kframework.backend.java.kil.MapLookup;
-import org.kframework.backend.java.kil.MapUpdate;
-import org.kframework.backend.java.kil.MetaVariable;
-import org.kframework.backend.java.kil.Rule;
-import org.kframework.backend.java.kil.SetLookup;
-import org.kframework.backend.java.kil.SetUpdate;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
-import org.kframework.backend.java.kil.Token;
-import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
-
-import java.util.*;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 
 
@@ -93,7 +69,7 @@ public class CopyOnWriteTransformer implements Transformer {
         boolean change = false;
         Multimap<String, Cell> cells = ArrayListMultimap.create();
         for (Map.Entry<String, Cell> entry : cellCollection.cellMap().entries()) {
-            Cell cell = (Cell) entry.getValue().accept(this);
+            Cell<?> cell = (Cell<?>) entry.getValue().accept(this);
             cells.put(entry.getKey(), cell);
             change = change || cell != entry.getValue();
         }
@@ -102,17 +78,22 @@ public class CopyOnWriteTransformer implements Transformer {
         }
 
         if (cellCollection.hasFrame()) {
-            boolean hasStar = cellCollection.hasStar();
             Variable frame;
             Term transformedFrame = (Term) cellCollection.frame().accept(this);
             if (transformedFrame instanceof CellCollection) {
-                hasStar = hasStar || ((CellCollection) transformedFrame).hasStar();
                 if (cells == cellCollection.cellMap()) {
                     cells = ArrayListMultimap.create(cellCollection.cellMap());
                 }
                 cells.putAll(((CellCollection) transformedFrame).cellMap());
                 frame = ((CellCollection) transformedFrame).hasFrame() ?
                         ((CellCollection) transformedFrame).frame() : null;
+            } else if (transformedFrame instanceof Cell) {
+                if (cells == cellCollection.cellMap()) {
+                    cells = ArrayListMultimap.create(cellCollection.cellMap());
+                }
+                Cell<?> cell = (Cell<?>) transformedFrame;
+                cells.put(cell.getLabel(), cell);
+                frame = null;
             } else {
                 frame = (Variable) transformedFrame;
             }
@@ -168,9 +149,18 @@ public class CopyOnWriteTransformer implements Transformer {
     }
 
     @Override
+    public ASTNode transform(KItemProjection kItemProjection) {
+        Term term = (Term) kItemProjection.term().accept(this);
+        if (term != kItemProjection.term()) {
+            kItemProjection = new KItemProjection(kItemProjection.kind(), term);
+        }
+        return kItemProjection;
+    }
+
+    @Override
     public ASTNode transform(KItem kItem) {
-        KLabel kLabel = (KLabel) kItem.kLabel().accept(this);
-        KList kList = (KList) kItem.kList().accept(this);
+        Term kLabel = (Term) kItem.kLabel().accept(this);
+        Term kList = (Term) kItem.kList().accept(this);
         if (kLabel != kItem.kLabel() || kList != kItem.kList()) {
             kItem = new KItem(kLabel, kList, context.definition().context());
         }
@@ -184,13 +174,16 @@ public class CopyOnWriteTransformer implements Transformer {
 
     @Override
     public ASTNode transform(UninterpretedConstraint uninterpretedConstraint) {
+        boolean changed = false;
         UninterpretedConstraint transformedUninterpretedConstraint = new UninterpretedConstraint();
         for (UninterpretedConstraint.Equality equality : uninterpretedConstraint.equalities()) {
-            transformedUninterpretedConstraint.add(
-                    (Term) equality.leftHandSide().accept(this),
-                    (Term) equality.rightHandSide().accept(this));
+            Term transformedLHS = (Term) equality.leftHandSide().accept(this);
+            Term transformedRHS = (Term) equality.rightHandSide().accept(this);
+            changed = changed || transformedLHS != equality.leftHandSide()
+                    || transformedRHS != equality.rightHandSide();
+            transformedUninterpretedConstraint.add(transformedLHS, transformedRHS);
         }
-        return transformedUninterpretedConstraint;
+        return changed ? transformedUninterpretedConstraint : uninterpretedConstraint;
     }
 
     @Override
@@ -549,9 +542,12 @@ public class CopyOnWriteTransformer implements Transformer {
 
         if (processedLeftHandSide != rule.leftHandSide()
                 || processedRightHandSide != rule.rightHandSide()
-                || !processedRequires.equals(rule.requires())
-                || !processedEnsures.equals(rule.ensures())
-                || !processedFreshVariables.equals(rule.freshVariables())
+//                || !processedRequires.equals(rule.requires())
+//                || !processedEnsures.equals(rule.ensures())
+//                || !processedFreshVariables.equals(rule.freshVariables())
+                || processedRequires != rule.requires()
+                || processedEnsures != rule.ensures()
+                || processedFreshVariables != rule.freshVariables()
                 || processedLookups != rule.lookups()) {
             return new Rule(
                     rule.label(),
@@ -592,8 +588,29 @@ public class CopyOnWriteTransformer implements Transformer {
     }
 
     @Override
+    public ASTNode transform(TermCons termCons) {
+        List<Term> transformedContents = transformList(termCons.contents());
+        if (transformedContents != termCons.contents()) {
+            return new TermCons(termCons.cons(), transformedContents, context
+                    .definition().context());
+        } else {
+            return termCons;
+        }
+    }
+
+    @Override
     public ASTNode transform(Variable variable) {
         return variable;
+    }
+    
+    @Override
+    public ASTNode transform(BuiltinMgu mgu) {
+        SymbolicConstraint transformedConstraint = (SymbolicConstraint) mgu.constraint().accept(this);
+        if (transformedConstraint == mgu.constraint()) {
+            return BuiltinMgu.of(transformedConstraint, context);
+        } else {
+            return mgu;
+        }
     }
 
     protected List<Term> transformList(List<Term> list) {

@@ -55,6 +55,12 @@ public class CmdArgParser {
         addOption(OptionBuilder.withLongOpt(Constants.TIMEOUT_OPTION).hasArg()
                 .withArgName("num").withDescription("Time limit for each process (milliseconds). " +
                         "Default is 300000 milliseconds.").create());
+        addOption(OptionBuilder.withLongOpt(Constants.UPDATE_OUT_OPTION)
+                .withDescription("Update existing .out files.")
+                .create());
+        addOption(OptionBuilder.withLongOpt(Constants.GENERATE_OUT_OPTION)
+                .withDescription("Newly generate .out files if needed.")
+                .create());
         addOption(OptionBuilder.withLongOpt(Constants.THREADS_SETTING).hasArg()
                 .withArgName("threads")
                 .withDescription("Maximum number of threads spawned for parallel execution.")

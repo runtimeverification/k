@@ -65,4 +65,5 @@ public class BackendTerm extends Term {
 		BackendTerm b = (BackendTerm)o;
 		return value.equals(b.value);
 	}
+
 }

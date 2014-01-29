@@ -71,7 +71,7 @@ public class CommandlineOptions {
 		addOptionS(OptionBuilder.withLongOpt("parser").hasArg().withArgName("command").withDescription("Command used to parse programs. (Default: kast).").create());
 		addOptionS(OptionBuilder.withLongOpt("config-var-parser").hasArg().withArgName("file").withDescription("Command used to parse configuration variables. (Default: kast -e).  See --parser above. Applies to subsequent -c options until another parser is specified with this option.").create());
 		addOptionS(OptionBuilder.withLongOpt("config-var").hasArgs(2).withValueSeparator('=').withArgName("name=value").withDescription("Specify values for variables in the configuration.").create("c"));
-		addOptionS(OptionBuilder.withLongOpt("output").hasArg().withArgName("mode").withDescription("How to display Maude results. <mode> is either [pretty|smart|raw|binary|none]. (Default: pretty).").create("o"));
+		addOptionS(OptionBuilder.withLongOpt("output").hasArg().withArgName("mode").withDescription("How to display Maude results. <mode> is either [pretty|smart|kore|raw|binary|none]. (Default: pretty).").create("o"));
 
 		// Advanced K options
 		addOptionS(OptionBuilder.withLongOpt("search").withDescription("In conjunction with it you can specify 3 options that are optional: pattern (the pattern used for search), bound (the number of desired solutions) and depth (the maximum depth of the search).").create());
@@ -86,7 +86,6 @@ public class CommandlineOptions {
 		addOptionS(OptionBuilder.withLongOpt("backend").hasArg().withArgName("backend").withDescription("Specify the krun backend to execute with. <backend> is either [maude|java]. (Default: maude).").create());
 		addOptionS(OptionBuilder.withLongOpt("simulation").hasArg().withArgName("string").withDescription("Simulation property of two programs in two semantics.").create());
 		addOptionS(OptionBuilder.withLongOpt("help-experimental").withDescription("Print help on non-standard options.").create("X"));
-
 		
 		// Experimental options
 		addOptionE(OptionBuilder.withLongOpt("fast-kast").withDescription("Using the (experimental) faster C SDF parser.").create());

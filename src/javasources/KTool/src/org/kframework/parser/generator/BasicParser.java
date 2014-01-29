@@ -28,10 +28,16 @@ public class BasicParser {
 	private String mainModule;
 	private boolean autoinclude;
 	private static final String missingFileMsg = "Could not find 'required' file: ";
+    private String autoincludeFileName;
 
 	public BasicParser(boolean autoinclude) {
 		this.autoinclude = autoinclude;
-	}
+        if (GlobalSettings.javaBackend)
+            autoincludeFileName = "autoinclude-java.k";
+        else
+            autoincludeFileName ="autoinclude.k";
+
+    }
 
 	/**
 	 * Given a file, this method parses it and creates a list of modules from all of the included files.
@@ -54,8 +60,8 @@ public class BasicParser {
 				List<DefinitionItem> tempmi = moduleItems;
 				moduleItems = new ArrayList<DefinitionItem>();
 
-				file = buildCanonicalPath("autoinclude.k", new File(fileName));
-				if (file == null)
+                file = buildCanonicalPath(autoincludeFileName, new File(fileName));
+                if (file == null)
 					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL,
 							missingFileMsg + fileName + " autoimported for every definition ", fileName, ""));
 
@@ -108,7 +114,7 @@ public class BasicParser {
 
 			boolean predefined = file.getCanonicalPath().startsWith(KPaths.getKBase(false) + File.separator + "include");
 			if (!predefined)
-				context.addFileRequirement(buildCanonicalPath("autoinclude.k", file).getCanonicalPath(), file.getCanonicalPath());
+				context.addFileRequirement(buildCanonicalPath(autoincludeFileName, file).getCanonicalPath(), file.getCanonicalPath());
 
 			// add the modules to the modules list and to the map for easy access
 			for (DefinitionItem di : defItemList) {

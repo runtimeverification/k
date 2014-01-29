@@ -8,6 +8,7 @@ import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.kil.Z3Term;
 import org.kframework.kil.ASTNode;
@@ -55,118 +56,123 @@ public class KILtoZ3 extends CopyOnWriteTransformer {
         }
         KLabelConstant kLabel = (KLabelConstant) kItem.kLabel();
 
-        if (kItem.kList().hasFrame()) {
+        if (!(kItem.kList() instanceof KList)) {
+            throw new RuntimeException();
+        }
+        KList kList = (KList) kItem.kList();
+        
+        if (kList.hasFrame()) {
             throw new RuntimeException();
         }
 
         // TODO(AndreiS): implement a more general mechanic
         try {
-            if (kLabel.label().equals("'notBool_") && kItem.kList().size() == 1) {
+            if (kLabel.label().equals("'notBool_") && kList.size() == 1) {
                 BoolExpr booleanExpression
-                        = (BoolExpr) ((Z3Term) kItem.kList().get(0).accept(this)).expression();
+                        = (BoolExpr) ((Z3Term) kList.get(0).accept(this)).expression();
                 return new Z3Term(context.MkNot(booleanExpression));
-            } else if (kLabel.label().equals("'_andBool_") && kItem.kList().size() == 2) {
+            } else if (kLabel.label().equals("'_andBool_") && kList.size() == 2) {
                 BoolExpr[] booleanExpressions = {
-                        (BoolExpr) ((Z3Term) kItem.kList().get(0).accept(this)).expression(),
-                        (BoolExpr) ((Z3Term) kItem.kList().get(1).accept(this)).expression()};
+                        (BoolExpr) ((Z3Term) kList.get(0).accept(this)).expression(),
+                        (BoolExpr) ((Z3Term) kList.get(1).accept(this)).expression()};
                 return new Z3Term(context.MkAnd(booleanExpressions));
-            } else if (kLabel.label().equals("'_orBool_") && kItem.kList().size() == 2) {
+            } else if (kLabel.label().equals("'_orBool_") && kList.size() == 2) {
                 BoolExpr[] booleanExpressions = {
-                        (BoolExpr) ((Z3Term) kItem.kList().get(0).accept(this)).expression(),
-                        (BoolExpr) ((Z3Term) kItem.kList().get(1).accept(this)).expression()};
+                        (BoolExpr) ((Z3Term) kList.get(0).accept(this)).expression(),
+                        (BoolExpr) ((Z3Term) kList.get(1).accept(this)).expression()};
                 return new Z3Term(context.MkOr(booleanExpressions));
-            } else if (kLabel.label().equals("'_==Bool_") && kItem.kList().size() == 2) {
+            } else if (kLabel.label().equals("'_==Bool_") && kList.size() == 2) {
                 BoolExpr booleanExpression1
-                        = (BoolExpr) ((Z3Term) kItem.kList().get(0).accept(this)).expression();
+                        = (BoolExpr) ((Z3Term) kList.get(0).accept(this)).expression();
                 BoolExpr booleanExpression2
-                        = (BoolExpr) ((Z3Term) kItem.kList().get(1).accept(this)).expression();
+                        = (BoolExpr) ((Z3Term) kList.get(1).accept(this)).expression();
                 return new Z3Term(context.MkEq(booleanExpression1, booleanExpression2));
-            } else if (kLabel.label().equals("'_=/=Bool_") && kItem.kList().size() == 2) {
+            } else if (kLabel.label().equals("'_=/=Bool_") && kList.size() == 2) {
                 BoolExpr booleanExpression1
-                        = (BoolExpr) ((Z3Term) kItem.kList().get(0).accept(this)).expression();
+                        = (BoolExpr) ((Z3Term) kList.get(0).accept(this)).expression();
                 BoolExpr booleanExpression2
-                        = (BoolExpr) ((Z3Term) kItem.kList().get(1).accept(this)).expression();
+                        = (BoolExpr) ((Z3Term) kList.get(1).accept(this)).expression();
                 return new Z3Term(context.MkNot(context.MkEq(
                         booleanExpression1,
                         booleanExpression2)));
-            } else if (kLabel.label().equals("'_+Int_") && kItem.kList().size() == 2) {
+            } else if (kLabel.label().equals("'_+Int_") && kList.size() == 2) {
                 ArithExpr[] arithmeticExpressions = {
-                        (ArithExpr) ((Z3Term) kItem.kList().get(0).accept(this)).expression(),
-                        (ArithExpr) ((Z3Term) kItem.kList().get(1).accept(this)).expression()};
+                        (ArithExpr) ((Z3Term) kList.get(0).accept(this)).expression(),
+                        (ArithExpr) ((Z3Term) kList.get(1).accept(this)).expression()};
                 return new Z3Term(context.MkAdd(arithmeticExpressions));
-            } else if (kLabel.label().equals("'_-Int_") && kItem.kList().size() == 2) {
+            } else if (kLabel.label().equals("'_-Int_") && kList.size() == 2) {
                 ArithExpr[] arithmeticExpressions = {
-                        (ArithExpr) ((Z3Term) kItem.kList().get(0).accept(this)).expression(),
-                        (ArithExpr) ((Z3Term) kItem.kList().get(1).accept(this)).expression()};
+                        (ArithExpr) ((Z3Term) kList.get(0).accept(this)).expression(),
+                        (ArithExpr) ((Z3Term) kList.get(1).accept(this)).expression()};
                 return new Z3Term(context.MkSub(arithmeticExpressions));
-            } else if (kLabel.label().equals("'_*Int_") && kItem.kList().size() == 2) {
+            } else if (kLabel.label().equals("'_*Int_") && kList.size() == 2) {
                 ArithExpr[] arithmeticExpressions = {
-                        (ArithExpr) ((Z3Term) kItem.kList().get(0).accept(this)).expression(),
-                        (ArithExpr) ((Z3Term) kItem.kList().get(1).accept(this)).expression()};
+                        (ArithExpr) ((Z3Term) kList.get(0).accept(this)).expression(),
+                        (ArithExpr) ((Z3Term) kList.get(1).accept(this)).expression()};
                 return new Z3Term(context.MkMul(arithmeticExpressions));
-            } else if (kLabel.label().equals("'_/Int_") && kItem.kList().size() == 2) {
+            } else if (kLabel.label().equals("'_/Int_") && kList.size() == 2) {
                 ArithExpr arithmeticExpression1
-                        = (ArithExpr) ((Z3Term) kItem.kList().get(0).accept(this)).expression();
+                        = (ArithExpr) ((Z3Term) kList.get(0).accept(this)).expression();
                 ArithExpr arithmeticExpression2
-                        = (ArithExpr) ((Z3Term) kItem.kList().get(1).accept(this)).expression();
+                        = (ArithExpr) ((Z3Term) kList.get(1).accept(this)).expression();
                 return new Z3Term(context.MkDiv(arithmeticExpression1, arithmeticExpression2));
-            } else if (kLabel.label().equals("'_>Int_") && kItem.kList().size() == 2) {
+            } else if (kLabel.label().equals("'_>Int_") && kList.size() == 2) {
                 ArithExpr arithmeticExpression1
-                        = (ArithExpr) ((Z3Term) kItem.kList().get(0).accept(this)).expression();
+                        = (ArithExpr) ((Z3Term) kList.get(0).accept(this)).expression();
                 ArithExpr arithmeticExpression2
-                        = (ArithExpr) ((Z3Term) kItem.kList().get(1).accept(this)).expression();
+                        = (ArithExpr) ((Z3Term) kList.get(1).accept(this)).expression();
                 return new Z3Term(context.MkGt(arithmeticExpression1, arithmeticExpression2));
-            } else if (kLabel.label().equals("'_>=Int_") && kItem.kList().size() == 2) {
+            } else if (kLabel.label().equals("'_>=Int_") && kList.size() == 2) {
                 ArithExpr arithmeticExpression1
-                        = (ArithExpr) ((Z3Term) kItem.kList().get(0).accept(this)).expression();
+                        = (ArithExpr) ((Z3Term) kList.get(0).accept(this)).expression();
                 ArithExpr arithmeticExpression2
-                        = (ArithExpr) ((Z3Term) kItem.kList().get(1).accept(this)).expression();
+                        = (ArithExpr) ((Z3Term) kList.get(1).accept(this)).expression();
                 return new Z3Term(context.MkGe(arithmeticExpression1, arithmeticExpression2));
-            } else if (kLabel.label().equals("'_<Int_") && kItem.kList().size() == 2) {
+            } else if (kLabel.label().equals("'_<Int_") && kList.size() == 2) {
                 ArithExpr arithmeticExpression1
-                        = (ArithExpr) ((Z3Term) kItem.kList().get(0).accept(this)).expression();
+                        = (ArithExpr) ((Z3Term) kList.get(0).accept(this)).expression();
                 ArithExpr arithmeticExpression2
-                        = (ArithExpr) ((Z3Term) kItem.kList().get(1).accept(this)).expression();
+                        = (ArithExpr) ((Z3Term) kList.get(1).accept(this)).expression();
                 return new Z3Term(context.MkLt(arithmeticExpression1, arithmeticExpression2));
-            } else if (kLabel.label().equals("'_<=Int_") && kItem.kList().size() == 2) {
+            } else if (kLabel.label().equals("'_<=Int_") && kList.size() == 2) {
                 ArithExpr arithmeticExpression1
-                        = (ArithExpr) ((Z3Term) kItem.kList().get(0).accept(this)).expression();
+                        = (ArithExpr) ((Z3Term) kList.get(0).accept(this)).expression();
                 ArithExpr arithmeticExpression2
-                        = (ArithExpr) ((Z3Term) kItem.kList().get(1).accept(this)).expression();
+                        = (ArithExpr) ((Z3Term) kList.get(1).accept(this)).expression();
                 return new Z3Term(context.MkLe(arithmeticExpression1, arithmeticExpression2));
-            } else if (kLabel.label().equals("'_==Int_") && kItem.kList().size() == 2) {
+            } else if (kLabel.label().equals("'_==Int_") && kList.size() == 2) {
                 ArithExpr arithmeticExpression1
-                        = (ArithExpr) ((Z3Term) kItem.kList().get(0).accept(this)).expression();
+                        = (ArithExpr) ((Z3Term) kList.get(0).accept(this)).expression();
                 ArithExpr arithmeticExpression2
-                        = (ArithExpr) ((Z3Term) kItem.kList().get(1).accept(this)).expression();
+                        = (ArithExpr) ((Z3Term) kList.get(1).accept(this)).expression();
                 return new Z3Term(context.MkEq(arithmeticExpression1, arithmeticExpression2));
-            } else if (kLabel.label().equals("'_=/=Int_") && kItem.kList().size() == 2) {
+            } else if (kLabel.label().equals("'_=/=Int_") && kList.size() == 2) {
                 ArithExpr arithmeticExpression1
-                        = (ArithExpr) ((Z3Term) kItem.kList().get(0).accept(this)).expression();
+                        = (ArithExpr) ((Z3Term) kList.get(0).accept(this)).expression();
                 ArithExpr arithmeticExpression2
-                        = (ArithExpr) ((Z3Term) kItem.kList().get(1).accept(this)).expression();
+                        = (ArithExpr) ((Z3Term) kList.get(1).accept(this)).expression();
                 return new Z3Term(context.MkNot(context.MkEq(
                         arithmeticExpression1,
                         arithmeticExpression2)));
-            } else if (kLabel.label().equals("'_==K_") && kItem.kList().size() == 2) {
-                Expr expression1 = ((Z3Term) kItem.kList().get(0).accept(this)).expression();
-                Expr expression2 = ((Z3Term) kItem.kList().get(1).accept(this)).expression();
+            } else if (kLabel.label().equals("'_==K_") && kList.size() == 2) {
+                Expr expression1 = ((Z3Term) kList.get(0).accept(this)).expression();
+                Expr expression2 = ((Z3Term) kList.get(1).accept(this)).expression();
                 return new Z3Term(context.MkEq(expression1, expression2));
-            } else if (kLabel.label().equals("'_=/=K_") && kItem.kList().size() == 2) {
-                Expr expression1 = ((Z3Term) kItem.kList().get(0).accept(this)).expression();
-                Expr expression2 = ((Z3Term) kItem.kList().get(1).accept(this)).expression();
+            } else if (kLabel.label().equals("'_=/=K_") && kList.size() == 2) {
+                Expr expression1 = ((Z3Term) kList.get(0).accept(this)).expression();
+                Expr expression2 = ((Z3Term) kList.get(1).accept(this)).expression();
                 return new Z3Term(context.MkNot(context.MkEq(expression1, expression2)));
                 
-            }else if (kLabel.label().equals("'[E]K_._") && kItem.kList().size() == 2) {
-                Expr expression1 = (ArithExpr) ((Z3Term) kItem.kList().get(0).accept(this)).expression();
-                Expr expression2 = (BoolExpr) ((Z3Term) kItem.kList().get(1).accept(this)).expression();
+            }else if (kLabel.label().equals("'[E]K_._") && kList.size() == 2) {
+                Expr expression1 = (ArithExpr) ((Z3Term) kList.get(0).accept(this)).expression();
+                Expr expression2 = (BoolExpr) ((Z3Term) kList.get(1).accept(this)).expression();
                 Expr[] newExpr = new Expr[1];
                 newExpr[0] = expression1;
                 return new Z3Term(context.MkExists(newExpr, expression2, 1, null, null, null, null));
 
-            }else if (kLabel.label().equals("'[A]K_._") && kItem.kList().size() == 2) {
-                Expr expression1 = (ArithExpr) ((Z3Term) kItem.kList().get(0).accept(this)).expression();
-                Expr expression2 = (BoolExpr) ((Z3Term) kItem.kList().get(1).accept(this)).expression();
+            }else if (kLabel.label().equals("'[A]K_._") && kList.size() == 2) {
+                Expr expression1 = (ArithExpr) ((Z3Term) kList.get(0).accept(this)).expression();
+                Expr expression2 = (BoolExpr) ((Z3Term) kList.get(1).accept(this)).expression();
                 Expr[] newExpr = new Expr[1];
                 newExpr[0] = expression1;
                 return new Z3Term(context.MkForall(newExpr, expression2, 1, null, null, null, null));

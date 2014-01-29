@@ -90,7 +90,7 @@ public class PrePostVisitor implements Visitor {
         preVisitor.resetProceed();
         cellCollection.accept(preVisitor);
         if (!preVisitor.isProceed()) return;
-        for (Cell cell : cellCollection.cells()) {
+        for (Cell<?> cell : cellCollection.cells()) {
             cell.accept(this);
         }
         if (cellCollection.hasFrame()) {
@@ -101,13 +101,7 @@ public class PrePostVisitor implements Visitor {
 
     @Override
     public void visit(Collection collection) {
-        preVisitor.resetProceed();
-        collection.accept(preVisitor);
-        if (!preVisitor.isProceed()) return;
-        if (collection.hasFrame()) {
-            collection.frame().accept(this);
-        }
-        collection.accept(postVisitor);
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -152,6 +146,26 @@ public class PrePostVisitor implements Visitor {
         kItem.kLabel().accept(this);
         kItem.kList().accept(this);
         kItem.accept(postVisitor);
+    }
+
+    @Override
+    public void visit(KItemProjection kItemProjection) {
+        preVisitor.resetProceed();
+        kItemProjection.accept(preVisitor);
+        if (!preVisitor.isProceed()) return;
+        kItemProjection.term().accept(this);
+        kItemProjection.accept(postVisitor);
+    }
+
+    @Override
+    public void visit(TermCons termCons) {
+        preVisitor.resetProceed();
+        termCons.accept(preVisitor);
+        if (!preVisitor.isProceed()) return;
+        for (Term term : termCons.contents()) {
+            term.accept(this);
+        }
+        termCons.accept(postVisitor);
     }
 
     @Override
@@ -379,4 +393,12 @@ public class PrePostVisitor implements Visitor {
         node.accept(postVisitor);
     }
 
+    @Override
+    public void visit(BuiltinMgu mgu) {
+        preVisitor.resetProceed();
+        mgu.accept(preVisitor);
+        if (!preVisitor.isProceed()) return;
+        mgu.constraint().accept(this);
+        mgu.accept(postVisitor);
+    }
 }

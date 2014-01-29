@@ -17,32 +17,7 @@ import org.kframework.backend.java.builtins.Int32Token;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
-import org.kframework.backend.java.kil.BuiltinList;
-import org.kframework.backend.java.kil.BuiltinMap;
-import org.kframework.backend.java.kil.BuiltinSet;
-import org.kframework.backend.java.kil.Cell;
-import org.kframework.backend.java.kil.CellCollection;
-import org.kframework.backend.java.kil.ConcreteCollectionVariable;
-import org.kframework.backend.java.kil.Definition;
-import org.kframework.backend.java.kil.Hole;
-import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.KLabel;
-import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.kil.KLabelFreezer;
-import org.kframework.backend.java.kil.KLabelInjection;
-import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.KSequence;
-import org.kframework.backend.java.kil.Kind;
-import org.kframework.backend.java.kil.ListLookup;
-import org.kframework.backend.java.kil.MapLookup;
-import org.kframework.backend.java.kil.MapUpdate;
-import org.kframework.backend.java.kil.Rule;
-import org.kframework.backend.java.kil.SetLookup;
-import org.kframework.backend.java.kil.SetUpdate;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
-import org.kframework.backend.java.kil.Token;
-import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.util.KSorts;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
@@ -97,8 +72,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     public Definition transformDefinition(org.kframework.kil.Definition node) {
         try {
-            //return new MacroExpander((Definition) node.accept(this)).processDefinition();
-            return (Definition) node.accept(this);
+            return new MacroExpander((Definition) node.accept(this)).processDefinition();
         } catch (TransformerException e) {
             e.printStackTrace();
             return null;
@@ -155,15 +129,36 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             }
         }
 
-        KLabel kLabel = (KLabel) node.getLabel().accept(this);
-        KList kList = (KList) node.getChild().accept(this);
-
+        Term kLabel = (Term) node.getLabel().accept(this);
+        Term kList = (Term) node.getChild().accept(this);
+        if (kList instanceof Variable) {
+            kList = new KList((Variable) kList);
+        }
         return new KItem(kLabel, kList, this.context);
+    }
+    
+    @Override
+    public ASTNode transform(org.kframework.kil.TermCons node) throws TransformerException {
+        List<Term> contents = new ArrayList<Term>();
+        for (org.kframework.kil.Term term : node.getContents()) {
+            contents.add((Term) term.accept(this));
+        }
+        return new TermCons(node.getCons(), contents, definition.context());
+    }
+
+    @Override
+    public ASTNode transform(org.kframework.kil.KItemProjection node) throws TransformerException {
+        return new KItemProjection(Kind.of(node.projectedKind()), (Term) node.getTerm().accept(this));
     }
 
     @Override
     public ASTNode transform(org.kframework.kil.KLabelConstant node) throws TransformerException {
         return KLabelConstant.of(node.getLabel(), this.context);
+    }
+
+    @Override
+    public ASTNode transform(org.kframework.kil.KLabelInjection node) throws TransformerException {
+        return new KLabelInjection((Term) node.getTerm().accept(this));
     }
 
     @Override
@@ -235,37 +230,16 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(org.kframework.kil.Cell node) throws TransformerException {
-        if (node.getContents() instanceof org.kframework.kil.Bag
-                || node.getContents() instanceof org.kframework.kil.Cell) {
-            List<org.kframework.kil.Term> contents;
-            if (node.getContents() instanceof org.kframework.kil.Bag) {
-                contents = new ArrayList<org.kframework.kil.Term>();
-                org.kframework.kil.Bag.flatten(contents, ((org.kframework.kil.Bag) node.getContents()).getContents());
-            } else {
-                contents = Collections.singletonList(node.getContents());
-            }
-
+        if (node.getContents() instanceof org.kframework.kil.Bag) {
+            CellCollection cellCollection = (CellCollection) node.getContents().accept(this);
+            return new Cell<CellCollection>(node.getLabel(), cellCollection);
+        } else if (node.getContents() instanceof org.kframework.kil.Cell) {
             Multimap<String, Cell> cells = ArrayListMultimap.create();
-            Variable variable = null;
-            for (org.kframework.kil.Term term : contents) {
-                if (term instanceof TermComment) {
-                    continue;
-                }
-                if (term instanceof org.kframework.kil.Cell) {
-                    Cell<?> cell = (Cell<?>) term.accept(this);
-                    cells.put(cell.getLabel(), cell);
-                } else if (variable == null
-                        && term instanceof org.kframework.kil.Variable
-                        && (term.getSort().equals(org.kframework.kil.KSorts.BAG))) {
-                    variable = (Variable) term.accept(this);
-                } else {
-                    throw new RuntimeException();
-                }
-            }
+            Cell<?> cell = (Cell<?>) node.getContents().accept(this);
+            cells.put(cell.getLabel(), cell);
 
-            return new Cell<CellCollection>(
-                    node.getLabel(),
-                    new CellCollection(cells, variable, context));
+            return new Cell<CellCollection>(node.getLabel(),
+                    new CellCollection(cells, context));
         } else {
             Term content = (Term) node.getContents().accept(this);
 
@@ -291,12 +265,42 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 return new Cell<MapUpdate>(node.getLabel(), (MapUpdate) content);
             } else if (content instanceof Variable) {
                 return new Cell<Term>(node.getLabel(), content);
+            } else if (content instanceof BuiltinMgu) {
+                return new Cell<BuiltinMgu>(node.getLabel(), (BuiltinMgu) content);
             } else {
                 throw new RuntimeException();
             }
         }
     }
 
+    @Override
+    public ASTNode transform(org.kframework.kil.Bag node)
+            throws TransformerException {
+        List<org.kframework.kil.Term> contents = new ArrayList<org.kframework.kil.Term>();
+        org.kframework.kil.Bag.flatten(contents,
+                ((org.kframework.kil.Bag) node).getContents());
+
+        Multimap<String, Cell> cells = ArrayListMultimap.create();
+        Variable variable = null;
+        for (org.kframework.kil.Term term : contents) {
+            if (term instanceof TermComment) {
+                continue;
+            }
+            if (term instanceof org.kframework.kil.Cell) {
+                Cell<?> cell = (Cell<?>) term.accept(this);
+                cells.put(cell.getLabel(), cell);
+            } else if (variable == null
+                    && term instanceof org.kframework.kil.Variable
+                    && (term.getSort().equals(org.kframework.kil.KSorts.BAG))) {
+                variable = (Variable) term.accept(this);
+            } else {
+                throw new RuntimeException();
+            }
+        }
+
+        return new CellCollection(cells, variable, context);
+    }
+    
     @Override
     public ASTNode transform(org.kframework.kil.ListBuiltin node) throws TransformerException {
         ArrayList<Term> elementsLeft = new ArrayList<Term>(node.elementsLeft().size());
@@ -476,6 +480,13 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             return new Variable(node.getName(), Kind.CELL_COLLECTION.toString());
         }
 
+        if (node.getSort().equals(org.kframework.kil.KSorts.K)) {
+            return new Variable(node.getName(), KSorts.KSEQUENCE);
+        }
+        if (node.getSort().equals(org.kframework.kil.KSorts.KLIST)) {
+            return new Variable(node.getName(), KSorts.KLIST);
+        }
+
         DataStructureSort dataStructureSort = context.dataStructureSortOf(node.getSort());
         if (dataStructureSort != null) {
             String sort = null;
@@ -498,6 +509,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 return new Variable(node.getName(), sort);
             }
         }
+
         return new Variable(node.getName(), node.getSort());
     }
 
@@ -520,16 +532,16 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             if (term instanceof KItem &&
                    (((KItem) term).kLabel().toString().equals(ANDBOOL_KLABEL.getLabel()) || 
                     ((KItem) term).kLabel().toString().equals(BOOL_ANDBOOL_KLABEL.getLabel()))) {
-                for (Term item : ((KItem) term).kList().getContents()) {
+                for (Term item : ((KList) ((KItem) term).kList()).getContents()) {
                     if (item instanceof KItem && ((KItem) item).kLabel().toString().equals("'fresh(_)")) {
-                        freshVariables.add((Variable) ((KItem) item).kList().get(0));
+                        freshVariables.add((Variable) ((KList) ((KItem) item).kList()).get(0));
                     } else {
                         requires.add(item);
                     }
                 }
             } else {
                 if (term instanceof KItem && ((KItem) term).kLabel().toString().equals("'fresh(_)")) {
-                    freshVariables.add((Variable) ((KItem) term).kList().get(0));
+                    freshVariables.add((Variable) ((KList) ((KItem) term).kList()).get(0));
                 } else {
                     requires.add(term);
                 }
@@ -540,7 +552,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             Term term = (Term) node.getEnsures().accept(this);
             // TODO(YilongL): "'_andBool_" or "#andBool"?
             if (term instanceof KItem && ((KItem) term).kLabel().toString().equals("'_andBool_")) {
-                for (Term item : ((KItem) term).kList().getContents()) {
+                for (Term item : ((KList) ((KItem) term).kList()).getContents()) {
                     ensures.add(item);
                 }
             } else {
@@ -620,13 +632,13 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         Module singletonModule = node.getSingletonModule();
 
         /*
-         * Liyi Li:
-         * add new constraint such that if an anywhere rule contains an attribute with "alphaRule"
-         * then we remove the rule
+         * Liyi Li: add new constraint such that if an anywhere rule contains an
+         * attribute with "alphaRule" then we remove the rule
          */
         for (org.kframework.kil.Rule rule : singletonModule.getRules()) {
             if (rule.containsAttribute(Attribute.PREDICATE.getKey())
-                || (rule.containsAttribute(Attribute.ANYWHERE.getKey()) && (! rule.containsAttribute("alphaRule")))) {
+                    || (rule.containsAttribute(Attribute.ANYWHERE.getKey()) && (!rule
+                            .containsAttribute("alphaRule")))) {
                 continue;
             }
 

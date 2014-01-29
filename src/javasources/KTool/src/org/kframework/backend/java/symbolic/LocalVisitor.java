@@ -115,6 +115,11 @@ public class LocalVisitor implements Visitor {
     }
 
     @Override
+    public void visit(KItemProjection kItemProjection) {
+        visit((Term) kItemProjection);
+    }
+
+    @Override
     public void visit(KCollection kCollection) {
         visit((Collection) kCollection);
     }
@@ -183,6 +188,11 @@ public class LocalVisitor implements Visitor {
     public void visit(Term node) {
         visit((JavaSymbolicObject) node);
     }
+    
+    @Override
+    public void visit(TermCons termCons) {
+        visit((Term) termCons);
+    }
 
     @Override
     public void visit(Token token) {
@@ -202,5 +212,10 @@ public class LocalVisitor implements Visitor {
     @Override
     public void visit(Variable variable) {
         visit((Term) variable);
+    }
+    
+    @Override
+    public void visit(BuiltinMgu mgu) {
+        visit((Term) mgu);
     }
 }

@@ -5,6 +5,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.Backend;
 import org.kframework.backend.html.HtmlBackend;
 import org.kframework.backend.java.symbolic.JavaSymbolicBackend;
+import org.kframework.backend.kore.KilTransformer;
 import org.kframework.backend.kore.KoreBackend;
 import org.kframework.backend.latex.LatexBackend;
 import org.kframework.backend.latex.PdfBackend;
@@ -16,8 +17,10 @@ import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Definition;
+import org.kframework.kil.Module;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.CountNodesVisitor;
+import org.kframework.krun.K;
 import org.kframework.krun.Main;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.utils.BinaryLoader;
@@ -29,6 +32,7 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
+import static org.apache.commons.io.FileUtils.writeStringToFile;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -36,6 +40,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 public class KompileFrontEnd {
@@ -95,6 +100,7 @@ public class KompileFrontEnd {
     }
 
     private static void kompile(CommandLine cmd) throws IOException {
+        K.do_kompilation = true;
         final String def = cmd.getArgs()[0];
         final String step = cmd.getOptionValue("step", null);
         GlobalSettings.setMainFile(def);
@@ -196,6 +202,44 @@ public class KompileFrontEnd {
         if (backend != null) {
             String lang = cmd.getOptionValue("main-module",
                     FileUtil.getMainModule(GlobalSettings.mainFile.getName()));
+            
+            if(cmd.hasOption("kore")){
+            	
+            	Definition toKore = DefinitionLoader.loadDefinition(GlobalSettings.mainFile, lang,
+                        backend.autoinclude(), context);
+                
+            	KilTransformer trans = new KilTransformer(context);
+                ArrayList<Module> temp = new ArrayList<Module>();
+                File mainKoreFile = new File((toKore.getMainFile().substring(0, toKore.getMainFile().length()-2))+".kore");
+                for(int i = 0; i < toKore.getItems().size(); ++i){
+                	
+                	if(toKore.getItems().get(i) instanceof Module){
+                		temp.add((Module) toKore.getItems().get(i));
+                	} else{
+                		
+                    	writeStringToFile(mainKoreFile,trans.kilToKore(toKore.getItems().get(i)));
+                	}
+                }
+                
+                HashMap<String,File> fileTable = new HashMap<String,File>();
+                
+                for(int i = 0; i < temp.size(); ++i){
+                	
+                	if(!fileTable.containsKey((temp.get(i).getFilename()))){
+                		
+                		fileTable.put(temp.get(i).getFilename(), 
+                				new File((temp.get(i).getFilename().substring(0, 
+                						temp.get(i).getFilename().length()-2))+".kore"));
+                		}
+                }
+                
+                for(int i = 0; i < temp.size(); ++i){
+                	
+                	writeStringToFile(fileTable.get(temp.get(i).getFilename()),trans.kilToKore(temp.get(i)));
+                }
+                return;
+            }
+            
             genericCompile(lang, backend, step, context);
         }
 
@@ -221,7 +265,7 @@ public class KompileFrontEnd {
                 backend.autoinclude(), context);
         
         javaDef.accept(new CountNodesVisitor(context));
-
+        
         CompilerSteps<Definition> steps = backend.getCompilationSteps();
 
         if (step == null) {
@@ -237,6 +281,7 @@ public class KompileFrontEnd {
                 MetaK.getConfiguration(javaDef, context));
 
         backend.run(javaDef);
+        
     }
 
     private static void printUsageS(KompileOptionsParser op) {

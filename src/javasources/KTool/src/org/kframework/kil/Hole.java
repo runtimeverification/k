@@ -71,4 +71,5 @@ public class Hole extends Term {
 	public int hashCode() {
 		return sort.hashCode();
 	}
+
 }

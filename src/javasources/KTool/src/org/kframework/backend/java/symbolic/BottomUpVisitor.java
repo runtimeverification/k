@@ -120,6 +120,12 @@ public class BottomUpVisitor implements Visitor {
     }
 
     @Override
+    public void visit(KItemProjection kItemProjection) {
+        kItemProjection.term().accept(this);
+        visit((Term) kItemProjection);
+    }
+
+    @Override
     public void visit(KCollection kCollection) {
         for (Term term : kCollection) {
             term.accept(this);
@@ -226,6 +232,14 @@ public class BottomUpVisitor implements Visitor {
     @Override public void visit(Term term) { }
 
     @Override
+    public void visit(TermCons termCons) {
+        for (Term term : termCons.contents()) {
+            term.accept(this);
+        }
+        visit((Term) termCons);
+    }
+    
+    @Override
     public void visit(Token token) {
         visit((Term) token);
     }
@@ -246,5 +260,10 @@ public class BottomUpVisitor implements Visitor {
     @Override
     public void visit(Variable variable) {
         visit((Term) variable);
+    }
+    
+    @Override
+    public void visit(BuiltinMgu mgu) {
+        visit((Term) mgu);
     }
 }

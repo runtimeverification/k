@@ -40,7 +40,10 @@ public class Hole extends Term implements Sorted {
 
     @Override
     public int hashCode() {
-        return super.hashCode();
+        if (hashCode == 0) {
+            hashCode = super.hashCode();
+        }
+        return hashCode;
     }
 
     @Override

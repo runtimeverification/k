@@ -1,5 +1,7 @@
 package org.kframework.kil;
 
+import java.util.ArrayList;
+
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.Transformer;
@@ -68,7 +70,7 @@ public class MapItem extends CollectionItem {
 	}
 
 	public String toString() {
-		return this.key + " |->" + this.value;
+		return this.key + " |-> " + this.value;
 	}
 
 	@Override
@@ -115,4 +117,5 @@ public class MapItem extends CollectionItem {
 	public int hashCode() {
 		return key.hashCode() * 31 + value.hashCode();
 	}
+
 }

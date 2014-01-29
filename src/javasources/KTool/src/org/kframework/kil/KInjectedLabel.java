@@ -94,4 +94,5 @@ public class KInjectedLabel extends Term {
 	public int hashCode() {
 		return term.hashCode();
 	}
+
 }

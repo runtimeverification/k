@@ -66,4 +66,5 @@ public class TermComment extends Term {
 			return false;
 		return true;
 	}
+
 }

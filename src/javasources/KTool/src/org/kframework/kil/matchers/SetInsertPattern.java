@@ -2,6 +2,10 @@ package org.kframework.kil.matchers;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cast;
+import org.kframework.kil.KApp;
+import org.kframework.kil.KLabelConstant;
+import org.kframework.kil.KList;
+import org.kframework.kil.KSequence;
 import org.kframework.kil.Set;
 import org.kframework.kil.SetItem;
 import org.kframework.kil.Term;
@@ -116,5 +120,6 @@ public class SetInsertPattern extends Term {
 		// TODO: finish implementing this equals
 		return true;
 	}
+  
 }  
 

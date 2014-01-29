@@ -1,14 +1,13 @@
 package org.kframework.kil;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
 
 
 /**
@@ -36,7 +35,7 @@ public class MapBuiltin extends DataStructureBuiltin {
 
     @Override
     public Term shallowCopy() {
-        throw new UnsupportedOperationException();
+        return new MapBuiltin(dataStructureSort, baseTerms, elements);
     }
 
     @Override

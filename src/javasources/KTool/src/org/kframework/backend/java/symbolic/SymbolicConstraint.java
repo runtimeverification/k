@@ -1,13 +1,21 @@
 package org.kframework.backend.java.symbolic;
 
 
-import com.microsoft.z3.BoolExpr;
-import com.microsoft.z3.Expr;
-import com.microsoft.z3.Sort;
-import com.microsoft.z3.Symbol;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
+
 import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.Int32Token;
+import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.util.GappaPrinter;
 import org.kframework.backend.java.util.GappaServer;
@@ -15,18 +23,18 @@ import org.kframework.backend.java.util.KSorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.kil.ASTNode;
-
-import java.util.*;
-import java.util.Collection;
+import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.krun.K;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
-
+import com.microsoft.z3.BoolExpr;
+import com.microsoft.z3.Expr;
 import com.microsoft.z3.Solver;
+import com.microsoft.z3.Sort;
 import com.microsoft.z3.Status;
+import com.microsoft.z3.Symbol;
 import com.microsoft.z3.Z3Exception;
-import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.krun.K;
 
 
 /**
@@ -37,6 +45,7 @@ import org.kframework.krun.K;
 public class SymbolicConstraint extends JavaSymbolicObject {
     private static final boolean DEBUG = true;
 
+    // TODO(YilongL): can't we use this.context instead of passing in a new one?
     public void orientSubstitution(Set<Variable> variables, TermContext termContext) {
         Map<Variable, Term> newSubstitution = new HashMap<>();
         if (substitution.keySet().containsAll(variables)) {
@@ -111,12 +120,12 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
         substitution.clear();
         for (Map.Entry<Variable, Term> subst : result.entrySet()) {
-            checkTruthValBeforePutIntoConstraint(subst.getKey(), subst.getValue());
+            checkTruthValBeforePutIntoConstraint(subst.getKey(), subst.getValue(), true);
         }
         
         /*
-         * after re-orientation, the RHS's of the {@code equalities} may contain
-         * variables on the LHS's of the {@code substitution}
+         * after re-orientation, the {@code equalities} may contain variables on
+         * the LHS's of the {@code substitution}
          */
         isNormal = false;
     }
@@ -146,11 +155,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         private Equality(Term leftHandSide, Term rightHandSide) {
             if (leftHandSide instanceof Bottom) rightHandSide = leftHandSide;
             if (rightHandSide instanceof Bottom) leftHandSide = rightHandSide;
-            assert leftHandSide.kind() == rightHandSide.kind()
-                    || ((leftHandSide.kind() == Kind.KITEM || leftHandSide.kind() == Kind.K
-                         || leftHandSide.kind() == Kind.KLIST)
-                        && (rightHandSide.kind() == Kind.KITEM || rightHandSide.kind() == Kind.K
-                            || rightHandSide.kind() == Kind.KLIST)):
+
+            assert checkKindMisMatch(leftHandSide, rightHandSide):
                     "kind mismatch between "
                     + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
                     + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
@@ -158,23 +164,26 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             if (leftHandSide.kind() == Kind.K || leftHandSide.kind() == Kind.KLIST) {
                 leftHandSide = KCollection.downKind(leftHandSide);
             }
+            if (leftHandSide.kind() == Kind.CELL_COLLECTION) {
+                leftHandSide = CellCollection.downKind(leftHandSide);
+            }
             if (rightHandSide.kind() == Kind.K || rightHandSide.kind() == Kind.KLIST) {
                 rightHandSide = KCollection.downKind(rightHandSide);
             }
+            if (rightHandSide.kind() == Kind.CELL_COLLECTION) {
+                rightHandSide = CellCollection.downKind(rightHandSide);
+            }
+            
+            // YilongL: we can not do the following here for now because builtin
+            // lookups maynot have the correct, or concrete, kind/sort
+            // e.g., currently, node ListLookup (always) has Kind.K
+            // Besides, it is better leave the complex decision in one place,
+            // which is the SymbolicUnifier, the assertion at the beginning is
+            // merely a simple sanity check
+            // assert leftHandSide.kind() == rightHandSide.kind();
 
             this.leftHandSide = leftHandSide;
             this.rightHandSide = rightHandSide;
-        }
-
-        /**
-         * Evaluates pending functions and predicate operations in this
-         * equality.
-         * 
-         * @param constraint
-         */
-        public void evaluate(SymbolicConstraint constraint) {
-            leftHandSide = leftHandSide.evaluate(constraint, context);
-            rightHandSide = rightHandSide.evaluate(constraint, context);
         }
 
         public Term leftHandSide() {
@@ -214,14 +223,15 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             }
 
             // TODO(YilongL): find a general way to deal with this
+            // TODO(AndreiS): handle KLabel variables
             if (!K.do_testgen) {
-                if (leftHandSide instanceof KItem
-                        && ((KItem) leftHandSide).kLabel().isConstructor()) {
+                if (leftHandSide instanceof KItem && ((KItem) leftHandSide).kLabel() instanceof KLabel
+                        && ((KLabel) ((KItem) leftHandSide).kLabel()).isConstructor()) {
                     return !definition.context().isSubsortedEq(
                             ((Sorted) rightHandSide).sort(),
                             ((KItem) leftHandSide).sort());
-                } else if (rightHandSide instanceof KItem
-                        && ((KItem) rightHandSide).kLabel().isConstructor()) {
+                } else if (rightHandSide instanceof KItem && ((KItem) rightHandSide).kLabel() instanceof KLabel
+                        && ((KLabel) ((KItem) rightHandSide).kLabel()).isConstructor()) {
                     return !definition.context().isSubsortedEq(
                             ((Sorted) leftHandSide).sort(),
                             ((KItem) rightHandSide).sort());
@@ -231,16 +241,16 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                         ((Sorted) rightHandSide).sort()));
                 }
             } else {
-                if (leftHandSide instanceof KItem
-                        && ((KItem) leftHandSide).kLabel().isConstructor()) {
+                if (leftHandSide instanceof KItem && ((KItem) leftHandSide).kLabel() instanceof KLabel
+                        && ((KLabel) ((KItem) leftHandSide).kLabel()).isConstructor()) {
                     for (String pms : ((KItem) leftHandSide).possibleMinimalSorts()) {
                         if (definition.context().isSubsortedEq(((Sorted) rightHandSide).sort(), pms)) {
                             return false;
                         }
                     }
                     return true;
-                } else if (rightHandSide instanceof KItem
-                        && ((KItem) rightHandSide).kLabel().isConstructor()) {
+                } else if (rightHandSide instanceof KItem && ((KItem) rightHandSide).kLabel() instanceof KLabel
+                        && ((KLabel) ((KItem) rightHandSide).kLabel()).isConstructor()) {
                     for (String pms : ((KItem) rightHandSide).possibleMinimalSorts()) {
                         if (definition.context().isSubsortedEq(((Sorted) leftHandSide).sort(), pms)) {
                             return false;
@@ -281,23 +291,22 @@ public class SymbolicConstraint extends JavaSymbolicObject {
          * 
          * @param substitution
          *            the specified substitution map
-         * @return {@code true} if this equality has changed after the
-         *         substitution; otherwise, {@code false}
          */
-        private boolean substitute(Map<Variable, ? extends Term> substitution) {
-            Term leftHandSide = this.leftHandSide.substituteWithBinders(substitution, context);
-            Term rightHandSide = this.rightHandSide.substituteWithBinders(substitution, context);
-            
-            boolean changed = false;            
-            if (leftHandSide != this.leftHandSide) {
-                changed = true;
-                this.leftHandSide = leftHandSide;
-            }
-            if (rightHandSide != this.rightHandSide) {
-                changed = true;
-                this.rightHandSide = rightHandSide;
-            }
-            return changed;
+        private void substitute(Map<Variable, ? extends Term> substitution) {
+            leftHandSide = leftHandSide.substituteWithBinders(substitution, context);
+            rightHandSide = rightHandSide.substituteWithBinders(substitution, context);
+        }
+        
+        /**
+         * Substitutes this equality with according to a specified substitution
+         * map and evaluates pending functions.
+         * 
+         * @param substitution
+         *            the specified substitution map
+         */
+        public void substituteAndEvaluate(Map<Variable, ? extends Term> substitution) {
+            leftHandSide = leftHandSide.substituteAndEvaluate(substitution, context);
+            rightHandSide = rightHandSide.substituteAndEvaluate(substitution, context);
         }
 
         @Override
@@ -410,28 +419,28 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      *         new equality
      */
     public TruthValue add(Term leftHandSide, Term rightHandSide) {
-        assert leftHandSide.kind() == rightHandSide.kind()
-                || ((leftHandSide.kind() == Kind.KITEM || leftHandSide.kind() == Kind.K
-                     || leftHandSide.kind() == Kind.KLIST)
-                    && (rightHandSide.kind() == Kind.KITEM || rightHandSide.kind() == Kind.K
-                        || rightHandSide.kind() == Kind.KLIST)):
+        assert checkKindMisMatch(leftHandSide, rightHandSide):
                 "kind mismatch between "
                 + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
                 + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
 
-        Term normalizedLeftHandSide = leftHandSide.substituteWithBinders(substitution, context);
-        if (normalizedLeftHandSide != leftHandSide) {
-            normalizedLeftHandSide = normalizedLeftHandSide.evaluate(this, context);
-        }
+        normalize();
+        leftHandSide = leftHandSide.substituteAndEvaluate(substitution, context);
+        rightHandSide = rightHandSide.substituteAndEvaluate(substitution, context);
 
-        Term normalizedRightHandSide = rightHandSide.substituteWithBinders(substitution, context);
-        if (normalizedRightHandSide != rightHandSide) {
-            normalizedRightHandSide = normalizedRightHandSide.evaluate(this, context);
-        }
-
-        checkTruthValBeforePutIntoConstraint(normalizedLeftHandSide, normalizedRightHandSide);
+        checkTruthValBeforePutIntoConstraint(leftHandSide, rightHandSide, false);
 
         return truthValue;
+    }
+    
+    private boolean checkKindMisMatch(Term leftHandSide, Term rightHandSide) {
+        return leftHandSide.kind() == rightHandSide.kind()
+                || ((leftHandSide.kind() == Kind.KITEM
+                        || leftHandSide.kind() == Kind.K || leftHandSide.kind() == Kind.KLIST) && (rightHandSide
+                        .kind() == Kind.KITEM || rightHandSide.kind() == Kind.K || rightHandSide
+                        .kind() == Kind.KLIST))
+                || ((leftHandSide.kind() == Kind.CELL || leftHandSide.kind() == Kind.CELL_COLLECTION) && (rightHandSide
+                        .kind() == Kind.CELL || rightHandSide.kind() == Kind.CELL_COLLECTION));
     }
     
     /**
@@ -443,12 +452,19 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      *            the left-hand side of the specified equality
      * @param rightHandSide
      *            the right-hand side of the specified equality
+     * @param putInSubst
+     *            specifies whether the equality can be safely added to the
+     *            substitution map of this symbolic constraint
      */
-    private void checkTruthValBeforePutIntoConstraint(Term leftHandSide, Term rightHandSide) {
-        boolean isSubst = leftHandSide instanceof Variable;
+    private void checkTruthValBeforePutIntoConstraint(Term leftHandSide, Term rightHandSide, boolean putInSubst) {
+        if (truthValue == TruthValue.FALSE) {
+            return;
+        }
+        
+        // assume the truthValue to be TRUE or UNKNOWN from now on
         Equality equality = this.new Equality(leftHandSide, rightHandSide);
         if (equality.isUnknown()){
-            if (isSubst) {
+            if (putInSubst) {
                 Term origVal = substitution.put((Variable) leftHandSide, rightHandSide);
                 if (origVal == null) {
                     isNormal = false;
@@ -459,7 +475,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             }
             truthValue = TruthValue.UNKNOWN;
         } else if (equality.isFalse()) {
-            if (isSubst) {
+            if (putInSubst) {
                 substitution.put((Variable) leftHandSide, rightHandSide);
             } else {
                 equalities.add(equality);
@@ -603,7 +619,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             right.accept(ifThenElseFinder);
             if (!ifThenElseFinder.result.isEmpty()) {
                 KItem ite = ifThenElseFinder.result.get(0);
-                Term condition = ite.kList().get(0);
+                // TODO (AndreiS): handle KList variables
+                Term condition = ((KList) ite.kList()).get(0);
                 if (DEBUG) {
                     System.out.println("Split on " + condition);
                 }
@@ -797,13 +814,29 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      */
     public Collection<SymbolicConstraint> getMultiConstraints() {
         if (!unifier.multiConstraints.isEmpty()) {
-            assert unifier.multiConstraints.size() == 1;
-
+            assert unifier.multiConstraints.size() <= 2;
+            
             List<SymbolicConstraint> multiConstraints = new ArrayList<SymbolicConstraint>();
-            for (SymbolicConstraint constraint : unifier.multiConstraints.iterator().next()) {
-                constraint.addAll(this);
-                constraint.simplify();
-                multiConstraints.add(constraint);
+            Iterator<Collection<SymbolicConstraint>> iterator = unifier.multiConstraints.iterator();
+            if (unifier.multiConstraints.size() == 1) {
+                for (SymbolicConstraint constraint : iterator.next()) {
+                    constraint.addAll(this);
+                    constraint.simplify();
+                    multiConstraints.add(constraint);
+                }
+            } else {
+                Collection<SymbolicConstraint> constraints = iterator.next();
+                Collection<SymbolicConstraint> otherConstraints = iterator.next();
+                for (SymbolicConstraint cnstr1 : constraints) {
+                    for (SymbolicConstraint cnstr2 : otherConstraints) {
+                        SymbolicConstraint constraint = new SymbolicConstraint(
+                                this, context);
+                        constraint.addAll(cnstr1);
+                        constraint.addAll(cnstr2);
+                        constraint.simplify();
+                        multiConstraints.add(constraint);
+                    }
+                }
             }
             return multiConstraints;
         } else {
@@ -818,6 +851,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      * @return the truth value of this symbolic constraint after simplification
      */
     public TruthValue simplify() {
+        if (truthValue == TruthValue.FALSE) {
+            return truthValue;
+        }
+        
         boolean change; // specifies if the equalities have been further
                          // simplified in the last iteration
         
@@ -876,9 +913,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         Set<Equality> equalitiesToRemove = new HashSet<Equality>();
         for (Iterator<Equality> iterator = equalities.iterator(); iterator.hasNext();) {
             Equality equality = iterator.next();
-            if (equality.substitute(substitution)) {
-                equality.evaluate(this);
-            }
+            equality.substituteAndEvaluate(substitution);
 
             if (equality.isTrue()) {
                 equalitiesToRemove.add(equality);
@@ -930,9 +965,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                  * need to do so
                  */
                 if (!equalitiesToRemove.contains(previousEquality)) {
-                    if (previousEquality.substitute(tempSubst)) {
-                        previousEquality.evaluate(this);
-                    }
+                    previousEquality.substituteAndEvaluate(tempSubst);
                     if (previousEquality.isTrue()) {
                         equalitiesToRemove.add(previousEquality);
                     } else if (previousEquality.isFalse()) {
@@ -968,14 +1001,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         @SuppressWarnings("unchecked")
         Map.Entry<Variable, Term>[] entries = substitution.entrySet().toArray(new Map.Entry[substitution.size()]);
         for (Map.Entry<Variable, Term> subst : entries) {
-            Term term = subst.getValue().substituteWithBinders(substMap, context);
+            Term term = subst.getValue().substituteAndEvaluate(substMap, context);
             if (term != subst.getValue()) {
-                term = term.evaluate(this, context);
-                /*
-                 * important: check the truth value of the substitution before
-                 * putting it into the substitution map
-                 */
-                checkTruthValBeforePutIntoConstraint(subst.getKey(), term);
+                checkTruthValBeforePutIntoConstraint(subst.getKey(), term, true);
             }
         }
         
@@ -1060,6 +1088,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
     @Override
     public int hashCode() {
+        // TODO(YilongL): normalize and sort equalities?
         int hash = 1;
         hash = hash * Utils.HASH_PRIME + equalities.hashCode();
         hash = hash * Utils.HASH_PRIME + substitution.hashCode();

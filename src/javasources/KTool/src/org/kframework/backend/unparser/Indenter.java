@@ -42,6 +42,7 @@ public class Indenter {
 	}
 
 	public void write(String string) {
+//	    System.err.println("@" + string + "@"); // for debugging
 		if (atBOL) {
 			for (int i = 0; i < indentSize(); ++i) {
 				stringBuilder.append(" ");

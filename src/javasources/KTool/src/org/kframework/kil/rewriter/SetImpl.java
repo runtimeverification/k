@@ -5,6 +5,11 @@ import java.util.Set;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cast;
+import org.kframework.kil.KApp;
+import org.kframework.kil.KLabel;
+import org.kframework.kil.KLabelConstant;
+import org.kframework.kil.KList;
+import org.kframework.kil.KSequence;
 import org.kframework.kil.SetItem;
 import org.kframework.kil.Term;
 import org.kframework.kil.matchers.MatchCompilationException;
@@ -99,5 +104,9 @@ public class SetImpl extends Term {
 		SetImpl c = (SetImpl) o;
 		// TODO: finish implementing this equals
 		return true;
+	}
+
+	public Set<Term> getSet(){
+		return this.set;
 	}
 }

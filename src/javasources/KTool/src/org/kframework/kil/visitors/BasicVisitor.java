@@ -3,6 +3,7 @@ package org.kframework.kil.visitors;
 import java.util.HashSet;
 
 import org.kframework.kil.*;
+import org.kframework.kil.KItemProjection;
 
 public class BasicVisitor implements Visitor {
 	protected org.kframework.kil.loader.Context context;
@@ -549,7 +550,15 @@ public class BasicVisitor implements Visitor {
 		visit((Term) node);
 	}
 
-	@Override
+    @Override
+    public void visit(KItemProjection node) {
+        if (isVisited(node))
+            return;
+        node.getTerm().accept(this);
+        visit((Term) node);
+    }
+
+    @Override
 	public void visit(KLabel node) {
 		if (isVisited(node))
 			return;
@@ -563,7 +572,15 @@ public class BasicVisitor implements Visitor {
 		visit((KLabel) node);
 	}
 
-	@Override
+    @Override
+    public void visit(KLabelInjection node) {
+        if (isVisited(node))
+            return;
+        node.getTerm().accept(this);
+        visit((KLabel) node);
+    }
+
+    @Override
 	public void visit(Rewrite node) {
 		if (isVisited(node))
 			return;

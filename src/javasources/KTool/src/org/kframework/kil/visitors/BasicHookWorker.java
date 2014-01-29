@@ -1,6 +1,7 @@
 package org.kframework.kil.visitors;
 
 import org.kframework.kil.*;
+import org.kframework.kil.KItemProjection;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class BasicHookWorker implements Transformer {
@@ -299,7 +300,12 @@ public class BasicHookWorker implements Transformer {
 		return transform((Term) node);
 	}
 
-	@Override
+    @Override
+    public ASTNode transform(KItemProjection node) throws TransformerException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
 	public ASTNode transform(KLabel node) throws TransformerException {
 		return transform((Term) node);
 	}
@@ -307,6 +313,11 @@ public class BasicHookWorker implements Transformer {
     @Override
     public ASTNode transform(KLabelConstant node) throws TransformerException {
         return transform((KLabel) node);
+    }
+
+    @Override
+    public ASTNode transform(KLabelInjection node) throws TransformerException {
+        throw new UnsupportedOperationException();
     }
 
     @Override

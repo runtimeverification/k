@@ -2,5 +2,5 @@ Search results:
 
 Solution 1:
 V:K -->
-Tree ( Tree ( Tree ( Leaf ( 5 ), (Leaf ( 4 )), .List{","} ), (Leaf ( 3 )), 
-  .List{","} ), (Tree ( Leaf ( 2 ), (Leaf ( 1 )), .List{","} )), .List{","} )
+Tree ( ((Tree ( ((Tree ( ((Leaf ( 5 )), ((Leaf ( 4 )))) )), ((Leaf ( 3 )))) ))
+  , ((Tree ( ((Leaf ( 2 )), ((Leaf ( 1 )))) )))) )

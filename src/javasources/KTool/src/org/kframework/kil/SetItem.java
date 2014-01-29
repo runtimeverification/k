@@ -54,4 +54,5 @@ public class SetItem extends CollectionItem {
 	public SetItem shallowCopy() {
 		return new SetItem(this);
 	}
+
 }

@@ -4,6 +4,7 @@ import java.util.*;
 
 import org.kframework.kil.*;
 import org.kframework.kil.Collection;
+import org.kframework.kil.KItemProjection;
 import org.kframework.kil.List;
 import org.kframework.kil.Map;
 import org.kframework.kil.Set;
@@ -479,13 +480,29 @@ public class BasicTransformer implements Transformer {
         return transform((Term) result);
 	}
 
-	@Override
+    @Override
+    public ASTNode transform(KItemProjection node) throws TransformerException {
+        Term term = (Term) node.getTerm().accept(this);
+        node = node.shallowCopy();
+        node.setTerm(term);
+        return transform((Term) node);
+    }
+
+    @Override
 	public ASTNode transform(KLabel node) throws TransformerException {
 		return transform((Term) node);
 	}
 
     @Override
     public ASTNode transform(KLabelConstant node) throws TransformerException {
+        return transform((KLabel) node);
+    }
+
+    @Override
+    public ASTNode transform(KLabelInjection node) throws TransformerException {
+        Term term = (Term) node.getTerm().accept(this);
+        node = node.shallowCopy();
+        node.setTerm(term);
         return transform((KLabel) node);
     }
 

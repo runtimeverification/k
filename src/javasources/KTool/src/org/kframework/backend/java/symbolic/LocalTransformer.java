@@ -1,8 +1,8 @@
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.Int32Token;
+import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.*;
@@ -20,7 +20,6 @@ public class LocalTransformer implements Transformer {
 
     protected final TermContext context;
 
-    
     public LocalTransformer() {
         this.context = null;
     }
@@ -105,6 +104,11 @@ public class LocalTransformer implements Transformer {
     }
 
     @Override
+    public ASTNode transform(KItemProjection kItemProjection) {
+        return transform((Term) kItemProjection);
+    }
+
+    @Override
     public ASTNode transform(KItem kItem) {
         return transform((Term) kItem);
     }
@@ -182,6 +186,11 @@ public class LocalTransformer implements Transformer {
     public ASTNode transform(Term node) {
         return transform((JavaSymbolicObject) node);
     }
+    
+    @Override
+    public ASTNode transform(TermCons termCons) {
+        return transform((Term) termCons);
+    }
 
     @Override
     public ASTNode transform(Token token) {
@@ -201,5 +210,10 @@ public class LocalTransformer implements Transformer {
     @Override
     public ASTNode transform(Variable variable) {
         return transform((Term) variable);
+    }
+    
+    @Override
+    public ASTNode transform(BuiltinMgu mgu) {
+        return transform((Term) mgu);
     }
 }

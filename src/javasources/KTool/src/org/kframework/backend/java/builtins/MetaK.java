@@ -151,4 +151,17 @@ public class MetaK {
         return e;
     }
 
+    /**
+     * Returns the K label of a specified {@link KItem}.
+     * 
+     * @param kItem
+     *            the specified {@code KItem}
+     * @param context
+     *            the term context
+     * @return the K label
+     */
+    public static KLabel getKLabel(KItem kItem, TermContext context) {
+        // TODO(AndreiS): handle KLabel variables
+        return (KLabel) kItem.kLabel();
+    }
 }

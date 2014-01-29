@@ -1,11 +1,19 @@
 package org.kframework.backend.java.symbolic;
 
-import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.kil.JavaSymbolicObject;
+import org.kframework.backend.java.kil.KCollection;
+import org.kframework.backend.java.kil.KCollectionFragment;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.KSequence;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Variable;
+import org.kframework.kil.ASTNode;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
 
 import com.google.common.collect.ImmutableList;
-import org.kframework.kil.ASTNode;
 
 
 /**
@@ -16,14 +24,13 @@ import org.kframework.kil.ASTNode;
 public class SubstitutionTransformer extends PrePostTransformer {
 
     private final Map<Variable, ? extends Term> substitution;
-
+    
     public SubstitutionTransformer(Map<Variable, ? extends Term> substitution, TermContext context) {
     	super(context);
         this.substitution = substitution;
+        preTransformer.addTransformer(new LocalVariableChecker());
         postTransformer.addTransformer(new LocalSubstitutionTransformer());
         postTransformer.addTransformer(new VariableUpdaterTransformer());
-//        preTransformer.addTransformer(new LocalVariableChecker());
-        preTransformer.addTransformer(new LocalSubstitutionChecker(context));
     }
 
     private class LocalSubstitutionTransformer extends LocalTransformer {
@@ -37,14 +44,24 @@ public class SubstitutionTransformer extends PrePostTransformer {
                     ImmutableList.Builder<Term> builder = new ImmutableList.Builder<Term>();
                     builder.addAll(fragment);
 
-                    KSequence kSequence;
-                    if (fragment.hasFrame()) {
-                        kSequence = new KSequence(builder.build(), fragment.frame());
+                    KCollection kCollection;
+                    if (fragment.getKCollection() instanceof KSequence) {
+                        if (fragment.hasFrame()) {
+                            kCollection = new KSequence(builder.build(), fragment.frame());
+                        } else {
+                            kCollection = new KSequence(builder.build());
+                        }
                     } else {
-                        kSequence = new KSequence(builder.build());
+                        assert fragment.getKCollection() instanceof KList;
+
+                        if (fragment.hasFrame()) {
+                            kCollection = new KList(builder.build(), fragment.frame());
+                        } else {
+                            kCollection = new KList(builder.build());
+                        }
                     }
 
-                    return kSequence;
+                    return kCollection;
                 } else {
                     return term;
                 }
@@ -58,19 +75,6 @@ public class SubstitutionTransformer extends PrePostTransformer {
      * Checks
      *
      */
-    private class LocalSubstitutionChecker extends LocalTransformer {
-        public LocalSubstitutionChecker(TermContext context) {
-            super(context);
-        }
-
-        @Override
-        public KList transform(KList kList) {
-            assert !kList.hasFrame() : "only KList with a fixed number of elements is supported";
-
-            return kList;
-        }
-    }
-
     private class LocalVariableChecker extends LocalTransformer {
         @Override
         public ASTNode transform(JavaSymbolicObject object) {

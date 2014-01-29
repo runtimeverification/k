@@ -55,7 +55,7 @@ public class BuiltinVisitorOperations {
 
     public static Term injectedTerm(Term kItem) {
         assert kItem instanceof KItem;
-        KLabel kLabel = ((KItem) kItem).kLabel();
+        Term kLabel = ((KItem) kItem).kLabel();
         assert kLabel instanceof KLabelInjection;
         final KLabelInjection kLabelInjection = (KLabelInjection) kLabel;
         return kLabelInjection.term();

@@ -385,7 +385,7 @@ public class StringUtil {
 					sb.append(' ');
 				i++;
 			} else {
-				if (str.charAt(i) == 'B' && str.charAt(i + 1) == 'K' && str.charAt(i + 2) == 'Q' && str.charAt(i + 3) == 'T') {
+				if (i + 3 < str.length() && str.charAt(i) == 'B' && str.charAt(i + 1) == 'K' && str.charAt(i + 2) == 'Q' && str.charAt(i + 3) == 'T') {
 					sb.append('`');
 					i += 3;
 				} else {

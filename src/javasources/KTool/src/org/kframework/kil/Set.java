@@ -55,4 +55,5 @@ public class Set extends Collection {
 	public Set shallowCopy() {
 		return new Set(this);
 	}
+
 }

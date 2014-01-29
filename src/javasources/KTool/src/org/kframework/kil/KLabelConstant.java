@@ -92,7 +92,7 @@ public class KLabelConstant extends KLabel {
 	/* unmodifiable view of the production list */
 	private final List<Production> productions;
 
-	private KLabelConstant(String label) {
+	public KLabelConstant(String label) {
 		this.label = label;
 		productions = Collections.emptyList();
 	}

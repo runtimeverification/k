@@ -23,6 +23,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import java.io.File;
 import java.io.IOException;
+import java.util.*;
 
 
 public class KTest {
@@ -62,7 +63,9 @@ public class KTest {
         case "k":
             TestCase tc = TestCase.makeTestCaseFromK(cmdArgs);
             tc.validate();
-            ret = new TestSuite(tc, cmdArgs);
+            List<TestCase> tcs = new LinkedList<>();
+            tcs.add(tc);
+            ret = new TestSuite(tcs, cmdArgs);
             break;
         default:
             // this code should be unreacable, because `validateArgs' should ensure that

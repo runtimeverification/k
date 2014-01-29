@@ -60,4 +60,5 @@ public class Map extends Collection {
 	public Map shallowCopy() {
 		return new Map(this);
 	}
+
 }

@@ -84,4 +84,8 @@ public class ListTerminator extends Term {
 	public int hashCode() {
 		return (sort + separator).hashCode();
 	}
+	
+	public String separator() {
+		return this.separator;
+	}
 }

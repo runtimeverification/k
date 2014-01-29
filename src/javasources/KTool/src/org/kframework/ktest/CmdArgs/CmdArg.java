@@ -89,6 +89,16 @@ public class CmdArg {
     private final int timeout;
 
     /**
+     * Update existing .out files.
+     */
+    private final boolean updateOut;
+
+    /**
+     * Newly generate .out files if needed.
+     */
+    private final boolean generateOut;
+
+    /**
      * Ignore whitespace while comparing program outputs.
      */
     private final boolean ignoreWS;
@@ -106,6 +116,7 @@ public class CmdArg {
     private CmdArg(String directory, String programs, String results, String[] extensions,
                    String[] excludes, Set<KTestStep> skips, int threads, boolean generateReport,
                    String targetFile, boolean verbose, ColorSetting colorSetting, int timeout,
+                   boolean updateOut, boolean generateOut,
                    boolean ignoreWS, boolean ignoreBalancedParens, boolean dry) {
         this.directory = directory;
         this.programs = programs;
@@ -119,6 +130,8 @@ public class CmdArg {
         this.verbose = verbose;
         this.colorSetting = colorSetting;
         this.timeout = timeout;
+        this.updateOut = updateOut;
+        this.generateOut = generateOut;
         this.ignoreWS = ignoreWS;
         this.ignoreBalancedParens = ignoreBalancedParens;
         this.dry = dry;
@@ -141,6 +154,8 @@ public class CmdArg {
         this.verbose = obj.verbose;
         this.colorSetting = obj.colorSetting;
         this.timeout = obj.timeout;
+        this.updateOut = obj.updateOut;
+        this.generateOut = obj.generateOut;
         this.ignoreWS = obj.ignoreWS;
         this.ignoreBalancedParens = obj.ignoreBalancedParens;
         this.dry = obj.dry;
@@ -185,6 +200,13 @@ public class CmdArg {
 
         boolean verbose = cmdOpts.hasOption(Constants.VERBOSE_OPTION);
 
+        boolean updateOut = cmdOpts.hasOption(Constants.UPDATE_OUT_OPTION);
+        boolean generateOut = cmdOpts.hasOption(Constants.GENERATE_OUT_OPTION);
+        if (updateOut && generateOut) {
+            throw new InvalidArgumentException("cannot have both options at once: --" +
+                Constants.UPDATE_OUT_OPTION + " and --" + Constants.GENERATE_OUT_OPTION);
+        }
+
         boolean ignoreWS = true;
         if (cmdOpts.hasOption("ignore-white-spaces")
                 && cmdOpts.getOptionValue("ignore-white-spaces").equals("off"))
@@ -199,8 +221,9 @@ public class CmdArg {
 
         return new CmdArg(directory, programs, results, extensions, excludes, parseSkips(cmdOpts),
                 parseThreads(cmdOpts), generateReport, targetFile, verbose,
-                parseColorSetting(cmdOpts), parseTimeout(cmdOpts), ignoreWS, ignoreBalancedParens,
-                dry);
+                parseColorSetting(cmdOpts), parseTimeout(cmdOpts),
+                updateOut, generateOut,
+                ignoreWS, ignoreBalancedParens, dry);
     }
 
     public String getDirectory() {
@@ -241,6 +264,14 @@ public class CmdArg {
 
     public int getTimeout() {
         return timeout;
+    }
+
+    public boolean getUpdateOut() {
+        return updateOut;
+    }
+
+    public boolean getGenerateOut() {
+        return generateOut;
     }
 
     public boolean getGenerateReport() {

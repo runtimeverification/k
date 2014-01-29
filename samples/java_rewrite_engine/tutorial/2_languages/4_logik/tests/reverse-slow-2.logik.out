@@ -1,0 +1,5 @@
+Search results:
+
+Solution 1:
+Solution:K -->
+L:Term |-> cons ( (c, ((cons ( (b, ((cons ( (a, nil) )))) )))) )

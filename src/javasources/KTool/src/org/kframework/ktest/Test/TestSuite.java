@@ -42,6 +42,10 @@ public class TestSuite {
      */
     private final int timeout;
 
+    private final boolean updateOut;
+
+    private final boolean generateOut;
+
     private final ReportGen reportGen;
 
     private final Comparator<String> strComparator;
@@ -62,7 +66,7 @@ public class TestSuite {
 
     private TestSuite(List<TestCase> tests, Set<KTestStep> skips, int threads, boolean verbose,
                      Comparator<String> strComparator, ColorSetting colorSetting,
-                     int timeout, boolean report) {
+                     int timeout, boolean updateOut, boolean generateOut, boolean report) {
         this.tests = tests;
         this.skips = skips;
         this.threads = threads;
@@ -70,32 +74,15 @@ public class TestSuite {
         this.strComparator = strComparator;
         this.colorSetting = colorSetting;
         this.timeout = timeout;
-        reportGen = report ? new ReportGen() : null;
-    }
-
-    private TestSuite(TestCase singleTest, Set<KTestStep> skips, int threads, boolean verbose,
-                     Comparator<String> strComparator, ColorSetting colorSetting,
-                     int timeout, boolean report) {
-        tests = new LinkedList<>();
-        tests.add(singleTest);
-        this.skips = skips;
-        this.threads = threads;
-        this.verbose = verbose;
-        this.strComparator = strComparator;
-        this.colorSetting = colorSetting;
-        this.timeout = timeout;
+        this.updateOut = updateOut;
+        this.generateOut = generateOut;
         reportGen = report ? new ReportGen() : null;
     }
 
     public TestSuite(List<TestCase> tests, CmdArg cmdArg) {
         this(tests, cmdArg.getSkips(), cmdArg.getThreads(), cmdArg.isVerbose(),
                 cmdArg.getStringComparator(), cmdArg.getColorSetting(), cmdArg.getTimeout(),
-                cmdArg.getGenerateReport());
-    }
-
-    public TestSuite(TestCase singleTest, CmdArg cmdArg) {
-        this(singleTest, cmdArg.getSkips(), cmdArg.getThreads(), cmdArg.isVerbose(),
-                cmdArg.getStringComparator(), cmdArg.getColorSetting(), cmdArg.getTimeout(),
+                cmdArg.getUpdateOut(), cmdArg.getGenerateOut(),
                 cmdArg.getGenerateReport());
     }
 
@@ -154,9 +141,9 @@ public class TestSuite {
                     StringBuilder krunLogCmd = new StringBuilder();
                     krunLogCmd.append(program.toLogString());
                     if (program.outputFile != null)
-                        krunLogCmd.append("> ").append(program.outputFile);
+                        krunLogCmd.append(" >").append(program.outputFile);
                     if (program.inputFile != null)
-                        krunLogCmd.append("< ").append(program.inputFile);
+                        krunLogCmd.append(" <").append(program.inputFile);
                     System.out.println(krunLogCmd.toString());
                 }
             }
@@ -190,7 +177,7 @@ public class TestSuite {
         startTpe();
         for (TestCase tc : tests) {
             Proc<TestCase> p = new Proc<>(tc, tc.getKompileCmd(), tc.toKompileLogString(),
-                    strComparator, timeout, verbose, colorSetting);
+                    strComparator, timeout, verbose, colorSetting, updateOut, generateOut);
             ps.add(p);
             tpe.execute(p);
             kompileSteps++;
@@ -227,7 +214,7 @@ public class TestSuite {
         long startTime = System.currentTimeMillis();
         for (TestCase tc : tests) {
             Proc<TestCase> p = new Proc<>(tc, tc.getPdfCmd(), tc.toPdfLogString(),
-                    strComparator, timeout, verbose, colorSetting);
+                    strComparator, timeout, verbose, colorSetting, updateOut, generateOut);
             ps.add(p);
             tpe.execute(p);
             pdfSteps++;
@@ -317,7 +304,13 @@ public class TestSuite {
     }
 
     private void startTpe() {
-        tpe = (ThreadPoolExecutor) Executors.newFixedThreadPool(threads);
+        int nThreads;
+        if (updateOut || generateOut) {
+            nThreads = 1;
+        } else {
+            nThreads = threads;
+        }
+        tpe = (ThreadPoolExecutor) Executors.newFixedThreadPool(nThreads);
     }
 
     private void stopTpe() throws InterruptedException {
@@ -377,7 +370,7 @@ public class TestSuite {
             printVerboseRunningMsg(program);
         Proc<KRunProgram> p = new Proc<>(program, args, inputContents, outputContentsAnn,
                 errorContentsAnn, program.toLogString(), strComparator, timeout, verbose,
-                colorSetting);
+                colorSetting, updateOut, generateOut, program.outputFile, program.newOutputFile);
         tpe.execute(p);
         krunSteps++;
         return p;

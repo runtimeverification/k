@@ -45,10 +45,12 @@ public abstract class Token extends Term implements Sorted {
 
     @Override
     public int hashCode() {
-        int hash = 1;
-        hash = hash * Utils.HASH_PRIME + sort().hashCode();
-        hash = hash * Utils.HASH_PRIME + value().hashCode();
-        return hash;
+        if (hashCode == 0) {
+            hashCode = 1;
+            hashCode = hashCode * Utils.HASH_PRIME + sort().hashCode();
+            hashCode = hashCode * Utils.HASH_PRIME + value().hashCode();
+        }
+        return hashCode;
     }
 
     @Override

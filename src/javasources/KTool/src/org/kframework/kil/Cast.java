@@ -1,5 +1,7 @@
 package org.kframework.kil;
 
+import java.util.ArrayList;
+
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.matchers.Matcher;
@@ -178,4 +180,5 @@ public class Cast extends Term {
 	public boolean isSyntactic() {
 		return type != CastType.SEMANTIC;
 	}
+
 }

@@ -86,14 +86,14 @@ public class AddEmptyLists extends BasicTransformer {
         String elementSort = element.getSort();
 
         /* TODO: properly infer sort of KApp */
-        if (elementSort.equals(KSorts.K) && element instanceof KApp) {
+        if (elementSort.equals(KSorts.KITEM) && element instanceof KApp) {
             /* infer sort for builtins and tokens */
             if (((KApp) element).getLabel() instanceof Token) {
                 elementSort = ((Token) ((KApp) element).getLabel()).tokenSort();
             }
         }
 
-        return !elementSort.equals(KSorts.K)
+        return !elementSort.equals(KSorts.KITEM)
                && context.isSubsortedEq(listSort, elementSort);
     }
 

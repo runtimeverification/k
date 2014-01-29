@@ -1,10 +1,10 @@
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.kil.*;
-import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.Int32Token;
+import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
+import org.kframework.backend.java.kil.*;
 
 
 /**
@@ -20,6 +20,7 @@ public interface Visitor {
     public void visit(BuiltinList builtinList);
     public void visit(BuiltinMap builtinMap);
     public void visit(BuiltinSet builtinSet);
+    public void visit(BuiltinMgu builtinMgu);
     public void visit(Cell cell);
     public void visit(CellCollection cellCollection);
     public void visit(Collection collection);
@@ -31,6 +32,7 @@ public interface Visitor {
     public void visit(KLabelFreezer kLabelFreezer);
     public void visit(KLabelInjection kLabelInjection);
     public void visit(KItem kItem);
+    public void visit(KItemProjection kItemProjection);
     public void visit(KCollection kCollection);
     public void visit(KCollectionFragment kCollectionFragment);
     public void visit(KLabel kLabel);
@@ -45,6 +47,7 @@ public interface Visitor {
     public void visit(SetUpdate mapUpdate);
     public void visit(SymbolicConstraint node);
     public void visit(Term node);
+    public void visit(TermCons termCons);
     public void visit(Token token);
     public void visit(UninterpretedConstraint uninterpretedConstraint);
     public void visit(UninterpretedToken uninterpretedToken);
