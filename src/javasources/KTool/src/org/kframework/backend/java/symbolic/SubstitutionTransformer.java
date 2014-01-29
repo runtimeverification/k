@@ -22,7 +22,6 @@ public class SubstitutionTransformer extends PrePostTransformer {
     	super(context);
         this.substitution = substitution;
         preTransformer.addTransformer(new LocalVariableChecker());
-        preTransformer.addTransformer(new LocalSubstitutionChecker(context));
         postTransformer.addTransformer(new LocalSubstitutionTransformer());
         postTransformer.addTransformer(new VariableUpdaterTransformer());
     }
@@ -38,14 +37,24 @@ public class SubstitutionTransformer extends PrePostTransformer {
                     ImmutableList.Builder<Term> builder = new ImmutableList.Builder<Term>();
                     builder.addAll(fragment);
 
-                    KSequence kSequence;
-                    if (fragment.hasFrame()) {
-                        kSequence = new KSequence(builder.build(), fragment.frame());
+                    KCollection kCollection;
+                    if (fragment.getKCollection() instanceof KSequence) {
+                        if (fragment.hasFrame()) {
+                            kCollection = new KSequence(builder.build(), fragment.frame());
+                        } else {
+                            kCollection = new KSequence(builder.build());
+                        }
                     } else {
-                        kSequence = new KSequence(builder.build());
+                        assert fragment.getKCollection() instanceof KList;
+
+                        if (fragment.hasFrame()) {
+                            kCollection = new KList(builder.build(), fragment.frame());
+                        } else {
+                            kCollection = new KList(builder.build());
+                        }
                     }
 
-                    return kSequence;
+                    return kCollection;
                 } else {
                     return term;
                 }
@@ -59,19 +68,6 @@ public class SubstitutionTransformer extends PrePostTransformer {
      * Checks
      *
      */
-    private class LocalSubstitutionChecker extends LocalTransformer {
-        public LocalSubstitutionChecker(TermContext context) {
-            super(context);
-        }
-
-        @Override
-        public KList transform(KList kList) {
-            assert !kList.hasFrame() : "only KList with a fixed number of elements is supported";
-
-            return kList;
-        }
-    }
-
     private class LocalVariableChecker extends LocalTransformer {
         @Override
         public ASTNode transform(JavaSymbolicObject object) {

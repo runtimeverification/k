@@ -364,7 +364,9 @@ public class KItem extends Term implements Sorted {
      */
     @Override
     public boolean isSymbolic() {
-        return !(kLabel instanceof KLabel) || ((KLabel) kLabel).isFunction();
+        // TODO(AndreiS): handle KLabel variables
+        //return !(kLabel instanceof KLabel) || ((KLabel) kLabel).isFunction();
+        return kLabel instanceof KLabel && ((KLabel) kLabel).isFunction();
     }
 
     /**
