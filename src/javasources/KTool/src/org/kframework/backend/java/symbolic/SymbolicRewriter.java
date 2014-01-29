@@ -366,12 +366,17 @@ public class SymbolicRewriter {
                 for (SymbolicConstraint constraint1 : constrainedTerm.unify(leftHandSide)) {
                     constraint1.orientSubstitution(rule.variableSet(), constrainedTerm.termContext());
                     constraint1.addAll(rule.ensures());
-                    /* rename rule variables in the constraints */
-                    Map<Variable, Variable> freshSubstitution = constraint1.rename(rule.variableSet());
-
+                    
                     Term result = rule.rightHandSide();
-                    /* rename rule variables in the rule RHS */
-                    result = result.substituteWithBinders(freshSubstitution, constrainedTerm.termContext());
+
+                    /* the RHS of the rule has introduced new variables */
+                    if (rule.hasUnboundedVariables()) {
+                        /* rename rule variables in the constraints */
+                        Map<Variable, Variable> freshSubstitution = constraint1.rename(rule.variableSet());
+                        /* rename rule variables in the rule RHS */
+                        result = result.substituteWithBinders(freshSubstitution, constrainedTerm.termContext());
+                    }
+                    
                     /* apply the constraints substitution on the rule RHS */
                     result = result.substituteAndEvaluate(constraint1.substitution(),
                             constrainedTerm.termContext());

@@ -1,20 +1,21 @@
 package org.kframework.backend.java.kil;
 
+import java.util.Collection;
+import java.util.Map;
+
 import org.kframework.backend.java.indexing.IndexingPair;
 import org.kframework.backend.java.symbolic.BottomUpVisitor;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.UninterpretedConstraint;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.compile.checks.CheckVariables;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-
-import java.util.Collection;
-import java.util.Map;
 
 
 /**
@@ -33,6 +34,7 @@ public class Rule extends JavaSymbolicObject {
     private final UninterpretedConstraint lookups;
     private final IndexingPair indexingPair;
     private final boolean containsKCell;
+    private final boolean hasUnboundedVars;
 
     public Rule(
             String label,
@@ -73,6 +75,8 @@ public class Rule extends JavaSymbolicObject {
             }
         });
         containsKCell = tempContainsKCell;
+        
+        hasUnboundedVars = attributes.containsAttribute(CheckVariables.UNBOUNDED_VARS);
 
         super.setAttributes(attributes);
     }
@@ -107,6 +111,10 @@ public class Rule extends JavaSymbolicObject {
 
     public ImmutableSet<Variable> freshVariables() {
         return freshVariables;
+    }
+    
+    public boolean hasUnboundedVariables() {
+        return hasUnboundedVars;
     }
 
     public KLabelConstant functionKLabel() {
