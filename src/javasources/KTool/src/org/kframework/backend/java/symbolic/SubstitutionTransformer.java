@@ -1,10 +1,17 @@
 package org.kframework.backend.java.symbolic;
 
+import org.kframework.backend.java.kil.JavaSymbolicObject;
+import org.kframework.backend.java.kil.KCollection;
+import org.kframework.backend.java.kil.KCollectionFragment;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.KSequence;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Variable;
+import org.kframework.kil.ASTNode;
+
 import java.util.Map;
 import java.util.Set;
-
-import org.kframework.backend.java.kil.*;
-import org.kframework.kil.ASTNode;
 
 import com.google.common.collect.ImmutableList;
 
