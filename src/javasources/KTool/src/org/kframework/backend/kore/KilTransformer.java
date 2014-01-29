@@ -1,5 +1,6 @@
 package org.kframework.backend.kore;
 
+import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;

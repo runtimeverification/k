@@ -395,7 +395,7 @@ if (isVisited(node))
 	@Override
 	public void visit(KLabelConstant node) {
 		prepare(node);
-		this.indenter.write(node.getLabel()); // TODO: escape the label
+		this.indenter.write(node.getLabel().replaceAll("\\(", "'(").replaceAll("\\)", "')")); // TODO: escape the label
 		postpare();
 	}
 /*

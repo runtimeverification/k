@@ -17,7 +17,10 @@ import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Definition;
+import org.kframework.kil.DefinitionItem;
+import org.kframework.kil.LiterateDefinitionComment;
 import org.kframework.kil.Module;
+import org.kframework.kil.Require;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.CountNodesVisitor;
 import org.kframework.krun.K;
@@ -102,7 +105,7 @@ public class KompileFrontEnd {
     private static void kompile(CommandLine cmd) throws IOException {
         K.do_kompilation = true;
         final String def = cmd.getArgs()[0];
-        final String step = cmd.getOptionValue("step", null);
+        String step = cmd.getOptionValue("step", null);
         GlobalSettings.setMainFile(def);
         GlobalSettings.outputDir = cmd.getOptionValue("directory",
                 GlobalSettings.mainFile.getAbsoluteFile().getParent());
@@ -209,33 +212,46 @@ public class KompileFrontEnd {
                         backend.autoinclude(), context);
                 
             	KilTransformer trans = new KilTransformer(context);
-                ArrayList<Module> temp = new ArrayList<Module>();
-                File mainKoreFile = new File((toKore.getMainFile().substring(0, toKore.getMainFile().length()-2))+".kore");
-                for(int i = 0; i < toKore.getItems().size(); ++i){
+                HashMap<String,File> fileTable = new HashMap<String,File>();
+                ArrayList<DefinitionItem> temp = new ArrayList<DefinitionItem>(toKore.getItems());
+                for(int i = 0; i < temp.size(); ++i){
                 	
-                	if(toKore.getItems().get(i) instanceof Module){
-                		temp.add((Module) toKore.getItems().get(i));
-                	} else{
+                	if(temp.get(i) instanceof Module){
                 		
-                    	writeStringToFile(mainKoreFile,trans.kilToKore(toKore.getItems().get(i)));
+                    	if(!fileTable.containsKey((((Module)temp.get(i)).getFilename()))){
+                    		
+                    		fileTable.put(((Module)temp.get(i)).getFilename(), 
+                    				new File((((Module)temp.get(i)).getFilename().substring(0, 
+                    						((Module)temp.get(i)).getFilename().length()-2))+".kore"));
+                    		}
+                	} else if(temp.get(i) instanceof Require){
+                		
+                    	if(!fileTable.containsKey((((Require)temp.get(i)).getFilename()))){
+                    		
+                    		fileTable.put(((Require)temp.get(i)).getFilename(), 
+                    				new File((((Require)temp.get(i)).getFilename().substring(0, 
+                    						((Require)temp.get(i)).getFilename().length()-2))+".kore"));
+                    		}
+                	} else if(temp.get(i) instanceof LiterateDefinitionComment){
+                		
+                    	if(!fileTable.containsKey((((LiterateDefinitionComment)temp.get(i)).getFilename()))){
+                    		
+                    		fileTable.put(((LiterateDefinitionComment)temp.get(i)).getFilename(), 
+                    				new File((((LiterateDefinitionComment)temp.get(i)).getFilename().substring(0, 
+                    						((LiterateDefinitionComment)temp.get(i)).getFilename().length()-2))+".kore"));
+                    		}
                 	}
                 }
                 
-                HashMap<String,File> fileTable = new HashMap<String,File>();
-                
                 for(int i = 0; i < temp.size(); ++i){
                 	
-                	if(!fileTable.containsKey((temp.get(i).getFilename()))){
-                		
-                		fileTable.put(temp.get(i).getFilename(), 
-                				new File((temp.get(i).getFilename().substring(0, 
-                						temp.get(i).getFilename().length()-2))+".kore"));
-                		}
-                }
-                
-                for(int i = 0; i < temp.size(); ++i){
-                	
-                	writeStringToFile(fileTable.get(temp.get(i).getFilename()),trans.kilToKore(temp.get(i)));
+                	if(temp.get(i) instanceof Module){
+                		writeStringToFile(fileTable.get(((Module)temp.get(i)).getFilename()),trans.kilToKore(((Module)temp.get(i))));
+                	} else if(temp.get(i) instanceof Require){
+                		writeStringToFile(fileTable.get(((Require)temp.get(i)).getFilename()),trans.kilToKore(((Require)temp.get(i))));
+                	} else if(temp.get(i) instanceof LiterateDefinitionComment){
+                		writeStringToFile(fileTable.get(((LiterateDefinitionComment)temp.get(i)).getFilename()),trans.kilToKore(((LiterateDefinitionComment)temp.get(i))));
+                	}
                 }
                 return;
             }
