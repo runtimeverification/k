@@ -123,7 +123,7 @@ public class JavaSymbolicBackend extends BasicBackend {
         //steps.add(new ResolveSyntaxPredicates(context));
         steps.add(new ResolveBuiltins(context));
         steps.add(new ResolveListOfK(context));
-        steps.add(new AddInjections(context));
+        //steps.add(new AddInjections(context));
 
         steps.add(new FlattenSyntax(context));
         steps.add(new ResolveBlockingInput(context, false));
