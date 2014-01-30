@@ -215,9 +215,9 @@ public class KompileFrontEnd {
                 HashMap<String,File> fileTable = new HashMap<String,File>();
                 ArrayList<DefinitionItem> temp = new ArrayList<DefinitionItem>(toKore.getItems());
                 for(int i = 0; i < temp.size(); ++i){
-                	
+            		
                 	if(temp.get(i) instanceof Module){
-                		
+                		                		
                     	if(!fileTable.containsKey((((Module)temp.get(i)).getFilename()))){
                     		
                     		fileTable.put(((Module)temp.get(i)).getFilename(), 
@@ -245,12 +245,20 @@ public class KompileFrontEnd {
                 
                 for(int i = 0; i < temp.size(); ++i){
                 	
+            		System.out.println(temp.get(i).getFilename()+","+fileTable.get(temp.get(i).getFilename()).getName()+","+temp.get(i).toString().substring(0, temp.get(i).toString().length() > 30 ? 30 : temp.get(i).toString().length()));
+
                 	if(temp.get(i) instanceof Module){
-                		writeStringToFile(fileTable.get(((Module)temp.get(i)).getFilename()),trans.kilToKore(((Module)temp.get(i))));
+                		File f = fileTable.get((temp.get(i)).getFilename());
+                		String content = trans.kilToKore(((Module)temp.get(i)));
+                		writeStringToFile(f, content);
                 	} else if(temp.get(i) instanceof Require){
-                		writeStringToFile(fileTable.get(((Require)temp.get(i)).getFilename()),trans.kilToKore(((Require)temp.get(i))));
+                		File f = fileTable.get((temp.get(i)).getFilename());
+                		String content = trans.kilToKore(((Require)temp.get(i)));
+                		writeStringToFile(f,content);
                 	} else if(temp.get(i) instanceof LiterateDefinitionComment){
-                		writeStringToFile(fileTable.get(((LiterateDefinitionComment)temp.get(i)).getFilename()),trans.kilToKore(((LiterateDefinitionComment)temp.get(i))));
+                		File f = fileTable.get((temp.get(i)).getFilename());
+                		String content = trans.kilToKore(((LiterateDefinitionComment)temp.get(i)));
+                		writeStringToFile(f, content);
                 	}
                 }
                 return;
