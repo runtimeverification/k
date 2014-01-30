@@ -40,6 +40,7 @@ import static org.apache.commons.io.FileUtils.writeStringToFile;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -212,58 +213,32 @@ public class KompileFrontEnd {
                         backend.autoinclude(), context);
                 
             	KilTransformer trans = new KilTransformer(context);
-                HashMap<String,File> fileTable = new HashMap<String,File>();
-                ArrayList<DefinitionItem> temp = new ArrayList<DefinitionItem>(toKore.getItems());
-                for(int i = 0; i < temp.size(); ++i){
+                HashMap<String,PrintWriter> fileTable = new HashMap<String,PrintWriter>();
+                for(int i = 0; i < toKore.getItems().size(); ++i){
             		
-                	if(temp.get(i) instanceof Module){
-                		                		
-                    	if(!fileTable.containsKey((((Module)temp.get(i)).getFilename()))){
-                    		
-                    		fileTable.put(((Module)temp.get(i)).getFilename(), 
-                    				new File((((Module)temp.get(i)).getFilename().substring(0, 
-                    						((Module)temp.get(i)).getFilename().length()-2))+".kore"));
-                    		}
-                	} else if(temp.get(i) instanceof Require){
+                	if(!fileTable.containsKey(((toKore.getItems().get(i)).getFilename()))){
                 		
-                    	if(!fileTable.containsKey((((Require)temp.get(i)).getFilename()))){
-                    		
-                    		fileTable.put(((Require)temp.get(i)).getFilename(), 
-                    				new File((((Require)temp.get(i)).getFilename().substring(0, 
-                    						((Require)temp.get(i)).getFilename().length()-2))+".kore"));
-                    		}
-                	} else if(temp.get(i) instanceof LiterateDefinitionComment){
-                		
-                    	if(!fileTable.containsKey((((LiterateDefinitionComment)temp.get(i)).getFilename()))){
-                    		
-                    		fileTable.put(((LiterateDefinitionComment)temp.get(i)).getFilename(), 
-                    				new File((((LiterateDefinitionComment)temp.get(i)).getFilename().substring(0, 
-                    						((LiterateDefinitionComment)temp.get(i)).getFilename().length()-2))+".kore"));
-                    		}
-                	}
+                		fileTable.put((toKore.getItems().get(i)).getFilename(), 
+                				new PrintWriter(((toKore.getItems().get(i)).getFilename().substring(0, 
+                						(toKore.getItems().get(i)).getFilename().length()-2))+".kore"));
+                		}
                 }
                 
-                for(int i = 0; i < temp.size(); ++i){
-                	
-            		System.out.println(temp.get(i).getFilename()+","+fileTable.get(temp.get(i).getFilename()).getName()+","+temp.get(i).toString().substring(0, temp.get(i).toString().length() > 30 ? 30 : temp.get(i).toString().length()));
+                for(int i = 0; i < toKore.getItems().size(); ++i){
 
-                	if(temp.get(i) instanceof Module){
-                		File f = fileTable.get((temp.get(i)).getFilename());
-                		String content = trans.kilToKore(((Module)temp.get(i)));
-                		writeStringToFile(f, content);
-                	} else if(temp.get(i) instanceof Require){
-                		File f = fileTable.get((temp.get(i)).getFilename());
-                		String content = trans.kilToKore(((Require)temp.get(i)));
-                		writeStringToFile(f,content);
-                	} else if(temp.get(i) instanceof LiterateDefinitionComment){
-                		File f = fileTable.get((temp.get(i)).getFilename());
-                		String content = trans.kilToKore(((LiterateDefinitionComment)temp.get(i)));
-                		writeStringToFile(f, content);
-                	}
+                	fileTable.get(fileTable.get((toKore.getItems().get(i)).getFilename())).println(trans.kilToKore(((toKore.getItems().get(i)))));
                 }
+                
+                ArrayList<PrintWriter> toClosedFiles = new ArrayList<PrintWriter>(fileTable.values());
+                
+                for(int i = 0; i < toClosedFiles.size(); ++i){
+                	
+                	toClosedFiles.get(i).close();
+                }
+                
                 return;
             }
-            
+
             genericCompile(lang, backend, step, context);
         }
 
