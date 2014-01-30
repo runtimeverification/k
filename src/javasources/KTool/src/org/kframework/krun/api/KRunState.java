@@ -113,7 +113,7 @@ public class KRunState implements Serializable{
 	public String toString() {
 		if (stateId == null) {
 			UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
-			KilTransformer trans = new KilTransformer(true, K.color, K.parens, context);
+			KilTransformer trans = new KilTransformer(true, K.color, context);
 			if(K.output_mode.equals("kore")){
 				return trans.kilToKore(getResult());
 			} else {

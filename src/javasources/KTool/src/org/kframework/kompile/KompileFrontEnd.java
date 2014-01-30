@@ -17,7 +17,6 @@ import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Definition;
-import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.LiterateDefinitionComment;
 import org.kframework.kil.Module;
 import org.kframework.kil.Require;
@@ -35,8 +34,6 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
-import static org.apache.commons.io.FileUtils.writeStringToFile;
-
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -106,7 +103,7 @@ public class KompileFrontEnd {
     private static void kompile(CommandLine cmd) throws IOException {
         K.do_kompilation = true;
         final String def = cmd.getArgs()[0];
-        String step = cmd.getOptionValue("step", null);
+        final String step = cmd.getOptionValue("step", null);
         GlobalSettings.setMainFile(def);
         GlobalSettings.outputDir = cmd.getOptionValue("directory",
                 GlobalSettings.mainFile.getAbsoluteFile().getParent());
@@ -226,7 +223,7 @@ public class KompileFrontEnd {
                 
                 for(int i = 0; i < toKore.getItems().size(); ++i){
 
-                	fileTable.get(fileTable.get((toKore.getItems().get(i)).getFilename())).println(trans.kilToKore(((toKore.getItems().get(i)))));
+                	fileTable.get((toKore.getItems().get(i)).getFilename()).println(trans.kilToKore(((toKore.getItems().get(i)))));
                 }
                 
                 ArrayList<PrintWriter> toClosedFiles = new ArrayList<PrintWriter>(fileTable.values());
@@ -238,7 +235,7 @@ public class KompileFrontEnd {
                 
                 return;
             }
-
+            
             genericCompile(lang, backend, step, context);
         }
 
