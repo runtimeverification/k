@@ -20,9 +20,9 @@ public class KilTransformer {
 
 	}
 	
-	public KilTransformer(boolean inConfiguration, ColorSetting color, boolean addParentheses, org.kframework.kil.loader.Context context){
+	public KilTransformer(boolean inConfiguration, ColorSetting color, org.kframework.kil.loader.Context context){
 		
-	    koreTrans = new KoreFilter(inConfiguration, color, addParentheses, context);
+	    koreTrans = new KoreFilter(inConfiguration, color, context);
 	    builtinTrans = new ToBuiltinTransformer(context);
 	    kappTrans = new ToKAppTransformer(context);
 
@@ -36,6 +36,6 @@ public class KilTransformer {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	    return "\n\n+++KORE+++\n"+koreTrans.getResult();
+	    return koreTrans.getResult();
 	}
 }

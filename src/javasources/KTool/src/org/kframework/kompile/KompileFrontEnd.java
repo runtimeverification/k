@@ -17,7 +17,9 @@ import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Definition;
+import org.kframework.kil.LiterateDefinitionComment;
 import org.kframework.kil.Module;
+import org.kframework.kil.Require;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.CountNodesVisitor;
 import org.kframework.krun.K;
@@ -32,11 +34,10 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
-import static org.apache.commons.io.FileUtils.writeStringToFile;
-
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -209,34 +210,29 @@ public class KompileFrontEnd {
                         backend.autoinclude(), context);
                 
             	KilTransformer trans = new KilTransformer(context);
-                ArrayList<Module> temp = new ArrayList<Module>();
-                File mainKoreFile = new File((toKore.getMainFile().substring(0, toKore.getMainFile().length()-2))+".kore");
+                HashMap<String,PrintWriter> fileTable = new HashMap<String,PrintWriter>();
                 for(int i = 0; i < toKore.getItems().size(); ++i){
-                	
-                	if(toKore.getItems().get(i) instanceof Module){
-                		temp.add((Module) toKore.getItems().get(i));
-                	} else{
+            		
+                	if(!fileTable.containsKey(((toKore.getItems().get(i)).getFilename()))){
                 		
-                    	writeStringToFile(mainKoreFile,trans.kilToKore(toKore.getItems().get(i)));
-                	}
-                }
-                
-                HashMap<String,File> fileTable = new HashMap<String,File>();
-                
-                for(int i = 0; i < temp.size(); ++i){
-                	
-                	if(!fileTable.containsKey((temp.get(i).getFilename()))){
-                		
-                		fileTable.put(temp.get(i).getFilename(), 
-                				new File((temp.get(i).getFilename().substring(0, 
-                						temp.get(i).getFilename().length()-2))+".kore"));
+                		fileTable.put((toKore.getItems().get(i)).getFilename(), 
+                				new PrintWriter(((toKore.getItems().get(i)).getFilename().substring(0, 
+                						(toKore.getItems().get(i)).getFilename().length()-2))+".kore"));
                 		}
                 }
                 
-                for(int i = 0; i < temp.size(); ++i){
-                	
-                	writeStringToFile(fileTable.get(temp.get(i).getFilename()),trans.kilToKore(temp.get(i)));
+                for(int i = 0; i < toKore.getItems().size(); ++i){
+
+                	fileTable.get((toKore.getItems().get(i)).getFilename()).println(trans.kilToKore(((toKore.getItems().get(i)))));
                 }
+                
+                ArrayList<PrintWriter> toClosedFiles = new ArrayList<PrintWriter>(fileTable.values());
+                
+                for(int i = 0; i < toClosedFiles.size(); ++i){
+                	
+                	toClosedFiles.get(i).close();
+                }
+                
                 return;
             }
             
