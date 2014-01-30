@@ -1055,7 +1055,7 @@ public class Main {
                         K.cfg_parsers.setProperty(opt.getValue(0), parser);
                     }
                     if (opt.equals(cmd_options.getOptions().getOption(
-                            "cfg-parser"))) {
+                            "config-var-parser"))) {
                         parser = opt.getValue();
                     }
                 }
