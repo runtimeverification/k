@@ -325,7 +325,7 @@ class KoreFilter extends BasicVisitor {
 
 		@Override
 		public void visit(KLabelConstant node) {
-			this.indenter.write(node.getLabel().replaceAll("\\(", "'(").replaceAll("\\)", "')")); // TODO: escape the label
+			this.indenter.write(node.getLabel().replaceAll("\\(", "`(").replaceAll("\\)", "`)")); // TODO: escape the label
 		}
 		
 		@Override
