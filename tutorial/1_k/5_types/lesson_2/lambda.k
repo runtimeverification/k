@@ -17,7 +17,9 @@ module LAMBDA
   syntax KResult ::= Type
 
   syntax Exp ::= Exp "->" Exp                  [strict]
-  rule lambda X : T . E => T -> E[T/X]
+  // TODO (AndreiS): fix sort inference for E
+  // rule lambda X : T . E => T -> E[T/X]
+  rule lambda X : T . E:Exp => T -> E[T/X]
   rule (T1 -> T2) T1 => T2
 
   syntax Exp ::= Int | Bool
