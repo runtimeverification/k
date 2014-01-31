@@ -189,7 +189,7 @@ location and then never allow that type to change.  The typed
 undefined values effectively assign both a type and an undefined value
 to a location. */
 
-  syntax K ::= undefined(Type)  [latex(\bot_{#1})]
+  syntax KItem ::= undefined(Type)  [latex(\bot_{#1})]
 
   rule <k> T:Type X:Id; => . ...</k>
        <env> Env => Env[L/X] </env>
@@ -241,7 +241,7 @@ make sure that parameters are well typed when the function is invoked. */
 /*@ \subsection{Calling \texttt{main()}}
 When done with the first pass, call \texttt{main()}. */
 
-  syntax K ::= "execute"
+  syntax KItem ::= "execute"
   rule <k> execute => main(.Exps); </k>
        <env> Env </env>
        <genv> . => Env </genv>  [structural]
@@ -310,7 +310,7 @@ Note that the operation \texttt{mkDecls} now declares properly typed
 instantiated variables, and that the semantics of \texttt{return} also
 checks that that type of the returned value is expected one. */
 
-  syntax K ::=  (Type,Map,K,ControlCellFragment)
+  syntax KItem ::= (Type,Map,K,ControlCellFragment)
 
   rule <k> lambda(T,Ps,S)(Vs:Vals) ~> K => mkDecls(Ps,Vs) S return; </k>
        <control>
@@ -391,9 +391,9 @@ the innermost try-catch paramete.  To keep things simple, for the time
 being we can assume that SIMPLE only throws and catches integer
 values, in which case our semantics below works fine: */
 
- syntax K ::= (Param,Stmt,K,Map,ControlCellFragment)  // Param instead of Id
+  syntax KItem ::= (Param,Stmt,K,Map,ControlCellFragment)  // Param instead of Id
 
-  syntax K ::= "popx"
+  syntax KItem ::= "popx"
 
   rule <k> (try S1 catch(P) S2 => S1 ~> popx) ~> K </k>
        <control>
@@ -473,12 +473,12 @@ into a list of variable declarations. */
 
 //@ Location lookup.
 
-  syntax K ::= lookup(Int)
+  syntax KItem ::= lookup(Int)
   rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [lookup]
 
 //@ Environment recovery.
 
-  syntax K ::= env(Map)
+  syntax KItem ::= env(Map)
   rule <k> env(Env) => . ...</k>  <env> _ => Env </env>  [structural]
   rule (env(_) => .) ~> env(_)  [structural]
 

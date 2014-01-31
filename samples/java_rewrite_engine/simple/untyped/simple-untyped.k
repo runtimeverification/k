@@ -954,7 +954,7 @@ tag in the transition option of \texttt{kompile}. */
 We have already discussed the environment recovery auxiliary operation in the
 IMP++ tutorial: */
 
-  syntax K ::= env(Map)
+  syntax KItem ::= env(Map)
   rule <k> env(Env) => . ...</k> <env> _ => Env </env>  [structural]
 
 /*@  While theoretically sufficient, the basic definition for environment

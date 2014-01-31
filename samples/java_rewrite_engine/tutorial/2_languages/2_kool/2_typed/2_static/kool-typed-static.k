@@ -784,7 +784,7 @@ the \textsf{tasks} cell has been removed. */
 
 The subclass relation introduces a subtyping relation.  */
 
-  syntax K ::= checkSubtype(Types,Types)
+  syntax KItem ::= checkSubtype(Types,Types)
 
   rule checkSubtype(T:Type, T) => .  [structural]
 
@@ -811,7 +811,7 @@ The subclass relation introduces a subtyping relation.  */
 Since now any $\it Id$ can be used as the type of a class, we need to
 check that the types used in the program actually exists */
 
-  syntax K ::= checkType(Types)
+  syntax KItem ::= checkType(Types)
 
   rule checkType(T:Type,Ts:Types) => checkType(T) ~> checkType(Ts)
     when Ts =/=K .Types  [structural]
@@ -837,7 +837,7 @@ below can only be function types.  See the definition of
 \texttt{checkSubtype} on function types at the end of this module (it
 is co-variant in the codomain and contra-variant in the domain). */
 
-  syntax K ::= checkMethod(Id,Type,Id)
+  syntax KItem ::= checkMethod(Id,Type,Id)
 
   rule <k> checkMethod(F:Id, T:Type, C:Id) => checkSubtype(T, T') ...</k>
        <className> C </className>
@@ -855,9 +855,9 @@ is co-variant in the codomain and contra-variant in the domain). */
 
 //@\subsubsection{Generic operations which could be part of the \K framework}
 
-  syntax K ::= stuck(K)  [latex(\framebox{${#1}$})]
+  syntax KItem ::= stuck(K)  [latex(\framebox{${#1}$})]
 
-  syntax K ::= "discard"
+  syntax KItem ::= "discard"
   rule _:KResult ~> discard => .  [structural]
 
 // The following two rules would shadow the builtin implementation of Id2String
