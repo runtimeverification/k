@@ -154,6 +154,13 @@ public class AddInjections extends CopyOnWriteTransformer{
             return node;
         }
 
+        // TODO (AndreiS): remove this check when old collections (list, map, set) are removed
+        if (node.getSort().equals(KSorts.LIST) || node.getSort().equals(KSorts.LIST_ITEM)
+                || node.getSort().equals(KSorts.MAP) || node.getSort().equals(KSorts.MAP_ITEM)
+                || node.getSort().equals(KSorts.SET) || node.getSort().equals(KSorts.SET_ITEM)) {
+            return node;
+        }
+
         boolean change = false;
         List<Term> transformedContents = new ArrayList<>();
         for (Term term : node.getContents()) {
