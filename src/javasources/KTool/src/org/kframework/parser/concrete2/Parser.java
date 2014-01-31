@@ -227,6 +227,8 @@ class Function {
             this.terms.add(stateReturn.key.stateCall.key.state.runRule(klist));
         }
     }
+
+    Set<KList> applyToNull() { return terms; }
 }
 
 
@@ -241,6 +243,28 @@ class StateCall {
 //// Boilerplate after this line ////
         public Key(NonTerminalCall ntCall, int stateBegin, State state) {
             this.ntCall = ntCall; this.stateBegin = stateBegin; this.state = state;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Key key = (Key) o;
+
+            if (stateBegin != key.stateBegin) return false;
+            if (!ntCall.equals(key.ntCall)) return false;
+            if (!state.equals(key.state)) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = ntCall.hashCode();
+            result = 31 * result + stateBegin;
+            result = 31 * result + state.hashCode();
+            return result;
         }
     }
     public final Key key;
@@ -275,6 +299,26 @@ class StateReturn implements Comparable<StateReturn> {
                     stateCall.key.stateBegin == stateEnd);
             this.stateCall = stateCall; this.stateEnd = stateEnd;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Key key = (Key) o;
+
+            if (stateEnd != key.stateEnd) return false;
+            if (!stateCall.equals(key.stateCall)) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = stateCall.hashCode();
+            result = 31 * result + stateEnd;
+            return result;
+        }
     }
     public final Key key;
     StateReturn(Key key) { this.key = key; }
@@ -287,10 +331,30 @@ class NonTerminalCall {
     public static class Key {
         public final NonTerminal nt;
         public final int ntBegin;
-//// Boilerplate after this line //
+//// Boilerplate after this line ////
         public Key(NonTerminal nt, int ntBegin) {
             // assert ntBegin == c.stateBegin for c in callers
             this.nt = nt; this.ntBegin = ntBegin;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Key key = (Key) o;
+
+            if (ntBegin != key.ntBegin) return false;
+            if (!nt.equals(key.nt)) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = nt.hashCode();
+            result = 31 * result + ntBegin;
+            return result;
         }
     }
     public final Key key;
@@ -372,7 +436,7 @@ class Parser {
         s = parseState;
     }
 
-    public void parse(NonTerminal nt, int position) {
+    public Term parse(NonTerminal nt, int position) {
         // TODO ordering info should not rely only on integers
         // This code assumes that ordering info in the grammar are between MIN_VALUE+1 and MAX_VALUE-2
         NonTerminal startNt = new NonTerminal(new NonTerminalId("<start>"),
@@ -390,6 +454,16 @@ class Parser {
             }
             s.stateReturnWorkLists.pop();
         }
+
+        Ambiguity result = new Ambiguity("K", new ArrayList<Term>());
+        for(StateReturn stateReturn : s.getNtCall(new NonTerminalCall.Key(nt,0)).exitStateReturns) {
+            if (stateReturn.key.stateEnd == s.input.length()) {
+                for (KList klist : stateReturn.postRuleFunction.applyToNull()) {
+                    result.getContents().add(klist);
+                }
+            }
+        }
+        return result;
     }
 
     private void unknownStateType() { assert false : "Unknown state type"; }

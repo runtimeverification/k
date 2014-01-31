@@ -13,12 +13,46 @@ public class Grammar {
         String name;
         public StateId(String name) { this.name = name; }
         public int compareTo(StateId that) { return this.name.compareTo(that.name); }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            StateId stateId = (StateId) o;
+
+            if (!name.equals(stateId.name)) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            return name.hashCode();
+        }
     }
 
     public static class NonTerminalId implements Comparable<NonTerminalId> { // Used only by rules
         String name;
         public NonTerminalId(String name) { this.name = name; }
         public int compareTo(NonTerminalId that) { return this.name.compareTo(that.name); }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            NonTerminalId that = (NonTerminalId) o;
+
+            if (!name.equals(that.name)) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            return name.hashCode();
+        }
     }
 
     public static class NonTerminal implements Comparable<NonTerminal> {
@@ -36,6 +70,23 @@ public class Grammar {
         }
 
         public int compareTo(NonTerminal that) { return this.nonTerminalId.compareTo(that.nonTerminalId); }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            NonTerminal that = (NonTerminal) o;
+
+            if (!nonTerminalId.equals(that.nonTerminalId)) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            return nonTerminalId.hashCode();
+        }
     }
 
     public abstract static class State implements Comparable<State> {
@@ -53,16 +104,36 @@ public class Grammar {
             this.stateId = stateId; this.nt = nt; this.orderingInfo = orderingInfo;
         }
 
+        public KList runRule(KList input) {
+            return input; // TODO
+        }
+
         public int compareTo(State that) {
             int x;
             return
-                    ((x = this.orderingInfo.compareTo(that.orderingInfo)) != 0) ? x :
-                            ((x = this.stateId.compareTo(that.stateId)) != 0) ? x :
-                                    this.nt.compareTo(that.nt);
+                ((x = this.orderingInfo.compareTo(that.orderingInfo)) != 0) ? x :
+                ((x = this.stateId.compareTo(that.stateId)) != 0) ? x :
+                this.nt.compareTo(that.nt);
         }
 
-        public KList runRule(KList input) {
-            return input; // TODO
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            State state = (State) o;
+
+            if (!nt.equals(state.nt)) return false;
+            if (!stateId.equals(state.stateId)) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = stateId.hashCode();
+            result = 31 * result + nt.hashCode();
+            return result;
         }
     }
 
