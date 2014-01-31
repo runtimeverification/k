@@ -279,7 +279,7 @@ class KoreFilter extends BasicVisitor {
 	    else {
 	      for (int i = 0; i < nodes.size(); i++) {
 	        nodes.get(i).accept(this);
-	        if (i < nodes.size() - 1) { indenter.write(sep); }
+	        if (i != (nodes.size() - 1)) { indenter.write(sep); }
 	      }
 	    }
 	  }
@@ -313,13 +313,7 @@ class KoreFilter extends BasicVisitor {
 		public void visit(KApp node) {
 	          node.getLabel().accept(this);
 	          this.indenter.write("(");
-
-	          if(node.getChild() instanceof KList && ((KList)node.getChild()).isEmpty()){
-	        	  
-	        	  this.indenter.write(".KList");
-	          } else {
-	        	  node.getChild().accept(this);
-	          }
+	          node.getChild().accept(this);
 	          this.indenter.write(")");
 		}
 
