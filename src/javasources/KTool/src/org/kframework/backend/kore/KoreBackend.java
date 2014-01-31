@@ -66,6 +66,7 @@ class KoreFilter extends BasicVisitor {
 		this.inConfiguration = inConfiguration;
 		this.color = color;
 		this.inTerm = 0;
+		this.indenter.setWidth(500);
 	}
 	
 	public String getResult() {
@@ -77,6 +78,7 @@ class KoreFilter extends BasicVisitor {
 	public void clear(){
 		
 		indenter=new Indenter();
+		this.indenter.setWidth(500);
 	}
 
 	@Override
@@ -227,6 +229,7 @@ class KoreFilter extends BasicVisitor {
 		indenter.write("  configuration ");
 		node.getBody().accept(this) ;
 		indenter.write(" ");
+		indenter.endLine();
 	}
 	
 	@Override
@@ -268,6 +271,7 @@ class KoreFilter extends BasicVisitor {
 	@Override
 	public void visit(Import node) {
 		indenter.write("  imports " +node.getName());
+		indenter.endLine();
 	}
   
     private void visitList(List<? extends ASTNode> nodes, String sep, String empty) {
@@ -321,7 +325,7 @@ class KoreFilter extends BasicVisitor {
 
 		@Override
 		public void visit(KLabelConstant node) {
-			this.indenter.write(node.getLabel().replaceAll("\\(", "'(").replaceAll("\\)", "')")); // TODO: escape the label
+			this.indenter.write(node.getLabel().replaceAll("\\(", "`(").replaceAll("\\)", "`)")); // TODO: escape the label
 		}
 		
 		@Override
@@ -391,7 +395,7 @@ class KoreFilter extends BasicVisitor {
 				Production production = node.getProductions().get(i);
 				production.accept(this);
 				if(i!=node.getProductions().size()-1){
-					indenter.write("\n| ");
+					indenter.write("\n     | ");
 				}
 			}
 		}
@@ -416,10 +420,10 @@ class KoreFilter extends BasicVisitor {
 				PriorityBlockExtended production = node.getPriorityBlocks().get(i);
 				production.accept(this);
 				if(i!=node.getPriorityBlocks().size()-1){
-					indenter.write("\n> ");
+					indenter.write("\n     > ");
 				}
 			}
-			indenter.write("\n");
+			indenter.endLine();
 		}
 		
 		@Override
@@ -433,13 +437,14 @@ class KoreFilter extends BasicVisitor {
 					indenter.write(" ");
 				}
 			}
-			indenter.write("\n");
+			indenter.endLine();
 		}
 		
 		@Override
 		public void visit(Require node) {
 			
 			indenter.write(node.toString());
+			indenter.endLine();
 		}
 		
 		@Override
@@ -450,7 +455,8 @@ class KoreFilter extends BasicVisitor {
 			} else {
 				node.getTerminal().accept(this);
 			}
-			indenter.write(" -/- " + node.getPattern() + "\n");
+			indenter.write(" -/- " + node.getPattern());
+			indenter.endLine();
 		}
 		
 		@Override
@@ -458,6 +464,7 @@ class KoreFilter extends BasicVisitor {
 			rewrite.getLeft().accept(this);
 			indenter.write(" => ");
 			rewrite.getRight().accept(this);
+			indenter.endLine();
 		}
 		
 		@Override
@@ -481,6 +488,7 @@ class KoreFilter extends BasicVisitor {
 				indenter.write(" ");
 			}
 			node.getAttributes().accept(this);
+			indenter.endLine();
 		}
 		
 		@Override
@@ -503,6 +511,7 @@ class KoreFilter extends BasicVisitor {
 				indenter.write(" ");
 			}
 			node.getAttributes().accept(this);
+			indenter.endLine();
 		}
 		
 		@Override
@@ -525,7 +534,7 @@ class KoreFilter extends BasicVisitor {
 				PriorityBlock production = node.getPriorityBlocks().get(i);
 				production.accept(this);
 				if(i!=node.getPriorityBlocks().size()-1){
-					indenter.write("\n> ");
+					indenter.write("\n     > ");
 				}
 			}
 			indenter.endLine();

@@ -18,17 +18,18 @@ module K-FUNCTIONAL-VISITOR
    * if IfLabel(K',,IFList) holds then replace K' with VisitLabel(K',,VisitList)
    * otherwise recurse on the children of K'.
    */
-  syntax K ::= "#visit" "(" K "," KLabel "," KList "," KLabel "," KList ")"   [function, hook(Visitor:visit)]
+  //syntax KItem ::= "#visit" "(" K "," KLabel "," KList "," KLabel "," KList ")"   [function, hook(Visitor:visit)]
+  syntax KItem ::= "#visit" "(" K "," KLabel "," KList "," KLabel "," KList ")"   [function]
 
   /*
    * Particular forms of #visit (default argument KList is .KList, default
-   * KLabel predicate is $visitTrue) 
+   * KLabel predicate is '$visitTrue) 
    */
-  syntax K ::= "#visit" "(" K "," KLabel "," KList "," KLabel ")"   [function]
-             | "#visit" "(" K "," KLabel "," KLabel "," KList ")"   [function]
-             | "#visit" "(" K "," KLabel "," KLabel ")"             [function]
-             | "#visit" "(" K "," KLabel "," KList ")"              [function]
-             | "#visit" "(" K "," KLabel ")"                        [function]
+  syntax KItem ::= "#visit" "(" K "," KLabel "," KList "," KLabel ")"   [function]
+                 | "#visit" "(" K "," KLabel "," KLabel "," KList ")"   [function]
+                 | "#visit" "(" K "," KLabel "," KLabel ")"             [function]
+                 | "#visit" "(" K "," KLabel "," KList ")"              [function]
+                 | "#visit" "(" K "," KLabel ")"                        [function]
 
   /*
    * #visitAll of a KList (first argument) applies #visit to each element of the
@@ -60,11 +61,11 @@ module K-FUNCTIONAL-VISITOR
   rule
     #visit(K:K, VisitLabel:KLabel, VisitList:KList)
   =>
-    #visit(K, VisitLabel, VisitList, $visitTrue, .KList)
+    #visit(K, VisitLabel, VisitList, '$visitTrue, .KList)
   rule
     #visit(K:K, VisitLabel:KLabel)
   =>
-    #visit(K, VisitLabel, .KList, $visitTrue, .KList)
+    #visit(K, VisitLabel, .KList, '$visitTrue, .KList)
 
   /*
    * Reduce uses of particular forms of #visitAll to the use of the most general
@@ -85,17 +86,19 @@ module K-FUNCTIONAL-VISITOR
   rule
     #visitAll(KList:KList, VisitLabel:KLabel, VisitList:KList)
   =>
-    #visitAll(KList, VisitLabel, VisitList, $visitTrue, .KList)
+    #visitAll(KList, VisitLabel, VisitList, '$visitTrue, .KList)
   rule
     #visitAll(KList:KList, VisitLabel:KLabel)
   =>
-    #visitAll(KList, VisitLabel, .KList, $visitTrue, .KList)
+    #visitAll(KList, VisitLabel, .KList, '$visitTrue, .KList)
 
   /*
    * Default predicate guard (always true)
    */
-  syntax KLabel ::= "$visitTrue"
-  rule $visitTrue(_) => true    [anywhere]
+  // TODO(AndreiS): fix this declaration; cannot declare a function
+  // with variable number of arguments
+  syntax Bool ::= "$visitTrue" "(" KItem ")"   [function]
+  rule '$visitTrue(_:KList) => true
 
   /*
    * #visitAll applies #visit to each element of the KList (first argument).
@@ -138,10 +141,44 @@ module K-FUNCTIONAL-VISITOR
            IfLabel:KLabel,
            IfList:KList)
   =>
-    #if IfLabel(KLabel:KLabel(KList:KList),,IfList) ==K true #then
-      VisitLabel(KLabel:KLabel(KList:KList),,VisitList)
+    #if IfLabel(KLabel(KList),,IfList) ==K true #then
+      VisitLabel(KLabel(KList),,VisitList)
     #else
       KLabel(#visitAll(KList, VisitLabel, VisitList, IfLabel, IfList))
     #fi
+
+  // TODO (AndreiS): fix tokens in the java engine (they stay tokens rather then becoming a K application)
+  rule
+    #visit(I:Int,
+           VisitLabel:KLabel,
+           VisitList:KList,
+           IfLabel:KLabel,
+           IfList:KList)
+  =>
+    #if IfLabel(I,,IfList) ==K true #then VisitLabel(I,,VisitList) #else I #fi
+  rule
+    #visit(F:Float,
+           VisitLabel:KLabel,
+           VisitList:KList,
+           IfLabel:KLabel,
+           IfList:KList)
+  =>
+    #if IfLabel(F,,IfList) ==K true #then VisitLabel(F,,VisitList) #else F #fi
+  rule
+    #visit(S:String,
+           VisitLabel:KLabel,
+           VisitList:KList,
+           IfLabel:KLabel,
+           IfList:KList)
+  =>
+    #if IfLabel(S,,IfList) ==K true #then VisitLabel(S,,VisitList) #else S #fi
+  rule
+    #visit(X:Id,
+           VisitLabel:KLabel,
+           VisitList:KList,
+           IfLabel:KLabel,
+           IfList:KList)
+  =>
+    #if IfLabel(X,,IfList) ==K true #then VisitLabel(X,,VisitList) #else X #fi
 endmodule
 

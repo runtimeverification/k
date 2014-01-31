@@ -115,175 +115,6 @@ public class AddInjections extends CopyOnWriteTransformer{
     }
 
 
-
-//    @Override
-//    public Context transform(Context node) throws TransformerException {
-//        assert expectedSortStack.isEmpty();
-//
-//        expectedSortStack.push(KSorts.K);
-//        Context returnNode = (Context) super.transform(node);
-//        expectedSortStack.pop();
-//
-//        return returnNode;
-//    }
-
-//    @Override
-//    public Rule transform(Rule node) throws TransformerException {
-//        assert expectedSortStack.isEmpty();
-//
-//        if (node.containsAttribute(Attribute.FUNCTION_KEY)
-//                || node.containsAttribute(Attribute.PREDICATE_KEY)) {
-//            expectedSortStack.push(KSorts.KITEM);
-//        } else {
-//            expectedSortStack.push(KSorts.K);
-//        }
-//        Rule returnNode = (Rule) super.transform(node);
-//        expectedSortStack.pop();
-//
-//        return returnNode;
-//    }
-//
-//
-//    @Override
-//    public Cell transform(Cell node) throws TransformerException {
-//        expectedSortStack.push(KSorts.K);
-//        Cell returnNode = (Cell) super.transform(node);
-//        expectedSortStack.pop();
-//
-//        return returnNode;
-//    }
-//
-//    @Override
-//    public ASTNode transform(KApp node)  throws TransformerException {
-//        expectedSortStack.push(KSorts.KLABEL);
-//        Term transformedKLabel = (KLabel) node.getLabel().accept(this);
-//        assert transformedKLabel != null && transformedKLabel.getSort().equals(KSorts.KLABEL);
-//        expectedSortStack.pop();
-//
-//        expectedSortStack.push(KSorts.KLIST);
-//        Term transformedKList = (KList) node.getChild().accept(this);
-//        assert transformedKList != null && transformedKList.getSort().equals(KSorts.KLIST);
-//        expectedSortStack.pop();
-//
-//        KApp returnNode;
-//        if (node.getLabel() != transformedKLabel || node.getChild() != transformedKList) {
-//            returnNode = node.shallowCopy();
-//            returnNode.setLabel(transformedKLabel);
-//            returnNode.setChild(transformedKList);
-//        } else {
-//            returnNode = node;
-//        }
-//
-//        return returnNode;
-//    }
-//
-//    @Override
-//    public ASTNode transform(KLabelConstant node) throws TransformerException {
-//        if (!expectedSortStack.peek().equals(KSorts.KLABEL)) {
-//            return KApp.of(new KLabelInjection(node));
-//        } else {
-//            return node;
-//        }
-//
-//    }
-//
-//    @Override
-//    public ASTNode transform(KList node) throws TransformerException {
-//        List<Term> transformedTerms = transformList(node.getContents(), KSorts.KLIST);
-//
-//        Term returnNode;
-//        if (transformedTerms != node.getContents()) {
-//            returnNode = node.shallowCopy();
-//            node.setContents(transformedTerms);
-//        } else {
-//            returnNode = node;
-//        }
-//
-//        if (expectedSortStack.peek().equals(KSorts.KITEM)
-//                || expectedSortStack.peek().equals(KSorts.K)) {
-//            returnNode = KApp.of(new KLabelInjection(returnNode));
-//        }
-//
-//        return returnNode;
-//    }
-//
-//    @Override
-//    public ASTNode transform(KSequence node) throws TransformerException {
-//        List<Term> transformedTerms = transformList(node.getContents(), KSorts.K);
-//
-//        Term returnNode;
-//        if (transformedTerms != node.getContents()) {
-//            returnNode = node.shallowCopy();
-//            node.setContents(transformedTerms);
-//        } else {
-//            returnNode = node;
-//        }
-//
-//        if (expectedSortStack.peek().equals(KSorts.KITEM)) {
-//            returnNode = KApp.of(new KLabelInjection(returnNode));
-//        }
-//
-//        return returnNode;
-//    }
-//
-//    @Override
-//    public ASTNode transform(TermCons node) throws TransformerException {
-//        List<Term> transformedTerms = transformList(node.getContents(), KSorts.K);
-//
-//        Term returnNode;
-//        if (transformedTerms != node.getContents()) {
-//            returnNode = node.shallowCopy();
-//            node.setContents(transformedTerms);
-//        } else {
-//            returnNode = node;
-//        }
-//
-//        if (expectedSortStack.peek().equals(node.getSort())
-//                && !expectedSortStack.peek().equals(KSorts.KITEM)) {
-//            returnNode = new KItemProjection(expectedSortStack.peek(), returnNode);
-//        }
-//
-//        return returnNode;
-//    }
-//
-//    @Override
-//    public ASTNode transform(Variable node) throws TransformerException {
-//        Term returnNode;
-//        switch (node.getSort()) {
-//            case KSorts.KLABEL:
-//                break;
-//            default:
-//                returnNode = node;
-//        }
-//
-//        if (expectedSortStack.peek().equals(KSorts.KLABEL)
-//                && !node.getSort().equals(KSorts.KLABEL)) {
-//            return KApp.of(new KLabelInjection(node));
-//        } else if (expectedSortStack.peek().equals(KSorts.KITEM) && )
-//        return expectedSortStack.peek().equals(KSorts.K) && ? node : KApp.of(new KLabelInjection
-//                (node));
-//
-//    }
-//
-//    private List<Term> transformList(List<Term> terms, String expectedSort)
-//            throws TransformerException {
-//        boolean change = false;
-//        List<Term> transformedTerms = new ArrayList<>();
-//        for (Term term : terms) {
-//            expectedSortStack.push(expectedSort);
-//            Term transformedTerm = (Term) term.accept(this);
-//            assert transformedTerm != null;
-//            expectedSortStack.pop();
-//
-//            transformedTerms.add(transformedTerm);
-//            if (transformedTerm != term) {
-//                change = true;
-//            }
-//        }
-//
-//        return change ? transformedTerms : terms;
-//    }
-
     /* Phase two: transform terms such that each term respects the transform productions */
     @Override
     public Rule transform(Rule node) throws TransformerException {
@@ -323,6 +154,13 @@ public class AddInjections extends CopyOnWriteTransformer{
             return node;
         }
 
+        // TODO (AndreiS): remove this check when old collections (list, map, set) are removed
+        if (node.getSort().equals(KSorts.LIST) || node.getSort().equals(KSorts.LIST_ITEM)
+                || node.getSort().equals(KSorts.MAP) || node.getSort().equals(KSorts.MAP_ITEM)
+                || node.getSort().equals(KSorts.SET) || node.getSort().equals(KSorts.SET_ITEM)) {
+            return node;
+        }
+
         boolean change = false;
         List<Term> transformedContents = new ArrayList<>();
         for (Term term : node.getContents()) {
@@ -351,6 +189,10 @@ public class AddInjections extends CopyOnWriteTransformer{
         String sort = node.getProduction().getSort();
         if (sort.equals(KSorts.K) || sort.equals(KSorts.KLABEL) || sort.equals(KSorts.KLIST)) {
             transformedNode.setSort(KSorts.KITEM);
+            // TODO (AndreiS): remove special case
+            if (node.getProduction().getLabel().equals("#if_#then_#else_#fi")) {
+                return transformedNode;
+            }
             return new KItemProjection(sort, transformedNode);
         } else {
             return transformedNode;
