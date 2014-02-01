@@ -1,25 +1,29 @@
 package org.kframework.parser.concrete2;
 
-import com.google.common.collect.HashMultimap;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
+
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.KList;
 import org.kframework.kil.Term;
-import org.kframework.parser.concrete2.Grammar.*;
-import org.kframework.kil.Token;
+import org.kframework.parser.concrete2.Grammar.ExitState;
+import org.kframework.parser.concrete2.Grammar.NextableState;
+import org.kframework.parser.concrete2.Grammar.NonTerminal;
+import org.kframework.parser.concrete2.Grammar.NonTerminalId;
+import org.kframework.parser.concrete2.Grammar.NonTerminalState;
+import org.kframework.parser.concrete2.Grammar.PrimitiveState;
+import org.kframework.parser.concrete2.Grammar.State;
+import org.kframework.parser.concrete2.Grammar.StateId;
 
 /*
 
@@ -207,6 +211,9 @@ class Function {
         // this factoring will be wrong once we move to context sensitive functions, but it works for now
         //this.terms.append(new Ambiguity("K", Arrays.asList(that.terms)));
 
+        this.terms.addAll(stateReturn.key.stateCall.key.state.runRule(that.terms));
+
+        /* This code may be no longer useful.  We discovered that factorings are unneeded (we think).
         //A more general algorithm would look roughly like the following:
         Set<KList> unfactorables = new HashSet<KList>();
         HashMultimap<KList,Term> factorings = HashMultimap.create();
@@ -226,6 +233,7 @@ class Function {
             klist.getContents().add(new Ambiguity("K", new ArrayList<Term>(entry.getValue()))); // TODO: check result
             this.terms.add(stateReturn.key.stateCall.key.state.runRule(klist));
         }
+        */
     }
 
     Set<KList> applyToNull() { return terms; }
@@ -261,7 +269,7 @@ class StateCall {
 
         @Override
         public int hashCode() {
-            int result = ntCall.hashCode();
+            int result = ntCall.key.hashCode();
             result = 31 * result + stateBegin;
             result = 31 * result + state.hashCode();
             return result;
@@ -285,8 +293,10 @@ class StateReturn implements Comparable<StateReturn> {
         int x;
         return
             ((x = Integer.compare(this.key.stateEnd, that.key.stateEnd)) != 0) ? x :
-            ((x = Integer.compare(that.key.stateCall.key.stateBegin, this.key.stateCall.key.stateBegin)) != 0) ? x: // note the reversed order
-            this.key.stateCall.key.state.compareTo(that.key.stateCall.key.state);
+            ((x = Integer.compare(that.key.stateCall.key.ntCall.key.ntBegin,
+                                  this.key.stateCall.key.ntCall.key.ntBegin)) != 0) ? x: // note the reversed order
+            ((x = this.key.stateCall.key.state.compareTo(that.key.stateCall.key.state)) != 0) ? x :
+            Integer.compare(this.key.stateCall.key.stateBegin, that.key.stateCall.key.stateBegin);
     }
 
     public static class Key {
@@ -315,13 +325,17 @@ class StateReturn implements Comparable<StateReturn> {
 
         @Override
         public int hashCode() {
-            int result = stateCall.hashCode();
+            int result = stateCall.key.hashCode();
             result = 31 * result + stateEnd;
             return result;
         }
     }
     public final Key key;
     StateReturn(Key key) { this.key = key; }
+
+    public int hashCode() {
+        return this.key.hashCode();
+    }
 }
 
 class NonTerminalCall {
@@ -384,44 +398,28 @@ class ParseState {
     Map<StateCall.Key,StateCall> stateCalls = new HashMap<StateCall.Key,StateCall>();
     Map<StateReturn.Key,StateReturn> stateReturns = new HashMap<StateReturn.Key,StateReturn>();
 
-    private static final Constructor<NonTerminalCall> nonTerminalCallCtor =
-        getCtor(NonTerminalCall.class, NonTerminalCall.Key.class);
-    private static final Constructor<StateCall> stateCallCtor =
-        getCtor(StateCall.class, StateCall.Key.class);
-    private static final Constructor<StateReturn> stateReturnCtor =
-        getCtor(StateReturn.class, StateReturn.Key.class);
-
-    public NonTerminalCall getNtCall(NonTerminalCall.Key key) { return getValue(key, ntCalls, nonTerminalCallCtor); }
-    public StateCall getStateCall(StateCall.Key key) { return getValue(key, stateCalls, stateCallCtor); }
-    public StateReturn getStateReturn(StateReturn.Key key) { return getValue(key, stateReturns, stateReturnCtor); }
-
-    static <T> Constructor<T> getCtor(Class<T> cls, Class arg) {
-        try {
-            return cls.getDeclaredConstructor(arg);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-            System.exit(1);
-            return null;
-        }
-    }
-
-    // See http://docs.oracle.com/javase/tutorial/java/generics/restrictions.html#createObjects
-    private static <V, Key> V getValue(Key key, Map<Key, V> map, Constructor<V> ctor) {
-        V value = map.get(key);
-        if (value == null) {
-            try {
-                value = ctor.newInstance(key);
-                map.put(key, value);
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-                System.exit(1);
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-                System.exit(1);
-            } catch (InstantiationException e) {
-                e.printStackTrace();
-                System.exit(1);
+    public NonTerminalCall getNtCall(NonTerminalCall.Key key) {
+            NonTerminalCall value = ntCalls.get(key);
+            if (value == null) {
+                    value = new NonTerminalCall(key);
+                    ntCalls.put(key, value);
             }
+            return value;
+    }
+    public StateCall getStateCall(StateCall.Key key) {
+        StateCall value = stateCalls.get(key);
+        if (value == null) {
+            value = new StateCall(key);
+            stateCalls.put(key, value);
+        }
+        return value;
+
+    }
+    public StateReturn getStateReturn(StateReturn.Key key) {
+        StateReturn value = stateReturns.get(key);
+        if (value == null) {
+            value = new StateReturn(key);
+            stateReturns.put(key, value);
         }
         return value;
     }
@@ -429,7 +427,71 @@ class ParseState {
 
 ////////////////
 
-class Parser {
+public class Parser {
+	
+    public static void main(String[] args) {
+        try {
+            System.in.read();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        Grammar.NonTerminalId ntistart = new Grammar.NonTerminalId("StartNT");
+        Grammar.StateId stistart = new Grammar.StateId("StartState");
+        Grammar.StateId stiend = new Grammar.StateId("EndState");
+
+        Grammar.NonTerminal nt1 = new Grammar.NonTerminal(ntistart, stistart, new Grammar.State.OrderingInfo(0), stiend, new Grammar.State.OrderingInfo(100));
+
+        Grammar.RegExState res1 = new Grammar.RegExState(new Grammar.StateId("RegExStid"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("[a-zA-Z0-9]"));
+
+        nt1.entryState.next.add(res1);
+        nt1.entryState.next.add(nt1.exitState);
+        res1.next.add(nt1.exitState);
+        res1.next.add(res1);
+
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < 100000; i++) {
+                sb.append('a');
+            }
+            for (int j = 0; j < 10; j++) {
+                long start = getCpuTime();
+                for (int i = 0; i < 1; i++) {
+                    Term result = new Parser(new ParseState(sb.toString())).parse(nt1, 0);
+                }
+                long end = getCpuTime();
+                System.out.println("Time: " + ((end - start) / 1000000.0));
+            }
+        }
+        try {
+            System.in.read();
+            System.in.read();
+            System.in.read();
+            System.in.read();
+            System.in.read();
+            System.in.read();
+            System.in.read();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        // with proper implementation we are slow:
+        //  - for a string of length 100, we are at 9.5 us per char
+        //  - for a string of length 1000, we are at 65 us per char
+        //  - for a string of length 10000, we are at 620 us per char
+        // but with no AST construction we are getting no quadratic behavior and 1.6 micro seconds per character
+        // - regex may slow things down
+        // - computing Term.hashCode inside a function slows things down quite a bit
+        // - constructing ASTs with long lists slows things down
+        // - calling java.Object.hashCode is SLOOOOOOW
+        // - calling RTTI versions of getStateCall, etc. are slow
+    }
+
+    public static long getCpuTime( ) {
+        ThreadMXBean bean = ManagementFactory.getThreadMXBean();
+        return bean.isCurrentThreadCpuTimeSupported( ) ?
+                bean.getCurrentThreadCpuTime( ) : 0L;
+    }
+
     private final ParseState s;
 
     public Parser(ParseState parseState) {
@@ -483,7 +545,7 @@ class Parser {
             // add exit state's function to all callers
             for (StateCall stateCall : stateReturn.key.stateCall.key.ntCall.callers) {
                 int stateEnd = ((NonTerminalState)stateCall.key.state).isLookahead ? // we know a caller must be a NonTerminalState
-                    stateReturn.key.stateCall.key.stateBegin :
+                    stateCall.key.stateBegin :
                     stateReturn.key.stateEnd;
                 this.addPreRuleFunction(new StateReturn.Key(stateCall, stateEnd),
                                         stateCall.function, stateReturn.postRuleFunction);

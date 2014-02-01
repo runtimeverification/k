@@ -1,10 +1,14 @@
 package org.kframework.parser.concrete2;
 
-import org.kframework.kil.KList;
-import org.kframework.kil.Token;
-
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.kframework.kil.Ambiguity;
+import org.kframework.kil.KList;
+import org.kframework.kil.Term;
+import org.kframework.kil.Token;
 
 public class Grammar {
 
@@ -104,8 +108,12 @@ public class Grammar {
             this.stateId = stateId; this.nt = nt; this.orderingInfo = orderingInfo;
         }
 
-        public KList runRule(KList input) {
-            return input; // TODO
+        public Set<KList> runRule(Set<KList> input) {
+            if (this instanceof ExitState) {
+                return new HashSet<KList>(Arrays.asList(new KList(Arrays.asList((Term)new Ambiguity("K", new ArrayList<Term>(input))))));
+            } else {
+                return input;
+            }
         }
 
         public int compareTo(State that) {
