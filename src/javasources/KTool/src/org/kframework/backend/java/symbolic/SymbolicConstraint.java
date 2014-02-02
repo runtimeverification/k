@@ -439,7 +439,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 isNormal = false;
             }
         } else {
-            normalize();
+            simplify(); // YilongL: normalize() is not enough
             leftHandSide = leftHandSide.substituteAndEvaluate(substitution, context);
             rightHandSide = rightHandSide.substituteAndEvaluate(substitution, context);
     
@@ -933,8 +933,12 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         Set<Equality> equalitiesToRemove = new HashSet<Equality>();
         for (Iterator<Equality> iterator = equalities.iterator(); iterator.hasNext();) {
             Equality equality = iterator.next();
-            equality.substituteAndEvaluate(substitution);
-
+            
+            // YilongL: no need to evaluate after substitution because the LHS
+            // of the rule and the subject term should have no function symbol
+            // inside; in other words, only side conditions need to be evaluated
+            // and they should have been taken care of in method add(Term,Term)
+            equality.substitute(substitution);
             if (equality.isTrue()) {
                 equalitiesToRemove.add(equality);
                 continue;
@@ -1018,7 +1022,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         @SuppressWarnings("unchecked")
         Map.Entry<Variable, Term>[] entries = substitution.entrySet().toArray(new Map.Entry[substitution.size()]);
         for (Map.Entry<Variable, Term> subst : entries) {
-            Term term = subst.getValue().substituteAndEvaluate(substMap, context);
+            Term term = subst.getValue().substitute(substMap, context);
             if (term != subst.getValue()) {
                 checkTruthValBeforePutIntoConstraint(subst.getKey(), term, true);
             }
