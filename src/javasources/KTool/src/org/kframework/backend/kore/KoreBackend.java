@@ -12,6 +12,7 @@ import org.kframework.utils.ColorUtil;
 import org.kframework.utils.Stopwatch;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -553,5 +554,10 @@ class KoreFilter extends BasicVisitor {
 		public void visit(Variable node) {
 			this.indenter.write(node.getName() + ":" + node.getSort());
 		}
+		
+		@Override
+		public void visit(TermCons node){
+			(new KApp(new KLabelConstant(node.getProduction().getKLabel()),new KList(node.getContents()))).accept(this);
 
+		}
 }

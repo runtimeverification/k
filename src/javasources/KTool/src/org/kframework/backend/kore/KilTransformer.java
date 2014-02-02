@@ -9,6 +9,7 @@ import org.kframework.krun.ColorSetting;
 
 public class KilTransformer {
 	
+	FlattenSyntax kilTermCons;
 	ToBuiltinTransformer builtinTrans;
 	ToKAppTransformer kappTrans;
 	KoreFilter koreTrans;
