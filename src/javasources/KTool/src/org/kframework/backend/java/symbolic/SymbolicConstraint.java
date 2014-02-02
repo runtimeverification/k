@@ -46,7 +46,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     private static final boolean DEBUG = true;
 
     // TODO(YilongL): can't we use this.context instead of passing in a new one?
-    public void orientSubstitution(Set<Variable> variables, TermContext termContext) {
+    public void orientSubstitution(Set<Variable> variables) {
         Map<Variable, Term> newSubstitution = new HashMap<>();
         if (substitution.keySet().containsAll(variables)) {
             /* avoid setting isNormal to false */
@@ -112,10 +112,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         for (Map.Entry<Variable, Term> entry : newSubstitution.entrySet()) {
             substitution.remove(entry.getValue());
             // TODO(YilongL): why not evaluate entry.getValue() after the substitution?
-            result.put(entry.getKey(), entry.getValue().substituteWithBinders(newSubstitution, termContext));
+            result.put(entry.getKey(), entry.getValue().substituteWithBinders(newSubstitution, context));
         }
         for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
-            result.put(entry.getKey(), entry.getValue().substituteWithBinders(newSubstitution, termContext));
+            result.put(entry.getKey(), entry.getValue().substituteWithBinders(newSubstitution, context));
         }
 
         substitution.clear();

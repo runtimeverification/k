@@ -279,7 +279,7 @@ public class KItem extends Term implements Sorted {
                         assert solution.isSubstitution() : "the solution shall not contain pending functions but found:\n" + solution.equalities();
                     }
                     
-                    solution.orientSubstitution(rule.leftHandSide().variableSet(), context);
+                    solution.orientSubstitution(rule.leftHandSide().variableSet());
 
                     Term rightHandSide = rule.rightHandSide();
 

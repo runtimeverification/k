@@ -102,7 +102,7 @@ public class ConstrainedTerm extends Term {
         unificationConstraint.simplify();
         Set<Variable> variables = constrainedTerm.variableSet();
         variables.removeAll(variableSet());
-        unificationConstraint.orientSubstitution(variables, context);
+        unificationConstraint.orientSubstitution(variables);
         if (unificationConstraint.isFalse() || !unificationConstraint.isSubstitution()) {
             return null;
         }
@@ -112,7 +112,7 @@ public class ConstrainedTerm extends Term {
         implicationConstraint.addAll(constrainedTerm.lookups);
         implicationConstraint.addAll(constrainedTerm.constraint);
         implicationConstraint.simplify();
-        implicationConstraint.orientSubstitution(variables, context);
+        implicationConstraint.orientSubstitution(variables);
         implicationConstraint = implicationConstraint.substituteWithBinders(implicationConstraint.substitution(), context);
 
         unificationConstraint.addAll(constraint);
@@ -198,8 +198,7 @@ public class ConstrainedTerm extends Term {
         
         /* compute the type of the unification between two terms */
         unificationConstraint.orientSubstitution(
-                constrainedTerm.term.variableSet(),
-                constrainedTerm.termContext());
+                constrainedTerm.term.variableSet());
         if (unificationConstraint.isSubstitution()
                 && unificationConstraint.substitution().keySet()
                         .equals(constrainedTerm.term.variableSet())) {
@@ -326,7 +325,7 @@ public class ConstrainedTerm extends Term {
                         }
                     }
 
-                    cnstr.orientSubstitution(orientedVars, context);
+                    cnstr.orientSubstitution(orientedVars);
                     for (Entry<Variable, Term> subst : cnstr.substitution().entrySet()) {
                         // handle equality involving two variables with different
                         // sorts, e.g. x1:sort1 =? x2:sort2
