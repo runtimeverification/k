@@ -309,28 +309,30 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             rightHandSide = rightHandSide.substituteAndEvaluate(substitution, context);
         }
 
-        @Override
-        public boolean equals(Object object) {
-            if (this == object) {
-                return true;
-            }
-
-            if (!(object instanceof Equality)) {
-                return false;
-            }
-
-            Equality equality = (Equality) object;
-            return leftHandSide.equals(equality.leftHandSide)
-                   && rightHandSide.equals(equality.rightHandSide);
-        }
-        
-        @Override
-        public int hashCode() {
-            int hash = 1;
-            hash = hash * Utils.HASH_PRIME + leftHandSide.hashCode();
-            hash = hash * Utils.HASH_PRIME + rightHandSide.hashCode();
-            return hash;
-        }
+        // YilongL: no need to override equals() and hashCode() because all we
+        // need to compare two equalities is identity check
+        //        @Override
+//        public boolean equals(Object object) {
+//            if (this == object) {
+//                return true;
+//            }
+//
+//            if (!(object instanceof Equality)) {
+//                return false;
+//            }
+//
+//            Equality equality = (Equality) object;
+//            return leftHandSide.equals(equality.leftHandSide)
+//                   && rightHandSide.equals(equality.rightHandSide);
+//        }
+//        
+//        @Override
+//        public int hashCode() {
+//            int hash = 1;
+//            hash = hash * Utils.HASH_PRIME + leftHandSide.hashCode();
+//            hash = hash * Utils.HASH_PRIME + rightHandSide.hashCode();
+//            return hash;
+//        }
 
         @Override
         public String toString() {
@@ -360,6 +362,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      * @see SymbolicConstraint#substitution
      */
     private final LinkedList<Equality> equalities = new LinkedList<Equality>();
+    
+    private final ArrayList<Equality> equalityBuffer = new ArrayList<Equality>();
+
+    private boolean simplifyingEqualities = false;
     
     /**
      * Specifies if this symbolic constraint is in normal form.
@@ -424,12 +430,21 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 + leftHandSide + " (instanceof " + leftHandSide.getClass() + ")" + " and "
                 + rightHandSide + " (instanceof " + rightHandSide.getClass() + ")";
 
-        normalize();
-        leftHandSide = leftHandSide.substituteAndEvaluate(substitution, context);
-        rightHandSide = rightHandSide.substituteAndEvaluate(substitution, context);
-
-        checkTruthValBeforePutIntoConstraint(leftHandSide, rightHandSide, false);
-
+        if (simplifyingEqualities) {
+            Equality equality = new Equality(leftHandSide, rightHandSide);
+            if (equality.isFalse()) {
+                truthValue = TruthValue.FALSE;
+            } else if (equality.isUnknown()) {
+                equalityBuffer.add(equality);
+                isNormal = false;
+            }
+        } else {
+            normalize();
+            leftHandSide = leftHandSide.substituteAndEvaluate(substitution, context);
+            rightHandSide = rightHandSide.substituteAndEvaluate(substitution, context);
+    
+            checkTruthValBeforePutIntoConstraint(leftHandSide, rightHandSide, false);
+        }
         return truthValue;
     }
     
@@ -564,12 +579,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     }
 
     /**
-     * Removes equalities between anonymous variables and terms.
-     * <p>
-     * <br>
-     * TODO(YilongL): the following needs to be revised to be precise<br>
-     * Anonymous variables are generated for doing unification; they are no
-     * longer needed at the end of a rewrite step.
+     * Garbage collect useless bindings. This method should be called after
+     * applying the substitution to the RHS of a rule. It then removes all
+     * bindings of anonymous variables.
      */
     public void eliminateAnonymousVariables() {
         for (Iterator<Variable> iterator = substitution.keySet().iterator(); iterator.hasNext();) {
@@ -862,21 +874,24 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             change = false;
             normalize();
 
-            for (int i = 0; i < equalities.size(); ++i) {
-                Equality equality = equalities.get(i);
+            simplifyingEqualities = true;
+            for (Iterator<Equality> iterator = equalities.iterator(); iterator.hasNext();) {
+                Equality equality = iterator.next();
                 if (!equality.leftHandSide.isSymbolic() && !equality.rightHandSide.isSymbolic()) {
                     // if both sides of the equality could be further
-                    // decomposed, unify them
-                    equalities.remove(i);
-                    i--;
+                    // decomposed, discharge the equality
+                    iterator.remove();
                     if (!unifier.unify(equality)) {
                         truthValue = TruthValue.FALSE;
+                        simplifyingEqualities = false;
                         break label;
                     }
 
                     change = true;
                 }
             }
+            
+            simplifyingEqualities = false;
         } while (change);
 
         return truthValue;
@@ -890,9 +905,11 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     private boolean recursiveNormalize = false;
 
     /**
-     * Converts this symbolic constraint back to normal form.
+     * Normalizes the symbolic constraint.
      */
     private void normalize() {
+        assert !simplifyingEqualities : "Do not modify the equalities when they are being simplified";
+        
         if (isNormal) {
             return;
         }
@@ -910,6 +927,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     
     private void renormalize() {
         isNormal = true;
+        equalities.addAll(equalityBuffer);
+        equalityBuffer.clear();
+                
         Set<Equality> equalitiesToRemove = new HashSet<Equality>();
         for (Iterator<Equality> iterator = equalities.iterator(); iterator.hasNext();) {
             Equality equality = iterator.next();
@@ -942,6 +962,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 continue;
             }
 
+            /* cycle found */
             if (term.variableSet().contains(variable)) {
                 continue;
             }
@@ -976,12 +997,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             }
             equalitiesToRemove.add(equality);
         }
-        for (Iterator<Equality> iterator = equalitiesToRemove.iterator(); iterator.hasNext();) {
-            Equality equality = iterator.next();
-            equalities.remove(equality);
-            iterator.remove();
-        }
-        assert equalitiesToRemove.size() == 0;
+        
+        equalities.removeAll(equalitiesToRemove);
     }
 
     /**

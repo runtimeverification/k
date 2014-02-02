@@ -265,7 +265,7 @@ public class ConstrainedTerm extends Term {
                             UninterpretedConstraint templCnstr = new UninterpretedConstraint();
                             Collection<UninterpretedConstraint> uninterpretedCnstrs = new ArrayList<UninterpretedConstraint>();
                             for (Equality eq2 : cnstr.equalities())
-                                if (!eq2.equals(eq1))
+                                if (eq2 != eq1)
                                     templCnstr.add(eq2.leftHandSide(), eq2.rightHandSide());
                             for (Map.Entry<Variable, Term> entry : cnstr.substitution().entrySet()) {
                                 templCnstr.add(entry.getKey(), entry.getValue());
@@ -300,7 +300,7 @@ public class ConstrainedTerm extends Term {
                             UninterpretedConstraint templCnstr = new UninterpretedConstraint();
                             Collection<UninterpretedConstraint> uninterpretedCnstrs = new ArrayList<UninterpretedConstraint>();
                             for (Equality eq2 : cnstr.equalities())
-                                if (!eq2.equals(eq1))
+                                if (eq2 != eq1)
                                     templCnstr.add(eq2.leftHandSide(), eq2.rightHandSide());
                             for (Map.Entry<Variable, Term> entry : cnstr.substitution().entrySet()) {
                                 templCnstr.add(entry.getKey(), entry.getValue());

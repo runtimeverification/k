@@ -140,9 +140,11 @@ public class SymbolicUnifier extends AbstractUnifier {
 
             /* add symbolic constraint */
             fConstraint.add(term, otherTerm);
-            if (fConstraint.isFalse()) {
-                fail();
-            }
+            // YilongL: not the right time to check the truth value because it
+            // may change the equalities
+            // if (fConstraint.isFalse()) {
+            //  fail();
+            // }
         } else {
             /* unify */
             if (!term.equals(otherTerm)) {
