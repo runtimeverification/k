@@ -62,12 +62,12 @@ public class Waitor extends Thread{
 		
 		
 		Term term = Term.of(implTerm, impl.getDefinition());
-		TermContext termContext = new TermContext(impl.getDefinition(), new PortableFileSystem());
+		TermContext termContext = TermContext.of(impl.getDefinition(), new PortableFileSystem());
 		ConstrainedTerm implConstraint = new ConstrainedTerm(term, termContext);
 		pair[0] = implConstraint;
 		
 		term = Term.of(specTerm, spec.getDefinition());
-		termContext = new TermContext(spec.getDefinition(), new PortableFileSystem());
+		termContext = TermContext.of(spec.getDefinition(), new PortableFileSystem());
 		ConstrainedTerm specConstraint = new ConstrainedTerm(term, termContext);
 		pair[1] = specConstraint;
 		
