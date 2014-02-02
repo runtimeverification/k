@@ -281,12 +281,14 @@ public class KItem extends Term implements Sorted {
                     
                     solution.orientSubstitution(rule.leftHandSide().variableSet(), context);
 
-                    /* rename rule variables in the constraints */
-                    Map<Variable, Variable> freshSubstitution = solution.rename(rule.variableSet());
-
                     Term rightHandSide = rule.rightHandSide();
-                    /* rename rule variables in the rule RHS */
-                    rightHandSide = rightHandSide.substitute(freshSubstitution, context);
+
+                    if (rule.hasUnboundedVariables()) {
+                        /* rename rule variables in the constraints */
+                        Map<Variable, Variable> freshSubstitution = solution.rename(rule.variableSet());
+                        /* rename rule variables in the rule RHS */
+                        result = result.substituteWithBinders(freshSubstitution, context);
+                    }
                     /* apply the constraints substitution on the rule RHS */
                     rightHandSide = rightHandSide.substituteAndEvaluate(solution.substitution(), context);
                     /* eliminate anonymous variables */
