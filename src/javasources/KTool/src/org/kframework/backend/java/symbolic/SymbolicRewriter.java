@@ -256,7 +256,7 @@ public class SymbolicRewriter {
                 rules.addAll(coolingRuleTable.get(pair.second));
             }
         }
-        rules.addAll(unindexedRules);
+        //rules.addAll(unindexedRules);
         return new ArrayList<Rule>(rules);
     }
 
