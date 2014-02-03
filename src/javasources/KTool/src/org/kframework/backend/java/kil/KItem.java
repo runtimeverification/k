@@ -60,11 +60,13 @@ public class KItem extends Term implements Sorted {
         this.kList = kList;
 
         Set<String> possibleMinimalSorts = null;
-        if (kLabel instanceof KLabelConstant && kList instanceof KList) {
+        if (kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isConstructor()) {
+            possibleMinimalSorts = new HashSet<>();
+        }
+
+        if (kLabel instanceof KLabelConstant && kList instanceof KList
+                && !((KList) kList).hasFrame()) {
             KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
-            if (kLabelConstant.isConstructor()) {
-                possibleMinimalSorts = new HashSet<>();
-            }
 
             List<Production> productions = kLabelConstant.productions();
             if (productions.size() != 0) {
@@ -80,7 +82,7 @@ public class KItem extends Term implements Sorted {
                     // we have passed the front-end the arguments of a K label
                     // can violate its original declaration, therefore the code
                     // below would need to be revised
-                    if (!((KList) kList).hasFrame() && ((KList) kList).size() == production.getArity()) {
+                    if (((KList) kList).size() == production.getArity()) {
                         for (int i = 0; i < ((KList) kList).size(); ++i) {
                             String childSort;
                             Term childTerm = ((KList) kList).get(i);
@@ -155,7 +157,7 @@ public class KItem extends Term implements Sorted {
             } else {    /* productions.size() == 0 */
                 /* a list terminator does not have conses */
                 Set<String> listSorts = context.listLabels.get(kLabelConstant.label());
-                if (listSorts != null && !((KList) kList).hasFrame() && ((KList) kList).size() == 0) {
+                if (listSorts != null && ((KList) kList).size() == 0) {
                     if (listSorts.size() == 1) {
                         sort = listSorts.iterator().next();
                     } else {
@@ -168,8 +170,7 @@ public class KItem extends Term implements Sorted {
         } else {    /* not a KLabelConstant */
             sort = kind.toString();
         }
-        
-        
+
         if (possibleMinimalSorts != null) {
             possibleMinimalSorts.add(sort);
             Set<String> nonMinimalSorts = new HashSet<String>();
@@ -279,14 +280,16 @@ public class KItem extends Term implements Sorted {
                         assert solution.isSubstitution() : "the solution shall not contain pending functions but found:\n" + solution.equalities();
                     }
                     
-                    solution.orientSubstitution(rule.leftHandSide().variableSet(), context);
-
-                    /* rename rule variables in the constraints */
-                    Map<Variable, Variable> freshSubstitution = solution.rename(rule.variableSet());
+                    solution.orientSubstitution(rule.leftHandSide().variableSet());
 
                     Term rightHandSide = rule.rightHandSide();
-                    /* rename rule variables in the rule RHS */
-                    rightHandSide = rightHandSide.substitute(freshSubstitution, context);
+
+                    if (rule.hasUnboundedVariables()) {
+                        /* rename rule variables in the constraints */
+                        Map<Variable, Variable> freshSubstitution = solution.rename(rule.variableSet());
+                        /* rename rule variables in the rule RHS */
+                        result = result.substituteWithBinders(freshSubstitution, context);
+                    }
                     /* apply the constraints substitution on the rule RHS */
                     rightHandSide = rightHandSide.substituteAndEvaluate(solution.substitution(), context);
                     /* eliminate anonymous variables */

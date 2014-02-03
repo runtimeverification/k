@@ -84,7 +84,7 @@ public class KApp extends Term {
 
 	public KApp(ATermAppl atm) {
 		super(atm);
-		this.sort = KSorts.K;
+		this.sort = KSorts.KITEM;
 
 		label = (Term) JavaClassesFactory.getTerm(atm.getArgument(0));
 		child = (Term) JavaClassesFactory.getTerm(atm.getArgument(1));

@@ -3,13 +3,7 @@ package org.kframework.backend.java.builtins;
 import java.io.IOException;
 import java.nio.charset.CharacterCodingException;
 
-import org.kframework.backend.java.kil.Definition;
-import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.KSequence;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.K;
@@ -70,7 +64,7 @@ public class BuiltinIOOperations {
     public static Term close(IntToken term, TermContext context) {
         try {
             fs(context).close(term.longValue());
-            return new KSequence();
+            return new KItem(new KLabelInjection(new KSequence()), new KList(), context.definition().context());
         } catch (IOException e) {
             return processIOException(e.getMessage(), context);
         }
@@ -79,7 +73,7 @@ public class BuiltinIOOperations {
     public static Term seek(IntToken term1, IntToken term2, TermContext context) {
         try {
             fs(context).get(term1.longValue()).seek(term2.longValue());
-            return new KSequence();
+            return new KItem(new KLabelInjection(new KSequence()), new KList(), context.definition().context());
         } catch (IOException e) {
             return processIOException(e.getMessage(), context);
         }
@@ -88,7 +82,7 @@ public class BuiltinIOOperations {
     public static Term putc(IntToken term1, IntToken term2, TermContext context) {
         try {
             fs(context).get(term1.longValue()).putc(term2.unsignedByteValue());
-            return new KSequence();
+            return new KItem(new KLabelInjection(new KSequence()), new KList(), context.definition().context());
         } catch (IOException e) {
             return processIOException(e.getMessage(), context);
         }
@@ -97,7 +91,7 @@ public class BuiltinIOOperations {
     public static Term write(IntToken term1, StringToken term2, TermContext context) {
         try {
             fs(context).get(term1.longValue()).write(term2.byteArrayValue());
-            return new KSequence();
+            return new KItem(new KLabelInjection(new KSequence()), new KList(), context.definition().context());
         } catch (CharacterCodingException e) {
             throw new IllegalArgumentException(e);
         } catch (IOException e) {

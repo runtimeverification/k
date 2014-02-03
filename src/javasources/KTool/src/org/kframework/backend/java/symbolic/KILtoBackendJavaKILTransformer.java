@@ -619,7 +619,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 node.getAttributes());
 
         if (freshRules) {
-            return rule.getFreshRule(new TermContext(definition));
+            return rule.getFreshRule(TermContext.of(definition));
         }
         return rule;
     }

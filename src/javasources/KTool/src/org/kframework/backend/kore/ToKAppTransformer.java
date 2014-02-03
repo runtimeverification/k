@@ -19,7 +19,6 @@ import org.kframework.kil.SetBuiltin;
 import org.kframework.kil.SetLookup;
 import org.kframework.kil.SetUpdate;
 import org.kframework.kil.Term;
-import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -338,12 +337,6 @@ public class ToKAppTransformer extends CopyOnWriteTransformer {
 		}
 		
 		return basedKapp;
-	}
-	
-	@Override
-	public ASTNode transform(TermCons node) throws TransformerException {
-
-       return new KApp(KLabelConstant.of(node.getProduction().getKLabel(), context), new KList(node.getContents()));
 	}
 	
 }

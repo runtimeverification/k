@@ -364,7 +364,7 @@ public class SymbolicRewriter {
                         constrainedTerm.termContext());
 
                 for (SymbolicConstraint constraint1 : constrainedTerm.unify(leftHandSide)) {
-                    constraint1.orientSubstitution(rule.variableSet(), constrainedTerm.termContext());
+                    constraint1.orientSubstitution(rule.variableSet());
                     constraint1.addAll(rule.ensures());
                     
                     Term result = rule.rightHandSide();
@@ -504,7 +504,7 @@ public class SymbolicRewriter {
             if (!constraint.isSubstitution()) {
                 return null;
             }
-            constraint.orientSubstitution(visitor.getVariableSet(), term.termContext());
+            constraint.orientSubstitution(visitor.getVariableSet());
             for (Variable variable : visitor.getVariableSet()) {
                 Term value = constraint.substitution().get(variable);
                 if (value == null) {
@@ -904,7 +904,7 @@ public class SymbolicRewriter {
             /* rename rule variables */
             Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.variableSet());
 
-            TermContext context = new TermContext(definition, fs);
+            TermContext context = TermContext.of(definition, fs);
             SymbolicConstraint sideConstraint = new SymbolicConstraint(context);
             sideConstraint.addAll(rule.requires());
             ConstrainedTerm initialTerm = new ConstrainedTerm(

@@ -73,7 +73,7 @@ public class KItemProjection extends Term {
 
     @Override
     public String toString() {
-        throw new UnsupportedOperationException();
+        return "projection(" + term + ")";
     }
 
     @Override

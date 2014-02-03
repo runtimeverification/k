@@ -621,7 +621,7 @@ switch to method closure's class and object environment and execute
 the method body.  The \texttt{mkDecls} construct is the one that came
 with the unchanged semantics of SIMPLE above.  */
 
-  syntax KItem ::=  (Map,K,ControlCellFragment)
+  syntax KItem ::= (Map,K,ControlCellFragment)
 
   rule <k> methodClosure(Class,OL,Xs,S)(Vs:Vals) ~> K
            => mkDecls(Xs,Vs) S return; </k>
@@ -1007,7 +1007,10 @@ starting with the most concrete class and going up in the hierarchy. */
 
 //  rule lookupMember(<envStack> (_, <env> Env </env>) => . ...</envStack>, X)
 //    when notBool(X in keys(Env))
-  rule lookupMember(<envStack> ListItem((_, <env> Env </env>)) => . ...</envStack>, X)
+  // TODO (AndreiS): support function with deep rewrites
+  // rule lookupMember(<envStack> ListItem((_, <env> Env </env>)) => . ...</envStack>, X)
+  //   when notBool(X in keys(Env))
+  rule lookupMember(<envStack> ListItem((_, <env> Env </env>)) L </envStack>, X)
+    => lookupMember(<envStack> L </envStack>, X)
     when notBool(X in keys(Env))
-
 endmodule
