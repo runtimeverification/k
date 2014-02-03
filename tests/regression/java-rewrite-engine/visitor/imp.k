@@ -13,9 +13,9 @@ module IMP-SYNTAX
   syntax Block ::= "{" "}"
                  | "{" Stmt "}"
   syntax Stmt  ::= Block
-                 | Id "=" AExp ";"	      [strict(2)]
+                 | Id "=" AExp ";"
                  | "if" "(" BExp ")"
-                   Block "else" Block         [strict(1)]
+                   Block "else" Block
                  | "while" "(" BExp ")" Block
                  > Stmt Stmt                  [left]
   syntax Pgm ::= "int" Ids ";" Stmt
