@@ -60,7 +60,8 @@ public class KItem extends Term implements Sorted {
         this.kList = kList;
 
         Set<String> possibleMinimalSorts = null;
-        if (kLabel instanceof KLabelConstant && kList instanceof KList) {
+        if (kLabel instanceof KLabelConstant && kList instanceof KList
+                && !((KList) kList).hasFrame()) {
             KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
             if (kLabelConstant.isConstructor()) {
                 possibleMinimalSorts = new HashSet<>();
@@ -80,7 +81,7 @@ public class KItem extends Term implements Sorted {
                     // we have passed the front-end the arguments of a K label
                     // can violate its original declaration, therefore the code
                     // below would need to be revised
-                    if (!((KList) kList).hasFrame() && ((KList) kList).size() == production.getArity()) {
+                    if (((KList) kList).size() == production.getArity()) {
                         for (int i = 0; i < ((KList) kList).size(); ++i) {
                             String childSort;
                             Term childTerm = ((KList) kList).get(i);
@@ -155,7 +156,7 @@ public class KItem extends Term implements Sorted {
             } else {    /* productions.size() == 0 */
                 /* a list terminator does not have conses */
                 Set<String> listSorts = context.listLabels.get(kLabelConstant.label());
-                if (listSorts != null && !((KList) kList).hasFrame() && ((KList) kList).size() == 0) {
+                if (listSorts != null && ((KList) kList).size() == 0) {
                     if (listSorts.size() == 1) {
                         sort = listSorts.iterator().next();
                     } else {
