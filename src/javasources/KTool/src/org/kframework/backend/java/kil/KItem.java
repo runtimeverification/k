@@ -60,12 +60,13 @@ public class KItem extends Term implements Sorted {
         this.kList = kList;
 
         Set<String> possibleMinimalSorts = null;
+        if (kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isConstructor()) {
+            possibleMinimalSorts = new HashSet<>();
+        }
+
         if (kLabel instanceof KLabelConstant && kList instanceof KList
                 && !((KList) kList).hasFrame()) {
             KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
-            if (kLabelConstant.isConstructor()) {
-                possibleMinimalSorts = new HashSet<>();
-            }
 
             List<Production> productions = kLabelConstant.productions();
             if (productions.size() != 0) {
@@ -169,8 +170,7 @@ public class KItem extends Term implements Sorted {
         } else {    /* not a KLabelConstant */
             sort = kind.toString();
         }
-        
-        
+
         if (possibleMinimalSorts != null) {
             possibleMinimalSorts.add(sort);
             Set<String> nonMinimalSorts = new HashSet<String>();
