@@ -21,6 +21,13 @@ public class DocumentationFilter extends LatexFilter {
     @Override
     public void visit(Module mod) {
         result.append("\\begin{module}{\\moduleName{" + StringUtil.latexify(mod.getName()) + "}}" + endl);
+        //insert section and label tags for link
+        result.append("\\section{" + mod.getName() + "}" + endl);
+        result.append("\\label{sec:" + mod.getName() + "}" + endl);
+        //insert link at beginning of document; assume we already have "\maketitle"
+        //as we should have visited a Definition before visiting a Module
+        result.insert(result.indexOf("\\maketitle") + ".maketitle".length(), "\\hyperref[sec:" + mod.getName() + "]{" + mod.getName() + "}\\\\" + endl);
+         
         if (isVisited(mod))
             return;
         for (ModuleItem mi : mod.getItems()) {
