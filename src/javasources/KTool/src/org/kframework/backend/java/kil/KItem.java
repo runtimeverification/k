@@ -146,10 +146,8 @@ public class KItem extends Term implements Sorted {
                     if (sorts.size() == 1) {
                         sort = sorts.iterator().next();
                     } else {
-                        // TODO(YilongL): Why set the sort of the KItem to be
-                        // the GLB of the sorts of all matching productions?
-                        // What if there is no GLB?
                         sort = context.getGLBSort(sorts);
+                        assert !sort.equals("null") : "The greatest lower bound (GLB) of sorts " + sorts + "doesn't exist!";
                     }
                 } else {    /* no production matches this KItem */
                     sort = kind.toString();
@@ -167,7 +165,7 @@ public class KItem extends Term implements Sorted {
                     sort = kind.toString();
                 }
             }
-        } else {    /* not a KLabelConstant */
+        } else {    /* not a KLabelConstant or the kList contains a frame variable */
             sort = kind.toString();
         }
 
