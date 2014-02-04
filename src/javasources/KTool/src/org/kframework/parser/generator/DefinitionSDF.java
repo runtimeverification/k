@@ -170,17 +170,22 @@ public class DefinitionSDF {
 		// print variables, HOLEs, cast
 		for (Sort s : psdfv.userSorts) {
 			if (!s.isBaseSort()) {
-				sdf.append("	VARID  \":" + s.getName() + "\"        -> VariableDz            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Var\")}\n");
+				sdf.append("	VARID  \":" + s.getName() + "\"        -> " + StringUtil.escapeSortName(s.getName()) + "DzVar            {cons(\"" + StringUtil.escapeSortName(s.getName()) + "12Var\")}\n");
 			}
 		}
 		// print variables, cast
 		sdf.append("\n");
 		for (Sort s : psdfv.userSorts) {
 			if (!s.isBaseSort()) {
-				sdf.append("	 K CastTypeDz \"" + s.getName() + "\"	-> VariableDz	{cons(\"" + StringUtil.escapeSortName(s.getName()) + "1Cast\")}\n");
+				sdf.append("	 K CastTypeDz \"" + s.getName() + "\"	-> " + StringUtil.escapeSortName(s.getName()) + "DzVar	{cons(\"" + StringUtil.escapeSortName(s.getName()) + "1Cast\")}\n");
 			}
 		}
-		sdf.append("	 K CastTypeDz \"K\"		-> VariableDz	{cons(\"K1Cast\")}\n");
+        for (Sort s : psdfv.userSorts) {
+            if (!s.isBaseSort()) {
+                sdf.append("	 " + StringUtil.escapeSortName(s.getName()) + "DzVar   -> " + StringUtil.escapeSortName(s.getName()) + "\n");
+            }
+        }
+        sdf.append("	 K CastTypeDz \"K\"		-> VariableDz	{cons(\"K1Cast\")}\n");
 		sdf.append("	 K CastTypeDz \"KItem\"	-> VariableDz	{cons(\"KItem1Cast\")}\n");
 
 		sdf.append("\n");
@@ -201,6 +206,11 @@ public class DefinitionSDF {
 		sdf.append("\n");
 
 		sdf.append("context-free restrictions\n");
+        for (Sort s : psdfv.userSorts) {
+            if (!s.isBaseSort()) {
+                sdf.append("	" + StringUtil.escapeSortName(s.getName()) + "DzVar -/- [a-zA-Z0-9]\n");
+            }
+        }
 		sdf.append("	VariableDz -/- [a-zA-Z0-9]\n");
 
 		sdf.append("lexical syntax\n");
