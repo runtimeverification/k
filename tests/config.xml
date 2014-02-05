@@ -485,7 +485,7 @@
   </test>
 
 
-  <test
+<!--  <test
       definition="tests/regression/issue677/test.k"
       programs="tests/regression/issue677/programs"
       extension="test"
@@ -496,6 +496,7 @@
         <krun-option name="-color" value="off" />
       </all-programs>
   </test>
+  -->
 <test
       definition="tests/regression/label-and-context/label-and-context.k"
       programs="tests/regression/label-and-context"
