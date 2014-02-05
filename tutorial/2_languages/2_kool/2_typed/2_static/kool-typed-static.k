@@ -197,7 +197,7 @@ the wrapper in the generated documentation, we associate it an
   rule if (E) S => if (E) S else {}                                     [macro]
   rule for(Start Cond; Step) {S:Stmts} => {Start while(Cond){S Step;}}  [macro]
   rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;               [macro]
-  rule T:Type X:Id::K = E; => T X; X = E;                                  [macro]
+  rule T:Type X:Id = E; => T X; X = E;                                  [macro]
 
   rule class C:Id S => class C extends Object S
 
@@ -403,7 +403,7 @@ The operation \texttt{checkType}, defined at the end of this module,
 checks whether the argument type is correct (it actually works with
 lists of types as well). */
 
-  rule <k> T:Type X:Id::K; => checkType(T) ~> stmt ...</k>
+  rule <k> T:Type X:Id; => checkType(T) ~> stmt ...</k>
        <tenv> Rho => Rho[T / X] </tenv>
 
 
@@ -426,11 +426,11 @@ with it; this \texttt{stuck} operation is displayed as a frame in this
 PDF document because of its latex attribute (see the ASCII .k file,
 at the end of this module). */
 
-  rule <k> T:Type X:Id::K; => checkType(T) ~> stmt ...</k>
+  rule <k> T:Type X:Id; => checkType(T) ~> stmt ...</k>
        <ctenvT> Rho (. => X |-> T) </ctenvT>
     when notBool(X in keys(Rho))
 
-  rule <k> T:Type X:Id::K; => stuck(T X;) ...</k>
+  rule <k> T:Type X:Id; => stuck(T X;) ...</k>
        <ctenvT>... X |-> _ ...</ctenvT>
        <inClass> C:Id </inClass>
        <br/>
