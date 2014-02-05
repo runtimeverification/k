@@ -2,21 +2,21 @@ Search results:
 
 Solution 1:
 Solution:K -->
-L:Term |-> cons ( (_75:Term, ((cons ( (_75, nil) )))) )
+L:Term |-> cons ( (_82:Term, ((cons ( (_82, nil) )))) )
 
 Solution 2:
 Solution:K -->
-L:Term |-> cons ( (_75:Term, ((cons ( (_80:Term, ((cons ( (_75, nil) )))) ))))
+L:Term |-> cons ( (_82:Term, ((cons ( (_87:Term, ((cons ( (_82, nil) )))) ))))
    )
 
 Solution 3:
 Solution:K -->
-L:Term |-> cons ( (_75:Term, ((cons ( (_80:Term, ((cons ( (_80, ((cons ( (_75
+L:Term |-> cons ( (_82:Term, ((cons ( (_87:Term, ((cons ( (_87, ((cons ( (_82
   , nil) )))) )))) )))) )
 
 Solution 4:
 Solution:K -->
-L:Term |-> cons ( (_75:Term, nil) )
+L:Term |-> cons ( (_82:Term, nil) )
 
 Solution 5:
 Solution:K -->
