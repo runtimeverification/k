@@ -12,7 +12,32 @@ import org.kframework.backend.java.builtins.Int32Token;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
-import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.kil.Bottom;
+import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.BuiltinMgu;
+import org.kframework.backend.java.kil.BuiltinSet;
+import org.kframework.backend.java.kil.Cell;
+import org.kframework.backend.java.kil.CellCollection;
+import org.kframework.backend.java.kil.Collection;
+import org.kframework.backend.java.kil.ConcreteCollectionVariable;
+import org.kframework.backend.java.kil.Hole;
+import org.kframework.backend.java.kil.KCollection;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.KLabelFreezer;
+import org.kframework.backend.java.kil.KLabelInjection;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.KSequence;
+import org.kframework.backend.java.kil.Kind;
+import org.kframework.backend.java.kil.MapUpdate;
+import org.kframework.backend.java.kil.MetaVariable;
+import org.kframework.backend.java.kil.SetUpdate;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermCons;
+import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Token;
+import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.loader.Context;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -82,7 +107,9 @@ public class SymbolicUnifier extends AbstractUnifier {
         if (term instanceof Bottom || otherTerm instanceof Bottom) {
             fail();
         }
-        if (term.kind() == Kind.KITEM || term.kind() == Kind.K || term.kind() == Kind.KLIST) {
+        if (term.kind().isComputational()) {
+            assert otherTerm.kind().isComputational();
+
             term = KCollection.upKind(term, otherTerm.kind());
             otherTerm = KCollection.upKind(otherTerm, term.kind());
         }
@@ -576,8 +603,14 @@ public class SymbolicUnifier extends AbstractUnifier {
         if(!(term instanceof KLabelInjection)) {
             fail();
         }
-
         KLabelInjection otherKLabelInjection = (KLabelInjection) term;
+
+        if (kLabelInjection.term().kind() != otherKLabelInjection.kind()
+                || !kLabelInjection.term().kind().isComputational()
+                || !otherKLabelInjection.term().kind().isComputational()) {
+            fail();
+        }
+
         unify(kLabelInjection.term(), otherKLabelInjection.term());
     }
 

@@ -58,6 +58,10 @@ public enum Kind {
         }
     }
 
+    public boolean isComputational() {
+        return this == Kind.KITEM || this == Kind.K || this == Kind.KLIST;
+    }
+
     @Override
     public String toString() {
         return names.get(this);
