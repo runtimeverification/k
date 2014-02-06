@@ -85,15 +85,18 @@ public class BuiltinMap extends Collection implements Sorted {
         }
 
         BuiltinMap map = (BuiltinMap) object;
-        return super.equals(map) && entries.equals(map.entries);
+        return (frame == null ? map.frame == null : frame.equals(map.frame))
+                && entries.equals(map.entries);
     }
 
     @Override
     public int hashCode() {
-        int hash = 1;
-        hash = hash * Utils.HASH_PRIME + (super.frame == null ? 0 : super.frame.hashCode());
-        hash = hash * Utils.HASH_PRIME + entries.hashCode();
-        return hash;
+        if (hashCode == 0) {
+            hashCode = 1;
+            hashCode = hashCode * Utils.HASH_PRIME + (frame == null ? 0 : frame.hashCode());
+            hashCode = hashCode * Utils.HASH_PRIME + entries.hashCode();
+        }
+        return hashCode;
     }
 
     @Override

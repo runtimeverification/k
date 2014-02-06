@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.DataStructureSort;
+import org.kframework.kil.KSorts;
 import org.kframework.kil.List;
 import org.kframework.kil.ListBuiltin;
 import org.kframework.kil.ListItem;
@@ -57,7 +58,8 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
 		ArrayList<Term> temp = new ArrayList<Term>();
 		temp.add((Term) node.getItem().accept(this));
 		
-		return new SetBuiltin(this.context.dataStructureSortOf(DataStructureSort.DEFAULT_SET_SORT),new ArrayList<Term>(),temp);
+		return new SetBuiltin(new DataStructureSort(DataStructureSort.DEFAULT_SET_SORT, KSorts.SET, DataStructureSort.DEFAULT_SET_LABEL, 
+				DataStructureSort.DEFAULT_SET_ITEM_LABEL, DataStructureSort.DEFAULT_SET_UNIT_LABEL, new HashMap<String,String>()),new ArrayList<Term>(),temp);
 	}
 
 	@Override
@@ -75,7 +77,9 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
 				baseTerms.add((Term) temp.get(i).accept(this));
 			}
 		}
-		return new SetBuiltin(this.context.dataStructureSortOf(DataStructureSort.DEFAULT_SET_SORT),
+		
+		return new SetBuiltin(new DataStructureSort(DataStructureSort.DEFAULT_SET_SORT, KSorts.SET, DataStructureSort.DEFAULT_SET_LABEL, 
+				DataStructureSort.DEFAULT_SET_ITEM_LABEL, DataStructureSort.DEFAULT_SET_UNIT_LABEL, new HashMap<String,String>()),
 				baseTerms,elements);
 	}
 	
@@ -135,7 +139,7 @@ public class ToBuiltinTransformer extends CopyOnWriteTransformer {
 		for( ;j >= i; --j){
 			
 			if(temp.get(j) instanceof ListItem){
-				elementRight.add((Term) ((ListItem)temp.get(i)).getItem().accept(this));
+				elementRight.add((Term) ((ListItem)temp.get(j)).getItem().accept(this));
 			} else {
 				break;
 			}

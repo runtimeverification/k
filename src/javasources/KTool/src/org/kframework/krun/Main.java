@@ -870,6 +870,7 @@ public class Main {
         sw.printIntermediate("Deleting temporary krun directory");
 
         try {
+            K.do_concrete_exec = true;
 
             // Parse the program arguments
 
@@ -880,6 +881,7 @@ public class Main {
                     || cmd.hasOption("search-one-or-more-steps")) {
                 K.maude_cmd = "search";
                 K.io = false;
+                K.do_concrete_exec = true;
                 K.do_search = true;
                 if (cmd.hasOption("search") && cmd.hasOption("depth")) {
                     K.searchType = SearchType.STAR;
@@ -1053,7 +1055,7 @@ public class Main {
                         K.cfg_parsers.setProperty(opt.getValue(0), parser);
                     }
                     if (opt.equals(cmd_options.getOptions().getOption(
-                            "cfg-parser"))) {
+                            "config-var-parser"))) {
                         parser = opt.getValue();
                     }
                 }

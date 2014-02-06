@@ -973,7 +973,7 @@ tag in the transition option of \texttt{kompile}. */
 
 /*@ \subsubsection{Environment recovery} */
 
-  syntax K ::= env(Map)
+  syntax KItem ::= env(Map)
 
   rule <k> env(Env:Map) => . ...</k> <env> _:Map => Env </env>   [structural]
 

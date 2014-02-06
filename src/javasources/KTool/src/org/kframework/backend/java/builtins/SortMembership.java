@@ -1,9 +1,6 @@
 package org.kframework.backend.java.builtins;
 
-import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.kil.Sorted;
-import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.*;
 import org.kframework.kil.loader.Context;
 
 import com.google.common.collect.ImmutableSet;
@@ -12,7 +9,7 @@ import com.google.common.collect.ImmutableSet;
 /**
  * Utility class for checking sort membership predicates.
  * 
- * @author: AndreiS
+ * @author AndreiS
  */
 public class SortMembership {
 
@@ -29,15 +26,21 @@ public class SortMembership {
      *         {@code kItem} itself if the evaluation gets stuck
      */
     public static Term check(KItem kItem, Context context) {
-        String sortName = ((KLabelConstant) kItem.kLabel()).label().substring("is".length());
-        Sorted sorted = (Sorted) kItem.kList().getContents().get(0);
+        assert kItem.kLabel() instanceof KLabelConstant;
+        assert kItem.kList() instanceof KList
+                && ((KList) kItem.kList()).size() == 1
+                && !((KList) kItem.kList()).hasFrame();
 
-        if (kItem.kList().getContents().get(0) instanceof KItem
-                && ((KItem) kItem.kList().getContents().get(0)).kLabel().isConstructor()) {
-            return context.isSubsortedEq(sortName, sorted.sort()) ? BoolToken.TRUE : BoolToken.FALSE;
-        } else if (context.isSubsortedEq(sortName, sorted.sort())) {
+        String predicateSort = ((KLabelConstant) kItem.kLabel()).label().substring("is".length());
+        Term term = ((KList) kItem.kList()).getContents().get(0);
+        String termSort = ((Sorted) term).sort();
+
+        if (term instanceof KItem && ((KItem) term).kLabel() instanceof KLabel
+                && ((KLabel) ((KItem) term).kLabel()).isConstructor()) {
+            return context.isSubsortedEq(predicateSort, termSort) ? BoolToken.TRUE : BoolToken.FALSE;
+        } else if (context.isSubsortedEq(predicateSort, termSort)) {
             return BoolToken.TRUE;
-        } else if (null == context.getGLBSort(ImmutableSet.<String>of(sortName, sorted.sort()))) {
+        } else if (null == context.getGLBSort(ImmutableSet.<String>of(predicateSort, termSort))) {
             return BoolToken.FALSE;
         } else {
             return kItem;

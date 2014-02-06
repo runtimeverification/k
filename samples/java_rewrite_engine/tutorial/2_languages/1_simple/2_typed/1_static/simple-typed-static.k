@@ -204,7 +204,8 @@ type the actual construct. */
                 | "if" "(" Exp ")" Block "else" Block      [avoid, strict]
                 | "if" "(" Exp ")" Block
                 | "while" "(" Exp ")" Block                [strict]
-                | "for" "(" Stmt Exp ";" Exp ")" Block
+                //| "for" "(" Stmt Exp ";" Exp ")" Block
+                | "for" "(" Stmts Exp ";" Exp ")" Block
                 | "return" Exp ";"                         [strict]
                 | "return" ";"
                 | "print" "(" Exps ")" ";"                 [strict]
@@ -227,15 +228,11 @@ they now reduce to the \texttt{stmt} type, which is a result. */
 We use the same desugaring macros like in untyped SIMPLE, but, of
 course, including the types of the involved variables. */
 
-//  rule if (E) S => if (E) S else {}                                     [macro]
-//  rule for(Start Cond; Step) {S:Stmts} => {Start while(Cond){S Step;}}  [macro]
-//  rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;               [macro]
-//  rule T:Type X:Id = E; => T X; X = E;                                  [macro]
-  rule if (E) S => if (E) S else {}
-  rule for(Start Cond; Step) {S:Stmts} => {Start while(Cond){S Step;}}
-  rule for(Start Cond; Step) {} => {Start while(Cond){Step;}}
-  rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;
-  rule T:Type X:Id = E; => T X; X = E;
+  rule if (E) S => if (E) S else {}                                     [macro]
+  rule for(Start Cond; Step) {S:Stmts} => {Start while(Cond){S Step;}}  [macro]
+  rule for(Start Cond; Step) {} => {Start while(Cond){Step;}}           [macro]
+  rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;               [macro]
+  rule T:Type X:Id = E; => T X; X = E;                                  [macro]
 
 endmodule
 

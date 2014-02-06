@@ -1,12 +1,6 @@
 package org.kframework.backend.java.symbolic;
 
-import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.ListLookup;
-import org.kframework.backend.java.kil.MapLookup;
-import org.kframework.backend.java.kil.MapUpdate;
-import org.kframework.backend.java.kil.SetLookup;
-import org.kframework.backend.java.kil.SetUpdate;
-import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
 
 /**
@@ -38,6 +32,11 @@ public class LocalEvaluator extends LocalTransformer {
     @Override
     public ASTNode transform(KItem kItem) {
         return kItem.evaluateFunction(constraint, context);
+    }
+
+    @Override
+    public ASTNode transform(KItemProjection kItemProjection) {
+        return kItemProjection.evaluateProjection();
     }
 
     @Override

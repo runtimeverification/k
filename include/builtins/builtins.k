@@ -34,6 +34,7 @@ module BUILTIN-HOOKS
   imports K-EQUAL-HOOKS
   imports RANDOM-HOOKS
   imports COUNTER-HOOKS
+  imports ID-HOOKS
   //imports LTL-HOOKS
   //imports MODEL-CHECKER-HOOKS
 endmodule

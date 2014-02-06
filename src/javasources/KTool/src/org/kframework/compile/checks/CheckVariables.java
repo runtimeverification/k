@@ -33,7 +33,9 @@ import java.util.Map;
  */
 public class CheckVariables extends BasicVisitor {
 
-	public CheckVariables(Context context) {
+	public static final String UNBOUNDED_VARS = "hasUnboundedVars";
+
+    public CheckVariables(Context context) {
 		super(context);
 	}
 
@@ -145,6 +147,8 @@ public class CheckVariables extends BasicVisitor {
 						getName(), v.getFilename(), v.getLocation()));
 			}
 			if (!left.containsKey(v)) {
+			    node.addAttribute(UNBOUNDED_VARS, "");
+			    
                 /* matching logic relaxes this restriction */
                 if (!GlobalSettings.javaBackend) {
                     GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,

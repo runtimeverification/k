@@ -101,17 +101,7 @@ public class PrePostVisitor implements Visitor {
 
     @Override
     public void visit(Collection collection) {
-        // TODO(YilongL): change to "throw new UnsupportedOperationException();"
-        preVisitor.resetProceed();
-        collection.accept(preVisitor);
-        if (!preVisitor.isProceed()) return;
-        if (collection.hasFrame()) {
-            collection.frame().accept(this);
-        }
-        for (Term term : collection.getContents()) {
-            term.accept(this);
-        }
-        collection.accept(postVisitor);
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -156,6 +146,15 @@ public class PrePostVisitor implements Visitor {
         kItem.kLabel().accept(this);
         kItem.kList().accept(this);
         kItem.accept(postVisitor);
+    }
+
+    @Override
+    public void visit(KItemProjection kItemProjection) {
+        preVisitor.resetProceed();
+        kItemProjection.accept(preVisitor);
+        if (!preVisitor.isProceed()) return;
+        kItemProjection.term().accept(this);
+        kItemProjection.accept(postVisitor);
     }
 
     @Override

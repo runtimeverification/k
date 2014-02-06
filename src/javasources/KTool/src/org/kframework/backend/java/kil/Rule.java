@@ -1,17 +1,21 @@
 package org.kframework.backend.java.kil;
 
+import java.util.Collection;
+import java.util.Map;
+
 import org.kframework.backend.java.indexing.IndexingPair;
 import org.kframework.backend.java.symbolic.BottomUpVisitor;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.UninterpretedConstraint;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.compile.checks.CheckVariables;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 
-import java.util.Collection;
-import java.util.Map;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
 
 /**
@@ -24,12 +28,13 @@ public class Rule extends JavaSymbolicObject {
     private final String label;
     private final Term leftHandSide;
     private final Term rightHandSide;
-    private final Collection<Term> requires;
-    private final Collection<Term> ensures;
-    private final Collection<Variable> freshVariables;
+    private final ImmutableList<Term> requires;
+    private final ImmutableList<Term> ensures;
+    private final ImmutableSet<Variable> freshVariables;
     private final UninterpretedConstraint lookups;
     private final IndexingPair indexingPair;
     private final boolean containsKCell;
+    private final boolean hasUnboundedVars;
 
     public Rule(
             String label,
@@ -43,9 +48,9 @@ public class Rule extends JavaSymbolicObject {
         this.label = label;
         this.leftHandSide = leftHandSide;
         this.rightHandSide = rightHandSide;
-        this.requires = requires;
-        this.ensures = ensures;
-        this.freshVariables = freshVariables;
+        this.requires = ImmutableList.copyOf(requires);
+        this.ensures = ImmutableList.copyOf(ensures);
+        this.freshVariables = ImmutableSet.copyOf(freshVariables);
         this.lookups = lookups;
 
         Collection<IndexingPair> indexingPairs = leftHandSide.getIndexingPairs();
@@ -70,6 +75,8 @@ public class Rule extends JavaSymbolicObject {
             }
         });
         containsKCell = tempContainsKCell;
+        
+        hasUnboundedVars = attributes.containsAttribute(CheckVariables.UNBOUNDED_VARS);
 
         super.setAttributes(attributes);
     }
@@ -94,16 +101,20 @@ public class Rule extends JavaSymbolicObject {
         return label;
     }
 
-    public Collection<Term> requires() {
+    public ImmutableList<Term> requires() {
         return requires;
     }
 
-    public Collection<Term> ensures() {
+    public ImmutableList<Term> ensures() {
         return ensures;
     }
 
-    public Collection<Variable> freshVariables() {
+    public ImmutableSet<Variable> freshVariables() {
         return freshVariables;
+    }
+    
+    public boolean hasUnboundedVariables() {
+        return hasUnboundedVars;
     }
 
     public KLabelConstant functionKLabel() {

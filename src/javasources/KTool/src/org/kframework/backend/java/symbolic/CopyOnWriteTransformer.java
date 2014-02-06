@@ -12,38 +12,7 @@ import org.kframework.backend.java.builtins.Int32Token;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
-import org.kframework.backend.java.kil.BuiltinList;
-import org.kframework.backend.java.kil.BuiltinMap;
-import org.kframework.backend.java.kil.BuiltinMgu;
-import org.kframework.backend.java.kil.BuiltinSet;
-import org.kframework.backend.java.kil.Cell;
-import org.kframework.backend.java.kil.CellCollection;
-import org.kframework.backend.java.kil.Collection;
-import org.kframework.backend.java.kil.ConstrainedTerm;
-import org.kframework.backend.java.kil.Definition;
-import org.kframework.backend.java.kil.Hole;
-import org.kframework.backend.java.kil.KCollection;
-import org.kframework.backend.java.kil.KCollectionFragment;
-import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.KLabel;
-import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.kil.KLabelFreezer;
-import org.kframework.backend.java.kil.KLabelInjection;
-import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.KSequence;
-import org.kframework.backend.java.kil.Kind;
-import org.kframework.backend.java.kil.ListLookup;
-import org.kframework.backend.java.kil.MapLookup;
-import org.kframework.backend.java.kil.MapUpdate;
-import org.kframework.backend.java.kil.MetaVariable;
-import org.kframework.backend.java.kil.Rule;
-import org.kframework.backend.java.kil.SetLookup;
-import org.kframework.backend.java.kil.SetUpdate;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermCons;
-import org.kframework.backend.java.kil.TermContext;
-import org.kframework.backend.java.kil.Token;
-import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -73,7 +42,7 @@ public class CopyOnWriteTransformer implements Transformer {
 	}
 
     public CopyOnWriteTransformer(Definition definition) {
-        this(new TermContext(definition));
+        this(TermContext.of(definition));
     }
 
     public CopyOnWriteTransformer() {
@@ -180,9 +149,18 @@ public class CopyOnWriteTransformer implements Transformer {
     }
 
     @Override
+    public ASTNode transform(KItemProjection kItemProjection) {
+        Term term = (Term) kItemProjection.term().accept(this);
+        if (term != kItemProjection.term()) {
+            kItemProjection = new KItemProjection(kItemProjection.kind(), term);
+        }
+        return kItemProjection;
+    }
+
+    @Override
     public ASTNode transform(KItem kItem) {
-        KLabel kLabel = (KLabel) kItem.kLabel().accept(this);
-        KList kList = (KList) kItem.kList().accept(this);
+        Term kLabel = (Term) kItem.kLabel().accept(this);
+        Term kList = (Term) kItem.kList().accept(this);
         if (kLabel != kItem.kLabel() || kList != kItem.kList()) {
             kItem = new KItem(kLabel, kList, context.definition().context());
         }
@@ -196,13 +174,16 @@ public class CopyOnWriteTransformer implements Transformer {
 
     @Override
     public ASTNode transform(UninterpretedConstraint uninterpretedConstraint) {
+        boolean changed = false;
         UninterpretedConstraint transformedUninterpretedConstraint = new UninterpretedConstraint();
         for (UninterpretedConstraint.Equality equality : uninterpretedConstraint.equalities()) {
-            transformedUninterpretedConstraint.add(
-                    (Term) equality.leftHandSide().accept(this),
-                    (Term) equality.rightHandSide().accept(this));
+            Term transformedLHS = (Term) equality.leftHandSide().accept(this);
+            Term transformedRHS = (Term) equality.rightHandSide().accept(this);
+            changed = changed || transformedLHS != equality.leftHandSide()
+                    || transformedRHS != equality.rightHandSide();
+            transformedUninterpretedConstraint.add(transformedLHS, transformedRHS);
         }
-        return transformedUninterpretedConstraint;
+        return changed ? transformedUninterpretedConstraint : uninterpretedConstraint;
     }
 
     @Override
@@ -244,7 +225,37 @@ public class CopyOnWriteTransformer implements Transformer {
         List<Term> items = transformList(kList.getContents());
 
         if (kList.hasFrame()) {
-            Variable frame = (Variable) kList.frame().accept(this);
+            Variable frame;
+            Term transformedFrame = (Term) kList.frame().accept(this);
+
+            if (transformedFrame.kind() == Kind.KLIST) {
+                if (transformedFrame instanceof KList) {
+                    if (items == kList.getContents()) {
+                        items = new ArrayList<>(items);
+                    }
+                    items.addAll(((KList) transformedFrame).getContents());
+                    frame = ((KList) transformedFrame).hasFrame() ?
+                            ((KList) transformedFrame).frame() : null;
+                } else if (transformedFrame instanceof KCollectionFragment) {
+                    if (items == kList.getContents()) {
+                        items = new ArrayList<>(items);
+                    }
+                    Iterables.addAll(items, (KCollectionFragment) transformedFrame);
+                    frame = ((KCollectionFragment) transformedFrame).hasFrame() ?
+                            ((KCollectionFragment) transformedFrame).frame() : null;
+                } else {
+                    frame = (Variable) transformedFrame;
+                }
+            } else {
+                assert transformedFrame.kind() == Kind.KITEM || transformedFrame.kind() == Kind.K;
+
+                if (items == kList.getContents()) {
+                    items = new ArrayList<>(items);
+                }
+                items.add(transformedFrame);
+                frame = null;
+            }
+
             if (items != kList.getContents() || frame != kList.frame()) {
                 kList = new KList(ImmutableList.<Term>copyOf(items), frame);
             }
@@ -268,14 +279,14 @@ public class CopyOnWriteTransformer implements Transformer {
             if (transformedFrame.kind() == Kind.K) {
                 if (transformedFrame instanceof KSequence) {
                     if (items == kSequence.getContents()) {
-                        items = new ArrayList<Term>(items);
+                        items = new ArrayList<>(items);
                     }
                     items.addAll(((KSequence) transformedFrame).getContents());
                     frame = ((KSequence) transformedFrame).hasFrame() ?
                             ((KSequence) transformedFrame).frame() : null;
                 } else if (transformedFrame instanceof KCollectionFragment) {
                     if (items == kSequence.getContents()) {
-                        items = new ArrayList<Term>(items);
+                        items = new ArrayList<>(items);
                     }
                     Iterables.addAll(items, (KCollectionFragment) transformedFrame);
                     frame = ((KCollectionFragment) transformedFrame).hasFrame() ?
@@ -287,7 +298,7 @@ public class CopyOnWriteTransformer implements Transformer {
                 assert transformedFrame.kind() == Kind.KITEM;
 
                 if (items == kSequence.getContents()) {
-                    items = new ArrayList<Term>(items);
+                    items = new ArrayList<>(items);
                 }
                 items.add(transformedFrame);
                 frame = null;
@@ -561,9 +572,12 @@ public class CopyOnWriteTransformer implements Transformer {
 
         if (processedLeftHandSide != rule.leftHandSide()
                 || processedRightHandSide != rule.rightHandSide()
-                || !processedRequires.equals(rule.requires())
-                || !processedEnsures.equals(rule.ensures())
-                || !processedFreshVariables.equals(rule.freshVariables())
+//                || !processedRequires.equals(rule.requires())
+//                || !processedEnsures.equals(rule.ensures())
+//                || !processedFreshVariables.equals(rule.freshVariables())
+                || processedRequires != rule.requires()
+                || processedEnsures != rule.ensures()
+                || processedFreshVariables != rule.freshVariables()
                 || processedLookups != rule.lookups()) {
             return new Rule(
                     rule.label(),

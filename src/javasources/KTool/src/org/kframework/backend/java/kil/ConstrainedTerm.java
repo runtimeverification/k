@@ -1,18 +1,5 @@
 package org.kframework.backend.java.kil;
 
-import org.kframework.backend.java.symbolic.SymbolicConstraint;
-import org.kframework.backend.java.symbolic.SymbolicConstraint.Equality;
-import org.kframework.backend.java.symbolic.SymbolicConstraint.TruthValue;
-import org.kframework.backend.java.symbolic.Transformer;
-import org.kframework.backend.java.symbolic.Unifier;
-import org.kframework.backend.java.symbolic.UninterpretedConstraint;
-import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.backend.java.util.GroupProductionsBySort;
-import org.kframework.backend.java.util.Utils;
-import org.kframework.kil.ASTNode;
-import org.kframework.kil.loader.Context;
-import org.kframework.krun.K;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -22,6 +9,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import org.kframework.backend.java.symbolic.SymbolicConstraint;
+import org.kframework.backend.java.symbolic.SymbolicConstraint.Equality;
+import org.kframework.backend.java.symbolic.SymbolicConstraint.TruthValue;
+import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Unifier;
+import org.kframework.backend.java.symbolic.UninterpretedConstraint;
+import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.Debug;
+import org.kframework.backend.java.util.GroupProductionsBySort;
+import org.kframework.backend.java.util.Utils;
+import org.kframework.kil.ASTNode;
+import org.kframework.kil.loader.Context;
+import org.kframework.krun.K;
 
 
 /**
@@ -101,7 +102,7 @@ public class ConstrainedTerm extends Term {
         unificationConstraint.simplify();
         Set<Variable> variables = constrainedTerm.variableSet();
         variables.removeAll(variableSet());
-        unificationConstraint.orientSubstitution(variables, context);
+        unificationConstraint.orientSubstitution(variables);
         if (unificationConstraint.isFalse() || !unificationConstraint.isSubstitution()) {
             return null;
         }
@@ -111,7 +112,7 @@ public class ConstrainedTerm extends Term {
         implicationConstraint.addAll(constrainedTerm.lookups);
         implicationConstraint.addAll(constrainedTerm.constraint);
         implicationConstraint.simplify();
-        implicationConstraint.orientSubstitution(variables, context);
+        implicationConstraint.orientSubstitution(variables);
         implicationConstraint = implicationConstraint.substituteWithBinders(implicationConstraint.substitution(), context);
 
         unificationConstraint.addAll(constraint);
@@ -136,30 +137,77 @@ public class ConstrainedTerm extends Term {
         return term;
     }
 
+    public enum UnificationType {
+        PatternMatching, Narrowing, Failure
+    }
+    
+    /**
+     * TODO(YilongL)
+     */
+    private UnificationType typeOfUnification;
+    
+    public UnificationType getTypeOfUnification() {
+        assert typeOfUnification != null : 
+            "Unification result not available; this method can only be called " +
+            "at most once after each call of ConstrainedTerm#unify(ConstrainedTerm).";
+        UnificationType result = typeOfUnification;
+        typeOfUnification = null;
+        return result;
+    }
+    
     /**
      * Unifies this constrained term with another constrained term.
-     *
+     * 
      * @param constrainedTerm
      *            another constrained term
      * @return solutions to the unification problem
      */
-    public Collection<SymbolicConstraint> unify(ConstrainedTerm constrainedTerm) {
-//        if (++Utils.constrainedTermUnifyInvocationCounter == Integer.MAX_VALUE) {
-//            System.err.println("Set breakpoint here to start debugging");
-//        }
+    public List<SymbolicConstraint> unify(ConstrainedTerm constrainedTerm) {
+        int numOfInvoc = Debug.incDebugMethodCounter();
+        if (numOfInvoc == Integer.MAX_VALUE) {
+            Debug.setBreakPointHere();
+        }
+        
+        List<SymbolicConstraint> solutions = unifyImpl(constrainedTerm);
+        
+        Debug.printUnifyResult(numOfInvoc, this, constrainedTerm, solutions);
+        return solutions;
+    }
+    
+    /**
+     * The actual implementation of the unify() method.
+     * 
+     * @param constrainedTerm
+     *            another constrained term
+     * @return solutions to the unification problem
+     */
+    private List<SymbolicConstraint> unifyImpl(ConstrainedTerm constrainedTerm) {
+        typeOfUnification = UnificationType.Failure;
         
         if (!term.kind.equals(constrainedTerm.term.kind)) {
             return Collections.emptyList();
         }
 
+        /* unify the subject term and the pattern term without considering those associated constraints */
         SymbolicConstraint unificationConstraint = new SymbolicConstraint(constrainedTerm.termContext());
-        unificationConstraint.add(term, constrainedTerm.term());
+        unificationConstraint.add(term, constrainedTerm.term);
         unificationConstraint.simplify();
         if (unificationConstraint.isFalse()) {
             return Collections.emptyList();
         }
+        
+        /* compute the type of the unification between two terms */
+        unificationConstraint.orientSubstitution(
+                constrainedTerm.term.variableSet());
+        if (unificationConstraint.isSubstitution()
+                && unificationConstraint.substitution().keySet()
+                        .equals(constrainedTerm.term.variableSet())) {
+            typeOfUnification = UnificationType.PatternMatching;
+        } else {
+            typeOfUnification = UnificationType.Narrowing;
+        }
 
-        Collection<SymbolicConstraint> solutions = new ArrayList<SymbolicConstraint>();
+        List<SymbolicConstraint> solutions = new ArrayList<SymbolicConstraint>();
         for (SymbolicConstraint candidate : unificationConstraint.getMultiConstraints()) {
             if (SymbolicConstraint.TruthValue.FALSE == candidate.addAll(constrainedTerm.lookups)) continue;
             if (SymbolicConstraint.TruthValue.FALSE == candidate.addAll(constrainedTerm.constraint)) continue;
@@ -178,8 +226,9 @@ public class ConstrainedTerm extends Term {
         }
 
         if (K.do_testgen && !solutions.isEmpty()) {
+            // TODO(AndreiS): deal with KLabel variables
             boolean changed;
-            Collection<SymbolicConstraint> tmpSolutions = solutions;
+            List<SymbolicConstraint> tmpSolutions = solutions;
             Set<Variable> sortIntersectionVariables = new HashSet<Variable>();
             Map<SymbolicConstraint, Set<Variable>> orientedVarsOfCnstr = new HashMap<SymbolicConstraint, Set<Variable>>();
 
@@ -200,7 +249,7 @@ public class ConstrainedTerm extends Term {
                         // dissolve negative membership predicates
                         Term lhsOfEq = eq1.leftHandSide();
                         if (lhsOfEq instanceof KItem && ((KItem) lhsOfEq).kLabel().toString().equals("'_=/=K_")) {
-                            Term mbPredicate = ((KItem) lhsOfEq).kList().get(0);
+                            Term mbPredicate = ((KList) ((KItem) lhsOfEq).kList()).get(0);
                             if (!(mbPredicate instanceof KItem)) continue;
                             if (!((KLabelConstant) ((KItem) mbPredicate).kLabel()).label().startsWith("is"))
                                 continue;
@@ -209,13 +258,13 @@ public class ConstrainedTerm extends Term {
                             String sortName = ((KLabelConstant) ((KItem) mbPredicate).kLabel()).label().substring("is".length());
 
                             // retrieve the argument; which must be a variable
-                            Variable arg = (Variable) ((KItem) mbPredicate).kList().get(0);
+                            Variable arg = (Variable) ((KList) ((KItem) mbPredicate).kList()).get(0);
 
                             // construct common part of the new constraints
                             UninterpretedConstraint templCnstr = new UninterpretedConstraint();
                             Collection<UninterpretedConstraint> uninterpretedCnstrs = new ArrayList<UninterpretedConstraint>();
                             for (Equality eq2 : cnstr.equalities())
-                                if (!eq2.equals(eq1))
+                                if (eq2 != eq1)
                                     templCnstr.add(eq2.leftHandSide(), eq2.rightHandSide());
                             for (Map.Entry<Variable, Term> entry : cnstr.substitution().entrySet()) {
                                 templCnstr.add(entry.getKey(), entry.getValue());
@@ -244,13 +293,13 @@ public class ConstrainedTerm extends Term {
                         if (eq1.toString().startsWith("isKResult(")) {
                             KItem mbPredicate = (KItem) eq1.leftHandSide();
                             String sortName = ((KLabelConstant) mbPredicate.kLabel()).label().substring("is".length());
-                            Variable arg = (Variable) mbPredicate.kList().get(0);
+                            Variable arg = (Variable) ((KList) mbPredicate.kList()).get(0);
 
                             // construct common part of the new constraints
                             UninterpretedConstraint templCnstr = new UninterpretedConstraint();
                             Collection<UninterpretedConstraint> uninterpretedCnstrs = new ArrayList<UninterpretedConstraint>();
                             for (Equality eq2 : cnstr.equalities())
-                                if (!eq2.equals(eq1))
+                                if (eq2 != eq1)
                                     templCnstr.add(eq2.leftHandSide(), eq2.rightHandSide());
                             for (Map.Entry<Variable, Term> entry : cnstr.substitution().entrySet()) {
                                 templCnstr.add(entry.getKey(), entry.getValue());
@@ -276,7 +325,7 @@ public class ConstrainedTerm extends Term {
                         }
                     }
 
-                    cnstr.orientSubstitution(orientedVars, context);
+                    cnstr.orientSubstitution(orientedVars);
                     for (Entry<Variable, Term> subst : cnstr.substitution().entrySet()) {
                         // handle equality involving two variables with different
                         // sorts, e.g. x1:sort1 =? x2:sort2
@@ -356,10 +405,6 @@ public class ConstrainedTerm extends Term {
             } while (changed);
         }
 
-//        System.out.printf(
-//                "###unify %s###\nsubject = %s\npattern = %s\nsols = %s\n",
-//                Utils.constrainedTermUnifyInvocationCounter, this,
-//                constrainedTerm, solutions);
         return solutions;
     }
 
@@ -469,11 +514,13 @@ public class ConstrainedTerm extends Term {
 
     @Override
     public int hashCode() {
-        int hash = 1;
-        hash = hash * Utils.HASH_PRIME + term.hashCode();
-        hash = hash * Utils.HASH_PRIME + lookups.hashCode();
-        hash = hash * Utils.HASH_PRIME + constraint.hashCode();
-        return hash;
+        if (hashCode == 0) {
+            hashCode = 1;
+            hashCode = hashCode * Utils.HASH_PRIME + term.hashCode();
+            hashCode = hashCode * Utils.HASH_PRIME + lookups.hashCode();
+            hashCode = hashCode * Utils.HASH_PRIME + constraint.hashCode();
+        }
+        return hashCode;
     }
 
     @Override

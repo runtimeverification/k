@@ -68,7 +68,7 @@ module IMP
   rule true  && B => B
   rule false && _ => false
 // Block
-  syntax K ::= env(Map)
+  syntax KItem ::= env(Map)
   rule <k> { Ss } => Ss ~> env(Rho) ...</k>
        <env> Rho:Map </env>   [structural]
   rule <k> env(Rho:Map) => . ...</k> <env> _ => Rho </env>   [structural]

@@ -1,14 +1,6 @@
 package org.kframework.backend.java.indexing;
 
-import org.kframework.backend.java.kil.Definition;
-import org.kframework.backend.java.kil.Hole;
-import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.kil.KLabelFreezer;
-import org.kframework.backend.java.kil.KSequence;
-import org.kframework.backend.java.kil.Sorted;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.util.Utils;
 
 import java.io.Serializable;
@@ -32,7 +24,7 @@ public class IndexingPair implements Serializable {
                 KItem frozenKItem = (KItem) freezer.term();
                 return new FreezerIndex(
                         (KLabelConstant) frozenKItem.kLabel(),
-                        frozenKItem.kList().getContents().indexOf(Hole.HOLE));
+                        ((KList) frozenKItem.kList()).getContents().indexOf(Hole.HOLE));
             }
         } else if (term instanceof Sorted) {
             Sorted sorted = (Sorted) term;

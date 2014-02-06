@@ -194,9 +194,9 @@ one cannot do it in general (same like for all Turing-complete
 languages).  */
 
 module LOGIK
-  syntax K ::= renameVariables(K) [function, hook(MetaK:renameVariables)]
-  syntax K ::= variables(K) [function, hook(MetaK:variables)]
-  syntax K ::= variablesMap(K) [function, hook(MetaK:variablesMap)]
+  syntax KItem ::= renameVariables(K) [function, hook(MetaK:renameVariables)]
+  syntax KItem ::= variables(K) [function, hook(MetaK:variables)]
+  syntax KItem ::= variablesMap(K) [function, hook(MetaK:variablesMap)]
   syntax Bool ::= unifiable(K,K) [function, hook(MetaK:unifiable)]
 
 

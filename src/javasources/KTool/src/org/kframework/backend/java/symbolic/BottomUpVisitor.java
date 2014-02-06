@@ -120,6 +120,12 @@ public class BottomUpVisitor implements Visitor {
     }
 
     @Override
+    public void visit(KItemProjection kItemProjection) {
+        kItemProjection.term().accept(this);
+        visit((Term) kItemProjection);
+    }
+
+    @Override
     public void visit(KCollection kCollection) {
         for (Term term : kCollection) {
             term.accept(this);

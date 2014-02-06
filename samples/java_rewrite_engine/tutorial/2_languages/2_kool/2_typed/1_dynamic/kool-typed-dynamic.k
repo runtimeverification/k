@@ -106,7 +106,8 @@ untyped KOOL.  */
                 | "if" "(" Exp ")" Block "else" Block   [avoid, strict(1)]
                 | "if" "(" Exp ")" Block
                 | "while" "(" Exp ")" Block
-                | "for" "(" Stmt Exp ";" Exp ")" Block
+                //| "for" "(" Stmt Exp ";" Exp ")" Block
+                | "for" "(" Stmts Exp ";" Exp ")" Block
                 | "print" "(" Exps ")" ";"              [strict]
                 | "return" Exp ";"                      [strict]
                 | "return" ";"
@@ -122,14 +123,10 @@ untyped KOOL.  */
 
 //@ \subsection{Desugaring macros}
 
-//  rule if (E) S => if (E) S else {}                                     [macro]
-//  rule for(Start Cond; Step) {S:Stmts} => {Start while(Cond){S Step;}}  [macro]
-//  rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;               [macro]
-//  rule T:Type X:Id = E; => T X; X = E;                                  [macro]
-  rule if (E) S => if (E) S else {}
-  rule for(Start Cond; Step) {S:Stmts} => {Start while(Cond){S Step;}}
-  rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;
-  rule T:Type X:Id = E; => T X; X = E;
+  rule if (E) S => if (E) S else {}                                     [macro]
+  rule for(Start Cond; Step) {S:Stmts} => {Start while(Cond){S Step;}}  [macro]
+  rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;               [macro]
+  rule T:Type X:Id = E; => T X; X = E;                                  [macro]
 
   rule class C:Id S => class C extends theObject S                     // KOOL
 
@@ -212,7 +209,7 @@ KOOL).  */
   syntax KResult ::= Val
 
 
-  syntax K ::= undefined(Type)  [latex(\bot_{#1})]
+  syntax KItem ::= undefined(Type)  [latex(\bot_{#1})]
 
   rule <k> T:Type X:Id; => . ...</k>
        <env> Env => Env[L/X] </env>
@@ -353,10 +350,10 @@ KOOL).  */
     => T X=V; mkDecls(Ps,Vs)
   rule mkDecls(.Params,.Vals) => {}
 
-  syntax K ::= lookup(Int)
+  syntax KItem ::= lookup(Int)
   rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [lookup]
 
-  syntax K ::= env(Map)
+  syntax KItem ::= env(Map)
   rule <k> env(Env) => . ...</k>  <env> _ => Env </env>  [structural]
   rule (env(_) => .) ~> env(_)  [structural]
 
@@ -404,7 +401,7 @@ get more from the existing SIMPLE constructs. */
 
 Like in untyped KOOL. */
 
-  syntax K ::= "execute"
+  syntax KItem ::= "execute"
   rule <k> execute => new theMain(.Exps); </k> <env> . </env>  [structural]
 
 
@@ -435,7 +432,7 @@ current status of the \textsf{return} cell and then pop it when the
 method returns.  We have to do the same with the current object
 environment, so we group them together in the stack frame.  */
 
-  syntax K ::=  (Map,K,ControlCellFragment)
+  syntax KItem ::= (Map,K,ControlCellFragment)
 
   rule <k> methodClosure(_->T,Class,OL,Ps,S)(Vs:Vals) ~> K
            => mkDecls(Ps,Vs) S return; </k>
@@ -494,8 +491,8 @@ values are allowed to be stored in each location.  */
 Exceptions are propagated now until a catch that can handle them is
 encountered. */
 
-  syntax K ::= (Param,Stmt,K,Map,ControlCellFragment)
-  syntax K ::= "popx"
+  syntax KItem ::= (Param,Stmt,K,Map,ControlCellFragment)
+  syntax KItem ::= "popx"
 
   rule <k> (try S1 catch(P) S2 => S1 ~> popx) ~> K </k>
        <control>
@@ -575,7 +572,7 @@ order to be recovered after the creation of the new object.  Only the
 first rule below needs to be changed; the others are identical to
 those in untyped KOOL. */
 
-  syntax K ::= (Id,EnvCellSort)
+  syntax KItem ::= (Id,EnvCellSort)
 
   rule <k> new Class:Id(Vs:Vals) ~> K
            => create(Class) ~> (storeObj ~> ((Class(Vs)); return this;)) </k>
@@ -593,7 +590,7 @@ those in untyped KOOL. */
          ...</fstack>
        </control>
 
-  syntax K ::= create(Id)
+  syntax KItem ::= create(Id)
 
   rule <k> create(Class:Id)
            => create(Class1) ~> setCrntClass(Class) ~> S ~> addEnvLayer ...</k>
@@ -603,12 +600,12 @@ those in untyped KOOL. */
 
   rule <k> create(theObject) => . ...</k>  [structural]
 
-  syntax K ::= setCrntClass(Id)
+  syntax KItem ::= setCrntClass(Id)
 
   rule <k> setCrntClass(C) => . ...</k>
        <crntClass> _ => C </crntClass>  [structural]
 
-  syntax K ::= "addEnvLayer"
+  syntax KItem ::= "addEnvLayer"
 
   rule <k> addEnvLayer => . ...</k>
        <env> Env => . </env>
@@ -616,7 +613,7 @@ those in untyped KOOL. */
        <envStack> . => ListItem((Class, <env>Env</env>)) ...</envStack>
     [structural]
 
-  syntax K ::= "storeObj"
+  syntax KItem ::= "storeObj"
 
   rule <k> storeObj => . ...</k>
        <crntObj> Obj (<location> L:Int </location> => .) </crntObj>
@@ -756,17 +753,26 @@ Like in untyped KOOL. */
               . X)
     when C =/=K C' [structural]
 
+
 /*@ \subsubsection{Lookup member}
 
 Like in untyped KOOL. */
 
-  syntax K ::= lookupMember(EnvStackCellSort,Id)  [function]
+  syntax KItem ::= lookupMember(BagItem,Id)  [function]
 
-  rule lookupMember(<envStack> ListItem((_, <env>... X |-> L ...</env>))
-                    ...</envStack>, X) => lookup(L)
+//  rule lookupMember(<envStack> (_, <env>... X|->L ...</env>) ...</envStack>, X)
+//    => lookup(L)
+  rule lookupMember(<envStack> ListItem((_, <env>... X|->L ...</env>)) ...</envStack>, X)
+    => lookup(L)
 
-  rule lookupMember(<envStack> ListItem((_, <env> Env </env>)) => .
-                    ...</envStack>, X)  when notBool(X in keys(Env))
+//  rule lookupMember(<envStack> (_, <env> Env </env>) => . ...</envStack>, X)
+//    when notBool(X in keys(Env))
+  // TODO (AndreiS): support function with deep rewrites
+  // rule lookupMember(<envStack> ListItem((_, <env> Env </env>)) => . ...</envStack>, X)
+  //   when notBool(X in keys(Env))
+  rule lookupMember(<envStack> ListItem((_, <env> Env </env>)) L </envStack>, X)
+    => lookupMember(<envStack> L </envStack>, X)
+    when notBool(X in keys(Env))
 
 
 //@ \subsubsection{\texttt{typeOf} for the additional values}
@@ -825,7 +831,7 @@ the subtype relation above. */
 A generic computational guard: it allows the computation to continue
 only if a prefix guard evaluates to true. */
 
-  syntax K ::= "true?"
+  syntax KItem ::= "true?"
   rule true ~> true? => .  [structural]
 
 endmodule

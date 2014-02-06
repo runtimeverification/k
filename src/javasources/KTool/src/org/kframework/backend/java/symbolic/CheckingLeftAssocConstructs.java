@@ -3,10 +3,7 @@ package org.kframework.backend.java.symbolic;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.kframework.backend.java.kil.Definition;
-import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.KLabel;
-import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.*;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Constants;
 
@@ -66,15 +63,21 @@ public class CheckingLeftAssocConstructs implements KastStructureCheckerPlugin {
     private class CheckLeftAssociativity extends LocalVisitor {
         @Override
         public void visit(KItem kItem) {
-            KLabel kLabel1 = kItem.kLabel();
+            // TODO(AndreiS): deal with KLabel variables and non-concrete KLists
+            assert kItem.kLabel() instanceof KLabel;
+            assert kItem.kList() instanceof KList;
+            KLabel kLabel1 = (KLabel) kItem.kLabel();
+            KList klist = (KList) kItem.kList();
             if (leftAssocKLabels.contains(kLabel1)) {
-                if (kItem.kList().size() != 2) {
+                if (klist.size() != 2) {
                     // TODO(YilongL): why is 'notBool or absInt left-assoc?
                     return;
                 }
                 
-                if (kItem.kList().get(1) instanceof KItem) {
-                    KLabel kLabel2 = ((KItem) kItem.kList().get(1)).kLabel();
+                if (klist.get(1) instanceof KItem) {
+                    // TODO(AndreiS): deal with KLabel variables
+                    assert ((KItem) klist.get(1)).kLabel() instanceof KLabel;
+                    KLabel kLabel2 = (KLabel) ((KItem) klist.get(1)).kLabel();
                     
                     if (kLabel1.equals(kLabel2)) {
                         this.proceed = false;

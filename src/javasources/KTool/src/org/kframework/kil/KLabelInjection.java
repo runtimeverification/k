@@ -30,8 +30,9 @@ public class KLabelInjection extends KLabel {
     }
 
     public void setTerm(Term term) {
-        assert term.getSort().equals(KSorts.K) || term.getSort().equals(KSorts.KLABEL)
-               || term.getSort().equals(KSorts.KLIST);
+        // TODO(AndreiS): fix assertion
+        //assert term.getSort().equals(KSorts.K) || term.getSort().equals(KSorts.KLABEL)
+        //       || term.getSort().equals(KSorts.KLIST);
         this.term = term;
     }
 

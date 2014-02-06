@@ -24,7 +24,8 @@ All the features are similar with the corresponding features for Intellij Idea J
 - Quick documentation view. Press Ctrl+Q on a reference. It will show the reference target plus the associated documentation. For auxiliary functions the associated documentation is the comment above the  function declaration.
 - Find auxiliary function. Press Ctrl+Alt+Shift+N. The list of all auxiliary functions in the project is displayed. The list is narrowed as you type.
 - Structure view for auxiliary functions. When the current file is a K file, press Ctrl+F12. The list of auxiliary functions in the file is displayed.
--  Quick code commenting / uncommenting. Press Ctrl+/ to comment / uncomment the current line. Press Ctrl+Shift+/ to comment / uncomment the current selection.
+- Quick code commenting / uncommenting. Press Ctrl+/ to comment / uncomment the current line. Press Ctrl+Shift+/ to comment / uncomment the current selection.
+- Code style: support for tab size only.
  
 ## Support for kompile / krun
 

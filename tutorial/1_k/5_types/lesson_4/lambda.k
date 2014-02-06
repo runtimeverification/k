@@ -35,7 +35,9 @@ module LAMBDA
   rule T1:Type  + T2:Type => T1 = int ~> T2 = int ~> int
   rule T1:Type <= T2:Type => T1 = int ~> T2 = int ~> bool
   syntax Exp ::= Exp "->" Exp  [strict]
-  rule lambda X . E => T -> E[T/X]  when fresh(T:Type)
+  // TODO (AndreiS): fix sort inference for E
+  // rule lambda X . E => T -> E[T/X]  when fresh(T:Type)
+  rule lambda X . E:Exp => T -> E[T/X]  when fresh(T:Type)
   rule T1:Type T2:Type => T1 = (T2 -> T) ~> T  when fresh(T:Type)
   rule if T:Type then T1:Type else T2:Type => T = bool ~> T1 = T2 ~> T1
   rule let X = E in E' => (lambda X . E') E                             [macro]

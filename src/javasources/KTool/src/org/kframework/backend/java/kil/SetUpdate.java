@@ -1,12 +1,17 @@
 package org.kframework.backend.java.kil;
 
-import org.kframework.backend.java.symbolic.Unifier;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
-import java.util.*;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 
 /**
  *
@@ -17,12 +22,12 @@ public class SetUpdate extends Term {
     /** {@link org.kframework.backend.java.kil.Term} representation of the map */
     private final Term set;
     /** {@code Set} of keys to be removed from the map */
-    private final Set<Term> removeSet;
+    private final ImmutableSet<Term> removeSet;
 
     public SetUpdate(Term set, Set<Term> removeSet) {
         super(Kind.KITEM);
         this.set = set;
-        this.removeSet = new HashSet<Term>(removeSet);
+        this.removeSet = ImmutableSet.copyOf(removeSet);
     }
 
     public Term evaluateUpdate() {
@@ -36,21 +41,23 @@ public class SetUpdate extends Term {
 
         BuiltinSet builtinSet = ((BuiltinSet) set);
 
-        Set<Term> entries = new HashSet<Term>(builtinSet.elements());
+        Set<Term> elems = new HashSet<Term>(builtinSet.elements());
+        Set<Term> elemsToRemove = new HashSet<Term>();
         for (Iterator<Term> iterator = removeSet.iterator(); iterator.hasNext();) {
-            if (entries.remove(iterator.next())) {
-                iterator.remove();
+            Term nextElem = iterator.next();
+            if (elems.remove(nextElem)) {
+                elemsToRemove.add(nextElem);
             }
         }
 
-        if (!removeSet.isEmpty()) {
-            return this;
+        if (removeSet.size() > elemsToRemove.size()) {
+            return new SetUpdate(set, Sets.difference(elems, elemsToRemove));
         }
 
         if (builtinSet.hasFrame()) {
-            return new BuiltinSet(entries, builtinSet.frame());
+            return new BuiltinSet(elems, builtinSet.frame());
         } else {
-            return new BuiltinSet(entries);
+            return new BuiltinSet(elems);
         }
     }
 
@@ -58,21 +65,23 @@ public class SetUpdate extends Term {
         return set;
     }
 
-    public Set<Term> removeSet() {
-        return Collections.unmodifiableSet(removeSet);
+    public ImmutableSet<Term> removeSet() {
+        return removeSet;
     }
 
     @Override
     public boolean isSymbolic() {
-        throw new UnsupportedOperationException();
+        return false;
     }
 
     @Override
     public int hashCode() {
-        int hash = 1;
-        hash = hash * Utils.HASH_PRIME + set.hashCode();
-        hash = hash * Utils.HASH_PRIME + removeSet.hashCode();
-        return hash;
+        if (hashCode == 0) {
+            hashCode = 1;
+            hashCode = hashCode * Utils.HASH_PRIME + set.hashCode();
+            hashCode = hashCode * Utils.HASH_PRIME + removeSet.hashCode();
+        }
+        return hashCode;
     }
 
     @Override
@@ -99,8 +108,8 @@ public class SetUpdate extends Term {
     }
 
     @Override
-    public void accept(Unifier unifier, Term patten) {
-        throw new UnsupportedOperationException();
+    public void accept(Unifier unifier, Term pattern) {
+        unifier.unify(this, pattern);
     }
 
     @Override

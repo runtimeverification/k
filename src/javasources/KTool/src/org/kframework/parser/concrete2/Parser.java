@@ -1,23 +1,38 @@
 package org.kframework.parser.concrete2;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Comparator;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.TreeSet;
-import java.util.Deque;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.regex.Pattern;
+
+import org.kframework.kil.Ambiguity;
+import org.kframework.kil.KList;
+import org.kframework.kil.Term;
+import org.kframework.parser.concrete2.Grammar.ExitState;
+import org.kframework.parser.concrete2.Grammar.NextableState;
+import org.kframework.parser.concrete2.Grammar.NonTerminal;
+import org.kframework.parser.concrete2.Grammar.NonTerminalId;
+import org.kframework.parser.concrete2.Grammar.NonTerminalState;
+import org.kframework.parser.concrete2.Grammar.PrimitiveState;
+import org.kframework.parser.concrete2.Grammar.State;
+import org.kframework.parser.concrete2.Grammar.StateId;
 
 /*
 
-rule automaton
+rule atomaton
   (auto built in bottom-up tree automaton)
 
 automatic priorities for internal positions is based on whether (dynamic) their are non-null forms
 
-(...)* needs to deal with greediness
+(...)* needs to deal with greedyness
 predicates
 regex as lookahead (requires single pass (going in reverse) at start)
   (hmm, lazy regexes?)
@@ -31,8 +46,8 @@ Single tree properties:
   attribute grammars
 + token parsing (e.g. ints)
   brackets
-    Conflicts with priorities (b/c they could be erased)
-    (maybe set "bracketed" property on output?)
+    Conflicts with priorities (b/c they could be errased)
+    (maybe set "bracketted" property on output?)
     or maybe rewrite brackets only as a child of another parse
     multi-pass macros
 * whitespace
@@ -45,7 +60,7 @@ Single tree properties:
     Cs typedef
     L-attributed grammars
     problem when mixed with non-det
-*greediness
+*greedyness
 *lexing productions
 +prefers/avoids
 *casts (?!)
@@ -109,62 +124,16 @@ nt:
 Terminology:
   entryState/exitState: the first and last states in a non-terminal
 
-  stateCall/stateReturn: records for the entry to or exit from a state
+  stateCall/stateReturn: records for the entery to or exit from a state
   ntCall/ntReturn: records for the entry to or exit from a non-terminal
 
-  stateBegin/stateEnd: the source positions for the beginning and end the span of a state
-  ntBegin/ntEnd: the source positions for the beginning and end the span of a state
+  stateBegin/stateEnd: the source positions for the begining and end the span of a state
+  ntBegin/ntEnd: the source positions for the begining and end the span of a state
 
-  nextState/previousState: successor/predecessor states in a state machine
+  nextState/previousState: successor/predicesor states in a state machine
 */
 
 ////////////////
-
-// Positions are 'int' because CharSequence uses 'int' // Position in the text
-
-class StateId {
-    String name;
-
-    public StateId(String name) {
-        this.name = name;
-    }
-} // Used only by rules
-
-class NonTerminalId {
-    String name;
-
-    public NonTerminalId(String name) {
-        this.name = name;
-    }
-} // Used only by rules
-
-// smallest states are computed first
-class StateReturnComparator implements Comparator<StateReturn> {
-    public int compare(StateReturn o1, StateReturn o2) {
-        assert false;
-        return 0;
-/*
-       o1.stateEnd <=> o2.stateEnd
-    && o1.stateCall.ntCall.ntBegin <=> o2.stateCall.ntCall.ntBegin
-    && 
-    public final NonTerminal nt;
-    public final int ntBegin;
-
-    public final NonTerminalCall ntCall;
-    public final int stateBegin;
-    public final State state;
-
-    public final StateCall stateCall;
-    public final int stateEnd;
-
-// Invariant:
-  A state return is committed only if there is no state that
-   - is earlier in the state machine,
-   - ends earlier in the string, and
-   - is on an either more or less general context
-*/
-    }
-}
 
 /*
 
@@ -189,314 +158,268 @@ class Function:
 */
 
 class Function {
-    public static final Function NULL = new Function(false, null);
-    public static final Function IDENTITY = new Function(false, null);
+    //private final NonTerminalCall ntCall;
+    //private Set<TermRewrites> terms;
+    private Set<KList> terms = new HashSet<KList>();
+    //private boolean parses;
+    private Function(Set<KList> terms) { this.terms = terms; }
+    //public Function(NonTerminalCall ntCall, Term ) { this.ntCall = ntCall; }
 
-    private final NonTerminalCall ntCall;
-    private boolean parses = false;
-
-    public Function(boolean parses, NonTerminalCall ntCall) {
-        this.parses = parses;
-        this.ntCall = ntCall;
+    public static Function constant(Term term) {
+        return new Function(new HashSet<KList>(Arrays.asList(new KList(Arrays.asList(term)))));
+    }
+    public static Function empty() {
+        return new Function(new HashSet<KList>());
+    }
+    public static Function identity() {
+        return new Function(new HashSet<KList>(Arrays.asList(new KList())));
     }
 
-    public void addFunction(Function f) {
-        this.parses |= f.parses;
+    public void addFunction(Function that) {
+        this.terms.addAll(that.terms);
     }
 
     public boolean addFunctionComposition(Function sibling, Function child) {
-        boolean oldParses = this.parses;
-        this.parses |= sibling.parses && child.parses;
-        return this.parses != oldParses;
+        boolean result = false;
+        for (KList x : sibling.terms) {
+            for (KList y : child.terms) {
+                KList z = x.shallowCopy();
+                z.getContents().addAll(y.getContents());
+                result |= this.terms.add(z);
+            }
+        }
+        return result;
     }
 
-    void addFactored(Function that) {
-        this.parses |= that.parses;
+    class Factoring {
+        public final KList prefix;
+        public final Term suffix;
+        public Factoring(KList prefix, Term suffix) {
+            this.prefix = prefix; this.suffix = suffix;
+        }
     }
-
-    void runRule(Function that, StateReturn stateReturn) { // always subjugates
-        this.parses |= that.parses;
-    }
-}
-
-////////////////
-
-class NonTerminal {
-    public final NonTerminalId nonTerminalId;
-    public final EntryState entryState;
-    public final ExitState exitState;
-    Set<NextableState> stepStates = new HashSet<NextableState>();
-    //states = entryState + exitState + stepStates;
-
-    public NonTerminal(NonTerminalId nonTerminalId,
-                       StateId entryStateId,
-                       State.OrderingInfo entryOrderingInfo,
-                       StateId exitStateId,
-                       State.OrderingInfo exitOrderingInfo) {
-        this.nonTerminalId = nonTerminalId;
-        this.entryState = new EntryState(entryStateId, this, entryOrderingInfo);
-        this.exitState = new ExitState(exitStateId, this, exitOrderingInfo);
-    }
-}
-
-abstract class State {
-    final StateId stateId;
-    final NonTerminal nt;
-    final OrderingInfo orderingInfo;
-
-    static class OrderingInfo {
-        int key;
-
-        public OrderingInfo(int key) {
-            this.key = key;
+    Factoring factor(KList klist) {
+        if (klist.getContents().size() == 0) {
+            return null;
+        } else {
+            return new Factoring(new KList(klist.getContents().subList(0, klist.getContents().size()-1)),
+                                 klist.getContents().get(klist.getContents().size()-1));
         }
     }
 
-    public State(StateId stateId, NonTerminal nt, OrderingInfo orderingInfo) {
-        this.stateId = stateId;
-        this.nt = nt;
-        this.orderingInfo = orderingInfo;
-    }
-}
+    void addFactoredAndRunRule(Function that, StateReturn stateReturn) { // if lookahead, factors all results; always subjugates
+        // this factoring will be wrong once we move to context sensitive functions, but it works for now
+        //this.terms.append(new Ambiguity("K", Arrays.asList(that.terms)));
 
-class ExitState extends State {
-    public ExitState(StateId stateId, NonTerminal nt, OrderingInfo orderingInfo) {
-        super(stateId, nt, orderingInfo);
-    }
-}
+        this.terms.addAll(stateReturn.key.stateCall.key.state.runRule(that.terms));
 
-abstract class NextableState extends State {
-    public final Set<State> next = new HashSet<State>();
-
-    NextableState(StateId stateId, NonTerminal nt, OrderingInfo orderingInfo) {
-        super(stateId, nt, orderingInfo);
-    }
-}
-
-class EntryState extends NextableState {
-    public EntryState(StateId stateId, NonTerminal nt, OrderingInfo orderingInfo) {
-        super(stateId, nt, orderingInfo);
-    }
-}
-
-class NonTerminalState extends NextableState {
-    public final NonTerminal nt;
-    public final boolean isLookahead;
-
-    public NonTerminalState(StateId stateId,
-                            NonTerminal nt,
-                            OrderingInfo orderingInfo,
-                            NonTerminal child,
-                            boolean isLookahead) {
-        super(stateId, nt, orderingInfo);
-        this.nt = child;
-        this.isLookahead = isLookahead;
-    }
-}
-
-abstract class PrimitiveState extends NextableState {
-    public static class MatchResult {
-        final public int matchEnd;
-        final public Function matchFunction;
-
-        public MatchResult(int matchEnd, Function matchFunction) {
-            this.matchEnd = matchEnd;
-            this.matchFunction = matchFunction;
+        /* This code may be no longer useful.  We discovered that factorings are unneeded (we think).
+        //A more general algorithm would look roughly like the following:
+        Set<KList> unfactorables = new HashSet<KList>();
+        HashMultimap<KList,Term> factorings = HashMultimap.create();
+        for (KList klist : that.terms) {
+            Factoring factoring = factor(klist);
+            if (factoring == null) {
+                unfactorables.add(klist);
+            } else {
+                factorings.put(factoring.prefix, factoring.suffix);
+            }
         }
-    }
-
-    abstract Set<MatchResult> matches(CharSequence text, int startPosition, Function context);
-
-    public PrimitiveState(StateId stateId, NonTerminal nt, OrderingInfo orderingInfo) {
-        super(stateId, nt, orderingInfo);
-    }
-}
-
-class RegExState extends PrimitiveState {
-    private final java.util.regex.Pattern pattern;
-
-    public RegExState(StateId stateId, NonTerminal nt, OrderingInfo orderingInfo, java.util.regex.Pattern pattern) {
-        super(stateId, nt, orderingInfo);
-        this.pattern = pattern;
-    }
-
-    Set<MatchResult> matches(CharSequence text, int startPosition, Function context) {
-        java.util.regex.Matcher matcher = pattern.matcher(text);
-        matcher.region(startPosition, text.length());
-        matcher.useAnchoringBounds(false);
-        matcher.useAnchoringBounds(false);
-        Set<MatchResult> results = new HashSet<MatchResult>();
-        if (matcher.lookingAt()) {
-            results.add(new MatchResult(matcher.end(), Function.IDENTITY)); //matchFunction(text, matcher.start(), matcher.end())));
+        for (KList klist : unfactorables) {
+            this.terms.add(stateReturn.key.stateCall.key.state.runRule(klist));
         }
-        return results;
+        for (Map.Entry<KList,Collection<Term>> entry : factorings.asMap().entrySet()) {
+            KList klist = entry.getKey().shallowCopy();
+            klist.getContents().add(new Ambiguity("K", new ArrayList<Term>(entry.getValue()))); // TODO: check result
+            this.terms.add(stateReturn.key.stateCall.key.state.runRule(klist));
+        }
+        */
     }
+
+    Set<KList> applyToNull() { return terms; }
 }
 
-////////////////
 
 class StateCall {
-    public final Function function = Function.NULL;
+    public final Function function = Function.empty();
     public StateReturnWorkList workList = null; // top of queue stack when addFunction was last updated called
-
     public static class Key {
         public final NonTerminalCall ntCall;
         public final int stateBegin;
         public final State state;
 
-        //// Boilerplate after this line ////
+//// Boilerplate after this line ////
         public Key(NonTerminalCall ntCall, int stateBegin, State state) {
-            this.ntCall = ntCall;
-            this.stateBegin = stateBegin;
-            this.state = state;
+            this.ntCall = ntCall; this.stateBegin = stateBegin; this.state = state;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Key key = (Key) o;
+
+            if (stateBegin != key.stateBegin) return false;
+            if (!ntCall.equals(key.ntCall)) return false;
+            if (!state.equals(key.state)) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = ntCall.key.hashCode();
+            result = 31 * result + stateBegin;
+            result = 31 * result + state.hashCode();
+            return result;
         }
     }
-
     public final Key key;
-
-    private StateCall(Key key) {
-        this.key = key;
-    }
+    StateCall(Key key) { this.key = key; }
 }
 
-class StateReturn {
-    public final Function preRuleFunction = Function.NULL; // entries are accumulated
-    public final Function factoredFunction = Function.NULL;
-    public final Function postRuleFunction = Function.NULL; // entries are immutable once added
+class StateReturn implements Comparable<StateReturn> {
+    public final Function preRuleFunction = Function.empty(); // entries are accumulated
+    public final Function postRuleFunction = Function.empty(); // entries are immutable once added
+
+/* Invarient:
+  A state return is committed only if there is no state that
+   - is earlier in the state machine,
+   - ends earlier in the string, and
+   - is on an either more or less general context
+*/
+    public int compareTo(StateReturn that) {
+        int x;
+        return
+            ((x = Integer.compare(this.key.stateEnd, that.key.stateEnd)) != 0) ? x :
+            ((x = Integer.compare(that.key.stateCall.key.ntCall.key.ntBegin,
+                                  this.key.stateCall.key.ntCall.key.ntBegin)) != 0) ? x: // note the reversed order
+            ((x = this.key.stateCall.key.state.compareTo(that.key.stateCall.key.state)) != 0) ? x :
+            Integer.compare(this.key.stateCall.key.stateBegin, that.key.stateCall.key.stateBegin);
+    }
 
     public static class Key {
         public final StateCall stateCall;
         public final int stateEnd;
-
-        //// Boilerplate after this line ////
+//// Boilerplate after this line ////
         public Key(StateCall stateCall, int stateEnd) {
             assert (!((stateCall.key.state instanceof NonTerminalState) &&
-                    (((NonTerminalState) stateCall.key.state).isLookahead)) ||
+                      (((NonTerminalState)stateCall.key.state).isLookahead)) ||
                     stateCall.key.stateBegin == stateEnd);
-            this.stateCall = stateCall;
-            this.stateEnd = stateEnd;
+            this.stateCall = stateCall; this.stateEnd = stateEnd;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Key key = (Key) o;
+
+            if (stateEnd != key.stateEnd) return false;
+            if (!stateCall.equals(key.stateCall)) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = stateCall.key.hashCode();
+            result = 31 * result + stateEnd;
+            return result;
         }
     }
-
     public final Key key;
+    StateReturn(Key key) { this.key = key; }
 
-    private StateReturn(Key key) {
-        this.key = key;
+    public int hashCode() {
+        return this.key.hashCode();
     }
 }
 
 class NonTerminalCall {
     Set<StateCall> callers = new HashSet<StateCall>();
     public final Set<StateReturn> stateReturns = new HashSet<StateReturn>();
-    public final Set<StateReturn> exitStateReturns = new HashSet<StateReturn>();
-
-    //exitStateReturns() // = stateReturns.filter(x.stateCall.state instanceof ReturnState)
+    public final Set<StateReturn> exitStateReturns = new HashSet<StateReturn>(); // = stateReturns.filter(x.stateCall.state instanceof ExitState)
     public static class Key {
         public final NonTerminal nt;
         public final int ntBegin;
-
-        // Boilerplate after this line
+//// Boilerplate after this line ////
         public Key(NonTerminal nt, int ntBegin) {
             // assert ntBegin == c.stateBegin for c in callers
-            this.nt = nt;
-            this.ntBegin = ntBegin;
+            this.nt = nt; this.ntBegin = ntBegin;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Key key = (Key) o;
+
+            if (ntBegin != key.ntBegin) return false;
+            if (!nt.equals(key.nt)) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = nt.hashCode();
+            result = 31 * result + ntBegin;
+            return result;
         }
     }
-
     public final Key key;
-
-    private NonTerminalCall(Key key) {
-        this.key = key;
-    }
+    NonTerminalCall(Key key) { this.key = key; }
 }
 
-class StateReturnWorkList extends TreeSet<StateReturn> {
-    //push
-    public void enqueue(StateReturn stateReturn) {
-        this.add(stateReturn);
-    }
+////////////////
 
-    public StateReturn dequeue() {
-        StateReturn stateReturn = this.first();
-        this.remove(stateReturn);
-        return stateReturn;
-    }
+class StateReturnWorkList extends TreeSet<StateReturn> {
+    public void enqueue(StateReturn stateReturn) { this.add(stateReturn); }
+    public StateReturn dequeue() { return this.pollFirst(); }
 }
 
 class StateReturnWorkLists {
     private final Deque<StateReturnWorkList> stack = new ArrayDeque<StateReturnWorkList>();
-
-    void push() {
-        stack.addFirst(new StateReturnWorkList());
-    }
-
-    void pop() {
-        stack.removeFirst();
-    }
-
-    StateReturnWorkList top() {
-        return stack.peekFirst();
-    }
+    void push() { stack.addFirst(new StateReturnWorkList()); }
+    void pop() { stack.removeFirst(); }
+    StateReturnWorkList top() { return stack.peekFirst(); }
 }
 
 class ParseState {
     final CharSequence input;
     final public StateReturnWorkLists stateReturnWorkLists = new StateReturnWorkLists();
+    public ParseState(CharSequence input) { this.input = input; }
 
-    public ParseState(CharSequence input) {
-        this.input = input;
-    }
-
-    Map<NonTerminalCall.Key, NonTerminalCall> ntCalls;
-    Map<StateCall.Key, StateCall> stateCalls;
-    Map<StateReturn.Key, StateReturn> stateReturns;
-
-    private static final Constructor<NonTerminalCall> nonTerminalCallCtor
-            = getCtor(NonTerminalCall.class, NonTerminalCall.Key.class);
-    private static final Constructor<StateCall> stateCallCtor
-            = getCtor(StateCall.class, StateCall.Key.class);
-    private static final Constructor<StateReturn> stateReturnCtor
-            = getCtor(StateReturn.class, StateReturn.Key.class);
-
-    static <T> Constructor<T> getCtor(Class<T> cls, Class arg) {
-        try {
-            return cls.getDeclaredConstructor(arg);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-            System.exit(1);
-            return null;
-        }
-    }
+    Map<NonTerminalCall.Key,NonTerminalCall> ntCalls = new HashMap<NonTerminalCall.Key,NonTerminalCall>();
+    Map<StateCall.Key,StateCall> stateCalls = new HashMap<StateCall.Key,StateCall>();
+    Map<StateReturn.Key,StateReturn> stateReturns = new HashMap<StateReturn.Key,StateReturn>();
 
     public NonTerminalCall getNtCall(NonTerminalCall.Key key) {
-        return getValue(key, ntCalls, nonTerminalCallCtor);
-    }
-
-    public StateCall getStateCall(StateCall.Key key) {
-        return getValue(key, stateCalls, stateCallCtor);
-    }
-
-    public StateReturn getStateReturn(StateReturn.Key key) {
-        return getValue(key, stateReturns, stateReturnCtor);
-    }
-
-    // See http://docs.oracle.com/javase/tutorial/java/generics/restrictions.html#createObjects
-    private static <V, Key> V getValue(Key key, Map<Key, V> map, Constructor<V> ctor) {
-        V value = map.get(key);
-        if (value == null) {
-            try {
-                value = ctor.newInstance(key);
-                map.put(key, value);
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-                System.exit(1);
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-                System.exit(1);
-            } catch (InstantiationException e) {
-                e.printStackTrace();
-                System.exit(1);
+            NonTerminalCall value = ntCalls.get(key);
+            if (value == null) {
+                    value = new NonTerminalCall(key);
+                    ntCalls.put(key, value);
             }
+            return value;
+    }
+    public StateCall getStateCall(StateCall.Key key) {
+        StateCall value = stateCalls.get(key);
+        if (value == null) {
+            value = new StateCall(key);
+            stateCalls.put(key, value);
+        }
+        return value;
+
+    }
+    public StateReturn getStateReturn(StateReturn.Key key) {
+        StateReturn value = stateReturns.get(key);
+        if (value == null) {
+            value = new StateReturn(key);
+            stateReturns.put(key, value);
         }
         return value;
     }
@@ -504,18 +427,86 @@ class ParseState {
 
 ////////////////
 
-class Parser {
-    ParseState s;
+public class Parser {
+	
+    public static void main(String[] args) {
+        try {
+            System.in.read();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-    public void parse(NonTerminal nt, int position) {
-        // TODO: fix
-        NonTerminal startNt =
-                new NonTerminal(
-                        new NonTerminalId("<start>"),
-                        new StateId("<start-entry>"), new State.OrderingInfo(0),
-                        new StateId("<start-exit>"), new State.OrderingInfo(2)); // TODO: fix
-        State state = new NonTerminalState(new StateId("<start>"), startNt, new State.OrderingInfo(1), nt, true);
+        Grammar.NonTerminalId ntistart = new Grammar.NonTerminalId("StartNT");
+        Grammar.StateId stistart = new Grammar.StateId("StartState");
+        Grammar.StateId stiend = new Grammar.StateId("EndState");
 
+        Grammar.NonTerminal nt1 = new Grammar.NonTerminal(ntistart, stistart, new Grammar.State.OrderingInfo(0), stiend, new Grammar.State.OrderingInfo(100));
+
+        Grammar.RegExState res1 = new Grammar.RegExState(new Grammar.StateId("RegExStid"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("[a-zA-Z0-9]"));
+
+        nt1.entryState.next.add(res1);
+        nt1.entryState.next.add(nt1.exitState);
+        res1.next.add(nt1.exitState);
+        res1.next.add(res1);
+
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < 100000; i++) {
+                sb.append('a');
+            }
+            for (int j = 0; j < 10; j++) {
+                long start = getCpuTime();
+                for (int i = 0; i < 1; i++) {
+                    Term result = new Parser(new ParseState(sb.toString())).parse(nt1, 0);
+                }
+                long end = getCpuTime();
+                System.out.println("Time: " + ((end - start) / 1000000.0));
+            }
+        }
+        try {
+            System.in.read();
+            System.in.read();
+            System.in.read();
+            System.in.read();
+            System.in.read();
+            System.in.read();
+            System.in.read();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        // with proper implementation we are slow:
+        //  - for a string of length 100, we are at 9.5 us per char
+        //  - for a string of length 1000, we are at 65 us per char
+        //  - for a string of length 10000, we are at 620 us per char
+        // but with no AST construction we are getting no quadratic behavior and 1.6 micro seconds per character
+        // - regex may slow things down
+        // - computing Term.hashCode inside a function slows things down quite a bit
+        // - constructing ASTs with long lists slows things down
+        // - calling java.Object.hashCode is SLOOOOOOW
+        // - calling RTTI versions of getStateCall, etc. are slow
+    }
+
+    public static long getCpuTime( ) {
+        ThreadMXBean bean = ManagementFactory.getThreadMXBean();
+        return bean.isCurrentThreadCpuTimeSupported( ) ?
+                bean.getCurrentThreadCpuTime( ) : 0L;
+    }
+
+    private final ParseState s;
+
+    public Parser(ParseState parseState) {
+        s = parseState;
+    }
+
+    public Term parse(NonTerminal nt, int position) {
+        // TODO ordering info should not rely only on integers
+        // This code assumes that ordering info in the grammar are between MIN_VALUE+1 and MAX_VALUE-2
+        NonTerminal startNt = new NonTerminal(new NonTerminalId("<start>"),
+                                              new StateId("<start-entry>"), new State.OrderingInfo(Integer.MIN_VALUE),
+                                              new StateId("<start-exit>"), new State.OrderingInfo(Integer.MAX_VALUE));
+        State state = new NonTerminalState(new StateId("<start>"), startNt, new State.OrderingInfo(Integer.MAX_VALUE - 1), nt, true);
+
+        // this lookahead must be true so that a new worklist is pushed on the stack
         activateNtCall(s.getStateCall(new StateCall.Key(s.getNtCall(new NonTerminalCall.Key(nt, position)), position, state)));
 
         while (s.stateReturnWorkLists.top() != null) {
@@ -525,85 +516,75 @@ class Parser {
             }
             s.stateReturnWorkLists.pop();
         }
+
+        Ambiguity result = new Ambiguity("K", new ArrayList<Term>());
+        for(StateReturn stateReturn : s.getNtCall(new NonTerminalCall.Key(nt,0)).exitStateReturns) {
+            if (stateReturn.key.stateEnd == s.input.length()) {
+                for (KList klist : stateReturn.postRuleFunction.applyToNull()) {
+                    result.getContents().add(klist);
+                }
+            }
+        }
+        return result;
     }
 
-    private void unknownStateType() {
-        assert false : "Unkown state type";
-    }
+    private void unknownStateType() { assert false : "Unknown state type"; }
 
-    /**
-     * *************
+    /****************
      * State Return
-     * **************
-     */
+     ****************/
     public void stateReturn(StateReturn stateReturn) {
         // Note that 'addPreRule' also puts the stateReturn in the work list
         // Note that 'addFunction' sets the call to use the top queue when a stateReturn is places
         // Note that 'addCaller' also sets up entry state
 
-        stateReturn.factoredFunction.addFactored(stateReturn.preRuleFunction); // if lookahead, factors all results
-        stateReturn.postRuleFunction.runRule(stateReturn.factoredFunction, stateReturn); // always subjugates
+        stateReturn.postRuleFunction.addFactoredAndRunRule(stateReturn.preRuleFunction, stateReturn); // if lookahead, factors all results; always subjugates
 
         State state = stateReturn.key.stateCall.key.state;
         if (state instanceof ExitState) {
             // add exit state's function to all callers
             for (StateCall stateCall : stateReturn.key.stateCall.key.ntCall.callers) {
-                int stateEnd = ((NonTerminalState) stateCall.key.state).isLookahead ? // we know a caller must be a NonTerminalState
-                        stateReturn.key.stateCall.key.stateBegin :
-                        stateReturn.key.stateEnd;
-                this.addPreRuleFunction(
-                        new StateReturn.Key(stateCall, stateEnd),
-                        stateCall.function,
-                        stateReturn.postRuleFunction);
+                int stateEnd = ((NonTerminalState)stateCall.key.state).isLookahead ? // we know a caller must be a NonTerminalState
+                    stateCall.key.stateBegin :
+                    stateReturn.key.stateEnd;
+                this.addPreRuleFunction(new StateReturn.Key(stateCall, stateEnd),
+                                        stateCall.function, stateReturn.postRuleFunction);
             }
         } else if (state instanceof NextableState) {
             // activate all next states
-            for (State nextState : ((NextableState) state).next) {
+            for (State nextState : ((NextableState)state).next) {
                 // activate state. add function and makes call use the top work list
                 StateCall stateCall = activateStateCall(
-                        new StateCall.Key(stateReturn.key.stateCall.key.ntCall, stateReturn.key.stateEnd, nextState),
-                        stateReturn.postRuleFunction);
+                    new StateCall.Key(stateReturn.key.stateCall.key.ntCall, stateReturn.key.stateEnd, nextState),
+                    stateReturn.postRuleFunction);
 
                 if (nextState instanceof ExitState) {
                     // an exit state's preRule is just the stateCall.function
-                    addPreRuleFunction(
-                            new StateReturn.Key(stateCall, stateCall.key.stateBegin),
-                            stateCall.function,
-                            Function.IDENTITY);
+                    addPreRuleFunction(new StateReturn.Key(stateCall, stateCall.key.stateBegin),
+                                       stateCall.function, Function.identity());
                 } else if (nextState instanceof PrimitiveState) {
                     // In order to avoid duplication of work, we must wrap a primitive inside a non-terminal (TODO: explain)
-                    for (PrimitiveState.MatchResult matchResult : ((PrimitiveState) nextState).matches(s.input, stateCall.key.stateBegin, stateCall.function)) {
+                    for (PrimitiveState.MatchResult matchResult : ((PrimitiveState)nextState).matches(s.input, stateCall.key.stateBegin, stateCall.function)) {
                         // a primitive state's preRule just moves the position forward
-                        addPreRuleFunction(
-                                new StateReturn.Key(stateCall, matchResult.matchEnd),
-                                stateCall.function,
-                                matchResult.matchFunction);
+                        addPreRuleFunction(new StateReturn.Key(stateCall, matchResult.matchEnd),
+                                           stateCall.function, matchResult.matchFunction);
                     }
                 } else if (nextState instanceof NonTerminalState) {
                     activateNtCall(stateCall);
-                } else {
-                    unknownStateType();
-                }
+                } else { unknownStateType(); }
             }
-        } else {
-            unknownStateType();
-        }
+        } else { unknownStateType(); }
     }
 
     void activateNtCall(StateCall stateCall) {
-        if (((NonTerminalState) stateCall.key.state).isLookahead) {
-            s.stateReturnWorkLists.push();
-        }
+        if (((NonTerminalState)stateCall.key.state).isLookahead) { s.stateReturnWorkLists.push(); }
 
-        NonTerminalCall ntCall = s.getNtCall(new NonTerminalCall.Key(stateCall.key.state.nt, stateCall.key.stateBegin));
+        NonTerminalCall ntCall = s.getNtCall(new NonTerminalCall.Key(((NonTerminalState)stateCall.key.state).child, stateCall.key.stateBegin));
         ntCall.callers.add(stateCall);
 
-        StateCall entryStateCall =
-                activateStateCall(
-                        new StateCall.Key(ntCall, ntCall.key.ntBegin, ntCall.key.nt.entryState),
-                        Function.IDENTITY);
+        StateCall entryStateCall = activateStateCall(new StateCall.Key(ntCall, ntCall.key.ntBegin, ntCall.key.nt.entryState), Function.identity());
 
-        addPreRuleFunction(new StateReturn.Key(entryStateCall, ntCall.key.ntBegin), Function.IDENTITY, Function.IDENTITY);
+        addPreRuleFunction(new StateReturn.Key(entryStateCall, ntCall.key.ntBegin), Function.identity(), Function.identity());
     }
 
     // mark state as being in the top queue
@@ -618,6 +599,7 @@ class Parser {
     void addPreRuleFunction(StateReturn.Key key, Function sibling, Function child) { // add stateReturn to queue if preRuleFunction gets new entries (constructor does not queue)
         // add the stateReturn to the nt's stateReturns and exitStateReturns lists
         StateReturn stateReturn = s.getStateReturn(key);
+        // Add the state return to the NT call
         stateReturn.key.stateCall.key.ntCall.stateReturns.add(stateReturn);
         if (stateReturn.key.stateCall.key.state instanceof ExitState) {
             stateReturn.key.stateCall.key.ntCall.exitStateReturns.add(stateReturn);

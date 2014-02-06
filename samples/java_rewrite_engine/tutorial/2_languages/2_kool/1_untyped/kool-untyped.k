@@ -208,7 +208,8 @@ for the KOOL object-oriented constructs.
                 | "if" "(" Exp ")" Block "else" Block   [avoid, strict(1)]
                 | "if" "(" Exp ")" Block
                 | "while" "(" Exp ")" Block
-        	    | "for" "(" Stmt Exp ";" Exp ")" Block
+        	    //| "for" "(" Stmt Exp ";" Exp ")" Block
+        	    | "for" "(" Stmts Exp ";" Exp ")" Block
                 | "return" Exp ";"                      [strict]
                 | "return" ";"
                 | "print" "(" Exps ")" ";"              [strict]
@@ -226,14 +227,10 @@ for the KOOL object-oriented constructs.
 
 //@ Old desugaring rules, from SIMPLE
 
-//  rule if (E) S => if (E) S else {}                                 [macro]
-//  rule for(Start Cond; Step) {S} => {Start while (Cond) {S Step;}}  [macro]
-//  rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;          [macro]
-//  rule var X:Id = E; => var X; X = E;                               [macro]
-  rule if (E) S => if (E) S else {}
-  rule for(Start Cond; Step) {S} => {Start while (Cond) {S Step;}}
-  rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;
-  rule var X:Id = E; => var X; X = E;
+  rule if (E) S => if (E) S else {}                                 [macro]
+  rule for(Start Cond; Step) {S} => {Start while (Cond) {S Step;}}  [macro]
+  rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;          [macro]
+  rule var X:Id = E; => var X; X = E;                               [macro]
 
 //@ New desugaring rule
 
@@ -443,8 +440,7 @@ interestingly, the semantics of return stays unchanged. */
        <env> _ => Env </env>
 
   syntax Val ::= "nothing"
-//  rule return; => return nothing;   [macro]
-  rule return; => return nothing;
+  rule return; => return nothing;   [macro]
 
 
   rule <k> read() => I ...</k> <in> ListItem(I:Int) => . ...</in>  [read]
@@ -625,7 +621,7 @@ switch to method closure's class and object environment and execute
 the method body.  The \texttt{mkDecls} construct is the one that came
 with the unchanged semantics of SIMPLE above.  */
 
-  syntax KItem ::=  (Map,K,ControlCellFragment)
+  syntax KItem ::= (Map,K,ControlCellFragment)
 
   rule <k> methodClosure(Class,OL,Xs,S)(Vs:Vals) ~> K
            => mkDecls(Xs,Vs) S return; </k>
@@ -1011,7 +1007,10 @@ starting with the most concrete class and going up in the hierarchy. */
 
 //  rule lookupMember(<envStack> (_, <env> Env </env>) => . ...</envStack>, X)
 //    when notBool(X in keys(Env))
-  rule lookupMember(<envStack> ListItem((_, <env> Env </env>)) => . ...</envStack>, X)
+  // TODO (AndreiS): support function with deep rewrites
+  // rule lookupMember(<envStack> ListItem((_, <env> Env </env>)) => . ...</envStack>, X)
+  //   when notBool(X in keys(Env))
+  rule lookupMember(<envStack> ListItem((_, <env> Env </env>)) L </envStack>, X)
+    => lookupMember(<envStack> L </envStack>, X)
     when notBool(X in keys(Env))
-
 endmodule

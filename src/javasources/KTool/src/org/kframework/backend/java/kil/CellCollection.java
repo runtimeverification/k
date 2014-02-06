@@ -116,15 +116,18 @@ public class CellCollection extends Collection implements Sorted {
         }
 
         CellCollection collection = (CellCollection) object;
-        return super.equals(collection) && cells.equals(collection.cells);
+        return (frame == null ? collection.frame == null : frame
+                .equals(collection.frame)) && cells.equals(collection.cells);
     }
 
     @Override
     public int hashCode() {
-        int hash = 1;
-        hash = hash * Utils.HASH_PRIME + (super.frame == null ? 0 : super.frame.hashCode());
-        hash = hash * Utils.HASH_PRIME + cells.hashCode();
-        return hash;
+        if (hashCode == 0) {
+            hashCode = 1;
+            hashCode = hashCode * Utils.HASH_PRIME + (frame == null ? 0 : frame.hashCode());
+            hashCode = hashCode * Utils.HASH_PRIME + cells.hashCode();
+        }
+        return hashCode;
     }
 
     @Override

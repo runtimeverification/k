@@ -24,9 +24,6 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
 
     /**
      * A list of {@code Term}s contained in this {@code KCollection}.
-     * <p>
-     * This field shadows {@link Collection#contents} to ensure that the
-     * contents of {@code KCollection} are immutable.
      */
     protected final ImmutableList<Term> contents;
 
@@ -35,7 +32,8 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
 
         List<Term> normalizedItems = new ArrayList<Term>();
         for (Term term : items) {
-            if (!(term instanceof Variable) && (term.kind() == kind)) {
+            // TODO (AndreiS): fix KItem projection
+            if (!(term instanceof Variable) && !(term instanceof KItemProjection) && (term.kind() == kind)) {
                 assert term instanceof KCollection :
                         "associative use of KCollection(" + items + ", " + frame + ")";
 
@@ -82,7 +80,6 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
     public abstract String getSeparatorName();
     public abstract String getIdentityName();
 
-    @Override
     public ImmutableList<Term> getContents() {
         return contents;
     }
@@ -104,10 +101,12 @@ public abstract class KCollection extends Collection implements Iterable<Term> {
 
     @Override
     public int hashCode() {
-        int hash = 1;
-        hash = hash * Utils.HASH_PRIME + (super.frame == null ? 0 : super.frame.hashCode());
-        hash = hash * Utils.HASH_PRIME + this.contents.hashCode();
-        return hash;
+        if (hashCode == 0) {
+            hashCode = 1;
+            hashCode = hashCode * Utils.HASH_PRIME + (frame == null ? 0 : frame.hashCode());
+            hashCode = hashCode * Utils.HASH_PRIME + contents.hashCode();
+        }
+        return hashCode;
     }
     
     @Override

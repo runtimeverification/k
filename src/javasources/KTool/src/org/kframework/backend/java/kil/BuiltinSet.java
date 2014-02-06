@@ -122,17 +122,20 @@ public class BuiltinSet extends Collection implements Sorted {
         }
 
         BuiltinSet set = (BuiltinSet) object;
-        return super.equals(set) && elements.equals(set.elements);
-//               && operations.equals(set.operations);
+        return (frame == null ? set.frame == null : frame.equals(set.frame))
+                && elements.equals(set.elements);
+        //               && operations.equals(set.operations);
     }
 
     @Override
     public int hashCode() {
-        int hash = 1;
-        hash = hash * Utils.HASH_PRIME + (super.frame == null ? 0 : super.frame.hashCode());
-        hash = hash * Utils.HASH_PRIME + elements.hashCode();
-//        hash = hash * Utils.HASH_PRIME + operations.hashCode();
-        return hash;
+        if (hashCode == 0) {
+            hashCode = 1;
+            hashCode = hashCode * Utils.HASH_PRIME + (frame == null ? 0 : frame.hashCode());
+            hashCode = hashCode * Utils.HASH_PRIME + elements.hashCode();
+//        hashCode = hashCode * Utils.HASH_PRIME + operations.hashCode();
+        }
+        return hashCode;
     }
 
     @Override

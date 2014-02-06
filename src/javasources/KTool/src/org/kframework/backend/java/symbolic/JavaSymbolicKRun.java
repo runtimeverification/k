@@ -58,7 +58,6 @@ public class JavaSymbolicKRun implements KRun {
         this.context = definition.context();
         this.context.kompiled = context.kompiled;
         transformer = new KILtoBackendJavaKILTransformer(this.context);
-        //this.simulationRewriter = new SymbolicRewriter(this.definition);
 	}
     
     public Definition getDefinition(){
@@ -80,16 +79,16 @@ public class JavaSymbolicKRun implements KRun {
     private ConstrainedTerm javaKILRun(org.kframework.kil.Term cfg, int bound) {
         SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
         Term term = Term.of(cfg, definition);
-        TermContext termContext = new TermContext(definition, new PortableFileSystem());
+        TermContext termContext = TermContext.of(definition, new PortableFileSystem());
         SymbolicConstraint constraint = new SymbolicConstraint(termContext);
-        term = term.evaluate(constraint, termContext);
+        term = term.evaluate(termContext);
         ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, constraint, termContext);
         return symbolicRewriter.rewrite(constrainedTerm, bound);
     }
 
     @Override
     public KRunProofResult<Set<org.kframework.kil.Term>> prove(Module module, org.kframework.kil.Term cfg) throws KRunExecutionException {
-        TermContext termContext = new TermContext(definition, new PortableFileSystem());
+        TermContext termContext = TermContext.of(definition, new PortableFileSystem());
         Map<org.kframework.kil.Term, org.kframework.kil.Term> substitution = null;
         if (cfg != null) {
             cfg = run(cfg).getResult().getRawResult();
@@ -201,7 +200,7 @@ public class JavaSymbolicKRun implements KRun {
             e.report();
         }
 
-        TermContext termContext = new TermContext(definition, fs);
+        TermContext termContext = TermContext.of(definition, fs);
         ConstrainedTerm initialTerm = new ConstrainedTerm(Term.of(cfg, definition), termContext);
         ConstrainedTerm targetTerm = new ConstrainedTerm(Term.of(cfg, definition), termContext);
         List<Rule> claims = Collections.emptyList();
@@ -288,7 +287,7 @@ public class JavaSymbolicKRun implements KRun {
                         stateMap));
         
         SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
-        TermContext termContext = new TermContext(definition, new PortableFileSystem());
+        TermContext termContext = TermContext.of(definition, new PortableFileSystem());
         ConstrainedTerm initCfg = new ConstrainedTerm(Term.of(cfg, definition), termContext);
 
         List<TestGenResult> generatorResults = new ArrayList<TestGenResult>();

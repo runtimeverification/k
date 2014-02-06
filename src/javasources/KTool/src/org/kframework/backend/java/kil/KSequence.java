@@ -83,9 +83,9 @@ public class KSequence extends KCollection {
         }
 
         KSequence kSequence = (KSequence) object;
-        return (super.frame == null ? kSequence.frame == null : frame
+        return (frame == null ? kSequence.frame == null : frame
                 .equals(kSequence.frame))
-                && super.contents.equals(kSequence.contents);
+                && contents.equals(kSequence.contents);
     }
 
     @Override

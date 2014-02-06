@@ -41,7 +41,17 @@ public class SentenceVariablesFilter extends BasicTransformer {
 		return cfg;
 	}
 
-	public ASTNode transform(Variable var) throws TransformerException {
+    public ASTNode transform(TermCons tc) throws TransformerException {
+        super.transform(tc);
+        if (tc.getProduction().isSubsort()) {
+            if (tc.getContents().get(0) instanceof Variable) {
+                return tc.getContents().get(0);
+            }
+        }
+        return tc;
+    }
+
+    public ASTNode transform(Variable var) throws TransformerException {
 		if (config) {
 			if (!var.getName().startsWith("$")) {
 				String msg = "In the configuration you can only have external variables, not: '" + var.getName() + "' (starts with '$').";

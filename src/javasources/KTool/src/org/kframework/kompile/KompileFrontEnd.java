@@ -5,6 +5,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.Backend;
 import org.kframework.backend.html.HtmlBackend;
 import org.kframework.backend.java.symbolic.JavaSymbolicBackend;
+import org.kframework.backend.kore.KilTransformer;
 import org.kframework.backend.kore.KoreBackend;
 import org.kframework.backend.latex.LatexBackend;
 import org.kframework.backend.latex.PdfBackend;
@@ -18,6 +19,7 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.CountNodesVisitor;
+import org.kframework.krun.K;
 import org.kframework.krun.Main;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.utils.BinaryLoader;
@@ -29,13 +31,14 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
-
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 public class KompileFrontEnd {
@@ -80,7 +83,9 @@ public class KompileFrontEnd {
                 GlobalSettings.supercool = metadataParse(cmd.getOptionValue("supercool"));
             if (cmd.hasOption("superheat"))
                 GlobalSettings.superheat = metadataParse(cmd.getOptionValue("superheat"));
-
+            if (cmd.hasOption("documentation"))
+                GlobalSettings.doctags = metadataParse(cmd.getOptionValue("documentation"));
+            
             if (cmd.hasOption("doc-style")) {
                 String style = cmd.getOptionValue("doc-style");
                 if (style.startsWith("+"))
@@ -93,6 +98,7 @@ public class KompileFrontEnd {
     }
 
     private static void kompile(CommandLine cmd) throws IOException {
+        K.do_kompilation = true;
         final String def = cmd.getArgs()[0];
         final String step = cmd.getOptionValue("step", null);
         GlobalSettings.setMainFile(def);
@@ -123,6 +129,10 @@ public class KompileFrontEnd {
                 GlobalSettings.documentation = true;
                 backend = new LatexBackend(Stopwatch.sw, context);
                 break;
+            case "doc":
+                GlobalSettings.documentation = true;
+                backend = new LatexBackend(Stopwatch.sw, context, true);                
+            	break;
             case "html":
                 if (!cmd.hasOption("doc-style")) {
                     GlobalSettings.style = "k-definition.css";
@@ -190,6 +200,39 @@ public class KompileFrontEnd {
         if (backend != null) {
             String lang = cmd.getOptionValue("main-module",
                     FileUtil.getMainModule(GlobalSettings.mainFile.getName()));
+            
+            if(cmd.hasOption("kore")){
+            	
+            	Definition toKore = DefinitionLoader.loadDefinition(GlobalSettings.mainFile, lang,
+                        backend.autoinclude(), context);
+                
+            	KilTransformer trans = new KilTransformer(context);
+                HashMap<String,PrintWriter> fileTable = new HashMap<String,PrintWriter>();
+                for(int i = 0; i < toKore.getItems().size(); ++i){
+            		
+                	if(!fileTable.containsKey(((toKore.getItems().get(i)).getFilename()))){
+                		
+                		fileTable.put((toKore.getItems().get(i)).getFilename(), 
+                				new PrintWriter(((toKore.getItems().get(i)).getFilename().substring(0, 
+                						(toKore.getItems().get(i)).getFilename().length()-2))+".kore"));
+                		}
+                }
+                
+                for(int i = 0; i < toKore.getItems().size(); ++i){
+
+                	fileTable.get((toKore.getItems().get(i)).getFilename()).println(trans.kilToKore(((toKore.getItems().get(i)))));
+                }
+                
+                ArrayList<PrintWriter> toClosedFiles = new ArrayList<PrintWriter>(fileTable.values());
+                
+                for(int i = 0; i < toClosedFiles.size(); ++i){
+                	
+                	toClosedFiles.get(i).close();
+                }
+                
+                return;
+            }
+            
             genericCompile(lang, backend, step, context);
         }
 
@@ -213,8 +256,9 @@ public class KompileFrontEnd {
         Stopwatch.sw.start();
         javaDef = DefinitionLoader.loadDefinition(GlobalSettings.mainFile, lang,
                 backend.autoinclude(), context);
+        
         javaDef.accept(new CountNodesVisitor(context));
-
+        
         CompilerSteps<Definition> steps = backend.getCompilationSteps();
 
         if (step == null) {
@@ -230,6 +274,7 @@ public class KompileFrontEnd {
                 MetaK.getConfiguration(javaDef, context));
 
         backend.run(javaDef);
+        
     }
 
     private static void printUsageS(KompileOptionsParser op) {

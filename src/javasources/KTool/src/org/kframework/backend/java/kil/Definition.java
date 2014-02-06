@@ -99,7 +99,7 @@ public class Definition extends JavaSymbolicObject {
     }
 
     public List<Rule> macros() {
-        return macros;
+        return Collections.unmodifiableList(macros);
     }
 
     public Collection<Rule> rules() {

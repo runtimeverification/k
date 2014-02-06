@@ -131,5 +131,8 @@ Before launch:
                                     implementationClass="ro.uaic.fmse.kplugin.RuleVarDocumentationProvider"/>
         <lang.documentationProvider language="K"
                                     implementationClass="ro.uaic.fmse.kplugin.RegularProductionDocumentationProvider"/>
+        <codeStyleSettingsProvider implementation="ro.uaic.fmse.kplugin.codeStyle.KCodeStyleSettingsProvider"/>
+        <langCodeStyleSettingsProvider
+            implementation="ro.uaic.fmse.kplugin.codeStyle.KLanguageCodeStyleSettingsProvider"/>
     </extensions>
 </idea-plugin>

@@ -23,11 +23,13 @@ public class KItemProjection extends Term {
             return this;
         }
 
-        if (!((KItem) term).kList().iterator().hasNext() && !(((KItem) term).kList().hasFrame())) {
+        if (!(((KItem) term).kLabel() instanceof KLabelInjection)) {
             return this;
         }
 
-        if (!(((KItem) term).kLabel() instanceof KLabelInjection)) {
+        if (!(((KItem) term).kList() instanceof KList)
+                || ((KList) ((KItem) term).kList()).size() != 0
+                || ((KList) ((KItem) term).kList()).hasFrame()) {
             return this;
         }
 
@@ -49,7 +51,10 @@ public class KItemProjection extends Term {
 
     @Override
     public int hashCode() {
-        return term.hashCode();
+        if (hashCode == 0) {
+            hashCode = term.hashCode();
+        }
+        return hashCode;
     }
 
     @Override
@@ -68,7 +73,7 @@ public class KItemProjection extends Term {
 
     @Override
     public String toString() {
-        throw new UnsupportedOperationException();
+        return "projection(" + term + ")";
     }
 
     @Override

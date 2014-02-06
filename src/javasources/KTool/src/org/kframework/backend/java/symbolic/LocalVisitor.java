@@ -115,6 +115,11 @@ public class LocalVisitor implements Visitor {
     }
 
     @Override
+    public void visit(KItemProjection kItemProjection) {
+        visit((Term) kItemProjection);
+    }
+
+    @Override
     public void visit(KCollection kCollection) {
         visit((Collection) kCollection);
     }

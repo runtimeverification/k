@@ -2,6 +2,7 @@ package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.ConstrainedTerm;
+import org.kframework.backend.java.kil.ConstrainedTerm.UnificationType;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
@@ -26,9 +27,8 @@ public class StepRewriter {
     private Collection<ConstrainedTerm> constrainedTermResults = new ArrayList<ConstrainedTerm>();
     private Collection<Term> termResults = new ArrayList<Term>();
 
-
     public StepRewriter(Collection<Rule> rules, Definition definition) {
-        this.rules = rules;
+        this.rules = new ArrayList<Rule>(rules);
         this.definition = definition;
     }
 
@@ -49,8 +49,8 @@ public class StepRewriter {
     public Term getOneSuccessor(Term term) {
         for (Rule rule : rules) {
             rewriteByRule(term, rule);
-            if (!constrainedTermResults.isEmpty()) {
-                return constrainedTermResults.iterator().next();
+            if (!termResults.isEmpty()) {
+                return termResults.iterator().next();
             }
         }
         return null;
@@ -113,9 +113,9 @@ public class StepRewriter {
         stopwatch.reset();
         stopwatch.start();
 
-        constrainedTermResults = new ArrayList<ConstrainedTerm>();
+        termResults = new ArrayList<Term>();
 
-        TermContext context = new TermContext(definition);
+        TermContext context = TermContext.of(definition);
         ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, context);
 
         SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(context);
@@ -132,19 +132,18 @@ public class StepRewriter {
 
         for (SymbolicConstraint constraint : constrainedTerm.unify(leftHandSide)) {
             /* check the constraint represents a match */
-            if (!constraint.isSubstitution()
-                    || !constraint.substitution().keySet().equals(rule.variableSet())) {
+            if (constrainedTerm.getTypeOfUnification() != UnificationType.PatternMatching) {
                 continue;
             }
+            
+            constraint.orientSubstitution(leftHandSide.variableSet());
 
             Term result = rule.rightHandSide();
             /* apply the constraints substitution on the rule RHS */
-            result = result.substituteWithBinders(constraint.substitution(), context);
-            /* evaluate pending functions in the rule RHS */
-            result = result.evaluate(context);
+            result = result.substituteAndEvaluate(constraint.substitution(), context);
 
             /* compute all results */
-            termResults.add(term);
+            termResults.add(result);
         }
 
         stopwatch.stop();

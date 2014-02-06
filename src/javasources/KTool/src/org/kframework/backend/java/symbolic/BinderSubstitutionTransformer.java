@@ -31,8 +31,15 @@ public class BinderSubstitutionTransformer extends SubstitutionTransformer {
 
         @Override
         public ASTNode transform(KItem kItem) {
-            KLabel kLabel = kItem.kLabel();
-            KList kList = kItem.kList();
+            // TODO(AndreiS): fix binder when dealing with KLabel variables and non-concrete KLists
+            if (!(kItem.kLabel() instanceof KLabel) || !(kItem.kList() instanceof KList)) {
+                return super.transform(kItem);
+            }
+            assert kItem.kLabel() instanceof KLabel : "KLabel variables are not supported";
+            assert kItem.kList() instanceof KList : "KList must be concrete";
+
+            KLabel kLabel = (KLabel) kItem.kLabel();
+            KList kList = (KList) kItem.kList();
             if (kLabel instanceof KLabelConstant) {
                 KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
                 if (kLabelConstant.isBinder()) {

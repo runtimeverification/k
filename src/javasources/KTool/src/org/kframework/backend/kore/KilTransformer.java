@@ -1,5 +1,6 @@
 package org.kframework.backend.kore;
 
+import org.kframework.compile.transformers.FlattenSyntax;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -8,6 +9,7 @@ import org.kframework.krun.ColorSetting;
 
 public class KilTransformer {
 	
+	FlattenSyntax kilTermCons;
 	ToBuiltinTransformer builtinTrans;
 	ToKAppTransformer kappTrans;
 	KoreFilter koreTrans;
@@ -20,34 +22,23 @@ public class KilTransformer {
 
 	}
 	
-	public KilTransformer(boolean inConfiguration, ColorSetting color, boolean addParentheses, org.kframework.kil.loader.Context context){
+	public KilTransformer(boolean inConfiguration, ColorSetting color, org.kframework.kil.loader.Context context){
 		
-	    koreTrans = new KoreFilter(inConfiguration, color, addParentheses, context);
+	    koreTrans = new KoreFilter(inConfiguration, color, context);
 	    builtinTrans = new ToBuiltinTransformer(context);
 	    kappTrans = new ToKAppTransformer(context);
 
 	}
 	
 	public String kilToKore(ASTNode node){
-		
-	    ASTNode oldtonew = null;
-	    ASTNode newtokapp = null;
-	    
+
 	    try {
-			oldtonew = node.accept(builtinTrans);
+			node.accept(builtinTrans).accept(kappTrans).accept(koreTrans);
+			//node.accept(kappTrans).accept(koreTrans);
 		} catch (TransformerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	    
-	    try {
-			newtokapp = oldtonew.accept(kappTrans);
-		} catch (TransformerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	    
-	    newtokapp.accept(koreTrans);
-	    return "\n\n+++KORE+++\n"+koreTrans.getResult();
+	    return koreTrans.getResult();
 	}
 }

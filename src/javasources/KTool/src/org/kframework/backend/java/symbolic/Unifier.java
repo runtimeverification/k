@@ -18,7 +18,9 @@ import org.kframework.backend.java.kil.KLabelFreezer;
 import org.kframework.backend.java.kil.KLabelInjection;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
+import org.kframework.backend.java.kil.MapUpdate;
 import org.kframework.backend.java.kil.MetaVariable;
+import org.kframework.backend.java.kil.SetUpdate;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermCons;
 import org.kframework.backend.java.kil.Token;
@@ -52,6 +54,8 @@ public interface Unifier {
     public void unify(KLabelInjection kLabelInjection, Term term);
     public void unify(KList kList, Term term);
     public void unify(KSequence kSequence, Term term);
+    public void unify(MapUpdate mapUpdate, Term term);
+    public void unify(SetUpdate setUpdate, Term term);
     public void unify(MetaVariable metaVariable, Term term);
     public void unify(StringToken stringToken, Term term);
     public void unify(Term term, Term otherTerm);

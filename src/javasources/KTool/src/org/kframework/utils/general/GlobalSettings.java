@@ -67,13 +67,16 @@ public class GlobalSettings {
 	public static List<String> transition = new ArrayList<String>();
 	public static List<String> superheat = new ArrayList<String>();
 	public static List<String> supercool = new ArrayList<String>();
+	public static List<String> doctags = new ArrayList<String>();
 
+	
     public static final String TRANSITION = "transition";
 
     static {
 		transition.add(TRANSITION);
 		superheat.add("superheat");
 		supercool.add("supercool");
+		doctags.add("documentation");
 	}
 	public static boolean addTopCell = false;
 	public static String style = "poster,style=bubble";

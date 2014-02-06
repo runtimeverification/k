@@ -52,10 +52,12 @@ public class ListLookup extends Term {
 
     @Override
     public int hashCode() {
-        int hash = 1;
-        hash = hash * Utils.HASH_PRIME + key.hashCode();
-        hash = hash * Utils.HASH_PRIME + list.hashCode();
-        return hash;
+        if (hashCode == 0) {
+            hashCode = 1;
+            hashCode = hashCode * Utils.HASH_PRIME + key.hashCode();
+            hashCode = hashCode * Utils.HASH_PRIME + list.hashCode();
+        }
+        return hashCode;
     }
 
     @Override

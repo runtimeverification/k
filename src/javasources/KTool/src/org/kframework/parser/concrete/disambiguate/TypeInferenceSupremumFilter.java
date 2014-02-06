@@ -45,18 +45,18 @@ public class TypeInferenceSupremumFilter extends BasicTransformer {
 				// found a group of terms that are alike
 				// alike means they have the same arity, same position for terminals and non terminals
 				if (t instanceof TermCons) {
-					// finally, try to find the maximum
+					// finally, try to find the <strike> maximum </strike> minimum
 					for (Term tm2 : group) {
-						boolean max = true;
+						boolean min = true;
 						Production tcBig = ((TermCons) tm2).getProduction();
 						for (Term tm22 : group) {
 							Production tcSmall = ((TermCons) tm22).getProduction();
-							if (tm2 != tm22 && isSubsorted(tcSmall, tcBig)) {
-								max = false;
+							if (tm2 != tm22 && isSubsorted(tcBig, tcSmall)) {
+								min = false;
 								break;
 							}
 						}
-						if (max)
+						if (min)
 							maxterms.add(tm2);
 					}
 				} else if (t instanceof Variable) {

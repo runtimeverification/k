@@ -10,34 +10,7 @@ import org.kframework.compile.sharing.DeclareCellLabels;
 import org.kframework.compile.tags.AddDefaultComputational;
 import org.kframework.compile.tags.AddOptionalTags;
 import org.kframework.compile.tags.AddStrictStar;
-import org.kframework.compile.transformers.AddEmptyLists;
-import org.kframework.compile.transformers.AddHeatingConditions;
-import org.kframework.compile.transformers.AddKCell;
-import org.kframework.compile.transformers.AddPredicates;
-import org.kframework.compile.transformers.AddStreamCells;
-import org.kframework.compile.transformers.AddTopCellConfig;
-import org.kframework.compile.transformers.AddTopCellRules;
-import org.kframework.compile.transformers.Cell2DataStructure;
-import org.kframework.compile.transformers.CompleteSortLatice;
-import org.kframework.compile.transformers.ContextsToHeating;
-import org.kframework.compile.transformers.DesugarStreams;
-import org.kframework.compile.transformers.FlattenSyntax;
-import org.kframework.compile.transformers.FreezeUserFreezers;
-import org.kframework.compile.transformers.DataStructureToLookupUpdate;
-import org.kframework.compile.transformers.RemoveBrackets;
-import org.kframework.compile.transformers.RemoveSyntacticCasts;
-import org.kframework.compile.transformers.ResolveAnonymousVariables;
-import org.kframework.compile.transformers.ResolveBinder;
-import org.kframework.compile.transformers.ResolveBlockingInput;
-import org.kframework.compile.transformers.ResolveBuiltins;
-import org.kframework.compile.transformers.ResolveFunctions;
-import org.kframework.compile.transformers.ResolveHybrid;
-import org.kframework.compile.transformers.ResolveListOfK;
-import org.kframework.compile.transformers.ResolveOpenCells;
-import org.kframework.compile.transformers.ResolveRewrite;
-import org.kframework.compile.transformers.SetVariablesInferredSort;
-import org.kframework.compile.transformers.StrictnessToContexts;
-import org.kframework.compile.transformers.RemovePreincludedRules;
+import org.kframework.compile.transformers.*;
 import org.kframework.compile.utils.*;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
@@ -47,6 +20,7 @@ import org.kframework.kil.loader.CollectSubsortsVisitor;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.krun.K;
 import org.kframework.main.FirstStep;
 import org.kframework.main.LastStep;
 import org.kframework.utils.BinaryLoader;
@@ -85,9 +59,11 @@ public class JavaSymbolicBackend extends BasicBackend {
 
     @Override
     public Definition lastStep(Definition javaDef) {
-        BinaryLoader.save(
-            new File(context.dotk, JavaSymbolicBackend.DEFINITION_FILENAME).toString(), new KILtoBackendJavaKILTransformer(context, true).transformDefinition(javaDef)
-        );
+        K.smt = "none"; // TODO(YilongL): do it nicely
+        BinaryLoader.save(new File(context.dotk,
+                JavaSymbolicBackend.DEFINITION_FILENAME).toString(),
+                new KILtoBackendJavaKILTransformer(context, true)
+                        .transformDefinition(javaDef));
 
         return javaDef;
     }
@@ -147,6 +123,7 @@ public class JavaSymbolicBackend extends BasicBackend {
         //steps.add(new ResolveSyntaxPredicates(context));
         steps.add(new ResolveBuiltins(context));
         steps.add(new ResolveListOfK(context));
+        steps.add(new AddInjections(context));
 
         steps.add(new FlattenSyntax(context));
         steps.add(new ResolveBlockingInput(context, true));

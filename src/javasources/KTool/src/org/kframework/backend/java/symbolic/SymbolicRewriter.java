@@ -345,6 +345,7 @@ public class SymbolicRewriter {
         while (strategy.hasNext()) {
             transition = strategy.nextIsTransition();
             ArrayList<Rule> rules = new ArrayList<Rule>(strategy.next());
+//            System.err.println(rules);
             for (Rule rule : rules) {
                 ruleStopwatch.reset();
                 ruleStopwatch.start();
@@ -363,19 +364,28 @@ public class SymbolicRewriter {
                         constrainedTerm.termContext());
 
                 for (SymbolicConstraint constraint1 : constrainedTerm.unify(leftHandSide)) {
-                    constraint1.orientSubstitution(rule.variableSet(), constrainedTerm.termContext());
+                    constraint1.orientSubstitution(rule.variableSet());
                     constraint1.addAll(rule.ensures());
-                    /* rename rule variables in the constraints */
-                    Map<Variable, Variable> freshSubstitution = constraint1.rename(rule.variableSet());
-
+                    
                     Term result = rule.rightHandSide();
-                    /* rename rule variables in the rule RHS */
-                    result = result.substituteWithBinders(freshSubstitution, constrainedTerm.termContext());
+
+                    /* the RHS of the rule has introduced new variables */
+                    if (rule.hasUnboundedVariables()) {
+                        /* rename rule variables in the constraints */
+                        Map<Variable, Variable> freshSubstitution = constraint1.rename(rule.variableSet());
+                        /* rename rule variables in the rule RHS */
+                        result = result.substituteWithBinders(freshSubstitution, constrainedTerm.termContext());
+                    }
+                    
                     /* apply the constraints substitution on the rule RHS */
                     result = result.substituteAndEvaluate(constraint1.substitution(),
                             constrainedTerm.termContext());
                     /* evaluate pending functions in the rule RHS */
-                    //                    result = result.evaluate(constrainedTerm.termContext());
+                    if (rule.containsAttribute("getModel")) {
+                        // TODO(YilongL): this check is a hack-ish workaround
+                        // for the smt_model test; do it nicely
+                        result = result.evaluate(constrainedTerm.termContext());
+                    }
                     /* eliminate anonymous variables */
                     constraint1.eliminateAnonymousVariables();
 
@@ -494,7 +504,7 @@ public class SymbolicRewriter {
             if (!constraint.isSubstitution()) {
                 return null;
             }
-            constraint.orientSubstitution(visitor.getVariableSet(), term.termContext());
+            constraint.orientSubstitution(visitor.getVariableSet());
             for (Variable variable : visitor.getVariableSet()) {
                 Term value = constraint.substitution().get(variable);
                 if (value == null) {
@@ -894,7 +904,7 @@ public class SymbolicRewriter {
             /* rename rule variables */
             Map<Variable, Variable> freshSubstitution = Variable.getFreshSubstitution(rule.variableSet());
 
-            TermContext context = new TermContext(definition, fs);
+            TermContext context = TermContext.of(definition, fs);
             SymbolicConstraint sideConstraint = new SymbolicConstraint(context);
             sideConstraint.addAll(rule.requires());
             ConstrainedTerm initialTerm = new ConstrainedTerm(

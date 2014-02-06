@@ -88,7 +88,8 @@ public class K {
 	public static boolean statistics = false;
 	public static ColorSetting color = ColorSetting.ON;
     public static Color terminalColor = ColorUtil.getColorByName("black");
-    public static boolean do_concrete_exec = true;
+    public static boolean do_kompilation = false;
+    public static boolean do_concrete_exec = false;
     public static boolean do_search = false;
     public static boolean do_testgen = false; // generate tests from semantics
 	public static boolean showSearchGraph = false;

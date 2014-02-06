@@ -86,6 +86,9 @@ public class BuiltinFunction {
         Object[] args =  Arrays.copyOf(arguments, arguments.length + 1, Object[].class);
         args[arguments.length] =  context;
         try {
+            // TODO(YilongL): is reflection/exception really the best way to
+            // deal with builtin functions? builtin functions are supposed to be
+            // super-fast...
             Term t = (Term) table.get(label).invoke(null, args);
             return t;
         } catch (InvocationTargetException e) {

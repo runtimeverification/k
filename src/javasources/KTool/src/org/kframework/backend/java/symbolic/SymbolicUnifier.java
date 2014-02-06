@@ -24,21 +24,21 @@ import org.kframework.backend.java.kil.ConcreteCollectionVariable;
 import org.kframework.backend.java.kil.Hole;
 import org.kframework.backend.java.kil.KCollection;
 import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.KLabel;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KLabelFreezer;
 import org.kframework.backend.java.kil.KLabelInjection;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
 import org.kframework.backend.java.kil.Kind;
+import org.kframework.backend.java.kil.MapUpdate;
 import org.kframework.backend.java.kil.MetaVariable;
+import org.kframework.backend.java.kil.SetUpdate;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermCons;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.matchers.MatcherException;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
@@ -89,7 +89,7 @@ public class SymbolicUnifier extends AbstractUnifier {
             multiConstraints.clear();
             unify(equality.leftHandSide(), equality.rightHandSide());
             return true;
-        } catch (MatcherException e) {
+        } catch (UnificationFailure e) {
             return false;
         }
     }
@@ -107,7 +107,9 @@ public class SymbolicUnifier extends AbstractUnifier {
         if (term instanceof Bottom || otherTerm instanceof Bottom) {
             fail();
         }
-        if (term.kind() == Kind.KITEM || term.kind() == Kind.K || term.kind() == Kind.KLIST) {
+        if (term.kind().isComputational()) {
+            assert otherTerm.kind().isComputational();
+
             term = KCollection.upKind(term, otherTerm.kind());
             otherTerm = KCollection.upKind(otherTerm, term.kind());
         }
@@ -138,9 +140,11 @@ public class SymbolicUnifier extends AbstractUnifier {
 
             /* add symbolic constraint */
             fConstraint.add(term, otherTerm);
-            if (fConstraint.isFalse()) {
-                fail();
-            }
+            // YilongL: not the right time to check the truth value because it
+            // may change the equalities
+            // if (fConstraint.isFalse()) {
+            //  fail();
+            // }
         } else {
             /* unify */
             if (!term.equals(otherTerm)) {
@@ -207,6 +211,19 @@ public class SymbolicUnifier extends AbstractUnifier {
     }
 
     @Override
+    public void unify(MapUpdate mapUpdate, Term term) {
+        // this method is only used during macro expansion of rewrite rules
+        assert !(term instanceof Variable);
+        
+        if (!(term instanceof MapUpdate)) {
+            this.fail();
+        }
+        
+        throw new UnsupportedOperationException(
+                "Currently, mapUpdate can only be matched with a variable.");
+    }
+
+    @Override
     public void unify(BuiltinSet builtinSet, Term term) {
         assert !(term instanceof Variable);
         if (!(term instanceof BuiltinSet)) {
@@ -215,6 +232,19 @@ public class SymbolicUnifier extends AbstractUnifier {
 
         throw new UnsupportedOperationException(
                 "set matching is only supported when one of the sets is a variable.");
+    }
+    
+    @Override
+    public void unify(SetUpdate setUpdate, Term term) {
+        // this method is only used during macro expansion of rewrite rules
+        assert !(term instanceof Variable);
+        
+        if (!(term instanceof SetUpdate)) {
+            this.fail();
+        }
+        
+        throw new UnsupportedOperationException(
+                "Currently, setUpdate can only be matched with a variable.");
     }
     
     @Override
@@ -377,7 +407,7 @@ public class SymbolicUnifier extends AbstractUnifier {
                     for (int i = 0; i < otherCells.length; ++i) {
                         unify(cells[generator.selection.get(i)], otherCells[i]);
                     }
-                } catch (MatcherException e) {
+                } catch (UnificationFailure e) {
                     continue;
                 }
 
@@ -573,8 +603,14 @@ public class SymbolicUnifier extends AbstractUnifier {
         if(!(term instanceof KLabelInjection)) {
             fail();
         }
-
         KLabelInjection otherKLabelInjection = (KLabelInjection) term;
+
+        if (kLabelInjection.term().kind() != otherKLabelInjection.kind()
+                || !kLabelInjection.term().kind().isComputational()
+                || !otherKLabelInjection.term().kind().isComputational()) {
+            fail();
+        }
+
         unify(kLabelInjection.term(), otherKLabelInjection.term());
     }
 
@@ -596,14 +632,17 @@ public class SymbolicUnifier extends AbstractUnifier {
         }
 
         KItem patternKItem = (KItem) term;
-        KLabel kLabel = kItem.kLabel();
-        KList kList = kItem.kList();
+        Term kLabel = kItem.kLabel();
+        Term kList = kItem.kList();
         unify(kLabel, patternKItem.kLabel());
+        // TODO(AndreiS): deal with KLabel variables
         if (kLabel instanceof KLabelConstant) {
             KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
             if (kLabelConstant.isBinder()) {
+                // TODO(AndreiS): deal with non-concrete KLists
+                assert kList instanceof KList;
                 Multimap<Integer, Integer> binderMap = kLabelConstant.getBinderMap();
-                List<Term> terms = new ArrayList<>(kList.getContents());
+                List<Term> terms = new ArrayList<>(((KList) kList).getContents());
                 for (Integer boundVarPosition : binderMap.keySet()) {
                     Term boundVars = terms.get(boundVarPosition);
                     Set<Variable> variables = boundVars.variableSet();
@@ -728,7 +767,7 @@ public class SymbolicUnifier extends AbstractUnifier {
             }
         }
     }
-
+    
     @Override
     public void unify(MetaVariable metaVariable, Term term) {
         // TODO(YilongL): not sure about the assertion below
