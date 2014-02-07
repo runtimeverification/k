@@ -34,6 +34,7 @@ import org.kframework.backend.kore.KilTransformer;
 import org.kframework.backend.maude.krun.MaudeKRun;
 import org.kframework.backend.symbolic.TokenVariableToSymbolic;
 import org.kframework.backend.symbolic.VariableReplaceTransformer;
+import org.kframework.backend.unparser.UnparserFilterNew;
 import org.kframework.compile.ConfigurationCleaner;
 import org.kframework.compile.FlattenModules;
 import org.kframework.compile.transformers.AddTopCellConfig;
@@ -393,7 +394,16 @@ public class Main {
 
             if ("pretty".equals(K.output_mode) || "kore".equals(K.output_mode)) {
             	
-            	String output = result.toString();
+            	String output = null;
+            			
+            	if(result.getResult() instanceof KRunState){
+            		
+            		UnparserFilterNew printer = new UnparserFilterNew(true, K.color, K.parens, context,K.definition);
+            		((KRunState)(result.getResult())).getResult().accept(printer);
+            		output = printer.getResult();
+            	} else {
+            		output = result.toString();
+            	}
             	
                 if (!cmd.hasOption("output-file")) {
                     AnsiConsole.out.println(output);

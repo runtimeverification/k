@@ -203,33 +203,9 @@ public class KompileFrontEnd {
             
             if(cmd.hasOption("kore")){
             	
-            	Definition toKore = DefinitionLoader.loadDefinition(GlobalSettings.mainFile, lang,
-                        backend.autoinclude(), context);
-                
-            	KilTransformer trans = new KilTransformer(context);
-                HashMap<String,PrintWriter> fileTable = new HashMap<String,PrintWriter>();
-                for(int i = 0; i < toKore.getItems().size(); ++i){
-            		
-                	if(!fileTable.containsKey(((toKore.getItems().get(i)).getFilename()))){
-                		
-                		fileTable.put((toKore.getItems().get(i)).getFilename(), 
-                				new PrintWriter(((toKore.getItems().get(i)).getFilename().substring(0, 
-                						(toKore.getItems().get(i)).getFilename().length()-2))+".kore"));
-                		}
-                }
-                
-                for(int i = 0; i < toKore.getItems().size(); ++i){
-
-                	fileTable.get((toKore.getItems().get(i)).getFilename()).println(trans.kilToKore(((toKore.getItems().get(i)))));
-                }
-                
-                ArrayList<PrintWriter> toClosedFiles = new ArrayList<PrintWriter>(fileTable.values());
-                
-                for(int i = 0; i < toClosedFiles.size(); ++i){
-                	
-                	toClosedFiles.get(i).close();
-                }
-                
+            	KoreBackend koreBackend = new KoreBackend(Stopwatch.sw, context);
+            	koreBackend.run(DefinitionLoader.loadDefinition(GlobalSettings.mainFile, lang,
+                        backend.autoinclude(), context));
                 return;
             }
             

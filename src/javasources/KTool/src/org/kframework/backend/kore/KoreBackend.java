@@ -2,17 +2,55 @@ package org.kframework.backend.kore;
 
 import org.kframework.backend.BasicBackend;
 import org.kframework.backend.unparser.Indenter;
+import org.kframework.compile.checks.CheckConfigurationCells;
+import org.kframework.compile.checks.CheckRewrite;
+import org.kframework.compile.checks.CheckVariables;
+import org.kframework.compile.transformers.AddEmptyLists;
+import org.kframework.compile.transformers.AddHeatingConditions;
+import org.kframework.compile.transformers.AddK2SMTLib;
+import org.kframework.compile.transformers.AddKCell;
+import org.kframework.compile.transformers.AddPredicates;
+import org.kframework.compile.transformers.AddSemanticEquality;
+import org.kframework.compile.transformers.AddStreamCells;
+import org.kframework.compile.transformers.AddSupercoolDefinition;
+import org.kframework.compile.transformers.AddSuperheatRules;
+import org.kframework.compile.transformers.AddSymbolicK;
+import org.kframework.compile.transformers.AddTopCellConfig;
+import org.kframework.compile.transformers.AddTopCellRules;
+import org.kframework.compile.transformers.ContextsToHeating;
+import org.kframework.compile.transformers.DesugarStreams;
+import org.kframework.compile.transformers.FlattenSyntax;
+import org.kframework.compile.transformers.FreezeUserFreezers;
+import org.kframework.compile.transformers.FreshCondToFreshVar;
+import org.kframework.compile.transformers.RemoveBrackets;
+import org.kframework.compile.transformers.RemoveSyntacticCasts;
+import org.kframework.compile.transformers.ResolveAnonymousVariables;
+import org.kframework.compile.transformers.ResolveBinder;
+import org.kframework.compile.transformers.ResolveBlockingInput;
+import org.kframework.compile.transformers.ResolveBuiltins;
+import org.kframework.compile.transformers.ResolveFreshVarMOS;
+import org.kframework.compile.transformers.ResolveFunctions;
+import org.kframework.compile.transformers.ResolveListOfK;
+import org.kframework.compile.transformers.ResolveSyntaxPredicates;
+import org.kframework.compile.transformers.StrictnessToContexts;
+import org.kframework.compile.utils.CheckVisitorStep;
+import org.kframework.compile.utils.CompilerStepDone;
+import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.ColorSetting;
+import org.kframework.main.FirstStep;
+import org.kframework.main.LastStep;
 import org.kframework.utils.ColorUtil;
 import org.kframework.utils.Stopwatch;
+import org.kframework.utils.general.GlobalSettings;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -22,32 +60,86 @@ public class KoreBackend extends BasicBackend {
   }
 
   @Override
-  public void run(Definition definition) throws IOException {
-    KoreFilter filter = new KoreFilter(context);
-    ToBuiltinTransformer oldFilter = new ToBuiltinTransformer(context);
-    ToKAppTransformer newFilter = new ToKAppTransformer(context);
-    
-    try {
-		definition.accept(oldFilter).accept(newFilter).accept(filter);
-	} catch (TransformerException e) {
+  public void run(Definition toKore) throws IOException {
+	  
+	  try {
+		toKore = this.getCompilationSteps().compile(toKore, this.getDefaultStep());
+	} catch (CompilerStepDone e) {
 		// TODO Auto-generated catch block
-		e.printStackTrace();
+		toKore = (Definition) e.getResult();
 	}
-    
-    String output = filter.getResult();
-    System.out.println("\n\n+++KORE+++\n");
-    System.out.println(output);
-/*
-		FileUtil.save(context.dotk.getAbsolutePath() + "/def.k", unparsedText);
+	  KilTransformer trans = new KilTransformer(context);
+      HashMap<String,PrintWriter> fileTable = new HashMap<String,PrintWriter>();
+      for(int i = 0; i < toKore.getItems().size(); ++i){
+  		
+      	if(!fileTable.containsKey(((toKore.getItems().get(i)).getFilename()))){
+      		
+      		fileTable.put((toKore.getItems().get(i)).getFilename(), 
+      				new PrintWriter(((toKore.getItems().get(i)).getFilename().substring(0, 
+      						(toKore.getItems().get(i)).getFilename().length()-2))+".kore"));
+      		}
+      }
+      
+      for(int i = 0; i < toKore.getItems().size(); ++i){
 
-		FileUtil.save(GlobalSettings.outputDir + File.separator + FileUtil.stripExtension(GlobalSettings.mainFile.getName()) + ".unparsed.k", unparsedText);
-*/
+      	fileTable.get((toKore.getItems().get(i)).getFilename()).println(trans.kilToKore(((toKore.getItems().get(i)))));
+      }
+      
+      ArrayList<PrintWriter> toClosedFiles = new ArrayList<PrintWriter>(fileTable.values());
+      
+      for(int i = 0; i < toClosedFiles.size(); ++i){
+      	
+      	toClosedFiles.get(i).close();
+      }
   }
 
   @Override
   public String getDefaultStep() {
-    return "FirstStep";
+      return "LastStep";
   }
+  
+  @Override
+	public CompilerSteps<Definition> getCompilationSteps() {
+		CompilerSteps<Definition> steps = new CompilerSteps<Definition>(context);
+		steps.add(new FirstStep(this, context));
+		steps.add(new CheckVisitorStep<Definition>(new CheckConfigurationCells(context), context));
+		steps.add(new RemoveBrackets(context));
+		steps.add(new AddEmptyLists(context));
+		steps.add(new RemoveSyntacticCasts(context));
+//        steps.add(new EnforceInferredSorts(context));
+		steps.add(new CheckVisitorStep<Definition>(new CheckVariables(context), context));
+		steps.add(new CheckVisitorStep<Definition>(new CheckRewrite(context), context));
+		steps.add(new StrictnessToContexts(context));
+		steps.add(new FreezeUserFreezers(context));
+		steps.add(new ContextsToHeating(context));
+		steps.add(new AddSupercoolDefinition(context));
+		steps.add(new AddHeatingConditions(context));
+		steps.add(new AddSuperheatRules(context));
+		steps.add(new DesugarStreams(context, false));
+		steps.add(new ResolveFunctions(context));
+		steps.add(new AddKCell(context));
+        steps.add(new AddStreamCells(context));
+		steps.add(new AddSymbolicK(context));
+		steps.add(new AddSemanticEquality(context));
+		// steps.add(new ResolveFresh());
+		steps.add(new FreshCondToFreshVar(context));
+		steps.add(new ResolveFreshVarMOS(context));
+		steps.add(new AddTopCellConfig(context));
+		if (GlobalSettings.addTopCell) {
+			steps.add(new AddTopCellRules(context));
+		}
+		steps.add(new ResolveBinder(context));
+		steps.add(new ResolveAnonymousVariables(context));
+		steps.add(new ResolveBlockingInput(context, false));
+		steps.add(new AddK2SMTLib(context));
+		steps.add(new AddPredicates(context));
+		steps.add(new ResolveSyntaxPredicates(context));
+		steps.add(new ResolveBuiltins(context));
+		steps.add(new ResolveListOfK(context));
+		steps.add(new FlattenSyntax(context));
+		//steps.add(new LastStep(this, context));
+		return steps;
+	}
 }
 
 class KoreFilter extends BasicVisitor {
