@@ -78,6 +78,7 @@ public class SubstitutionTransformer extends PrePostTransformer {
     private class LocalVariableChecker extends LocalTransformer {
         @Override
         public ASTNode transform(JavaSymbolicObject object) {
+            // TODO(AndreiS) this stops the traversal for ground terms (even if the functions are not fully evaluated)
             Set<Variable> variables = object.variableSet();
             for (Variable variable : substitution.keySet()) {
                 if (variables.contains(variable)) {
