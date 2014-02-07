@@ -58,8 +58,23 @@ public enum Kind {
         }
     }
 
+    /**
+     * Returns {@code true} if {@code this} kind is one of
+     * {@link org.kframework.backend.java.kil.Kind.KItem},
+     * {@link org.kframework.backend.java.kil.Kind.K}, or
+     * {@link org.kframework.backend.java.kil.Kind.KList}.
+     */
     public boolean isComputational() {
         return this == Kind.KITEM || this == Kind.K || this == Kind.KLIST;
+    }
+
+    /**
+     * Returns {@code true} if {@code this} kind is one of
+     * {@link org.kframework.backend.java.kil.Kind.CELL} or
+     * {@link org.kframework.backend.java.kil.Kind.CELL_COLLECTION}.
+     */
+    public boolean isStructural() {
+        return this == Kind.CELL || this == Kind.CELL_COLLECTION;
     }
 
     @Override

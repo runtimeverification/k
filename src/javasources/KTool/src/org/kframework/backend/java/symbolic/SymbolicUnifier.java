@@ -605,9 +605,11 @@ public class SymbolicUnifier extends AbstractUnifier {
         }
         KLabelInjection otherKLabelInjection = (KLabelInjection) term;
 
-        if (kLabelInjection.term().kind() != otherKLabelInjection.kind()
-                || !kLabelInjection.term().kind().isComputational()
-                || !otherKLabelInjection.term().kind().isComputational()) {
+        Kind injectionKind = kLabelInjection.term().kind();
+        Kind otherInjectionKind = otherKLabelInjection.term().kind();
+        if (injectionKind != otherInjectionKind
+                && !(injectionKind.isComputational() && otherInjectionKind.isComputational())
+                && !(injectionKind.isStructural() && otherInjectionKind.isStructural())) {
             fail();
         }
 
