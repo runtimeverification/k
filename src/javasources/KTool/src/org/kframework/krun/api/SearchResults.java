@@ -72,4 +72,9 @@ public class SearchResults {
 	public List<SearchResult> getSolutions() {
 		return solutions;
 	}
+	
+	public boolean isDefaultPattern(){
+		
+		return this.isDefaultPattern;
+	}
 }

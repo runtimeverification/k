@@ -10,12 +10,10 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.TreeSet;
 
 import jline.ArgumentCompletor;
 import jline.Completor;
@@ -30,10 +28,8 @@ import org.apache.commons.io.FilenameUtils;
 import org.fusesource.jansi.AnsiConsole;
 import org.kframework.backend.java.ksimulation.Waitor;
 import org.kframework.backend.java.symbolic.JavaSymbolicKRun;
-import org.kframework.backend.kore.KilTransformer;
 import org.kframework.backend.maude.krun.MaudeKRun;
-import org.kframework.backend.symbolic.TokenVariableToSymbolic;
-import org.kframework.backend.symbolic.VariableReplaceTransformer;
+import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.backend.unparser.UnparserFilterNew;
 import org.kframework.compile.ConfigurationCleaner;
 import org.kframework.compile.FlattenModules;
@@ -63,8 +59,11 @@ import org.kframework.krun.api.KRunDebugger;
 import org.kframework.krun.api.KRunProofResult;
 import org.kframework.krun.api.KRunResult;
 import org.kframework.krun.api.KRunState;
+import org.kframework.krun.api.SearchResult;
 import org.kframework.krun.api.SearchResults;
 import org.kframework.krun.api.SearchType;
+import org.kframework.krun.api.TestGenResult;
+import org.kframework.krun.api.TestGenResults;
 import org.kframework.krun.api.Transition;
 import org.kframework.krun.api.UnsupportedBackendOptionException;
 import org.kframework.krun.gui.Controller.RunKRunCommand;
@@ -332,7 +331,7 @@ public class Main {
                         KAST1 = rp.runParserOrDie("kast", K.model_checking, false,
                                 "LtlFormula", context);
                     }
-
+                    
                     result = krun
                             .modelCheck(
                                     KAST1,
@@ -401,6 +400,102 @@ public class Main {
             		UnparserFilterNew printer = new UnparserFilterNew(true, K.color, K.parens, context,K.definition);
             		((KRunState)(result.getResult())).getResult().accept(printer);
             		output = printer.getResult();
+            	} else if (result.getResult() instanceof SearchResults) {
+            		
+            		TreeSet<String> solutionStrings = new TreeSet<String>();
+            		for (SearchResult solution : ((SearchResults)result.getResult()).getSolutions()) {
+            			Map<String, Term> substitution = solution.getSubstitution();
+            			if (((SearchResults)result.getResult()).isDefaultPattern()) {
+            				UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, context,K.definition);
+            				substitution.get("B:Bag").accept(unparser);
+            				solutionStrings.add("\n" + unparser.getResult());
+            			} else {
+            				boolean empty = true;
+            				
+            				StringBuilder varStringBuilder = new StringBuilder();
+            				for (String variable : substitution.keySet()) {
+            					UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, context,K.definition);
+            					substitution.get(variable).accept(unparser);
+            					varStringBuilder.append("\n" + variable + " -->\n" + unparser.getResult());
+            					empty = false;
+            				}
+            				if (empty) {
+            					solutionStrings.add("\nEmpty substitution");
+            				} else {
+            					solutionStrings.add(varStringBuilder.toString());
+            				}
+            			}
+            		}
+            		StringBuilder sb = new StringBuilder();
+            		sb.append("Search results:");
+            		if (solutionStrings.isEmpty()) {
+            			sb.append("\nNo search results");
+            		} else {
+            			int i = 1;
+            			for (String string : solutionStrings) {
+            				sb.append("\n\nSolution " + i + ":" + string);
+            				i++;
+            			}
+            		}
+            		
+            		output = sb.toString();
+            	} else if (result.getResult() instanceof TestGenResults) {
+            		
+                    int n = 1;
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Test generation results:");
+                    
+                    for (TestGenResult testGenResult : ((TestGenResults)result.getResult()).getTestGenResults()) {
+                    	// TODO(YilongL): how to set state id?
+                        sb.append("\n\nTest case " + n /*+ ", State " + testGenResult.getState().getStateId()*/ + ":");
+                        
+                        UnparserFilterNew t = new UnparserFilterNew(true, K.color, K.parens, context,K.definition);
+                        Term concretePgm = KRunState.concretize(testGenResult.getGeneratedProgram(), context);
+                        concretePgm.accept(t);
+                        // sb.append("\nProgram:\n" + testGenResult.getGeneratedProgram()); // print abstract syntax form
+                        sb.append("\nProgram:\n" + t.getResult()); // print concrete syntax form
+                        sb.append("\nResult:");
+                        Map<String, Term> substitution = testGenResult.getSubstitution();
+
+                        if (((TestGenResults)result.getResult()).isDefaultPattern()) {
+                        	UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, context,K.definition);
+                            substitution.get("B:Bag").accept(unparser);
+                            sb.append("\n" + unparser.getResult());
+                        } else {
+                            boolean empty = true;
+
+                            for (String variable : substitution.keySet()) {
+                            	UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, context,K.definition);
+                                sb.append("\n" + variable + " -->");
+                                substitution.get(variable).accept(unparser);
+                                sb.append("\n" + unparser.getResult());
+                                empty = false;
+                            }
+                            if (empty) {
+                                sb.append("\nEmpty substitution");
+                            }
+                        }
+                        // Temporarily printing the constraints until problems with
+                        // translation of Term to Z3 are fixed
+                        sb.append("\nConstraint:\n");
+                        // temporary hack to eliminate constraints due to the rigidity of
+                        // term equality; TODO(YilongL): fix it
+                        String strCnstr = testGenResult.getConstraint().toString();
+                        strCnstr = strCnstr.replaceAll("'_=/=K_\\(.*?,, '\\{\\}\\(\\.KList\\)\\) =\\? Bool\\(#\"true\"\\) /\\\\ ", "");
+                        strCnstr = strCnstr.replaceAll(" /\\\\ " + "'_=/=K_\\(.*?,, '\\{\\}\\(\\.KList\\)\\) =\\? Bool\\(#\"true\"\\)", "");
+                        strCnstr = strCnstr.replaceAll("'_=/=K_\\(.*?,, '\\{\\}\\(\\.KList\\)\\) =\\? Bool\\(#\"true\"\\)", "");
+                        strCnstr = strCnstr.replace("/\\ ", "/\\\n");
+                        sb.append(strCnstr);
+                        
+                        n++;
+                    }
+                    
+                    if (n == 1) {
+                        sb.append("\nNo test generation results");
+                    }
+                    
+                    output = sb.toString();
+                    
             	} else {
             		output = result.toString();
             	}
