@@ -436,7 +436,7 @@ public class UnparserFilterNew extends BasicVisitor {
 				ProductionItem productionItem = production.getItems().get(i);
 				if (!(productionItem instanceof Terminal)) {
 					if(!(termCons.getContents().get(where) instanceof ListTerminator)){
-						termCons.getContents().get(where++).accept(this);
+							termCons.getContents().get(where++).accept(this);
 					} else {
 						where++;
 					}
