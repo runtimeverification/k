@@ -2,37 +2,35 @@ Search results:
 
 Solution 1:
 Solution:Map -->
-"L1" |-> cons ( (#symVariable(1), (cons ( (#symVariable(6), (cons ( (
-  #symVariable(11), (cons ( (#symVariable(16), (nil ( .Terms ))) ))) ))) ))) )
+"L1" |-> cons ( #symVariable(1), cons ( #symVariable(6), cons ( #symVariable(
+  11), cons ( #symVariable(16), nil (  ) ) ) ) )
 "L2" |-> L2
-"L3" |-> cons ( (#symVariable(1), (cons ( (#symVariable(6), (cons ( (
-  #symVariable(11), (cons ( (#symVariable(16), (cons ( ((a ( .Terms )), L2) ))
-  ) ))) ))) ))) )
+"L3" |-> cons ( #symVariable(1), cons ( #symVariable(6), cons ( #symVariable(
+  11), cons ( #symVariable(16), cons ( a (  ), L2 ) ) ) ) )
 
 Solution 2:
 Solution:Map -->
-"L1" |-> cons ( (#symVariable(1), (cons ( (#symVariable(6), (cons ( (
-  #symVariable(11), (nil ( .Terms ))) ))) ))) )
+"L1" |-> cons ( #symVariable(1), cons ( #symVariable(6), cons ( #symVariable(
+  11), nil (  ) ) ) )
 "L2" |-> L2
-"L3" |-> cons ( (#symVariable(1), (cons ( (#symVariable(6), (cons ( (
-  #symVariable(11), (cons ( ((a ( .Terms )), L2) ))) ))) ))) )
+"L3" |-> cons ( #symVariable(1), cons ( #symVariable(6), cons ( #symVariable(
+  11), cons ( a (  ), L2 ) ) ) )
 
 Solution 3:
 Solution:Map -->
-"L1" |-> cons ( (#symVariable(1), (cons ( (#symVariable(6), (nil ( .Terms ))) 
-  ))) )
+"L1" |-> cons ( #symVariable(1), cons ( #symVariable(6), nil (  ) ) )
 "L2" |-> L2
-"L3" |-> cons ( (#symVariable(1), (cons ( (#symVariable(6), (cons ( ((a ( 
-  .Terms )), L2) ))) ))) )
+"L3" |-> cons ( #symVariable(1), cons ( #symVariable(6), cons ( a (  ), L2 ) )
+   )
 
 Solution 4:
 Solution:Map -->
-"L1" |-> cons ( (#symVariable(1), (nil ( .Terms ))) )
+"L1" |-> cons ( #symVariable(1), nil (  ) )
 "L2" |-> L2
-"L3" |-> cons ( (#symVariable(1), (cons ( ((a ( .Terms )), L2) ))) )
+"L3" |-> cons ( #symVariable(1), cons ( a (  ), L2 ) )
 
 Solution 5:
 Solution:Map -->
-"L1" |-> nil ( .Terms )
+"L1" |-> nil (  )
 "L2" |-> L2
-"L3" |-> cons ( ((a ( .Terms )), L2) )
+"L3" |-> cons ( a (  ), L2 )

@@ -1,5 +1,5 @@
 <k>
-    foo ( true , '`(`) , x , .Exps )
+    foo ( true , '`(`) , x ,  )
 </k>
 <in>
     ListItem(#buffer ( "" ))
