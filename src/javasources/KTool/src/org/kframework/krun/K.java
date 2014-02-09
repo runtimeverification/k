@@ -18,6 +18,10 @@ public class K {
 	public static final String userdir = System.getProperty("user.dir");
 	public static final String fileSeparator = System.getProperty("file.separator");
 	public static final String lineSeparator = System.getProperty("line.separator");
+	
+	//define some constants for print 
+	public static final String PRETTY = "pretty";
+	public static final String KORE = "kore";
 
 	public static String kdir;
 	

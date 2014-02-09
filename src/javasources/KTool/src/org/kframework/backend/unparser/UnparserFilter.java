@@ -354,7 +354,7 @@ public class UnparserFilter extends BasicVisitor {
 			assert child instanceof KList : "child of KApp with Token is not KList";
 			assert ((KList) child).isEmpty() : "child of KApp with Token is not empty";
 			indenter.write(((Token) label).value());
-		} else if (K.output_mode.equals("pretty") && (label instanceof KLabelConstant) && ((KLabelConstant) label).getLabel().contains("'_")) {
+		} else if (K.output_mode.equals(K.PRETTY) && (label instanceof KLabelConstant) && ((KLabelConstant) label).getLabel().contains("'_")) {
 			
 			String rawLabel = "("+((KLabelConstant) label).getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)").replaceAll("'", "") + ")";
 

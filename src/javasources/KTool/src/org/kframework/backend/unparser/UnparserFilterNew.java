@@ -357,7 +357,7 @@ public class UnparserFilterNew extends BasicVisitor {
 			assert child instanceof KList : "child of KApp with Token is not KList";
 			assert ((KList) child).isEmpty() : "child of KApp with Token is not empty";
 			indenter.write(((Token) label).value());
-		} else if (K.output_mode.equals("pretty") && (label instanceof KLabelConstant) && ((KLabelConstant) label).getLabel().contains("'_")) {
+		} else if (K.output_mode.equals(K.PRETTY) && (label instanceof KLabelConstant) && ((KLabelConstant) label).getLabel().contains("'_")) {
 			
 			String rawLabel = "("+((KLabelConstant) label).getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)").replaceAll("'", "") + ")";
 
@@ -412,6 +412,13 @@ public class UnparserFilterNew extends BasicVisitor {
 		postpare();
 	}
 
+	/*
+	 * TermCons actually controls most input terms, ie. most input terms will
+	 * have classes TermCons.
+	 * The way to deal with TermCons is that if the syntax of the given definition allowed,
+	 * we will put parentheses surrounding a TermCons term.
+	 * We will also delete the final ListTerminator if the input mode is pretty printing. 
+	 */
 	@Override
 	public void visit(TermCons termCons) {
 		//prepare(termCons);
@@ -426,7 +433,8 @@ public class UnparserFilterNew extends BasicVisitor {
 			String separator = userList.getSeparator();
 			java.util.List<Term> contents = termCons.getContents();
 			contents.get(0).accept(this);
-			if (!(contents.get(1) instanceof ListTerminator)) {
+			if (!(contents.get(1) instanceof ListTerminator) 
+					|| (! (K.output_mode.equals(K.PRETTY)) && ! (K.output_mode.equals(K.KORE)))) {
     			indenter.write(separator + " ");
     			contents.get(1).accept(this);
 			}
@@ -435,7 +443,7 @@ public class UnparserFilterNew extends BasicVisitor {
 			for (int i = 0; i < production.getItems().size(); ++i) {
 				ProductionItem productionItem = production.getItems().get(i);
 				if (!(productionItem instanceof Terminal)) {
-					if(!(termCons.getContents().get(where) instanceof ListTerminator)){
+					if(!(termCons.getContents().get(where) instanceof ListTerminator) || (! (K.output_mode.equals(K.PRETTY)) && ! (K.output_mode.equals(K.KORE)))){
 							termCons.getContents().get(where++).accept(this);
 					} else {
 						where++;

@@ -389,10 +389,13 @@ public class Main {
                 org.kframework.utils.Error.report("Backend \"" + K.backend + "\" does not support option " + e.getMessage());
             }
 
-            if ("pretty".equals(K.output_mode) || "kore".equals(K.output_mode)) {
+            if (K.PRETTY.equals(K.output_mode) || K.KORE.equals(K.output_mode)) {
             	
             	String output = null;
             			
+            	//Liyi Li: I think this code is temporal, since the new pretty printer
+            	//relies on k definition. I think eventually we need to add
+            	// the KStatue, KSearchResults, and KTestGenerates a definition field.
             	if(result.getResult() instanceof KRunState){
             		
             		UnparserFilterNew printer = new UnparserFilterNew(true, K.color, K.parens, context,K.definition);
@@ -1100,7 +1103,7 @@ public class Main {
                 
                 if (K.output_mode.equals("smart")){
                 	
-                	K.output_mode="pretty";
+                	K.output_mode=K.PRETTY;
                 	K.parens=false;
                 }
             }
