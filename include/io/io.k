@@ -15,6 +15,10 @@ module IO
        (MyListItem(I:Int) => .MyList),
        _:MyList [stdout, stderr]
   rule MyListItem(#ostream(_)),
+       MyListItem(#buffer(Buffer:String => Buffer +String Char2String(C))),
+       (MyListItem(C:Char) => .MyList),
+       _:MyList [stdout, stderr]
+  rule MyListItem(#ostream(_)),
        MyListItem(#buffer(Buffer:String => Buffer +String S)),
        (MyListItem(S:String) => .MyList),
        _:MyList [stdout, stderr]
@@ -26,7 +30,8 @@ module IO
        _:MyList [stdout, stderr]
   rule MyListItem(#buffer(Buffer:String => Buffer +String S)), 
        (MyListItem(S:String) => .MyList),
-       _:MyList [stdout, stderr]
+       _:MyList [stdout, stderr] 
+
 
   // Send first char from the buffer to the server
   rule MyListItem(#ostream((. => #write(N, S)) ~> N:Int)), 
