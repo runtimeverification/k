@@ -6,11 +6,43 @@ module LIST
   imports K-EQUAL-HOOKS
   imports INT-HOOKS
 
-  syntax MyList ::= MyList "," MyList   [left, function, hook(List:__), klabel('_List_)]
-                  | ".MyList"       [function, hook(List:.List)]
-                  | MyListItem(K)   [function, hook(List:ListItem)]
+  /*@ \section{Description} \K lists are ordered collections that may contain
+   duplicate elements. These behave more like lists in functional programming
+   languages than arrays in imperative programming languages; there's no
+   numerical indexing, but instead specific elements are refered to using the
+   Mylist,Mylist construct in combination with the MyListItem construct. For
+   example, to refer to element E in a MyList, one would write L:Mylist,E . */
 
-  /* element membership */
+  /*@ \section{User-Defined Lists} It is very common in \K to define a shorthand
+   for lists of user-defined sorts. \K 's builtin way of doing this is to use
+   List\left{K,"Separator"\right}, where "Separator" is any valid character or sequence of
+   characters used to separate distinct elements.
+   For example, after defining \\
+   syntax K ::= Elt\\ 
+   a user could then define
+   syntax Elts ::= List\left{Elt,","\right} \\
+   which would be a comma-separated list whose elements are all of sort Elt. A
+   user could just as well define \\
+   syntax Elts ::= List\left{Elt,"and"\right} \\
+   which would be a list containing elements of sort Elt that are separated with
+   the word "and". If only one argument is given, the separator is asumed to be
+   commas. So, \\
+   syntax Elts = List\left{Elt\right} \\
+   sould define a comma-separated list containing elements of sort Elt.
+  */
+
+
+  /*@ Construct a List using two Lists. This is similar to the "Cons" operation
+   in many functional programming languages.*/
+  syntax MyList ::= MyList "," MyList   [left, function, hook(List:__), klabel('_List_)]
+  /*@ Construct an empty list: */
+  syntax MyList ::= ".MyList"       [function, hook(List:.List)]
+  /*@ TODO: How does this work, exactly? Create a list with one element? Also,
+   mention that MyListElement is commonly etended to create lists of arbitrary
+   contents, especially tuples. */
+  syntax MyList ::= MyListItem(K)   [function, hook(List:ListItem)]
+
+  /*@ Test element membership in the given list: */
   syntax Bool ::= K "in" MyList   [function]
 //  rule
 //    K1:K in /* L1:MyList */ MyListItem(K2:K) L2:MyList
@@ -18,7 +50,7 @@ module LIST
 //    K1 =K K2 orBool /* K1 in L1 orBool */ K1 in L2
 //  rule _ in .MyList => false
 
-  /* list length */
+  /*@  Get list length: */
   syntax Int ::= size(MyList)   [function]
 //  rule
 //    size(/* L1:MyList */ MyListItem(_) L2:MyList)
