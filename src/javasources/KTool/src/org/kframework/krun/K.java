@@ -22,6 +22,7 @@ public class K {
 	//define some constants for print 
 	public static final String PRETTY = "pretty";
 	public static final String KORE = "kore";
+	public static final String COMPATIBLE = "compatible";
 
 	public static String kdir;
 	

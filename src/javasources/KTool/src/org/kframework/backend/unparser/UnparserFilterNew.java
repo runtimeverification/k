@@ -356,11 +356,35 @@ public class UnparserFilterNew extends BasicVisitor {
 		if (label instanceof Token) {
 			assert child instanceof KList : "child of KApp with Token is not KList";
 			assert ((KList) child).isEmpty() : "child of KApp with Token is not empty";
+			
+			ArrayList<Terminal> temp = this.findRightSyntax(label.getSort());
+			if(!temp.isEmpty()){
+				indenter.write(temp.get(0).getTerminal());
+			}
+			
 			indenter.write(((Token) label).value());
+			
+			if(temp.size()>1){
+				
+				indenter.write(temp.get(1).getTerminal());
+			}
 		} else if (K.output_mode.equals(K.PRETTY) && (label instanceof KLabelConstant) && ((KLabelConstant) label).getLabel().contains("'_")) {
 			
-			String rawLabel = "("+((KLabelConstant) label).getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)").replaceAll("'", "") + ")";
+			String rawLabel = null;
+			ArrayList<Terminal> temp = this.findRightSyntax(label.getSort());
+			if(!temp.isEmpty()){
+				if(temp.size()>1){
+					rawLabel = temp.get(0).getTerminal()
+							+((KLabelConstant) label).getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)").replaceAll("'", "") + 
+							temp.get(1).getTerminal();
 
+				} else {
+					rawLabel = temp.get(0).getTerminal()
+							+((KLabelConstant) label).getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)").replaceAll("'", "");
+				}
+			} else {
+				rawLabel = ((KLabelConstant) label).getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)").replaceAll("'", "");
+			}
             if (child instanceof KList) {
                 java.util.List<Term> termList = ((KList)child).getContents();
 

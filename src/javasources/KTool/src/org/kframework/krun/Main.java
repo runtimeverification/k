@@ -389,7 +389,7 @@ public class Main {
                 org.kframework.utils.Error.report("Backend \"" + K.backend + "\" does not support option " + e.getMessage());
             }
 
-            if (K.PRETTY.equals(K.output_mode) || K.KORE.equals(K.output_mode)) {
+            if (K.PRETTY.equals(K.output_mode) || K.KORE.equals(K.output_mode) || K.COMPATIBLE.equals(K.output_mode)) {
             	
             	String output = null;
             			
