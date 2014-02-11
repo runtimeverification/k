@@ -192,7 +192,7 @@ to a location. */
   syntax KItem ::= undefined(Type)  [latex(\bot_{#1})]
 
   rule <k> T:Type X:Id; => . ...</k>
-       <env> Env => Env[L/X] </env>
+       <env> Env => Env[X <- L] </env>
        <store>... .Map => L |-> undefined(T) ...</store>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
 
@@ -202,7 +202,7 @@ in untyped SIMPLE, but we have to make sure that we associate the
 right type to the allocated locations. */
 
   rule <k> T:Type X:Id[N:Int]; => . ...</k>
-       <env> Env => Env[L/X] </env>
+       <env> Env => Env[X <- L] </env>
        <store>... .Map => L |-> array(T, L +Int 1, N)
                        (L +Int 1)...(L +Int N) |-> undefined(T) ...</store>
        <nextLoc> L:Int => L +Int 1 +Int N </nextLoc>
@@ -234,7 +234,7 @@ of the lambda abstraction.  In the spirit of dynamic typing, we will
 make sure that parameters are well typed when the function is invoked. */
 
   rule <k> T:Type F:Id(Ps:Params) S => . ...</k>
-       <env> Env => Env[L/F] </env>
+       <env> Env => Env[F <- L] </env>
        <store>... .Map => L |-> lambda(T, Ps, S) ...</store>
        <nextLoc> L => L +Int 1 </nextLoc>
 

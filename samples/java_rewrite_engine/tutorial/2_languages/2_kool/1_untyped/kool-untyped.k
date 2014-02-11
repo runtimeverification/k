@@ -359,7 +359,7 @@ definition. */
   syntax KItem ::= "undefined"  [latex(\bot)]
 
   rule <k> var X:Id; => . ...</k>
-       <env> Env => Env[L/X] </env>
+       <env> Env => Env[X <- L] </env>
        <store>... .Map => L |-> undefined ...</store>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
 
@@ -367,7 +367,7 @@ definition. */
   context var _:Id[HOLE];
 
   rule <k> var X:Id[N:Int]; => . ...</k>
-       <env> Env => Env[L/X] </env>
+       <env> Env => Env[X <- L] </env>
        <store>... .Map => L |-> array(L +Int 1, N)
                        (L +Int 1) ... (L +Int N) |-> undefined ...</store>
        <nextLoc> L:Int => L +Int 1 +Int N </nextLoc>
@@ -699,7 +699,7 @@ understand and reason about if one overuses these features. */
   rule <k> method F:Id(Xs:Ids) S => . ...</k>
        <crntClass> Class:Id </crntClass>
        <location> OL:Int </location>
-       <env> Env => Env[L/F] </env>
+       <env> Env => Env[F <- L] </env>
        <store>... .Map => L |-> methodClosure(Class,OL,Xs,S) ...</store>
        <nextLoc> L => L +Int 1 </nextLoc>
 
@@ -1011,7 +1011,8 @@ starting with the most concrete class and going up in the hierarchy. */
 
 //  rule lookupMember(<envStack> (_, <env> Env </env>) => .List ...</envStack>, X)
 //    when notBool(X in keys(Env))
-  rule lookupMember(<envStack> ListItem((_, <env> Env </env>)) => .List ...</envStack>, X)
+  rule lookupMember(<envStack> ListItem((_, <env> Env </env>)) Rest </envStack>, X) =>
+       lookupMember(<envStack> .List Rest </envStack>, X)
     when notBool(X in keys(Env))
 
 endmodule

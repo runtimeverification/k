@@ -345,7 +345,7 @@ variable. */
   rule <task> <k> T:Type X:Id; => stmt ...</k> </task>
        <gtenv> Rho (.Map => X |-> T) </gtenv>
     when notBool(X in keys(Rho))
-  rule <k> T:Type X:Id; => stmt ...</k> <tenv> Rho => Rho[T/X] </tenv>
+  rule <k> T:Type X:Id; => stmt ...</k> <tenv> Rho => Rho[X <- T] </tenv>
 
   context _:Type _::Exp[HOLE::Exps];
 // The rule below may need to sort E to Exp in the future, if the
