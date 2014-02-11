@@ -1,5 +1,7 @@
 package org.kframework.backend.pdmc.pda.graph;
 
+import org.kframework.parser.concrete.lib.once_$Memo$My$Tbl$Ground_0_0;
+
 import java.util.*;
 
 /**
@@ -18,7 +20,7 @@ public class TarjanSCC<Data, Label> {
         sccs = null;
     }
 
-    class TarjanSCCVertex {
+    public class TarjanSCCVertex {
 
         TarjanSCCVertex(Data data) {
             this.data = data;
@@ -47,9 +49,14 @@ public class TarjanSCC<Data, Label> {
         int index;
         int lowlink;
         boolean inStack;
+
+        @Override
+        public String toString() {
+            return data.toString();
+        }
     }
 
-    public void addEdge(Data data1, Data data2, Label l) {
+    public boolean addEdge(Data data1, Data data2, Label l) {
         TarjanSCCVertex vertex1 = vertexSet.get(data1);
         if (vertex1 == null) {
             vertex1 = new TarjanSCCVertex(data1);
@@ -60,12 +67,13 @@ public class TarjanSCC<Data, Label> {
             vertex2 = new TarjanSCCVertex(data2);
             vertexSet.put(data2, vertex2);
         }
-        vertex1.nextVertex.put(data2, l);
+        Label ll = vertex1.nextVertex.put(data2, l);
+        return (!l.equals(ll));
     }
 
-    ArrayList<ArrayList<TarjanSCCVertex>> sccs;
+    ArrayList<ArrayList<TarjanSCCVertex>> sccs = null;
 
-    ArrayList<ArrayList<TarjanSCCVertex>> stronglyConnectedComponents() {
+    public ArrayList<ArrayList<TarjanSCCVertex>> stronglyConnectedComponents() {
         if (sccs == null) computeSCC();
         return sccs;
     }
@@ -74,6 +82,7 @@ public class TarjanSCC<Data, Label> {
     Stack<TarjanSCCVertex> sccStack;
     private void computeSCC() {
         index = 0;
+        sccs = new ArrayList<>();
         sccStack = new Stack<TarjanSCCVertex>();
         for (TarjanSCCVertex v : vertexSet.values()) {
             if (v.index == -1) {
@@ -109,5 +118,40 @@ public class TarjanSCC<Data, Label> {
             sccs.add(scc);
         }
 
+    }
+
+    public String getSCCSString() {
+        StringBuilder result = new StringBuilder();
+        ArrayList<ArrayList<TarjanSCCVertex>> sccs = stronglyConnectedComponents();
+        for (ArrayList<TarjanSCCVertex> scc : sccs) {
+            result.append("{ ");
+            for (TarjanSCCVertex v : scc) {
+                result.append(v.toString());
+                result.append(" ");
+            }
+            result.append("}");
+            result.append(";\n");
+        }
+        return result.toString();
+    }
+
+
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        for (TarjanSCCVertex vertex : vertexSet.values()) {
+            if (vertex.nextVertex.isEmpty()) continue;
+            result.append(vertex.toString());
+            result.append(" |->");
+            for(Map.Entry<Data,Label> next : vertex.nextVertex.entrySet()) {
+                result.append(" (");
+                result.append(next.getKey().toString());
+                result.append(",");
+                result.append(next.getValue().toString());
+                result.append(") ;");
+            }
+            result.append("\n");
+        }
+        return result.toString();
     }
 }

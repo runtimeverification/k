@@ -56,18 +56,23 @@ public class PAutomatonState<Control, Alphabet> {
     }
 
     @Override
-    public int hashCode() {
-        int hash = 1;
-        hash = hash * Utils.HASH_PRIME + state.hashCode();
-        if (letter != null) {
-            hash = hash * Utils.HASH_PRIME + letter.hashCode();
-        }
-        return hash;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PAutomatonState that = (PAutomatonState) o;
+
+        if (letter != null ? !letter.equals(that.letter) : that.letter != null) return false;
+        if (!state.equals(that.state)) return false;
+
+        return true;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return this == obj;
+    public int hashCode() {
+        int result = state.hashCode();
+        result = 31 * result + (letter != null ? letter.hashCode() : 0);
+        return result;
     }
 
     public static PAutomatonState<String, String> ofString(String string) {

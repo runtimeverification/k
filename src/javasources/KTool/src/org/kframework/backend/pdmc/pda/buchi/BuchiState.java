@@ -45,4 +45,24 @@ public class BuchiState {
         }
         return state;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        BuchiState that = (BuchiState) o;
+
+        if (!left.equals(that.left)) return false;
+        if (!right.equals(that.right)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = left.hashCode();
+        result = 31 * result + right.hashCode();
+        return result;
+    }
 }

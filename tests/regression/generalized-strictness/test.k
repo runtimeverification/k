@@ -1,12 +1,19 @@
 module TEST
   syntax Exp ::= Int | Id 
                | "++" Exp [strict]
-//               > Exp "+" Exp [left, plus, strict, context('rvalue), result(RVal)]
-               > Exp "+" Exp [left, strict<k>(all(context('rvalue)))]
+               > Exp "+" Exp [left]
+
+    context rvalue ( HOLE ) [strict, context(result(RVal)), klabel('rvalue), cell(k)]
+
+    context (HOLE => 'rvalue(HOLE)) + GeneratedFreshVar2:K [left, result(RVal), cell(k)]
+
+    context GeneratedFreshVar3:K + (HOLE => 'rvalue(HOLE)) [left, result(RVal), cell(k)]
+
+
 
   syntax RVal ::= Int
 
-  syntax K ::= rvalue(K) [strict,context(result(RVal))]
+  syntax K ::= rvalue(K) 
 
   syntax KResult ::= Id | RVal
 

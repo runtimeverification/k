@@ -48,14 +48,16 @@ public class PostStar {
                         assert  stack.size() <= 2 : "At most 2 elements are allowed in the stack for now";
                         Alphabet gamma1 = null;
                         Alphabet gamma2 = null;
+                        PAutomatonState<Control, Alphabet> qPPrime = PAutomatonState.<Control, Alphabet>of(pPrime);
                         switch (stack.size()) {
                             case 0:
-                                trans.add(Transition.<PAutomatonState<Control, Alphabet>, Alphabet>of(tp, null, q));
+                                trans.add(Transition.<PAutomatonState<Control, Alphabet>, Alphabet>of(
+                                        qPPrime, null, q));
                                 break;
                             case 1:
                                 gamma1 = stack.peek();
                                 trans.add(Transition.of(
-                                        PAutomatonState.<Control,Alphabet>of(pPrime), gamma1, q));
+                                        qPPrime, gamma1, q));
                                 break;
                             case 2:
                                 gamma1 = stack.get(1);
@@ -63,7 +65,7 @@ public class PostStar {
                                 PAutomatonState<Control, Alphabet> qPPrimeGamma1
                                         = PAutomatonState.<Control, Alphabet>of(pPrime, gamma1);
                                 trans.add(Transition.of(
-                                        PAutomatonState.<Control,Alphabet>of(pPrime), gamma1, qPPrimeGamma1));
+                                        qPPrime, gamma1, qPPrimeGamma1));
                                 rel.add(Transition.of(qPPrimeGamma1, gamma2, q));
                                 for (Transition<PAutomatonState<Control, Alphabet>, Alphabet> t :
                                         rel.getBackEpsilonTransitions(qPPrimeGamma1)) {
