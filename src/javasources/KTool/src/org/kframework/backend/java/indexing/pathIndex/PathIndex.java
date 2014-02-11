@@ -212,6 +212,7 @@ public class PathIndex {
     }
 
     private Set<Integer> addInputCellIndices(Term term, Set<Integer> matchingIndices, int baseIOCellSize) {
+        //TODO(OwolabiL): Find a better way to find the input cell. Something more general is needed
         Cell in = LookupCell.find(term, "in");
         List<Term> inCellList = ((BuiltinList) in.getContent()).elements();
 
@@ -222,6 +223,8 @@ public class PathIndex {
     }
 
     private Set<Integer> addOutputCellIndices(Term term, Set<Integer> matchingIndices, int baseIOCellSize) {
+        //TODO(OwolabiL): Find a better way to find the output cell. Something more general is needed
+
         Cell out = LookupCell.find(term, "out");
         List<Term> outCellList = ((BuiltinList) out.getContent()).elements();
 
