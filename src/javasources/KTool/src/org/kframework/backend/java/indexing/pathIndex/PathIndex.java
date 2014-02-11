@@ -160,10 +160,6 @@ public class PathIndex {
             pStrings = getTermPString2(term);
         }
 
-//        String test = "@.'int";
-//        Set<Integer> ret = trie.retrieve(trie.getRoot(),test);
-//        System.out.println("test size: "+ret.size());
-
 //        System.out.println("PStrings: "+pStrings);
 
         Set<Rule> rules = new HashSet<>();
@@ -173,23 +169,18 @@ public class PathIndex {
         String subString;
 
         for (String pString : pStrings) {
-//            System.out.println("PString: "+pString);
             String[] split = pString.split("\\.");
             int i = split.length;
             currentMatch = trie.retrieve(trie.getRoot(), pString);
-//            System.out.println("match-1: "+currentMatch);
             subString = pString;
 
             while (i > 0 && subString.lastIndexOf('.') > 1) {
                 subString = pString.substring(0, subString.lastIndexOf('.') - 2);
                 Set<Integer> retrievedIndices = trie.retrieve(trie.getRoot(), subString);
-//                System.out.println("subString: "+subString);
-//                System.out.println("retrieved: "+retrievedIndices);
                 if (retrievedIndices != null) {
                     currentMatch.addAll(retrievedIndices);
                 }
             }
-//            System.out.println("match-2: "+currentMatch);
 
             if (matchingIndices.isEmpty()) {
                 matchingIndices = currentMatch;
