@@ -189,6 +189,17 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
+    public ASTNode transform(org.kframework.kil.List node) throws TransformerException {
+        List<org.kframework.kil.Term> list = new ArrayList<>();
+        KILtoBackendJavaKILTransformer.flattenList(list,node.getContents());
+        if (list.isEmpty()){
+            return new KList();
+        }
+        //TODO(OwolabiL): What should happen when the list is not empty?
+        return super.transform(node);
+    }
+
+    @Override
     public ASTNode transform(org.kframework.kil.KSequence node) throws TransformerException {
         List<org.kframework.kil.Term> list = new ArrayList<org.kframework.kil.Term>();
         KILtoBackendJavaKILTransformer.flattenKSequence(list, node.getContents());
@@ -686,6 +697,19 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             if (term instanceof org.kframework.kil.KList) {
                 org.kframework.kil.KList kList = (org.kframework.kil.KList) term;
                 KILtoBackendJavaKILTransformer.flattenKList(flatList, kList.getContents());
+            } else {
+                flatList.add(term);
+            }
+        }
+    }
+
+    private static void flattenList(
+            List<org.kframework.kil.Term> flatList,
+            List<org.kframework.kil.Term> nestedList) {
+        for (org.kframework.kil.Term term : nestedList) {
+            if (term instanceof org.kframework.kil.List) {
+                org.kframework.kil.List list = (org.kframework.kil.List) term;
+                KILtoBackendJavaKILTransformer.flattenKList(flatList, list.getContents());
             } else {
                 flatList.add(term);
             }

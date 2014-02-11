@@ -199,6 +199,8 @@ public class PathIndexTrie implements Trie {
         }
         String firstString = splitList.get(0);
         ArrayList<String> subList = new ArrayList<>(splitList.subList(1, splitList.size()));
+//        System.out.println("firstString: "+firstString);
+//        System.out.println("node: "+trieNode);
         TrieNode child = trieNode.getChild(firstString);
         if (child != null) {
             if (trieNode.getValue().equals("@")) {
@@ -207,10 +209,11 @@ public class PathIndexTrie implements Trie {
                 }
                 return retrieveSet(child, subList);
             }
+        } else {
+            if (!trieNode.getValue().equals("@")){
+                return trieNode.getIndices();
+            }
         }
-//        else {
-//            return trieNode.getIndices();
-//        }
 
         if (splitList.size() == 1) {
             if (child != null) {
