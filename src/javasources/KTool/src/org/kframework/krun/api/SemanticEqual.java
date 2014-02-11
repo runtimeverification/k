@@ -5,13 +5,16 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.kframework.kil.BackendTerm;
+import org.kframework.kil.Bag;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Collection;
 import org.kframework.kil.CollectionItem;
 import org.kframework.kil.IntBuiltin;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KInjectedLabel;
+import org.kframework.kil.Map;
 import org.kframework.kil.MapItem;
+import org.kframework.kil.Set;
 import org.kframework.kil.Term;
 import org.kframework.kil.TermCons;
 
@@ -165,6 +168,18 @@ public class SemanticEqual {
     }
 
     /*
+     * Checks if a collection is comutative 
+     * BAG,SET,MAP are comuatative
+     */
+    private static boolean isComutative(Collection c){
+    	if(c instanceof Bag || c instanceof Set || c instanceof Map)
+    		return true;
+    	else {
+    		return false;
+    	}
+    }
+    
+    /*
      * Checks equality for Collection terms. Check if sorts are equal and if
      * content lists are equal
      */
@@ -174,7 +189,12 @@ public class SemanticEqual {
         }
         if (!c1.getSort().equals(c2.getSort()))
             return false;
-        return areListEqual(c1.getContents(), c2.getContents());
+        if(isComutative(c1)){
+        	return areMultisetsEqual(c1.getContents(), c2.getContents());
+        }
+        else {
+        	return areSetsEqual(c1.getContents(), c2.getContents());
+        }
     }
 
     /*
@@ -194,7 +214,7 @@ public class SemanticEqual {
             return false;
         }
         return areEqual(c1.getContents(), c2.getContents())
-                && areListEqual(c1.getCellTerms(), c2.getCellTerms());
+                && areMultisetsEqual(c1.getCellTerms(), c2.getCellTerms());
     }
 
     /*
@@ -214,7 +234,7 @@ public class SemanticEqual {
         if (!checkForNull(t1, t2)) {
             return false;
         }
-        return areListEqual(t1.getContents(), t2.getContents());
+        return areMultisetsEqual(t1.getContents(), t2.getContents());
     }
     
     /*
@@ -230,7 +250,7 @@ public class SemanticEqual {
     /*
      * Check if two lists contain same elements (ignoring elements order)
      */
-    private static boolean areListEqual(List<Term> l1, List<Term> l2) {
+    private static boolean areMultisetsEqual(List<Term> l1, List<Term> l2) {
         if (!checkForNull(l1, l2)) {
             return false;
         }
@@ -250,6 +270,22 @@ public class SemanticEqual {
         }
         // for equality we should have removed all items
         return clone.isEmpty();
+    }
+    
+    private static boolean areSetsEqual(List<Term> l1, List<Term> l2) {
+        if (!checkForNull(l1, l2)) {
+            return false;
+        }
+        if (l1.size() != l2.size())
+            return false;
+        // check if contents are equals
+        for (int i = 0 ; i<l1.size();i++){
+        	if(!areEqual(l1.get(i), l2.get(i))){
+        		return false;
+        	}
+        }
+        // if we reach here the lists are equal since each l1(i) eqauls l2(i)
+        return true;
     }
 }
 
