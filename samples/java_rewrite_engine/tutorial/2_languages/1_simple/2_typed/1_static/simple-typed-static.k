@@ -343,7 +343,7 @@ the array dimension into the type until the array becomes a simple
 variable. */
 
   rule <task> <k> T:Type X:Id; => stmt ...</k> </task>
-       <gtenv> Rho (. => X |-> T) </gtenv>
+       <gtenv> Rho (.Map => X |-> T) </gtenv>
     when notBool(X in keys(Rho))
   rule <k> T:Type X:Id; => stmt ...</k> <tenv> Rho => Rho[T/X] </tenv>
 

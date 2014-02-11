@@ -27,6 +27,7 @@ endmodule
 module BUILTIN-HOOKS
   imports BOOL-HOOKS 
   imports INT-HOOKS
+  imports ID-HOOKS
 //  imports ARRAY
   imports FLOAT-HOOKS 
   imports STRING-HOOKS

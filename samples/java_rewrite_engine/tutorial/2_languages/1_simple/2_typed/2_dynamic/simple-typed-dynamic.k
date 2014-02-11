@@ -193,7 +193,7 @@ to a location. */
 
   rule <k> T:Type X:Id; => . ...</k>
        <env> Env => Env[L/X] </env>
-       <store>... . => L |-> undefined(T) ...</store>
+       <store>... .Map => L |-> undefined(T) ...</store>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
 
 /*@ \subsubsection{Array Declaration}
@@ -203,7 +203,7 @@ right type to the allocated locations. */
 
   rule <k> T:Type X:Id[N:Int]; => . ...</k>
        <env> Env => Env[L/X] </env>
-       <store>... . => L |-> array(T, L +Int 1, N)
+       <store>... .Map => L |-> array(T, L +Int 1, N)
                        (L +Int 1)...(L +Int N) |-> undefined(T) ...</store>
        <nextLoc> L:Int => L +Int 1 +Int N </nextLoc>
     when N >=Int 0
@@ -235,7 +235,7 @@ make sure that parameters are well typed when the function is invoked. */
 
   rule <k> T:Type F:Id(Ps:Params) S => . ...</k>
        <env> Env => Env[L/F] </env>
-       <store>... . => L |-> lambda(T, Ps, S) ...</store>
+       <store>... .Map => L |-> lambda(T, Ps, S) ...</store>
        <nextLoc> L => L +Int 1 </nextLoc>
 
 /*@ \subsection{Calling \texttt{main()}}
@@ -244,7 +244,7 @@ When done with the first pass, call \texttt{main()}. */
   syntax KItem ::= "execute"
   rule <k> execute => main(.Exps); </k>
        <env> Env </env>
-       <genv> . => Env </genv>  [structural]
+       <genv> .Map => Env </genv>  [structural]
 
 //@ \subsection{Expressions}
 
@@ -314,7 +314,7 @@ checks that that type of the returned value is expected one. */
 
   rule <k> lambda(T,Ps,S)(Vs:Vals) ~> K => mkDecls(Ps,Vs) S return; </k>
        <control>
-         <fstack> . => ListItem((T',Env,K,C)) ...</fstack>
+         <fstack> .List => ListItem((T',Env,K,C)) ...</fstack>
          <return> T' => T </return>
          C
        </control>
@@ -323,7 +323,7 @@ checks that that type of the returned value is expected one. */
 
   rule <k> return V:Val; ~> _ => V ~> K </k>
        <control>
-         <fstack> ListItem((T',Env,K,C)) => . ...</fstack>
+         <fstack> ListItem((T',Env,K,C)) => .List ...</fstack>
          <return> T => T' </return>
          (_ => C)
        </control>
@@ -340,7 +340,7 @@ completed to return the \texttt{nothing} value tagged as expected. */
 
 //@ \subsubsection{Read}
 
-  rule <k> read() => I ...</k> <in> ListItem(I:Int) => . ...</in>  [read]
+  rule <k> read() => I ...</k> <in> ListItem(I:Int) => .List ...</in>  [read]
 
 /*@ \subsubsection{Assignment}
 The assignment now checks that the type of the assigned location is
@@ -379,7 +379,7 @@ preserved: */
 
 We only allow printing integers and strings: */
 
-  rule <k> print(V:Val, Es => Es); ...</k> <out>... . => ListItem(V) </out>
+  rule <k> print(V:Val, Es => Es); ...</k> <out>... .List => ListItem(V) </out>
     when typeOf(V) ==K int orBool typeOf(V) ==K string  [print]
   rule print(.Vals); => .  [structural]
 
@@ -397,17 +397,17 @@ values, in which case our semantics below works fine: */
 
   rule <k> (try S1 catch(P) S2 => S1 ~> popx) ~> K </k>
        <control>
-         <xstack> . => ListItem((P, S2, K, Env, C)) ...</xstack>
+         <xstack> .List => ListItem((P, S2, K, Env, C)) ...</xstack>
          C
        </control>
        <env> Env </env>
 
   rule <k> popx => . ...</k>
-       <xstack> _:ListItem => . ...</xstack>
+       <xstack> ListItem(_) => .List ...</xstack>
 
   rule <k> throw V:Val; ~> _ => { T X = V; S2 } ~> K </k>
        <control>
-         <xstack> ListItem((T:Type X:Id, S2, K, Env, C)) => . ...</xstack>
+         <xstack> ListItem((T:Type X:Id, S2, K, Env, C)) => .List ...</xstack>
          (_ => C)
        </control>
        <env> _ => Env </env>
@@ -431,7 +431,7 @@ values, in which case our semantics below works fine: */
 
    rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .)
         <busy> Busy => Busy -Set keys(H) </busy>
-        <terminated>... . => SetItem(T) ...</terminated>
+        <terminated>... .Set => SetItem(T) ...</terminated>
 
 //@ {Thread joining}
 
@@ -441,8 +441,8 @@ values, in which case our semantics below works fine: */
 //@ {Acquire lock}
 
    rule <k> acquire V:Val; => . ...</k>
-        <holds>... . => V |-> 0 ...</holds>
-        <busy> Busy (. => SetItem(V)) </busy>
+        <holds>... .Map => V |-> 0 ...</holds>
+        <busy> Busy (.Set => SetItem(V)) </busy>
      when (notBool(V in Busy:Set))  [acquire]
 
    rule <k> acquire V; => . ...</k>
@@ -454,8 +454,8 @@ values, in which case our semantics below works fine: */
         <holds>... V |-> (N => N:Int -Int 1) ...</holds>
       when N >Int 0
 
-   rule <k> release V; => . ...</k> <holds>... V:Val |-> 0 => . ...</holds>
-        <busy>... SetItem(V) => . ...</busy>
+   rule <k> release V; => . ...</k> <holds>... V:Val |-> 0 => .Map ...</holds>
+        <busy>... SetItem(V) => .Set ...</busy>
 
 //@ {Rendezvous synchronization}
 

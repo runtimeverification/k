@@ -408,7 +408,7 @@ checks whether the argument type is correct (it actually works with
 lists of types as well). */
 
   rule <k> T:Type X:Id; => checkType(T) ~> stmt ...</k>
-       <tenv> Rho => Rho[T / X] </tenv>
+       <tenv> Rho => Rho[X <- T] </tenv>
 
 
 /*@ \subsubsection{Class member declaration}
@@ -431,14 +431,14 @@ PDF document because of its latex attribute (see the ASCII .k file,
 at the end of this module). */
 
   rule <k> T:Type X:Id; => checkType(T) ~> stmt ...</k>
-       <ctenvT> Rho (. => X |-> T) </ctenvT>
+       <ctenvT> Rho (.Map => X |-> T) </ctenvT>
     when notBool(X in keys(Rho))
 
   rule <k> T:Type X:Id; => stuck(T X;) ...</k>
        <ctenvT>... X |-> _ ...</ctenvT>
        <inClass> C:Id </inClass>
        <br/>
-       <out>... . => ListItem("Member \"" +String Id2String(X)
+       <out>... .List => ListItem("Member \"" +String Id2String(X)
                               +String "\" declared twice in class \""
                               +String Id2String(C) +String "\"!\n") </out>
     [structural]
@@ -554,7 +554,7 @@ instance of this rule). */
        (. => <task>
                 <k> checkType(class(C')) ~> S </k>
                 <inClass> C </inClass>
-                <ctenvT> . </ctenvT>
+                <ctenvT> .Map </ctenvT>
              </task>)  [structural]
 
 //@ \paragraph{Check for unique class names}
@@ -565,7 +565,7 @@ instance of this rule). */
   rule <T> (<classes>... <className> C </className>
                          <className> C </className>
             ...</classes> _ => .)
-           <out>... . => ListItem("Class \"" +String Id2String(C)
+           <out>... .List => ListItem("Class \"" +String Id2String(C)
                                   +String "\" declared twice!\n") </out>
        </T>  [structural]
 
@@ -578,10 +578,10 @@ superclass relation, the second transitively closes it, and the third
 checks for cycles. */
 
   rule <extends> C </extends>
-       <extendsAll> . => SetItem(C) </extendsAll>  [structural]
+       <extendsAll> .Set => SetItem(C) </extendsAll>  [structural]
 
   rule <class>...
-         <extendsAll> SetItem(C) Cs:Set (. => SetItem(C')) </extendsAll>
+         <extendsAll> SetItem(C) Cs:Set (.Set => SetItem(C')) </extendsAll>
        ...</class>
        <class>... <className>C</className> <extends>C'</extends> ...</class>
     when notBool(C' in SetItem(C) Cs)  [structural]
@@ -590,7 +590,7 @@ checks for cycles. */
   rule <T> (<classes>... <className> C </className>
                          <extendsAll>... SetItem(C) ...</extendsAll>
             ...</classes> _ => .)
-           <out>... . => ListItem("Class \"" +String Id2String(C)
+           <out>... .List => ListItem("Class \"" +String Id2String(C)
                                   +String "\" is in a cycle!\n") </out>
        </T>  [structural]
 
@@ -689,7 +689,7 @@ wait.  Finally, the sixth rule below reports an error when the
   rule <k> class(theObject) . X:Id => stuck(class(theObject) . X) ...</k>
        <inClass> C:Id </inClass>
        <br/>
-       <out>... . => ListItem("Member \"" +String Id2String(X)
+       <out>... .List => ListItem("Member \"" +String Id2String(X)
                               +String "\" not declared! (see class \""
                               +String Id2String(C) +String "\")\n") </out>
     [structural]
@@ -720,7 +720,7 @@ of the language need to insert runtime checks for downcasting to be safe. */
          <className> C2 </className>
          <extendsAll> S2 </extendsAll>
        ...</class>
-       <out>... . => ListItem("Classes \"" +String Id2String(C1)
+       <out>... .List => ListItem("Classes \"" +String Id2String(C1)
                               +String "\" and \"" +String Id2String(C2)
                               +String "\" are incompatible!\n") </out>
     when notBool(C1 in S2) andBool notBool(C2 in S1)
@@ -746,7 +746,7 @@ the \textsf{tasks} cell has been removed. */
 // make sure that the class main and the method main() are declared.
 
   rule <task> <k> stmt => new theMain(.Exps); </k>
-              (. => <tenv> . </tenv>
+              (. => <tenv> .Map </tenv>
                     <return> void </return>
                     <inClass> theMain </inClass>)
        </task>
@@ -774,7 +774,7 @@ the \textsf{tasks} cell has been removed. */
 // cleanup tasks and output a success message when done
 
   rule (<tasks> .Bag </tasks> => .)
-       <out>... . => ListItem("Type checked!\n") </out>
+       <out>... .List => ListItem("Type checked!\n") </out>
     [structural]
 
 

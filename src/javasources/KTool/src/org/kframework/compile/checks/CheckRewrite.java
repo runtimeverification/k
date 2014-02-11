@@ -4,6 +4,7 @@ import org.kframework.kil.Configuration;
 import org.kframework.kil.Rewrite;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Syntax;
+import org.kframework.kil.TermCons;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.errorsystem.KException;
@@ -18,6 +19,7 @@ public class CheckRewrite extends BasicVisitor {
 	private boolean inConfig = false;
 	private boolean inRewrite = false;
 	private boolean inSideCondition = false;
+	private boolean inFunction = false;
 	private int rewritesNo = 0;
 
 	@Override
@@ -68,6 +70,16 @@ public class CheckRewrite extends BasicVisitor {
 	}
 
 	@Override
+	public void visit(TermCons node) {
+		boolean temp = inFunction;
+		if (node.getProduction().containsAttribute("function")) {
+			//inFunction = true;
+		}
+		super.visit(node);
+		inFunction = temp;
+	}
+	
+	@Override
 	public void visit(Rewrite node) {
 		if (inConfig) {
 			String msg = "Rewrites are not allowed in configurations.";
@@ -79,6 +91,10 @@ public class CheckRewrite extends BasicVisitor {
 		}
 		if (inSideCondition) {
 			String msg = "Rewrites are not allowed in side conditions.";
+			GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
+		}
+		if (inFunction) {
+			String msg = "Rewrites are not allowed under functions.";
 			GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
 		}
 		rewritesNo++;
