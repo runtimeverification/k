@@ -1,5 +1,0 @@
-Search results:
-
-Solution 1:
-V:K -->
-(lambda x . (x x)) (lambda x . (x x))
