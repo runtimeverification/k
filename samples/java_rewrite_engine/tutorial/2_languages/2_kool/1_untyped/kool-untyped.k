@@ -521,7 +521,7 @@ from SIMPLE unchanged. */
     when N >Int 0
 
   rule <k> release V; => . ...</k> <holds>... V:Val |-> 0 => .Map ...</holds>
-       <busy>... SetItem(V) => .Map ...</busy>
+       <busy>... SetItem(V) => .Set ...</busy>
 
   rule <k> rendezvous V:Val; => . ...</k>
        <k> rendezvous V; => . ...</k>  [rendezvous]

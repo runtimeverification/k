@@ -4,7 +4,7 @@ module TEST
   imports MAP
 
   syntax Map ::= init(Int)  [function]
-  rule init(N) => N |-> 0, init(N -Int 1)
+  rule init(N) => N |-> 0 init(N -Int 1)
   when N >=Int 0
   rule init(N) => .Map
   when N <Int 0

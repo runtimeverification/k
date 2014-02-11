@@ -106,6 +106,14 @@ endmodule
 module FREE-VARS
   imports BINDER
 
+/* // TODO: (radum) deleted these from k-prelude.k and are required by substitution
+  syntax K ::= Set2KTerm(Set)        [function]
+  rule Set2KTerm(S:Set) => Set2KTermAcc(S, #set(.KList))
+
+  syntax K ::= Set2KTermAcc(Set, K)  [function]
+  rule Set2KTermAcc((SetItem(K:K) => .Set)_, _(_,,(.KList => K))) [nojava]
+  rule Set2KTermAcc(.Set, K:K) => K
+*/
   syntax Set ::= freeVariables(KList)  [function, latex({\it FV}({#1}))]  // public
                | freeVariables(Set)      [function, latex({\it FV}({#1}))]
   rule freeVariables(Ks:KList) => #getVarsFromK(#freeVars(Ks))
