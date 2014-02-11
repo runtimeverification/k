@@ -68,7 +68,7 @@ public class PathIndex {
         }
 
         assert indexedRules.size() == definition.rules().size();
-        printIndices(indexedRules, pStringMap);
+//        printIndices(indexedRules, pStringMap);
 
         //initialise the trie
         trie = new PathIndexTrie();
@@ -148,7 +148,7 @@ public class PathIndex {
 
     public Set<Rule> getRulesForTerm(Term term) {
         Set<String> pStrings;
-        System.out.println("term: "+term);
+//        System.out.println("term: "+term);
         //check if the definition has a cell with multiplicity* which contains a k cell
         //if such a cell is found, the multiCellInfoHolder field should have been set at index
         // creation time and getting pStrings from it is done differently
@@ -160,6 +160,10 @@ public class PathIndex {
             pStrings = getTermPString2(term);
         }
 
+//        String test = "@.'int";
+//        Set<Integer> ret = trie.retrieve(trie.getRoot(),test);
+//        System.out.println("test size: "+ret.size());
+
 //        System.out.println("PStrings: "+pStrings);
 
         Set<Rule> rules = new HashSet<>();
@@ -169,6 +173,7 @@ public class PathIndex {
         String subString;
 
         for (String pString : pStrings) {
+//            System.out.println("PString: "+pString);
             String[] split = pString.split("\\.");
             int i = split.length;
             currentMatch = trie.retrieve(trie.getRoot(), pString);
@@ -178,6 +183,7 @@ public class PathIndex {
             while (i > 0 && subString.lastIndexOf('.') > 1) {
                 subString = pString.substring(0, subString.lastIndexOf('.') - 2);
                 Set<Integer> retrievedIndices = trie.retrieve(trie.getRoot(), subString);
+//                System.out.println("subString: "+subString);
 //                System.out.println("retrieved: "+retrievedIndices);
                 if (retrievedIndices != null) {
                     currentMatch.addAll(retrievedIndices);
