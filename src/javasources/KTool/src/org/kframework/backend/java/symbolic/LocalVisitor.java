@@ -29,7 +29,7 @@ public class LocalVisitor implements Visitor {
         this.proceed = true;
     }
 
-    boolean proceed = true;
+    protected boolean proceed = true;
 
     @Override
     public String getName() {

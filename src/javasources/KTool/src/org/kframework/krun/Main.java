@@ -1077,6 +1077,12 @@ public class Main {
                 K.do_search = true;
                 K.do_concrete_exec = false;
             }
+
+            //indexing
+            if (cmd.hasOption("index")){
+                K.do_indexing = true;
+            }
+
             if (cmd.hasOption("maude-cmd")) {
                 K.maude_cmd = cmd.getOptionValue("maude-cmd");
             }
