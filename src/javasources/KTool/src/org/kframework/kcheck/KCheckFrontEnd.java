@@ -25,11 +25,12 @@ import org.kframework.utils.general.GlobalSettings;
 
 public class KCheckFrontEnd {
     public static String output;
+    public static CommandLine cmd;
 
     public static void kcheck(String[] args) {
         KCheckOptionsParser op = new KCheckOptionsParser();
 
-        CommandLine cmd = op.parse(args);
+        cmd = op.parse(args);
 
         // options: help
         if (cmd.hasOption("help"))
@@ -41,26 +42,29 @@ public class KCheckFrontEnd {
             System.exit(0);
         }
 
+        // main settings
+        GlobalSettings.symbolicEquality = true;
+        GlobalSettings.SMT = true;
+        GlobalSettings.NOSMT = false;
+        RLBackend.SIMPLIFY = cmd.hasOption("simplify");
+        GlobalSettings.addTopCell = true;
+
+
+        // set verbose
+        if (cmd.hasOption("verbose"))
+            GlobalSettings.verbose = true;
+
 
         // user interface
         if (cmd.hasOption("interface")) {
             KCheckMainWindow kcheck = new KCheckMainWindow();
             kcheck.setVisible(true);
         } else {
-            GlobalSettings.symbolicEquality = true;
-            GlobalSettings.SMT = true;
-            GlobalSettings.NOSMT = false;
-            RLBackend.SIMPLIFY = cmd.hasOption("simplify");
 
             if (cmd.hasOption("pgm")) {
                 RLBackend.PGM = cmd.getOptionValue("pgm");
             }
 
-            // set verbose
-            if (cmd.hasOption("verbose"))
-                GlobalSettings.verbose = true;
-
-            GlobalSettings.addTopCell = true;
 
             if (!cmd.hasOption("prove")) {
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "You have to provide a rl file!.", "command line", "Command line arguments."));
@@ -112,7 +116,7 @@ public class KCheckFrontEnd {
         }
     }
 
-    private static void verbose(CommandLine cmd, Context context) {
+    public static void verbose(CommandLine cmd, Context context) {
         Stopwatch.sw.printTotal("Total");
         if (GlobalSettings.verbose) {
             context.printStatistics();
@@ -121,7 +125,7 @@ public class KCheckFrontEnd {
     }
 
 
-    private static void genericCompile(
+    public static void genericCompile(
             String lang,
             Backend backend,
             String step,
