@@ -6,7 +6,7 @@ module TEST
   syntax List ::= init(Int)
                 | initLeft(Int)   [function]
                 | initRight(Int)  [function]
-  rule init(N) => initLeft(N), initRight(N)
+  rule init(N) => initLeft(N) initRight(N)
   rule initLeft(N) => initLeft(N -Int 1) ListItem(N)
   when N >=Int 0
   rule initLeft(N) => .List
