@@ -374,7 +374,7 @@ public class SymbolicRewriter {
         while (strategy.hasNext()) {
             transition = strategy.nextIsTransition();
             ArrayList<Rule> rules = new ArrayList<Rule>(strategy.next());
-//            System.err.println(rules);
+            System.err.println("rules.size: "+rules.size());
             for (Rule rule : rules) {
                 ruleStopwatch.reset();
                 ruleStopwatch.start();
