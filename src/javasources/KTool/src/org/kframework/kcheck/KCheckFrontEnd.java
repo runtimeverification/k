@@ -9,6 +9,7 @@ import org.kframework.backend.Backend;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.CompilerSteps;
 import org.kframework.compile.utils.MetaK;
+import org.kframework.kcheck.gui.KCheckMainWindow;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.CountNodesVisitor;
@@ -23,124 +24,132 @@ import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
 
 public class KCheckFrontEnd {
-	public static String output;
-	
-	public static void kcheck(String[] args) {
-			KCheckOptionsParser op = new KCheckOptionsParser();
+    public static String output;
 
-			CommandLine cmd = op.parse(args);
+    public static void kcheck(String[] args) {
+        KCheckOptionsParser op = new KCheckOptionsParser();
 
-			// options: help
-			if (cmd.hasOption("help"))
-				org.kframework.utils.Error.helpExit(op.getHelp(), op.getOptions());
+        CommandLine cmd = op.parse(args);
 
-			if (cmd.hasOption("version")) {
-				String msg = FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE);
-				System.out.println(msg);
-				System.exit(0);
-			}
+        // options: help
+        if (cmd.hasOption("help"))
+            org.kframework.utils.Error.helpExit(op.getHelp(), op.getOptions());
 
-	        GlobalSettings.symbolicEquality = true;
-	        GlobalSettings.SMT = true;
-	        GlobalSettings.NOSMT = false;
-	        RLBackend.SIMPLIFY = cmd.hasOption("simplify");
-	        
-	        if (cmd.hasOption("pgm")) {
-	        	RLBackend.PGM = cmd.getOptionValue("pgm");
-	        }
-	        
-			// set verbose
-			if (cmd.hasOption("verbose"))
-				GlobalSettings.verbose = true;
+        if (cmd.hasOption("version")) {
+            String msg = FileUtil.getFileContent(KPaths.getKBase(false) + KPaths.VERSION_FILE);
+            System.out.println(msg);
+            System.exit(0);
+        }
 
-			GlobalSettings.addTopCell = true;
 
-			if (!cmd.hasOption("prove")) {
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "You have to provide a rl file!.", "command line", "Command line arguments."));
-			}else {
-				GlobalSettings.CHECK = new File(cmd.getOptionValue("prove")).getAbsolutePath();
-			}
-			
+        // user interface
+        if (cmd.hasOption("interface")) {
+            KCheckMainWindow kcheck = new KCheckMainWindow();
+            kcheck.setVisible(true);
+        } else {
+            GlobalSettings.symbolicEquality = true;
+            GlobalSettings.SMT = true;
+            GlobalSettings.NOSMT = false;
+            RLBackend.SIMPLIFY = cmd.hasOption("simplify");
 
-			String def = null;
-			if (cmd.hasOption("definition"))
-				def = cmd.getOptionValue("definition");
-			else {
-				String[] restArgs = cmd.getArgs();
-				if (restArgs.length < 1)
-					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "You have to provide a file in order to compile!.", "command line", "System file."));
-				else
-					def = restArgs[0];
-			}
+            if (cmd.hasOption("pgm")) {
+                RLBackend.PGM = cmd.getOptionValue("pgm");
+            }
 
-                        GlobalSettings.setMainFile(def);
+            // set verbose
+            if (cmd.hasOption("verbose"))
+                GlobalSettings.verbose = true;
 
-			String lang = FileUtil.getMainModule(GlobalSettings.mainFile.getName());
+            GlobalSettings.addTopCell = true;
 
-			// Matching Logic & Symbolic Calculus options
-			GlobalSettings.symbolicEquality = true;
-			GlobalSettings.SMT = true;
-			
-			Context context = new Context();
-			
-			if (context.dotk == null) {
-				try {
-					context.dotk = new File(GlobalSettings.mainFile.getCanonicalFile().getParent() + File.separator + ".k");
-				} catch (IOException e) {
-					GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Canonical file cannot be obtained for main file.", GlobalSettings.mainFile.getAbsolutePath(),
-							"File system."));
-				}
-				context.dotk.mkdirs();
-			}
+            if (!cmd.hasOption("prove")) {
+                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "You have to provide a rl file!.", "command line", "Command line arguments."));
+            } else {
+                GlobalSettings.CHECK = new File(cmd.getOptionValue("prove")).getAbsolutePath();
+            }
 
-			Backend backend = new RLBackend(Stopwatch.sw, context);
-        output = FilenameUtils.removeExtension(GlobalSettings.mainFile.getName()) + "-kompiled";
-			context.dotk = new File(output);
-			context.dotk.mkdirs();
 
-			genericCompile(lang, backend, null, context);
-        BinaryLoader.save(context.dotk.getAbsolutePath() + "/compile-options.bin", cmd);
+            String def = null;
+            if (cmd.hasOption("definition"))
+                def = cmd.getOptionValue("definition");
+            else {
+                String[] restArgs = cmd.getArgs();
+                if (restArgs.length < 1)
+                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "You have to provide a file in order to compile!.", "command line", "System file."));
+                else
+                    def = restArgs[0];
+            }
 
-        verbose(cmd, context);
-	}
-	private static void verbose(CommandLine cmd, Context context) {
+            GlobalSettings.setMainFile(def);
+
+            String lang = FileUtil.getMainModule(GlobalSettings.mainFile.getName());
+
+            // Matching Logic & Symbolic Calculus options
+            GlobalSettings.symbolicEquality = true;
+            GlobalSettings.SMT = true;
+
+            Context context = new Context();
+
+            if (context.dotk == null) {
+                try {
+                    context.dotk = new File(GlobalSettings.mainFile.getCanonicalFile().getParent() + File.separator + ".k");
+                } catch (IOException e) {
+                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Canonical file cannot be obtained for main file.", GlobalSettings.mainFile.getAbsolutePath(),
+                            "File system."));
+                }
+                context.dotk.mkdirs();
+            }
+
+            Backend backend = new RLBackend(Stopwatch.sw, context);
+            output = FilenameUtils.removeExtension(GlobalSettings.mainFile.getName()) + "-kompiled";
+            context.dotk = new File(output);
+            context.dotk.mkdirs();
+
+            genericCompile(lang, backend, null, context);
+            BinaryLoader.save(context.dotk.getAbsolutePath() + "/compile-options.bin", cmd);
+
+            verbose(cmd, context);
+        }
+    }
+
+    private static void verbose(CommandLine cmd, Context context) {
         Stopwatch.sw.printTotal("Total");
-		if (GlobalSettings.verbose) {
+        if (GlobalSettings.verbose) {
             context.printStatistics();
         }
-		GlobalSettings.kem.print();
-	}
+        GlobalSettings.kem.print();
+    }
 
 
-	private static void genericCompile(
+    private static void genericCompile(
             String lang,
             Backend backend,
             String step,
             Context context) {
-		org.kframework.kil.Definition javaDef;
-		try {
-			Stopwatch.sw.start();
-			javaDef = DefinitionLoader.loadDefinition(GlobalSettings.mainFile, lang, backend.autoinclude(), context);
+        org.kframework.kil.Definition javaDef;
+        try {
+            Stopwatch.sw.start();
+            javaDef = DefinitionLoader.loadDefinition(GlobalSettings.mainFile, lang, backend.autoinclude(), context);
             javaDef.accept(new CountNodesVisitor(context));
 
-			CompilerSteps<Definition> steps = backend.getCompilationSteps();
+            CompilerSteps<Definition> steps = backend.getCompilationSteps();
 
-			if (step == null) {
-				step = backend.getDefaultStep();
-			}
-			try {
-				javaDef = steps.compile(javaDef, step);
-			} catch (CompilerStepDone e) {
-				javaDef = (Definition) e.getResult();
-			}
+            if (step == null) {
+                step = backend.getDefaultStep();
+            }
+            try {
+                javaDef = steps.compile(javaDef, step);
+            } catch (CompilerStepDone e) {
+                javaDef = (Definition) e.getResult();
+            }
 
             BinaryLoader.save(
-                context.dotk.getAbsolutePath() + "/configuration.bin", MetaK.getConfiguration(javaDef, context)
+                    context.dotk.getAbsolutePath() + "/configuration.bin", MetaK.getConfiguration(javaDef, context)
             );
 
-			backend.run(javaDef);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+            backend.run(javaDef);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
