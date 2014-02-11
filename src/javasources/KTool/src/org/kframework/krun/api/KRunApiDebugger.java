@@ -63,10 +63,15 @@ public class KRunApiDebugger implements KRunDebugger {
 		putState(initialState);
 		KRunState reduced = krun.step(cfg, 0).getResult();
 		reduced.setStateId(K.stateCounter++);
-		putState(reduced);
-		graph.addVertex(reduced);
-		graph.addEdge(Transition.reduce(context), initialState, reduced);
-		currentState = reduced.getStateId();
+		//reduce may return same node as initial node
+		//so we add it just if it is different from the initial node
+		if(putState(reduced)){
+			graph.addVertex(reduced);
+			graph.addEdge(Transition.reduce(context), initialState, reduced);
+			currentState = reduced.getStateId();
+		}else {
+			currentState = initialState.getStateId();
+		}
 	}
 
 	public KRunApiDebugger(KRun krun, DirectedGraph<KRunState, Transition> graph) {
@@ -79,8 +84,17 @@ public class KRunApiDebugger implements KRunDebugger {
 		}
 	}
 
-	private void putState(KRunState state) {
-		states.put(state.getStateId(), state);
+	/**
+	 * Adds the new state to the states map
+	 * @param state new state to add
+	 * @return if the stated wasn't previously in the states map return true else return false
+	 */
+	private boolean putState(KRunState state) {
+		if(!states.containsValue(state)){
+			states.put(state.getStateId(), state);
+			return true;
+		}
+		return false;
 	}
 
 	public DirectedGraph<KRunState, Transition> getGraph() {
