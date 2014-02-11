@@ -68,7 +68,7 @@ public class PathIndex {
         }
 
         assert indexedRules.size() == definition.rules().size();
-//        printIndices(indexedRules, pStringMap);
+        printIndices(indexedRules, pStringMap);
 
         //initialise the trie
         trie = new PathIndexTrie();
@@ -148,7 +148,7 @@ public class PathIndex {
 
     public Set<Rule> getRulesForTerm(Term term) {
         Set<String> pStrings;
-//        System.out.println("term: "+term);
+        System.out.println("term: "+term);
         //check if the definition has a cell with multiplicity* which contains a k cell
         //if such a cell is found, the multiCellInfoHolder field should have been set at index
         // creation time and getting pStrings from it is done differently
