@@ -380,10 +380,10 @@ public class UnparserFilterNew extends BasicVisitor {
 
 				} else {
 					rawLabel = temp.get(0).getTerminal()
-							+((KLabelConstant) label).getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)").replaceAll("'", "");
+							+((KLabelConstant) label).getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)").replaceAll("'", "")+" ";
 				}
 			} else {
-				rawLabel = ((KLabelConstant) label).getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)").replaceAll("'", "");
+				rawLabel = " "+((KLabelConstant) label).getLabel().replaceAll("`", "``").replaceAll("\\(", "`(").replaceAll("\\)", "`)").replaceAll("'", "")+" ";
 			}
             if (child instanceof KList) {
                 java.util.List<Term> termList = ((KList)child).getContents();
