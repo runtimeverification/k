@@ -1,11 +1,7 @@
 package org.kframework.backend.java.kil;
 
+import java.util.*;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.SortMembership;
@@ -30,14 +26,14 @@ import com.google.common.collect.Sets;
  * Or in the usual syntax of K, it can be defined as the following:
  * <p>
  * <blockquote>
- * 
+ *
  * <pre>
  * syntax KItem ::= KLabel "(" KList ")"
  * </pre>
- * 
+ *
  * </blockquote>
  * <p>
- * 
+ *
  * @author AndreiS
  */
 @SuppressWarnings("serial")
@@ -46,7 +42,7 @@ public class KItem extends Term implements Sorted {
     private final Term kLabel;
     private final Term kList;
     private final String sort;
-    
+
     /**
      * Valid only if {@code kLabel} is a constructor. Must contain a sort
      * which is subsorted or equal to {@code sort} when it is valid.
@@ -123,7 +119,7 @@ public class KItem extends Term implements Sorted {
                                     } else { // e.g., childTerm is a HOLE
                                         mayMatch = false;
                                     }
-                                 
+
                                     if (!mayMatch) {
                                         // mayMatch == false => mustMatch == false
                                         break;
@@ -136,7 +132,7 @@ public class KItem extends Term implements Sorted {
                     if (mustMatch) {
                         sorts.add(production.getSort());
                     }
-                    
+
                     if (mayMatch && kLabelConstant.isConstructor()) {
                         possibleMinimalSorts.add(production.getSort());
                     }
@@ -179,17 +175,17 @@ public class KItem extends Term implements Sorted {
                     }
                 }
             }
-            possibleMinimalSorts.removeAll(nonMinimalSorts);            
+            possibleMinimalSorts.removeAll(nonMinimalSorts);
             this.possibleMinimalSorts = possibleMinimalSorts;
         } else {
             this.possibleMinimalSorts = null;
         }
 //        System.out.printf("KItem = %s, sort = %s, possibleMinimalSorts = %s\n", this, sort, possibleMinimalSorts);
     }
-    
+
     /**
      * Evaluates this {@code KItem} if it is a predicate or function
-     * 
+     *
      * @param constraint
      *            the existing symbolic constraint that needs to be taken into
      *            consideration when evaluating this function
@@ -244,6 +240,7 @@ public class KItem extends Term implements Sorted {
                 // TODO(YilongL): consider applying rules with attribute [owise]
                 // only after no other rules can be applied
                 Term result = null;
+                LinkedHashSet<Term> owiseResults = new LinkedHashSet<Term>();
                 for (Rule rule : definition.functionRules().get((KLabelConstant) kLabel)) {
                     SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(context);
                     leftHandSideConstraint.addAll(rule.requires());
@@ -261,7 +258,7 @@ public class KItem extends Term implements Sorted {
                     if (solutions.isEmpty()) {
                         continue;
                     }
-                    
+
                     SymbolicConstraint solution = solutions.iterator().next();
                     if (K.do_kompilation) {
                         assert solutions.size() <= 1 : "function definition is not deterministic";
@@ -295,7 +292,7 @@ public class KItem extends Term implements Sorted {
                                 + " (the pattern) should be a substitution";
                         assert solution.isSubstitution() : "the solution shall not contain pending functions but found:\n" + solution.equalities();
                     }
-                    
+
                     solution.orientSubstitution(rule.leftHandSide().variableSet());
 
                     Term rightHandSide = rule.rightHandSide();
@@ -307,7 +304,12 @@ public class KItem extends Term implements Sorted {
                         result = result.substituteWithBinders(freshSubstitution, context);
                     }
                     /* apply the constraints substitution on the rule RHS */
-                    rightHandSide = rightHandSide.substituteAndEvaluate(solution.substitution(), context);
+                    rightHandSide = rightHandSide.substituteWithBinders(solution.substitution(),
+                            constrainedTerm.termContext());
+                    if (rule.containsFunctionOnRHS()) {
+                        /* evaluate pending functions in the rule RHS */
+                        rightHandSide = rightHandSide.evaluate(constrainedTerm.termContext());
+                    }
                     /* eliminate anonymous variables */
                     solution.eliminateAnonymousVariables();
 
@@ -329,15 +331,22 @@ public class KItem extends Term implements Sorted {
                         }
                     }
 
-                    if (K.do_concrete_exec) {
-                        assert result == null || result.equals(rightHandSide):
-                                "function definition is not deterministic";
+                    if (!rule.containsAttribute("owise")) {
+                        if (K.do_concrete_exec) {
+                            assert result == null || result.equals(rightHandSide):
+                                    "function definition is not deterministic";
+                        }
+                        result = rightHandSide;
+                    } else {
+                        owiseResults.add(rightHandSide);
                     }
-                    result = rightHandSide;
                 }
 
                 if (result != null) {
                     return result;
+                } else if (!owiseResults.isEmpty()) {
+                    assert owiseResults.size() == 1 : "function definition is not deterministic";
+                    return owiseResults.iterator().next();
                 }
             }
         }
@@ -409,7 +418,7 @@ public class KItem extends Term implements Sorted {
             return null;
         }
     }
-    
+
     @Override
     public boolean equals(Object object) {
         if (this == object) {
@@ -458,7 +467,7 @@ public class KItem extends Term implements Sorted {
     /**
      * Checks if the specified KItem is merely used as a wrapper for a non-K
      * term.
-     * 
+     *
      * @param kItem
      *            the specified KItem
      * @return {@code true} if the specified KItem is an injection wrapper;
@@ -468,10 +477,10 @@ public class KItem extends Term implements Sorted {
         return kItem.kLabel.getClass() == KLabelInjection.class && kItem.kList instanceof KList
                 && ((KList) kItem.kList).contents.isEmpty();
     }
-    
+
     /**
      * Extracts the injected non-K term inside the specified KItem.
-     * 
+     *
      * @param kItem
      *            the specified KItem
      * @return the injected term

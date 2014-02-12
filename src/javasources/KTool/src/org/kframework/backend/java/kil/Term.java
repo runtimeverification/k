@@ -17,9 +17,9 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
 
     protected final Kind kind;
     // protected final boolean normalized;
-    
+
     protected int hashCode = 0;
-    
+
     protected Term(Kind kind) {
         this.kind = kind;
     }
@@ -76,7 +76,7 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     public Term evaluate(TermContext context) {
         return evaluate(null, context);
     }
-    
+
     /**
      * Returns a new {@code Term} instance obtained from this term by evaluating
      * pending functions and predicates.
@@ -88,7 +88,7 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
      * process may still need the information of this constraint when performing
      * unification; 2) the evaluation process may create new constraints in
      * certain cases (e.g., in test generation).
-     * 
+     *
      * @param constraint
      *            the symbolic constraint of the {@link ConstrainedTerm} which
      *            contains this {@code Term}
@@ -117,7 +117,13 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     }
 
     /**
-     * Returns a new {@code Term} instance obtained from this term by applying substitution.
+     * Returns a new {@code Term} instance obtained from this term by applying
+     * substitution.
+     * <p>
+     * Note: for efficiency reason, this method will only evaluate functions
+     * that become concrete due to the substitution. That is to say, concrete
+     * pending functions are omitted by this method. In this case, use the
+     * {@code evaluate} method instead.
      */
     public Term substituteAndEvaluate(Map<Variable, ? extends Term> substitution, TermContext context) {
         // TODO(AndreiS): assert that there are not any unevaluated functions in this term

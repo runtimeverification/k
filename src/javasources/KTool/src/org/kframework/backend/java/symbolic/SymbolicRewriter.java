@@ -407,12 +407,13 @@ public class SymbolicRewriter {
                     }
                     
                     /* apply the constraints substitution on the rule RHS */
-                    result = result.substituteAndEvaluate(constraint1.substitution(),
-                            constrainedTerm.termContext());
-                    /* evaluate pending functions in the rule RHS */
-                    if (rule.containsAttribute("getModel")) {
-                        // TODO(YilongL): this check is a hack-ish workaround
-                        // for the smt_model test; do it nicely
+                    // YilongL: cannot use substituteAndEvaluate here because
+                    // the RHS of the rule may contain functions omitted by this
+                    // method @see{Term#substituteAndEvaluate}
+                    result = result.substituteWithBinders(constraint1.substitution(),
+                            constrainedTerm.termContext());                    
+                    if (rule.containsFunctionOnRHS()) {
+                        /* evaluate pending functions in the rule RHS */
                         result = result.evaluate(constrainedTerm.termContext());
                     }
                     /* eliminate anonymous variables */
