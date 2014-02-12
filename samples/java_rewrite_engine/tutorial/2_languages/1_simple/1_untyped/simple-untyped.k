@@ -724,7 +724,7 @@ to something).  This means that once $S_1$ completes in the rule below, $S_2$
 becomes automatically the next computation item without any additional
 (explicit or implicit) rules. */
 
-  rule S1::Stmt S2::Stmts => S1 ~> S2  [structural]
+  rule S1:Stmts S2:Stmts => S1 ~> S2  [structural]
 
 /*@ \subsection{Expression statements}
 Expression statements are only used for their side effects, so their result
