@@ -35,6 +35,11 @@ public class KLabelInjection extends KLabel {
         //       || term.getSort().equals(KSorts.KLIST);
         this.term = term;
     }
+    
+    @Override
+    public String toString() {
+        return "(# " + term + ")";
+    }
 
     @Override
     public KLabelInjection shallowCopy() {

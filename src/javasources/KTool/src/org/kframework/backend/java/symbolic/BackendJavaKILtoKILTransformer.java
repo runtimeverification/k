@@ -1,24 +1,7 @@
 package org.kframework.backend.java.symbolic;
 
 import com.google.common.collect.Multimap;
-import org.kframework.backend.java.kil.BuiltinMap;
-import org.kframework.backend.java.kil.BuiltinMgu;
-import org.kframework.backend.java.kil.BuiltinSet;
-import org.kframework.backend.java.kil.BuiltinList;
-import org.kframework.backend.java.kil.Cell;
-import org.kframework.backend.java.kil.CellCollection;
-import org.kframework.backend.java.kil.Hole;
-import org.kframework.backend.java.kil.KCollection;
-import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.kil.KLabelFreezer;
-import org.kframework.backend.java.kil.KLabelInjection;
-import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.KSequence;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermCons;
-import org.kframework.backend.java.kil.Token;
-import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.kil.*;
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
@@ -91,6 +74,13 @@ public class BackendJavaKILtoKILTransformer extends CopyOnWriteTransformer {
         return new org.kframework.kil.KApp(
                 (org.kframework.kil.Term) kItem.kLabel().accept(this),
                 (org.kframework.kil.Term) kItem.kList().accept(this));
+    }
+    
+    @Override
+    public ASTNode transform(KItemProjection kItemProj) {
+        return new org.kframework.kil.KItemProjection(
+                kItemProj.kind().toString(), 
+                (org.kframework.kil.Term) kItemProj.term().accept(this));
     }
     
     @Override

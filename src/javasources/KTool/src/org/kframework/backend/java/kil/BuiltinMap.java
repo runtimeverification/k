@@ -6,6 +6,7 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.KSorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.DataStructureSort;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -101,7 +102,7 @@ public class BuiltinMap extends Collection implements Sorted {
 
     @Override
     public String toString() {
-        return toString(" ", " |-> ", ".Map");
+        return toString(" ", " |-> ", DataStructureSort.DEFAULT_MAP_UNIT_LABEL);
     }
 
     private String toString(String operator, String mapsTo, String identity) {

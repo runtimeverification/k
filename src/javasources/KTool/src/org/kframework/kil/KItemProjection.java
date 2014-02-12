@@ -35,7 +35,7 @@ public class KItemProjection extends Term {
     public void setTerm(Term term) {
         this.term = term;
     }
-
+    
     @Override
     public KItemProjection shallowCopy() {
         return new KItemProjection(this);
@@ -61,6 +61,11 @@ public class KItemProjection extends Term {
         KItemProjection kItemProjection = (KItemProjection) object;
 
         return getSort().equals(kItemProjection.getSort()) && term.equals(kItemProjection.term);
+    }
+    
+    @Override
+    public String toString() {
+        return "projection(" + term + ")";
     }
 
     @Override
