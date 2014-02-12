@@ -14,7 +14,7 @@ import java.util.ArrayList;
 public class CoolingRuleVisitor extends RuleVisitor {
     private final Rule rule;
     private String currentLabel;
-
+    private boolean isKItemHead = false;
 
     public CoolingRuleVisitor(Rule rule, Context context) {
         super(context);
@@ -23,7 +23,11 @@ public class CoolingRuleVisitor extends RuleVisitor {
 
     @Override
     public void visit(KSequence kSequence) {
-        kSequence.get(0).accept(this);
+        Term term = kSequence.get(0);
+        if (term instanceof KItem){
+           isKItemHead = true;
+        }
+        term.accept(this);
         ((KItem) kSequence.get(1)).kLabel().accept(this);
     }
 
@@ -49,16 +53,25 @@ public class CoolingRuleVisitor extends RuleVisitor {
     @Override
     public void visit(KItem kItem) {
         visit((KLabelConstant)kItem.kLabel());
-        visit((KList)kItem.kList());
+        if (isKItemHead){
+            Term term = ((KList) kItem.kList()).get(0);
+            if (term instanceof Variable){
+                String requiredKResult = "isKResult(" + ((Variable)term) + ")";
+                String firstSort;
+                if (rule.requires().toString().contains(requiredKResult)) {
+                    firstSort = "KResult";
+                } else {
+                    throw new IllegalStateException("First term in K cell is not a K result: \n" + rule);
+                }
+
+                pStrings.add(pString + "1" + SEPARATOR + firstSort);
+            }
+            //TODO(OwolabiL): Remove this check and use concrete sort instead
+        } else{
+            visit((KList)kItem.kList());
+        }
         this.proceed = false;
     }
-
-//    @Override
-//    public void visit(KLabel kLabel) {
-//        System.out.println("theKLabel: "+kLabel);
-//        currentLabel = kLabel.toString();
-//        pString = pString.concat(kLabel.toString() + ".");
-//    }
 
     @Override
     public void visit(KLabelConstant kLabel) {
