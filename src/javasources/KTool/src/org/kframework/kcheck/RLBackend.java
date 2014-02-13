@@ -202,16 +202,16 @@ public class RLBackend extends BasicBackend implements Backend {
 		K.main_module = mainModule;
 		K.init(context);
 		// delete temporary krun directory
-		deleteDirectory(new File(K.krunDir));
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-			public void run() {
-				try {
-                    moveDirectory(new File(K.krunTempDir), new File(K.krunDir));
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		});
+//		deleteDirectory(new File(K.krunDir));
+//		Runtime.getRuntime().addShutdownHook(new Thread() {
+//			public void run() {
+//				try {
+//                    moveDirectory(new File(K.krunTempDir), new File(K.krunDir));
+//				} catch (IOException e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		});
 		Rule defaultPattern = null;
 		RuleCompilerSteps defaultPatternInfo = null;
 		ASTNode pattern;

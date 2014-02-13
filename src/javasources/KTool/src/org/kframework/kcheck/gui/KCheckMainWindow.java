@@ -6,6 +6,9 @@ import org.kframework.backend.symbolic.SymbolicBackend;
 import org.kframework.kcheck.KCheckFrontEnd;
 import org.kframework.kcheck.RLBackend;
 import org.kframework.kil.loader.Context;
+import org.kframework.krun.RunProcess;
+import org.kframework.ktest.ExecNames;
+import org.kframework.ktest.Proc;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.StringUtil;
@@ -65,6 +68,12 @@ public class KCheckMainWindow extends JFrame implements KeyListener, ActionListe
     private final String VERIF = "verify";
     private final String ADD = "add";
 
+    // please wait dialog
+    private JDialog dialog;
+
+    // latest visited directory
+    private File cDir;
+
     /**
      * The Main kcheck window
      */
@@ -105,7 +114,7 @@ public class KCheckMainWindow extends JFrame implements KeyListener, ActionListe
         c.gridy = levely;
         mainPanel.add(def, c);
 
-        loadDef = new JButton("Browse K definition");
+        loadDef = new JButton("Setup K definition");
         loadDef.setActionCommand(BROWSE_DEF);
         loadDef.addActionListener(this);
         c.anchor = GridBagConstraints.WEST;
@@ -348,56 +357,123 @@ public class KCheckMainWindow extends JFrame implements KeyListener, ActionListe
                 break;
             case BROWSE_PGM:
                 selectFile(pgm);
+                if (pgm.getText().equals("null"))
+                    break;
+
+                // run
+                addToConsole("Running program " + pgm.getText());
+                initPleaseWait("Running " + pgm.getText());
+                RunProcess rpRun = new RunProcess();
+                rpRun.execute(System.getenv(), getKrun(), pgm.getText(), "-d", new File(def.getText()).getParent());
+                stopPleaseWait();
+                addToConsole("Run command:\n" + getKrun() + " " + pgm.getText() + " " + "-d" + " " + new File(def.getText()).getParent());
+                int exit = rpRun.getExitCode();
+                addToConsole("Ended with code: " + exit);
+                String output = rpRun.getStdout();
+                String error = rpRun.getErr();
+                addToConsole(output);
+                addToConsole(error);
                 break;
             case BROWSE_DEF:
                 selectFile(def);
                 if (def.getText().equals("null"))
                     break;
 
-                GlobalSettings.setMainFile(def.getText());
-                String lang = FileUtil.getMainModule(GlobalSettings.mainFile.getName());
-                // Matching Logic & Symbolic Calculus options
-                GlobalSettings.symbolicEquality = true;
-                GlobalSettings.SMT = true;
-
-                Context context = new Context();
-
-                if (context.dotk == null) {
-                    try {
-                        context.dotk = new File(GlobalSettings.mainFile.getCanonicalFile().getParent() + File.separator + ".k");
-                    } catch (IOException ioe) {
-                        GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, "Canonical file cannot be obtained for main file.", GlobalSettings.mainFile.getAbsolutePath(),
-                                "File system."));
-                        JOptionPane.showMessageDialog(this, new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, "Canonical file cannot be obtained for main file.", GlobalSettings.mainFile.getAbsolutePath(),
-                                "File system.").toString());
-                    }
-                    context.dotk.mkdirs();
-                }
-
-                Backend backend = new RLBackend(Stopwatch.sw, context);
-                KCheckFrontEnd.output = FilenameUtils.removeExtension(GlobalSettings.mainFile.getName()) + "-kompiled";
-                context.dotk = new File(KCheckFrontEnd.output);
-                context.dotk.mkdirs();
-
-                KCheckFrontEnd.genericCompile(lang, backend, null, context);
-                BinaryLoader.save(context.dotk.getAbsolutePath() + "/compile-options.bin", cmd);
-
-                KCheckFrontEnd.verbose(KCheckFrontEnd.cmd, context);
+                // run
+                addToConsole("Loading " + def.getText());
+                initPleaseWait("Compiling " + def.getText());
+                RunProcess rp = new RunProcess();
+                rp.execute(System.getenv(), getKompile(), def.getText(), "-v");
+                stopPleaseWait();
+                addToConsole("Started compilation:\n" + getKompile() + " " + def.getText() + " " + "-v");
+                exit = rp.getExitCode();
+                addToConsole("Compilation ended with code: " + exit);
+                output = rp.getStdout();
+                error = rp.getErr();
+                addToConsole(output);
+                addToConsole(error);
                 break;
             case ADD:
                 break;
             case VERIF:
+                if (file.getText().equals("null") || file.getText().equals("")) {
+                    JOptionPane.showMessageDialog(this, "Please select a valid file for verification!");
+                    break;
+                }
+                // run
+                addToConsole("Verifying " + file.getText());
+                initPleaseWait("Verifying " + file.getText());
+                RunProcess rpVerif = new RunProcess();
+                rpVerif.execute(System.getenv(), getKcheck(), def.getText(), "-prove", file.getText());
+                stopPleaseWait();
+                addToConsole("Started verification:\n" + getKcheck() + " " + def.getText() + " " + "-prove" + " " + file.getText());
+                exit = rpVerif.getExitCode();
+                addToConsole("Verification ended with code: " + exit);
+                output = rpVerif.getStdout();
+                error = rpVerif.getErr();
+                addToConsole(output);
+                addToConsole(error);
                 break;
         }
 
     }
 
+
+    private void initPleaseWait(String message) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BorderLayout());
+
+        JTextArea text = new JTextArea();
+        text.setText(message);
+        text.setPreferredSize(new Dimension(300, 200));
+        text.setVisible(true);
+        panel.add(text, BorderLayout.CENTER);
+        panel.setVisible(true);
+
+        dialog = new JDialog();
+        dialog.setLocationRelativeTo(this);
+        dialog.setTitle("Please wait");
+//        dialog.setPreferredSize(new Dimension(400, 300));
+        dialog.add(panel);
+        dialog.pack();
+        dialog.setVisible(true);
+    }
+
+    private void stopPleaseWait() {
+        dialog.setVisible(false);
+        dialog.dispose();
+    }
+
+    private void addToConsole(String log) {
+        if (log == null)
+            return;
+        console.setText(console.getText() + "\n" + log);
+        console.repaint();
+        console.revalidate();
+    }
+
+    private static String getKompile() {
+        return ExecNames.getKompile().replace("/src", "");
+    }
+
+    private static String getKrun() {
+        return ExecNames.getKrun().replace("/src", "");
+    }
+
+    public String getKcheck() {
+        return ExecNames.getExecutable("kcheck").replace("/src", "");
+    }
+
     private void selectFile(JTextField field) {
         final JFileChooser fc = new JFileChooser();
+        if (cDir != null) {
+            fc.setCurrentDirectory(cDir);
+        }
         int response = fc.showOpenDialog(this);
         if (response == JFileChooser.FILES_ONLY) {
             field.setBackground(Color.WHITE);
             field.setText(fc.getSelectedFile().getAbsolutePath());
+            cDir = fc.getSelectedFile().getParentFile();
         } else {
             JOptionPane.showMessageDialog(this, "Please select a file.");
             field.setText("null");
