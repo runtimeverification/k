@@ -1,4 +1,4 @@
-package org.kframework.backend.java.indexing.util;
+package org.kframework.backend.java.indexing.pathIndex.util;
 
 import org.kframework.backend.java.indexing.pathIndex.visitors.TermVisitor;
 import org.kframework.backend.java.kil.Cell;

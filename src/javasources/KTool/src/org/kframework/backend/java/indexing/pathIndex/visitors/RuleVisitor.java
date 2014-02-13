@@ -1,7 +1,6 @@
 package org.kframework.backend.java.indexing.pathIndex.visitors;
 
 import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.indexing.util.MultipleCellUtil;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.symbolic.LocalVisitor;
 import org.kframework.backend.java.util.LookupCell;

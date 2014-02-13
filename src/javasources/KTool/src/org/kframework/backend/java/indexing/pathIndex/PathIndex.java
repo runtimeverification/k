@@ -1,12 +1,11 @@
 package org.kframework.backend.java.indexing.pathIndex;
 
-import com.google.common.collect.Sets;
 import org.apache.commons.collections15.MultiMap;
 import org.apache.commons.collections15.multimap.MultiHashMap;
 import org.kframework.backend.java.indexing.pathIndex.trie.PathIndexTrie;
 import org.kframework.backend.java.indexing.pathIndex.visitors.*;
-import org.kframework.backend.java.indexing.util.MultipleCellUtil;
-import org.kframework.backend.java.indexing.util.MultiplicityStarCellHolder;
+import org.kframework.backend.java.indexing.pathIndex.util.MultipleCellUtil;
+import org.kframework.backend.java.indexing.pathIndex.util.MultiplicityStarCellHolder;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.Definition;
@@ -25,6 +24,7 @@ import java.util.Map;
  */
 //TODO(OwolabiL): How to deal with macros and function rules? (imp has none)
 public class PathIndex {
+    public static final String BUFFER_LABEL = "#buffer";
     private Map<Integer, Rule> indexedRules;
     private Definition definition;
     private PathIndexTrie trie;
@@ -146,7 +146,7 @@ public class PathIndex {
         return pStrings;
     }
 
-    public Set<Rule> getRulesForTerm(Term term) {
+    public List<Rule> getRulesForTerm(Term term) {
         Set<String> pStrings;
 //        System.out.println("term: "+term);
         //check if the definition has a cell with multiplicity* which contains a k cell
@@ -165,7 +165,7 @@ public class PathIndex {
         Set<Rule> rules = new HashSet<>();
 
         Set<Integer> currentMatch = null;
-        Set<Integer> matchingIndices = new HashSet<>();
+        Set<Integer> matchingIndices = new LinkedHashSet<>();
         String subString;
 
         for (String pString : pStrings) {
@@ -186,7 +186,8 @@ public class PathIndex {
                 matchingIndices = currentMatch;
             } else {
                 //should it be an intersection?
-                matchingIndices = Sets.union(matchingIndices, currentMatch);
+//                matchingIndices = Sets.union(matchingIndices, currentMatch);
+                matchingIndices.addAll(currentMatch);
             }
         }
 
@@ -208,7 +209,7 @@ public class PathIndex {
 
 //        System.out.println("matching: "+matchingIndices+"\n");
 //        System.out.println("rules: "+rules +"\n");
-        return rules;
+        return new ArrayList<>(rules);
     }
 
     private Set<Integer> addInputCellIndices(Term term, Set<Integer> matchingIndices, int baseIOCellSize) {
@@ -217,7 +218,8 @@ public class PathIndex {
         List<Term> inCellList = ((BuiltinList) in.getContent()).elements();
 
         if (inCellList.size() > baseIOCellSize) {
-            matchingIndices = Sets.union(matchingIndices, inputRuleIndices);
+//            matchingIndices = Sets.union(matchingIndices, inputRuleIndices);
+            matchingIndices.addAll(inputRuleIndices);
         }
         return matchingIndices;
     }
@@ -230,16 +232,19 @@ public class PathIndex {
 
 
         if (outCellList.size() > baseIOCellSize) {
-            matchingIndices = Sets.union(matchingIndices, outputRuleIndices);
+//            matchingIndices = Sets.union(matchingIndices, outputRuleIndices);
+            matchingIndices.addAll(outputRuleIndices);
         }
 
         //TODO(OwolabiL): Write a visitor for this
         if (out.getContent() instanceof BuiltinList) {
             for (Term outCellElement : outCellList) {
-                if (outCellElement instanceof KItem && ((KItem) outCellElement).kLabel().toString().equals("#buffer")) {
+                if (outCellElement instanceof KItem &&
+                        ((KItem) outCellElement).kLabel().toString().equals(BUFFER_LABEL)) {
                     Term bufferTerm = ((KList)((KItem) outCellElement).kList()).get(0);
                     if (bufferTerm instanceof Token && !((Token) bufferTerm).value().equals("\"\"")) {
-                        matchingIndices = Sets.union(matchingIndices, outputRuleIndices);
+                        matchingIndices.addAll(outputRuleIndices);
+//                        matchingIndices = Sets.union(matchingIndices, outputRuleIndices);
                     }
                 }
             }

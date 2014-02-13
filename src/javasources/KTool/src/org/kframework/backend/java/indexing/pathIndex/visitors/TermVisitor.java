@@ -18,6 +18,12 @@ import java.util.Set;
  * Time: 12:05 PM
  */
 public class TermVisitor extends LocalVisitor {
+    public static final String K_RESULT = "KResult";
+    public static final String EMPTY_LIST_LABEL = "'.List{\",\"}";
+    public static final String EMPTY_LIST_SORT = "#ListOf#Bot{\",\"}";
+    public static final String LIST_LABEL = "List{\",\"}";
+    public static final String USER_LIST_REPLACEMENT = "UserList";
+    public static final String K_ITEM_SORT = "KItem";
     private final Set<String> pStrings;
 
     private final Context context;
@@ -47,15 +53,14 @@ public class TermVisitor extends LocalVisitor {
         cell.getContent().accept(this);
     }
 
-
     @Override
     public void visit(KSequence kSequence) {
         if (kSequence.size() > 0) {
             //TODO (OwolabiL): This is too messy. Restructure the conditionals
             if (kSequence.get(0) instanceof KItem) {
-                boolean isKResult = context.isSubsorted("KResult", ((KItem) kSequence.get(0)).sort());
+                boolean isKResult = context.isSubsorted(K_RESULT, ((KItem) kSequence.get(0)).sort());
                 if (isKResult) {
-                    pString = START_STRING + "KResult";
+                    pString = START_STRING + K_RESULT;
                     kSequence.get(1).accept(this);
                 } else {
                     kSequence.get(0).accept(this);
@@ -74,10 +79,9 @@ public class TermVisitor extends LocalVisitor {
 
     @Override
     public void visit(Token token) {
-
         if (pString == null) {
-            if (context.isSubsorted("KResult", token.sort())) {
-                pString = START_STRING + "KResult";
+            if (context.isSubsorted(K_RESULT, token.sort())) {
+                pString = START_STRING + K_RESULT;
             } else {
                 //TODO(OwolabiL): Use a better check than the nullity of pString
                 pStrings.add(START_STRING + token.sort());
@@ -92,7 +96,7 @@ public class TermVisitor extends LocalVisitor {
             }
             ArrayList<Production> productions = (ArrayList<Production>) productions1;
             Production p = productions.get(0);
-            if (context.isSubsorted("KResult", token.sort())) {
+            if (context.isSubsorted(K_RESULT, token.sort())) {
                 if (pString != null) {
                     if (productions.size() == 1) {
                         pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR + token.sort());
@@ -112,6 +116,7 @@ public class TermVisitor extends LocalVisitor {
 
     @Override
     public void visit(KItem kItem) {
+        //TODO(OwolabiL): This is starting to get nasty. Refactor.
 
         if (kItem.kLabel() instanceof KLabelFreezer) {
 
@@ -128,27 +133,40 @@ public class TermVisitor extends LocalVisitor {
                 kItem.kList().accept(this);
             } else {
                 int kListSize = ((KList) kItem.kList()).size();
-                if (kListSize == 0 && currentLabel.equals("List{\",\"}")) {
-                    pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR + "'.List{\",\"}");
-                } else if (kListSize == 0 && kItem.sort().equals("#ListOf#Bot{\",\"}")) {
-                    pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR + "'.List{\",\"}");
+                if (kListSize == 0 && currentLabel.equals(LIST_LABEL)) {
+                    pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR
+                            + EMPTY_LIST_LABEL);
+                } else if (kListSize == 0 && kItem.sort().equals(EMPTY_LIST_SORT)) {
+                    pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR
+                            + EMPTY_LIST_LABEL);
                 } else {
                     if (context.isListSort(kItem.sort())) {
-                        pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR + "UserList");
+                        pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR
+                                + USER_LIST_REPLACEMENT);
                     } else {
-                        if (kListSize > 0 && ((KList) kItem.kList()).get(0) instanceof Token){
+                        if (kListSize > 0 && ((KList) kItem.kList()).get(0) instanceof Token) {
                             String sort = ((Token) ((KList) kItem.kList()).get(0)).sort();
-                            if (context.isSubsorted("KResult",sort)){
-                                pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR + "KResult");
-                            } else{
-                                ArrayList<Production> productions = (ArrayList<Production>) context.productionsOf(currentLabel);
+                            if (context.isSubsorted(K_RESULT, sort)) {
+                                if (kItem.sort().equals(K_ITEM_SORT)) {
+                                    pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR
+                                            + kItem.kLabel()
+                                            + SEPARATOR + (currentPosition) + SEPARATOR + sort);
+                                } else {
+                                    pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR
+                                            + K_RESULT);
+                                }
+                            } else {
+                                ArrayList<Production> productions =
+                                        (ArrayList<Production>) context.productionsOf(currentLabel);
                                 Production p = productions.get(0);
-                                String test = pString + SEPARATOR +(currentPosition) + SEPARATOR + p.getChildSort(currentPosition-1);
+                                String test = pString + SEPARATOR + (currentPosition) + SEPARATOR
+                                        + p.getChildSort(currentPosition - 1);
                                 pStrings.add(test);
                             }
 
-                        } else{
-                            pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR + kItem.sort());
+                        } else {
+                            pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR
+                                    + kItem.sort());
                         }
                     }
                 }
@@ -163,15 +181,10 @@ public class TermVisitor extends LocalVisitor {
         } else {
             for (int i = 0; i < kList.size(); i++) {
                 currentPosition = i + 1;
-                if (kList.get(i) instanceof UninterpretedToken){
-                    pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR + ((UninterpretedToken)kList.get(i)).sort());
-                } else{
-                    kList.get(i).accept(this);
-                }
+                kList.get(i).accept(this);
             }
         }
     }
-
 
     @Override
     public void visit(KLabelConstant kLabel) {
@@ -210,7 +223,6 @@ public class TermVisitor extends LocalVisitor {
             frozenItem.kList().accept(this);
         }
 
-
         @Override
         public void visit(KLabelConstant kLabel) {
             pString = baseString + ".1." + kLabel.toString();
@@ -218,7 +230,8 @@ public class TermVisitor extends LocalVisitor {
 
         @Override
         public void visit(UninterpretedToken uninterpretedToken) {
-            candidates.add(pString + SEPARATOR + currentPosition + SEPARATOR + uninterpretedToken.sort());
+            candidates.add(pString + SEPARATOR + currentPosition + SEPARATOR
+                    + uninterpretedToken.sort());
         }
 
         @Override
