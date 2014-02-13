@@ -150,6 +150,7 @@ public class PathIndex {
     public List<Rule> getRulesForTerm(Term term) {
         Set<String> pStrings;
 //        System.out.println("term: "+term);
+
         //check if the definition has a cell with multiplicity* which contains a k cell
         //if such a cell is found, the multiCellInfoHolder field should have been set at index
         // creation time and getting pStrings from it is done differently
@@ -204,8 +205,12 @@ public class PathIndex {
             matchingIndices = addInputCellIndices(term, matchingIndices, baseIOCellSize);
         }
 
-        for (Integer n : matchingIndices) {
-            rules.add(indexedRules.get(n));
+        // this check is needed because of .K which now has a pString of @.EMPTY_K, but may not have
+        // any rules so indexed in some simpler languages like IMP
+        if (matchingIndices != null) {
+            for (Integer n : matchingIndices) {
+                rules.add(indexedRules.get(n));
+            }
         }
 
 //        System.out.println("matching: "+matchingIndices+"\n");
