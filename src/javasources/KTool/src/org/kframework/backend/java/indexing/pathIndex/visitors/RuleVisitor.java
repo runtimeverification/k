@@ -17,6 +17,7 @@ import java.util.List;
 public class RuleVisitor extends LocalVisitor {
     static final String SEPARATOR = ".";
     static final String START_STRING = "@.";
+    public static final String EMPTY_K = "EMPTY_K";
     final Context context;
     String pString;
     List<String> pStrings;
@@ -44,13 +45,11 @@ public class RuleVisitor extends LocalVisitor {
         //taking care of .K
         if (kSequence.size() > 0) {
             kSequence.get(0).accept(this);
+        } else if (kSequence.size() == 0) {
+            //there may be more than one k cell in the rule and one of them may be empty e.g. the
+            // join rule in IMP++, SIMPLE. The correct solution is to get pStrings from all kCells.
+            pStrings.add(START_STRING + EMPTY_K);
         }
-
-        //else if (kSequence.size() == 0) {
-            //TODO(OwolabiL): there may be more than one k cell in the rule and one of them may be
-            // empty e.g. the join rule in IMP++. The correct solution is to get pStrings from all
-            // kCells.
-        //}
     }
 
     @Override

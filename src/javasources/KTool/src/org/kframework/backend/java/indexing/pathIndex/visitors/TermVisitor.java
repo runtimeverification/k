@@ -24,6 +24,7 @@ public class TermVisitor extends LocalVisitor {
     public static final String LIST_LABEL = "List{\",\"}";
     public static final String USER_LIST_REPLACEMENT = "UserList";
     public static final String K_ITEM_SORT = "KItem";
+    public static final String EMPTY_K = "EMPTY_K";
     private final Set<String> pStrings;
 
     private final Context context;
@@ -74,6 +75,10 @@ public class TermVisitor extends LocalVisitor {
                     kSequence.get(1).accept(this);
                 }
             }
+        } else if (kSequence.size() == 0){
+            //there are cases (e.g., in SIMPLE's join rule, where we need to know that one of the K
+            // cells in the configuration is empty.
+            pStrings.add(START_STRING + EMPTY_K);
         }
     }
 

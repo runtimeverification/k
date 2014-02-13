@@ -78,6 +78,7 @@ public class PathIndex {
         for (Integer key : pStringMap.keySet()) {
             strings = (ArrayList<String>) pStringMap.get(key);
             for (String string : strings) {
+                //pass the substring starting at 2 to prevent clashes with "@.", the root node
                 trie.addIndex(trie.getRoot(), string.substring(2), key);
             }
         }
