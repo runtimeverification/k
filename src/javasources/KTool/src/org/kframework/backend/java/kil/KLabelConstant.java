@@ -2,6 +2,7 @@ package org.kframework.backend.java.kil;
 
 import com.google.common.collect.Multimap;
 import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
