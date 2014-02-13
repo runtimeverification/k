@@ -43,7 +43,8 @@ public class BuiltinFunction {
 
             for (String label : definition.context().labels.keySet()) {
                 for (Production production : definition.context().productionsOf(label)) {
-                    if (production.containsAttribute(Attribute.HOOK_KEY)) {
+                    if (production.getKLabel().equals(label)    // make sure the label is a Klabel
+                            && production.containsAttribute(Attribute.HOOK_KEY)) {
                         try {
                             String hook = properties.getProperty(
                                     production.getAttribute(Attribute.HOOK_KEY));

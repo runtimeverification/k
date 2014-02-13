@@ -1,8 +1,6 @@
 package org.kframework.backend.java.kil;
 
 import com.google.common.collect.Multimap;
-import org.apache.commons.collections15.MultiMap;
-import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
@@ -10,7 +8,6 @@ import org.kframework.kil.Attribute;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 
