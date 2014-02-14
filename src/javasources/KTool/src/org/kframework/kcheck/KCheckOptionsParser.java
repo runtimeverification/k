@@ -41,8 +41,13 @@ public class KCheckOptionsParser {
 			OptionGroup simplify = new OptionGroup();
 			Option sim = new Option("simplify", false, "simplify the path condition before sending it to SMT solver");
 			simplify.addOption(sim);
-			
-			options.addOptionGroup(main);
+
+            OptionGroup interfaceGroup = new OptionGroup();
+            Option gui = new Option("interface", false, "start the user interface");
+            interfaceGroup.addOption(gui);
+
+            options.addOptionGroup(main);
+            options.addOptionGroup(interfaceGroup);
             options.addOptionGroup(prove);
 			options.addOptionGroup(verb);
 			options.addOptionGroup(simplify);
@@ -52,8 +57,7 @@ public class KCheckOptionsParser {
 		public CommandLine parse(String[] cmd) {
 			CommandLineParser parser = new ActualPosixParser();
 			try {
-				CommandLine cl = parser.parse(options, cmd);
-				return cl;
+				return parser.parse(options, cmd);
 			} catch (ParseException e) {
 				org.kframework.utils.Error.silentReport(e.getLocalizedMessage());
 			}

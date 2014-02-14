@@ -132,17 +132,24 @@ public class AddInjections extends CopyOnWriteTransformer{
             return transformedNode;
         }
 
-        Term left = ((Rewrite) transformedNode.getBody()).getLeft();
-        Term right = ((Rewrite) transformedNode.getBody()).getRight();
-        if (!(left instanceof KItemProjection)) {
-            return transformedNode;
+        Term right,left;
+        if (transformedNode.getBody() instanceof Rewrite){
+            left = ((Rewrite) transformedNode.getBody()).getLeft();
+            right = ((Rewrite) transformedNode.getBody()).getRight();
+
+            if (!(left instanceof KItemProjection)) {
+                return transformedNode;
+            }
+
+            transformedNode = transformedNode.shallowCopy();
+            Rewrite transformedBody = (Rewrite) transformedNode.getBody().shallowCopy();
+            transformedNode.setBody(transformedBody);
+            transformedBody.setLeft(((KItemProjection) left).getTerm(), context);
+            transformedBody.setRight(KApp.of(new KLabelInjection(right)), context);
         }
 
-        transformedNode = transformedNode.shallowCopy();
-        Rewrite transformedBody = (Rewrite) transformedNode.getBody().shallowCopy();
-        transformedNode.setBody(transformedBody);
-        transformedBody.setLeft(((KItemProjection) left).getTerm(), context);
-        transformedBody.setRight(KApp.of(new KLabelInjection(right)), context);
+        //TODO(Owolabi): what happens when the body of the tranformedNode is a KItemProjection?
+
         return transformedNode;
     }
 

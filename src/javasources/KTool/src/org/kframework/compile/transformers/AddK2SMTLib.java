@@ -84,6 +84,15 @@ public class AddK2SMTLib  extends CopyOnWriteTransformer {
                 rule = new Rule(lhs, rhs, context);
                 rule.addAttribute(Attribute.FUNCTION);
                 retNode.appendModuleItem(rule);
+
+                var = Variable.getFreshVar("#Id");
+                symTerm = KApp.of(KLabelConstant.of(symCtor, context), var);
+                lhs = KApp.of(K_TO_SMTLIB, symTerm);
+                strTerm = KApp.of(KLabelConstant.of("#tokenToString", context), var);
+                rhs = appendString(StringBuiltin.kAppOf(SMTLIB_VAR_PREFIX), strTerm, context);
+                rule = new Rule(lhs, rhs, context);
+                rule.addAttribute(Attribute.FUNCTION);
+                retNode.appendModuleItem(rule);
             }
         }
 

@@ -65,6 +65,8 @@ module STRING-HOOKS
   rule rfindChar(_, "", _) => -1
 
   syntax Char
+  syntax String ::= "Char2String" "(" Char ")" [function]
+  syntax Char ::= "String2Char" "(" String ")" [function]
 
   rule isChar(S:String) => lengthString(S) ==Int 1 [function, anywhere]
 
@@ -114,6 +116,7 @@ module STRING-HOOKS
   rule #parseToken("Int",S:String) => String2Int(S)
   rule #parseToken("Float",S:String) => (String2Float(S)) 
   rule #parseToken("String",S:String) => (S) 
+  rule #parseToken("Char",S:String) => (String2Char(S))
 
   syntax String ::= "#tokenToString" "(" K ")"    [function, klabel(#tokenToString)]
 endmodule

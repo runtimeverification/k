@@ -5,7 +5,6 @@ module IO
   imports LIST
   imports URIS
 
-
   rule ListItem(#ostream(_))
        ListItem(#buffer(Buffer:String => Buffer +String Float2String(F)))
        (ListItem(F:Float) => .List)
@@ -13,6 +12,10 @@ module IO
   rule ListItem(#ostream(_))
        ListItem(#buffer(Buffer:String => Buffer +String Int2String(I)))
        (ListItem(I:Int) => .List)
+       _:List [stdout, stderr]
+  rule ListItem(#ostream(_))
+       ListItem(#buffer(Buffer:String => Buffer +String Char2String(C)))
+       (ListItem(C:Char) => .List)
        _:List [stdout, stderr]
   rule ListItem(#ostream(_))
        ListItem(#buffer(Buffer:String => Buffer +String S))
@@ -27,6 +30,7 @@ module IO
   rule ListItem(#buffer(Buffer:String => Buffer +String S))
        (ListItem(S:String) => .List)
        _:List [stdout, stderr]
+
 
   // Send first char from the buffer to the server
   rule ListItem(#ostream((. => #write(N, S)) ~> N:Int))

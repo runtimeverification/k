@@ -31,7 +31,7 @@
 ;;;; Syntax Highlighting ;;;;
 (setq k-keywords
       '("syntax" "priorities" "left" "right" "non-assoc" "module" "endmodule" "imports" "::=" "|"
-        "sort" "op" "subsort" "rule" "context" "eq" "ceq" "load" "when" "require" "configuration" "context")
+        "sort" "op" "subsort" "rule" "context" "eq" "ceq" "load" "when" "require" "configuration" "context" "requires" "ensures")
       k-syntax-terminals-regex
       "`\\w+"
       k-declarations ;; Syntax highlight the name after a declaration

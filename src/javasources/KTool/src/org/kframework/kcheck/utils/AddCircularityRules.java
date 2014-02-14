@@ -3,6 +3,8 @@ package org.kframework.kcheck.utils;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.kframework.backend.java.kil.Token;
+import org.kframework.compile.transformers.AddSymbolicK;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kcheck.RLBackend;
 import org.kframework.kil.ASTNode;
@@ -98,7 +100,7 @@ public class AddCircularityRules extends CopyOnWriteTransformer {
 						vlist.add(v);
 //						System.out.println("Generate fresh "  + v);
 						fresh.add(new TermCons(v.getSort(), MetaK.Constants.freshCons, vlist, context));
-//						fresh.add(KApp.of(KLabelConstant.of(AddSymbolicK.symbolicConstructor(v.getSort())), Token.kAppOf("#Id", v.getName())));
+//						fresh.add(KApp.of(KLabelConstant.of(AddSymbolicK.symbolicConstructor(v.getSort())), org.kframework.kil.Token.kAppOf("#Id", v.getName())));
 					}
 				}
 

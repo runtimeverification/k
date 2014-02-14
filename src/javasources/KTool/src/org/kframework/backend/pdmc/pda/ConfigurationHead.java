@@ -16,24 +16,29 @@ public class ConfigurationHead<Control, Alphabet> {
     private final Control state;
     private final Alphabet stackHead;
 
-    private ConfigurationHead(Control state, Alphabet stackHead) {
+    protected ConfigurationHead(Control state, Alphabet stackHead) {
         this.state = state;
         this.stackHead = stackHead;
     }
 
-
     @Override
-    public int hashCode() {
-        int hash = 1;
-        hash = hash * Utils.HASH_PRIME + state.hashCode();
-        if (stackHead != null)
-            hash = hash * Utils.HASH_PRIME + stackHead.hashCode();
-        return hash;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ConfigurationHead that = (ConfigurationHead) o;
+
+        if (stackHead != null ? !stackHead.equals(that.stackHead) : that.stackHead != null) return false;
+        if (!state.equals(that.state)) return false;
+
+        return true;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return (this == obj);
+    public int hashCode() {
+        int result = state.hashCode();
+        result = 31 * result + (stackHead != null ? stackHead.hashCode() : 0);
+        return result;
     }
 
     public boolean isProper() {

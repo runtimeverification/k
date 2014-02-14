@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.Iterables;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.Int32Token;
 import org.kframework.backend.java.builtins.IntToken;
@@ -186,6 +187,17 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     @Override
     public ASTNode transform(org.kframework.kil.Token node) throws TransformerException {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ASTNode transform(org.kframework.kil.List node) throws TransformerException {
+        List<org.kframework.kil.Term> list = new ArrayList<>();
+        KILtoBackendJavaKILTransformer.flattenList(list,node.getContents());
+        if (list.isEmpty()){
+            return new KList();
+        }
+        //TODO(OwolabiL): What should happen when the list is not empty?
+        return super.transform(node);
     }
 
     @Override
@@ -662,6 +674,50 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             definition.addFrozenKLabel(KLabelConstant.of(production.getKLabel(), context));
         }
 
+        /*
+         * Partially evaluate functions in the rules of the definition
+         */
+        /* initialize the builtin function table */
+        BuiltinFunction.init(definition);
+
+        /* partially evaluate the right-hand side and the conditions for each rule */
+        TermContext termContext = TermContext.of(definition);
+        ArrayList<Rule> partiallyEvaluatedRules = new ArrayList<>();
+        for (Rule rule : Iterables.concat(definition.rules(), definition.functionRules().values(), definition.macros())) {
+            // TODO(AndreiS): some evaluation is required in the LHS as well
+            //Term leftHandSide = rule.leftHandSide().evaluate(termContext);
+            Term rightHandSide = rule.rightHandSide().evaluate(termContext);
+            List<Term> requires = new ArrayList<>();
+            for (Term term : rule.requires()) {
+                requires.add(term.evaluate(termContext));
+            }
+            List<Term> ensures = new ArrayList<>();
+            for (Term term : rule.ensures()) {
+                ensures.add(term.evaluate(termContext));
+            }
+            UninterpretedConstraint lookups = new UninterpretedConstraint();
+            for (UninterpretedConstraint.Equality equality : rule.lookups().equalities()) {
+                lookups.add(
+                        equality.leftHandSide().evaluate(termContext),
+                        equality.rightHandSide().evaluate(termContext));
+            }
+            partiallyEvaluatedRules.add(new Rule(
+                    rule.label(),
+                    rule.leftHandSide(),
+                    rightHandSide,
+                    requires,
+                    ensures,
+                    rule.freshVariables(),
+                    lookups,
+                    rule.getAttributes()));
+        }
+
+         /* replace the unevaluated rules with the partially evaluated rules */
+        definition.rules().clear();
+        definition.functionRules().clear();
+        definition.macros().clear();
+        definition.addRuleCollection(partiallyEvaluatedRules);
+
         this.definition = null;
         return definition;
     }
@@ -686,6 +742,19 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             if (term instanceof org.kframework.kil.KList) {
                 org.kframework.kil.KList kList = (org.kframework.kil.KList) term;
                 KILtoBackendJavaKILTransformer.flattenKList(flatList, kList.getContents());
+            } else {
+                flatList.add(term);
+            }
+        }
+    }
+
+    private static void flattenList(
+            List<org.kframework.kil.Term> flatList,
+            List<org.kframework.kil.Term> nestedList) {
+        for (org.kframework.kil.Term term : nestedList) {
+            if (term instanceof org.kframework.kil.List) {
+                org.kframework.kil.List list = (org.kframework.kil.List) term;
+                KILtoBackendJavaKILTransformer.flattenKList(flatList, list.getContents());
             } else {
                 flatList.add(term);
             }

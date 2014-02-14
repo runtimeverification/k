@@ -605,9 +605,11 @@ public class SymbolicUnifier extends AbstractUnifier {
         }
         KLabelInjection otherKLabelInjection = (KLabelInjection) term;
 
-        if (kLabelInjection.term().kind() != otherKLabelInjection.kind()
-                || !kLabelInjection.term().kind().isComputational()
-                || !otherKLabelInjection.term().kind().isComputational()) {
+        Kind injectionKind = kLabelInjection.term().kind();
+        Kind otherInjectionKind = otherKLabelInjection.term().kind();
+        if (injectionKind != otherInjectionKind
+                && !(injectionKind.isComputational() && otherInjectionKind.isComputational())
+                && !(injectionKind.isStructural() && otherInjectionKind.isStructural())) {
             fail();
         }
 
@@ -650,9 +652,9 @@ public class SymbolicUnifier extends AbstractUnifier {
                     Term freshBoundVars = boundVars.substituteWithBinders(freshSubstitution, termContext);
                     terms.set(boundVarPosition, freshBoundVars);
                     for (Integer bindingExpPosition : binderMap.get(boundVarPosition)) {
-                        Term bindingExp = terms.get(bindingExpPosition);
+                        Term bindingExp = terms.get(bindingExpPosition-1);
                         Term freshbindingExp = bindingExp.substituteWithBinders(freshSubstitution, termContext);
-                        terms.set(bindingExpPosition, freshbindingExp);
+                        terms.set(bindingExpPosition-1, freshbindingExp);
                     }
                 }
                 kList = new KList(ImmutableList.copyOf(terms));

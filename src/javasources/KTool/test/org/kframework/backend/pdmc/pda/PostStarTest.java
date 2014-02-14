@@ -21,7 +21,8 @@ public class PostStarTest {
                 "<p, a> => <q, b a>;\n" +
                 "<q, b> => <r, c a>;\n" +
                 "<r, c> => <p, b>;\n" +
-                "<p, b> => <p>;");
+                "<p, b> => <p>;\n" +
+                "<p, a>");
         PAutomaton aPostStar = PostStar.postStar(pds, automaton);
         String expectedPostStar = PAutomaton.of("p a <p,out1>;" +
                 "<p,out1> a <p,out2>;" +
@@ -35,7 +36,29 @@ public class PostStarTest {
                 "<r,c> a <q,b>;" +
                 "p;" +
                 "<p,out2>").toString();
+        System.err.print(aPostStar.toString());
+        System.err.println("\n---------------------------");
         Assert.assertEquals(expectedPostStar.length(), aPostStar.toString().length());
+
+    }
+
+    @Test
+    public void testPostStar1() throws Exception {
+        PushdownSystem pds = PushdownSystem.of("" +
+                "<x0, p> => <x0>;\n" +
+                "<x0, p> => <x1, p p>;\n" +
+                "<x1, p> => <x1, p p>;\n" +
+                "<x1, p> => <x0>;\n" +
+                "<x0, p>");
+
+        PAutomaton automaton = PAutomaton.of("" +
+                "x0 p <x0,out1>;" +
+                "x0;" +
+                "<x0,out1>");
+
+        PAutomaton aPostStar = PostStar.postStar(pds, automaton);
+
+        System.err.print(aPostStar.toString());
 
     }
 }

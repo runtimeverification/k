@@ -92,5 +92,10 @@ public class TestGenResults {
     public List<TestGenResult> getTestGenResults() {
         return testGenResults;
     }
+    
+	public boolean isDefaultPattern(){
+		
+		return this.isDefaultPattern;
+	}
 }
 

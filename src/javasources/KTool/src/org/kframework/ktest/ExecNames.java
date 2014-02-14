@@ -26,7 +26,7 @@ public class ExecNames {
                 .getParentFile().getPath();
     }
 
-    private static String getExecutable(String exe) {
+    public static String getExecutable(String exe) {
         String os = System.getProperty("os.name").toLowerCase();
         if (os.contains("win")) {
             return getKHome() + FILE_SEPARATOR + "bin" + FILE_SEPARATOR + exe + ".bat";

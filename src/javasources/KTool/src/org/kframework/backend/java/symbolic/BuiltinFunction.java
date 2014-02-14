@@ -6,6 +6,7 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Production;
+import org.kframework.krun.K;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 
@@ -89,7 +90,13 @@ public class BuiltinFunction {
             // TODO(YilongL): is reflection/exception really the best way to
             // deal with builtin functions? builtin functions are supposed to be
             // super-fast...
-            Term t = (Term) table.get(label).invoke(null, args);
+            Method method = table.get(label);
+            /* do not evaluate meta functions during the compilation */
+            if (K.do_kompilation && method.getDeclaringClass().getSimpleName().equals("MetaK")) {
+                return null;
+            }
+
+            Term t = (Term) method.invoke(null, args);
             return t;
         } catch (InvocationTargetException e) {
             Throwable t = e.getTargetException();

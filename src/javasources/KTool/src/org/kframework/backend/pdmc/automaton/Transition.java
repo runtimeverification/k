@@ -25,7 +25,7 @@ public class Transition<State, Alphabet> {
 
     private final Alphabet letter;
 
-    private Transition(State startState, Alphabet letter, State endState) {
+    protected Transition(State startState, Alphabet letter, State endState) {
         this.startState = startState;
         this.endState = endState;
         this.letter = letter;
@@ -34,17 +34,17 @@ public class Transition<State, Alphabet> {
     public static <State,Alphabet> Transition<State, Alphabet> of(State startState,
                                                                       Alphabet letter,
                                                                       State endState) {
-        if (cache == null) cache = new HashMap<TransitionIndex, Map<Object, Transition>>();
+        if (cache == null) cache = new HashMap<>();
         TransitionIndex<State, Alphabet> index = TransitionIndex.of(startState, letter);
         Map<Object, Transition> map = cache.get(index);
         if (map == null) {
-            map = new HashMap<Object, Transition>();
+            map = new HashMap<>();
             cache.put(index, map);
         }
         @SuppressWarnings("unchecked")
         Transition<State, Alphabet> transition = (Transition<State, Alphabet>) map.get(endState);
         if (transition == null) {
-            transition = new Transition<State, Alphabet>(startState, letter, endState);
+            transition = new Transition<>(startState, letter, endState);
             map.put(endState, transition);
         }
         return transition;
@@ -68,11 +68,33 @@ public class Transition<State, Alphabet> {
             letter = strings[i++];
         }
         PAutomatonState<String,String> endState = PAutomatonState.ofString(strings[i]);
-        return new Transition<PAutomatonState<String, String>, String>(startState, letter, endState);
+        return new Transition<>(startState, letter, endState);
     }
 
     @Override
     public String toString() {
         return startState + " " + (letter != null ? letter + " " : "") + endState;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Transition that = (Transition) o;
+
+        if (!endState.equals(that.endState)) return false;
+        if (letter != null ? !letter.equals(that.letter) : that.letter != null) return false;
+        if (!startState.equals(that.startState)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = startState.hashCode();
+        result = 31 * result + endState.hashCode();
+        result = 31 * result + (letter != null ? letter.hashCode() : 0);
+        return result;
     }
 }
