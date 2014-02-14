@@ -35,7 +35,6 @@ public class Rule extends JavaSymbolicObject {
     private final UninterpretedConstraint lookups;
     private final IndexingPair indexingPair;
     private final boolean containsKCell;
-    private final boolean containsFunctionOnRHS;
     private final boolean hasUnboundedVars;
     private int hashCode = 0;
 
@@ -78,24 +77,13 @@ public class Rule extends JavaSymbolicObject {
             }
         });
         containsKCell = tempContainsKCell;
-        
-        rightHandSide.accept(new BottomUpVisitor() {
-            @Override
-            public void visit(KLabelConstant kLabel) {
-                if (kLabel.isFunction()) {
-                    tempContainsFunctionOnRHS = true;
-                }
-            }
-        });
-        containsFunctionOnRHS = tempContainsFunctionOnRHS;
-        
+               
         hasUnboundedVars = attributes.containsAttribute(CheckVariables.UNBOUNDED_VARS);
 
         super.setAttributes(attributes);
     }
 
     private boolean tempContainsKCell = false;
-    private boolean tempContainsFunctionOnRHS = false;
     
     /*
     public Rule(Term leftHandSide, Term rightHandSide, Term requires) {
@@ -135,10 +123,6 @@ public class Rule extends JavaSymbolicObject {
         assert super.containsAttribute(Attribute.FUNCTION_KEY);
 
         return (KLabelConstant) ((KItem) leftHandSide).kLabel();
-    }
-
-    public boolean containsFunctionOnRHS() {
-        return containsFunctionOnRHS;
     }
 
     /**

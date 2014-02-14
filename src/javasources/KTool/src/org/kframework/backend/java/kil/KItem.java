@@ -304,12 +304,9 @@ public class KItem extends Term implements Sorted {
                         result = result.substituteWithBinders(freshSubstitution, context);
                     }
                     /* apply the constraints substitution on the rule RHS */
-                    rightHandSide = rightHandSide.substituteWithBinders(solution.substitution(),
+                    rightHandSide = rightHandSide.substituteAndEvaluate(
+                            solution.substitution(),
                             constrainedTerm.termContext());
-                    if (rule.containsFunctionOnRHS()) {
-                        /* evaluate pending functions in the rule RHS */
-                        rightHandSide = rightHandSide.evaluate(constrainedTerm.termContext());
-                    }
                     /* eliminate anonymous variables */
                     solution.eliminateAnonymousVariables();
 
