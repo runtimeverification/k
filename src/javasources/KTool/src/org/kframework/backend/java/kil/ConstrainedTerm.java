@@ -199,13 +199,9 @@ public class ConstrainedTerm extends Term {
         /* compute the type of the unification between two terms */
         unificationConstraint.orientSubstitution(
                 constrainedTerm.term.variableSet());
-        if (unificationConstraint.isSubstitution()
-                && unificationConstraint.substitution().keySet()
-                        .equals(constrainedTerm.term.variableSet())) {
-            typeOfUnification = UnificationType.PatternMatching;
-        } else {
-            typeOfUnification = UnificationType.Narrowing;
-        }
+        typeOfUnification = isPatternMatching(unificationConstraint,
+                constrainedTerm.term.variableSet()) ? UnificationType.PatternMatching
+                : UnificationType.Narrowing;
 
         List<SymbolicConstraint> solutions = new ArrayList<SymbolicConstraint>();
         for (SymbolicConstraint candidate : unificationConstraint.getMultiConstraints()) {
@@ -406,6 +402,33 @@ public class ConstrainedTerm extends Term {
         }
 
         return solutions;
+    }
+    
+    /**
+     * Private helper method that checks if result of the unification is a
+     * pattern matching.
+     * 
+     * @param unifCnstr
+     *            the result unification constraint
+     * @param patternVars
+     *            the variables in the pattern term
+     * @return {@code true} if the result is a pattern matching; otherwise,
+     *         {@code false}
+     */
+    private boolean isPatternMatching(SymbolicConstraint unifCnstr, Set<Variable> patternVars) {
+        if (unifCnstr.isSubstitution()
+                && unifCnstr.substitution().keySet().equals(patternVars)) {
+            for (Variable patternVar : patternVars) {
+                Sorted subst = (Sorted) unifCnstr.substitution().get(patternVar);
+                if ((subst instanceof Variable) && 
+                        context.definition().context().isSubsorted(((Sorted) subst).sort(), patternVar.sort())) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            return false;
+        }            
     }
 
     private Set<Variable> computeSortIntersection(String sort1, String sort2) {
