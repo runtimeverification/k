@@ -15,20 +15,20 @@ module LIST
 
   /*@ \section{User-Defined Lists} It is very common in \K to define a shorthand
    for lists of user-defined sorts. \K 's builtin way of doing this is to use
-   List\left{K,"Separator"\right}, where "Separator" is any valid character or sequence of
+   List\{K,"Separator"\}, where "Separator" is any valid character or sequence of
    characters used to separate distinct elements.
    For example, after defining \\
    syntax K ::= Elt\\ 
    a user could then define
-   syntax Elts ::= List\left{Elt,","\right} \\
+   syntax Elts ::= List\{Elt,","\} \\
    which would be a comma-separated list whose elements are all of sort Elt. A
    user could just as well define \\
-   syntax Elts ::= List\left{Elt,"and"\right} \\
+   syntax Elts ::= List\{Elt,"and"\} \\
    which would be a list containing elements of sort Elt that are separated with
    the word "and". If only one argument is given, the separator is asumed to be
    commas. So, \\
-   syntax Elts = List\left{Elt\right} \\
-   sould define a comma-separated list containing elements of sort Elt.
+   syntax Elts = List\{Elt\} \\
+   would define a comma-separated list containing elements of sort Elt.
   */
 
 

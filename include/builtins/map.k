@@ -8,8 +8,7 @@ module MAP
 
   /*@\section{Description} The Map represents a generalized associative array;
    arbitrary keys can be paired with arbitrary values; the values can later
-   be referenced using the key.
-  (TODO: What are all these "MyMap"s doing? how are they different from Maps?) 
+   be referenced using the key. 
   */
 
   /*@ Construct a new Map consisting of key-value pairs of multiple Maps (deep copy) (TODO: double-check this):*/

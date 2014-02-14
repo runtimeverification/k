@@ -15,7 +15,7 @@ module SET
  */
 
 
-  /*@ Construct a set from the union of two different sets (A \cup B): */
+  /*@ Construct a set from the union of two different sets (A $\cup$ B): */
   syntax MySet ::= MySet "," MySet    [left, function, hook(Set:__), klabel('_Set_)]
   /*@ Construct an empty Set: */
   syntax MySet ::= ".MySet"       [function, hook(Set:.Set)]
@@ -37,16 +37,16 @@ module SET
 //  when notBool(K in S1)
 //  rule S:MySet -MySet .MySet => S
 
-  /*@ Construct a Set consisting of the intersection of two sets (A \cap B):*/
+  /*@ Construct a Set consisting of the intersection of two sets (A $\cap$ B):*/
   syntax MySet ::= intersectSet(MySet, MySet)   [function]
 //  rule intersectSet(S1:MySet, S2:MySet) => S1 -MySet (S1 -MySet S2)
 
-  /*@ Test element membership in a set ( a \epsilon A ) :*/
+  /*@ Test element membership in a set ( a $\epsilon$ A ) :*/
   syntax Bool ::= K "in" MySet    [function, hook(Set:in)]
 //  rule K1:K in MySetItem(K2:K) S:MySet => K1 =K K2 orBool K1 in S
 //  rule _ in .MySet => false
 
-  /*@ Get the cardinality of a set (\left|A\right|) :*/
+  /*@ Get the cardinality of a set (|A|) :*/
   syntax Int ::= size(MySet)   [function]
 //  rule size(MySetItem(_) S:MySet) => 1 +Int size(S)
 //  rule size(.MySet) => 0
