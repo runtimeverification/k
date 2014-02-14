@@ -265,7 +265,25 @@ public class KItem extends Term implements Sorted {
                     SymbolicConstraint solution = solutions.iterator().next();
                     if (K.do_kompilation) {
                         assert solutions.size() <= 1 : "function definition is not deterministic";
+                        // TODO(AndreiS): there is an issue with ConstrainedTerm#getTypeOfUnification because it does
+                        // not take into account lookups (which introduces new variables)
                         if (!(constrainedTerm.getTypeOfUnification() == UnificationType.PatternMatching && solution.isSubstitution())) {
+                            continue;
+                        }
+                        if (!solution.isSubstitution() || !solution.substitution().keySet().equals(leftHandSide.variableSet())) {
+                            continue;
+                        }
+
+                        boolean isMatching = true;
+                        for (Map.Entry<Variable, Term> entry : solution.substitution().entrySet()) {
+                            if (context.definition().context().isSubsortedEq(
+                                    entry.getValue() instanceof Sorted ?((Sorted) entry.getValue()).sort() : entry.getValue().kind().toString(),
+                                    entry.getKey().sort())) {
+                                isMatching = false;
+                                break;
+                            }
+                        }
+                        if (!isMatching) {
                             continue;
                         }
                     } else if (K.do_concrete_exec) {

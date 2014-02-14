@@ -120,7 +120,7 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
      * Returns a new {@code Term} instance obtained from this term by applying substitution.
      */
     public Term substituteAndEvaluate(Map<Variable, ? extends Term> substitution, TermContext context) {
-        // TODO(AndreiS): this does not evaluate the RHS of a rule if it is ground
+        // TODO(AndreiS): assert that there are not any unevaluated functions in this term
         if (substitution.isEmpty() || isGround()) {
             return this;
         }

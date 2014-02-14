@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.Iterables;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.Int32Token;
 import org.kframework.backend.java.builtins.IntToken;
@@ -672,6 +673,50 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         for (Production production : productions) {
             definition.addFrozenKLabel(KLabelConstant.of(production.getKLabel(), context));
         }
+
+        /*
+         * Partially evaluate functions in the rules of the definition
+         */
+        /* initialize the builtin function table */
+        BuiltinFunction.init(definition);
+
+        /* partially evaluate the right-hand side and the conditions for each rule */
+        TermContext termContext = TermContext.of(definition);
+        ArrayList<Rule> partiallyEvaluatedRules = new ArrayList<>();
+        for (Rule rule : Iterables.concat(definition.rules(), definition.functionRules().values(), definition.macros())) {
+            // TODO(AndreiS): some evaluation is required in the LHS as well
+            //Term leftHandSide = rule.leftHandSide().evaluate(termContext);
+            Term rightHandSide = rule.rightHandSide().evaluate(termContext);
+            List<Term> requires = new ArrayList<>();
+            for (Term term : rule.requires()) {
+                requires.add(term.evaluate(termContext));
+            }
+            List<Term> ensures = new ArrayList<>();
+            for (Term term : rule.ensures()) {
+                ensures.add(term.evaluate(termContext));
+            }
+            UninterpretedConstraint lookups = new UninterpretedConstraint();
+            for (UninterpretedConstraint.Equality equality : rule.lookups().equalities()) {
+                lookups.add(
+                        equality.leftHandSide().evaluate(termContext),
+                        equality.rightHandSide().evaluate(termContext));
+            }
+            partiallyEvaluatedRules.add(new Rule(
+                    rule.label(),
+                    rule.leftHandSide(),
+                    rightHandSide,
+                    requires,
+                    ensures,
+                    rule.freshVariables(),
+                    lookups,
+                    rule.getAttributes()));
+        }
+
+         /* replace the unevaluated rules with the partially evaluated rules */
+        definition.rules().clear();
+        definition.functionRules().clear();
+        definition.macros().clear();
+        definition.addRuleCollection(partiallyEvaluatedRules);
 
         this.definition = null;
         return definition;
