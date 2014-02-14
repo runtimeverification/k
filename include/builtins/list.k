@@ -10,8 +10,11 @@ module LIST
    duplicate elements. These behave more like lists in functional programming
    languages than arrays in imperative programming languages; there's no
    numerical indexing, but instead specific elements are refered to using the
-   Mylist,Mylist construct in combination with the MyListItem construct. For
-   example, to refer to element E in a MyList, one would write L:Mylist,E . */
+   Mylist,Mylist construct in combination with the MyListItem construct. It's 
+   worth noting that \K lists aren't exactly like lists in functional languages;
+   they're associative, which means that it's easy to access elements at both
+   ends of the lists and concatenate them. For example, L:Mylist,E accesses
+   element E at the end of a list. */
 
   /*@ \section{User-Defined Lists} It is very common in \K to define a shorthand
    for lists of user-defined sorts. \K 's builtin way of doing this is to use
