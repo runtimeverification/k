@@ -199,10 +199,17 @@ public class ConstrainedTerm extends Term {
         /* compute the type of the unification between two terms */
         unificationConstraint.orientSubstitution(
                 constrainedTerm.term.variableSet());
-        typeOfUnification = isPatternMatching(unificationConstraint,
-                constrainedTerm.term.variableSet()) ? UnificationType.PatternMatching
-                : UnificationType.Narrowing;
-
+//        typeOfUnification = isPatternMatching(unificationConstraint,
+//                constrainedTerm.term.variableSet()) ? UnificationType.PatternMatching
+//                : UnificationType.Narrowing;
+        if (unificationConstraint.isSubstitution()
+                && unificationConstraint.substitution().keySet()
+                        .equals(constrainedTerm.term.variableSet())) {
+            typeOfUnification = UnificationType.PatternMatching;
+        } else {
+            typeOfUnification = UnificationType.Narrowing;
+        }
+        
         List<SymbolicConstraint> solutions = new ArrayList<SymbolicConstraint>();
         for (SymbolicConstraint candidate : unificationConstraint.getMultiConstraints()) {
             if (SymbolicConstraint.TruthValue.FALSE == candidate.addAll(constrainedTerm.lookups)) continue;
@@ -418,13 +425,13 @@ public class ConstrainedTerm extends Term {
     private boolean isPatternMatching(SymbolicConstraint unifCnstr, Set<Variable> patternVars) {
         if (unifCnstr.isSubstitution()
                 && unifCnstr.substitution().keySet().equals(patternVars)) {
-            for (Variable patternVar : patternVars) {
-                Sorted subst = (Sorted) unifCnstr.substitution().get(patternVar);
-                if ((subst instanceof Variable) && 
-                        context.definition().context().isSubsorted(((Sorted) subst).sort(), patternVar.sort())) {
-                    return false;
-                }
-            }
+//            for (Variable patternVar : patternVars) {
+//                Sorted subst = (Sorted) unifCnstr.substitution().get(patternVar);
+//                if ((subst instanceof Variable) && 
+//                        context.definition().context().isSubsorted(((Sorted) subst).sort(), patternVar.sort())) {
+//                    return false;
+//                }
+//            }
             return true;
         } else {
             return false;

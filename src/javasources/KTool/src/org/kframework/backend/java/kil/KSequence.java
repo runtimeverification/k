@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.KSorts;
 import org.kframework.kil.ASTNode;
 
 
@@ -24,7 +25,7 @@ import org.kframework.kil.ASTNode;
  * @author AndreiS
  */
 @SuppressWarnings("serial")
-public class KSequence extends KCollection {
+public class KSequence extends KCollection /*implements Sorted*/ {
 
     private static final String SEPARATOR_NAME = " ~> ";
     private static final String IDENTITY_NAME = "." + Kind.K;
@@ -103,4 +104,8 @@ public class KSequence extends KCollection {
         return transformer.transform(this);
     }
 
+//    @Override
+//    public String sort() {
+//        return KSorts.KSEQUENCE;
+//    }
 }
