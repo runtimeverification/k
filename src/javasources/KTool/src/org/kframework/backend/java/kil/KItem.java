@@ -330,7 +330,8 @@ public class KItem extends Term implements Sorted {
                     }
 
                     if (K.do_concrete_exec) {
-                        assert result == null : "function definition is not deterministic";
+                        assert result == null || result.equals(rightHandSide):
+                                "function definition is not deterministic";
                     }
                     result = rightHandSide;
                 }

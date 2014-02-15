@@ -9,6 +9,7 @@ import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.UninterpretedConstraint;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.Utils;
 import org.kframework.compile.checks.CheckVariables;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
@@ -35,6 +36,7 @@ public class Rule extends JavaSymbolicObject {
     private final IndexingPair indexingPair;
     private final boolean containsKCell;
     private final boolean hasUnboundedVars;
+    private int hashCode = 0;
 
     public Rule(
             String label,
@@ -162,6 +164,41 @@ public class Rule extends JavaSymbolicObject {
     @Override
     public Rule substituteWithBinders(Variable variable, Term term, TermContext context) {
         return (Rule) super.substituteWithBinders(variable, term, context);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+
+        if (!(object instanceof Rule)) {
+            return false;
+        }
+
+        Rule rule = (Rule) object;
+        return label.equals(rule.label)
+                && leftHandSide.equals(rule.leftHandSide)
+                && rightHandSide.equals(rule.rightHandSide)
+                && requires.equals(rule.requires)
+                && ensures.equals(rule.ensures)
+                && lookups.equals(rule.lookups)
+                && freshVariables.equals(rule.freshVariables);
+    }
+
+    @Override
+    public int hashCode() {
+        if (hashCode == 0) {
+            hashCode = 1;
+            hashCode = hashCode * Utils.HASH_PRIME + label.hashCode();
+            hashCode = hashCode * Utils.HASH_PRIME + leftHandSide.hashCode();
+            hashCode = hashCode * Utils.HASH_PRIME + rightHandSide.hashCode();
+            hashCode = hashCode * Utils.HASH_PRIME + requires.hashCode();
+            hashCode = hashCode * Utils.HASH_PRIME + ensures.hashCode();
+            hashCode = hashCode * Utils.HASH_PRIME + lookups.hashCode();
+            hashCode = hashCode * Utils.HASH_PRIME + freshVariables.hashCode();
+        }
+        return hashCode;
     }
 
     @Override
