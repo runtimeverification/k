@@ -1,6 +1,7 @@
 package org.kframework.backend.java.indexing.pathIndex.visitors;
 
 import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.symbolic.LocalVisitor;
 import org.kframework.backend.java.util.LookupCell;
@@ -54,8 +55,8 @@ public class RuleVisitor extends LocalVisitor {
 
     @Override
     public void visit(KItem kItem) {
-        visit((KLabelConstant)kItem.kLabel());
-        visit((KList)kItem.kList());
+        kItem.kLabel().accept(this);
+        visit((KList) kItem.kList());
     }
 
 //    @Override
@@ -66,6 +67,11 @@ public class RuleVisitor extends LocalVisitor {
     @Override
     public void visit(KLabelConstant kLabel) {
         pString = pString.concat(kLabel.toString());
+    }
+
+    @Override
+    public void visit(KLabelInjection kLabelInjection) {
+        super.visit(kLabelInjection);
     }
 
     @Override
@@ -95,6 +101,11 @@ public class RuleVisitor extends LocalVisitor {
     public void visit(Variable variable) {
         pStrings.add(pString + variable.sort());
 
+    }
+
+    @Override
+    public void visit(UninterpretedToken uninterpretedToken) {
+        pStrings.add(pString + uninterpretedToken.sort());
     }
 
     @Override

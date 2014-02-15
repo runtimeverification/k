@@ -31,7 +31,8 @@ public class MultipleCellUtil {
                 try {
                     backendKILCell = (Cell)entry.getValue().cell.accept(new KILtoBackendJavaKILTransformer(context));
                     Term kCell = LookupCell.find(backendKILCell, "k");
-                    if (LookupCell.find(kCell, "k") != null){
+//                    System.out.println("kCell: "+ kCell);
+                    if (kCell != null && LookupCell.find(kCell, "k") != null){
                         starCellHolder = new MultiplicityStarCellHolder();
                         starCellHolder.setCellWithMultipleK(entry.getKey());
                         starCellHolder.setParentOfCellWithMultipleK(entry.getValue().parent.cell.getId());
