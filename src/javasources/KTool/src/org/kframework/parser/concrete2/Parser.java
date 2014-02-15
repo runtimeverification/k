@@ -1,18 +1,5 @@
 package org.kframework.parser.concrete2;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.ThreadMXBean;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.regex.Pattern;
-
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.KList;
 import org.kframework.kil.Term;
@@ -22,8 +9,14 @@ import org.kframework.parser.concrete2.Grammar.NonTerminal;
 import org.kframework.parser.concrete2.Grammar.NonTerminalId;
 import org.kframework.parser.concrete2.Grammar.NonTerminalState;
 import org.kframework.parser.concrete2.Grammar.PrimitiveState;
+import org.kframework.parser.concrete2.Grammar.RegExState;
 import org.kframework.parser.concrete2.Grammar.State;
 import org.kframework.parser.concrete2.Grammar.StateId;
+
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
+import java.util.*;
+import java.util.regex.Pattern;
 
 /*
 
@@ -436,13 +429,13 @@ public class Parser {
             e.printStackTrace();
         }
 
-        Grammar.NonTerminalId ntistart = new Grammar.NonTerminalId("StartNT");
-        Grammar.StateId stistart = new Grammar.StateId("StartState");
-        Grammar.StateId stiend = new Grammar.StateId("EndState");
+        NonTerminalId ntistart = new NonTerminalId("StartNT");
+        StateId stistart = new StateId("StartState");
+        StateId stiend = new StateId("EndState");
 
-        Grammar.NonTerminal nt1 = new Grammar.NonTerminal(ntistart, stistart, new Grammar.State.OrderingInfo(0), stiend, new Grammar.State.OrderingInfo(100));
+        NonTerminal nt1 = new NonTerminal(ntistart, stistart, new State.OrderingInfo(0), stiend, new State.OrderingInfo(100));
 
-        Grammar.RegExState res1 = new Grammar.RegExState(new Grammar.StateId("RegExStid"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("[a-zA-Z0-9]"));
+        RegExState res1 = new RegExState(new StateId("RegExStid"), nt1, new State.OrderingInfo(1), Pattern.compile("[a-zA-Z0-9]"));
 
         nt1.entryState.next.add(res1);
         nt1.entryState.next.add(nt1.exitState);

@@ -2,10 +2,15 @@ package org.kframework.parser.concrete2;
 
 import junit.framework.TestCase;
 import org.kframework.kil.*;
-import org.kframework.utils.Stopwatch;
-import java.lang.management.*;
+import org.kframework.parser.concrete2.Grammar.NonTerminal;
+import org.kframework.parser.concrete2.Grammar.NonTerminalId;
+import org.kframework.parser.concrete2.Grammar.NonTerminalState;
+import org.kframework.parser.concrete2.Grammar.RegExState;
+import org.kframework.parser.concrete2.Grammar.State;
+import org.kframework.parser.concrete2.Grammar.StateId;
 
-import java.util.ArrayList;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
@@ -24,14 +29,14 @@ public class ParserTest extends TestCase {
     }*/
 
     public void testEmptyGrammar() throws Exception {
-        Grammar.NonTerminalId ntistart = new Grammar.NonTerminalId("StartNT");
-        Grammar.StateId stistart = new Grammar.StateId("StartState");
-        Grammar.StateId stiend = new Grammar.StateId("EndState");
+        NonTerminalId ntistart = new NonTerminalId("StartNT");
+        StateId stistart = new StateId("StartState");
+        StateId stiend = new StateId("EndState");
 
-        Grammar.State.OrderingInfo oinf2 = new Grammar.State.OrderingInfo(2);
-        Grammar.State.OrderingInfo oinf3 = new Grammar.State.OrderingInfo(3);
+        State.OrderingInfo oinf2 = new State.OrderingInfo(2);
+        State.OrderingInfo oinf3 = new State.OrderingInfo(3);
 
-        Grammar.NonTerminal nt1 = new Grammar.NonTerminal(ntistart, stistart, oinf2, stiend, oinf3);
+        NonTerminal nt1 = new NonTerminal(ntistart, stistart, oinf2, stiend, oinf3);
 
         nt1.entryState.next.add(nt1.exitState);
 
@@ -41,17 +46,16 @@ public class ParserTest extends TestCase {
         Term expected = amb(klist(amb(KList.EMPTY)));
 
         assertEquals("Empty Grammar check: ", expected, result);
-
     }
 
     public void testSingleToken() throws Exception {
-        Grammar.NonTerminalId ntistart = new Grammar.NonTerminalId("StartNT");
-        Grammar.StateId stistart = new Grammar.StateId("StartState");
-        Grammar.StateId stiend = new Grammar.StateId("EndState");
+        NonTerminalId ntistart = new NonTerminalId("StartNT");
+        StateId stistart = new StateId("StartState");
+        StateId stiend = new StateId("EndState");
 
-        Grammar.NonTerminal nt1 = new Grammar.NonTerminal(ntistart, stistart, new Grammar.State.OrderingInfo(0), stiend, new Grammar.State.OrderingInfo(100));
+        NonTerminal nt1 = new NonTerminal(ntistart, stistart, new State.OrderingInfo(0), stiend, new State.OrderingInfo(100));
 
-        Grammar.RegExState res = new Grammar.RegExState(new Grammar.StateId("RegExStid"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("[a-zA-Z0-9]+"));
+        RegExState res = new RegExState(new StateId("RegExStid"), nt1, new State.OrderingInfo(1), Pattern.compile("[a-zA-Z0-9]+"));
 
 
         nt1.entryState.next.add(res);
@@ -66,14 +70,14 @@ public class ParserTest extends TestCase {
     }
 
     public void testSequenceOfTokens() throws Exception {
-        Grammar.NonTerminalId ntistart = new Grammar.NonTerminalId("StartNT");
-        Grammar.StateId stistart = new Grammar.StateId("StartState");
-        Grammar.StateId stiend = new Grammar.StateId("EndState");
+        NonTerminalId ntistart = new NonTerminalId("StartNT");
+        StateId stistart = new StateId("StartState");
+        StateId stiend = new StateId("EndState");
 
-        Grammar.NonTerminal nt1 = new Grammar.NonTerminal(ntistart, stistart, new Grammar.State.OrderingInfo(0), stiend, new Grammar.State.OrderingInfo(100));
+        NonTerminal nt1 = new NonTerminal(ntistart, stistart, new State.OrderingInfo(0), stiend, new State.OrderingInfo(100));
 
-        Grammar.RegExState res1 = new Grammar.RegExState(new Grammar.StateId("RegExStid"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("[a-zA-Z0-9]+ +"));
-        Grammar.RegExState res2 = new Grammar.RegExState(new Grammar.StateId("RegExStid2"), nt1, new Grammar.State.OrderingInfo(2), Pattern.compile("[a-zA-Z0-9]+"));
+        RegExState res1 = new RegExState(new StateId("RegExStid"), nt1, new State.OrderingInfo(1), Pattern.compile("[a-zA-Z0-9]+ +"));
+        RegExState res2 = new RegExState(new StateId("RegExStid2"), nt1, new State.OrderingInfo(2), Pattern.compile("[a-zA-Z0-9]+"));
 
 
         nt1.entryState.next.add(res1);
@@ -89,15 +93,15 @@ public class ParserTest extends TestCase {
     }
 
     public void testDisjunctionOfTokens() throws Exception {
-        Grammar.NonTerminalId ntistart = new Grammar.NonTerminalId("StartNT");
-        Grammar.StateId stistart = new Grammar.StateId("StartState");
-        Grammar.StateId stiend = new Grammar.StateId("EndState");
+        NonTerminalId ntistart = new NonTerminalId("StartNT");
+        StateId stistart = new StateId("StartState");
+        StateId stiend = new StateId("EndState");
 
-        Grammar.NonTerminal nt1 = new Grammar.NonTerminal(ntistart, stistart, new Grammar.State.OrderingInfo(0), stiend, new Grammar.State.OrderingInfo(100));
+        NonTerminal nt1 = new NonTerminal(ntistart, stistart, new State.OrderingInfo(0), stiend, new State.OrderingInfo(100));
 
-        Grammar.RegExState res1 = new Grammar.RegExState(new Grammar.StateId("RegExStid"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("[a-z0-9]+"));
-        Grammar.RegExState res2 = new Grammar.RegExState(new Grammar.StateId("RegExStid2"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("[A-Z0-2]+"));
-        Grammar.RegExState res3 = new Grammar.RegExState(new Grammar.StateId("RegExStid3"), nt1, new Grammar.State.OrderingInfo(2), Pattern.compile("[3-9]*"));
+        RegExState res1 = new RegExState(new StateId("RegExStid"), nt1, new State.OrderingInfo(1), Pattern.compile("[a-z0-9]+"));
+        RegExState res2 = new RegExState(new StateId("RegExStid2"), nt1, new State.OrderingInfo(1), Pattern.compile("[A-Z0-2]+"));
+        RegExState res3 = new RegExState(new StateId("RegExStid3"), nt1, new State.OrderingInfo(2), Pattern.compile("[3-9]*"));
 
         nt1.entryState.next.add(res1);
         nt1.entryState.next.add(res2);
@@ -125,13 +129,13 @@ public class ParserTest extends TestCase {
     }
 
     public void testListOfTokens() throws Exception {
-        Grammar.NonTerminalId ntistart = new Grammar.NonTerminalId("StartNT");
-        Grammar.StateId stistart = new Grammar.StateId("StartState");
-        Grammar.StateId stiend = new Grammar.StateId("EndState");
+        NonTerminalId ntistart = new NonTerminalId("StartNT");
+        StateId stistart = new StateId("StartState");
+        StateId stiend = new StateId("EndState");
 
-        Grammar.NonTerminal nt1 = new Grammar.NonTerminal(ntistart, stistart, new Grammar.State.OrderingInfo(0), stiend, new Grammar.State.OrderingInfo(100));
+        NonTerminal nt1 = new NonTerminal(ntistart, stistart, new State.OrderingInfo(0), stiend, new State.OrderingInfo(100));
 
-        Grammar.RegExState res1 = new Grammar.RegExState(new Grammar.StateId("RegExStid"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("[a-zA-Z0-9]"));
+        RegExState res1 = new RegExState(new StateId("RegExStid"), nt1, new State.OrderingInfo(1), Pattern.compile("[a-zA-Z0-9]"));
 
         nt1.entryState.next.add(res1);
         nt1.entryState.next.add(nt1.exitState);
@@ -173,16 +177,16 @@ public class ParserTest extends TestCase {
     public void testNestedNonTerminals1() throws Exception {
         // A ::= ""
         //     | x A y
-        Grammar.NonTerminalId ntistart = new Grammar.NonTerminalId("StartNT");
-        Grammar.StateId stistart = new Grammar.StateId("StartState");
-        Grammar.StateId stiend = new Grammar.StateId("EndState");
+        NonTerminalId ntistart = new NonTerminalId("StartNT");
+        StateId stistart = new StateId("StartState");
+        StateId stiend = new StateId("EndState");
 
-        Grammar.NonTerminal nt1 = new Grammar.NonTerminal(ntistart, stistart, new Grammar.State.OrderingInfo(0), stiend, new Grammar.State.OrderingInfo(100));
+        NonTerminal nt1 = new NonTerminal(ntistart, stistart, new State.OrderingInfo(0), stiend, new State.OrderingInfo(100));
 
-        Grammar.RegExState resx = new Grammar.RegExState(new Grammar.StateId("RegExStidx"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("x"));
-        Grammar.RegExState resy = new Grammar.RegExState(new Grammar.StateId("RegExStidy"), nt1, new Grammar.State.OrderingInfo(3), Pattern.compile("y"));
+        RegExState resx = new RegExState(new StateId("RegExStidx"), nt1, new State.OrderingInfo(1), Pattern.compile("x"));
+        RegExState resy = new RegExState(new StateId("RegExStidy"), nt1, new State.OrderingInfo(3), Pattern.compile("y"));
 
-        Grammar.NonTerminalState nts = new Grammar.NonTerminalState(new Grammar.StateId("NT"), nt1, new Grammar.State.OrderingInfo(2), nt1, false);
+        NonTerminalState nts = new NonTerminalState(new StateId("NT"), nt1, new State.OrderingInfo(2), nt1, false);
 
         nt1.entryState.next.add(resx);
         nt1.entryState.next.add(nt1.exitState);
@@ -206,15 +210,15 @@ public class ParserTest extends TestCase {
     public void testNestedNonTerminals2() throws Exception {
         // A ::= ""
         //     | A y
-        Grammar.NonTerminalId ntistart = new Grammar.NonTerminalId("StartNT");
-        Grammar.StateId stistart = new Grammar.StateId("StartState");
-        Grammar.StateId stiend = new Grammar.StateId("EndState");
+        NonTerminalId ntistart = new NonTerminalId("StartNT");
+        StateId stistart = new StateId("StartState");
+        StateId stiend = new StateId("EndState");
 
-        Grammar.NonTerminal nt1 = new Grammar.NonTerminal(ntistart, stistart, new Grammar.State.OrderingInfo(0), stiend, new Grammar.State.OrderingInfo(100));
+        NonTerminal nt1 = new NonTerminal(ntistart, stistart, new State.OrderingInfo(0), stiend, new State.OrderingInfo(100));
 
-        Grammar.RegExState resy = new Grammar.RegExState(new Grammar.StateId("RegExStidy"), nt1, new Grammar.State.OrderingInfo(3), Pattern.compile("y"));
+        RegExState resy = new RegExState(new StateId("RegExStidy"), nt1, new State.OrderingInfo(3), Pattern.compile("y"));
 
-        Grammar.NonTerminalState nts = new Grammar.NonTerminalState(new Grammar.StateId("NT"), nt1, new Grammar.State.OrderingInfo(2), nt1, false);
+        NonTerminalState nts = new NonTerminalState(new StateId("NT"), nt1, new State.OrderingInfo(2), nt1, false);
 
         nt1.entryState.next.add(nts);
         nt1.entryState.next.add(nt1.exitState);
@@ -237,15 +241,15 @@ public class ParserTest extends TestCase {
     public void testNestedNonTerminals3() throws Exception {
         // A ::= ""
         //     | x A
-        Grammar.NonTerminalId ntistart = new Grammar.NonTerminalId("StartNT");
-        Grammar.StateId stistart = new Grammar.StateId("StartState");
-        Grammar.StateId stiend = new Grammar.StateId("EndState");
+        NonTerminalId ntistart = new NonTerminalId("StartNT");
+        StateId stistart = new StateId("StartState");
+        StateId stiend = new StateId("EndState");
 
-        Grammar.NonTerminal nt1 = new Grammar.NonTerminal(ntistart, stistart, new Grammar.State.OrderingInfo(0), stiend, new Grammar.State.OrderingInfo(100));
+        NonTerminal nt1 = new NonTerminal(ntistart, stistart, new State.OrderingInfo(0), stiend, new State.OrderingInfo(100));
 
-        Grammar.RegExState resx = new Grammar.RegExState(new Grammar.StateId("RegExStidx"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("x"));
+        RegExState resx = new RegExState(new StateId("RegExStidx"), nt1, new State.OrderingInfo(1), Pattern.compile("x"));
 
-        Grammar.NonTerminalState nts = new Grammar.NonTerminalState(new Grammar.StateId("NT"), nt1, new Grammar.State.OrderingInfo(2), nt1, false);
+        NonTerminalState nts = new NonTerminalState(new StateId("NT"), nt1, new State.OrderingInfo(2), nt1, false);
 
         nt1.entryState.next.add(resx);
         nt1.entryState.next.add(nt1.exitState);
@@ -268,16 +272,16 @@ public class ParserTest extends TestCase {
     public void testNestedNonTerminals4() throws Exception {
         // A ::= "x"
         //     | A A
-        Grammar.NonTerminalId ntistart = new Grammar.NonTerminalId("StartNT");
-        Grammar.StateId stistart = new Grammar.StateId("StartState");
-        Grammar.StateId stiend = new Grammar.StateId("EndState");
+        NonTerminalId ntistart = new NonTerminalId("StartNT");
+        StateId stistart = new StateId("StartState");
+        StateId stiend = new StateId("EndState");
 
-        Grammar.NonTerminal nt1 = new Grammar.NonTerminal(ntistart, stistart, new Grammar.State.OrderingInfo(0), stiend, new Grammar.State.OrderingInfo(100));
+        NonTerminal nt1 = new NonTerminal(ntistart, stistart, new State.OrderingInfo(0), stiend, new State.OrderingInfo(100));
 
-        Grammar.RegExState resx = new Grammar.RegExState(new Grammar.StateId("RegExStidx"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("x"));
+        RegExState resx = new RegExState(new StateId("RegExStidx"), nt1, new State.OrderingInfo(1), Pattern.compile("x"));
 
-        Grammar.NonTerminalState nts1 = new Grammar.NonTerminalState(new Grammar.StateId("NT1"), nt1, new Grammar.State.OrderingInfo(2), nt1, false);
-        Grammar.NonTerminalState nts2 = new Grammar.NonTerminalState(new Grammar.StateId("NT2"), nt1, new Grammar.State.OrderingInfo(3), nt1, false);
+        NonTerminalState nts1 = new NonTerminalState(new StateId("NT1"), nt1, new State.OrderingInfo(2), nt1, false);
+        NonTerminalState nts2 = new NonTerminalState(new StateId("NT2"), nt1, new State.OrderingInfo(3), nt1, false);
 
         nt1.entryState.next.add(resx);
         nt1.entryState.next.add(nts1);
@@ -318,13 +322,13 @@ public class ParserTest extends TestCase {
 
     public void testNestedNonTerminals5() throws Exception {
 
-        Grammar.NonTerminalId baseCaseId = new Grammar.NonTerminalId("BaseCase");
-        Grammar.StateId baseCaseEntry= new Grammar.StateId("BaseCaseEntry");
-        Grammar.StateId baseCaseExit = new Grammar.StateId("BaseCaseExit");
+        NonTerminalId baseCaseId = new NonTerminalId("BaseCase");
+        StateId baseCaseEntry= new StateId("BaseCaseEntry");
+        StateId baseCaseExit = new StateId("BaseCaseExit");
 
-        Grammar.NonTerminal baseCase = new Grammar.NonTerminal(baseCaseId, baseCaseEntry, new Grammar.State.OrderingInfo(-1),
-                                                                      baseCaseExit,  new Grammar.State.OrderingInfo(1));
-        Grammar.RegExState resx = new Grammar.RegExState(new Grammar.StateId("X"), baseCase, new Grammar.State.OrderingInfo(0), Pattern.compile("x"));
+        NonTerminal baseCase = new NonTerminal(baseCaseId, baseCaseEntry, new State.OrderingInfo(-1),
+                                                                      baseCaseExit,  new State.OrderingInfo(1));
+        RegExState resx = new RegExState(new StateId("X"), baseCase, new State.OrderingInfo(0), Pattern.compile("x"));
 
         baseCase.entryState.next.add(resx);
         resx.next.add(baseCase.exitState);
@@ -332,11 +336,11 @@ public class ParserTest extends TestCase {
         Term expected = amb(klist(Token.kAppOf("K", "x")));
 
         for (int i = 2; i < 10; i++) {
-            Grammar.NonTerminal nt = new Grammar.NonTerminal(new Grammar.NonTerminalId("NT"+i),
-                    new Grammar.StateId("NT"+1+"Entry"), new Grammar.State.OrderingInfo(-i),
-                    new Grammar.StateId("NT"+1+"Exit"), new Grammar.State.OrderingInfo(2*i-1));
-            Grammar.NonTerminalState state = new Grammar.NonTerminalState(
-                    new Grammar.StateId("S"+i), nt, new Grammar.State.OrderingInfo(2*i-2), baseCase, false);
+            NonTerminal nt = new NonTerminal(new NonTerminalId("NT"+i),
+                    new StateId("NT"+1+"Entry"), new State.OrderingInfo(-i),
+                    new StateId("NT"+1+"Exit"), new State.OrderingInfo(2*i-1));
+            NonTerminalState state = new NonTerminalState(
+                    new StateId("S"+i), nt, new State.OrderingInfo(2*i-2), baseCase, false);
             nt.entryState.next.add(state);
             state.next.add(nt.exitState);
             baseCase = nt;
@@ -351,30 +355,30 @@ public class ParserTest extends TestCase {
     }
 
     public void testArithmeticLanguage() throws Exception {
-        Grammar.NonTerminal lit = new Grammar.NonTerminal(new Grammar.NonTerminalId("Lit"),
-                new Grammar.StateId("LitEntry"), new Grammar.State.OrderingInfo(0),
-                new Grammar.StateId("LitExit"), new Grammar.State.OrderingInfo(1));
-        Grammar.NonTerminal trm = new Grammar.NonTerminal(new Grammar.NonTerminalId("Trm"),
-                new Grammar.StateId("TrmEntry"), new Grammar.State.OrderingInfo(0),
-                new Grammar.StateId("TrmExit"), new Grammar.State.OrderingInfo(3));
-        Grammar.NonTerminal exp = new Grammar.NonTerminal(new Grammar.NonTerminalId("Exp"),
-                new Grammar.StateId("ExpEntry"), new Grammar.State.OrderingInfo(0),
-                new Grammar.StateId("ExpExit"), new Grammar.State.OrderingInfo(5));
+        NonTerminal lit = new NonTerminal(new NonTerminalId("Lit"),
+                new StateId("LitEntry"), new State.OrderingInfo(0),
+                new StateId("LitExit"), new State.OrderingInfo(1));
+        NonTerminal trm = new NonTerminal(new NonTerminalId("Trm"),
+                new StateId("TrmEntry"), new State.OrderingInfo(0),
+                new StateId("TrmExit"), new State.OrderingInfo(3));
+        NonTerminal exp = new NonTerminal(new NonTerminalId("Exp"),
+                new StateId("ExpEntry"), new State.OrderingInfo(0),
+                new StateId("ExpExit"), new State.OrderingInfo(5));
 
         { // lit
-            Grammar.RegExState litState = new Grammar.RegExState(new Grammar.StateId("LitState"), lit, new Grammar.State.OrderingInfo(0), Pattern.compile("[0-9]+"));
+            RegExState litState = new RegExState(new StateId("LitState"), lit, new State.OrderingInfo(0), Pattern.compile("[0-9]+"));
             lit.entryState.next.add(litState);
             litState.next.add(lit.exitState);
         }
 
         { // trm
-            Grammar.RegExState lparen = new Grammar.RegExState(new Grammar.StateId("LParen"), trm, new Grammar.State.OrderingInfo(0), Pattern.compile("\\("));
-            Grammar.RegExState rparen = new Grammar.RegExState(new Grammar.StateId("RParen"), trm, new Grammar.State.OrderingInfo(0), Pattern.compile("\\)"));
-            Grammar.RegExState star = new Grammar.RegExState(new Grammar.StateId("Star"), trm, new Grammar.State.OrderingInfo(0), Pattern.compile("\\*"));
-            Grammar.NonTerminalState expState = new Grammar.NonTerminalState(new Grammar.StateId("Trm->Exp"), trm, new Grammar.State.OrderingInfo(6), exp, false);
-            Grammar.NonTerminalState trmState = new Grammar.NonTerminalState(new Grammar.StateId("Trm->Trm"), trm, new Grammar.State.OrderingInfo(4), trm, false);
-            Grammar.NonTerminalState lit1State = new Grammar.NonTerminalState(new Grammar.StateId("Trm->Lit1"), trm, new Grammar.State.OrderingInfo(2), lit, false);
-            Grammar.NonTerminalState lit2State = new Grammar.NonTerminalState(new Grammar.StateId("Trm->Lit2"), trm, new Grammar.State.OrderingInfo(2), lit, false);
+            RegExState lparen = new RegExState(new StateId("LParen"), trm, new State.OrderingInfo(0), Pattern.compile("\\("));
+            RegExState rparen = new RegExState(new StateId("RParen"), trm, new State.OrderingInfo(0), Pattern.compile("\\)"));
+            RegExState star = new RegExState(new StateId("Star"), trm, new State.OrderingInfo(0), Pattern.compile("\\*"));
+            NonTerminalState expState = new NonTerminalState(new StateId("Trm->Exp"), trm, new State.OrderingInfo(6), exp, false);
+            NonTerminalState trmState = new NonTerminalState(new StateId("Trm->Trm"), trm, new State.OrderingInfo(4), trm, false);
+            NonTerminalState lit1State = new NonTerminalState(new StateId("Trm->Lit1"), trm, new State.OrderingInfo(2), lit, false);
+            NonTerminalState lit2State = new NonTerminalState(new StateId("Trm->Lit2"), trm, new State.OrderingInfo(2), lit, false);
 
             trm.entryState.next.add(lparen);
             lparen.next.add(expState);
@@ -391,10 +395,10 @@ public class ParserTest extends TestCase {
         }
 
         { // exp
-            Grammar.RegExState plus = new Grammar.RegExState(new Grammar.StateId("Plus"), exp, new Grammar.State.OrderingInfo(0), Pattern.compile("\\+"));
-            Grammar.NonTerminalState expState = new Grammar.NonTerminalState(new Grammar.StateId("Exp->Exp"), exp, new Grammar.State.OrderingInfo(6), exp, false);
-            Grammar.NonTerminalState trm1State = new Grammar.NonTerminalState(new Grammar.StateId("Exp->Trm1"), exp, new Grammar.State.OrderingInfo(4), trm, false);
-            Grammar.NonTerminalState trm2State = new Grammar.NonTerminalState(new Grammar.StateId("Exp->Trm2"), exp, new Grammar.State.OrderingInfo(4), trm, false);
+            RegExState plus = new RegExState(new StateId("Plus"), exp, new State.OrderingInfo(0), Pattern.compile("\\+"));
+            NonTerminalState expState = new NonTerminalState(new StateId("Exp->Exp"), exp, new State.OrderingInfo(6), exp, false);
+            NonTerminalState trm1State = new NonTerminalState(new StateId("Exp->Trm1"), exp, new State.OrderingInfo(4), trm, false);
+            NonTerminalState trm2State = new NonTerminalState(new StateId("Exp->Trm2"), exp, new State.OrderingInfo(4), trm, false);
 
             exp.entryState.next.add(expState);
             expState.next.add(plus);
