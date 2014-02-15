@@ -138,7 +138,7 @@ the wrapper in the generated documentation, we associate it an
                | "(" Id ")" Exp          [strict(2)]
                | "new" Id "(" Exps ")"   [strict(2)]
                | Exp "." Id              [strict(1)]
-               > Exp "[" Exps "]"        [strict]
+               > Exp "[" Exps "]"        [strict, klabel("'_:Exp[_:Exps]")]
                > Exp "(" Exps ")"        [strict]
                | "-" Exp                 [strict]
                | "sizeOf" "(" Exp ")"    [strict]
