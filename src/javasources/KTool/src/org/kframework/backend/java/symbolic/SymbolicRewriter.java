@@ -393,9 +393,14 @@ public class SymbolicRewriter {
                         constrainedTerm.termContext());
 
                 for (SymbolicConstraint constraint1 : constrainedTerm.unify(leftHandSide)) {
-                    if (K.do_concrete_exec) {
-                        assert constraint1.isMatching(leftHandSide) : "Pattern matching expected in concrete execution mode";
-                    }
+                    /*
+                     * TODO(YilongL): had to comment out the following assertion
+                     * because logik.k uses unification even in concrete
+                     * execution mode
+                     */
+//                    if (K.do_concrete_exec) {
+//                        assert constraint1.isMatching(leftHandSide) : "Pattern matching expected in concrete execution mode";
+//                    }
                         
                     constraint1.orientSubstitution(rule.leftHandSide().variableSet());
                     constraint1.addAll(rule.ensures());
