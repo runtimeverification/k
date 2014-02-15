@@ -5,7 +5,6 @@ import java.util.Collection;
 
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.SortMembership;
-import org.kframework.backend.java.kil.ConstrainedTerm.UnificationType;
 import org.kframework.backend.java.symbolic.BuiltinFunction;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformer;
@@ -262,35 +261,12 @@ public class KItem extends Term implements Sorted {
                     SymbolicConstraint solution = solutions.iterator().next();
                     if (K.do_kompilation) {
                         assert solutions.size() <= 1 : "function definition is not deterministic";
-                        // TODO(AndreiS): there is an issue with ConstrainedTerm#getTypeOfUnification because it does
-                        // not take into account lookups (which introduces new variables)
-                        if (!(constrainedTerm.getTypeOfUnification() == UnificationType.PatternMatching && solution.isSubstitution())) {
-                            continue;
-                        }
-                        if (!solution.isSubstitution() || !solution.substitution().keySet().equals(leftHandSide.variableSet())) {
-                            continue;
-                        }
-
-                        boolean isMatching = true;
-                        for (Map.Entry<Variable, Term> entry : solution.substitution().entrySet()) {
-                            if (context.definition().context().isSubsortedEq(
-                                    entry.getValue() instanceof Sorted ?((Sorted) entry.getValue()).sort() : entry.getValue().kind().toString(),
-                                    entry.getKey().sort())) {
-                                isMatching = false;
-                                break;
-                            }
-                        }
-                        if (!isMatching) {
+                        if (!solution.isMatching(leftHandSide)) {
                             continue;
                         }
                     } else if (K.do_concrete_exec) {
                         assert solutions.size() <= 1 : "function definition is not deterministic";
-                        assert constrainedTerm.getTypeOfUnification() == UnificationType.PatternMatching : "the result of unification between:"
-                                + constrainedTerm.term()
-                                + " (the ground subject term) and "
-                                + leftHandSide.term()
-                                + " (the pattern) should be a substitution";
-                        assert solution.isSubstitution() : "the solution shall not contain pending functions but found:\n" + solution.equalities();
+                        assert solution.isMatching(leftHandSide) : "Pattern matching expected in concrete execution mode";
                     }
 
                     solution.orientSubstitution(rule.leftHandSide().variableSet());
@@ -304,9 +280,7 @@ public class KItem extends Term implements Sorted {
                         result = result.substituteWithBinders(freshSubstitution, context);
                     }
                     /* apply the constraints substitution on the rule RHS */
-                    rightHandSide = rightHandSide.substituteAndEvaluate(
-                            solution.substitution(),
-                            constrainedTerm.termContext());
+                    rightHandSide = rightHandSide.substituteAndEvaluate(solution.substitution(), context);
                     /* eliminate anonymous variables */
                     solution.eliminateAnonymousVariables();
 

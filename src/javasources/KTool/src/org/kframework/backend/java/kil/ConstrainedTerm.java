@@ -136,24 +136,6 @@ public class ConstrainedTerm extends Term {
     public Term term() {
         return term;
     }
-
-    public enum UnificationType {
-        PatternMatching, Narrowing, Failure
-    }
-    
-    /**
-     * TODO(YilongL)
-     */
-    private UnificationType typeOfUnification;
-    
-    public UnificationType getTypeOfUnification() {
-        assert typeOfUnification != null : 
-            "Unification result not available; this method can only be called " +
-            "at most once after each call of ConstrainedTerm#unify(ConstrainedTerm).";
-        UnificationType result = typeOfUnification;
-        typeOfUnification = null;
-        return result;
-    }
     
     /**
      * Unifies this constrained term with another constrained term.
@@ -182,8 +164,6 @@ public class ConstrainedTerm extends Term {
      * @return solutions to the unification problem
      */
     private List<SymbolicConstraint> unifyImpl(ConstrainedTerm constrainedTerm) {
-        typeOfUnification = UnificationType.Failure;
-        
         if (!term.kind.equals(constrainedTerm.term.kind)) {
             return Collections.emptyList();
         }
@@ -194,20 +174,6 @@ public class ConstrainedTerm extends Term {
         unificationConstraint.simplify();
         if (unificationConstraint.isFalse()) {
             return Collections.emptyList();
-        }
-        
-        /* compute the type of the unification between two terms */
-        unificationConstraint.orientSubstitution(
-                constrainedTerm.term.variableSet());
-//        typeOfUnification = isPatternMatching(unificationConstraint,
-//                constrainedTerm.term.variableSet()) ? UnificationType.PatternMatching
-//                : UnificationType.Narrowing;
-        if (unificationConstraint.isSubstitution()
-                && unificationConstraint.substitution().keySet()
-                        .equals(constrainedTerm.term.variableSet())) {
-            typeOfUnification = UnificationType.PatternMatching;
-        } else {
-            typeOfUnification = UnificationType.Narrowing;
         }
         
         List<SymbolicConstraint> solutions = new ArrayList<SymbolicConstraint>();
@@ -409,33 +375,6 @@ public class ConstrainedTerm extends Term {
         }
 
         return solutions;
-    }
-    
-    /**
-     * Private helper method that checks if result of the unification is a
-     * pattern matching.
-     * 
-     * @param unifCnstr
-     *            the result unification constraint
-     * @param patternVars
-     *            the variables in the pattern term
-     * @return {@code true} if the result is a pattern matching; otherwise,
-     *         {@code false}
-     */
-    private boolean isPatternMatching(SymbolicConstraint unifCnstr, Set<Variable> patternVars) {
-        if (unifCnstr.isSubstitution()
-                && unifCnstr.substitution().keySet().equals(patternVars)) {
-//            for (Variable patternVar : patternVars) {
-//                Sorted subst = (Sorted) unifCnstr.substitution().get(patternVar);
-//                if ((subst instanceof Variable) && 
-//                        context.definition().context().isSubsorted(((Sorted) subst).sort(), patternVar.sort())) {
-//                    return false;
-//                }
-//            }
-            return true;
-        } else {
-            return false;
-        }            
     }
 
     private Set<Variable> computeSortIntersection(String sort1, String sort2) {

@@ -1102,6 +1102,36 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         return substituteWithBinders(Collections.singletonMap(variable, term), context);
     }
 
+    /**
+     * Checks if the rule application that produces this symbolic constraint is
+     * driven by pattern matching instead of narrowing. This method should only
+     * be called from the symbolic constraint that is returned by the method
+     * {@code ConstrainedTerm#unify(ConstrainedTerm)}.
+     * 
+     * @param pattern
+     *            the pattern term, which is the left-hand side of a rule plus
+     *            side conditions
+     * @return {@code true} if the rule application is driven by pattern
+     *         matching and all side conditions are successfully dissolved;
+     *         otherwise, {@code false}
+     */
+    public boolean isMatching(ConstrainedTerm pattern) {
+        orientSubstitution(pattern.variableSet());
+        if (!isSubstitution() || !substitution.keySet().equals(pattern.variableSet())) {
+            return false;
+        }
+
+        for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
+            String sortOfPatVar = entry.getKey().sort();
+            Term subst = entry.getValue();
+            String sortOfSubst = subst instanceof Sorted ? ((Sorted) subst).sort() : subst.kind().toString();
+            if (definition.context().isSubsorted(sortOfSubst, sortOfPatVar)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     @Override
     public boolean equals(Object object) {
         // TODO(AndreiS): normalize

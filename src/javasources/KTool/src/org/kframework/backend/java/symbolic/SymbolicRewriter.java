@@ -393,7 +393,11 @@ public class SymbolicRewriter {
                         constrainedTerm.termContext());
 
                 for (SymbolicConstraint constraint1 : constrainedTerm.unify(leftHandSide)) {
-                    constraint1.orientSubstitution(rule.variableSet());
+                    if (K.do_concrete_exec) {
+                        assert constraint1.isMatching(leftHandSide) : "Pattern matching expected in concrete execution mode";
+                    }
+                        
+                    constraint1.orientSubstitution(rule.leftHandSide().variableSet());
                     constraint1.addAll(rule.ensures());
                     
                     Term result = rule.rightHandSide();
@@ -405,7 +409,6 @@ public class SymbolicRewriter {
                         /* rename rule variables in the rule RHS */
                         result = result.substituteWithBinders(freshSubstitution, constrainedTerm.termContext());
                     }
-                    
                     /* apply the constraints substitution on the rule RHS */
                     result = result.substituteAndEvaluate(
                             constraint1.substitution(),

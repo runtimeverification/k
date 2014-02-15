@@ -1,17 +1,16 @@
 package org.kframework.backend.java.symbolic;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.ConstrainedTerm;
-import org.kframework.backend.java.kil.ConstrainedTerm.UnificationType;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
 
 import com.google.common.base.Stopwatch;
 
@@ -131,8 +130,7 @@ public class StepRewriter {
                 context);
 
         for (SymbolicConstraint constraint : constrainedTerm.unify(leftHandSide)) {
-            /* check the constraint represents a match */
-            if (constrainedTerm.getTypeOfUnification() != UnificationType.PatternMatching) {
+            if (!constraint.isMatching(leftHandSide)) {
                 continue;
             }
             
