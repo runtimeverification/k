@@ -68,7 +68,7 @@ untyped KOOL.  */
                | "(" Id ")" Exp          [strict(2)]    // KOOL  cast
                | "new" Id "(" Exps ")"   [strict(2)]    // KOOL
                | Exp "." Id                             // KOOL
-               > Exp "[" Exps "]"        [strict, , klabel("'_:Exp[_:Exps]")]
+               > Exp "[" Exps "]"        [strict, klabel("'_:Exp[_:Exps]")]
                > Exp "(" Exps ")"        [strict(2)]    // was strict in SIMPLE
                | "-" Exp                 [strict]
                | "sizeOf" "(" Exp ")"    [strict]

@@ -187,8 +187,15 @@ public class ConstrainedTerm extends Term {
                 continue;
             }
 
-            if (candidate.checkUnsat()) {
-                continue;
+            if (!K.do_kompilation) {
+                /*
+                 * YilongL: had to disable checkUnsat in kompilation because the
+                 * KILtoZ3 transformer often crash the Java backend; besides,
+                 * this method may not be necessary for kompilation
+                 */
+                if (candidate.checkUnsat()) {
+                    continue;
+                }
             }
 
             solutions.add(candidate);
