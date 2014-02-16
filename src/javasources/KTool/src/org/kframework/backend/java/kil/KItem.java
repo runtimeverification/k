@@ -194,131 +194,112 @@ public class KItem extends Term implements Sorted {
      */
     public Term evaluateFunction(SymbolicConstraint constraint, TermContext context) {
         Definition definition = context.definition();
-        KLabelConstant kLabelConstant = null; // the function symbol
-        Term[] arguments = null;
 
-        if (kLabel.getClass().equals(KLabelInjection.class)) {
-            /*
-             * if the kLabel is a KLabelInjection and the term injected inside
-             * is a TermCons, then this TermCons must be a function whose return
-             * value is a KLabel or a KList
-             */
-            Term term = ((KLabelInjection) kLabel).term();
-            if (term instanceof TermCons) {
-                TermCons termCons = (TermCons) term;
-                String kLabel = termCons.production().getAttribute("klabel");
-                kLabelConstant = KLabelConstant.of(kLabel, definition.context());
-                arguments = termCons.contents().toArray(new Term[termCons.contents().size()]);
-            } else {
-                return this;
-            }
-        } else {
-            if (!(kLabel instanceof KLabelConstant)) {
-                return this;
-            }
-            kLabelConstant = (KLabelConstant) kLabel;
+        if (!(kLabel instanceof KLabelConstant)) {
+            return this;
+        }
+        KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
 
-            if (!(kList instanceof  KList)) {
-                return this;
-            }
-            arguments = ((KList) kList).getContents().toArray(new Term[((KList) kList).getContents().size()]);
+        if (!(kList instanceof KList)) {
+            return this;
+        }
+        KList kList = (KList) this.kList;
 
-            /* evaluate a sort membership predicate */
-            // TODO(YilongL): maybe we can move sort membership evaluation after
-            // applying user-defined rules to allow the users to provide their
-            // own rules for checking sort membership
-            if (kLabelConstant.label().startsWith("is") && ((KList) kList).getContents().size() == 1
-                    && ((KList) kList).getContents().get(0) instanceof Sorted) {
-                return SortMembership.check(this, context.definition().context());
-            }
+        /* evaluate a sort membership predicate */
+        // TODO(YilongL): maybe we can move sort membership evaluation after
+        // applying user-defined rules to allow the users to provide their
+        // own rules for checking sort membership
+        if (kLabelConstant.label().startsWith("is") && kList.getContents().size() == 1
+                && (kList.getContents().get(0) instanceof Sorted)) {
+            return SortMembership.check(this, context.definition().context());
+        }
 
-            /* apply rules for user defined functions */
-            if (!definition.functionRules().get((KLabelConstant) kLabel).isEmpty()) {
-                ConstrainedTerm constrainedTerm = new ConstrainedTerm(kList, context);
+        /* apply rules for user defined functions */
+        if (!definition.functionRules().get(kLabelConstant).isEmpty()) {
+            ConstrainedTerm constrainedTerm = new ConstrainedTerm(kList, context);
 
-                // TODO(YilongL): consider applying rules with attribute [owise]
-                // only after no other rules can be applied
-                Term result = null;
-                LinkedHashSet<Term> owiseResults = new LinkedHashSet<Term>();
-                for (Rule rule : definition.functionRules().get((KLabelConstant) kLabel)) {
-                    SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(context);
-                    leftHandSideConstraint.addAll(rule.requires());
-                    for (Variable variable : rule.freshVariables()) {
-                        leftHandSideConstraint.add(variable, IntToken.fresh());
-                    }
+            // TODO(YilongL): consider applying rules with attribute [owise]
+            // only after no other rules can be applied
+            Term result = null;
+            LinkedHashSet<Term> owiseResults = new LinkedHashSet<Term>();
+            for (Rule rule : definition.functionRules().get(kLabelConstant)) {
+                SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(context);
+                leftHandSideConstraint.addAll(rule.requires());
+                for (Variable variable : rule.freshVariables()) {
+                    leftHandSideConstraint.add(variable, IntToken.fresh());
+                }
 
-                    ConstrainedTerm leftHandSide = new ConstrainedTerm(
-                            ((KItem) rule.leftHandSide()).kList,
-                            rule.lookups().getSymbolicConstraint(context),
-                            leftHandSideConstraint,
-                            context);
+                ConstrainedTerm leftHandSide = new ConstrainedTerm(
+                        ((KItem) rule.leftHandSide()).kList,
+                        rule.lookups().getSymbolicConstraint(context),
+                        leftHandSideConstraint,
+                        context);
 
-                    Collection<SymbolicConstraint> solutions = constrainedTerm.unify(leftHandSide);
-                    if (solutions.isEmpty()) {
+                Collection<SymbolicConstraint> solutions = constrainedTerm.unify(leftHandSide);
+                if (solutions.isEmpty()) {
+                    continue;
+                }
+
+                SymbolicConstraint solution = solutions.iterator().next();
+                if (K.do_kompilation) {
+                    assert solutions.size() <= 1 : "function definition is not deterministic";
+                    if (!solution.isMatching(leftHandSide)) {
                         continue;
                     }
+                } else if (K.do_concrete_exec) {
+                    assert solutions.size() <= 1 : "function definition is not deterministic";
+                    assert solution.isMatching(leftHandSide) : "Pattern matching expected in concrete execution mode";
+                }
 
-                    SymbolicConstraint solution = solutions.iterator().next();
-                    if (K.do_kompilation) {
-                        assert solutions.size() <= 1 : "function definition is not deterministic";
-                        if (!solution.isMatching(leftHandSide)) {
-                            continue;
-                        }
-                    } else if (K.do_concrete_exec) {
-                        assert solutions.size() <= 1 : "function definition is not deterministic";
-                        assert solution.isMatching(leftHandSide) : "Pattern matching expected in concrete execution mode";
-                    }
+                solution.orientSubstitution(rule.leftHandSide().variableSet());
 
-                    solution.orientSubstitution(rule.leftHandSide().variableSet());
+                Term rightHandSide = rule.rightHandSide();
 
-                    Term rightHandSide = rule.rightHandSide();
+                if (rule.hasUnboundedVariables()) {
+                    /* rename rule variables in the constraints */
+                    Map<Variable, Variable> freshSubstitution = solution.rename(rule.variableSet());
+                    /* rename rule variables in the rule RHS */
+                    result = result.substituteWithBinders(freshSubstitution, context);
+                }
+                /* apply the constraints substitution on the rule RHS */
+                rightHandSide = rightHandSide.substituteAndEvaluate(solution.substitution(), context);
+                /* eliminate anonymous variables */
+                solution.eliminateAnonymousVariables();
 
-                    if (rule.hasUnboundedVariables()) {
-                        /* rename rule variables in the constraints */
-                        Map<Variable, Variable> freshSubstitution = solution.rename(rule.variableSet());
-                        /* rename rule variables in the rule RHS */
-                        result = result.substituteWithBinders(freshSubstitution, context);
-                    }
-                    /* apply the constraints substitution on the rule RHS */
-                    rightHandSide = rightHandSide.substituteAndEvaluate(solution.substitution(), context);
-                    /* eliminate anonymous variables */
-                    solution.eliminateAnonymousVariables();
-
-                    /* update the constraint */
-                    if (K.do_kompilation || K.do_concrete_exec) {
-                        // in kompilation and concrete execution mode, the
-                        // evaluation of user-defined functions will not create
-                        // new constraints
-                    } else if (constraint != null) {
+                /* update the constraint */
+                if (K.do_kompilation || K.do_concrete_exec) {
+                    // in kompilation and concrete execution mode, the
+                    // evaluation of user-defined functions will not create
+                    // new constraints
+                } else if (constraint != null) {
+                    throw new RuntimeException(
+                            "Fix it; need to find a proper way to update "
+                                    + "the constraint without interferring with the "
+                                    + "potential ongoing normalization process");
+                } else { // constraint == null
+                    if (solution.isUnknown() || solution.isFalse()) {
                         throw new RuntimeException(
-                                "Fix it; need to find a proper way to update "
-                                        + "the constraint without interferring with the "
-                                        + "potential ongoing normalization process");
-                    } else { // constraint == null
-                        if (solution.isUnknown() || solution.isFalse()) {
-                            throw new RuntimeException(
-                                    "Fix it; no reference to the symbolic " +
-                                    "constraint that needs to be updated");
-                        }
-                    }
-
-                    if (!rule.containsAttribute("owise")) {
-                        if (K.do_concrete_exec) {
-                            assert result == null || result.equals(rightHandSide):
-                                    "function definition is not deterministic";
-                        }
-                        result = rightHandSide;
-                    } else {
-                        owiseResults.add(rightHandSide);
+                                "Fix it; no reference to the symbolic " +
+                                "constraint that needs to be updated");
                     }
                 }
 
-                if (result != null) {
-                    return result;
-                } else if (!owiseResults.isEmpty()) {
-                    assert owiseResults.size() == 1 : "function definition is not deterministic";
-                    return owiseResults.iterator().next();
+                if (!rule.containsAttribute("owise")) {
+                    if (K.do_concrete_exec) {
+                        assert result == null || result.equals(rightHandSide):
+                                "function definition is not deterministic";
+                    }
+                    result = rightHandSide;
+                } else {
+                    owiseResults.add(rightHandSide);
                 }
+            }
+
+            if (result != null) {
+                return result;
+            } else if (!owiseResults.isEmpty()) {
+                assert owiseResults.size() == 1 : "function definition is not deterministic";
+                return owiseResults.iterator().next();
             }
         }
 
@@ -327,8 +308,9 @@ public class KItem extends Term implements Sorted {
         }
 
         try {
+            Term[] arguments = kList.getContents().toArray(new Term[kList.getContents().size()]);
             Term result = BuiltinFunction.invoke(context, kLabelConstant, arguments);
-//            System.err.println(this + " => " + result);
+//          System.err.println(this + " => " + result);
             if (result == null) {
                 result = this;
             } else if (result instanceof KLabel) {
