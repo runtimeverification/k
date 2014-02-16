@@ -196,11 +196,6 @@ public class CombinedLocalTransformer extends LocalTransformer {
     }
 
     @Override
-    public ASTNode transform(TermCons node) {
-        return transformAll(node);
-    }
-
-    @Override
     public ASTNode transform(Token node) {
         return transformAll(node);
     }

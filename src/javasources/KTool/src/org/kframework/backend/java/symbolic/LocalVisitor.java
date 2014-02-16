@@ -190,11 +190,6 @@ public class LocalVisitor implements Visitor {
     }
     
     @Override
-    public void visit(TermCons termCons) {
-        visit((Term) termCons);
-    }
-
-    @Override
     public void visit(Token token) {
         visit((Term) token);
     }

@@ -22,7 +22,6 @@ import org.kframework.backend.java.kil.MapUpdate;
 import org.kframework.backend.java.kil.MetaVariable;
 import org.kframework.backend.java.kil.SetUpdate;
 import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermCons;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 
@@ -59,7 +58,6 @@ public interface Unifier {
     public void unify(MetaVariable metaVariable, Term term);
     public void unify(StringToken stringToken, Term term);
     public void unify(Term term, Term otherTerm);
-    public void unify(TermCons termCons, Term term);
     public void unify(Token token, Term term);
     public void unify(UninterpretedToken uninterpretedToken, Term term);
     public void unify(Variable variable, Term term);

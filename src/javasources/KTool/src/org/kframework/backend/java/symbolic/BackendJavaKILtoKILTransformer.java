@@ -84,17 +84,6 @@ public class BackendJavaKILtoKILTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(TermCons termCons) {
-        String cons = termCons.cons();
-        String psort = context.conses.get(cons).getSort();
-        List<org.kframework.kil.Term> contents = new ArrayList<org.kframework.kil.Term>();
-        for (Term term : termCons.contents()) {
-            contents.add((org.kframework.kil.Term) term.accept(this));
-        }
-        return new org.kframework.kil.TermCons(psort, cons, contents, context);
-    }
-
-    @Override
     public ASTNode transform(KLabelConstant kLabelConstant) {
         return org.kframework.kil.KLabelConstant.of(kLabelConstant.label(), context);
     }

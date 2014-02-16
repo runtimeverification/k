@@ -34,7 +34,6 @@ import org.kframework.backend.java.kil.MapUpdate;
 import org.kframework.backend.java.kil.MetaVariable;
 import org.kframework.backend.java.kil.SetUpdate;
 import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermCons;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
@@ -785,30 +784,6 @@ public class SymbolicUnifier extends AbstractUnifier {
         unify((Term) variable, term);
     }
     
-    @Override
-    public void unify(TermCons termCons, Term term) {
-        if (!(term instanceof TermCons)) {
-            fail();
-        }
-        
-        TermCons otherTermCons = (TermCons) term;
-        if (!(termCons.cons().equals(otherTermCons.cons()))) {
-            fail();
-        }
-        
-        List<Term> contents = termCons.contents();
-        List<Term> otherContents = otherTermCons.contents();
-        if (contents.size() != otherContents.size()) {
-            fail();
-        }
-        
-        Iterator<Term> iter = contents.iterator();
-        Iterator<Term> otherIter = otherContents.iterator();
-        while (iter.hasNext()) {
-            unify(iter.next(), otherIter.next());
-        }
-    }
-
     @Override
     public String getName() {
         return this.getClass().toString();

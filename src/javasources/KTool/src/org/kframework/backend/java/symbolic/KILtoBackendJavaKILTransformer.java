@@ -139,15 +139,6 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(org.kframework.kil.TermCons node) throws TransformerException {
-        List<Term> contents = new ArrayList<Term>();
-        for (org.kframework.kil.Term term : node.getContents()) {
-            contents.add((Term) term.accept(this));
-        }
-        return new TermCons(node.getCons(), contents, definition.context());
-    }
-
-    @Override
     public ASTNode transform(org.kframework.kil.KItemProjection node) throws TransformerException {
         return new KItemProjection(Kind.of(node.projectedKind()), (Term) node.getTerm().accept(this));
     }
