@@ -218,9 +218,13 @@ public class KItem extends Term implements Sorted {
         if (!definition.functionRules().get(kLabelConstant).isEmpty()) {
             ConstrainedTerm constrainedTerm = new ConstrainedTerm(kList, context);
 
-            // TODO(YilongL): consider applying rules with attribute [owise]
-            // only after no other rules can be applied
             Term result = null;
+            
+            /*
+             * YilongL: consider applying rules with attribute [owise]
+             * only after no other rules can be applied for sure
+             */
+            boolean mayUseOwiseRule = true;
             LinkedHashSet<Term> owiseResults = new LinkedHashSet<Term>();
             for (Rule rule : definition.functionRules().get(kLabelConstant)) {
                 SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(context);
@@ -244,6 +248,7 @@ public class KItem extends Term implements Sorted {
                 if (K.do_kompilation) {
                     assert solutions.size() <= 1 : "function definition is not deterministic";
                     if (!solution.isMatching(leftHandSide)) {
+                        mayUseOwiseRule = false;
                         continue;
                     }
                 } else if (K.do_concrete_exec) {
@@ -284,20 +289,20 @@ public class KItem extends Term implements Sorted {
                     }
                 }
 
-                if (!rule.containsAttribute("owise")) {
+                if (rule.containsAttribute("owise")) {
+                    owiseResults.add(rightHandSide);
+                } else {
                     if (K.do_concrete_exec) {
                         assert result == null || result.equals(rightHandSide):
                                 "function definition is not deterministic";
                     }
                     result = rightHandSide;
-                } else {
-                    owiseResults.add(rightHandSide);
                 }
             }
 
             if (result != null) {
                 return result;
-            } else if (!owiseResults.isEmpty()) {
+            } else if (mayUseOwiseRule && !owiseResults.isEmpty()) {
                 assert owiseResults.size() == 1 : "function definition is not deterministic";
                 return owiseResults.iterator().next();
             }
