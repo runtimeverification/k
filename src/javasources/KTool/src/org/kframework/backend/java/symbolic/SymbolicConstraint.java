@@ -1105,6 +1105,13 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      */
     public boolean isMatching(ConstrainedTerm pattern) {
         orientSubstitution(pattern.variableSet());
+        /*
+         * YilongL: data structure lookups will change the variables on the LHS
+         * of a rule, e.g.: "rule foo(M:Map X |-> Y, X) => 0" will be kompiled
+         * into "rule foo(_,_)(_0:Map,, X) => 0 requires [] /\ _0:Map[X] = Y
+         * ensures []". Therefore, we cannot write pattern.term().variableSet()
+         * in the following check.
+         */
         if (!isSubstitution() || !substitution.keySet().equals(pattern.variableSet())) {
             return false;
         }
@@ -1112,6 +1119,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
             String sortOfPatVar = entry.getKey().sort();
             Term subst = entry.getValue();
+            if (subst instanceof DataStructureLookup) {
+                return false;
+            }
             String sortOfSubst = subst instanceof Sorted ? ((Sorted) subst).sort() : subst.kind().toString();
             if (definition.context().isSubsorted(sortOfSubst, sortOfPatVar)) {
                 return false;

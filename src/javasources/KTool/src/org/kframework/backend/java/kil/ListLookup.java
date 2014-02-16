@@ -11,7 +11,7 @@ import org.kframework.kil.ASTNode;
  *
  * @author AndreiS
  */
-public class ListLookup extends Term {
+public class ListLookup extends Term implements DataStructureLookup {
 
     private final Term list;
     private final Term key;
