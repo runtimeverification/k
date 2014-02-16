@@ -119,6 +119,12 @@ public class TermVisitor extends LocalVisitor {
         }
     }
 
+    //TODO(OwolabiL): Fix this properly
+    @Override
+    public void visit(UninterpretedToken uninterpretedToken) {
+        super.visit(uninterpretedToken);
+    }
+
     @Override
     public void visit(KItem kItem) {
         //TODO(OwolabiL): This is starting to get nasty. Refactor.
