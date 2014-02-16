@@ -20,7 +20,7 @@ import java.util.List;
  * @author AndreiS
  */
 @SuppressWarnings("serial")
-public abstract class KCollection extends Collection implements Iterable<Term> {
+public abstract class KCollection extends Collection implements Iterable<Term>, Sorted {
 
     /**
      * A list of {@code Term}s contained in this {@code KCollection}.

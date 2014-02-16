@@ -45,7 +45,6 @@ import com.microsoft.z3.Z3Exception;
 public class SymbolicConstraint extends JavaSymbolicObject {
     private static final boolean DEBUG = true;
 
-    // TODO(YilongL): can't we use this.context instead of passing in a new one?
     public void orientSubstitution(Set<Variable> variables) {
         Map<Variable, Term> newSubstitution = new HashMap<>();
         if (substitution.keySet().containsAll(variables)) {
@@ -209,17 +208,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 return !leftHandSide.equals(rightHandSide);
             }
             if (!(leftHandSide instanceof Sorted) || !(rightHandSide instanceof Sorted)) {
-                // TODO(AndreiS): hack for dealing with equalities like X:Id =? 1 ~> 2 which should become false
-                if (leftHandSide instanceof KCollection && ((KCollection) leftHandSide).size() > 1
-                        && rightHandSide instanceof Sorted
-                        && !definition.context().isSubsortedEq(((Sorted) rightHandSide).sort(), leftHandSide.kind().toString())) {
-                    return true;
-                }
-                if (rightHandSide instanceof KCollection && ((KCollection) rightHandSide).size() > 1
-                        && leftHandSide instanceof Sorted
-                        && !definition.context().isSubsortedEq(((Sorted) leftHandSide).sort(), rightHandSide.kind().toString())) {
-                    return true;
-                }
                 return false;
             }
 
