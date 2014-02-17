@@ -91,7 +91,11 @@ public class CoolingRuleVisitor extends RuleVisitor {
             } else {
                 ArrayList<Production> productions = (ArrayList<Production>) context.productionsOf(currentLabel);
                 Production p = productions.get(0);
-                pStrings.add(pString + (i + 1) + SEPARATOR + p.getChildSort(i));
+                if (productions.size() == 1) {
+                    pStrings.add(pString + (i + 1) + SEPARATOR + p.getChildSort(0));
+                } else {
+                    pStrings.add(pString + (i + 1) + SEPARATOR + "UserList");
+                }
             }
         }
     }

@@ -37,6 +37,7 @@ public class TermVisitor extends LocalVisitor {
     private final String START_STRING = "@.";
 
     public TermVisitor(Context context) {
+
         pStrings = new HashSet<>();
         this.context = context;
     }
@@ -76,7 +77,7 @@ public class TermVisitor extends LocalVisitor {
                 }
             }
         } else if (kSequence.size() == 0){
-            //there are cases (e.g., in SIMPLE's join rule, where we need to know that one of the K
+            //there are cases (e.g., in SIMPLE's join rule) where we need to know that one of the K
             // cells in the configuration is empty.
             pStrings.add(START_STRING + EMPTY_K);
         }
@@ -119,18 +120,19 @@ public class TermVisitor extends LocalVisitor {
         }
     }
 
-    //TODO(OwolabiL): Fix this properly
     @Override
     public void visit(UninterpretedToken uninterpretedToken) {
-        super.visit(uninterpretedToken);
+        if (pString == null){
+            pStrings.add(START_STRING + uninterpretedToken.sort());
+        } else{
+            pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR + uninterpretedToken.sort());
+        }
     }
 
     @Override
     public void visit(KItem kItem) {
         //TODO(OwolabiL): This is starting to get nasty. Refactor.
-
         if (kItem.kLabel() instanceof KLabelFreezer) {
-
             if (pString != null) {
                 TokenVisitor visitor = new TokenVisitor(context, pString);
                 kItem.kLabel().accept(visitor);
@@ -174,7 +176,6 @@ public class TermVisitor extends LocalVisitor {
                                         + p.getChildSort(currentPosition - 1);
                                 pStrings.add(test);
                             }
-
                         } else {
                             pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR
                                     + kItem.sort());

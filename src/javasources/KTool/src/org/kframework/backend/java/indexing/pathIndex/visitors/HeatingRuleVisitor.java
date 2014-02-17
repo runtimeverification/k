@@ -68,7 +68,7 @@ public class HeatingRuleVisitor extends RuleVisitor {
             kList.get(i).accept(this);
         }
         pStringStack.pop();
-        this.proceed = false;
+//        this.proceed = false;
     }
 
     @Override

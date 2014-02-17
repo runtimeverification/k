@@ -213,7 +213,7 @@ public class PathIndex {
             }
         }
 
-//        System.out.println("matching: "+ matchingIndices + "\n");
+//        System.out.println("matching: "+ matchingIndices);
 //        System.out.println("rules: "+rules +"\n");
         return new ArrayList<>(rules);
     }

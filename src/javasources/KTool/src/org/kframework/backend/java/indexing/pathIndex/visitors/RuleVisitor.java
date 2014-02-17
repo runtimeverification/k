@@ -5,10 +5,12 @@ import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.symbolic.LocalVisitor;
 import org.kframework.backend.java.util.LookupCell;
+import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 /**
  * Author: OwolabiL
@@ -23,6 +25,7 @@ public class RuleVisitor extends LocalVisitor {
     String pString;
     List<String> pStrings;
     private boolean isKSequence = false;
+    private String currentLabel;
 
     public RuleVisitor(Context context) {
         this.context = context;
@@ -66,6 +69,7 @@ public class RuleVisitor extends LocalVisitor {
 
     @Override
     public void visit(KLabelConstant kLabel) {
+        currentLabel = kLabel.label();
         pString = pString.concat(kLabel.toString());
     }
 
@@ -96,6 +100,7 @@ public class RuleVisitor extends LocalVisitor {
             }
         }
     }
+
 
     @Override
     public void visit(Variable variable) {
