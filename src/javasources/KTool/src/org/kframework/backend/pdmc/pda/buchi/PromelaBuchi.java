@@ -48,14 +48,16 @@ public class PromelaBuchi {
 
     public Set<BuchiState> getTransitions(BuchiState buchiState, Evaluator atomEvaluator) {
         Collection<PromelaTransition> transitions = transitionMap.get(buchiState);
-        if (transitions == null) return Collections.emptySet();
+        if (transitions == null)
+            return Collections.emptySet();
         Set<BuchiState> states = new HashSet<BuchiState>();
         for (PromelaTransition transition : transitions) {
             if (transition.getCondition().evaluate(atomEvaluator)) {
                 states.add(transition.getState());
             }
         }
-        if (states.isEmpty()) return Collections.emptySet();
+        if (states.isEmpty())
+            return Collections.emptySet();
         return states;
     }
 }

@@ -158,17 +158,6 @@ public class PrePostVisitor implements Visitor {
     }
 
     @Override
-    public void visit(TermCons termCons) {
-        preVisitor.resetProceed();
-        termCons.accept(preVisitor);
-        if (!preVisitor.isProceed()) return;
-        for (Term term : termCons.contents()) {
-            term.accept(this);
-        }
-        termCons.accept(postVisitor);
-    }
-
-    @Override
     public void visit(Token token) {
         preVisitor.resetProceed();
         token.accept(preVisitor);

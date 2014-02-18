@@ -167,18 +167,6 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(TermCons termCons) {
-        ASTNode astNode = termCons.accept(preTransformer);
-        if (astNode instanceof DoneTransforming) {
-            return ((DoneTransforming) astNode).getContents();
-        }
-        assert astNode instanceof TermCons : "preTransformer should not modify type";
-        termCons = (TermCons) astNode;
-        termCons = (TermCons) super.transform(termCons);
-        return termCons.accept(postTransformer);
-    }
-
-    @Override
     public ASTNode transform(Token token) {
         ASTNode astNode = token.accept(preTransformer);
         if (astNode instanceof DoneTransforming) {

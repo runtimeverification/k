@@ -62,6 +62,13 @@ public abstract class Collection extends Term {
         return frame;
     }
 
+    /**
+     * Returns the size of the contents of this {@code Collection}.
+     *
+     * @return the size of the contents
+     */
+    public abstract int size();
+
     @Override
     public boolean isSymbolic() {
         return false;

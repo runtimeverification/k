@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.KSorts;
 import org.kframework.kil.ASTNode;
 
 
@@ -28,7 +29,9 @@ public class KSequence extends KCollection {
 
     private static final String SEPARATOR_NAME = " ~> ";
     private static final String IDENTITY_NAME = "." + Kind.K;
-
+    
+    private String sort;
+    
     public KSequence(ImmutableList<Term> items, Variable frame) {
         super(items, frame, Kind.K);
     }
@@ -60,6 +63,21 @@ public class KSequence extends KCollection {
     @Override
     public KCollection fragment(int fromIndex) {
         return new KSequence(contents.subList(fromIndex, contents.size()), frame);
+    }
+
+    @Override
+    public String sort() {
+        if (sort != null) {
+            return sort;
+        }
+        
+        if (size() == 1 && !hasFrame()) {
+            Term term = contents.get(0);
+            sort = term instanceof Sorted ? ((Sorted) term).sort() : term.kind().toString();
+        } else {
+            sort = KSorts.KSEQUENCE;
+        }
+        return sort;
     }
 
     @Override
@@ -102,5 +120,4 @@ public class KSequence extends KCollection {
     public ASTNode accept(Transformer transformer) {
         return transformer.transform(this);
     }
-
 }

@@ -68,7 +68,7 @@ untyped KOOL.  */
                | "(" Id ")" Exp          [strict(2)]    // KOOL  cast
                | "new" Id "(" Exps ")"   [strict(2)]    // KOOL
                | Exp "." Id                             // KOOL
-               > Exp "[" Exps "]"        [strict]
+               > Exp "[" Exps "]"        [strict, klabel("'_:Exp[_:Exps]")]
                > Exp "(" Exps ")"        [strict(2)]    // was strict in SIMPLE
                | "-" Exp                 [strict]
                | "sizeOf" "(" Exp ")"    [strict]
@@ -698,7 +698,7 @@ The method lookup is the same as in untyped KOOL.  */
     when Class =/=K Class' [structural]
 
   context HOLE(_:Exps)
-    when getKLabel HOLE ==KLabel '_`(_`) orBool getKLabel HOLE ==KLabel '_`[_`]
+    when getKLabel HOLE ==KLabel '_`(_`) orBool getKLabel HOLE ==KLabel '_:Exp`[_:Exps`] //'_`[_`]
 
   rule <k> (lookup(L) => V)(_:Exps) ...</k>  <store>... L |-> V:Val ...</store>
     [lookup]

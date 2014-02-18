@@ -107,32 +107,50 @@ public class BuchiPushdownSystemTest {
     @Test
     public void testMarcelloTrue() throws Exception {
         String promelaString = "" +
-                "never { /* ! [](px1 -> <> px0) */\n" +
+                "never { /* ! [](px1 -> X (px1 \\/ px2)) */\n" +
                 "T0_init:\n" +
                 "\tif\n" +
                 "\t:: (1) -> goto T0_init\n" +
-                "\t:: (!px0 && px1) -> goto accept_S2\n" +
+                "\t:: (px1) -> goto accept_S2\n" +
                 "\tfi;\n" +
                 "accept_S2:\n" +
                 "\tif\n" +
-                "\t:: (!px0) -> goto accept_S2\n" +
+                "\t:: (!px1 && !px2) -> goto accept_all\n" +
                 "\tfi;\n" +
-                "T1_all:\n" +
+                "accept_all:\n" +
                 "\tskip\n" +
                 "}\n";
+
 
         PromelaBuchi automaton = PromelaBuchiParser.parse(new ByteArrayInputStream(promelaString.getBytes("UTF-8")));
 
         PushdownSystem<String,String> pds = PushdownSystem.of(""+
-                "<x0, p> => <x0>;\n" +
-                "<x0, p> => <x1, p p>;\n" +
-                "<x1, p> => <x1, p p>;\n" +
-                "<x1, p> => <x0>;\n" +
+                "<x0, p>     => <x0, skip ret>;\n" +
+                "<x0, p>     => <x01, incx ret>;\n" +
+                "<x01, incx> => <x0, p incx>;\n" +
+                "<x0, skip>  => <x0>;\n" +
+                "<x0, incx>  => <x1>;\n" +
+                "<x1, incx>  => <x2>;\n" +
+                "<x2, incx>  => <x0>;\n" +
+                "<x0, ret>   => <x0>;\n" +
+                "<x1, ret>   => <x1>;\n" +
+                "<x2, ret>   => <x2>;\n" +
                 "<x0, p>");
 
-        ConcreteEvaluator<String,String> evaluator = ConcreteEvaluator.of(""
-                + "<x0, p> |= px0;\n"
-                +  "<x1, p> |= px1;");
+        String[] states = new String[] {"x0", "x01", "x1", "x2"};
+        String[] heads = new String[] {"p", "incx", "skip", "ret"};
+        String evalString = "";
+        for (int s = 0; s < states.length; s++)
+            for (int h = 0; h < heads.length; h++) {
+                evalString += "<" + states[s] + ", " + heads[h] +
+                        "> |= p";
+                if (s != 1) evalString += states[s];
+                else evalString += "x0";
+                evalString += ";\n";
+            }
+        System.err.println(evalString);
+        ConcreteEvaluator<String,String> evaluator
+                = ConcreteEvaluator.of(evalString);
 
         BuchiPushdownSystem<String, String> bps = new BuchiPushdownSystem<>(pds, automaton, evaluator);
         System.err.println("\n----Buchi Pushdown System---");

@@ -22,6 +22,8 @@ public class KCollectionFragment extends KCollection {
 
     private final int startIndex;
     private final KCollection kCollection;
+    
+    private String sort;
 
     public KCollectionFragment(KCollection kCollection, int startIndex) {
         super(kCollection.getContents(),
@@ -40,6 +42,21 @@ public class KCollectionFragment extends KCollection {
     @Override
     public KCollection fragment(int fromIndex) {
         throw new UnsupportedOperationException();
+    }
+    
+    @Override
+    public String sort() {
+        if (sort != null) {
+            return sort;
+        }
+        
+        if (size() == 1 && !hasFrame()) {
+            Term term = contents.get(startIndex);
+            sort = term instanceof Sorted ? ((Sorted) term).sort() : term.kind().toString();
+        } else {
+            sort = kCollection.sort();
+        }
+        return sort;
     }
 
     @Override

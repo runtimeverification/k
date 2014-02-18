@@ -1,15 +1,10 @@
 package org.kframework.backend.java.kil;
 
+import java.util.*;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.SortMembership;
-import org.kframework.backend.java.kil.ConstrainedTerm.UnificationType;
 import org.kframework.backend.java.symbolic.BuiltinFunction;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformer;
@@ -30,14 +25,14 @@ import com.google.common.collect.Sets;
  * Or in the usual syntax of K, it can be defined as the following:
  * <p>
  * <blockquote>
- * 
+ *
  * <pre>
  * syntax KItem ::= KLabel "(" KList ")"
  * </pre>
- * 
+ *
  * </blockquote>
  * <p>
- * 
+ *
  * @author AndreiS
  */
 @SuppressWarnings("serial")
@@ -46,7 +41,7 @@ public class KItem extends Term implements Sorted {
     private final Term kLabel;
     private final Term kList;
     private final String sort;
-    
+
     /**
      * Valid only if {@code kLabel} is a constructor. Must contain a sort
      * which is subsorted or equal to {@code sort} when it is valid.
@@ -123,7 +118,7 @@ public class KItem extends Term implements Sorted {
                                     } else { // e.g., childTerm is a HOLE
                                         mayMatch = false;
                                     }
-                                 
+
                                     if (!mayMatch) {
                                         // mayMatch == false => mustMatch == false
                                         break;
@@ -136,7 +131,7 @@ public class KItem extends Term implements Sorted {
                     if (mustMatch) {
                         sorts.add(production.getSort());
                     }
-                    
+
                     if (mayMatch && kLabelConstant.isConstructor()) {
                         possibleMinimalSorts.add(production.getSort());
                     }
@@ -179,17 +174,17 @@ public class KItem extends Term implements Sorted {
                     }
                 }
             }
-            possibleMinimalSorts.removeAll(nonMinimalSorts);            
+            possibleMinimalSorts.removeAll(nonMinimalSorts);
             this.possibleMinimalSorts = possibleMinimalSorts;
         } else {
             this.possibleMinimalSorts = null;
         }
 //        System.out.printf("KItem = %s, sort = %s, possibleMinimalSorts = %s\n", this, sort, possibleMinimalSorts);
     }
-    
+
     /**
      * Evaluates this {@code KItem} if it is a predicate or function
-     * 
+     *
      * @param constraint
      *            the existing symbolic constraint that needs to be taken into
      *            consideration when evaluating this function
@@ -199,145 +194,117 @@ public class KItem extends Term implements Sorted {
      */
     public Term evaluateFunction(SymbolicConstraint constraint, TermContext context) {
         Definition definition = context.definition();
-        KLabelConstant kLabelConstant = null; // the function symbol
-        Term[] arguments = null;
 
-        if (kLabel.getClass().equals(KLabelInjection.class)) {
+        if (!(kLabel instanceof KLabelConstant)) {
+            return this;
+        }
+        KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
+
+        if (!(kList instanceof KList)) {
+            return this;
+        }
+        KList kList = (KList) this.kList;
+
+        /* evaluate a sort membership predicate */
+        // TODO(YilongL): maybe we can move sort membership evaluation after
+        // applying user-defined rules to allow the users to provide their
+        // own rules for checking sort membership
+        if (kLabelConstant.label().startsWith("is") && kList.getContents().size() == 1
+                && (kList.getContents().get(0) instanceof Sorted)) {
+            return SortMembership.check(this, context.definition().context());
+        }
+
+        /* apply rules for user defined functions */
+        if (!definition.functionRules().get(kLabelConstant).isEmpty()) {
+            ConstrainedTerm constrainedTerm = new ConstrainedTerm(kList, context);
+
+            Term result = null;
+            
             /*
-             * if the kLabel is a KLabelInjection and the term injected inside
-             * is a TermCons, then this TermCons must be a function whose return
-             * value is a KLabel or a KList
+             * YilongL: consider applying rules with attribute [owise]
+             * only after no other rules can be applied for sure
              */
-            Term term = ((KLabelInjection) kLabel).term();
-            if (term instanceof TermCons) {
-                TermCons termCons = (TermCons) term;
-                String kLabel = termCons.production().getAttribute("klabel");
-                kLabelConstant = KLabelConstant.of(kLabel, definition.context());
-                arguments = termCons.contents().toArray(new Term[termCons.contents().size()]);
-            } else {
-                return this;
-            }
-        } else {
-            if (!(kLabel instanceof KLabelConstant)) {
-                return this;
-            }
-            kLabelConstant = (KLabelConstant) kLabel;
+            boolean mayUseOwiseRule = true;
+            LinkedHashSet<Term> owiseResults = new LinkedHashSet<Term>();
+            for (Rule rule : definition.functionRules().get(kLabelConstant)) {
+                SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(context);
+                leftHandSideConstraint.addAll(rule.requires());
+                for (Variable variable : rule.freshVariables()) {
+                    leftHandSideConstraint.add(variable, IntToken.fresh());
+                }
 
-            if (!(kList instanceof  KList)) {
-                return this;
-            }
-            arguments = ((KList) kList).getContents().toArray(new Term[((KList) kList).getContents().size()]);
+                ConstrainedTerm leftHandSide = new ConstrainedTerm(
+                        ((KItem) rule.leftHandSide()).kList,
+                        rule.lookups().getSymbolicConstraint(context),
+                        leftHandSideConstraint,
+                        context);
 
-            /* evaluate a sort membership predicate */
-            // TODO(YilongL): maybe we can move sort membership evaluation after
-            // applying user-defined rules to allow the users to provide their
-            // own rules for checking sort membership
-            if (kLabelConstant.label().startsWith("is") && ((KList) kList).getContents().size() == 1
-                    && ((KList) kList).getContents().get(0) instanceof Sorted) {
-                return SortMembership.check(this, context.definition().context());
-            }
+                Collection<SymbolicConstraint> solutions = constrainedTerm.unify(leftHandSide);
+                if (solutions.isEmpty()) {
+                    continue;
+                }
 
-            /* apply rules for user defined functions */
-            if (!definition.functionRules().get((KLabelConstant) kLabel).isEmpty()) {
-                ConstrainedTerm constrainedTerm = new ConstrainedTerm(kList, context);
-
-                // TODO(YilongL): consider applying rules with attribute [owise]
-                // only after no other rules can be applied
-                Term result = null;
-                for (Rule rule : definition.functionRules().get((KLabelConstant) kLabel)) {
-                    SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(context);
-                    leftHandSideConstraint.addAll(rule.requires());
-                    for (Variable variable : rule.freshVariables()) {
-                        leftHandSideConstraint.add(variable, IntToken.fresh());
-                    }
-
-                    ConstrainedTerm leftHandSide = new ConstrainedTerm(
-                            ((KItem) rule.leftHandSide()).kList,
-                            rule.lookups().getSymbolicConstraint(context),
-                            leftHandSideConstraint,
-                            context);
-
-                    Collection<SymbolicConstraint> solutions = constrainedTerm.unify(leftHandSide);
-                    if (solutions.isEmpty()) {
+                SymbolicConstraint solution = solutions.iterator().next();
+                if (K.do_kompilation) {
+                    assert solutions.size() <= 1 : "function definition is not deterministic";
+                    if (!solution.isMatching(leftHandSide)) {
+                        mayUseOwiseRule = false;
                         continue;
                     }
-                    
-                    SymbolicConstraint solution = solutions.iterator().next();
-                    if (K.do_kompilation) {
-                        assert solutions.size() <= 1 : "function definition is not deterministic";
-                        // TODO(AndreiS): there is an issue with ConstrainedTerm#getTypeOfUnification because it does
-                        // not take into account lookups (which introduces new variables)
-                        if (!(constrainedTerm.getTypeOfUnification() == UnificationType.PatternMatching && solution.isSubstitution())) {
-                            continue;
-                        }
-                        if (!solution.isSubstitution() || !solution.substitution().keySet().equals(leftHandSide.variableSet())) {
-                            continue;
-                        }
+                } else if (K.do_concrete_exec) {
+                    assert solutions.size() <= 1 : "function definition is not deterministic";
+                    assert solution.isMatching(leftHandSide) : "Pattern matching expected in concrete execution mode";
+                }
 
-                        boolean isMatching = true;
-                        for (Map.Entry<Variable, Term> entry : solution.substitution().entrySet()) {
-                            if (context.definition().context().isSubsortedEq(
-                                    entry.getValue() instanceof Sorted ?((Sorted) entry.getValue()).sort() : entry.getValue().kind().toString(),
-                                    entry.getKey().sort())) {
-                                isMatching = false;
-                                break;
-                            }
-                        }
-                        if (!isMatching) {
-                            continue;
-                        }
-                    } else if (K.do_concrete_exec) {
-                        assert solutions.size() <= 1 : "function definition is not deterministic";
-                        assert constrainedTerm.getTypeOfUnification() == UnificationType.PatternMatching : "the result of unification between:"
-                                + constrainedTerm.term()
-                                + " (the ground subject term) and "
-                                + leftHandSide.term()
-                                + " (the pattern) should be a substitution";
-                        assert solution.isSubstitution() : "the solution shall not contain pending functions but found:\n" + solution.equalities();
-                    }
-                    
-                    solution.orientSubstitution(rule.leftHandSide().variableSet());
+                solution.orientSubstitution(rule.leftHandSide().variableSet());
 
-                    Term rightHandSide = rule.rightHandSide();
+                Term rightHandSide = rule.rightHandSide();
 
-                    if (rule.hasUnboundedVariables()) {
-                        /* rename rule variables in the constraints */
-                        Map<Variable, Variable> freshSubstitution = solution.rename(rule.variableSet());
-                        /* rename rule variables in the rule RHS */
-                        result = result.substituteWithBinders(freshSubstitution, context);
-                    }
-                    /* apply the constraints substitution on the rule RHS */
-                    rightHandSide = rightHandSide.substituteAndEvaluate(solution.substitution(), context);
-                    /* eliminate anonymous variables */
-                    solution.eliminateAnonymousVariables();
+                if (rule.hasUnboundedVariables()) {
+                    /* rename rule variables in the constraints */
+                    Map<Variable, Variable> freshSubstitution = solution.rename(rule.variableSet());
+                    /* rename rule variables in the rule RHS */
+                    result = result.substituteWithBinders(freshSubstitution, context);
+                }
+                /* apply the constraints substitution on the rule RHS */
+                rightHandSide = rightHandSide.substituteAndEvaluate(solution.substitution(), context);
+                /* eliminate anonymous variables */
+                // solution.eliminateAnonymousVariables();
 
-                    /* update the constraint */
-                    if (K.do_kompilation || K.do_concrete_exec) {
-                        // in kompilation and concrete execution mode, the
-                        // evaluation of user-defined functions will not create
-                        // new constraints
-                    } else if (constraint != null) {
+                /* update the constraint */
+                if (K.do_kompilation || K.do_concrete_exec) {
+                    // in kompilation and concrete execution mode, the
+                    // evaluation of user-defined functions will not create
+                    // new constraints
+                } else if (constraint != null) {
+                    throw new RuntimeException(
+                            "Fix it; need to find a proper way to update "
+                                    + "the constraint without interferring with the "
+                                    + "potential ongoing normalization process");
+                } else { // constraint == null
+                    if (solution.isUnknown() || solution.isFalse()) {
                         throw new RuntimeException(
-                                "Fix it; need to find a proper way to update "
-                                        + "the constraint without interferring with the "
-                                        + "potential ongoing normalization process");
-                    } else { // constraint == null
-                        if (solution.isUnknown() || solution.isFalse()) {
-                            throw new RuntimeException(
-                                    "Fix it; no reference to the symbolic " +
-                                    "constraint that needs to be updated");
-                        }
+                                "Fix it; no reference to the symbolic " +
+                                "constraint that needs to be updated");
                     }
+                }
 
+                if (rule.containsAttribute("owise")) {
+                    owiseResults.add(rightHandSide);
+                } else {
                     if (K.do_concrete_exec) {
-                        assert result == null : "function definition is not deterministic";
+                        assert result == null || result.equals(rightHandSide):
+                                "function definition is not deterministic";
                     }
                     result = rightHandSide;
                 }
+            }
 
-                if (result != null) {
-                    return result;
-                }
+            if (result != null) {
+                return result;
+            } else if (mayUseOwiseRule && !owiseResults.isEmpty()) {
+                assert owiseResults.size() == 1 : "function definition is not deterministic";
+                return owiseResults.iterator().next();
             }
         }
 
@@ -346,8 +313,9 @@ public class KItem extends Term implements Sorted {
         }
 
         try {
+            Term[] arguments = kList.getContents().toArray(new Term[kList.getContents().size()]);
             Term result = BuiltinFunction.invoke(context, kLabelConstant, arguments);
-//            System.err.println(this + " => " + result);
+//          System.err.println(this + " => " + result);
             if (result == null) {
                 result = this;
             } else if (result instanceof KLabel) {
@@ -408,7 +376,7 @@ public class KItem extends Term implements Sorted {
             return null;
         }
     }
-    
+
     @Override
     public boolean equals(Object object) {
         if (this == object) {
@@ -457,7 +425,7 @@ public class KItem extends Term implements Sorted {
     /**
      * Checks if the specified KItem is merely used as a wrapper for a non-K
      * term.
-     * 
+     *
      * @param kItem
      *            the specified KItem
      * @return {@code true} if the specified KItem is an injection wrapper;
@@ -467,10 +435,10 @@ public class KItem extends Term implements Sorted {
         return kItem.kLabel.getClass() == KLabelInjection.class && kItem.kList instanceof KList
                 && ((KList) kItem.kList).contents.isEmpty();
     }
-    
+
     /**
      * Extracts the injected non-K term inside the specified KItem.
-     * 
+     *
      * @param kItem
      *            the specified KItem
      * @return the injected term

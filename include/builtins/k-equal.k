@@ -80,7 +80,7 @@ module K-EQUAL-HOOKS
 
   // disequality over KLabel
   syntax Bool ::= KLabel "=/=KLabel" KLabel
-    [function, latex({#1}\mathrel{\neq_{\it KLabel}}{#2})]
+    [function, hook(KEqual:_=/=KLabel_), latex({#1}\mathrel{\neq_{\it KLabel}}{#2})]
   rule Lbl1:KLabel =/=KLabel Lbl2:KLabel => notBool(Lbl1 ==KLabel Lbl2)
 
   // equality over lists

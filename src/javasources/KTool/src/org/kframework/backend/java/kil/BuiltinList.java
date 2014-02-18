@@ -77,6 +77,10 @@ public class BuiltinList extends Collection implements Sorted {
         return Collections.unmodifiableList(elements);
     }
 
+    @Override
+    public int size() {
+        return elementsLeft.size() + elementsRight.size();
+    }
 
     /**
      * Returns a {@code String} representation of the sort of this object.

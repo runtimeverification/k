@@ -11,7 +11,7 @@ import org.kframework.kil.ASTNode;
  *
  * @author TraianSF
  */
-public class SetLookup extends Term {
+public class SetLookup extends Term implements DataStructureLookup {
 
     private final Term base;
     private final Term key;

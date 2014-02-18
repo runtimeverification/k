@@ -136,24 +136,6 @@ public class ConstrainedTerm extends Term {
     public Term term() {
         return term;
     }
-
-    public enum UnificationType {
-        PatternMatching, Narrowing, Failure
-    }
-    
-    /**
-     * TODO(YilongL)
-     */
-    private UnificationType typeOfUnification;
-    
-    public UnificationType getTypeOfUnification() {
-        assert typeOfUnification != null : 
-            "Unification result not available; this method can only be called " +
-            "at most once after each call of ConstrainedTerm#unify(ConstrainedTerm).";
-        UnificationType result = typeOfUnification;
-        typeOfUnification = null;
-        return result;
-    }
     
     /**
      * Unifies this constrained term with another constrained term.
@@ -182,8 +164,6 @@ public class ConstrainedTerm extends Term {
      * @return solutions to the unification problem
      */
     private List<SymbolicConstraint> unifyImpl(ConstrainedTerm constrainedTerm) {
-        typeOfUnification = UnificationType.Failure;
-        
         if (!term.kind.equals(constrainedTerm.term.kind)) {
             return Collections.emptyList();
         }
@@ -196,17 +176,6 @@ public class ConstrainedTerm extends Term {
             return Collections.emptyList();
         }
         
-        /* compute the type of the unification between two terms */
-        unificationConstraint.orientSubstitution(
-                constrainedTerm.term.variableSet());
-        if (unificationConstraint.isSubstitution()
-                && unificationConstraint.substitution().keySet()
-                        .equals(constrainedTerm.term.variableSet())) {
-            typeOfUnification = UnificationType.PatternMatching;
-        } else {
-            typeOfUnification = UnificationType.Narrowing;
-        }
-
         List<SymbolicConstraint> solutions = new ArrayList<SymbolicConstraint>();
         for (SymbolicConstraint candidate : unificationConstraint.getMultiConstraints()) {
             if (SymbolicConstraint.TruthValue.FALSE == candidate.addAll(constrainedTerm.lookups)) continue;
@@ -218,8 +187,15 @@ public class ConstrainedTerm extends Term {
                 continue;
             }
 
-            if (candidate.checkUnsat()) {
-                continue;
+            if (!K.do_kompilation) {
+                /*
+                 * YilongL: had to disable checkUnsat in kompilation because the
+                 * KILtoZ3 transformer often crash the Java backend; besides,
+                 * this method may not be necessary for kompilation
+                 */
+                if (candidate.checkUnsat()) {
+                    continue;
+                }
             }
 
             solutions.add(candidate);

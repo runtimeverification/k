@@ -15,7 +15,6 @@ import java.util.Set;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import org.kframework.compile.utils.CellMap;
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
@@ -59,9 +58,24 @@ public class Context implements Serializable {
 		"{",
 		"}");
 
+    /**
+     * Represents the bijection map between conses and productions.
+     */
     public BiMap<String, Production> conses = HashBiMap.create();
-	public Map<String, Set<Production>> productions = new HashMap<String, Set<Production>>();
-	public Map<String, Set<String>> labels = new HashMap<String, Set<String>>();
+    /**
+     * Represents a map from all Klabels in string representation plus two
+     * strings, "cons" and "prefixlabel", to sets of corresponding productions.
+     * 
+     * TODO(YilongL): it doesn't contain getKLabel_ in key set?! instead the
+     * production "getKLabel" K is in the values of both "cons" and "prefix".
+     * why?
+     */
+    public Map<String, Set<Production>> productions = new HashMap<String, Set<Production>>();
+    /**
+     * Represents a map from all labels (KLabels and prefix-labels) to sets of
+     * corresponding conses in string representation.
+     */
+    public Map<String, Set<String>> labels = new HashMap<String, Set<String>>();
 	public Map<String, Cell> cells = new HashMap<String, Cell>();
 	public Map<String, String> cellKinds = new HashMap<String, String>();
     public Map<String, String> cellSorts = new HashMap<String, String>();
@@ -145,17 +159,27 @@ public class Context implements Serializable {
 	}
 
 	public void putLabel(Production p, String cons) {
-		String label;
-		if (!MetaK.isComputationSort(p.getSort()))
-			label = p.getLabel();
-		else
-			label = p.getKLabel();
-		Set<String> s = labels.get(label);
-		if (s == null) {
-			labels.put(label, s = new HashSet<String>());
-		}
-		s.add(cons);
+//		String label;
+//		if (!MetaK.isComputationSort(p.getSort()))
+//			label = p.getLabel();
+//		else
+//			label = p.getKLabel();
+//		Set<String> s = labels.get(label);
+//		if (s == null) {
+//			labels.put(label, s = new HashSet<String>());
+//		}
+//		s.add(cons);
+		putLabel(p.getLabel(), cons);
+		putLabel(p.getKLabel(), cons);
 	}
+	
+    private void putLabel(String label, String cons) {
+        Set<String> s = labels.get(label);
+        if (s == null) {
+            labels.put(label, s = new HashSet<String>());
+        }
+        s.add(cons);
+    }
 
 	public void putListLabel(Production p) {
 		String separator = ((UserList) p.getItems().get(0)).getSeparator();

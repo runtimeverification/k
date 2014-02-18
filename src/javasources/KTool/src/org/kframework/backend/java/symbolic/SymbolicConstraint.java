@@ -16,7 +16,25 @@ import java.util.Set;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.Int32Token;
 import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.kil.Bottom;
+import org.kframework.backend.java.kil.CellCollection;
+import org.kframework.backend.java.kil.ConcreteCollectionVariable;
+import org.kframework.backend.java.kil.ConstrainedTerm;
+import org.kframework.backend.java.kil.DataStructureLookup;
+import org.kframework.backend.java.kil.Definition;
+import org.kframework.backend.java.kil.Hole;
+import org.kframework.backend.java.kil.JavaSymbolicObject;
+import org.kframework.backend.java.kil.KCollection;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KLabel;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.Kind;
+import org.kframework.backend.java.kil.Sorted;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.kil.Z3Term;
 import org.kframework.backend.java.util.GappaPrinter;
 import org.kframework.backend.java.util.GappaServer;
 import org.kframework.backend.java.util.KSorts;
@@ -45,7 +63,6 @@ import com.microsoft.z3.Z3Exception;
 public class SymbolicConstraint extends JavaSymbolicObject {
     private static final boolean DEBUG = true;
 
-    // TODO(YilongL): can't we use this.context instead of passing in a new one?
     public void orientSubstitution(Set<Variable> variables) {
         Map<Variable, Term> newSubstitution = new HashMap<>();
         if (substitution.keySet().containsAll(variables)) {
@@ -209,17 +226,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 return !leftHandSide.equals(rightHandSide);
             }
             if (!(leftHandSide instanceof Sorted) || !(rightHandSide instanceof Sorted)) {
-                // TODO(AndreiS): hack for dealing with equalities like X:Id =? 1 ~> 2 which should become false
-                if (leftHandSide instanceof KCollection && ((KCollection) leftHandSide).size() > 1
-                        && rightHandSide instanceof Sorted
-                        && !definition.context().isSubsortedEq(((Sorted) rightHandSide).sort(), leftHandSide.kind().toString())) {
-                    return true;
-                }
-                if (rightHandSide instanceof KCollection && ((KCollection) rightHandSide).size() > 1
-                        && leftHandSide instanceof Sorted
-                        && !definition.context().isSubsortedEq(((Sorted) leftHandSide).sort(), rightHandSide.kind().toString())) {
-                    return true;
-                }
                 return false;
             }
 
@@ -230,6 +236,14 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             }
             if (rightHandSide == Hole.HOLE && (leftHandSide instanceof Sorted)
                 && !definition.context().isSubsortedEq(((Sorted) leftHandSide).sort(), KSorts.KITEM)) {
+                return true;
+            }
+
+            if (leftHandSide instanceof ConcreteCollectionVariable
+                    && !((ConcreteCollectionVariable) leftHandSide).matchConcreteSize(rightHandSide)) {
+                return true;
+            } else if (rightHandSide instanceof ConcreteCollectionVariable
+                    && !((ConcreteCollectionVariable) rightHandSide).matchConcreteSize(leftHandSide)) {
                 return true;
             }
 
@@ -246,6 +260,15 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                     return !definition.context().isSubsortedEq(
                             ((Sorted) leftHandSide).sort(),
                             ((KItem) rightHandSide).sort());
+                // TODO(AndreiS): fix sorting for KCollections
+                } else if (leftHandSide instanceof KCollection && ((KCollection) leftHandSide).size() > 1) {
+                    return !definition.context().isSubsortedEq(
+                            ((Sorted) rightHandSide).sort(),
+                            leftHandSide.kind().toString());
+                } else if (rightHandSide instanceof KCollection && ((KCollection) rightHandSide).size() > 1) {
+                    return !definition.context().isSubsortedEq(
+                            ((Sorted) leftHandSide).sort(),
+                            rightHandSide.kind().toString());
                 } else {
                     return null == definition.context().getGLBSort(ImmutableSet.<String>of(
                         ((Sorted) leftHandSide).sort(),
@@ -1100,6 +1123,52 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      */
     public SymbolicConstraint substituteWithBinders(Variable variable, Term term, TermContext context) {
         return substituteWithBinders(Collections.singletonMap(variable, term), context);
+    }
+
+    /**
+     * Checks if the rule application that produces this symbolic constraint is
+     * driven by pattern matching instead of narrowing. This method should only
+     * be called from the symbolic constraint that is returned by the method
+     * {@code ConstrainedTerm#unify(ConstrainedTerm)}.
+     * 
+     * @param pattern
+     *            the pattern term, which is the left-hand side of a rule plus
+     *            side conditions
+     * @return {@code true} if the rule application is driven by pattern
+     *         matching and all side conditions are successfully dissolved;
+     *         otherwise, {@code false}
+     */
+    public boolean isMatching(ConstrainedTerm pattern) {
+        orientSubstitution(pattern.variableSet());
+        /*
+         * YilongL: data structure lookups will change the variables on the LHS
+         * of a rule, e.g.: "rule foo(M:Map X |-> Y, X) => 0" will be kompiled
+         * into "rule foo(_,_)(_0:Map,, X) => 0 requires [] /\ _0:Map[X] = Y
+         * ensures []". Therefore, we cannot write pattern.term().variableSet()
+         * in the following check.
+         */
+        if (!isSubstitution() || !substitution.keySet().equals(pattern.variableSet())) {
+            return false;
+        }
+
+        for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
+            String sortOfPatVar = entry.getKey().sort();
+            Term subst = entry.getValue();
+            if (subst instanceof DataStructureLookup) {
+                return false;
+            }
+            String sortOfSubst = subst instanceof Sorted ? ((Sorted) subst).sort() : subst.kind().toString();
+            if (definition.context().isSubsorted(sortOfSubst, sortOfPatVar)) {
+                return false;
+            }
+
+            if (entry.getKey() instanceof ConcreteCollectionVariable
+                    && !(entry.getValue() instanceof ConcreteCollectionVariable && ((ConcreteCollectionVariable) entry.getKey()).concreteCollectionSize() == ((ConcreteCollectionVariable) entry.getValue()).concreteCollectionSize())
+                    && !(entry.getValue() instanceof org.kframework.backend.java.kil.Collection && !((org.kframework.backend.java.kil.Collection) entry.getValue()).hasFrame() && ((ConcreteCollectionVariable) entry.getKey()).concreteCollectionSize() == ((org.kframework.backend.java.kil.Collection) entry.getValue()).size())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

@@ -11,6 +11,7 @@ import org.kframework.kil.ASTNode;
  */
 public class KItemProjection extends Term {
 
+    // TODO(YilongL): can we enforce this to be a KItem?
     private final Term term;
 
     public KItemProjection(Kind kind, Term term) {
@@ -40,10 +41,6 @@ public class KItemProjection extends Term {
         return term;
     }
 
-    /**
-     * Returns {@code true} if a unification task between this term and another term cannot be
-     * further decomposed into simpler unification tasks.
-     */
     @Override
     public boolean isSymbolic() {
         return true;
@@ -77,7 +74,7 @@ public class KItemProjection extends Term {
     }
 
     @Override
-    public void accept(Unifier unifier, Term patten) {
+    public void accept(Unifier unifier, Term pattern) {
         throw new UnsupportedOperationException();
     }
 

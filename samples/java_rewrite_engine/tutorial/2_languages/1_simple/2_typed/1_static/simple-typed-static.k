@@ -144,7 +144,7 @@ evaluation strategies. */
   syntax Exp ::= Int | Bool | String | Id
                | "(" Exp ")"             [bracket]
                | "++" Exp
-               > Exp "[" Exps "]"        [strict]
+               > Exp "[" Exps "]"        [strict, klabel("'_:Exp[_:Exps]")]
                > Exp "(" Exps ")"        [strict]
                | "-" Exp                 [strict]
                | "sizeOf" "(" Exp ")"    [strict]

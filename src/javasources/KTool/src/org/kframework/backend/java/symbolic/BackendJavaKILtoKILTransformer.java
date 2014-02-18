@@ -1,24 +1,7 @@
 package org.kframework.backend.java.symbolic;
 
 import com.google.common.collect.Multimap;
-import org.kframework.backend.java.kil.BuiltinMap;
-import org.kframework.backend.java.kil.BuiltinMgu;
-import org.kframework.backend.java.kil.BuiltinSet;
-import org.kframework.backend.java.kil.BuiltinList;
-import org.kframework.backend.java.kil.Cell;
-import org.kframework.backend.java.kil.CellCollection;
-import org.kframework.backend.java.kil.Hole;
-import org.kframework.backend.java.kil.KCollection;
-import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.kil.KLabelFreezer;
-import org.kframework.backend.java.kil.KLabelInjection;
-import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.KSequence;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermCons;
-import org.kframework.backend.java.kil.Token;
-import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.kil.*;
 import org.kframework.compile.utils.ConfigurationStructureMap;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
@@ -94,16 +77,12 @@ public class BackendJavaKILtoKILTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(TermCons termCons) {
-        String cons = termCons.cons();
-        String psort = context.conses.get(cons).getSort();
-        List<org.kframework.kil.Term> contents = new ArrayList<org.kframework.kil.Term>();
-        for (Term term : termCons.contents()) {
-            contents.add((org.kframework.kil.Term) term.accept(this));
-        }
-        return new org.kframework.kil.TermCons(psort, cons, contents, context);
+    public ASTNode transform(KItemProjection kItemProj) {
+        return new org.kframework.kil.KItemProjection(
+                kItemProj.kind().toString(), 
+                (org.kframework.kil.Term) kItemProj.term().accept(this));
     }
-
+    
     @Override
     public ASTNode transform(KLabelConstant kLabelConstant) {
         return org.kframework.kil.KLabelConstant.of(kLabelConstant.label(), context);

@@ -47,7 +47,6 @@ public interface Visitor {
     public void visit(SetUpdate mapUpdate);
     public void visit(SymbolicConstraint node);
     public void visit(Term node);
-    public void visit(TermCons termCons);
     public void visit(Token token);
     public void visit(UninterpretedConstraint uninterpretedConstraint);
     public void visit(UninterpretedToken uninterpretedToken);

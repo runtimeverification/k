@@ -170,7 +170,7 @@ for the KOOL object-oriented constructs.
                | "(" Id ")" Exp          [strict(2)]    // KOOL  cast
                | "new" Id "(" Exps ")"   [strict(2)]    // KOOL
                | Exp "." Id                             // KOOL
-               > Exp "[" Exps "]"        [strict]
+               > Exp "[" Exps "]"        [strict, klabel("'_:Exp[_:Exps]")]
                > Exp "(" Exps ")"        [strict(2)]    // was strict in SIMPLE
                | "-" Exp                 [strict]
                | "sizeOf" "(" Exp ")"    [strict]
@@ -912,7 +912,7 @@ method call or the array access.  */
     when Class =/=K Class'  [structural]
 
   context HOLE(_:Exps)
-    when getKLabel HOLE ==KLabel '_`(_`) orBool getKLabel HOLE ==KLabel '_`[_`]
+    when getKLabel HOLE ==KLabel '_`(_`) orBool getKLabel HOLE ==KLabel '_:Exp`[_:Exps`] //'_`[_`]
 
 /*@ Eventually, each of the rules above produces a \texttt{lookup(L)}
 task as a replacement for the method.  When that happens, we just

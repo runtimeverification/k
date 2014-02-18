@@ -19,7 +19,6 @@ import org.kframework.backend.java.kil.BuiltinMgu;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
-import org.kframework.backend.java.kil.Collection;
 import org.kframework.backend.java.kil.ConcreteCollectionVariable;
 import org.kframework.backend.java.kil.Hole;
 import org.kframework.backend.java.kil.KCollection;
@@ -34,7 +33,6 @@ import org.kframework.backend.java.kil.MapUpdate;
 import org.kframework.backend.java.kil.MetaVariable;
 import org.kframework.backend.java.kil.SetUpdate;
 import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermCons;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
@@ -131,10 +129,10 @@ public class SymbolicUnifier extends AbstractUnifier {
             // TODO(YilongL): can we move this adhoc code to another place?
             /* special case for concrete collections  */
             if (term instanceof ConcreteCollectionVariable
-                    && !matchConcreteSize((ConcreteCollectionVariable) term, otherTerm)) {
+                    && !((ConcreteCollectionVariable) term).matchConcreteSize(otherTerm)) {
                 fail();
             } else if (otherTerm instanceof ConcreteCollectionVariable
-                    && !matchConcreteSize((ConcreteCollectionVariable) otherTerm, term)) {
+                    && !((ConcreteCollectionVariable) otherTerm).matchConcreteSize(term)) {
                 fail();
             }
 
@@ -150,37 +148,6 @@ public class SymbolicUnifier extends AbstractUnifier {
             if (!term.equals(otherTerm)) {
                 term.accept(this, otherTerm);
             }
-        }
-    }
-
-    private boolean matchConcreteSize(ConcreteCollectionVariable variable, Term term) {
-        if (term instanceof ConcreteCollectionVariable) {
-            ConcreteCollectionVariable otherVariable = (ConcreteCollectionVariable) term;
-            return variable.concreteCollectionSize() == otherVariable.concreteCollectionSize();
-        }
-
-        if (!(term instanceof Collection)) {
-            return false;
-        }
-        Collection collection = (Collection) term;
-
-        if (collection.hasFrame()) {
-            return false;
-        }
-
-        if (collection instanceof BuiltinList) {
-            BuiltinList list = (BuiltinList) collection;
-            return variable.concreteCollectionSize()
-                   == list.elementsLeft().size() + list.elementsRight().size();
-        } else if (collection instanceof BuiltinMap) {
-            BuiltinMap map = (BuiltinMap) collection;
-            return variable.concreteCollectionSize() == map.getEntries().size();
-        } else if (collection instanceof BuiltinSet) {
-            BuiltinSet set = (BuiltinSet) collection;
-            return variable.concreteCollectionSize() == set.elements().size();
-        } else {
-            assert false: "unexpected collection class";
-            return false;
         }
     }
 
@@ -785,30 +752,6 @@ public class SymbolicUnifier extends AbstractUnifier {
         unify((Term) variable, term);
     }
     
-    @Override
-    public void unify(TermCons termCons, Term term) {
-        if (!(term instanceof TermCons)) {
-            fail();
-        }
-        
-        TermCons otherTermCons = (TermCons) term;
-        if (!(termCons.cons().equals(otherTermCons.cons()))) {
-            fail();
-        }
-        
-        List<Term> contents = termCons.contents();
-        List<Term> otherContents = otherTermCons.contents();
-        if (contents.size() != otherContents.size()) {
-            fail();
-        }
-        
-        Iterator<Term> iter = contents.iterator();
-        Iterator<Term> otherIter = otherContents.iterator();
-        while (iter.hasNext()) {
-            unify(iter.next(), otherIter.next());
-        }
-    }
-
     @Override
     public String getName() {
         return this.getClass().toString();

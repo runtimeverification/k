@@ -102,6 +102,10 @@ public class BuiltinSet extends Collection implements Sorted {
 //        }
 //    }
 
+    @Override
+    public int size() {
+        return elements.size();
+    }
 
     /**
      * Returns a {@code String} representation of the sort of this object.

@@ -1,17 +1,16 @@
 package org.kframework.backend.java.kil;
 
 import com.google.common.collect.Multimap;
-import org.apache.commons.collections15.MultiMap;
-import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
 
-import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
@@ -41,18 +40,31 @@ public class KLabelConstant extends KLabel {
     private KLabelConstant(String label, Context context) {
         this.label = label;
         productions = ImmutableList.copyOf(context.productionsOf(label));
+        
+        // TODO(YilongL): urgent; how to detect KLabel clash?
 
         boolean isFunction = false;
         if (!label.startsWith("is")) {
-            for (Production production : productions) {
-                if (production.containsAttribute(Attribute.FUNCTION.getKey())) {
-                    isFunction = true;
-                    break;
-                }
-                if (production.containsAttribute(Attribute.PREDICATE.getKey())) {
-                    isFunction = true;
-                    break;
-                }
+            Iterator<Production> iterator = productions.iterator();
+            if (iterator.hasNext()) {
+                Production fstProd = iterator.next();
+                isFunction = fstProd.containsAttribute(Attribute.FUNCTION.getKey())
+                        || fstProd.containsAttribute(Attribute.PREDICATE.getKey());
+            }
+            
+            while (iterator.hasNext()) {
+                Production production = iterator.next();
+                /*
+                 * YilongL: this assertion is necessary because whether this
+                 * KLabel is a function determines if the KItem constructed by
+                 * this KLabel can be split during unification
+                 */
+                assert isFunction == (production
+                        .containsAttribute(Attribute.FUNCTION.getKey()) || production
+                        .containsAttribute(Attribute.PREDICATE.getKey())) : "Cannot determine if the KLabel "
+                        + label
+                        + " is a function symbol because there are multiple productions associated with this KLabel: "
+                        + productions;
             }
         } else {
             /* a KLabel beginning with "is" represents a sort membership predicate */

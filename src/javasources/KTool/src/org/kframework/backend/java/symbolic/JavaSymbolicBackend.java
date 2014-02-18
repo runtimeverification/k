@@ -20,7 +20,6 @@ import org.kframework.kil.loader.CollectSubsortsVisitor;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.krun.K;
 import org.kframework.main.FirstStep;
 import org.kframework.main.LastStep;
 import org.kframework.utils.BinaryLoader;
@@ -59,7 +58,6 @@ public class JavaSymbolicBackend extends BasicBackend {
 
     @Override
     public Definition lastStep(Definition javaDef) {
-        K.smt = "none"; // TODO(YilongL): do it nicely
         BinaryLoader.save(new File(context.dotk,
                 JavaSymbolicBackend.DEFINITION_FILENAME).toString(),
                 new KILtoBackendJavaKILTransformer(context, true)

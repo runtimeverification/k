@@ -139,15 +139,6 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     }
     
     @Override
-    public ASTNode transform(org.kframework.kil.TermCons node) throws TransformerException {
-        List<Term> contents = new ArrayList<Term>();
-        for (org.kframework.kil.Term term : node.getContents()) {
-            contents.add((Term) term.accept(this));
-        }
-        return new TermCons(node.getCons(), contents, definition.context());
-    }
-
-    @Override
     public ASTNode transform(org.kframework.kil.KItemProjection node) throws TransformerException {
         return new KItemProjection(Kind.of(node.projectedKind()), (Term) node.getTerm().accept(this));
     }
@@ -192,7 +183,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     @Override
     public ASTNode transform(org.kframework.kil.List node) throws TransformerException {
         List<org.kframework.kil.Term> list = new ArrayList<>();
-        KILtoBackendJavaKILTransformer.flattenList(list,node.getContents());
+        KILtoBackendJavaKILTransformer.flattenList(list, node.getContents());
         if (list.isEmpty()){
             return new KList();
         }
@@ -680,46 +671,80 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         /* initialize the builtin function table */
         BuiltinFunction.init(definition);
 
-        /* partially evaluate the right-hand side and the conditions for each rule */
-        TermContext termContext = TermContext.of(definition);
+        /* replace the unevaluated rules defining functions with their partially evaluated counterparts */
         ArrayList<Rule> partiallyEvaluatedRules = new ArrayList<>();
-        for (Rule rule : Iterables.concat(definition.rules(), definition.functionRules().values(), definition.macros())) {
-            // TODO(AndreiS): some evaluation is required in the LHS as well
-            //Term leftHandSide = rule.leftHandSide().evaluate(termContext);
-            Term rightHandSide = rule.rightHandSide().evaluate(termContext);
-            List<Term> requires = new ArrayList<>();
-            for (Term term : rule.requires()) {
-                requires.add(term.evaluate(termContext));
+        /* iterate until a fixpoint is reached, because the evaluation with functions uses Term#substituteAndEvalaute */
+        while (true) {
+            boolean change = false;
+
+            partiallyEvaluatedRules.clear();
+            for (Rule rule : definition.functionRules().values()) {
+                Rule evaluatedRule = evaluateRule(rule, definition);
+                partiallyEvaluatedRules.add(evaluatedRule);
+
+                if (!evaluatedRule.equals(rule)) {
+                    change = true;
+                }
             }
-            List<Term> ensures = new ArrayList<>();
-            for (Term term : rule.ensures()) {
-                ensures.add(term.evaluate(termContext));
+
+            if (!change) {
+                break;
             }
-            UninterpretedConstraint lookups = new UninterpretedConstraint();
-            for (UninterpretedConstraint.Equality equality : rule.lookups().equalities()) {
-                lookups.add(
-                        equality.leftHandSide().evaluate(termContext),
-                        equality.rightHandSide().evaluate(termContext));
-            }
-            partiallyEvaluatedRules.add(new Rule(
-                    rule.label(),
-                    rule.leftHandSide(),
-                    rightHandSide,
-                    requires,
-                    ensures,
-                    rule.freshVariables(),
-                    lookups,
-                    rule.getAttributes()));
+
+            definition.functionRules().clear();
+            definition.addRuleCollection(partiallyEvaluatedRules);
         }
 
-         /* replace the unevaluated rules with the partially evaluated rules */
+        /* replace the unevaluated rules and macros with their partially evaluated counterparts */
+        partiallyEvaluatedRules.clear();
+        for (Rule rule : Iterables.concat(definition.rules(), definition.macros())) {
+            partiallyEvaluatedRules.add(evaluateRule(rule, definition));
+        }
         definition.rules().clear();
-        definition.functionRules().clear();
         definition.macros().clear();
         definition.addRuleCollection(partiallyEvaluatedRules);
 
         this.definition = null;
         return definition;
+    }
+
+    /**
+     * Partially evaluate the right-hand side and the conditions for each rule.
+     * @param rule
+     *          the rule being partially evaluated
+     * @param definition
+     *          the definition used for evaluation
+     * @return
+     *          the partially evaluated rule
+     */
+    public static Rule evaluateRule(Rule rule, Definition definition) {
+        TermContext termContext = TermContext.of(definition);
+        // TODO(AndreiS): some evaluation is required in the LHS as well
+        //Term leftHandSide = rule.leftHandSide().evaluate(termContext);
+        Term rightHandSide = rule.rightHandSide().evaluate(termContext);
+        List<Term> requires = new ArrayList<>();
+        for (Term term : rule.requires()) {
+            requires.add(term.evaluate(termContext));
+        }
+        List<Term> ensures = new ArrayList<>();
+        for (Term term : rule.ensures()) {
+            ensures.add(term.evaluate(termContext));
+        }
+        UninterpretedConstraint lookups = new UninterpretedConstraint();
+        for (UninterpretedConstraint.Equality equality : rule.lookups().equalities()) {
+            lookups.add(
+                    equality.leftHandSide().evaluate(termContext),
+                    equality.rightHandSide().evaluate(termContext));
+        }
+        return new Rule(
+                rule.label(),
+                rule.leftHandSide(),
+                rightHandSide,
+                requires,
+                ensures,
+                rule.freshVariables(),
+                lookups,
+                rule.getAttributes());
     }
 
     private static void flattenKSequence(

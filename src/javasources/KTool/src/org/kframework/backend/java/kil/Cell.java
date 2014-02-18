@@ -5,6 +5,7 @@ import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.KSorts;
 
 
 /**
@@ -20,7 +21,7 @@ import org.kframework.kil.ASTNode;
  * @author AndreiS
  */
 @SuppressWarnings("serial")
-public class Cell<T extends Term> extends Term {
+public class Cell<T extends Term> extends Term /*implements Sorted*/ {
 
     private final String label;
     private final Kind contentKind;
@@ -102,5 +103,10 @@ public class Cell<T extends Term> extends Term {
     public ASTNode accept(Transformer transformer) {
         return transformer.transform(this);
     }
+
+//    @Override
+//    public String sort() {
+//        return KSorts.BAG_ITEM;
+//    }
 
 }

@@ -10,7 +10,7 @@ import org.kframework.kil.ASTNode;
  *
  * @author AndreiS
  */
-public class MapLookup extends Term {
+public class MapLookup extends Term implements DataStructureLookup {
 
     private final Term map;
     private final Term key;

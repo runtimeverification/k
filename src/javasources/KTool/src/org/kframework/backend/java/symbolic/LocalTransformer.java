@@ -186,11 +186,6 @@ public class LocalTransformer implements Transformer {
     public ASTNode transform(Term node) {
         return transform((JavaSymbolicObject) node);
     }
-    
-    @Override
-    public ASTNode transform(TermCons termCons) {
-        return transform((Term) termCons);
-    }
 
     @Override
     public ASTNode transform(Token token) {

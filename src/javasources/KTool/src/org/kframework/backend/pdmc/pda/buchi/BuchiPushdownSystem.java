@@ -100,19 +100,39 @@ public class BuchiPushdownSystem<Control, Alphabet>
         result.append("Initial Configuration: ");
         result.append(cfg.toString());
         result.append("\n");
-        Set<ConfigurationHead<Pair<Control, BuchiState>, Alphabet> > considered = new HashSet<>();
+        Set<Pair<Control, BuchiState>> states = new HashSet<>();
+        Set<Alphabet> letters = new HashSet<>();
         Stack<ConfigurationHead<Pair<Control, BuchiState>, Alphabet> > toBeProcessed = new Stack<>();
-        toBeProcessed.push(cfg.getHead());  considered.add(cfg.getHead());
+        toBeProcessed.push(cfg.getHead());
+        states.add(cfg.getHead().getState());
+        letters.add(cfg.getHead().getLetter());
+        Joiner joiner = Joiner.on(";\n");
         while (!toBeProcessed.empty()) {
             ConfigurationHead<Pair<Control, BuchiState>, Alphabet> head = toBeProcessed.pop();
+            System.err.println("To be processed: " + head);
             Set<Rule<Pair<Control, BuchiState>, Alphabet>> rules = getRules(head);
-            Joiner joiner = Joiner.on(";\n");
+            System.err.println(rules);
             result.append("\n");
             joiner.appendTo(result, rules);
             for (Rule<Pair<Control, BuchiState>, Alphabet> rule : rules) {
-                head = rule.endConfiguration().getHead();
-                if (!considered.contains(head)) {
-                    considered.add(head); toBeProcessed.push(head);
+                cfg = rule.endConfiguration();
+                Stack<Alphabet> newstack = new Stack<>();
+                newstack.addAll(cfg.getStack());
+                if (cfg.getHead().isProper()) newstack.add(cfg.getHead().getLetter());
+                for (Alphabet l : newstack) {
+                    if (!letters.contains(l)) {
+                        letters.add(l);
+                        for (Pair<Control, BuchiState> state : states) {
+                            toBeProcessed.push(ConfigurationHead.of(state, l));
+                        }
+                    }
+                }
+                Pair<Control, BuchiState> state = cfg.getHead().getState();
+                if (!states.contains(state)) {
+                    states.add(state);
+                    for (Alphabet l : letters) {
+                        toBeProcessed.push(ConfigurationHead.of(state, l));
+                    }
                 }
             }
         }

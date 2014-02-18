@@ -618,17 +618,6 @@ public class CopyOnWriteTransformer implements Transformer {
     }
 
     @Override
-    public ASTNode transform(TermCons termCons) {
-        List<Term> transformedContents = transformList(termCons.contents());
-        if (transformedContents != termCons.contents()) {
-            return new TermCons(termCons.cons(), transformedContents, context
-                    .definition().context());
-        } else {
-            return termCons;
-        }
-    }
-
-    @Override
     public ASTNode transform(Variable variable) {
         return variable;
     }

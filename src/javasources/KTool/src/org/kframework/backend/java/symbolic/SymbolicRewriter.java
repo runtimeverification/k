@@ -393,7 +393,16 @@ public class SymbolicRewriter {
                         constrainedTerm.termContext());
 
                 for (SymbolicConstraint constraint1 : constrainedTerm.unify(leftHandSide)) {
-                    constraint1.orientSubstitution(rule.variableSet());
+                    /*
+                     * TODO(YilongL): had to comment out the following assertion
+                     * because logik.k uses unification even in concrete
+                     * execution mode
+                     */
+//                    if (K.do_concrete_exec) {
+//                        assert constraint1.isMatching(leftHandSide) : "Pattern matching expected in concrete execution mode";
+//                    }
+                        
+                    constraint1.orientSubstitution(rule.leftHandSide().variableSet());
                     constraint1.addAll(rule.ensures());
                     
                     Term result = rule.rightHandSide();
@@ -405,16 +414,10 @@ public class SymbolicRewriter {
                         /* rename rule variables in the rule RHS */
                         result = result.substituteWithBinders(freshSubstitution, constrainedTerm.termContext());
                     }
-                    
                     /* apply the constraints substitution on the rule RHS */
-                    result = result.substituteAndEvaluate(constraint1.substitution(),
+                    result = result.substituteAndEvaluate(
+                            constraint1.substitution(),
                             constrainedTerm.termContext());
-                    /* evaluate pending functions in the rule RHS */
-                    if (rule.containsAttribute("getModel")) {
-                        // TODO(YilongL): this check is a hack-ish workaround
-                        // for the smt_model test; do it nicely
-                        result = result.evaluate(constrainedTerm.termContext());
-                    }
                     /* eliminate anonymous variables */
                     constraint1.eliminateAnonymousVariables();
 

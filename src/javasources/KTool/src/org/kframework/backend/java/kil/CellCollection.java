@@ -93,6 +93,7 @@ public class CellCollection extends Collection implements Sorted {
         return cells.keySet();
     }
 
+    @Override
     public int size() {
         return cells.size();
     }
