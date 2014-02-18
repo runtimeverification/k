@@ -161,13 +161,14 @@ public class Main {
             String name = (String) en.nextElement();
             String value = K.configuration_variables.getProperty(name);
             String parser = K.cfg_parsers.getProperty(name);
-            // TODO: get sort from configuration term in definition and pass it
-            // here
+            assert context.configVarSorts.containsKey(name) : "Command line variable '" + name +"' was not declared in a configuration.";
+            String startSymbol = context.configVarSorts.get(name);
+            System.out.println();
             Term parsed = null;
             if (parser == null) {
                 parser = "kast -groundParser -e";
             }
-            parsed = rp.runParserOrDie(parser, value, false, null, context);
+            parsed = rp.runParserOrDie(parser, value, false, startSymbol, context);
             parsed = (Term) parsed.accept(new ResolveVariableAttribute(context));
             output.put("$" + name, parsed);
             hasPGM = hasPGM || name.equals("$PGM");
