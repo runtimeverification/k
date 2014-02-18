@@ -16,7 +16,25 @@ import java.util.Set;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.Int32Token;
 import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.kil.Bottom;
+import org.kframework.backend.java.kil.CellCollection;
+import org.kframework.backend.java.kil.ConcreteCollectionVariable;
+import org.kframework.backend.java.kil.ConstrainedTerm;
+import org.kframework.backend.java.kil.DataStructureLookup;
+import org.kframework.backend.java.kil.Definition;
+import org.kframework.backend.java.kil.Hole;
+import org.kframework.backend.java.kil.JavaSymbolicObject;
+import org.kframework.backend.java.kil.KCollection;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KLabel;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.Kind;
+import org.kframework.backend.java.kil.Sorted;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.kil.Z3Term;
 import org.kframework.backend.java.util.GappaPrinter;
 import org.kframework.backend.java.util.GappaServer;
 import org.kframework.backend.java.util.KSorts;
@@ -221,6 +239,14 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 return true;
             }
 
+            if (leftHandSide instanceof ConcreteCollectionVariable
+                    && !((ConcreteCollectionVariable) leftHandSide).matchConcreteSize(rightHandSide)) {
+                return true;
+            } else if (rightHandSide instanceof ConcreteCollectionVariable
+                    && !((ConcreteCollectionVariable) rightHandSide).matchConcreteSize(leftHandSide)) {
+                return true;
+            }
+
             // TODO(YilongL): find a general way to deal with this
             // TODO(AndreiS): handle KLabel variables
             if (!K.do_testgen) {
@@ -234,6 +260,15 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                     return !definition.context().isSubsortedEq(
                             ((Sorted) leftHandSide).sort(),
                             ((KItem) rightHandSide).sort());
+                // TODO(AndreiS): fix sorting for KCollections
+                } else if (leftHandSide instanceof KCollection && ((KCollection) leftHandSide).size() > 1) {
+                    return !definition.context().isSubsortedEq(
+                            ((Sorted) rightHandSide).sort(),
+                            leftHandSide.kind().toString());
+                } else if (rightHandSide instanceof KCollection && ((KCollection) rightHandSide).size() > 1) {
+                    return !definition.context().isSubsortedEq(
+                            ((Sorted) leftHandSide).sort(),
+                            rightHandSide.kind().toString());
                 } else {
                     return null == definition.context().getGLBSort(ImmutableSet.<String>of(
                         ((Sorted) leftHandSide).sort(),
@@ -1124,6 +1159,12 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             }
             String sortOfSubst = subst instanceof Sorted ? ((Sorted) subst).sort() : subst.kind().toString();
             if (definition.context().isSubsorted(sortOfSubst, sortOfPatVar)) {
+                return false;
+            }
+
+            if (entry.getKey() instanceof ConcreteCollectionVariable
+                    && !(entry.getValue() instanceof ConcreteCollectionVariable && ((ConcreteCollectionVariable) entry.getKey()).concreteCollectionSize() == ((ConcreteCollectionVariable) entry.getValue()).concreteCollectionSize())
+                    && !(entry.getValue() instanceof org.kframework.backend.java.kil.Collection && !((org.kframework.backend.java.kil.Collection) entry.getValue()).hasFrame() && ((ConcreteCollectionVariable) entry.getKey()).concreteCollectionSize() == ((org.kframework.backend.java.kil.Collection) entry.getValue()).size())) {
                 return false;
             }
         }
