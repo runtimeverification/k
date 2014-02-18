@@ -711,7 +711,7 @@ Like in untyped KOOL.  */
   rule objectClosure(<envStack> ListItem((C,_)) ...</envStack> _)
        instanceOf C => true
 
-  rule objectClosure(<envStack> ListItem((C::Id,_)) => . ...</envStack> _)
+  rule objectClosure(<envStack> ListItem((C::Id,_)) => .List ...</envStack> _)
        instanceOf C'  when C =/=K C'  [structural]
 
   rule objectClosure(<envStack> .List </envStack> _) instanceOf _ => false
