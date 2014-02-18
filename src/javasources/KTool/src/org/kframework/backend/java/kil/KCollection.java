@@ -95,6 +95,7 @@ public abstract class KCollection extends Collection implements Iterable<Term>, 
      * @see {@link KCollection#contents}
      * @return the size of the contents
      */
+    @Override
     public int size() {
         return contents.size();
     }
