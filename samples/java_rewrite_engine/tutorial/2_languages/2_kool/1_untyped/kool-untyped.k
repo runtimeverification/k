@@ -208,7 +208,8 @@ for the KOOL object-oriented constructs.
                 | "if" "(" Exp ")" Block "else" Block   [avoid, strict(1)]
                 | "if" "(" Exp ")" Block
                 | "while" "(" Exp ")" Block
-        	    | "for" "(" Stmt Exp ";" Exp ")" Block
+        	    //| "for" "(" Stmt Exp ";" Exp ")" Block
+                | "for" "(" Stmts Exp ";" Exp ")" Block
                 | "return" Exp ";"                      [strict]
                 | "return" ";"
                 | "print" "(" Exps ")" ";"              [strict]
@@ -226,14 +227,10 @@ for the KOOL object-oriented constructs.
 
 //@ Old desugaring rules, from SIMPLE
 
-//  rule if (E) S => if (E) S else {}                                 [macro]
-//  rule for(Start Cond; Step) {S} => {Start while (Cond) {S Step;}}  [macro]
-//  rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;          [macro]
-//  rule var X:Id = E; => var X; X = E;                               [macro]
-  rule if (E) S => if (E) S else {}
-  rule for(Start Cond; Step) {S} => {Start while (Cond) {S Step;}}
-  rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;
-  rule var X:Id = E; => var X; X = E;
+  rule if (E) S => if (E) S else {}                                 [macro]
+  rule for(Start Cond; Step) {S} => {Start while (Cond) {S Step;}}  [macro]
+  rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;          [macro]
+  rule var X:Id = E; => var X; X = E;                               [macro]
 
 //@ New desugaring rule
 
@@ -443,8 +440,7 @@ interestingly, the semantics of return stays unchanged. */
        <env> _ => Env </env>
 
   syntax Val ::= "nothing"
-//  rule return; => return nothing;   [macro]
-  rule return; => return nothing;
+  rule return; => return nothing;   [macro]
 
 
   rule <k> read() => I ...</k> <in> ListItem(I:Int) => .List ...</in>  [read]
@@ -938,9 +934,10 @@ argument does not evaluate to an object.  */
   rule objectClosure(<envStack> ListItem((C,_)) ...</envStack> _)
        instanceOf C => true
 
-//  rule objectClosure(<envStack> (C,_) => . ...</envStack> _)
+//  rule objectClosure(<envStack> (C,_) => .List ...</envStack> _)
 //       instanceOf C'  when C =/=K C'  [structural]
-  rule objectClosure(<envStack> ListItem((C:Id,_)) => . ...</envStack> _)
+// TODO(YilongL): Changing `.List' to `.' in the following line would cause the rewrite engine to get stuck in the test instanceOf.kool because that `.' will be interpreted as `.K'. Why doesn't the type-inferencer catch this error?
+  rule objectClosure(<envStack> ListItem((C:Id,_)) => .List ...</envStack> _)
        instanceOf C'  when C =/=K C'  [structural]
 
   rule objectClosure(<envStack> .List </envStack> _) instanceOf _ => false
@@ -1012,7 +1009,7 @@ starting with the most concrete class and going up in the hierarchy. */
 //  rule lookupMember(<envStack> (_, <env> Env </env>) => .List ...</envStack>, X)
 //    when notBool(X in keys(Env))
   rule lookupMember(<envStack> ListItem((_, <env> Env </env>)) Rest </envStack>, X) =>
-       lookupMember(<envStack> .List Rest </envStack>, X)
+       lookupMember(<envStack> Rest </envStack>, X)
     when notBool(X in keys(Env))
 
 endmodule
