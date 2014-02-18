@@ -125,7 +125,7 @@ public class DefinitionLoader {
 
 			//This following line was commented out to make the latex backend 
 			//parse files importing from other files
-			def = (Definition) def.accept(new RemoveUnusedModules(context));
+			def = (Definition) def.accept(new RemoveUnusedModules(context, autoinclude));
 
 			// HERE: add labels to sorts
 
