@@ -269,7 +269,7 @@ public class KItem extends Term implements Sorted {
                 /* apply the constraints substitution on the rule RHS */
                 rightHandSide = rightHandSide.substituteAndEvaluate(solution.substitution(), context);
                 /* eliminate anonymous variables */
-                solution.eliminateAnonymousVariables();
+                // solution.eliminateAnonymousVariables();
 
                 /* update the constraint */
                 if (K.do_kompilation || K.do_concrete_exec) {
