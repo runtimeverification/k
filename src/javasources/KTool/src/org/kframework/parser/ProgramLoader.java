@@ -100,17 +100,14 @@ public class ProgramLoader {
 			ASTNode out;
 			if (whatParser == GlobalSettings.ParserType.GROUND) {
 				org.kframework.parser.concrete.KParser.ImportTblGround(context.kompiled.getCanonicalPath() + "/ground/Concrete.tbl");
-				out = DefinitionLoader.parseCmdString(content, filename, context);
-				out = out.accept(new TypeSystemFilter2(startSymbol, context));
+				out = DefinitionLoader.parseCmdString(content, filename, startSymbol, context);
 				out = out.accept(new RemoveBrackets(context));
 				out = out.accept(new AddEmptyLists(context));
 				out = out.accept(new RemoveSyntacticCasts(context));
 				out = out.accept(new FlattenSyntax(context));
-				out = out.accept(new RemoveSyntacticCasts(context));
 			} else if (whatParser == GlobalSettings.ParserType.RULES) {
 				org.kframework.parser.concrete.KParser.ImportTbl(context.kompiled.getCanonicalPath() + "/def/Concrete.tbl");
-				out = DefinitionLoader.parsePattern(content, filename, context);
-				out = out.accept(new TypeSystemFilter2(startSymbol, context));
+				out = DefinitionLoader.parsePattern(content, filename, startSymbol, context);
 				out = out.accept(new RemoveBrackets(context));
 				out = out.accept(new AddEmptyLists(context));
 				out = out.accept(new RemoveSyntacticCasts(context));
@@ -126,7 +123,6 @@ public class ProgramLoader {
                 out = (org.kframework.kil.Cell) BinaryLoader.load(filename);
 			} else {
                 out = loadPgmAst(content, filename, startSymbol, context);
-				out = out.accept(new TypeSystemFilter2(startSymbol, context));
                 out = out.accept(new ResolveVariableAttribute(context));
 			}
             Stopwatch.sw.printIntermediate("Parsing Program");

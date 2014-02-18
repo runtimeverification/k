@@ -9,6 +9,7 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Cell;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
+import org.kframework.kil.KSorts;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.StringBuiltin;
@@ -43,7 +44,10 @@ public class KRunApiDebugger implements KRunDebugger {
 		this.context = context;
 		try { 
 			org.kframework.parser.concrete.KParser.ImportTbl(K.compiled_def + "/def/Concrete.tbl");
-			ASTNode pattern = DefinitionLoader.parsePattern(K.pattern, "Command line pattern",
+			ASTNode pattern = DefinitionLoader.parsePattern(
+					K.pattern,
+					"Command line pattern",
+					KSorts.BAG,
                     context);
 			CollectVariablesVisitor vars = new CollectVariablesVisitor(context);
 			pattern.accept(vars);
