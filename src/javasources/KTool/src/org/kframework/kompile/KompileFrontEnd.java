@@ -1,11 +1,18 @@
 package org.kframework.kompile;
 
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.Backend;
 import org.kframework.backend.html.HtmlBackend;
 import org.kframework.backend.java.symbolic.JavaSymbolicBackend;
-import org.kframework.backend.kore.KilTransformer;
 import org.kframework.backend.kore.KoreBackend;
 import org.kframework.backend.latex.LatexBackend;
 import org.kframework.backend.latex.PdfBackend;
@@ -31,15 +38,6 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
 
 public class KompileFrontEnd {
 
@@ -70,6 +68,7 @@ public class KompileFrontEnd {
             GlobalSettings.NOSMT |= "none".equals(cmd.getOptionValue("smt"));
             GlobalSettings.verbose |= cmd.hasOption("verbose");
             GlobalSettings.fastKast |= cmd.hasOption("fast-kast");
+            GlobalSettings.noPrelude |= cmd.hasOption("no-prelude");
             GlobalSettings.warnings = cmd.getOptionValue("warnings", GlobalSettings.warnings);
             GlobalSettings.addTopCell |= cmd.hasOption("add-top-cell");
             GlobalSettings.lib = cmd.getOptionValue("lib", GlobalSettings.lib);

@@ -45,6 +45,7 @@ public class KompileOptionsParser {
         addOptionE(OptionBuilder.withLongOpt("sort-cells").withDescription("Sort cells according to the order in the configuration.").create());
         addOptionE(OptionBuilder.withLongOpt("smt").hasArg().withArgName("solver").withDescription("SMT solver to use for checking constraints. <solver> is one of [z3|none]. (Default: z3). This only has an effect with '--backend symbolic'.").create());
         addOptionE(OptionBuilder.withLongOpt("fast-kast").withDescription("Using the (experimental) faster C SDF parser.").create());
+        addOptionE(OptionBuilder.withLongOpt("no-prelude").withDescription("Do not include anything automatically.").create());
         addOptionE(OptionBuilder.withLongOpt("symbolic-rules").hasArg().withArgName("tags").withDescription("Apply symbolic transformations only to rules annotated with tags from <tags> set. This only has an effect with '--backend symbolic'.").create());
         addOptionE(OptionBuilder.withLongOpt("non-symbolic-rules").hasArg().withArgName("tags").withDescription("Do not apply symbolic transformations to rules annotated with tags from <tags> set. This only has an effect with '--backend symbolic'.").create());
         addOptionE(OptionBuilder.withLongOpt("test-gen").withDescription("Compile for test-case generation purpose in the Java backend. Use concrete sorts and automatically generated labels for heating and cooling rules. This only has an effect with '--backend java'.").create());
