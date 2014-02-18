@@ -22,6 +22,20 @@ public class ConcreteCollectionVariable extends Variable {
         return concreteSize;
     }
 
+    public boolean matchConcreteSize(Term term) {
+        if (term instanceof ConcreteCollectionVariable) {
+            ConcreteCollectionVariable otherVariable = (ConcreteCollectionVariable) term;
+            return concreteCollectionSize() == otherVariable.concreteCollectionSize();
+        } else if (term instanceof Collection) {
+            Collection collection = (Collection) term;
+            return collection.hasFrame() || concreteCollectionSize() == collection.size();
+        } else if (term instanceof Variable) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     @Override
     public ConcreteCollectionVariable getFreshCopy() {
         return new ConcreteCollectionVariable(
