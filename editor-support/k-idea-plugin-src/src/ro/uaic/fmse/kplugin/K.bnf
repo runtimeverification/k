@@ -98,7 +98,8 @@ private cell_end_cont ::= id ">"
 
 private tag_border_in_exp ::= (("<" !cell_start_cont) | ("</" !cell_end_cont) | ">" | "/>")
 
-label ::= LABEL_TOK
+label ::= LABEL_TOK {mixin="ro.uaic.fmse.kplugin.psi.impl.KLabelBase"
+                     implements="ro.uaic.fmse.kplugin.psi.IKLabelBase"}
 string_literal ::= STRING
 
 l_comment ::= COMMENT

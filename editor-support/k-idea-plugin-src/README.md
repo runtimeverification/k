@@ -16,6 +16,7 @@ All the features are similar with the corresponding features for Intellij Idea J
 - Custom settings for syntax highlighting. go to Settings -> Editor -> Colors & Fonts -> K to change color settings.
 - References for rule variables. A reference points at the first occurrence in the rule where variable is typed. To navigate from reference to the target Ctrl+click on the reference. 
 - References for auxiliary functions. If the file don't contain "require" clauses then references are resolved locally. Otherwise they are resolved in the module scope. Both standard auxiliary functions and auxiliary functions defined as regular syntax (old style) are supported.
+- References for KLabels. Both KLabels declared as such as well as KLabels of auxiliary functions.
 - Find usages for variables and auxiliary functions. Right click on the name -> Find Usages.
 - Rename variables/auxiliary functions. Right click on the name -> Refactor -> Rename.
 - Folding of comments/rules/syntax. Multi-line comments are folded by default.

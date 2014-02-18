@@ -79,9 +79,10 @@ public class KPsiUtil {
     }
 
     @Nullable
-    public static KRegularProduction findFirstSyntaxDef(KFile refFile, String name) {
+    public static KRegularProduction findFirstSyntaxDef(KFile refFile, String... names) {
         //If the file have no "require" clauses resolve the reference in the current file scope.
         //Otherwise resolve it in the module scope.
+        List<String> namesList = Arrays.asList(names);
         Collection<VirtualFile> virtualFiles = refFile.getRequires().size() > 0
                 ? FileBasedIndex.getInstance().getContainingFiles(FileTypeIndex.NAME,
                 KFileType.INSTANCE, getModule(refFile).getModuleContentScope())
@@ -92,7 +93,7 @@ public class KPsiUtil {
                 Collection<KRegularProduction> syntaxDefs =
                         PsiTreeUtil.findChildrenOfType(kFile, KRegularProduction.class);
                 for (KRegularProduction syntaxDef : syntaxDefs) {
-                    if (name.equals(syntaxDef.getName())) {
+                    if (namesList.contains(syntaxDef.getName())) {
                         return syntaxDef;
                     }
                 }
@@ -109,6 +110,23 @@ public class KPsiUtil {
     @NotNull
     public static ResolveResult[] resolveAuxFunctions(PsiReference psiReference, String name) {
         KRegularProduction syntaxDef = findFirstSyntaxDef((KFile) psiReference.getElement().getContainingFile(), name);
+        return syntaxDef != null ? new ResolveResult[]{new PsiElementResolveResult(syntaxDef)} : new ResolveResult[0];
+    }
+
+    @NotNull
+    public static ResolveResult[] resolveLabelDec(PsiReference psiReference, String labelName) {
+        List<String> labelDecNames = new ArrayList<>(3);
+        labelDecNames.add(labelName);
+        String labelWithoutQuote = labelName.substring(1);
+        labelDecNames.add(labelWithoutQuote);
+
+        int backQuotePos = labelWithoutQuote.indexOf('`');
+        if (backQuotePos != -1) {
+            labelDecNames.add(labelWithoutQuote.substring(0, backQuotePos));
+        }
+
+        KRegularProduction syntaxDef = findFirstSyntaxDef((KFile) psiReference.getElement().getContainingFile(),
+                labelDecNames.toArray(new String[labelDecNames.size()]));
         return syntaxDef != null ? new ResolveResult[]{new PsiElementResolveResult(syntaxDef)} : new ResolveResult[0];
     }
 

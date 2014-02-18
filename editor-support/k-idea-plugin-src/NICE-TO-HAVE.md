@@ -1,6 +1,6 @@
 ## Features nice to have
 
-- References support for sorts, labels.
+- References support for sorts.
 - Interoperability between labels and their syntactic definitions. If usages of a syntactic definition are searched, labels should be displayed as well.
 - Quick documentation support for Sorts and Labels.
 - Support for predicates isSort(), like isKResult(). whenever we search for usages for a Sort, these predicates should also be listed and the opposite.
