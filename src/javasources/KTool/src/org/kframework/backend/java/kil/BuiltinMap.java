@@ -66,6 +66,11 @@ public class BuiltinMap extends Collection implements Sorted {
         return entries.remove(key);
     }
 
+    @Override
+    public int size() {
+        return entries.size();
+    }
+
     /**
      * Returns a {@code String} representation of the sort of this builtin map.
      */
