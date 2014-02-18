@@ -161,17 +161,19 @@ public class Main {
             String name = (String) en.nextElement();
             String value = K.configuration_variables.getProperty(name);
             String parser = K.cfg_parsers.getProperty(name);
-            assert context.configVarSorts.containsKey(name) : "Command line variable '" + name +"' was not declared in a configuration.";
-            String startSymbol = context.configVarSorts.get(name);
-            System.out.println();
-            Term parsed = null;
-            if (parser == null) {
-                parser = "kast -groundParser -e";
+            if (context.configVarSorts.containsKey(name)) { // "Command line variable '" + name +"' was not declared in a configuration.";
+            	// there is a problem because en contains also the '(c)olor' element and I can't report an error
+            	// if the user mistypes a variable.
+	            String startSymbol = context.configVarSorts.get(name);
+	            Term parsed = null;
+	            if (parser == null) {
+	                parser = "kast -groundParser -e";
+	            }
+	            parsed = rp.runParserOrDie(parser, value, false, startSymbol, context);
+	            parsed = (Term) parsed.accept(new ResolveVariableAttribute(context));
+	            output.put("$" + name, parsed);
+	            hasPGM = hasPGM || name.equals("$PGM");
             }
-            parsed = rp.runParserOrDie(parser, value, false, startSymbol, context);
-            parsed = (Term) parsed.accept(new ResolveVariableAttribute(context));
-            output.put("$" + name, parsed);
-            hasPGM = hasPGM || name.equals("$PGM");
         }
         if (!hasPGM && kast != null) {
             output.put("$PGM", kast);
