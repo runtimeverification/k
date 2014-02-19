@@ -378,7 +378,7 @@ entire code of the function body needs to type anyway. */
 
   rule <task> <k> T:Type F:Id(Ps:Params) S => getTypes(Ps)->T F;...</k> </task>
        (. => <task>
-               <k> mkDecls(Ps) S </k> <tenv> . </tenv> <return> T </return>
+               <k> mkDecls(Ps) S </k> <tenv> .Map </tenv> <return> T </return>
              </task>)
     [structural]
 
@@ -392,7 +392,7 @@ generate a function task executing \texttt{main()} to ensure that it
 types (remove this task creation if you do not want your type system
 to reject programs without a \texttt{main} function). */
 
-  rule <task> <k> stmt => main(.Exps); </k> (. => <tenv> . </tenv>) </task>
+  rule <task> <k> stmt => main(.Exps); </k> (. => <tenv> .Map </tenv>) </task>
     [structural]
 
 /*@ \subsection{Collecting the terminated tasks}
