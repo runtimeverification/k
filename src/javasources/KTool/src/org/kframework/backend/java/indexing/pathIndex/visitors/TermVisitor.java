@@ -125,7 +125,8 @@ public class TermVisitor extends LocalVisitor {
         if (pString == null){
             pStrings.add(START_STRING + uninterpretedToken.sort());
         } else{
-            pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR + uninterpretedToken.sort());
+            pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR +
+                    uninterpretedToken.sort());
         }
     }
 
@@ -172,13 +173,28 @@ public class TermVisitor extends LocalVisitor {
                                 ArrayList<Production> productions =
                                         (ArrayList<Production>) context.productionsOf(currentLabel);
                                 Production p = productions.get(0);
-                                String test = pString + SEPARATOR + (currentPosition) + SEPARATOR
-                                        + p.getChildSort(currentPosition - 1);
-                                pStrings.add(test);
+                                String test = pString + SEPARATOR + (currentPosition) + SEPARATOR;
+                                if (p.getChildSort(currentPosition-1).equals("K")){
+                                    //TODO(OwolabiL): This needs to be investigated further and
+                                    // handled properly
+                                    pStrings.add(test +kItem.kLabel()+ SEPARATOR + "1.Exp");
+                                }  else{
+                                    pStrings.add(test+ p.getChildSort(currentPosition - 1));
+                                }
                             }
                         } else {
-                            pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR
-                                    + kItem.sort());
+                            //TODO(OwolabiL): This needs to be investigated further and handled
+                            // properly. Plus there's duplicated code here to be possibly removed.
+                            String test =  pString + SEPARATOR + currentPosition + SEPARATOR;
+                            ArrayList<Production> productions =
+                                    (ArrayList<Production>) context.productionsOf(currentLabel);
+                            Production p = productions.get(0);
+                            if (p.getChildSort(currentPosition-1).equals("K")){
+                                pStrings.add(test +kItem.kLabel()+ SEPARATOR + (currentPosition)+
+                                        SEPARATOR + kItem.sort());
+                            }else {
+                                pStrings.add(test + kItem.sort());
+                            }
                         }
                     }
                 }

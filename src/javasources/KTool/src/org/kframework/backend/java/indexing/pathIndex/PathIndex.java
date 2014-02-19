@@ -29,8 +29,9 @@ public class PathIndex {
     private Definition definition;
     private PathIndexTrie trie;
     private MultiplicityStarCellHolder multiCellInfoHolder = null;
-    private Set<Integer> outputRuleIndices = new HashSet<>();
-    private Set<Integer> inputRuleIndices = new HashSet<>();
+    private Set<Integer> outputRuleIndices = new LinkedHashSet<>();
+    private Set<Integer> inputRuleIndices = new LinkedHashSet<>();
+    private List<Term> outCellList = new ArrayList<>();
 
     public enum RuleType {
         COOLING,
@@ -166,7 +167,7 @@ public class PathIndex {
 
         Set<Rule> rules = new HashSet<>();
 
-        Set<Integer> currentMatch = null;
+        Set<Integer> currentMatch;
         Set<Integer> matchingIndices = new LinkedHashSet<>();
         String subString;
 
@@ -193,7 +194,6 @@ public class PathIndex {
             }
         }
 
-
         // check the out cell
         int baseIOCellSize = 2;
         if (!outputRuleIndices.isEmpty()) {
@@ -213,7 +213,7 @@ public class PathIndex {
             }
         }
 
-//        System.out.println("matching: "+ matchingIndices);
+//        System.out.println("matching: "+ matchingIndices + "\n");
 //        System.out.println("rules: "+rules +"\n");
         return new ArrayList<>(rules);
     }
@@ -232,25 +232,33 @@ public class PathIndex {
 
     private Set<Integer> addOutputCellIndices(Term term, Set<Integer> matchingIndices, int baseIOCellSize) {
         //TODO(OwolabiL): Find a better way to find the output cell. Something more general is needed
-
         Cell out = LookupCell.find(term, "out");
-        List<Term> outCellList = ((BuiltinList) out.getContent()).elements();
-
-
-        if (outCellList.size() > baseIOCellSize) {
+        List<Term> currentOutCellList = ((BuiltinList) out.getContent()).elements();
+        if (outCellList.isEmpty()){
+            outCellList =  currentOutCellList;
+        } else {
+            if (outCellList.size() == currentOutCellList.size() && outCellList.containsAll(currentOutCellList)){
+                return  matchingIndices;
+            } else {
+                outCellList =  currentOutCellList;
+                if (currentOutCellList.size() > baseIOCellSize) {
 //            matchingIndices = Sets.union(matchingIndices, outputRuleIndices);
-            matchingIndices.addAll(outputRuleIndices);
-        }
+                    matchingIndices.addAll(outputRuleIndices);
+                    return matchingIndices;
+                }
 
-        //TODO(OwolabiL): Write a visitor for this
-        if (out.getContent() instanceof BuiltinList) {
-            for (Term outCellElement : outCellList) {
-                if (outCellElement instanceof KItem &&
-                        ((KItem) outCellElement).kLabel().toString().equals(BUFFER_LABEL)) {
-                    Term bufferTerm = ((KList)((KItem) outCellElement).kList()).get(0);
-                    if (bufferTerm instanceof Token && !((Token) bufferTerm).value().equals("\"\"")) {
-                        matchingIndices.addAll(outputRuleIndices);
+                //TODO(OwolabiL): Write a visitor for this
+                if (out.getContent() instanceof BuiltinList) {
+                    for (Term outCellElement : currentOutCellList) {
+                        if (outCellElement instanceof KItem &&
+                                ((KItem) outCellElement).kLabel().toString().equals(BUFFER_LABEL)) {
+                            Term bufferTerm = ((KList)((KItem) outCellElement).kList()).get(0);
+                            if (bufferTerm instanceof Token && !((Token) bufferTerm).value().equals("\"\"")) {
+                                matchingIndices.addAll(outputRuleIndices);
+                                return matchingIndices;
 //                        matchingIndices = Sets.union(matchingIndices, outputRuleIndices);
+                            }
+                        }
                     }
                 }
             }

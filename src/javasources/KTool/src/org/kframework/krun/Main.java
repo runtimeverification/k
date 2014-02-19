@@ -1090,6 +1090,10 @@ public class Main {
                 K.do_indexing = true;
             }
 
+            if (cmd.hasOption("indexing-stats")){
+                K.get_indexing_stats = true;
+            }
+
             if (cmd.hasOption("maude-cmd")) {
                 K.maude_cmd = cmd.getOptionValue("maude-cmd");
             }

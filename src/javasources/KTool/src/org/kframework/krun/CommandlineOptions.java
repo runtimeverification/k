@@ -104,6 +104,7 @@ public class CommandlineOptions {
 		addOptionE(OptionBuilder.withLongOpt("smt").hasArg().withArgName("solver").withDescription("SMT solver to use for checking constraints. <solver> is either [z3|gappa|none]. (Default: z3).").create());
 		addOptionE(OptionBuilder.withLongOpt("generate-tests").withDescription("Test programs will be generated along with normal search.").create());
         addOptionE(OptionBuilder.withLongOpt("index").withDescription("Index the rules for faster rewriting.").create());
+        addOptionE(OptionBuilder.withLongOpt("indexing-stats").withDescription("Measure indexing-related information.").create());
 
 		addOptionE(OptionBuilder.withLongOpt("output-file").hasArg().withArgName("file").withDescription("Store output in the file instead of displaying it.").create());
 		addOptionE(OptionBuilder.withLongOpt("load-cfg").hasArg().withArgName("file").withDescription("Load a configuration saved with the \"binary\" output mode into the $PGM configuration variable instead of a program.").create());
