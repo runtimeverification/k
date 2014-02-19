@@ -109,11 +109,12 @@ public class BuchiPushdownSystem<Control, Alphabet>
         Joiner joiner = Joiner.on(";\n");
         while (!toBeProcessed.empty()) {
             ConfigurationHead<Pair<Control, BuchiState>, Alphabet> head = toBeProcessed.pop();
-            System.err.println("To be processed: " + head);
+//            System.err.println("To be processed: " + head);
             Set<Rule<Pair<Control, BuchiState>, Alphabet>> rules = getRules(head);
-            System.err.println(rules);
-            result.append("\n");
+//            System.err.println(rules);
+            if (rules.isEmpty()) continue;
             joiner.appendTo(result, rules);
+            result.append("\n");
             for (Rule<Pair<Control, BuchiState>, Alphabet> rule : rules) {
                 cfg = rule.endConfiguration();
                 Stack<Alphabet> newstack = new Stack<>();
