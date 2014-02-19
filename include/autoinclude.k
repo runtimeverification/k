@@ -23,10 +23,4 @@ module AUTO-INCLUDED-MODULE
   imports SET
   imports IO
   imports K-LISTK-EXTRAS
-  imports K-LIST-EXTRAS
-  imports K-MAP-EXTRAS            // operations on Maps
-  imports K-BAG-EXTRAS            // operations on Bags
-  imports K-SET-EXTRAS            // operations on Sets
-
-
 endmodule

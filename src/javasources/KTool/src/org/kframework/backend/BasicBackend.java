@@ -52,6 +52,7 @@ public abstract class BasicBackend implements Backend {
 		steps.add(new FirstStep(this, context));
 		steps.add(new CheckVisitorStep<Definition>(new CheckConfigurationCells(context), context));
 		steps.add(new RemoveBrackets(context));
+        steps.add(new SetVariablesInferredSort(context));
 		steps.add(new AddEmptyLists(context));
 		steps.add(new RemoveSyntacticCasts(context));
 //        steps.add(new EnforceInferredSorts(context));
