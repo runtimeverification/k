@@ -24,9 +24,8 @@ module VARIABLE
 
   syntax K ::= #getVars1(KList, Set)  [function]
   rule #getVars1((X:Variable => .KList),,_, _ (.Set => SetItem(X)))
-  rule #getVars1(((Set2KLabel S:Set)(.KList) => Set2KTerm(S:Set)),,_, _)
   rule #getVars1((L:KLabel(Ks:KList) => Ks),,_, _)
-    when isVariable(L(Ks)) =/=K true andBool isSet(L(Ks)) =/=K true
+    when isVariable(L(Ks)) =/=K true 
   rule #getVars1((.K => .KList),,_, _) 
   rule #getVars1(.KList, S:Set) => vars(S)
 
@@ -42,13 +41,8 @@ module VARIABLE
        #then #freshVar1(Ks, L("local",, I1 +Int 1))
        #else #freshVar1(Ks, L("local",, I2))
        #fi
-  rule #freshVar1((SetItem(K:K) => .Set) _, _)
+  rule #freshVar1((SetItem(K:K) => .Set) _:Set, _)
     when isLocalFreshVar(K) =/=K true
-//    when isSymbolicK(K) =/=K true
-// Grigore: Traian, I do not understand why you had the condition above.
-// It made some type inference examples fail.  See, for example,
-// tutorial/5_types/lesson_4/tricky-1.lambda.  I think you meant "when K is a
-// non-local variable.  I added the predicate below.
 
   syntax Bool ::= isLocalFreshVar(K)  [function]
   rule isLocalFreshVar(_:KLabel("local",,_:Int)) => true
@@ -121,7 +115,7 @@ module FREE-VARS
   rule freeVariables(SetItem(K:K) S:Set) => freeVariables(K) freeVariables(S)
 
   syntax K ::= #freeVarsSet(Set) [function]
-  rule #freeVarsSet(S:Set) => #freeVars(Set2KTerm(S))
+  rule #freeVarsSet(S:Set) => #freeVars(S)
 
 // Grigore: again, I think this should just return a set of variables, not a K
 // I added a user-interface variant of it above.  I use it in type-inference.
@@ -136,17 +130,13 @@ module FREE-VARS
     => #freeVars(Ks, Bound, Free SetItem(X)) when notBool(X in Bound)
   rule #freeVars((L:KLabel(Ks:KList) => Ks),, _, _, _)
     when (isVariable(L(Ks)) =/=K true) andBool
-         (isBinder(L(Ks)) =/=K true) andBool
-         (isSet(L(Ks)) =/=K true)
+         (isBinder(L(Ks)) =/=K true) 
   rule #freeVars(K:K,,Ks:KList, Bound:Set, Free:Set)
     => #freeVars1(Ks, #freeVarsBinder(K, Bound), Bound, Free)
     when isBinder(K)
 // Grigore: new in order to deal with cc(.K)
   rule #freeVars((.K => .KList),,_, _, _)
   rule #freeVars((K1:KItem ~> K:K => K1,,K),,_, _, _)
-//  rule #freeVars( .K , _, Free:Set) => vars(Free)
-//  rule #freeVars( (.K,,K:K => K) , _, _)
-
 
   syntax K ::= #freeVars1(KList, K, Set, Set)  [function]
   rule #freeVars1(Ks:KList, vars(Free1:Set), Bound:Set, Free2:Set)

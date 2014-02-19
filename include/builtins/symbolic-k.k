@@ -117,16 +117,16 @@ module SYMBOLIC-K
 
   // define isSymbolicK
   rule
-    isSymbolicK(List2KLabel(L:List)(.KList)) => isSymbolicList(L)
+    isSymbolicK(L:List) => isSymbolicList(L)
   [predicate]
   rule
-    isSymbolicK(Set2KLabel(S:Set)(.KList)) => isSymbolicSet(S)
+    isSymbolicK(S:Set) => isSymbolicSet(S)
   [predicate]
+  //rule
+    //isSymbolicK(B:Bag) => isSymbolicBag(B)
+  //[predicate]
   rule
-    isSymbolicK(Bag2KLabel(B:Bag)(.KList)) => isSymbolicBag(B)
-  [predicate]
-  rule
-    isSymbolicK(Map2KLabel(M:Map)(.KList)) => isSymbolicMap(M)
+    isSymbolicK(M:Map) => isSymbolicMap(M)
   [predicate]
   rule isSymbolicK(KL:KLabel(LK:KList)) => false
   when isBuiltin(KL(LK))

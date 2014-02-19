@@ -711,12 +711,8 @@ public class MaudeFilter extends BackendFilter {
                 visitMapElements((MapBuiltin) dataStructure);
             }
 
-            if (dataStructure.isLHSView() && dataStructure.hasViewBase() && !(dataStructure instanceof ListBuiltin)) {
-                result.append(", ");
-                Variable variable = new Variable(
-                        dataStructure.viewBase().getName(),
-                        dataStructure.sort().type());
-                variable.accept(this);
+            if (!(dataStructure instanceof ListBuiltin)) {
+                visitDataStructureBaseTerms(dataStructure);
             }
 
 			result.append(")");
@@ -727,6 +723,12 @@ public class MaudeFilter extends BackendFilter {
 
         result.append("), .KList)");
 	}
+
+    private void visitDataStructureVariable(String varName, String varType) {
+        result.append(varName);
+        result.append(":");
+        result.append(varType);
+    }
 
     private void visitCollectionElements(CollectionBuiltin collection) {
         for (Term term : collection.elements()) {
@@ -750,22 +752,7 @@ public class MaudeFilter extends BackendFilter {
             result.append(")");
         }
 
-        // append base elements
-        for (Term term : listBuiltin.baseTerms()) {
-            result.append(", ");
-            if (term instanceof  Variable) {
-                Variable variable = new Variable(
-                        listBuiltin.viewBase().getName(),
-                        listBuiltin.sort().type());
-                variable.accept(this);
-            } else {
-                result.append(DataStructureSort.LABELS.get(listBuiltin.sort().type()).get(
-                        DataStructureSort.Label.ELEMENT));
-                result.append("(");
-                    term.accept(this);
-                    result.append(")");
-            }
-        }
+        visitDataStructureBaseTerms(listBuiltin);
 
         // append rhs elements
         for (Term term : listBuiltin.elementsRight()) {
@@ -775,6 +762,23 @@ public class MaudeFilter extends BackendFilter {
             result.append("(");
             term.accept(this);
             result.append(")");
+        }
+    }
+
+    private void visitDataStructureBaseTerms(DataStructureBuiltin listBuiltin) {
+        // append base elements
+        for (Term term : listBuiltin.baseTerms()) {
+            result.append(", ");
+            if (term instanceof Variable) {
+                visitDataStructureVariable(
+                        ((Variable)term).getName(),
+                        listBuiltin.sort().type());
+            } else {
+                result.append("K2" + listBuiltin.sort().type());
+                result.append("(");
+                    term.accept(this);
+                    result.append(")");
+            }
         }
     }
 

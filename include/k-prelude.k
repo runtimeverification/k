@@ -37,18 +37,18 @@ endmodule
 module K-WRAPPERS-LABELS
 	imports K-TECHNIQUE
 
-	syntax KLabel ::= "KLabel2KLabel" KLabel
-					| "CellLabel2KLabel" CellLabel
-					| "KList2KLabel" KList
-					| "Bag2KLabel" Bag
-					| "Set2KLabel" Set
-					| "List2KLabel" List
-					| "Map2KLabel" Map
-					| "wrap-with"
+	//syntax KLabel ::= "KLabel2KLabel" KLabel
+					//| "CellLabel2KLabel" CellLabel
+					//| "KList2KLabel" KList
+					//| "Bag2KLabel" Bag
+					//| "Set2KLabel" Set
+					//| "List2KLabel" List
+					//| "Map2KLabel" Map
+					//| "wrap-with"
 
 
 
-  rule isSet(Set2KLabel(_)(.KList)) => true [predicate,anywhere]
+  //rule isSet(Set2KLabel(_)(.KList)) => true [predicate,anywhere]
 
 endmodule
 

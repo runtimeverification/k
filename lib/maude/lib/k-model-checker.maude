@@ -220,7 +220,7 @@ mod #MODEL-CHECKER is
   protecting #QID .
   including #MODEL-CHECKER-INTERFACE .
   including #LTL .
-  including K-WRAPPERS-LABELS .
+  including K-TECHNIQUE .
 
   subsort Bag < #ModelCheckerState .
   subsort K < #Prop .
