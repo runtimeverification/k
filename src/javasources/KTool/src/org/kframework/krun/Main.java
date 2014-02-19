@@ -1,6 +1,9 @@
 package org.kframework.krun;
 
-import java.awt.*;
+import static org.apache.commons.io.FileUtils.deleteDirectory;
+import static org.apache.commons.io.FileUtils.writeStringToFile;
+
+import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.Console;
 import java.io.File;
@@ -44,6 +47,7 @@ import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.Definition;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KLabelConstant;
+import org.kframework.kil.KSorts;
 import org.kframework.kil.ListItem;
 import org.kframework.kil.Module;
 import org.kframework.kil.Rule;
@@ -70,6 +74,7 @@ import org.kframework.parser.DefinitionLoader;
 import org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.ColorUtil;
+import org.kframework.utils.OptionComparator;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -77,12 +82,8 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
-import org.kframework.utils.OptionComparator;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
-
-import static org.apache.commons.io.FileUtils.deleteDirectory;
-import static org.apache.commons.io.FileUtils.writeStringToFile;
 
 public class Main {
 
@@ -161,16 +162,19 @@ public class Main {
             String name = (String) en.nextElement();
             String value = K.configuration_variables.getProperty(name);
             String parser = K.cfg_parsers.getProperty(name);
-            // TODO: get sort from configuration term in definition and pass it
-            // here
-            Term parsed = null;
-            if (parser == null) {
-                parser = "kast -groundParser -e";
+            if (context.configVarSorts.containsKey(name)) { // "Command line variable '" + name +"' was not declared in a configuration.";
+            	// there is a problem because en contains also the '(c)olor' element and I can't report an error
+            	// if the user mistypes a variable.
+	            String startSymbol = context.configVarSorts.get(name);
+	            Term parsed = null;
+	            if (parser == null) {
+	                parser = "kast -groundParser -e";
+	            }
+	            parsed = rp.runParserOrDie(parser, value, false, startSymbol, context);
+	            parsed = (Term) parsed.accept(new ResolveVariableAttribute(context));
+	            output.put("$" + name, parsed);
+	            hasPGM = hasPGM || name.equals("$PGM");
             }
-            parsed = rp.runParserOrDie(parser, value, false, null, context);
-            parsed = (Term) parsed.accept(new ResolveVariableAttribute(context));
-            output.put("$" + name, parsed);
-            hasPGM = hasPGM || name.equals("$PGM");
         }
         if (!hasPGM && kast != null) {
             output.put("$PGM", kast);
@@ -244,8 +248,11 @@ public class Main {
                 if (cmd.hasOption("pattern") || "search".equals(K.maude_cmd)) {
                     org.kframework.parser.concrete.KParser
                             .ImportTbl(K.compiled_def + "/def/Concrete.tbl");
-                    ASTNode pattern = DefinitionLoader.parsePattern(K.pattern,
-                            "Command line pattern", context);
+                    ASTNode pattern = DefinitionLoader.parsePattern(
+                    		K.pattern,
+                            "Command line pattern",
+                            KSorts.BAG,
+                            context);
                     CollectVariablesVisitor vars = new CollectVariablesVisitor(context);
                     pattern.accept(vars);
                     //varNames = vars.getVars().keySet();

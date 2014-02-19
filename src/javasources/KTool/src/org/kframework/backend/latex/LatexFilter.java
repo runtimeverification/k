@@ -18,7 +18,7 @@ public class LatexFilter extends BackendFilter {
 		super(context);
 	}
 
-	private String endl = System.getProperty("line.separator");
+	protected String endl = System.getProperty("line.separator");
 	private StringBuilder preamble = new StringBuilder();
 	private boolean firstProduction = false;
 	private boolean terminalBefore = false;

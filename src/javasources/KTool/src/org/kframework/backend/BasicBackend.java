@@ -44,7 +44,7 @@ public abstract class BasicBackend implements Backend {
 
 	@Override
 	public boolean autoinclude() {
-		return true;
+		return !GlobalSettings.noPrelude;
 	}
 
 	public CompilerSteps<Definition> getCompilationSteps() {

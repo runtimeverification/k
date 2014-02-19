@@ -21,6 +21,7 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
+import org.kframework.parser.concrete.disambiguate.TypeSystemFilter2;
 import org.kframework.parser.utils.ReportErrorsVisitor;
 import org.kframework.parser.utils.Sglr;
 import org.kframework.utils.BinaryLoader;
@@ -93,20 +94,20 @@ public class ProgramLoader {
 	public static Term processPgm(String content, String filename, Definition def, String startSymbol,
             Context context, GlobalSettings.ParserType whatParser) throws TransformerException {
 		Stopwatch.sw.printIntermediate("Importing Files");
+		assert context.definedSorts.contains(startSymbol) : "The start symbol must be declared in the definition. Found: " + startSymbol;
 
 		try {
 			ASTNode out;
 			if (whatParser == GlobalSettings.ParserType.GROUND) {
 				org.kframework.parser.concrete.KParser.ImportTblGround(context.kompiled.getCanonicalPath() + "/ground/Concrete.tbl");
-				out = DefinitionLoader.parseCmdString(content, filename, context);
+				out = DefinitionLoader.parseCmdString(content, filename, startSymbol, context);
 				out = out.accept(new RemoveBrackets(context));
 				out = out.accept(new AddEmptyLists(context));
 				out = out.accept(new RemoveSyntacticCasts(context));
 				out = out.accept(new FlattenSyntax(context));
-				out = out.accept(new RemoveSyntacticCasts(context));
 			} else if (whatParser == GlobalSettings.ParserType.RULES) {
 				org.kframework.parser.concrete.KParser.ImportTbl(context.kompiled.getCanonicalPath() + "/def/Concrete.tbl");
-				out = DefinitionLoader.parsePattern(content, filename, context);
+				out = DefinitionLoader.parsePattern(content, filename, startSymbol, context);
 				out = out.accept(new RemoveBrackets(context));
 				out = out.accept(new AddEmptyLists(context));
 				out = out.accept(new RemoveSyntacticCasts(context));
