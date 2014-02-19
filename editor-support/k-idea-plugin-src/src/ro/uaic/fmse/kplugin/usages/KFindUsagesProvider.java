@@ -10,10 +10,7 @@ import com.intellij.psi.tree.TokenSet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ro.uaic.fmse.kplugin.KLexer;
-import ro.uaic.fmse.kplugin.psi.KIdExpr;
-import ro.uaic.fmse.kplugin.psi.KRegularProduction;
-import ro.uaic.fmse.kplugin.psi.KTypes;
-import ro.uaic.fmse.kplugin.psi.KVarDec;
+import ro.uaic.fmse.kplugin.psi.*;
 
 import java.io.Reader;
 
@@ -47,10 +44,12 @@ public class KFindUsagesProvider implements FindUsagesProvider {
     @NotNull
     @Override
     public String getType(@NotNull PsiElement psiElement) {
-        if (psiElement instanceof KVarDec || psiElement instanceof KIdExpr) {
+        if (psiElement instanceof KVarDec) {
             return "Rule Variable";
         } else if (psiElement instanceof KRegularProduction) {
             return "Auxiliary Function";
+        } else if (psiElement instanceof KSyntax) {
+            return "K Sort";
         } else {
             return "";
         }
@@ -59,6 +58,11 @@ public class KFindUsagesProvider implements FindUsagesProvider {
     @NotNull
     @Override
     public String getDescriptiveName(@NotNull PsiElement psiElement) {
+        return "getDescriptiveName: " + getName(psiElement);
+        //return getName(psiElement);
+    }
+
+    private String getName(PsiElement psiElement) {
         String name = ((PsiNamedElement) psiElement).getName();
         return name != null ? name : psiElement.getText();
     }
@@ -66,6 +70,7 @@ public class KFindUsagesProvider implements FindUsagesProvider {
     @NotNull
     @Override
     public String getNodeText(@NotNull PsiElement psiElement, boolean useFullName) {
-        return getDescriptiveName(psiElement);
+        return "getNodeText: " + getName(psiElement);
+        //return getName(psiElement);
     }
 }

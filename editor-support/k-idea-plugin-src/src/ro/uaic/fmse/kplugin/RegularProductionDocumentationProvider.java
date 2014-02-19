@@ -8,8 +8,8 @@ import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiWhiteSpace;
 import org.jetbrains.annotations.Nullable;
 import ro.uaic.fmse.kplugin.psi.KRegularProduction;
+import ro.uaic.fmse.kplugin.psi.KSort;
 import ro.uaic.fmse.kplugin.psi.KSyntax;
-import ro.uaic.fmse.kplugin.psi.KType;
 
 import java.util.List;
 
@@ -32,13 +32,13 @@ public class RegularProductionDocumentationProvider implements DocumentationProv
     private String getOriginalText(KRegularProduction element) {
         KSyntax syntaxDec = (KSyntax) element.getParent().getParent();
 
-        return "syntax <b>" + syntaxDec.getType().getText() + "</b> ::= " + getProductionQuickNavigateText(element);
+        return "syntax <b>" + syntaxDec.getSort().getText() + "</b> ::= " + getProductionQuickNavigateText(element);
     }
 
     private String getProductionQuickNavigateText(KRegularProduction element) {
         StringBuilder sb = new StringBuilder(element.getTextLength());
         for (ASTNode child : element.getNode().getChildren(null)) {
-            if (child.getPsi() instanceof KType) {
+            if (child.getPsi() instanceof KSort) {
                 sb.append("<b>").append(child.getText()).append("</b>");
             } else if (child.getPsi() instanceof PsiWhiteSpace) {
                 sb.append(child.getText().replace(" ", "&nbsp;"));

@@ -78,6 +78,8 @@ public class KPsiUtil {
         return findSyntaxDefs(project, null);
     }
 
+    //todo bug, here and other similar functions. If this file contains no require causes it could be a file referred
+    //todo by other files as well. If at least one other k file refers this one, search in the whole project.
     @Nullable
     public static KRegularProduction findFirstSyntaxDef(KFile refFile, String... names) {
         //If the file have no "require" clauses resolve the reference in the current file scope.
@@ -95,6 +97,29 @@ public class KPsiUtil {
                 for (KRegularProduction syntaxDef : syntaxDefs) {
                     if (namesList.contains(syntaxDef.getName())) {
                         return syntaxDef;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    public static KSyntax findFirstSyntax(KFile refFile, String... names) {
+        //If the file have no "require" clauses resolve the reference in the current file scope.
+        //Otherwise resolve it in the module scope.
+        List<String> namesList = Arrays.asList(names);
+        Collection<VirtualFile> virtualFiles = refFile.getRequires().size() > 0
+                ? FileBasedIndex.getInstance().getContainingFiles(FileTypeIndex.NAME,
+                KFileType.INSTANCE, getModule(refFile).getModuleContentScope())
+                : Arrays.asList(refFile.getVirtualFile());
+        for (VirtualFile virtualFile : virtualFiles) {
+            KFile kFile = (KFile) PsiManager.getInstance(refFile.getProject()).findFile(virtualFile);
+            if (kFile != null) {
+                Collection<KSyntax> syntaxNodes = PsiTreeUtil.findChildrenOfType(kFile, KSyntax.class);
+                for (KSyntax syntax : syntaxNodes) {
+                    if (namesList.contains(syntax.getName())) {
+                        return syntax;
                     }
                 }
             }
@@ -128,6 +153,11 @@ public class KPsiUtil {
         KRegularProduction syntaxDef = findFirstSyntaxDef((KFile) psiReference.getElement().getContainingFile(),
                 labelDecNames.toArray(new String[labelDecNames.size()]));
         return syntaxDef != null ? new ResolveResult[]{new PsiElementResolveResult(syntaxDef)} : new ResolveResult[0];
+    }
+
+    public static ResolveResult[] resolveSyntax(PsiReference psiReference, String sort) {
+        KSyntax syntax = findFirstSyntax((KFile) psiReference.getElement().getContainingFile(), sort);
+        return syntax != null ? new ResolveResult[]{new PsiElementResolveResult(syntax)} : new ResolveResult[0];
     }
 
     @NotNull

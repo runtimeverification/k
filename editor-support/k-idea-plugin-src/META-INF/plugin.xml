@@ -118,11 +118,10 @@ Before launch:
                            implementationClass="ro.uaic.fmse.kplugin.highlighting.KBraceMatcher"/>
 
         <annotator language="K" implementationClass="ro.uaic.fmse.kplugin.highlighting.KSyntaxAnnotator"/>
-        <lang.findUsagesProvider language="K" implementationClass="ro.uaic.fmse.kplugin.usages.KFindUsagesProvider"/>
+
         <lang.refactoringSupport language="K"
                                  implementationClass="ro.uaic.fmse.kplugin.KRefactoringSupportProvider"/>
         <lang.foldingBuilder language="K" implementationClass="ro.uaic.fmse.kplugin.KFoldingBuilder"/>
-        <usageTypeProvider implementation="ro.uaic.fmse.kplugin.usages.KUsageTypeProvider"/>
         <gotoSymbolContributor implementation="ro.uaic.fmse.kplugin.navigation.KChooseByNameContributor"/>
         <lang.psiStructureViewFactory language="K"
                                       implementationClass="ro.uaic.fmse.kplugin.navigation.KStructureViewFactory"/>
@@ -134,5 +133,9 @@ Before launch:
         <codeStyleSettingsProvider implementation="ro.uaic.fmse.kplugin.codeStyle.KCodeStyleSettingsProvider"/>
         <langCodeStyleSettingsProvider
             implementation="ro.uaic.fmse.kplugin.codeStyle.KLanguageCodeStyleSettingsProvider"/>
+
+        <lang.findUsagesProvider language="K" implementationClass="ro.uaic.fmse.kplugin.usages.KFindUsagesProvider"/>
+        <usageTypeProvider implementation="ro.uaic.fmse.kplugin.usages.KUsageTypeProvider"/>
+        <referencesSearch implementation="ro.uaic.fmse.kplugin.usages.KSortPredicateReferenceSearcher"/>
     </extensions>
 </idea-plugin>
