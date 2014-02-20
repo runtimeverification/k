@@ -6,10 +6,9 @@ import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiWhiteSpace;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.jetbrains.annotations.Nullable;
-import ro.uaic.fmse.kplugin.psi.KRegularProduction;
-import ro.uaic.fmse.kplugin.psi.KSort;
-import ro.uaic.fmse.kplugin.psi.KSyntax;
+import ro.uaic.fmse.kplugin.psi.*;
 
 import java.util.List;
 
@@ -26,27 +25,22 @@ public class RegularProductionDocumentationProvider implements DocumentationProv
             return null;
         }
 
-        return getOriginalText((KRegularProduction) element);
+        return getFormattedSyntaxDef((KRegularProduction) element).toString();
     }
 
-    private String getOriginalText(KRegularProduction element) {
-        KSyntax syntaxDec = (KSyntax) element.getParent().getParent();
-
-        return "syntax <b>" + syntaxDec.getSort().getText() + "</b> ::= " + getProductionQuickNavigateText(element);
-    }
-
-    private String getProductionQuickNavigateText(KRegularProduction element) {
-        StringBuilder sb = new StringBuilder(element.getTextLength());
-        for (ASTNode child : element.getNode().getChildren(null)) {
-            if (child.getPsi() instanceof KSort) {
-                sb.append("<b>").append(child.getText()).append("</b>");
-            } else if (child.getPsi() instanceof PsiWhiteSpace) {
-                sb.append(child.getText().replace(" ", "&nbsp;"));
-            } else {
-                sb.append(child.getText());
-            }
+    @Nullable
+    @Override
+    public String generateDoc(PsiElement element, @Nullable PsiElement originalElement) {
+        if (!(element instanceof KRegularProduction)) {
+            return null;
         }
-        return sb.toString();
+        KRegularProduction production = (KRegularProduction) element;
+        StringBuilder result = getFormattedSyntaxAndComment(production);
+
+        for (KRule rule : KPsiUtil.getImplementationRules(production)) {
+            result.append("\n\n").append(getFormattedRuleAndComment(rule));
+        }
+        return result.toString().replace("\n", "<br/>");
     }
 
     @Nullable
@@ -57,13 +51,58 @@ public class RegularProductionDocumentationProvider implements DocumentationProv
 
     @Nullable
     @Override
-    public String generateDoc(PsiElement element, @Nullable PsiElement originalElement) {
-        if (!(element instanceof KRegularProduction)) {
-            return null;
+    public PsiElement getDocumentationElementForLookupItem(PsiManager psiManager, Object object, PsiElement element) {
+        return null;
+    }
+
+    @Nullable
+    @Override
+    public PsiElement getDocumentationElementForLink(PsiManager psiManager, String link, PsiElement context) {
+        return null;
+    }
+
+    private CharSequence formatSortsAndWhitespaces(ASTNode element) {
+        StringBuilder sb = new StringBuilder(element.getTextLength());
+        for (ASTNode child : element.getChildren(null)) {
+            if (child.getPsi() instanceof KSort || child.getElementType() == KTypes.KEYWORD ||
+                    child.getPsi() instanceof KRuleName) {
+                sb.append("<b>").append(child.getText()).append("</b>");
+            } else if (child instanceof PsiWhiteSpace) {
+                sb.append(child.getText().replace(" ", "&nbsp;"));
+            } else if (child instanceof PsiComment) {
+                sb.append("<i>").append(getEncodedText(child)).append("</i>");
+            } else if (child.getChildren(null).length == 0) {
+                sb.append(getEncodedText(child));
+            } else {
+                sb.append(formatSortsAndWhitespaces(child));
+            }
         }
-        String result = getQuickNavigateInfo(element, originalElement);
-        KSyntax syntaxDec = (KSyntax) element.getParent().getParent();
-        PsiElement prevNode = syntaxDec.getPrevSibling();
+        return sb;
+    }
+
+    private String getEncodedText(ASTNode child) {
+        return StringEscapeUtils.escapeHtml(child.getText());
+    }
+
+    private StringBuilder getFormattedSyntaxDef(KRegularProduction production) {
+        KSyntax syntaxDec = (KSyntax) production.getParent().getParent();
+        StringBuilder sb = new StringBuilder();
+
+        return sb.append("<tt><b>syntax</b> <b>").append(syntaxDec.getSort().getText()).append("</b> ::= ")
+                .append(formatSortsAndWhitespaces(production.getNode())).append("</tt>");
+    }
+
+    private StringBuilder getFormattedSyntaxAndComment(KRegularProduction production) {
+        StringBuilder sb = getFormattedSyntaxDef(production);
+        KSyntax syntaxDec = (KSyntax) production.getParent().getParent();
+        String formattedComment = getAssociatedComment(syntaxDec);
+        sb.insert(0, formattedComment);
+        return sb;
+    }
+
+    private String getAssociatedComment(PsiElement element) {
+        String formattedComment = "";
+        PsiElement prevNode = element.getPrevSibling();
         if (prevNode instanceof PsiWhiteSpace && countNewLines(prevNode.getText()) <= 1) {
             prevNode = prevNode.getPrevSibling();
         }
@@ -83,11 +122,9 @@ public class RegularProductionDocumentationProvider implements DocumentationProv
             }
             String trimmedComment = commentText.substring(startTrim, commentText.length() - endTrim).trim();
             String extraNewLines = "\n\n";
-            result = trimmedComment + extraNewLines + result;
+            formattedComment = "<i>" + StringEscapeUtils.escapeHtml(trimmedComment) + extraNewLines + "</i>";
         }
-
-        result = result != null ? result.replace("\n", "<br/>") : null;
-        return result;
+        return formattedComment;
     }
 
     private static int countNewLines(String text) {
@@ -100,15 +137,15 @@ public class RegularProductionDocumentationProvider implements DocumentationProv
         return count;
     }
 
-    @Nullable
-    @Override
-    public PsiElement getDocumentationElementForLookupItem(PsiManager psiManager, Object object, PsiElement element) {
-        return null;
+    private CharSequence getFormattedRuleAndComment(KRule rule) {
+        StringBuilder sb = new StringBuilder().append(getFormattedRule(rule));
+        String formattedComment = getAssociatedComment(rule);
+        sb.insert(0, formattedComment);
+        return sb;
     }
 
-    @Nullable
-    @Override
-    public PsiElement getDocumentationElementForLink(PsiManager psiManager, String link, PsiElement context) {
-        return null;
+    private CharSequence getFormattedRule(KRule rule) {
+        return new StringBuilder().append("<tt>").append(formatSortsAndWhitespaces(rule.getNode())).append("</tt>");
     }
+
 }

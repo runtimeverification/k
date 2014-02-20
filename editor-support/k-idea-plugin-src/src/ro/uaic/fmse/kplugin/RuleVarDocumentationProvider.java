@@ -17,7 +17,7 @@ public class RuleVarDocumentationProvider implements DocumentationProvider {
     @Nullable
     @Override
     public String getQuickNavigateInfo(PsiElement element, PsiElement originalElement) {
-        return element instanceof KVarDec ? element.getParent().getText() : null;
+        return generateDoc(element, originalElement);
     }
 
     @Nullable
