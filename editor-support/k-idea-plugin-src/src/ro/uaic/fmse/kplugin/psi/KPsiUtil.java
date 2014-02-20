@@ -78,25 +78,27 @@ public class KPsiUtil {
         return findSyntaxDefs(project, null);
     }
 
-    //todo bug, here and other similar functions. If this file contains no require causes it could be a file referred
-    //todo by other files as well. If at least one other k file refers this one, search in the whole project.
     @Nullable
-    public static KRegularProduction findFirstSyntaxDef(KFile refFile, String... names) {
+    public static <T extends PsiNamedElement> T findFirstElementInModule(KFile refFile, Class<T> elementClass,
+                                                                         String... names) {
         //If the file have no "require" clauses resolve the reference in the current file scope.
         //Otherwise resolve it in the module scope.
         List<String> namesList = Arrays.asList(names);
-        Collection<VirtualFile> virtualFiles = refFile.getRequires().size() > 0
-                ? FileBasedIndex.getInstance().getContainingFiles(FileTypeIndex.NAME,
-                KFileType.INSTANCE, getModule(refFile).getModuleContentScope())
+        boolean haveRequires = refFile.getRequires().size() > 0;
+        Collection<VirtualFile> filesInModule = FileBasedIndex.getInstance().getContainingFiles(FileTypeIndex.NAME,
+                KFileType.INSTANCE, getModule(refFile).getModuleContentScope());
+        PsiManager psiManager = PsiManager.getInstance(refFile.getProject());
+        boolean searchInModule = haveRequires || anyFileRequires(filesInModule, psiManager, refFile.getName());
+        Collection<VirtualFile> virtualFiles = searchInModule
+                ? filesInModule
                 : Arrays.asList(refFile.getVirtualFile());
         for (VirtualFile virtualFile : virtualFiles) {
-            KFile kFile = (KFile) PsiManager.getInstance(refFile.getProject()).findFile(virtualFile);
+            KFile kFile = (KFile) psiManager.findFile(virtualFile);
             if (kFile != null) {
-                Collection<KRegularProduction> syntaxDefs =
-                        PsiTreeUtil.findChildrenOfType(kFile, KRegularProduction.class);
-                for (KRegularProduction syntaxDef : syntaxDefs) {
-                    if (namesList.contains(syntaxDef.getName())) {
-                        return syntaxDef;
+                Collection<T> elements = PsiTreeUtil.findChildrenOfType(kFile, elementClass);
+                for (T element : elements) {
+                    if (namesList.contains(element.getName())) {
+                        return element;
                     }
                 }
             }
@@ -104,27 +106,19 @@ public class KPsiUtil {
         return null;
     }
 
-    @Nullable
-    public static KSyntax findFirstSyntax(KFile refFile, String... names) {
-        //If the file have no "require" clauses resolve the reference in the current file scope.
-        //Otherwise resolve it in the module scope.
-        List<String> namesList = Arrays.asList(names);
-        Collection<VirtualFile> virtualFiles = refFile.getRequires().size() > 0
-                ? FileBasedIndex.getInstance().getContainingFiles(FileTypeIndex.NAME,
-                KFileType.INSTANCE, getModule(refFile).getModuleContentScope())
-                : Arrays.asList(refFile.getVirtualFile());
-        for (VirtualFile virtualFile : virtualFiles) {
-            KFile kFile = (KFile) PsiManager.getInstance(refFile.getProject()).findFile(virtualFile);
+    private static boolean anyFileRequires(Collection<VirtualFile> filesInModule, PsiManager psiManager, String name) {
+        for (VirtualFile virtualFile : filesInModule) {
+            KFile kFile = (KFile) psiManager.findFile(virtualFile);
             if (kFile != null) {
-                Collection<KSyntax> syntaxNodes = PsiTreeUtil.findChildrenOfType(kFile, KSyntax.class);
-                for (KSyntax syntax : syntaxNodes) {
-                    if (namesList.contains(syntax.getName())) {
-                        return syntax;
+                Collection<KRequire> requireList = PsiTreeUtil.findChildrenOfType(kFile, KRequire.class);
+                for (KRequire require : requireList) {
+                    if (require.getStringLiteral() != null && require.getStringLiteral().getText().contains(name)) {
+                        return true;
                     }
                 }
             }
         }
-        return null;
+        return false;
     }
 
     public static Module getModule(PsiElement element) {
@@ -134,7 +128,8 @@ public class KPsiUtil {
 
     @NotNull
     public static ResolveResult[] resolveAuxFunctions(PsiReference psiReference, String name) {
-        KRegularProduction syntaxDef = findFirstSyntaxDef((KFile) psiReference.getElement().getContainingFile(), name);
+        KRegularProduction syntaxDef = findFirstElementInModule((KFile) psiReference.getElement().getContainingFile(),
+                KRegularProduction.class, name);
         return syntaxDef != null ? new ResolveResult[]{new PsiElementResolveResult(syntaxDef)} : new ResolveResult[0];
     }
 
@@ -150,13 +145,14 @@ public class KPsiUtil {
             labelDecNames.add(labelWithoutQuote.substring(0, backQuotePos));
         }
 
-        KRegularProduction syntaxDef = findFirstSyntaxDef((KFile) psiReference.getElement().getContainingFile(),
-                labelDecNames.toArray(new String[labelDecNames.size()]));
+        KRegularProduction syntaxDef = findFirstElementInModule((KFile) psiReference.getElement().getContainingFile(),
+                KRegularProduction.class, labelDecNames.toArray(new String[labelDecNames.size()]));
         return syntaxDef != null ? new ResolveResult[]{new PsiElementResolveResult(syntaxDef)} : new ResolveResult[0];
     }
 
     public static ResolveResult[] resolveSyntax(PsiReference psiReference, String sort) {
-        KSyntax syntax = findFirstSyntax((KFile) psiReference.getElement().getContainingFile(), sort);
+        KSyntax syntax = findFirstElementInModule((KFile) psiReference.getElement().getContainingFile(), KSyntax.class,
+                sort);
         return syntax != null ? new ResolveResult[]{new PsiElementResolveResult(syntax)} : new ResolveResult[0];
     }
 
