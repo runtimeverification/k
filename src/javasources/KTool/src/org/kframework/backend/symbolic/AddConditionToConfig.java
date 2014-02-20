@@ -49,8 +49,11 @@ public class AddConditionToConfig extends CopyOnWriteTransformer {
         Cell cell = new Cell();
         cell.setLabel(MetaK.Constants.pathCondition);
         cell.setEllipses(Ellipses.NONE);
-        if (PC)
-        	cell.setContents(new Variable("$PC", "Bool"));
+        if (PC) {
+            Variable pc = new Variable("$PC", "Bool");
+            cell.setContents(pc);
+            context.configVarSorts.put(pc.getName(), pc.getSort());
+        }
         else 
         	cell.setContents(BoolBuiltin.TRUE);
         // append the path condition cell as subcell of generated top cell
