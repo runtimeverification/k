@@ -6,10 +6,10 @@ module VARIABLE
   imports SYMBOLIC-K
   imports K-FRESH
 
-  syntax K ::= vars(Set)
-
-  syntax Set ::= #getVarsFromK(K)  [function]
-  rule #getVarsFromK(vars(Vars:Set)) => Vars
+  syntax K ::= isCollection(K) [function]
+  rule isCollection(_:Set) => true
+  rule isCollection(_:List) => true
+  rule isCollection(_:Map) => true
 
 // Get the variables in a K term, going through the sets Klabeled as
 // terms as well, if any.
@@ -17,17 +17,22 @@ module VARIABLE
 // returns an actual set of variables.  Well, I just added it, please check.
 
   syntax Set ::= getVariables(K)  [function]  // public
-  rule getVariables(vars(Vars:Set)) => Vars
+  rule getVariables(K) => #getVars(K)
 
-  syntax K ::= #getVars(K)  [function]
-  rule #getVars(K:K) => #getVars1(K, .Set)
+  syntax Set ::= #getVars(K)  [function] 
+  rule #getVars(K) => #getVars1(K, .Set)
 
-  syntax K ::= #getVars1(KList, Set)  [function]
+  syntax Set ::= #getVars1(KList, Set)  [function]
   rule #getVars1((X:Variable => .KList),,_, _ (.Set => SetItem(X)))
   rule #getVars1((L:KLabel(Ks:KList) => Ks),,_, _)
-    when isVariable(L(Ks)) =/=K true 
+    when (isVariable(L(Ks)) =/=K true) andBool
+         (isCollection(L(Ks)) =/=K true)
   rule #getVars1((.K => .KList),,_, _) 
-  rule #getVars1(.KList, S:Set) => vars(S)
+  rule #getVars1(.KList, S:Set) => S
+  rule #getVars1((.KList => I),,(ListItem(I) => .List) _:List,,_, _)
+  rule #getVars1((.KList => I),,(SetItem(I) => .Set) _:Set,,_, _)
+  rule #getVars1((.KList => Key,,Value),,(Key |-> Value => .Map) _:Map,,_, _)
+  rule #getVars1((K1:KItem ~> K:K => K1,,K),,_, _)
 
 // Generates a "fresh" local variable of the type of K that does not appear
 // anywhere within the set Set
@@ -61,15 +66,12 @@ module BINDER
 
   syntax K ::= #splitedBinder(KList, KList, Set)
 
-  syntax Bool ::= K "inVars" K  [function]
-  rule K:K inVars vars(S:Set) => K in S
-
   syntax K ::= #boundVars(K)  [function]
   rule #boundVars(K:K) => #boundVars1(#binderSplit(K))
 
-  syntax K ::= #boundVars1(K)  [function]
+  syntax Set ::= #boundVars1(K)  [function]
   rule #boundVars1(#splitedBinder(_, _, Bound:Set))
-    => vars(Bound)
+    => Bound
 
   syntax K ::= #binderSplit(K)  [function]
   rule #binderSplit(L:KLabel(Ks:KList))
@@ -79,7 +81,7 @@ module BINDER
   rule #binderSplit1(L:KLabel, I:Int, K:K,,Ks:KList,
                      NBEs:KList, BEs:KList, Bound:Set)
     => #if isBound(L,I) ==K true
-       #then #binderSplit2(L, I +Int 1, Ks, NBEs, BEs, Bound, #getVars(K))
+       #then #binderSplit1(L, I +Int 1, Ks, NBEs, BEs, Bound #getVars(K))
        #else #if isBounding(L, I) ==K true
              #then #binderSplit1(L, I +Int 1, Ks, NBEs, (BEs,,K), Bound)
              #else #binderSplit1(L, I +Int 1, Ks, (NBEs,,K), BEs, Bound)
@@ -87,13 +89,6 @@ module BINDER
        #fi
   rule #binderSplit1(_, _, .KList, NBEs:KList, BEs:KList, Bound:Set)
     => #splitedBinder(NBEs, BEs, Bound)
-
-// Grigore: remove this, once we change #getVars to return a set of variables
-  syntax K ::= #binderSplit2(KLabel, Int, KList, KList, KList, Set, K)
-    [function]
-  rule #binderSplit2(L:KLabel, I:Int, Ks:KList,
-                     NBEs:KList, BEs:KList, Bound:Set, vars(Bound':Set))
-    => #binderSplit1(L, I, Ks, NBEs, BEs, Bound Bound')
 
 endmodule
 
@@ -109,56 +104,50 @@ module FREE-VARS
   rule Set2KTermAcc(.Set, K:K) => K
 */
   syntax Set ::= freeVariables(KList)  [function, latex({\it FV}({#1}))]  // public
-               | freeVariables(Set)      [function, latex({\it FV}({#1}))]
-  rule freeVariables(Ks:KList) => #getVarsFromK(#freeVars(Ks))
-  rule freeVariables(.Set) => .Set
-  rule freeVariables(SetItem(K:K) S:Set) => freeVariables(K) freeVariables(S)
-
-  syntax K ::= #freeVarsSet(Set) [function]
-  rule #freeVarsSet(S:Set) => #freeVars(S)
+  rule freeVariables(Ks:KList) => #freeVars(Ks)
 
 // Grigore: again, I think this should just return a set of variables, not a K
 // I added a user-interface variant of it above.  I use it in type-inference.
-  syntax K ::= #freeVars(KList)  [function]
+  syntax Set ::= #freeVars(KList)  [function]
   rule #freeVars(Ks:KList) => #freeVars(Ks:KList, .Set, .Set)
 
-  syntax K ::= #freeVars(KList, Set, Set)  [function]
-  rule #freeVars(.KList, _, Free:Set) => vars(Free)
+  syntax Set ::= #freeVars(KList, Set, Set)  [function]
+  rule #freeVars(.KList, _, Free:Set) => Free
   rule #freeVars(X:Variable,,Ks:KList, Bound:Set, Free:Set)
     => #freeVars(Ks, Bound, Free) when X in Bound
   rule #freeVars(X:Variable,,Ks:KList, Bound:Set, Free:Set)
     => #freeVars(Ks, Bound, Free SetItem(X)) when notBool(X in Bound)
   rule #freeVars((L:KLabel(Ks:KList) => Ks),, _, _, _)
     when (isVariable(L(Ks)) =/=K true) andBool
-         (isBinder(L(Ks)) =/=K true) 
+         (isBinder(L(Ks)) =/=K true) andBool
+         (isCollection(L(Ks)) =/=K true)
+  rule #freeVars((.KList => I),, (ListItem(I) => .List) _:List,,_, _, _)
+  rule #freeVars((.KList => I),, (SetItem(I) => .Set) _:Set,,_, _, _)
+  rule #freeVars((.KList => Key,,Value),, (Key |-> Value => .Map) _:Map,,_, _, _)
+
+
   rule #freeVars(K:K,,Ks:KList, Bound:Set, Free:Set)
-    => #freeVars1(Ks, #freeVarsBinder(K, Bound), Bound, Free)
+    => #freeVars(Ks, Bound, #freeVarsBinder(K, Bound) Free)
     when isBinder(K)
 // Grigore: new in order to deal with cc(.K)
   rule #freeVars((.K => .KList),,_, _, _)
   rule #freeVars((K1:KItem ~> K:K => K1,,K),,_, _, _)
 
-  syntax K ::= #freeVars1(KList, K, Set, Set)  [function]
-  rule #freeVars1(Ks:KList, vars(Free1:Set), Bound:Set, Free2:Set)
-    => #freeVars(Ks, Bound, Free1 Free2)
-
-  syntax K ::= #freeVarsBinder(K, Set)  [function]
+  syntax Set ::= #freeVarsBinder(K, Set)  [function]
   rule #freeVarsBinder(K:K, Bound:Set)
     => #freeVarsBinder1(#binderSplit(K), Bound)
 
-  syntax K ::= #freeVarsBinder1(K, Set)  [function]
+  syntax Set ::= #freeVarsBinder1(K, Set)  [function]
   rule #freeVarsBinder1(
           #splitedBinder(NBEs:KList, BEs:KList, Bound1:Set), Bound:Set)
-    => #freeVarsBinder2(
-          #freeVars(NBEs, Bound, .Set), #freeVars(BEs, Bound1 Bound, .Set))
+    => #freeVars(NBEs, Bound, .Set) #freeVars(BEs, Bound1 Bound, .Set)
 
-  syntax K ::= #freeVarsBinder2(K, K)  [function]
-  rule #freeVarsBinder2(vars(Free1:Set), vars(Free2:Set)) => vars(Free1 Free2)
 endmodule
 
 module SUBSTITUTION
   imports FREE-VARS
   imports PATTERN-MATCHING
+  imports MAP
 
 // Seems unnecessary
 //  syntax K ::= #substitutionError(K,String)
@@ -168,34 +157,42 @@ module SUBSTITUTION
   syntax K ::= K "[" KList "/" KList "]"  [function, prefer]
   syntax K ::= K "[" Map "]"  [function, prefer]
 
-  rule K:K[Ks:KList / Vs:KList] => #substituteK(K,#patternMatch(Vs,Ks))
+  rule K:K[Ks:KList / Vs:KList] => #substitute(K,#patternMatch(Vs,Ks))
   rule K:K[M:Map] => #substitute(K, M)
 
 //  rule _[_/V:K] 
 //    => #substitutionError(V, "is not a Variable; cannot #substitute")
 //    when isVariable(V) =/=K true
 
-  syntax K ::= #substituteK(K, K)  [function]
-             | #substitute(K, Map)  [function]
-             | #substituteFV(K, Map, K)  [function]
-             | #substituteList(K, Map, K)  [function]
-             | #substituteList1(K, Map, K, KList)  [function]
-
-  rule #substituteK(K:K, #map(M:Map)) => #substitute(K,M)
+  syntax K ::= #substitute(K, Map)  [function]
+             | #substituteFV(K, Map, Set)  [function]
+             | #substituteList(K, Map, Set)  [function]
+             | #substituteList1(K, Map, Set, KList)  [function]
 
 // Grigore: should add Set ::= #freeVars(Set)
 
   rule #substitute(K:K, M:Map)
-    => #substituteFV(K, M, #freeVarsSet(values(M)))
+    => #substituteFV(K, M, #freeVars(values(M)))
 
-  rule #substituteFV(Y:Variable, M:Map, _)
-    => #if $hasMapping(M, Y) #then M:Map(Y) #else Y #fi
-  rule #substituteFV(K:K, M:Map, FV:K) => #substituteBinder(K, M, FV:K)
+  rule #substituteFV(Y:Variable, M:Map Y |-> V, _) => V
+  rule #substituteFV(Y:Variable, M:Map, _) => Y
+    when notBool (Y in keys(M))
+  
+  rule #substituteFV(K:K, M:Map, FV) => #substituteBinder(K, M, FV)
     when isBinder(K)
-  rule #substituteFV(K:K, M:Map, FV:K) => #substituteList(K, M, FV)
-    when isVariable(K) =/=K true andBool isBinder(K) =/=K true
+  rule #substituteFV(K:K, M:Map, FV) => #substituteList(K, M, FV)
+    when isVariable(K) =/=K true andBool isBinder(K) =/=K true andBool 
+         isCollection(K) =/=K true
 
-  rule #substituteList(K:K,M:Map,FV:K) => #substituteList1(K,M,FV:K,.KList)
+  rule #substituteFV(K:Set, M:Map, FV) => #substituteSet(K, M, FV, .Set)
+  rule #substituteFV(K:List, M:Map, FV) => #substituteList(K, M, FV, .List)
+  rule #substituteFV(K:Map, M:Map, FV) => #substituteMap(K, M, FV, .Map)
+
+  syntax List ::= #substituteList(List, Map, Set, List)  [function]
+  syntax Set ::= #substituteSet(Set, Map, Set, Set)  [function]
+  syntax Map ::= #substituteMap(Map, Map, Set, Map)  [function]
+
+  rule #substituteList(K:K,M:Map,FV) => #substituteList1(K,M,FV,.KList)
   rule #substituteList1(_:KLabel((K:K => .KList),,_),M:Map,FV:K,
                         _,,(.KList => #substituteFV(K, M, FV)))
   rule #substituteList1(L:KLabel(.KList), _, _, Ks:KList) => L(Ks)
@@ -204,29 +201,27 @@ module SUBSTITUTION
   rule #substituteList1(K1:KItem ~> K2:KItem ~> K, M:Map, FV:K, .KList) 
     => #substituteKArrow(K1:KItem ~> K2:KItem ~> K, M:Map, FV:K, .K) 
 
-  syntax K ::= #substituteKArrow(K, Map, K, K)  [function]
+  syntax K ::= #substituteKArrow(K, Map, Set, K)  [function]
   rule #substituteKArrow(.K, M, FV, K) => K
-  rule #substituteKArrow((K1:KItem => .K) ~> _, M:Map, FV:K, _ ~> (.K => #substituteFV(K1,M,FV)))
+  rule #substituteKArrow((K1:KItem => .K) ~> _, M:Map, FV, _ ~> (.K => #substituteFV(K1,M,FV)))
 
-  syntax K ::= #substituteBinder(K, Map, K)  [function]
-  rule #substituteBinder(K:K, M:Map, FV:K)
+  syntax K ::= #substituteBinder(K, Map, Set)  [function]
+  rule #substituteBinder(K:K, M:Map, FV)
     => #substituteBinder1(K, M, #boundVars(K), FV)
 
-  syntax K ::= #substituteBinder1(K, Map, K, K)  [function]
-  rule #substituteBinder1(K:K, M:Map, vars(BKVs:Set), vars(FEVs:Set))
-    => #substituteBinder2(K,M,vars(intersectSet(BKVs,FEVs keys M)),vars(FEVs))
+  syntax K ::= #substituteBinder1(K, Map, Set, Set)  [function]
+  rule #substituteBinder1(K:K, M:Map, BKVs:Set, FEVs:Set)
+    => #substituteBinder2(K,M,intersectSet(BKVs,FEVs keys(M)),FEVs)
 
-  syntax K ::=  #substituteBinder2(K, Map, K, K)  [function]
-  rule #substituteBinder2(K:K, M:Map, vars(Vs:Set), vars(FEVs:Set))
-    => #if isEmptySet(Vs)
-       #then #substituteList(K, M, vars(FEVs))
-       #else #substituteList(#rebind(K,vars(Vs),#getVars(K),vars(FEVs keys M)),
-                             M, vars(FEVs))
-       #fi
+  syntax K ::=  #substituteBinder2(K, Map, Set, Set)  [function]
+  rule #substituteBinder2(K:K, M:Map, .Set, FEVs:Set)
+    => #substituteList(K, M, FEVs)
+  rule #substituteBinder2(K:K, M:Map, SetItem(I) Vs, FEVs:Set)
+    => #substituteList(#rebind(K,SetItem(I) Vs,#getVars(K),FEVs keys(M)),
+                             M, FEVs)
 
-
-  syntax K ::= #rebind(K, K, K, K) [function]
-  rule #rebind(K:K, vars(BVs:Set), vars(AVs:Set), vars(FEVs:Set))
+  syntax K ::= #rebind(K, Set, Set, Set) [function]
+  rule #rebind(K:K, BVs:Set, AVs:Set, FEVs:Set)
     => #rebind1(K, #freshSubst(BVs, AVs FEVs, .Map))
 
   syntax K ::= #freshSubst(Set, Set, Map)  [function]
@@ -237,8 +232,8 @@ module SUBSTITUTION
 
   syntax K ::= #substMap(Map)
 
-  syntax K ::= #rebind1(K, K) [function]
-  rule #rebind1(L:KLabel(Ks:KList), #substMap(M:Map))
+  syntax K ::= #rebind1(K, Map) [function]
+  rule #rebind1(L:KLabel(Ks:KList), M:Map)
     => #rebind2(L(Ks), 1, M, L(.KList))
 
   syntax K ::= #rebind2(K, Int, Map, K) [function]
@@ -252,7 +247,7 @@ module SUBSTITUTION
   rule #rebind2(_:KLabel(.KList), _, _, K:K) => K
     
 
-  syntax K ::= #freshSubst1(Set, Set, Map, K, K) [function]
+  syntax Map ::= #freshSubst1(Set, Set, Map, K, K) [function]
   rule #freshSubst1(BVs:Set, AVs:Set, M:Map, X:K, Y:K)
     => #freshSubst(BVs, SetItem(Y) AVs, M X |-> Y)
 
@@ -263,7 +258,7 @@ module SUBSTITUTION
 
   rule #substitutePlain(X:K, X:K |-> Y:K _) => Y
   rule #substitutePlain(K:K, M:Map) => #substitutePlainList(K, M)
-    when isId(K) =/=K true orElseBool $hasMapping(M, K) =/=K true
+    when isId(K) =/=K true orElseBool K in keys(M) =/=K true
 
   rule #substitutePlainList(L:KLabel(Ks:KList), M:Map)
     => #substitutePlainList1(L:KLabel(Ks), M, .KList)

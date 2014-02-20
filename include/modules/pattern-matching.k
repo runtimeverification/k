@@ -7,6 +7,13 @@ module PATTERN-MATCHING
   VISIBLE
 ***********/
 
+
+  syntax K ::= #map(Map)
+  syntax Bool ::= #isMapInK(K)     [function]
+  syntax Map  ::= #getMapFromK(K)  [function]
+  rule #isMapInK(#map(_)) => true
+  rule #getMapFromK(#map(M:Map)) => M
+
 // Tells if a matching exists
   syntax Bool ::= isMatching(KList, KList)            [function]
   rule isMatching(Ps:KList, Ks:KList)
@@ -43,7 +50,7 @@ module PATTERN-MATCHING
   syntax K ::= #patternMatch1(KList, Map)  [function]
   rule #patternMatch1((decomposeMatching(X:Variable,K:K) => .KList),,_,
                       M:Map (.Map => X |-> K))
-    when notBool $hasMapping(M,X)  // only linear patterns allowed for now
+    when notBool(X in keys(M))  // only linear patterns allowed for now
   rule #patternMatch1(.KList, M:Map) => #map(M)
 
 endmodule

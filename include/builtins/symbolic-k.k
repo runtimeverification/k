@@ -114,20 +114,21 @@ module SYMBOLIC-K
   // declare isSymbolicSort for List, Set, Bag and Map
   syntax K ::= "isSymbolicBag" "(" Bag ")" [prefixlabel(isSymbolicBag), predicate]
 
+  syntax K ::= isSymbolicK(List)
 
   // define isSymbolicK
-  rule
-    isSymbolicK(L:List) => isSymbolicList(L)
-  [predicate]
-  rule
-    isSymbolicK(S:Set) => isSymbolicSet(S)
-  [predicate]
+  //rule
+    //isSymbolicK(L:List) => isSymbolicList(L)
+  //[predicate]
+  //rule
+    //isSymbolicK(S:Set) => isSymbolicSet(S)
+  //[predicate]
   //rule
     //isSymbolicK(B:Bag) => isSymbolicBag(B)
   //[predicate]
-  rule
-    isSymbolicK(M:Map) => isSymbolicMap(M)
-  [predicate]
+  //rule
+    //isSymbolicK(M:Map) => isSymbolicMap(M)
+  //[predicate]
   rule isSymbolicK(KL:KLabel(LK:KList)) => false
   when isBuiltin(KL(LK))
   rule isSymbolicK(KL:KLabel(LK:KList)) => false

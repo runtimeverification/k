@@ -60,7 +60,7 @@ module MAP
 //  rule keys(.Map) => .Set
 
   /* bag of map values */
-	syntax Bag ::= values(Map)    [function]
+	syntax List ::= values(Map)    [function]
 //  rule values(_ |-> K:K M:Map) => BagItem(K) values(M)
 //  rule values(.Map) => .Bag
 
