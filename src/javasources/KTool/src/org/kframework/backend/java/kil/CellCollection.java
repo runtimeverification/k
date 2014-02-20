@@ -40,10 +40,7 @@ public class CellCollection extends Collection implements Sorted {
         
         int numOfStarredCellTypes = 0;
         for (String cellLabel : cells.keySet()) {
-            if (context.getConfigurationStructureMap().get(cellLabel).multiplicity
-                    == org.kframework.kil.Cell.Multiplicity.ANY
-                    || context.getConfigurationStructureMap().get(cellLabel).multiplicity
-                            == org.kframework.kil.Cell.Multiplicity.SOME) {
+            if (context.getConfigurationStructureMap().get(cellLabel).isStarOrPlus()) {
                 numOfStarredCellTypes++;
             } else {
                 assert cells.get(cellLabel).size() == 1:
