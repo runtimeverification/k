@@ -44,7 +44,7 @@ public class CellCollection extends Collection implements Sorted {
                 numOfStarredCellTypes++;
             } else {
                 assert cells.get(cellLabel).size() == 1:
-                        "cell label " + cellLabel + "does not have multiplicity='*', "
+                        "cell label " + cellLabel + " does not have multiplicity='*', "
                         + "but multiple cells found " + cells;
             }
         }
