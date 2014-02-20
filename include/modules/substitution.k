@@ -282,7 +282,8 @@ module SUBSTITUTION
   syntax K ::= freshVariables(Set,K)
   rule freshVariables(.Set, T:K) => T
   rule freshVariables(SetItem(Tv:K) S:Set, T:K)
-    => freshVariables(S, T[#changeLabel(?Tv':K,Tv)/Tv])
+    => freshVariables(S, T[#changeLabel(Tv',Tv)/Tv])
+    when fresh(Tv':K)
 
   syntax K ::= #changeLabel(K,K)  [function]
   rule #changeLabel(_:KLabel(Ks:KList),L':KLabel(_)) => L'(Ks)

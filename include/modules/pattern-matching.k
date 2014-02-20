@@ -8,11 +8,8 @@ module PATTERN-MATCHING
 ***********/
 
 
-  syntax K ::= #map(Map)
   syntax Bool ::= #isMapInK(K)     [function]
-  syntax Map  ::= #getMapFromK(K)  [function]
-  rule #isMapInK(#map(_)) => true
-  rule #getMapFromK(#map(M:Map)) => M
+  rule #isMapInK(M:Map) => true
 
 // Tells if a matching exists
   syntax Bool ::= isMatching(KList, KList)            [function]
@@ -22,7 +19,7 @@ module PATTERN-MATCHING
 // Gets the matching; call isMatching first, for safety
   syntax Map  ::= getMatching(KList, KList)           [function]
   rule getMatching(Ps:KList, Ks:KList)
-    => #getMapFromK(#patternMatch(Ps,Ks))
+    => #patternMatch(Ps,Ks)
 
 // Tells how to decompose pattern matching
   syntax KList ::= decomposeMatching(KList, KList)  [function]
@@ -43,14 +40,14 @@ module PATTERN-MATCHING
   // Subsorting ids to variables for matching purposes.
   syntax Variable ::= Id
 
-  syntax K ::= #patternMatch(KList, KList)   [function]
+  syntax Map ::= #patternMatch(KList, KList)   [function]
   rule #patternMatch(Ps:KList, Ks:KList)
     => #patternMatch1(decomposeMatching(Ps,Ks), .Map)
 
-  syntax K ::= #patternMatch1(KList, Map)  [function]
+  syntax Map ::= #patternMatch1(KList, Map)  [function]
   rule #patternMatch1((decomposeMatching(X:Variable,K:K) => .KList),,_,
                       M:Map (.Map => X |-> K))
     when notBool(X in keys(M))  // only linear patterns allowed for now
-  rule #patternMatch1(.KList, M:Map) => #map(M)
+  rule #patternMatch1(.KList, M:Map) => M
 
 endmodule
