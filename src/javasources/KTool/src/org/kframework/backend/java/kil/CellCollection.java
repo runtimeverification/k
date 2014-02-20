@@ -43,7 +43,9 @@ public class CellCollection extends Collection implements Sorted {
                     == org.kframework.kil.Cell.Multiplicity.ANY) {
                 numOfStarredCellTypes++;
             } else {
-                assert cells.get(cellLabel).size() == 1;
+                assert cells.get(cellLabel).size() == 1:
+                        "cell label " + cellLabel + "does not have multiplicity='*', "
+                        + "but multiple cells found " + cells;
             }
         }
 
