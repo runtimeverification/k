@@ -98,6 +98,7 @@ public class K {
     public static boolean do_search = false;
     public static boolean do_testgen = false; // generate tests from semantics
     public static boolean do_indexing = false; // index the rules before rewriting
+    public static boolean get_indexing_stats = false; // measure indexing related info
 	public static boolean showSearchGraph = false;
 	//apply parenthesis by default
 	public static boolean parens = true;

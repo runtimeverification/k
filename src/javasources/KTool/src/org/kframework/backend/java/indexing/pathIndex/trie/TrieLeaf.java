@@ -2,6 +2,7 @@ package org.kframework.backend.java.indexing.pathIndex.trie;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -13,12 +14,12 @@ public class TrieLeaf extends TrieNode {
         return indices;
     }
 
-    private final Set<Integer> indices;
+    private Set<Integer> indices;
 
     public TrieLeaf(String value, int index) {
         super(value);
 
-        indices = new HashSet<>();
+        indices = new LinkedHashSet<>();
         indices.add(index);
     }
 

@@ -142,7 +142,8 @@ public class KItem extends Term implements Sorted {
                         sort = sorts.iterator().next();
                     } else {
                         sort = context.getGLBSort(sorts);
-                        assert !sort.equals("null") : "The greatest lower bound (GLB) of sorts " + sorts + "doesn't exist!";
+                        assert sort != null && !sort.equals("null"):
+                                "The greatest lower bound (GLB) of sorts " + sorts + "doesn't exist!";
                     }
                 } else {    /* no production matches this KItem */
                     sort = kind.toString();

@@ -1,4 +1,4 @@
-package org.kframework.backend.java.indexing.util;
+package org.kframework.backend.java.indexing.pathIndex.util;
 
 /**
  * Author: OwolabiL

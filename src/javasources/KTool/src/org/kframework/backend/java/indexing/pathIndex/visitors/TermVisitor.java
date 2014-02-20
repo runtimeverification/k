@@ -1,5 +1,6 @@
 package org.kframework.backend.java.indexing.pathIndex.visitors;
 
+import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.symbolic.LocalVisitor;
 import org.kframework.backend.java.util.LookupCell;
@@ -17,6 +18,13 @@ import java.util.Set;
  * Time: 12:05 PM
  */
 public class TermVisitor extends LocalVisitor {
+    public static final String K_RESULT = "KResult";
+    public static final String EMPTY_LIST_LABEL = "'.List{\",\"}";
+    public static final String EMPTY_LIST_SORT = "#ListOf#Bot{\",\"}";
+    public static final String LIST_LABEL = "List{\",\"}";
+    public static final String USER_LIST_REPLACEMENT = "UserList";
+    public static final String K_ITEM_SORT = "KItem";
+    public static final String EMPTY_K = "EMPTY_K";
     private final Set<String> pStrings;
 
     private final Context context;
@@ -29,6 +37,7 @@ public class TermVisitor extends LocalVisitor {
     private final String START_STRING = "@.";
 
     public TermVisitor(Context context) {
+
         pStrings = new HashSet<>();
         this.context = context;
     }
@@ -46,16 +55,14 @@ public class TermVisitor extends LocalVisitor {
         cell.getContent().accept(this);
     }
 
-
     @Override
     public void visit(KSequence kSequence) {
         if (kSequence.size() > 0) {
-//            System.out.println("1st: "+(KItem)kSequence.get(0));
             //TODO (OwolabiL): This is too messy. Restructure the conditionals
             if (kSequence.get(0) instanceof KItem) {
-                boolean isKResult = context.isSubsorted("KResult", ((KItem) kSequence.get(0)).sort());
+                boolean isKResult = context.isSubsorted(K_RESULT, ((KItem) kSequence.get(0)).sort());
                 if (isKResult) {
-                    pString = START_STRING + "KResult";
+                    pString = START_STRING + K_RESULT;
                     kSequence.get(1).accept(this);
                 } else {
                     kSequence.get(0).accept(this);
@@ -69,15 +76,18 @@ public class TermVisitor extends LocalVisitor {
                     kSequence.get(1).accept(this);
                 }
             }
+        } else if (kSequence.size() == 0){
+            //there are cases (e.g., in SIMPLE's join rule) where we need to know that one of the K
+            // cells in the configuration is empty.
+            pStrings.add(START_STRING + EMPTY_K);
         }
     }
 
     @Override
     public void visit(Token token) {
-
         if (pString == null) {
-            if (context.isSubsorted("KResult", token.sort())) {
-                pString = START_STRING + "KResult";
+            if (context.isSubsorted(K_RESULT, token.sort())) {
+                pString = START_STRING + K_RESULT;
             } else {
                 //TODO(OwolabiL): Use a better check than the nullity of pString
                 pStrings.add(START_STRING + token.sort());
@@ -92,7 +102,7 @@ public class TermVisitor extends LocalVisitor {
             }
             ArrayList<Production> productions = (ArrayList<Production>) productions1;
             Production p = productions.get(0);
-            if (context.isSubsorted("KResult", token.sort())) {
+            if (context.isSubsorted(K_RESULT, token.sort())) {
                 if (pString != null) {
                     if (productions.size() == 1) {
                         pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR + token.sort());
@@ -111,7 +121,18 @@ public class TermVisitor extends LocalVisitor {
     }
 
     @Override
+    public void visit(UninterpretedToken uninterpretedToken) {
+        if (pString == null){
+            pStrings.add(START_STRING + uninterpretedToken.sort());
+        } else{
+            pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR +
+                    uninterpretedToken.sort());
+        }
+    }
+
+    @Override
     public void visit(KItem kItem) {
+        //TODO(OwolabiL): This is starting to get nasty. Refactor.
         if (kItem.kLabel() instanceof KLabelFreezer) {
             if (pString != null) {
                 TokenVisitor visitor = new TokenVisitor(context, pString);
@@ -122,19 +143,59 @@ public class TermVisitor extends LocalVisitor {
             if (!inner) {
                 inner = true;
                 currentLabel = kItem.kLabel().toString();
-                ((KLabelConstant)kItem.kLabel()).accept(this);
-                ((KList)kItem.kList()).accept(this);
+                kItem.kLabel().accept(this);
+                kItem.kList().accept(this);
             } else {
                 int kListSize = ((KList) kItem.kList()).size();
-                if (kListSize == 0 && currentLabel.equals("List{\",\"}")) {
-                    pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR + "'.List{\",\"}");
-                } else if (kListSize == 0 && kItem.sort().equals("#ListOf#Bot{\",\"}")) {
-                    pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR + "'.List{\",\"}");
+                if (kListSize == 0 && currentLabel.equals(LIST_LABEL)) {
+                    pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR
+                            + EMPTY_LIST_LABEL);
+                } else if (kListSize == 0 && kItem.sort().equals(EMPTY_LIST_SORT)) {
+                    pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR
+                            + EMPTY_LIST_LABEL);
                 } else {
                     if (context.isListSort(kItem.sort())) {
-                        pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR + "UserList");
+                        pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR
+                                + USER_LIST_REPLACEMENT);
                     } else {
-                        pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR + kItem.sort());
+                        if (kListSize > 0 && ((KList) kItem.kList()).get(0) instanceof Token) {
+                            String sort = ((Token) ((KList) kItem.kList()).get(0)).sort();
+                            if (context.isSubsorted(K_RESULT, sort)) {
+                                if (kItem.sort().equals(K_ITEM_SORT)) {
+                                    pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR
+                                            + kItem.kLabel()
+                                            + SEPARATOR + (currentPosition) + SEPARATOR + sort);
+                                } else {
+                                    pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR
+                                            + K_RESULT);
+                                }
+                            } else {
+                                ArrayList<Production> productions =
+                                        (ArrayList<Production>) context.productionsOf(currentLabel);
+                                Production p = productions.get(0);
+                                String test = pString + SEPARATOR + (currentPosition) + SEPARATOR;
+                                if (p.getChildSort(currentPosition-1).equals("K")){
+                                    //TODO(OwolabiL): This needs to be investigated further and
+                                    // handled properly
+                                    pStrings.add(test +kItem.kLabel()+ SEPARATOR + "1.Exp");
+                                }  else{
+                                    pStrings.add(test+ p.getChildSort(currentPosition - 1));
+                                }
+                            }
+                        } else {
+                            //TODO(OwolabiL): This needs to be investigated further and handled
+                            // properly. Plus there's duplicated code here to be possibly removed.
+                            String test =  pString + SEPARATOR + currentPosition + SEPARATOR;
+                            ArrayList<Production> productions =
+                                    (ArrayList<Production>) context.productionsOf(currentLabel);
+                            Production p = productions.get(0);
+                            if (p.getChildSort(currentPosition-1).equals("K")){
+                                pStrings.add(test +kItem.kLabel()+ SEPARATOR + (currentPosition)+
+                                        SEPARATOR + kItem.sort());
+                            }else {
+                                pStrings.add(test + kItem.sort());
+                            }
+                        }
                     }
                 }
             }
@@ -152,11 +213,6 @@ public class TermVisitor extends LocalVisitor {
             }
         }
     }
-
-//    @Override
-//    public void visit(KLabel kLabel) {
-//        pString = START_STRING + kLabel.toString();
-//    }
 
     @Override
     public void visit(KLabelConstant kLabel) {
@@ -178,13 +234,13 @@ public class TermVisitor extends LocalVisitor {
     }
 
     private class TokenVisitor extends TermVisitor {
-        private final String baseString;
+        private String baseString;
         private String pString;
-        private final List<String> candidates;
+        private List<String> candidates;
 
         public TokenVisitor(Context context, String string) {
             super(context);
-            this.baseString = string;
+            baseString = string;
             candidates = new ArrayList<>();
         }
 
@@ -195,14 +251,15 @@ public class TermVisitor extends LocalVisitor {
             frozenItem.kList().accept(this);
         }
 
-//        @Override
-//        public void visit(KLabel kLabel) {
-//            pString = baseString + ".1." + kLabel;
-//        }
-
         @Override
         public void visit(KLabelConstant kLabel) {
             pString = baseString + ".1." + kLabel.toString();
+        }
+
+        @Override
+        public void visit(UninterpretedToken uninterpretedToken) {
+            candidates.add(pString + SEPARATOR + currentPosition + SEPARATOR
+                    + uninterpretedToken.sort());
         }
 
         @Override
