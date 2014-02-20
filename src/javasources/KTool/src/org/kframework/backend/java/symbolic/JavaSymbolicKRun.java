@@ -83,7 +83,9 @@ public class JavaSymbolicKRun implements KRun {
         ConstrainedTerm result = javaKILRun(cfg, bound);
         org.kframework.kil.Term kilTerm = (org.kframework.kil.Term) result.term().accept(
                 new BackendJavaKILtoKILTransformer(context));
-        return new KRunResult<KRunState>(new KRunState(kilTerm, context));
+        KRunResult<KRunState> returnResult = new KRunResult<KRunState>(new KRunState(kilTerm, context));
+        returnResult.setRawOutput(returnResult.getResult().toString());
+        return returnResult;
     }
 
     private ConstrainedTerm javaKILRun(org.kframework.kil.Term cfg, int bound) {
