@@ -9,7 +9,7 @@ module ID-HOOKS
   imports STRING-HOOKS
   imports K
 
-  syntax String ::= "Id2String" "(" Id ")"		 [function, hook(#CONVERSION:id2string), klabel(Id2String)]
+  syntax String ::= "Id2String" "(" Id ")"		 [function, hook(#CONVERSION:token2string), klabel(Id2String)]
   syntax Id ::= "String2Id" "(" String ")"		 [function, klabel(String2Id)]
   rule Id2String(X:Id) => #tokenToString(X)
   rule String2Id(S:String) => #parseToken("Id", S)

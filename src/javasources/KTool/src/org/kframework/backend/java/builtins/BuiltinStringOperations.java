@@ -144,9 +144,8 @@ public class BuiltinStringOperations {
         byte cat = Character.getDirectionality(term.stringValue().codePointAt(0));
         return StringToken.of(StringUtil.getDirectionalityCode(cat));
     }
-    
-    public static StringToken id2string(UninterpretedToken token, TermContext context) {
-        assert token.sort().equals("Id");
+
+    public static StringToken token2string(UninterpretedToken token, TermContext context) {
         return StringToken.of(token.value());
     }
 }
