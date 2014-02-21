@@ -23,16 +23,19 @@ module VARIABLE
   rule #getVars(K) => #getVars1(K, .Set)
 
   syntax Set ::= #getVars1(KList, Set)  [function]
-  rule #getVars1((X:Variable => .KList),,_, _ (.Set => SetItem(X)))
+  rule #getVars1((X:Variable => .KList),,_, (.Set => SetItem(X)) _:Set)
   rule #getVars1((L:KLabel(Ks:KList) => Ks),,_, _)
     when (isVariable(L(Ks)) =/=K true) andBool
          (isCollection(L(Ks)) =/=K true)
-  rule #getVars1((.K => .KList),,_, _) 
   rule #getVars1(.KList, S:Set) => S
   rule #getVars1((.KList => I),,(ListItem(I) => .List) _:List,,_, _)
+  rule #getVars1((.List => .KList),,_, _)
   rule #getVars1((.KList => I),,(SetItem(I) => .Set) _:Set,,_, _)
+  rule #getVars1((.Set => .KList),,_, _)
   rule #getVars1((.KList => Key,,Value),,(Key |-> Value => .Map) _:Map,,_, _)
-  rule #getVars1((K1:KItem ~> K:K => K1,,K),,_, _)
+  rule #getVars1((.Map => .KList),,_, _)
+  rule #getVars1((K1:KItem ~> K2:KItem ~> K:K => K1,,K2,,K),,_, _)
+  rule #getVars1((.K => .KList),,_, _) 
 
 // Generates a "fresh" local variable of the type of K that does not appear
 // anywhere within the set Set
@@ -122,8 +125,11 @@ module FREE-VARS
          (isBinder(L(Ks)) =/=K true) andBool
          (isCollection(L(Ks)) =/=K true)
   rule #freeVars((.KList => I),, (ListItem(I) => .List) _:List,,_, _, _)
+  rule #freeVars((.List => .KList),,_, _, _)
   rule #freeVars((.KList => I),, (SetItem(I) => .Set) _:Set,,_, _, _)
+  rule #freeVars((.Set => .KList),,_, _, _)
   rule #freeVars((.KList => Key,,Value),, (Key |-> Value => .Map) _:Map,,_, _, _)
+  rule #freeVars((.Map => .KList),,_, _, _)
 
 
   rule #freeVars(K:K,,Ks:KList, Bound:Set, Free:Set)
@@ -131,7 +137,7 @@ module FREE-VARS
     when isBinder(K)
 // Grigore: new in order to deal with cc(.K)
   rule #freeVars((.K => .KList),,_, _, _)
-  rule #freeVars((K1:KItem ~> K:K => K1,,K),,_, _, _)
+  rule #freeVars((K1:KItem ~> K2:KItem ~> K => K1,,K2,,K),,_, _, _)
 
   syntax Set ::= #freeVarsBinder(K, Set)  [function]
   rule #freeVarsBinder(K:K, Bound:Set)
@@ -228,9 +234,7 @@ module SUBSTITUTION
   rule #freshSubst(SetItem(X:K) BVs:Set, AVs:Set, M:Map)
     => #freshSubst1(BVs, AVs, M, X, #freshVar(#getSymLabel(K2Sort(X)), AVs))
   rule #freshSubst(.Set, _, M:Map)
-    => #substMap(M)
-
-  syntax K ::= #substMap(Map)
+    => M
 
   syntax K ::= #rebind1(K, Map) [function]
   rule #rebind1(L:KLabel(Ks:KList), M:Map)
