@@ -167,7 +167,7 @@ public class PathIndex {
 
 //        System.out.println("PStrings: "+pStrings);
 
-        Set<Rule> rules = new HashSet<>();
+        Set<Rule> rules = new LinkedHashSet<>();
 
         Set<Integer> currentMatch;
         Set<Integer> matchingIndices = new LinkedHashSet<>();

@@ -58,6 +58,7 @@ public class TermVisitor extends LocalVisitor {
         int BASE_IO_CELL_SIZE = 2;
         //first find all the term's cells of interest in  a single pass
         MultiMap<String, Cell> cellsFound = LookupMultipleCell.find(node);
+
         //get the pString from each k cell using a new visitor each time, but accumulate the pStrings
         Collection<Cell> cellsOfInterest = cellsFound.get("k");
         if (cellsOfInterest != null) {
@@ -144,10 +145,10 @@ public class TermVisitor extends LocalVisitor {
             if (productions1.isEmpty()) {
                 return;
             }
-            ArrayList<Production> productions = (ArrayList<Production>) productions1;
-            Production p = productions.get(0);
+
             if (context.isSubsorted(K_RESULT, token.sort())) {
                 if (pString != null) {
+                    ArrayList<Production> productions = (ArrayList<Production>) productions1;
                     if (productions.size() == 1) {
                         pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR + token.sort());
                     } else {
@@ -155,6 +156,8 @@ public class TermVisitor extends LocalVisitor {
                     }
                 }
             } else {
+                ArrayList<Production> productions = (ArrayList<Production>) productions1;
+                Production p = productions.get(0);
                 if (productions.size() == 1) {
                     pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR + p.getChildSort(0));
                 } else {
