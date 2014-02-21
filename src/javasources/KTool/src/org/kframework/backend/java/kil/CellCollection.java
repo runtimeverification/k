@@ -31,6 +31,7 @@ public class CellCollection extends Collection implements Sorted {
      * collection contains one or more types of cells whose multiplicity
      * attributes are {@code "*"}'s; otherwise, {@code false}.
      */
+    // TODO(AndreiS): handle multiplicity='+'
     private final boolean hasStar;
 
     public CellCollection(Multimap<String, Cell> cells, Variable frame, Context context) {
@@ -39,11 +40,12 @@ public class CellCollection extends Collection implements Sorted {
         
         int numOfStarredCellTypes = 0;
         for (String cellLabel : cells.keySet()) {
-            if (context.getConfigurationStructureMap().get(cellLabel).multiplicity 
-                    == org.kframework.kil.Cell.Multiplicity.ANY) {
+            if (context.getConfigurationStructureMap().get(cellLabel).isStarOrPlus()) {
                 numOfStarredCellTypes++;
             } else {
-                assert cells.get(cellLabel).size() == 1;
+                assert cells.get(cellLabel).size() == 1:
+                        "cell label " + cellLabel + " does not have multiplicity='*', "
+                        + "but multiple cells found " + cells;
             }
         }
 

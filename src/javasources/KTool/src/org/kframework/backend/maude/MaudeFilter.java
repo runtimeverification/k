@@ -319,7 +319,7 @@ public class MaudeFilter extends BackendFilter {
             result.append("  sort " + cellFragment + " .\n");
             result.append("  subsort " + cellSort + " < " + cellFragment + " .\n");
             result.append("  op " + cellUnit + " : -> " + cellFragment + " .\n");
-            if (cellStr.multiplicity == Cell.Multiplicity.ANY || cellStr.multiplicity == Cell.Multiplicity.SOME) {
+            if (cellStr.isStarOrPlus()) {
                 result.append(" op __ : " + cellFragment + " " + cellFragment + " -> " + cellFragment + " " +
                         "[assoc comm id: " + cellUnit + "] .\n");
             }

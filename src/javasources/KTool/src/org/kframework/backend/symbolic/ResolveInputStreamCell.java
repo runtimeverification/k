@@ -19,7 +19,7 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 public class ResolveInputStreamCell extends CopyOnWriteTransformer {
 
 	private boolean notSet = true;
-	
+    public static String IN = "$IN";
 	public ResolveInputStreamCell(Context context) {
 		super("Resolve InputStream cell", context);
 	}
@@ -32,11 +32,14 @@ public class ResolveInputStreamCell extends CopyOnWriteTransformer {
 			return super.transform(node);
 		
 		if (node.getCellAttributes().get("stream").equals(Constants.STDIN) && notSet){
-			Variable in = new Variable("$IN", "List");
+
+            Variable in = new Variable(IN, "List");
 			
 			node.shallowCopy();
 			node.setContents(in);
 			notSet = true;
+
+            context.configVarSorts.put(in.getName(), in.getSort());
 		}
 		
 		

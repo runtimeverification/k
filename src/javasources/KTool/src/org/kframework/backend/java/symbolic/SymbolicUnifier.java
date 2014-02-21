@@ -329,8 +329,7 @@ public class SymbolicUnifier extends AbstractUnifier {
 
             for (Iterator<String> iter = unifiableCellLabels.iterator(); iter.hasNext(); ) {
                 String cellLabel = iter.next();
-                if (context.getConfigurationStructureMap().get(cellLabel).multiplicity != 
-                        org.kframework.kil.Cell.Multiplicity.ANY) {
+                if (!context.getConfigurationStructureMap().get(cellLabel).isStarOrPlus()) {
                     assert cellCollection.get(cellLabel).size() == 1
                             && otherCellCollection.get(cellLabel).size() == 1;
                     unify(cellCollection.get(cellLabel).iterator().next(),
