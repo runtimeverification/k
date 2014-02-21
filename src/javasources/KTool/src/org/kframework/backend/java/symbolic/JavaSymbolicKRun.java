@@ -9,6 +9,7 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.TestCaseGenerationSettings;
 import org.kframework.backend.java.util.TestCaseGenerationUtil;
+import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.compile.transformers.DataStructureToLookupUpdate;
 import org.kframework.compile.utils.*;
 //import org.kframework.kil.*;
@@ -84,7 +85,9 @@ public class JavaSymbolicKRun implements KRun {
         org.kframework.kil.Term kilTerm = (org.kframework.kil.Term) result.term().accept(
                 new BackendJavaKILtoKILTransformer(context));
         KRunResult<KRunState> returnResult = new KRunResult<KRunState>(new KRunState(kilTerm, context));
-        returnResult.setRawOutput(returnResult.getResult().toString());
+        UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
+        kilTerm.accept(unparser);
+        returnResult.setRawOutput(unparser.getResult());
         return returnResult;
     }
 
