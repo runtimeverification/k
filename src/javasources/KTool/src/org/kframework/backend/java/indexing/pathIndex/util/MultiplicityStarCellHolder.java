@@ -6,15 +6,12 @@ package org.kframework.backend.java.indexing.pathIndex.util;
  * Time: 3:17 PM
  */
 public class MultiplicityStarCellHolder {
-    private  String cellWithMultipleK;
-    private  String parentOfCellWithMultipleK;
+    private String parentOfCellWithMultipleK;
+    private String cellWithMultipleK1;
 
-    public String getCellWithMultipleK() {
-        return cellWithMultipleK;
-    }
 
     public void setCellWithMultipleK(String cellWithMultipleK) {
-        this.cellWithMultipleK = cellWithMultipleK;
+        cellWithMultipleK1 = cellWithMultipleK;
     }
 
     public String getParentOfCellWithMultipleK() {

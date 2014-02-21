@@ -208,7 +208,7 @@ public class PathIndexTrie implements Trie {
                 return retrieveSet(child, subList);
             }
         } else {
-            if (!trieNode.getValue().equals("@")){
+            if (!trieNode.getValue().equals("@")) {
                 return trieNode.getIndices();
             }
         }
@@ -216,8 +216,8 @@ public class PathIndexTrie implements Trie {
         if (splitList.size() == 1) {
             if (child != null) {
                 return child.getIndices();
-            } else{
-                if (!trieNode.getValue().equals("@")){
+            } else {
+                if (!trieNode.getValue().equals("@")) {
                     return trieNode.getIndices();
                 }
             }

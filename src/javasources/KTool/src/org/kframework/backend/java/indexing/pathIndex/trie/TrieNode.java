@@ -13,7 +13,7 @@ public class TrieNode {
     private final String value;
     private ArrayList<TrieNode> children;
 
-    private Set<Integer> indices;
+    private final Set<Integer> indices;
 
     public TrieNode(String value) {
         this.value = value;

@@ -13,12 +13,12 @@ import org.kframework.backend.java.symbolic.PrePostVisitor;
  */
 public class LookupMultipleCell extends LocalVisitor {
 
-    public LookupMultipleCell() {
+    private LookupMultipleCell() {
         results = new MultiHashMap<>();
-        cellsOfInterest = new String[]{"k","in","out"};
+        cellsOfInterest = new String[]{"k", "in", "out"};
     }
 
-    MultiMap<String,Cell> results;
+    private final MultiMap<String, Cell> results;
     private final String[] cellsOfInterest;
 
     @Override
@@ -27,17 +27,17 @@ public class LookupMultipleCell extends LocalVisitor {
         // loop.
         for (Cell cell : cellCollection.cells()) {
             if (cell.getLabel().equals(cellsOfInterest[0])) {
-                results.put(cellsOfInterest[0],cell);
+                results.put(cellsOfInterest[0], cell);
                 continue;
             }
 
             if (cell.getLabel().equals(cellsOfInterest[1])) {
-                results.put(cellsOfInterest[1],cell);
+                results.put(cellsOfInterest[1], cell);
                 continue;
             }
 
             if (cell.getLabel().equals(cellsOfInterest[2])) {
-                results.put(cellsOfInterest[2],cell);
+                results.put(cellsOfInterest[2], cell);
             }
         }
     }

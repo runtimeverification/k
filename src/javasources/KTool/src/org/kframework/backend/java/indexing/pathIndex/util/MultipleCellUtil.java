@@ -31,8 +31,7 @@ public class MultipleCellUtil {
                 try {
                     backendKILCell = (Cell)entry.getValue().cell.accept(new KILtoBackendJavaKILTransformer(context));
                     Term kCell = LookupCell.find(backendKILCell, "k");
-//                    System.out.println("kCell: "+ kCell);
-                    if (kCell != null && LookupCell.find(kCell, "k") != null){
+                    if (kCell != null && LookupCell.find(kCell, "k") != null) {
                         starCellHolder = new MultiplicityStarCellHolder();
                         starCellHolder.setCellWithMultipleK(entry.getKey());
                         starCellHolder.setParentOfCellWithMultipleK(entry.getValue().parent.cell.getId());
@@ -70,7 +69,7 @@ public class MultipleCellUtil {
     public static Set<String> getPStringsFromMultiple(Term term, String parentOfCellWithMultipleK, Context context) {
         Cell threadsCell = LookupCell.find(term,parentOfCellWithMultipleK);
         TermVisitor visitor = new TermVisitor(context);
-        Set<String> possible = new HashSet<>();
+        Set<String> possible = new LinkedHashSet<>();
 
         for (Cell cell : ((CellCollection)threadsCell.getContent()).cells()){
             if (LookupCell.find(cell,"k") != null){

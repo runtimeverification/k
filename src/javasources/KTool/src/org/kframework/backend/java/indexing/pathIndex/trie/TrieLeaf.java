@@ -14,7 +14,7 @@ public class TrieLeaf extends TrieNode {
         return indices;
     }
 
-    private Set<Integer> indices;
+    private final Set<Integer> indices;
 
     public TrieLeaf(String value, int index) {
         super(value);

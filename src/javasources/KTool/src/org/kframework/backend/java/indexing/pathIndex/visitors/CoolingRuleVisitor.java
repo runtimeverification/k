@@ -24,8 +24,8 @@ public class CoolingRuleVisitor extends RuleVisitor {
     @Override
     public void visit(KSequence kSequence) {
         Term term = kSequence.get(0);
-        if (term instanceof KItem){
-           isKItemHead = true;
+        if (term instanceof KItem) {
+            isKItemHead = true;
         }
         term.accept(this);
         ((KItem) kSequence.get(1)).kLabel().accept(this);
@@ -52,11 +52,11 @@ public class CoolingRuleVisitor extends RuleVisitor {
 
     @Override
     public void visit(KItem kItem) {
-        visit((KLabelConstant)kItem.kLabel());
-        if (isKItemHead){
+        visit((KLabelConstant) kItem.kLabel());
+        if (isKItemHead) {
             Term term = ((KList) kItem.kList()).get(0);
-            if (term instanceof Variable){
-                String requiredKResult = "isKResult(" + ((Variable)term) + ")";
+            if (term instanceof Variable) {
+                String requiredKResult = "isKResult(" + term + ")";
                 String firstSort;
                 if (rule.requires().toString().contains(requiredKResult)) {
                     firstSort = "KResult";
@@ -67,8 +67,8 @@ public class CoolingRuleVisitor extends RuleVisitor {
                 pStrings.add(pString + "1" + SEPARATOR + firstSort);
             }
             //TODO(OwolabiL): Remove this check and use concrete sort instead
-        } else{
-            visit((KList)kItem.kList());
+        } else {
+            visit((KList) kItem.kList());
         }
         this.proceed = false;
     }

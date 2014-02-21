@@ -57,14 +57,14 @@ public class TermVisitor extends LocalVisitor {
     public void visit(Term node) {
         int BASE_IO_CELL_SIZE = 2;
         //first find all the term's cells of interest in  a single pass
-        MultiMap<String,Cell> cellsFound = LookupMultipleCell.find(node);
+        MultiMap<String, Cell> cellsFound = LookupMultipleCell.find(node);
         //get the pString from each k cell using a new visitor each time, but accumulate the pStrings
         Collection<Cell> cellsOfInterest = cellsFound.get("k");
         if (cellsOfInterest != null) {
-            for (Cell kCell: cellsFound.get("k")){
+            for (Cell kCell : cellsFound.get("k")) {
                 TermVisitor visitor = new TermVisitor(this.context);
                 kCell.getContent().accept(visitor);
-                pStrings.addAll(visitor.getpStrings()) ;
+                pStrings.addAll(visitor.getpStrings());
             }
         }
 
@@ -89,9 +89,9 @@ public class TermVisitor extends LocalVisitor {
         //check whether input rules should be added
         cellsOfInterest = cellsFound.get("in");
         if (cellsOfInterest != null) {
-            ioCell = ((ArrayList<Cell>)cellsFound.get("in")).get(0);
+            ioCell = ((ArrayList<Cell>) cellsFound.get("in")).get(0);
             ioCellList = ((BuiltinList) ioCell.getContent()).elements();
-            if (ioCellList.size() > BASE_IO_CELL_SIZE){
+            if (ioCellList.size() > BASE_IO_CELL_SIZE) {
                 addInputRules = true;
             }
         }
@@ -120,7 +120,7 @@ public class TermVisitor extends LocalVisitor {
                     kSequence.get(1).accept(this);
                 }
             }
-        } else if (kSequence.size() == 0){
+        } else if (kSequence.size() == 0) {
             //there are cases (e.g., in SIMPLE's join rule) where we need to know that one of the K
             // cells in the configuration is empty.
             pStrings.add(START_STRING + EMPTY_K);
@@ -166,9 +166,9 @@ public class TermVisitor extends LocalVisitor {
 
     @Override
     public void visit(UninterpretedToken uninterpretedToken) {
-        if (pString == null){
+        if (pString == null) {
             pStrings.add(START_STRING + uninterpretedToken.sort());
-        } else{
+        } else {
             pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR +
                     uninterpretedToken.sort());
         }
@@ -218,25 +218,25 @@ public class TermVisitor extends LocalVisitor {
                                         (ArrayList<Production>) context.productionsOf(currentLabel);
                                 Production p = productions.get(0);
                                 String test = pString + SEPARATOR + (currentPosition) + SEPARATOR;
-                                if (p.getChildSort(currentPosition-1).equals("K")){
+                                if (p.getChildSort(currentPosition - 1).equals("K")) {
                                     //TODO(OwolabiL): This needs to be investigated further and
                                     // handled properly
-                                    pStrings.add(test +kItem.kLabel()+ SEPARATOR + "1.Exp");
-                                }  else{
-                                    pStrings.add(test+ p.getChildSort(currentPosition - 1));
+                                    pStrings.add(test + kItem.kLabel() + SEPARATOR + "1.Exp");
+                                } else {
+                                    pStrings.add(test + p.getChildSort(currentPosition - 1));
                                 }
                             }
                         } else {
                             //TODO(OwolabiL): This needs to be investigated further and handled
                             // properly. Plus there's duplicated code here to be possibly removed.
-                            String test =  pString + SEPARATOR + currentPosition + SEPARATOR;
+                            String test = pString + SEPARATOR + currentPosition + SEPARATOR;
                             ArrayList<Production> productions =
                                     (ArrayList<Production>) context.productionsOf(currentLabel);
                             Production p = productions.get(0);
-                            if (p.getChildSort(currentPosition-1).equals("K")){
-                                pStrings.add(test +kItem.kLabel()+ SEPARATOR + (currentPosition)+
+                            if (p.getChildSort(currentPosition - 1).equals("K")) {
+                                pStrings.add(test + kItem.kLabel() + SEPARATOR + (currentPosition) +
                                         SEPARATOR + kItem.sort());
-                            }else {
+                            } else {
                                 pStrings.add(test + kItem.sort());
                             }
                         }
@@ -282,6 +282,7 @@ public class TermVisitor extends LocalVisitor {
         private final String baseString;
         private String pString;
         private final List<String> candidates;
+
         public TokenVisitor(Context context, String string) {
             super(context);
             baseString = string;
@@ -334,7 +335,7 @@ public class TermVisitor extends LocalVisitor {
 
     }
 
-    private class OutPutCellVisitor extends LocalVisitor{
+    private class OutPutCellVisitor extends LocalVisitor {
         public static final String BUFFER_LABEL = "#buffer";
 
         private boolean isAddOutCell() {
@@ -342,21 +343,22 @@ public class TermVisitor extends LocalVisitor {
         }
 
         private boolean addOutCell;
+
         private OutPutCellVisitor() {
             addOutCell = false;
         }
 
         @Override
         public void visit(BuiltinList node) {
-            for (Term content : node.elements()){
+            for (Term content : node.elements()) {
                 content.accept(this);
             }
         }
 
         @Override
         public void visit(KItem kItem) {
-            if (kItem.kLabel().toString().equals(BUFFER_LABEL)){
-                Term bufferTerm = ((KList)kItem.kList()).get(0);
+            if (kItem.kLabel().toString().equals(BUFFER_LABEL)) {
+                Term bufferTerm = ((KList) kItem.kList()).get(0);
                 if (bufferTerm instanceof Token && !((Token) bufferTerm).value().equals("\"\"")) {
                     addOutCell = true;
                 }

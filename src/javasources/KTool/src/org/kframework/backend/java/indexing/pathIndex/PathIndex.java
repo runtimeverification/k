@@ -27,14 +27,12 @@ import java.util.concurrent.TimeUnit;
  */
 //TODO(OwolabiL): How to deal with macros and function rules? (imp has none)
 public class PathIndex {
-    public static final String BUFFER_LABEL = "#buffer";
-    private Map<Integer, Rule> indexedRules;
-    private Definition definition;
+    private final Map<Integer, Rule> indexedRules;
+    private final Definition definition;
     private PathIndexTrie trie;
     private MultiplicityStarCellHolder multiCellInfoHolder = null;
-    private Set<Integer> outputRuleIndices = new LinkedHashSet<>();
-    private Set<Integer> inputRuleIndices = new LinkedHashSet<>();
-    private List<Term> outCellList = new ArrayList<>();
+    private final Set<Integer> outputRuleIndices = new LinkedHashSet<>();
+    private final Set<Integer> inputRuleIndices = new LinkedHashSet<>();
     private TermVisitor termVisitor;
 
     public enum RuleType {
@@ -176,7 +174,7 @@ public class PathIndex {
         String subString;
 
 
-        if (K.get_indexing_stats){
+        if (K.get_indexing_stats) {
             IndexingStatistics.findMatchingIndicesStopWatch.reset();
             IndexingStatistics.findMatchingIndicesStopWatch.start();
         }
@@ -203,15 +201,15 @@ public class PathIndex {
             }
         }
 
-        if(termVisitor.isAddOutputRules()){
+        if (termVisitor.isAddOutputRules()) {
             matchingIndices.addAll(outputRuleIndices);
         }
 
-        if (termVisitor.isAddInputRules()){
+        if (termVisitor.isAddInputRules()) {
             matchingIndices.addAll(inputRuleIndices);
         }
 
-        if (K.get_indexing_stats){
+        if (K.get_indexing_stats) {
             IndexingStatistics.findMatchingIndicesStopWatch.stop();
             IndexingStatistics.timesForFindingMatchingIndices.add(
                     IndexingStatistics.findMatchingIndicesStopWatch.elapsed(TimeUnit.MICROSECONDS));

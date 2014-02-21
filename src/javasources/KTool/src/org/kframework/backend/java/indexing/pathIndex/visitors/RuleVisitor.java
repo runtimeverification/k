@@ -20,12 +20,11 @@ import java.util.Stack;
 public class RuleVisitor extends LocalVisitor {
     static final String SEPARATOR = ".";
     static final String START_STRING = "@.";
-    public static final String EMPTY_K = "EMPTY_K";
+    private static final String EMPTY_K = "EMPTY_K";
     final Context context;
     String pString;
-    List<String> pStrings;
+    final List<String> pStrings;
     private boolean isKSequence = false;
-    private String currentLabel;
 
     public RuleVisitor(Context context) {
         this.context = context;
@@ -69,13 +68,7 @@ public class RuleVisitor extends LocalVisitor {
 
     @Override
     public void visit(KLabelConstant kLabel) {
-        currentLabel = kLabel.label();
         pString = pString.concat(kLabel.toString());
-    }
-
-    @Override
-    public void visit(KLabelInjection kLabelInjection) {
-        super.visit(kLabelInjection);
     }
 
     @Override

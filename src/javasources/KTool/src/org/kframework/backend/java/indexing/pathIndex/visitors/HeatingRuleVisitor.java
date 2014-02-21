@@ -14,7 +14,7 @@ import java.util.*;
 public class HeatingRuleVisitor extends RuleVisitor {
     private final Context context;
     private String currentLabel = null;
-    private Stack<String> pStringStack;
+    private final Stack<String> pStringStack;
 
     private int counter = 0;
 
@@ -31,8 +31,8 @@ public class HeatingRuleVisitor extends RuleVisitor {
 
     @Override
     public void visit(KItem kItem) {
-        visit((KLabelConstant)kItem.kLabel());
-        visit((KList)kItem.kList());
+        visit((KLabelConstant) kItem.kLabel());
+        visit((KList) kItem.kList());
     }
 
 //    @Override
