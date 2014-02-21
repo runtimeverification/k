@@ -17,17 +17,15 @@ import java.util.Collection;
  * Time: 12:05 PM
  */
 public class TermVisitor extends LocalVisitor {
-    public static final String K_RESULT = "KResult";
-    public static final String EMPTY_LIST_LABEL = "'.List{\",\"}";
-    public static final String EMPTY_LIST_SORT = "#ListOf#Bot{\",\"}";
-    public static final String LIST_LABEL = "List{\",\"}";
-    public static final String USER_LIST_REPLACEMENT = "UserList";
-    public static final String K_ITEM_SORT = "KItem";
-    public static final String EMPTY_K = "EMPTY_K";
+    private static final String K_RESULT = "KResult";
+    private static final String EMPTY_LIST_LABEL = "'.List{\",\"}";
+    private static final String EMPTY_LIST_SORT = "#ListOf#Bot{\",\"}";
+    private static final String LIST_LABEL = "List{\",\"}";
+    private static final String USER_LIST_REPLACEMENT = "UserList";
+    private static final String K_ITEM_SORT = "KItem";
+    private static final String EMPTY_K = "EMPTY_K";
     private final Set<String> pStrings;
     private final Context context;
-
-    public static final int BASE_IO_CELL_SIZE = 2;
 
     private String pString;
     private int currentPosition = 0;
@@ -37,7 +35,6 @@ public class TermVisitor extends LocalVisitor {
     private final String START_STRING = "@.";
 
     private boolean addInputRules;
-    ArrayList<String> cellNamesToFind;
 
     public boolean isAddInputRules() {
         return addInputRules;
@@ -53,15 +50,12 @@ public class TermVisitor extends LocalVisitor {
         pStrings = new LinkedHashSet<>();
         addInputRules = false;
         addOutputRules = false;
-        cellNamesToFind = new ArrayList<>();
-        cellNamesToFind.add("k");
-        cellNamesToFind.add("in");
-        cellNamesToFind.add("out");
         this.context = context;
     }
 
     @Override
     public void visit(Term node) {
+        int BASE_IO_CELL_SIZE = 2;
         //first find all the term's cells of interest in  a single pass
         MultiMap<String,Cell> cellsFound = LookupMultipleCell.find(node);
         //get the pString from each k cell using a new visitor each time, but accumulate the pStrings
@@ -285,9 +279,9 @@ public class TermVisitor extends LocalVisitor {
 
     private class TokenVisitor extends TermVisitor {
 
-        private String baseString;
+        private final String baseString;
         private String pString;
-        private List<String> candidates;
+        private final List<String> candidates;
         public TokenVisitor(Context context, String string) {
             super(context);
             baseString = string;
@@ -358,8 +352,6 @@ public class TermVisitor extends LocalVisitor {
                 content.accept(this);
             }
         }
-
-//        @Override
 
         @Override
         public void visit(KItem kItem) {
