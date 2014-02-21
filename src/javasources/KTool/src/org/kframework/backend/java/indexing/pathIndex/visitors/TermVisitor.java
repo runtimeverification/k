@@ -1,16 +1,15 @@
 package org.kframework.backend.java.indexing.pathIndex.visitors;
 
+import org.apache.commons.collections15.MultiMap;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.symbolic.LocalVisitor;
-import org.kframework.backend.java.util.LookupCell;
+import org.kframework.backend.java.indexing.pathIndex.util.LookupMultipleCell;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.Collection;
 
 /**
  * Author: OwolabiL
@@ -26,8 +25,9 @@ public class TermVisitor extends LocalVisitor {
     public static final String K_ITEM_SORT = "KItem";
     public static final String EMPTY_K = "EMPTY_K";
     private final Set<String> pStrings;
-
     private final Context context;
+
+    public static final int BASE_IO_CELL_SIZE = 2;
 
     private String pString;
     private int currentPosition = 0;
@@ -36,24 +36,74 @@ public class TermVisitor extends LocalVisitor {
     private final String SEPARATOR = ".";
     private final String START_STRING = "@.";
 
-    public TermVisitor(Context context) {
+    private boolean addInputRules;
+    ArrayList<String> cellNamesToFind;
 
-        pStrings = new HashSet<>();
+    public boolean isAddInputRules() {
+        return addInputRules;
+    }
+
+    public boolean isAddOutputRules() {
+        return addOutputRules;
+    }
+
+    private boolean addOutputRules;
+
+    public TermVisitor(Context context) {
+        pStrings = new LinkedHashSet<>();
+        addInputRules = false;
+        addOutputRules = false;
+        cellNamesToFind = new ArrayList<>();
+        cellNamesToFind.add("k");
+        cellNamesToFind.add("in");
+        cellNamesToFind.add("out");
         this.context = context;
     }
 
     @Override
     public void visit(Term node) {
-        Term lookedUpK = LookupCell.find(node, "k");
-        if (lookedUpK != null) {
-            (LookupCell.find(node, "k")).accept(this);
+        //first find all the term's cells of interest in  a single pass
+        MultiMap<String,Cell> cellsFound = LookupMultipleCell.find(node);
+        //get the pString from each k cell using a new visitor each time, but accumulate the pStrings
+        Collection<Cell> cellsOfInterest = cellsFound.get("k");
+        if (cellsOfInterest != null) {
+            for (Cell kCell: cellsFound.get("k")){
+                TermVisitor visitor = new TermVisitor(this.context);
+                kCell.getContent().accept(visitor);
+                pStrings.addAll(visitor.getpStrings()) ;
+            }
+        }
+
+        Cell ioCell;
+        List<Term> ioCellList;
+        //check whether output rules should be added
+        cellsOfInterest = cellsFound.get("out");
+        if (cellsOfInterest != null) {
+            ioCell = ((ArrayList<Cell>) cellsOfInterest).get(0);
+            BuiltinList content = (BuiltinList) ioCell.getContent();
+            ioCellList = content.elements();
+            if (ioCellList.size() > BASE_IO_CELL_SIZE) {
+                addOutputRules = true;
+            } else {
+                OutPutCellVisitor outPutCellVisitor = new OutPutCellVisitor();
+                content.accept(outPutCellVisitor);
+                if (outPutCellVisitor.isAddOutCell()) {
+                    addOutputRules = true;
+                }
+            }
+        }
+        //check whether input rules should be added
+        cellsOfInterest = cellsFound.get("in");
+        if (cellsOfInterest != null) {
+            ioCell = ((ArrayList<Cell>)cellsFound.get("in")).get(0);
+            ioCellList = ((BuiltinList) ioCell.getContent()).elements();
+            if (ioCellList.size() > BASE_IO_CELL_SIZE){
+                addInputRules = true;
+            }
         }
     }
 
-    @Override
-    public void visit(Cell cell) {
-        cell.getContent().accept(this);
-    }
+//    @Override
 
     @Override
     public void visit(KSequence kSequence) {
@@ -234,10 +284,10 @@ public class TermVisitor extends LocalVisitor {
     }
 
     private class TokenVisitor extends TermVisitor {
+
         private String baseString;
         private String pString;
         private List<String> candidates;
-
         public TokenVisitor(Context context, String string) {
             super(context);
             baseString = string;
@@ -286,6 +336,39 @@ public class TermVisitor extends LocalVisitor {
 
         private List<String> getCandidates() {
             return candidates;
+        }
+
+    }
+
+    private class OutPutCellVisitor extends LocalVisitor{
+        public static final String BUFFER_LABEL = "#buffer";
+
+        private boolean isAddOutCell() {
+            return addOutCell;
+        }
+
+        private boolean addOutCell;
+        private OutPutCellVisitor() {
+            addOutCell = false;
+        }
+
+        @Override
+        public void visit(BuiltinList node) {
+            for (Term content : node.elements()){
+                content.accept(this);
+            }
+        }
+
+//        @Override
+
+        @Override
+        public void visit(KItem kItem) {
+            if (kItem.kLabel().toString().equals(BUFFER_LABEL)){
+                Term bufferTerm = ((KList)kItem.kList()).get(0);
+                if (bufferTerm instanceof Token && !((Token) bufferTerm).value().equals("\"\"")) {
+                    addOutCell = true;
+                }
+            }
         }
     }
 }

@@ -19,10 +19,18 @@ public class IndexingStatistics {
     public  static Stopwatch totalKrunStopwatch = new Stopwatch();
     public  static Stopwatch indexConstructionStopWatch = new Stopwatch();
     public  static Stopwatch getRulesForTermStopWatch = new Stopwatch();
+    public  static Stopwatch getPStringFromTermStopWatch = new Stopwatch();
+    public  static Stopwatch findMatchingIndicesStopWatch = new Stopwatch();
     public  static Stopwatch rewriteStepStopWatch = new Stopwatch();
+    public  static Stopwatch rewritingStopWatch = new Stopwatch();
+    public  static Stopwatch preProcessStopWatch = new Stopwatch();
+    public  static Stopwatch kilTransformationStopWatch = new Stopwatch();
 
     public  static List<Long> timesForRuleSelection = new ArrayList<>();
+    public  static List<Long> timesForGettingPStringsFromTerm = new ArrayList<>();
+    public  static List<Long> timesForFindingMatchingIndices = new ArrayList<>();
     public  static List<Long> timesForRewriteSteps = new ArrayList<>();
+    public  static List<Long> timesForRewriting= new ArrayList<>();
     public  static List<Integer> rulesSelectedAtEachStep = new ArrayList<>();
 
     public IndexingStatistics() {
@@ -32,18 +40,44 @@ public class IndexingStatistics {
     public static void print() {
         System.err.println("=====================================================");
         System.err.println("Total KRun time: " + totalKrunStopwatch);
+        System.err.println("Total KRun Preprocessing time: " + preProcessStopWatch);
+        System.err.println("\tTime for constructing Index: " + indexConstructionStopWatch);
+        System.err.println("\tTime for transforming KIL: " + kilTransformationStopWatch);
         System.err.println("Total Time For Rewriting: " + totalRewriteStopwatch);
-        System.err.println("Time for constructing Index: " + indexConstructionStopWatch);
+        System.err.println("\tTotal time for Rule selection: " +
+                computeTotal(timesForRuleSelection) + " ms");
+        System.err.println("\t\tTotal time for getting PStrings from term: " +
+                computeTotal(timesForGettingPStringsFromTerm) + " ms");
+        System.err.println("\t\tTotal time for finding matching indices " +
+                computeTotal(timesForFindingMatchingIndices) + " ms");
+        System.err.println("\tTotal time for Actual Rewriting: " +
+                computeTotal(timesForRewriting) + " ms");
+        System.err.println("Total time For Rewrite Steps: " +
+                computeTotal(timesForRewriteSteps) + " ms");
         System.err.println("Average time for Rule selection: " +
                 computeAverage(timesForRuleSelection) + " \u00B5"+"s");
+        System.err.println("\tAverage time for getting PStrings from term: " +
+                computeAverage(timesForGettingPStringsFromTerm) + " \u00B5"+"s");
+        System.err.println("\tAverage time for finding matching indices: " +
+                computeAverage(timesForFindingMatchingIndices) + " \u00B5"+"s");
+        System.err.println("Average time for Actual Rewriting: " +
+                computeAverage(timesForRewriting) + " \u00B5"+"s");
         System.err.println("Average time For Rewrite Steps: " +
                 computeAverage(timesForRewriteSteps) + " \u00B5"+"s");
         System.err.println("Average rules selected at each step: " +
                 computeAverages(rulesSelectedAtEachStep));
-        System.err.println("times For Rule selection: " + timesForRuleSelection);
-        System.err.println("times For Rewrite Steps: " + timesForRewriteSteps);
-        System.err.println("Rules selected at each step: " + rulesSelectedAtEachStep);
+//        System.err.println("Times For Rule selection: " + timesForRuleSelection);
+//        System.err.println("Times For Rewrite Steps: " + timesForRewriteSteps);
+//        System.err.println("Rules selected at each step: " + rulesSelectedAtEachStep);
         System.err.println("=====================================================");
+    }
+
+    private static double computeTotal(List<Long> times) {
+        long sum = 0L;
+        for (long time : times){
+            sum +=time;
+        }
+        return ((double)sum)/1000;
     }
 
     //TODO(OwolaiL): These two methods should be merged since they have the same erasure

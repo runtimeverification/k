@@ -417,7 +417,12 @@ public class SymbolicRewriter {
         // classes one at a time, seeing which one contains rules we can apply.
         //        System.out.println(LookupCell.find(constrainedTerm.term(),"k"));
         strategy.reset(getRules(constrainedTerm.term()));
+
         while (strategy.hasNext()) {
+            if (K.get_indexing_stats){
+                IndexingStatistics.rewritingStopWatch.reset();
+                IndexingStatistics.rewritingStopWatch.start();
+            }
             transition = strategy.nextIsTransition();
             ArrayList<Rule> rules = new ArrayList<Rule>(strategy.next());
 //            System.out.println("rules.size: "+rules.size());
@@ -484,7 +489,11 @@ public class SymbolicRewriter {
 //                    }
                     results.add(newCnstrTerm);
                     appliedRules.add(rule);
-
+                    if (K.get_indexing_stats){
+                        IndexingStatistics.rewritingStopWatch.stop();
+                        IndexingStatistics.timesForRewriting.add(
+                                IndexingStatistics.rewritingStopWatch.elapsed(TimeUnit.MICROSECONDS));
+                    }
                     if (results.size() == successorBound) {
                         if (K.get_indexing_stats) {
                             IndexingStatistics.rewriteStepStopWatch.stop();

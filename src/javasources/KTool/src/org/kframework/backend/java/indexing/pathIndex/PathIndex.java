@@ -13,10 +13,13 @@ import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.util.LookupCell;
+import org.kframework.krun.K;
+import org.kframework.utils.general.IndexingStatistics;
 
 import java.util.*;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Author: Owolabi Legunsen
@@ -32,6 +35,7 @@ public class PathIndex {
     private Set<Integer> outputRuleIndices = new LinkedHashSet<>();
     private Set<Integer> inputRuleIndices = new LinkedHashSet<>();
     private List<Term> outCellList = new ArrayList<>();
+    private TermVisitor termVisitor;
 
     public enum RuleType {
         COOLING,
@@ -44,6 +48,7 @@ public class PathIndex {
     public PathIndex(Definition definition) {
         this.definition = definition;
         this.indexedRules = new HashMap<>();
+        termVisitor = new TermVisitor(definition.context());
         multiCellInfoHolder = MultipleCellUtil.checkDefinitionForMultiplicityStar(definition.context());
         constructIndex(definition);
     }
@@ -151,14 +156,13 @@ public class PathIndex {
     public List<Rule> getRulesForTerm(Term term) {
         Set<String> pStrings;
 //        System.out.println("term: "+term);
-
-        //check if the definition has a cell with multiplicity* which contains a k cell
-        //if such a cell is found, the multiCellInfoHolder field should have been set at index
-        // creation time and getting pStrings from it is done differently
-        if (multiCellInfoHolder != null) {
-            pStrings = MultipleCellUtil.getPStringsFromMultiple(term,
-                    multiCellInfoHolder.getParentOfCellWithMultipleK(),
-                    definition.context());
+        if (K.get_indexing_stats) {
+            IndexingStatistics.getPStringFromTermStopWatch.reset();
+            IndexingStatistics.getPStringFromTermStopWatch.start();
+            pStrings = getTermPString2(term);
+            IndexingStatistics.getPStringFromTermStopWatch.stop();
+            IndexingStatistics.timesForGettingPStringsFromTerm.add(
+                    IndexingStatistics.getPStringFromTermStopWatch.elapsed(TimeUnit.MICROSECONDS));
         } else {
             pStrings = getTermPString2(term);
         }
@@ -171,6 +175,11 @@ public class PathIndex {
         Set<Integer> matchingIndices = new LinkedHashSet<>();
         String subString;
 
+
+        if (K.get_indexing_stats){
+            IndexingStatistics.findMatchingIndicesStopWatch.reset();
+            IndexingStatistics.findMatchingIndicesStopWatch.start();
+        }
         for (String pString : pStrings) {
             String[] split = pString.split("\\.");
             int i = split.length;
@@ -194,15 +203,18 @@ public class PathIndex {
             }
         }
 
-        // check the out cell
-        int baseIOCellSize = 2;
-        if (!outputRuleIndices.isEmpty()) {
-            matchingIndices = addOutputCellIndices(term, matchingIndices, baseIOCellSize);
+        if(termVisitor.isAddOutputRules()){
+            matchingIndices.addAll(outputRuleIndices);
         }
 
-        // check the in cell
-        if (!inputRuleIndices.isEmpty()) {
-            matchingIndices = addInputCellIndices(term, matchingIndices, baseIOCellSize);
+        if (termVisitor.isAddInputRules()){
+            matchingIndices.addAll(inputRuleIndices);
+        }
+
+        if (K.get_indexing_stats){
+            IndexingStatistics.findMatchingIndicesStopWatch.stop();
+            IndexingStatistics.timesForFindingMatchingIndices.add(
+                    IndexingStatistics.findMatchingIndicesStopWatch.elapsed(TimeUnit.MICROSECONDS));
         }
 
         // this check is needed because of .K which now has a pString of @.EMPTY_K, but may not have
@@ -218,56 +230,8 @@ public class PathIndex {
         return new ArrayList<>(rules);
     }
 
-    private Set<Integer> addInputCellIndices(Term term, Set<Integer> matchingIndices, int baseIOCellSize) {
-        //TODO(OwolabiL): Find a better way to find the input cell. Something more general is needed
-        Cell in = LookupCell.find(term, "in");
-        List<Term> inCellList = ((BuiltinList) in.getContent()).elements();
-
-        if (inCellList.size() > baseIOCellSize) {
-//            matchingIndices = Sets.union(matchingIndices, inputRuleIndices);
-            matchingIndices.addAll(inputRuleIndices);
-        }
-        return matchingIndices;
-    }
-
-    private Set<Integer> addOutputCellIndices(Term term, Set<Integer> matchingIndices, int baseIOCellSize) {
-        //TODO(OwolabiL): Find a better way to find the output cell. Something more general is needed
-        Cell out = LookupCell.find(term, "out");
-        List<Term> currentOutCellList = ((BuiltinList) out.getContent()).elements();
-        if (outCellList.isEmpty()){
-            outCellList =  currentOutCellList;
-        } else {
-            if (outCellList.size() == currentOutCellList.size() && outCellList.containsAll(currentOutCellList)){
-                return  matchingIndices;
-            } else {
-                outCellList =  currentOutCellList;
-                if (currentOutCellList.size() > baseIOCellSize) {
-//            matchingIndices = Sets.union(matchingIndices, outputRuleIndices);
-                    matchingIndices.addAll(outputRuleIndices);
-                    return matchingIndices;
-                }
-
-                //TODO(OwolabiL): Write a visitor for this
-                if (out.getContent() instanceof BuiltinList) {
-                    for (Term outCellElement : currentOutCellList) {
-                        if (outCellElement instanceof KItem &&
-                                ((KItem) outCellElement).kLabel().toString().equals(BUFFER_LABEL)) {
-                            Term bufferTerm = ((KList)((KItem) outCellElement).kList()).get(0);
-                            if (bufferTerm instanceof Token && !((Token) bufferTerm).value().equals("\"\"")) {
-                                matchingIndices.addAll(outputRuleIndices);
-                                return matchingIndices;
-//                        matchingIndices = Sets.union(matchingIndices, outputRuleIndices);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return matchingIndices;
-    }
-
     private Set<String> getTermPString2(Term term) {
-        TermVisitor termVisitor = new TermVisitor(definition.context());
+        termVisitor = new TermVisitor(definition.context());
         term.accept(termVisitor);
         return termVisitor.getpStrings();
     }

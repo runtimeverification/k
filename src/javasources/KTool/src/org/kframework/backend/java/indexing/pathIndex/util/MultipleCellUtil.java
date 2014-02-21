@@ -26,8 +26,8 @@ public class MultipleCellUtil {
 
             //for now I am assuming that there is only one cell in the definition which (1) has
             // multiplicity* and (2) has children which can contain kCells
-            if (entry.getValue().isStarOrPlus()){
-                Term backendKILCell = null;
+            if (entry.getValue().multiplicity.equals(org.kframework.kil.Cell.Multiplicity.ANY)){
+                Term backendKILCell;
                 try {
                     backendKILCell = (Cell)entry.getValue().cell.accept(new KILtoBackendJavaKILTransformer(context));
                     Term kCell = LookupCell.find(backendKILCell, "k");

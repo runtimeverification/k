@@ -92,12 +92,18 @@ public class JavaSymbolicKRun implements KRun {
     }
 
     private ConstrainedTerm javaKILRun(org.kframework.kil.Term cfg, int bound) {
+        if (K.get_indexing_stats){
+            IndexingStatistics.preProcessStopWatch.start();
+        }
         SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
         Term term = Term.of(cfg, definition);
         TermContext termContext = TermContext.of(definition, new PortableFileSystem());
         SymbolicConstraint constraint = new SymbolicConstraint(termContext);
         term = term.evaluate(termContext);
         ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, constraint, termContext);
+        if (K.get_indexing_stats){
+            IndexingStatistics.preProcessStopWatch.stop();
+        }
         ConstrainedTerm rewriteResult;
         if (K.get_indexing_stats) {
             IndexingStatistics.totalRewriteStopwatch.start();
