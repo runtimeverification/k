@@ -76,7 +76,6 @@ public class MacroExpander extends TermTransformer {
      * @return the expanded node
      */
     private JavaSymbolicObject expandMacro(JavaSymbolicObject node) {
-        node = (JavaSymbolicObject) node.accept(this);
         JavaSymbolicObject expandedNode = (JavaSymbolicObject) node.accept(this);
         while (node != expandedNode) {
             node = expandedNode;
