@@ -1,5 +1,4 @@
-Learning K
-by Grigore Rosu
+# Learning K
 
 We start by introducing the basic features of K by means of a series
 of very simple languages.  The objective here is not to learn those
