@@ -1158,7 +1158,13 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 return false;
             }
             String sortOfSubst = subst instanceof Sorted ? ((Sorted) subst).sort() : subst.kind().toString();
-            if (definition.context().isSubsorted(sortOfSubst, sortOfPatVar)) {
+            /* YilongL: There are three different cases:
+             * 1) sortOfParVar >= sortOfSubst
+             * 2) sortOfParVar < sortOfSubst
+             * 3) there is no order between sortOfParVar & sortOfSubst 
+             * Only case 1) represents a pattern matching 
+             */
+            if (!definition.context().isSubsortedEq(sortOfPatVar, sortOfSubst)) {
                 return false;
             }
 
