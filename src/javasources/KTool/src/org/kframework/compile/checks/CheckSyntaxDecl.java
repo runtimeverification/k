@@ -1,6 +1,7 @@
 package org.kframework.compile.checks;
 
 import java.util.HashMap;
+import java.util.List;
 
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
@@ -8,6 +9,7 @@ import org.kframework.kil.Sentence;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
+import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.errorsystem.KException;
@@ -84,6 +86,13 @@ public class CheckSyntaxDecl extends BasicVisitor {
 			}
 		}
 
+		if (!isBinaryInfixProd(node)) {
+		    if (node.containsAttribute(Constants.LEFT) || node.containsAttribute(Constants.RIGHT) || node.containsAttribute(Constants.NON_ASSOC)) {
+		        String msg = "Associativity attribute should only be assigned to binary infix production.\n";
+                GlobalSettings.kem.register(new KException(KException.ExceptionType.WARNING, KException.KExceptionGroup.COMPILER, msg, getName(), node.getFilename(), node.getLocation()));
+		    }
+		}
+		
 		if (eTerminals > 0 && (neTerminals == 0 || sorts < 2))
 			if (!node.containsAttribute("onlyLabel") || !node.containsAttribute("klabel")) {
 				String msg = "Cannot declare empty terminals in the definition.\n";
@@ -92,8 +101,27 @@ public class CheckSyntaxDecl extends BasicVisitor {
 			}
 	}
 
-	@Override
+    @Override
 	public void visit(Sentence node) {
 		// optimization to not visit the entire tree
 	}
+    
+    private boolean isBinaryInfixProd(Production node) {
+        if (node.getArity() != 2) {
+            return false;
+        }
+        List<ProductionItem> prodItems = node.getItems();
+        if (prodItems.size() == 2) {
+            ProductionItem oprnd1 = node.getItems().get(0);
+            ProductionItem oprnd2 = node.getItems().get(1);
+            return (oprnd1 instanceof Sort) && (oprnd2 instanceof Sort);
+        } else if (prodItems.size() == 3) {
+            ProductionItem oprnd1 = node.getItems().get(0);
+            ProductionItem op = node.getItems().get(1);
+            ProductionItem oprnd2 = node.getItems().get(2);
+            return (oprnd1 instanceof Sort) && (oprnd2 instanceof Sort) && (op instanceof Terminal);
+        } else {
+            return false;
+        }
+    }
 }
