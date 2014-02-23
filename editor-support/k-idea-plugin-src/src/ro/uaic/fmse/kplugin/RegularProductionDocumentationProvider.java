@@ -35,12 +35,13 @@ public class RegularProductionDocumentationProvider implements DocumentationProv
             return null;
         }
         KRegularProduction production = (KRegularProduction) element;
-        StringBuilder result = getFormattedSyntaxAndComment(production);
+        StringBuilder sb = getFormattedSyntaxAndComment(production);
 
         for (KRule rule : KPsiUtil.getImplementationRules(production)) {
-            result.append("\n\n").append(getFormattedRuleAndComment(rule));
+            sb.append("\n\n").append(getFormattedRuleAndComment(rule));
         }
-        return result.toString().replace("\n", "<br/>");
+        String result = sb.toString().replace("\n", "<br/>");
+        return result;
     }
 
     @Nullable
@@ -68,7 +69,11 @@ public class RegularProductionDocumentationProvider implements DocumentationProv
                     child.getPsi() instanceof KRuleName) {
                 sb.append("<b>").append(child.getText()).append("</b>");
             } else if (child instanceof PsiWhiteSpace) {
-                sb.append(child.getText().replace(" ", "&nbsp;"));
+                String text = child.getText();
+                if (child.getTextLength() > 1) {
+                    text = text.replace(" ", "&nbsp;");
+                }
+                sb.append(text);
             } else if (child instanceof PsiComment) {
                 sb.append("<i>").append(getEncodedText(child)).append("</i>");
             } else if (child.getChildren(null).length == 0) {
