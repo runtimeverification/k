@@ -81,7 +81,7 @@ public class DocumentationUtil {
             }
             String trimmedComment = commentText.substring(startTrim, commentText.length() - endTrim).trim();
             String extraNewLines = "\n\n";
-            formattedComment = "<i>" + StringEscapeUtils.escapeHtml(trimmedComment) + extraNewLines + "</i>";
+            formattedComment = "<tt><i>" + StringEscapeUtils.escapeHtml(trimmedComment) + extraNewLines + "</i></tt>";
         }
         return formattedComment;
     }
