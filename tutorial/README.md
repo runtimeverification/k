@@ -2,12 +2,12 @@
 ##### Grigore Rosu
 
 In this tutorial you will learn how to use the K tool by means of a series of
-lectures illustrating several simple languages defined using K.  The material in
-each lecture is presented in two almost equivalent forms: as ordinary text and a
-a short screencast movie.  We recommend the readers to either download the K tool
-from its URL (<http://kframework.org>) and install it on their machines (K is
-implemented in Java, so it is platform-independent) or use the provided online
-interface to execute the tutorial lessons and do the proposed exercises.
+lectures illustrating several simple languages defined using K.  Almost all the
+material is presented in two forms: as ordinary text and a a short screencast movie.
+We recommend the readers to either download the K tool from its URL
+(<http://kframework.org>) and install it on their machines (K is implemented in Java,
+so it is platform-independent) or use the provided online interface to execute the
+tutorial lessons and do the proposed exercises.
 The objective of this tutorial is twofold: to learn K (in folder
 [tutorial/1_k](/tutorial/1_k/)) and to learn how to define languages across
 various paradigms using K (in folder [tutorial/2_languages](/tutorial/2_languages/)).
@@ -25,6 +25,16 @@ Feel free to contact us at <info@kframework.org> for any questions or
 concerns.
 
 ## K Framework Overview
+
+[
+[MOVIE (kframework.org)](http://fsl.cs.uiuc.edu/k-overview/k-overview_player.html)
+|
+[MOVIE (YouTube)](http://youtu.be/eSaIKHQOo4c)
+|
+[SLIDES (PPT)](http://www.kframework.org/images/e/e4/K-Overview.zip)
+|
+[SLIDES (PDF)](http://www.kframework.org/images/e/eb/K-Overview.pdf)
+]
 
 K is an executable semantic framework in which programming languages,
 calculi, as well as type systems or formal analysis tools can be
