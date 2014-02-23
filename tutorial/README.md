@@ -1,10 +1,16 @@
 # K Tutorial
 ##### Grigore Rosu
 
-In this tutorial you will learn how to use the K tool by means of a few simple
-languages defined using K.  The objective here is twofold: to learn K
-(in folder [tutorial/1_k](/tutorial/1_k/)) and to learn how to define languages
-across various paradigms using K (in folder [tutorial/2_languages](/tutorial/2_languages/)).
+In this tutorial you will learn how to use the K tool by means of a series of
+lectures illustrating several simple languages defined using K.  The material in
+each lecture is presented in two almost equivalent forms: as ordinary text and a
+a short screencast movie.  We recommend the readers to either download the K tool
+from its URL (<http://kframework.org>) and install it on their machines (K is
+implemented in Java, so it is platform-independent) or use the provided online
+interface to execute the tutorial lessons and do the proposed exercises.
+The objective of this tutorial is twofold: to learn K (in folder
+[tutorial/1_k](/tutorial/1_k/)) and to learn how to define languages across
+various paradigms using K (in folder [tutorial/2_languages](/tutorial/2_languages/)).
 
 It is recommended to study the languages defined in this folder in the
 order indicated by their name, because K features already discussed in
