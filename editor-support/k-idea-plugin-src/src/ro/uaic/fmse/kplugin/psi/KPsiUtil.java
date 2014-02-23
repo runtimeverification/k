@@ -83,63 +83,55 @@ public class KPsiUtil {
     public static <T extends PsiNamedElement> T findFirstElementInModule(KFile refFile, Class<T> elementClass,
                                                                          String... names) {
         final List<String> namesList = Arrays.asList(names);
-        Collection<VirtualFile> virtualFiles = getSearchScope(refFile);
-        PsiManager psiManager = PsiManager.getInstance(refFile.getProject());
-        for (VirtualFile virtualFile : virtualFiles) {
-            KFile kFile = (KFile) psiManager.findFile(virtualFile);
-            if (kFile != null) {
-                T resultCandidate = findFirstElement(kFile, elementClass, new Predicate<T>() {
-                    @Override
-                    public boolean apply(T t) {
-                        return namesList.contains(t.getName());
-                    }
-                });
-                if (resultCandidate != null) {
-                    return resultCandidate;
-                }
+        Collection<T> result = findElements(getSearchScope(refFile), elementClass, new Predicate<T>() {
+            @Override
+            public boolean apply(T t) {
+                return namesList.contains(t.getName());
             }
-        }
-        return null;
+        });
+        return !result.isEmpty() ? result.iterator().next() : null;
+    }
+
+    @Nullable
+    private static <T extends PsiElement> T findFirstElement(PsiElement rootElement, Class<T> targetClass) {
+        return findFirstElement(rootElement, targetClass, new Predicate<T>() {
+            @Override
+            public boolean apply(T t) {
+                return true;
+            }
+        });
     }
 
     @Nullable
     private static <T extends PsiElement> T findFirstElement(PsiElement rootElement, Class<T> targetClass,
                                                              Predicate<T> predicate) {
-        Collection<T> elements = PsiTreeUtil.findChildrenOfType(rootElement, targetClass);
-        for (T element : elements) {
-            if (predicate == null || predicate.apply(element)) {
-                return element;
-            }
-        }
-        return null;
+        Collection<T> result = findElements(Arrays.asList(rootElement), targetClass, predicate);
+        return !result.isEmpty() ? result.iterator().next() : null;
+
     }
 
-    /**
-     * @return the collection pf PSI elements of the given class that satisfy the given predicate.
-     */
-    @NotNull
-    public static <T extends PsiElement> Collection<T> findElementsInModule(PsiElement refElement,
-                                                                            Class<T> elementClass,
-                                                                            Predicate<T> predicate) {
-        Collection<T> result = new ArrayList<>();
-        Collection<VirtualFile> virtualFiles = getSearchScope(refElement);
-        PsiManager psiManager = PsiManager.getInstance(refElement.getProject());
-        for (VirtualFile virtualFile : virtualFiles) {
-            KFile kFile = (KFile) psiManager.findFile(virtualFile);
-            if (kFile != null) {
-                result.addAll(findElements(kFile, elementClass, predicate));
-            }
-        }
-        return result;
-    }
 
-    private static <T extends PsiElement> Collection<T> findElements(PsiElement rootElement, Class<T> targetClass,
+    @SuppressWarnings("unchecked")
+    private static <T extends PsiElement> Collection<T> findElements(Collection<? extends PsiElement> rootElements,
+                                                                     Class<? extends T> targetClass,
                                                                      Predicate<T> predicate) {
-        Collection<T> elements = PsiTreeUtil.findChildrenOfType(rootElement, targetClass);
+        Collection<Class<? extends T>> classes = new ArrayList<>();
+        classes.add(targetClass);
+        return findElements(rootElements, classes, predicate);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T extends PsiElement> Collection<T> findElements(Collection<? extends PsiElement> rootElements,
+                                                                     Collection<Class<? extends T>> targetClasses,
+                                                                     Predicate<T> predicate) {
         Collection<T> result = new ArrayList<>();
-        for (T element : elements) {
-            if (predicate.apply(element)) {
-                result.add(element);
+        for (PsiElement rootElement : rootElements) {
+            Class<T>[] classes = targetClasses.toArray(new Class[targetClasses.size()]);
+            Collection<T> elements = PsiTreeUtil.findChildrenOfAnyType(rootElement, classes);
+            for (T element : elements) {
+                if (predicate.apply(element)) {
+                    result.add(element);
+                }
             }
         }
         return result;
@@ -149,16 +141,23 @@ public class KPsiUtil {
      * If the file have no "require" clauses and no other files require this one, resolve the reference in the current
      * file scope. Otherwise resolve it in the module scope.
      */
-    private static Collection<VirtualFile> getSearchScope(PsiElement element) {
+    private static Collection<KFile> getSearchScope(PsiElement element) {
         KFile refFile = (KFile) element.getContainingFile();
         boolean haveRequires = refFile.getRequires().size() > 0;
         Collection<VirtualFile> filesInModule = FileBasedIndex.getInstance().getContainingFiles(FileTypeIndex.NAME,
                 KFileType.INSTANCE, getModule(refFile).getModuleContentScope());
         PsiManager psiManager = PsiManager.getInstance(refFile.getProject());
         boolean searchInModule = haveRequires || anyFileRequires(filesInModule, psiManager, refFile.getName());
-        return searchInModule
-                ? filesInModule
-                : Arrays.asList(refFile.getVirtualFile());
+        filesInModule = searchInModule ? filesInModule : Arrays.asList(refFile.getVirtualFile());
+
+        Collection<KFile> result = new ArrayList<>();
+        for (VirtualFile virtualFile : filesInModule) {
+            KFile kFile = (KFile) psiManager.findFile(virtualFile);
+            if (kFile != null) {
+                result.add(kFile);
+            }
+        }
+        return result;
     }
 
     private static boolean anyFileRequires(Collection<VirtualFile> filesInModule, PsiManager psiManager, String name) {
@@ -221,42 +220,63 @@ public class KPsiUtil {
     }
 
     @NotNull
-    public static Collection<KRule> getImplementationRules(KRegularProduction production) {
+    public static Collection<IModuleItem> getImplementationRulesAndContexts(final KRegularProduction production) {
         final String productionName = production.getName();
         if (productionName == null) {
             return Collections.emptyList();
         }
 
-        Collection<KRule> implRules = findElementsInModule(production, KRule.class, new Predicate<KRule>() {
-            @Override
-            public boolean apply(KRule kRule) {
-                String ruleName = kRule.getRuleName() != null ? kRule.getRuleName().getItemName().getText() : null;
+        List<Class<? extends IModuleItem>> classes = new ArrayList<>();
+        classes.add(KRule.class);
+        //classes.add(KContext.class); //todo debug uncomment - commenting this leads to great performance improvements
 
-                if (ruleName != null) {
-                    int productionNamePos = ruleName.indexOf(productionName);
-                    if (productionNamePos != -1) {
-                        String productionNamePrefix = ruleName.substring(0, productionNamePos);
-                        String productionNameSuffix = ruleName.substring(productionNamePos + productionName.length());
-                        if ((productionNamePrefix.equals("") || productionNamePrefix.endsWith("-"))
-                                && !productionNamePrefix.endsWith("to-")
-                                && (productionNameSuffix.equals("") || productionNameSuffix.startsWith("-"))) {
-                            KIdExpr firstIdRefToProductionName =
-                                    findFirstElement(kRule.getRuleBody(), KIdExpr.class, new Predicate<KIdExpr>() {
-                                        @Override
-                                        public boolean apply(KIdExpr kIdExpr) {
-                                            return kIdExpr.getText().equals(productionName);
-                                        }
-                                    });
-                            return firstIdRefToProductionName != null;
+        Collection<IModuleItem> implRules =
+                findElements(getSearchScope(production), classes, new Predicate<IModuleItem>() {
+                    @Override
+                    public boolean apply(IModuleItem moduleItem) {
+                        if (moduleItem instanceof KRule) {
+                            KRule kRule = (KRule) moduleItem;
+                            String ruleName =
+                                    kRule.getRuleName() != null ? kRule.getRuleName().getItemName().getText() : null;
+
+                            if (ruleName != null) {
+                                int productionNamePos = ruleName.indexOf(productionName);
+                                if (productionNamePos != -1) {
+                                    String productionNamePrefix = ruleName.substring(0, productionNamePos);
+                                    String productionNameSuffix =
+                                            ruleName.substring(productionNamePos + productionName.length());
+                                    if ((productionNamePrefix.equals("") || productionNamePrefix.endsWith("-"))
+                                            && !productionNamePrefix.endsWith("to-")
+                                            &&
+                                            (productionNameSuffix.equals("") || productionNameSuffix.startsWith("-"))) {
+                                        KIdExpr firstIdRefToProductionName =
+                                                findFirstElement(kRule.getRuleBody(), KIdExpr.class,
+                                                        new Predicate<KIdExpr>() {
+                                                            @Override
+                                                            public boolean apply(KIdExpr kIdExpr) {
+                                                                return kIdExpr.getText().equals(productionName);
+                                                            }
+                                                        });
+                                        return firstIdRefToProductionName != null;
+                                    }
+                                }
+                                return false;
+                            } else {
+                                PsiElement firstChild = kRule.getRuleBody().getFirstChild();
+                                return (firstChild instanceof KIdExpr) && firstChild.getText().equals(productionName);
+                            }
+                        } else if (moduleItem instanceof KContext) {
+                            KContext kContext = (KContext) moduleItem;
+                            return findFirstElement(kContext, KIdExpr.class, new Predicate<KIdExpr>() {
+                                @Override
+                                public boolean apply(KIdExpr kIdExpr) {
+                                    return production.equals(kIdExpr.getReference().resolve());
+                                }
+                            }) != null;
                         }
+                        return false;
                     }
-                    return false;
-                } else {
-                    PsiElement firstChild = kRule.getRuleBody().getFirstChild();
-                    return (firstChild instanceof KIdExpr) && firstChild.getText().equals(productionName);
-                }
-            }
-        });
+                });
 
         return implRules;
     }

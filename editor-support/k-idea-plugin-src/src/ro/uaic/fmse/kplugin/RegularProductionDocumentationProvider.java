@@ -37,8 +37,8 @@ public class RegularProductionDocumentationProvider implements DocumentationProv
         KRegularProduction production = (KRegularProduction) element;
         StringBuilder sb = getFormattedSyntaxAndComment(production);
 
-        for (KRule rule : KPsiUtil.getImplementationRules(production)) {
-            sb.append("\n\n").append(getFormattedRuleAndComment(rule));
+        for (IModuleItem moduleItem : KPsiUtil.getImplementationRulesAndContexts(production)) {
+            sb.append("\n\n").append(getFormattedModuleItemAndComment(moduleItem));
         }
         String result = sb.toString().replace("\n", "<br/>");
         return result;
@@ -142,15 +142,15 @@ public class RegularProductionDocumentationProvider implements DocumentationProv
         return count;
     }
 
-    private CharSequence getFormattedRuleAndComment(KRule rule) {
-        StringBuilder sb = new StringBuilder().append(getFormattedRule(rule));
-        String formattedComment = getAssociatedComment(rule);
+    private CharSequence getFormattedModuleItemAndComment(IModuleItem moduleItem) {
+        StringBuilder sb = new StringBuilder().append(getFormattedKElement(moduleItem));
+        String formattedComment = getAssociatedComment(moduleItem);
         sb.insert(0, formattedComment);
         return sb;
     }
 
-    private CharSequence getFormattedRule(KRule rule) {
-        return new StringBuilder().append("<tt>").append(formatSortsAndWhitespaces(rule.getNode())).append("</tt>");
+    private CharSequence getFormattedKElement(PsiElement element) {
+        return new StringBuilder().append("<tt>").append(formatSortsAndWhitespaces(element.getNode())).append("</tt>");
     }
 
 }
