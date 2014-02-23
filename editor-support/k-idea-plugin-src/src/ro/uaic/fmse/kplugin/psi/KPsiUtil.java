@@ -93,16 +93,6 @@ public class KPsiUtil {
     }
 
     @Nullable
-    private static <T extends PsiElement> T findFirstElement(PsiElement rootElement, Class<T> targetClass) {
-        return findFirstElement(rootElement, targetClass, new Predicate<T>() {
-            @Override
-            public boolean apply(T t) {
-                return true;
-            }
-        });
-    }
-
-    @Nullable
     private static <T extends PsiElement> T findFirstElement(PsiElement rootElement, Class<T> targetClass,
                                                              Predicate<T> predicate) {
         Collection<T> result = findElements(Arrays.asList(rootElement), targetClass, predicate);
@@ -228,7 +218,7 @@ public class KPsiUtil {
 
         List<Class<? extends IModuleItem>> classes = new ArrayList<>();
         classes.add(KRule.class);
-        //classes.add(KContext.class); //todo debug uncomment - commenting this leads to great performance improvements
+        classes.add(KContext.class);
 
         Collection<IModuleItem> implRules =
                 findElements(getSearchScope(production), classes, new Predicate<IModuleItem>() {
@@ -266,11 +256,16 @@ public class KPsiUtil {
                                 return (firstChild instanceof KIdExpr) && firstChild.getText().equals(productionName);
                             }
                         } else if (moduleItem instanceof KContext) {
-                            KContext kContext = (KContext) moduleItem;
-                            return findFirstElement(kContext, KIdExpr.class, new Predicate<KIdExpr>() {
+                            return findFirstElement(moduleItem, KIdExpr.class, new Predicate<KIdExpr>() {
                                 @Override
                                 public boolean apply(KIdExpr kIdExpr) {
-                                    return production.equals(kIdExpr.getReference().resolve());
+                                    return kIdExpr.getId().getText().equals(productionName);
+                                }
+                            }) != null || findFirstElement(moduleItem, KLabel.class, new Predicate<KLabel>() {
+                                @Override
+                                public boolean apply(KLabel kLabel) {
+                                    return kLabel.getText().contains(productionName) &&
+                                            production.equals(kLabel.getReference().resolve());
                                 }
                             }) != null;
                         }
