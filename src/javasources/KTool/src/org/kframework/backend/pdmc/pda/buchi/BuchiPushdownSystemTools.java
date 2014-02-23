@@ -17,6 +17,78 @@ import java.util.*;
  */
 public class BuchiPushdownSystemTools<Control, Alphabet> {
 
+    static class LabelledAlphabet<Control, Alphabet> {
+        Alphabet letter;
+        boolean repeated;
+
+        public Rule<Pair<Control, BuchiState>, Alphabet> getRule() {
+            return rule;
+        }
+
+        public void setRule(Rule<Pair<Control, BuchiState>, Alphabet> rule) {
+            this.rule = rule;
+        }
+
+        public PAutomatonState<Pair<Control, BuchiState>, Alphabet> getBackState() {
+            return backState;
+        }
+
+        public void setBackState(PAutomatonState<Pair<Control, BuchiState>, Alphabet> backState) {
+            this.backState = backState;
+        }
+
+        Rule<Pair<Control, BuchiState>, Alphabet> rule;
+        PAutomatonState<Pair<Control, BuchiState>, Alphabet> backState;
+
+        LabelledAlphabet(Alphabet letter, boolean repeated) {
+            this.letter = letter;
+            this.repeated = repeated;
+            rule = null;
+            backState = null;
+        }
+
+        public static<Control, Alphabet> LabelledAlphabet<Control, Alphabet> of(Alphabet letter, boolean repeated) {
+           return new LabelledAlphabet<>(letter, repeated);
+        }
+
+        public Alphabet getLeft() {
+            return letter;
+        }
+
+        public boolean isRepeated() {
+            return repeated;
+        }
+
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            LabelledAlphabet that = (LabelledAlphabet) o;
+
+            if (repeated != that.repeated) return false;
+            if (letter != null ? !letter.equals(that.letter) : that.letter != null) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = letter != null ? letter.hashCode() : 0;
+            result = 31 * result + (repeated ? 1 : 0);
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            return "<" +
+                    "" + letter +
+                    ", " + repeated +
+                    '>';
+        }
+    }
+
     BuchiPushdownSystemInterface<Control, Alphabet> bps;
 
     public BuchiPushdownSystemTools(BuchiPushdownSystemInterface<Control, Alphabet> bps) {
@@ -49,10 +121,10 @@ public class BuchiPushdownSystemTools<Control, Alphabet> {
         }
     }
 
-    private PAutomaton<PAutomatonState<Pair<Control, BuchiState>, Alphabet>, Pair<Alphabet, Boolean>> postStar = null;
+    private PAutomaton<PAutomatonState<Pair<Control, BuchiState>, Alphabet>, LabelledAlphabet<Control, Alphabet>> postStar = null;
     TarjanSCC<ConfigurationHead<Pair<Control, BuchiState>, Alphabet>, Boolean> repeatedHeadsGraph = null;
 
-    public PAutomaton<PAutomatonState<Pair<Control, BuchiState>, Alphabet>, Pair<Alphabet, Boolean>> getPostStar() {
+    public PAutomaton<PAutomatonState<Pair<Control, BuchiState>, Alphabet>, LabelledAlphabet<Control, Alphabet>> getPostStar() {
         if (postStar == null)
             compute();
         return postStar;
@@ -66,12 +138,12 @@ public class BuchiPushdownSystemTools<Control, Alphabet> {
 
     private void compute() {
         EpsilonTransitionWatch watch = new EpsilonTransitionWatch();
-        Set<Transition<PAutomatonState<Pair<Control, BuchiState>, Alphabet>, Pair<Alphabet, Boolean>>> trans =
+        Set<Transition<PAutomatonState<Pair<Control, BuchiState>, Alphabet>, LabelledAlphabet<Control, Alphabet>>> trans =
                 new HashSet<>();
-        IndexedTransitions<PAutomatonState<Pair<Control, BuchiState>, Alphabet>, Pair<Alphabet, Boolean>> rel =
-                new IndexedTransitions<PAutomatonState<Pair<Control, BuchiState>, Alphabet>, Pair<Alphabet, Boolean>>() {
+        IndexedTransitions<PAutomatonState<Pair<Control, BuchiState>, Alphabet>, LabelledAlphabet<Control, Alphabet>> rel =
+                new IndexedTransitions<PAutomatonState<Pair<Control, BuchiState>, Alphabet>, LabelledAlphabet<Control, Alphabet>>() {
                     @Override
-                    public boolean isEpsilon(Pair<Alphabet, Boolean> gamma) {
+                    public boolean isEpsilon(LabelledAlphabet<Control, Alphabet> gamma) {
                         if (gamma == null) return true;
                         return gamma.getLeft() == null;
                     }
@@ -86,12 +158,12 @@ public class BuchiPushdownSystemTools<Control, Alphabet> {
         assert initial.getStack().isEmpty() : "Only one element in the initial stack accepted at the moment";
         PAutomatonState<Pair<Control, BuchiState>, Alphabet> finalState =
                 PAutomatonState.of(initialHead.getState(), initialHead.getLetter());
-        trans.add(Transition.of(initialState, Pair.of(initialHead.getLetter(), false), finalState));
+        trans.add(Transition.of(initialState, LabelledAlphabet.<Control, Alphabet>of(initialHead.getLetter(), false), finalState));
 
         while (!trans.isEmpty()) {
-            Iterator<Transition<PAutomatonState<Pair<Control, BuchiState>, Alphabet>, Pair<Alphabet, Boolean>>> iterator
+            Iterator<Transition<PAutomatonState<Pair<Control, BuchiState>, Alphabet>, LabelledAlphabet<Control, Alphabet>>> iterator
                     = trans.iterator();
-            Transition<PAutomatonState<Pair<Control, BuchiState>, Alphabet>, Pair<Alphabet, Boolean>> transition
+            Transition<PAutomatonState<Pair<Control, BuchiState>, Alphabet>, LabelledAlphabet<Control, Alphabet>> transition
                     = iterator.next();
             iterator.remove();
             if (transition.getLetter().getLeft() == null) {
@@ -99,7 +171,7 @@ public class BuchiPushdownSystemTools<Control, Alphabet> {
                         watch.get(transition.getEnd())) {
                     ConfigurationHead<Pair<Control, BuchiState>, Alphabet> endV =
                             ConfigurationHead.of(transition.getStart().getState(), pair.getRight());
-                    if (repeatedHeadsGraph.addEdge(pair.getLeft(), endV, transition.getLetter().getRight())) {
+                    if (repeatedHeadsGraph.addEdge(pair.getLeft(), endV, transition.getLetter().isRepeated())) {
 //                        System.err.println("Forgotten edge from " + pair.getLeft().toString()
 //                                + " to " + endV.toString());
                     }
@@ -108,9 +180,9 @@ public class BuchiPushdownSystemTools<Control, Alphabet> {
             }
             if (!rel.contains(transition)) {
                 rel.add(transition);
-                Pair<Alphabet, Boolean> letter = transition.getLetter();
+                LabelledAlphabet<Control, Alphabet> letter = transition.getLetter();
                 Alphabet gamma = letter.getLeft();
-                boolean b = letter.getRight().booleanValue();
+                boolean b = letter.isRepeated();
                 PAutomatonState<Pair<Control, BuchiState>, Alphabet> tp = transition.getStart();
                 PAutomatonState<Pair<Control, BuchiState>, Alphabet> q = transition.getEnd();
                 if (gamma != null) {
@@ -126,18 +198,21 @@ public class BuchiPushdownSystemTools<Control, Alphabet> {
                         assert  stack.size() <= 2 : "At most 2 elements are allowed in the stack for now";
                         Alphabet gamma1 = null;
                         Alphabet gamma2 = null;
+                        LabelledAlphabet<Control, Alphabet> labelledLetter;
                         switch (stack.size()) {
                             case 0:
+                                labelledLetter = LabelledAlphabet.<Control, Alphabet>of(null, b || bps.isFinal(pPrime));
                                 trans.add(Transition.of(
                                         PAutomatonState.<Pair<Control, BuchiState>, Alphabet>of(pPrime),
-                                        Pair.<Alphabet, Boolean>of(null, b || bps.isFinal(pPrime)), q));
+                                        labelledLetter, q));
                                 break;
                             case 1:
                                 gamma1 = stack.peek();
                                 repeatedHeadsGraph.addEdge(configurationHead, rule.endConfiguration().getHead(), bps.isFinal(p));
+                                labelledLetter = LabelledAlphabet.<Control, Alphabet>of(gamma1, b || bps.isFinal(pPrime));
                                 trans.add(Transition.of(
                                         PAutomatonState.<Pair<Control, BuchiState>, Alphabet>of(pPrime),
-                                        Pair.of(gamma1, b || bps.isFinal(pPrime)), q));
+                                        labelledLetter, q));
                                 break;
                             case 2:
                                 gamma1 = stack.get(1);
@@ -145,30 +220,33 @@ public class BuchiPushdownSystemTools<Control, Alphabet> {
                                 gamma2 = stack.get(0);
                                 PAutomatonState<Pair<Control, BuchiState>, Alphabet> qPPrimeGamma1
                                         = PAutomatonState.of(pPrime, gamma1);
+                                labelledLetter = LabelledAlphabet.<Control, Alphabet>of(gamma1, b || bps.isFinal(pPrime));
                                 trans.add(Transition.of(
                                         PAutomatonState.<Pair<Control, BuchiState>, Alphabet>of(pPrime),
-                                        Pair.of(gamma1, b || bps.isFinal(pPrime) ), qPPrimeGamma1));
-                                rel.add(Transition.of(qPPrimeGamma1, Pair.of(gamma2, false), q));
-                                for (Transition<PAutomatonState<Pair<Control, BuchiState>, Alphabet>, Pair<Alphabet, Boolean>> t :
+                                        labelledLetter, qPPrimeGamma1));
+                                labelledLetter = LabelledAlphabet.<Control, Alphabet>of(gamma2, false);
+                                rel.add(Transition.of(qPPrimeGamma1, labelledLetter, q));
+                                for (Transition<PAutomatonState<Pair<Control, BuchiState>, Alphabet>, LabelledAlphabet<Control, Alphabet>> t :
                                         rel.getBackEpsilonTransitions(qPPrimeGamma1)) {
-                                    trans.add(Transition.of(t.getStart(), Pair.of(gamma2, t.getLetter().getRight()), q));
+                                    labelledLetter = LabelledAlphabet.<Control, Alphabet>of(gamma2, t.getLetter().isRepeated());
+                                    trans.add(Transition.of(t.getStart(), labelledLetter, q));
                                     ConfigurationHead<Pair<Control, BuchiState>, Alphabet> endV =
                                             ConfigurationHead.of(t.getStart().getState(), gamma2);
-                                    repeatedHeadsGraph.addEdge(configurationHead, endV, t.getLetter().getRight());
+                                    repeatedHeadsGraph.addEdge(configurationHead, endV, t.getLetter().isRepeated());
                                 }
                                 watch.addWatch(qPPrimeGamma1, configurationHead, gamma2);
                         }
                     }
                 } else {
-                    for (Transition<PAutomatonState<Pair<Control, BuchiState>, Alphabet>, Pair<Alphabet, Boolean>> t : rel.getFrontTransitions(q)) {
-                        Pair<Alphabet, Boolean> tLetter = t.getLetter();
-                        trans.add(Transition.of(tp, Pair.of(tLetter.getLeft(), tLetter.getRight() || b), t.getEnd()));
+                    for (Transition<PAutomatonState<Pair<Control, BuchiState>, Alphabet>, LabelledAlphabet<Control, Alphabet>> t : rel.getFrontTransitions(q)) {
+                        LabelledAlphabet<Control, Alphabet> tLetter = t.getLetter();
+                        trans.add(Transition.of(tp, LabelledAlphabet.<Control, Alphabet>of(tLetter.getLeft(), tLetter.isRepeated() || b), t.getEnd()));
                     }
                 }
             }
         }
 
-        postStar = new PAutomaton<PAutomatonState<Pair<Control, BuchiState>, Alphabet>, Pair<Alphabet, Boolean>>(
+        postStar = new PAutomaton<PAutomatonState<Pair<Control, BuchiState>, Alphabet>, LabelledAlphabet<Control, Alphabet>>(
                 rel.getTransitions(),
                 initialState,
                 Collections.singleton(finalState));

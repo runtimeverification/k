@@ -118,5 +118,5 @@ module STRING-HOOKS
   rule #parseToken("String",S:String) => (S) 
   rule #parseToken("Char",S:String) => (String2Char(S))
 
-  syntax String ::= "#tokenToString" "(" K ")"    [function, klabel(#tokenToString)]
+  syntax String ::= "#tokenToString" "(" K ")"    [function, klabel(#tokenToString), hook(#CONVERSION:token2string)]
 endmodule

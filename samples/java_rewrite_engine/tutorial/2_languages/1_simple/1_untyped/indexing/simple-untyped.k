@@ -121,7 +121,7 @@ the increment). */
   syntax Exp ::= Int | Bool | String | Id
                | "(" Exp ")"             [bracket]
                | "++" Exp
-               > Exp "[" Exps "]"        [strict]
+               > Exp "[" Exps "]"        [strict, klabel("'_:Exp[_:Exps]")] // YilongL: gotta use klabel attribute to avoid clash with Map "[" Map "]" in k-prelude.k
                > Exp "(" Exps ")"        [strict]
                | "-" Exp                 [strict]
                | "sizeOf" "(" Exp ")"    [strict]

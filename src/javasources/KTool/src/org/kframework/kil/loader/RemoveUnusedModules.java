@@ -12,16 +12,21 @@ import java.util.Set;
 
 public class RemoveUnusedModules extends CopyOnWriteTransformer {
 
-	public RemoveUnusedModules(Context context) {
+	private boolean autoinclude;
+	public RemoveUnusedModules(Context context, boolean autoinclude) {
 		super(RemoveUnusedModules.class.toString(), context);
+		this.autoinclude = autoinclude;
 	}
 
     @Override
     public ASTNode transform(Definition def) throws TransformerException {
         boolean change = false;
         Set<String> initialModules = new HashSet<>();
-        initialModules.add(Constants.AUTO_INCLUDED_MODULE);
-        initialModules.add(Constants.AUTO_INCLUDED_SYNTAX_MODULE);
+        if (autoinclude) {
+            initialModules.add(Constants.AUTO_INCLUDED_MODULE);
+            initialModules.add(Constants.AUTO_INCLUDED_SYNTAX_MODULE);
+        }
+        
         initialModules.add(def.getMainModule());
 		CollectReachableModulesVisitor fm = new CollectReachableModulesVisitor(context, initialModules);
 		def.accept(fm);

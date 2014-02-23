@@ -37,7 +37,6 @@ public class PathIndexTrie implements Trie {
     }
 
     private void add(TrieNode trieNode, ArrayList<String> strings, int value) {
-
         if (strings.size() == 0) {
             return;
         }
@@ -79,6 +78,7 @@ public class PathIndexTrie implements Trie {
                 TrieNode node = trieNode.getChild(elem);
                 if (node instanceof TrieLeaf && elem.equals(node.getValue())) {
                     node.getIndices().add(value);
+                    trieNode.getIndices().add(value);
                     return;
                 }
 
@@ -199,8 +199,6 @@ public class PathIndexTrie implements Trie {
         }
         String firstString = splitList.get(0);
         ArrayList<String> subList = new ArrayList<>(splitList.subList(1, splitList.size()));
-//        System.out.println("firstString: "+firstString);
-//        System.out.println("node: "+trieNode);
         TrieNode child = trieNode.getChild(firstString);
         if (child != null) {
             if (trieNode.getValue().equals("@")) {
@@ -290,4 +288,13 @@ public class PathIndexTrie implements Trie {
     public TrieNode getRoot() {
         return root;
     }
+
+//    public static void main(String[] args) {
+//        Trie trie = new PathIndexTrie();
+//        String pString = "@.'acquire_;.1.Val";
+//        String pString2 = "@.'acquire_;.1.Int";
+//        trie.addIndex(trie.getRoot(), pString.substring(2), 1);
+//        trie.addIndex(trie.getRoot(), pString.substring(2), 2);
+//        System.out.println("ret: "+trie.retrieve(trie.getRoot(), pString2));
+//    }
 }

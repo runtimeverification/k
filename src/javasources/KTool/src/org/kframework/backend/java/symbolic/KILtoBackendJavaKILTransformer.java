@@ -73,7 +73,13 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     public Definition transformDefinition(org.kframework.kil.Definition node) {
         try {
-            return new MacroExpander((Definition) node.accept(this)).processDefinition();
+            Definition transformedDef = (Definition) node.accept(this);
+            
+            /* initialize the builtin function table */
+            BuiltinFunction.init(transformedDef);
+
+            Definition expandedDefinition = new MacroExpander(transformedDef).processDefinition();
+            return evaluateDefinition(expandedDefinition);
         } catch (TransformerException e) {
             e.printStackTrace();
             return null;
@@ -665,12 +671,18 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             definition.addFrozenKLabel(KLabelConstant.of(production.getKLabel(), context));
         }
 
-        /*
-         * Partially evaluate functions in the rules of the definition
-         */
-        /* initialize the builtin function table */
-        BuiltinFunction.init(definition);
-
+        this.definition = null;
+        return definition;
+    }
+    
+    /**
+     * Partially evaluate the right-hand side and the conditions for each rule.
+     * 
+     * @param definition
+     *            the definition used for evaluation
+     * @return the partially evaluated definition
+     */
+    private static Definition evaluateDefinition(Definition definition) {
         /* replace the unevaluated rules defining functions with their partially evaluated counterparts */
         ArrayList<Rule> partiallyEvaluatedRules = new ArrayList<>();
         /* iterate until a fixpoint is reached, because the evaluation with functions uses Term#substituteAndEvalaute */
@@ -704,12 +716,11 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         definition.macros().clear();
         definition.addRuleCollection(partiallyEvaluatedRules);
 
-        this.definition = null;
         return definition;
     }
 
     /**
-     * Partially evaluate the right-hand side and the conditions for each rule.
+     * Partially evaluate the right-hand side and the conditions of a specified rule.
      * @param rule
      *          the rule being partially evaluated
      * @param definition
@@ -717,7 +728,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
      * @return
      *          the partially evaluated rule
      */
-    public static Rule evaluateRule(Rule rule, Definition definition) {
+    private static Rule evaluateRule(Rule rule, Definition definition) {
         TermContext termContext = TermContext.of(definition);
         // TODO(AndreiS): some evaluation is required in the LHS as well
         //Term leftHandSide = rule.leftHandSide().evaluate(termContext);
@@ -736,6 +747,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                     equality.leftHandSide().evaluate(termContext),
                     equality.rightHandSide().evaluate(termContext));
         }
+        
         return new Rule(
                 rule.label(),
                 rule.leftHandSide(),

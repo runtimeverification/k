@@ -14,12 +14,14 @@ import java.util.*;
 public class HeatingRuleVisitor extends RuleVisitor {
     private final Context context;
     private String currentLabel = null;
+    private Stack<String> pStringStack;
 
     private int counter = 0;
 
     public HeatingRuleVisitor(Context context) {
         super(context);
         this.context = context;
+        pStringStack = new Stack<>();
     }
 
     @Override
@@ -55,6 +57,8 @@ public class HeatingRuleVisitor extends RuleVisitor {
             //the original pString has been modified along the way
             pString = pString.concat(counter + SEPARATOR + kLabel.toString() + SEPARATOR);
         }
+
+        pStringStack.push(pString);
     }
 
     @Override
@@ -63,7 +67,8 @@ public class HeatingRuleVisitor extends RuleVisitor {
             counter = i + 1;
             kList.get(i).accept(this);
         }
-        this.proceed = false;
+        pStringStack.pop();
+//        this.proceed = false;
     }
 
     @Override
@@ -74,12 +79,12 @@ public class HeatingRuleVisitor extends RuleVisitor {
         if (productions.size() == 1) {
             Production p = productions.get(0);
             sort = p.getChildSort(counter - 1);
-            pStrings.add(pString + counter + "." + sort);
+            pStrings.add(pStringStack.peek() + counter + "." + sort);
         } else {
             if (productions.size() > 1) {
                 //TODO(OwolabiL): find the exact sort of this variable before it was transformed
                 // as part of this rule
-                pStrings.add(pString + counter + "." + "UserList");
+                pStrings.add(pStringStack.peek() + counter + "." + "UserList");
             }
         }
     }

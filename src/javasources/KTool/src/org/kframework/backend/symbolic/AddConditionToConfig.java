@@ -19,6 +19,7 @@ import org.kframework.kil.Syntax;
 import org.kframework.kil.Term;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.Variable;
+import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
@@ -37,7 +38,8 @@ public class AddConditionToConfig extends CopyOnWriteTransformer {
 
     public static String KCELL = "k";
     public static boolean PC = true;
-    
+    public static String PC_VAR = "$PC";
+
     public AddConditionToConfig(Context context) {
         super("Add path condition to configuration", context);
     }
@@ -49,8 +51,11 @@ public class AddConditionToConfig extends CopyOnWriteTransformer {
         Cell cell = new Cell();
         cell.setLabel(MetaK.Constants.pathCondition);
         cell.setEllipses(Ellipses.NONE);
-        if (PC)
-        	cell.setContents(new Variable("$PC", "Bool"));
+        if (PC) {
+            Variable pc = new Variable(PC_VAR, "Bool");
+            cell.setContents(pc);
+            context.configVarSorts.put(pc.getName(), pc.getSort());
+        }
         else 
         	cell.setContents(BoolBuiltin.TRUE);
         // append the path condition cell as subcell of generated top cell

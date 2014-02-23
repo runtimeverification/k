@@ -9,12 +9,14 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.TestCaseGenerationSettings;
 import org.kframework.backend.java.util.TestCaseGenerationUtil;
+import org.kframework.backend.unparser.UnparserFilter;
 import org.kframework.compile.transformers.DataStructureToLookupUpdate;
 import org.kframework.compile.utils.*;
 //import org.kframework.kil.*;
 import org.kframework.kil.Module;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.krun.K;
 import org.kframework.krun.KRunExecutionException;
 import org.kframework.krun.SubstitutionFilter;
 import org.kframework.krun.api.*;
@@ -27,6 +29,7 @@ import java.util.*;
 
 
 import edu.uci.ics.jung.graph.DirectedGraph;
+import org.kframework.utils.general.IndexingStatistics;
 
 
 /**
@@ -66,14 +69,26 @@ public class JavaSymbolicKRun implements KRun {
 
     @Override
     public KRunResult<KRunState> run(org.kframework.kil.Term cfg) throws KRunExecutionException {
-        return internalRun(cfg, -1);
+        if (K.get_indexing_stats){
+            IndexingStatistics.totalKrunStopwatch.start();
+            KRunResult<KRunState> result = internalRun(cfg, -1);
+            IndexingStatistics.totalKrunStopwatch.stop();
+            IndexingStatistics.print();
+            return result;
+        } else{
+            return internalRun(cfg, -1);
+        }
     }
 
     private KRunResult<KRunState> internalRun(org.kframework.kil.Term cfg, int bound) throws KRunExecutionException {
         ConstrainedTerm result = javaKILRun(cfg, bound);
         org.kframework.kil.Term kilTerm = (org.kframework.kil.Term) result.term().accept(
                 new BackendJavaKILtoKILTransformer(context));
-        return new KRunResult<KRunState>(new KRunState(kilTerm, context));
+        KRunResult<KRunState> returnResult = new KRunResult<KRunState>(new KRunState(kilTerm, context));
+        UnparserFilter unparser = new UnparserFilter(true, K.color, K.parens, context);
+        kilTerm.accept(unparser);
+        returnResult.setRawOutput(unparser.getResult());
+        return returnResult;
     }
 
     private ConstrainedTerm javaKILRun(org.kframework.kil.Term cfg, int bound) {
@@ -83,7 +98,15 @@ public class JavaSymbolicKRun implements KRun {
         SymbolicConstraint constraint = new SymbolicConstraint(termContext);
         term = term.evaluate(termContext);
         ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, constraint, termContext);
-        return symbolicRewriter.rewrite(constrainedTerm, bound);
+        ConstrainedTerm rewriteResult;
+        if (K.get_indexing_stats) {
+            IndexingStatistics.totalRewriteStopwatch.start();
+            rewriteResult = symbolicRewriter.rewrite(constrainedTerm, bound);
+            IndexingStatistics.totalRewriteStopwatch.stop();
+        } else {
+            rewriteResult = symbolicRewriter.rewrite(constrainedTerm, bound);
+        }
+        return rewriteResult;
     }
 
     @Override

@@ -39,6 +39,7 @@ import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.parser.concrete.disambiguate.SentenceVariablesFilter;
 import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
 import org.kframework.parser.concrete.disambiguate.TypeSystemFilter;
+import org.kframework.parser.concrete.disambiguate.TypeSystemFilter2;
 import org.kframework.parser.concrete.disambiguate.VariableTypeInferenceFilter;
 import org.kframework.parser.generator.BasicParser;
 import org.kframework.parser.generator.Definition2SDF;
@@ -125,7 +126,7 @@ public class DefinitionLoader {
 
 			//This following line was commented out to make the latex backend 
 			//parse files importing from other files
-			def = (Definition) def.accept(new RemoveUnusedModules(context));
+			def = (Definition) def.accept(new RemoveUnusedModules(context, autoinclude));
 
 			// HERE: add labels to sorts
 
@@ -261,7 +262,7 @@ public class DefinitionLoader {
 		return null;
 	}
 
-	public static Term parseCmdString(String content, String filename, Context context) throws TransformerException {
+	public static Term parseCmdString(String content, String filename, String startSymbol, Context context) throws TransformerException {
 		if (!context.initialized) {
 			System.err.println("You need to load the definition before you call parsePattern!");
 			System.exit(1);
@@ -281,6 +282,7 @@ public class DefinitionLoader {
 		config = config.accept(new CellEndLabelFilter(context));
 		//if (checkInclusion)
 		//	config = config.accept(new InclusionFilter(localModule, context));
+		config = config.accept(new TypeSystemFilter2(startSymbol, context));
 		config = config.accept(new CellTypesFilter(context));
 		config = config.accept(new CorrectRewritePriorityFilter(context));
 		config = config.accept(new CorrectKSeqFilter(context));
@@ -310,7 +312,7 @@ public class DefinitionLoader {
 		return (Term) config;
 	}
 
-	public static ASTNode parsePattern(String pattern, String filename, Context context) throws TransformerException {
+	public static ASTNode parsePattern(String pattern, String filename, String startSymbol, Context context) throws TransformerException {
 		if (!context.initialized) {
 			System.err.println("You need to load the definition before you call parsePattern!");
 			System.exit(1);
@@ -333,6 +335,7 @@ public class DefinitionLoader {
 		config = config.accept(new CellEndLabelFilter(context));
 		//if (checkInclusion)
 		//	config = config.accept(new InclusionFilter(localModule, context));
+		config = config.accept(new TypeSystemFilter2(startSymbol, context));
 		config = config.accept(new CellTypesFilter(context));
 		config = config.accept(new CorrectRewritePriorityFilter(context));
 		config = config.accept(new CorrectKSeqFilter(context));

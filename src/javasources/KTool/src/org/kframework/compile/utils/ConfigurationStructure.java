@@ -19,4 +19,11 @@ public class ConfigurationStructure implements Serializable {
     public ConfigurationStructureMap sons = new ConfigurationStructureMap();
     public Cell.Multiplicity multiplicity;
     public int level = 0;
+
+    /**
+     * Returns {@code true} if this cell has multiplicity='*' or multiplicity='+'
+     */
+    public boolean isStarOrPlus() {
+        return multiplicity == Cell.Multiplicity.ANY || multiplicity == Cell.Multiplicity.SOME;
+    }
 }

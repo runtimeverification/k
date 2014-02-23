@@ -1,10 +1,9 @@
-K Tutorial --- LAMBDA
-by Grigore Rosu
+## Part 1: Defining LAMBDA
 
 Here you will learn how to define a very simple language in K and the basics
-of how to use the K tool.  The language is a variant of lambda calculus and
-its definition is based on substitution.  Specifically, you will learn the
-following:
+of how to use the K tool.  The language is a variant of call-by-value lambda
+calculus and its definition is based on substitution.  Specifically, you will
+learn the following:
 
 * How to define a module.
 * How to define a language syntax.
@@ -18,6 +17,3 @@ following:
 * How to define derived language constructs.
 
 This folder contains several lessons, each adding new features to LAMBDA.
-We recommend that you actually incrementally (re)type all the versions in
-the "work_here" directory, in the suggested order and following the
-discussion flow in the README files.
