@@ -278,4 +278,13 @@ public class KPsiUtil {
                 element.getText().contains(productionName) &&
                 production.equals(((KLabel) element).getReference().resolve()));
     }
+
+    public static Collection<KSyntax> findSyntaxDefs(final KSort sort) {
+        return findElements(getSearchScope(sort), KSyntax.class, new Predicate<KSyntax>() {
+            @Override
+            public boolean apply(KSyntax kSyntax) {
+                return kSyntax.getSort().getText().equals(sort.getText());
+            }
+        });
+    }
 }

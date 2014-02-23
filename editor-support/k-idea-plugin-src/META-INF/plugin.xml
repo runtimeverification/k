@@ -126,10 +126,6 @@ Before launch:
         <lang.psiStructureViewFactory language="K"
                                       implementationClass="ro.uaic.fmse.kplugin.navigation.KStructureViewFactory"/>
         <lang.commenter language="K" implementationClass="ro.uaic.fmse.kplugin.KCommenter"/>
-        <lang.documentationProvider language="K"
-                                    implementationClass="ro.uaic.fmse.kplugin.RuleVarDocumentationProvider"/>
-        <lang.documentationProvider language="K"
-                                    implementationClass="ro.uaic.fmse.kplugin.RegularProductionDocumentationProvider"/>
         <codeStyleSettingsProvider implementation="ro.uaic.fmse.kplugin.codeStyle.KCodeStyleSettingsProvider"/>
         <langCodeStyleSettingsProvider
             implementation="ro.uaic.fmse.kplugin.codeStyle.KLanguageCodeStyleSettingsProvider"/>
@@ -137,5 +133,12 @@ Before launch:
         <lang.findUsagesProvider language="K" implementationClass="ro.uaic.fmse.kplugin.usages.KFindUsagesProvider"/>
         <usageTypeProvider implementation="ro.uaic.fmse.kplugin.usages.KUsageTypeProvider"/>
         <referencesSearch implementation="ro.uaic.fmse.kplugin.usages.KSortPredicateReferenceSearcher"/>
+
+        <lang.documentationProvider language="K"
+                                    implementationClass="ro.uaic.fmse.kplugin.RuleVarDocumentationProvider"/>
+        <lang.documentationProvider language="K"
+                                    implementationClass="ro.uaic.fmse.kplugin.RegularProductionDocumentationProvider"/>
+        <lang.documentationProvider language="K"
+                                    implementationClass="ro.uaic.fmse.kplugin.SyntaxDocumentationProvider"/>
     </extensions>
 </idea-plugin>
