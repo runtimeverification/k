@@ -92,15 +92,6 @@ public class KPsiUtil {
         return !result.isEmpty() ? result.iterator().next() : null;
     }
 
-    @Nullable
-    private static <T extends PsiElement> T findFirstElement(PsiElement rootElement, Class<T> targetClass,
-                                                             Predicate<T> predicate) {
-        Collection<T> result = findElements(Arrays.asList(rootElement), targetClass, predicate);
-        return !result.isEmpty() ? result.iterator().next() : null;
-
-    }
-
-
     @SuppressWarnings("unchecked")
     private static <T extends PsiElement> Collection<T> findElements(Collection<? extends PsiElement> rootElements,
                                                                      Class<? extends T> targetClass,
@@ -211,10 +202,12 @@ public class KPsiUtil {
 
     @NotNull
     public static Collection<IModuleItem> getImplementationRulesAndContexts(final KRegularProduction production) {
-        final String productionName = production.getName();
+        String productionName = production.getName();
         if (productionName == null) {
             return Collections.emptyList();
         }
+        final String expectedFragmentInRuleName =
+                productionName.startsWith("'") ? productionName.substring(1) : productionName;
 
         List<Class<? extends IModuleItem>> classes = new ArrayList<>();
         classes.add(KRule.class);
@@ -230,49 +223,59 @@ public class KPsiUtil {
                                     kRule.getRuleName() != null ? kRule.getRuleName().getItemName().getText() : null;
 
                             if (ruleName != null) {
-                                int productionNamePos = ruleName.indexOf(productionName);
+                                int productionNamePos = ruleName.indexOf(expectedFragmentInRuleName);
                                 if (productionNamePos != -1) {
                                     String productionNamePrefix = ruleName.substring(0, productionNamePos);
                                     String productionNameSuffix =
-                                            ruleName.substring(productionNamePos + productionName.length());
+                                            ruleName.substring(productionNamePos + expectedFragmentInRuleName.length());
                                     if ((productionNamePrefix.equals("") || productionNamePrefix.endsWith("-"))
                                             && !productionNamePrefix.endsWith("to-")
                                             &&
                                             (productionNameSuffix.equals("") || productionNameSuffix.startsWith("-"))) {
-                                        KIdExpr firstIdRefToProductionName =
-                                                findFirstElement(kRule.getRuleBody(), KIdExpr.class,
-                                                        new Predicate<KIdExpr>() {
-                                                            @Override
-                                                            public boolean apply(KIdExpr kIdExpr) {
-                                                                return kIdExpr.getText().equals(productionName);
-                                                            }
-                                                        });
-                                        return firstIdRefToProductionName != null;
+                                        return getReferencesToFast(kRule, production).size() > 0;
                                     }
                                 }
                                 return false;
                             } else {
                                 PsiElement firstChild = kRule.getRuleBody().getFirstChild();
-                                return (firstChild instanceof KIdExpr) && firstChild.getText().equals(productionName);
+                                return isReferenceToFast(firstChild, production);
                             }
                         } else if (moduleItem instanceof KContext) {
-                            return findFirstElement(moduleItem, KIdExpr.class, new Predicate<KIdExpr>() {
-                                @Override
-                                public boolean apply(KIdExpr kIdExpr) {
-                                    return kIdExpr.getId().getText().equals(productionName);
-                                }
-                            }) != null || findFirstElement(moduleItem, KLabel.class, new Predicate<KLabel>() {
-                                @Override
-                                public boolean apply(KLabel kLabel) {
-                                    return kLabel.getText().contains(productionName) &&
-                                            production.equals(kLabel.getReference().resolve());
-                                }
-                            }) != null;
+                            return getReferencesToFast(moduleItem, production).size() > 0;
                         }
                         return false;
                     }
                 });
 
         return implRules;
+    }
+
+    /**
+     * @return The references contained within the given module item to the given production.
+     */
+    private static Collection<PsiElement> getReferencesToFast(IModuleItem moduleItem,
+                                                              final KRegularProduction production) {
+        List<Class<? extends PsiElement>> elementClasses = new ArrayList<>();
+        elementClasses.add(KIdExpr.class);
+        elementClasses.add(KLabel.class);
+
+        return findElements(Arrays.asList(moduleItem), elementClasses, new Predicate<PsiElement>() {
+            @Override
+            public boolean apply(PsiElement element) {
+                return isReferenceToFast(element, production);
+            }
+        });
+    }
+
+    private static boolean isReferenceToFast(PsiElement element, KRegularProduction production) {
+        final String productionName = production.getName();
+        if (productionName == null) {
+            return false;
+        }
+        //noinspection RedundantCast
+        return ((element instanceof KIdExpr) && element.getText().equals(productionName))
+                || ((element instanceof KLabel) &&
+                element.getText().contains(productionName) &&
+                production.equals(((KLabel) element).getReference().resolve()));
     }
 }
