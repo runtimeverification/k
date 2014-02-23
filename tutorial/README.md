@@ -27,9 +27,9 @@ concerns.
 ## K Framework Overview
 
 [
-[MOVIE (kframework.org)](http://fsl.cs.uiuc.edu/k-overview/k-overview_player.html)
+[MOVIE (kframework.org) [9'59'']](http://fsl.cs.uiuc.edu/k-overview/k-overview_player.html)
 |
-[MOVIE (YouTube)](http://youtu.be/eSaIKHQOo4c)
+[MOVIE (YouTube) [9'59'']](http://youtu.be/eSaIKHQOo4c)
 |
 [SLIDES (PPT)](http://www.kframework.org/images/e/e4/K-Overview.zip)
 |
