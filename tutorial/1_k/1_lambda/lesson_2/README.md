@@ -1,5 +1,11 @@
 ### Lesson 2, LAMBDA: Module Importing, Rules, Variables
 
+[
+[MOVIE (kframework.org) [4'03'']](http://fsl.cs.uiuc.edu/k-tutorial/1_lambda/1_lambda-lesson_2/1_lambda-lesson_2_player.html)
+|
+[MOVIE (YouTube) [4'03'']](http://youtu.be/NDXgYfHG6R4)
+]
+
 We here learn how to include a predefined module (SUBSTITUTION), how to
 use it to define a K rule (the characteristic rule of lambda calculus),
 and how to make proper use of variables in rules.
