@@ -1,4 +1,4 @@
-### Lesson 3, LAMBDA: Evaluation Strategies using Strictness
+### Evaluation Strategies using Strictness
 
 [
 [MOVIE (kframework.org) [2'20'']](http://fsl.cs.uiuc.edu/k-tutorial/1_lambda/1_lambda-lesson_3/1_lambda-lesson_3_player.html)

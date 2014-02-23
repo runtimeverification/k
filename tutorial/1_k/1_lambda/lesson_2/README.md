@@ -1,4 +1,4 @@
-### Lesson 2, LAMBDA: Module Importing, Rules, Variables
+### Module Importing, Rules, Variables
 
 [
 [MOVIE (kframework.org) [4'03'']](http://fsl.cs.uiuc.edu/k-tutorial/1_lambda/1_lambda-lesson_2/1_lambda-lesson_2_player.html)

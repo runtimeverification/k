@@ -1,9 +1,14 @@
-K Tutorial --- LAMBDA --- Multiple Binding Constructs
-by Grigore Rosu
+### Multiple Binding Constructs
+
+[
+[MOVIE (kframework.org) [2'40'']](http://fsl.cs.uiuc.edu/k-tutorial/1_lambda/1_lambda-lesson_8/1_lambda-lesson_8_player.html)
+|
+[MOVIE (YouTube) [2'40'']](http://youtu.be/Ox4uXDpcY64)
+]
 
 Here we learn how multiple language constructs that bind variables can coexist.
-We will also learn about or recall another famous binder besides "lambda",
-namely "mu", which can be used to elegantly define all kinds of interesting
+We will also learn about or recall another famous binder besides `lambda`,
+namely `mu`, which can be used to elegantly define all kinds of interesting
 fixed-point constructs.
 
 The mu binder has the same syntax as lambda, except that it replaces
@@ -16,7 +21,7 @@ its desired latex attribute.
 
 The intuition for
 
-  mu x . e
+    mu x . e
 
 is that it reduces to e, but each free occurrence of x in e behaves like a
 pointer that points back to mu x .e.
@@ -25,27 +30,27 @@ With that in mind, let us postpone the definition of mu and instead redefine
 letrec F X = E in E' as a derived construct, assuming mu available.  The idea
 is to simply regard F as a fixed-point of the function
 
-  lambda X . E
+    lambda X . E
 
 that is, to first calculate
 
-  mu F . lambda X . E
+    mu F . lambda X . E
 
 and then to evaluate E' where F is bound to this fixed-point:
 
-  let F = mu F . lambda X . E in E'
+    let F = mu F . lambda X . E in E'
 
 This new definition of letrec may still look a bit tricky, particularly because
 F is bound twice, but it is much simpler and cleaner than our previous
 definition.  Moreover, now it is done in a type-safe manner (this aspect goes
 beyond our objective in this tutorial).
 
-Let us now define the semantic rule of "mu".
+Let us now define the semantic rule of `mu`.
 
 The semantics of mu is actually disarmingly simple.  We just have to substitute
 mu X . E for each free occurrence of X in E:
 
-  mu X . E => E[(mu X . E) / X]
+    mu X . E => E[(mu X . E) / X]
 
 Compile lambda.k and execute some recursive programs.  They should be now
 several times faster.  Write a few more recursive programs, for example ones

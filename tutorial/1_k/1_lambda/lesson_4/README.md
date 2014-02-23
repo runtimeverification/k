@@ -1,4 +1,4 @@
-### Lesson 4, LAMBDA: Generating Documentation; Latex Attributes
+### Generating Documentation; Latex Attributes
 
 [
 [MOVIE (kframework.org) [3'13'']](http://fsl.cs.uiuc.edu/k-tutorial/1_lambda/1_lambda-lesson_4/1_lambda-lesson_4_player.html)

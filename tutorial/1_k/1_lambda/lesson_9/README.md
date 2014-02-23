@@ -1,5 +1,10 @@
-K Tutorial --- LAMBDA --- A Complete and Documented K Definition
-by Grigore Rosu
+### A Complete and Documented K Definition
+
+[
+[MOVIE (kframework.org) [6'07'']](http://fsl.cs.uiuc.edu/k-tutorial/1_lambda/1_lambda-lesson_9/1_lambda-lesson_9_player.html)
+|
+[MOVIE (YouTube) [6'07'']](http://youtu.be/-pHgLqNMKac)
+]
 
 In this lesson you will learn how to add formal comments to your K definition,
 in order to nicely document it.  The generated document can be then used for
@@ -22,7 +27,7 @@ comments are completely ignored.
 Document annotations
 --------------------
 
-Use the "@" symbol right after // or /* in order for the comment to be
+Use the `@` symbol right after // or /* in order for the comment to be
 considered an annotation and thus be processed by the K tool when it
 generates documentation.
 
@@ -41,9 +46,9 @@ experiment with these options.
 Header annotations
 ------------------
 
-Use the "!" symbol right after // or /* if you want the comment to be
+Use the `!` symbol right after // or /* if you want the comment to be
 considered a header annotation, that is, one which goes before
-"\begin{document}" in the generated Latex.  You typically need header
+`\begin{document}` in the generated Latex.  You typically need header
 annotations to include macros, or to define a title, etc.
 
 As an example, let us set a Latex length and then add a title and an
