@@ -25,7 +25,6 @@ import java.util.concurrent.TimeUnit;
  * Author: Owolabi Legunsen
  * 1/8/14: 10:08 AM
  */
-//TODO(OwolabiL): How to deal with macros and function rules? (imp has none)
 public class PathIndex {
     private final Map<Integer, Rule> indexedRules;
     private final Definition definition;
@@ -82,12 +81,18 @@ public class PathIndex {
         for (Integer key : pStringMap.keySet()) {
             strings = (ArrayList<String>) pStringMap.get(key);
             for (String string : strings) {
-                //pass the substring starting at 2 to prevent clashes with "@.", the root node
+                //pass the substring starting at 2 to prevent clashes with "@.", which represents
+                // the root node
                 trie.addIndex(trie.getRoot(), string.substring(2), key);
             }
         }
     }
 
+    /**
+     * Utility method for printing the indexed rules. Useful only for debugging.
+     * @param indexedRules  Mapping of Rules to the integers used to refer to them.
+     * @param pString       Mapping of Rule number to the pStrings derived from a rule.
+     */
     private void printIndices(Map<Integer, Rule> indexedRules, MultiMap<Integer,
             String> pString) {
         for (Integer n : indexedRules.keySet()) {
@@ -107,6 +112,14 @@ public class PathIndex {
         }
     }
 
+    /**
+     * This method creates pStrings from an input rule.
+     *
+     * @param rule  The rule from which pStrings are to be extracted
+     * @param n     The integer to be assigned to this rule in the Index structure
+     * @param type  The type of the rule, i.e., cooling, heating, etc.
+     * @return      A mapping of the rule index to the PStrings created from the input rule
+     */
     private MultiMap<Integer, String> createRulePString(Rule rule, int n, RuleType type) {
         MultiMap<Integer, String> pStrings = new MultiHashMap<>();
         RuleVisitor ruleVisitor;
@@ -123,7 +136,8 @@ public class PathIndex {
                 ruleVisitor = new RuleVisitor(definition.context());
                 //TODO(OwolabiL): Move this to the RuleVisitor class
                 if (multiCellInfoHolder != null) {
-                    kCells = MultipleCellUtil.checkRuleForMultiplicityStar(rule, multiCellInfoHolder.getParentOfCellWithMultipleK());
+                    kCells = MultipleCellUtil.checkRuleForMultiplicityStar(rule,
+                            multiCellInfoHolder.getParentOfCellWithMultipleK());
                 }
                 break;
             case OUT:
@@ -135,7 +149,8 @@ public class PathIndex {
                 inputRuleIndices.add(n);
                 return pStrings;
             default:
-                throw new IllegalArgumentException("Cannot create P-String for unknown rule type:" + type);
+                throw new IllegalArgumentException("Cannot create P-String for unknown rule type:"
+                        + type);
         }
 
         //TODO(OwolabiL): Move this check to the RuleVisitor class
@@ -150,6 +165,7 @@ public class PathIndex {
         pStrings.putAll(n, ruleVisitor.getpStrings());
         return pStrings;
     }
+
 
     public List<Rule> getRulesForTerm(Term term) {
         Set<String> pStrings;
