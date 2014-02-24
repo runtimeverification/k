@@ -69,6 +69,8 @@ public class KSyntaxHighlighter extends SyntaxHighlighterBase {
             = createTextAttributesKey("K_VAR", new TextAttributes(JBColor.black, null, null, null, Font.BOLD));
     public static final TextAttributesKey FUNCTION_CALL
             = createTextAttributesKey("K_FUNCTION_CALL", DefaultLanguageHighlighterColors.FUNCTION_CALL);
+    public static final TextAttributesKey FUNCTION_DECLARATION
+            = createTextAttributesKey("K_FUNCTION_DECLARATION", DefaultLanguageHighlighterColors.FUNCTION_DECLARATION);
 
     static final TextAttributesKey BAD_CHARACTER = createTextAttributesKey("K_BAD_CHARACTER",
             HighlighterColors.BAD_CHARACTER);

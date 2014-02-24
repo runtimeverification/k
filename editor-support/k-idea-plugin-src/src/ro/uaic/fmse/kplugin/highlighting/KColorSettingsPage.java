@@ -33,7 +33,8 @@ public class KColorSettingsPage implements ColorSettingsPage {
             new AttributesDescriptor("Colon", KSyntaxHighlighter.COLON),
             new AttributesDescriptor("Type", KSyntaxHighlighter.TYPE),
             new AttributesDescriptor("Variable", KSyntaxHighlighter.VAR),
-            new AttributesDescriptor("Auxiliary function call", KSyntaxHighlighter.FUNCTION_CALL),
+            new AttributesDescriptor("Aux function declaration", KSyntaxHighlighter.FUNCTION_DECLARATION),
+            new AttributesDescriptor("Aux function call", KSyntaxHighlighter.FUNCTION_CALL),
             new AttributesDescriptor("Cell", KSyntaxHighlighter.CELL),
             new AttributesDescriptor("Attribute", KSyntaxHighlighter.ATTRIBUTE_BLOCK),
             new AttributesDescriptor("Module or rule name", KSyntaxHighlighter.ITEM_NAME),
@@ -52,6 +53,7 @@ public class KColorSettingsPage implements ColorSettingsPage {
         ourTags.put("type", KSyntaxHighlighter.TYPE);
         ourTags.put("var", KSyntaxHighlighter.VAR);
         ourTags.put("func-call", KSyntaxHighlighter.FUNCTION_CALL);
+        ourTags.put("func-dec", KSyntaxHighlighter.FUNCTION_DECLARATION);
         ourTags.put("error", KSyntaxHighlighter.ERROR);
     }
 
