@@ -24,6 +24,7 @@ public class TermVisitor extends LocalVisitor {
     private static final String USER_LIST_REPLACEMENT = "UserList";
     private static final String K_ITEM_SORT = "KItem";
     private static final String EMPTY_K = "EMPTY_K";
+    public static final String K_STRING = "K";
     private final Set<String> pStrings;
     private final Context context;
 
@@ -150,18 +151,22 @@ public class TermVisitor extends LocalVisitor {
                 if (pString != null) {
                     ArrayList<Production> productions = (ArrayList<Production>) productions1;
                     if (productions.size() == 1) {
-                        pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR + token.sort());
+                        pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR +
+                                token.sort());
                     } else {
-                        pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR + "UserList");
+                        pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR +
+                                USER_LIST_REPLACEMENT);
                     }
                 }
             } else {
                 ArrayList<Production> productions = (ArrayList<Production>) productions1;
                 Production p = productions.get(0);
                 if (productions.size() == 1) {
-                    pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR + p.getChildSort(0));
+                    pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR +
+                            p.getChildSort(0));
                 } else {
-                    pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR + "UserList");
+                    pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR +
+                            USER_LIST_REPLACEMENT);
                 }
             }
         }
@@ -221,9 +226,9 @@ public class TermVisitor extends LocalVisitor {
                                         (ArrayList<Production>) context.productionsOf(currentLabel);
                                 Production p = productions.get(0);
                                 String test = pString + SEPARATOR + (currentPosition) + SEPARATOR;
-                                if (p.getChildSort(currentPosition - 1).equals("K")) {
+                                if (p.getChildSort(currentPosition - 1).equals(K_STRING)) {
                                     //TODO(OwolabiL): This needs to be investigated further and
-                                    // handled properly
+                                    // handled properly. This is not a good way to handle this case.
                                     pStrings.add(test + kItem.kLabel() + SEPARATOR + "1.Exp");
                                 } else {
                                     pStrings.add(test + p.getChildSort(currentPosition - 1));
@@ -236,7 +241,7 @@ public class TermVisitor extends LocalVisitor {
                             ArrayList<Production> productions =
                                     (ArrayList<Production>) context.productionsOf(currentLabel);
                             Production p = productions.get(0);
-                            if (p.getChildSort(currentPosition - 1).equals("K")) {
+                            if (p.getChildSort(currentPosition - 1).equals(K_STRING)) {
                                 pStrings.add(test + kItem.kLabel() + SEPARATOR + (currentPosition) +
                                         SEPARATOR + kItem.sort());
                             } else {
