@@ -33,10 +33,6 @@ public class IndexingStatistics {
     public  static List<Long> timesForRewriting= new ArrayList<>();
     public  static List<Integer> rulesSelectedAtEachStep = new ArrayList<>();
 
-    public IndexingStatistics() {
-    }
-
-
     public static void print() {
         System.err.println("=====================================================");
         System.err.println("Total KRun time: " + totalKrunStopwatch);
