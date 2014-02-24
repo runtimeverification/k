@@ -62,11 +62,6 @@ public class RuleVisitor extends LocalVisitor {
         visit((KList) kItem.kList());
     }
 
-//    @Override
-//    public void visit(KLabel kLabel) {
-//        pString = pString.concat(kLabel.toString());
-//    }
-
     @Override
     public void visit(KLabelConstant kLabel) {
         pString = pString.concat(kLabel.toString());

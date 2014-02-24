@@ -8,30 +8,30 @@ import java.util.List;
 /**
  * This class holds statistics about rewriting. The goal is to be able to compare different indexing
  * schemes and measure progress as we build them.
- *
+ * <p/>
  * Author: OwolabiL
  * Date: 2/18/14
  * Time: 4:51 PM
  */
 public class IndexingStatistics {
     //TODO(OwolabiL): Make this a Singleton class instead
-    public  static Stopwatch totalRewriteStopwatch = new Stopwatch();
-    public  static Stopwatch totalKrunStopwatch = new Stopwatch();
-    public  static Stopwatch indexConstructionStopWatch = new Stopwatch();
-    public  static Stopwatch getRulesForTermStopWatch = new Stopwatch();
-    public  static Stopwatch getPStringFromTermStopWatch = new Stopwatch();
-    public  static Stopwatch findMatchingIndicesStopWatch = new Stopwatch();
-    public  static Stopwatch rewriteStepStopWatch = new Stopwatch();
-    public  static Stopwatch rewritingStopWatch = new Stopwatch();
-    public  static Stopwatch preProcessStopWatch = new Stopwatch();
-    public  static Stopwatch kilTransformationStopWatch = new Stopwatch();
+    public static Stopwatch totalRewriteStopwatch = new Stopwatch();
+    public static Stopwatch totalKrunStopwatch = new Stopwatch();
+    public static Stopwatch indexConstructionStopWatch = new Stopwatch();
+    public static Stopwatch getRulesForTermStopWatch = new Stopwatch();
+    public static Stopwatch getPStringFromTermStopWatch = new Stopwatch();
+    public static Stopwatch findMatchingIndicesStopWatch = new Stopwatch();
+    public static Stopwatch rewriteStepStopWatch = new Stopwatch();
+    public static Stopwatch rewritingStopWatch = new Stopwatch();
+    public static Stopwatch preProcessStopWatch = new Stopwatch();
+    public static Stopwatch kilTransformationStopWatch = new Stopwatch();
 
-    public  static List<Long> timesForRuleSelection = new ArrayList<>();
-    public  static List<Long> timesForGettingPStringsFromTerm = new ArrayList<>();
-    public  static List<Long> timesForFindingMatchingIndices = new ArrayList<>();
-    public  static List<Long> timesForRewriteSteps = new ArrayList<>();
-    public  static List<Long> timesForRewriting= new ArrayList<>();
-    public  static List<Integer> rulesSelectedAtEachStep = new ArrayList<>();
+    public static List<Long> timesForRuleSelection = new ArrayList<>();
+    public static List<Long> timesForGettingPStringsFromTerm = new ArrayList<>();
+    public static List<Long> timesForFindingMatchingIndices = new ArrayList<>();
+    public static List<Long> timesForRewriteSteps = new ArrayList<>();
+    public static List<Long> timesForRewriting = new ArrayList<>();
+    public static List<Integer> rulesSelectedAtEachStep = new ArrayList<>();
 
     public static void print() {
         System.err.println("=====================================================");
@@ -51,15 +51,15 @@ public class IndexingStatistics {
         System.err.println("Total time For Rewrite Steps: " +
                 computeTotal(timesForRewriteSteps) + " ms");
         System.err.println("Average time for Rule selection: " +
-                computeAverage(timesForRuleSelection) + " \u00B5"+"s");
+                computeAverage(timesForRuleSelection) + " \u00B5" + "s");
         System.err.println("\tAverage time for getting PStrings from term: " +
-                computeAverage(timesForGettingPStringsFromTerm) + " \u00B5"+"s");
+                computeAverage(timesForGettingPStringsFromTerm) + " \u00B5" + "s");
         System.err.println("\tAverage time for finding matching indices: " +
-                computeAverage(timesForFindingMatchingIndices) + " \u00B5"+"s");
+                computeAverage(timesForFindingMatchingIndices) + " \u00B5" + "s");
         System.err.println("Average time for Actual Rewriting: " +
-                computeAverage(timesForRewriting) + " \u00B5"+"s");
+                computeAverage(timesForRewriting) + " \u00B5" + "s");
         System.err.println("Average time For Rewrite Steps: " +
-                computeAverage(timesForRewriteSteps) + " \u00B5"+"s");
+                computeAverage(timesForRewriteSteps) + " \u00B5" + "s");
         System.err.println("Average rules selected at each step: " +
                 computeAverages(rulesSelectedAtEachStep));
         System.err.println("Min. Number of rules selected at each step: " +
@@ -74,12 +74,8 @@ public class IndexingStatistics {
 
     private static int computeMin(List<Integer> rulesSelectedAtEachStep) {
         int min = rulesSelectedAtEachStep.get(0);
-        for (int num:rulesSelectedAtEachStep){
-            if(num == 0){
-                continue;
-            }
-
-            if (num < min){
+        for (int num : rulesSelectedAtEachStep) {
+            if (num != 0 && num < min) {
                 min = num;
             }
         }
@@ -88,8 +84,8 @@ public class IndexingStatistics {
 
     private static int computeMax(List<Integer> rulesSelectedAtEachStep) {
         int max = rulesSelectedAtEachStep.get(0);
-        for (int num:rulesSelectedAtEachStep){
-            if (num > max){
+        for (Integer num : rulesSelectedAtEachStep) {
+            if (num > max) {
                 max = num;
             }
         }
@@ -98,26 +94,26 @@ public class IndexingStatistics {
 
     private static double computeTotal(List<Long> times) {
         long sum = 0L;
-        for (long time : times){
-            sum +=time;
+        for (long time : times) {
+            sum += time;
         }
-        return ((double)sum)/1000;
+        return ((double) sum) / 1000;
     }
 
     //TODO(OwolaiL): These two methods should be merged since they have the same erasure
     private static double computeAverages(List<Integer> ruleCounts) {
         Integer sum = 0;
-        for (int count: ruleCounts) {
+        for (int count : ruleCounts) {
             sum += count;
         }
-        return ((double)sum)/ruleCounts.size();
+        return ((double) sum) / ruleCounts.size();
     }
 
     private static double computeAverage(List<Long> times) {
         Long sum = 0L;
-        for (Long time: times) {
-             sum+=time;
+        for (Long time : times) {
+            sum += time;
         }
-        return ((double)sum)/times.size();
+        return ((double) sum) / times.size();
     }
 }

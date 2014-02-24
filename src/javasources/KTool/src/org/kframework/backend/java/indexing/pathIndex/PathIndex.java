@@ -90,8 +90,9 @@ public class PathIndex {
 
     /**
      * Utility method for printing the indexed rules. Useful only for debugging.
-     * @param indexedRules  Mapping of Rules to the integers used to refer to them.
-     * @param pString       Mapping of Rule number to the pStrings derived from a rule.
+     *
+     * @param indexedRules Mapping of Rules to the integers used to refer to them.
+     * @param pString      Mapping of Rule number to the pStrings derived from a rule.
      */
     private void printIndices(Map<Integer, Rule> indexedRules, MultiMap<Integer,
             String> pString) {
@@ -115,10 +116,10 @@ public class PathIndex {
     /**
      * This method creates pStrings from an input rule.
      *
-     * @param rule  The rule from which pStrings are to be extracted
-     * @param n     The integer to be assigned to this rule in the Index structure
-     * @param type  The type of the rule, i.e., cooling, heating, etc.
-     * @return      A mapping of the rule index to the PStrings created from the input rule
+     * @param rule The rule from which pStrings are to be extracted
+     * @param n    The integer to be assigned to this rule in the Index structure
+     * @param type The type of the rule, i.e., cooling, heating, etc.
+     * @return A mapping of the rule index to the PStrings created from the input rule
      */
     private MultiMap<Integer, String> createRulePString(Rule rule, int n, RuleType type) {
         MultiMap<Integer, String> pStrings = new MultiHashMap<>();
@@ -170,8 +171,8 @@ public class PathIndex {
      * This method is called at every rewriting step in order to find which of the indexed rules may
      * may be applicable to the term at that step.
      *
-     * @param term  the term to be rewritten
-     * @return      a list of rules that can possibly match
+     * @param term the term to be rewritten
+     * @return a list of rules that can possibly match
      */
     public List<Rule> getRulesForTerm(Term term) {
         Set<String> pStrings;
