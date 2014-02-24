@@ -7,6 +7,7 @@ import org.kframework.kil.loader.Context;
 import java.util.ArrayList;
 
 /**
+ * Visitor for traversing cooling Rules
  * Author: OwolabiL
  * Date: 1/20/14
  * Time: 12:40 PM

@@ -12,7 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-/**
+/** This Visitor class traverses a rule and makes PStrings out of the rule using the contents of
+ * the k cell
+ *
  * Author: OwolabiL
  * Date: 1/20/14
  * Time: 1:50 PM
