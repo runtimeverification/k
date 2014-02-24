@@ -17,24 +17,24 @@ is nothing but syntactic sugar for
 
     (lambda x . e') e
 
-This can be easily achieved with a rule, as shown in lambda.k.
+This can be easily achieved with a rule, as shown in `lambda.k`.
 
 As a side point, which is not very relevant here but good to know, we may
-want the `desugaring` of let to not even count as a computational step, but
-as a mere `structural rearrangement` of the program so that other semantic
+want the *desugaring* of `let` to not even count as a computational step, but
+as a mere *structural rearrangement* of the program so that other semantic
 rules (beta reduction, in our case) can match and apply.
 
 The K tool allows us to tag rules with the attribute `structural`, with
 precisely the intuition above.  You can think of structural rules as a kind
-of light rules, almost like macros, or like ones which apply `under the hood`,
+of light rules, almost like macros, or like ones which apply *under the hood*,
 instantaneously.  There are several other uses for structural rules in K,
 which we will discuss later in this tutorial.
 
-Compile lambda.k and write some programs using let binders.  
+Compile `lambda.k` and write some programs using `let` binders.  
 
-For example, consider a lets.lambda program which takes arithmetic.lambda
+For example, consider a `lets.lambda` program which takes `arithmetic.lambda`
 and replaces each integer by a let-bound variable.  It should evaluate to
-`true`, just like the original arithmetic.lambda.
+`true`, just like the original `arithmetic.lambda`.
 
 Let us now consider a more interesting program, namely one that calculates the
 factorial of 10:
@@ -52,8 +52,8 @@ lambda calculus, based on passing a function to itself.
 We may not like to define fixed points following the approach above, because
 it requires global changes in the body of the function meant to be recursive,
 basically to pass it to itself (`f f` in our case above).  The approach below
-isolates the fixed point aspect of the function in a so-called `fixed point
-combinator`, which we call `fix` below, and then apply it to the function
+isolates the fixed point aspect of the function in a so-called *fixed point
+combinator*, which we call `fix` below, and then apply it to the function
 defining the body of the factorial, without any changes to it:
 
     let fix = lambda f . (
@@ -68,11 +68,11 @@ Although the above techniques are interesting and powerful (indeed, untyped
 lambda calculus is in fact Turing complete), programmers will probably not
 like to write programs this way.
 
-We can easily define a more complex derived construct, called letrec and
+We can easily define a more complex derived construct, called `letrec` and
 conventionally encountered in functional programming languages, whose semantics
 captures the fixed-point idea above.  In order to keep its definition simple
-and intuitive, we define a simplified variant of letrec, namely one which only
-allows to define one recursive one-argument function.  See lambda.k.
+and intuitive, we define a simplified variant of `letrec`, namely one which only
+allows to define one recursive one-argument function.  See `lambda.k`.
 
 There are two interesting observations here.
 
@@ -91,11 +91,11 @@ because any possible uses of $x in the body of the function defined
 using `letrec` would be captured by the `lambda $x` declaration in the
 definition of `letrec`.
 
-Using letrec, we can now write the factorial program as elegantly as it can
+Using `letrec`, we can now write the factorial program as elegantly as it can
 be written in a functional language:
 
     letrec f x = if x <= 1 then 1 else (x * (f (x + -1)))
     in (f 10)
 
-In the next lesson we will discuss an alternative definition of letrec, based
+In the next lesson we will discuss an alternative definition of `letrec`, based
 on another binder, `mu`, specifically designed to define fixed points.

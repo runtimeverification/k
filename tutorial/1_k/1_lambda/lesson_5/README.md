@@ -2,7 +2,7 @@
 
 [MOVIE [4'52"]](http://youtu.be/T1aI04q3l9U)
 
-We have already added the builtin identifiers (sort Id) to LAMBDA expressions,
+We have already added the builtin identifiers (sort `Id`) to LAMBDA expressions,
 but those had no operations on them (note that substitution is not builtin; it
 is a predefined operation, defined in K).  In this lesson we add integers and
 Booleans to LAMBDA, and extend the builtin operations on them into
@@ -14,7 +14,7 @@ The K tool provides several builtins, defined in the K distribution (Maude)
 file k/bin/maude/lib/pl-builtins.maude, which are automatically included in all
 definitions.  These can be used in the languages that we define, typically by
 including them in the desired syntactic categories.  You can also define your
-own `builtins` in case the provided ones are not suitable for your language
+own builtins in case the provided ones are not suitable for your language
 (e.g., the provided builtin integers and operations on them are arbitrary
 precision).
 
@@ -23,24 +23,24 @@ add the productions
 
     syntax Val ::= Int | Bool
 
-Int and Bool are the nonterminals that correspond to these builtins.
+`Int` and `Bool` are the nonterminals that correspond to these builtins.
 
 To make use of these builtins, we have to add some arithmetic operation
 constructs to our language.  We prefer to use the conventional infix notation
 for these, and the usual precedences (i.e., multiplication and division bind
 tighter than addition, which binds tighter than relational operators).
 Inspired from SDF, we use `>` instead of `|` to state that all the previous
-constructs bind tighter than all the subsequent ones.  See lambda.k.
+constructs bind tighter than all the subsequent ones.  See `lambda.k`.
 
 The only thing left is to link the LAMBDA arithmetic operations to the
 corresponding builtin operations, when their arguments are evaluated.
-This can be easily done using trivial rewrite rules, as shown in lambda.k.
+This can be easily done using trivial rewrite rules, as shown in `lambda.k`.
 In general, the K tool attempts to uniformly add the corresponding builtin
 name as a suffix to all the operations over builtins.  For example, the
 addition over integers is an infix operation named `+Int`.
 
-Compile the new lambda.k definition and evaluate some simple arithmetic
-expressions.  For example, if arithmetic.lambda is `(1+2*3)/4 <= 1`, then
+Compile the new `lambda.k` definition and evaluate some simple arithmetic
+expressions.  For example, if `arithmetic.lambda` is `(1+2*3)/4 <= 1`, then
 
     krun arithmetic.lambda
 
@@ -56,9 +56,9 @@ yields, as expected,
 Note that the parser took the desired operation precedence into account.
 
 Let us now try to evaluate an expression which performs a wrong computation,
-namely a division by zero.  Consider the expression arithmetic-div-zero.lambda
-which is `1/(2/3)`.  Since division is strict and 2/3 evaluates to 0, this
-expression reduces to 1/0, which further reduces to 1 /Int 0 by the rule for
+namely a division by zero.  Consider the expression `arithmetic-div-zero.lambda`
+which is `1/(2/3)`.  Since division is strict and `2/3` evaluates to `0`, this
+expression reduces to `1/0`, which further reduces to `1 /Int 0` by the rule for
 division, which is now stuck (with the current Maude back-end to the K tool).
 
 In fact, depending upon the back-end that we use to execute K definitions and

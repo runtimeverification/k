@@ -14,7 +14,7 @@ K allows to define selective strictness using the same `strict` attribute,
 but passing it a list of numbers.  The numbers correspond to the arguments
 in which we want the defined construct to be strict.  In our case,
 
-    syntax Exp ::= `if` Exp `then` Exp `else` Exp   [strict(1)]
+    syntax Exp ::= "if" Exp "then" Exp "else" Exp   [strict(1)]
 
 states that the conditional construct is strict in the first argument.
 
@@ -32,12 +32,12 @@ An anonymous variable is therefore completely equivalent to a normal variable
 which is unsorted and different from all the other variables in the rule.  If
 you use `_` multiple times in a rule, they will all be considered distinct.
 
-Compile lambda.k and write and execute some interesting expressions making
+Compile `lambda.k` and write and execute some interesting expressions making
 use of the conditional construct.  For example, the expression
 
     if 2<=1 then 3/0 else 10
 
-evaluates to 10 and will never evaluate 3/0, thus avoiding an unwanted
+evaluates to `10` and will never evaluate `3/0`, thus avoiding an unwanted
 division-by-zero.
 
 In the next lesson we will introduce two new language constructs, called
