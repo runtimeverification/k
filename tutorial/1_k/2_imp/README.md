@@ -1,5 +1,4 @@
-K Tutorial --- IMP
-by Grigore Rosu
+## Part 2: Defining IMP
 
 Here you will learn how to define a very simple imperative language in K
 and the basics of how to work with configurations, cells, and computations.
@@ -16,5 +15,5 @@ Specifically, you will learn the following:
 * The distinction between structural and computational rules.
 
 Like in the previous tutorial, this folder contains several lessons, each
-adding new features to IMP.  Do them in order and follow the README files.
-Also, make sure you completed and understood the previous tutorial.
+adding new features to IMP.  Do them in order.  Also, make sure you completed
+and understood the previous tutorial.

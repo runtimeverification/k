@@ -38,17 +38,18 @@ private not_new_item ::= !new_item
 
 configuration ::= "configuration" cell+ &new_item {implements="ro.uaic.fmse.kplugin.psi.IModuleItem"} //{pin=1}
 
-syntax ::= "syntax" type "::=" production_attr? syntax_rhs (production_sep production_attr? syntax_rhs)* &new_item
-             {implements="ro.uaic.fmse.kplugin.psi.IModuleItem"} //{pin=1}
+syntax ::= "syntax" sort "::=" production_attr? syntax_rhs (production_sep production_attr? syntax_rhs)* &new_item
+             {mixin="ro.uaic.fmse.kplugin.psi.impl.KSyntaxBase"
+              implements="ro.uaic.fmse.kplugin.psi.IKSyntaxBase"} //{pin=1}
 production_sep ::= "|" | ">"
 production_attr ::= ("left" ":") | ("non-assoc" ":")
 
-syntax_rhs ::= syntax_rhs_regular | syntax_rhs_aux_function | syntax_rhs_list | syntax_rhs_token
-syntax_rhs_regular ::= (attribute_block_list | type | STRING)+ &(production_sep | new_item_strict)
+private syntax_rhs ::= syntax_rhs_regular | syntax_rhs_aux_function | syntax_rhs_list | syntax_rhs_token
+syntax_rhs_regular ::= (attribute_block_list | sort | STRING)+ &(production_sep | new_item_strict)
                             {mixin = "ro.uaic.fmse.kplugin.psi.impl.PsiKSyntaxRhsRegularBase"}
-syntax_rhs_aux_function ::= id? "(" type? ("," type)* ")" attribute_block_list?
+syntax_rhs_aux_function ::= id? "(" sort? ("," sort)* ")" attribute_block_list?
                             {mixin = "ro.uaic.fmse.kplugin.psi.impl.PsiKSyntaxRhsAuxFunctionBase"}
-syntax_rhs_list ::= "List" "{" type "," STRING "}" attribute_block_list?
+syntax_rhs_list ::= "List" "{" sort "," STRING "}" attribute_block_list?
 syntax_rhs_token ::= "Token" "{" token_elem* "}" attribute_block_list?
 private token_elem ::= INTEGER_LITERAL|STRING|OPERATOR|OTHER|id|",,"|","|"_"|label
 
@@ -84,11 +85,12 @@ private expr_no_brackets  ::= cell|typed_var|id_expr|INTEGER_LITERAL|STRING|OPER
 id_expr ::= id {mixin="ro.uaic.fmse.kplugin.psi.impl.KIdExprBase"
                    implements="ro.uaic.fmse.kplugin.psi.IKIdExprBase"}
 
-typed_var ::= var_dec colon type
+typed_var ::= var_dec colon sort
 var_dec ::= id | "_" {mixin="ro.uaic.fmse.kplugin.psi.impl.KVarDecBase"
                       implements="ro.uaic.fmse.kplugin.psi.IKVarDecBase"}
 colon ::= ":"
-type ::= id
+sort ::= id {mixin="ro.uaic.fmse.kplugin.psi.impl.KSortBase"
+             implements="ro.uaic.fmse.kplugin.psi.IKSortBase"}
 
 cell ::= cell_start expr+ cell_end | "<" id "/>"
 cell_start ::= "<" cell_start_cont
@@ -98,7 +100,8 @@ private cell_end_cont ::= id ">"
 
 private tag_border_in_exp ::= (("<" !cell_start_cont) | ("</" !cell_end_cont) | ">" | "/>")
 
-label ::= LABEL_TOK
+label ::= LABEL_TOK {mixin="ro.uaic.fmse.kplugin.psi.impl.KLabelBase"
+                     implements="ro.uaic.fmse.kplugin.psi.IKLabelBase"}
 string_literal ::= STRING
 
 l_comment ::= COMMENT

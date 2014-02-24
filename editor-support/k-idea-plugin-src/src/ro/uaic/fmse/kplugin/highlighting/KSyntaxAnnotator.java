@@ -1,5 +1,6 @@
 package ro.uaic.fmse.kplugin.highlighting;
 
+import com.intellij.lang.ASTNode;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.Annotator;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
@@ -7,6 +8,7 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiErrorElement;
 import com.intellij.psi.ResolveResult;
+import com.intellij.psi.tree.TokenSet;
 import org.jetbrains.annotations.NotNull;
 import ro.uaic.fmse.kplugin.psi.*;
 
@@ -41,7 +43,7 @@ public class KSyntaxAnnotator implements Annotator {
                 createAnnotation(holder, cellEnd.getTextRange(), KSyntaxHighlighter.CELL);
             }
 
-        } else if (element instanceof KType) {
+        } else if (element instanceof KSort) {
             createAnnotation(holder, element.getTextRange(), KSyntaxHighlighter.TYPE);
         } else if (element instanceof KColon) {
             createAnnotation(holder, element.getTextRange(), KSyntaxHighlighter.COLON);
@@ -57,6 +59,15 @@ public class KSyntaxAnnotator implements Annotator {
                 createAnnotation(holder, element.getTextRange(), KSyntaxHighlighter.VAR);
             } else {
                 createAnnotation(holder, element.getTextRange(), KSyntaxHighlighter.FUNCTION_CALL);
+            }
+        } else if (element instanceof KSyntaxRhsAuxFunction) {
+            KId id = ((KSyntaxRhsAuxFunction) element).getId();
+            if (id != null) {
+                createAnnotation(holder, id.getTextRange(), KSyntaxHighlighter.FUNCTION_DECLARATION);
+            }
+            for (ASTNode child : element.getNode()
+                    .getChildren(TokenSet.create(KTypes.COMMA, KTypes.LEFT_PAREN, KTypes.RIGHT_PAREN))) {
+                createAnnotation(holder, child.getTextRange(), KSyntaxHighlighter.FUNCTION_DECLARATION);
             }
         } else if (element instanceof PsiErrorElement || element instanceof KOtherItemBody) {
             createAnnotation(holder, element.getTextRange(), KSyntaxHighlighter.ERROR);

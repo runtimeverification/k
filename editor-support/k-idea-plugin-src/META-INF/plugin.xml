@@ -1,86 +1,16 @@
-<idea-plugin version="2">
+<idea-plugin version="2" url="https://github.com/kframework/k/blob/master/editor-support/k-idea-plugin-src/README.md">
     <id>ro.uaic.fmse.kplugin</id>
     <name>K Framework Support</name>
-    <version>1.0</version>
+    <version>1.1.1</version>
     <vendor email="denis.bogdanas@gmail.com" url="https://fmse.info.uaic.ro">UAIC</vendor>
 
-    <description><![CDATA[
-<h2>Installation</h2>
-<p>Requirements:</p>
-<ul>
-<li>Intellij Idea 13</li>
-</ul>
-<p>Installation instructions:</p>
-<ul>
-<li>Copy k-idea-plugin.jar to c:\Users\<user name="">.IdeaIC13\config\plugins or whatever.</user></li>
-<li>Restart Intellij Idea</li>
-</ul>
-<h2>Features</h2>
-<p>All the features are similar with the corresponding features for Intellij Idea Java IDE. </p>
-<ul>
-<li>Syntax highlighting of K files.</li>
-<li>Custom settings for syntax highlighting. go to Settings -&gt; Editor -&gt; Colors &amp; Fonts -&gt; K to change color settings.</li>
-<li>References for rule variables. A reference points at the first occurrence in the rule where variable is typed. To navigate from reference to the target Ctrl+click on the reference. </li>
-<li>References for auxiliary functions. If the file don't contain "require" clauses then references are resolved locally. Otherwise they are resolved in the module scope. Both standard auxiliary functions and auxiliary functions defined as regular syntax (old style) are supported.</li>
-<li>Find usages for variables and auxiliary functions. Right click on the name -&gt; Find Usages.</li>
-<li>Rename variables/auxiliary functions. Right click on the name -&gt; Refactor -&gt; Rename.</li>
-<li>Folding of comments/rules/syntax. Multi-line comments are folded by default.</li>
-<li>Highlighting of open/closed parentheses pairs. Move the cursor over a parenthesis to see the effect.</li>
-<li>Quick navigation info for vars/functions. Keep Ctrl pressed and hover over a variable/aux function. Reference target should be displayed.</li>
-<li>Quick documentation view. Press Ctrl+Q on a reference. It will show the reference target plus the associated documentation. For auxiliary functions the associated documentation is the comment above the  function declaration.</li>
-<li>Find auxiliary function. Press Ctrl+Alt+Shift+N. The list of all auxiliary functions in the project is displayed. The list is narrowed as you type.</li>
-<li>Structure view for auxiliary functions. When the current file is a K file, press Ctrl+F12. The list of auxiliary functions in the file is displayed.</li>
-<li>Quick code commenting / uncommenting. Press Ctrl+/ to comment / uncomment the current line. Press Ctrl+Shift+/ to comment / uncomment the current selection.</li>
-</ul>
-<h2>Support for kompile / krun</h2>
-<ul>
-<li>
-Go to Settings -&gt; External Tools -&gt; press "+"
-<ul>
-<li>Name: kompile</li>
-<li>Program: kompile. On Windows: kompile.bat. Provided you already have k/bin in your $PATH.</li>
-<li>Parameters: -v $FileName$</li>
-<li>Working directory: $FileDir$</li>
-</ul>
-</li>
-<li>Open a K file</li>
-<li>Right click -&gt; kompile</li>
-<li>
-Go to Settings -&gt; External Tools -&gt; press "+"
-<ul>
-<li>Name: krun-simple</li>
-<li>Program: krun. On Windows: krun.bat.</li>
-<li>Parameters: $FileDir$/$FileName$</li>
-<li>Working directory: &lt;path to simple-untyped.k&gt;</li>
-</ul>
-</li>
-<li>Open  a .simple file.</li>
-<li>Right click -&gt; krun-simple</li>
-</ul>
-<p>If you want to kompile/krun from run configurations, do the following:</p>
-<ul>
-<li>Install the plugin batch Script Support (Version 1.0.4 is patched by me to support Idea 13.)</li>
-<li>
-Edit configurations -&gt; "+" -&gt; Batch
-<ul>
-<li>Name: kompile</li>
-<li>Script: leave empty</li>
-<li>
-Before launch:
-<ul>
-<li>Remove "Make"</li>
-<li>Add "Run external tool" -&gt; kompile</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Now if you select this configuration and press "Run", the currently selected file will be kompiled.</li>
-<li>Similarly for krun</li></ul>
-      ]]></description>
+    <description> </description>
 
     <change-notes><![CDATA[
-      Initial version.
-      If certain K feature is not supported, errors could be disabled in from Settings/Editor/Colors & Fonts
+      <ul>
+      <li> v1.1 Added support for references, search and documentation for auxiliary functions, K labels and sorts.</li>
+      <li> v1.1.1 Navigation to auxiliary functions / KLabels / Sorts through Ctrl + Alt + Shift + N.</li>
+      </ul>
       ]]>
     </change-notes>
 
@@ -118,21 +48,27 @@ Before launch:
                            implementationClass="ro.uaic.fmse.kplugin.highlighting.KBraceMatcher"/>
 
         <annotator language="K" implementationClass="ro.uaic.fmse.kplugin.highlighting.KSyntaxAnnotator"/>
-        <lang.findUsagesProvider language="K" implementationClass="ro.uaic.fmse.kplugin.usages.KFindUsagesProvider"/>
+
         <lang.refactoringSupport language="K"
                                  implementationClass="ro.uaic.fmse.kplugin.KRefactoringSupportProvider"/>
         <lang.foldingBuilder language="K" implementationClass="ro.uaic.fmse.kplugin.KFoldingBuilder"/>
-        <usageTypeProvider implementation="ro.uaic.fmse.kplugin.usages.KUsageTypeProvider"/>
         <gotoSymbolContributor implementation="ro.uaic.fmse.kplugin.navigation.KChooseByNameContributor"/>
         <lang.psiStructureViewFactory language="K"
                                       implementationClass="ro.uaic.fmse.kplugin.navigation.KStructureViewFactory"/>
         <lang.commenter language="K" implementationClass="ro.uaic.fmse.kplugin.KCommenter"/>
+        <codeStyleSettingsProvider implementation="ro.uaic.fmse.kplugin.codeStyle.KCodeStyleSettingsProvider"/>
+        <langCodeStyleSettingsProvider
+            implementation="ro.uaic.fmse.kplugin.codeStyle.KLanguageCodeStyleSettingsProvider"/>
+
+        <lang.findUsagesProvider language="K" implementationClass="ro.uaic.fmse.kplugin.usages.KFindUsagesProvider"/>
+        <usageTypeProvider implementation="ro.uaic.fmse.kplugin.usages.KUsageTypeProvider"/>
+        <referencesSearch implementation="ro.uaic.fmse.kplugin.usages.KSortPredicateReferenceSearcher"/>
+
         <lang.documentationProvider language="K"
                                     implementationClass="ro.uaic.fmse.kplugin.RuleVarDocumentationProvider"/>
         <lang.documentationProvider language="K"
                                     implementationClass="ro.uaic.fmse.kplugin.RegularProductionDocumentationProvider"/>
-        <codeStyleSettingsProvider implementation="ro.uaic.fmse.kplugin.codeStyle.KCodeStyleSettingsProvider"/>
-        <langCodeStyleSettingsProvider
-            implementation="ro.uaic.fmse.kplugin.codeStyle.KLanguageCodeStyleSettingsProvider"/>
+        <lang.documentationProvider language="K"
+                                    implementationClass="ro.uaic.fmse.kplugin.SyntaxDocumentationProvider"/>
     </extensions>
 </idea-plugin>

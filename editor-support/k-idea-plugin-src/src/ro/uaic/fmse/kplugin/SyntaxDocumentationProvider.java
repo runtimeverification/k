@@ -4,9 +4,9 @@ import com.intellij.lang.documentation.DocumentationProvider;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiManager;
 import org.jetbrains.annotations.Nullable;
-import ro.uaic.fmse.kplugin.psi.IModuleItem;
 import ro.uaic.fmse.kplugin.psi.KPsiUtil;
-import ro.uaic.fmse.kplugin.psi.KRegularProduction;
+import ro.uaic.fmse.kplugin.psi.KSort;
+import ro.uaic.fmse.kplugin.psi.KSyntax;
 
 import java.util.List;
 
@@ -14,13 +14,13 @@ import java.util.List;
  * @author Denis Bogdanas
  *         Created on 12/21/13.
  */
-public class RegularProductionDocumentationProvider implements DocumentationProvider {
+public class SyntaxDocumentationProvider implements DocumentationProvider {
 
     @Nullable
     @Override
     public String getQuickNavigateInfo(PsiElement element, PsiElement originalElement) {
-        if ((element instanceof KRegularProduction)) {
-            return DocumentationUtil.getFormattedSyntaxDef((KRegularProduction) element).toString();
+        if (element instanceof KSyntax) {
+            return DocumentationUtil.getFormattedModuleItemAndComment((KSyntax) element).toString();
         }
         return null;
 
@@ -29,12 +29,15 @@ public class RegularProductionDocumentationProvider implements DocumentationProv
     @Nullable
     @Override
     public String generateDoc(PsiElement element, @Nullable PsiElement originalElement) {
-        if ((element instanceof KRegularProduction)) {
-            KRegularProduction production = (KRegularProduction) element;
-            StringBuilder sb = DocumentationUtil.getFormattedSyntaxAndComment(production);
+        if (element instanceof KSyntax) {
+            KSort sort = ((KSyntax) element).getSort();
+            StringBuilder sb = new StringBuilder();
 
-            for (IModuleItem moduleItem : KPsiUtil.getImplementationRulesAndContexts(production)) {
-                sb.append("\n\n").append(DocumentationUtil.getFormattedModuleItemAndComment(moduleItem));
+            for (KSyntax syntax : KPsiUtil.findSyntaxDefs(sort)) {
+                if (sb.length() > 0) {
+                    sb.append("\n\n");
+                }
+                sb.append(DocumentationUtil.getFormattedModuleItemAndComment(syntax));
             }
             String result = sb.toString().replace("\n", "<br/>");
             return result;

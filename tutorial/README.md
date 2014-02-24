@@ -1,10 +1,16 @@
-K Tutorial
-by Grigore Rosu
+# K Tutorial
+##### Grigore Rosu
 
-Here you will learn how to use the K tool by means of a few simple
-languages defined using K.  The objective here is twofold: to learn K
-(in folder "1_k") and to learn how to define languages across various
-paradigms using K (in folder "2_languages").
+In this tutorial you will learn how to use the K tool by means of a series of
+lectures illustrating several simple languages defined using K.  Almost all the
+material is presented in two forms: as ordinary text and a a short screencast movie.
+We recommend the readers to either download the K tool from its URL
+(<http://kframework.org>) and install it on their machines (K is implemented in Java,
+so it is platform-independent) or use the provided online interface to execute the
+tutorial lessons and do the proposed exercises.
+The objective of this tutorial is twofold: to learn K (in folder
+[tutorial/1_k](/tutorial/1_k/)) and to learn how to define languages across
+various paradigms using K (in folder [tutorial/2_languages](/tutorial/2_languages/)).
 
 It is recommended to study the languages defined in this folder in the
 order indicated by their name, because K features already discussed in
@@ -15,13 +21,20 @@ Below we discuss some of the high-level features of the K framework
 and of the current K tool prototype, which you may find useful to know
 about before starting to type and execute the tutorial examples.
 
-Feel free to contact us at info@kframework.org for any questions or
+Feel free to contact us at <info@kframework.org> for any questions or
 concerns.
 
+## K Framework Overview
 
---------------------
-K Framework Overview
---------------------
+[
+[MOVIE (kframework.org) [9'59"]](http://fsl.cs.uiuc.edu/k-overview/k-overview_player.html)
+|
+[MOVIE (YouTube) [9'59"]](http://youtu.be/eSaIKHQOo4c)
+|
+[SLIDES (PPT)](http://www.kframework.org/images/e/e4/K-Overview.zip)
+|
+[SLIDES (PDF)](http://www.kframework.org/images/e/eb/K-Overview.pdf)
+]
 
 K is an executable semantic framework in which programming languages,
 calculi, as well as type systems or formal analysis tools can be
@@ -45,53 +58,51 @@ particularly suitable for defining control-intensive language features
 such as abrupt termination, exceptions, call/cc, concurrency, etc.
 
 
---------------------
-The K Tool Prototype
---------------------
+## The K Tool Prototype
 
 The K tool prototype, called the "K tool" or the "K prototype" from
 here on, is a prototype implementation of the K Framework written in
 Java and Maude.  The K prototype is developed by a joint team of
-faculties and students from the University of Illinois at
+faculty and students from the University of Illinois at
 Urbana-Champaign, USA (the FSL group, led by professor Grigore Rosu),
 the University Alexandru Ioan Cuza, Iasi, Romania (the FMSE group, led
 by professor Dorel Lucanu), the University of Bucharest (professor
-Traian Florin Serbanuta), as well as several individual enthusiasts .
+Traian Florin Serbanuta), as well as several individual enthusiasts.
 A current list of the people involved in the project and their
-specific roles can be accessed from http://kframework.org.
+specific roles can be accessed from <http://kframework.org>.
 
-Usage
------
+### Usage
 
 Some of the languages defined so far using the K framework can be found in
-the 'tutorial/2_languages' directory, and many others in the 'samples'
-directory.  For example, the directory
+the [tutorial/2_languages](/tutorial/2_languages/) directory, and many others
+in the [samples](/samples/) directory.  For example, the directory
 
-  tutorial/2_languages/1_simple/1_untyped
+    tutorial/2_languages/1_simple/1_untyped
 
 contains the definition of the untyped version of the SIMPLE language, while 
 
-  tutorial/2_languages/1_simple/2_typed/1_static
+    tutorial/2_languages/1_simple/2_typed/1_static
 
 contains the static semantics, i.e., the type checker.
 
 We encourage you to contribute with examples to our distribution.
-Please see samples/README for instructions on how to do it.
+Please see the README file under [samples](/samples/) for instructions on how to do it.
 
 
-# How It Works
+### How It Works
 
-We recommend the papers listed at http://kframework.org for a
+We recommend the papers listed at <http://kframework.org> for a
 deeper understanding of K.  Here we only discuss how our current K
 tool works, reminding important facts about K in general by-need.
 
 By default, the tool uses the syntax module of a definition to generate a
 parser for that definition which can be used to parse programs and turn
 them into their corresponding K-AST (KAST) format.  We briefly outline the
-process below, using the untyped SIMPLE language.
+process below, using the untyped SIMPLE language
+([tutorial/2_languages/1_simple/1_untyped](/tutorial/2_languages/1_simple/1_untyped)).
 
 
-## Parsing Programs
+#### Parsing Programs
 
 You may prefer to first define the syntax and then the semantics.
 That is how most of the languages in the examples directory are
@@ -103,8 +114,7 @@ semantics, it is a good idea to test the syntax by parsing a large
 variety of programs.
 
 In the examples provided with the tool, programs are generally kept in
-a `programs` directory in the directory containing the syntax
-definition.
+a subdirectory in the directory containing the syntax definition.
 
 As explained in detail in the papers about K, the entire language
 syntax is automatically included as constructors for the builtin sort
@@ -117,55 +127,53 @@ relevant in implementations of K tools, because we want to use the
 defined language syntax as much as possible in the semantics, which
 means that we need to combine a parser for the defined language with a
 parser for K in order to parse the semantic rules.  It is also possble
-to use an external parser for programs in K; see krun --help.
+to use an external parser for programs in K; type `krun --help`.
 
 In our current implementation of K, the internal representation of the
 syntactic terms follows the simple abstract-syntax-tree (AST) syntax:
 
-  K ::= KLabel "(" KList ")"
+    K ::= KLabel "(" KList ")"
 
-KList is a non-terminal standing for lists of K terms (currently
-separated by double-comma ",,", to avoid conflicts with user-defined
-language syntax, for example comma).  We use ".KList" for the unit of
-KList.  This way, from an internal representation point of view, a language
-syntax is nothing but a finite set of KLabel constants.  The `kast` program
-can be used to parse a program and see its KAST form.  By running
+`KList` is a non-terminal standing for lists of K terms.  We use
+`.KList` for the unit of KList.  This way, from an internal representation
+point of view, a language syntax is nothing but a finite set of `KLabel`
+constants.  The `kast` tool can be used to parse a program and see its
+KAST form.  By running
 
-  $ kompile simple-untyped.k
-  $ kast programs_and_results/diverse/factorial.simple
+    $ kompile simple-untyped.k
+    $ kast tests/diverse/factorial.simple
 
-from the examples/simple-untyped directory, you get the internal
-representation of the factorial program.  Typically, you should not
-need to run the `kast` program directly, as it will be run by the
-`krun` program (below) when necessary.  However, running it directly
-can be useful to test and understand your syntax.
+from the [tutorial/2_languages/1_simple/1_untyped](/tutorial/2_languages/1_simple/1_untyped)
+directory, you get the internal representation of the factorial program.
+Typically, you should not need to execute the `kast` tool directly, as it will
+be executed by the `krun` tool (below) when necessary.  However, executing it
+directly can be useful to test and understand your syntax.
 
 Our current implementation allows you to use either concrete syntax or
-abstract syntax (as displayed by the kast command above) in your
+abstract syntax (as displayed by the `kast` command above) in your
 semantic rules.  We typically prefer the concrete syntax, but you may
-need to use the abstract syntax instead when your syntax confuses our
-current (simplistic) parser.
+need to use the abstract syntax instead when your syntax confuses the K parser.
 
 
-## Running Programs
+#### Running Programs
 
 The `krun` tool can be used to execute programs, or explore their
 behaviors.  What the `krun` tool basically does is:
-(1) to put the internal representation of the program in the initial
+1.  put the internal representation of the program in the initial
     configuration described in the definition;
-(2) to call the rewrite engine to execute the program by rewriting the
+2.  call the rewrite engine to execute the program by rewriting the
     resulting initial configuration; and
-(3) to post-process the output of the rewrite engine and display it in
+3.  post-process the output of the rewrite engine and display it in
     a more appealing format.
 
 To run our sample program `factorial`, all we need to do is:
 
-  $ kompile simple-untyped.k
-  $ krun programs_and_results/diverse/factorial.simple --output-mode none
-  Input a natural number: 5
-  Factorial of 5 is: 120
+    $ kompile simple-untyped.k
+    $ krun tests/diverse/factorial.simple --output none
+    Input a natural number: 5
+    Factorial of 5 is: 120
 
-The "--output-mode none" option tells krun to not display the
+The `--output none` option tells `krun` to not display the
 configuration.  Instead, it only displays output produced by the
 program.  Try running it without this option to see the resulting
 configuration.
@@ -177,11 +185,11 @@ deductively verify programs.  These are all explained in the various
 lectures in the tutorial.
 
 
-# Reporting Issues/Bugs/Feature requests
+## Reporting Issues/Bugs/Feature requests
 
-Please report issues here: https://github.com/kframework/k/issues.
+Please report issues at <https://github.com/kframework/k/issues>.
 Simply post your test case and briefly explain your problem.  If you
 have write permissions to our repository, please also add a test case
 to the repository yourself using the directions in
-"tests/issues/README" (do this in addition to posting an issue,
+[tests/issues](/tests/issues/) (do this in addition to posting an issue,
 because you need the issue number).

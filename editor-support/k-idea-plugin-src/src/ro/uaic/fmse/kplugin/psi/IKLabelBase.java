@@ -1,0 +1,18 @@
+package ro.uaic.fmse.kplugin.psi;
+
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiReference;
+import com.intellij.util.IncorrectOperationException;
+import org.jetbrains.annotations.NonNls;
+import org.jetbrains.annotations.NotNull;
+
+/**
+ * @author Denis Bogdanas
+ *         Created on 12/14/13.
+ */
+public interface IKLabelBase extends PsiElement {
+    @NotNull
+    PsiReference getReference();
+
+    PsiElement setName(@NonNls @NotNull String name) throws IncorrectOperationException;
+}

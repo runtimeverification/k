@@ -33,6 +33,10 @@ public class KElementFactory {
         return PsiTreeUtil.findChildOfType(file, KId.class);
     }
 
+    public static KSort createSort(Project project, String name) {
+        throw new UnsupportedOperationException();
+    }
+
     public static PsiElement createString(Project project, String name) {
         String dummyFileContent = String.format("require \"%1$s\" module %1$s rule %1$s:Id => %1$s endmodule", name);
         final KFile file = createFile(project, dummyFileContent);

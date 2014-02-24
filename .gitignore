@@ -1,6 +1,7 @@
 .k
 *-kompiled
 *-kompiled-symbolic
+*.kore
 *.pdf
 *.class
 .metadata

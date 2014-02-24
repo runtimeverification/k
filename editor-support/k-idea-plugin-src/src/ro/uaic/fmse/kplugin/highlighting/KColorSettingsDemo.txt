@@ -4,6 +4,7 @@ require "core.k"
 module <name>PRIMITIVE-TYPES</name>
     imports <name>CORE</name>
 syntax K ::= "bitCount" "(" Type ")" <attribute>[function]</attribute>
+syntax K ::= <func-dec>func</func-dec> <func-dec>(</func-dec> K <func-dec>,</func-dec> K <func-dec>)</func-dec>
 syntax <error>error</error>
 
 rule 'Byte(.KList) => <func-call>byte</func-call>      <attribute>[structural, anywhere]</attribute>

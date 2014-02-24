@@ -1,4 +1,4 @@
-module PATTERN-MATCHING
+module MY-PATTERN-MATCHING
 
 // adapted from k-prelude.k
   syntax KItem ::= #myMap(MyMap)
@@ -75,7 +75,7 @@ module PATTERN-MATCHING
 endmodule
 
 module TEST
-  imports PATTERN-MATCHING
+  imports MY-PATTERN-MATCHING
 
   syntax Variable ::= Name
   syntax Name ::= Token{"x0"} | Token{"x1"} | Token{"x2"}

@@ -10,6 +10,7 @@ import com.intellij.psi.PsiNamedElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import ro.uaic.fmse.kplugin.psi.KFile;
 import ro.uaic.fmse.kplugin.psi.KRegularProduction;
+import ro.uaic.fmse.kplugin.psi.KSyntax;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,12 +61,16 @@ public class KStructureViewElement implements StructureViewTreeElement, Sortable
     @Override
     public TreeElement[] getChildren() {
         if (element instanceof KFile) {
-            Collection<KRegularProduction> syntaxRhs =
-                    PsiTreeUtil.findChildrenOfType(element, KRegularProduction.class);
-            List<TreeElement> treeElements = new ArrayList<>(syntaxRhs.size());
-            for (KRegularProduction property : syntaxRhs) {
-                if (property.getName() != null) {
-                    treeElements.add(new KStructureViewElement(property));
+            @SuppressWarnings("unchecked")
+            Collection<PsiNamedElement> elements =
+                    PsiTreeUtil.findChildrenOfAnyType(element, KSyntax.class, KRegularProduction.class);
+            List<TreeElement> treeElements = new ArrayList<>(elements.size());
+            List<String> names = new ArrayList<>();
+            for (PsiNamedElement element : elements) {
+                String name = element.getName();
+                if (name != null && !names.contains(name)) {
+                    names.add(name);
+                    treeElements.add(new KStructureViewElement(element));
                 }
             }
             return treeElements.toArray(new TreeElement[treeElements.size()]);
