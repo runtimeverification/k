@@ -184,24 +184,24 @@ public class Main {
         }
         if (stdin != null) {
             KApp noIO = KApp.of(KLabelConstant.of("'#noIO", context));
-            if (K.backend.equals("java")) {
+//            if (K.backend.equals("java")) {
                 DataStructureSort myList = context.dataStructureListSortOf(DataStructureSort.DEFAULT_LIST_SORT);
                 if (myList != null) {
                     output.put("$noIO", DataStructureBuiltin.element(myList, noIO));
                 }
-            } else {
-                output.put("$noIO", new ListItem(noIO));
-            }
+//            } else {
+//                output.put("$noIO", new ListItem(noIO));
+//            }
             output.put("$stdin", StringBuiltin.kAppOf(stdin + "\n"));
         } else {
-            if (K.backend.equals("java")) {
+//            if (K.backend.equals("java")) {
                 DataStructureSort myList = context.dataStructureListSortOf(DataStructureSort.DEFAULT_LIST_SORT);
                 if (myList != null) {
                     output.put("$noIO", DataStructureBuiltin.empty(myList));
                 }
-            } else {
-                output.put("$noIO", org.kframework.kil.List.EMPTY);
-            }
+//            } else {
+//                output.put("$noIO", org.kframework.kil.List.EMPTY);
+//            }
             output.put("$stdin", StringBuiltin.EMPTY);
         }
 
