@@ -3,7 +3,6 @@ package ro.uaic.fmse.kplugin;
 import com.intellij.lang.documentation.DocumentationProvider;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiManager;
-import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.Nullable;
 import ro.uaic.fmse.kplugin.psi.KPsiUtil;
 import ro.uaic.fmse.kplugin.psi.KSort;
@@ -31,7 +30,7 @@ public class SyntaxDocumentationProvider implements DocumentationProvider {
     @Override
     public String generateDoc(PsiElement element, @Nullable PsiElement originalElement) {
         if (element instanceof KSyntax) {
-            KSort sort = PsiTreeUtil.getParentOfType(originalElement, KSort.class, false);
+            KSort sort = ((KSyntax) element).getSort();
             StringBuilder sb = new StringBuilder();
 
             for (KSyntax syntax : KPsiUtil.findSyntaxDefs(sort)) {

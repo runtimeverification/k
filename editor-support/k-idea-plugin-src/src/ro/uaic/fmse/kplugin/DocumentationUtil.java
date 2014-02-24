@@ -16,27 +16,25 @@ public class DocumentationUtil {
     }
 
 
-    private static CharSequence formatSortsAndWhitespaces(ASTNode element) {
-        StringBuilder sb = new StringBuilder(element.getTextLength());
-        for (ASTNode child : element.getChildren(null)) {
-            if (child.getPsi() instanceof KSort || child.getElementType() == KTypes.KEYWORD ||
-                    child.getPsi() instanceof KRuleName) {
-                sb.append("<b>").append(child.getText()).append("</b>");
-            } else if (child instanceof PsiWhiteSpace) {
-                String text = child.getText();
-                if (child.getTextLength() > 1) {
-                    text = text.replace(" ", "&nbsp;");
-                }
-                sb.append(text);
-            } else if (child instanceof PsiComment) {
-                sb.append("<i>").append(getEncodedText(child)).append("</i>");
-            } else if (child.getChildren(null).length == 0) {
-                sb.append(getEncodedText(child));
-            } else {
-                sb.append(formatSortsAndWhitespaces(child));
+    private static void formatSortsAndWhitespaces(StringBuilder sb, ASTNode element) {
+        if (element.getPsi() instanceof KSort || element.getElementType() == KTypes.KEYWORD ||
+                element.getPsi() instanceof KRuleName) {
+            sb.append("<b>").append(element.getText()).append("</b>");
+        } else if (element instanceof PsiWhiteSpace) {
+            String text = element.getText();
+            if (element.getTextLength() > 1) {
+                text = text.replace(" ", "&nbsp;");
+            }
+            sb.append(text);
+        } else if (element instanceof PsiComment) {
+            sb.append("<i>").append(getEncodedText(element)).append("</i>");
+        } else if (element.getChildren(null).length == 0) {
+            sb.append(getEncodedText(element));
+        } else {
+            for (ASTNode child : element.getChildren(null)) {
+                formatSortsAndWhitespaces(sb, child);
             }
         }
-        return sb;
     }
 
     private static String getEncodedText(ASTNode child) {
@@ -44,16 +42,20 @@ public class DocumentationUtil {
     }
 
     static StringBuilder getFormattedSyntaxDef(KRegularProduction production) {
-        KSyntax syntaxDec = (KSyntax) production.getParent().getParent();
+        KSyntax syntaxDec = (KSyntax) production.getParent();
         StringBuilder sb = new StringBuilder();
 
-        return sb.append("<tt><b>syntax</b> <b>").append(syntaxDec.getSort().getText()).append("</b> ::= ")
-                .append(formatSortsAndWhitespaces(production.getNode())).append("</tt>");
+        sb.append("<tt><b>syntax</b> <b>").append(syntaxDec.getSort().getText()).append("</b> ::= ");
+        formatSortsAndWhitespaces(sb, production.getNode());
+        for (PsiElement trailingElem : KPsiUtil.getTrailingSpaceAndComment(production)) {
+            formatSortsAndWhitespaces(sb, trailingElem.getNode());
+        }
+        return sb.append("</tt>");
     }
 
     static StringBuilder getFormattedSyntaxAndComment(KRegularProduction production) {
         StringBuilder sb = getFormattedSyntaxDef(production);
-        KSyntax syntaxDec = (KSyntax) production.getParent().getParent();
+        KSyntax syntaxDec = (KSyntax) production.getParent();
         String formattedComment = getAssociatedComment(syntaxDec);
         sb.insert(0, formattedComment);
         return sb;
@@ -69,7 +71,7 @@ public class DocumentationUtil {
             String commentText = prevNode.getText();
             int startTrim;
             int endTrim;
-            if (commentText.startsWith("/*@")) {
+            if (commentText.startsWith("/*@") || commentText.startsWith("//@")) {
                 startTrim = 3;
             } else {
                 startTrim = 2;
@@ -104,6 +106,12 @@ public class DocumentationUtil {
     }
 
     private static CharSequence getFormattedKElement(PsiElement element) {
-        return new StringBuilder().append("<tt>").append(formatSortsAndWhitespaces(element.getNode())).append("</tt>");
+        StringBuilder sb = new StringBuilder();
+        sb.append("<tt>");
+        formatSortsAndWhitespaces(sb, element.getNode());
+        for (PsiElement trailingElem : KPsiUtil.getTrailingSpaceAndComment(element)) {
+            formatSortsAndWhitespaces(sb, trailingElem.getNode());
+        }
+        return sb.append("</tt>");
     }
 }

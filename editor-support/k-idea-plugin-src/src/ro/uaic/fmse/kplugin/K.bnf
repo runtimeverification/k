@@ -44,7 +44,7 @@ syntax ::= "syntax" sort "::=" production_attr? syntax_rhs (production_sep produ
 production_sep ::= "|" | ">"
 production_attr ::= ("left" ":") | ("non-assoc" ":")
 
-syntax_rhs ::= syntax_rhs_regular | syntax_rhs_aux_function | syntax_rhs_list | syntax_rhs_token
+private syntax_rhs ::= syntax_rhs_regular | syntax_rhs_aux_function | syntax_rhs_list | syntax_rhs_token
 syntax_rhs_regular ::= (attribute_block_list | sort | STRING)+ &(production_sep | new_item_strict)
                             {mixin = "ro.uaic.fmse.kplugin.psi.impl.PsiKSyntaxRhsRegularBase"}
 syntax_rhs_aux_function ::= id? "(" sort? ("," sort)* ")" attribute_block_list?

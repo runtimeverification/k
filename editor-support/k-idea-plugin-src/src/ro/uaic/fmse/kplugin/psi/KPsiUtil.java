@@ -1,6 +1,8 @@
 package ro.uaic.fmse.kplugin.psi;
 
 import com.google.common.base.Predicate;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootManager;
@@ -286,5 +288,32 @@ public class KPsiUtil {
                 return kSyntax.getSort().getText().equals(sort.getText());
             }
         });
+    }
+
+    /**
+     * @return The comment that starts at the same line as the last line of this element, if any.
+     */
+    public static List<? extends PsiElement> getTrailingSpaceAndComment(PsiElement element) {
+        PsiElement next = element.getNextSibling();
+        if (next != null) {
+            if (next instanceof PsiComment && isTrailingComment(element, (PsiComment) next)) {
+                return Arrays.asList(next);
+            }
+            if (next instanceof PsiWhiteSpace) {
+                PsiElement nextNext = next.getNextSibling();
+                if (nextNext instanceof PsiComment && isTrailingComment(element, (PsiComment) nextNext)) {
+                    return Arrays.asList(next, nextNext);
+                }
+            }
+        }
+        return Collections.emptyList();
+    }
+
+    private static boolean isTrailingComment(PsiElement element, PsiComment nextComment) {
+        Document document = FileDocumentManager.getInstance().getDocument(element.getContainingFile().getVirtualFile());
+
+        return nextComment != null && document != null
+                && document.getLineNumber(element.getTextRange().getEndOffset()) ==
+                document.getLineNumber(nextComment.getTextOffset());
     }
 }
