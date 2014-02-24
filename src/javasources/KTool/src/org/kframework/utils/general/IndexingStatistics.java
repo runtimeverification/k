@@ -66,10 +66,38 @@ public class IndexingStatistics {
                 computeAverage(timesForRewriteSteps) + " \u00B5"+"s");
         System.err.println("Average rules selected at each step: " +
                 computeAverages(rulesSelectedAtEachStep));
+        System.err.println("Min. Number of rules selected at each step: " +
+                computeMin(rulesSelectedAtEachStep));
+        System.err.println("Max. Number of rules selected at each step: " +
+                computeMax(rulesSelectedAtEachStep));
 //        System.err.println("Times For Rule selection: " + timesForRuleSelection);
 //        System.err.println("Times For Rewrite Steps: " + timesForRewriteSteps);
 //        System.err.println("Rules selected at each step: " + rulesSelectedAtEachStep);
         System.err.println("=====================================================");
+    }
+
+    private static int computeMin(List<Integer> rulesSelectedAtEachStep) {
+        int min = rulesSelectedAtEachStep.get(0);
+        for (int num:rulesSelectedAtEachStep){
+            if(num == 0){
+                continue;
+            }
+
+            if (num < min){
+                min = num;
+            }
+        }
+        return min;
+    }
+
+    private static int computeMax(List<Integer> rulesSelectedAtEachStep) {
+        int max = rulesSelectedAtEachStep.get(0);
+        for (int num:rulesSelectedAtEachStep){
+            if (num > max){
+                max = num;
+            }
+        }
+        return max;
     }
 
     private static double computeTotal(List<Long> times) {
