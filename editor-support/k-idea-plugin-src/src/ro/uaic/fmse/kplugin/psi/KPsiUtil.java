@@ -55,30 +55,31 @@ public class KPsiUtil {
         return result;
     }
 
-    public static List<KRegularProduction> findSyntaxDefs(Project project, String name) {
-        List<KRegularProduction> result = null;
+    public static List<PsiNamedElement> findSearchableSymbols(Project project, String name) {
+        List<PsiNamedElement> result = new ArrayList<>();
         Collection<VirtualFile> virtualFiles = FileBasedIndex.getInstance().getContainingFiles(FileTypeIndex.NAME,
                 KFileType.INSTANCE, GlobalSearchScope.allScope(project));
         for (VirtualFile virtualFile : virtualFiles) {
             KFile kFile = (KFile) PsiManager.getInstance(project).findFile(virtualFile);
             if (kFile != null) {
-                Collection<KRegularProduction> syntaxDefs =
-                        PsiTreeUtil.findChildrenOfType(kFile, KRegularProduction.class);
-                for (KRegularProduction syntaxDef : syntaxDefs) {
-                    if (name == null || name.equals(syntaxDef.getName())) {
-                        if (result == null) {
-                            result = new ArrayList<>();
-                        }
+                @SuppressWarnings("unchecked")
+                Collection<PsiNamedElement> syntaxDefs =
+                        PsiTreeUtil.findChildrenOfAnyType(kFile, KSyntax.class, KRegularProduction.class);
+                List<String> names = new ArrayList<>();
+                for (PsiNamedElement syntaxDef : syntaxDefs) {
+                    String syntaxDefName = syntaxDef.getName();
+                    if ((name == null || name.equals(syntaxDefName)) && !names.contains(syntaxDefName)) {
+                        names.add(syntaxDefName);
                         result.add(syntaxDef);
                     }
                 }
             }
         }
-        return result != null ? result : Collections.<KRegularProduction>emptyList();
+        return result;
     }
 
-    public static List<KRegularProduction> findSyntaxDefs(Project project) {
-        return findSyntaxDefs(project, null);
+    public static List<PsiNamedElement> findSearchableSymbols(Project project) {
+        return findSearchableSymbols(project, null);
     }
 
     @Nullable

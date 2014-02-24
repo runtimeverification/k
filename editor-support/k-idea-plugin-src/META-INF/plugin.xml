@@ -1,13 +1,16 @@
 <idea-plugin version="2" url="https://github.com/kframework/k/blob/master/editor-support/k-idea-plugin-src/README.md">
     <id>ro.uaic.fmse.kplugin</id>
     <name>K Framework Support</name>
-    <version>1.1</version>
+    <version>1.1.1</version>
     <vendor email="denis.bogdanas@gmail.com" url="https://fmse.info.uaic.ro">UAIC</vendor>
 
     <description> </description>
 
     <change-notes><![CDATA[
-      Version 1.1. Added support for references, search and documentation for auxiliary functions, K labels and sorts.
+      <ul>
+      <li> v1.1 Added support for references, search and documentation for auxiliary functions, K labels and sorts.</li>
+      <li> v1.1.1 Navigation to auxiliary functions / KLabels / Sorts through Ctrl + Alt + Shift + N.</li>
+      </ul>
       ]]>
     </change-notes>
 

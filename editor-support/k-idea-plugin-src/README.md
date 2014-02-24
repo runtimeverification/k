@@ -27,7 +27,7 @@ All the features are similar with the corresponding features for Intellij Idea J
   Supported targets are rule variables, auxiliary functions, sorts. The documentation view for auxiliary functions displays
   not only the syntax definition but also the rules implementing the particular function. The algorithm deciding which
   rules implement a particular function is a heuristic that relies, among others, on the rule name. Refer the source code for the precise algorithm.
-- Find auxiliary function. Press Ctrl+Alt+Shift+N. The list of all auxiliary functions in the project is displayed. The list is narrowed as you type.
+- Find auxiliary function / KLabel / Sort. Press Ctrl+Alt+Shift+N. The list of all navigable symbols in the project is displayed. The list is narrowed as you type.
 - Structure view for auxiliary functions. When the current file is a K file, press Ctrl+F12. The list of auxiliary functions in the file is displayed.
 - Quick code commenting / uncommenting. Press Ctrl+/ to comment / uncomment the current line. Press Ctrl+Shift+/ to comment / uncomment the current selection.
 - Code style: support for tab size only.
