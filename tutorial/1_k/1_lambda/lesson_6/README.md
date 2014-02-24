@@ -1,10 +1,6 @@
 ### Selective Strictness; Anonymous Variables
 
-[
-[MOVIE (kframework.org) [2'14'']](http://fsl.cs.uiuc.edu/k-tutorial/1_lambda/1_lambda-lesson_6/1_lambda-lesson_6_player.html)
-|
-[MOVIE (YouTube) [2'14'']](http://youtu.be/IreP6DFPWdk)
-]
+[MOVIE [2'14'']](http://youtu.be/IreP6DFPWdk)
 
 We here show how to define selective strictness of language constructs,
 that is, how to state that certain language constructs are strict only

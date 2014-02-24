@@ -1,10 +1,6 @@
 ### Multiple Binding Constructs
 
-[
-[MOVIE (kframework.org) [2'40'']](http://fsl.cs.uiuc.edu/k-tutorial/1_lambda/1_lambda-lesson_8/1_lambda-lesson_8_player.html)
-|
-[MOVIE (YouTube) [2'40'']](http://youtu.be/Ox4uXDpcY64)
-]
+[MOVIE [2'40'']](http://youtu.be/Ox4uXDpcY64)
 
 Here we learn how multiple language constructs that bind variables can coexist.
 We will also learn about or recall another famous binder besides `lambda`,

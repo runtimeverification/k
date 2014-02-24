@@ -1,10 +1,6 @@
 ### Derived Constructs, Extending Predefined Syntax
 
-[
-[MOVIE (kframework.org) [5'10'']](http://fsl.cs.uiuc.edu/k-tutorial/1_lambda/1_lambda-lesson_7/1_lambda-lesson_7_player.html)
-|
-[MOVIE (YouTube) [5'10'']](http://youtu.be/qZWiBaN7zrw)
-]
+[MOVIE [5'10'']](http://youtu.be/qZWiBaN7zrw)
 
 In this lesson we will learn how to define derived language constructs, that
 is, ones whose semantics is defined completely in terms of other language

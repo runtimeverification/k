@@ -1,10 +1,6 @@
 ### Evaluation Strategies using Strictness
 
-[
-[MOVIE (kframework.org) [2'20'']](http://fsl.cs.uiuc.edu/k-tutorial/1_lambda/1_lambda-lesson_3/1_lambda-lesson_3_player.html)
-|
-[MOVIE (YouTube) [2'20'']](http://youtu.be/aul1x6bd1YM)
-]
+[MOVIE [2'20'']](http://youtu.be/aul1x6bd1YM)
 
 Here we learn how to use the K `strict` attribute to define desired evaluation
 strategies.  We will also learn how to tell K which terms are already

@@ -1,10 +1,6 @@
 ### Generating Documentation; Latex Attributes
 
-[
-[MOVIE (kframework.org) [3'13'']](http://fsl.cs.uiuc.edu/k-tutorial/1_lambda/1_lambda-lesson_4/1_lambda-lesson_4_player.html)
-|
-[MOVIE (YouTube) [3'13'']](http://youtu.be/ULXA4e_6-DY)
-]
+[MOVIE [3'13'']](http://youtu.be/ULXA4e_6-DY)
 
 In this lesson we learn how to generate formatted documentation from K
 language definitions.  We also learn how to use Latex attributes to control

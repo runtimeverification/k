@@ -1,10 +1,6 @@
 ### Adding Builtins; Side Conditions
 
-[
-[MOVIE (kframework.org) [4'52'']](http://fsl.cs.uiuc.edu/k-tutorial/1_lambda/1_lambda-lesson_5/1_lambda-lesson_5_player.html)
-|
-[MOVIE (YouTube) [4'52'']](http://youtu.be/T1aI04q3l9U)
-]
+[MOVIE [4'52'']](http://youtu.be/T1aI04q3l9U)
 
 We have already added the builtin identifiers (sort Id) to LAMBDA expressions,
 but those had no operations on them (note that substitution is not builtin; it

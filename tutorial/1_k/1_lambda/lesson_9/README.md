@@ -1,10 +1,6 @@
 ### A Complete and Documented K Definition
 
-[
-[MOVIE (kframework.org) [6'07'']](http://fsl.cs.uiuc.edu/k-tutorial/1_lambda/1_lambda-lesson_9/1_lambda-lesson_9_player.html)
-|
-[MOVIE (YouTube) [6'07'']](http://youtu.be/-pHgLqNMKac)
-]
+[MOVIE [6'07'']](http://youtu.be/-pHgLqNMKac)
 
 In this lesson you will learn how to add formal comments to your K definition,
 in order to nicely document it.  The generated document can be then used for
