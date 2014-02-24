@@ -23,12 +23,10 @@ public class LookupMultipleCell extends LocalVisitor {
 
     @Override
     public void visit(CellCollection cellCollection) {
-        //TODO(OwolabiL): This is error prone. Check that it is really more efficient than a nested
-        // loop.
         for (Cell cell : cellCollection.cells()) {
-            for (int i = 0; i < cellsOfInterest.length; i++) {
-                if (cell.getLabel().equals(cellsOfInterest[i])){
-                    results.put(cellsOfInterest[i],cell);
+            for (String aCellsOfInterest : cellsOfInterest) {
+                if (cell.getLabel().equals(aCellsOfInterest)) {
+                    results.put(aCellsOfInterest, cell);
                 }
             }
         }

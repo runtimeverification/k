@@ -166,7 +166,13 @@ public class PathIndex {
         return pStrings;
     }
 
-
+    /**
+     * This method is called at every rewriting step in order to find which of the indexed rules may
+     * may be applicable to the term at that step.
+     *
+     * @param term  the term to be rewritten
+     * @return      a list of rules that can possibly match
+     */
     public List<Rule> getRulesForTerm(Term term) {
         Set<String> pStrings;
 //        System.out.println("term: "+term);
@@ -231,7 +237,7 @@ public class PathIndex {
                     IndexingStatistics.findMatchingIndicesStopWatch.elapsed(TimeUnit.MICROSECONDS));
         }
 
-        // this check is needed because of .K which now has a pString of @.EMPTY_K, but may not have
+        // this check is needed because of .K which now has  a pString of @.EMPTY_K, but may not have
         // any rules so indexed in some simpler languages like IMP
         if (matchingIndices != null) {
             for (Integer n : matchingIndices) {

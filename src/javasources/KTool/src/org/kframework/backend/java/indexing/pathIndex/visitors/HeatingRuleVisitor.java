@@ -35,18 +35,6 @@ public class HeatingRuleVisitor extends RuleVisitor {
         visit((KList) kItem.kList());
     }
 
-//    @Override
-//    public void visit(KLabel kLabel) {
-//        currentLabel = kLabel.toString();
-//        if (pString.equals(START_STRING)) {
-//            //we are at the initial pString
-//            pString = pString.concat(kLabel.toString() + SEPARATOR);
-//        } else {
-//            //the original pString has been modified along the way
-//            pString = pString.concat(counter + SEPARATOR + kLabel.toString() + SEPARATOR);
-//        }
-//    }
-
     @Override
     public void visit(KLabelConstant kLabel) {
         currentLabel = kLabel.toString();
@@ -68,7 +56,6 @@ public class HeatingRuleVisitor extends RuleVisitor {
             kList.get(i).accept(this);
         }
         pStringStack.pop();
-//        this.proceed = false;
     }
 
     @Override

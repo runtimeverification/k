@@ -21,6 +21,7 @@ public class RuleVisitor extends LocalVisitor {
     static final String SEPARATOR = ".";
     static final String START_STRING = "@.";
     private static final String EMPTY_K = "EMPTY_K";
+    private static final String K_CELL_NAME = "k";
     final Context context;
     String pString;
     final List<String> pStrings;
@@ -34,7 +35,7 @@ public class RuleVisitor extends LocalVisitor {
 
     @Override
     public void visit(Rule rule) {
-        visit(LookupCell.find(rule.leftHandSide(), "k"));
+        visit(LookupCell.find(rule.leftHandSide(), K_CELL_NAME));
     }
 
     @Override

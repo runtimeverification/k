@@ -24,7 +24,7 @@ public class TermVisitor extends LocalVisitor {
     private static final String USER_LIST_REPLACEMENT = "UserList";
     private static final String K_ITEM_SORT = "KItem";
     private static final String EMPTY_K = "EMPTY_K";
-    public static final String K_STRING = "K";
+    private static final String K_STRING = "K";
     private final Set<String> pStrings;
     private final Context context;
 
@@ -98,8 +98,6 @@ public class TermVisitor extends LocalVisitor {
             }
         }
     }
-
-//    @Override
 
     @Override
     public void visit(KSequence kSequence) {

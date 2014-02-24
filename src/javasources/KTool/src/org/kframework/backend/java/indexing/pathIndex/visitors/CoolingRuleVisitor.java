@@ -12,9 +12,11 @@ import java.util.ArrayList;
  * Time: 12:40 PM
  */
 public class CoolingRuleVisitor extends RuleVisitor {
+    private static final String K_RESULT_STRING = "KResult";
     private final Rule rule;
     private String currentLabel;
     private boolean isKItemHead = false;
+    private static final String USER_LIST_REPLACEMENT = "UserList";
 
     public CoolingRuleVisitor(Rule rule, Context context) {
         super(context);
@@ -31,14 +33,13 @@ public class CoolingRuleVisitor extends RuleVisitor {
         ((KItem) kSequence.get(1)).kLabel().accept(this);
     }
 
-    //TODO(OwolabiL): This method can be greatly improved!
     @Override
     public void visit(Variable variable) {
-        String requiredKResult = "isKResult(" + variable + ")";
+        String requiredKResult = getRequiresKResultString(variable);
         String firstSort;
         //TODO(OwolabiL): Remove this check and use concrete sort instead
         if (rule.requires().toString().contains(requiredKResult)) {
-            firstSort = "KResult";
+            firstSort = K_RESULT_STRING;
         } else {
             throw new IllegalStateException("First term in K cell is not a K result: \n" + rule);
         }
@@ -56,21 +57,25 @@ public class CoolingRuleVisitor extends RuleVisitor {
         if (isKItemHead) {
             Term term = ((KList) kItem.kList()).get(0);
             if (term instanceof Variable) {
-                String requiredKResult = "isKResult(" + term + ")";
+                String requiredKResult = getRequiresKResultString(term);
                 String firstSort;
                 if (rule.requires().toString().contains(requiredKResult)) {
-                    firstSort = "KResult";
+                    firstSort = K_RESULT_STRING;
                 } else {
-                    throw new IllegalStateException("First term in K cell is not a K result: \n" + rule);
+                    throw new IllegalStateException("First term in K cell is not a K result: \n" +
+                            rule);
                 }
 
                 pStrings.add(pString + "1" + SEPARATOR + firstSort);
             }
-            //TODO(OwolabiL): Remove this check and use concrete sort instead
         } else {
             visit((KList) kItem.kList());
         }
         this.proceed = false;
+    }
+
+    private String getRequiresKResultString(Term term) {
+        return "isKResult(" + term + ")";
     }
 
     @Override
@@ -89,12 +94,13 @@ public class CoolingRuleVisitor extends RuleVisitor {
                 pStrings.add(pString + (i + 1) + ".HOLE");
 
             } else {
-                ArrayList<Production> productions = (ArrayList<Production>) context.productionsOf(currentLabel);
+                ArrayList<Production> productions =
+                        (ArrayList<Production>) context.productionsOf(currentLabel);
                 Production p = productions.get(0);
                 if (productions.size() == 1) {
                     pStrings.add(pString + (i + 1) + SEPARATOR + p.getChildSort(0));
                 } else {
-                    pStrings.add(pString + (i + 1) + SEPARATOR + "UserList");
+                    pStrings.add(pString + (i + 1) + SEPARATOR + USER_LIST_REPLACEMENT);
                 }
             }
         }

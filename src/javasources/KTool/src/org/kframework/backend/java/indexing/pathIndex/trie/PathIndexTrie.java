@@ -16,8 +16,6 @@ public class PathIndexTrie implements Trie {
 
     /**
      * This method adds a new string to the index
-     * TODO: convert this to a graph labelled by the chars in the string (like in "Term Indexing" book
-     * TODO: How much faster is this stuff?
      *
      * @param trieNode node to start adding the string. should always be root
      * @param pString  the string to add
@@ -159,10 +157,6 @@ public class PathIndexTrie implements Trie {
             }
         }
 
-//        if (child == null) {
-////            result = false;
-//        } else
-
         if (newSuffix.size() == 0) {
             if (child instanceof TrieLeaf && child.getIndices().size() > 0) {
                 children.remove(child);
@@ -269,32 +263,8 @@ public class PathIndexTrie implements Trie {
         return tree.toString();
     }
 
-//    int size(TrieNode node) {
-//        if (node == null) {
-//            //TODO(OwolabiL): Throw an exception instead
-//            return -1000;
-//        }
-//        int size = 1;
-//        if (node.getChildren() != null) {
-//            for (TrieNode trieNode : node.getChildren()) {
-//                size += size(trieNode);
-//            }
-//        }
-//
-//        return size;
-//    }
-
     @Override
     public TrieNode getRoot() {
         return root;
     }
-
-//    public static void main(String[] args) {
-//        Trie trie = new PathIndexTrie();
-//        String pString = "@.'acquire_;.1.Val";
-//        String pString2 = "@.'acquire_;.1.Int";
-//        trie.addIndex(trie.getRoot(), pString.substring(2), 1);
-//        trie.addIndex(trie.getRoot(), pString.substring(2), 2);
-//        System.out.println("ret: "+trie.retrieve(trie.getRoot(), pString2));
-//    }
 }

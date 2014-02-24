@@ -47,8 +47,8 @@ public class MultipleCellUtil {
 
     /**
      * Finds the multiple k cells in a rule if they exist
-     * @param rule
-     * @param cellWithMultipleK
+     * @param rule  The rule to be checked
+     * @param cellWithMultipleK  The cell which has a multiplicity star attribute
      * @return the multiple kCells (where they exist)
      */
     public static ArrayList<Cell> checkRuleForMultiplicityStar(Rule rule, String cellWithMultipleK) {
@@ -65,23 +65,4 @@ public class MultipleCellUtil {
 
         return kCells;
     }
-
-    public static Set<String> getPStringsFromMultiple(Term term, String parentOfCellWithMultipleK, Context context) {
-        Cell threadsCell = LookupCell.find(term,parentOfCellWithMultipleK);
-        TermVisitor visitor = new TermVisitor(context);
-        Set<String> possible = new LinkedHashSet<>();
-
-        for (Cell cell : ((CellCollection)threadsCell.getContent()).cells()){
-            if (LookupCell.find(cell,"k") != null){
-                Cell kCell = LookupCell.find(cell,"k");
-                kCell.accept(visitor);
-                possible.addAll(visitor.getpStrings());
-                //TODO(OwolabiL): remember to reset the visitor in a better way than this?
-                visitor = new TermVisitor(context);
-            }
-        }
-
-        return possible;
-    }
-
 }
