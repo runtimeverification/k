@@ -1,6 +1,6 @@
 ### Adding Builtins; Side Conditions
 
-[MOVIE [4'52'']](http://youtu.be/T1aI04q3l9U)
+[MOVIE [4'52"]](http://youtu.be/T1aI04q3l9U)
 
 We have already added the builtin identifiers (sort Id) to LAMBDA expressions,
 but those had no operations on them (note that substitution is not builtin; it

@@ -1,6 +1,6 @@
 ### Selective Strictness; Anonymous Variables
 
-[MOVIE [2'14'']](http://youtu.be/IreP6DFPWdk)
+[MOVIE [2'14"]](http://youtu.be/IreP6DFPWdk)
 
 We here show how to define selective strictness of language constructs,
 that is, how to state that certain language constructs are strict only

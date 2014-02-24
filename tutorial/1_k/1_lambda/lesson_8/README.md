@@ -1,6 +1,6 @@
 ### Multiple Binding Constructs
 
-[MOVIE [2'40'']](http://youtu.be/Ox4uXDpcY64)
+[MOVIE [2'40"]](http://youtu.be/Ox4uXDpcY64)
 
 Here we learn how multiple language constructs that bind variables can coexist.
 We will also learn about or recall another famous binder besides `lambda`,

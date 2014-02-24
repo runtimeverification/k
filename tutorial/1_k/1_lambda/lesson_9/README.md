@@ -1,6 +1,6 @@
 ### A Complete and Documented K Definition
 
-[MOVIE [6'07'']](http://youtu.be/-pHgLqNMKac)
+[MOVIE [6'07"]](http://youtu.be/-pHgLqNMKac)
 
 In this lesson you will learn how to add formal comments to your K definition,
 in order to nicely document it.  The generated document can be then used for

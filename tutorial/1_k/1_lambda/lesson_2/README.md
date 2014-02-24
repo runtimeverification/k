@@ -1,6 +1,6 @@
 ### Module Importing, Rules, Variables
 
-[MOVIE [4'03'']](http://youtu.be/NDXgYfHG6R4)
+[MOVIE [4'03"]](http://youtu.be/NDXgYfHG6R4)
 
 We here learn how to include a predefined module (SUBSTITUTION), how to
 use it to define a K rule (the characteristic rule of lambda calculus),

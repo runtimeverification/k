@@ -1,6 +1,6 @@
 ### Evaluation Strategies using Strictness
 
-[MOVIE [2'20'']](http://youtu.be/aul1x6bd1YM)
+[MOVIE [2'20"]](http://youtu.be/aul1x6bd1YM)
 
 Here we learn how to use the K `strict` attribute to define desired evaluation
 strategies.  We will also learn how to tell K which terms are already

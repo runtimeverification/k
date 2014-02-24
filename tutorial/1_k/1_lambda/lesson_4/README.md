@@ -1,6 +1,6 @@
 ### Generating Documentation; Latex Attributes
 
-[MOVIE [3'13'']](http://youtu.be/ULXA4e_6-DY)
+[MOVIE [3'13"]](http://youtu.be/ULXA4e_6-DY)
 
 In this lesson we learn how to generate formatted documentation from K
 language definitions.  We also learn how to use Latex attributes to control
