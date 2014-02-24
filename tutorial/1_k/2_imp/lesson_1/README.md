@@ -1,5 +1,6 @@
-K Tutorial --- IMP --- Defining a More Complex Syntax
-by Grigore Rosu
+### Defining a More Complex Syntax
+
+[MOVIE [9'15"]](http://youtu.be/F39Ta1stiCM)
 
 Here we learn how to define a more complex language syntax than LAMBDA's,
 namely the C-like syntax of IMP.  Also, we will learn how to define languages
@@ -14,7 +15,7 @@ language features in modules, we often separate the language syntax from the
 language semantics in different modules.
 
 In our case here, we start by defining two modules, IMP-SYNTAX and IMP, and
-import the first in the second, using the keyword "imports".  As their names
+import the first in the second, using the keyword `imports`.  As their names
 suggest, we will place all IMP's syntax definition in IMP-SYNTAX and all its
 semantics in IMP.
 
@@ -31,22 +32,22 @@ conditional statement and the while loop statement to only take blocks as
 branches and body, respectively.
 
 There is nothing special about arithmetic and Boolean expressions.  
-They are given the expected strictness attributes, except for "<=" and "&&",
+They are given the expected strictness attributes, except for `<=` and `&&`,
 for demonstration purposes.
 
-The "<=" is defined to be "seqstrict", which means that it evaluates its
-arguments in order, from left-to-right (recall that the "strict" operators
+The `<=` is defined to be `seqstrict`, which means that it evaluates its
+arguments in order, from left-to-right (recall that the `strict` operators
 can evaluate their arguments in any, fully interleaved, orders).  Like
-"strict", the "seqstrict" annotation can also be configured; for example, one
-can specify in which arguments and in what order.  By default, "seqstrict"
+`strict`, the `seqstrict` annotation can also be configured; for example, one
+can specify in which arguments and in what order.  By default, `seqstrict`
 refers to all the arguments, in their left-to-right order.  In our case here,
-it is equivalent with "seqstrict(1 2)".
+it is equivalent with `seqstrict(1 2)`.
 
-The "&&" is only strict in its first argument, because we will give it a
+The `&&` is only strict in its first argument, because we will give it a
 short-circuited semantics (its second argument will only be evaluated when
 the first evaluates to true).  Recall the K tool also allows us to associate
 Latex attributes to constructs, telling the document generator how to display
-them.  For example, we associate "<=" the attribute "latex({#1}\leq{#2})",
+them.  For example, we associate `<=` the attribute `latex({#1}\leq{#2})`,
 which makes it be displayed $\leq$ everywhere in the generated documentation.
 
 In this tutorial we take the freedom to associate the various constructs
@@ -58,14 +59,14 @@ parser.
 Blocks are defined using curly brackets, and they can either be empty or
 hold a statement.
 
-Nothing special about the IMP statements.  Note that ";" is an assignment
+Nothing special about the IMP statements.  Note that `;` is an assignment
 statement terminator, not a statement separator.  Note also that blocks are
 special statements.
 
 An IMP program declares a comma-separated list of variables using the keyword
-"int" like in C, followed by a semicolon ";", followed by a statement.
+`int` like in C, followed by a semicolon `;`, followed by a statement.
 Syntactically, the idea here is that we can wrap any IMP program within a
-"main(){...}" function and get a valid C program.  IMP does not allow variable
+`main(){...}` function and get a valid C program.  IMP does not allow variable
 declarations anywhere else except through this construct, at the top-level of
 the program.  Other languages provided with the \K distribution (see, e.g., the
 IMP++ language also discussed in this tutorial) remove this top-level program
@@ -73,17 +74,17 @@ construct of IMP and add instead variable declaration as a statement construct,
 which can be used anywhere in the program, not only at the top level.
 
 Note how we defined the comma-separated list of identifiers, using
-List{Id,","}.  The K tool provides builtin support for generic syntactic
+`List{Id,","}`.  The K tool provides builtin support for generic syntactic
 lists.  In general,
 
-  syntax B ::= List{A,T}
+    syntax B ::= List{A,T}
 
 declares a new non-terminal, B, corresponding to T-separated sequences of
 elements of A, where A is a non-terminal and T is a terminal.  These lists
 can also be empty, that is, IMP programs declaring no variable are also
-allowed (e.g., ``int; {}'' is a valid IMP program).  To instantiate and use
+allowed (e.g., `int; {}` is a valid IMP program).  To instantiate and use
 the K builtin lists, you should alias each instance with a (typically fresh)
-non-terminal in your syntax, like we do with the "Ids" nonterminal.
+non-terminal in your syntax, like we do with the `Ids` nonterminal.
 
 Like with other K features, there are ways to configure the syntactic lists,
 but we do not discuss them here.
@@ -99,61 +100,61 @@ you are writing programs in a real programming language :)
 
 For example, here is sum.imp, which sums in sum all numbers up to n:
 
-int n, sum;
-n = 100;
-sum=0;
-while (!(n <= 0)) {
-  sum = sum + n;
-  n = n + -1;
-}
+    int n, sum;
+    n = 100;
+    sum=0;
+    while (!(n <= 0)) {
+      sum = sum + n;
+      n = n + -1;
+    }
 
-Now krun it and see how it looks parsed in the default k cell.
+Now krun it and see how it looks parsed in the default `k` cell.
 
 The program collatz.imp tests the Collatz conjecture for all numbers up to
 m and accumulates the total number of steps in s:
 
-int m, n, q, r, s;
-m = 10;
-while (!(m<=2)) {
-  n = m;
-  m = m + -1;
-  while (!(n<=1)) {
-    s = s+1;
-    q = n/2;
-    r = q+q+1;
-    if (r<=n) {
-      n = n+n+n+1;         // n becomes 3*n+1 if odd
-    } else {n=q;}          //        of   n/2 if even
-  }
-}
+    int m, n, q, r, s;
+    m = 10;
+    while (!(m<=2)) {
+      n = m;
+      m = m + -1;
+      while (!(n<=1)) {
+        s = s+1;
+        q = n/2;
+        r = q+q+1;
+        if (r<=n) {
+          n = n+n+n+1;         // n becomes 3*n+1 if odd
+        } else {n=q;}          //        of   n/2 if even
+      }
+    }
 
-Finally, program primes.imp counts in s all the prime numbers up to m:
+Finally, program `primes.imp` counts in `s` all the prime numbers up to `m`:
 
-int i, m, n, q, r, s, t, x, y, z;
-m = 10;  n = 2;
-while (n <= m) {
-  // checking primality of n and writing t to 1 or 0
-  i = 2;  q = n/i;  t = 1;
-  while (i<=q && 1<=t) {
-    x = i;
-    y = q;
-    // fast multiplication (base 2) algorithm
-    z = 0;
-    while (!(x <= 0)) {
-      q = x/2;
-      r = q+q+1;
-      if (r <= x) { z = z+y; } else {}
-      x = q;
-      y = y+y;
-    } // end fast multiplication
-    if (n <= z) { t = 0; } else { i = i+1;  q = n/i; }
-  } // end checking primality
-  if (1 <= t) { s = s+1; } else {}
-  n = n+1;
-}
+    int i, m, n, q, r, s, t, x, y, z;
+    m = 10;  n = 2;
+    while (n <= m) {
+      // checking primality of n and writing t to 1 or 0
+      i = 2;  q = n/i;  t = 1;
+      while (i<=q && 1<=t) {
+        x = i;
+        y = q;
+        // fast multiplication (base 2) algorithm
+        z = 0;
+        while (!(x <= 0)) {
+          q = x/2;
+          r = q+q+1;
+          if (r <= x) { z = z+y; } else {}
+          x = q;
+          y = y+y;
+        } // end fast multiplication
+        if (n <= z) { t = 0; } else { i = i+1;  q = n/i; }
+      } // end checking primality
+      if (1 <= t) { s = s+1; } else {}
+      n = n+1;
+    }
 
 All the programs above will run once we define the semantics of IMP.  If you
-want to execute them now, wrap them in a main(){...} function and compile them
+want to execute them now, wrap them in a `main(){...}` function and compile them
 and run them with your favorite C compiler.
 
 Before we move to the K semantics of IMP, we would like to make some
@@ -162,11 +163,12 @@ powerful, thanks to the SDF system upon which it builds, you should not expect
 magic from it!  While the K parser can parse many non-trivial languages (see,
 for example, the KOOL language in k/examples in the K distribution), it was
 never meant to be a substitute for real parsers.  We often call the syntax
-defined in K ``the syntax of the semantics'', to highlight the fact that its
+defined in K *the syntax of the semantics*, to highlight the fact that its
 role is to serve as a convenient notation when writing the semantics, not
 necessarily as a means to define concrete syntax of arbitrarily complex
-programming languages.  See the KERNELC language in k/examples for an example
-on how to connect an external parser for concrete syntax to the \K tool.
+programming languages.  See the KERNELC language in [samples](/samples/)
+for an example on how to connect an external parser for concrete syntax to
+the K tool.
 
 The above being said, I personally strongly encourage you to strive to make
 the builtin parser work with your desired language syntax!  Do not give up

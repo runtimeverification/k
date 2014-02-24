@@ -1,10 +1,6 @@
-### Lesson 1, LAMBDA: Syntax Modules and Basic K Commands
+### Syntax Modules and Basic K Commands
 
-[
-[MOVIE (kframework.org) [4'07'']](http://fsl.cs.uiuc.edu/k-tutorial/1_lambda/1_lambda-lesson_1/1_lambda-lesson_1_player.html)
-|
-[MOVIE (YouTube) [4'07'']](http://youtu.be/y5Tf1EZVj8E)
-]
+[MOVIE [4'07"]](http://youtu.be/y5Tf1EZVj8E)
 
 Here we define our first K module, which contains the initial syntax of LAMBDA,
 and learn how to use the basic K commands.
