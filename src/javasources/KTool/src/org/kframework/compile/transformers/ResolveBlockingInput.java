@@ -1,11 +1,13 @@
 package org.kframework.compile.transformers;
 
+import org.kframework.backend.java.symbolic.PrePostVisitor;
 import org.kframework.compile.utils.GetLhsPattern;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
+import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -175,11 +177,10 @@ public class ResolveBlockingInput extends GetLhsPattern {
 		
 		hasInputCell = true;
         resultCondition = MetaK.incrementCondition(originalCondition, getPredicateTerm((Variable) variable));
-        originalCondition = originalCondition.shallowCopy();
 
-        String sort = getSort(originalCondition, (Variable) variable);
+        String sort = getSort((Variable) variable);
         Term parseTerm = KApp.of(parseInputLabel, 
-            StringBuiltin.kAppOf(variable.getSort()),
+            StringBuiltin.kAppOf(sort),
             StringBuiltin.kAppOf(inputCells.get(node.getLabel())));
 		
         Term ioBuffer = KApp.of(bufferLabel,
@@ -207,8 +208,32 @@ public class ResolveBlockingInput extends GetLhsPattern {
 		return node;
 	}
 
-    private String getSort(Term condition, Variable var) {
-        return var.getSort();
+    private String getSort(final Variable var) throws TransformerException {
+        if (!var.getSort().equals(KSorts.KITEM)) return var.getSort();
+        final String[] sort = {null};
+        CopyOnWriteTransformer transformer = new CopyOnWriteTransformer("find missing variables", context) {
+
+            @Override
+            public ASTNode transform(KApp node) throws TransformerException {
+                if (node.getChild() instanceof KList) {
+                    KList args = (KList) node.getChild();
+                    if (args.getContents().size() == 1) {
+                        Term v = args.getContents().get(0);
+                        if (var.equals(v)) {
+                            assert node.getLabel() instanceof KLabelConstant : "label should be a predicate label";
+                            KLabelConstant l = (KLabelConstant) node.getLabel();
+                            assert MetaK.isPredicateLabel(l.getLabel()) : "label should be a predicate label";
+                            sort[0] = l.getLabel().substring(2);
+                            return null;
+                        }
+                    }
+                }
+                return super.transform(node);
+            }
+        };
+        originalCondition = (Term) originalCondition.accept(transformer);
+
+        return sort[0];
     }
 
     private static final KLabelConstant parseInputLabel = KLabelConstant.of("#parseInput");
