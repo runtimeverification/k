@@ -6,18 +6,18 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 public enum KilProperty {
-    NO_CONCRETE_SYNTAX
+    NO_CONCRETE_SYNTAX;
     //TODO: add more
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
-    public @interface DependsOn {
+    public static @interface DependsOn {
 	    KilProperty value();
     }
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
-    public @interface Provides {
+    public static @interface Provides {
 	    KilProperty value();
     }
 }
