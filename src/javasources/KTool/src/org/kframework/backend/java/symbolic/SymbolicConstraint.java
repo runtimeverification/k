@@ -147,6 +147,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         isNormal = false;
     }
 
+    public Equality falsifyingEquality() {
+        return falsifyingEquality;
+    }
+
     public enum TruthValue { TRUE, UNKNOWN, FALSE }
 
 
@@ -425,6 +429,11 @@ public class SymbolicConstraint extends JavaSymbolicObject {
      */
     private final Map<Variable, Term> substitution = new HashMap<Variable, Term>();
     private TruthValue truthValue;
+    /**
+     * Stores the minimal equality causing this constraint to become false.
+     * It is null is this constraint is not false.
+     */
+    private Equality falsifyingEquality;
     private final TermContext context;
     private final Definition definition;
     
@@ -467,7 +476,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         if (simplifyingEqualities) {
             Equality equality = new Equality(leftHandSide, rightHandSide);
             if (equality.isFalse()) {
-                truthValue = TruthValue.FALSE;
+                falsify(equality);
             } else if (equality.isUnknown()) {
                 equalityBuffer.add(equality);
                 isNormal = false;
@@ -529,7 +538,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             } else {
                 equalities.add(equality);
             }
-            truthValue = TruthValue.FALSE;
+            falsify(equality);
         }
     }
 
@@ -855,6 +864,17 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     }
 
     /**
+     * Sets this constraint to be false, and record a minimal equality that makes it false.
+     * @param equality
+     */
+    private void falsify(Equality equality) {
+        // TODO(AndreiS): this assertion should not fail
+        // assert truthValue == TruthValue.TRUE || truthValue == TruthValue.UNKNOWN;
+        truthValue = TruthValue.FALSE;
+        falsifyingEquality = equality;
+    }
+
+    /**
      * TODO(YilongL):Gets solutions to this symbolic constraint?
      * @return
      */
@@ -916,7 +936,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                     // decomposed, discharge the equality
                     iterator.remove();
                     if (!unifier.unify(equality)) {
-                        truthValue = TruthValue.FALSE;
+                        falsify(new Equality(
+                                unifier.unificationFailureLeftHandSide(),
+                                unifier.unificationFailureRightHandSide()));
                         simplifyingEqualities = false;
                         break label;
                     }
@@ -977,7 +999,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 equalitiesToRemove.add(equality);
                 continue;
             } else if (equality.isFalse()) {
-                truthValue = TruthValue.FALSE;
+                falsify(equality);
                 return;
             }
 
@@ -1028,7 +1050,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                     if (previousEquality.isTrue()) {
                         equalitiesToRemove.add(previousEquality);
                     } else if (previousEquality.isFalse()) {
-                        truthValue = TruthValue.FALSE;
+                        falsify(previousEquality);
                         return;
                     }
                 }
