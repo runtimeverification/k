@@ -130,10 +130,7 @@ public class Definition extends ASTNode {
         /* collect lexical token sorts */
         TokenSortCollector tokenSortCollector = new TokenSortCollector(context);
         this.accept(tokenSortCollector);
-        // TODO(AndreiS): remove from K #Id
-        Set<String> tokenSorts = tokenSortCollector.getSorts();
-        tokenSorts.add("#Id");
-        context.setTokenSorts(tokenSorts);
+        context.setTokenSorts(tokenSortCollector.getSorts());
 
         /* collect the data structure sorts */
         DataStructureSortCollector dataStructureSortCollector
