@@ -3,9 +3,12 @@ package org.kframework.backend.java.indexing.pathIndex;
 import org.apache.commons.collections15.MultiMap;
 import org.apache.commons.collections15.multimap.MultiHashMap;
 import org.kframework.backend.java.indexing.pathIndex.trie.PathIndexTrie;
-import org.kframework.backend.java.indexing.pathIndex.visitors.*;
 import org.kframework.backend.java.indexing.pathIndex.util.MultipleCellUtil;
 import org.kframework.backend.java.indexing.pathIndex.util.MultiplicityStarCellHolder;
+import org.kframework.backend.java.indexing.pathIndex.visitors.CoolingRuleVisitor;
+import org.kframework.backend.java.indexing.pathIndex.visitors.HeatingRuleVisitor;
+import org.kframework.backend.java.indexing.pathIndex.visitors.RuleVisitor;
+import org.kframework.backend.java.indexing.pathIndex.visitors.TermVisitor;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Rule;
@@ -13,12 +16,17 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.krun.K;
 import org.kframework.utils.general.IndexingStatistics;
 
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
 
 /**
+ * This class implements some variant of the Path Indexing technique.
+ *
  * Author: Owolabi Legunsen
  * 1/8/14: 10:08 AM
  */
@@ -41,20 +49,22 @@ public class PathIndex {
 
     public PathIndex(Definition definition) {
         this.definition = definition;
-        this.indexedRules = new HashMap<>();
+        this.indexedRules = new LinkedHashMap<>();
         termVisitor = new TermVisitor(definition.context());
-        multiCellInfoHolder = MultipleCellUtil.checkDefinitionForMultiplicityStar(definition.context());
+        multiCellInfoHolder =
+                MultipleCellUtil.checkDefinitionForMultiplicityStar(definition.context());
         constructIndex(definition);
     }
 
     /**
-     * Constructs a trie data structure from all the rules in the definition.
+     * Constructs the index (a trie) data structure from all the rules in the definition.
      * @param definition
      */
     private void constructIndex(Definition definition) {
         MultiMap<Integer, String> pStringMap = new MultiHashMap<>();
         int count = 1;
 
+        //Step 1. Get all the pStrings from each of the rules
         for (Rule rule : definition.rules()) {
             if (rule.containsAttribute("heat") || rule.containsAttribute("print")) {
                 pStringMap.putAll(createRulePString(rule, count, RuleType.HEATING));
@@ -74,10 +84,10 @@ public class PathIndex {
         assert indexedRules.size() == definition.rules().size();
 //        printIndices(indexedRules, pStringMap);
 
-        //initialise the trie
+        //Step 2. initialise the trie
         trie = new PathIndexTrie();
 
-        //add all the pStrings to the trie
+        //Step 3. add all the pStrings to the trie
         ArrayList<String> strings;
         for (Integer key : pStringMap.keySet()) {
             strings = (ArrayList<String>) pStringMap.get(key);

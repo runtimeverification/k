@@ -92,7 +92,7 @@ public class IndexingStatistics {
                 min = num;
             }
         }
-        return (Integer)min;
+        return (Integer) min;
     }
 
     private static int computeMax(List<Number> rulesSelectedAtEachStep) {
@@ -102,25 +102,16 @@ public class IndexingStatistics {
                 max = num;
             }
         }
-        return (Integer)max;
+        return (Integer) max;
     }
 
     private static double computeTotal(List<Number> times) {
         long sum = 0L;
         for (Number time : times) {
-            sum += (Long)time;
+            sum += (Long) time;
         }
         return ((double) sum) / 1000;
     }
-
-    //TODO(OwolaiL): These two methods should be merged since they have the same erasure
-//    private static double computeAverages(List<Integer> ruleCounts) {
-//        Integer sum = 0;
-//        for (int count : ruleCounts) {
-//            sum += count;
-//        }
-//        return ((double) sum) / ruleCounts.size();
-//    }
 
     private static double computeAverage(List<Number> times) {
         Long sum = 0L;

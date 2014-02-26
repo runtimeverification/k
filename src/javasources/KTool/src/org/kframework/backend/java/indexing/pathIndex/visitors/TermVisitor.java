@@ -2,17 +2,23 @@ package org.kframework.backend.java.indexing.pathIndex.visitors;
 
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.*;
-import org.kframework.backend.java.symbolic.BottomUpVisitor;
 import org.kframework.backend.java.symbolic.LocalVisitor;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.K;
 import org.kframework.utils.general.IndexingStatistics;
 
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
+
 /**
+ * This visitor class is used to traverse the current term being rewritten in order to select what
+ * rules may be applied.
+ * <p/>
  * Author: OwolabiL
  * Date: 1/21/14
  * Time: 12:05 PM
@@ -36,16 +42,9 @@ public class TermVisitor extends LocalVisitor {
     private final String SEPARATOR = ".";
     private final String START_STRING = "@.";
 
+    // these flags are used to decide whether (or not) to try the i/o rules while rewriting
+    // the current term.
     private boolean addInputRules;
-
-    public boolean isAddInputRules() {
-        return addInputRules;
-    }
-
-    public boolean isAddOutputRules() {
-        return addOutputRules;
-    }
-
     private boolean addOutputRules;
 
     public TermVisitor(Context context) {
@@ -115,7 +114,8 @@ public class TermVisitor extends LocalVisitor {
         if (kSequence.size() > 0) {
             //TODO (OwolabiL): This is too messy. Restructure the conditionals
             if (kSequence.get(0) instanceof KItem) {
-                boolean isKResult = context.isSubsorted(K_RESULT, ((KItem) kSequence.get(0)).sort());
+                boolean isKResult = context.isSubsorted(K_RESULT,
+                        ((KItem) kSequence.get(0)).sort());
                 if (isKResult) {
                     pString = START_STRING + K_RESULT;
                     kSequence.get(1).accept(this);
@@ -294,6 +294,14 @@ public class TermVisitor extends LocalVisitor {
         return pStrings;
     }
 
+    public boolean isAddInputRules() {
+        return addInputRules;
+    }
+
+    public boolean isAddOutputRules() {
+        return addOutputRules;
+    }
+
     private class TokenVisitor extends TermVisitor {
 
         private final String baseString;
@@ -350,36 +358,5 @@ public class TermVisitor extends LocalVisitor {
             return candidates;
         }
 
-    }
-
-    private class OutPutCellVisitor extends BottomUpVisitor {
-        public static final String BUFFER_LABEL = "#buffer";
-
-        private boolean isAddOutCell() {
-            return addOutCell;
-        }
-
-        private boolean addOutCell;
-
-        private OutPutCellVisitor() {
-            addOutCell = false;
-        }
-
-        @Override
-        public void visit(BuiltinList node) {
-            for (Term content : node.elements()) {
-                content.accept(this);
-            }
-        }
-
-        @Override
-        public void visit(KItem kItem) {
-            if (kItem.kLabel().toString().equals(BUFFER_LABEL)) {
-                Term bufferTerm = ((KList) kItem.kList()).get(0);
-                if (bufferTerm instanceof Token && !((Token) bufferTerm).value().equals("\"\"")) {
-                    addOutCell = true;
-                }
-            }
-        }
     }
 }

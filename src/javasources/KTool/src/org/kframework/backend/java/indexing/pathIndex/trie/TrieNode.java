@@ -6,6 +6,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
+ * A single node in the trie.
+ * <p/>
  * Author: Owolabi Legunsen
  * 1/2/14: 7:23 PM
  */
@@ -20,7 +22,12 @@ public class TrieNode {
         indices = new LinkedHashSet<>();
     }
 
-
+    /**
+     * Checks whether any of the children of this node holds a particular value.
+     *
+     * @param value The value that we are looking for
+     * @return true if the children of this node contain the value passed in. false otherwise
+     */
     public boolean inChildren(String value) {
         boolean contained = false;
         for (TrieNode node : getChildren()) {
@@ -32,6 +39,13 @@ public class TrieNode {
         return contained;
     }
 
+    /**
+     * Fetches the child of this node which has a particular value.
+     *
+     * @param value The value that we are looking for.
+     * @return The child of this node which has the value that we are looking for, if there is one,
+     *         or null if there is none.
+     */
     public TrieNode getChild(String value) {
         TrieNode child = null;
         for (TrieNode node : getChildren()) {
@@ -52,6 +66,10 @@ public class TrieNode {
 
     public void setChildren(ArrayList<TrieNode> children) {
         this.children = children;
+    }
+
+    public Set<Integer> getIndices() {
+        return indices;
     }
 
     @Override
@@ -76,9 +94,5 @@ public class TrieNode {
         int result = value.hashCode();
         result = 31 * result + (children != null ? children.hashCode() : 0);
         return result;
-    }
-
-    public Set<Integer> getIndices() {
-        return indices;
     }
 }

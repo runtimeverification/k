@@ -10,9 +10,9 @@ import java.util.List;
 
 /**
  * This visitor class is used to traverse a term. It does the following in a single traversal:
- *  (1) collect position strings from its kCell(s)
- *  (2) selects i/o cells by name (this is a shortcoming of this approach as it specializes the
- *      indexing technique to the, possibly user-defined cell names.)
+ * (1) collect position strings from its kCell(s)
+ * (2) selects i/o cells by name (this is a shortcoming of this approach as it specializes the
+ * indexing technique to the, possibly user-defined cell names.)
  * Author: OwolabiL
  * Date: 2/26/14
  * Time: 12:56 PM
