@@ -14,6 +14,7 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import java.util.*;
 
 /**
+ * TODO(OwolabiL): This class can be removed.
  * Author: OwolabiL
  * Date: 2/4/14
  * Time: 3:34 PM
