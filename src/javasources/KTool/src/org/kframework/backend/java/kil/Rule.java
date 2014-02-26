@@ -46,7 +46,8 @@ public class Rule extends JavaSymbolicObject {
             Collection<Term> ensures,
             Collection<Variable> freshVariables,
             UninterpretedConstraint lookups,
-            Attributes attributes) {
+            Attributes attributes,
+            Definition definition) {
         this.label = label;
         this.leftHandSide = leftHandSide;
         this.rightHandSide = rightHandSide;
@@ -55,7 +56,7 @@ public class Rule extends JavaSymbolicObject {
         this.freshVariables = ImmutableSet.copyOf(freshVariables);
         this.lookups = lookups;
 
-        Collection<IndexingPair> indexingPairs = leftHandSide.getIndexingPairs();
+        Collection<IndexingPair> indexingPairs = leftHandSide.getIndexingPairs(definition);
         /*
          * Compute indexing information only if the left-hand side of this rule has precisely one
          * k cell; set indexing to top otherwise (this rule could rewrite any term).

@@ -37,13 +37,13 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     /**
      * Returns a {@link List} view of the indexing pairs.
      */
-    public List<IndexingPair> getIndexingPairs() {
+    public List<IndexingPair> getIndexingPairs(final Definition definition) {
         final List<IndexingPair> indexingPairs = new ArrayList<IndexingPair>();
         accept(new BottomUpVisitor() {
             @Override
             public void visit(Cell cell) {
                 if (cell.getLabel().equals("k")) {
-                    indexingPairs.add(IndexingPair.getIndexingPair(cell.getContent()));
+                    indexingPairs.add(IndexingPair.getIndexingPair(cell.getContent(), definition));
                 } else if (cell.contentKind() == Kind.CELL_COLLECTION) {
                     super.visit(cell);
                 }

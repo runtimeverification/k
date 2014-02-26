@@ -587,7 +587,8 @@ public class CopyOnWriteTransformer implements Transformer {
                     processedEnsures,
                     processedFreshVariables,
                     processedLookups,
-                    rule.getAttributes());
+                    rule.getAttributes(),
+                    definition);
         } else {
             return rule;
         }

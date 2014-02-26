@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.collect.Sets;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.indexing.BottomIndex;
 import org.kframework.backend.java.indexing.FreezerIndex;
@@ -152,7 +153,7 @@ public class SymbolicRewriter {
         //        indices.add(new FreezerIndex(frozenKLabel, i));
         //    }
         //}
-        for (String sort : Definition.TOKEN_SORTS) {
+        for (String sort : definition.builtinSorts()) {
             indices.add(new TokenIndex(sort));
         }
 
@@ -269,7 +270,7 @@ public class SymbolicRewriter {
      */
     private List<Rule> getSimulationRules(Term term) {
         List<Rule> rules = new ArrayList<Rule>();
-        for (IndexingPair pair : term.getIndexingPairs()) {
+        for (IndexingPair pair : term.getIndexingPairs(definition)) {
             if (simulationRuleTable.get(pair.first) != null) {
                 rules.addAll(simulationRuleTable.get(pair.first));
             }
@@ -315,7 +316,7 @@ public class SymbolicRewriter {
             buildBasicIndex();
         }
 
-        for (IndexingPair pair : term.getIndexingPairs()) {
+        for (IndexingPair pair : term.getIndexingPairs(definition)) {
             if (ruleTable.get(pair.first) != null) {
                 rules.addAll(ruleTable.get(pair.first));
             }

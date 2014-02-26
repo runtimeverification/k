@@ -625,7 +625,8 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 ensures,
                 freshVariables,
                 lookups,
-                node.getAttributes());
+                node.getAttributes(),
+                definition);
 
         if (freshRules) {
             return rule.getFreshRule(TermContext.of(definition));
@@ -756,7 +757,8 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 ensures,
                 rule.freshVariables(),
                 lookups,
-                rule.getAttributes());
+                rule.getAttributes(),
+                definition);
     }
 
     private static void flattenKSequence(

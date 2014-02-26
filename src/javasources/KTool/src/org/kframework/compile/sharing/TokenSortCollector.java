@@ -30,7 +30,7 @@ public class TokenSortCollector extends BasicVisitor {
 
     @Override
     public void visit(Production production) {
-        if (production.isLexical()) {
+        if (production.isLexical() && !production.containsAttribute("variable")) {
             sorts.add(production.getSort());
         }
     }
