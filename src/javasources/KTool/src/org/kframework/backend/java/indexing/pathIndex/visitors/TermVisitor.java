@@ -1,15 +1,16 @@
 package org.kframework.backend.java.indexing.pathIndex.visitors;
 
-import org.apache.commons.collections15.MultiMap;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.symbolic.BottomUpVisitor;
 import org.kframework.backend.java.symbolic.LocalVisitor;
-import org.kframework.backend.java.indexing.pathIndex.util.LookupMultipleCell;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
+import org.kframework.krun.K;
+import org.kframework.utils.general.IndexingStatistics;
 
 import java.util.*;
-import java.util.Collection;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Author: OwolabiL
@@ -49,54 +50,64 @@ public class TermVisitor extends LocalVisitor {
 
     public TermVisitor(Context context) {
         pStrings = new LinkedHashSet<>();
-        addInputRules = false;
-        addOutputRules = false;
         this.context = context;
     }
 
     @Override
     public void visit(Term node) {
         int BASE_IO_CELL_SIZE = 2;
-        //first find all the term's cells of interest in  a single pass
-        MultiMap<String, Cell> cellsFound = LookupMultipleCell.find(node);
-
-        //get the pString from each k cell using a new visitor each time, but accumulate the pStrings
-        Collection<Cell> cellsOfInterest = cellsFound.get("k");
-        if (cellsOfInterest != null) {
-            for (Cell kCell : cellsFound.get("k")) {
-                TermVisitor visitor = new TermVisitor(this.context);
-                kCell.getContent().accept(visitor);
-                pStrings.addAll(visitor.getpStrings());
-            }
+        if (K.get_indexing_stats) {
+            IndexingStatistics.getPStringStopwatch.reset();
+            IndexingStatistics.getPStringStopwatch.start();
         }
+        //first find all the term's cells of interest in  a single pass
+        CellVisitor v = new CellVisitor(context);
+        node.accept(v);
+        pStrings.addAll(v.getkCellPStings());
+
+        if (K.get_indexing_stats) {
+            IndexingStatistics.getPStringStopwatch.stop();
+            IndexingStatistics.getPStringTimes.add(
+                    IndexingStatistics.getPStringStopwatch.elapsed(TimeUnit.MICROSECONDS));
+        }
+
+        if (K.get_indexing_stats) {
+            IndexingStatistics.traverseCellsStopwatch.reset();
+            IndexingStatistics.traverseCellsStopwatch.start();
+        }
+        Cell cellOfInterest;
 
         Cell ioCell;
         List<Term> ioCellList;
         //check whether output rules should be added
-        cellsOfInterest = cellsFound.get("out");
-        if (cellsOfInterest != null) {
-            ioCell = ((ArrayList<Cell>) cellsOfInterest).get(0);
-            BuiltinList content = (BuiltinList) ioCell.getContent();
-            ioCellList = content.elements();
+        if (v.getOutCell() != null) {
+            ioCell = v.getOutCell();
+            ioCellList = ((BuiltinList) ioCell.getContent()).elements();
             if (ioCellList.size() > BASE_IO_CELL_SIZE) {
                 addOutputRules = true;
             } else {
                 OutPutCellVisitor outPutCellVisitor = new OutPutCellVisitor();
-                content.accept(outPutCellVisitor);
+                (ioCell.getContent()).accept(outPutCellVisitor);
                 if (outPutCellVisitor.isAddOutCell()) {
                     addOutputRules = true;
                 }
             }
         }
         //check whether input rules should be added
-        cellsOfInterest = cellsFound.get("in");
-        if (cellsOfInterest != null) {
-            ioCell = ((ArrayList<Cell>) cellsFound.get("in")).get(0);
-            ioCellList = ((BuiltinList) ioCell.getContent()).elements();
+        cellOfInterest = v.getInCell();
+        if (cellOfInterest != null) {
+            ioCellList = ((BuiltinList) cellOfInterest.getContent()).elements();
             if (ioCellList.size() > BASE_IO_CELL_SIZE) {
                 addInputRules = true;
             }
         }
+
+        if (K.get_indexing_stats) {
+            IndexingStatistics.traverseCellsStopwatch.stop();
+            IndexingStatistics.traverseCellsTimes.add(
+                    IndexingStatistics.traverseCellsStopwatch.elapsed(TimeUnit.MICROSECONDS));
+        }
+
     }
 
     @Override
@@ -341,7 +352,7 @@ public class TermVisitor extends LocalVisitor {
 
     }
 
-    private class OutPutCellVisitor extends LocalVisitor {
+    private class OutPutCellVisitor extends BottomUpVisitor {
         public static final String BUFFER_LABEL = "#buffer";
 
         private boolean isAddOutCell() {
