@@ -311,10 +311,6 @@ public class SymbolicRewriter {
 
     private List<Rule> getNonIndexedRules(Term term) {
         Set<Rule> rules = new LinkedHashSet<>();
-        //TODO(OwolabiL): This should be removed. It's only here for comparison with new indexing.
-        if (K.do_indexing) {
-            buildBasicIndex();
-        }
 
         for (IndexingPair pair : term.getIndexingPairs(definition)) {
             if (ruleTable.get(pair.first) != null) {
@@ -328,7 +324,7 @@ public class SymbolicRewriter {
             }
         }
         rules.addAll(unindexedRules);
-        return new ArrayList<Rule>(rules);
+        return new ArrayList<>(rules);
     }
 
     private ConstrainedTerm getTransition(int n) {

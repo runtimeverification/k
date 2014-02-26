@@ -6,13 +6,10 @@ import org.kframework.backend.java.indexing.pathIndex.trie.PathIndexTrie;
 import org.kframework.backend.java.indexing.pathIndex.visitors.*;
 import org.kframework.backend.java.indexing.pathIndex.util.MultipleCellUtil;
 import org.kframework.backend.java.indexing.pathIndex.util.MultiplicityStarCellHolder;
-import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.Token;
-import org.kframework.backend.java.util.LookupCell;
 import org.kframework.krun.K;
 import org.kframework.utils.general.IndexingStatistics;
 
@@ -50,6 +47,10 @@ public class PathIndex {
         constructIndex(definition);
     }
 
+    /**
+     * Constructs a trie data structure from all the rules in the definition.
+     * @param definition
+     */
     private void constructIndex(Definition definition) {
         MultiMap<Integer, String> pStringMap = new MultiHashMap<>();
         int count = 1;
@@ -180,12 +181,12 @@ public class PathIndex {
         if (K.get_indexing_stats) {
             IndexingStatistics.getPStringFromTermStopWatch.reset();
             IndexingStatistics.getPStringFromTermStopWatch.start();
-            pStrings = getTermPString2(term);
+            pStrings = getPStringsFromTerm(term);
             IndexingStatistics.getPStringFromTermStopWatch.stop();
             IndexingStatistics.timesForGettingPStringsFromTerm.add(
                     IndexingStatistics.getPStringFromTermStopWatch.elapsed(TimeUnit.MICROSECONDS));
         } else {
-            pStrings = getTermPString2(term);
+            pStrings = getPStringsFromTerm(term);
         }
 
 //        System.out.println("PStrings: "+pStrings);
@@ -195,7 +196,6 @@ public class PathIndex {
         Set<Integer> currentMatch;
         Set<Integer> matchingIndices = new LinkedHashSet<>();
         String subString;
-
 
         if (K.get_indexing_stats) {
             IndexingStatistics.findMatchingIndicesStopWatch.reset();
@@ -219,7 +219,6 @@ public class PathIndex {
                 matchingIndices = currentMatch;
             } else {
                 //should it be an intersection?
-//                matchingIndices = Sets.union(matchingIndices, currentMatch);
                 matchingIndices.addAll(currentMatch);
             }
         }
@@ -232,18 +231,18 @@ public class PathIndex {
             matchingIndices.addAll(inputRuleIndices);
         }
 
-        if (K.get_indexing_stats) {
-            IndexingStatistics.findMatchingIndicesStopWatch.stop();
-            IndexingStatistics.timesForFindingMatchingIndices.add(
-                    IndexingStatistics.findMatchingIndicesStopWatch.elapsed(TimeUnit.MICROSECONDS));
-        }
-
-        // this check is needed because of .K which now has  a pString of @.EMPTY_K, but may not have
-        // any rules so indexed in some simpler languages like IMP
+        // this check is needed because of .K which now has  a pString of @.EMPTY_K, but may not
+        // have any rules so indexed in some simpler languages like IMP
         if (matchingIndices != null) {
             for (Integer n : matchingIndices) {
                 rules.add(indexedRules.get(n));
             }
+        }
+
+        if (K.get_indexing_stats) {
+            IndexingStatistics.findMatchingIndicesStopWatch.stop();
+            IndexingStatistics.timesForFindingMatchingIndices.add(
+                    IndexingStatistics.findMatchingIndicesStopWatch.elapsed(TimeUnit.MICROSECONDS));
         }
 
 //        System.out.println("matching: "+ matchingIndices + "\n");
@@ -251,7 +250,13 @@ public class PathIndex {
         return new ArrayList<>(rules);
     }
 
-    private Set<String> getTermPString2(Term term) {
+    /**
+     * Takes as input the term that is currently  being rewritten, traverses it and return a set
+     * of strings that are used to query the index structure for finding possibly matching rules.
+     * @param term  the term that is to be traversed
+     * @return a set of positions that can be used to query the path index
+     */
+    private Set<String> getPStringsFromTerm(Term term) {
         termVisitor = new TermVisitor(definition.context());
         term.accept(termVisitor);
         return termVisitor.getpStrings();

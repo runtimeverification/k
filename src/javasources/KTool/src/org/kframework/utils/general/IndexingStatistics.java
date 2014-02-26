@@ -8,6 +8,7 @@ import java.util.List;
 /**
  * This class holds statistics about rewriting. The goal is to be able to compare different indexing
  * schemes and measure progress as we build them.
+ * TODO(OwolabiL): This should be removed once I get a good handle on the visual vm way of profiling.
  * <p/>
  * Author: OwolabiL
  * Date: 2/18/14
@@ -25,13 +26,21 @@ public class IndexingStatistics {
     public static Stopwatch rewritingStopWatch = new Stopwatch();
     public static Stopwatch preProcessStopWatch = new Stopwatch();
     public static Stopwatch kilTransformationStopWatch = new Stopwatch();
+    public static Stopwatch getPStringStopwatch = new Stopwatch();
+    public static Stopwatch cellCheckingStopwatch = new Stopwatch();
+    public static Stopwatch traverseCellsStopwatch = new Stopwatch();
+    public static Stopwatch LookupMultiCellStopwatch = new Stopwatch();
 
-    public static List<Long> timesForRuleSelection = new ArrayList<>();
-    public static List<Long> timesForGettingPStringsFromTerm = new ArrayList<>();
-    public static List<Long> timesForFindingMatchingIndices = new ArrayList<>();
-    public static List<Long> timesForRewriteSteps = new ArrayList<>();
-    public static List<Long> timesForRewriting = new ArrayList<>();
-    public static List<Integer> rulesSelectedAtEachStep = new ArrayList<>();
+    public static List<Number> timesForRuleSelection = new ArrayList<>();
+    public static List<Number> timesForGettingPStringsFromTerm = new ArrayList<>();
+    public static List<Number> timesForFindingMatchingIndices = new ArrayList<>();
+    public static List<Number> timesForRewriteSteps = new ArrayList<>();
+    public static List<Number> timesForRewriting = new ArrayList<>();
+    public static List<Number> rulesSelectedAtEachStep = new ArrayList<>();
+    public static List<Number> getPStringTimes = new ArrayList<>();
+    public static List<Number> traverseCellsTimes = new ArrayList<>();
+    public static List<Long> cellCheckingTimes = new ArrayList<>();
+    public static List<Long> lookupMultiCellTimes = new ArrayList<>();
 
     public static void print() {
         System.err.println("=====================================================");
@@ -44,6 +53,10 @@ public class IndexingStatistics {
                 computeTotal(timesForRuleSelection) + " ms");
         System.err.println("\t\tTotal time for getting PStrings from term: " +
                 computeTotal(timesForGettingPStringsFromTerm) + " ms");
+        System.err.println("\t\t\tTotal time for traversing term: " +
+                computeTotal(getPStringTimes) + " ms");
+        System.err.println("\t\t\tTotal time traversing I/O cells: " +
+                computeTotal(traverseCellsTimes) + " ms");
         System.err.println("\t\tTotal time for finding matching indices " +
                 computeTotal(timesForFindingMatchingIndices) + " ms");
         System.err.println("\tTotal time for Actual Rewriting: " +
@@ -61,7 +74,7 @@ public class IndexingStatistics {
         System.err.println("Average time For Rewrite Steps: " +
                 computeAverage(timesForRewriteSteps) + " \u00B5" + "s");
         System.err.println("Average rules selected at each step: " +
-                computeAverages(rulesSelectedAtEachStep));
+                computeAverage(rulesSelectedAtEachStep));
         System.err.println("Min. Number of rules selected at each step: " +
                 computeMin(rulesSelectedAtEachStep));
         System.err.println("Max. Number of rules selected at each step: " +
@@ -72,47 +85,47 @@ public class IndexingStatistics {
         System.err.println("=====================================================");
     }
 
-    private static int computeMin(List<Integer> rulesSelectedAtEachStep) {
-        int min = rulesSelectedAtEachStep.get(0);
-        for (int num : rulesSelectedAtEachStep) {
-            if (num != 0 && num < min) {
+    private static int computeMin(List<Number> rulesSelectedAtEachStep) {
+        Number min = rulesSelectedAtEachStep.get(0);
+        for (Number num : rulesSelectedAtEachStep) {
+            if (num != 0 && num.longValue() < min.longValue()) {
                 min = num;
             }
         }
-        return min;
+        return (Integer)min;
     }
 
-    private static int computeMax(List<Integer> rulesSelectedAtEachStep) {
-        int max = rulesSelectedAtEachStep.get(0);
-        for (Integer num : rulesSelectedAtEachStep) {
-            if (num > max) {
+    private static int computeMax(List<Number> rulesSelectedAtEachStep) {
+        Number max = rulesSelectedAtEachStep.get(0);
+        for (Number num : rulesSelectedAtEachStep) {
+            if (num.longValue() > max.longValue()) {
                 max = num;
             }
         }
-        return max;
+        return (Integer)max;
     }
 
-    private static double computeTotal(List<Long> times) {
+    private static double computeTotal(List<Number> times) {
         long sum = 0L;
-        for (long time : times) {
-            sum += time;
+        for (Number time : times) {
+            sum += (Long)time;
         }
         return ((double) sum) / 1000;
     }
 
     //TODO(OwolaiL): These two methods should be merged since they have the same erasure
-    private static double computeAverages(List<Integer> ruleCounts) {
-        Integer sum = 0;
-        for (int count : ruleCounts) {
-            sum += count;
-        }
-        return ((double) sum) / ruleCounts.size();
-    }
+//    private static double computeAverages(List<Integer> ruleCounts) {
+//        Integer sum = 0;
+//        for (int count : ruleCounts) {
+//            sum += count;
+//        }
+//        return ((double) sum) / ruleCounts.size();
+//    }
 
-    private static double computeAverage(List<Long> times) {
+    private static double computeAverage(List<Number> times) {
         Long sum = 0L;
-        for (Long time : times) {
-            sum += time;
+        for (Number time : times) {
+            sum += time.longValue();
         }
         return ((double) sum) / times.size();
     }
