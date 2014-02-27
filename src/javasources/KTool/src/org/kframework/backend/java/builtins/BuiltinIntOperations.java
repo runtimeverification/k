@@ -30,6 +30,10 @@ public class BuiltinIntOperations {
         return IntToken.of(term1.bigIntegerValue().remainder(term2.bigIntegerValue()));
     }
 
+    public static IntToken mod(IntToken term1, IntToken term2, TermContext context) {
+        return IntToken.of(term1.bigIntegerValue().mod(term2.bigIntegerValue()));
+    }
+
     public static IntToken pow(IntToken term1, IntToken term2, TermContext context) {
         return IntToken.of(term1.bigIntegerValue().pow(term2.bigIntegerValue().intValue()));
     }
