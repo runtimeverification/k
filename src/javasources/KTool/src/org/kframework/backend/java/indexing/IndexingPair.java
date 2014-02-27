@@ -13,7 +13,7 @@ public class IndexingPair implements Serializable {
 
     public static final IndexingPair TOP = new IndexingPair(TopIndex.TOP, TopIndex.TOP);
 
-    public static Index getIndex(Term term) {
+    public static Index getIndex(Term term, Definition definition) {
         if (term instanceof KItem) {
             KItem kItem = (KItem) term;
             if (kItem.kLabel() instanceof KLabelConstant) {
@@ -28,7 +28,7 @@ public class IndexingPair implements Serializable {
             }
         } else if (term instanceof Sorted) {
             Sorted sorted = (Sorted) term;
-            if (Definition.TOKEN_SORTS.contains(sorted.sort())) {
+            if (definition.builtinSorts().contains(sorted.sort())) {
                 return new TokenIndex(sorted.sort());
             }
         }
@@ -36,7 +36,7 @@ public class IndexingPair implements Serializable {
         return TopIndex.TOP;
     }
 
-    public static IndexingPair getIndexingPair(Term term) {
+    public static IndexingPair getIndexingPair(Term term, Definition definition) {
         if (term instanceof KSequence) {
             KSequence kSequence = (KSequence) term;
 
@@ -49,16 +49,18 @@ public class IndexingPair implements Serializable {
             }
             else if (kSequence.size() == 1) {
                 if (kSequence.hasFrame()) {
-                    return new IndexingPair(getIndex(kSequence.get(0)), TopIndex.TOP);
+                    return new IndexingPair(getIndex(kSequence.get(0), definition), TopIndex.TOP);
                 } else {
-                    return new IndexingPair(getIndex(kSequence.get(0)), BottomIndex.BOTTOM);
+                    return new IndexingPair(getIndex(kSequence.get(0), definition), BottomIndex.BOTTOM);
                 }
             }
             else {
-                return new IndexingPair(getIndex(kSequence.get(0)), getIndex(kSequence.get(1)));
+                return new IndexingPair(
+                        getIndex(kSequence.get(0), definition),
+                        getIndex(kSequence.get(1), definition));
             }
         } else {
-            return new IndexingPair(getIndex(term), BottomIndex.BOTTOM);
+            return new IndexingPair(getIndex(term, definition), BottomIndex.BOTTOM);
         }
     }
 

@@ -14,6 +14,7 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import java.util.*;
 
 /**
+ * TODO(OwolabiL): This class can be removed.
  * Author: OwolabiL
  * Date: 2/4/14
  * Time: 3:34 PM
@@ -22,17 +23,16 @@ public class MultipleCellUtil {
 
     public static MultiplicityStarCellHolder checkDefinitionForMultiplicityStar(Context context) {
         MultiplicityStarCellHolder starCellHolder = null;
-        for (Map.Entry<String, ConfigurationStructure> entry : context.getConfigurationStructureMap().entrySet()){
+        for (Map.Entry<String, ConfigurationStructure> entry : context.getConfigurationStructureMap().entrySet()) {
 
             //for now I am assuming that there is only one cell in the definition which (1) has
             // multiplicity* and (2) has children which can contain kCells
-            if (entry.getValue().isStarOrPlus()){
-                Term backendKILCell = null;
+            if (entry.getValue().multiplicity.equals(org.kframework.kil.Cell.Multiplicity.ANY)) {
+                Term backendKILCell;
                 try {
-                    backendKILCell = (Cell)entry.getValue().cell.accept(new KILtoBackendJavaKILTransformer(context));
+                    backendKILCell = (Cell) entry.getValue().cell.accept(new KILtoBackendJavaKILTransformer(context));
                     Term kCell = LookupCell.find(backendKILCell, "k");
-//                    System.out.println("kCell: "+ kCell);
-                    if (kCell != null && LookupCell.find(kCell, "k") != null){
+                    if (kCell != null && LookupCell.find(kCell, "k") != null) {
                         starCellHolder = new MultiplicityStarCellHolder();
                         starCellHolder.setCellWithMultipleK(entry.getKey());
                         starCellHolder.setParentOfCellWithMultipleK(entry.getValue().parent.cell.getId());
@@ -48,41 +48,23 @@ public class MultipleCellUtil {
 
     /**
      * Finds the multiple k cells in a rule if they exist
-     * @param rule
-     * @param cellWithMultipleK
+     *
+     * @param rule              The rule to be checked
+     * @param cellWithMultipleK The cell which has a multiplicity star attribute
      * @return the multiple kCells (where they exist)
      */
     public static ArrayList<Cell> checkRuleForMultiplicityStar(Rule rule, String cellWithMultipleK) {
         Term lhs = rule.leftHandSide();
-        Cell withMultipleA = LookupCell.find(lhs,cellWithMultipleK);
+        Cell withMultipleA = LookupCell.find(lhs, cellWithMultipleK);
         Collection<Cell> innerInnerCell = ((CellCollection) withMultipleA.getContent()).cells();
         ArrayList<Cell> kCells = new ArrayList<>();
-        if (innerInnerCell.size() > 1){
-            for (Cell innerInner : innerInnerCell){
-                Cell kCell = LookupCell.find(innerInner,"k");
+        if (innerInnerCell.size() > 1) {
+            for (Cell innerInner : innerInnerCell) {
+                Cell kCell = LookupCell.find(innerInner, "k");
                 kCells.add(kCell);
             }
         }
 
         return kCells;
     }
-
-    public static Set<String> getPStringsFromMultiple(Term term, String parentOfCellWithMultipleK, Context context) {
-        Cell threadsCell = LookupCell.find(term,parentOfCellWithMultipleK);
-        TermVisitor visitor = new TermVisitor(context);
-        Set<String> possible = new HashSet<>();
-
-        for (Cell cell : ((CellCollection)threadsCell.getContent()).cells()){
-            if (LookupCell.find(cell,"k") != null){
-                Cell kCell = LookupCell.find(cell,"k");
-                kCell.accept(visitor);
-                possible.addAll(visitor.getpStrings());
-                //TODO(OwolabiL): remember to reset the visitor in a better way than this?
-                visitor = new TermVisitor(context);
-            }
-        }
-
-        return possible;
-    }
-
 }

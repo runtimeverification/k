@@ -12,7 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-/**
+/** This Visitor class traverses a rule and makes PStrings out of the rule using the contents of
+ * the k cell
+ *
  * Author: OwolabiL
  * Date: 1/20/14
  * Time: 1:50 PM
@@ -20,12 +22,12 @@ import java.util.Stack;
 public class RuleVisitor extends LocalVisitor {
     static final String SEPARATOR = ".";
     static final String START_STRING = "@.";
-    public static final String EMPTY_K = "EMPTY_K";
+    private static final String EMPTY_K = "EMPTY_K";
+    private static final String K_CELL_NAME = "k";
     final Context context;
     String pString;
-    List<String> pStrings;
+    final List<String> pStrings;
     private boolean isKSequence = false;
-    private String currentLabel;
 
     public RuleVisitor(Context context) {
         this.context = context;
@@ -35,7 +37,7 @@ public class RuleVisitor extends LocalVisitor {
 
     @Override
     public void visit(Rule rule) {
-        visit(LookupCell.find(rule.leftHandSide(), "k"));
+        visit(LookupCell.find(rule.leftHandSide(), K_CELL_NAME));
     }
 
     @Override
@@ -62,20 +64,9 @@ public class RuleVisitor extends LocalVisitor {
         visit((KList) kItem.kList());
     }
 
-//    @Override
-//    public void visit(KLabel kLabel) {
-//        pString = pString.concat(kLabel.toString());
-//    }
-
     @Override
     public void visit(KLabelConstant kLabel) {
-        currentLabel = kLabel.label();
         pString = pString.concat(kLabel.toString());
-    }
-
-    @Override
-    public void visit(KLabelInjection kLabelInjection) {
-        super.visit(kLabelInjection);
     }
 
     @Override

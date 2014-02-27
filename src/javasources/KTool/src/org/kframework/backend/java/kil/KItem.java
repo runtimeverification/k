@@ -212,7 +212,10 @@ public class KItem extends Term implements Sorted {
         // own rules for checking sort membership
         if (kLabelConstant.label().startsWith("is") && kList.getContents().size() == 1
                 && (kList.getContents().get(0) instanceof Sorted)) {
-            return SortMembership.check(this, context.definition().context());
+            Term checkResult = SortMembership.check(this, context.definition().context());
+            if (checkResult != this) {
+                return checkResult;
+            }
         }
 
         /* apply rules for user defined functions */

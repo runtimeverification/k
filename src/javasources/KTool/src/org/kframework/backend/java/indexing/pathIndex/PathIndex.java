@@ -3,35 +3,41 @@ package org.kframework.backend.java.indexing.pathIndex;
 import org.apache.commons.collections15.MultiMap;
 import org.apache.commons.collections15.multimap.MultiHashMap;
 import org.kframework.backend.java.indexing.pathIndex.trie.PathIndexTrie;
-import org.kframework.backend.java.indexing.pathIndex.visitors.*;
 import org.kframework.backend.java.indexing.pathIndex.util.MultipleCellUtil;
 import org.kframework.backend.java.indexing.pathIndex.util.MultiplicityStarCellHolder;
-import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.indexing.pathIndex.visitors.CoolingRuleVisitor;
+import org.kframework.backend.java.indexing.pathIndex.visitors.HeatingRuleVisitor;
+import org.kframework.backend.java.indexing.pathIndex.visitors.RuleVisitor;
+import org.kframework.backend.java.indexing.pathIndex.visitors.TermVisitor;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.Token;
-import org.kframework.backend.java.util.LookupCell;
+import org.kframework.krun.K;
+import org.kframework.utils.general.IndexingStatistics;
 
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
 
 /**
+ * This class implements some variant of the Path Indexing technique.
+ *
  * Author: Owolabi Legunsen
  * 1/8/14: 10:08 AM
  */
-//TODO(OwolabiL): How to deal with macros and function rules? (imp has none)
 public class PathIndex {
-    public static final String BUFFER_LABEL = "#buffer";
-    private Map<Integer, Rule> indexedRules;
-    private Definition definition;
+    private final Map<Integer, Rule> indexedRules;
+    private final Definition definition;
     private PathIndexTrie trie;
     private MultiplicityStarCellHolder multiCellInfoHolder = null;
-    private Set<Integer> outputRuleIndices = new LinkedHashSet<>();
-    private Set<Integer> inputRuleIndices = new LinkedHashSet<>();
-    private List<Term> outCellList = new ArrayList<>();
+    private final Set<Integer> outputRuleIndices = new LinkedHashSet<>();
+    private final Set<Integer> inputRuleIndices = new LinkedHashSet<>();
+    private TermVisitor termVisitor;
 
     public enum RuleType {
         COOLING,
@@ -43,15 +49,22 @@ public class PathIndex {
 
     public PathIndex(Definition definition) {
         this.definition = definition;
-        this.indexedRules = new HashMap<>();
-        multiCellInfoHolder = MultipleCellUtil.checkDefinitionForMultiplicityStar(definition.context());
+        this.indexedRules = new LinkedHashMap<>();
+        termVisitor = new TermVisitor(definition.context());
+        multiCellInfoHolder =
+                MultipleCellUtil.checkDefinitionForMultiplicityStar(definition.context());
         constructIndex(definition);
     }
 
+    /**
+     * Constructs the index (a trie) data structure from all the rules in the definition.
+     * @param definition
+     */
     private void constructIndex(Definition definition) {
         MultiMap<Integer, String> pStringMap = new MultiHashMap<>();
         int count = 1;
 
+        //Step 1. Get all the pStrings from each of the rules
         for (Rule rule : definition.rules()) {
             if (rule.containsAttribute("heat") || rule.containsAttribute("print")) {
                 pStringMap.putAll(createRulePString(rule, count, RuleType.HEATING));
@@ -71,20 +84,27 @@ public class PathIndex {
         assert indexedRules.size() == definition.rules().size();
 //        printIndices(indexedRules, pStringMap);
 
-        //initialise the trie
+        //Step 2. initialise the trie
         trie = new PathIndexTrie();
 
-        //add all the pStrings to the trie
+        //Step 3. add all the pStrings to the trie
         ArrayList<String> strings;
         for (Integer key : pStringMap.keySet()) {
             strings = (ArrayList<String>) pStringMap.get(key);
             for (String string : strings) {
-                //pass the substring starting at 2 to prevent clashes with "@.", the root node
+                //pass the substring starting at 2 to prevent clashes with "@.", which represents
+                // the root node
                 trie.addIndex(trie.getRoot(), string.substring(2), key);
             }
         }
     }
 
+    /**
+     * Utility method for printing the indexed rules. Useful only for debugging.
+     *
+     * @param indexedRules Mapping of Rules to the integers used to refer to them.
+     * @param pString      Mapping of Rule number to the pStrings derived from a rule.
+     */
     private void printIndices(Map<Integer, Rule> indexedRules, MultiMap<Integer,
             String> pString) {
         for (Integer n : indexedRules.keySet()) {
@@ -104,6 +124,14 @@ public class PathIndex {
         }
     }
 
+    /**
+     * This method creates pStrings from an input rule.
+     *
+     * @param rule The rule from which pStrings are to be extracted
+     * @param n    The integer to be assigned to this rule in the Index structure
+     * @param type The type of the rule, i.e., cooling, heating, etc.
+     * @return A mapping of the rule index to the PStrings created from the input rule
+     */
     private MultiMap<Integer, String> createRulePString(Rule rule, int n, RuleType type) {
         MultiMap<Integer, String> pStrings = new MultiHashMap<>();
         RuleVisitor ruleVisitor;
@@ -120,7 +148,8 @@ public class PathIndex {
                 ruleVisitor = new RuleVisitor(definition.context());
                 //TODO(OwolabiL): Move this to the RuleVisitor class
                 if (multiCellInfoHolder != null) {
-                    kCells = MultipleCellUtil.checkRuleForMultiplicityStar(rule, multiCellInfoHolder.getParentOfCellWithMultipleK());
+                    kCells = MultipleCellUtil.checkRuleForMultiplicityStar(rule,
+                            multiCellInfoHolder.getParentOfCellWithMultipleK());
                 }
                 break;
             case OUT:
@@ -132,7 +161,8 @@ public class PathIndex {
                 inputRuleIndices.add(n);
                 return pStrings;
             default:
-                throw new IllegalArgumentException("Cannot create P-String for unknown rule type:" + type);
+                throw new IllegalArgumentException("Cannot create P-String for unknown rule type:"
+                        + type);
         }
 
         //TODO(OwolabiL): Move this check to the RuleVisitor class
@@ -148,29 +178,39 @@ public class PathIndex {
         return pStrings;
     }
 
+    /**
+     * This method is called at every rewriting step in order to find which of the indexed rules may
+     * may be applicable to the term at that step.
+     *
+     * @param term the term to be rewritten
+     * @return a list of rules that can possibly match
+     */
     public List<Rule> getRulesForTerm(Term term) {
         Set<String> pStrings;
 //        System.out.println("term: "+term);
-
-        //check if the definition has a cell with multiplicity* which contains a k cell
-        //if such a cell is found, the multiCellInfoHolder field should have been set at index
-        // creation time and getting pStrings from it is done differently
-        if (multiCellInfoHolder != null) {
-            pStrings = MultipleCellUtil.getPStringsFromMultiple(term,
-                    multiCellInfoHolder.getParentOfCellWithMultipleK(),
-                    definition.context());
+        if (K.get_indexing_stats) {
+            IndexingStatistics.getPStringFromTermStopWatch.reset();
+            IndexingStatistics.getPStringFromTermStopWatch.start();
+            pStrings = getPStringsFromTerm(term);
+            IndexingStatistics.getPStringFromTermStopWatch.stop();
+            IndexingStatistics.timesForGettingPStringsFromTerm.add(
+                    IndexingStatistics.getPStringFromTermStopWatch.elapsed(TimeUnit.MICROSECONDS));
         } else {
-            pStrings = getTermPString2(term);
+            pStrings = getPStringsFromTerm(term);
         }
 
 //        System.out.println("PStrings: "+pStrings);
 
-        Set<Rule> rules = new HashSet<>();
+        Set<Rule> rules = new LinkedHashSet<>();
 
         Set<Integer> currentMatch;
         Set<Integer> matchingIndices = new LinkedHashSet<>();
         String subString;
 
+        if (K.get_indexing_stats) {
+            IndexingStatistics.findMatchingIndicesStopWatch.reset();
+            IndexingStatistics.findMatchingIndicesStopWatch.start();
+        }
         for (String pString : pStrings) {
             String[] split = pString.split("\\.");
             int i = split.length;
@@ -189,28 +229,30 @@ public class PathIndex {
                 matchingIndices = currentMatch;
             } else {
                 //should it be an intersection?
-//                matchingIndices = Sets.union(matchingIndices, currentMatch);
                 matchingIndices.addAll(currentMatch);
             }
         }
 
-        // check the out cell
-        int baseIOCellSize = 2;
-        if (!outputRuleIndices.isEmpty()) {
-            matchingIndices = addOutputCellIndices(term, matchingIndices, baseIOCellSize);
+        if (termVisitor.isAddOutputRules()) {
+            matchingIndices.addAll(outputRuleIndices);
         }
 
-        // check the in cell
-        if (!inputRuleIndices.isEmpty()) {
-            matchingIndices = addInputCellIndices(term, matchingIndices, baseIOCellSize);
+        if (termVisitor.isAddInputRules()) {
+            matchingIndices.addAll(inputRuleIndices);
         }
 
-        // this check is needed because of .K which now has a pString of @.EMPTY_K, but may not have
-        // any rules so indexed in some simpler languages like IMP
+        // this check is needed because of .K which now has  a pString of @.EMPTY_K, but may not
+        // have any rules so indexed in some simpler languages like IMP
         if (matchingIndices != null) {
             for (Integer n : matchingIndices) {
                 rules.add(indexedRules.get(n));
             }
+        }
+
+        if (K.get_indexing_stats) {
+            IndexingStatistics.findMatchingIndicesStopWatch.stop();
+            IndexingStatistics.timesForFindingMatchingIndices.add(
+                    IndexingStatistics.findMatchingIndicesStopWatch.elapsed(TimeUnit.MICROSECONDS));
         }
 
 //        System.out.println("matching: "+ matchingIndices + "\n");
@@ -218,56 +260,14 @@ public class PathIndex {
         return new ArrayList<>(rules);
     }
 
-    private Set<Integer> addInputCellIndices(Term term, Set<Integer> matchingIndices, int baseIOCellSize) {
-        //TODO(OwolabiL): Find a better way to find the input cell. Something more general is needed
-        Cell in = LookupCell.find(term, "in");
-        List<Term> inCellList = ((BuiltinList) in.getContent()).elements();
-
-        if (inCellList.size() > baseIOCellSize) {
-//            matchingIndices = Sets.union(matchingIndices, inputRuleIndices);
-            matchingIndices.addAll(inputRuleIndices);
-        }
-        return matchingIndices;
-    }
-
-    private Set<Integer> addOutputCellIndices(Term term, Set<Integer> matchingIndices, int baseIOCellSize) {
-        //TODO(OwolabiL): Find a better way to find the output cell. Something more general is needed
-        Cell out = LookupCell.find(term, "out");
-        List<Term> currentOutCellList = ((BuiltinList) out.getContent()).elements();
-        if (outCellList.isEmpty()){
-            outCellList =  currentOutCellList;
-        } else {
-            if (outCellList.size() == currentOutCellList.size() && outCellList.containsAll(currentOutCellList)){
-                return  matchingIndices;
-            } else {
-                outCellList =  currentOutCellList;
-                if (currentOutCellList.size() > baseIOCellSize) {
-//            matchingIndices = Sets.union(matchingIndices, outputRuleIndices);
-                    matchingIndices.addAll(outputRuleIndices);
-                    return matchingIndices;
-                }
-
-                //TODO(OwolabiL): Write a visitor for this
-                if (out.getContent() instanceof BuiltinList) {
-                    for (Term outCellElement : currentOutCellList) {
-                        if (outCellElement instanceof KItem &&
-                                ((KItem) outCellElement).kLabel().toString().equals(BUFFER_LABEL)) {
-                            Term bufferTerm = ((KList)((KItem) outCellElement).kList()).get(0);
-                            if (bufferTerm instanceof Token && !((Token) bufferTerm).value().equals("\"\"")) {
-                                matchingIndices.addAll(outputRuleIndices);
-                                return matchingIndices;
-//                        matchingIndices = Sets.union(matchingIndices, outputRuleIndices);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return matchingIndices;
-    }
-
-    private Set<String> getTermPString2(Term term) {
-        TermVisitor termVisitor = new TermVisitor(definition.context());
+    /**
+     * Takes as input the term that is currently  being rewritten, traverses it and return a set
+     * of strings that are used to query the index structure for finding possibly matching rules.
+     * @param term  the term that is to be traversed
+     * @return a set of positions that can be used to query the path index
+     */
+    private Set<String> getPStringsFromTerm(Term term) {
+        termVisitor = new TermVisitor(definition.context());
         term.accept(termVisitor);
         return termVisitor.getpStrings();
     }

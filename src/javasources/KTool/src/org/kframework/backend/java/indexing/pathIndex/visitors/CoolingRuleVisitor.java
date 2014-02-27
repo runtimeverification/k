@@ -7,14 +7,17 @@ import org.kframework.kil.loader.Context;
 import java.util.ArrayList;
 
 /**
+ * Visitor for traversing cooling Rules
  * Author: OwolabiL
  * Date: 1/20/14
  * Time: 12:40 PM
  */
 public class CoolingRuleVisitor extends RuleVisitor {
+    private static final String K_RESULT_STRING = "KResult";
     private final Rule rule;
     private String currentLabel;
     private boolean isKItemHead = false;
+    private static final String USER_LIST_REPLACEMENT = "UserList";
 
     public CoolingRuleVisitor(Rule rule, Context context) {
         super(context);
@@ -24,21 +27,20 @@ public class CoolingRuleVisitor extends RuleVisitor {
     @Override
     public void visit(KSequence kSequence) {
         Term term = kSequence.get(0);
-        if (term instanceof KItem){
-           isKItemHead = true;
+        if (term instanceof KItem) {
+            isKItemHead = true;
         }
         term.accept(this);
         ((KItem) kSequence.get(1)).kLabel().accept(this);
     }
 
-    //TODO(OwolabiL): This method can be greatly improved!
     @Override
     public void visit(Variable variable) {
-        String requiredKResult = "isKResult(" + variable + ")";
+        String requiredKResult = getRequiresKResultString(variable);
         String firstSort;
         //TODO(OwolabiL): Remove this check and use concrete sort instead
         if (rule.requires().toString().contains(requiredKResult)) {
-            firstSort = "KResult";
+            firstSort = K_RESULT_STRING;
         } else {
             throw new IllegalStateException("First term in K cell is not a K result: \n" + rule);
         }
@@ -52,25 +54,29 @@ public class CoolingRuleVisitor extends RuleVisitor {
 
     @Override
     public void visit(KItem kItem) {
-        visit((KLabelConstant)kItem.kLabel());
-        if (isKItemHead){
+        visit((KLabelConstant) kItem.kLabel());
+        if (isKItemHead) {
             Term term = ((KList) kItem.kList()).get(0);
-            if (term instanceof Variable){
-                String requiredKResult = "isKResult(" + ((Variable)term) + ")";
+            if (term instanceof Variable) {
+                String requiredKResult = getRequiresKResultString(term);
                 String firstSort;
                 if (rule.requires().toString().contains(requiredKResult)) {
-                    firstSort = "KResult";
+                    firstSort = K_RESULT_STRING;
                 } else {
-                    throw new IllegalStateException("First term in K cell is not a K result: \n" + rule);
+                    throw new IllegalStateException("First term in K cell is not a K result: \n" +
+                            rule);
                 }
 
                 pStrings.add(pString + "1" + SEPARATOR + firstSort);
             }
-            //TODO(OwolabiL): Remove this check and use concrete sort instead
-        } else{
-            visit((KList)kItem.kList());
+        } else {
+            visit((KList) kItem.kList());
         }
         this.proceed = false;
+    }
+
+    private String getRequiresKResultString(Term term) {
+        return "isKResult(" + term + ")";
     }
 
     @Override
@@ -89,12 +95,13 @@ public class CoolingRuleVisitor extends RuleVisitor {
                 pStrings.add(pString + (i + 1) + ".HOLE");
 
             } else {
-                ArrayList<Production> productions = (ArrayList<Production>) context.productionsOf(currentLabel);
+                ArrayList<Production> productions =
+                        (ArrayList<Production>) context.productionsOf(currentLabel);
                 Production p = productions.get(0);
                 if (productions.size() == 1) {
                     pStrings.add(pString + (i + 1) + SEPARATOR + p.getChildSort(0));
                 } else {
-                    pStrings.add(pString + (i + 1) + SEPARATOR + "UserList");
+                    pStrings.add(pString + (i + 1) + SEPARATOR + USER_LIST_REPLACEMENT);
                 }
             }
         }

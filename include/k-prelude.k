@@ -53,9 +53,8 @@ module K-WRAPPERS-LABELS
 endmodule
 
 module K-DESTRUCTORS
-  // TODO(YilongL): why not tag the following production and rule with function attribute?
-  syntax KLabel ::= "getKLabel" K  [hook(MetaK:getKLabel_)]
-  rule getKLabel(L:KLabel(_:KList)) => L [structural, anywhere]
+  syntax KLabel ::= "getKLabel" K  [function, hook(MetaK:getKLabel_)]
+  rule getKLabel(L:KLabel(_:KList)) => L
 
 endmodule
 
@@ -112,8 +111,11 @@ endmodule
 module K-TOKENS
   imports K-TECHNIQUE
   syntax KLabel ::= "#token"
-  syntax K ::= isToken(K) [predicate]
+  syntax Bool ::= isToken(K) [predicate, hook(#PREDICATE:isToken)]
   rule isToken(#token(_)) => true
+  syntax Bool ::= isBuiltin(K)
+  //[klabel(isBuiltin), predicate, hook(#PREDICATE:isBuiltin)]
+  [prefixlabel(isBuiltin), klabel(isBuiltin), predicate, hook(#PREDICATE:isBuiltin)]
 endmodule
 
 module K

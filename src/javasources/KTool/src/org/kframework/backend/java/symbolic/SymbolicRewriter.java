@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.collect.Sets;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.indexing.BottomIndex;
 import org.kframework.backend.java.indexing.FreezerIndex;
@@ -152,7 +153,7 @@ public class SymbolicRewriter {
         //        indices.add(new FreezerIndex(frozenKLabel, i));
         //    }
         //}
-        for (String sort : Definition.TOKEN_SORTS) {
+        for (String sort : definition.builtinSorts()) {
             indices.add(new TokenIndex(sort));
         }
 
@@ -269,7 +270,7 @@ public class SymbolicRewriter {
      */
     private List<Rule> getSimulationRules(Term term) {
         List<Rule> rules = new ArrayList<Rule>();
-        for (IndexingPair pair : term.getIndexingPairs()) {
+        for (IndexingPair pair : term.getIndexingPairs(definition)) {
             if (simulationRuleTable.get(pair.first) != null) {
                 rules.addAll(simulationRuleTable.get(pair.first));
             }
@@ -310,12 +311,8 @@ public class SymbolicRewriter {
 
     private List<Rule> getNonIndexedRules(Term term) {
         Set<Rule> rules = new LinkedHashSet<>();
-        //TODO(OwolabiL): This should be removed. It's only here for comparison with new indexing.
-        if (K.do_indexing) {
-            buildBasicIndex();
-        }
 
-        for (IndexingPair pair : term.getIndexingPairs()) {
+        for (IndexingPair pair : term.getIndexingPairs(definition)) {
             if (ruleTable.get(pair.first) != null) {
                 rules.addAll(ruleTable.get(pair.first));
             }
@@ -327,7 +324,7 @@ public class SymbolicRewriter {
             }
         }
         rules.addAll(unindexedRules);
-        return new ArrayList<Rule>(rules);
+        return new ArrayList<>(rules);
     }
 
     private ConstrainedTerm getTransition(int n) {
@@ -416,7 +413,12 @@ public class SymbolicRewriter {
         // classes one at a time, seeing which one contains rules we can apply.
         //        System.out.println(LookupCell.find(constrainedTerm.term(),"k"));
         strategy.reset(getRules(constrainedTerm.term()));
+
         while (strategy.hasNext()) {
+            if (K.get_indexing_stats){
+                IndexingStatistics.rewritingStopWatch.reset();
+                IndexingStatistics.rewritingStopWatch.start();
+            }
             transition = strategy.nextIsTransition();
             ArrayList<Rule> rules = new ArrayList<Rule>(strategy.next());
 //            System.out.println("rules.size: "+rules.size());
@@ -483,7 +485,11 @@ public class SymbolicRewriter {
 //                    }
                     results.add(newCnstrTerm);
                     appliedRules.add(rule);
-
+                    if (K.get_indexing_stats){
+                        IndexingStatistics.rewritingStopWatch.stop();
+                        IndexingStatistics.timesForRewriting.add(
+                                IndexingStatistics.rewritingStopWatch.elapsed(TimeUnit.MICROSECONDS));
+                    }
                     if (results.size() == successorBound) {
                         if (K.get_indexing_stats) {
                             IndexingStatistics.rewriteStepStopWatch.stop();

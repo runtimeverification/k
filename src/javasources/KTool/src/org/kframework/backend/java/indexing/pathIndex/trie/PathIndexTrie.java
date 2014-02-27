@@ -1,8 +1,14 @@
 package org.kframework.backend.java.indexing.pathIndex.trie;
 
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
+ * This class implements a trie, the data structure that supports the operations of the Path
+ * Indexing technique.
  * Author: Owolabi Legunsen
  * 1/2/14: 7:52 PM
  */
@@ -16,8 +22,6 @@ public class PathIndexTrie implements Trie {
 
     /**
      * This method adds a new string to the index
-     * TODO: convert this to a graph labelled by the chars in the string (like in "Term Indexing" book
-     * TODO: How much faster is this stuff?
      *
      * @param trieNode node to start adding the string. should always be root
      * @param pString  the string to add
@@ -36,6 +40,14 @@ public class PathIndexTrie implements Trie {
         add(trieNode, splitList, value);
     }
 
+    /**
+     * Helper method that recursively traverses the current data structure and then adds the new
+     * P-String to the right places.
+     *
+     * @param trieNode  The node to start the insertion from
+     * @param strings   A list of strings obtained from splitting up the initial pString
+     * @param value     The value to be associated with the inserted string in the trie
+     */
     private void add(TrieNode trieNode, ArrayList<String> strings, int value) {
         if (strings.size() == 0) {
             return;
@@ -124,61 +136,6 @@ public class PathIndexTrie implements Trie {
     }
 
     /**
-     * Inspired by implementation of Trie#remove in weka
-     * <p/>
-     * TODO(OwolabiL): Needs to be fixed for cases when there is more than one value at the leaf
-     *
-     * @param node    to start removal from
-     * @param pString pString to remove
-     */
-    @Override
-    public void removeIndex(TrieNode node, String pString, int value) {
-        String[] split = pString.split(delimiter);
-        ArrayList<String> splitList = new ArrayList<>(Arrays.asList(split));
-        remove(node, splitList, value);
-    }
-
-    private void remove(TrieNode node, ArrayList<String> splitList, int value) {
-        String c;
-        ArrayList<String> newSuffix;
-        TrieNode child = null;
-
-        c = splitList.get(0);
-        if (splitList.size() == 1) {
-            newSuffix = new ArrayList<>();
-        } else {
-            newSuffix = new ArrayList<>(splitList.subList(1, splitList.size()));
-        }
-
-        //TODO(OwolabiL): replace with node.getChild
-        ArrayList<TrieNode> children = node.getChildren();
-        for (TrieNode cnode : children) {
-            if (cnode.getValue().equals(c)) {
-                child = cnode;
-                break;
-            }
-        }
-
-//        if (child == null) {
-////            result = false;
-//        } else
-
-        if (newSuffix.size() == 0) {
-            if (child instanceof TrieLeaf && child.getIndices().size() > 0) {
-                children.remove(child);
-            }
-        } else {
-            remove(child, newSuffix, value);
-
-            if (child != null) {
-                if (child.getChildren().size() == 0) {
-                    children.remove(child);
-                }
-            }
-        }
-    }
-
-    /**
      * Retrieve the index set associated with a given query (p)String
      *
      * @param trieNode    the node to start checking from
@@ -195,7 +152,7 @@ public class PathIndexTrie implements Trie {
 
     private Set<Integer> retrieveSet(TrieNode trieNode, ArrayList<String> splitList) {
         if (splitList.size() == 0) {
-            return new HashSet<>();
+            return new LinkedHashSet<>();
         }
         String firstString = splitList.get(0);
         ArrayList<String> subList = new ArrayList<>(splitList.subList(1, splitList.size()));
@@ -208,7 +165,7 @@ public class PathIndexTrie implements Trie {
                 return retrieveSet(child, subList);
             }
         } else {
-            if (!trieNode.getValue().equals("@")){
+            if (!trieNode.getValue().equals("@")) {
                 return trieNode.getIndices();
             }
         }
@@ -216,8 +173,8 @@ public class PathIndexTrie implements Trie {
         if (splitList.size() == 1) {
             if (child != null) {
                 return child.getIndices();
-            } else{
-                if (!trieNode.getValue().equals("@")){
+            } else {
+                if (!trieNode.getValue().equals("@")) {
                     return trieNode.getIndices();
                 }
             }
@@ -230,7 +187,7 @@ public class PathIndexTrie implements Trie {
     }
 
     /**
-     * Check membership of a key in the index
+     * Checks membership of a key in the index
      *
      * @param trieNode    the node to start searching from
      * @param queryString the string to find
@@ -269,32 +226,8 @@ public class PathIndexTrie implements Trie {
         return tree.toString();
     }
 
-//    int size(TrieNode node) {
-//        if (node == null) {
-//            //TODO(OwolabiL): Throw an exception instead
-//            return -1000;
-//        }
-//        int size = 1;
-//        if (node.getChildren() != null) {
-//            for (TrieNode trieNode : node.getChildren()) {
-//                size += size(trieNode);
-//            }
-//        }
-//
-//        return size;
-//    }
-
     @Override
     public TrieNode getRoot() {
         return root;
     }
-
-//    public static void main(String[] args) {
-//        Trie trie = new PathIndexTrie();
-//        String pString = "@.'acquire_;.1.Val";
-//        String pString2 = "@.'acquire_;.1.Int";
-//        trie.addIndex(trie.getRoot(), pString.substring(2), 1);
-//        trie.addIndex(trie.getRoot(), pString.substring(2), 2);
-//        System.out.println("ret: "+trie.retrieve(trie.getRoot(), pString2));
-//    }
 }

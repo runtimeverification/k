@@ -1,5 +1,6 @@
 package org.kframework.backend.java.kil;
 
+import com.google.common.collect.Sets;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
@@ -28,8 +29,11 @@ public class Definition extends JavaSymbolicObject {
     public static final Set<String> TOKEN_SORTS = ImmutableSet.of(
             "Bool",
             "Int",
+            "Float",
             "String",
-            "Id");
+            "List",
+            "Set",
+            "Map");
 
     private final List<Rule> rules;
     private final List<Rule> macros;
@@ -82,6 +86,10 @@ public class Definition extends JavaSymbolicObject {
         }
     }
 
+    public Set<String> builtinSorts() {
+        return Sets.union(tokenSorts(), Definition.TOKEN_SORTS);
+    }
+
     public Context context() {
         return context;
     }
@@ -108,6 +116,10 @@ public class Definition extends JavaSymbolicObject {
         // TODO(AndreiS): fix this issue with modifiable collections
         //return Collections.unmodifiableList(rules);
         return rules;
+    }
+
+    public Set<String> tokenSorts() {
+        return context.getTokenSorts();
     }
 
     @Override

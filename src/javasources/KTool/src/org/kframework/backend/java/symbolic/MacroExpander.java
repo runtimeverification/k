@@ -60,7 +60,8 @@ public class MacroExpander extends TermTransformer {
                 processedEnsures,
                 rule.freshVariables(),
                 processedLookups,
-                rule.getAttributes());
+                rule.getAttributes(),
+                definition);
     }
 
     public Term processTerm(Term term) {

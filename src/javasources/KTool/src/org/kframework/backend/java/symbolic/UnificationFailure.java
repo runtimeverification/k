@@ -10,7 +10,7 @@ package org.kframework.backend.java.symbolic;
 public class UnificationFailure extends RuntimeException {
     
     public static final UnificationFailure UNIFICATION_FAILURE = new UnificationFailure("unification failed");
-    
+
     private UnificationFailure(String message) {
         super(message);
     }

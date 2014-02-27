@@ -3,30 +3,36 @@ package org.kframework.backend.java.indexing.pathIndex.visitors;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.symbolic.LocalVisitor;
-import org.kframework.backend.java.util.LookupCell;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
+import org.kframework.krun.K;
+import org.kframework.utils.general.IndexingStatistics;
 
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
+
 
 /**
+ * This visitor class is used to traverse the current term being rewritten in order to select what
+ * rules may be applied.
+ * <p/>
  * Author: OwolabiL
  * Date: 1/21/14
  * Time: 12:05 PM
  */
 public class TermVisitor extends LocalVisitor {
-    public static final String K_RESULT = "KResult";
-    public static final String EMPTY_LIST_LABEL = "'.List{\",\"}";
-    public static final String EMPTY_LIST_SORT = "#ListOf#Bot{\",\"}";
-    public static final String LIST_LABEL = "List{\",\"}";
-    public static final String USER_LIST_REPLACEMENT = "UserList";
-    public static final String K_ITEM_SORT = "KItem";
-    public static final String EMPTY_K = "EMPTY_K";
+    private static final String K_RESULT = "KResult";
+    private static final String EMPTY_LIST_LABEL = "'.List{\",\"}";
+    private static final String EMPTY_LIST_SORT = "#ListOf#Bot{\",\"}";
+    private static final String LIST_LABEL = "List{\",\"}";
+    private static final String USER_LIST_REPLACEMENT = "UserList";
+    private static final String K_ITEM_SORT = "KItem";
+    private static final String EMPTY_K = "EMPTY_K";
+    private static final String K_STRING = "K";
     private final Set<String> pStrings;
-
     private final Context context;
 
     private String pString;
@@ -36,23 +42,71 @@ public class TermVisitor extends LocalVisitor {
     private final String SEPARATOR = ".";
     private final String START_STRING = "@.";
 
-    public TermVisitor(Context context) {
+    // these flags are used to decide whether (or not) to try the i/o rules while rewriting
+    // the current term.
+    private boolean addInputRules;
+    private boolean addOutputRules;
 
-        pStrings = new HashSet<>();
+    public TermVisitor(Context context) {
+        pStrings = new LinkedHashSet<>();
         this.context = context;
     }
 
     @Override
     public void visit(Term node) {
-        Term lookedUpK = LookupCell.find(node, "k");
-        if (lookedUpK != null) {
-            (LookupCell.find(node, "k")).accept(this);
+        int BASE_IO_CELL_SIZE = 2;
+        if (K.get_indexing_stats) {
+            IndexingStatistics.getPStringStopwatch.reset();
+            IndexingStatistics.getPStringStopwatch.start();
         }
-    }
+        //first find all the term's cells of interest in  a single pass
+        CellVisitor v = new CellVisitor(context);
+        node.accept(v);
+        pStrings.addAll(v.getkCellPStings());
 
-    @Override
-    public void visit(Cell cell) {
-        cell.getContent().accept(this);
+        if (K.get_indexing_stats) {
+            IndexingStatistics.getPStringStopwatch.stop();
+            IndexingStatistics.getPStringTimes.add(
+                    IndexingStatistics.getPStringStopwatch.elapsed(TimeUnit.MICROSECONDS));
+        }
+
+        if (K.get_indexing_stats) {
+            IndexingStatistics.traverseCellsStopwatch.reset();
+            IndexingStatistics.traverseCellsStopwatch.start();
+        }
+        Cell cellOfInterest;
+
+        Cell ioCell;
+        List<Term> ioCellList;
+        //check whether output rules should be added
+        if (v.getOutCell() != null) {
+            ioCell = v.getOutCell();
+            ioCellList = ((BuiltinList) ioCell.getContent()).elements();
+            if (ioCellList.size() > BASE_IO_CELL_SIZE) {
+                addOutputRules = true;
+            } else {
+                OutPutCellVisitor outPutCellVisitor = new OutPutCellVisitor();
+                (ioCell.getContent()).accept(outPutCellVisitor);
+                if (outPutCellVisitor.isAddOutCell()) {
+                    addOutputRules = true;
+                }
+            }
+        }
+        //check whether input rules should be added
+        cellOfInterest = v.getInCell();
+        if (cellOfInterest != null) {
+            ioCellList = ((BuiltinList) cellOfInterest.getContent()).elements();
+            if (ioCellList.size() > BASE_IO_CELL_SIZE) {
+                addInputRules = true;
+            }
+        }
+
+        if (K.get_indexing_stats) {
+            IndexingStatistics.traverseCellsStopwatch.stop();
+            IndexingStatistics.traverseCellsTimes.add(
+                    IndexingStatistics.traverseCellsStopwatch.elapsed(TimeUnit.MICROSECONDS));
+        }
+
     }
 
     @Override
@@ -60,7 +114,8 @@ public class TermVisitor extends LocalVisitor {
         if (kSequence.size() > 0) {
             //TODO (OwolabiL): This is too messy. Restructure the conditionals
             if (kSequence.get(0) instanceof KItem) {
-                boolean isKResult = context.isSubsorted(K_RESULT, ((KItem) kSequence.get(0)).sort());
+                boolean isKResult = context.isSubsorted(K_RESULT,
+                        ((KItem) kSequence.get(0)).sort());
                 if (isKResult) {
                     pString = START_STRING + K_RESULT;
                     kSequence.get(1).accept(this);
@@ -76,7 +131,7 @@ public class TermVisitor extends LocalVisitor {
                     kSequence.get(1).accept(this);
                 }
             }
-        } else if (kSequence.size() == 0){
+        } else if (kSequence.size() == 0) {
             //there are cases (e.g., in SIMPLE's join rule) where we need to know that one of the K
             // cells in the configuration is empty.
             pStrings.add(START_STRING + EMPTY_K);
@@ -100,21 +155,27 @@ public class TermVisitor extends LocalVisitor {
             if (productions1.isEmpty()) {
                 return;
             }
-            ArrayList<Production> productions = (ArrayList<Production>) productions1;
-            Production p = productions.get(0);
+
             if (context.isSubsorted(K_RESULT, token.sort())) {
                 if (pString != null) {
+                    ArrayList<Production> productions = (ArrayList<Production>) productions1;
                     if (productions.size() == 1) {
-                        pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR + token.sort());
+                        pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR +
+                                token.sort());
                     } else {
-                        pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR + "UserList");
+                        pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR +
+                                USER_LIST_REPLACEMENT);
                     }
                 }
             } else {
+                ArrayList<Production> productions = (ArrayList<Production>) productions1;
+                Production p = productions.get(0);
                 if (productions.size() == 1) {
-                    pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR + p.getChildSort(0));
+                    pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR +
+                            p.getChildSort(0));
                 } else {
-                    pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR + "UserList");
+                    pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR +
+                            USER_LIST_REPLACEMENT);
                 }
             }
         }
@@ -122,9 +183,9 @@ public class TermVisitor extends LocalVisitor {
 
     @Override
     public void visit(UninterpretedToken uninterpretedToken) {
-        if (pString == null){
+        if (pString == null) {
             pStrings.add(START_STRING + uninterpretedToken.sort());
-        } else{
+        } else {
             pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR +
                     uninterpretedToken.sort());
         }
@@ -174,25 +235,25 @@ public class TermVisitor extends LocalVisitor {
                                         (ArrayList<Production>) context.productionsOf(currentLabel);
                                 Production p = productions.get(0);
                                 String test = pString + SEPARATOR + (currentPosition) + SEPARATOR;
-                                if (p.getChildSort(currentPosition-1).equals("K")){
+                                if (p.getChildSort(currentPosition - 1).equals(K_STRING)) {
                                     //TODO(OwolabiL): This needs to be investigated further and
-                                    // handled properly
-                                    pStrings.add(test +kItem.kLabel()+ SEPARATOR + "1.Exp");
-                                }  else{
-                                    pStrings.add(test+ p.getChildSort(currentPosition - 1));
+                                    // handled properly. This is not a good way to handle this case.
+                                    pStrings.add(test + kItem.kLabel() + SEPARATOR + "1.Exp");
+                                } else {
+                                    pStrings.add(test + p.getChildSort(currentPosition - 1));
                                 }
                             }
                         } else {
                             //TODO(OwolabiL): This needs to be investigated further and handled
                             // properly. Plus there's duplicated code here to be possibly removed.
-                            String test =  pString + SEPARATOR + currentPosition + SEPARATOR;
+                            String test = pString + SEPARATOR + currentPosition + SEPARATOR;
                             ArrayList<Production> productions =
                                     (ArrayList<Production>) context.productionsOf(currentLabel);
                             Production p = productions.get(0);
-                            if (p.getChildSort(currentPosition-1).equals("K")){
-                                pStrings.add(test +kItem.kLabel()+ SEPARATOR + (currentPosition)+
+                            if (p.getChildSort(currentPosition - 1).equals(K_STRING)) {
+                                pStrings.add(test + kItem.kLabel() + SEPARATOR + (currentPosition) +
                                         SEPARATOR + kItem.sort());
-                            }else {
+                            } else {
                                 pStrings.add(test + kItem.sort());
                             }
                         }
@@ -233,10 +294,19 @@ public class TermVisitor extends LocalVisitor {
         return pStrings;
     }
 
+    public boolean isAddInputRules() {
+        return addInputRules;
+    }
+
+    public boolean isAddOutputRules() {
+        return addOutputRules;
+    }
+
     private class TokenVisitor extends TermVisitor {
-        private String baseString;
+
+        private final String baseString;
         private String pString;
-        private List<String> candidates;
+        private final List<String> candidates;
 
         public TokenVisitor(Context context, String string) {
             super(context);
@@ -287,5 +357,6 @@ public class TermVisitor extends LocalVisitor {
         private List<String> getCandidates() {
             return candidates;
         }
+
     }
 }

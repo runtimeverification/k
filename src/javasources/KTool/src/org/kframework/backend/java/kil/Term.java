@@ -6,6 +6,8 @@ import java.util.Map;
 
 import org.kframework.backend.java.indexing.IndexingPair;
 import org.kframework.backend.java.symbolic.*;
+import org.kframework.krun.K;
+import org.kframework.utils.general.IndexingStatistics;
 
 
 /**
@@ -29,21 +31,30 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
      * Java Rewrite Engine internal representation ({@link org.kframework.backend.java.kil.Term}).
      */
     public static Term of(org.kframework.kil.Term kilTerm, Definition definition) {
+        if (K.get_indexing_stats){
+            IndexingStatistics.kilTransformationStopWatch.start();
+        }
+
         KILtoBackendJavaKILTransformer transformer
                 = new KILtoBackendJavaKILTransformer(definition.context());
-        return transformer.transformTerm(kilTerm, definition);
+        Term term = transformer.transformTerm(kilTerm, definition);
+
+        if (K.get_indexing_stats){
+            IndexingStatistics.kilTransformationStopWatch.stop();
+        }
+        return term;
     }
 
     /**
      * Returns a {@link List} view of the indexing pairs.
      */
-    public List<IndexingPair> getIndexingPairs() {
+    public List<IndexingPair> getIndexingPairs(final Definition definition) {
         final List<IndexingPair> indexingPairs = new ArrayList<IndexingPair>();
         accept(new BottomUpVisitor() {
             @Override
             public void visit(Cell cell) {
                 if (cell.getLabel().equals("k")) {
-                    indexingPairs.add(IndexingPair.getIndexingPair(cell.getContent()));
+                    indexingPairs.add(IndexingPair.getIndexingPair(cell.getContent(), definition));
                 } else if (cell.contentKind() == Kind.CELL_COLLECTION) {
                     super.visit(cell);
                 }
