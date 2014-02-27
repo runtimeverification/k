@@ -18,15 +18,40 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This compilation phase adds rules for fetching new input from the input stream whenever such input is needed.
+ * To achieve this, rules reading from cells tagged with "stdin" are detected, and for each such rule
+ * another rule is generated which when the input list contains no elements to be read issues a request that a
+ * token should be read from stdin and parsed into the requested type.
+ *
+ * For example, for rule
+ *   rule <k> read => I ...</k> <in> ListItem(I:Int) => .List ...</in>
+ * this rule will also be generated:
+ *   rule <k> read ...</k> <in> (.List => ListItem(parseInput("Int", " \n\r\t"))) ListItem(#buffer(K))</in>o
+ *
+ * The current implementation assumes this pass runs after concrete syntax has been compiled away.
+ */
 @KilProperty.DependsOn(KilProperty.NO_CONCRETE_SYNTAX)
 public class ResolveBlockingInput extends GetLhsPattern {
 	
 	Map<String, String> inputCells = new HashMap<String, String>();
 	java.util.List<Rule> generated = new ArrayList<Rule>();
 	boolean hasInputCell;
-    Term resultCondition;
 	boolean newList;
+    /**
+     * The original requires condition of the rule.  the predicate  corresponding to the variable being
+     * read from the stream will be removed from this condition before setting this condition as the
+     * condition of the new generated rule.
+     * Initialized in transform(Rule).
+     * Altered in getSort(Variable).
+     */
     private Term originalCondition;
+    /**
+     * The resulting condition is obtained from the originalCondition by adding a check that the
+     * variable being read does not match the stream handle.
+     * Initialized in transform(Cell).
+     */
+    Term resultCondition;
 
     public ResolveBlockingInput(Context context, boolean newList) {
 		super("Resolve Blocking Input", context);
@@ -207,6 +232,23 @@ public class ResolveBlockingInput extends GetLhsPattern {
 		node.setContents(list);
 		return node;
 	}
+
+    /**
+     * This method gets the *concrete* sort of variable var. As the ResolveBlocking input phase is run
+     * after the syntax is flatten, a rule like
+     *   rule <k> read => I ...</k> <in> ListItem(I:Int) => .List ...</in>
+     * will become
+     *   rule <k> 'read(.KList) => I ...</k> <in> ListItem(I:KItem) => .List ...</in> when isInt(I)
+     *
+     * Thus, the sort of the variable is moved into the side condition.  This method retrieves the
+     * sort of the variable from the side condition (stored in the originalCondition field) and removes the
+     * corresponding predicate from the side condition to be used for the newly generated rule.
+     *
+     * @modifies originalCondition field
+     * @param var the variable to be looked up
+     * @return the original sort of var.
+     * @throws TransformerException
+     */
 
     private String getSort(final Variable var) throws TransformerException {
         if (!var.getSort().equals(KSorts.KITEM)) return var.getSort();
