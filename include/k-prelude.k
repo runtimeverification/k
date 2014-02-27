@@ -186,9 +186,8 @@ module K-WRAPPERS-LABELS
 endmodule
 
 module K-DESTRUCTORS
-  // TODO(YilongL): why not tag the following production and rule with function attribute?
-  syntax KLabel ::= "getKLabel" K  [hook(MetaK:getKLabel_)]
-  rule getKLabel(L:KLabel(_:KList)) => L [structural, anywhere]
+  syntax KLabel ::= "getKLabel" K  [function, hook(MetaK:getKLabel_)]
+  rule getKLabel(L:KLabel(_:KList)) => L
 
 endmodule
 
