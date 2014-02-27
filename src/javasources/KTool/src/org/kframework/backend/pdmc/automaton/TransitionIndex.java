@@ -12,6 +12,15 @@ public class TransitionIndex<State, Alphabet> {
     private static HashMap<Object, Map<Object, TransitionIndex>> extendedCache;
     private static HashMap<Object, TransitionIndex> basicCache;
     private final State state;
+
+    public Alphabet getLetter() {
+        return letter;
+    }
+
+    public State getState() {
+        return state;
+    }
+
     private final Alphabet letter;
 
     private TransitionIndex(State state, Alphabet letter) {
