@@ -1,6 +1,6 @@
 package org.kframework.compile.transformers;
 
-import org.kframework.backend.java.symbolic.PrePostVisitor;
+import org.kframework.compile.utils.KilProperty;
 import org.kframework.compile.utils.GetLhsPattern;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-
+@KilProperty.DependsOn(KilProperty.NO_CONCRETE_SYNTAX)
 public class ResolveBlockingInput extends GetLhsPattern {
 	
 	Map<String, String> inputCells = new HashMap<String, String>();
@@ -37,20 +37,20 @@ public class ResolveBlockingInput extends GetLhsPattern {
 	public ASTNode transform(Definition node) throws TransformerException {
 		Configuration config = MetaK.getConfiguration(node, context);
 		config.accept(new BasicVisitor(context) {
-			@Override
-			public void visit(Cell node) {
-				String stream = node.getCellAttributes().get("stream");
-				if ("stdin".equals(stream)) {
+            @Override
+            public void visit(Cell node) {
+                String stream = node.getCellAttributes().get("stream");
+                if ("stdin".equals(stream)) {
                     String delimiter = node.getCellAttributes().get("delimiters");
                     if (delimiter == null) {
                         delimiter = " \n\t\r";
                     }
-					inputCells.put(node.getLabel(), delimiter);
-				}
-				super.visit(node);
-			}
+                    inputCells.put(node.getLabel(), delimiter);
+                }
+                super.visit(node);
+            }
 
-		});
+        });
 		return super.transform(node);
 	}
 	
