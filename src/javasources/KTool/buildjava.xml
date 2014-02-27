@@ -33,6 +33,7 @@
 			<pathelement location="${javalibs}/jung-visualization-2.0.1.jar" />
 			<pathelement location="${javalibs}/strategoxt.jar" />
             <pathelement location="lib/junit.jar" />
+            <pathelement location="lib/mockito-all.jar" />
 		</path>
 	</path>
 	<target name="init">

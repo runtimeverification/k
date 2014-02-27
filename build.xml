@@ -173,7 +173,7 @@
 	</target>
 
     <target name="junit" depends="test-build">
-       <junit haltonfailure="true" fork="true">
+       <junit haltonfailure="true" fork="true" dir="${javasources}/KTool">
          <formatter type="plain" usefile="false" />
          <classpath>
            <pathelement location="${javasources}/KTool/bin/" />
