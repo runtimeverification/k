@@ -1,6 +1,5 @@
 package org.kframework.compile.transformers;
 
-import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
@@ -11,7 +10,7 @@ import org.kframework.utils.general.GlobalSettings;
 /**
  * Add the function attribute to rules which rewrite either a TermCons of
  * a production with a function or predicate attribute,
- * or a KApp of a KLabelConstant satisfying MetaK.isPredicateLabel.
+ * or a KApp of a KLabelConstant satisfying isPredicate.
  */
 public class ResolveFunctions extends CopyOnWriteTransformer {
 
@@ -34,7 +33,7 @@ public class ResolveFunctions extends CopyOnWriteTransformer {
 		if (body instanceof KApp) {
 			Term l = ((KApp) body).getLabel();
 			if (l instanceof KLabelConstant) {
-				if (MetaK.isPredicateLabel(((KLabelConstant) l).getLabel())) {
+				if (((KLabelConstant)l).isPredicate()) {
 					node = addFunction(node);
 				}
 			}

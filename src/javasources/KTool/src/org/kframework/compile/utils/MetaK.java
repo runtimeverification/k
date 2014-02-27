@@ -410,10 +410,4 @@ public class MetaK {
 		}
 	}
 
-	public static boolean isPredicateLabel(String name) {
-		if (name.startsWith("is")) {
-			return true;
-		}
-		return false;
-	}
 }
