@@ -104,6 +104,10 @@ public class BuiltinStringOperations {
         }
     }
 
+    public static IntToken string2base(StringToken term, IntToken base, TermContext context) {
+        return IntToken.of(new BigInteger(term.stringValue(), base.intValue()));
+    }
+
     public static UninterpretedToken string2float(StringToken term, TermContext context) {
         return UninterpretedToken.of("Float", term.value());
     }
