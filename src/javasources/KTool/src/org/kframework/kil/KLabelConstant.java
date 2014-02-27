@@ -83,7 +83,15 @@ public class KLabelConstant extends KLabel {
 		return kLabelConstant;
 	}
 
-	public String getLabel() {
+    /**
+     * Checks whether this label corresponds to a predicate
+     * @return true if the label denotes a predicate or false otherwise
+     */
+    public boolean isPredicate() {
+        return  label.startsWith("is");
+    }
+
+    public String getLabel() {
 		return label;
 	}
 
