@@ -588,3 +588,10 @@ function: is a label has this attribute, then it is as if it is a builtin functi
 
 anywhere: these are just rules which can apply anywhere they match, so they are expected to be comparatively very slow.  Their application counts as computational steps, so they are interleaved etc. in formal analyses.  It is hard to reason with them in reachability logic.  One should avoid such rules by any means if possible, and use strictness and normal rules instead.
 
+
+KOMPILE - isSort predicates
+---------------------------
+
+Currently the compilation process assumes that all KLabels having 'is' as a prefix are of the form 'isSort' where Sort is the name of a syntactic category.
+Therefore users defining their own labels should be aware of this and understand that defining and using an isXXX label which is not related to a sort XXX will 
+result in undefined behavior.
