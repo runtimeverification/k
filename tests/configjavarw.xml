@@ -6,6 +6,9 @@
 
 <tests>
 
+  <!-- YilongL: imp & imp++ -->
+  <include file="../samples/java_rewrite_engine/tutorial/1_k/tests/config.xml" directory="samples/java_rewrite_engine/tutorial/1_k" />
+
 <!-- begin Java Rewrite Engine tests -->
 
   <!-- YilongL: threads_05.simple always runs into infinite loop in Java backend -->

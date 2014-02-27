@@ -82,7 +82,7 @@ module IMP
   rule while (B) S => if (B) { S while(B) S } else { .Stmts }   [structural]
 
   rule <k> int (X:Id, Xs => Xs); ...</k>
-       <env> Rho:Map => Rho[L/X] </env>
+       <env> Rho:Map => Rho[X <- L] </env>
        <store>... .Map => L |-> 0 ...</store>
     when fresh(L:Int)   [structural]
   rule int .Ids; => .   [structural]
@@ -92,7 +92,7 @@ module IMP
   rule <k> print(P:Printable, AEs => AEs); ...</k>
        <out>... .List => ListItem(P) </out>   [print]
   rule print(.AExps); => .  [structural]
-  
+
   rule <k> halt; ~> _ => . </k>
 
   rule <k> spawn S => T ...</k> <env> Rho:Map </env>
@@ -106,4 +106,3 @@ module IMP
   // the following has sort annotation to avoid ambiguity with Map, Set, etc
   rule S:Stmt Ss:Stmts => S ~> Ss   [structural]
 endmodule
-
