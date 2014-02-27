@@ -118,6 +118,7 @@ module K-FUNCTIONAL-VISITOR
    * #visit applied to a "~>" sequence of K items (first argument) reduces to
    * #visit applied to each K item.
    */
+  // TODO(AndreiS): replace K1 and K2 with KI:KItem and K:K
   rule
     #visit(K1:K ~> K2:K,
            VisitLabel:KLabel,
@@ -146,39 +147,24 @@ module K-FUNCTIONAL-VISITOR
     #else
       KLabel(#visitAll(KList, VisitLabel, VisitList, IfLabel, IfList))
     #fi
+  when notBool(isBuiltin(KLabel(KList)))
 
-  // TODO (AndreiS): fix tokens in the java engine (they stay tokens rather then becoming a K application)
+  /*
+   * #visit applied to an AST node (a KLabel applies to a KList) either
+   * transforms the node or reduces to #visit applied to its children.
+   */
   rule
-    #visit(I:Int,
+    #visit(KI:KItem,
            VisitLabel:KLabel,
            VisitList:KList,
            IfLabel:KLabel,
            IfList:KList)
   =>
-    #if IfLabel(I,,IfList) ==K true #then VisitLabel(I,,VisitList) #else I #fi
-  rule
-    #visit(F:Float,
-           VisitLabel:KLabel,
-           VisitList:KList,
-           IfLabel:KLabel,
-           IfList:KList)
-  =>
-    #if IfLabel(F,,IfList) ==K true #then VisitLabel(F,,VisitList) #else F #fi
-  rule
-    #visit(S:String,
-           VisitLabel:KLabel,
-           VisitList:KList,
-           IfLabel:KLabel,
-           IfList:KList)
-  =>
-    #if IfLabel(S,,IfList) ==K true #then VisitLabel(S,,VisitList) #else S #fi
-  rule
-    #visit(X:Id,
-           VisitLabel:KLabel,
-           VisitList:KList,
-           IfLabel:KLabel,
-           IfList:KList)
-  =>
-    #if IfLabel(X,,IfList) ==K true #then VisitLabel(X,,VisitList) #else X #fi
+    #if IfLabel(KI,,IfList) ==K true #then
+      VisitLabel(KI,,VisitList)
+    #else
+      KI
+    #fi
+  when isBuiltin(KI)
 endmodule
 

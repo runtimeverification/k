@@ -85,9 +85,6 @@ module SYMBOLIC-K
 //  rule checkSat(B:Bool) => SMTCall(SMTLibQuery(unflat(dnf(B))))
   rule checkSat(false) => "unsat"
 
-  syntax Bool ::= "isBuiltin" "(" K ")"
-  [prefixlabel(isBuiltin), klabel(isBuiltin), predicate]
-
   syntax Variable
 //  syntax Bool ::= "isVariable" "(" K ")"
 //  [prefixlabel(isVariable), klabel(isVariable), predicate]

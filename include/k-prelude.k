@@ -245,8 +245,11 @@ endmodule
 module K-TOKENS
   imports K-TECHNIQUE
   syntax KLabel ::= "#token"
-  syntax K ::= isToken(K) [predicate]
+  syntax Bool ::= isToken(K) [predicate, hook(#PREDICATE:isToken)]
   rule isToken(#token(_)) => true
+  syntax Bool ::= isBuiltin(K)
+  //[klabel(isBuiltin), predicate, hook(#PREDICATE:isBuiltin)]
+  [prefixlabel(isBuiltin), klabel(isBuiltin), predicate, hook(#PREDICATE:isBuiltin)]
 endmodule
 
 module K
