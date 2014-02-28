@@ -297,15 +297,6 @@ public class BuchiPushdownSystemTools<Control, Alphabet> {
                 rel.getTransitions(),
                 initialState,
                 Collections.singleton(finalState));
-
-        List<Rule<Pair<Control, BuchiState>, Alphabet>> path = getWitness(postStar.getPath(initialState, finalState));
-
     }
-
-    private List<Rule<Pair<Control, BuchiState>, Alphabet>> getWitness(Deque<Transition<PAutomatonState<Pair<Control, BuchiState>, Alphabet>, LabelledAlphabet<Control, Alphabet>>> path) {
-        Stack<Rule<Pair<Control, BuchiState>, Alphabet>> result =  new Stack<>();
-        return result;
-    }
-
 
 }
