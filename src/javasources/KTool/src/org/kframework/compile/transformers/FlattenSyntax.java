@@ -1,5 +1,6 @@
 package org.kframework.compile.transformers;
 
+import org.kframework.compile.utils.KilProperty;
 import org.kframework.compile.utils.MaudeHelper;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
@@ -14,7 +15,7 @@ import java.util.*;
 import java.util.List;
 import java.util.Set;
 
-
+@KilProperty.Provides(KilProperty.NO_CONCRETE_SYNTAX)
 public class FlattenSyntax extends CopyOnWriteTransformer {
 	FlattenKSyntax kTrans;
 	Set<String> listSeparators = new HashSet<String>();
