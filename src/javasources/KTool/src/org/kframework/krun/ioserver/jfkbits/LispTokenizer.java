@@ -38,7 +38,7 @@ public class LispTokenizer implements Iterator<Token>
     }
  
     public Token peekToken()
-    {	
+    {    
         if(m_ioexn != null)
             return null;
         try

@@ -20,7 +20,7 @@ public class AddKStringConversion extends CopyOnWriteTransformer {
             "KLabel1String2KLabelSyn";
 
     public AddKStringConversion(Context context) {
-    	super("Define KLabel2String and String2Klabel for KLabel constants", context);
+        super("Define KLabel2String and String2Klabel for KLabel constants", context);
     }
 
     @Override

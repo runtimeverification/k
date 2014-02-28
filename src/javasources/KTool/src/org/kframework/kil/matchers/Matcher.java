@@ -37,39 +37,39 @@ import org.kframework.kil.rewriter.SetImpl;
  * order by kil class, e.g., handling Ambiguity is the first method
  */
 public interface Matcher {
-	public void match(Ambiguity term, Term term2);
-	public void match(BackendTerm term, Term term2);
-	public void match(Bag term, Term term2);
-	public void match(BagItem term, Term term2);
-	public void match(Bracket term, Term term2);
-	public void match(Cast term, Term term2);
-	public void match(Cell term, Term term2);
-	public void match(Freezer term, Term term2);
-	public void match(FreezerHole term, Term term2);
-	public void match(Hole term, Term term2);
-	public void match(KApp term, Term term2);
-	public void match(KInjectedLabel term, Term term2);
-	public void match(KList term, Term term2);
-	public void match(KSequence term, Term term2);
-	public void match(List term, Term term2);
-	public void match(ListItem term, Term term2);
-	public void match(ListTerminator term, Term term2);
-	public void match(Map term, Term term2);
-	public void match(MapItem term, Term term2);
-	public void match(MapLookupPattern term, Term term2);
-	public void match(MapInsertPattern term, Term term2);
-	public void match(MapImpl term, Term term2);
-	public void match(Rewrite term, Term term2);
-	public void match(Set term, Term term2);
-	public void match(SetItem term, Term term2);
-	public void match(SetLookupPattern term, Term term2);
-	public void match(SetInsertPattern term, Term term2);
-	public void match(SetImpl term, Term term2);
-	public void match(TermComment term, Term term2);
-	public void match(TermCons term, Term term2);
-	public void match(Variable term, Term term2);
+    public void match(Ambiguity term, Term term2);
+    public void match(BackendTerm term, Term term2);
+    public void match(Bag term, Term term2);
+    public void match(BagItem term, Term term2);
+    public void match(Bracket term, Term term2);
+    public void match(Cast term, Term term2);
+    public void match(Cell term, Term term2);
+    public void match(Freezer term, Term term2);
+    public void match(FreezerHole term, Term term2);
+    public void match(Hole term, Term term2);
+    public void match(KApp term, Term term2);
+    public void match(KInjectedLabel term, Term term2);
+    public void match(KList term, Term term2);
+    public void match(KSequence term, Term term2);
+    public void match(List term, Term term2);
+    public void match(ListItem term, Term term2);
+    public void match(ListTerminator term, Term term2);
+    public void match(Map term, Term term2);
+    public void match(MapItem term, Term term2);
+    public void match(MapLookupPattern term, Term term2);
+    public void match(MapInsertPattern term, Term term2);
+    public void match(MapImpl term, Term term2);
+    public void match(Rewrite term, Term term2);
+    public void match(Set term, Term term2);
+    public void match(SetItem term, Term term2);
+    public void match(SetLookupPattern term, Term term2);
+    public void match(SetInsertPattern term, Term term2);
+    public void match(SetImpl term, Term term2);
+    public void match(TermComment term, Term term2);
+    public void match(TermCons term, Term term2);
+    public void match(Variable term, Term term2);
 
-	public String getName();
+    public String getName();
 
   /** 
    * this is the result of the pattern matching, or null if matching fails

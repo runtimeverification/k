@@ -28,59 +28,59 @@ import java.util.List;
  */
 public class AddEmptyLists extends BasicTransformer {
 
-	public AddEmptyLists(Context context) {
-		super("Add empty lists", context);
-	}
+    public AddEmptyLists(Context context) {
+        super("Add empty lists", context);
+    }
 
-	@Override
-	public ASTNode transform(TermCons tc) throws TransformerException {
-		// traverse
-		Production p = tc.getProduction();
+    @Override
+    public ASTNode transform(TermCons tc) throws TransformerException {
+        // traverse
+        Production p = tc.getProduction();
 
-		if (p.isListDecl()) {
-			Term t = tc.getContents().get(0);
-			UserList ul = (UserList) p.getItems().get(0);
-			if (isAddEmptyList(ul.getSort(), t.getSort())) {
-				if (!isUserListElement(ul.getSort(), t, context)) {
-					String msg = "Found sort '" + t.getSort() + "' where list sort '" + ul.getSort() + "' was expected. Moving on.";
-					GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.LISTS, msg, t.getFilename(), t.getLocation()));
-				} else
-					tc.getContents().set(0, addEmpty(t, ul.getSort()));
-			}
+        if (p.isListDecl()) {
+            Term t = tc.getContents().get(0);
+            UserList ul = (UserList) p.getItems().get(0);
+            if (isAddEmptyList(ul.getSort(), t.getSort())) {
+                if (!isUserListElement(ul.getSort(), t, context)) {
+                    String msg = "Found sort '" + t.getSort() + "' where list sort '" + ul.getSort() + "' was expected. Moving on.";
+                    GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.LISTS, msg, t.getFilename(), t.getLocation()));
+                } else
+                    tc.getContents().set(0, addEmpty(t, ul.getSort()));
+            }
 
-			// if the term should be a list, append the empty element
-			t = tc.getContents().get(1);
-			if (isAddEmptyList(p.getSort(), t.getSort())) {
-				if (!isUserListElement(p.getSort(), t, context)) {
-					String msg = "Found sort '" + t.getSort() + "' where list sort '" + p.getSort() + "' was expected. Moving on.";
-					GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.LISTS, msg, t.getFilename(), t.getLocation()));
-				} else
-					tc.getContents().set(1, addEmpty(t, tc.getProduction().getSort()));
-			}
-		} else {
-			for (int i = 0, j = 0; j < p.getItems().size(); j++) {
-				ProductionItem pi = p.getItems().get(j);
-				if (!(pi instanceof Sort))
-					continue;
+            // if the term should be a list, append the empty element
+            t = tc.getContents().get(1);
+            if (isAddEmptyList(p.getSort(), t.getSort())) {
+                if (!isUserListElement(p.getSort(), t, context)) {
+                    String msg = "Found sort '" + t.getSort() + "' where list sort '" + p.getSort() + "' was expected. Moving on.";
+                    GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.LISTS, msg, t.getFilename(), t.getLocation()));
+                } else
+                    tc.getContents().set(1, addEmpty(t, tc.getProduction().getSort()));
+            }
+        } else {
+            for (int i = 0, j = 0; j < p.getItems().size(); j++) {
+                ProductionItem pi = p.getItems().get(j);
+                if (!(pi instanceof Sort))
+                    continue;
 
-				String srt = ((Sort) pi).getName();
-				if (context.isListSort(srt)) {
-					Term t = (Term) tc.getContents().get(i);
-					// if the term should be a list, append the empty element
-					if (isAddEmptyList(srt, t.getSort())) {
-						if (!isUserListElement(srt, t, context)) {
-							String msg = "Found sort '" + t.getSort() + "' where list sort '" + srt + "' was expected. Moving on.";
-							GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.LISTS, msg, t.getFilename(), t.getLocation()));
-						} else
-							tc.getContents().set(i, addEmpty(t, srt));
-					}
-				}
-				i++;
-			}
-		}
+                String srt = ((Sort) pi).getName();
+                if (context.isListSort(srt)) {
+                    Term t = (Term) tc.getContents().get(i);
+                    // if the term should be a list, append the empty element
+                    if (isAddEmptyList(srt, t.getSort())) {
+                        if (!isUserListElement(srt, t, context)) {
+                            String msg = "Found sort '" + t.getSort() + "' where list sort '" + srt + "' was expected. Moving on.";
+                            GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.LISTS, msg, t.getFilename(), t.getLocation()));
+                        } else
+                            tc.getContents().set(i, addEmpty(t, srt));
+                    }
+                }
+                i++;
+            }
+        }
 
-		return super.transform(tc);
-	}
+        return super.transform(tc);
+    }
 
     private boolean isUserListElement(String listSort, Term element, Context context) {
         String elementSort = element.getSort();
@@ -97,26 +97,26 @@ public class AddEmptyLists extends BasicTransformer {
                && context.isSubsortedEq(listSort, elementSort);
     }
 
-	public boolean isAddEmptyList(String expectedSort, String termSort) {
-		if (!context.isListSort(expectedSort))
-			return false;
-		if (context.isSubsortedEq(expectedSort, termSort) && context.isListSort(termSort))
-			return false;
-		return true;
-	}
+    public boolean isAddEmptyList(String expectedSort, String termSort) {
+        if (!context.isListSort(expectedSort))
+            return false;
+        if (context.isSubsortedEq(expectedSort, termSort) && context.isListSort(termSort))
+            return false;
+        return true;
+    }
 
-	private Term addEmpty(Term node, String sort) {
-		TermCons tc = new TermCons(sort, getListCons(sort), context);
-		List<Term> genContents = new ArrayList<Term>();
-		genContents.add(node);
-		genContents.add(new ListTerminator(sort, null));
+    private Term addEmpty(Term node, String sort) {
+        TermCons tc = new TermCons(sort, getListCons(sort), context);
+        List<Term> genContents = new ArrayList<Term>();
+        genContents.add(node);
+        genContents.add(new ListTerminator(sort, null));
 
-		tc.setContents(genContents);
-		return tc;
-	}
+        tc.setContents(genContents);
+        return tc;
+    }
 
-	private String getListCons(String psort) {
-		Production p = context.listConses.get(psort);
-		return p.getAttribute(Constants.CONS_cons_ATTR);
-	}
+    private String getListCons(String psort) {
+        Production p = context.listConses.get(psort);
+        return p.getAttribute(Constants.CONS_cons_ATTR);
+    }
 }

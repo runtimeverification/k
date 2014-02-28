@@ -13,73 +13,73 @@ import java.util.List;
 
 /** A module. */
 public class Module extends DefinitionItem {
-	private String name;
-	private List<ModuleItem> items = new ArrayList<ModuleItem>();
+    private String name;
+    private List<ModuleItem> items = new ArrayList<ModuleItem>();
 
-	public Module(Module m) {
-		super(m);
-		this.name = m.name;
-		this.items = m.items;
-	}
+    public Module(Module m) {
+        super(m);
+        this.name = m.name;
+        this.items = m.items;
+    }
 
-	public Module() {
-		super();
-	}
+    public Module() {
+        super();
+    }
 
-	public Module(String name) {
-		super();
-		this.name = name;
-	}
+    public Module(String name) {
+        super();
+        this.name = name;
+    }
 
-	public void appendModuleItem(ModuleItem item) {
-		this.items.add(item);
-	}
+    public void appendModuleItem(ModuleItem item) {
+        this.items.add(item);
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setItems(List<ModuleItem> items) {
-		this.items = items;
-	}
+    public void setItems(List<ModuleItem> items) {
+        this.items = items;
+    }
 
-	public List<ModuleItem> getItems() {
-		return items;
-	}
+    public List<ModuleItem> getItems() {
+        return items;
+    }
 
-	@Override
-	public String toString() {
-		String content = "";
-		for (ModuleItem i : items)
-			content += i + " \n";
+    @Override
+    public String toString() {
+        String content = "";
+        for (ModuleItem i : items)
+            content += i + " \n";
 
-		return "module " + name + "\n" + content + "\nendmodule";
-	}
+        return "module " + name + "\n" + content + "\nendmodule";
+    }
 
-	public List<String> getModuleKLabels() {
-		List<String> mkl = new LinkedList<String>();
+    public List<String> getModuleKLabels() {
+        List<String> mkl = new LinkedList<String>();
 
-		for (ModuleItem mi : items) {
-			List<String> list = mi.getKLabels();
-			if (list != null)
-				mkl.addAll(list);
-		}
+        for (ModuleItem mi : items) {
+            List<String> list = mi.getKLabels();
+            if (list != null)
+                mkl.addAll(list);
+        }
 
-		return mkl;
-	}
+        return mkl;
+    }
 
-	public java.util.Set<String> getAllSorts() {
-		java.util.Set<String> sorts = new HashSet<String>();
+    public java.util.Set<String> getAllSorts() {
+        java.util.Set<String> sorts = new HashSet<String>();
 
-		for (ModuleItem mi : items) {
-			List<String> list = mi.getAllSorts();
-			if (list != null)
-				sorts.addAll(list);
-		}
+        for (ModuleItem mi : items) {
+            List<String> list = mi.getAllSorts();
+            if (list != null)
+                sorts.addAll(list);
+        }
 
         // Andrei S: bad, bad practice ...
         // ... but it is 11:55pm and I do not see another way to get them
@@ -89,63 +89,63 @@ public class Module extends DefinitionItem {
         sorts.add("#String");
         sorts.add("#Id");
 
-		return sorts;
-	}
+        return sorts;
+    }
 
-	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-	}
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
+    }
 
-	@Override
-	public ASTNode accept(Transformer transformer) throws TransformerException {
-		return transformer.transform(this);
-	}
+    @Override
+    public ASTNode accept(Transformer transformer) throws TransformerException {
+        return transformer.transform(this);
+    }
 
-	public Module addModuleItems(List<ModuleItem> rules) {
-		Module result = new Module(this);
-		List<ModuleItem> items = new ArrayList<ModuleItem>(this.items);
-		items.addAll(rules);
-		result.setItems(items);
-		return result;
-	}
+    public Module addModuleItems(List<ModuleItem> rules) {
+        Module result = new Module(this);
+        List<ModuleItem> items = new ArrayList<ModuleItem>(this.items);
+        items.addAll(rules);
+        result.setItems(items);
+        return result;
+    }
 
-	@Override
-	public Module shallowCopy() {
-		return new Module(this);
-	}
+    @Override
+    public Module shallowCopy() {
+        return new Module(this);
+    }
 
-	public void addSubsort(String sort, String subsort, Context context) {
-		this.addProduction(sort, new Sort(subsort));
+    public void addSubsort(String sort, String subsort, Context context) {
+        this.addProduction(sort, new Sort(subsort));
         context.addSubsort(sort, subsort);
-	}
+    }
 
-	public void addConstant(String ctSort, String ctName) {
-		this.addProduction(ctSort, new Terminal(ctName));
-	}
+    public void addConstant(String ctSort, String ctName) {
+        this.addProduction(ctSort, new Terminal(ctName));
+    }
 
     public void addConstant(KLabelConstant kLabelConstant) {
         this.addProduction(kLabelConstant.getSort(), new Terminal(kLabelConstant.getLabel()));
     }
 
-	public void addProduction(String sort, ProductionItem prodItem) {
-		List<ProductionItem> prodItems = new LinkedList<ProductionItem>();
-		prodItems.add(prodItem);
-		this.addProduction(sort, new Production(new Sort(sort), prodItems));
-	}
+    public void addProduction(String sort, ProductionItem prodItem) {
+        List<ProductionItem> prodItems = new LinkedList<ProductionItem>();
+        prodItems.add(prodItem);
+        this.addProduction(sort, new Production(new Sort(sort), prodItems));
+    }
 
-	public void addProduction(String sort, Production prod) {
-		List<PriorityBlock> pbs = new LinkedList<PriorityBlock>();
-		PriorityBlock pb = new PriorityBlock();
-		pbs.add(pb);
+    public void addProduction(String sort, Production prod) {
+        List<PriorityBlock> pbs = new LinkedList<PriorityBlock>();
+        PriorityBlock pb = new PriorityBlock();
+        pbs.add(pb);
 
-		List<Production> prods = new LinkedList<Production>();
-		pb.setProductions(prods);
+        List<Production> prods = new LinkedList<Production>();
+        pb.setProductions(prods);
 
-		prods.add(prod);
+        prods.add(prod);
 
-		this.items.add(new Syntax(new Sort(sort), pbs));
-	}
+        this.items.add(new Syntax(new Sort(sort), pbs));
+    }
 
     public List<Rule> getRules() {
         List<Rule> list = new LinkedList<Rule>();

@@ -25,120 +25,120 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class AddCircularityRules extends CopyOnWriteTransformer {
 
-	public static final String RRULE_ATTR = "reachability-rule";
-	
-	private List<ASTNode> reachabilityRules;
+    public static final String RRULE_ATTR = "reachability-rule";
+    
+    private List<ASTNode> reachabilityRules;
 
-	public AddCircularityRules(Context context, List<ASTNode> reachabilityRules) {
-		super("Add circularity rules", context);
-		this.reachabilityRules = reachabilityRules;
-	}
+    public AddCircularityRules(Context context, List<ASTNode> reachabilityRules) {
+        super("Add circularity rules", context);
+        this.reachabilityRules = reachabilityRules;
+    }
 
-	@Override
-	public ASTNode transform(Module node) throws TransformerException {
+    @Override
+    public ASTNode transform(Module node) throws TransformerException {
 
         ArrayList<ModuleItem> items = new ArrayList<ModuleItem>(node.getItems());
         Module module = node.shallowCopy();
         module.setItems(items);
 
-		
-		for (ASTNode rr : reachabilityRules) {
-			if (rr instanceof Sentence) {
-				Sentence r = (Sentence) rr;
-				
-				// "parse" the reachability rules
-				ReachabilityRuleKILParser parser = new ReachabilityRuleKILParser(
-						context);
-				r.accept(parser);
+        
+        for (ASTNode rr : reachabilityRules) {
+            if (rr instanceof Sentence) {
+                Sentence r = (Sentence) rr;
+                
+                // "parse" the reachability rules
+                ReachabilityRuleKILParser parser = new ReachabilityRuleKILParser(
+                        context);
+                r.accept(parser);
 
-				Term newPi = parser.getPi().shallowCopy();
-				Variable K = Variable.getFreshVar("K");
+                Term newPi = parser.getPi().shallowCopy();
+                Variable K = Variable.getFreshVar("K");
 
-				// extract the content of the K cell (PGM) from LHS of  
-				// the reachability rule and replace it by PGM ~> K
-				ExtractCellContent extract = new ExtractCellContent(context, "k");
-				newPi.accept(extract);
-				Term pgm = extract.getContent().shallowCopy();
-				
-				// push the new program without the first label
-				Term pgmprime = pgm.shallowCopy();
-				RemoveLabel pl = new RemoveLabel(context);
-				pgmprime = (Term) pgmprime.accept(pl);
-				
-				List<Term> cnt = new ArrayList<Term>();
-				cnt.add(pgm);
-				cnt.add(pgmprime); // append the pgmprime too
-				cnt.add(K);
-				KSequence newContent = new KSequence(cnt);
+                // extract the content of the K cell (PGM) from LHS of  
+                // the reachability rule and replace it by PGM ~> K
+                ExtractCellContent extract = new ExtractCellContent(context, "k");
+                newPi.accept(extract);
+                Term pgm = extract.getContent().shallowCopy();
+                
+                // push the new program without the first label
+                Term pgmprime = pgm.shallowCopy();
+                RemoveLabel pl = new RemoveLabel(context);
+                pgmprime = (Term) pgmprime.accept(pl);
+                
+                List<Term> cnt = new ArrayList<Term>();
+                cnt.add(pgm);
+                cnt.add(pgmprime); // append the pgmprime too
+                cnt.add(K);
+                KSequence newContent = new KSequence(cnt);
 
-				SetCellContent app = new SetCellContent(context, newContent, "k");
-				newPi = (Term) newPi.accept(app);
+                SetCellContent app = new SetCellContent(context, newContent, "k");
+                newPi = (Term) newPi.accept(app);
 
-				// in RHS, replace .K with K
-				Term newPiPrime = parser.getPi_prime().shallowCopy();
-				SetCellContent appPrime = new SetCellContent(context, K, "k");
-				newPiPrime = (Term) newPiPrime.accept(appPrime);
-				
-				// fresh variables
-				VariablesVisitor vvleft = new VariablesVisitor(context);
-				parser.getPi().accept(vvleft);
-				
-//				System.out.println("CFG VARS: " + vvleft.getVariables());
-//				System.out.println("FROM: " + parser.getPi());
-//				
-				VariablesVisitor vvright = new VariablesVisitor(context);
-				parser.getPi_prime().accept(vvright);
-				
-//				System.out.println("CFG' VARS: " + vvright.getVariables());
-//				System.out.println("FROM: " + parser.getPi_prime());
-//				
-				List<Term> fresh = new ArrayList<Term>();
-				
-				for(Variable v : vvright.getVariables()){
-					if (!varInList(v, vvleft.getVariables())){
-						List<Term> vlist = new ArrayList<Term>();
-						vlist.add(v);
-//						System.out.println("Generate fresh "  + v);
-						fresh.add(new TermCons(v.getSort(), MetaK.Constants.freshCons, vlist, context));
-//						fresh.add(KApp.of(KLabelConstant.of(AddSymbolicK.symbolicConstructor(v.getSort())), org.kframework.kil.Token.kAppOf("#Id", v.getName())));
-					}
-				}
+                // in RHS, replace .K with K
+                Term newPiPrime = parser.getPi_prime().shallowCopy();
+                SetCellContent appPrime = new SetCellContent(context, K, "k");
+                newPiPrime = (Term) newPiPrime.accept(appPrime);
+                
+                // fresh variables
+                VariablesVisitor vvleft = new VariablesVisitor(context);
+                parser.getPi().accept(vvleft);
+                
+//                System.out.println("CFG VARS: " + vvleft.getVariables());
+//                System.out.println("FROM: " + parser.getPi());
+//                
+                VariablesVisitor vvright = new VariablesVisitor(context);
+                parser.getPi_prime().accept(vvright);
+                
+//                System.out.println("CFG' VARS: " + vvright.getVariables());
+//                System.out.println("FROM: " + parser.getPi_prime());
+//                
+                List<Term> fresh = new ArrayList<Term>();
+                
+                for(Variable v : vvright.getVariables()){
+                    if (!varInList(v, vvleft.getVariables())){
+                        List<Term> vlist = new ArrayList<Term>();
+                        vlist.add(v);
+//                        System.out.println("Generate fresh "  + v);
+                        fresh.add(new TermCons(v.getSort(), MetaK.Constants.freshCons, vlist, context));
+//                        fresh.add(KApp.of(KLabelConstant.of(AddSymbolicK.symbolicConstructor(v.getSort())), org.kframework.kil.Token.kAppOf("#Id", v.getName())));
+                    }
+                }
 
-				// insert patternless formulas into condition
-				Term phi = parser.getPhi().shallowCopy();
-				Term phiPrime = parser.getPhi_prime().shallowCopy();
-				Term rrcond = KApp.of(KLabelConstant.of(RLBackend.INTERNAL_KLABEL, context), phi, phiPrime);
-				fresh.add(rrcond);
-				
-//				Term condition = KApp.of(KLabelConstant.ANDBOOL_KLABEL, new KList(fresh));
-				Term condition = andBool(fresh);
+                // insert patternless formulas into condition
+                Term phi = parser.getPhi().shallowCopy();
+                Term phiPrime = parser.getPhi_prime().shallowCopy();
+                Term rrcond = KApp.of(KLabelConstant.of(RLBackend.INTERNAL_KLABEL, context), phi, phiPrime);
+                fresh.add(rrcond);
+                
+//                Term condition = KApp.of(KLabelConstant.ANDBOOL_KLABEL, new KList(fresh));
+                Term condition = andBool(fresh);
 
-				Rule circRule = new Rule(newPi, newPiPrime, context);
-				circRule.setRequires(condition);
-				int correspondingIndex = reachabilityRules.indexOf(rr);
-				circRule.addAttribute(RRULE_ATTR, correspondingIndex + "");
-				
-				items.add(circRule);
-			}
-		}
+                Rule circRule = new Rule(newPi, newPiPrime, context);
+                circRule.setRequires(condition);
+                int correspondingIndex = reachabilityRules.indexOf(rr);
+                circRule.addAttribute(RRULE_ATTR, correspondingIndex + "");
+                
+                items.add(circRule);
+            }
+        }
 
-		return module;
-	}
-	
-	private Term andBool(List<Term> terms) {
-		if (terms.size() == 0) 
-			return BoolBuiltin.TRUE;
-		Term term = terms.get(0);
-		terms.remove(0);
-		return KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, term, andBool(terms));
-	}
-	
-	public static boolean varInList(Variable v, List<Variable> vars) {
-		for(Variable var : vars){
-			if (v.getName().equals(var.getName())) {
-				return true;
-			}
-		}
-		return false;
-	}
+        return module;
+    }
+    
+    private Term andBool(List<Term> terms) {
+        if (terms.size() == 0) 
+            return BoolBuiltin.TRUE;
+        Term term = terms.get(0);
+        terms.remove(0);
+        return KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, term, andBool(terms));
+    }
+    
+    public static boolean varInList(Variable v, List<Variable> vars) {
+        for(Variable var : vars){
+            if (v.getName().equals(var.getName())) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

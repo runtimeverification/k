@@ -13,43 +13,43 @@ import java.util.Map;
  */
 public class CheckConfigurationCells extends BasicVisitor {
 
-	Map<String,Cell> cells = new HashMap<String,Cell>();
+    Map<String,Cell> cells = new HashMap<String,Cell>();
 
-	@Override
-	public void visit(Configuration node) {
-		cells.clear();
-		super.visit(node);
-	}
+    @Override
+    public void visit(Configuration node) {
+        cells.clear();
+        super.visit(node);
+    }
 
-	public CheckConfigurationCells(org.kframework.kil.loader.Context context) {
-		super("Check that configuration cells have unique names", context);
-	}
+    public CheckConfigurationCells(org.kframework.kil.loader.Context context) {
+        super("Check that configuration cells have unique names", context);
+    }
 
-	@Override
-	public void visit(Syntax node) {
-		return;
-	}
+    @Override
+    public void visit(Syntax node) {
+        return;
+    }
 
-	@Override
-	public void visit(org.kframework.kil.Context node) {
-		return;
-	}
+    @Override
+    public void visit(org.kframework.kil.Context node) {
+        return;
+    }
 
-	@Override
-	public void visit(Rule node) {
-		return;
-	}
+    @Override
+    public void visit(Rule node) {
+        return;
+    }
 
-	@Override
-	public void visit(Cell node) {
-		Cell cell = cells.get(node.getId());
-		if (cell != null) {
-			GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
-					KException.KExceptionGroup.COMPILER,
-					"Cell " + node.getId() + " found twice in configuration (once at " + cell.getLocation() + ").",
-					getName(), node.getFilename(), node.getLocation()));
-		}
-		cells.put(node.getId(), node);
-		super.visit(node);
-	}
+    @Override
+    public void visit(Cell node) {
+        Cell cell = cells.get(node.getId());
+        if (cell != null) {
+            GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
+                    KException.KExceptionGroup.COMPILER,
+                    "Cell " + node.getId() + " found twice in configuration (once at " + cell.getLocation() + ").",
+                    getName(), node.getFilename(), node.getLocation()));
+        }
+        cells.put(node.getId(), node);
+        super.visit(node);
+    }
 }

@@ -9,23 +9,23 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class CollectTerminalsVisitor extends BasicVisitor {
-	public CollectTerminalsVisitor(Context context) {
-		super(context);
-	}
+    public CollectTerminalsVisitor(Context context) {
+        super(context);
+    }
 
-	public Set<String> terminals = new HashSet<String>();
+    public Set<String> terminals = new HashSet<String>();
 
-	private void addTerminal(String terminal) {
-		if (terminal.equals(""))
-			return;
-		terminals.add(terminal);
-	}
+    private void addTerminal(String terminal) {
+        if (terminal.equals(""))
+            return;
+        terminals.add(terminal);
+    }
 
-	public void visit(Terminal t) {
-		addTerminal(t.getTerminal());
-	}
+    public void visit(Terminal t) {
+        addTerminal(t.getTerminal());
+    }
 
-	public void visit(UserList ul) {
-		addTerminal(ul.getSeparator());
-	}
+    public void visit(UserList ul) {
+        addTerminal(ul.getSeparator());
+    }
 }

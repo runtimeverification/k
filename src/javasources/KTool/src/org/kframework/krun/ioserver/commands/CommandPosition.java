@@ -9,23 +9,23 @@ import java.util.logging.Logger;
 public class CommandPosition extends Command {
 
 
-	private long ID;
+    private long ID;
 
-	public CommandPosition(String[] args, Socket socket, Logger logger, FileSystem fs) { //, Long maudeId) {
-		super(args, socket, logger, fs); //, maudeId);
+    public CommandPosition(String[] args, Socket socket, Logger logger, FileSystem fs) { //, Long maudeId) {
+        super(args, socket, logger, fs); //, maudeId);
 
-		try {
-			ID = Long.parseLong(args[1]);
-		} catch (NumberFormatException nfe) {
-			fail("position operation aborted: " + nfe.getLocalizedMessage());
-		}
-	}
+        try {
+            ID = Long.parseLong(args[1]);
+        } catch (NumberFormatException nfe) {
+            fail("position operation aborted: " + nfe.getLocalizedMessage());
+        }
+    }
 
-	public void run() {
+    public void run() {
         try {
             succeed(Long.toString(fs.get(ID).tell()));
         } catch (IOException e) {
             fail(e.getMessage());
         }
-	}
+    }
 }

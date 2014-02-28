@@ -12,15 +12,15 @@ import org.kframework.krun.K;
 import edu.uci.ics.jung.graph.DirectedGraph;
 
 public class TestGenResults {
-	private List<TestGenResult> testGenResults;
-	private DirectedGraph<KRunState, Transition> graph;
-	private boolean isDefaultPattern;
+    private List<TestGenResult> testGenResults;
+    private DirectedGraph<KRunState, Transition> graph;
+    private boolean isDefaultPattern;
 
     protected Context context;
 
-	public TestGenResults(List<TestGenResult> results,
-			DirectedGraph<KRunState, Transition> graph,
-			boolean isDefaultPattern, Context context) {
+    public TestGenResults(List<TestGenResult> results,
+            DirectedGraph<KRunState, Transition> graph,
+            boolean isDefaultPattern, Context context) {
         this.context = context;
         this.testGenResults = results;
         this.graph = graph;
@@ -34,7 +34,7 @@ public class TestGenResults {
         sb.append("Test generation results:");
         
         for (TestGenResult testGenResult : testGenResults) {
-        	// TODO(YilongL): how to set state id?
+            // TODO(YilongL): how to set state id?
             sb.append("\n\nTest case " + n /*+ ", State " + testGenResult.getState().getStateId()*/ + ":");
             
             UnparserFilter t = new UnparserFilter(true, K.color, K.parens, context);
@@ -93,9 +93,9 @@ public class TestGenResults {
         return testGenResults;
     }
     
-	public boolean isDefaultPattern(){
-		
-		return this.isDefaultPattern;
-	}
+    public boolean isDefaultPattern(){
+        
+        return this.isDefaultPattern;
+    }
 }
 

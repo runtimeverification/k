@@ -16,38 +16,38 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class AddCheckConstants extends CopyOnWriteTransformer {
 
-	private int n = 0;
-	public static final String CHECK = "check";
-	
-	public AddCheckConstants(Context context, int n) {
-		super("Add check constants for kcheck", context);
-		this.n = n;
-	}
+    private int n = 0;
+    public static final String CHECK = "check";
+    
+    public AddCheckConstants(Context context, int n) {
+        super("Add check constants for kcheck", context);
+        this.n = n;
+    }
 
-	@Override
-	public ASTNode transform(Module node) throws TransformerException {
-		Module retNode = node.shallowCopy();
-		retNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
+    @Override
+    public ASTNode transform(Module node) throws TransformerException {
+        Module retNode = node.shallowCopy();
+        retNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
 
-		for (int i = 0; i < n; i++) {
-			retNode.addConstant(KSorts.KLABEL, getName(i));
-		}
+        for (int i = 0; i < n; i++) {
+            retNode.addConstant(KSorts.KLABEL, getName(i));
+        }
 
-		if (retNode.getItems().size() != node.getItems().size())
-			return retNode;
-		else
-			return node;
-	}
+        if (retNode.getItems().size() != node.getItems().size())
+            return retNode;
+        else
+            return node;
+    }
 
-	private static String getName(int i) {
-		return CHECK + i;
-	}
-	
-	public static Term getFreshImplicationForRule(int indexOf, Context context) {
-		return KApp.of(KLabelConstant.of(getName(indexOf), context), KList.EMPTY);
-	}
-	
-	public static Term getFreshImplicationForPgm(int indexOf, Context context) {
-		return KApp.of(KLabelConstant.of(getName(indexOf), context), KList.EMPTY);
-	}
+    private static String getName(int i) {
+        return CHECK + i;
+    }
+    
+    public static Term getFreshImplicationForRule(int indexOf, Context context) {
+        return KApp.of(KLabelConstant.of(getName(indexOf), context), KList.EMPTY);
+    }
+    
+    public static Term getFreshImplicationForPgm(int indexOf, Context context) {
+        return KApp.of(KLabelConstant.of(getName(indexOf), context), KList.EMPTY);
+    }
 }

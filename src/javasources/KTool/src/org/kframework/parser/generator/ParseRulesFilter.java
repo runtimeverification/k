@@ -43,150 +43,150 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 public class ParseRulesFilter extends BasicTransformer {
-	Formatter f;
-	boolean checkInclusion = true;
+    Formatter f;
+    boolean checkInclusion = true;
 
-	public ParseRulesFilter(Context context, boolean checkInclusion) {
-		super("Parse Configurations", context);
-		this.checkInclusion = checkInclusion;
-		if (GlobalSettings.verbose)
-			try {
-				f = new Formatter(new File(context.dotk.getAbsolutePath() + "/timing.log"));
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			}
-	}
+    public ParseRulesFilter(Context context, boolean checkInclusion) {
+        super("Parse Configurations", context);
+        this.checkInclusion = checkInclusion;
+        if (GlobalSettings.verbose)
+            try {
+                f = new Formatter(new File(context.dotk.getAbsolutePath() + "/timing.log"));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+    }
 
-	public ParseRulesFilter(Context context) {
-		super("Parse Configurations", context);
-		if (GlobalSettings.verbose)
-			try {
-				f = new Formatter(new File(context.dotk.getAbsolutePath() + "/timing.log"));
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			}
-	}
+    public ParseRulesFilter(Context context) {
+        super("Parse Configurations", context);
+        if (GlobalSettings.verbose)
+            try {
+                f = new Formatter(new File(context.dotk.getAbsolutePath() + "/timing.log"));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+    }
 
-	String localModule = null;
+    String localModule = null;
 
-	@Override
-	public ASTNode transform(Module m) throws TransformerException {
-		localModule = m.getName();
-		return super.transform(m);
-	}
+    @Override
+    public ASTNode transform(Module m) throws TransformerException {
+        localModule = m.getName();
+        return super.transform(m);
+    }
 
-	public ASTNode transform(StringSentence ss) throws TransformerException {
-		if (ss.getType().equals(Constants.RULE) || ss.getType().equals(Constants.CONTEXT)) {
-			long startTime = System.currentTimeMillis();
-			try {
-				ASTNode config;
+    public ASTNode transform(StringSentence ss) throws TransformerException {
+        if (ss.getType().equals(Constants.RULE) || ss.getType().equals(Constants.CONTEXT)) {
+            long startTime = System.currentTimeMillis();
+            try {
+                ASTNode config;
 
-				if (GlobalSettings.fastKast) {
-					// TODO(RaduM): load directly from ATerms
-					ASTNode anode = Sglr.run_sglri(context.dotk.getAbsolutePath() + "/def/Concrete.tbl", "CondSentence", ss.getContent(), ss.getFilename());
+                if (GlobalSettings.fastKast) {
+                    // TODO(RaduM): load directly from ATerms
+                    ASTNode anode = Sglr.run_sglri(context.dotk.getAbsolutePath() + "/def/Concrete.tbl", "CondSentence", ss.getContent(), ss.getFilename());
 
-					int startLine = StringUtil.getStartLineFromLocation(ss.getContentLocation());
-					int startCol = StringUtil.getStartColFromLocation(ss.getContentLocation());
-					anode.accept(new UpdateLocationVisitor(context, startLine, startCol));
-					anode.accept(new ReportErrorsVisitor(context, "rule"));
+                    int startLine = StringUtil.getStartLineFromLocation(ss.getContentLocation());
+                    int startCol = StringUtil.getStartColFromLocation(ss.getContentLocation());
+                    anode.accept(new UpdateLocationVisitor(context, startLine, startCol));
+                    anode.accept(new ReportErrorsVisitor(context, "rule"));
 
-					Sentence st = (Sentence) anode;
-					if (ss.getType().equals(Constants.CONTEXT))
-						config = new org.kframework.kil.Context(st);
-					else if (ss.getType().equals(Constants.RULE))
-						config = new Rule(st);
-					else { // should not reach here
-						config = null;
-						assert false : "Only context and rules have been implemented.";
-					}
+                    Sentence st = (Sentence) anode;
+                    if (ss.getType().equals(Constants.CONTEXT))
+                        config = new org.kframework.kil.Context(st);
+                    else if (ss.getType().equals(Constants.RULE))
+                        config = new Rule(st);
+                    else { // should not reach here
+                        config = null;
+                        assert false : "Only context and rules have been implemented.";
+                    }
 
-					((Sentence) config).setLabel(ss.getLabel());
-					//assert st.getAttributes() == null || st.getAttributes().isEmpty(); // attributes should have been parsed in Basic Parsing
-					((Sentence) config).setAttributes(ss.getAttributes());
-				} else {
-					String parsed = null;
-					if (ss.containsAttribute("kore")) {
+                    ((Sentence) config).setLabel(ss.getLabel());
+                    //assert st.getAttributes() == null || st.getAttributes().isEmpty(); // attributes should have been parsed in Basic Parsing
+                    ((Sentence) config).setAttributes(ss.getAttributes());
+                } else {
+                    String parsed = null;
+                    if (ss.containsAttribute("kore")) {
 
-						long koreStartTime = System.currentTimeMillis();
-						parsed = org.kframework.parser.concrete.KParser.ParseKoreString(ss.getContent());
-						if (GlobalSettings.verbose)
-							System.out.println("Parsing with Kore: " + ss.getFilename() + ":" + ss.getLocation() + " - " + (System.currentTimeMillis() - koreStartTime));
-					} else
-						parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
-					Document doc = XmlLoader.getXMLDoc(parsed);
+                        long koreStartTime = System.currentTimeMillis();
+                        parsed = org.kframework.parser.concrete.KParser.ParseKoreString(ss.getContent());
+                        if (GlobalSettings.verbose)
+                            System.out.println("Parsing with Kore: " + ss.getFilename() + ":" + ss.getLocation() + " - " + (System.currentTimeMillis() - koreStartTime));
+                    } else
+                        parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
+                    Document doc = XmlLoader.getXMLDoc(parsed);
 
-					// replace the old xml node with the newly parsed sentence
-					Node xmlTerm = doc.getFirstChild().getFirstChild().getNextSibling();
-					XmlLoader.updateLocation(xmlTerm, XmlLoader.getLocNumber(ss.getContentLocation(), 0), XmlLoader.getLocNumber(ss.getContentLocation(), 1));
-					XmlLoader.addFilename(xmlTerm, ss.getFilename());
-					XmlLoader.reportErrors(doc, ss.getType());
+                    // replace the old xml node with the newly parsed sentence
+                    Node xmlTerm = doc.getFirstChild().getFirstChild().getNextSibling();
+                    XmlLoader.updateLocation(xmlTerm, XmlLoader.getLocNumber(ss.getContentLocation(), 0), XmlLoader.getLocNumber(ss.getContentLocation(), 1));
+                    XmlLoader.addFilename(xmlTerm, ss.getFilename());
+                    XmlLoader.reportErrors(doc, ss.getType());
 
-					if (ss.getType().equals(Constants.CONTEXT))
-						config = new org.kframework.kil.Context((Sentence) JavaClassesFactory.getTerm((Element) xmlTerm));
-					else if (ss.getType().equals(Constants.RULE))
-						config = new Rule((Sentence) JavaClassesFactory.getTerm((Element) xmlTerm));
-					else { // should not reach here
-						config = null;
-						assert false : "Only context and rules have been implemented.";
-					}
-					Sentence st = (Sentence) config;
-					assert st.getLabel().equals(""); // labels should have been parsed in Basic Parsing
-					st.setLabel(ss.getLabel());
-					//assert st.getAttributes() == null || st.getAttributes().isEmpty(); // attributes should have been parsed in Basic Parsing
-					st.setAttributes(ss.getAttributes());
-				}
-				// disambiguate rules
-				if (config.getFilename().endsWith("test.k")) {
-					// this is just for testing. I put a breakpoint on the next line so I can get faster to the rule that I'm interested in
-					int a = 1;
-					a = a + 1;
-				}
+                    if (ss.getType().equals(Constants.CONTEXT))
+                        config = new org.kframework.kil.Context((Sentence) JavaClassesFactory.getTerm((Element) xmlTerm));
+                    else if (ss.getType().equals(Constants.RULE))
+                        config = new Rule((Sentence) JavaClassesFactory.getTerm((Element) xmlTerm));
+                    else { // should not reach here
+                        config = null;
+                        assert false : "Only context and rules have been implemented.";
+                    }
+                    Sentence st = (Sentence) config;
+                    assert st.getLabel().equals(""); // labels should have been parsed in Basic Parsing
+                    st.setLabel(ss.getLabel());
+                    //assert st.getAttributes() == null || st.getAttributes().isEmpty(); // attributes should have been parsed in Basic Parsing
+                    st.setAttributes(ss.getAttributes());
+                }
+                // disambiguate rules
+                if (config.getFilename().endsWith("test.k")) {
+                    // this is just for testing. I put a breakpoint on the next line so I can get faster to the rule that I'm interested in
+                    int a = 1;
+                    a = a + 1;
+                }
 
-				config = config.accept(new SentenceVariablesFilter(context));
-				config = config.accept(new CellEndLabelFilter(context));
-				if (checkInclusion)
-					config = config.accept(new InclusionFilter(localModule, context));
-				config = config.accept(new CellTypesFilter(context));
-				config = config.accept(new CorrectRewritePriorityFilter(context));
-				config = config.accept(new CorrectKSeqFilter(context));
-				config = config.accept(new CorrectCastPriorityFilter(context));
-				// config = config.accept(new CheckBinaryPrecedenceFilter());
-				config = config.accept(new PriorityFilter(context));
-				if (GlobalSettings.fastKast)
-					config = config.accept(new MergeAmbFilter(context));
-				config = config.accept(new VariableTypeInferenceFilter(context));
-				// config = config.accept(new AmbDuplicateFilter(context));
-				// config = config.accept(new TypeSystemFilter(context));
-				// config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context));
-				// config = config.accept(new TypeInferenceSupremumFilter(context));
-				config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context));
-				config = config.accept(new PreferAvoidFilter(context));
-				config = config.accept(new FlattenListsFilter(context));
-				config = config.accept(new AmbDuplicateFilter(context));
-				// last resort disambiguation
-				config = config.accept(new AmbFilter(context));
+                config = config.accept(new SentenceVariablesFilter(context));
+                config = config.accept(new CellEndLabelFilter(context));
+                if (checkInclusion)
+                    config = config.accept(new InclusionFilter(localModule, context));
+                config = config.accept(new CellTypesFilter(context));
+                config = config.accept(new CorrectRewritePriorityFilter(context));
+                config = config.accept(new CorrectKSeqFilter(context));
+                config = config.accept(new CorrectCastPriorityFilter(context));
+                // config = config.accept(new CheckBinaryPrecedenceFilter());
+                config = config.accept(new PriorityFilter(context));
+                if (GlobalSettings.fastKast)
+                    config = config.accept(new MergeAmbFilter(context));
+                config = config.accept(new VariableTypeInferenceFilter(context));
+                // config = config.accept(new AmbDuplicateFilter(context));
+                // config = config.accept(new TypeSystemFilter(context));
+                // config = config.accept(new BestFitFilter(new GetFitnessUnitTypeCheckVisitor(context), context));
+                // config = config.accept(new TypeInferenceSupremumFilter(context));
+                config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context));
+                config = config.accept(new PreferAvoidFilter(context));
+                config = config.accept(new FlattenListsFilter(context));
+                config = config.accept(new AmbDuplicateFilter(context));
+                // last resort disambiguation
+                config = config.accept(new AmbFilter(context));
 
-				if (GlobalSettings.verbose) {
-					f.format("Parsing rule: Time: %6d Location: %s:%s\n", (System.currentTimeMillis() - startTime), ss.getFilename(), ss.getLocation());
-					f.flush();
-				}
-				return config;
-			} catch (TransformerException te) {
-				te.printStackTrace();
-			} catch (Exception | Error e) {
-				e.printStackTrace();
-				String msg = "Cannot parse sentence: " + e.getLocalizedMessage();
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ss.getFilename(), ss.getLocation()));
-			}
-		}
-		return ss;
-	}
+                if (GlobalSettings.verbose) {
+                    f.format("Parsing rule: Time: %6d Location: %s:%s\n", (System.currentTimeMillis() - startTime), ss.getFilename(), ss.getLocation());
+                    f.flush();
+                }
+                return config;
+            } catch (TransformerException te) {
+                te.printStackTrace();
+            } catch (Exception | Error e) {
+                e.printStackTrace();
+                String msg = "Cannot parse sentence: " + e.getLocalizedMessage();
+                GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, ss.getFilename(), ss.getLocation()));
+            }
+        }
+        return ss;
+    }
 
-	public boolean isCheckInclusion() {
-		return checkInclusion;
-	}
+    public boolean isCheckInclusion() {
+        return checkInclusion;
+    }
 
-	public void setCheckInclusion(boolean checkInclusion) {
-		this.checkInclusion = checkInclusion;
-	}
+    public void setCheckInclusion(boolean checkInclusion) {
+        this.checkInclusion = checkInclusion;
+    }
 }

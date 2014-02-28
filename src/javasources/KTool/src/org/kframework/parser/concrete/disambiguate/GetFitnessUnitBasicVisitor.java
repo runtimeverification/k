@@ -4,19 +4,19 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 
 public abstract class GetFitnessUnitBasicVisitor extends BasicVisitor {
-	public GetFitnessUnitBasicVisitor(Context context) {
-		super(context);
-	}
+    public GetFitnessUnitBasicVisitor(Context context) {
+        super(context);
+    }
 
-	protected int score = 0;
+    protected int score = 0;
 
-	public int getScore() {
-		return score;
-	}
+    public int getScore() {
+        return score;
+    }
 
-	public void setScore(int score) {
-		this.score = score;
-	}
+    public void setScore(int score) {
+        this.score = score;
+    }
 
-	public abstract GetFitnessUnitBasicVisitor getInstance();
+    public abstract GetFitnessUnitBasicVisitor getInstance();
 }

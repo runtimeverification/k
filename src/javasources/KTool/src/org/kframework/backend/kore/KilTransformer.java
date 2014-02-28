@@ -8,37 +8,37 @@ import org.kframework.krun.ColorSetting;
 
 
 public class KilTransformer {
-	
-	FlattenSyntax kilTermCons;
-	ToBuiltinTransformer builtinTrans;
-	ToKAppTransformer kappTrans;
-	KoreFilter koreTrans;
-	
-	public KilTransformer(Context context){
-		
-	    koreTrans = new KoreFilter(context);
-	    builtinTrans = new ToBuiltinTransformer(context);
-	    kappTrans = new ToKAppTransformer(context);
+    
+    FlattenSyntax kilTermCons;
+    ToBuiltinTransformer builtinTrans;
+    ToKAppTransformer kappTrans;
+    KoreFilter koreTrans;
+    
+    public KilTransformer(Context context){
+        
+        koreTrans = new KoreFilter(context);
+        builtinTrans = new ToBuiltinTransformer(context);
+        kappTrans = new ToKAppTransformer(context);
 
-	}
-	
-	public KilTransformer(boolean inConfiguration, ColorSetting color, org.kframework.kil.loader.Context context){
-		
-	    koreTrans = new KoreFilter(inConfiguration, color, context);
-	    builtinTrans = new ToBuiltinTransformer(context);
-	    kappTrans = new ToKAppTransformer(context);
+    }
+    
+    public KilTransformer(boolean inConfiguration, ColorSetting color, org.kframework.kil.loader.Context context){
+        
+        koreTrans = new KoreFilter(inConfiguration, color, context);
+        builtinTrans = new ToBuiltinTransformer(context);
+        kappTrans = new ToKAppTransformer(context);
 
-	}
-	
-	public String kilToKore(ASTNode node){
+    }
+    
+    public String kilToKore(ASTNode node){
 
-	    try {
-			node.accept(builtinTrans).accept(kappTrans).accept(koreTrans);
-			//node.accept(kappTrans).accept(koreTrans);
-		} catch (TransformerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	    return koreTrans.getResult();
-	}
+        try {
+            node.accept(builtinTrans).accept(kappTrans).accept(koreTrans);
+            //node.accept(kappTrans).accept(koreTrans);
+        } catch (TransformerException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return koreTrans.getResult();
+    }
 }

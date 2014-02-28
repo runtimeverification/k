@@ -428,7 +428,7 @@ class ParseState {
 ////////////////
 
 public class Parser {
-	
+    
     public static void main(String[] args) {
         try {
             System.in.read();

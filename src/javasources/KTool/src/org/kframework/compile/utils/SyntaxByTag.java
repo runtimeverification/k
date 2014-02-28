@@ -12,24 +12,24 @@ import java.util.Set;
 
 
 public class SyntaxByTag extends BasicVisitor {
-	private final Set<Production> productions = new HashSet<Production>();
-	private final String key;
+    private final Set<Production> productions = new HashSet<Production>();
+    private final String key;
     private final boolean prefix;
 
     @Override
-	public void visit(Configuration node) { return; }
-	
-	@Override
-	public void visit(org.kframework.kil.Context node) { return; }
-	
-	@Override
-	public void visit(Rule node) { return; }
-	
-	@Override
-	public void visit(Production node) {
-		if (key.equals("") || node.containsAttribute(key, prefix))
-			productions.add(node);
-	};
+    public void visit(Configuration node) { return; }
+    
+    @Override
+    public void visit(org.kframework.kil.Context node) { return; }
+    
+    @Override
+    public void visit(Rule node) { return; }
+    
+    @Override
+    public void visit(Production node) {
+        if (key.equals("") || node.containsAttribute(key, prefix))
+            productions.add(node);
+    };
 
     public SyntaxByTag(String key, Context context) {
         this(key, false, context);
@@ -49,10 +49,10 @@ public class SyntaxByTag extends BasicVisitor {
         return get(node, key, false, context);
     }
 
-	public static Set<Production> get(ASTNode node, String key, boolean prefix, Context context) {
-		SyntaxByTag visitor = new SyntaxByTag(key, prefix, context);
-		node.accept(visitor);
-		return visitor.getProductions();
-	}
-	
+    public static Set<Production> get(ASTNode node, String key, boolean prefix, Context context) {
+        SyntaxByTag visitor = new SyntaxByTag(key, prefix, context);
+        node.accept(visitor);
+        return visitor.getProductions();
+    }
+    
 }

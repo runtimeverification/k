@@ -13,41 +13,41 @@ import org.w3c.dom.Element;
  */
 public class Context extends Sentence {
 
-	public Context(Element element) {
-		super(element);
-	}
+    public Context(Element element) {
+        super(element);
+    }
 
-	public Context(Context node) {
-		super(node);
-	}
+    public Context(Context node) {
+        super(node);
+    }
 
-	public Context() {
-		super();
-	}
+    public Context() {
+        super();
+    }
 
-	public Context(Sentence term) {
-		super(term);
-	}
+    public Context(Sentence term) {
+        super(term);
+    }
 
-	public String toString() {
-		String content = "  context ";
-		content += this.body + " ";
+    public String toString() {
+        String content = "  context ";
+        content += this.body + " ";
 
-		return content + attributes;
-	}
+        return content + attributes;
+    }
 
-	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-	}
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
+    }
 
-	@Override
-	public ASTNode accept(Transformer transformer) throws TransformerException {
-		return transformer.transform(this);
-	}
+    @Override
+    public ASTNode accept(Transformer transformer) throws TransformerException {
+        return transformer.transform(this);
+    }
 
-	@Override
-	public Context shallowCopy() {
-		return new Context(this);
-	}
+    @Override
+    public Context shallowCopy() {
+        return new Context(this);
+    }
 }

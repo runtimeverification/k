@@ -7,13 +7,13 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class GetLhsPattern extends CopyOnWriteTransformer {
-	public GetLhsPattern(String s, Context context) {
-		super(s, context);
-	}
-	
-	@Override
-	public ASTNode transform(Rewrite node) throws TransformerException {
-		return node.getLeft();
-	}
+    public GetLhsPattern(String s, Context context) {
+        super(s, context);
+    }
+    
+    @Override
+    public ASTNode transform(Rewrite node) throws TransformerException {
+        return node.getLeft();
+    }
 
 }

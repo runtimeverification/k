@@ -172,11 +172,11 @@ public class SemanticEqual {
      * BAG,SET,MAP are comuatative
      */
     private static boolean isComutative(Collection c){
-    	if(c instanceof Bag || c instanceof Set || c instanceof Map)
-    		return true;
-    	else {
-    		return false;
-    	}
+        if(c instanceof Bag || c instanceof Set || c instanceof Map)
+            return true;
+        else {
+            return false;
+        }
     }
     
     /*
@@ -190,10 +190,10 @@ public class SemanticEqual {
         if (!c1.getSort().equals(c2.getSort()))
             return false;
         if(isComutative(c1)){
-        	return areMultisetsEqual(c1.getContents(), c2.getContents());
+            return areMultisetsEqual(c1.getContents(), c2.getContents());
         }
         else {
-        	return areSetsEqual(c1.getContents(), c2.getContents());
+            return areSetsEqual(c1.getContents(), c2.getContents());
         }
     }
 
@@ -280,9 +280,9 @@ public class SemanticEqual {
             return false;
         // check if contents are equals
         for (int i = 0 ; i<l1.size();i++){
-        	if(!areEqual(l1.get(i), l2.get(i))){
-        		return false;
-        	}
+            if(!areEqual(l1.get(i), l2.get(i))){
+                return false;
+            }
         }
         // if we reach here the lists are equal since each l1(i) eqauls l2(i)
         return true;

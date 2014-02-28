@@ -24,92 +24,92 @@ import java.util.Map;
 // instantiate processes
 public class RunProcess {
 
-	private String stdout = null;
-	private String err = null;
-	private int exitCode;
+    private String stdout = null;
+    private String err = null;
+    private int exitCode;
 
-	public void execute(Map<String, String> environment,String... commands) {
+    public void execute(Map<String, String> environment,String... commands) {
 
-		ThreadedStreamCapturer inputStreamHandler, errorStreamHandler;
+        ThreadedStreamCapturer inputStreamHandler, errorStreamHandler;
 
-		try {
-			if (commands.length <= 0) {
-				org.kframework.utils.Error.report("Need command options to run");
-			}
+        try {
+            if (commands.length <= 0) {
+                org.kframework.utils.Error.report("Need command options to run");
+            }
 
-			// create process
-			ProcessBuilder pb = new ProcessBuilder(commands);
-			Map<String, String> realEnvironment = pb.environment();
-			realEnvironment.putAll(environment);
+            // create process
+            ProcessBuilder pb = new ProcessBuilder(commands);
+            Map<String, String> realEnvironment = pb.environment();
+            realEnvironment.putAll(environment);
 
-			// set execution directory to current user dir
-			pb.directory(new File(K.userdir));
+            // set execution directory to current user dir
+            pb.directory(new File(K.userdir));
 
-			// start process
-			Process process = pb.start();
+            // start process
+            Process process = pb.start();
 
-			InputStream inputStream = process.getInputStream();
-			InputStream errorStream = process.getErrorStream();
-			// these need to run as java threads to get the standard output and error from the command.
-			inputStreamHandler = new ThreadedStreamCapturer(inputStream);
-			errorStreamHandler = new ThreadedStreamCapturer(errorStream);
+            InputStream inputStream = process.getInputStream();
+            InputStream errorStream = process.getErrorStream();
+            // these need to run as java threads to get the standard output and error from the command.
+            inputStreamHandler = new ThreadedStreamCapturer(inputStream);
+            errorStreamHandler = new ThreadedStreamCapturer(errorStream);
 
-			inputStreamHandler.start();
-			errorStreamHandler.start();
+            inputStreamHandler.start();
+            errorStreamHandler.start();
 
-			// wait for process to finish
-			process.waitFor();
-			setExitCode(process.exitValue());
+            // wait for process to finish
+            process.waitFor();
+            setExitCode(process.exitValue());
 
-			synchronized (inputStreamHandler) {
-				while (inputStreamHandler.isAlive())
-					inputStreamHandler.wait();
-			}
-			synchronized (errorStreamHandler) {
-				while (errorStreamHandler.isAlive())
-					errorStreamHandler.wait();
-			}
+            synchronized (inputStreamHandler) {
+                while (inputStreamHandler.isAlive())
+                    inputStreamHandler.wait();
+            }
+            synchronized (errorStreamHandler) {
+                while (errorStreamHandler.isAlive())
+                    errorStreamHandler.wait();
+            }
 
-			String s1 = inputStreamHandler.getContent().toString();
-			if (!s1.equals("")) {
-				this.setStdout(s1);
-			}
+            String s1 = inputStreamHandler.getContent().toString();
+            if (!s1.equals("")) {
+                this.setStdout(s1);
+            }
 
-			String s2 = errorStreamHandler.getContent().toString();
-			// if some errors occurred (if something was written on the stderr stream)
-			if (!s2.equals("")) {
-				this.setErr(s2);
-			}
+            String s2 = errorStreamHandler.getContent().toString();
+            // if some errors occurred (if something was written on the stderr stream)
+            if (!s2.equals("")) {
+                this.setErr(s2);
+            }
 
-		} catch (IOException e) {
-			// e.printStackTrace();
-			org.kframework.utils.Error.report("Error while running process:" + e.getMessage());
-		} catch (InterruptedException e) {
-			// e.printStackTrace();
-			org.kframework.utils.Error.report("Error while running process:" + e.getMessage());
-		}
+        } catch (IOException e) {
+            // e.printStackTrace();
+            org.kframework.utils.Error.report("Error while running process:" + e.getMessage());
+        } catch (InterruptedException e) {
+            // e.printStackTrace();
+            org.kframework.utils.Error.report("Error while running process:" + e.getMessage());
+        }
 
-	}
+    }
 
-	public Term runParserOrDie(String parser, String pgm, boolean isPgm, String startSymbol, Context context) throws IOException {
-		try {
-			return runParser(parser, pgm, isPgm, startSymbol, context);
-		} catch (TransformerException e) {
-			e.report();
-			return null;
-		}
-	}
+    public Term runParserOrDie(String parser, String pgm, boolean isPgm, String startSymbol, Context context) throws IOException {
+        try {
+            return runParser(parser, pgm, isPgm, startSymbol, context);
+        } catch (TransformerException e) {
+            e.report();
+            return null;
+        }
+    }
 
-	/*
-	 * run the process denoted by the parser ("kast" or an external parser specified with --parser option) and return the AST obtained by parser
-	 */
-	public Term runParser(String parser, String value, boolean isNotFile, String startSymbol, Context context) throws TransformerException {
+    /*
+     * run the process denoted by the parser ("kast" or an external parser specified with --parser option) and return the AST obtained by parser
+     */
+    public Term runParser(String parser, String value, boolean isNotFile, String startSymbol, Context context) throws TransformerException {
         Term term;
 
-		if (startSymbol == null) {
-			startSymbol = context.startSymbolPgm;
-		}		
-		String content = value;
+        if (startSymbol == null) {
+            startSymbol = context.startSymbolPgm;
+        }        
+        String content = value;
 
         switch (parser) {
             case "kast":
@@ -159,63 +159,63 @@ public class RunProcess {
         }
 
         return term;
-	}
+    }
 
-	// check if the execution of Maude process produced some errors
-	public void printError(String content, String lang, Context context) {
-		try {
-			if (content.contains("GLIBC")) {
-				System.out.println("\nError: A known bug in the current version of the Maude rewrite engine\n" + "prohibits running K with I/O on certain architectures.\n"
-						+ "If non I/O programs and definitions work but I/O ones fail, \n" + "please let us know and we'll try helping you fix it.\n");
-				return;
+    // check if the execution of Maude process produced some errors
+    public void printError(String content, String lang, Context context) {
+        try {
+            if (content.contains("GLIBC")) {
+                System.out.println("\nError: A known bug in the current version of the Maude rewrite engine\n" + "prohibits running K with I/O on certain architectures.\n"
+                        + "If non I/O programs and definitions work but I/O ones fail, \n" + "please let us know and we'll try helping you fix it.\n");
+                return;
 
-			}
-			System.out.println("Krun was executed with the following arguments:" + K.lineSeparator + "syntax_module=" + K.syntax_module
-					+ K.lineSeparator + "main_module=" + K.main_module + K.lineSeparator + "compiled_def=" + K.compiled_def + K.lineSeparator);
-			String compiledDefName = context.kompiled.getName();
-			int index = compiledDefName.indexOf("-kompiled");
-			compiledDefName = compiledDefName.substring(0, index);
-			if (lang != null && !lang.equals(compiledDefName)) {
-				org.kframework.utils.Error.silentReport("Compiled definition file name (" + compiledDefName + ") and the extension of the program (" + lang + ") aren't the same. "
-						+ "Maybe you should use --syntax-module or --main-module options of krun");
-			}
+            }
+            System.out.println("Krun was executed with the following arguments:" + K.lineSeparator + "syntax_module=" + K.syntax_module
+                    + K.lineSeparator + "main_module=" + K.main_module + K.lineSeparator + "compiled_def=" + K.compiled_def + K.lineSeparator);
+            String compiledDefName = context.kompiled.getName();
+            int index = compiledDefName.indexOf("-kompiled");
+            compiledDefName = compiledDefName.substring(0, index);
+            if (lang != null && !lang.equals(compiledDefName)) {
+                org.kframework.utils.Error.silentReport("Compiled definition file name (" + compiledDefName + ") and the extension of the program (" + lang + ") aren't the same. "
+                        + "Maybe you should use --syntax-module or --main-module options of krun");
+            }
 
-			// Error.externalReport("Fatal: Maude produced warnings or errors:\n" + content);
-			/*
-			 * String fileName = K.krunDir + K.fileSeparator + new File(K.maude_err).getName(); Error.silentReport("Maude produced warnings or errors. See in " + fileName + " file");
-			 */
+            // Error.externalReport("Fatal: Maude produced warnings or errors:\n" + content);
+            /*
+             * String fileName = K.krunDir + K.fileSeparator + new File(K.maude_err).getName(); Error.silentReport("Maude produced warnings or errors. See in " + fileName + " file");
+             */
 
-			// get the absolute path on disk for the maude_err file disregard the rename of krun temp dir took place or not
-			String fileName = new File(K.maude_err).getName();
-			String fullPath = new File(K.kdir + K.fileSeparator + "krun" + K.fileSeparator + fileName).getCanonicalPath();
-			org.kframework.utils.Error.silentReport("Maude produced warnings or errors.\n" + content);
-		} catch (IOException e) {
-			org.kframework.utils.Error.report("Error in checkMaudeForErrors method:" + e.getMessage());
-		}
-	}
+            // get the absolute path on disk for the maude_err file disregard the rename of krun temp dir took place or not
+            String fileName = new File(K.maude_err).getName();
+            String fullPath = new File(K.kdir + K.fileSeparator + "krun" + K.fileSeparator + fileName).getCanonicalPath();
+            org.kframework.utils.Error.silentReport("Maude produced warnings or errors.\n" + content);
+        } catch (IOException e) {
+            org.kframework.utils.Error.report("Error in checkMaudeForErrors method:" + e.getMessage());
+        }
+    }
 
-	public String getStdout() {
-		return stdout;
-	}
+    public String getStdout() {
+        return stdout;
+    }
 
-	public void setStdout(String stdout) {
-		this.stdout = stdout;
-	}
+    public void setStdout(String stdout) {
+        this.stdout = stdout;
+    }
 
-	public String getErr() {
-		return err;
-	}
+    public String getErr() {
+        return err;
+    }
 
-	public void setErr(String err) {
-		this.err = err;
-	}
+    public void setErr(String err) {
+        this.err = err;
+    }
 
-	public void setExitCode(int exitCode) {
-		this.exitCode = exitCode;
-	}
+    public void setExitCode(int exitCode) {
+        this.exitCode = exitCode;
+    }
 
-	public int getExitCode() {
-		return exitCode;
-	}
+    public int getExitCode() {
+        return exitCode;
+    }
 
 }

@@ -9,13 +9,13 @@ import java.util.Iterator;
  
 public class ExprList extends ArrayList<Expr> implements Expr
 {
-	String kif = "";
-	
+    String kif = "";
+    
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	ExprList parent = null;
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+    ExprList parent = null;
     int indent =1;
  
     public int getIndent()
@@ -47,7 +47,7 @@ public class ExprList extends ArrayList<Expr> implements Expr
             indent = "\n";
             char[] chars = new char[getIndent()];
             Arrays.fill(chars, ' ');
-            indent += new String(chars);		
+            indent += new String(chars);        
         }
  
         String output = indent+"(";
@@ -76,19 +76,19 @@ public class ExprList extends ArrayList<Expr> implements Expr
     
     public String getKIF()
     {
-    	String internal = "";
-    	for(Iterator<Expr> it=this.iterator(); it.hasNext(); ) 
+        String internal = "";
+        for(Iterator<Expr> it=this.iterator(); it.hasNext(); ) 
         {
             Expr expr = it.next();
             if (expr.toString().equals("define-fun"))
             {
-            	internal += it.next().toString().trim() + "#";
-            	it.next();
-            	internal += it.next().toString().trim() + "#";
-            	internal += it.next().toString().trim().replaceAll("[\\(\\)\\s+]*", "") + "$";
+                internal += it.next().toString().trim() + "#";
+                it.next();
+                internal += it.next().toString().trim() + "#";
+                internal += it.next().toString().trim().replaceAll("[\\(\\)\\s+]*", "") + "$";
             }
             internal += expr.getKIF() + "##";
         }
-    	return internal.replaceAll("#+", "#").replaceAll("\\\\s+", "");
+        return internal.replaceAll("#+", "#").replaceAll("\\\\s+", "");
     }
 }

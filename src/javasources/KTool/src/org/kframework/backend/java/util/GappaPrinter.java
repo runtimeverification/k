@@ -36,30 +36,30 @@ public class GappaPrinter extends BottomUpVisitor {
     };
 
 
-   	public static Map<String,String> binaryOps = new HashMap<String, String>();
-	static {
+       public static Map<String,String> binaryOps = new HashMap<String, String>();
+    static {
         comparisonOps.put("'_>=Float_", ">=");
         comparisonOps.put("'_<=Float_", "<=");
         comparisonOps.put("'_>Float_", ">=");
         comparisonOps.put("'_<Float_", "<=");
-		binaryOps.put("'_+Float_", "+");
+        binaryOps.put("'_+Float_", "+");
         binaryOps.put("'_-Float_", "-");
-		binaryOps.put("'_*Float_", "*");
-		binaryOps.put("'_/Float_", "/");
+        binaryOps.put("'_*Float_", "*");
+        binaryOps.put("'_/Float_", "/");
         binaryOps.put("'_/Float_", "/");
         binaryOps.put("'_andBool_", "/\\");
         binaryOps.put("'_orBool_", "\\/");
         binaryOps.put("'_impliesBool_", " -> ");
-	};
+    };
 
-   	public static Map<String,String> doubleBinaryOps = new HashMap<String, String>();
-	static {
-		doubleBinaryOps.put("'_+Float64_", "+");
+       public static Map<String,String> doubleBinaryOps = new HashMap<String, String>();
+    static {
+        doubleBinaryOps.put("'_+Float64_", "+");
         doubleBinaryOps.put("'_-Float64_", "-");
-		doubleBinaryOps.put("'_*Float64_", "*");
-		doubleBinaryOps.put("'_/Float64_", "/");
+        doubleBinaryOps.put("'_*Float64_", "*");
         doubleBinaryOps.put("'_/Float64_", "/");
-	};
+        doubleBinaryOps.put("'_/Float64_", "/");
+    };
 
     public static Map<String,String> unaryOps = new HashMap<String, String>();
     static {

@@ -28,7 +28,7 @@ import com.google.common.collect.ImmutableSet;
  */
 public class TagUserRules extends CopyOnWriteTransformer {
 
-	public static final Set<String> notSymbolicTags;
+    public static final Set<String> notSymbolicTags;
     static {
         if (GlobalSettings.javaBackend) {
             notSymbolicTags = Collections.emptySet();
@@ -45,22 +45,22 @@ public class TagUserRules extends CopyOnWriteTransformer {
         }
     }
 
-	public TagUserRules(Context context) {
-		super("Tag rules which are not builtin with 'symbolic' tag", context);
-	}
+    public TagUserRules(Context context) {
+        super("Tag rules which are not builtin with 'symbolic' tag", context);
+    }
 
-	@Override
-	public ASTNode transform(Rule node) throws TransformerException {
+    @Override
+    public ASTNode transform(Rule node) throws TransformerException {
 
-		for (String nst : notSymbolicTags)
-			if (node.containsAttribute(nst)) {
-				return super.transform(node);
-			}
+        for (String nst : notSymbolicTags)
+            if (node.containsAttribute(nst)) {
+                return super.transform(node);
+            }
 
-		if ((!node.getFilename().startsWith(
-				KPaths.getKBase(false) + File.separator + "include")
-				&& !node.getFilename().startsWith(
-						org.kframework.kil.loader.Constants.GENERATED_FILENAME))
+        if ((!node.getFilename().startsWith(
+                KPaths.getKBase(false) + File.separator + "include")
+                && !node.getFilename().startsWith(
+                        org.kframework.kil.loader.Constants.GENERATED_FILENAME))
                 || (GlobalSettings.javaBackend && node.getFilename().equals(
                         KPaths.getKBase(false) + File.separator + "include" +
                                 File.separator + "io" +
@@ -84,16 +84,16 @@ public class TagUserRules extends CopyOnWriteTransformer {
             }
 
             List<Attribute> attrs = node.getAttributes().getContents();
-			attrs.add(new Attribute(SymbolicBackend.SYMBOLIC, ""));
+            attrs.add(new Attribute(SymbolicBackend.SYMBOLIC, ""));
 
-			Attributes atts = node.getAttributes().shallowCopy();
-			atts.setContents(attrs);
+            Attributes atts = node.getAttributes().shallowCopy();
+            atts.setContents(attrs);
 
-			node = node.shallowCopy();
-			node.setAttributes(atts);
-			return node;
-		}
+            node = node.shallowCopy();
+            node.setAttributes(atts);
+            return node;
+        }
 
-		return super.transform(node);
-	}
+        return super.transform(node);
+    }
 }

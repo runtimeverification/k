@@ -17,14 +17,14 @@ import org.kframework.kil.loader.Context;
  */
 public class ResolveConfigurationAbstraction extends CompilerSteps<Definition> {
 
-	public ResolveConfigurationAbstraction(Context context) {
-		super(context);
-	}
+    public ResolveConfigurationAbstraction(Context context) {
+        super(context);
+    }
 
-	@Override
-	public Definition compile(Definition def, String stepName) throws CompilerStepDone {
-		add(new ResolveContextAbstraction(context));
-		add(new ResolveDefaultTerms(context));
-		return super.compile(def, stepName);
-	}
+    @Override
+    public Definition compile(Definition def, String stepName) throws CompilerStepDone {
+        add(new ResolveContextAbstraction(context));
+        add(new ResolveDefaultTerms(context));
+        return super.compile(def, stepName);
+    }
 }

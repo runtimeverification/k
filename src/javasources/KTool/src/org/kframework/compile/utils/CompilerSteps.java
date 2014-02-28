@@ -15,45 +15,45 @@ import java.util.List;
  */
 public class CompilerSteps<T extends ASTNode> extends BasicCompilerStep<T> {
 
-	List<CompilerStep<T>> steps;
+    List<CompilerStep<T>> steps;
 
-	public CompilerSteps(Context context) {
-		super(context);
-		steps = new ArrayList<CompilerStep<T>>();
-	}
+    public CompilerSteps(Context context) {
+        super(context);
+        steps = new ArrayList<CompilerStep<T>>();
+    }
 
-	public CompilerSteps(List<CompilerStep<T>> ts, Context context) {
-		super(context);
-		this.steps = new ArrayList<CompilerStep<T>>(ts);
-	}
+    public CompilerSteps(List<CompilerStep<T>> ts, Context context) {
+        super(context);
+        this.steps = new ArrayList<CompilerStep<T>>(ts);
+    }
 
-	public void add(CompilerStep<T> t) {
-		steps.add(t);
-	}
+    public void add(CompilerStep<T> t) {
+        steps.add(t);
+    }
 
-	public void add(Transformer t) {
-		steps.add(new CompilerTransformerStep<T>(t, context));
-	}
+    public void add(Transformer t) {
+        steps.add(new CompilerTransformerStep<T>(t, context));
+    }
 
-	@Override
-	public T compile(T def, String stepName) throws CompilerStepDone {
-		for (CompilerStep<T> step : steps) {
-			step.setSw(sw);
-			def = step.compile(def, stepName);
-			if (step.getName().equals(stepName)) {
-				throw new CompilerStepDone(def);
-			}
-		}
-		return def;
-	}
+    @Override
+    public T compile(T def, String stepName) throws CompilerStepDone {
+        for (CompilerStep<T> step : steps) {
+            step.setSw(sw);
+            def = step.compile(def, stepName);
+            if (step.getName().equals(stepName)) {
+                throw new CompilerStepDone(def);
+            }
+        }
+        return def;
+    }
 
-	@Override
-	public String getName() {
-		String result = "Aggregated transformers:\n";
-		for (CompilerStep<T> t : steps) {
-			result+= "\t" + t.getName() + "\n";
-		}
-		return result;
-	}
+    @Override
+    public String getName() {
+        String result = "Aggregated transformers:\n";
+        for (CompilerStep<T> t : steps) {
+            result+= "\t" + t.getName() + "\n";
+        }
+        return result;
+    }
 
 }

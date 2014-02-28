@@ -29,33 +29,33 @@ public class AddStreamCells extends CopyOnWriteTransformer {
         ASTNode result = super.transform(node);
         if (result == node)
             return node;
-		if (generated.isEmpty()) {
+        if (generated.isEmpty()) {
 //            GlobalSettings.kem.register(new KException(ExceptionType.WARNING, KExceptionGroup.COMPILER,
 //                    "Stream cells missing in module " + node.getName() + ". " +
 //                            "Some rules tagged with streams have been erased",
 //                    node.getFilename(), node.getLocation()));
             return result;
         }
-		result = result.shallowCopy();
-		((Module)result).getItems().addAll(generated);
-		return result;
-	}
+        result = result.shallowCopy();
+        ((Module)result).getItems().addAll(generated);
+        return result;
+    }
 
-	@Override
-	public ASTNode transform(Configuration node) throws TransformerException {
-		return node;
-	}
-	
-	@Override
-	public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
-		return node;
-	}
-	
-	@Override
-	public ASTNode transform(Syntax node) throws TransformerException {
-		return node;
-	}
-	
+    @Override
+    public ASTNode transform(Configuration node) throws TransformerException {
+        return node;
+    }
+    
+    @Override
+    public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
+        return node;
+    }
+    
+    @Override
+    public ASTNode transform(Syntax node) throws TransformerException {
+        return node;
+    }
+    
     @Override
     public ASTNode transform(Rule node) throws TransformerException {
         boolean isStream = false;

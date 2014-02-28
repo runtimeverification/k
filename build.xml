@@ -161,7 +161,7 @@
 	</target>
 
 
-	<target name="test" depends="build,junit">
+	<target name="test" depends="build,junit,checkstyle">
           <java jar="${javasources}/../../lib/java/k3.jar" fork="true" failonerror="true">
 	     <arg value="-ktest"/>
 	     <arg value="${config}"/>
@@ -188,6 +188,18 @@
            <fileset dir="${javasources}/KTool/test" includes="**/*.java" />
          </batchtest>
        </junit>
+    </target>
+
+    <taskdef resource="checkstyletask.properties"
+             classpath="${javasources}/KTool/lib/checkstyle-all.jar"/>
+
+    <target name="checkstyle">
+        <checkstyle config="${javasources}/KTool/checkstyle.xml">
+            <fileset dir="${javasources}/KTool">
+                <include name="**/*.java"/>
+                <exclude name="src/org/kframework/parser/concrete/lib/**" />
+            </fileset>
+        </checkstyle>
     </target>
 
 </project>

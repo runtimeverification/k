@@ -13,27 +13,27 @@ import java.util.logging.Logger;
 
 public class CommandParse extends Command {
 
-	private String stringToParse;
-	private String sort;
-	protected Context context;
+    private String stringToParse;
+    private String sort;
+    protected Context context;
 
-	public CommandParse(String[] args, Socket socket, Logger logger, Context context, FileSystem fs) {
-		super(args, socket, logger, fs);
-		this.context = context;
+    public CommandParse(String[] args, Socket socket, Logger logger, Context context, FileSystem fs) {
+        super(args, socket, logger, fs);
+        this.context = context;
 
-		sort = args[1];
-		stringToParse = args[2];
-	}
+        sort = args[1];
+        stringToParse = args[2];
+    }
 
-	public void run() {
-		try {
-			RunProcess rp = new RunProcess();
-			Term kast = rp.runParser(K.parser, stringToParse, true, sort, context);
-			MaudeFilter mf = new MaudeFilter(context);
-			kast.accept(mf);
-			succeed(mf.getResult().toString());
-		} catch (TransformerException e) {
-			fail("noparse");
-		}
-	}
+    public void run() {
+        try {
+            RunProcess rp = new RunProcess();
+            Term kast = rp.runParser(K.parser, stringToParse, true, sort, context);
+            MaudeFilter mf = new MaudeFilter(context);
+            kast.accept(mf);
+            succeed(mf.getResult().toString());
+        } catch (TransformerException e) {
+            fail("noparse");
+        }
+    }
 }

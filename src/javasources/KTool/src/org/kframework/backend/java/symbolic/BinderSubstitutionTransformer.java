@@ -16,7 +16,7 @@ import java.util.Set;
 public class BinderSubstitutionTransformer extends SubstitutionTransformer {
 
     public BinderSubstitutionTransformer(Map<Variable, ? extends Term> substitution, TermContext context) {
-    	super(substitution, context);
+        super(substitution, context);
         preTransformer.addTransformer(new BinderSubstitution(context));
     }
 

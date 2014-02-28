@@ -30,7 +30,7 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(Module node) throws TransformerException {
-    	return ((Module)super.transform(node)).addModuleItems(rules);
+        return ((Module)super.transform(node)).addModuleItems(rules);
     }
     
     /* assumes term has exactly one rewrite and returns the list 
@@ -63,96 +63,96 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
         } else {
             v = Variable.getFreshVar(KSorts.K);
         }
-    	final List<Term> list = new ArrayList<Term>();
-    	Transformer transformer = new CopyOnWriteTransformer("splitter", context) {
-    		@Override public ASTNode transform(Rewrite rewrite) {
-    			list.add(rewrite.getLeft());
-    			list.add(rewrite.getRight());
-    			return v;
-    		}
-    	};
-    	Term result = (Term)term.accept(transformer);
-    	list.add(0, v);
-    	list.add(0, result);
-    	return list;
+        final List<Term> list = new ArrayList<Term>();
+        Transformer transformer = new CopyOnWriteTransformer("splitter", context) {
+            @Override public ASTNode transform(Rewrite rewrite) {
+                list.add(rewrite.getLeft());
+                list.add(rewrite.getRight());
+                return v;
+            }
+        };
+        Term result = (Term)term.accept(transformer);
+        list.add(0, v);
+        list.add(0, result);
+        return list;
     }
     
     private Term substituteHole(Term term, Term replacement) throws TransformerException {
-		return substituteSubstitutable(term, Hole.KITEM_HOLE, replacement);
+        return substituteSubstitutable(term, Hole.KITEM_HOLE, replacement);
     }
 
-	public Term freeze(Term term) {
-		try {
-			return new Freezer(substituteHole(term, new FreezerHole(0)));
-		} catch (TransformerException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
+    public Term freeze(Term term) {
+        try {
+            return new Freezer(substituteHole(term, new FreezerHole(0)));
+        } catch (TransformerException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
     private Term substituteVariable(Term term, Variable variable, Term replacement) throws TransformerException {
-		return substituteSubstitutable(term, variable, replacement);
+        return substituteSubstitutable(term, variable, replacement);
    }
 
-	private Term substituteSubstitutable(Term term, Term variable, Term replacement) throws TransformerException {
-		HashMap<Term, Term> hashMap = new HashMap<Term, Term>();
-		hashMap.put(variable, replacement);
-		Substitution substitution = new Substitution(hashMap, context);
-		if (term == null) {
-			return null;
-		}
-		return (Term)term.accept(substitution);
-	}
+    private Term substituteSubstitutable(Term term, Term variable, Term replacement) throws TransformerException {
+        HashMap<Term, Term> hashMap = new HashMap<Term, Term>();
+        hashMap.put(variable, replacement);
+        Substitution substitution = new Substitution(hashMap, context);
+        if (term == null) {
+            return null;
+        }
+        return (Term)term.accept(substitution);
+    }
 
-	@Override
+    @Override
     public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
-    	Term body = (Term) node.getBody().accept(new ResolveAnonymousVariables(context));
-    	int countHoles = MetaK.countHoles(body, context);
-    	if (countHoles == 0) {
-    		GlobalSettings.kem.register(
-    				new KException(ExceptionType.ERROR,
-    						KExceptionGroup.CRITICAL,
-    						"Contexts must have at least one HOLE.",
-    						getName(),
-    						node.getLocation(),
-    						node.getFilename()));
-    	}
-    	Integer countRewrites = MetaK.countRewrites(body, context);
-    	if (countRewrites > 1) {
-    		GlobalSettings.kem.register(
-    				new KException(ExceptionType.ERROR,
-    						KExceptionGroup.CRITICAL,
-    						"Contexts can contain at most one rewrite",
-    						getName(),
-    						node.getLocation(),
-    						node.getFilename()));
-    	} else if (countRewrites == 0) {
-    		body = substituteHole(body, new Rewrite(Hole.KITEM_HOLE, Hole.KITEM_HOLE, context));
-    	}
-    	List<Term> r = splitRewrite(body);
-    	Term rewriteContext = r.get(0);
-    	Variable freshVariable = (Variable)r.get(1);
-    	Term left = r.get(2);
-    	Term right = r.get(3);
-    	if (!(left instanceof Hole)) {
-    		GlobalSettings.kem.register(
-    				new KException(ExceptionType.ERROR,
-    						KExceptionGroup.CRITICAL,
-    						"Only the HOLE can be rewritten in a context definition",
-    						getName(),
-    						node.getLocation(),
-    						node.getFilename()));
-    	}
-    	Term lhsHeat = rewriteContext;
-    	List<Term> rewriteList = new ArrayList<Term>();
-    	rewriteList.add(substituteHole(right, freshVariable));
-    	rewriteList.add(new Freezer(substituteVariable(rewriteContext, freshVariable, new FreezerHole(0))));
-    	Term rhsHeat = new KSequence(rewriteList);
-    	Rule heatingRule = new Rule(lhsHeat, rhsHeat, context);
-    	heatingRule.setRequires(substituteHole(node.getRequires(), freshVariable));
-    	heatingRule.setEnsures(substituteHole(node.getEnsures(), freshVariable));
-    	heatingRule.getAttributes().getContents().addAll(node.getAttributes().getContents());
-    	heatingRule.putAttribute(MetaK.Constants.heatingTag,"");
+        Term body = (Term) node.getBody().accept(new ResolveAnonymousVariables(context));
+        int countHoles = MetaK.countHoles(body, context);
+        if (countHoles == 0) {
+            GlobalSettings.kem.register(
+                    new KException(ExceptionType.ERROR,
+                            KExceptionGroup.CRITICAL,
+                            "Contexts must have at least one HOLE.",
+                            getName(),
+                            node.getLocation(),
+                            node.getFilename()));
+        }
+        Integer countRewrites = MetaK.countRewrites(body, context);
+        if (countRewrites > 1) {
+            GlobalSettings.kem.register(
+                    new KException(ExceptionType.ERROR,
+                            KExceptionGroup.CRITICAL,
+                            "Contexts can contain at most one rewrite",
+                            getName(),
+                            node.getLocation(),
+                            node.getFilename()));
+        } else if (countRewrites == 0) {
+            body = substituteHole(body, new Rewrite(Hole.KITEM_HOLE, Hole.KITEM_HOLE, context));
+        }
+        List<Term> r = splitRewrite(body);
+        Term rewriteContext = r.get(0);
+        Variable freshVariable = (Variable)r.get(1);
+        Term left = r.get(2);
+        Term right = r.get(3);
+        if (!(left instanceof Hole)) {
+            GlobalSettings.kem.register(
+                    new KException(ExceptionType.ERROR,
+                            KExceptionGroup.CRITICAL,
+                            "Only the HOLE can be rewritten in a context definition",
+                            getName(),
+                            node.getLocation(),
+                            node.getFilename()));
+        }
+        Term lhsHeat = rewriteContext;
+        List<Term> rewriteList = new ArrayList<Term>();
+        rewriteList.add(substituteHole(right, freshVariable));
+        rewriteList.add(new Freezer(substituteVariable(rewriteContext, freshVariable, new FreezerHole(0))));
+        Term rhsHeat = new KSequence(rewriteList);
+        Rule heatingRule = new Rule(lhsHeat, rhsHeat, context);
+        heatingRule.setRequires(substituteHole(node.getRequires(), freshVariable));
+        heatingRule.setEnsures(substituteHole(node.getEnsures(), freshVariable));
+        heatingRule.getAttributes().getContents().addAll(node.getAttributes().getContents());
+        heatingRule.putAttribute(MetaK.Constants.heatingTag,"");
         if (GlobalSettings.testgen) {
             // TODO(YilongL): 1) is the body always a TermCons? 2) the following
             // naming convention may not guarantee a unique label for each
@@ -165,11 +165,11 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
                 }
             }
         }
-    	rules.add(heatingRule);
+        rules.add(heatingRule);
 
-    	Rule coolingRule = new Rule(rhsHeat, lhsHeat, context);
-    	coolingRule.getAttributes().getContents().addAll(node.getAttributes().getContents());
-    	coolingRule.putAttribute(MetaK.Constants.coolingTag,"");
+        Rule coolingRule = new Rule(rhsHeat, lhsHeat, context);
+        coolingRule.getAttributes().getContents().addAll(node.getAttributes().getContents());
+        coolingRule.putAttribute(MetaK.Constants.coolingTag,"");
         if (GlobalSettings.testgen) {
             // TODO(YilongL): the following naming convention may not guarantee
             // a unique label for each generated cooling rule; need to be
@@ -181,10 +181,10 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
                     break;
                 }
             }
-        }    	
-    	rules.add(coolingRule);
-    	
-    	return null;
+        }        
+        rules.add(coolingRule);
+        
+        return null;
     }
 
     @Override

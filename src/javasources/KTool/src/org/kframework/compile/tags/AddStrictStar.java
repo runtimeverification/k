@@ -8,15 +8,15 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class AddStrictStar extends BasicTransformer {
 
-	public AddStrictStar(Context context) {
-		super("AddStrictStar", context);
-	}
+    public AddStrictStar(Context context) {
+        super("AddStrictStar", context);
+    }
 
-	@Override
-	public ASTNode transform(Production node) throws TransformerException {
-		if (node.containsAttribute("strict") || node.containsAttribute("seqstrict"))
-			node.putAttribute("strict*", "");
+    @Override
+    public ASTNode transform(Production node) throws TransformerException {
+        if (node.containsAttribute("strict") || node.containsAttribute("seqstrict"))
+            node.putAttribute("strict*", "");
 
-		return node;
-	}
+        return node;
+    }
 }

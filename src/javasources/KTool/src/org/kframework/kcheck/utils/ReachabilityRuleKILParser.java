@@ -8,40 +8,40 @@ import org.kframework.kil.visitors.BasicVisitor;
 
 public class ReachabilityRuleKILParser extends BasicVisitor {
 
-	private Term pi;
-	private Term phi;
-	private Term pi_prime;
-	private Term phi_prime;
+    private Term pi;
+    private Term phi;
+    private Term pi_prime;
+    private Term phi_prime;
 
-	public ReachabilityRuleKILParser(Context context) {
-		super(context);
-	}
+    public ReachabilityRuleKILParser(Context context) {
+        super(context);
+    }
 
-	public void visit(Sentence node) {
-		
-		if (node.getBody() instanceof Rewrite) {
-			Rewrite rew = (Rewrite) node.getBody();
-			pi = rew.getLeft();
-			pi_prime = rew.getRight();
-		}
-		
-		phi = node.getRequires();
-		phi_prime = node.getEnsures();
-	}
+    public void visit(Sentence node) {
+        
+        if (node.getBody() instanceof Rewrite) {
+            Rewrite rew = (Rewrite) node.getBody();
+            pi = rew.getLeft();
+            pi_prime = rew.getRight();
+        }
+        
+        phi = node.getRequires();
+        phi_prime = node.getEnsures();
+    }
 
-	public Term getPi() {
-		return pi;
-	}
+    public Term getPi() {
+        return pi;
+    }
 
-	public Term getPhi() {
-		return phi;
-	}
+    public Term getPhi() {
+        return phi;
+    }
 
-	public Term getPi_prime() {
-		return pi_prime;
-	}
+    public Term getPi_prime() {
+        return pi_prime;
+    }
 
-	public Term getPhi_prime() {
-		return phi_prime;
-	}
+    public Term getPhi_prime() {
+        return phi_prime;
+    }
 }

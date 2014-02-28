@@ -12,37 +12,37 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.general.GlobalSettings;
 
 public class ConfigurationCleaner extends CopyOnWriteTransformer {
-		
-	public ConfigurationCleaner(Context context) {
-		super("Configuration Cleaner", context);
-		// TODO Auto-generated constructor stub
-	}
+        
+    public ConfigurationCleaner(Context context) {
+        super("Configuration Cleaner", context);
+        // TODO Auto-generated constructor stub
+    }
 
-	@Override
-	public ASTNode transform(Cell node) throws TransformerException {
-		if (node.getMultiplicity() == Multiplicity.ANY || node.getMultiplicity() == Multiplicity.MAYBE) {
-			if (node.variables().isEmpty()) {
+    @Override
+    public ASTNode transform(Cell node) throws TransformerException {
+        if (node.getMultiplicity() == Multiplicity.ANY || node.getMultiplicity() == Multiplicity.MAYBE) {
+            if (node.variables().isEmpty()) {
                 return new Bag();
-			}
-		}
+            }
+        }
 
-		ASTNode result = super.transform(node);
-		if (result == null) return null;
+        ASTNode result = super.transform(node);
+        if (result == null) return null;
 
-		if (result == node) {
-			node = node.shallowCopy();
-		} else {
-			if (!(result instanceof Cell)) {
-				GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
-						KExceptionGroup.INTERNAL,
-						"Expecting Cell, but got " + node.getClass() + " in Configuration Cleaner.",
-						getName(), node.getFilename(), node.getLocation()));
-			} else	node = (Cell) result;
-		}
-		node.setDefaultAttributes();
-		node.setEllipses(Ellipses.NONE);
-		return node;
-	}
+        if (result == node) {
+            node = node.shallowCopy();
+        } else {
+            if (!(result instanceof Cell)) {
+                GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
+                        KExceptionGroup.INTERNAL,
+                        "Expecting Cell, but got " + node.getClass() + " in Configuration Cleaner.",
+                        getName(), node.getFilename(), node.getLocation()));
+            } else    node = (Cell) result;
+        }
+        node.setDefaultAttributes();
+        node.setEllipses(Ellipses.NONE);
+        return node;
+    }
 
 }
 

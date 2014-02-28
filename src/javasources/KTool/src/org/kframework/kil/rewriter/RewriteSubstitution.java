@@ -13,12 +13,12 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import java.util.Map;
 
 public class RewriteSubstitution extends CopyOnWriteTransformer {
-	Map<Term, Term> substitution;
-	public RewriteSubstitution(Map<Term, Term> substitution, Context context) {
-		super("Substitution", context);
-		this.substitution = substitution;
-	}
-	
+    Map<Term, Term> substitution;
+    public RewriteSubstitution(Map<Term, Term> substitution, Context context) {
+        super("Substitution", context);
+        this.substitution = substitution;
+    }
+    
   private MapImpl rewriteMap(MapInsertPattern mip){
     Variable remainder = mip.getRemainder(); 
     MapImpl map = (MapImpl) substitution.get(remainder);
@@ -55,8 +55,8 @@ public class RewriteSubstitution extends CopyOnWriteTransformer {
 
 
   @SuppressWarnings("cast")
-	@Override
-	public ASTNode transform(Term node) throws TransformerException {
+    @Override
+    public ASTNode transform(Term node) throws TransformerException {
     if(node instanceof MapInsertPattern){
       return super.transform(rewriteMap((MapInsertPattern)node));
     }
@@ -65,10 +65,10 @@ public class RewriteSubstitution extends CopyOnWriteTransformer {
     }
     //put other builtin pattern types here
     else{
-		  Term substitute = substitution.get(node);
-		  if (substitute != null) 
-			  node = substitute;
-		  return super.transform(node);
+          Term substitute = substitution.get(node);
+          if (substitute != null) 
+              node = substitute;
+          return super.transform(node);
     }
-	}
+    }
 }

@@ -209,7 +209,7 @@ public abstract class DataStructureBuiltin extends Term {
     protected final Collection<Term> baseTerms;
 
     protected DataStructureBuiltin(DataStructureSort sort, Collection<Term> baseTerms) {
-    	super(sort.name());
+        super(sort.name());
         this.dataStructureSort = sort;
         this.baseTerms = baseTerms;
         if (baseTerms.size() == 1) {

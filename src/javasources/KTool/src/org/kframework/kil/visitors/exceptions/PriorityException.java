@@ -5,7 +5,7 @@ import org.kframework.utils.errorsystem.KException;
 @SuppressWarnings("serial")
 public class PriorityException extends TransformerException {
 
-	public PriorityException(KException kex) {
-		super(kex);
-	}
+    public PriorityException(KException kex) {
+        super(kex);
+    }
 }

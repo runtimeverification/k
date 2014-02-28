@@ -11,14 +11,14 @@ import org.kframework.utils.Stopwatch;
  * Time: 12:36 PM
  */
 public abstract class BasicCompilerStep<T extends ASTNode> implements CompilerStep<T> {
-	protected Stopwatch sw = null;
-	protected Context context;
+    protected Stopwatch sw = null;
+    protected Context context;
 
-	public BasicCompilerStep(Context context) {
-		this.context = context;
-	}
-	
-	public void setSw(Stopwatch sw) {
-		this.sw = sw;
-	}
+    public BasicCompilerStep(Context context) {
+        this.context = context;
+    }
+    
+    public void setSw(Stopwatch sw) {
+        this.sw = sw;
+    }
 }

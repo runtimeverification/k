@@ -15,44 +15,44 @@ import aterm.ATermAppl;
  */
 public class Configuration extends Sentence {
 
-	public Configuration() {
-		super();
-	}
+    public Configuration() {
+        super();
+    }
 
-	public Configuration(Element element) {
-		super(element);
-	}
+    public Configuration(Element element) {
+        super(element);
+    }
 
-	public Configuration(ATermAppl element) {
-		super(element);
-	}
+    public Configuration(ATermAppl element) {
+        super(element);
+    }
 
-	public Configuration(Configuration node) {
-		super(node);
-	}
+    public Configuration(Configuration node) {
+        super(node);
+    }
 
-	public Configuration(Sentence term) {
-		super(term);
-	}
+    public Configuration(Sentence term) {
+        super(term);
+    }
 
-	public String toString() {
-		String content = "  configuration ";
-		content += this.body + " ";
-		return content;
-	}
+    public String toString() {
+        String content = "  configuration ";
+        content += this.body + " ";
+        return content;
+    }
 
-	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-	}
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
+    }
 
-	@Override
-	public ASTNode accept(Transformer transformer) throws TransformerException {
-		return transformer.transform(this);
-	}
+    @Override
+    public ASTNode accept(Transformer transformer) throws TransformerException {
+        return transformer.transform(this);
+    }
 
-	@Override
-	public Configuration shallowCopy() {
-		return new Configuration(this);
-	}
+    @Override
+    public Configuration shallowCopy() {
+        return new Configuration(this);
+    }
 }

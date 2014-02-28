@@ -17,55 +17,55 @@ import org.w3c.dom.Element;
  * Base of all nodes that represent terms in the semantics. Each term is labeled with a sort.
  */
 public abstract class Term extends ASTNode implements Matchable, Comparable<Term> {
-	protected String sort;
+    protected String sort;
 
-	protected Term() {
-	}
+    protected Term() {
+    }
 
-	public Term(Term t) {
-		super(t);
-		this.sort = t.sort;
-	}
+    public Term(Term t) {
+        super(t);
+        this.sort = t.sort;
+    }
 
-	public Term(String location, String filename, String sort) {
-		super(location, filename);
-		setSort(sort);
-	}
+    public Term(String location, String filename, String sort) {
+        super(location, filename);
+        setSort(sort);
+    }
 
-	public Term(Element element) {
-		super(element);
-		this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
-	}
+    public Term(Element element) {
+        super(element);
+        this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
+    }
 
-	public Term(ATermAppl atm) {
-		super(atm);
-		this.sort = StringUtil.getSortNameFromCons(atm.getName());
-	}
+    public Term(ATermAppl atm) {
+        super(atm);
+        this.sort = StringUtil.getSortNameFromCons(atm.getName());
+    }
 
-	public Term(String sort) {
-		super();
-		this.sort = sort;
-	}
+    public Term(String sort) {
+        super();
+        this.sort = sort;
+    }
 
-	public String getSort() {
-		return sort;
-	}
+    public String getSort() {
+        return sort;
+    }
 
-	public void setSort(String sort) {
-		this.sort = sort;
-	}
+    public void setSort(String sort) {
+        this.sort = sort;
+    }
 
-	@Override
-	public abstract Term shallowCopy();
+    @Override
+    public abstract Term shallowCopy();
 
-	public abstract int hashCode();
+    public abstract int hashCode();
 
-	public abstract boolean equals(Object obj);
+    public abstract boolean equals(Object obj);
 
-	// This method compares equality based on membership in a parse forest
-	public boolean contains(Object obj) {
-		return this.equals(obj);
-	}
+    // This method compares equality based on membership in a parse forest
+    public boolean contains(Object obj) {
+        return this.equals(obj);
+    }
 
     /**
      * Returns a {@code Set} of {@link Variable} instances occurring in this {@code Term}.

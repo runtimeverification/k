@@ -181,9 +181,9 @@ public class SymbolicRewriter {
                         coolingListBuilder.add(rule);
                     }
                 } else if(rule.containsAttribute("alphaRule")){
-                	if(index.isUnifiable(rule.indexingPair().first)) {
-                		simulationListBuilder.add(rule);
-                	}
+                    if(index.isUnifiable(rule.indexingPair().first)) {
+                        simulationListBuilder.add(rule);
+                    }
 
                 } else {
                     if (index.isUnifiable(rule.indexingPair().first)) {
@@ -205,7 +205,7 @@ public class SymbolicRewriter {
             }
             rules = simulationListBuilder.build();
             if(!rules.isEmpty()){
-            	simulationMapBuilder.put(index,rules);
+                simulationMapBuilder.put(index,rules);
             }
         }
         heatingRuleTable = heatingMapBuilder.build();
@@ -251,9 +251,9 @@ public class SymbolicRewriter {
      */
     public ArrayList<ConstrainedTerm> rewriteAll(ConstrainedTerm constrainedTerm){
 
-    	computeRewriteStep(constrainedTerm);
+        computeRewriteStep(constrainedTerm);
 
-    	return (ArrayList<ConstrainedTerm>) results;
+        return (ArrayList<ConstrainedTerm>) results;
     }
 
     /*
@@ -261,7 +261,7 @@ public class SymbolicRewriter {
      * return the rules for simulations only
      */
     public Map<Index, List<Rule>> getSimulationMap(){
-    	return this.simulationRuleTable;
+        return this.simulationRuleTable;
     }
 
     /*
@@ -336,7 +336,7 @@ public class SymbolicRewriter {
      * computer steps by rules of simulation
      */
     @SuppressWarnings("unchecked")
-	public ConstrainedTerm computeSimulationStep(ConstrainedTerm constrainedTerm) {
+    public ConstrainedTerm computeSimulationStep(ConstrainedTerm constrainedTerm) {
         // Applying a strategy to a list of rules divides the rules up into
         // equivalence classes of rules. We iterate through these equivalence
         // classes one at a time, seeing which one contains rules we can apply.
@@ -361,7 +361,7 @@ public class SymbolicRewriter {
                 Cell<Term> newRuleTerm = new Cell<Term>("generatedTop",newTemp);
 
                 ConstrainedTerm leftHandSideTerm = new ConstrainedTerm(
-                		newRuleTerm,
+                        newRuleTerm,
                         rule.lookups().getSymbolicConstraint(constrainedTerm.termContext()),
                         leftHandSideConstraint,
                         constrainedTerm.termContext());

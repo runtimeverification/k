@@ -9,23 +9,23 @@ import java.util.logging.Logger;
 
 public class CommandOpen extends Command {
 
-	private String path;
+    private String path;
     private String mode;
-	
-	public CommandOpen(String[] args, Socket socket, Logger logger, FileSystem fs) { //, Long maudeId) {
-		super(args, socket, logger, fs); //, maudeId);
+    
+    public CommandOpen(String[] args, Socket socket, Logger logger, FileSystem fs) { //, Long maudeId) {
+        super(args, socket, logger, fs); //, maudeId);
 
-		// uri#attribute1=v1#a2=v2...
-		path = args[1];
+        // uri#attribute1=v1#a2=v2...
+        path = args[1];
         mode = args[2];
-	}
+    }
 
-	public void run() {
+    public void run() {
         try {
             succeed(Long.toString(fs.open(path, mode)));
-		} catch (IOException e) {
+        } catch (IOException e) {
             fail(e.getMessage());
         }
-	}
+    }
 
 }

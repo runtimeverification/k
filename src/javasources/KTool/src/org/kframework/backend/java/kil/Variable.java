@@ -100,8 +100,8 @@ public class Variable extends Term implements Sorted {
         return true;
     }
 
-	@Override
-	public boolean equals(Object object) {
+    @Override
+    public boolean equals(Object object) {
         if (this == object) {
             return true;
         }
@@ -112,17 +112,17 @@ public class Variable extends Term implements Sorted {
 
         Variable variable = (Variable) object;
         return name.equals(variable.name) && sort.equals(variable.sort);
-	}
+    }
 
-	@Override
-	public int hashCode() {
+    @Override
+    public int hashCode() {
         if (hashCode == 0) {
-    	    hashCode = 1;
+            hashCode = 1;
             hashCode = hashCode * Utils.HASH_PRIME + name.hashCode();
             hashCode = hashCode * Utils.HASH_PRIME + sort.hashCode();
         }
         return hashCode;
-	}
+    }
 
     @Override
     public String toString() {

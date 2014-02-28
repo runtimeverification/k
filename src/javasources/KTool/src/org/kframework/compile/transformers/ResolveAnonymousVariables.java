@@ -9,15 +9,15 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class ResolveAnonymousVariables extends CopyOnWriteTransformer {
 
-	public ResolveAnonymousVariables(Context context) {
-		super("Resolve anonymous variables", context);
-	}
-	
-	@Override
-	public ASTNode transform(Variable node) throws TransformerException {
-		if (MetaK.isAnonVar(node))
-			return Variable.getFreshVar(node.getSort());
-		return node;
-	}
+    public ResolveAnonymousVariables(Context context) {
+        super("Resolve anonymous variables", context);
+    }
+    
+    @Override
+    public ASTNode transform(Variable node) throws TransformerException {
+        if (MetaK.isAnonVar(node))
+            return Variable.getFreshVar(node.getSort());
+        return node;
+    }
 
 }

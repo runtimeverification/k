@@ -25,8 +25,8 @@ public class SimpleRewriter {
   protected Matcher matcher;
 
   public SimpleRewriter(org.kframework.kil.loader.Context context) {
-	  this.context = context;
-	  matcher = new SimpleMatcher(context);
+      this.context = context;
+      matcher = new SimpleMatcher(context);
   }
   
 

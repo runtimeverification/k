@@ -23,65 +23,65 @@ public class Rule extends Sentence {
     private Map<Variable, Integer> concreteDataStructureSize = Collections.emptyMap();
 
     public Rule(Element element) {
-		super(element);
-	}
+        super(element);
+    }
 
-	public Rule(Rule node) {
-		super(node);
+    public Rule(Rule node) {
+        super(node);
         lookups = node.lookups;
         concreteDataStructureSize = node.concreteDataStructureSize;
     }
 
-	public Rule() {
-		super();
-	}
+    public Rule() {
+        super();
+    }
 
-	public Rule(Term lhs, Term rhs, Context context) {
-		super();
-		this.setBody(new Rewrite(lhs, rhs, context));
-	}
+    public Rule(Term lhs, Term rhs, Context context) {
+        super();
+        this.setBody(new Rewrite(lhs, rhs, context));
+    }
 
-	public Rule(Term lhs, Term rhs, Term requires, Term ensures, Context context) {
+    public Rule(Term lhs, Term rhs, Term requires, Term ensures, Context context) {
         this(lhs, rhs, context);
         this.setRequires(requires);
         this.setEnsures(ensures);
-	}
+    }
 
-	public Rule(Sentence term) {
-		super(term);
-	}
+    public Rule(Sentence term) {
+        super(term);
+    }
 
-	public String toString() {
-		String content = "  rule ";
+    public String toString() {
+        String content = "  rule ";
 
-		if (this.label != null && !this.label.equals(""))
-			content += "[" + this.label + "]: ";
+        if (this.label != null && !this.label.equals(""))
+            content += "[" + this.label + "]: ";
 
-		content += this.body + " ";
-		if (this.requires != null) {
-			content += "requires " + this.requires + " ";
-		}
-		if (this.ensures != null) {
-			content += "ensures " + this.ensures + " ";
-		}
+        content += this.body + " ";
+        if (this.requires != null) {
+            content += "requires " + this.requires + " ";
+        }
+        if (this.ensures != null) {
+            content += "ensures " + this.ensures + " ";
+        }
 
-		return content + attributes;
-	}
+        return content + attributes;
+    }
 
-	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-	}
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
+    }
 
-	@Override
-	public ASTNode accept(Transformer transformer) throws TransformerException {
-		return transformer.transform(this);
-	}
+    @Override
+    public ASTNode accept(Transformer transformer) throws TransformerException {
+        return transformer.transform(this);
+    }
 
-	@Override
-	public Rule shallowCopy() {
-		return new Rule(this);
-	}
+    @Override
+    public Rule shallowCopy() {
+        return new Rule(this);
+    }
 
     public List<BuiltinLookup> getLookups() {
         return lookups;

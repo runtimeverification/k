@@ -16,63 +16,63 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class MergeToTransformer extends CopyOnWriteTransformer {
 
-	private Term toMerge;
+    private Term toMerge;
 
-	public MergeToTransformer(Context context, Term toMerge) {
-		super("Left merge of a term into accepting term", context);
-		this.toMerge = toMerge;
-	}
+    public MergeToTransformer(Context context, Term toMerge) {
+        super("Left merge of a term into accepting term", context);
+        this.toMerge = toMerge;
+    }
 
-	@Override
-	public ASTNode transform(Cell node) throws TransformerException {
+    @Override
+    public ASTNode transform(Cell node) throws TransformerException {
 
-		// retrieve the content of the left hand side
-		ExtractCellContent ecc = new ExtractCellContent(context,
-				node.getLabel());
-		toMerge.accept(ecc);
-		Term lcontent = ecc.getContent();
+        // retrieve the content of the left hand side
+        ExtractCellContent ecc = new ExtractCellContent(context,
+                node.getLabel());
+        toMerge.accept(ecc);
+        Term lcontent = ecc.getContent();
 
-		if (lcontent != null) {
-			// Then, do "sort case" merging
-			String sort = node.getContents().getSort();
-			Cell newCell = node.shallowCopy();
-			if (context.isSubsortedEq(KSorts.K, sort)) {
-				// K: replace the entire content - this is mainly for the K cell
-				newCell.setContents(lcontent);
-				return newCell;
-			} else if (sort.equals(KSorts.MAP)) {
-				// Map: append all the MapItems except variables of any kind
-				Map rmap = (Map) node.getContents();
-				Map lmap = (Map) lcontent;
+        if (lcontent != null) {
+            // Then, do "sort case" merging
+            String sort = node.getContents().getSort();
+            Cell newCell = node.shallowCopy();
+            if (context.isSubsortedEq(KSorts.K, sort)) {
+                // K: replace the entire content - this is mainly for the K cell
+                newCell.setContents(lcontent);
+                return newCell;
+            } else if (sort.equals(KSorts.MAP)) {
+                // Map: append all the MapItems except variables of any kind
+                Map rmap = (Map) node.getContents();
+                Map lmap = (Map) lcontent;
 
-				List<Term> terms = new LinkedList<Term>();
+                List<Term> terms = new LinkedList<Term>();
 
-				for (Term term : rmap.getContents()) {
-					terms.add(term);
-				}
-				for (Term term : lmap.getContents()) {
-					if (!(term instanceof Variable))
-						if (term instanceof MapItem) {
-							MapItem mapItem = (MapItem) term;
-							Term texist = null;
-							for (Term t : terms) {
-								if (((MapItem)t).getKey().equals(mapItem.getKey())) {
-									texist = t;
-								}
-							}
-							if (texist != null) {
-								terms.remove(texist);
-							}
-							terms.add(term);
-						}
-				}
-				newCell.setContents(new Map(terms));
-				return newCell;
-			}
-		}
-		// System.out.println("Node: " + node + "\nLL: " + lcontent + "\n\n");
+                for (Term term : rmap.getContents()) {
+                    terms.add(term);
+                }
+                for (Term term : lmap.getContents()) {
+                    if (!(term instanceof Variable))
+                        if (term instanceof MapItem) {
+                            MapItem mapItem = (MapItem) term;
+                            Term texist = null;
+                            for (Term t : terms) {
+                                if (((MapItem)t).getKey().equals(mapItem.getKey())) {
+                                    texist = t;
+                                }
+                            }
+                            if (texist != null) {
+                                terms.remove(texist);
+                            }
+                            terms.add(term);
+                        }
+                }
+                newCell.setContents(new Map(terms));
+                return newCell;
+            }
+        }
+        // System.out.println("Node: " + node + "\nLL: " + lcontent + "\n\n");
 
-		return super.transform(node);
-	}
-	
+        return super.transform(node);
+    }
+    
 }

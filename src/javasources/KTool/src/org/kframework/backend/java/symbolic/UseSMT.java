@@ -45,24 +45,24 @@ public class UseSMT implements Serializable {
             
             
             if(solver.Check() == Status.SATISFIABLE){
-            	
-            	Map<Term,Term> entries = new HashMap<Term,Term>();
-            	
-            	Model model = solver.Model();
-            	FuncDecl[] consts = model.ConstDecls();
-            	
-            	for(int i=0 ; i < consts.length; ++i){
-            		
-            		Expr resultFrg = model.ConstInterp(consts[i]);
-            		            		
-            		Variable akey = new Variable(consts[i].Name().toString(), consts[i].Range().toString());
-            		
-            		IntToken avalue = IntToken.of(Integer.parseInt(resultFrg.toString()));
-            		
-            		result.put((Term)akey,(Term)avalue);
-            	}
-            	
-            	
+                
+                Map<Term,Term> entries = new HashMap<Term,Term>();
+                
+                Model model = solver.Model();
+                FuncDecl[] consts = model.ConstDecls();
+                
+                for(int i=0 ; i < consts.length; ++i){
+                    
+                    Expr resultFrg = model.ConstInterp(consts[i]);
+                                        
+                    Variable akey = new Variable(consts[i].Name().toString(), consts[i].Range().toString());
+                    
+                    IntToken avalue = IntToken.of(Integer.parseInt(resultFrg.toString()));
+                    
+                    result.put((Term)akey,(Term)avalue);
+                }
+                
+                
             }
             context.Dispose();
         } catch (Z3Exception e) {

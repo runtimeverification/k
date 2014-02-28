@@ -16,41 +16,41 @@ import org.kframework.utils.general.GlobalSettings;
 
 public class ResolveRLFile extends CopyOnWriteTransformer {
 
-	private List<ASTNode> reachabilityRules = new ArrayList<ASTNode>();
-	private Term program = null;
+    private List<ASTNode> reachabilityRules = new ArrayList<ASTNode>();
+    private Term program = null;
 
-	public ResolveRLFile(Context context, String pgmFilePath) {
-		super("Parse RL input file", context);
+    public ResolveRLFile(Context context, String pgmFilePath) {
+        super("Parse RL input file", context);
 
-		// resolve reachability rules
-		String rlFileContent = FileUtil.getFileContent(GlobalSettings.CHECK);
-		context.kompiled = context.dotk.getAbsoluteFile();
-		ASTNode rlModule = DefinitionLoader.parseString(rlFileContent,
-				GlobalSettings.CHECK, context);
-		RetrieveRRVisitor rrrv = new RetrieveRRVisitor(context);
-		rlModule.accept(rrrv);
-		reachabilityRules = rrrv.getRules();
+        // resolve reachability rules
+        String rlFileContent = FileUtil.getFileContent(GlobalSettings.CHECK);
+        context.kompiled = context.dotk.getAbsoluteFile();
+        ASTNode rlModule = DefinitionLoader.parseString(rlFileContent,
+                GlobalSettings.CHECK, context);
+        RetrieveRRVisitor rrrv = new RetrieveRRVisitor(context);
+        rlModule.accept(rrrv);
+        reachabilityRules = rrrv.getRules();
 
-		// resolve pgm if any
-		if (RLBackend.PGM != null) {
-			String pgmContent = FileUtil.getFileContent(pgmFilePath);
-			try {
-				context.kompiled = context.dotk.getAbsoluteFile();
-				program = (Term) ProgramLoader.loadPgmAst(pgmContent,
-						GlobalSettings.CHECK, "K", context);
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			} catch (TransformerException e1) {
-				e1.printStackTrace();
-			}
-		}
-	}
+        // resolve pgm if any
+        if (RLBackend.PGM != null) {
+            String pgmContent = FileUtil.getFileContent(pgmFilePath);
+            try {
+                context.kompiled = context.dotk.getAbsoluteFile();
+                program = (Term) ProgramLoader.loadPgmAst(pgmContent,
+                        GlobalSettings.CHECK, "K", context);
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            } catch (TransformerException e1) {
+                e1.printStackTrace();
+            }
+        }
+    }
 
-	public List<ASTNode> getReachabilityRules() {
-		return reachabilityRules;
-	}
+    public List<ASTNode> getReachabilityRules() {
+        return reachabilityRules;
+    }
 
-	public Term getPgm() {
-		return program;
-	}
+    public Term getPgm() {
+        return program;
+    }
 }

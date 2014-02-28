@@ -28,16 +28,16 @@ public interface CompilerStep<T extends ASTNode> {
      * @return the resulting AST after this compilation step
      * @throws CompilerStepDone
      */
-	T compile(T ast, String haltAfterStep) throws CompilerStepDone;
-	
-	/**
-	 * Returns the name of this compilation step.
-	 */
-	String getName();
+    T compile(T ast, String haltAfterStep) throws CompilerStepDone;
+    
+    /**
+     * Returns the name of this compilation step.
+     */
+    String getName();
 
-	/**
-	 * Sets the stop watch of this compilation step.
-	 * @param sw the stop watch
-	 */
-	void setSw(Stopwatch sw);
+    /**
+     * Sets the stop watch of this compilation step.
+     * @param sw the stop watch
+     */
+    void setSw(Stopwatch sw);
 }

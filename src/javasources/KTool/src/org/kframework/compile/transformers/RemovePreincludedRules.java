@@ -16,12 +16,12 @@ import org.kframework.utils.file.KPaths;
  */
 public class RemovePreincludedRules extends CopyOnWriteTransformer {
 
-	public RemovePreincludedRules(Context context) {
-		super("Remove rules that are useless for the Java backend", context);
-	}
+    public RemovePreincludedRules(Context context) {
+        super("Remove rules that are useless for the Java backend", context);
+    }
 
-	@Override
-	public ASTNode transform(Rule node) throws TransformerException {
+    @Override
+    public ASTNode transform(Rule node) throws TransformerException {
         if ((!node.getFilename().startsWith(KPaths.getKBase(false) + File.separator + "include") 
                 && !node.getFilename().startsWith(org.kframework.kil.loader.Constants.GENERATED_FILENAME))
                 || (node.getFilename().equals(KPaths.getKBase(false)
@@ -33,9 +33,9 @@ public class RemovePreincludedRules extends CopyOnWriteTransformer {
                 || (node.getFilename().equals(KPaths.getKBase(false)
                         + File.separator + "include" + File.separator + "modules"
                         + File.separator + "k-functional-visitor.k"))) {
-			return node;
-		}
+            return node;
+        }
 
-		return null;
-	}
+        return null;
+    }
 }

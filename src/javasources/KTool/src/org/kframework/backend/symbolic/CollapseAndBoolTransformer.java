@@ -57,17 +57,17 @@ public class CollapseAndBoolTransformer extends CopyOnWriteTransformer {
                                 Term tlabel = tapp.getLabel();
                                 if (tlabel.equals(KLabelConstant.BOOL_ANDBOOL_KLABEL)
                                         || tlabel.equals(KLabelConstant.ANDBOOL_KLABEL)) {
-                                	Term term = tapp.getChild().shallowCopy();
-                                	if (term instanceof KList) {
-                                		KList listTerm = (KList) term;
-                                		List<Term> listContent = listTerm.getContents();
-                                		for(Term lt : listContent) {
-                                			newList.add(lt);
-                                		}
-                                	}
-                                	else {
-                                		newList.add(tapp.getChild().shallowCopy());
-                                	}
+                                    Term term = tapp.getChild().shallowCopy();
+                                    if (term instanceof KList) {
+                                        KList listTerm = (KList) term;
+                                        List<Term> listContent = listTerm.getContents();
+                                        for(Term lt : listContent) {
+                                            newList.add(lt);
+                                        }
+                                    }
+                                    else {
+                                        newList.add(tapp.getChild().shallowCopy());
+                                    }
                                     collapsed = true;
                                 }
                             }
@@ -80,12 +80,12 @@ public class CollapseAndBoolTransformer extends CopyOnWriteTransformer {
                     Term aLabel = ((KApp) content).getLabel();
                     if (aLabel.equals(KLabelConstant.BOOL_ANDBOOL_KLABEL)
                             || aLabel.equals(KLabelConstant.ANDBOOL_KLABEL)){
-                    	
-                    	Term resolved = recursiveCollapseAndBool((KApp)content);
-                    	
-                    	List<Term> newList = new ArrayList<Term>();
-                    	newList.add(resolved.shallowCopy());
-                    	newContent = new KList(newList);
+                        
+                        Term resolved = recursiveCollapseAndBool((KApp)content);
+                        
+                        List<Term> newList = new ArrayList<Term>();
+                        newList.add(resolved.shallowCopy());
+                        newContent = new KList(newList);
                     }
                 }
             }
