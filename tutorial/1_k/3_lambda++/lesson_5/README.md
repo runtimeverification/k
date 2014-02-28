@@ -1,5 +1,7 @@
 ### More Semantic Computation Items
 
+[MOVIE [5'19"]](http://youtu.be/dP3FW0kZN6k)
+
 In this lesson we see more examples of semantic (i.e., non-syntactic)
 computational items, and how useful they can be.  Specifically, we fix the
 environment-based definition of `callcc` and give an environment-based

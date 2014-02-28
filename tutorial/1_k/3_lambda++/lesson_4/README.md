@@ -1,5 +1,7 @@
 ### Do Not Reuse Blindly!
 
+[MOVIE [3'37"]](http://youtu.be/OXvtklaSaSQ)
+
 It may be tempting to base your decision to reuse an existing semantics of
 a language feature solely on syntactic considerations; for example, to reuse
 whenever the parser does not complain.  As seen in this lesson, this could
