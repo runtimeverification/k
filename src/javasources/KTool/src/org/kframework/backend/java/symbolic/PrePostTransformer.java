@@ -48,9 +48,9 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
     protected CombinedLocalTransformer preTransformer = new CombinedLocalTransformer();
     protected CombinedLocalTransformer postTransformer = new CombinedLocalTransformer();
 
-	public PrePostTransformer(TermContext context) {
+    public PrePostTransformer(TermContext context) {
         super(context);
-	}
+    }
 
     public PrePostTransformer(Definition definition) {
         super(TermContext.of(definition));

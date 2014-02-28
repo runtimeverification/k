@@ -34,12 +34,12 @@ public class FileUtil {
     }
 
     public static void save(String fileName, String content) {
-		try {
+        try {
             writeStringToFile(new File(fileName), content);
-		} catch (IOException e) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot save file content: " + fileName, "internal", "FileUtil.java"));
-		}
-	}
+        } catch (IOException e) {
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot save file content: " + fileName, "internal", "FileUtil.java"));
+        }
+    }
 
     /**
      * A performance-optimized version of save() that uses reflection to access private fields of
@@ -72,22 +72,22 @@ public class FileUtil {
     }
 
     /**
-	 * Get language name in uppercase (main module name) given the filename of definition.
-	 */
-	public static String getMainModule(String filename) {
+     * Get language name in uppercase (main module name) given the filename of definition.
+     */
+    public static String getMainModule(String filename) {
         return FilenameUtils.getBaseName(filename).toUpperCase();
-	}
+    }
 
-	public static String getFileContent(String file) {
-		try {
+    public static String getFileContent(String file) {
+        try {
             return readFileToString(new File(file));
-		} catch (FileNotFoundException e) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot retrieve file content. Make sure that file: " + file + " exists.", "internal", "FileUtil.java"));
-		} catch (IOException e) {
-			GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot retrieve file content. An IO error occured: " + file, "internal", "FileUtil.java"));
-		}
-		return "";
-	}
+        } catch (FileNotFoundException e) {
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot retrieve file content. Make sure that file: " + file + " exists.", "internal", "FileUtil.java"));
+        } catch (IOException e) {
+            GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Cannot retrieve file content. An IO error occured: " + file, "internal", "FileUtil.java"));
+        }
+        return "";
+    }
 
     // create a file with the specified name, create parent directory if it doesn't exist
     public static File createFile(String file) {

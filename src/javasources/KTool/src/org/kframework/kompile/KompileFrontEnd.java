@@ -131,7 +131,7 @@ public class KompileFrontEnd {
             case "doc":
                 GlobalSettings.documentation = true;
                 backend = new LatexBackend(Stopwatch.sw, context, true);                
-            	break;
+                break;
             case "html":
                 if (!cmd.hasOption("doc-style")) {
                     GlobalSettings.style = "k-definition.css";
@@ -201,9 +201,9 @@ public class KompileFrontEnd {
                     FileUtil.getMainModule(GlobalSettings.mainFile.getName()));
             
             if(cmd.hasOption("kore")){
-            	
-            	KoreBackend koreBackend = new KoreBackend(Stopwatch.sw, context);
-            	koreBackend.run(DefinitionLoader.loadDefinition(GlobalSettings.mainFile, lang,
+                
+                KoreBackend koreBackend = new KoreBackend(Stopwatch.sw, context);
+                koreBackend.run(DefinitionLoader.loadDefinition(GlobalSettings.mainFile, lang,
                         backend.autoinclude(), context));
                 return;
             }

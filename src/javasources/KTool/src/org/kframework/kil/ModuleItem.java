@@ -1,23 +1,23 @@
 package org.kframework.kil;
 
 public abstract class ModuleItem extends ASTNode {
-	public ModuleItem(ModuleItem s) {
-		super(s);
-	}
+    public ModuleItem(ModuleItem s) {
+        super(s);
+    }
 
-	public ModuleItem() {
-		super();
-	}
+    public ModuleItem() {
+        super();
+    }
 
-	public java.util.List<String> getLabels() {
-		return null;
-	}
+    public java.util.List<String> getLabels() {
+        return null;
+    }
 
-	public java.util.List<String> getKLabels() {
-		return null;
-	}
+    public java.util.List<String> getKLabels() {
+        return null;
+    }
 
-	public java.util.List<String> getAllSorts() {
-		return null;
-	}
+    public java.util.List<String> getAllSorts() {
+        return null;
+    }
 }

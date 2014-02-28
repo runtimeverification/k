@@ -14,57 +14,57 @@ import aterm.ATermAppl;
  */
 public class TermComment extends Term {
 
-	public TermComment(Element element) {
-		super(element);
-	}
+    public TermComment(Element element) {
+        super(element);
+    }
 
-	public TermComment(TermComment termComment) {
-		super(termComment);
-	}
+    public TermComment(TermComment termComment) {
+        super(termComment);
+    }
 
-	public TermComment(ATermAppl element) {
-		super(element);
-	}
+    public TermComment(ATermAppl element) {
+        super(element);
+    }
 
-	@Override
-	public String toString() {
-		return "<br />";
-	}
+    @Override
+    public String toString() {
+        return "<br />";
+    }
 
-	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-	}
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
+    }
 
-	@Override
-	public ASTNode accept(Transformer transformer) throws TransformerException {
-		return transformer.transform(this);
-	}
+    @Override
+    public ASTNode accept(Transformer transformer) throws TransformerException {
+        return transformer.transform(this);
+    }
 
-	@Override
-	public void accept(Matcher matcher, Term toMatch) {
-		matcher.match(this, toMatch);
-	}
+    @Override
+    public void accept(Matcher matcher, Term toMatch) {
+        matcher.match(this, toMatch);
+    }
 
-	@Override
-	public Term shallowCopy() {
-		return new TermComment(this);
-	}
+    @Override
+    public Term shallowCopy() {
+        return new TermComment(this);
+    }
 
-	@Override
-	public int hashCode() {
-		return 53;
-	}
+    @Override
+    public int hashCode() {
+        return 53;
+    }
 
-	@Override
-	public boolean equals(Object o) {
-		if (o == null)
-			return false;
-		if (this == o)
-			return true;
-		if (!(o instanceof TermComment))
-			return false;
-		return true;
-	}
+    @Override
+    public boolean equals(Object o) {
+        if (o == null)
+            return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof TermComment))
+            return false;
+        return true;
+    }
 
 }

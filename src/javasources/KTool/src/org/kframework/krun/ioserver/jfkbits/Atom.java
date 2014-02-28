@@ -15,6 +15,6 @@ public class Atom implements Expr
     }
  
     public String getKIF() {
-    	return "";
+        return "";
     }
 }

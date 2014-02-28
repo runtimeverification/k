@@ -18,13 +18,13 @@ import org.strategoxt.lang.Strategy;
  */
 public class clear_console_0_0 extends Strategy {
 
-	public static clear_console_0_0 instance = new clear_console_0_0();
+    public static clear_console_0_0 instance = new clear_console_0_0();
 
-	public final static String conName = "Spoofax Console";
+    public final static String conName = "Spoofax Console";
 
-	@Override
-	public IStrategoTerm invoke(Context context, IStrategoTerm current) {
-		return current;
-	}
+    @Override
+    public IStrategoTerm invoke(Context context, IStrategoTerm current) {
+        return current;
+    }
 
 }

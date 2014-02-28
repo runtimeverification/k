@@ -11,13 +11,13 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  */
 public class RemoveBrackets extends CopyOnWriteTransformer {
 
-	public RemoveBrackets(Context context) {
-		super("Remove brackets", context);
-	}
+    public RemoveBrackets(Context context) {
+        super("Remove brackets", context);
+    }
 
-	@Override
-	public ASTNode transform(Bracket node) throws TransformerException {
-		// System.out.println("Remove: " + node.getFilename() + ":" + node.getLocation());
-		return node.getContent().accept(this);
-	}
+    @Override
+    public ASTNode transform(Bracket node) throws TransformerException {
+        // System.out.println("Remove: " + node.getFilename() + ":" + node.getLocation());
+        return node.getContent().accept(this);
+    }
 }

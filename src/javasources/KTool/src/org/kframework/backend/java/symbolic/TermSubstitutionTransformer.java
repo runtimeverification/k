@@ -18,7 +18,7 @@ public class TermSubstitutionTransformer extends PrePostTransformer {
     private final Map<? extends Term, ? extends Term> substitution;
 
     public TermSubstitutionTransformer(Map<? extends Term, ? extends Term> substitution, TermContext context) {
-    	super(context);
+        super(context);
         this.substitution = substitution;
 //        preTransformer.addTransformer(new LocalVariableChecker());
         preTransformer.addTransformer(new LocalSubstitutionTransformer());

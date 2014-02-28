@@ -21,8 +21,8 @@ public class TokenSortCollector extends BasicVisitor {
     private final Set<String> sorts = new HashSet<String>();
 
     public TokenSortCollector(Context context) {
-		super(context);
-	}
+        super(context);
+    }
 
     public Set<String> getSorts() {
         return sorts;

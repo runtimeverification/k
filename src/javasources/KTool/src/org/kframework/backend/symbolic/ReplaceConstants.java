@@ -27,62 +27,62 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  */
 public class ReplaceConstants extends CopyOnWriteTransformer {
 
-	public ReplaceConstants(Context context) {
-		super("Replace Constants with Variables", context);
-	}
+    public ReplaceConstants(Context context) {
+        super("Replace Constants with Variables", context);
+    }
 
-	@Override
-	public ASTNode transform(Rule node) throws TransformerException {
-		if (!node.containsAttribute(SymbolicBackend.SYMBOLIC)) {
-			return node;
-		}
+    @Override
+    public ASTNode transform(Rule node) throws TransformerException {
+        if (!node.containsAttribute(SymbolicBackend.SYMBOLIC)) {
+            return node;
+        }
 
-		if (node.getBody() instanceof Rewrite) {
-			ConstantsReplaceTransformer crt = new ConstantsReplaceTransformer(
-					"", context);
-			Rewrite rew = (Rewrite) node.getBody();
-			Term left = rew.getLeft().shallowCopy();
-//			System.out.println("LEFT : " + node);
-			rew.setLeft((Term) left.accept(crt), context);
-			Map<Variable, KApp> newGeneratedSV = crt.getGeneratedSV();
-			Term condition = node.getRequires();
+        if (node.getBody() instanceof Rewrite) {
+            ConstantsReplaceTransformer crt = new ConstantsReplaceTransformer(
+                    "", context);
+            Rewrite rew = (Rewrite) node.getBody();
+            Term left = rew.getLeft().shallowCopy();
+//            System.out.println("LEFT : " + node);
+            rew.setLeft((Term) left.accept(crt), context);
+            Map<Variable, KApp> newGeneratedSV = crt.getGeneratedSV();
+            Term condition = node.getRequires();
 
-			List<Term> terms = new ArrayList<Term>();
-			for (Entry<Variable, KApp> entry : newGeneratedSV.entrySet()) {
-				List<Term> vars = new ArrayList<Term>();
-				vars.add(entry.getKey());
-//				vars.add(KApp.of(new KInjectedLabel(entry.getValue())));
-				vars.add(entry.getValue());
-				terms.add(new KApp(KLabelConstant.of(KLabelConstant.KEQ.getLabel(), context), new KList(vars)));
+            List<Term> terms = new ArrayList<Term>();
+            for (Entry<Variable, KApp> entry : newGeneratedSV.entrySet()) {
+                List<Term> vars = new ArrayList<Term>();
+                vars.add(entry.getKey());
+//                vars.add(KApp.of(new KInjectedLabel(entry.getValue())));
+                vars.add(entry.getValue());
+                terms.add(new KApp(KLabelConstant.of(KLabelConstant.KEQ.getLabel(), context), new KList(vars)));
 
-				Token token = (Token) (entry.getValue().getLabel());
-				terms.add(KApp.of( 
+                Token token = (Token) (entry.getValue().getLabel());
+                terms.add(KApp.of( 
                         KLabelConstant.of(AddPredicates.predicate(
                                 token.tokenSort().replaceFirst("#", "")), context),
                         entry.getKey()));
-			}
+            }
 
-			if (terms.isEmpty())
-				return node;
+            if (terms.isEmpty())
+                return node;
 
-			Term newCondition = new KApp(KLabelConstant.ANDBOOL_KLABEL, new KList(
-					terms));
+            Term newCondition = new KApp(KLabelConstant.ANDBOOL_KLABEL, new KList(
+                    terms));
 
-			if (condition != null) {
-				List<Term> vars = new ArrayList<Term>();
-				vars.add(condition);
-				vars.add(newCondition);
-				newCondition = new KApp(KLabelConstant.ANDBOOL_KLABEL,
-						new KList(vars));
-			}
+            if (condition != null) {
+                List<Term> vars = new ArrayList<Term>();
+                vars.add(condition);
+                vars.add(newCondition);
+                newCondition = new KApp(KLabelConstant.ANDBOOL_KLABEL,
+                        new KList(vars));
+            }
 
-			node = node.shallowCopy();
-			node.setBody(rew);
-			node.setRequires(newCondition);
-		}
-//		System.out.println("LEFT': " + node);
-//		System.out.println("\n\n");
+            node = node.shallowCopy();
+            node.setBody(rew);
+            node.setRequires(newCondition);
+        }
+//        System.out.println("LEFT': " + node);
+//        System.out.println("\n\n");
 
-		return node;
-	}
+        return node;
+    }
 }

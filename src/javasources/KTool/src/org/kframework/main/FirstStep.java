@@ -11,7 +11,7 @@ import org.kframework.kil.loader.Context;
  * backend.
  */
 public class FirstStep extends BasicCompilerStep<Definition> {
-	Backend backend;
+    Backend backend;
 
     /**
      * @param backend
@@ -19,19 +19,19 @@ public class FirstStep extends BasicCompilerStep<Definition> {
      * @param context
      *            the context
      */
-	public FirstStep(Backend backend, Context context) {
-		super(context);
-		this.backend = backend;
-	}
+    public FirstStep(Backend backend, Context context) {
+        super(context);
+        this.backend = backend;
+    }
 
-	@Override
-	public Definition compile(Definition def, String stepName)
-			throws CompilerStepDone {
-		return backend.firstStep(def);
-	}
+    @Override
+    public Definition compile(Definition def, String stepName)
+            throws CompilerStepDone {
+        return backend.firstStep(def);
+    }
 
-	@Override
-	public String getName() {
-		return "FirstStep";
-	}
+    @Override
+    public String getName() {
+        return "FirstStep";
+    }
 }

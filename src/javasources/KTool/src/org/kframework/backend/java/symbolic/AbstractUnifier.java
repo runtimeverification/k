@@ -31,9 +31,9 @@ public abstract class AbstractUnifier implements Unifier {
      * 
      * @throws UnificationFailure
      */
-	protected void fail(Term term, Term otherTerm) {
+    protected void fail(Term term, Term otherTerm) {
         unificationFailureLeftHandSide = term;
         unificationFailureRightHandSide = otherTerm;
-		throw UnificationFailure.UNIFICATION_FAILURE;
-	}
+        throw UnificationFailure.UNIFICATION_FAILURE;
+    }
 }

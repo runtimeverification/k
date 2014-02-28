@@ -20,16 +20,16 @@ public class LatexBackend extends BasicBackend {
     private File latexStyleFile;
     private boolean makeDocument = false;
 
-	public LatexBackend(Stopwatch sw, Context context) {
-		super(sw, context);
-	}
+    public LatexBackend(Stopwatch sw, Context context) {
+        super(sw, context);
+    }
 
-	public LatexBackend(Stopwatch sw, Context context, boolean doc) {
-		super(sw, context);
-		makeDocument = doc;
-	}
+    public LatexBackend(Stopwatch sw, Context context, boolean doc) {
+        super(sw, context);
+        makeDocument = doc;
+    }
 
-	public void compile(Definition javaDef) throws IOException {
+    public void compile(Definition javaDef) throws IOException {
         String fileSep = System.getProperty("file.separator");
         String endl = System.getProperty("line.separator");
 
@@ -65,7 +65,7 @@ public class LatexBackend extends BasicBackend {
     }
 
     @Override
-	public void run(Definition javaDef) {
+    public void run(Definition javaDef) {
         try {
             compile(javaDef);
             copyFiles();
@@ -79,15 +79,15 @@ public class LatexBackend extends BasicBackend {
         return latexFile;
     }
 
-	@Override
-	public String getDefaultStep() {
-		return "FirstStep";
-	}
-	
-	@Override
-	public boolean autoinclude(){
-        //When the autoinclude stuff gets worked out, uncomment this next line.	    
+    @Override
+    public String getDefaultStep() {
+        return "FirstStep";
+    }
+    
+    @Override
+    public boolean autoinclude(){
+        //When the autoinclude stuff gets worked out, uncomment this next line.        
         return !makeDocument;
-	    //return true;
-	}
+        //return true;
+    }
 }

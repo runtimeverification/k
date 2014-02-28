@@ -1,33 +1,33 @@
 package org.kframework.utils;
 
 public class StringUtil {
-	public static String unescape(String str) {
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < str.length(); i++) {
-			if (str.charAt(i) == '\\') {
-				if (str.charAt(i + 1) == '\\')
-					sb.append('\\');
-				else if (str.charAt(i + 1) == 'n')
-					sb.append('\n');
-				else if (str.charAt(i + 1) == 'r')
-					sb.append('\r');
-				else if (str.charAt(i + 1) == 't')
-					sb.append('\t');
-				else if (str.charAt(i + 1) == '"')
-					sb.append('"');
-				i++;
-			} else
-				sb.append(str.charAt(i));
-		}
+    public static String unescape(String str) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < str.length(); i++) {
+            if (str.charAt(i) == '\\') {
+                if (str.charAt(i + 1) == '\\')
+                    sb.append('\\');
+                else if (str.charAt(i + 1) == 'n')
+                    sb.append('\n');
+                else if (str.charAt(i + 1) == 'r')
+                    sb.append('\r');
+                else if (str.charAt(i + 1) == 't')
+                    sb.append('\t');
+                else if (str.charAt(i + 1) == '"')
+                    sb.append('"');
+                i++;
+            } else
+                sb.append(str.charAt(i));
+        }
 
-		return sb.toString();
-	}
+        return sb.toString();
+    }
 
-	public static String makeProper(String str) {
-		return Character.toUpperCase(str.charAt(0)) + str.substring(1);
-	}
+    public static String makeProper(String str) {
+        return Character.toUpperCase(str.charAt(0)) + str.substring(1);
+    }
 
-	public static String escape(String value) {
+    public static String escape(String value) {
         final int length = value.length();
         StringBuilder result = new StringBuilder();
         for (int offset = 0, codepoint; offset < length; offset += Character.charCount(codepoint)) {
@@ -50,7 +50,7 @@ public class StringUtil {
             }
         }
         return result.toString();
-	}
+    }
 
     public static void throwIfSurrogatePair(int codePoint) {
         if (codePoint >= 0xd800 && codePoint <= 0xdfff) {
@@ -95,15 +95,15 @@ public class StringUtil {
     public static String unescapeK(String str) {
         StringBuilder sb = new StringBuilder();
         for (int i = 1; i < str.length() - 1; i++) {
-			if (str.charAt(i) == '\\') {
-			    if (str.charAt(i + 1) == '"') {
-			        sb.append('"');
+            if (str.charAt(i) == '\\') {
+                if (str.charAt(i + 1) == '"') {
+                    sb.append('"');
                     i++;
-    			} else if (str.charAt(i + 1) == '\\') {
-	    			sb.append('\\');
+                } else if (str.charAt(i + 1) == '\\') {
+                    sb.append('\\');
                     i++;
-		    	} else if (str.charAt(i + 1) == 'n') {
-			    	sb.append('\n');
+                } else if (str.charAt(i + 1) == 'n') {
+                    sb.append('\n');
                     i++;
                 } else if (str.charAt(i + 1) == 'r') {
                     sb.append('\r');
@@ -135,7 +135,7 @@ public class StringUtil {
         return sb.toString();
     }
 
-	
+    
     public static String escapeK(String value) {
         final int length = value.length();
         StringBuilder result = new StringBuilder();
@@ -169,24 +169,24 @@ public class StringUtil {
         return result.toString();
     }
 
-	/**
-	 * Use this function to print XML directly as string, and not when using DOM.
-	 * 
-	 * @param str
-	 * @return
-	 *
+    /**
+     * Use this function to print XML directly as string, and not when using DOM.
+     * 
+     * @param str
+     * @return
+     *
 
-	public static String escapeToXmlAttribute(String str) {
-		str = str.replaceAll("\\", "\\\\");
-		str = str.replaceAll("\n", "\\n");
-		str = str.replaceAll("\r", "\\r");
-		str = str.replaceAll("\t", "\\t");
-		str = str.replaceAll("&", "&amp;");
-		str = str.replaceAll("<", "&lt;");
-		str = str.replaceAll(">", "&gt;");
-		str = str.replaceAll("\"", "&quot;");
-		return str;
-	}
+    public static String escapeToXmlAttribute(String str) {
+        str = str.replaceAll("\\", "\\\\");
+        str = str.replaceAll("\n", "\\n");
+        str = str.replaceAll("\r", "\\r");
+        str = str.replaceAll("\t", "\\t");
+        str = str.replaceAll("&", "&amp;");
+        str = str.replaceAll("<", "&lt;");
+        str = str.replaceAll(">", "&gt;");
+        str = str.replaceAll("\"", "&quot;");
+        return str;
+    }
 
     /**
      * Returns the two-letter code for a general category of Unicode code point.
@@ -307,116 +307,116 @@ public class StringUtil {
         }
     }
 
-	public static String escapeSortName(String str) {
-		str = str.replace("D", "Dd");
-		str = str.replace("#", "Dz");
-		return str;
-	}
+    public static String escapeSortName(String str) {
+        str = str.replace("D", "Dd");
+        str = str.replace("#", "Dz");
+        return str;
+    }
 
-	public static String unEscapeSortName(String str) {
-		str = str.replace("Dz", "#");
-		str = str.replace("Dd", "D");
-		return str;
-	}
+    public static String unEscapeSortName(String str) {
+        str = str.replace("Dz", "#");
+        str = str.replace("Dd", "D");
+        return str;
+    }
 
-	public static String getSortNameFromCons(String str) {
-		String ret = "";
-		int idx = str.lastIndexOf("1");
+    public static String getSortNameFromCons(String str) {
+        String ret = "";
+        int idx = str.lastIndexOf("1");
 
-		if (idx > 0) {
-			ret = str.substring(0, idx);
-		}
-		return StringUtil.unEscapeSortName(ret);
-	}
+        if (idx > 0) {
+            ret = str.substring(0, idx);
+        }
+        return StringUtil.unEscapeSortName(ret);
+    }
 
-	private static int number = 0;
+    private static int number = 0;
 
-	/**
-	 * Generate incremental numbers that dosn't contain the number 1
-	 * 
-	 * @return an integer that doesn't contain the number 1
-	 */
-	public static int getUniqueId() {
-		boolean valid = false;
-		while (!valid) {
-			int nr = number;
-			while (nr > 0) {
-				if (nr % 10 == 1) {
-					number++;
-					break;
-				} else {
-					nr /= 10;
-				}
-			}
-			if (nr == 0) {
-				valid = true;
-			}
-		}
-		return number++;
-	}
+    /**
+     * Generate incremental numbers that dosn't contain the number 1
+     * 
+     * @return an integer that doesn't contain the number 1
+     */
+    public static int getUniqueId() {
+        boolean valid = false;
+        while (!valid) {
+            int nr = number;
+            while (nr > 0) {
+                if (nr % 10 == 1) {
+                    number++;
+                    break;
+                } else {
+                    nr /= 10;
+                }
+            }
+            if (nr == 0) {
+                valid = true;
+            }
+        }
+        return number++;
+    }
 
-	public static String escapeMaude(String tag) {
-		// TODO [andreis]: current implementation appears wrong to me, i.e. '`(`) stays the same rather than becoming '```(```)
-		tag = tag.replaceAll("(?<!`)`", "BKQT");
-		return tag.replaceAll("(?<!`)([\\(\\)\\[\\]\\{\\},])", "`$1");
-	}
+    public static String escapeMaude(String tag) {
+        // TODO [andreis]: current implementation appears wrong to me, i.e. '`(`) stays the same rather than becoming '```(```)
+        tag = tag.replaceAll("(?<!`)`", "BKQT");
+        return tag.replaceAll("(?<!`)([\\(\\)\\[\\]\\{\\},])", "`$1");
+    }
 
-	public static String unescapeMaude(String str) {
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < str.length(); i++) {
-			if (str.charAt(i) == '`') {
-				if (str.charAt(i + 1) == '`')
-					sb.append('`');
-				else if (str.charAt(i + 1) == '(')
-					sb.append('(');
-				else if (str.charAt(i + 1) == ')')
-					sb.append(')');
-				else if (str.charAt(i + 1) == '[')
-					sb.append('[');
-				else if (str.charAt(i + 1) == ']')
-					sb.append(']');
-				else if (str.charAt(i + 1) == '{')
-					sb.append('{');
-				else if (str.charAt(i + 1) == '}')
-					sb.append('}');
-				else if (str.charAt(i + 1) == ',')
-					sb.append(',');
-				else
-					sb.append(' ');
-				i++;
-			} else {
-				if (i + 3 < str.length() && str.charAt(i) == 'B' && str.charAt(i + 1) == 'K' && str.charAt(i + 2) == 'Q' && str.charAt(i + 3) == 'T') {
-					sb.append('`');
-					i += 3;
-				} else {
-					sb.append(str.charAt(i));
-				}
-			}
-		}
+    public static String unescapeMaude(String str) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < str.length(); i++) {
+            if (str.charAt(i) == '`') {
+                if (str.charAt(i + 1) == '`')
+                    sb.append('`');
+                else if (str.charAt(i + 1) == '(')
+                    sb.append('(');
+                else if (str.charAt(i + 1) == ')')
+                    sb.append(')');
+                else if (str.charAt(i + 1) == '[')
+                    sb.append('[');
+                else if (str.charAt(i + 1) == ']')
+                    sb.append(']');
+                else if (str.charAt(i + 1) == '{')
+                    sb.append('{');
+                else if (str.charAt(i + 1) == '}')
+                    sb.append('}');
+                else if (str.charAt(i + 1) == ',')
+                    sb.append(',');
+                else
+                    sb.append(' ');
+                i++;
+            } else {
+                if (i + 3 < str.length() && str.charAt(i) == 'B' && str.charAt(i + 1) == 'K' && str.charAt(i + 2) == 'Q' && str.charAt(i + 3) == 'T') {
+                    sb.append('`');
+                    i += 3;
+                } else {
+                    sb.append(str.charAt(i));
+                }
+            }
+        }
 
-		return sb.toString();
-	}
+        return sb.toString();
+    }
 
-	public static String latexify(String name) {
-		return name.replace("\\", "\\textbackslash ").replace("_", "\\_").replace("{", "\\{").replace("}", "\\}").replace("#", "\\#").replace("%", "\\%").replace("$", "\\$")
-				.replace("&", "\\&").replace("~", "\\mbox{\\~{}}").replace("^", "\\mbox{\\^{}}").replace("`", "\\mbox{\\`{}}");
-	}
+    public static String latexify(String name) {
+        return name.replace("\\", "\\textbackslash ").replace("_", "\\_").replace("{", "\\{").replace("}", "\\}").replace("#", "\\#").replace("%", "\\%").replace("$", "\\$")
+                .replace("&", "\\&").replace("~", "\\mbox{\\~{}}").replace("^", "\\mbox{\\^{}}").replace("`", "\\mbox{\\`{}}");
+    }
 
-	public static String emptyIfNull(String string) {
-		if (string == null)
-			return "";
-		return string;
-	}
+    public static String emptyIfNull(String string) {
+        if (string == null)
+            return "";
+        return string;
+    }
 
-	public static int getStartLineFromLocation(String location) {
-		String[] str = location.split("[\\(,\\)]");
-		return Integer.parseInt(str[0 + 1]);
-	}
+    public static int getStartLineFromLocation(String location) {
+        String[] str = location.split("[\\(,\\)]");
+        return Integer.parseInt(str[0 + 1]);
+    }
 
-	public static int getStartColFromLocation(String location) {
-		String[] str = location.split("[\\(,\\)]");
-		return Integer.parseInt(str[1 + 1]);
-	}
+    public static int getStartColFromLocation(String location) {
+        String[] str = location.split("[\\(,\\)]");
+        return Integer.parseInt(str[1 + 1]);
+    }
 
     /**
      * split string to lines in a way that no lines will exceed 80 columns

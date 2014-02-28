@@ -14,84 +14,84 @@ import java.util.ArrayList;
  * @see PriorityExtended */
 public class PriorityBlockExtended extends ASTNode {
 
-	java.util.List<KLabelConstant> productions = new ArrayList<KLabelConstant>();
+    java.util.List<KLabelConstant> productions = new ArrayList<KLabelConstant>();
 
-	public java.util.List<KLabelConstant> getProductions() {
-		return productions;
-	}
+    public java.util.List<KLabelConstant> getProductions() {
+        return productions;
+    }
 
-	public void setProductions(java.util.List<KLabelConstant> productions) {
-		this.productions = productions;
-	}
+    public void setProductions(java.util.List<KLabelConstant> productions) {
+        this.productions = productions;
+    }
 
-	public PriorityBlockExtended() {
-		super();
-	}
+    public PriorityBlockExtended() {
+        super();
+    }
 
-	public PriorityBlockExtended(PriorityBlockExtended node) {
-		super(node);
-		this.productions.addAll(node.productions);
-	}
+    public PriorityBlockExtended(PriorityBlockExtended node) {
+        super(node);
+        this.productions.addAll(node.productions);
+    }
 
-	public PriorityBlockExtended(java.util.List<KLabelConstant> productions) {
-		super();
-		this.productions.addAll(productions);
-	}
+    public PriorityBlockExtended(java.util.List<KLabelConstant> productions) {
+        super();
+        this.productions.addAll(productions);
+    }
 
-	@Override
-	public String toString() {
-		String content = "";
-		for (Term production : productions)
-			content += production + " ";
+    @Override
+    public String toString() {
+        String content = "";
+        for (Term production : productions)
+            content += production + " ";
 
-		if (content.length() > 2)
-			content = content.substring(0, content.length() - 1);
+        if (content.length() > 2)
+            content = content.substring(0, content.length() - 1);
 
-		return content;
-	}
+        return content;
+    }
 
-	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-	}
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
+    }
 
-	@Override
-	public ASTNode accept(Transformer transformer) throws TransformerException {
-		return transformer.transform(this);
-	}
+    @Override
+    public ASTNode accept(Transformer transformer) throws TransformerException {
+        return transformer.transform(this);
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null)
-			return false;
-		if (this == obj)
-			return true;
-		if (!(obj instanceof PriorityBlockExtended))
-			return false;
-		PriorityBlockExtended pb = (PriorityBlockExtended) obj;
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null)
+            return false;
+        if (this == obj)
+            return true;
+        if (!(obj instanceof PriorityBlockExtended))
+            return false;
+        PriorityBlockExtended pb = (PriorityBlockExtended) obj;
 
-		if (pb.productions.size() != productions.size())
-			return false;
+        if (pb.productions.size() != productions.size())
+            return false;
 
-		for (int i = 0; i < pb.productions.size(); i++) {
-			if (!pb.productions.get(i).equals(productions.get(i)))
-				return false;
-		}
+        for (int i = 0; i < pb.productions.size(); i++) {
+            if (!pb.productions.get(i).equals(productions.get(i)))
+                return false;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	@Override
-	public int hashCode() {
-		int hash = 0;
+    @Override
+    public int hashCode() {
+        int hash = 0;
 
-		for (Term prd : productions)
-			hash += prd.hashCode();
-		return hash;
-	}
+        for (Term prd : productions)
+            hash += prd.hashCode();
+        return hash;
+    }
 
-	@Override
-	public PriorityBlockExtended shallowCopy() {
-		return new PriorityBlockExtended(this);
-	}
+    @Override
+    public PriorityBlockExtended shallowCopy() {
+        return new PriorityBlockExtended(this);
+    }
 }

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC
+"-//Puppy Crawl//DTD Check Configuration 1.3//EN"
+"http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
+<module name="Checker">
+    <module name="TreeWalker">
+<!--<module name="EqualsAvoidNull" />
+<module name="EqualsHashCode" />
+<module name="SimplifyBooleanReturn" />
+<module name="StringLiteralEquality" />
+<module name="PackageDeclaration" />
+<module name="AvoidStarImport" />
+<module name="RedundantImport" />
+<module name="UnusedImports" />
+<module name="UpperEll" />
+<module name="ArrayTypeStyle" />
+<module name="OuterTypeFilename" />
+<module name="OuterTypeNumber" />-->
+    </module>
+<module name="FileTabCharacter" />
+<!--<module name="NewlineAtEndOfFile" />-->
+</module>

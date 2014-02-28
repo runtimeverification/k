@@ -11,67 +11,67 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  * 
  */
 public class StringSentence extends ModuleItem {
-	private String content;
-	private String contentLocation;
-	private String label;
-	private String type;
+    private String content;
+    private String contentLocation;
+    private String label;
+    private String type;
 
-	public StringSentence(String content, String contentLocation, String type, String label) {
-		this.content = content;
+    public StringSentence(String content, String contentLocation, String type, String label) {
+        this.content = content;
                 this.contentLocation = contentLocation;
-		this.type = type;
-		this.label = label;
-	}
+        this.type = type;
+        this.label = label;
+    }
 
-	public StringSentence(StringSentence node) {
-		super(node);
-		this.content = node.content;
-	}
+    public StringSentence(StringSentence node) {
+        super(node);
+        this.content = node.content;
+    }
 
-	public String toString() {
-		return type+"["+label+"]:"+content;
-	}
+    public String toString() {
+        return type+"["+label+"]:"+content;
+    }
 
-	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-	}
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
+    }
 
-	@Override
-	public ASTNode accept(Transformer transformer) throws TransformerException {
-		return transformer.transform(this);
-	}
+    @Override
+    public ASTNode accept(Transformer transformer) throws TransformerException {
+        return transformer.transform(this);
+    }
 
-	public String getContent() {
-		return content;
-	}
+    public String getContent() {
+        return content;
+    }
 
-	public void setContent(String content) {
-		this.content = content;
-	}
+    public void setContent(String content) {
+        this.content = content;
+    }
 
-	public String getContentLocation() {
-		return contentLocation;
-	}
+    public String getContentLocation() {
+        return contentLocation;
+    }
 
-	@Override
-	public StringSentence shallowCopy() {
-		return new StringSentence(this);
-	}
+    @Override
+    public StringSentence shallowCopy() {
+        return new StringSentence(this);
+    }
 
-	public void setType(String type) {
-		this.type = type;
-	}
+    public void setType(String type) {
+        this.type = type;
+    }
 
-	public String getType() {
-		return type;
-	}
+    public String getType() {
+        return type;
+    }
 
-	public String getLabel() {
-		return label;
-	}
+    public String getLabel() {
+        return label;
+    }
 
-	public void setLabel(String label) {
-		this.label = label;
-	}
+    public void setLabel(String label) {
+        this.label = label;
+    }
 }

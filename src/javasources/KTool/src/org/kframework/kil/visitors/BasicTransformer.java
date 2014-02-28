@@ -16,281 +16,281 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  * Default implementations of methods visit non-attribute children, and then call the transform method for the parent class on the current node.
  */
 public class BasicTransformer implements Transformer {
-	protected Context context;
-	private String name;
+    protected Context context;
+    private String name;
 
-	public BasicTransformer(String name, Context context) {
-		this.name = name;
-		this.context = context;
-	}
+    public BasicTransformer(String name, Context context) {
+        this.name = name;
+        this.context = context;
+    }
 
-	@Override
-	public ASTNode transform(ASTNode node) throws TransformerException {
-		return node;
-	}
+    @Override
+    public ASTNode transform(ASTNode node) throws TransformerException {
+        return node;
+    }
 
-	@Override
-	public ASTNode transform(ParseError node) throws TransformerException {
-		return transform((ASTNode) node);
-	}
+    @Override
+    public ASTNode transform(ParseError node) throws TransformerException {
+        return transform((ASTNode) node);
+    }
 
-	@Override
-	public ASTNode transform(Definition node) throws TransformerException {
-		for (int i = 0; i < node.getItems().size(); i++) {
-			node.getItems().set(i, (DefinitionItem) node.getItems().get(i).accept(this));
-		}
-		return transform((ASTNode) node);
-	}
+    @Override
+    public ASTNode transform(Definition node) throws TransformerException {
+        for (int i = 0; i < node.getItems().size(); i++) {
+            node.getItems().set(i, (DefinitionItem) node.getItems().get(i).accept(this));
+        }
+        return transform((ASTNode) node);
+    }
 
-	@Override
-	public ASTNode transform(DefinitionItem node) throws TransformerException {
-		return transform((ASTNode) node);
-	}
+    @Override
+    public ASTNode transform(DefinitionItem node) throws TransformerException {
+        return transform((ASTNode) node);
+    }
 
-	@Override
-	public ASTNode transform(LiterateDefinitionComment node) throws TransformerException {
-		return transform((DefinitionItem) node);
-	}
+    @Override
+    public ASTNode transform(LiterateDefinitionComment node) throws TransformerException {
+        return transform((DefinitionItem) node);
+    }
 
-	@Override
-	public ASTNode transform(Module node) throws TransformerException {
-		for (int i = 0; i < node.getItems().size(); i++) {
-			node.getItems().set(i, (ModuleItem) node.getItems().get(i).accept(this));
-		}
-		return transform((DefinitionItem) node);
-	}
+    @Override
+    public ASTNode transform(Module node) throws TransformerException {
+        for (int i = 0; i < node.getItems().size(); i++) {
+            node.getItems().set(i, (ModuleItem) node.getItems().get(i).accept(this));
+        }
+        return transform((DefinitionItem) node);
+    }
 
-	@Override
-	public ASTNode transform(ModuleItem node) throws TransformerException {
-		return transform((ASTNode) node);
-	}
+    @Override
+    public ASTNode transform(ModuleItem node) throws TransformerException {
+        return transform((ASTNode) node);
+    }
 
-	@Override
-	public ASTNode transform(Import node) throws TransformerException {
-		return transform((ModuleItem) node);
-	}
+    @Override
+    public ASTNode transform(Import node) throws TransformerException {
+        return transform((ModuleItem) node);
+    }
 
-	@Override
-	public ASTNode transform(LiterateModuleComment node) throws TransformerException {
-		return transform((ModuleItem) node);
-	}
+    @Override
+    public ASTNode transform(LiterateModuleComment node) throws TransformerException {
+        return transform((ModuleItem) node);
+    }
 
-	@Override
-	public ASTNode transform(Sentence node) throws TransformerException {
-		Term body = (Term) node.getBody().accept(this);
-		Term requires = node.getRequires();
-		if (requires != null)
-			requires = (Term) requires.accept(this);
-		Term ensures = node.getEnsures();
-		if (ensures != null)
-			ensures = (Term) ensures.accept(this);
-		node.setBody(body);
-		node.setRequires(requires);
-		node.setEnsures(ensures);
-		return transform((ModuleItem) node);
-	}
+    @Override
+    public ASTNode transform(Sentence node) throws TransformerException {
+        Term body = (Term) node.getBody().accept(this);
+        Term requires = node.getRequires();
+        if (requires != null)
+            requires = (Term) requires.accept(this);
+        Term ensures = node.getEnsures();
+        if (ensures != null)
+            ensures = (Term) ensures.accept(this);
+        node.setBody(body);
+        node.setRequires(requires);
+        node.setEnsures(ensures);
+        return transform((ModuleItem) node);
+    }
 
-	@Override
-	public ASTNode transform(Configuration node) throws TransformerException {
-		Configuration c = node.shallowCopy();
-		return transform((Sentence) c);
-	}
+    @Override
+    public ASTNode transform(Configuration node) throws TransformerException {
+        Configuration c = node.shallowCopy();
+        return transform((Sentence) c);
+    }
 
-	@Override
-	public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
-		org.kframework.kil.Context c = node.shallowCopy();
-		return transform((Sentence) c);
-	}
+    @Override
+    public ASTNode transform(org.kframework.kil.Context node) throws TransformerException {
+        org.kframework.kil.Context c = node.shallowCopy();
+        return transform((Sentence) c);
+    }
 
-	@Override
-	public ASTNode transform(Rule node) throws TransformerException {
-		Rule r = node.shallowCopy();
-		return transform((Sentence) r);
-	}
+    @Override
+    public ASTNode transform(Rule node) throws TransformerException {
+        Rule r = node.shallowCopy();
+        return transform((Sentence) r);
+    }
 
-	@Override
-	public ASTNode transform(Syntax node) throws TransformerException {
-		node.setSort((Sort) node.getSort().accept(this));
-		for (int i = 0; i < node.getPriorityBlocks().size(); i++) {
-			node.getPriorityBlocks().set(i, (PriorityBlock) node.getPriorityBlocks().get(i).accept(this));
-		}
-		return transform((ModuleItem) node);
-	}
+    @Override
+    public ASTNode transform(Syntax node) throws TransformerException {
+        node.setSort((Sort) node.getSort().accept(this));
+        for (int i = 0; i < node.getPriorityBlocks().size(); i++) {
+            node.getPriorityBlocks().set(i, (PriorityBlock) node.getPriorityBlocks().get(i).accept(this));
+        }
+        return transform((ModuleItem) node);
+    }
 
-	@Override
-	public ASTNode transform(PriorityExtended node) throws TransformerException {
-		for (int i = 0; i < node.getPriorityBlocks().size(); i++) {
-			node.getPriorityBlocks().set(i, (PriorityBlockExtended) node.getPriorityBlocks().get(i).accept(this));
-		}
-		return transform((ModuleItem) node);
-	}
+    @Override
+    public ASTNode transform(PriorityExtended node) throws TransformerException {
+        for (int i = 0; i < node.getPriorityBlocks().size(); i++) {
+            node.getPriorityBlocks().set(i, (PriorityBlockExtended) node.getPriorityBlocks().get(i).accept(this));
+        }
+        return transform((ModuleItem) node);
+    }
 
-	@Override
-	public ASTNode transform(PriorityExtendedAssoc node) throws TransformerException {
-		for (int i = 0; i < node.getTags().size(); i++) {
-			node.getTags().set(i, (KLabelConstant) node.getTags().get(i).accept(this));
-		}
-		return transform((ModuleItem) node);
-	}
+    @Override
+    public ASTNode transform(PriorityExtendedAssoc node) throws TransformerException {
+        for (int i = 0; i < node.getTags().size(); i++) {
+            node.getTags().set(i, (KLabelConstant) node.getTags().get(i).accept(this));
+        }
+        return transform((ModuleItem) node);
+    }
 
-	@Override
-	public ASTNode transform(PriorityBlock node) throws TransformerException {
-		for (int i = 0; i < node.getProductions().size(); i++) {
-			node.getProductions().set(i, (Production) node.getProductions().get(i).accept(this));
-		}
-		return transform((ASTNode) node);
-	}
+    @Override
+    public ASTNode transform(PriorityBlock node) throws TransformerException {
+        for (int i = 0; i < node.getProductions().size(); i++) {
+            node.getProductions().set(i, (Production) node.getProductions().get(i).accept(this));
+        }
+        return transform((ASTNode) node);
+    }
 
-	@Override
-	public ASTNode transform(PriorityBlockExtended node) throws TransformerException {
-		for (int i = 0; i < node.getProductions().size(); i++) {
-			node.getProductions().set(i, (KLabelConstant) node.getProductions().get(i).accept(this));
-		}
-		return transform((ASTNode) node);
-	}
+    @Override
+    public ASTNode transform(PriorityBlockExtended node) throws TransformerException {
+        for (int i = 0; i < node.getProductions().size(); i++) {
+            node.getProductions().set(i, (KLabelConstant) node.getProductions().get(i).accept(this));
+        }
+        return transform((ASTNode) node);
+    }
 
-	@Override
-	public ASTNode transform(Production node) throws TransformerException {
-		for (int i = 0; i < node.getItems().size(); i++) {
-			node.getItems().set(i, (ProductionItem) node.getItems().get(i).accept(this));
-		}
-		return transform((ASTNode) node);
-	}
+    @Override
+    public ASTNode transform(Production node) throws TransformerException {
+        for (int i = 0; i < node.getItems().size(); i++) {
+            node.getItems().set(i, (ProductionItem) node.getItems().get(i).accept(this));
+        }
+        return transform((ASTNode) node);
+    }
 
-	@Override
-	public ASTNode transform(ProductionItem node) throws TransformerException {
-		return transform((ASTNode) node);
-	}
+    @Override
+    public ASTNode transform(ProductionItem node) throws TransformerException {
+        return transform((ASTNode) node);
+    }
 
-	@Override
-	public ASTNode transform(Sort node) throws TransformerException {
-		return transform((ProductionItem) node);
-	}
+    @Override
+    public ASTNode transform(Sort node) throws TransformerException {
+        return transform((ProductionItem) node);
+    }
 
-	@Override
-	public ASTNode transform(Terminal node) throws TransformerException {
-		return transform((ProductionItem) node);
-	}
+    @Override
+    public ASTNode transform(Terminal node) throws TransformerException {
+        return transform((ProductionItem) node);
+    }
 
-	@Override
-	public ASTNode transform(Lexical node) throws TransformerException {
-		return transform((ProductionItem) node);
-	}
+    @Override
+    public ASTNode transform(Lexical node) throws TransformerException {
+        return transform((ProductionItem) node);
+    }
 
-	@Override
-	public ASTNode transform(UserList node) throws TransformerException {
-		return transform((ProductionItem) node);
-	}
+    @Override
+    public ASTNode transform(UserList node) throws TransformerException {
+        return transform((ProductionItem) node);
+    }
 
-	@Override
-	public ASTNode transform(Term node) throws TransformerException {
-		return transform((ASTNode) node);
-	}
+    @Override
+    public ASTNode transform(Term node) throws TransformerException {
+        return transform((ASTNode) node);
+    }
 
-	@Override
-	public ASTNode transform(Cell node) throws TransformerException {
-		Cell result = node.shallowCopy();
-		result.setContents((Term) node.getContents().accept(this));
-		return transform((Term) result);
-	}
+    @Override
+    public ASTNode transform(Cell node) throws TransformerException {
+        Cell result = node.shallowCopy();
+        result.setContents((Term) node.getContents().accept(this));
+        return transform((Term) result);
+    }
 
-	@Override
-	public ASTNode transform(Collection node) throws TransformerException {
-		for (int i = 0; i < node.getContents().size(); i++) {
-			node.getContents().set(i, (Term) node.getContents().get(i).accept(this));
-		}
-		return transform((Term) node);
-	}
+    @Override
+    public ASTNode transform(Collection node) throws TransformerException {
+        for (int i = 0; i < node.getContents().size(); i++) {
+            node.getContents().set(i, (Term) node.getContents().get(i).accept(this));
+        }
+        return transform((Term) node);
+    }
 
-	@Override
-	public ASTNode transform(Ambiguity node) throws TransformerException {
-		TransformerException exception = null;
-		ArrayList<Term> terms = new ArrayList<Term>();
-		for (Term t : node.getContents()) {
-			ASTNode result;
-			try {
-				result = t.accept(this);
-				terms.add((Term) result);
-			} catch (TransformerException e) {
-				exception = e;
-			}
-		}
-		if (terms.isEmpty())
-			throw exception;
-		if (terms.size() == 1) {
-			return terms.get(0);
-		}
-		node.setContents(terms);
-		return transform((Term) node);
-	}
+    @Override
+    public ASTNode transform(Ambiguity node) throws TransformerException {
+        TransformerException exception = null;
+        ArrayList<Term> terms = new ArrayList<Term>();
+        for (Term t : node.getContents()) {
+            ASTNode result;
+            try {
+                result = t.accept(this);
+                terms.add((Term) result);
+            } catch (TransformerException e) {
+                exception = e;
+            }
+        }
+        if (terms.isEmpty())
+            throw exception;
+        if (terms.size() == 1) {
+            return terms.get(0);
+        }
+        node.setContents(terms);
+        return transform((Term) node);
+    }
 
-	@Override
-	public ASTNode transform(Bag node) throws TransformerException {
-		Bag result = node.shallowCopy();
-		return transform((Collection) result);
-	}
+    @Override
+    public ASTNode transform(Bag node) throws TransformerException {
+        Bag result = node.shallowCopy();
+        return transform((Collection) result);
+    }
 
-	@Override
-	public ASTNode transform(KSequence node) throws TransformerException {
-		KSequence result = node.shallowCopy();
-		return transform((Collection) result);
-	}
+    @Override
+    public ASTNode transform(KSequence node) throws TransformerException {
+        KSequence result = node.shallowCopy();
+        return transform((Collection) result);
+    }
 
-	@Override
-	public ASTNode transform(List node) throws TransformerException {
-		List result = node.shallowCopy();
-		return transform((Collection) result);
-	}
+    @Override
+    public ASTNode transform(List node) throws TransformerException {
+        List result = node.shallowCopy();
+        return transform((Collection) result);
+    }
 
-	@Override
-	public ASTNode transform(KList node) throws TransformerException {
-		KList result = node.shallowCopy();
-		return transform((Collection) result);
-	}
+    @Override
+    public ASTNode transform(KList node) throws TransformerException {
+        KList result = node.shallowCopy();
+        return transform((Collection) result);
+    }
 
-	@Override
-	public ASTNode transform(Map node) throws TransformerException {
-		Map result = node.shallowCopy();
-		return transform((Collection) result);
-	}
+    @Override
+    public ASTNode transform(Map node) throws TransformerException {
+        Map result = node.shallowCopy();
+        return transform((Collection) result);
+    }
 
-	@Override
-	public ASTNode transform(Set node) throws TransformerException {
-		Set result = node.shallowCopy();
-		return transform((Collection) result);
-	}
+    @Override
+    public ASTNode transform(Set node) throws TransformerException {
+        Set result = node.shallowCopy();
+        return transform((Collection) result);
+    }
 
-	@Override
-	public ASTNode transform(CollectionItem node) throws TransformerException {
-		node.setItem((Term) node.getItem().accept(this));
-		return transform((Term) node);
-	}
+    @Override
+    public ASTNode transform(CollectionItem node) throws TransformerException {
+        node.setItem((Term) node.getItem().accept(this));
+        return transform((Term) node);
+    }
 
-	@Override
-	public ASTNode transform(BagItem node) throws TransformerException {
-		BagItem result = node.shallowCopy();
-		return transform((CollectionItem) result);
-	}
+    @Override
+    public ASTNode transform(BagItem node) throws TransformerException {
+        BagItem result = node.shallowCopy();
+        return transform((CollectionItem) result);
+    }
 
-	@Override
-	public ASTNode transform(ListItem node) throws TransformerException {
-		ListItem result = node.shallowCopy();
-		return transform((CollectionItem) result);
-	}
+    @Override
+    public ASTNode transform(ListItem node) throws TransformerException {
+        ListItem result = node.shallowCopy();
+        return transform((CollectionItem) result);
+    }
 
-	@Override
-	public ASTNode transform(MapItem node) throws TransformerException {
-		MapItem result = node.shallowCopy();
-		result.setKey((Term) node.getKey().accept(this));
-		result.setValue((Term) node.getValue().accept(this));
-		return transform((CollectionItem) result);
-	}
+    @Override
+    public ASTNode transform(MapItem node) throws TransformerException {
+        MapItem result = node.shallowCopy();
+        result.setKey((Term) node.getKey().accept(this));
+        result.setValue((Term) node.getValue().accept(this));
+        return transform((CollectionItem) result);
+    }
 
-	@Override
-	public ASTNode transform(SetItem node) throws TransformerException {
-		SetItem result = node.shallowCopy();
-		return transform((CollectionItem) result);
-	}
+    @Override
+    public ASTNode transform(SetItem node) throws TransformerException {
+        SetItem result = node.shallowCopy();
+        return transform((CollectionItem) result);
+    }
 
     @Override
     public ASTNode transform(CollectionBuiltin node) throws TransformerException {
@@ -354,8 +354,8 @@ public class BasicTransformer implements Transformer {
             elementsRight.add(transformedEntry);
         }
 
-		return ListBuiltin.of(node.sort(), elementsLeft, elementsRight, terms);
-	}
+        return ListBuiltin.of(node.sort(), elementsLeft, elementsRight, terms);
+    }
 
     @Override
     public ASTNode transform(ListLookup node) throws TransformerException {
@@ -399,8 +399,8 @@ public class BasicTransformer implements Transformer {
             elements.put(transformedKey, transformedValue);
         }
 
-		return new MapBuiltin(node.sort(), terms, elements);
-	}
+        return new MapBuiltin(node.sort(), terms, elements);
+    }
 
     @Override
     public ASTNode transform(MapLookup node) throws TransformerException {
@@ -457,28 +457,28 @@ public class BasicTransformer implements Transformer {
         return transform((Token) node);
     }
 
-	@Override
-	public ASTNode transform(ListTerminator node) throws TransformerException {
-		return transform((Term) node);
-	}
+    @Override
+    public ASTNode transform(ListTerminator node) throws TransformerException {
+        return transform((Term) node);
+    }
 
-	@Override
-	public ASTNode transform(Hole node) throws TransformerException {
-		return transform((Term) node);
-	}
+    @Override
+    public ASTNode transform(Hole node) throws TransformerException {
+        return transform((Term) node);
+    }
 
-	@Override
-	public ASTNode transform(KApp node) throws TransformerException {
-		KApp result = node.shallowCopy();
-		result.setLabel((Term) node.getLabel().accept(this));
+    @Override
+    public ASTNode transform(KApp node) throws TransformerException {
+        KApp result = node.shallowCopy();
+        result.setLabel((Term) node.getLabel().accept(this));
         Term resultChild = (Term) node.getChild().accept(this);
         if (!(resultChild.getSort().equals(KSorts.KLIST) || resultChild instanceof Ambiguity)) {
             result.setChild(new KList(Collections.<Term>singletonList(resultChild)));
         } else {
-		    result.setChild(resultChild);
+            result.setChild(resultChild);
         }
         return transform((Term) result);
-	}
+    }
 
     @Override
     public ASTNode transform(KItemProjection node) throws TransformerException {
@@ -489,9 +489,9 @@ public class BasicTransformer implements Transformer {
     }
 
     @Override
-	public ASTNode transform(KLabel node) throws TransformerException {
-		return transform((Term) node);
-	}
+    public ASTNode transform(KLabel node) throws TransformerException {
+        return transform((Term) node);
+    }
 
     @Override
     public ASTNode transform(KLabelConstant node) throws TransformerException {
@@ -507,99 +507,99 @@ public class BasicTransformer implements Transformer {
     }
 
     @Override
-	public ASTNode transform(Rewrite node) throws TransformerException {
-		Rewrite result = node.shallowCopy();
-		result.replaceChildren(
+    public ASTNode transform(Rewrite node) throws TransformerException {
+        Rewrite result = node.shallowCopy();
+        result.replaceChildren(
                 (Term) node.getLeft().accept(this),
                 (Term) node.getRight().accept(this),
                 context);
-		return transform((Term) result);
-	}
+        return transform((Term) result);
+    }
 
-	@Override
-	public ASTNode transform(TermCons node) throws TransformerException {
-		for (int i = 0; i < node.getContents().size(); i++) {
-			node.getContents().set(i, (Term) node.getContents().get(i).accept(this));
-		}
-		return transform((Term) node);
-	}
+    @Override
+    public ASTNode transform(TermCons node) throws TransformerException {
+        for (int i = 0; i < node.getContents().size(); i++) {
+            node.getContents().set(i, (Term) node.getContents().get(i).accept(this));
+        }
+        return transform((Term) node);
+    }
 
-	@Override
-	public ASTNode transform(Bracket node) throws TransformerException {
-		node.setContent((Term) node.getContent().accept(this));
-		return transform((Term) node);
-	}
+    @Override
+    public ASTNode transform(Bracket node) throws TransformerException {
+        node.setContent((Term) node.getContent().accept(this));
+        return transform((Term) node);
+    }
 
-	@Override
-	public ASTNode transform(Cast node) throws TransformerException {
-		node.setContent((Term) node.getContent().accept(this));
-		return transform((Term) node);
-	}
+    @Override
+    public ASTNode transform(Cast node) throws TransformerException {
+        node.setContent((Term) node.getContent().accept(this));
+        return transform((Term) node);
+    }
 
-	@Override
-	public ASTNode transform(Variable node) throws TransformerException {
-		return transform((Term) node);
-	}
+    @Override
+    public ASTNode transform(Variable node) throws TransformerException {
+        return transform((Term) node);
+    }
 
-	@Override
-	public ASTNode transform(Freezer node) throws TransformerException {
-		Term term = (Term) node.getTerm().accept(this);
-		Freezer result = node.shallowCopy();
-		result.setTerm(term);
-		return transform((Term) node);
-	}
+    @Override
+    public ASTNode transform(Freezer node) throws TransformerException {
+        Term term = (Term) node.getTerm().accept(this);
+        Freezer result = node.shallowCopy();
+        result.setTerm(term);
+        return transform((Term) node);
+    }
 
-	@Override
-	public ASTNode transform(BackendTerm term) throws TransformerException {
-		return transform((Term) term);
-	}
+    @Override
+    public ASTNode transform(BackendTerm term) throws TransformerException {
+        return transform((Term) term);
+    }
 
-	@Override
-	public ASTNode transform(Attributes node) throws TransformerException {
-		for (int i = 0; i < node.getContents().size(); i++) {
-			node.getContents().set(i, (Attribute) node.getContents().get(i).accept(this));
-		}
-		return node;
-	}
+    @Override
+    public ASTNode transform(Attributes node) throws TransformerException {
+        for (int i = 0; i < node.getContents().size(); i++) {
+            node.getContents().set(i, (Attribute) node.getContents().get(i).accept(this));
+        }
+        return node;
+    }
 
-	@Override
-	public ASTNode transform(Attribute node) throws TransformerException {
-		return transform((Attribute) node);
-	}
+    @Override
+    public ASTNode transform(Attribute node) throws TransformerException {
+        return transform((Attribute) node);
+    }
 
-	@Override
-	public String getName() {
-		return name;
-	}
+    @Override
+    public String getName() {
+        return name;
+    }
 
-	@Override
-	public ASTNode transform(KInjectedLabel node) throws TransformerException {
-		Term term = (Term) node.getTerm().accept(this);
-		KInjectedLabel result = node.shallowCopy();
-		result.setTerm(term);
-		return transform((Term) result);
-	}
+    @Override
+    public ASTNode transform(KInjectedLabel node) throws TransformerException {
+        Term term = (Term) node.getTerm().accept(this);
+        KInjectedLabel result = node.shallowCopy();
+        result.setTerm(term);
+        return transform((Term) result);
+    }
 
-	@Override
-	public ASTNode transform(FreezerHole node) throws TransformerException {
-		return transform((Term) node);
-	}
+    @Override
+    public ASTNode transform(FreezerHole node) throws TransformerException {
+        return transform((Term) node);
+    }
 
-	@Override
-	public ASTNode transform(FreezerLabel node) throws TransformerException {
-		Term term = (Term) node.getTerm().accept(this);
-		FreezerLabel result = node.shallowCopy();
-		result.setTerm(term);
-		return transform((Term) result);
-	}
+    @Override
+    public ASTNode transform(FreezerLabel node) throws TransformerException {
+        Term term = (Term) node.getTerm().accept(this);
+        FreezerLabel result = node.shallowCopy();
+        result.setTerm(term);
+        return transform((Term) result);
+    }
 
-	@Override
-	public ASTNode transform(StringSentence node) throws TransformerException {
-		return node;
-	}
+    @Override
+    public ASTNode transform(StringSentence node) throws TransformerException {
+        return node;
+    }
 
-	@Override
-	public ASTNode transform(Restrictions node) throws TransformerException {
-		return node;
-	}
+    @Override
+    public ASTNode transform(Restrictions node) throws TransformerException {
+        return node;
+    }
 }

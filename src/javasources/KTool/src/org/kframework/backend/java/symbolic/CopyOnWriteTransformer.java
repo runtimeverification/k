@@ -35,11 +35,11 @@ public class CopyOnWriteTransformer implements Transformer {
 
     protected final TermContext context;
     protected final Definition definition;
-	
-	public CopyOnWriteTransformer(TermContext context) {
-		this.context = context;
+    
+    public CopyOnWriteTransformer(TermContext context) {
+        this.context = context;
         this.definition = context.definition();
-	}
+    }
 
     public CopyOnWriteTransformer(Definition definition) {
         this(TermContext.of(definition));
@@ -49,7 +49,7 @@ public class CopyOnWriteTransformer implements Transformer {
         this.context = null;
         this.definition = null;
     }
-	
+    
     @Override
     public String getName() {
         return this.getClass().toString();

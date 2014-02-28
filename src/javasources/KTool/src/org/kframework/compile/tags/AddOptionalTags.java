@@ -9,23 +9,23 @@ import org.kframework.utils.general.GlobalSettings;
 
 public class AddOptionalTags extends BasicTransformer {
 
-	public AddOptionalTags(Context context) {
-		super("AddOptionalTags", context);
-	}
+    public AddOptionalTags(Context context) {
+        super("AddOptionalTags", context);
+    }
 
-	@Override
-	public ASTNode transform(Attributes node) throws TransformerException {
+    @Override
+    public ASTNode transform(Attributes node) throws TransformerException {
 
-		for (String tag : GlobalSettings.transition)
-			if (node.containsKey(tag))
-				node.set("transition", "");
-		for (String tag : GlobalSettings.supercool)
-			if (node.containsKey(tag))
-				node.set("supercool", "");
-		for (String tag : GlobalSettings.superheat)
-			if (node.containsKey(tag))
-				node.set("superheat", "");
+        for (String tag : GlobalSettings.transition)
+            if (node.containsKey(tag))
+                node.set("transition", "");
+        for (String tag : GlobalSettings.supercool)
+            if (node.containsKey(tag))
+                node.set("supercool", "");
+        for (String tag : GlobalSettings.superheat)
+            if (node.containsKey(tag))
+                node.set("superheat", "");
 
-		return node;
-	}
+        return node;
+    }
 }

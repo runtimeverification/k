@@ -163,17 +163,17 @@ public class Main {
             String value = K.configuration_variables.getProperty(name);
             String parser = K.cfg_parsers.getProperty(name);
             if (context.configVarSorts.containsKey(name)) { // "Command line variable '" + name +"' was not declared in a configuration.";
-            	// there is a problem because en contains also the '(c)olor' element and I can't report an error
-            	// if the user mistypes a variable.
-	            String startSymbol = context.configVarSorts.get(name);
-	            Term parsed = null;
-	            if (parser == null) {
-	                parser = "kast -groundParser -e";
-	            }
-	            parsed = rp.runParserOrDie(parser, value, false, startSymbol, context);
-	            parsed = (Term) parsed.accept(new ResolveVariableAttribute(context));
-	            output.put("$" + name, parsed);
-	            hasPGM = hasPGM || name.equals("$PGM");
+                // there is a problem because en contains also the '(c)olor' element and I can't report an error
+                // if the user mistypes a variable.
+                String startSymbol = context.configVarSorts.get(name);
+                Term parsed = null;
+                if (parser == null) {
+                    parser = "kast -groundParser -e";
+                }
+                parsed = rp.runParserOrDie(parser, value, false, startSymbol, context);
+                parsed = (Term) parsed.accept(new ResolveVariableAttribute(context));
+                output.put("$" + name, parsed);
+                hasPGM = hasPGM || name.equals("$PGM");
             }
         }
         if (!hasPGM && kast != null) {
@@ -233,7 +233,7 @@ public class Main {
 
     // execute krun in normal mode (i.e. not in debug mode)
     @SuppressWarnings("unchecked")
-	public static void normalExecution(Term KAST, String lang, RunProcess rp,
+    public static void normalExecution(Term KAST, String lang, RunProcess rp,
                                        CommandlineOptions cmd_options, Context context) {
         try {
             CommandLine cmd = cmd_options.getCommandLine();
@@ -249,7 +249,7 @@ public class Main {
                     org.kframework.parser.concrete.KParser
                             .ImportTbl(K.compiled_def + "/def/Concrete.tbl");
                     ASTNode pattern = DefinitionLoader.parsePattern(
-                    		K.pattern,
+                            K.pattern,
                             "Command line pattern",
                             KSorts.BAG,
                             context);
@@ -397,64 +397,64 @@ public class Main {
             }
 
             if (K.PRETTY.equals(K.output_mode) || K.KORE.equals(K.output_mode) || K.COMPATIBLE.equals(K.output_mode)) {
-            	
-            	String output = null;
-            			
-            	//Liyi Li: I think this code is temporal, since the new pretty printer
-            	//relies on k definition. I think eventually we need to add
-            	// the KStatue, KSearchResults, and KTestGenerates a definition field.
-            	if(result.getResult() instanceof KRunState){
-            		
-            		UnparserFilterNew printer = new UnparserFilterNew(true, K.color, K.parens, context,K.definition);
-            		((KRunState)(result.getResult())).getResult().accept(printer);
-            		output = printer.getResult();
-            	} else if (result.getResult() instanceof SearchResults) {
-            		
-            		TreeSet<String> solutionStrings = new TreeSet<String>();
-            		for (SearchResult solution : ((SearchResults)result.getResult()).getSolutions()) {
-            			Map<String, Term> substitution = solution.getSubstitution();
-            			if (((SearchResults)result.getResult()).isDefaultPattern()) {
-            				UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, context,K.definition);
-            				substitution.get("B:Bag").accept(unparser);
-            				solutionStrings.add("\n" + unparser.getResult());
-            			} else {
-            				boolean empty = true;
-            				
-            				StringBuilder varStringBuilder = new StringBuilder();
-            				for (String variable : substitution.keySet()) {
-            					UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, context,K.definition);
-            					substitution.get(variable).accept(unparser);
-            					varStringBuilder.append("\n" + variable + " -->\n" + unparser.getResult());
-            					empty = false;
-            				}
-            				if (empty) {
-            					solutionStrings.add("\nEmpty substitution");
-            				} else {
-            					solutionStrings.add(varStringBuilder.toString());
-            				}
-            			}
-            		}
-            		StringBuilder sb = new StringBuilder();
-            		sb.append("Search results:");
-            		if (solutionStrings.isEmpty()) {
-            			sb.append("\nNo search results");
-            		} else {
-            			int i = 1;
-            			for (String string : solutionStrings) {
-            				sb.append("\n\nSolution " + i + ":" + string);
-            				i++;
-            			}
-            		}
-            		
-            		output = sb.toString();
-            	} else if (result.getResult() instanceof TestGenResults) {
-            		
+                
+                String output = null;
+                        
+                //Liyi Li: I think this code is temporal, since the new pretty printer
+                //relies on k definition. I think eventually we need to add
+                // the KStatue, KSearchResults, and KTestGenerates a definition field.
+                if(result.getResult() instanceof KRunState){
+                    
+                    UnparserFilterNew printer = new UnparserFilterNew(true, K.color, K.parens, context,K.definition);
+                    ((KRunState)(result.getResult())).getResult().accept(printer);
+                    output = printer.getResult();
+                } else if (result.getResult() instanceof SearchResults) {
+                    
+                    TreeSet<String> solutionStrings = new TreeSet<String>();
+                    for (SearchResult solution : ((SearchResults)result.getResult()).getSolutions()) {
+                        Map<String, Term> substitution = solution.getSubstitution();
+                        if (((SearchResults)result.getResult()).isDefaultPattern()) {
+                            UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, context,K.definition);
+                            substitution.get("B:Bag").accept(unparser);
+                            solutionStrings.add("\n" + unparser.getResult());
+                        } else {
+                            boolean empty = true;
+                            
+                            StringBuilder varStringBuilder = new StringBuilder();
+                            for (String variable : substitution.keySet()) {
+                                UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, context,K.definition);
+                                substitution.get(variable).accept(unparser);
+                                varStringBuilder.append("\n" + variable + " -->\n" + unparser.getResult());
+                                empty = false;
+                            }
+                            if (empty) {
+                                solutionStrings.add("\nEmpty substitution");
+                            } else {
+                                solutionStrings.add(varStringBuilder.toString());
+                            }
+                        }
+                    }
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Search results:");
+                    if (solutionStrings.isEmpty()) {
+                        sb.append("\nNo search results");
+                    } else {
+                        int i = 1;
+                        for (String string : solutionStrings) {
+                            sb.append("\n\nSolution " + i + ":" + string);
+                            i++;
+                        }
+                    }
+                    
+                    output = sb.toString();
+                } else if (result.getResult() instanceof TestGenResults) {
+                    
                     int n = 1;
                     StringBuilder sb = new StringBuilder();
                     sb.append("Test generation results:");
                     
                     for (TestGenResult testGenResult : ((TestGenResults)result.getResult()).getTestGenResults()) {
-                    	// TODO(YilongL): how to set state id?
+                        // TODO(YilongL): how to set state id?
                         sb.append("\n\nTest case " + n /*+ ", State " + testGenResult.getState().getStateId()*/ + ":");
                         
                         UnparserFilterNew t = new UnparserFilterNew(true, K.color, K.parens, context,K.definition);
@@ -466,14 +466,14 @@ public class Main {
                         Map<String, Term> substitution = testGenResult.getSubstitution();
 
                         if (((TestGenResults)result.getResult()).isDefaultPattern()) {
-                        	UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, context,K.definition);
+                            UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, context,K.definition);
                             substitution.get("B:Bag").accept(unparser);
                             sb.append("\n" + unparser.getResult());
                         } else {
                             boolean empty = true;
 
                             for (String variable : substitution.keySet()) {
-                            	UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, context,K.definition);
+                                UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, context,K.definition);
                                 sb.append("\n" + variable + " -->");
                                 substitution.get(variable).accept(unparser);
                                 sb.append("\n" + unparser.getResult());
@@ -504,10 +504,10 @@ public class Main {
                     
                     output = sb.toString();
                     
-            	} else {
-            		output = result.toString();
-            	}
-            	
+                } else {
+                    output = result.toString();
+                }
+                
                 if (!cmd.hasOption("output-file")) {
                     AnsiConsole.out.println(output);
                 } else {
@@ -833,10 +833,10 @@ public class Main {
      * it will be used for simulation tool
      */
     public static org.kframework.kil.Term preDefineSimulation(CommandlineOptions cmd_options,
-    		CommandLine cmd,Context context,String directory,String pgm) throws IOException, KRunExecutionException, TransformerException{
-    	
-    	K.directory=new File(directory).getCanonicalPath();
-    	K.pgm = pgm;
+            CommandLine cmd,Context context,String directory,String pgm) throws IOException, KRunExecutionException, TransformerException{
+        
+        K.directory=new File(directory).getCanonicalPath();
+        K.pgm = pgm;
 
         File[] dirs = new File(K.directory).listFiles(new FilenameFilter() {
             @Override
@@ -1097,12 +1097,12 @@ public class Main {
             if (cmd.hasOption("maude-cmd")) {
                 K.maude_cmd = cmd.getOptionValue("maude-cmd");
             }
-			/*
-			 * if (cmd.hasOption("xsearch-pattern")) { K.maude_cmd = "search";
-			 * K.do_search = true; K.xsearch_pattern =
-			 * cmd.getOptionValue("xsearch-pattern"); //
-			 * System.out.println("xsearch-pattern:" + K.xsearch_pattern); }
-			 */
+            /*
+             * if (cmd.hasOption("xsearch-pattern")) { K.maude_cmd = "search";
+             * K.do_search = true; K.xsearch_pattern =
+             * cmd.getOptionValue("xsearch-pattern"); //
+             * System.out.println("xsearch-pattern:" + K.xsearch_pattern); }
+             */
             if (cmd.hasOption("pattern")) {
                 K.pattern = cmd.getOptionValue("pattern");
             }
@@ -1119,9 +1119,9 @@ public class Main {
                 K.output_mode = cmd.getOptionValue("output");
                 
                 if (K.output_mode.equals("smart")){
-                	
-                	K.output_mode=K.PRETTY;
-                	K.parens=false;
+                    
+                    K.output_mode=K.PRETTY;
+                    K.parens=false;
                 }
             }
             if (cmd.hasOption("load-cfg")) {
@@ -1202,42 +1202,42 @@ public class Main {
             }
             
             if(cmd.hasOption("simulation")) {
-            	
-            	String[] temp = cmd.getOptionValue("simulation").split("\\s+");
-            	K.simulationDefinitionLeft=temp[0];
-            	K.simulationDefinitionRight=temp[1];
-            	K.simulationProgLeft=temp[2];
-            	K.simulationProgRight=temp[3];
-            	
-            	Context contextLeft = new Context();
-            	Context contextRight = new Context();
-            	Term leftInitTerm = null;
-            	Term rightInitTerm = null;
-            	Waitor runSimulation = null;
-            	
-            	try {
-					leftInitTerm = Main.preDefineSimulation(cmd_options, cmd,
-							contextLeft, K.simulationDefinitionLeft, K.simulationProgLeft);
-					rightInitTerm = Main.preDefineSimulation(cmd_options, cmd,
-							contextRight, K.simulationDefinitionRight, K.simulationProgRight);
-				} catch (KRunExecutionException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (TransformerException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-            	
-            	try {
-					runSimulation = new Waitor(contextLeft, contextRight, leftInitTerm, rightInitTerm);
-				} catch (KRunExecutionException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-            	
-            	runSimulation.start();
-            	
-            	return;
+                
+                String[] temp = cmd.getOptionValue("simulation").split("\\s+");
+                K.simulationDefinitionLeft=temp[0];
+                K.simulationDefinitionRight=temp[1];
+                K.simulationProgLeft=temp[2];
+                K.simulationProgRight=temp[3];
+                
+                Context contextLeft = new Context();
+                Context contextRight = new Context();
+                Term leftInitTerm = null;
+                Term rightInitTerm = null;
+                Waitor runSimulation = null;
+                
+                try {
+                    leftInitTerm = Main.preDefineSimulation(cmd_options, cmd,
+                            contextLeft, K.simulationDefinitionLeft, K.simulationProgLeft);
+                    rightInitTerm = Main.preDefineSimulation(cmd_options, cmd,
+                            contextRight, K.simulationDefinitionRight, K.simulationProgRight);
+                } catch (KRunExecutionException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (TransformerException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                
+                try {
+                    runSimulation = new Waitor(contextLeft, contextRight, leftInitTerm, rightInitTerm);
+                } catch (KRunExecutionException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                
+                runSimulation.start();
+                
+                return;
             }
             
             String[] remainingArguments = null;
@@ -1311,12 +1311,12 @@ public class Main {
             context.kompiled = new File(K.compiled_def);
             K.kdir = context.dotk.getCanonicalPath();
             K.setKDir();
-			/*
-			 * System.out.println("K.k_definition=" + K.k_definition);
-			 * System.out.println("K.syntax_module=" + K.syntax_module);
-			 * System.out.println("K.main_module=" + K.main_module);
-			 * System.out.println("K.compiled_def=" + K.compiled_def);
-			 */
+            /*
+             * System.out.println("K.k_definition=" + K.k_definition);
+             * System.out.println("K.syntax_module=" + K.syntax_module);
+             * System.out.println("K.main_module=" + K.main_module);
+             * System.out.println("K.compiled_def=" + K.compiled_def);
+             */
 
             sw.printIntermediate("Checking compiled definition");
 

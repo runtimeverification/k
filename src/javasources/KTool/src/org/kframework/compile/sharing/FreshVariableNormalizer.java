@@ -60,10 +60,10 @@ public class FreshVariableNormalizer extends CopyOnWriteTransformer {
     class FreshVariableCounter extends BasicVisitor {
 
         public FreshVariableCounter(Context context) {
-			super(context);
-		}
+            super(context);
+        }
 
-		@Override
+        @Override
         public void visit(Variable variable) {
             if (substitution.containsKey(variable)) {
                 return;

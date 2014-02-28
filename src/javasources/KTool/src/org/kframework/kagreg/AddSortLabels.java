@@ -23,61 +23,61 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  * syntax Exp ::= Id
  *              | Exp "+" Exp into
  * syntax Exp ::= Id 
- * 	            | Exp "+" Exp
+ *                 | Exp "+" Exp
  *              | "LExp" Id ":" Exp
  *              
  * If multiple syntax declarations for the same sort appear, makes sure only one is changed.
  */
 public class AddSortLabels extends CopyOnWriteTransformer {
-	
-	/* 
-	 * list of sorts already labeled, when encountered again ignore.
-	 */
-	final protected List<String> labeledSorts;
+    
+    /* 
+     * list of sorts already labeled, when encountered again ignore.
+     */
+    final protected List<String> labeledSorts;
 
-	public AddSortLabels(Context context, List<String> labeledSorts) {
-		super("AddSortLabels", context);
-		this.labeledSorts = labeledSorts;
-	}
-	
-	@Override
-	public ASTNode transform(Module module) throws TransformerException {
-		if (module.isPredefined()) {
-			return module;
-		}
-		return super.transform(module);
-	}
-	
-	@Override
-	public ASTNode transform(Syntax syntax) throws TransformerException {
-		if (labeledSorts.contains(syntax.getSort().getName())) {
-			return syntax;
-		}
-		labeledSorts.add(syntax.getSort().getName());
-		List<ProductionItem> productionItems = new ArrayList<ProductionItem>();
-		productionItems.add(new Terminal("L" + syntax.getSort()));
-		productionItems.add(new Sort("Id"));
-		productionItems.add(new Terminal(":"));
-		productionItems.add(syntax.getSort());
-		Production production = new Production(syntax.getSort(), productionItems);
+    public AddSortLabels(Context context, List<String> labeledSorts) {
+        super("AddSortLabels", context);
+        this.labeledSorts = labeledSorts;
+    }
+    
+    @Override
+    public ASTNode transform(Module module) throws TransformerException {
+        if (module.isPredefined()) {
+            return module;
+        }
+        return super.transform(module);
+    }
+    
+    @Override
+    public ASTNode transform(Syntax syntax) throws TransformerException {
+        if (labeledSorts.contains(syntax.getSort().getName())) {
+            return syntax;
+        }
+        labeledSorts.add(syntax.getSort().getName());
+        List<ProductionItem> productionItems = new ArrayList<ProductionItem>();
+        productionItems.add(new Terminal("L" + syntax.getSort()));
+        productionItems.add(new Sort("Id"));
+        productionItems.add(new Terminal(":"));
+        productionItems.add(syntax.getSort());
+        Production production = new Production(syntax.getSort(), productionItems);
 
-//		System.out.println("Before: " + context.conses);
-		AddConsesVisitor acv = new AddConsesVisitor(context);
-		production.accept(acv);
-//		System.out.println("After: " + context.conses);
-//		acv.visit(production);
-		List<PriorityBlock> priorityBlocks = syntax.getPriorityBlocks();
-		if (priorityBlocks.size() == 0) {
-//			System.out.println(syntax.getSort() + " empty priorityBlocks");
-			PriorityBlock priorityBlock = new PriorityBlock();
-			List<Production> productions = new ArrayList<Production>();
-			productions.add(production);
-			priorityBlock.setProductions(productions);
-			priorityBlocks.add(priorityBlock);
-		} else {
-			priorityBlocks.get(priorityBlocks.size() - 1).getProductions().add(production);
-		}
-		syntax.setPriorityBlocks(priorityBlocks);
-		return syntax;
-	}
+//        System.out.println("Before: " + context.conses);
+        AddConsesVisitor acv = new AddConsesVisitor(context);
+        production.accept(acv);
+//        System.out.println("After: " + context.conses);
+//        acv.visit(production);
+        List<PriorityBlock> priorityBlocks = syntax.getPriorityBlocks();
+        if (priorityBlocks.size() == 0) {
+//            System.out.println(syntax.getSort() + " empty priorityBlocks");
+            PriorityBlock priorityBlock = new PriorityBlock();
+            List<Production> productions = new ArrayList<Production>();
+            productions.add(production);
+            priorityBlock.setProductions(productions);
+            priorityBlocks.add(priorityBlock);
+        } else {
+            priorityBlocks.get(priorityBlocks.size() - 1).getProductions().add(production);
+        }
+        syntax.setPriorityBlocks(priorityBlocks);
+        return syntax;
+    }
 }

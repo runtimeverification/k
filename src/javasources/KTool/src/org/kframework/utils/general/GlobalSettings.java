@@ -56,35 +56,35 @@ public class GlobalSettings {
     }
 
     private static OS os = null;
-	public static boolean verbose = false;
-	public static String lib = "";
-	public static String synModule = null;
-	public static KExceptionManager kem = new KExceptionManager();
-	public static File mainFile;
-	public static String mainFileWithNoExtension;
-	public static String outputDir;
-	public static String warnings = "normal";
-	public static List<String> transition = new ArrayList<String>();
-	public static List<String> superheat = new ArrayList<String>();
-	public static List<String> supercool = new ArrayList<String>();
-	public static List<String> doctags = new ArrayList<String>();
+    public static boolean verbose = false;
+    public static String lib = "";
+    public static String synModule = null;
+    public static KExceptionManager kem = new KExceptionManager();
+    public static File mainFile;
+    public static String mainFileWithNoExtension;
+    public static String outputDir;
+    public static String warnings = "normal";
+    public static List<String> transition = new ArrayList<String>();
+    public static List<String> superheat = new ArrayList<String>();
+    public static List<String> supercool = new ArrayList<String>();
+    public static List<String> doctags = new ArrayList<String>();
 
-	
+    
     public static final String TRANSITION = "transition";
 
     static {
-		transition.add(TRANSITION);
-		superheat.add("superheat");
-		supercool.add("supercool");
-		doctags.add("documentation");
-	}
-	public static boolean addTopCell = false;
-	public static String style = "poster,style=bubble";
-	public static boolean fastKast = false;
-	public static boolean noPrelude = false;
-	
-	// this is used by kast to know what parser to use fort the input string
-	public static ParserType whatParser = ParserType.PROGRAM;
+        transition.add(TRANSITION);
+        superheat.add("superheat");
+        supercool.add("supercool");
+        doctags.add("documentation");
+    }
+    public static boolean addTopCell = false;
+    public static String style = "poster,style=bubble";
+    public static boolean fastKast = false;
+    public static boolean noPrelude = false;
+    
+    // this is used by kast to know what parser to use fort the input string
+    public static ParserType whatParser = ParserType.PROGRAM;
 
     public static OS os() {
         if (os == null) {
@@ -99,23 +99,23 @@ public class GlobalSettings {
 
     public static boolean isWindowsOS() {
         return os() == OS.WIN;
-	}
+    }
 
     public enum ParserType {
-		PROGRAM, GROUND, RULES, BINARY
-	}
+        PROGRAM, GROUND, RULES, BINARY
+    }
 
-	public static boolean symbolicEquality = false;
-	public static boolean SMT = false;
-	public static boolean javaBackend = false;
-	public static boolean documentation = false;
-	public static boolean NOSMT = false;
+    public static boolean symbolicEquality = false;
+    public static boolean SMT = false;
+    public static boolean javaBackend = false;
+    public static boolean documentation = false;
+    public static boolean NOSMT = false;
 
-	//needed for test generation in Java backend
-	public static boolean testgen = false;
-	
-	public static String CHECK = null;
-	public static boolean symbolic = false; // true if the --symbolic argument has been provided to kompile
+    //needed for test generation in Java backend
+    public static boolean testgen = false;
+    
+    public static String CHECK = null;
+    public static boolean symbolic = false; // true if the --symbolic argument has been provided to kompile
     public static List<String> symbolicTags = new LinkedList<>();
     public static List<String> nonSymbolicTags = new LinkedList<>();
 }

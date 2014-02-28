@@ -20,7 +20,7 @@ public enum KilProperty {
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
     public static @interface DependsOn {
-	    KilProperty value();
+        KilProperty value();
     }
 
     /**
@@ -30,6 +30,6 @@ public enum KilProperty {
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
     public static @interface Provides {
-	    KilProperty value();
+        KilProperty value();
     }
 }

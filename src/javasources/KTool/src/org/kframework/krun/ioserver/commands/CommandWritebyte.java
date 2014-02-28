@@ -9,29 +9,29 @@ import java.util.logging.Logger;
 public class CommandWritebyte extends Command {
 
 
-	private long ID;
-	private byte ascii;
+    private long ID;
+    private byte ascii;
 
-	public CommandWritebyte(String[] args, Socket socket, Logger logger, FileSystem fs) { //, Long maudeId) {
-		super(args, socket, logger, fs); //, maudeId);
+    public CommandWritebyte(String[] args, Socket socket, Logger logger, FileSystem fs) { //, Long maudeId) {
+        super(args, socket, logger, fs); //, maudeId);
 
-		try {
-			ID = Long.parseLong(args[1]);
-			// ascii = Byte.parseByte(args[2]);
-			int signedByte = Integer.parseInt(args[2]);
-			ascii = (byte)signedByte;
-		} catch (NumberFormatException nfe) {
-			fail("write operation aborted: " + nfe.getLocalizedMessage());
-		}
-	}
+        try {
+            ID = Long.parseLong(args[1]);
+            // ascii = Byte.parseByte(args[2]);
+            int signedByte = Integer.parseInt(args[2]);
+            ascii = (byte)signedByte;
+        } catch (NumberFormatException nfe) {
+            fail("write operation aborted: " + nfe.getLocalizedMessage());
+        }
+    }
 
-	public void run() {
-		try {
+    public void run() {
+        try {
             fs.get(ID).putc(ascii);
             succeed();
         } catch (IOException e) {
             fail(e.getMessage());
         }
-	}
+    }
 
 }

@@ -7,11 +7,11 @@ import java.util.ArrayList;
 
 public class KompileOptionsParser {
 
-	private final Options options;
-	// For printing help messages: options = optionsStandard + optionsExperimental
-	private final Options optionsStandard;
-	private final Options optionsExperimental;
-	private final ArrayList<Option> optionList = new ArrayList<>();
+    private final Options options;
+    // For printing help messages: options = optionsStandard + optionsExperimental
+    private final Options optionsStandard;
+    private final Options optionsExperimental;
+    private final ArrayList<Option> optionList = new ArrayList<>();
 
     @SuppressWarnings("static-access")
     public KompileOptionsParser() {
@@ -65,17 +65,17 @@ public class KompileOptionsParser {
         return null; // unreachable code
     }
 
-	Options getOptionsStandard() {
-		return optionsStandard;
-	}
+    Options getOptionsStandard() {
+        return optionsStandard;
+    }
 
-	Options getOptionsExperimental() {
-		return optionsExperimental;
-	}
+    Options getOptionsExperimental() {
+        return optionsExperimental;
+    }
 
-	ArrayList<Option> getOptionList() {
-		return optionList;
-	}
+    ArrayList<Option> getOptionList() {
+        return optionList;
+    }
 
     private void addOptionWrapper(Option opt, boolean isStandard) {
         // for parsing command-line options

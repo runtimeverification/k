@@ -14,42 +14,42 @@ import java.io.File;
 import java.io.IOException;
 
 public class UnparserBackend extends BasicBackend {
-	private boolean unflattenFirst; // unflatten syntax before unparsing
+    private boolean unflattenFirst; // unflatten syntax before unparsing
 
-	public UnparserBackend(Stopwatch sw, Context context) {
-		super(sw, context);
-		this.unflattenFirst = false;
-	}
+    public UnparserBackend(Stopwatch sw, Context context) {
+        super(sw, context);
+        this.unflattenFirst = false;
+    }
 
-	public UnparserBackend(Stopwatch sw, Context context, boolean unflattenFirst) {
-		super(sw, context);
-		this.unflattenFirst = unflattenFirst;
-	}
+    public UnparserBackend(Stopwatch sw, Context context, boolean unflattenFirst) {
+        super(sw, context);
+        this.unflattenFirst = unflattenFirst;
+    }
 
-	@Override
-	public void run(Definition definition) throws IOException {
-		if (unflattenFirst) {
-			ConcretizeSyntax concretizeSyntax = new ConcretizeSyntax(context);
-			try {
-				definition = (Definition)definition.accept(concretizeSyntax);
-			} catch (TransformerException e) {
-				System.err.println("Error unflattening syntax:");
-				e.printStackTrace();
-			}
-		}
-		UnparserFilter unparserFilter = new UnparserFilter(context);
-		definition.accept(unparserFilter);
+    @Override
+    public void run(Definition definition) throws IOException {
+        if (unflattenFirst) {
+            ConcretizeSyntax concretizeSyntax = new ConcretizeSyntax(context);
+            try {
+                definition = (Definition)definition.accept(concretizeSyntax);
+            } catch (TransformerException e) {
+                System.err.println("Error unflattening syntax:");
+                e.printStackTrace();
+            }
+        }
+        UnparserFilter unparserFilter = new UnparserFilter(context);
+        definition.accept(unparserFilter);
 
-		String unparsedText = unparserFilter.getResult();
+        String unparsedText = unparserFilter.getResult();
 
-		FileUtil.save(context.dotk.getAbsolutePath() + "/def.k", unparsedText);
+        FileUtil.save(context.dotk.getAbsolutePath() + "/def.k", unparsedText);
 
         FileUtil.save(GlobalSettings.outputDir + File.separator + FilenameUtils.removeExtension(GlobalSettings.mainFile.getName()) + ".unparsed.k", unparsedText);
-	}
+    }
 
-	@Override
-	public String getDefaultStep() {
-		return "FirstStep";
-	}
+    @Override
+    public String getDefaultStep() {
+        return "FirstStep";
+    }
 
 }

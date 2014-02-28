@@ -11,27 +11,27 @@ import java.util.ArrayList;
 
 public class AddSymbolicK extends CopyOnWriteTransformer {
 
-	private static final String SymbolicConstructorPrefix = "#sym";
+    private static final String SymbolicConstructorPrefix = "#sym";
 
-	public AddSymbolicK(Context context) {
-		super("Add symbolic constructors", context);
-	}
+    public AddSymbolicK(Context context) {
+        super("Add symbolic constructors", context);
+    }
 
-	public static final boolean allowSymbolic(String sort) {
-		return sort.equals("List") || sort.equals("Set") ||
+    public static final boolean allowSymbolic(String sort) {
+        return sort.equals("List") || sort.equals("Set") ||
                 sort.equals("Bag") || sort.equals("Map") ||
                 allowKSymbolic(sort);
-	}
+    }
 
     public static final boolean allowKSymbolic(String sort) {
         return MetaK.isComputationSort(sort) && !MetaK.isBuiltinSort(sort);
     }
 
     public static final String symbolicConstructor(String sort) {
-		assert allowSymbolic(sort);
+        assert allowSymbolic(sort);
 
             return SymbolicConstructorPrefix + sort;
-	}
+    }
 
     public static final boolean isSymbolicConstructor(String sort) {
         return sort.startsWith(SymbolicConstructorPrefix);
@@ -58,37 +58,37 @@ public class AddSymbolicK extends CopyOnWriteTransformer {
         return symTerm;
     }
 
-	public Term freshSymSortN(String sort, int n) {
-		return KApp.of(
+    public Term freshSymSortN(String sort, int n) {
+        return KApp.of(
                 KLabelConstant.of("'#freshSymSortN", context),
                 StringBuiltin.kAppOf(sort),
                 IntBuiltin.kAppOf(n));
-	}
+    }
 
-//	public Term freshSymSortId(String sort, String id) {
-//		return KApp.of(
+//    public Term freshSymSortId(String sort, String id) {
+//        return KApp.of(
 //                KLabelConstant.of("'#freshSymSortN", context),
 //                StringBuiltin.kAppOf(sort),
 //                StringBuiltin.kAppOf(id));
-//	}
-	
-	@Override
-	public ASTNode transform(Module node) throws TransformerException {
-		Module retNode = node.shallowCopy();
-		retNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
+//    }
+    
+    @Override
+    public ASTNode transform(Module node) throws TransformerException {
+        Module retNode = node.shallowCopy();
+        retNode.setItems(new ArrayList<ModuleItem>(node.getItems()));
 
-		for (String sort : node.getAllSorts()) {
+        for (String sort : node.getAllSorts()) {
             if (allowKSymbolic(sort)) {
                 //retNode.addProduction(sort, getSymbolicProduction(sort));
                 retNode.addConstant(KSorts.KLABEL, symbolicConstructor(sort));
             }
-		}
+        }
 
-		if (retNode.getItems().size() != node.getItems().size())
-			return retNode;
-		else
-			return node;
-	}
+        if (retNode.getItems().size() != node.getItems().size())
+            return retNode;
+        else
+            return node;
+    }
 
     public static String getSymbolicConstructorPrefix() {
         return SymbolicConstructorPrefix;
