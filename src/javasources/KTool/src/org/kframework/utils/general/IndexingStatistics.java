@@ -88,7 +88,7 @@ public class IndexingStatistics {
     private static int computeMin(List<Number> rulesSelectedAtEachStep) {
         Number min = rulesSelectedAtEachStep.get(0);
         for (Number num : rulesSelectedAtEachStep) {
-            if (num != 0 && num.longValue() < min.longValue()) {
+            if (!num.equals(0) && num.longValue() < min.longValue()) {
                 min = num;
             }
         }
