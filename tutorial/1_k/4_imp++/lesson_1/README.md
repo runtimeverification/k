@@ -1,5 +1,7 @@
 ### Extending/Changing an Existing Language Syntax
 
+[MOVIE [7'47"]](http://youtu.be/hWqJ8k9NNp8)
+
 Here we learn how to extend the syntax of an existing language, both with
 new syntactic constructs and with more general uses of existing constructs.
 The latter, in particular, requires changes of the existing semantics.

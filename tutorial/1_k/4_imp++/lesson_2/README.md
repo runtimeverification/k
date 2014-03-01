@@ -1,5 +1,7 @@
 ### Configuration Refinement; Freshness
 
+[MOVIE [4'06"]](http://youtu.be/f-qrqs8cMcU)
+
 To prepare for the semantics of threads and local variables, in this lesson we
 split the state cell into an environment and a store.  The environment and
 the store will be similar to those in the definition of LAMBDA++ in Part
