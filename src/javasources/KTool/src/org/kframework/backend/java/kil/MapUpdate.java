@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
@@ -83,6 +84,7 @@ public class MapUpdate extends Term {
 
     @Override
     public boolean isSymbolic() {
+        // TODO(YilongL): throw an exception instead?
         return false;
     }
 
@@ -126,7 +128,13 @@ public class MapUpdate extends Term {
 
     @Override
     public void accept(Unifier unifier, Term pattern) {
+        // TODO(YilongL): throw an exception instead?
         unifier.unify(this, pattern);
+    }
+
+    @Override
+    public void accept(Matcher matcher, Term pattern) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

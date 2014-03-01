@@ -1,6 +1,11 @@
 package org.kframework.backend.java.kil;
 
+import org.kframework.backend.java.symbolic.Matcher;
+import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Unifier;
+import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
+import org.kframework.kil.ASTNode;
 
 import java.util.Collections;
 import java.util.Set;
@@ -65,6 +70,26 @@ public abstract class Token extends Term implements Sorted {
 
         Token token = (Token) object;
         return sort().equals(token.sort()) && value().equals(token.value());
+    }
+
+    @Override
+    public void accept(Unifier unifier, Term pattern) {
+        unifier.unify(this, pattern);
+    }
+
+    @Override
+    public void accept(Matcher matcher, Term pattern) {
+        matcher.match(this, pattern);
+    }
+
+    @Override
+    public ASTNode accept(Transformer transformer) {
+        return transformer.transform(this);
+    }
+
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
     }
 
     @Override

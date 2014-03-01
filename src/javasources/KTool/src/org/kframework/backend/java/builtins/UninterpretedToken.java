@@ -73,21 +73,6 @@ public class UninterpretedToken extends Token {
         return this == object;
     }
 
-    @Override
-    public void accept(Unifier unifier, Term patten) {
-        unifier.unify(this, patten);
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) {
-        return transformer.transform(this);
-    }
-
-    @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-
     /**
      * Returns the cached instance rather than the de-serialized instance if there is a cached
      * instance.

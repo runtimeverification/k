@@ -15,7 +15,7 @@ import org.kframework.utils.general.IndexingStatistics;
  *
  * @author AndreiS
  */
-public abstract class Term extends JavaSymbolicObject implements Transformable, Unifiable, Comparable<Term> {
+public abstract class Term extends JavaSymbolicObject implements Transformable, Matchable, Unifiable, Comparable<Term> {
 
     protected final Kind kind;
     // protected final boolean normalized;

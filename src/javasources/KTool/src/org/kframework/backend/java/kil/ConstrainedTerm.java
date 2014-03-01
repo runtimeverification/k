@@ -13,6 +13,7 @@ import java.util.Set;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.SymbolicConstraint.Equality;
 import org.kframework.backend.java.symbolic.SymbolicConstraint.TruthValue;
+import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.UninterpretedConstraint;
@@ -511,6 +512,11 @@ public class ConstrainedTerm extends Term {
 
     @Override
     public void accept(Unifier unifier, Term patten) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void accept(Matcher matcher, Term pattern) {
         throw new UnsupportedOperationException();
     }
 

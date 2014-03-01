@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
@@ -122,8 +123,13 @@ public class BuiltinList extends Collection implements Sorted {
     }
 
     @Override
-    public void accept(Unifier unifier, Term patten) {
-        unifier.unify(this, patten);
+    public void accept(Unifier unifier, Term pattern) {
+        unifier.unify(this, pattern);
+    }
+    
+    @Override
+    public void accept(Matcher matcher, Term pattern) {
+        matcher.match(this, pattern);
     }
 
     @Override
@@ -276,4 +282,5 @@ public class BuiltinList extends Collection implements Sorted {
     public int removeRight() {
         return removeRight;
     }
+
 }
