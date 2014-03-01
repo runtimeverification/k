@@ -1,5 +1,6 @@
 package org.kframework.compile.transformers;
 
+import org.kframework.compile.utils.KilProperty;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.BuiltinLookup;
 import org.kframework.kil.KSort;
@@ -45,6 +46,8 @@ import java.util.Set;
  *
  * @author AndreiS
  */
+@KilProperty.Requires({KilProperty.TOP_REWRITING, KilProperty.COMPILED_DATA_STRUCTURES})
+@KilProperty.Ensures(KilProperty.NO_DATA_STRUCTURE_PATTERN_MATCHING)
 public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
 
     private interface VariableCache {
