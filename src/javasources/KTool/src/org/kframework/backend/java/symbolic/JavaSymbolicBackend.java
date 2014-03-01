@@ -1,6 +1,7 @@
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.BasicBackend;
+import org.kframework.backend.java.indexing.IndexCreator;
 import org.kframework.compile.FlattenModules;
 import org.kframework.compile.ResolveConfigurationAbstraction;
 import org.kframework.compile.checks.CheckConfigurationCells;
@@ -58,10 +59,16 @@ public class JavaSymbolicBackend extends BasicBackend {
 
     @Override
     public Definition lastStep(Definition javaDef) {
+        org.kframework.backend.java.kil.Definition definition =
+                new KILtoBackendJavaKILTransformer(context, true).transformDefinition(javaDef);
+
+        IndexCreator.build(definition);
+
+        assert definition.getIndex() != null;
+
         BinaryLoader.save(new File(context.dotk,
                 JavaSymbolicBackend.DEFINITION_FILENAME).toString(),
-                new KILtoBackendJavaKILTransformer(context, true)
-                        .transformDefinition(javaDef));
+                definition);
 
         return javaDef;
     }

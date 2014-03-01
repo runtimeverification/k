@@ -22,13 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.common.collect.Sets;
 import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.indexing.BottomIndex;
-import org.kframework.backend.java.indexing.FreezerIndex;
-import org.kframework.backend.java.indexing.Index;
-import org.kframework.backend.java.indexing.IndexingPair;
-import org.kframework.backend.java.indexing.KLabelIndex;
-import org.kframework.backend.java.indexing.TokenIndex;
-import org.kframework.backend.java.indexing.TopIndex;
+import org.kframework.backend.java.indexing.*;
 import org.kframework.backend.java.indexing.pathIndex.PathIndex;
 import org.kframework.utils.general.IndexingStatistics;
 import org.kframework.backend.java.kil.Cell;
@@ -61,35 +55,37 @@ public class SymbolicRewriter {
 
     private final Definition definition;
     private final TransitionCompositeStrategy strategy
-    = new TransitionCompositeStrategy(GlobalSettings.transition);
+            = new TransitionCompositeStrategy(GlobalSettings.transition);
     private final Stopwatch stopwatch = new Stopwatch();
     private int step;
     private final Stopwatch ruleStopwatch = new Stopwatch();
-    private Map<Index, List<Rule>> ruleTable;
-    private Map<Index, List<Rule>> heatingRuleTable;
-    private Map<Index, List<Rule>> coolingRuleTable;
-    private Map<Index, List<Rule>> simulationRuleTable;
-    private List<Rule> unindexedRules;
+    //    private Map<Index, List<Rule>> ruleTable;
+//    private Map<Index, List<Rule>> heatingRuleTable;
+//    private Map<Index, List<Rule>> coolingRuleTable;
+//    private Map<Index, List<Rule>> simulationRuleTable;
+//    private List<Rule> unindexedRules;
     private final List<ConstrainedTerm> results = new ArrayList<ConstrainedTerm>();
     private final List<Rule> appliedRules = new ArrayList<Rule>();
     private boolean transition;
     private final PluggableKastStructureChecker phase1PluggableKastChecker;
     private final PluggableKastStructureChecker phase2PluggableKastChecker;
     private PathIndex pathIndex;
-    
+    private BasicIndex basicIndex;
+
     /*
      * Liyi Li : add simulation rules in the constructor, and allow user to input label [alphaRule] as
      * the indication that the rule will be used as simulation
      */
     public SymbolicRewriter(Definition definition) {
         this.definition = definition;
+        basicIndex = (BasicIndex)definition.getIndex();
         
         /* initialize the K AST checker for test generation */
         if (K.do_testgen) {
             phase1PluggableKastChecker = new PluggableKastStructureChecker();
             phase1PluggableKastChecker.register(new CheckingNestedStructureDepth());
             phase1PluggableKastChecker.register(new CheckingLeftAssocConstructs(definition));
-            
+
             phase2PluggableKastChecker = new PluggableKastStructureChecker();
             phase2PluggableKastChecker.register(new CheckingLeftAssocConstructs(definition));
         } else {
@@ -97,130 +93,132 @@ public class SymbolicRewriter {
             phase2PluggableKastChecker = null;
         }
 
-        // Index may be built with or without measurement
-        if (K.get_indexing_stats){
-            buildIndexWithStats(definition);
-        } else{
-            buildIndex(definition);
-        }
+
+
+//        // Index may be built with or without measurement
+//        if (K.get_indexing_stats){
+//            buildIndexWithStats(definition);
+//        } else{
+//            buildIndex(definition);
+//        }
     }
 
-    /**
-     * Builds rule index with a very basic Indexing Scheme. Does not measure time.
-     *
-     * @param definition
-     */
-    private void buildIndex(Definition definition) {
-        if (K.do_indexing) {
-            pathIndex = new PathIndex(definition);
-        } else {
-            buildBasicIndex();
-        }
-    }
-
-    /**
-     * Builds rule index with a very basic Indexing Scheme. Measures index creation time.
-     *
-     * @param definition
-     */
-    private void buildIndexWithStats(Definition definition) {
-        IndexingStatistics.indexConstructionStopWatch.start();
-        if (K.do_indexing) {
-            pathIndex = new PathIndex(definition);
-        } else {
-            buildBasicIndex();
-        }
-        IndexingStatistics.indexConstructionStopWatch.stop();
-    }
-
-    private void buildBasicIndex() {
-
-        /* populate the table of rules rewriting the top configuration */
-        List<Index> indices = new ArrayList<Index>();
-        indices.add(TopIndex.TOP);
-        indices.add(BottomIndex.BOTTOM);
-        for (KLabelConstant kLabel : definition.kLabels()) {
-            indices.add(new KLabelIndex(kLabel));
-            indices.add(new FreezerIndex(kLabel, -1));
-            if (!kLabel.productions().isEmpty()) {
-                for (int i = 0; i < kLabel.productions().get(0).getArity(); ++i) {
-                    indices.add(new FreezerIndex(kLabel, i));
-                }
-            }
-        }
-        //for (KLabelConstant frozenKLabel : definition.frozenKLabels()) {
-        //    for (int i = 0; i < frozenKLabel.productions().get(0).getArity(); ++i) {
-        //        indices.add(new FreezerIndex(frozenKLabel, i));
-        //    }
-        //}
-        for (String sort : definition.builtinSorts()) {
-            indices.add(new TokenIndex(sort));
-        }
-
-        /* Map each index to a list of rules unifiable with that index */
-        /* Heating rules and regular rules have their first index checked */
-        /* Cooling rules have their second index checked */
-        ImmutableMap.Builder<Index, List<Rule>> mapBuilder = ImmutableMap.builder();
-        ImmutableMap.Builder<Index, List<Rule>> heatingMapBuilder = ImmutableMap.builder();
-        ImmutableMap.Builder<Index, List<Rule>> coolingMapBuilder = ImmutableMap.builder();
-        ImmutableMap.Builder<Index, List<Rule>> simulationMapBuilder = ImmutableMap.builder();
-
-        for (Index index : indices) {
-            ImmutableList.Builder<Rule> listBuilder = ImmutableList.builder();
-            ImmutableList.Builder<Rule> heatingListBuilder = ImmutableList.builder();
-            ImmutableList.Builder<Rule> coolingListBuilder = ImmutableList.builder();
-            ImmutableList.Builder<Rule> simulationListBuilder = ImmutableList.builder();
-
-            for (Rule rule : definition.rules()) {
-                if (rule.containsAttribute("heat")) {
-                    if (index.isUnifiable(rule.indexingPair().first)) {
-                        heatingListBuilder.add(rule);
-                    }
-                } else if (rule.containsAttribute("cool")) {
-                    if (index.isUnifiable(rule.indexingPair().second)) {
-                        coolingListBuilder.add(rule);
-                    }
-                } else if(rule.containsAttribute("alphaRule")){
-                    if(index.isUnifiable(rule.indexingPair().first)) {
-                        simulationListBuilder.add(rule);
-                    }
-
-                } else {
-                    if (index.isUnifiable(rule.indexingPair().first)) {
-                        listBuilder.add(rule);
-                    }
-                }
-            }
-            ImmutableList<Rule> rules = listBuilder.build();
-            if (!rules.isEmpty()) {
-                mapBuilder.put(index, rules);
-            }
-            rules = heatingListBuilder.build();
-            if (!rules.isEmpty()) {
-                heatingMapBuilder.put(index, rules);
-            }
-            rules = coolingListBuilder.build();
-            if (!rules.isEmpty()) {
-                coolingMapBuilder.put(index, rules);
-            }
-            rules = simulationListBuilder.build();
-            if(!rules.isEmpty()){
-                simulationMapBuilder.put(index,rules);
-            }
-        }
-        heatingRuleTable = heatingMapBuilder.build();
-        coolingRuleTable = coolingMapBuilder.build();
-        ruleTable = mapBuilder.build();
-        simulationRuleTable = simulationMapBuilder.build();
-
-        ImmutableList.Builder<Rule> listBuilder = ImmutableList.builder();
-        for (Rule rule : definition.rules()) {
-            if (!rule.containsKCell()) {
-                listBuilder.add(rule);
-            }
-        }
-        unindexedRules = listBuilder.build();
-    }
+//    /**
+//     * Builds rule index with a very basic Indexing Scheme. Does not measure time.
+//     *
+//     * @param definition
+//     */
+//    private void buildIndex(Definition definition) {
+//        if (K.do_indexing) {
+//            pathIndex = new PathIndex(definition);
+//        } else {
+//            buildBasicIndex();
+//        }
+//    }
+//
+//    /**
+//     * Builds rule index with a very basic Indexing Scheme. Measures index creation time.
+//     *
+//     * @param definition
+//     */
+//    private void buildIndexWithStats(Definition definition) {
+//        IndexingStatistics.indexConstructionStopWatch.start();
+//        if (K.do_indexing) {
+//            pathIndex = new PathIndex(definition);
+//        } else {
+//            buildBasicIndex();
+//        }
+//        IndexingStatistics.indexConstructionStopWatch.stop();
+//    }
+//
+//    private void buildBasicIndex() {
+//
+//        /* populate the table of rules rewriting the top configuration */
+//        List<Index> indices = new ArrayList<Index>();
+//        indices.add(TopIndex.TOP);
+//        indices.add(BottomIndex.BOTTOM);
+//        for (KLabelConstant kLabel : definition.kLabels()) {
+//            indices.add(new KLabelIndex(kLabel));
+//            indices.add(new FreezerIndex(kLabel, -1));
+//            if (!kLabel.productions().isEmpty()) {
+//                for (int i = 0; i < kLabel.productions().get(0).getArity(); ++i) {
+//                    indices.add(new FreezerIndex(kLabel, i));
+//                }
+//            }
+//        }
+//        //for (KLabelConstant frozenKLabel : definition.frozenKLabels()) {
+//        //    for (int i = 0; i < frozenKLabel.productions().get(0).getArity(); ++i) {
+//        //        indices.add(new FreezerIndex(frozenKLabel, i));
+//        //    }
+//        //}
+//        for (String sort : definition.builtinSorts()) {
+//            indices.add(new TokenIndex(sort));
+//        }
+//
+//        /* Map each index to a list of rules unifiable with that index */
+//        /* Heating rules and regular rules have their first index checked */
+//        /* Cooling rules have their second index checked */
+//        ImmutableMap.Builder<Index, List<Rule>> mapBuilder = ImmutableMap.builder();
+//        ImmutableMap.Builder<Index, List<Rule>> heatingMapBuilder = ImmutableMap.builder();
+//        ImmutableMap.Builder<Index, List<Rule>> coolingMapBuilder = ImmutableMap.builder();
+//        ImmutableMap.Builder<Index, List<Rule>> simulationMapBuilder = ImmutableMap.builder();
+//
+//        for (Index index : indices) {
+//            ImmutableList.Builder<Rule> listBuilder = ImmutableList.builder();
+//            ImmutableList.Builder<Rule> heatingListBuilder = ImmutableList.builder();
+//            ImmutableList.Builder<Rule> coolingListBuilder = ImmutableList.builder();
+//            ImmutableList.Builder<Rule> simulationListBuilder = ImmutableList.builder();
+//
+//            for (Rule rule : definition.rules()) {
+//                if (rule.containsAttribute("heat")) {
+//                    if (index.isUnifiable(rule.indexingPair().first)) {
+//                        heatingListBuilder.add(rule);
+//                    }
+//                } else if (rule.containsAttribute("cool")) {
+//                    if (index.isUnifiable(rule.indexingPair().second)) {
+//                        coolingListBuilder.add(rule);
+//                    }
+//                } else if(rule.containsAttribute("alphaRule")){
+//                    if(index.isUnifiable(rule.indexingPair().first)) {
+//                        simulationListBuilder.add(rule);
+//                    }
+//
+//                } else {
+//                    if (index.isUnifiable(rule.indexingPair().first)) {
+//                        listBuilder.add(rule);
+//                    }
+//                }
+//            }
+//            ImmutableList<Rule> rules = listBuilder.build();
+//            if (!rules.isEmpty()) {
+//                mapBuilder.put(index, rules);
+//            }
+//            rules = heatingListBuilder.build();
+//            if (!rules.isEmpty()) {
+//                heatingMapBuilder.put(index, rules);
+//            }
+//            rules = coolingListBuilder.build();
+//            if (!rules.isEmpty()) {
+//                coolingMapBuilder.put(index, rules);
+//            }
+//            rules = simulationListBuilder.build();
+//            if(!rules.isEmpty()){
+//                simulationMapBuilder.put(index,rules);
+//            }
+//        }
+//        heatingRuleTable = heatingMapBuilder.build();
+//        coolingRuleTable = coolingMapBuilder.build();
+//        ruleTable = mapBuilder.build();
+//        simulationRuleTable = simulationMapBuilder.build();
+//
+//        ImmutableList.Builder<Rule> listBuilder = ImmutableList.builder();
+//        for (Rule rule : definition.rules()) {
+//            if (!rule.containsKCell()) {
+//                listBuilder.add(rule);
+//            }
+//        }
+//        unindexedRules = listBuilder.build();
+//    }
 
     public ConstrainedTerm rewrite(ConstrainedTerm constrainedTerm, int bound) {
         stopwatch.start();
@@ -261,7 +259,7 @@ public class SymbolicRewriter {
      * return the rules for simulations only
      */
     public Map<Index, List<Rule>> getSimulationMap(){
-        return this.simulationRuleTable;
+        return basicIndex.getSimulationRuleTable();
     }
 
     /*
@@ -271,8 +269,8 @@ public class SymbolicRewriter {
     private List<Rule> getSimulationRules(Term term) {
         List<Rule> rules = new ArrayList<Rule>();
         for (IndexingPair pair : term.getIndexingPairs(definition)) {
-            if (simulationRuleTable.get(pair.first) != null) {
-                rules.addAll(simulationRuleTable.get(pair.first));
+            if (basicIndex.getSimulationRuleTable().get(pair.first) != null) {
+                rules.addAll(basicIndex.getSimulationRuleTable().get(pair.first));
             }
         }
         return rules;
@@ -313,17 +311,17 @@ public class SymbolicRewriter {
         Set<Rule> rules = new LinkedHashSet<>();
 
         for (IndexingPair pair : term.getIndexingPairs(definition)) {
-            if (ruleTable.get(pair.first) != null) {
-                rules.addAll(ruleTable.get(pair.first));
+            if (basicIndex.getRuleTable().get(pair.first) != null) {
+                rules.addAll(basicIndex.getRuleTable().get(pair.first));
             }
-            if (heatingRuleTable.get(pair.first) != null) {
-                rules.addAll(heatingRuleTable.get(pair.first));
+            if (basicIndex.getHeatingRuleTable().get(pair.first) != null) {
+                rules.addAll(basicIndex.getHeatingRuleTable().get(pair.first));
             }
-            if (coolingRuleTable.get(pair.second) != null) {
-                rules.addAll(coolingRuleTable.get(pair.second));
+            if (basicIndex.getCoolingRuleTable().get(pair.second) != null) {
+                rules.addAll(basicIndex.getCoolingRuleTable().get(pair.second));
             }
         }
-        rules.addAll(unindexedRules);
+        rules.addAll(basicIndex.getUnindexedRules());
         return new ArrayList<>(rules);
     }
 
@@ -353,11 +351,11 @@ public class SymbolicRewriter {
                 SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(
                         constrainedTerm.termContext());
                 leftHandSideConstraint.addAll(rule.requires());
-                            
+
                 CellCollection newTemp = new CellCollection();
-                
+
                 newTemp.cellMap().put(((Cell<Term>)rule.leftHandSide()).getLabel(), (Cell<Term>)rule.leftHandSide());
-                
+
                 Cell<Term> newRuleTerm = new Cell<Term>("generatedTop",newTemp);
 
                 ConstrainedTerm leftHandSideTerm = new ConstrainedTerm(
@@ -388,11 +386,11 @@ public class SymbolicRewriter {
                 /* return first solution */
                 return new ConstrainedTerm(result, constraint, constrainedTerm.termContext());
             }
-            
+
         }
         //System.out.println("Result: " + results.toString());
         //System.out.println();
-        
+
         return null;
     }
 
@@ -451,7 +449,7 @@ public class SymbolicRewriter {
 
                     constraint1.orientSubstitution(rule.leftHandSide().variableSet());
                     constraint1.addAll(rule.ensures());
-                    
+
                     Term result = rule.rightHandSide();
 
                     /* the RHS of the rule has introduced new variables */
@@ -669,60 +667,60 @@ public class SymbolicRewriter {
         }
 
         label:
-            for (step = 0; !queue.isEmpty(); ++step) {
-                for (Map.Entry<ConstrainedTerm, Integer> entry : queue.entrySet()) {
-                    ConstrainedTerm term = entry.getKey();
-                    Integer currentDepth = entry.getValue();
-                    computeRewriteStep(term);
+        for (step = 0; !queue.isEmpty(); ++step) {
+            for (Map.Entry<ConstrainedTerm, Integer> entry : queue.entrySet()) {
+                ConstrainedTerm term = entry.getKey();
+                Integer currentDepth = entry.getValue();
+                computeRewriteStep(term);
 //                    System.out.println(step);
 //                    System.err.println(term);
 //                    for (ConstrainedTerm r : results) {
 //                        System.out.println(r);
 //                    }
 
-                    if (results.isEmpty() && searchType == SearchType.FINAL) {
-                        Map<Variable, Term> map = getSubstitutionMap(term, pattern);
-                        if (map != null) {
-                            searchResults.add(map);
-                            if (searchResults.size() == bound) {
-                                break label;
-                            }
+                if (results.isEmpty() && searchType == SearchType.FINAL) {
+                    Map<Variable, Term> map = getSubstitutionMap(term, pattern);
+                    if (map != null) {
+                        searchResults.add(map);
+                        if (searchResults.size() == bound) {
+                            break label;
                         }
                     }
+                }
 
-                    for (ConstrainedTerm result : results) {
-                        if (!transition) {
-                            nextQueue.put(result, currentDepth);
-                            break;
-                        } else {
-                            // Continue searching if we haven't reached our target
-                            // depth and we haven't already visited this state.
-                            if (currentDepth + 1 != depth && visited.add(result)) {
-                                nextQueue.put(result, currentDepth + 1);
-                            }
-                            // If we aren't searching for only final results, then
-                            // also add this as a result if it matches the pattern.
-                            if (searchType != SearchType.FINAL || currentDepth + 1 == depth) {
-                                Map<Variable, Term> map = getSubstitutionMap(result, pattern);
-                                if (map != null) {
-                                    searchResults.add(map);
-                                    if (searchResults.size() == bound) {
-                                        break label;
-                                    }
+                for (ConstrainedTerm result : results) {
+                    if (!transition) {
+                        nextQueue.put(result, currentDepth);
+                        break;
+                    } else {
+                        // Continue searching if we haven't reached our target
+                        // depth and we haven't already visited this state.
+                        if (currentDepth + 1 != depth && visited.add(result)) {
+                            nextQueue.put(result, currentDepth + 1);
+                        }
+                        // If we aren't searching for only final results, then
+                        // also add this as a result if it matches the pattern.
+                        if (searchType != SearchType.FINAL || currentDepth + 1 == depth) {
+                            Map<Variable, Term> map = getSubstitutionMap(result, pattern);
+                            if (map != null) {
+                                searchResults.add(map);
+                                if (searchResults.size() == bound) {
+                                    break label;
                                 }
                             }
                         }
                     }
                 }
+            }
 //                System.out.println("+++++++++++++++++++++++");
 
                 /* swap the queues */
-                Map<ConstrainedTerm, Integer> temp;
-                temp = queue;
-                queue = nextQueue;
-                nextQueue = temp;
-                nextQueue.clear();
-            }
+            Map<ConstrainedTerm, Integer> temp;
+            temp = queue;
+            queue = nextQueue;
+            nextQueue = temp;
+            nextQueue.clear();
+        }
 
         stopwatch.stop();
         System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
@@ -755,11 +753,11 @@ public class SymbolicRewriter {
 
         visited.add(initialTerm);
         queue.add(initialTerm);
-        
+
         label:
         for (step = 0; !queue.isEmpty() && step != depth; ++step) {
             System.out.printf("testgen #step = %s, size = %s\n", step, queue.size());
-            
+
             Map<String, Integer> ruleDistStats = new HashMap<>();
             nextQueueOfRules.clear();
 
@@ -776,14 +774,14 @@ public class SymbolicRewriter {
                 eliminateShadowedRewriteSteps();
 
                 TestCaseGenerationUtil.updateRuleDistStats(ruleDistStats, appliedRules);
-                
+
                 if (results.isEmpty()) {
                     /* final term */
                     testgenResults.add(term);
                     if (testgenResults.size() == bound) {
                         break label;
                     }
-                    
+
                     // TODO(YilongL): how to determine if this final term is
                     // proper result or junk? should it be user-defined or
                     // provided by developers?
@@ -804,7 +802,7 @@ public class SymbolicRewriter {
                     }
                 }
             }
-            
+
             System.out.println("rule distribution stats: " + ruleDistStats);            
             
             /* debugging: test generation runs into a (local) dead end */
@@ -883,16 +881,16 @@ public class SymbolicRewriter {
      */
     private void eliminateShadowedRewriteSteps() {
         assert K.do_testgen;
-        
+
         Set<String> shadowedLabels = new HashSet<String>();
-        
+
         for (Rule rule : appliedRules) {
-            String label = rule.getAttribute("testgen-precede"); 
+            String label = rule.getAttribute("testgen-precede");
             if (label != null) {
                 shadowedLabels.add(label);
             }
         }
-        
+
         List<ConstrainedTerm> tmpResults = new ArrayList<ConstrainedTerm>(results);
         List<Rule> tmpAppliedRules = new ArrayList<Rule>(appliedRules);
         results.clear();
@@ -915,7 +913,7 @@ public class SymbolicRewriter {
             Term pgm = initTerm.term().substituteWithBinders(
                     tmpResults.get(i).constraint().substitution(),
                     initTerm.termContext());
-            
+
             checker.reset();
             pgm.accept(checker);
             if (checker.isSuccess()) {
@@ -927,8 +925,8 @@ public class SymbolicRewriter {
             }
 //            System.out.printf("partial pgm: %s\n", pgm);
         }
-    }    
-    
+    }
+
     /**
      * Searches for a ground term which the given term can reach within a given
      * bound of rewrite steps.
