@@ -1,0 +1,730 @@
+package org.kframework.backend.java.symbolic;
+
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.kframework.backend.java.kil.*;
+import org.kframework.kil.loader.Context;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Multimap;
+
+
+/**
+ * @author YilongL
+ */
+public class PatternMatcher extends AbstractMatcher {
+
+    /**
+     * Represents the substitution after the pattern matching.
+     */
+    private java.util.Map<Variable, Term> fSubstitution = new HashMap<Variable, Term>();
+    
+    /**
+     * Represents a conjunction of multiple collections of substitutions; each
+     * collection is a disjunction of substitutions created by some AC-matching
+     * between two cell collections.
+     */
+    private final java.util.Collection<java.util.Collection<Map<Variable, Term>>> multiSubstitutions;
+    
+    /**
+     * TODO(YilongL)
+     */
+    private boolean isStarNested;
+    
+    private final TermContext termContext;
+    
+    /**
+     * Matches a subject term against a pattern.
+     * 
+     * @param subject
+     *            the subject term
+     * @param pattern
+     *            the pattern term
+     * @param context
+     *            the term context
+     * @return a list of possible instantiations of the pattern (each
+     *         instantiation is represented as a substitution mapping variables
+     *         in the pattern to sub-terms in the subject)
+     */
+    public static List<Map<Variable, Term>> patternMatch(Term subject, Term pattern, TermContext context) {
+        PatternMatcher matcher = new PatternMatcher(context);
+        matcher.patternMatch(subject, pattern);
+        
+        if (!matcher.multiSubstitutions.isEmpty()) {
+            assert matcher.multiSubstitutions.size() <= 2;
+            
+            List<Map<Variable, Term>> result = new ArrayList<Map<Variable, Term>>();
+            Iterator<Collection<Map<Variable, Term>>> iterator = matcher.multiSubstitutions.iterator();
+            if (matcher.multiSubstitutions.size() == 1) {
+                for (Map<Variable, Term> subst : iterator.next()) {
+                    Map<Variable, Term> composedSubst = composeSubstitution(matcher.fSubstitution, subst);
+                    if (composedSubst != null) {
+                        result.add(composedSubst);
+                    }
+                }
+            } else {
+                Collection<Map<Variable, Term>> substitutions = iterator.next();
+                Collection<Map<Variable, Term>> otherSubstitutions = iterator.next();
+                for (Map<Variable, Term> subst1 : substitutions) {
+                    for (Map<Variable, Term> subst2 : otherSubstitutions) {
+                        Map<Variable, Term> composedSubst = composeSubstitution(matcher.fSubstitution, subst1);
+                        if (composedSubst != null) {
+                            composedSubst = composeSubstitution(composedSubst, subst2);
+                            if (composedSubst != null) {
+                                result.add(composedSubst);
+                            }
+                        }
+                    }
+                }
+            }
+            return result;
+        } else {
+            return Collections.singletonList(matcher.fSubstitution);
+        }
+    }
+    
+    /**
+     * Composes two specified substitutions.
+     * 
+     * @param subst1
+     *            the first substitution
+     * @param subst2
+     *            the second substitution
+     * @return the composed substitution on success; otherwise, {@code null}
+     */
+    private static Map<Variable, Term> composeSubstitution(Map<Variable, Term> subst1, Map<Variable, Term> subst2) {
+        Map<Variable, Term> result = new HashMap<Variable, Term>(subst1);
+        for (Map.Entry<Variable, Term> entry : subst2.entrySet()) {
+            Variable variable = entry.getKey();
+            Term term = entry.getValue();
+            Term otherTerm = result.get(variable);
+            if (otherTerm == null) {
+                result.put(variable, term);
+            } else if (!otherTerm.equals(term)) {
+                return null;
+            }
+        }
+        return result;
+    }
+
+    private PatternMatcher(TermContext context) {
+        this.termContext = context;
+        multiSubstitutions = new ArrayList<java.util.Collection<Map<Variable, Term>>>();
+    }
+
+    private boolean patternMatch(Term subject, Term pattern) {
+        try {
+            isStarNested = false;
+            match(subject, pattern);
+            return true;
+        } catch (PatternMatchingFailure e) {
+            return false;
+        }
+    }
+
+    /**
+     * Performs generic operations for the matching between the subject term and
+     * the pattern term. Term-specific operations are then delegated to the
+     * specific {@code match} method by overloading. That is to say, in general,
+     * the safe way to match any two terms is to invoke this generic
+     * {@code match} method; do not invoke the specialized ones directly unless
+     * you know exactly what you are doing.
+     */
+    @Override
+    public void match(Term subject, Term pattern) {
+        if (subject.kind().isComputational()) {
+            assert pattern.kind().isComputational();
+
+            subject = KCollection.upKind(subject, pattern.kind());
+            pattern = KCollection.upKind(pattern, subject.kind());
+        }
+
+        if (subject.kind() == Kind.CELL || subject.kind() == Kind.CELL_COLLECTION) {
+            Context context = termContext.definition().context();
+            subject = CellCollection.upKind(subject, pattern.kind(), context);
+            pattern = CellCollection.upKind(pattern, subject.kind(), context);
+        }
+        
+        // TODO(YilongL): may need to replace the following assertion to the
+        // method fail() in the future because it crashes the Java rewrite
+        // engine instead of just failing the pattern matching process
+        assert subject.kind() == pattern.kind():
+               "kind mismatch between " + subject + " (" + subject.kind() + ")"
+               + " and " + pattern + " (" + pattern.kind() + ")";
+
+        assert !subject.isSymbolic() : "the subject term shall be ground";
+        if (pattern.isSymbolic()) {
+            assert pattern instanceof Variable;
+            Variable variable = (Variable) pattern;
+
+            /* special case for concrete collections  */
+            if (variable instanceof ConcreteCollectionVariable
+                    && !((ConcreteCollectionVariable) variable).matchConcreteSize(subject)) {
+                fail(variable, subject);
+            }
+
+            /* add substitution */
+            addSubstitution(variable, subject);
+        } else {
+            /* match */
+            if (!subject.equals(pattern)) {
+                subject.accept(this, pattern);
+            }
+        }
+    }
+
+    private void addSubstitution(Variable variable, Term term) {
+        Term subst = fSubstitution.get(variable);
+        if (subst == null) {
+            fSubstitution.put(variable, term);
+        } else if (!subst.equals(term)) {
+            fail(subst, term);
+        }
+    }
+    
+    private void addSubstitution(Map<Variable, Term> substitution) {
+        for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
+            addSubstitution(entry.getKey(), entry.getValue());
+        }
+    }
+
+
+    @Override
+    public void match(BuiltinList builtinList, Term pattern) {
+        assert !(pattern instanceof Variable);
+        
+        if (!(pattern instanceof BuiltinList)) {
+            this.fail(builtinList, pattern);
+        }
+        
+        throw new UnsupportedOperationException(
+                "list matching is only supported when one of the lists is a variable.");
+    }
+
+    @Override
+    public void match(BuiltinMap builtinMap, Term pattern) {
+        assert !(pattern instanceof Variable);
+
+        if (!(pattern instanceof BuiltinMap)) {
+            this.fail(builtinMap, pattern);
+        }
+
+        throw new UnsupportedOperationException(
+                "map matching is only supported when one of the maps is a variable.");
+    }
+
+    @Override
+    public void match(BuiltinSet builtinSet, Term pattern) {
+        assert !(pattern instanceof Variable);
+
+        if (!(pattern instanceof BuiltinSet)) {
+            this.fail(builtinSet, pattern);
+        }
+
+        throw new UnsupportedOperationException(
+                "set matching is only supported when one of the sets is a variable.");
+    }
+
+    @Override
+    public void match(BuiltinMgu builtinMgu, Term pattern) {
+        assert !(pattern instanceof Variable);
+        
+        if (!(pattern instanceof BuiltinMgu)) {
+            this.fail(builtinMgu, pattern);
+        }
+
+        throw new UnsupportedOperationException(
+                "Mgu matching is only supported when one of the Mgu's is a variable.");
+    }
+
+    /**
+     * Two cells can be unified if and only if they have the same cell label and
+     * their contents can be unified.
+     */
+    @Override
+    public void match(Cell cell, Term pattern) {
+        assert !(pattern instanceof Variable);
+
+        if (!(pattern instanceof Cell)) {
+            this.fail(cell, pattern);
+        }
+
+        Cell<?> otherCell = (Cell<?>) pattern;
+        if (!cell.getLabel().equals(otherCell.getLabel())) {
+            /*
+             * AndreiS: commented out the check below as matching might fail due
+             * to KItem < K < KList subsorting:
+             * !cell.contentKind().equals(otherCell.contentKind())
+             */            
+            fail(cell, otherCell);
+        }
+
+        match(cell.getContent(), otherCell.getContent());
+    }
+
+    /**
+     * 
+     */
+    @Override
+    public void match(CellCollection cellCollection, Term pattern) {
+        assert !(pattern instanceof Variable);
+        
+        if (!(pattern instanceof CellCollection)) {
+            fail(cellCollection, pattern);
+        }
+        CellCollection otherCellCollection = (CellCollection) pattern;
+        
+        assert !cellCollection.hasFrame() : "the subject term should be ground";
+
+        Set<String> unifiableCellLabels = new HashSet<String>(cellCollection.labelSet());
+        unifiableCellLabels.retainAll(otherCellCollection.labelSet());
+
+        Context context = termContext.definition().context();
+        
+        /*
+         * Case 1: at least one of the cell collections has no explicitly
+         * specified starred-cell; therefore, no need to worry about AC-matching
+         * at all!
+         */
+        if (!cellCollection.hasStar() || !otherCellCollection.hasStar()) {
+            for (String label : unifiableCellLabels) {
+                assert cellCollection.get(label).size() == 1
+                        && otherCellCollection.get(label).size() == 1;
+                match(cellCollection.get(label).iterator().next(),
+                        otherCellCollection.get(label).iterator().next());
+            }
+
+            Multimap<String, Cell> cellMap = ArrayListMultimap.create();
+            Multimap<String, Cell> otherCellMap = ArrayListMultimap.create();
+            computeDisjointCellMaps(unifiableCellLabels, cellCollection,
+                    cellMap, otherCellCollection, otherCellMap);
+            
+            if (!cellCollection.hasStar()
+                    && !addCellCollectionConstraint(
+                            cellMap, null,
+                            otherCellMap, otherCellCollection.hasFrame() ? otherCellCollection.frame() : null)) {
+                fail(cellCollection, otherCellCollection);
+            } else if (!otherCellCollection.hasStar()
+                    && !addCellCollectionConstraint(
+                            otherCellMap, otherCellCollection.hasFrame() ? otherCellCollection.frame() : null, 
+                            cellMap, null)) {
+                fail(cellCollection, otherCellCollection);
+            }
+        } 
+        /* Case 2: both cell collections have explicitly specified starred-cells */
+        else {
+            assert !isStarNested : "nested cells with multiplicity='*' not supported";
+            // TODO(AndreiS): fix this assertions
+        
+//            assert !(cellCollection.hasFrame() && otherCellCollection.hasFrame()) :
+//                "Two cell collections both having starred cells in their explicit contents and frames: " +
+//                "unable to handle this case at present since it greatly complicates the AC-unification";
+//            if (cellCollection.hasFrame()) {
+//                /* swap two cell collections to make sure cellCollection is free of frame */
+//                CellCollection tmp = cellCollection;
+//                cellCollection = otherCellCollection;
+//                otherCellCollection = tmp;
+//            }
+
+            // note that cellCollection is free of frame
+            Multimap<String, Cell> cellMap = ArrayListMultimap.create();
+            Multimap<String, Cell> otherCellMap = ArrayListMultimap.create();
+            computeDisjointCellMaps(unifiableCellLabels, cellCollection,
+                    cellMap, otherCellCollection, otherCellMap);
+            if (!otherCellMap.isEmpty()) {
+                fail(cellCollection, otherCellCollection);
+            }
+
+            for (Iterator<String> iter = unifiableCellLabels.iterator(); iter.hasNext(); ) {
+                String cellLabel = iter.next();
+                if (!context.getConfigurationStructureMap().get(cellLabel).isStarOrPlus()) {
+                    assert cellCollection.get(cellLabel).size() == 1
+                            && otherCellCollection.get(cellLabel).size() == 1;
+                    match(cellCollection.get(cellLabel).iterator().next(),
+                            otherCellCollection.get(cellLabel).iterator().next());
+                    iter.remove();
+                }
+            }
+            
+            // YilongL: the assertion here must hold
+            if (unifiableCellLabels.isEmpty()) {
+                fail(cellCollection, otherCellCollection);
+            } else {
+                assert unifiableCellLabels.size() == 1;
+            }
+
+            if (cellCollection.size() < otherCellCollection.size()
+                    || cellCollection.size() > otherCellCollection.size()
+                    && !otherCellCollection.hasFrame()) {
+                fail(cellCollection, otherCellCollection);
+            }
+
+            String label = unifiableCellLabels.iterator().next();
+            Cell<?>[] cells = cellCollection.get(label).toArray(new Cell[1]);
+            Cell<?>[] otherCells = otherCellCollection.get(label).toArray(new Cell[1]);
+            Variable otherFrame = otherCellCollection.hasFrame() ? otherCellCollection.frame() : null;
+
+            // TODO(YilongL): maybe extract the code below that performs searching to a single method
+            // temporarily store the current substitution at a safe place before
+            // starting to search for multiple substitutions
+//            SymbolicConstraint mainConstraint = fConstraint;
+            Map<Variable, Term> mainSubstitution = fSubstitution;
+            isStarNested = true;
+
+//            java.util.Collection<SymbolicConstraint> constraints = new ArrayList<SymbolicConstraint>();
+            java.util.Collection<Map<Variable, Term>> substitutions = 
+                    new ArrayList<Map<Variable, Term>>();   // represents all possible substitutions by matching 
+                                                            // these two cell collections
+            SelectionGenerator generator = new SelectionGenerator(otherCells.length, cells.length);
+            // start searching for all possible unifiers
+            do {
+                // clear the constraint before each attempt of unification
+//                fConstraint = new SymbolicConstraint(termContext);
+                fSubstitution = new HashMap<Variable, Term>();
+
+                try {
+                    for (int i = 0; i < otherCells.length; ++i) {
+                        match(cells[generator.selection.get(i)], otherCells[i]);
+                    }
+                } catch (UnificationFailure e) {
+                    continue;
+                }
+
+                Multimap<String, Cell> cm = ArrayListMultimap.create();
+                for (int i = 0; i < cells.length; ++i) {
+                    if (!generator.selected.contains(i)) {
+                        cm.put(cells[i].getLabel(), cells[i]);
+                    }
+                }
+                cm.putAll(cellMap);
+
+                if (otherFrame != null) {
+//                    fConstraint.add(new CellCollection(cm, context), otherFrame);
+                    addSubstitution(otherFrame, new CellCollection(cm, context));
+                } else {
+                    if (!cm.isEmpty()) {
+                        fail(cellCollection, otherCellCollection);
+                    }
+                }
+//                constraints.add(fConstraint);
+                substitutions.add(fSubstitution);
+            } while (generator.generate());
+
+            // restore the current constraint after searching
+//            fConstraint = mainConstraint;
+            fSubstitution = mainSubstitution;
+            isStarNested = false;
+
+//            if (constraints.isEmpty()) {
+            if (substitutions.isEmpty()) {
+                fail(cellCollection, otherCellCollection);
+            }
+
+//            if (constraints.size() == 1) {
+            if (substitutions.size() == 1) {
+//                fConstraint.addAll(constraints.iterator().next());
+                addSubstitution(substitutions.iterator().next());
+            } else {
+//                multiConstraints.add(constraints);
+                multiSubstitutions.add(substitutions);
+            }
+        }
+    }
+
+    private void computeDisjointCellMaps(Set<String> unifiableCellLabels,
+            CellCollection cellCollection, Multimap<String, Cell> cellMap,
+            CellCollection otherCellCollection,
+            Multimap<String, Cell> otherCellMap) {
+        cellMap.clear();
+        for (String label : cellCollection.labelSet()) {
+            if (!unifiableCellLabels.contains(label)) {
+                cellMap.putAll(label, cellCollection.get(label));
+            }
+        }
+
+        otherCellMap.clear();
+        for (String label : otherCellCollection.labelSet()) {
+            if (!unifiableCellLabels.contains(label)) {
+                otherCellMap.putAll(label, otherCellCollection.get(label));
+            }
+        }
+    }
+
+    private class SelectionGenerator {
+
+        private final int size;
+        private final int coSize;
+        public List<Integer> selection;
+        public Set<Integer> selected;
+        private int index;
+
+        public SelectionGenerator(int size, int coSize) {
+            assert size <= coSize;
+
+            this.size = size;
+            this.coSize = coSize;
+            selection = new ArrayList<Integer>();
+            selected = new HashSet<Integer>();
+            for (int i = 0; i < size; ++i) {
+                selection.add(i);
+                selected.add(i);
+            }
+        }
+
+        private void pop() {
+            index = selection.remove(selection.size() - 1);
+            selected.remove(index);
+            ++index;
+        }
+
+        private void push() {
+            selection.add(index);
+            selected.add(index);
+            index = 0;
+        }
+
+        public boolean generate() {
+            if (selection.isEmpty()) return false;
+            pop();
+            while (selection.size() != size) {
+                if (index == coSize) {
+                    if (selection.isEmpty()) {
+                        break;
+                    } else {
+                        pop();
+                        continue;
+                    }
+                }
+
+                if (!selected.contains(index)) {
+                    push();
+                    continue;
+                }
+
+                ++index;
+            }
+
+            return !selection.isEmpty();
+        }
+
+    }
+
+    /**
+     * Private helper method to compute and add constraint(s) between two
+     * specialized cell collections. Three preconditions for the arguments: 1)
+     * The two specified cell collections shall have no common cell label in
+     * their explicit contents; 2) the first cell collection contains no
+     * starred-cell in its explicit content; 3) at least one of the cell
+     * collections has no frame.
+     * 
+     * @return true if the constraint addition does not make the matching to
+     *         fail
+     */
+    private boolean addCellCollectionConstraint(
+            Multimap<String, Cell> cellMap,
+            Variable frame,
+            Multimap<String, Cell> otherCellMap,
+            Variable otherFrame) {
+        for (String cellLabel : cellMap.keySet()) {
+            assert !otherCellMap.containsKey(cellLabel);
+            assert cellMap.get(cellLabel).size() == 1;
+        }
+        assert frame == null || otherFrame == null;
+        
+        Context context = termContext.definition().context();
+        
+        if (frame != null) {
+            // otherFrame == null
+            if (!cellMap.isEmpty()) {
+                return false;
+            }
+
+            addSubstitution(frame, new CellCollection(otherCellMap, context));
+        } else {
+            // frame == null
+            if (!otherCellMap.isEmpty()) {
+                return false;
+            }
+
+            if (otherFrame == null) {
+                if (!cellMap.isEmpty()) {
+                    return false;
+                }
+            } else {
+                addSubstitution(otherFrame, new CellCollection(cellMap, context));
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    public void match(KLabelConstant kLabelConstant, Term pattern) {
+        assert !(pattern instanceof Variable);
+        
+        if (!kLabelConstant.equals(pattern)) {
+            fail(kLabelConstant, pattern);
+        }
+    }
+
+    @Override
+    public void match(KLabelFreezer kLabelFreezer, Term pattern) {
+        assert !(pattern instanceof Variable);
+
+        if(!(pattern instanceof KLabelFreezer)) {
+            fail(kLabelFreezer, pattern);
+        }
+
+        KLabelFreezer otherKLabelFreezer = (KLabelFreezer) pattern;
+        match(kLabelFreezer.term(), otherKLabelFreezer.term());
+    }
+
+    @Override
+    public void match(KLabelInjection kLabelInjection, Term pattern) {
+        assert !(pattern instanceof Variable);
+
+        if(!(pattern instanceof KLabelInjection)) {
+            fail(kLabelInjection, pattern);
+        }
+        KLabelInjection otherKLabelInjection = (KLabelInjection) pattern;
+
+        Kind injectionKind = kLabelInjection.term().kind();
+        Kind otherInjectionKind = otherKLabelInjection.term().kind();
+        if (injectionKind != otherInjectionKind
+                && !(injectionKind.isComputational() && otherInjectionKind.isComputational())
+                && !(injectionKind.isStructural() && otherInjectionKind.isStructural())) {
+            fail(kLabelInjection, otherKLabelInjection);
+        }
+
+        match(kLabelInjection.term(), otherKLabelInjection.term());
+    }
+
+    @Override
+    public void match(Hole hole, Term pattern) {
+        assert !(pattern instanceof Variable);
+
+        if (!hole.equals(pattern)) {
+            fail(hole, pattern);
+        }
+    }
+
+    @Override
+    public void match(KItem kItem, Term pattern) {
+        assert !(pattern instanceof Variable);
+
+        if (!(pattern instanceof KItem)) {
+            fail(kItem, pattern);
+        }
+
+        KItem patternKItem = (KItem) pattern;
+        Term kLabel = kItem.kLabel();
+        Term kList = kItem.kList();
+        match(kLabel, patternKItem.kLabel());
+        // TODO(AndreiS): deal with KLabel variables
+        if (kLabel instanceof KLabelConstant) {
+            KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
+            if (kLabelConstant.isBinder()) {
+                // TODO(AndreiS): deal with non-concrete KLists
+                assert kList instanceof KList;
+                Multimap<Integer, Integer> binderMap = kLabelConstant.getBinderMap();
+                List<Term> terms = new ArrayList<>(((KList) kList).getContents());
+                for (Integer boundVarPosition : binderMap.keySet()) {
+                    Term boundVars = terms.get(boundVarPosition);
+                    Set<Variable> variables = boundVars.variableSet();
+                    Map<Variable,Variable> freshSubstitution = Variable.getFreshSubstitution(variables);
+                    Term freshBoundVars = boundVars.substituteWithBinders(freshSubstitution, termContext);
+                    terms.set(boundVarPosition, freshBoundVars);
+                    for (Integer bindingExpPosition : binderMap.get(boundVarPosition)) {
+                        Term bindingExp = terms.get(bindingExpPosition-1);
+                        Term freshbindingExp = bindingExp.substituteWithBinders(freshSubstitution, termContext);
+                        terms.set(bindingExpPosition-1, freshbindingExp);
+                    }
+                }
+                kList = new KList(ImmutableList.copyOf(terms));
+            }
+        }
+        match(kList, patternKItem.kList());
+    }
+
+    @Override
+    public void match(Token token, Term pattern) {
+        assert !(pattern instanceof Variable);
+
+        if (!token.equals(pattern)) {
+            fail(token, pattern);
+        }
+    }
+
+    @Override
+    public void match(KList kList, Term pattern) {
+        assert !(pattern instanceof Variable);
+
+        if(!(pattern instanceof KList)) {
+            fail(kList, pattern);
+        }
+
+        KList otherKList = (KList) pattern;
+        matchKCollection(kList, otherKList);
+    }
+
+    @Override
+    public void match(KSequence kSequence, Term pattern) {
+        assert !(pattern instanceof Variable);
+
+        if (!(pattern instanceof KSequence)) {
+            this.fail(kSequence, pattern);
+        }
+
+        KSequence otherKSequence = (KSequence) pattern;
+        matchKCollection(kSequence, otherKSequence);
+    }
+
+    private void matchKCollection(KCollection kCollection, KCollection pattern) {
+        assert kCollection.getClass().equals(pattern.getClass());
+        
+        assert !kCollection.hasFrame() : "the subject term should be ground";
+
+        int length = pattern.size();
+        if (kCollection.size() >= length) {
+            if ((kCollection.size() > length) && !pattern.hasFrame()) {
+                fail(kCollection, pattern);
+            }
+            for(int index = 0; index < length; ++index) {
+                match(kCollection.get(index), pattern.get(index));
+            }
+            addSubstitution(pattern.frame(), kCollection.fragment(length));
+        } else {
+            fail(kCollection, pattern);
+        }
+    }
+    
+    @Override
+    public void match(MetaVariable metaVariable, Term pattern) {
+        assert !(pattern instanceof Variable);
+
+        if (!metaVariable.equals(pattern)) {
+            fail(metaVariable, pattern);
+        }
+    }
+
+    @Override
+    public void match(Variable variable, Term pattern) {
+        assert false : "the subject term should be ground; but found variable " + variable;
+    }
+    
+    @Override
+    public String getName() {
+        return this.getClass().toString();
+    }
+
+}
