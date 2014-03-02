@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.kil.loader.Context;
 
@@ -37,29 +39,114 @@ public class PatternMatcher extends AbstractMatcher {
     private final java.util.Collection<java.util.Collection<Map<Variable, Term>>> multiSubstitutions;
     
     /**
-     * TODO(YilongL)
+     * Records whether the pattern matcher is currently traversing under a
+     * starred cell.
      */
     private boolean isStarNested;
     
     private final TermContext termContext;
     
     /**
-     * Matches a subject term against a pattern.
+     * Matches a subject term against a rule.
      * 
      * @param subject
      *            the subject term
-     * @param pattern
-     *            the pattern term
+     * @param rule
+     *            the rule
      * @param context
      *            the term context
-     * @return a list of possible instantiations of the pattern (each
-     *         instantiation is represented as a substitution mapping variables
-     *         in the pattern to sub-terms in the subject)
+     * @return a list of possible instantiations of the left-hand side of the
+     *         rule (each instantiation is represented as a substitution mapping
+     *         variables in the pattern to sub-terms in the subject)
      */
-    public static List<Map<Variable, Term>> patternMatch(Term subject, Term pattern, TermContext context) {
+    public static List<Map<Variable, Term>> patternMatch(Term subject, Rule rule, TermContext context) {
         PatternMatcher matcher = new PatternMatcher(context);
-        matcher.patternMatch(subject, pattern);
+        if (!matcher.patternMatch(subject, rule.leftHandSide())) {
+            return Collections.emptyList();
+        }
         
+        List<Map<Variable, Term>> substitutions = new ArrayList<Map<Variable, Term>>();
+        label: 
+        for (Map<Variable, Term> subst : getMultiSubstitutions(matcher)) {
+            /* add bindings for fresh variables used in the rule */
+            for (Variable variable : rule.freshVariables()) {
+                subst.put(variable, IntToken.fresh());
+            }
+            
+            /* evaluate data structure lookups and add bindings for them */
+            List<Map<Variable, Term>> multiSubsts = new ArrayList<>(Collections.singletonList(subst));
+            for (UninterpretedConstraint.Equality equality : rule.lookups().equalities()) {
+                Term lookup = equality.leftHandSide() instanceof DataStructureLookup ? 
+                        equality.leftHandSide() : equality.rightHandSide();
+                Term nonLookup = equality.leftHandSide() == lookup ? 
+                        equality.rightHandSide() : equality.leftHandSide();
+                assert lookup instanceof DataStructureLookup : 
+                    "one side of the equality should be an instance of DataStructureLookup";
+                
+                Term evaluatedLookup = lookup.substituteAndEvaluate(subst, context);
+                if (nonLookup instanceof Variable) {
+                    Variable variable = (Variable) nonLookup;
+                    if (checkOrderedSortedCondition(variable, evaluatedLookup, context)) {
+                        for (Map<Variable, Term> subst2 : multiSubsts) {
+                            subst2.put(variable, evaluatedLookup);
+                        }
+                    } else {
+                        continue label;
+                    }
+                } else {
+                    // the non-lookup term is not a variable and thus requires further pattern matching
+                    PatternMatcher lookupMatcher = new PatternMatcher(context);
+                    if (lookupMatcher.patternMatch(evaluatedLookup, nonLookup)) {
+                        List<Map<Variable, Term>> product = new ArrayList<Map<Variable, Term>>();
+                        // it's possible that multiple substitutions are possible from the pattern matching above
+                        for (Map<Variable, Term> subst1 : PatternMatcher.getMultiSubstitutions(lookupMatcher)) {
+                            for (Map<Variable, Term> subst2 : multiSubsts) {
+                                Map<Variable, Term> composedSubst = composeSubstitution(subst1, subst2);
+                                if (composedSubst != null) {
+                                    product.add(composedSubst);
+                                }
+                            }
+                        }
+                        if (product.isEmpty()) {
+                            continue label;
+                        } else {
+                            multiSubsts = product;
+                        }
+                    } else {
+                        continue label;
+                    }
+                }
+            }
+            
+            /* evaluate side conditions */
+            Iterator<Map<Variable, Term>> iter = multiSubsts.iterator();
+            while (iter.hasNext()) {
+                Map<Variable, Term> nextSubst = iter.next();
+                for (Term require : rule.requires()) {
+                    if (!require.substituteAndEvaluate(nextSubst, context).equals(BoolToken.TRUE)) {
+                        iter.remove();
+                        break;
+                    }
+                }
+            }
+            
+            substitutions.addAll(multiSubsts);
+        }
+        
+        return substitutions;
+    }
+    
+    /**
+     * Private helper method which constructs all possible variable bindings of
+     * the pattern term to match the subject term, given the pattern matcher
+     * object that is used to perform the matching.
+     * 
+     * @param matcher
+     *            the pattern matcher
+     * @return all possible substitutions of the pattern term to match the
+     *         subject term
+     */
+    private static List<Map<Variable, Term>> getMultiSubstitutions(PatternMatcher matcher) {
         if (!matcher.multiSubstitutions.isEmpty()) {
             assert matcher.multiSubstitutions.size() <= 2;
             
@@ -182,8 +269,40 @@ public class PatternMatcher extends AbstractMatcher {
             }
         }
     }
+    
+    /**
+     * Private helper method that checks if a specified variable binding
+     * satifies the ordered-sorted pattern matching condition; namely, the sort
+     * of the term must be subsorted to the sort of the variable.
+     * 
+     * @param variable
+     *            the variable to be bound
+     * @param term
+     *            the term to be bound to
+     * @param termContext 
+     * @return {@code true} if the variable can be bound to the term
+     *         successfully; otherwise, {@code false}
+     */
+    private static boolean checkOrderedSortedCondition(Variable variable, Term term, TermContext termContext) {
+        String sortOfVar = variable.sort();
+        String sortOfTerm = term instanceof Sorted ? ((Sorted) term).sort() : term.kind().toString();
+        return termContext.definition().context().isSubsortedEq(sortOfVar, sortOfTerm);
+    }
 
+    /**
+     * Binds a variable in the pattern to a subterm of the subject; calls
+     * {@link PatternMatcher#fail(Term, Term)} when the binding fails.
+     * 
+     * @param variable
+     *            the variable
+     * @param term
+     *            the term
+     */
     private void addSubstitution(Variable variable, Term term) {
+        if (!checkOrderedSortedCondition(variable, term, termContext)) {
+            fail(variable, term);
+        }
+        
         Term subst = fSubstitution.get(variable);
         if (subst == null) {
             fSubstitution.put(variable, term);
@@ -192,12 +311,21 @@ public class PatternMatcher extends AbstractMatcher {
         }
     }
     
+    /**
+     * Binds multiple variables in the pattern to an equal number of subterms of
+     * the subject respectively; calls {@link PatternMatcher#fail(Term, Term)}
+     * when the binding fails.
+     * 
+     * @param variable
+     *            the variable
+     * @param term
+     *            the term
+     */
     private void addSubstitution(Map<Variable, Term> substitution) {
         for (Map.Entry<Variable, Term> entry : substitution.entrySet()) {
             addSubstitution(entry.getKey(), entry.getValue());
         }
     }
-
 
     @Override
     public void match(BuiltinList builtinList, Term pattern) {
@@ -696,13 +824,15 @@ public class PatternMatcher extends AbstractMatcher {
 
         int length = pattern.size();
         if (kCollection.size() >= length) {
-            if ((kCollection.size() > length) && !pattern.hasFrame()) {
+            if (pattern.hasFrame()) {
+                addSubstitution(pattern.frame(), kCollection.fragment(length));
+            } else if (kCollection.size() > length) {
                 fail(kCollection, pattern);
             }
-            for(int index = 0; index < length; ++index) {
+            
+            for (int index = 0; index < length; ++index) {
                 match(kCollection.get(index), pattern.get(index));
             }
-            addSubstitution(pattern.frame(), kCollection.fragment(length));
         } else {
             fail(kCollection, pattern);
         }
