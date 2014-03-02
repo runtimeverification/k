@@ -1,10 +1,5 @@
 package org.kframework.backend.java.symbolic;
 
-import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.builtins.Int32Token;
-import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.builtins.StringToken;
-import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinMgu;
@@ -13,14 +8,13 @@ import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.Hole;
 import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KItemProjection;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KLabelFreezer;
 import org.kframework.backend.java.kil.KLabelInjection;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.KSequence;
-import org.kframework.backend.java.kil.MapUpdate;
 import org.kframework.backend.java.kil.MetaVariable;
-import org.kframework.backend.java.kil.SetUpdate;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
@@ -45,6 +39,7 @@ public interface Matcher {
     public void match(CellCollection cellCollection, Term pattern);
     public void match(Hole hole, Term pattern);
     public void match(KItem kItem, Term pattern);
+    public void match(KItemProjection kItemProj, Term pattern);
     public void match(KLabelConstant kLabelConstant, Term pattern);
     public void match(KLabelFreezer kLabelFreezer, Term pattern);
     public void match(KLabelInjection kLabelInjection, Term pattern);

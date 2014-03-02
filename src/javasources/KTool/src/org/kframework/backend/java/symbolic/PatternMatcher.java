@@ -27,9 +27,14 @@ import com.google.common.collect.Multimap;
 public class PatternMatcher extends AbstractMatcher {
 
     /**
-     * Represents the substitution after the pattern matching.
+     * Stores the substitution after the pattern matching.
      */
-    private java.util.Map<Variable, Term> fSubstitution = new HashMap<Variable, Term>();
+    private Map<Variable, Term> fSubstitution = new HashMap<Variable, Term>();
+    
+    /**
+     * The substitution map for the variables in the subject term.
+     */
+    private Map<Variable, Term> subjectSubstMap;
     
     /**
      * Represents a conjunction of multiple collections of substitutions; each
@@ -59,9 +64,10 @@ public class PatternMatcher extends AbstractMatcher {
      *         rule (each instantiation is represented as a substitution mapping
      *         variables in the pattern to sub-terms in the subject)
      */
-    public static List<Map<Variable, Term>> patternMatch(Term subject, Rule rule, TermContext context) {
+    public static List<Map<Variable, Term>> patternMatch(ConstrainedTerm subject, Rule rule, TermContext context) {
+        assert subject.constraint().isSubstitution();
         PatternMatcher matcher = new PatternMatcher(context);
-        if (!matcher.patternMatch(subject, rule.leftHandSide())) {
+        if (!matcher.patternMatch(subject.term(), subject.constraint().substitution(), rule.leftHandSide())) {
             return Collections.emptyList();
         }
 
@@ -132,6 +138,10 @@ public class PatternMatcher extends AbstractMatcher {
             }
             
             substitutions.addAll(multiSubsts);
+        }
+        
+        for (Map<Variable, Term> subst : substitutions) {
+            assert subst.keySet().containsAll(rule.rightHandSide().variableSet());
         }
         
         return substitutions;
@@ -206,12 +216,14 @@ public class PatternMatcher extends AbstractMatcher {
     }
 
     private PatternMatcher(TermContext context) {
-        this.termContext = context;
+        termContext = context;
         multiSubstitutions = new ArrayList<java.util.Collection<Map<Variable, Term>>>();
     }
 
-    private boolean patternMatch(Term subject, Term pattern) {
+    private boolean patternMatch(Term subject, Map<Variable, Term> subjectSubstMap, Term pattern) {
         try {
+            this.subjectSubstMap = subjectSubstMap;
+            assert subject.variableSet().equals(subjectSubstMap.keySet());
             isStarNested = false;
             match(subject, pattern);
             return true;
@@ -220,6 +232,10 @@ public class PatternMatcher extends AbstractMatcher {
         }
     }
 
+    private boolean patternMatch(Term subject, Term pattern) {
+        return patternMatch(subject, Collections.<Variable, Term> emptyMap(), pattern);
+    }
+    
     /**
      * Performs generic operations for the matching between the subject term and
      * the pattern term. Term-specific operations are then delegated to the
@@ -230,6 +246,14 @@ public class PatternMatcher extends AbstractMatcher {
      */
     @Override
     public void match(Term subject, Term pattern) {
+        if (subject instanceof Variable) {
+            /* retrieves the actual ground term this variable is bound to */
+            Variable variable = (Variable) subject;
+            assert subjectSubstMap.get(variable).isGround();
+            match(subjectSubstMap.get(variable), pattern);
+            return;
+        }
+        
         if (subject.kind().isComputational()) {
             assert pattern.kind().isComputational();
 
@@ -250,7 +274,6 @@ public class PatternMatcher extends AbstractMatcher {
                "kind mismatch between " + subject + " (" + subject.kind() + ")"
                + " and " + pattern + " (" + pattern.kind() + ")";
 
-        assert !subject.isSymbolic() : "the subject term shall be ground";
         if (pattern.isSymbolic()) {
             assert pattern instanceof Variable;
             Variable variable = (Variable) pattern;
@@ -273,14 +296,14 @@ public class PatternMatcher extends AbstractMatcher {
     
     /**
      * Private helper method that checks if a specified variable binding
-     * satifies the ordered-sorted pattern matching condition; namely, the sort
+     * satisfies the ordered-sorted pattern matching condition; namely, the sort
      * of the term must be subsorted to the sort of the variable.
      * 
      * @param variable
      *            the variable to be bound
      * @param term
      *            the term to be bound to
-     * @param termContext 
+     * @param termContext
      * @return {@code true} if the variable can be bound to the term
      *         successfully; otherwise, {@code false}
      */
@@ -300,6 +323,9 @@ public class PatternMatcher extends AbstractMatcher {
      *            the term
      */
     private void addSubstitution(Variable variable, Term term) {
+        // TODO(YilongL): hmm, better solution?
+        term = term.substituteAndEvaluate(subjectSubstMap, termContext);
+        
         if (!checkOrderedSortedCondition(variable, term, termContext)) {
             fail(variable, term);
         }
@@ -413,6 +439,10 @@ public class PatternMatcher extends AbstractMatcher {
         }
         CellCollection otherCellCollection = (CellCollection) pattern;
         
+        if (cellCollection.hasFrame()) {
+            Variable frame = cellCollection.frame();
+            cellCollection = (CellCollection) cellCollection.substitute(frame, subjectSubstMap.get(frame), termContext);
+        }
         assert !cellCollection.hasFrame() : "the subject term should be ground";
 
         Set<String> unifiableCellLabels = new HashSet<String>(cellCollection.labelSet());
@@ -730,6 +760,14 @@ public class PatternMatcher extends AbstractMatcher {
     @Override
     public void match(KItem kItem, Term pattern) {
         assert !(pattern instanceof Variable);
+        
+        if (kItem.kLabel() instanceof KLabel) {
+            KLabel kLabel = (KLabel) kItem.kLabel();
+            if (kLabel.isFunction()) {
+                match(kItem.substituteAndEvaluate(subjectSubstMap, termContext), pattern);
+                return;
+            }
+        }
 
         if (!(pattern instanceof KItem)) {
             fail(kItem, pattern);
@@ -764,7 +802,12 @@ public class PatternMatcher extends AbstractMatcher {
         }
         match(kList, patternKItem.kList());
     }
-
+    
+    @Override
+    public void match(KItemProjection kItemProj, Term pattern) {
+        match(kItemProj.substituteAndEvaluate(subjectSubstMap, termContext), pattern);
+    }
+        
     @Override
     public void match(Token token, Term pattern) {
         assert !(pattern instanceof Variable);
@@ -801,6 +844,11 @@ public class PatternMatcher extends AbstractMatcher {
     private void matchKCollection(KCollection kCollection, KCollection pattern) {
         assert kCollection.getClass().equals(pattern.getClass());
         
+        if (kCollection.hasFrame()) {
+            Variable frame = kCollection.frame();
+            match((Term) kCollection.substitute(frame, subjectSubstMap.get(frame), termContext), pattern);
+            return;
+        }
         assert !kCollection.hasFrame() : "the subject term should be ground";
 
         int length = pattern.size();
