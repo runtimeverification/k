@@ -64,7 +64,8 @@ public class PatternMatcher extends AbstractMatcher {
         if (!matcher.patternMatch(subject, rule.leftHandSide())) {
             return Collections.emptyList();
         }
-        
+
+        /* handle fresh variables, data structure lookups, and side conditions */
         List<Map<Variable, Term>> substitutions = new ArrayList<Map<Variable, Term>>();
         label: 
         for (Map<Variable, Term> subst : getMultiSubstitutions(matcher)) {
@@ -454,16 +455,6 @@ public class PatternMatcher extends AbstractMatcher {
             assert !isStarNested : "nested cells with multiplicity='*' not supported";
             // TODO(AndreiS): fix this assertions
         
-//            assert !(cellCollection.hasFrame() && otherCellCollection.hasFrame()) :
-//                "Two cell collections both having starred cells in their explicit contents and frames: " +
-//                "unable to handle this case at present since it greatly complicates the AC-unification";
-//            if (cellCollection.hasFrame()) {
-//                /* swap two cell collections to make sure cellCollection is free of frame */
-//                CellCollection tmp = cellCollection;
-//                cellCollection = otherCellCollection;
-//                otherCellCollection = tmp;
-//            }
-
             // note that cellCollection is free of frame
             Multimap<String, Cell> cellMap = ArrayListMultimap.create();
             Multimap<String, Cell> otherCellMap = ArrayListMultimap.create();
@@ -505,19 +496,16 @@ public class PatternMatcher extends AbstractMatcher {
             // TODO(YilongL): maybe extract the code below that performs searching to a single method
             // temporarily store the current substitution at a safe place before
             // starting to search for multiple substitutions
-//            SymbolicConstraint mainConstraint = fConstraint;
             Map<Variable, Term> mainSubstitution = fSubstitution;
             isStarNested = true;
 
-//            java.util.Collection<SymbolicConstraint> constraints = new ArrayList<SymbolicConstraint>();
             java.util.Collection<Map<Variable, Term>> substitutions = 
                     new ArrayList<Map<Variable, Term>>();   // represents all possible substitutions by matching 
                                                             // these two cell collections
             SelectionGenerator generator = new SelectionGenerator(otherCells.length, cells.length);
             // start searching for all possible unifiers
             do {
-                // clear the constraint before each attempt of unification
-//                fConstraint = new SymbolicConstraint(termContext);
+                // clear the substitution before each attempt of matching
                 fSubstitution = new HashMap<Variable, Term>();
 
                 try {
@@ -537,33 +525,26 @@ public class PatternMatcher extends AbstractMatcher {
                 cm.putAll(cellMap);
 
                 if (otherFrame != null) {
-//                    fConstraint.add(new CellCollection(cm, context), otherFrame);
                     addSubstitution(otherFrame, new CellCollection(cm, context));
                 } else {
                     if (!cm.isEmpty()) {
                         fail(cellCollection, otherCellCollection);
                     }
                 }
-//                constraints.add(fConstraint);
                 substitutions.add(fSubstitution);
             } while (generator.generate());
 
             // restore the current constraint after searching
-//            fConstraint = mainConstraint;
             fSubstitution = mainSubstitution;
             isStarNested = false;
 
-//            if (constraints.isEmpty()) {
             if (substitutions.isEmpty()) {
                 fail(cellCollection, otherCellCollection);
             }
 
-//            if (constraints.size() == 1) {
             if (substitutions.size() == 1) {
-//                fConstraint.addAll(constraints.iterator().next());
                 addSubstitution(substitutions.iterator().next());
             } else {
-//                multiConstraints.add(constraints);
                 multiSubstitutions.add(substitutions);
             }
         }
