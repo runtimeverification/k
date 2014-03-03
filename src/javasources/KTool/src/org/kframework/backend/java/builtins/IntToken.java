@@ -139,6 +139,26 @@ public class IntToken extends Token {
         return this == object;
     }
 
+    @Override
+    public void accept(Unifier unifier, Term pattern) {
+        unifier.unify(this, pattern);
+    }
+    
+    @Override
+    public void accept(Matcher matcher, Term pattern) {
+        matcher.match(this, pattern);
+    }
+
+    @Override
+    public ASTNode accept(Transformer transformer) {
+        return transformer.transform(this);
+    }
+
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
+    }
+
     /**
      * Returns the cached instance rather than the de-serialized instance if there is a cached
      * instance.

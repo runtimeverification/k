@@ -2,6 +2,7 @@ package org.kframework.backend.java.builtins;
 
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Token;
+import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
@@ -71,6 +72,26 @@ public class UninterpretedToken extends Token {
     public boolean equals(Object object) {
         /* UninterpretedToken instances are cached */
         return this == object;
+    }
+
+    @Override
+    public void accept(Unifier unifier, Term pattern) {
+        unifier.unify(this, pattern);
+    }
+    
+    @Override
+    public void accept(Matcher matcher, Term pattern) {
+        matcher.match(this, pattern);
+    }
+
+    @Override
+    public ASTNode accept(Transformer transformer) {
+        return transformer.transform(this);
+    }
+
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
     }
 
     /**
