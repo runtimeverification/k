@@ -250,7 +250,6 @@ public class PatternMatcher extends AbstractMatcher {
                "kind mismatch between " + subject + " (" + subject.kind() + ")"
                + " and " + pattern + " (" + pattern.kind() + ")";
 
-        assert !subject.isSymbolic() : "the subject term shall be ground";
         if (pattern.isSymbolic()) {
             assert pattern instanceof Variable;
             Variable variable = (Variable) pattern;
