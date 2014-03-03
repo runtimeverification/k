@@ -448,21 +448,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         substitution.putAll(constraint.substitution);
         addAll(constraint);
     }
-    
-    public SymbolicConstraint(Map<Variable, Term> substitution, TermContext context) {
-        this(context);
-        
-        /* check if the given substitution violates the invariant */
-        Set<Variable> rhsVariables = new HashSet<Variable>();
-        for (Term term : substitution.values()) {
-            rhsVariables.addAll(term.variableSet());
-        }
-        rhsVariables.retainAll(substitution.keySet());
-        assert rhsVariables.isEmpty();
-        
-        this.substitution.putAll(substitution);
-        truthValue = TruthValue.UNKNOWN;
-    }
 
     public SymbolicConstraint(TermContext context) {
         this.context = context;
