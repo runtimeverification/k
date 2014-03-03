@@ -55,7 +55,7 @@ public class Transition<State, Alphabet> {
     }
 
     public TransitionIndex getIndex() {
-        return TransitionIndex.<State, Alphabet>of(startState, letter);
+        return TransitionIndex.of(startState, letter);
     }
 
     public static Transition<PAutomatonState<String, String>, String> of(String transitionString) {
