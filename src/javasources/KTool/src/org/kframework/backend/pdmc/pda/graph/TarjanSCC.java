@@ -37,11 +37,6 @@ public class TarjanSCC<Data, Label> {
             inStack = false;
         }
 
-        @Override
-        public int hashCode() {
-            return data.hashCode();
-        }
-
         Data data;
         Map<Data, Label> nextVertex;
         int index;
