@@ -1,5 +1,7 @@
 ### Semantic (Non-Syntactic) Computation Items
 
+[MOVIE [8'02"]](http://youtu.be/BYhQQW6swfc)
+
 In this lesson we start another semantic definition of LAMBDA++, which
 follows a style based on environments instead of substitution.  In terms of
 K, we will learn how easy it is to add new items to the syntactic category
