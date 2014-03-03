@@ -7,7 +7,10 @@ import org.kframework.backend.pdmc.pda.ConfigurationHead;
 import java.util.*;
 
 /**
- * Created by Traian on 04.02.2014.
+ * An implementation of an LTL atoms evaluator
+ * @see org.kframework.backend.pdmc.pda.buchi.Evaluator
+ *
+ * @author TraianSF
  */
 public class ConcreteEvaluator<Control, Alphabet> implements Evaluator<ConfigurationHead<Control, Alphabet>> {
 
@@ -24,7 +27,7 @@ public class ConcreteEvaluator<Control, Alphabet> implements Evaluator<Configura
     @Override
     public void setState(ConfigurationHead<Control, Alphabet> controlAlphabetConfigurationHead) {
         currentAtoms = evaluationMap.get(controlAlphabetConfigurationHead);
-        if (null == currentAtoms) currentAtoms = Collections.EMPTY_SET;
+        if (null == currentAtoms) currentAtoms = Collections.emptySet();
     }
 
     Map<ConfigurationHead<Control, Alphabet>, Set<String>> evaluationMap;

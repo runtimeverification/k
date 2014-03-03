@@ -14,7 +14,7 @@ import java.util.*;
 
 /**
  * Implements some pushdown model-checking related algorithms from  Stefan Schwoon's Phd Thesis:
- * S. Schwoon.  Model-Checking Pushdown Systems.  Ph.D. Thesis, Technische Universität München, June 2002.
+ * S. Schwoon.  Model-Checking Pushdown Systems.  Ph.D. Thesis, Technische Universitaet Muenchen, June 2002.
  *
  * @author TraianSF
  */
