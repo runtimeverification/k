@@ -1,13 +1,16 @@
 package org.kframework.backend.pdmc.pda;
 
-import org.kframework.backend.java.util.Utils;
-import org.kframework.backend.pdmc.pda.buchi.Evaluator;
-
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author Traian
+ * The head of a pushdown system configuration consisting of a pair between the state of the configuration
+ * and the top of the stack (or null, if the stack is empty)
+ *
+ * @param <Control>  representing the states of a PDS
+ * @param <Alphabet> representing the stack alphabet of the PDS
+ *
+ * @author TraianSF
  */
 public class ConfigurationHead<Control, Alphabet> {
     private static Map<Object, ConfigurationHead> basicCache;
@@ -51,29 +54,29 @@ public class ConfigurationHead<Control, Alphabet> {
 
     public static <Control, Alphabet> ConfigurationHead<Control, Alphabet> of(Control c, Alphabet gamma) {
         if (gamma == null) return of(c);
-        if (extendedCache == null) extendedCache = new HashMap<Object, Map<Object, ConfigurationHead>>();
+        if (extendedCache == null) extendedCache = new HashMap<>();
         Map<Object, ConfigurationHead> map = extendedCache.get(c);
         if (map == null) {
-            map = new HashMap<Object, ConfigurationHead>();
+            map = new HashMap<>();
             extendedCache.put(c, map);
         }
         @SuppressWarnings("unchecked")
         ConfigurationHead<Control, Alphabet> configurationHead =
                 (ConfigurationHead<Control, Alphabet>) map.get(gamma);
         if (configurationHead == null) {
-            configurationHead = new ConfigurationHead<Control, Alphabet>(c, gamma);
+            configurationHead = new ConfigurationHead<>(c, gamma);
             map.put(gamma, configurationHead);
         }
         return  configurationHead;
     }
 
     private static <Control, Alphabet> ConfigurationHead<Control, Alphabet> of(Control c) {
-        if (basicCache == null) basicCache = new HashMap<Object, ConfigurationHead>();
+        if (basicCache == null) basicCache = new HashMap<>();
         @SuppressWarnings("unchecked")
         ConfigurationHead<Control, Alphabet> configurationHead =
                 (ConfigurationHead<Control, Alphabet>) basicCache.get(c);
         if (configurationHead == null) {
-            configurationHead = new ConfigurationHead<Control, Alphabet>(c, null);
+            configurationHead = new ConfigurationHead<>(c, null);
             basicCache.put(c, configurationHead);
         }
         return  configurationHead;

@@ -1,42 +1,40 @@
 package org.kframework.backend.pdmc.pda.graph;
 
-import org.kframework.parser.concrete.lib.once_$Memo$My$Tbl$Ground_0_0;
-
 import java.util.*;
 
 /**
- * @author Traian
+ * A graph class designed for performing Tarjan's SCC algorithm on it.
  *
  * @see <a href="http://en.wikipedia.org/wiki/Tarjan's_strongly_connected_components_algorithm">The rendition on
  * Wikipedia of Tarjan's Strongly Connected Components algorithm.</a>
+ *
+ * @author TraianSF
  */
 public class TarjanSCC<Data, Label> {
     Map<Data,TarjanSCCVertex> vertexSet;
     Map<Data, Map<Data, Label>> edgeSet;
 
     public TarjanSCC() {
-        vertexSet = new HashMap<Data, TarjanSCCVertex>();
-        edgeSet = new HashMap<Data, Map<Data, Label>>();
+        vertexSet = new HashMap<>();
+        edgeSet = new HashMap<>();
         sccs = null;
     }
 
+    /**
+     * Indexing class for graph vertices specialized for Tarjan's SCC algorithm
+     */
     public class TarjanSCCVertex {
 
         TarjanSCCVertex(Data data) {
             this.data = data;
             nextVertex = edgeSet.get(data);
             if (nextVertex == null) {
-                nextVertex = new HashMap<Data, Label>();
+                nextVertex = new HashMap<>();
                 edgeSet.put(data, nextVertex);
             }
             index = -1;
             lowlink = -1;
             inStack = false;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            return (this == o);
         }
 
         @Override
@@ -71,9 +69,9 @@ public class TarjanSCC<Data, Label> {
         return (!l.equals(ll));
     }
 
-    ArrayList<ArrayList<TarjanSCCVertex>> sccs = null;
+    Collection<Collection<TarjanSCCVertex>> sccs = null;
 
-    public ArrayList<ArrayList<TarjanSCCVertex>> stronglyConnectedComponents() {
+    public Collection<Collection<TarjanSCCVertex>> stronglyConnectedComponents() {
         if (sccs == null) computeSCC();
         return sccs;
     }
@@ -83,7 +81,7 @@ public class TarjanSCC<Data, Label> {
     private void computeSCC() {
         index = 0;
         sccs = new ArrayList<>();
-        sccStack = new Stack<TarjanSCCVertex>();
+        sccStack = new Stack<>();
         for (TarjanSCCVertex v : vertexSet.values()) {
             if (v.index == -1) {
                 strongConnect(v);
@@ -108,7 +106,7 @@ public class TarjanSCC<Data, Label> {
         }
 
         if (v.lowlink == v.index) {
-            ArrayList<TarjanSCCVertex> scc = new ArrayList<TarjanSCCVertex>();
+            Collection<TarjanSCCVertex> scc = new HashSet<>();
             TarjanSCCVertex w = null;
             while (w != v) {
                 w = sccStack.pop();
@@ -117,13 +115,12 @@ public class TarjanSCC<Data, Label> {
             }
             sccs.add(scc);
         }
-
     }
 
     public String getSCCSString() {
         StringBuilder result = new StringBuilder();
-        ArrayList<ArrayList<TarjanSCCVertex>> sccs = stronglyConnectedComponents();
-        for (ArrayList<TarjanSCCVertex> scc : sccs) {
+        Collection<Collection<TarjanSCCVertex>> sccs = stronglyConnectedComponents();
+        for (Collection<TarjanSCCVertex> scc : sccs) {
             result.append("{ ");
             for (TarjanSCCVertex v : scc) {
                 result.append(v.toString());

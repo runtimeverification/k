@@ -9,8 +9,8 @@ import java.util.Map;
  * @author Traian
  */
 public class TransitionIndex<State, Alphabet> {
-    private static HashMap<Object, Map<Object, TransitionIndex>> extendedCache;
-    private static HashMap<Object, TransitionIndex> basicCache;
+    private static Map<Object, Map<Object, TransitionIndex>> extendedCache;
+    private static Map<Object, TransitionIndex> basicCache;
     private final State state;
 
     public Alphabet getLetter() {
@@ -45,16 +45,16 @@ public class TransitionIndex<State, Alphabet> {
 
     public static <State, Alphabet> TransitionIndex<State, Alphabet> of(State start, Alphabet letter) {
         if (letter == null) return of(start);
-        if (extendedCache == null) extendedCache = new HashMap<Object, Map<Object, TransitionIndex>>();
+        if (extendedCache == null) extendedCache = new HashMap<>();
         Map<Object,TransitionIndex> map = extendedCache.get(start);
         if (map == null) {
-            map = new HashMap<Object, TransitionIndex>();
+            map = new HashMap<>();
             extendedCache.put(start, map);
         }
         @SuppressWarnings("unchecked")
         TransitionIndex<State, Alphabet> index = (TransitionIndex<State, Alphabet>) map.get(letter);
         if (index == null) {
-            index = new TransitionIndex<State, Alphabet>(start, letter);
+            index = new TransitionIndex<>(start, letter);
             map.put(letter, index);
         }
         return index;
@@ -62,12 +62,12 @@ public class TransitionIndex<State, Alphabet> {
 
     private static <State, Alphabet> TransitionIndex<State, Alphabet> of(State start) {
         if (basicCache == null) {
-            basicCache = new HashMap<Object, TransitionIndex>();
+            basicCache = new HashMap<>();
         }
         @SuppressWarnings("unchecked")
         TransitionIndex<State, Alphabet> index = (TransitionIndex<State, Alphabet>) basicCache.get(start);
         if (index == null) {
-            index = new TransitionIndex<State, Alphabet>(start, null);
+            index = new TransitionIndex<>(start, null);
             basicCache.put(start, index);
         }
         return index;

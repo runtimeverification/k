@@ -1,11 +1,13 @@
 package org.kframework.backend.pdmc.pda.pautomaton;
 
-import org.kframework.backend.java.util.Utils;
-
 import java.util.HashMap;
 
 /**
- * @author Traian
+ * A class for caching the states of a post* automaton associated to a pushdown system
+ * @see org.kframework.backend.pdmc.pda.pautomaton.PAutomaton
+ * @see org.kframework.backend.pdmc.pda.PushdownSystem
+ *
+ * @author TraianSF
  */
 public class PAutomatonState<Control, Alphabet> {
     private static HashMap<Object, PAutomatonState> basicCache;
@@ -29,27 +31,27 @@ public class PAutomatonState<Control, Alphabet> {
 
     public static<Control, Alphabet> PAutomatonState<Control, Alphabet> of(Control state, Alphabet letter) {
         if (letter == null) return of(state);
-        if (extendedCache == null) extendedCache = new HashMap<Object, HashMap<Object, PAutomatonState>>();
+        if (extendedCache == null) extendedCache = new HashMap<>();
         HashMap<Object, PAutomatonState> map = extendedCache.get(state);
         if (map == null) {
-            map = new HashMap<Object, PAutomatonState>();
+            map = new HashMap<>();
             extendedCache.put(state, map);
         }
         @SuppressWarnings("unchecked")
         PAutomatonState<Control, Alphabet> state1 = (PAutomatonState<Control, Alphabet>) map.get(letter);
         if (state1 == null) {
-            state1 = new PAutomatonState<Control, Alphabet>(state, letter);
+            state1 = new PAutomatonState<>(state, letter);
             map.put(letter, state1);
         }
         return state1;
      }
 
     public static <Control, Alphabet> PAutomatonState<Control, Alphabet> of(Control state) {
-        if (basicCache == null) basicCache = new HashMap<Object, PAutomatonState>();
+        if (basicCache == null) basicCache = new HashMap<>();
         @SuppressWarnings("unchecked")
         PAutomatonState<Control, Alphabet> state1 = (PAutomatonState<Control, Alphabet>) basicCache.get(state);
         if (state1 == null) {
-            state1 = new PAutomatonState<Control, Alphabet>(state, null);
+            state1 = new PAutomatonState<>(state, null);
             basicCache.put(state, state1);
         }
         return state1;
@@ -77,12 +79,12 @@ public class PAutomatonState<Control, Alphabet> {
 
     public static PAutomatonState<String, String> ofString(String string) {
         if (string.charAt(0) != '<') {
-            return PAutomatonState.<String,String>of(string);
+            return PAutomatonState.of(string);
         }
         assert string.charAt(string.length() - 1) == '>' : "Composed state must end with '>'.";
         String[] strings = string.substring(1, string.length() - 1).split(",");
         assert strings.length == 2 : "Composed state is of form <p,l>.";
-        return PAutomatonState.<String,String>of(strings[0], strings[1]);
+        return PAutomatonState.of(strings[0], strings[1]);
     }
 
     @Override

@@ -1,13 +1,17 @@
 package org.kframework.backend.pdmc.automaton;
 
 import com.google.common.base.Joiner;
-import org.kframework.backend.pdmc.automaton.AutomatonInterface;
-import org.kframework.backend.pdmc.automaton.Transition;
-import org.kframework.backend.pdmc.automaton.TransitionIndex;
 
 import java.util.*;
 
 /**
+ * This class defines a nondeterministic finite automaton (NFA).  It keeps the transition function of the automatonas a
+ * map indexed on pairs of states and alphabet letters having as values the set of transitions corresponding to that
+ * index.
+ * It is parameterized on the class for states and the one for the alphabet.
+ *
+ * @param <State>  represents the states of the automaton
+ * @param <Alphabet>  represents the alphabet of the automaton
  * @author Traian
  */
 public class BasicAutomaton<State, Alphabet> implements AutomatonInterface<State, Alphabet> {
@@ -18,12 +22,17 @@ public class BasicAutomaton<State, Alphabet> implements AutomatonInterface<State
     private final Set<Alphabet> letters;
 
 
+    /**
+     * Retrieves the set of automaton transitions corresponding to a  state-letter pair.
+     * @param state the first argument of the NFA transition function
+     * @param letter the second argument of the NFA transition function
+     * @return the (possibly empty) set of transitions corresponding to given state and letter
+     */
     @Override
     public Set<Transition<State, Alphabet>> getTransitions(State state, Alphabet letter) {
         Set<Transition<State, Alphabet>> transitions = deltaIndex.get(
-                TransitionIndex.<State, Alphabet>of(state, letter) );
-        if (transitions == null) transitions =
-                Collections.<Transition<State, Alphabet>>emptySet();
+                TransitionIndex.of(state, letter) );
+        if (transitions == null) transitions = Collections.emptySet();
         return transitions;
     }
 
@@ -41,10 +50,9 @@ public class BasicAutomaton<State, Alphabet> implements AutomatonInterface<State
                           State initialState,
                           Collection<State> finalStates) {
         this.initialState = initialState;
-        this.finalStates = new HashSet<State>(finalStates);
+        this.finalStates = new HashSet<>(finalStates);
         this.letters = new HashSet<>();
-        deltaIndex = new HashMap<TransitionIndex<State, Alphabet>,
-                Set<Transition<State, Alphabet>>>();
+        deltaIndex = new HashMap<>();
         for (Transition<State, Alphabet> transition : delta) {
             @SuppressWarnings("unchecked")
             TransitionIndex<State, Alphabet> index = transition.getIndex();
@@ -53,7 +61,7 @@ public class BasicAutomaton<State, Alphabet> implements AutomatonInterface<State
             }
             Set<Transition<State, Alphabet>> transitions = deltaIndex.get(index);
             if (transitions == null) {
-                transitions = new HashSet<Transition<State, Alphabet>>();
+                transitions = new HashSet<>();
                 deltaIndex.put(index, transitions);
             }
             transitions.add(transition);
@@ -82,7 +90,7 @@ public class BasicAutomaton<State, Alphabet> implements AutomatonInterface<State
     @Override
     public String toString() {
         Joiner joiner = Joiner.on(";\n");
-        List<StringBuilder> builders = new ArrayList<StringBuilder>();
+        List<StringBuilder> builders = new ArrayList<>();
         for (Set<Transition<State, Alphabet>> transitions : deltaIndex.values()) {
             StringBuilder builder = new StringBuilder();
             joiner.appendTo(builder, transitions);
@@ -100,14 +108,19 @@ public class BasicAutomaton<State, Alphabet> implements AutomatonInterface<State
 
     /**
      * Given an initial state, a final state and the transition relation of an automaton, find a path of transitions
-     * between them
+     * between them.
      * @param initialState the state to begin from
      * @param finalState  the final state to reach
-     * @return
+     * @return a list of transitions describing a path from initialState to finalState or null if there is no such list.
      */
     public Deque<Transition<State, Alphabet>> getPath(State initialState, State finalState) {
+        // This algorithm is a simple BFS traversal of the transition graph.
+        // toProcess keeps the queue of the states which have yet to be processed
         Deque<State> toProcess = new ArrayDeque<>();
-        HashMap<State, Transition<State, Alphabet>> considered = new HashMap<>();
+        // considered remembers states which have already been seen.
+        // To save the return path, is organized as a map, assigning to each state the transition through which it was
+        // reached.
+        Map<State, Transition<State, Alphabet>> considered = new HashMap<>();
         toProcess.add(initialState);
         considered.put(initialState, null);
         State next;
@@ -117,6 +130,7 @@ public class BasicAutomaton<State, Alphabet> implements AutomatonInterface<State
                 for (Transition<State, Alphabet> transition : transitions) {
                     State endState = transition.getEnd();
                     if (endState.equals(finalState)) {
+                        // if the final state is reached, compute the path to it by walking back on the transitions.
                         Deque<Transition<State, Alphabet>> result = new ArrayDeque<>();
                         while (transition != null) {
                             result.push(transition);
@@ -130,13 +144,18 @@ public class BasicAutomaton<State, Alphabet> implements AutomatonInterface<State
                 }
             }
         }
+        // If this point was reached, it means finalState is not reachable from initialState.
         return null;
     }
 
-    private Collection<Set<Transition<State, Alphabet>>> getFrontTransitions(State next) {
+    /**
+     * @param state the state for which forward transitions are needed
+     * @return the collection of all sets of transitions originating in state.
+     */
+    private Collection<Set<Transition<State, Alphabet>>> getFrontTransitions(State state) {
         ArrayList<Set<Transition<State, Alphabet>>> result = new ArrayList<>();
         for (Alphabet letter : letters) {
-            Set<Transition<State, Alphabet>> transitions = getTransitions(next, letter);
+            Set<Transition<State, Alphabet>> transitions = getTransitions(state, letter);
             if (!transitions.isEmpty()) {
                 result.add(transitions);
             }

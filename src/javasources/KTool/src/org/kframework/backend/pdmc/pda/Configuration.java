@@ -5,10 +5,16 @@ import com.google.common.base.Joiner;
 import org.kframework.backend.java.util.Utils;
 
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.Stack;
 
 /**
+ * The configuration of a pushdown system, consisting of a state and a stack.
+ * Internally, this is represented as a pair between a ConfigurationHead and the remainder of the stack.
+ * @see org.kframework.backend.pdmc.pda.ConfigurationHead
+ *
+ * @param <Control> represents the states of the PDS
+ * @param <Alphabet> represents the stack alphabet for the PDS
+ *
  * @author TraianSF
  */
 public class Configuration<Control, Alphabet> {
@@ -30,7 +36,7 @@ public class Configuration<Control, Alphabet> {
             if (stack.size() == 1) {
                 this.stack = emptyStack();
             } else {
-                this.stack = new Stack<Alphabet>();
+                this.stack = new Stack<>();
                 this.stack.addAll(stack);
                 this.stack.pop();
             }
@@ -42,11 +48,11 @@ public class Configuration<Control, Alphabet> {
         if (stack.isEmpty()) {
             this.stack = configuration.getStack();
         } else {
-            Stack<Alphabet> newStack = new Stack<Alphabet>();
+            Stack<Alphabet> newStack = new Stack<>();
             newStack.addAll(stack);
             newStack.addAll(configuration.getStack());
             if (!head.isProper()) {
-                head = ConfigurationHead.<Control,Alphabet>of(head.getState(), newStack.pop());
+                head = ConfigurationHead.of(head.getState(), newStack.pop());
             }
             this.stack = newStack;
         }
@@ -97,13 +103,13 @@ public class Configuration<Control, Alphabet> {
         assert strings.length >= 1 : "Configuration must have a state.";
         assert strings.length <= 2 : "Configuration cannot have more than a stack.";
         String control = strings[0].trim();
-        Stack<String> stack = new Stack<String>();
+        Stack<String> stack = new Stack<>();
         if (strings.length==2) {
             String[] letters = strings[1].trim().split("\\s+");
             for (int i = letters.length; i-- > 0; )
                 stack.push(letters[i]);
         }
-        return new Configuration<String, String>(control, stack);
+        return new Configuration<>(control, stack);
     }
 
     @Override

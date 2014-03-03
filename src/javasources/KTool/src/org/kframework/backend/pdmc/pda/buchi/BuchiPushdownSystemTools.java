@@ -15,6 +15,8 @@ import java.util.*;
 /**
  * Implements some pushdown model-checking related algorithms from  Stefan Schwoon's Phd Thesis:
  * S. Schwoon.  Model-Checking Pushdown Systems.  Ph.D. Thesis, Technische Universität München, June 2002.
+ *
+ * @author TraianSF
  */
 public class BuchiPushdownSystemTools<Control, Alphabet> {
 
@@ -164,7 +166,10 @@ public class BuchiPushdownSystemTools<Control, Alphabet> {
     }
 
     /**
-     * Main method of the class. Implements the APost* algorithm instrumented to also produce the repeated heads graph.
+     * Main method of the class. Implements the post* algorithm instrumented to also produce the repeated heads graph.
+     * The post* algorithm implemented is presented in Figure 3.4, Section 3.1.4 of S. Schwoon's PhD thesis (p. 48)
+     * The modification to compute the repeated heads graph is explained in Section 3.2.3 of Schwoon's thesis
+     * (see also Algorithm 4 in Figure 3.9, p. 81)
      */
     private void compute() {
         EpsilonTransitionWatch watch = new EpsilonTransitionWatch();

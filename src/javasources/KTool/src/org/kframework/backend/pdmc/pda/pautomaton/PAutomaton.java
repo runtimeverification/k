@@ -2,12 +2,13 @@ package org.kframework.backend.pdmc.pda.pautomaton;
 
 import org.kframework.backend.pdmc.automaton.BasicAutomaton;
 import org.kframework.backend.pdmc.automaton.Transition;
-import org.kframework.backend.pdmc.automaton.TransitionIndex;
 
 import java.util.*;
 
 /**
- * @author Traian
+ * A special class of automaton, used to compute all reachable states of a pushdown system.
+ *
+ * @author TraianSF
  */
 public class PAutomaton<State, Alphabet> extends BasicAutomaton<State, Alphabet> {
 
@@ -15,13 +16,9 @@ public class PAutomaton<State, Alphabet> extends BasicAutomaton<State, Alphabet>
         super(delta, initialState, finalStates);
     }
 
-    public PAutomaton(Map<TransitionIndex<State, Alphabet>, Set<Transition<State, Alphabet>>> deltaIndex, State initialState, Set<State> finalStates) {
-        super(deltaIndex, initialState, finalStates);
-    }
-
     public static PAutomaton<PAutomatonState<String, String>, String> of(String s) {
-        ArrayList<Transition<PAutomatonState<String, String>, String>> rules = new ArrayList<>();
-        ArrayList<PAutomatonState<String, String>> states = new ArrayList<>();
+        List<Transition<PAutomatonState<String, String>, String>> rules = new ArrayList<>();
+        List<PAutomatonState<String, String>> states = new ArrayList<>();
         String[] stringTransitions = s.split("\\s*;\\s*");
         int n = stringTransitions.length - 2;
         PAutomatonState<String,String> initialState = PAutomatonState.of(stringTransitions[n]);

@@ -49,11 +49,11 @@ public class PAutomatonTest {
                 "q a t;\n" +
                 "p;\n" +
                 "t;\n";
-        PAutomaton auto = PAutomaton.of(aut);
-        PAutomatonState p = PAutomatonState.ofString("p");
-        PAutomatonState t = PAutomatonState.ofString("t");
-        Collection<Transition> path = auto.getPath(p, t);
-        System.err.println("One shortest path from p to t is: " + path);
+        PAutomaton<PAutomatonState<String, String>, String> auto = PAutomaton.of(aut);
+        PAutomatonState<String, String> p = PAutomatonState.ofString("p");
+        PAutomatonState<String, String> t = PAutomatonState.ofString("t");
+        Collection<Transition<PAutomatonState<String, String>, String>> path = auto.getPath(p, t);
         org.junit.Assert.assertEquals("Path from p to t should have size 3", 3, path.size());
+        org.junit.Assert.assertEquals("Shortest path","[p b r, r a q, q a t]",path.toString());
     }
 }
