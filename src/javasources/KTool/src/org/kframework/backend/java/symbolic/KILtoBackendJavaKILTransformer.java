@@ -365,44 +365,52 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(org.kframework.kil.SetBuiltin node) throws TransformerException {
-        assert node.isLHSView() : "unsupported set " + node;
-
         HashSet<Term> entries = new HashSet<Term>(node.elements().size());
         for (org.kframework.kil.Term entry : node.elements()) {
             Term key = (Term) entry.accept(this);
             entries.add(key);
         }
 
-        if (node.hasViewBase()) {
-            Term base = (Term) node.viewBase().accept(this);
-            if (base instanceof SetUpdate) {
-                SetUpdate setUpdate = (SetUpdate) base;
-                /* TODO(AndreiS): check key uniqueness */
-                return new SetUpdate(setUpdate.base(), setUpdate.removeSet());
+        if (node.isLHSView()) {
+            if (node.hasViewBase()) {
+                Term base = (Term) node.viewBase().accept(this);
+                if (base instanceof SetUpdate) {
+                    SetUpdate setUpdate = (SetUpdate) base;
+                    /* TODO(AndreiS): check key uniqueness */
+                    return new SetUpdate(setUpdate.base(), setUpdate.removeSet());
+                } else {
+                    /* base instanceof Variable */
+                    return new BuiltinSet(entries, (Variable) base);
+                }
             } else {
-                /* base instanceof Variable */
-                return new BuiltinSet(entries, (Variable) base);
+                return new BuiltinSet(entries);
             }
         } else {
-            return new BuiltinSet(entries);
+            ArrayList<Term> baseTerms = new ArrayList<>(node.baseTerms().size());
+            for (org.kframework.kil.Term term : node.baseTerms()) {
+                baseTerms.add((Term) term.accept(this));
+            }
+            baseTerms.add(new BuiltinSet(entries));
+
+            Term result = baseTerms.get(0);
+            for (int i = 1; i < baseTerms.size(); ++i) {
+                result = new KItem(
+                        KLabelConstant.of(DataStructureSort.DEFAULT_SET_LABEL, context),
+                        new KList(ImmutableList.of(result, baseTerms.get(i))),
+                        context);
+            }
+            return result;
         }
     }
 
     @Override
     public ASTNode transform(org.kframework.kil.MapBuiltin node) throws TransformerException {
-//        assert node.isLHSView() : "unsupported map " + node;
-
         HashMap<Term, Term> entries = new HashMap<Term, Term>(node.elements().size());
         for (Map.Entry<org.kframework.kil.Term, org.kframework.kil.Term> entry :
                 node.elements().entrySet()) {
             Term key = (Term) entry.getKey().accept(this);
             Term value = (Term) entry.getValue().accept(this);
             entries.put(key, value);
-        }
-
-        ArrayList<Term> baseTerms = new ArrayList<>(node.baseTerms().size());
-        for (org.kframework.kil.Term term : node.baseTerms()) {
-            baseTerms.add((Term) term.accept(this));
         }
 
         if (node.isLHSView()) {
@@ -421,7 +429,12 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 return new BuiltinMap(entries);
             }
         } else {
+            ArrayList<Term> baseTerms = new ArrayList<>(node.baseTerms().size());
+            for (org.kframework.kil.Term term : node.baseTerms()) {
+                baseTerms.add((Term) term.accept(this));
+            }
             baseTerms.add(new BuiltinMap(entries));
+
             Term result = baseTerms.get(0);
             for (int i = 1; i < baseTerms.size(); ++i) {
                 result = new KItem(
@@ -599,10 +612,17 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             }
 
             if (lookup instanceof org.kframework.kil.SetLookup) {
-                lookups.add(new SetLookup(base, key), BoolToken.TRUE);
+                if (lookup.choice()) {
+                    lookups.add(new SetElementChoice(base), key);
+                } else {
+                    lookups.add(new SetLookup(base, key), BoolToken.TRUE);
+                }
             } else {
                 Term value = (Term) lookup.value().accept(this);
                 if (lookup instanceof org.kframework.kil.MapLookup) {
+                    if (lookup.choice()) {
+                        lookups.add(new MapKeyChoice(base), key);
+                    }
                     lookups.add(new MapLookup(base, key, kind), value);
                 } else { // ListLookup
                     lookups.add(new ListLookup(base, key, kind), value);

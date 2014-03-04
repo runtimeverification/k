@@ -127,6 +127,11 @@ public class TermTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
+    public ASTNode transform(MapKeyChoice mapKeyChoice) {
+        return transformTerm((Term) super.transform(mapKeyChoice));
+    }
+
+    @Override
     public ASTNode transform(MapLookup mapLookup) {
         return transformTerm((Term) super.transform(mapLookup));
     }
@@ -134,6 +139,11 @@ public class TermTransformer extends CopyOnWriteTransformer {
     @Override
     public ASTNode transform(MapUpdate mapUpdate) {
         return transformTerm((Term) super.transform(mapUpdate));
+    }
+
+    @Override
+    public ASTNode transform(SetElementChoice setElementChoice) {
+        return transformTerm((Term) super.transform(setElementChoice));
     }
 
     @Override

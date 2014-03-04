@@ -394,6 +394,31 @@
     </all-programs>
   </test>
 
+  <test
+      definition="tests/regression/java-rewrite-engine/data_structure_iteration/test1/test.k"
+      programs="tests/regression/java-rewrite-engine/data_structure_iteration/test1"
+      results="tests/regression/java-rewrite-engine/data_structure_iteration/test1"
+      extension="test"
+      >
+    <kompile-option name="-backend" value="java" />
+    <all-programs>
+      <krun-option name="-backend" value="java" />
+      <krun-option name="-smt" value="none" />
+    </all-programs>
+  </test>
+  <test
+      definition="tests/regression/java-rewrite-engine/data_structure_iteration/test2/test.k"
+      programs="tests/regression/java-rewrite-engine/data_structure_iteration/test2"
+      results="tests/regression/java-rewrite-engine/data_structure_iteration/test2"
+      extension="test"
+      >
+    <kompile-option name="-backend" value="java" />
+    <all-programs>
+      <krun-option name="-backend" value="java" />
+      <krun-option name="-smt" value="none" />
+    </all-programs>
+  </test>
+
 <!-- end Java Rewrite Engine tests -->
 
 </tests>

@@ -63,6 +63,13 @@ public abstract class Collection extends Term {
     }
 
     /**
+     * Returns true if this {@code Collection} does not have any contents and does not have a frame.
+     */
+    public boolean isEmpty() {
+        return size() == 0 && !hasFrame();
+    }
+
+    /**
      * Returns the size of the contents of this {@code Collection}.
      *
      * @return the size of the contents

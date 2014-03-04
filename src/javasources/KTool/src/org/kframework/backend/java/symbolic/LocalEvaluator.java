@@ -45,6 +45,11 @@ public class LocalEvaluator extends LocalTransformer {
     }
 
     @Override
+    public ASTNode transform(SetElementChoice setElementChoice) {
+        return setElementChoice.evaluateChoice();
+    }
+
+    @Override
     public ASTNode transform(SetLookup setLookup) {
         return setLookup.evaluateLookup();
     }
@@ -52,6 +57,11 @@ public class LocalEvaluator extends LocalTransformer {
     @Override
     public ASTNode transform(SetUpdate setUpdate) {
         return setUpdate.evaluateUpdate();
+    }
+
+    @Override
+    public ASTNode transform(MapKeyChoice mapKeyChoice) {
+        return mapKeyChoice.evaluateChoice();
     }
 
     @Override

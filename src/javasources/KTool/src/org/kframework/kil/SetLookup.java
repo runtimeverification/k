@@ -19,8 +19,8 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  */
 public class SetLookup extends BuiltinLookup {
 
-    public SetLookup(Variable base, Term key) {
-        super(base, key, KSort.KItem);
+    public SetLookup(Variable base, Term key, boolean choice) {
+        super(base, key, KSort.KItem, choice);
     }
 
     @Override

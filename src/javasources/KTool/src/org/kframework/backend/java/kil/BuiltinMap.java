@@ -51,10 +51,6 @@ public class BuiltinMap extends Collection implements Sorted {
         return Collections.unmodifiableMap(entries);
     }
 
-    public boolean isEmpty() {
-        return entries.isEmpty() && !hasFrame();
-    }
-
     public Term put(Term key, Term value) {
         return entries.put(key, value);
     }

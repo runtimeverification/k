@@ -295,6 +295,18 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
+    public ASTNode transform(MapKeyChoice mapKeyChoice) {
+        ASTNode astNode = mapKeyChoice.accept(preTransformer);
+        if (astNode instanceof DoneTransforming) {
+            return ((DoneTransforming) astNode).getContents();
+        }
+        assert astNode instanceof MapKeyChoice : "preTransformer should not modify type";
+        mapKeyChoice = (MapKeyChoice) astNode;
+        mapKeyChoice = (MapKeyChoice) super.transform(mapKeyChoice);
+        return mapKeyChoice.accept(postTransformer);
+    }
+
+    @Override
     public ASTNode transform(MapLookup mapLookup) {
         ASTNode astNode = mapLookup.accept(preTransformer);
         if (astNode instanceof DoneTransforming) {
@@ -304,7 +316,6 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
         mapLookup = (MapLookup) astNode;
         mapLookup = (MapLookup) super.transform(mapLookup);
         return mapLookup.accept(postTransformer);
-
     }
 
     @Override
@@ -329,6 +340,18 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
         setUpdate = (SetUpdate) astNode;
         setUpdate = (SetUpdate) super.transform(setUpdate);
         return setUpdate.accept(postTransformer);
+    }
+
+    @Override
+    public ASTNode transform(SetElementChoice setElementChoice) {
+        ASTNode astNode = setElementChoice.accept(preTransformer);
+        if (astNode instanceof DoneTransforming) {
+            return ((DoneTransforming) astNode).getContents();
+        }
+        assert astNode instanceof SetElementChoice : "preTransformer should not modify type";
+        setElementChoice = (SetElementChoice) astNode;
+        setElementChoice = (SetElementChoice) super.transform(setElementChoice);
+        return setElementChoice.accept(postTransformer);
     }
 
     @Override

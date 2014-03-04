@@ -163,6 +163,12 @@ public class BottomUpVisitor implements Visitor {
     }
 
     @Override
+    public void visit(MapKeyChoice mapKeyChoice) {
+        mapKeyChoice.map().accept(this);
+        visit((Term) mapKeyChoice);
+    }
+
+    @Override
     public void visit(MapLookup mapLookup) {
         mapLookup.map().accept(this);
         mapLookup.key().accept(this);
@@ -200,6 +206,12 @@ public class BottomUpVisitor implements Visitor {
         for (Variable variable : rule.freshVariables()) {
             variable.accept(this);
         }
+    }
+
+    @Override
+    public void visit(SetElementChoice setElementChoice) {
+        setElementChoice.set().accept(this);
+        visit((Term) setElementChoice);
     }
 
     @Override
