@@ -29,14 +29,14 @@ public class PatternMatcher extends AbstractMatcher {
     /**
      * Represents the substitution after the pattern matching.
      */
-    private java.util.Map<Variable, Term> fSubstitution = new HashMap<Variable, Term>();
+    private Map<Variable, Term> fSubstitution = new HashMap<Variable, Term>();
     
     /**
      * Represents a conjunction of multiple collections of substitutions; each
      * collection is a disjunction of substitutions created by some AC-matching
      * between two cell collections.
      */
-    private final java.util.Collection<java.util.Collection<Map<Variable, Term>>> multiSubstitutions;
+    private final Collection<Collection<Map<Variable, Term>>> multiSubstitutions;
     
     /**
      * Records whether the pattern matcher is currently traversing under a
@@ -210,6 +210,15 @@ public class PatternMatcher extends AbstractMatcher {
         multiSubstitutions = new ArrayList<java.util.Collection<Map<Variable, Term>>>();
     }
 
+    /**
+     * Matches the subject term against the pattern.
+     * 
+     * @param subject
+     *            the subject term
+     * @param pattern
+     *            the pattern term
+     * @return {@code true} if the matching succeeds; otherwise, {@code false}
+     */
     private boolean patternMatch(Term subject, Term pattern) {
         try {
             isStarNested = false;
