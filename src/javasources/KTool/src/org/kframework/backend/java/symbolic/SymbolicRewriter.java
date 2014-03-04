@@ -59,11 +59,6 @@ public class SymbolicRewriter {
     private final Stopwatch stopwatch = new Stopwatch();
     private int step;
     private final Stopwatch ruleStopwatch = new Stopwatch();
-    //    private Map<Index, List<Rule>> ruleTable;
-//    private Map<Index, List<Rule>> heatingRuleTable;
-//    private Map<Index, List<Rule>> coolingRuleTable;
-//    private Map<Index, List<Rule>> simulationRuleTable;
-//    private List<Rule> unindexedRules;
     private final List<ConstrainedTerm> results = new ArrayList<ConstrainedTerm>();
     private final List<Rule> appliedRules = new ArrayList<Rule>();
     private boolean transition;
@@ -78,8 +73,8 @@ public class SymbolicRewriter {
      */
     public SymbolicRewriter(Definition definition) {
         this.definition = definition;
-        basicIndex = (BasicIndex)definition.getIndex();
-        
+        basicIndex = definition.getIndex();
+
         /* initialize the K AST checker for test generation */
         if (K.do_testgen) {
             phase1PluggableKastChecker = new PluggableKastStructureChecker();
@@ -92,133 +87,7 @@ public class SymbolicRewriter {
             phase1PluggableKastChecker = null;
             phase2PluggableKastChecker = null;
         }
-
-
-
-//        // Index may be built with or without measurement
-//        if (K.get_indexing_stats){
-//            buildIndexWithStats(definition);
-//        } else{
-//            buildIndex(definition);
-//        }
     }
-
-//    /**
-//     * Builds rule index with a very basic Indexing Scheme. Does not measure time.
-//     *
-//     * @param definition
-//     */
-//    private void buildIndex(Definition definition) {
-//        if (K.do_indexing) {
-//            pathIndex = new PathIndex(definition);
-//        } else {
-//            buildBasicIndex();
-//        }
-//    }
-//
-//    /**
-//     * Builds rule index with a very basic Indexing Scheme. Measures index creation time.
-//     *
-//     * @param definition
-//     */
-//    private void buildIndexWithStats(Definition definition) {
-//        IndexingStatistics.indexConstructionStopWatch.start();
-//        if (K.do_indexing) {
-//            pathIndex = new PathIndex(definition);
-//        } else {
-//            buildBasicIndex();
-//        }
-//        IndexingStatistics.indexConstructionStopWatch.stop();
-//    }
-//
-//    private void buildBasicIndex() {
-//
-//        /* populate the table of rules rewriting the top configuration */
-//        List<Index> indices = new ArrayList<Index>();
-//        indices.add(TopIndex.TOP);
-//        indices.add(BottomIndex.BOTTOM);
-//        for (KLabelConstant kLabel : definition.kLabels()) {
-//            indices.add(new KLabelIndex(kLabel));
-//            indices.add(new FreezerIndex(kLabel, -1));
-//            if (!kLabel.productions().isEmpty()) {
-//                for (int i = 0; i < kLabel.productions().get(0).getArity(); ++i) {
-//                    indices.add(new FreezerIndex(kLabel, i));
-//                }
-//            }
-//        }
-//        //for (KLabelConstant frozenKLabel : definition.frozenKLabels()) {
-//        //    for (int i = 0; i < frozenKLabel.productions().get(0).getArity(); ++i) {
-//        //        indices.add(new FreezerIndex(frozenKLabel, i));
-//        //    }
-//        //}
-//        for (String sort : definition.builtinSorts()) {
-//            indices.add(new TokenIndex(sort));
-//        }
-//
-//        /* Map each index to a list of rules unifiable with that index */
-//        /* Heating rules and regular rules have their first index checked */
-//        /* Cooling rules have their second index checked */
-//        ImmutableMap.Builder<Index, List<Rule>> mapBuilder = ImmutableMap.builder();
-//        ImmutableMap.Builder<Index, List<Rule>> heatingMapBuilder = ImmutableMap.builder();
-//        ImmutableMap.Builder<Index, List<Rule>> coolingMapBuilder = ImmutableMap.builder();
-//        ImmutableMap.Builder<Index, List<Rule>> simulationMapBuilder = ImmutableMap.builder();
-//
-//        for (Index index : indices) {
-//            ImmutableList.Builder<Rule> listBuilder = ImmutableList.builder();
-//            ImmutableList.Builder<Rule> heatingListBuilder = ImmutableList.builder();
-//            ImmutableList.Builder<Rule> coolingListBuilder = ImmutableList.builder();
-//            ImmutableList.Builder<Rule> simulationListBuilder = ImmutableList.builder();
-//
-//            for (Rule rule : definition.rules()) {
-//                if (rule.containsAttribute("heat")) {
-//                    if (index.isUnifiable(rule.indexingPair().first)) {
-//                        heatingListBuilder.add(rule);
-//                    }
-//                } else if (rule.containsAttribute("cool")) {
-//                    if (index.isUnifiable(rule.indexingPair().second)) {
-//                        coolingListBuilder.add(rule);
-//                    }
-//                } else if(rule.containsAttribute("alphaRule")){
-//                    if(index.isUnifiable(rule.indexingPair().first)) {
-//                        simulationListBuilder.add(rule);
-//                    }
-//
-//                } else {
-//                    if (index.isUnifiable(rule.indexingPair().first)) {
-//                        listBuilder.add(rule);
-//                    }
-//                }
-//            }
-//            ImmutableList<Rule> rules = listBuilder.build();
-//            if (!rules.isEmpty()) {
-//                mapBuilder.put(index, rules);
-//            }
-//            rules = heatingListBuilder.build();
-//            if (!rules.isEmpty()) {
-//                heatingMapBuilder.put(index, rules);
-//            }
-//            rules = coolingListBuilder.build();
-//            if (!rules.isEmpty()) {
-//                coolingMapBuilder.put(index, rules);
-//            }
-//            rules = simulationListBuilder.build();
-//            if(!rules.isEmpty()){
-//                simulationMapBuilder.put(index,rules);
-//            }
-//        }
-//        heatingRuleTable = heatingMapBuilder.build();
-//        coolingRuleTable = coolingMapBuilder.build();
-//        ruleTable = mapBuilder.build();
-//        simulationRuleTable = simulationMapBuilder.build();
-//
-//        ImmutableList.Builder<Rule> listBuilder = ImmutableList.builder();
-//        for (Rule rule : definition.rules()) {
-//            if (!rule.containsKCell()) {
-//                listBuilder.add(rule);
-//            }
-//        }
-//        unindexedRules = listBuilder.build();
-//    }
 
     public ConstrainedTerm rewrite(ConstrainedTerm constrainedTerm, int bound) {
         stopwatch.start();
@@ -292,11 +161,9 @@ public class SymbolicRewriter {
         }
 
         if (K.do_indexing) {
-//            pathIndex.getRulesForTerm(term);
-//            rules.addAll(getNonIndexedRules(term));
             rules.addAll(pathIndex.getRulesForTerm(term));
         } else {
-            rules.addAll(getNonIndexedRules(term));
+            rules.addAll(basicIndex.getRules(term));
         }
 
         if (K.get_indexing_stats){
@@ -305,24 +172,6 @@ public class SymbolicRewriter {
             IndexingStatistics.timesForRuleSelection.add(elapsed);
         }
         return rules;
-    }
-
-    private List<Rule> getNonIndexedRules(Term term) {
-        Set<Rule> rules = new LinkedHashSet<>();
-
-        for (IndexingPair pair : term.getIndexingPairs(definition)) {
-            if (basicIndex.getRuleTable().get(pair.first) != null) {
-                rules.addAll(basicIndex.getRuleTable().get(pair.first));
-            }
-            if (basicIndex.getHeatingRuleTable().get(pair.first) != null) {
-                rules.addAll(basicIndex.getHeatingRuleTable().get(pair.first));
-            }
-            if (basicIndex.getCoolingRuleTable().get(pair.second) != null) {
-                rules.addAll(basicIndex.getCoolingRuleTable().get(pair.second));
-            }
-        }
-        rules.addAll(basicIndex.getUnindexedRules());
-        return new ArrayList<>(rules);
     }
 
     private ConstrainedTerm getTransition(int n) {

@@ -5,19 +5,22 @@ import com.google.common.collect.ImmutableMap;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Rule;
+import org.kframework.backend.java.kil.Term;
 import org.kframework.utils.general.IndexingStatistics;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 
 /**
  * Author: OwolabiL
  * Date: 3/1/14
  * Time: 12:23 PM
  */
-public class BasicIndex implements IndexType, Serializable{
+public class BasicIndex implements Serializable{
     private Map<Index, List<Rule>> ruleTable;
     private Map<Index, List<Rule>> heatingRuleTable;
     private Map<Index, List<Rule>> coolingRuleTable;
@@ -27,25 +30,7 @@ public class BasicIndex implements IndexType, Serializable{
 
     public BasicIndex(Definition definition) {
         this.definition = definition;
-    }
-
-    /**
-     * Builds rule index with a very basic Indexing Scheme. Does not measure time.
-     */
-    public void buildIndex() {
         buildBasicIndex();
-        definition.setIndex(this);
-    }
-
-    /**
-     * Builds rule index with a very basic Indexing Scheme. Measures index creation time.
-     *
-     * @param definition
-     */
-    private void buildIndexWithStats(Definition definition) {
-        IndexingStatistics.indexConstructionStopWatch.start();
-            buildBasicIndex();
-        IndexingStatistics.indexConstructionStopWatch.stop();
     }
 
     private void buildBasicIndex() {
@@ -137,23 +122,25 @@ public class BasicIndex implements IndexType, Serializable{
         unindexedRules = listBuilder.build();
     }
 
-    public Map<Index, List<Rule>> getRuleTable() {
-        return ruleTable;
-    }
+    public List<Rule> getRules(Term term) {
+        Set<Rule> rules = new LinkedHashSet<>();
 
-    public Map<Index, List<Rule>> getHeatingRuleTable() {
-        return heatingRuleTable;
+        for (IndexingPair pair : term.getIndexingPairs(definition)) {
+            if (ruleTable.get(pair.first) != null) {
+                rules.addAll(ruleTable.get(pair.first));
+            }
+            if (heatingRuleTable.get(pair.first) != null) {
+                rules.addAll(heatingRuleTable.get(pair.first));
+            }
+            if (coolingRuleTable.get(pair.second) != null) {
+                rules.addAll(coolingRuleTable.get(pair.second));
+            }
+        }
+        rules.addAll(unindexedRules);
+        return new ArrayList<>(rules);
     }
 
     public Map<Index, List<Rule>> getSimulationRuleTable() {
         return simulationRuleTable;
-    }
-
-    public Map<Index, List<Rule>> getCoolingRuleTable() {
-        return coolingRuleTable;
-    }
-
-    public List<Rule> getUnindexedRules() {
-        return unindexedRules;
     }
 }

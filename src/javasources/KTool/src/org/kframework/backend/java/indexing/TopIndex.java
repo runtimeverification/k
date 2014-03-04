@@ -6,6 +6,7 @@ package org.kframework.backend.java.indexing;
  */
 public class TopIndex implements Index {
 
+    private final String Id = "@Top";
     public static final TopIndex TOP = new TopIndex();
 
     private TopIndex() { }
@@ -16,13 +17,24 @@ public class TopIndex implements Index {
     }
     
     @Override
-    public int hashCode() {
-        return 1;
-    }
-    
-    @Override
     public String toString() {
-        return "@Top";
+        return Id;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TopIndex topIndex = (TopIndex) o;
+
+        if (!Id.equals(topIndex.Id)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Id.hashCode();
+    }
 }
