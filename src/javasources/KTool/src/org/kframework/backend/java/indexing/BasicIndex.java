@@ -16,9 +16,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 
 /**
- * Author: OwolabiL
- * Date: 3/1/14
- * Time: 12:23 PM
+ * The indexing scheme currently used in the Java Backend
  */
 public class BasicIndex implements Serializable{
     private Map<Index, List<Rule>> ruleTable;
@@ -122,6 +120,11 @@ public class BasicIndex implements Serializable{
         unindexedRules = listBuilder.build();
     }
 
+    /**
+     * Given a term, it uses queries the index table to find the rules that may apply.
+     * @param term  The term being re-written
+     * @return  A list of rules that may apply
+     */
     public List<Rule> getRules(Term term) {
         Set<Rule> rules = new LinkedHashSet<>();
 
