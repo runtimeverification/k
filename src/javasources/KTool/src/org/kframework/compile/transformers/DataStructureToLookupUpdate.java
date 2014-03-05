@@ -137,14 +137,22 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
 
         Rewrite rewrite = (Rewrite) node.getBody();
 
+        /*
+         * Replace data structure patterns in the left-hand side with fresh variables, and populate
+         * the {@code queue} with data structure lookup operations equivalent to the replaced
+         * patterns.
+         */
         status = Status.LHS;
         Term lhs = (Term) rewrite.getLeft().accept(this);
+
+        /*
+         * Update the data structure uses in the right-hand side and condition with update
+         * operations on the map variables introduced in the left-hand side in the previous step.
+         */
         status = Status.RHS;
         Term rhs = (Term) rewrite.getRight().accept(this);
-
         status = Status.CONDITION;
         Term requires = node.getRequires() != null ? (Term) node.getRequires().accept(this) : null;
-
         Term ensures = node.getEnsures();
         //TODO: Handle Ensures as well.
 
@@ -164,6 +172,13 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
             item.unmatchedVariables().removeAll(lhs.variables());
         }
 
+        /*
+         * Order the lookup operations in the {@code queue} such that when an operation is
+         * performed the variables required by the operation (the data structure, the element for
+         * a set lookup, the key for a map lookup) are already bound either by the left-hand side,
+         * or by previous lookup operations. This allows an efficient evaluation of the lookup
+         * operations.
+         */
         boolean change;
         do {
             change = false;
@@ -203,7 +218,14 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
             }
         } while (change);
 
-        /* remaining lookups must be iterations over builtin data structures */
+        /*
+         * The remaining lookup operations must be iterations over builtin data structures (they
+         * depend on variable that are not bound yet). Thus, these operations require the choice
+         * of an element (for the case of sets) of a key (for the case of maps) in order to
+         * evaluate successfully. The choice must be completely unrestricted, so these elements or
+         * keys must not appear in the left-hand side, in the condition, or in other lookup
+         * operations (they can be used only in the right-hand side).
+         */
         for (int i = 0; i < queue.size(); ++i) {
             for (int j = i + 1; j < queue.size(); ++j) {
                 Set<Variable> commonVariables = Sets.intersection(
