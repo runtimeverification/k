@@ -32,7 +32,29 @@ public class SubstitutionTransformer extends PrePostTransformer {
         postTransformer.addTransformer(new LocalSubstitutionTransformer());
         postTransformer.addTransformer(new VariableUpdaterTransformer());
     }
+    
+    /**
+     * Stops further traversing the term when it contains no variable that needs
+     * to be substituted.
+     * 
+     */
+    private class LocalVariableChecker extends LocalTransformer {
+        @Override
+        public ASTNode transform(JavaSymbolicObject object) {
+            // TODO(AndreiS) this stops the traversal for ground terms (even if the functions are not fully evaluated)
+            Set<Variable> variables = object.variableSet();
+            for (Variable variable : substitution.keySet()) {
+                if (variables.contains(variable)) {
+                    return object;
+                }
+            }
+            return new DoneTransforming(object);
+        }
+    }
 
+    /**
+     * Local transformer that performs the actual substitution of variables.
+     */
     private class LocalSubstitutionTransformer extends LocalTransformer {
 
         @Override
@@ -70,22 +92,17 @@ public class SubstitutionTransformer extends PrePostTransformer {
             }
         }
     }
-
+   
     /**
-     * Checks
-     *
+     * Recomputes the set of variables contained in each node of the AST.
+     * 
+     * @author TraianSF
      */
-    private class LocalVariableChecker extends LocalTransformer {
+    private class VariableUpdaterTransformer extends LocalTransformer {
         @Override
-        public ASTNode transform(JavaSymbolicObject object) {
-            // TODO(AndreiS) this stops the traversal for ground terms (even if the functions are not fully evaluated)
-            Set<Variable> variables = object.variableSet();
-            for (Variable variable : substitution.keySet()) {
-                if (variables.contains(variable)) {
-                    return object;
-                }
-            }
-            return new DoneTransforming(object);
+        protected ASTNode transform(JavaSymbolicObject object) {
+            object.updateVariableSet();
+            return object;
         }
     }
 }

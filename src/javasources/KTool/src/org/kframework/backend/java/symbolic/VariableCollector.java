@@ -1,32 +1,28 @@
 package org.kframework.backend.java.symbolic;
 
-import org.kframework.backend.java.kil.JavaSymbolicObject;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.Variable;
-
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
 
+import org.kframework.backend.java.kil.JavaSymbolicObject;
+import org.kframework.backend.java.kil.Variable;
+
 
 /**
- * Created with IntelliJ IDEA.
- * User: andrei
- * Date: 3/26/13
- * Time: 11:39 AM
- * To change this template use File | Settings | File Templates.
+ * A visitor which computes the set of variables in a term.
+ * 
+ * @author AndreiS
  */
-public class VariableVisitor extends PrePostVisitor {
+public class VariableCollector extends PrePostVisitor {
 
     private Set<Variable> variableSet = new HashSet<Variable>();
     private final Stack<Set<Variable>> variableSetStack = new Stack<Set<Variable>>();
 
-    public VariableVisitor() {
+    public VariableCollector() {
         getPreVisitor().addVisitor(new PreVariableVisitor());
         getPostVisitor().addVisitor(new LocalVariableVisitor());
         getPostVisitor().addVisitor(new PostVariableVisitor());
     }
-
 
     private class PreVariableVisitor extends LocalVisitor {
         @Override
@@ -58,6 +54,12 @@ public class VariableVisitor extends PrePostVisitor {
         }
     }
 
+    /**
+     * Gets the computed set of variables in the term which accepts this
+     * visitor.
+     * 
+     * @return the set of variables in that term
+     */
     public Set<Variable> getVariableSet() {
         return variableSet;
     }
