@@ -1,5 +1,6 @@
 package org.kframework.compile.transformers;
 
+import com.google.common.collect.Sets;
 import org.kframework.compile.utils.KilProperty;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.BuiltinLookup;
@@ -51,7 +52,10 @@ import java.util.Set;
 public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
 
     private interface VariableCache {
-        public Set<Variable> variables();
+        /**
+         * Returns a {@code Set} of {@link Variable} instances that are not matched yet.
+         */
+        public Set<Variable> unmatchedVariables();
     }
 
     private class ExtendedListLookup extends ListLookup implements VariableCache {
@@ -59,12 +63,12 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
 
         ExtendedListLookup(Variable list, int key, Term value, KSort kind) {
             super(list, key, value, kind);
-            variables = new HashSet<Variable>();
+            variables = new HashSet<>();
             variables.add(list);
         }
 
         @Override
-        public Set<Variable> variables() {
+        public Set<Variable> unmatchedVariables() {
             return variables;
         }
     }
@@ -73,14 +77,14 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
         private Set<Variable> variables;
 
         ExtendedMapLookup(Variable map, Term key, Term value, KSort kind) {
-            super(map, key, value, kind);
-            variables = new HashSet<Variable>();
+            super(map, key, value, kind, false);
+            variables = new HashSet<>();
             variables.add(map);
             variables.addAll(key.variables());
         }
 
         @Override
-        public Set<Variable> variables() {
+        public Set<Variable> unmatchedVariables() {
             return variables;
         }
     }
@@ -89,23 +93,32 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
         private Set<Variable> variables;
 
         ExtendedSetLookup(Variable set, Term key) {
-            super(set, key);
-            variables = new HashSet<Variable>();
+            super(set, key, false);
+            variables = new HashSet<>();
             variables.add(set);
             variables.addAll(key.variables());
         }
 
         @Override
-        public Set<Variable> variables() {
+        public Set<Variable> unmatchedVariables() {
             return variables;
         }
     }
 
     private enum Status {LHS, RHS, CONDITION }
 
-    private Map<Variable, Term> reverseMap = new HashMap<Variable, Term>();
-    private Map<Variable, Integer> concreteSize = new HashMap<Variable, Integer>();
-    private ArrayList<VariableCache> queue = new ArrayList<VariableCache>();
+    private void registerError(Rule node, String message) {
+        GlobalSettings.kem.register(new KException(
+                KException.ExceptionType.ERROR,
+                KException.KExceptionGroup.CRITICAL,
+                message,
+                node.getFilename(),
+                node.getLocation()));
+    }
+
+    private Map<Variable, Term> reverseMap = new HashMap<>();
+    private Map<Variable, Integer> concreteSize = new HashMap<>();
+    private ArrayList<VariableCache> queue = new ArrayList<>();
     private Status status;
 
     public DataStructureToLookupUpdate(Context context) {
@@ -123,22 +136,62 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
         queue.clear();
 
         Rewrite rewrite = (Rewrite) node.getBody();
+
+        /*
+         * Replace data structure patterns in the left-hand side with fresh variables, and populate
+         * the {@code queue} with data structure lookup operations equivalent to the replaced
+         * patterns.
+         */
         status = Status.LHS;
         Term lhs = (Term) rewrite.getLeft().accept(this);
 
-        List<BuiltinLookup> lookups = new ArrayList<BuiltinLookup>(node.getLookups());
+        /*
+         * Update the data structure uses in the right-hand side and condition with update
+         * operations on the map variables introduced in the left-hand side in the previous step.
+         */
+        status = Status.RHS;
+        Term rhs = (Term) rewrite.getRight().accept(this);
+        status = Status.CONDITION;
+        Term requires = node.getRequires() != null ? (Term) node.getRequires().accept(this) : null;
+        Term ensures = node.getEnsures();
+        //TODO: Handle Ensures as well.
 
-        for (VariableCache item : queue) {
-            item.variables().removeAll(lhs.variables());
+        if (lhs == rewrite.getLeft() && rhs == rewrite.getRight()
+                && requires == node.getRequires() && ensures == node.getEnsures()) {
+            return node;
         }
 
+        Set<Variable> variables = new HashSet<>(lhs.variables());
+        if (requires!= null) {
+            variables.addAll(requires.variables());
+        }
+
+        List<BuiltinLookup> lookups = new ArrayList<>(node.getLookups());
+
+        for (VariableCache item : queue) {
+            item.unmatchedVariables().removeAll(lhs.variables());
+        }
+
+        /*
+         * Order the lookup operations in the {@code queue} such that when an operation is
+         * performed the variables required by the operation (the data structure, the element for
+         * a set lookup, the key for a map lookup) are already bound either by the left-hand side,
+         * or by previous lookup operations. This allows an efficient evaluation of the lookup
+         * operations.
+         */
         boolean change;
         do {
             change = false;
             for (int i = 0; i < queue.size(); ++i) {
-                if (queue.get(i).variables().isEmpty()) {
+                if (queue.get(i).unmatchedVariables().isEmpty()) {
                     change = true;
-                    VariableCache lookup = queue.remove(i);
+                    BuiltinLookup lookup = (BuiltinLookup) queue.remove(i);
+                    --i;
+
+                    for (VariableCache item : queue) {
+                        item.unmatchedVariables().removeAll(lookup.variables());
+                    }
+                    variables.addAll(lookup.variables());
 
                     if (lookup instanceof ListLookup) {
                         ListLookup listLookup = (ListLookup) lookup;
@@ -147,24 +200,17 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
                                 listLookup.key(),
                                 listLookup.value(),
                                 listLookup.kind()));
-
-                        for (VariableCache item : queue) {
-                            item.variables().removeAll(listLookup.value().variables());
-                        }
                     } else if (lookup instanceof MapLookup) {
                         MapLookup mapLookup = (MapLookup) lookup;
                         lookups.add(new MapLookup(
                                 mapLookup.base(),
                                 mapLookup.key(),
                                 mapLookup.value(),
-                                mapLookup.kind()));
-
-                        for (VariableCache item : queue) {
-                            item.variables().removeAll(mapLookup.value().variables());
-                        }
+                                mapLookup.kind(),
+                                false));
                     } else if (lookup instanceof SetLookup) {
                         SetLookup setLookup = (SetLookup) lookup;
-                        lookups.add(new SetLookup(setLookup.base(), setLookup.key()));
+                        lookups.add(new SetLookup(setLookup.base(), setLookup.key(), false));
                     } else {
                         assert false: "unexpected builtin data structure type";
                     }
@@ -172,30 +218,58 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
             }
         } while (change);
 
-        if (!queue.isEmpty()) {
-            /* TODO(AndreiS): handle iteration over builtin data structures */
-            GlobalSettings.kem.register(new KException(
-                    KException.ExceptionType.HIDDENWARNING,
-                    KException.KExceptionGroup.CRITICAL,
-                    "Unsupported map pattern in the rule left-hand side",
-                    node.getFilename(),
-                    node.getLocation()));
-            return node;
+        /*
+         * The remaining lookup operations must be iterations over builtin data structures (they
+         * depend on variable that are not bound yet). Thus, these operations require the choice
+         * of an element (for the case of sets) of a key (for the case of maps) in order to
+         * evaluate successfully. The choice must be completely unrestricted, so these elements or
+         * keys must not appear in the left-hand side, in the condition, or in other lookup
+         * operations (they can be used only in the right-hand side).
+         */
+        for (int i = 0; i < queue.size(); ++i) {
+            for (int j = i + 1; j < queue.size(); ++j) {
+                Set<Variable> commonVariables = Sets.intersection(
+                        ((BuiltinLookup) queue.get(i)).variables(),
+                        ((BuiltinLookup) queue.get(j)).variables());
+                if (!commonVariables.isEmpty()) {
+                    registerError(node, "Unsupported map pattern in the rule left-hand side");
+                    /* dead code */
+                    return null;
+                }
+            }
         }
 
-        status = Status.RHS;
-        Term rhs = (Term) rewrite.getRight().accept(this);
-        Term requires = node.getRequires();
-        if (requires != null) {
-            status = Status.CONDITION;
-            requires = (Term) requires.accept(this);
-        }
-
-        Term ensures = node.getEnsures();
-        //TODO: Handle Ensures as well.
-        if (lhs == rewrite.getLeft() && rhs == rewrite.getRight()
-                && requires == node.getRequires() && ensures == node.getEnsures()) {
-            return node;
+        for (int i = 0; i < queue.size(); ++i) {
+            BuiltinLookup lookup = (BuiltinLookup) queue.get(i);
+            if (lookup instanceof MapLookup) {
+                MapLookup mapLookup = (MapLookup) lookup;
+                if (mapLookup.key() instanceof Variable
+                        && !variables.contains(mapLookup.key())
+                        && mapLookup.value() instanceof Variable
+                        && !variables.contains(mapLookup.value())) {
+                    lookups.add(new MapLookup(
+                            mapLookup.base(),
+                            mapLookup.key(),
+                            mapLookup.value(),
+                            mapLookup.kind(),
+                            true));
+                } else {
+                    registerError(node, "Unsupported map pattern in the rule left-hand side");
+                    /* dead code */
+                    return null;
+                }
+            } else if (lookup instanceof SetLookup) {
+                SetLookup setLookup = (SetLookup) lookup;
+                if (setLookup.key() instanceof Variable && !variables.contains(setLookup.key())) {
+                    lookups.add(new SetLookup(setLookup.base(), setLookup.key(), true));
+                } else {
+                    registerError(node, "Unsupported map pattern in the rule left-hand side");
+                    /* dead code */
+                    return null;
+                }
+            } else {
+                assert false: "unexpected builtin data structure type";
+            }
         }
 
         Rule returnNode = node.shallowCopy();
@@ -207,7 +281,7 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
         returnNode.setEnsures(ensures);
         returnNode.setLookups(lookups);
         returnNode.setConcreteDataStructureSize(
-                new HashMap<Variable, Integer>(returnNode.getConcreteDataStructureSize()));
+                new HashMap<>(returnNode.getConcreteDataStructureSize()));
         returnNode.getConcreteDataStructureSize().putAll(concreteSize);
         return returnNode;
     }
@@ -295,7 +369,6 @@ public class DataStructureToLookupUpdate extends CopyOnWriteTransformer {
                 }
             }
 
-            //assert baseTerms.size() <= 1 : "We don't support lists with more baseterms.";
             if (baseTerms.size() == 1 && elementsLeft.isEmpty() && elementsRight.isEmpty()) {
                 /* if the ListBuiltin instance consists of only one base term,
                  * return the base term instead */

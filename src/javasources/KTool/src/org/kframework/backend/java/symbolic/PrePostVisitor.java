@@ -256,6 +256,15 @@ public class PrePostVisitor implements Visitor {
     }
 
     @Override
+    public void visit(MapKeyChoice mapKeyChoice) {
+        preVisitor.resetProceed();
+        mapKeyChoice.accept(preVisitor);
+        if (!preVisitor.isProceed()) return;
+        mapKeyChoice.map().accept(this);
+        mapKeyChoice.accept(postVisitor);
+    }
+
+    @Override
     public void visit(MapLookup mapLookup) {
         preVisitor.resetProceed();
         mapLookup.accept(preVisitor);
@@ -279,6 +288,15 @@ public class PrePostVisitor implements Visitor {
             entry.getValue().accept(this);
         }
         mapUpdate.accept(postVisitor);
+    }
+
+    @Override
+    public void visit(SetElementChoice setElementChoice) {
+        preVisitor.resetProceed();
+        setElementChoice.accept(preVisitor);
+        if (!preVisitor.isProceed()) return;
+        setElementChoice.set().accept(this);
+        setElementChoice.accept(postVisitor);
     }
 
     @Override

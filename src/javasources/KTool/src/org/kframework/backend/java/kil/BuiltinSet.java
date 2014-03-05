@@ -18,6 +18,10 @@ import java.util.Set;
 
 
 /**
+ * Class representing a set. It only has one frame (which is a variable), and concrete elements.
+ * A set composed of multiple set variables or terms (in addition to the elements) is represented
+ * using concatenation (and can only occur in the right-hand side or in the condition).
+ *
  * @author AndreiS
  */
 public class BuiltinSet extends Collection implements Sorted {

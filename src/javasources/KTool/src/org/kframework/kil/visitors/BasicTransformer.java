@@ -318,7 +318,7 @@ public class BasicTransformer implements Transformer {
     public ASTNode transform(SetLookup node) throws TransformerException {
         Variable set = (Variable) node.base().accept(this);
         Term value = (Term) node.key().accept(this);
-        return new SetLookup(set, value);
+        return new SetLookup(set, value, node.choice());
     }
 
     @Override
@@ -407,7 +407,7 @@ public class BasicTransformer implements Transformer {
         Variable map = (Variable) node.base().accept(this);
         Term key = (Term) node.key().accept(this);
         Term value = (Term) node.value().accept(this);
-        return new MapLookup(map, key, value, node.kind());
+        return new MapLookup(map, key, value, node.kind(), node.choice());
     }
 
     @Override
