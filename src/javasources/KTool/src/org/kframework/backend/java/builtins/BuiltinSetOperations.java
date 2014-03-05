@@ -19,7 +19,8 @@ public class BuiltinSetOperations {
     public static BuiltinSet construct(BuiltinSet term1, BuiltinSet term2, TermContext context) {
         Variable frame = null;
         if (term1.hasFrame() && term2.hasFrame()) {
-            throw new IllegalArgumentException("both map arguments have frames");
+            throw new IllegalArgumentException(
+                    "both set arguments have frames, but the combined set cannot have two frames");
         } else if (term1.hasFrame()) {
             frame = term1.frame();
         } else if (term2.hasFrame()) {

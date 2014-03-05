@@ -17,6 +17,10 @@ import com.google.common.base.Joiner;
 
 
 /**
+ * Class representing a map. It only has one frame (which is a variable), and a set of entries.
+ * A map composed of multiple map variables or terms (in addition to the entries) is represented
+ * using concatenation (and can only occur in the right-hand side or in the condition).
+ *
  * @author AndreiS
  */
 public class BuiltinMap extends Collection implements Sorted {
