@@ -31,6 +31,11 @@ public class LocalEvaluator extends LocalTransformer {
     
     @Override
     public ASTNode transform(KItem kItem) {
+        // TODO(YilongL): shall we consider cache evaluation result in certain cases?
+        Term evaluatedTerm = kItem.evaluateFunction(constraint, context);
+        if (kItem.isGround() && kItem.isEvaluable(context)) {
+            assert evaluatedTerm != kItem : "failed to evaluate function with ground arguments: " + kItem;
+        }
         return kItem.evaluateFunction(constraint, context);
     }
 

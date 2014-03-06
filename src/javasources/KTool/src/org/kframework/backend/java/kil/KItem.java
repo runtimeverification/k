@@ -42,6 +42,7 @@ public class KItem extends Term implements Sorted {
     private final Term kLabel;
     private final Term kList;
     private final String sort;
+    private Boolean evaluable = null;
 
     /**
      * Valid only if {@code kLabel} is a constructor. Must contain a sort
@@ -183,6 +184,29 @@ public class KItem extends Term implements Sorted {
         }
 //        System.out.printf("KItem = %s, sort = %s, possibleMinimalSorts = %s\n", this, sort, possibleMinimalSorts);
     }
+    
+    public boolean isEvaluable(TermContext context) {
+        if (evaluable != null) {
+            return evaluable;
+        }
+
+        evaluable = false;
+        if (!(kLabel instanceof KLabelConstant)) {
+            return evaluable;
+        }
+        KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
+        
+        if (!(kList instanceof KList)) {
+            return evaluable;
+        }
+        
+        if (kLabelConstant.label().startsWith("is")
+                || !context.definition().functionRules().get(kLabelConstant).isEmpty()
+                || BuiltinFunction.isBuiltinKLabel(kLabelConstant)) {
+            return evaluable = true;
+        }
+        return evaluable;
+    }
 
     /**
      * Evaluates this {@code KItem} if it is a predicate or function
@@ -195,6 +219,10 @@ public class KItem extends Term implements Sorted {
      * @return the evaluated result on success, or this {@code KItem} otherwise
      */
     public Term evaluateFunction(SymbolicConstraint constraint, TermContext context) {
+        if (!isEvaluable(context)) {
+            return this;
+        }
+        
         Definition definition = context.definition();
 
         if (!(kLabel instanceof KLabelConstant)) {
