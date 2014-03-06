@@ -17,6 +17,7 @@ module K-EQUAL-HOOKS
 
   syntax K ::= "#if" Bool "#then" K "#else" K "#fi"   [function, hook(KEqual:ite)]
   syntax KItem ::= "#if" Bool "#then" KItem "#else" KItem "#fi"   [function, hook(KEqual:ite)]
+  syntax KList ::= "#if" Bool "#then" KList "#else" KList "#fi"   [function, hook(KEqual:ite)]
   syntax Int ::= "#if" Bool "#then" Int "#else" Int "#fi"   [function, smtlib(ite)]
   rule #if true #then K:K #else _ #fi => K
   rule #if false #then _ #else K:K #fi => K
@@ -64,13 +65,13 @@ module K-EQUAL-HOOKS
 
 
   // equality over KList
-  syntax Bool ::= KList "==KList" KList    [function]
+  syntax Bool ::= KList "==KList" KList    [function, hook(#K-EQUAL:_==K_)]
 
   syntax K ::= dummy(KList)
   rule LK1:KList ==KList LK2:KList => dummy(LK1) ==K dummy(LK2)
 
   // disequality over KList
-  syntax Bool ::= KList "=/=KList" KList   [function]
+  syntax Bool ::= KList "=/=KList" KList   [function, hook(#K-EQUAL:_=/=K_)]
   rule LK1:KList =/=KList LK2:KList  => notBool(LK1 ==KList LK2)
 
   // equality over KLabel
