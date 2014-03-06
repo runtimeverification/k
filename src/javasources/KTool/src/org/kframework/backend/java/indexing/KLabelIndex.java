@@ -14,9 +14,16 @@ public class KLabelIndex implements Index {
         this.kLabel = kLabel;
     }
 
+    public KLabelConstant kLabel() {
+        return kLabel;
+    }
+    
     @Override
     public boolean isUnifiable(Index index) {
-        return index instanceof TopIndex || equals(index);
+        return index instanceof TopIndex
+                || equals(index)
+                || (index instanceof TokenIndex && 
+                        kLabel.sorts().contains(((TokenIndex) index).sort()));
     }
 
     @Override

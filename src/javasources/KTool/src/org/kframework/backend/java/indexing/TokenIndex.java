@@ -1,5 +1,6 @@
 package org.kframework.backend.java.indexing;
 
+
 /**
  * @author AndreiS
  */
@@ -10,10 +11,17 @@ public class TokenIndex implements Index {
     public TokenIndex(String sort) {
         this.sort = sort;
     }
+    
+    public String sort() {
+        return sort;
+    }
 
     @Override
     public boolean isUnifiable(Index index) {
-        return index instanceof TopIndex || equals(index);
+        return index instanceof TopIndex
+                || equals(index)
+                || (index instanceof KLabelIndex && 
+                        ((KLabelIndex) index).kLabel().sorts().contains(sort));
     }
 
     @Override

@@ -1,6 +1,10 @@
 package org.kframework.backend.java.kil;
 
-import com.google.common.collect.Multimap;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
@@ -11,11 +15,9 @@ import org.kframework.kil.Attribute;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
 
 
 /**
@@ -30,8 +32,13 @@ public class KLabelConstant extends KLabel {
 
     /* un-escaped label */
     private final String label;
+    
     /* unmodifiable view of a list of productions generating this {@code KLabelConstant} */
-    private final List<Production> productions;
+    private final ImmutableList<Production> productions;
+    
+    /** the sorts of the productions generating this {@code KLabelConstant} */
+    private final ImmutableSet<String> sorts;
+
     /*
      * boolean flag set iff a production tagged with "function" or "predicate"
      * generates this {@code KLabelConstant}
@@ -42,6 +49,12 @@ public class KLabelConstant extends KLabel {
     private KLabelConstant(String label, Context context) {
         this.label = label;
         productions = ImmutableList.copyOf(context.productionsOf(label));
+        
+        Set<String> set = new HashSet<>();
+        for (Production prod : productions) {
+            set.add(prod.getSort());
+        }
+        sorts = ImmutableSet.copyOf(set);
         
         // TODO(YilongL): urgent; how to detect KLabel clash?
 
@@ -118,10 +131,17 @@ public class KLabelConstant extends KLabel {
     }
 
     /**
-     * Returns a unmodifiable view of a list of productions generating this {@code KLabelConstant}.
+     * Returns a list of productions generating this {@code KLabelConstant}.
      */
     public List<Production> productions() {
         return productions;
+    }
+    
+    /**
+     * Returns the sorts of the productions generating this {@code KLabelConstant}.
+     */
+    public Set<String> sorts() {
+        return sorts;
     }
 
     @Override
