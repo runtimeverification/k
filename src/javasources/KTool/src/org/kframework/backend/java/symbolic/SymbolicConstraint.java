@@ -457,6 +457,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         isNormal = true;
     }
     
+    public TermContext termContext() {
+        return context;
+    }
+    
     /**
      * Adds a new equality to this symbolic constraint.
      * 

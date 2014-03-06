@@ -1,13 +1,7 @@
 package org.kframework.backend.java.builtins;
 
-import org.kframework.backend.java.kil.KCollection;
-import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.KLabel;
-import org.kframework.backend.java.kil.KLabelInjection;
-import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.Kind;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
+import com.google.common.collect.ImmutableList;
+import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.symbolic.LocalTransformer;
 import org.kframework.backend.java.symbolic.PrePostTransformer;
 import org.kframework.kil.ASTNode;
@@ -58,16 +52,17 @@ public class BuiltinVisitorOperations extends PrePostTransformer {
 
         preTransformer.addTransformer(new LocalTransformer(context) {
             @Override
-            public ASTNode transform(Term term) {
-                if (term instanceof KLabel) {
-                    return new DoneTransforming(term);
-                }
-
-                if (evaluateGuard(term)) {
-                    return new DoneTransforming(visitNode(term));
-                } else {
-                    return term;
-                }
+            public ASTNode transform(Term node) {
+                guardParams.set(0, node);
+                KItem test = new KItem(ifLabel, new KList(ImmutableList.copyOf(guardParams)), context.definition());
+                Term truth = test.evaluate(context);
+                //TODO:  Think about what happens when test has symbolic values in it.
+                if (!(truth instanceof BoolToken)) return node;
+                if (!((BoolToken) truth).booleanValue()) return node;
+                visitParams.set(0, node);
+                node = new KItem(visitLabel, new KList(ImmutableList.copyOf(visitParams)), context.definition());
+                node = node.evaluate(context);
+                return new DoneTransforming(node);
             }
         });
     }

@@ -50,12 +50,14 @@ public class KItem extends Term implements Sorted {
      */
     private final Set<String> possibleMinimalSorts;
 
-    public KItem(Term kLabel, Term kList, Context context) {
+    public KItem(Term kLabel, Term kList, Definition definition) {
         super(Kind.KITEM);
 
         this.kLabel = kLabel;
         this.kList = kList;
 
+        Context context = definition.context();
+        
         Set<String> possibleMinimalSorts = null;
         if (kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isConstructor()) {
             possibleMinimalSorts = new HashSet<>();
@@ -68,7 +70,7 @@ public class KItem extends Term implements Sorted {
             List<Production> productions = kLabelConstant.productions();
             if (productions.size() != 0) {
                 Set<String> sorts = new HashSet<String>();
-
+                
                 for (Production production : productions) {
                     boolean mustMatch = true;
                     boolean mayMatch = true;
@@ -182,6 +184,7 @@ public class KItem extends Term implements Sorted {
         } else {
             this.possibleMinimalSorts = null;
         }
+        
 //        System.out.printf("KItem = %s, sort = %s, possibleMinimalSorts = %s\n", this, sort, possibleMinimalSorts);
     }
     
@@ -360,7 +363,7 @@ public class KItem extends Term implements Sorted {
             if (result == null) {
                 result = this;
             } else if (result instanceof KLabel) {
-                result = new KItem(new KLabelInjection(result), new KList(), definition.context());
+                result = new KItem(new KLabelInjection(result), new KList(), definition);
             } else if (result instanceof KList) {
                 // TODO: handle the case that KList as return value
                 assert false : "YilongL: Fix it; handle the case where the return value is a KList";

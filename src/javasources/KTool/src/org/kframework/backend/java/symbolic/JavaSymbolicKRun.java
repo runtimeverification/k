@@ -354,7 +354,7 @@ public class JavaSymbolicKRun implements KRun {
                 pgm.accept(new BottomUpVisitor() {
                    @Override
                    public void visit(Variable var) {
-                       subst.put(var, TestCaseGenerationUtil.getSimplestTermOfSort(var.sort(), context));
+                       subst.put(var, TestCaseGenerationUtil.getSimplestTermOfSort(var.sort(), definition));
                    }
                 });
                 pgm = pgm.substituteWithBinders(subst, termContext);

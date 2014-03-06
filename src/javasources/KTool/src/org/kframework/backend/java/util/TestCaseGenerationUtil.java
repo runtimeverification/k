@@ -11,6 +11,7 @@ import java.util.Set;
 
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.kil.ConstrainedTerm;
+import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KList;
@@ -167,11 +168,11 @@ public class TestCaseGenerationUtil {
         return set.size();
     }
 
-    public static Term getSimplestTermOfSort(String sort, Context context) {
+    public static Term getSimplestTermOfSort(String sort, Definition definition) {
         // TODO(YilongL): This is cheating; fix it!
         switch (sort) {
         case "Block":
-            return new KItem(KLabelConstant.of("'{}", context), new KList(), context);
+            return new KItem(KLabelConstant.of("'{}", definition.context()), new KList(), definition);
             
         case "BExp":
             return BoolToken.TRUE;
