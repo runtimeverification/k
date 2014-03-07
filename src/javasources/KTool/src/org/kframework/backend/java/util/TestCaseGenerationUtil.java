@@ -17,6 +17,7 @@ import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.loader.Context;
 
@@ -168,11 +169,11 @@ public class TestCaseGenerationUtil {
         return set.size();
     }
 
-    public static Term getSimplestTermOfSort(String sort, Definition definition) {
+    public static Term getSimplestTermOfSort(String sort, TermContext termContext) {
         // TODO(YilongL): This is cheating; fix it!
         switch (sort) {
         case "Block":
-            return new KItem(KLabelConstant.of("'{}", definition.context()), new KList(), definition);
+            return new KItem(KLabelConstant.of("'{}", termContext.definition().context()), new KList(), termContext);
             
         case "BExp":
             return BoolToken.TRUE;

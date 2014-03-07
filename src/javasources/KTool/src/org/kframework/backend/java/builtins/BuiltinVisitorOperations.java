@@ -54,13 +54,13 @@ public class BuiltinVisitorOperations extends PrePostTransformer {
             @Override
             public ASTNode transform(Term node) {
                 guardParams.set(0, node);
-                KItem test = new KItem(ifLabel, new KList(ImmutableList.copyOf(guardParams)), context.definition());
+                KItem test = new KItem(ifLabel, new KList(ImmutableList.copyOf(guardParams)), context);
                 Term truth = test.evaluate(context);
                 //TODO:  Think about what happens when test has symbolic values in it.
                 if (!(truth instanceof BoolToken)) return node;
                 if (!((BoolToken) truth).booleanValue()) return node;
                 visitParams.set(0, node);
-                node = new KItem(visitLabel, new KList(ImmutableList.copyOf(visitParams)), context.definition());
+                node = new KItem(visitLabel, new KList(ImmutableList.copyOf(visitParams)), context);
                 node = node.evaluate(context);
                 return new DoneTransforming(node);
             }

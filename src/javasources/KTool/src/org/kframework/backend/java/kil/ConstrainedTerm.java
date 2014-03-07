@@ -466,7 +466,7 @@ public class ConstrainedTerm extends Term {
             cachedGroupProductionsBySort.put(def, gpbs);
         }
         
-        return gpbs.getProductionsAsTerms(sort);
+        return gpbs.getProductionsAsTerms(sort, context);
     }
 
     @Override

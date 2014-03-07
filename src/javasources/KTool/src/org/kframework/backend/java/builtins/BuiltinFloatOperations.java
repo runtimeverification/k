@@ -29,7 +29,7 @@ public class BuiltinFloatOperations {
             return new KItem(
                     KLabelConstant.of("'--Float_",context1),
                     new KList(ImmutableList.<Term>of(term2),null),
-                    context.definition()).evaluate(context);
+                    context).evaluate(context);
         }
         if (term2.equals(UninterpretedToken.of("#Float","0.0")))
             return term1;

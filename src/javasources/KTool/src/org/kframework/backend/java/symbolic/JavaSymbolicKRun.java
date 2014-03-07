@@ -316,7 +316,7 @@ public class JavaSymbolicKRun implements KRun {
                         stateMap));
         
         SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
-        TermContext termContext = TermContext.of(definition, new PortableFileSystem());
+        final TermContext termContext = TermContext.of(definition, new PortableFileSystem());
         ConstrainedTerm initCfg = new ConstrainedTerm(Term.of(cfg, definition), termContext);
 
         List<TestGenResult> generatorResults = new ArrayList<TestGenResult>();
@@ -354,7 +354,7 @@ public class JavaSymbolicKRun implements KRun {
                 pgm.accept(new BottomUpVisitor() {
                    @Override
                    public void visit(Variable var) {
-                       subst.put(var, TestCaseGenerationUtil.getSimplestTermOfSort(var.sort(), definition));
+                       subst.put(var, TestCaseGenerationUtil.getSimplestTermOfSort(var.sort(), termContext));
                    }
                 });
                 pgm = pgm.substituteWithBinders(subst, termContext);
