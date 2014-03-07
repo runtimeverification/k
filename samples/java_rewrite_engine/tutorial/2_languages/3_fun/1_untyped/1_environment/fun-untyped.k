@@ -1,4 +1,4 @@
-require "pattern-matching.k"
+require "my-pattern-matching.k"
 
 /*!
 \title{FUN --- Untyped --- Environment}
@@ -397,7 +397,7 @@ construct as explained above. */
 
 module FUN-UNTYPED
   imports FUN-UNTYPED-SYNTAX
-  imports PATTERN-MATCHING
+  imports MY-PATTERN-MATCHING
 
 
 /*@ \subsection{Configuration}
