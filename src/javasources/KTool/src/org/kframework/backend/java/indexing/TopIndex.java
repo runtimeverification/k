@@ -1,6 +1,8 @@
 package org.kframework.backend.java.indexing;
 
 
+import java.util.HashMap;
+
 /**
  * @author: AndreiS
  */
@@ -9,6 +11,10 @@ public class TopIndex implements Index {
     public static final TopIndex TOP = new TopIndex();
 
     private TopIndex() { }
+
+    private Object readResolve() {
+        return TOP;
+    }
 
     @Override
     public boolean isUnifiable(Index index) {
@@ -24,5 +30,4 @@ public class TopIndex implements Index {
     public String toString() {
         return "@Top";
     }
-
 }
