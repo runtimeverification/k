@@ -20,6 +20,20 @@ public class TokenIndex implements Index {
     public boolean isUnifiable(Index index) {
         return index instanceof TopIndex
                 || equals(index)
+                /*
+                 * TokenSort can also have non-lexical productions and,
+                 * therefore, it's possible to match a TokenIndex with a
+                 * KLabelIndex. For instance, consider the following productions
+                 * and rule:
+                 * 
+                 * syntax Name ::= some lexical production
+                 *               | "$h"
+                 *               
+                 * rule X:Name => .      
+                 * 
+                 * The above rule should be able to match when "$h" appears 
+                 * on top of the k cell.
+                 */
                 || (index instanceof KLabelIndex && 
                         ((KLabelIndex) index).kLabel().sorts().contains(sort));
     }

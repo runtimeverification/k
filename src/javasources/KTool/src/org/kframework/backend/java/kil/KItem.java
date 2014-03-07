@@ -75,6 +75,15 @@ public class KItem extends Term implements Sorted {
                 Set<String> sorts = new HashSet<String>();
                 
                 if (!K.do_kompilation) {
+                    /**
+                     * Sort checks in the Java engine are not implemented as
+                     * rewrite rules, so we need to precompute the sort of
+                     * terms. However, right now, we also want to allow users
+                     * to provide user-defined sort predicate rules, e.g.
+                     *      ``rule isVal(cons V:Val) => true'' 
+                     * to express the same meaning as overloaded productions
+                     * which are not allowed to write in the current front-end.
+                     */
                     /* YilongL: user-defined sort predicate rules are interpreted as overloaded productions at runtime */
                     for (KLabelConstant sortPredLabel : definition.sortPredLabels()) {
                         Collection<Rule> rules = definition.functionRules().get(sortPredLabel); 
@@ -212,18 +221,18 @@ public class KItem extends Term implements Sorted {
 
         evaluable = false;
         if (!(kLabel instanceof KLabelConstant)) {
-            return evaluable;
+            return false;
         }
         KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
         
         if (!(kList instanceof KList)) {
-            return evaluable;
+            return false;
         }
         
         if (kLabelConstant.label().startsWith("is")
                 || !context.definition().functionRules().get(kLabelConstant).isEmpty()
                 || BuiltinFunction.isBuiltinKLabel(kLabelConstant)) {
-            return evaluable = true;
+            evaluable = true;
         }
         return evaluable;
     }

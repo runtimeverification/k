@@ -1,7 +1,6 @@
 package org.kframework.backend.java.kil;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -17,6 +16,7 @@ import org.kframework.kil.loader.Context;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Multimap;
 
 
@@ -50,11 +50,11 @@ public class KLabelConstant extends KLabel {
         this.label = label;
         productions = ImmutableList.copyOf(context.productionsOf(label));
         
-        Set<String> set = new HashSet<>();
+        Builder<String> setBuilder = ImmutableSet.builder();
         for (Production prod : productions) {
-            set.add(prod.getSort());
+            setBuilder.add(prod.getSort());
         }
-        sorts = ImmutableSet.copyOf(set);
+        sorts = setBuilder.build();
         
         // TODO(YilongL): urgent; how to detect KLabel clash?
 

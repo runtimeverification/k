@@ -18,6 +18,9 @@ public class KLabelIndex implements Index {
         return kLabel;
     }
     
+    /**
+     * @see TokenIndex#isUnifiable(Index)
+     */
     @Override
     public boolean isUnifiable(Index index) {
         return index instanceof TopIndex
