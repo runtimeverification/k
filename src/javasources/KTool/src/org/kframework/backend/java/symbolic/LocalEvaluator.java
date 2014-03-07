@@ -36,7 +36,7 @@ public class LocalEvaluator extends LocalTransformer {
         if (kItem.isGround() && kItem.isEvaluable(context)) {
             assert evaluatedTerm != kItem : "failed to evaluate function with ground arguments: " + kItem;
         }
-        return kItem.evaluateFunction(constraint, context);
+        return evaluatedTerm;
     }
 
     @Override
