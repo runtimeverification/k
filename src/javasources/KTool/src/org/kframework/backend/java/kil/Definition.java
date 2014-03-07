@@ -2,6 +2,7 @@ package org.kframework.backend.java.kil;
 
 import com.google.common.collect.Sets;
 import org.kframework.backend.java.indexing.IndexingTable;
+import org.kframework.backend.java.indexing.RuleIndex;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
@@ -42,7 +43,7 @@ public class Definition extends JavaSymbolicObject {
     private final Set<KLabelConstant> kLabels;
     private final Set<KLabelConstant> frozenKLabels;
     private final Context context;
-    private IndexingTable index;
+    private RuleIndex index;
 
     public Definition(Context context) {
         this.context = context;
@@ -134,11 +135,11 @@ public class Definition extends JavaSymbolicObject {
         throw new UnsupportedOperationException();
     }
 
-    public void setIndex(IndexingTable index) {
+    public void setIndex(RuleIndex index) {
         this.index = index;
     }
 
-    public IndexingTable getIndex() {
+    public RuleIndex getIndex() {
         return index;
     }
 }

@@ -18,7 +18,7 @@ import java.util.LinkedHashSet;
 /**
  * The indexing scheme currently used in the Java Backend
  */
-public class IndexingTable implements Serializable{
+public class IndexingTable implements Serializable, RuleIndex{
     private Map<Index, List<Rule>> ruleTable;
     private Map<Index, List<Rule>> heatingRuleTable;
     private Map<Index, List<Rule>> coolingRuleTable;
@@ -28,10 +28,11 @@ public class IndexingTable implements Serializable{
 
     public IndexingTable(Definition definition) {
         this.definition = definition;
-        buildBasicIndex();
+        buildIndex();
     }
 
-    private void buildBasicIndex() {
+    @Override
+    public void buildIndex() {
 
         /* populate the table of rules rewriting the top configuration */
         List<Index> indices = new ArrayList<Index>();
@@ -149,6 +150,7 @@ public class IndexingTable implements Serializable{
      * @param term  The term being re-written
      * @return  A list of rules that may apply
      */
+    @Override
     public List<Rule> getRules(Term term) {
         Set<Rule> rules = new LinkedHashSet<>();
 
