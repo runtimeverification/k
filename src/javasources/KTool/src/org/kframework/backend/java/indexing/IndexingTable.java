@@ -6,7 +6,7 @@ import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
-import org.kframework.utils.general.IndexingStatistics;
+import org.kframework.kil.Production;
 
 import java.io.Serializable;
 import java.util.Set;
@@ -41,7 +41,8 @@ public class IndexingTable implements Serializable{
             indices.add(new KLabelIndex(kLabel));
             indices.add(new FreezerIndex(kLabel, -1));
             if (!kLabel.productions().isEmpty()) {
-                for (int i = 0; i < kLabel.productions().get(0).getArity(); ++i) {
+                int maxArity = getMaxArityForProductions(kLabel.productions());
+                for (int i = 0; i < maxArity; ++i) {
                     indices.add(new FreezerIndex(kLabel, i));
                 }
             }
@@ -118,6 +119,29 @@ public class IndexingTable implements Serializable{
             }
         }
         unindexedRules = listBuilder.build();
+    }
+
+    /**
+     * This methos takes a list of productions with the same kLabel, and finds the maximum arity.
+     * This is needed to avoid situations where there might be more productions with different
+     * arities belonging to same label, for example:
+     *
+     *          syntax Foo ::= Bar "*" Bar [klabel(Foo)]
+     *          syntax Foo ::= Bar "*" [klabel(Foo)]
+     *
+     * @param productions
+     * @return
+     */
+    private int getMaxArityForProductions(List<Production> productions) {
+        int max = productions.get(0).getArity();
+        if (productions.size() > 1){
+            for (Production production : productions.subList(1,productions.size())){
+                if (production.getArity() > max){
+                    max = production.getArity();
+                }
+            }
+        }
+        return max;
     }
 
     /**
