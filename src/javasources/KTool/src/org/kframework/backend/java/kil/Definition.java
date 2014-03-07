@@ -77,7 +77,7 @@ public class Definition extends JavaSymbolicObject {
     public void addRule(Rule rule) {
         if (rule.containsAttribute(Attribute.FUNCTION_KEY)) {
             functionRules.put(rule.functionKLabel(), rule);
-            if (rule.functionKLabel().toString().startsWith("is")) {
+            if (rule.isSortPredicate()) {
                 sortPredLabels.add(rule.functionKLabel());
             }
         } else if (rule.containsAttribute(Attribute.MACRO_KEY)) {

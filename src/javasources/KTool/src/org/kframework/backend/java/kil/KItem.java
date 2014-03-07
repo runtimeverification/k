@@ -3,7 +3,9 @@ package org.kframework.backend.java.kil;
 import java.util.*;
 import java.util.Collection;
 
+import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.builtins.MetaK;
 import org.kframework.backend.java.builtins.SortMembership;
 import org.kframework.backend.java.symbolic.BuiltinFunction;
 import org.kframework.backend.java.symbolic.Matcher;
@@ -56,7 +58,8 @@ public class KItem extends Term implements Sorted {
         this.kLabel = kLabel;
         this.kList = kList;
 
-        Context context = termContext.definition().context();
+        Definition definition = termContext.definition();
+        Context context = definition.context();
         
         Set<String> possibleMinimalSorts = null;
         if (kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isConstructor()) {
@@ -70,6 +73,20 @@ public class KItem extends Term implements Sorted {
             List<Production> productions = kLabelConstant.productions();
             if (productions.size() != 0) {
                 Set<String> sorts = new HashSet<String>();
+                
+                if (!K.do_kompilation) {
+                    /* YilongL: user-defined sort predicate rules are interpreted as overloaded productions at runtime */
+                    for (KLabelConstant sortPredLabel : definition.sortPredLabels()) {
+                        Collection<Rule> rules = definition.functionRules().get(sortPredLabel); 
+                        for (Rule rule : rules) {
+                            KItem predArg = rule.getSortPredArgument();
+                            if (MetaK.matchable(kLabel, predArg.kLabel(), termContext).equals(BoolToken.TRUE)
+                                && MetaK.matchable(kList, predArg.kList(), termContext).equals(BoolToken.TRUE)) {
+                                sorts.add(rule.getPredSort());
+                            }
+                        }
+                    }
+                }
                 
                 for (Production production : productions) {
                     boolean mustMatch = true;
