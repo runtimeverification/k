@@ -7,16 +7,11 @@ package org.kframework.backend.java.symbolic;
  * @author YilongL
  * 
  */
-public class PatternMatchingFailure extends RuntimeException {
+public class PatternMatchingFailure extends UnificationOrMatchingFailure {
     
     public static final PatternMatchingFailure PATTERN_MATCHING_FAILURE = new PatternMatchingFailure("pattern matching failed");
 
     private PatternMatchingFailure(String message) {
         super(message);
-    }
-
-    @Override
-    public Throwable fillInStackTrace() {
-        return this;
     }
 }
