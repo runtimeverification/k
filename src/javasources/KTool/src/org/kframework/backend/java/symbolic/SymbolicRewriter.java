@@ -14,13 +14,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import com.google.common.collect.Sets;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.indexing.*;
 import org.kframework.backend.java.indexing.pathIndex.PathIndex;
@@ -29,7 +27,6 @@ import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Definition;
-import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
@@ -42,8 +39,6 @@ import org.kframework.krun.api.io.FileSystem;
 import org.kframework.utils.general.GlobalSettings;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 
 /**
  *
@@ -65,7 +60,7 @@ public class SymbolicRewriter {
     private final PluggableKastStructureChecker phase1PluggableKastChecker;
     private final PluggableKastStructureChecker phase2PluggableKastChecker;
     private PathIndex pathIndex;
-    private BasicIndex basicIndex;
+    private IndexingTable basicIndex;
 
     /*
      * Liyi Li : add simulation rules in the constructor, and allow user to input label [alphaRule] as

@@ -18,7 +18,7 @@ import java.util.LinkedHashSet;
 /**
  * The indexing scheme currently used in the Java Backend
  */
-public class BasicIndex implements Serializable{
+public class IndexingTable implements Serializable{
     private Map<Index, List<Rule>> ruleTable;
     private Map<Index, List<Rule>> heatingRuleTable;
     private Map<Index, List<Rule>> coolingRuleTable;
@@ -26,7 +26,7 @@ public class BasicIndex implements Serializable{
     private List<Rule> unindexedRules;
     private final Definition definition;
 
-    public BasicIndex(Definition definition) {
+    public IndexingTable(Definition definition) {
         this.definition = definition;
         buildBasicIndex();
     }
