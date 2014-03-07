@@ -1,7 +1,6 @@
 package org.kframework.backend.java.indexing.pathIndex.trie;
 
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.io.Serializable;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -11,7 +10,7 @@ import java.util.Set;
  * Author: Owolabi Legunsen
  * 1/2/14: 7:30 PM
  */
-public class TrieLeaf extends TrieNode {
+public class TrieLeaf extends TrieNode implements Serializable{
     public Set<Integer> getIndices() {
         return indices;
     }

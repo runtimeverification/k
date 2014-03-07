@@ -4,8 +4,6 @@ import org.apache.commons.collections15.MultiMap;
 import org.apache.commons.collections15.multimap.MultiHashMap;
 import org.kframework.backend.java.indexing.RuleIndex;
 import org.kframework.backend.java.indexing.pathIndex.trie.PathIndexTrie;
-import org.kframework.backend.java.indexing.pathIndex.util.MultipleCellUtil;
-import org.kframework.backend.java.indexing.pathIndex.util.MultiplicityStarCellHolder;
 import org.kframework.backend.java.indexing.pathIndex.visitors.CoolingRuleVisitor;
 import org.kframework.backend.java.indexing.pathIndex.visitors.HeatingRuleVisitor;
 import org.kframework.backend.java.indexing.pathIndex.visitors.RuleVisitor;
@@ -17,6 +15,7 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.krun.K;
 import org.kframework.utils.general.IndexingStatistics;
 
+import java.io.Serializable;
 import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,11 +30,10 @@ import java.util.ArrayList;
  * Author: Owolabi Legunsen
  * 1/8/14: 10:08 AM
  */
-public class PathIndex implements RuleIndex{
+public class PathIndex implements RuleIndex, Serializable{
     private final Map<Integer, Rule> indexedRules;
     private final Definition definition;
     private PathIndexTrie trie;
-    private MultiplicityStarCellHolder multiCellInfoHolder = null;
     private final Set<Integer> outputRuleIndices = new LinkedHashSet<>();
     private final Set<Integer> inputRuleIndices = new LinkedHashSet<>();
     private TermVisitor termVisitor;
@@ -52,8 +50,6 @@ public class PathIndex implements RuleIndex{
         this.definition = definition;
         this.indexedRules = new LinkedHashMap<>();
         termVisitor = new TermVisitor(definition.context());
-        multiCellInfoHolder =
-                MultipleCellUtil.checkDefinitionForMultiplicityStar(definition.context());
         buildIndex();
     }
 
@@ -147,11 +143,6 @@ public class PathIndex implements RuleIndex{
                 break;
             case OTHER:
                 ruleVisitor = new RuleVisitor(definition.context());
-                //TODO(OwolabiL): Move this to the RuleVisitor class
-                if (multiCellInfoHolder != null) {
-                    kCells = MultipleCellUtil.checkRuleForMultiplicityStar(rule,
-                            multiCellInfoHolder.getParentOfCellWithMultipleK());
-                }
                 break;
             case OUT:
                 pStrings.put(n, "@.out");
@@ -166,14 +157,7 @@ public class PathIndex implements RuleIndex{
                         + type);
         }
 
-        //TODO(OwolabiL): Move this check to the RuleVisitor class
-        if (kCells.size() > 1) {
-            for (Cell kCell : kCells) {
-                kCell.accept(ruleVisitor);
-            }
-        } else {
-            rule.accept(ruleVisitor);
-        }
+        rule.accept(ruleVisitor);
 
         pStrings.putAll(n, ruleVisitor.getpStrings());
         return pStrings;

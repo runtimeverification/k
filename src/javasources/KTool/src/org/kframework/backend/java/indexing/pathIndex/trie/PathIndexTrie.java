@@ -1,6 +1,7 @@
 package org.kframework.backend.java.indexing.pathIndex.trie;
 
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -12,7 +13,7 @@ import java.util.Set;
  * Author: Owolabi Legunsen
  * 1/2/14: 7:52 PM
  */
-public class PathIndexTrie implements Trie {
+public class PathIndexTrie implements Trie,Serializable {
     private final TrieNode root;
     private final String delimiter = "\\.";
 

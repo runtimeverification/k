@@ -2,15 +2,20 @@ package org.kframework.backend.java.indexing.pathIndex.visitors;
 
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
-import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.kil.Rule;
+import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.kil.Cell;
+import org.kframework.backend.java.kil.KSequence;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.symbolic.LocalVisitor;
 import org.kframework.backend.java.util.LookupCell;
-import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 
 /** This Visitor class traverses a rule and makes PStrings out of the rule using the contents of
  * the k cell
@@ -42,7 +47,11 @@ public class RuleVisitor extends LocalVisitor {
 
     @Override
     public void visit(Cell cell) {
-        cell.getContent().accept(this);
+        if (cell.getLabel().equals("k")){
+            cell.getContent().accept(this);
+        } else if(cell.contentKind() == Kind.CELL_COLLECTION){
+            super.visit(cell);
+        }
     }
 
     @Override
