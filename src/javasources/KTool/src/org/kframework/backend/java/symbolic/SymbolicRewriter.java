@@ -20,8 +20,10 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.indexing.*;
-import org.kframework.backend.java.indexing.pathIndex.PathIndex;
+import org.kframework.backend.java.indexing.Index;
+import org.kframework.backend.java.indexing.IndexingPair;
+import org.kframework.backend.java.indexing.RuleIndex;
+import org.kframework.backend.java.indexing.IndexingTable;
 import org.kframework.utils.general.IndexingStatistics;
 import org.kframework.backend.java.kil.Cell;
 import org.kframework.backend.java.kil.CellCollection;
@@ -59,8 +61,7 @@ public class SymbolicRewriter {
     private boolean transition;
     private final PluggableKastStructureChecker phase1PluggableKastChecker;
     private final PluggableKastStructureChecker phase2PluggableKastChecker;
-    private PathIndex pathIndex;
-    private IndexingTable basicIndex;
+    private RuleIndex ruleIndex;
 
     /*
      * Liyi Li : add simulation rules in the constructor, and allow user to input label [alphaRule] as
@@ -68,7 +69,7 @@ public class SymbolicRewriter {
      */
     public SymbolicRewriter(Definition definition) {
         this.definition = definition;
-        basicIndex = definition.getIndex();
+        ruleIndex = definition.getIndex();
 
         /* initialize the K AST checker for test generation */
         if (K.do_testgen) {
@@ -123,7 +124,7 @@ public class SymbolicRewriter {
      * return the rules for simulations only
      */
     public Map<Index, List<Rule>> getSimulationMap(){
-        return basicIndex.getSimulationRuleTable();
+        return ((IndexingTable) ruleIndex).getSimulationRuleTable();
     }
 
     /*
@@ -133,8 +134,8 @@ public class SymbolicRewriter {
     private List<Rule> getSimulationRules(Term term) {
         List<Rule> rules = new ArrayList<Rule>();
         for (IndexingPair pair : term.getIndexingPairs(definition)) {
-            if (basicIndex.getSimulationRuleTable().get(pair.first) != null) {
-                rules.addAll(basicIndex.getSimulationRuleTable().get(pair.first));
+            if (((IndexingTable) ruleIndex).getSimulationRuleTable().get(pair.first) != null) {
+                rules.addAll(((IndexingTable) ruleIndex).getSimulationRuleTable().get(pair.first));
             }
         }
         return rules;
@@ -155,15 +156,12 @@ public class SymbolicRewriter {
             IndexingStatistics.getRulesForTermStopWatch.start();
         }
 
-        if (K.do_indexing) {
-            rules.addAll(pathIndex.getRulesForTerm(term));
-        } else {
-            rules.addAll(basicIndex.getRules(term));
-        }
+        rules.addAll(ruleIndex.getRules(term));
 
         if (K.get_indexing_stats){
             IndexingStatistics.rulesSelectedAtEachStep.add(rules.size());
-            long elapsed = IndexingStatistics.getRulesForTermStopWatch.stop().elapsed(TimeUnit.MICROSECONDS);
+            long elapsed =
+                    IndexingStatistics.getRulesForTermStopWatch.stop().elapsed(TimeUnit.MICROSECONDS);
             IndexingStatistics.timesForRuleSelection.add(elapsed);
         }
         return rules;

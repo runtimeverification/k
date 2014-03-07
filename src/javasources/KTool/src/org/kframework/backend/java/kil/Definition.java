@@ -1,7 +1,6 @@
 package org.kframework.backend.java.kil;
 
 import com.google.common.collect.Sets;
-import org.kframework.backend.java.indexing.IndexingTable;
 import org.kframework.backend.java.indexing.RuleIndex;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;

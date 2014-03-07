@@ -2,6 +2,7 @@ package org.kframework.backend.java.indexing.pathIndex;
 
 import org.apache.commons.collections15.MultiMap;
 import org.apache.commons.collections15.multimap.MultiHashMap;
+import org.kframework.backend.java.indexing.RuleIndex;
 import org.kframework.backend.java.indexing.pathIndex.trie.PathIndexTrie;
 import org.kframework.backend.java.indexing.pathIndex.util.MultipleCellUtil;
 import org.kframework.backend.java.indexing.pathIndex.util.MultiplicityStarCellHolder;
@@ -30,7 +31,7 @@ import java.util.ArrayList;
  * Author: Owolabi Legunsen
  * 1/8/14: 10:08 AM
  */
-public class PathIndex {
+public class PathIndex implements RuleIndex{
     private final Map<Integer, Rule> indexedRules;
     private final Definition definition;
     private PathIndexTrie trie;
@@ -53,14 +54,14 @@ public class PathIndex {
         termVisitor = new TermVisitor(definition.context());
         multiCellInfoHolder =
                 MultipleCellUtil.checkDefinitionForMultiplicityStar(definition.context());
-        constructIndex(definition);
+        buildIndex();
     }
 
     /**
      * Constructs the index (a trie) data structure from all the rules in the definition.
-     * @param definition
      */
-    private void constructIndex(Definition definition) {
+    @Override
+    public void buildIndex() {
         MultiMap<Integer, String> pStringMap = new MultiHashMap<>();
         int count = 1;
 
@@ -185,7 +186,8 @@ public class PathIndex {
      * @param term the term to be rewritten
      * @return a list of rules that can possibly match
      */
-    public List<Rule> getRulesForTerm(Term term) {
+    @Override
+    public List<Rule> getRules(Term term) {
         Set<String> pStrings;
 //        System.out.println("term: "+term);
         if (K.get_indexing_stats) {

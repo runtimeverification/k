@@ -70,6 +70,7 @@ public class KompileFrontEnd {
             GlobalSettings.fastKast |= cmd.hasOption("fast-kast");
             GlobalSettings.noPrelude |= cmd.hasOption("no-prelude");
             GlobalSettings.warnings = cmd.getOptionValue("warnings", GlobalSettings.warnings);
+            GlobalSettings.ruleIndex = cmd.getOptionValue("rule-index", GlobalSettings.ruleIndex);
             GlobalSettings.addTopCell |= cmd.hasOption("add-top-cell");
             GlobalSettings.lib = cmd.getOptionValue("lib", GlobalSettings.lib);
             GlobalSettings.synModule =
