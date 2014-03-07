@@ -65,13 +65,13 @@ module K-EQUAL-HOOKS
 
 
   // equality over KList
-  syntax Bool ::= KList "==KList" KList    [function, hook(#K-EQUAL:_==K_)]
+  syntax Bool ::= KList "==KList" KList    [function, hook(KEqual:_==KList_)]
 
   syntax K ::= dummy(KList)
   rule LK1:KList ==KList LK2:KList => dummy(LK1) ==K dummy(LK2)
 
   // disequality over KList
-  syntax Bool ::= KList "=/=KList" KList   [function, hook(#K-EQUAL:_=/=K_)]
+  syntax Bool ::= KList "=/=KList" KList   [function, hook(KEqual:_=/=KList_)]
   rule LK1:KList =/=KList LK2:KList  => notBool(LK1 ==KList LK2)
 
   // equality over KLabel
