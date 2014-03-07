@@ -11,7 +11,6 @@ import java.util.Set;
 
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.kil.ConstrainedTerm;
-import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KList;
@@ -173,7 +172,7 @@ public class TestCaseGenerationUtil {
         // TODO(YilongL): This is cheating; fix it!
         switch (sort) {
         case "Block":
-            return new KItem(KLabelConstant.of("'{}", termContext.definition().context()), new KList(), termContext);
+            return new KItem(KLabelConstant.of("'{}", termContext), new KList(), termContext);
             
         case "BExp":
             return BoolToken.TRUE;

@@ -25,9 +25,8 @@ public class BuiltinFloatOperations {
 
      public static Term sub(Term term1, Term term2, TermContext context) {
         if (term1.equals(UninterpretedToken.of("#Float","0.0"))) {
-            Context context1 = context.definition().context();
             return new KItem(
-                    KLabelConstant.of("'--Float_",context1),
+                    KLabelConstant.of("'--Float_",context),
                     new KList(ImmutableList.<Term>of(term2),null),
                     context).evaluate(context);
         }
