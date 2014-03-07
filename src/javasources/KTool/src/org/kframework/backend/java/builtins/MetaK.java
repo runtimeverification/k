@@ -1,14 +1,23 @@
 package org.kframework.backend.java.builtins;
 
-import org.kframework.backend.java.kil.*;
-import org.kframework.backend.java.symbolic.SymbolicConstraint;
-import org.kframework.backend.java.symbolic.SymbolicUnifier;
-import org.kframework.kil.matchers.MatcherException;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.BuiltinSet;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KLabel;
+import org.kframework.backend.java.kil.MetaVariable;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.symbolic.PatternMatcher;
+import org.kframework.backend.java.symbolic.PatternMatchingFailure;
+import org.kframework.backend.java.symbolic.SymbolicConstraint;
+import org.kframework.backend.java.symbolic.SymbolicUnifier;
+import org.kframework.backend.java.symbolic.UnificationFailure;
 
 /**
  * Table of {@code public static} methods for builtin meta K operations.
@@ -36,12 +45,34 @@ public class MetaK {
         SymbolicUnifier unifier = new SymbolicUnifier(constraint, context);
         try {
             unifier.unify(term1, term2);
-        } catch (MatcherException e) {
+        } catch (UnificationFailure e) {
             return BoolToken.FALSE;
         }
         return BoolToken.TRUE;
     }
 
+    /**
+     * Checks if the subject term matches the pattern.
+     * 
+     * @param subject
+     *            the subject term
+     * @param pattern
+     *            the pattern term
+     * @param context
+     *            the term context
+     * @return {@link BoolToken#TRUE} if the two terms can be matched;
+     *         otherwise, {@link BoolToken#FALSE}
+     */
+    public static BoolToken matchable(Term subject, Term pattern, TermContext context) {
+        PatternMatcher matcher = new PatternMatcher(context);
+        try {
+            matcher.match(subject, pattern);
+        } catch (PatternMatchingFailure e) {
+            return BoolToken.FALSE;
+        }
+        return BoolToken.TRUE;
+    }
+    
     /**
      * Renames {@link Variable}s of a given {@link Term} if they appear also in
      * a given {@link BuiltinSet} of {@link MetaVariable}s.

@@ -205,7 +205,7 @@ public class PatternMatcher extends AbstractMatcher {
         return result;
     }
 
-    private PatternMatcher(TermContext context) {
+    public PatternMatcher(TermContext context) {
         this.termContext = context;
         multiSubstitutions = new ArrayList<java.util.Collection<Map<Variable, Term>>>();
     }
