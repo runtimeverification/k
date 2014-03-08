@@ -1,8 +1,6 @@
 package org.kframework.backend.java.indexing;
 
 
-import java.util.HashMap;
-
 /**
  * @author: AndreiS
  */
