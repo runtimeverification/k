@@ -1186,6 +1186,9 @@ public class Main {
             if (cmd.hasOption("backend")) {
                 K.backend = cmd.getOptionValue("backend");
             }
+            if (cmd.hasOption("deterministic-functions")) {
+                K.deterministic_functions = true;
+            }
             // printing the output according to the given options
             if (K.help) {
                 printKRunUsageS(cmd_options);

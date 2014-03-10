@@ -303,6 +303,14 @@ public class KItem extends Term implements Sorted {
                     }
                     result = rightHandSide;
                 }
+
+                /*
+                 * If the function definitions do not need to be deterministic, try them in order
+                 * and apply the first one that matches.
+                 */
+                if (!K.deterministic_functions && result != null) {
+                    return result;
+                }
             }
 
             if (result != null) {

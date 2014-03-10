@@ -76,6 +76,8 @@ public class KompileFrontEnd {
                     cmd.getOptionValue("syntax-module", GlobalSettings.synModule);
             GlobalSettings.testgen |= cmd.hasOption("test-gen");
 
+            K.deterministic_functions |= cmd.hasOption("deterministic-functions");
+
             if (cmd.hasOption("transition"))
                 GlobalSettings.transition = metadataParse(cmd.getOptionValue("transition"));
             if (cmd.hasOption("supercool"))

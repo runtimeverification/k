@@ -108,6 +108,7 @@ public class K {
     public static boolean trace = false;
     public static boolean profile = false;
     public static String smt = "z3";
+    public static boolean deterministic_functions = false;
 
 
     public static Properties configuration_variables = new Properties();
