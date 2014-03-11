@@ -1,8 +1,13 @@
 package org.kframework.backend.java.builtins;
 
-import com.google.common.collect.ImmutableList;
-import org.kframework.backend.java.kil.*;
-import org.kframework.backend.java.symbolic.BuiltinFunction;
+import org.kframework.backend.java.kil.KCollection;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KLabel;
+import org.kframework.backend.java.kil.KLabelInjection;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.Kind;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.symbolic.LocalTransformer;
 import org.kframework.backend.java.symbolic.PrePostTransformer;
 import org.kframework.kil.ASTNode;
@@ -10,82 +15,126 @@ import org.kframework.kil.ASTNode;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
+
+
 /**
+ * Provides a builtin implementation of a K visitor.
+ *
+ * @see include/modules/k-functional-visitor.k
+ *
  * @author Traian
  */
-public class BuiltinVisitorOperations {
+public class BuiltinVisitorOperations extends PrePostTransformer {
 
+    /**
+     * KLabel of the guard controlling whether a node is visited.
+     */
+    private final KLabel ifLabel;
+    /**
+     * List of arguments passed to the guard KLabel.
+     */
+    private final List<Term> ifParams;
+    /**
+     * KLabel of the visitation performed on a node.
+     */
+    private final KLabel visitLabel;
+    /**
+     * List of arguments passed the visitation KLabel.
+     */
+    private final List<Term> visitParams;
 
-    static class BuiltinVisitor extends PrePostTransformer {
+    BuiltinVisitorOperations(
+            KLabel ifLabel,
+            List<Term> ifParams,
+            KLabel visitLabel,
+            List<Term> visitParams,
+            TermContext context) {
+        super(context);
+        this.ifLabel = ifLabel;
+        this.ifParams = ifParams;
+        this.visitLabel = visitLabel;
+        this.visitParams = visitParams;
 
-        private List<Term> guardParams;
-        private List<Term> visitParams;
-        private KLabel ifLabel;
-        private KLabel visitLabel;
-
-        BuiltinVisitor(TermContext context, KLabel guardLabel, List<Term> guardParams, KLabel visitLabel, List<Term> visitParams) {
-            super(context);
-            this.guardParams = guardParams;
-            this.visitParams = visitParams;
-            this.ifLabel = guardLabel;
-            this.visitLabel = visitLabel;
-            this.preTransformer.addTransformer(new TermVisitor(context));
-        }
-
-        private class TermVisitor extends LocalTransformer {
-            private TermVisitor(TermContext context) {
-                super(context);
-            }
-
+        preTransformer.addTransformer(new LocalTransformer(context) {
             @Override
-            public ASTNode transform(Term node) {
-                guardParams.set(0, node);
-                KItem test = new KItem(ifLabel, new KList(ImmutableList.copyOf(guardParams)), context.definition().context());
-                Term truth = test.evaluate(context);
-                //TODO:  Think about what happens when test has syumbolic values in it.
-                if (!(truth instanceof BoolToken)) return node;
-                if (!((BoolToken) truth).booleanValue()) return node;
-                visitParams.set(0, node);
-                node = new KItem(visitLabel, new KList(ImmutableList.copyOf(visitParams)), context.definition().context());
-                node = node.evaluate(context);
-                return new DoneTransforming(node);
+            public ASTNode transform(Term term) {
+                if (term instanceof KLabel) {
+                    return new DoneTransforming(term);
+                }
+
+                if (evaluateGuard(term)) {
+                    return new DoneTransforming(visitNode(term));
+                } else {
+                    return term;
+                }
             }
+        });
+    }
+
+    private Term visitNode(Term term) {
+        visitParams.set(0, term);
+        term = new KItem(
+                visitLabel,
+                new KList(ImmutableList.copyOf(visitParams)),
+                context.definition().context());
+        return term.evaluate(context);
+    }
+
+    private boolean evaluateGuard(Term term) {
+        ifParams.set(0, term);
+        KItem test = new KItem(
+                ifLabel,
+                new KList(ImmutableList.copyOf(ifParams)),
+                context.definition().context());
+        // TODO: Think about what happens when test has symbolic values in it.
+        return test.evaluate(context) == BoolToken.TRUE;
+    }
+
+    private static Term getInjectedTerm(KItem kItem) {
+        return ((KLabelInjection) kItem.kLabel()).term();
+    }
+
+    /**
+     * Implements operation {@code #visit(K, VisitLabel, VisitList, IfLabel, IfList)}.
+     *
+     * @param term Term being visited
+     * @param visitLabelTerm {@code KItem} representation of the kLabel of the visitation performed on a node
+     * @param visitListTerm {@code KItem} representation of the kList of additional arguments passed the visitation KLabel
+     * @param ifLabelTerm {@code KItem} representation of the kLabel of the guard controlling whether a node is visited
+     * @param ifListTerm {@code KItem} representation of the kList of additional arguments passed to the guard KLabel
+     * @param context
+     * @return Visited term
+     *
+     * @see org.kframework.backend.java.kil.KLabelInjection
+     */
+    public static Term visit(
+            Term term,
+            KItem visitLabelTerm,
+            KItem visitListTerm,
+            KItem ifLabelTerm,
+            KItem ifListTerm,
+            TermContext context) {
+        KLabel visitLabel;
+        KList visitList;
+        KLabel ifLabel;
+        KList ifList;
+        try {
+            visitLabel = (KLabel) getInjectedTerm(visitLabelTerm);
+            visitList = (KList) KCollection.upKind(getInjectedTerm(visitListTerm), Kind.KLIST);
+            ifLabel = (KLabel) getInjectedTerm(ifLabelTerm);
+            ifList = (KList) KCollection.upKind(getInjectedTerm(ifListTerm), Kind.KLIST);
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException(e);
         }
-    }
-
-    public static Term injectedTerm(Term kItem) {
-        assert kItem instanceof KItem;
-        Term kLabel = ((KItem) kItem).kLabel();
-        assert kLabel instanceof KLabelInjection;
-        final KLabelInjection kLabelInjection = (KLabelInjection) kLabel;
-        return kLabelInjection.term();
-    }
-
-    public static KLabel injectedKLabel(Term kItem) {
-        Term labelTerm = injectedTerm(kItem);
-        assert labelTerm instanceof KLabel;
-        return (KLabel) labelTerm;
-    }
-
-     public static KList injectedKList(Term kItem) {
-        Term listTerm = injectedTerm(kItem);
-        assert listTerm instanceof KList;
-        return (KList) listTerm;
-    }
-
-    //public static Term visit(Term k, KLabel visitLabel, KList visitList, KLabel ifLabel, KList ifList) {
-    public static Term visit(Term k, Term visitLabelTerm, Term visitListTerm, Term ifLabelTerm, Term ifListTerm, TermContext context) {
-        KLabel visitLabel = injectedKLabel(visitLabelTerm);
-        KLabel ifLabel = injectedKLabel(ifLabelTerm);
-        KList ifList = injectedKList(ifListTerm);
-        KList visitList = injectedKList(visitListTerm);
-        final ArrayList<Term> guardParams = new ArrayList<>();
-        guardParams.add(k);
-        guardParams.addAll(ifList.getContents());
+        final ArrayList<Term> ifParams = new ArrayList<>();
+        ifParams.add(term);
+        ifParams.addAll(ifList.getContents());
         final ArrayList<Term> visitParams = new ArrayList<>();
-        visitParams.add(k);
+        visitParams.add(term);
         visitParams.addAll(visitList.getContents());
-        PrePostTransformer visitor = new BuiltinVisitor(context, ifLabel, guardParams, visitLabel, visitParams);
-        return (Term) k.accept(visitor);
+        return (Term) term.accept(
+                new BuiltinVisitorOperations(ifLabel, ifParams, visitLabel, visitParams, context));
     }
+
 }

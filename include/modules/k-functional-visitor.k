@@ -18,8 +18,7 @@ module K-FUNCTIONAL-VISITOR
    * if IfLabel(K',,IFList) holds then replace K' with VisitLabel(K',,VisitList)
    * otherwise recurse on the children of K'.
    */
-  //syntax KItem ::= "#visit" "(" K "," KLabel "," KList "," KLabel "," KList ")"   [function, hook(Visitor:visit)]
-  syntax KItem ::= "#visit" "(" K "," KLabel "," KList "," KLabel "," KList ")"   [function]
+  syntax KItem ::= "#visit" "(" K "," KLabel "," KList "," KLabel "," KList ")"   [function, hook(Visitor:visit)]
 
   /*
    * Particular forms of #visit (default argument KList is .KList, default
@@ -147,24 +146,5 @@ module K-FUNCTIONAL-VISITOR
     #else
       KLabel(#visitAll(KList, VisitLabel, VisitList, IfLabel, IfList))
     #fi
-  when notBool(isBuiltin(KLabel(KList)))
-
-  /*
-   * #visit applied to an AST node (a KLabel applies to a KList) either
-   * transforms the node or reduces to #visit applied to its children.
-   */
-  rule
-    #visit(KI:KItem,
-           VisitLabel:KLabel,
-           VisitList:KList,
-           IfLabel:KLabel,
-           IfList:KList)
-  =>
-    #if IfLabel(KI,,IfList) ==K true #then
-      VisitLabel(KI,,VisitList)
-    #else
-      KI
-    #fi
-  when isBuiltin(KI)
 endmodule
 
