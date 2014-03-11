@@ -34,7 +34,12 @@ public class BuiltinFunction {
     private static final String hookPropertiesFileName = "hooks.properties";
 
     /**
-     * Set of hook module names excluded from evaluation during compilation.
+     * Set of hook module names excluded from evaluation during compilation, when each rule's
+     * right-hand side and condition are partially evaluated. Certain functions, like functions
+     * performing I/O operations or meta operations should only be evaluated at runtime.
+     *
+     * @see org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer#evaluateDefinition(org.kframework.backend.java.kil.Definition)
+     * @see org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer#evaluateRule(org.kframework.backend.java.kil.Rule, org.kframework.backend.java.kil.Definition)
      */
     private static final ImmutableSet hookMetaModules = ImmutableSet.of(
             "#META-K",
