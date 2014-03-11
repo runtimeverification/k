@@ -7,8 +7,10 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Production;
 import org.kframework.krun.K;
+import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
+import org.kframework.utils.general.GlobalSettings;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -18,6 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import com.google.common.collect.ImmutableSet;
+
 
 /**
  * Utility class that handles the builtin (hooked) operations and their Java
@@ -26,6 +30,22 @@ import java.util.Properties;
  * @author AndreiS
  */
 public class BuiltinFunction {
+
+    private static final String hookPropertiesFileName = "hooks.properties";
+
+    /**
+     * Set of hook module names excluded from evaluation during compilation, when each rule's
+     * right-hand side and condition are partially evaluated. Certain functions, like functions
+     * performing I/O operations or meta operations should only be evaluated at runtime.
+     *
+     * @see org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer#evaluateDefinition(org.kframework.backend.java.kil.Definition)
+     * @see org.kframework.backend.java.symbolic.KILtoBackendJavaKILTransformer#evaluateRule(org.kframework.backend.java.kil.Rule, org.kframework.backend.java.kil.Definition)
+     */
+    private static final ImmutableSet hookMetaModules = ImmutableSet.of(
+            "#META-K",
+            "MetaK",
+            "Visitor",
+            "#IO");
 
     /**
      * Map of {@link KLabelConstant} representation of builtin (hooked) operations to
@@ -39,15 +59,36 @@ public class BuiltinFunction {
             String separator = System.getProperty("file.separator");
             String path = KPaths.getKBase(false) + separator + "include" + separator + "java";
             Properties properties = new Properties();
-            FileUtil.loadProperties(properties, path + separator + "hooks.properties");
+
+            FileUtil.loadProperties(properties, path + separator + hookPropertiesFileName);
 
             for (String label : definition.context().labels.keySet()) {
                 for (Production production : definition.context().productionsOf(label)) {
                     if (production.getKLabel().equals(label)    // make sure the label is a Klabel
                             && production.containsAttribute(Attribute.HOOK_KEY)) {
+                        String hookAttribute = production.getAttribute(Attribute.HOOK_KEY);
+                        String hookPrefix = hookAttribute.substring(0, hookAttribute.indexOf(":"));
+                        /*
+                         * exclude hook from evaluation during compilation if the hook is dynamic
+                         * in nature (is related to I/O or to meta properties).
+                         * */
+                        if (K.do_kompilation && hookMetaModules.contains(hookPrefix)) {
+                            continue;
+                        }
+
+                        String hook = properties.getProperty(hookAttribute);
+                        if (hook == null) {
+                            GlobalSettings.kem.register(new KException(
+                                    KException.ExceptionType.HIDDENWARNING,
+                                    KException.KExceptionGroup.CRITICAL,
+                                    "missing entry in " + hookPropertiesFileName
+                                            + " for hook " + hookAttribute,
+                                    production.getFilename(),
+                                    production.getLocation()));
+                            continue;
+                        }
+
                         try {
-                            String hook = properties.getProperty(
-                                    production.getAttribute(Attribute.HOOK_KEY));
                             String className = hook.substring(0, hook.lastIndexOf('.'));
                             String methodName = hook.substring(hook.lastIndexOf('.') + 1);
                             Class<?> c = Class.forName(className);
@@ -60,7 +101,13 @@ public class BuiltinFunction {
                                 }
                             }
                         } catch (Exception e) {
-                            // TODO(AndreiS): report errors
+                            GlobalSettings.kem.register(new KException(
+                                    KException.ExceptionType.WARNING,
+                                    KException.KExceptionGroup.CRITICAL,
+                                    "missing implementation for hook " + hookAttribute + ":\n"
+                                            + hook,
+                                    production.getFilename(),
+                                    production.getLocation()));
                         }
                     }
                 }
@@ -92,11 +139,6 @@ public class BuiltinFunction {
             // deal with builtin functions? builtin functions are supposed to be
             // super-fast...
             Method method = table.get(label);
-            /* do not evaluate meta functions during the compilation */
-            if (K.do_kompilation && method.getDeclaringClass().getSimpleName().equals("MetaK")) {
-                return null;
-            }
-
             Term t = (Term) method.invoke(null, args);
             return t;
         } catch (InvocationTargetException e) {
