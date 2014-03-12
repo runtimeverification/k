@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.kframework.kil.Ambiguity;
+import org.kframework.kil.KApp;
+import org.kframework.kil.KLabel;
 import org.kframework.kil.KList;
 import org.kframework.kil.Term;
 import org.kframework.kil.Token;
@@ -69,8 +71,8 @@ public class Grammar {
                            StateId entryStateId, State.OrderingInfo entryOrderingInfo,
                            StateId exitStateId, State.OrderingInfo exitOrderingInfo) {
             this.nonTerminalId = nonTerminalId;
-            this.entryState = new EntryState(entryStateId, this, entryOrderingInfo);
-            this.exitState = new ExitState(exitStateId, this, exitOrderingInfo);
+            this.entryState = new EntryState(entryStateId, this, entryOrderingInfo, null);
+            this.exitState = new ExitState(exitStateId, this, exitOrderingInfo, null);
         }
 
         public int compareTo(NonTerminal that) { return this.nonTerminalId.compareTo(that.nonTerminalId); }
@@ -97,6 +99,7 @@ public class Grammar {
         final StateId stateId;
         final NonTerminal nt;
         final OrderingInfo orderingInfo;
+        final KLabel label;
 
         static class OrderingInfo implements Comparable<OrderingInfo> {
             int key;
@@ -104,15 +107,24 @@ public class Grammar {
             public int compareTo(OrderingInfo that) { return Integer.compare(this.key, that.key); }
         }
 
-        public State(StateId stateId, NonTerminal nt, OrderingInfo orderingInfo) {
-            this.stateId = stateId; this.nt = nt; this.orderingInfo = orderingInfo;
+        public State(StateId stateId, NonTerminal nt, OrderingInfo orderingInfo, KLabel label) {
+            this.stateId = stateId; this.nt = nt; this.orderingInfo = orderingInfo; this.label = label;
         }
 
         public Set<KList> runRule(Set<KList> input) {
-            if (this instanceof ExitState) {
-                return new HashSet<KList>(Arrays.asList(new KList(Arrays.asList((Term)new Ambiguity("K", new ArrayList<Term>(input))))));
+            Set<KList> result;
+            if (this.label == null) {
+                result = input;
             } else {
-                return input;
+                result = new HashSet<>();
+                for (KList kl : input) {
+                    result.add(new KList(Arrays.<Term>asList(new KApp(label, kl))));
+                }
+            }
+            if (this instanceof ExitState) {
+                return new HashSet<KList>(Arrays.asList(new KList(Arrays.asList((Term)new Ambiguity("K", new ArrayList<Term>(result))))));
+            } else {
+                return result;
             }
         }
 
@@ -146,22 +158,22 @@ public class Grammar {
     }
 
     public static class ExitState extends State {
-        public ExitState(StateId stateId, NonTerminal nt, OrderingInfo orderingInfo) {
-            super(stateId, nt, orderingInfo);
+        public ExitState(StateId stateId, NonTerminal nt, OrderingInfo orderingInfo, KLabel label) {
+            super(stateId, nt, orderingInfo, label);
         }
     }
 
     public abstract static class NextableState extends State {
         public final Set<State> next = new HashSet<State>();
-        NextableState(StateId stateId, NonTerminal nt, OrderingInfo orderingInfo, boolean intermediary) {
-            super(stateId, nt, orderingInfo);
+        NextableState(StateId stateId, NonTerminal nt, OrderingInfo orderingInfo, boolean intermediary, KLabel label) {
+            super(stateId, nt, orderingInfo, label);
             if (intermediary) { nt.intermediaryStates.add(this); }
         }
     }
 
     public static class EntryState extends NextableState {
-        public EntryState(StateId stateId, NonTerminal nt, OrderingInfo orderingInfo) {
-            super(stateId, nt, orderingInfo, false);
+        public EntryState(StateId stateId, NonTerminal nt, OrderingInfo orderingInfo, KLabel label) {
+            super(stateId, nt, orderingInfo, false, label);
         }
     }
 
@@ -171,8 +183,8 @@ public class Grammar {
 
         public NonTerminalState(
                 StateId stateId, NonTerminal nt, OrderingInfo orderingInfo,
-                NonTerminal child, boolean isLookahead) {
-            super(stateId, nt, orderingInfo, true);
+                NonTerminal child, boolean isLookahead, KLabel label) {
+            super(stateId, nt, orderingInfo, true, label);
             nt.intermediaryStates.add(this);
             this.child = child;
             this.isLookahead = isLookahead;
@@ -191,16 +203,16 @@ public class Grammar {
 
         abstract Set<MatchResult> matches(CharSequence text, int startPosition, Function context);
 
-        public PrimitiveState(StateId stateId, NonTerminal nt, OrderingInfo orderingInfo) {
-            super(stateId, nt, orderingInfo, true);
+        public PrimitiveState(StateId stateId, NonTerminal nt, OrderingInfo orderingInfo, KLabel label) {
+            super(stateId, nt, orderingInfo, true, label);
         }
     }
 
     public static class RegExState extends PrimitiveState {
         private final java.util.regex.Pattern pattern;
 
-        public RegExState(StateId stateId, NonTerminal nt, OrderingInfo orderingInfo, java.util.regex.Pattern pattern) {
-            super(stateId, nt, orderingInfo);
+        public RegExState(StateId stateId, NonTerminal nt, OrderingInfo orderingInfo, java.util.regex.Pattern pattern, KLabel label) {
+            super(stateId, nt, orderingInfo, label);
             this.pattern = pattern;
         }
 
