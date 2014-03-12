@@ -12,6 +12,41 @@ import org.kframework.kil.KList;
 import org.kframework.kil.Term;
 import org.kframework.kil.Token;
 
+
+/**
+ * The classes used by the parser to represent the internal structure of a grammar.
+ * A grammar represents a NFA generated from EBNF style grammar (in this case the K syntax declarations).
+ * The main object is the {@link NonTerminal}, containing a unique {@link NonTerminalId},
+ * and two states: entry and exit.
+ *
+ * There are four main types of states:
+ * {@link EntryState}, {@link NonTerminalState}, {@link PrimitiveState} and {@link ExitState}.
+ * The first three extend {@link NextableState} in order to make accommodate connections
+ * between the sates. ExitState signifies the end of a NonTerminal so it doesn't need a 'next' field.
+ *
+ * Each {@link org.kframework.parser.concrete2.Grammar.NonTerminal} contains exactly one {@link EntryState}
+ * and one {@link org.kframework.parser.concrete2.Grammar.ExitState}. Depending on the grammar it may contain
+ * multiple {@link PrimitiveState} and {@link NonTerminalState}.
+ *
+ * Example of a NonTerminal NFA structure:
+ * E ::= E "+" E
+ *     | E "*" E
+ *     | {E, ","}+
+ *
+ *     |->[E]-->("+")--->[E]--|
+ *     |                      |
+ * (|--|->[E]-->("*")--->[E]--|->|)
+ *     |                      |
+ *     |   |------------------|
+ *     |->[E]-->(",")
+ *         ^------|
+ *
+ * (| - EntryState
+ * |) - ExitState
+ * [] - NonTerminalState
+ * () - PrimitiveState
+ *
+ */
 public class Grammar {
 
 // Positions are 'int' because CharSequence uses 'int' // Position in the text
