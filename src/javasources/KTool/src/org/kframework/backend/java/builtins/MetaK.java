@@ -14,7 +14,6 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.symbolic.PatternMatcher;
-import org.kframework.backend.java.symbolic.PatternMatchingFailure;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.SymbolicUnifier;
 import org.kframework.backend.java.symbolic.UnificationFailure;
@@ -64,13 +63,8 @@ public class MetaK {
      *         otherwise, {@link BoolToken#FALSE}
      */
     public static BoolToken matchable(Term subject, Term pattern, TermContext context) {
-        PatternMatcher matcher = new PatternMatcher(context);
-        try {
-            matcher.match(subject, pattern);
-        } catch (PatternMatchingFailure e) {
-            return BoolToken.FALSE;
-        }
-        return BoolToken.TRUE;
+        return PatternMatcher.matchable(subject, pattern, context) ? BoolToken.TRUE
+                : BoolToken.FALSE;
     }
     
     /**
