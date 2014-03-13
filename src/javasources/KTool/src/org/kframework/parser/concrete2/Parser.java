@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.KList;
+import org.kframework.kil.KSorts;
 import org.kframework.kil.Term;
 import org.kframework.parser.concrete2.Grammar.ExitState;
 import org.kframework.parser.concrete2.Grammar.NextableState;
@@ -209,7 +210,7 @@ class Function {
 
     void addFactoredAndRunRule(Function that, StateReturn stateReturn) { // if lookahead, factors all results; always subjugates
         // this factoring will be wrong once we move to context sensitive functions, but it works for now
-        //this.terms.append(new Ambiguity("K", Arrays.asList(that.terms)));
+        //this.terms.append(new Ambiguity(KSorts.K, Arrays.asList(that.terms)));
 
         this.terms.addAll(stateReturn.key.stateCall.key.state.runRule(that.terms));
 
@@ -230,7 +231,7 @@ class Function {
         }
         for (Map.Entry<KList,Collection<Term>> entry : factorings.asMap().entrySet()) {
             KList klist = entry.getKey().shallowCopy();
-            klist.getContents().add(new Ambiguity("K", new ArrayList<Term>(entry.getValue()))); // TODO: check result
+            klist.getContents().add(new Ambiguity(KSorts.K, new ArrayList<Term>(entry.getValue()))); // TODO: check result
             this.terms.add(stateReturn.key.stateCall.key.state.runRule(klist));
         }
         */
@@ -517,7 +518,7 @@ public class Parser {
             s.stateReturnWorkLists.pop();
         }
 
-        Ambiguity result = new Ambiguity("K", new ArrayList<Term>());
+        Ambiguity result = new Ambiguity(KSorts.K, new ArrayList<Term>());
         for(StateReturn stateReturn : s.getNtCall(new NonTerminalCall.Key(nt,0)).exitStateReturns) {
             if (stateReturn.key.stateEnd == s.input.length()) {
                 for (KList klist : stateReturn.postRuleFunction.applyToNull()) {

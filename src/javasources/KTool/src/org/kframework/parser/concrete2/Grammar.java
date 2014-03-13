@@ -9,6 +9,7 @@ import org.kframework.kil.Ambiguity;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KLabel;
 import org.kframework.kil.KList;
+import org.kframework.kil.KSorts;
 import org.kframework.kil.Term;
 import org.kframework.kil.Token;
 
@@ -157,7 +158,7 @@ public class Grammar {
                 }
             }
             if (this instanceof ExitState) {
-                return new HashSet<KList>(Arrays.asList(new KList(Arrays.asList((Term)new Ambiguity("K", new ArrayList<Term>(result))))));
+                return new HashSet<KList>(Arrays.asList(new KList(Arrays.asList((Term)new Ambiguity(KSorts.K, new ArrayList<Term>(result))))));
             } else {
                 return result;
             }
@@ -258,7 +259,7 @@ public class Grammar {
             matcher.useAnchoringBounds(false);
             Set<MatchResult> results = new HashSet<MatchResult>();
             if (matcher.lookingAt()) {
-                results.add(new MatchResult(matcher.end(), Function.constant(Token.kAppOf("K", matcher.group())))); //matchFunction(text, matcher.start(), matcher.end())));
+                results.add(new MatchResult(matcher.end(), Function.constant(Token.kAppOf(KSorts.K, matcher.group())))); //matchFunction(text, matcher.start(), matcher.end())));
             }
             return results;
         }

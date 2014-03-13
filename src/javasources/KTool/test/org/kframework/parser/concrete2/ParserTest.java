@@ -61,7 +61,7 @@ public class ParserTest extends TestCase {
         Parser parser = new Parser(ps);
 
         Term result = parser.parse(nt1, 0);
-        Term expected = amb(klist(amb(klist(Token.kAppOf("K", "asdfAAA1")))));
+        Term expected = amb(klist(amb(klist(Token.kAppOf(KSorts.K, "asdfAAA1")))));
         assertEquals("Single Token check: ", expected, result);
     }
 
@@ -85,7 +85,7 @@ public class ParserTest extends TestCase {
         Parser parser = new Parser(ps);
 
         Term result = parser.parse(nt1, 0);
-        Term expected = amb(klist(amb(klist(kapp("seq", Token.kAppOf("K", "asdfAAA1 "), Token.kAppOf("K", "adfsf"))))));
+        Term expected = amb(klist(amb(klist(kapp("seq", Token.kAppOf(KSorts.K, "asdfAAA1 "), Token.kAppOf(KSorts.K, "adfsf"))))));
         assertEquals("Single Token check: ", expected, result);
     }
 
@@ -110,19 +110,19 @@ public class ParserTest extends TestCase {
 
         {
             Term result = new Parser(new ParseState("abc")).parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("s1", Token.kAppOf("K", "abc"))))));
+            Term expected = amb(klist(amb(klist(kapp("s1", Token.kAppOf(KSorts.K, "abc"))))));
             assertEquals("Single Token check: ", expected, result);
         }
 
         {
             Term result = new Parser(new ParseState("ABC")).parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("s3", Token.kAppOf("K", "ABC"), Token.kAppOf("K", ""))))));
+            Term expected = amb(klist(amb(klist(kapp("s3", Token.kAppOf(KSorts.K, "ABC"), Token.kAppOf(KSorts.K, ""))))));
             assertEquals("Single Token check: ", expected, result);
         }
 
         {
             Term result = new Parser(new ParseState("123")).parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("s1", Token.kAppOf("K", "123"))), klist(kapp("s3", Token.kAppOf("K", "12"), Token.kAppOf("K", "3"))))));
+            Term expected = amb(klist(amb(klist(kapp("s1", Token.kAppOf(KSorts.K, "123"))), klist(kapp("s3", Token.kAppOf(KSorts.K, "12"), Token.kAppOf(KSorts.K, "3"))))));
             assertEquals("Single Token check: ", expected, result);
         }
     }
@@ -146,13 +146,13 @@ public class ParserTest extends TestCase {
 
         {
             Term result = new Parser(new ParseState("abc")).parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("seq", Token.kAppOf("K", "a"), Token.kAppOf("K", "b"), Token.kAppOf("K", "c"), Token.kAppOf("K", ""))))));
+            Term expected = amb(klist(amb(klist(kapp("seq", Token.kAppOf(KSorts.K, "a"), Token.kAppOf(KSorts.K, "b"), Token.kAppOf(KSorts.K, "c"), Token.kAppOf(KSorts.K, ""))))));
             assertEquals("Single Token check: ", expected, result);
         }
 
         {
             Term result = new Parser(new ParseState("")).parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("seq", Token.kAppOf("K", ""))))));
+            Term expected = amb(klist(amb(klist(kapp("seq", Token.kAppOf(KSorts.K, ""))))));
             assertEquals("Single Token check: ", expected, result);
         }
 
@@ -202,7 +202,7 @@ public class ParserTest extends TestCase {
 
         {
             Term result = new Parser(new ParseState("")).parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("epsilon", Token.kAppOf("K", ""))))));
+            Term expected = amb(klist(amb(klist(kapp("epsilon", Token.kAppOf(KSorts.K, ""))))));
             assertEquals("EmtpyString check: ", expected, result);
         }
 
@@ -210,12 +210,12 @@ public class ParserTest extends TestCase {
             Term result = new Parser(new ParseState("xxyy")).parse(nt1, 0);
             Term expected =
                 amb(klist(amb(klist(kapp("xAy",
-                    Token.kAppOf("K", "x"),
+                    Token.kAppOf(KSorts.K, "x"),
                     amb(klist(kapp("xAy",
-                        Token.kAppOf("K", "x"),
-                        amb(klist(kapp("epsilon", Token.kAppOf("K", "")))),
-                        Token.kAppOf("K", "y")))),
-                    Token.kAppOf("K", "y"))))));
+                        Token.kAppOf(KSorts.K, "x"),
+                        amb(klist(kapp("epsilon", Token.kAppOf(KSorts.K, "")))),
+                        Token.kAppOf(KSorts.K, "y")))),
+                    Token.kAppOf(KSorts.K, "y"))))));
             assertEquals("x^ny^n check: ", expected, result);
         }
     }
@@ -242,7 +242,7 @@ public class ParserTest extends TestCase {
 
         {
             Term result = new Parser(new ParseState("")).parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("epsilon", Token.kAppOf("K", ""))))));
+            Term expected = amb(klist(amb(klist(kapp("epsilon", Token.kAppOf(KSorts.K, ""))))));
             assertEquals("EmtpyString check: ", expected, result);
         }
 
@@ -251,9 +251,9 @@ public class ParserTest extends TestCase {
             Term expected =
                 amb(klist(amb(klist(kapp("Ay",
                     amb(klist(kapp("Ay",
-                        amb(klist(kapp("epsilon", Token.kAppOf("K", "")))),
-                        Token.kAppOf("K", "y")))),
-                    Token.kAppOf("K", "y"))))));
+                        amb(klist(kapp("epsilon", Token.kAppOf(KSorts.K, "")))),
+                        Token.kAppOf(KSorts.K, "y")))),
+                    Token.kAppOf(KSorts.K, "y"))))));
             assertEquals("y^n check: ", expected, result);
         }
     }
@@ -280,7 +280,7 @@ public class ParserTest extends TestCase {
 
         {
             Term result = new Parser(new ParseState("")).parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("epsilon", Token.kAppOf("K", ""))))));
+            Term expected = amb(klist(amb(klist(kapp("epsilon", Token.kAppOf(KSorts.K, ""))))));
             assertEquals("EmtpyString check: ", expected, result);
         }
 
@@ -288,10 +288,10 @@ public class ParserTest extends TestCase {
             Term result = new Parser(new ParseState("xx")).parse(nt1, 0);
             Term expected =
                 amb(klist(amb(klist(kapp("xA",
-                    Token.kAppOf("K", "x"),
-                    amb(klist(kapp("xA",
-                        Token.kAppOf("K", "x"),
-                        amb(klist(kapp("epsilon", Token.kAppOf("K", ""))))))))))));
+                        Token.kAppOf(KSorts.K, "x"),
+                        amb(klist(kapp("xA",
+                                Token.kAppOf(KSorts.K, "x"),
+                                amb(klist(kapp("epsilon", Token.kAppOf(KSorts.K, ""))))))))))));
             assertEquals("x^n check: ", expected, result);
         }
     }
@@ -320,16 +320,16 @@ public class ParserTest extends TestCase {
 
         {
             Term result = new Parser(new ParseState("x")).parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("x", Token.kAppOf("K", "x"))))));
+            Term expected = amb(klist(amb(klist(kapp("x", Token.kAppOf(KSorts.K, "x"))))));
             assertEquals("Single char check: ", expected, result);
         }
 
         {
             Term result = new Parser(new ParseState("xx")).parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("AA", amb(klist(kapp("x", Token.kAppOf("K", "x")))), amb(klist(kapp("x", Token.kAppOf("K", "x")))))))));
+            Term expected = amb(klist(amb(klist(kapp("AA", amb(klist(kapp("x", Token.kAppOf(KSorts.K, "x")))), amb(klist(kapp("x", Token.kAppOf(KSorts.K, "x")))))))));
             assertEquals("AA check: ", expected, result);
         }
-        Term X = kapp("x", Token.kAppOf("K", "x"));
+        Term X = kapp("x", Token.kAppOf(KSorts.K, "x"));
         {
             Term result = new Parser(new ParseState("xxx")).parse(nt1, 0);
             Term expected = amb(klist(amb(klist(kapp("AA", amb(klist(kapp("AA", amb(klist(X)), amb(klist(X))))), amb(klist(X)))),
@@ -364,7 +364,7 @@ public class ParserTest extends TestCase {
         baseCase.entryState.next.add(resx);
         resx.next.add(baseCase.exitState);
 
-        Term expected = amb(klist(kapp("x", Token.kAppOf("K", "x"))));
+        Term expected = amb(klist(kapp("x", Token.kAppOf(KSorts.K, "x"))));
 
         for (int i = 2; i < 10; i++) {
             Grammar.NonTerminal nt = new Grammar.NonTerminal(new Grammar.NonTerminalId("NT"+i),
@@ -458,7 +458,7 @@ public class ParserTest extends TestCase {
     }
 
     public static Ambiguity amb(Term ... terms) {
-        return new Ambiguity("K", Arrays.asList(terms));
+        return new Ambiguity(KSorts.K, Arrays.asList(terms));
     }
 
     public static KApp kapp(String label, Term ... terms) {
@@ -470,7 +470,7 @@ public class ParserTest extends TestCase {
     }
 
     public static KApp token(String x) {
-        return Token.kAppOf("K", x);
+        return Token.kAppOf(KSorts.K, x);
     }
 
     public static KLabel label(String x) {
