@@ -1,6 +1,5 @@
 package org.kframework.backend.java.builtins;
 
-import com.google.common.collect.ImmutableList;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.symbolic.LocalTransformer;
 import org.kframework.backend.java.symbolic.PrePostTransformer;
@@ -52,17 +51,16 @@ public class BuiltinVisitorOperations extends PrePostTransformer {
 
         preTransformer.addTransformer(new LocalTransformer(context) {
             @Override
-            public ASTNode transform(Term node) {
-                guardParams.set(0, node);
-                KItem test = new KItem(ifLabel, new KList(ImmutableList.copyOf(guardParams)), context);
-                Term truth = test.evaluate(context);
-                //TODO:  Think about what happens when test has symbolic values in it.
-                if (!(truth instanceof BoolToken)) return node;
-                if (!((BoolToken) truth).booleanValue()) return node;
-                visitParams.set(0, node);
-                node = new KItem(visitLabel, new KList(ImmutableList.copyOf(visitParams)), context);
-                node = node.evaluate(context);
-                return new DoneTransforming(node);
+            public ASTNode transform(Term term) {
+                if (term instanceof KLabel) {
+                    return new DoneTransforming(term);
+                }
+
+                if (evaluateGuard(term)) {
+                    return new DoneTransforming(visitNode(term));
+                } else {
+                    return term;
+                }
             }
         });
     }
@@ -72,7 +70,7 @@ public class BuiltinVisitorOperations extends PrePostTransformer {
         term = new KItem(
                 visitLabel,
                 new KList(ImmutableList.copyOf(visitParams)),
-                context.definition().context());
+                context);
         return term.evaluate(context);
     }
 
@@ -81,7 +79,7 @@ public class BuiltinVisitorOperations extends PrePostTransformer {
         KItem test = new KItem(
                 ifLabel,
                 new KList(ImmutableList.copyOf(ifParams)),
-                context.definition().context());
+                context);
         // TODO: Think about what happens when test has symbolic values in it.
         return test.evaluate(context) == BoolToken.TRUE;
     }
