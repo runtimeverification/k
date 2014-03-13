@@ -60,7 +60,6 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
                 }
             }
         });
-
         return indexingPairs;
     }
 

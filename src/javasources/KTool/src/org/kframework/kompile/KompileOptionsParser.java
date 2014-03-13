@@ -51,6 +51,8 @@ public class KompileOptionsParser {
         addOptionE(OptionBuilder.withLongOpt("test-gen").withDescription("Compile for test-case generation purpose in the Java backend. Use concrete sorts and automatically generated labels for heating and cooling rules. This only has an effect with '--backend java'.").create());
         addOptionE(OptionBuilder.withLongOpt("kore").withDescription("Generate kore files of a given k definition").create());
         addOptionE(OptionBuilder.withLongOpt("loud").withDescription("Prints 'Done' at the end if all is ok.").create());
+        addOptionE(OptionBuilder.withLongOpt("rule-index").hasArg().withArgName("rule-index").withDescription("Choose a technique for indexing the rules. <rule-index> is one of [table|path]. (Default: table). This only has effect with '--backend java'.").create());
+
         addOptionE(OptionBuilder.withLongOpt("deterministic-functions").withDescription("Throw assertion failure during execution in the java backend if function definitions are not deterministic.").create());
         
         addOptionE(OptionBuilder.withLongOpt("documentation").hasArg().withArgName("string").withDescription("<string> is a space-separated list of tags designating rules to be included in the file generated with --backend=doc").create());
