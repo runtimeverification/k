@@ -343,7 +343,7 @@ the array dimension into the type until the array becomes a simple
 variable. */
 
   rule <task> <k> T:Type X:Id; => stmt ...</k> </task>
-       <gtenv> Rho (. => X |-> T) </gtenv>
+       <gtenv> Rho (.Map => X |-> T) </gtenv>
     when notBool(X in keys(Rho))
   rule <k> T:Type X:Id; => stmt ...</k> <tenv> Rho => Rho[T/X] </tenv>
 
@@ -592,25 +592,15 @@ list of variable declarations. */
 // We would like to say the following instead of the predicate rule below:
 //  syntax LValue ::= Id | Exp "[" Exps "]"
 // but unfortunately that currently generates some ambiguous parsings.
-// YilongL: I had to comment out the following two sentences, and implement
-// checkLValue as user-defined function
-//  syntax LValue ::= Id
-//  rule isLValue(_:Exp[_:Exps]) => true
+  syntax LValue ::= Id
+  rule isLValue(_:Exp[_:Exps]) => true
 
-  syntax KItem ::= checkLValue(K)  [function]
-  rule checkLValue(_:Id) => true
-  rule checkLValue(_:Exp[_:Exps]) => true
 
   syntax Exp ::= ltype(Exp)
 // We would like to say:
 //  context ltype(HOLE:LValue)
 // but we currently cannot type the HOLE
-//  context ltype(HOLE) when isLValue(HOLE)
-// YilongL: I had to rename the predicate isLValue because sort membership
-// checking in the Java backend doesn't allow supplemented user-defined
-// predicate rules
-  context ltype(HOLE) when checkLValue(HOLE)
-
+  context ltype(HOLE) when isLValue(HOLE)
 
 //@ The function \texttt{getTypes} is the same as in SIMPLE typed dynamic.
 

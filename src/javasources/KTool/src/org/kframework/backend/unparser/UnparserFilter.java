@@ -372,6 +372,9 @@ public class UnparserFilter extends BasicVisitor {
                             indenter.write(" ");
                         }
                         termList.get(i).accept(this);
+                        if (i < termList.size() - 1) {
+                            indenter.write(" ");
+                        }
                     }
                     indenter.write(rawLabelList[i]);
                 }
@@ -559,9 +562,9 @@ public class UnparserFilter extends BasicVisitor {
     @Override
     public void visit(KLabel kLabel) {
         prepare(kLabel);
-        indenter.endLine();
-        indenter.write("Don't know how to pretty print KLabel");
-        indenter.endLine();
+//        indenter.endLine();
+//        indenter.write("Don't know how to pretty print KLabel");
+//        indenter.endLine();
         super.visit(kLabel);
         postpare();
     }

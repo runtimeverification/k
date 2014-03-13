@@ -64,7 +64,7 @@ public class BuiltinIOOperations {
     public static Term close(IntToken term, TermContext context) {
         try {
             fs(context).close(term.longValue());
-            return new KItem(new KLabelInjection(new KSequence()), new KList(), context.definition().context());
+            return new KItem(new KLabelInjection(new KSequence()), new KList(), context);
         } catch (IOException e) {
             return processIOException(e.getMessage(), context);
         }
@@ -73,7 +73,7 @@ public class BuiltinIOOperations {
     public static Term seek(IntToken term1, IntToken term2, TermContext context) {
         try {
             fs(context).get(term1.longValue()).seek(term2.longValue());
-            return new KItem(new KLabelInjection(new KSequence()), new KList(), context.definition().context());
+            return new KItem(new KLabelInjection(new KSequence()), new KList(), context);
         } catch (IOException e) {
             return processIOException(e.getMessage(), context);
         }
@@ -82,7 +82,7 @@ public class BuiltinIOOperations {
     public static Term putc(IntToken term1, IntToken term2, TermContext context) {
         try {
             fs(context).get(term1.longValue()).putc(term2.unsignedByteValue());
-            return new KItem(new KLabelInjection(new KSequence()), new KList(), context.definition().context());
+            return new KItem(new KLabelInjection(new KSequence()), new KList(), context);
         } catch (IOException e) {
             return processIOException(e.getMessage(), context);
         }
@@ -91,7 +91,7 @@ public class BuiltinIOOperations {
     public static Term write(IntToken term1, StringToken term2, TermContext context) {
         try {
             fs(context).get(term1.longValue()).write(term2.byteArrayValue());
-            return new KItem(new KLabelInjection(new KSequence()), new KList(), context.definition().context());
+            return new KItem(new KLabelInjection(new KSequence()), new KList(), context);
         } catch (CharacterCodingException e) {
             throw new IllegalArgumentException(e);
         } catch (IOException e) {
@@ -114,8 +114,8 @@ public class BuiltinIOOperations {
     private static KItem processIOException(String errno, TermContext context) {
         String klabelString = "'#" + errno;
         Definition def = context.definition();
-        KLabelConstant klabel = KLabelConstant.of(klabelString, def.context());
+        KLabelConstant klabel = KLabelConstant.of(klabelString, TermContext.of(def));
         assert def.kLabels().contains(klabel) : "No KLabel in definition for errno '" + errno + "'";
-        return new KItem(klabel, new KList(), def.context());
+        return new KItem(klabel, new KList(), context);
     }
 }

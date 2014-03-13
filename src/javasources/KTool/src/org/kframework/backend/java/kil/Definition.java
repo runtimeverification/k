@@ -41,6 +41,7 @@ public class Definition extends JavaSymbolicObject {
     private final Multimap<KLabelConstant, Rule> functionRules = ArrayListMultimap.create();
     private final Set<KLabelConstant> kLabels;
     private final Set<KLabelConstant> frozenKLabels;
+    private final Set<KLabelConstant> sortPredLabels;
     private final Context context;
     private RuleIndex index;
 
@@ -50,6 +51,7 @@ public class Definition extends JavaSymbolicObject {
         macros = new ArrayList<Rule>();
         kLabels = new HashSet<KLabelConstant>();
         frozenKLabels = new HashSet<KLabelConstant>();
+        sortPredLabels = new HashSet<KLabelConstant>();
     }
 
     public void addFrozenKLabel(KLabelConstant frozenKLabel) {
@@ -75,6 +77,9 @@ public class Definition extends JavaSymbolicObject {
     public void addRule(Rule rule) {
         if (rule.containsAttribute(Attribute.FUNCTION_KEY)) {
             functionRules.put(rule.functionKLabel(), rule);
+            if (rule.isSortPredicate()) {
+                sortPredLabels.add(rule.functionKLabel());
+            }
         } else if (rule.containsAttribute(Attribute.MACRO_KEY)) {
             macros.add(rule);
         } else {
@@ -106,6 +111,10 @@ public class Definition extends JavaSymbolicObject {
 
     public Set<KLabelConstant> kLabels() {
         return Collections.unmodifiableSet(kLabels);
+    }
+    
+    public Set<KLabelConstant> sortPredLabels() {
+        return sortPredLabels;
     }
 
     public List<Rule> macros() {

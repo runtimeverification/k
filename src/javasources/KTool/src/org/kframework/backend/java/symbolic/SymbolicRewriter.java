@@ -426,7 +426,7 @@ public class SymbolicRewriter {
                 term.termContext());
 
         // Collect the variables we are interested in finding
-        VariableVisitor visitor = new VariableVisitor();
+        VariableCollector visitor = new VariableCollector();
         lhs.accept(visitor);
 
         Collection<SymbolicConstraint> constraints = term.unify(lhs);

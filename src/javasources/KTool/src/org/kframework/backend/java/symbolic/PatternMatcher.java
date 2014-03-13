@@ -47,6 +47,28 @@ public class PatternMatcher extends AbstractMatcher {
     private final TermContext termContext;
     
     /**
+     * Checks if the subject term matches the pattern.
+     * 
+     * @param subject
+     *            the subject term
+     * @param pattern
+     *            the pattern
+     * @param context
+     *            the term context
+     * @return {@code true} if the two terms can be matched; otherwise,
+     *         {@code false}
+     */
+    public static boolean matchable(Term subject, Term pattern, TermContext context) {
+        PatternMatcher matcher = new PatternMatcher(context);
+        try {
+            matcher.match(subject, pattern);
+        } catch (PatternMatchingFailure e) {
+            return false;
+        }
+        return true;
+    }
+    
+    /**
      * Matches a subject term against a rule.
      * 
      * @param subject
@@ -207,7 +229,7 @@ public class PatternMatcher extends AbstractMatcher {
 
     private PatternMatcher(TermContext context) {
         this.termContext = context;
-        multiSubstitutions = new ArrayList<java.util.Collection<Map<Variable, Term>>>();
+        multiSubstitutions = new ArrayList<Collection<Map<Variable, Term>>>();
     }
 
     /**
@@ -507,9 +529,10 @@ public class PatternMatcher extends AbstractMatcher {
             Map<Variable, Term> mainSubstitution = fSubstitution;
             isStarNested = true;
 
-            java.util.Collection<Map<Variable, Term>> substitutions = 
-                    new ArrayList<Map<Variable, Term>>();   // represents all possible substitutions by matching 
-                                                            // these two cell collections
+            // {@code substitutions} represents all possible substitutions by
+            // matching these two cell collections
+            Collection<Map<Variable, Term>> substitutions = new ArrayList<Map<Variable, Term>>(); 
+            
             SelectionGenerator generator = new SelectionGenerator(otherCells.length, cells.length);
             // start searching for all possible unifiers
             do {

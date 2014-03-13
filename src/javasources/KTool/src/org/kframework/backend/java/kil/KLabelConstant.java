@@ -1,6 +1,8 @@
 package org.kframework.backend.java.kil;
 
-import com.google.common.collect.Multimap;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
@@ -9,13 +11,9 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Production;
-import org.kframework.kil.loader.Context;
-
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Multimap;
 
 
 /**
@@ -30,18 +28,20 @@ public class KLabelConstant extends KLabel {
 
     /* un-escaped label */
     private final String label;
+    
     /* unmodifiable view of a list of productions generating this {@code KLabelConstant} */
-    private final List<Production> productions;
+    private final ImmutableList<Production> productions;
+
     /*
      * boolean flag set iff a production tagged with "function" or "predicate"
      * generates this {@code KLabelConstant}
      */
     private final boolean isFunction;
-    private final Context context;
+    private final TermContext termContext;
 
-    private KLabelConstant(String label, Context context) {
+    private KLabelConstant(String label, TermContext termContext) {
         this.label = label;
-        productions = ImmutableList.copyOf(context.productionsOf(label));
+        productions = ImmutableList.copyOf(termContext.definition().context().productionsOf(label));
         
         // TODO(YilongL): urgent; how to detect KLabel clash?
 
@@ -73,7 +73,7 @@ public class KLabelConstant extends KLabel {
             isFunction = true;
         }
         this.isFunction = isFunction;
-        this.context = context;
+        this.termContext = termContext;
     }
 
     /**
@@ -84,12 +84,12 @@ public class KLabelConstant extends KLabel {
      * @param label string representation of the KLabel; must not be '`' escaped;
      * @return AST term representation the the KLabel;
      */
-    public static KLabelConstant of(String label, Context context) {
+    public static KLabelConstant of(String label, TermContext termContext) {
         assert label != null;
 
         KLabelConstant kLabelConstant = cache.get(label);
         if (kLabelConstant == null) {
-            kLabelConstant = new KLabelConstant(label, context);
+            kLabelConstant = new KLabelConstant(label, termContext);
             cache.put(label, kLabelConstant);
         }
         return kLabelConstant;
@@ -118,12 +118,12 @@ public class KLabelConstant extends KLabel {
     }
 
     /**
-     * Returns a unmodifiable view of a list of productions generating this {@code KLabelConstant}.
+     * Returns a list of productions generating this {@code KLabelConstant}.
      */
     public List<Production> productions() {
         return productions;
     }
-
+    
     @Override
     public boolean equals(Object object) {
         /* {@code KLabelConstant} objects are cached to ensure uniqueness */
@@ -176,8 +176,8 @@ public class KLabelConstant extends KLabel {
         return kLabelConstant;
     }
 
-    public Context context() {
-        return context;
+    public TermContext termContext() {
+        return termContext;
     }
 
     public boolean isBinder() {
