@@ -3,7 +3,6 @@ package org.kframework.backend.java.kil;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
@@ -12,11 +11,8 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Production;
-import org.kframework.kil.loader.Context;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Multimap;
 
 
@@ -35,9 +31,6 @@ public class KLabelConstant extends KLabel {
     
     /* unmodifiable view of a list of productions generating this {@code KLabelConstant} */
     private final ImmutableList<Production> productions;
-    
-    /** the sorts of the productions generating this {@code KLabelConstant} */
-    private final ImmutableSet<String> sorts;
 
     /*
      * boolean flag set iff a production tagged with "function" or "predicate"
@@ -49,12 +42,6 @@ public class KLabelConstant extends KLabel {
     private KLabelConstant(String label, TermContext termContext) {
         this.label = label;
         productions = ImmutableList.copyOf(termContext.definition().context().productionsOf(label));
-        
-        Builder<String> setBuilder = ImmutableSet.builder();
-        for (Production prod : productions) {
-            setBuilder.add(prod.getSort());
-        }
-        sorts = setBuilder.build();
         
         // TODO(YilongL): urgent; how to detect KLabel clash?
 
@@ -137,13 +124,6 @@ public class KLabelConstant extends KLabel {
         return productions;
     }
     
-    /**
-     * Returns the sorts of the productions generating this {@code KLabelConstant}.
-     */
-    public Set<String> sorts() {
-        return sorts;
-    }
-
     @Override
     public boolean equals(Object object) {
         /* {@code KLabelConstant} objects are cached to ensure uniqueness */

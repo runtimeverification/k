@@ -294,7 +294,7 @@ it as a name instead of as an expression constant: */
 
   syntax Exp ::= "callcc"
                | "try" Exp "catch" "(" Name ")" Exp
-  syntax Name ::= "throw"
+  syntax Name ::= Token{"throw"}
 
 /*@ Finally, FUN also allows polymorphic datatype declarations.  These
 will be useful when we define the type system later on. */
@@ -357,7 +357,7 @@ those, we follow the same convention like in the \K tutorial, where we
 added them as new identifier constructs starting with the character $\$$,
 so we can easily recognize them when we debug or trace the semantics. */
 
-  syntax Name ::= "$h" | "$t"
+  syntax Name ::= Token{"$h"} | Token{"$t"}
   rule head => fun [$h|$t] -> $h                             [macro]
   rule tail => fun [$h|$t] -> $t                             [macro]
   rule null? => fun [.Exps] -> true | [$h|$t] -> false       [macro]
@@ -373,7 +373,7 @@ so we can easily recognize them when we debug or trace the semantics. */
 
 /*@ We desugar the \texttt{try-catch} construct into callcc: */
 
-  syntax Name ::= "$k" | "$v"
+  syntax Name ::= Token{"$k"} | Token{"$v"}
   rule try E catch(X) E'
     => callcc (fun $k -> (fun throw -> E)(fun X -> $k E'))   [macro]
 
@@ -600,7 +600,7 @@ Sequential composition, which is needed only to accumulate the
 side effects due to assignments, was strict in the first argument.
 Once evaluated, its first argument is simply discarded: */
 
-  syntax Name ::= "$x"
+  syntax Name ::= Token{"$x"}
   rule ref => fun $x -> & $x                                 [macro]
   rule <k> & X => L ...</k>  <env>... X |-> L ...</env>
   rule <k> @ L:Int => V:Val ...</k>  <store>... L |-> V ...</store>
