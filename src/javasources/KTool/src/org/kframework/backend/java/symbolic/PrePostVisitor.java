@@ -1,9 +1,6 @@
 package org.kframework.backend.java.symbolic;
 
-import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.builtins.Int32Token;
-import org.kframework.backend.java.builtins.UninterpretedToken;
+import org.kframework.backend.java.builtins.*;
 import org.kframework.backend.java.kil.*;
 
 import java.util.Map;
@@ -204,11 +201,19 @@ public class PrePostVisitor implements Visitor {
     }
 
     @Override
-    public void visit(Int32Token intToken) {
+    public void visit(BitVector bitVector) {
         preVisitor.resetProceed();
-        intToken.accept(preVisitor);
+        bitVector.accept(preVisitor);
         if (!preVisitor.isProceed()) return;
-        intToken.accept(postVisitor);
+        bitVector.accept(postVisitor);
+    }
+
+    @Override
+    public void visit(PrimitiveIntToken primitiveIntToken) {
+        preVisitor.resetProceed();
+        primitiveIntToken.accept(preVisitor);
+        if (!preVisitor.isProceed()) return;
+        primitiveIntToken.accept(postVisitor);
     }
 
     @Override

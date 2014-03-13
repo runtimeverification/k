@@ -18,7 +18,7 @@ import java.util.Map;
  * 
  * @author AndreiS
  */
-public class UninterpretedToken extends Token {
+public final class UninterpretedToken extends Token {
 
     /* Token cache */
     private static final Map<String, Map <String, UninterpretedToken>> cache = new HashMap<String, Map <String, UninterpretedToken>>();

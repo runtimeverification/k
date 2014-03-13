@@ -1,10 +1,7 @@
 package org.kframework.backend.java.symbolic;
 
-import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.builtins.Int32Token;
-import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.builtins.StringToken;
-import org.kframework.backend.java.builtins.UninterpretedToken;
+import org.kframework.backend.java.builtins.*;
+import org.kframework.backend.java.builtins.PrimitiveIntToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
 
@@ -34,6 +31,11 @@ public class TermTransformer extends CopyOnWriteTransformer {
      */
     protected Term transformTerm(Term term) {
         return term;
+    }
+
+    @Override
+    public ASTNode transform(BitVector bitVector) {
+        return transformTerm((Term) super.transform(bitVector));
     }
 
     @Override
@@ -82,8 +84,8 @@ public class TermTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(Int32Token intToken) {
-        return transformTerm((Term) super.transform(intToken));
+    public ASTNode transform(PrimitiveIntToken primitiveIntToken) {
+        return transformTerm((Term) super.transform(primitiveIntToken));
     }
 
     @Override

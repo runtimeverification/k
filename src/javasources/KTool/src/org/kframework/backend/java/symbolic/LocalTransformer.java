@@ -1,10 +1,7 @@
 package org.kframework.backend.java.symbolic;
 
-import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.builtins.Int32Token;
-import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.builtins.StringToken;
-import org.kframework.backend.java.builtins.UninterpretedToken;
+import org.kframework.backend.java.builtins.*;
+import org.kframework.backend.java.builtins.PrimitiveIntToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
 
@@ -31,6 +28,11 @@ public class LocalTransformer implements Transformer {
     @Override
     public String getName() {
         return "Identity Transformer";
+    }
+
+    @Override
+    public ASTNode transform(BitVector bitVector) {
+        return transform((Token) bitVector);
     }
 
     @Override
@@ -80,11 +82,6 @@ public class LocalTransformer implements Transformer {
 
     @Override
     public ASTNode transform(IntToken intToken) {
-        return transform((Token) intToken);
-    }
-
-    @Override
-    public ASTNode transform(Int32Token intToken) {
         return transform((Token) intToken);
     }
 
@@ -156,6 +153,11 @@ public class LocalTransformer implements Transformer {
     @Override
     public ASTNode transform(MetaVariable metaVariable) {
         return transform((Token) metaVariable);
+    }
+
+    @Override
+    public ASTNode transform(PrimitiveIntToken intToken) {
+        return transform((BitVector) intToken);
     }
 
     @Override

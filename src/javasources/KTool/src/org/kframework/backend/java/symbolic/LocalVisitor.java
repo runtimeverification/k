@@ -1,9 +1,6 @@
 package org.kframework.backend.java.symbolic;
 
-import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.builtins.Int32Token;
-import org.kframework.backend.java.builtins.UninterpretedToken;
+import org.kframework.backend.java.builtins.*;
 import org.kframework.backend.java.kil.*;
 
 /**
@@ -34,6 +31,11 @@ public class LocalVisitor implements Visitor {
     @Override
     public String getName() {
         return null;
+    }
+
+    @Override
+    public void visit(BitVector bitVector) {
+        visit((Token) bitVector);
     }
 
     @Override
@@ -83,11 +85,6 @@ public class LocalVisitor implements Visitor {
 
     @Override
     public void visit(IntToken intToken) {
-        visit((Token) intToken);
-    }
-
-    @Override
-    public void visit(Int32Token intToken) {
         visit((Token) intToken);
     }
 
@@ -167,6 +164,11 @@ public class LocalVisitor implements Visitor {
     @Override
     public void visit(MetaVariable metaVariable) {
         visit((Token) metaVariable);
+    }
+
+    @Override
+    public void visit(PrimitiveIntToken primitiveIntToken) {
+        visit((BitVector) primitiveIntToken);
     }
 
     @Override

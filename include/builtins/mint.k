@@ -2,279 +2,307 @@ require "int.k"
 require "k-equal.k"
 
 
+/*
+ * Module implementing machine integers of arbitrary bit width represented in
+ * 2's complement.
+ */
 module MINT
   imports INT-HOOKS
   imports K-EQUAL-HOOKS
 
-  /* Machine integer of bitwidth, interpreted value */
-  syntax MInt ::= "mi" "(" Int "," Int ")"
+  /* Machine integer of bit width and value. */
+  syntax MInt ::= mi(Int, Int)    [function, hook(#MINT:constructor)]
 
-  syntax Int ::= "wMInt" "(" MInt ")"   [function]
-               | "iMInt" "(" MInt ")"   [function]
-  rule wMInt(mi(N:Int, _)) => N 
-  rule iMInt(mi(_, I:Int)) => I 
+  /* Function returning the bit width of this machine integer. */
+  syntax Int ::= bitwidthMInt(MInt)   [function, hook(#MINT:bitwidth)]
+  rule bitwidthMInt(mi(N:Int, _)) => N 
+  /*
+   * Functions returning the signed and unsigned interpretations of this
+   * machine integers.
+   *   svalue  returns an integer between -2^(bitwidth - 1) and
+   *           2^(bitwidth - 1) - 1
+   *   uvalue  returns an integer between 0 and 2^bitwidth - 1
+   */
+  syntax Int ::= svalueMInt(MInt)     [function, hook(#MINT:svalue)]
+               | uvalueMInt(MInt)     [function, hook(#MINT:uvalue)]
+  rule
+    svalueMInt(mi(N:Int, I:Int))
+  =>
+    ((I +Int (1 <<Int (N -Int 1))) modInt (1 <<Int N)) -Int (1 <<Int (N -Int 1))
+  rule uvalueMInt(mi(N:Int, I:Int)) => I modInt (1 <<Int N)
 
-  syntax Int ::= "infMInt" "(" Int ")"    [function]
-               | "supMInt" "(" Int ")"    [function]
-               | "uinfMInt" "(" Int ")"   [function]
-               | "usupMInt" "(" Int ")"   [function]
-  rule infMInt(N:Int) => 0 -Int (1 <<Int (N -Int 1))
-  rule supMInt(N:Int) => (1 <<Int (N -Int 1)) -Int 1
+  /*
+   * Functions for signed and unsigned minimum and maximum values of a machine
+   * integer on a given bit width.
+   */
+  syntax Int ::= sinfMInt(Int)    [function]
+               | ssupMInt(Int)    [function]
+               | uinfMInt(Int)    [function]
+               | usupMInt(Int)    [function]
+  rule sinfMInt(N:Int) => 0 -Int (1 <<Int (N -Int 1))
+  rule ssupMInt(N:Int) => (1 <<Int (N -Int 1)) -Int 1
   rule uinfMInt(_:Int) => 0 
   rule usupMInt(N:Int) => (1 <<Int N) -Int 1
- 
-  /* Functions for signed and unsigned interpretations of machine integers. */
-  syntax MInt ::= "sMInt" "(" MInt ")"    [function]
-                | "uMInt" "(" MInt ")"    [function]
-  rule uMInt(mi(N:Int, I:Int)) => mi(N, (I modInt (1 <<Int N)))
+
+  /*
+   * Functions checking whether a given integer can be represented on as signed
+   * or unsigned on a given bit width without overflow.
+   */
+  syntax Bool ::= soverflowMInt(Int, Int)   [function]
+                | uoverflowMInt(Int, Int)   [function]
   rule
-    sMInt(mi(N:Int, I:Int))
+    soverflowMInt(N:Int, I:Int)
   =>
-    mi(N,
-       ((I +Int (1 <<Int (N -Int 1))) modInt (1 <<Int N))
-         -Int (1 <<Int (N -Int 1)))
+    I <Int sinfMInt(N) orBool I >Int ssupMInt(N)
+  rule
+    uoverflowMInt(N:Int, I:Int)
+  =>
+    I <Int uinfMInt(N) orBool I >Int usupMInt(N)
 
-  /* Machine integer operations results */
-  syntax MIntRes ::= "resMInt" "(" MInt "," Bool "," Bool ")"
-                   | "errMInt"
+  /* Result of machine integer operations without overflow. */
+  syntax MIntResult ::= MInt
+                      | "errorMInt"   [function, hook(#MINT:error)]
 
-  syntax MInt ::= "miMInt" "(" MIntRes ")"    [function]
-  rule miMInt(resMInt(MI:MInt, _, _)) => MI
+  /* Result of machine integer operations with overflow. */
+  syntax MIntResultOverflow ::= resultOverflowMInt(MInt, Bool)
 
-  /* NOTE: what is the difference between predicate and function? */
-  syntax Bool ::= "ofMInt" "(" MIntRes")"   [function]
-                | "ufMInt" "(" MIntRes")"   [function]
-  rule ufMInt(resMInt(_, B:Bool, _)) => B
-  rule ofMInt(resMInt(_, _, B:Bool)) => B
+  /* Projection functions for results of operations with overflow. */
+  syntax MInt ::= miMInt(MIntResultOverflow)          [function]
+                | overflowMInt(MIntResultOverflow)    [function]
+  rule miMInt(resultOverflowMInt(MI:MInt, _)) => MI
+  rule overflowMInt(resultOverflowMInt(_, B:Bool)) => B
 
 
   /* 
-   * Arithmetic operations.
-   *   op   interprets the operands as signed 
+   * Arithmetic and comparison operations
+   *   op   does not interprets th operands as either signed or unsigned 
+   *   sop  interprets the operands as signed
    *   uop  interprets the operands as unsigned
    */
-  syntax MIntRes ::= "addMInt" "(" MInt "," MInt ")"    [function]
-                   | "uaddMInt" "(" MInt "," MInt ")"   [function]
-                   | "subMInt" "(" MInt "," MInt ")"    [function]
-                   | "usubMInt" "(" MInt "," MInt ")"   [function]
-                   | "mulMInt" "(" MInt "," MInt ")"    [function]
-                   | "umulMInt" "(" MInt "," MInt ")"   [function]
-                   | "divMInt" "(" MInt "," MInt ")"    [function]
-                   | "udivMInt" "(" MInt "," MInt ")"   [function]
-                   | "remMInt" "(" MInt "," MInt ")"    [function]
-                   | "uremMInt" "(" MInt "," MInt ")"   [function]
+  syntax MInt ::= addMInt(MInt, MInt)   [function]
+                | subMInt(MInt, MInt)   [function]
+                | mulMInt(MInt, MInt)   [function]
+
+  syntax MIntResult ::= sdivMInt(MInt, MInt)    [function]
+                      | udivMInt(MInt, MInt)    [function]
+                      | sremMInt(MInt, MInt)    [function]
+                      | uremMInt(MInt, MInt)    [function]
+
+  syntax MIntResultOverflow ::= saddMInt(MInt, MInt)    [function]
+                              | uaddMInt(MInt, MInt)    [function]
+                              | ssubMInt(MInt, MInt)    [function]
+                              | usubMInt(MInt, MInt)    [function]
+                              | smulMInt(MInt, MInt)    [function]
+                              | umulMInt(MInt, MInt)    [function]
+
+  /* Shift operations */
+  syntax MIntResult ::= "shlMInt" "(" MInt "," Int ")"    [function]
+                      | "ushlMInt" "(" MInt "," Int ")"   [function]
+                      | "shrMInt" "(" MInt "," Int ")"    [function]
+                      | "ushrMInt" "(" MInt "," Int ")"   [function]
 
   /* Bitwise operations */
-  syntax MIntRes ::= "shlMInt" "(" MInt "," Int ")"     [function]
-                   | "ushlMInt" "(" MInt "," Int ")"    [function]
-                   | "shrMInt" "(" MInt "," Int ")"     [function]
-                   | "ushrMInt" "(" MInt "," Int ")"    [function]
-                   | "andMInt" "(" MInt "," MInt ")"    [function]
-                   | "xorMInt" "(" MInt "," MInt ")"    [function]
-                   | "orMInt" "(" MInt "," MInt ")"     [function]
-                   | "negMInt" "(" MInt ")"             [function]
+  syntax MInt ::= andMInt(MInt, MInt)   [function]
+                | orMInt(MInt, MInt)    [function]
+                | xorMInt(MInt, MInt)   [function]
+
+  syntax Bool ::= sltMInt(MInt, MInt)   [function]
+                | ultMInt(MInt, MInt)   [function]
+                | sleMInt(MInt, MInt)   [function]
+                | uleMInt(MInt, MInt)   [function]
+                | sgtMInt(MInt, MInt)   [function]
+                | ugtMInt(MInt, MInt)   [function]
+                | sgeMInt(MInt, MInt)   [function]
+                | ugeMInt(MInt, MInt)   [function]
+                | MInt "==MInt" MInt    [function]
+                | MInt "=/=MInt" MInt   [function]
 
   /* */
-  syntax MIntRes ::= "minMInt" "(" MInt "," MInt ")"    [function]
-                   | "maxMInt" "(" MInt "," MInt ")"    [function]
-                   | "absMInt" "(" MInt ")"             [function]
+  //syntax MIntRes ::= "minMInt" "(" MInt "," MInt ")"    [function]
+  //                 | "maxMInt" "(" MInt "," MInt ")"    [function]
+  //                 | "absMInt" "(" MInt ")"             [function]
 
-  syntax Bool ::= "ltMInt" "(" MInt "," MInt ")"      [function]
-                | "ultMInt" "(" MInt "," MInt ")"     [function]
-                | "leqMInt" "(" MInt "," MInt ")"     [function]
-                | "uleqMInt" "(" MInt "," MInt ")"    [function]
-                | "gtMInt" "(" MInt "," MInt ")"      [function]
-                | "ugtMInt" "(" MInt "," MInt ")"     [function]
-                | "geqMInt" "(" MInt "," MInt ")"     [function]
-                | "ugeqMInt" "(" MInt "," MInt ")"    [function]
-                | MInt "==MInt" MInt                  [function]
-                | MInt "=/=MInt" MInt                 [function]
+
 
   /*
-   * Arithmetic operations
+   * Arithmetic operations without overflow
    */
-  rule
-    addMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
-  =>
-    resMInt(
-        sMInt(mi(N, I1 +Int I2)),
-        iMInt(sMInt(mi(N, I1))) +Int iMInt(sMInt(mi(N, I2))) <Int infMInt(N),
-        iMInt(sMInt(mi(N, I1))) +Int iMInt(sMInt(mi(N, I2))) >Int supMInt(N))
-  rule
-    uaddMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
-  =>
-    resMInt(
-        uMInt(mi(N, I1 +Int I2)),
-        false,
-        iMInt(uMInt(mi(N, I1))) +Int iMInt(uMInt(mi(N, I2))) >Int usupMInt(N))
+  rule addMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int)) => mi(N, I1 +Int I2)
+  rule subMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int)) => mi(N, I1 -Int I2)
+  rule mulMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int)) => mi(N, I1 *Int I2)
 
   rule
-    subMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
+    sdivMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
-    resMInt(
-        sMInt(mi(N, I1 -Int I2)),
-        iMInt(sMInt(mi(N, I1))) -Int iMInt(sMInt(mi(N, I2))) <Int infMInt(N),
-        iMInt(sMInt(mi(N, I1))) -Int iMInt(sMInt(mi(N, I2))) >Int supMInt(N))
-  rule
-    usubMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
-  =>
-    resMInt(
-        uMInt(mi(N, I1 -Int I2)),
-        iMInt(uMInt(mi(N, I1))) -Int iMInt(uMInt(mi(N, I2))) <Int uinfMInt(N),
-        false)
-
-  rule
-    mulMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
-  =>
-    resMInt(
-        sMInt(mi(N, I1 *Int I2)),
-        iMInt(sMInt(mi(N, I1))) *Int iMInt(sMInt(mi(N, I2))) <Int infMInt(N),
-        iMInt(sMInt(mi(N, I1))) *Int iMInt(sMInt(mi(N, I2))) >Int supMInt(N))
-  rule
-    umulMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
-  =>
-    resMInt(
-        uMInt(mi(N, I1 *Int I2)),
-        false,
-        iMInt(uMInt(mi(N, I1))) *Int iMInt(uMInt(mi(N, I2))) >Int usupMInt(N))
-
-  rule
-    divMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
-  =>
-    #if iMInt(sMInt(mi(N, I2))) =/=Int 0 #then
-      resMInt(
-          sMInt(mi(N, iMInt(sMInt(mi(N, I1))) /Int iMInt(sMInt(mi(N, I2))))),
-          false,
-          iMInt(sMInt(mi(N, I1))) /Int iMInt(sMInt(mi(N, I2))) >Int supMInt(N))
+    #if notBool (svalueMInt(mi(N, I2)) ==Int 0
+            orBool (svalueMInt(mi(N, I1)) ==Int sinfMInt(N)
+                andBool svalueMInt(mi(N, I2)) ==Int -1))
+    #then
+      mi(N, svalueMInt(mi(N, I1)) /Int svalueMInt(mi(N, I2)))
     #else
-      errMInt
+      errorMInt
     #fi
   rule
     udivMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
-    #if iMInt(uMInt(mi(N, I2))) =/=Int 0 #then
-      resMInt(
-          mi(N, iMInt(uMInt(mi(N, I1))) /Int iMInt(uMInt(mi(N, I2)))),
-          false,
-          false)
+    #if uvalueMInt(mi(N, I2)) =/=Int 0 #then
+      mi(N, uvalueMInt(mi(N, I1)) /Int uvalueMInt(mi(N, I2)))
     #else
-      errMInt
+      errorMInt
     #fi
 
   rule
-    remMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
+    sremMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
-    #if iMInt(sMInt(mi(N, I2))) =/=Int 0 #then
-      resMInt(
-          mi(N, iMInt(sMInt(mi(N, I1))) %Int iMInt(sMInt(mi(N, I2)))),
-          false,
-          false)
+    #if notBool (svalueMInt(mi(N, I2)) ==Int 0
+            orBool (svalueMInt(mi(N, I1)) ==Int sinfMInt(N)
+                andBool svalueMInt(mi(N, I2)) ==Int -1))
+    #then
+      mi(N, svalueMInt(mi(N, I1)) %Int svalueMInt(mi(N, I2)))
     #else
-      errMInt
+      errorMInt
     #fi
   rule
     uremMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
-    #if iMInt(uMInt(mi(N, I2))) =/=Int 0 #then 
-      resMInt(
-          mi(N, iMInt(uMInt(mi(N, I1))) %Int iMInt(uMInt(mi(N, I2)))),
-          false,
-          false)
+    #if uvalueMInt(mi(N, I2)) =/=Int 0 #then
+      mi(N, uvalueMInt(mi(N, I1)) %Int uvalueMInt(mi(N, I2)))
     #else
-      errMInt
+      errorMInt
     #fi
+
+
+  /*
+   * Arithmetic operations with overflow
+   */
+  rule
+    saddMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
+  =>
+    resultOverflowMInt(
+        mi(N, I1 +Int I2),
+        soverflowMInt(N, svalueMInt(mi(N, I1)) +Int svalueMInt(mi(N, I2))))
+  rule
+    uaddMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
+  =>
+    resultOverflowMInt(
+        mi(N, I1 +Int I2),
+        uoverflowMInt(N, uvalueMInt(mi(N, I1)) +Int uvalueMInt(mi(N, I2))))
+
+  rule
+    ssubMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
+  =>
+    resultOverflowMInt(
+        mi(N, I1 -Int I2),
+        soverflowMInt(N, svalueMInt(mi(N, I1)) -Int svalueMInt(mi(N, I2))))
+  rule
+    usubMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
+  =>
+    resultOverflowMInt(
+        mi(N, I1 -Int I2),
+        uoverflowMInt(N, uvalueMInt(mi(N, I1)) -Int uvalueMInt(mi(N, I2))))
+
+  rule
+    smulMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
+  =>
+    resultOverflowMInt(
+        mi(N, I1 *Int I2),
+        soverflowMInt(N, svalueMInt(mi(N, I1)) *Int svalueMInt(mi(N, I2))))
+  rule
+    umulMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
+  =>
+    resultOverflowMInt(
+        mi(N, I1 *Int I2),
+        uoverflowMInt(N, uvalueMInt(mi(N, I1)) *Int uvalueMInt(mi(N, I2))))
+
 
   /*
    * Bitwise operations
    */
-  rule
-    shlMInt(mi(N:Int, I:Int), M:Int)
-  =>
-    resMInt(
-        sMInt(mi(N, iMInt(sMInt(mi(N, I))) <<Int M)),
-        iMInt(sMInt(mi(N, I))) <<Int M <Int infMInt(N),
-        iMInt(sMInt(mi(N, I))) <<Int M >Int supMInt(N))
-  rule
-    ushlMInt(mi(N:Int, I:Int), M:Int)
-  =>
-    resMInt(
-        uMInt(mi(N, iMInt(uMInt(mi(N, I))) <<Int M)),
-        false,
-        iMInt(uMInt(mi(N, I))) <<Int M >Int usupMInt(N))
+  rule andMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int)) => mi(N, I1 &Int I2)
+  rule orMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int)) => mi(N, I1 |Int I2)
+  rule xorMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int)) => mi(N, I1 xorInt I2)
 
-  rule
-    shrMInt(mi(N:Int, I:Int), M:Int)
-  =>
-    resMInt(
-        mi(N, iMInt(sMInt(mi(N, I))) >>Int M),
-        false,
-        false)
-  rule
-    ushrMInt(mi(N:Int, I:Int), M:Int)
-  =>
-    resMInt(
-        mi(N, iMInt(uMInt(mi(N, I))) >>Int M),
-        false,
-        false)
 
-  rule
-    andMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
-  =>
-    resMInt(mi(N, I1 &Int I2), false, false)
+  /*
+   * Shift operations
+   */
+//  rule
+//    shlMInt(mi(N:Int, I:Int), M:Int)
+//  =>
+//    resMInt(
+//        sMInt(mi(N, iMInt(sMInt(mi(N, I))) <<Int M)),
+//        iMInt(sMInt(mi(N, I))) <<Int M <Int infMInt(N),
+//        iMInt(sMInt(mi(N, I))) <<Int M >Int supMInt(N))
+//  rule
+//    ushlMInt(mi(N:Int, I:Int), M:Int)
+//  =>
+//    resMInt(
+//        uMInt(mi(N, iMInt(uMInt(mi(N, I))) <<Int M)),
+//        false,
+//        iMInt(uMInt(mi(N, I))) <<Int M >Int usupMInt(N))
+//
+//  rule
+//    shrMInt(mi(N:Int, I:Int), M:Int)
+//  =>
+//    resMInt(
+//        mi(N, iMInt(sMInt(mi(N, I))) >>Int M),
+//        false,
+//        false)
+//  rule
+//    ushrMInt(mi(N:Int, I:Int), M:Int)
+//  =>
+//    resMInt(
+//        mi(N, iMInt(uMInt(mi(N, I))) >>Int M),
+//        false,
+//        false)
 
-  rule
-    xorMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
-  =>
-    resMInt(mi(N, I1 xorInt I2), false, false)
 
+  /*
+   * Comparison operations
+   */
   rule
-    orMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
+    sltMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
-    resMInt(mi(N, I1 |Int I2), false, false)
-
-  rule
-    ltMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
-  =>
-    iMInt(sMInt(mi(N, I1))) <Int iMInt(sMInt(mi(N, I2)))
+    svalueMInt(mi(N, I1)) <Int svalueMInt(mi(N, I2))
   rule
     ultMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
-    iMInt(uMInt(mi(N, I1))) <Int iMInt(uMInt(mi(N, I2)))
+    uvalueMInt(mi(N, I1)) <Int uvalueMInt(mi(N, I2))
 
   rule
-    leqMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
+    sleMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
-    iMInt(sMInt(mi(N, I1))) <=Int iMInt(sMInt(mi(N, I2)))
+    svalueMInt(mi(N, I1)) <=Int svalueMInt(mi(N, I2))
   rule
-    uleqMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
+    uleMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
-    iMInt(uMInt(mi(N, I1))) <=Int iMInt(uMInt(mi(N, I2)))
+    uvalueMInt(mi(N, I1)) <=Int uvalueMInt(mi(N, I2))
 
   rule
-    gtMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
+    sgtMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
-    iMInt(sMInt(mi(N, I1))) >Int iMInt(sMInt(mi(N, I2)))
+    svalueMInt(mi(N, I1)) >Int svalueMInt(mi(N, I2))
   rule
     ugtMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
-    iMInt(uMInt(mi(N, I1))) >Int iMInt(uMInt(mi(N, I2)))
+    uvalueMInt(mi(N, I1)) >Int uvalueMInt(mi(N, I2))
 
   rule
-    geqMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
+    sgeMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
-    iMInt(sMInt(mi(N, I1))) >=Int iMInt(sMInt(mi(N, I2)))
+    svalueMInt(mi(N, I1)) >=Int svalueMInt(mi(N, I2))
   rule
-    ugeqMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
+    ugeMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
-    iMInt(uMInt(mi(N, I1))) >=Int iMInt(uMInt(mi(N, I2)))
+    uvalueMInt(mi(N, I1)) >=Int uvalueMInt(mi(N, I2))
 
   rule
     mi(N:Int, I1:Int) ==MInt mi(N:Int, I2:Int)
   =>
-    I1 modInt (1 <<Int N) ==Int I2 modInt (1 <<Int N)
+    (I1 modInt (1 <<Int N)) ==Int (I2 modInt (1 <<Int N))
   rule
     mi(N:Int, I1:Int) =/=MInt mi(N:Int, I2:Int)
   =>
-    I1 modInt (1 <<Int N) =/=Int I2 modInt (1 <<Int N)
+    (I1 modInt (1 <<Int N)) =/=Int (I2 modInt (1 <<Int N))
 endmodule
 

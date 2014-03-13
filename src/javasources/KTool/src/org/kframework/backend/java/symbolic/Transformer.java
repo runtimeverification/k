@@ -1,10 +1,6 @@
 package org.kframework.backend.java.symbolic;
 
-import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.builtins.Int32Token;
-import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.builtins.StringToken;
-import org.kframework.backend.java.builtins.UninterpretedToken;
+import org.kframework.backend.java.builtins.*;
 import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
 
@@ -18,6 +14,7 @@ public interface Transformer {
 
     public String getName();
 
+    public ASTNode transform(BitVector bitVector);
     public ASTNode transform(BoolToken boolToken);
     public ASTNode transform(BuiltinList builtinList);
     public ASTNode transform(BuiltinMap builtinMap);
@@ -29,7 +26,6 @@ public interface Transformer {
     public ASTNode transform(ConstrainedTerm constrainedTerm);
     public ASTNode transform(Hole hole);
     public ASTNode transform(IntToken intToken);
-    public ASTNode transform(Int32Token intToken);
     public ASTNode transform(KLabelConstant kLabelConstant);
     public ASTNode transform(KLabelFreezer kLabelFreezer);
     public ASTNode transform(KLabelInjection kLabelInjection);
@@ -44,6 +40,7 @@ public interface Transformer {
     public ASTNode transform(MapLookup mapLookup);
     public ASTNode transform(MapUpdate mapUpdate);
     public ASTNode transform(MetaVariable metaVariable);
+    public ASTNode transform(PrimitiveIntToken rule);
     public ASTNode transform(Rule rule);
     public ASTNode transform(SetElementChoice setElementChoice);
     public ASTNode transform(SetLookup setLookup);

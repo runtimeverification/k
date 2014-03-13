@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.builtins.Int32Token;
+import org.kframework.backend.java.builtins.PrimitiveIntToken;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.CellCollection;
@@ -778,7 +778,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                         variableSorts[i] = context.MkBoolSort();
                     } else if (variable.sort().equals(IntToken.SORT_NAME)) {
                         variableSorts[i] = context.MkIntSort();
-                    } else if (variable.sort().equals(Int32Token.SORT_NAME)) {
+                    } else if (variable.sort().equals(PrimitiveIntToken.SORT_NAME)) {
                         variableSorts[i] = context.MkBitVecSort(32);
                     } else {
                         throw new RuntimeException();
