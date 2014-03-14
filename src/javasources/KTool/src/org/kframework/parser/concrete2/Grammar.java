@@ -245,7 +245,7 @@ public class Grammar {
 
         public boolean isNullable() {
             Set<MatchResult> matchResults = this.matches("", 0, null);
-            return matchResults.size() == 0;
+            return matchResults.size() != 0;
         }
     }
 

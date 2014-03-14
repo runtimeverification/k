@@ -42,7 +42,8 @@ public class ParserTest {
         Term expected = amb(klist(amb(KList.EMPTY)));
 
         Assert.assertEquals("Empty Grammar check: ", expected, result);
-        Assert.assertEquals("Expected Nullable NTs", 1, NullabilityCheck.getReachableNullableStates(nt1).size());
+        // the start and exit state of the NonTerminal
+        Assert.assertEquals("Expected Nullable NTs", 2, NullabilityCheck.getReachableNullableStates(nt1).size());
     }
 
     @Test
@@ -65,7 +66,7 @@ public class ParserTest {
         Term result = parser.parse(nt1, 0);
         Term expected = amb(klist(amb(klist(Token.kAppOf(KSorts.K, "asdfAAA1")))));
         Assert.assertEquals("Single Token check: ", expected, result);
-        Assert.assertEquals("Expected Nullable NTs", 1, NullabilityCheck.getReachableNullableStates(nt1).size());
+        Assert.assertEquals("Expected Nullable NTs", 2, NullabilityCheck.getReachableNullableStates(nt1).size());
     }
 
     @Test
@@ -91,7 +92,7 @@ public class ParserTest {
         Term result = parser.parse(nt1, 0);
         Term expected = amb(klist(amb(klist(kapp("seq", Token.kAppOf(KSorts.K, "asdfAAA1 "), Token.kAppOf(KSorts.K, "adfsf"))))));
         Assert.assertEquals("Single Token check: ", expected, result);
-        Assert.assertEquals("Expected Nullable NTs", 0, NullabilityCheck.getReachableNullableStates(nt1).size());
+        Assert.assertEquals("Expected Nullable NTs", 2, NullabilityCheck.getReachableNullableStates(nt1).size());
     }
 
     @Test
@@ -131,7 +132,7 @@ public class ParserTest {
             Term expected = amb(klist(amb(klist(kapp("s1", Token.kAppOf(KSorts.K, "123"))), klist(kapp("s3", Token.kAppOf(KSorts.K, "12"), Token.kAppOf(KSorts.K, "3"))))));
             Assert.assertEquals("Single Token check: ", expected, result);
         }
-        Assert.assertEquals("Expected Nullable NTs", 0, NullabilityCheck.getReachableNullableStates(nt1).size());
+        Assert.assertEquals("Expected Nullable NTs", 3, NullabilityCheck.getReachableNullableStates(nt1).size());
     }
 
     @Test
@@ -180,7 +181,7 @@ public class ParserTest {
             }
         }
         */
-        Assert.assertEquals("Expected Nullable NTs", 1, NullabilityCheck.getReachableNullableStates(nt1).size());
+        Assert.assertEquals("Expected Nullable NTs", 4, NullabilityCheck.getReachableNullableStates(nt1).size());
     }
     public static long getCpuTime( ) {
         ThreadMXBean bean = ManagementFactory.getThreadMXBean( );
@@ -229,7 +230,7 @@ public class ParserTest {
                     Token.kAppOf(KSorts.K, "y"))))));
             Assert.assertEquals("x^ny^n check: ", expected, result);
         }
-        Assert.assertEquals("Expected Nullable NTs", 1, NullabilityCheck.getReachableNullableStates(nt1).size());
+        Assert.assertEquals("Expected Nullable NTs", 4, NullabilityCheck.getReachableNullableStates(nt1).size());
     }
 
     @Test
@@ -269,7 +270,7 @@ public class ParserTest {
                     Token.kAppOf(KSorts.K, "y"))))));
             Assert.assertEquals("y^n check: ", expected, result);
         }
-        Assert.assertEquals("Expected Nullable NTs", 1, NullabilityCheck.getReachableNullableStates(nt1).size());
+        Assert.assertEquals("Expected Nullable NTs", 5, NullabilityCheck.getReachableNullableStates(nt1).size());
     }
 
     @Test
@@ -309,7 +310,7 @@ public class ParserTest {
                                 amb(klist(kapp("epsilon", Token.kAppOf(KSorts.K, ""))))))))))));
             Assert.assertEquals("x^n check: ", expected, result);
         }
-        Assert.assertEquals("Expected Nullable NTs", 1, NullabilityCheck.getReachableNullableStates(nt1).size());
+        Assert.assertEquals("Expected Nullable NTs", 4, NullabilityCheck.getReachableNullableStates(nt1).size());
     }
 
     @Test
@@ -362,7 +363,7 @@ public class ParserTest {
             Term expected = amb(klist(t4));
             Assert.assertEquals("AAA check: ", expected, result);
         }
-        Assert.assertEquals("Expected Nullable NTs", 1, NullabilityCheck.getReachableNullableStates(nt1).size());
+        Assert.assertEquals("Expected Nullable NTs", 3, NullabilityCheck.getReachableNullableStates(nt1).size());
     }
 
     @Test
@@ -402,7 +403,8 @@ public class ParserTest {
             expected = amb(klist(expected));
             Assert.assertEquals("Single char check: ", expected, result);
         }
-        Assert.assertEquals("Expected Nullable NTs", 0, NullabilityCheck.getReachableNullableStates(baseCase).size());
+        // all the entry and NonTerminalStates + one more regex state
+        Assert.assertEquals("Expected Nullable NTs", 18, NullabilityCheck.getReachableNullableStates(baseCase).size());
     }
 
     @Test
@@ -428,8 +430,8 @@ public class ParserTest {
 
         for (int i = 2; i < 10; i++) {
             Grammar.NonTerminal nt = new Grammar.NonTerminal(new Grammar.NonTerminalId("NT"+i),
-                    new Grammar.StateId("NT"+1+"Entry"), new Grammar.State.OrderingInfo(-i),
-                    new Grammar.StateId("NT"+1+"Exit"), new Grammar.State.OrderingInfo(2*i-1));
+                    new Grammar.StateId("NT"+i+"Entry"), new Grammar.State.OrderingInfo(-i),
+                    new Grammar.StateId("NT"+i+"Exit"), new Grammar.State.OrderingInfo(2*i-1));
             Grammar.NonTerminalState state = new Grammar.NonTerminalState(
                     new Grammar.StateId("S"+i), nt, new Grammar.State.OrderingInfo(2*i-2), baseCase, false, label("n" + i));
             nt.entryState.next.add(state);
@@ -444,7 +446,7 @@ public class ParserTest {
             Assert.assertEquals("Single char check: ", expected, result);
         }
         // all of the non terminals should be returned
-        Assert.assertEquals("Expected Nullable NTs", 9, NullabilityCheck.getReachableNullableStates(baseCase).size());
+        Assert.assertEquals("Expected Nullable NTs", 27, NullabilityCheck.getReachableNullableStates(baseCase).size());
     }
 
     @Test
@@ -518,7 +520,7 @@ public class ParserTest {
                                                           amb(klist(kapp("lit", token("3"))))))))))));
             Assert.assertEquals("1+2*3: ", expected, result);
         }
-        Assert.assertEquals("Expected Nullable NTs", 0, NullabilityCheck.getReachableNullableStates(exp).size());
+        Assert.assertEquals("Expected Nullable NTs", 9, NullabilityCheck.getReachableNullableStates(exp).size());
     }
 
     public static Ambiguity amb(Term ... terms) {
