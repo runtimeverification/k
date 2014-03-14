@@ -242,6 +242,11 @@ public class Grammar {
         public PrimitiveState(StateId stateId, NonTerminal nt, OrderingInfo orderingInfo, KLabel label) {
             super(stateId, nt, orderingInfo, true, label);
         }
+
+        public boolean isNullable() {
+            Set<MatchResult> matchResults = this.matches("", 0, null);
+            return matchResults.size() == 0;
+        }
     }
 
     public static class RegExState extends PrimitiveState {
