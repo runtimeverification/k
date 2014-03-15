@@ -32,6 +32,7 @@
 			<pathelement location="${javalibs}/jung-io-2.0.1.jar" />
 			<pathelement location="${javalibs}/jung-visualization-2.0.1.jar" />
 			<pathelement location="${javalibs}/strategoxt.jar" />
+			<pathelement location="${javalibs}/jcommander-1.35.jar" />
             <pathelement location="lib/junit.jar" />
             <pathelement location="lib/mockito-all.jar" />
 		</path>

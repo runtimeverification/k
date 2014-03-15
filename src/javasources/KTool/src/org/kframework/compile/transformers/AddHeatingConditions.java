@@ -84,7 +84,7 @@ public class AddHeatingConditions extends CopyOnWriteTransformer {
                 );
         }
         Term term = null;
-        if (!GlobalSettings.testgen) {
+        if (!kompileOptions.experimental.testGen) {
             java.util.Set<Variable> vars = kSequence.getContents().get(0).variables();
             if (vars.size() != 1) {
                 GlobalSettings.kem.register(

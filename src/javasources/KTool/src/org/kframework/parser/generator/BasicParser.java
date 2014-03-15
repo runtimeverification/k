@@ -12,6 +12,9 @@ import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Module;
 import org.kframework.kil.Require;
 import org.kframework.kil.loader.Context;
+import org.kframework.kompile.KompileOptions;
+import org.kframework.kompile.KompileOptions.Backend;
+import org.kframework.main.GlobalOptions;
 import org.kframework.parser.basic.Basic;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -29,10 +32,15 @@ public class BasicParser {
     private boolean autoinclude;
     private static final String missingFileMsg = "Could not find 'required' file: ";
     private String autoincludeFileName;
+    
+    private KompileOptions kompileOptions;
+    private GlobalOptions globalOptions;
 
-    public BasicParser(boolean autoinclude) {
+    public BasicParser(boolean autoinclude, KompileOptions kompileOptions) {
         this.autoinclude = autoinclude;
-        if (GlobalSettings.javaBackend)
+        this.kompileOptions = kompileOptions;
+        this.globalOptions = kompileOptions.global;
+        if (this.kompileOptions.backend.java())
             autoincludeFileName = "autoinclude-java.k";
         else
             autoincludeFileName ="autoinclude.k";
@@ -92,7 +100,7 @@ public class BasicParser {
         if (!filePaths.contains(canonicalPath)) {
             filePaths.add(canonicalPath);
 
-            if (GlobalSettings.verbose)
+            if (globalOptions.verbose)
                 System.out.println("Including file: " + file.getAbsolutePath());
             List<DefinitionItem> defItemList = Basic.parse(file.getAbsolutePath(), FileUtil.getFileContent(file.getAbsolutePath()), context);
 

@@ -322,7 +322,7 @@
       results="tests/regression/tokenconstants"
       extension="issue">
     <program name="test.issue">
-      <krun-option name="-color" value="off" />
+      <krun-option name="--color" value="off" />
     </program>
   </test>
 

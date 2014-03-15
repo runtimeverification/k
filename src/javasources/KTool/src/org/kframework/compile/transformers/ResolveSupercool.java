@@ -3,7 +3,6 @@ package org.kframework.compile.transformers;
 import org.kframework.kil.*;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.utils.general.GlobalSettings;
 
 import java.util.*;
 import java.util.List;
@@ -22,7 +21,7 @@ public class ResolveSupercool extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(Rule node) throws TransformerException {
-        for (String cool : GlobalSettings.supercool) {
+        for (String cool : kompileOptions.supercool) {
             if (node.containsAttribute(cool)) {
                 return super.transform(node);
             }

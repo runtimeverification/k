@@ -17,17 +17,13 @@ import org.kframework.kil.ModuleItem;
 import org.kframework.kil.Production;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Term;
-import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.krun.K;
-import org.kframework.utils.general.GlobalSettings;
+import org.kframework.kompile.KompileOptions.Backend;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -100,7 +96,7 @@ public class ResolveBinder extends CopyOnWriteTransformer {
             prod.setBinderMap(bndMap);
 
             /* do not generate the rules below for the java backend */
-            if (!GlobalSettings.javaBackend) {
+            if (!kompileOptions.backend.java()) {
                 Rule rule = new Rule(
                         KApp.of(BINDER_PREDICATE, MetaK.getTerm(prod, context)),
                         BoolBuiltin.TRUE, context);
@@ -116,7 +112,7 @@ public class ResolveBinder extends CopyOnWriteTransformer {
                     rule = new Rule(new KApp(BOUNDED_PREDICATE, list), BoolBuiltin.TRUE, context);
                     rule.addAttribute(Attribute.ANYWHERE);
                     items.add(rule);
-                    String bndSort = prod.getChildSort(bndIdx - 1);
+                    //String bndSort = prod.getChildSort(bndIdx - 1);
                     // (AndreiS): the bounded sort is no longer automatically
                     // considered to be subsorted to Variable; Variable must be
                     // manually declared.

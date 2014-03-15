@@ -57,6 +57,7 @@ import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.ResolveVariableAttribute;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.api.KRun;
 import org.kframework.krun.api.KRunDebugger;
 import org.kframework.krun.api.KRunResult;
@@ -70,7 +71,9 @@ import org.kframework.krun.api.Transition;
 import org.kframework.krun.api.UnsupportedBackendOptionException;
 import org.kframework.krun.gui.Controller.RunKRunCommand;
 import org.kframework.krun.gui.UIDesign.MainWindow;
+import org.kframework.main.GlobalOptions;
 import org.kframework.parser.DefinitionLoader;
+import org.kframework.parser.ExperimentalParserOptions;
 import org.kframework.parser.concrete.disambiguate.CollectVariablesVisitor;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.ColorUtil;
@@ -113,7 +116,7 @@ public class Main {
     public static void printDebugUsage(CommandlineOptions op) {
         org.kframework.utils.Error.helpMsg(USAGE_DEBUG, HEADER_STANDARD, FOOTER_STANDARD, op.getOptionsStandard(), new OptionComparator(op.getOptionList()));
     }
-    private static Stopwatch sw = Stopwatch.sw;
+    private static Stopwatch sw = Stopwatch.instance();
 
     public static Term plug(Map<String, Term> args, Context context) throws TransformerException {
         Configuration cfg = K.kompiled_cfg;
@@ -217,7 +220,7 @@ public class Main {
 
     private static KRun obtainKRun(Context context) {
         if (K.backend.equals("maude")) {
-            return new MaudeKRun(context);
+            return new MaudeKRun(context, sw);
         } else if (K.backend.equals("java")) {
             try {
                 return new JavaSymbolicKRun(context);
@@ -791,7 +794,7 @@ public class Main {
                     }
                     if (cmd.hasOption("load")) {
                         savedGraph = (DirectedGraph<KRunState, Transition>) BinaryLoader.load(cmd.getOptionValue("load"));
-                        krun = new MaudeKRun(context);
+                        krun = new MaudeKRun(context, sw);
                         debugger = krun.debug(savedGraph);
                         debugger.setCurrentState(1);
                         System.out.println("File successfully loaded.");
@@ -945,8 +948,8 @@ public class Main {
      *            represents the arguments/options given to krun command..
      */
     public static void execute_Krun(String cmds[]) {
-        Context context = new Context();
-        K.init(context);
+        GlobalOptions globalOptions = new GlobalOptions();
+        ExperimentalParserOptions parserOptions = new ExperimentalParserOptions();
 
         CommandlineOptions cmd_options = new CommandlineOptions();
         CommandLine cmd = cmd_options.parse(cmds);
@@ -970,12 +973,14 @@ public class Main {
 
         // set verbose
         if (cmd.hasOption("verbose")) {
-            GlobalSettings.verbose = true;
+            globalOptions.verbose = true;
         }
+        
+        globalOptions.initialize();
 
         // set fast-kast
         if (cmd.hasOption("fast-kast")) {
-            GlobalSettings.fastKast = !GlobalSettings.fastKast;
+            parserOptions.fastKast = true;
         }
 
         sw.printIntermediate("Deleting temporary krun directory");
@@ -1210,8 +1215,8 @@ public class Main {
                 K.simulationProgLeft=temp[2];
                 K.simulationProgRight=temp[3];
                 
-                Context contextLeft = new Context();
-                Context contextRight = new Context();
+                Context contextLeft = new Context(globalOptions, parserOptions);
+                Context contextRight = new Context(globalOptions, parserOptions);
                 Term leftInitTerm = null;
                 Term rightInitTerm = null;
                 Waitor runSimulation = null;
@@ -1302,6 +1307,19 @@ public class Main {
                         + K.compiled_def
                         + "\nPlease compile the definition by using `kompile'.");
             }
+            
+            KompileOptions kompileOptions = BinaryLoader.load(KompileOptions.class, new File(compiledFile, "kompile-options.bin").getAbsolutePath());
+            //merge krun options into kompile options object
+            kompileOptions.global = globalOptions;
+            kompileOptions.experimental.parser = parserOptions;
+            //merge kompile options into K static object
+            //TODO(dwightguth): fix this when org.kframework.krun.K is deleted
+            if (!cmd.hasOption("backend")) {
+                K.backend = kompileOptions.backend.name();
+            }
+            
+            Context context = new Context(kompileOptions);
+            K.init(context);
 
             context.dotk = new File(
                     new File(K.compiled_def).getParent() + File.separator

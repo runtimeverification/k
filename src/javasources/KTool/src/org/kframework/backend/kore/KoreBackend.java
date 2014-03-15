@@ -42,10 +42,8 @@ import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.ColorSetting;
 import org.kframework.main.FirstStep;
-import org.kframework.main.LastStep;
 import org.kframework.utils.ColorUtil;
 import org.kframework.utils.Stopwatch;
-import org.kframework.utils.general.GlobalSettings;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -125,7 +123,7 @@ public class KoreBackend extends BasicBackend {
         steps.add(new FreshCondToFreshVar(context));
         steps.add(new ResolveFreshVarMOS(context));
         steps.add(new AddTopCellConfig(context));
-        if (GlobalSettings.addTopCell) {
+        if (options.experimental.addTopCell) {
             steps.add(new AddTopCellRules(context));
         }
         steps.add(new ResolveBinder(context));

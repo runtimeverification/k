@@ -13,6 +13,8 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.K;
 import org.kframework.krun.Main;
+import org.kframework.main.GlobalOptions;
+import org.kframework.parser.ExperimentalParserOptions;
 import org.kframework.parser.ProgramLoader;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
@@ -39,7 +41,9 @@ public class KastFrontEnd {
     }
 
     public static void kast(String[] args) {
-        Context context = new Context();
+        GlobalOptions globalOptions = new GlobalOptions();
+        ExperimentalParserOptions parserOptions = new ExperimentalParserOptions();
+        Context context = new Context(globalOptions, parserOptions);
         KastOptionsParser op = new KastOptionsParser();
         CommandLine cmd = op.parse(args);
         if (cmd == null) {
@@ -64,12 +68,14 @@ public class KastFrontEnd {
 
         // set verbose
         if (cmd.hasOption("verbose")) {
-            GlobalSettings.verbose = true;
+            globalOptions.verbose = true;
         }
+        
+        globalOptions.initialize();
 
         // set fast kast option
         if (cmd.hasOption("fast-kast")) {
-            GlobalSettings.fastKast = !GlobalSettings.fastKast;
+            parserOptions.fastKast = true;
         }
 
         String pgm = null;
@@ -94,7 +100,6 @@ public class KastFrontEnd {
             pgm = FileUtil.getFileContent(mainFile.getAbsolutePath());
         }
 
-        File def = null;
         org.kframework.kil.Definition javaDef = null;
         String directory;
         if (cmd.hasOption("directory")) {
@@ -149,8 +154,6 @@ public class KastFrontEnd {
                         context));
                 // This is essential for generating maude
                 javaDef.preprocess(context);
-
-                def = new File(javaDef.getMainFile());
             } else {
                 String msg = "Could not find a valid compiled definition. Use --directory to specify one.";
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, "command line", new File(".").getAbsolutePath()));
@@ -232,8 +235,8 @@ public class KastFrontEnd {
                 e.printStackTrace();
             }
 
-            Stopwatch.sw.printIntermediate("Maudify Program");
-            Stopwatch.sw.printTotal("Total");
+            Stopwatch.instance().printIntermediate("Maudify Program");
+            Stopwatch.instance().printTotal("Total");
             GlobalSettings.kem.print();
         } catch (TransformerException e) {
             e.report();

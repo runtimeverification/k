@@ -12,6 +12,7 @@ import org.kframework.ktest.Config.InvalidConfigError;
 import org.kframework.ktest.Config.LocationData;
 import org.kframework.ktest.Test.TestCase;
 import org.kframework.ktest.Test.TestSuite;
+import org.kframework.main.GlobalOptions;
 import org.kframework.utils.OptionComparator;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.file.FileUtil;
@@ -43,6 +44,9 @@ public class KTest {
             printVersion();
         else {
             CmdArg cmdArgs = CmdArg.validateArgs(argParser.cmdOpts);
+            GlobalOptions globalOptions = new GlobalOptions();
+            globalOptions.verbose = cmdArgs.isVerbose();
+            globalOptions.initialize();
             TestSuite testSuite = makeTestSuite(cmdArgs.getTargetFile(), cmdArgs);
             if (cmdArgs.getDry())
                 testSuite.dryRun();

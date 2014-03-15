@@ -168,10 +168,10 @@ public class RLBackend extends BasicBackend implements Backend {
                 + "/k-prelude\"\n";
 
         // load libraries if any
-        String maudeLib = GlobalSettings.lib.equals("") ? "" : "load "
-                + KPaths.windowfyPath(new File(GlobalSettings.lib)
-                        .getAbsolutePath()) + "\n";
-        load += maudeLib;
+        //String maudeLib = GlobalSettings.lib.equals("") ? "" : "load "
+        //        + KPaths.windowfyPath(new File(GlobalSettings.lib)
+        //                .getAbsolutePath()) + "\n";
+        //load += maudeLib;
 
         final String mainModule = javaDef.getMainModule();
         // String defFile = javaDef.getMainFile().replaceFirst("\\.[a-zA-Z]+$",
@@ -233,7 +233,7 @@ public class RLBackend extends BasicBackend implements Backend {
         }
 
         // setup the runner
-        MaudeKRun mkr = new MaudeKRun(context);
+        MaudeKRun mkr = new MaudeKRun(context, Stopwatch.instance());
         mkr.setBackendOption("io", false);
         /****************
          * end *
@@ -286,10 +286,10 @@ public class RLBackend extends BasicBackend implements Backend {
 //        System.exit(1);
         
         // prints programs when verbose
-        if (GlobalSettings.verbose) {
+        //if (GlobalSettings.verbose) {
             for (int i = 0; i < programs.size(); i++)
                 System.out.println("PGM(" + i + "): " + programs.get(i));
-        }
+        //}
 
         for (Term pgm : programs) {
             try {

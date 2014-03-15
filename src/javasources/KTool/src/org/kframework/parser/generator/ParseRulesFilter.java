@@ -50,7 +50,7 @@ public class ParseRulesFilter extends BasicTransformer {
     public ParseRulesFilter(Context context, boolean checkInclusion) {
         super("Parse Configurations", context);
         this.checkInclusion = checkInclusion;
-        if (GlobalSettings.verbose)
+        if (globalOptions.verbose)
             try {
                 f = new Formatter(new File(context.dotk.getAbsolutePath() + "/timing.log"));
             } catch (FileNotFoundException e) {
@@ -60,7 +60,7 @@ public class ParseRulesFilter extends BasicTransformer {
 
     public ParseRulesFilter(Context context) {
         super("Parse Configurations", context);
-        if (GlobalSettings.verbose)
+        if (globalOptions.verbose)
             try {
                 f = new Formatter(new File(context.dotk.getAbsolutePath() + "/timing.log"));
             } catch (FileNotFoundException e) {
@@ -82,7 +82,7 @@ public class ParseRulesFilter extends BasicTransformer {
             try {
                 ASTNode config;
 
-                if (GlobalSettings.fastKast) {
+                if (experimentalParserOptions.fastKast) {
                     // TODO(RaduM): load directly from ATerms
                     ASTNode anode = Sglr.run_sglri(context.dotk.getAbsolutePath() + "/def/Concrete.tbl", "CondSentence", ss.getContent(), ss.getFilename());
 
@@ -110,7 +110,7 @@ public class ParseRulesFilter extends BasicTransformer {
 
                         long koreStartTime = System.currentTimeMillis();
                         parsed = org.kframework.parser.concrete.KParser.ParseKoreString(ss.getContent());
-                        if (GlobalSettings.verbose)
+                        if (globalOptions.verbose)
                             System.out.println("Parsing with Kore: " + ss.getFilename() + ":" + ss.getLocation() + " - " + (System.currentTimeMillis() - koreStartTime));
                     } else
                         parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
@@ -153,7 +153,7 @@ public class ParseRulesFilter extends BasicTransformer {
                 config = config.accept(new CorrectCastPriorityFilter(context));
                 // config = config.accept(new CheckBinaryPrecedenceFilter());
                 config = config.accept(new PriorityFilter(context));
-                if (GlobalSettings.fastKast)
+                if (experimentalParserOptions.fastKast)
                     config = config.accept(new MergeAmbFilter(context));
                 config = config.accept(new VariableTypeInferenceFilter(context));
                 // config = config.accept(new AmbDuplicateFilter(context));
@@ -167,7 +167,7 @@ public class ParseRulesFilter extends BasicTransformer {
                 // last resort disambiguation
                 config = config.accept(new AmbFilter(context));
 
-                if (GlobalSettings.verbose) {
+                if (globalOptions.verbose) {
                     f.format("Parsing rule: Time: %6d Location: %s:%s\n", (System.currentTimeMillis() - startTime), ss.getFilename(), ss.getLocation());
                     f.flush();
                 }

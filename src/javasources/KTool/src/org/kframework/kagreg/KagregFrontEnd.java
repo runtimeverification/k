@@ -14,9 +14,11 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.Import;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.main.GlobalOptions;
 import org.kframework.parser.DefinitionLoader;
 import org.kframework.parser.concrete.KParser;
 import org.kframework.utils.Error;
+import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -57,7 +59,10 @@ public class KagregFrontEnd {
             }
         }
         
-        GlobalSettings.verbose = true;
+        GlobalOptions globalOptions = new GlobalOptions();
+        globalOptions.verbose = true;
+        globalOptions.initialize();
+        
 //        GlobalSettings.symbolicEquality = false;
 //        GlobalSettings.SMT = false;
 //        GlobalSettings.javaBackend = false;
@@ -66,7 +71,7 @@ public class KagregFrontEnd {
         String firstLang = FileUtil.getMainModule(firstDefinitionFile.getName());
         String secondLang = FileUtil.getMainModule(secondDefinitionFile.getName());
         
-        Context context1 = new Context();
+        Context context1 = new Context(globalOptions);
         context1.dotk = new File(firstDefinitionFile.getCanonicalFile().getParent() + File.separator + ".k");
         context1.dotk.mkdirs();
         Definition firstDef = DefinitionLoader.loadDefinition(firstDefinitionFile, firstLang, true,
@@ -78,14 +83,13 @@ public class KagregFrontEnd {
         collectImportsVisitor1.visit(firstDef);
         List<Import> imports1 = collectImportsVisitor1.getImports();
         
-        GlobalSettings.verbose = true;
 //        GlobalSettings.symbolicEquality = false;
 //        GlobalSettings.SMT = false;
 //        GlobalSettings.javaBackend = false;
 //        GlobalSettings.NOSMT = true;
 
         KParser.reset();
-        Context context2 = new Context();
+        Context context2 = new Context(globalOptions);
         assert context2 != null;
         context2.dotk = new File(secondDefinitionFile.getCanonicalFile().getParent() + File.separator + ".k");
         context2.dotk.mkdirs();

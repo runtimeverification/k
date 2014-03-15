@@ -15,11 +15,11 @@ import org.kframework.krun.RunProcess;
 import org.kframework.krun.api.KRun;
 import org.kframework.krun.api.KRunDebugger;
 import org.kframework.krun.api.KRunState;
-import org.kframework.krun.api.SearchResults;
 import org.kframework.krun.api.Transition;
 import org.kframework.parser.concrete.disambiguate.BestFitFilter;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitTypeCheckVisitor;
 import org.kframework.parser.concrete.disambiguate.TypeInferenceSupremumFilter;
+import org.kframework.utils.Stopwatch;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
@@ -77,7 +77,7 @@ public class RunKRunCommand {
         if (steps < 1)
             steps = 1;
         debugger.setCurrentState(v.getStateId());
-        SearchResults states = debugger.stepAll(steps);
+        debugger.stepAll(steps);
         return debugger.getGraph();
     }
 
@@ -100,7 +100,7 @@ public class RunKRunCommand {
     private static KRun createKrun(Context context) {
         KRun krun;
         if (K.backend.equals("maude")) {
-            krun = new MaudeKRun(context);
+            krun = new MaudeKRun(context, Stopwatch.instance());
         } else if (K.backend.equals("java")) {
             try {
                 krun = new JavaSymbolicKRun(context);

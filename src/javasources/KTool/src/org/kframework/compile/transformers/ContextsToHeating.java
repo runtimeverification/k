@@ -7,6 +7,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kompile.KompileOptions.Backend;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -38,9 +39,9 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
      * v is a fresh variable and term = C[t1 => t2] */
     private List<Term> splitRewrite(Term term) throws TransformerException {
         final Variable v;
-        if (GlobalSettings.javaBackend) {
+        if (kompileOptions.backend.java()) {
             /* the java rewrite engine only supports heating/cooling on KItem */
-            if(GlobalSettings.testgen){
+            if(kompileOptions.experimental.testGen){
                 if(term instanceof TermCons){
                     TermCons termCons = (TermCons)term;
                     int index = 0;
@@ -153,7 +154,7 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
         heatingRule.setEnsures(substituteHole(node.getEnsures(), freshVariable));
         heatingRule.getAttributes().getContents().addAll(node.getAttributes().getContents());
         heatingRule.putAttribute(MetaK.Constants.heatingTag,"");
-        if (GlobalSettings.testgen) {
+        if (kompileOptions.experimental.testGen) {
             // TODO(YilongL): 1) is the body always a TermCons? 2) the following
             // naming convention may not guarantee a unique label for each
             // generated heating rule; need to be revised later
@@ -170,7 +171,7 @@ public class ContextsToHeating extends CopyOnWriteTransformer {
         Rule coolingRule = new Rule(rhsHeat, lhsHeat, context);
         coolingRule.getAttributes().getContents().addAll(node.getAttributes().getContents());
         coolingRule.putAttribute(MetaK.Constants.coolingTag,"");
-        if (GlobalSettings.testgen) {
+        if (kompileOptions.experimental.testGen) {
             // TODO(YilongL): the following naming convention may not guarantee
             // a unique label for each generated cooling rule; need to be
             // revised later

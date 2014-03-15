@@ -3,7 +3,6 @@
   <include file="../../../../../../tutorial/1_k/2_imp/lesson_5/tests/config.xml" >
    <kompile-option name="--backend" value="java" />
     <all-programs>
-      <krun-option name="--backend" value="java" />
       <krun-option name="--smt" value="none" />
       <krun-option name="--color" value="off" />
     </all-programs>

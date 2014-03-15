@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.kframework.backend.SMTSolver;
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
@@ -21,7 +22,6 @@ import org.kframework.kil.Variable;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
-import org.kframework.utils.general.GlobalSettings;
 
 /**
  * Add path condition cell to rules. Since this step is right after
@@ -106,7 +106,7 @@ public class AddPathCondition extends CopyOnWriteTransformer {
             
             Attributes atts = node.getAttributes();
             Term cond = condition;
-            if (!GlobalSettings.NOSMT) {
+            if (context.kompileOptions.experimental.smt == SMTSolver.NONE) {
                 List<Term> myList = new ArrayList<Term>();
                 myList.add(condition);
                 myList.add(checkSat(pathCondition, context));

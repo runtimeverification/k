@@ -7,9 +7,9 @@ import java.util.HashSet;
 
 import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
-import org.kframework.kil.KItemProjection;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.kompile.KompileOptions;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -19,10 +19,12 @@ import org.kframework.utils.general.GlobalSettings;
 public class CopyOnWriteTransformer implements Transformer {
     String name;
     protected Context context;
+    protected KompileOptions kompileOptions;
 
     public CopyOnWriteTransformer(String name, Context context) {
         this.name = name;
         this.context = context;
+        this.kompileOptions = context.kompileOptions;
     }
 
     @Override

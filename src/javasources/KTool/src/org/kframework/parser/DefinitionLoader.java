@@ -70,16 +70,16 @@ public class DefinitionLoader {
         if ("bin".equals(extension)) {
             javaDef = (Definition) BinaryLoader.load(canoFile.toString());
 
-            Stopwatch.sw.printIntermediate("Load definition from binary");
+            Stopwatch.instance().printIntermediate("Load definition from binary");
 
             javaDef.preprocess(context);
 
-            Stopwatch.sw.printIntermediate("Preprocess");
+            Stopwatch.instance().printIntermediate("Preprocess");
 
         } else {
             javaDef = parseDefinition(mainFile, lang, autoinclude, context);
 
-            BinaryLoader.save(context.dotk.getAbsolutePath() + "/defx-" + (GlobalSettings.javaBackend ? "java" : "maude") + ".bin", javaDef);
+            BinaryLoader.save(context.dotk.getAbsolutePath() + "/defx-" + context.kompileOptions.backend.name().toLowerCase() + ".bin", javaDef);
         }
         return javaDef;
     }
@@ -96,7 +96,7 @@ public class DefinitionLoader {
             // for now just use this file as main argument
             // ------------------------------------- basic parsing
 
-            BasicParser bparser = new BasicParser(autoinclude);
+            BasicParser bparser = new BasicParser(autoinclude, context.kompileOptions);
             bparser.slurp(mainFile.getPath(), context);
 
             // transfer information from the BasicParser object, to the Definition object
@@ -106,24 +106,21 @@ public class DefinitionLoader {
             def.setModulesMap(bparser.getModulesMap());
             def.setItems(bparser.getModuleItems());
 
-            if (!GlobalSettings.documentation) {
-                if (GlobalSettings.synModule == null) {
-                    String synModule = mainModule + "-SYNTAX";
-                    if (!def.getModulesMap().containsKey(synModule)) {
-                        synModule = mainModule;
-                        String msg = "Could not find main syntax module used to generate a parser for programs (X-SYNTAX). Using: '" + synModule + "' instead.";
-                        GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.INNER_PARSER, msg, def.getMainFile(), "File system."));
-                    }
-                    def.setMainSyntaxModule(synModule);
-                } else
-                    def.setMainSyntaxModule(GlobalSettings.synModule);
-
+            if (!context.kompileOptions.backend.documentation()) {
+                if (!def.getModulesMap().containsKey(context.kompileOptions.syntaxModule())) {
+                    String msg = "Could not find main syntax module used to generate a parser for programs (X-SYNTAX). Using: '" + mainModule + "' instead.";
+                    GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.PARSER, msg, def.getMainFile(), "File system."));
+                    def.setMainSyntaxModule(mainModule);
+                } else {
+                    def.setMainSyntaxModule(context.kompileOptions.syntaxModule());
+                }
+                
                 if (!def.getModulesMap().containsKey(mainModule)) {
                     String msg = "Could not find main module '" + mainModule + "'. Use --main-module option to specify another.";
                     GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.COMPILER, msg, def.getMainFile(), "File system."));
                 }
             }
-            Stopwatch.sw.printIntermediate("Basic Parsing");
+            Stopwatch.instance().printIntermediate("Basic Parsing");
 
             //This following line was commented out to make the latex backend 
             //parse files importing from other files
@@ -133,13 +130,13 @@ public class DefinitionLoader {
 
             def.preprocess(context);
 
-            Stopwatch.sw.printIntermediate("Preprocess");
+            Stopwatch.instance().printIntermediate("Preprocess");
 
             new CheckVisitorStep<Definition>(new CheckSyntaxDecl(context), context).check(def);
             new CheckVisitorStep<Definition>(new CheckListDecl(context), context).check(def);
             new CheckVisitorStep<Definition>(new CheckSortTopUniqueness(context), context).check(def);
 
-            Stopwatch.sw.printIntermediate("Checks");
+            Stopwatch.instance().printIntermediate("Checks");
 
             // ------------------------------------- generate files
             ResourceExtractor.ExtractDefSDF(new File(context.dotk + "/def"));
@@ -149,7 +146,7 @@ public class DefinitionLoader {
 
             // ------------------------------------- generate parser TBL
             // cache the TBL if the sdf file is the same
-            if (!GlobalSettings.documentation) {
+            if (!context.kompileOptions.backend.documentation()) {
                 String oldSdfPgm = "";
                 if (new File(context.dotk.getAbsolutePath() + "/pgm/Program.sdf").exists())
                     oldSdfPgm = FileUtil.getFileContent(context.dotk.getAbsolutePath() + "/pgm/Program.sdf");
@@ -159,11 +156,11 @@ public class DefinitionLoader {
                 FileUtil.save(context.dotk.getAbsolutePath() + "/pgm/Program.sdf", newSdfPgmBuilder);
                 String newSdfPgm = FileUtil.getFileContent(context.dotk.getAbsolutePath() + "/pgm/Program.sdf");
 
-                Stopwatch.sw.printIntermediate("File Gen Pgm");
+                Stopwatch.instance().printIntermediate("File Gen Pgm");
 
                 if (!oldSdfPgm.equals(newSdfPgm) || !new File(context.dotk.getAbsoluteFile() + "/pgm/Program.tbl").exists()) {
                     Sdf2Table.run_sdf2table(new File(context.dotk.getAbsoluteFile() + "/pgm"), "Program");
-                    Stopwatch.sw.printIntermediate("Generate TBLPgm");
+                    Stopwatch.instance().printIntermediate("Generate TBLPgm");
                 }
             }
 
@@ -180,23 +177,23 @@ public class DefinitionLoader {
             FileUtil.save(context.dotk.getAbsolutePath() + "/ground/Integration.sdf", Definition2SDF.getSdfForDefinition(def, context));
             String newSdf = FileUtil.getFileContent(context.dotk.getAbsolutePath() + "/def/Integration.sdf");
 
-            Stopwatch.sw.printIntermediate("File Gen Def");
+            Stopwatch.instance().printIntermediate("File Gen Def");
 
             if (!oldSdf.equals(newSdf) || !new File(context.dotk.getAbsoluteFile() + "/def/Concrete.tbl").exists()
                     || !new File(context.dotk.getAbsoluteFile() + "/ground/Concrete.tbl").exists()) {
                 // Sdf2Table.run_sdf2table(new File(context.dotk.getAbsoluteFile() + "/def"), "Concrete");
                 Thread t1 = Sdf2Table.run_sdf2table_parallel(new File(context.dotk.getAbsoluteFile() + "/def"), "Concrete");
-                if (!GlobalSettings.documentation) {
+                if (!context.kompileOptions.backend.documentation()) {
                     Thread t2 = Sdf2Table.run_sdf2table_parallel(new File(context.dotk.getAbsoluteFile() + "/ground"), "Concrete");
                     t2.join();
                 }
                 t1.join();
-                Stopwatch.sw.printIntermediate("Generate TBLDef");
+                Stopwatch.instance().printIntermediate("Generate TBLDef");
             }
-            if (!GlobalSettings.fastKast) { // ------------------------------------- import files in Stratego
+            if (!context.experimentalParserOptions.fastKast) { // ------------------------------------- import files in Stratego
                 org.kframework.parser.concrete.KParser.ImportTbl(context.dotk.getAbsolutePath() + "/def/Concrete.tbl");
 
-                Stopwatch.sw.printIntermediate("Importing Files");
+                Stopwatch.instance().printIntermediate("Importing Files");
             }
             // ------------------------------------- parse configs
             JavaClassesFactory.startConstruction(context);
@@ -207,7 +204,7 @@ public class DefinitionLoader {
             // sort List in streaming cells
             new CheckVisitorStep<Definition>(new CheckStreams(context), context).check(def);
 
-            Stopwatch.sw.printIntermediate("Parsing Configs");
+            Stopwatch.instance().printIntermediate("Parsing Configs");
 
             // ----------------------------------- parse rules
             JavaClassesFactory.startConstruction(context);
@@ -216,7 +213,7 @@ public class DefinitionLoader {
             def = (Definition) def.accept(new CorrectConstantsTransformer(context));
 
 
-            Stopwatch.sw.printIntermediate("Parsing Rules");
+            Stopwatch.instance().printIntermediate("Parsing Rules");
 
             return def;
         } catch (IOException e1) {
@@ -294,7 +291,7 @@ public class DefinitionLoader {
         config = config.accept(new CorrectCastPriorityFilter(context));
         // config = config.accept(new CheckBinaryPrecedenceFilter());
         config = config.accept(new PriorityFilter(context));
-        if (GlobalSettings.fastKast)
+        if (context.experimentalParserOptions.fastKast)
             config = config.accept(new MergeAmbFilter(context));
         config = config.accept(new VariableTypeInferenceFilter(context));
         try {
@@ -348,7 +345,7 @@ public class DefinitionLoader {
         config = config.accept(new CorrectCastPriorityFilter(context));
         // config = config.accept(new CheckBinaryPrecedenceFilter());
         config = config.accept(new PriorityFilter(context));
-        if (GlobalSettings.fastKast)
+        if (context.experimentalParserOptions.fastKast)
             config = config.accept(new MergeAmbFilter(context));
         config = config.accept(new VariableTypeInferenceFilter(context));
         try {

@@ -13,7 +13,6 @@
       >
     <kompile-option name="--backend" value="java" />
     <all-programs>
-      <krun-option name="--backend" value="java" />
       <krun-option name="--smt" value="none" />
       <krun-option name="--output" value="none" />
     </all-programs>
@@ -27,7 +26,6 @@
       >
     <kompile-option name="--backend" value="java" />
     <all-programs>
-      <krun-option name="--backend" value="java" />
       <krun-option name="--smt" value="none" />
       <krun-option name="--search" />
       <krun-option name="--pattern" value="&lt;tasks&gt;.Bag&lt;/tasks&gt;"/>
@@ -43,7 +41,6 @@
       >
     <kompile-option name="--backend" value="java" />
     <all-programs>
-      <krun-option name="--backend" value="java" />
       <krun-option name="--smt" value="none" />
       <krun-option name="--output" value="none" />
     </all-programs>
@@ -58,7 +55,6 @@
       >
     <kompile-option name="--backend" value="java" />
     <all-programs>
-      <krun-option name="--backend" value="java" />
       <krun-option name="--smt" value="none" />
       <krun-option name="--output" value="none" />
     </all-programs>
@@ -73,7 +69,6 @@
       >
     <kompile-option name="--backend" value="java" />
     <all-programs>
-      <krun-option name="--backend" value="java" />
       <krun-option name="--smt" value="none" />
       <krun-option name="--output" value="none" />
     </all-programs>
@@ -89,7 +84,6 @@
       >
     <kompile-option name="--backend" value="java" />
     <all-programs>
-      <krun-option name="--backend" value="java" />
       <krun-option name="--smt" value="none" />
       <krun-option name="--output" value="none" />
     </all-programs>
@@ -106,7 +100,6 @@
       >
     <kompile-option name="--backend" value="java" />
     <all-programs>
-      <krun-option name="--backend" value="java" />
       <krun-option name="--search" />
       <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
     </all-programs>
@@ -123,36 +116,30 @@
       >
     <kompile-option name="--backend" value="java" />
     <all-programs>
-      <krun-option name="--backend" value="java" />
       <krun-option name="--search" />
       <krun-option name="--pattern" value="&lt;solution&gt; Solution:K &lt;/solution&gt;" />
     </all-programs>
     <program name="append-4.logik">
-      <krun-option name="--backend" value="java" />
       <krun-option name="--search" />
       <krun-option name="--bound" value="5" />
       <krun-option name="--pattern" value="&lt;solution&gt; Solution:K &lt;/solution&gt;" />
     </program>
     <program name="reverse-slow-palindromes-1.logik">
-      <krun-option name="--backend" value="java" />
       <krun-option name="--search" />
       <krun-option name="--bound" value="5" />
       <krun-option name="--pattern" value="&lt;solution&gt; Solution:K &lt;/solution&gt;" />
     </program>
     <program name="reverse-fast-palindromes-1.logik">
-      <krun-option name="--backend" value="java" />
       <krun-option name="--search" />
       <krun-option name="--bound" value="5" />
       <krun-option name="--pattern" value="&lt;solution&gt; Solution:K &lt;/solution&gt;" />
     </program>
     <program name="reverse-slow-2.logik">
-      <krun-option name="--backend" value="java" />
       <krun-option name="--search" />
       <krun-option name="--bound" value="1" />
       <krun-option name="--pattern" value="&lt;solution&gt; Solution:K &lt;/solution&gt;" />
     </program>
     <program name="reverse-fast-2.logik">
-      <krun-option name="--backend" value="java" />
       <krun-option name="--search" />
       <krun-option name="--bound" value="1" />
       <krun-option name="--pattern" value="&lt;solution&gt; Solution:K &lt;/solution&gt;" />
@@ -170,7 +157,6 @@
       >
     <kompile-option name="-backend" value="java" />
     <all-programs>
-      <krun-option name="-backend" value="java" />
       <krun-option name="-smt" value="none" />
       <krun-option name="-parser" value="kast -parser ground" />
     </all-programs>
@@ -183,7 +169,6 @@
       >
     <kompile-option name="-backend" value="java" />
     <all-programs>
-      <krun-option name="-backend" value="java-symbolic" />
       <krun-option name="-smt" value="none" />
     </all-programs>
   </test>
@@ -196,7 +181,6 @@
       >
     <kompile-option name="--backend" value="java" />
     <all-programs>
-      <krun-option name="--backend" value="java" />
       <krun-option name="--smt" value="none" />
       <krun-option name="--parser" value="kast --parser ground" />
     </all-programs>
@@ -211,7 +195,6 @@
     <kompile-option name="-backend" value="java" />
     <all-programs>
       <krun-option name="-smt" value="none" />
-      <krun-option name="-backend" value="java" />
       <krun-option name="-output" value="pretty" />
     </all-programs>
   </test>
@@ -225,7 +208,6 @@
     <kompile-option name="-backend" value="java" />
     <all-programs>
       <krun-option name="-smt" value="none" />
-      <krun-option name="-backend" value="java" />
       <krun-option name="-output" value="pretty" />
     </all-programs>
   </test>
@@ -239,7 +221,6 @@
     <kompile-option name="-backend" value="java" />
     <all-programs>
       <krun-option name="-smt" value="none" />
-      <krun-option name="-backend" value="java" />
       <krun-option name="-output" value="pretty" />
     </all-programs>
   </test>
@@ -252,7 +233,6 @@
     <kompile-option name="-backend" value="java" />
     <all-programs>
       <krun-option name="-smt" value="none" />
-      <krun-option name="-backend" value="java" />
       <krun-option name="-output" value="pretty" />
     </all-programs>
   </test>
@@ -266,7 +246,6 @@
     <kompile-option name="--backend" value="java" />
     <all-programs>
       <krun-option name="--smt" value="none" />
-      <krun-option name="--backend" value="java" />
       <krun-option name="--output" value="pretty" />
     </all-programs>
   </test>
@@ -280,7 +259,6 @@
     <kompile-option name="--backend" value="java" />
     <all-programs>
       <krun-option name="--smt" value="none" />
-      <krun-option name="--backend" value="java" />
       <krun-option name="--output" value="pretty" />
     </all-programs>
   </test>
@@ -293,7 +271,6 @@
     <kompile-option name="--backend" value="java" />
     <all-programs>
       <krun-option name="--smt" value="none" />
-      <krun-option name="--backend" value="java" />
       <krun-option name="--output" value="pretty" />
     </all-programs>
   </test>
@@ -306,7 +283,6 @@
     <kompile-option name="-backend" value="java" />
     <all-programs>
       <krun-option name="-smt" value="none" />
-      <krun-option name="-backend" value="java" />
       <krun-option name="-output" value="pretty" />
     </all-programs>
   </test>
@@ -319,23 +295,21 @@
       >
     <kompile-option name="-backend" value="java" />
     <all-programs>
-      <krun-option name="-backend" value="java" />
       <krun-option name="-smt" value="gappa" />
     </all-programs>
   </test>
 -->
+
   <test
       definition="tests/regression/tokenconstants/issue.k"
       programs="tests/regression/tokenconstants"
       results="tests/regression/tokenconstants"
       extension="issue">
-    <kompile-option name="-backend" value="java" />
+    <kompile-option name="--backend" value="java" />
     <program name="test.issue">
-      <krun-option name="-backend" value="java" />
-	  <krun-option name="-smt" value="none" />
+	  <krun-option name="--smt" value="none" />
     </program>
   </test>
-
 
   <test
       definition="tests/regression/java-rewrite-engine/visitor/imp.k"
@@ -344,7 +318,6 @@
       extension="imp" >
     <kompile-option name="--backend" value="java" />
     <all-programs>
-      <krun-option name="--backend" value="java" />
       <krun-option name="--smt" value="none" />
     </all-programs>
   </test>
@@ -357,7 +330,6 @@
       >
     <kompile-option name="--backend" value="java" />
     <all-programs>
-      <krun-option name="--backend" value="java" />
       <krun-option name="--smt" value="none" />
     </all-programs>
   </test>
@@ -369,7 +341,6 @@
       >
     <kompile-option name="--backend" value="java" />
     <all-programs>
-      <krun-option name="--backend" value="java" />
       <krun-option name="--smt" value="none" />
     </all-programs>
   </test>
@@ -382,7 +353,6 @@
       >
     <kompile-option name="--backend" value="java" />
     <all-programs>
-      <krun-option name="--backend" value="java" />
       <krun-option name="--smt" value="none" />
     </all-programs>
   </test>
@@ -394,7 +364,6 @@
       >
     <kompile-option name="--backend" value="java" />
     <all-programs>
-      <krun-option name="--backend" value="java" />
       <krun-option name="--smt" value="none" />
     </all-programs>
   </test>
@@ -406,9 +375,6 @@
       extension="test"
       >
     <kompile-option name="--backend" value="java" />
-    <all-programs>
-      <krun-option name="--backend" value="java" />
-    </all-programs>
   </test>
 
   <test
@@ -419,9 +385,6 @@
       >
     <kompile-option name="--backend" value="java" />
     <kompile-option name="--warnings" value="none" />
-    <all-programs>
-      <krun-option name="--backend" value="java" />
-    </all-programs>
   </test>
 
   <test
@@ -432,7 +395,6 @@
       >
     <kompile-option name="--backend" value="java" />
     <all-programs>
-      <krun-option name="--backend" value="java" />
       <krun-option name="--smt" value="none" />
     </all-programs>
   </test>
@@ -444,7 +406,6 @@
       >
     <kompile-option name="--backend" value="java" />
     <all-programs>
-      <krun-option name="--backend" value="java" />
       <krun-option name="--smt" value="none" />
     </all-programs>
   </test>
@@ -455,10 +416,9 @@
       results="tests/regression/java-rewrite-engine/machine_integers"
       extension="test"
       >
-    <kompile-option name="-backend" value="java" />
+    <kompile-option name="--backend" value="java" />
     <all-programs>
-      <krun-option name="-backend" value="java" />
-      <krun-option name="-smt" value="none" />
+      <krun-option name="--smt" value="none" />
     </all-programs>
   </test>
 <!-- end Java Rewrite Engine tests -->

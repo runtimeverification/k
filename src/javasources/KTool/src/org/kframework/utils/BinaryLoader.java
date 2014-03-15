@@ -16,6 +16,10 @@ public class BinaryLoader {
             System.exit(1);
         }
     }
+    
+    public static <T> T load(Class<T> cls, String fileName) {
+        return cls.cast(load(fileName));
+    }
 
     public static Object load(String fileName) {
         try (ObjectInputStream deserializer

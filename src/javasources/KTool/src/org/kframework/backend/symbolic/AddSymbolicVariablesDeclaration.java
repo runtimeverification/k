@@ -3,7 +3,7 @@ package org.kframework.backend.symbolic;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.utils.general.GlobalSettings;
+import org.kframework.kompile.KompileOptions;
 
 import java.util.*;
 
@@ -30,7 +30,7 @@ public class AddSymbolicVariablesDeclaration extends BasicVisitor {
     @Override
     public void visit(Module module) {
 
-        if (module.getName().equals(syntaxModule) && GlobalSettings.symbolic) {
+        if (module.getName().equals(syntaxModule) && context.kompileOptions.backend == KompileOptions.Backend.symbolic) {
 
             // adding lexical construct
             Lexical lexical = new Lexical(terminal, follow);

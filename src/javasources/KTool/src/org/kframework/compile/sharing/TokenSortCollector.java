@@ -8,6 +8,8 @@ import org.kframework.kil.Terminal;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
+import org.kframework.kompile.KompileOptions;
+import org.kframework.kompile.KompileOptions.Backend;
 import org.kframework.krun.K;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -47,14 +49,17 @@ public class TokenSortCollector extends BasicVisitor {
         definition.accept(collector);
         return collector.tokenSorts;
     }
+    
+    private KompileOptions kompileOptions;
 
     private TokenSortCollector(Context context) {
         super(context);
+        this.kompileOptions = context.kompileOptions;
     }
 
     @Override
     public void visit(Production production) {
-        if (GlobalSettings.javaBackend || K.backend.equals("java")) {
+        if (kompileOptions.backend.java() || K.backend.equals("java")) {
             checkIllegalProduction(production);
         } else {
             if (production.isLexical() && !production.containsAttribute(Constants.VARIABLE)) {

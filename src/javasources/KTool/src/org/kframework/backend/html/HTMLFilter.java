@@ -8,10 +8,8 @@ import org.kframework.kil.Collection;
 import org.kframework.kil.LiterateComment.LiterateCommentType;
 import org.kframework.kil.loader.*;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.general.GlobalSettings;
 
 import java.awt.*;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
@@ -22,7 +20,7 @@ import java.util.regex.Pattern;
 
 public class HTMLFilter extends BackendFilter {
     String endl = System.getProperty("line.separator");
-    private String cssFile = GlobalSettings.style;
+    private String cssFile = options.docStyle();
     private String css = "";
     private String preamble = "";
     private String title = "";

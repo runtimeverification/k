@@ -63,7 +63,7 @@ public class ParseConfigsFilter extends BasicTransformer {
         if (ss.getType().equals(Constants.CONFIG)) {
             try {
                 ASTNode config = null;
-                if (GlobalSettings.fastKast) {
+                if (experimentalParserOptions.fastKast) {
                     // TODO(RaduM): load directly from ATerms
                     config = Sglr.run_sglri(context.dotk.getAbsolutePath() + "/def/Concrete.tbl", "CondSentence", ss.getContent(), ss.getFilename());
                     int startLine = StringUtil.getStartLineFromLocation(ss.getContentLocation());
@@ -79,7 +79,7 @@ public class ParseConfigsFilter extends BasicTransformer {
                     if (ss.containsAttribute("kore")) {
                         long startTime = System.currentTimeMillis();
                         parsed = org.kframework.parser.concrete.KParser.ParseKoreString(ss.getContent());
-                        if (GlobalSettings.verbose)
+                        if (globalOptions.verbose)
                             System.out.println("Parsing with Kore: " + ss.getFilename() + ":" + ss.getLocation() + " - " + (System.currentTimeMillis() - startTime));
                     } else
                         parsed = org.kframework.parser.concrete.KParser.ParseKConfigString(ss.getContent());
@@ -110,7 +110,7 @@ public class ParseConfigsFilter extends BasicTransformer {
                 config = config.accept(new CorrectCastPriorityFilter(context));
                 // config = config.accept(new CheckBinaryPrecedenceFilter());
                 config = config.accept(new PriorityFilter(context));
-                if (GlobalSettings.fastKast)
+                if (experimentalParserOptions.fastKast)
                     config = config.accept(new MergeAmbFilter(context));
                 config = config.accept(new VariableTypeInferenceFilter(context));
                 // config = config.accept(new AmbDuplicateFilter(context));

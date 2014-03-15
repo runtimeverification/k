@@ -85,5 +85,4 @@ public class FlattenSyntax extends CopyOnWriteTransformer {
             return node;
         return new Sort("K");
     }
-
 }

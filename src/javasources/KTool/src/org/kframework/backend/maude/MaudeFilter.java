@@ -9,6 +9,7 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.Collection;
 import org.kframework.kil.loader.Context;
+import org.kframework.kompile.KompileOptions;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -28,16 +29,16 @@ public class MaudeFilter extends BackendFilter {
 
     public MaudeFilter(Context context) {
         super(context);
-        unusedTransitions = new HashSet<>(GlobalSettings.transition.size());
+        unusedTransitions = new HashSet<>(options.transition.size());
         this.cfgStr = context.getConfigurationStructureMap();
     }
 
     @Override
     public void visit(Definition definition) {
-        unusedTransitions.addAll(GlobalSettings.transition);
-        // if --transition was not specified do not consider the default tag "transition"
-        if (unusedTransitions.size() ==1 && unusedTransitions.contains(GlobalSettings.TRANSITION))
-            unusedTransitions.clear();
+        unusedTransitions.addAll(options.transition);
+        if (unusedTransitions.contains(KompileOptions.DEFAULT_TRANSITION)) {
+            unusedTransitions.remove(KompileOptions.DEFAULT_TRANSITION);
+        }
         // TODO: remove hack for token membership predicates
 
         for (DefinitionItem di : definition.getItems()) {
@@ -457,7 +458,7 @@ public class MaudeFilter extends BackendFilter {
     public void visit(Rule rule) {
         boolean isTransition = false;
         for (Attribute a : rule.getAttributes().getContents()) {
-            if (GlobalSettings.transition.contains(a.getKey())) {
+            if (options.transition.contains(a.getKey())) {
                 isTransition = true;
                 unusedTransitions.remove(a.getKey());
                 break;

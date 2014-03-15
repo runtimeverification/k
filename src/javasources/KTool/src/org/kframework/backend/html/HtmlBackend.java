@@ -7,7 +7,6 @@ import org.kframework.kil.loader.Context;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
-import org.kframework.utils.general.GlobalSettings;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,8 +26,8 @@ public class HtmlBackend extends BasicBackend {
 
         String html = htmlFilter.getHTML();
 
-        FileUtil.save(GlobalSettings.outputDir + File.separator + FilenameUtils.removeExtension(new File(definition.getMainFile()).getName()) + ".html", html);
-        FileUtil.save(GlobalSettings.outputDir + File.separator + "k-definition.css",
+        FileUtil.save(options.directory.getPath() + File.separator + FilenameUtils.removeExtension(new File(definition.getMainFile()).getName()) + ".html", html);
+        FileUtil.save(options.directory.getPath() + File.separator + "k-definition.css",
                 FileUtil.getFileContent(htmlIncludePath + "k-definition.css"));
 
         sw.printIntermediate("Generating HTML");

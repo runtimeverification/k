@@ -60,6 +60,8 @@ public class JavaSymbolicKRun implements KRun {
 
         this.context = definition.context();
         this.context.kompiled = context.kompiled;
+        this.context.globalOptions = context.globalOptions;
+        this.context.experimentalParserOptions = context.experimentalParserOptions;
         transformer = new KILtoBackendJavaKILTransformer(this.context);
     }
     

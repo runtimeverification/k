@@ -43,16 +43,16 @@ public class KCheckFrontEnd {
         }
 
         // main settings
-        GlobalSettings.symbolicEquality = true;
-        GlobalSettings.SMT = true;
-        GlobalSettings.NOSMT = false;
+        //GlobalSettings.symbolicEquality = true;
+        //GlobalSettings.SMT = true;
+        //GlobalSettings.NOSMT = false;
         RLBackend.SIMPLIFY = cmd.hasOption("simplify");
-        GlobalSettings.addTopCell = true;
+        //GlobalSettings.addTopCell = true;
 
 
         // set verbose
-        if (cmd.hasOption("verbose"))
-            GlobalSettings.verbose = true;
+        //if (cmd.hasOption("verbose"))
+        //    GlobalSettings.verbose = true;
 
 
         // user interface
@@ -84,29 +84,28 @@ public class KCheckFrontEnd {
                     def = restArgs[0];
             }
 
-            GlobalSettings.setMainFile(def);
+            //GlobalSettings.setMainFile(def);
 
-            String lang = FileUtil.getMainModule(GlobalSettings.mainFile.getName());
+            String lang = null;//FileUtil.getMainModule(GlobalSettings.mainFile.getName());
 
             // Matching Logic & Symbolic Calculus options
-            GlobalSettings.symbolicEquality = true;
-            GlobalSettings.SMT = true;
+            //GlobalSettings.symbolicEquality = true;
+            //GlobalSettings.SMT = true;
 
-            Context context = new Context();
+            Context context = null;//new Context();
 
             if (context.dotk == null) {
-                try {
-                    context.dotk = new File(GlobalSettings.mainFile.getCanonicalFile().getParent() + File.separator + ".k");
-                } catch (IOException e) {
-                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Canonical file cannot be obtained for main file.", GlobalSettings.mainFile.getAbsolutePath(),
-                            "File system."));
-                }
+                //try {
+                //    context.dotk = new File(GlobalSettings.mainFile.getCanonicalFile().getParent() + File.separator + ".k");
+                //} catch (IOException e) {
+                //    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Canonical file cannot be obtained for main file.", GlobalSettings.mainFile.getAbsolutePath(),
+                //            "File system."));
+                //}
                 context.dotk.mkdirs();
             }
 
-            Backend backend = new RLBackend(Stopwatch.sw, context);
-            output = FilenameUtils.removeExtension(GlobalSettings.mainFile.getName()) + "-kompiled";
-            context.dotk = new File(output);
+            Backend backend = new RLBackend(Stopwatch.instance(), context);
+            //output = FilenameUtils.removeExtension(GlobalSettings.mainFile.getName()) + "-kompiled";
             context.dotk.mkdirs();
 
             genericCompile(lang, backend, null, context);
@@ -117,10 +116,10 @@ public class KCheckFrontEnd {
     }
 
     public static void verbose(CommandLine cmd, Context context) {
-        Stopwatch.sw.printTotal("Total");
-        if (GlobalSettings.verbose) {
+        Stopwatch.instance().printTotal("Total");
+        //if (GlobalSettings.verbose) {
             context.printStatistics();
-        }
+        //}
         GlobalSettings.kem.print();
     }
 
@@ -132,8 +131,8 @@ public class KCheckFrontEnd {
             Context context) {
         org.kframework.kil.Definition javaDef;
         try {
-            Stopwatch.sw.start();
-            javaDef = DefinitionLoader.loadDefinition(GlobalSettings.mainFile, lang, backend.autoinclude(), context);
+            Stopwatch.instance().start();
+            javaDef = null;//DefinitionLoader.loadDefinition(GlobalSettings.mainFile, lang, backend.autoinclude(), context);
             javaDef.accept(new CountNodesVisitor(context));
 
             CompilerSteps<Definition> steps = backend.getCompilationSteps();

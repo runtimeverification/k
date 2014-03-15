@@ -9,7 +9,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.K;
-import org.kframework.utils.general.GlobalSettings;
+import org.kframework.kompile.KompileOptions.Backend;
 
 import java.util.*;
 
@@ -223,7 +223,7 @@ public class FlattenTerms extends CopyOnWriteTransformer {
             }
 
             node = node.shallowCopy();
-            if (GlobalSettings.javaBackend || K.backend.equals("java")) {
+            if (kompileOptions.backend.java() || K.backend.equals("java")) {
                 /* the Java Rewrite Engine preserves sort information for variables */
             } else {
                 node.setSort(KSorts.KITEM);

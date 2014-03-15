@@ -1,5 +1,9 @@
 package org.kframework.utils;
 
+import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class StringUtil {
     public static String unescape(String str) {
         StringBuilder sb = new StringBuilder();
@@ -449,14 +453,16 @@ public class StringUtil {
     public static String splitLines(String str, int col) {
         String[] lines = str.split("\n");
         StringBuilder builder = new StringBuilder();
+        String nl = "";
         for (String line : lines) {
+            builder.append(nl);
             if (line.length() < 80) {
                 builder.append(line);
-                builder.append("\n");
+                
             } else {
                 builder.append(splitLine(line, col));
-                builder.append("\n");
             }
+            nl = "\n";
         }
 
         return builder.toString();
@@ -474,5 +480,31 @@ public class StringUtil {
             }
         }
         return str.substring(0, lastIdx) + "\n" + splitLine(str.substring(lastIdx + 1), col);
+    }
+
+    /**
+     * Finesse the JCommander usage output to make it more readable to the user.
+     * 
+     * This function does two things. First, it reworks the indentation to fix a 
+     * bug where different commands are indented differently. Second, it
+     * separates out experimental and non-experimental options in order to print
+     * their usage separately.
+     * @param string The unfiltered output from JCommander's usage
+     * @return An array of strings. If the command has experimental options, they 
+     * are in the second string, and the main options are in the first string.
+     * Otherwise, there will only be one string outputted.
+     */
+    public static String[] finesseJCommanderUsage(String string) {
+        //for some reason the usage pattern indents commands inconsistently, so we need to adjust it
+        string = string.replaceAll("        ", "    ");
+        //we also need to move the experimental options to the end
+        Pattern p = Pattern.compile("^(\\s*--X.*?)^\\s*--[^X]", Pattern.DOTALL | Pattern.MULTILINE);
+        Matcher m = p.matcher(string);
+        if (m.find()) {
+            String experimentalOptions = "  Experimental Options:\n" + m.group(1);
+            string = string.substring(0, m.start(1)) + string.substring(m.end(1));
+            return new String[] {string, experimentalOptions};
+        }
+        return new String[] {string};
     }
 }

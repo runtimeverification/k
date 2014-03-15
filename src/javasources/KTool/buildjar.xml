@@ -1,29 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project default="jar" name="Create Runnable Jar for Project KTool">
+	<property name="jarfile" location="../../../lib/java/k3.jar" />
 	<target name="jar">
-		<delete file="../../../lib/java/k3.jar" failonerror="false" />
-		<jar destfile="../../../lib/java/k3.jar" filesetmanifest="mergewithoutmain">
+		<delete file="${jarfile}" failonerror="false" />
+		<manifestclasspath property="jar.classpath" jarfile="${jarfile}">
+			<classpath refid="KTool.classpath" />
+		</manifestclasspath>
+		<jar destfile="${jarfile}" filesetmanifest="mergewithoutmain">
 			<manifest>
 				<attribute name="Main-Class" value="org.kframework.main.Main"/>
-        <attribute name="Class-Path" value="
-          .
-          aterm-java.jar
-          collections-generic-4.01.jar
-          com.microsoft.z3.jar
-          commons-cli-1.2.jar
-          commons-io-2.1.jar
-          commons-lang3-3.1.jar
-          diffutils-1.2.1.jar
-          guava-14.0.1.jar
-          jansi-1.8.jar
-          jline-1.0.jar
-          jopt-simple-3.3.jar
-          jung-algorithms-2.0.1.jar
-          jung-api-2.0.1.jar
-          jung-graph-impl-2.0.1.jar
-          jung-io-2.0.1.jar
-          jung-visualization-2.0.1.jar
-          strategoxt.jar" />
+				<attribute name="Class-Path" value="${jar.classpath}" />
 			</manifest>
 			<fileset dir="./bin"/>
 		</jar>

@@ -38,7 +38,6 @@ import org.kframework.backend.java.util.TestCaseGenerationUtil;
 import org.kframework.krun.K;
 import org.kframework.krun.api.SearchType;
 import org.kframework.krun.api.io.FileSystem;
-import org.kframework.utils.general.GlobalSettings;
 
 import com.google.common.base.Stopwatch;
 
@@ -51,8 +50,7 @@ import com.google.common.base.Stopwatch;
 public class SymbolicRewriter {
 
     private final Definition definition;
-    private final TransitionCompositeStrategy strategy
-            = new TransitionCompositeStrategy(GlobalSettings.transition);
+    private final TransitionCompositeStrategy strategy;
     private final Stopwatch stopwatch = new Stopwatch();
     private int step;
     private final Stopwatch ruleStopwatch = new Stopwatch();
@@ -71,6 +69,8 @@ public class SymbolicRewriter {
         this.definition = definition;
         ruleIndex = definition.getIndex();
 
+        this.strategy = new TransitionCompositeStrategy(definition.context().kompileOptions.transition);
+        
         /* initialize the K AST checker for test generation */
         if (K.do_testgen) {
             phase1PluggableKastChecker = new PluggableKastStructureChecker();

@@ -19,7 +19,6 @@ import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.CorrectConstantsTransformer;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
-import org.kframework.parser.concrete.disambiguate.TypeSystemFilter2;
 import org.kframework.parser.utils.ReportErrorsVisitor;
 import org.kframework.parser.utils.Sglr;
 import org.kframework.utils.BinaryLoader;
@@ -50,7 +49,7 @@ public class ProgramLoader {
         // ------------------------------------- import files in Stratego
         ASTNode out;
 
-        if (GlobalSettings.fastKast) {
+        if (context.experimentalParserOptions.fastKast) {
             //out = Sglri.run_sglri(context.kompiled.getAbsolutePath() + "/pgm/Program.tbl", startSymbol, content);
             JavaClassesFactory.startConstruction(context);
             out = Sglr.run_sglri(context.kompiled.getAbsolutePath() + "/pgm/Program.tbl", startSymbol, content, filename);
@@ -92,7 +91,7 @@ public class ProgramLoader {
      */
     public static Term processPgm(String content, String filename, Definition def, String startSymbol,
             Context context, GlobalSettings.ParserType whatParser) throws TransformerException {
-        Stopwatch.sw.printIntermediate("Importing Files");
+        Stopwatch.instance().printIntermediate("Importing Files");
         assert context.definedSorts.contains(startSymbol) : "The start symbol must be declared in the definition. Found: " + startSymbol;
 
         try {
@@ -124,7 +123,7 @@ public class ProgramLoader {
                 out = loadPgmAst(content, filename, startSymbol, context);
                 out = out.accept(new ResolveVariableAttribute(context));
             }
-            Stopwatch.sw.printIntermediate("Parsing Program");
+            Stopwatch.instance().printIntermediate("Parsing Program");
 
             return (Term) out;
         } catch (IOException e) {

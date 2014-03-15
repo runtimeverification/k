@@ -1,17 +1,25 @@
 package org.kframework.utils;
 
-import org.kframework.utils.general.GlobalSettings;
+import org.kframework.main.GlobalOptions;
 
 import java.util.Formatter;
 
 public class Stopwatch {
-    public static final Stopwatch sw = new Stopwatch();
+    private static Stopwatch sw;
     private long start;
     private long lastIntermediate;
     Formatter f = new Formatter(System.out);
+    private GlobalOptions options;
 
-    public static void init() {
-        //Have to stay empty. The role of the method is to trigger static initialization of the class.
+    public void init(GlobalOptions options) {
+        this.options = options;
+    }
+    
+    public static Stopwatch instance() {
+        if (sw == null) {
+            sw = new Stopwatch();
+        }
+        return sw;
     }
 
     /**
@@ -27,15 +35,17 @@ public class Stopwatch {
     }
 
     public void printIntermediate(String message) {
+        assert options != null;
         long current = System.currentTimeMillis();
-        if (GlobalSettings.verbose)
+        if (options.verbose)
             f.format("%-60s = %5d%n", message, current - lastIntermediate);
         lastIntermediate = current;
     }
 
     public void printTotal(String message) {
+        assert options != null;
         printIntermediate("Cleanup");
-        if (GlobalSettings.verbose)
+        if (options.verbose)
             f.format("%-60s = %5d%n", message, lastIntermediate - start);
     }
 

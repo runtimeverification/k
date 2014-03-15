@@ -50,7 +50,7 @@ public class AddSuperheatRules extends CopyOnWriteTransformer {
             return node;
         }
         boolean superheat = false;
-        for (String heat : GlobalSettings.superheat) {
+        for (String heat : kompileOptions.superheat) {
             if (node.containsAttribute(heat)) {
                 superheat = true;
                 break;

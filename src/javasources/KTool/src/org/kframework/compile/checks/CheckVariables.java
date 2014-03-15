@@ -4,6 +4,8 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.*;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
+import org.kframework.kompile.KompileOptions;
+import org.kframework.kompile.KompileOptions.Backend;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
 
@@ -35,8 +37,11 @@ public class CheckVariables extends BasicVisitor {
 
     public static final String UNBOUNDED_VARS = "hasUnboundedVars";
 
+    KompileOptions options;
+    
     public CheckVariables(Context context) {
         super(context);
+        options = context.kompileOptions;
     }
 
     HashMap<Variable, Integer> left = new HashMap<Variable, Integer>();
@@ -150,7 +155,7 @@ public class CheckVariables extends BasicVisitor {
                 node.addAttribute(UNBOUNDED_VARS, "");
                 
                 /* matching logic relaxes this restriction */
-                if (!GlobalSettings.javaBackend) {
+                if (!options.backend.java()) {
                     GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
                             KException.KExceptionGroup.COMPILER,
                             "Unbounded Variable " + v.toString() + ".",
