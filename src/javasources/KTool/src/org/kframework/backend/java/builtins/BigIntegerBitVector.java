@@ -1,0 +1,264 @@
+package org.kframework.backend.java.builtins;
+
+import com.google.common.collect.Lists;
+import org.kframework.backend.java.kil.Bottom;
+import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.Kind;
+import org.kframework.backend.java.kil.Term;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.google.common.collect.ImmutableList;
+
+
+/**
+ * @author AndreiS
+ */
+public class BigIntegerBitVector extends BitVector<BigInteger> {
+
+    private BigIntegerBitVector(BigInteger value, int bitwidth) {
+        super(value, bitwidth);
+    }
+
+    public static BigIntegerBitVector of(BigInteger value, int bitwidth) {
+        assert bitwidth > 0;
+
+        return new BigIntegerBitVector(value, bitwidth);
+    }
+
+    @Override
+    public boolean isZero() {
+        return unsignedValue().equals(BigInteger.ZERO);
+    }
+
+    private boolean checkSignedOverflow(BigInteger bigInteger) {
+        return bigInteger.compareTo(signedMin()) < 0 || bigInteger.compareTo(signedMax()) > 0;
+    }
+
+    private boolean checkUnsignedOverflow(BigInteger bigInteger) {
+        return bigInteger.compareTo(unsignedMin()) < 0 || bigInteger.compareTo(unsignedMax()) > 0;
+    }
+
+    private BigInteger signedMin() {
+        return BigInteger.ZERO.subtract(BigInteger.ONE.shiftLeft(bitwidth - 1));
+    }
+
+    private BigInteger signedMax() {
+        return BigInteger.ONE.shiftLeft(bitwidth - 1).subtract(BigInteger.ONE);
+    }
+
+    private BigInteger unsignedMin() {
+        return BigInteger.ZERO;
+    }
+
+    private BigInteger unsignedMax() {
+        return BigInteger.ONE.shiftLeft(bitwidth).subtract(BigInteger.ONE);
+    }
+
+    @Override
+    public BigInteger signedValue() {
+        return value
+                .add(BigInteger.ONE.shiftLeft(bitwidth - 1))
+                .mod(BigInteger.ONE.shiftLeft(bitwidth))
+                .subtract(BigInteger.ONE.shiftLeft(bitwidth - 1));
+    }
+
+    @Override
+    public BigInteger unsignedValue() {
+        return value.mod(BigInteger.ONE.shiftLeft(bitwidth));
+    }
+
+    @Override
+    public BitVector<BigInteger> add(BitVector<BigInteger> bitVector) {
+        return BigIntegerBitVector.of(value.add(bitVector.value), bitwidth);
+    }
+
+    @Override
+    public BitVector<BigInteger> sub(BitVector<BigInteger> bitVector) {
+        return BigIntegerBitVector.of(value.subtract(bitVector.value), bitwidth);
+    }
+
+    @Override
+    public BitVector<BigInteger> mul(BitVector<BigInteger> bitVector) {
+        return BigIntegerBitVector.of(value.multiply(bitVector.value), bitwidth);
+    }
+
+    @Override
+    public Term sdiv(BitVector<BigInteger> bitVector) {
+        if (!bitVector.signedValue().equals(BigInteger.ZERO)
+                && !(signedValue().equals(signedMin())
+                        && bitVector.signedValue().equals(BigInteger.valueOf(-1)))) {
+            return BigIntegerBitVector.of(
+                    signedValue().divide(bitVector.signedValue()),
+                    bitwidth);
+        } else {
+            return new Bottom(Kind.KITEM);
+        }
+    }
+
+    @Override
+    public Term udiv(BitVector<BigInteger> bitVector) {
+        if (!bitVector.unsignedValue().equals(BigInteger.ZERO)) {
+            return BigIntegerBitVector.of(
+                    unsignedValue().divide(bitVector.unsignedValue()),
+                    bitwidth);
+        } else {
+            return new Bottom(Kind.KITEM);
+        }
+    }
+
+    @Override
+    public Term srem(BitVector<BigInteger> bitVector) {
+        if (!bitVector.signedValue().equals(BigInteger.ZERO)
+                && !(signedValue().equals(signedMin())
+                        && bitVector.signedValue().equals(BigInteger.valueOf(-1)))) {
+            return BigIntegerBitVector.of(
+                    signedValue().remainder(bitVector.signedValue()),
+                    bitwidth);
+        } else {
+            return new Bottom(Kind.KITEM);
+        }
+    }
+
+    @Override
+    public Term urem(BitVector<BigInteger> bitVector) {
+        if (!bitVector.unsignedValue().equals(BigInteger.ZERO)) {
+            return BigIntegerBitVector.of(
+                    unsignedValue().remainder(bitVector.unsignedValue()),
+                    bitwidth);
+        } else {
+            return new Bottom(Kind.KITEM);
+        }
+    }
+
+    @Override
+    public BuiltinList sadd(BitVector<BigInteger> bitVector) {
+        BigInteger result = signedValue().add(bitVector.signedValue());
+        return new BuiltinList(ImmutableList.<Term>of(
+                BitVector.of(result, bitwidth),
+                BoolToken.of(checkSignedOverflow(result))));
+    }
+
+    @Override
+    public BuiltinList uadd(BitVector<BigInteger> bitVector) {
+        BigInteger result = signedValue().add(bitVector.signedValue());
+        return new BuiltinList(ImmutableList.<Term>of(
+                BitVector.of(result, bitwidth),
+                BoolToken.of(checkUnsignedOverflow(result))));
+    }
+
+    @Override
+    public BuiltinList ssub(BitVector<BigInteger> bitVector) {
+        BigInteger result = signedValue().subtract(bitVector.signedValue());
+        return new BuiltinList(ImmutableList.<Term>of(
+                BitVector.of(result, bitwidth),
+                BoolToken.of(checkSignedOverflow(result))));
+    }
+
+    @Override
+    public BuiltinList usub(BitVector<BigInteger> bitVector) {
+        BigInteger result = signedValue().subtract(bitVector.signedValue());
+        return new BuiltinList(ImmutableList.<Term>of(
+                BitVector.of(result, bitwidth),
+                BoolToken.of(checkUnsignedOverflow(result))));
+    }
+
+    @Override
+    public BuiltinList smul(BitVector<BigInteger> bitVector) {
+        BigInteger result = signedValue().multiply(bitVector.signedValue());
+        return new BuiltinList(ImmutableList.<Term>of(
+                BitVector.of(result, bitwidth),
+                BoolToken.of(checkSignedOverflow(result))));
+    }
+
+    @Override
+    public BuiltinList umul(BitVector<BigInteger> bitVector) {
+        BigInteger result = signedValue().multiply(bitVector.signedValue());
+        return new BuiltinList(ImmutableList.<Term>of(
+                BitVector.of(result, bitwidth),
+                BoolToken.of(checkUnsignedOverflow(result))));
+    }
+
+    @Override
+    public BitVector<BigInteger> and(BitVector<BigInteger> bitVector) {
+        return BigIntegerBitVector.of(value.and(bitVector.value), bitwidth);
+    }
+
+    @Override
+    public BitVector<BigInteger> or(BitVector<BigInteger> bitVector) {
+        return BigIntegerBitVector.of(value.or(bitVector.value), bitwidth);
+    }
+
+    @Override
+    public BitVector<BigInteger> xor(BitVector<BigInteger> bitVector) {
+        return BigIntegerBitVector.of(value.xor(bitVector.value), bitwidth);
+    }
+
+    @Override
+    public BoolToken slt(BitVector<BigInteger> bitVector) {
+        return BoolToken.of(signedValue().compareTo(bitVector.signedValue()) < 0);
+    }
+
+    @Override
+    public BoolToken ult(BitVector<BigInteger> bitVector) {
+        return BoolToken.of(unsignedValue().compareTo(bitVector.unsignedValue()) < 0);
+    }
+
+    @Override
+    public BoolToken sle(BitVector<BigInteger> bitVector) {
+        return BoolToken.of(signedValue().compareTo(bitVector.signedValue()) <= 0);
+    }
+
+    @Override
+    public BoolToken ule(BitVector<BigInteger> bitVector) {
+        return BoolToken.of(unsignedValue().compareTo(bitVector.unsignedValue()) <= 0);
+    }
+
+    @Override
+    public BoolToken sgt(BitVector<BigInteger> bitVector) {
+        return BoolToken.of(signedValue().compareTo(bitVector.signedValue()) > 0);
+    }
+
+    @Override
+    public BoolToken ugt(BitVector<BigInteger> bitVector) {
+        return BoolToken.of(unsignedValue().compareTo(bitVector.unsignedValue()) > 0);
+    }
+
+    @Override
+    public BoolToken sge(BitVector<BigInteger> bitVector) {
+        return BoolToken.of(signedValue().compareTo(bitVector.signedValue()) >= 0);
+    }
+
+    @Override
+    public BoolToken uge(BitVector<BigInteger> bitVector) {
+        return BoolToken.of(unsignedValue().compareTo(bitVector.unsignedValue()) >= 0);
+    }
+
+    @Override
+    public BoolToken eq(BitVector<BigInteger> bitVector) {
+        return BoolToken.of(unsignedValue().equals(bitVector.unsignedValue()));
+    }
+
+    @Override
+    public BoolToken ne(BitVector<BigInteger> bitVector) {
+        return BoolToken.of(!unsignedValue().equals(bitVector.unsignedValue()));
+    }
+
+    @Override
+    public List<BitVector> toDigits(int digitBase) {
+        assert digitBase > 0;
+
+        List<BitVector> digits = new ArrayList<>();
+        for (BigInteger value = unsignedValue();
+                !value.equals(BigInteger.ZERO);
+                value = value.shiftRight(digitBase)) {
+            digits.add(
+                    BitVector.of(value.remainder(BigInteger.ONE.shiftLeft(digitBase)), digitBase));
+        }
+
+        return Lists.reverse(digits);
+    }
+
+}

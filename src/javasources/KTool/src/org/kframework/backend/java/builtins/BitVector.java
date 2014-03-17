@@ -1,5 +1,6 @@
 package org.kframework.backend.java.builtins;
 
+import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.symbolic.Matcher;
@@ -10,12 +11,15 @@ import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
 import java.math.BigInteger;
+import java.util.List;
 
 
 /**
  * @author AndreiS
+ *
+ * @see include/builtins/mint.k
  */
-public class BitVector<T extends Number> extends Token {
+public abstract class BitVector<T extends Number> extends Token {
 
     public static final String SORT_NAME = "MInt";
 
@@ -28,39 +32,38 @@ public class BitVector<T extends Number> extends Token {
      */
     protected final int bitwidth;
 
-    public BitVector(T value, int bitwidth) {
+    protected BitVector(T value, int bitwidth) {
         this.value = value;
         this.bitwidth = bitwidth;
     }
 
     /**
-     * Returns a {@code BitVector} representation of the given integer value on the given
+     * Returns a {@code BitVector} representation of the given big integer value on the given
      * bit width.
      */
     public static BitVector of(BigInteger value, int bitwidth) {
-        switch (bitwidth) {
-            case Byte.SIZE:
-                return PrimitiveIntToken.of(value.byteValue());
-            case Short.SIZE:
-                return PrimitiveIntToken.of(value.shortValue());
-            case Integer.SIZE:
-                return PrimitiveIntToken.of(value.intValue());
-            case Long.SIZE:
-                return PrimitiveIntToken.of(value.longValue());
-            default:
-                return new BitVector<>(value, bitwidth);
-        }
+        assert bitwidth > 0;
 
+        switch (bitwidth) {
+            case Integer.SIZE:
+                return Int32Token.of(value.intValue());
+            default:
+                return BigIntegerBitVector.of(value, bitwidth);
+        }
     }
 
     /**
-     * Returns an {@code BigInteger} representation of the (interpreted) value of this BitVector.
+     * Returns a {@code BitVector} representation of the given big integer value on the given
+     * bit width.
      */
-    public BigInteger bigIntegerValue() {
-        if (this instanceof PrimitiveIntToken) {
-            return BigInteger.valueOf(((PrimitiveIntToken) this).longValue());
-        } else {
-            return (BigInteger) value;
+    public static BitVector of(long value, int bitwidth) {
+        assert bitwidth > 0;
+
+        switch (bitwidth) {
+            case Integer.SIZE:
+                return Int32Token.of(Long.valueOf(value).intValue());
+            default:
+                return BigIntegerBitVector.of(BigInteger.valueOf(value), bitwidth);
         }
     }
 
@@ -70,6 +73,21 @@ public class BitVector<T extends Number> extends Token {
     public int bitwidth() {
         return bitwidth;
     }
+
+    /**
+     * Returns true if this BitVector is zero.
+     */
+    public abstract boolean isZero();
+
+    /**
+     * Returns an {@code BigInteger} representation of the signed value of this BitVector.
+     */
+    public abstract BigInteger signedValue();
+
+    /**
+     * Returns an {@code BigInteger} representation of the unsigned value of this BitVector.
+     */
+    public abstract BigInteger unsignedValue();
 
     /**
      * Returns a {@code String} representation of the sort of this BitVector.
@@ -88,16 +106,6 @@ public class BitVector<T extends Number> extends Token {
     }
 
     @Override
-    public int hashCode() {
-        if (hashCode == 0) {
-            hashCode = 1;
-            hashCode = hashCode * Utils.HASH_PRIME + value.hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + bitwidth;
-        }
-        return hashCode;
-    }
-
-    @Override
     public boolean equals(Object object) {
         if (this == object) {
             return true;
@@ -109,6 +117,16 @@ public class BitVector<T extends Number> extends Token {
 
         BitVector bitVector = (BitVector) object;
         return value.equals(bitVector.value) && bitwidth == bitVector.bitwidth;
+    }
+
+    @Override
+    public int hashCode() {
+        if (hashCode == 0) {
+            hashCode = 1;
+            hashCode = hashCode * Utils.HASH_PRIME + value.hashCode();
+            hashCode = hashCode * Utils.HASH_PRIME + bitwidth;
+        }
+        return hashCode;
     }
 
     @Override
@@ -129,6 +147,56 @@ public class BitVector<T extends Number> extends Token {
     @Override
     public void accept(Visitor visitor) {
         visitor.visit(this);
+    }
+
+    public abstract BitVector<T> add(BitVector<T> bitVector);
+    public abstract BitVector<T> sub(BitVector<T> bitVector);
+    public abstract BitVector<T> mul(BitVector<T> bitVector);
+
+    public abstract Term sdiv(BitVector<T> bitVector);
+    public abstract Term udiv(BitVector<T> bitVector);
+    public abstract Term srem(BitVector<T> bitVector);
+    public abstract Term urem(BitVector<T> bitVector);
+
+    public abstract BuiltinList sadd(BitVector<T> bitVector);
+    public abstract BuiltinList uadd(BitVector<T> bitVector);
+    public abstract BuiltinList ssub(BitVector<T> bitVector);
+    public abstract BuiltinList usub(BitVector<T> bitVector);
+    public abstract BuiltinList smul(BitVector<T> bitVector);
+    public abstract BuiltinList umul(BitVector<T> bitVector);
+
+    public abstract BitVector<T> and(BitVector<T> bitVector);
+    public abstract BitVector<T> or(BitVector<T> bitVector);
+    public abstract BitVector<T> xor(BitVector<T> bitVector);
+
+    public abstract BoolToken slt(BitVector<T> bitVector);
+    public abstract BoolToken ult(BitVector<T> bitVector);
+    public abstract BoolToken sle(BitVector<T> bitVector);
+    public abstract BoolToken ule(BitVector<T> bitVector);
+    public abstract BoolToken sgt(BitVector<T> bitVector);
+    public abstract BoolToken ugt(BitVector<T> bitVector);
+    public abstract BoolToken sge(BitVector<T> bitVector);
+    public abstract BoolToken uge(BitVector<T> bitVector);
+    public abstract BoolToken eq(BitVector<T> bitVector);
+    public abstract BoolToken ne(BitVector<T> bitVector);
+
+    public abstract List<BitVector> toDigits(int digitBase);
+
+    public static BitVector fromDigits(List<BitVector> digits, int base) {
+        assert base > 0;
+        assert !digits.isEmpty();
+
+        BigInteger value = BigInteger.ZERO;
+        for (BitVector digit : digits) {
+            if (digit.bitwidth != base) {
+                return null;
+            }
+
+            /* value = value * 2^base + digit */
+            value = (value.shiftLeft(base)).add(digit.unsignedValue());
+        }
+
+        return BitVector.of(value, digits.size() * base);
     }
 
 }

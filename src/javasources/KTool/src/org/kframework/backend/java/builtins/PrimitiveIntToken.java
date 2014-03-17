@@ -13,7 +13,7 @@ import org.kframework.kil.ASTNode;
  *
  * @author AndreiS
  */
-public final class PrimitiveIntToken<T extends Number> extends BitVector<T> {
+public abstract class PrimitiveIntToken<T extends Number> extends BitVector<T> {
 
     private PrimitiveIntToken(T value, int bitwidth) {
         super(value, bitwidth);
@@ -23,19 +23,8 @@ public final class PrimitiveIntToken<T extends Number> extends BitVector<T> {
      * Returns a {@code PrimitiveIntToken} representation of the given primitive integer value.
      */
     public static <T extends Number> PrimitiveIntToken of(T value) {
-        if (value instanceof Byte) {
-            return new PrimitiveIntToken<>(value, Byte.SIZE);
-        } else if (value instanceof Short) {
-            return new PrimitiveIntToken<>(value, Short.SIZE);
-        } else if (value instanceof Integer) {
-            return new PrimitiveIntToken<>(value, Integer.SIZE);
-        } else if (value instanceof Long) {
-            return new PrimitiveIntToken<>(value, Long.SIZE);
-        } else {
-            assert false : "unexpected class type for " + value;
-            /* dead code */
+
             return null;
-        }
     }
 
     /**
