@@ -264,6 +264,23 @@ public class KItem extends Term implements Sorted {
         }
         KList kList = (KList) this.kList;
 
+        if (BuiltinFunction.isBuiltinKLabel(kLabelConstant)) {
+            try {
+                Term[] arguments = kList.getContents().toArray(new Term[kList.getContents().size()]);
+                Term result = BuiltinFunction.invoke(context, kLabelConstant, arguments);
+                if (result != null) {
+                    assert result instanceof KItem : "expected ";
+                    return result;
+                }
+            } catch (IllegalAccessException | IllegalArgumentException e) {
+            } catch (RuntimeException e) {
+                if (GlobalSettings.verbose) {
+                    System.err.println("Ignored exception thrown by hook " + kLabelConstant + " : ");
+                    e.printStackTrace();
+                }
+            }
+        }
+
         /* evaluate a sort membership predicate */
         // TODO(YilongL): maybe we can move sort membership evaluation after
         // applying user-defined rules to allow the users to provide their
@@ -375,32 +392,6 @@ public class KItem extends Term implements Sorted {
             } else if (mayUseOwiseRule && !owiseResults.isEmpty()) {
                 assert owiseResults.size() == 1 : "function definition is not deterministic";
                 return owiseResults.iterator().next();
-            }
-        }
-
-        if (!BuiltinFunction.isBuiltinKLabel(kLabelConstant)) {
-            return this;
-        }
-
-        try {
-            Term[] arguments = kList.getContents().toArray(new Term[kList.getContents().size()]);
-            Term result = BuiltinFunction.invoke(context, kLabelConstant, arguments);
-//          System.err.println(this + " => " + result);
-            if (result == null) {
-                result = this;
-            } else if (result instanceof KLabel) {
-                result = new KItem(new KLabelInjection(result), new KList(), context);
-            } else if (result instanceof KList) {
-                // TODO: handle the case that KList as return value
-                assert false : "YilongL: Fix it; handle the case where the return value is a KList";
-            }
-            return result;
-        } catch (IllegalAccessException | IllegalArgumentException e) {
-            //e.printStackTrace();
-        } catch (RuntimeException e) {
-            if (GlobalSettings.verbose) {
-                System.err.println("Ignored exception thrown by hook " + kLabelConstant + " : ");
-                e.printStackTrace();
             }
         }
 

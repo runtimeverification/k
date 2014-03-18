@@ -4,6 +4,8 @@ import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 
+import java.util.List;
+
 
 /**
  * Table of {@code public static} methods on builtin fixed precision integers.
@@ -237,15 +239,23 @@ public class BuiltinBitVectorOperations {
         }
     }
 
-    public static BuiltinList toDigits(BitVector term1, IntToken term2, TermContext context) {
-        return new BuiltinList(term1.toDigits(term2.intValue()));
+    public static BuiltinList toDigits(BitVector term, IntToken bitwidth, TermContext context) {
+        return new BuiltinList(term.toDigits(bitwidth.intValue()));
     }
 
-    public static BitVector fromDigits(BitVector term1, BitVector term2, TermContext context) {
-        if (term1.bitwidth() == term2.bitwidth()) {
-            return term1.ne(term2);
+    public static BitVector fromDigits(BuiltinList digitList, IntToken bitwidth, TermContext context) {
+        if (!digitList.hasFrame()) {
+            List<BitVector> digits;
+            try {
+                // AndreiS: double cast because Java in its infinite wisdom does not allow to cast
+                // List<Term> to List<BitVector>
+                digits = (List<BitVector>) ((List) digitList.elements());
+            } catch (ClassCastException e) {
+                throw new IllegalArgumentException(digitList + " is not a list of bitvectors");
+            }
+            return BitVector.fromDigits(digits, bitwidth.intValue());
         } else {
-            return (BoolToken) failWithBitwidthMismatch(term1, term2);
+            throw new IllegalArgumentException(digitList + " contains list variables");
         }
     }
 
