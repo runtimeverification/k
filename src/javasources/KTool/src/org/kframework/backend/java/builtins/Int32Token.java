@@ -1,11 +1,8 @@
 package org.kframework.backend.java.builtins;
 
-import com.google.common.primitives.UnsignedInteger;
 import org.kframework.backend.java.builtins.primitives.Ints;
 import org.kframework.backend.java.builtins.primitives.OverflowArithmeticResult;
-import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinList;
-import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Term;
 
 import java.math.BigInteger;
@@ -18,6 +15,8 @@ import com.google.common.primitives.UnsignedInts;
 
 
 /**
+ * Wrapper around java primitive int.
+ *
  * @author AndreiS
  */
 public class Int32Token extends BitVector<Integer> {
@@ -61,38 +60,38 @@ public class Int32Token extends BitVector<Integer> {
     }
 
     @Override
-    public Term sdiv(BitVector<Integer> bitVector) {
+    public Int32Token sdiv(BitVector<Integer> bitVector) {
         if (!(bitVector.value == 0 || (value == Integer.MIN_VALUE && bitVector.value == -1))) {
             return Int32Token.of(value / bitVector.value);
         } else {
-            return new Bottom(Kind.KITEM);
+            return null;
         }
     }
 
     @Override
-    public Term udiv(BitVector<Integer> bitVector) {
+    public Int32Token udiv(BitVector<Integer> bitVector) {
         if (bitVector.value != 0) {
             return Int32Token.of(UnsignedInts.divide(value, bitVector.value));
         } else {
-            return new Bottom(Kind.KITEM);
+            return null;
         }
     }
 
     @Override
-    public Term srem(BitVector<Integer> bitVector) {
+    public Int32Token srem(BitVector<Integer> bitVector) {
         if (!(bitVector.value == 0 || (value == Integer.MIN_VALUE && bitVector.value == -1))) {
             return Int32Token.of(value % bitVector.value);
         } else {
-            return new Bottom(Kind.KITEM);
+            return null;
         }
     }
 
     @Override
-    public Term urem(BitVector<Integer> bitVector) {
+    public Int32Token urem(BitVector<Integer> bitVector) {
         if (bitVector.value != 0) {
             return Int32Token.of(UnsignedInts.remainder(value, bitVector.value));
         } else {
-            return new Bottom(Kind.KITEM);
+            return null;
         }
     }
 
@@ -130,17 +129,33 @@ public class Int32Token extends BitVector<Integer> {
     }
 
     @Override
-    public BitVector<Integer> and(BitVector<Integer> bitVector) {
+    public Int32Token shl(IntToken intToken) {
+        return Int32Token.of(value << intToken.intValue());
+    }
+
+    @Override
+    public Int32Token ashr(IntToken intToken) {
+        return Int32Token.of(value >> intToken.intValue());
+    }
+
+    @Override
+    public Int32Token lshr(IntToken intToken) {
+        /* cast to long to avoid sign extension */
+        return Int32Token.of((int) (UnsignedInts.toLong(value) >> intToken.intValue()));
+    }
+
+    @Override
+    public Int32Token and(BitVector<Integer> bitVector) {
         return Int32Token.of(value & bitVector.value);
     }
 
     @Override
-    public BitVector<Integer> or(BitVector<Integer> bitVector) {
+    public Int32Token or(BitVector<Integer> bitVector) {
         return Int32Token.of(value | bitVector.value);
     }
 
     @Override
-    public BitVector<Integer> xor(BitVector<Integer> bitVector) {
+    public Int32Token xor(BitVector<Integer> bitVector) {
         return Int32Token.of(value ^ bitVector.value);
     }
 
@@ -161,7 +176,7 @@ public class Int32Token extends BitVector<Integer> {
 
     @Override
     public BoolToken ule(BitVector<Integer> bitVector) {
-        return BoolToken.of(UnsignedInts.compare(value, bitVector.value) >= 0);
+        return BoolToken.of(UnsignedInts.compare(value, bitVector.value) <= 0);
     }
 
     @Override
@@ -199,8 +214,8 @@ public class Int32Token extends BitVector<Integer> {
         assert digitBase > 0;
 
         List<BitVector> digits = new ArrayList<>();
-        for (int value = this.value; value != 0; value >>= digitBase) {
-            digits.add(BitVector.of(UnsignedInts.remainder(value, (1 << digitBase)), digitBase));
+        for (long value = UnsignedInts.toLong(this.value); value != 0; value >>= digitBase) {
+            digits.add(BitVector.of(value % (1 << digitBase), digitBase));
         }
 
         return Lists.reverse(digits);

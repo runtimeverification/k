@@ -101,9 +101,9 @@ module MINT
                   | umulMInt(MInt, MInt)    [function, hook(#MINT:umul)]
 
   /* Shift operations; the second operand must be non-negative */
-  syntax MInt ::= shlMInt(MInt, Int)    [function]
-                | ashrMInt(MInt, Int)   [function]
-                | lshrMInt(MInt, Int)   [function]
+  syntax MInt ::= shlMInt(MInt, Int)    [function, hook(#MINT:shl)]
+                | ashrMInt(MInt, Int)   [function, hook(#MINT:ashr)]
+                | lshrMInt(MInt, Int)   [function, hook(#MINT:lshr)]
 
   /* Bitwise operations */
   syntax MInt ::= andMInt(MInt, MInt)   [function, hook(#MINT:and)]
@@ -229,7 +229,7 @@ module MINT
    */
   rule shlMInt(mi(N:Int, I:Int), M:Int) => mi(N, I <<Int M)
   rule ashrMInt(mi(N:Int, I:Int), M:Int) => mi(N, I >>Int M)
-  rule lshrMInt(mi(N:Int, I:Int), M:Int) => mi(N, I <<Int M)
+  rule lshrMInt(mi(N:Int, I:Int), M:Int) => mi(N, (I &Int usupMInt(N)) <<Int M)
 
   /*
    * Comparison operations

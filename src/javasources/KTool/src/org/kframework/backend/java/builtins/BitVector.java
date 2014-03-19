@@ -15,6 +15,7 @@ import java.util.List;
 
 
 /**
+ * Abstract class representing a bit vector (and integer on an arbitrary but fixed number of bits).
  * @author AndreiS
  *
  * @see include/builtins/mint.k
@@ -153,10 +154,10 @@ public abstract class BitVector<T extends Number> extends Token {
     public abstract BitVector<T> sub(BitVector<T> bitVector);
     public abstract BitVector<T> mul(BitVector<T> bitVector);
 
-    public abstract Term sdiv(BitVector<T> bitVector);
-    public abstract Term udiv(BitVector<T> bitVector);
-    public abstract Term srem(BitVector<T> bitVector);
-    public abstract Term urem(BitVector<T> bitVector);
+    public abstract BitVector<T> sdiv(BitVector<T> bitVector);
+    public abstract BitVector<T> udiv(BitVector<T> bitVector);
+    public abstract BitVector<T> srem(BitVector<T> bitVector);
+    public abstract BitVector<T> urem(BitVector<T> bitVector);
 
     public abstract BuiltinList sadd(BitVector<T> bitVector);
     public abstract BuiltinList uadd(BitVector<T> bitVector);
@@ -164,6 +165,10 @@ public abstract class BitVector<T extends Number> extends Token {
     public abstract BuiltinList usub(BitVector<T> bitVector);
     public abstract BuiltinList smul(BitVector<T> bitVector);
     public abstract BuiltinList umul(BitVector<T> bitVector);
+
+    public abstract BitVector<T> shl(IntToken intToken);
+    public abstract BitVector<T> ashr(IntToken intToken);
+    public abstract BitVector<T> lshr(IntToken intToken);
 
     public abstract BitVector<T> and(BitVector<T> bitVector);
     public abstract BitVector<T> or(BitVector<T> bitVector);

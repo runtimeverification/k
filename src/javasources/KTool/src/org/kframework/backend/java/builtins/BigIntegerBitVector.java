@@ -14,6 +14,8 @@ import com.google.common.collect.ImmutableList;
 
 
 /**
+ * Implementation of a bit vector using {@link java.math.BigInteger}.
+ *
  * @author AndreiS
  */
 public class BigIntegerBitVector extends BitVector<BigInteger> {
@@ -86,7 +88,7 @@ public class BigIntegerBitVector extends BitVector<BigInteger> {
     }
 
     @Override
-    public Term sdiv(BitVector<BigInteger> bitVector) {
+    public BitVector<BigInteger> sdiv(BitVector<BigInteger> bitVector) {
         if (!bitVector.signedValue().equals(BigInteger.ZERO)
                 && !(signedValue().equals(signedMin())
                         && bitVector.signedValue().equals(BigInteger.valueOf(-1)))) {
@@ -94,23 +96,23 @@ public class BigIntegerBitVector extends BitVector<BigInteger> {
                     signedValue().divide(bitVector.signedValue()),
                     bitwidth);
         } else {
-            return new Bottom(Kind.KITEM);
+            return null;
         }
     }
 
     @Override
-    public Term udiv(BitVector<BigInteger> bitVector) {
+    public BitVector<BigInteger> udiv(BitVector<BigInteger> bitVector) {
         if (!bitVector.unsignedValue().equals(BigInteger.ZERO)) {
             return BigIntegerBitVector.of(
                     unsignedValue().divide(bitVector.unsignedValue()),
                     bitwidth);
         } else {
-            return new Bottom(Kind.KITEM);
+            return null;
         }
     }
 
     @Override
-    public Term srem(BitVector<BigInteger> bitVector) {
+    public BitVector<BigInteger> srem(BitVector<BigInteger> bitVector) {
         if (!bitVector.signedValue().equals(BigInteger.ZERO)
                 && !(signedValue().equals(signedMin())
                         && bitVector.signedValue().equals(BigInteger.valueOf(-1)))) {
@@ -118,18 +120,18 @@ public class BigIntegerBitVector extends BitVector<BigInteger> {
                     signedValue().remainder(bitVector.signedValue()),
                     bitwidth);
         } else {
-            return new Bottom(Kind.KITEM);
+            return null;
         }
     }
 
     @Override
-    public Term urem(BitVector<BigInteger> bitVector) {
+    public BitVector<BigInteger> urem(BitVector<BigInteger> bitVector) {
         if (!bitVector.unsignedValue().equals(BigInteger.ZERO)) {
             return BigIntegerBitVector.of(
                     unsignedValue().remainder(bitVector.unsignedValue()),
                     bitwidth);
         } else {
-            return new Bottom(Kind.KITEM);
+            return null;
         }
     }
 
@@ -179,6 +181,24 @@ public class BigIntegerBitVector extends BitVector<BigInteger> {
         return new BuiltinList(ImmutableList.<Term>of(
                 BitVector.of(result, bitwidth),
                 BoolToken.of(checkUnsignedOverflow(result))));
+    }
+
+    @Override
+    public BitVector<BigInteger> shl(IntToken intToken) {
+        return BigIntegerBitVector.of(value.shiftLeft(intToken.intValue()), bitwidth);
+    }
+
+    @Override
+    public BitVector<BigInteger> ashr(IntToken intToken) {
+        return BigIntegerBitVector.of(value.shiftRight(intToken.intValue()), bitwidth);
+    }
+
+    @Override
+    public BitVector<BigInteger> lshr(IntToken intToken) {
+        BigInteger widthMask = BigInteger.ONE.shiftLeft(bitwidth).subtract(BigInteger.ONE);
+        return BigIntegerBitVector.of(
+                value.and(widthMask).shiftRight(intToken.intValue()),
+                bitwidth);
     }
 
     @Override
