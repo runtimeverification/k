@@ -269,7 +269,9 @@ public class KItem extends Term implements Sorted {
                 Term[] arguments = kList.getContents().toArray(new Term[kList.getContents().size()]);
                 Term result = BuiltinFunction.invoke(context, kLabelConstant, arguments);
                 if (result != null) {
-                    assert result instanceof KItem : "expected ";
+                    assert result.kind() == Kind.KITEM:
+                            "unexpected kind " + result.kind() + " of term " + result + ";"
+                            + "expected kind " + Kind.KITEM + " instead";
                     return result;
                 }
             } catch (IllegalAccessException | IllegalArgumentException e) {
