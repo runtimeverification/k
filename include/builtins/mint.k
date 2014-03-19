@@ -35,14 +35,14 @@ module MINT
    * Functions for signed and unsigned minimum and maximum values of a machine
    * integer on a given bit width.
    */
-  syntax Int ::= sinfMInt(Int)    [function]
-               | ssupMInt(Int)    [function]
-               | uinfMInt(Int)    [function]
-               | usupMInt(Int)    [function]
-  rule sinfMInt(N:Int) => 0 -Int (1 <<Int (N -Int 1))
-  rule ssupMInt(N:Int) => (1 <<Int (N -Int 1)) -Int 1
-  rule uinfMInt(_:Int) => 0 
-  rule usupMInt(N:Int) => (1 <<Int N) -Int 1
+  syntax Int ::= sminMInt(Int)    [function]
+               | smaxMInt(Int)    [function]
+               | uminMInt(Int)    [function]
+               | umaxMInt(Int)    [function]
+  rule sminMInt(N:Int) => 0 -Int (1 <<Int (N -Int 1))
+  rule smaxMInt(N:Int) => (1 <<Int (N -Int 1)) -Int 1
+  rule uminMInt(_:Int) => 0 
+  rule umaxMInt(N:Int) => (1 <<Int N) -Int 1
 
   /*
    * Functions checking whether a given integer can be represented on as signed
@@ -53,11 +53,11 @@ module MINT
   rule
     soverflowMInt(N:Int, I:Int)
   =>
-    I <Int sinfMInt(N) orBool I >Int ssupMInt(N)
+    I <Int sminMInt(N) orBool I >Int smaxMInt(N)
   rule
     uoverflowMInt(N:Int, I:Int)
   =>
-    I <Int uinfMInt(N) orBool I >Int usupMInt(N)
+    I <Int uminMInt(N) orBool I >Int umaxMInt(N)
 
   /* Projection functions for results of operations with overflow. */
   syntax MInt ::= miMInt(MyList)          [function]
@@ -160,7 +160,7 @@ module MINT
   =>
     mi(N, svalueMInt(mi(N, I1)) /Int svalueMInt(mi(N, I2)))
   when notBool (zeroMInt(mi(N, I2))
-          orBool (svalueMInt(mi(N, I1)) ==Int sinfMInt(N)
+          orBool (svalueMInt(mi(N, I1)) ==Int sminMInt(N)
               andBool svalueMInt(mi(N, I2)) ==Int -1))
   rule
     udivMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
@@ -173,7 +173,7 @@ module MINT
   =>
     mi(N, svalueMInt(mi(N, I1)) %Int svalueMInt(mi(N, I2)))
   when notBool (zeroMInt(mi(N, I2))
-          orBool (svalueMInt(mi(N, I1)) ==Int sinfMInt(N)
+          orBool (svalueMInt(mi(N, I1)) ==Int sminMInt(N)
               andBool svalueMInt(mi(N, I2)) ==Int -1))
   rule
     uremMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
@@ -229,7 +229,7 @@ module MINT
    */
   rule shlMInt(mi(N:Int, I:Int), M:Int) => mi(N, I <<Int M)
   rule ashrMInt(mi(N:Int, I:Int), M:Int) => mi(N, I >>Int M)
-  rule lshrMInt(mi(N:Int, I:Int), M:Int) => mi(N, (I &Int usupMInt(N)) <<Int M)
+  rule lshrMInt(mi(N:Int, I:Int), M:Int) => mi(N, (I &Int umaxMInt(N)) <<Int M)
 
   /*
    * Comparison operations
