@@ -155,11 +155,6 @@ public class LocalTransformer implements Transformer {
     }
 
     @Override
-    public ASTNode transform(PrimitiveIntToken intToken) {
-        return transform((BitVector) intToken);
-    }
-
-    @Override
     public ASTNode transform(Rule rule) {
         return transform((JavaSymbolicObject) rule);
     }

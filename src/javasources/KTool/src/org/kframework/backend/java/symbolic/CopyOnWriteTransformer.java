@@ -202,10 +202,6 @@ public class CopyOnWriteTransformer implements Transformer {
         return transform((Token) intToken);
     }
 
-    public ASTNode transform(PrimitiveIntToken intToken) {
-        return transform((BitVector) intToken);
-    }
-
     @Override
     public ASTNode transform(StringToken stringToken) {
         return transform((Token) stringToken);

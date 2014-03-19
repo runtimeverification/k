@@ -83,11 +83,6 @@ public class TermTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(PrimitiveIntToken primitiveIntToken) {
-        return transformTerm((Term) super.transform(primitiveIntToken));
-    }
-
-    @Override
     public ASTNode transform(KLabelConstant kLabelConstant) {
         return transformTerm((Term) super.transform(kLabelConstant));
     }

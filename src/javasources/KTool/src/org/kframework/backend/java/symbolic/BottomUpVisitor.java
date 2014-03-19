@@ -93,11 +93,6 @@ public class BottomUpVisitor implements Visitor {
     }
 
     @Override
-    public void visit(PrimitiveIntToken primitiveIntToken) {
-        visit((BitVector) primitiveIntToken);
-    }
-
-    @Override
     public void visit(KLabelConstant kLabelConstant) {
         visit((KLabel) kLabelConstant);
     }

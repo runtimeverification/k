@@ -40,7 +40,6 @@ public interface Visitor {
     public void visit(MapLookup mapLookup);
     public void visit(MapUpdate mapUpdate);
     public void visit(MetaVariable metaVariable);
-    public void visit(PrimitiveIntToken primitiveIntToken);
     public void visit(Rule rule);
     public void visit(SetElementChoice setElementChoice);
     public void visit(SetLookup mapLookup);

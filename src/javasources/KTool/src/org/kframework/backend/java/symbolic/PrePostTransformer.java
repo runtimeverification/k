@@ -190,11 +190,6 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
     }
 
     @Override
-    public ASTNode transform(PrimitiveIntToken intToken) {
-        return transform((BitVector) intToken);
-    }
-
-    @Override
     public ASTNode transform(StringToken stringToken) {
         return transform((Token) stringToken);
     }

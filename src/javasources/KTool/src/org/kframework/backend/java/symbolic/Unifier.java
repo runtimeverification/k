@@ -50,7 +50,6 @@ public interface Unifier {
     public void unify(KList kList, Term term);
     public void unify(KSequence kSequence, Term term);
     public void unify(MapUpdate mapUpdate, Term term);
-    public void unify(PrimitiveIntToken intToken, Term term);
     public void unify(SetUpdate setUpdate, Term term);
     public void unify(MetaVariable metaVariable, Term term);
     public void unify(StringToken stringToken, Term term);

@@ -677,15 +677,6 @@ public class SymbolicUnifier extends AbstractUnifier {
     }
 
     @Override
-    public void unify(PrimitiveIntToken primitiveIntToken, Term term) {
-        assert !(term instanceof Variable);
-
-        if (!primitiveIntToken.equals(term)) {
-            fail(primitiveIntToken, term);
-        }
-    }
-
-    @Override
     public void unify(StringToken stringToken, Term term) {
         assert !(term instanceof Variable);
 

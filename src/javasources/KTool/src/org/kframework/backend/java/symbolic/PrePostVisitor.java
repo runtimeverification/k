@@ -209,14 +209,6 @@ public class PrePostVisitor implements Visitor {
     }
 
     @Override
-    public void visit(PrimitiveIntToken primitiveIntToken) {
-        preVisitor.resetProceed();
-        primitiveIntToken.accept(preVisitor);
-        if (!preVisitor.isProceed()) return;
-        primitiveIntToken.accept(postVisitor);
-    }
-
-    @Override
     public void visit(KCollection kCollection) {
         preVisitor.resetProceed();
         kCollection.accept(preVisitor);

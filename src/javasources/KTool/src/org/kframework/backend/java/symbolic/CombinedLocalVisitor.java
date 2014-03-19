@@ -174,11 +174,6 @@ public class CombinedLocalVisitor extends LocalVisitor {
     }
 
     @Override
-    public void visit(PrimitiveIntToken node) {
-        visitAll(node);
-    }
-
-    @Override
     public void visit(Rule node) {
         visitAll(node);
     }

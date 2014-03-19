@@ -173,11 +173,6 @@ public class CombinedLocalTransformer extends LocalTransformer {
     }
 
     @Override
-    public ASTNode transform(PrimitiveIntToken node) {
-        return transformAll(node);
-    }
-
-    @Override
     public ASTNode transform(Rule node) {
         return transformAll(node);
     }
