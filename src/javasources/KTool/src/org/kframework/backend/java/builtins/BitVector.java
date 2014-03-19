@@ -25,7 +25,12 @@ public abstract class BitVector<T extends Number> extends Token {
     public static final String SORT_NAME = "MInt";
 
     /**
-     * Integer value wrapped by this BitVector.
+     * Integer value wrapped by this BitVector. The signed value and the unsigned value of this
+     * BitVector are guaranteed to be equal with {@code value} only on the last {@code bitwidth}
+     * bits.
+     *
+     * @see #signedValue()
+     * @see #unsignedValue()
      */
     protected final T value;
     /**
@@ -54,8 +59,7 @@ public abstract class BitVector<T extends Number> extends Token {
     }
 
     /**
-     * Returns a {@code BitVector} representation of the given big integer value on the given
-     * bit width.
+     * Returns a {@code BitVector} representation of the given long value on the given bit width.
      */
     public static BitVector of(long value, int bitwidth) {
         assert bitwidth > 0;

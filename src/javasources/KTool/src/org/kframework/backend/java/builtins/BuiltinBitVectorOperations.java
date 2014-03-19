@@ -13,7 +13,9 @@ import java.util.List;
  * @author AndreiS
  */
 @SuppressWarnings("unchecked")
-public class BuiltinBitVectorOperations {
+public final class BuiltinBitVectorOperations {
+
+    private BuiltinBitVectorOperations() { }
 
     public static BitVector construct(IntToken bitwidth, IntToken value, TermContext context) {
         try {

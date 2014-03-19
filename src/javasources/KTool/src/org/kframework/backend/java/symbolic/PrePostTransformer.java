@@ -1,7 +1,6 @@
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.builtins.*;
-import org.kframework.backend.java.builtins.PrimitiveIntToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.visitors.Visitor;

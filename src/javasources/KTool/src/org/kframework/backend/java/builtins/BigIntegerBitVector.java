@@ -18,7 +18,7 @@ import com.google.common.collect.ImmutableList;
  *
  * @author AndreiS
  */
-public class BigIntegerBitVector extends BitVector<BigInteger> {
+public final class BigIntegerBitVector extends BitVector<BigInteger> {
 
     private BigIntegerBitVector(BigInteger value, int bitwidth) {
         super(value, bitwidth);
@@ -138,49 +138,37 @@ public class BigIntegerBitVector extends BitVector<BigInteger> {
     @Override
     public BuiltinList sadd(BitVector<BigInteger> bitVector) {
         BigInteger result = signedValue().add(bitVector.signedValue());
-        return new BuiltinList(ImmutableList.<Term>of(
-                BitVector.of(result, bitwidth),
-                BoolToken.of(checkSignedOverflow(result))));
+        return getBuiltinList(result, checkSignedOverflow(result));
     }
 
     @Override
     public BuiltinList uadd(BitVector<BigInteger> bitVector) {
         BigInteger result = signedValue().add(bitVector.signedValue());
-        return new BuiltinList(ImmutableList.<Term>of(
-                BitVector.of(result, bitwidth),
-                BoolToken.of(checkUnsignedOverflow(result))));
+        return getBuiltinList(result, checkUnsignedOverflow(result));
     }
 
     @Override
     public BuiltinList ssub(BitVector<BigInteger> bitVector) {
         BigInteger result = signedValue().subtract(bitVector.signedValue());
-        return new BuiltinList(ImmutableList.<Term>of(
-                BitVector.of(result, bitwidth),
-                BoolToken.of(checkSignedOverflow(result))));
+        return getBuiltinList(result, checkSignedOverflow(result));
     }
 
     @Override
     public BuiltinList usub(BitVector<BigInteger> bitVector) {
         BigInteger result = signedValue().subtract(bitVector.signedValue());
-        return new BuiltinList(ImmutableList.<Term>of(
-                BitVector.of(result, bitwidth),
-                BoolToken.of(checkUnsignedOverflow(result))));
+        return getBuiltinList(result, checkUnsignedOverflow(result));
     }
 
     @Override
     public BuiltinList smul(BitVector<BigInteger> bitVector) {
         BigInteger result = signedValue().multiply(bitVector.signedValue());
-        return new BuiltinList(ImmutableList.<Term>of(
-                BitVector.of(result, bitwidth),
-                BoolToken.of(checkSignedOverflow(result))));
+        return getBuiltinList(result, checkSignedOverflow(result));
     }
 
     @Override
     public BuiltinList umul(BitVector<BigInteger> bitVector) {
         BigInteger result = signedValue().multiply(bitVector.signedValue());
-        return new BuiltinList(ImmutableList.<Term>of(
-                BitVector.of(result, bitwidth),
-                BoolToken.of(checkUnsignedOverflow(result))));
+        return getBuiltinList(result, checkUnsignedOverflow(result));
     }
 
     @Override
@@ -279,6 +267,12 @@ public class BigIntegerBitVector extends BitVector<BigInteger> {
         }
 
         return Lists.reverse(digits);
+    }
+
+    private BuiltinList getBuiltinList(BigInteger result, boolean overflow) {
+        return new BuiltinList(ImmutableList.<Term>of(
+                BitVector.of(result, bitwidth),
+                BoolToken.of(overflow)));
     }
 
 }

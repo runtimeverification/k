@@ -1,6 +1,5 @@
 package org.kframework.backend.java.symbolic;
 
-import com.google.common.math.IntMath;
 import org.kframework.backend.BasicBackend;
 import org.kframework.backend.java.indexing.IndexingTable;
 import org.kframework.backend.java.indexing.pathIndex.PathIndex;

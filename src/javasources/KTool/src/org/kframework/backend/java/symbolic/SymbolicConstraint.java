@@ -13,8 +13,8 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.kframework.backend.java.builtins.BitVector;
 import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.builtins.PrimitiveIntToken;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.CellCollection;
@@ -778,8 +778,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                         variableSorts[i] = context.MkBoolSort();
                     } else if (variable.sort().equals(IntToken.SORT_NAME)) {
                         variableSorts[i] = context.MkIntSort();
-                    } else if (variable.sort().equals(PrimitiveIntToken.SORT_NAME)) {
-                        variableSorts[i] = context.MkBitVecSort(32);
+                    //} else if (variable.sort().equals(BitVector.SORT_NAME)) {
+                    //    variableSorts[i] = context.MkBitVecSort(32);
+                    // TODO(AndreiS): need support for parametric type MInt{32}, in order to
+                    // translate to SMT
                     } else {
                         throw new RuntimeException();
                     }
