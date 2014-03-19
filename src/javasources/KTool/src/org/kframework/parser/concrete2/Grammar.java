@@ -141,6 +141,7 @@ public class Grammar {
             int key;
             public OrderingInfo(int key) { this.key = key; }
             public int compareTo(OrderingInfo that) { return Integer.compare(this.key, that.key); }
+            public static final OrderingInfo ZERO = new OrderingInfo(0);
         }
 
         public State(StateId stateId, NonTerminal nt, OrderingInfo orderingInfo, KLabel label) {
