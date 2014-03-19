@@ -12,6 +12,13 @@ import java.lang.annotation.Target;
  * Since contracts can be either positive or negative in nature, we could hypothetically specify each
  * KilProperty as its inverse as well as itself. By convention, the positive form of the KilProperty
  * represents the state the KilProperty is in following a successful compilation sequence.
+ *
+ * The goal of this class and its annotations is to eventually annotate all kompilation transformers
+ * with the properties that they affect, and then demonstrate that those annotations are complete
+ * by means of mutation testing which reorders the transformers and verifies that the output remains
+ * the same. We do this so that we have a complete picture of the interdependencies of the
+ * compilation stages, which is the first step towards eventually breaking down those dependencies
+ * as much as possible.
  */
 public enum KilProperty {
     NO_CONCRETE_SYNTAX,
