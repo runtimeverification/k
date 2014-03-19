@@ -345,14 +345,7 @@ public class ConfigFileParser {
                     && childNode.getNodeName().equals("kompile-option")) {
                 Element elem = (Element) childNode;
 
-                // TODO: there is a problem with our current config files,
-                // correct parameter for backend is `--backend', not `-backend' or `backend'. but
-                // in config file it's specified as `-backed'. for now I'm handling it in ad-hoc
-                // way. we should fix this in config files. (this applies to other parameters too)
-                // (osa1)
                 String name = elem.getAttribute("name");
-                while (name.startsWith("-"))
-                    name = name.substring(1);
                 ret.add(new PgmArg(name, elem.getAttribute("value")));
             }
         }
@@ -390,10 +383,7 @@ public class ConfigFileParser {
                     && n.getNodeName().equals("krun-option")) {
                 Element e = (Element) n;
 
-                // TODO: see comments in parseKompileOpts
                 String name = e.getAttribute("name");
-                while (name.startsWith("-"))
-                    name = name.substring(1);
                 ret.add(new PgmArg(name, e.getAttribute("value")));
             }
         }

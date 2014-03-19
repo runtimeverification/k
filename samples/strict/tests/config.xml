@@ -6,7 +6,7 @@
     extension="strict"
     results="." >
     <all-programs>
-      <krun-option name="-output" value="pretty" />
+      <krun-option name="--output" value="pretty" />
     </all-programs>
   </test>
 

@@ -19,6 +19,7 @@ import java.util.concurrent.*;
 public class Proc<T> implements Runnable {
 
     private final String[] args;
+    private File workingDir;
 
     /**
      * Expected program output with location information for output file.
@@ -134,7 +135,7 @@ public class Proc<T> implements Runnable {
     @Override
     public void run() {
         // TODO: what happens when a process is run multiple times?
-        ProcessBuilder pb = new ProcessBuilder(args);
+        ProcessBuilder pb = new ProcessBuilder(args).directory(workingDir);
 
         try {
             long startTime = System.currentTimeMillis();
@@ -215,6 +216,14 @@ public class Proc<T> implements Runnable {
      */
     public String getPgmErr() {
         return pgmErr;
+    }
+    
+    public File getWorkingDir() {
+        return workingDir;
+    }
+    
+    public void setWorkingDir(File workingDir) {
+        this.workingDir = workingDir;
     }
 
     private int wait(final Process proc) throws InterruptedException {

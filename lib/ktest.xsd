@@ -1,5 +1,24 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:complexType name="program-config">
+  <xs:sequence>
+    <xs:element name="krun-option" minOccurs="1" maxOccurs="unbounded" type="option" />
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="program-group-config">
+  <xs:complexContent>
+    <xs:extension base="program-config">
+      <xs:attribute name="name" type="xs:string" use="required" />
+    </xs:extension>
+  </xs:complexContent>
+</xs:complexType>
+
+<xs:complexType name="option">
+  <xs:attribute name="name" type="xs:string" use="required" />
+  <xs:attribute name="key" type="xs:string" use="optional" />
+  <xs:attribute name="value" type="xs:string" use="optional" />
+</xs:complexType>
 
 <xs:element name="tests" >
   <xs:complexType>
@@ -7,39 +26,9 @@
       <xs:element name="test">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="kompile-option" minOccurs="0" maxOccurs="unbounded" >
-              <xs:complexType>
-                <xs:attribute name="name" type="xs:string" use="required" />
-                <xs:attribute name="value" type="xs:string" use="optional" />
-              </xs:complexType>
-            </xs:element>
-            <xs:element name="all-programs" minOccurs="0" maxOccurs="1" >
-              <xs:complexType>
-                <xs:sequence>
-                  <xs:element name="krun-option" minOccurs="1" maxOccurs="unbounded" >
-                    <xs:complexType>
-                      <xs:attribute name="name" type="xs:string" use="required" />
-                      <xs:attribute name="value" type="xs:string" use="optional" />
-                      <xs:attribute name="parser-home" type="xs:string" use="optional" />
-                    </xs:complexType>
-                  </xs:element>
-                </xs:sequence>
-              </xs:complexType>
-            </xs:element>
-            <xs:element name="program" minOccurs="0" maxOccurs="unbounded" >
-              <xs:complexType>
-                <xs:sequence>
-                  <xs:element name="krun-option" minOccurs="1" maxOccurs="unbounded" >
-                    <xs:complexType>
-                      <xs:attribute name="name" type="xs:string" use="required" />
-                      <xs:attribute name="value" type="xs:string" use="optional" />
-                      <xs:attribute name="parser-home" type="xs:string" use="optional" />
-                    </xs:complexType>
-                  </xs:element>
-                </xs:sequence>
-                <xs:attribute name="name" type="xs:string" use="required" />
-              </xs:complexType>
-            </xs:element>
+            <xs:element name="kompile-option" minOccurs="0" maxOccurs="unbounded" type="option" />
+            <xs:element name="all-programs" minOccurs="0" maxOccurs="1" type="program-config" />
+            <xs:element name="program" minOccurs="0" maxOccurs="unbounded" type="program-group-config" />
           </xs:sequence>
           <xs:attribute name="definition" type="xs:string" use="required" />
           <xs:attribute name="directory" type="xs:string" use="optional" />
@@ -54,39 +43,9 @@
       <xs:element name="include">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="kompile-option" minOccurs="0" maxOccurs="unbounded" >
-              <xs:complexType>
-                <xs:attribute name="name" type="xs:string" use="required" />
-                <xs:attribute name="value" type="xs:string" use="optional" />
-              </xs:complexType>
-            </xs:element>
-            <xs:element name="all-programs" minOccurs="0" maxOccurs="1" >
-              <xs:complexType>
-                <xs:sequence>
-                  <xs:element name="krun-option" minOccurs="1" maxOccurs="unbounded" >
-                    <xs:complexType>
-                      <xs:attribute name="name" type="xs:string" use="required" />
-                      <xs:attribute name="value" type="xs:string" use="optional" />
-                      <xs:attribute name="parser-home" type="xs:string" use="optional" />
-                    </xs:complexType>
-                  </xs:element>
-                </xs:sequence>
-              </xs:complexType>
-            </xs:element>
-            <xs:element name="program" minOccurs="0" maxOccurs="unbounded" >
-              <xs:complexType>
-                <xs:sequence>
-                  <xs:element name="krun-option" minOccurs="1" maxOccurs="unbounded" >
-                    <xs:complexType>
-                      <xs:attribute name="name" type="xs:string" use="required" />
-                      <xs:attribute name="value" type="xs:string" use="optional" />
-                      <xs:attribute name="parser-home" type="xs:string" use="optional" />
-                    </xs:complexType>
-                  </xs:element>
-                </xs:sequence>
-                <xs:attribute name="name" type="xs:string" use="required" />
-              </xs:complexType>
-            </xs:element>
+            <xs:element name="kompile-option" minOccurs="0" maxOccurs="unbounded" type="option" />
+            <xs:element name="all-programs" minOccurs="0" maxOccurs="1" type="program-config" />
+            <xs:element name="program" minOccurs="0" maxOccurs="unbounded" type="program-group-config" />
           </xs:sequence>
           <xs:attribute name="file" type="xs:string" use="required" />
           <xs:attribute name="directory" type="xs:string" use="optional" />
