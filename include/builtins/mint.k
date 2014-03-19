@@ -119,8 +119,8 @@ module MINT
                 | ugtMInt(MInt, MInt)   [function, hook(#MINT:ugt)]
                 | sgeMInt(MInt, MInt)   [function, hook(#MINT:sge)]
                 | ugeMInt(MInt, MInt)   [function, hook(#MINT:uge)]
-                | MInt "==MInt" MInt    [function, hook(#MINT:eq)]
-                | MInt "=/=MInt" MInt   [function, hook(#MINT:ne)]
+                | eqMInt(MInt, MInt)    [function, hook(#MINT:eq)]
+                | neMInt(MInt, MInt)    [function, hook(#MINT:ne)]
 
   /*
    * Returns a list of digits representing the given machine integers in the
@@ -271,11 +271,11 @@ module MINT
     uvalueMInt(mi(N, I1)) >=Int uvalueMInt(mi(N, I2))
 
   rule
-    mi(N:Int, I1:Int) ==MInt mi(N:Int, I2:Int)
+    eqMInt(mi(N:Int, I1:Int),  mi(N:Int, I2:Int))
   =>
     (I1 modInt (1 <<Int N)) ==Int (I2 modInt (1 <<Int N))
   rule
-    mi(N:Int, I1:Int) =/=MInt mi(N:Int, I2:Int)
+    neMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
     (I1 modInt (1 <<Int N)) =/=Int (I2 modInt (1 <<Int N))
 
