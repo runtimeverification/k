@@ -19,32 +19,32 @@ import org.strategoxt.lang.Strategy;
  */
 public class xml_string_escape_from_string_0_0 extends Strategy {
 
-	public static xml_string_escape_from_string_0_0 instance = new xml_string_escape_from_string_0_0();
+    public static xml_string_escape_from_string_0_0 instance = new xml_string_escape_from_string_0_0();
 
-	@Override
-	public IStrategoTerm invoke(Context context, IStrategoTerm current) {
-		IStrategoString istr = (IStrategoString) current;
-		String str = istr.stringValue();
+    @Override
+    public IStrategoTerm invoke(Context context, IStrategoTerm current) {
+        IStrategoString istr = (IStrategoString) current;
+        String str = istr.stringValue();
 
-		StringBuilder sb = new StringBuilder();
-		for (int i = 1; i < str.length() - 1; i++) {
-			if (str.charAt(i) == '&')
-				sb.append("&amp;");
-			else if (str.charAt(i) == '>')
-				sb.append("&gt;");
-			else if (str.charAt(i) == '<')
-				sb.append("&lt;");
-			else if (str.charAt(i) == '\\' && str.charAt(i + 1) == '\"') {
-				sb.append("&quot;");
-				i++;
-			} else if (str.charAt(i) == '\\' && str.charAt(i + 1) == '\\') {
-				sb.append("\\");
-				i++;
-			} else
-				sb.append(str.charAt(i));
-		}
+        StringBuilder sb = new StringBuilder();
+        for (int i = 1; i < str.length() - 1; i++) {
+            if (str.charAt(i) == '&')
+                sb.append("&amp;");
+            else if (str.charAt(i) == '>')
+                sb.append("&gt;");
+            else if (str.charAt(i) == '<')
+                sb.append("&lt;");
+            else if (str.charAt(i) == '\\' && str.charAt(i + 1) == '\"') {
+                sb.append("&quot;");
+                i++;
+            } else if (str.charAt(i) == '\\' && str.charAt(i + 1) == '\\') {
+                sb.append("\\");
+                i++;
+            } else
+                sb.append(str.charAt(i));
+        }
 
-		ITermFactory factory = context.getFactory();
-		return factory.makeString(sb.toString());
-	}
+        ITermFactory factory = context.getFactory();
+        return factory.makeString(sb.toString());
+    }
 }

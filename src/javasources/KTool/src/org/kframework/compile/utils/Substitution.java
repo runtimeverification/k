@@ -10,17 +10,17 @@ import java.util.Map;
 
 
 public class Substitution extends CopyOnWriteTransformer {
-	Map<Term, Term> substitution;
-	public Substitution(Map<Term, Term> substitution, Context context) {
-		super("Substitution", context);
-		this.substitution = substitution;
-	}
-	
-	@Override
-	public ASTNode transform(Term node) throws TransformerException {
-		Term substitute = substitution.get(node);
-		if (!(null ==substitute)) 
-			node = substitute;
-		return super.transform(node);
-	}
+    Map<Term, Term> substitution;
+    public Substitution(Map<Term, Term> substitution, Context context) {
+        super("Substitution", context);
+        this.substitution = substitution;
+    }
+    
+    @Override
+    public ASTNode transform(Term node) throws TransformerException {
+        Term substitute = substitution.get(node);
+        if (!(null ==substitute)) 
+            node = substitute;
+        return super.transform(node);
+    }
 }

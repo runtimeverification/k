@@ -10,11 +10,15 @@ public class BottomIndex implements Index {
 
     private BottomIndex() { }
 
+    private Object readResolve() {
+        return BOTTOM;
+    }
+
     @Override
     public boolean isUnifiable(Index index) {
         return index instanceof BottomIndex || index instanceof TopIndex;
     }
-    
+
     @Override
     public int hashCode() {
         return 0;
@@ -24,5 +28,4 @@ public class BottomIndex implements Index {
     public String toString() {
         return "@Bottom";
     }
-
 }

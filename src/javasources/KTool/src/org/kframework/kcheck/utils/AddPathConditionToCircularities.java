@@ -21,62 +21,62 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class AddPathConditionToCircularities extends CopyOnWriteTransformer {
 
-	public AddPathConditionToCircularities(Context context, List<ASTNode> reachabilityRules) {
-		super("Add path condition to circularities", context);
-	}
+    public AddPathConditionToCircularities(Context context, List<ASTNode> reachabilityRules) {
+        super("Add path condition to circularities", context);
+    }
 
-	@Override
-	public ASTNode transform(Rule node) throws TransformerException {
-		
-		if(node.getAttribute(AddCircularityRules.RRULE_ATTR) != null && (node.getBody() instanceof Rewrite)) {
+    @Override
+    public ASTNode transform(Rule node) throws TransformerException {
+        
+        if(node.getAttribute(AddCircularityRules.RRULE_ATTR) != null && (node.getBody() instanceof Rewrite)) {
 
-			
-			//TODO:  use ensures to get phi'
-			
-			// extract phi and phi'
-			Term cnd = node.getRequires();
-			ExtractPatternless ep = new ExtractPatternless(context, false);
-			cnd = (Term) cnd.accept(ep);
-			
-			// separate left and right
-			Rewrite ruleBody = (Rewrite) node.getBody();
-			Term left = ruleBody.getLeft().shallowCopy();
-			Term right = ruleBody.getRight().shallowCopy();
-			
-			
-			// create lhs path condition cell
-			Variable psi = Variable.getFreshVar("K");
+            
+            //TODO:  use ensures to get phi'
+            
+            // extract phi and phi'
+            Term cnd = node.getRequires();
+            ExtractPatternless ep = new ExtractPatternless(context, false);
+            cnd = (Term) cnd.accept(ep);
+            
+            // separate left and right
+            Rewrite ruleBody = (Rewrite) node.getBody();
+            Term left = ruleBody.getLeft().shallowCopy();
+            Term right = ruleBody.getRight().shallowCopy();
+            
+            
+            // create lhs path condition cell
+            Variable psi = Variable.getFreshVar("K");
             Cell leftCell = new Cell();
             leftCell.setLabel(MetaK.Constants.pathCondition);
             leftCell.setEllipses(Ellipses.NONE);
             leftCell.setContents(psi);
-			left = AddConditionToConfig.addSubcellToCell((Cell)left, leftCell);
+            left = AddConditionToConfig.addSubcellToCell((Cell)left, leftCell);
 
-			// create rhs path condition cell
+            // create rhs path condition cell
             Cell rightCell = new Cell();
             rightCell.setLabel(MetaK.Constants.pathCondition);
             rightCell.setEllipses(Ellipses.NONE);
             rightCell.setContents(KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, psi, ep.getPhi()), ep.getPhiPrime()));
-			right = AddConditionToConfig.addSubcellToCell((Cell)right, rightCell);
+            right = AddConditionToConfig.addSubcellToCell((Cell)right, rightCell);
 
-			// condition
-//			Term implication = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, psi, KApp.of(KLabelConstant.NOTBOOL_KLABEL, ep.getPhi()));
-//			KApp unsat = StringBuiltin.kAppOf("unsat");
-//	        KApp checkSat = KApp.of(KLabelConstant.of("'checkSat", context), implication);
-//	        implication = KApp.of(KLabelConstant.KEQ_KLABEL, checkSat, unsat);
-	        Term pc = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, psi, ep.getPhi()), ep.getPhiPrime());
-	        pc = AddPathCondition.checkSat(pc, context);
-			
-			Rule newRule = new Rule(left, right, context);
-			Term cc = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, cnd, pc);
-			if (RLBackend.SIMPLIFY) {
-	        	cc = KApp.of(KLabelConstant.of(RLBackend.SIMPLIFY_KLABEL, context) , cc);
-	        }
-			newRule.setRequires(cc);
-			newRule.setAttributes(node.getAttributes().shallowCopy());
-			return newRule;
-		}
-		
-		return super.transform(node);
-	}
+            // condition
+//            Term implication = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, psi, KApp.of(KLabelConstant.NOTBOOL_KLABEL, ep.getPhi()));
+//            KApp unsat = StringBuiltin.kAppOf("unsat");
+//            KApp checkSat = KApp.of(KLabelConstant.of("'checkSat", context), implication);
+//            implication = KApp.of(KLabelConstant.KEQ_KLABEL, checkSat, unsat);
+            Term pc = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, psi, ep.getPhi()), ep.getPhiPrime());
+            pc = AddPathCondition.checkSat(pc, context);
+            
+            Rule newRule = new Rule(left, right, context);
+            Term cc = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, cnd, pc);
+            if (RLBackend.SIMPLIFY) {
+                cc = KApp.of(KLabelConstant.of(RLBackend.SIMPLIFY_KLABEL, context) , cc);
+            }
+            newRule.setRequires(cc);
+            newRule.setAttributes(node.getAttributes().shallowCopy());
+            return newRule;
+        }
+        
+        return super.transform(node);
+    }
 }

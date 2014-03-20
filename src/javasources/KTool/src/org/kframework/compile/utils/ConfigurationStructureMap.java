@@ -67,13 +67,13 @@ public class ConfigurationStructureMap implements
 
     @Override
     public ConfigurationStructure put(String s, ConfigurationStructure configurationStructure) {
-		if (config.containsKey(s)) {
-			Cell c = config.get(s).cell;
-			GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
-					KException.KExceptionGroup.INTERNAL,
-					"Cell " + s + " found twice in configuration (once at " + c.getLocation() + ").", this.getClass().getName(),
-					configurationStructure.cell.getFilename(), configurationStructure.cell.getLocation()));
-		}
+        if (config.containsKey(s)) {
+            Cell c = config.get(s).cell;
+            GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
+                    KException.KExceptionGroup.INTERNAL,
+                    "Cell " + s + " found twice in configuration (once at " + c.getLocation() + ").", this.getClass().getName(),
+                    configurationStructure.cell.getFilename(), configurationStructure.cell.getLocation()));
+        }
         return config.put(s,configurationStructure);
     }
 

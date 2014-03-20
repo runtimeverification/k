@@ -10,19 +10,19 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
 public class ReportErrorsVisitor extends BasicTransformer {
-	String fromWhere = null;
+    String fromWhere = null;
 
-	public ReportErrorsVisitor(Context context, String fromWhere) {
-		super("Report parse errors", context);
-		this.fromWhere = fromWhere;
-	}
+    public ReportErrorsVisitor(Context context, String fromWhere) {
+        super("Report parse errors", context);
+        this.fromWhere = fromWhere;
+    }
 
-	public ASTNode transform(ParseError pe) throws TransformerException {
-		String msg = pe.getMessage();
-		if (msg.equals("Parse error: eof unexpected"))
-			msg = "Parse error: Unexpected end of " + fromWhere;
-		String file = pe.getFilename();
-		String location = pe.getLocation();
-		throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, file, location));
-	}
+    public ASTNode transform(ParseError pe) throws TransformerException {
+        String msg = pe.getMessage();
+        if (msg.equals("Parse error: eof unexpected"))
+            msg = "Parse error: Unexpected end of " + fromWhere;
+        String file = pe.getFilename();
+        String location = pe.getLocation();
+        throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, file, location));
+    }
 }

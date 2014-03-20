@@ -18,45 +18,45 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class FlattenDisambiguationFilter extends CopyOnWriteTransformer {
-	public FlattenDisambiguationFilter(Context context) {
-		super("Reflatten ambiguous syntax", context);
-	}
+    public FlattenDisambiguationFilter(Context context) {
+        super("Reflatten ambiguous syntax", context);
+    }
 
-	@Override
-	public ASTNode transform(Ambiguity amb) throws TransformerException {
-		
-		if (amb.getContents().get(0) instanceof TermCons) {
-			TermCons t1 = (TermCons)amb.getContents().get(0);
-			if (MetaK.isComputationSort(t1.getSort())) {
-				if (t1.getProduction().isListDecl()) {
-					Term t2 = t1.getContents().get(1);
-					UserList ul = (UserList)t1.getProduction().getItems().get(0);
-					if (context.isSubsortedEq(ul.getSort(), t2.getSort())) {
-						t1.getContents().set(1, addEmpty(t2, t1.getSort()));
-					}
-					if (t2 instanceof ListTerminator) {
-						t1.getContents().set(1, new ListTerminator(ul.getSeparator()));
-					}
-				}
-				return new KApp(
+    @Override
+    public ASTNode transform(Ambiguity amb) throws TransformerException {
+        
+        if (amb.getContents().get(0) instanceof TermCons) {
+            TermCons t1 = (TermCons)amb.getContents().get(0);
+            if (MetaK.isComputationSort(t1.getSort())) {
+                if (t1.getProduction().isListDecl()) {
+                    Term t2 = t1.getContents().get(1);
+                    UserList ul = (UserList)t1.getProduction().getItems().get(0);
+                    if (context.isSubsortedEq(ul.getSort(), t2.getSort())) {
+                        t1.getContents().set(1, addEmpty(t2, t1.getSort()));
+                    }
+                    if (t2 instanceof ListTerminator) {
+                        t1.getContents().set(1, new ListTerminator(ul.getSeparator()));
+                    }
+                }
+                return new KApp(
                         KLabelConstant.of(t1.getProduction().getKLabel(), context),
                         (Term) new KList(t1.getContents()).accept(this));
-			}
-		} else if (amb.getContents().get(0) instanceof ListTerminator) {
-			ListTerminator t1 = (ListTerminator)amb.getContents().get(0);
-			if (MetaK.isComputationSort(t1.getSort())) {
-				return new ListTerminator(((UserList) context.listConses.get(t1.getSort()).getItems().get(0)).getSeparator());
-			}
-		}
-		return amb;
-	}
+            }
+        } else if (amb.getContents().get(0) instanceof ListTerminator) {
+            ListTerminator t1 = (ListTerminator)amb.getContents().get(0);
+            if (MetaK.isComputationSort(t1.getSort())) {
+                return new ListTerminator(((UserList) context.listConses.get(t1.getSort()).getItems().get(0)).getSeparator());
+            }
+        }
+        return amb;
+    }
 
-	private Term addEmpty(Term node, String sort) {
-		TermCons tc = new TermCons(sort, context.listConses.get(sort).getCons(), context);
-		List<Term> contents = new ArrayList<Term>();
-		contents.add(node);
-		contents.add(new ListTerminator(sort, null));
-		tc.setContents(contents);
-		return tc;
-	}
+    private Term addEmpty(Term node, String sort) {
+        TermCons tc = new TermCons(sort, context.listConses.get(sort).getCons(), context);
+        List<Term> contents = new ArrayList<Term>();
+        contents.add(node);
+        contents.add(new ListTerminator(sort, null));
+        tc.setContents(contents);
+        return tc;
+    }
 }

@@ -1,5 +1,6 @@
 package org.kframework.backend.java.kil;
 
+import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
@@ -16,6 +17,10 @@ import com.google.common.base.Joiner;
 
 
 /**
+ * Class representing a map. It only has one frame (which is a variable), and a set of entries.
+ * A map composed of multiple map variables or terms (in addition to the entries) is represented
+ * using concatenation (and can only occur in the right-hand side or in the condition).
+ *
  * @author AndreiS
  */
 public class BuiltinMap extends Collection implements Sorted {
@@ -48,10 +53,6 @@ public class BuiltinMap extends Collection implements Sorted {
 
     public Map<Term, Term> getEntries() {
         return Collections.unmodifiableMap(entries);
-    }
-
-    public boolean isEmpty() {
-        return entries.isEmpty() && !hasFrame();
     }
 
     public Term put(Term key, Term value) {
@@ -127,8 +128,13 @@ public class BuiltinMap extends Collection implements Sorted {
     }
 
     @Override
-    public void accept(Unifier unifier, Term patten) {
-        unifier.unify(this, patten);
+    public void accept(Unifier unifier, Term pattern) {
+        unifier.unify(this, pattern);
+    }
+    
+    @Override
+    public void accept(Matcher matcher, Term pattern) {
+        matcher.match(this, pattern);
     }
 
     @Override

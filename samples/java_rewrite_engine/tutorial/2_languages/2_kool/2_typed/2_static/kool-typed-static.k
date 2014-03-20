@@ -369,17 +369,14 @@ typed SIMPLE, so we do not discuss them much here. */
 // We would like to say the following instead of the predicate rule below:
 //  syntax LValue ::= Id | Exp "[" Exps "]"
 // but unfortunately that currently generates some ambiguous parsings.
-//  syntax LValue ::= Id
-//  rule isLValue(_:Exp[_:Exps]) => true
-  rule checkLValue(_:Id) => true
-  rule checkLValue(_:Exp[_:Exps]) => true
+  syntax LValue ::= Id
+  rule isLValue(_:Exp[_:Exps]) => true
 
   syntax Exp ::= ltype(Exp)
 // We would like to say:
 //  context ltype(HOLE:LValue)
 // but we currently cannot type the HOLE
-//  context ltype(HOLE) when isLValue(HOLE)
-  context ltype(HOLE) when checkLValue(HOLE)
+  context ltype(HOLE) when isLValue(HOLE)
 
 // OLD approach:
 //  syntax Exp ::= ltype(Exp)  [function]
@@ -669,9 +666,7 @@ wait.  Finally, the sixth rule below reports an error when the
 // We would like to say the following instead of the predicate rule below:
 //  syntax LValue ::= Exp "." Id
 // but unfortunately that currently generates some ambiguous parsings.
-//  rule isLValue(_:Exp . _:Id) => true
-  syntax KItem ::= checkLValue(K)  [function]
-  rule checkLValue(_:Exp . _:Id) => true
+  rule isLValue(_:Exp . _:Id) => true
 
 // OLD approach:
 //  rule ltype(E:Exp . X:Id) => E . X  [structural]

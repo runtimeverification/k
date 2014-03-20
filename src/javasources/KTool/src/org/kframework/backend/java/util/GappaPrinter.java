@@ -1,7 +1,6 @@
 package org.kframework.backend.java.util;
 
 import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.symbolic.BottomUpVisitor;
@@ -36,30 +35,30 @@ public class GappaPrinter extends BottomUpVisitor {
     };
 
 
-   	public static Map<String,String> binaryOps = new HashMap<String, String>();
-	static {
+       public static Map<String,String> binaryOps = new HashMap<String, String>();
+    static {
         comparisonOps.put("'_>=Float_", ">=");
         comparisonOps.put("'_<=Float_", "<=");
         comparisonOps.put("'_>Float_", ">=");
         comparisonOps.put("'_<Float_", "<=");
-		binaryOps.put("'_+Float_", "+");
+        binaryOps.put("'_+Float_", "+");
         binaryOps.put("'_-Float_", "-");
-		binaryOps.put("'_*Float_", "*");
-		binaryOps.put("'_/Float_", "/");
+        binaryOps.put("'_*Float_", "*");
+        binaryOps.put("'_/Float_", "/");
         binaryOps.put("'_/Float_", "/");
         binaryOps.put("'_andBool_", "/\\");
         binaryOps.put("'_orBool_", "\\/");
         binaryOps.put("'_impliesBool_", " -> ");
-	};
+    };
 
-   	public static Map<String,String> doubleBinaryOps = new HashMap<String, String>();
-	static {
-		doubleBinaryOps.put("'_+Float64_", "+");
+       public static Map<String,String> doubleBinaryOps = new HashMap<String, String>();
+    static {
+        doubleBinaryOps.put("'_+Float64_", "+");
         doubleBinaryOps.put("'_-Float64_", "-");
-		doubleBinaryOps.put("'_*Float64_", "*");
-		doubleBinaryOps.put("'_/Float64_", "/");
+        doubleBinaryOps.put("'_*Float64_", "*");
         doubleBinaryOps.put("'_/Float64_", "/");
-	};
+        doubleBinaryOps.put("'_/Float64_", "/");
+    };
 
     public static Map<String,String> unaryOps = new HashMap<String, String>();
     static {
@@ -105,8 +104,8 @@ public class GappaPrinter extends BottomUpVisitor {
                         String label = klabelCt.label();
                         String newlabel = reverseComparisonOps.get(label);
                         if (newlabel != null) {
-                            klabelCt = KLabelConstant.of(newlabel, klabelCt.context());
-                            equalityLHS = new KItem(klabelCt, (KList) ((KItem) equalityLHS).kList(), klabelCt.context());
+                            klabelCt = KLabelConstant.of(newlabel, klabelCt.termContext());
+                            equalityLHS = new KItem(klabelCt, (KList) ((KItem) equalityLHS).kList(), constraint.termContext());
                             equalityRHS = BoolToken.TRUE;
                         }
                     }

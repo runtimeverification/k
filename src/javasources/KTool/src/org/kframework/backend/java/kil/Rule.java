@@ -3,6 +3,7 @@ package org.kframework.backend.java.kil;
 import java.util.Collection;
 import java.util.Map;
 
+import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.indexing.IndexingPair;
 import org.kframework.backend.java.symbolic.BottomUpVisitor;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
@@ -36,6 +37,9 @@ public class Rule extends JavaSymbolicObject {
     private final IndexingPair indexingPair;
     private final boolean containsKCell;
     private final boolean hasUnboundedVars;
+    private final boolean isSortPredicate;
+    private final String predSort;
+    private final KItem sortPredArg;
     private int hashCode = 0;
 
     public Rule(
@@ -55,6 +59,7 @@ public class Rule extends JavaSymbolicObject {
         this.ensures = ImmutableList.copyOf(ensures);
         this.freshVariables = ImmutableSet.copyOf(freshVariables);
         this.lookups = lookups;
+        super.setAttributes(attributes);
 
         Collection<IndexingPair> indexingPairs = leftHandSide.getIndexingPairs(definition);
         /*
@@ -79,9 +84,24 @@ public class Rule extends JavaSymbolicObject {
         });
         containsKCell = tempContainsKCell;
                
-        hasUnboundedVars = attributes.containsAttribute(CheckVariables.UNBOUNDED_VARS);
-
-        super.setAttributes(attributes);
+        hasUnboundedVars = super.containsAttribute(CheckVariables.UNBOUNDED_VARS);
+        
+        isSortPredicate = super.containsAttribute(Attribute.FUNCTION_KEY)
+                && functionKLabel().toString().startsWith("is");
+        if (isSortPredicate) {
+            predSort = functionKLabel().toString().substring(2);
+            
+            assert leftHandSide instanceof KItem
+                    && rightHandSide.equals(BoolToken.TRUE)
+                    && ((KList) ((KItem) leftHandSide).kList()).size() == 1 : 
+                        "unexpected sort predicate rule: " + this;
+            Term arg = ((KList) ((KItem) leftHandSide).kList()).get(0);
+            assert arg instanceof KItem : "unexpected sort predicate rule: " + this;
+            sortPredArg = (KItem) arg;
+        } else {
+            predSort = null;
+            sortPredArg = null;
+        }
     }
 
     private boolean tempContainsKCell = false;
@@ -118,6 +138,32 @@ public class Rule extends JavaSymbolicObject {
     
     public boolean hasUnboundedVariables() {
         return hasUnboundedVars;
+    }
+    
+    /**
+     * @return {@code true} if this rule is a sort predicate rule; otherwise,
+     *         {@code false}
+     */
+    public boolean isSortPredicate() {
+        return isSortPredicate;
+    }
+    
+    /**
+     * Gets the predicate sort if this rule is a sort predicate rule.
+     */
+    public String getPredSort() {
+        assert isSortPredicate;
+        
+        return predSort;
+    }
+    
+    /**
+     * Gets the argument of the sort predicate if this rule is a sort predicate rule. 
+     */
+    public KItem getSortPredArgument() {
+        assert isSortPredicate;
+
+        return sortPredArg;
     }
 
     public KLabelConstant functionKLabel() {

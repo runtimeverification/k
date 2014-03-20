@@ -11,26 +11,26 @@ import org.kframework.kil.loader.Context;
  * Must run after FlattenModules
  */
 public class DeclareCellLabels extends BasicCompilerStep<Definition> {
-	public DeclareCellLabels(Context context) {
-		super(context);
-	}
+    public DeclareCellLabels(Context context) {
+        super(context);
+    }
 
-	@Override
-	public String getName() {
-		return "Generate CellLabel sort";
-	}
-		
-	@Override
-	public Definition compile(Definition def, String stepName) {
-		Module module = def.getSingletonModule();		
+    @Override
+    public String getName() {
+        return "Generate CellLabel sort";
+    }
+        
+    @Override
+    public Definition compile(Definition def, String stepName) {
+        Module module = def.getSingletonModule();        
 
-		CellLabelCollector labels = new CellLabelCollector(context);
-		module.accept(labels);
-		
-		for (String cellLabel : labels.cellLabels) {
-			module.addProduction("CellLabel", new Terminal(cellLabel));
-		}
-		
-		return def;
-	}
+        CellLabelCollector labels = new CellLabelCollector(context);
+        module.accept(labels);
+        
+        for (String cellLabel : labels.cellLabels) {
+            module.addProduction("CellLabel", new Terminal(cellLabel));
+        }
+        
+        return def;
+    }
 }

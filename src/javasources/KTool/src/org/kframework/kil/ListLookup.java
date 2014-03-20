@@ -22,7 +22,7 @@ public class ListLookup extends BuiltinLookup {
     private final Term value;
 
     public ListLookup(Variable base, Term key, Term value, KSort kind) {
-        super(base, key, kind);
+        super(base, key, kind, false);
         this.value = value;
     }
 

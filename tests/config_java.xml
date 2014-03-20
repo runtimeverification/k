@@ -95,6 +95,23 @@
     </all-programs>
   </test>
 
+  <!-- YilongL: the pretty printer stucks at the result of constructor-bst-sorting -->
+  <!-- YilongL: the outputs of stuck-letrec & polymorphism-6 are different from the maude backend -->
+  <test
+      definition="samples/java_rewrite_engine/tutorial/2_languages/3_fun/1_untyped/1_environment/fun-untyped.k"
+      programs="tutorial/2_languages/3_fun/programs"
+      extension="fun"
+      exclude="constructor-bst-sorting stuck-letrec polymorphism-6"
+      results="tutorial/2_languages/3_fun/1_untyped/1_environment/tests"
+      >
+    <kompile-option name="-backend" value="java" />
+    <all-programs>
+      <krun-option name="-backend" value="java" />
+      <krun-option name="--search" />
+      <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
+    </all-programs>
+  </test>
+
   <!-- TODO(YilongL): change the type of the solution cell to Map
     and revise the search pattern accordingly -->
   <test
@@ -391,6 +408,31 @@
     <kompile-option name="-warnings" value="none" />
     <all-programs>
       <krun-option name="-backend" value="java" />
+    </all-programs>
+  </test>
+
+  <test
+      definition="tests/regression/java-rewrite-engine/data_structure_iteration/test1/test.k"
+      programs="tests/regression/java-rewrite-engine/data_structure_iteration/test1"
+      results="tests/regression/java-rewrite-engine/data_structure_iteration/test1"
+      extension="test"
+      >
+    <kompile-option name="-backend" value="java" />
+    <all-programs>
+      <krun-option name="-backend" value="java" />
+      <krun-option name="-smt" value="none" />
+    </all-programs>
+  </test>
+  <test
+      definition="tests/regression/java-rewrite-engine/data_structure_iteration/test2/test.k"
+      programs="tests/regression/java-rewrite-engine/data_structure_iteration/test2"
+      results="tests/regression/java-rewrite-engine/data_structure_iteration/test2"
+      extension="test"
+      >
+    <kompile-option name="-backend" value="java" />
+    <all-programs>
+      <krun-option name="-backend" value="java" />
+      <krun-option name="-smt" value="none" />
     </all-programs>
   </test>
 

@@ -15,132 +15,132 @@ import java.util.List;
  * according to precedence marked by {@code >} in the declaration.
  */
 public class Syntax extends ModuleItem {
-	/** The sort being declared. */
-	Sort sort;
-	java.util.List<PriorityBlock> priorityBlocks;
+    /** The sort being declared. */
+    Sort sort;
+    java.util.List<PriorityBlock> priorityBlocks;
 
-	public Syntax(Sort sort, java.util.List<PriorityBlock> priorities) {
-		super();
-		this.sort = sort;
-		this.priorityBlocks = priorities;
-	}
+    public Syntax(Sort sort, java.util.List<PriorityBlock> priorities) {
+        super();
+        this.sort = sort;
+        this.priorityBlocks = priorities;
+    }
 
-	public Syntax(Sort sort) {
-		this(sort, new ArrayList<PriorityBlock>());
-	}
+    public Syntax(Sort sort) {
+        this(sort, new ArrayList<PriorityBlock>());
+    }
 
-	public Sort getSort() {
-		return sort;
-	}
+    public Sort getSort() {
+        return sort;
+    }
 
-	public void setSort(Sort sort) {
-		this.sort = sort;
-	}
+    public void setSort(Sort sort) {
+        this.sort = sort;
+    }
 
-	public java.util.List<PriorityBlock> getPriorityBlocks() {
-		return priorityBlocks;
-	}
+    public java.util.List<PriorityBlock> getPriorityBlocks() {
+        return priorityBlocks;
+    }
 
-	public void setPriorityBlocks(java.util.List<PriorityBlock> priorityBlocks) {
-		this.priorityBlocks = priorityBlocks;
-	}
+    public void setPriorityBlocks(java.util.List<PriorityBlock> priorityBlocks) {
+        this.priorityBlocks = priorityBlocks;
+    }
 
-	public Syntax(Syntax node) {
-		super(node);
-		this.sort = node.sort;
-		this.priorityBlocks = node.priorityBlocks;
-	}
+    public Syntax(Syntax node) {
+        super(node);
+        this.sort = node.sort;
+        this.priorityBlocks = node.priorityBlocks;
+    }
 
-	@Override
-	public String toString() {
-		String blocks = "";
+    @Override
+    public String toString() {
+        String blocks = "";
 
-		for (PriorityBlock pb : priorityBlocks) {
-			blocks += pb + "\n> ";
-		}
-		if (blocks.length() > 2)
-			blocks = blocks.substring(0, blocks.length() - 3);
+        for (PriorityBlock pb : priorityBlocks) {
+            blocks += pb + "\n> ";
+        }
+        if (blocks.length() > 2)
+            blocks = blocks.substring(0, blocks.length() - 3);
 
-		return "  syntax " + sort + " ::= " + blocks + "\n";
-	}
+        return "  syntax " + sort + " ::= " + blocks + "\n";
+    }
 
-	@Override
-	public List<String> getLabels() {
-		List<String> lbls = new LinkedList<String>();
-		for (PriorityBlock pb : priorityBlocks) {
-			for (Production prod : pb.getProductions()) {
-				lbls.add(prod.getLabel());
-			}
-		}
-		return lbls;
-	}
+    @Override
+    public List<String> getLabels() {
+        List<String> lbls = new LinkedList<String>();
+        for (PriorityBlock pb : priorityBlocks) {
+            for (Production prod : pb.getProductions()) {
+                lbls.add(prod.getLabel());
+            }
+        }
+        return lbls;
+    }
 
-	@Override
-	public List<String> getKLabels() {
-		List<String> lbls = new LinkedList<String>();
-		if (priorityBlocks == null)
-			return lbls;
-		for (PriorityBlock pb : priorityBlocks) {
-			for (Production prod : pb.getProductions()) {
-				if (MetaK.isComputationSort(prod.getSort()) || prod.getSort().equals(KSorts.KLABEL) && prod.isConstant())
-					lbls.add(prod.getKLabel());
-			}
-		}
-		return lbls;
-	}
+    @Override
+    public List<String> getKLabels() {
+        List<String> lbls = new LinkedList<String>();
+        if (priorityBlocks == null)
+            return lbls;
+        for (PriorityBlock pb : priorityBlocks) {
+            for (Production prod : pb.getProductions()) {
+                if (MetaK.isComputationSort(prod.getSort()) || prod.getSort().equals(KSorts.KLABEL) && prod.isConstant())
+                    lbls.add(prod.getKLabel());
+            }
+        }
+        return lbls;
+    }
 
-	@Override
-	public List<String> getAllSorts() {
-		List<String> sorts = new ArrayList<String>();
-		sorts.add(sort.toString());
-		return sorts;
-	}
+    @Override
+    public List<String> getAllSorts() {
+        List<String> sorts = new ArrayList<String>();
+        sorts.add(sort.toString());
+        return sorts;
+    }
 
-	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-	}
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
+    }
 
-	@Override
-	public ASTNode accept(Transformer transformer) throws TransformerException {
-		return transformer.transform(this);
-	}
+    @Override
+    public ASTNode accept(Transformer transformer) throws TransformerException {
+        return transformer.transform(this);
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null)
-			return false;
-		if (this == obj)
-			return true;
-		if (!(obj instanceof Syntax))
-			return false;
-		Syntax syn = (Syntax) obj;
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null)
+            return false;
+        if (this == obj)
+            return true;
+        if (!(obj instanceof Syntax))
+            return false;
+        Syntax syn = (Syntax) obj;
 
-		if (!syn.getSort().equals(this.sort))
-			return false;
+        if (!syn.getSort().equals(this.sort))
+            return false;
 
-		if (syn.priorityBlocks.size() != priorityBlocks.size())
-			return false;
+        if (syn.priorityBlocks.size() != priorityBlocks.size())
+            return false;
 
-		for (int i = 0; i < syn.priorityBlocks.size(); i++) {
-			if (!syn.priorityBlocks.get(i).equals(priorityBlocks.get(i)))
-				return false;
-		}
+        for (int i = 0; i < syn.priorityBlocks.size(); i++) {
+            if (!syn.priorityBlocks.get(i).equals(priorityBlocks.get(i)))
+                return false;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	@Override
-	public int hashCode() {
-		int hash = sort.hashCode();
+    @Override
+    public int hashCode() {
+        int hash = sort.hashCode();
 
-		for (PriorityBlock pb : priorityBlocks)
-			hash += pb.hashCode();
-		return hash;
-	}
+        for (PriorityBlock pb : priorityBlocks)
+            hash += pb.hashCode();
+        return hash;
+    }
 
-	@Override
-	public Syntax shallowCopy() {
-		return new Syntax(this);
-	}
+    @Override
+    public Syntax shallowCopy() {
+        return new Syntax(this);
+    }
 }

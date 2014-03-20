@@ -192,7 +192,7 @@ public class AddInjections extends CopyOnWriteTransformer{
         if (sort.equals(KSorts.K) || sort.equals(KSorts.KLABEL) || sort.equals(KSorts.KLIST)) {
             transformedNode.setSort(KSorts.KITEM);
             // TODO (AndreiS): remove special case
-            if (node.getProduction().getLabel().equals("#if_#then_#else_#fi")) {
+            if (node.getProduction().getLabel().equals("#if_#then_#else_#fi") && !sort.equals(KSorts.KLIST)) {
                 return transformedNode;
             }
             return new KItemProjection(sort, transformedNode);

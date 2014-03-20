@@ -7,23 +7,23 @@ import org.kframework.kil.visitors.BasicVisitor;
 
 public class CollectModuleImportsVisitor extends BasicVisitor {
 
-	public CollectModuleImportsVisitor(Context context) {
-		super(context);
-	}
+    public CollectModuleImportsVisitor(Context context) {
+        super(context);
+    }
 
-	private String parentModule = null;
+    private String parentModule = null;
 
-	public void visit(Definition def) {
-		super.visit(def);
-		context.finalizeModules();
-	}
+    public void visit(Definition def) {
+        super.visit(def);
+        context.finalizeModules();
+    }
 
-	public void visit(Module m) {
-		parentModule = m.getName();
-		super.visit(m);
-	}
+    public void visit(Module m) {
+        parentModule = m.getName();
+        super.visit(m);
+    }
 
-	public void visit(Import i) {
-		context.addModuleImport(parentModule, i.getName());
-	}
+    public void visit(Import i) {
+        context.addModuleImport(parentModule, i.getName());
+    }
 }

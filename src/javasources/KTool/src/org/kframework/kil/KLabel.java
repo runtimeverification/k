@@ -9,23 +9,23 @@ import aterm.ATermAppl;
  */
 public abstract class KLabel extends Term {
 
-	protected KLabel() {
-		super(KSorts.KLABEL);
-	}
+    protected KLabel() {
+        super(KSorts.KLABEL);
+    }
 
-	protected KLabel(Element element) {
-		super(element);
-		this.sort = KSorts.KLABEL;
-		//System.out.println(this.sort);
-		//assert this.sort.equals(KSorts.KLABEL);
-	}
+    protected KLabel(Element element) {
+        super(element);
+        this.sort = KSorts.KLABEL;
+        //System.out.println(this.sort);
+        //assert this.sort.equals(KSorts.KLABEL);
+    }
 
-	public KLabel(ATermAppl atm) {
-		super(atm);
-		//assert this.sort.equals(KSorts.KLABEL);
-	}
+    public KLabel(ATermAppl atm) {
+        super(atm);
+        //assert this.sort.equals(KSorts.KLABEL);
+    }
 
-	protected KLabel(KLabel kLabel) {
-		super(kLabel);
-	}
+    protected KLabel(KLabel kLabel) {
+        super(kLabel);
+    }
 }

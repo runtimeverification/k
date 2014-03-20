@@ -35,11 +35,11 @@ public class CopyOnWriteTransformer implements Transformer {
 
     protected final TermContext context;
     protected final Definition definition;
-	
-	public CopyOnWriteTransformer(TermContext context) {
-		this.context = context;
+    
+    public CopyOnWriteTransformer(TermContext context) {
+        this.context = context;
         this.definition = context.definition();
-	}
+    }
 
     public CopyOnWriteTransformer(Definition definition) {
         this(TermContext.of(definition));
@@ -49,7 +49,7 @@ public class CopyOnWriteTransformer implements Transformer {
         this.context = null;
         this.definition = null;
     }
-	
+    
     @Override
     public String getName() {
         return this.getClass().toString();
@@ -162,7 +162,7 @@ public class CopyOnWriteTransformer implements Transformer {
         Term kLabel = (Term) kItem.kLabel().accept(this);
         Term kList = (Term) kItem.kList().accept(this);
         if (kLabel != kItem.kLabel() || kList != kItem.kList()) {
-            kItem = new KItem(kLabel, kList, context.definition().context());
+            kItem = new KItem(kLabel, kList, context);
         }
         return kItem;
     }
@@ -435,6 +435,15 @@ public class CopyOnWriteTransformer implements Transformer {
     }
 
     @Override
+    public ASTNode transform(MapKeyChoice mapKeyChoice) {
+        Term map = (Term) mapKeyChoice.map().accept(this);
+        if (map != mapKeyChoice.map()) {
+            mapKeyChoice = new MapKeyChoice(map);
+        }
+        return mapKeyChoice;
+    }
+
+    @Override
     public ASTNode transform(MapLookup mapLookup) {
         Term map = (Term) mapLookup.map().accept(this);
         Term key = (Term) mapLookup.key().accept(this);
@@ -533,6 +542,15 @@ public class CopyOnWriteTransformer implements Transformer {
         }
 
         return setUpdate;
+    }
+
+    @Override
+    public ASTNode transform(SetElementChoice setElementChoice) {
+        Term set = (Term) setElementChoice.set().accept(this);
+        if (set != setElementChoice.set()) {
+            setElementChoice = new SetElementChoice(set);
+        }
+        return setElementChoice;
     }
 
     @Override

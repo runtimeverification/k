@@ -30,61 +30,61 @@ public class Attribute extends ASTNode {
     public static final String CELL_KEY = "cell";
 
     private String key;
-	private String value;
+    private String value;
 
-	public Attribute(String key, String value) {
-		super();
-		this.key = key;
-		this.value = value;
-	}
+    public Attribute(String key, String value) {
+        super();
+        this.key = key;
+        this.value = value;
+    }
 
-	public Attribute(Element elm) {
-		super(elm);
+    public Attribute(Element elm) {
+        super(elm);
 
-		key = elm.getAttribute(Constants.KEY_key_ATTR);
-		value = elm.getAttribute(Constants.VALUE_value_ATTR);
-	}
+        key = elm.getAttribute(Constants.KEY_key_ATTR);
+        value = elm.getAttribute(Constants.VALUE_value_ATTR);
+    }
 
-	public Attribute(Attribute attribute) {
-		super(attribute);
-		key = attribute.key;
-		value = attribute.value;
-	}
+    public Attribute(Attribute attribute) {
+        super(attribute);
+        key = attribute.key;
+        value = attribute.value;
+    }
 
-	@Override
-	public String toString() {
-		return " " + this.getKey() + "(" + this.getValue() + ")";
-	}
+    @Override
+    public String toString() {
+        return " " + this.getKey() + "(" + this.getValue() + ")";
+    }
 
-	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
 
-	}
+    }
 
-	@Override
-	public ASTNode accept(Transformer transformer) throws TransformerException {
-		return transformer.transform(this);
-	}
+    @Override
+    public ASTNode accept(Transformer transformer) throws TransformerException {
+        return transformer.transform(this);
+    }
 
-	public void setValue(String value) {
-		this.value = value;
-	}
+    public void setValue(String value) {
+        this.value = value;
+    }
 
-	public String getValue() {
-		return value;
-	}
+    public String getValue() {
+        return value;
+    }
 
-	public void setKey(String key) {
-		this.key = key;
-	}
+    public void setKey(String key) {
+        this.key = key;
+    }
 
-	public String getKey() {
-		return key;
-	}
+    public String getKey() {
+        return key;
+    }
 
-	@Override
-	public Attribute shallowCopy() {
-		return new Attribute(this);
-	}
+    @Override
+    public Attribute shallowCopy() {
+        return new Attribute(this);
+    }
 }

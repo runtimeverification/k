@@ -1,7 +1,7 @@
 package org.kframework.backend.java.indexing.pathIndex.trie;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -11,7 +11,7 @@ import java.util.Set;
  * Author: Owolabi Legunsen
  * 1/2/14: 7:23 PM
  */
-public class TrieNode {
+public class TrieNode implements Serializable{
     private final String value;
     private ArrayList<TrieNode> children;
 

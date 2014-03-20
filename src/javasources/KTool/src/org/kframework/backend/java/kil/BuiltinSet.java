@@ -1,6 +1,8 @@
 package org.kframework.backend.java.kil;
 
 import com.google.common.base.Joiner;
+
+import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
@@ -16,6 +18,10 @@ import java.util.Set;
 
 
 /**
+ * Class representing a set. It only has one frame (which is a variable), and concrete elements.
+ * A set composed of multiple set variables or terms (in addition to the elements) is represented
+ * using concatenation (and can only occur in the right-hand side or in the condition).
+ *
  * @author AndreiS
  */
 public class BuiltinSet extends Collection implements Sorted {
@@ -143,8 +149,13 @@ public class BuiltinSet extends Collection implements Sorted {
     }
 
     @Override
-    public void accept(Unifier unifier, Term patten) {
-        unifier.unify(this, patten);
+    public void accept(Unifier unifier, Term pattern) {
+        unifier.unify(this, pattern);
+    }
+
+    @Override
+    public void accept(Matcher matcher, Term pattern) {
+        matcher.match(this, pattern);
     }
 
     @Override

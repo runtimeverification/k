@@ -1,8 +1,6 @@
 package org.kframework.backend.java.kil;
 
-/**
- * @author: TraianSF
- */
+import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
@@ -10,6 +8,12 @@ import org.kframework.kil.ASTNode;
 
 /**
  * Refers to a computation which never completes successfully.
+ * A {@link org.kframework.backend.java.symbolic.SymbolicConstraint.Equality} instance between
+ * bottom and anything else is false and makes the entire constraint false.
+ *
+ * @see org.kframework.backend.java.symbolic.SymbolicConstraint
+ * 
+ * @author TraianSF
  */
 public class Bottom extends Term {
 
@@ -45,9 +49,14 @@ public class Bottom extends Term {
     public ASTNode accept(Transformer transformer) {
         return this;
     }
+    
+    @Override
+    public void accept(Matcher matcher, Term pattern) { 
+        // TODO(YilongL): why not throw an exception here?
+    }
 
     @Override
-    public void accept(Unifier unifier, Term patten) { }
+    public void accept(Unifier unifier, Term pattern) { }
 
     @Override
     public void accept(Visitor visitor) { }

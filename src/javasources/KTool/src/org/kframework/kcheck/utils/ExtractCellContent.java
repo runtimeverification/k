@@ -7,24 +7,24 @@ import org.kframework.kil.visitors.BasicVisitor;
 
 public class ExtractCellContent extends BasicVisitor {
 
-	String cellLabel = null;
-	private Term content;
+    String cellLabel = null;
+    private Term content;
 
-	public ExtractCellContent(Context context, String cellLabel) {
-		super(context);
-		this.cellLabel = cellLabel;
-	}
+    public ExtractCellContent(Context context, String cellLabel) {
+        super(context);
+        this.cellLabel = cellLabel;
+    }
 
-	@Override
-	public void visit(Cell node) {
+    @Override
+    public void visit(Cell node) {
 
-		if (node.getLabel().equals(cellLabel)) {
-			content = node.getContents();
-		}
-		super.visit(node);
-	}
+        if (node.getLabel().equals(cellLabel)) {
+            content = node.getContents();
+        }
+        super.visit(node);
+    }
 
-	public Term getContent() {
-		return content;
-	}
+    public Term getContent() {
+        return content;
+    }
 }

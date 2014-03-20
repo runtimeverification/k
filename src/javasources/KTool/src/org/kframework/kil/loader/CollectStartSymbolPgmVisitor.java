@@ -18,8 +18,8 @@ import org.kframework.utils.general.GlobalSettings;
  */
 public class CollectStartSymbolPgmVisitor extends BasicVisitor {
 
-	public CollectStartSymbolPgmVisitor(Context context) {
-		super(context);
+    public CollectStartSymbolPgmVisitor(Context context) {
+        super(context);
         {
             /*
                 Here we add $PC and $IN manually because they are added during the compilation process
@@ -32,26 +32,26 @@ public class CollectStartSymbolPgmVisitor extends BasicVisitor {
             context.configVarSorts.put(AddConditionToConfig.PC_VAR.substring(1), "Bool");
             context.configVarSorts.put(ResolveInputStreamCell.IN.substring(1), org.kframework.kil.KSorts.LIST);
         }
-	}
+    }
 
-	@Override
-	public void visit(Rule node) {
-	}
+    @Override
+    public void visit(Rule node) {
+    }
 
-	@Override
-	public void visit(org.kframework.kil.Context node) {
-	}
+    @Override
+    public void visit(org.kframework.kil.Context node) {
+    }
 
-	@Override
-	public void visit(Syntax node) {
-	}
+    @Override
+    public void visit(Syntax node) {
+    }
 
-	@Override
-	public void visit(Variable node) {
-		if (node.getName().equals("$PGM")) {
-			context.startSymbolPgm = node.getSort();
-		}
-		assert node.getName().startsWith("$") : "Configuration variables must start with $ symbol.";
-		context.configVarSorts.put(node.getName().substring(1), node.getSort());
-	}
+    @Override
+    public void visit(Variable node) {
+        if (node.getName().equals("$PGM")) {
+            context.startSymbolPgm = node.getSort();
+        }
+        assert node.getName().startsWith("$") : "Configuration variables must start with $ symbol.";
+        context.configVarSorts.put(node.getName().substring(1), node.getSort());
+    }
 }

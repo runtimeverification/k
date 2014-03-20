@@ -11,7 +11,7 @@ import java.util.HashMap;
 
 public class ColorUtil {
 
-	public final static Map<String, Color> colors = initColors();
+    public final static Map<String, Color> colors = initColors();
 
     /**
      * Terminal code corresponding to closest color for this one, from the list of basic 8
@@ -40,98 +40,98 @@ public class ColorUtil {
 
     private static Map<String, Color> initColors() {
         Map<String, Color> colors = new HashMap<String, Color>();
-		colors.put("black", Color.black);
-		colors.put("blue", Color.blue);
-		colors.put("brown", getColorByRgb("#C08040"));
-		colors.put("cyan", Color.cyan);
-		colors.put("darkgray", Color.darkGray);
-		colors.put("gray", Color.gray);
-		colors.put("green", Color.green);
-		colors.put("lightgray", Color.lightGray);
-		colors.put("lime", getColorByRgb("#C0FF00"));
-		colors.put("magenta", Color.magenta);
-		colors.put("olive", getColorByRgb("#808000"));
-		colors.put("orange", Color.orange);
-		colors.put("pink", Color.pink);
-		colors.put("purple", getColorByRgb("#C00040"));
-		colors.put("red", Color.red);
-		colors.put("teal", getColorByRgb("#008080"));
-		colors.put("violet", getColorByRgb("#800080"));
-		colors.put("white", Color.white);
-		colors.put("yellow", Color.yellow);
-		colors.put("Apricot", getColorByRgb("#FBB982"));
-		colors.put("Aquamarine", getColorByRgb("#00B5BE"));
-		colors.put("Bittersweet", getColorByRgb("#C04F17"));
-		colors.put("Black", getColorByRgb("#221E1F"));
-		colors.put("Blue", getColorByRgb("#2D2F92"));
-		colors.put("BlueGreen", getColorByRgb("#00B3B8"));
-		colors.put("BlueViolet", getColorByRgb("#473992"));
-		colors.put("BrickRed", getColorByRgb("#B6321C"));
-		colors.put("Brown", getColorByRgb("#792500"));
-		colors.put("BurntOrange", getColorByRgb("#F7921D"));
-		colors.put("CadetBlue", getColorByRgb("#74729A"));
-		colors.put("CarnationPink", getColorByRgb("#F282B4"));
-		colors.put("Cerulean", getColorByRgb("#00A2E3"));
-		colors.put("CornflowerBlue", getColorByRgb("#41B0E4"));
-		colors.put("Cyan", getColorByRgb("#00AEEF"));
-		colors.put("Dandelion", getColorByRgb("#FDBC42"));
-		colors.put("DarkOrchid", getColorByRgb("#A4538A"));
-		colors.put("Emerald", getColorByRgb("#00A99D"));
-		colors.put("ForestGreen", getColorByRgb("#009B55"));
-		colors.put("Fuchsia", getColorByRgb("#8C368C"));
-		colors.put("Goldenrod", getColorByRgb("#FFDF42"));
-		colors.put("Gray", getColorByRgb("#949698"));
-		colors.put("Green", getColorByRgb("#00A64F"));
-		colors.put("GreenYellow", getColorByRgb("#DFE674"));
-		colors.put("JungleGreen", getColorByRgb("#00A99A"));
-		colors.put("Lavender", getColorByRgb("#F49EC4"));
-		colors.put("LimeGreen", getColorByRgb("#8DC73E"));
-		colors.put("Magenta", getColorByRgb("#EC008C"));
-		colors.put("Mahogany", getColorByRgb("#A9341F"));
-		colors.put("Maroon", getColorByRgb("#AF3235"));
-		colors.put("Melon", getColorByRgb("#F89E7B"));
-		colors.put("MidnightBlue", getColorByRgb("#006795"));
-		colors.put("Mulberry", getColorByRgb("#A93C93"));
-		colors.put("NavyBlue", getColorByRgb("#006EB8"));
-		colors.put("OliveGreen", getColorByRgb("#3C8031"));
-		colors.put("Orange", getColorByRgb("#F58137"));
-		colors.put("OrangeRed", getColorByRgb("#ED135A"));
-		colors.put("Orchid", getColorByRgb("#AF72B0"));
-		colors.put("Peach", getColorByRgb("#F7965A"));
-		colors.put("Periwinkle", getColorByRgb("#7977B8"));
-		colors.put("PineGreen", getColorByRgb("#008B72"));
-		colors.put("Plum", getColorByRgb("#92268F"));
-		colors.put("ProcessBlue", getColorByRgb("#00B0F0"));
-		colors.put("Purple", getColorByRgb("#99479B"));
-		colors.put("RawSienna", getColorByRgb("#974006"));
-		colors.put("Red", getColorByRgb("#ED1B23"));
-		colors.put("RedOrange", getColorByRgb("#F26035"));
-		colors.put("RedViolet", getColorByRgb("#A1246B"));
-		colors.put("Rhodamine", getColorByRgb("#EF559F"));
-		colors.put("RoyalBlue", getColorByRgb("#0071BC"));
-		colors.put("RoyalPurple", getColorByRgb("#613F99"));
-		colors.put("RubineRed", getColorByRgb("#ED017D"));
-		colors.put("Salmon", getColorByRgb("#F69289"));
-		colors.put("SeaGreen", getColorByRgb("#3FBC9D"));
-		colors.put("Sepia", getColorByRgb("#671800"));
-		colors.put("SkyBlue", getColorByRgb("#46C5DD"));
-		colors.put("SpringGreen", getColorByRgb("#C6DC67"));
-		colors.put("Tan", getColorByRgb("#DA9D76"));
-		colors.put("TealBlue", getColorByRgb("#00AEB3"));
-		colors.put("Thistle", getColorByRgb("#D883B7"));
-		colors.put("Turquoise", getColorByRgb("#00B4CE"));
-		colors.put("Violet", getColorByRgb("#58429B"));
-		colors.put("VioletRed", getColorByRgb("#EF58A0"));
-		colors.put("White", getColorByRgb("#FFFFFF"));
-		colors.put("WildStrawberry", getColorByRgb("#EE2967"));
-		colors.put("Yellow", getColorByRgb("#FFF200"));
-		colors.put("YellowGreen", getColorByRgb("#98CC70"));
-		colors.put("YellowOrange", getColorByRgb("#FAA21A"));
+        colors.put("black", Color.black);
+        colors.put("blue", Color.blue);
+        colors.put("brown", getColorByRgb("#C08040"));
+        colors.put("cyan", Color.cyan);
+        colors.put("darkgray", Color.darkGray);
+        colors.put("gray", Color.gray);
+        colors.put("green", Color.green);
+        colors.put("lightgray", Color.lightGray);
+        colors.put("lime", getColorByRgb("#C0FF00"));
+        colors.put("magenta", Color.magenta);
+        colors.put("olive", getColorByRgb("#808000"));
+        colors.put("orange", Color.orange);
+        colors.put("pink", Color.pink);
+        colors.put("purple", getColorByRgb("#C00040"));
+        colors.put("red", Color.red);
+        colors.put("teal", getColorByRgb("#008080"));
+        colors.put("violet", getColorByRgb("#800080"));
+        colors.put("white", Color.white);
+        colors.put("yellow", Color.yellow);
+        colors.put("Apricot", getColorByRgb("#FBB982"));
+        colors.put("Aquamarine", getColorByRgb("#00B5BE"));
+        colors.put("Bittersweet", getColorByRgb("#C04F17"));
+        colors.put("Black", getColorByRgb("#221E1F"));
+        colors.put("Blue", getColorByRgb("#2D2F92"));
+        colors.put("BlueGreen", getColorByRgb("#00B3B8"));
+        colors.put("BlueViolet", getColorByRgb("#473992"));
+        colors.put("BrickRed", getColorByRgb("#B6321C"));
+        colors.put("Brown", getColorByRgb("#792500"));
+        colors.put("BurntOrange", getColorByRgb("#F7921D"));
+        colors.put("CadetBlue", getColorByRgb("#74729A"));
+        colors.put("CarnationPink", getColorByRgb("#F282B4"));
+        colors.put("Cerulean", getColorByRgb("#00A2E3"));
+        colors.put("CornflowerBlue", getColorByRgb("#41B0E4"));
+        colors.put("Cyan", getColorByRgb("#00AEEF"));
+        colors.put("Dandelion", getColorByRgb("#FDBC42"));
+        colors.put("DarkOrchid", getColorByRgb("#A4538A"));
+        colors.put("Emerald", getColorByRgb("#00A99D"));
+        colors.put("ForestGreen", getColorByRgb("#009B55"));
+        colors.put("Fuchsia", getColorByRgb("#8C368C"));
+        colors.put("Goldenrod", getColorByRgb("#FFDF42"));
+        colors.put("Gray", getColorByRgb("#949698"));
+        colors.put("Green", getColorByRgb("#00A64F"));
+        colors.put("GreenYellow", getColorByRgb("#DFE674"));
+        colors.put("JungleGreen", getColorByRgb("#00A99A"));
+        colors.put("Lavender", getColorByRgb("#F49EC4"));
+        colors.put("LimeGreen", getColorByRgb("#8DC73E"));
+        colors.put("Magenta", getColorByRgb("#EC008C"));
+        colors.put("Mahogany", getColorByRgb("#A9341F"));
+        colors.put("Maroon", getColorByRgb("#AF3235"));
+        colors.put("Melon", getColorByRgb("#F89E7B"));
+        colors.put("MidnightBlue", getColorByRgb("#006795"));
+        colors.put("Mulberry", getColorByRgb("#A93C93"));
+        colors.put("NavyBlue", getColorByRgb("#006EB8"));
+        colors.put("OliveGreen", getColorByRgb("#3C8031"));
+        colors.put("Orange", getColorByRgb("#F58137"));
+        colors.put("OrangeRed", getColorByRgb("#ED135A"));
+        colors.put("Orchid", getColorByRgb("#AF72B0"));
+        colors.put("Peach", getColorByRgb("#F7965A"));
+        colors.put("Periwinkle", getColorByRgb("#7977B8"));
+        colors.put("PineGreen", getColorByRgb("#008B72"));
+        colors.put("Plum", getColorByRgb("#92268F"));
+        colors.put("ProcessBlue", getColorByRgb("#00B0F0"));
+        colors.put("Purple", getColorByRgb("#99479B"));
+        colors.put("RawSienna", getColorByRgb("#974006"));
+        colors.put("Red", getColorByRgb("#ED1B23"));
+        colors.put("RedOrange", getColorByRgb("#F26035"));
+        colors.put("RedViolet", getColorByRgb("#A1246B"));
+        colors.put("Rhodamine", getColorByRgb("#EF559F"));
+        colors.put("RoyalBlue", getColorByRgb("#0071BC"));
+        colors.put("RoyalPurple", getColorByRgb("#613F99"));
+        colors.put("RubineRed", getColorByRgb("#ED017D"));
+        colors.put("Salmon", getColorByRgb("#F69289"));
+        colors.put("SeaGreen", getColorByRgb("#3FBC9D"));
+        colors.put("Sepia", getColorByRgb("#671800"));
+        colors.put("SkyBlue", getColorByRgb("#46C5DD"));
+        colors.put("SpringGreen", getColorByRgb("#C6DC67"));
+        colors.put("Tan", getColorByRgb("#DA9D76"));
+        colors.put("TealBlue", getColorByRgb("#00AEB3"));
+        colors.put("Thistle", getColorByRgb("#D883B7"));
+        colors.put("Turquoise", getColorByRgb("#00B4CE"));
+        colors.put("Violet", getColorByRgb("#58429B"));
+        colors.put("VioletRed", getColorByRgb("#EF58A0"));
+        colors.put("White", getColorByRgb("#FFFFFF"));
+        colors.put("WildStrawberry", getColorByRgb("#EE2967"));
+        colors.put("Yellow", getColorByRgb("#FFF200"));
+        colors.put("YellowGreen", getColorByRgb("#98CC70"));
+        colors.put("YellowOrange", getColorByRgb("#FAA21A"));
 
         addSvgnamesColors(colors);
 
         return Collections.unmodifiableMap(colors);
-	}
+    }
 
     private static void addSvgnamesColors(Map<String, Color> colors) {
         Object[][] svgColors = {
@@ -297,11 +297,11 @@ public class ColorUtil {
     }
 
     private static Color getColorByRgb(String rgb) {
-		int r = Integer.valueOf(rgb.substring(1, 3), 16);
-		int g = Integer.valueOf(rgb.substring(3, 5), 16);
-		int b = Integer.valueOf(rgb.substring(5, 7), 16);
-		return new Color(r, g, b);
-	}
+        int r = Integer.valueOf(rgb.substring(1, 3), 16);
+        int g = Integer.valueOf(rgb.substring(3, 5), 16);
+        int b = Integer.valueOf(rgb.substring(5, 7), 16);
+        return new Color(r, g, b);
+    }
 
     private static Map<Color, String> initAnsiColors() {
         Map<Color, String> map = new HashMap<Color, String>(8);
@@ -404,13 +404,13 @@ public class ColorUtil {
 
     public static final String ANSI_NORMAL = "\u001b[0m";
 
-	private static int getColorError(Color c1, Color c2) {
-		int r = c1.getRed() - c2.getRed();
-		int g = c1.getGreen() - c2.getGreen();
-		int b = c1.getBlue() - c2.getBlue();
+    private static int getColorError(Color c1, Color c2) {
+        int r = c1.getRed() - c2.getRed();
+        int g = c1.getGreen() - c2.getGreen();
+        int b = c1.getBlue() - c2.getBlue();
 
-		return r*r + g*g + b*b;
-	}
+        return r*r + g*g + b*b;
+    }
 
     public static Color getColorByName(String colorName) {
         try {

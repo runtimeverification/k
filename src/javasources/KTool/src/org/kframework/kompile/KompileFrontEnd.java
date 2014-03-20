@@ -70,11 +70,14 @@ public class KompileFrontEnd {
             GlobalSettings.fastKast |= cmd.hasOption("fast-kast");
             GlobalSettings.noPrelude |= cmd.hasOption("no-prelude");
             GlobalSettings.warnings = cmd.getOptionValue("warnings", GlobalSettings.warnings);
+            GlobalSettings.ruleIndex = cmd.getOptionValue("rule-index", GlobalSettings.ruleIndex);
             GlobalSettings.addTopCell |= cmd.hasOption("add-top-cell");
             GlobalSettings.lib = cmd.getOptionValue("lib", GlobalSettings.lib);
             GlobalSettings.synModule =
                     cmd.getOptionValue("syntax-module", GlobalSettings.synModule);
             GlobalSettings.testgen |= cmd.hasOption("test-gen");
+
+            K.deterministic_functions |= cmd.hasOption("deterministic-functions");
 
             if (cmd.hasOption("transition"))
                 GlobalSettings.transition = metadataParse(cmd.getOptionValue("transition"));
@@ -131,7 +134,7 @@ public class KompileFrontEnd {
             case "doc":
                 GlobalSettings.documentation = true;
                 backend = new LatexBackend(Stopwatch.sw, context, true);                
-            	break;
+                break;
             case "html":
                 if (!cmd.hasOption("doc-style")) {
                     GlobalSettings.style = "k-definition.css";
@@ -201,9 +204,9 @@ public class KompileFrontEnd {
                     FileUtil.getMainModule(GlobalSettings.mainFile.getName()));
             
             if(cmd.hasOption("kore")){
-            	
-            	KoreBackend koreBackend = new KoreBackend(Stopwatch.sw, context);
-            	koreBackend.run(DefinitionLoader.loadDefinition(GlobalSettings.mainFile, lang,
+                
+                KoreBackend koreBackend = new KoreBackend(Stopwatch.sw, context);
+                koreBackend.run(DefinitionLoader.loadDefinition(GlobalSettings.mainFile, lang,
                         backend.autoinclude(), context));
                 return;
             }

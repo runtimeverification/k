@@ -16,7 +16,7 @@ import java.util.Set;
 public class BinderSubstitutionTransformer extends SubstitutionTransformer {
 
     public BinderSubstitutionTransformer(Map<Variable, ? extends Term> substitution, TermContext context) {
-    	super(substitution, context);
+        super(substitution, context);
         preTransformer.addTransformer(new BinderSubstitution(context));
     }
 
@@ -55,7 +55,7 @@ public class BinderSubstitutionTransformer extends SubstitutionTransformer {
                         Term freshBoundVars = boundVars.substitute(freshSubstitution, context);
                         Term freshbindingExp = bindingExp.substitute(freshSubstitution, context);
                         kList = new KList(ImmutableList.<Term>of(freshBoundVars,freshbindingExp));
-                        kItem = new KItem(kLabel, kList, context.definition().context());
+                        kItem = new KItem(kLabel, kList, context);
 //                    }
                 }
             }

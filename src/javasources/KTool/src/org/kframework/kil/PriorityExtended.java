@@ -8,82 +8,82 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  * @see PriorityBlockExtended
  */
 public class PriorityExtended extends ModuleItem {
-	/** Highest priority block comes first */
-	java.util.List<PriorityBlockExtended> priorityBlocks;
+    /** Highest priority block comes first */
+    java.util.List<PriorityBlockExtended> priorityBlocks;
 
-	public PriorityExtended(java.util.List<PriorityBlockExtended> priorities) {
-		super();
-		this.priorityBlocks = priorities;
-	}
+    public PriorityExtended(java.util.List<PriorityBlockExtended> priorities) {
+        super();
+        this.priorityBlocks = priorities;
+    }
 
-	public java.util.List<PriorityBlockExtended> getPriorityBlocks() {
-		return priorityBlocks;
-	}
+    public java.util.List<PriorityBlockExtended> getPriorityBlocks() {
+        return priorityBlocks;
+    }
 
-	public void setPriorityBlocks(java.util.List<PriorityBlockExtended> priorityBlocks) {
-		this.priorityBlocks = priorityBlocks;
-	}
+    public void setPriorityBlocks(java.util.List<PriorityBlockExtended> priorityBlocks) {
+        this.priorityBlocks = priorityBlocks;
+    }
 
-	public PriorityExtended(PriorityExtended node) {
-		super(node);
-		this.priorityBlocks = node.priorityBlocks;
-	}
+    public PriorityExtended(PriorityExtended node) {
+        super(node);
+        this.priorityBlocks = node.priorityBlocks;
+    }
 
-	@Override
-	public String toString() {
-		String blocks = "";
+    @Override
+    public String toString() {
+        String blocks = "";
 
-		for (PriorityBlockExtended pb : priorityBlocks) {
-			blocks += pb + "\n> ";
-		}
-		if (blocks.length() > 2)
-			blocks = blocks.substring(0, blocks.length() - 3);
+        for (PriorityBlockExtended pb : priorityBlocks) {
+            blocks += pb + "\n> ";
+        }
+        if (blocks.length() > 2)
+            blocks = blocks.substring(0, blocks.length() - 3);
 
-		return "  syntax priorities" + blocks + "\n";
-	}
+        return "  syntax priorities" + blocks + "\n";
+    }
 
-	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-	}
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
+    }
 
-	@Override
-	public ASTNode accept(Transformer transformer) throws TransformerException {
-		return transformer.transform(this);
-	}
+    @Override
+    public ASTNode accept(Transformer transformer) throws TransformerException {
+        return transformer.transform(this);
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null)
-			return false;
-		if (this == obj)
-			return true;
-		if (!(obj instanceof PriorityExtended))
-			return false;
-		PriorityExtended syn = (PriorityExtended) obj;
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null)
+            return false;
+        if (this == obj)
+            return true;
+        if (!(obj instanceof PriorityExtended))
+            return false;
+        PriorityExtended syn = (PriorityExtended) obj;
 
-		if (syn.priorityBlocks.size() != priorityBlocks.size())
-			return false;
+        if (syn.priorityBlocks.size() != priorityBlocks.size())
+            return false;
 
-		for (int i = 0; i < syn.priorityBlocks.size(); i++) {
-			if (!syn.priorityBlocks.get(i).equals(priorityBlocks.get(i)))
-				return false;
-		}
+        for (int i = 0; i < syn.priorityBlocks.size(); i++) {
+            if (!syn.priorityBlocks.get(i).equals(priorityBlocks.get(i)))
+                return false;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	@Override
-	public int hashCode() {
-		int hash = 0;
+    @Override
+    public int hashCode() {
+        int hash = 0;
 
-		for (PriorityBlockExtended pb : priorityBlocks)
-			hash += pb.hashCode();
-		return hash;
-	}
+        for (PriorityBlockExtended pb : priorityBlocks)
+            hash += pb.hashCode();
+        return hash;
+    }
 
-	@Override
-	public PriorityExtended shallowCopy() {
-		return new PriorityExtended(this);
-	}
+    @Override
+    public PriorityExtended shallowCopy() {
+        return new PriorityExtended(this);
+    }
 }

@@ -84,14 +84,14 @@ public class MapLookupPattern extends Term {
   }
 
   @Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-	}
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
+    }
 
   @Override
-	public ASTNode accept(Transformer transformer) throws TransformerException {
-		return transformer.transform(this);
-	}
+    public ASTNode accept(Transformer transformer) throws TransformerException {
+        return transformer.transform(this);
+    }
 
   @Override
   public void accept(Matcher matcher, Term toMatch){
@@ -99,26 +99,26 @@ public class MapLookupPattern extends Term {
   }
 
   @Override
-	public MapLookupPattern shallowCopy() {
-		return new MapLookupPattern(this);
-	}
+    public MapLookupPattern shallowCopy() {
+        return new MapLookupPattern(this);
+    }
  
-	@Override
-	public int hashCode() {
-		//TODO: finish implementation
-		return 0;
-	}
+    @Override
+    public int hashCode() {
+        //TODO: finish implementation
+        return 0;
+    }
 
-	@Override
-	public boolean equals(Object o) {
-		if (o == null)
-			return false;
-		if (this == o)
-			return true;
-		if (!(o instanceof Cast))
-			return false;
-		// TODO: finish implementing this equals
-		return true;
-	}
+    @Override
+    public boolean equals(Object o) {
+        if (o == null)
+            return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof Cast))
+            return false;
+        // TODO: finish implementing this equals
+        return true;
+    }
 }  
 

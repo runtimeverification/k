@@ -31,7 +31,13 @@ public class LocalEvaluator extends LocalTransformer {
     
     @Override
     public ASTNode transform(KItem kItem) {
-        return kItem.evaluateFunction(constraint, context);
+        // TODO(YilongL): shall we consider cache evaluation result in certain cases?
+        Term evaluatedTerm = kItem.evaluateFunction(constraint, context);
+        // TODO(YilongL): had to comment out the following assertion because the visitor/imp.k somehow fails here
+//        if (kItem.isGround() && kItem.isEvaluable(context)) {
+//            assert evaluatedTerm != kItem : "failed to evaluate function with ground arguments: " + kItem;
+//        }
+        return evaluatedTerm;
     }
 
     @Override
@@ -45,6 +51,11 @@ public class LocalEvaluator extends LocalTransformer {
     }
 
     @Override
+    public ASTNode transform(SetElementChoice setElementChoice) {
+        return setElementChoice.evaluateChoice();
+    }
+
+    @Override
     public ASTNode transform(SetLookup setLookup) {
         return setLookup.evaluateLookup();
     }
@@ -52,6 +63,11 @@ public class LocalEvaluator extends LocalTransformer {
     @Override
     public ASTNode transform(SetUpdate setUpdate) {
         return setUpdate.evaluateUpdate();
+    }
+
+    @Override
+    public ASTNode transform(MapKeyChoice mapKeyChoice) {
+        return mapKeyChoice.evaluateChoice();
     }
 
     @Override

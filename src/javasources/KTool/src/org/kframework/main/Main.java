@@ -11,34 +11,34 @@ import org.kframework.utils.file.KPaths;
 
 public class Main {
 
-	/**
-	 * Sets the {@code java.library.path} system property to include the native libraries
-	 * directory containing extra Jar files distributed with K for this platform.
-	 */
-	private static void setJavaLibraryPath() {
-		System.setProperty("java.library.path", KPaths.getJavaLibraryPath());
+    /**
+     * Sets the {@code java.library.path} system property to include the native libraries
+     * directory containing extra Jar files distributed with K for this platform.
+     */
+    private static void setJavaLibraryPath() {
+        System.setProperty("java.library.path", KPaths.getJavaLibraryPath());
 
-		/* force java to reset the path (dirty hack) */
-		try {
-			Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
-			fieldSysPath.setAccessible(true);
-			fieldSysPath.set(null, null);
-		} catch (IllegalAccessException | NoSuchFieldException e) {
-			e.printStackTrace();
-		}
-	}
+        /* force java to reset the path (dirty hack) */
+        try {
+            Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
+            fieldSysPath.setAccessible(true);
+            fieldSysPath.set(null, null);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+    }
 
-	/**
-	 * @param args
-	 *            - the running arguments for the K3 tool. First argument must be one of the following: kompile|kast|krun.
-	 * @throws TransformerException when loadDefinition fails
-	 * @throws IOException when loadDefinition fails 
-	 */
-	public static void main(String[] args) throws IOException, TransformerException {
+    /**
+     * @param args
+     *            - the running arguments for the K3 tool. First argument must be one of the following: kompile|kast|krun.
+     * @throws TransformerException when loadDefinition fails
+     * @throws IOException when loadDefinition fails 
+     */
+    public static void main(String[] args) throws IOException, TransformerException {
         Stopwatch.init();
-		setJavaLibraryPath();
+        setJavaLibraryPath();
 
-		if (args.length >= 1) {
+        if (args.length >= 1) {
             String[] args2 = Arrays.copyOfRange(args, 1, args.length);
             switch (args[0]) {
                 case "-kompile":
@@ -87,7 +87,7 @@ public class Main {
                     Error.report("The first argument of K3 not recognized. Try -kompile, -kast, -krun or -kpp.");
                     break;
             }
-		} else
-			Error.report("There must be a first argument to K3: try -kompile, -kast, -krun or -kpp.");
-	}
+        } else
+            Error.report("There must be a first argument to K3: try -kompile, -kast, -krun or -kpp.");
+    }
 }

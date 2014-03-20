@@ -15,61 +15,61 @@ public class Hole extends Term {
 
     public static final Hole KITEM_HOLE = new Hole(KSorts.KITEM);
 
-	private Hole(Element element) {
-		super(element);
-		this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
-	}
+    private Hole(Element element) {
+        super(element);
+        this.sort = element.getAttribute(Constants.SORT_sort_ATTR);
+    }
 
-	private Hole(Hole hole) {
-		super(hole);
-	}
+    private Hole(Hole hole) {
+        super(hole);
+    }
 
-	private Hole(String sort) {
-		super(sort);
+    private Hole(String sort) {
+        super(sort);
 
         assert sort.equals(KSorts.KITEM);
-	}
+    }
 
-	public String toString() {
-		return "[]:" + sort + " ";
-	}
+    public String toString() {
+        return "[]:" + sort + " ";
+    }
 
-	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-	}
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
+    }
 
-	@Override
-	public ASTNode accept(Transformer transformer) throws TransformerException {
-		return transformer.transform(this);
-	}
+    @Override
+    public ASTNode accept(Transformer transformer) throws TransformerException {
+        return transformer.transform(this);
+    }
 
   @Override
   public void accept(Matcher matcher, Term toMatch){
     matcher.match(this, toMatch);
   }
 
-	@Override
-	public Hole shallowCopy() {
-		return new Hole(this);
-	}
+    @Override
+    public Hole shallowCopy() {
+        return new Hole(this);
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null)
-			return false;
-		if (this == obj)
-			return true;
-		if (!(obj instanceof Hole))
-			return false;
-		Hole hole = (Hole)obj;
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null)
+            return false;
+        if (this == obj)
+            return true;
+        if (!(obj instanceof Hole))
+            return false;
+        Hole hole = (Hole)obj;
 
-		return this.sort.equals(hole.getSort());
-	}
+        return this.sort.equals(hole.getSort());
+    }
 
-	@Override
-	public int hashCode() {
-		return sort.hashCode();
-	}
+    @Override
+    public int hashCode() {
+        return sort.hashCode();
+    }
 
 }

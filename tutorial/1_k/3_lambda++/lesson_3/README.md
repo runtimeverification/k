@@ -1,5 +1,7 @@
 ### Reusing Existing Semantics
 
+[MOVIE [3'21"]](http://youtu.be/tW4KRdgBIGo)
+
 In this lesson we will learn that, in some cases, we can reuse existing
 semantics of language features without having to make any change!
 

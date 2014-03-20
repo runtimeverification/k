@@ -8,25 +8,25 @@ import java.util.logging.Logger;
 
 public class CommandReadbytes extends Command {
 
-	private long ID;
-	private int numBytes;
+    private long ID;
+    private int numBytes;
 
-	public CommandReadbytes(String[] args, Socket socket, Logger logger, FileSystem fs) {
-		super(args, socket, logger, fs);
+    public CommandReadbytes(String[] args, Socket socket, Logger logger, FileSystem fs) {
+        super(args, socket, logger, fs);
 
-		try {
-			ID = Long.parseLong(args[1]);
-			numBytes = Integer.parseInt(args[2]);
-		} catch (NumberFormatException nfe) {
-			fail("read bytes operation aborted: " + nfe.getLocalizedMessage());
-		}
-	}
+        try {
+            ID = Long.parseLong(args[1]);
+            numBytes = Integer.parseInt(args[2]);
+        } catch (NumberFormatException nfe) {
+            fail("read bytes operation aborted: " + nfe.getLocalizedMessage());
+        }
+    }
 
-	public void run() {
+    public void run() {
         try {
            succeed(new String(fs.get(ID).read(numBytes)));
         } catch (IOException e) {
             fail(e.getMessage());
         }
-	}
+    }
 }

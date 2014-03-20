@@ -10,55 +10,55 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  * Usually only occurs as the label of a {@link KApp} an {@link Empty} as arguments.
  */
 public class KInjectedLabel extends Term {
-	protected Term term;
+    protected Term term;
 
-	public KInjectedLabel(String location, String filename) {
-		super(location, filename, KSorts.KLABEL);
-	}
+    public KInjectedLabel(String location, String filename) {
+        super(location, filename, KSorts.KLABEL);
+    }
 
-	public KInjectedLabel(KInjectedLabel l) {
-		super(l);
-		term = l.term;
-	}
+    public KInjectedLabel(KInjectedLabel l) {
+        super(l);
+        term = l.term;
+    }
 
-	public KInjectedLabel(Term t) {
-		super(KSorts.KLABEL);
-		term = t;
-	}
+    public KInjectedLabel(Term t) {
+        super(KSorts.KLABEL);
+        term = t;
+    }
 
-	public Term getTerm() {
-		return term;
-	}
+    public Term getTerm() {
+        return term;
+    }
 
-	public void setTerm(Term term) {
-		this.term = term;
-	}
+    public void setTerm(Term term) {
+        this.term = term;
+    }
 
-	public String toString() {
-		return "# " + term;
-	}
+    public String toString() {
+        return "# " + term;
+    }
 
-	public static String getInjectedSort(String sort) {
-		if (sort.equals("BagItem"))
-			return "Bag";
-		if (sort.equals("SetItem"))
-			return "Set";
-		if (sort.equals("MapItem"))
-			return "Map";
-		if (sort.equals("ListItem"))
-			return "List";
-		return sort;
-	}
+    public static String getInjectedSort(String sort) {
+        if (sort.equals("BagItem"))
+            return "Bag";
+        if (sort.equals("SetItem"))
+            return "Set";
+        if (sort.equals("MapItem"))
+            return "Map";
+        if (sort.equals("ListItem"))
+            return "List";
+        return sort;
+    }
 
-	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-	}
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
+    }
 
-	@Override
-	public ASTNode accept(Transformer transformer) throws TransformerException {
-		return transformer.transform(this);
-	}
+    @Override
+    public ASTNode accept(Transformer transformer) throws TransformerException {
+        return transformer.transform(this);
+    }
 
   @Override
   public void accept(Matcher matcher, Term toMatch){
@@ -66,33 +66,33 @@ public class KInjectedLabel extends Term {
   }
 
 
-	@Override
-	public KInjectedLabel shallowCopy() {
-		return new KInjectedLabel(this);
-	}
+    @Override
+    public KInjectedLabel shallowCopy() {
+        return new KInjectedLabel(this);
+    }
 
-	@Override
-	public boolean equals(Object o) {
-		if (getClass() != o.getClass()) return false;
-		KInjectedLabel k = (KInjectedLabel)o;
-		return term.equals(k.term);
-	}
+    @Override
+    public boolean equals(Object o) {
+        if (getClass() != o.getClass()) return false;
+        KInjectedLabel k = (KInjectedLabel)o;
+        return term.equals(k.term);
+    }
 
-	@Override
-	public boolean contains(Object o) {
-		if (o instanceof Bracket)
-			return contains(((Bracket)o).getContent());
-		if (o instanceof Cast)
-			return contains(((Cast)o).getContent());
-		if (getClass() != o.getClass()) return false;
-		KInjectedLabel k = (KInjectedLabel)o;
-		return term.contains(k.term);
-	}
+    @Override
+    public boolean contains(Object o) {
+        if (o instanceof Bracket)
+            return contains(((Bracket)o).getContent());
+        if (o instanceof Cast)
+            return contains(((Cast)o).getContent());
+        if (getClass() != o.getClass()) return false;
+        KInjectedLabel k = (KInjectedLabel)o;
+        return term.contains(k.term);
+    }
 
 
-	@Override
-	public int hashCode() {
-		return term.hashCode();
-	}
+    @Override
+    public int hashCode() {
+        return term.hashCode();
+    }
 
 }

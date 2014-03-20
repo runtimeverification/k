@@ -20,16 +20,16 @@ import org.strategoxt.lang.Strategy;
  */
 public class string_unescape_sort_0_0 extends Strategy {
 
-	public static string_unescape_sort_0_0 instance = new string_unescape_sort_0_0();
+    public static string_unescape_sort_0_0 instance = new string_unescape_sort_0_0();
 
-	@Override
-	public IStrategoTerm invoke(Context context, IStrategoTerm current) {
-		IStrategoString istr = (IStrategoString) current;
-		String str = istr.stringValue();
+    @Override
+    public IStrategoTerm invoke(Context context, IStrategoTerm current) {
+        IStrategoString istr = (IStrategoString) current;
+        String str = istr.stringValue();
 
-		str = StringUtil.unEscapeSortName(str);
+        str = StringUtil.unEscapeSortName(str);
 
-		ITermFactory factory = context.getFactory();
-		return factory.makeString(str);
-	}
+        ITermFactory factory = context.getFactory();
+        return factory.makeString(str);
+    }
 }

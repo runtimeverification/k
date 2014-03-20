@@ -18,6 +18,10 @@
 		<antcall target="makeversion" />	
 	</target>
 
+    <target name="test-build">
+        <ant antfile="${javasources}/KTool/buildjava.xml" target="test-build" dir="${javasources}/KTool" />
+    </target>
+
 	<target name="clean">
 		<delete>
 			<fileset dir="${javasources}/KTool/src/org/kframework/parser/concrete/lib">
@@ -157,8 +161,8 @@
 	</target>
 
 
-	<target name="test" depends="build">
-           <java jar="${javasources}/../../lib/java/k3.jar" fork="true" failonerror="true">
+	<target name="test" depends="build,junit,checkstyle">
+          <java jar="${javasources}/../../lib/java/k3.jar" fork="true" failonerror="true">
 	     <arg value="-ktest"/>
 	     <arg value="${config}"/>
 	     <arg value="-programs"/>
@@ -167,4 +171,35 @@
 	     <arg value="."/>
 	   </java>
 	</target>
+
+    <target name="junit" depends="test-build">
+       <junit haltonfailure="true" fork="true" dir="${javasources}/KTool">
+         <formatter type="plain" usefile="false" />
+         <classpath>
+           <pathelement location="${javasources}/KTool/bin/" />
+           <fileset dir="${javasources}/KTool/lib">
+             <include name="*.jar" />
+           </fileset>
+           <fileset dir="lib/java/">
+             <include name="*.jar" />
+           </fileset>
+         </classpath>
+         <batchtest>
+           <fileset dir="${javasources}/KTool/test" includes="**/*.java" />
+         </batchtest>
+       </junit>
+    </target>
+
+    <taskdef resource="checkstyletask.properties"
+             classpath="${javasources}/KTool/lib/checkstyle-all.jar"/>
+
+    <target name="checkstyle">
+        <checkstyle config="${javasources}/KTool/checkstyle.xml">
+            <fileset dir="${javasources}/KTool">
+                <include name="**/*.java"/>
+                <exclude name="src/org/kframework/parser/concrete/lib/**" />
+            </fileset>
+        </checkstyle>
+    </target>
+
 </project>

@@ -17,35 +17,35 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  * Usually only occurs as the label of a {@link KApp} an {@link Empty} as arguments.
  */
 public class FreezerLabel extends KInjectedLabel {
-	public FreezerLabel(String location, String filename) {
-		super(location, filename);
-	}
+    public FreezerLabel(String location, String filename) {
+        super(location, filename);
+    }
 
-	public FreezerLabel(FreezerLabel l) {
-		super(l);
-	}
+    public FreezerLabel(FreezerLabel l) {
+        super(l);
+    }
 
-	@Override
-	public FreezerLabel shallowCopy() {
-		return new FreezerLabel(this);
-	}
+    @Override
+    public FreezerLabel shallowCopy() {
+        return new FreezerLabel(this);
+    }
 
-	public FreezerLabel(Term t) {
-		super(t);
-	}
+    public FreezerLabel(Term t) {
+        super(t);
+    }
 
-	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-	}
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
+    }
 
-	@Override
-	public ASTNode accept(Transformer transformer) throws TransformerException {
-		return transformer.transform(this);
-	}
+    @Override
+    public ASTNode accept(Transformer transformer) throws TransformerException {
+        return transformer.transform(this);
+    }
 
-	@Override
-	public void accept(Matcher matcher, Term toMatch) {
-		matcher.match(this, toMatch);
-	}
+    @Override
+    public void accept(Matcher matcher, Term toMatch) {
+        matcher.match(this, toMatch);
+    }
 }

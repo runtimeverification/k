@@ -264,7 +264,7 @@ module MINT
   =>
     iMInt(sMInt(mi(N, I1))) >=Int iMInt(sMInt(mi(N, I2)))
   rule
-    geqMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
+    ugeqMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
     iMInt(uMInt(mi(N, I1))) >=Int iMInt(uMInt(mi(N, I2)))
 

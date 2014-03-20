@@ -9,27 +9,27 @@ import java.util.logging.Logger;
 public class CommandSeek extends Command {
 
 
-	private long ID;
-	private int position;
+    private long ID;
+    private int position;
 
-	public CommandSeek(String[] args, Socket socket, Logger logger, FileSystem fs) { //, Long maudeId) {
-		super(args, socket, logger, fs); //, maudeId);
-		
-		try {
-			ID = Long.parseLong(args[1]);
-			position = Integer.parseInt(args[2]);
-		} catch (NumberFormatException nfe) {
-			fail("seek operation aborted: " + nfe.getLocalizedMessage());
-		}
-	}
+    public CommandSeek(String[] args, Socket socket, Logger logger, FileSystem fs) { //, Long maudeId) {
+        super(args, socket, logger, fs); //, maudeId);
+        
+        try {
+            ID = Long.parseLong(args[1]);
+            position = Integer.parseInt(args[2]);
+        } catch (NumberFormatException nfe) {
+            fail("seek operation aborted: " + nfe.getLocalizedMessage());
+        }
+    }
 
-	public void run() {
+    public void run() {
         try {
             fs.get(ID).seek(position);
             succeed();
         } catch (IOException e) {
             fail(e.getMessage());
         }
-	}
+    }
 
 }

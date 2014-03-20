@@ -11,29 +11,29 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class EliminateRRWrapper extends CopyOnWriteTransformer {
 
-	Term lphi, rphi;
-	
-	public EliminateRRWrapper(Context context) {
-		super("Filter condition: eliminate RRCondition wrapper", context);
-	}
+    Term lphi, rphi;
+    
+    public EliminateRRWrapper(Context context) {
+        super("Filter condition: eliminate RRCondition wrapper", context);
+    }
 
-	@Override
-	public ASTNode transform(KApp node) throws TransformerException {
-		if (node.getLabel().toString().equals(ReachabilityRuleToKRule.RR_COND)) {
-				KList contents = (KList) node.getChild();
-				lphi = contents.getContents().get(0);
-				rphi = contents.getContents().get(1);
-				return BoolBuiltin.TRUE;
-		}
-		
-		return super.transform(node);
-	}
+    @Override
+    public ASTNode transform(KApp node) throws TransformerException {
+        if (node.getLabel().toString().equals(ReachabilityRuleToKRule.RR_COND)) {
+                KList contents = (KList) node.getChild();
+                lphi = contents.getContents().get(0);
+                rphi = contents.getContents().get(1);
+                return BoolBuiltin.TRUE;
+        }
+        
+        return super.transform(node);
+    }
 
-	public Term getLphi() {
-		return lphi;
-	}
+    public Term getLphi() {
+        return lphi;
+    }
 
-	public Term getRphi() {
-		return rphi;
-	}
+    public Term getRphi() {
+        return rphi;
+    }
 }

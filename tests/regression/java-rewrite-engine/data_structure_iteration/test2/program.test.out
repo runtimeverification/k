@@ -1,0 +1,9 @@
+<k>
+    0 ~> SetItem(0)
+    SetItem(1)
+</k>
+<state>
+    0 |-> .Set
+    1 |-> SetItem(1)
+    SetItem(2)
+</state>

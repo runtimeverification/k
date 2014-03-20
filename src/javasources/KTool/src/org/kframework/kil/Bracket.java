@@ -17,109 +17,109 @@ import aterm.ATermAppl;
 /** Represents parentheses uses for grouping. All productions labeled bracket parse to this. */
 public class Bracket extends Term {
 
-	private Term content;
+    private Term content;
 
-	public Term getContent() {
-		return content;
-	}
+    public Term getContent() {
+        return content;
+    }
 
-	public void setContent(Term content) {
-		this.content = content;
-	}
+    public void setContent(Term content) {
+        this.content = content;
+    }
 
-	public String getSort() {
-		if (content instanceof Ambiguity)
-			return super.getSort();
-		return content.getSort();
-	}
+    public String getSort() {
+        if (content instanceof Ambiguity)
+            return super.getSort();
+        return content.getSort();
+    }
 
-	public Bracket(Bracket i) {
-		super(i);
-		this.content = i.content;
-	}
+    public Bracket(Bracket i) {
+        super(i);
+        this.content = i.content;
+    }
 
-	public Bracket(Term t, Context context) {
-		super(t.getSort());
-		this.content = t;
-	}
+    public Bracket(Term t, Context context) {
+        super(t.getSort());
+        this.content = t;
+    }
 
-	public Bracket(String location, String filename, String sort) {
-		super(location, filename, sort);
-	}
+    public Bracket(String location, String filename, String sort) {
+        super(location, filename, sort);
+    }
 
-	public Bracket(String location, String filename, Term t, Context context) {
-		super(location, filename, t.getSort());
-		this.content = t;
-	}
+    public Bracket(String location, String filename, Term t, Context context) {
+        super(location, filename, t.getSort());
+        this.content = t;
+    }
 
-	public Bracket(Element element) {
-		super(element);
-		this.content = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
-	}
+    public Bracket(Element element) {
+        super(element);
+        this.content = (Term) JavaClassesFactory.getTerm(XML.getChildrenElements(element).get(0));
+    }
 
-	public Bracket(ATermAppl atm) {
-		super(atm);
-		this.sort = StringUtil.getSortNameFromCons(atm.getName());
+    public Bracket(ATermAppl atm) {
+        super(atm);
+        this.sort = StringUtil.getSortNameFromCons(atm.getName());
 
-		content = (Term) JavaClassesFactory.getTerm(atm.getArgument(0));
-	}
+        content = (Term) JavaClassesFactory.getTerm(atm.getArgument(0));
+    }
 
-	public Bracket(String sort) {
-		super(sort);
-	}
+    public Bracket(String sort) {
+        super(sort);
+    }
 
-	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-	}
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
+    }
 
-	@Override
-	public ASTNode accept(Transformer transformer) throws TransformerException {
-		return transformer.transform(this);
-	}
+    @Override
+    public ASTNode accept(Transformer transformer) throws TransformerException {
+        return transformer.transform(this);
+    }
 
-	@Override
-	public void accept(Matcher matcher, Term toMatch) {
-		matcher.match(this, toMatch);
-	}
+    @Override
+    public void accept(Matcher matcher, Term toMatch) {
+        matcher.match(this, toMatch);
+    }
 
-	@Override
-	public Bracket shallowCopy() {
-		return new Bracket(this);
-	}
+    @Override
+    public Bracket shallowCopy() {
+        return new Bracket(this);
+    }
 
-	@Override
-	public String toString() {
-		return "(" + content + ")";
-	}
+    @Override
+    public String toString() {
+        return "(" + content + ")";
+    }
 
-	@Override
-	public int hashCode() {
-		return content.hashCode();
-	}
+    @Override
+    public int hashCode() {
+        return content.hashCode();
+    }
 
-	@Override
-	public boolean equals(Object o) {
-		if (o == null)
-			return false;
-		if (this == o)
-			return true;
-		if (!(o instanceof Bracket))
-			return false;
-		Bracket b = (Bracket) o;
-		return content.equals(b.content);
-	}
+    @Override
+    public boolean equals(Object o) {
+        if (o == null)
+            return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof Bracket))
+            return false;
+        Bracket b = (Bracket) o;
+        return content.equals(b.content);
+    }
 
-	@Override
-	public boolean contains(Object o) {
-		if (o == null)
-			return false;
-		if (this == o)
-			return true;
-		if (!(o instanceof Bracket))
-			return false;
-		Bracket b = (Bracket) o;
-		return content.contains(b.content);
-	}
+    @Override
+    public boolean contains(Object o) {
+        if (o == null)
+            return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof Bracket))
+            return false;
+        Bracket b = (Bracket) o;
+        return content.contains(b.content);
+    }
 
 }

@@ -5,13 +5,13 @@ package org.kframework.krun.ioserver.main;
  *
  */
 public class Fresh {
-	private static Long id = (long) 0;
+    private static Long id = (long) 0;
 
-	/**
-	 * Increment the id and return it.
-	 * @return a fresh id.
-	 */
-	public static Long getFreshId() {
-		return id++;
-	}
+    /**
+     * Increment the id and return it.
+     * @return a fresh id.
+     */
+    public static Long getFreshId() {
+        return id++;
+    }
 }

@@ -12,11 +12,11 @@ import java.util.Set;
 
 public class RemoveUnusedModules extends CopyOnWriteTransformer {
 
-	private boolean autoinclude;
-	public RemoveUnusedModules(Context context, boolean autoinclude) {
-		super(RemoveUnusedModules.class.toString(), context);
-		this.autoinclude = autoinclude;
-	}
+    private boolean autoinclude;
+    public RemoveUnusedModules(Context context, boolean autoinclude) {
+        super(RemoveUnusedModules.class.toString(), context);
+        this.autoinclude = autoinclude;
+    }
 
     @Override
     public ASTNode transform(Definition def) throws TransformerException {
@@ -28,8 +28,8 @@ public class RemoveUnusedModules extends CopyOnWriteTransformer {
         }
         
         initialModules.add(def.getMainModule());
-		CollectReachableModulesVisitor fm = new CollectReachableModulesVisitor(context, initialModules);
-		def.accept(fm);
+        CollectReachableModulesVisitor fm = new CollectReachableModulesVisitor(context, initialModules);
+        def.accept(fm);
         ArrayList<DefinitionItem> reachableModulesList = new ArrayList<>();
         HashMap<String, Module> reachableModulesMap = fm.getResult();
 //        System.out.println(reachableModulesMap.keySet());
@@ -50,33 +50,33 @@ public class RemoveUnusedModules extends CopyOnWriteTransformer {
             def.setModulesMap(reachableModulesMap);
         }
         return def;
-	}
+    }
 
-	private class CollectReachableModulesVisitor extends BasicVisitor  {
+    private class CollectReachableModulesVisitor extends BasicVisitor  {
         HashMap<String,Module> included;
         private Collection<String> initialModules;
 
         public CollectReachableModulesVisitor(Context context, Collection<String> initialModules) {
-			super(context);
+            super(context);
             this.initialModules = initialModules;
             included = new HashMap<>();
         }
 
-		@Override
-		public void visit(Definition d) {
-			Queue<Module> mods = new LinkedList<Module>();
+        @Override
+        public void visit(Definition d) {
+            Queue<Module> mods = new LinkedList<Module>();
             for (String name : initialModules) {
                 Module mainModule = d.getModulesMap().get(name);
                 mods.add(mainModule);
                 included.put(name, mainModule);
             }
-			//		System.out.println("push " + d.getMainModule());
-			while (!mods.isEmpty()) {
-				Module mod = mods.remove();
-				//			System.out.println("pop " + mod.getName());
-				if (null == mod.getItems()) continue;
-				for(ModuleItem i : mod.getItems()) {
-					if (!(i instanceof Import)) continue;
+            //        System.out.println("push " + d.getMainModule());
+            while (!mods.isEmpty()) {
+                Module mod = mods.remove();
+                //            System.out.println("pop " + mod.getName());
+                if (null == mod.getItems()) continue;
+                for(ModuleItem i : mod.getItems()) {
+                    if (!(i instanceof Import)) continue;
                     String name = ((Import)i).getName();
                     if (included.containsKey(name)) continue;
                     Module mod1 = d.getModulesMap().get(name);
@@ -84,17 +84,17 @@ public class RemoveUnusedModules extends CopyOnWriteTransformer {
                         mods.add(mod1);
                         included.put(name, mod1);
                     }
-				}
-			}
-		}
+                }
+            }
+        }
 
-		public HashMap<String, Module> getResult() {
-			return included;
-		}
-	}
+        public HashMap<String, Module> getResult() {
+            return included;
+        }
+    }
 
-	@Override
-	public String getName() {
-		return "Flatten Modules";
-	}
+    @Override
+    public String getName() {
+        return "Flatten Modules";
+    }
 }

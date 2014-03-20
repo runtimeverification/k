@@ -5,26 +5,26 @@ import org.kframework.utils.general.GlobalSettings;
 
 @SuppressWarnings("serial")
 public class TransformerException extends Exception {
-	KException exception;
+    KException exception;
 
-	public TransformerException(KException kException) {
-		exception = kException;
-	}
+    public TransformerException(KException kException) {
+        exception = kException;
+    }
 
-	public TransformerException(TransformerException exception2) {
-		exception = exception2.exception;
-	}
+    public TransformerException(TransformerException exception2) {
+        exception = exception2.exception;
+    }
 
-	@Override
-	public void printStackTrace() {
-		report();
-	}
+    @Override
+    public void printStackTrace() {
+        report();
+    }
 
-	public void report() {
-		GlobalSettings.kem.register(exception);
-	}
+    public void report() {
+        GlobalSettings.kem.register(exception);
+    }
 
-	public String getMessage() {
-		return exception.getMessage();
-	}
+    public String getMessage() {
+        return exception.getMessage();
+    }
 }

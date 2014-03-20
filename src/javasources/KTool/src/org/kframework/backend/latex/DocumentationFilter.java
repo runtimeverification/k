@@ -10,9 +10,9 @@ import org.kframework.utils.general.GlobalSettings;
 
 public class DocumentationFilter extends LatexFilter {
 
-	public DocumentationFilter(org.kframework.kil.loader.Context context) {
-		super(context);
-	}
+    public DocumentationFilter(org.kframework.kil.loader.Context context) {
+        super(context);
+    }
 
     @Override
     public void visit(Module mod) {
@@ -33,17 +33,17 @@ public class DocumentationFilter extends LatexFilter {
         result.append("\\end{module}" + endl);
     }
 
-	@Override
+    @Override
     public void visit(Rule rule) {
-    	// termComment = false;
-		Attributes atts = rule.getAttributes(); 
-    	boolean process = false;
-    	for(String tag : GlobalSettings.doctags) {
-    	    if(atts.containsKey(tag)) {
-    		    process = true;
-    		    break;
-    		}
-    	}
-		if(process) super.visit(rule);
-	}
+        // termComment = false;
+        Attributes atts = rule.getAttributes(); 
+        boolean process = false;
+        for(String tag : GlobalSettings.doctags) {
+            if(atts.containsKey(tag)) {
+                process = true;
+                break;
+            }
+        }
+        if(process) super.visit(rule);
+    }
 }

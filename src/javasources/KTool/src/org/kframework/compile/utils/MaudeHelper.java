@@ -12,12 +12,12 @@ import java.util.Set;
 
 public class MaudeHelper {
 
-	public static List<String> separators = new ArrayList<String>();
-	public static Set<String> declaredSorts = new HashSet<String>();
-	public static Set<String> kLabels = new HashSet<String>();
+    public static List<String> separators = new ArrayList<String>();
+    public static Set<String> declaredSorts = new HashSet<String>();
+    public static Set<String> kLabels = new HashSet<String>();
 
     public static Set<String> basicSorts = new HashSet<String>();
-	static {
+    static {
         basicSorts.add(KSorts.K);
         basicSorts.add(KSorts.KITEM);
         basicSorts.add(KSorts.KLABEL);
@@ -46,10 +46,10 @@ public class MaudeHelper {
         basicSorts.add("#ModelCheckResult");
         basicSorts.add("#LTLFormula");
         basicSorts.add("#Prop");
-	}
+    }
 
     public static Set<String> constantSorts = new HashSet<String>();
-	static {
+    static {
         constantSorts.add(BoolBuiltin.SORT_NAME);
         constantSorts.add(IntBuiltin.SORT_NAME);
         constantSorts.add(StringBuiltin.SORT_NAME);
@@ -62,5 +62,5 @@ public class MaudeHelper {
         constantSorts.add("#Id");
         constantSorts.add("#Rat");
         constantSorts.add("#Float");
-	}
+    }
 }

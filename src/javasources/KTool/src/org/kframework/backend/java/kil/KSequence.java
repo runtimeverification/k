@@ -2,6 +2,7 @@ package org.kframework.backend.java.kil;
 
 import com.google.common.collect.ImmutableList;
 
+import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
@@ -107,8 +108,13 @@ public class KSequence extends KCollection {
     }
 
     @Override
-    public void accept(Unifier unifier, Term patten) {
-        unifier.unify(this, patten);
+    public void accept(Unifier unifier, Term pattern) {
+        unifier.unify(this, pattern);
+    }
+
+    @Override
+    public void accept(Matcher matcher, Term pattern) {
+        matcher.match(this, pattern);
     }
 
     @Override

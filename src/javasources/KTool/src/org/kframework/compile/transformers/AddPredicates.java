@@ -37,10 +37,10 @@ public class AddPredicates extends CopyOnWriteTransformer {
     public class PredicatesVisitor extends BasicVisitor {
 
         public PredicatesVisitor(String name, Context context) {
-			super(name, context);
-		}
+            super(name, context);
+        }
 
-		private List<ModuleItem> result = new ArrayList<ModuleItem>();
+        private List<ModuleItem> result = new ArrayList<ModuleItem>();
         private Set<String> lists = new HashSet<String>();
 
         @Override
@@ -206,7 +206,7 @@ public class AddPredicates extends CopyOnWriteTransformer {
                     retNode.appendModuleItem(rule);
 
                     // define isVariable predicate for symbolic sort constructor symSort
-					rule = getIsVariableRule(symTerm, context);
+                    rule = getIsVariableRule(symTerm, context);
                     retNode.appendModuleItem(rule);
 
                     // define K2Sort function for symbolic sort constructor
@@ -253,20 +253,20 @@ public class AddPredicates extends CopyOnWriteTransformer {
             return node;
     }
 
-	public static Rule getIsVariableRule(Term symTerm, Context context) {
-		Term lhs;
-		Rule rule;
-		if (!MetaK.isComputationSort(symTerm.getSort())) {
-			symTerm = KApp.of(new KInjectedLabel(symTerm));
-		}
+    public static Rule getIsVariableRule(Term symTerm, Context context) {
+        Term lhs;
+        Rule rule;
+        if (!MetaK.isComputationSort(symTerm.getSort())) {
+            symTerm = KApp.of(new KInjectedLabel(symTerm));
+        }
 
-		lhs = KApp.of(VariablePredicate, symTerm);
-		rule = new Rule(lhs, BoolBuiltin.TRUE, context);
-		rule.addAttribute(Attribute.PREDICATE);
-		return rule;
-	}
+        lhs = KApp.of(VariablePredicate, symTerm);
+        rule = new Rule(lhs, BoolBuiltin.TRUE, context);
+        rule.addAttribute(Attribute.PREDICATE);
+        return rule;
+    }
 
-	public AddPredicates(Context context) {
+    public AddPredicates(Context context) {
         super("Add syntax and symbolic predicates", context);
     }
 

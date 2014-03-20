@@ -8,18 +8,18 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 
 public class AddDefaultComputational extends BasicTransformer {
 
-	public AddDefaultComputational(Context context) {
-		super("AddDefaultComputational", context);
-	}
+    public AddDefaultComputational(Context context) {
+        super("AddDefaultComputational", context);
+    }
 
-	@Override
-	public ASTNode transform(Rule node) throws TransformerException {
-		if (!(node.containsAttribute("structural")
-				|| node.containsAttribute("anywhere")
-				|| node.containsAttribute("function")
-				|| node.containsAttribute("predicate")))
-			node.putAttribute("computational", "");
+    @Override
+    public ASTNode transform(Rule node) throws TransformerException {
+        if (!(node.containsAttribute("structural")
+                || node.containsAttribute("anywhere")
+                || node.containsAttribute("function")
+                || node.containsAttribute("predicate")))
+            node.putAttribute("computational", "");
 
-		return node;
-	}
+        return node;
+    }
 }

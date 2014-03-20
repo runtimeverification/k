@@ -18,65 +18,65 @@ import java.util.Map;
 
 public class MaudeBackend extends BasicBackend {
 
-	public MaudeBackend(Stopwatch sw, Context context) {
-		super(sw, context);
-	}
+    public MaudeBackend(Stopwatch sw, Context context) {
+        super(sw, context);
+    }
 
-	@Override
-	public void run(Definition definition) throws IOException {
+    @Override
+    public void run(Definition definition) throws IOException {
         try {
             definition = (Definition) definition.accept(new FreshVariableNormalizer(context));
         } catch (TransformerException e) { }
         MaudeFilter maudeFilter = new MaudeFilter(context);
-		definition.accept(maudeFilter);
+        definition.accept(maudeFilter);
 
-		final String mainModule = definition.getMainModule();
-		StringBuilder maudified = maudeFilter.getResult();
+        final String mainModule = definition.getMainModule();
+        StringBuilder maudified = maudeFilter.getResult();
         StringBuilderUtil.replaceFirst(maudified, mainModule, mainModule + "-BASE");
 
-		FileUtil.save(context.dotk.getAbsolutePath() + "/base.maude", maudified);
-		sw.printIntermediate("Generating Maude file");
+        FileUtil.save(context.dotk.getAbsolutePath() + "/base.maude", maudified);
+        sw.printIntermediate("Generating Maude file");
 
         StringBuilder consTable = getLabelTable(definition);
-		FileUtil.save(context.dotk.getAbsolutePath() + "/consTable.txt", consTable);
-	}
-	
-	private StringBuilder getLabelTable(Definition def) {
-		StringBuilder b = new StringBuilder();
-		/*
-		b.append("# Each line has the SDF cons label, a literal tab, a space or * to mark preferred productions,\n"+
-		         "# then P followed by the klabel for ordinary productions, a B for brackets,\n"+
-				 "# or L followed by the klabel, a tab, and the separator.\n"+
-		         "# strings escaped with \\t for tabs and \\n for newlines. # is comment to end of line");
-		 */
-		for (Map.Entry<String,Production> e : context.conses.entrySet()) {
-			String cons = e.getKey();
-			Production p = e.getValue();
-			b.append(StringEscapeUtils.escapeJava(cons));
-			b.append('\t');
-			if (p.containsAttribute("prefer")) {
-				b.append('*');
-			} else {
-				b.append(' ');
-			}
-			if (p.isListDecl()) {
-				b.append('L');
-				b.append(StringEscapeUtils.escapeJava(p.getKLabel()));
-				b.append('\t');
-				b.append(StringEscapeUtils.escapeJava(((UserList)p.getItems().get(0)).getSeparator()));
-			} else if (p.containsAttribute("bracket")) {
-				b.append('B');
-			} else {
-				b.append('P');
-				b.append(StringEscapeUtils.escapeJava(p.getKLabel()));
-			}
-			b.append('\n');			
-		}
-		return b;
-	}
+        FileUtil.save(context.dotk.getAbsolutePath() + "/consTable.txt", consTable);
+    }
+    
+    private StringBuilder getLabelTable(Definition def) {
+        StringBuilder b = new StringBuilder();
+        /*
+        b.append("# Each line has the SDF cons label, a literal tab, a space or * to mark preferred productions,\n"+
+                 "# then P followed by the klabel for ordinary productions, a B for brackets,\n"+
+                 "# or L followed by the klabel, a tab, and the separator.\n"+
+                 "# strings escaped with \\t for tabs and \\n for newlines. # is comment to end of line");
+         */
+        for (Map.Entry<String,Production> e : context.conses.entrySet()) {
+            String cons = e.getKey();
+            Production p = e.getValue();
+            b.append(StringEscapeUtils.escapeJava(cons));
+            b.append('\t');
+            if (p.containsAttribute("prefer")) {
+                b.append('*');
+            } else {
+                b.append(' ');
+            }
+            if (p.isListDecl()) {
+                b.append('L');
+                b.append(StringEscapeUtils.escapeJava(p.getKLabel()));
+                b.append('\t');
+                b.append(StringEscapeUtils.escapeJava(((UserList)p.getItems().get(0)).getSeparator()));
+            } else if (p.containsAttribute("bracket")) {
+                b.append('B');
+            } else {
+                b.append('P');
+                b.append(StringEscapeUtils.escapeJava(p.getKLabel()));
+            }
+            b.append('\n');            
+        }
+        return b;
+    }
 
-	@Override
-	public String getDefaultStep() {
-		return "LastStep";
-	}
+    @Override
+    public String getDefaultStep() {
+        return "LastStep";
+    }
 }

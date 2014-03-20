@@ -15,18 +15,18 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
  */
 public class ResolveSymbolicInputStream extends CopyOnWriteTransformer {
 
-	public ResolveSymbolicInputStream(Context context) {
-		super("Resolve input stream for symbolic execution", context);
-	}
+    public ResolveSymbolicInputStream(Context context) {
+        super("Resolve input stream for symbolic execution", context);
+    }
 
-	@Override
-	public ASTNode transform(Configuration node) throws TransformerException {
-		
-		ResolveInputStreamCell risc = new ResolveInputStreamCell(context);
-		Term content = (Term) node.getBody().accept(risc);
-		
-		node.shallowCopy();
-		node.setBody(content);
-		return node;
-	}
+    @Override
+    public ASTNode transform(Configuration node) throws TransformerException {
+        
+        ResolveInputStreamCell risc = new ResolveInputStreamCell(context);
+        Term content = (Term) node.getBody().accept(risc);
+        
+        node.shallowCopy();
+        node.setBody(content);
+        return node;
+    }
 }

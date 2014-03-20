@@ -1,6 +1,7 @@
 package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
@@ -81,6 +82,11 @@ public class ListLookup extends Term implements DataStructureLookup {
 
     @Override
     public void accept(Unifier unifier, Term patten) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void accept(Matcher matcher, Term pattern) {
         throw new UnsupportedOperationException();
     }
 

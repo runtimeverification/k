@@ -3,9 +3,12 @@ package org.kframework.backend.java.kil;
 import java.util.*;
 import java.util.Collection;
 
+import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
+import org.kframework.backend.java.builtins.MetaK;
 import org.kframework.backend.java.builtins.SortMembership;
 import org.kframework.backend.java.symbolic.BuiltinFunction;
+import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
@@ -41,6 +44,7 @@ public class KItem extends Term implements Sorted {
     private final Term kLabel;
     private final Term kList;
     private final String sort;
+    private Boolean evaluable = null;
 
     /**
      * Valid only if {@code kLabel} is a constructor. Must contain a sort
@@ -48,12 +52,15 @@ public class KItem extends Term implements Sorted {
      */
     private final Set<String> possibleMinimalSorts;
 
-    public KItem(Term kLabel, Term kList, Context context) {
+    public KItem(Term kLabel, Term kList, TermContext termContext) {
         super(Kind.KITEM);
 
         this.kLabel = kLabel;
         this.kList = kList;
 
+        Definition definition = termContext.definition();
+        Context context = definition.context();
+        
         Set<String> possibleMinimalSorts = null;
         if (kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isConstructor()) {
             possibleMinimalSorts = new HashSet<>();
@@ -66,7 +73,30 @@ public class KItem extends Term implements Sorted {
             List<Production> productions = kLabelConstant.productions();
             if (productions.size() != 0) {
                 Set<String> sorts = new HashSet<String>();
-
+                
+                if (!K.do_kompilation) {
+                    /**
+                     * Sort checks in the Java engine are not implemented as
+                     * rewrite rules, so we need to precompute the sort of
+                     * terms. However, right now, we also want to allow users
+                     * to provide user-defined sort predicate rules, e.g.
+                     *      ``rule isVal(cons V:Val) => true'' 
+                     * to express the same meaning as overloaded productions
+                     * which are not allowed to write in the current front-end.
+                     */
+                    /* YilongL: user-defined sort predicate rules are interpreted as overloaded productions at runtime */
+                    for (KLabelConstant sortPredLabel : definition.sortPredLabels()) {
+                        Collection<Rule> rules = definition.functionRules().get(sortPredLabel); 
+                        for (Rule rule : rules) {
+                            KItem predArg = rule.getSortPredArgument();
+                            if (MetaK.matchable(kLabel, predArg.kLabel(), termContext).equals(BoolToken.TRUE)
+                                && MetaK.matchable(kList, predArg.kList(), termContext).equals(BoolToken.TRUE)) {
+                                sorts.add(rule.getPredSort());
+                            }
+                        }
+                    }
+                }
+                
                 for (Production production : productions) {
                     boolean mustMatch = true;
                     boolean mayMatch = true;
@@ -180,7 +210,31 @@ public class KItem extends Term implements Sorted {
         } else {
             this.possibleMinimalSorts = null;
         }
+        
 //        System.out.printf("KItem = %s, sort = %s, possibleMinimalSorts = %s\n", this, sort, possibleMinimalSorts);
+    }
+    
+    public boolean isEvaluable(TermContext context) {
+        if (evaluable != null) {
+            return evaluable;
+        }
+
+        evaluable = false;
+        if (!(kLabel instanceof KLabelConstant)) {
+            return false;
+        }
+        KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
+        
+        if (!(kList instanceof KList)) {
+            return false;
+        }
+        
+        if (kLabelConstant.label().startsWith("is")
+                || !context.definition().functionRules().get(kLabelConstant).isEmpty()
+                || BuiltinFunction.isBuiltinKLabel(kLabelConstant)) {
+            evaluable = true;
+        }
+        return evaluable;
     }
 
     /**
@@ -194,6 +248,10 @@ public class KItem extends Term implements Sorted {
      * @return the evaluated result on success, or this {@code KItem} otherwise
      */
     public Term evaluateFunction(SymbolicConstraint constraint, TermContext context) {
+        if (!isEvaluable(context)) {
+            return this;
+        }
+        
         Definition definition = context.definition();
 
         if (!(kLabel instanceof KLabelConstant)) {
@@ -302,6 +360,14 @@ public class KItem extends Term implements Sorted {
                     }
                     result = rightHandSide;
                 }
+
+                /*
+                 * If the function definitions do not need to be deterministic, try them in order
+                 * and apply the first one that matches.
+                 */
+                if (!K.deterministic_functions && result != null) {
+                    return result;
+                }
             }
 
             if (result != null) {
@@ -323,7 +389,7 @@ public class KItem extends Term implements Sorted {
             if (result == null) {
                 result = this;
             } else if (result instanceof KLabel) {
-                result = new KItem(new KLabelInjection(result), new KList(), definition.context());
+                result = new KItem(new KLabelInjection(result), new KList(), context);
             } else if (result instanceof KList) {
                 // TODO: handle the case that KList as return value
                 assert false : "YilongL: Fix it; handle the case where the return value is a KList";
@@ -412,8 +478,13 @@ public class KItem extends Term implements Sorted {
     }
 
     @Override
-    public void accept(Unifier unifier, Term patten) {
-        unifier.unify(this, patten);
+    public void accept(Unifier unifier, Term pattern) {
+        unifier.unify(this, pattern);
+    }
+
+    @Override
+    public void accept(Matcher matcher, Term pattern) {
+        matcher.match(this, pattern);
     }
 
     @Override
