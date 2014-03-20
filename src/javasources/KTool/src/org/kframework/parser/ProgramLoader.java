@@ -2,6 +2,7 @@ package org.kframework.parser;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 import org.kframework.kil.loader.ResolveVariableAttribute;
 import org.kframework.compile.transformers.AddEmptyLists;
@@ -22,6 +23,8 @@ import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.parser.concrete.disambiguate.TypeSystemFilter2;
+import org.kframework.parser.concrete2.Grammar;
+import org.kframework.parser.concrete2.Parser;
 import org.kframework.parser.utils.ReportErrorsVisitor;
 import org.kframework.parser.utils.Sglr;
 import org.kframework.utils.BinaryLoader;
@@ -121,6 +124,10 @@ public class ProgramLoader {
                 out = ((Rule) out).getBody();
             } else if (whatParser == GlobalSettings.ParserType.BINARY) {
                 out = (org.kframework.kil.Cell) BinaryLoader.load(filename);
+            } else if (whatParser == GlobalSettings.ParserType.NEWPROGRAM) {
+                // load the new parser
+                Map<String, Grammar.NonTerminal> nts = (Map<String, Grammar.NonTerminal>) BinaryLoader.load(context.kompiled.getPath() + "/pgm/newParser.bin");
+                out = new Parser("1+2*3").parse(nts.get(context.startSymbolPgm), 0);
             } else {
                 out = loadPgmAst(content, filename, startSymbol, context);
                 out = out.accept(new ResolveVariableAttribute(context));

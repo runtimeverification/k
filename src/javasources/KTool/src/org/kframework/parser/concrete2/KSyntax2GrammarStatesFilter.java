@@ -4,11 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.kframework.kil.Configuration;
 import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.Lexical;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
-import org.kframework.kil.Sentence;
+import org.kframework.kil.Rule;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
@@ -45,6 +46,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
 
     private int seed = 0;
     private Map<String, NonTerminal> ntmap = new HashMap<>();
+
     private int getUid() {
         return seed++;
     }
@@ -77,7 +79,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
             PrimitiveState pstate = new RegExState(
                     new StateId(prd.getSort() + "-T-" + getUid()),
                     nt, OrderingInfo.ZERO,
-                    Pattern.compile(ul.getSeparator()),
+                    Pattern.compile("\\Q" + ul.getSeparator() + "\\E"),
                     null);
             epsilonForLabel1.next.add(nts);
             // if the list can be empty add the jump connection
@@ -128,7 +130,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
             PrimitiveState pstate = new RegExState(
                     new StateId(prd.getSort() + "-T-" + getUid()),
                     nt, OrderingInfo.ZERO,
-                    Pattern.compile(terminal.getTerminal()),
+                    Pattern.compile("\\Q" + terminal.getTerminal() + "\\E"),
                     null);
             previous.next.add(pstate);
             previous = pstate;
@@ -147,7 +149,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                     PrimitiveState pstate = new RegExState(
                             new StateId(prd.getSort() + "-T-" + getUid()),
                             nt, OrderingInfo.ZERO,
-                            Pattern.compile(terminal.getTerminal()),
+                            Pattern.compile("\\Q" + terminal.getTerminal() + "\\E"),
                             null);
                     previous.next.add(pstate);
                     previous = pstate;
@@ -165,10 +167,27 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                 }
             }
         }
+        previous.next.add(nt.exitState);
     }
 
     @Override
-    public void visit(Sentence s) {
+    public void visit(Rule s) {
         // skip visiting rules, contexts and configurations
+    }
+
+    @Override
+    public void visit(Configuration s) {
+        // skip visiting rules, contexts and configurations
+    }
+
+    @Override
+    public void visit(org.kframework.kil.Context s) {
+        // skip visiting rules, contexts and configurations
+    }
+
+    public Map<String, NonTerminal> getGrammar() {
+        // TODO: I think this should return a Grammar object of some sort.
+        // TODO: calculate OrderingInfo before returning
+        return ntmap;
     }
 }

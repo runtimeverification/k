@@ -1,5 +1,6 @@
 package org.kframework.parser.concrete2;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -51,7 +52,7 @@ import org.kframework.kil.Token;
 public class Grammar {
 
 // Positions are 'int' because CharSequence uses 'int' // Position in the text
-    public static class StateId implements Comparable<StateId> { // Used only by rules
+    public static class StateId implements Comparable<StateId>, Serializable { // Used only by rules
         String name;
         public StateId(String name) { this.name = name; }
         public int compareTo(StateId that) { return this.name.compareTo(that.name); }
@@ -74,7 +75,7 @@ public class Grammar {
         }
     }
 
-    public static class NonTerminalId implements Comparable<NonTerminalId> { // Used only by rules
+    public static class NonTerminalId implements Comparable<NonTerminalId>, Serializable { // Used only by rules
         String name;
         public NonTerminalId(String name) { this.name = name; }
         public int compareTo(NonTerminalId that) { return this.name.compareTo(that.name); }
@@ -97,7 +98,7 @@ public class Grammar {
         }
     }
 
-    public static class NonTerminal implements Comparable<NonTerminal> {
+    public static class NonTerminal implements Comparable<NonTerminal>, Serializable {
         public final NonTerminalId nonTerminalId;
         public final EntryState entryState;
         public final ExitState exitState;
@@ -131,13 +132,13 @@ public class Grammar {
         }
     }
 
-    public abstract static class State implements Comparable<State> {
+    public abstract static class State implements Comparable<State>, Serializable {
         final StateId stateId;
         final NonTerminal nt;
         final OrderingInfo orderingInfo;
         final KLabel label;
 
-        static class OrderingInfo implements Comparable<OrderingInfo> {
+        static class OrderingInfo implements Comparable<OrderingInfo>, Serializable {
             int key;
             public OrderingInfo(int key) { this.key = key; }
             public int compareTo(OrderingInfo that) { return Integer.compare(this.key, that.key); }

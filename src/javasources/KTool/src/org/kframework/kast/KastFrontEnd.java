@@ -184,6 +184,8 @@ public class KastFrontEnd {
             String parser = cmd.getOptionValue("parser");
             if (parser.equals("program")) {
                 GlobalSettings.whatParser = GlobalSettings.ParserType.PROGRAM;
+            } else if (parser.equals("newprogram")) {
+                GlobalSettings.whatParser = GlobalSettings.ParserType.NEWPROGRAM;
             } else if (parser.equals("ground")) {
                 GlobalSettings.whatParser = GlobalSettings.ParserType.GROUND;
             } else if (parser.equals("rule")) {

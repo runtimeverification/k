@@ -499,6 +499,10 @@ public class Parser {
         s = parseState;
     }
 
+    public Parser(CharSequence input) {
+        s = new ParseState(input);
+    }
+
     public Term parse(NonTerminal nt, int position) {
         // TODO ordering info should not rely only on integers
         // This code assumes that ordering info in the grammar are between MIN_VALUE+1 and MAX_VALUE-2

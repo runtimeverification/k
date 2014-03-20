@@ -48,7 +48,7 @@ public class KastOptionsParser {
 
         addOptionS(OptionBuilder.withLongOpt("directory").hasArg().withArgName("dir").withDescription("Path to the directory in which the kompiled K definition resides. The default is the current directory.").create("d"));
         addOptionS(OptionBuilder.withLongOpt("expression").hasArg().withArgName("string").withDescription("An expression to parse passed on the command line. Note that positional arguments are ignored when this option is given.").create("e"));
-        addOptionS(OptionBuilder.withLongOpt("parser").hasArg().withArgName("parser").withDescription("Choose a parser. <parser> is either [program|ground|rule|binary]. (Default: program).").create());
+        addOptionS(OptionBuilder.withLongOpt("parser").hasArg().withArgName("parser").withDescription("Choose a parser. <parser> is either [program|newprogram|ground|rule|binary]. (Default: program).").create());
         addOptionS(OptionBuilder.withLongOpt("sort").hasArg().withArgName("string").withDescription("The start sort for the default parser. (The default is the sort of $PGM from the configuration.)").create());
         addOptionS(OptionBuilder.withLongOpt("help-experimental").withDescription("Print help on non-standard options.").create("X"));
 
