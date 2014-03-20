@@ -52,7 +52,6 @@
 		<delete file="${javasources}/../../lib/version.txt" />
 		<delete dir="./k/" />
 		<delete>
-			<fileset dir="${javasources}/KTool/src/org/kframework/backend/pdmc/pda/buchi/parser" includes="*.java" />
 			<fileset dir="${javasources}/KTool/src/org/kframework/parser/basic" includes="*.java" />
 			<fileset dir="${javasources}/KTool/src/org/kframework/utils/kastparser" includes="*.java" />
 		</delete>
