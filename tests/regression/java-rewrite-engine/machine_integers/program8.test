@@ -1,2 +1,3 @@
-uleMInt(mi(32, -1), mi(32, 0))
+ MyListItem(uvalueMInt(miMInt(usubMInt(mi(31, 0), mi(31, -1))))),
+ MyListItem(overflowMInt(usubMInt(mi(31, 0), mi(31, -1))))
 

@@ -169,6 +169,18 @@ public final class BuiltinBitVectorOperations {
         }
     }
 
+    public static BitVector shl(BitVector term1, IntToken term2, TermContext context) {
+        return term1.shl(term2);
+    }
+
+    public static BitVector ashr(BitVector term1, IntToken term2, TermContext context) {
+        return term1.ashr(term2);
+    }
+
+    public static BitVector lshr(BitVector term1, IntToken term2, TermContext context) {
+        return term1.lshr(term2);
+    }
+
     public static BoolToken slt(BitVector term1, BitVector term2, TermContext context) {
         if (term1.bitwidth() == term2.bitwidth()) {
             return term1.slt(term2);

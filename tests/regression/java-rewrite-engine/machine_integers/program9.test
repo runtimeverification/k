@@ -1,2 +1,2 @@
-svalueMInt(mIntOfDigits(digitsOfMInt(mi(32, -1), 8), 8))
-
+MyListItem(uvalueMInt(miMInt(sremMInt(mi(32, sminMInt(32)), mi(32, -1))))),
+MyListItem(overflowMInt(sremMInt(mi(32, sminMInt(32)), mi(32, -1))))
