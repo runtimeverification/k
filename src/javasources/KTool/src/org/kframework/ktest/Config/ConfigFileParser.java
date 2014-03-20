@@ -384,8 +384,8 @@ public class ConfigFileParser {
                 Element e = (Element) n;
 
                 ret.add(new PgmArg(e.getAttribute("name"),
-                		e.getAttribute("key"),
-                		e.getAttribute("value")));
+                    e.getAttribute("key"),
+                    e.getAttribute("value")));
             }
         }
         return ret;

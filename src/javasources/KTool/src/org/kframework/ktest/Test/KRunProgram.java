@@ -51,6 +51,6 @@ public class KRunProgram {
      * @return String to be used in logging.
      */
     public String toLogString() {
-    	return StringUtils.join(getKrunCmd(), " ");
+        return StringUtils.join(getKrunCmd(), " ");
     }
 }
