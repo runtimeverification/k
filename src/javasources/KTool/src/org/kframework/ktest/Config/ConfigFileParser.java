@@ -383,8 +383,9 @@ public class ConfigFileParser {
                     && n.getNodeName().equals("krun-option")) {
                 Element e = (Element) n;
 
-                String name = e.getAttribute("name");
-                ret.add(new PgmArg(name, e.getAttribute("value")));
+                ret.add(new PgmArg(e.getAttribute("name"),
+                		e.getAttribute("key"),
+                		e.getAttribute("value")));
             }
         }
         return ret;

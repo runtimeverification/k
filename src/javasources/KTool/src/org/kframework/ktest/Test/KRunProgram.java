@@ -51,13 +51,6 @@ public class KRunProgram {
      * @return String to be used in logging.
      */
     public String toLogString() {
-        String[] args1 = new String[args.size() + 2];
-        args1[0] = ExecNames.getKrun();
-        args1[1] = pgmPath;
-        for (int i = 2; i < args1.length; i++) {
-            PgmArg arg = args.get(i - 2);
-            args1[i] = new PgmArg(arg.arg, QuoteHandling.quoteArgument(arg.val)).toString();
-        }
-        return StringUtils.join(args1, " ");
+    	return StringUtils.join(getKrunCmd(), " ");
     }
 }

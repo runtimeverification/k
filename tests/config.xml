@@ -84,35 +84,10 @@
       </all-programs>
   </test>
 
-<!--
-  WCET
--->
-  <test
-      definition="samples/wcet/wcet.k"
-      programs="samples/wcet/programs"
-      extension="wcet"
-      results="samples/wcet/programs"
-      >
-      <all-programs>
-        <krun-option name="-c" key="TIMING" value="add |-> 1 sub |-> 1 mul |-> 1 div |-> 1 or |-> 1 and |-> 1 not |-> 1 load |-> 10 store |-> 10 jmp |-> 1 beq |-> 2 bne |-> 2 blt |-> 2 ble |-> 2 halt |-> 1 read |-> 100 write |-> 100 'rw(.KList) |-> 200 int |-> 5 rfi |-> 5" />
-        <krun-option name="-c" key="INPUT" value=".List" />
-        <krun-option name="-c" key="INITIAL" value=".Map" />
-        <krun-option name="--pattern" value="&lt;k&gt; .K &lt;/k&gt;&lt;input&gt; .List &lt;/input&gt;" />
-      </all-programs>
-      <program name="interrupt.wcet">
-        <krun-option name="-c" key="TIMING" value="add |-> 1 sub |-> 1 mul |-> 1 div |-> 1 or |-> 1 and |-> 1 not |-> 1 load |-> 10 store |-> 10 jmp |-> 1 beq |-> 2 bne |-> 2 blt |-> 2 ble |-> 2 halt |-> 1 read |-> 100 write |-> 100 'rw(.KList) |-> 200 int |-> 5 rfi |-> 5" />
-        <krun-option name="-c" key="INPUT" value="ListItem((400, data |-> 1000)) ListItem((401, data |-> 5)) ListItem((1000, data |-> 6))" />
-        <krun-option name="-c" key="INITIAL" value="data |-> 0" />
-        <krun-option name="--pattern" value="&lt;k&gt; .K &lt;/k&gt;&lt;input&gt; .List &lt;/input&gt;" />
-      </program>
-      <program name="polling.wcet">
-        <krun-option name="-c" key="TIMING" value="add |-> 1 sub |-> 1 mul |-> 1 div |-> 1 or |-> 1 and |-> 1 not |-> 1 load |-> 10 store |-> 10 jmp |-> 1 beq |-> 2 bne |-> 2 blt |-> 2 ble |-> 2 halt |-> 1 read |-> 100 write |-> 100 'rw(.KList) |-> 200 int |-> 5 rfi |-> 5" />
-        <krun-option name="-c" key="INPUT" value="ListItem((400, data |-> 1000)) ListItem((401, data |-> 5)) ListItem((1000, data |-> 6))" />
-        <krun-option name="-c" key="INITIAL" value="data |-> 0" />
-        <krun-option name="--pattern" value="&lt;k&gt; .K &lt;/k&gt;&lt;input&gt; .List &lt;/input&gt;" />
-       </program>
-  </test>
-
+  <include file="samples/wcet/tests/config.xml"
+           directory="samples/wcet"
+           programs="samples/wcet"
+           results="samples/wcet" />
 
 <!--
   IMP-SYMBOLIC

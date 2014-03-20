@@ -28,9 +28,9 @@ public class PgmArg {
     public List<String> toStringList() {
         String arg = this.arg;
         String val = this.val;
-        //if (key != null) {
-        //    return Collections.singletonList(arg + key + "=" + val);
-        if (val == null || val.equals("")) {
+        if (key != null) {
+            return Collections.singletonList(arg + key + "=" + val);
+        } else if (val == null || val.equals("")) {
             return Collections.singletonList(arg);
         } else {
             return Arrays.asList(arg, val);
