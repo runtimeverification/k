@@ -121,7 +121,7 @@ module MINT
                 | orMInt(MInt, MInt)    [function, hook(#MINT:or)]
                 | xorMInt(MInt, MInt)   [function, hook(#MINT:xor)]
 
-  syntax MInt ::= negMInt(MInt, MInt)   [function]
+  syntax MInt ::= negMInt(MInt)   [function]
   rule negMInt(MI:MInt) => xorMInt(MI, mi(bitwidthMInt(MI), 0))
 
   /* Comparison operations */
@@ -176,13 +176,13 @@ module MINT
   =>
     MyListItem(mi(N, svalueMInt(mi(N, I1)) /Int svalueMInt(mi(N, I2)))),
     MyListItem(soverflowMInt(N, svalueMInt(mi(N, I1)) /Int svalueMInt(mi(N, I2))))
-  when notBool zeroMInt(mi(N, I2)
+  when notBool zeroMInt(mi(N, I2))
   rule
     sremMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
     MyListItem(mi(N, svalueMInt(mi(N, I1)) %Int svalueMInt(mi(N, I2)))),
     MyListItem(soverflowMInt(N, svalueMInt(mi(N, I1)) /Int svalueMInt(mi(N, I2))))
-  when notBool zeroMInt(mi(N, I2)
+  when notBool zeroMInt(mi(N, I2))
 
 
   rule
