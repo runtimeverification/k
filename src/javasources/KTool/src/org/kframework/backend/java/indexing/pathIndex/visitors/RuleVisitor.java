@@ -2,6 +2,7 @@ package org.kframework.backend.java.indexing.pathIndex.visitors;
 
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
+import org.kframework.backend.java.kil.KLabelInjection;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.kil.Cell;
@@ -76,6 +77,11 @@ public class RuleVisitor extends LocalVisitor {
     @Override
     public void visit(KLabelConstant kLabel) {
         pString = pString.concat(kLabel.toString());
+    }
+
+    @Override
+    public void visit(KLabelInjection kLabelInjection) {
+        pString = pString.concat(kLabelInjection.term().kind().toString());
     }
 
     @Override
