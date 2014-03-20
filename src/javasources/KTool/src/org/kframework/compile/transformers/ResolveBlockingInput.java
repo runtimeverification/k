@@ -31,7 +31,7 @@ import java.util.Map;
  *
  * The current implementation assumes this pass runs after concrete syntax has been compiled away.
  */
-@KilProperty.DependsOn(KilProperty.NO_CONCRETE_SYNTAX)
+@KilProperty.Requires(KilProperty.NO_CONCRETE_SYNTAX)
 public class ResolveBlockingInput extends GetLhsPattern {
 	
 	Map<String, String> inputCells = new HashMap<String, String>();
@@ -264,7 +264,7 @@ public class ResolveBlockingInput extends GetLhsPattern {
                         if (var.equals(v)) {
                             assert node.getLabel() instanceof KLabelConstant : "label should be a predicate label";
                             KLabelConstant l = (KLabelConstant) node.getLabel();
-                            assert MetaK.isPredicateLabel(l.getLabel()) : "label should be a predicate label";
+                            assert l.isPredicate() : "label should be a predicate label";
                             sort[0] = l.getLabel().substring(2);
                             return null;
                         }

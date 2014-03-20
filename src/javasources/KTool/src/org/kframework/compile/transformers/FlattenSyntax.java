@@ -15,7 +15,7 @@ import java.util.*;
 import java.util.List;
 import java.util.Set;
 
-@KilProperty.Provides(KilProperty.NO_CONCRETE_SYNTAX)
+@KilProperty.Ensures(KilProperty.NO_CONCRETE_SYNTAX)
 public class FlattenSyntax extends CopyOnWriteTransformer {
 	FlattenKSyntax kTrans;
 	Set<String> listSeparators = new HashSet<String>();
