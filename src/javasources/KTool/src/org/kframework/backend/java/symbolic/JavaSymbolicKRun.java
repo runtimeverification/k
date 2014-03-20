@@ -220,6 +220,10 @@ public class JavaSymbolicKRun implements KRun {
             org.kframework.kil.Term cfg,
             RuleCompilerSteps compilationInfo) throws KRunExecutionException {
 
+        if (K.get_indexing_stats){
+            IndexingStatistics.totalSearchStopwatch.start();
+        }
+
         SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
         FileSystem fs = new PortableFileSystem();
 
@@ -284,11 +288,17 @@ public class JavaSymbolicKRun implements KRun {
         }
 
         // TODO(ericmikida): Make the isDefaultPattern option set in some reasonable way
-        return new KRunResult<SearchResults>(new SearchResults(
+        KRunResult<SearchResults> searchResultsKRunResult = new KRunResult<>(new SearchResults(
                 searchResults,
                 null,
                 false,
                 context));
+
+        if (K.get_indexing_stats){
+            IndexingStatistics.totalSearchStopwatch.stop();
+            IndexingStatistics.print();
+        }
+        return searchResultsKRunResult;
     }
 
     @Override
