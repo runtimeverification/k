@@ -158,9 +158,10 @@ public abstract class BitVector<T extends Number> extends Token {
     public abstract BitVector<T> sub(BitVector<T> bitVector);
     public abstract BitVector<T> mul(BitVector<T> bitVector);
 
-    public abstract BitVector<T> sdiv(BitVector<T> bitVector);
+    public abstract BuiltinList sdiv(BitVector<T> bitVector);
+    public abstract BuiltinList srem(BitVector<T> bitVector);
+
     public abstract BitVector<T> udiv(BitVector<T> bitVector);
-    public abstract BitVector<T> srem(BitVector<T> bitVector);
     public abstract BitVector<T> urem(BitVector<T> bitVector);
 
     public abstract BuiltinList sadd(BitVector<T> bitVector);

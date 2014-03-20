@@ -59,7 +59,13 @@ module MINT
   =>
     I <Int uminMInt(N) orBool I >Int umaxMInt(N)
 
-  /* Projection functions for results of operations with overflow. */
+  /*
+   * Projection functions for results of operations with overflow.
+   * miInt(saddMInt(...))         returns the result of the operation (ignoring
+   *                              overflow)
+   * overflowMInt(saddMInt(...))  returns true if overflow is detected during
+   *                              the execution of the operation
+   */
   syntax MInt ::= miMInt(MyList)          [function]
   rule miMInt(MyListItem(MI:MInt), MyListItem(_:Bool)) => MI
   syntax Bool ::= overflowMInt(MyList)    [function]
@@ -81,18 +87,23 @@ module MINT
 
   /*
    * Division and reminder
-   * sdiv/srem  interprets operands as signed; undefined if the second argument
-   *            is 0 or if the result overflows (it happens when the first
-   *            operand is the minimum value and the second operand is -1)
-   * udiv/urem  interprets operands as unsigned; undefined if the second
-   *            argument is 0 
+   * sdiv/srem  operation interprets operands as signed; undefined if the second
+   *            argument is 0; returns a pair of result and overflow flag
+   *            represented as a list of 2 elements (overflow happens when the
+   *            first operand is the minimum value and the second operand is -1)
+   * udiv/urem  operation interprets operands as unsigned; undefined if the
+   *            second argument is 0 
    */
-  syntax MInt ::= sdivMInt(MInt, MInt)    [function, hook(#MINT:sdiv)]
-                | udivMInt(MInt, MInt)    [function, hook(#MINT:udiv)]
-                | sremMInt(MInt, MInt)    [function, hook(#MINT:srem)]
+  syntax MyList ::= sdivMInt(MInt, MInt)    [function, hook(#MINT:sdiv)]
+                  | sremMInt(MInt, MInt)    [function, hook(#MINT:srem)]
+  syntax MInt ::= udivMInt(MInt, MInt)    [function, hook(#MINT:udiv)]
                 | uremMInt(MInt, MInt)    [function, hook(#MINT:urem)]
 
-  /* List of 2 elements representing a pair of result and overflow flag */
+  /*
+   * Addition, subtraction and multiplication with overflow detection; each
+   * operation returns a pair of result and overflow flag represented as a list
+   * of 2 elements
+   */
   syntax MyList ::= saddMInt(MInt, MInt)    [function, hook(#MINT:sadd)]
                   | uaddMInt(MInt, MInt)    [function, hook(#MINT:uadd)]
                   | ssubMInt(MInt, MInt)    [function, hook(#MINT:ssub)]
@@ -110,6 +121,9 @@ module MINT
                 | orMInt(MInt, MInt)    [function, hook(#MINT:or)]
                 | xorMInt(MInt, MInt)   [function, hook(#MINT:xor)]
 
+  syntax MInt ::= negMInt(MInt, MInt)   [function]
+  rule negMInt(MI:MInt) => xorMInt(MI, mi(bitwidthMInt(MI), 0))
+
   /* Comparison operations */
   syntax Bool ::= sltMInt(MInt, MInt)   [function, hook(#MINT:slt)]
                 | ultMInt(MInt, MInt)   [function, hook(#MINT:ult)]
@@ -125,14 +139,16 @@ module MINT
   /*
    * Returns a list of digits representing the given machine integers in the
    * given base. Each digit is represented as a machine integers. The base must
-   * be an integer greater than 1.
+   * be an integer greater than 1. Useful for serializing a integer to a
+   * sequence of bytes.
    */
   syntax MyList ::= digitsOfMInt(MInt, Int)   [function, hook(#MINT:toDigits)]
 
   /*
    * Returns a machine integer representing the given list of digits in the
    * given base. Each digit is represented as a machine integers. The base must
-   * be an integer greater than 1.
+   * be an integer greater than 1. Useful for deserializing an integer from a
+   * sequence of bytes.
    */
   syntax MInt ::= mIntOfDigits(MyList, Int)   [function, hook(#MINT:fromDigits)]
 
@@ -158,23 +174,22 @@ module MINT
   rule
     sdivMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
-    mi(N, svalueMInt(mi(N, I1)) /Int svalueMInt(mi(N, I2)))
-  when notBool (zeroMInt(mi(N, I2))
-          orBool (svalueMInt(mi(N, I1)) ==Int sminMInt(N)
-              andBool svalueMInt(mi(N, I2)) ==Int -1))
+    MyListItem(mi(N, svalueMInt(mi(N, I1)) /Int svalueMInt(mi(N, I2)))),
+    MyListItem(soverflowMInt(N, svalueMInt(mi(N, I1)) /Int svalueMInt(mi(N, I2))))
+  when notBool zeroMInt(mi(N, I2)
+  rule
+    sremMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
+  =>
+    MyListItem(mi(N, svalueMInt(mi(N, I1)) %Int svalueMInt(mi(N, I2)))),
+    MyListItem(soverflowMInt(N, svalueMInt(mi(N, I1)) /Int svalueMInt(mi(N, I2))))
+  when notBool zeroMInt(mi(N, I2)
+
+
   rule
     udivMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>
     mi(N, uvalueMInt(mi(N, I1)) /Int uvalueMInt(mi(N, I2)))
   when notBool zeroMInt(mi(N, I2))
-
-  rule
-    sremMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
-  =>
-    mi(N, svalueMInt(mi(N, I1)) %Int svalueMInt(mi(N, I2)))
-  when notBool (zeroMInt(mi(N, I2))
-          orBool (svalueMInt(mi(N, I1)) ==Int sminMInt(N)
-              andBool svalueMInt(mi(N, I2)) ==Int -1))
   rule
     uremMInt(mi(N:Int, I1:Int), mi(N:Int, I2:Int))
   =>

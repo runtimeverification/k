@@ -88,13 +88,23 @@ public final class BigIntegerBitVector extends BitVector<BigInteger> {
     }
 
     @Override
-    public BitVector<BigInteger> sdiv(BitVector<BigInteger> bitVector) {
-        if (!bitVector.signedValue().equals(BigInteger.ZERO)
-                && !(signedValue().equals(signedMin())
-                        && bitVector.signedValue().equals(BigInteger.valueOf(-1)))) {
-            return BigIntegerBitVector.of(
-                    signedValue().divide(bitVector.signedValue()),
-                    bitwidth);
+    public BuiltinList sdiv(BitVector<BigInteger> bitVector) {
+        if (!bitVector.signedValue().equals(BigInteger.ZERO)) {
+            BigInteger result = signedValue().divide(bitVector.signedValue());
+            return getBuiltinList(result, checkSignedOverflow(result));
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public BuiltinList srem(BitVector<BigInteger> bitVector) {
+        if (!bitVector.signedValue().equals(BigInteger.ZERO)) {
+            /* the overflow flag for srem is set if the associated sdiv overflows */
+            BigInteger result = signedValue().remainder(bitVector.signedValue());
+            return getBuiltinList(
+                    signedValue().remainder(bitVector.signedValue()),
+                    checkSignedOverflow(signedValue().divide(bitVector.signedValue())));
         } else {
             return null;
         }
@@ -105,19 +115,6 @@ public final class BigIntegerBitVector extends BitVector<BigInteger> {
         if (!bitVector.unsignedValue().equals(BigInteger.ZERO)) {
             return BigIntegerBitVector.of(
                     unsignedValue().divide(bitVector.unsignedValue()),
-                    bitwidth);
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public BitVector<BigInteger> srem(BitVector<BigInteger> bitVector) {
-        if (!bitVector.signedValue().equals(BigInteger.ZERO)
-                && !(signedValue().equals(signedMin())
-                        && bitVector.signedValue().equals(BigInteger.valueOf(-1)))) {
-            return BigIntegerBitVector.of(
-                    signedValue().remainder(bitVector.signedValue()),
                     bitwidth);
         } else {
             return null;
@@ -143,7 +140,7 @@ public final class BigIntegerBitVector extends BitVector<BigInteger> {
 
     @Override
     public BuiltinList uadd(BitVector<BigInteger> bitVector) {
-        BigInteger result = signedValue().add(bitVector.signedValue());
+        BigInteger result = unsignedValue().add(bitVector.unsignedValue());
         return getBuiltinList(result, checkUnsignedOverflow(result));
     }
 
@@ -155,7 +152,7 @@ public final class BigIntegerBitVector extends BitVector<BigInteger> {
 
     @Override
     public BuiltinList usub(BitVector<BigInteger> bitVector) {
-        BigInteger result = signedValue().subtract(bitVector.signedValue());
+        BigInteger result = unsignedValue().subtract(bitVector.unsignedValue());
         return getBuiltinList(result, checkUnsignedOverflow(result));
     }
 
@@ -167,7 +164,7 @@ public final class BigIntegerBitVector extends BitVector<BigInteger> {
 
     @Override
     public BuiltinList umul(BitVector<BigInteger> bitVector) {
-        BigInteger result = signedValue().multiply(bitVector.signedValue());
+        BigInteger result = unsignedValue().multiply(bitVector.unsignedValue());
         return getBuiltinList(result, checkUnsignedOverflow(result));
     }
 

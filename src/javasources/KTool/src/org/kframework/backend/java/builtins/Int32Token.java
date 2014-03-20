@@ -60,9 +60,18 @@ public class Int32Token extends BitVector<Integer> {
     }
 
     @Override
-    public Int32Token sdiv(BitVector<Integer> bitVector) {
-        if (!(bitVector.value == 0 || (value == Integer.MIN_VALUE && bitVector.value == -1))) {
-            return Int32Token.of(value / bitVector.value);
+    public BuiltinList sdiv(BitVector<Integer> bitVector) {
+        if (bitVector.value != 0) {
+            return makeBuiltinListOfOverflowArithmeticResult(Ints.checkedDiv(value, bitVector.value));
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public BuiltinList srem(BitVector<Integer> bitVector) {
+        if (bitVector.value != 0) {
+            return makeBuiltinListOfOverflowArithmeticResult(Ints.checkedRem(value, bitVector.value));
         } else {
             return null;
         }
@@ -72,15 +81,6 @@ public class Int32Token extends BitVector<Integer> {
     public Int32Token udiv(BitVector<Integer> bitVector) {
         if (bitVector.value != 0) {
             return Int32Token.of(UnsignedInts.divide(value, bitVector.value));
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public Int32Token srem(BitVector<Integer> bitVector) {
-        if (!(bitVector.value == 0 || (value == Integer.MIN_VALUE && bitVector.value == -1))) {
-            return Int32Token.of(value % bitVector.value);
         } else {
             return null;
         }
