@@ -45,7 +45,7 @@ public final class BuiltinBitVectorOperations {
         if (term1.bitwidth() == term2.bitwidth()) {
             return term1.add(term2);
         } else {
-            return (BitVector) failWithBitwidthMismatch(term1, term2);
+            throw bitwidthMismatchException(term1, term2);
         }
     }
 
@@ -53,7 +53,7 @@ public final class BuiltinBitVectorOperations {
         if (term1.bitwidth() == term2.bitwidth()) {
             return term1.sub(term2);
         } else {
-            return (BitVector) failWithBitwidthMismatch(term1, term2);
+            throw bitwidthMismatchException(term1, term2);
         }
     }
 
@@ -61,7 +61,7 @@ public final class BuiltinBitVectorOperations {
         if (term1.bitwidth() == term2.bitwidth()) {
             return term1.mul(term2);
         } else {
-            return (BitVector) failWithBitwidthMismatch(term1, term2);
+            throw bitwidthMismatchException(term1, term2);
         }
     }
 
@@ -69,7 +69,7 @@ public final class BuiltinBitVectorOperations {
         if (term1.bitwidth() == term2.bitwidth()) {
             return term1.sadd(term2);
         } else {
-            return (BuiltinList) failWithBitwidthMismatch(term1, term2);
+            throw bitwidthMismatchException(term1, term2);
         }
     }
 
@@ -77,7 +77,7 @@ public final class BuiltinBitVectorOperations {
         if (term1.bitwidth() == term2.bitwidth()) {
             return term1.uadd(term2);
         } else {
-            return (BuiltinList) failWithBitwidthMismatch(term1, term2);
+            throw bitwidthMismatchException(term1, term2);
         }
     }
 
@@ -85,7 +85,7 @@ public final class BuiltinBitVectorOperations {
         if (term1.bitwidth() == term2.bitwidth()) {
             return term1.ssub(term2);
         } else {
-            return (BuiltinList) failWithBitwidthMismatch(term1, term2);
+            throw bitwidthMismatchException(term1, term2);
         }
     }
 
@@ -93,7 +93,7 @@ public final class BuiltinBitVectorOperations {
         if (term1.bitwidth() == term2.bitwidth()) {
             return term1.usub(term2);
         } else {
-            return (BuiltinList) failWithBitwidthMismatch(term1, term2);
+            throw bitwidthMismatchException(term1, term2);
         }
     }
 
@@ -101,7 +101,7 @@ public final class BuiltinBitVectorOperations {
         if (term1.bitwidth() == term2.bitwidth()) {
             return term1.smul(term2);
         } else {
-            return (BuiltinList) failWithBitwidthMismatch(term1, term2);
+            throw bitwidthMismatchException(term1, term2);
         }
     }
 
@@ -109,7 +109,7 @@ public final class BuiltinBitVectorOperations {
         if (term1.bitwidth() == term2.bitwidth()) {
             return term1.umul(term2);
         } else {
-            return (BuiltinList) failWithBitwidthMismatch(term1, term2);
+            throw bitwidthMismatchException(term1, term2);
         }
     }
 
@@ -117,7 +117,7 @@ public final class BuiltinBitVectorOperations {
         if (term1.bitwidth() == term2.bitwidth()) {
             return term1.sdiv(term2);
         } else {
-            return (Term) failWithBitwidthMismatch(term1, term2);
+            throw bitwidthMismatchException(term1, term2);
         }
     }
 
@@ -125,7 +125,7 @@ public final class BuiltinBitVectorOperations {
         if (term1.bitwidth() == term2.bitwidth()) {
             return term1.udiv(term2);
         } else {
-            return (Term) failWithBitwidthMismatch(term1, term2);
+            throw bitwidthMismatchException(term1, term2);
         }
     }
 
@@ -133,7 +133,7 @@ public final class BuiltinBitVectorOperations {
         if (term1.bitwidth() == term2.bitwidth()) {
             return term1.srem(term2);
         } else {
-            return (Term) failWithBitwidthMismatch(term1, term2);
+            throw bitwidthMismatchException(term1, term2);
         }
     }
 
@@ -141,7 +141,7 @@ public final class BuiltinBitVectorOperations {
         if (term1.bitwidth() == term2.bitwidth()) {
             return term1.urem(term2);
         } else {
-            return (Term) failWithBitwidthMismatch(term1, term2);
+            throw bitwidthMismatchException(term1, term2);
         }
     }
 
@@ -149,7 +149,7 @@ public final class BuiltinBitVectorOperations {
         if (term1.bitwidth() == term2.bitwidth()) {
             return term1.and(term2);
         } else {
-            return (BitVector) failWithBitwidthMismatch(term1, term2);
+            throw bitwidthMismatchException(term1, term2);
         }
     }
 
@@ -157,7 +157,7 @@ public final class BuiltinBitVectorOperations {
         if (term1.bitwidth() == term2.bitwidth()) {
             return term1.or(term2);
         } else {
-            return (BitVector) failWithBitwidthMismatch(term1, term2);
+            throw bitwidthMismatchException(term1, term2);
         }
     }
 
@@ -165,7 +165,7 @@ public final class BuiltinBitVectorOperations {
         if (term1.bitwidth() == term2.bitwidth()) {
             return term1.xor(term2);
         } else {
-            return (BitVector) failWithBitwidthMismatch(term1, term2);
+            throw bitwidthMismatchException(term1, term2);
         }
     }
 
@@ -173,7 +173,7 @@ public final class BuiltinBitVectorOperations {
         if (term1.bitwidth() == term2.bitwidth()) {
             return term1.slt(term2);
         } else {
-            return (BoolToken) failWithBitwidthMismatch(term1, term2);
+            throw bitwidthMismatchException(term1, term2);
         }
     }
 
@@ -181,7 +181,7 @@ public final class BuiltinBitVectorOperations {
         if (term1.bitwidth() == term2.bitwidth()) {
             return term1.ult(term2);
         } else {
-            return (BoolToken) failWithBitwidthMismatch(term1, term2);
+            throw bitwidthMismatchException(term1, term2);
         }
     }
 
@@ -189,7 +189,7 @@ public final class BuiltinBitVectorOperations {
         if (term1.bitwidth() == term2.bitwidth()) {
             return term1.sle(term2);
         } else {
-            return (BoolToken) failWithBitwidthMismatch(term1, term2);
+            throw bitwidthMismatchException(term1, term2);
         }
     }
 
@@ -197,7 +197,7 @@ public final class BuiltinBitVectorOperations {
         if (term1.bitwidth() == term2.bitwidth()) {
             return term1.ule(term2);
         } else {
-            return (BoolToken) failWithBitwidthMismatch(term1, term2);
+            throw bitwidthMismatchException(term1, term2);
         }
     }
 
@@ -205,7 +205,7 @@ public final class BuiltinBitVectorOperations {
         if (term1.bitwidth() == term2.bitwidth()) {
             return term1.sgt(term2);
         } else {
-            return (BoolToken) failWithBitwidthMismatch(term1, term2);
+            throw bitwidthMismatchException(term1, term2);
         }
     }
 
@@ -213,7 +213,7 @@ public final class BuiltinBitVectorOperations {
         if (term1.bitwidth() == term2.bitwidth()) {
             return term1.ugt(term2);
         } else {
-            return (BoolToken) failWithBitwidthMismatch(term1, term2);
+            throw bitwidthMismatchException(term1, term2);
         }
     }
 
@@ -221,7 +221,7 @@ public final class BuiltinBitVectorOperations {
         if (term1.bitwidth() == term2.bitwidth()) {
             return term1.sge(term2);
         } else {
-            return (BoolToken) failWithBitwidthMismatch(term1, term2);
+            throw bitwidthMismatchException(term1, term2);
         }
     }
 
@@ -229,7 +229,7 @@ public final class BuiltinBitVectorOperations {
         if (term1.bitwidth() == term2.bitwidth()) {
             return term1.uge(term2);
         } else {
-            return (BoolToken) failWithBitwidthMismatch(term1, term2);
+            throw bitwidthMismatchException(term1, term2);
         }
     }
 
@@ -237,7 +237,7 @@ public final class BuiltinBitVectorOperations {
         if (term1.bitwidth() == term2.bitwidth()) {
             return term1.eq(term2);
         } else {
-            return (BoolToken) failWithBitwidthMismatch(term1, term2);
+            throw bitwidthMismatchException(term1, term2);
         }
     }
 
@@ -262,12 +262,12 @@ public final class BuiltinBitVectorOperations {
     }
 
     /**
-     * Throws {@link IllegalArgumentException}.
-     * @return does not return anything; it is not void as a convenience.
+     * Returns {@link IllegalArgumentException} containing the bit width mismatch details.
      */
-    private static Object failWithBitwidthMismatch(BitVector term1, BitVector term2)
-            throws IllegalArgumentException {
-        throw new IllegalArgumentException(
+    private static IllegalArgumentException bitwidthMismatchException(
+            BitVector term1,
+            BitVector term2) {
+        return new IllegalArgumentException(
                 "mismatch bit width: "
                 + "first argument is represented on " + term1.bitwidth() + " bits "
                 + "while second argument is represented on " + term2.bitwidth() + "bits");
