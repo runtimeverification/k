@@ -213,6 +213,8 @@ public class DefinitionLoader {
             JavaClassesFactory.startConstruction(context);
             def = (Definition) def.accept(new ParseRulesFilter(context));
             JavaClassesFactory.endConstruction();
+            def = (Definition) def.accept(new CorrectConstantsTransformer(context));
+
 
             Stopwatch.sw.printIntermediate("Parsing Rules");
 
@@ -405,6 +407,7 @@ public class DefinitionLoader {
         config = config.accept(new TypeInferenceSupremumFilter(context));
         config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context));
         // config = config.accept(new PreferAvoidFilter());
+        config = config.accept(new CorrectConstantsTransformer(context));
         config = config.accept(new FlattenListsFilter(context));
         config = config.accept(new AmbDuplicateFilter(context));
         // last resort disambiguation
