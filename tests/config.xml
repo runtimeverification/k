@@ -382,25 +382,14 @@
 
   <test
       definition="tests/regression/tokenconstants/issue.k"
-      programs="tests/regression/tokenconstants/programs"
-      results="tests/regression/tokenconstants/out"
+      programs="tests/regression/tokenconstants"
+      results="tests/regression/tokenconstants"
       extension="issue">
     <program name="test.issue">
       <krun-option name="-color" value="off" />
     </program>
   </test>
 
-  <test
-      definition="tests/regression/tokenconstants/issue.k"
-      programs="tests/regression/tokenconstants/programs"
-      results="tests/regression/tokenconstants/out"
-      extension="issue">
-    <kompile-option name="-backend" value="java" />
-    <program name="test.issue">
-      <krun-option name="-color" value="off" />
-    </program>
-  </test>
-  
   <test
       definition="tests/regression/unparsing/issue.k"
       programs="tests/regression/unparsing/programs"

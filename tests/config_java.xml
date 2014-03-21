@@ -325,6 +325,19 @@
 -->
 
   <test
+      definition="tests/regression/tokenconstants/issue.k"
+      programs="tests/regression/tokenconstants"
+      results="tests/regression/tokenconstants"
+      extension="issue">
+    <kompile-option name="-backend" value="java" />
+    <program name="test.issue">
+      <krun-option name="-backend" value="java" />
+	  <krun-option name="-smt" value="none" />
+    </program>
+  </test>
+
+
+  <test
       definition="tests/regression/java-rewrite-engine/visitor/imp.k"
       programs="tests/regression/java-rewrite-engine/visitor"
       results="tests/regression/java-rewrite-engine/visitor"
