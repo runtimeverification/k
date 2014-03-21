@@ -84,7 +84,7 @@
       </all-programs>
   </test>
 
-  <include file="samples/wcet/tests/config.xml"
+  <include file="../samples/wcet/tests/config.xml"
            directory="samples/wcet"
            programs="samples/wcet"
            results="samples/wcet" />
