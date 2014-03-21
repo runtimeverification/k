@@ -25,6 +25,7 @@ import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.parser.concrete.disambiguate.TypeSystemFilter2;
 import org.kframework.parser.concrete2.Grammar;
 import org.kframework.parser.concrete2.Parser;
+import org.kframework.parser.concrete2.TreeCleanerVisitor;
 import org.kframework.parser.utils.ReportErrorsVisitor;
 import org.kframework.parser.utils.Sglr;
 import org.kframework.utils.BinaryLoader;
@@ -94,6 +95,7 @@ public class ProgramLoader {
      * 
      * Save it in kompiled cache under pgm.maude.
      */
+    @SuppressWarnings("unchecked")
     public static Term processPgm(String content, String filename, Definition def, String startSymbol,
             Context context, GlobalSettings.ParserType whatParser) throws TransformerException {
         Stopwatch.sw.printIntermediate("Importing Files");
@@ -127,7 +129,10 @@ public class ProgramLoader {
             } else if (whatParser == GlobalSettings.ParserType.NEWPROGRAM) {
                 // load the new parser
                 Map<String, Grammar.NonTerminal> nts = (Map<String, Grammar.NonTerminal>) BinaryLoader.load(context.kompiled.getPath() + "/pgm/newParser.bin");
-                out = new Parser("1+2*3").parse(nts.get(context.startSymbolPgm), 0);
+                out = new Parser(content).parse(nts.get(context.startSymbolPgm), 0);
+                System.out.println(out);
+                out = out.accept(new TreeCleanerVisitor(context));
+                System.out.println(out);
             } else {
                 out = loadPgmAst(content, filename, startSymbol, context);
                 out = out.accept(new ResolveVariableAttribute(context));

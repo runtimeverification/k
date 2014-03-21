@@ -443,7 +443,7 @@ public class Parser {
 
         Grammar.NonTerminal nt1 = new Grammar.NonTerminal(ntistart, stistart, new Grammar.State.OrderingInfo(0), stiend, new Grammar.State.OrderingInfo(100));
 
-        Grammar.RegExState res1 = new Grammar.RegExState(new Grammar.StateId("RegExStid"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("[a-zA-Z0-9]"), null);
+        Grammar.RegExState res1 = new Grammar.RegExState(new Grammar.StateId("RegExStid"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("[a-zA-Z0-9]"), null, "StartNt");
 
         nt1.entryState.next.add(res1);
         nt1.entryState.next.add(nt1.exitState);
@@ -509,7 +509,7 @@ public class Parser {
         NonTerminal startNt = new NonTerminal(new NonTerminalId("<start>"),
                                               new StateId("<start-entry>"), new State.OrderingInfo(Integer.MIN_VALUE),
                                               new StateId("<start-exit>"), new State.OrderingInfo(Integer.MAX_VALUE));
-        State state = new NonTerminalState(new StateId("<start>"), startNt, new State.OrderingInfo(Integer.MAX_VALUE - 1), nt, true, null);
+        State state = new NonTerminalState(new StateId("<start>"), startNt, new State.OrderingInfo(Integer.MAX_VALUE - 1), nt, true, null, KSorts.K);
 
         // this lookahead must be true so that a new worklist is pushed on the stack
         activateNtCall(s.getStateCall(new StateCall.Key(s.getNtCall(new NonTerminalCall.Key(nt, position)), position, state)));

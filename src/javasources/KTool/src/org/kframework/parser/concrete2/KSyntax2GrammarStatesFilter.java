@@ -5,7 +5,9 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.kframework.kil.Configuration;
+import org.kframework.kil.KLabel;
 import org.kframework.kil.KLabelConstant;
+import org.kframework.kil.KSorts;
 import org.kframework.kil.Lexical;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
@@ -57,92 +59,97 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
         NextableState previous = nt.entryState;
         if (prd.isListDecl()) {
             UserList ul = (UserList) prd.getItems().get(0);
-            // label for '_,_
-            Grammar.RegExState epsilonForLabel1 = new Grammar.RegExState(
-                    new Grammar.StateId(prd.getSort() + "-ET-" + getUid()),
-                    nt, OrderingInfo.ZERO,
-                    Pattern.compile(""),
-                    new KLabelConstant(prd.getKLabel()));
-            // label for '.Ids (list terminator)
-            Grammar.RegExState epsilonForLabel2 = new Grammar.RegExState(
-                    new Grammar.StateId(prd.getSort() + "-ET-" + getUid()),
-                    nt, OrderingInfo.ZERO,
-                    Pattern.compile(""),
-                    new KLabelConstant("'." + prd.getSort()));
-            previous.next.add(epsilonForLabel1);
-            previous.next.add(epsilonForLabel2);
-            NonTerminalState nts = new NonTerminalState(
+
+            NonTerminalState Id = new NonTerminalState(
                     new StateId(prd.getSort() + "-S-" + getUid()),
                     nt, OrderingInfo.ZERO,
                     ntmap.get(ul.getSort()),
-                    false, null);
+                    false, null, null);
             PrimitiveState pstate = new RegExState(
                     new StateId(prd.getSort() + "-T-" + getUid()),
                     nt, OrderingInfo.ZERO,
                     Pattern.compile("\\Q" + ul.getSeparator() + "\\E"),
-                    null);
-            epsilonForLabel1.next.add(nts);
-            // if the list can be empty add the jump connection
-            if (ul.getListType().equals("*"))
-                nts.next.add(epsilonForLabel2);
-            nts.next.add(pstate);
-            pstate.next.add(epsilonForLabel1);
-            previous = epsilonForLabel2;
-            /**
-             * Allows for empty* cons lists which always terminate with the identity element of the list.
-             *     |----empty-list----|
-             *     |                  |
-             * (|--|--[e1]------[Id]----->[e2]---|)
-             *          ^        |
-             *          |-[","]<-|
-             */
-        } else if (prd.isSubsort()) {
-            if (prd.containsAttribute("klabel")) {
-                Grammar.RegExState epsilonForLabel1 = new Grammar.RegExState(
+                    null, TreeCleanerVisitor.DELETESORT);
+            NonTerminalState Ids = new NonTerminalState(
+                    new StateId(prd.getSort() + "-S-" + getUid()),
+                    nt, OrderingInfo.ZERO,
+                    ntmap.get(prd.getSort()),
+                    false, new KLabelConstant(prd.getKLabel()), null);
+            nt.entryState.next.add(Id);
+            Id.next.add(pstate);
+            pstate.next.add(Ids);
+            Ids.next.add(nt.exitState);
+
+            if (!ul.getListType().equals("*")) {
+                NonTerminalState Id2 = new NonTerminalState(
+                        new StateId(prd.getSort() + "-S-" + getUid()),
+                        nt, OrderingInfo.ZERO,
+                        ntmap.get(ul.getSort()),
+                        false, null, null);
+                previous.next.add(Id2);
+                previous = Id2;
+            }
+            // label for '.Ids (list terminator)
+            NonTerminal specialNt = getListTerminatorNT(prd.getSort());
+            NonTerminalState special = new NonTerminalState(
+                    new StateId(prd.getSort() + "-S-" + getUid()),
+                    nt, OrderingInfo.ZERO,
+                    specialNt,
+                    false,  new KLabelConstant(prd.getKLabel()), null);
+            special.next.add(previous);
+            previous = special;
+            // label for '_,_
+            if (!ul.getListType().equals("*")) {
+                Grammar.RegExState epsilonForLabel2 = new Grammar.RegExState(
                         new Grammar.StateId(prd.getSort() + "-ET-" + getUid()),
                         nt, OrderingInfo.ZERO,
                         Pattern.compile(""),
-                        new KLabelConstant(prd.getKLabel()));
-                previous.next.add(epsilonForLabel1);
-                previous = epsilonForLabel1;
+                        new KLabelConstant(prd.getKLabel()),
+                        TreeCleanerVisitor.DELETESORT);
+                previous.next.add(epsilonForLabel2);
+                previous = epsilonForLabel2;
+            }
+            /**
+             * Allows for empty* cons lists which always terminate with the identity element of the list.
+             *                           '_,_
+             * (|-|-->[Id]----->(,)---->[Ids]--|->|)
+             *    |                            |
+             *    |-->[Id]-->[special]->(e2)---|
+             *                 '.Ids     '_,_
+             */
+        } else if (prd.isSubsort()) {
+            KLabel kl = null;
+            if (prd.containsAttribute("klabel")) {
+                kl = new KLabelConstant(prd.getKLabel());
             }
             Sort srt = (Sort) prd.getItems().get(0);
             NonTerminalState nts = new NonTerminalState(
                     new StateId(prd.getSort() + "-S-" + getUid()),
                     nt, OrderingInfo.ZERO,
                     ntmap.get(srt.getName()),
-                    false, null);
+                    false, kl, prd.getSort());
             previous.next.add(nts);
             previous = nts;
         } else if (prd.isLexical()) {
-            // TODO: this should have the sort of the production and not K
             Lexical lx = (Lexical) prd.getItems().get(0);
             PrimitiveState pstate = new RegExState(
                     new StateId(prd.getSort() + "-T-" + getUid()),
                     nt, OrderingInfo.ZERO,
                     Pattern.compile(lx.getLexicalRule()),
-                    null);
+                    null, prd.getSort());
             previous.next.add(pstate);
             previous = pstate;
         } else if (prd.isConstant()) {
-            // TODO: this should have the sort of the production and not K
             Terminal terminal = (Terminal) prd.getItems().get(0);
             PrimitiveState pstate = new RegExState(
                     new StateId(prd.getSort() + "-T-" + getUid()),
                     nt, OrderingInfo.ZERO,
                     Pattern.compile("\\Q" + terminal.getTerminal() + "\\E"),
-                    null);
+                    null, prd.getSort());
             previous.next.add(pstate);
             previous = pstate;
         } else {
             // just a normal production with Terminals and Sort alternations
-            Grammar.RegExState epsilonForLabel = new Grammar.RegExState(
-                    new Grammar.StateId(prd.getSort() + "-ET-" + getUid()),
-                    nt, OrderingInfo.ZERO,
-                    Pattern.compile(""),
-                    new KLabelConstant(prd.getKLabel()));
-            previous.next.add(epsilonForLabel);
-            previous = epsilonForLabel;
             for (ProductionItem prdItem : prd.getItems()) {
                 if (prdItem instanceof Terminal) {
                     Terminal terminal = (Terminal) prdItem;
@@ -150,7 +157,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                             new StateId(prd.getSort() + "-T-" + getUid()),
                             nt, OrderingInfo.ZERO,
                             Pattern.compile("\\Q" + terminal.getTerminal() + "\\E"),
-                            null);
+                            null, TreeCleanerVisitor.DELETESORT);
                     previous.next.add(pstate);
                     previous = pstate;
                 } else if (prdItem instanceof Sort) {
@@ -159,15 +166,39 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                             new StateId(prd.getSort() + "-S-" + getUid()),
                             nt, OrderingInfo.ZERO,
                             ntmap.get(srt.getName()),
-                            false, null);
+                            false, null, null);
                     previous.next.add(nts);
                     previous = nts;
                 } else {
                     assert false : "Didn't expect this ProductionItem type here: " + prdItem.getClass().getName();
                 }
             }
+            Grammar.RegExState epsilonForLabel = new Grammar.RegExState(
+                    new Grammar.StateId(prd.getSort() + "-ET-" + getUid()),
+                    nt, OrderingInfo.ZERO,
+                    Pattern.compile(""),
+                    new KLabelConstant(prd.getKLabel()),
+                    TreeCleanerVisitor.DELETESORT);
+            previous.next.add(epsilonForLabel);
+            previous = epsilonForLabel;
         }
         previous.next.add(nt.exitState);
+    }
+
+    // label for '.Ids (list terminator)
+    private NonTerminal getListTerminatorNT(String sort) {
+        NonTerminal nt = new NonTerminal(new NonTerminalId(sort),
+                new StateId("Entry-special-" + sort), OrderingInfo.ZERO,
+                new StateId("Exit-special-" + sort), OrderingInfo.ZERO);
+        Grammar.RegExState epsilonForLabel = new Grammar.RegExState(
+                new Grammar.StateId(sort + "-ET-" + getUid()),
+                nt, OrderingInfo.ZERO,
+                Pattern.compile(""),
+                new KLabelConstant("'." + sort),
+                TreeCleanerVisitor.DELETESORT);
+        nt.entryState.next.add(epsilonForLabel);
+        epsilonForLabel.next.add(nt.exitState);
+        return nt;
     }
 
     @Override

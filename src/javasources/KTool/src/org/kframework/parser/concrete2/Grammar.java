@@ -108,8 +108,8 @@ public class Grammar {
                            StateId entryStateId, State.OrderingInfo entryOrderingInfo,
                            StateId exitStateId, State.OrderingInfo exitOrderingInfo) {
             this.nonTerminalId = nonTerminalId;
-            this.entryState = new EntryState(entryStateId, this, entryOrderingInfo, null);
-            this.exitState = new ExitState(exitStateId, this, exitOrderingInfo, null);
+            this.entryState = new EntryState(entryStateId, this, entryOrderingInfo, null, null);
+            this.exitState = new ExitState(exitStateId, this, exitOrderingInfo, null, null);
         }
 
         public int compareTo(NonTerminal that) { return this.nonTerminalId.compareTo(that.nonTerminalId); }
@@ -137,6 +137,7 @@ public class Grammar {
         final NonTerminal nt;
         final OrderingInfo orderingInfo;
         final KLabel label;
+        final String sort;
 
         static class OrderingInfo implements Comparable<OrderingInfo>, Serializable {
             int key;
@@ -145,8 +146,8 @@ public class Grammar {
             public static final OrderingInfo ZERO = new OrderingInfo(0);
         }
 
-        public State(StateId stateId, NonTerminal nt, OrderingInfo orderingInfo, KLabel label) {
-            this.stateId = stateId; this.nt = nt; this.orderingInfo = orderingInfo; this.label = label;
+        public State(StateId stateId, NonTerminal nt, OrderingInfo orderingInfo, KLabel label, String sort) {
+            this.stateId = stateId; this.nt = nt; this.orderingInfo = orderingInfo; this.label = label; this.sort = sort;
         }
 
         public Set<KList> runRule(Set<KList> input) {
@@ -190,28 +191,28 @@ public class Grammar {
         @Override
         public int hashCode() {
             int result = stateId.hashCode();
-            result = 31 * result + nt.hashCode();
+            //result = 31 * result + nt.hashCode();
             return result;
         }
     }
 
     public static class ExitState extends State {
-        public ExitState(StateId stateId, NonTerminal nt, OrderingInfo orderingInfo, KLabel label) {
-            super(stateId, nt, orderingInfo, label);
+        public ExitState(StateId stateId, NonTerminal nt, OrderingInfo orderingInfo, KLabel label, String sort) {
+            super(stateId, nt, orderingInfo, label, sort);
         }
     }
 
     public abstract static class NextableState extends State {
         public final Set<State> next = new HashSet<State>();
-        NextableState(StateId stateId, NonTerminal nt, OrderingInfo orderingInfo, boolean intermediary, KLabel label) {
-            super(stateId, nt, orderingInfo, label);
+        NextableState(StateId stateId, NonTerminal nt, OrderingInfo orderingInfo, boolean intermediary, KLabel label, String sort) {
+            super(stateId, nt, orderingInfo, label, sort);
             if (intermediary) { nt.intermediaryStates.add(this); }
         }
     }
 
     public static class EntryState extends NextableState {
-        public EntryState(StateId stateId, NonTerminal nt, OrderingInfo orderingInfo, KLabel label) {
-            super(stateId, nt, orderingInfo, false, label);
+        public EntryState(StateId stateId, NonTerminal nt, OrderingInfo orderingInfo, KLabel label, String sort) {
+            super(stateId, nt, orderingInfo, false, label, sort);
         }
     }
 
@@ -221,8 +222,8 @@ public class Grammar {
 
         public NonTerminalState(
                 StateId stateId, NonTerminal nt, OrderingInfo orderingInfo,
-                NonTerminal child, boolean isLookahead, KLabel label) {
-            super(stateId, nt, orderingInfo, true, label);
+                NonTerminal child, boolean isLookahead, KLabel label, String sort) {
+            super(stateId, nt, orderingInfo, true, label, sort);
             nt.intermediaryStates.add(this);
             this.child = child;
             this.isLookahead = isLookahead;
@@ -241,8 +242,8 @@ public class Grammar {
 
         abstract Set<MatchResult> matches(CharSequence text, int startPosition, Function context);
 
-        public PrimitiveState(StateId stateId, NonTerminal nt, OrderingInfo orderingInfo, KLabel label) {
-            super(stateId, nt, orderingInfo, true, label);
+        public PrimitiveState(StateId stateId, NonTerminal nt, OrderingInfo orderingInfo, KLabel label, String sort) {
+            super(stateId, nt, orderingInfo, true, label, sort);
         }
 
         public boolean isNullable() {
@@ -254,8 +255,8 @@ public class Grammar {
     public static class RegExState extends PrimitiveState {
         private final java.util.regex.Pattern pattern;
 
-        public RegExState(StateId stateId, NonTerminal nt, OrderingInfo orderingInfo, java.util.regex.Pattern pattern, KLabel label) {
-            super(stateId, nt, orderingInfo, label);
+        public RegExState(StateId stateId, NonTerminal nt, OrderingInfo orderingInfo, java.util.regex.Pattern pattern, KLabel label, String sort) {
+            super(stateId, nt, orderingInfo, label, sort);
             this.pattern = pattern;
         }
 
@@ -266,7 +267,7 @@ public class Grammar {
             matcher.useAnchoringBounds(false);
             Set<MatchResult> results = new HashSet<MatchResult>();
             if (matcher.lookingAt()) {
-                results.add(new MatchResult(matcher.end(), Function.constant(Token.kAppOf(KSorts.K, matcher.group())))); //matchFunction(text, matcher.start(), matcher.end())));
+                results.add(new MatchResult(matcher.end(), Function.constant(Token.kAppOf(this.sort, matcher.group())))); //matchFunction(text, matcher.start(), matcher.end())));
             }
             return results;
         }

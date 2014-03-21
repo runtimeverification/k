@@ -54,7 +54,7 @@ public class ParserTest {
 
         Grammar.NonTerminal nt1 = new Grammar.NonTerminal(ntistart, stistart, new Grammar.State.OrderingInfo(0), stiend, new Grammar.State.OrderingInfo(100));
 
-        Grammar.RegExState res = new Grammar.RegExState(new Grammar.StateId("RegExStid"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("[a-zA-Z0-9]+"), null);
+        Grammar.RegExState res = new Grammar.RegExState(new Grammar.StateId("RegExStid"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("[a-zA-Z0-9]+"), null, KSorts.K);
 
 
         nt1.entryState.next.add(res);
@@ -78,8 +78,8 @@ public class ParserTest {
 
         Grammar.NonTerminal nt1 = new Grammar.NonTerminal(ntistart, stistart, new Grammar.State.OrderingInfo(0), stiend, new Grammar.State.OrderingInfo(100));
 
-        Grammar.RegExState res1 = new Grammar.RegExState(new Grammar.StateId("RegExStid"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("[a-zA-Z0-9]+ +"), null);
-        Grammar.RegExState res2 = new Grammar.RegExState(new Grammar.StateId("RegExStid2"), nt1, new Grammar.State.OrderingInfo(2), Pattern.compile("[a-zA-Z0-9]+"), label("seq"));
+        Grammar.RegExState res1 = new Grammar.RegExState(new Grammar.StateId("RegExStid"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("[a-zA-Z0-9]+ +"), null, KSorts.K);
+        Grammar.RegExState res2 = new Grammar.RegExState(new Grammar.StateId("RegExStid2"), nt1, new Grammar.State.OrderingInfo(2), Pattern.compile("[a-zA-Z0-9]+"), label("seq"), KSorts.K);
 
 
         nt1.entryState.next.add(res1);
@@ -105,9 +105,9 @@ public class ParserTest {
 
         Grammar.NonTerminal nt1 = new Grammar.NonTerminal(ntistart, stistart, new Grammar.State.OrderingInfo(0), stiend, new Grammar.State.OrderingInfo(100));
 
-        Grammar.RegExState res1 = new Grammar.RegExState(new Grammar.StateId("RegExStid"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("[a-z0-9]+"), label("s1"));
-        Grammar.RegExState res2 = new Grammar.RegExState(new Grammar.StateId("RegExStid2"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("[A-Z0-2]+"), null);
-        Grammar.RegExState res3 = new Grammar.RegExState(new Grammar.StateId("RegExStid3"), nt1, new Grammar.State.OrderingInfo(2), Pattern.compile("[3-9]*"), label("s3"));
+        Grammar.RegExState res1 = new Grammar.RegExState(new Grammar.StateId("RegExStid"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("[a-z0-9]+"), label("s1"), KSorts.K);
+        Grammar.RegExState res2 = new Grammar.RegExState(new Grammar.StateId("RegExStid2"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("[A-Z0-2]+"), null, KSorts.K);
+        Grammar.RegExState res3 = new Grammar.RegExState(new Grammar.StateId("RegExStid3"), nt1, new Grammar.State.OrderingInfo(2), Pattern.compile("[3-9]*"), label("s3"), KSorts.K);
 
         nt1.entryState.next.add(res1);
         nt1.entryState.next.add(res2);
@@ -144,8 +144,8 @@ public class ParserTest {
 
         Grammar.NonTerminal nt1 = new Grammar.NonTerminal(ntistart, stistart, new Grammar.State.OrderingInfo(0), stiend, new Grammar.State.OrderingInfo(100));
 
-        Grammar.RegExState res1 = new Grammar.RegExState(new Grammar.StateId("RegExStid"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("[a-zA-Z0-9]"), null);
-        Grammar.RegExState epsilonForLabel = new Grammar.RegExState(new Grammar.StateId("RegExEpsilon"), nt1, new Grammar.State.OrderingInfo(2), Pattern.compile(""), label("seq"));
+        Grammar.RegExState res1 = new Grammar.RegExState(new Grammar.StateId("RegExStid"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("[a-zA-Z0-9]"), null, KSorts.K);
+        Grammar.RegExState epsilonForLabel = new Grammar.RegExState(new Grammar.StateId("RegExEpsilon"), nt1, new Grammar.State.OrderingInfo(2), Pattern.compile(""), label("seq"), KSorts.K);
 
         nt1.entryState.next.add(res1);
         nt1.entryState.next.add(epsilonForLabel);
@@ -199,11 +199,11 @@ public class ParserTest {
 
         Grammar.NonTerminal nt1 = new Grammar.NonTerminal(ntistart, stistart, new Grammar.State.OrderingInfo(0), stiend, new Grammar.State.OrderingInfo(100));
 
-        Grammar.RegExState resx = new Grammar.RegExState(new Grammar.StateId("RegExStidx"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("x"), null);
-        Grammar.RegExState resy = new Grammar.RegExState(new Grammar.StateId("RegExStidy"), nt1, new Grammar.State.OrderingInfo(3), Pattern.compile("y"), label("xAy"));
-        Grammar.RegExState epsilonForLabel = new Grammar.RegExState(new Grammar.StateId("RegExEpsilon"), nt1, new Grammar.State.OrderingInfo(2), Pattern.compile(""), label("epsilon"));
+        Grammar.RegExState resx = new Grammar.RegExState(new Grammar.StateId("RegExStidx"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("x"), null, KSorts.K);
+        Grammar.RegExState resy = new Grammar.RegExState(new Grammar.StateId("RegExStidy"), nt1, new Grammar.State.OrderingInfo(3), Pattern.compile("y"), label("xAy"), KSorts.K);
+        Grammar.RegExState epsilonForLabel = new Grammar.RegExState(new Grammar.StateId("RegExEpsilon"), nt1, new Grammar.State.OrderingInfo(2), Pattern.compile(""), label("epsilon"), KSorts.K);
 
-        Grammar.NonTerminalState nts = new Grammar.NonTerminalState(new Grammar.StateId("NT"), nt1, new Grammar.State.OrderingInfo(2), nt1, false, null);
+        Grammar.NonTerminalState nts = new Grammar.NonTerminalState(new Grammar.StateId("NT"), nt1, new Grammar.State.OrderingInfo(2), nt1, false, null, KSorts.K);
 
         nt1.entryState.next.add(resx);
         nt1.entryState.next.add(epsilonForLabel);
@@ -243,10 +243,10 @@ public class ParserTest {
 
         Grammar.NonTerminal nt1 = new Grammar.NonTerminal(ntistart, stistart, new Grammar.State.OrderingInfo(0), stiend, new Grammar.State.OrderingInfo(100));
 
-        Grammar.RegExState resy = new Grammar.RegExState(new Grammar.StateId("RegExStidy"), nt1, new Grammar.State.OrderingInfo(3), Pattern.compile("y"), label("Ay"));
-        Grammar.RegExState epsilonForLabel = new Grammar.RegExState(new Grammar.StateId("RegExEpsilon"), nt1, new Grammar.State.OrderingInfo(2), Pattern.compile(""), label("epsilon"));
+        Grammar.RegExState resy = new Grammar.RegExState(new Grammar.StateId("RegExStidy"), nt1, new Grammar.State.OrderingInfo(3), Pattern.compile("y"), label("Ay"), KSorts.K);
+        Grammar.RegExState epsilonForLabel = new Grammar.RegExState(new Grammar.StateId("RegExEpsilon"), nt1, new Grammar.State.OrderingInfo(2), Pattern.compile(""), label("epsilon"), KSorts.K);
 
-        Grammar.NonTerminalState nts = new Grammar.NonTerminalState(new Grammar.StateId("NT"), nt1, new Grammar.State.OrderingInfo(2), nt1, false, null);
+        Grammar.NonTerminalState nts = new Grammar.NonTerminalState(new Grammar.StateId("NT"), nt1, new Grammar.State.OrderingInfo(2), nt1, false, null, KSorts.K);
 
         nt1.entryState.next.add(nts);
         nt1.entryState.next.add(epsilonForLabel);
@@ -283,10 +283,10 @@ public class ParserTest {
 
         Grammar.NonTerminal nt1 = new Grammar.NonTerminal(ntistart, stistart, new Grammar.State.OrderingInfo(0), stiend, new Grammar.State.OrderingInfo(100));
 
-        Grammar.RegExState resx = new Grammar.RegExState(new Grammar.StateId("RegExStidx"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("x"), null);
+        Grammar.RegExState resx = new Grammar.RegExState(new Grammar.StateId("RegExStidx"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("x"), null, KSorts.K);
 
-        Grammar.NonTerminalState nts = new Grammar.NonTerminalState(new Grammar.StateId("NT"), nt1, new Grammar.State.OrderingInfo(2), nt1, false, label("xA"));
-        Grammar.RegExState epsilonForLabel = new Grammar.RegExState(new Grammar.StateId("RegExEpsilon"), nt1, new Grammar.State.OrderingInfo(2), Pattern.compile(""), label("epsilon"));
+        Grammar.NonTerminalState nts = new Grammar.NonTerminalState(new Grammar.StateId("NT"), nt1, new Grammar.State.OrderingInfo(2), nt1, false, label("xA"), KSorts.K);
+        Grammar.RegExState epsilonForLabel = new Grammar.RegExState(new Grammar.StateId("RegExEpsilon"), nt1, new Grammar.State.OrderingInfo(2), Pattern.compile(""), label("epsilon"), KSorts.K);
 
         nt1.entryState.next.add(resx);
         nt1.entryState.next.add(epsilonForLabel);
@@ -323,10 +323,10 @@ public class ParserTest {
 
         Grammar.NonTerminal nt1 = new Grammar.NonTerminal(ntistart, stistart, new Grammar.State.OrderingInfo(0), stiend, new Grammar.State.OrderingInfo(100));
 
-        Grammar.RegExState resx = new Grammar.RegExState(new Grammar.StateId("RegExStidx"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("x"), label("x"));
+        Grammar.RegExState resx = new Grammar.RegExState(new Grammar.StateId("RegExStidx"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("x"), label("x"), KSorts.K);
 
-        Grammar.NonTerminalState nts1 = new Grammar.NonTerminalState(new Grammar.StateId("NT1"), nt1, new Grammar.State.OrderingInfo(2), nt1, false, null);
-        Grammar.NonTerminalState nts2 = new Grammar.NonTerminalState(new Grammar.StateId("NT2"), nt1, new Grammar.State.OrderingInfo(3), nt1, false, label("AA"));
+        Grammar.NonTerminalState nts1 = new Grammar.NonTerminalState(new Grammar.StateId("NT1"), nt1, new Grammar.State.OrderingInfo(2), nt1, false, null, KSorts.K);
+        Grammar.NonTerminalState nts2 = new Grammar.NonTerminalState(new Grammar.StateId("NT2"), nt1, new Grammar.State.OrderingInfo(3), nt1, false, label("AA"), KSorts.K);
 
         nt1.entryState.next.add(resx);
         nt1.entryState.next.add(nts1);
@@ -379,7 +379,7 @@ public class ParserTest {
 
         Grammar.NonTerminal baseCase = new Grammar.NonTerminal(baseCaseId, baseCaseEntry, new Grammar.State.OrderingInfo(-1),
                                                                       baseCaseExit,  new Grammar.State.OrderingInfo(1));
-        Grammar.RegExState resx = new Grammar.RegExState(new Grammar.StateId("X"), baseCase, new Grammar.State.OrderingInfo(0), Pattern.compile("x"), label("x"));
+        Grammar.RegExState resx = new Grammar.RegExState(new Grammar.StateId("X"), baseCase, new Grammar.State.OrderingInfo(0), Pattern.compile("x"), label("x"), KSorts.K);
 
         baseCase.entryState.next.add(resx);
         resx.next.add(baseCase.exitState);
@@ -391,7 +391,7 @@ public class ParserTest {
                     new Grammar.StateId("NT"+1+"Entry"), new Grammar.State.OrderingInfo(-i),
                     new Grammar.StateId("NT"+1+"Exit"), new Grammar.State.OrderingInfo(2*i-1));
             Grammar.NonTerminalState state = new Grammar.NonTerminalState(
-                    new Grammar.StateId("S"+i), nt, new Grammar.State.OrderingInfo(2*i-2), baseCase, false, label("n" + i));
+                    new Grammar.StateId("S"+i), nt, new Grammar.State.OrderingInfo(2*i-2), baseCase, false, label("n" + i), KSorts.K);
             nt.entryState.next.add(state);
             state.next.add(nt.exitState);
             baseCase = nt;
@@ -421,7 +421,7 @@ public class ParserTest {
 
         Grammar.NonTerminal baseCase = new Grammar.NonTerminal(baseCaseId, baseCaseEntry, new Grammar.State.OrderingInfo(-1),
                 baseCaseExit,  new Grammar.State.OrderingInfo(1));
-        Grammar.RegExState resx = new Grammar.RegExState(new Grammar.StateId("X"), baseCase, new Grammar.State.OrderingInfo(0), Pattern.compile(""), label("x"));
+        Grammar.RegExState resx = new Grammar.RegExState(new Grammar.StateId("X"), baseCase, new Grammar.State.OrderingInfo(0), Pattern.compile(""), label("x"), KSorts.K);
 
         baseCase.entryState.next.add(resx);
         resx.next.add(baseCase.exitState);
@@ -433,7 +433,7 @@ public class ParserTest {
                     new Grammar.StateId("NT"+i+"Entry"), new Grammar.State.OrderingInfo(-i),
                     new Grammar.StateId("NT"+i+"Exit"), new Grammar.State.OrderingInfo(2*i-1));
             Grammar.NonTerminalState state = new Grammar.NonTerminalState(
-                    new Grammar.StateId("S"+i), nt, new Grammar.State.OrderingInfo(2*i-2), baseCase, false, label("n" + i));
+                    new Grammar.StateId("S"+i), nt, new Grammar.State.OrderingInfo(2*i-2), baseCase, false, label("n" + i), KSorts.K);
             nt.entryState.next.add(state);
             state.next.add(nt.exitState);
             baseCase = nt;
@@ -468,19 +468,19 @@ public class ParserTest {
                 new Grammar.StateId("ExpExit"), new Grammar.State.OrderingInfo(5));
 
         { // lit
-            Grammar.RegExState litState = new Grammar.RegExState(new Grammar.StateId("LitState"), lit, new Grammar.State.OrderingInfo(0), Pattern.compile("[0-9]+"), label("lit"));
+            Grammar.RegExState litState = new Grammar.RegExState(new Grammar.StateId("LitState"), lit, new Grammar.State.OrderingInfo(0), Pattern.compile("[0-9]+"), label("lit"), KSorts.K);
             lit.entryState.next.add(litState);
             litState.next.add(lit.exitState);
         }
 
         { // trm
-            Grammar.RegExState lparen = new Grammar.RegExState(new Grammar.StateId("LParen"), trm, new Grammar.State.OrderingInfo(0), Pattern.compile("\\("), null);
-            Grammar.RegExState rparen = new Grammar.RegExState(new Grammar.StateId("RParen"), trm, new Grammar.State.OrderingInfo(0), Pattern.compile("\\)"), label("bracket"));
-            Grammar.RegExState star = new Grammar.RegExState(new Grammar.StateId("Star"), trm, new Grammar.State.OrderingInfo(0), Pattern.compile("\\*"), null);
-            Grammar.NonTerminalState expState = new Grammar.NonTerminalState(new Grammar.StateId("Trm->Exp"), trm, new Grammar.State.OrderingInfo(6), exp, false, null);
-            Grammar.NonTerminalState trmState = new Grammar.NonTerminalState(new Grammar.StateId("Trm->Trm"), trm, new Grammar.State.OrderingInfo(4), trm, false, null);
-            Grammar.NonTerminalState lit1State = new Grammar.NonTerminalState(new Grammar.StateId("Trm->Lit1"), trm, new Grammar.State.OrderingInfo(2), lit, false, label("mul"));
-            Grammar.NonTerminalState lit2State = new Grammar.NonTerminalState(new Grammar.StateId("Trm->Lit2"), trm, new Grammar.State.OrderingInfo(2), lit, false, null);
+            Grammar.RegExState lparen = new Grammar.RegExState(new Grammar.StateId("LParen"), trm, new Grammar.State.OrderingInfo(0), Pattern.compile("\\("), null, KSorts.K);
+            Grammar.RegExState rparen = new Grammar.RegExState(new Grammar.StateId("RParen"), trm, new Grammar.State.OrderingInfo(0), Pattern.compile("\\)"), label("bracket"), KSorts.K);
+            Grammar.RegExState star = new Grammar.RegExState(new Grammar.StateId("Star"), trm, new Grammar.State.OrderingInfo(0), Pattern.compile("\\*"), null, KSorts.K);
+            Grammar.NonTerminalState expState = new Grammar.NonTerminalState(new Grammar.StateId("Trm->Exp"), trm, new Grammar.State.OrderingInfo(6), exp, false, null, KSorts.K);
+            Grammar.NonTerminalState trmState = new Grammar.NonTerminalState(new Grammar.StateId("Trm->Trm"), trm, new Grammar.State.OrderingInfo(4), trm, false, null, KSorts.K);
+            Grammar.NonTerminalState lit1State = new Grammar.NonTerminalState(new Grammar.StateId("Trm->Lit1"), trm, new Grammar.State.OrderingInfo(2), lit, false, label("mul"), KSorts.K);
+            Grammar.NonTerminalState lit2State = new Grammar.NonTerminalState(new Grammar.StateId("Trm->Lit2"), trm, new Grammar.State.OrderingInfo(2), lit, false, null, KSorts.K);
 
             trm.entryState.next.add(lparen);
             lparen.next.add(expState);
@@ -497,10 +497,10 @@ public class ParserTest {
         }
 
         { // exp
-            Grammar.RegExState plus = new Grammar.RegExState(new Grammar.StateId("Plus"), exp, new Grammar.State.OrderingInfo(0), Pattern.compile("\\+"), null);
-            Grammar.NonTerminalState expState = new Grammar.NonTerminalState(new Grammar.StateId("Exp->Exp"), exp, new Grammar.State.OrderingInfo(6), exp, false, null);
-            Grammar.NonTerminalState trm1State = new Grammar.NonTerminalState(new Grammar.StateId("Exp->Trm1"), exp, new Grammar.State.OrderingInfo(4), trm, false, label("plus"));
-            Grammar.NonTerminalState trm2State = new Grammar.NonTerminalState(new Grammar.StateId("Exp->Trm2"), exp, new Grammar.State.OrderingInfo(4), trm, false, null);
+            Grammar.RegExState plus = new Grammar.RegExState(new Grammar.StateId("Plus"), exp, new Grammar.State.OrderingInfo(0), Pattern.compile("\\+"), null, KSorts.K);
+            Grammar.NonTerminalState expState = new Grammar.NonTerminalState(new Grammar.StateId("Exp->Exp"), exp, new Grammar.State.OrderingInfo(6), exp, false, null, KSorts.K);
+            Grammar.NonTerminalState trm1State = new Grammar.NonTerminalState(new Grammar.StateId("Exp->Trm1"), exp, new Grammar.State.OrderingInfo(4), trm, false, label("plus"), KSorts.K);
+            Grammar.NonTerminalState trm2State = new Grammar.NonTerminalState(new Grammar.StateId("Exp->Trm2"), exp, new Grammar.State.OrderingInfo(4), trm, false, null, KSorts.K);
 
             exp.entryState.next.add(expState);
             expState.next.add(plus);
