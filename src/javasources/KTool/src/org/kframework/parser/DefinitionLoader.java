@@ -254,6 +254,8 @@ public class DefinitionLoader {
             // ----------------------------------- parse rules
             JavaClassesFactory.startConstruction(context);
             def = (Definition) def.accept(new ParseRulesFilter(context, false));
+            def = (Definition) def.accept(new CorrectConstantsTransformer(context));
+
             JavaClassesFactory.endConstruction();
 
             return def;

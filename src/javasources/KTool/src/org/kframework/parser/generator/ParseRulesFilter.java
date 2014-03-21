@@ -162,7 +162,6 @@ public class ParseRulesFilter extends BasicTransformer {
                 // config = config.accept(new TypeInferenceSupremumFilter(context));
                 config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context));
                 config = config.accept(new PreferAvoidFilter(context));
-                config = config.accept(new CorrectConstantsTransformer(context));
                 config = config.accept(new FlattenListsFilter(context));
                 config = config.accept(new AmbDuplicateFilter(context));
                 // last resort disambiguation
