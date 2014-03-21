@@ -231,7 +231,8 @@ public class TermVisitor extends LocalVisitor implements Serializable {
                         pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR
                                 + USER_LIST_REPLACEMENT);
                     } else {
-                        if (kListSize > 0 && ((KList) kItem.kList()).get(0) instanceof Token) {
+                        if (kListSize > 0 && ((KList) kItem.kList()).get(0) instanceof Token
+                                && !context.isSubsortedEq(K_RESULT,kItem.sort())) {
                             String sort = ((Token) ((KList) kItem.kList()).get(0)).sort();
                             if (context.isSubsorted(K_RESULT, sort)) {
                                 if (kItem.sort().equals(K_ITEM_SORT)) {
