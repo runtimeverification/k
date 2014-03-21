@@ -16,6 +16,7 @@ import org.kframework.parser.concrete.disambiguate.AmbFilter;
 import org.kframework.parser.concrete.disambiguate.BestFitFilter;
 import org.kframework.parser.concrete.disambiguate.CellEndLabelFilter;
 import org.kframework.parser.concrete.disambiguate.CorrectCastPriorityFilter;
+import org.kframework.parser.concrete.disambiguate.CorrectConstantsTransformer;
 import org.kframework.parser.concrete.disambiguate.CorrectKSeqFilter;
 import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
 import org.kframework.parser.concrete.disambiguate.GetFitnessUnitKCheckVisitor;
@@ -118,6 +119,7 @@ public class ParseConfigsFilter extends BasicTransformer {
                 // config = config.accept(new TypeInferenceSupremumFilter(context));
                 config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context));
                 config = config.accept(new PreferAvoidFilter(context));
+                config = config.accept(new CorrectConstantsTransformer(context));
                 config = config.accept(new FlattenListsFilter(context));
                 config = config.accept(new AmbDuplicateFilter(context));
                 // last resort disambiguation
