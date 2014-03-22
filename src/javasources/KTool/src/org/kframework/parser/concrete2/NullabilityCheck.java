@@ -1,7 +1,5 @@
 package org.kframework.parser.concrete2;
 
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -18,22 +16,8 @@ import org.kframework.parser.concrete2.Grammar.State;
  * Helper class in the parser that finds all of the nullable NonTerminals in a grammar.
  */
 public class NullabilityCheck {
-    /**
-     * Starting from the start symbol, find all the non terminals that can match on the empty string.
-     * @param startNt The start non terminal.
-     * @return A set of all reachable non terminals that are nullable.
-     */
-    public static Set<State> getReachableNullableStates(NonTerminal startNt) {
-        NullabilityCheck nc = new NullabilityCheck();
-        nc.checkNullability2(startNt);
-        return nc.nullable;
-    }
-
-    // list NonTerminals reachable from the start symbol.
-    // the value of the map keeps a reference to all the states which call NonTerminals
-    Map<NonTerminal, Set<NonTerminalState>> reachableNonTerminals = new HashMap<>();
     // accumulate the results here (TODO: explain that this is nulable up to the *entry* of the state)
-    Set<State> nullable = new HashSet<>();
+    private Set<State> nullable = new HashSet<>();
 
     /**
      * Nullability of a state is based on the following two implications:
@@ -48,73 +32,61 @@ public class NullabilityCheck {
      * 2. The nullable(state) in rule B becomes true (in which case we check childNullable).)
      * 3. The childNullable(state) in rule B becomes true (in which case we check nullable(state).)
      * (ChildNullable(state) becomes true when an exit state becomes nullable.)
-     * @param startNt The start symbol in the grammar.
+     * @param grammar the grammar object.
      * @return A set with all the NonTerminals that can become nullable.
      */
-    private void checkNullability2(NonTerminal startNt) {
-        reachableNonTerminals.put(startNt, new HashSet<NonTerminalState>());
-        collectReachableNT(startNt.entryState, new HashSet<State>());
+    public NullabilityCheck(Grammar grammar) {
+        // 1. get all nullable states
+        // list NonTerminals reachable from the start symbol.
+        // the value of the map keeps a reference to all the states which call NonTerminals
+        Map<NonTerminal, Set<NonTerminalState>> nonTerminalCallers = grammar.getNonTerminalCallers();
+
         // A state is nullable iff the *start* of it is reachable from the entry of its nt without consuming input
         // A non-terminal is nullable if its exit state is nullable
-        for (Map.Entry<NonTerminal, Set<NonTerminalState>> entry : reachableNonTerminals.entrySet()) {
-            mark(entry.getKey().entryState);
+        for (NonTerminal entry : nonTerminalCallers.keySet()) {
+            mark(entry.entryState, nonTerminalCallers);
         }
     }
 
     /** marks a state as nullable if it is not already, and calls mark on any
      * states that should be nullable as a result.
      */
-    private void mark(State state) {
+    private void mark(State state, Map<NonTerminal, Set<NonTerminalState>> nonTerminalCallers) {
         if (!nullable.contains(state)) {
             nullable.add(state);
             if (state instanceof NextableState) {
-                if (childNullable(state))
+                if (isNullable(state))
                     for (State s : ((NextableState) state).next)
-                        mark(s);
+                        mark(s, nonTerminalCallers);
             } else {
                 assert state instanceof ExitState: "I was expecting this element to be of type ExitState";
                 // previous calls to childNullable would have returned False
                 // so now we restart those recursions
-                for (State s : reachableNonTerminals.get(state.nt))
+                for (State s : nonTerminalCallers.get(state.nt)) {
                     if (nullable.contains(s)) {
                         // assert s instanceof NonTerminalState : "Intermediary states are NonTerminalStates?";
                         for (State child : ((NextableState)s).next) {
-                            mark(child);
+                            mark(child, nonTerminalCallers);
                         }
                     }
+                }
             }
         }
-    }
-
-    private boolean childNullable(State state) {
-        return (state instanceof EntryState) ||
-               ((state instanceof PrimitiveState) && ((PrimitiveState)state).isNullable()) ||
-               ((state instanceof NonTerminalState) && (nullable.contains(((NonTerminalState)state).child.exitState)));
     }
 
     /**
-     * Recursive DFS that traverses all the states and returns a set of all reachable {@Link NonTerminal}.
-     * @param start The state from which to run the collector.
-     * @param visited Start with an empty Set<State>. Used as intermediate data.
-     * @return A set of all reachable {@Link NonTerminal}.
+     * Checks if a state can parse without consuming characters.
+     * @param state The state to check
+     * @return true if the state can parse without consuming characters and false otherwise
      */
-    private void collectReachableNT(State start, Set<State> visited) {
-        if (visited.contains(start))
-            return;
-        visited.add(start);
-        if (start instanceof NextableState) {
-            NextableState ns = (NextableState) start;
-            for (State st : ns.next) {
-                if (st instanceof NonTerminalState) {
-                    NonTerminalState nts = (NonTerminalState) st;
-                    if (!reachableNonTerminals.containsKey(nts.child)) {
-                        reachableNonTerminals.put(nts.child, new HashSet<NonTerminalState>(Arrays.asList(nts)));
-                    }
-                    reachableNonTerminals.get(nts.child).add(nts);
-                    collectReachableNT(((NonTerminalState) st).child.entryState, visited);
-                }
-                collectReachableNT(st, visited);
-            }
-        }
+    public boolean isNullable(State state) {
+        return (state instanceof EntryState) ||
+               (state instanceof ExitState) ||
+               ((state instanceof PrimitiveState) && ((PrimitiveState)state).isNullable()) ||
+               ((state instanceof NonTerminalState) && isNullable(((NonTerminalState) state).child));
+    }
+
+    public boolean isNullable(NonTerminal nt) {
+        return nullable.contains(nt.exitState);
     }
 }

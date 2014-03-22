@@ -1,13 +1,10 @@
 package org.kframework.parser.concrete2;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.kframework.kil.Configuration;
 import org.kframework.kil.KLabel;
 import org.kframework.kil.KLabelConstant;
-import org.kframework.kil.KSorts;
 import org.kframework.kil.Lexical;
 import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
@@ -37,17 +34,15 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
 
         // create a NonTerminal for every declared sort
         for (String sort : context.definedSorts) {
-            if (!ntmap.containsKey(sort)) {
-                NonTerminal nt = new NonTerminal(new NonTerminalId(sort),
-                        new StateId("Entry-" + sort), OrderingInfo.ZERO,
-                        new StateId("Exit-" + sort), OrderingInfo.ZERO);
-                ntmap.put(sort, nt);
-            }
+            NonTerminal nt = new NonTerminal(new NonTerminalId(sort),
+                    new StateId("Entry-" + sort), OrderingInfo.ZERO,
+                    new StateId("Exit-" + sort), OrderingInfo.ZERO);
+            grammar.add(nt);
         }
     }
 
     private int seed = 0;
-    private Map<String, NonTerminal> ntmap = new HashMap<>();
+    private Grammar grammar = new Grammar();
 
     private int getUid() {
         return seed++;
@@ -55,7 +50,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
 
     @Override
     public void visit(Production prd) {
-        NonTerminal nt = ntmap.get(prd.getSort());
+        NonTerminal nt = grammar.get(prd.getSort());
         NextableState previous = nt.entryState;
         if (prd.isListDecl()) {
             UserList ul = (UserList) prd.getItems().get(0);
@@ -63,7 +58,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
             NonTerminalState Id = new NonTerminalState(
                     new StateId(prd.getSort() + "-S-" + getUid()),
                     nt, OrderingInfo.ZERO,
-                    ntmap.get(ul.getSort()),
+                    grammar.get(ul.getSort()),
                     false, null, null);
             PrimitiveState pstate = new RegExState(
                     new StateId(prd.getSort() + "-T-" + getUid()),
@@ -73,7 +68,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
             NonTerminalState Ids = new NonTerminalState(
                     new StateId(prd.getSort() + "-S-" + getUid()),
                     nt, OrderingInfo.ZERO,
-                    ntmap.get(prd.getSort()),
+                    grammar.get(prd.getSort()),
                     false, new KLabelConstant(prd.getKLabel()), null);
             nt.entryState.next.add(Id);
             Id.next.add(pstate);
@@ -84,7 +79,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                 NonTerminalState Id2 = new NonTerminalState(
                         new StateId(prd.getSort() + "-S-" + getUid()),
                         nt, OrderingInfo.ZERO,
-                        ntmap.get(ul.getSort()),
+                        grammar.get(ul.getSort()),
                         false, null, null);
                 previous.next.add(Id2);
                 previous = Id2;
@@ -95,8 +90,8 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                     new StateId(prd.getSort() + "-S-" + getUid()),
                     nt, OrderingInfo.ZERO,
                     specialNt,
-                    false,  new KLabelConstant(prd.getKLabel()), null);
-            special.next.add(previous);
+                    false,  null, null);
+            previous.next.add(special);
             previous = special;
             // label for '_,_
             if (!ul.getListType().equals("*")) {
@@ -126,7 +121,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
             NonTerminalState nts = new NonTerminalState(
                     new StateId(prd.getSort() + "-S-" + getUid()),
                     nt, OrderingInfo.ZERO,
-                    ntmap.get(srt.getName()),
+                    grammar.get(srt.getName()),
                     false, kl, prd.getSort());
             previous.next.add(nts);
             previous = nts;
@@ -144,6 +139,8 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
             PrimitiveState pstate = new RegExState(
                     new StateId(prd.getSort() + "-T-" + getUid()),
                     nt, OrderingInfo.ZERO,
+                    // TODO: if there is a \\E in the input string, this next line will fail
+                    // should double escape \ if there is an odd number
                     Pattern.compile("\\Q" + terminal.getTerminal() + "\\E"),
                     null, prd.getSort());
             previous.next.add(pstate);
@@ -156,6 +153,8 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                     PrimitiveState pstate = new RegExState(
                             new StateId(prd.getSort() + "-T-" + getUid()),
                             nt, OrderingInfo.ZERO,
+                            // TODO: if there is a \\E in the input string, this next line will fail
+                            // should double escape \ if there is an odd number
                             Pattern.compile("\\Q" + terminal.getTerminal() + "\\E"),
                             null, TreeCleanerVisitor.DELETESORT);
                     previous.next.add(pstate);
@@ -165,7 +164,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                     NonTerminalState nts = new NonTerminalState(
                             new StateId(prd.getSort() + "-S-" + getUid()),
                             nt, OrderingInfo.ZERO,
-                            ntmap.get(srt.getName()),
+                            grammar.get(srt.getName()),
                             false, null, null);
                     previous.next.add(nts);
                     previous = nts;
@@ -187,7 +186,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
 
     // label for '.Ids (list terminator)
     private NonTerminal getListTerminatorNT(String sort) {
-        NonTerminal nt = new NonTerminal(new NonTerminalId(sort),
+        NonTerminal nt = new NonTerminal(new NonTerminalId(sort + "-special"),
                 new StateId("Entry-special-" + sort), OrderingInfo.ZERO,
                 new StateId("Exit-special-" + sort), OrderingInfo.ZERO);
         Grammar.RegExState epsilonForLabel = new Grammar.RegExState(
@@ -216,9 +215,8 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
         // skip visiting rules, contexts and configurations
     }
 
-    public Map<String, NonTerminal> getGrammar() {
-        // TODO: I think this should return a Grammar object of some sort.
-        // TODO: calculate OrderingInfo before returning
-        return ntmap;
+    public Grammar getGrammar() {
+        grammar.finalize();
+        return grammar;
     }
 }

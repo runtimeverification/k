@@ -3,7 +3,10 @@ package org.kframework.parser.concrete2;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.kframework.kil.Ambiguity;
@@ -13,6 +16,7 @@ import org.kframework.kil.KList;
 import org.kframework.kil.KSorts;
 import org.kframework.kil.Term;
 import org.kframework.kil.Token;
+import org.kframework.parser.concrete2.Grammar.State.OrderingInfo;
 
 
 /**
@@ -49,9 +53,121 @@ import org.kframework.kil.Token;
  * () - PrimitiveState
  *
  */
-public class Grammar {
+public class Grammar implements Serializable {
 
-// Positions are 'int' because CharSequence uses 'int' // Position in the text
+    // Contains all start symbol NonTerminals
+    private Map<NonTerminalId, NonTerminal> startNonTerminals = new HashMap<>();
+
+    public boolean add(NonTerminal newNT) {
+        if (startNonTerminals.containsKey(newNT.nonTerminalId))
+            return false;
+        else {
+            startNonTerminals.put(newNT.nonTerminalId, newNT);
+            return true;
+        }
+    }
+
+    public Set<NonTerminal> getAllNonTerminals() {
+        return getNonTerminalCallers().keySet();
+    }
+
+    public NonTerminal get(String ntSymbol) {
+        return startNonTerminals.get(new NonTerminalId(ntSymbol));
+    }
+
+    public Set<NonTerminal> getStartNonTerminals() {
+        return new HashSet<NonTerminal>(startNonTerminals.values());
+    }
+
+    public Map<NonTerminal, Set<NonTerminalState>> getNonTerminalCallers() {
+        Map<NonTerminal, Set<NonTerminalState>> reachableNonTerminals = new HashMap<>();
+        Set<State> visited = new HashSet<>();
+        for (NonTerminal nt : startNonTerminals.values()) {
+            collectNTCallers(nt.entryState, visited, reachableNonTerminals);
+        }
+        return reachableNonTerminals;
+    }
+
+    public void finalize() {
+        // 1. get all nullable states
+        NullabilityCheck nullability = new NullabilityCheck(this);
+
+        // 2. make an array with all the states
+        List<State> allStates = new ArrayList<>();
+        for (NonTerminal nonTerminal : getAllNonTerminals()) {
+            allStates.addAll(nonTerminal.getReachableStates());
+        }
+        // 3. prepare the inverse relation
+        Map<State, Integer> inverseAllStates = new HashMap<>();
+        for (int i = 0; i < allStates.size(); i++) {
+            inverseAllStates.put(allStates.get(i), i);
+        }
+
+        // prepare the Tarjan input data
+        // TODO: java doesn't allow arrays of generic types.
+        @SuppressWarnings("unchecked")
+        List<Integer>[] predecessors = new List[allStates.size()];
+        for (int i = 0; i < predecessors.length; i++) {
+            predecessors[i] = new ArrayList<>();
+        }
+
+        for (State s : allStates) {
+            if (s instanceof NextableState) {
+                NextableState ns = (NextableState) s;
+                for (State nextState : ns.next) {
+                    if (nullability.isNullable(nextState)) {
+                        predecessors[inverseAllStates.get(nextState)].add(inverseAllStates.get(s));
+                    }
+                    if (nextState instanceof NonTerminalState) {
+                        EntryState es = ((NonTerminalState) nextState).child.entryState;
+                        predecessors[inverseAllStates.get(es)].add(inverseAllStates.get(s));
+                    }
+                }
+                if (ns instanceof NonTerminalState) {
+                    ExitState es = ((NonTerminalState) ns).child.exitState;
+                    predecessors[inverseAllStates.get(es)].add(inverseAllStates.get(s));
+                }
+            }
+        }
+
+        List<List<Integer>> components = new SCCTarjan().scc(predecessors);
+
+        // assign the OrderingInfo for states
+        for (int i = 0; i < components.size(); i++) {
+            for (int j : components.get(i)) {
+                State state = allStates.get(j);
+                state.orderingInfo = new OrderingInfo(i);
+            }
+        }
+    }
+
+    /**
+     * Recursive DFS that traverses all the states and returns a set of all reachable {@Link NonTerminal}.
+     * @param start The state from which to run the collector.
+     * @param visited Start with an empty Set<State>. Used as intermediate data.
+     * @return A set of all reachable {@Link NonTerminal}.
+     */
+    private static void collectNTCallers(State start, Set<State> visited, Map<NonTerminal, Set<NonTerminalState>> reachableNonTerminals) {
+        if (visited.contains(start))
+            return;
+        visited.add(start);
+        if (start instanceof NextableState) {
+            NextableState ns = (NextableState) start;
+            for (State st : ns.next) {
+                if (st instanceof NonTerminalState) {
+                    NonTerminalState nts = (NonTerminalState) st;
+                    if (!reachableNonTerminals.containsKey(nts.child)) {
+                        reachableNonTerminals.put(nts.child, new HashSet<NonTerminalState>(Arrays.asList(nts)));
+                    }
+                    reachableNonTerminals.get(nts.child).add(nts);
+                    collectNTCallers(((NonTerminalState) st).child.entryState, visited, reachableNonTerminals);
+                }
+                collectNTCallers(st, visited, reachableNonTerminals);
+            }
+        }
+    }
+
+    // Positions are 'int' because CharSequence uses 'int' // Position in the text
     public static class StateId implements Comparable<StateId>, Serializable { // Used only by rules
         String name;
         public StateId(String name) { this.name = name; }
@@ -114,6 +230,19 @@ public class Grammar {
 
         public int compareTo(NonTerminal that) { return this.nonTerminalId.compareTo(that.nonTerminalId); }
 
+        public Set<NextableState> getIntermediaryStates() {
+            return intermediaryStates;
+        }
+
+        public Set<State> getReachableStates() {
+            Set<State> states = new HashSet<>();
+            states.add(this.exitState);
+            states.add(this.entryState);
+            // TODO: replace this with a recursive collector
+            states.addAll(this.intermediaryStates);
+            return states;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -135,9 +264,9 @@ public class Grammar {
     public abstract static class State implements Comparable<State>, Serializable {
         final StateId stateId;
         final NonTerminal nt;
-        final OrderingInfo orderingInfo;
         final KLabel label;
         final String sort;
+        OrderingInfo orderingInfo = null;
 
         static class OrderingInfo implements Comparable<OrderingInfo>, Serializable {
             int key;
@@ -224,6 +353,7 @@ public class Grammar {
                 StateId stateId, NonTerminal nt, OrderingInfo orderingInfo,
                 NonTerminal child, boolean isLookahead, KLabel label, String sort) {
             super(stateId, nt, orderingInfo, true, label, sort);
+            assert child != null : "here it is null: " + stateId.name;
             nt.intermediaryStates.add(this);
             this.child = child;
             this.isLookahead = isLookahead;

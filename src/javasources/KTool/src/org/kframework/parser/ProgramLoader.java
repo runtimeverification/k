@@ -128,8 +128,8 @@ public class ProgramLoader {
                 out = (org.kframework.kil.Cell) BinaryLoader.load(filename);
             } else if (whatParser == GlobalSettings.ParserType.NEWPROGRAM) {
                 // load the new parser
-                Map<String, Grammar.NonTerminal> nts = (Map<String, Grammar.NonTerminal>) BinaryLoader.load(context.kompiled.getPath() + "/pgm/newParser.bin");
-                out = new Parser(content).parse(nts.get(context.startSymbolPgm), 0);
+                Grammar grammar = (Grammar) BinaryLoader.load(context.kompiled.getPath() + "/pgm/newParser.bin");
+                out = new Parser(content).parse(grammar.get(context.startSymbolPgm), 0);
                 System.out.println(out);
                 out = out.accept(new TreeCleanerVisitor(context));
                 System.out.println(out);
