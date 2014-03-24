@@ -15,7 +15,7 @@ import org.kframework.parser.concrete2.Grammar.State;
 /**
  * Helper class in the parser that finds all of the nullable NonTerminals in a grammar.
  */
-public class NullabilityCheck {
+public class Nullability {
     // accumulate the results here (TODO: explain that this is nulable up to the *entry* of the state)
     private Set<State> nullable = new HashSet<>();
 
@@ -35,7 +35,7 @@ public class NullabilityCheck {
      * @param grammar the grammar object.
      * @return A set with all the NonTerminals that can become nullable.
      */
-    public NullabilityCheck(Grammar grammar) {
+    public Nullability(Grammar grammar) {
         // 1. get all nullable states
         // list NonTerminals reachable from the start symbol.
         // the value of the map keeps a reference to all the states which call NonTerminals
@@ -44,6 +44,8 @@ public class NullabilityCheck {
         // A state is nullable iff the *start* of it is reachable from the entry of its nt without consuming input
         // A non-terminal is nullable if its exit state is nullable
         for (NonTerminal entry : nonTerminalCallers.keySet()) {
+            // there are hidden NonTerminals (like List{...} special)
+            // the only way to get to them is with the full traversal
             mark(entry.entryState, nonTerminalCallers);
         }
     }

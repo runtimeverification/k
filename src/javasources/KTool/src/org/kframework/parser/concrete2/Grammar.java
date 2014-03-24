@@ -83,6 +83,10 @@ public class Grammar implements Serializable {
         Map<NonTerminal, Set<NonTerminalState>> reachableNonTerminals = new HashMap<>();
         Set<State> visited = new HashSet<>();
         for (NonTerminal nt : startNonTerminals.values()) {
+            if (!reachableNonTerminals.containsKey(nt)) {
+                // if it is the start symbol it won't have any callers, so add it here first
+                reachableNonTerminals.put(nt, new HashSet<NonTerminalState>());
+            }
             collectNTCallers(nt.entryState, visited, reachableNonTerminals);
         }
         return reachableNonTerminals;
@@ -90,7 +94,7 @@ public class Grammar implements Serializable {
 
     public void finalize() {
         // 1. get all nullable states
-        NullabilityCheck nullability = new NullabilityCheck(this);
+        Nullability nullability = new Nullability(this);
 
         // 2. make an array with all the states
         List<State> allStates = new ArrayList<>();

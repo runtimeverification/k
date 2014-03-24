@@ -129,10 +129,12 @@ public class ProgramLoader {
             } else if (whatParser == GlobalSettings.ParserType.NEWPROGRAM) {
                 // load the new parser
                 Grammar grammar = (Grammar) BinaryLoader.load(context.kompiled.getPath() + "/pgm/newParser.bin");
-                out = new Parser(content).parse(grammar.get(context.startSymbolPgm), 0);
-                System.out.println(out);
+                out = new Parser(content).parse(grammar.get(startSymbol), 0);
+                if (GlobalSettings.verbose)
+                    System.out.println("Raw: " + out + "\n");
                 out = out.accept(new TreeCleanerVisitor(context));
-                System.out.println(out);
+                if (GlobalSettings.verbose)
+                    System.out.println("Clean: " + out + "\n");
             } else {
                 out = loadPgmAst(content, filename, startSymbol, context);
                 out = out.accept(new ResolveVariableAttribute(context));
