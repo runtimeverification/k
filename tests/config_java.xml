@@ -166,7 +166,7 @@
       extensions="test"
       programs="tests/regression/java-rewrite-engine/io/test1/programs"
       results="tests/regression/java-rewrite-engine/io/test1/tests"
-      unixOnly="tests/regression/java-rewrite-engine/io/test1/prepare.sh"
+      posixInitScript="tests/regression/java-rewrite-engine/io/test1/prepare.sh"
       >
     <kompile-option name="-backend" value="java" />
     <all-programs>

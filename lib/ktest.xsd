@@ -48,6 +48,7 @@
           <xs:attribute name="exclude" type="xs:string" use="optional" />
           <xs:attribute name="results" type="xs:string" use="optional" />
           <xs:attribute name="skip" type="xs:string" use="optional" />
+          <xs:attribute name="posixInitScript" type="xs:string" use="optional" />
         </xs:complexType>
       </xs:element>
       <xs:element name="include">
