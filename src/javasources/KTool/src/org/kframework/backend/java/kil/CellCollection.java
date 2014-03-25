@@ -191,7 +191,7 @@ public class CellCollection extends Collection implements Sorted {
                 Cell cell = (Cell) term;
                 Multimap<String, Cell> cells = ArrayListMultimap.create();
                 cells.put(cell.getLabel(), cell);
-                term = new CellCollection(cells, context);
+                return new CellCollection(cells, context);
             } else {
                 // do nothing since we cannot simply promote a variable from
                 // sort BagItem to Bag

@@ -236,7 +236,7 @@ public class SymbolicRewriter {
         return null;
     }
 
-    private void computeRewriteStep(ConstrainedTerm constrainedTerm, int successorBound) {
+    private void computeRewriteStep(ConstrainedTerm constrainedSubject, int successorBound) {
         if (K.get_indexing_stats){
             IndexingStatistics.rewriteStepStopWatch.reset();
             IndexingStatistics.rewriteStepStopWatch.start();
@@ -252,7 +252,7 @@ public class SymbolicRewriter {
         // equivalence classes of rules. We iterate through these equivalence
         // classes one at a time, seeing which one contains rules we can apply.
         //        System.out.println(LookupCell.find(constrainedTerm.term(),"k"));
-        strategy.reset(getRules(constrainedTerm.term()));
+        strategy.reset(getRules(constrainedSubject.term()));
 
         while (strategy.hasNext()) {
             if (K.get_indexing_stats){
@@ -266,59 +266,12 @@ public class SymbolicRewriter {
                 ruleStopwatch.reset();
                 ruleStopwatch.start();
 
-                SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(
-                        constrainedTerm.termContext());
-                leftHandSideConstraint.addAll(rule.requires());
-                for (Variable variable : rule.freshVariables()) {
-                    leftHandSideConstraint.add(variable, IntToken.fresh());
-                }
+                ConstrainedTerm constrainedPattern = preparePattern(rule, constrainedSubject.termContext());
 
-                ConstrainedTerm leftHandSide = new ConstrainedTerm(
-                        rule.leftHandSide(),
-                        rule.lookups().getSymbolicConstraint(constrainedTerm.termContext()),
-                        leftHandSideConstraint,
-                        constrainedTerm.termContext());
-
-                for (SymbolicConstraint constraint1 : constrainedTerm.unify(leftHandSide)) {
-                    /*
-                     * TODO(YilongL): had to comment out the following assertion
-                     * because logik.k uses unification even in concrete
-                     * execution mode
-                     */
-//                    if (K.do_concrete_exec) {
-//                        assert constraint1.isMatching(leftHandSide) : "Pattern matching expected in concrete execution mode";
-//                    }
-
-                    constraint1.orientSubstitution(rule.leftHandSide().variableSet());
-                    constraint1.addAll(rule.ensures());
-
-                    Term result = rule.rightHandSide();
-
-                    /* the RHS of the rule has introduced new variables */
-                    if (rule.hasUnboundedVariables()) {
-                        /* rename rule variables in the constraints */
-                        Map<Variable, Variable> freshSubstitution = constraint1.rename(rule.variableSet());
-                        /* rename rule variables in the rule RHS */
-                        result = result.substituteWithBinders(freshSubstitution, constrainedTerm.termContext());
-                    }
-                    
-                    /* apply the constraints substitution on the rule RHS */
-                    result = result.substituteAndEvaluate(
-                            constraint1.substitution(),
-                            constrainedTerm.termContext());
-                    /* eliminate anonymous variables */
-                    constraint1.eliminateAnonymousVariables();
-
-                    /*
-                    System.err.println("rule \n\t" + rule);
-                    System.err.println("result term\n\t" + result);
-                    System.err.println("result constraint\n\t" + constraint1);
-                    System.err.println("============================================================");
-                     */
-
+                for (SymbolicConstraint constraint1 : getUnificationResults(constrainedSubject, constrainedPattern)) {
                     /* compute all results */
-                    ConstrainedTerm newCnstrTerm = new ConstrainedTerm(result,
-                            constraint1, constrainedTerm.termContext());
+                    ConstrainedTerm newCnstrTerm = constructNewSubjectTerm(
+                            rule, constraint1);
                     // TODO(YilongL): the following assertion is not always true; fix it
 //                    if (K.do_concrete_exec) {
 //                        assert newCnstrTerm.isGround();
@@ -361,6 +314,94 @@ public class SymbolicRewriter {
 
     private void computeRewriteStep(ConstrainedTerm constrainedTerm) {
         computeRewriteStep(constrainedTerm, -1);
+    }
+    
+    /**
+     * Prepares the pattern term used in unification by composing the left-hand
+     * side of a specified rule and its side-conditions.
+     * 
+     * @param rule
+     *            the specified rule
+     * @param termContext
+     *            the term context
+     * @return the pattern term
+     */
+    private ConstrainedTerm preparePattern(Rule rule, TermContext termContext) {
+        SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(
+                termContext);
+        leftHandSideConstraint.addAll(rule.requires());
+        for (Variable variable : rule.freshVariables()) {
+            leftHandSideConstraint.add(variable, IntToken.fresh());
+        }
+
+        ConstrainedTerm leftHandSide = new ConstrainedTerm(
+                rule.leftHandSide(),
+                rule.lookups().getSymbolicConstraint(termContext),
+                leftHandSideConstraint,
+                termContext);
+        return leftHandSide;
+    }
+
+    /**
+     * Constructs the new subject term by applying the resulting symbolic
+     * constraint of unification to the right-hand side of the rewrite rule.
+     * 
+     * @param rule
+     *            the rewrite rule
+     * @param constraint
+     *            a symbolic constraint between the left-hand side of the
+     *            rewrite rule and the current subject term
+     * @return the new subject term
+     */
+    private ConstrainedTerm constructNewSubjectTerm(Rule rule, SymbolicConstraint constraint) {
+        /*
+         * TODO(YilongL): had to comment out the following assertion because
+         * logik.k uses unification even in concrete execution mode
+         */
+        // if (K.do_concrete_exec) {
+        // assert constraint1.isMatching(leftHandSide) :
+        // "Pattern matching expected in concrete execution mode";
+        // }
+        constraint.orientSubstitution(rule.leftHandSide().variableSet());
+        constraint.addAll(rule.ensures());
+
+        Term result = rule.rightHandSide();
+
+        /* the RHS of the rule has introduced new variables */
+        if (rule.hasUnboundedVariables()) {
+            /* rename rule variables in the constraints */
+            Map<Variable, Variable> freshSubstitution = constraint.rename(rule.variableSet());
+            /* rename rule variables in the rule RHS */
+            result = result.substituteWithBinders(freshSubstitution, constraint.termContext());
+        }
+        
+        /* apply the constraints substitution on the rule RHS */
+        result = result.substituteAndEvaluate(
+                constraint.substitution(),
+                constraint.termContext());
+        /* eliminate anonymous variables */
+        constraint.eliminateAnonymousVariables();
+
+        /*
+        System.err.println("rule \n\t" + rule);
+        System.err.println("result term\n\t" + result);
+        System.err.println("result constraint\n\t" + constraint1);
+        System.err.println("============================================================");
+         */
+        return new ConstrainedTerm(result, constraint, constraint.termContext());
+    }
+
+    /**
+     * Returns a list of symbolic constraints obtained by unifying the two
+     * constrained terms.
+     * <p>
+     * This method is extracted to simplify the profiling script.
+     * </p>
+     */
+    private List<SymbolicConstraint> getUnificationResults(
+            ConstrainedTerm constrainedTerm,
+            ConstrainedTerm otherConstrainedTerm) {
+        return constrainedTerm.unify(otherConstrainedTerm);
     }
 
     /**
@@ -429,7 +470,7 @@ public class SymbolicRewriter {
         VariableCollector visitor = new VariableCollector();
         lhs.accept(visitor);
 
-        Collection<SymbolicConstraint> constraints = term.unify(lhs);
+        Collection<SymbolicConstraint> constraints = getUnificationResults(term, lhs);
         if (constraints.isEmpty()) {
             return null;
         }

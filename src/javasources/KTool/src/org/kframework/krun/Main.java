@@ -576,8 +576,6 @@ public class Main {
                 org.kframework.utils.Error.report(K.output_mode
                         + " is not a valid value for output option");
             }
-
-            System.exit(0);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
