@@ -23,8 +23,8 @@ class B extends A {
   }
 }
 
-class theMain {
-  method theMain() {
+class Main {
+  method Main() {
     var b = new B(), a = (A) b;
     print("b.x = ", b.x, "\n");
     print("a.x = ", a.x, "\n");

@@ -13,8 +13,8 @@ class C2 extends C {
   }
 }
 
-class theMain {
-  method theMain() {
+class Main {
+  method Main() {
     // print("(new C2()).c is:",(new C2()).c,"\n"); // YilongL: creates mysterious race related to output stream
     var c = (new C2()).c;
     print("(new C2()).c is:",c,"\n");

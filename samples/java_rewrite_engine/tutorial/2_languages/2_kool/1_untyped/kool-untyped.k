@@ -154,7 +154,7 @@ into \texttt{strict(2)}.
 for the KOOL object-oriented constructs.
 \end{itemize} */
 
-  syntax Id ::= Token{"theObject"} | Token{"theMain"}
+  syntax Id ::= "Object" | "Main"
 
   syntax Decl ::= "var" Exps ";"
                 | "method" Id "(" Ids ")" Block  // called "function" in SIMPLE
@@ -234,7 +234,7 @@ for the KOOL object-oriented constructs.
 
 //@ New desugaring rule
 
-  rule class C:Id S => class C extends theObject S                     // KOOL
+  rule class C:Id S => class C extends Object S                     // KOOL
 
 endmodule
 
@@ -289,7 +289,7 @@ member declarations (\textsf{declarations}).
                         <xstack color="purple"> .List </xstack>
                         <br/>
                         <crntObj color="Fuchsia">  // KOOL
-                           <crntClass> theObject </crntClass>
+                           <crntClass> Object </crntClass>
                            <envStack> .List </envStack>
                            <location multiplicity="?"> .K </location>
                         </crntObj>
@@ -310,8 +310,8 @@ member declarations (\textsf{declarations}).
                   <br/>
                   <classes color="Fuchsia">        // KOOL
                      <class multiplicity="*" color="Fuchsia">
-                        <className color="Fuchsia"> theMain </className>
-                        <extends color="Fuchsia"> theObject </extends>
+                        <className color="Fuchsia"> Main </className>
+                        <extends color="Fuchsia"> Object </extends>
                         <declarations color="Fuchsia"> .K </declarations>
                      </class>
                   </classes>
@@ -579,7 +579,7 @@ that the user has not declared anything but classes at the top level
 of the program. */
 
   syntax KItem ::= "execute"
-  rule <k> execute => new theMain(.Exps); </k> <env> . </env>  [structural]
+  rule <k> execute => new Main(.Exps); </k> <env> . </env>  [structural]
 
 /*@ The semantics of \texttt{new} (defined below) requires the
 execution of all the class' declarations (and also of its
@@ -729,9 +729,9 @@ refer to it (see rule above). */
        <br/>
        <control> C
          <crntObj> Obj
-                   => <crntClass> theObject </crntClass>
-                      //<envStack> (theObject, <env>.Map</env>) </envStack>
-                      <envStack> ListItem((theObject, <env>.Map</env>)) </envStack>
+                   => <crntClass> Object </crntClass>
+                      //<envStack> (Object, <env>.Map</env>) </envStack>
+                      <envStack> ListItem((Object, <env>.Map</env>)) </envStack>
                       <location> L </location>
          </crntObj>
          <fstack> . => ListItem((Env, K, C <crntObj> Obj </crntObj>)) ...</fstack>
@@ -752,7 +752,7 @@ members (both fields and methods) of that class. */
        <extends> Class1:Id </extends>
        <declarations> S </declarations>  [structural]
 
-  rule <k> create(theObject) => . ...</k>  [structural]
+  rule <k> create(Object) => . ...</k>  [structural]
 
 /*@ The next operation sets the current class of the current object.
 This is necessary to be done at each layer, because the current class

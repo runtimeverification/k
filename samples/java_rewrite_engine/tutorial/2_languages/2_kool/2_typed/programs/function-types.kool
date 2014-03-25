@@ -21,8 +21,8 @@ class C extends B {
   C CC(C c) {}
 }
 
-class theMain extends C {
-  void theMain() {
+class Main extends C {
+  void Main() {
   C c = new C();
   A->A aa = c.AA;
   A->B ab = c.AB;

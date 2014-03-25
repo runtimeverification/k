@@ -23,8 +23,8 @@ class C3 extends C2 {
   int m2() { return 33; }
 }
 
-class theMain {
-  void theMain() {
+class Main {
+  void Main() {
     C3 o3 = new C3();
     print(o3.m3(), "\n");
   }

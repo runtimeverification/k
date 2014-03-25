@@ -103,7 +103,7 @@ class Sorting {
 }
 
 
-class theMain {
+class Main {
 
   method map(m,f) {
     for (var i=0; i<sizeOf(f); ++i) {
@@ -112,7 +112,7 @@ class theMain {
     }
   }
 
-  method theMain() {
+  method Main() {
     print("Size of the array to sort = ");
     var s = new Sorting(read()), m[11], f[11];
     m[ 0] = "The original unsorted array is:";

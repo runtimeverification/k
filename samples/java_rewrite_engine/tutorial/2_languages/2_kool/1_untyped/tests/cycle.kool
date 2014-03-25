@@ -10,8 +10,8 @@ class C2 extends C1 {
   method C2() { }
 }
 
-class theMain {
-  method theMain() {
+class Main {
+  method Main() {
 // Should work if you comment next line
     new C1();
     print("No cycle detected\n");

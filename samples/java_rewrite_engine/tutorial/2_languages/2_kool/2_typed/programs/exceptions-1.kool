@@ -1,6 +1,6 @@
 // This program tests the basic functionality of exceptions
 
-class theMain {
+class Main {
 
   void foo() {
     try {
@@ -13,7 +13,7 @@ class theMain {
     throw 1;          // should not be reached
   }
 
-  void theMain() {
+  void Main() {
     try {
       foo();
     }

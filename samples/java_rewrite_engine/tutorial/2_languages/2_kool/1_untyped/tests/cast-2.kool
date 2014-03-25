@@ -9,8 +9,8 @@ class X { method X() {} }
 class Y extends X { method Y() {} }
 class Z extends X { method Z() {} }
 
-class theMain {
-  method theMain() {
+class Main {
+  method Main() {
     var x  = new X();
     var y  = new Y();
     var z  = new Z();

@@ -73,8 +73,8 @@ class Matrix {
 }
 
 
-class theMain {
-  void theMain() {
+class Main {
+  void Main() {
     print("Input the number of lines and columns (two natural numbers): ");
     int x = read(), y = read();
     Matrix a = new Matrix(x,y);

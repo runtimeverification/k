@@ -105,7 +105,7 @@ class Sorting {
 }
 
 
-class theMain {
+class Main {
 
   void map(string[] m, (void -> void)[] f) {
     for (int i=0; i<sizeOf(f); ++i) {
@@ -114,7 +114,7 @@ class theMain {
     }
   }
 
-  void theMain() {
+  void Main() {
     print("Size of the array to sort = ");
     Sorting s = new Sorting(read());
     string m[11];

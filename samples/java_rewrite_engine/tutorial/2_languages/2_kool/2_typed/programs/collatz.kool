@@ -1,6 +1,6 @@
 // Program testing Collatz' conjecture up to a user-provided number.
 
-class theMain {
+class Main {
   int collatz(int n) {
     int s=0;
     while (n > 1) {
@@ -11,7 +11,7 @@ class theMain {
     return s;
   }
 
-  void theMain() {
+  void Main() {
     print("Testing Collatz' conjecture up to what number? ");
     int m = read(), s;
     for (int i=1; i<=m; ++i) { 

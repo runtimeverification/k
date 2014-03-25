@@ -57,13 +57,13 @@ class C extends B {
   }
 }
 
-class theMain {
+class Main {
   void p(A o) {
     print(o.f(), " ");
     print(o.g(), " ");
     print(o.h(), "\n");
   }
-  void theMain() {
+  void Main() {
     this.p(new A());
     this.p(new B());
     this.p(new C());

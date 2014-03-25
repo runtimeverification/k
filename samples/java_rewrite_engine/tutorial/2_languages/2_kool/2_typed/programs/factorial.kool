@@ -1,11 +1,11 @@
 // Testing recursion
 
-class theMain {
+class Main {
   int f(int x) {
     if (x <= 1) { return 1; }
     else { return x * f(x - 1); }
   }
-  void theMain() {
+  void Main() {
     print(f(f(5)), "\n");
   }
 }

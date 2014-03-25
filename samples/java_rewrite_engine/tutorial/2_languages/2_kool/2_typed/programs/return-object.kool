@@ -18,8 +18,8 @@ class G {
   void print2() { print(a, "\n"); }
 }
 
-class theMain {
-  void theMain() {
+class Main {
+  void Main() {
     ((new C(1)).m1()).print2();
   }
 }

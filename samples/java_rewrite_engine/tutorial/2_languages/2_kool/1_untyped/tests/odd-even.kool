@@ -25,8 +25,8 @@ class OddEven {
   }
 }
 
-class theMain {
-  method theMain() {
+class Main {
+  method Main() {
     print((new OddEven(17)).odd(), "\n");
   }
 }

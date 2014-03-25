@@ -22,8 +22,8 @@ class B extends A {
   }
 }
 
-class theMain {
-  void theMain() {
+class Main {
+  void Main() {
     B b = new B();
     A a = (A) b;
     print("b.x = ", b.x, "\n");

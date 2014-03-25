@@ -10,8 +10,8 @@ class C2 extends C1 {
   void C2() { }
 }
 
-class theMain {
-  void theMain() {
+class Main {
+  void Main() {
 // Should work if you comment next line
     new C1();
     print("No cycle detected\n");

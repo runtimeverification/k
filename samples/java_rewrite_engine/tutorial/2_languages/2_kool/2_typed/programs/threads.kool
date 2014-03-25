@@ -42,9 +42,9 @@ class MyThread extends Thread {
 }
 
 
-class theMain {
+class Main {
 
-  void theMain() {
+  void Main() {
     Cell c = new Cell(7);
     MyThread t1 = new MyThread(c);
     MyThread t2 = new MyThread(c);

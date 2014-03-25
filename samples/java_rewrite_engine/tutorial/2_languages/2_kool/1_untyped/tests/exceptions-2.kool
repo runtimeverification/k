@@ -18,7 +18,7 @@ class Exception2 extends Exception {
   }
 }
 
-class theMain {
+class Main {
 
   method foo() {
     try {
@@ -30,7 +30,7 @@ class theMain {
     throw new Exception(-1);              // should not be reached
   }
 
-  method theMain() {
+  method Main() {
     try {
       foo();
     } catch(e) {

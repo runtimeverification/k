@@ -27,8 +27,8 @@ class ColorPoint extends Point {
   }
 }
 
-class theMain {
-  method theMain() {
+class Main {
+  method Main() {
     var p = new Point(3,4), cp = new ColorPoint(10,20,87);
     p.move(1,2);
     p.printLocation();

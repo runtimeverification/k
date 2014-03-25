@@ -19,8 +19,8 @@ class G {
   }
 }
 
-class theMain {
-  void theMain() {
+class Main {
+  void Main() {
     C t = new C(1);
     G y = new G(t);
     print(y.d(), "\n");

@@ -26,8 +26,8 @@ class Leaf extends Summable {
   }
 }
 
-class theMain {
-  void theMain() {
+class Main {
+  void Main() {
     Node o;
     o = new Node(new Node(new Leaf(3), new Leaf(4)), new Leaf(5));
     print(o.sum(), "\n");

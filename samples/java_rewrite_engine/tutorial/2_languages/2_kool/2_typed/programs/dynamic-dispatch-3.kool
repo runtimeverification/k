@@ -62,8 +62,8 @@ class C extends B {
 // don't return "new A()" instead of "this").
 }
 
-class theMain {
-  void theMain() {
+class Main {
+  void Main() {
     A a = new A();
     B b = new B();
     C c = new C();

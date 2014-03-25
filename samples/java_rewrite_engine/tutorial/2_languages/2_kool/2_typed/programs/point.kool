@@ -27,8 +27,8 @@ class ColorPoint extends Point {
   }
 }
 
-class theMain {
-  void theMain() {
+class Main {
+  void Main() {
     Point p = new Point(3,4);
     ColorPoint cp = new ColorPoint(10,20,87);
     p.move(1,2);

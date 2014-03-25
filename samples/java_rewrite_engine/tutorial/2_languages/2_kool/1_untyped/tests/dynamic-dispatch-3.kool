@@ -43,8 +43,8 @@ class C extends B {
   }
 }
 
-class theMain {
-  method theMain() {
+class Main {
+  method Main() {
     var a = new A(), b = new B(), c = new C();
     print(b.y, " ", c.z, "\n");
     print((b.m2(b)).y, " ", (c.m2(b)).y, "\n");

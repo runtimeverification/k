@@ -10,8 +10,8 @@ class C {
   }
 }
 
-class theMain {
-  method theMain() {
+class Main {
+  method Main() {
     print((new C()).m1(), "\n");
   }
 }

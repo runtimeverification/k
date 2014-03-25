@@ -36,7 +36,7 @@ strict in the first argument anymore due to dynamic method dispatch).
 The KOOL-specific syntactic extensions are identical to those in
 untyped KOOL.  */
 
-  syntax Id ::= Token{"theObject"} | Token{"theMain"}
+  syntax Id ::= "Object" | "Main"
 
 //@ \subsection{Types}
 
@@ -128,7 +128,7 @@ untyped KOOL.  */
   rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;               [macro]
   rule T:Type X:Id = E; => T X; X = E;                                  [macro]
 
-  rule class C:Id S => class C extends theObject S                     // KOOL
+  rule class C:Id S => class C extends Object S                     // KOOL
 
 endmodule
 
@@ -161,7 +161,7 @@ the expected type. */
                         <return color="LimeGreen"> void </return>  // KOOL
                         <br/>
                         <crntObj color="Fuchsia">  // KOOL
-                           <crntClass> theObject </crntClass>
+                           <crntClass> Object </crntClass>
                            <envStack> .List </envStack>
                            <location multiplicity="?"> .K </location>
                         </crntObj>
@@ -182,8 +182,8 @@ the expected type. */
                   <br/>
                   <classes color="Fuchsia">        // KOOL
                      <class multiplicity="*" color="Fuchsia">
-                        <className color="Fuchsia"> theMain </className>
-                        <extends color="Fuchsia"> theObject </extends>
+                        <className color="Fuchsia"> Main </className>
+                        <extends color="Fuchsia"> Object </extends>
                         <declarations color="Fuchsia"> .K </declarations>
                      </class>
                   </classes>
@@ -402,7 +402,7 @@ get more from the existing SIMPLE constructs. */
 Like in untyped KOOL. */
 
   syntax KItem ::= "execute"
-  rule <k> execute => new theMain(.Exps); </k> <env> . </env>  [structural]
+  rule <k> execute => new Main(.Exps); </k> <env> . </env>  [structural]
 
 
 /*@ \subsubsection{Method application}
@@ -581,8 +581,8 @@ those in untyped KOOL. */
        <br/>
        <control> C
          <crntObj> Obj
-                   => <crntClass> theObject </crntClass>
-                      <envStack> ListItem((theObject, <env>.Map</env>)) </envStack>
+                   => <crntClass> Object </crntClass>
+                      <envStack> ListItem((Object, <env>.Map</env>)) </envStack>
                       <location> L </location>
          </crntObj>
          <return> T => Class </return>
@@ -598,7 +598,7 @@ those in untyped KOOL. */
        <extends> Class1:Id </extends>
        <declarations> S </declarations>  [structural]
 
-  rule <k> create(theObject) => . ...</k>  [structural]
+  rule <k> create(Object) => . ...</k>  [structural]
 
   syntax KItem ::= setCrntClass(Id)
 
@@ -794,8 +794,8 @@ The subclass relation induces a subtyping relation. */
        <extends> C2:Id </extends>
     when C1 =/=K C  [structural]
 
-  rule subtype(theObject,Class) => false
-    when Class =/=K theObject  [structural]
+  rule subtype(Object,Class) => false
+    when Class =/=K Object  [structural]
 
   rule subtype(Ts1->T2,Ts1'->T2') => subtype(((T2)::Type,Ts1'),((T2')::Type,Ts1))  [structural]
 

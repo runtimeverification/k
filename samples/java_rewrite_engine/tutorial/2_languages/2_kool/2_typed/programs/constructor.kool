@@ -15,10 +15,10 @@ class C {
   }
 }
 
-class theMain {
+class Main {
   int a,b;
   C o;
-  void theMain(){
+  void Main(){
     a = b = 5;
     o = new C(a);
     o.print2();

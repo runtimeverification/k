@@ -1,8 +1,8 @@
 // Testing field initialization and access.
 
-class theMain {
+class Main {
   int a=3;
-  void theMain() {
+  void Main() {
     print("a = ", a, "\n");
   }
 }

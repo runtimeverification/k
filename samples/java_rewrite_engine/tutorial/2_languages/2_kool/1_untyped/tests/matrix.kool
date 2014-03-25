@@ -72,8 +72,8 @@ class Matrix {
 }
 
 
-class theMain {
-  method theMain() {
+class Main {
+  method Main() {
     print("Input the number of lines and columns (two natural numbers): ");
     var x = read(), y = read(), a = new Matrix(x,y);
     a.readMatrix();

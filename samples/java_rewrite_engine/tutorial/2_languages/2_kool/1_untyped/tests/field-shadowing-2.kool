@@ -19,8 +19,8 @@ class G {
   }
 }
 
-class theMain {
-  method theMain() {
+class Main {
+  method Main() {
     var t = new C(1), y = new G(t);
     print(y.d(), "\n");
   }

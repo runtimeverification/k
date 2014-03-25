@@ -25,9 +25,9 @@ class B {
   }
 }
 
-class theMain {
+class Main {
   void->void f;
-  void theMain() {
+  void Main() {
     B b = new B();
     void->void t = f = b.getM();
     f();

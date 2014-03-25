@@ -29,8 +29,8 @@ class C3 extends C2 {
   }
 }
 
-class theMain {
-  void theMain() {
+class Main {
+  void Main() {
     C3 o = new C3();
     print(o.x, " ", o.y, " ", o.z, " ", o.u, " ", o.w, "\n");
   }

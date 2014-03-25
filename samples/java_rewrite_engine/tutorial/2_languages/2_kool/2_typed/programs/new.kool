@@ -6,8 +6,8 @@ class C {
   int g() { return a; }
 }
 
-class theMain {
-  void theMain() {
+class Main {
+  void Main() {
     print("a = ", (new C()).g(), "\n");
   }
 }

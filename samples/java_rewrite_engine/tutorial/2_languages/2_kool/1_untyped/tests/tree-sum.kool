@@ -22,8 +22,8 @@ class Leaf {
   }
 }
 
-class theMain {
-  method theMain() {
+class Main {
+  method Main() {
     var o;
     o = new Node(new Node(new Leaf(3), new Leaf(4)), new Leaf(5));
     print(o.sum(), "\n");

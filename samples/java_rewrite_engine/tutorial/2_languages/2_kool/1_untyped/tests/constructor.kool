@@ -15,9 +15,9 @@ class C {
   }
 }
 
-class theMain {
+class Main {
   var a,b,o;
-  method theMain(){
+  method Main(){
     a = b = 5;
     o = new C(a);
     o.print2();

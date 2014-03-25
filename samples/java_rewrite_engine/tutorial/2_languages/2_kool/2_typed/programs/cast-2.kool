@@ -2,8 +2,8 @@ class X { void X() {} }
 class Y extends X { void Y() {} }
 class Z extends X { void Z() {} }
 
-class theMain {
-  void theMain() {
+class Main {
+  void Main() {
     X x  = new X();
     Y y  = new Y();
     Z z  = new Z();
@@ -20,8 +20,8 @@ class theMain {
     Z z2 = (Z) x2;      // types and runs ok (x2 is type Z)
 //  Y y3 = (Y) z;       // inconvertible types
 //  Z z3 = (Z) y;       // inconvertible types
-    theObject o = z;
-//  theObject o1 = (Y) o;  // types ok but produces runtime error
+    Object o = z;
+//  Object o1 = (Y) o;  // types ok but produces runtime error
     print("OK\n");
   }
 }

@@ -29,8 +29,8 @@ class C3 extends C2 {
   }
 }
 
-class theMain {
-  method theMain() {
+class Main {
+  method Main() {
     var o = new C3();
     print(o.x, " ", o.y, " ", o.z, " ", o.u, " ", o.w, "\n");
   }

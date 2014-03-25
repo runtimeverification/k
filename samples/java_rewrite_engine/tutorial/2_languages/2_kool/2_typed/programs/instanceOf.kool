@@ -23,8 +23,8 @@ class C3 extends C {
   void C3() {}
 }
 
-class theMain {
-  void theMain() {
+class Main {
+  void Main() {
     (new C()).test();
     (new C1()).test();
     (new C2()).test();
