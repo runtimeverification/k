@@ -21,6 +21,13 @@ import java.lang.annotation.Target;
  * as much as possible.
  */
 public enum KilProperty {
+    /**
+     * True if all syntax declarations have been converted to KLabel declarations
+     */
+    NO_CONCRETE_SYNTAX_DECLARATIONS,
+    /**
+     * True if no term uses concrete syntax.
+     */
     NO_CONCRETE_SYNTAX,
     /**
      * True if no rule matches on a  data structure (list, set, map) pattern in the left-hand side.

@@ -3,11 +3,8 @@ package org.kframework.parser;
 import java.io.File;
 import java.io.IOException;
 
+import org.kframework.compile.transformers.*;
 import org.kframework.kil.loader.ResolveVariableAttribute;
-import org.kframework.compile.transformers.AddEmptyLists;
-import org.kframework.compile.transformers.FlattenSyntax;
-import org.kframework.compile.transformers.RemoveBrackets;
-import org.kframework.compile.transformers.RemoveSyntacticCasts;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
@@ -79,7 +76,7 @@ public class ProgramLoader {
         out = out.accept(new RemoveBrackets(context));
 
         if (kappize)
-            out = out.accept(new FlattenSyntax(context));
+            out = out.accept(new FlattenTerms(context));
 
         return out;
     }
@@ -106,7 +103,7 @@ public class ProgramLoader {
                 out = out.accept(new RemoveBrackets(context));
                 out = out.accept(new AddEmptyLists(context));
                 out = out.accept(new RemoveSyntacticCasts(context));
-                out = out.accept(new FlattenSyntax(context));
+                out = out.accept(new FlattenTerms(context));
             } else if (whatParser == GlobalSettings.ParserType.RULES) {
                 org.kframework.parser.concrete.KParser.ImportTbl(context.kompiled.getCanonicalPath() + "/def/Concrete.tbl");
                 out = DefinitionLoader.parsePattern(content, filename, startSymbol, context);
