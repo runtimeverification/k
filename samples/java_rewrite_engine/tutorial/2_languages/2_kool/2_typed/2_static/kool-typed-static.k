@@ -104,7 +104,7 @@ static semantics of KOOL using the modified programs.  To avoid seeing
 the wrapper in the generated documentation, we associate it an
 ``invisibility'' latex attribute below.  */
 
-  syntax Id ::= Token{"theObject"} | Token{"theMain"}
+  syntax Id ::= "Object" | "Main"
 
 //@ \subsection{Types}
 
@@ -200,7 +200,7 @@ the wrapper in the generated documentation, we associate it an
   rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;               [macro]
   rule T:Type X:Id = E; => T X; X = E;                                  [macro]
 
-  rule class C:Id S => class C extends theObject S
+  rule class C:Id S => class C extends Object S
 
 endmodule
 
@@ -266,7 +266,7 @@ in the class extends relation. */
                   <br/>
                   <classes color="Fuchsia">
                     <class multiplicity="*">
-                      <className color="Fuchsia"> theObject </className>
+                      <className color="Fuchsia"> Object </className>
                       <extends color="Fuchsia"> .K </extends>
                       <extendsAll color="Fuchsia"> .Set </extendsAll>
                       <ctenv multiplicity="?" color="blue"> .Map </ctenv>
@@ -681,7 +681,7 @@ wait.  Finally, the sixth rule below reports an error when the
        <ctenv> Rho </ctenv>
     when notBool(X in keys(Rho))  [structural]
 
-  rule <k> class(theObject) . X:Id => stuck(class(theObject) . X) ...</k>
+  rule <k> class(Object) . X:Id => stuck(class(Object) . X) ...</k>
        <inClass> C:Id </inClass>
        <br/>
        <out>... . => ListItem("Member \"" +String Id2String(X)
@@ -740,10 +740,10 @@ the \textsf{tasks} cell has been removed. */
 // discard main task when done, issuing a "new main();" command to
 // make sure that the class main and the method main() are declared.
 
-  rule <task> <k> stmt => new theMain(.Exps); </k>
+  rule <task> <k> stmt => new Main(.Exps); </k>
               (. => <tenv> . </tenv>
                     <return> void </return>
-                    <inClass> theMain </inClass>)
+                    <inClass> Main </inClass>)
        </task>
     [structural]
 
@@ -817,7 +817,7 @@ check that the types used in the program actually exists */
   rule checkType(void) => .  [structural]
   rule <k> checkType(class(C:Id)) => . ...</k> <className> C </className>
     [structural]
-  rule checkType(class(theObject)) => .  [structural]
+  rule checkType(class(Object)) => .  [structural]
   rule checkType(Ts:Types -> T:Type) => checkType(T,Ts)  [structural]
   rule checkType(T:Type[]) => checkType(T)  [structural]
 
@@ -845,7 +845,7 @@ is co-variant in the codomain and contra-variant in the domain). */
        <ctenv> Rho </ctenv>
     when notBool(F in keys(Rho))  [structural]
 
-  rule checkMethod(_:Id,_,theObject) => .
+  rule checkMethod(_:Id,_,Object) => .
 
 
 //@\subsubsection{Generic operations which could be part of the \K framework}
@@ -854,10 +854,5 @@ is co-variant in the codomain and contra-variant in the domain). */
 
   syntax KItem ::= "discard"
   rule _:KResult ~> discard => .  [structural]
-
-// The following two rules would shadow the builtin implementation of Id2String
-// in the Java backend since user-defined rule
-  rule Id2String(theMain) => "Main"
-  rule Id2String(theObject) => "Object"
-
 endmodule
+

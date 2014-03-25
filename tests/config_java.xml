@@ -51,7 +51,7 @@
 
   <test
       definition="samples/java_rewrite_engine/tutorial/2_languages/2_kool/1_untyped/kool-untyped.k"
-      programs="samples/java_rewrite_engine/tutorial/2_languages/2_kool/1_untyped/tests/"
+      programs="tutorial/2_languages/2_kool/1_untyped/tests/"
       extension="kool"
       exclude="cycle.kool"
       results="tutorial/2_languages/2_kool/1_untyped/tests/"
@@ -66,7 +66,7 @@
 
   <test
       definition="samples/java_rewrite_engine/tutorial/2_languages/2_kool/2_typed/1_dynamic/kool-typed-dynamic.k"
-      programs="samples/java_rewrite_engine/tutorial/2_languages/2_kool/2_typed/programs/"
+      programs="tutorial/2_languages/2_kool/2_typed/programs/"
       extension="kool"
       exclude="cycle.kool"
       results="tutorial/2_languages/2_kool/2_typed/1_dynamic/tests/"
@@ -82,7 +82,7 @@
   <!-- YilongL: the output of cycle.kool depends on the implementation of the rewrite engine -->
   <test
       definition="samples/java_rewrite_engine/tutorial/2_languages/2_kool/2_typed/2_static/kool-typed-static.k"
-      programs="samples/java_rewrite_engine/tutorial/2_languages/2_kool/2_typed/programs/"
+      programs="tutorial/2_languages/2_kool/2_typed/programs/"
       extension="kool"
       exclude="cycle.kool"
       results="tutorial/2_languages/2_kool/2_typed/2_static/tests/"
