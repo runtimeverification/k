@@ -18,8 +18,8 @@ import org.kframework.kil.loader.Context;
 import java.util.ArrayList;
 import java.util.List;
 
-/** This Visitor class traverses a rule and makes PStrings out of the rule using the contents of
- * the k cell
+/** This Visitor class traverses a rule and makes PStrings out of the rule using
+ *  the contents of the k cell
  *
  * Author: OwolabiL
  * Date: 1/20/14
@@ -43,7 +43,12 @@ public class RuleVisitor extends LocalVisitor {
 
     @Override
     public void visit(Rule rule) {
-        visit(LookupCell.find(rule.leftHandSide(), K_CELL_NAME));
+        Cell kCell = LookupCell.find(rule.leftHandSide(), K_CELL_NAME);
+        if (kCell != null){
+            visit(kCell);
+        }else{
+            pStrings.add("@.NO_K_CELL");
+        }
     }
 
     @Override

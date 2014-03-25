@@ -75,7 +75,11 @@ public class TermVisitor extends LocalVisitor implements Serializable {
         //first find all the term's cells of interest in  a single pass
         CellVisitor v = new CellVisitor(context);
         node.accept(v);
-        pStrings.addAll(v.getkCellPStings());
+        if (!v.getkCellPStings().isEmpty()){
+            pStrings.addAll(v.getkCellPStings());
+        } else {
+            pStrings.add("@.NO_K_CELL");
+        }
 
         if (K.get_indexing_stats) {
             IndexingStatistics.getPStringStopwatch.stop();
@@ -235,6 +239,19 @@ public class TermVisitor extends LocalVisitor implements Serializable {
                     String kItemSort = kItem.sort();
                     pStrings.add("@."+kItemSort);
                 }
+
+                // added to handle a case in kool untyped. 1st element in
+                // kSequence is already a KResult, but the second Item is simply
+                // a KLabel applied to an empty KList:
+                //      <k>
+                //        (void) ~> discard ~> 'class(theMain) ~> HOLE ;
+                //        </k>
+                if (!context.isSubsortedEq(K_RESULT,kItem.sort()) && ((KList)kItem.kList()).size() == 0){
+                    if (pString != null) {
+                        pStrings.add(pString);
+                    }
+                }
+
                 kItem.kLabel().accept(this);
                 kItem.kList().accept(this);
             } else {
@@ -309,6 +326,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
 
     @Override
     public void visit(KLabelConstant kLabel) {
+        //making sure this does not shadow existing
         pString = START_STRING + kLabel.toString();
     }
 
