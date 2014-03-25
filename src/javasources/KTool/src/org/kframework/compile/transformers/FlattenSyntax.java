@@ -14,7 +14,7 @@ import java.util.Set;
 /**
  * Transformer replacing concrete syntax declarations by KLabel declarations.
  */
-@KilProperty.Ensures(KilProperty.NO_CONCRETE_SYNTAX)
+@KilProperty.Ensures({KilProperty.NO_CONCRETE_SYNTAX, KilProperty.NO_CONCRETE_SYNTAX_DECLARATIONS})
 public class FlattenSyntax extends CopyOnWriteTransformer {
     Set<String> listSeparators = new HashSet<>();
     boolean isComputation = false;
