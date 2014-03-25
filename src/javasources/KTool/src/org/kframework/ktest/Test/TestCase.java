@@ -58,6 +58,11 @@ public class TestCase {
      */
     private final Set<KTestStep> skips;
 
+    /**
+     * Script to be executed before testing, only valid on Posix system
+     */
+    private String posixInitScript;
+
     public TestCase(Annotated<String, LocationData> definition,
                     List<Annotated<String, LocationData>> programs,
                     String[] extensions,
@@ -160,6 +165,35 @@ public class TestCase {
     }
 
     /**
+     * @return true if posixInitScript attribute exists
+     */
+    public boolean hasPosixOnly() {
+        return posixInitScript != null;
+    }
+
+    /**
+     * @return posixInitScript attribute
+     */
+    public String getPosixInitScript() {
+        return posixInitScript;
+    }
+
+    /**
+     * @return command array to pass process builder
+     */
+    public String[] getPosixOnlyCmd() {
+        assert new File(posixInitScript).isFile();
+        return new String[] { posixInitScript };
+    }
+
+    /**
+     * @return String representation of posixInitScript command to be used in logging.
+     */
+    public String toPosixOnlyLogString() {
+        return StringUtils.join(getPosixOnlyCmd(), " ");
+    }
+
+    /**
      * @return command array to pass process builder
      */
     public String[] getPdfCmd() {
@@ -188,6 +222,10 @@ public class TestCase {
 
     public void setPgmSpecificKRunOpts(Map<String, List<PgmArg>> pgmSpecificKRunOpts) {
         this.pgmSpecificKRunOpts = pgmSpecificKRunOpts;
+    }
+
+    public void setPosixInitScript(String posixInitScript) {
+        this.posixInitScript = posixInitScript;
     }
 
     public void addProgram(Annotated<String, LocationData> program) {
