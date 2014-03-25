@@ -216,6 +216,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
     }
 
     public Grammar getGrammar() {
+        grammar.addWhiteSpace();
         grammar.finalize();
         return grammar;
     }

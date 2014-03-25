@@ -7,7 +7,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.KApp;
@@ -90,6 +92,35 @@ public class Grammar implements Serializable {
             collectNTCallers(nt.entryState, visited, reachableNonTerminals);
         }
         return reachableNonTerminals;
+    }
+
+    public void addWhiteSpace() {
+        // TODO: make whitespace include comments too
+        // create a NonTerminal which parses a list of whitespace characters.
+        // the NT is a star list that has 3 branches
+        // 1. whitespace, 2. single line comment, 3. multiple lines comment
+        Pattern pattern = Pattern.compile("((/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/)|(//.*)|([ \n\r\t]))*");
+        int seed = 0;
+
+        // create a whitespace PrimitiveState after every every terminal that can match a character
+        for (NonTerminal nonTerminal : getAllNonTerminals()) {
+            for (State s : nonTerminal.getReachableStates()) {
+                if (s instanceof PrimitiveState) {
+                    PrimitiveState ps = ((PrimitiveState) s);
+                    if (!ps.isAlwaysNull()) { // add whitespace after
+                        PrimitiveState whitespace =
+                                new RegExState(
+                                        new StateId("whitespace" + seed++),
+                                        s.nt, OrderingInfo.ZERO,
+                                        pattern,
+                                        null, TreeCleanerVisitor.DELETESORT);
+                        whitespace.next.addAll(ps.next);
+                        ps.next.clear();
+                        ps.next.add(whitespace);
+                    }
+                }
+            }
+        }
     }
 
     public void finalize() {
@@ -384,6 +415,8 @@ public class Grammar implements Serializable {
             Set<MatchResult> matchResults = this.matches("", 0, null);
             return matchResults.size() != 0;
         }
+
+        abstract public boolean isAlwaysNull();
     }
 
     public static class RegExState extends PrimitiveState {
@@ -404,6 +437,13 @@ public class Grammar implements Serializable {
                 results.add(new MatchResult(matcher.end(), Function.constant(Token.kAppOf(this.sort, matcher.group())))); //matchFunction(text, matcher.start(), matcher.end())));
             }
             return results;
+        }
+
+        public boolean isAlwaysNull() {
+            if (pattern.equals(""))
+                return true;
+            else
+                return false;
         }
     }
 }

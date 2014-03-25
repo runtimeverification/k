@@ -11,6 +11,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
@@ -28,28 +29,54 @@ public class TreeCleanerVisitor extends BasicTransformer {
 
     @Override
     public ASTNode transform(Ambiguity node) throws TransformerException {
-        if (node.getContents().size() == 1)
-            return node.getContents().get(0).accept(this);
+        java.util.List<Term> contents = new ArrayList<>();
+        for (Term t : node.getContents()) {
+            ASTNode transformed = t.accept(this);
+            if (transformed != null)
+                contents.add((Term) transformed);
+        }
+        node.setContents(contents);
+        if (contents.size() == 0)
+            return null;
+        else if(contents.size() == 1)
+            return contents.get(0);
         else
-            return super.transform(node);
+            return node;
     }
 
     @Override
     public ASTNode transform(KApp node) throws TransformerException {
-        KList children = (KList) node.getChild();
-        Iterator<Term> iter = children.getContents().iterator();
-        while (iter.hasNext()) {
-            Term trm = iter.next();
-            if (trm instanceof KApp) {
-                KApp child = (KApp) trm;
-                if (child.getLabel() instanceof GenericToken) {
-                    GenericToken gt = (GenericToken) child.getLabel();
-                    if (gt.tokenSort().equals(DELETESORT)) {
-                        iter.remove();
-                    }
-                }
-            }
+        if (node.getLabel() instanceof GenericToken && ((GenericToken) node.getLabel()).tokenSort().equals(DELETESORT)) {
+            return null;
         }
-        return super.transform(node);
+
+        ASTNode rez = node.getChild().accept(this);
+        if (rez == null)
+            node.setChild(KList.EMPTY);
+        else if (rez instanceof KList)
+            node.setChild((KList) rez);
+        else {
+            KList contents = new KList();
+            contents.getContents().add((Term) rez);
+            node.setChild(contents);
+        }
+        return node;
+    }
+
+    @Override
+    public ASTNode transform(KList node) throws TransformerException {
+        java.util.List<Term> contents = new ArrayList<>();
+        for (Term t : node.getContents()) {
+            ASTNode transformed = t.accept(this);
+            if (transformed != null)
+                contents.add((Term) transformed);
+        }
+        node.setContents(contents);
+        if (contents.size() == 0)
+            return null;
+        else if(contents.size() == 1)
+            return contents.get(0);
+        else
+            return node;
     }
 }
