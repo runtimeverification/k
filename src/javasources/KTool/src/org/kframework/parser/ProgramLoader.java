@@ -19,6 +19,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
+import org.kframework.parser.concrete.disambiguate.CorrectConstantsTransformer;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.parser.concrete.disambiguate.TypeSystemFilter2;
@@ -73,6 +74,7 @@ public class ProgramLoader {
 
         out = out.accept(new PriorityFilter(context));
         out = out.accept(new PreferAvoidFilter(context));
+        out = out.accept(new CorrectConstantsTransformer(context));
         out = out.accept(new AmbFilter(context));
         out = out.accept(new RemoveBrackets(context));
 

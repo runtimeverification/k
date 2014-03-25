@@ -4,6 +4,7 @@ import org.kframework.kil.Configuration;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Production;
 import org.kframework.kil.Rule;
+import org.kframework.kil.Terminal;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
@@ -86,12 +87,14 @@ public class TokenSortCollector extends BasicVisitor {
             
             tokenSorts.add(sort);
         }
-        
-        if (!production.isLexical() && !production.containsAttribute(Constants.FUNCTION)) {
-            /*
-             * The second check above is used to filter out cases such as the following:
-             *   syntax Id ::= "String2Id" "(" String ")"  [function, klabel(String2Id)] 
-             */
+
+        /*
+         * The second and third check above is used to filter out cases such as the following:
+         *   syntax Id ::= "Main"
+         *   syntax Id ::= "String2Id" "(" String ")"  [function, klabel(String2Id)]
+         */
+        if (!production.isLexical() && !production.isTerminal()
+                && !production.containsAttribute(Constants.FUNCTION))  {
             if (tokenSorts.contains(sort)) {
                 String msg = "Cannot subsort a non-lexical production to a token sort:\nsyntax "
                         + sort + " ::= " + production;

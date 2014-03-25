@@ -56,7 +56,14 @@ public class Production extends ASTNode {
     }
 
     public boolean isConstant() {
-        return items.size() == 1 && items.get(0) instanceof Terminal && (sort.startsWith("#") || sort.equals(KSorts.KLABEL));
+        return isTerminal() && (sort.startsWith("#") || sort.equals(KSorts.KLABEL));
+    }
+
+    /**
+     * Returns true if this production consists of exactly one terminal.
+     */
+    public boolean isTerminal() {
+        return items.size() == 1 && items.get(0) instanceof Terminal;
     }
 
     public Production(Production node) {
