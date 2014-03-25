@@ -211,11 +211,16 @@ public class PathIndex implements RuleIndex, Serializable{
                 }
             }
 
-            if (matchingIndices.isEmpty()) {
-                matchingIndices = currentMatch;
-            } else {
-                //should it be an intersection?
-                matchingIndices.addAll(currentMatch);
+            if (matchingIndices != null) {
+
+                if (matchingIndices.isEmpty()) {
+                    matchingIndices = currentMatch;
+                } else {
+                    //should it be an intersection?
+                    if (currentMatch != null){
+                        matchingIndices.addAll(currentMatch);
+                    }
+                }
             }
         }
 
@@ -241,7 +246,7 @@ public class PathIndex implements RuleIndex, Serializable{
                     IndexingStatistics.findMatchingIndicesStopWatch.elapsed(TimeUnit.MICROSECONDS));
         }
 
-//        System.out.println("matching: "+ matchingIndices + "\n");
+//        System.out.println("matching: "+ matchingIndices);
 //        System.out.println("rules: "+rules +"\n");
         return new ArrayList<>(rules);
     }
@@ -249,6 +254,8 @@ public class PathIndex implements RuleIndex, Serializable{
     /**
      * Takes as input the term that is currently  being rewritten, traverses it and return a set
      * of strings that are used to query the index structure for finding possibly matching rules.
+     *
+     *
      * @param term  the term that is to be traversed
      * @return a set of positions that can be used to query the path index
      */

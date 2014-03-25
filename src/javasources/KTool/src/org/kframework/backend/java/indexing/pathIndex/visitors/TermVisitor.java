@@ -1,5 +1,6 @@
 package org.kframework.backend.java.indexing.pathIndex.visitors;
 
+import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.symbolic.LocalVisitor;
 import org.kframework.backend.java.kil.Term;
@@ -144,8 +145,8 @@ public class TermVisitor extends LocalVisitor implements Serializable {
                 }
             }
         } else if (kSequence.size() == 0) {
-            //there are cases (e.g., in SIMPLE's join rule) where we need to know that one of the K
-            // cells in the configuration is empty.
+            //there are cases (e.g., in SIMPLE's join rule) where we need to
+            // know that one of the K cells in the configuration is empty.
             pStrings.add(START_STRING + EMPTY_K);
         }
     }
@@ -194,6 +195,13 @@ public class TermVisitor extends LocalVisitor implements Serializable {
     }
 
     @Override
+    public void visit(BoolToken boolToken) {
+        if (pString == null){
+            pStrings.add(START_STRING+boolToken.sort());
+        }
+    }
+
+    @Override
     public void visit(UninterpretedToken uninterpretedToken) {
         if (pString == null) {
             pStrings.add(START_STRING + uninterpretedToken.sort());
@@ -211,11 +219,20 @@ public class TermVisitor extends LocalVisitor implements Serializable {
                 TokenVisitor visitor = new TokenVisitor(context, pString);
                 kItem.kLabel().accept(visitor);
                 pStrings.addAll(visitor.getCandidates());
+            } else if (pString == null){
+                //this works for bool ~> (# if_then_else). may not always work
+                TokenVisitor visitor = new TokenVisitor(context, "@.KResult");
+                kItem.kLabel().accept(visitor);
+                pStrings.addAll(visitor.getCandidates());
             }
         } else {
             if (!inner) {
                 inner = true;
                 currentLabel = kItem.kLabel().toString();
+                if (context.isSubsortedEq(K_RESULT,kItem.sort()) && ((KList)kItem.kList()).size() == 0){
+                    String kItemSort = kItem.sort();
+                    pStrings.add("@."+kItemSort);
+                }
                 kItem.kLabel().accept(this);
                 kItem.kList().accept(this);
             } else {
