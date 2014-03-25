@@ -198,6 +198,8 @@ public class TermVisitor extends LocalVisitor implements Serializable {
     public void visit(BoolToken boolToken) {
         if (pString == null){
             pStrings.add(START_STRING+boolToken.sort());
+        } else{
+            pStrings.add(pString+".1."+boolToken.sort());
         }
     }
 
