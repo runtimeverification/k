@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.builtins.Int32Token;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
@@ -151,8 +150,6 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 return BoolToken.of(((BoolBuiltin) node.getLabel()).booleanValue());
             } else if (node.getLabel() instanceof IntBuiltin) {
                 return IntToken.of(((IntBuiltin) node.getLabel()).bigIntegerValue());
-            } else if (node.getLabel() instanceof Int32Builtin) {
-                return Int32Token.of(((Int32Builtin) node.getLabel()).intValue());
             } else if (node.getLabel() instanceof StringBuiltin) {
                 return StringToken.of(((StringBuiltin) node.getLabel()).stringValue());
             } else if (node.getLabel() instanceof GenericToken) {

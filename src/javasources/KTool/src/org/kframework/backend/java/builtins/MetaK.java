@@ -1,14 +1,10 @@
 package org.kframework.backend.java.builtins;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.KLabel;
+import org.kframework.backend.java.kil.KLabelInjection;
+import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.MetaVariable;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
@@ -17,6 +13,12 @@ import org.kframework.backend.java.symbolic.PatternMatcher;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.SymbolicUnifier;
 import org.kframework.backend.java.symbolic.UnificationFailure;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 
 /**
  * Table of {@code public static} methods for builtin meta K operations.
@@ -165,8 +167,8 @@ public class MetaK {
      *            the term context
      * @return the K label
      */
-    public static KLabel getKLabel(KItem kItem, TermContext context) {
+    public static KItem getKLabel(KItem kItem, TermContext context) {
         // TODO(AndreiS): handle KLabel variables
-        return (KLabel) kItem.kLabel();
+        return new KItem(new KLabelInjection(kItem.kLabel()), new KList(), context);
     }
 }
