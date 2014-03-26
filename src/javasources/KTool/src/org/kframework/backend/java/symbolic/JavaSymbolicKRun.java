@@ -60,7 +60,7 @@ public class JavaSymbolicKRun implements KRun {
         this.context.globalOptions = context.globalOptions;
         transformer = new KILtoBackendJavaKILTransformer(this.context);
     }
-    
+
     public Definition getDefinition(){
         return this.definition;
     }
@@ -93,24 +93,32 @@ public class JavaSymbolicKRun implements KRun {
         if (K.get_indexing_stats){
             IndexingStatistics.preProcessStopWatch.start();
         }
-        SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
+
         Term term = Term.of(cfg, definition);
         TermContext termContext = TermContext.of(definition, new PortableFileSystem());
-        SymbolicConstraint constraint = new SymbolicConstraint(termContext);
         term = term.evaluate(termContext);
-        ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, constraint, termContext);
-        if (K.get_indexing_stats){
-            IndexingStatistics.preProcessStopWatch.stop();
-        }
-        ConstrainedTerm rewriteResult;
-        if (K.get_indexing_stats) {
-            IndexingStatistics.totalRewriteStopwatch.start();
-            rewriteResult = symbolicRewriter.rewrite(constrainedTerm, bound);
-            IndexingStatistics.totalRewriteStopwatch.stop();
+
+        if (K.pattern_matching) {
+            GroundRewriter groundRewriter = new GroundRewriter(definition, termContext);
+            ConstrainedTerm rewriteResult = new ConstrainedTerm(groundRewriter.rewrite(term, bound), termContext);
+            return rewriteResult;
         } else {
-            rewriteResult = symbolicRewriter.rewrite(constrainedTerm, bound);
+            SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
+            SymbolicConstraint constraint = new SymbolicConstraint(termContext);
+            ConstrainedTerm constrainedTerm = new ConstrainedTerm(term, constraint, termContext);
+            if (K.get_indexing_stats){
+                IndexingStatistics.preProcessStopWatch.stop();
+            }
+            ConstrainedTerm rewriteResult;
+            if (K.get_indexing_stats) {
+                IndexingStatistics.totalRewriteStopwatch.start();
+                rewriteResult = symbolicRewriter.rewrite(constrainedTerm, bound);
+                IndexingStatistics.totalRewriteStopwatch.stop();
+            } else {
+                rewriteResult = symbolicRewriter.rewrite(constrainedTerm, bound);
+            }
+            return rewriteResult;
         }
-        return rewriteResult;
     }
 
     @Override
@@ -219,8 +227,6 @@ public class JavaSymbolicKRun implements KRun {
         cfg = (org.kframework.kil.Term) builtinTransformer.visitNode(cfg);
 
         TermContext termContext = TermContext.of(definition, fs);
-        ConstrainedTerm initialTerm = new ConstrainedTerm(Term.of(cfg, definition), termContext);
-        ConstrainedTerm targetTerm = new ConstrainedTerm(Term.of(cfg, definition), termContext);
         List<Rule> claims = Collections.emptyList();
         if (bound == null) {
             bound = -1;
@@ -238,8 +244,20 @@ public class JavaSymbolicKRun implements KRun {
         Rule patternRule = transformer.transformRule(pattern, definition);
 
         List<SearchResult> searchResults = new ArrayList<SearchResult>();
-        List<Map<Variable,Term>> hits = symbolicRewriter.search(
-                initialTerm, targetTerm, claims, patternRule, bound, depth, searchType);
+        List<Map<Variable,Term>> hits;
+        if (K.pattern_matching) {
+            Term initialTerm = Term.of(cfg, definition);
+            Term targetTerm = null;
+            GroundRewriter rewriter = new GroundRewriter(definition, termContext);
+            hits = rewriter.search(initialTerm, targetTerm, claims,
+                    patternRule, bound, depth, searchType);
+        } else {
+            ConstrainedTerm initialTerm = new ConstrainedTerm(Term.of(cfg, definition), termContext);
+            ConstrainedTerm targetTerm = null;
+            SymbolicRewriter rewriter = new SymbolicRewriter(definition);
+            hits = rewriter.search(initialTerm, targetTerm, claims,
+                    patternRule, bound, depth, searchType);
+        }
 
         for (Map<Variable,Term> map : hits) {
             // Construct substitution map from the search results
@@ -291,7 +309,7 @@ public class JavaSymbolicKRun implements KRun {
         if (searchType != SearchType.STAR) {
             throw new UnsupportedOperationException("Search type should be SearchType.STAR");
         }
-        
+
         // TODO: get rid of this ugly hack
         Object o = ((org.kframework.kil.Bag) ((org.kframework.kil.Cell) cfg).getContents()).getContents().get(0);
         o = ((org.kframework.kil.Bag) ((org.kframework.kil.Cell) o).getContents()).getContents().get(1);
@@ -301,10 +319,10 @@ public class JavaSymbolicKRun implements KRun {
         stateMap.put((org.kframework.kil.Term) org.kframework.kil.GenericToken.kAppOf("Id", "$1"), (org.kframework.kil.Term) org.kframework.kil.IntBuiltin.kAppOf("1"));
         ((org.kframework.kil.Cell) o)
                 .setContents(new org.kframework.kil.MapBuiltin(context
-                        .dataStructureSortOf("MyMap"), 
-                        Collections.<org.kframework.kil.Term>emptyList(), 
+                        .dataStructureSortOf("MyMap"),
+                        Collections.<org.kframework.kil.Term>emptyList(),
                         stateMap));
-        
+
         SymbolicRewriter symbolicRewriter = new SymbolicRewriter(definition);
         final TermContext termContext = TermContext.of(definition, new PortableFileSystem());
         ConstrainedTerm initCfg = new ConstrainedTerm(Term.of(cfg, definition), termContext);
@@ -317,14 +335,14 @@ public class JavaSymbolicKRun implements KRun {
         for (String s : strRules) {
             System.out.println(s);
         }
-        
+
         if (bound == null) {
             bound = -1;
         }
         if (depth == null) {
             depth = -1;
         }
-        
+
         for (Rule rule : definition.functionRules().values()) {
             System.out.println(rule);
         }
@@ -336,7 +354,7 @@ public class JavaSymbolicKRun implements KRun {
             // obtained from the result configuration to the initial one
             Term pgm = Term.of(cfg, definition);
             pgm = pgm.substituteWithBinders(result.constraint().substitution(), termContext);
-            
+
             /* concretize the pgm; only reasonable when the 2nd phase of the
              * test generation is performed */
             if (TestCaseGenerationSettings.TWO_PHASE_GENERATION) {
@@ -385,46 +403,46 @@ public class JavaSymbolicKRun implements KRun {
             throws KRunExecutionException {
         return internalRun(cfg, steps);
     }
-    
+
     /*
      * author: Liyi Li
      * to get the symbolic rewriter
      */
     public SymbolicRewriter getSimulationRewriter(){
-        
+
         return this.simulationRewriter;
     }
-    
+
     public void initialSimulationRewriter(){
-        
+
         this.simulationRewriter = new SymbolicRewriter(definition);
     }
-    
+
     /* author: Liyi Li
      * a function return all the next step of a given simulation term
      */
     public ConstrainedTerm simulationSteps(ConstrainedTerm cfg)
             throws KRunExecutionException {
-        
+
         ConstrainedTerm result = this.simulationRewriter.computeSimulationStep(cfg);
-  
+
         return result;
     }
-    
+
     /* author: Liyi Li
      * a function return all the next steps of a given term
      */
     public ArrayList<ConstrainedTerm> steps(ConstrainedTerm cfg)
             throws KRunExecutionException {
 
-        ArrayList<ConstrainedTerm> results = this.simulationRewriter.rewriteAll(cfg);    
-        
+        ArrayList<ConstrainedTerm> results = this.simulationRewriter.rewriteAll(cfg);
+
 
 
         return results;
     }
-    
- 
+
+
     @Override
     public KRunDebugger debug(org.kframework.kil.Term cfg) {
         throw new UnsupportedBackendOptionException("--debug");
