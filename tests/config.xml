@@ -309,6 +309,18 @@
   </test>
 
   <test
+      definition="tests/regression/klabel-strictness/issue.k"
+      programs="tests/regression/klabel-strictness/programs"
+      results="tests/regression/klabel-strictness/tests"
+      extension="issue"
+      >
+      <all-programs>
+        <krun-option name="-output" value="none" />
+        <krun-option name="-color" value="off" />
+      </all-programs>
+  </test>
+
+  <test
       definition="tests/regression/issue580/issue.k"
       programs="tests/regression/issue580/programs"
       results="tests/regression/issue580/tests"
