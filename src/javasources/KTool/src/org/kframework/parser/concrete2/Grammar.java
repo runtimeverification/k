@@ -573,7 +573,7 @@ public class Grammar implements Serializable {
     }
 
     public static class RegExState extends PrimitiveState {
-        private final java.util.regex.Pattern pattern;
+        public final java.util.regex.Pattern pattern;
 
         public RegExState(StateId stateId, NonTerminal nt, java.util.regex.Pattern pattern, String sort) {
             super(stateId, nt, sort);

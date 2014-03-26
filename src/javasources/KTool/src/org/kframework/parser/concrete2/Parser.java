@@ -9,7 +9,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.kil.Ambiguity;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KList;
@@ -24,6 +27,7 @@ import org.kframework.parser.concrete2.Grammar.NonTerminal;
 import org.kframework.parser.concrete2.Grammar.NonTerminalId;
 import org.kframework.parser.concrete2.Grammar.NonTerminalState;
 import org.kframework.parser.concrete2.Grammar.PrimitiveState;
+import org.kframework.parser.concrete2.Grammar.RegExState;
 import org.kframework.parser.concrete2.Grammar.Rule;
 import org.kframework.parser.concrete2.Grammar.RuleState;
 import org.kframework.parser.concrete2.Grammar.State;
@@ -629,6 +633,31 @@ public class Parser {
             }
         }
         return result;
+    }
+
+    public ParseError getErrors() {
+        int current = 0;
+        for (StateCall.Key key : s.stateCalls.keySet()) {
+            if (key.state instanceof PrimitiveState)
+                current = Math.max(current, key.stateBegin);
+        }
+        Set<Pair<String, Pattern>> tokens = new HashSet<>();
+        for (StateCall.Key key : s.stateCalls.keySet()) {
+            if (key.state instanceof RegExState && key.stateBegin == current) {
+                tokens.add(new ImmutablePair<String, Pattern>(((RegExState) key.state).sort, ((RegExState) key.state).pattern));
+            }
+        }
+        return new ParseError(current, tokens);
+    }
+
+    public static class ParseError {
+        public final int position;
+        public final Set<Pair<String, Pattern>> tokens;
+
+        public ParseError(int position, Set<Pair<String, Pattern>> tokens) {
+            this.position = position;
+            this.tokens = tokens;
+        }
     }
 
     private void unknownStateType() { assert false : "Unknown state type"; }
