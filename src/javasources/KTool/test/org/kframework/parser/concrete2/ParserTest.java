@@ -3,6 +3,8 @@ package org.kframework.parser.concrete2;
 import junit.framework.Assert;
 import org.junit.Test;
 import org.kframework.kil.*;
+import org.kframework.parser.concrete2.*;
+import org.kframework.parser.concrete2.Grammar.*;
 
 import java.lang.management.*;
 
@@ -25,25 +27,20 @@ public class ParserTest {
 
     @Test
     public void testEmptyGrammar() throws Exception {
-        Grammar.NonTerminalId ntistart = new Grammar.NonTerminalId("StartNT");
-        Grammar.StateId stistart = new Grammar.StateId("StartState");
-        Grammar.StateId stiend = new Grammar.StateId("EndState");
-
-        Grammar.State.OrderingInfo oinf2 = new Grammar.State.OrderingInfo(2);
-        Grammar.State.OrderingInfo oinf3 = new Grammar.State.OrderingInfo(3);
-
-        Grammar.NonTerminal nt1 = new Grammar.NonTerminal(ntistart, stistart, oinf2, stiend, oinf3);
-
+        Grammar grammar = new Grammar();
+        NonTerminal nt1 = new NonTerminal(new NonTerminalId("startNt"));
         nt1.entryState.next.add(nt1.exitState);
+        grammar.add(nt1);
 
-        ParseState ps = new ParseState("");
-        Parser parser = new Parser(ps);
-        Term result = parser.parse(nt1, 0);
+        grammar.finalize();
+
+
+        Parser parser = new Parser("");
+        Term result = parser.parse(grammar.get("startNt"), 0);
         Term expected = amb(klist(amb(KList.EMPTY)));
 
         Assert.assertEquals("Empty Grammar check: ", expected, result);
         // the start and exit state of the NonTerminal
-        Grammar grammar = new Grammar();
         grammar.add(nt1);
         Nullability nc = new Nullability(grammar) ;
         Assert.assertEquals("Expected Nullable NTs", true, nc.isNullable(nt1.entryState) && nc.isNullable(nt1.exitState));
@@ -52,26 +49,19 @@ public class ParserTest {
 
     @Test
     public void testSingleToken() throws Exception {
-        Grammar.NonTerminalId ntistart = new Grammar.NonTerminalId("StartNT");
-        Grammar.StateId stistart = new Grammar.StateId("StartState");
-        Grammar.StateId stiend = new Grammar.StateId("EndState");
-
-        Grammar.NonTerminal nt1 = new Grammar.NonTerminal(ntistart, stistart, new Grammar.State.OrderingInfo(0), stiend, new Grammar.State.OrderingInfo(100));
-
-        Grammar.RegExState res = new Grammar.RegExState(new Grammar.StateId("RegExStid"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("[a-zA-Z0-9]+"), null, KSorts.K);
-
-
+        NonTerminal nt1 = new NonTerminal(new NonTerminalId("StartNT"));
+        RegExState res = new RegExState(new StateId("RegExStid"), nt1, Pattern.compile("[a-zA-Z0-9]+"));
+        Grammar grammar = new Grammar();
+        grammar.add(nt1);
         nt1.entryState.next.add(res);
         res.next.add(nt1.exitState);
 
-        ParseState ps = new ParseState("asdfAAA1");
-        Parser parser = new Parser(ps);
+        grammar.finalize();
+        Parser parser = new Parser("asdfAAA1");
 
         Term result = parser.parse(nt1, 0);
         Term expected = amb(klist(amb(klist(Token.kAppOf(KSorts.K, "asdfAAA1")))));
         Assert.assertEquals("Single Token check: ", expected, result);
-        Grammar grammar = new Grammar();
-        grammar.add(nt1);
         Nullability nc = new Nullability(grammar) ;
         Assert.assertEquals("Expected Nullable NTs", true, nc.isNullable(nt1.entryState) && nc.isNullable(nt1.exitState));
         Assert.assertEquals("Expected Nullable NTs", false, nc.isNullable(nt1));
@@ -80,28 +70,24 @@ public class ParserTest {
     @Test
     public void testSequenceOfTokens() throws Exception {
         // A ::= #token{"[a-zA-Z0-9]+ +"} #token{"[a-zA-Z0-9]+"} [klabel(seq)]
-        Grammar.NonTerminalId ntistart = new Grammar.NonTerminalId("StartNT");
-        Grammar.StateId stistart = new Grammar.StateId("StartState");
-        Grammar.StateId stiend = new Grammar.StateId("EndState");
+        NonTerminal nt1 = new NonTerminal(new NonTerminalId("StartNT"));
 
-        Grammar.NonTerminal nt1 = new Grammar.NonTerminal(ntistart, stistart, new Grammar.State.OrderingInfo(0), stiend, new Grammar.State.OrderingInfo(100));
-
-        Grammar.RegExState res1 = new Grammar.RegExState(new Grammar.StateId("RegExStid"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("[a-zA-Z0-9]+ +"), null, KSorts.K);
-        Grammar.RegExState res2 = new Grammar.RegExState(new Grammar.StateId("RegExStid2"), nt1, new Grammar.State.OrderingInfo(2), Pattern.compile("[a-zA-Z0-9]+"), label("seq"), KSorts.K);
-
+        RegExState res1 = new RegExState(new StateId("RegExStid"), nt1, Pattern.compile("[a-zA-Z0-9]+ +"));
+        RegExState res2 = new RegExState(new StateId("RegExStid2"), nt1, Pattern.compile("[a-zA-Z0-9]+"));
+        RuleState rs = new RuleState(new StateId("RuleStateId"), nt1, new WrapLabelRule(label("seq")));
 
         nt1.entryState.next.add(res1);
         res1.next.add(res2);
-        res2.next.add(nt1.exitState);
-
-        ParseState ps = new ParseState("asdfAAA1 adfsf");
-        Parser parser = new Parser(ps);
+        res2.next.add(rs);
+        rs.next.add(nt1.exitState);
+        Grammar grammar = new Grammar();
+        grammar.add(nt1);
+        grammar.finalize();
+        Parser parser = new Parser("asdfAAA1 adfsf");
 
         Term result = parser.parse(nt1, 0);
         Term expected = amb(klist(amb(klist(kapp("seq", Token.kAppOf(KSorts.K, "asdfAAA1 "), Token.kAppOf(KSorts.K, "adfsf"))))));
         Assert.assertEquals("Single Token check: ", expected, result);
-        Grammar grammar = new Grammar();
-        grammar.add(nt1);
         Nullability nc = new Nullability(grammar) ;
         Assert.assertEquals("Expected Nullable NTs", true, nc.isNullable(nt1.entryState) && nc.isNullable(nt1.exitState));
         Assert.assertEquals("Expected Nullable NTs", false, nc.isNullable(nt1));
@@ -111,21 +97,26 @@ public class ParserTest {
     public void testDisjunctionOfTokens() throws Exception {
         // A ::= #token{"[a-z0-9]+"} [klabel(s1)]
         //     | #token{"[A-Z0-2]+"} #token{"[3-9]*"} [klabel(s3)]
-        Grammar.NonTerminalId ntistart = new Grammar.NonTerminalId("StartNT");
-        Grammar.StateId stistart = new Grammar.StateId("StartState");
-        Grammar.StateId stiend = new Grammar.StateId("EndState");
+        NonTerminal nt1 = new NonTerminal(new NonTerminalId("StartNT"));
 
-        Grammar.NonTerminal nt1 = new Grammar.NonTerminal(ntistart, stistart, new Grammar.State.OrderingInfo(0), stiend, new Grammar.State.OrderingInfo(100));
+        RegExState res1 = new RegExState(new StateId("RegExStid"), nt1, Pattern.compile("[a-z0-9]+"));
+        RegExState res2 = new RegExState(new StateId("RegExStid2"), nt1, Pattern.compile("[A-Z0-2]+"));
+        RegExState res3 = new RegExState(new StateId("RegExStid3"), nt1, Pattern.compile("[3-9]*"));
 
-        Grammar.RegExState res1 = new Grammar.RegExState(new Grammar.StateId("RegExStid"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("[a-z0-9]+"), label("s1"), KSorts.K);
-        Grammar.RegExState res2 = new Grammar.RegExState(new Grammar.StateId("RegExStid2"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("[A-Z0-2]+"), null, KSorts.K);
-        Grammar.RegExState res3 = new Grammar.RegExState(new Grammar.StateId("RegExStid3"), nt1, new Grammar.State.OrderingInfo(2), Pattern.compile("[3-9]*"), label("s3"), KSorts.K);
+        RuleState rs1 = new RuleState(new StateId("RuleStateId1"), nt1, new WrapLabelRule(label("s1")));
+        RuleState rs3 = new RuleState(new StateId("RuleStateId2"), nt1, new WrapLabelRule(label("s3")));
 
         nt1.entryState.next.add(res1);
         nt1.entryState.next.add(res2);
-        res1.next.add(nt1.exitState);
+        res1.next.add(rs1);
+        rs1.next.add(nt1.exitState);
         res2.next.add(res3);
-        res3.next.add(nt1.exitState);
+        res3.next.add(rs3);
+        rs3.next.add(nt1.exitState);
+
+        Grammar grammar = new Grammar();
+        grammar.add(nt1);
+        grammar.finalize();
 
         {
             Term result = new Parser(new ParseState("abc")).parse(nt1, 0);
@@ -144,8 +135,6 @@ public class ParserTest {
             Term expected = amb(klist(amb(klist(kapp("s1", Token.kAppOf(KSorts.K, "123"))), klist(kapp("s3", Token.kAppOf(KSorts.K, "12"), Token.kAppOf(KSorts.K, "3"))))));
             Assert.assertEquals("Single Token check: ", expected, result);
         }
-        Grammar grammar = new Grammar();
-        grammar.add(nt1);
         Nullability nc = new Nullability(grammar) ;
         Assert.assertEquals("Expected Nullable NTs", true, nc.isNullable(nt1.entryState) && nc.isNullable(nt1.exitState));
         Assert.assertEquals("Expected Nullable NTs", false, nc.isNullable(nt1));
@@ -153,31 +142,31 @@ public class ParserTest {
 
     @Test
     public void testListOfTokens() throws Exception {
-        // A ::= ("[a-zA-Z0-9]")* "" [klabel(seq)]
-        Grammar.NonTerminalId ntistart = new Grammar.NonTerminalId("StartNT");
-        Grammar.StateId stistart = new Grammar.StateId("StartState");
-        Grammar.StateId stiend = new Grammar.StateId("EndState");
+        // A ::= ("[a-zA-Z0-9]")*  [klabel(seq)]
 
-        Grammar.NonTerminal nt1 = new Grammar.NonTerminal(ntistart, stistart, new Grammar.State.OrderingInfo(0), stiend, new Grammar.State.OrderingInfo(100));
+        NonTerminal nt1 = new NonTerminal(new NonTerminalId("StartNT"));
 
-        Grammar.RegExState res1 = new Grammar.RegExState(new Grammar.StateId("RegExStid"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("[a-zA-Z0-9]"), null, KSorts.K);
-        Grammar.RegExState epsilonForLabel = new Grammar.RegExState(new Grammar.StateId("RegExEpsilon"), nt1, new Grammar.State.OrderingInfo(2), Pattern.compile(""), label("seq"), KSorts.K);
+        RegExState res1 = new RegExState(new StateId("RegExStid"), nt1, Pattern.compile("[a-zA-Z0-9]"));
+        RuleState rs3 = new RuleState(new StateId("RuleStateId2"), nt1, new WrapLabelRule(label("seq")));
 
         nt1.entryState.next.add(res1);
-        nt1.entryState.next.add(epsilonForLabel);
-        res1.next.add(epsilonForLabel);
+        nt1.entryState.next.add(rs3);
+        res1.next.add(rs3);
         res1.next.add(res1);
-        epsilonForLabel.next.add(nt1.exitState);
+        rs3.next.add(nt1.exitState);
+        Grammar grammar = new Grammar();
+        grammar.add(nt1);
+        grammar.finalize();
 
         {
             Term result = new Parser(new ParseState("abc")).parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("seq", Token.kAppOf(KSorts.K, "a"), Token.kAppOf(KSorts.K, "b"), Token.kAppOf(KSorts.K, "c"), Token.kAppOf(KSorts.K, ""))))));
+            Term expected = amb(klist(amb(klist(kapp("seq", Token.kAppOf(KSorts.K, "a"), Token.kAppOf(KSorts.K, "b"), Token.kAppOf(KSorts.K, "c"))))));
             Assert.assertEquals("Single Token check: ", expected, result);
         }
 
         {
             Term result = new Parser(new ParseState("")).parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("seq", Token.kAppOf(KSorts.K, ""))))));
+            Term expected = amb(klist(amb(klist(kapp("seq")))));
             Assert.assertEquals("Single Token check: ", expected, result);
         }
 
@@ -197,8 +186,6 @@ public class ParserTest {
             }
         }
         */
-        Grammar grammar = new Grammar();
-        grammar.add(nt1);
         Nullability nc = new Nullability(grammar) ;
         Assert.assertEquals("Expected Nullable NTs", true, nc.isNullable(nt1.entryState) && nc.isNullable(nt1.exitState));
         Assert.assertEquals("Expected Nullable NTs", true, nc.isNullable(nt1));
@@ -213,28 +200,30 @@ public class ParserTest {
     public void testNestedNonTerminals1() throws Exception {
         // A ::= ""    [klabel(epsilon)]
         //     | x A y [klabel(xAy)]
-        Grammar.NonTerminalId ntistart = new Grammar.NonTerminalId("StartNT");
-        Grammar.StateId stistart = new Grammar.StateId("StartState");
-        Grammar.StateId stiend = new Grammar.StateId("EndState");
+        NonTerminal nt1 = new NonTerminal(new NonTerminalId("StartNT"));
 
-        Grammar.NonTerminal nt1 = new Grammar.NonTerminal(ntistart, stistart, new Grammar.State.OrderingInfo(0), stiend, new Grammar.State.OrderingInfo(100));
+        RegExState resx = new RegExState(new StateId("RegExStidx"), nt1, Pattern.compile("x"));
+        RegExState resy = new RegExState(new StateId("RegExStidy"), nt1, Pattern.compile("y"));//, label("xAy"));
+        RuleState rs1 = new RuleState(new StateId("RuleStateId1"), nt1, new WrapLabelRule(label("xAy")));
+        RuleState rs3 = new RuleState(new StateId("RuleStateId2"), nt1, new WrapLabelRule(label("epsilon")));
 
-        Grammar.RegExState resx = new Grammar.RegExState(new Grammar.StateId("RegExStidx"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("x"), null, KSorts.K);
-        Grammar.RegExState resy = new Grammar.RegExState(new Grammar.StateId("RegExStidy"), nt1, new Grammar.State.OrderingInfo(3), Pattern.compile("y"), label("xAy"), KSorts.K);
-        Grammar.RegExState epsilonForLabel = new Grammar.RegExState(new Grammar.StateId("RegExEpsilon"), nt1, new Grammar.State.OrderingInfo(2), Pattern.compile(""), label("epsilon"), KSorts.K);
-
-        Grammar.NonTerminalState nts = new Grammar.NonTerminalState(new Grammar.StateId("NT"), nt1, new Grammar.State.OrderingInfo(2), nt1, false, null, KSorts.K);
+        NonTerminalState nts = new NonTerminalState(new StateId("NT"), nt1, nt1, false);
 
         nt1.entryState.next.add(resx);
-        nt1.entryState.next.add(epsilonForLabel);
-        epsilonForLabel.next.add(nt1.exitState);
+        nt1.entryState.next.add(rs3);
+        rs3.next.add(nt1.exitState);
         resx.next.add(nts);
         nts.next.add(resy);
-        resy.next.add(nt1.exitState);
+        resy.next.add(rs1);
+        rs1.next.add(nt1.exitState);
+
+        Grammar grammar = new Grammar();
+        grammar.add(nt1);
+        grammar.finalize();
 
         {
             Term result = new Parser(new ParseState("")).parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("epsilon", Token.kAppOf(KSorts.K, ""))))));
+            Term expected = amb(klist(amb(klist(kapp("epsilon")))));
             Assert.assertEquals("EmtpyString check: ", expected, result);
         }
 
@@ -245,13 +234,11 @@ public class ParserTest {
                     Token.kAppOf(KSorts.K, "x"),
                     amb(klist(kapp("xAy",
                         Token.kAppOf(KSorts.K, "x"),
-                        amb(klist(kapp("epsilon", Token.kAppOf(KSorts.K, "")))),
+                        amb(klist(kapp("epsilon"))),
                         Token.kAppOf(KSorts.K, "y")))),
                     Token.kAppOf(KSorts.K, "y"))))));
             Assert.assertEquals("x^ny^n check: ", expected, result);
         }
-        Grammar grammar = new Grammar();
-        grammar.add(nt1);
         Nullability nc = new Nullability(grammar) ;
         Assert.assertEquals("Expected Nullable NTs", true, nc.isNullable(nt1.entryState) && nc.isNullable(nt1.exitState));
         Assert.assertEquals("Expected Nullable NTs", true, nc.isNullable(nt1));
@@ -261,26 +248,27 @@ public class ParserTest {
     public void testNestedNonTerminals2() throws Exception {
         // A ::= ""  [klabel(epsilon)]
         //     | A y [klabel(Ay)]
-        Grammar.NonTerminalId ntistart = new Grammar.NonTerminalId("StartNT");
-        Grammar.StateId stistart = new Grammar.StateId("StartState");
-        Grammar.StateId stiend = new Grammar.StateId("EndState");
+        NonTerminal nt1 = new NonTerminal(new NonTerminalId("StartNT"));
 
-        Grammar.NonTerminal nt1 = new Grammar.NonTerminal(ntistart, stistart, new Grammar.State.OrderingInfo(0), stiend, new Grammar.State.OrderingInfo(100));
+        RegExState resy = new RegExState(new StateId("RegExStidy"), nt1, Pattern.compile("y"));
 
-        Grammar.RegExState resy = new Grammar.RegExState(new Grammar.StateId("RegExStidy"), nt1, new Grammar.State.OrderingInfo(3), Pattern.compile("y"), label("Ay"), KSorts.K);
-        Grammar.RegExState epsilonForLabel = new Grammar.RegExState(new Grammar.StateId("RegExEpsilon"), nt1, new Grammar.State.OrderingInfo(2), Pattern.compile(""), label("epsilon"), KSorts.K);
-
-        Grammar.NonTerminalState nts = new Grammar.NonTerminalState(new Grammar.StateId("NT"), nt1, new Grammar.State.OrderingInfo(2), nt1, false, null, KSorts.K);
+        NonTerminalState nts = new NonTerminalState(new StateId("NT"), nt1, nt1, false);
+        RuleState rs1 = new RuleState(new StateId("RuleStateId1"), nt1, new WrapLabelRule(label("Ay")));
+        RuleState rs3 = new RuleState(new StateId("RuleStateId2"), nt1, new WrapLabelRule(label("epsilon")));
 
         nt1.entryState.next.add(nts);
-        nt1.entryState.next.add(epsilonForLabel);
-        epsilonForLabel.next.add(nt1.exitState);
+        nt1.entryState.next.add(rs3);
+        rs3.next.add(nt1.exitState);
         nts.next.add(resy);
-        resy.next.add(nt1.exitState);
+        resy.next.add(rs1);
+        rs1.next.add(nt1.exitState);
+        Grammar grammar = new Grammar();
+        grammar.add(nt1);
+        grammar.finalize();
 
         {
             Term result = new Parser(new ParseState("")).parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("epsilon", Token.kAppOf(KSorts.K, ""))))));
+            Term expected = amb(klist(amb(klist(kapp("epsilon")))));
             Assert.assertEquals("EmtpyString check: ", expected, result);
         }
 
@@ -289,13 +277,11 @@ public class ParserTest {
             Term expected =
                 amb(klist(amb(klist(kapp("Ay",
                     amb(klist(kapp("Ay",
-                        amb(klist(kapp("epsilon", Token.kAppOf(KSorts.K, "")))),
+                        amb(klist(kapp("epsilon"))),
                         Token.kAppOf(KSorts.K, "y")))),
                     Token.kAppOf(KSorts.K, "y"))))));
             Assert.assertEquals("y^n check: ", expected, result);
         }
-        Grammar grammar = new Grammar();
-        grammar.add(nt1);
         Nullability nc = new Nullability(grammar) ;
         Assert.assertEquals("Expected Nullable NTs", true, nc.isNullable(nt1.entryState) && nc.isNullable(nt1.exitState));
         Assert.assertEquals("Expected Nullable NTs", true, nc.isNullable(nt1));
@@ -305,26 +291,28 @@ public class ParserTest {
     public void testNestedNonTerminals3() throws Exception {
         // A ::= ""  [klabel(epsilon)]
         //     | x A [klabel(xA)]
-        Grammar.NonTerminalId ntistart = new Grammar.NonTerminalId("StartNT");
-        Grammar.StateId stistart = new Grammar.StateId("StartState");
-        Grammar.StateId stiend = new Grammar.StateId("EndState");
+        NonTerminal nt1 = new NonTerminal(new NonTerminalId("StartNT"));
 
-        Grammar.NonTerminal nt1 = new Grammar.NonTerminal(ntistart, stistart, new Grammar.State.OrderingInfo(0), stiend, new Grammar.State.OrderingInfo(100));
+        RegExState resx = new RegExState(new StateId("RegExStidx"), nt1, Pattern.compile("x"));
 
-        Grammar.RegExState resx = new Grammar.RegExState(new Grammar.StateId("RegExStidx"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("x"), null, KSorts.K);
-
-        Grammar.NonTerminalState nts = new Grammar.NonTerminalState(new Grammar.StateId("NT"), nt1, new Grammar.State.OrderingInfo(2), nt1, false, label("xA"), KSorts.K);
-        Grammar.RegExState epsilonForLabel = new Grammar.RegExState(new Grammar.StateId("RegExEpsilon"), nt1, new Grammar.State.OrderingInfo(2), Pattern.compile(""), label("epsilon"), KSorts.K);
+        NonTerminalState nts = new NonTerminalState(new StateId("NT"), nt1, nt1, false);
+        RuleState rs1 = new RuleState(new StateId("RuleStateId1"), nt1, new WrapLabelRule(label("xA")));
+        RuleState rs3 = new RuleState(new StateId("RuleStateId2"), nt1, new WrapLabelRule(label("epsilon")));
 
         nt1.entryState.next.add(resx);
-        nt1.entryState.next.add(epsilonForLabel);
-        epsilonForLabel.next.add(nt1.exitState);
+        nt1.entryState.next.add(rs3);
+        rs3.next.add(nt1.exitState);
         resx.next.add(nts);
-        nts.next.add(nt1.exitState);
+        nts.next.add(rs1);
+        rs1.next.add(nt1.exitState);
+
+        Grammar grammar = new Grammar();
+        grammar.add(nt1);
+        grammar.finalize();
 
         {
             Term result = new Parser(new ParseState("")).parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("epsilon", Token.kAppOf(KSorts.K, ""))))));
+            Term expected = amb(klist(amb(klist(kapp("epsilon")))));
             Assert.assertEquals("EmtpyString check: ", expected, result);
         }
 
@@ -335,11 +323,9 @@ public class ParserTest {
                         Token.kAppOf(KSorts.K, "x"),
                         amb(klist(kapp("xA",
                                 Token.kAppOf(KSorts.K, "x"),
-                                amb(klist(kapp("epsilon", Token.kAppOf(KSorts.K, ""))))))))))));
+                                amb(klist(kapp("epsilon")))))))))));
             Assert.assertEquals("x^n check: ", expected, result);
         }
-        Grammar grammar = new Grammar();
-        grammar.add(nt1);
         Nullability nc = new Nullability(grammar) ;
         Assert.assertEquals("Expected Nullable NTs", true, nc.isNullable(nt1.entryState) && nc.isNullable(nt1.exitState));
         Assert.assertEquals("Expected Nullable NTs", true, nc.isNullable(nt1));
@@ -349,24 +335,30 @@ public class ParserTest {
     public void testNestedNonTerminals4() throws Exception {
         // A ::= "x" [klabel(x)]
         //     | A A [klabel(AA)]
-        Grammar.NonTerminalId ntistart = new Grammar.NonTerminalId("StartNT");
-        Grammar.StateId stistart = new Grammar.StateId("StartState");
-        Grammar.StateId stiend = new Grammar.StateId("EndState");
+        NonTerminal nt1 = new NonTerminal(new NonTerminalId("StartNT"));
 
-        Grammar.NonTerminal nt1 = new Grammar.NonTerminal(ntistart, stistart, new Grammar.State.OrderingInfo(0), stiend, new Grammar.State.OrderingInfo(100));
+        RegExState resx = new RegExState(new StateId("RegExStidx"), nt1,Pattern.compile("x"));//, label("x"), KSorts.K);
 
-        Grammar.RegExState resx = new Grammar.RegExState(new Grammar.StateId("RegExStidx"), nt1, new Grammar.State.OrderingInfo(1), Pattern.compile("x"), label("x"), KSorts.K);
+        NonTerminalState nts1 = new NonTerminalState(new StateId("NT1"), nt1, nt1, false);
+        NonTerminalState nts2 = new NonTerminalState(new StateId("NT2"), nt1, nt1, false);//, label("AA"), KSorts.K);
 
-        Grammar.NonTerminalState nts1 = new Grammar.NonTerminalState(new Grammar.StateId("NT1"), nt1, new Grammar.State.OrderingInfo(2), nt1, false, null, KSorts.K);
-        Grammar.NonTerminalState nts2 = new Grammar.NonTerminalState(new Grammar.StateId("NT2"), nt1, new Grammar.State.OrderingInfo(3), nt1, false, label("AA"), KSorts.K);
+        RuleState rs1 = new RuleState(new StateId("RuleStateId1"), nt1, new WrapLabelRule(label("x")));
+        RuleState rs3 = new RuleState(new StateId("RuleStateId2"), nt1, new WrapLabelRule(label("AA")));
+
 
         nt1.entryState.next.add(resx);
         nt1.entryState.next.add(nts1);
 
-        resx.next.add(nt1.exitState);
+        resx.next.add(rs1);
+        rs1.next.add(nt1.exitState);
 
         nts1.next.add(nts2);
-        nts2.next.add(nt1.exitState);
+        nts2.next.add(rs3);
+        rs3.next.add(nt1.exitState);
+
+        Grammar grammar = new Grammar();
+        grammar.add(nt1);
+        grammar.finalize();
 
         {
             Term result = new Parser(new ParseState("x")).parse(nt1, 0);
@@ -395,8 +387,6 @@ public class ParserTest {
             Term expected = amb(klist(t4));
             Assert.assertEquals("AAA check: ", expected, result);
         }
-        Grammar grammar = new Grammar();
-        grammar.add(nt1);
         Nullability nc = new Nullability(grammar) ;
         Assert.assertEquals("Expected Nullable NTs", true, nc.isNullable(nt1.entryState) && nc.isNullable(nt1.exitState));
         Assert.assertEquals("Expected Nullable NTs", false, nc.isNullable(nt1));
@@ -409,38 +399,35 @@ public class ParserTest {
         // ....
         // An ::= An-1 [klabel(n[n-1])]
         // start symb is An
-        Grammar.NonTerminalId baseCaseId = new Grammar.NonTerminalId("BaseCase");
-        Grammar.StateId baseCaseEntry= new Grammar.StateId("BaseCaseEntry");
-        Grammar.StateId baseCaseExit = new Grammar.StateId("BaseCaseExit");
-
-        Grammar.NonTerminal baseCase = new Grammar.NonTerminal(baseCaseId, baseCaseEntry, new Grammar.State.OrderingInfo(-1),
-                                                                      baseCaseExit,  new Grammar.State.OrderingInfo(1));
-        Grammar.RegExState resx = new Grammar.RegExState(new Grammar.StateId("X"), baseCase, new Grammar.State.OrderingInfo(0), Pattern.compile("x"), label("x"), KSorts.K);
+        NonTerminal baseCase = new NonTerminal(new NonTerminalId("BaseCase"));
+        RegExState resx = new RegExState(new StateId("X"), baseCase, Pattern.compile("x"));
+        RuleState rs1 = new RuleState(new StateId("RuleStateId1"), baseCase, new WrapLabelRule(label("x")));
 
         baseCase.entryState.next.add(resx);
-        resx.next.add(baseCase.exitState);
+        resx.next.add(rs1);
+        rs1.next.add(baseCase.exitState);
 
         Term expected = amb(klist(kapp("x", Token.kAppOf(KSorts.K, "x"))));
 
         for (int i = 2; i < 10; i++) {
-            Grammar.NonTerminal nt = new Grammar.NonTerminal(new Grammar.NonTerminalId("NT"+i),
-                    new Grammar.StateId("NT"+1+"Entry"), new Grammar.State.OrderingInfo(-i),
-                    new Grammar.StateId("NT"+1+"Exit"), new Grammar.State.OrderingInfo(2*i-1));
-            Grammar.NonTerminalState state = new Grammar.NonTerminalState(
-                    new Grammar.StateId("S"+i), nt, new Grammar.State.OrderingInfo(2*i-2), baseCase, false, label("n" + i), KSorts.K);
+            NonTerminal nt = new NonTerminal(new NonTerminalId("NT"+i));
+            NonTerminalState state = new NonTerminalState(new StateId("S"+i), nt, baseCase, false);
+            RuleState rs2 = new RuleState(new StateId("RuleStateId" + i), baseCase, new WrapLabelRule(label("n" + i)));
             nt.entryState.next.add(state);
-            state.next.add(nt.exitState);
+            state.next.add(rs2);
+            rs2.next.add(nt.exitState);
             baseCase = nt;
             expected = amb(klist(kapp("n" + i, expected)));
         }
+        Grammar grammar = new Grammar();
+        grammar.add(baseCase);
+        grammar.finalize();
 
         {
             Term result = new Parser(new ParseState("x")).parse(baseCase, 0);
             expected = amb(klist(expected));
             Assert.assertEquals("Single char check: ", expected, result);
         }
-        Grammar grammar = new Grammar();
-        grammar.add(baseCase);
         Nullability nc = new Nullability(grammar) ;
         Assert.assertEquals("Expected Nullable NTs", true, nc.isNullable(baseCase.entryState) && nc.isNullable(baseCase.exitState));
         Assert.assertEquals("Expected Nullable NTs", false, nc.isNullable(baseCase));
@@ -454,38 +441,35 @@ public class ParserTest {
         // An ::= An-1 [klabel(n[n-1])]
         // start symb is An
 
-        Grammar.NonTerminalId baseCaseId = new Grammar.NonTerminalId("BaseCase");
-        Grammar.StateId baseCaseEntry= new Grammar.StateId("BaseCaseEntry");
-        Grammar.StateId baseCaseExit = new Grammar.StateId("BaseCaseExit");
-
-        Grammar.NonTerminal baseCase = new Grammar.NonTerminal(baseCaseId, baseCaseEntry, new Grammar.State.OrderingInfo(-1),
-                baseCaseExit,  new Grammar.State.OrderingInfo(1));
-        Grammar.RegExState resx = new Grammar.RegExState(new Grammar.StateId("X"), baseCase, new Grammar.State.OrderingInfo(0), Pattern.compile(""), label("x"), KSorts.K);
+        NonTerminal baseCase = new NonTerminal(new NonTerminalId("BaseCase"));
+        RegExState resx = new RegExState(new StateId("X"), baseCase, Pattern.compile(""));
+        RuleState rs1 = new RuleState(new StateId("RuleStateId1"), baseCase, new WrapLabelRule(label("x")));
 
         baseCase.entryState.next.add(resx);
-        resx.next.add(baseCase.exitState);
+        resx.next.add(rs1);
+        rs1.next.add(baseCase.exitState);
 
         Term expected = amb(klist(kapp("x", Token.kAppOf(KSorts.K, ""))));
 
         for (int i = 2; i < 10; i++) {
-            Grammar.NonTerminal nt = new Grammar.NonTerminal(new Grammar.NonTerminalId("NT"+i),
-                    new Grammar.StateId("NT"+i+"Entry"), new Grammar.State.OrderingInfo(-i),
-                    new Grammar.StateId("NT"+i+"Exit"), new Grammar.State.OrderingInfo(2*i-1));
-            Grammar.NonTerminalState state = new Grammar.NonTerminalState(
-                    new Grammar.StateId("S"+i), nt, new Grammar.State.OrderingInfo(2*i-2), baseCase, false, label("n" + i), KSorts.K);
+            NonTerminal nt = new NonTerminal(new NonTerminalId("NT"+i));
+            NonTerminalState state = new NonTerminalState(new StateId("S"+i), nt, baseCase, false);
+            RuleState rs2 = new RuleState(new StateId("RuleStateId" + i), baseCase, new WrapLabelRule(label("n" + i)));
             nt.entryState.next.add(state);
-            state.next.add(nt.exitState);
+            state.next.add(rs2);
+            rs2.next.add(nt.exitState);
             baseCase = nt;
             expected = amb(klist(kapp("n" + i, expected)));
         }
+        Grammar grammar = new Grammar();
+        grammar.add(baseCase);
+        grammar.finalize();
 
         {
             Term result = new Parser(new ParseState("")).parse(baseCase, 0);
             expected = amb(klist(expected));
             Assert.assertEquals("Single char check: ", expected, result);
         }
-        Grammar grammar = new Grammar();
-        grammar.add(baseCase);
         Nullability nc = new Nullability(grammar) ;
         Assert.assertEquals("Expected Nullable NTs", true, nc.isNullable(baseCase.entryState) && nc.isNullable(baseCase.exitState));
         Assert.assertEquals("Expected Nullable NTs", true, nc.isNullable(baseCase));
@@ -499,60 +483,67 @@ public class ParserTest {
         //        | Lit
         // Exp  ::= Exp "+" Term [klabel(plus)]
         //        | Term
-        Grammar.NonTerminal lit = new Grammar.NonTerminal(new Grammar.NonTerminalId("Lit"),
-                new Grammar.StateId("LitEntry"), new Grammar.State.OrderingInfo(0),
-                new Grammar.StateId("LitExit"), new Grammar.State.OrderingInfo(1));
-        Grammar.NonTerminal trm = new Grammar.NonTerminal(new Grammar.NonTerminalId("Trm"),
-                new Grammar.StateId("TrmEntry"), new Grammar.State.OrderingInfo(0),
-                new Grammar.StateId("TrmExit"), new Grammar.State.OrderingInfo(3));
-        Grammar.NonTerminal exp = new Grammar.NonTerminal(new Grammar.NonTerminalId("Exp"),
-                new Grammar.StateId("ExpEntry"), new Grammar.State.OrderingInfo(0),
-                new Grammar.StateId("ExpExit"), new Grammar.State.OrderingInfo(5));
+        NonTerminal lit = new NonTerminal(new NonTerminalId("Lit"));
+        NonTerminal trm = new NonTerminal(new NonTerminalId("Trm"));
+        NonTerminal exp = new NonTerminal(new NonTerminalId("Exp"));
 
         { // lit
-            Grammar.RegExState litState = new Grammar.RegExState(new Grammar.StateId("LitState"), lit, new Grammar.State.OrderingInfo(0), Pattern.compile("[0-9]+"), label("lit"), KSorts.K);
+            RegExState litState = new RegExState(new StateId("LitState"), lit, Pattern.compile("[0-9]+"));
+            RuleState rs1 = new RuleState(new StateId("RuleStateId1"), lit, new WrapLabelRule(label("lit")));
             lit.entryState.next.add(litState);
-            litState.next.add(lit.exitState);
+            litState.next.add(rs1);
+            rs1.next.add(lit.exitState);
         }
 
         { // trm
-            Grammar.RegExState lparen = new Grammar.RegExState(new Grammar.StateId("LParen"), trm, new Grammar.State.OrderingInfo(0), Pattern.compile("\\("), null, KSorts.K);
-            Grammar.RegExState rparen = new Grammar.RegExState(new Grammar.StateId("RParen"), trm, new Grammar.State.OrderingInfo(0), Pattern.compile("\\)"), label("bracket"), KSorts.K);
-            Grammar.RegExState star = new Grammar.RegExState(new Grammar.StateId("Star"), trm, new Grammar.State.OrderingInfo(0), Pattern.compile("\\*"), null, KSorts.K);
-            Grammar.NonTerminalState expState = new Grammar.NonTerminalState(new Grammar.StateId("Trm->Exp"), trm, new Grammar.State.OrderingInfo(6), exp, false, null, KSorts.K);
-            Grammar.NonTerminalState trmState = new Grammar.NonTerminalState(new Grammar.StateId("Trm->Trm"), trm, new Grammar.State.OrderingInfo(4), trm, false, null, KSorts.K);
-            Grammar.NonTerminalState lit1State = new Grammar.NonTerminalState(new Grammar.StateId("Trm->Lit1"), trm, new Grammar.State.OrderingInfo(2), lit, false, label("mul"), KSorts.K);
-            Grammar.NonTerminalState lit2State = new Grammar.NonTerminalState(new Grammar.StateId("Trm->Lit2"), trm, new Grammar.State.OrderingInfo(2), lit, false, null, KSorts.K);
+            RegExState lparen = new RegExState(new StateId("LParen"), trm, Pattern.compile("\\("));
+            RegExState rparen = new RegExState(new StateId("RParen"), trm, Pattern.compile("\\)"));
+            RuleState rs1 = new RuleState(new StateId("RuleStateId1"), lit, new WrapLabelRule(label("bracket")));
+
+            RegExState star = new RegExState(new StateId("Star"), trm, Pattern.compile("\\*"));
+            NonTerminalState expState = new NonTerminalState(new StateId("Trm->Exp"), trm, exp, false);
+            NonTerminalState trmState = new NonTerminalState(new StateId("Trm->Trm"), trm, trm, false);
+            NonTerminalState lit1State = new NonTerminalState(new StateId("Trm->Lit1"), trm, lit, false);
+            RuleState rs2 = new RuleState(new StateId("RuleStateId2"), lit, new WrapLabelRule(label("mul")));
+
+            NonTerminalState lit2State = new NonTerminalState(new StateId("Trm->Lit2"), trm, lit, false);
 
             trm.entryState.next.add(lparen);
             lparen.next.add(expState);
             expState.next.add(rparen);
-            rparen.next.add(trm.exitState);
+            rparen.next.add(rs1);
+            rs1.next.add(trm.exitState);
 
             trm.entryState.next.add(trmState);
             trmState.next.add(star);
             star.next.add(lit1State);
-            lit1State.next.add(trm.exitState);
+            lit1State.next.add(rs2);
+            rs2.next.add(trm.exitState);
 
             trm.entryState.next.add(lit2State);
             lit2State.next.add(trm.exitState);
         }
 
         { // exp
-            Grammar.RegExState plus = new Grammar.RegExState(new Grammar.StateId("Plus"), exp, new Grammar.State.OrderingInfo(0), Pattern.compile("\\+"), null, KSorts.K);
-            Grammar.NonTerminalState expState = new Grammar.NonTerminalState(new Grammar.StateId("Exp->Exp"), exp, new Grammar.State.OrderingInfo(6), exp, false, null, KSorts.K);
-            Grammar.NonTerminalState trm1State = new Grammar.NonTerminalState(new Grammar.StateId("Exp->Trm1"), exp, new Grammar.State.OrderingInfo(4), trm, false, label("plus"), KSorts.K);
-            Grammar.NonTerminalState trm2State = new Grammar.NonTerminalState(new Grammar.StateId("Exp->Trm2"), exp, new Grammar.State.OrderingInfo(4), trm, false, null, KSorts.K);
+            RegExState plus = new RegExState(new StateId("Plus"), exp, Pattern.compile("\\+"));
+            NonTerminalState expState = new NonTerminalState(new StateId("Exp->Exp"), exp, exp, false);
+            NonTerminalState trm1State = new NonTerminalState(new StateId("Exp->Trm1"), exp, trm, false);
+            RuleState rs1 = new RuleState(new StateId("RuleStateId3"), lit, new WrapLabelRule(label("plus")));
+            NonTerminalState trm2State = new NonTerminalState(new StateId("Exp->Trm2"), exp, trm, false);
 
             exp.entryState.next.add(expState);
             expState.next.add(plus);
             plus.next.add(trm1State);
-            trm1State.next.add(exp.exitState);
+            trm1State.next.add(rs1);
+            rs1.next.add(exp.exitState);
 
             exp.entryState.next.add(trm2State);
             trm2State.next.add(exp.exitState);
         }
 
+        Grammar grammar = new Grammar();
+        grammar.add(exp);
+        grammar.finalize();
         {
             Term result = new Parser(new ParseState("1+2*3")).parse(exp, 0);
             Term expected = amb(klist(amb(klist(kapp("plus", amb(klist(amb(klist(amb(klist(kapp("lit", token("1")))))))),
@@ -562,14 +553,68 @@ public class ParserTest {
                                                           amb(klist(kapp("lit", token("3"))))))))))));
             Assert.assertEquals("1+2*3: ", expected, result);
         }
-        //Assert.assertEquals("Expected Nullable NTs", 9, Nullability.getReachableNullableStates(exp).size());
-        Grammar grammar = new Grammar();
-        grammar.add(exp);
         Nullability nc = new Nullability(grammar) ;
         Assert.assertEquals("Expected Nullable NTs", true, nc.isNullable(exp.entryState) && nc.isNullable(exp.exitState));
         Assert.assertEquals("Expected Nullable NTs", false, nc.isNullable(exp));
 
     }
+
+//    public void testPrecedence1() throws Exception {
+//        NonTerminal e = new NonTerminal(new NonTerminalId("E"),
+//            new StateId("E-entry"), new State.OrderingInfo(?),
+//            new StateId("E-exit"), new State.OrderingInfo(?));
+//        { // lit
+//            NextableState var = new RegExState(new StateId("Var"), e, new State.OrderingInfo(?), Pattern.compile("[a-z]"));
+//            NextableState varLabel = new WrapLabelRuleState(new StateId("VarLabel"), e, new State.OrderingInfo(?), new KLabelConstant("Var"));
+//            e.entryState.next.add(var);
+//            var.next.add(varLabel);
+//            varLabel.next.add(e.exitState);
+//        }
+//
+//        { // plus
+//            NextableState e1 = new NonTerminalState(new StateId("Plus-e1"), e, new State.OrderingInfo(?), e, false);
+//            NextableState plus = new RegExState(new StateId("Plus-token"), e, new State.OrderingInfo(?), Pattern.compile("\\+"));
+//            NextableState e2 = new NonTerminalState(new StateId("Plus-e1"), e, new State.OrderingInfo(?), e, false);
+//            NextableState plusLabel = new WrapLabelRuleState(new StateId("Plus-label"), e, new State.OrderingInfo(?), new KLabelConstant("_+_"));
+//            e.entryState.next.add(e1);
+//            e1.next.add(plus);
+//            plus.next.add(e2);
+//            e2.next.add(plusLabel);
+//            plusLabel.next.add(e.exitState);
+//        }
+//
+//        { // times
+//            NextableState e1 = new NonTerminalState(new StateId("Times-e1"), e, new State.OrderingInfo(?), e, false);
+//            NextableState times = new RegExState(new StateId("Times-token"), e, new State.OrderingInfo(?), Pattern.compile("\\*"));
+//            NextableState e2 = new NonTerminalState(new StateId("Times-e1"), e, new State.OrderingInfo(?), e, false);
+//            NextableState timesLabel = new RuleState(new StateId("Times-label"), e, new State.OrderingInfo(?), new WrapLabelRule(new KLabelConstant("_*_")));
+//            e.entryState.next.add(e1);
+//            e1.next.add(times);
+//            times.next.add(e2);
+//            e2.next.add(timesLabel);
+//            timesLabel.next.add(e.exitState);
+//        }
+//
+//        {
+//            Term result = new Parser(new ParseState("x+y*z")).parse(e, 0);
+//            /*Term expected = amb(klist(amb(klist(amb(klist(amb(klist(amb(klist(token("1"))))))),
+//                token("+"),
+//                amb(klist(amb(klist(amb(klist(token("2"))))),
+//                    token("*"),
+//                    amb(klist(token("3")))))))));*/
+//            assertEquals("1+2*3: ", null, result);
+//            // lookahead success
+//            // lookahead failure
+//            // require context
+//            // reduce = Adopt
+//            // insert
+//            // delete = Done
+//            // assoc
+//            // prec
+//            // prefer
+//        }
+//
+//    }
 
     public static Ambiguity amb(Term ... terms) {
         return new Ambiguity(KSorts.K, Arrays.asList(terms));

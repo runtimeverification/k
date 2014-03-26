@@ -10,6 +10,7 @@ import org.kframework.parser.concrete2.Grammar.NextableState;
 import org.kframework.parser.concrete2.Grammar.NonTerminal;
 import org.kframework.parser.concrete2.Grammar.NonTerminalState;
 import org.kframework.parser.concrete2.Grammar.PrimitiveState;
+import org.kframework.parser.concrete2.Grammar.RuleState;
 import org.kframework.parser.concrete2.Grammar.State;
 
 /**
@@ -83,7 +84,8 @@ public class Nullability {
      */
     public boolean isNullable(State state) {
         return (state instanceof EntryState) ||
-               (state instanceof ExitState) ||
+                (state instanceof ExitState) ||
+                (state instanceof RuleState) ||
                ((state instanceof PrimitiveState) && ((PrimitiveState)state).isNullable()) ||
                ((state instanceof NonTerminalState) && isNullable(((NonTerminalState) state).child));
     }
