@@ -15,7 +15,7 @@ import org.kframework.kil.ASTNode;
  *
  * @author AndreiS
  */
-public class SetElementChoice extends Term {
+public class SetElementChoice extends Term implements DataStructureChoice {
 
     /**
      * Set from which the element is chosen.

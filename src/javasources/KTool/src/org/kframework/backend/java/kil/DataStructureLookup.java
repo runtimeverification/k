@@ -7,6 +7,6 @@ package org.kframework.backend.java.kil;
  * @author YilongL
  * 
  */
-public interface DataStructureLookup {
+public interface DataStructureLookup extends DataStructureLookupOrChoice {
 
 }
