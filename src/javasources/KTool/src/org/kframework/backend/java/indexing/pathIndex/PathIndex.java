@@ -224,13 +224,19 @@ public class PathIndex implements RuleIndex, Serializable{
             }
         }
 
-        if (termVisitor.isAddOutputRules()) {
-            matchingIndices.addAll(outputRuleIndices);
+        if (matchingIndices != null) {
+            if (termVisitor.isAddOutputRules()) {
+                matchingIndices.addAll(outputRuleIndices);
+            }
+
+            if (termVisitor.isAddInputRules()) {
+                matchingIndices.addAll(inputRuleIndices);
+            }
+        } else {
+            //avoiding null
+            matchingIndices = new LinkedHashSet<>();
         }
 
-        if (termVisitor.isAddInputRules()) {
-            matchingIndices.addAll(inputRuleIndices);
-        }
 
         // this check is needed because of .K which now has  a pString of @.EMPTY_K, but may not
         // have any rules so indexed in some simpler languages like IMP

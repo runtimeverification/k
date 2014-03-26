@@ -75,11 +75,11 @@ public class TermVisitor extends LocalVisitor implements Serializable {
         //first find all the term's cells of interest in  a single pass
         CellVisitor v = new CellVisitor(context);
         node.accept(v);
-        if (!v.getkCellPStings().isEmpty()){
+//        if (!v.getkCellPStings().isEmpty()){
             pStrings.addAll(v.getkCellPStings());
-        } else {
-            pStrings.add("@.NO_K_CELL");
-        }
+//        } else {
+//            pStrings.add("@.NO_K_CELL");
+//        }
 
         if (K.get_indexing_stats) {
             IndexingStatistics.getPStringStopwatch.stop();
@@ -198,6 +198,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
         }
     }
 
+    //needed for kool typed but breaks kool untyped
     @Override
     public void visit(BoolToken boolToken) {
         if (pString == null){
@@ -221,6 +222,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
     public void visit(KItem kItem) {
         //TODO(OwolabiL): This is starting to get nasty. Refactor.
         if (kItem.kLabel() instanceof KLabelFreezer) {
+
             if (pString != null) {
                 TokenVisitor visitor = new TokenVisitor(context, pString);
                 kItem.kLabel().accept(visitor);
@@ -235,6 +237,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
             if (!inner) {
                 inner = true;
                 currentLabel = kItem.kLabel().toString();
+                //needed for simple typed static
                 if (context.isSubsortedEq(K_RESULT,kItem.sort()) && ((KList)kItem.kList()).size() == 0){
                     String kItemSort = kItem.sort();
                     pStrings.add("@."+kItemSort);
@@ -246,11 +249,11 @@ public class TermVisitor extends LocalVisitor implements Serializable {
                 //      <k>
                 //        (void) ~> discard ~> 'class(theMain) ~> HOLE ;
                 //        </k>
-                if (!context.isSubsortedEq(K_RESULT,kItem.sort()) && ((KList)kItem.kList()).size() == 0){
-                    if (pString != null) {
-                        pStrings.add(pString);
-                    }
-                }
+//                if (!context.isSubsortedEq(K_RESULT,kItem.sort()) && ((KList)kItem.kList()).size() == 0){
+//                    if (pString != null) {
+//                        pStrings.add(pString);
+//                    }
+//                }
 
                 kItem.kLabel().accept(this);
                 kItem.kList().accept(this);
