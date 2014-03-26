@@ -1,4 +1,4 @@
-package org.kframework.backend.java.profile;
+package main.btrace.org.kframework.backend.java.profile;
 
 import com.sun.btrace.aggregation.Aggregation;
 import com.sun.btrace.aggregation.AggregationFunction;

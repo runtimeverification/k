@@ -69,7 +69,7 @@
 		<echo message="${ant.project.name}: ${ant.file}" />
 		<javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" includeantruntime="false">
 			<src path="src" />
-			<exclude name="org/kframework/backend/java/profile/**Trace.java"/>
+			<exclude name="main/btrace/**"/>
 			<classpath refid="KTool.classpath" />
 			<compilerarg value="-Xlint:unchecked" />
 		</javac>
@@ -82,7 +82,7 @@
 		<echo message="${ant.project.name}: ${ant.file}" />
 		<javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" includeantruntime="false">
 			<src path="src" />
-			<exclude name="org/kframework/backend/java/profile/**Trace.java"/>
+			<exclude name="main/btrace/**"/>
 			<classpath refid="KTool.classpath" />
 			<compilerarg value="-Xlint:unchecked" />
 			<exclude name="org/kframework/krun/ioserver/commands/CommandStat.java" />
