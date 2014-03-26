@@ -198,15 +198,15 @@ public class TermVisitor extends LocalVisitor implements Serializable {
         }
     }
 
-    //needed for kool typed but breaks kool untyped
-    @Override
-    public void visit(BoolToken boolToken) {
-        if (pString == null){
-            pStrings.add(START_STRING+boolToken.sort());
-        } else{
-            pStrings.add(pString+".1."+boolToken.sort());
-        }
-    }
+    //needed for kool typed but breaks all prior definitions
+//    @Override
+//    public void visit(BoolToken boolToken) {
+//        if (pString == null){
+//            pStrings.add(START_STRING+boolToken.sort());
+//        } else{
+//            pStrings.add(pString+".1."+boolToken.sort());
+//        }
+//    }
 
     @Override
     public void visit(UninterpretedToken uninterpretedToken) {
@@ -243,7 +243,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
                     pStrings.add("@."+kItemSort);
                 }
 
-                // added to handle a case in kool untyped. 1st element in
+                // added to handle a case in kool typed static. 1st element in
                 // kSequence is already a KResult, but the second Item is simply
                 // a KLabel applied to an empty KList:
                 //      <k>
