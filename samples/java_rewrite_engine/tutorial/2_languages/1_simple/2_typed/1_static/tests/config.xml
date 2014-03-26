@@ -1,0 +1,19 @@
+<tests>
+
+    <test
+            definition="simple-typed-static.k"
+            programs="../../../../../../../../tutorial/2_languages/1_simple/2_typed/programs"
+            results="../../../../../../../../tutorial/2_languages/1_simple/2_typed/1_static/tests"
+            extension="simple" >
+        <kompile-option name="-rule-index" value="path" />
+        <kompile-option name="-backend" value="java" />
+        <all-programs>
+            <krun-option name="-backend" value="java" />
+            <krun-option name="-smt" value="none" />
+            <!--<krun-option name="-output" value="none" />-->
+            <krun-option name="-search" />
+            <krun-option name="-pattern" value="&lt;tasks&gt;.Bag&lt;/tasks&gt;"/>
+        </all-programs>
+    </test>
+
+</tests>

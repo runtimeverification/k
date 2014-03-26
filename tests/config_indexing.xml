@@ -1,0 +1,38 @@
+<!-- Expected to be called from k/1_k, with the command
+
+  ktest tests/config.xml
+
+-->
+
+<tests>
+
+    <!--Simple untyped-->
+  <include
+          file="../samples/java_rewrite_engine/tutorial/2_languages/1_simple/1_untyped/tests/config.xml"
+          directory= "samples/java_rewrite_engine/tutorial/2_languages/1_simple/1_untyped/" />
+
+    <!--Simple typed static-->
+  <include
+          file="../samples/java_rewrite_engine/tutorial/2_languages/1_simple/2_typed/1_static/tests/config.xml"
+          directory= "samples/java_rewrite_engine/tutorial/2_languages/1_simple/2_typed/1_static/" />
+
+    <!--Simple typed dynamic-->
+  <include
+          file="../samples/java_rewrite_engine/tutorial/2_languages/1_simple/2_typed/2_dynamic/tests/config.xml"
+          directory= "samples/java_rewrite_engine/tutorial/2_languages/1_simple/2_typed/2_dynamic/" />
+    <!--Kool untyped-->
+    <include
+          file="../samples/java_rewrite_engine/tutorial/2_languages/2_kool/1_untyped/tests/config.xml"
+          directory= "samples/java_rewrite_engine/tutorial/2_languages/2_kool/1_untyped/" />
+    <!--Kool typed dynamic-->
+    <!--<include-->
+        <!--file="../samples/java_rewrite_engine/tutorial/2_languages/2_kool/2_typed/1_dynamic/tests/config.xml"-->
+        <!--directory="samples/java_rewrite_engine/tutorial/2_languages/2_kool/2_typed/1_dynamic/" />-->
+    <!--Kool typed static-->
+    <!--<include-->
+        <!--file="../samples/java_rewrite_engine/tutorial/2_languages/2_kool/2_typed/2_static/tests/config.xml"-->
+        <!--directory="samples/java_rewrite_engine/tutorial/2_languages/2_kool/2_typed/2_static/" />-->
+
+
+
+</tests>

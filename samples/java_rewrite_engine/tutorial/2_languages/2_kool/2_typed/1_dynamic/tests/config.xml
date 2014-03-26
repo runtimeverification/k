@@ -1,0 +1,19 @@
+<tests>
+
+    <test
+            definition="kool-typed-dynamic.k"
+            programs="../../programs/"
+            extension="kool"
+            exclude="cycle.kool"
+            results="./../../../../../../../../tutorial/2_languages/2_kool/2_typed/1_dynamic/tests/"
+            >
+        <kompile-option name="-backend" value="java" />
+        <kompile-option name="-rule-index" value="path" />
+        <all-programs>
+            <krun-option name="-backend" value="java" />
+            <krun-option name="-smt" value="none" />
+            <krun-option name="-output" value="none" />
+        </all-programs>
+    </test>
+
+</tests>

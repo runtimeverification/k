@@ -1,0 +1,17 @@
+<tests>
+
+  <test definition="kool-untyped"
+        programs="."
+        extension="kool"
+        exclude="cycle"
+        results="../../../../../../../tutorial/2_languages/2_kool/1_untyped/tests" >
+      <kompile-option name="-rule-index" value="path" />
+      <kompile-option name="-backend" value="java" />
+      <all-programs>
+            <krun-option name="-backend" value="java" />
+            <krun-option name="-smt" value="none" />
+            <krun-option name="-output" value="none" />
+        </all-programs>
+  </test>
+
+</tests>

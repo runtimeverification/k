@@ -1,0 +1,17 @@
+<tests>
+
+  <test definition="simple-untyped"
+        programs="../../../../../../../tutorial/2_languages/1_simple/1_untyped/tests"
+        extension="simple"
+        exclude="dekker.simple threads_05.simple exceptions_07.simple"
+        results="../../../../../../../tutorial/2_languages/1_simple/1_untyped/tests" >
+      <kompile-option name="-backend" value="java" />
+      <kompile-option name="-rule-index" value="path" />
+        <all-programs>
+            <krun-option name="-backend" value="java" />
+            <krun-option name="-smt" value="none" />
+            <krun-option name="-output" value="none" />
+        </all-programs>
+  </test>
+
+</tests>
