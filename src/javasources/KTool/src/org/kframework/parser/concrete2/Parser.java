@@ -1,21 +1,36 @@
 package org.kframework.parser.concrete2;
 
 import org.kframework.kil.Ambiguity;
+import org.kframework.kil.KApp;
 import org.kframework.kil.KList;
 import org.kframework.kil.Term;
-import org.kframework.parser.concrete2.Grammar.ExitState;
-import org.kframework.parser.concrete2.Grammar.NextableState;
-import org.kframework.parser.concrete2.Grammar.NonTerminal;
-import org.kframework.parser.concrete2.Grammar.NonTerminalId;
+import org.kframework.kil.Token;
+import org.kframework.parser.concrete2.Grammar.ContextFreeRule;
+import org.kframework.parser.concrete2.Grammar.ContextSensitiveRule;
+import org.kframework.parser.concrete2.Grammar.Rule;
+import org.kframework.parser.concrete2.Grammar.RuleState;
+import org.kframework.parser.concrete2.Grammar.State;
 import org.kframework.parser.concrete2.Grammar.NonTerminalState;
 import org.kframework.parser.concrete2.Grammar.PrimitiveState;
-import org.kframework.parser.concrete2.Grammar.RegExState;
-import org.kframework.parser.concrete2.Grammar.State;
+import org.kframework.parser.concrete2.Grammar.EntryState;
+import org.kframework.parser.concrete2.Grammar.ExitState;
+import org.kframework.parser.concrete2.Grammar.NonTerminal;
+import org.kframework.parser.concrete2.Grammar.NextableState;
+import org.kframework.parser.concrete2.Grammar.NonTerminalId;
 import org.kframework.parser.concrete2.Grammar.StateId;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 /*
@@ -150,99 +165,17 @@ class Function:
   // composition must track which entries are new
 */
 
-class Function {
-    //private final NonTerminalCall ntCall;
-    //private Set<TermRewrites> terms;
-    private Set<KList> terms = new HashSet<KList>();
-    //private boolean parses;
-    private Function(Set<KList> terms) { this.terms = terms; }
-    //public Function(NonTerminalCall ntCall, Term ) { this.ntCall = ntCall; }
-
-    public static Function constant(Term term) {
-        return new Function(new HashSet<KList>(Arrays.asList(new KList(Arrays.asList(term)))));
-    }
-    public static Function empty() {
-        return new Function(new HashSet<KList>());
-    }
-    public static Function identity() {
-        return new Function(new HashSet<KList>(Arrays.asList(new KList())));
-    }
-
-    public void addFunction(Function that) {
-        this.terms.addAll(that.terms);
-    }
-
-    public boolean addFunctionComposition(Function sibling, Function child) {
-        boolean result = false;
-        for (KList x : sibling.terms) {
-            for (KList y : child.terms) {
-                KList z = x.shallowCopy();
-                z.getContents().addAll(y.getContents());
-                result |= this.terms.add(z);
-            }
-        }
-        return result;
-    }
-
-    class Factoring {
-        public final KList prefix;
-        public final Term suffix;
-        public Factoring(KList prefix, Term suffix) {
-            this.prefix = prefix; this.suffix = suffix;
-        }
-    }
-    Factoring factor(KList klist) {
-        if (klist.getContents().size() == 0) {
-            return null;
-        } else {
-            return new Factoring(new KList(klist.getContents().subList(0, klist.getContents().size()-1)),
-                                 klist.getContents().get(klist.getContents().size()-1));
-        }
-    }
-
-    void addFactoredAndRunRule(Function that, StateReturn stateReturn) { // if lookahead, factors all results; always subjugates
-        // this factoring will be wrong once we move to context sensitive functions, but it works for now
-        //this.terms.append(new Ambiguity("K", Arrays.asList(that.terms)));
-
-        this.terms.addAll(stateReturn.key.stateCall.key.state.runRule(that.terms));
-
-        /* This code may be no longer useful.  We discovered that factorings are unneeded (we think).
-        //A more general algorithm would look roughly like the following:
-        Set<KList> unfactorables = new HashSet<KList>();
-        HashMultimap<KList,Term> factorings = HashMultimap.create();
-        for (KList klist : that.terms) {
-            Factoring factoring = factor(klist);
-            if (factoring == null) {
-                unfactorables.add(klist);
-            } else {
-                factorings.put(factoring.prefix, factoring.suffix);
-            }
-        }
-        for (KList klist : unfactorables) {
-            this.terms.add(stateReturn.key.stateCall.key.state.runRule(klist));
-        }
-        for (Map.Entry<KList,Collection<Term>> entry : factorings.asMap().entrySet()) {
-            KList klist = entry.getKey().shallowCopy();
-            klist.getContents().add(new Ambiguity("K", new ArrayList<Term>(entry.getValue()))); // TODO: check result
-            this.terms.add(stateReturn.key.stateCall.key.state.runRule(klist));
-        }
-        */
-    }
-
-    Set<KList> applyToNull() { return terms; }
-}
-
-
 class StateCall {
     public final Function function = Function.empty();
-    public StateReturnWorkList workList = null; // top of queue stack when addFunction was last updated called
+
+    //public StateReturnWorkList workList = null; // top of queue stack when addFunction was last updated called
     public static class Key {
         public final NonTerminalCall ntCall;
         public final int stateBegin;
         public final State state;
 
-//// Boilerplate after this line ////
         public Key(NonTerminalCall ntCall, int stateBegin, State state) {
+//// Boilerplate after this line ////
             this.ntCall = ntCall; this.stateBegin = stateBegin; this.state = state;
         }
 
@@ -273,8 +206,7 @@ class StateCall {
 }
 
 class StateReturn implements Comparable<StateReturn> {
-    public final Function preRuleFunction = Function.empty(); // entries are accumulated
-    public final Function postRuleFunction = Function.empty(); // entries are immutable once added
+    public final Function function = Function.empty(); // entries are accumulated
 
 /* Invarient:
   A state return is committed only if there is no state that
@@ -285,21 +217,29 @@ class StateReturn implements Comparable<StateReturn> {
     public int compareTo(StateReturn that) {
         int x;
         return
-            ((x = Integer.compare(this.key.stateEnd, that.key.stateEnd)) != 0) ? x :
+            // NOTE: ntBegin is contravarient
             ((x = Integer.compare(that.key.stateCall.key.ntCall.key.ntBegin,
-                                  this.key.stateCall.key.ntCall.key.ntBegin)) != 0) ? x: // note the reversed order
-            ((x = this.key.stateCall.key.state.compareTo(that.key.stateCall.key.state)) != 0) ? x :
-            Integer.compare(this.key.stateCall.key.stateBegin, that.key.stateCall.key.stateBegin);
+                                  this.key.stateCall.key.ntCall.key.ntBegin)) != 0) ? x :
+            // TODO: ((x = this.key.stateCall.key.ntCall.key.nt.orderingInfo.compareTo(
+            //             that.key.stateCall.key.ntCall.key.nt.orderingInfo)) != 0) ? x :
+            ((x = Integer.compare(this.key.stateEnd, that.key.stateEnd)) != 0) ? x :
+            ((x = this.key.stateCall.key.state.orderingInfo.compareTo(
+                  that.key.stateCall.key.state.orderingInfo)) != 0) ? x :
+            // NOTE: these last two comparisons are just so we don't conflate distinct values
+            ((x = Integer.compare(this.key.stateCall.key.stateBegin,
+                                  that.key.stateCall.key.stateBegin)) != 0) ? x :
+            this.key.stateCall.key.state.compareTo(that.key.stateCall.key.state);
     }
 
     public static class Key {
         public final StateCall stateCall;
         public final int stateEnd;
-//// Boilerplate after this line ////
         public Key(StateCall stateCall, int stateEnd) {
-            assert (!((stateCall.key.state instanceof NonTerminalState) &&
-                      (((NonTerminalState)stateCall.key.state).isLookahead)) ||
-                    stateCall.key.stateBegin == stateEnd);
+            if (stateCall.key.state instanceof NonTerminalState &&
+                ((NonTerminalState)stateCall.key.state).isLookahead) {
+                stateEnd = stateCall.key.stateBegin;
+            }
+//// Boilerplate after this line ////
             this.stateCall = stateCall; this.stateEnd = stateEnd;
         }
 
@@ -324,17 +264,31 @@ class StateReturn implements Comparable<StateReturn> {
         }
     }
     public final Key key;
-    StateReturn(Key key) { this.key = key; }
+    StateReturn(Key key) {
+        this.key = key;
+        // TODO: remove this?
+        //this.key.stateCall.key.ntCall.stateReturns.add(this);
+        if (this.key.stateCall.key.state instanceof ExitState) {
+            this.key.stateCall.key.ntCall.exitStateReturns.add(this);
+        }
+
+    }
 
     public int hashCode() {
         return this.key.hashCode();
     }
 }
 
+class Context {
+    Set<KList> contexts = new HashSet<>();
+}
+
 class NonTerminalCall {
     Set<StateCall> callers = new HashSet<StateCall>();
-    public final Set<StateReturn> stateReturns = new HashSet<StateReturn>();
+    //public final Set<StateReturn> stateReturns = new HashSet<StateReturn>();
     public final Set<StateReturn> exitStateReturns = new HashSet<StateReturn>(); // = stateReturns.filter(x.stateCall.state instanceof ExitState)
+    public final Set<StateReturn> reactivations = new HashSet<>();
+    public final Context context = new Context();
     public static class Key {
         public final NonTerminal nt;
         public final int ntBegin;
@@ -375,29 +329,22 @@ class StateReturnWorkList extends TreeSet<StateReturn> {
     public StateReturn dequeue() { return this.pollFirst(); }
 }
 
-class StateReturnWorkLists {
-    private final Deque<StateReturnWorkList> stack = new ArrayDeque<StateReturnWorkList>();
-    void push() { stack.addFirst(new StateReturnWorkList()); }
-    void pop() { stack.removeFirst(); }
-    StateReturnWorkList top() { return stack.peekFirst(); }
-}
-
 class ParseState {
     final CharSequence input;
-    final public StateReturnWorkLists stateReturnWorkLists = new StateReturnWorkLists();
+    final public StateReturnWorkList stateReturnWorkList = new StateReturnWorkList();
     public ParseState(CharSequence input) { this.input = input; }
 
-    Map<NonTerminalCall.Key,NonTerminalCall> ntCalls = new HashMap<NonTerminalCall.Key,NonTerminalCall>();
-    Map<StateCall.Key,StateCall> stateCalls = new HashMap<StateCall.Key,StateCall>();
-    Map<StateReturn.Key,StateReturn> stateReturns = new HashMap<StateReturn.Key,StateReturn>();
+    Map<NonTerminalCall.Key,NonTerminalCall> ntCalls = new HashMap<>();
+    Map<StateCall.Key,StateCall> stateCalls = new HashMap<>();
+    Map<StateReturn.Key,StateReturn> stateReturns = new HashMap<>();
 
     public NonTerminalCall getNtCall(NonTerminalCall.Key key) {
-            NonTerminalCall value = ntCalls.get(key);
-            if (value == null) {
-                    value = new NonTerminalCall(key);
-                    ntCalls.put(key, value);
-            }
-            return value;
+        NonTerminalCall value = ntCalls.get(key);
+        if (value == null) {
+            value = new NonTerminalCall(key);
+            ntCalls.put(key, value);
+        }
+        return value;
     }
     public StateCall getStateCall(StateCall.Key key) {
         StateCall value = stateCalls.get(key);
@@ -420,8 +367,168 @@ class ParseState {
 
 ////////////////
 
+class Function {
+    private abstract class Mapping {}
+    private class Nil extends Mapping { Set<KList> values = new HashSet<>(); }
+    private class One extends Mapping { Map<KList, Set<KList>> values = new HashMap<>(); }
+    private Mapping mapping = new Nil();
+    private boolean unknownMappingType() { assert false : "unknown mapping type"; return false; }
+    public static final Function IDENTITY = new Function();
+    static {
+        ((Nil) IDENTITY.mapping).values.add(KList.EMPTY);
+    }
+    static Function empty() { return new Function(); }
+
+    // Converts a Nil to a One with the given contexts
+    private void promote(Set<KList> contexts) {
+        assert this.mapping instanceof Nil;
+        Set<KList> oldValues = ((Nil) this.mapping).values;
+        this.mapping = new One();
+        for (KList key : contexts) {
+            // Java, why you no have copy constructor?!
+            Set<KList> value = new HashSet<>();
+            value.addAll(oldValues);
+            ((One) this.mapping).values.put(key, value);
+        }
+    }
+
+    // Should be method of KList
+    private static KList append(KList klist, Term t) {
+        KList newKList = new KList(klist);
+        newKList.add(t);
+        return newKList;
+    }
+
+    private abstract class Lambda<T,S> { public abstract S apply(T t); }
+    // for each set in that, add adder applied to that set
+    boolean addAux(Function that, Lambda<Set<KList>, Set<KList>> adder) {
+        if (this.mapping instanceof Nil && that.mapping instanceof Nil) {
+            return ((Nil) this.mapping).values.addAll(adder.apply(((Nil) that.mapping).values));
+        } else if (this.mapping instanceof Nil && that.mapping instanceof One) {
+            this.promote(((One) that.mapping).values.keySet());
+            return this.addAux(that, adder);
+        } else if (this.mapping instanceof One && that.mapping instanceof Nil) {
+            boolean result = false;
+            Set<KList> newValues = adder.apply(((Nil) that.mapping).values);
+            for (Set<KList> values : ((One) this.mapping).values.values()) {
+                result |= values.addAll(newValues);
+            }
+            return result;
+        } else if (this.mapping instanceof One && that.mapping instanceof One) {
+            boolean result = false;
+            for (KList key : ((One) that.mapping).values.keySet()) {
+                if (!((One) this.mapping).values.containsKey(key)) {
+                    ((One) this.mapping).values.put(key, new HashSet<KList>());
+                }
+                result |= ((One) this.mapping).values.get(key).addAll(adder.apply(((One) that.mapping).values.get(key)));
+            }
+            return result;
+        } else { return unknownMappingType(); }
+    }
+
+    // Returns the KLists that this function maps to
+    Set<KList> results() {
+        if (this.mapping instanceof Nil) { return ((Nil) this.mapping).values; }
+        else if (this.mapping instanceof One) {
+            Set<KList> result = new HashSet<>();
+            for (Set<KList> value: ((One) this.mapping).values.values()) {
+                result.addAll(value);
+            }
+            return result;
+        } else { unknownMappingType(); return null; }
+    }
+
+    Set<KList> applyToNull() {
+        if (this.mapping instanceof Nil) { return ((Nil) this.mapping).values; }
+        else { assert false : "unimplemented"; return null; } // TODO
+    }
+
+    public boolean addIdentity() { return add(IDENTITY); }
+
+    public boolean add(Function that) {
+        return addAux(that, new Lambda<Set<KList>, Set<KList>>() {
+            public Set<KList> apply(Set<KList> set) { return set; }
+        });
+    }
+    boolean addToken(Function that, String string) {
+        final KApp token = Token.kAppOf("K", string);
+        return addAux(that, new Lambda<Set<KList>, Set<KList>>() {
+            public Set<KList> apply(Set<KList> set) {
+                Set<KList> result = new HashSet<>();
+                for (KList klist : set) {
+                    result.add(append(klist, token));
+                }
+                return result;
+            }
+        });
+    }
+
+    boolean addNTCall(Function call, final Function exit) {
+        return addAux(call, new Lambda<Set<KList>, Set<KList>>() {
+            public Set<KList> apply(Set<KList> set) {
+                Set<KList> result = new HashSet<>();
+                for (KList context : set) {
+                    // find subset of exit that matches
+                    Set<KList> matches = null;
+                    if (exit.mapping instanceof Nil) {
+                        matches = ((Nil) exit.mapping).values;
+                    } else if (exit.mapping instanceof One) {
+                        matches = ((One) exit.mapping).values.get(context);
+                    } else { unknownMappingType(); }
+                    // if we found some, make an amb node and append them to the KList
+                    if (!matches.isEmpty()) {
+                        result.add(append(context, new Ambiguity("K", new ArrayList<Term>(matches))));
+                    }
+                }
+                return result;
+            }
+        });
+    }
+
+    // NOTE: also adds rule to reactivations
+    boolean addRule(Function that, final Rule rule, StateReturn stateReturn) {
+        if (rule instanceof ContextFreeRule) {
+            return addAux(that, new Lambda<Set<KList>, Set<KList>>() {
+                public Set<KList> apply(Set<KList> set) {
+                    return ((ContextFreeRule) rule).apply(set);
+                }
+            });
+        } else if (rule instanceof ContextSensitiveRule) {
+            Set<KList> ntCallContexts = stateReturn.key.stateCall.key.ntCall.context.contexts;
+
+            if (this.mapping instanceof Nil) { promote(ntCallContexts); }
+
+            // Build a "promoted" version of "that"
+            One promotedThat = null;
+            if (that.mapping instanceof Nil) {
+                promotedThat = new One();
+                for (KList context : ntCallContexts) {
+                    promotedThat.values.put(context, ((Nil) that.mapping).values);
+                }
+            } else if (that.mapping instanceof One) {
+                promotedThat = ((One) that.mapping);
+            } else { unknownMappingType(); }
+
+            boolean result = false;
+            for (KList key : promotedThat.values.keySet()) {
+                if (((One) this.mapping).values.get(key) == null) {
+                    ((One) this.mapping).values.put(key, new HashSet<KList>());
+                }
+                result |= ((One) this.mapping).values.get(key).
+                    addAll(((ContextSensitiveRule) rule).apply(key, promotedThat.values.get(key)));
+            }
+
+            stateReturn.key.stateCall.key.ntCall.reactivations.add(stateReturn);
+
+            return result;
+        } else { return unknownMappingType(); }
+    }
+}
+
+////////////////
+
 public class Parser {
-	
+	/*
     public static void main(String[] args) {
         try {
             System.in.read();
@@ -478,6 +585,7 @@ public class Parser {
         // - calling java.Object.hashCode is SLOOOOOOW
         // - calling RTTI versions of getStateCall, etc. are slow
     }
+    */
 
     public static long getCpuTime( ) {
         ThreadMXBean bean = ManagementFactory.getThreadMXBean();
@@ -497,25 +605,22 @@ public class Parser {
         NonTerminal startNt = new NonTerminal(new NonTerminalId("<start>"),
                                               new StateId("<start-entry>"), new State.OrderingInfo(Integer.MIN_VALUE),
                                               new StateId("<start-exit>"), new State.OrderingInfo(Integer.MAX_VALUE));
-        State state = new NonTerminalState(new StateId("<start>"), startNt, new State.OrderingInfo(Integer.MAX_VALUE - 1), nt, true);
+        NonTerminalState state = new NonTerminalState(new StateId("<start>"), startNt, new State.OrderingInfo(Integer.MAX_VALUE - 1), nt, false);
+        startNt.entryState.next.add(state);
+        state.next.add(startNt.exitState);
 
-        // this lookahead must be true so that a new worklist is pushed on the stack
-        activateNtCall(s.getStateCall(new StateCall.Key(s.getNtCall(new NonTerminalCall.Key(nt, position)), position, state)));
+        //activateStateCall(s.getStateCall(new StateCall.Key(s.getNtCall(new NonTerminalCall.Key(nt, position)), position, state)), Function.IDENTITY);
+        activateStateCall(s.getStateCall(new StateCall.Key(s.getNtCall(new NonTerminalCall.Key(startNt, position)), position, startNt.entryState)), Function.IDENTITY);
 
-        while (s.stateReturnWorkLists.top() != null) {
-            StateReturn stateReturn = null;
-            while ((stateReturn = s.stateReturnWorkLists.top().dequeue()) != null) {
-                this.stateReturn(stateReturn);
-            }
-            s.stateReturnWorkLists.pop();
+        for (StateReturn stateReturn = null;
+             (stateReturn = s.stateReturnWorkList.dequeue()) != null;) {
+            this.workListStep(stateReturn);
         }
 
         Ambiguity result = new Ambiguity("K", new ArrayList<Term>());
-        for(StateReturn stateReturn : s.getNtCall(new NonTerminalCall.Key(nt,0)).exitStateReturns) {
+        for(StateReturn stateReturn : s.getNtCall(new NonTerminalCall.Key(nt,position)).exitStateReturns) {
             if (stateReturn.key.stateEnd == s.input.length()) {
-                for (KList klist : stateReturn.postRuleFunction.applyToNull()) {
-                    result.getContents().add(klist);
-                }
+                result.getContents().add(new KList(Arrays.<Term>asList(new Ambiguity("K", new ArrayList<Term>(stateReturn.function.applyToNull())))));
             }
         }
         return result;
@@ -526,22 +631,124 @@ public class Parser {
     /****************
      * State Return
      ****************/
+
+    public void workListStep(StateReturn stateReturn) {
+        if (finishStateReturn(stateReturn)) {
+            State state = stateReturn.key.stateCall.key.state;
+            if (state instanceof ExitState) {
+                for (StateCall stateCall : stateReturn.key.stateCall.key.ntCall.callers) {
+                    s.stateReturnWorkList.enqueue(
+                        s.getStateReturn(
+                            new StateReturn.Key(stateCall, stateReturn.key.stateEnd)));
+                }
+            } else if (state instanceof NextableState) {
+                for (State nextState : ((NextableState) state).next) {
+                    activateStateCall(s.getStateCall(new StateCall.Key(stateReturn.key.stateCall.key.ntCall, stateReturn.key.stateEnd, nextState)),
+                        stateReturn.function);
+                }
+            } else { unknownStateType(); }
+        }
+    }
+
+    // get function from call to return
+    private boolean finishStateReturn(StateReturn stateReturn) {
+        if (stateReturn.key.stateCall.key.state instanceof EntryState) {
+            return stateReturn.function.add(stateReturn.key.stateCall.function);
+        } else if (stateReturn.key.stateCall.key.state instanceof ExitState) {
+            return stateReturn.function.add(stateReturn.key.stateCall.function);
+        } else if (stateReturn.key.stateCall.key.state instanceof PrimitiveState) {
+            return stateReturn.function.addToken(stateReturn.key.stateCall.function,
+                s.input.subSequence(stateReturn.key.stateCall.key.stateBegin,
+                    stateReturn.key.stateEnd).toString());
+        } else if (stateReturn.key.stateCall.key.state instanceof RuleState) {
+            return stateReturn.function.addRule(stateReturn.key.stateCall.function,
+                ((RuleState) stateReturn.key.stateCall.key.state).rule,
+                stateReturn);
+        } else if (stateReturn.key.stateCall.key.state instanceof NonTerminalState) {
+            // TODO: mark sensitive if need be (we don't need to b/c all NT behave like context free rules)
+            return stateReturn.function.addNTCall(
+                stateReturn.key.stateCall.function,
+                s.getStateReturn(new StateReturn.Key(
+                    s.getStateCall(new StateCall.Key(
+                        s.getNtCall(new NonTerminalCall.Key(
+                            ((Grammar.NonTerminalState) stateReturn.key.stateCall.key.state).child,
+                            stateReturn.key.stateCall.key.stateBegin)),
+                        stateReturn.key.stateEnd,
+                        ((Grammar.NonTerminalState) stateReturn.key.stateCall.key.state).child.exitState)),
+                    stateReturn.key.stateEnd)).function);
+        } else { unknownStateType(); return false; }
+    }
+
+    // copy function from state return to next state call
+    // also put state return in the queue if need be
+    //private void activateStateCall(StateReturn stateReturn, State nextState) {
+    private void activateStateCall(StateCall stateCall, Function function) {
+        //StateCall stateCall = s.getStateCall(new StateCall.Key(stateReturn.key.stateCall.key.ntCall, stateReturn.key.stateEnd, nextState));
+        if (!stateCall.function.add(function)) return;
+        State nextState = stateCall.key.state;
+        // instanceof SimpleState
+        if (nextState instanceof EntryState) {
+            s.stateReturnWorkList.enqueue(
+                s.getStateReturn(
+                    new StateReturn.Key(stateCall, stateCall.key.stateBegin)));
+        } else if (nextState instanceof ExitState) {
+            s.stateReturnWorkList.enqueue(
+                s.getStateReturn(
+                    new StateReturn.Key(stateCall, stateCall.key.stateBegin)));
+        } else if (nextState instanceof RuleState) {
+            s.stateReturnWorkList.enqueue(
+                s.getStateReturn(
+                    new StateReturn.Key(stateCall, stateCall.key.stateBegin)));
+        } else if (nextState instanceof PrimitiveState) {
+            for (PrimitiveState.MatchResult matchResult : ((PrimitiveState)nextState).matches(s.input, stateCall.key.stateBegin)) {
+                s.stateReturnWorkList.enqueue(
+                    s.getStateReturn(
+                        new StateReturn.Key(stateCall, matchResult.matchEnd)));
+            }
+        // not instanceof SimpleState
+        } else if (nextState instanceof NonTerminalState) {
+            // make sure lookaheads have a stateReturn even if empty
+            if (((NonTerminalState) nextState).isLookahead) {
+                s.stateReturnWorkList.enqueue(
+                    s.getStateReturn(
+                        new StateReturn.Key(stateCall, stateCall.key.stateBegin)));
+            }
+            // add to the ntCall
+            NonTerminalCall ntCall = s.getNtCall(new NonTerminalCall.Key(((NonTerminalState) nextState).child, stateCall.key.stateBegin));
+            ntCall.callers.add(stateCall);
+            if (ntCall.context.contexts.addAll(stateCall.function.results())) {
+                // enqueues anything sensitive
+                s.stateReturnWorkList.addAll(ntCall.reactivations);
+            }
+            // activate the entry state call (almost like activateStateCall but we have no stateReturn)
+            StateCall entryStateCall = s.getStateCall(new StateCall.Key(ntCall, stateCall.key.stateBegin, ntCall.key.nt.entryState));
+            activateStateCall(entryStateCall, Function.IDENTITY);
+            // process existStateReturns already done in the ntCall
+            for (StateReturn exitStateReturn : ntCall.exitStateReturns) {
+                s.stateReturnWorkList.enqueue(
+                    s.getStateReturn(
+                        new StateReturn.Key(stateCall, exitStateReturn.key.stateEnd)));
+            }
+        } else { unknownStateType(); }
+    }
+
+    /*
     public void stateReturn(StateReturn stateReturn) {
         // Note that 'addPreRule' also puts the stateReturn in the work list
         // Note that 'addFunction' sets the call to use the top queue when a stateReturn is places
         // Note that 'addCaller' also sets up entry state
 
-        stateReturn.postRuleFunction.addFactoredAndRunRule(stateReturn.preRuleFunction, stateReturn); // if lookahead, factors all results; always subjugates
+        // if lookahead, factors all results; always subjugates
+        if (!(stateReturn.postRuleFunction.addFactoredAndRunRule(stateReturn.preRuleFunction, stateReturn)
+             || stateReturn.key.stateCall.key.state instanceof ExitState)) {
+            return;
+        }
 
         State state = stateReturn.key.stateCall.key.state;
         if (state instanceof ExitState) {
             // add exit state's function to all callers
             for (StateCall stateCall : stateReturn.key.stateCall.key.ntCall.callers) {
-                int stateEnd = ((NonTerminalState)stateCall.key.state).isLookahead ? // we know a caller must be a NonTerminalState
-                    stateCall.key.stateBegin :
-                    stateReturn.key.stateEnd;
-                this.addPreRuleFunction(new StateReturn.Key(stateCall, stateEnd),
-                                        stateCall.function, stateReturn.postRuleFunction);
+                activateStateReturn(new StateReturn.Key(stateCall, stateReturn.key.stateEnd), stateReturn.postRuleFunction);
             }
         } else if (state instanceof NextableState) {
             // activate all next states
@@ -551,56 +758,53 @@ public class Parser {
                     new StateCall.Key(stateReturn.key.stateCall.key.ntCall, stateReturn.key.stateEnd, nextState),
                     stateReturn.postRuleFunction);
 
-                if (nextState instanceof ExitState) {
-                    // an exit state's preRule is just the stateCall.function
-                    addPreRuleFunction(new StateReturn.Key(stateCall, stateCall.key.stateBegin),
-                                       stateCall.function, Function.identity());
-                } else if (nextState instanceof PrimitiveState) {
-                    // In order to avoid duplication of work, we must wrap a primitive inside a non-terminal (TODO: explain)
-                    for (PrimitiveState.MatchResult matchResult : ((PrimitiveState)nextState).matches(s.input, stateCall.key.stateBegin, stateCall.function)) {
-                        // a primitive state's preRule just moves the position forward
-                        addPreRuleFunction(new StateReturn.Key(stateCall, matchResult.matchEnd),
-                                           stateCall.function, matchResult.matchFunction);
-                    }
-                } else if (nextState instanceof NonTerminalState) {
-                    activateNtCall(stateCall);
-                } else { unknownStateType(); }
+                if (stateCall != null) {
+                    if (nextState instanceof ExitState) {
+                        // an exit state's preRule is just the stateCall.function
+                        activateStateReturn(new StateReturn.Key(stateCall, stateCall.key.stateBegin), Function.identity());
+                    } else if (nextState instanceof PrimitiveState) {
+                        // In order to avoid duplication of work, we must wrap a primitive inside a non-terminal (TODO: explain)
+                        for (PrimitiveState.MatchResult matchResult : ((PrimitiveState)nextState).matches(s.input, stateCall.key.stateBegin, stateCall.function)) {
+                            // a primitive state's preRule just moves the position forward
+                            activateStateReturn(new StateReturn.Key(stateCall, matchResult.matchEnd), matchResult.matchFunction);
+                        }
+                    } else if (nextState instanceof NonTerminalState) {
+                        activateNtCall(stateCall);
+                    } else { unknownStateType(); }
+                }
             }
         } else { unknownStateType(); }
     }
 
     void activateNtCall(StateCall stateCall) {
-        if (((NonTerminalState)stateCall.key.state).isLookahead) { s.stateReturnWorkLists.push(); }
+        if (((NonTerminalState)stateCall.key.state).isLookahead) {
+            activateStateReturn(new StateReturn.Key(stateCall, stateCall.key.stateBegin), Function.empty());
+            StateReturn stateReturn = s.getStateReturn(new StateReturn.Key(stateCall, stateCall.key.stateBegin));
+            s.stateReturnWorkList.enqueue(stateReturn);
+        }
 
         NonTerminalCall ntCall = s.getNtCall(new NonTerminalCall.Key(((NonTerminalState)stateCall.key.state).child, stateCall.key.stateBegin));
-        ntCall.callers.add(stateCall);
+        if (ntCall.callers.add(stateCall)) {
+            StateCall entryStateCall = activateStateCall(new StateCall.Key(ntCall, ntCall.key.ntBegin, ntCall.key.nt.entryState), Function.identity());
+            if (entryStateCall != null) {
+                activateStateReturn(new StateReturn.Key(entryStateCall, ntCall.key.ntBegin), Function.identity());
+            }
+            for (StateReturn stateReturn : ntCall.reactivations) {
+                s.stateReturnWorkList.enqueue(stateReturn);
+                /*
+                StateCall stateCall = stateReturn.key.stateCall;
+                if (stateCall.function.newerThan(stateReturn.preRuleFunction, ntCall)) {
+                    assert stateReturn.key.stateCall.key.state instanceof NonTerminalState;
+                    activateNtCall(stateCall); // loop?
+                } else if (stateReturn.preRuleFunction.newerThan(stateReturn.postRuleFunction, ntCall)) {
+                    s.stateReturnWorkList.enqueue(stateReturn);
+                } else if (stateReturn.key.stateCall.key.state instanceof ExitState &&
+                           stateReturn.postRuleFunction.newer(ntCall)) {
+                    s.stateReturnWorkList.enqueue(stateReturn);
+                }
 
-        StateCall entryStateCall = activateStateCall(new StateCall.Key(ntCall, ntCall.key.ntBegin, ntCall.key.nt.entryState), Function.identity());
-
-        addPreRuleFunction(new StateReturn.Key(entryStateCall, ntCall.key.ntBegin), Function.identity(), Function.identity());
-    }
-
-    // mark state as being in the top queue
-    // add function to the state function
-    StateCall activateStateCall(StateCall.Key key, Function function) {
-        StateCall stateCall = s.getStateCall(key);
-        stateCall.workList = s.stateReturnWorkLists.top();
-        stateCall.function.addFunction(function);
-        return stateCall;
-    }
-
-    void addPreRuleFunction(StateReturn.Key key, Function sibling, Function child) { // add stateReturn to queue if preRuleFunction gets new entries (constructor does not queue)
-        // add the stateReturn to the nt's stateReturns and exitStateReturns lists
-        StateReturn stateReturn = s.getStateReturn(key);
-        // Add the state return to the NT call
-        stateReturn.key.stateCall.key.ntCall.stateReturns.add(stateReturn);
-        if (stateReturn.key.stateCall.key.state instanceof ExitState) {
-            stateReturn.key.stateCall.key.ntCall.exitStateReturns.add(stateReturn);
-        }
-
-        // Enqueue if we creates new data
-        if (stateReturn.preRuleFunction.addFunctionComposition(sibling, child)) {
-            stateReturn.key.stateCall.workList.enqueue(stateReturn);
+            }
         }
     }
+    */
 }

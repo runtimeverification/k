@@ -7,6 +7,7 @@ import org.kframework.parser.concrete2.Grammar.NonTerminalId;
 import org.kframework.parser.concrete2.Grammar.NonTerminalState;
 import org.kframework.parser.concrete2.Grammar.RegExState;
 import org.kframework.parser.concrete2.Grammar.State;
+import org.kframework.parser.concrete2.Grammar.NextableState;
 import org.kframework.parser.concrete2.Grammar.StateId;
 
 import java.lang.management.ManagementFactory;
@@ -337,8 +338,8 @@ public class ParserTest extends TestCase {
 
         for (int i = 2; i < 10; i++) {
             NonTerminal nt = new NonTerminal(new NonTerminalId("NT"+i),
-                    new StateId("NT"+1+"Entry"), new State.OrderingInfo(-i),
-                    new StateId("NT"+1+"Exit"), new State.OrderingInfo(2*i-1));
+                    new StateId("NT"+i+"Entry"), new State.OrderingInfo(-i),
+                    new StateId("NT"+i+"Exit"), new State.OrderingInfo(2*i-1));
             NonTerminalState state = new NonTerminalState(
                     new StateId("S"+i), nt, new State.OrderingInfo(2*i-2), baseCase, false);
             nt.entryState.next.add(state);
@@ -419,6 +420,63 @@ public class ParserTest extends TestCase {
             assertEquals("1+2*3: ", expected, result);
         }
     }
+
+//    public void testPrecedence1() throws Exception {
+//        NonTerminal e = new NonTerminal(new NonTerminalId("E"),
+//            new StateId("E-entry"), new State.OrderingInfo(?),
+//            new StateId("E-exit"), new State.OrderingInfo(?));
+//        { // lit
+//            NextableState var = new RegExState(new StateId("Var"), e, new State.OrderingInfo(?), Pattern.compile("[a-z]"));
+//            NextableState varLabel = new WrapLabelRuleState(new StateId("VarLabel"), e, new State.OrderingInfo(?), new KLabelConstant("Var"));
+//            e.entryState.next.add(var);
+//            var.next.add(varLabel);
+//            varLabel.next.add(e.exitState);
+//        }
+//
+//        { // plus
+//            NextableState e1 = new NonTerminalState(new StateId("Plus-e1"), e, new State.OrderingInfo(?), e, false);
+//            NextableState plus = new RegExState(new StateId("Plus-token"), e, new State.OrderingInfo(?), Pattern.compile("\\+"));
+//            NextableState e2 = new NonTerminalState(new StateId("Plus-e1"), e, new State.OrderingInfo(?), e, false);
+//            NextableState plusLabel = new WrapLabelRuleState(new StateId("Plus-label"), e, new State.OrderingInfo(?), new KLabelConstant("_+_"));
+//            e.entryState.next.add(e1);
+//            e1.next.add(plus);
+//            plus.next.add(e2);
+//            e2.next.add(plusLabel);
+//            plusLabel.next.add(e.exitState);
+//        }
+//
+//        { // times
+//            NextableState e1 = new NonTerminalState(new StateId("Times-e1"), e, new State.OrderingInfo(?), e, false);
+//            NextableState times = new RegExState(new StateId("Times-token"), e, new State.OrderingInfo(?), Pattern.compile("\\*"));
+//            NextableState e2 = new NonTerminalState(new StateId("Times-e1"), e, new State.OrderingInfo(?), e, false);
+//            NextableState timesLabel = new RuleState(new StateId("Times-label"), e, new State.OrderingInfo(?), new WrapLabelRule(new KLabelConstant("_*_")));
+//            e.entryState.next.add(e1);
+//            e1.next.add(times);
+//            times.next.add(e2);
+//            e2.next.add(timesLabel);
+//            timesLabel.next.add(e.exitState);
+//        }
+//
+//        {
+//            Term result = new Parser(new ParseState("x+y*z")).parse(e, 0);
+//            /*Term expected = amb(klist(amb(klist(amb(klist(amb(klist(amb(klist(token("1"))))))),
+//                token("+"),
+//                amb(klist(amb(klist(amb(klist(token("2"))))),
+//                    token("*"),
+//                    amb(klist(token("3")))))))));*/
+//            assertEquals("1+2*3: ", null, result);
+//            // lookahead success
+//            // lookahead failure
+//            // require context
+//            // reduce = Adopt
+//            // insert
+//            // delete = Done
+//            // assoc
+//            // prec
+//            // prefer
+//        }
+//
+//    }
 
     public static Ambiguity amb(Term ... terms) {
         return new Ambiguity("K", Arrays.asList(terms));
