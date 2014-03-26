@@ -44,10 +44,11 @@ import com.google.common.collect.Sets;
  * @author AndreiS
  */
 @SuppressWarnings("serial")
-public class KItem extends Term implements Sorted {
+public final class KItem extends Term {
 
     private final Term kLabel;
     private final Term kList;
+    private final boolean isExactSort;
     private final String sort;
     private Boolean evaluable = null;
 
@@ -123,19 +124,14 @@ public class KItem extends Term implements Sorted {
                                     childTerm = extractInjectedTerm(kItem);
                                 }
                             }
-
-                            if (childTerm instanceof Sorted) {
-                                childSort = ((Sorted) childTerm).sort();
-                            } else {
-                                childSort = kind.toString();
-                            }
+                            childSort = childTerm.sort();
 
                             if (!context.isSubsortedEq(production.getChildSort(i), childSort)) {
                                 mustMatch = false;
 
                                 if (kLabelConstant.isConstructor()) {
                                     if (childTerm instanceof Variable) {
-                                        Set<String> set = Sets.newHashSet(production.getChildSort(i), ((Variable) childTerm).sort());
+                                        Set<String> set = Sets.newHashSet(production.getChildSort(i), childTerm.sort());
                                         if (context.getCommonSubsorts(set).isEmpty()) {
                                             mayMatch = false;
                                         }
@@ -180,8 +176,10 @@ public class KItem extends Term implements Sorted {
                         assert sort != null && !sort.equals("null"):
                                 "The greatest lower bound (GLB) of sorts " + sorts + "doesn't exist!";
                     }
+                    isExactSort = kLabelConstant.isConstructor() && sorts.equals(possibleMinimalSorts);
                 } else {    /* no production matches this KItem */
                     sort = kind.toString();
+                    isExactSort = false;
                 }
             } else {    /* productions.size() == 0 */
                 /* a list terminator does not have conses */
@@ -195,9 +193,11 @@ public class KItem extends Term implements Sorted {
                 } else {
                     sort = kind.toString();
                 }
+                isExactSort = kLabelConstant.isConstructor();
             }
         } else {    /* not a KLabelConstant or the kList contains a frame variable */
             sort = kind.toString();
+            isExactSort = false;
         }
 
         if (possibleMinimalSorts != null) {
@@ -292,8 +292,7 @@ public class KItem extends Term implements Sorted {
         // TODO(YilongL): maybe we can move sort membership evaluation after
         // applying user-defined rules to allow the users to provide their
         // own rules for checking sort membership
-        if (kLabelConstant.label().startsWith("is") && kList.getContents().size() == 1
-                && (kList.getContents().get(0) instanceof Sorted)) {
+        if (kLabelConstant.label().startsWith("is") && kList.getContents().size() == 1) {
             Term checkResult = SortMembership.check(this, context.definition().context());
             if (checkResult != this) {
                 return checkResult;
@@ -411,6 +410,12 @@ public class KItem extends Term implements Sorted {
 
     public Term kList() {
         return kList;
+    }
+
+    @Override
+    public boolean isExactSort() {
+        //return isExactSort;
+        return kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isConstructor();
     }
 
     /**

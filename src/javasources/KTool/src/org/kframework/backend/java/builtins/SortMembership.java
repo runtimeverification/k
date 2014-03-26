@@ -38,9 +38,8 @@ public class SortMembership {
         }
 
         Term term = ((KList) kItem.kList()).getContents().get(0);
-        String termSort = ((Sorted) term).sort();
-        if (term instanceof KItem && ((KItem) term).kLabel() instanceof KLabel
-                && ((KLabel) ((KItem) term).kLabel()).isConstructor()) {
+        String termSort = term.sort();
+        if (term.isExactSort()) {
             return context.isSubsortedEq(predicateSort, termSort) ? BoolToken.TRUE : BoolToken.FALSE;
         } else if (context.isSubsortedEq(predicateSort, termSort)) {
             return BoolToken.TRUE;

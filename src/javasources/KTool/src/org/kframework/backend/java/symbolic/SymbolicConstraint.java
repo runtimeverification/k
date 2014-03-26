@@ -16,28 +16,9 @@ import java.util.Set;
 import org.kframework.backend.java.builtins.BitVector;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.kil.Bottom;
-import org.kframework.backend.java.kil.CellCollection;
-import org.kframework.backend.java.kil.ConcreteCollectionVariable;
-import org.kframework.backend.java.kil.ConstrainedTerm;
-import org.kframework.backend.java.kil.DataStructureLookup;
-import org.kframework.backend.java.kil.Definition;
-import org.kframework.backend.java.kil.Hole;
-import org.kframework.backend.java.kil.JavaSymbolicObject;
-import org.kframework.backend.java.kil.KCollection;
-import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.KLabel;
-import org.kframework.backend.java.kil.KLabelConstant;
-import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.Kind;
-import org.kframework.backend.java.kil.Sorted;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
-import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.java.kil.Z3Term;
+import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.util.GappaPrinter;
 import org.kframework.backend.java.util.GappaServer;
-import org.kframework.backend.java.util.KSorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.kil.ASTNode;
@@ -229,19 +210,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             if (leftHandSide.isGround() && rightHandSide.isGround()) {
                 return !leftHandSide.equals(rightHandSide);
             }
-            if (!(leftHandSide instanceof Sorted) || !(rightHandSide instanceof Sorted)) {
-                return false;
-            }
-
-            // TODO(AndreiS): treat HOLE more uniformly
-            if (leftHandSide == Hole.HOLE && (rightHandSide instanceof Sorted)
-                    && !definition.context().isSubsortedEq(((Sorted) rightHandSide).sort(), KSorts.KITEM)) {
-                return true;
-            }
-            if (rightHandSide == Hole.HOLE && (leftHandSide instanceof Sorted)
-                && !definition.context().isSubsortedEq(((Sorted) leftHandSide).sort(), KSorts.KITEM)) {
-                return true;
-            }
 
             if (leftHandSide instanceof ConcreteCollectionVariable
                     && !((ConcreteCollectionVariable) leftHandSide).matchConcreteSize(rightHandSide)) {
@@ -251,38 +219,27 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 return true;
             }
 
-            // TODO(YilongL): find a general way to deal with this
-            // TODO(AndreiS): handle KLabel variables
             if (!K.do_testgen) {
-                if (leftHandSide instanceof KItem && ((KItem) leftHandSide).kLabel() instanceof KLabel
-                        && ((KLabel) ((KItem) leftHandSide).kLabel()).isConstructor()) {
+                if (leftHandSide.isExactSort() && rightHandSide.isExactSort()) {
+                    return !leftHandSide.sort().equals(rightHandSide.sort());
+                } else if (leftHandSide.isExactSort()) {
                     return !definition.context().isSubsortedEq(
-                            ((Sorted) rightHandSide).sort(),
-                            ((KItem) leftHandSide).sort());
-                } else if (rightHandSide instanceof KItem && ((KItem) rightHandSide).kLabel() instanceof KLabel
-                        && ((KLabel) ((KItem) rightHandSide).kLabel()).isConstructor()) {
+                            rightHandSide.sort(),
+                            leftHandSide.sort());
+                } else if (rightHandSide.isExactSort()) {
                     return !definition.context().isSubsortedEq(
-                            ((Sorted) leftHandSide).sort(),
-                            ((KItem) rightHandSide).sort());
-                // TODO(AndreiS): fix sorting for KCollections
-                } else if (leftHandSide instanceof KCollection && ((KCollection) leftHandSide).size() > 1) {
-                    return !definition.context().isSubsortedEq(
-                            ((Sorted) rightHandSide).sort(),
-                            leftHandSide.kind().toString());
-                } else if (rightHandSide instanceof KCollection && ((KCollection) rightHandSide).size() > 1) {
-                    return !definition.context().isSubsortedEq(
-                            ((Sorted) leftHandSide).sort(),
-                            rightHandSide.kind().toString());
+                            leftHandSide.sort(),
+                            rightHandSide.sort());
                 } else {
-                    return null == definition.context().getGLBSort(ImmutableSet.<String>of(
-                        ((Sorted) leftHandSide).sort(),
-                        ((Sorted) rightHandSide).sort()));
+                    return null == definition.context().getGLBSort(ImmutableSet.of(
+                            leftHandSide.sort(),
+                            rightHandSide.sort()));
                 }
             } else {
                 if (leftHandSide instanceof KItem && ((KItem) leftHandSide).kLabel() instanceof KLabel
                         && ((KLabel) ((KItem) leftHandSide).kLabel()).isConstructor()) {
                     for (String pms : ((KItem) leftHandSide).possibleMinimalSorts()) {
-                        if (definition.context().isSubsortedEq(((Sorted) rightHandSide).sort(), pms)) {
+                        if (definition.context().isSubsortedEq(rightHandSide.sort(), pms)) {
                             return false;
                         }
                     }
@@ -290,15 +247,15 @@ public class SymbolicConstraint extends JavaSymbolicObject {
                 } else if (rightHandSide instanceof KItem && ((KItem) rightHandSide).kLabel() instanceof KLabel
                         && ((KLabel) ((KItem) rightHandSide).kLabel()).isConstructor()) {
                     for (String pms : ((KItem) rightHandSide).possibleMinimalSorts()) {
-                        if (definition.context().isSubsortedEq(((Sorted) leftHandSide).sort(), pms)) {
+                        if (definition.context().isSubsortedEq(leftHandSide.sort(), pms)) {
                             return false;
                         }
                     }
                     return true;
                 } else {
                     return definition.context().getCommonSubsorts(ImmutableSet.<String>of(
-                        ((Sorted) leftHandSide).sort(),
-                        ((Sorted) rightHandSide).sort())).isEmpty();
+                        (leftHandSide).sort(),
+                        (rightHandSide).sort())).isEmpty();
                 }
             }
         }
@@ -1185,7 +1142,7 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             if (subst instanceof DataStructureLookup) {
                 return false;
             }
-            String sortOfSubst = subst instanceof Sorted ? ((Sorted) subst).sort() : subst.kind().toString();
+            String sortOfSubst = subst.sort();
             /* YilongL: There are three different cases:
              * 1) sortOfParVar >= sortOfSubst
              * 2) sortOfParVar < sortOfSubst

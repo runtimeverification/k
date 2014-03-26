@@ -22,7 +22,7 @@ import com.google.common.base.Joiner;
 /**
  * @author: TraianSF
  */
-public class BuiltinList extends Collection implements Sorted {
+public class BuiltinList extends Collection {
 
     private final ImprovedArrayDeque<Term> elementsLeft;
     protected final ImprovedArrayDeque<Term> elementsRight;
@@ -83,9 +83,11 @@ public class BuiltinList extends Collection implements Sorted {
         return elementsLeft.size() + elementsRight.size();
     }
 
-    /**
-     * Returns a {@code String} representation of the sort of this object.
-     */
+    @Override
+    public boolean isExactSort() {
+        return true;
+    }
+
     @Override
     public String sort() {
         return KSorts.LIST;

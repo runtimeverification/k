@@ -22,7 +22,7 @@ import org.kframework.kil.KSorts;
  * @author AndreiS
  */
 @SuppressWarnings("serial")
-public class Cell<T extends Term> extends Term /*implements Sorted*/ {
+public class Cell<T extends Term> extends Term {
 
     private final String label;
     private final Kind contentKind;
@@ -57,8 +57,18 @@ public class Cell<T extends Term> extends Term /*implements Sorted*/ {
     }
 
     @Override
+    public boolean isExactSort() {
+        return true;
+    }
+
+    @Override
     public boolean isSymbolic() {
         return false;
+    }
+
+    @Override
+    public String sort() {
+        return kind.toString();
     }
 
     @Override

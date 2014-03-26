@@ -6,6 +6,7 @@ import org.kframework.backend.java.symbolic.Matcher;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
 import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.KSorts;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
@@ -23,7 +24,7 @@ import com.google.common.collect.Multimap;
  * 
  */
 @SuppressWarnings("rawtypes")
-public class CellCollection extends Collection implements Sorted {
+public class CellCollection extends Collection {
 
     private final Multimap<String, Cell> cells;
     
@@ -102,11 +103,13 @@ public class CellCollection extends Collection implements Sorted {
     }
 
     @Override
+    public boolean isExactSort() {
+        return true;
+    }
+
+    @Override
     public String sort() {
-        // TODO(YilongL): Should I return "MyBag" instead of "Bag" like BuiltinList, etc.?
-        // Or should I convert "Bag" to "MyBag" in Java backend kompilation?
-        // Note: the sort of Kind#Cell_Collection may also need to be changed to "MyBag"
-        return org.kframework.kil.KSorts.BAG;
+        return kind.toString();
     }
 
     @Override
