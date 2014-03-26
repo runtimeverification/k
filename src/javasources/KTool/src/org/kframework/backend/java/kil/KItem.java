@@ -60,7 +60,7 @@ public class KItem extends Term implements Sorted {
 
         Definition definition = termContext.definition();
         Context context = definition.context();
-        
+
         Set<String> possibleMinimalSorts = null;
         if (kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isConstructor()) {
             possibleMinimalSorts = new HashSet<>();
@@ -73,20 +73,20 @@ public class KItem extends Term implements Sorted {
             List<Production> productions = kLabelConstant.productions();
             if (productions.size() != 0) {
                 Set<String> sorts = new HashSet<String>();
-                
+
                 if (!K.do_kompilation) {
                     /**
                      * Sort checks in the Java engine are not implemented as
                      * rewrite rules, so we need to precompute the sort of
                      * terms. However, right now, we also want to allow users
                      * to provide user-defined sort predicate rules, e.g.
-                     *      ``rule isVal(cons V:Val) => true'' 
+                     *      ``rule isVal(cons V:Val) => true''
                      * to express the same meaning as overloaded productions
                      * which are not allowed to write in the current front-end.
                      */
                     /* YilongL: user-defined sort predicate rules are interpreted as overloaded productions at runtime */
                     for (KLabelConstant sortPredLabel : definition.sortPredLabels()) {
-                        Collection<Rule> rules = definition.functionRules().get(sortPredLabel); 
+                        Collection<Rule> rules = definition.functionRules().get(sortPredLabel);
                         for (Rule rule : rules) {
                             KItem predArg = rule.getSortPredArgument();
                             if (MetaK.matchable(kLabel, predArg.kLabel(), termContext).equals(BoolToken.TRUE)
@@ -96,7 +96,7 @@ public class KItem extends Term implements Sorted {
                         }
                     }
                 }
-                
+
                 for (Production production : productions) {
                     boolean mustMatch = true;
                     boolean mayMatch = true;
@@ -210,10 +210,10 @@ public class KItem extends Term implements Sorted {
         } else {
             this.possibleMinimalSorts = null;
         }
-        
+
 //        System.out.printf("KItem = %s, sort = %s, possibleMinimalSorts = %s\n", this, sort, possibleMinimalSorts);
     }
-    
+
     public boolean isEvaluable(TermContext context) {
         if (evaluable != null) {
             return evaluable;
@@ -224,11 +224,11 @@ public class KItem extends Term implements Sorted {
             return false;
         }
         KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
-        
+
         if (!(kList instanceof KList)) {
             return false;
         }
-        
+
         if (kLabelConstant.label().startsWith("is")
                 || !context.definition().functionRules().get(kLabelConstant).isEmpty()
                 || BuiltinFunction.isBuiltinKLabel(kLabelConstant)) {
@@ -251,7 +251,7 @@ public class KItem extends Term implements Sorted {
         if (!isEvaluable(context)) {
             return this;
         }
-        
+
         Definition definition = context.definition();
 
         if (!(kLabel instanceof KLabelConstant)) {
@@ -300,7 +300,7 @@ public class KItem extends Term implements Sorted {
             ConstrainedTerm constrainedTerm = new ConstrainedTerm(kList, context);
 
             Term result = null;
-            
+
             /*
              * YilongL: consider applying rules with attribute [owise]
              * only after no other rules can be applied for sure
