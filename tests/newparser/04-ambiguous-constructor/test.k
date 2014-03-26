@@ -4,8 +4,8 @@ module TEST
 
   syntax Exp ::= Id
                | Exp "." Id
-               | "1" Exp "(" Exp ")" [klabel('new_(_))]
+               | "new" Exp "(" Exp ")"
                | Exp "(" Exp ")"
-               //| "1" Exp             [klabel('new_)]
+               //| "new" Exp
 //new C(x).y(z)
 endmodule
