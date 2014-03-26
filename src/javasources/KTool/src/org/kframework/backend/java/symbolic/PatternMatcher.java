@@ -100,16 +100,19 @@ public class PatternMatcher extends AbstractMatcher {
             /* evaluate data structure lookups and add bindings for them */
             List<Map<Variable, Term>> multiSubsts = new ArrayList<>(Collections.singletonList(subst));
             for (UninterpretedConstraint.Equality equality : rule.lookups().equalities()) {
-                Term lookup = equality.leftHandSide() instanceof DataStructureLookup ? 
+                Term lookupOrChoice = equality.leftHandSide() instanceof DataStructureLookupOrChoice ? 
                         equality.leftHandSide() : equality.rightHandSide();
-                Term nonLookup = equality.leftHandSide() == lookup ? 
+                Term nonLookupOrChoice = equality.leftHandSide() == lookupOrChoice ? 
                         equality.rightHandSide() : equality.leftHandSide();
-                assert lookup instanceof DataStructureLookup : 
-                    "one side of the equality should be an instance of DataStructureLookup";
+                assert lookupOrChoice instanceof DataStructureLookupOrChoice : 
+                    "one side of the equality should be an instance of DataStructureLookup or DataStructureChoice";
                 
-                Term evaluatedLookup = lookup.substituteAndEvaluate(subst, context);
-                if (nonLookup instanceof Variable) {
-                    Variable variable = (Variable) nonLookup;
+                Term evaluatedLookup = lookupOrChoice.substituteAndEvaluate(subst, context);
+                if (evaluatedLookup instanceof Bottom) {
+                    continue label;
+                }
+                if (nonLookupOrChoice instanceof Variable) {
+                    Variable variable = (Variable) nonLookupOrChoice;
                     if (checkOrderedSortedCondition(variable, evaluatedLookup, context)) {
                         for (Map<Variable, Term> subst2 : multiSubsts) {
                             subst2.put(variable, evaluatedLookup);
@@ -120,9 +123,9 @@ public class PatternMatcher extends AbstractMatcher {
                 } else {
                     // the non-lookup term is not a variable and thus requires further pattern matching
                     PatternMatcher lookupMatcher = new PatternMatcher(context);
-                    if (lookupMatcher.patternMatch(evaluatedLookup, nonLookup)) {
+                    if (lookupMatcher.patternMatch(evaluatedLookup, nonLookupOrChoice)) {
                         List<Map<Variable, Term>> product = new ArrayList<Map<Variable, Term>>();
-                        // it's possible that multiple substitutions are possible from the pattern matching above
+                        // it's possible that multiple substitutions are viable from the pattern matching above
                         for (Map<Variable, Term> subst1 : PatternMatcher.getMultiSubstitutions(lookupMatcher)) {
                             for (Map<Variable, Term> subst2 : multiSubsts) {
                                 Map<Variable, Term> composedSubst = composeSubstitution(subst1, subst2);
@@ -262,6 +265,9 @@ public class PatternMatcher extends AbstractMatcher {
      */
     @Override
     public void match(Term subject, Term pattern) {
+        // TODO(YilongL): we may want to remove this restriction in the future
+        assert subject.isGround() : "expected the subject to be ground: " + subject;
+
         if (subject.kind().isComputational()) {
             assert pattern.kind().isComputational();
 
@@ -329,6 +335,14 @@ public class PatternMatcher extends AbstractMatcher {
      *            the term
      */
     private void addSubstitution(Variable variable, Term term) {
+        /* retrieve the exact element when the term is some singleton collection */
+        if (term.kind() == Kind.K || term.kind() == Kind.KLIST) {
+            term = KCollection.downKind(term);
+        }
+        if (term.kind() == Kind.CELL_COLLECTION) {
+            term = CellCollection.downKind(term);
+        }
+        
         if (!checkOrderedSortedCondition(variable, term, termContext)) {
             fail(variable, term);
         }
@@ -542,7 +556,7 @@ public class PatternMatcher extends AbstractMatcher {
                     for (int i = 0; i < otherCells.length; ++i) {
                         match(cells[generator.selection.get(i)], otherCells[i]);
                     }
-                } catch (UnificationFailure e) {
+                } catch (PatternMatchingFailure e) {
                     continue;
                 }
 
