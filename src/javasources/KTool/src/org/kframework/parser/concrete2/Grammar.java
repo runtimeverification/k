@@ -121,6 +121,30 @@ public class Grammar implements Serializable {
                 }
             }
         }
+        // create a new state for every start state that can have whitespace at the beginning
+        for (Entry<NonTerminalId, NonTerminal> entry : startNonTerminals.entrySet()) {
+            // create a new NT that calls the the startNT and has whitespace available at the beginning.
+            // the NonTerminalId is copied into the new NT to keep the reference in the Map
+            // the startNT gets another Id to eliminate confusion.
+            NonTerminal nt = entry.getValue();
+            NonTerminal whiteStartNt = new NonTerminal(
+                    new NonTerminalId(nt.nonTerminalId.name),
+                    new StateId(nt.nonTerminalId.name+"-whiteEntry"), OrderingInfo.ZERO,
+                    new StateId(nt.nonTerminalId.name+"-whiteExit"), OrderingInfo.ZERO);
+            PrimitiveState whitespace = new RegExState(
+                    new StateId("whitespace-" + seed++),
+                    whiteStartNt, OrderingInfo.ZERO,
+                    pattern,
+                    null, TreeCleanerVisitor.DELETESORT);
+            NonTerminalState nts = new NonTerminalState(
+                    new StateId("white-calls-" + nt.nonTerminalId.name),
+                    whiteStartNt, OrderingInfo.ZERO, nt, false, null, null);
+            nt.nonTerminalId = new NonTerminalId(nt.nonTerminalId.name + "-afterWhite");
+            whiteStartNt.entryState.next.add(whitespace);
+            whitespace.next.add(nts);
+            nts.next.add(whiteStartNt.exitState);
+            entry.setValue(whiteStartNt);
+        }
     }
 
     public void finalize() {
@@ -250,7 +274,7 @@ public class Grammar implements Serializable {
     }
 
     public static class NonTerminal implements Comparable<NonTerminal>, Serializable {
-        public final NonTerminalId nonTerminalId;
+        public NonTerminalId nonTerminalId;
         public final EntryState entryState;
         public final ExitState exitState;
         Set<NextableState> intermediaryStates = new HashSet<NextableState>();
@@ -261,6 +285,12 @@ public class Grammar implements Serializable {
             this.nonTerminalId = nonTerminalId;
             this.entryState = new EntryState(entryStateId, this, entryOrderingInfo, null, null);
             this.exitState = new ExitState(exitStateId, this, exitOrderingInfo, null, null);
+        }
+
+        public NonTerminal(NonTerminalId nonTerminalId) {
+            this.nonTerminalId = nonTerminalId;
+            this.entryState = new EntryState(new StateId(nonTerminalId.name + "-entry"), this, OrderingInfo.ZERO, null, null);
+            this.exitState = new ExitState(new StateId(nonTerminalId.name + "-exit"), this, OrderingInfo.ZERO, null, null);
         }
 
         public int compareTo(NonTerminal that) { return this.nonTerminalId.compareTo(that.nonTerminalId); }

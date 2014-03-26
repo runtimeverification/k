@@ -55,63 +55,46 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
         if (prd.isListDecl()) {
             UserList ul = (UserList) prd.getItems().get(0);
 
-            NonTerminalState Id = new NonTerminalState(
-                    new StateId(prd.getSort() + "-S-" + getUid()),
-                    nt, OrderingInfo.ZERO,
-                    grammar.get(ul.getSort()),
-                    false, null, null);
-            PrimitiveState pstate = new RegExState(
-                    new StateId(prd.getSort() + "-T-" + getUid()),
-                    nt, OrderingInfo.ZERO,
-                    Pattern.compile("\\Q" + ul.getSeparator() + "\\E"),
-                    null, TreeCleanerVisitor.DELETESORT);
-            NonTerminalState Ids = new NonTerminalState(
-                    new StateId(prd.getSort() + "-S-" + getUid()),
-                    nt, OrderingInfo.ZERO,
-                    grammar.get(prd.getSort()),
-                    false, new KLabelConstant(prd.getKLabel()), null);
-            nt.entryState.next.add(Id);
-            Id.next.add(pstate);
-            pstate.next.add(Ids);
-            Ids.next.add(nt.exitState);
-
-            if (!ul.getListType().equals("*")) {
-                NonTerminalState Id2 = new NonTerminalState(
-                        new StateId(prd.getSort() + "-S-" + getUid()),
-                        nt, OrderingInfo.ZERO,
-                        grammar.get(ul.getSort()),
-                        false, null, null);
-                previous.next.add(Id2);
-                previous = Id2;
-            }
-            // label for '.Ids (list terminator)
             NonTerminal specialNt = getListTerminatorNT(prd.getSort());
-            NonTerminalState special = new NonTerminalState(
-                    new StateId(prd.getSort() + "-S-" + getUid()),
-                    nt, OrderingInfo.ZERO,
-                    specialNt,
-                    false,  null, null);
-            previous.next.add(special);
-            previous = special;
-            // label for '_,_
-            if (!ul.getListType().equals("*")) {
-                Grammar.RegExState epsilonForLabel2 = new Grammar.RegExState(
-                        new Grammar.StateId(prd.getSort() + "-ET-" + getUid()),
-                        nt, OrderingInfo.ZERO,
-                        Pattern.compile(""),
-                        new KLabelConstant(prd.getKLabel()),
-                        TreeCleanerVisitor.DELETESORT);
-                previous.next.add(epsilonForLabel2);
-                previous = epsilonForLabel2;
+            String ntName = prd.getSort() + "-helper";
+            if (ul.getListType().equals("*")) {
+                // create the branch which allows for empty lists
+                NonTerminalState special = new NonTerminalState(new StateId(ntName + "-S-" + getUid()), nt, OrderingInfo.ZERO, specialNt, false, null, null);
+                nt.entryState.next.add(special);
+                special.next.add(nt.exitState);
+                previous = special;
             }
-            /**
-             * Allows for empty* cons lists which always terminate with the identity element of the list.
-             *                           '_,_
-             * (|-|-->[Id]----->(,)---->[Ids]--|->|)
-             *    |                            |
-             *    |-->[Id]-->[special]->(e2)---|
-             *                 '.Ids     '_,_
-             */
+            {
+                NonTerminal wrapperNt = new NonTerminal(new NonTerminalId(ntName));
+                NonTerminalState IdsHelper = new NonTerminalState(new StateId(ntName + "-S-" + getUid()), nt, OrderingInfo.ZERO, wrapperNt, false, null, null);
+                // label for '.Ids (list terminator)
+                nt.entryState.next.add(IdsHelper);
+                IdsHelper.next.add(nt.exitState);
+
+                // inside the wrapperNt
+                NonTerminalState Id = new NonTerminalState(new StateId(ntName + "-S-" + getUid()), wrapperNt, OrderingInfo.ZERO, grammar.get(ul.getSort()), false, null, null);
+                PrimitiveState separatorState = new RegExState(new StateId(ntName + "-T-" + getUid()), wrapperNt, OrderingInfo.ZERO, Pattern.compile("\\Q" + ul.getSeparator() + "\\E"), null, TreeCleanerVisitor.DELETESORT);
+                NonTerminalState Ids = new NonTerminalState(new StateId(ntName + "-S-" + getUid()), wrapperNt, OrderingInfo.ZERO, wrapperNt, false, new KLabelConstant(prd.getKLabel()), null);
+                wrapperNt.entryState.next.add(Id);
+                Id.next.add(separatorState);
+                separatorState.next.add(Ids);
+                Ids.next.add(wrapperNt.exitState);
+
+                // label for '.Ids (list terminator)
+                NonTerminalState special = new NonTerminalState(new StateId(prd.getSort() + "-S-" + getUid()), wrapperNt, OrderingInfo.ZERO, specialNt, false, null, null);
+                Id.next.add(special);
+                Grammar.RegExState epsilonForLabel2 = new Grammar.RegExState(new Grammar.StateId(prd.getSort() + "-ET-" + getUid()), wrapperNt, OrderingInfo.ZERO, Pattern.compile(""), new KLabelConstant(prd.getKLabel()), TreeCleanerVisitor.DELETESORT);
+                special.next.add(epsilonForLabel2);
+                epsilonForLabel2.next.add(wrapperNt.exitState);
+                /**
+                 * Allows for non empty cons lists which always terminate with the identity element of the list.
+                 * Ids:                      '_,_
+                 * (|---->[Id]-|--->(,)---->[Ids]--|->|)
+                 *             |                   |
+                 *             |>[special]->(e2)---|
+                 *                 '.Ids     '_,_
+                 */
+            }
         } else if (prd.isSubsort()) {
             KLabel kl = null;
             if (prd.containsAttribute("klabel")) {
