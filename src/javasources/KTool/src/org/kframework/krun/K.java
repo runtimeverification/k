@@ -110,6 +110,7 @@ public class K {
     public static boolean profile = false;
     public static String smt = "z3";
     public static boolean deterministic_functions = false;
+    public static boolean pattern_matching = false;
 
     
     /**

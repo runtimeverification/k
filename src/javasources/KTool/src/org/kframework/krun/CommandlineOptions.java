@@ -107,6 +107,7 @@ public class CommandlineOptions {
         addOptionE(OptionBuilder.withLongOpt("index").withDescription("Index the rules for faster rewriting.").create());
         addOptionE(OptionBuilder.withLongOpt("indexing-stats").withDescription("Measure indexing-related information.").create());
         addOptionE(OptionBuilder.withLongOpt("deterministic-functions").withDescription("Throw assertion failure during execution in the java backend if function definitions are not deterministic.").create());
+        addOptionE(OptionBuilder.withLongOpt("pattern-matching").withDescription("Use pattern-matching rather than unification to drive rewriting in the Java backend.").create());
 
         addOptionE(OptionBuilder.withLongOpt("output-file").hasArg().withArgName("file").withDescription("Store output in the file instead of displaying it.").create());
         addOptionE(OptionBuilder.withLongOpt("load-cfg").hasArg().withArgName("file").withDescription("Load a configuration saved with the \"binary\" output mode into the $PGM configuration variable instead of a program.").create());

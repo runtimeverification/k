@@ -1227,6 +1227,9 @@ public class Main {
             if (cmd.hasOption("deterministic-functions")) {
                 K.deterministic_functions = true;
             }
+            if (cmd.hasOption("pattern-matching")) {
+                K.pattern_matching  = true;
+            }
             // printing the output according to the given options
             if (K.help) {
                 printKRunUsageS(cmd_options);
