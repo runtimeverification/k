@@ -446,8 +446,8 @@ class Function {
             public Set<KList> apply(Set<KList> set) { return set; }
         });
     }
-    boolean addToken(Function that, String string) {
-        final KApp token = Token.kAppOf("K", string);
+    boolean addToken(Function that, String string, String sort) {
+        final KApp token = Token.kAppOf(sort, string);
         return addAux(that, new Lambda<Set<KList>, Set<KList>>() {
             public Set<KList> apply(Set<KList> set) {
                 Set<KList> result = new HashSet<>();
@@ -664,7 +664,8 @@ public class Parser {
         } else if (stateReturn.key.stateCall.key.state instanceof PrimitiveState) {
             return stateReturn.function.addToken(stateReturn.key.stateCall.function,
                 s.input.subSequence(stateReturn.key.stateCall.key.stateBegin,
-                    stateReturn.key.stateEnd).toString());
+                    stateReturn.key.stateEnd).toString(),
+                ((PrimitiveState) stateReturn.key.stateCall.key.state).sort);
         } else if (stateReturn.key.stateCall.key.state instanceof RuleState) {
             return stateReturn.function.addRule(stateReturn.key.stateCall.function,
                 ((RuleState) stateReturn.key.stateCall.key.state).rule,

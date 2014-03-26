@@ -95,7 +95,7 @@ public class Grammar implements Serializable {
     }
 
     public void addWhiteSpace() {
-        // TODO: make whitespace include comments too
+        // TODO: make whitespace able to return comments somehow
         // create a NonTerminal which parses a list of whitespace characters.
         // the NT is a star list that has 3 branches
         // 1. whitespace, 2. single line comment, 3. multiple lines comment
@@ -108,12 +108,10 @@ public class Grammar implements Serializable {
                 if (s instanceof PrimitiveState) {
                     PrimitiveState ps = ((PrimitiveState) s);
                     if (!ps.isAlwaysNull()) { // add whitespace after
-                        PrimitiveState whitespace =
-                                new RegExState(
-                                        new StateId("whitespace" + seed++),
-                                        s.nt,
-                                        pattern);
-                        whitespace.next.addAll(ps.next);
+                        PrimitiveState whitespace = new RegExState(new StateId("whitespace" + seed++), s.nt, pattern, TreeCleanerVisitor.DELETESORT);
+                        RuleState deleteToken = new RuleState(new StateId("whitespace-D-" + seed++), s.nt, new DeleteRule(1, true));
+                        whitespace.next.add(deleteToken);
+                        deleteToken.next.addAll(ps.next);
                         ps.next.clear();
                         ps.next.add(whitespace);
                     }
@@ -126,20 +124,14 @@ public class Grammar implements Serializable {
             // the NonTerminalId is copied into the new NT to keep the reference in the Map
             // the startNT gets another Id to eliminate confusion.
             NonTerminal nt = entry.getValue();
-            NonTerminal whiteStartNt = new NonTerminal(
-                    new NonTerminalId(nt.nonTerminalId.name),
-                    new StateId(nt.nonTerminalId.name+"-whiteEntry"),
-                    new StateId(nt.nonTerminalId.name+"-whiteExit"));
-            PrimitiveState whitespace = new RegExState(
-                    new StateId("whitespace-" + seed++),
-                    whiteStartNt,
-                    pattern);
-            NonTerminalState nts = new NonTerminalState(
-                    new StateId("white-calls-" + nt.nonTerminalId.name),
-                    whiteStartNt, nt, false);
+            NonTerminal whiteStartNt = new NonTerminal(new NonTerminalId(nt.nonTerminalId.name));
+            PrimitiveState whitespace = new RegExState(new StateId("whitespace-" + seed++), whiteStartNt, pattern, TreeCleanerVisitor.DELETESORT);
+            NonTerminalState nts = new NonTerminalState(new StateId("white-calls-" + nt.nonTerminalId.name), whiteStartNt, nt, false);
+            RuleState deleteToken = new RuleState(new StateId("whitespace-D-" + seed++), whiteStartNt, new DeleteRule(1, true));
             nt.nonTerminalId = new NonTerminalId(nt.nonTerminalId.name + "-afterWhite");
             whiteStartNt.entryState.next.add(whitespace);
-            whitespace.next.add(nts);
+            whitespace.next.add(deleteToken);
+            deleteToken.next.add(nts);
             nts.next.add(whiteStartNt.exitState);
             entry.setValue(whiteStartNt);
         }
@@ -405,10 +397,12 @@ public class Grammar implements Serializable {
         }
     }
 
-    public static abstract class Rule {}
+    public static abstract class Rule implements Serializable {}
+
     public static abstract class ContextFreeRule extends Rule {
         public abstract Set<KList> apply(Set<KList> set);
     }
+
     public static abstract class KListRule extends ContextFreeRule {
         public Set<KList> apply(Set<KList> set) {
             Set<KList> result = new HashSet<>();
@@ -422,14 +416,19 @@ public class Grammar implements Serializable {
         }
         protected abstract KList apply(KList set);
     }
+
     // for putting labels after the fact
     public static class WrapLabelRule extends KListRule {
         KLabel label;
-        public WrapLabelRule(KLabel label) { this.label = label; }
+        String sort;
+        public WrapLabelRule(KLabel label, String sort) { this.label = label; }
         protected KList apply(KList klist) {
-            return new KList(Arrays.<Term>asList(new KApp(label, klist)));
+            Term term = new KApp(label, klist);
+            term.setSort(this.sort);
+            return new KList(Arrays.<Term>asList(term));
         }
     }
+
     public static abstract class SuffixRule extends KListRule {
         protected abstract boolean rejectSmallKLists();
         protected abstract int getSuffixLength();
@@ -472,6 +471,7 @@ public class Grammar implements Serializable {
             }
         }
     }
+
     // for deleting tokens
     public static class DeleteRule extends SuffixRule {
         private final int length;
@@ -486,6 +486,7 @@ public class Grammar implements Serializable {
             return new Accept(Arrays.<Term>asList());
         }
     }
+
     // for adding a constant to a label that was added before the fact
     public static class AppendRule extends SuffixRule {
         private final Term term;
@@ -496,6 +497,7 @@ public class Grammar implements Serializable {
             return new Accept(Arrays.<Term>asList(term));
         }
     }
+
     // for putting labels before the fact
     public static class InsertRule extends SuffixRule {
         private final Term term;
@@ -506,6 +508,7 @@ public class Grammar implements Serializable {
             return new Accept(Arrays.asList(term));
         }
     }
+
 /*  // for adding a non-constant to a label that was added before the fact
     class AdoptionRule extends ContextFreeRule {
         private boolean reject;
@@ -532,6 +535,7 @@ public class Grammar implements Serializable {
     public static abstract class ContextSensitiveRule extends Rule {
         abstract Set<KList> apply(KList context, Set<KList> set);
     }
+
     public static class CheckLabelContextRule {
         private boolean positive;
     }
@@ -545,6 +549,7 @@ public class Grammar implements Serializable {
     }
 
     public abstract static class PrimitiveState extends NextableState {
+        final String sort;
         public static class MatchResult {
             final public int matchEnd;
             public MatchResult(int matchEnd) {
@@ -554,8 +559,9 @@ public class Grammar implements Serializable {
 
         abstract Set<MatchResult> matches(CharSequence text, int startPosition);
 
-        public PrimitiveState(StateId stateId, NonTerminal nt) {
+        public PrimitiveState(StateId stateId, NonTerminal nt, String sort) {
             super(stateId, nt, true);
+            this.sort = sort;
         }
 
         public boolean isNullable() {
@@ -569,8 +575,8 @@ public class Grammar implements Serializable {
     public static class RegExState extends PrimitiveState {
         private final java.util.regex.Pattern pattern;
 
-        public RegExState(StateId stateId, NonTerminal nt, java.util.regex.Pattern pattern) {
-            super(stateId, nt);
+        public RegExState(StateId stateId, NonTerminal nt, java.util.regex.Pattern pattern, String sort) {
+            super(stateId, nt, sort);
             this.pattern = pattern;
         }
 

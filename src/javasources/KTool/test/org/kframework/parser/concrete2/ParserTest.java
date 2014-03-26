@@ -1,15 +1,28 @@
 package org.kframework.parser.concrete2;
 
-import junit.framework.Assert;
-import org.junit.Test;
-import org.kframework.kil.*;
-import org.kframework.parser.concrete2.*;
-import org.kframework.parser.concrete2.Grammar.*;
-
-import java.lang.management.*;
-
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 import java.util.Arrays;
 import java.util.regex.Pattern;
+
+import junit.framework.Assert;
+
+import org.junit.Test;
+import org.kframework.kil.Ambiguity;
+import org.kframework.kil.KApp;
+import org.kframework.kil.KLabel;
+import org.kframework.kil.KLabelConstant;
+import org.kframework.kil.KList;
+import org.kframework.kil.KSorts;
+import org.kframework.kil.Term;
+import org.kframework.kil.Token;
+import org.kframework.parser.concrete2.Grammar.NonTerminal;
+import org.kframework.parser.concrete2.Grammar.NonTerminalId;
+import org.kframework.parser.concrete2.Grammar.NonTerminalState;
+import org.kframework.parser.concrete2.Grammar.RegExState;
+import org.kframework.parser.concrete2.Grammar.RuleState;
+import org.kframework.parser.concrete2.Grammar.StateId;
+import org.kframework.parser.concrete2.Grammar.WrapLabelRule;
 
 public class ParserTest {
     /* public static void main(String[] args) {
