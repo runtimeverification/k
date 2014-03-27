@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
+import org.kframework.kil.Ambiguity;
 import org.kframework.kil.loader.ResolveVariableAttribute;
 import org.kframework.compile.transformers.AddEmptyLists;
 import org.kframework.compile.transformers.FlattenSyntax;
@@ -25,6 +26,7 @@ import org.kframework.parser.concrete.disambiguate.PriorityFilter;
 import org.kframework.parser.concrete.disambiguate.TypeSystemFilter2;
 import org.kframework.parser.concrete2.Grammar;
 import org.kframework.parser.concrete2.Parser;
+import org.kframework.parser.concrete2.Parser.ParseError;
 import org.kframework.parser.concrete2.TreeCleanerVisitor;
 import org.kframework.parser.utils.ReportErrorsVisitor;
 import org.kframework.parser.utils.Sglr;
@@ -129,9 +131,23 @@ public class ProgramLoader {
             } else if (whatParser == GlobalSettings.ParserType.NEWPROGRAM) {
                 // load the new parser
                 Grammar grammar = (Grammar) BinaryLoader.load(context.kompiled.getPath() + "/pgm/newParser.bin");
-                out = new Parser(content).parse(grammar.get(startSymbol), 0);
+
+                Parser parser = new Parser(content);
+                out = parser.parse(grammar.get(startSymbol), 0);
                 if (GlobalSettings.verbose)
                     System.out.println("Raw: " + out + "\n");
+                if (((Ambiguity)out).getContents().size() == 0) {
+                    // say parsing error
+                    ParseError perror = parser.getErrors();
+
+                    String msg;
+                    if (content.length() == perror.position)
+                        msg = "Parse error: unexpected end of file.";
+                    else
+                        msg = "Parse error: unexpected character '" + content.charAt(perror.position) + "'.";
+                    String loc = "(" + perror.line + "," + perror.column + "," + perror.line + "," + perror.column + ")";
+                    throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, filename, loc));
+                }
                 out = out.accept(new TreeCleanerVisitor(context));
                 if (GlobalSettings.verbose)
                     System.out.println("Clean: " + out + "\n");

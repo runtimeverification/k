@@ -332,7 +332,40 @@ class StateReturnWorkList extends TreeSet<StateReturn> {
 class ParseState {
     final CharSequence input;
     final public StateReturnWorkList stateReturnWorkList = new StateReturnWorkList();
-    public ParseState(CharSequence input) { this.input = input; }
+    final public int[] lines;
+    final public int[] columns;
+    public ParseState(CharSequence input) {
+        this.input = input;
+        lines = new int[input.length()+1];
+        columns = new int[input.length()+1];
+        int l = 1;
+        int c = 1;
+        for (int i = 0; i < input.length(); i++) {
+            lines[i] = l;
+            columns[i] = c;
+            switch (input.charAt(i)) {
+                case '\r' :
+                    if (i+1 < input.length()) {
+                        if (input.charAt(i+1) == '\n') {
+                            lines[i+1] = l;
+                            columns[i+1] = c + 1;
+                            i++;
+                        }
+                    }
+                case '\n'      :
+                case  '\u000B' :
+                case  '\u000C' :
+                case  '\u0085' :
+                case  '\u2028' :
+                case  '\u2029' :
+                    l++; c = 1; break;
+                default :
+                    c++;
+            }
+        }
+        lines[input.length()] = l;
+        columns[input.length()] = c;
+    }
 
     Map<NonTerminalCall.Key,NonTerminalCall> ntCalls = new HashMap<>();
     Map<StateCall.Key,StateCall> stateCalls = new HashMap<>();
@@ -647,16 +680,20 @@ public class Parser {
                 tokens.add(new ImmutablePair<String, Pattern>(((RegExState) key.state).sort, ((RegExState) key.state).pattern));
             }
         }
-        return new ParseError(current, tokens);
+        return new ParseError(current, s.lines[current], s.columns[current], tokens);
     }
 
     public static class ParseError {
         public final int position;
+        public final int column;
+        public final int line;
         public final Set<Pair<String, Pattern>> tokens;
 
-        public ParseError(int position, Set<Pair<String, Pattern>> tokens) {
+        public ParseError(int position, int line, int column, Set<Pair<String, Pattern>> tokens) {
             this.position = position;
             this.tokens = tokens;
+            this.column = column;
+            this.line = line;
         }
     }
 
