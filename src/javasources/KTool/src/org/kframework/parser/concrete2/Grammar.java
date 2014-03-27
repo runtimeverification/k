@@ -369,7 +369,13 @@ public class Grammar implements Serializable {
     }
 
     public abstract static class NextableState extends State {
-        public final Set<State> next = new HashSet<State>();
+        public final Set<State> next = new HashSet<State>() {
+            @Override
+            public boolean add(State s) {
+                assert s.nt == NextableState.this.nt : "States are not in the same NonTerminal.";
+                return super.add(s);
+            }
+        };
         NextableState(StateId stateId, NonTerminal nt, boolean intermediary) {
             super(stateId, nt);
             if (intermediary) { nt.intermediaryStates.add(this); }
@@ -397,24 +403,37 @@ public class Grammar implements Serializable {
         }
     }
 
-    public static abstract class Rule implements Serializable {}
+    public static abstract class Rule implements Serializable {
+        static class MetaData {
+            public final int startPosition;
+            public final int startLine;
+            public final int startColumn;
+            public final int endPosition;
+            public final int endLine;
+            public final int endColumn;
+            public MetaData(int startPosition, int startLine, int startColumn, int endPosition, int endLine, int endColumn) {
+                this.startPosition = startPosition; this.startLine = startLine; this.startColumn = startColumn;
+                this.endPosition = endPosition; this.endLine = endLine; this.endColumn = endColumn;
+            }
+        }
+    }
 
     public static abstract class ContextFreeRule extends Rule {
-        public abstract Set<KList> apply(Set<KList> set);
+        public abstract Set<KList> apply(Set<KList> set, MetaData metaData);
     }
 
     public static abstract class KListRule extends ContextFreeRule {
-        public Set<KList> apply(Set<KList> set) {
+        public Set<KList> apply(Set<KList> set, MetaData metaData) {
             Set<KList> result = new HashSet<>();
             for (KList klist : set) {
-                KList newKList = this.apply(klist);
+                KList newKList = this.apply(klist, metaData);
                 if (newKList != null) {
                     result.add(newKList);
                 }
             }
             return result;
         }
-        protected abstract KList apply(KList set);
+        protected abstract KList apply(KList set, MetaData metaData);
     }
 
     // for putting labels after the fact
@@ -422,7 +441,7 @@ public class Grammar implements Serializable {
         KLabel label;
         String sort;
         public WrapLabelRule(KLabel label, String sort) { this.label = label; }
-        protected KList apply(KList klist) {
+        protected KList apply(KList klist, MetaData metaData) {
             Term term = new KApp(label, klist);
             term.setSort(this.sort);
             return new KList(Arrays.<Term>asList(term));
@@ -432,7 +451,7 @@ public class Grammar implements Serializable {
     public static abstract class SuffixRule extends KListRule {
         protected abstract boolean rejectSmallKLists();
         protected abstract int getSuffixLength();
-        protected abstract Result applySuffix(List<Term> suffix);
+        protected abstract Result applySuffix(List<Term> suffix, MetaData metaData);
 
         protected abstract class Result {}
         protected class Reject extends Result {}
@@ -442,7 +461,7 @@ public class Grammar implements Serializable {
             public Accept(List<Term> list) { this.list = list; }
         }
 
-        protected KList apply(KList klist) {
+        protected KList apply(KList klist, MetaData metaData) {
             List<Term> terms = klist.getContents();
             int i = terms.size() - this.getSuffixLength();
             if (i < 0) {
@@ -452,7 +471,7 @@ public class Grammar implements Serializable {
                 for (; i < terms.size(); i++) {
                     suffix.add(terms.get(i));
                 }
-                Result result = this.applySuffix(suffix);
+                Result result = this.applySuffix(suffix, metaData);
                 if (result instanceof Reject) {
                     return null;
                 } else if (result instanceof Original) {
@@ -482,19 +501,8 @@ public class Grammar implements Serializable {
 
         protected boolean rejectSmallKLists() { return reject; }
         protected int getSuffixLength() { return length; }
-        protected Result applySuffix(List<Term> terms) {
+        protected Result applySuffix(List<Term> terms, MetaData metaData) {
             return new Accept(Arrays.<Term>asList());
-        }
-    }
-
-    // for adding a constant to a label that was added before the fact
-    public static class AppendRule extends SuffixRule {
-        private final Term term;
-        public AppendRule(Term term) { this.term = term; }
-        protected boolean rejectSmallKLists() { return false; }
-        protected int getSuffixLength() { return 0; }
-        protected Result applySuffix(List<Term> terms) {
-            return new Accept(Arrays.<Term>asList(term));
         }
     }
 
@@ -504,8 +512,18 @@ public class Grammar implements Serializable {
         public InsertRule(Term term) { this.term = term; }
         protected boolean rejectSmallKLists() { return false; }
         protected int getSuffixLength() { return 0; }
-        public Result applySuffix(List<Term> set) {
+        public Result applySuffix(List<Term> set, MetaData metaData) {
             return new Accept(Arrays.asList(term));
+        }
+    }
+
+    public static class AddLocationRule extends SuffixRule {
+        protected boolean rejectSmallKLists() { return false; }
+        protected int getSuffixLength() { return 1; }
+        public Result applySuffix(List<Term> terms, MetaData metaData) {
+            Term newTerm = terms.get(0).shallowCopy();
+            newTerm.setLocation("("+metaData.startLine+","+metaData.startColumn+","+metaData.endLine+","+metaData.endColumn+")");
+            return new Accept(Arrays.asList(newTerm));
         }
     }
 
@@ -533,7 +551,7 @@ public class Grammar implements Serializable {
     }
     */
     public static abstract class ContextSensitiveRule extends Rule {
-        abstract Set<KList> apply(KList context, Set<KList> set);
+        abstract Set<KList> apply(KList context, Set<KList> set, MetaData metaData);
     }
 
     public static class CheckLabelContextRule {

@@ -29,6 +29,7 @@ import org.kframework.parser.concrete2.Grammar.NonTerminalState;
 import org.kframework.parser.concrete2.Grammar.PrimitiveState;
 import org.kframework.parser.concrete2.Grammar.RegExState;
 import org.kframework.parser.concrete2.Grammar.Rule;
+import org.kframework.parser.concrete2.Grammar.Rule.MetaData;
 import org.kframework.parser.concrete2.Grammar.RuleState;
 import org.kframework.parser.concrete2.Grammar.State;
 import org.kframework.parser.concrete2.Grammar.StateId;
@@ -379,6 +380,7 @@ class ParseState {
         }
         return value;
     }
+
     public StateCall getStateCall(StateCall.Key key) {
         StateCall value = stateCalls.get(key);
         if (value == null) {
@@ -386,8 +388,8 @@ class ParseState {
             stateCalls.put(key, value);
         }
         return value;
-
     }
+
     public StateReturn getStateReturn(StateReturn.Key key) {
         StateReturn value = stateReturns.get(key);
         if (value == null) {
@@ -519,11 +521,11 @@ class Function {
     }
 
     // NOTE: also adds rule to reactivations
-    boolean addRule(Function that, final Rule rule, StateReturn stateReturn) {
+    boolean addRule(Function that, final Rule rule, final StateReturn stateReturn, final MetaData metaData) {
         if (rule instanceof ContextFreeRule) {
             return addAux(that, new Lambda<Set<KList>, Set<KList>>() {
                 public Set<KList> apply(Set<KList> set) {
-                    return ((ContextFreeRule) rule).apply(set);
+                    return ((ContextFreeRule) rule).apply(set, metaData);
                 }
             });
         } else if (rule instanceof ContextSensitiveRule) {
@@ -548,7 +550,7 @@ class Function {
                     ((One) this.mapping).values.put(key, new HashSet<KList>());
                 }
                 result |= ((One) this.mapping).values.get(key).
-                    addAll(((ContextSensitiveRule) rule).apply(key, promotedThat.values.get(key)));
+                    addAll(((ContextSensitiveRule) rule).apply(key, promotedThat.values.get(key), metaData));
             }
 
             stateReturn.key.stateCall.key.ntCall.reactivations.add(stateReturn);
@@ -733,9 +735,12 @@ public class Parser {
                     stateReturn.key.stateEnd).toString(),
                 ((PrimitiveState) stateReturn.key.stateCall.key.state).sort);
         } else if (stateReturn.key.stateCall.key.state instanceof RuleState) {
+            int startPosition = stateReturn.key.stateCall.key.ntCall.key.ntBegin;
+            int endPosition = stateReturn.key.stateEnd;
             return stateReturn.function.addRule(stateReturn.key.stateCall.function,
-                ((RuleState) stateReturn.key.stateCall.key.state).rule,
-                stateReturn);
+                ((RuleState) stateReturn.key.stateCall.key.state).rule, stateReturn,
+                new MetaData(startPosition, s.lines[startPosition], s.columns[startPosition],
+                             endPosition, s.lines[endPosition], s.columns[endPosition]));
         } else if (stateReturn.key.stateCall.key.state instanceof NonTerminalState) {
             // TODO: mark sensitive if need be (we don't need to b/c all NT behave like context free rules)
             return stateReturn.function.addNTCall(
