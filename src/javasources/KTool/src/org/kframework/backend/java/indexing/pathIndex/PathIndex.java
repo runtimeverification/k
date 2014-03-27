@@ -37,6 +37,7 @@ public class PathIndex implements RuleIndex, Serializable{
     private final Set<Integer> outputRuleIndices = new LinkedHashSet<>();
     private final Set<Integer> inputRuleIndices = new LinkedHashSet<>();
     private TermVisitor termVisitor;
+    private boolean hasNOKCellRules;
 
     public enum RuleType {
         COOLING,
@@ -79,7 +80,7 @@ public class PathIndex implements RuleIndex, Serializable{
         }
 
         assert indexedRules.size() == definition.rules().size();
-//        printIndices(indexedRules, pStringMap);
+        printIndices(indexedRules, pStringMap);
 
         //Step 2. initialise the trie
         trie = new PathIndexTrie();
@@ -160,6 +161,7 @@ public class PathIndex implements RuleIndex, Serializable{
         rule.accept(ruleVisitor);
 
         pStrings.putAll(n, ruleVisitor.getpStrings());
+        hasNOKCellRules |= ruleVisitor.isHasNOKCellRule();
         return pStrings;
     }
 
@@ -211,31 +213,23 @@ public class PathIndex implements RuleIndex, Serializable{
                 }
             }
 
-            if (matchingIndices != null) {
-
+            if (currentMatch != null) {
                 if (matchingIndices.isEmpty()) {
                     matchingIndices = currentMatch;
                 } else {
                     //should it be an intersection?
-                    if (currentMatch != null){
                         matchingIndices.addAll(currentMatch);
-                    }
                 }
             }
         }
 
-        if (matchingIndices != null) {
-            if (termVisitor.isAddOutputRules()) {
+            if (matchingIndices != null && termVisitor.isAddOutputRules()) {
                 matchingIndices.addAll(outputRuleIndices);
             }
 
-            if (termVisitor.isAddInputRules()) {
+            if (matchingIndices != null && termVisitor.isAddInputRules()) {
                 matchingIndices.addAll(inputRuleIndices);
             }
-        } else {
-            //avoiding null
-            matchingIndices = new LinkedHashSet<>();
-        }
 
 
         // this check is needed because of .K which now has  a pString of @.EMPTY_K, but may not
@@ -266,7 +260,7 @@ public class PathIndex implements RuleIndex, Serializable{
      * @return a set of positions that can be used to query the path index
      */
     private Set<String> getPStringsFromTerm(Term term) {
-        termVisitor = new TermVisitor(definition.context());
+        termVisitor = new TermVisitor(definition.context(), hasNOKCellRules);
         term.accept(termVisitor);
         return termVisitor.getpStrings();
     }

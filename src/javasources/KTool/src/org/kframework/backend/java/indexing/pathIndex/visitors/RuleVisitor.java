@@ -35,6 +35,12 @@ public class RuleVisitor extends LocalVisitor {
     final List<String> pStrings;
     private boolean isKSequence = false;
 
+    public boolean isHasNOKCellRule() {
+        return hasNOKCellRule;
+    }
+
+    private boolean hasNOKCellRule;
+
     public RuleVisitor(Context context) {
         this.context = context;
         this.pString = START_STRING;
@@ -47,6 +53,9 @@ public class RuleVisitor extends LocalVisitor {
         if (kCell != null){
             visit(kCell);
         }else{
+            if(!hasNOKCellRule){
+                hasNOKCellRule = true;
+            }
             pStrings.add("@.NO_K_CELL");
         }
     }

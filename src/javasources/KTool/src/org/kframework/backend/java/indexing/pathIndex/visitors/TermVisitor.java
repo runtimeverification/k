@@ -54,6 +54,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
     private String currentLabel;
     private final String SEPARATOR = ".";
     private final String START_STRING = "@.";
+    private boolean defHasNOKCellRules;
 
     // these flags are used to decide whether (or not) to try the i/o rules while rewriting
     // the current term.
@@ -63,6 +64,11 @@ public class TermVisitor extends LocalVisitor implements Serializable {
     public TermVisitor(Context context) {
         pStrings = new LinkedHashSet<>();
         this.context = context;
+    }
+
+    public TermVisitor(Context context, boolean hasNOKCellRules) {
+        this(context);
+        this.defHasNOKCellRules |= hasNOKCellRules;
     }
 
     @Override
@@ -75,11 +81,11 @@ public class TermVisitor extends LocalVisitor implements Serializable {
         //first find all the term's cells of interest in  a single pass
         CellVisitor v = new CellVisitor(context);
         node.accept(v);
-//        if (!v.getkCellPStings().isEmpty()){
-            pStrings.addAll(v.getkCellPStings());
-//        } else {
-//            pStrings.add("@.NO_K_CELL");
-//        }
+        pStrings.addAll(v.getkCellPStings());
+        //needed for kool-static where some rules have no k-cell
+        if (v.getkCellPStings().isEmpty() && defHasNOKCellRules){
+            pStrings.add("@.NO_K_CELL");
+        }
 
         if (K.get_indexing_stats) {
             IndexingStatistics.getPStringStopwatch.stop();
@@ -157,9 +163,19 @@ public class TermVisitor extends LocalVisitor implements Serializable {
 
     @Override
     public void visit(Token token) {
+//        if (pString == null){
+//            pStrings.add(START_STRING+token.sort());
+//        } else{
+//            pStrings.add(pString+".1."+token.sort());
+//        }
+
         if (pString == null) {
             if (context.isSubsorted(K_RESULT, token.sort())) {
                 pString = START_STRING + K_RESULT;
+                //hack for kool-dynamic
+                if (token instanceof BoolToken){
+                    pStrings.add(START_STRING+token.sort());
+                }
             } else {
                 //TODO(OwolabiL): Use a better check than the nullity of pString
                 pStrings.add(START_STRING + token.sort());
@@ -183,6 +199,12 @@ public class TermVisitor extends LocalVisitor implements Serializable {
                         pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR +
                                 USER_LIST_REPLACEMENT);
                     }
+
+                    //hack for kool-dynamic
+                    if (token instanceof BoolToken){
+                        pStrings.add(pString+".1."+token.sort());
+                    }
+
                 }
             } else {
                 ArrayList<Production> productions = (ArrayList<Production>) productions1;
@@ -249,11 +271,11 @@ public class TermVisitor extends LocalVisitor implements Serializable {
                 //      <k>
                 //        (void) ~> discard ~> 'class(theMain) ~> HOLE ;
                 //        </k>
-//                if (!context.isSubsortedEq(K_RESULT,kItem.sort()) && ((KList)kItem.kList()).size() == 0){
-//                    if (pString != null) {
-//                        pStrings.add(pString);
-//                    }
-//                }
+                if (!context.isSubsortedEq(K_RESULT,kItem.sort()) && ((KList)kItem.kList()).size() == 0){
+                    if (pString != null) {
+                        pStrings.add(pString);
+                    }
+                }
 
                 kItem.kLabel().accept(this);
                 kItem.kList().accept(this);
