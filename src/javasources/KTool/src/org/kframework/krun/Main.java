@@ -168,7 +168,7 @@ public class Main {
                 String startSymbol = context.configVarSorts.get(name);
                 Term parsed = null;
                 if (parser == null) {
-                    parser = "kast -groundParser -e";
+                    parser = "kast --parser ground -e";
                 }
                 parsed = rp.runParserOrDie(parser, value, false, startSymbol, context);
                 parsed = (Term) parsed.accept(new ResolveVariableAttribute(context));
@@ -928,9 +928,9 @@ public class Main {
         if (K.term != null) {
             if (K.parser.equals("kast") && !cmd.hasOption("parser")) {
                 if (K.backend.equals("java")) {
-                    K.parser = "kast -ruleParser";
+                    K.parser = "kast --parser rule";
                 } else {
-                    K.parser = "kast -groundParser";
+                    K.parser = "kast --parser ground";
                 }
             }
         }
@@ -1389,9 +1389,9 @@ public class Main {
             if (K.term != null) {
                 if (K.parser.equals("kast") && !cmd.hasOption("parser")) {
                     if (K.backend.equals("java")) {
-                        K.parser = "kast -ruleParser";
+                        K.parser = "kast --parser rule";
                     } else {
-                        K.parser = "kast -groundParser";
+                        K.parser = "kast --parser ground";
                     }
                 }
             }

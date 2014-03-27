@@ -35,8 +35,8 @@
       results="tests/examples/quine-explicit"
       extension="quine" >
       <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
+        <krun-option name="--output" value="none" />
+        <krun-option name="--color" value="off" />
       </all-programs>
   </test>
   <test
@@ -45,28 +45,11 @@
       results="tests/examples/quine-short"
       extension="quine" >
       <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
+        <krun-option name="--output" value="none" />
+        <krun-option name="--color" value="off" />
       </all-programs>
   </test>
 
-
-<!--
-  LOGIK
-
-  <test
-      definition="tutorial/2_languages/4_logik/logik.k"
-      programs="tutorial/2_languages/4_logik/programs"
-      extension="logik"
-      results="tests/examples/logik"
-      >
-    <all-programs>
-      <krun-option name="-search" />
-      <krun-option name="-bound" value="2" />
-      <krun-option name="-color" value="off" />
-    </all-programs>
-  </test>
--->
 
 
 <!--
@@ -80,8 +63,8 @@
       results="tests/examples/agent"
       >
       <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
+        <krun-option name="--output" value="none" />
+        <krun-option name="--color" value="off" />
       </all-programs>
   </test>
 
@@ -96,40 +79,15 @@
       results="tests/examples/bf"
       >
       <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
+        <krun-option name="--output" value="none" />
+        <krun-option name="--color" value="off" />
       </all-programs>
   </test>
 
-<!--
-  WCET
--->
-  <test
-      definition="samples/wcet/wcet.k"
-      programs="samples/wcet/programs"
-      extension="wcet"
-      results="samples/wcet/programs"
-      >
-      <all-programs>
-        <krun-option name="-cTIMING" value="add |-> 1 sub |-> 1 mul |-> 1 div |-> 1 or |-> 1 and |-> 1 not |-> 1 load |-> 10 store |-> 10 jmp |-> 1 beq |-> 2 bne |-> 2 blt |-> 2 ble |-> 2 halt |-> 1 read |-> 100 write |-> 100 'rw(.KList) |-> 200 int |-> 5 rfi |-> 5" />
-        <krun-option name="-cINPUT" value=".List" />
-        <krun-option name="-cINITIAL" value=".Map" />
-        <krun-option name="-pattern" value="&lt;k&gt; .K &lt;/k&gt;&lt;input&gt; .List &lt;/input&gt;" />
-      </all-programs>
-      <program name="interrupt.wcet">
-        <krun-option name="-cTIMING" value="add |-> 1 sub |-> 1 mul |-> 1 div |-> 1 or |-> 1 and |-> 1 not |-> 1 load |-> 10 store |-> 10 jmp |-> 1 beq |-> 2 bne |-> 2 blt |-> 2 ble |-> 2 halt |-> 1 read |-> 100 write |-> 100 'rw(.KList) |-> 200 int |-> 5 rfi |-> 5" />
-        <krun-option name="-cINPUT" value="ListItem((400, data |-> 1000)) ListItem((401, data |-> 5)) ListItem((1000, data |-> 6))" />
-        <krun-option name="-cINITIAL" value="data |-> 0" />
-        <krun-option name="-pattern" value="&lt;k&gt; .K &lt;/k&gt;&lt;input&gt; .List &lt;/input&gt;" />
-      </program>
-      <program name="polling.wcet">
-        <krun-option name="-cTIMING" value="add |-> 1 sub |-> 1 mul |-> 1 div |-> 1 or |-> 1 and |-> 1 not |-> 1 load |-> 10 store |-> 10 jmp |-> 1 beq |-> 2 bne |-> 2 blt |-> 2 ble |-> 2 halt |-> 1 read |-> 100 write |-> 100 'rw(.KList) |-> 200 int |-> 5 rfi |-> 5" />
-        <krun-option name="-cINPUT" value="ListItem((400, data |-> 1000)) ListItem((401, data |-> 5)) ListItem((1000, data |-> 6))" />
-        <krun-option name="-cINITIAL" value="data |-> 0" />
-        <krun-option name="-pattern" value="&lt;k&gt; .K &lt;/k&gt;&lt;input&gt; .List &lt;/input&gt;" />
-       </program>
-  </test>
-
+  <include file="../samples/wcet/tests/config.xml"
+           directory="samples/wcet"
+           programs="samples/wcet"
+           results="samples/wcet" />
 
 <!--
   IMP-SYMBOLIC
@@ -142,9 +100,9 @@
       results="samples/imp-symbolic/programs"
       >
     <all-programs>
-      <krun-option name="-search" />
-      <krun-option name="-parser" value="kast -groundParser" parser-home="PARSER_HOME"/>
-      <krun-option name="-color" value="off" />
+      <krun-option name="--search" />
+      <krun-option name="--parser" value="kast --parser ground"/>
+      <krun-option name="--color" value="off" />
     </all-programs>
   </test>
 
@@ -159,8 +117,8 @@
       results="samples/imp-hoare/programs"
       >
       <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
+        <krun-option name="--output" value="none" />
+        <krun-option name="--color" value="off" />
       </all-programs>
   </test>
 
@@ -176,10 +134,10 @@
       results="samples/imp-reachability"
       >
     <all-programs>
-      <krun-option name="-search" />
-      <krun-option name="-depth" value="5" />
-      <krun-option name="-parser" value="kast -groundParser"  parser-home="PARSER_HOME"/>
-      <krun-option name="-color" value="off" />
+      <krun-option name="--search" />
+      <krun-option name="--depth" value="5" />
+      <krun-option name="--parser" value="kast --parser ground" />
+      <krun-option name="--color" value="off" />
     </all-programs>
   </test>
 
@@ -194,32 +152,10 @@
       extension="peq"
       results="samples/prog-equiv/imp//programs" >
       <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
+        <krun-option name="--output" value="none" />
+        <krun-option name="--color" value="off" />
       </all-programs>
   </test>
-
-<!--
-
--->
-<!-- TODO: Consider 'title' attribute
-  <test
-      definition="tutorial/1_k/2_imp/lesson_4/imp.k"
-      programs="tutorial/1_k/2_imp"
-      extension="imp"
-      results="tutorial/1_k/2_imp"
-      title="symbolic"
-	  exclude="lesson_4/test.imp"
-      >
-    <kompile-option name="-backend" value="symbolic" />
-    <all-programs>
-      <krun-option name="-color" value="off" />
-      <krun-option name="-output" value="none" />
-      <krun-option name="-cPC" value="true" />
-    </all-programs>
-  </test>
--->
-
 
 <!--
     Regression tests
@@ -241,8 +177,8 @@
       extension="issue"
       >
       <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
+        <krun-option name="--output" value="none" />
+        <krun-option name="--color" value="off" />
       </all-programs>
   </test>
   <test
@@ -252,8 +188,8 @@
       extension="issue"
       >
       <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
+        <krun-option name="--output" value="none" />
+        <krun-option name="--color" value="off" />
       </all-programs>
   </test>
   <test
@@ -263,8 +199,8 @@
       extension="issue"
       >
       <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
+        <krun-option name="--output" value="none" />
+        <krun-option name="--color" value="off" />
       </all-programs>
   </test>
   <test
@@ -277,8 +213,8 @@
       extension="issue"
       >
       <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
+        <krun-option name="--output" value="none" />
+        <krun-option name="--color" value="off" />
       </all-programs>
   </test>
   <test
@@ -303,8 +239,8 @@
       extension="issue"
       >
       <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
+        <krun-option name="--output" value="none" />
+        <krun-option name="--color" value="off" />
       </all-programs>
   </test>
 
@@ -314,13 +250,13 @@
       results="tests/regression/issue580/tests"
       extension="issue" >
       <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
+        <krun-option name="--output" value="none" />
+        <krun-option name="--color" value="off" />
       </all-programs>
       <program name="test.issue">
-        <krun-option name="-output" value="pretty" />
-        <krun-option name="-search" />
-        <krun-option name="-pattern" value="&lt;k&gt; 6 &lt;/k&gt;" />
+        <krun-option name="--output" value="pretty" />
+        <krun-option name="--search" />
+        <krun-option name="--pattern" value="&lt;k&gt; 6 &lt;/k&gt;" />
       </program>
   </test>
 
@@ -330,11 +266,11 @@
       results="tests/regression/subsort-klabel/tests"
       extension="issue" >
       <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
+        <krun-option name="--output" value="none" />
+        <krun-option name="--color" value="off" />
       </all-programs>
       <program name="test.issue">
-        <krun-option name="-output" value="pretty" />
+        <krun-option name="--output" value="pretty" />
       </program>
   </test>
 
@@ -344,8 +280,8 @@
       results="tests/regression/issue627/tests"
       extension="issue" >
       <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
+        <krun-option name="--output" value="none" />
+        <krun-option name="--color" value="off" />
       </all-programs>
   </test>
 
@@ -355,8 +291,8 @@
       results="tests/regression/issue631"
       extension="issue" >
       <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
+        <krun-option name="--output" value="none" />
+        <krun-option name="--color" value="off" />
       </all-programs>
   </test>
 
@@ -366,7 +302,7 @@
       results="tests/regression/negative-test/tests"
       extension="issue" >
     <program name="test.issue">
-      <krun-option name="-color" value="off" />
+      <krun-option name="--color" value="off" />
     </program>
   </test>
 
@@ -376,7 +312,7 @@
       results="tests/regression/escapedKLabel/tests"
       extension="issue" >
       <program name="test.issue">
-        <krun-option name="-output" value="pretty" />
+        <krun-option name="--output" value="pretty" />
       </program>
   </test>
 
@@ -396,7 +332,7 @@
       extension="issue"
       results="tests/regression/unparsing/out/">
       <all-programs>
-        <krun-option name="-output" value="pretty" />
+        <krun-option name="--output" value="pretty" />
       </all-programs>
   </test>
 
@@ -406,8 +342,8 @@
       extension="issue"
       results="tests/regression/addbrackets/out/">
       <all-programs>
-        <krun-option name="-output" value="smart" />
-	<krun-option name="-parser" value="kast -groundParser" parser-home="PARSER_HOME" />
+        <krun-option name="--output" value="smart" />
+	<krun-option name="--parser" value="kast --parser ground" />
       </all-programs>
   </test>
 
@@ -418,8 +354,8 @@
       extension="issue"
       >
       <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
+        <krun-option name="--output" value="none" />
+        <krun-option name="--color" value="off" />
       </all-programs>
   </test>
 
@@ -429,7 +365,7 @@
       results="tests/regression/issue663/out"
       extension="issue">
       <all-programs>
-        <krun-option name="-ltlmc" value="TrueLtl" />
+        <krun-option name="--ltlmc" value="TrueLtl" />
       </all-programs>
   </test>
   <test
@@ -438,7 +374,7 @@
       results="tests/regression/issue674"
       extension="issue" >
       <all-programs>
-        <krun-option name="-output" value="pretty" />
+        <krun-option name="--output" value="pretty" />
       </all-programs>
   </test>
 
@@ -449,8 +385,8 @@
       extension="issue"
       >
       <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
+        <krun-option name="--output" value="none" />
+        <krun-option name="--color" value="off" />
       </all-programs>
   </test>
   <test
@@ -460,8 +396,8 @@
       extension="issue"
       >
       <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
+        <krun-option name="--output" value="none" />
+        <krun-option name="--color" value="off" />
       </all-programs>
   </test>
 
@@ -473,8 +409,8 @@
       >
     <kompile-option name="-w" value="none" />
       <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
+        <krun-option name="--output" value="none" />
+        <krun-option name="--color" value="off" />
       </all-programs>
   </test>
 
@@ -484,7 +420,7 @@
       results="tests/regression/string2int"
       extension="test" >
       <all-programs>
-        <krun-option name="-output" value="pretty" />
+        <krun-option name="--output" value="pretty" />
       </all-programs>
   </test>
 
@@ -495,8 +431,8 @@
 	  extension="issue"
       >
     <all-programs>
-      <krun-option name="-output" value="pretty" />
-      <krun-option name="-color" value="off" />
+      <krun-option name="--output" value="pretty" />
+      <krun-option name="--color" value="off" />
     </all-programs>
   </test>
 
@@ -508,8 +444,8 @@
       results="tests/regression/issue677/tests"
       >
       <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
+        <krun-option name="--output" value="none" />
+        <krun-option name="--color" value="off" />
       </all-programs>
   </test>
 
@@ -519,9 +455,9 @@
       results="tests/regression/label-and-context"
       extension="issue">
   <all-programs>
-    <krun-option name="-output" value="pretty" />
-    <krun-option name="-color" value="off" />
-    <krun-option name="-parser" value="cat"/>
+    <krun-option name="--output" value="pretty" />
+    <krun-option name="--color" value="off" />
+    <krun-option name="--parser" value="cat"/>
   </all-programs>
 </test>
 
@@ -533,7 +469,7 @@
       results="tests/regression/cool-issue/tests"
       extension="test">
     <all-programs>
-       <krun-option name="-color" value="off" />
+       <krun-option name="--color" value="off" />
     </all-programs>
   </test>
 

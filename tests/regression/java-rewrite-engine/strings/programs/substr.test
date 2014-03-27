@@ -1,1 +1,1 @@
-test(substrString("foo", 0, 1) ~> substrString("foo", 2, 3) ~> substrString("foo", 1, 1) ~> substrString("foo", 2, 1) ~> substrString("\x00\x01\xff\u0100\uffff\U00010000\U0010ffff", 2, 6))
+substrString("foo", 0, 1) ~> substrString("foo", 2, 3) ~> substrString("foo", 1, 1) ~> substrString("foo", 2, 1) ~> substrString("\x00\x01\xff\u0100\uffff\U00010000\U0010ffff", 2, 6)

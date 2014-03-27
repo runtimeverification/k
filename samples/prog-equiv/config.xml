@@ -12,8 +12,8 @@
       extension="peq"
       results="imp/programs" >
       <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
+        <krun-option name="--output" value="none" />
+        <krun-option name="--color" value="off" />
       </all-programs>
   </test>
   <test
@@ -22,8 +22,8 @@
       extension="seq"
       results="streams/programs" >
       <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
+        <krun-option name="--output" value="none" />
+        <krun-option name="--color" value="off" />
       </all-programs>
   </test> 
 </tests>

@@ -1,1 +1,1 @@
-test(chrChar(-1) ~> chrChar(0) ~> chrChar(1) ~> chrChar(97) ~> chrChar(255) ~> chrChar(256) ~> chrChar(55295) ~> chrChar(55296) ~> chrChar(57343) ~> chrChar(57344) ~> chrChar(65535) ~> chrChar(65536) ~> chrChar(1114111) ~> chrChar(11141112))
+chrChar(-1) ~> chrChar(0) ~> chrChar(1) ~> chrChar(97) ~> chrChar(255) ~> chrChar(256) ~> chrChar(55295) ~> chrChar(55296) ~> chrChar(57343) ~> chrChar(57344) ~> chrChar(65535) ~> chrChar(65536) ~> chrChar(1114111) ~> chrChar(11141112)
