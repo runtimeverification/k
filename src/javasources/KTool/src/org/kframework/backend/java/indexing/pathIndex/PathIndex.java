@@ -80,7 +80,7 @@ public class PathIndex implements RuleIndex, Serializable{
         }
 
         assert indexedRules.size() == definition.rules().size();
-        printIndices(indexedRules, pStringMap);
+//        printIndices(indexedRules, pStringMap);
 
         //Step 2. initialise the trie
         trie = new PathIndexTrie();
