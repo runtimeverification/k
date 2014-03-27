@@ -11,11 +11,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.MetaK;
 import org.kframework.backend.java.builtins.SortMembership;
 import org.kframework.backend.java.symbolic.BuiltinFunction;
 import org.kframework.backend.java.symbolic.Matcher;
+import org.kframework.backend.java.symbolic.PatternMatcher;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Unifier;
@@ -309,81 +309,51 @@ public final class KItem extends Term {
 
         /* apply rules for user defined functions */
         if (!definition.functionRules().get(kLabelConstant).isEmpty()) {
-            ConstrainedTerm constrainedTerm = new ConstrainedTerm(kList, context);
-
             Term result = null;
 
-            /*
-             * YilongL: consider applying rules with attribute [owise]
-             * only after no other rules can be applied for sure
-             */
-            boolean mayUseOwiseRule = true;
             LinkedHashSet<Term> owiseResults = new LinkedHashSet<Term>();
             for (Rule rule : definition.functionRules().get(kLabelConstant)) {
-                SymbolicConstraint leftHandSideConstraint = new SymbolicConstraint(context);
-                leftHandSideConstraint.addAll(rule.requires());
-                for (Variable variable : rule.freshVariables()) {
-                    leftHandSideConstraint.add(variable, IntToken.fresh());
-                }
-
-                ConstrainedTerm leftHandSide = new ConstrainedTerm(
-                        ((KItem) rule.leftHandSide()).kList,
-                        rule.lookups().getSymbolicConstraint(context),
-                        leftHandSideConstraint,
-                        context);
-
-                Collection<SymbolicConstraint> solutions = constrainedTerm.unify(leftHandSide);
+                
+                Collection<Map<Variable, Term>> solutions = PatternMatcher.patternMatch(this, rule, context);
                 if (solutions.isEmpty()) {
                     continue;
                 }
 
-                SymbolicConstraint solution = solutions.iterator().next();
-                if (K.do_kompilation) {
+                Map<Variable, Term> solution = solutions.iterator().next();
+                if (K.do_kompilation || K.do_concrete_exec) {
                     assert solutions.size() <= 1 : "function definition is not deterministic";
-                    if (!solution.isMatching(leftHandSide)) {
-                        mayUseOwiseRule = false;
-                        continue;
-                    }
-                } else if (K.do_concrete_exec) {
-                    assert solutions.size() <= 1 : "function definition is not deterministic";
-                    assert solution.isMatching(leftHandSide) : "Pattern matching expected in concrete execution mode";
                 }
 
-                solution.orientSubstitution(rule.leftHandSide().variableSet());
-
-                Term rightHandSide = rule.rightHandSide();
-
-                if (rule.hasUnboundedVariables()) {
-                    /* rename rule variables in the constraints */
-                    Map<Variable, Variable> freshSubstitution = solution.rename(rule.variableSet());
-                    /* rename rule variables in the rule RHS */
-                    result = result.substituteWithBinders(freshSubstitution, context);
-                }
-                /* apply the constraints substitution on the rule RHS */
-                rightHandSide = rightHandSide.substituteAndEvaluate(solution.substitution(), context);
-                /* eliminate anonymous variables */
-                // solution.eliminateAnonymousVariables();
+                Term rightHandSide = rule.rightHandSide().substituteAndEvaluate(solution, context);
 
                 /* update the constraint */
                 if (K.do_kompilation || K.do_concrete_exec) {
                     // in kompilation and concrete execution mode, the
                     // evaluation of user-defined functions will not create
                     // new constraints
-                } else if (constraint != null) {
-                    throw new RuntimeException(
-                            "Fix it; need to find a proper way to update "
-                                    + "the constraint without interferring with the "
-                                    + "potential ongoing normalization process");
-                } else { // constraint == null
-                    if (solution.isUnknown() || solution.isFalse()) {
+                } else {
+                    if (constraint != null) {
                         throw new RuntimeException(
-                                "Fix it; no reference to the symbolic " +
-                                "constraint that needs to be updated");
+                                "Fix it; need to find a proper way to update "
+                                        + "the constraint without interferring with the "
+                                        + "potential ongoing normalization process");
                     }
                 }
 
                 if (rule.containsAttribute("owise")) {
-                    owiseResults.add(rightHandSide);
+                    /*
+                     * YilongL: consider applying rules with attribute [owise]
+                     * only after no other rules can be applied for sure; in
+                     * other words, we cannot apply [owise] rule if some argument 
+                     * is symbolic
+                     */
+                    boolean mayUseOwiseRule = true;
+                    for (Term term : solution.values()) {
+                        mayUseOwiseRule = mayUseOwiseRule && !term.isSymbolic();
+                    }
+                    if (mayUseOwiseRule) {
+                        owiseResults.add(rightHandSide);
+                    }
                 } else {
                     if (K.do_concrete_exec) {
                         assert result == null || result.equals(rightHandSide):
@@ -403,7 +373,7 @@ public final class KItem extends Term {
 
             if (result != null) {
                 return result;
-            } else if (mayUseOwiseRule && !owiseResults.isEmpty()) {
+            } else if (!owiseResults.isEmpty()) {
                 assert owiseResults.size() == 1 : "function definition is not deterministic";
                 return owiseResults.iterator().next();
             }
