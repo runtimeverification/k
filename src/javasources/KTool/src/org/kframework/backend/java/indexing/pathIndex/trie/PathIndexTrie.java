@@ -180,7 +180,7 @@ public class PathIndexTrie implements Trie,Serializable {
                 }
             }
 
-        } else if (splitList.size() > 1) {
+        } else if (splitList.size() > 1 && child != null) {
             return retrieveSet(child, subList);
         }
 
