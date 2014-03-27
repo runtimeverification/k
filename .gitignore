@@ -3,6 +3,7 @@
 *-kompiled-symbolic
 *.kore
 *.pdf
+*.swp
 *.class
 .metadata
 .cache
