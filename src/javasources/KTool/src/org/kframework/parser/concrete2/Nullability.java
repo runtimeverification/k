@@ -14,36 +14,40 @@ import org.kframework.parser.concrete2.Grammar.RuleState;
 import org.kframework.parser.concrete2.Grammar.State;
 
 /**
- * Helper class in the parser that finds all of the nullable NonTerminals in a grammar.
+ * Helper class in the parser that finds all of the entryNullable NonTerminals in a grammar.
  */
 public class Nullability {
-    // accumulate the results here (TODO: explain that this is nulable up to the *entry* of the state)
-    private Set<State> nullable = new HashSet<>();
+    /// Accumulated set of "entry nullable" states.
+    /// A state is entry nullable if we can get to the start of it from the start of its
+    /// non-terminal without consuming input.
+    private Set<State> entryNullable = new HashSet<>();
 
     /**
      * Nullability of a state is based on the following two implications:
-     * A. EntryState state => nullable(state)
-     * B. nullable(state) && childNullable(state) => nullable(state.next)
-     * Where childNullable(state) is true when it is possible to get from the start of the state to the end of the state without consuming input.
+     * A. EntryState state => entryNullable(state)
+     * B. entryNullable(state) && childNullable(state) => entryNullable(state.next)
+     * Where childNullable(state) is true when it is possible to get from the
+     * start of the state to the end of the state without consuming input.
      *
      * The following algorithm is a least fixed-point algorithm for solving those implications.
-     * mark(state) is called when we discover an implication implying nullable(state). We can discover this implication one of three ways:
+     * mark(state) is called when we discover an implication implying entryNullable(state). We can
+     * discover this implication one of three ways:
      *
      * 1. A state is an entry state (see rule A)
-     * 2. The nullable(state) in rule B becomes true (in which case we check childNullable).)
-     * 3. The childNullable(state) in rule B becomes true (in which case we check nullable(state).)
-     * (ChildNullable(state) becomes true when an exit state becomes nullable.)
+     * 2. The entryNullable(state) in rule B becomes true (in which case we check childNullable).)
+     * 3. The childNullable(state) in rule B becomes true (in which case we check entryNullable(state).)
+     * (ChildNullable(state) becomes true when an exit state becomes entryNullable.)
      * @param grammar the grammar object.
-     * @return A set with all the NonTerminals that can become nullable.
+     * @return A set with all the NonTerminals that can become entryNullable.
      */
     public Nullability(Grammar grammar) {
-        // 1. get all nullable states
+        // 1. get all entryNullable states
         // list NonTerminals reachable from the start symbol.
         // the value of the map keeps a reference to all the states which call NonTerminals
         Map<NonTerminal, Set<NonTerminalState>> nonTerminalCallers = grammar.getNonTerminalCallers();
 
-        // A state is nullable iff the *start* of it is reachable from the entry of its nt without consuming input
-        // A non-terminal is nullable if its exit state is nullable
+        // A state is entryNullable iff the *start* of it is reachable from the entry of its nt without consuming input
+        // A non-terminal is entryNullable if its exit state is entryNullable
         for (NonTerminal entry : nonTerminalCallers.keySet()) {
             // there are hidden NonTerminals (like List{...} special)
             // the only way to get to them is with the full traversal
@@ -51,12 +55,12 @@ public class Nullability {
         }
     }
 
-    /** marks a state as nullable if it is not already, and calls mark on any
-     * states that should be nullable as a result.
+    /** marks a state as entryNullable if it is not already, and calls mark on any
+     * states that should be entryNullable as a result.
      */
     private void mark(State state, Map<NonTerminal, Set<NonTerminalState>> nonTerminalCallers) {
-        if (!nullable.contains(state)) {
-            nullable.add(state);
+        if (!entryNullable.contains(state)) {
+            entryNullable.add(state);
             if (state instanceof NextableState) {
                 if (isNullable(state))
                     for (State s : ((NextableState) state).next)
@@ -66,7 +70,7 @@ public class Nullability {
                 // previous calls to childNullable would have returned False
                 // so now we restart those recursions
                 for (State s : nonTerminalCallers.get(state.nt)) {
-                    if (nullable.contains(s)) {
+                    if (entryNullable.contains(s)) {
                         // assert s instanceof NonTerminalState : "Intermediary states are NonTerminalStates?";
                         for (State child : ((NextableState)s).next) {
                             mark(child, nonTerminalCallers);
@@ -90,7 +94,5 @@ public class Nullability {
                ((state instanceof NonTerminalState) && isNullable(((NonTerminalState) state).child));
     }
 
-    public boolean isNullable(NonTerminal nt) {
-        return nullable.contains(nt.exitState);
-    }
+    public boolean isNullable(NonTerminal nt) { return entryNullable.contains(nt.exitState); }
 }

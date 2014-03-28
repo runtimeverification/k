@@ -8,6 +8,9 @@ import org.w3c.dom.Element;
 
 import aterm.ATermAppl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 /**
  * Used for representing parsing ambiguity. Shouldn't exist after disambiguation.
  */
@@ -28,6 +31,8 @@ public class Ambiguity extends Collection {
     public Ambiguity(String sort, java.util.List<Term> col) {
         super(sort, col);
     }
+
+    public Ambiguity(String sort, java.util.Collection<? extends Term> col) { this(sort, new ArrayList<>(col)); }
 
     @Override
     public String toString() {

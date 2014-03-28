@@ -145,8 +145,10 @@ public class ProgramLoader {
                         msg = "Parse error: unexpected end of file.";
                     else
                         msg = "Parse error: unexpected character '" + content.charAt(perror.position) + "'.";
-                    String loc = "(" + perror.line + "," + perror.column + "," + perror.line + "," + perror.column + ")";
-                    throw new TransformerException(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, filename, loc));
+                    String loc = "(" + perror.line + "," + perror.column + "," +
+                                       perror.line + "," +(perror.column+1) + ")";
+                    throw new TransformerException(new KException(
+                            ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, filename, loc));
                 }
                 out = out.accept(new TreeCleanerVisitor(context));
                 if (GlobalSettings.verbose)

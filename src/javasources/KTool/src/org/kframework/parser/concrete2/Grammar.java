@@ -9,32 +9,33 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.kframework.kil.Ambiguity;
 import org.kframework.kil.KApp;
 import org.kframework.kil.KLabel;
 import org.kframework.kil.KList;
 import org.kframework.kil.KSorts;
 import org.kframework.kil.Term;
-import org.kframework.kil.Token;
 import org.kframework.parser.concrete2.Grammar.State.OrderingInfo;
+import org.kframework.parser.concrete2.Rule.DeleteRule;
 
 
 /**
  * The classes used by the parser to represent the internal structure of a grammar.
- * A grammar represents a NFA generated from EBNF style grammar (in this case the K syntax declarations).
+ * A grammar consists of NFAs generated for each non-terminal from a EBNF style grammar
+ * (in this case the K syntax declarations).
  * The main object is the {@link NonTerminal}, containing a unique {@link NonTerminalId},
  * and two states: entry and exit.
  *
- * There are four main types of states:
- * {@link EntryState}, {@link NonTerminalState}, {@link PrimitiveState} and {@link ExitState}.
- * The first three extend {@link NextableState} in order to make accommodate connections
- * between the sates. ExitState signifies the end of a NonTerminal so it doesn't need a 'next' field.
+ * There are five main types of states: {@link EntryState}, {@link NonTerminalState},
+ * {@link PrimitiveState}, @{@link RuleState} and {@link ExitState}.
+ * The first four extend {@link NextableState} in order to make accommodate connections
+ * between the sates. ExitState signifies the end of a NonTerminal so it doesn't have a 'next' field.
  *
- * Each {@link org.kframework.parser.concrete2.Grammar.NonTerminal} contains exactly one {@link EntryState}
- * and one {@link org.kframework.parser.concrete2.Grammar.ExitState}. Depending on the grammar it may contain
- * multiple {@link PrimitiveState} and {@link NonTerminalState}.
+ * Each {@link NonTerminal} contains exactly one {@link EntryState}
+ * and one {@link ExitState}. Depending on the grammar it may contain
+ * multiple {@link NonTerminalState}, {@link PrimitiveState} or {@link RuleState}.
  *
  * Example of a NonTerminal NFA structure:
  * E ::= E "+" E
@@ -53,17 +54,19 @@ import org.kframework.parser.concrete2.Grammar.State.OrderingInfo;
  * |) - ExitState
  * [] - NonTerminalState
  * () - PrimitiveState
+ * <> - RuleState
  *
+ * NOTE: compile() must be called on a grammar before it is handed to the parser
  */
 public class Grammar implements Serializable {
 
-    // Contains all start symbol NonTerminals
+    /// The set of "root" NonTerminals
     private Map<NonTerminalId, NonTerminal> startNonTerminals = new HashMap<>();
 
     public boolean add(NonTerminal newNT) {
-        if (startNonTerminals.containsKey(newNT.nonTerminalId))
+        if (startNonTerminals.containsKey(newNT.nonTerminalId)) {
             return false;
-        else {
+        } else {
             startNonTerminals.put(newNT.nonTerminalId, newNT);
             return true;
         }
@@ -75,10 +78,6 @@ public class Grammar implements Serializable {
 
     public NonTerminal get(String ntSymbol) {
         return startNonTerminals.get(new NonTerminalId(ntSymbol));
-    }
-
-    public Set<NonTerminal> getStartNonTerminals() {
-        return new HashSet<NonTerminal>(startNonTerminals.values());
     }
 
     public Map<NonTerminal, Set<NonTerminalState>> getNonTerminalCallers() {
@@ -95,6 +94,9 @@ public class Grammar implements Serializable {
     }
 
     public void addWhiteSpace() {
+        // TODO: Move out of grammar and into a post processing of KSyntax
+        // TODO: Put whitespace at start of NT so we don't need the extra NT names
+        // TODO: (once we don't need extra NT names), make nt.nonTerminalId be final
         // TODO: make whitespace able to return comments somehow
         // create a NonTerminal which parses a list of whitespace characters.
         // the NT is a star list that has 3 branches
@@ -107,14 +109,14 @@ public class Grammar implements Serializable {
             for (State s : nonTerminal.getReachableStates()) {
                 if (s instanceof PrimitiveState) {
                     PrimitiveState ps = ((PrimitiveState) s);
-                    if (!ps.isAlwaysNull()) { // add whitespace after
-                        PrimitiveState whitespace = new RegExState(new StateId("whitespace" + seed++), s.nt, pattern, TreeCleanerVisitor.DELETESORT);
-                        RuleState deleteToken = new RuleState(new StateId("whitespace-D-" + seed++), s.nt, new DeleteRule(1, true));
-                        whitespace.next.add(deleteToken);
-                        deleteToken.next.addAll(ps.next);
-                        ps.next.clear();
-                        ps.next.add(whitespace);
-                    }
+                    PrimitiveState whitespace = new RegExState(
+                        new StateId("whitespace" + seed++), s.nt, pattern, KSorts.K);
+                    RuleState deleteToken = new RuleState(
+                        new StateId("whitespace-D-" + seed++), s.nt, new DeleteRule(1, true));
+                    whitespace.next.add(deleteToken);
+                    deleteToken.next.addAll(ps.next);
+                    ps.next.clear();
+                    ps.next.add(whitespace);
                 }
             }
         }
@@ -125,9 +127,12 @@ public class Grammar implements Serializable {
             // the startNT gets another Id to eliminate confusion.
             NonTerminal nt = entry.getValue();
             NonTerminal whiteStartNt = new NonTerminal(new NonTerminalId(nt.nonTerminalId.name));
-            PrimitiveState whitespace = new RegExState(new StateId("whitespace-" + seed++), whiteStartNt, pattern, TreeCleanerVisitor.DELETESORT);
-            NonTerminalState nts = new NonTerminalState(new StateId("white-calls-" + nt.nonTerminalId.name), whiteStartNt, nt, false);
-            RuleState deleteToken = new RuleState(new StateId("whitespace-D-" + seed++), whiteStartNt, new DeleteRule(1, true));
+            PrimitiveState whitespace = new RegExState(
+                new StateId("whitespace-" + seed++), whiteStartNt, pattern, KSorts.K);
+            NonTerminalState nts = new NonTerminalState(
+                new StateId("white-calls-" + nt.nonTerminalId.name), whiteStartNt, nt, false);
+            RuleState deleteToken = new RuleState(
+                new StateId("whitespace-D-" + seed++), whiteStartNt, new DeleteRule(1, true));
             nt.nonTerminalId = new NonTerminalId(nt.nonTerminalId.name + "-afterWhite");
             whiteStartNt.entryState.next.add(whitespace);
             whitespace.next.add(deleteToken);
@@ -137,7 +142,7 @@ public class Grammar implements Serializable {
         }
     }
 
-    public void finalize() {
+    public void compile() {
         // 1. get all nullable states
         Nullability nullability = new Nullability(this);
 
@@ -153,7 +158,7 @@ public class Grammar implements Serializable {
         }
 
         // prepare the Tarjan input data
-        // TODO: java doesn't allow arrays of generic types.
+        // TODO: java doesn't allow arrays of generic types so we need to move from arrays to ArrayList
         @SuppressWarnings("unchecked")
         List<Integer>[] predecessors = new List[allStates.size()];
         for (int i = 0; i < predecessors.length; i++) {
@@ -196,29 +201,36 @@ public class Grammar implements Serializable {
      * @param visited Start with an empty Set<State>. Used as intermediate data.
      * @return A set of all reachable {@Link NonTerminal}.
      */
-    private static void collectNTCallers(State start, Set<State> visited, Map<NonTerminal, Set<NonTerminalState>> reachableNonTerminals) {
-        if (visited.contains(start))
-            return;
-        visited.add(start);
-        if (start instanceof NextableState) {
-            NextableState ns = (NextableState) start;
-            for (State st : ns.next) {
-                if (st instanceof NonTerminalState) {
-                    NonTerminalState nts = (NonTerminalState) st;
-                    if (!reachableNonTerminals.containsKey(nts.child)) {
-                        reachableNonTerminals.put(nts.child, new HashSet<NonTerminalState>(Arrays.asList(nts)));
+    private static void collectNTCallers(State start, Set<State> visited,
+        Map<NonTerminal, Set<NonTerminalState>> reachableNonTerminals) {
+        if (!visited.contains(start)) {
+            visited.add(start);
+            if (start instanceof NextableState) {
+                NextableState ns = (NextableState) start;
+                for (State st : ns.next) {
+                    if (st instanceof NonTerminalState) {
+                        NonTerminalState nts = (NonTerminalState) st;
+                        if (!reachableNonTerminals.containsKey(nts.child)) {
+                            reachableNonTerminals.put(
+                                nts.child, new HashSet<NonTerminalState>(Arrays.asList(nts)));
+                        }
+                        reachableNonTerminals.get(nts.child).add(nts);
+                        collectNTCallers(((NonTerminalState) st).child.entryState,
+                            visited, reachableNonTerminals);
                     }
-                    reachableNonTerminals.get(nts.child).add(nts);
-                    collectNTCallers(((NonTerminalState) st).child.entryState, visited, reachableNonTerminals);
+                    collectNTCallers(st, visited, reachableNonTerminals);
                 }
-                collectNTCallers(st, visited, reachableNonTerminals);
             }
         }
     }
 
+    ///////////////////
+    // Inner Classes //
+    ///////////////////
+
     // Positions are 'int' because CharSequence uses 'int' // Position in the text
     public static class StateId implements Comparable<StateId>, Serializable { // Used only by rules
-        String name;
+        public final String name;
         public StateId(String name) { this.name = name; }
         public int compareTo(StateId that) { return this.name.compareTo(that.name); }
 
@@ -240,8 +252,8 @@ public class Grammar implements Serializable {
         }
     }
 
-    public static class NonTerminalId implements Comparable<NonTerminalId>, Serializable { // Used only by rules
-        String name;
+    public static class NonTerminalId implements Comparable<NonTerminalId>, Serializable {
+        public final String name;
         public NonTerminalId(String name) { this.name = name; }
         public int compareTo(NonTerminalId that) { return this.name.compareTo(that.name); }
 
@@ -264,11 +276,11 @@ public class Grammar implements Serializable {
     }
 
     public static class NonTerminal implements Comparable<NonTerminal>, Serializable {
-        public NonTerminalId nonTerminalId;
+        public NonTerminalId nonTerminalId; // TODO: make final once whitespace is refactored
         public final EntryState entryState;
         public final ExitState exitState;
-        Set<NextableState> intermediaryStates = new HashSet<>();
-        public final OrderingInfo orderingInfo = null; // TODO
+        private final Set<NextableState> intermediaryStates = new HashSet<>();
+        public final OrderingInfo orderingInfo = null; // TODO: unused until we fix lookahead
 
         static class OrderingInfo implements Comparable<OrderingInfo> {
             final int key;
@@ -290,7 +302,9 @@ public class Grammar implements Serializable {
             this.exitState = new ExitState(new StateId(nonTerminalId.name + "-exit"), this);
         }
 
-        public int compareTo(NonTerminal that) { return this.nonTerminalId.compareTo(that.nonTerminalId); }
+        public int compareTo(NonTerminal that) {
+            return this.nonTerminalId.compareTo(that.nonTerminalId);
+        }
 
         public Set<NextableState> getIntermediaryStates() {
             return intermediaryStates;
@@ -324,15 +338,14 @@ public class Grammar implements Serializable {
     }
 
     public abstract static class State implements Comparable<State>, Serializable {
-        final StateId stateId;
-        final NonTerminal nt;
+        public final StateId stateId;
+        public final NonTerminal nt;
         OrderingInfo orderingInfo = null;
 
         static class OrderingInfo implements Comparable<OrderingInfo>, Serializable {
-            int key;
+            final int key;
             public OrderingInfo(int key) { this.key = key; }
             public int compareTo(OrderingInfo that) { return Integer.compare(this.key, that.key); }
-            public static final OrderingInfo ZERO = new OrderingInfo(0);
         }
 
         public State(StateId stateId, NonTerminal nt) {
@@ -372,7 +385,9 @@ public class Grammar implements Serializable {
         public final Set<State> next = new HashSet<State>() {
             @Override
             public boolean add(State s) {
-                assert s.nt == NextableState.this.nt : "States are not in the same NonTerminal.";
+                assert s.nt == NextableState.this.nt :
+                    "States " + NextableState.this.stateId.name + " and " +
+                        s.stateId.name + " are not in the same NonTerminal.";
                 return super.add(s);
             }
         };
@@ -396,166 +411,10 @@ public class Grammar implements Serializable {
                 StateId stateId, NonTerminal nt,
                 NonTerminal child, boolean isLookahead) {
             super(stateId, nt, true);
-            assert child != null : "here it is null: " + stateId.name;
             nt.intermediaryStates.add(this);
             this.child = child;
             this.isLookahead = isLookahead;
         }
-    }
-
-    public static abstract class Rule implements Serializable {
-        static class MetaData {
-            public final int startPosition;
-            public final int startLine;
-            public final int startColumn;
-            public final int endPosition;
-            public final int endLine;
-            public final int endColumn;
-            public MetaData(int startPosition, int startLine, int startColumn, int endPosition, int endLine, int endColumn) {
-                this.startPosition = startPosition; this.startLine = startLine; this.startColumn = startColumn;
-                this.endPosition = endPosition; this.endLine = endLine; this.endColumn = endColumn;
-            }
-        }
-    }
-
-    public static abstract class ContextFreeRule extends Rule {
-        public abstract Set<KList> apply(Set<KList> set, MetaData metaData);
-    }
-
-    public static abstract class KListRule extends ContextFreeRule {
-        public Set<KList> apply(Set<KList> set, MetaData metaData) {
-            Set<KList> result = new HashSet<>();
-            for (KList klist : set) {
-                KList newKList = this.apply(klist, metaData);
-                if (newKList != null) {
-                    result.add(newKList);
-                }
-            }
-            return result;
-        }
-        protected abstract KList apply(KList set, MetaData metaData);
-    }
-
-    // for putting labels after the fact
-    public static class WrapLabelRule extends KListRule {
-        KLabel label;
-        String sort;
-        public WrapLabelRule(KLabel label, String sort) { this.label = label; }
-        protected KList apply(KList klist, MetaData metaData) {
-            Term term = new KApp(label, klist);
-            term.setSort(this.sort);
-            return new KList(Arrays.<Term>asList(term));
-        }
-    }
-
-    public static abstract class SuffixRule extends KListRule {
-        protected abstract boolean rejectSmallKLists();
-        protected abstract int getSuffixLength();
-        protected abstract Result applySuffix(List<Term> suffix, MetaData metaData);
-
-        protected abstract class Result {}
-        protected class Reject extends Result {}
-        protected class Original extends Result {}
-        protected class Accept extends Result {
-            List<Term> list;
-            public Accept(List<Term> list) { this.list = list; }
-        }
-
-        protected KList apply(KList klist, MetaData metaData) {
-            List<Term> terms = klist.getContents();
-            int i = terms.size() - this.getSuffixLength();
-            if (i < 0) {
-                return this.rejectSmallKLists() ? null : klist;
-            } else {
-                List<Term> suffix = new ArrayList<>();
-                for (; i < terms.size(); i++) {
-                    suffix.add(terms.get(i));
-                }
-                Result result = this.applySuffix(suffix, metaData);
-                if (result instanceof Reject) {
-                    return null;
-                } else if (result instanceof Original) {
-                    return klist;
-                } else if (result instanceof Accept) {
-                    KList prefix = new KList(klist);
-                    for (int j = terms.size() - 1;
-                         j >= terms.size() - this.getSuffixLength(); j--) {
-                        prefix.getContents().remove(j);
-                    }
-                    for (Term term : ((Accept) result).list) {
-                        prefix.add(term);
-                    }
-                    return prefix;
-                } else { assert false : "impossible"; return null; }
-            }
-        }
-    }
-
-    // for deleting tokens
-    public static class DeleteRule extends SuffixRule {
-        private final int length;
-        private final boolean reject;
-        public DeleteRule(int length, boolean reject) {
-            this.length = length; this.reject = reject;
-        }
-
-        protected boolean rejectSmallKLists() { return reject; }
-        protected int getSuffixLength() { return length; }
-        protected Result applySuffix(List<Term> terms, MetaData metaData) {
-            return new Accept(Arrays.<Term>asList());
-        }
-    }
-
-    // for putting labels before the fact
-    public static class InsertRule extends SuffixRule {
-        private final Term term;
-        public InsertRule(Term term) { this.term = term; }
-        protected boolean rejectSmallKLists() { return false; }
-        protected int getSuffixLength() { return 0; }
-        public Result applySuffix(List<Term> set, MetaData metaData) {
-            return new Accept(Arrays.asList(term));
-        }
-    }
-
-    public static class AddLocationRule extends SuffixRule {
-        protected boolean rejectSmallKLists() { return false; }
-        protected int getSuffixLength() { return 1; }
-        public Result applySuffix(List<Term> terms, MetaData metaData) {
-            Term newTerm = terms.get(0).shallowCopy();
-            newTerm.setLocation("("+metaData.startLine+","+metaData.startColumn+","+metaData.endLine+","+metaData.endColumn+")");
-            return new Accept(Arrays.asList(newTerm));
-        }
-    }
-
-/*  // for adding a non-constant to a label that was added before the fact
-    class AdoptionRule extends ContextFreeRule {
-        private boolean reject;
-        public Set<KList> apply(Set<KList> set) {
-            Set<KList> result = new HashSet<>();
-            for (KList klist : set) {
-                List<Term> contents = klist.getContents();
-                if (contents.size() >= 2) {
-                    KList newKList = new KList(klist);
-                    Term oldFinal = newKList.getContents().remove(contents);
-                    Term oldPreFinal = newKList.getContents().remove(...);
-                    if (oldPreFinal instanceof KApp) {
-                        assert ((KApp) oldPreFinal).getChild() instanceof KList : "unimplemented"; // TODO
-                        Term newFinal = new KApp(((KApp) oldPreFinal).getLabel(),
-                            KList.append((KList) ((KApp) oldPreFinal).getChild(), oldFinal));
-                        newKList.add(newFinal);
-                        result.add(newKList);
-                    } else if (!reject) { result.add(klist); }
-                } else if (!reject) { return.add(klist); }
-            }
-        }
-    }
-    */
-    public static abstract class ContextSensitiveRule extends Rule {
-        abstract Set<KList> apply(KList context, Set<KList> set, MetaData metaData);
-    }
-
-    public static class CheckLabelContextRule {
-        private boolean positive;
     }
 
     public static class RuleState extends NextableState {
@@ -567,7 +426,7 @@ public class Grammar implements Serializable {
     }
 
     public abstract static class PrimitiveState extends NextableState {
-        final String sort;
+        public final String sort;
         public static class MatchResult {
             final public int matchEnd;
             public MatchResult(int matchEnd) {
@@ -586,35 +445,26 @@ public class Grammar implements Serializable {
             Set<MatchResult> matchResults = this.matches("", 0);
             return matchResults.size() != 0;
         }
-
-        abstract public boolean isAlwaysNull();
     }
 
     public static class RegExState extends PrimitiveState {
-        public final java.util.regex.Pattern pattern;
+        public final Pattern pattern;
 
-        public RegExState(StateId stateId, NonTerminal nt, java.util.regex.Pattern pattern, String sort) {
+        public RegExState(StateId stateId, NonTerminal nt, Pattern pattern, String sort) {
             super(stateId, nt, sort);
             this.pattern = pattern;
         }
 
         Set<MatchResult> matches(CharSequence text, int startPosition) {
-            java.util.regex.Matcher matcher = pattern.matcher(text);
+            Matcher matcher = pattern.matcher(text);
             matcher.region(startPosition, text.length());
             matcher.useAnchoringBounds(false);
-            matcher.useAnchoringBounds(false);
-            Set<MatchResult> results = new HashSet<MatchResult>();
+            matcher.useTransparentBounds(true);
+            Set<MatchResult> results = new HashSet<>();
             if (matcher.lookingAt()) {
-                results.add(new MatchResult(matcher.end())); //matchFunction(text, matcher.start(), matcher.end())));
+                results.add(new MatchResult(matcher.end()));
             }
             return results;
-        }
-
-        public boolean isAlwaysNull() {
-            if (pattern.equals(""))
-                return true;
-            else
-                return false;
         }
     }
 }
