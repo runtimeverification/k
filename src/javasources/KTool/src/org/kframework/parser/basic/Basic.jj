@@ -622,7 +622,19 @@ void Element(StringBuilder reg, StringBuilder follow) :
 | Group(sb)
 | "(" { sb.append(specialAndImage()); }
   (Element(sb, follow))*
+  ( "|" { sb.append(specialAndImage()); }
+    (Element(sb, follow))*)*
   ")" { sb.append(specialAndImage()); }
+/*
+| "(" { sb.append(specialAndImage()); }
+  (Element(sb, follow))*
+  ")" { sb.append(specialAndImage()); }
+| "(" { sb.append(specialAndImage()); }
+  Element(sb, follow)
+  "|" { sb.append(specialAndImage()); }
+  Element(sb, follow)
+  ")" { sb.append(specialAndImage()); }
+*/
 | "{" { sb.append(specialAndImage()); }
   Element(sb, follow)
   <STRING> { sb.append(specialAndImage()); }
