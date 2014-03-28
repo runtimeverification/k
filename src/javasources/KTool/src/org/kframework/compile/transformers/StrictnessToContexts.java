@@ -29,7 +29,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
     public static final String STRICT = "strict";
     public static final String SEQSTRICT = "seqstrict";
     public static final String CONTEXT = "context";
-    private List<ModuleItem> items = new ArrayList<ModuleItem>();
+    private List<ModuleItem> items = new ArrayList<>();
 
     public StrictnessToContexts(Context context) {
         super("Strict Ops To Context", context);
@@ -44,7 +44,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
             return node;
         }
 
-        items = new ArrayList<ModuleItem>(node.getItems());
+        items = new ArrayList<>(node.getItems());
         node = node.shallowCopy();
         node.setItems(items);
 
@@ -53,7 +53,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                    || !prod.containsAttribute("strict", true) && prod.containsAttribute("seqstrict", true);
             Boolean isSeq = prod.containsAttribute("seqstrict", true);
 
-            if (!MetaK.isComputationSort(prod.getSort()) || prod.getSort().equals(KSorts.KLABEL)) {
+            if (!(MetaK.isComputationSort(prod.getSort()) || prod.getSort().equals(KSorts.KLABEL))) {
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
                         KExceptionGroup.COMPILER,
                         "only productions of sort K, sort KLabel or of syntactic sorts can have "
@@ -83,7 +83,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
                 }
             }
 
-            if (prod.isConstant()) {
+            if (prod.isConstant() && !prod.getSort().equals(KSorts.KLABEL)) {
                 GlobalSettings.kem.register(new KException(ExceptionType.ERROR,
                         KExceptionGroup.COMPILER,
                         "Production is a constant and cannot be strict.",
@@ -146,7 +146,6 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
             }
             for (Attribute strictAttr : strictAttrs.getContents()) {
                 Attributes strictAttrAttrs = null;
-                String strictAttrKey = strictAttr.getKey();
                 String strictAttrValue = strictAttr.getValue();
                 if (strictAttrValue.isEmpty()) strictAttrAttrs = new Attributes();
                 else {
@@ -331,7 +330,7 @@ public class StrictnessToContexts extends CopyOnWriteTransformer {
      * If KLabel is seqstrict then add the condition isKResult(KList1)
      */
     private void kLabelStrictness(Production prod, boolean isSeq) {
-        List<Term> contents = new ArrayList<Term>(3);
+        List<Term> contents = new ArrayList<>(3);
         //first argument is a variable of sort KList
         Variable variable = Variable.getFreshVar(KSorts.KLIST);
         contents.add(variable);
