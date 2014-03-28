@@ -327,6 +327,16 @@
   </test>
 
   <test
+      definition="tests/regression/lexerOr/issue.k"
+      programs="tests/regression/lexerOr"
+      results="tests/regression/lexerOr"
+      extension="issue">
+    <program name="test.issue">
+      <krun-option name="-color" value="off" />
+    </program>
+  </test>
+
+  <test
       definition="tests/regression/unparsing/issue.k"
       programs="tests/regression/unparsing/programs"
       extension="issue"
