@@ -1,4 +1,0 @@
-baz(1, 3 + 4, 5, 7)
-print
-bar(3, 1 + 2, 5)
-print
