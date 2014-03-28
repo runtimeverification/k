@@ -47,8 +47,11 @@ endmodule
 
 module MODEL-CHECKER-SYNTAX-HOOKS
   imports LTL-SYNTAX-HOOKS
+  syntax #ModelCheckerState
   syntax ModelCheckerState ::= #ModelCheckerState 
+  syntax #Prop
   syntax Prop ::= #Prop
+  syntax #ModelCheckResult
   syntax ModelCheckResult ::= #ModelCheckResult
   syntax LtlFormula ::= Prop
 endmodule
