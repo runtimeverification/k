@@ -122,16 +122,16 @@ public class RunProcess {
             case "kast -e":
                 term = ProgramLoader.processPgm(value, value, K.definition, startSymbol, context, ParserType.PROGRAM);
                 break;
-            case "kast -groundParser":
+            case "kast --parser ground":
                 if (!isNotFile) {
                     content = FileUtil.getFileContent(value);
                 }
                 term = ProgramLoader.processPgm(content, value, K.definition, startSymbol, context, ParserType.GROUND);
                 break;
-            case "kast -groundParser -e":
+            case "kast --parser ground -e":
                 term = ProgramLoader.processPgm(value, value, K.definition, startSymbol, context, ParserType.GROUND);
                 break;
-            case "kast -ruleParser":
+            case "kast --parser rule":
                 if (!isNotFile) {
                     content = FileUtil.getFileContent(value);
                 }
@@ -155,6 +155,7 @@ public class RunProcess {
                 String kast = this.getStdout() != null ? this.getStdout() : "";
 
                 //hopefully sort information will get filled in later if we need it, e.g. by SubstitutionFilter
+                //TODO(dwightguth): parse the output of the external parser into real kil classes
                 term = new BackendTerm("", kast);
         }
 

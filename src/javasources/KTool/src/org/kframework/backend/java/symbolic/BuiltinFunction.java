@@ -95,7 +95,7 @@ public class BuiltinFunction {
                             for (Method method : c.getDeclaredMethods()) {
                                 if (method.getName().equals(methodName)) {
                                     table.put(
-                                            KLabelConstant.of(label, definition.context()),
+                                            KLabelConstant.of(label, TermContext.of(definition)),
                                             method);
                                     break;
                                 }

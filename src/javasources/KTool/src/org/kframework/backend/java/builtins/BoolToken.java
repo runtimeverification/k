@@ -14,7 +14,7 @@ import org.kframework.kil.ASTNode;
  *
  * @author AndreiS
  */
-public class BoolToken extends Token {
+public final class BoolToken extends Token {
 
     public static final String SORT_NAME = "Bool";
 

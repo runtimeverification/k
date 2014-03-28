@@ -1,6 +1,5 @@
 package org.kframework.kil;
 
-import org.kframework.backend.symbolic.AddSymbolicVariablesDeclaration;
 import org.kframework.compile.sharing.DataStructureSortCollector;
 import org.kframework.compile.sharing.TokenSortCollector;
 import org.kframework.kil.loader.*;
@@ -20,7 +19,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 
 /**
@@ -128,9 +126,7 @@ public class Definition extends ASTNode {
         this.accept(new CollectVariableTokens(context));
 
         /* collect lexical token sorts */
-        TokenSortCollector tokenSortCollector = new TokenSortCollector(context);
-        this.accept(tokenSortCollector);
-        context.setTokenSorts(tokenSortCollector.getSorts());
+        context.setTokenSorts(TokenSortCollector.collectTokenSorts(this, context));
 
         /* collect the data structure sorts */
         DataStructureSortCollector dataStructureSortCollector

@@ -1,6 +1,7 @@
 package org.kframework.backend.java.kil;
 
 import com.google.common.collect.Sets;
+import org.kframework.backend.java.indexing.RuleIndex;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.ASTNode;
@@ -40,7 +41,9 @@ public class Definition extends JavaSymbolicObject {
     private final Multimap<KLabelConstant, Rule> functionRules = ArrayListMultimap.create();
     private final Set<KLabelConstant> kLabels;
     private final Set<KLabelConstant> frozenKLabels;
+    private final Set<KLabelConstant> sortPredLabels;
     private final Context context;
+    private RuleIndex index;
 
     public Definition(Context context) {
         this.context = context;
@@ -48,6 +51,7 @@ public class Definition extends JavaSymbolicObject {
         macros = new ArrayList<Rule>();
         kLabels = new HashSet<KLabelConstant>();
         frozenKLabels = new HashSet<KLabelConstant>();
+        sortPredLabels = new HashSet<KLabelConstant>();
     }
 
     public void addFrozenKLabel(KLabelConstant frozenKLabel) {
@@ -73,6 +77,9 @@ public class Definition extends JavaSymbolicObject {
     public void addRule(Rule rule) {
         if (rule.containsAttribute(Attribute.FUNCTION_KEY)) {
             functionRules.put(rule.functionKLabel(), rule);
+            if (rule.isSortPredicate()) {
+                sortPredLabels.add(rule.functionKLabel());
+            }
         } else if (rule.containsAttribute(Attribute.MACRO_KEY)) {
             macros.add(rule);
         } else {
@@ -105,6 +112,10 @@ public class Definition extends JavaSymbolicObject {
     public Set<KLabelConstant> kLabels() {
         return Collections.unmodifiableSet(kLabels);
     }
+    
+    public Set<KLabelConstant> sortPredLabels() {
+        return sortPredLabels;
+    }
 
     public List<Rule> macros() {
         // TODO(AndreiS): fix this issue with modifiable collections
@@ -132,4 +143,11 @@ public class Definition extends JavaSymbolicObject {
         throw new UnsupportedOperationException();
     }
 
+    public void setIndex(RuleIndex index) {
+        this.index = index;
+    }
+
+    public RuleIndex getIndex() {
+        return index;
+    }
 }

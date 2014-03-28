@@ -87,6 +87,8 @@ public class Main {
                     Error.report("The first argument of K3 not recognized. Try -kompile, -kast, -krun or -kpp.");
                     break;
             }
+            
+            System.exit(0);
         } else
             Error.report("There must be a first argument to K3: try -kompile, -kast, -krun or -kpp.");
     }

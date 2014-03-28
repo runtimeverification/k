@@ -76,11 +76,16 @@ public abstract class JavaSymbolicObject extends ASTNode
     }
 
     /**
-     * Returns a {@code Set} view of the variables in this java symbolic object.
+     * Returns a {@code Set} view of the variables in this
+     * {@code JavaSymbolicObject}.
+     * <p>
+     * When the set of variables has not been computed, this method will do the
+     * computation instead of simply returning {@code null} as in
+     * {@link JavaSymbolicObject#getVariableSet()}.
      */
     public Set<Variable> variableSet() {
         if (variableSet == null) {
-            VariableVisitor visitor = new VariableVisitor();
+            VariableCollector visitor = new VariableCollector();
             accept(visitor);
             variableSet = visitor.getVariableSet();
         }
@@ -103,11 +108,22 @@ public abstract class JavaSymbolicObject extends ASTNode
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Forces to recompute the cached set of variables in this
+     * {@code JavaSymbolicObject}.
+     */
     public void updateVariableSet() {
         variableSet = null;
         variableSet();
     }
 
+    /**
+     * Gets the cached set of variables in this {@code JavaSymbolicObject}.
+     * 
+     * @return a set of variables in this {@code JavaSymbolicObject} if they
+     *         have been computed; otherwise, {@code null}
+     * @see JavaSymbolicObject#variableSet()
+     */
     public Set<Variable> getVariableSet() {
         return variableSet;
     }
@@ -116,6 +132,8 @@ public abstract class JavaSymbolicObject extends ASTNode
         this.variableSet = variableSet;
     }
 
+    // TODO(YilongL): remove the comments below to enforce that every subclass
+    // has implemented the following two methods properly
     //@Override
     //public abstract boolean equals(Object object);
 

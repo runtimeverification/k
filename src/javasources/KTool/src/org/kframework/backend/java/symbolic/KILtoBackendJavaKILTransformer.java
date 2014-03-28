@@ -12,13 +12,39 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.collect.Iterables;
 import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.builtins.Int32Token;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
-import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.BuiltinMgu;
+import org.kframework.backend.java.kil.BuiltinSet;
+import org.kframework.backend.java.kil.Cell;
+import org.kframework.backend.java.kil.CellCollection;
+import org.kframework.backend.java.kil.ConcreteCollectionVariable;
+import org.kframework.backend.java.kil.Definition;
+import org.kframework.backend.java.kil.Hole;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KItemProjection;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.KLabelFreezer;
+import org.kframework.backend.java.kil.KLabelInjection;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.KSequence;
+import org.kframework.backend.java.kil.Kind;
+import org.kframework.backend.java.kil.ListLookup;
+import org.kframework.backend.java.kil.MapKeyChoice;
+import org.kframework.backend.java.kil.MapLookup;
+import org.kframework.backend.java.kil.MapUpdate;
+import org.kframework.backend.java.kil.Rule;
+import org.kframework.backend.java.kil.SetElementChoice;
+import org.kframework.backend.java.kil.SetLookup;
+import org.kframework.backend.java.kil.SetUpdate;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Token;
+import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.KSorts;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
@@ -37,6 +63,7 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 
 
@@ -123,8 +150,6 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 return BoolToken.of(((BoolBuiltin) node.getLabel()).booleanValue());
             } else if (node.getLabel() instanceof IntBuiltin) {
                 return IntToken.of(((IntBuiltin) node.getLabel()).bigIntegerValue());
-            } else if (node.getLabel() instanceof Int32Builtin) {
-                return Int32Token.of(((Int32Builtin) node.getLabel()).intValue());
             } else if (node.getLabel() instanceof StringBuiltin) {
                 return StringToken.of(((StringBuiltin) node.getLabel()).stringValue());
             } else if (node.getLabel() instanceof GenericToken) {
@@ -141,7 +166,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         if (kList instanceof Variable) {
             kList = new KList((Variable) kList);
         }
-        return new KItem(kLabel, kList, this.context);
+        return new KItem(kLabel, kList, TermContext.of(definition));
     }
     
     @Override
@@ -151,7 +176,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode transform(org.kframework.kil.KLabelConstant node) throws TransformerException {
-        return KLabelConstant.of(node.getLabel(), this.context);
+        return KLabelConstant.of(node.getLabel(), TermContext.of(definition));
     }
 
     @Override
@@ -352,9 +377,9 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                             elementsRight));
                     for (Term baseTerm : baseTerms) {
                         result = new KItem(
-                                KLabelConstant.of(DataStructureSort.DEFAULT_LIST_LABEL, context),
+                                KLabelConstant.of(DataStructureSort.DEFAULT_LIST_LABEL, TermContext.of(definition)),
                                 new KList(ImmutableList.of(result, baseTerm)),
-                                context);
+                                TermContext.of(definition));
                     }
                     return result;
                 }
@@ -395,9 +420,9 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             Term result = baseTerms.get(0);
             for (int i = 1; i < baseTerms.size(); ++i) {
                 result = new KItem(
-                        KLabelConstant.of(DataStructureSort.DEFAULT_SET_LABEL, context),
+                        KLabelConstant.of(DataStructureSort.DEFAULT_SET_LABEL, TermContext.of(definition)),
                         new KList(ImmutableList.of(result, baseTerms.get(i))),
-                        context);
+                        TermContext.of(definition));
             }
             return result;
         }
@@ -438,9 +463,9 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             Term result = baseTerms.get(0);
             for (int i = 1; i < baseTerms.size(); ++i) {
                 result = new KItem(
-                        KLabelConstant.of(DataStructureSort.DEFAULT_MAP_LABEL, context),
+                        KLabelConstant.of(DataStructureSort.DEFAULT_MAP_LABEL, TermContext.of(definition)),
                         new KList(ImmutableList.of(result, baseTerms.get(i))),
-                        context);
+                        TermContext.of(definition));
             }
             return result;
         }
@@ -682,14 +707,14 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         }
 
         for (String kLabelName : singletonModule.getModuleKLabels()) {
-            definition.addKLabel(KLabelConstant.of(kLabelName, context));
+            definition.addKLabel(KLabelConstant.of(kLabelName, TermContext.of(definition)));
         }
 
         /* collect the productions which have the attributes strict and seqstrict */
         Set<Production> productions = singletonModule.getSyntaxByTag("strict", context);
         productions.addAll(singletonModule.getSyntaxByTag("seqstrict", context));
         for (Production production : productions) {
-            definition.addFrozenKLabel(KLabelConstant.of(production.getKLabel(), context));
+            definition.addFrozenKLabel(KLabelConstant.of(production.getKLabel(), TermContext.of(definition)));
         }
 
         this.definition = null;

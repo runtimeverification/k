@@ -6,6 +6,7 @@ import org.kframework.krun.ColorSetting;
 import org.kframework.ktest.*;
 import org.kframework.ktest.CmdArgs.CmdArg;
 import org.kframework.utils.ColorUtil;
+import org.kframework.utils.general.GlobalSettings;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -94,11 +95,21 @@ public class TestSuite {
     public boolean run() throws InterruptedException, TransformerException,
             ParserConfigurationException, IOException {
         boolean ret = true;
-        List<TestCase> successfulTests = tests;
+
+        List<TestCase> successfulTests;
+
+        if (GlobalSettings.isPosix()) {
+            successfulTests = runPosixOnlySteps(tests);
+        } else {
+            successfulTests = tests;
+        }
+
+        ret &= successfulTests.size() == tests.size();
 
         if (!skips.contains(KTestStep.KOMPILE)) {
-            successfulTests = runKompileSteps(filterSkips(tests, KTestStep.KOMPILE));
-            ret = successfulTests.size() == tests.size();
+            List<TestCase> testsIn = successfulTests;
+            successfulTests = runKompileSteps(filterSkips(testsIn, KTestStep.KOMPILE));
+            ret &= successfulTests.size() == testsIn.size();
         }
         if (!skips.contains(KTestStep.PDF))
             ret &= runPDFSteps(filterSkips(successfulTests, KTestStep.PDF));
@@ -159,6 +170,46 @@ public class TestSuite {
     }
 
     /**
+     * Run posixOnly scripts in list of test cases.
+     *
+     * @return list of test cases that run successfully
+     * @throws InterruptedException
+     */
+    private List<TestCase> runPosixOnlySteps(List<TestCase> tests) throws InterruptedException {
+        assert GlobalSettings.isPosix();
+        int len = tests.size();
+        List<TestCase> successfulTests = new ArrayList<>(len);
+        List<Proc<TestCase>> ps = new ArrayList<>(len);
+
+        System.out.format("Running initial scripts...%n");
+        startTpe();
+        for (TestCase tc : tests) {
+            if (tc.hasPosixOnly()) {
+                Proc<TestCase> p = new Proc<>(tc, tc.getPosixOnlyCmd(), tc.toPosixOnlyLogString(),
+                        strComparator, timeout, verbose, colorSetting, updateOut, generateOut);
+                ps.add(p);
+                tpe.execute(p);
+            } else {
+                successfulTests.add(tc);
+            }
+        }
+        stopTpe();
+
+        // collect successful test cases, report failures
+        for (Proc<TestCase> p : ps) {
+            TestCase tc = p.getObj();
+            if (p.isSuccess())
+                successfulTests.add(tc);
+            makeReport(p, makeRelative(tc.getDefinition()),
+                    FilenameUtils.getName(tc.getPosixInitScript()));
+        }
+
+        printResult(successfulTests.size() == len);
+
+        return successfulTests;
+    }
+
+    /**
      * Run kompile steps in list of test cases.
      *
      * This method returns something different from others, this is because in kompile tests we
@@ -178,6 +229,7 @@ public class TestSuite {
         for (TestCase tc : tests) {
             Proc<TestCase> p = new Proc<>(tc, tc.getKompileCmd(), tc.toKompileLogString(),
                     strComparator, timeout, verbose, colorSetting, updateOut, generateOut);
+            p.setWorkingDir(tc.getWorkingDir());
             ps.add(p);
             tpe.execute(p);
             kompileSteps++;
@@ -215,6 +267,7 @@ public class TestSuite {
         for (TestCase tc : tests) {
             Proc<TestCase> p = new Proc<>(tc, tc.getPdfCmd(), tc.toPdfLogString(),
                     strComparator, timeout, verbose, colorSetting, updateOut, generateOut);
+            p.setWorkingDir(tc.getWorkingDir());
             ps.add(p);
             tpe.execute(p);
             pdfSteps++;
@@ -371,6 +424,7 @@ public class TestSuite {
         Proc<KRunProgram> p = new Proc<>(program, args, inputContents, outputContentsAnn,
                 errorContentsAnn, program.toLogString(), strComparator, timeout, verbose,
                 colorSetting, updateOut, generateOut, program.outputFile, program.newOutputFile);
+        p.setWorkingDir(new File(program.defPath));
         tpe.execute(p);
         krunSteps++;
         return p;

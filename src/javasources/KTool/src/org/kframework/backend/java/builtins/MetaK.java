@@ -1,14 +1,24 @@
 package org.kframework.backend.java.builtins;
 
-import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.BuiltinSet;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KLabelInjection;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.MetaVariable;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.symbolic.PatternMatcher;
 import org.kframework.backend.java.symbolic.SymbolicConstraint;
 import org.kframework.backend.java.symbolic.SymbolicUnifier;
-import org.kframework.kil.matchers.MatcherException;
+import org.kframework.backend.java.symbolic.UnificationFailure;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
 
 /**
  * Table of {@code public static} methods for builtin meta K operations.
@@ -36,12 +46,29 @@ public class MetaK {
         SymbolicUnifier unifier = new SymbolicUnifier(constraint, context);
         try {
             unifier.unify(term1, term2);
-        } catch (MatcherException e) {
+        } catch (UnificationFailure e) {
             return BoolToken.FALSE;
         }
         return BoolToken.TRUE;
     }
 
+    /**
+     * Checks if the subject term matches the pattern.
+     * 
+     * @param subject
+     *            the subject term
+     * @param pattern
+     *            the pattern term
+     * @param context
+     *            the term context
+     * @return {@link BoolToken#TRUE} if the two terms can be matched;
+     *         otherwise, {@link BoolToken#FALSE}
+     */
+    public static BoolToken matchable(Term subject, Term pattern, TermContext context) {
+        return PatternMatcher.matchable(subject, pattern, context) ? BoolToken.TRUE
+                : BoolToken.FALSE;
+    }
+    
     /**
      * Renames {@link Variable}s of a given {@link Term} if they appear also in
      * a given {@link BuiltinSet} of {@link MetaVariable}s.
@@ -132,26 +159,6 @@ public class MetaK {
     }
 
     /**
-     * Returns the first or the second {@link Term} according to the value of
-     * the {@link BoolToken}.
-     * 
-     * @param boolToken
-     *            the boolean token
-     * @param t
-     *            the first term
-     * @param e
-     *            the second term
-     * @param context
-     *            the term context
-     * @return the first term if the {@code BoolToken} represents true;
-     *         otherwise, the second term
-     */
-    public static Term ite(BoolToken boolToken, Term t, Term e, TermContext context) {
-        if (boolToken.booleanValue()) return t;
-        return e;
-    }
-
-    /**
      * Returns the K label of a specified {@link KItem}.
      * 
      * @param kItem
@@ -160,8 +167,8 @@ public class MetaK {
      *            the term context
      * @return the K label
      */
-    public static KLabel getKLabel(KItem kItem, TermContext context) {
+    public static KItem getKLabel(KItem kItem, TermContext context) {
         // TODO(AndreiS): handle KLabel variables
-        return (KLabel) kItem.kLabel();
+        return new KItem(new KLabelInjection(kItem.kLabel()), new KList(), context);
     }
 }

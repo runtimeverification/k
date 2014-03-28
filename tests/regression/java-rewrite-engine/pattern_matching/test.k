@@ -25,7 +25,8 @@ module MY-PATTERN-MATCHING
 
 // Tells how to decompose pattern matching
   syntax KList ::= myDecomposeMatching(KList, KList)    [function]
-  syntax KItem ::= myDoneDecomposeMatching(K, K)
+  syntax KItem ::= myDoneDecomposeMatching(Variable, K)
+  syntax KItem ::= #unmatchableError(KList, KList)
 // Here are some basic decomposition rules, but one can add more
 //  rule myDecomposeMatching((L:KLabel(Ps:KList) => Ps), (L(Ks:KList) => Ks))
 // TODO(Yilong): current impl. assumes that rewrite has been pushed to the top
@@ -39,7 +40,12 @@ module MY-PATTERN-MATCHING
     when notBool emptyKList(Ps)
   // rule myDecomposeMatching(.KList, .KList) => .KList
   // TODO(YilongL): builtins in Java rewrite engine may not be represented as KItem's
-  rule myDecomposeMatching(Ks, Ks) => .KList  [owise]
+  rule myDecomposeMatching(Ps:KList, Ks:KList)
+    => #if Ps ==KList Ks
+       #then .KList
+       #else #unmatchableError(Ps,Ks)
+       #fi
+    [owise]
 
 // For example, one may add rules like the following in one's language
 //  rule myDecomposeMatching(([P:Exp|T:Exp] => P,T),([V:Val,Vs:Vals] => V,[Vs]))
@@ -65,12 +71,12 @@ module MY-PATTERN-MATCHING
   rule #myPatternMatch1(myDoneDecomposeMatching(X:Variable,K:K),,Ps, M:MyMap) // YilongL: use myDoneDecomposeMatching
     => #myPatternMatch1(.KList,,Ps, (M:MyMap, X |-> K))
     when notBool (X in keys(M))  // only linear patterns allowed for now
+  rule #myPatternMatch1(#unmatchableError(P,K),,_, _:MyMap)
+    => #unmatchableError(P,K)
   rule #myPatternMatch1(myDoneDecomposeMatching(X:Variable,K:K),,Ps, M:MyMap)
     => #nonlinearPatternError
     when X in keys(M)  // TODO(YilongL): this side condition contains two function calls which can be combined into one instead
   rule #myPatternMatch1(.KList, M:MyMap) => #myMap(M)
-
-  //rule #myPatternMatch1(_,_) => #nonlinearPatternError  [owise]
 
 endmodule
 

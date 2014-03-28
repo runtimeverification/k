@@ -17,6 +17,16 @@ public class KLabelInjection extends KLabel {
     private final Term term;
 
     public KLabelInjection(Term term) {
+        // TODO(YilongL): enable this assertion
+//        if (term instanceof KItem) {
+//            assert !(((KItem) term).kLabel() instanceof KLabelInjection);
+//        }
+        // TODO(YilongL): no need to inject twice; however, this should be prevented in kompilation
+//        if (term instanceof KItem && ((KItem) term).kLabel() instanceof KLabelInjection) {
+//            this.term = ((KLabelInjection) ((KItem) term).kLabel()).term();
+//        } else {
+//            this.term = term;
+//        }
         this.term = term;
     }
 

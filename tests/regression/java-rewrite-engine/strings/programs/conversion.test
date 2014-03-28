@@ -1,1 +1,1 @@
-test(String2Int("1000") ~> Int2String(1000) ~> String2Int("-1000") ~> Int2String(-1000) ~> String2Int("1\u0660\u0660") ~> String2Int("\u2163") ~> String2Int("\xbe"))
+String2Int("1000") ~> Int2String(1000) ~> String2Int("-1000") ~> Int2String(-1000) ~> String2Int("1\u0660\u0660") ~> String2Int("\u2163") ~> String2Int("\xbe")

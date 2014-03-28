@@ -1,13 +1,25 @@
 package org.kframework.backend.java.indexing.pathIndex.visitors;
 
 import org.kframework.backend.java.builtins.UninterpretedToken;
-import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.symbolic.LocalVisitor;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.Cell;
+import org.kframework.backend.java.kil.Token;
+import org.kframework.backend.java.kil.KSequence;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KLabelFreezer;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.Hole;
+import org.kframework.backend.java.kil.BuiltinMap;
+
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
 import org.kframework.krun.K;
 import org.kframework.utils.general.IndexingStatistics;
 
+import java.io.Serializable;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -23,7 +35,7 @@ import java.util.concurrent.TimeUnit;
  * Date: 1/21/14
  * Time: 12:05 PM
  */
-public class TermVisitor extends LocalVisitor {
+public class TermVisitor extends LocalVisitor implements Serializable {
     private static final String K_RESULT = "KResult";
     private static final String EMPTY_LIST_LABEL = "'.List{\",\"}";
     private static final String EMPTY_LIST_SORT = "#ListOf#Bot{\",\"}";

@@ -28,6 +28,7 @@ import org.kframework.parser.concrete.disambiguate.BestFitFilter;
 import org.kframework.parser.concrete.disambiguate.CellEndLabelFilter;
 import org.kframework.parser.concrete.disambiguate.CellTypesFilter;
 import org.kframework.parser.concrete.disambiguate.CorrectCastPriorityFilter;
+import org.kframework.parser.concrete.disambiguate.CorrectConstantsTransformer;
 import org.kframework.parser.concrete.disambiguate.CorrectKSeqFilter;
 import org.kframework.parser.concrete.disambiguate.CorrectRewritePriorityFilter;
 import org.kframework.parser.concrete.disambiguate.FlattenListsFilter;
@@ -85,7 +86,7 @@ public class DefinitionLoader {
 
     /**
      * step. 1. slurp 2. gen files 3. gen TBLs 4. import files in stratego 5. parse configs 6. parse rules 7. ???
-     * 
+     *
      * @param mainFile
      * @param mainModule
      * @return
@@ -212,6 +213,8 @@ public class DefinitionLoader {
             JavaClassesFactory.startConstruction(context);
             def = (Definition) def.accept(new ParseRulesFilter(context));
             JavaClassesFactory.endConstruction();
+            def = (Definition) def.accept(new CorrectConstantsTransformer(context));
+
 
             Stopwatch.sw.printIntermediate("Parsing Rules");
 
@@ -226,7 +229,7 @@ public class DefinitionLoader {
 
     /**
      * Parses a string representing a file with modules in it. Returns the complete parse tree. Any bubble rule has been parsed and disambiguated.
-     * 
+     *
      * @param content
      *            - the input string.
      * @param filename
@@ -253,6 +256,8 @@ public class DefinitionLoader {
             // ----------------------------------- parse rules
             JavaClassesFactory.startConstruction(context);
             def = (Definition) def.accept(new ParseRulesFilter(context, false));
+            def = (Definition) def.accept(new CorrectConstantsTransformer(context));
+
             JavaClassesFactory.endConstruction();
 
             return def;
@@ -304,6 +309,7 @@ public class DefinitionLoader {
         // config = config.accept(new TypeInferenceSupremumFilter(context));
         config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context));
         config = config.accept(new PreferAvoidFilter(context));
+        config = config.accept(new CorrectConstantsTransformer(context));
         config = config.accept(new FlattenListsFilter(context));
         config = config.accept(new AmbDuplicateFilter(context));
         // last resort disambiguation
@@ -357,6 +363,7 @@ public class DefinitionLoader {
         // config = config.accept(new TypeInferenceSupremumFilter(context));
         config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context));
         config = config.accept(new PreferAvoidFilter(context));
+        config = config.accept(new CorrectConstantsTransformer(context));
         config = config.accept(new FlattenListsFilter(context));
         config = config.accept(new AmbDuplicateFilter(context));
         // last resort disambiguation
@@ -400,6 +407,7 @@ public class DefinitionLoader {
         config = config.accept(new TypeInferenceSupremumFilter(context));
         config = config.accept(new BestFitFilter(new GetFitnessUnitKCheckVisitor(context), context));
         // config = config.accept(new PreferAvoidFilter());
+        config = config.accept(new CorrectConstantsTransformer(context));
         config = config.accept(new FlattenListsFilter(context));
         config = config.accept(new AmbDuplicateFilter(context));
         // last resort disambiguation

@@ -1,9 +1,0 @@
-// Testing main
-
-class theMain {
-  method theMain() {
-    print("Hello world!\n");
-  }
-}
-
-// Hello world!

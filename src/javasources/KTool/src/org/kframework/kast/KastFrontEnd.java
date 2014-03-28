@@ -135,8 +135,12 @@ public class KastFrontEnd {
             if (context.kompiled.exists()) {
                 File defXml = new File(context.kompiled.getCanonicalPath() + "/defx-maude.bin");
                 if (!defXml.exists()) {
-                    GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find the compiled definition.", "command line",
-                            defXml.getAbsolutePath()));
+                    //TODO(dwightguth): detect this based on kompile options
+                    defXml = new File(context.kompiled.getCanonicalPath() + "/defx-java.bin");
+                    if (!defXml.exists()) {
+                        GlobalSettings.kem.register(new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, "Could not find the compiled definition.", "command line",
+                                defXml.getAbsolutePath()));
+                    }
                 }
 
                 javaDef = (org.kframework.kil.Definition) BinaryLoader.load(defXml.toString());

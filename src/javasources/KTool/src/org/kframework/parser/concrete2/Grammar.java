@@ -12,11 +12,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.kframework.kil.KApp;
-import org.kframework.kil.KLabel;
-import org.kframework.kil.KList;
 import org.kframework.kil.KSorts;
-import org.kframework.kil.Term;
 import org.kframework.parser.concrete2.Grammar.State.OrderingInfo;
 import org.kframework.parser.concrete2.Rule.DeleteRule;
 

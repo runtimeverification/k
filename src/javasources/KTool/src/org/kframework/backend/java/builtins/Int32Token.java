@@ -1,97 +1,229 @@
 package org.kframework.backend.java.builtins;
 
+import org.kframework.backend.java.builtins.primitives.Ints;
+import org.kframework.backend.java.builtins.primitives.OverflowArithmeticResult;
+import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.Token;
-import org.kframework.backend.java.symbolic.Matcher;
-import org.kframework.backend.java.symbolic.Unifier;
-import org.kframework.backend.java.symbolic.Transformer;
-import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.kil.ASTNode;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
+import com.google.common.primitives.UnsignedInts;
 
 
 /**
- * An integer token. Integer tokens have arbitrary precision.
+ * Wrapper around java primitive int.
  *
- * @author Pat
+ * @author AndreiS
  */
-public class Int32Token extends Token {
-
-    public static final String SORT_NAME = "Int32";
-
-    /* Int32Token cache */
-    private static final Map<Integer, Int32Token> cache = new HashMap<Integer, Int32Token>();
-
-    /* counter for generating fresh Int32Token values */
-    private static int freshValue = 0;
-
-    /* Integer value wrapped by this Int32Token */
-    private final int value;
+public class Int32Token extends BitVector<Integer> {
 
     private Int32Token(int value) {
-        this.value = value;
+        super(value, Integer.SIZE);
     }
 
-    public static Int32Token fresh() {
-        ++freshValue;
-        return of(freshValue);
-    }
-
-    /**
-     * Returns a {@code Int32Token} representation of the given {@link Integer} value. The
-     * {@code Int32Token} instances are cached to ensure uniqueness (subsequent invocations of this
-     * method with the same {@code Integer} value return the same {@code Int32Token} object).
-     */
     public static Int32Token of(int value) {
-
-        Int32Token intToken = cache.get(value);
-        if (intToken == null) {
-            intToken = new Int32Token(value);
-            cache.put(value, intToken);
-        }
-        return intToken;
+        return new Int32Token(value);
     }
 
-    /**
-     * Returns an {@code int} representation of the (interpreted) value of this
-     * Int32Token.
-     * @throws ArithmeticException Integer does not fit in an int.
-     */
-    public int intValue() {
-      return value;
-    }
-
-    /**
-     * Returns a {@code byte} representation of the (interpreted) value of this
-     * Int32Token. Assumes an unsigned value in the range 0-255.
-     * @throws ArithmeticException Integer is not in the range of an unsigned byte.
-     */
-    public byte unsignedByteValue() {
-        if (value > 255) {
-            throw new ArithmeticException();
-        }
-        if (value < 0) {
-            throw new ArithmeticException();
-        }
-        return (byte)value;
-    }
-
-    /**
-     * Returns a {@code String} representation of the sort of this Int32Token.
-     */
     @Override
-    public String sort() {
-        return Int32Token.SORT_NAME;
+    public boolean isZero() {
+        return value == 0;
     }
 
-    /**
-     * Returns a {@code String} representation of the (uninterpreted) value of this Int32Token.
-     */
     @Override
-    public String value() {
-      return Integer.toString(value);
+    public BigInteger signedValue() {
+        return BigInteger.valueOf(value);
+    }
+
+    @Override
+    public BigInteger unsignedValue() {
+        return BigInteger.valueOf(UnsignedInts.toLong(value));
+    }
+
+    @Override
+    public Int32Token add(BitVector<Integer> bitVector) {
+        return Int32Token.of(value + bitVector.value);
+    }
+
+    @Override
+    public Int32Token sub(BitVector<Integer> bitVector) {
+        return Int32Token.of(value - bitVector.value);
+    }
+
+    @Override
+    public Int32Token mul(BitVector<Integer> bitVector) {
+        return Int32Token.of(value * bitVector.value);
+    }
+
+    @Override
+    public BuiltinList sdiv(BitVector<Integer> bitVector) {
+        if (bitVector.value != 0) {
+            return makeBuiltinListOfOverflowArithmeticResult(Ints.checkedDiv(value, bitVector.value));
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public BuiltinList srem(BitVector<Integer> bitVector) {
+        if (bitVector.value != 0) {
+            return makeBuiltinListOfOverflowArithmeticResult(Ints.checkedRem(value, bitVector.value));
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public Int32Token udiv(BitVector<Integer> bitVector) {
+        if (bitVector.value != 0) {
+            return Int32Token.of(UnsignedInts.divide(value, bitVector.value));
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public Int32Token urem(BitVector<Integer> bitVector) {
+        if (bitVector.value != 0) {
+            return Int32Token.of(UnsignedInts.remainder(value, bitVector.value));
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public BuiltinList sadd(BitVector<Integer> bitVector) {
+        return makeBuiltinListOfOverflowArithmeticResult(Ints.checkedAdd(value, bitVector.value));
+    }
+
+    @Override
+    public BuiltinList uadd(BitVector<Integer> bitVector) {
+        return makeBuiltinListOfOverflowArithmeticResult(
+                Ints.checkedUnsignedAdd(value, bitVector.value));
+    }
+
+    @Override
+    public BuiltinList ssub(BitVector<Integer> bitVector) {
+        return makeBuiltinListOfOverflowArithmeticResult(Ints.checkedSub(value, bitVector.value));
+    }
+
+    @Override
+    public BuiltinList usub(BitVector<Integer> bitVector) {
+        return makeBuiltinListOfOverflowArithmeticResult(
+                Ints.checkedUnsignedSub(value, bitVector.value));
+    }
+
+    @Override
+    public BuiltinList smul(BitVector<Integer> bitVector) {
+        return makeBuiltinListOfOverflowArithmeticResult(Ints.checkedMul(value, bitVector.value));
+    }
+
+    @Override
+    public BuiltinList umul(BitVector<Integer> bitVector) {
+        return makeBuiltinListOfOverflowArithmeticResult(
+                Ints.checkedUnsignedMul(value, bitVector.value));
+    }
+
+    @Override
+    public Int32Token shl(IntToken intToken) {
+        return Int32Token.of(value << intToken.intValue());
+    }
+
+    @Override
+    public Int32Token ashr(IntToken intToken) {
+        return Int32Token.of(value >> intToken.intValue());
+    }
+
+    @Override
+    public Int32Token lshr(IntToken intToken) {
+        /* cast to long to avoid sign extension */
+        return Int32Token.of((int) (UnsignedInts.toLong(value) >> intToken.intValue()));
+    }
+
+    @Override
+    public Int32Token and(BitVector<Integer> bitVector) {
+        return Int32Token.of(value & bitVector.value);
+    }
+
+    @Override
+    public Int32Token or(BitVector<Integer> bitVector) {
+        return Int32Token.of(value | bitVector.value);
+    }
+
+    @Override
+    public Int32Token xor(BitVector<Integer> bitVector) {
+        return Int32Token.of(value ^ bitVector.value);
+    }
+
+    @Override
+    public BoolToken slt(BitVector<Integer> bitVector) {
+        return BoolToken.of(value < bitVector.value);
+    }
+
+    @Override
+    public BoolToken ult(BitVector<Integer> bitVector) {
+        return BoolToken.of(UnsignedInts.compare(value, bitVector.value) < 0);
+    }
+
+    @Override
+    public BoolToken sle(BitVector<Integer> bitVector) {
+        return BoolToken.of(value <= bitVector.value);
+    }
+
+    @Override
+    public BoolToken ule(BitVector<Integer> bitVector) {
+        return BoolToken.of(UnsignedInts.compare(value, bitVector.value) <= 0);
+    }
+
+    @Override
+    public BoolToken sgt(BitVector<Integer> bitVector) {
+        return BoolToken.of(value > bitVector.value);
+    }
+
+    @Override
+    public BoolToken ugt(BitVector<Integer> bitVector) {
+        return BoolToken.of(UnsignedInts.compare(value, bitVector.value) > 0);
+    }
+
+    @Override
+    public BoolToken sge(BitVector<Integer> bitVector) {
+        return BoolToken.of(value >= bitVector.value);
+    }
+
+    @Override
+    public BoolToken uge(BitVector<Integer> bitVector) {
+        return BoolToken.of(UnsignedInts.compare(value, bitVector.value) >= 0);
+    }
+
+    @Override
+    public BoolToken eq(BitVector<Integer> bitVector) {
+        return BoolToken.of(value.equals(bitVector.value));
+    }
+
+    @Override
+    public BoolToken ne(BitVector<Integer> bitVector) {
+        return BoolToken.of(!value.equals(bitVector.value));
+    }
+
+    @Override
+    public List<BitVector> toDigits(int digitBase) {
+        assert digitBase > 0;
+
+        List<BitVector> digits = new ArrayList<>();
+        for (long value = UnsignedInts.toLong(this.value); value != 0; value >>= digitBase) {
+            digits.add(BitVector.of(value % (1 << digitBase), digitBase));
+        }
+
+        return Lists.reverse(digits);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        return object instanceof Int32Token && value.equals(((Int32Token) object).value);
     }
 
     @Override
@@ -99,43 +231,11 @@ public class Int32Token extends Token {
         return value;
     }
 
-    @Override
-    public boolean equals(Object object) {
-        /* Int32Token instances are cached */
-        return this == object;
-    }
-
-    @Override
-    public void accept(Unifier unifier, Term pattern) {
-        unifier.unify(this, pattern);
-    }
-    
-    @Override
-    public void accept(Matcher matcher, Term pattern) {
-        matcher.match(this, pattern);
-    }
-
-    @Override
-    public ASTNode accept(Transformer transformer) {
-        return transformer.transform(this);
-    }
-
-    @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-
-    /**
-     * Returns the cached instance rather than the de-serialized instance if there is a cached
-     * instance.
-     */
-    private Object readResolve() {
-        Int32Token intToken = cache.get(value);
-        if (intToken == null) {
-            intToken = this;
-            cache.put(value, intToken);
-        }
-        return intToken;
+    private static BuiltinList makeBuiltinListOfOverflowArithmeticResult(
+            OverflowArithmeticResult<Integer> result) {
+        return new BuiltinList(ImmutableList.<Term>of(
+                Int32Token.of(result.value),
+                BoolToken.of(result.overflow)));
     }
 
 }

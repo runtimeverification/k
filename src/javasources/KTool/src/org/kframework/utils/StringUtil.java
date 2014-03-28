@@ -13,8 +13,11 @@ public class StringUtil {
                     sb.append('\r');
                 else if (str.charAt(i + 1) == 't')
                     sb.append('\t');
+                else if (str.charAt(i + 1) == 'f')
+                    sb.append('\f');
                 else if (str.charAt(i + 1) == '"')
                     sb.append('"');
+                // TODO: else, I think it should throw an exception
                 i++;
             } else
                 sb.append(str.charAt(i));
@@ -42,6 +45,8 @@ public class StringUtil {
                 result.append("\\t");
             } else if (codepoint == '\r') {
                 result.append("\\r");
+            } else if (codepoint == '\f') {
+                result.append("\\f");
             } else if (codepoint >= 32 && codepoint < 127) {
                 result.append((char)codepoint);
             } else if (codepoint <= 0xff) {
@@ -111,6 +116,9 @@ public class StringUtil {
                 } else if (str.charAt(i + 1) == 't') {
                     sb.append('\t');
                     i++;
+                } else if (str.charAt(i + 1) == 'f') {
+                    sb.append('\f');
+                    i++;
                 } else if (str.charAt(i + 1) == 'x') {
                     String arg = str.substring(i + 2, i + 4);
                     sb.append((char)Integer.parseInt(arg, 16));
@@ -128,6 +136,7 @@ public class StringUtil {
                     sb.append(Character.toChars(codePoint));
                     i += 9;
                 }
+                // TODO: else, I think it should throw an exception
             } else {
                 sb.append(str.charAt(i));
             }
@@ -152,6 +161,8 @@ public class StringUtil {
                 result.append("\\t");
             } else if (codepoint == '\r') {
                 result.append("\\r");
+            } else if (codepoint == '\f') {
+                result.append("\\f");
             } else if (codepoint >= 32 && codepoint < 127) {
                 result.append((char)codepoint);
             } else if (codepoint <= 0xff) {

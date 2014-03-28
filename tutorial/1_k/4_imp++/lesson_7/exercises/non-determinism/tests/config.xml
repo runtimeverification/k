@@ -5,9 +5,9 @@
     programs="."
     extension="imp"
     results="." >
-    <kompile-option name="-superheat" value="superheat" />
-    <kompile-option name="-supercool" value="supercool" />
-    <kompile-option name="-transition" value="transition" />
+    <kompile-option name="--superheat" value="superheat" />
+    <kompile-option name="--supercool" value="supercool" />
+    <kompile-option name="--transition" value="transition" />
 
     <all-programs>
       <krun-option name="--search" />

@@ -1,13 +1,6 @@
 package org.kframework.backend.java.builtins;
 
-import org.kframework.backend.java.kil.KCollection;
-import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.kil.KLabel;
-import org.kframework.backend.java.kil.KLabelInjection;
-import org.kframework.backend.java.kil.KList;
-import org.kframework.backend.java.kil.Kind;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.symbolic.LocalTransformer;
 import org.kframework.backend.java.symbolic.PrePostTransformer;
 import org.kframework.kil.ASTNode;
@@ -77,7 +70,7 @@ public class BuiltinVisitorOperations extends PrePostTransformer {
         term = new KItem(
                 visitLabel,
                 new KList(ImmutableList.copyOf(visitParams)),
-                context.definition().context());
+                context);
         return term.evaluate(context);
     }
 
@@ -86,7 +79,7 @@ public class BuiltinVisitorOperations extends PrePostTransformer {
         KItem test = new KItem(
                 ifLabel,
                 new KList(ImmutableList.copyOf(ifParams)),
-                context.definition().context());
+                context);
         // TODO: Think about what happens when test has symbolic values in it.
         return test.evaluate(context) == BoolToken.TRUE;
     }

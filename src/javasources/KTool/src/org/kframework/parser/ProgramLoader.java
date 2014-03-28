@@ -2,28 +2,27 @@ package org.kframework.parser;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 
-import org.kframework.kil.Ambiguity;
-import org.kframework.kil.loader.ResolveVariableAttribute;
 import org.kframework.compile.transformers.AddEmptyLists;
-import org.kframework.compile.transformers.FlattenSyntax;
+import org.kframework.compile.transformers.FlattenTerms;
 import org.kframework.compile.transformers.RemoveBrackets;
 import org.kframework.compile.transformers.RemoveSyntacticCasts;
 import org.kframework.compile.utils.CompilerStepDone;
 import org.kframework.compile.utils.RuleCompilerSteps;
 import org.kframework.kil.ASTNode;
+import org.kframework.kil.Ambiguity;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Rule;
 import org.kframework.kil.Sentence;
 import org.kframework.kil.Term;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.JavaClassesFactory;
+import org.kframework.kil.loader.ResolveVariableAttribute;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.concrete.disambiguate.AmbFilter;
+import org.kframework.parser.concrete.disambiguate.CorrectConstantsTransformer;
 import org.kframework.parser.concrete.disambiguate.PreferAvoidFilter;
 import org.kframework.parser.concrete.disambiguate.PriorityFilter;
-import org.kframework.parser.concrete.disambiguate.TypeSystemFilter2;
 import org.kframework.parser.concrete2.Grammar;
 import org.kframework.parser.concrete2.Parser;
 import org.kframework.parser.concrete2.Parser.ParseError;
@@ -79,11 +78,12 @@ public class ProgramLoader {
 
         out = out.accept(new PriorityFilter(context));
         out = out.accept(new PreferAvoidFilter(context));
+        out = out.accept(new CorrectConstantsTransformer(context));
         out = out.accept(new AmbFilter(context));
         out = out.accept(new RemoveBrackets(context));
 
         if (kappize)
-            out = out.accept(new FlattenSyntax(context));
+            out = out.accept(new FlattenTerms(context));
 
         return out;
     }
@@ -111,7 +111,7 @@ public class ProgramLoader {
                 out = out.accept(new RemoveBrackets(context));
                 out = out.accept(new AddEmptyLists(context));
                 out = out.accept(new RemoveSyntacticCasts(context));
-                out = out.accept(new FlattenSyntax(context));
+                out = out.accept(new FlattenTerms(context));
             } else if (whatParser == GlobalSettings.ParserType.RULES) {
                 org.kframework.parser.concrete.KParser.ImportTbl(context.kompiled.getCanonicalPath() + "/def/Concrete.tbl");
                 out = DefinitionLoader.parsePattern(content, filename, startSymbol, context);

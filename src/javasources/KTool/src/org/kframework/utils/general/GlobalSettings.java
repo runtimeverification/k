@@ -101,9 +101,16 @@ public class GlobalSettings {
         return os() == OS.WIN;
     }
 
+    public static boolean isPosix() {
+        return os() == OS.UNIX || os() == OS.OSX;
+    }
+
     public enum ParserType {
         PROGRAM, GROUND, RULES, BINARY, NEWPROGRAM
     }
+
+    //the type of rule indexing rule to use during kompile
+    public static String ruleIndex = "table";
 
     public static boolean symbolicEquality = false;
     public static boolean SMT = false;

@@ -25,7 +25,7 @@ import java.util.Map;
  *
  * @author DwightG
  */
-public class StringToken extends Token {
+public final class StringToken extends Token {
 
     public static final String SORT_NAME = "String";
 
