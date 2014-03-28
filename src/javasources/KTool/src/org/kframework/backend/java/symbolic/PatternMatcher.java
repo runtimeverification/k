@@ -276,7 +276,7 @@ public class PatternMatcher extends AbstractMatcher {
          */
         
         if (K.do_concrete_exec) {
-            assert subject.isGround() : "expected the subject to be ground in concrete execution mode; but found: " + subject;
+//            assert subject.isGround() : "expected the subject to be ground in concrete execution mode; but found: " + subject;
         }
         
         if (subject.kind().isComputational()) {
