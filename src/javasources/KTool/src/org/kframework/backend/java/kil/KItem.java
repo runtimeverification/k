@@ -67,42 +67,46 @@ public final class KItem extends Term {
         Definition definition = termContext.definition();
         Context context = definition.context();
 
-        Set<String> possibleMinimalSorts = null;
-        if (kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isConstructor()) {
-            possibleMinimalSorts = new HashSet<>();
-        }
-
         if (kLabel instanceof KLabelConstant && kList instanceof KList
                 && !((KList) kList).hasFrame()) {
             KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
 
-            List<Production> productions = kLabelConstant.productions();
-            if (productions.size() != 0) {
-                Set<String> sorts = new HashSet<String>();
+            Set<String> sorts = new HashSet<>();
+            Set<String> possibleMinimalSorts = new HashSet<>();
 
-                if (!K.do_kompilation) {
-                    /**
-                     * Sort checks in the Java engine are not implemented as
-                     * rewrite rules, so we need to precompute the sort of
-                     * terms. However, right now, we also want to allow users
-                     * to provide user-defined sort predicate rules, e.g.
-                     *      ``rule isVal(cons V:Val) => true''
-                     * to express the same meaning as overloaded productions
-                     * which are not allowed to write in the current front-end.
-                     */
-                    /* YilongL: user-defined sort predicate rules are interpreted as overloaded productions at runtime */
-                    for (KLabelConstant sortPredLabel : definition.sortPredLabels()) {
-                        Collection<Rule> rules = definition.functionRules().get(sortPredLabel);
-                        for (Rule rule : rules) {
-                            KItem predArg = rule.getSortPredArgument();
-                            if (MetaK.matchable(kLabel, predArg.kLabel(), termContext).equals(BoolToken.TRUE)
+            if (!K.do_kompilation) {
+                /**
+                 * Sort checks in the Java engine are not implemented as
+                 * rewrite rules, so we need to precompute the sort of
+                 * terms. However, right now, we also want to allow users
+                 * to provide user-defined sort predicate rules, e.g.
+                 *      ``rule isVal(cons V:Val) => true''
+                 * to express the same meaning as overloaded productions
+                 * which are not allowed to write in the current front-end.
+                 */
+                /* YilongL: user-defined sort predicate rules are interpreted as overloaded productions at runtime */
+                for (KLabelConstant sortPredLabel : definition.sortPredLabels()) {
+                    Collection<Rule> rules = definition.functionRules().get(sortPredLabel);
+                    for (Rule rule : rules) {
+                        KItem predArg = rule.getSortPredArgument();
+                        if (MetaK.matchable(kLabel, predArg.kLabel(), termContext).equals(BoolToken.TRUE)
                                 && MetaK.matchable(kList, predArg.kList(), termContext).equals(BoolToken.TRUE)) {
-                                sorts.add(rule.getPredSort());
+                            sorts.add(rule.getPredSort());
+                            if (kLabelConstant.isConstructor()) {
+                                possibleMinimalSorts.add(rule.getPredSort());
+                            }
+                        } else if (MetaK.matchable(kLabel, predArg.kLabel(), termContext).equals(BoolToken.TRUE)
+                                && MetaK.unifiable(kList, predArg.kList(), termContext).equals(BoolToken.TRUE)) {
+                            if (kLabelConstant.isConstructor()) {
+                                possibleMinimalSorts.add(rule.getPredSort());
                             }
                         }
                     }
                 }
+            }
 
+            List<Production> productions = kLabelConstant.productions();
+            if (productions.size() != 0) {
                 for (Production production : productions) {
                     boolean mustMatch = true;
                     boolean mayMatch = true;
@@ -167,56 +171,45 @@ public final class KItem extends Term {
                         possibleMinimalSorts.add(production.getSort());
                     }
                 }
-
-                if (!sorts.isEmpty()) { /* one or more productions match this KItem */
-                    if (sorts.size() == 1) {
-                        sort = sorts.iterator().next();
-                    } else {
-                        sort = context.getGLBSort(sorts);
-                        assert sort != null && !sort.equals("null"):
-                                "The greatest lower bound (GLB) of sorts " + sorts + "doesn't exist!";
-                    }
-                    isExactSort = kLabelConstant.isConstructor() && sorts.equals(possibleMinimalSorts);
-                } else {    /* no production matches this KItem */
-                    sort = kind.toString();
-                    isExactSort = false;
-                }
             } else {    /* productions.size() == 0 */
                 /* a list terminator does not have conses */
                 Set<String> listSorts = context.listLabels.get(kLabelConstant.label());
                 if (listSorts != null && ((KList) kList).size() == 0) {
-                    if (listSorts.size() == 1) {
-                        sort = listSorts.iterator().next();
-                    } else {
-                        sort = context.getGLBSort(listSorts);
-                    }
-                } else {
-                    sort = kind.toString();
+                    sorts.addAll(listSorts);
                 }
-                isExactSort = kLabelConstant.isConstructor();
+            }
+
+            /* no production matches this KItem */
+            if (sorts.isEmpty()) {
+                sorts.add(kind.toString());
+            }
+
+            sort = context.getGLBSort(sorts);
+            assert sort != null && !sort.equals("null"):
+                    "The greatest lower bound (GLB) of sorts " + sorts + "doesn't exist!";
+            /* this sort is exact if the KLabel is a constructor and there are no possible smaller sorts */
+            isExactSort = kLabelConstant.isConstructor() && sorts.containsAll(possibleMinimalSorts);
+
+            if (kLabelConstant.isConstructor()) {
+                possibleMinimalSorts.add(sort);
+                Set<String> nonMinimalSorts = new HashSet<String>();
+                for (String s1 : possibleMinimalSorts) {
+                    for (String s2 : possibleMinimalSorts) {
+                        if (context.isSubsorted(s1, s2)) {
+                            nonMinimalSorts.add(s1);
+                        }
+                    }
+                }
+                possibleMinimalSorts.removeAll(nonMinimalSorts);
+                this.possibleMinimalSorts = possibleMinimalSorts;
+            } else {
+                this.possibleMinimalSorts = null;
             }
         } else {    /* not a KLabelConstant or the kList contains a frame variable */
             sort = kind.toString();
             isExactSort = false;
+            possibleMinimalSorts = null;
         }
-
-        if (possibleMinimalSorts != null) {
-            possibleMinimalSorts.add(sort);
-            Set<String> nonMinimalSorts = new HashSet<String>();
-            for (String s1 : possibleMinimalSorts) {
-                for (String s2 : possibleMinimalSorts) {
-                    if (context.isSubsorted(s1, s2)) {
-                        nonMinimalSorts.add(s1);
-                    }
-                }
-            }
-            possibleMinimalSorts.removeAll(nonMinimalSorts);
-            this.possibleMinimalSorts = possibleMinimalSorts;
-        } else {
-            this.possibleMinimalSorts = null;
-        }
-
-//        System.out.printf("KItem = %s, sort = %s, possibleMinimalSorts = %s\n", this, sort, possibleMinimalSorts);
     }
 
     public boolean isEvaluable(TermContext context) {
@@ -414,8 +407,7 @@ public final class KItem extends Term {
 
     @Override
     public boolean isExactSort() {
-        //return isExactSort;
-        return kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isConstructor();
+        return isExactSort;
     }
 
     /**
