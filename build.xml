@@ -51,6 +51,10 @@
 		<delete file="${javasources}/../../lib/java/k3.jar" />
 		<delete file="${javasources}/../../lib/version.txt" />
 		<delete dir="./k/" />
+                <!-- Next task is removable once everybody updates -->
+                <delete failonerror="false"> 
+                   <fileset dir="${javasources}/KTool/src/org/kframework/backend/pdmc/pda/buchi/parser" includes="*.java" />  
+                </delete>
 		<delete>
 			<fileset dir="${javasources}/KTool/src/org/kframework/parser/basic" includes="*.java" />
 			<fileset dir="${javasources}/KTool/src/org/kframework/utils/kastparser" includes="*.java" />
