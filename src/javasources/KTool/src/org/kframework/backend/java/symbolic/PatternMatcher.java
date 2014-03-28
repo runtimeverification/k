@@ -16,6 +16,7 @@ import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.kil.loader.Context;
+import org.kframework.krun.K;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
@@ -90,7 +91,6 @@ public class PatternMatcher extends AbstractMatcher {
 
         /* handle fresh variables, data structure lookups, and side conditions */
         List<Map<Variable, Term>> substitutions = new ArrayList<Map<Variable, Term>>();
-        label: 
         for (Map<Variable, Term> subst : getMultiSubstitutions(matcher)) {
             /* add bindings for fresh variables used in the rule */
             for (Variable variable : rule.freshVariables()) {
@@ -107,42 +107,35 @@ public class PatternMatcher extends AbstractMatcher {
                 assert lookupOrChoice instanceof DataStructureLookupOrChoice : 
                     "one side of the equality should be an instance of DataStructureLookup or DataStructureChoice";
                 
-                Term evaluatedLookup = lookupOrChoice.substituteAndEvaluate(subst, context);
-                if (evaluatedLookup instanceof Bottom) {
-                    continue label;
-                }
-                if (nonLookupOrChoice instanceof Variable) {
-                    Variable variable = (Variable) nonLookupOrChoice;
-                    if (checkOrderedSortedCondition(variable, evaluatedLookup, context)) {
-                        for (Map<Variable, Term> subst2 : multiSubsts) {
-                            subst2.put(variable, evaluatedLookup);
-                        }
-                    } else {
+                List<Map<Variable, Term>> newMultiSubsts = new ArrayList<>();
+                label: 
+                for (Map<Variable, Term> oldSubst : multiSubsts) {
+                    Term evaluatedLookup = lookupOrChoice.substituteAndEvaluate(oldSubst, context);
+                    if (evaluatedLookup instanceof Bottom) {
                         continue label;
                     }
-                } else {
-                    // the non-lookup term is not a variable and thus requires further pattern matching
-                    PatternMatcher lookupMatcher = new PatternMatcher(context);
-                    if (lookupMatcher.patternMatch(evaluatedLookup, nonLookupOrChoice)) {
-                        List<Map<Variable, Term>> product = new ArrayList<Map<Variable, Term>>();
-                        // it's possible that multiple substitutions are viable from the pattern matching above
-                        for (Map<Variable, Term> subst1 : PatternMatcher.getMultiSubstitutions(lookupMatcher)) {
-                            for (Map<Variable, Term> subst2 : multiSubsts) {
-                                Map<Variable, Term> composedSubst = composeSubstitution(subst1, subst2);
+                    if (nonLookupOrChoice instanceof Variable) {
+                        Variable variable = (Variable) nonLookupOrChoice;
+                        if (checkOrderedSortedCondition(variable, evaluatedLookup, context)) {
+                            Map<Variable, Term> newSubst = new HashMap<Variable, Term>(oldSubst);
+                            newSubst.put(variable, evaluatedLookup);
+                            newMultiSubsts.add(newSubst);
+                        } 
+                    } else {
+                        // the non-lookup term is not a variable and thus requires further pattern matching
+                        PatternMatcher lookupMatcher = new PatternMatcher(context);
+                        if (lookupMatcher.patternMatch(evaluatedLookup, nonLookupOrChoice)) {
+                            // it's possible that multiple substitutions are viable from the pattern matching above
+                            for (Map<Variable, Term> subst1 : PatternMatcher.getMultiSubstitutions(lookupMatcher)) {
+                                Map<Variable, Term> composedSubst = composeSubstitution(subst1, oldSubst);
                                 if (composedSubst != null) {
-                                    product.add(composedSubst);
+                                    newMultiSubsts.add(composedSubst);
                                 }
                             }
                         }
-                        if (product.isEmpty()) {
-                            continue label;
-                        } else {
-                            multiSubsts = product;
-                        }
-                    } else {
-                        continue label;
                     }
                 }
+                multiSubsts = newMultiSubsts;
             }
             
             /* evaluate side conditions */
@@ -265,9 +258,27 @@ public class PatternMatcher extends AbstractMatcher {
      */
     @Override
     public void match(Term subject, Term pattern) {
-        // TODO(YilongL): we may want to remove this restriction in the future
-        assert subject.isGround() : "expected the subject to be ground: " + subject;
-
+        /*
+         * During concrete execution:
+         *   - the subject must be ground;
+         *   - the top symbol of the subject can be a function klabel because 
+         *     we are also using pattern matching to search for function rules
+         *     to evaluate user-defined functions;
+         *   - the top symbol of the pattern can be a function klabel; besides
+         *     that all symbolic terms in the pattern must be variables;
+         *   
+         * During kompilation:
+         *   - the subject can be non-ground due to macro expansion and partial evaluation;
+         *   - the subject can be symbolic for the same reason above; there could be variables,
+         *     function klabels, KItem projections, and data structure lookup/update operations
+         *     inside;
+         *   - the pattern is pretty much the same case as the subject
+         */
+        
+        if (K.do_concrete_exec) {
+            assert subject.isGround() : "expected the subject to be ground in concrete execution mode; but found: " + subject;
+        }
+        
         if (subject.kind().isComputational()) {
             assert pattern.kind().isComputational();
 
@@ -288,8 +299,7 @@ public class PatternMatcher extends AbstractMatcher {
                "kind mismatch between " + subject + " (" + subject.kind() + ")"
                + " and " + pattern + " (" + pattern.kind() + ")";
 
-        if (pattern.isSymbolic()) {
-            assert pattern instanceof Variable;
+        if (pattern instanceof Variable) {
             Variable variable = (Variable) pattern;
 
             /* special case for concrete collections  */
@@ -300,9 +310,12 @@ public class PatternMatcher extends AbstractMatcher {
 
             /* add substitution */
             addSubstitution(variable, subject);
+        } else if (subject.isSymbolic() && !(subject instanceof KItem)) {
+            assert K.do_kompilation : "KItem projection and data structure lookup/update can appear in the subject only during kompilation; but found: " + subject;
+            fail(subject, pattern);
         } else {
             /* match */
-            if (!subject.equals(pattern)) {
+            if (subject.hashCode() != pattern.hashCode() || !subject.equals(pattern)) {
                 subject.accept(this, pattern);
             }
         }
@@ -456,7 +469,12 @@ public class PatternMatcher extends AbstractMatcher {
         }
         CellCollection otherCellCollection = (CellCollection) pattern;
         
-        assert !cellCollection.hasFrame() : "the subject term should be ground";
+        if (cellCollection.hasFrame()) {
+            assert !K.do_concrete_exec : "the subject term should be ground in concrete execution";
+            if (!otherCellCollection.hasFrame()) {
+                fail(cellCollection, otherCellCollection);
+            }
+        }
 
         Set<String> unifiableCellLabels = new HashSet<String>(cellCollection.labelSet());
         unifiableCellLabels.retainAll(otherCellCollection.labelSet());
@@ -481,15 +499,11 @@ public class PatternMatcher extends AbstractMatcher {
             computeDisjointCellMaps(unifiableCellLabels, cellCollection,
                     cellMap, otherCellCollection, otherCellMap);
             
-            if (!cellCollection.hasStar()
-                    && !addCellCollectionConstraint(
-                            cellMap, null,
-                            otherCellMap, otherCellCollection.hasFrame() ? otherCellCollection.frame() : null)) {
-                fail(cellCollection, otherCellCollection);
-            } else if (!otherCellCollection.hasStar()
-                    && !addCellCollectionConstraint(
-                            otherCellMap, otherCellCollection.hasFrame() ? otherCellCollection.frame() : null, 
-                            cellMap, null)) {
+            if (!addCellCollectionConstraint(
+                    cellMap,
+                    cellCollection.hasFrame() ? cellCollection.frame() : null,
+                    otherCellMap,
+                    otherCellCollection.hasFrame() ? otherCellCollection.frame() : null)) {
                 fail(cellCollection, otherCellCollection);
             }
         } 
@@ -498,7 +512,6 @@ public class PatternMatcher extends AbstractMatcher {
             assert !isStarNested : "nested cells with multiplicity='*' not supported";
             // TODO(AndreiS): fix this assertions
         
-            // note that cellCollection is free of frame
             Multimap<String, Cell> cellMap = ArrayListMultimap.create();
             Multimap<String, Cell> otherCellMap = ArrayListMultimap.create();
             computeDisjointCellMaps(unifiableCellLabels, cellCollection,
@@ -518,22 +531,31 @@ public class PatternMatcher extends AbstractMatcher {
                 }
             }
             
-            // YilongL: the assertion here must hold
             if (unifiableCellLabels.isEmpty()) {
+                // now we have different starred-cells in subject and pattern
                 fail(cellCollection, otherCellCollection);
             } else {
                 assert unifiableCellLabels.size() == 1;
             }
+            String starredCellLabel = unifiableCellLabels.iterator().next();
 
-            if (cellCollection.size() < otherCellCollection.size()
-                    || cellCollection.size() > otherCellCollection.size()
-                    && !otherCellCollection.hasFrame()) {
-                fail(cellCollection, otherCellCollection);
+            if (otherCellCollection.hasFrame()) {
+                if (cellCollection.get(starredCellLabel).size() < otherCellCollection.get(starredCellLabel).size()) {
+                    fail(cellCollection, otherCellCollection);
+                }
+            } else {
+                // now we know otherCellMap.isEmpty() && otherCellCollection is free of frame
+                if (cellCollection.hasFrame()
+                        || cellMap.isEmpty()
+                        || cellCollection.get(starredCellLabel).size() != otherCellCollection
+                                .get(starredCellLabel).size()) {
+                    fail(cellCollection, otherCellCollection);
+                }
             }
 
-            String label = unifiableCellLabels.iterator().next();
-            Cell<?>[] cells = cellCollection.get(label).toArray(new Cell[1]);
-            Cell<?>[] otherCells = otherCellCollection.get(label).toArray(new Cell[1]);
+            Cell<?>[] cells = cellCollection.get(starredCellLabel).toArray(new Cell[1]);
+            Cell<?>[] otherCells = otherCellCollection.get(starredCellLabel).toArray(new Cell[1]);
+            Variable frame = cellCollection.hasFrame() ? cellCollection.frame() : null;
             Variable otherFrame = otherCellCollection.hasFrame() ? otherCellCollection.frame() : null;
 
             // TODO(YilongL): maybe extract the code below that performs searching to a single method
@@ -569,11 +591,12 @@ public class PatternMatcher extends AbstractMatcher {
                 cm.putAll(cellMap);
 
                 if (otherFrame != null) {
-                    addSubstitution(otherFrame, new CellCollection(cm, context));
+                    addSubstitution(otherFrame, new CellCollection(cm, frame, context));
                 } else {
-                    if (!cm.isEmpty()) {
-                        fail(cellCollection, otherCellCollection);
-                    }
+                    // we should've guaranteed that 
+                    //   cellMap.isEmpty() && cells.length == otherCells.length 
+                    // when otherFrame == null
+                    assert cm.isEmpty();
                 }
                 substitutions.add(fSubstitution);
             } while (generator.generate());
@@ -674,11 +697,9 @@ public class PatternMatcher extends AbstractMatcher {
 
     /**
      * Private helper method to compute and add constraint(s) between two
-     * specialized cell collections. Three preconditions for the arguments: 1)
+     * specialized cell collections. One precondition for the arguments: 
      * The two specified cell collections shall have no common cell label in
-     * their explicit contents; 2) the first cell collection contains no
-     * starred-cell in its explicit content; 3) at least one of the cell
-     * collections has no frame.
+     * their explicit contents.
      * 
      * @return true if the constraint addition does not make the matching to
      *         fail
@@ -690,25 +711,23 @@ public class PatternMatcher extends AbstractMatcher {
             Variable otherFrame) {
         for (String cellLabel : cellMap.keySet()) {
             assert !otherCellMap.containsKey(cellLabel);
-            assert cellMap.get(cellLabel).size() == 1;
         }
-        assert frame == null || otherFrame == null;
-        
+
         Context context = termContext.definition().context();
         
         if (frame != null) {
-            // otherFrame == null
-            if (!cellMap.isEmpty()) {
+            if (!otherCellMap.isEmpty()) {
                 return false;
+            } else if (otherFrame == null) {
+                return false;
+            } else {
+                // otherFrame != null && otherCellMap.isEmpty() == true
+                addSubstitution(otherFrame, new CellCollection(cellMap, frame, context));
             }
-
-            addSubstitution(frame, new CellCollection(otherCellMap, context));
-        } else {
-            // frame == null
+        } else { // frame == null
             if (!otherCellMap.isEmpty()) {
                 return false;
             }
-
             if (otherFrame == null) {
                 if (!cellMap.isEmpty()) {
                     return false;
@@ -845,16 +864,19 @@ public class PatternMatcher extends AbstractMatcher {
     private void matchKCollection(KCollection kCollection, KCollection pattern) {
         assert kCollection.getClass().equals(pattern.getClass());
         
-        assert !kCollection.hasFrame() : "the subject term should be ground";
-
+        if (K.do_concrete_exec) {
+            assert !kCollection.hasFrame() : "the subject term should be ground";
+        }
+        
         int length = pattern.size();
         if (kCollection.size() >= length) {
             if (pattern.hasFrame()) {
                 addSubstitution(pattern.frame(), kCollection.fragment(length));
-            } else if (kCollection.size() > length) {
+            } else if (kCollection.hasFrame() || kCollection.size() > length) {
                 fail(kCollection, pattern);
             }
             
+            // kCollection.size() == length
             for (int index = 0; index < length; ++index) {
                 match(kCollection.get(index), pattern.get(index));
             }
@@ -874,7 +896,13 @@ public class PatternMatcher extends AbstractMatcher {
 
     @Override
     public void match(Variable variable, Term pattern) {
-        assert false : "the subject term should be ground; but found variable " + variable;
+        assert !(pattern instanceof Variable);
+
+        if (K.do_concrete_exec) {
+            assert false : "the subject term should be ground; but found variable " + variable;
+        }
+        
+        fail(variable, pattern);
     }
     
     @Override
