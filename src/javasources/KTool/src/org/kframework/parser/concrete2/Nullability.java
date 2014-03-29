@@ -71,7 +71,6 @@ public class Nullability {
                 // so now we restart those recursions
                 for (State s : nonTerminalCallers.get(state.nt)) {
                     if (entryNullable.contains(s)) {
-                        // assert s instanceof NonTerminalState : "Intermediary states are NonTerminalStates?";
                         for (State child : ((NextableState)s).next) {
                             mark(child, nonTerminalCallers);
                         }

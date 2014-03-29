@@ -47,12 +47,42 @@ public class Production extends ASTNode {
         return items.size() == 1 && items.get(0) instanceof UserList;
     }
 
+    /**
+     * Retrieves the {@link UserList} object of the production if this is a list declaration.
+     * Should not be called on other types of productions.
+     * @return the list object
+     */
+    public UserList getListDecl() {
+        assert isListDecl();
+        return (UserList) items.get(0);
+    }
+
     public boolean isSubsort() {
         return items.size() == 1 && items.get(0) instanceof Sort;
     }
 
+    /**
+     * Retrieves the {@link Sort} object of the production if this is a subsorting.
+     * Should not be called on other types of productions.
+     * @return the Sort object
+     */
+    public Sort getSubsort() {
+        assert isSubsort();
+        return (Sort) items.get(0);
+    }
+
     public boolean isLexical() {
         return items.size() == 1 && items.get(0) instanceof Lexical;
+    }
+
+    /**
+     * Retrieves the {@link Lexical} object of the production if this is a lexical token.
+     * Should not be called on other types of productions.
+     * @return the Lexical object
+     */
+    public Lexical getLexical() {
+        assert isLexical();
+        return (Lexical) items.get(0);
     }
 
     public boolean isConstant() {
@@ -61,6 +91,16 @@ public class Production extends ASTNode {
     
     public boolean isBracket() {
         return getArity() == 1 && getAttribute(Attribute.BRACKET.getKey()) != null;
+    }
+
+    /**
+     * Retrieves the {@link Terminal} object of the production if this is a constant.
+     * Should not be called on other types of productions.
+     * @return the Terminal object
+     */
+    public Terminal getConstant() {
+        assert isConstant();
+        return (Terminal) items.get(0);
     }
 
     /**

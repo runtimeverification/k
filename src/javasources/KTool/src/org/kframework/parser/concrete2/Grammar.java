@@ -90,14 +90,17 @@ public class Grammar implements Serializable {
     }
 
     public void addWhiteSpace() {
-        // TODO: Move out of grammar and into a post processing of KSyntax
+        // TODO(Radu): Move out of grammar and into a post processing of KSyntax
         // TODO: Put whitespace at start of NT so we don't need the extra NT names
         // TODO: (once we don't need extra NT names), make nt.nonTerminalId be final
         // TODO: make whitespace able to return comments somehow
         // create a NonTerminal which parses a list of whitespace characters.
         // the NT is a star list that has 3 branches
         // 1. whitespace, 2. single line comment, 3. multiple lines comment
-        Pattern pattern = Pattern.compile("((/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/)|(//.*)|([ \n\r\t]))*");
+        String multiLine = "(/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/)";
+        String singleLine = "(//.*)";
+        String whites = "([ \n\r\t])";
+        Pattern pattern = Pattern.compile("("+ multiLine +"|"+ singleLine +"|"+ whites +")*");
         int seed = 0;
 
         // create a whitespace PrimitiveState after every every terminal that can match a character

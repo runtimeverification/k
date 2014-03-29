@@ -97,7 +97,6 @@ public class ProgramLoader {
      * 
      * Save it in kompiled cache under pgm.maude.
      */
-    @SuppressWarnings("unchecked")
     public static Term processPgm(String content, String filename, Definition def, String startSymbol,
             Context context, GlobalSettings.ParserType whatParser) throws TransformerException {
         Stopwatch.sw.printIntermediate("Importing Files");
@@ -130,7 +129,9 @@ public class ProgramLoader {
                 out = (org.kframework.kil.Cell) BinaryLoader.load(filename);
             } else if (whatParser == GlobalSettings.ParserType.NEWPROGRAM) {
                 // load the new parser
-                Grammar grammar = (Grammar) BinaryLoader.load(context.kompiled.getPath() + "/pgm/newParser.bin");
+                // TODO(Radu): after the parser is in a good enough shape, replace the program parser
+                // TODO(Radu): (the default one) with this branch of the 'if'
+                Grammar grammar = (Grammar) BinaryLoader.load(context.kompiled.getAbsolutePath() + "/pgm/newParser.bin");
 
                 Parser parser = new Parser(content);
                 out = parser.parse(grammar.get(startSymbol), 0);
@@ -138,6 +139,9 @@ public class ProgramLoader {
                     System.out.println("Raw: " + out + "\n");
                 if (((Ambiguity)out).getContents().size() == 0) {
                     // say parsing error
+                    // TODO(Radu, Michael): revisit error reporting. At the moment we are making
+                    // TODO: the assumption that the parser always Ambiguity with 0 elements if
+                    // TODO: the parse fails.
                     ParseError perror = parser.getErrors();
 
                     String msg;

@@ -25,7 +25,6 @@ import org.kframework.parser.concrete2.Grammar.StateId;
 import org.kframework.parser.concrete2.Rule.AddLocationRule;
 import org.kframework.parser.concrete2.Rule.DeleteRule;
 import org.kframework.parser.concrete2.Rule.WrapLabelRule;
-import org.kframework.utils.StringUtil;
 
 /**
  * A simple visitor that goes through every accessible production and creates the NFA states for the
@@ -54,16 +53,16 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
     public void visit(Production prd) {
         // TODO: put whitespace here instead of in grammar
         NonTerminal nt = grammar.get(prd.getSort());
+        assert nt != null : "Could not find in the grammar the required sort: " + prd.getSort();
         NextableState previous = nt.entryState;
         if (prd.isListDecl()) {
-            UserList ul = (UserList) prd.getItems().get(0);
+            UserList ul = prd.getListDecl();
 
             // label for '.Ids (list terminator)
             NonTerminal specialNt = new NonTerminal(new NonTerminalId(prd.getSort() + "-special"));
             {
                 RuleState rs1 = new RuleState(new StateId("AddLabelRS-" + getUid()), specialNt,
-                    new WrapLabelRule(new KLabelConstant(
-                        "'.List{\"" + StringUtil.escape(ul.getSeparator()) + "\"}"), prd.getSort()));
+                    new WrapLabelRule(new KLabelConstant(ul.getTerminatorKLabel()), prd.getSort()));
                 RuleState locRule0 = new RuleState(new StateId(prd.getSort() + "-R-" + getUid()),
                     specialNt, new AddLocationRule());
                 specialNt.entryState.next.add(rs1);
@@ -133,7 +132,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                  */
             }
         } else if (prd.isSubsort()) {
-            Sort srt = (Sort) prd.getItems().get(0);
+            Sort srt = prd.getSubsort();
             NonTerminalState nts = new NonTerminalState(
                     new StateId(prd.getSort() + "-S-" + getUid()),
                     nt, grammar.get(srt.getName()), false);
@@ -149,7 +148,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                 previous = locRule;
             }
         } else if (prd.isLexical()) {
-            Lexical lx = (Lexical) prd.getItems().get(0);
+            Lexical lx = prd.getLexical();
             PrimitiveState pstate = new RegExState(new StateId(prd.getSort() + "-T-" + getUid()),
                 nt, Pattern.compile(lx.getLexicalRule()), prd.getSort());
             previous.next.add(pstate);
@@ -158,7 +157,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
             pstate.next.add(locRule);
             previous = locRule;
         } else if (prd.isConstant()) {
-            Terminal terminal = (Terminal) prd.getItems().get(0);
+            Terminal terminal = prd.getConstant();
             PrimitiveState pstate = new RegExState(
                 new StateId(prd.getSort() + "-T-" + getUid()), nt,
                 // TODO: if there is a \\E in the input string, this next line will fail
@@ -192,7 +191,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                     previous.next.add(nts);
                     previous = nts;
                 } else {
-                    assert false : "Didn't expect this ProductionItem type here: " + prdItem.getClass().getName();
+                    assert false : "Didn't expect this ProductionItem type: " + prdItem.getClass().getName();
                 }
             }
             RuleState rs1 = new RuleState(new StateId("AddLabelRS-" + getUid()),

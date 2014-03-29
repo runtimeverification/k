@@ -543,6 +543,12 @@ public class Parser {
         return result;
     }
 
+    /**
+     * Looks through the list of possible parses and returns the ones that got the furthest
+     * into the text.
+     * @return a {@link ParseError} object containing all the possible parses that got to the
+     * maximum point in the input string.
+     */
     public ParseError getErrors() {
         int current = 0;
         for (StateCall.Key key : s.stateCalls.keySet()) {
@@ -559,6 +565,10 @@ public class Parser {
         return new ParseError(current, s.lines[current], s.columns[current], tokens);
     }
 
+    /**
+     * Contains the maximum position in the text which the parser managed to recognize the text.
+     * TODO: better explain the tokens Set when error reporting evolves.
+     */
     public static class ParseError {
         public final int position;
         public final int column;

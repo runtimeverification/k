@@ -40,7 +40,7 @@ public class Ambiguity extends Collection {
 
         for (Term term : contents)
             if (term != null)
-                content += term + ",,";
+                content += term + ",";
 
         if (content.length() > 1)
             content = content.substring(0, content.length() - 2);
