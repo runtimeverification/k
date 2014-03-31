@@ -141,8 +141,7 @@ public final class KItem extends Term {
                                         }
                                     } else if (childTerm instanceof KItem) {
                                         mayMatch = false;
-                                        if (((KItem) childTerm).kLabel instanceof KLabel
-                                                && ((KLabel) ((KItem) childTerm).kLabel).isConstructor()) {
+                                        if (((KItem) childTerm).possibleMinimalSorts() != null) {
                                             for (String pms : ((KItem) childTerm).possibleMinimalSorts()) {
                                                 if (context.isSubsortedEq(production.getChildSort(i), pms)) {
                                                     mayMatch = true;
