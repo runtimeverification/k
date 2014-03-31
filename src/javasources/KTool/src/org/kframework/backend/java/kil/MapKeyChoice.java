@@ -52,8 +52,18 @@ public class MapKeyChoice extends Term {
     }
 
     @Override
+    public boolean isExactSort() {
+        return false;
+    }
+
+    @Override
     public boolean isSymbolic() {
         return true;
+    }
+
+    @Override
+    public String sort() {
+        return kind.toString();
     }
 
     @Override

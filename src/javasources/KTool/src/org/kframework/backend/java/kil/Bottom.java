@@ -22,8 +22,18 @@ public class Bottom extends Term {
     }
 
     @Override
+    public boolean isExactSort() {
+        return false;
+    }
+
+    @Override
     public boolean isSymbolic() {
         return false;
+    }
+
+    @Override
+    public String sort() {
+        return kind.toString();
     }
 
     @Override

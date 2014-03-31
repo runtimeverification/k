@@ -17,7 +17,7 @@ import java.util.Set;
  *
  * @author AndreiS
  */
-public class Variable extends Term implements Sorted {
+public class Variable extends Term {
 
     protected static final String VARIABLE_PREFIX = "_";
     protected static int counter = 0;
@@ -94,6 +94,11 @@ public class Variable extends Term implements Sorted {
     @Override
     public String sort() {
         return sort;
+    }
+
+    @Override
+    public boolean isExactSort() {
+        return false;
     }
 
     @Override

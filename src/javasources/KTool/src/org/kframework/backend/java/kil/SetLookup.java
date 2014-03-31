@@ -43,10 +43,20 @@ public class SetLookup extends Term implements DataStructureLookup {
     }
 
     @Override
+    public boolean isExactSort() {
+        return true;
+    }
+
+    @Override
     public boolean isSymbolic() {
         return true;
 //        assert false : "isSymbolic is not supported by SetLookup (yet)";
 //        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String sort() {
+        return BoolToken.SORT_NAME;
     }
 
     @Override
