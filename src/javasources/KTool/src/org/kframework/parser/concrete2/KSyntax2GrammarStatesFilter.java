@@ -21,7 +21,6 @@ import org.kframework.parser.concrete2.Grammar.NonTerminalState;
 import org.kframework.parser.concrete2.Grammar.PrimitiveState;
 import org.kframework.parser.concrete2.Grammar.RegExState;
 import org.kframework.parser.concrete2.Grammar.RuleState;
-import org.kframework.parser.concrete2.Grammar.StateId;
 import org.kframework.parser.concrete2.Rule.AddLocationRule;
 import org.kframework.parser.concrete2.Rule.DeleteRule;
 import org.kframework.parser.concrete2.Rule.WrapLabelRule;
@@ -42,12 +41,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
         }
     }
 
-    private int seed = 0;
     private Grammar grammar = new Grammar();
-
-    private int getUid() {
-        return seed++;
-    }
 
     @Override
     public void visit(Production prd) {
@@ -60,10 +54,9 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
             // label for '.Ids (list terminator)
             NonTerminal specialNt = new NonTerminal(new NonTerminalId(prd.getSort() + "-special"));
             {
-                RuleState rs1 = new RuleState(new StateId("AddLabelRS-" + getUid()), specialNt,
+                RuleState rs1 = new RuleState("AddLabelRS", specialNt,
                     new WrapLabelRule(new KLabelConstant(ul.getTerminatorKLabel()), prd.getSort()));
-                RuleState locRule0 = new RuleState(new StateId(prd.getSort() + "-R-" + getUid()),
-                    specialNt, new AddLocationRule());
+                RuleState locRule0 = new RuleState(prd.getSort() + "-R", specialNt, new AddLocationRule());
                 specialNt.entryState.next.add(rs1);
                 rs1.next.add(locRule0);
                 locRule0.next.add(specialNt.exitState);
@@ -72,33 +65,27 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
             String ntName = prd.getSort() + "-helper";
             if (ul.getListType().equals("*")) {
                 // create the branch which allows for empty lists
-                NonTerminalState special = new NonTerminalState(
-                    new StateId(ntName + "-S-" + getUid()), nt, specialNt, false);
+                NonTerminalState special = new NonTerminalState(ntName + "-S", nt, specialNt, false);
                 previous.next.add(special);
                 special.next.add(nt.exitState);
                 previous = special;
             }
             {
                 NonTerminal wrapperNt = new NonTerminal(new NonTerminalId(ntName));
-                NonTerminalState IdsHelper = new NonTerminalState(
-                    new StateId(ntName + "-S-" + getUid()), nt, wrapperNt, false);
+                NonTerminalState IdsHelper = new NonTerminalState(ntName + "-S", nt, wrapperNt, false);
                 // label for '.Ids (list terminator)
                 previous.next.add(IdsHelper);
                 IdsHelper.next.add(nt.exitState);
 
                 // inside the wrapperNt
-                NonTerminalState Id = new NonTerminalState(new StateId(ntName + "-S-" + getUid()),
-                    wrapperNt, grammar.get(ul.getSort()), false);
-                PrimitiveState separatorState = new RegExState(new StateId(ntName + "-T-" + getUid()),
+                NonTerminalState Id = new NonTerminalState(ntName + "-S", wrapperNt, grammar.get(ul.getSort()), false);
+                PrimitiveState separatorState = new RegExState(ntName + "-T",
                     wrapperNt, Pattern.compile("\\Q" + ul.getSeparator() + "\\E"), KSorts.K);
-                RuleState deleteToken = new RuleState(new StateId(ntName + "-D-" + getUid()),
-                    wrapperNt, new DeleteRule(1, true));
-                NonTerminalState Ids = new NonTerminalState(new StateId(ntName + "-S-" + getUid()),
-                    wrapperNt, wrapperNt, false);
-                RuleState labelState = new RuleState(new StateId(ntName + "-L-" + getUid()),
+                RuleState deleteToken = new RuleState(ntName + "-D", wrapperNt, new DeleteRule(1, true));
+                NonTerminalState Ids = new NonTerminalState(ntName + "-S", wrapperNt, wrapperNt, false);
+                RuleState labelState = new RuleState(ntName + "-L",
                     wrapperNt, new WrapLabelRule(new KLabelConstant(prd.getKLabel()), prd.getSort()));
-                RuleState locRule = new RuleState(new StateId(prd.getSort() + "-R-" + getUid()),
-                    wrapperNt, new AddLocationRule());
+                RuleState locRule = new RuleState(prd.getSort() + "-R", wrapperNt, new AddLocationRule());
 
                 wrapperNt.entryState.next.add(Id);
                 Id.next.add(separatorState);
@@ -109,14 +96,12 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                 locRule.next.add(wrapperNt.exitState);
 
                 // label for '.Ids (list terminator)
-                NonTerminalState special = new NonTerminalState(
-                    new StateId(prd.getSort() + "-S-" + getUid()), wrapperNt, specialNt, false);
+                NonTerminalState special = new NonTerminalState(prd.getSort() + "-S", wrapperNt, specialNt, false);
                 Id.next.add(special);
-                RuleState labelState2 = new RuleState(new StateId(prd.getSort() + "-L-" + getUid()),
+                RuleState labelState2 = new RuleState(prd.getSort() + "-L",
                     wrapperNt, new WrapLabelRule(new KLabelConstant(prd.getKLabel()), prd.getSort()));
                 special.next.add(labelState2);
-                RuleState locRule2 = new RuleState(new StateId(prd.getSort() + "-R-" + getUid()),
-                    wrapperNt, new AddLocationRule());
+                RuleState locRule2 = new RuleState(prd.getSort() + "-R", wrapperNt, new AddLocationRule());
                 labelState2.next.add(locRule2);
                 locRule2.next.add(wrapperNt.exitState);
 
@@ -133,38 +118,34 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
         } else if (prd.isSubsort()) {
             Sort srt = prd.getSubsort();
             NonTerminalState nts = new NonTerminalState(
-                    new StateId(prd.getSort() + "-S-" + getUid()),
-                    nt, grammar.get(srt.getName()), false);
+                    prd.getSort() + "-S", nt, grammar.get(srt.getName()), false);
             previous.next.add(nts);
             previous = nts;
             if (prd.containsAttribute("klabel")) {
-                RuleState rs1 = new RuleState(new StateId("AddLabelRS-" + getUid()),
+                RuleState rs1 = new RuleState("AddLabelRS",
                     nt, new WrapLabelRule(new KLabelConstant(prd.getKLabel()), prd.getSort()));
                 previous.next.add(rs1);
-                RuleState locRule = new RuleState(new StateId(prd.getSort() + "-R-" + getUid()),
-                    nt, new AddLocationRule());
+                RuleState locRule = new RuleState(prd.getSort() + "-R", nt, new AddLocationRule());
                 rs1.next.add(locRule);
                 previous = locRule;
             }
         } else if (prd.isLexical()) {
             Lexical lx = prd.getLexical();
-            PrimitiveState pstate = new RegExState(new StateId(prd.getSort() + "-T-" + getUid()),
+            PrimitiveState pstate = new RegExState(prd.getSort() + "-T",
                 nt, Pattern.compile(lx.getLexicalRule()), prd.getSort());
             previous.next.add(pstate);
-            RuleState locRule = new RuleState(new StateId(prd.getSort() + "-R-" + getUid()),
-                nt, new AddLocationRule());
+            RuleState locRule = new RuleState(prd.getSort() + "-R", nt, new AddLocationRule());
             pstate.next.add(locRule);
             previous = locRule;
         } else if (prd.isConstant()) {
             Terminal terminal = prd.getConstant();
             PrimitiveState pstate = new RegExState(
-                new StateId(prd.getSort() + "-T-" + getUid()), nt,
+                prd.getSort() + "-T", nt,
                 // TODO: if there is a \\E in the input string, this next line will fail
                 // should double escape \ if there is an odd number
                 Pattern.compile("\\Q" + terminal.getTerminal() + "\\E"), prd.getSort());
             previous.next.add(pstate);
-            RuleState locRule = new RuleState(new StateId(prd.getSort() + "-R-" + getUid()),
-                nt, new AddLocationRule());
+            RuleState locRule = new RuleState(prd.getSort() + "-R", nt, new AddLocationRule());
             pstate.next.add(locRule);
             previous = locRule;
         } else {
@@ -173,31 +154,28 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                 if (prdItem instanceof Terminal) {
                     Terminal terminal = (Terminal) prdItem;
                     PrimitiveState pstate = new RegExState(
-                        new StateId(prd.getSort() + "-T-" + getUid()), nt,
+                        prd.getSort() + "-T", nt,
                         // TODO: if there is a \\E in the input string, this next line will fail
                         // should double escape \ if there is an odd number
                         Pattern.compile("\\Q" + terminal.getTerminal() + "\\E"), KSorts.K);
                     previous.next.add(pstate);
-                    RuleState rs1 = new RuleState(new StateId("DelTerminalRS-" + getUid()),
-                        nt, new DeleteRule(1, true));
+                    RuleState rs1 = new RuleState("DelTerminalRS", nt, new DeleteRule(1, true));
                     pstate.next.add(rs1);
                     previous = rs1;
                 } else if (prdItem instanceof Sort) {
                     Sort srt = (Sort) prdItem;
                     NonTerminalState nts = new NonTerminalState(
-                        new StateId(prd.getSort() + "-S-" + getUid()),
-                        nt, grammar.get(srt.getName()), false);
+                        prd.getSort() + "-S", nt, grammar.get(srt.getName()), false);
                     previous.next.add(nts);
                     previous = nts;
                 } else {
                     assert false : "Didn't expect this ProductionItem type: " + prdItem.getClass().getName();
                 }
             }
-            RuleState rs1 = new RuleState(new StateId("AddLabelRS-" + getUid()),
+            RuleState rs1 = new RuleState("AddLabelRS",
                 nt, new WrapLabelRule(new KLabelConstant(prd.getKLabel()), prd.getSort()));
             previous.next.add(rs1);
-            RuleState locRule = new RuleState(new StateId(prd.getSort() + "-R-" + getUid()),
-                nt, new AddLocationRule());
+            RuleState locRule = new RuleState(prd.getSort() + "-R", nt, new AddLocationRule());
             rs1.next.add(locRule);
             previous = locRule;
         }

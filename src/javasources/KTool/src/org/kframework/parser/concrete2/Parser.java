@@ -26,7 +26,6 @@ import org.kframework.parser.concrete2.Grammar.PrimitiveState;
 import org.kframework.parser.concrete2.Grammar.RegExState;
 import org.kframework.parser.concrete2.Grammar.RuleState;
 import org.kframework.parser.concrete2.Grammar.State;
-import org.kframework.parser.concrete2.Grammar.StateId;
 import org.kframework.parser.concrete2.Rule.ContextFreeRule;
 import org.kframework.parser.concrete2.Rule.ContextSensitiveRule;
 import org.kframework.parser.concrete2.Rule.MetaData;
@@ -514,7 +513,7 @@ public class Parser {
         // This code assumes that ordering info in the grammar are between MIN_VALUE+1 and MAX_VALUE-2
         // TODO: can we do away with the <start> non-terminal?
         NonTerminal startNt = new NonTerminal(new NonTerminalId("<start>"));
-        NonTerminalState state = new NonTerminalState(new StateId("<start>"), startNt, nt, false);
+        NonTerminalState state = new NonTerminalState("<start>", startNt, nt, false);
         startNt.entryState.next.add(state);
         state.next.add(startNt.exitState);
 

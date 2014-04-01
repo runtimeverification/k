@@ -118,7 +118,6 @@ public class Grammar implements Serializable {
     String singleLine = "(//.*)";
     String whites = "([ \n\r\t])";
     Pattern pattern = Pattern.compile("("+ multiLine +"|"+ singleLine +"|"+ whites +")*");
-    int seed = 0;
 
     /**
      * Add a pair of whitespace-remove whitespace rule to the given state.
@@ -129,9 +128,9 @@ public class Grammar implements Serializable {
      */
     private NextableState addWhitespace(NextableState start) {
         PrimitiveState whitespace = new RegExState(
-                new StateId("whitespace" + seed++), start.nt, pattern, KSorts.K);
+            "whitespace", start.nt, pattern, KSorts.K);
         RuleState deleteToken = new RuleState(
-                new StateId("whitespace-D-" + seed++), start.nt, new DeleteRule(1, true));
+            "whitespace-D", start.nt, new DeleteRule(1, true));
         whitespace.next.add(deleteToken);
         deleteToken.next.addAll(start.next);
         start.next.clear();
@@ -225,29 +224,6 @@ public class Grammar implements Serializable {
     // Inner Classes //
     ///////////////////
 
-    public static class StateId implements Comparable<StateId>, Serializable { // Used only by rules
-        public final String name;
-        public StateId(String name) { this.name = name; }
-        public int compareTo(StateId that) { return this.name.compareTo(that.name); }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            StateId stateId = (StateId) o;
-
-            if (!name.equals(stateId.name)) return false;
-
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            return name.hashCode();
-        }
-    }
-
     public static class NonTerminalId implements Comparable<NonTerminalId>, Serializable {
         public final String name;
         public NonTerminalId(String name) { this.name = name; }
@@ -286,8 +262,8 @@ public class Grammar implements Serializable {
 
         public NonTerminal(NonTerminalId nonTerminalId) {
             this.nonTerminalId = nonTerminalId;
-            this.entryState = new EntryState(new StateId(nonTerminalId.name + "-entry"), this);
-            this.exitState = new ExitState(new StateId(nonTerminalId.name + "-exit"), this);
+            this.entryState = new EntryState(nonTerminalId.name + "-entry", this);
+            this.exitState = new ExitState(nonTerminalId.name + "-exit", this);
         }
 
         public int compareTo(NonTerminal that) {
@@ -322,7 +298,13 @@ public class Grammar implements Serializable {
     }
 
     public abstract static class State implements Comparable<State>, Serializable {
-        public final StateId stateId;
+        /// "User friendly" name for the state.  Used only for debugging and error reporting.
+        public final String name;
+        /// Counter for generating unique ids for the state
+        private static int counter = 0;
+        /// The unique id of this state
+        private final int unique = counter++;
+
         public final NonTerminal nt;
         OrderingInfo orderingInfo = null;
 
@@ -332,11 +314,12 @@ public class Grammar implements Serializable {
             public int compareTo(OrderingInfo that) { return Integer.compare(this.key, that.key); }
         }
 
-        public State(StateId stateId, NonTerminal nt) {
-            this.stateId = stateId; this.nt = nt;
+        public State(String name, NonTerminal nt) {
+            this.name = name + "[" + this.unique + "]";
+            this.nt = nt;
         }
 
-        public int compareTo(State that) { return this.stateId.compareTo(that.stateId); }
+        public int compareTo(State that) { return Integer.compare(this.unique, that.unique); }
 
         @Override
         public boolean equals(Object o) {
@@ -345,22 +328,19 @@ public class Grammar implements Serializable {
 
             State state = (State) o;
 
-            if (!nt.equals(state.nt)) return false;
-            if (!stateId.equals(state.stateId)) return false;
+            if (unique != state.unique) return false;
 
             return true;
         }
 
         @Override
         public int hashCode() {
-            int result = stateId.hashCode();
-            //result = 31 * result + nt.hashCode();
-            return result;
+            return unique;
         }
     }
 
     public static class ExitState extends State {
-        ExitState(StateId stateId, NonTerminal nt) { super(stateId, nt); }
+        ExitState(String name, NonTerminal nt) { super(name, nt); }
     }
 
     public abstract static class NextableState extends State {
@@ -368,19 +348,19 @@ public class Grammar implements Serializable {
             @Override
             public boolean add(State s) {
                 assert s.nt == NextableState.this.nt :
-                    "States " + NextableState.this.stateId.name + " and " +
-                        s.stateId.name + " are not in the same NonTerminal.";
+                    "States " + NextableState.this.name + " and " +
+                        s.name + " are not in the same NonTerminal.";
                 return super.add(s);
             }
         };
-        NextableState(StateId stateId, NonTerminal nt, boolean intermediary) {
-            super(stateId, nt);
+        NextableState(String name, NonTerminal nt, boolean intermediary) {
+            super(name, nt);
             if (intermediary) { nt.intermediaryStates.add(this); }
         }
     }
 
     public static class EntryState extends NextableState {
-        EntryState(StateId stateId, NonTerminal nt) { super(stateId, nt, false); }
+        EntryState(String name, NonTerminal nt) { super(name, nt, false); }
     }
 
     public static class NonTerminalState extends NextableState {
@@ -388,9 +368,9 @@ public class Grammar implements Serializable {
         public final boolean isLookahead;
 
         public NonTerminalState(
-                StateId stateId, NonTerminal nt,
+                String name, NonTerminal nt,
                 NonTerminal child, boolean isLookahead) {
-            super(stateId, nt, true);
+            super(name, nt, true);
             nt.intermediaryStates.add(this);
             this.child = child;
             this.isLookahead = isLookahead;
@@ -399,8 +379,8 @@ public class Grammar implements Serializable {
 
     public static class RuleState extends NextableState {
         public final Rule rule;
-        public RuleState(StateId stateId, NonTerminal nt, Rule rule) {
-            super(stateId, nt, true);
+        public RuleState(String name, NonTerminal nt, Rule rule) {
+            super(name, nt, true);
             this.rule = rule;
         }
     }
@@ -418,8 +398,8 @@ public class Grammar implements Serializable {
 
         abstract Set<MatchResult> matches(CharSequence text, int startPosition);
 
-        public PrimitiveState(StateId stateId, NonTerminal nt, String sort) {
-            super(stateId, nt, true);
+        public PrimitiveState(String name, NonTerminal nt, String sort) {
+            super(name, nt, true);
             this.sort = sort;
         }
 
@@ -432,8 +412,8 @@ public class Grammar implements Serializable {
     public static class RegExState extends PrimitiveState {
         public final Pattern pattern;
 
-        public RegExState(StateId stateId, NonTerminal nt, Pattern pattern, String sort) {
-            super(stateId, nt, sort);
+        public RegExState(String name, NonTerminal nt, Pattern pattern, String sort) {
+            super(name, nt, sort);
             this.pattern = pattern;
         }
 

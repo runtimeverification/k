@@ -21,7 +21,6 @@ import org.kframework.parser.concrete2.Grammar.NonTerminalId;
 import org.kframework.parser.concrete2.Grammar.NonTerminalState;
 import org.kframework.parser.concrete2.Grammar.RegExState;
 import org.kframework.parser.concrete2.Grammar.RuleState;
-import org.kframework.parser.concrete2.Grammar.StateId;
 import org.kframework.parser.concrete2.Rule.WrapLabelRule;
 
 public class ParserTest {
@@ -62,7 +61,7 @@ public class ParserTest {
     @Test
     public void testSingleToken() throws Exception {
         NonTerminal nt1 = new NonTerminal(new NonTerminalId("StartNT"));
-        RegExState res = new RegExState(new StateId("RegExStid"), nt1, Pattern.compile("[a-zA-Z0-9]+"), KSorts.K);
+        RegExState res = new RegExState("RegExStid", nt1, Pattern.compile("[a-zA-Z0-9]+"), KSorts.K);
         Grammar grammar = new Grammar();
         grammar.add(nt1);
         nt1.entryState.next.add(res);
@@ -84,9 +83,9 @@ public class ParserTest {
         // A ::= #token{"[a-zA-Z0-9]+ +"} #token{"[a-zA-Z0-9]+"} [klabel(seq)]
         NonTerminal nt1 = new NonTerminal(new NonTerminalId("StartNT"));
 
-        RegExState res1 = new RegExState(new StateId("RegExStid"), nt1, Pattern.compile("[a-zA-Z0-9]+ +"), KSorts.K);
-        RegExState res2 = new RegExState(new StateId("RegExStid2"), nt1, Pattern.compile("[a-zA-Z0-9]+"), KSorts.K);
-        RuleState rs = new RuleState(new StateId("RuleStateId"), nt1, new WrapLabelRule(label("seq"), KSorts.K));
+        RegExState res1 = new RegExState("RegExStid", nt1, Pattern.compile("[a-zA-Z0-9]+ +"), KSorts.K);
+        RegExState res2 = new RegExState("RegExStid2", nt1, Pattern.compile("[a-zA-Z0-9]+"), KSorts.K);
+        RuleState rs = new RuleState("RuleStateId", nt1, new WrapLabelRule(label("seq"), KSorts.K));
 
         nt1.entryState.next.add(res1);
         res1.next.add(res2);
@@ -111,12 +110,12 @@ public class ParserTest {
         //     | #token{"[A-Z0-2]+"} #token{"[3-9]*"} [klabel(s3)]
         NonTerminal nt1 = new NonTerminal(new NonTerminalId("StartNT"));
 
-        RegExState res1 = new RegExState(new StateId("RegExStid"), nt1, Pattern.compile("[a-z0-9]+"), KSorts.K);
-        RegExState res2 = new RegExState(new StateId("RegExStid2"), nt1, Pattern.compile("[A-Z0-2]+"), KSorts.K);
-        RegExState res3 = new RegExState(new StateId("RegExStid3"), nt1, Pattern.compile("[3-9]*"), KSorts.K);
+        RegExState res1 = new RegExState("RegExStid", nt1, Pattern.compile("[a-z0-9]+"), KSorts.K);
+        RegExState res2 = new RegExState("RegExStid2", nt1, Pattern.compile("[A-Z0-2]+"), KSorts.K);
+        RegExState res3 = new RegExState("RegExStid3", nt1, Pattern.compile("[3-9]*"), KSorts.K);
 
-        RuleState rs1 = new RuleState(new StateId("RuleStateId1"), nt1, new WrapLabelRule(label("s1"), KSorts.K));
-        RuleState rs3 = new RuleState(new StateId("RuleStateId2"), nt1, new WrapLabelRule(label("s3"), KSorts.K));
+        RuleState rs1 = new RuleState("RuleStateId1", nt1, new WrapLabelRule(label("s1"), KSorts.K));
+        RuleState rs3 = new RuleState("RuleStateId2", nt1, new WrapLabelRule(label("s3"), KSorts.K));
 
         nt1.entryState.next.add(res1);
         nt1.entryState.next.add(res2);
@@ -158,8 +157,8 @@ public class ParserTest {
 
         NonTerminal nt1 = new NonTerminal(new NonTerminalId("StartNT"));
 
-        RegExState res1 = new RegExState(new StateId("RegExStid"), nt1, Pattern.compile("[a-zA-Z0-9]"), KSorts.K);
-        RuleState rs3 = new RuleState(new StateId("RuleStateId2"), nt1, new WrapLabelRule(label("seq"), KSorts.K));
+        RegExState res1 = new RegExState("RegExStid", nt1, Pattern.compile("[a-zA-Z0-9]"), KSorts.K);
+        RuleState rs3 = new RuleState("RuleStateId2", nt1, new WrapLabelRule(label("seq"), KSorts.K));
 
         nt1.entryState.next.add(res1);
         nt1.entryState.next.add(rs3);
@@ -214,12 +213,12 @@ public class ParserTest {
         //     | x A y [klabel(xAy)]
         NonTerminal nt1 = new NonTerminal(new NonTerminalId("StartNT"));
 
-        RegExState resx = new RegExState(new StateId("RegExStidx"), nt1, Pattern.compile("x"), KSorts.K);
-        RegExState resy = new RegExState(new StateId("RegExStidy"), nt1, Pattern.compile("y"), KSorts.K);
-        RuleState rs1 = new RuleState(new StateId("RuleStateId1"), nt1, new WrapLabelRule(label("xAy"), KSorts.K));
-        RuleState rs3 = new RuleState(new StateId("RuleStateId2"), nt1, new WrapLabelRule(label("epsilon"), KSorts.K));
+        RegExState resx = new RegExState("RegExStidx", nt1, Pattern.compile("x"), KSorts.K);
+        RegExState resy = new RegExState("RegExStidy", nt1, Pattern.compile("y"), KSorts.K);
+        RuleState rs1 = new RuleState("RuleStateId1", nt1, new WrapLabelRule(label("xAy"), KSorts.K));
+        RuleState rs3 = new RuleState("RuleStateId2", nt1, new WrapLabelRule(label("epsilon"), KSorts.K));
 
-        NonTerminalState nts = new NonTerminalState(new StateId("NT"), nt1, nt1, false);
+        NonTerminalState nts = new NonTerminalState("NT", nt1, nt1, false);
 
         nt1.entryState.next.add(resx);
         nt1.entryState.next.add(rs3);
@@ -262,11 +261,11 @@ public class ParserTest {
         //     | A y [klabel(Ay)]
         NonTerminal nt1 = new NonTerminal(new NonTerminalId("StartNT"));
 
-        RegExState resy = new RegExState(new StateId("RegExStidy"), nt1, Pattern.compile("y"), KSorts.K);
+        RegExState resy = new RegExState("RegExStidy", nt1, Pattern.compile("y"), KSorts.K);
 
-        NonTerminalState nts = new NonTerminalState(new StateId("NT"), nt1, nt1, false);
-        RuleState rs1 = new RuleState(new StateId("RuleStateId1"), nt1, new WrapLabelRule(label("Ay"), KSorts.K));
-        RuleState rs3 = new RuleState(new StateId("RuleStateId2"), nt1, new WrapLabelRule(label("epsilon"), KSorts.K));
+        NonTerminalState nts = new NonTerminalState("NT", nt1, nt1, false);
+        RuleState rs1 = new RuleState("RuleStateId1", nt1, new WrapLabelRule(label("Ay"), KSorts.K));
+        RuleState rs3 = new RuleState("RuleStateId2", nt1, new WrapLabelRule(label("epsilon"), KSorts.K));
 
         nt1.entryState.next.add(nts);
         nt1.entryState.next.add(rs3);
@@ -305,11 +304,11 @@ public class ParserTest {
         //     | x A [klabel(xA)]
         NonTerminal nt1 = new NonTerminal(new NonTerminalId("StartNT"));
 
-        RegExState resx = new RegExState(new StateId("RegExStidx"), nt1, Pattern.compile("x"), KSorts.K);
+        RegExState resx = new RegExState("RegExStidx", nt1, Pattern.compile("x"), KSorts.K);
 
-        NonTerminalState nts = new NonTerminalState(new StateId("NT"), nt1, nt1, false);
-        RuleState rs1 = new RuleState(new StateId("RuleStateId1"), nt1, new WrapLabelRule(label("xA"), KSorts.K));
-        RuleState rs3 = new RuleState(new StateId("RuleStateId2"), nt1, new WrapLabelRule(label("epsilon"), KSorts.K));
+        NonTerminalState nts = new NonTerminalState("NT", nt1, nt1, false);
+        RuleState rs1 = new RuleState("RuleStateId1", nt1, new WrapLabelRule(label("xA"), KSorts.K));
+        RuleState rs3 = new RuleState("RuleStateId2", nt1, new WrapLabelRule(label("epsilon"), KSorts.K));
 
         nt1.entryState.next.add(resx);
         nt1.entryState.next.add(rs3);
@@ -349,13 +348,13 @@ public class ParserTest {
         //     | A A [klabel(AA)]
         NonTerminal nt1 = new NonTerminal(new NonTerminalId("StartNT"));
 
-        RegExState resx = new RegExState(new StateId("RegExStidx"), nt1,Pattern.compile("x"), KSorts.K);//, label("x"), KSorts.K);
+        RegExState resx = new RegExState("RegExStidx", nt1,Pattern.compile("x"), KSorts.K);//, label("x"), KSorts.K);
 
-        NonTerminalState nts1 = new NonTerminalState(new StateId("NT1"), nt1, nt1, false);
-        NonTerminalState nts2 = new NonTerminalState(new StateId("NT2"), nt1, nt1, false);//, label("AA"), KSorts.K);
+        NonTerminalState nts1 = new NonTerminalState("NT1", nt1, nt1, false);
+        NonTerminalState nts2 = new NonTerminalState("NT2", nt1, nt1, false);//, label("AA"), KSorts.K);
 
-        RuleState rs1 = new RuleState(new StateId("RuleStateId1"), nt1, new WrapLabelRule(label("x"), KSorts.K));
-        RuleState rs3 = new RuleState(new StateId("RuleStateId2"), nt1, new WrapLabelRule(label("AA"), KSorts.K));
+        RuleState rs1 = new RuleState("RuleStateId1", nt1, new WrapLabelRule(label("x"), KSorts.K));
+        RuleState rs3 = new RuleState("RuleStateId2", nt1, new WrapLabelRule(label("AA"), KSorts.K));
 
 
         nt1.entryState.next.add(resx);
@@ -412,8 +411,8 @@ public class ParserTest {
         // An ::= An-1 [klabel(n[n-1])]
         // start symb is An
         NonTerminal baseCase = new NonTerminal(new NonTerminalId("BaseCase"));
-        RegExState resx = new RegExState(new StateId("X"), baseCase, Pattern.compile("x"), KSorts.K);
-        RuleState rs1 = new RuleState(new StateId("RuleStateId1"), baseCase, new WrapLabelRule(label("x"), KSorts.K));
+        RegExState resx = new RegExState("X", baseCase, Pattern.compile("x"), KSorts.K);
+        RuleState rs1 = new RuleState("RuleStateId1", baseCase, new WrapLabelRule(label("x"), KSorts.K));
 
         baseCase.entryState.next.add(resx);
         resx.next.add(rs1);
@@ -423,8 +422,8 @@ public class ParserTest {
 
         for (int i = 2; i < 10; i++) {
             NonTerminal nt = new NonTerminal(new NonTerminalId("NT"+i));
-            NonTerminalState state = new NonTerminalState(new StateId("S"+i), nt, baseCase, false);
-            RuleState rs2 = new RuleState(new StateId("RuleStateId" + i), nt, new WrapLabelRule(label("n" + i), KSorts.K));
+            NonTerminalState state = new NonTerminalState("S"+i, nt, baseCase, false);
+            RuleState rs2 = new RuleState("RuleStateId" + i, nt, new WrapLabelRule(label("n" + i), KSorts.K));
             nt.entryState.next.add(state);
             state.next.add(rs2);
             rs2.next.add(nt.exitState);
@@ -454,8 +453,8 @@ public class ParserTest {
         // start symb is An
 
         NonTerminal baseCase = new NonTerminal(new NonTerminalId("BaseCase"));
-        RegExState resx = new RegExState(new StateId("X"), baseCase, Pattern.compile(""), KSorts.K);
-        RuleState rs1 = new RuleState(new StateId("RuleStateId1"), baseCase, new WrapLabelRule(label("x"), KSorts.K));
+        RegExState resx = new RegExState("X", baseCase, Pattern.compile(""), KSorts.K);
+        RuleState rs1 = new RuleState("RuleStateId1", baseCase, new WrapLabelRule(label("x"), KSorts.K));
 
         baseCase.entryState.next.add(resx);
         resx.next.add(rs1);
@@ -465,8 +464,8 @@ public class ParserTest {
 
         for (int i = 2; i < 10; i++) {
             NonTerminal nt = new NonTerminal(new NonTerminalId("NT"+i));
-            NonTerminalState state = new NonTerminalState(new StateId("S"+i), nt, baseCase, false);
-            RuleState rs2 = new RuleState(new StateId("RuleStateId" + i), nt, new WrapLabelRule(label("n" + i), KSorts.K));
+            NonTerminalState state = new NonTerminalState("S"+i, nt, baseCase, false);
+            RuleState rs2 = new RuleState("RuleStateId" + i, nt, new WrapLabelRule(label("n" + i), KSorts.K));
             nt.entryState.next.add(state);
             state.next.add(rs2);
             rs2.next.add(nt.exitState);
@@ -500,25 +499,25 @@ public class ParserTest {
         NonTerminal exp = new NonTerminal(new NonTerminalId("Exp"));
 
         { // lit
-            RegExState litState = new RegExState(new StateId("LitState"), lit, Pattern.compile("[0-9]+"), KSorts.K);
-            RuleState rs1 = new RuleState(new StateId("RuleStateId1"), lit, new WrapLabelRule(label("lit"), KSorts.K));
+            RegExState litState = new RegExState("LitState", lit, Pattern.compile("[0-9]+"), KSorts.K);
+            RuleState rs1 = new RuleState("RuleStateId1", lit, new WrapLabelRule(label("lit"), KSorts.K));
             lit.entryState.next.add(litState);
             litState.next.add(rs1);
             rs1.next.add(lit.exitState);
         }
 
         { // trm
-            RegExState lparen = new RegExState(new StateId("LParen"), trm, Pattern.compile("\\("), KSorts.K);
-            RegExState rparen = new RegExState(new StateId("RParen"), trm, Pattern.compile("\\)"), KSorts.K);
-            RuleState rs1 = new RuleState(new StateId("RuleStateId1"), trm, new WrapLabelRule(label("bracket"), KSorts.K));
+            RegExState lparen = new RegExState("LParen", trm, Pattern.compile("\\("), KSorts.K);
+            RegExState rparen = new RegExState("RParen", trm, Pattern.compile("\\)"), KSorts.K);
+            RuleState rs1 = new RuleState("RuleStateId1", trm, new WrapLabelRule(label("bracket"), KSorts.K));
 
-            RegExState star = new RegExState(new StateId("Star"), trm, Pattern.compile("\\*"), KSorts.K);
-            NonTerminalState expState = new NonTerminalState(new StateId("Trm->Exp"), trm, exp, false);
-            NonTerminalState trmState = new NonTerminalState(new StateId("Trm->Trm"), trm, trm, false);
-            NonTerminalState lit1State = new NonTerminalState(new StateId("Trm->Lit1"), trm, lit, false);
-            RuleState rs2 = new RuleState(new StateId("RuleStateId2"), trm, new WrapLabelRule(label("mul"), KSorts.K));
+            RegExState star = new RegExState("Star", trm, Pattern.compile("\\*"), KSorts.K);
+            NonTerminalState expState = new NonTerminalState("Trm->Exp", trm, exp, false);
+            NonTerminalState trmState = new NonTerminalState("Trm->Trm", trm, trm, false);
+            NonTerminalState lit1State = new NonTerminalState("Trm->Lit1", trm, lit, false);
+            RuleState rs2 = new RuleState("RuleStateId2", trm, new WrapLabelRule(label("mul"), KSorts.K));
 
-            NonTerminalState lit2State = new NonTerminalState(new StateId("Trm->Lit2"), trm, lit, false);
+            NonTerminalState lit2State = new NonTerminalState("Trm->Lit2", trm, lit, false);
 
             trm.entryState.next.add(lparen);
             lparen.next.add(expState);
@@ -537,11 +536,11 @@ public class ParserTest {
         }
 
         { // exp
-            RegExState plus = new RegExState(new StateId("Plus"), exp, Pattern.compile("\\+"), KSorts.K);
-            NonTerminalState expState = new NonTerminalState(new StateId("Exp->Exp"), exp, exp, false);
-            NonTerminalState trm1State = new NonTerminalState(new StateId("Exp->Trm1"), exp, trm, false);
-            RuleState rs1 = new RuleState(new StateId("RuleStateId3"), exp, new WrapLabelRule(label("plus"), KSorts.K));
-            NonTerminalState trm2State = new NonTerminalState(new StateId("Exp->Trm2"), exp, trm, false);
+            RegExState plus = new RegExState("Plus", exp, Pattern.compile("\\+"), KSorts.K);
+            NonTerminalState expState = new NonTerminalState("Exp->Exp", exp, exp, false);
+            NonTerminalState trm1State = new NonTerminalState("Exp->Trm1", exp, trm, false);
+            RuleState rs1 = new RuleState("RuleStateId3", exp, new WrapLabelRule(label("plus"), KSorts.K));
+            NonTerminalState trm2State = new NonTerminalState("Exp->Trm2", exp, trm, false);
 
             exp.entryState.next.add(expState);
             expState.next.add(plus);
