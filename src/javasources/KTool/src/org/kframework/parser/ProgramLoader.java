@@ -152,7 +152,7 @@ public class ProgramLoader {
                     String loc = "(" + perror.line + "," + perror.column + "," +
                                        perror.line + "," +(perror.column+1) + ")";
                     throw new TransformerException(new KException(
-                            ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, filename, loc));
+                            ExceptionType.ERROR, KExceptionGroup.PARSER, msg, filename, loc));
                 }
                 out = out.accept(new TreeCleanerVisitor(context));
                 if (GlobalSettings.verbose)
