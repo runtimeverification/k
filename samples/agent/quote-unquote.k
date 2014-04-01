@@ -1,35 +1,37 @@
+// Copyright @ 2012-2014.  K Team.  All Rights Reserved.
+
 require "/modules/k-visitor.k"
 
 module QUOTE-UNQUOTE-SYNTAX
-  syntax Exp ::= "quote" Exp  [quote]
-             | "unquote" Exp [unquote]
-             | "lift" Exp    [lift, strict]
-             | "eval" Exp    [eval, strict]
+  syntax Exp ::= "quote" Exp    [quote]
+               | "unquote" Exp  [unquote]
+               | "lift" Exp     [lift, strict]
+               | "eval" Exp     [eval, strict]
 endmodule
 
-module QUOTE-UNQUOTE 
+module QUOTE-UNQUOTE
   imports QUOTE-UNQUOTE-SYNTAX
   imports K-VISITOR
-  syntax K ::= isQuote(K)  [function]
-  rule isQuote(quote K) => true
-  rule isQuote(unquote K) => true
 
-  syntax K ::= mQuote(K, Int) [function, latex({\it quote}({#1},{#2}))]
-  rule mQuote(K,N) 
-    => visit K applying quoteit[N] if 'isQuote
-    [structural]
+  syntax Bool ::= isQuoted(Exp)     [function]
+  rule isQuoted(quote E) => true
+  rule isQuoted(unquote K) => true
+
+// Quotes code starting with a certain quoting depth
+  syntax Exp ::= mQuote(Exp, Int)   [function]
+// Uses the pre-defined visitor
+  rule mQuote(E, N) => #visit(E,, #visitor('quoteit(N),, #label('isQuoted)))
 
 // Code generation (via reflection)
-  syntax KLabel ::= "quoteit" "[" Int "]" [latex({\it quote}_{\mbox{\scriptsize\ensuremath{#1}}})]
+  syntax Exp ::= quoteit(Int,Exp)
+  rule quote E => mQuote(E, 0)
+  rule quoteit(N, quote E)   => #visiting.kapp(#label('quote_),,   mQuote(E, N +Int 1))
+  rule quoteit(0, unquote E) => E
+  rule quoteit(N, unquote E) => #visiting.kapp(#label('unquote_),, mQuote(E, N -Int 1))
+  when (N >Int 0)
 
-  rule <k>quote K:K => mQuote(K,0) ...</k>
-  rule quoteit[N](quote(K)) => visitedL('quote_)(mQuote(K,N +Int 1)) 
-  rule quoteit[0](unquote(K)) => K 
-  rule quoteit[N](unquote(K)) => visitedL('unquote_)(mQuote(K,N -Int 1))  
-    when (N >Int 0) 
+  rule lift V:Val => #visited(V)
+  rule eval #visited(E) => E
 
-  rule lift V:KResult => visitedK(V) 
-  rule eval visitedK(K) => K 
-
-  rule isVal(visitedK(_)) => true
+  rule isVal(#visited(_)) => true
 endmodule
