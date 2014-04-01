@@ -288,14 +288,6 @@ public class Grammar implements Serializable {
             public int compareTo(OrderingInfo that) { return Integer.compare(this.key, that.key); }
         }
 
-        public NonTerminal(NonTerminalId nonTerminalId,
-                           StateId entryStateId,
-                           StateId exitStateId) {
-            this.nonTerminalId = nonTerminalId;
-            this.entryState = new EntryState(entryStateId, this);
-            this.exitState = new ExitState(exitStateId, this);
-        }
-
         public NonTerminal(NonTerminalId nonTerminalId) {
             this.nonTerminalId = nonTerminalId;
             this.entryState = new EntryState(new StateId(nonTerminalId.name + "-entry"), this);
