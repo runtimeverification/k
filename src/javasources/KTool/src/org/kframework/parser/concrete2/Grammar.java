@@ -280,7 +280,7 @@ public class Grammar implements Serializable {
         public final EntryState entryState;
         public final ExitState exitState;
         private final Set<NextableState> intermediaryStates = new HashSet<>();
-        public final OrderingInfo orderingInfo = null; // TODO: unused until we fix lookahead
+        final OrderingInfo orderingInfo = null; // TODO: unused until we fix lookahead
 
         static class OrderingInfo implements Comparable<OrderingInfo> {
             final int key;
