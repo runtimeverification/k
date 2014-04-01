@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.kil.Ambiguity;
@@ -48,7 +50,7 @@ Terminology:
 class StateCall {
     final Function function = Function.empty();
 
-    public static class Key {
+    static class Key {
         final NonTerminalCall ntCall;
         final int stateBegin;
         final State state;
@@ -82,6 +84,10 @@ class StateCall {
     }
     final Key key;
     StateCall(Key key) { this.key = key; }
+
+    public int hashCode() {
+        return this.key.hashCode();
+    }
 }
 
 /// The dynamic record for where a state ends parsing
@@ -153,7 +159,7 @@ class StateReturn implements Comparable<StateReturn> {
 }
 
 class Context {
-    Set<KList> contexts = new HashSet<>();
+    final Set<KList> contexts = new HashSet<>();
 }
 
 /// The dynamic record for where a non-terminal starts parsing
@@ -193,6 +199,10 @@ class NonTerminalCall {
     }
     final Key key;
     NonTerminalCall(Key key) { this.key = key; }
+
+    public int hashCode() {
+        return this.key.hashCode();
+    }
 }
 
 ////////////////
@@ -240,9 +250,9 @@ class ParseState {
         columns[input.length()] = c;
     }
 
-    Map<NonTerminalCall.Key,NonTerminalCall> ntCalls = new HashMap<>();
-    Map<StateCall.Key,StateCall> stateCalls = new HashMap<>();
-    Map<StateReturn.Key,StateReturn> stateReturns = new HashMap<>();
+    private BiMap<NonTerminalCall.Key,NonTerminalCall> ntCalls = HashBiMap.create();
+    private BiMap<StateCall.Key,StateCall> stateCalls = HashBiMap.create();
+    private BiMap<StateReturn.Key,StateReturn> stateReturns = HashBiMap.create();
 
     public NonTerminalCall getNtCall(NonTerminalCall.Key key) {
         NonTerminalCall value = ntCalls.get(key);
@@ -261,6 +271,8 @@ class ParseState {
         }
         return value;
     }
+
+    public Set<StateCall.Key> getStateCallKeys() { return stateCalls.keySet(); }
 
     public StateReturn getStateReturn(StateReturn.Key key) {
         StateReturn value = stateReturns.get(key);
@@ -547,12 +559,12 @@ public class Parser {
      */
     public ParseError getErrors() {
         int current = 0;
-        for (StateCall.Key key : s.stateCalls.keySet()) {
+        for (StateCall.Key key : s.getStateCallKeys()) {
             if (key.state instanceof PrimitiveState)
                 current = Math.max(current, key.stateBegin);
         }
         Set<Pair<String, Pattern>> tokens = new HashSet<>();
-        for (StateCall.Key key : s.stateCalls.keySet()) {
+        for (StateCall.Key key : s.getStateCallKeys()) {
             if (key.state instanceof RegExState && key.stateBegin == current) {
                 tokens.add(new ImmutablePair<>(
                     ((RegExState) key.state).sort, ((RegExState) key.state).pattern));
