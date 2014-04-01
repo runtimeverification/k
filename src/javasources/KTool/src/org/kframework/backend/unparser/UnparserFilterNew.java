@@ -26,8 +26,7 @@ public class UnparserFilterNew extends BasicVisitor {
     private java.util.List<String> variableList = new java.util.LinkedList<String>();
     private java.util.Map<Production, Integer> priorities = null;
     private java.util.Stack<ASTNode> stack = new java.util.Stack<ASTNode>();
-    private Definition definition;
-
+    
     public void setForEquivalence() {
         forEquivalence = true;
     }
@@ -36,30 +35,29 @@ public class UnparserFilterNew extends BasicVisitor {
         this.indenter = indenter;
     }
     
-    public UnparserFilterNew(org.kframework.kil.loader.Context context,Definition definition) {
-        this(false, context,definition);
+    public UnparserFilterNew(org.kframework.kil.loader.Context context) {
+        this(false, context);
     }
 
-    public UnparserFilterNew(boolean inConfiguration, org.kframework.kil.loader.Context context,Definition definition) {
-        this(inConfiguration, false, context,definition);
+    public UnparserFilterNew(boolean inConfiguration, org.kframework.kil.loader.Context context) {
+        this(inConfiguration, false, context);
     }
 
-    public UnparserFilterNew(boolean inConfiguration, boolean color, org.kframework.kil.loader.Context context,Definition definition) {
-        this(inConfiguration, color ? ColorSetting.ON : ColorSetting.OFF, true, context,definition);
+    public UnparserFilterNew(boolean inConfiguration, boolean color, org.kframework.kil.loader.Context context) {
+        this(inConfiguration, color ? ColorSetting.ON : ColorSetting.OFF, true, context);
     }
 
-    public UnparserFilterNew(boolean inConfiguration, ColorSetting color, boolean addParentheses, org.kframework.kil.loader.Context context,Definition definition) {
-        this(inConfiguration, color, addParentheses, false, context,definition);
+    public UnparserFilterNew(boolean inConfiguration, ColorSetting color, boolean addParentheses, org.kframework.kil.loader.Context context) {
+        this(inConfiguration, color, addParentheses, false, context);
     }
 
-    public UnparserFilterNew(boolean inConfiguration, ColorSetting color, boolean addParentheses, boolean annotateLocation, org.kframework.kil.loader.Context context,Definition definition) {
+    public UnparserFilterNew(boolean inConfiguration, ColorSetting color, boolean addParentheses, boolean annotateLocation, org.kframework.kil.loader.Context context) {
         super(context);
         this.inConfiguration = inConfiguration;
         this.color = color;
         this.inTerm = 0;
         this.addParentheses = addParentheses;
         this.annotateLocation = annotateLocation;
-        this.definition=definition;
     }
 
     public String getResult() {
@@ -357,7 +355,7 @@ public class UnparserFilterNew extends BasicVisitor {
             assert child instanceof KList : "child of KApp with Token is not KList";
             assert ((KList) child).isEmpty() : "child of KApp with Token is not empty";
             
-            ArrayList<Terminal> temp = this.findRightSyntax(label.getSort());
+            List<Terminal> temp = this.findRightSyntax(label.getSort());
             if(!temp.isEmpty()){
                 indenter.write(temp.get(0).getTerminal());
             }
@@ -371,7 +369,7 @@ public class UnparserFilterNew extends BasicVisitor {
         } else if (K.output_mode.equals(K.PRETTY) && (label instanceof KLabelConstant) && ((KLabelConstant) label).getLabel().contains("'_")) {
             
             String rawLabel = null;
-            ArrayList<Terminal> temp = this.findRightSyntax(label.getSort());
+            List<Terminal> temp = this.findRightSyntax(label.getSort());
             if(!temp.isEmpty()){
                 if(temp.size()>1){
                     rawLabel = temp.get(0).getTerminal()
@@ -446,7 +444,7 @@ public class UnparserFilterNew extends BasicVisitor {
     @Override
     public void visit(TermCons termCons) {
         //prepare(termCons);
-        ArrayList<Terminal> temp = this.findRightSyntax(termCons.getSort());
+        List<Terminal> temp = this.findRightSyntax(termCons.getSort());
         if(!temp.isEmpty()){
             indenter.write(temp.get(0).getTerminal());
         }
@@ -769,67 +767,20 @@ public class UnparserFilterNew extends BasicVisitor {
         }
     }
     
-    private ArrayList<Terminal> findRightSyntax(String sort){
+    private List<Terminal> findRightSyntax(String sort){
         
-        for(int i = 0; i < this.definition.getItems().size(); ++i){
-            
-            if(this.definition.getItems().get(i) instanceof Module){
-                
-                for(int j = 0; j < ((Module)(this.definition.getItems().get(i))).getItems().size(); ++j){
-                    
-                    if(((Module)(this.definition.getItems().get(i))).getItems().get(j) instanceof Syntax){
-                        
-                        if(((Syntax)(((Module)(this.definition.getItems().get(i))).
-                                getItems().get(j))).getSort().getName().equals(sort)){
-                            
-                            for(int k = 0; k < 
-                                    ((Syntax)(((Module)(this.definition.getItems().get(i))).
-                                            getItems().get(j))).getPriorityBlocks().size(); ++k){
-                                
-                                for(int l = 0; l < 
-                                        ((Syntax)(((Module)(this.definition.getItems().get(i))).getItems().get(j))).
-                                        getPriorityBlocks().get(k).getProductions().size(); ++l){
-                                    
-                                    
-                                    if(((Syntax)(((Module)(this.definition.getItems().get(i))).
-                                            getItems().get(j))).getPriorityBlocks().get(k).getProductions().
-                                            get(l).containsAttribute(Attribute.BRACKET.getKey())){
-                                        
-                                        ArrayList<Terminal> result = new ArrayList<Terminal>();
-                                        
-                                        int m = 0;
-                                        for(int n = 0; n < ((Syntax)(((Module)(this.definition.getItems().get(i))).
-                                            getItems().get(j))).getPriorityBlocks().get(k).getProductions().
-                                            get(l).getItems().size(); ++n){
-                                            
-                                            if(((Syntax)(((Module)(this.definition.getItems().get(i))).
-                                                    getItems().get(j))).getPriorityBlocks().get(k).getProductions().
-                                                    get(l).getItems().get(n) instanceof Terminal){
-                                                result.add((Terminal)(((Syntax)(((Module)(this.definition.getItems().get(i))).
-                                                    getItems().get(j))).getPriorityBlocks().get(k).getProductions().
-                                                    get(l).getItems().get(n)));
-                                                m++;
-                                            }
-                                            
-                                            if(m==2){
-                                                
-                                                return result;
-                                            }
-                                        }
-                                        
-                                        return result;
-                                    }
-                                    
-                                }
-                            }
-                        }
-                    }
-
+        Production p = context.canonicalBracketForSort.get(sort);
+        if (p == null) {
+            return new ArrayList<Terminal>();
+        } else {
+            List<Terminal> terminals = new ArrayList<>();
+            for (ProductionItem item : p.getItems()) {
+                if (item instanceof Terminal) {
+                    terminals.add((Terminal)item);
                 }
             }
+            return terminals;
         }
-        
-        return new ArrayList<Terminal>();
     }
 
     private boolean needsParenthesis(ASTNode upper, ASTNode astNode) {
@@ -841,8 +792,7 @@ public class UnparserFilterNew extends BasicVisitor {
             }
             return true;
         } else if(astNode instanceof TermCons){
-            
-            ArrayList<Terminal> isRightSyntax = findRightSyntax(((TermCons) astNode).getSort());
+            List<Terminal> isRightSyntax = findRightSyntax(((TermCons) astNode).getSort());
             
             if(isRightSyntax.isEmpty()){
                 

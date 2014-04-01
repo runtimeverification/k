@@ -109,6 +109,7 @@ public class JavaSymbolicBackend extends BasicBackend {
         steps.add(new CheckVisitorStep<Definition>(new AddConsesVisitor(context), context));
         steps.add(new CheckVisitorStep<Definition>(new CollectConsesVisitor(context), context));
         steps.add(new CheckVisitorStep<Definition>(new CollectSubsortsVisitor(context), context));
+        steps.add(new CheckVisitorStep<Definition>(new CollectBracketsVisitor(context), context));
         steps.add(new DefinitionSerializer(context));
 
         steps.add(new StrictnessToContexts(context));
