@@ -427,6 +427,8 @@ public class Grammar implements Serializable {
     }
 
     public abstract static class PrimitiveState extends NextableState {
+        /// The sort of the token (or rather the KApp containing this token)
+        // to be constructed when parsing this primitive state.
         public final String sort;
         public static class MatchResult {
             final public int matchEnd;
