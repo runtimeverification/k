@@ -368,9 +368,7 @@ public class Grammar implements Serializable {
     }
 
     public static class ExitState extends State {
-        public ExitState(StateId stateId, NonTerminal nt) {
-            super(stateId, nt);
-        }
+        ExitState(StateId stateId, NonTerminal nt) { super(stateId, nt); }
     }
 
     public abstract static class NextableState extends State {
@@ -390,9 +388,7 @@ public class Grammar implements Serializable {
     }
 
     public static class EntryState extends NextableState {
-        public EntryState(StateId stateId, NonTerminal nt) {
-            super(stateId, nt, false);
-        }
+        EntryState(StateId stateId, NonTerminal nt) { super(stateId, nt, false); }
     }
 
     public static class NonTerminalState extends NextableState {
