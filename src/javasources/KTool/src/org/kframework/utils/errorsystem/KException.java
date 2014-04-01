@@ -21,6 +21,7 @@ public class KException {
 
         labels = new HashMap<KException.KExceptionGroup, String>();
         labels.put(KExceptionGroup.COMPILER, "Compiler");
+        labels.put(KExceptionGroup.OUTER_PARSER, "Outer Parser");
         labels.put(KExceptionGroup.PARSER, "Parser");
         labels.put(KExceptionGroup.LISTS, "Lists");
         labels.put(KExceptionGroup.INTERNAL, "Internal");
@@ -46,7 +47,7 @@ public class KException {
     }
 
     public enum KExceptionGroup {
-        PARSER, COMPILER, LISTS, INTERNAL, CRITICAL
+        OUTER_PARSER, PARSER, COMPILER, LISTS, INTERNAL, CRITICAL
     }
 
     public enum ExceptionType {

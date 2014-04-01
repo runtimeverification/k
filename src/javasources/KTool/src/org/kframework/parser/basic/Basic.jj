@@ -223,11 +223,11 @@ public class Basic {
     } catch (ParseException e) {
       // TODO: report location
       GlobalSettings.kem.register(new KException(
-        ExceptionType.ERROR, KExceptionGroup.PARSER, e.toString(), filename, null));
+        ExceptionType.ERROR, KExceptionGroup.OUTER_PARSER, e.getMessage(), filename, null));
       return new ArrayList<DefinitionItem>();
     } catch (TokenMgrError e) {
       GlobalSettings.kem.register(new KException(
-        ExceptionType.ERROR, KExceptionGroup.PARSER, e.toString(), filename, null));
+        ExceptionType.ERROR, KExceptionGroup.OUTER_PARSER, e.getMessage(), filename, null));
       return new ArrayList<DefinitionItem>();
     }
   }
