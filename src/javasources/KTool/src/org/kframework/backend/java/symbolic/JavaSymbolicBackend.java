@@ -17,6 +17,7 @@ import org.kframework.compile.utils.*;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.AddConsesVisitor;
+import org.kframework.kil.loader.CollectBracketsVisitor;
 import org.kframework.kil.loader.CollectConsesVisitor;
 import org.kframework.kil.loader.CollectSubsortsVisitor;
 import org.kframework.kil.loader.Context;
