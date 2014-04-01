@@ -92,55 +92,51 @@ public class Grammar implements Serializable {
     }
 
     public void addWhiteSpace() {
-        // TODO(Radu): Move out of grammar and into a post processing of KSyntax
-        // TODO: Put whitespace at start of NT so we don't need the extra NT names
-        // TODO: (once we don't need extra NT names), make nt.nonTerminalId be final
-        // TODO: make whitespace able to return comments somehow
         // create a NonTerminal which parses a list of whitespace characters.
         // the NT is a star list that has 3 branches
         // 1. whitespace, 2. single line comment, 3. multiple lines comment
-        String multiLine = "(/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/)";
-        String singleLine = "(//.*)";
-        String whites = "([ \n\r\t])";
-        Pattern pattern = Pattern.compile("("+ multiLine +"|"+ singleLine +"|"+ whites +")*");
-        int seed = 0;
 
         // create a whitespace PrimitiveState after every every terminal that can match a character
         for (NonTerminal nonTerminal : getAllNonTerminals()) {
             for (State s : nonTerminal.getReachableStates()) {
                 if (s instanceof PrimitiveState) {
                     PrimitiveState ps = ((PrimitiveState) s);
-                    PrimitiveState whitespace = new RegExState(
-                        new StateId("whitespace" + seed++), s.nt, pattern, KSorts.K);
-                    RuleState deleteToken = new RuleState(
-                        new StateId("whitespace-D-" + seed++), s.nt, new DeleteRule(1, true));
-                    whitespace.next.add(deleteToken);
-                    deleteToken.next.addAll(ps.next);
-                    ps.next.clear();
-                    ps.next.add(whitespace);
+                    addWhitespace(ps);
                 }
             }
         }
+
         // create a new state for every start state that can have whitespace at the beginning
-        for (Entry<NonTerminalId, NonTerminal> entry : startNonTerminals.entrySet()) {
-            // create a new NT that calls the the startNT and has whitespace available at the beginning.
-            // the NonTerminalId is copied into the new NT to keep the reference in the Map
-            // the startNT gets another Id to eliminate confusion.
-            NonTerminal nt = entry.getValue();
-            NonTerminal whiteStartNt = new NonTerminal(new NonTerminalId(nt.nonTerminalId.name));
-            PrimitiveState whitespace = new RegExState(
-                new StateId("whitespace-" + seed++), whiteStartNt, pattern, KSorts.K);
-            NonTerminalState nts = new NonTerminalState(
-                new StateId("white-calls-" + nt.nonTerminalId.name), whiteStartNt, nt, false);
-            RuleState deleteToken = new RuleState(
-                new StateId("whitespace-D-" + seed++), whiteStartNt, new DeleteRule(1, true));
-            nt.nonTerminalId = new NonTerminalId(nt.nonTerminalId.name + "-afterWhite");
-            whiteStartNt.entryState.next.add(whitespace);
-            whitespace.next.add(deleteToken);
-            deleteToken.next.add(nts);
-            nts.next.add(whiteStartNt.exitState);
-            entry.setValue(whiteStartNt);
+        for (NonTerminal nt : startNonTerminals.values()) {
+            // add whitespace to the beginning of every start NonTerminal to allow for
+            // whitespace at the beginning of the input
+            addWhitespace(nt.entryState);
         }
+    }
+
+    String multiLine = "(/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/)";
+    String singleLine = "(//.*)";
+    String whites = "([ \n\r\t])";
+    Pattern pattern = Pattern.compile("("+ multiLine +"|"+ singleLine +"|"+ whites +")*");
+    int seed = 0;
+
+    /**
+     * Add a pair of whitespace-remove whitespace rule to the given state.
+     * All children of the given state are moved to the remove whitespace rule.
+     * (|-- gets transformed into (|-->(white)--><remove>---
+     * @param start NextableState to which to attach the whitespaces
+     * @return the remove whitespace state
+     */
+    private NextableState addWhitespace(NextableState start) {
+        PrimitiveState whitespace = new RegExState(
+                new StateId("whitespace" + seed++), start.nt, pattern, KSorts.K);
+        RuleState deleteToken = new RuleState(
+                new StateId("whitespace-D-" + seed++), start.nt, new DeleteRule(1, true));
+        whitespace.next.add(deleteToken);
+        deleteToken.next.addAll(start.next);
+        start.next.clear();
+        start.next.add(whitespace);
+        return deleteToken;
     }
 
     public void compile() {
@@ -276,7 +272,7 @@ public class Grammar implements Serializable {
     }
 
     public static class NonTerminal implements Comparable<NonTerminal>, Serializable {
-        public NonTerminalId nonTerminalId; // TODO: make final once whitespace is refactored
+        public final NonTerminalId nonTerminalId;
         public final EntryState entryState;
         public final ExitState exitState;
         private final Set<NextableState> intermediaryStates = new HashSet<>();

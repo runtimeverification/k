@@ -51,7 +51,6 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
 
     @Override
     public void visit(Production prd) {
-        // TODO: put whitespace here instead of in grammar
         NonTerminal nt = grammar.get(prd.getSort());
         assert nt != null : "Could not find in the grammar the required sort: " + prd.getSort();
         NextableState previous = nt.entryState;
@@ -75,7 +74,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                 // create the branch which allows for empty lists
                 NonTerminalState special = new NonTerminalState(
                     new StateId(ntName + "-S-" + getUid()), nt, specialNt, false);
-                nt.entryState.next.add(special);
+                previous.next.add(special);
                 special.next.add(nt.exitState);
                 previous = special;
             }
@@ -84,7 +83,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                 NonTerminalState IdsHelper = new NonTerminalState(
                     new StateId(ntName + "-S-" + getUid()), nt, wrapperNt, false);
                 // label for '.Ids (list terminator)
-                nt.entryState.next.add(IdsHelper);
+                previous.next.add(IdsHelper);
                 IdsHelper.next.add(nt.exitState);
 
                 // inside the wrapperNt
