@@ -570,9 +570,13 @@ public class Parser {
      * TODO: better explain the tokens Set when error reporting evolves.
      */
     public static class ParseError {
+        /// The character offset of the error
         public final int position;
+        /// The column of the error
         public final int column;
+        /// The line of the error
         public final int line;
+        /// Pairs of Sorts and RegEx patterns that the parsed expected to occur next
         public final Set<Pair<String, Pattern>> tokens;
 
         public ParseError(int position, int line, int column, Set<Pair<String, Pattern>> tokens) {
