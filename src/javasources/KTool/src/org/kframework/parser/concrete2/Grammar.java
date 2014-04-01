@@ -298,10 +298,6 @@ public class Grammar implements Serializable {
             return this.nonTerminalId.compareTo(that.nonTerminalId);
         }
 
-        public Set<NextableState> getIntermediaryStates() {
-            return intermediaryStates;
-        }
-
         public Set<State> getReachableStates() {
             Set<State> states = new HashSet<>();
             states.add(this.exitState);
