@@ -229,7 +229,6 @@ public class Grammar implements Serializable {
     // Inner Classes //
     ///////////////////
 
-    // Positions are 'int' because CharSequence uses 'int' // Position in the text
     public static class StateId implements Comparable<StateId>, Serializable { // Used only by rules
         public final String name;
         public StateId(String name) { this.name = name; }
@@ -458,6 +457,7 @@ public class Grammar implements Serializable {
             this.pattern = pattern;
         }
 
+        // Position is an 'int' offset into the text because CharSequence uses 'int'
         Set<MatchResult> matches(CharSequence text, int startPosition) {
             Matcher matcher = pattern.matcher(text);
             matcher.region(startPosition, text.length());
