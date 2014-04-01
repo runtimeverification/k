@@ -12,6 +12,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import org.kframework.kil.KSorts;
 import org.kframework.parser.concrete2.Grammar.State.OrderingInfo;
 import org.kframework.parser.concrete2.Rule.DeleteRule;
@@ -57,7 +59,7 @@ import org.kframework.parser.concrete2.Rule.DeleteRule;
 public class Grammar implements Serializable {
 
     /// The set of "root" NonTerminals
-    private Map<NonTerminalId, NonTerminal> startNonTerminals = new HashMap<>();
+    private BiMap<NonTerminalId, NonTerminal> startNonTerminals = HashBiMap.create();
 
     public boolean add(NonTerminal newNT) {
         if (startNonTerminals.containsKey(newNT.nonTerminalId)) {
