@@ -545,13 +545,14 @@ Sort SortID() : { Sort sort; }
 StringSentence Bubble(String type) :
 {
   StringBuilder sb = new StringBuilder();
-  int sentenceBeginLine, sentenceBeginColumn;
+  int sentenceBeginLine = beginLine + token.endLine;
+  int sentenceBeginColumn = beginColumn + token.endColumn + 1;
 }
 {
-  <BUBBLE> { sb.append(image());
-             sentenceBeginLine = beginLine + token.beginLine;
-             sentenceBeginColumn = beginColumn + token.beginColumn; }
-  (<BUBBLE> { sb.append(specialAndImage()); })*
+  (<BUBBLE> { sb.append(image());
+              sentenceBeginLine = beginLine + token.beginLine;
+              sentenceBeginColumn = beginColumn + token.beginColumn; }
+   (<BUBBLE> { sb.append(specialAndImage()); })*)?
   { return makeStringSentence(type, sb.toString(),
       sentenceBeginLine, sentenceBeginColumn); }
 }
