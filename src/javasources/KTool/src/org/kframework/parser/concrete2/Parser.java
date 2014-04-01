@@ -292,7 +292,7 @@ class Function {
     private class One extends Mapping { Map<KList, Set<KList>> values = new HashMap<>(); }
 
     private Mapping mapping = new Nil();
-    private boolean unknownMappingType() { assert false : "unknown mapping type"; return false; }
+    private AssertionError unknownMappingType() { return new AssertionError("Unknown mapping type"); }
 
     public static final Function IDENTITY = new Function();
     static {
@@ -344,7 +344,7 @@ class Function {
                     adder.apply(((One) that.mapping).values.get(key)));
             }
             return result;
-        } else { return unknownMappingType(); }
+        } else { throw unknownMappingType(); }
     }
 
     // Returns the KLists that this function maps to
@@ -356,7 +356,7 @@ class Function {
                 result.addAll(value);
             }
             return result;
-        } else { unknownMappingType(); return null; }
+        } else { throw unknownMappingType(); }
     }
 
     Set<KList> applyToNull() {
@@ -442,7 +442,7 @@ class Function {
             stateReturn.key.stateCall.key.ntCall.reactivations.add(stateReturn);
 
             return result;
-        } else { return unknownMappingType(); }
+        } else { throw unknownMappingType(); }
     }
 }
 
@@ -530,7 +530,7 @@ public class Parser {
         }
     }
 
-    private void unknownStateType() { assert false : "Unknown state type"; }
+    private AssertionError unknownStateType() { return new AssertionError("Unknown state type"); }
 
     /****************
      * State Return
@@ -551,7 +551,7 @@ public class Parser {
                         stateReturn.key.stateCall.key.ntCall, stateReturn.key.stateEnd, nextState)),
                         stateReturn.function);
                 }
-            } else { unknownStateType(); }
+            } else { throw unknownStateType(); }
         }
     }
 
@@ -584,7 +584,7 @@ public class Parser {
                         stateReturn.key.stateEnd,
                         ((Grammar.NonTerminalState) stateReturn.key.stateCall.key.state).child.exitState)),
                     stateReturn.key.stateEnd)).function);
-        } else { unknownStateType(); return false; }
+        } else { throw unknownStateType(); }
     }
 
     // copy function from state return to next state call
@@ -638,6 +638,6 @@ public class Parser {
                     s.getStateReturn(
                         new StateReturn.Key(stateCall, exitStateReturn.key.stateEnd)));
             }
-        } else { unknownStateType(); }
+        } else { throw unknownStateType(); }
     }
 }
