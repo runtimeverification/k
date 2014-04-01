@@ -256,11 +256,12 @@ public final class BigIntegerBitVector extends BitVector<BigInteger> {
         assert digitBase > 0;
 
         List<BitVector> digits = new ArrayList<>();
-        for (BigInteger value = unsignedValue();
-                !value.equals(BigInteger.ZERO);
-                value = value.shiftRight(digitBase)) {
-            digits.add(
-                    BitVector.of(value.remainder(BigInteger.ONE.shiftLeft(digitBase)), digitBase));
+        BigInteger unsignedValue = unsignedValue();
+        for (int i = 0; i * digitBase < bitwidth; ++i) {
+            digits.add(BitVector.of(
+                    unsignedValue.remainder(BigInteger.ONE.shiftLeft(digitBase)),
+                    digitBase));
+            unsignedValue = unsignedValue.shiftRight(digitBase);
         }
 
         return Lists.reverse(digits);
