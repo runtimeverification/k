@@ -66,7 +66,7 @@ public class Nullability {
                     for (State s : ((NextableState) state).next)
                         mark(s, nonTerminalCallers);
             } else {
-                assert state instanceof ExitState: "I was expecting this element to be of type ExitState";
+                assert state instanceof ExitState: "Expected element of type ExitState: " + state;
                 // previous calls to childNullable would have returned False
                 // so now we restart those recursions
                 for (State s : nonTerminalCallers.get(state.nt)) {
