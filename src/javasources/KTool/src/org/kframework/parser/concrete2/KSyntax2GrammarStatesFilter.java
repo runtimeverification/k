@@ -16,7 +16,6 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.parser.concrete2.Grammar.NextableState;
 import org.kframework.parser.concrete2.Grammar.NonTerminal;
-import org.kframework.parser.concrete2.Grammar.NonTerminalId;
 import org.kframework.parser.concrete2.Grammar.NonTerminalState;
 import org.kframework.parser.concrete2.Grammar.PrimitiveState;
 import org.kframework.parser.concrete2.Grammar.RegExState;
@@ -36,8 +35,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
 
         // create a NonTerminal for every declared sort
         for (String sort : context.definedSorts) {
-            NonTerminal nt = new NonTerminal(new NonTerminalId(sort));
-            grammar.add(nt);
+            grammar.add(new NonTerminal(sort));
         }
     }
 
@@ -52,7 +50,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
             UserList ul = prd.getListDecl();
 
             // label for '.Ids (list terminator)
-            NonTerminal specialNt = new NonTerminal(new NonTerminalId(prd.getSort() + "-special"));
+            NonTerminal specialNt = new NonTerminal(prd.getSort() + "-special");
             {
                 RuleState rs1 = new RuleState("AddLabelRS", specialNt,
                     new WrapLabelRule(new KLabelConstant(ul.getTerminatorKLabel()), prd.getSort()));
@@ -71,7 +69,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                 previous = special;
             }
             {
-                NonTerminal wrapperNt = new NonTerminal(new NonTerminalId(ntName));
+                NonTerminal wrapperNt = new NonTerminal(ntName);
                 NonTerminalState IdsHelper = new NonTerminalState(ntName + "-S", nt, wrapperNt, false);
                 // label for '.Ids (list terminator)
                 previous.next.add(IdsHelper);

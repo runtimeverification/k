@@ -23,7 +23,7 @@ import org.kframework.parser.concrete2.Rule.DeleteRule;
  * The classes used by the parser to represent the internal structure of a grammar.
  * A grammar consists of NFAs generated for each non-terminal from a EBNF style grammar
  * (in this case the K syntax declarations).
- * The main object is the {@link NonTerminal}, containing a unique {@link NonTerminalId},
+ * The main object is the {@link NonTerminal}, containing a unique {@link String} name,
  * and two states: entry and exit.
  *
  * There are five main types of states: {@link EntryState}, {@link NonTerminalState},
@@ -59,13 +59,13 @@ import org.kframework.parser.concrete2.Rule.DeleteRule;
 public class Grammar implements Serializable {
 
     /// The set of "root" NonTerminals
-    private BiMap<NonTerminalId, NonTerminal> startNonTerminals = HashBiMap.create();
+    private BiMap<String, NonTerminal> startNonTerminals = HashBiMap.create();
 
     public boolean add(NonTerminal newNT) {
-        if (startNonTerminals.containsKey(newNT.nonTerminalId)) {
+        if (startNonTerminals.containsKey(newNT.name)) {
             return false;
         } else {
-            startNonTerminals.put(newNT.nonTerminalId, newNT);
+            startNonTerminals.put(newNT.name, newNT);
             return true;
         }
     }
@@ -74,9 +74,7 @@ public class Grammar implements Serializable {
         return getNonTerminalCallers().keySet();
     }
 
-    public NonTerminal get(String ntSymbol) {
-        return startNonTerminals.get(new NonTerminalId(ntSymbol));
-    }
+    public NonTerminal get(String name) { return startNonTerminals.get(name); }
 
     public Map<NonTerminal, Set<NonTerminalState>> getNonTerminalCallers() {
         Map<NonTerminal, Set<NonTerminalState>> reachableNonTerminals = new HashMap<>();
@@ -224,31 +222,8 @@ public class Grammar implements Serializable {
     // Inner Classes //
     ///////////////////
 
-    public static class NonTerminalId implements Comparable<NonTerminalId>, Serializable {
-        public final String name;
-        public NonTerminalId(String name) { this.name = name; }
-        public int compareTo(NonTerminalId that) { return this.name.compareTo(that.name); }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            NonTerminalId that = (NonTerminalId) o;
-
-            if (!name.equals(that.name)) return false;
-
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            return name.hashCode();
-        }
-    }
-
     public static class NonTerminal implements Comparable<NonTerminal>, Serializable {
-        public final NonTerminalId nonTerminalId;
+        public final String name;
         public final EntryState entryState;
         public final ExitState exitState;
         private final Set<NextableState> intermediaryStates = new HashSet<>();
@@ -260,14 +235,14 @@ public class Grammar implements Serializable {
             public int compareTo(OrderingInfo that) { return Integer.compare(this.key, that.key); }
         }
 
-        public NonTerminal(NonTerminalId nonTerminalId) {
-            this.nonTerminalId = nonTerminalId;
-            this.entryState = new EntryState(nonTerminalId.name + "-entry", this);
-            this.exitState = new ExitState(nonTerminalId.name + "-exit", this);
+        public NonTerminal(String name) {
+            this.name = name;
+            this.entryState = new EntryState(name + "-entry", this);
+            this.exitState = new ExitState(name + "-exit", this);
         }
 
         public int compareTo(NonTerminal that) {
-            return this.nonTerminalId.compareTo(that.nonTerminalId);
+            return this.name.compareTo(that.name);
         }
 
         public Set<State> getReachableStates() {
@@ -286,14 +261,14 @@ public class Grammar implements Serializable {
 
             NonTerminal that = (NonTerminal) o;
 
-            if (!nonTerminalId.equals(that.nonTerminalId)) return false;
+            if (!name.equals(that.name)) return false;
 
             return true;
         }
 
         @Override
         public int hashCode() {
-            return nonTerminalId.hashCode();
+            return name.hashCode();
         }
     }
 
