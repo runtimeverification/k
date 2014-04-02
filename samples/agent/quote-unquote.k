@@ -21,8 +21,7 @@ argument to evaluate to a code value and turns it into its coresponding
 code, which is consequently evaluated in the current context.
 \texttt{quote} and \texttt{unquote} are not strict.
 The former freezes its argument code into a code value, without evaluating
-it.  Exception makes subparts of the code which appear as arguments of
-\texttt{unquote}.
+it, except for code appearing as arguments of \texttt{unquote}.
 In fact, \texttt{quote} and \texttt{unquote} can be nested; a counter keeps
 track of how many times \texttt{quote} appears nested, and only the code
 which is unquoted the same number of times gets evaluated in the current
@@ -102,7 +101,7 @@ need to explicitly state it that \texttt{\#visited}-wrapped terms belong to
 
 /*@  Conceptually, the above is the conventional definition of
 \texttt{quote}/\texttt{unquote}.
-However but the definitions that we encountered so far were all language
+However, the definitions that we encountered so far were all language
 specific; that is, rules propagating the transformations above through each
 particular language construct were given, ending up with a semantics of
 \texttt{quote}/\texttt{unquote} as large as the size of the language syntax.
