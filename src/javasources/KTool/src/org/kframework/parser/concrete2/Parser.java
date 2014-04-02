@@ -29,7 +29,6 @@ import org.kframework.parser.concrete2.Grammar.RuleState;
 import org.kframework.parser.concrete2.Grammar.State;
 import org.kframework.parser.concrete2.Rule.ContextFreeRule;
 import org.kframework.parser.concrete2.Rule.ContextSensitiveRule;
-import org.kframework.parser.concrete2.Rule.MetaData;
 
 /*
 Terminology:
@@ -407,7 +406,7 @@ class Function {
     }
 
     // NOTE: also adds rule to reactivations
-    boolean addRule(Function that, final Rule rule, final StateReturn stateReturn, final MetaData metaData) {
+    boolean addRule(Function that, final Rule rule, final StateReturn stateReturn, final Rule.MetaData metaData) {
         if (rule instanceof ContextFreeRule) {
             return addAux(that, new com.google.common.base.Function<Set<KList>, Set<KList>>() {
                 public Set<KList> apply(Set<KList> set) {
@@ -571,8 +570,8 @@ public class Parser {
             int endPosition = stateReturn.key.stateEnd;
             return stateReturn.function.addRule(stateReturn.key.stateCall.function,
                 ((RuleState) stateReturn.key.stateCall.key.state).rule, stateReturn,
-                new MetaData(startPosition, s.lines[startPosition], s.columns[startPosition],
-                             endPosition, s.lines[endPosition], s.columns[endPosition]));
+                new Rule.MetaData(startPosition, s.lines[startPosition], s.columns[startPosition],
+                                    endPosition, s.lines[endPosition], s.columns[endPosition]));
         } else if (stateReturn.key.stateCall.key.state instanceof NonTerminalState) {
             return stateReturn.function.addNTCall(
                 stateReturn.key.stateCall.function,
