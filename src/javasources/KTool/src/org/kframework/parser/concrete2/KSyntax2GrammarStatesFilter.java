@@ -78,7 +78,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                 // inside the wrapperNt
                 NonTerminalState Id = new NonTerminalState(ntName + "-S", wrapperNt, grammar.get(ul.getSort()), false);
                 PrimitiveState separatorState = new RegExState(ntName + "-T",
-                    wrapperNt, Pattern.compile("\\Q" + ul.getSeparator() + "\\E"), KSorts.K);
+                    wrapperNt, Pattern.compile(ul.getSeparator(), Pattern.LITERAL), KSorts.K);
                 RuleState deleteToken = new RuleState(ntName + "-D", wrapperNt, new DeleteRule(1, true));
                 NonTerminalState Ids = new NonTerminalState(ntName + "-S", wrapperNt, wrapperNt, false);
                 RuleState labelState = new RuleState(ntName + "-L",
@@ -139,9 +139,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
             Terminal terminal = prd.getConstant();
             PrimitiveState pstate = new RegExState(
                 prd.getSort() + "-T", nt,
-                // TODO: if there is a \\E in the input string, this next line will fail
-                // should double escape \ if there is an odd number
-                Pattern.compile("\\Q" + terminal.getTerminal() + "\\E"), prd.getSort());
+                Pattern.compile(terminal.getTerminal(), Pattern.LITERAL), prd.getSort());
             previous.next.add(pstate);
             RuleState locRule = new RuleState(prd.getSort() + "-R", nt, new AddLocationRule());
             pstate.next.add(locRule);
@@ -153,9 +151,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                     Terminal terminal = (Terminal) prdItem;
                     PrimitiveState pstate = new RegExState(
                         prd.getSort() + "-T", nt,
-                        // TODO: if there is a \\E in the input string, this next line will fail
-                        // should double escape \ if there is an odd number
-                        Pattern.compile("\\Q" + terminal.getTerminal() + "\\E"), KSorts.K);
+                        Pattern.compile(terminal.getTerminal(), Pattern.LITERAL), KSorts.K);
                     previous.next.add(pstate);
                     RuleState rs1 = new RuleState("DelTerminalRS", nt, new DeleteRule(1, true));
                     pstate.next.add(rs1);
