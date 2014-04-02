@@ -208,7 +208,9 @@
 
     <target name="checkstyle-copyright">
         <checkstyle config="${javasources}/KTool/checkstyle-copyright.xml">
-            <fileset dir="." includesfile=".checkstyle-files" />
+            <fileset dir="." includesfile=".checkstyle-files">
+              <!-- TODO: exclude files here which should not be given copyright notices -->
+            </fileset>
         </checkstyle>
     </target>
 
