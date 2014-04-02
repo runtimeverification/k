@@ -4,6 +4,7 @@
 "-//Puppy Crawl//DTD Check Configuration 1.3//EN"
 "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
 <!-- do not remove this DOCTYPE, it will break the checkstyle configuration parser -->
+<!-- TODO: update the end year of the copyright notice in this file every January -->
 <module name="Checker">
   <!-- Enforce that every source file begins with a copyright notice. We only check files modified by the current commit,
        doing this by means of computing which files are changed in git and saving them in a file to be loaded by checkstyle.
