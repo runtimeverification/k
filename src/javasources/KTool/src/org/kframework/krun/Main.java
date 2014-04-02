@@ -405,7 +405,7 @@ public class Main {
                 // the KStatue, KSearchResults, and KTestGenerates a definition field.
                 if(result.getResult() instanceof KRunState){
                     
-                    UnparserFilterNew printer = new UnparserFilterNew(true, K.color, K.parens, context,K.definition);
+                    UnparserFilterNew printer = new UnparserFilterNew(true, K.color, K.parens, context);
                     ((KRunState)(result.getResult())).getResult().accept(printer);
                     output = printer.getResult();
                 } else if (result.getResult() instanceof SearchResults) {
@@ -414,7 +414,7 @@ public class Main {
                     for (SearchResult solution : ((SearchResults)result.getResult()).getSolutions()) {
                         Map<String, Term> substitution = solution.getSubstitution();
                         if (((SearchResults)result.getResult()).isDefaultPattern()) {
-                            UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, context,K.definition);
+                            UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, context);
                             substitution.get("B:Bag").accept(unparser);
                             solutionStrings.add("\n" + unparser.getResult());
                         } else {
@@ -422,7 +422,7 @@ public class Main {
                             
                             StringBuilder varStringBuilder = new StringBuilder();
                             for (String variable : substitution.keySet()) {
-                                UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, context,K.definition);
+                                UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, context);
                                 substitution.get(variable).accept(unparser);
                                 varStringBuilder.append("\n" + variable + " -->\n" + unparser.getResult());
                                 empty = false;
@@ -457,7 +457,7 @@ public class Main {
                         // TODO(YilongL): how to set state id?
                         sb.append("\n\nTest case " + n /*+ ", State " + testGenResult.getState().getStateId()*/ + ":");
                         
-                        UnparserFilterNew t = new UnparserFilterNew(true, K.color, K.parens, context,K.definition);
+                        UnparserFilterNew t = new UnparserFilterNew(true, K.color, K.parens, context);
                         Term concretePgm = KRunState.concretize(testGenResult.getGeneratedProgram(), context);
                         concretePgm.accept(t);
                         // sb.append("\nProgram:\n" + testGenResult.getGeneratedProgram()); // print abstract syntax form
@@ -466,14 +466,14 @@ public class Main {
                         Map<String, Term> substitution = testGenResult.getSubstitution();
 
                         if (((TestGenResults)result.getResult()).isDefaultPattern()) {
-                            UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, context,K.definition);
+                            UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, context);
                             substitution.get("B:Bag").accept(unparser);
                             sb.append("\n" + unparser.getResult());
                         } else {
                             boolean empty = true;
 
                             for (String variable : substitution.keySet()) {
-                                UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, context,K.definition);
+                                UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, context);
                                 sb.append("\n" + variable + " -->");
                                 substitution.get(variable).accept(unparser);
                                 sb.append("\n" + unparser.getResult());
