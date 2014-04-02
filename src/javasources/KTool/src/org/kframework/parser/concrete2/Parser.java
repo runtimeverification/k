@@ -592,16 +592,10 @@ public class Parser {
     private void activateStateCall(StateCall stateCall, Function function) {
         if (!stateCall.function.add(function)) { return; }
         State nextState = stateCall.key.state;
-        // instanceof SimpleState
-        if (nextState instanceof EntryState) {
-            s.stateReturnWorkList.enqueue(
-                s.getStateReturn(
-                    new StateReturn.Key(stateCall, stateCall.key.stateBegin)));
-        } else if (nextState instanceof ExitState) {
-            s.stateReturnWorkList.enqueue(
-                s.getStateReturn(
-                    new StateReturn.Key(stateCall, stateCall.key.stateBegin)));
-        } else if (nextState instanceof RuleState) {
+        // These types of states
+        if (nextState instanceof EntryState ||
+            nextState instanceof ExitState ||
+            nextState instanceof RuleState) {
             s.stateReturnWorkList.enqueue(
                 s.getStateReturn(
                     new StateReturn.Key(stateCall, stateCall.key.stateBegin)));
