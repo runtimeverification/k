@@ -217,6 +217,14 @@ class ParseState {
     final int[] lines;
     final int[] columns;
     public ParseState(CharSequence input) {
+        /**
+         * Create arrays corresponding to the index in the input CharSequence and the line and
+         * column in the text. Tab counts as one.
+         *
+         * The newline characters are handled according to:
+         * http://www.unicode.org/standard/reports/tr13/tr13-5.html
+         * http://www.unicode.org/reports/tr18/#Line_Boundaries
+         */
         this.input = input;
         lines = new int[input.length()+1];
         columns = new int[input.length()+1];
