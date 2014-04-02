@@ -2,7 +2,7 @@
 
     <test
             definition="kool-typed-dynamic.k"
-            programs="../../programs/"
+            programs="./../../../../../../../../tutorial/2_languages/2_kool/2_typed/programs/"
             extension="kool"
             exclude="cycle.kool"
             results="./../../../../../../../../tutorial/2_languages/2_kool/2_typed/1_dynamic/tests/"

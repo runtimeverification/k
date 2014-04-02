@@ -29,9 +29,9 @@
         file="../samples/java_rewrite_engine/tutorial/2_languages/2_kool/2_typed/1_dynamic/tests/config.xml"
         directory="samples/java_rewrite_engine/tutorial/2_languages/2_kool/2_typed/1_dynamic/" />
     <!--Kool typed static-->
-    <!--<include-->
-        <!--file="../samples/java_rewrite_engine/tutorial/2_languages/2_kool/2_typed/2_static/tests/config.xml"-->
-        <!--directory="samples/java_rewrite_engine/tutorial/2_languages/2_kool/2_typed/2_static/" />-->
+    <include
+        file="../samples/java_rewrite_engine/tutorial/2_languages/2_kool/2_typed/2_static/tests/config.xml"
+        directory="samples/java_rewrite_engine/tutorial/2_languages/2_kool/2_typed/2_static/" />
 
 
 

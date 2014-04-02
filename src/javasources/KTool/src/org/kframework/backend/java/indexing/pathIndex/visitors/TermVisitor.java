@@ -82,10 +82,14 @@ public class TermVisitor extends LocalVisitor implements Serializable {
         CellVisitor v = new CellVisitor(context);
         node.accept(v);
         pStrings.addAll(v.getkCellPStings());
+
         //needed for kool-static where some rules have no k-cell
-        if (v.getkCellPStings().isEmpty() && defHasNOKCellRules){
+        if (defHasNOKCellRules){
             pStrings.add("@.NO_K_CELL");
         }
+        //if (v.getkCellPStings().isEmpty() && defHasNOKCellRules){
+        //    pStrings.add("@.NO_K_CELL");
+        //}
 
         if (K.get_indexing_stats) {
             IndexingStatistics.getPStringStopwatch.stop();
