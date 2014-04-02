@@ -1,4 +1,4 @@
-// Copyright @ 2012-2014.  K Team.  All Rights Reserved.
+// Copyright (C) 2012-2014 K Team. All Rights Reserved.
 
 require "builtins/k-equal.k"
 
