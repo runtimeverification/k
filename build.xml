@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Copyright (C) 2012-2014 K Team. All Rights Reserved. -->
 <project basedir="." default="build" name="KTool Build file">
 
 	<property location="src/javasources" name="javasources" />
@@ -201,6 +202,14 @@
             <fileset dir="${javasources}/KTool">
                 <include name="**/*.java"/>
                 <exclude name="src/org/kframework/parser/concrete/lib/**" />
+            </fileset>
+        </checkstyle>
+    </target>
+
+    <target name="checkstyle-copyright">
+        <checkstyle config="${javasources}/KTool/checkstyle-copyright.xml">
+            <fileset dir="." includesfile=".checkstyle-files">
+              <!-- TODO: exclude files here which should not be given copyright notices -->
             </fileset>
         </checkstyle>
     </target>

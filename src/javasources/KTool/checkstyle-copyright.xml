@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (C) 2014 K Team. All Rights Reserved. -->
+<!DOCTYPE module PUBLIC
+"-//Puppy Crawl//DTD Check Configuration 1.3//EN"
+"http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
+<!-- do not remove this DOCTYPE, it will break the checkstyle configuration parser -->
+<!-- TODO: update the end year of the copyright notice in this file every January -->
+<module name="Checker">
+  <!-- Enforce that every source file begins with a copyright notice. We only check files modified by the current commit,
+       doing this by means of computing which files are changed in git and saving them in a file to be loaded by checkstyle.
+       We do this in order to prevent the need to update every file in the repository with a copyright notice, which cannot
+       be effectively automated. -->
+  <!-- TODO: add modules as needed to support comments in other programming languages -->
+  <module name="RegexpHeader">
+    <property name="header" value="^&lt;\?xml.*\?&gt;$\n^&lt;!-- Copyright \(C\) (\d\d\d\d-)?2014 K Team. All Rights Reserved. --&gt;$" />
+    <property name="fileExtensions" value="xml,xsd" />
+  </module>
+  <module name="RegexpHeader">
+    <property name="header" value="^// Copyright \(C\) (\d\d\d\d-)?2014 K Team. All Rights Reserved.$" />
+    <property name="fileExtensions" value="k,kore,java,jj,c,h,str" />
+  </module>
+  <module name="RegexpHeader">
+    <property name="header" value="^--- Copyright \(C\) (\d\d\d\d-)?2014 K Team. All Rights Reserved.$" />
+    <property name="fileExtensions" value="maude" />
+  </module>
+  <module name="RegexpHeader">
+    <property name="header" value="^-- Copyright \(C\) (\d\d\d\d-)?2014 K Team. All Rights Reserved.$" />
+    <property name="fileExtensions" value="hs" />
+  </module>
+  <module name="RegexpHeader">
+    <property name="header" value="^/\* Copyright \(C\) (\d\d\d\d-)?2014 K Team. All Rights Reserved. \*/$" />
+    <property name="fileExtensions" value="css" />
+  </module>
+  <module name="RegexpHeader">
+    <property name="header" value="^#!.*$\n^# Copyright \(C\) (\d\d\d\d-)?2014 K Team. All Rights Reserved.$" />
+    <property name="fileExtensions" value="sh,py" />
+  </module>
+  <module name="RegexpHeader">
+    <property name="header" value="^&quot; Copyright \(C\) (\d\d\d\d-)?2014 K Team. All Rights Reserved.$" />
+    <property name="fileExtensions" value="vim" />
+  </module>
+  <module name="RegexpHeader">
+    <property name="header" value="% Copyright \(C\) (\d\d\d\d-)?2014 K Team. All Rights Reserved.$" />
+    <property name="fileExtensions" value="sty,tex,cls" />
+  </module>
+  <module name="RegexpHeader">
+    <property name="header" value="%% Copyright \(C\) (\d\d\d\d-)?2014 K Team. All Rights Reserved.$" />
+    <property name="fileExtensions" value="sdf" />
+  </module>
+</module>
