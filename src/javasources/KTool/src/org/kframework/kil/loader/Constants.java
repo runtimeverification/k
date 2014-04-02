@@ -71,6 +71,7 @@ public class Constants {
     public static final String STRUCTURAL = "structural";
     public static final String FUNCTION = "function";
     public static final String ANYWHERE = "anywhere";
+    public static final String REGEX = "regex";
 
     // Streams
     public static final String STDIN = "stdin";

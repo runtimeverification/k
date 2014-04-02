@@ -13,10 +13,13 @@ public class UserList extends ProductionItem {
     protected String separator;
     protected String listType;
 
+    public static final String ZERO_OR_MORE = "*";
+    public static final String ONE_OR_MORE = "+";
+
     public UserList(String sort, String separator) {
         this.sort = sort;
         this.separator = separator.trim();
-        this.listType = "*";
+        this.listType = ZERO_OR_MORE;
     }
 
     public UserList(String sort, String separator, String listType) {
@@ -34,7 +37,7 @@ public class UserList extends ProductionItem {
 
     @Override
     public String toString() {
-        if (listType.equals("*"))
+        if (listType.equals(ZERO_OR_MORE))
             return "List{" + sort + ",\"" + StringUtil.escape(separator) + "\"} ";
         else
             return "NeList{" + sort + ",\"" + StringUtil.escape(separator) + "\"} ";

@@ -5,6 +5,9 @@ module STRING-SYNTAX-HOOKS
   imports #STRING-INTERFACE
   syntax #String
   syntax String ::= #String
+  // TODO(Radu): replace the above with bellow
+  //   syntax String ::= Token{"\"" ((~[\"\n\r\\])|([\\]~[\n\r]))* "'"}
+
 endmodule
 
 module STRING-HOOKS

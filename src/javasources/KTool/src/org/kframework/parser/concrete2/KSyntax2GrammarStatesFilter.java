@@ -13,6 +13,7 @@ import org.kframework.kil.Sort;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Context;
+import org.kframework.kil.loader.Constants;
 import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.parser.concrete2.Grammar.NextableState;
 import org.kframework.parser.concrete2.Grammar.NonTerminal;
@@ -47,78 +48,103 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
         assert nt != null : "Could not find in the grammar the required sort: " + prd.getSort();
         NextableState previous = nt.entryState;
         if (prd.isListDecl()) {
+            // ************************************** start of list creation **********************
             UserList ul = prd.getListDecl();
+            /**
+             * An empty list such as Ids ::= List{Id,","} is treated as if it would be written
+             * as the following:
+             *
+             * Ids ::= IdsTerminator
+             *       | NeIds
+             * NeIds ::= Id IdsTerminator [klabel('_,_)]
+             *         | Id "," NeIds     [klabel('_,_)]
+             * IdsTerminator ::= ""       [klabel('.Ids)]
+             *
+             * However, it's implemented by directly generating the grammar because all the labels
+             * must maintain the sort of the original production, therefore we create the
+             * following graph:
+             *
+             * IdsTerminator:
+             * (|-----<'.Ids>---<loc>---|)
+             *
+             * NeIds:
+             * (|-----[Id]--+--(",")---<Del>---[NeIds]--+--<'_,_>---<loc>-|)
+             *              |                           |
+             *              +-----[IdsTerminator]-------+
+             *
+             * Ids:
+             * (|--+-/-[IdsTerminator]-/-+--|) // optional line if the list type is *
+             *     |                     |
+             *     +-------[NeIds]-------+
+             */
 
-            // label for '.Ids (list terminator)
-            NonTerminal specialNt = new NonTerminal(prd.getSort() + "-special");
+            // IdsTerminator
+            NonTerminal IdsTerminatorNt = new NonTerminal(prd.getSort() + "-Terminator");
             {
-                RuleState rs1 = new RuleState("AddLabelRS", specialNt,
+                RuleState terminatorLabelRule = new RuleState("AddLabelRS", IdsTerminatorNt,
                     new WrapLabelRule(new KLabelConstant(ul.getTerminatorKLabel()), prd.getSort()));
-                RuleState locRule0 = new RuleState(prd.getSort() + "-R", specialNt, new AddLocationRule());
-                specialNt.entryState.next.add(rs1);
-                rs1.next.add(locRule0);
-                locRule0.next.add(specialNt.exitState);
-            }
+                RuleState locRule = new RuleState(prd.getSort() + "-R", IdsTerminatorNt,
+                    new AddLocationRule());
 
-            String ntName = prd.getSort() + "-helper";
-            if (ul.getListType().equals("*")) {
-                // create the branch which allows for empty lists
-                NonTerminalState special = new NonTerminalState(ntName + "-S", nt, specialNt, false);
-                previous.next.add(special);
-                special.next.add(nt.exitState);
-                previous = special;
+                IdsTerminatorNt.entryState.next.add(terminatorLabelRule);
+                terminatorLabelRule.next.add(locRule);
+                locRule.next.add(IdsTerminatorNt.exitState);
             }
+            // NeIds
+            String ntName = prd.getSort();
+            NonTerminal NeIdsNt = new NonTerminal("Ne-" + ntName);
             {
-                NonTerminal wrapperNt = new NonTerminal(ntName);
-                NonTerminalState IdsHelper = new NonTerminalState(ntName + "-S", nt, wrapperNt, false);
-                // label for '.Ids (list terminator)
-                previous.next.add(IdsHelper);
-                IdsHelper.next.add(nt.exitState);
+                NonTerminalState IdState = new NonTerminalState(ntName + "-S", NeIdsNt,
+                    grammar.get(ul.getSort()), false);
+                PrimitiveState separatorState = new RegExState(ntName + "-T", NeIdsNt,
+                    Pattern.compile(ul.getSeparator(), Pattern.LITERAL), KSorts.K);
+                RuleState deleteToken = new RuleState(ntName + "-D", NeIdsNt,
+                    new DeleteRule(1, true));
+                NonTerminalState NeIdsState = new NonTerminalState(ntName + "-S", NeIdsNt,
+                    NeIdsNt, false);
+                RuleState labelState = new RuleState(ntName + "-L", NeIdsNt,
+                    new WrapLabelRule(new KLabelConstant(prd.getKLabel()), prd.getSort()));
+                RuleState locRule = new RuleState(prd.getSort() + "-R", NeIdsNt,
+                    new AddLocationRule());
 
-                // inside the wrapperNt
-                NonTerminalState Id = new NonTerminalState(ntName + "-S", wrapperNt, grammar.get(ul.getSort()), false);
-                PrimitiveState separatorState = new RegExState(ntName + "-T",
-                    wrapperNt, Pattern.compile(ul.getSeparator(), Pattern.LITERAL), KSorts.K);
-                RuleState deleteToken = new RuleState(ntName + "-D", wrapperNt, new DeleteRule(1, true));
-                NonTerminalState Ids = new NonTerminalState(ntName + "-S", wrapperNt, wrapperNt, false);
-                RuleState labelState = new RuleState(ntName + "-L",
-                    wrapperNt, new WrapLabelRule(new KLabelConstant(prd.getKLabel()), prd.getSort()));
-                RuleState locRule = new RuleState(prd.getSort() + "-R", wrapperNt, new AddLocationRule());
-
-                wrapperNt.entryState.next.add(Id);
-                Id.next.add(separatorState);
+                NeIdsNt.entryState.next.add(IdState);
+                IdState.next.add(separatorState);
                 separatorState.next.add(deleteToken);
-                deleteToken.next.add(Ids);
-                Ids.next.add(labelState);
+                deleteToken.next.add(NeIdsState);
+                NeIdsState.next.add(labelState);
                 labelState.next.add(locRule);
-                locRule.next.add(wrapperNt.exitState);
+                locRule.next.add(NeIdsNt.exitState);
 
-                // label for '.Ids (list terminator)
-                NonTerminalState special = new NonTerminalState(prd.getSort() + "-S", wrapperNt, specialNt, false);
-                Id.next.add(special);
-                RuleState labelState2 = new RuleState(prd.getSort() + "-L",
-                    wrapperNt, new WrapLabelRule(new KLabelConstant(prd.getKLabel()), prd.getSort()));
-                special.next.add(labelState2);
-                RuleState locRule2 = new RuleState(prd.getSort() + "-R", wrapperNt, new AddLocationRule());
-                labelState2.next.add(locRule2);
-                locRule2.next.add(wrapperNt.exitState);
+                NonTerminalState IdsTerminatorState = new NonTerminalState(
+                    prd.getSort() + "-S", NeIdsNt, IdsTerminatorNt, false);
 
-                // TODO: this diagram is out of date
-                /**
-                 * Allows for non empty cons lists which always terminate with the identity element of the list.
-                 * Ids:                      '_,_
-                 * (|---->[Id]-|--->(,)---->[Ids]--|->|)
-                 *             |                   |
-                 *             |>[special]->(e2)---|
-                 *                 '.Ids     '_,_
-                 */
+                IdState.next.add(IdsTerminatorState);
+                IdsTerminatorState.next.add(labelState);
             }
+            // Ids
+            NonTerminal IdsNt = nt;
+            {
+                if (ul.getListType().equals(UserList.ZERO_OR_MORE)) {
+                    // create the branch which allows for empty lists
+                    NonTerminalState special = new NonTerminalState(ntName + "-S", IdsNt,
+                        IdsTerminatorNt, false);
+                    previous.next.add(special);
+                    special.next.add(IdsNt.exitState);
+                }
+                NonTerminalState NeIdsState = new NonTerminalState(ntName + "-S", IdsNt,
+                    NeIdsNt, false);
+                IdsNt.entryState.next.add(NeIdsState);
+                // NeIdsState.next.add(IdsNt.exitState); // added at the end
+                previous = NeIdsState;
+            }
+            // ************************************** end of list creation **********************
         } else if (prd.isSubsort()) {
             Sort srt = prd.getSubsort();
             NonTerminalState nts = new NonTerminalState(
                     prd.getSort() + "-S", nt, grammar.get(srt.getName()), false);
             previous.next.add(nts);
             previous = nts;
+            // if the subsort has a klabel attached to it, then we must attach a label to it
             if (prd.containsAttribute("klabel")) {
                 RuleState rs1 = new RuleState("AddLabelRS",
                     nt, new WrapLabelRule(new KLabelConstant(prd.getKLabel()), prd.getSort()));
@@ -129,8 +155,11 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
             }
         } else if (prd.isLexical()) {
             Lexical lx = prd.getLexical();
+            String pattern = prd.containsAttribute(Constants.REGEX) ?
+                                prd.getAttribute(Constants.REGEX) :
+                                lx.getLexicalRule();
             PrimitiveState pstate = new RegExState(prd.getSort() + "-T",
-                nt, Pattern.compile(lx.getLexicalRule()), prd.getSort());
+                nt, Pattern.compile(pattern), prd.getSort());
             previous.next.add(pstate);
             RuleState locRule = new RuleState(prd.getSort() + "-R", nt, new AddLocationRule());
             pstate.next.add(locRule);
