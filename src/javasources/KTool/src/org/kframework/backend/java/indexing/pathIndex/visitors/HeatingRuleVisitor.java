@@ -69,8 +69,9 @@ public class HeatingRuleVisitor extends RuleVisitor {
             pStrings.add(pStringStack.peek() + counter + "." + sort);
         } else {
             if (productions.size() > 1) {
-                //TODO(OwolabiL): find the exact sort of this variable before it was transformed
-                // as part of this rule
+                //TODO(OwolabiL): Fix needed!! find the exact sort of this variable before it was transformed
+                // as part of this rule. This affects fun where other kItems apart from User defined
+                // lists can have multiple productions.
                 pStrings.add(pStringStack.peek() + counter + "." + "UserList");
             }
         }

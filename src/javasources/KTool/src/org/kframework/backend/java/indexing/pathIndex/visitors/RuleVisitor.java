@@ -74,7 +74,14 @@ public class RuleVisitor extends LocalVisitor {
         isKSequence = true;
         //taking care of .K
         if (kSequence.size() > 0) {
-            kSequence.get(0).accept(this);
+            //needed for env rule in fun
+            if (kSequence.size() > 1){
+//                System.out.println("Greater: "+kSequence);
+                kSequence.get(0).accept(this);
+                kSequence.get(1).accept(this);
+            } else{
+                kSequence.get(0).accept(this);
+            }
         } else if (kSequence.size() == 0) {
             //there may be more than one k cell in the rule and one of them may be empty e.g. the
             // join rule in IMP++, SIMPLE. The correct solution is to get pStrings from all kCells.

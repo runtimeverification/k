@@ -293,8 +293,15 @@ public class TermVisitor extends LocalVisitor implements Serializable {
                             + EMPTY_LIST_LABEL);
                 } else {
                     if (context.isListSort(kItem.sort())) {
+//                        System.out.println("Multiple: "+kItem);
                         pStrings.add(pString + SEPARATOR + currentPosition + SEPARATOR
                                 + USER_LIST_REPLACEMENT);
+                        // TODO(Owolabileg): Bad hack to be removed - trying this out for fun where
+                        // other kItems apart from kList can have multiple productions
+                        TokenVisitor visitor = new TokenVisitor(context, pString);
+                        kItem.kLabel().accept(visitor);
+                        kItem.kList().accept(visitor);
+                        pStrings.addAll(visitor.getCandidates());
                     } else {
                         if (kListSize > 0 && ((KList) kItem.kList()).get(0) instanceof Token
                                 && !context.isSubsortedEq(K_RESULT,kItem.sort())) {
