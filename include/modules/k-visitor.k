@@ -5,12 +5,12 @@ require "builtins/k-equal.k"
 /*@ \subsection{Generic Visitors}
 
 \K allows to define generic visitors, that is, visitors that take any K term
-and transform it into according to given parameters.
+and transform it according to given parameters.
 The particular user-defined syntax of the target language is irrelevant for
 the visitor, because that is all eventually transformed into K terms, and the
 visitors work with the latter.
 This is in sharp constrast with conventional visitor-like semantic approaches,
-such as those envountered in conventional semantics of
+such as those encountered in conventional semantics of
 \texttt{quote}/\texttt{unquote} conmstructs in languages with support for code
 generation, which are language-specific, that is, which have a case (smeantic rule)
 for each language construct.
@@ -27,7 +27,7 @@ the first two describe the action to take, and the later two describe the
 condition under which to take the action.
 We need two arguments for each because both the action and the condition
 consist of a \texttt{KLabel} and a partial list of arguments for it.
-The complete list of argument is obtained by appending the actual node being
+The complete list of arguments is obtained by appending the actual node being
 visited to the partial list of arguments.
 \item \texttt{\#visited}, which is a wrapper for the visited K term.
 \end{itemize}
@@ -62,7 +62,7 @@ module K-VISITOR
   syntax KLabel ::= "#visitor"
   syntax KLabel ::= "#visited"
 
-/*@ \texttt{\#visitor} takes an action and a predicate, and \texttt{\3visit}
+/*@ \texttt{\#visitor} takes an action and a predicate, and \texttt{\#visit}
 applies the action on each visited \texttt{KItem} that satisfies the predicate.
 The action and the predicate can be regarded as curried functions, taking the
 \texttt{KItem} being visited as final argument:  */
