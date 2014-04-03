@@ -12,7 +12,13 @@ import org.kframework.kil.KLabel;
 import org.kframework.kil.KList;
 import org.kframework.kil.Term;
 
+/**
+ * An action that transforms an AST into another AST
+ */
 public abstract class Rule implements Serializable {
+    /**
+     * Metadata used to inform a rule about the current parse.
+     */
     static class MetaData {
         public final int startPosition;
         public final int startLine;
@@ -26,11 +32,16 @@ public abstract class Rule implements Serializable {
         }
     }
 
+    /**
+     * A rule who's action does not depend on the context in which the parse occurs.
+     */
     public static abstract class ContextFreeRule extends Rule {
         public abstract Set<KList> apply(Set<KList> set, MetaData metaData);
     }
 
-    // helper class for rules that treat each KList separately
+    /**
+     * Helper class for rules that treat each KList passed to apply() independently from each other
+     */
     public static abstract class KListRule extends ContextFreeRule {
         public Set<KList> apply(Set<KList> set, MetaData metaData) {
             Set<KList> result = new HashSet<>();
@@ -45,7 +56,9 @@ public abstract class Rule implements Serializable {
         protected abstract KList apply(KList set, MetaData metaData);
     }
 
-    // for putting labels after the fact
+    /**
+     * Wraps the current KList with the given KLabel
+     */
     public static class WrapLabelRule extends KListRule {
         private final KLabel label;
         private final String sort;
@@ -57,22 +70,24 @@ public abstract class Rule implements Serializable {
         }
     }
 
-    // helper class for rules that consider only the last few elements of a KList
+    /**
+     * Helper class for rules that consider only the last few elements of a KList
+     */
     public static abstract class SuffixRule extends KListRule {
-        /// Returns true iff a KList should be rejected if it doesn't have enough elements
+        /** Returns true iff a KList should be rejected if it doesn't have enough elements */
         protected abstract boolean rejectSmallKLists();
-        /// Returns the number of elements at the end of a KList to consider
+        /** Returns the number of elements at the end of a KList to consider */
         protected abstract int getSuffixLength();
-        /// Transforms the last {@link getSuffixLength()} elements of a KList
+        /** Transforms the last {@link getSuffixLength()} elements of a KList */
         protected abstract Result applySuffix(List<Term> suffix, MetaData metaData);
 
-        /// Determines what should be done with the entire KList
+        /** Determines what should be done with the entire KList */
         protected abstract class Result {}
-        /// Reject the entire KList
+        /** Reject the entire KList */
         protected class Reject extends Result {}
-        /// Keep the KList unchanged
+        /** Keep the KList unchanged */
         protected class Original extends Result {}
-        /// Change the last {@link getSuffixLength()} elements to the ones in {@link list}
+        /** Change the last {@link getSuffixLength()} elements to the ones in {@link list} */
         protected class Accept extends Result {
             List<Term> list;
             public Accept(List<Term> list) { this.list = list; }
@@ -108,7 +123,10 @@ public abstract class Rule implements Serializable {
         }
     }
 
-    // for deleting tokens
+    /**
+     * Delete the last few elements added to the KList.
+     * Usually used to remove whitespace and tokens
+     */
     public static class DeleteRule extends SuffixRule {
         private final int length;
         private final boolean reject;
@@ -123,7 +141,10 @@ public abstract class Rule implements Serializable {
         }
     }
 
-    // for putting labels before the fact
+    /**
+     * Appends a term to the KList in a parse.
+     * This is useful if you are putting labels down before parsing children.
+     */
     public static class InsertRule extends SuffixRule {
         private final Term term;
         public InsertRule(Term term) { this.term = term; }
@@ -134,7 +155,9 @@ public abstract class Rule implements Serializable {
         }
     }
 
-    // adds location the location attribute to a term
+    /**
+     * Annotates the last term from the KList with location information.
+     */
     public static class AddLocationRule extends SuffixRule {
         protected boolean rejectSmallKLists() { return false; }
         protected int getSuffixLength() { return 1; }
@@ -168,6 +191,10 @@ public abstract class Rule implements Serializable {
             }
         }
         */
+
+    /**
+     * TODO: implement this
+     */
     public static abstract class ContextSensitiveRule extends Rule {
         abstract Set<KList> apply(KList context, Set<KList> set, MetaData metaData);
     }

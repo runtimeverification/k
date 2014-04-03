@@ -34,18 +34,18 @@ import org.kframework.parser.concrete2.Rule.ContextSensitiveRule;
 Terminology:
   entryState/exitState: the first and last states in a non-terminal
 
-  stateCall/stateReturn: records for the entery to or exit from a state
+  stateCall/stateReturn: records for the entry to or exit from a state
   ntCall/ntReturn: records for the entry to or exit from a non-terminal
 
-  stateBegin/stateEnd: the source positions for the begining and end the span of a state
-  ntBegin/ntEnd: the source positions for the begining and end the span of a state
+  stateBegin/stateEnd: the source positions for the beginning and end the span of a state
+  ntBegin/ntEnd: the source positions for the beginning and end the span of a state
 
-  nextState/previousState: successor/predicesor states in a state machine
+  nextState/previousState: successor/predecessor states in a state machine
 */
 
-////////////////
-
-/// The dynamic record for where a state starts parsing
+/**
+ * The dynamic record for where a state starts parsing.
+ */
 class StateCall {
     final Function function = Function.empty();
 
@@ -55,7 +55,7 @@ class StateCall {
         final State state;
 
         public Key(NonTerminalCall ntCall, int stateBegin, State state) {
-//// Boilerplate after this line ////
+//***************************** Start Boilerplate *****************************
             this.ntCall = ntCall; this.stateBegin = stateBegin; this.state = state;
         }
 
@@ -87,9 +87,12 @@ class StateCall {
     public int hashCode() {
         return this.key.hashCode();
     }
+//***************************** End Boilerplate *****************************
 }
 
-/// The dynamic record for where a state ends parsing
+/**
+ *  The dynamic record for where a state ends parsing.
+ */
 class StateReturn implements Comparable<StateReturn> {
     final Function function = Function.empty();
 
@@ -114,11 +117,12 @@ class StateReturn implements Comparable<StateReturn> {
         public final StateCall stateCall;
         public final int stateEnd;
         public Key(StateCall stateCall, int stateEnd) {
+            // if we are a lookahead, then force the the state end to be equal to the state begin
             if (stateCall.key.state instanceof NonTerminalState &&
                 ((NonTerminalState)stateCall.key.state).isLookahead) {
                 stateEnd = stateCall.key.stateBegin;
             }
-//// Boilerplate after this line (except as noted) ////
+//***************************** Start Boilerplate *****************************
             this.stateCall = stateCall; this.stateEnd = stateEnd;
         }
 
@@ -147,6 +151,7 @@ class StateReturn implements Comparable<StateReturn> {
     StateReturn(Key key) {
         this.key = key;
         //// NON-BOILERPLATE CODE: ////
+        // update the NonTerminalCalls set of ExitStateReturns
         if (this.key.stateCall.key.state instanceof ExitState) {
             this.key.stateCall.key.ntCall.exitStateReturns.add(this);
         }
@@ -155,13 +160,16 @@ class StateReturn implements Comparable<StateReturn> {
     public int hashCode() {
         return this.key.hashCode();
     }
+//***************************** End Boilerplate *****************************
 }
 
 class Context {
     final Set<KList> contexts = new HashSet<>();
 }
 
-/// The dynamic record for where a non-terminal starts parsing
+/**
+ * The dynamic record for where a non-terminal starts parsing.
+ */
 class NonTerminalCall {
     final Set<StateCall> callers = new HashSet<>();
     final Set<StateReturn> exitStateReturns = new HashSet<>();
@@ -170,7 +178,7 @@ class NonTerminalCall {
     public static class Key {
         public final NonTerminal nt;
         public final int ntBegin;
-//// Boilerplate after this line ////
+//***************************** Start Boilerplate *****************************
         public Key(NonTerminal nt, int ntBegin) {
             // assert ntBegin == c.stateBegin for c in callers
             this.nt = nt; this.ntBegin = ntBegin;
@@ -202,6 +210,7 @@ class NonTerminalCall {
     public int hashCode() {
         return this.key.hashCode();
     }
+//***************************** End Boilerplate *****************************
 }
 
 ////////////////
@@ -211,9 +220,15 @@ class StateReturnWorkList extends TreeSet<StateReturn> {
     public StateReturn dequeue() { return this.pollFirst(); }
 }
 
+/**
+ * The state used internally by the parser.
+ */
 class ParseState {
+    // the input string which needs parsing
     final CharSequence input;
+    // a priority queue containing the return states to be processed
     final StateReturnWorkList stateReturnWorkList = new StateReturnWorkList();
+    // a preprocessed correspondence from index to line and column in the input string
     final int[] lines;
     final int[] columns;
     public ParseState(CharSequence input) {
@@ -293,6 +308,9 @@ class ParseState {
 
 ////////////////
 
+/**
+ * An abstract mapping from a Context to a parse tree.
+ */
 class Function {
     private abstract class Mapping {}
     private class Nil extends Mapping { Set<KList> values = new HashSet<>(); }
@@ -455,6 +473,9 @@ class Function {
 
 ////////////////
 
+/**
+ * The main code for running the parser.
+ */
 public class Parser {
     private final ParseState s;
 
@@ -462,6 +483,12 @@ public class Parser {
         s = new ParseState(input);
     }
 
+    /**
+     * Main function to run the parser.
+     * @param nt the start non-terminal
+     * @param position where to start parsing in the input string
+     * @return the result of parsing, as a Term
+     */
     public Term parse(NonTerminal nt, int position) {
         // This code assumes that ordering info in the grammar are between MIN_VALUE+1 and MAX_VALUE-2
         // TODO: can we do away with the <start> non-terminal?
@@ -516,8 +543,7 @@ public class Parser {
     }
 
     /**
-     * Contains the maximum position in the text which the parser managed to recognize the text.
-     * TODO: better explain the tokens Set when error reporting evolves.
+     * Contains the maximum position in the text which the parser managed to recognize.
      */
     public static class ParseError {
         /// The character offset of the error
@@ -543,7 +569,8 @@ public class Parser {
      * State Return
      ****************/
 
-    public void workListStep(StateReturn stateReturn) {
+    // finish the process of one state return from the work list
+    private void workListStep(StateReturn stateReturn) {
         if (finishStateReturn(stateReturn)) {
             State state = stateReturn.key.stateCall.key.state;
             if (state instanceof ExitState) {
@@ -562,7 +589,8 @@ public class Parser {
         }
     }
 
-    // get function from call to return
+    // compute the function for a state return based on the function for the state call associated
+    // with the state return, and the type of the state
     private boolean finishStateReturn(StateReturn stateReturn) {
         if (stateReturn.key.stateCall.key.state instanceof EntryState) {
             return stateReturn.function.add(stateReturn.key.stateCall.function);

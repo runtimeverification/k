@@ -7,16 +7,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.kframework.kil.KSorts;
+import org.kframework.parser.concrete2.Rule.DeleteRule;
+
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import org.kframework.kil.KSorts;
-import org.kframework.parser.concrete2.Grammar.State.OrderingInfo;
-import org.kframework.parser.concrete2.Rule.DeleteRule;
 
 
 /**
@@ -58,7 +57,7 @@ import org.kframework.parser.concrete2.Rule.DeleteRule;
  */
 public class Grammar implements Serializable {
 
-    /// The set of "root" NonTerminals
+    /** The set of "root" NonTerminals */
     private BiMap<String, NonTerminal> startNonTerminals = HashBiMap.create();
 
     public boolean add(NonTerminal newNT) {
@@ -76,6 +75,13 @@ public class Grammar implements Serializable {
 
     public NonTerminal get(String name) { return startNonTerminals.get(name); }
 
+    /**
+     * Creates a mapping from {@link NonTerminal} to a set of all the {@link NonTerminalState}
+     * which have as a child (call) that NonTerminal. Normally the NonTerminal contains a set of
+     * NonTerminalStates which calls to other NonTerminals. This creates the inverse relation.
+     * @return A mapping from NonTerminal to a Set of NonTerminalStates which call to that
+     * NonTerminal
+     */
     public Map<NonTerminal, Set<NonTerminalState>> getNonTerminalCallers() {
         Map<NonTerminal, Set<NonTerminalState>> reachableNonTerminals = new HashMap<>();
         Set<State> visited = new HashSet<>();
@@ -89,6 +95,10 @@ public class Grammar implements Serializable {
         return reachableNonTerminals;
     }
 
+    /**
+     * Adds (whitespace)---<Del> pairs of states at the beginning of start NonTerminals
+     * and right after every PrimitiveState in order to allow for whitespace in the language.
+     */
     public void addWhiteSpace() {
         // create a NonTerminal which parses a list of whitespace characters.
         // the NT is a star list that has 3 branches
@@ -159,18 +169,27 @@ public class Grammar implements Serializable {
             predecessors[i] = new ArrayList<>();
         }
 
+        // A state "A" must preceed another state "B" if it is possible to get from a StateReturn
+        // of A to a StateReturn of B without consuming input.
+        // There are three ways for this to happen:
+        // (1) A.next contains B and B is nullable
+        // (2) A.next contains a NonTerminalState "N" and B is the EntryState of the NonTerminal referenced by N.
+        // (3) B is a NonTerminalState and A is the ExitState of the NonTerminal referenced by N.
         for (State s : allStates) {
             if (s instanceof NextableState) {
                 NextableState ns = (NextableState) s;
                 for (State nextState : ns.next) {
+                    // Case 1 (See above)
                     if (nullability.isNullable(nextState)) {
                         predecessors[inverseAllStates.get(nextState)].add(inverseAllStates.get(s));
                     }
+                    // Case 2 (See above)
                     if (nextState instanceof NonTerminalState) {
                         EntryState es = ((NonTerminalState) nextState).child.entryState;
                         predecessors[inverseAllStates.get(es)].add(inverseAllStates.get(s));
                     }
                 }
+                // Case 3 (See above)
                 if (ns instanceof NonTerminalState) {
                     ExitState es = ((NonTerminalState) ns).child.exitState;
                     predecessors[inverseAllStates.get(es)].add(inverseAllStates.get(s));
@@ -184,7 +203,7 @@ public class Grammar implements Serializable {
         for (int i = 0; i < components.size(); i++) {
             for (int j : components.get(i)) {
                 State state = allStates.get(j);
-                state.orderingInfo = new OrderingInfo(i);
+                state.orderingInfo = new State.OrderingInfo(i);
             }
         }
     }
@@ -222,13 +241,24 @@ public class Grammar implements Serializable {
     // Inner Classes //
     ///////////////////
 
+    /**
+     * A NonTerminal is the representation of a non-terminal from the left hand side of the
+     * original BNF grammar. The non-terminal is represented as a NFA automaton which has only
+     * one EntryState and one ExitState.
+     */
     public static class NonTerminal implements Comparable<NonTerminal>, Serializable {
         public final String name;
         public final EntryState entryState;
         public final ExitState exitState;
+        // contains a list of all States found in this NonTerminal other than the EntryState
+        // and ExitState
         private final Set<NextableState> intermediaryStates = new HashSet<>();
         final OrderingInfo orderingInfo = null; // TODO: unused until we fix lookahead
 
+        /**
+         * Metadata used by the parser used to determine in what order to process StateReturns
+         * Note: currently unused until we do lookahead.
+         */
         static class OrderingInfo implements Comparable<OrderingInfo> {
             final int key;
             public OrderingInfo(int key) { this.key = key; }
@@ -245,6 +275,11 @@ public class Grammar implements Serializable {
             return this.name.compareTo(that.name);
         }
 
+        /**
+         * NonTerminal references only EntryState and ExitState. This goes through the entire
+         * NFA graph and returns all the reachable states in the NonTerminal as one Set object.
+         * @return All the states contained in this NonTerminal
+         */
         public Set<State> getReachableStates() {
             Set<State> states = new HashSet<>();
             states.add(this.exitState);
@@ -272,17 +307,27 @@ public class Grammar implements Serializable {
         }
     }
 
+    /**
+     * State is the basic element from which the NFA automaton of the grammar is composed.
+     * There are two classes which directly extend this one: {@link ExitState} and
+     * (@link NextableState}
+     */
     public abstract static class State implements Comparable<State>, Serializable {
-        /// "User friendly" name for the state.  Used only for debugging and error reporting.
+        /** "User friendly" name for the state.  Used only for debugging and error reporting. */
         public final String name;
-        /// Counter for generating unique ids for the state
+        /** Counter for generating unique ids for the state. */
         private static int counter = 0;
-        /// The unique id of this state
+        /** The unique id of this state. */
         private final int unique = counter++;
 
+        /** A back reference to the NonTerminal that this state is part of. */
         public final NonTerminal nt;
+        /** The OrderingInfo for this state. */
         OrderingInfo orderingInfo = null;
 
+        /**
+         * Metadata used by the parser used to determine in what order to process StateReturns
+         */
         static class OrderingInfo implements Comparable<OrderingInfo>, Serializable {
             final int key;
             public OrderingInfo(int key) { this.key = key; }
@@ -314,17 +359,25 @@ public class Grammar implements Serializable {
         }
     }
 
+    /**
+     * The final state of a NonTerminal. Note that an ExitState has no successors and there is only
+     * one per NonTerminal.
+     */
     public static class ExitState extends State {
         ExitState(String name, NonTerminal nt) { super(name, nt); }
     }
 
+    /**
+     * Abstract category of states that may have successors.
+     */
     public abstract static class NextableState extends State {
+        /** States that are successors of this one in the NFA. */
         public final Set<State> next = new HashSet<State>() {
             @Override
             public boolean add(State s) {
                 assert s.nt == NextableState.this.nt :
                     "States " + NextableState.this.name + " and " +
-                        s.name + " are not in the same NonTerminal.";
+                    s.name + " are not in the same NonTerminal.";
                 return super.add(s);
             }
         };
@@ -334,12 +387,22 @@ public class Grammar implements Serializable {
         }
     }
 
+    /**
+     * The first state of a NonTerminal. Only one per NonTerminal.
+     */
     public static class EntryState extends NextableState {
         EntryState(String name, NonTerminal nt) { super(name, nt, false); }
     }
 
+    /**
+     * NonTerminalState contains a reference to the NonTerminal which has to be called to continue
+     * parsing from a particular spot. This is specific to the non-terminals in the right hand side
+     * of BNF productions.
+     */
     public static class NonTerminalState extends NextableState {
+        /** The NonTerminal referenced by this NonTerminalState */
         public final NonTerminal child;
+        /** Specifies if this state should be treated as a lookahead parse */
         public final boolean isLookahead;
 
         public NonTerminalState(
@@ -352,7 +415,11 @@ public class Grammar implements Serializable {
         }
     }
 
+    /**
+     * A RuleState takes a Rule and applies an action to the term parsed up to that point.
+     */
     public static class RuleState extends NextableState {
+        /** The rule to be applied. */
         public final Rule rule;
         public RuleState(String name, NonTerminal nt, Rule rule) {
             super(name, nt, true);
@@ -360,9 +427,13 @@ public class Grammar implements Serializable {
         }
     }
 
+    /**
+     * PrimitiveState is the only State that matches on characters and consumes them.
+     * The content of the matched string is stored into a KApp of a #token.
+     * TODO: revisit this description once we get the new KORE
+     */
     public abstract static class PrimitiveState extends NextableState {
-        /// The sort of the token (or rather the KApp containing this token)
-        // to be constructed when parsing this primitive state.
+        /** The sort of the KApp */
         public final String sort;
         public static class MatchResult {
             final public int matchEnd;
@@ -371,6 +442,10 @@ public class Grammar implements Serializable {
             }
         }
 
+        /*
+         *  Returns a set of matches at the given position in the given string.
+         *  If there are no matches, the returned set will be empty.
+         */
         abstract Set<MatchResult> matches(CharSequence text, int startPosition);
 
         public PrimitiveState(String name, NonTerminal nt, String sort) {
@@ -378,13 +453,22 @@ public class Grammar implements Serializable {
             this.sort = sort;
         }
 
+        /**
+         * Checks whether this PrimitiveStates can parse without consuming any tokens.
+         * @return true if it can parse without consuming any tokens.
+         */
         public boolean isNullable() {
             Set<MatchResult> matchResults = this.matches("", 0);
             return matchResults.size() != 0;
         }
     }
 
+    /**
+     * Uses java regular expression (@link Matcher} class to consume characters in the
+     * char sequence.
+     */
     public static class RegExState extends PrimitiveState {
+        /** The java regular expression pattern. */
         public final Pattern pattern;
 
         public RegExState(String name, NonTerminal nt, Pattern pattern, String sort) {
