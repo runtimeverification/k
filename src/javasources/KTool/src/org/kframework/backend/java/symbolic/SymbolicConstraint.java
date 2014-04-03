@@ -1,17 +1,6 @@
+// Copyright (C) 2013-2014 K Team. All Rights Reserved.
+
 package org.kframework.backend.java.symbolic;
-
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Set;
 
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
@@ -39,6 +28,18 @@ import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.krun.K;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
@@ -560,6 +561,10 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         }
 
         normalize();
+        if (isSubstitution()) {
+            return false;
+        }
+
         Boolean result = false;
         try {
             com.microsoft.z3.Context context = Z3Wrapper.newContext();
