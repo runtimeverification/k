@@ -24,21 +24,18 @@ You can test if it works by calling 'ant' in a Terminal.
 3. Install
 Checkout this directory in your desired location and call 'ant' from the main
 directory to build the .jar binaries. For convenient usage, you can update
-your $PATH with <checkout-dir>/dist/bin (strongly recommended, but optional).
+your $PATH with <checkout-dir>/bin (strongly recommended, but optional).
 
 4. Work on Java code
 We here only give instructions for Eclipse, but similar instructions apply
-for other ISEs.  Open eclipse and set your workspace to /javasources.  Go to
-File->Import->General->Existing projects into workspace, and select all of 
-the projects from /javasources.  If you have the spoofax plugin installed in
-eclipse, you might be able to work and compile directly within eclipse (the
-main project is K3Java and can be used to test the main functionalities).
-
-If your do not have the Spoofax plugin, you can still use Eclipse as an editor
-and to test functionality not related to parsing.
+for other ISEs.  Open eclipse and set your workspace to src/javasources.  Go to
+File->Import->General->Existing projects into workspace, and select
+the project src/javasources/KTool.  If you need to edit SDF-related code,
+you should install the Spoofax plugin and then also import
+src/javasources/parsers/Concrete.
 
 5. Work on Maude code
-Modify the Maude files found in /dist/bin/maude.  No need for recompilation.
+Modify the Maude files found in lib/maude/lib.  No need for recompilation.
 
 6. Build the final release directory/archives
 Call 'ant release' in the base directory.  This will create a k directory in
@@ -47,10 +44,9 @@ trunk containing the release distribution and two archives k-latest.(zip|tgz)
 You can use 'ant release -Dversion="3.0"' to create a tagged release.
 
 7. Compiling definitions and running programs
-Assuming /dist/bin is in your path, you can compile definitions using
+Assuming k/bin is in your path, you can compile definitions using
 the 'kompile' command.  To execute a program you can use 'krun'.
 
 8. Troubleshooting
 If everything fails, try 'ant clean' and rebuild the entire project.
-If that still doesn't work, verify that the maude files provided in the
-distribution (k/bin/maude/binaries) are compatible with your system.
+If that still doesn't work, please contact a K developer.
