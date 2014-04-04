@@ -30,7 +30,7 @@ public class AddSymbolicVariablesDeclaration extends BasicVisitor {
     @Override
     public void visit(Module module) {
 
-        if (module.getName().equals(syntaxModule) && context.kompileOptions.backend == KompileOptions.Backend.symbolic) {
+        if (module.getName().equals(syntaxModule) && context.kompileOptions.backend == KompileOptions.Backend.SYMBOLIC) {
 
             // adding lexical construct
             Lexical lexical = new Lexical(terminal, follow);

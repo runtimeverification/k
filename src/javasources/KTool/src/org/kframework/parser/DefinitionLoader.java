@@ -109,7 +109,7 @@ public class DefinitionLoader {
             if (!context.kompileOptions.backend.documentation()) {
                 if (!def.getModulesMap().containsKey(context.kompileOptions.syntaxModule())) {
                     String msg = "Could not find main syntax module used to generate a parser for programs (X-SYNTAX). Using: '" + mainModule + "' instead.";
-                    GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.PARSER, msg, def.getMainFile(), "File system."));
+                    GlobalSettings.kem.register(new KException(ExceptionType.HIDDENWARNING, KExceptionGroup.INNER_PARSER, msg, def.getMainFile(), "File system."));
                     def.setMainSyntaxModule(mainModule);
                 } else {
                     def.setMainSyntaxModule(context.kompileOptions.syntaxModule());

@@ -13,6 +13,7 @@ import org.kframework.backend.SMTSolver;
 import org.kframework.backend.java.indexing.IndexingAlgorithm;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.ExperimentalParserOptions;
+import org.kframework.utils.options.BaseEnumConverter;
 
 import com.beust.jcommander.IStringConverter;
 import com.beust.jcommander.Parameter;
@@ -22,17 +23,17 @@ import com.beust.jcommander.ParametersDelegate;
 public final class KompileOptions implements Serializable {
     
     public static enum Backend {
-        pdf(true, false),
-        latex(true, false),
-        doc(true, false),
-        html(true, false),
-        kore(false, false),
-        maude(false, false),
-        java(false, true),
-        unparse(false, false),
-        unflatten(false, false),
-        unflatten_java(false, true),
-        symbolic(false, false);
+        PDF(true, false),
+        LATEX(true, false),
+        DOC(true, false),
+        HTML(true, false),
+        KORE(false, false),
+        MAUDE(false, false),
+        JAVA(false, true),
+        UNPARSE(false, false),
+        UNFLATTEN(false, false),
+        UNFLATTEN_JAVA(false, true),
+        SYMBOLIC(false, false);
         
         private Backend(boolean documentation, boolean java) {
             this.documentation = documentation;
@@ -74,8 +75,16 @@ public final class KompileOptions implements Serializable {
     @Parameter(names={"--directory", "-d"}, description="Path to the directory in which the output resides. An output can be either a kompiled K definition or a document which depends on the type of backend. The default is the current directory.")
     public File directory = new File(".");
     
-    @Parameter(names="--backend", description="Choose a backend. <backend> is one of [pdf|latex|html|maude|java|unparse|symbolic]. Each of [pdf|latex|html] generates a document from the given K definition. Either of [maude|java] creates the kompiled K definition. 'unparse' generates an unparsed version of the given K definition. 'symbolic' generates symbolic semantics. Experimental: 'doc' generates a .tex document, omitting rules unless specified.")
-    public Backend backend = Backend.maude;
+    @Parameter(names="--backend", converter=BackendConverter.class, description="Choose a backend. <backend> is one of [pdf|latex|html|maude|java|unparse|symbolic]. Each of [pdf|latex|html] generates a document from the given K definition. Either of [maude|java] creates the kompiled K definition. 'unparse' generates an unparsed version of the given K definition. 'symbolic' generates symbolic semantics. Experimental: 'doc' generates a .tex document, omitting rules unless specified.")
+    public Backend backend = Backend.MAUDE;
+    
+    public static class BackendConverter extends BaseEnumConverter<Backend> implements IStringConverter<Backend> {
+
+        @Override
+        public Backend convert(String arg0) {
+            return convert(Backend.class, arg0);
+        }
+    }
     
     @Parameter(names="--doc-style", description="Specify a style option for the package 'k.sty' (when '--backend [pdf|latex]' is used) or path to an alternative .css file (when '--backend html' is used).")
     private String docStyle;
@@ -83,7 +92,7 @@ public final class KompileOptions implements Serializable {
     private static final String DEFAULT_DOC_STYLE = "poster,style=bubble";
     
     public String docStyle() {
-        if (backend == Backend.html) {
+        if (backend == Backend.HTML) {
             if (docStyle == null) {
                 return "k-definition.css";
             }
@@ -150,49 +159,65 @@ public final class KompileOptions implements Serializable {
     @ParametersDelegate
     public Experimental experimental = new Experimental();
     
-    public final class Experimental implements Serializable {
+    public static final class Experimental implements Serializable {
         
         // Experimental options
-        @Parameter(names="--Xstep", description="Name of the compilation phase after which the compilation process should stop.")
+        @Parameter(names="--step", description="Name of the compilation phase after which the compilation process should stop.")
         public String step;
         
-        @Parameter(names="--Xlib", description="Specify extra-libraries for compile/runtime.")
+        @Parameter(names="--lib", description="Specify extra-libraries for compile/runtime.")
         public String lib = "";
         
-        @Parameter(names="--Xadd-top-cell", description="Add a top cell to configuration and all rules.")
+        @Parameter(names="--add-top-cell", description="Add a top cell to configuration and all rules.")
         public boolean addTopCell = false;
         
-        @Parameter(names="--Xk-cells", description="Cells which contain komputations.")
+        @Parameter(names="--k-cells", description="Cells which contain komputations.")
         public List<String> kCells = Arrays.asList("k");
         
-        @Parameter(names="--Xsmt", description="SMT solver to use for checking constraints. <solver> is one of [z3|none]. (Default: z3). This only has an effect with '--backend symbolic'.")
+        @Parameter(names="--smt", converter=SMTSolverConverter.class, description="SMT solver to use for checking constraints. <solver> is one of [z3|none]. (Default: z3). This only has an effect with '--backend symbolic'.")
         public SMTSolver smt = SMTSolver.Z3;
+        
+        public static class SMTSolverConverter extends BaseEnumConverter<SMTSolver> implements IStringConverter<SMTSolver> {
+
+            @Override
+            public SMTSolver convert(String arg0) {
+                return convert(SMTSolver.class, arg0);
+            }
+        }
         
         @ParametersDelegate
         public transient ExperimentalParserOptions parser = new ExperimentalParserOptions();
         
-        @Parameter(names="--Xno-prelude", description="Do not include anything automatically.")
+        @Parameter(names="--no-prelude", description="Do not include anything automatically.")
         public boolean noPrelude = false;
         
-        @Parameter(names="--Xsymbolic-rules", converter=TagListConverter.class, description="Apply symbolic transformations only to rules annotated with tags from <tags> set. This only has an effect with '--backend symbolic'.")
+        @Parameter(names="--symbolic-rules", converter=TagListConverter.class, description="Apply symbolic transformations only to rules annotated with tags from <tags> set. This only has an effect with '--backend symbolic'.")
         public Set<String> symbolicTags;
         
-        @Parameter(names="--Xnon-symbolic-rules", converter=TagListConverter.class, description="Do not apply symbolic transformations to rules annotated with tags from <tags> set. This only has an effect with '--backend symbolic'.")
+        @Parameter(names="--non-symbolic-rules", converter=TagListConverter.class, description="Do not apply symbolic transformations to rules annotated with tags from <tags> set. This only has an effect with '--backend symbolic'.")
         public Set<String> nonSymbolicTags;
         
-        @Parameter(names="--Xtest-gen", description="Compile for test-case generation purpose in the Java backend. Use concrete sorts and automatically generated labels for heating and cooling rules. This only has an effect with '--backend java'.")
+        @Parameter(names="--test-gen", description="Compile for test-case generation purpose in the Java backend. Use concrete sorts and automatically generated labels for heating and cooling rules. This only has an effect with '--backend java'.")
         public boolean testGen = false;
         
-        @Parameter(names="--Xkore", description="Generate kore files of a given k definition")
+        @Parameter(names="--kore", description="Generate kore files of a given k definition")
         public boolean kore = false;
         
-        @Parameter(names="--Xloud", description="Prints 'Done' at the end if all is ok.")
+        @Parameter(names="--loud", description="Prints 'Done' at the end if all is ok.")
         public boolean loud = false;
              
-        @Parameter(names="--Xdocumentation", converter=TagListConverter.class, description="<string> is a comma-separated list of tags designating rules to be included in the file generated with --backend=doc")
+        @Parameter(names="--documentation", converter=TagListConverter.class, description="<string> is a comma-separated list of tags designating rules to be included in the file generated with --backend=doc")
         public Set<String> documentation = Collections.singleton("documentation");
 
-        @Parameter(names="--rule-index", description="Choose a technique for indexing the rules. <rule-index> is one of [table|path]. (Default: table). This only has effect with '--backend java'.")
+        @Parameter(names="--rule-index", converter=RuleIndexConveter.class, description="Choose a technique for indexing the rules. <rule-index> is one of [table|path]. (Default: table). This only has effect with '--backend java'.")
         public IndexingAlgorithm ruleIndex = IndexingAlgorithm.RULE_TABLE;
+        
+        public static class RuleIndexConveter extends BaseEnumConverter<IndexingAlgorithm> implements IStringConverter<IndexingAlgorithm> {
+
+            @Override
+            public IndexingAlgorithm convert(String arg0) {
+                return convert(IndexingAlgorithm.class, arg0);
+            }
+        }
     }
 }

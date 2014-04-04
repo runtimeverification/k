@@ -35,7 +35,7 @@ public class KompileOptionsTest {
     @Test
     public void testHtmlDocStyle() {
         parse("--backend", "html", "foo.k");
-        assertEquals(Backend.html, options.backend);
+        assertEquals(Backend.HTML, options.backend);
         assertEquals("k-definition.css", options.docStyle());
     }
     
@@ -71,5 +71,11 @@ public class KompileOptionsTest {
         assertEquals(2, options.transition.size());
         assertTrue(options.transition.contains("foo"));
         assertTrue(options.transition.contains("bar"));
+    }
+    
+    @Test
+    public void testLowercaseEnum() {
+        parse("--backend", "unflatten-java", "foo.k");
+        assertEquals(Backend.UNFLATTEN_JAVA, options.backend);
     }
 }

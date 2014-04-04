@@ -4,6 +4,9 @@ import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.ParameterDescription;
+
 public class StringUtil {
     public static String unescape(String str) {
         StringBuilder sb = new StringBuilder();
@@ -494,17 +497,29 @@ public class StringUtil {
      * are in the second string, and the main options are in the first string.
      * Otherwise, there will only be one string outputted.
      */
-    public static String[] finesseJCommanderUsage(String string) {
+    public static String[] finesseJCommanderUsage(String string, JCommander jc) {
         //for some reason the usage pattern indents commands inconsistently, so we need to adjust it
         string = string.replaceAll("        ", "    ");
-        //we also need to move the experimental options to the end
-        Pattern p = Pattern.compile("^(\\s*--X.*?)^\\s*--[^X]", Pattern.DOTALL | Pattern.MULTILINE);
-        Matcher m = p.matcher(string);
-        if (m.find()) {
-            String experimentalOptions = "  Experimental Options:\n" + m.group(1);
-            string = string.substring(0, m.start(1)) + string.substring(m.end(1));
-            return new String[] {string, experimentalOptions};
+        String lastLine = "";
+        StringBuilder mainOptions = new StringBuilder();
+        StringBuilder experimentalOptions = new StringBuilder();
+        experimentalOptions.append("  Experimental Options:\n");
+        boolean inExperimentalOptions = false;
+        for (String line : string.split("\n")) {
+            if (line.startsWith("    --")) {
+                if (lastLine.compareTo(line) > 0) {
+                    inExperimentalOptions = true;
+                }
+                lastLine = line;
+            }
+            if (inExperimentalOptions) {
+                experimentalOptions.append(line);
+                experimentalOptions.append("\n");
+            } else {
+                mainOptions.append(line);
+                mainOptions.append("\n");
+            }
         }
-        return new String[] {string};
+        return new String[] {mainOptions.toString(), experimentalOptions.toString()};
     }
 }

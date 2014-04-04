@@ -1315,7 +1315,7 @@ public class Main {
             //merge kompile options into K static object
             //TODO(dwightguth): fix this when org.kframework.krun.K is deleted
             if (!cmd.hasOption("backend")) {
-                K.backend = kompileOptions.backend.name();
+                K.backend = kompileOptions.backend.name().toLowerCase();
             }
             
             Context context = new Context(kompileOptions);

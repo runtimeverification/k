@@ -23,6 +23,7 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.CountNodesVisitor;
 import org.kframework.krun.K;
 import org.kframework.parser.DefinitionLoader;
+import org.kframework.parser.ExperimentalParserOptions;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.StringUtil;
@@ -32,6 +33,7 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.KPaths;
 import org.kframework.utils.general.GlobalSettings;
+import org.kframework.utils.options.SortedParameterDescriptions;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
@@ -44,18 +46,20 @@ public class KompileFrontEnd {
         try {
             JCommander jc = new JCommander(options, args);
             jc.setProgramName("kompile");
+            jc.setColumnSize(80);
+            jc.setParameterDescriptionComparator(new SortedParameterDescriptions(KompileOptions.Experimental.class, ExperimentalParserOptions.class));
             
             if (options.help) {
                 StringBuilder sb = new StringBuilder();
                 jc.usage(sb);
-                System.out.print(StringUtil.finesseJCommanderUsage(sb.toString())[0]);
+                System.out.print(StringUtil.finesseJCommanderUsage(sb.toString(), jc)[0]);
                 return;
             }
             
             if (options.helpExperimental) {
                 StringBuilder sb = new StringBuilder();
                 jc.usage(sb);
-                System.out.print(StringUtil.finesseJCommanderUsage(sb.toString())[1]);
+                System.out.print(StringUtil.finesseJCommanderUsage(sb.toString(), jc)[1]);
                 return;    
             }
             
@@ -82,42 +86,42 @@ public class KompileFrontEnd {
 
         Backend backend = null;
         switch (options.backend) {
-            case pdf:
+            case PDF:
                 backend = new PdfBackend(Stopwatch.instance(), context);
                 break;
-            case latex:
+            case LATEX:
                 backend = new LatexBackend(Stopwatch.instance(), context);
                 break;
-            case doc:
+            case DOC:
                 backend = new LatexBackend(Stopwatch.instance(), context, true);                
                 break;
-            case html:
+            case HTML:
                 backend = new HtmlBackend(Stopwatch.instance(), context);
                 break;
-            case kore:
+            case KORE:
                 backend = new KoreBackend(Stopwatch.instance(), context);
                 backend.run(DefinitionLoader.loadDefinition(options.definition(), options.mainModule(),
                         backend.autoinclude(), context));
                 return;
-            case maude:
+            case MAUDE:
                 backend = new KompileBackend(Stopwatch.instance(), context);
                 context.dotk = new File(options.directory, FilenameUtils.removeExtension(options.definition().getName()) + "-kompiled");
                 checkAnotherKompiled(context.dotk);
                 context.dotk.mkdirs();
                 break;
-            case java:
+            case JAVA:
                 backend = new JavaSymbolicBackend(Stopwatch.instance(), context);
                 context.dotk = new File(options.directory, FilenameUtils.removeExtension(options.definition().getName()) + "-kompiled");
                 checkAnotherKompiled(context.dotk);
                 context.dotk.mkdirs();
                 break;
-            case unparse:
+            case UNPARSE:
                 backend = new UnparserBackend(Stopwatch.instance(), context);
                 break;
-            case unflatten:
+            case UNFLATTEN:
                 backend = new UnparserBackend(Stopwatch.instance(), context, true);
                 break;
-            case unflatten_java:
+            case UNFLATTEN_JAVA:
                 // TODO(YilongL): make it general to all backends; add info about
                 // this backend in KompileOptionsParser
                 Backend innerBackend = new JavaSymbolicBackend(Stopwatch.instance(), context);
@@ -126,7 +130,7 @@ public class KompileFrontEnd {
                 context.dotk.mkdirs();
                 backend = new UnflattenBackend(Stopwatch.instance(), context, innerBackend);
                 break;
-            case symbolic:
+            case SYMBOLIC:
                 backend = new SymbolicBackend(Stopwatch.instance(), context);
                 context.dotk = new File(options.directory, FilenameUtils.removeExtension(options.definition().getName()) + "-kompiled");
                 checkAnotherKompiled(context.dotk);

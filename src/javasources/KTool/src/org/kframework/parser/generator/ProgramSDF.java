@@ -114,7 +114,7 @@ public class ProgramSDF {
                 sdf.append("    " + StringUtil.escapeSortName(s) + "        -> K\n");
         }
 
-        if (context.kompileOptions.backend == Backend.symbolic) {
+        if (context.kompileOptions.backend == Backend.SYMBOLIC) {
             sdf.append("\ncontext-free syntax\n");
             sdf.append("    DzId    -> UnitDz\n");
             sdf.append("    DzBool    -> UnitDz\n");
