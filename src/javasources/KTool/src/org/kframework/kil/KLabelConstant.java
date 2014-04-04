@@ -1,3 +1,5 @@
+// Copyright (C) 2012-2014 K Team. All Rights Reserved.
+
 package org.kframework.kil;
 
 import java.util.Collections;
@@ -12,6 +14,8 @@ import org.kframework.kil.visitors.Transformer;
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.StringUtil;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.Element;
 
 import aterm.ATermAppl;
@@ -24,7 +28,7 @@ public class KLabelConstant extends KLabel {
     /**
      * HashMap caches the constants to ensure uniqueness.
      */
-    private static final HashMap<String, KLabelConstant> cache = new HashMap<String, KLabelConstant>();
+    private static final HashMap<String, KLabelConstant> cache = new HashMap<>();
 
     /*
      * Useful constants.
@@ -53,7 +57,7 @@ public class KLabelConstant extends KLabel {
      *            string representation of the KLabel; must not be '`' escaped;
      * @return AST term representation the KLabel;
      */
-    public static final KLabelConstant of(String label, Context context) {
+    public static KLabelConstant of(String label, Context context) {
         assert label != null;
 
         KLabelConstant kLabelConstant = cache.get(label);
@@ -114,7 +118,7 @@ public class KLabelConstant extends KLabel {
      * Constructs a {@link KLabelConstant} from an XML {@link Element} representing a constant. The KLabel string representation in the element is escaped according to Maude
      * conventions.
      */
-    public KLabelConstant(Element element, org.kframework.kil.loader.Context context) {
+    public KLabelConstant(Element element, Context context) {
         super(element);
         label = StringUtil.unescapeMaude(element.getAttribute(Constants.VALUE_value_ATTR));
         productions = Collections.unmodifiableList(context.productionsOf(label));
@@ -184,5 +188,37 @@ public class KLabelConstant extends KLabel {
     @Override
     public void accept(Visitor visitor) {
         visitor.visit(this);
+    }
+
+    /**
+     * A KLabel is considered functional if either it syntactically qualifies as a predicate,
+     * or if the attributes associated to its production contain
+     * @param context  the definitional context in which the labels should be considered.
+     * @return  whether this KLabel is functional or not in the given {@code context}
+     */
+    public boolean isFunctional(Context context) {
+        if (isPredicate()) {
+            return true;
+        } else {
+            List<Production> productions = context.productionsOf(getLabel());
+            Production functionProduction = null;
+            for (Production production : productions) {
+                if (production.containsAttribute(Attribute.FUNCTION_KEY)
+                        || production.containsAttribute(Attribute.PREDICATE_KEY)) {
+                    functionProduction = production;
+                } else if (functionProduction != null) {  // this label can either be function or not.
+                    GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
+                            KException.KExceptionGroup.CRITICAL,
+                            "Ambiguity: Top symbol " + label + " corresponds to both a functional declaration (" +
+                                    functionProduction + ") and to a non-functional one (" +
+                                    production + ")",
+                            "KLabelConstant.isFunctional()", getFilename(), getLocation()));
+                }
+            }
+            if (functionProduction != null) {
+                return true;
+            }
+        }
+        return false;
     }
 }

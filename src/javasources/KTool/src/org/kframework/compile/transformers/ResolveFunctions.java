@@ -1,3 +1,5 @@
+// Copyright (C) 2012-2014 K Team. All Rights Reserved.
+
 package org.kframework.compile.transformers;
 
 import org.kframework.kil.*;
@@ -6,9 +8,6 @@ import org.kframework.kil.visitors.CopyOnWriteTransformer;
 import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.general.GlobalSettings;
-
-import java.util.*;
-import java.util.List;
 
 /**
  * Add the function attribute to rules which rewrite either a TermCons of
@@ -38,26 +37,8 @@ public class ResolveFunctions extends CopyOnWriteTransformer {
             Term l = ((KApp) body).getLabel();
             if (l instanceof KLabelConstant) {
                 KLabelConstant label = (KLabelConstant) l;
-                if (label.isPredicate()) {
+                if (label.isFunctional(context)) {
                     node = addFunction(node);
-                } else {
-                    List<Production> productions = context.productionsOf(label.getLabel());
-                    Production functionProduction = null;
-                    for (Production production : productions) {
-                        if (production.containsAttribute("function") || production.containsAttribute("predicate")) {
-                            functionProduction = production;
-                        } else if (functionProduction != null) {  // this label can either be function or not.
-                            GlobalSettings.kem.register(new KException(KException.ExceptionType.ERROR,
-                                    KException.KExceptionGroup.CRITICAL,
-                                    "Ambiguity: Top symbol " + label + " corresponds to both a functional declaration (" +
-                                            functionProduction + ") and to a non-functional one (" +
-                                            production + ")",
-                                    getName(), node.getFilename(), node.getLocation()));
-                        }
-                    }
-                    if (functionProduction != null) {
-                        node = addFunction(node);
-                    }
                 }
             }
         }
