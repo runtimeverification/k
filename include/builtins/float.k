@@ -1,3 +1,4 @@
+// Copyright (c) 2014 K Team. All Rights Reserved.
 require "bool.k"
 require "int.k"
 module FLOAT-SYNTAX-HOOKS
