@@ -229,6 +229,7 @@ public class TestSuite {
         for (TestCase tc : tests) {
             Proc<TestCase> p = new Proc<>(tc, tc.getKompileCmd(), tc.toKompileLogString(),
                     strComparator, timeout, verbose, colorSetting, updateOut, generateOut);
+            p.setWorkingDir(tc.getWorkingDir());
             ps.add(p);
             tpe.execute(p);
             kompileSteps++;
@@ -266,6 +267,7 @@ public class TestSuite {
         for (TestCase tc : tests) {
             Proc<TestCase> p = new Proc<>(tc, tc.getPdfCmd(), tc.toPdfLogString(),
                     strComparator, timeout, verbose, colorSetting, updateOut, generateOut);
+            p.setWorkingDir(tc.getWorkingDir());
             ps.add(p);
             tpe.execute(p);
             pdfSteps++;
@@ -422,6 +424,7 @@ public class TestSuite {
         Proc<KRunProgram> p = new Proc<>(program, args, inputContents, outputContentsAnn,
                 errorContentsAnn, program.toLogString(), strComparator, timeout, verbose,
                 colorSetting, updateOut, generateOut, program.outputFile, program.newOutputFile);
+        p.setWorkingDir(new File(program.defPath));
         tpe.execute(p);
         krunSteps++;
         return p;

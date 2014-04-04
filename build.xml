@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Copyright (C) 2012-2014 K Team. All Rights Reserved. -->
 <project basedir="." default="build" name="KTool Build file">
 
 	<property location="src/javasources" name="javasources" />
@@ -51,6 +52,10 @@
 		<delete file="${javasources}/../../lib/java/k3.jar" />
 		<delete file="${javasources}/../../lib/version.txt" />
 		<delete dir="./k/" />
+                <!-- Next task is removable once everybody updates -->
+                <delete failonerror="false"> 
+                   <fileset dir="${javasources}/KTool/src/org/kframework/backend/pdmc/pda/buchi/parser" includes="*.java" />  
+                </delete>
 		<delete>
 			<fileset dir="${javasources}/KTool/src/org/kframework/parser/basic" includes="*.java" />
 			<fileset dir="${javasources}/KTool/src/org/kframework/utils/kastparser" includes="*.java" />
@@ -197,6 +202,14 @@
             <fileset dir="${javasources}/KTool">
                 <include name="**/*.java"/>
                 <exclude name="src/org/kframework/parser/concrete/lib/**" />
+            </fileset>
+        </checkstyle>
+    </target>
+
+    <target name="checkstyle-copyright">
+        <checkstyle config="${javasources}/KTool/checkstyle-copyright.xml">
+            <fileset dir="." includesfile=".checkstyle-files">
+              <!-- TODO: exclude files here which should not be given copyright notices -->
             </fileset>
         </checkstyle>
     </target>

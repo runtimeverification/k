@@ -1,1 +1,1 @@
-test(lengthString("") ~> lengthString("foo") ~> lengthString("\x00\x01\x61\xff\uffff\U0010ffff"))
+lengthString("") ~> lengthString("foo") ~> lengthString("\x00\x01\x61\xff\uffff\U0010ffff")

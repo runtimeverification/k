@@ -64,6 +64,14 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     }
 
     /**
+     * Returns true if this term has exactly the sort returned by {@link #sort()},
+     * and not any of its proper subsorts.
+     *
+     * @see #sort()
+     */
+    public abstract boolean isExactSort();
+
+    /**
      * Returns {@code true} if a unification task between this term and another term cannot be
      * further decomposed into simpler unification tasks.
      */
@@ -75,6 +83,11 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     public Kind kind() {
         return kind;
     }
+
+    /**
+     * Returns a {@code String} representation of the sort of this object.
+     */
+    public abstract String sort();
 
     /**
      * Returns a new {@code Term} instance obtained from this term by evaluating

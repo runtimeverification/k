@@ -107,7 +107,7 @@ public abstract class BitVector<T extends Number> extends Token {
      */
     @Override
     public String value() {
-      return value.toString();
+        return bitwidth + "'" + value.toString();
     }
 
     @Override

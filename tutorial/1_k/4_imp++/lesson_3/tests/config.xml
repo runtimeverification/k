@@ -2,10 +2,10 @@
 
   <include file="../../lesson_2/tests/config.xml"
            more-results="." >
-    <kompile-option name="-superheat" value="division" />
-    <kompile-option name="-supercool" value="lookup increment" />
+    <kompile-option name="--superheat" value="division" />
+    <kompile-option name="--supercool" value="lookup increment" />
     <program name="div.imp">
-      <krun-option name="-search" />
+      <krun-option name="--search" />
     </program>
   </include>
 

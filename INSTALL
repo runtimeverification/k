@@ -14,7 +14,7 @@ update your $PATH with <preferred-location>/k/bin.
 Go to one of the examples (say k/tutorial/2_languages/1_simple/1_untyped/).
 Assuming k/bin is in your $PATH, you can compile definitions using 
 the 'kompile simple-untyped.k' command.
-To execute a program you can use 'krun programs/diverse/factorial.simple'.
+To execute a program you can use 'krun tests/diverse/factorial.simple'.
 
 4. (Optional) To use the pdf backend, a relatively recent installation 
 of Latex is required.  Besides basic packages, the following (texlive)

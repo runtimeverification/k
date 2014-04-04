@@ -470,7 +470,17 @@ public class ConstrainedTerm extends Term {
     }
 
     @Override
+    public boolean isExactSort() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean isSymbolic() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String sort() {
         throw new UnsupportedOperationException();
     }
 

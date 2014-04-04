@@ -8,6 +8,7 @@
 .metadata
 .cache
 .idea
+.checkstyle-files
 *~
 junit-reports
 samples/test/

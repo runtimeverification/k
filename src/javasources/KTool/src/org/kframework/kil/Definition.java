@@ -117,6 +117,7 @@ public class Definition extends ASTNode {
         this.accept(new AddConsesVisitor(context));
         this.accept(new UpdateAssocVisitor(context));
         this.accept(new CollectConsesVisitor(context));
+        this.accept(new CollectBracketsVisitor(context));
         this.accept(new CollectSubsortsVisitor(context));
         this.accept(new CollectPrioritiesVisitor(context));
         this.accept(new CollectStartSymbolPgmVisitor(context));

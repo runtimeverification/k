@@ -1,1 +1,1 @@
-test(findString("foo", "o", 0) ~> findString("foo", "o", 2) ~> findString("foo", "ooo", 0) ~> findString("\x00\x01\xff\u0100\uffff\U0010ffff\x00", "\x00", 1))
+findString("foo", "o", 0) ~> findString("foo", "o", 2) ~> findString("foo", "ooo", 0) ~> findString("\x00\x01\xff\u0100\uffff\U0010ffff\x00", "\x00", 1)
