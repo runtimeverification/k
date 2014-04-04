@@ -1,3 +1,4 @@
+// Copyright (C) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
 import static org.kframework.backend.java.util.TestCaseGenerationSettings.PHASE_ONE_BOUND_FREEVARS;

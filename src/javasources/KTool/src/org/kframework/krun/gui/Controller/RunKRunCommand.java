@@ -1,3 +1,4 @@
+// Copyright (C) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.krun.gui.Controller;
 
 import org.kframework.backend.java.symbolic.JavaSymbolicKRun;

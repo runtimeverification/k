@@ -1,3 +1,4 @@
+// Copyright (C) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.maude.krun;
 
 import org.apache.commons.collections15.Transformer;
