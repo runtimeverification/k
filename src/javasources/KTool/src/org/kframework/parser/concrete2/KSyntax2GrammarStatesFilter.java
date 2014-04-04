@@ -138,71 +138,71 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                 previous = NeIdsState;
             }
             // ************************************** end of list creation **********************
-        } else if (prd.isSubsort()) {
-            Sort srt = prd.getSubsort();
-            NonTerminalState nts = new NonTerminalState(
-                    prd.getSort() + "-S", nt, grammar.get(srt.getName()), false);
-            previous.next.add(nts);
-            previous = nts;
-            // if the subsort has a klabel attached to it, then we must attach a label to it
-            if (prd.containsAttribute("klabel")) {
-                RuleState rs1 = new RuleState("AddLabelRS",
-                    nt, new WrapLabelRule(new KLabelConstant(prd.getKLabel()), prd.getSort()));
-                previous.next.add(rs1);
-                RuleState locRule = new RuleState(prd.getSort() + "-R", nt, new AddLocationRule());
-                rs1.next.add(locRule);
-                previous = locRule;
-            }
-        } else if (prd.isLexical()) {
-            Lexical lx = prd.getLexical();
-            String pattern = prd.containsAttribute(Constants.REGEX) ?
-                                prd.getAttribute(Constants.REGEX) :
-                                lx.getLexicalRule();
-            PrimitiveState pstate = new RegExState(prd.getSort() + "-T",
-                nt, Pattern.compile(pattern), prd.getSort());
-            previous.next.add(pstate);
-            RuleState locRule = new RuleState(prd.getSort() + "-R", nt, new AddLocationRule());
-            pstate.next.add(locRule);
-            previous = locRule;
-        } else if (prd.isConstant()) {
-            Terminal terminal = prd.getConstant();
-            PrimitiveState pstate = new RegExState(
-                prd.getSort() + "-T", nt,
-                Pattern.compile(terminal.getTerminal(), Pattern.LITERAL), prd.getSort());
-            previous.next.add(pstate);
-            RuleState locRule = new RuleState(prd.getSort() + "-R", nt, new AddLocationRule());
-            pstate.next.add(locRule);
-            previous = locRule;
         } else {
-            // just a normal production with Terminals and Sort alternations
-            for (ProductionItem prdItem : prd.getItems()) {
-                if (prdItem instanceof Terminal) {
-                    Terminal terminal = (Terminal) prdItem;
-                    PrimitiveState pstate = new RegExState(
-                        prd.getSort() + "-T", nt,
-                        Pattern.compile(terminal.getTerminal(), Pattern.LITERAL), KSorts.K);
-                    previous.next.add(pstate);
-                    RuleState rs1 = new RuleState("DelTerminalRS", nt, new DeleteRule(1, true));
-                    pstate.next.add(rs1);
-                    previous = rs1;
-                } else if (prdItem instanceof Sort) {
-                    Sort srt = (Sort) prdItem;
-                    NonTerminalState nts = new NonTerminalState(
+            // the other types of production follow pretty much the same pattern
+            // add a new State to the 'previous' state; update 'previous' state
+            if (prd.isSubsort()) {
+                Sort srt = prd.getSubsort();
+                NonTerminalState nts = new NonTerminalState(
                         prd.getSort() + "-S", nt, grammar.get(srt.getName()), false);
-                    previous.next.add(nts);
-                    previous = nts;
-                } else {
-                    assert false : "Didn't expect this ProductionItem type: " + prdItem.getClass().getName();
+                previous.next.add(nts);
+                previous = nts;
+                // if the subsort has a klabel attached to it, then we must attach a label to it
+                if (prd.containsAttribute("klabel")) {
+                    RuleState labelRule = new RuleState("AddLabelRS",
+                        nt, new WrapLabelRule(new KLabelConstant(prd.getKLabel()), prd.getSort()));
+                    previous.next.add(labelRule);
+                    previous = labelRule;
                 }
+            } else if (prd.isLexical()) {
+                Lexical lx = prd.getLexical();
+                String pattern = prd.containsAttribute(Constants.REGEX) ?
+                                    prd.getAttribute(Constants.REGEX) :
+                                    lx.getLexicalRule();
+                PrimitiveState pstate = new RegExState(prd.getSort() + "-T",
+                    nt, Pattern.compile(pattern), prd.getSort());
+                previous.next.add(pstate);
+                previous = pstate;
+            } else if (prd.isConstant()) {
+                Terminal terminal = prd.getConstant();
+                PrimitiveState pstate = new RegExState(
+                    prd.getSort() + "-T", nt,
+                    Pattern.compile(terminal.getTerminal(), Pattern.LITERAL), prd.getSort());
+                previous.next.add(pstate);
+                previous = pstate;
+            } else {
+                // just a normal production with Terminals and Sort alternations
+                for (ProductionItem prdItem : prd.getItems()) {
+                    if (prdItem instanceof Terminal) {
+                        Terminal terminal = (Terminal) prdItem;
+                        PrimitiveState pstate = new RegExState(
+                                prd.getSort() + "-T", nt,
+                                Pattern.compile(terminal.getTerminal(), Pattern.LITERAL), KSorts.K);
+                        previous.next.add(pstate);
+                        RuleState del = new RuleState("DelTerminalRS", nt, new DeleteRule(1, true));
+                        pstate.next.add(del);
+                        previous = del;
+                    } else if (prdItem instanceof Sort) {
+                        Sort srt = (Sort) prdItem;
+                        NonTerminalState nts = new NonTerminalState(
+                                prd.getSort() + "-S", nt, grammar.get(srt.getName()), false);
+                        previous.next.add(nts);
+                        previous = nts;
+                    } else {
+                        assert false : "Didn't expect this ProductionItem type: " + prdItem.getClass().getName();
+                    }
+                }
+                RuleState labelRule = new RuleState("AddLabelRS",
+                        nt, new WrapLabelRule(new KLabelConstant(prd.getKLabel()), prd.getSort()));
+                previous.next.add(labelRule);
+                previous = labelRule;
             }
-            RuleState rs1 = new RuleState("AddLabelRS",
-                nt, new WrapLabelRule(new KLabelConstant(prd.getKLabel()), prd.getSort()));
-            previous.next.add(rs1);
             RuleState locRule = new RuleState(prd.getSort() + "-R", nt, new AddLocationRule());
-            rs1.next.add(locRule);
+            previous.next.add(locRule);
             previous = locRule;
+
+            previous.next.add(nt.exitState);
         }
-        previous.next.add(nt.exitState);
     }
 
     @Override
