@@ -1,3 +1,4 @@
+// Copyright (C) 2014 K Team. All Rights Reserved.
 require "k-equal.k"
 module INT-SYNTAX-HOOKS
   imports #INT-INTERFACE

@@ -210,6 +210,7 @@
         <checkstyle config="${javasources}/KTool/checkstyle-copyright.xml">
             <fileset dir="." includesfile=".checkstyle-files">
               <!-- TODO: exclude files here which should not be given copyright notices -->
+              <exclude name="src/javasources/KTool/src/org/kframework/parser/concrete2/SCCTarjan.java"/>
             </fileset>
         </checkstyle>
     </target>

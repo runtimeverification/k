@@ -1,3 +1,4 @@
+// Copyright (C) 2014 K Team. All Rights Reserved.
 package org.kframework.kil.loader;
 
 import java.util.HashMap;

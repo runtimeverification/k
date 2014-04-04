@@ -1,3 +1,4 @@
+// Copyright (C) 2014 K Team. All Rights Reserved.
 package org.kframework.kast;
 
 import org.apache.commons.cli.*;
