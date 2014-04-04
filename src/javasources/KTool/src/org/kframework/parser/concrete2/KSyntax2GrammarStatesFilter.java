@@ -73,7 +73,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
              *              +-----[IdsTerminator]-------+
              *
              * Ids:
-             * (|--+-/-[IdsTerminator]-/-+--|) // optional line if the list type is *
+             * (|--+-/-[IdsTerminator]-/-+--|) // used only if the list type is *
              *     |                     |
              *     +-------[NeIds]-------+
              */

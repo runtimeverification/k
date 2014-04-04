@@ -43,7 +43,7 @@ public class Ambiguity extends Collection {
                 content += term + ",";
 
         if (content.length() > 1)
-            content = content.substring(0, content.length() - 2);
+            content = content.substring(0, content.length() - 1);
 
         return "'amb(" + content + ")";
     }

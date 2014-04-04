@@ -70,6 +70,7 @@ public class Grammar implements Serializable {
     }
 
     public Set<NonTerminal> getAllNonTerminals() {
+        // TODO: in the future make a cache for this
         return getNonTerminalCallers().keySet();
     }
 
@@ -122,10 +123,10 @@ public class Grammar implements Serializable {
         }
     }
 
-    String multiLine = "(/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/)";
-    String singleLine = "(//.*)";
-    String whites = "([ \n\r\t])";
-    Pattern pattern = Pattern.compile("("+ multiLine +"|"+ singleLine +"|"+ whites +")*");
+    static final String multiLine = "(/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/)";
+    static final String singleLine = "(//.*)";
+    static final String whites = "([ \n\r\t])";
+    static final Pattern pattern = Pattern.compile("("+ multiLine +"|"+ singleLine +"|"+ whites +")*");
 
     /**
      * Add a pair of whitespace-remove whitespace rule to the given state.
@@ -266,6 +267,7 @@ public class Grammar implements Serializable {
         }
 
         public NonTerminal(String name) {
+            assert name != null && !name.equals("") : "NonTerminal name cannot be null or empty.";
             this.name = name;
             this.entryState = new EntryState(name + "-entry", this);
             this.exitState = new ExitState(name + "-exit", this);
