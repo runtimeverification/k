@@ -17,7 +17,7 @@ module QUOTE-UNQUOTE-SYNTAX
 
 \texttt{lift} and \texttt{eval} are strict, where the former takes the
 resulting value and lifts it into a code value, and the later expects its
-argument to evaluate to a code value and turns it into its coresponding
+argument to evaluate to a code value and turns it into its corresponding
 code, which is consequently evaluated in the current context.
 \texttt{quote} and \texttt{unquote} are not strict.
 The former freezes its argument code into a code value, without evaluating
@@ -67,7 +67,7 @@ we want it to work also if we add other syntactic categories to our language
 
 /*@ The semantics of \texttt{quote E} is defined as follows: visit \texttt{E},
 starting with counter 0; whenever a nested \texttt{quote} construct is
-encountred, increment the counter and continue; whenever a nested \texttt{unquote}
+encountered, increment the counter and continue; whenever a nested \texttt{unquote}
 construct is encountered, if the counter is 0 then execute the unquoted code,
 otherwise decrement the counter and continue.
 The \texttt{unquote} construct is expected to produce a code value, otherwise
@@ -81,7 +81,7 @@ and \texttt{eval} are defined using the \texttt{\#visited} wrapper: */
   rule quote E => mQuote(E, 0)
   rule quoteit(N, quote E)   => #visiting.kapp(#label('quote_),,mQuote(E, N +Int 1))
   rule quoteit(0, unquote E) => E
-  rule quoteit(N, unquote E) => #visiting.kapp(#label('unquote_),,mQuote(E, N +Int 1))
+  rule quoteit(N, unquote E) => #visiting.kapp(#label('unquote_),,mQuote(E, N -Int 1))
   when (N >Int 0)
 
   rule lift V:Val => #visited(V)
@@ -93,7 +93,7 @@ need to explicitly state it that \texttt{\#visited}-wrapped terms belong to
 
   rule isVal(#visited(_)) => true
 
-/*@ Finally, we define the auxilliary predicate testing if a code fragment is a
+/*@ Finally, we define the auxiliary predicate testing if a code fragment is a
 \texttt{quote} or \texttt{unquote}:  */
   syntax Bool ::= isQuoted(Exp)     [function]
   rule isQuoted(quote E) => true

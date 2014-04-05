@@ -4,15 +4,15 @@ require "builtins/k-equal.k"
 
 /*@ \subsection{Generic Visitors}
 
-\K allows to define generic visitors, that is, visitors that take any K term
-and transform it according to given parameters.
+\K allows users to define generic visitors, that is, visitors that take any K
+term and transform it according to given parameters.
 The particular user-defined syntax of the target language is irrelevant for
 the visitor, because that is all eventually transformed into K terms, and the
 visitors work with the latter.
-This is in sharp constrast with conventional visitor-like semantic approaches,
+This is in sharp contrast with conventional visitor-like semantic approaches,
 such as those encountered in conventional semantics of
-\texttt{quote}/\texttt{unquote} conmstructs in languages with support for code
-generation, which are language-specific, that is, which have a case (smeantic rule)
+\texttt{quote}/\texttt{unquote} constructs in languages with support for code
+generation, which are language-specific, that is, which have a case (semantic rule)
 for each language construct.
 Our generic visitor approach is possible thanks to \K's meta-representation
 of syntax as \texttt{KLabel}s and applications of them to \texttt{KList}s.
@@ -85,7 +85,11 @@ The action and the predicate can be regarded as curried functions, taking the
   rule isKResult(#visited(_:KList)) => true
 
 /*@ The rules above make the visitor apply top-down.
-The next rules propagate the visited status bottom-up.  */
+The next rules propagate the visited status bottom-up.  
+For example, \texttt{\#visiting.kapp} takes a \texttt{KLabel}
+represented as a \texttt{KItem} and a visited \texttt{KList}, and
+yields the visited \texttt{KItem} obtained by applying the
+\texttt{KLabel} to the \texttt{KList}.  */
 
   syntax KLabel ::= "#visiting.kapp"     // [strict(2)]
   syntax KLabel ::= "#visiting.kseq"     // [strict]
