@@ -8,7 +8,7 @@ import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.CellCollection;
 import org.kframework.backend.java.kil.ConcreteCollectionVariable;
 import org.kframework.backend.java.kil.ConstrainedTerm;
-import org.kframework.backend.java.kil.DataStructureLookup;
+import org.kframework.backend.java.kil.DataStructureLookupOrChoice;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.JavaSymbolicObject;
 import org.kframework.backend.java.kil.KCollection;

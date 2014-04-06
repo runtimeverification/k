@@ -60,8 +60,10 @@
       results="tutorial/2_languages/1_simple/2_typed/2_dynamic/tests/"
       >
     <kompile-option name="-backend" value="java" />
+    <kompile-option name="-d" value="pattern-matching" />
     <all-programs>
       <krun-option name="-backend" value="java" />
+      <krun-option name="-d" value="pattern-matching" />
       <krun-option name="-pattern-matching" />
       <krun-option name="-smt" value="none" />
       <krun-option name="-output" value="none" />
@@ -107,8 +109,10 @@
       results="tutorial/2_languages/2_kool/2_typed/1_dynamic/tests/"
       >
     <kompile-option name="-backend" value="java" />
+    <kompile-option name="-d" value="pattern-matching" />
     <all-programs>
       <krun-option name="-backend" value="java" />
+      <krun-option name="-d" value="pattern-matching" />
       <krun-option name="-pattern-matching" />
       <krun-option name="-smt" value="none" />
       <krun-option name="-output" value="none" />
@@ -140,8 +144,10 @@
       results="tutorial/2_languages/2_kool/2_typed/2_static/tests/"
       >
     <kompile-option name="-backend" value="java" />
+    <kompile-option name="-d" value="pattern-matching" />
     <all-programs>
       <krun-option name="-backend" value="java" />
+      <krun-option name="-d" value="pattern-matching" />
       <krun-option name="-pattern-matching" />
       <krun-option name="-smt" value="none" />
       <krun-option name="-output" value="none" />
@@ -174,8 +180,10 @@
       results="tutorial/2_languages/3_fun/1_untyped/1_environment/tests"
       >
     <kompile-option name="-backend" value="java" />
+    <kompile-option name="-d" value="pattern-matching" />
     <all-programs>
       <krun-option name="-backend" value="java" />
+      <krun-option name="-d" value="pattern-matching" />
       <krun-option name="-pattern-matching" />
       <krun-option name="--search" />
       <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
