@@ -1,3 +1,5 @@
+// Copyright (C) 2013-2014 K Team. All Rights Reserved.
+
 package org.kframework.backend.java.symbolic;
 
 import java.util.ArrayList;
@@ -24,6 +26,7 @@ import org.kframework.utils.general.GlobalSettings;
 
 import com.google.common.base.Stopwatch;
 
+// TODO(YilongL): extract common functionalities with SymbolicRewriter to superclass
 public class GroundRewriter {
     
     private final TermContext termContext;

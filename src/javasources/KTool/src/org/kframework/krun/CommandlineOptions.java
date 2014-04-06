@@ -22,7 +22,7 @@ public class CommandlineOptions {
         help = new HelpFormatter();
         optionsStandard = new Options();
         optionsExperimental = new Options();
-        
+
         if (K.debug || K.guidebug) {
             initializeDebugOptions();
         }
@@ -88,7 +88,7 @@ public class CommandlineOptions {
         addOptionS(OptionBuilder.withLongOpt("backend").hasArg().withArgName("backend").withDescription("Specify the krun backend to execute with. <backend> is either [maude|java]. (Default: maude).").create());
         addOptionS(OptionBuilder.withLongOpt("simulation").hasArg().withArgName("string").withDescription("Simulation property of two programs in two semantics.").create());
         addOptionS(OptionBuilder.withLongOpt("help-experimental").withDescription("Print help on non-standard options.").create("X"));
-        
+
         // Experimental options
         addOptionE(OptionBuilder.withLongOpt("statistics").hasArg().withArgName("[on|off]").withDescription("Print Maude's rewrite statistics. (Default: ...).").create());
         addOptionE(OptionBuilder.withLongOpt("term").withDescription("Input argument will be parsed with the specified parser and used as the sole input to krun.").create());
@@ -173,5 +173,5 @@ public class CommandlineOptions {
     public void setOptionList(ArrayList<Option> optionList) {
         this.optionList = optionList;
     }
-    
+
 }

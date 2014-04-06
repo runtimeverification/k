@@ -313,7 +313,7 @@ public final class KItem extends Term {
 
             LinkedHashSet<Term> owiseResults = new LinkedHashSet<Term>();
             for (Rule rule : definition.functionRules().get(kLabelConstant)) {
-                
+
                 Collection<Map<Variable, Term>> solutions = PatternMatcher.patternMatch(this, rule, context);
                 if (solutions.isEmpty()) {
                     continue;
@@ -344,7 +344,7 @@ public final class KItem extends Term {
                     /*
                      * YilongL: consider applying rules with attribute [owise]
                      * only after no other rules can be applied for sure; in
-                     * other words, we cannot apply [owise] rule if some argument 
+                     * other words, we cannot apply [owise] rule if some argument
                      * is symbolic
                      */
                     boolean mayUseOwiseRule = true;
