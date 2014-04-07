@@ -1,3 +1,5 @@
+// Copyright (C) 2012-2014 K Team. All Rights Reserved.
+
 package org.kframework.backend.symbolic;
 
 import org.kframework.compile.utils.MetaK;
@@ -37,7 +39,7 @@ public class WrapVariableWithTopCell extends CopyOnWriteTransformer {
             return wrapPCAndVarWithGeneratedTop(pathCondition, node);
         }
 
-        return super.transform(node); 
+        return super.transform(node);
     }
 
     /**
