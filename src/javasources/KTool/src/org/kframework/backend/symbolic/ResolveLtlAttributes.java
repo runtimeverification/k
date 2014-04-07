@@ -119,8 +119,7 @@ public class ResolveLtlAttributes extends CopyOnWriteTransformer {
                                     ensures = (Term) ensures.accept(new WrapVariableWithTopCell(context, phi, ltlVarStateName));
                                 }
 
-                                // transform the rule:  pi /\ phi |= p when phi implies b
-                                // into pi /\ phi |= p when checkSat(phi /\ not b) == unsat
+                                // check if the path condition implies the rule condition
                                 // step 1: filter the condition and separate the smtValid part
                                 //         of it (operations which can be sent to the
                                 //         SMT solver) from the smtInvalid clauses.
@@ -132,10 +131,9 @@ public class ResolveLtlAttributes extends CopyOnWriteTransformer {
                                 Term smtValidCondition = AddPathCondition.andBool(filtered);
                                 Term predicates = AddPathCondition.andBool(ct.getGeneratedPredicates());
 
-                                // step 2: check the implication using the SMT solver:
-                                //         phi implies b is equivalent with checkSat(phi /\ not b).
-                                // Note that we use smtValid instead of b because predicates are not
-                                // important when checking the implication.
+                                // step 2: check the implication using the SMT solver using 'checkSat;
+                                // Note that we use smtValid instead of the rule condition because
+                                // predicates are not important when checking the implication.
                                 Term conditionNegation = KApp.of(KLabelConstant.NOTBOOL_KLABEL, smtValidCondition);
                                 Term implication = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, phi, conditionNegation);
                                 KApp unsat = StringBuiltin.kAppOf("unsat");
