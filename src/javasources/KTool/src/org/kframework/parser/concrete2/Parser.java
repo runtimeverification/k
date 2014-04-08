@@ -106,7 +106,14 @@ Terminology:
         public int compareTo(StateReturn that) {
             int x;
             return
-                // NOTE: ntBegin is contravarient
+                // The following idiom is a short-circuiting, integer "and"
+                // that does a lexicographic ordering over:
+                //  - ntBegin (contravariently),
+                //  - nt.orderingInfo (not used until we get lookaheads fixed)
+                //  - stateEnd,
+                //  - state.orderingInfo,
+                //  - stateBegin and
+                //  - state.
                 ((x = Integer.compare(that.key.stateCall.key.ntCall.key.ntBegin,
                                       this.key.stateCall.key.ntCall.key.ntBegin)) != 0) ? x :
                 // TODO: ((x = this.key.stateCall.key.ntCall.key.nt.orderingInfo.compareTo(
