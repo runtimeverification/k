@@ -42,6 +42,7 @@ public class Nullability {
      * @return A set with all the NonTerminals that can become entryNullable.
      */
     public Nullability(Grammar grammar) {
+        assert grammar != null;
         // 1. get all entryNullable states
         // list NonTerminals reachable from the start symbol.
         // the value of the map keeps a reference to all the states which call NonTerminals

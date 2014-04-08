@@ -62,6 +62,7 @@ Terminology:
 
             public Key(NonTerminalCall ntCall, int stateBegin, State state) {
     //***************************** Start Boilerplate *****************************
+                assert ntCall != null; assert state != null;
                 this.ntCall = ntCall; this.stateBegin = stateBegin; this.state = state;
             }
 
@@ -88,7 +89,7 @@ Terminology:
             }
         }
         final Key key;
-        StateCall(Key key) { this.key = key; }
+        StateCall(Key key) { assert key != null; this.key = key; }
 
         public int hashCode() {
             return this.key.hashCode();
@@ -123,6 +124,7 @@ Terminology:
             public final StateCall stateCall;
             public final int stateEnd;
             public Key(StateCall stateCall, int stateEnd) {
+                assert stateCall != null;
                 // if we are a lookahead, then force the the state end to be equal to the state begin
                 if (stateCall.key.state instanceof NonTerminalState &&
                     ((NonTerminalState)stateCall.key.state).isLookahead) {
@@ -186,6 +188,7 @@ Terminology:
             public final int ntBegin;
     //***************************** Start Boilerplate *****************************
             public Key(NonTerminal nt, int ntBegin) {
+                assert nt != null;
                 // assert ntBegin == c.stateBegin for c in callers
                 this.nt = nt; this.ntBegin = ntBegin;
             }
@@ -211,7 +214,7 @@ Terminology:
             }
         }
         final Key key;
-        NonTerminalCall(Key key) { this.key = key; }
+        NonTerminalCall(Key key) { assert key != null; this.key = key; }
 
         public int hashCode() {
             return this.key.hashCode();
@@ -558,6 +561,7 @@ Terminology:
         public final Set<Pair<String, Pattern>> tokens;
 
         public ParseError(int position, int line, int column, Set<Pair<String, Pattern>> tokens) {
+            assert tokens != null;
             this.position = position;
             this.tokens = tokens;
             this.column = column;

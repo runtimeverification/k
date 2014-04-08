@@ -63,7 +63,10 @@ public abstract class Rule implements Serializable {
     public static class WrapLabelRule extends KListRule {
         private final KLabel label;
         private final String sort;
-        public WrapLabelRule(KLabel label, String sort) { this.label = label; this.sort = sort; }
+        public WrapLabelRule(KLabel label, String sort) {
+            assert label != null; assert sort != null;
+            this.label = label; this.sort = sort;
+        }
         protected KList apply(KList klist, MetaData metaData) {
             Term term = new KApp(label, klist);
             term.setSort(this.sort);
@@ -91,7 +94,7 @@ public abstract class Rule implements Serializable {
         /** Change the last {@link getSuffixLength()} elements to the ones in {@link list} */
         protected class Accept extends Result {
             List<Term> list;
-            public Accept(List<Term> list) { this.list = list; }
+            public Accept(List<Term> list) { assert list != null; this.list = list; }
         }
 
         protected KList apply(KList klist, MetaData metaData) {
@@ -148,7 +151,7 @@ public abstract class Rule implements Serializable {
      */
     public static class InsertRule extends SuffixRule {
         private final Term term;
-        public InsertRule(Term term) { this.term = term; }
+        public InsertRule(Term term) { assert term != null; this.term = term; }
         protected boolean rejectSmallKLists() { return false; }
         protected int getSuffixLength() { return 0; }
         public Result applySuffix(List<Term> set, MetaData metaData) {

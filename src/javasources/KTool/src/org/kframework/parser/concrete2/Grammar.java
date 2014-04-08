@@ -338,6 +338,7 @@ public class Grammar implements Serializable {
         }
 
         public State(String name, NonTerminal nt) {
+            assert nt != null;
             this.name = name + "[" + this.unique + "]";
             this.nt = nt;
         }
@@ -412,6 +413,7 @@ public class Grammar implements Serializable {
                 String name, NonTerminal nt,
                 NonTerminal child, boolean isLookahead) {
             super(name, nt, true);
+            assert child != null;
             nt.intermediaryStates.add(this);
             this.child = child;
             this.isLookahead = isLookahead;
@@ -426,6 +428,7 @@ public class Grammar implements Serializable {
         public final Rule rule;
         public RuleState(String name, NonTerminal nt, Rule rule) {
             super(name, nt, true);
+            assert rule != null;
             this.rule = rule;
         }
     }
@@ -453,6 +456,7 @@ public class Grammar implements Serializable {
 
         public PrimitiveState(String name, NonTerminal nt, String sort) {
             super(name, nt, true);
+            assert sort != null;
             this.sort = sort;
         }
 
@@ -476,6 +480,7 @@ public class Grammar implements Serializable {
 
         public RegExState(String name, NonTerminal nt, Pattern pattern, String sort) {
             super(name, nt, sort);
+            assert pattern != null;
             this.pattern = pattern;
         }
 
