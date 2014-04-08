@@ -31,6 +31,11 @@ import org.kframework.parser.concrete2.Grammar.State;
 import org.kframework.parser.concrete2.Rule.ContextFreeRule;
 import org.kframework.parser.concrete2.Rule.ContextSensitiveRule;
 
+/**
+ * The main code for running the parser.
+ */
+public class Parser {
+
 /*
 Terminology:
   entryState/exitState: the first and last states in a non-terminal
@@ -44,440 +49,436 @@ Terminology:
   nextState/previousState: successor/predecessor states in a state machine
 */
 
-/**
- * The dynamic record for where a state starts parsing.
- */
-class StateCall {
-    final Function function = Function.empty();
+    /**
+     * The dynamic record for where a state starts parsing.
+     */
+    static class StateCall {
+        final Function function = Function.empty();
 
-    static class Key {
-        final NonTerminalCall ntCall;
-        final int stateBegin;
-        final State state;
+        static class Key {
+            final NonTerminalCall ntCall;
+            final int stateBegin;
+            final State state;
 
-        public Key(NonTerminalCall ntCall, int stateBegin, State state) {
-//***************************** Start Boilerplate *****************************
-            this.ntCall = ntCall; this.stateBegin = stateBegin; this.state = state;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            Key key = (Key) o;
-
-            if (stateBegin != key.stateBegin) return false;
-            if (!ntCall.equals(key.ntCall)) return false;
-            if (!state.equals(key.state)) return false;
-
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = ntCall.key.hashCode();
-            result = 31 * result + stateBegin;
-            result = 31 * result + state.hashCode();
-            return result;
-        }
-    }
-    final Key key;
-    StateCall(Key key) { this.key = key; }
-
-    public int hashCode() {
-        return this.key.hashCode();
-    }
-//***************************** End Boilerplate *****************************
-}
-
-/**
- *  The dynamic record for where a state ends parsing.
- */
-class StateReturn implements Comparable<StateReturn> {
-    final Function function = Function.empty();
-
-    public int compareTo(StateReturn that) {
-        int x;
-        return
-            // NOTE: ntBegin is contravarient
-            ((x = Integer.compare(that.key.stateCall.key.ntCall.key.ntBegin,
-                                  this.key.stateCall.key.ntCall.key.ntBegin)) != 0) ? x :
-            // TODO: ((x = this.key.stateCall.key.ntCall.key.nt.orderingInfo.compareTo(
-            //             that.key.stateCall.key.ntCall.key.nt.orderingInfo)) != 0) ? x :
-            ((x = Integer.compare(this.key.stateEnd, that.key.stateEnd)) != 0) ? x :
-            ((x = this.key.stateCall.key.state.orderingInfo.compareTo(
-                  that.key.stateCall.key.state.orderingInfo)) != 0) ? x :
-            // NOTE: these last two comparisons are just so we don't conflate distinct values
-            ((x = Integer.compare(this.key.stateCall.key.stateBegin,
-                                  that.key.stateCall.key.stateBegin)) != 0) ? x :
-            this.key.stateCall.key.state.compareTo(that.key.stateCall.key.state);
-    }
-
-    public static class Key {
-        public final StateCall stateCall;
-        public final int stateEnd;
-        public Key(StateCall stateCall, int stateEnd) {
-            // if we are a lookahead, then force the the state end to be equal to the state begin
-            if (stateCall.key.state instanceof NonTerminalState &&
-                ((NonTerminalState)stateCall.key.state).isLookahead) {
-                stateEnd = stateCall.key.stateBegin;
+            public Key(NonTerminalCall ntCall, int stateBegin, State state) {
+    //***************************** Start Boilerplate *****************************
+                this.ntCall = ntCall; this.stateBegin = stateBegin; this.state = state;
             }
-//***************************** Start Boilerplate *****************************
-            this.stateCall = stateCall; this.stateEnd = stateEnd;
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+
+                Key key = (Key) o;
+
+                if (stateBegin != key.stateBegin) return false;
+                if (!ntCall.equals(key.ntCall)) return false;
+                if (!state.equals(key.state)) return false;
+
+                return true;
+            }
+
+            @Override
+            public int hashCode() {
+                int result = ntCall.key.hashCode();
+                result = 31 * result + stateBegin;
+                result = 31 * result + state.hashCode();
+                return result;
+            }
         }
+        final Key key;
+        StateCall(Key key) { this.key = key; }
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            Key key = (Key) o;
-
-            if (stateEnd != key.stateEnd) return false;
-            if (!stateCall.equals(key.stateCall)) return false;
-
-            return true;
-        }
-
-        @Override
         public int hashCode() {
-            int result = stateCall.key.hashCode();
-            result = 31 * result + stateEnd;
-            return result;
+            return this.key.hashCode();
         }
+    //***************************** End Boilerplate *****************************
     }
 
-    final Key key;
-    StateReturn(Key key) {
-        this.key = key;
-        //// NON-BOILERPLATE CODE: ////
-        // update the NonTerminalCalls set of ExitStateReturns
-        if (this.key.stateCall.key.state instanceof ExitState) {
-            this.key.stateCall.key.ntCall.exitStateReturns.add(this);
-        }
-    }
+    /**
+     *  The dynamic record for where a state ends parsing.
+     */
+    static class StateReturn implements Comparable<StateReturn> {
+        final Function function = Function.empty();
 
-    public int hashCode() {
-        return this.key.hashCode();
-    }
-//***************************** End Boilerplate *****************************
-}
-
-class Context {
-    final Set<KList> contexts = new HashSet<>();
-}
-
-/**
- * The dynamic record for where a non-terminal starts parsing.
- */
-class NonTerminalCall {
-    final Set<StateCall> callers = new HashSet<>();
-    final Set<StateReturn> exitStateReturns = new HashSet<>();
-    final Set<StateReturn> reactivations = new HashSet<>();
-    final Context context = new Context();
-    public static class Key {
-        public final NonTerminal nt;
-        public final int ntBegin;
-//***************************** Start Boilerplate *****************************
-        public Key(NonTerminal nt, int ntBegin) {
-            // assert ntBegin == c.stateBegin for c in callers
-            this.nt = nt; this.ntBegin = ntBegin;
+        public int compareTo(StateReturn that) {
+            int x;
+            return
+                // NOTE: ntBegin is contravarient
+                ((x = Integer.compare(that.key.stateCall.key.ntCall.key.ntBegin,
+                                      this.key.stateCall.key.ntCall.key.ntBegin)) != 0) ? x :
+                // TODO: ((x = this.key.stateCall.key.ntCall.key.nt.orderingInfo.compareTo(
+                //             that.key.stateCall.key.ntCall.key.nt.orderingInfo)) != 0) ? x :
+                ((x = Integer.compare(this.key.stateEnd, that.key.stateEnd)) != 0) ? x :
+                ((x = this.key.stateCall.key.state.orderingInfo.compareTo(
+                      that.key.stateCall.key.state.orderingInfo)) != 0) ? x :
+                // NOTE: these last two comparisons are just so we don't conflate distinct values
+                ((x = Integer.compare(this.key.stateCall.key.stateBegin,
+                                      that.key.stateCall.key.stateBegin)) != 0) ? x :
+                this.key.stateCall.key.state.compareTo(that.key.stateCall.key.state);
         }
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+        public static class Key {
+            public final StateCall stateCall;
+            public final int stateEnd;
+            public Key(StateCall stateCall, int stateEnd) {
+                // if we are a lookahead, then force the the state end to be equal to the state begin
+                if (stateCall.key.state instanceof NonTerminalState &&
+                    ((NonTerminalState)stateCall.key.state).isLookahead) {
+                    stateEnd = stateCall.key.stateBegin;
+                }
+    //***************************** Start Boilerplate *****************************
+                this.stateCall = stateCall; this.stateEnd = stateEnd;
+            }
 
-            Key key = (Key) o;
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
 
-            if (ntBegin != key.ntBegin) return false;
-            if (!nt.equals(key.nt)) return false;
+                Key key = (Key) o;
 
-            return true;
+                if (stateEnd != key.stateEnd) return false;
+                if (!stateCall.equals(key.stateCall)) return false;
+
+                return true;
+            }
+
+            @Override
+            public int hashCode() {
+                int result = stateCall.key.hashCode();
+                result = 31 * result + stateEnd;
+                return result;
+            }
         }
 
-        @Override
+        final Key key;
+        StateReturn(Key key) {
+            this.key = key;
+            //// NON-BOILERPLATE CODE: ////
+            // update the NonTerminalCalls set of ExitStateReturns
+            if (this.key.stateCall.key.state instanceof ExitState) {
+                this.key.stateCall.key.ntCall.exitStateReturns.add(this);
+            }
+        }
+
         public int hashCode() {
-            int result = nt.hashCode();
-            result = 31 * result + ntBegin;
-            return result;
+            return this.key.hashCode();
         }
+    //***************************** End Boilerplate *****************************
     }
-    final Key key;
-    NonTerminalCall(Key key) { this.key = key; }
 
-    public int hashCode() {
-        return this.key.hashCode();
+    static class Context {
+        final Set<KList> contexts = new HashSet<>();
     }
-//***************************** End Boilerplate *****************************
-}
 
-////////////////
+    /**
+     * The dynamic record for where a non-terminal starts parsing.
+     */
+    static class NonTerminalCall {
+        final Set<StateCall> callers = new HashSet<>();
+        final Set<StateReturn> exitStateReturns = new HashSet<>();
+        final Set<StateReturn> reactivations = new HashSet<>();
+        final Context context = new Context();
+        public static class Key {
+            public final NonTerminal nt;
+            public final int ntBegin;
+    //***************************** Start Boilerplate *****************************
+            public Key(NonTerminal nt, int ntBegin) {
+                // assert ntBegin == c.stateBegin for c in callers
+                this.nt = nt; this.ntBegin = ntBegin;
+            }
 
-class StateReturnWorkList extends TreeSet<StateReturn> {
-    public void enqueue(StateReturn stateReturn) { this.add(stateReturn); }
-    public StateReturn dequeue() { return this.pollFirst(); }
-}
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
 
-/**
- * The state used internally by the parser.
- */
-class ParseState {
-    // the input string which needs parsing
-    final CharSequence input;
-    // a priority queue containing the return states to be processed
-    final StateReturnWorkList stateReturnWorkList = new StateReturnWorkList();
-    // a preprocessed correspondence from index to line and column in the input string
-    final int[] lines;
-    final int[] columns;
-    public ParseState(CharSequence input) {
-        /**
-         * Create arrays corresponding to the index in the input CharSequence and the line and
-         * column in the text. Tab counts as one.
-         *
-         * The newline characters are handled according to:
-         * http://www.unicode.org/standard/reports/tr13/tr13-5.html
-         * http://www.unicode.org/reports/tr18/#Line_Boundaries
-         */
-        this.input = input;
-        lines = new int[input.length()+1];
-        columns = new int[input.length()+1];
-        int l = 1;
-        int c = 1;
-        for (int i = 0; i < input.length(); i++) {
-            lines[i] = l;
-            columns[i] = c;
-            switch (input.charAt(i)) {
-                case '\r' :
-                    if (i+1 < input.length()) {
-                        if (input.charAt(i+1) == '\n') {
-                            lines[i+1] = l;
-                            columns[i+1] = c + 1;
-                            i++;
+                Key key = (Key) o;
+
+                if (ntBegin != key.ntBegin) return false;
+                if (!nt.equals(key.nt)) return false;
+
+                return true;
+            }
+
+            @Override
+            public int hashCode() {
+                int result = nt.hashCode();
+                result = 31 * result + ntBegin;
+                return result;
+            }
+        }
+        final Key key;
+        NonTerminalCall(Key key) { this.key = key; }
+
+        public int hashCode() {
+            return this.key.hashCode();
+        }
+    //***************************** End Boilerplate *****************************
+    }
+
+    ////////////////
+
+    static class StateReturnWorkList extends TreeSet<StateReturn> {
+        public void enqueue(StateReturn stateReturn) { this.add(stateReturn); }
+        public StateReturn dequeue() { return this.pollFirst(); }
+    }
+
+    /**
+     * The state used internally by the parser.
+     */
+    static class ParseState {
+        // the input string which needs parsing
+        final CharSequence input;
+        // a priority queue containing the return states to be processed
+        final StateReturnWorkList stateReturnWorkList = new StateReturnWorkList();
+        // a preprocessed correspondence from index to line and column in the input string
+        final int[] lines;
+        final int[] columns;
+        public ParseState(CharSequence input) {
+            /**
+             * Create arrays corresponding to the index in the input CharSequence and the line and
+             * column in the text. Tab counts as one.
+             *
+             * The newline characters are handled according to:
+             * http://www.unicode.org/standard/reports/tr13/tr13-5.html
+             * http://www.unicode.org/reports/tr18/#Line_Boundaries
+             */
+            this.input = input;
+            lines = new int[input.length()+1];
+            columns = new int[input.length()+1];
+            int l = 1;
+            int c = 1;
+            for (int i = 0; i < input.length(); i++) {
+                lines[i] = l;
+                columns[i] = c;
+                switch (input.charAt(i)) {
+                    case '\r' :
+                        if (i+1 < input.length()) {
+                            if (input.charAt(i+1) == '\n') {
+                                lines[i+1] = l;
+                                columns[i+1] = c + 1;
+                                i++;
+                            }
                         }
-                    }
-                case '\n'      :
-                case  '\u000B' :
-                case  '\u000C' :
-                case  '\u0085' :
-                case  '\u2028' :
-                case  '\u2029' :
-                    l++; c = 1; break;
-                default :
-                    c++;
-            }
-        }
-        lines[input.length()] = l;
-        columns[input.length()] = c;
-    }
-
-    private BiMap<NonTerminalCall.Key,NonTerminalCall> ntCalls = HashBiMap.create();
-    private BiMap<StateCall.Key,StateCall> stateCalls = HashBiMap.create();
-    private BiMap<StateReturn.Key,StateReturn> stateReturns = HashBiMap.create();
-
-    public NonTerminalCall getNtCall(NonTerminalCall.Key key) {
-        NonTerminalCall value = ntCalls.get(key);
-        if (value == null) {
-            value = new NonTerminalCall(key);
-            ntCalls.put(key, value);
-        }
-        return value;
-    }
-
-    public StateCall getStateCall(StateCall.Key key) {
-        StateCall value = stateCalls.get(key);
-        if (value == null) {
-            value = new StateCall(key);
-            stateCalls.put(key, value);
-        }
-        return value;
-    }
-
-    public Set<StateCall.Key> getStateCallKeys() { return stateCalls.keySet(); }
-
-    public StateReturn getStateReturn(StateReturn.Key key) {
-        StateReturn value = stateReturns.get(key);
-        if (value == null) {
-            value = new StateReturn(key);
-            stateReturns.put(key, value);
-        }
-        return value;
-    }
-}
-
-////////////////
-
-/**
- * An abstract mapping from a Context to a parse tree.
- */
-class Function {
-    private abstract class Mapping {}
-    private class Nil extends Mapping { Set<KList> values = new HashSet<>(); }
-    private class One extends Mapping { Map<KList, Set<KList>> values = new HashMap<>(); }
-
-    private Mapping mapping = new Nil();
-    private AssertionError unknownMappingType() { return new AssertionError("Unknown mapping type"); }
-
-    public static final Function IDENTITY = new Function();
-    static {
-        ((Nil) IDENTITY.mapping).values.add(KList.EMPTY);
-    }
-    static Function empty() { return new Function(); }
-
-    // Converts a Nil to a One with the given contexts
-    private void promote(Set<KList> contexts) {
-        assert this.mapping instanceof Nil;
-        Set<KList> oldValues = ((Nil) this.mapping).values;
-        this.mapping = new One();
-        for (KList key : contexts) {
-            // Java, why you no have copy constructor?!
-            Set<KList> value = new HashSet<>();
-            value.addAll(oldValues);
-            ((One) this.mapping).values.put(key, value);
-        }
-    }
-
-    // Should be method of KList
-    private static KList append(KList klist, Term t) {
-        KList newKList = new KList(klist);
-        newKList.add(t);
-        return newKList;
-    }
-
-    // for each set in that, add adder applied to that set
-    boolean addAux(Function that, com.google.common.base.Function<Set<KList>, Set<KList>> adder) {
-        if (this.mapping instanceof Nil && that.mapping instanceof Nil) {
-            return ((Nil) this.mapping).values.addAll(adder.apply(((Nil) that.mapping).values));
-        } else if (this.mapping instanceof Nil && that.mapping instanceof One) {
-            this.promote(((One) that.mapping).values.keySet());
-            return this.addAux(that, adder);
-        } else if (this.mapping instanceof One && that.mapping instanceof Nil) {
-            boolean result = false;
-            Set<KList> newValues = adder.apply(((Nil) that.mapping).values);
-            for (Set<KList> values : ((One) this.mapping).values.values()) {
-                result |= values.addAll(newValues);
-            }
-            return result;
-        } else if (this.mapping instanceof One && that.mapping instanceof One) {
-            boolean result = false;
-            for (KList key : ((One) that.mapping).values.keySet()) {
-                if (!((One) this.mapping).values.containsKey(key)) {
-                    ((One) this.mapping).values.put(key, new HashSet<KList>());
+                    case '\n'      :
+                    case  '\u000B' :
+                    case  '\u000C' :
+                    case  '\u0085' :
+                    case  '\u2028' :
+                    case  '\u2029' :
+                        l++; c = 1; break;
+                    default :
+                        c++;
                 }
-                result |= ((One) this.mapping).values.get(key).addAll(
-                    adder.apply(((One) that.mapping).values.get(key)));
             }
-            return result;
-        } else { throw unknownMappingType(); }
-    }
+            lines[input.length()] = l;
+            columns[input.length()] = c;
+        }
 
-    // Returns the KLists that this function maps to
-    Set<KList> results() {
-        if (this.mapping instanceof Nil) { return ((Nil) this.mapping).values; }
-        else if (this.mapping instanceof One) {
-            Set<KList> result = new HashSet<>();
-            for (Set<KList> value: ((One) this.mapping).values.values()) {
-                result.addAll(value);
+        private BiMap<NonTerminalCall.Key,NonTerminalCall> ntCalls = HashBiMap.create();
+        private BiMap<StateCall.Key,StateCall> stateCalls = HashBiMap.create();
+        private BiMap<StateReturn.Key,StateReturn> stateReturns = HashBiMap.create();
+
+        public NonTerminalCall getNtCall(NonTerminalCall.Key key) {
+            NonTerminalCall value = ntCalls.get(key);
+            if (value == null) {
+                value = new NonTerminalCall(key);
+                ntCalls.put(key, value);
             }
-            return result;
-        } else { throw unknownMappingType(); }
+            return value;
+        }
+
+        public StateCall getStateCall(StateCall.Key key) {
+            StateCall value = stateCalls.get(key);
+            if (value == null) {
+                value = new StateCall(key);
+                stateCalls.put(key, value);
+            }
+            return value;
+        }
+
+        public Set<StateCall.Key> getStateCallKeys() { return stateCalls.keySet(); }
+
+        public StateReturn getStateReturn(StateReturn.Key key) {
+            StateReturn value = stateReturns.get(key);
+            if (value == null) {
+                value = new StateReturn(key);
+                stateReturns.put(key, value);
+            }
+            return value;
+        }
     }
 
-    Set<KList> applyToNull() {
-        if (this.mapping instanceof Nil) { return ((Nil) this.mapping).values; }
-        else { assert false : "unimplemented"; return null; } // TODO
-    }
+    ////////////////
 
-    public boolean addIdentity() { return add(IDENTITY); }
+    /**
+     * An abstract mapping from a Context to a parse tree.
+     */
+    static class Function {
+        private abstract class Mapping {}
+        private class Nil extends Mapping { Set<KList> values = new HashSet<>(); }
+        private class One extends Mapping { Map<KList, Set<KList>> values = new HashMap<>(); }
 
-    public boolean add(Function that) {
-        return addAux(that, new com.google.common.base.Function<Set<KList>, Set<KList>>() {
-            public Set<KList> apply(Set<KList> set) { return set; }
-        });
-    }
-    boolean addToken(Function that, String string, String sort) {
-        final KApp token = Token.kAppOf(sort, string);
-        return addAux(that, new com.google.common.base.Function<Set<KList>, Set<KList>>() {
-            public Set<KList> apply(Set<KList> set) {
-                Set<KList> result = new HashSet<>();
-                for (KList klist : set) {
-                    result.add(append(klist, token));
+        private Mapping mapping = new Nil();
+        private AssertionError unknownMappingType() { return new AssertionError("Unknown mapping type"); }
+
+        public static final Function IDENTITY = new Function();
+        static {
+            ((Nil) IDENTITY.mapping).values.add(KList.EMPTY);
+        }
+        static Function empty() { return new Function(); }
+
+        // Converts a Nil to a One with the given contexts
+        private void promote(Set<KList> contexts) {
+            assert this.mapping instanceof Nil;
+            Set<KList> oldValues = ((Nil) this.mapping).values;
+            this.mapping = new One();
+            for (KList key : contexts) {
+                // Java, why you no have copy constructor?!
+                Set<KList> value = new HashSet<>();
+                value.addAll(oldValues);
+                ((One) this.mapping).values.put(key, value);
+            }
+        }
+
+        // Should be method of KList
+        private static KList append(KList klist, Term t) {
+            KList newKList = new KList(klist);
+            newKList.add(t);
+            return newKList;
+        }
+
+        // for each set in that, add adder applied to that set
+        boolean addAux(Function that, com.google.common.base.Function<Set<KList>, Set<KList>> adder) {
+            if (this.mapping instanceof Nil && that.mapping instanceof Nil) {
+                return ((Nil) this.mapping).values.addAll(adder.apply(((Nil) that.mapping).values));
+            } else if (this.mapping instanceof Nil && that.mapping instanceof One) {
+                this.promote(((One) that.mapping).values.keySet());
+                return this.addAux(that, adder);
+            } else if (this.mapping instanceof One && that.mapping instanceof Nil) {
+                boolean result = false;
+                Set<KList> newValues = adder.apply(((Nil) that.mapping).values);
+                for (Set<KList> values : ((One) this.mapping).values.values()) {
+                    result |= values.addAll(newValues);
                 }
                 return result;
-            }
-        });
-    }
-
-    boolean addNTCall(Function call, final Function exit) {
-        return addAux(call, new com.google.common.base.Function<Set<KList>, Set<KList>>() {
-            public Set<KList> apply(Set<KList> set) {
-                Set<KList> result = new HashSet<>();
-                for (KList context : set) {
-                    // find subset of exit that matches
-                    Set<KList> matches = null;
-                    if (exit.mapping instanceof Nil) {
-                        matches = ((Nil) exit.mapping).values;
-                    } else if (exit.mapping instanceof One) {
-                        matches = ((One) exit.mapping).values.get(context);
-                    } else { unknownMappingType(); }
-                    // if we found some, make an amb node and append them to the KList
-                    if (!matches.isEmpty()) {
-                        result.add(append(context, new Ambiguity(KSorts.K, new ArrayList<Term>(matches))));
+            } else if (this.mapping instanceof One && that.mapping instanceof One) {
+                boolean result = false;
+                for (KList key : ((One) that.mapping).values.keySet()) {
+                    if (!((One) this.mapping).values.containsKey(key)) {
+                        ((One) this.mapping).values.put(key, new HashSet<KList>());
                     }
+                    result |= ((One) this.mapping).values.get(key).addAll(
+                        adder.apply(((One) that.mapping).values.get(key)));
                 }
                 return result;
-            }
-        });
-    }
+            } else { throw unknownMappingType(); }
+        }
 
-    // NOTE: also adds rule to reactivations
-    boolean addRule(Function that, final Rule rule, final StateReturn stateReturn, final Rule.MetaData metaData) {
-        if (rule instanceof ContextFreeRule) {
+        // Returns the KLists that this function maps to
+        Set<KList> results() {
+            if (this.mapping instanceof Nil) { return ((Nil) this.mapping).values; }
+            else if (this.mapping instanceof One) {
+                Set<KList> result = new HashSet<>();
+                for (Set<KList> value: ((One) this.mapping).values.values()) {
+                    result.addAll(value);
+                }
+                return result;
+            } else { throw unknownMappingType(); }
+        }
+
+        Set<KList> applyToNull() {
+            if (this.mapping instanceof Nil) { return ((Nil) this.mapping).values; }
+            else { assert false : "unimplemented"; return null; } // TODO
+        }
+
+        public boolean addIdentity() { return add(IDENTITY); }
+
+        public boolean add(Function that) {
+            return addAux(that, new com.google.common.base.Function<Set<KList>, Set<KList>>() {
+                public Set<KList> apply(Set<KList> set) { return set; }
+            });
+        }
+        boolean addToken(Function that, String string, String sort) {
+            final KApp token = Token.kAppOf(sort, string);
             return addAux(that, new com.google.common.base.Function<Set<KList>, Set<KList>>() {
                 public Set<KList> apply(Set<KList> set) {
-                    return ((ContextFreeRule) rule).apply(set, metaData);
+                    Set<KList> result = new HashSet<>();
+                    for (KList klist : set) {
+                        result.add(append(klist, token));
+                    }
+                    return result;
                 }
             });
-        } else if (rule instanceof ContextSensitiveRule) {
-            Set<KList> ntCallContexts = stateReturn.key.stateCall.key.ntCall.context.contexts;
+        }
 
-            if (this.mapping instanceof Nil) { promote(ntCallContexts); }
-
-            // Build a "promoted" version of "that"
-            One promotedThat = null;
-            if (that.mapping instanceof Nil) {
-                promotedThat = new One();
-                for (KList context : ntCallContexts) {
-                    promotedThat.values.put(context, ((Nil) that.mapping).values);
+        boolean addNTCall(Function call, final Function exit) {
+            return addAux(call, new com.google.common.base.Function<Set<KList>, Set<KList>>() {
+                public Set<KList> apply(Set<KList> set) {
+                    Set<KList> result = new HashSet<>();
+                    for (KList context : set) {
+                        // find subset of exit that matches
+                        Set<KList> matches = null;
+                        if (exit.mapping instanceof Nil) {
+                            matches = ((Nil) exit.mapping).values;
+                        } else if (exit.mapping instanceof One) {
+                            matches = ((One) exit.mapping).values.get(context);
+                        } else { unknownMappingType(); }
+                        // if we found some, make an amb node and append them to the KList
+                        if (!matches.isEmpty()) {
+                            result.add(append(context, new Ambiguity(KSorts.K, new ArrayList<Term>(matches))));
+                        }
+                    }
+                    return result;
                 }
-            } else if (that.mapping instanceof One) {
-                promotedThat = ((One) that.mapping);
-            } else { unknownMappingType(); }
+            });
+        }
 
-            boolean result = false;
-            for (KList key : promotedThat.values.keySet()) {
-                if (((One) this.mapping).values.get(key) == null) {
-                    ((One) this.mapping).values.put(key, new HashSet<KList>());
+        // NOTE: also adds rule to reactivations
+        boolean addRule(Function that, final Rule rule, final StateReturn stateReturn, final Rule.MetaData metaData) {
+            if (rule instanceof ContextFreeRule) {
+                return addAux(that, new com.google.common.base.Function<Set<KList>, Set<KList>>() {
+                    public Set<KList> apply(Set<KList> set) {
+                        return ((ContextFreeRule) rule).apply(set, metaData);
+                    }
+                });
+            } else if (rule instanceof ContextSensitiveRule) {
+                Set<KList> ntCallContexts = stateReturn.key.stateCall.key.ntCall.context.contexts;
+
+                if (this.mapping instanceof Nil) { promote(ntCallContexts); }
+
+                // Build a "promoted" version of "that"
+                One promotedThat = null;
+                if (that.mapping instanceof Nil) {
+                    promotedThat = new One();
+                    for (KList context : ntCallContexts) {
+                        promotedThat.values.put(context, ((Nil) that.mapping).values);
+                    }
+                } else if (that.mapping instanceof One) {
+                    promotedThat = ((One) that.mapping);
+                } else { unknownMappingType(); }
+
+                boolean result = false;
+                for (KList key : promotedThat.values.keySet()) {
+                    if (((One) this.mapping).values.get(key) == null) {
+                        ((One) this.mapping).values.put(key, new HashSet<KList>());
+                    }
+                    result |= ((One) this.mapping).values.get(key).
+                        addAll(((ContextSensitiveRule) rule).apply(key, promotedThat.values.get(key), metaData));
                 }
-                result |= ((One) this.mapping).values.get(key).
-                    addAll(((ContextSensitiveRule) rule).apply(key, promotedThat.values.get(key), metaData));
-            }
 
-            stateReturn.key.stateCall.key.ntCall.reactivations.add(stateReturn);
+                stateReturn.key.stateCall.key.ntCall.reactivations.add(stateReturn);
 
-            return result;
-        } else { throw unknownMappingType(); }
+                return result;
+            } else { throw unknownMappingType(); }
+        }
     }
-}
 
-////////////////
+    ////////////////
 
-/**
- * The main code for running the parser.
- */
-public class Parser {
     private final ParseState s;
 
     public Parser(CharSequence input) {
