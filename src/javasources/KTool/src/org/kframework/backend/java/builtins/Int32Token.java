@@ -214,8 +214,9 @@ public class Int32Token extends BitVector<Integer> {
         assert digitBase > 0;
 
         List<BitVector> digits = new ArrayList<>();
-        for (long value = UnsignedInts.toLong(this.value); value != 0; value >>= digitBase) {
-            digits.add(BitVector.of(value % (1 << digitBase), digitBase));
+        long longValue = UnsignedInts.toLong(this.value);
+        for (int i = 0; i * digitBase < Integer.SIZE;  ++i, longValue >>= digitBase) {
+            digits.add(BitVector.of(longValue % (1 << digitBase), digitBase));
         }
 
         return Lists.reverse(digits);

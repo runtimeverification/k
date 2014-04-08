@@ -83,9 +83,19 @@ public class MapUpdate extends Term {
     }
 
     @Override
+    public boolean isExactSort() {
+        return true;
+    }
+
+    @Override
     public boolean isSymbolic() {
         // TODO(YilongL): throw an exception instead?
         return false;
+    }
+
+    @Override
+    public String sort() {
+        return map.sort();
     }
 
     @Override

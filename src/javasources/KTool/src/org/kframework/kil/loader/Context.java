@@ -83,6 +83,8 @@ public class Context implements Serializable {
     public Map<String, Set<String>> listLabels = new HashMap<String, Set<String>>();
     public Map<String, ASTNode> locations = new HashMap<String, ASTNode>();
     public Map<String, Set<Production>> associativity = new HashMap<String, Set<Production>>();
+    
+    public Map<String, Production> canonicalBracketForSort = new HashMap<>();
     private Poset subsorts = new Poset();
     public java.util.Set<String> definedSorts = Sort.getBaseSorts();
     private Poset priorities = new Poset();

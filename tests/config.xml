@@ -1,3 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- Copyright (C) 2012-2014 K Team. All Rights Reserved. -->
+
 <!--
   Use these tags for comments.  To test only one language,
   just comment out the other tests and then type "ant test".
@@ -232,6 +235,18 @@
   <test
       definition="tests/regression/issue483/issue.k"
   />
+  <test
+      definition="tests/regression/issue#313/test.k"
+      programs="tests/regression/issue#313/programs"
+      results="tests/regression/issue#313/tests"
+      extension="test"
+      >
+      <all-programs>
+        <krun-option name="--output" value="pretty" />
+        <krun-option name="--color" value="off" />
+      </all-programs>
+  </test>
+
   <test
       definition="tests/regression/strictness/issue.k"
       programs="tests/regression/strictness/programs"
@@ -478,4 +493,3 @@
            programs="tests/regression/generalized-strictness"
            results="tests/regression/generalized-strictness" />
 </tests>
-

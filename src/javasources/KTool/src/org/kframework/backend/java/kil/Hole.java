@@ -13,7 +13,7 @@ import org.kframework.kil.ASTNode;
  *
  * @author AndreiS
  */
-public class Hole extends Term implements Sorted {
+public final class Hole extends Term {
 
     public static final Hole HOLE = new Hole();
 
@@ -22,13 +22,15 @@ public class Hole extends Term implements Sorted {
     }
 
     @Override
+    public boolean isExactSort() {
+        return true;
+    }
+
+    @Override
     public boolean isSymbolic() {
         return false;
     }
 
-    /**
-     * Returns a {@code String} representation of the sort of this object.
-     */
     @Override
     public String sort() {
         return KSorts.KITEM;

@@ -223,11 +223,11 @@ public class Basic {
     } catch (ParseException e) {
       // TODO: report location
       GlobalSettings.kem.register(new KException(
-        ExceptionType.ERROR, KExceptionGroup.PARSER, e.toString(), filename, null));
+        ExceptionType.ERROR, KExceptionGroup.OUTER_PARSER, e.getMessage(), filename, null));
       return new ArrayList<DefinitionItem>();
     } catch (TokenMgrError e) {
       GlobalSettings.kem.register(new KException(
-        ExceptionType.ERROR, KExceptionGroup.PARSER, e.toString(), filename, null));
+        ExceptionType.ERROR, KExceptionGroup.OUTER_PARSER, e.getMessage(), filename, null));
       return new ArrayList<DefinitionItem>();
     }
   }
@@ -545,13 +545,14 @@ Sort SortID() : { Sort sort; }
 StringSentence Bubble(String type) :
 {
   StringBuilder sb = new StringBuilder();
-  int sentenceBeginLine, sentenceBeginColumn;
+  int sentenceBeginLine = beginLine + token.endLine;
+  int sentenceBeginColumn = beginColumn + token.endColumn + 1;
 }
 {
-  <BUBBLE> { sb.append(image());
-             sentenceBeginLine = beginLine + token.beginLine;
-             sentenceBeginColumn = beginColumn + token.beginColumn; }
-  (<BUBBLE> { sb.append(specialAndImage()); })*
+  (<BUBBLE> { sb.append(image());
+              sentenceBeginLine = beginLine + token.beginLine;
+              sentenceBeginColumn = beginColumn + token.beginColumn; }
+   (<BUBBLE> { sb.append(specialAndImage()); })*)?
   { return makeStringSentence(type, sb.toString(),
       sentenceBeginLine, sentenceBeginColumn); }
 }
@@ -622,7 +623,19 @@ void Element(StringBuilder reg, StringBuilder follow) :
 | Group(sb)
 | "(" { sb.append(specialAndImage()); }
   (Element(sb, follow))*
+  ( "|" { sb.append(specialAndImage()); }
+    (Element(sb, follow))*)*
   ")" { sb.append(specialAndImage()); }
+/*
+| "(" { sb.append(specialAndImage()); }
+  (Element(sb, follow))*
+  ")" { sb.append(specialAndImage()); }
+| "(" { sb.append(specialAndImage()); }
+  Element(sb, follow)
+  "|" { sb.append(specialAndImage()); }
+  Element(sb, follow)
+  ")" { sb.append(specialAndImage()); }
+*/
 | "{" { sb.append(specialAndImage()); }
   Element(sb, follow)
   <STRING> { sb.append(specialAndImage()); }

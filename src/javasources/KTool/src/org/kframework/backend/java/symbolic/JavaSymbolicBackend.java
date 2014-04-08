@@ -17,6 +17,7 @@ import org.kframework.compile.utils.*;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.AddConsesVisitor;
+import org.kframework.kil.loader.CollectBracketsVisitor;
 import org.kframework.kil.loader.CollectConsesVisitor;
 import org.kframework.kil.loader.CollectSubsortsVisitor;
 import org.kframework.kil.loader.Context;
@@ -109,6 +110,7 @@ public class JavaSymbolicBackend extends BasicBackend {
         steps.add(new CheckVisitorStep<Definition>(new AddConsesVisitor(context), context));
         steps.add(new CheckVisitorStep<Definition>(new CollectConsesVisitor(context), context));
         steps.add(new CheckVisitorStep<Definition>(new CollectSubsortsVisitor(context), context));
+        steps.add(new CheckVisitorStep<Definition>(new CollectBracketsVisitor(context), context));
         steps.add(new DefinitionSerializer(context));
 
         steps.add(new StrictnessToContexts(context));

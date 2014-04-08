@@ -253,6 +253,14 @@ public final class BuiltinBitVectorOperations {
         }
     }
 
+    public static BoolToken ne(BitVector term1, BitVector term2, TermContext context) {
+        if (term1.bitwidth() == term2.bitwidth()) {
+            return term1.ne(term2);
+        } else {
+            throw bitwidthMismatchException(term1, term2);
+        }
+    }
+
     public static BuiltinList toDigits(BitVector term, IntToken bitwidth, TermContext context) {
         return new BuiltinList(term.toDigits(bitwidth.intValue()));
     }

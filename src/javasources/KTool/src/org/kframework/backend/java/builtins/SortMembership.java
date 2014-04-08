@@ -1,11 +1,18 @@
 package org.kframework.backend.java.builtins;
 
-import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.BuiltinSet;
+import org.kframework.backend.java.kil.KCollection;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Token;
 import org.kframework.kil.loader.Context;
 
 import com.google.common.collect.ImmutableSet;
-import org.kframework.parser.concrete.lib.test$Me5_0_0;
-
 
 /**
  * Utility class for checking sort membership predicates.
@@ -38,9 +45,8 @@ public class SortMembership {
         }
 
         Term term = ((KList) kItem.kList()).getContents().get(0);
-        String termSort = ((Sorted) term).sort();
-        if (term instanceof KItem && ((KItem) term).kLabel() instanceof KLabel
-                && ((KLabel) ((KItem) term).kLabel()).isConstructor()) {
+        String termSort = term.sort();
+        if (term.isExactSort()) {
             return context.isSubsortedEq(predicateSort, termSort) ? BoolToken.TRUE : BoolToken.FALSE;
         } else if (context.isSubsortedEq(predicateSort, termSort)) {
             return BoolToken.TRUE;

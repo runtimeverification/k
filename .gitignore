@@ -3,10 +3,12 @@
 *-kompiled-symbolic
 *.kore
 *.pdf
+*.swp
 *.class
 .metadata
 .cache
 .idea
+.checkstyle-files
 *~
 junit-reports
 samples/test/

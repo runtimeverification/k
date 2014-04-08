@@ -1,0 +1,4 @@
+lbaz(1, 5 + 6)
+print
+lbar(3 + 4, 1 + 2)
+print

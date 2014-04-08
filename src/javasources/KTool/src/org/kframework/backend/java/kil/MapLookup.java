@@ -48,10 +48,20 @@ public class MapLookup extends Term implements DataStructureLookup {
     }
 
     @Override
+    public boolean isExactSort() {
+        return false;
+    }
+
+    @Override
     public boolean isSymbolic() {
         return true;
 //        assert final : "isSymbolic is not supported by MapLookup (yet)";
 //        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String sort() {
+        return kind.toString();
     }
 
     @Override
