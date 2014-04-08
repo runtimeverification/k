@@ -52,10 +52,10 @@ Terminology:
     /**
      * The dynamic record for where a state starts parsing.
      */
-    static class StateCall {
+    private static class StateCall {
         final Function function = Function.empty();
 
-        static class Key {
+        private static class Key {
             final NonTerminalCall ntCall;
             final int stateBegin;
             final State state;
@@ -99,7 +99,7 @@ Terminology:
     /**
      *  The dynamic record for where a state ends parsing.
      */
-    static class StateReturn implements Comparable<StateReturn> {
+    private static class StateReturn implements Comparable<StateReturn> {
         final Function function = Function.empty();
 
         public int compareTo(StateReturn that) {
@@ -119,7 +119,7 @@ Terminology:
                 this.key.stateCall.key.state.compareTo(that.key.stateCall.key.state);
         }
 
-        public static class Key {
+        private static class Key {
             public final StateCall stateCall;
             public final int stateEnd;
             public Key(StateCall stateCall, int stateEnd) {
@@ -169,19 +169,19 @@ Terminology:
     //***************************** End Boilerplate *****************************
     }
 
-    static class Context {
+    private static class Context {
         final Set<KList> contexts = new HashSet<>();
     }
 
     /**
      * The dynamic record for where a non-terminal starts parsing.
      */
-    static class NonTerminalCall {
+    private static class NonTerminalCall {
         final Set<StateCall> callers = new HashSet<>();
         final Set<StateReturn> exitStateReturns = new HashSet<>();
         final Set<StateReturn> reactivations = new HashSet<>();
         final Context context = new Context();
-        public static class Key {
+        private static class Key {
             public final NonTerminal nt;
             public final int ntBegin;
     //***************************** Start Boilerplate *****************************
@@ -221,7 +221,7 @@ Terminology:
 
     ////////////////
 
-    static class StateReturnWorkList extends TreeSet<StateReturn> {
+    private static class StateReturnWorkList extends TreeSet<StateReturn> {
         public void enqueue(StateReturn stateReturn) { this.add(stateReturn); }
         public StateReturn dequeue() { return this.pollFirst(); }
     }
@@ -229,7 +229,7 @@ Terminology:
     /**
      * The state used internally by the parser.
      */
-    static class ParseState {
+    private static class ParseState {
         // the input string which needs parsing
         final CharSequence input;
         // a priority queue containing the return states to be processed
@@ -317,7 +317,7 @@ Terminology:
     /**
      * An abstract mapping from a Context to a parse tree.
      */
-    static class Function {
+    private static class Function {
         private abstract class Mapping {}
         private class Nil extends Mapping { Set<KList> values = new HashSet<>(); }
         private class One extends Mapping { Map<KList, Set<KList>> values = new HashMap<>(); }
