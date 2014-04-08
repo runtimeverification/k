@@ -98,7 +98,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                 NonTerminalState IdState = new NonTerminalState(ntName + "-S", NeIdsNt,
                     grammar.get(ul.getSort()), false);
                 PrimitiveState separatorState = new RegExState(ntName + "-T", NeIdsNt,
-                    Pattern.compile(ul.getSeparator(), Pattern.LITERAL), KSorts.K);
+                    Pattern.compile(ul.getSeparator(), Pattern.LITERAL), KSorts.KITEM);
                 RuleState deleteToken = new RuleState(ntName + "-D", NeIdsNt,
                     new DeleteRule(1, true));
                 NonTerminalState NeIdsState = new NonTerminalState(ntName + "-S", NeIdsNt,
@@ -178,7 +178,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                         Terminal terminal = (Terminal) prdItem;
                         PrimitiveState pstate = new RegExState(
                                 prd.getSort() + "-T", nt,
-                                Pattern.compile(terminal.getTerminal(), Pattern.LITERAL), KSorts.K);
+                                Pattern.compile(terminal.getTerminal(), Pattern.LITERAL), KSorts.KITEM);
                         previous.next.add(pstate);
                         RuleState del = new RuleState("DelTerminalRS", nt, new DeleteRule(1, true));
                         pstate.next.add(del);

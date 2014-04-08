@@ -138,7 +138,7 @@ public class Grammar implements Serializable {
      */
     private NextableState addWhitespace(NextableState start) {
         PrimitiveState whitespace = new RegExState(
-            "whitespace", start.nt, pattern, KSorts.K);
+            "whitespace", start.nt, pattern, KSorts.KITEM);
         RuleState deleteToken = new RuleState(
             "whitespace-D", start.nt, new DeleteRule(1, true));
         whitespace.next.add(deleteToken);
