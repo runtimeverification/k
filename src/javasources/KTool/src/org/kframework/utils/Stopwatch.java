@@ -5,6 +5,9 @@ import org.kframework.main.GlobalOptions;
 
 import java.util.Formatter;
 
+/**
+ * To use, access {@link #instance()} after calling {@link #init(GlobalOptions) init()}.
+ */
 public class Stopwatch {
     private static Stopwatch sw;
     private long start;
@@ -12,6 +15,12 @@ public class Stopwatch {
     Formatter f = new Formatter(System.out);
     private GlobalOptions options;
 
+    /**
+     * Must be called before attempting to call 
+     * {@link #printIntermediate(String) printIntermediate} or {@link #printTotal(String) printTotal}.
+     * @param options a {@link GlobalOptions} instance instantiated with the correct value of the 
+     * {@link GlobalOptions#verbose verbose} field.
+     */
     public void init(GlobalOptions options) {
         this.options = options;
     }
