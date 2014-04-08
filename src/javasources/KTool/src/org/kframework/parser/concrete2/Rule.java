@@ -21,15 +21,23 @@ public abstract class Rule implements Serializable {
      * Metadata used to inform a rule about the current parse.
      */
     static class MetaData {
-        public final int startPosition;
-        public final int startLine;
-        public final int startColumn;
-        public final int endPosition;
-        public final int endLine;
-        public final int endColumn;
-        public MetaData(int startPosition, int startLine, int startColumn, int endPosition, int endLine, int endColumn) {
-            this.startPosition = startPosition; this.startLine = startLine; this.startColumn = startColumn;
-            this.endPosition = endPosition; this.endLine = endLine; this.endColumn = endColumn;
+        public static class Location {
+            public final int position;
+            public final int line;
+            public final int column;
+
+            public Location(int position, int line, int column) {
+                this.position = position;
+                this.line = line;
+                this.column = column;
+            }
+        }
+        public final Location start;
+        public final Location end;
+        public MetaData(Location start, Location end) {
+            assert start != null && end != null;
+            this.start = start;
+            this.end = end;
         }
     }
 
@@ -167,7 +175,7 @@ public abstract class Rule implements Serializable {
         protected int getSuffixLength() { return 1; }
         public Result applySuffix(List<Term> terms, MetaData metaData) {
             Term newTerm = terms.get(0).shallowCopy();
-            newTerm.setLocation("("+metaData.startLine+","+metaData.startColumn+","+metaData.endLine+","+metaData.endColumn+")");
+            newTerm.setLocation("("+metaData.start.line+","+metaData.start.column+","+metaData.end.line+","+metaData.end.column+")");
             return new Accept(Arrays.asList(newTerm));
         }
     }
