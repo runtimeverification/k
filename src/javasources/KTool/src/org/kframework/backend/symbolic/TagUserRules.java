@@ -60,7 +60,7 @@ public class TagUserRules extends CopyOnWriteTransformer {
             // specify exactly what rules should be transformed
             // symAllowed is true when the rule is tagged in this purpose
             boolean symAllowed = false;
-            for (String st : kompileOptions.experimental.symbolicTags) {
+            for (String st : kompileOptions.experimental.symbolicRules) {
                 if (node.containsAttribute(st)) {
                     symAllowed = true;
                 }
@@ -68,7 +68,7 @@ public class TagUserRules extends CopyOnWriteTransformer {
             // the first condition might not be needed, but we keep it
             // to ensure that, by default, if no rules (identified by tags)
             // are specified, then all rules are transformed by symbolic steps.
-            if (!kompileOptions.experimental.symbolicTags.isEmpty() && !symAllowed) {
+            if (!kompileOptions.experimental.symbolicRules.isEmpty() && !symAllowed) {
                 return super.transform(node);
             }
 

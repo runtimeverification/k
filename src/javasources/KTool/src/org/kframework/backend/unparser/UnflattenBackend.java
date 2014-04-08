@@ -55,7 +55,7 @@ public class UnflattenBackend extends BasicBackend {
 
         FileUtil.save(context.dotk.getAbsolutePath() + "/def.k", unparsedText);
 
-        FileUtil.save(options.directory.getPath() + File.separator + FilenameUtils.removeExtension(options.definition().getName()) + ".unparsed.k", unparsedText);
+        FileUtil.save(options.directory.getPath() + File.separator + FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + ".unparsed.k", unparsedText);
     }
 
     @Override

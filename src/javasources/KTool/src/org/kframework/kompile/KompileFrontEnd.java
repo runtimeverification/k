@@ -101,18 +101,18 @@ public class KompileFrontEnd {
                 break;
             case KORE:
                 backend = new KoreBackend(Stopwatch.instance(), context);
-                backend.run(DefinitionLoader.loadDefinition(options.definition(), options.mainModule(),
+                backend.run(DefinitionLoader.loadDefinition(options.mainDefinitionFile(), options.mainModule(),
                         backend.autoinclude(), context));
                 return;
             case MAUDE:
                 backend = new KompileBackend(Stopwatch.instance(), context);
-                context.dotk = new File(options.directory, FilenameUtils.removeExtension(options.definition().getName()) + "-kompiled");
+                context.dotk = new File(options.directory, FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + "-kompiled");
                 checkAnotherKompiled(context.dotk);
                 context.dotk.mkdirs();
                 break;
             case JAVA:
                 backend = new JavaSymbolicBackend(Stopwatch.instance(), context);
-                context.dotk = new File(options.directory, FilenameUtils.removeExtension(options.definition().getName()) + "-kompiled");
+                context.dotk = new File(options.directory, FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + "-kompiled");
                 checkAnotherKompiled(context.dotk);
                 context.dotk.mkdirs();
                 break;
@@ -126,14 +126,14 @@ public class KompileFrontEnd {
                 // TODO(YilongL): make it general to all backends; add info about
                 // this backend in KompileOptionsParser
                 Backend innerBackend = new JavaSymbolicBackend(Stopwatch.instance(), context);
-                context.dotk = new File(options.directory, FilenameUtils.removeExtension(options.definition().getName()) + "-kompiled");
+                context.dotk = new File(options.directory, FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + "-kompiled");
                 checkAnotherKompiled(context.dotk);
                 context.dotk.mkdirs();
                 backend = new UnflattenBackend(Stopwatch.instance(), context, innerBackend);
                 break;
             case SYMBOLIC:
                 backend = new SymbolicBackend(Stopwatch.instance(), context);
-                context.dotk = new File(options.directory, FilenameUtils.removeExtension(options.definition().getName()) + "-kompiled");
+                context.dotk = new File(options.directory, FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + "-kompiled");
                 checkAnotherKompiled(context.dotk);
                 context.dotk.mkdirs();
                 break;
@@ -167,7 +167,7 @@ public class KompileFrontEnd {
                                        Context context) throws IOException {
         org.kframework.kil.Definition javaDef;
         Stopwatch.instance().start();
-        javaDef = DefinitionLoader.loadDefinition(options.definition(), options.mainModule(),
+        javaDef = DefinitionLoader.loadDefinition(options.mainDefinitionFile(), options.mainModule(),
                 backend.autoinclude(), context);
         
         javaDef.accept(new CountNodesVisitor(context));

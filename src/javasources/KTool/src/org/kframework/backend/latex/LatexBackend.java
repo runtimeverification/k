@@ -50,7 +50,7 @@ public class LatexBackend extends BasicBackend {
         String preamble = lf.getPreamble().toString();
         latexified += preamble + "\\begin{document}" + endl + lf.getResult() + "\\end{document}" + endl;
 
-        File canonicalFile = options.definition();
+        File canonicalFile = options.mainDefinitionFile();
         String latexFilePath;
         if(makeDocument) latexFilePath= context.dotk.getAbsolutePath() + fileSep + FilenameUtils.removeExtension(canonicalFile.getName()) + "-doc.tex";
         else latexFilePath = context.dotk.getAbsolutePath() + fileSep + FilenameUtils.removeExtension(canonicalFile.getName()) + ".tex";

@@ -56,7 +56,7 @@ public final class KompileOptions implements Serializable {
     @Parameter(description="<file>")
     private List<String> parameters;
     
-    public File definition() {
+    public File mainDefinitionFile() {
         if (parameters == null || parameters.size() != 1) {
             throw new ParameterException("You have to provide a file in order to compile.");
         }
@@ -113,7 +113,7 @@ public final class KompileOptions implements Serializable {
     
     public String mainModule() {
         if (mainModule == null) {
-            return FilenameUtils.getBaseName(definition().getName()).toUpperCase();
+            return FilenameUtils.getBaseName(mainDefinitionFile().getName()).toUpperCase();
         }
         return mainModule;
     }
@@ -193,10 +193,10 @@ public final class KompileOptions implements Serializable {
         public boolean noPrelude = false;
         
         @Parameter(names="--symbolic-rules", converter=TagListConverter.class, description="Apply symbolic transformations only to rules annotated with tags from <tags> set. This only has an effect with '--backend symbolic'.")
-        public Set<String> symbolicTags;
+        public Set<String> symbolicRules;
         
         @Parameter(names="--non-symbolic-rules", converter=TagListConverter.class, description="Do not apply symbolic transformations to rules annotated with tags from <tags> set. This only has an effect with '--backend symbolic'.")
-        public Set<String> nonSymbolicTags;
+        public Set<String> nonSymbolicRules;
         
         @Parameter(names="--test-gen", description="Compile for test-case generation purpose in the Java backend. Use concrete sorts and automatically generated labels for heating and cooling rules. This only has an effect with '--backend java'.")
         public boolean testGen = false;

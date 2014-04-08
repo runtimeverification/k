@@ -22,7 +22,7 @@ public class KompileOptionsTest {
     
     private void parse(String... args) {
         new JCommander(options, args);
-        options.definition();
+        options.mainDefinitionFile();
         options.mainModule();
         options.docStyle();
         options.syntaxModule();
