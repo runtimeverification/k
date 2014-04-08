@@ -37,8 +37,8 @@ public class TagUserRules extends CopyOnWriteTransformer {
                 Constants.STRUCTURAL,
                 Constants.ANYWHERE,
                 SymbolicBackend.NOTSYMBOLIC);
-        if (!kompileOptions.experimental.nonSymbolicTags.isEmpty()) {
-            notSymbolicTags.addAll(kompileOptions.experimental.nonSymbolicTags);
+        if (!kompileOptions.experimental.nonSymbolicRules.isEmpty()) {
+            notSymbolicTags.addAll(kompileOptions.experimental.nonSymbolicRules);
         }
     }
 
