@@ -1,7 +1,7 @@
 <tests>
 
   <test definition="kool-untyped"
-        programs="."
+        programs="../../../../../../../tutorial/2_languages/2_kool/1_untyped/tests"
         extension="kool"
         exclude="cycle"
         results="../../../../../../../tutorial/2_languages/2_kool/1_untyped/tests" >
