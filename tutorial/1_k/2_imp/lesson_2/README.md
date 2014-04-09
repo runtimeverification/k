@@ -1,7 +1,5 @@
 ### Defining a Configuration
 
-[MOVIE [4'21"]](http://youtu.be/jkwLyGdt70U)
-
 Here we learn how to define a configuration in K.  We also learn how to
 initialize and how to display it.
 
