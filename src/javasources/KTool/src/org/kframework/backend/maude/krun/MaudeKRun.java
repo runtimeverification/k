@@ -97,15 +97,22 @@ public class MaudeKRun implements KRun {
         MaudeFilter maudeFilter = new MaudeFilter(context);
         cfg.accept(maudeFilter);
         StringBuilder cmd = new StringBuilder();
+
         if(K.trace) {
             cmd.append("set trace on .").append(K.lineSeparator);
         }
+        if(K.profile) {
+            cmd.append("set profile on .").append(K.lineSeparator);
+        }
+
         cmd.append("set show command off .").append(K.lineSeparator)
             .append(setCounter()).append(K.maude_cmd).append(" ")
-            .append(maudeFilter.getResult()).append(" .");
+            .append(maudeFilter.getResult()).append(" .").append(K.lineSeparator);
+
         if(K.profile) {
-            cmd.append("set profile on .").append(K.lineSeparator).append(K.lineSeparator).append("show profile .");
+            cmd.append("show profile .").append(K.lineSeparator);
         }
+
         cmd.append(getCounter());
 
         executeKRun(cmd);
