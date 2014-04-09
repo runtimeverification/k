@@ -47,7 +47,6 @@ public class KompileFrontEnd {
         try {
             JCommander jc = new JCommander(options, args);
             jc.setProgramName("kompile");
-            jc.setColumnSize(80);
             jc.setParameterDescriptionComparator(new SortedParameterDescriptions(KompileOptions.Experimental.class, ExperimentalParserOptions.class));
             
             if (options.help) {
