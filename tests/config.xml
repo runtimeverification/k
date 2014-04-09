@@ -498,6 +498,16 @@
     </all-programs>
   </test>
 
+  <test
+      definition="tests/regression/profiler/test.k"
+      programs="tests/regression/profiler"
+      results="tests/regression/profiler"
+      extension="test">
+      <all-programs>
+         <krun-option name="--profile" />
+      </all-programs>
+  </test>
+
   <include file="regression/generalized-strictness/config.xml"
            directory="tests/regression/generalized-strictness"
            programs="tests/regression/generalized-strictness"
