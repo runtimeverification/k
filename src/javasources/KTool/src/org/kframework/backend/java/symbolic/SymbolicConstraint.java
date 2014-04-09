@@ -170,6 +170,8 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         private Term leftHandSide;
         private Term rightHandSide;
 
+        private int hashCode;
+
         private Equality(Term leftHandSide, Term rightHandSide) {
             if (leftHandSide instanceof Bottom) rightHandSide = leftHandSide;
             if (rightHandSide instanceof Bottom) leftHandSide = rightHandSide;
@@ -320,30 +322,30 @@ public class SymbolicConstraint extends JavaSymbolicObject {
             rightHandSide = rightHandSide.substituteAndEvaluate(substitution, context);
         }
 
-        // YilongL: no need to override equals() and hashCode() because all we
-        // need to compare two equalities is identity check
-        //        @Override
-//        public boolean equals(Object object) {
-//            if (this == object) {
-//                return true;
-//            }
-//
-//            if (!(object instanceof Equality)) {
-//                return false;
-//            }
-//
-//            Equality equality = (Equality) object;
-//            return leftHandSide.equals(equality.leftHandSide)
-//                   && rightHandSide.equals(equality.rightHandSide);
-//        }
-//        
-//        @Override
-//        public int hashCode() {
-//            int hash = 1;
-//            hash = hash * Utils.HASH_PRIME + leftHandSide.hashCode();
-//            hash = hash * Utils.HASH_PRIME + rightHandSide.hashCode();
-//            return hash;
-//        }
+        @Override
+        public boolean equals(Object object) {
+            if (this == object) {
+                return true;
+            }
+
+            if (!(object instanceof Equality)) {
+                return false;
+            }
+
+            Equality equality = (Equality) object;
+            return leftHandSide.equals(equality.leftHandSide)
+                    && rightHandSide.equals(equality.rightHandSide);
+        }
+
+        @Override
+        public int hashCode() {
+            if (hashCode == 0) {
+                hashCode = 1;
+                hashCode = hashCode * Utils.HASH_PRIME + leftHandSide.hashCode();
+                hashCode = hashCode * Utils.HASH_PRIME + rightHandSide.hashCode();
+            }
+            return hashCode;
+        }
 
         @Override
         public String toString() {
@@ -1201,10 +1203,11 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     @Override
     public int hashCode() {
         // TODO(YilongL): normalize and sort equalities?
-        int hash = 1;
-        hash = hash * Utils.HASH_PRIME + equalities.hashCode();
-        hash = hash * Utils.HASH_PRIME + substitution.hashCode();
-        return hash;
+        if (hashCode == 0) {
+            hashCode = hashCode * Utils.HASH_PRIME + equalities.hashCode();
+            hashCode = hashCode * Utils.HASH_PRIME + substitution.hashCode();
+        }
+        return hashCode;
     }
 
     @Override

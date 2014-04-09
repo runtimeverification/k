@@ -40,7 +40,6 @@ public class Rule extends JavaSymbolicObject {
     private final boolean isSortPredicate;
     private final String predSort;
     private final KItem sortPredArg;
-    private int hashCode = 0;
 
     public Rule(
             String label,

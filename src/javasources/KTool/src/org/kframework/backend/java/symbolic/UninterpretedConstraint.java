@@ -132,7 +132,10 @@ public class UninterpretedConstraint extends JavaSymbolicObject {
 
     @Override
     public int hashCode() {
-        return equalities.hashCode();
+        if (hashCode == 0) {
+            hashCode = equalities.hashCode();
+        }
+        return hashCode;
     }
 
     @Override

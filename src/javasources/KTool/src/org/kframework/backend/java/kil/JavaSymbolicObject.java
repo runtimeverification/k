@@ -18,6 +18,11 @@ public abstract class JavaSymbolicObject extends ASTNode
         implements Transformable, Visitable, Serializable {
 
     /**
+     * Field used for cashing the hash code
+     */
+    protected int hashCode = 0;
+
+    /**
      * AndreiS: serializing this field causes a NullPointerException when hashing a de-serialized
      * Variable (the variable has all fields set to null at the moment of hashing).
      */
