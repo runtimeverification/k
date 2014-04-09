@@ -5,6 +5,15 @@
 -->
 
 <tests>
+    <!--IMP-->
+    <include
+            file="../samples/java_rewrite_engine/tutorial/1_k/2_imp/tests/config_indexing.xml"
+            directory= "samples/java_rewrite_engine/tutorial/1_k/2_imp/" />
+
+    <!--IMP++-->
+    <include
+            file="../samples/java_rewrite_engine/tutorial/1_k/4_imp++/tests/config_indexing.xml"
+            directory= "samples/java_rewrite_engine/tutorial/1_k/4_imp++/" />
 
     <!--Simple untyped-->
   <include
