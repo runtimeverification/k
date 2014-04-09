@@ -10,6 +10,9 @@ import org.kframework.kil.Map;
 import org.kframework.kil.Set;
 import org.kframework.kil.loader.Context;
 import org.kframework.kil.visitors.exceptions.TransformerException;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
 
 /**
@@ -215,8 +218,15 @@ public class BasicTransformer implements Transformer {
                 exception = e;
             }
         }
-        if (terms.isEmpty())
+        if (terms.isEmpty()) {
+            if (exception == null) {
+                String msg = "Found empty ambiguity!";
+                exception = new TransformerException(
+                    new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg,
+                        node.getFilename(), node.getLocation()));
+            }
             throw exception;
+        }
         if (terms.size() == 1) {
             return terms.get(0);
         }

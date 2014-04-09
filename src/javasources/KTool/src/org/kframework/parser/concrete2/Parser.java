@@ -19,6 +19,7 @@ import org.kframework.kil.KList;
 import org.kframework.kil.KSorts;
 import org.kframework.kil.Term;
 import org.kframework.kil.Token;
+import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.concrete2.Grammar.EntryState;
 import org.kframework.parser.concrete2.Grammar.ExitState;
 import org.kframework.parser.concrete2.Grammar.NextableState;
@@ -30,6 +31,7 @@ import org.kframework.parser.concrete2.Grammar.RuleState;
 import org.kframework.parser.concrete2.Grammar.State;
 import org.kframework.parser.concrete2.Rule.ContextFreeRule;
 import org.kframework.parser.concrete2.Rule.ContextSensitiveRule;
+import org.kframework.utils.general.GlobalSettings;
 
 /**
  * The main code for running the parser.
@@ -501,7 +503,7 @@ Terminology:
      * @param position where to start parsing in the input string
      * @return the result of parsing, as a Term
      */
-    public Term parse(NonTerminal nt, int position) {
+    public Term parse(NonTerminal nt, int position) throws TransformerException {
         // This code assumes that ordering info in the grammar are between MIN_VALUE+1 and MAX_VALUE-2
         // TODO: can we do away with the <start> non-terminal?
         NonTerminal startNt = new NonTerminal("<start>");
@@ -529,7 +531,10 @@ Terminology:
                     KSorts.K, stateReturn.function.applyToNull())));
             }
         }
-        return result;
+
+        if (GlobalSettings.verbose) // TODO(Radu): temporary for testing. Remove once we have something like --debug
+            System.out.println("Raw: " + result + "\n");
+        return (Term) result.accept(new TreeCleanerVisitor(null));
     }
 
     /**
@@ -558,6 +563,7 @@ Terminology:
      * Contains the maximum position in the text which the parser managed to recognize.
      */
     public static class ParseError {
+        // TODO: replace these fields with Metadata.Location ?
         /// The character offset of the error
         public final int position;
         /// The column of the error
