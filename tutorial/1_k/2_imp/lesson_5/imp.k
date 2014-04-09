@@ -165,7 +165,7 @@ and counting only the steps corresponding to computational rules as
 transitions (i.e., hiding the structural rules as unobservable, or
 internal steps). */
 
-  rule S1 S2 => S1 ~> S2  [structural]
+  rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
 
 /*@ \subsubsection{Conditional}
 The conditional statement has two semantic cases, corresponding to
@@ -196,7 +196,7 @@ make the second rule structural, thinking of dissolving the residual
 empty \texttt{int;} declaration as a structural cleanup rather than as
 a computational step. */
 
-  rule <k> int (X:Id,Xs:Ids => Xs);_ </k> <state> Rho:Map (. => X|->0) </state>
+  rule <k> int (X,Xs => Xs);_ </k> <state> Rho:Map (.Map => X|->0) </state>
     when notBool (X in keys(Rho))
   rule int .Ids; S => S  [structural]
 endmodule
