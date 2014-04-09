@@ -58,6 +58,11 @@ public class TestCase {
      */
     private final Set<KTestStep> skips;
 
+    /**
+     * Script to be executed before testing, only valid on Posix system
+     */
+    private String posixInitScript;
+
     public TestCase(Annotated<String, LocationData> definition,
                     List<Annotated<String, LocationData>> programs,
                     String[] extensions,
@@ -131,32 +136,62 @@ public class TestCase {
         assert new File(definition.getObj()).isFile();
         return definition.getObj();
     }
-
+    
+    public File getWorkingDir() {
+        File f = new File(definition.getObj());
+        assert f.isFile();
+        return f.getParentFile();
+    }
+    
     /**
      * @return command array to pass process builder
      */
     public String[] getKompileCmd() {
         assert new File(getDefinition()).isFile();
-        String[] args = new String[kompileOpts.size() + 2];
-        args[0] = ExecNames.getKompile();
-        args[1] = getDefinition();
-        for (int i = 0; i < kompileOpts.size(); i++)
-            args[i+2] = kompileOpts.get(i).toString();
-        return args;
+        List<String> stringArgs = new ArrayList<String>();
+        stringArgs.add(ExecNames.getKompile());
+        stringArgs.add(getDefinition());
+        for (int i = 0; i < kompileOpts.size(); i++) {
+            stringArgs.addAll(kompileOpts.get(i).toStringList());
+        }
+        String[] argsArr = new String[stringArgs.size()];
+        return stringArgs.toArray(argsArr);
     }
 
     /**
      * @return String representation of kompile command to be used in logging.
      */
     public String toKompileLogString() {
-        String[] args = new String[kompileOpts.size() + 2];
-        args[0] = ExecNames.getKompile();
-        args[1] = getDefinition();
-        for (int i = 0; i < kompileOpts.size(); i++) {
-            PgmArg arg = kompileOpts.get(i);
-            args[i+2] = new PgmArg(arg.arg, QuoteHandling.quoteArgument(arg.val)).toString();
-        }
-        return StringUtils.join(args, " ");
+        return StringUtils.join(getKompileCmd(), " ");
+    }
+
+    /**
+     * @return true if posixInitScript attribute exists
+     */
+    public boolean hasPosixOnly() {
+        return posixInitScript != null;
+    }
+
+    /**
+     * @return posixInitScript attribute
+     */
+    public String getPosixInitScript() {
+        return posixInitScript;
+    }
+
+    /**
+     * @return command array to pass process builder
+     */
+    public String[] getPosixOnlyCmd() {
+        assert new File(posixInitScript).isFile();
+        return new String[] { posixInitScript };
+    }
+
+    /**
+     * @return String representation of posixInitScript command to be used in logging.
+     */
+    public String toPosixOnlyLogString() {
+        return StringUtils.join(getPosixOnlyCmd(), " ");
     }
 
     /**
@@ -164,7 +199,7 @@ public class TestCase {
      */
     public String[] getPdfCmd() {
         assert new File(getDefinition()).isFile();
-        return new String[] { ExecNames.getKompile(), "--backend=pdf", getDefinition() };
+        return new String[] { ExecNames.getKompile(), "--backend", "pdf", getDefinition() };
     }
 
     /**
@@ -188,6 +223,10 @@ public class TestCase {
 
     public void setPgmSpecificKRunOpts(Map<String, List<PgmArg>> pgmSpecificKRunOpts) {
         this.pgmSpecificKRunOpts = pgmSpecificKRunOpts;
+    }
+
+    public void setPosixInitScript(String posixInitScript) {
+        this.posixInitScript = posixInitScript;
     }
 
     public void addProgram(Annotated<String, LocationData> program) {
@@ -267,10 +306,9 @@ public class TestCase {
                     List<PgmArg> args = new LinkedList<>();
                     for (PgmArg arg : getPgmOptions(pgmFilePath))
                         args.add(arg);
-                    args.add(new PgmArg("directory", definitionFilePath));
 
                     ret.add(new KRunProgram(
-                            pgmFilePath, args, inputFilePath, outputFilePath, errorFilePath,
+                            pgmFilePath, definitionFilePath, args, inputFilePath, outputFilePath, errorFilePath,
                             getNewOutputFilePath(outputFileName)));
                 }
             } else {

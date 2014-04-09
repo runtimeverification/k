@@ -1,3 +1,5 @@
+// Copyright (C) 2012-2014 K Team. All Rights Reserved.
+
 package org.kframework.compile.transformers;
 
 import org.kframework.kil.*;
@@ -10,7 +12,8 @@ import org.kframework.utils.general.GlobalSettings;
 /**
  * Add the function attribute to rules which rewrite either a TermCons of
  * a production with a function or predicate attribute,
- * or a KApp of a KLabelConstant satisfying isPredicate.
+ * or a KApp of a KLabelConstant satisfying isPredicate
+ * or corresponding to a production with a function or predicate attribute.
  */
 public class ResolveFunctions extends CopyOnWriteTransformer {
 
@@ -33,7 +36,8 @@ public class ResolveFunctions extends CopyOnWriteTransformer {
         if (body instanceof KApp) {
             Term l = ((KApp) body).getLabel();
             if (l instanceof KLabelConstant) {
-                if (((KLabelConstant)l).isPredicate()) {
+                KLabelConstant label = (KLabelConstant) l;
+                if (label.isFunctional(context)) {
                     node = addFunction(node);
                 }
             }

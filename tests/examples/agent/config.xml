@@ -1,3 +1,0 @@
-<config>
-	<test def="/dist/examples/agent/agent.k" program-extension="" compiled-file-name="agent-compiled.maude"/>
-</config>

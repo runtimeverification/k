@@ -16,10 +16,15 @@ import java.util.Set;
  *
  * @author AndreiS
  */
-public abstract class Token extends Term implements Sorted {
+public abstract class Token extends Term {
 
     public Token() {
         super(Kind.KITEM);
+    }
+
+    @Override
+    public boolean isExactSort() {
+        return true;
     }
 
     /**

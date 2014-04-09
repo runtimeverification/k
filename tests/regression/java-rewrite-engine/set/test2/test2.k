@@ -7,7 +7,7 @@ module TEST2
 
   configuration
     <T>
-      <set> MySetItem(0) MySetItem(1) MySetItem(2) MySetItem(3) MySetItem(4) </set> 
+      <set> MySetItem(0), MySetItem(1), MySetItem(2), MySetItem(3), MySetItem(4) </set> 
 			<k> $PGM:K </k> 
 		</T>
   

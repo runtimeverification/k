@@ -18,7 +18,7 @@ import java.util.Map;
  *
  * @author AndreiS
  */
-public class IntToken extends Token {
+public final class IntToken extends Token {
 
     public static final String SORT_NAME = "Int";
 

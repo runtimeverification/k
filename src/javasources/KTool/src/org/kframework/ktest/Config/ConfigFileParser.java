@@ -7,6 +7,7 @@ import org.kframework.ktest.KTest;
 import org.kframework.ktest.KTestStep;
 import org.kframework.ktest.PgmArg;
 import org.kframework.ktest.Test.TestCase;
+import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -105,7 +106,7 @@ public class ConfigFileParser {
 
             Element node = (Element) tests.item(testNodeIdx);
             switch (node.getNodeName()) {
-                case "test": testCases.add(parseTestCase(node)); break;
+                case "test": if (isValidTestCase(node)) testCases.add(parseTestCase(node)); break;
                 case "include": testCases.addAll(parseInclude(node)); break;
                 default: assert false; // this case should not happen, XML files are validated
                                        // using XSD and this should be ensured by XSD file
@@ -113,6 +114,15 @@ public class ConfigFileParser {
         }
 
         return testCases;
+    }
+
+    /**
+     * Check if `test' node is semantically valid.
+     */
+    private boolean isValidTestCase(Element testNode) {
+        // posixOnly attribute is valid only on Posix-compliant OS
+        return testNode.getAttributes().getNamedItem("posixOnly") == null
+                || GlobalSettings.isPosix();
     }
 
     /**
@@ -252,6 +262,7 @@ public class ConfigFileParser {
         String[] extensions = splitNodeValue(testAttrs.getNamedItem("extension"));
         String[] excludes = splitNodeValue(testAttrs.getNamedItem("exclude"));
         Set<KTestStep> skips = parseSkips(testAttrs.getNamedItem("skip"), location);
+        String posixOnly = parsePosixOnly(testAttrs.getNamedItem("posixOnly"));
 
         // handle children of `test' node
         NodeList childNodes = testNode.getChildNodes();
@@ -262,6 +273,9 @@ public class ConfigFileParser {
 
         TestCase ret = new TestCase(definition, programs, extensions, excludes, results,
                 kompileOpts, krunOpts, pgmSpecificKRunOpts, skips);
+        if (posixOnly != null) {
+            ret.setPosixInitScript(posixOnly);
+        }
         ret.validate();
         return ret;
     }
@@ -287,6 +301,13 @@ public class ConfigFileParser {
             }
         }
         return skips;
+    }
+
+    private String parsePosixOnly(Node node) {
+        if (node == null) {
+            return null;
+        }
+        return normalize(node.getNodeValue(), cmdArgs.getDirectory());
     }
 
     private Annotated<String, LocationData> annotate(String str, LocationData location) {
@@ -324,14 +345,7 @@ public class ConfigFileParser {
                     && childNode.getNodeName().equals("kompile-option")) {
                 Element elem = (Element) childNode;
 
-                // TODO: there is a problem with our current config files,
-                // correct parameter for backend is `--backend', not `-backend' or `backend'. but
-                // in config file it's specified as `-backed'. for now I'm handling it in ad-hoc
-                // way. we should fix this in config files. (this applies to other parameters too)
-                // (osa1)
                 String name = elem.getAttribute("name");
-                while (name.startsWith("-"))
-                    name = name.substring(1);
                 ret.add(new PgmArg(name, elem.getAttribute("value")));
             }
         }
@@ -369,11 +383,9 @@ public class ConfigFileParser {
                     && n.getNodeName().equals("krun-option")) {
                 Element e = (Element) n;
 
-                // TODO: see comments in parseKompileOpts
-                String name = e.getAttribute("name");
-                while (name.startsWith("-"))
-                    name = name.substring(1);
-                ret.add(new PgmArg(name, e.getAttribute("value")));
+                ret.add(new PgmArg(e.getAttribute("name"),
+                    e.getAttribute("key"),
+                    e.getAttribute("value")));
             }
         }
         return ret;

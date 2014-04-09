@@ -1,1 +1,1 @@
-test(rfindString("foo", "o", 2) ~> rfindString("foo", "o", 1) ~> rfindString("foo", "ooo", 2) ~> rfindString("\x00\x01\xff\u0100\uffff\U0010ffff\x00", "\x00", 5))
+rfindString("foo", "o", 2) ~> rfindString("foo", "o", 1) ~> rfindString("foo", "ooo", 2) ~> rfindString("\x00\x01\xff\u0100\uffff\U0010ffff\x00", "\x00", 5)

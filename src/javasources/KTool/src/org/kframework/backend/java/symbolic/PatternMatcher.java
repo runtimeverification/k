@@ -315,9 +315,7 @@ public class PatternMatcher extends AbstractMatcher {
      *         successfully; otherwise, {@code false}
      */
     private static boolean checkOrderedSortedCondition(Variable variable, Term term, TermContext termContext) {
-        String sortOfVar = variable.sort();
-        String sortOfTerm = term instanceof Sorted ? ((Sorted) term).sort() : term.kind().toString();
-        return termContext.definition().context().isSubsortedEq(sortOfVar, sortOfTerm);
+        return termContext.definition().context().isSubsortedEq(variable.sort(), term.sort());
     }
 
     /**

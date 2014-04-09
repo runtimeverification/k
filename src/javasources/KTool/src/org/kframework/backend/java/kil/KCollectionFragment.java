@@ -51,13 +51,8 @@ public class KCollectionFragment extends KCollection {
         if (sort != null) {
             return sort;
         }
-        
-        if (size() == 1 && !hasFrame()) {
-            Term term = contents.get(startIndex);
-            sort = term instanceof Sorted ? ((Sorted) term).sort() : term.kind().toString();
-        } else {
-            sort = kCollection.sort();
-        }
+
+        sort =  startIndex < size() && !hasFrame() ? contents.get(startIndex).sort() : kCollection.sort();
         return sort;
     }
 

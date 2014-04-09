@@ -1,0 +1,25 @@
+Search results:
+
+Solution 1:
+L:List -->
+ListItem(#buffer ( "1230" ))
+
+Solution 2:
+L:List -->
+ListItem(#buffer ( "1320" ))
+
+Solution 3:
+L:List -->
+ListItem(#buffer ( "2130" ))
+
+Solution 4:
+L:List -->
+ListItem(#buffer ( "2310" ))
+
+Solution 5:
+L:List -->
+ListItem(#buffer ( "3120" ))
+
+Solution 6:
+L:List -->
+ListItem(#buffer ( "3210" ))

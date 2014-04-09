@@ -1,0 +1,10 @@
+(\x.  
+  while (*x <= 3) do (
+    ((\y.send *x to y) (newAgent (
+      print receive ;
+      barrier))) ;
+    
+    *x := *x + 1
+  ) ; 
+  barrier;
+  print me) (ref 1)

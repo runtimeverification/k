@@ -1,10 +1,7 @@
 package org.kframework.backend.java.symbolic;
 
-import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.builtins.*;
 import org.kframework.backend.java.kil.*;
-import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.builtins.Int32Token;
-import org.kframework.backend.java.builtins.UninterpretedToken;
 
 import java.util.Map;
 
@@ -19,6 +16,11 @@ public class BottomUpVisitor implements Visitor {
     @Override
     public String getName() {
         return this.getClass().toString();
+    }
+
+    @Override
+    public void visit(BitVector bitVector) {
+        visit((Token) bitVector);
     }
 
     @Override
@@ -87,11 +89,6 @@ public class BottomUpVisitor implements Visitor {
 
     @Override
     public void visit(IntToken intToken) {
-        visit((Token) intToken);
-    }
-
-    @Override
-    public void visit(Int32Token intToken) {
         visit((Token) intToken);
     }
 

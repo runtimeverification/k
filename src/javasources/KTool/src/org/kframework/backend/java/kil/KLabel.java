@@ -17,9 +17,19 @@ public abstract class KLabel extends Term {
     }
 
     @Override
+    public boolean isExactSort() {
+        return true;
+    }
+
+    @Override
     public boolean isSymbolic() {
         /* AndreiS: no support for symbolic KLabels */
         return false;
+    }
+
+    @Override
+    public String sort() {
+        return kind.toString();
     }
 
     /**

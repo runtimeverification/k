@@ -2,10 +2,15 @@ module ISSUE
 
 syntax Foo ::= bar(Foo, Foo, Foo) [strict(1,  2)]
              | baz(Foo, Foo, Foo, Foo) [seqstrict(1, 3, 2)]
+             | lbar(Foo, Foo)
+             | lbaz(Foo, Foo)
              | Foo "+" Foo
              | Int
              | "print"
              | Foo Foo [left]
+
+syntax KLabel ::= "'lbar" [strict]
+                | "'lbaz" [seqstrict]
 
 syntax KResult ::= Int
 
@@ -22,5 +27,8 @@ rule F:Foo F2:Foo => F ~> F2
 
 rule bar(I:Int, I2:Int, _) => .
 rule baz(I:Int, I2:Int, I3:Int, _) => .
+
+rule lbar(I:Int, J:Int) => .
+rule lbaz(I:Int, J:Int) => .
 
 endmodule

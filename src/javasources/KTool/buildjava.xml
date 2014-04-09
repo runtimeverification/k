@@ -52,39 +52,19 @@
 		</copy>
 		<javacc target="src/org/kframework/parser/basic/Basic.jj" javacchome="../../../lib/java"/>
 		<javacc target="src/org/kframework/utils/kastparser/KastParser.jj" javacchome="../../../lib/java" />
-		<condition property="isJava7">
-			<equals arg1="${ant.java.version}" arg2="1.7" />
-		</condition>
-		<condition property="isJava6">
-			<equals arg1="${ant.java.version}" arg2="1.6" />
-		</condition>
 	</target>
 	<target name="clean">
 		<delete dir="bin" />
 	</target>
 	<target depends="clean" name="cleanall" />
-	<target depends="build-subprojects,build-project-java6,build-project-java7" name="build" />
+	<target depends="build-subprojects,build-project-java" name="build" />
 	<target name="build-subprojects" />
-	<target depends="init" name="build-project-java7" if="isJava7">
+	<target depends="init" name="build-project-java">
 		<echo message="${ant.project.name}: ${ant.file}" />
 		<javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" includeantruntime="false">
 			<src path="src" />
 			<classpath refid="KTool.classpath" />
 			<compilerarg value="-Xlint:unchecked" />
-		</javac>
-		<javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" includeantruntime="false">
-			<src path="lib/resources" />
-			<classpath refid="KTool.classpath" />
-		</javac>
-	</target>
-	<target depends="init" name="build-project-java6" if="isJava6">
-		<echo message="${ant.project.name}: ${ant.file}" />
-		<javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" includeantruntime="false">
-			<src path="src" />
-			<classpath refid="KTool.classpath" />
-			<compilerarg value="-Xlint:unchecked" />
-			<exclude name="org/kframework/krun/ioserver/commands/CommandStat.java" />
-			<exclude name="org/kframework/krun/ioserver/commands/CommandOpendir.java" />
 		</javac>
 		<javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}" includeantruntime="false">
 			<src path="lib/resources" />

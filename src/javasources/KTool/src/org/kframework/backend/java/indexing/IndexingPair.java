@@ -26,10 +26,9 @@ public class IndexingPair implements Serializable {
                         (KLabelConstant) frozenKItem.kLabel(),
                         ((KList) frozenKItem.kList()).getContents().indexOf(Hole.HOLE));
             }
-        } else if (term instanceof Sorted) {
-            Sorted sorted = (Sorted) term;
-            if (definition.builtinSorts().contains(sorted.sort())) {
-                return new TokenIndex(sorted.sort());
+        } else {
+            if (definition.builtinSorts().contains(term.sort())) {
+                return new TokenIndex(term.sort());
             }
         }
 

@@ -1,5 +1,5 @@
 # K Tutorial
-##### Grigore Rosu
+##### [Grigore Rosu](http://fsl.cs.illinois.edu/grosu) (<grosu@illinois.edu>)
 
 In this tutorial you will learn how to use the K tool by means of a series of
 lectures illustrating several simple languages defined using K.  Almost all the

@@ -6,7 +6,7 @@
       results="."
       extension="simple" >
       <all-programs>
-        <krun-option name="-pattern" value="&lt;tasks&gt;.Bag&lt;/tasks&gt;"/>
+        <krun-option name="--pattern" value="&lt;tasks&gt;.Bag&lt;/tasks&gt;"/>
       </all-programs>
   </test>
 

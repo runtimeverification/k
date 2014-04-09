@@ -8,7 +8,7 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Utils;
 import org.kframework.kil.ASTNode;
 
-public class BuiltinMgu extends Term implements Sorted {
+public class BuiltinMgu extends Term {
     
     public static String MGU_SORT = "Mgu";
     
@@ -61,6 +61,11 @@ public class BuiltinMgu extends Term implements Sorted {
 
     @Override
     public boolean isSymbolic() {
+        return true;
+    }
+
+    @Override
+    public boolean isExactSort() {
         return true;
     }
 

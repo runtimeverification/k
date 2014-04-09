@@ -71,13 +71,8 @@ public class KSequence extends KCollection {
         if (sort != null) {
             return sort;
         }
-        
-        if (size() == 1 && !hasFrame()) {
-            Term term = contents.get(0);
-            sort = term instanceof Sorted ? ((Sorted) term).sort() : term.kind().toString();
-        } else {
-            sort = KSorts.KSEQUENCE;
-        }
+
+        sort = size() == 1 && !hasFrame() ? contents.get(0).sort() : KSorts.KSEQUENCE;
         return sort;
     }
 

@@ -1,1 +1,1 @@
-test("" +String "" ~> "" +String "foo" ~> "abc" +String "def" +String "ghi" ~> "\x00" +String "\x61" +String "\x7f" +String "\xff" +String "\uffff" +String "\U0010ffff")
+"" +String "" ~> "" +String "foo" ~> "abc" +String "def" +String "ghi" ~> "\x00" +String "\x61" +String "\x7f" +String "\xff" +String "\uffff" +String "\U0010ffff"
