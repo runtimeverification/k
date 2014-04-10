@@ -160,12 +160,8 @@ public class TermVisitor extends LocalVisitor implements Serializable {
 
     @Override
     public void visit(Token token) {
-//        if (pString == null){
-//            pStrings.add(START_STRING+token.sort());
-//        } else{
-//            pStrings.add(pString+".1."+token.sort());
-//        }
-
+        //check if we are just starting to create a pString for this term
+        //TODO(OwolabiL): Use a better check than the nullity of pString
         if (pString == null) {
             if (context.isSubsorted(K_RESULT, token.sort())) {
                 pString = START_STRING + K_RESULT;
@@ -174,7 +170,6 @@ public class TermVisitor extends LocalVisitor implements Serializable {
                     pStrings.add(START_STRING+token.sort());
                 }
             } else {
-                //TODO(OwolabiL): Use a better check than the nullity of pString
                 pStrings.add(START_STRING + token.sort());
             }
         }
@@ -216,16 +211,6 @@ public class TermVisitor extends LocalVisitor implements Serializable {
             }
         }
     }
-
-    //needed for kool typed but breaks all prior definitions
-//    @Override
-//    public void visit(BoolToken boolToken) {
-//        if (pString == null){
-//            pStrings.add(START_STRING+boolToken.sort());
-//        } else{
-//            pStrings.add(pString+".1."+boolToken.sort());
-//        }
-//    }
 
     @Override
     public void visit(UninterpretedToken uninterpretedToken) {
