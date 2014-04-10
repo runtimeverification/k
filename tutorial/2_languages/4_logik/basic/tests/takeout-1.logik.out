@@ -1,9 +1,2 @@
-Search results:
-
-Solution 1:
-Solution:Map -->
-"L" |-> cons ( a (  ), cons ( b (  ), nil (  ) ) )
-
-Solution 2:
-Solution:Map -->
-"L" |-> cons ( b (  ), cons ( a (  ), nil (  ) ) )
+\Q"L" |-> cons ( a (  ), cons ( b (  ), nil (  ) ) )\E
+\Q"L" |-> cons ( b (  ), cons ( a (  ), nil (  ) ) )\E

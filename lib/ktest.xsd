@@ -4,6 +4,7 @@
   <xs:sequence>
     <xs:element name="krun-option" minOccurs="1" maxOccurs="unbounded" type="option" />
   </xs:sequence>
+  <xs:attribute name="regex" type="xs:boolean" use="optional" />
 </xs:complexType>
 
 <xs:complexType name="program-group-config">

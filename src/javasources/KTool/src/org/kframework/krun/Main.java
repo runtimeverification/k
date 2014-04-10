@@ -405,7 +405,7 @@ public class Main {
                 // the KStatue, KSearchResults, and KTestGenerates a definition field.
                 if(result.getResult() instanceof KRunState){
                     
-                    UnparserFilterNew printer = new UnparserFilterNew(true, K.color, K.parens, context);
+                    UnparserFilterNew printer = new UnparserFilterNew(true, K.color, K.parens, false, K.wrap, context);
                     ((KRunState)(result.getResult())).getResult().accept(printer);
                     output = printer.getResult();
                 } else if (result.getResult() instanceof SearchResults) {
@@ -414,7 +414,7 @@ public class Main {
                     for (SearchResult solution : ((SearchResults)result.getResult()).getSolutions()) {
                         Map<String, Term> substitution = solution.getSubstitution();
                         if (((SearchResults)result.getResult()).isDefaultPattern()) {
-                            UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, context);
+                            UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, false, K.wrap, context);
                             substitution.get("B:Bag").accept(unparser);
                             solutionStrings.add("\n" + unparser.getResult());
                         } else {
@@ -422,7 +422,7 @@ public class Main {
                             
                             StringBuilder varStringBuilder = new StringBuilder();
                             for (String variable : substitution.keySet()) {
-                                UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, context);
+                                UnparserFilterNew unparser = new UnparserFilterNew(true, K.color, K.parens, false, K.wrap, context);
                                 substitution.get(variable).accept(unparser);
                                 varStringBuilder.append("\n" + variable + " -->\n" + unparser.getResult());
                                 empty = false;
@@ -1120,6 +1120,9 @@ public class Main {
                     
                     K.output_mode=K.PRETTY;
                     K.parens=false;
+                } else if (K.output_mode.equals("no-wrap")) {
+                    K.output_mode = K.PRETTY;
+                    K.wrap = false;
                 }
             }
             if (cmd.hasOption("load-cfg")) {

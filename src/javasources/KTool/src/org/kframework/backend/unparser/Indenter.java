@@ -51,7 +51,7 @@ public class Indenter {
         }
         int indexEndLine = stringBuilder.lastIndexOf(endl) + endl.length();
         int indexEndString = stringBuilder.length();
-        if (indexEndString - indexEndLine + string.length() > getWidth()) {
+        if (indexEndString - indexEndLine + string.length() > getWidth() && getWidth() >= 0) {
             stringBuilder.append(endl);
             lineNo++;
             colNo = 1;

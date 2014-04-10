@@ -46,12 +46,12 @@ public class TestCase {
     /**
      * List of command line arguments to pass to krun.
      */
-    private List<PgmArg> krunOpts;
+    private ProgramProfile krunOpts;
 
     /**
-     * Program full path, list of kompile arguments pairs.
+     * Program full path, list of krun arguments pairs.
      */
-    private Map<String, List<PgmArg>> pgmSpecificKRunOpts;
+    private Map<String, ProgramProfile> pgmSpecificKRunOpts;
 
     /**
      * Which tests to skip for this particular test case.
@@ -69,8 +69,8 @@ public class TestCase {
                     String[] excludes,
                     List<Annotated<String, LocationData>> results,
                     List<PgmArg> kompileOpts,
-                    List<PgmArg> krunOpts,
-                    Map<String, List<PgmArg>> pgmSpecificKRunOpts,
+                    ProgramProfile krunOpts,
+                    Map<String, ProgramProfile> pgmSpecificKRunOpts,
                     Set<KTestStep> skips) throws InvalidConfigError {
         // programs and results should be ordered set because of how search algorithm works
         this.definition = definition;
@@ -94,12 +94,13 @@ public class TestCase {
         List<Annotated<String,LocationData>> results = new LinkedList<>();
         results.add(new Annotated<>(cmdArgs.getResults(), new LocationData()));
 
-        List<PgmArg> emptyOpts = new ArrayList<>(0);
+        List<PgmArg> emptyOpts = Collections.emptyList();
+        ProgramProfile emptyProfile = new ProgramProfile(emptyOpts, false);
 
-        HashMap<String, List<PgmArg>> emptyOptsMap = new HashMap<>(0);
+        Map<String, ProgramProfile> emptyOptsMap = Collections.emptyMap();
 
         return new TestCase(targetFile, programs, cmdArgs.getExtensions(),
-                cmdArgs.getExcludes(), results, emptyOpts, emptyOpts, emptyOptsMap,
+                cmdArgs.getExcludes(), results, emptyOpts, emptyProfile, emptyOptsMap,
                 new HashSet<KTestStep>());
     }
 
@@ -217,11 +218,11 @@ public class TestCase {
         this.excludes = toSet(excludes);
     }
 
-    public void setKrunOpts(List<PgmArg> krunOpts) {
+    public void setKrunOpts(ProgramProfile krunOpts) {
         this.krunOpts = krunOpts;
     }
 
-    public void setPgmSpecificKRunOpts(Map<String, List<PgmArg>> pgmSpecificKRunOpts) {
+    public void setPgmSpecificKRunOpts(Map<String, ProgramProfile> pgmSpecificKRunOpts) {
         this.pgmSpecificKRunOpts = pgmSpecificKRunOpts;
     }
 
@@ -263,8 +264,8 @@ public class TestCase {
                         r.getAnn());
     }
 
-    private List<PgmArg> getPgmOptions(String pgm) {
-        List<PgmArg> ret = pgmSpecificKRunOpts.get(FilenameUtils.getName(pgm));
+    private ProgramProfile getPgmOptions(String pgm) {
+        ProgramProfile ret = pgmSpecificKRunOpts.get(FilenameUtils.getName(pgm));
         if (ret == null)
             return krunOpts;
         return ret;
@@ -304,12 +305,13 @@ public class TestCase {
 
                     // set krun args
                     List<PgmArg> args = new LinkedList<>();
-                    for (PgmArg arg : getPgmOptions(pgmFilePath))
+                    ProgramProfile profile = getPgmOptions(pgmFilePath);
+                    for (PgmArg arg : profile.getArgs())
                         args.add(arg);
 
                     ret.add(new KRunProgram(
                             pgmFilePath, definitionFilePath, args, inputFilePath, outputFilePath, errorFilePath,
-                            getNewOutputFilePath(outputFileName)));
+                            getNewOutputFilePath(outputFileName), profile.isRegex()));
                 }
             } else {
                 ret.addAll(searchPrograms(pgmFile.getAbsolutePath()));

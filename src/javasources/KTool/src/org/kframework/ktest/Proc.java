@@ -8,7 +8,6 @@ import org.kframework.utils.general.GlobalSettings;
 
 import java.awt.*;
 import java.io.*;
-import java.util.Comparator;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.*;
@@ -54,7 +53,7 @@ public class Proc<T> implements Runnable {
     /**
      * Comparator to compare program outputs with expected outputs.
      */
-    private final Comparator<String> strComparator;
+    private final StringMatcher strComparator;
 
     /**
      * Some arbitrary user data to later get with `getObj()'.
@@ -105,7 +104,7 @@ public class Proc<T> implements Runnable {
      */
     public Proc(T obj, String[] args, String procInput, Annotated<String, String> expectedOut,
                 Annotated<String, String> expectedErr, String logStr,
-                Comparator<String> strComparator, int timeout, boolean verbose,
+                StringMatcher strComparator, int timeout, boolean verbose,
                 ColorSetting colorSetting,
                 boolean updateOut, boolean generateOut,
                 String outputFile, String newOutputFile) {
@@ -125,7 +124,7 @@ public class Proc<T> implements Runnable {
         this.newOutputFile = newOutputFile;
     }
 
-    public Proc(T obj, String[] args, String logStr, Comparator<String> strComparator, int timeout,
+    public Proc(T obj, String[] args, String logStr, StringMatcher strComparator, int timeout,
                 boolean verbose, ColorSetting colorSetting,
                 boolean updateOut, boolean generateOut) {
         this(obj, args, "", null, null, logStr, strComparator, timeout, verbose, colorSetting,
@@ -257,12 +256,14 @@ public class Proc<T> implements Runnable {
                 if (verbose)
                     System.out.format("Done with [%s] (time %d ms)%n", logStr, timeDelta);
                 doGenerateOut = true;
-            } else if (strComparator.compare(pgmOut, expectedOut.getObj()) != 0) {
+            } else if (!strComparator.matches(expectedOut.getObj(), pgmOut)) {
                 // outputs don't match
                 System.out.format(
                         "%sERROR: [%s] output doesn't match with expected output (time: %d ms)%s%n",
                         red, logStr, timeDelta, ColorUtil.ANSI_NORMAL);
                 reportOutMatch(expectedOut, pgmOut);
+                if (verbose)
+                    System.out.println(getReason());
                 doGenerateOut = true;
             }
             else {
@@ -300,7 +301,7 @@ public class Proc<T> implements Runnable {
                     System.out.format("error was: %s%n", pgmErr);
                 reportErr(pgmErr);
             }
-            else if (strComparator.compare(pgmErr, expectedErr.getObj()) == 0) {
+            else if (strComparator.matches(expectedErr.getObj(), pgmErr)) {
                 // error outputs match
                 success = true;
                 if (verbose)
@@ -323,12 +324,12 @@ public class Proc<T> implements Runnable {
 
     private void reportErrMatch(Annotated<String, String> expected, String found) {
         assert reason == null;
-        reason = String.format("Expected program error:%n%s%n%nbut found:%n%s%n", expected, found);
+        reason = "Unexpected program error:\n" + strComparator.errorMessage();
     }
 
     private void reportOutMatch(Annotated<String, String> expected, String found) {
         assert reason == null;
-        reason = String.format("Expected program output:%n%s%n%nbut found:%n%s%n", expected, found);
+        reason = "Unexpexted program output:\n" + strComparator.errorMessage();
     }
 
     private void reportTimeout() {

@@ -1,61 +1,10 @@
-Search results:
-
-Solution 1:
-Solution:Map -->
-"A" |-> jim (  )
-"B" |-> john (  )
-"X" |-> david (  )
-
-Solution 2:
-Solution:Map -->
-"A" |-> nathan (  )
-"B" |-> david (  )
-"X" |-> jim (  )
-
-Solution 3:
-Solution:Map -->
-"A" |-> nathan (  )
-"B" |-> david (  )
-"X" |-> steve (  )
-
-Solution 4:
-Solution:Map -->
-"A" |-> nathan (  )
-"B" |-> jim (  )
-"X" |-> steve (  )
-
-Solution 5:
-Solution:Map -->
-"A" |-> nathan (  )
-"B" |-> john (  )
-"X" |-> david (  )
-
-Solution 6:
-Solution:Map -->
-"A" |-> nathan (  )
-"B" |-> john (  )
-"X" |-> jim (  )
-
-Solution 7:
-Solution:Map -->
-"A" |-> nathan (  )
-"B" |-> john (  )
-"X" |-> steve (  )
-
-Solution 8:
-Solution:Map -->
-"A" |-> steve (  )
-"B" |-> david (  )
-"X" |-> jim (  )
-
-Solution 9:
-Solution:Map -->
-"A" |-> steve (  )
-"B" |-> john (  )
-"X" |-> david (  )
-
-Solution 10:
-Solution:Map -->
-"A" |-> steve (  )
-"B" |-> john (  )
-"X" |-> jim (  )
+"A".*jim.*\n"B".*john.*\n"X".*david.*
+"A".*nathan.*\n"B".*david.*\n"X".*jim.*
+"A".*nathan.*\n"B".*david.*\n"X".*steve.*
+"A".*nathan.*\n"B".*jim.*\n"X".*steve.*
+"A".*nathan.*\n"B".*john.*\n"X".*david.*
+"A".*nathan.*\n"B".*john.*\n"X".*jim.*
+"A".*nathan.*\n"B".*john.*\n"X".*steve.*
+"A".*steve.*\n"B".*david.*\n"X".*jim.*
+"A".*steve.*\n"B".*john.*\n"X".*david.*
+"A".*steve.*\n"B".*john.*\n"X".*jim.*

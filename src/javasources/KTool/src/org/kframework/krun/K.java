@@ -110,6 +110,11 @@ public class K {
     public static String smt = "z3";
     public static boolean deterministic_functions = false;
 
+    
+    /**
+     * Whether to wrap output at 80 characters.
+     */
+    public static boolean wrap = true;
 
     public static Properties configuration_variables = new Properties();
     public static Properties cfg_parsers = new Properties();    
