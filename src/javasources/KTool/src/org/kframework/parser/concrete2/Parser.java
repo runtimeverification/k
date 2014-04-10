@@ -32,22 +32,107 @@ import org.kframework.parser.concrete2.Rule.ContextFreeRule;
 import org.kframework.parser.concrete2.Rule.ContextSensitiveRule;
 
 /**
- * The main code for running the parser.
+ * This is the main code for running the parser.
+ *
+ * ----------------
+ * Terminology
+ * ----------------
+ *
+ * entryState/exitState: the first and last states in a non-terminal
+ *
+ * stateCall/stateReturn: records for the entry to or exit from a state
+ * ntCall/ntReturn: records for the entry to or exit from a non-terminal
+ *
+ * stateBegin/stateEnd: the source positions for the beginning and end the span of a state
+ * ntBegin/ntEnd: the source positions for the beginning and end the span of a state
+ *
+ * nextState/previousState: successor/predecessor states in a state machine
+ *
+ * ----------------
+ * ParseState
+ * ----------------
+ *
+ * The parser operates by maintaining tables of NonTerminalCall,
+ * StateCall and StateReturn records. These tables are stored
+ * in ParseState and are keyed by NonTerminalCall.Key,
+ * StateCall.Key and StateReturn.Key. For any given Key, there is
+ * a single value that can be looked up with getNtCall(), getStateCall(),
+ * and getStateReturn(). If no value exists for a given Key, then those
+ * functions will create one.
+ *
+ * In addition to these tables, a work queue of StateReturn to be processed
+ * is kept in StateReturnWorkList. This queue is ordered according to
+ * StateReturn.compareTo() in such a way that it is impossible for a
+ * StateReturn later in the queue to contribute to or influence a StateReturn
+ * earlier in the queue.
+ *
+ * The main loop of the parser then processes elements in this queue until
+ * it is empty.
+ *
+ * ----------------
+ * NonTerminalCall
+ * ----------------
+ *
+ * A NonTerminalCall represents the fact that the parser needs to try parsing
+ * a particular NonTerminal (i.e., key.nt) starting at a particular position
+ * (i.e., key.ntBegin).
+ *
+ * For each NonTerminalCall, we keep track of all StateCall
+ * that triggered this NonTerminalCall (i.e., callers) so that when
+ * the NonTerminalCall is finished, we can notify them of the successful parse.
+ *
+ * We also keep track of all StateReturns for the ExitState (i.e., exitStateReturns)
+ * so that when a new StateCall activates this NonTerminalCall, we can notify
+ * the StateCall of successful parses of this NonTerminalCall that are
+ * already computed.
+ *
+ * We also keep track of all StateReturns in this NonTerminal that
+ * should be added back on the work queue if we discover that this NonTerminalCall
+ * is called from a new context (i.e., reactivations).  This is used
+ * to handle context sensitivity.
+ *
+ * The contexts in which a NonTerminalCall is called are stored in a Context object
+ * (i.e., 'context'). For now, contexts are limited to one layer and thus a context
+ * might say that this NonTerminal is called from a StateCall that has thus far
+ * parsed a '+(1,_)'.  This information is stored as a KList where the "_"
+ * are omitted.  This is kept as a separate class because they might be extended
+ * in the future.
+ *
+ * ----------------
+ * StateCall
+ * ----------------
+ *
+ * A StateCall represents the fact that the parser started parsing
+ * a particular State (i.e., key.state) at a particular position
+ * (i.e., key.stateBegin) while parsing a particular NonTerminalCall
+ * (i.e., key.ntCall).
+ *
+ * For each StateCall, we keep track of the AST produced up to that point.
+ * Since the AST produced may depend on the context in which the
+ * NonTerminalCall associated with this StateCall (i.e., key.ntCall.context),
+ * we do not simply store an AST but rather a function from individual contexts.
+ * This is stored in the 'function' field.
+ * (See the Function class for how that is implemented).
+ *
+ * ----------------
+ * StateReturn
+ * ----------------
+ *
+ * A StateReturn represents the fact that the parser finished parsing
+ * something that was started by a particular StateCall (i.e., key.stateCall)
+ * at a particular position (i.e. key.stateEnd).
+ *
+ * Just was with StateCall, a StateReturn stores the AST produced up to that
+ * point as the 'function' field.
+ *
+ * ----------------
+ * Context
+ * ----------------
+ *
+ * See NonTerminalCall for an explanation of Context.
+ *
  */
 public class Parser {
-
-/*
-Terminology:
-  entryState/exitState: the first and last states in a non-terminal
-
-  stateCall/stateReturn: records for the entry to or exit from a state
-  ntCall/ntReturn: records for the entry to or exit from a non-terminal
-
-  stateBegin/stateEnd: the source positions for the beginning and end the span of a state
-  ntBegin/ntEnd: the source positions for the beginning and end the span of a state
-
-  nextState/previousState: successor/predecessor states in a state machine
-*/
 
     /**
      * The dynamic record for where a state starts parsing.
@@ -245,6 +330,8 @@ Terminology:
         // a priority queue containing the return states to be processed
         final StateReturnWorkList stateReturnWorkList = new StateReturnWorkList();
         // a preprocessed correspondence from index to line and column in the input string
+        // TODO: replace lines and columns with Location class
+        // TODO: extract Location class into it's own file
         final int[] lines;
         final int[] columns;
         public ParseState(CharSequence input) {
@@ -325,7 +412,20 @@ Terminology:
     ////////////////
 
     /**
-     * An abstract mapping from a Context to a parse tree.
+     * A 'Function' represents a mapping from one or more 'Context's
+     * to one or more ASTs.  'Function's are used throughout the parser
+     * instead of manipulating ASTs in order to support context sensitivity.
+     *
+     * A 'Function' stores this mapping from a context to an AST as it's
+     * 'mapping' field.  Their are two sorts of mappings: Nil and One.
+     * A 'Nil' mapping does not depend on the context in any way.
+     * In effect, it represents a constant 'Function' that ignores its argument.
+     * A 'One' mapping, on the other hand, depends on one layer of context.
+     * It does this by storing input/output pairs.  These pairs are populated
+     * dynamically based on what input contexts actually occur, so this
+     * mapping may grow when new contexts are added to a NonTerminalCall.
+     * The reason we have both 'Nil' and 'One' is that several operations
+     * on 'Nil' can be done much more efficiently than on a 'One'.
      */
     private static class Function {
         private abstract class Mapping {}
@@ -335,13 +435,29 @@ Terminology:
         private Mapping mapping = new Nil();
         private AssertionError unknownMappingType() { return new AssertionError("Unknown mapping type"); }
 
-        public static final Function IDENTITY = new Function();
+        /**
+         * The identity function that maps everything to a singleton containing an empty KList.
+         * This is an identity because it maps every context to the KList.EMPTY which is the identity for KList.
+         *
+         * NOTE: It is important that this function is never mutated, but we have no good way
+         * of enforcing this.
+         */
+        static final Function IDENTITY = new Function();
         static {
             ((Nil) IDENTITY.mapping).values.add(KList.EMPTY);
         }
+
+        /**
+         * Returns a function that maps everything to the empty set.
+         * @return The newly created function.
+         */
         static Function empty() { return new Function(); }
 
-        // Converts a Nil to a One with the given contexts
+        /**
+         * Converts a function containing a 'Nil' mapping to and equivalent one with
+         * a 'One' mapping for the given contexts
+         * @param contexts The contexts for which the 'One' should have mappings
+         */
         private void promote(Set<KList> contexts) {
             assert this.mapping instanceof Nil;
             Set<KList> oldValues = ((Nil) this.mapping).values;
@@ -354,15 +470,13 @@ Terminology:
             }
         }
 
-        // Should be method of KList
-        private static KList append(KList klist, Term t) {
-            KList newKList = new KList(klist);
-            newKList.add(t);
-            return newKList;
-        }
-
-        // for each set in that, add adder applied to that set
-        boolean addAux(Function that, com.google.common.base.Function<Set<KList>, Set<KList>> adder) {
+        /**
+         * A helper function that adds the mappings in 'that' to 'this' after applying 'adder' to each mapping.
+         * @param that     That 'Function' from which to get the mappings to be added to 'this'.
+         * @param adder    The function to be applied to each value that a particular context is mapped to.
+         * @return 'true' iff new mappings were added to this
+         */
+        private boolean addAux(Function that, com.google.common.base.Function<Set<KList>, Set<KList>> adder) {
             if (this.mapping instanceof Nil && that.mapping instanceof Nil) {
                 return ((Nil) this.mapping).values.addAll(adder.apply(((Nil) that.mapping).values));
             } else if (this.mapping instanceof Nil && that.mapping instanceof One) {
@@ -388,7 +502,10 @@ Terminology:
             } else { throw unknownMappingType(); }
         }
 
-        // Returns the KLists that this function maps to
+        /**
+         * Get the set of KLists that this function maps to regardless of input (i.e., the range of this function).
+         * @return The set of KLists that this function maps to
+         */
         Set<KList> results() {
             if (this.mapping instanceof Nil) { return ((Nil) this.mapping).values; }
             else if (this.mapping instanceof One) {
@@ -400,31 +517,60 @@ Terminology:
             } else { throw unknownMappingType(); }
         }
 
+        /**
+         * Returns the output of this function if it were applied to an empty (i.e., zero depth) context.
+         * @return The output of this function applied to an empty context
+         */
         Set<KList> applyToNull() {
             if (this.mapping instanceof Nil) { return ((Nil) this.mapping).values; }
             else { assert false : "unimplemented"; return null; } // TODO
         }
 
-        public boolean addIdentity() { return add(IDENTITY); }
-
+        /**
+         * Adds all mappings in 'that' to 'this'
+         * @param that    The 'Function' from which to add mappings
+         * @return 'true' iff the mappings in this function changed
+         */
         public boolean add(Function that) {
             return addAux(that, new com.google.common.base.Function<Set<KList>, Set<KList>>() {
                 public Set<KList> apply(Set<KList> set) { return set; }
             });
         }
+
+        /**
+         * Add to 'this' all mappings formed by adding the token
+         * 'string' of sort 'sort' to the end of the mapping in that.
+         * @param that      The function from which
+         * @param string    The token value
+         * @param sort      The sort of the token
+         * @return 'true' iff the mappings in this function changed.
+         */
         boolean addToken(Function that, String string, String sort) {
             final KApp token = Token.kAppOf(sort, string);
             return addAux(that, new com.google.common.base.Function<Set<KList>, Set<KList>>() {
                 public Set<KList> apply(Set<KList> set) {
                     Set<KList> result = new HashSet<>();
                     for (KList klist : set) {
-                        result.add(append(klist, token));
+                        KList newKList = new KList(klist);
+                        newKList.add(token);
+                        result.add(newKList);
                     }
                     return result;
                 }
             });
         }
 
+        /**
+         * Add to this function the mappings resulting from composing mappings in call with the mappings in exit.
+         * We do this in a way that matches up the contexts in 'exit' with the results in 'call'.
+         *
+         * This is used when the child (a NonTerminal) of a NonTerminalState finishes parsing.
+         * In that case 'call' is the Function for the StateCall for that NonTerminalState and
+         * 'exit' is the Function for the StateReturn of the ExitState in the NonTerminal.
+         * @param call    The base function onto which 'exit' should be appended
+         * @param exit    The function to append on 'call'
+         * @return 'true' iff the mapping in this function changed
+         */
         boolean addNTCall(Function call, final Function exit) {
             return addAux(call, new com.google.common.base.Function<Set<KList>, Set<KList>>() {
                 public Set<KList> apply(Set<KList> set) {
@@ -439,7 +585,9 @@ Terminology:
                         } else { unknownMappingType(); }
                         // if we found some, make an amb node and append them to the KList
                         if (!matches.isEmpty()) {
-                            result.add(append(context, new Ambiguity(KSorts.K, new ArrayList<Term>(matches))));
+                            KList newKList = new KList(context);
+                            newKList.add(new Ambiguity(KSorts.K, new ArrayList<Term>(matches)));
+                            result.add(newKList);
                         }
                     }
                     return result;
@@ -447,7 +595,18 @@ Terminology:
             });
         }
 
-        // NOTE: also adds rule to reactivations
+        /**
+         * Add to 'this', the mappings from 'that' after they have had 'rule' applied to them.
+         *
+         * NOTE: May also add 'stateReturn' to the 'reactivations' of the NonTerminalCall containing 'stateReturn'
+         *
+         * @param that           The function on which to apply 'rule'
+         * @param rule           The 'Rule' to apply to the values in 'that'
+         * @param stateReturn    The StateReturn containing the StateRule containing the Rule
+         * @param metaData       Metadata about the current state of parsing (e.g., location information)
+         *                       that the rule can use
+         * @return 'true' iff the mapping in this function changed
+         */
         boolean addRule(Function that, final Rule rule, final StateReturn stateReturn, final Rule.MetaData metaData) {
             if (rule instanceof ContextFreeRule) {
                 return addAux(that, new com.google.common.base.Function<Set<KList>, Set<KList>>() {
@@ -558,6 +717,7 @@ Terminology:
      * Contains the maximum position in the text which the parser managed to recognize.
      */
     public static class ParseError {
+        // TODO: replace the fields below with Location class
         /// The character offset of the error
         public final int position;
         /// The column of the error
@@ -602,7 +762,7 @@ Terminology:
         }
     }
 
-    // compute the function for a state return based on the function for the state call associated
+    // compute the Function for a state return based on the Function for the state call associated
     // with the state return, and the type of the state
     private boolean finishStateReturn(StateReturn stateReturn) {
         if (stateReturn.key.stateCall.key.state instanceof EntryState) {
@@ -636,7 +796,7 @@ Terminology:
         } else { throw unknownStateType(); }
     }
 
-    // copy function from state return to next state call
+    // copy Function from state return to next state call
     // also put state return in the queue if need be
     private void activateStateCall(StateCall stateCall, Function function) {
         if (!stateCall.function.add(function)) { return; }
