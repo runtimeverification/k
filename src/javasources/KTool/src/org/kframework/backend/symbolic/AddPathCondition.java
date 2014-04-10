@@ -8,6 +8,7 @@ import org.kframework.compile.utils.MetaK;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
+import org.kframework.kil.BoolBuiltin;
 import org.kframework.kil.Cell;
 import org.kframework.kil.Cell.Ellipses;
 import org.kframework.kil.KApp;
@@ -131,14 +132,13 @@ public class AddPathCondition extends CopyOnWriteTransformer {
         return node;
     }
 
-    public static Term andBool(List<Term> filteredTerms) {
+    public static Term andBool(List<Term> terms) {
 
-        Iterator<Term> it = filteredTerms.iterator();
-        Term and = it.next();
-        while (it.hasNext()) {
+        Term and = BoolBuiltin.TRUE;
+        for (Term t : terms){
             List<Term> list = new ArrayList<Term>();
             list.add(and);
-            list.add(it.next());
+            list.add(t);
             and = new KApp(KLabelConstant.BOOL_ANDBOOL_KLABEL, new KList(list));
         }
         return and;

@@ -58,9 +58,6 @@ public class ResolveLtlAttributes extends CopyOnWriteTransformer {
         if (rule.getAttributes().containsKey(LTL)) {
             Term body = rule.getBody();
             if (body instanceof Rewrite) {
-                // get the rule's side condition
-                Term requires = rule.getRequires();
-
                 // search the LTL state
                 SearchLTLState searchLTLState = new SearchLTLState(context);
                 rule.accept(searchLTLState);
@@ -104,6 +101,7 @@ public class ResolveLtlAttributes extends CopyOnWriteTransformer {
                     // check if the path condition implies the rule condition
                     // step 1: filter the rule condition by extracting the terms
                     //         which can be translated into SMTLIB
+                    Term requires = rule.getRequires();
                     ConditionTransformer ct = new ConditionTransformer(context);
                     Term smtlibInvalidCondition = (Term) requires.accept(ct);
                     List<Term> filtered = ct.getFilteredTerms();
