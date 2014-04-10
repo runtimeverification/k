@@ -79,25 +79,19 @@ public class TermVisitor extends LocalVisitor implements Serializable {
             IndexingStatistics.getPStringStopwatch.start();
         }
         //first find all the term's cells of interest in  a single pass
-        CellVisitor v = new CellVisitor(context);
-        node.accept(v);
-        pStrings.addAll(v.getkCellPStings());
+        CellVisitor cellVisitor = new CellVisitor(context);
+        node.accept(cellVisitor);
+        pStrings.addAll(cellVisitor.getkCellPStings());
 
-        //needed for kool-static where some rules have no k-cell
+        //needed for kool-static where some rules have no k-cell. Note that we add it last.
         if (defHasNOKCellRules){
             pStrings.add("@.NO_K_CELL");
         }
-        //if (v.getkCellPStings().isEmpty() && defHasNOKCellRules){
-        //    pStrings.add("@.NO_K_CELL");
-        //}
 
         if (K.get_indexing_stats) {
             IndexingStatistics.getPStringStopwatch.stop();
             IndexingStatistics.getPStringTimes.add(
                     IndexingStatistics.getPStringStopwatch.elapsed(TimeUnit.MICROSECONDS));
-        }
-
-        if (K.get_indexing_stats) {
             IndexingStatistics.traverseCellsStopwatch.reset();
             IndexingStatistics.traverseCellsStopwatch.start();
         }
@@ -106,8 +100,8 @@ public class TermVisitor extends LocalVisitor implements Serializable {
         Cell ioCell;
         List<Term> ioCellList;
         //check whether output rules should be added
-        if (v.getOutCell() != null) {
-            ioCell = v.getOutCell();
+        if (cellVisitor.getOutCell() != null) {
+            ioCell = cellVisitor.getOutCell();
             ioCellList = ((BuiltinList) ioCell.getContent()).elements();
             if (ioCellList.size() > BASE_IO_CELL_SIZE) {
                 addOutputRules = true;
@@ -120,7 +114,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
             }
         }
         //check whether input rules should be added
-        cellOfInterest = v.getInCell();
+        cellOfInterest = cellVisitor.getInCell();
         if (cellOfInterest != null) {
             ioCellList = ((BuiltinList) cellOfInterest.getContent()).elements();
             if (ioCellList.size() > BASE_IO_CELL_SIZE) {
@@ -141,8 +135,7 @@ public class TermVisitor extends LocalVisitor implements Serializable {
         if (kSequence.size() > 0) {
             //TODO (OwolabiL): This is too messy. Restructure the conditionals
             if (kSequence.get(0) instanceof KItem) {
-                boolean isKResult = context.isSubsorted(K_RESULT,
-                        ((KItem) kSequence.get(0)).sort());
+                boolean isKResult = context.isSubsorted(K_RESULT, (kSequence.get(0)).sort());
                 if (isKResult) {
                     pString = START_STRING + K_RESULT;
                     kSequence.get(1).accept(this);
