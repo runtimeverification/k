@@ -532,9 +532,7 @@ Terminology:
             }
         }
 
-        if (GlobalSettings.verbose) // TODO(Radu): temporary for testing. Remove once we have something like --debug
-            System.out.println("Raw: " + result + "\n");
-        return (Term) result.accept(new TreeCleanerVisitor(null));
+        return result;
     }
 
     /**

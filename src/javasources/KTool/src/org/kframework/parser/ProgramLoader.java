@@ -135,18 +135,19 @@ public class ProgramLoader {
                 Grammar grammar = (Grammar) BinaryLoader.load(context.kompiled.getAbsolutePath() + "/pgm/newParser.bin");
 
                 Parser parser = new Parser(content);
+                out = parser.parse(grammar.get(startSymbol), 0);
+                if (GlobalSettings.verbose) // TODO(Radu): temporary for testing. Remove once we have something like --debug
+                    System.out.println("Raw: " + out + "\n");
                 try {
-                    out = parser.parse(grammar.get(startSymbol), 0);
+                    out = out.accept(new TreeCleanerVisitor(context));
                     if (GlobalSettings.verbose) // TODO(Radu): temporary for testing. Remove once we have something like --debug
                         System.out.println("Clean: " + out + "\n");
                 } catch (TransformerException te) {
                     ParseError perror = parser.getErrors();
 
-                    String msg;
-                    if (content.length() == perror.position)
-                        msg = "Parse error: unexpected end of file.";
-                    else
-                        msg = "Parse error: unexpected character '" + content.charAt(perror.position) + "'.";
+                    String msg = content.length() == perror.position ?
+                        "Parse error: unexpected end of file." :
+                        "Parse error: unexpected character '" + content.charAt(perror.position) + "'.";
                     String loc = "(" + perror.line + "," + perror.column + "," +
                             perror.line + "," + (perror.column + 1) + ")";
                     throw new TransformerException(new KException(
