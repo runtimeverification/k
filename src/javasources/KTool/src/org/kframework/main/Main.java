@@ -1,3 +1,4 @@
+// Copyright (C) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.main;
 
 import java.io.IOException;
@@ -35,7 +36,7 @@ public class Main {
      * @throws IOException when loadDefinition fails 
      */
     public static void main(String[] args) throws IOException, TransformerException {
-        Stopwatch.init();
+        Stopwatch.instance();
         setJavaLibraryPath();
 
         if (args.length >= 1) {
@@ -72,16 +73,6 @@ public class Main {
                     break;
                 case "-kpp":
                     Kpp.codeClean(args2);
-                    break;
-                case "-ioserver":
-                    try {
-                        org.kframework.krun.ioserver.main.MainServer.main(args2);
-                    } catch (Exception e) {
-                        Error.report("IO server threw exception");
-                    }
-                    break;
-                case "-kpretty":
-                    KPretty.main(args2);
                     break;
                 default:
                     Error.report("The first argument of K3 not recognized. Try -kompile, -kast, -krun or -kpp.");

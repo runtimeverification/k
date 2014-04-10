@@ -1,3 +1,4 @@
+// Copyright (C) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.backend.maude;
 
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -11,7 +12,6 @@ import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.StringBuilderUtil;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.general.GlobalSettings;
 
 import java.io.IOException;
 import java.util.Map;

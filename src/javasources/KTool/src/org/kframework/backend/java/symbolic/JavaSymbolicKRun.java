@@ -1,3 +1,4 @@
+// Copyright (C) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
 
@@ -60,6 +61,8 @@ public class JavaSymbolicKRun implements KRun {
 
         this.context = definition.context();
         this.context.kompiled = context.kompiled;
+        this.context.globalOptions = context.globalOptions;
+        this.context.experimentalParserOptions = context.experimentalParserOptions;
         transformer = new KILtoBackendJavaKILTransformer(this.context);
     }
     

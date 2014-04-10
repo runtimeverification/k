@@ -1,3 +1,4 @@
+// Copyright (C) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.parser.generator;
 
 import java.util.HashSet;
@@ -14,8 +15,8 @@ import org.kframework.kil.Sort;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Context;
+import org.kframework.kompile.KompileOptions.Backend;
 import org.kframework.utils.StringUtil;
-import org.kframework.utils.general.GlobalSettings;
 
 /**
  * Collect the syntax module, call the syntax collector and print SDF for programs.
@@ -114,7 +115,7 @@ public class ProgramSDF {
                 sdf.append("    " + StringUtil.escapeSortName(s) + "        -> K\n");
         }
 
-        if (GlobalSettings.symbolic) {
+        if (context.kompileOptions.backend == Backend.SYMBOLIC) {
             sdf.append("\ncontext-free syntax\n");
             sdf.append("    DzId    -> UnitDz\n");
             sdf.append("    DzBool    -> UnitDz\n");

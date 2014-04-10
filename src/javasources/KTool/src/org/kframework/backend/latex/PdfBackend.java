@@ -1,3 +1,4 @@
+// Copyright (C) 2012-2014 K Team. All Rights Reserved.
 package org.kframework.backend.latex;
 
 import org.apache.commons.io.FilenameUtils;
@@ -61,7 +62,7 @@ public class PdfBackend extends BasicBackend {
         latexBackend.compile(definition);
         File latexFile = latexBackend.getLatexFile();
         File pdfFile = generatePdf(latexFile);
-        copyFile(pdfFile, new File(GlobalSettings.outputDir + File.separator + FilenameUtils.removeExtension(new File(definition.getMainFile()).getName()) + ".pdf"));
+        copyFile(pdfFile, new File(options.directory, FilenameUtils.removeExtension(new File(definition.getMainFile()).getName()) + ".pdf"));
     }
 
     @Override
