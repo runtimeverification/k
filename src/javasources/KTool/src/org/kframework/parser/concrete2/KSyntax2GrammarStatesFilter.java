@@ -141,7 +141,8 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
             // ************************************** end of list creation **********************
         } else {
             // the other types of production follow pretty much the same pattern
-            // add a new State to the 'previous' state; update 'previous' state
+            // previous = entryState
+            // loop: add a new State to the 'previous' state; update 'previous' state
             if (prd.isSubsort()) {
                 Sort srt = prd.getSubsort();
                 NonTerminalState nts = new NonTerminalState(
@@ -156,6 +157,8 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                     previous = labelRule;
                 }
             } else if (prd.isLexical()) {
+                // T ::= Token{regex}
+                // these kind of productions create KApps which contain token elements
                 Lexical lx = prd.getLexical();
                 String pattern = prd.containsAttribute(Constants.REGEX) ?
                                     prd.getAttribute(Constants.REGEX) :
@@ -165,6 +168,8 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                 previous.next.add(pstate);
                 previous = pstate;
             } else if (prd.isConstant()) {
+                // T ::= "value"
+                // just like the above case, but match an exact string instead of a regex
                 Terminal terminal = prd.getConstant();
                 PrimitiveState pstate = new RegExState(
                     prd.getSort() + "-T", nt,
@@ -173,6 +178,7 @@ public class KSyntax2GrammarStatesFilter extends BasicVisitor {
                 previous = pstate;
             } else {
                 // just a normal production with Terminals and Sort alternations
+                // this will create a labeled KApp with the same arity as the production
                 for (ProductionItem prdItem : prd.getItems()) {
                     if (prdItem instanceof Terminal) {
                         Terminal terminal = (Terminal) prdItem;
