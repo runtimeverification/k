@@ -4,7 +4,7 @@ package org.kframework.ktest.CmdArgs;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.krun.ColorSetting;
-import org.kframework.ktest.IgnoringStringMatcher;
+import org.kframework.ktest.IgnoringStringComparator;
 import org.kframework.ktest.KTestStep;
 import org.kframework.ktest.StringMatcher;
 
@@ -307,7 +307,7 @@ public class CmdArg {
     }
 
     public StringMatcher getDefaultStringMatcher() {
-        return new IgnoringStringMatcher(ignoreWS, ignoreBalancedParens);
+        return new IgnoringStringComparator(ignoreWS, ignoreBalancedParens);
     }
 
     private static int parseTimeout(CommandLine cmdOpts) throws InvalidArgumentException {

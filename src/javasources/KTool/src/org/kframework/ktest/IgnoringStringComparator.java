@@ -1,34 +1,38 @@
 package org.kframework.ktest;
 
-import java.util.Comparator;
-
-public class IgnoringStringComparator implements Comparator<String> {
+public class IgnoringStringComparator implements StringMatcher {
 
     private final boolean ignoreWS;
     private final boolean ignoreBalancedParens;
 
+    private String lastPattern;
+    private String lastActual;
+    
     public IgnoringStringComparator(boolean ignoreWS, boolean ignoreBalancedParens) {
         this.ignoreWS = ignoreWS;
         this.ignoreBalancedParens = ignoreBalancedParens;
     }
 
     @Override
-    public int compare(String s1, String s2) {
+    public boolean matches(String pattern, String actual) {
+        lastPattern = pattern;
+        lastActual = actual;
+        
         // algorithm copied from old ktest; I'm not convinced that they work correctly in all cases
         if (ignoreWS) {
-            s1 = s1.replaceAll("\\r|\\s|\\n","");
-            s2 = s2.replaceAll("\\r|\\s|\\n","");
-            s1 = s1.replaceAll("\u001B\\[[;\\d]*m", "");
-            s2 = s2.replaceAll("\u001B\\[[;\\d]*m", "");
+            pattern = pattern.replaceAll("\\r|\\s|\\n","");
+            actual = actual.replaceAll("\\r|\\s|\\n","");
+            pattern = pattern.replaceAll("\u001B\\[[;\\d]*m", "");
+            actual = actual.replaceAll("\u001B\\[[;\\d]*m", "");
         } else {
-            s1 = s1.replaceAll("\\r","");
-            s2 = s2.replaceAll("\\r","");
+            pattern = pattern.replaceAll("\\r","");
+            actual = actual.replaceAll("\\r","");
         }
         if (ignoreBalancedParens) {
-            s1 = removeAllBalanced(s1);
-            s2 = removeAllBalanced(s2);
+            pattern = removeAllBalanced(pattern);
+            actual = removeAllBalanced(actual);
         }
-        return s1.trim().compareTo(s2.trim());
+        return pattern.trim().compareTo(actual.trim()) == 0;
     }
 
     private static String removeAllBalanced(String s1) {
@@ -41,4 +45,10 @@ public class IgnoringStringComparator implements Comparator<String> {
             return removeAllBalanced(s2);
         }
     }
+    
+    @Override
+    public String errorMessage() {
+        return String.format("Expected:%n%s%n%nbut found:%n%s%n", lastPattern, lastActual);
+    }
+
 }
