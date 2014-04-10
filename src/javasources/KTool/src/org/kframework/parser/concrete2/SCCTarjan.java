@@ -1,3 +1,8 @@
+// Copyright (C) 2014 K Team. All Rights Reserved.
+// This is a modified version of
+// https://github.com/indy256/codelibrary/blob/master/java/src/SCCTarjan.java
+// which is licensed under the Unlicense http://unlicense.org/UNLICENSE
+
 package org.kframework.parser.concrete2;
 
 import java.util.*;
