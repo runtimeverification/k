@@ -436,7 +436,7 @@ Terminology:
                             matches = ((Nil) exit.mapping).values;
                         } else if (exit.mapping instanceof One) {
                             matches = ((One) exit.mapping).values.get(context);
-                        } else { unknownMappingType(); }
+                        } else { throw unknownMappingType(); }
                         // if we found some, make an amb node and append them to the KList
                         if (!matches.isEmpty()) {
                             result.add(append(context, new Ambiguity(KSorts.K, new ArrayList<Term>(matches))));
