@@ -469,7 +469,7 @@ Terminology:
                     }
                 } else if (that.mapping instanceof One) {
                     promotedThat = ((One) that.mapping);
-                } else { unknownMappingType(); }
+                } else { throw unknownMappingType(); }
 
                 boolean result = false;
                 for (KList key : promotedThat.values.keySet()) {
