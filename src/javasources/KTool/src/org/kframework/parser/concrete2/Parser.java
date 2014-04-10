@@ -1,14 +1,6 @@
 // Copyright (C) 2014 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.regex.Pattern;
-
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -19,7 +11,6 @@ import org.kframework.kil.KList;
 import org.kframework.kil.KSorts;
 import org.kframework.kil.Term;
 import org.kframework.kil.Token;
-import org.kframework.kil.visitors.exceptions.TransformerException;
 import org.kframework.parser.concrete2.Grammar.EntryState;
 import org.kframework.parser.concrete2.Grammar.ExitState;
 import org.kframework.parser.concrete2.Grammar.NextableState;
@@ -31,7 +22,14 @@ import org.kframework.parser.concrete2.Grammar.RuleState;
 import org.kframework.parser.concrete2.Grammar.State;
 import org.kframework.parser.concrete2.Rule.ContextFreeRule;
 import org.kframework.parser.concrete2.Rule.ContextSensitiveRule;
-import org.kframework.utils.general.GlobalSettings;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 /**
  * The main code for running the parser.
