@@ -102,28 +102,21 @@ public class ResolveLtlAttributes extends CopyOnWriteTransformer {
                     rule = (Rule) rule.accept(wrapper);
 
                     // check if the path condition implies the rule condition
-                    // step 1: filter the condition and separate the smtValid part
-                    //         of it (operations which can be sent to the
-                    //         SMT solver) from the smtInvalid clauses.
-                    //         For the latter add predicates in condition.
+                    // step 1: filter the rule condition by extracting the terms
+                    //         which can be translated into SMTLIB
                     ConditionTransformer ct = new ConditionTransformer(context);
-                    Term smtInvalidCondition = (Term) requires.accept(ct);
+                    Term smtlibInvalidCondition = (Term) requires.accept(ct);
                     List<Term> filtered = ct.getFilteredTerms();
                     filtered.add(BoolBuiltin.TRUE);
-                    Term smtValidCondition = AddPathCondition.andBool(filtered);
+                    Term smtlibValidCondition = AddPathCondition.andBool(filtered);
                     Term predicates = AddPathCondition.andBool(ct.getGeneratedPredicates());
 
-                    // step 2: check the implication using the SMT solver using 'checkSat;
-                    // Note that we use smtValid instead of the rule condition because
-                    // predicates are not important when checking the implication.
-                    Term conditionNegation = KApp.of(KLabelConstant.NOTBOOL_KLABEL, smtValidCondition);
-                    Term implication = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, phi, conditionNegation);
-                    KApp unsat = StringBuiltin.kAppOf("unsat");
-                    KApp checkSat = KApp.of(KLabelConstant.of("'checkSat", context), implication);
-                    Term equalsUnsat = KApp.of(KLabelConstant.KEQ_KLABEL, checkSat, unsat);
-                    // append the implication and the predicates to condition
-                    requires = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, smtInvalidCondition, equalsUnsat);
-                    requires = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, predicates, requires);
+                    // step 2: prepare to check the implication using the SMT solver
+                    Term implicationTerm = createSMTImplicationTerm(phi, smtlibValidCondition, context);
+
+                    // append the implication, the predicates and the rest of the condition
+                    // back into the new rule condition
+                    requires = KApp.of(KLabelConstant.ANDBOOL_KLABEL, smtlibInvalidCondition, predicates, implicationTerm);
 
                     // add the new side condition of the rule and return
                     Rule newRule = rule.shallowCopy();
@@ -134,5 +127,25 @@ public class ResolveLtlAttributes extends CopyOnWriteTransformer {
         }
 
         return super.transform(rule);
+    }
+
+    /**
+     * This function creates and returns a term which is used
+     * to check the logical implication of two given terms using
+     * an SMT solver. For the implication:
+     *     x implies y
+     * this function returns:
+     *     'checkSat(x and not(y)) == "unsat"
+     * @param x a logical term
+     * @param y a logical term
+     * @param context the K definition context
+     * @return
+     */
+    public static Term createSMTImplicationTerm(Term x, Term y, Context context) {
+        Term yNegation = KApp.of(KLabelConstant.NOTBOOL_KLABEL, y);
+        Term xAndy = KApp.of(KLabelConstant.BOOL_ANDBOOL_KLABEL, x, yNegation);
+        KApp unsat = StringBuiltin.kAppOf("unsat");
+        KApp checkSat = KApp.of(KLabelConstant.of("'checkSat", context), xAndy);
+        return KApp.of(KLabelConstant.KEQ_KLABEL, checkSat, unsat);
     }
 }
