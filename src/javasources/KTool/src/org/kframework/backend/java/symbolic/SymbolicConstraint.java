@@ -170,8 +170,6 @@ public class SymbolicConstraint extends JavaSymbolicObject {
         private Term leftHandSide;
         private Term rightHandSide;
 
-        private int hashCode;
-
         private Equality(Term leftHandSide, Term rightHandSide) {
             if (leftHandSide instanceof Bottom) rightHandSide = leftHandSide;
             if (rightHandSide instanceof Bottom) leftHandSide = rightHandSide;
@@ -339,11 +337,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
 
         @Override
         public int hashCode() {
-            if (hashCode == 0) {
-                hashCode = 1;
-                hashCode = hashCode * Utils.HASH_PRIME + leftHandSide.hashCode();
-                hashCode = hashCode * Utils.HASH_PRIME + rightHandSide.hashCode();
-            }
+            int hashCode = 1;
+            hashCode = hashCode * Utils.HASH_PRIME + leftHandSide.hashCode();
+            hashCode = hashCode * Utils.HASH_PRIME + rightHandSide.hashCode();
             return hashCode;
         }
 
@@ -1203,10 +1199,9 @@ public class SymbolicConstraint extends JavaSymbolicObject {
     @Override
     public int hashCode() {
         // TODO(YilongL): normalize and sort equalities?
-        if (hashCode == 0) {
-            hashCode = hashCode * Utils.HASH_PRIME + equalities.hashCode();
-            hashCode = hashCode * Utils.HASH_PRIME + substitution.hashCode();
-        }
+        int hashCode = 1;
+        hashCode = hashCode * Utils.HASH_PRIME + equalities.hashCode();
+        hashCode = hashCode * Utils.HASH_PRIME + substitution.hashCode();
         return hashCode;
     }
 
