@@ -503,7 +503,7 @@ Terminology:
      * @param position where to start parsing in the input string
      * @return the result of parsing, as a Term
      */
-    public Term parse(NonTerminal nt, int position) throws TransformerException {
+    public Term parse(NonTerminal nt, int position) {
         // This code assumes that ordering info in the grammar are between MIN_VALUE+1 and MAX_VALUE-2
         // TODO: can we do away with the <start> non-terminal?
         NonTerminal startNt = new NonTerminal("<start>");
