@@ -26,7 +26,8 @@ public class RegexStringMatcher implements StringMatcher {
     
     @Override
     public String errorMessage() {
-        return String.format("Expected result to match regular expression:%n%s%n%nbut found:%n%s%n", failedRegex, failedActual);
+        return String.format("Expected result to match regular expression:" +
+                "%n%s%n%nbut found:%n%s%n", failedRegex, failedActual);
     }
 
 }

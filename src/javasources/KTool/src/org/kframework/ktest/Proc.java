@@ -262,7 +262,7 @@ public class Proc<T> implements Runnable {
                 System.out.format(
                         "%sERROR: [%s] output doesn't match with expected output (time: %d ms)%s%n",
                         red, logStr, timeDelta, ColorUtil.ANSI_NORMAL);
-                reportOutMatch(expectedOut, pgmOut);
+                reportOutMatch();
                 if (verbose)
                     System.out.println(getReason());
                 doGenerateOut = true;
@@ -313,7 +313,7 @@ public class Proc<T> implements Runnable {
                 System.out.format(
                         "%sERROR: [%s] throwed error, but expected error message doesn't match "+
                                 "(time: %d ms)%s%n", red, logStr, timeDelta, ColorUtil.ANSI_NORMAL);
-                reportErrMatch(expectedErr, pgmErr);
+                reportErrMatch();
             }
         }
     }
@@ -323,14 +323,14 @@ public class Proc<T> implements Runnable {
         reason = err;
     }
 
-    private void reportErrMatch(Annotated<String, String> expected, String found) {
+    private void reportErrMatch() {
         assert reason == null;
         reason = "Unexpected program error:\n" + strComparator.errorMessage();
     }
 
-    private void reportOutMatch(Annotated<String, String> expected, String found) {
+    private void reportOutMatch() {
         assert reason == null;
-        reason = "Unexpexted program output:\n" + strComparator.errorMessage();
+        reason = "Unexpected program output:\n" + strComparator.errorMessage();
     }
 
     private void reportTimeout() {

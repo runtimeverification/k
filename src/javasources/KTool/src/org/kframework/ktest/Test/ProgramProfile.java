@@ -11,7 +11,15 @@ import org.kframework.ktest.PgmArg;
  *
  */
 public class ProgramProfile {
+    /**
+     * The list of command line options to pass to the program.
+     */
     private List<PgmArg> args;
+    
+    /**
+     * {@code true} if the program's expected results should be treated as a list of regular expressions, one
+     * per line. {@false} to use legacy comparator.
+     */
     private boolean regex;
     
     public ProgramProfile(List<PgmArg> args, boolean regex) {
