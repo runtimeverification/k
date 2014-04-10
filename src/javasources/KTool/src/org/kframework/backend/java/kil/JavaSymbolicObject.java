@@ -1,6 +1,12 @@
+// Copyright (C) 2013-2014 K Team. All Rights Reserved.
+
 package org.kframework.backend.java.kil;
 
-import org.kframework.backend.java.symbolic.*;
+import org.kframework.backend.java.symbolic.BinderSubstitutionTransformer;
+import org.kframework.backend.java.symbolic.SubstitutionTransformer;
+import org.kframework.backend.java.symbolic.Transformable;
+import org.kframework.backend.java.symbolic.VariableCollector;
+import org.kframework.backend.java.symbolic.Visitable;
 import org.kframework.kil.ASTNode;
 
 import java.io.Serializable;
