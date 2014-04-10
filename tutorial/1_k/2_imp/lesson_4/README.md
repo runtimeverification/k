@@ -10,16 +10,20 @@ Let us add the remaining rules, in the order in which the language constructs
 were defined in IMP-SYNTAX.
 
 The rules for the arithmetic and Boolean constructs are self-explanatory.
-Note, however, that in all rules except those for && we inserted dynamic
-checks for the variable sorts.  Indeed, we do not want to apply the rule for
-addition, for example, when the two arguments are not integers.  In the rules
-for `&&`, we prefer not to add the dynamic check `B:BExp`, for two reasons.
-First, it can be shown that whenever any of these rules apply, `B` will indeed
-be a `BExp`; that's because there is no rule that can touch such a `B` (this
+Note, however, that K will infer the correct sorts of all the variables in
+these rules, because of they appear as arguments of the builtin operations
+(`_+Int_`, etc.).  Moreover, the inferred sorts will be enforced dynamically.
+Indeed, we do not want to apply the rule for addition, for example, when the
+two arguments are not integers.  In the rules for `&&`, although we prefer to
+not do it here for simplicity, we could have eliminated the dynamic check by
+replacing `B` (and similarly for `_`) with `B:K`, for two reasons.  First, it
+can be shown that whenever any of these rules apply, `B` will be a `BExp`
+anyway; that's because there is no rule that can touch such a `B` (this
 will become clearer shortly, when we discuss the first step of configuration
 abstraction).  Second, since we know that `B` will be a `BExp` anyway, we can
 save the time it takes to check its sort; such times may look minor, but they
-accumulate, so in general we try to avoid run-time checks as much as possible.
+accumulate, so some designers may prefer to avoid run-time checks whenever
+possible.
 
 The block rules are trivial.  However, the rule for non-empty blocks works
 only because we do not have local variable declarations in IMP.  We will have

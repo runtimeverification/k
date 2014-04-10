@@ -114,8 +114,8 @@ There is nothing special about these, but recall that \K's configuration
 abstraction mechanism is at work here!  That means that the rewrites in the
 rules below all happen at the beginning of the \textsf{k} cell.  */
 
-  rule I1:Int / I2:Int => I1 /Int I2  when I2 =/=Int 0
-  rule I1:Int + I2:Int => I1 +Int I2
+  rule I1 / I2 => I1 /Int I2  when I2 =/=Int 0
+  rule I1 + I2 => I1 +Int I2
 
 /*@ \subsection{Boolean expressions}
 The rules below are straightforward.  Note the short-circuited semantics
@@ -123,8 +123,8 @@ of \texttt{\&\&}; this is the reason we annotated the syntax of
 \texttt{\&\&} with the \K attribute \texttt{strict(1)} instead of
 \texttt{strict}. */
 
-  rule I1:Int <= I2:Int => I1 <=Int I2
-  rule ! T:Bool => notBool T
+  rule I1 <= I2 => I1 <=Int I2
+  rule ! T => notBool T
   rule true && B => B
   rule false && _ => false
 
