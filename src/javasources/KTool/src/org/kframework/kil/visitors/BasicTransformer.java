@@ -15,7 +15,7 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 /**
  * Default implementations of methods visit non-attribute children, and then call the transform method for the parent class on the current node.
  */
-public class BasicTransformer extends AbstractTransformer<Void, TransformerException> {
+public class BasicTransformer extends AbstractTransformer {
 
     public BasicTransformer(String name, Context context) {
         super(name, context);

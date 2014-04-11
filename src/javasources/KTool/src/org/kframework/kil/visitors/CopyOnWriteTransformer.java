@@ -4,7 +4,7 @@ package org.kframework.kil.visitors;
 import org.kframework.kil.loader.Context;
 
 
-public class CopyOnWriteTransformer<P> extends AbstractTransformer<P, RuntimeException> {
+public class CopyOnWriteTransformer extends AbstractTransformer {
 
     public CopyOnWriteTransformer(String name, Context context) {
         super(name, context);
