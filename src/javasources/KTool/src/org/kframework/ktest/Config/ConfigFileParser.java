@@ -1,3 +1,4 @@
+// Copyright (C) 2013-2014 K Team. All Rights Reserved.
 package org.kframework.ktest.Config;
 
 import org.apache.commons.io.FilenameUtils;
@@ -6,6 +7,7 @@ import org.kframework.ktest.CmdArgs.CmdArg;
 import org.kframework.ktest.KTest;
 import org.kframework.ktest.KTestStep;
 import org.kframework.ktest.PgmArg;
+import org.kframework.ktest.Test.ProgramProfile;
 import org.kframework.ktest.Test.TestCase;
 import org.kframework.utils.general.GlobalSettings;
 import org.w3c.dom.*;
@@ -205,13 +207,13 @@ public class ConfigFileParser {
             tc.setKompileOpts(kompileOpts);
     }
 
-    private void overrideKrunOpts(List<TestCase> tests, List<PgmArg> krunOpts) {
+    private void overrideKrunOpts(List<TestCase> tests, ProgramProfile krunOpts) {
         for (TestCase tc : tests)
             tc.setKrunOpts(krunOpts);
     }
 
     private void overridePgmSpecificKRunOpts(
-            List<TestCase> tests, Map<String, List<PgmArg>> pgmSpecificKrunOpts) {
+            List<TestCase> tests, Map<String, ProgramProfile> pgmSpecificKrunOpts) {
         for (TestCase tc : tests)
             tc.setPgmSpecificKRunOpts(pgmSpecificKrunOpts);
     }
@@ -268,8 +270,8 @@ public class ConfigFileParser {
         NodeList childNodes = testNode.getChildNodes();
 
         List<PgmArg> kompileOpts = parseKompileOpts(childNodes);
-        List<PgmArg> krunOpts = parseAllPgmsKrunOpts(childNodes);
-        Map<String, List<PgmArg>> pgmSpecificKRunOpts = parsePgmSpecificKRunOpts(childNodes);
+        ProgramProfile krunOpts = parseAllPgmsKrunOpts(childNodes);
+        Map<String, ProgramProfile> pgmSpecificKRunOpts = parsePgmSpecificKRunOpts(childNodes);
 
         TestCase ret = new TestCase(definition, programs, extensions, excludes, results,
                 kompileOpts, krunOpts, pgmSpecificKRunOpts, skips);
@@ -358,15 +360,18 @@ public class ConfigFileParser {
      * @param nodes NodeList to search `all-programs' elements
      * @return List of krun arguments
      */
-    private List<PgmArg> parseAllPgmsKrunOpts(NodeList nodes) {
+    private ProgramProfile parseAllPgmsKrunOpts(NodeList nodes) {
         List<PgmArg> ret = new LinkedList<>();
+        boolean regex = false;
         for (int childNodeIdx = 0; childNodeIdx < nodes.getLength(); childNodeIdx++) {
             Node childNode = nodes.item(childNodeIdx);
             if (childNode.getNodeType() == Node.ELEMENT_NODE
-                    && childNode.getNodeName().equals("all-programs"))
+                    && childNode.getNodeName().equals("all-programs")) {
                 ret.addAll(parseKrunOpts(childNode.getChildNodes()));
+                regex = Boolean.parseBoolean(((Element)childNode).getAttribute("regex"));
+            }
         }
-        return ret;
+        return new ProgramProfile(ret, regex);
     }
 
     /**
@@ -397,14 +402,16 @@ public class ConfigFileParser {
      * @param nodes NodeList to search `program' elements
      * @return Map from program names to list of program arguments
      */
-    private Map<String, List<PgmArg>> parsePgmSpecificKRunOpts(NodeList nodes) {
-        Map<String, List<PgmArg>> ret = new HashMap<>();
+    private Map<String, ProgramProfile> parsePgmSpecificKRunOpts(NodeList nodes) {
+        Map<String, ProgramProfile> ret = new HashMap<>();
         for (int childNodeIdx = 0; childNodeIdx < nodes.getLength(); childNodeIdx++) {
             Node childNode = nodes.item(childNodeIdx);
             if (childNode.getNodeType() == Node.ELEMENT_NODE
                     && childNode.getNodeName().equals("program")) {
                 Element elem = (Element) childNode;
-                ret.put(elem.getAttribute("name"), parseKrunOpts(elem.getChildNodes()));
+                ret.put(elem.getAttribute("name"), new ProgramProfile(parseKrunOpts(
+                        elem.getChildNodes()),
+                        Boolean.parseBoolean(elem.getAttribute("regex"))));
             }
         }
         return ret;
