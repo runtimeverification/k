@@ -1,6 +1,6 @@
-### Deleting, Saving and Restoring Cell Contents
+<!-- Copyright (C) 2010-2014 K Team. All Rights Reserved. -->
 
-[MOVIE [4'30"]](http://youtu.be/Hr1yfcnee_c)
+### Deleting, Saving and Restoring Cell Contents
 
 In this lesson we will see how easily we can delete, save and/or restore
 contents of cells in order to achieve the desired semantics of language

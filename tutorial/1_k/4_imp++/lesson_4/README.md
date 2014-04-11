@@ -1,6 +1,6 @@
-### Semantic Lists; Input/Output Streaming
+<!-- Copyright (C) 2010-2014 K Team. All Rights Reserved. -->
 
-[MOVIE [5'21"]](http://youtu.be/a0qxV1GFR5s)
+### Semantic Lists; Input/Output Streaming
 
 In this lesson we add semantics to the read and print IMP++ constructs.
 In doing so, we also learn how to use semantic lists and how to connect
@@ -16,8 +16,8 @@ each holding a semantic list, initially empty.  Semantic lists are
 space-separated sequences of items, each item being a term of the form
 `ListItem(t)`, where `t` is a term of sort `K`.  Recall that the semantic maps,
 which we use for states, environments, stores, etc., are sets of pairs
-`t1 |-> t2`, where `t1` and `t2` are terms of sort K.  The `ListItem` wrapper is
-currently needed, to avoid parsing ambiguities.
+`t1 |-> t2`, where `t1` and `t2` are terms of sort K.  The `ListItem` wrapper
+is currently needed, to avoid parsing ambiguities.
 
 Since we want the print statement to also print strings, we need to tell
 K that strings are results.  To make it more interesting, let us also overload
@@ -54,17 +54,17 @@ numbers have been placed into the `<out/>` cell.
 Cells holding semantic lists can be connected to the standard input and
 standard output buffers, and `krun` knows how to handle these appropriately.
 Let us connect the `<in/>` cell to the standard input using the cell attribute
-`stream="stdin"` and the `<out/>` cell to the standard output with the attribute
-`stream="sdtout"`.  A cell connected to the standard input will take its
-items from the standard input and block the rewriting process when an input
-is needed until an item is available in the standard input buffer.  A cell
-connected to the standard output buffer will send all its items, in order, to
-the standard output.
+`stream="stdin"` and the `<out/>` cell to the standard output with the
+attribute `stream="sdtout"`.  A cell connected to the standard input will
+take its items from the standard input and block the rewriting process when
+an input is needed until an item is available in the standard input buffer.
+A cell connected to the standard output buffer will send all its items, in
+order, to the standard output.
 
-Let us `kompile` and `krun` `io.imp` again.  It prints the message and then waits
-for your input numbers.  Type in two numbers, then press `<Enter>`.  A message
-with their sum is then printed, followed by the final configuration.  If you
-do not want to see the final configuration, and thus obtain a realistic
+Let us `kompile` and `krun` `io.imp` again.  It prints the message and then
+waits for your input numbers.  Type in two numbers, then press `<Enter>`.
+A message with their sum is then printed, followed by the final configuration.
+If you do not want to see the final configuration, and thus obtain a realistic
 interpreter for our language, then call `krun` with the option `--no-config`:
 
     krun io.imp --no-config

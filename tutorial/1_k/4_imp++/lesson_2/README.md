@@ -1,12 +1,12 @@
-### Configuration Refinement; Freshness
+<!-- Copyright (C) 2010-2014 K Team. All Rights Reserved. -->
 
-[MOVIE [4'06"]](http://youtu.be/f-qrqs8cMcU)
+### Configuration Refinement; Freshness
 
 To prepare for the semantics of threads and local variables, in this lesson we
 split the state cell into an environment and a store.  The environment and
 the store will be similar to those in the definition of LAMBDA++ in Part
-3 of the Tutorial.  This configuration refinement will require us to change some
-of IMP's rules, namely those that used the state.
+3 of the Tutorial.  This configuration refinement will require us to change
+some of IMP's rules, namely those that used the state.
 
 To split the state map, which binds program variables to values, into an
 environment mapping program variables to locations and a store mapping
@@ -40,8 +40,8 @@ We modify it as follows:
          <env>... X |-> N ...</env>
          <store>... N |-> I ...</store>
 
-So we first match the location `N` of `X` in the environment, then the value `I`
-at location `N` in the store, and finally we rewrite `X` to `I` into the
+So we first match the location `N` of `X` in the environment, then the value
+`I` at location `N` in the store, and finally we rewrite `X` to `I` into the
 computation.  This rule also shows an instance of a more complex
 multiset matching, where two variables (`X` and `N`) are matched each twice.
 
@@ -58,16 +58,18 @@ the environment-based definition of LAMBDA++ in Part 3 of the tutorial.
       when fresh(N:Nat)
 
 The side condition `fresh(N:Nat)` generates an *element* of sort `Nat` that has
-not been generated so far.  We emphasized *element*, because, like also explained
-in the LAMBDA++ tutorial, technically it is nothing but K syntactic sugar for
-a straightforward operation: it generates a term of the form `symNat(n)` of sort
-`Nat`, where `n` is a natural number, thought of as the `n`-th symbolic natural
-number that had been generated so far; the counter `n` is maintained in a
-cell that the K tool automatically adds to the configuration for this purpose.
+not been generated so far.  We emphasized *element*, because, like also
+explained in the LAMBDA++ tutorial, technically it is nothing but K syntactic
+sugar for a straightforward operation: it generates a term of the form
+`symNat(n)` of sort `Nat`, where `n` is a natural number, thought of as the
+`n`-th symbolic natural number that had been generated so far; the counter
+`n` is maintained in a cell that the K tool automatically adds to the
+configuration for this purpose.
 
-`kompile` and `krun` `sum.imp` to see how the fresh locations have been generated and
-used.  There were two fresh locations needed, for the two variables.  Note
-also that a cell holding the counter has been added to the configuration.
+`kompile` and `krun` `sum.imp` to see how the fresh locations have been
+generated and used.  There were two fresh locations needed, for the two
+variables.  Note also that a cell holding the counter has been added to the
+configuration.
 
 In the next lesson we will add the semantics of variable increment, and see
 how that yields non-deterministic behaviors in programs and how to explore

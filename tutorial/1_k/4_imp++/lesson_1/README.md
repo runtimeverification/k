@@ -1,6 +1,6 @@
-### Extending/Changing an Existing Language Syntax
+<!-- Copyright (C) 2010-2014 K Team. All Rights Reserved. -->
 
-[MOVIE [7'47"]](http://youtu.be/hWqJ8k9NNp8)
+### Extending/Changing an Existing Language Syntax
 
 Here we learn how to extend the syntax of an existing language, both with
 new syntactic constructs and with more general uses of existing constructs.
@@ -10,8 +10,8 @@ Consider the IMP language, as defined in Lesson 4 of Part 2 of the tutorial.
 
 Let us first add the new syntactic constructs, with their precedences:
 
-- variable increment, `++`, which increments an integer variable and evaluates to
-  the new value;
+- variable increment, `++`, which increments an integer variable and
+evaluates to the new value;
 - `read`, which reads and evaluates to a new integer from the input buffer;
 - `print`, which takes a comma-separated list of arithmetic expressions,
   evaluates all of them, and then prints their values to the output buffer;
@@ -23,8 +23,8 @@ Let us first add the new syntactic constructs, with their precedences:
   expressions, because we intend print to also take strings, in order to print
   nice messages to the user;
 - `halt`, which abruptly terminates the program; and
-- `spawn`, which takes a statement and creates a new concurrent thread executing 
-  it and sharing its environment with the parent thread.
+- `spawn`, which takes a statement and creates a new concurrent thread
+  executing it and sharing its environment with the parent thread.
 
 Also, we want to allow local variable declarations, which can appear anywhere
 a statement can appear.  Their scope ranges from the place they are defined
@@ -37,8 +37,8 @@ Programs are now just statements.
 We are now done with adding the new syntax and modifying the old one.
 Note that the old syntax was modified in a way which makes the previous IMP
 programs still parse, but this time as statements.  Let us then modify
-the configuration variable `$PGM` to have the sort `Stmt` instead of `Pgm`, and let
-us try to run the old IMP programs, for example `sum.imp`.
+the configuration variable `$PGM` to have the sort `Stmt` instead of `Pgm`,
+and let us try to run the old IMP programs, for example `sum.imp`.
 
 Note that they actually get stuck with the *global* declaration on the top
 of their computations.  This is because variable declarations are now treated
@@ -65,10 +65,10 @@ expressions will have side effects once we add variable increment.  We will
 be able to see all the different behaviors of this program.  Challenge: can
 you identify the behavior where the program performs a division-by-zero?
 
-If we run `div.imp` now, it will get stuck with the variable increment construct
-on top of the computation cell.  Once we give it a semantics, in the next
-lesson, `div.imp` will execute completely (all the other constructs in `div.imp`
-already have their semantics defined as part of IMP).
+If we run `div.imp` now, it will get stuck with the variable increment
+construct on top of the computation cell.  Once we give it a semantics, in
+the next lesson, `div.imp` will execute completely (all the other constructs
+in `div.imp` already have their semantics defined as part of IMP).
 
 Note that some people prefer to define all their semantics in a *by need*
 style, that is, they first write and parse lots of programs, and then they

@@ -1,6 +1,6 @@
-### Tagging; Superheat/Supercool Kompilation Options
+<!-- Copyright (C) 2010-2014 K Team. All Rights Reserved. -->
 
-[MOVIE [6'56"]](http://youtu.be/uwCUfWt7n-o)
+### Tagging; Superheat/Supercool Kompilation Options
 
 In this lesson we add the semantics of variable increment.  In doing so, we
 learn how to tag syntactic constructs and rules and then use such tags to
@@ -44,8 +44,8 @@ showed us only one solution when run with the `--search` option on `div.imp`.
 We next explain how to tell `kompile` in what kind of language model we are
 interested for analysis purposes.  When we experiment with non-determinism due
 to evaluation strategies of language constructs, we should keep in mind that
-`kompile` allows us to configure two important parameters, called `--superheat`,
-and respectively, `--supercool`:
+`kompile` allows us to configure two important parameters, called
+`--superheat`, and respectively, `--supercool`:
 
 1. `superheat`: what language constructs we want the generated language model
 to allow for exhaustive non-deterministic analysis; and
@@ -59,14 +59,14 @@ us, it is way too much in practice when you deal with large languages!  There
 are simply too many behaviors for `krun` to consider, and it will likely hang
 on you or crush.  For example, a small ten-statement program where each
 statement uses one strict expression construct already has 1000+ behaviors for
-`krun` to explore!  Driven by practical needs of its users, the K tool therefore
-allows you to finely tune the generated language models using the two options
-above.  Metaphorically, the `super` prefix is meant to fully incorporate in
-the generated language model the theoretical meaning of the corresponding
-operation: `superheat` indicates strict language constructs whose heating
-rules have to be considered as backtracking markers for search, and
-`supercool` indicates rules which enforce the application of the corresponding
-cooling rules of those constructs.
+`krun` to explore!  Driven by practical needs of its users, the K tool
+therefore allows you to finely tune the generated language models using the
+two options above.  Metaphorically, the `super` prefix is meant to fully
+incorporate in the generated language model the theoretical meaning of the
+corresponding operation: `superheat` indicates strict language constructs
+whose heating rules have to be considered as backtracking markers for search,
+and `supercool` indicates rules which enforce the application of the
+corresponding cooling rules of those constructs.
 
 To state which constructs are `superheat` and which rules are `supercool`, and
 not only for these reasons, the K tool allows you to tag any productions
@@ -114,8 +114,8 @@ the command
 is completely equivalent to the previous `kompile` command!
 
 Please use this default behavior with caution, or even better, try to avoid
-using it!  You may be tempted to add the `superheat` and `supercool` tags to lots
-of things and then forget about them; your language models will then be
+using it!  You may be tempted to add the `superheat` and `supercool` tags to
+lots of things and then forget about them; your language models will then be
 increasingly slower when you execute them and you may wonder why ...  This
 convention is typically convenient when you want to quickly experiment with
 non-determinism and do not want to bother inventing tag names and calling

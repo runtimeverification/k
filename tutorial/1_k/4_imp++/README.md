@@ -1,3 +1,5 @@
+<!-- Copyright (C) 2010-2014 K Team. All Rights Reserved. -->
+
 ## Part 4: Defining IMP++
 
 IMP++ extends IMP, which was discussed in Part 2 of this tutorial, with several

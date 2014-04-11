@@ -1,6 +1,6 @@
-### Adding/Deleting Cells Dynamically; Configuration Abstraction, Part 2
+<!-- Copyright (C) 2010-2014 K Team. All Rights Reserved. -->
 
-[MOVIE [11'40"]](http://youtu.be/DpJPP3Qtqno)
+### Adding/Deleting Cells Dynamically; Configuration Abstraction, Part 2
 
 In this lesson we add dynamic thread creation and termination to IMP, and
 while doing so we learn how to define and use configurations whose structure

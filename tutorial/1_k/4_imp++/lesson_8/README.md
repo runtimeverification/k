@@ -1,6 +1,6 @@
-### Wrapping up Larger Languages
+<!-- Copyright (C) 2010-2014 K Team. All Rights Reserved. -->
 
-[MOVIE [6'26"]](http://youtu.be/QV1AGagktzk)
+### Wrapping up Larger Languages
 
 In this lesson we wrap up IMP++'s semantics and also generate its poster.
 While doing so, we also learn how to display larger configurations in order
