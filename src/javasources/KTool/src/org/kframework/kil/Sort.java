@@ -13,93 +13,93 @@ public class Sort extends ProductionItem {
 
     public static final String BOOL = "Bool";
 
-	private String name;
-	private static Set<String> baseSorts = new HashSet<String>();
-	static {
-		baseSorts.add("K");
-		baseSorts.add("KResult");
-		baseSorts.add(KSorts.KITEM);
-		baseSorts.add(KSorts.KLIST);
-		baseSorts.add("Bag");
-		baseSorts.add("BagItem");
-		baseSorts.add(KSorts.KLABEL);
-		baseSorts.add("CellLabel");
-	}
+    private String name;
+    private static Set<String> baseSorts = new HashSet<String>();
+    static {
+        baseSorts.add("K");
+        baseSorts.add("KResult");
+        baseSorts.add(KSorts.KITEM);
+        baseSorts.add(KSorts.KLIST);
+        baseSorts.add("Bag");
+        baseSorts.add("BagItem");
+        baseSorts.add(KSorts.KLABEL);
+        baseSorts.add("CellLabel");
+    }
 
-	public Sort(String name) {
-		super();
-		this.name = name;
-	}
+    public Sort(String name) {
+        super();
+        this.name = name;
+    }
 
-	public Sort(Sort sort) {
-		super(sort);
-		this.name = sort.getName();
-	}
+    public Sort(Sort sort) {
+        super(sort);
+        this.name = sort.getName();
+    }
 
-	public static boolean isBasesort(String sort) {
-		return baseSorts.contains(sort);
-	}
+    public static boolean isBasesort(String sort) {
+        return baseSorts.contains(sort);
+    }
 
-	public static Set<String> getBaseSorts() {
-		return new HashSet<String>(baseSorts);
-	}
+    public static Set<String> getBaseSorts() {
+        return new HashSet<String>(baseSorts);
+    }
 
-	public boolean isBaseSort() {
-		return Sort.isBasesort(getName());
-	}
+    public boolean isBaseSort() {
+        return Sort.isBasesort(getName());
+    }
 
-	public void setName(String sort) {
-		this.name = sort;
-	}
+    public void setName(String sort) {
+        this.name = sort;
+    }
 
-	public String getName() {
-		if (MetaK.isCellSort(name))
-			return KSort.Bag.name();
-		return name;
-	}
+    public String getName() {
+        if (MetaK.isCellSort(name))
+            return KSort.Bag.name();
+        return name;
+    }
 
-	public String getRealName() {
-		return name;
-	}
+    public String getRealName() {
+        return name;
+    }
 
-	@Override
-	public String toString() {
-		return getName();
-	}
+    @Override
+    public String toString() {
+        return getName();
+    }
 
-	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-	}
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
+    }
 
-	@Override
-	public ASTNode accept(Transformer transformer) throws TransformerException {
-		return transformer.transform(this);
-	}
+    @Override
+    public ASTNode accept(Transformer transformer) throws TransformerException {
+        return transformer.transform(this);
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null)
-			return false;
-		if (obj == this)
-			return true;
-		if (!(obj instanceof Sort))
-			return false;
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null)
+            return false;
+        if (obj == this)
+            return true;
+        if (!(obj instanceof Sort))
+            return false;
 
-		Sort srt = (Sort) obj;
+        Sort srt = (Sort) obj;
 
-		if (!getName().equals(srt.getName()))
-			return false;
-		return true;
-	}
+        if (!getName().equals(srt.getName()))
+            return false;
+        return true;
+    }
 
-	@Override
-	public int hashCode() {
-		return this.getName().hashCode();
-	}
+    @Override
+    public int hashCode() {
+        return this.getName().hashCode();
+    }
 
-	@Override
-	public Sort shallowCopy() {
-		return new Sort(this);
-	}
+    @Override
+    public Sort shallowCopy() {
+        return new Sort(this);
+    }
 }
