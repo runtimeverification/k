@@ -1,3 +1,5 @@
+<!-- Copyright (C) 2010-2014 K Team. All Rights Reserved. -->
+
 ### Defining a More Complex Syntax
 
 Here we learn how to define a more complex language syntax than LAMBDA's,

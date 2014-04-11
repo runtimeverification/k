@@ -1,3 +1,5 @@
+<!-- Copyright (C) 2010-2014 K Team. All Rights Reserved. -->
+
 ### Defining a Configuration
 
 Here we learn how to define a configuration in K.  We also learn how to

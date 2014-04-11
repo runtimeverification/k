@@ -1,7 +1,4 @@
-//
-// WARNING
-//
-// This is a heavily commented K definition, part of the K tutorial.
+// Copyright (C) 2010-2014 K Team. All Rights Reserved.
 
 /*!
 \setlength{\parindent}{1em}

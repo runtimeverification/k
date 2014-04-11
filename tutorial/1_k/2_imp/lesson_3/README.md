@@ -1,3 +1,5 @@
+<!-- Copyright (C) 2010-2014 K Team. All Rights Reserved. -->
+
 ### Computations, Results, Strictness; Rules Involving Cells
 
 In this lesson we will learn about the syntactic category K of computations,
