@@ -1,3 +1,5 @@
+<!-- Copyright (C) 2010-2014 K Team. All Rights Reserved. -->
+
 ### Completing and Documenting IMP
 
 We here learn no new concepts, but it is a good moment to take a break
