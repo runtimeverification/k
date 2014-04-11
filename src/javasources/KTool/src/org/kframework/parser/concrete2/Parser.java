@@ -431,7 +431,7 @@ Terminology:
                     Set<KList> result = new HashSet<>();
                     for (KList context : set) {
                         // find subset of exit that matches
-                        Set<KList> matches = null;
+                        Set<KList> matches;
                         if (exit.mapping instanceof Nil) {
                             matches = ((Nil) exit.mapping).values;
                         } else if (exit.mapping instanceof One) {
@@ -461,7 +461,7 @@ Terminology:
                 if (this.mapping instanceof Nil) { promote(ntCallContexts); }
 
                 // Build a "promoted" version of "that"
-                One promotedThat = null;
+                One promotedThat;
                 if (that.mapping instanceof Nil) {
                     promotedThat = new One();
                     for (KList context : ntCallContexts) {
@@ -517,7 +517,7 @@ Terminology:
             new NonTerminalCall.Key(startNt, position)), position, startNt.entryState)),
             Function.IDENTITY);
 
-        for (StateReturn stateReturn = null;
+        for (StateReturn stateReturn;
              (stateReturn = s.stateReturnWorkList.dequeue()) != null;) {
             this.workListStep(stateReturn);
         }
