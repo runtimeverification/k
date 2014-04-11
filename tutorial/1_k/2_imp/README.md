@@ -1,3 +1,5 @@
+<!-- Copyright (C) 2010-2014 K Team. All Rights Reserved. -->
+
 ## Part 2: Defining IMP
 
 Here you will learn how to define a very simple imperative language in K
