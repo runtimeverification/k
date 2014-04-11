@@ -5,12 +5,12 @@ public interface Visitable {
      * Implements a Visitor pattern.
      * @param visitor
      */
-    public <P, R> R accept(Visitor<P, R> visitor, P p);
+    public <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E;
     
     /**
      * Implements a visitor pattern with no parameters
      * @param visitor
      * @return
      */
-    public <R> R accept(Visitor<Void, R> visitor);
+    public <R, E extends Throwable> R accept(Visitor<Void, R, E> visitor) throws E;
 }

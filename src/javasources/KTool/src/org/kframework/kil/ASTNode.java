@@ -283,7 +283,7 @@ public abstract class ASTNode implements Visitable, Serializable {
     public abstract ASTNode shallowCopy();
 
     @Override
-    public <R> R accept(Visitor<Void, R> visitor) {
+    public <R, E extends Throwable> R accept(Visitor<Void, R, E> visitor) throws E {
         return this.accept(visitor, null);
     }
 }

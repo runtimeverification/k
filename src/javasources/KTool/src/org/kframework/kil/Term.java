@@ -1,7 +1,7 @@
 package org.kframework.kil;
 
 import org.kframework.kil.loader.Constants;
-import org.kframework.kil.visitors.AbstractVisitor;
+import org.kframework.kil.visitors.BasicVisitor;
 import org.kframework.utils.StringUtil;
 
 import java.util.HashSet;
@@ -10,7 +10,6 @@ import java.util.Set;
 import aterm.ATermAppl;
 
 import org.w3c.dom.Element;
-
 
 /**
  * Base of all nodes that represent terms in the semantics. Each term is labeled with a sort.
@@ -73,7 +72,7 @@ public abstract class Term extends ASTNode implements Comparable<Term> {
      */
     public Set<Variable> variables() {
         final Set<Variable> result = new HashSet<Variable>();
-        this.accept(new AbstractVisitor<Void, Void>(null) {
+        this.accept(new BasicVisitor(null) {
             @Override
             public Void visit(Variable node, Void _) {
                 result.add(node);

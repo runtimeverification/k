@@ -26,7 +26,7 @@ import java.util.Map;
  * @param <R> The parameter to return from each visit method. Use {@link Void} if not needed, and
  * return {@code null}.
  */
-public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
+public abstract class AbstractVisitor<P, R, E extends Throwable> implements Visitor<P, R, E> {
     protected org.kframework.kil.loader.Context context;
     protected KompileOptions kompileOptions;
     protected GlobalOptions globalOptions;
@@ -48,14 +48,14 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(ASTNode node, P p) {
+    public R visit(ASTNode node, P p) throws E {
         R ret = defaultReturnValue(node, p);
         cache.put(node, ret);
         return ret;
     }
 
     @Override
-    public R visit(Definition node, P p) {
+    public R visit(Definition node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -75,7 +75,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(DefinitionItem node, P p) {
+    public R visit(DefinitionItem node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -83,7 +83,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(LiterateDefinitionComment node, P p) {
+    public R visit(LiterateDefinitionComment node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -91,7 +91,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(Module node, P p) {
+    public R visit(Module node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -111,7 +111,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(Require node, P p) {
+    public R visit(Require node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -119,7 +119,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(ModuleItem node, P p) {
+    public R visit(ModuleItem node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -127,7 +127,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(Import node, P p) {
+    public R visit(Import node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -135,7 +135,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(LiterateModuleComment node, P p) {
+    public R visit(LiterateModuleComment node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -143,7 +143,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(Sentence node, P p) {
+    public R visit(Sentence node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -172,7 +172,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(Configuration node, P p) {
+    public R visit(Configuration node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -180,7 +180,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(org.kframework.kil.Context node, P p) {
+    public R visit(org.kframework.kil.Context node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -188,7 +188,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(Rule node, P p) {
+    public R visit(Rule node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -196,7 +196,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(Syntax node, P p) {
+    public R visit(Syntax node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -220,7 +220,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(PriorityExtended node, P p) {
+    public R visit(PriorityExtended node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -240,7 +240,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(PriorityExtendedAssoc node, P p) {
+    public R visit(PriorityExtendedAssoc node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -260,7 +260,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(PriorityBlock node, P p) {
+    public R visit(PriorityBlock node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -280,7 +280,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(PriorityBlockExtended node, P p) {
+    public R visit(PriorityBlockExtended node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -300,7 +300,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(Production node, P p) {
+    public R visit(Production node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -320,7 +320,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(ProductionItem node, P p) {
+    public R visit(ProductionItem node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -328,7 +328,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(Sort node, P p) {
+    public R visit(Sort node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -336,7 +336,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(Terminal node, P p) {
+    public R visit(Terminal node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -344,7 +344,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(Lexical node, P p) {
+    public R visit(Lexical node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -352,7 +352,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(UserList node, P p) {
+    public R visit(UserList node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -360,7 +360,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(Term node, P p) {
+    public R visit(Term node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -368,7 +368,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(TermComment node, P p) {
+    public R visit(TermComment node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -376,7 +376,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(Cell node, P p) {
+    public R visit(Cell node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -393,7 +393,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(Collection node, P p) {
+    public R visit(Collection node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -413,7 +413,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(Ambiguity node, P p) {
+    public R visit(Ambiguity node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -421,7 +421,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(Bag node, P p) {
+    public R visit(Bag node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -429,7 +429,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(KSequence node, P p) {
+    public R visit(KSequence node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -437,7 +437,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(org.kframework.kil.List node, P p) {
+    public R visit(org.kframework.kil.List node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -445,7 +445,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(KList node, P p) {
+    public R visit(KList node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -453,7 +453,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(org.kframework.kil.Map node, P p) {
+    public R visit(org.kframework.kil.Map node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -461,7 +461,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(Set node, P p) {
+    public R visit(Set node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -469,7 +469,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(CollectionItem node, P p) {
+    public R visit(CollectionItem node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -486,7 +486,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(BagItem node, P p) {
+    public R visit(BagItem node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -494,7 +494,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(ListItem node, P p) {
+    public R visit(ListItem node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -502,7 +502,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(MapItem node, P p) {
+    public R visit(MapItem node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -510,7 +510,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(SetItem node, P p) {
+    public R visit(SetItem node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -518,7 +518,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(DataStructureBuiltin node, P p) {
+    public R visit(DataStructureBuiltin node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -535,7 +535,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(CollectionBuiltin node, P p) {
+    public R visit(CollectionBuiltin node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -552,7 +552,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(SetBuiltin node, P p) {
+    public R visit(SetBuiltin node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -560,7 +560,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(SetLookup node, P p) {
+    public R visit(SetLookup node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -575,7 +575,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(SetUpdate node, P p) {
+    public R visit(SetUpdate node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -593,7 +593,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(ListBuiltin node, P p) {
+    public R visit(ListBuiltin node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -614,7 +614,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(ListLookup node, P p) {
+    public R visit(ListLookup node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -630,7 +630,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(ListUpdate node, P p) {
+    public R visit(ListUpdate node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -653,7 +653,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(MapBuiltin node, P p) {
+    public R visit(MapBuiltin node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -672,7 +672,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(MapLookup node, P p) {
+    public R visit(MapLookup node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -688,7 +688,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(MapUpdate node, P p) {
+    public R visit(MapUpdate node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -715,7 +715,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(Token node, P p) {
+    public R visit(Token node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -723,7 +723,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(BoolBuiltin node, P p) {
+    public R visit(BoolBuiltin node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -731,7 +731,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(IntBuiltin node, P p) {
+    public R visit(IntBuiltin node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -739,7 +739,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(StringBuiltin node, P p) {
+    public R visit(StringBuiltin node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -747,7 +747,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(GenericToken node, P p) {
+    public R visit(GenericToken node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -755,7 +755,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(ListTerminator node, P p) {
+    public R visit(ListTerminator node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -763,7 +763,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(Hole node, P p) {
+    public R visit(Hole node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -771,7 +771,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(FreezerHole node, P p) {
+    public R visit(FreezerHole node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -779,7 +779,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(KApp node, P p) {
+    public R visit(KApp node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -800,7 +800,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(KItemProjection node, P p) {
+    public R visit(KItemProjection node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -817,7 +817,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(KLabel node, P p) {
+    public R visit(KLabel node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -825,7 +825,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(KLabelConstant node, P p) {
+    public R visit(KLabelConstant node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -833,7 +833,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(KLabelInjection node, P p) {
+    public R visit(KLabelInjection node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -850,7 +850,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(Rewrite node, P p) {
+    public R visit(Rewrite node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -871,7 +871,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(TermCons node, P p) {
+    public R visit(TermCons node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -891,7 +891,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(Bracket node, P p) {
+    public R visit(Bracket node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -908,7 +908,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(Cast node, P p) {
+    public R visit(Cast node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -925,7 +925,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(Variable node, P p) {
+    public R visit(Variable node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -933,7 +933,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(StringSentence node, P p) {
+    public R visit(StringSentence node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -941,7 +941,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(Restrictions node, P p) {
+    public R visit(Restrictions node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -949,7 +949,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(Freezer node, P p) {
+    public R visit(Freezer node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -966,7 +966,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(BackendTerm node, P p) {
+    public R visit(BackendTerm node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -974,7 +974,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(KInjectedLabel node, P p) {
+    public R visit(KInjectedLabel node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }
@@ -991,7 +991,7 @@ public abstract class AbstractVisitor<P, R> implements Visitor<P, R> {
     }
 
     @Override
-    public R visit(FreezerLabel node, P p) {
+    public R visit(FreezerLabel node, P p) throws E {
         if (cache() && cache.containsKey(node)) {
             return cache.get(node);
         }

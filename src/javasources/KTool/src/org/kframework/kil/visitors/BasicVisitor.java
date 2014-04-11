@@ -3,19 +3,23 @@ package org.kframework.kil.visitors;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
 
-public class BasicVisitor<P> extends AbstractVisitor<P, Void> {
+public class BasicVisitor extends AbstractVisitor<Void, Void, RuntimeException> {
+    
+    public BasicVisitor(Context context) {
+        super(context);
+    }
     
     public BasicVisitor(String name, Context context) {
         super(name, context);
     }
 
     @Override
-    public Void defaultReturnValue(ASTNode node, P p) {
+    public Void defaultReturnValue(ASTNode node, Void _) {
         return null;
     }
 
     @Override
-    public ASTNode processChildTerm(ASTNode node, ASTNode child, Void _, P p) {
+    public ASTNode processChildTerm(ASTNode node, ASTNode child, Void _, Void __) {
         return child;
     }
     

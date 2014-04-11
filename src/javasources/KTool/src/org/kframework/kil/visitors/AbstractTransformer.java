@@ -3,7 +3,7 @@ package org.kframework.kil.visitors;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.loader.Context;
 
-public abstract class AbstractTransformer<P> extends AbstractVisitor<P, ASTNode> {
+public abstract class AbstractTransformer<P, E extends Throwable> extends AbstractVisitor<P, ASTNode, E> {
 
     public AbstractTransformer(String name, Context context) {
         super(name, context);

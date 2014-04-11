@@ -2,99 +2,99 @@ package org.kframework.kil.visitors;
 
 import org.kframework.kil.*;
 
-public interface Visitor<P, R> {
-    public R visit(ASTNode node, P p);
-    public R visit(Definition node, P p);
-    public R visit(DefinitionItem node, P p);
+public interface Visitor<P, R, E extends Throwable> {
+    public R visit(ASTNode node, P p) throws E;
+    public R visit(Definition node, P p) throws E;
+    public R visit(DefinitionItem node, P p) throws E;
     // <DefinitionItems>
-    public R visit(LiterateDefinitionComment node, P p);
-    public R visit(Module node, P p);
-    public R visit(Require require, P p);
+    public R visit(LiterateDefinitionComment node, P p) throws E;
+    public R visit(Module node, P p) throws E;
+    public R visit(Require require, P p) throws E;
     // </DefinitionItems>
-    public R visit(ModuleItem node, P p);
+    public R visit(ModuleItem node, P p) throws E;
     // <ModuleItems>
-    public R visit(Import node, P p);
-    public R visit(LiterateModuleComment node, P p);
-    public R visit(Sentence node, P p);
+    public R visit(Import node, P p) throws E;
+    public R visit(LiterateModuleComment node, P p) throws E;
+    public R visit(Sentence node, P p) throws E;
     // <Sentences>
-    public R visit(StringSentence node, P p);
-    public R visit(Restrictions node, P p);
-    public R visit(Configuration node, P p);
-    public R visit(Context node, P p);
-    public R visit(Rule node, P p);
+    public R visit(StringSentence node, P p) throws E;
+    public R visit(Restrictions node, P p) throws E;
+    public R visit(Configuration node, P p) throws E;
+    public R visit(Context node, P p) throws E;
+    public R visit(Rule node, P p) throws E;
     // </Sentences>
-    public R visit(Syntax node, P p);
-    public R visit(PriorityExtended node, P p);
-    public R visit(PriorityExtendedAssoc node, P p);
+    public R visit(Syntax node, P p) throws E;
+    public R visit(PriorityExtended node, P p) throws E;
+    public R visit(PriorityExtendedAssoc node, P p) throws E;
     // <ModuleItems>
-    public R visit(PriorityBlock node, P p);
-    public R visit(PriorityBlockExtended node, P p);
-    public R visit(Production node, P p);
-    public R visit(ProductionItem node, P p);
+    public R visit(PriorityBlock node, P p) throws E;
+    public R visit(PriorityBlockExtended node, P p) throws E;
+    public R visit(Production node, P p) throws E;
+    public R visit(ProductionItem node, P p) throws E;
     // <ProductionItems>
-    public R visit(Sort node, P p);
-    public R visit(Lexical node, P p);
-    public R visit(Terminal node, P p);
-    public R visit(UserList node, P p);
+    public R visit(Sort node, P p) throws E;
+    public R visit(Lexical node, P p) throws E;
+    public R visit(Terminal node, P p) throws E;
+    public R visit(UserList node, P p) throws E;
     // </ProductionItems>
-    public R visit(Term node, P p);
+    public R visit(Term node, P p) throws E;
     // <Terms>
-    public R visit(Cell node, P p);
-    public R visit(org.kframework.kil.Collection node, P p);
+    public R visit(Cell node, P p) throws E;
+    public R visit(org.kframework.kil.Collection node, P p) throws E;
     // <Collections>
-    public R visit(Ambiguity node, P p);
-    public R visit(Bag node, P p);
-    public R visit(KSequence node, P p);
-    public R visit(List node, P p);
-    public R visit(KList node, P p);
-    public R visit(org.kframework.kil.Map node, P p);
-    public R visit(Set node, P p);
+    public R visit(Ambiguity node, P p) throws E;
+    public R visit(Bag node, P p) throws E;
+    public R visit(KSequence node, P p) throws E;
+    public R visit(List node, P p) throws E;
+    public R visit(KList node, P p) throws E;
+    public R visit(org.kframework.kil.Map node, P p) throws E;
+    public R visit(Set node, P p) throws E;
     // </Collections>
-    public R visit(CollectionItem node, P p);
+    public R visit(CollectionItem node, P p) throws E;
     // <CollectionItems>
-    public R visit(BagItem node, P p);
-    public R visit(ListItem node, P p);
-    public R visit(MapItem node, P p);
-    public R visit(SetItem node, P p);
+    public R visit(BagItem node, P p) throws E;
+    public R visit(ListItem node, P p) throws E;
+    public R visit(MapItem node, P p) throws E;
+    public R visit(SetItem node, P p) throws E;
     // </CollectionItems>
     // <BuiltinDataStructure>
-    public R visit(DataStructureBuiltin node, P p);
-    public R visit(CollectionBuiltin node, P p);
-    public R visit(ListBuiltin node, P p);
-    public R visit(ListLookup node, P p);
-    public R visit(ListUpdate node, P p);
-    public R visit(SetBuiltin node, P p);
-    public R visit(SetLookup node, P p);
-    public R visit(SetUpdate node, P p);
-    public R visit(MapBuiltin node, P p);
-    public R visit(MapLookup node, P p);
-    public R visit(MapUpdate node, P p);
+    public R visit(DataStructureBuiltin node, P p) throws E;
+    public R visit(CollectionBuiltin node, P p) throws E;
+    public R visit(ListBuiltin node, P p) throws E;
+    public R visit(ListLookup node, P p) throws E;
+    public R visit(ListUpdate node, P p) throws E;
+    public R visit(SetBuiltin node, P p) throws E;
+    public R visit(SetLookup node, P p) throws E;
+    public R visit(SetUpdate node, P p) throws E;
+    public R visit(MapBuiltin node, P p) throws E;
+    public R visit(MapLookup node, P p) throws E;
+    public R visit(MapUpdate node, P p) throws E;
     // </BuiltinDataStructure>
     // <Token>
-    public R visit(Token node, P p);
-    public R visit(BoolBuiltin node, P p);
-    public R visit(IntBuiltin node, P p);
-    public R visit(StringBuiltin node, P p);
-    public R visit(GenericToken node, P p);
+    public R visit(Token node, P p) throws E;
+    public R visit(BoolBuiltin node, P p) throws E;
+    public R visit(IntBuiltin node, P p) throws E;
+    public R visit(StringBuiltin node, P p) throws E;
+    public R visit(GenericToken node, P p) throws E;
     // </Token>
-    public R visit(ListTerminator node, P p);
-    public R visit(Hole node, P p);
-    public R visit(FreezerHole node, P p);
-    public R visit(KApp node, P p);
-    public R visit(KItemProjection node, P p);
-    public R visit(KLabel node, P p);
-    public R visit(KLabelConstant node, P p);
-    public R visit(KLabelInjection node, P p);
-    public R visit(Rewrite node, P p);
-    public R visit(TermCons node, P p);
-    public R visit(Bracket node, P p);
-    public R visit(Cast node, P p);
-    public R visit(Variable node, P p);
+    public R visit(ListTerminator node, P p) throws E;
+    public R visit(Hole node, P p) throws E;
+    public R visit(FreezerHole node, P p) throws E;
+    public R visit(KApp node, P p) throws E;
+    public R visit(KItemProjection node, P p) throws E;
+    public R visit(KLabel node, P p) throws E;
+    public R visit(KLabelConstant node, P p) throws E;
+    public R visit(KLabelInjection node, P p) throws E;
+    public R visit(Rewrite node, P p) throws E;
+    public R visit(TermCons node, P p) throws E;
+    public R visit(Bracket node, P p) throws E;
+    public R visit(Cast node, P p) throws E;
+    public R visit(Variable node, P p) throws E;
     // </Terms>
-    public R visit(TermComment node, P p);
+    public R visit(TermComment node, P p) throws E;
     // Others
-    public R visit(KInjectedLabel kInjectedLabel, P p);
-    public R visit(FreezerLabel freezerLabel, P p);
-    public R visit(Freezer f, P p);
-    public R visit(BackendTerm term, P p);
+    public R visit(KInjectedLabel kInjectedLabel, P p) throws E;
+    public R visit(FreezerLabel freezerLabel, P p) throws E;
+    public R visit(Freezer f, P p) throws E;
+    public R visit(BackendTerm term, P p) throws E;
 }

@@ -15,14 +15,14 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 /**
  * Default implementations of methods visit non-attribute children, and then call the transform method for the parent class on the current node.
  */
-public class BasicTransformer<P> extends AbstractTransformer<P> {
+public class BasicTransformer extends AbstractTransformer<Void, TransformerException> {
 
     public BasicTransformer(String name, Context context) {
         super(name, context);
     }
 
     @Override
-    public ASTNode visit(Ambiguity node, P p) {
+    public ASTNode visit(Ambiguity node, Void _) throws TransformerException {
         TransformerException exception = new TransformerException(new KException(
                 ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, 
                 "Parse forest contains no trees!", node.getFilename(), node.getLocation()));
@@ -30,7 +30,7 @@ public class BasicTransformer<P> extends AbstractTransformer<P> {
         for (Term t : node.getContents()) {
             ASTNode result;
             try {
-                result = t.accept(this, p);
+                result = t.accept(this, null);
                 terms.add((Term) result);
             } catch (TransformerException e) {
                 exception = e;
@@ -42,7 +42,7 @@ public class BasicTransformer<P> extends AbstractTransformer<P> {
             return terms.get(0);
         }
         node.setContents(terms);
-        return visit((Term) node, p);
+        return visit((Term) node, null);
     }
 
     @Override

@@ -41,7 +41,7 @@ public class PriorityExtended extends ModuleItem {
     }
 
     @Override
-    public <P, R> R accept(Visitor<P, R> visitor, P p) {
+    public <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
         return visitor.visit(this, p);
     }
 
